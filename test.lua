@@ -1,3 +1,14 @@
-io.write("Running ", _VERSION, "\n")
-a = my_function(1, 2, 3, "abc", "def")
-io.write("my_function() returned ", a, "\n")
+
+x,y = 640, 480
+
+stage = Stage.new(x,y)
+
+print(stage)
+
+t = 5000
+
+timeline = Timeline.new(t)
+
+print(timeline)
+
+stage:circles(timeline)

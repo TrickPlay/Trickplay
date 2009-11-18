@@ -1,14 +1,12 @@
-#include <iostream>
+#include <math.h>
+#include <stdio.h>
 
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
-}
 
-extern "C" {
 #include "clutter/clutter.h"
-#include <math.h>
 }
 
 #define N_CIRCLES 3     /* number of circles */
@@ -51,24 +49,109 @@ circle_paint_cb (ClutterActor *actor)
     }
 }
 
-int
-clutter_main (int argc, char **argv)
+#define STAGE "Stage"
+#define TIMELINE "Timeline"
+
+static ClutterActor **pushstage(lua_State *L, ClutterActor *stage)
 {
-  const ClutterColor transp = { 0x00, 0x00, 0x00, 0x00 };
+	ClutterActor **pstage = (ClutterActor **)lua_newuserdata(L, sizeof(ClutterActor *));
+	*pstage = stage;
+	luaL_getmetatable(L, STAGE);
+	lua_setmetatable(L, -2);
+
+	return pstage;
+}
+
+static ClutterActor *tostage(lua_State *L, int index)
+{
+	ClutterActor **pstage = (ClutterActor **)lua_touserdata(L, index);
+	if(NULL == pstage) luaL_typerror(L, index, STAGE);
+
+	return *pstage;
+}
+
+static ClutterActor *checkstage(lua_State *L, int index)
+{
+	ClutterActor **pstage;
+	luaL_checktype(L, index, LUA_TUSERDATA);
+	pstage = (ClutterActor **)luaL_checkudata(L, index, STAGE);
+	if(NULL == pstage) luaL_typerror(L, index, STAGE);
+	if(NULL == *pstage) luaL_error(L, "null stage");
+	
+	return *pstage;
+}
+
+static int Stage_new(lua_State *L)
+{
+  int x = luaL_checkint(L, 1);
+  int y = luaL_checkint(L, 2);
+
   const ClutterColor bg_color = { 0xe0, 0xf2, 0xfc, 0xff };
+
+	ClutterActor *stage = clutter_stage_get_default();
+	clutter_actor_set_size(stage, x, y);
+	clutter_stage_set_color(CLUTTER_STAGE(stage), &bg_color);
+
+   pushstage(L, stage);
+   return 1;
+}
+
+static ClutterTimeline **pushtimeline(lua_State *L, ClutterTimeline *timeline)
+{
+	ClutterTimeline **ptimeline = (ClutterTimeline **)lua_newuserdata(L, sizeof(ClutterTimeline *));
+	*ptimeline = timeline;
+	luaL_getmetatable(L, TIMELINE);
+	lua_setmetatable(L, -2);
+
+	return ptimeline;
+}
+
+static ClutterTimeline *totimeline(lua_State *L, int index)
+{
+	ClutterTimeline **ptimeline = (ClutterTimeline **)lua_touserdata(L, index);
+	if(NULL == ptimeline) luaL_typerror(L, index, TIMELINE);
+
+	return *ptimeline;
+}
+
+static ClutterTimeline *checktimeline(lua_State *L, int index)
+{
+	ClutterTimeline **ptimeline;
+	luaL_checktype(L, index, LUA_TUSERDATA);
+	ptimeline = (ClutterTimeline **)luaL_checkudata(L, index, TIMELINE);
+	if(NULL == ptimeline) luaL_typerror(L, index, TIMELINE);
+	if(NULL == *ptimeline) luaL_error(L, "null timeline");
+	
+	return *ptimeline;
+}
+
+static int Timeline_new(lua_State *L)
+{
+  int t = luaL_checkint(L, 1);
+
   ClutterTimeline *timeline;
-  ClutterActor *stage;
-  gint i;
-  
-  clutter_init (&argc, &argv);
-  
-  stage = clutter_stage_get_default ();
-  clutter_actor_set_size (stage, SCREEN_W, SCREEN_H);
-  clutter_stage_set_color (CLUTTER_STAGE (stage), &bg_color);
-  
-  timeline = clutter_timeline_new (5000);
+  timeline = clutter_timeline_new (t);
   clutter_timeline_set_loop (timeline, TRUE);
 
+  // Push the timeline pointer as a userdata
+  pushtimeline(L, timeline);
+  
+  return 1;
+}
+
+int Stage_circles(lua_State *L)
+{
+  ClutterTimeline *timeline;
+  ClutterActor *stage;
+
+  const ClutterColor transp = { 0xe0, 0xf2, 0xfc, 0x00 };
+
+  
+  stage = checkstage(L, 1);
+  timeline = checktimeline(L, 2);
+
+  gint i;
+  
   for (i = 0; i < N_CIRCLES; i++)
     {
       gint size;
@@ -106,47 +189,106 @@ clutter_main (int argc, char **argv)
   
   clutter_timeline_start (timeline);
   
-  clutter_main ();
-  
+  clutter_main();
+
   return 0;
 }
 
-int my_function(lua_State *L)
+static int Timeline_gc (lua_State *L)
 {
-  int argc = lua_gettop(L);
+  printf("goodbye Timeline (%p)\n", lua_touserdata(L, 1));
+  return 0;
+}
 
-  std::cerr << "-- my_function() called with " << argc
-    << " arguments:" << std::endl;
+static int Timeline_tostring (lua_State *L)
+{
+  lua_pushfstring(L, "Timeline: %p", lua_touserdata(L, 1));
+  return 1;
+}
 
-  for ( int n=1; n<=argc; ++n ) {
-    std::cerr << "-- argument " << n << ": "
-      << lua_tostring(L, n) << std::endl;
-  }
+static const luaL_reg Timeline_meta[] = {
+  {"__gc",       Timeline_gc},
+  {"__tostring", Timeline_tostring},
+  {0, 0}
+};
 
-  lua_pushnumber(L, 123); // return value
-  return 1; // number of return values
+static int Stage_gc (lua_State *L)
+{
+  printf("goodbye Stage (%p)\n", lua_touserdata(L, 1));
+  return 0;
+}
+
+static int Stage_tostring (lua_State *L)
+{
+  lua_pushfstring(L, "Stage: %p", lua_touserdata(L, 1));
+  return 1;
+}
+
+static const luaL_reg Stage_meta[] = {
+  {"__gc",       Stage_gc},
+  {"__tostring", Stage_tostring},
+  {0, 0}
+};
+
+static const luaL_reg Timeline_methods[] = {
+  {"new",			Timeline_new},
+  {0, 0}
+};
+
+static const luaL_reg Stage_methods[] = {
+  {"new",		Stage_new},
+  {"circles",  Stage_circles},
+  {0,0}
+};
+
+int clutter_register(lua_State *L)
+{
+	luaL_openlib(L, STAGE, Stage_methods, 0);
+	luaL_newmetatable(L, STAGE);
+	luaL_openlib(L, 0, Stage_meta, 0);
+	lua_pushliteral(L, "__index");
+	lua_pushvalue(L, -3);
+	lua_rawset(L, -3);
+	lua_pushliteral(L, "__metatable");
+	lua_pushvalue(L, -3);
+	lua_rawset(L, -3);
+	lua_pop(L, 1);
+	
+	luaL_openlib(L, TIMELINE, Timeline_methods, 0);
+   luaL_newmetatable(L, TIMELINE);
+	luaL_openlib(L, 0, Timeline_meta, 0);
+	lua_pushliteral(L, "__index");
+	lua_pushvalue(L, -3);
+	lua_rawset(L, -3);
+	lua_pushliteral(L, "__metatable");
+	lua_pushvalue(L, -3);
+	lua_rawset(L, -3);	
+	lua_pop(L, 1);
+
+	return 1;
 }
 
 void report_errors(lua_State *L, int status)
 {
   if ( status!=0 ) {
-    std::cerr << "-- " << lua_tostring(L, -1) << std::endl;
+    printf("-- %s\n", lua_tostring(L, -1));
     lua_pop(L, 1); // remove error message
   }
 }
 
 int main(int argc, char** argv)
 {
+  clutter_init (&argc, &argv);
+
   for ( int n=1; n<argc; ++n ) {
     const char* file = argv[n];
 
     lua_State *L = lua_open();
 
     luaL_openlibs(L);
-    // make my_function() available to Lua programs
-    lua_register(L, "my_function", my_function);
+    clutter_register(L);
 
-    std::cerr << "-- Loading file: " << file << std::endl;
+    printf("-- Loading file: %s\n", file);
 
     int s = luaL_loadfile(L, file);
 
@@ -157,8 +299,5 @@ int main(int argc, char** argv)
 
     report_errors(L, s);
     lua_close(L);
-    std::cerr << std::endl;
   }
-
-  return clutter_main(argc, argv);
 }
