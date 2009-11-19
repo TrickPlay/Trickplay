@@ -1,5 +1,5 @@
-#include "clutter-stage.h"
-#include "clutter-timeline.h"
+#include "UI-stage.h"
+#include "UI-timeline.h"
 
 #include <math.h>
 

@@ -7,15 +7,7 @@ extern "C"
 #include "lauxlib.h"
 }
 
-#include "clutter-timeline.h"
-#include "clutter-stage.h"
-
-int clutter_register(lua_State *L)
-{
-	clutter_stage_register(L);
-	clutter_timeline_register(L);
-	return 1;
-}
+#include "UI/UI.h"
 
 void report_errors(lua_State *L, int status)
 {
@@ -37,7 +29,7 @@ int main(int argc, char** argv)
 		lua_State *L = lua_open();
 
 		luaL_openlibs(L);
-		clutter_register(L);
+		UI_register(L);
 
 		printf("-- Loading file: %s\n", file);
 

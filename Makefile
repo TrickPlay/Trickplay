@@ -1,25 +1,28 @@
-CLUTTER_LIBS=`pkg-config --libs clutter-1.0`
-CLUTTER_INCS=`pkg-config --cflags clutter-1.0`
+CLUTTER_LIBS = `pkg-config --libs clutter-1.0`
+CLUTTER_INCS = `pkg-config --cflags clutter-1.0`
 
-LUA_LIBS=-I/opt/local/include
-LUA_INCS=-L/opt/local/lib -llua
+LUA_LIBS = -I/opt/local/include
+LUA_INCS = -L/opt/local/lib -llua
 
-INCS=$(LUA_INCS) $(CLUTTER_INCS)
-LIBS=$(LUA_LIBS) $(CLUTTER_LIBS)
+INCS = $(LUA_INCS) $(CLUTTER_INCS)
+LIBS = $(LUA_LIBS) $(CLUTTER_LIBS) UI/UI.a
 
-SOURCES= \
-	clutter-host.cpp \
-	clutter-timeline.cpp \
-	clutter-stage.cpp
+DIRS = UI
 
-HEADERS= \
-	clutter-timeline.h \
-	clutter-stage.h
+SOURCES = \
+	trickplay-host.cpp
 
-all: clutter-host
+HEADERS = \
+	UI/UI.h
 
-clutter-host: $(HEADERS) $(SOURCES)
+all: subdirs trickplay-host
+
+trickplay-host: $(HEADERS) $(SOURCES)
 	$(CXX) $(INCS) $(LIBS) -O3 -Wall $(CFLAGS) -o $@ $(SOURCES)
 
+subdirs:
+	for dir in $(DIRS) ; do ( cd $$dir ; ${MAKE} all ) ; done
+
 clean:
-	rm -fr *.o clutter-host
+	for dir in $(DIRS); do ( cd $$dir ; ${MAKE} clean ) ; done
+	rm -fr *.o trickplay-host

@@ -1,2 +1,3 @@
-clutter-host
-clutter-host.dSYM
+trickplay-host
+*.o
+*.a
