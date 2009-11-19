@@ -7,10 +7,19 @@ LUA_INCS=-L/opt/local/lib -llua
 INCS=$(LUA_INCS) $(CLUTTER_INCS)
 LIBS=$(LUA_LIBS) $(CLUTTER_LIBS)
 
+SOURCES= \
+	clutter-host.cpp \
+	clutter-timeline.cpp \
+	clutter-stage.cpp
+
+HEADERS= \
+	clutter-timeline.h \
+	clutter-stage.h
+
 all: clutter-host
 
-clutter-host: clutter-host.cpp
-	$(CXX) $(INCS) $(LIBS) -g -Wall $(CFLAGS) -o $@ $<
+clutter-host: $(HEADERS) $(SOURCES)
+	$(CXX) $(INCS) $(LIBS) -O3 -Wall $(CFLAGS) -o $@ $(SOURCES)
 
 clean:
 	rm -fr *.o clutter-host

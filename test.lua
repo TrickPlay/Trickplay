@@ -11,4 +11,9 @@ timeline = Timeline.new(t)
 
 print(timeline)
 
-stage:circles(timeline)
+n_circles = 5
+circle_width = 64
+circle_gap = 16
+circle_segments = 3
+
+stage:circles(timeline, n_circles, circle_width, circle_gap, circle_segments)
