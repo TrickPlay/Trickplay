@@ -36,12 +36,16 @@ static int Stage_new(lua_State *L)
 {
   int x = luaL_checkint(L, 1);
   int y = luaL_checkint(L, 2);
+  int r = luaL_checkint(L, 3);
+  int g = luaL_checkint(L, 4);
+  int b = luaL_checkint(L, 5);
 
-  const ClutterColor bg_color = { 0xe0, 0xf2, 0xfc, 0xff };
+   ClutterColor *bg_color = clutter_color_new(r, g, b, 0xff);
 
 	ClutterActor *stage = clutter_stage_get_default();
 	clutter_actor_set_size(stage, x, y);
-	clutter_stage_set_color(CLUTTER_STAGE(stage), &bg_color);
+	clutter_stage_set_color(CLUTTER_STAGE(stage), bg_color);
+	clutter_color_free(bg_color);
 
    pushstage(L, stage);
    return 1;
