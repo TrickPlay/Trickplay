@@ -1,12 +1,12 @@
 
-x,y = 640, 480
+x,y = 640, 540
 r,g,b = 0xe0, 0xc2, 0xfc
 stage = Stage.new(x,y,r,g,b)
 
 t = 6000
 timeline = Timeline.new(t)
 
-n_circles = 5
+n_circles = 3
 circle_width = 128
 circle_gap = 16
 circle_segments = 3
