@@ -1,7 +1,8 @@
 #ifndef __CLUTTER_TIMELINE__
 #define __CLUTTER_TIMELINE__
 
-extern "C" {
+extern "C"
+{
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"

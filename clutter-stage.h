@@ -2,7 +2,8 @@
 #define __CLUTTER_STAGE__
 
 
-extern "C" {
+extern "C"
+{
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
