@@ -7,20 +7,21 @@ TOKYO_LIBS = -L/opt/local/lib -ltokyocabinet -ltokyotyrant
 LUA_LIBS = -I/opt/local/include
 LUA_INCS = -L/opt/local/lib -llua
 
-INCS = $(LUA_INCS) $(CLUTTER_INCS) $(TOKYO_INCS)
-LIBS = $(LUA_LIBS) $(CLUTTER_LIBS) $(TOKYO_LIBS) UI/UI.a Storage/Storage.a
-
 DIRS = UI Storage
+
+TRICKPLAY_INCS = $(foreach dir,$(DIRS),$(dir)/$(dir).h)
+TRICKPLAY_LIBS = $(TRICKPLAY_INCS:%.h=%.a)
+
+INCS = $(LUA_INCS) $(CLUTTER_INCS) $(TOKYO_INCS)
+LIBS = $(LUA_LIBS) $(CLUTTER_LIBS) $(TOKYO_LIBS) $(TRICKPLAY_LIBS)
 
 SOURCES = \
 	trickplay-host.cpp
 
-HEADERS = \
-	UI/UI.h
 
-all: subdirs trickplay-host
+all: trickplay-host
 
-trickplay-host: $(HEADERS) $(SOURCES)
+trickplay-host: $(TRICKPLAY_HEADERS) $(SOURCES) subdirs
 	$(CXX) $(INCS) $(LIBS) -O3 -Wall $(CFLAGS) -o $@ $(SOURCES)
 
 subdirs:
