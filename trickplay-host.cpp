@@ -8,6 +8,7 @@ extern "C"
 }
 
 #include "UI/UI.h"
+#include "Storage/Storage.h"
 
 void report_errors(lua_State *L, int status)
 {
@@ -30,6 +31,7 @@ int main(int argc, char** argv)
 
 		luaL_openlibs(L);
 		UI_register(L);
+		Storage_register(L);
 
 		printf("-- Loading file: %s\n", file);
 

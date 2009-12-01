@@ -1,27 +1,27 @@
-CLUTTER_INCS = `pkg-config --cflags clutter-1.0`
-
 LUA_INCS = -I/opt/local/include
 
-INCS = $(LUA_INCS) $(CLUTTER_INCS)
+INCS = $(LUA_INCS)
 
 SOURCES = \
-	UI.cpp \
-	UI-stage.cpp \
-	UI-timeline.cpp
+	Storage.cpp \
+	Storage-local.cpp \
+	Storage-cloud.cpp \
+	Storage-remote.cpp
 
 HEADERS = \
-	UI.h \
-	UI-stage.h \
-	UI-timeline.h
+	Storage.h \
+	Storage-local.h \
+	Storage-cloud.h \
+	Storage-remote.h
 
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 
 %.o: %.cpp %.h
 	$(CXX) $(INCS) -O3 -Wall $(CFLAGS) -c -o $@ $<
 
-all: UI.a
+all: Storage.a
 
-UI.a: $(OBJECTS)
+Storage.a: $(OBJECTS)
 	libtool -static -o $@ $^
 
 clean:
