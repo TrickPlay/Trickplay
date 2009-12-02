@@ -1,6 +1,7 @@
 
 local_hash = Localhash.new()
 
+url_fetcher = URLFetcher.new()
 
 x,y = 640, 540
 r,g,b = 0xe0, 0xc2, 0xfc

@@ -1,8 +1,10 @@
 #ifndef __TRICKPLAY_UI__
 #define __TRICKPLAY_UI__
 
-#include "UI-timeline.h"
-#include "UI-stage.h"
+extern "C"
+{
+#include "lua.h"
+}
 
 int UI_register(lua_State *L);
 

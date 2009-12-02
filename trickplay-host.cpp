@@ -9,6 +9,7 @@ extern "C"
 
 #include "UI/UI.h"
 #include "Storage/Storage.h"
+#include "Network/Network.h"
 
 void report_errors(lua_State *L, int status)
 {
@@ -21,8 +22,6 @@ void report_errors(lua_State *L, int status)
 
 int main(int argc, char** argv)
 {
-	clutter_init(&argc, &argv);
-
 	for (int n=1; n<argc; ++n)
 	{
 		const char* file = argv[n];
@@ -32,6 +31,7 @@ int main(int argc, char** argv)
 		luaL_openlibs(L);
 		UI_register(L);
 		Storage_register(L);
+		Network_register(L);
 
 		printf("-- Loading file: %s\n", file);
 
