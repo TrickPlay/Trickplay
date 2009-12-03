@@ -32,14 +32,62 @@ TCHDB *checklocalhash(lua_State *L, int index)
 static int LocalHash_new(lua_State *L)
 {
 	// TODO: retrieve initialization variables off the stack
+	const char *db_name = luaL_checkstring(L, 1);
+	if (NULL == db_name) return luaL_typerror(L, 1, "bad name");
 
 	TCHDB *hash;
 	hash = tchdbnew();
+	if(!tchdbopen(hash, db_name, HDBOWRITER | HDBOREADER | HDBOCREAT | HDBOTSYNC))
+	{
+		return luaL_error(L, "Failed to open DB file");
+	}
 
 	// Push the hash pointer as a userdata
 	pushlocalhash(L, hash);
 
 	return 1;
+}
+
+static int LocalHash_get(lua_State *L)
+{
+	TCHDB *hash = checklocalhash(L, 1);
+	size_t key_len;
+	const char *key = luaL_checklstring(L, 2, &key_len);
+	if (NULL == key) return luaL_typerror(L, 2, "bad key");
+	if (0 == key_len) return luaL_argerror(L, 2, "key length 0");
+
+	int val_len;
+	void *value = tchdbget(hash, (const void *)key, key_len, &val_len);
+	if(NULL == value)
+	{
+		lua_pushnil(L);
+	} else {
+		lua_pushlstring(L, (const char *)value, (size_t)val_len);
+		free(value);
+	}
+
+	return 1;
+}
+
+static int LocalHash_put(lua_State *L)
+{
+	TCHDB *hash = checklocalhash(L, 1);
+	size_t key_len;
+	const char *key = luaL_checklstring(L, 2, &key_len);
+	if (NULL == key) return luaL_typerror(L, 2, "bad key");
+	if (0 == key_len) return luaL_argerror(L, 2, "key length 0");
+
+	size_t value_len;
+	const char *value = luaL_checklstring(L, 3, &value_len);
+	if (NULL == value) return luaL_typerror(L, 3, "bad value");
+	if (0 == value_len) return luaL_argerror(L, 3, "value length 0");
+
+   if(!tchdbput(hash, (const void*)key, key_len, (const void *)value, value_len))
+   {
+   	return luaL_error(L, "Failed to put (%s, %s)", key, value);
+   }
+
+	return 0;
 }
 
 static int LocalHash_gc(lua_State *L)
@@ -64,6 +112,8 @@ const luaL_reg LocalHash_meta[] =
 const luaL_reg LocalHash_methods[] =
 {
 	{"new",         LocalHash_new},
+	{"get",         LocalHash_get},
+	{"put",         LocalHash_put},
 	{0, 0}
 };
 

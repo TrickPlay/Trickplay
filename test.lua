@@ -1,5 +1,12 @@
 
-local_hash = Localhash.new()
+local_hash = Localhash.new('data_file')
+
+print(1234,local_hash:get(1234))
+
+--[[
+for i=1,1000000 do local_hash:put(i,i*2) end
+
+for i=1,1000000 do print(i,local_hash:get(i)) end
 
 url_fetcher = URLFetcher.new()
 
@@ -16,3 +23,4 @@ circle_gap = 16
 circle_segments = 3
 stage:circles(timeline, n_circles, circle_width, circle_gap, circle_segments)
 
+--]]
