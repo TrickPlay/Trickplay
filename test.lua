@@ -1,13 +1,26 @@
 
 local_hash = Localhash.new('data_file')
 
-print(1234,local_hash:get(1234))
 
 --[[
-for i=1,1000000 do local_hash:put(i,i*2) end
+value=''
 
-for i=1,1000000 do print(i,local_hash:get(i)) end
+for i=1,20000 do
+	value = value..i*2
+	local_hash:put(i,value)
+end
 
+print(1234,local_hash:get(1234))
+
+--]]
+
+---[[
+for j=1,10 do
+	for i=1,20000 do local_hash:get(i) end
+end
+--]]
+
+--[[
 url_fetcher = URLFetcher.new()
 
 x,y = 640, 540
