@@ -25,7 +25,7 @@ SOURCES = \
 all: trickplay-host
 
 trickplay-host: $(TRICKPLAY_HEADERS) $(SOURCES) $(TRICKPLAY_LIBS)
-	$(CXX) $(INCS) $(LIBS) -O3 -Wall $(CFLAGS) -o $@ $(SOURCES)
+	$(CXX) $(INCS) $(LIBS) -g -Wall $(CFLAGS) -o $@ $(SOURCES)
 
 .PHONY: subdirs $(DIRS)
 

@@ -17,7 +17,7 @@ HEADERS = \
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 
 %.o: %.cpp %.h
-	$(CXX) $(INCS) -O3 -Wall $(CFLAGS) -c -o $@ $<
+	$(CXX) $(INCS) -g -Wall $(CFLAGS) -c -o $@ $<
 
 all: UI.a
 
