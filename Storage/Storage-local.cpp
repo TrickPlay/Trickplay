@@ -1,10 +1,13 @@
 #include "Storage-local.h"
 
+#include "tcutil.h"
+#include "tchdb.h"
+
 #include <string.h>
 
-TCBDB **pushlocaldb(lua_State *L, TCBDB *db)
+TCHDB **pushlocaldb(lua_State *L, TCHDB *db)
 {
-	TCBDB **pdb = (TCBDB **)lua_newuserdata(L, sizeof(TCBDB *));
+	TCHDB **pdb = (TCHDB **)lua_newuserdata(L, sizeof(TCHDB *));
 	*pdb = db;
 	luaL_getmetatable(L, LOCAL_DB);
 	lua_setmetatable(L, -2);
@@ -12,19 +15,19 @@ TCBDB **pushlocaldb(lua_State *L, TCBDB *db)
 	return pdb;
 }
 
-TCBDB *tolocaldb(lua_State *L, int index)
+TCHDB *tolocaldb(lua_State *L, int index)
 {
-	TCBDB **pdb = (TCBDB **)lua_touserdata(L, index);
+	TCHDB **pdb = (TCHDB **)lua_touserdata(L, index);
 	if (NULL == pdb) luaL_typerror(L, index, LOCAL_DB);
 
 	return *pdb;
 }
 
-TCBDB *checklocaldb(lua_State *L, int index)
+TCHDB *checklocaldb(lua_State *L, int index)
 {
-	TCBDB **pdb;
+	TCHDB **pdb;
 	luaL_checktype(L, index, LUA_TUSERDATA);
-	pdb = (TCBDB **)luaL_checkudata(L, index, LOCAL_DB);
+	pdb = (TCHDB **)luaL_checkudata(L, index, LOCAL_DB);
 	if (NULL == pdb) luaL_typerror(L, index, LOCAL_DB);
 	if (NULL == *pdb) luaL_error(L, "null local db");
 
@@ -37,23 +40,23 @@ static int LocalDB_new(lua_State *L)
 	const char *db_name = luaL_checkstring(L, 1);
 	if (NULL == db_name) return luaL_typerror(L, 1, "bad name");
 
-	TCBDB *db;
-	db = tcbdbnew();
+	TCHDB *db;
+	db = tchdbnew();
 
 	// Set up optimization on the database:
-	if(!tcbdbtune(db, 0, 0, 0, -1, -1, 0))
+	if(!tchdbtune(db, 0, -1, -1, 0))
 	{
-		return luaL_error(L, "Failed to tune DB: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to tune DB: %s", tchdberrmsg(tchdbecode(db)));
 	}
 
-	if(!tcbdbsetcache(db, -1, -1))
+	if(!tchdbsetcache(db, 32768))
 	{
-		return luaL_error(L, "Failed to set cache for DB: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to set cache for DB: %s", tchdberrmsg(tchdbecode(db)));
 	}
 
-	if(!tcbdbopen(db, db_name, HDBOWRITER | HDBOREADER | HDBOCREAT))
+	if(!tchdbopen(db, db_name, HDBOWRITER | HDBOREADER | HDBOCREAT))
 	{
-		return luaL_error(L, "Failed to open DB file: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to open DB file: %s", tchdberrmsg(tchdbecode(db)));
 	}
 
 	// Push the db pointer as a userdata
@@ -64,14 +67,14 @@ static int LocalDB_new(lua_State *L)
 
 static int LocalDB_get(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
+	TCHDB *db = checklocaldb(L, 1);
 	size_t key_len;
 	const char *key = luaL_checklstring(L, 2, &key_len);
 	if (NULL == key) return luaL_typerror(L, 2, "bad key");
 	if (0 == key_len) return luaL_argerror(L, 2, "key length 0");
 
 	int val_len;
-	void *value = tcbdbget(db, (const void *)key, key_len, &val_len);
+	void *value = tchdbget(db, (const void *)key, key_len, &val_len);
 	if(NULL == value)
 	{
 		lua_pushnil(L);
@@ -85,7 +88,7 @@ static int LocalDB_get(lua_State *L)
 
 static int LocalDB_put(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
+	TCHDB *db = checklocaldb(L, 1);
 	size_t key_len;
 	const char *key = luaL_checklstring(L, 2, &key_len);
 	if (NULL == key) return luaL_typerror(L, 2, "bad key");
@@ -96,9 +99,9 @@ static int LocalDB_put(lua_State *L)
 	if (NULL == value) return luaL_typerror(L, 3, "bad value");
 	if (0 == value_len) return luaL_argerror(L, 3, "value length 0");
 
-   if(!tcbdbput(db, (const void*)key, (int)key_len, (const void *)value, value_len))
+   if(!tchdbput(db, (const void*)key, (int)key_len, (const void *)value, value_len))
    {
-   	return luaL_error(L, "Failed to put (%s, %s): %s", key, value, tcbdberrmsg(tcbdbecode(db)));
+   	return luaL_error(L, "Failed to put (%s, %s): %s", key, value, tchdberrmsg(tchdbecode(db)));
    }
 
 	return 0;
@@ -106,15 +109,15 @@ static int LocalDB_put(lua_State *L)
 
 static int LocalDB_del(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
+	TCHDB *db = checklocaldb(L, 1);
 	size_t key_len;
 	const char *key = luaL_checklstring(L, 2, &key_len);
 	if (NULL == key) return luaL_typerror(L, 2, "bad key");
 	if (0 == key_len) return luaL_argerror(L, 2, "key length 0");
 
-	if(!tcbdbout(db, (const void *)key, (int)key_len))
+	if(!tchdbout(db, (const void *)key, (int)key_len))
 	{
-		return luaL_error(L, "Failed to delete (%s): %s", key, tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to delete (%s): %s", key, tchdberrmsg(tchdbecode(db)));
 	}
 
 	return 0;
@@ -122,7 +125,7 @@ static int LocalDB_del(lua_State *L)
 
 static int LocalDB_nuke(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
+	TCHDB *db = checklocaldb(L, 1);
 	size_t confirm_len;
 	const char *confirm = luaL_checklstring(L, 2, &confirm_len);
 	if (NULL == confirm) return luaL_typerror(L, 2, "bad confirm string");
@@ -132,9 +135,9 @@ static int LocalDB_nuke(lua_State *L)
 		return luaL_argerror(L, 2, "Will not nuke: bad confirm string");
 	}
 
-	if(!tcbdbvanish(db))
+	if(!tchdbvanish(db))
 	{
-		return luaL_error(L, "Failed to nuke DB: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to nuke DB: %s", tchdberrmsg(tchdbecode(db)));
 	}
 
 	return 0;
@@ -142,38 +145,38 @@ static int LocalDB_nuke(lua_State *L)
 
 static int LocalDB_begin(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	if(!tcbdbtranbegin(db))
+	TCHDB *db = checklocaldb(L, 1);
+	if(!tchdbtranbegin(db))
 	{
-		return luaL_error(L, "Failed to begin transaction: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to begin transaction: %s", tchdberrmsg(tchdbecode(db)));
 	}
 	return 0;
 }
 
 static int LocalDB_commit(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	if(!tcbdbtrancommit(db))
+	TCHDB *db = checklocaldb(L, 1);
+	if(!tchdbtrancommit(db))
 	{
-		return luaL_error(L, "Failed to commit transaction: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to commit transaction: %s", tchdberrmsg(tchdbecode(db)));
 	}
 	return 0;
 }
 
 static int LocalDB_abort(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	if(!tcbdbtranabort(db))
+	TCHDB *db = checklocaldb(L, 1);
+	if(!tchdbtranabort(db))
 	{
-		return luaL_error(L, "Failed to abort transaction: %s", tcbdberrmsg(tcbdbecode(db)));
+		return luaL_error(L, "Failed to abort transaction: %s", tchdberrmsg(tchdbecode(db)));
 	}
 	return 0;
 }
 
 static int LocalDB_count(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	uint64_t count = tcbdbrnum(db);
+	TCHDB *db = checklocaldb(L, 1);
+	uint64_t count = tchdbrnum(db);
 
 	lua_pushinteger(L, count);
 
@@ -182,10 +185,10 @@ static int LocalDB_count(lua_State *L)
 
 static int LocalDB_flush(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	if(!tcbdbsync(db))
+	TCHDB *db = checklocaldb(L, 1);
+	if(!tchdbsync(db))
 	{
-		luaL_error(L, "Failed to flush DB: %s", tcbdberrmsg(tcbdbecode(db)));
+		luaL_error(L, "Failed to flush DB: %s", tchdberrmsg(tchdbecode(db)));
 	}
 
 	return 0;
@@ -193,16 +196,16 @@ static int LocalDB_flush(lua_State *L)
 
 static int LocalDB_gc(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	tcbdbdel(db);
+	TCHDB *db = checklocaldb(L, 1);
+	tchdbdel(db);
 
 	return 0;
 }
 
 static int LocalDB_tostring(lua_State *L)
 {
-	TCBDB *db = checklocaldb(L, 1);
-	lua_pushfstring(L, "LocalDB: (%p) [%s] - %d records", db, tcbdbpath(db), tcbdbrnum(db));
+	TCHDB *db = checklocaldb(L, 1);
+	lua_pushfstring(L, "LocalDB: (%p) [%s] - %d records", db, tchdbpath(db), tchdbrnum(db));
 	return 1;
 }
 

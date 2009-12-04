@@ -1,5 +1,7 @@
 #include "Storage-cloud.h"
 
+#include "tcrdb.h"
+
 TCRDB **pushclouddb(lua_State *L, TCRDB *db)
 {
 	TCRDB **pdb = (TCRDB **)lua_newuserdata(L, sizeof(TCRDB *));
