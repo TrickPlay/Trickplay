@@ -11,12 +11,8 @@ extern "C"
 }
 
 
-#define CLOUD_HASH "Cloudhash"
+#define CLOUD_DB "CloudDB"
 
-int cloud_hash_register(lua_State *L);
-
-TCRDB **pushcloudhash(lua_State *L, TCRDB *hash);
-TCRDB *tocloudhash(lua_State *L, int index);
-TCRDB *checkcloudhash(lua_State *L, int index);
+int cloud_db_register(lua_State *L);
 
 #endif __TRICKPLAY_STORAGE_CLOUD__

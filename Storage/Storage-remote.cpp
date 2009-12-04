@@ -1,77 +1,77 @@
 #include "Storage-remote.h"
 
-TCRDB **pushremotehash(lua_State *L, TCRDB *hash)
+TCRDB **pushremotedb(lua_State *L, TCRDB *db)
 {
-	TCRDB **phash = (TCRDB **)lua_newuserdata(L, sizeof(TCRDB *));
-	*phash = hash;
-	luaL_getmetatable(L, REMOTE_HASH);
+	TCRDB **pdb = (TCRDB **)lua_newuserdata(L, sizeof(TCRDB *));
+	*pdb = db;
+	luaL_getmetatable(L, REMOTE_DB);
 	lua_setmetatable(L, -2);
 
-	return phash;
+	return pdb;
 }
 
-TCRDB *toremotehash(lua_State *L, int index)
+TCRDB *toremotedb(lua_State *L, int index)
 {
-	TCRDB **phash = (TCRDB **)lua_touserdata(L, index);
-	if (NULL == phash) luaL_typerror(L, index, REMOTE_HASH);
+	TCRDB **pdb = (TCRDB **)lua_touserdata(L, index);
+	if (NULL == pdb) luaL_typerror(L, index, REMOTE_DB);
 
-	return *phash;
+	return *pdb;
 }
 
-TCRDB *checkremotehash(lua_State *L, int index)
+TCRDB *checkremotedb(lua_State *L, int index)
 {
-	TCRDB **phash;
+	TCRDB **pdb;
 	luaL_checktype(L, index, LUA_TUSERDATA);
-	phash = (TCRDB **)luaL_checkudata(L, index, REMOTE_HASH);
-	if (NULL == phash) luaL_typerror(L, index, REMOTE_HASH);
-	if (NULL == *phash) luaL_error(L, "null remote hash");
+	pdb = (TCRDB **)luaL_checkudata(L, index, REMOTE_DB);
+	if (NULL == pdb) luaL_typerror(L, index, REMOTE_DB);
+	if (NULL == *pdb) luaL_error(L, "null remote db");
 
-	return *phash;
+	return *pdb;
 }
 
-static int RemoteHash_new(lua_State *L)
+static int RemoteDB_new(lua_State *L)
 {
 	// TODO: retrieve initialization variables off the stack
 
-	TCRDB *hash;
-	hash = tcrdbnew();
+	TCRDB *db;
+	db = tcrdbnew();
 
-	// Push the hash pointer as a userdata
-	pushremotehash(L, hash);
+	// Push the db pointer as a userdata
+	pushremotedb(L, db);
 
 	return 1;
 }
 
-static int RemoteHash_gc(lua_State *L)
+static int RemoteDB_gc(lua_State *L)
 {
-	printf("goodbye RemoteHash (%p)\n", lua_touserdata(L, 1));
+	printf("goodbye RemoteDB (%p)\n", lua_touserdata(L, 1));
 	return 0;
 }
 
-static int RemoteHash_tostring(lua_State *L)
+static int RemoteDB_tostring(lua_State *L)
 {
-	lua_pushfstring(L, "RemoteHash: %p", lua_touserdata(L, 1));
+	lua_pushfstring(L, "RemoteDB: %p", lua_touserdata(L, 1));
 	return 1;
 }
 
-const luaL_reg RemoteHash_meta[] =
+const luaL_reg RemoteDB_meta[] =
 {
-	{"__gc",       RemoteHash_gc},
-	{"__tostring", RemoteHash_tostring},
+	{"__gc",       RemoteDB_gc},
+	{"__tostring", RemoteDB_tostring},
 	{0, 0}
 };
 
-const luaL_reg RemoteHash_methods[] =
+const luaL_reg RemoteDB_methods[] =
 {
-	{"new",         RemoteHash_new},
+	{"new",         RemoteDB_new},
 	{0, 0}
 };
 
-int remote_hash_register(lua_State *L)
+int remote_db_register(lua_State *L)
 {
-	luaL_openlib(L, REMOTE_HASH, RemoteHash_methods, 0);
-	luaL_newmetatable(L, REMOTE_HASH);
-	luaL_openlib(L, 0, RemoteHash_meta, 0);
+	luaL_openlib(L, REMOTE_DB, RemoteDB_methods, 0);
+	luaL_newmetatable(L, REMOTE_DB);
+	luaL_openlib(L, 0, RemoteDB_meta, 0);
 	lua_pushliteral(L, "__index");
 	lua_pushvalue(L, -3);
 	lua_rawset(L, -3);

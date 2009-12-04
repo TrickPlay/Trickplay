@@ -11,12 +11,8 @@ extern "C"
 }
 
 
-#define REMOTE_HASH "Remotehash"
+#define REMOTE_DB "RemoteDB"
 
-int remote_hash_register(lua_State *L);
-
-TCRDB **pushremotehash(lua_State *L, TCRDB *hash);
-TCRDB *toremotehash(lua_State *L, int index);
-TCRDB *checkremotehash(lua_State *L, int index);
+int remote_db_register(lua_State *L);
 
 #endif __TRICKPLAY_STORAGE_REMOTE__

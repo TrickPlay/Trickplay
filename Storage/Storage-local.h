@@ -8,16 +8,12 @@ extern "C"
 #include "lauxlib.h"
 
 #include "tcutil.h"
-#include "tchdb.h"
+#include "tcbdb.h"
 }
 
 
-#define LOCAL_HASH "Localhash"
+#define LOCAL_DB "LocalDB"
 
-int local_hash_register(lua_State *L);
-
-TCHDB **pushlocalhash(lua_State *L, TCHDB *hash);
-TCHDB *tolocalhash(lua_State *L, int index);
-TCHDB *checklocalhash(lua_State *L, int index);
+int local_db_register(lua_State *L);
 
 #endif __TRICKPLAY_STORAGE_LOCAL__
