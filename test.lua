@@ -1,22 +1,24 @@
 
-local_hash = Localhash.new('data_file')
+local_db = LocalDB.new('data_file')
 
 
---[[
+---[[
 value=''
 
-for i=1,20000 do
+for i=1,5000 do
 	value = value..i*2
-	local_hash:put(i,value)
+	local_db:put(i,value)
 end
+--]]
 
-print(1234,local_hash:get(1234))
-
+---[[
+print(1234,local_db:get(1234))
+print(local_db)
 --]]
 
 ---[[
 for j=1,10 do
-	for i=1,20000 do local_hash:get(i) end
+	for i=1,20000 do local_db:get(i) end
 end
 --]]
 
