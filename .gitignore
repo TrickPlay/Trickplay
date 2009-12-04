@@ -2,3 +2,4 @@ trickplay-host
 *.o
 *.a
 trickplay-host.bbprojectd
+circles_demo.tch
