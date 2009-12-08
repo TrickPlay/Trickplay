@@ -133,7 +133,6 @@ static int URLFetcher_fetch(lua_State *L)
 static int URLFetcher_gc(lua_State *L)
 {
 	CURL *curl = checkurlfetcher(L, 1);
-	printf("goodbye URLFetcher (%p)\n", curl);
 	curl_easy_cleanup(curl);
 	return 0;
 }
