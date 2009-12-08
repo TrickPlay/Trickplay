@@ -35,6 +35,7 @@ public:
 
 	~write_aggregator()
 	{
+		if(data) free(data);
 		if(next) delete next;
 	}
 };

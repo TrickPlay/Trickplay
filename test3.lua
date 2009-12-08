@@ -1,3 +1,6 @@
 url_fetcher = URLFetcher.new()
 
-print(url_fetcher:fetch('http://www.hughes-family.org/'))
+
+for i=1,250 do
+	print(url_fetcher:fetch('http://www.google.com/'))
+end
