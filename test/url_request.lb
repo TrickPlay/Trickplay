@@ -1,0 +1,179 @@
+module url_request;
+
+[[
+#include "network.h"
+]]
+
+interface URLResponse [[Network::Response*]]
+{
+    URLResponse()
+        [[
+            *self=(Network::Response*)lua_touserdata(L,-2);
+        ]];
+        
+    ~URLResponse()
+        [[
+            delete self;
+        ]];
+        
+    readonly int code
+        [[code=self->code;]];
+        
+    readonly string status
+        [[status=self->status.c_str();]];
+        
+    readonly bool failed
+        [[failed=self->failed;]];
+        
+    # This one is really a string, but we want to
+    # use pushlstring instead of the default behavior
+    
+    readonly table body
+        [[
+            if (self->body->len==0)
+                lua_pushstring(L,"");
+            else
+                lua_pushlstring(L,(const char*)self->body->data,self->body->len);
+        ]];
+        
+    readonly int length
+        [[length=self->body->len;]];
+        
+    readonly table headers
+        [[
+            int i=1;
+            lua_newtable(L);
+            for(Network::StringMultiMap::const_iterator it=self->headers.begin();
+                it!=self->headers.end();++it)
+            {
+                lua_newtable(L);
+                lua_pushstring(L,it->first.c_str());
+                lua_rawseti(L,-2,1);
+                lua_pushstring(L,it->second.c_str());
+                lua_rawseti(L,-2,2);
+                
+                lua_rawseti(L,-2,i);
+                ++i;
+            }
+        ]];
+}
+
+[[
+struct RequestInfo
+{
+    RequestInfo(Network::Request*r,lua_State*l) : self(r),L(l) {}
+    Network::Request * self;
+    lua_State * L;
+};
+
+void URLRequest_response_callback(const Network::Response&response,gpointer info);
+]]
+
+class URLRequest [[Network::Request*]]
+{
+    URLRequest(string url=NULL)
+        [[
+            *self=new Network::Request();
+            
+            if (lua_gettop(L)==2 && lua_istable(L,-2))
+            {
+                lua_pushvalue(L,-2);
+                lb_set_props_from_table(L);
+                lua_pop(L,1);
+            }
+	    else
+	    {
+		if (url)
+		    (*self)->url=url;		    
+	    }
+        ]];
+    
+    ~URLRequest()
+        [[
+            delete self;
+        ]];
+        
+    string url
+        [[url=self->url.c_str();]]
+        [[self->url=url;]];
+    
+    string method
+        [[method=self->method.c_str();]]
+        [[self->method=method;]];
+        
+    double timeout
+        [[timeout=self->timeout_s;]]
+        [[self->timeout_s=timeout;]];
+        
+    bool redirect
+        [[redirect=self->redirect;]]
+        [[self->redirect=redirect;]];
+        
+    string body
+        [[body=self->body.c_str();]]
+        [[self->body=body;]];
+        
+    string user_agent
+        [[user_agent=self->user_agent.c_str();]]
+        [[self->user_agent=user_agent;]];
+        
+    string certificate
+        [[certificate=self->client_certificate_pem.c_str();]]
+        [[self->client_certificate_pem=certificate;]];
+        
+    string private_key
+        [[private_key=self->client_private_key_pem.c_str();]]
+        [[self->client_private_key_pem=private_key;]];
+    
+    table headers
+        [[
+            lua_newtable(L);
+            for(Network::StringMap::const_iterator it=self->headers.begin();
+                it!=self->headers.end();++it)
+            {
+                lua_pushstring(L,it->first.c_str());
+                lua_pushstring(L,it->second.c_str());
+                lua_rawset(L,-3);
+            }
+        ]]
+        [[
+            self->headers.clear();
+            lua_pushnil(L);
+            while(lua_next(L,2))
+            {
+                self->headers.insert(std::make_pair(std::string(lua_tostring(L,-2)),std::string(lua_tostring(L,-1))));
+                lua_pop(L,1);
+            }
+        ]];
+    
+    table perform()
+        [[
+            Network::Response response=Network::perform_request(*self);
+            lua_pushlightuserdata(L,new Network::Response(response));
+            new_URLResponse(L);
+            lua_remove(L,-2);
+        ]];
+        
+    callback on_complete;
+    
+    send()
+        [[
+            Network::perform_request_async(*self,URLRequest_response_callback,new RequestInfo(self,L));
+        ]];
+        
+}
+
+[[
+void URLRequest_response_callback(const Network::Response&response,gpointer info)
+{
+    RequestInfo * ri=(RequestInfo*)info;
+    lua_pushlightuserdata(ri->L,new Network::Response(response));
+    new_URLResponse(ri->L);
+    lua_remove(ri->L,-2);
+    
+    invoke_URLRequest_on_complete(ri->L,ri->self,1,0);
+    
+    delete ri;
+}
+
+]]

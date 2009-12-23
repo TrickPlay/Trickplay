@@ -1,0 +1,1622 @@
+
+module clutter;
+
+[[    
+#include "clutter/clutter.h"
+#warning Using gdk-pixbuf directly, may not work on OSX
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <cstring>
+#include <string>
+
+#include "network.h"
+]]
+
+[[
+void push_clutter_color(lua_State*L,ClutterColor*color)
+{
+    LSG;
+    
+    lua_newtable(L);
+    lua_pushnumber(L,color->red);
+    lua_rawseti(L,-2,1);
+    lua_pushnumber(L,color->green);
+    lua_rawseti(L,-2,2);
+    lua_pushnumber(L,color->blue);
+    lua_rawseti(L,-2,3);
+    lua_pushnumber(L,color->alpha);
+    lua_rawseti(L,-2,4);
+    
+    LSG_END(0);
+}
+
+void to_clutter_color(lua_State*L,int index,ClutterColor*color)
+{
+    LSG;
+    
+    if(lua_istable(L,index))
+    {
+        lua_rawgeti(L,2,1);
+        lua_rawgeti(L,2,2);
+        lua_rawgeti(L,2,3);
+        lua_rawgeti(L,2,4);
+        color->red = luaL_optint(L,-4,0);
+        color->green = luaL_optint(L,-3,0);
+        color->blue = luaL_optint(L,-2,0);
+        color->alpha = luaL_optint(L,-1,255);
+        lua_pop(L,4);
+    }
+    else if (lua_isstring(L,index))
+    {
+        unsigned short int r(0),g(0),b(0),a(255);
+			
+	sscanf(lua_tostring(L,index),"%2hx%2hx%2hx%2hx",&r,&g,&b,&a);
+        
+        color->red = r;
+        color->green = g;
+        color->blue = b;
+        color->alpha=a;
+    }
+    else
+    {
+        luaL_error(L,"Expecting a color as a table or a string");
+    }
+    
+    LSG_END(0);
+}
+
+void set_props_from_table(lua_State*L,int table)
+{
+    LSG;
+    
+    if (table)
+    {
+	if(table==lua_gettop(L))
+	{
+	    lb_set_props_from_table(L);	    
+	}
+	else
+	{
+	    lua_pushvalue(L,table);
+	    lb_set_props_from_table(L);
+	    lua_pop(L,1);
+	}
+    }
+    
+    LSG_END(0);
+}
+
+void wrap_concrete_actor(lua_State*L,ClutterActor*actor);
+const char * get_actor_metatable(ClutterActor*actor);
+
+]]
+
+[[
+void actor_on_show(ClutterActor*actor,lua_State*L)
+{
+    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_show",0,0);        
+}
+
+void actor_on_hide(ClutterActor*actor,lua_State*L)
+{
+    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_hide",0,0);        
+}
+    
+    
+void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
+{
+    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_focus_in",0,0);        
+}
+
+void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
+{
+    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_focus_out",0,0);        
+}
+
+gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    
+    lua_pushinteger(L,event->keyval);
+    lua_pushinteger(L,event->unicode_value);
+    lua_pushinteger(L,event->time);
+    
+    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_down",3,1))
+    {
+	if (lua_toboolean(L,-1))
+	    result = TRUE;
+	lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    
+    lua_pushinteger(L,event->keyval);
+    lua_pushinteger(L,event->unicode_value);
+    lua_pushinteger(L,event->time);
+    
+    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_up",3,1))
+    {
+	if (lua_toboolean(L,-1))
+	    result = TRUE;
+	lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    
+    lua_pushnumber(L,event->x);
+    lua_pushnumber(L,event->y);
+    lua_pushinteger(L,event->button);
+    lua_pushinteger(L,event->click_count);
+    
+    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_button_down",4,1))
+    {
+	if (lua_toboolean(L,-1))
+	    result = TRUE;
+	lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    
+    lua_pushnumber(L,event->x);
+    lua_pushnumber(L,event->y);
+    lua_pushinteger(L,event->button);
+    lua_pushinteger(L,event->click_count);
+    
+    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_button_up",4,1))
+    {
+	if (lua_toboolean(L,-1))
+	    result = TRUE;
+	lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    
+    lua_pushnumber(L,event->x);
+    lua_pushnumber(L,event->y);
+    lua_pushinteger(L,event->direction);
+    
+    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_scroll",3,1))
+    {
+	if (lua_toboolean(L,-1))
+	    result = TRUE;
+	lua_pop(L,1);
+    }
+
+    return result;
+}
+
+]]
+
+interface actor [[ClutterActor*]]
+{
+    string name
+        [[name=clutter_actor_get_name(self);]]
+        [[clutter_actor_set_name(self,name);]];
+        
+    readonly long gid
+        [[gid=clutter_actor_get_gid(self);]];
+    
+    double x
+        [[ x = clutter_actor_get_x( self ); ]]
+        [[ clutter_actor_set_x( self , x ); ]];
+    
+    double y
+        [[ y = clutter_actor_get_y( self ); ]]
+        [[ clutter_actor_set_y( self , y ); ]];
+    
+    double z
+        [[ z = clutter_actor_get_depth( self ); ]]
+        [[ clutter_actor_set_depth( self , z ); ]];
+
+    double w
+        [[ w = clutter_actor_get_width( self ); ]]
+        [[ clutter_actor_set_width( self , w ); ]];
+    
+    double h
+        [[ h = clutter_actor_get_height( self ); ]]
+        [[ clutter_actor_set_height( self , h ); ]];
+
+    table position
+        [[
+            lua_newtable(L);
+            lua_pushnumber(L,clutter_actor_get_x(self));
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,clutter_actor_get_y(self));
+            lua_rawseti(L,-2,2);
+            lua_pushnumber(L,clutter_actor_get_depth(self));
+	    lua_rawseti(L,-2,3);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+	    lua_rawgeti(L,2,3);
+            clutter_actor_set_position(self,lua_tonumber(L,-3),lua_tonumber(L,-2));
+	    clutter_actor_set_depth(self,lua_tonumber(L,-1));
+            lua_pop(L,3);
+        ]];
+        
+    table anchor_point
+        [[
+	    gfloat x;
+	    gfloat y;
+	    clutter_actor_get_anchor_point(self,&x,&y);
+            lua_newtable(L);
+            lua_pushnumber(L,x);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,y);
+            lua_rawseti(L,-2,2);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);	    
+            clutter_actor_set_anchor_point(self,lua_tonumber(L,-2),lua_tonumber(L,-2));
+            lua_pop(L,2);
+        ]];
+	
+    table size
+        [[
+            lua_newtable(L);
+            lua_pushnumber(L,clutter_actor_get_width(self));
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,clutter_actor_get_height(self));
+            lua_rawseti(L,-2,2);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            clutter_actor_set_size(self,lua_tonumber(L,-2),lua_tonumber(L,-1));
+            lua_pop(L,2);
+        ]];
+        
+    table scale
+        [[
+            gdouble scalex;
+            gdouble scaley;
+            clutter_actor_get_scale(self,&scalex,&scaley);
+            lua_newtable(L);
+            lua_pushnumber(L,scalex);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,scaley);
+            lua_rawseti(L,-2,2);
+            
+            gfloat x;
+            gfloat y;
+            clutter_actor_get_scale_center(self,&x,&y);
+            lua_pushnumber(L,x);
+            lua_rawseti(L,-2,3);
+            lua_pushnumber(L,y);
+            lua_rawseti(L,-2,4);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);            
+            lua_rawgeti(L,2,3);
+            lua_rawgeti(L,2,4);
+            if (!lua_isnil(L,-2)&&!lua_isnil(L,-1))
+                clutter_actor_set_scale_full(self,lua_tonumber(L,-4),lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1));
+            else
+                clutter_actor_set_scale(self,lua_tonumber(L,-4),lua_tonumber(L,-3));
+            lua_pop(L,4);
+        ]];
+        
+    table x_rotation
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat z;
+            gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+            lua_newtable(L);
+            lua_pushnumber(L,angle);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,y);
+            lua_rawseti(L,-2,2);
+            lua_pushnumber(L,z);
+            lua_rawseti(L,-2,3);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,-3),0,lua_tonumber(L,-2),lua_tonumber(L,-1));
+            lua_pop(L,3);
+        ]];
+
+    table y_rotation
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat z;
+            gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+            lua_newtable(L);
+            lua_pushnumber(L,angle);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,x);
+            lua_rawseti(L,-2,2);
+            lua_pushnumber(L,z);
+            lua_rawseti(L,-2,3);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),0,lua_tonumber(L,-1));
+            lua_pop(L,3);
+        ]];
+        
+    table z_rotation
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat z;
+            gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+            lua_newtable(L);
+            lua_pushnumber(L,angle);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,x);
+            lua_rawseti(L,-2,2);
+            lua_pushnumber(L,y);
+            lua_rawseti(L,-2,3);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1),0);
+            lua_pop(L,3);
+        ]];
+        
+        
+    readonly bool is_scaled
+        [[is_scaled=clutter_actor_is_scaled(self);]];
+        
+    readonly bool is_rotated
+        [[is_rotated=clutter_actor_is_rotated(self);]];
+        
+    int opacity
+        [[opacity=clutter_actor_get_opacity(self);]]
+        [[clutter_actor_set_opacity(self,opacity);]];
+        
+    table clip
+        [[
+            if (!clutter_actor_has_clip(self))
+            {
+                lua_pushnil(L);
+            }
+            else
+            {
+                gfloat x;
+                gfloat y;
+                gfloat w;
+                gfloat h;
+                clutter_actor_get_clip(self,&x,&y,&w,&h);
+                lua_newtable(L);
+                lua_pushnumber(L,x);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,y);
+                lua_rawseti(L,-2,2);
+                lua_pushnumber(L,w);
+                lua_rawseti(L,-2,3);
+                lua_pushnumber(L,h);
+                lua_rawseti(L,-2,4);
+            }
+        ]]
+        [[
+            if (lua_isnil(L,2))
+            {
+                clutter_actor_remove_clip(self);
+            }
+            else
+            {
+                luaL_checktype(L,2,LUA_TTABLE);
+                lua_rawgeti(L,2,1);
+                lua_rawgeti(L,2,2);
+                lua_rawgeti(L,2,3);
+                lua_rawgeti(L,2,4);
+                clutter_actor_set_clip(self,lua_tonumber(L,-4),lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1));
+                lua_pop(L,4);
+            }
+        ]];
+        
+    readonly bool has_clip
+        [[has_clip=clutter_actor_has_clip(self);]];
+        
+    double depth
+        [[depth=clutter_actor_get_depth(self);]]
+        [[clutter_actor_set_depth(self,depth);]];
+	
+    set(table props)
+	[[
+	  set_props_from_table(L,props);
+	]];
+
+    show()
+        [[clutter_actor_show(self);]];
+        
+    show_all()
+        [[clutter_actor_show_all(self);]];
+        
+    hide()
+        [[clutter_actor_hide(self);]];
+        
+    hide_all()
+        [[clutter_actor_hide_all(self);]];
+	
+    move_by( double dx , double dy )
+	[[clutter_actor_move_by(self,dx,dy);]];
+	
+    readonly udata parent
+	[[wrap_concrete_actor(L,clutter_actor_get_parent(self));]];
+	
+    raise( udata above )
+	[[
+	    ClutterActor* source = *((ClutterActor**)lua_touserdata(L,above));
+            clutter_actor_raise(self,source);
+	]];
+	
+    lower( udata below )
+	[[
+	    ClutterActor* source = *((ClutterActor**)lua_touserdata(L,below));
+            clutter_actor_lower(self,source);
+	]];
+	
+    raise_to_top()
+	[[
+	    clutter_actor_raise_top(self);    
+	]];
+	
+    lower_to_bottom()
+	[[
+	    clutter_actor_lower_bottom(self);    
+	]];
+	
+    move_anchor_point( double x , double y )
+	[[clutter_actor_move_anchor_point(self,x,y);]];
+	
+    grab_key_focus()
+	[[clutter_actor_grab_key_focus(self);]];
+	
+    bool reactive
+	[[reactive=clutter_actor_get_reactive(self);]]
+	[[clutter_actor_set_reactive(self,reactive);]];
+	
+    readonly table transformed_size
+	[[
+	    gfloat w;
+	    gfloat h;
+	    clutter_actor_get_transformed_size(self,&w,&h);
+	    lua_newtable(L);
+	    lua_pushnumber(L,w);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,h);
+	    lua_rawseti(L,-2,2);
+	]];
+	
+    readonly table transformed_position
+	[[
+	    gfloat x;
+	    gfloat y;
+	    clutter_actor_get_transformed_position(self,&x,&y);
+	    lua_newtable(L);
+	    lua_pushnumber(L,x);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,y);
+	    lua_rawseti(L,-2,2);
+	]];
+
+    callback on_key_focus_in
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_focus_in),L);
+	    if (on_key_focus_in)
+		g_signal_connect(self,"key-focus-in",G_CALLBACK(actor_on_key_focus_in),L);
+	]];
+
+    callback on_key_focus_out
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_focus_out),L);
+	    if (on_key_focus_out)
+		g_signal_connect(self,"key-focus-out",G_CALLBACK(actor_on_key_focus_out),L);
+	]];
+	
+    callback on_key_down
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_down),L);	    
+	    if (on_key_down)
+		g_signal_connect(self,"key-press-event",G_CALLBACK(actor_on_key_down),L);	    
+	]];
+	
+    callback on_key_up
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_up),L);	    
+	    if (on_key_up)
+		g_signal_connect(self,"key-release-event",G_CALLBACK(actor_on_key_up),L);	    
+	]];
+	
+    callback on_scroll
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_scroll),L);	    
+	    if (on_scroll)
+		g_signal_connect(self,"scroll-event",G_CALLBACK(actor_on_scroll),L);	    
+	]];
+	
+    callback on_button_down
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_button_down),L);	    
+	    if (on_button_down)
+		g_signal_connect(self,"button-press-event",G_CALLBACK(actor_on_button_down),L);	    
+	]];
+	
+    callback on_button_up
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_button_up),L);	    
+	    if (on_button_up)
+		g_signal_connect(self,"button-release-event",G_CALLBACK(actor_on_button_up),L);	    
+	]];
+	
+    callback on_show
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_show),L);	    
+	    if (on_show)
+		g_signal_connect(self,"show",G_CALLBACK(actor_on_show),L);	    	    
+	]];
+	
+    callback on_hide
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_hide),L);	    
+	    if (on_hide)
+		g_signal_connect(self,"hide",G_CALLBACK(actor_on_hide),L);	    	    
+	]];
+}
+
+[[
+void container_foreach_callback(ClutterActor*actor,lua_State*L)
+{
+    // The callback is always at 2
+    lua_pushvalue(L,2);
+    wrap_concrete_actor(L,actor);
+    lua_call(L,1,0);
+}
+]]
+
+interface container [[ClutterActor*]]
+{
+    add( )
+        [[
+            for(int i=2;i<=lua_gettop(L);++i)
+            {
+                if(ClutterActor* source = *((ClutterActor**)lua_touserdata(L,i)))
+                    clutter_container_add_actor(CLUTTER_CONTAINER(self),source);
+            }
+        ]];
+	
+    remove()
+	[[
+            for(int i=2;i<=lua_gettop(L);++i)
+            {
+                if(ClutterActor* source = *((ClutterActor**)lua_touserdata(L,i)))
+                    clutter_container_remove_actor(CLUTTER_CONTAINER(self),source);
+            }	    
+	]];
+	
+    clear()
+	[[
+            clutter_group_remove_all(CLUTTER_GROUP(self));	    
+	]];
+	
+    foreach_child( function f )
+	[[
+	    clutter_container_foreach(CLUTTER_CONTAINER(self),(ClutterCallback)container_foreach_callback,L);    
+	]];
+	
+    table find_child( string name )
+	[[
+	    wrap_concrete_actor(L,clutter_container_find_child_by_name(CLUTTER_CONTAINER(self),name));    
+	]];
+	
+    raise_child( udata child , udata sibling = 0 )
+	[[
+	    ClutterActor * c = *((ClutterActor**)lua_touserdata(L,child));
+	    ClutterActor * s = sibling?*((ClutterActor**)lua_touserdata(L,sibling)):NULL;
+	    
+	    clutter_container_raise_child(CLUTTER_CONTAINER(self),c,s);
+	]];
+	
+    lower_child( udata child , udata sibling = 0 )
+	[[
+	    ClutterActor * c = *((ClutterActor**)lua_touserdata(L,child));
+	    ClutterActor * s = sibling?*((ClutterActor**)lua_touserdata(L,sibling)):NULL;
+	    
+	    clutter_container_lower_child(CLUTTER_CONTAINER(self),c,s);
+	]];
+
+    # This one is very wasteful - it has to create and free the list as well as
+    # traverse it to determine the number of children. Should consider removing
+    # it altogether
+    
+    readonly int count
+	[[
+            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
+	    count = g_list_length(list);
+	    g_list_free(list);
+	]];
+	
+    table children
+        [[
+            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
+	    
+	    lua_newtable(L);
+	    int n = 1;
+	    for(GList*item=g_list_first(list);item;item=g_list_next(item),++n)
+	    {
+		wrap_concrete_actor(L,CLUTTER_ACTOR(item->data));
+		lua_rawseti(L,-2,n);
+	    }
+	    g_list_free(list);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            clutter_group_remove_all(CLUTTER_GROUP(self));
+            lua_pushnil(L);
+            while(lua_next(L,2))
+            {
+                ClutterActor* source(*((ClutterActor**)lua_touserdata(L,-1)));
+                if(source)
+                    clutter_container_add_actor(CLUTTER_CONTAINER(self),source);
+                lua_pop(L,1);
+            }
+        ]];
+	
+}
+
+[[
+gboolean Stage_on_key_press(ClutterActor*actor,ClutterEvent*event,lua_State*L);
+
+gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
+{
+    ClutterKeyEvent * k=(ClutterKeyEvent*)event;
+    
+    if (k->keyval==CLUTTER_Escape)
+    {
+	clutter_main_quit();
+	return TRUE;
+    }
+    return FALSE;    
+}
+]]
+
+global stage [[ClutterActor*]] actor , container
+{
+    stage()
+    [[
+        *self = clutter_stage_get_default();
+	
+	#warning We may want to disable this on production builds - it quits clutter when you press escape	
+	g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);	    
+    ]];
+        
+    table color
+        [[
+            ClutterColor color;
+            clutter_stage_get_color(CLUTTER_STAGE(self),&color);
+            push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            to_clutter_color(L,2,&color);
+            clutter_stage_set_color(CLUTTER_STAGE(self),&color);            
+        ]];
+	
+    table perspective
+	[[
+	    ClutterPerspective p;
+	    clutter_stage_get_perspective(CLUTTER_STAGE(self),&p);
+	    lua_newtable(L);
+	    lua_pushnumber(L,p.fovy);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,p.aspect);
+	    lua_rawseti(L,-2,2);
+	    lua_pushnumber(L,p.z_near);
+	    lua_rawseti(L,-2,3);
+	    lua_pushnumber(L,p.z_far);
+	    lua_rawseti(L,-2,4);
+	]]
+	[[
+	    luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            lua_rawgeti(L,2,4);
+	    ClutterPerspective p = {lua_tonumber(L,-4),lua_tonumber(L,-3),
+		lua_tonumber(L,-2),lua_tonumber(L,-1)};
+            clutter_stage_set_perspective(CLUTTER_STAGE(self),&p);
+            lua_pop(L,4);
+	]];
+	
+    # This doesn't seem to work
+    
+    udata get_object_at( double x , double y )
+	[[
+	    wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(self),CLUTTER_PICK_ALL,x,y));
+	]];
+		
+    udata key_focus
+	[[
+	    wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(self)));
+	]]
+	[[
+	    ClutterActor *k=*((ClutterActor**)lua_touserdata(L,2));
+	    clutter_stage_set_key_focus(CLUTTER_STAGE(self),k);
+	]];
+}
+
+[[
+void Text_on_text_changed(ClutterText*text,lua_State*L);
+]]
+
+class Text [[ClutterActor*]] actor
+{
+    Text(table props =0)
+        [[
+            *self = clutter_text_new();
+	    set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Text()
+	[[g_object_unref(G_OBJECT(self));]];
+    
+    table color
+        [[
+            ClutterColor color;
+            clutter_text_get_color(CLUTTER_TEXT(self),&color);
+            push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            to_clutter_color(L,2,&color);
+            clutter_text_set_color(CLUTTER_TEXT(self),&color);
+        ]];
+        
+    string text
+        [[text=clutter_text_get_text(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_text(CLUTTER_TEXT(self),text);]];
+        
+    string markup
+        [[
+            // markup doesn't have a getter
+            markup=clutter_text_get_text(CLUTTER_TEXT(self));
+        ]]
+        [[clutter_text_set_markup(CLUTTER_TEXT(self),markup);]];
+        
+    string font
+        [[font=clutter_text_get_font_name(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_font_name(CLUTTER_TEXT(self),font);]];
+        
+    bool justify
+        [[justify=clutter_text_get_justify(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_justify(CLUTTER_TEXT(self),justify);]];
+        
+    bool wrap
+        [[wrap=clutter_text_get_line_wrap(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_line_wrap(CLUTTER_TEXT(self),wrap);]];
+        
+    bool use_markup
+        [[use_markup=clutter_text_get_use_markup(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_use_markup(CLUTTER_TEXT(self),use_markup);]];
+	
+    string ellipsize
+	[[
+	    switch(clutter_text_get_ellipsize(CLUTTER_TEXT(self)))
+	    {
+		case PANGO_ELLIPSIZE_START:
+		    ellipsize="START";
+		    break;
+		case PANGO_ELLIPSIZE_MIDDLE:
+		    ellipsize="MIDDLE";
+		    break;
+		case PANGO_ELLIPSIZE_END:
+		    ellipsize="END";
+		    break;
+		default:
+		    ellipsize="NONE";
+	    }
+	]]
+	[[
+	    PangoEllipsizeMode mode = PANGO_ELLIPSIZE_NONE;
+	    if(!strcmp(ellipsize,"START"))
+		mode = PANGO_ELLIPSIZE_START;
+	    else if(!strcmp(ellipsize,"MIDDLE"))
+		mode = PANGO_ELLIPSIZE_MIDDLE;
+	    else if(!strcmp(ellipsize,"END"))
+		mode = PANGO_ELLIPSIZE_END;
+	    else if(!strcmp(ellipsize,"NONE"))
+		mode = PANGO_ELLIPSIZE_NONE;
+	    else
+		luaL_error(L,"Invalid ellipsize '%s'",ellipsize);
+	    clutter_text_set_ellipsize(CLUTTER_TEXT(self),mode);	
+	]];
+	
+    string alignment
+	[[
+	    switch(clutter_text_get_line_alignment(CLUTTER_TEXT(self)))
+	    {
+		case PANGO_ALIGN_CENTER:
+		    alignment="CENTER";
+		    break;
+		case PANGO_ALIGN_RIGHT:
+		    alignment="RIGHT";
+		    break;
+		default:
+		    alignment="LEFT";
+	    }	    
+	]]
+	[[
+	    PangoAlignment a=PANGO_ALIGN_LEFT;
+	    if(!strcmp(alignment,"LEFT"))
+		a=PANGO_ALIGN_LEFT;
+	    else if(!strcmp(alignment,"CENTER"))
+		a=PANGO_ALIGN_CENTER;
+	    else if(!strcmp(alignment,"RIGHT"))
+		a=PANGO_ALIGN_RIGHT;
+	    else
+		luaL_error(L,"Invalid alignment '%s'",alignment);
+	    clutter_text_set_line_alignment(CLUTTER_TEXT(self),a);
+	]];
+	
+    int max_length
+	[[max_length=clutter_text_get_max_length(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_max_length(CLUTTER_TEXT(self),max_length);]];
+	
+    set_selection( int start_pos , int end_pos )
+	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
+	
+    # This is really a string, but we must deallocate it 
+    readonly table selected_text
+	[[
+	    gchar * s=clutter_text_get_selection(CLUTTER_TEXT(self));
+	    if (!s)
+	    {
+		lua_pushnil(L);
+	    }
+	    else
+	    {
+		lua_pushstring(L,s);
+		g_free(s);
+	    }
+	]];
+	
+    int selection_end
+	[[selection_end=clutter_text_get_selection_bound(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_selection_bound(CLUTTER_TEXT(self),selection_end);]];
+	
+    bool single_line
+	[[single_line=clutter_text_get_single_line_mode(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_single_line_mode(CLUTTER_TEXT(self),single_line);]];
+	
+    bool editable
+	[[editable=clutter_text_get_editable(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_editable(CLUTTER_TEXT(self),editable);]];
+	
+    insert_text( int pos , string text )
+	[[clutter_text_insert_text(CLUTTER_TEXT(self),text,pos);]];
+	
+    delete_chars( int count )
+	[[clutter_text_delete_chars(CLUTTER_TEXT(self),count);]];
+	
+    delete_text( int start_pos , int end_pos )
+	[[clutter_text_delete_text(CLUTTER_TEXT(self),start_pos,end_pos);]];
+	
+    bool delete_selection()
+	[[result=clutter_text_delete_selection(CLUTTER_TEXT(self));]];
+	
+    # Really a string
+    
+    table get_chars( int start_pos , int end_pos )
+	[[
+	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
+	    if(!c)
+	    {
+		lua_pushnil(L);
+	    }
+	    else
+	    {
+		lua_pushstring(L,c);
+		g_free(c);
+	    }
+	]];
+	
+    table cursor_color
+	[[
+	    ClutterColor color;
+	    clutter_text_get_cursor_color(CLUTTER_TEXT(self),&color);
+	    push_clutter_color(L,&color);
+	]]
+	[[
+	    ClutterColor color;
+	    to_clutter_color(L,2,&color);
+	    clutter_text_set_cursor_color(CLUTTER_TEXT(self),&color);
+	]];
+	
+    table selection_color
+	[[
+	    ClutterColor color;
+	    clutter_text_get_selection_color(CLUTTER_TEXT(self),&color);
+	    push_clutter_color(L,&color);
+	]]
+	[[
+	    ClutterColor color;
+	    to_clutter_color(L,2,&color);
+	    clutter_text_set_selection_color(CLUTTER_TEXT(self),&color);
+	]];
+	
+    int cursor_position
+	[[cursor_position=clutter_text_get_cursor_position(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_cursor_position(CLUTTER_TEXT(self),cursor_position);]];
+	
+    bool cursor_visible
+	[[cursor_visible=clutter_text_get_cursor_visible(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_cursor_visible(CLUTTER_TEXT(self),cursor_visible);]];
+    
+    int cursor_size
+	[[cursor_size=clutter_text_get_cursor_size(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_cursor_size(CLUTTER_TEXT(self),cursor_size);]];
+	
+    bool wants_enter
+	[[wants_enter=!clutter_text_get_activatable(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_activatable(CLUTTER_TEXT(self),!wants_enter);]];
+	
+    int password_char
+	[[password_char=clutter_text_get_password_char(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_password_char(CLUTTER_TEXT(self),password_char);]];
+	
+    callback on_text_changed
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Text_on_text_changed),L);	    
+	    if (on_text_changed)
+		g_signal_connect(self,"text-changed",G_CALLBACK(Text_on_text_changed),L);	    
+	]];	
+}
+[[
+void Text_on_text_changed(ClutterText*text,lua_State*L)
+{
+    invoke_Text_on_text_changed(L,CLUTTER_ACTOR(text),0,0);
+}
+]]
+
+class Rectangle [[ClutterActor*]] actor
+{
+    Rectangle(table props = 0)
+        [[
+            *self = clutter_rectangle_new();
+	    set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Rectangle()
+	[[g_object_unref(G_OBJECT(self));]];
+        
+    table color
+        [[
+            ClutterColor color;
+            clutter_rectangle_get_color(CLUTTER_RECTANGLE(self),&color);
+            push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            to_clutter_color(L,2,&color);
+            clutter_rectangle_set_color(CLUTTER_RECTANGLE(self),&color);            
+        ]];
+        
+    int border_width
+        [[border_width=clutter_rectangle_get_border_width(CLUTTER_RECTANGLE(self));]]
+        [[clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(self),border_width);]];
+        
+    table border_color
+        [[
+            ClutterColor color;
+            clutter_rectangle_get_border_color(CLUTTER_RECTANGLE(self),&color);
+            push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            to_clutter_color(L,2,&color);
+            clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(self),&color);
+        ]];
+}
+
+class Clone [[ClutterActor*]] actor
+{
+    Clone(table props = 0)
+        [[
+            *self = clutter_clone_new(NULL);
+	    set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Clone()
+	[[g_object_unref(G_OBJECT(self));]];
+        
+    table source
+        [[
+	    wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
+        ]]
+        [[
+            ClutterActor* source(*((ClutterActor**)lua_touserdata(L,2)));
+            if(source)
+                clutter_clone_set_source(CLUTTER_CLONE(self),source);
+        ]];
+}
+
+class Group [[ClutterActor*]] actor , container
+{
+    Group(table props = 0 )
+        [[
+            *self = clutter_group_new();
+	    set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Group()
+	[[g_object_unref(G_OBJECT(self));]];        
+}
+
+[[
+#warning Using gdk-pixbuf directly, may not work on OSX
+
+void Image_response_callback(const Network::Response & response,gpointer t)
+{
+    GError * error = NULL;
+    
+    if (!response.failed && response.body->data && response.body->len > 0)
+    {
+	GdkPixbufLoader * l = gdk_pixbuf_loader_new();
+	
+	if (gdk_pixbuf_loader_write(l,response.body->data,response.body->len,NULL))
+	{
+	    //g_debug("IMAGE SENT TO LOADER");
+	    
+	    if (gdk_pixbuf_loader_close(l,NULL))
+	    {	    
+		GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(l);
+		
+		if (p)
+		{
+		    if ( clutter_texture_set_from_rgb_data(CLUTTER_TEXTURE(t),
+			gdk_pixbuf_get_pixels(p),
+			gdk_pixbuf_get_has_alpha(p),
+			gdk_pixbuf_get_width(p),
+			gdk_pixbuf_get_height(p),
+			gdk_pixbuf_get_rowstride(p),
+			gdk_pixbuf_get_has_alpha(p)?4:3,
+			CLUTTER_TEXTURE_NONE,NULL))
+		    {
+			//g_debug("TEXTURE DATA SET");
+		    }
+		    else
+		    {
+			g_set_error(&error,
+			    CLUTTER_TEXTURE_ERROR,
+			    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+			    "Failed to set texture data");
+		    }
+		}
+		else
+		{
+		    g_set_error(&error,
+			CLUTTER_TEXTURE_ERROR,
+			CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+			"Failed to get pixbuf from loader");
+		}
+	    }
+	    else
+	    {
+		g_set_error(&error,
+		    CLUTTER_TEXTURE_ERROR,
+		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		    "Failed to close loader");
+	    }
+	}	
+	else
+	{
+	    gdk_pixbuf_loader_close(l,NULL);
+	    g_set_error(&error,
+		CLUTTER_TEXTURE_ERROR,
+		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		"Failed to write data into loader");
+	}
+	
+	g_object_unref(G_OBJECT(l));
+    }
+    else
+    {
+	g_set_error(&error,
+	    CLUTTER_TEXTURE_ERROR,
+	    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+	    "Image URL request failed");
+    }
+    
+    if (error)
+    {
+	g_signal_emit_by_name(CLUTTER_TEXTURE(t),"load-finished",error);
+	g_clear_error(&error);
+    }
+    
+    g_object_unref(G_OBJECT(t));    
+}
+]]
+
+[[
+void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L);
+void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*L);
+]]
+
+class Image [[ClutterActor*]] actor
+{
+    Image(table props = 0 )
+        [[
+            *self = clutter_texture_new();
+	    set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Image()
+	[[
+	    g_object_unref(G_OBJECT(self));
+	]];
+    
+    string src
+	[[
+	    src=(char*)g_object_get_data(G_OBJECT(self),"tp-src");
+	]]
+	[[
+	    char * scheme=g_uri_parse_scheme(src);
+	    
+	    if (scheme)
+	    {
+		if(!strcmp(scheme,"http") || !strcmp(scheme,"https"))
+		{
+		    Network::Request request;
+		    request.url = src;
+		    g_object_ref(G_OBJECT(self));
+		    Network::perform_request_async(request,Image_response_callback,self);
+		}
+		
+		g_free(scheme);
+	    }
+	    else
+	    {
+		// TODO: we must validate this path so they can't load an image
+		// from anywhere
+		clutter_texture_set_from_file(CLUTTER_TEXTURE(self),src,NULL);
+	    }
+	    g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
+	]];
+	
+    readonly table base_size
+	[[
+	    gint w;
+	    gint h;
+	    clutter_texture_get_base_size(CLUTTER_TEXTURE(self),&w,&h);
+	    lua_newtable(L);
+	    lua_pushnumber(L,w);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,h);
+	    lua_rawseti(L,-2,2);
+	]];
+	
+    bool sync_size
+	[[sync_size=clutter_texture_get_sync_size(CLUTTER_TEXTURE(self));]]
+	[[clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);]];
+	
+    table tile
+	[[
+	    gboolean rx;
+	    gboolean ry;
+	    clutter_texture_get_repeat(CLUTTER_TEXTURE(self),&rx,&ry);
+	    lua_newtable(L);
+	    lua_pushboolean(L,rx);
+	    lua_rawseti(L,-2,1);
+	    lua_pushboolean(L,ry);
+	    lua_rawseti(L,-2,2);
+	]]
+	[[
+	    lb_checktable(L,2);
+	    lua_rawgeti(L,2,1);
+	    lua_rawgeti(L,2,2);
+	    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));
+	    lua_pop(L,2);
+	]];
+	
+    bool keep_aspect_ratio
+	[[keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));]]
+	[[clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);]];
+	
+    bool load_async
+	[[load_async=clutter_texture_get_load_async(CLUTTER_TEXTURE(self));]]
+	[[clutter_texture_set_load_async(CLUTTER_TEXTURE(self),load_async);]];
+	
+    callback on_loaded
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Image_on_loaded),L);
+	    if (on_loaded)
+		g_signal_connect(self,"load-finished",G_CALLBACK(Image_on_loaded),L);
+	]];
+	
+    callback on_size_changed
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Image_on_size_changed),L);
+	    if (on_size_changed)
+		g_signal_connect(self,"size-change",G_CALLBACK(Image_on_size_changed),L);	    
+	]];	
+}
+
+[[
+void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L)
+{
+    lua_pushboolean(L,error?1:0);
+    invoke_Image_on_loaded(L,CLUTTER_ACTOR(self),1,0);
+}
+
+void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*L)
+{
+    lua_pushinteger(L,width);
+    lua_pushinteger(L,height);
+    invoke_Image_on_size_changed(L,CLUTTER_ACTOR(self),2,0);
+}
+]]
+
+
+
+[[
+void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L);
+void Timeline_on_started(ClutterTimeline*timeline,lua_State*L);
+void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L);
+void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L);
+void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L);
+]]
+
+class Timeline [[ClutterTimeline*]]
+{
+    Timeline(table props = 0)
+	[[
+	    *self=clutter_timeline_new(1000);
+    	    set_props_from_table(L,props);
+	]];
+	
+    ~Timeline()
+	[[
+	    g_object_unref(G_OBJECT(self));
+	]];
+	
+    int duration
+	[[duration=clutter_timeline_get_duration(self);]]
+	[[clutter_timeline_set_duration(self,duration);]];
+	
+    bool loop
+	[[loop=clutter_timeline_get_loop(self);]]
+	[[clutter_timeline_set_loop(self,loop);]];
+	
+    int delay
+	[[delay=clutter_timeline_get_delay(self);]]
+	[[clutter_timeline_set_delay(self,delay);]];
+	
+    string direction
+	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"forward":"backward");]]
+	[[
+	    static const char * directions[3] = { "forward" , "backward" , NULL };
+	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
+	]];
+	
+    start()
+	[[clutter_timeline_start(self);]];
+	
+    pause()
+	[[clutter_timeline_pause(self);]];
+	
+    stop()
+	[[clutter_timeline_stop(self);]];
+	
+    rewind()
+	[[clutter_timeline_rewind(self);]];
+	
+    skip(int msecs)
+	[[clutter_timeline_skip(self,msecs);]];
+	
+    advance(int msecs)
+	[[clutter_timeline_advance(self,msecs);]];
+	
+    readonly int elapsed
+	[[elapsed=clutter_timeline_get_elapsed_time(self);]];
+	
+    readonly int delta
+	[[delta=clutter_timeline_get_delta(self);]];
+	
+    readonly double progress
+	[[progress=clutter_timeline_get_progress(self);]];
+	
+    readonly bool is_playing
+	[[is_playing=clutter_timeline_is_playing(self);]];
+	
+    add_marker(string name,int msecs)
+	[[clutter_timeline_add_marker_at_time(self,name,msecs);]];
+	
+    remove_marker(string name)
+	[[clutter_timeline_remove_marker(self,name);]];
+	
+    bool has_marker(string name)
+	[[result=clutter_timeline_has_marker(self,name);]];
+	
+    advance_to_marker(string name)
+	[[clutter_timeline_advance_to_marker(self,name);]];
+    
+    table list_markers(int msecs = -1)
+	[[
+	    gsize len;
+	    gchar** markers=clutter_timeline_list_markers(self,msecs,&len);
+	    gchar** m = markers;
+	    lua_newtable(L);
+	    for(int i=1;len;--len,++m,++i)
+	    {
+		lua_pushstring(L,*m);
+		lua_rawseti(L,-2,i);
+	    }
+	    g_strfreev(markers);
+	]];
+	
+    readonly table markers
+	[[Timeline_list_markers(L);]];
+	
+	
+    callback on_new_frame
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_new_frame),L);	    
+	    if (on_new_frame)
+		g_signal_connect(self,"new-frame",G_CALLBACK(Timeline_on_new_frame),L);
+	]];
+	
+    callback on_started
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_started),L);	    
+	    if (on_started)
+		g_signal_connect(self,"started",G_CALLBACK(Timeline_on_started),L);	    
+	]];
+    
+    callback on_completed
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_completed),L);
+	    if (on_completed)
+		g_signal_connect(self,"completed",G_CALLBACK(Timeline_on_completed),L);	    	    
+	]];
+	
+    callback on_paused
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_paused),L);
+	    if (on_paused)
+		g_signal_connect(self,"paused",G_CALLBACK(Timeline_on_paused),L);	    	    
+	]];
+	
+    callback on_marker_reached
+	[[
+	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_marker_reached),L);
+	    if (on_marker_reached)
+		g_signal_connect(self,"marker-reached",G_CALLBACK(Timeline_on_marker_reached),L);	    	    	    
+	]];
+}
+
+[[
+void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L)
+{
+    lua_pushinteger(L,msecs);
+    lua_pushnumber(L,clutter_timeline_get_progress(timeline));
+    invoke_Timeline_on_new_frame(L,timeline,2,0);
+}
+
+void Timeline_on_started(ClutterTimeline*timeline,lua_State*L)
+{
+    invoke_Timeline_on_started(L,timeline,0,0);    
+}
+
+void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L)
+{
+    invoke_Timeline_on_completed(L,timeline,0,0);    
+}
+
+void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L)
+{
+    invoke_Timeline_on_paused(L,timeline,0,0);    
+}
+
+void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L)
+{
+    lua_pushstring(L,marker_name);
+    lua_pushinteger(L,msecs);
+    invoke_Timeline_on_marker_reached(L,timeline,2,0);
+}
+
+]]
+
+[[
+gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer l);    
+]]
+
+class Alpha [[ClutterAlpha*]]
+{
+    Alpha(table props = 0)
+	[[
+	    *self=clutter_alpha_new();
+	    g_object_ref_sink(G_OBJECT(*self));
+    	    set_props_from_table(L,props);
+	]];
+
+    
+    ~Alpha()
+	[[
+	    g_object_unref(G_OBJECT(self));
+	]];
+	
+    table timeline
+	[[
+	    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
+	    if(wrap_Timeline(L,timeline))
+		g_object_ref(G_OBJECT(timeline));
+	]]
+	[[
+	    luaL_checkudata(L,-1,TIMELINE_METATABLE);
+	    ClutterTimeline * timeline(*((ClutterTimeline**)lua_touserdata(L,-1)));
+	    if (timeline)
+		clutter_alpha_set_timeline(self,timeline);
+	]];
+	
+    string mode
+	[[
+	    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+	    GEnumValue * v  = g_enum_get_value(ec,clutter_alpha_get_mode(self));
+	    mode = (v?&(v->value_name[8]):"");
+	    g_type_class_unref(ec);	    
+	]]
+	[[
+	    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+	    std::string cm("CLUTTER_");
+	    cm+= mode;
+	    
+	    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
+	    
+	    if(!v)
+		luaL_error(L,"Invalid alpha mode '%s'",mode);
+		
+		
+	    clutter_alpha_set_mode(self,v->value);
+	    g_type_class_unref(ec);
+	]];
+	
+    readonly double alpha
+	[[alpha=clutter_alpha_get_alpha(self);]];
+	
+    callback on_alpha
+	[[clutter_alpha_set_func(self,Alpha_on_alpha,L,NULL);]];	    
+}
+
+[[
+gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer l)
+{
+    lua_State * L((lua_State*)l);
+    
+    lua_pushnumber(L,clutter_timeline_get_progress(clutter_alpha_get_timeline(self)));
+    
+    invoke_Alpha_on_alpha(L,self,1,1);
+    
+    gdouble result(lua_tonumber(L,-1));
+    lua_pop(L,1);
+    
+    return result;    
+}
+]]
+
+[[
+struct interval
+{
+    interval(double aa , double bb) : a(aa),b(bb) {}
+    double a;
+    double b;
+};
+]]
+
+class Interval [[interval*]]
+{
+    Interval( double from , double to )
+	[[
+	    *self = new interval(from,to);
+	]];
+    
+    ~Interval()
+	[[
+	    delete self;
+	]];
+	
+    double get_value(double factor)
+	[[
+	    result=(factor*(self->b-self->a))+self->a;
+	]];
+	
+    double from
+	[[from=self->a;]]
+	[[self->a=from;]];
+	
+    double to
+	[[to=self->b;]]
+	[[self->b=to;]];
+    
+}
+
+[[
+void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
+{
+    int is_new = 0;
+    
+    if (!actor)
+	lua_pushnil(L);
+    else if (CLUTTER_IS_TEXTURE(actor))
+	is_new = wrap_Image(L,actor);
+    else if (CLUTTER_IS_STAGE(actor))
+	is_new = wrap_stage(L,actor);
+    else if (CLUTTER_IS_GROUP(actor))
+	is_new = wrap_Group(L,actor);
+    else if (CLUTTER_IS_TEXT(actor))
+	is_new = wrap_Text(L,actor);
+    else if (CLUTTER_IS_RECTANGLE(actor))
+	is_new = wrap_Rectangle(L,actor);
+    else if (CLUTTER_IS_CLONE(actor))
+	is_new = wrap_Clone(L,actor);
+    else
+	lua_pushnil(L);
+	
+    if (is_new)
+	g_object_ref(G_OBJECT(actor));
+}
+
+const char * get_actor_metatable(ClutterActor*actor)
+{
+    if (!actor)
+	return NULL;
+    else if (CLUTTER_IS_TEXTURE(actor))
+	return IMAGE_METATABLE;
+    else if (CLUTTER_IS_STAGE(actor))
+	return STAGE_METATABLE;
+    else if (CLUTTER_IS_GROUP(actor))
+	return GROUP_METATABLE;
+    else if (CLUTTER_IS_TEXT(actor))
+	return TEXT_METATABLE;
+    else if (CLUTTER_IS_RECTANGLE(actor))
+	return RECTANGLE_METATABLE;
+    else if (CLUTTER_IS_CLONE(actor))
+	return CLONE_METATABLE;
+    else
+	return NULL;
+}
+
+]]

@@ -3,15 +3,32 @@
 import sys
 import os
 import pprint
+from optparse import OptionParser
+
+line = 1
+file_name = None
+module = None
+initializers = []
+options = None
 
 def parse( source ):
     
-    operators = [ "[[" , "]]" , "(" , "," , ")" , "{" , "}" , ";" , "=" ]
+    global line
+    global file_name
+    global options
+    
+    operators = [ "[[" , "]]" , "(" , "," , ")" , "{" , "}" , ";" , "=" , "#" ]
     
     def skip_white_space( i ):
+
+        global line                
                 
         while ( ( i + 1 ) < len( source ) ) and ( source[ i : i + 1 ].isspace() ):
             
+            if source[ i : i + 1 ] == "\n":
+                
+                line += 1
+
             i += 1
 
         return i
@@ -58,10 +75,12 @@ def parse( source ):
         
     tokens = []
     
+    lines = []
+    
     output = []
     
     while i < len( source ):
-        
+                
         i = skip_white_space( i )
         
         if i >= len( source ):
@@ -88,17 +107,43 @@ def parse( source ):
                 
                 sys.exit( "Missing closing ]]" )
                 
-            token = source[ i : j ]
+            if options.lines:
+                line_directive = '#line %d "%s"\n' % ( line , file_name )
+            else:
+                line_directive = "\n"
             
+            token = line_directive + source[ i : j ]
+            
+            line -= 1
+            
+            for c in token:
+                if c == "\n":
+                    line += 1
+                    
             i = j + 2
             
             is_code = True
-    
+            
+        elif token == "#":
+            
+            while i < len(source):
+                
+                if source[i:i+1] == "\n":
+                    
+                    i += 1
+                    break
+                
+                i += 1 
+                
+            line += 1
+            
+            continue
+            
         # Now look for "marker" tokens
         
         if token == "{":
             
-            if len( tokens ) not in [ 3 , 4 ]:
+            if len( tokens ) < 3:
                 
                 sys.exit( "Bad bind" )
                                                 
@@ -108,14 +153,29 @@ def parse( source ):
                 
             inherits = None
             
-            if len( tokens ) == 4:
+            t = 3
+            
+            while t < len( tokens ):
                 
-                inherits = tokens[ 3 ]
+                if tokens[ t ] != ",":
+                
+                    if inherits is None:
+                        
+                        inherits = []
+                    
+                    inherits.append( tokens[ t ] )
+                
+                t += 1
+                
+            # This is to remove the #line directive we added earlier.
+            # It does not belong in the type
+            
+            udata = "\n".join(tokens[2].splitlines()[1:])
                 
             output.append( dict(
                 type = tokens[ 0 ] ,
                 name = tokens[ 1 ] ,
-                udata = tokens[ 2 ] ,
+                udata = udata ,
                 inherits = inherits ,
                 properties = [] ,
                 functions = [] )
@@ -125,9 +185,15 @@ def parse( source ):
             
         elif token == ";":
             
-            # See if it is a function or property
+            # See if it is a function, property or module
             
-            if ( len( tokens ) >= 3 ) and ( tokens[ 1 ] == "(" or tokens[ 2 ] == "(" ):
+            if ( len( tokens ) == 2 ) and ( tokens[ 0 ] == "module" ):
+                
+                output.append( dict( type = "module" , name = tokens[ 1 ] ) )
+                
+                tokens = []
+            
+            elif ( len( tokens ) >= 3 ) and ( tokens[ 1 ] == "(" or tokens[ 2 ] == "(" ):
                                 
                 if tokens[ 2 ] == "(":
                     
@@ -175,12 +241,12 @@ def parse( source ):
                                 
                             param_default = params[ 1 ]
                             
-                            del params[ 0 : 2 ]
+                            del params[ 0 : 3 ]
                             
                         else:
                             
                             sys.exit( "Invalid parameters for " + name )
-                                                    
+                            
                     parameters.append( dict( type = param_type , name = param_name , default = param_default ) )
                                     
                 if len( params ) != 0:
@@ -227,6 +293,9 @@ def parse( source ):
             
         elif token == "}":
             
+            if len(tokens) > 0:
+                sys.exit( "Something missing" );
+                
             tokens = []
                                 
         elif is_code and len( tokens ) == 0:
@@ -255,7 +324,10 @@ def emit( stuff , f ):
             "bool"      : "bool",
             "integer"   : "lua_Integer",
             "long"      : "long",
-            "string"    : "const char*"
+            "string"    : "const char*",
+            "table"     : "int",
+            "function"  : "int",
+            "udata"     : "int",
         }
         
         lua_check = {
@@ -264,16 +336,23 @@ def emit( stuff , f ):
             "bool"      : "lua_toboolean",
             "integer"   : "luaL_checkinteger",
             "long"      : "luaL_checklong",
-            "string"    : "luaL_checkstring"
+            "string"    : "luaL_checkstring",
+            "table"     : "lb_checktable",
+            "function"  : "lb_checkfunction",
+            "udata"     : "lb_checkudata"
         }
         
         lua_opt  = {
-            "int"       : "luaL_optint",
-            "double"    : "luaL_optnumber",
-            "bool"      : "luaL_optint",
-            "integer"   : "luaL_optinteger",
-            "long"      : "luaL_optlong",
-            "string"    : "luaL_optstring"            
+            "int"       : "lb_optint",
+            "double"    : "lb_optnumber",
+            "bool"      : "lb_optint",
+            "integer"   : "lb_optint",
+            "long"      : "lb_optint",
+            "string"    : "lb_optstring",
+            "table"     : "lb_opttable",
+            "function"  : "lb_optfunction",
+            "udata"     : "lb_optudata"
+            
         }
 
         lua_push  = {
@@ -282,7 +361,10 @@ def emit( stuff , f ):
             "bool"      : "lua_pushboolean",
             "integer"   : "lua_pushinteger",
             "long"      : "lua_pushinteger",
-            "string"    : "lua_pushstring"            
+            "string"    : "lua_pushstring",
+            "table"     : "lua_pushvalue",
+            "function"  : "lua_pushvalue",
+            "udata"     : "lua_pushvalue"
         }
         
         
@@ -305,7 +387,8 @@ def emit( stuff , f ):
         def flow_code( code ):
             
             if code is not None:
-                for line in code.strip().splitlines():
+                code = code.strip()
+                for line in code.splitlines():
                     f.write( "  " + line.strip() + "\n" )
         
         bind_name = bind[ "name" ]
@@ -327,6 +410,38 @@ def emit( stuff , f ):
         )
         
         #-----------------------------------------------------------------------
+        # WRAPPER
+        #-----------------------------------------------------------------------
+        
+        f.write(
+            "\n"
+            "int wrap_%s(lua_State*L,%s self)\n"
+            "{\n"
+            %
+            (bind_name,udata_type)
+        )
+        
+        if options.instrument:
+            
+            f.write(
+                "  int result=lb_wrap(L,self,%s);\n"
+                "  if(result)\n"
+                '    g_debug("CREATED %s %%p",self);\n'
+                "  return result;\n"
+                "}\n"
+                    %
+                    (metatable_name , bind_name )
+            )
+        else:
+            
+            f.write(
+                "  return lb_wrap(L,self,%s);\n"
+                "}\n"
+                %
+                metatable_name
+            )
+        
+        #-----------------------------------------------------------------------
         # FUNCTIONS        
         #-----------------------------------------------------------------------
 
@@ -342,6 +457,8 @@ def emit( stuff , f ):
             
             elif func[ "name" ] == "~" + bind_name:
                 
+                # Destructor
+                
                 destructors.append( func )
                 
                 continue
@@ -351,7 +468,8 @@ def emit( stuff , f ):
                 "\n"
                 "int %s_%s(lua_State*L)\n"
                 "{\n"
-                "  %s self(*((%s*)lua_touserdata(L,1)));\n"
+                "  luaL_checktype(L,1,LUA_TUSERDATA);\n"
+                "  %s self(lb_get_self(L,%s));\n"
                 %
                 ( bind_name , func[ "name" ] , udata_type , udata_type )
             )
@@ -364,7 +482,7 @@ def emit( stuff , f ):
                     ( declare_local( param , index + 2 )  , )
                 )
                 
-            if func[ "type" ] is not None:
+            if func[ "type" ] not in [ None , "table" , "udata" ]:
                 
                 f.write(
                     "  %s result;\n"
@@ -382,7 +500,15 @@ def emit( stuff , f ):
                 
                 pass
                 
-            if func[ "type" ] is not None:
+            if func[ "type" ] is None:
+                
+                f.write( "  return 0;\n" )
+                
+            elif func[ "type" ] in [ "table" , "udata" ]:
+                
+                f.write( "  return 1;\n" );
+        
+            else:
                 
                 f.write(
                     "  %s(L,result);\n"
@@ -390,10 +516,6 @@ def emit( stuff , f ):
                     %
                     ( lua_push[ func[ "type" ] ] , ) 
                 )
-                
-            else:
-                
-                f.write( "  return 0;\n" )
                 
             f.write( "}\n" )
             
@@ -411,12 +533,12 @@ def emit( stuff , f ):
                 "\n"
                 "int new_%s(lua_State*L)\n"
                 "{\n"
-                "  %s* self((%s*)lua_newuserdata(L,sizeof(%s)));\n"
+                "  %s* self(lb_new_self(L,%s));\n"
                 "  luaL_getmetatable(L,%s);\n"
 	        "  lua_setmetatable(L,-2);\n"
                 "\n"
                 %
-                ( bind_name , udata_type , udata_type , udata_type , metatable_name )
+                ( bind_name , udata_type , udata_type , metatable_name )
             )
             
             for index , param in enumerate( func[ "parameters" ] ):
@@ -436,6 +558,15 @@ def emit( stuff , f ):
                 # TODO - default constructor behavior
                 
                 pass
+            
+            f.write("  lb_store_weak_ref(L,lua_gettop(L),*self);\n");
+            
+            if options.instrument:
+                
+                f.write(
+                    '  g_debug("CREATED %s %%p",*self);\n'
+                    %
+                    bind_name );
             
             f.write(
                 "  return 1;\n"
@@ -459,10 +590,18 @@ def emit( stuff , f ):
                 "\n"
                 "int delete_%s(lua_State*L)\n"
                 "{\n"
-                "  %s self(*((%s*)lua_touserdata(L,1)));\n"
+                "  %s self(lb_get_self(L,%s));\n"
                 %
                 ( bind_name , udata_type , udata_type )
             )
+            
+            if options.instrument:
+                
+                f.write(
+                    '  g_debug("DESTROYED %s %%p",self);\n'
+                    %
+                    bind_name );
+            
                 
             if func[ "code" ] is not None:
                 
@@ -475,28 +614,36 @@ def emit( stuff , f ):
                 pass
             
             f.write( "  return 0;\n}\n" )
+        
             
         #-----------------------------------------------------------------------
         # PROPERTIES
         #-----------------------------------------------------------------------
         
+        callbacks = []
+        
         for prop in bind[ "properties" ]:
             
             prop_type = prop[ "type" ]
+            
+            if prop_type == "callback":
+                
+                callbacks.append( prop )
+                
+                continue
             
             f.write(
                 "\n"
                 "int get_%s_%s(lua_State*L)\n"
                 "{\n"
-                "  %s self(*((%s*)lua_touserdata(L,1)));\n"
-                "\n"
+                "  %s self(lb_get_self(L,%s));\n"
                 %
                 ( bind_name , prop[ "name" ] , udata_type , udata_type )
             )
           
             if prop[ "get_code" ] is not None:
                 
-                if prop_type != "table":
+                if prop_type not in( "table" , "function" , "udata" ):
                 
                     f.write(
                         "  %s %s;\n"
@@ -505,7 +652,7 @@ def emit( stuff , f ):
                 
                 flow_code( prop[ "get_code" ] )
 
-                if prop_type != "table":
+                if prop_type not in ( "table" , "function" , "udata" ):
                     
                     f.write(
                         "  %s(L,%s);\n"
@@ -531,15 +678,14 @@ def emit( stuff , f ):
                     "\n"
                     "int set_%s_%s(lua_State*L)\n"
                     "{\n"
-                    "  %s self(*((%s*)lua_touserdata(L,1)));\n"
-                    "\n"
+                    "  %s self(lb_get_self(L,%s));\n"
                     %
                     ( bind_name , prop[ "name" ] , udata_type , udata_type )
                 )
               
                 if prop[ "set_code" ] is not None:
                     
-                    if prop_type != "table":
+                    if prop_type not in ( "table" , "function" , "udata" ):
                         
                         f.write(
                             "  %s\n"
@@ -560,12 +706,64 @@ def emit( stuff , f ):
                     
                     pass
                 
+        #-----------------------------------------------------------------------
+        # CALLBACKS
+        #-----------------------------------------------------------------------
             
-        
+        for cb in callbacks:
+
+            f.write(
+                "\n"
+                "int get_%s_%s(lua_State*L)\n"
+                "{\n"
+                '  return lb_get_callback(L,lb_get_self(L,%s),"%s",0);\n'
+                "}\n"
+                %
+                ( bind_name , cb[ "name" ] , udata_type , cb[ "name" ] )
+            )
+            
+            f.write(
+                "\n"
+                "int set_%s_%s(lua_State*L)\n"
+                "{\n"
+                "  %s self(lb_get_self(L,%s));\n"
+                '  int %s(!lb_set_callback(L,self,"%s"));\n'
+                %
+                ( bind_name , cb[ "name" ] , udata_type , udata_type , cb[ "name" ] , cb[ "name" ] )
+            )
+                
+            flow_code( cb[ "get_code" ] );                
+                
+            f.write(
+                "  return 0;\n"
+                "}\n"
+            )                
+            
+            f.write(
+                "\n"
+                "int invoke_%s_%s(lua_State*L,%s self,int nargs,int nresults)\n"
+                "{\n"
+                '  return lb_invoke_callback(L,self,%s,"%s",nargs,nresults);\n'
+                "}\n"
+                %
+                ( bind_name , cb[ "name" ] , udata_type , metatable_name , cb[ "name" ] )
+            )
+            
+        if len(callbacks) > 0:
+            
+            f.write(
+                "\n"
+                "void detach_%s(lua_State*L,%s self)\n"
+                "{\n"
+                "  lb_clear_callbacks(L,self,%s);\n"
+                "}\n"
+                %
+                (bind_name , udata_type , metatable_name )
+            )
         #-----------------------------------------------------------------------
         # INITIALIZER
         #-----------------------------------------------------------------------
-        
+                
         f.write(
             "\n"
             "void luaopen_%s(lua_State*L)\n"
@@ -574,12 +772,17 @@ def emit( stuff , f ):
             ( bind_name , )
         )
         
+        initializers.append( bind_name );
+        
         # Create the metatable
         
         f.write(
             "  luaL_newmetatable(L,%s);\n"
+            '  lua_pushstring(L,"type");\n'
+            '  lua_pushstring(L,"%s");\n'
+            "  lua_rawset(L,-3);\n"
             %
-            metatable_name
+            (metatable_name,bind_name)
         )
 
         f.write(
@@ -690,11 +893,13 @@ def emit( stuff , f ):
                 
         if bind[ "inherits" ] is not None:
             
-            f.write(
-                '  lb_inherit(L,"%s_METATABLE");\n'
-                %
-                bind[ "inherits" ].upper()
-            )
+            for inh in bind[ "inherits" ]:
+                
+                f.write(
+                    '  lb_inherit(L,"%s_METATABLE");\n'
+                    %
+                    inh.upper()
+                )
 
         # Pop the metatable
         
@@ -738,6 +943,9 @@ def emit( stuff , f ):
         
     
     f.write( '#include "lb.h"\n' );
+    
+    module = None
+    initializers  = []
 
     for thing in stuff:
         
@@ -749,18 +957,44 @@ def emit( stuff , f ):
             
             emit_bind( thing )
             
+        elif thing[ "type" ] == "module":
+            
+            module = thing[ "name" ]
+            
         else:
             
             sys.exit( "Unknown " + thing[ "type" ] )
+            
+    if ( module is not None ) and ( len( initializers ) > 0 ):
+        
+        f.write(
+            "\n"
+            "void luaopen_%s(lua_State*L)\n"
+            "{\n"            
+            % module
+        )
+        
+        for init in initializers:
+            f.write(
+                "  luaopen_%s(L);\n"
+                % init
+            )
+            
+        f.write( "}\n" )
         
         
 if __name__ == "__main__":
-
-    for f in sys.argv[1:]:
+    
+    parser = OptionParser()
+    parser.add_option( "-l" , "--lines" , action="store_true" , default=False , help="Include #line directives" )
+    parser.add_option( "-i" , "--instrument" , action="store_true" , default=False , help="Add instrumentation" )
+    (options,args) = parser.parse_args()
+    
+    for file_name in args:
         
-        output = open( os.path.splitext( os.path.basename( f ) )[ 0 ] + ".cpp" , "w")
+        output = open( os.path.splitext( os.path.basename( file_name ) )[ 0 ] + ".cpp" , "w")
         
-        binding = parse( open( f ).read() )
+        binding = parse( open( file_name ).read() )
         
 #        pprint.pprint( binding )
         

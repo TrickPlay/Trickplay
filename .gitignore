@@ -1,6 +1,4 @@
-trickplay-host
+Debug
+src
 *.o
 *.a
-trickplay-host.bbprojectd
-circles_demo.tch
-speed_test.tch
