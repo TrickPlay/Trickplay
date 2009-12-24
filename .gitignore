@@ -1,4 +1,5 @@
 /Debug
 /src
+/build
 *.o
 *.a
