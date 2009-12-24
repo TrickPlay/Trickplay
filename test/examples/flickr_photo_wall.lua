@@ -266,7 +266,7 @@ local key_down  = 65364
 local key_up    = 65362
 local key_enter = 65293
 
-function stage.on_key_press(stage,keyval)
+function stage.on_key_down(stage,keyval)
 
     local function reset()
         if timeline.is_playing then
