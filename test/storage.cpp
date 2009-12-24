@@ -5,8 +5,6 @@ namespace Storage
 {
 
 	LocalHash::LocalHash()
-	:
-		name(NULL)
 	{
 	}
 
