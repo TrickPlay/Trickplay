@@ -3,7 +3,6 @@ module clutter;
 
 [[    
 #include "clutter/clutter.h"
-#warning Using gdk-pixbuf directly, may not work on OSX
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cstring>
 #include <string>
@@ -1086,7 +1085,6 @@ class Group [[ClutterActor*]] actor , container
 }
 
 [[
-#warning Using gdk-pixbuf directly, may not work on OSX
 
 void Image_response_callback(const Network::Response & response,gpointer t)
 {

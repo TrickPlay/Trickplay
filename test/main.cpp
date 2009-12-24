@@ -46,12 +46,6 @@ int main( int argc , char * argv[] )
     else
     {
         clutter_actor_show_all(clutter_stage_get_default());
-#if 0
-        g_signal_connect( clutter_stage_get_default() ,
-                    "key-press-event",
-		    G_CALLBACK( clutter_main_quit ) , NULL );
-#endif	
-
         clutter_main();
     }
     

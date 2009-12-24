@@ -1,6 +1,6 @@
 #include "network.h"
 
-#include "curl.h"
+#include "curl/curl.h"
 #include "glib-object.h"
 #include <cstring>
 #include <cstdlib>

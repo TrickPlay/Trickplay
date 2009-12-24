@@ -3,21 +3,20 @@ cmake_minimum_required( VERSION 2.6 )
 
 project( TP )
 
-set( LUA_INCLUDE        /home/pablo/Downloads/lua-5.1.4/src )
-set( LUA_LIB            /home/pablo/Downloads/lua-5.1.4/src )
-
-set( LB                 /home/pablo/Dropbox/tp/lb )
+set( LB                 ${PROJECT_SOURCE_DIR}/../lb )
 set( LB_GENERATOR       ${LB}/bin/lb.py )
 
-set( CLUTTER_INCLUDE    /usr/local/include/clutter-1.0 )
-set( GLIB_INCLUDE       /usr/include/glib-2.0 )
-set( GLIB_LIB_INCLUDE   /usr/lib/glib-2.0/include )
-set( CAIRO_INCLUDE      /usr/include/cairo )
-set( PANGO_INCLUDE      /usr/include/pango-1.0 )
-set( CURL_INCLUDE	/usr/local/include/curl )
+list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR} )
+
+find_package(Lua51 REQUIRED)
+find_package(GLIB2 REQUIRED)
+find_package(CURL REQUIRED)
+find_package(Cairo REQUIRED)
+find_package(Pango REQUIRED)
+find_package(Clutter REQUIRED)
 
 # This one is temporary
-set( GTK_INCLUDE	/usr/include/gtk-2.0 )
+find_package(GTK2 REQUIRED)
 
 set(
     CLUTTER_LIBS
@@ -53,21 +52,17 @@ set(
 include_directories(
     
     ${PROJECT_SOURCE_DIR}
-    ${LUA_INCLUDE}
     ${LB}/include
-    ${GLIB_INCLUDE}
-    ${GLIB_LIB_INCLUDE}
-    ${CAIRO_INCLUDE}
-    ${PANGO_INCLUDE}
-    ${CLUTTER_INCLUDE}
-    ${CURL_INCLUDE}
-    ${GTK_INCLUDE}
+
+    ${LUA_INCLUDE_DIR}    
+    ${CLUTTER_INCLUDE_DIRS} 
+    ${GTK2_GTK_INCLUDE_DIR}
+    ${GLIB2_INCLUDE_DIR}
+    ${CURL_INCLUDE_DIRS}
+    ${CAIRO_INCLUDE_DIRS}
+    ${PANGO_INCLUDE_DIRS}
 )
 
-link_directories(
-
-    ${LUA_LIB}
-)
 
 set(
 
@@ -108,6 +103,7 @@ add_executable(
     
     main.cpp
     network.cpp
+    
     ${GENERATED_FILES}
     ${LB}/src/lb.c
     
@@ -118,8 +114,8 @@ target_link_libraries(
     tp
     
     dl
-    lua
     
+    ${LUA_LIBRARIES}
     ${CLUTTER_LIBS}
     ${CURL_LIBS}
 )
