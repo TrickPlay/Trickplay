@@ -1,4 +1,4 @@
-Debug
-src
+/Debug
+/src
 *.o
 *.a
