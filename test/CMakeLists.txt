@@ -3,21 +3,21 @@ cmake_minimum_required( VERSION 2.6 )
 
 project( TP )
 
-set( LUA_INCLUDE        /home/pablo/Downloads/lua-5.1.4/src )
-set( LUA_LIB            /home/pablo/Downloads/lua-5.1.4/src )
+set( LUA_INCLUDE        /opt/local/include )
+set( LUA_LIB            /opt/local/lib )
 
-set( LB                 /home/pablo/Dropbox/tp/lb )
+set( LB                 /Users/craig/code/trickplay/lb )
 set( LB_GENERATOR       ${LB}/bin/lb.py )
 
-set( CLUTTER_INCLUDE    /usr/local/include/clutter-1.0 )
-set( GLIB_INCLUDE       /usr/include/glib-2.0 )
-set( GLIB_LIB_INCLUDE   /usr/lib/glib-2.0/include )
-set( CAIRO_INCLUDE      /usr/include/cairo )
-set( PANGO_INCLUDE      /usr/include/pango-1.0 )
-set( CURL_INCLUDE	/usr/local/include/curl )
+set( CLUTTER_INCLUDE    /opt/local/include/clutter-1.0 )
+set( GLIB_INCLUDE       /opt/local/include/glib-2.0 )
+set( GLIB_LIB_INCLUDE   /opt/local/lib/glib-2.0/include )
+set( CAIRO_INCLUDE      /opt/local/include/cairo )
+set( PANGO_INCLUDE      /opt/local/include/pango-1.0 )
+set( CURL_INCLUDE			/opt/local/include/curl )
 
 # This one is temporary
-set( GTK_INCLUDE	/usr/include/gtk-2.0 )
+set( GTK_INCLUDE			/opt/local/include/gtk-2.0 )
 
 set(
     CLUTTER_LIBS
@@ -76,6 +76,7 @@ set(
     clutter.lb
     timer.lb
     url_request.lb
+    storage.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
@@ -108,6 +109,7 @@ add_executable(
     
     main.cpp
     network.cpp
+    storage.cpp
     ${GENERATED_FILES}
     ${LB}/src/lb.c
     

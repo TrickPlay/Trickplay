@@ -1,0 +1,76 @@
+module storage;
+
+[[
+#include "storage.h"
+]]
+
+class LocalHash [[Storage::LocalHash*]]
+{
+	LocalHash(string name="DEFAULT_DB")
+		[[
+				*self = new Storage::LocalHash(name);
+            if (lua_gettop(L)==2 && lua_istable(L,-2))
+            {
+                lua_pushvalue(L,-2);
+                lb_set_props_from_table(L);
+                lua_pop(L,1);
+            }
+				else
+				{
+					self->name = name;
+				}
+
+				self->connect();
+		]];
+
+	~LocalHash()
+		[[
+			delete self;
+		]];
+
+	readonly int count
+		[[
+			count = self->count();
+		]];
+
+	table get(string key)
+		[[
+			Storage::String value = self->get(key);
+			lua_pushlstring(L, value.data(), value.length());
+		]];
+
+	put(string key, string value)
+		[[
+			self->put(key, value);
+		]];
+
+	del(string key)
+		[[
+			self->del(key);
+		]];
+
+	nuke()
+		[[
+			self->nuke();
+		]];
+
+	begin()
+		[[
+			self->begin();
+		]];
+
+	commit()
+		[[
+			self->commit();
+		]];
+
+	abort()
+		[[
+			self->abort();
+		]];
+
+	flush()
+		[[
+			self->flush();
+		]];
+}
