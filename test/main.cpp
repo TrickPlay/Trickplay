@@ -10,6 +10,7 @@
 extern void luaopen_clutter(lua_State*L);
 extern void luaopen_timer(lua_State*L);
 extern void luaopen_url_request(lua_State*L);
+extern void luaopen_local_hash(lua_State*L);
     
 void ncb(const Network::Response & r , gpointer data )
 {
@@ -36,6 +37,7 @@ int main( int argc , char * argv[] )
     luaopen_clutter(L);
     luaopen_timer(L);
     luaopen_url_request(L);
+    luaopen_local_hash(L);
     
     int result = luaL_dofile(L,"tp.lua");
 
