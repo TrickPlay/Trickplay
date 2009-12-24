@@ -50,4 +50,4 @@ namespace Storage
 	uint64_t count(LocalHash & db);
 };
 
-#endif __TRICKPLAY_STORAGE__
+#endif // __TRICKPLAY_STORAGE__
