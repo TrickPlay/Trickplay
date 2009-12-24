@@ -2,6 +2,7 @@ module local_hash;
 
 [[
 #include "storage.h"
+#include "glib.h"
 ]]
 
 class LocalHash [[Storage::LocalHash*]]
@@ -17,6 +18,7 @@ class LocalHash [[Storage::LocalHash*]]
             }
 				else
 				{
+					g_debug("Name is: %p (%s)",name,name);
 					(*self)->name = name;
 				}
 
@@ -33,24 +35,36 @@ class LocalHash [[Storage::LocalHash*]]
 			count = self->count();
 		]];
 
-	table get(string key)
+	table get(table key=0)
 		[[
-			Storage::String theKey = key;
-			Storage::String value = self->get(theKey);
+			size_t key_length;
+			const char *key_buf = luaL_checklstring(L, 2, &key_length);
+
+			Storage::String tKey = Storage::String(key_buf, key_length);
+			Storage::String value = self->get(tKey);
 			lua_pushlstring(L, value.data(), value.length());
 		]];
 
-	put(string key, string value)
+	put(table key=0, table value=0)
 		[[
-			Storage::String theKey = key;
-			Storage::String theValue = value;
-			self->put(theKey, theValue);
+			size_t key_length;
+			const char *key_buf = luaL_checklstring(L, 2, &key_length);
+
+			size_t value_length;
+			const char *value_buf = luaL_checklstring(L, 3, &value_length);
+
+			Storage::String tKey = Storage::String(key_buf, key_length);
+			Storage::String tValue = Storage::String(value_buf, value_length);
+			self->put(tKey, tValue);
 		]];
 
-	del(string key)
+	del(table key=0)
 		[[
-			Storage::String theKey = key;
-			self->del(theKey);
+			size_t key_length;
+			const char *key_buf = luaL_checklstring(L, 2, &key_length);
+
+			Storage::String tKey = Storage::String(key_buf, key_length);
+			self->del(tKey);
 		]];
 
 	nuke()
