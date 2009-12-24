@@ -8,7 +8,7 @@ class LocalHash [[Storage::LocalHash*]]
 {
 	LocalHash(string name="DEFAULT_DB")
 		[[
-				*self = new Storage::LocalHash(name);
+				*self = new Storage::LocalHash();
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {
                 lua_pushvalue(L,-2);
@@ -17,10 +17,10 @@ class LocalHash [[Storage::LocalHash*]]
             }
 				else
 				{
-					self->name = name;
+					(*self)->name = name;
 				}
 
-				self->connect();
+				(*self)->connect();
 		]];
 
 	~LocalHash()
@@ -35,18 +35,22 @@ class LocalHash [[Storage::LocalHash*]]
 
 	table get(string key)
 		[[
-			Storage::String value = self->get(key);
+			Storage::String theKey = key;
+			Storage::String value = self->get(theKey);
 			lua_pushlstring(L, value.data(), value.length());
 		]];
 
 	put(string key, string value)
 		[[
-			self->put(key, value);
+			Storage::String theKey = key;
+			Storage::String theValue = value;
+			self->put(theKey, theValue);
 		]];
 
 	del(string key)
 		[[
-			self->del(key);
+			Storage::String theKey = key;
+			self->del(theKey);
 		]];
 
 	nuke()

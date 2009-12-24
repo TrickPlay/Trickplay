@@ -25,7 +25,6 @@ set(
     clutter-glx-1.0
     pangocairo-1.0
     gthread-2.0
-    rt
     gdk_pixbuf-2.0
     m
     GL
@@ -44,10 +43,15 @@ set(
 set(
     CURL_LIBS
     
-    cares
     ssl
     crypto
     curl
+)
+
+set(
+	TOKYO_LIBS
+	
+	tokyocabinet
 )
 
 include_directories(
@@ -76,7 +80,7 @@ set(
     clutter.lb
     timer.lb
     url_request.lb
-    storage.lb
+    local_hash.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
@@ -93,7 +97,7 @@ foreach( LB_FILE ${LB_FILES} )
 	file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 	add_custom_command( 
 		OUTPUT ${LB_FILE_NAME_NO_EXT}.cpp
-		COMMAND ${LB_GENERATOR} -i ${PROJECT_SOURCE_DIR}/${NATIVE_LB_FILE}
+		COMMAND ${LB_GENERATOR} -i -l ${PROJECT_SOURCE_DIR}/${NATIVE_LB_FILE}
 		DEPENDS ${LB_FILE} ${LB_GENERATOR} )
         
 
@@ -124,4 +128,5 @@ target_link_libraries(
     
     ${CLUTTER_LIBS}
     ${CURL_LIBS}
+    ${TOKYO_LIBS}
 )

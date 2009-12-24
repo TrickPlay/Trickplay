@@ -10,6 +10,11 @@ namespace Storage
 	{
 	}
 
+	LocalHash::~LocalHash()
+	{	
+		tchdbdel(db);
+	}
+
 	void LocalHash::connect()
 	{
 		db = tchdbnew();
