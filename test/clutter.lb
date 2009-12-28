@@ -636,6 +636,33 @@ interface actor [[ClutterActor*]]
 	    lb_checktable(L,2);
 	    g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
 	]];
+	
+    string request_mode
+	[[
+	    ClutterRequestMode mode;
+	    g_object_get(G_OBJECT(self),"request-mode",&mode,NULL);
+	    switch(mode)
+	    {
+		case CLUTTER_REQUEST_HEIGHT_FOR_WIDTH:
+		    request_mode = "HEIGHT_FOR_WIDTH";
+		    break;
+		case CLUTTER_REQUEST_WIDTH_FOR_HEIGHT:
+		    request_mode = "WIDTH_FOR_HEIGHT";
+		    break;
+		default:
+		    request_mode = "";
+	    }
+	]]
+	[[
+	    ClutterRequestMode mode = CLUTTER_REQUEST_HEIGHT_FOR_WIDTH;
+	    if (!strcmp(request_mode,"HEIGHT_FOR_WIDTH"))
+		mode = CLUTTER_REQUEST_HEIGHT_FOR_WIDTH;
+	    else if (!strcmp(request_mode,"WIDTH_FOR_HEIGHT"))
+		mode = CLUTTER_REQUEST_WIDTH_FOR_HEIGHT;
+	    else
+		luaL_error(L,"Invalid request mode '%s'",request_mode);
+	    g_object_set(G_OBJECT(self),"request-mode",mode,NULL);
+	]];
 
     callback on_key_focus_in
 	[[
