@@ -33,23 +33,24 @@ class LocalHash [[Storage::LocalHash*]]
 			count = self->count();
 		]];
 
-	table get(string key)
+	lstring get(lstring key)
 		[[
-			Storage::String theKey = key;
+			Storage::String theKey( key , key_len );
 			Storage::String value = self->get(theKey);
-			lua_pushlstring(L, value.data(), value.length());
+			result = value.c_str();
+			result_len = value.length();
 		]];
 
-	put(string key, string value)
+	put(lstring key, lstring value)
 		[[
-			Storage::String theKey = key;
-			Storage::String theValue = value;
+			Storage::String theKey( key , key_len );
+			Storage::String theValue( value , value_len );
 			self->put(theKey, theValue);
 		]];
 
-	del(string key)
+	del(lstring key)
 		[[
-			Storage::String theKey = key;
+			Storage::String theKey( key , key_len );
 			self->del(theKey);
 		]];
 

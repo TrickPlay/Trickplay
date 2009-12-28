@@ -502,3 +502,13 @@ int lb_wrap(lua_State*L,void*self,const char*metatable)
     
     return 1;
 }
+
+const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
+{
+    if (lua_isstring(L,narg))
+        return lua_tolstring(L,narg,len);
+          
+    if (len)
+      *len = (def ? strlen(def) : 0);
+    return def;
+}

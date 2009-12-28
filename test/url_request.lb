@@ -25,15 +25,10 @@ interface URLResponse [[Network::Response*]]
     readonly bool failed
         [[failed=self->failed;]];
         
-    # This one is really a string, but we want to
-    # use pushlstring instead of the default behavior
-    
-    readonly table body
+    readonly lstring body
         [[
-            if (self->body->len==0)
-                lua_pushstring(L,"");
-            else
-                lua_pushlstring(L,(const char*)self->body->data,self->body->len);
+	    body = (const char*) self->body->data;
+	    body_len = self->body->len;
         ]];
         
     readonly int length

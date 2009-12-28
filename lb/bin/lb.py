@@ -325,6 +325,7 @@ def emit( stuff , f ):
             "integer"   : "lua_Integer",
             "long"      : "long",
             "string"    : "const char*",
+            "lstring"   : "const char*",
             "table"     : "int",
             "function"  : "int",
             "udata"     : "int",
@@ -337,6 +338,7 @@ def emit( stuff , f ):
             "integer"   : "luaL_checkinteger",
             "long"      : "luaL_checklong",
             "string"    : "luaL_checkstring",
+            "lstring"   : "luaL_checklstring",
             "table"     : "lb_checktable",
             "function"  : "lb_checkfunction",
             "udata"     : "lb_checkudata"
@@ -349,6 +351,7 @@ def emit( stuff , f ):
             "integer"   : "lb_optint",
             "long"      : "lb_optint",
             "string"    : "lb_optstring",
+            "lstring"   : "lb_optlstring",
             "table"     : "lb_opttable",
             "function"  : "lb_optfunction",
             "udata"     : "lb_optudata"
@@ -362,6 +365,7 @@ def emit( stuff , f ):
             "integer"   : "lua_pushinteger",
             "long"      : "lua_pushinteger",
             "string"    : "lua_pushstring",
+            "lstring"   : "lua_pushlstring",
             "table"     : "lua_pushvalue",
             "function"  : "lua_pushvalue",
             "udata"     : "lua_pushvalue"
@@ -372,17 +376,39 @@ def emit( stuff , f ):
             
             type = param[ "type" ]
             
-            result = "%s %s(" % ( ctype[ type ] , param[ "name" ] );
+            result = ""
+            extra = ""
+            
+            if type == "lstring":
+                
+                result += "size_t %s_len=0;\n" % param[ "name" ]
+                
+                extra = ",&%s_len" % param[ "name" ]
+                
+            
+            
+            result += "%s %s(" % ( ctype[ type ] , param[ "name" ] )
             
             if param.get( "default" ) is not None:
                 
-                result += "%s(L,%d,%s));" % ( lua_opt[ type ] , index , param[ "default"] )
+                result += "%s(L,%d,%s%s));" % ( lua_opt[ type ] , index , param[ "default"] , extra )
                 
             else:
                 
-                result += "%s(L,%d));" % ( lua_check[ type ] , index )
+                result += "%s(L,%d%s));" % ( lua_check[ type ] , index , extra )
+                
                 
             return result
+        
+        def write_push_result( type ):
+            
+            if type == "lstring":
+                
+                f.write( "  %s(L,result,result_len);\n" % lua_push[ type ] )
+                
+            else:
+                
+                f.write( "  %s(L,result);\n" % lua_push[ type ] )
             
         def flow_code( code ):
             
@@ -489,6 +515,9 @@ def emit( stuff , f ):
                     % ( ctype[ func[ "type" ] ] ,  )
                 )
                 
+                if func[ "type" ] == "lstring":
+                    
+                    f.write( "  size_t result_len=0;\n" )
                 
             if func[ "code" ] is not None:
                 
@@ -510,12 +539,8 @@ def emit( stuff , f ):
         
             else:
                 
-                f.write(
-                    "  %s(L,result);\n"
-                    "  return 1;\n"
-                    %
-                    ( lua_push[ func[ "type" ] ] , ) 
-                )
+                write_push_result( func[ "type" ] )
+                f.write( "  return 1;\n" )
                 
             f.write( "}\n" )
             
@@ -649,16 +674,30 @@ def emit( stuff , f ):
                         "  %s %s;\n"
                         % ( ctype[ prop_type ] , prop[ "name" ] )
                     )
+                    
+                    if prop_type == "lstring":
+                        
+                        f.write( "  size_t %s_len=0;\n" % prop[ "name" ] )
                 
                 flow_code( prop[ "get_code" ] )
 
                 if prop_type not in ( "table" , "function" , "udata" ):
                     
-                    f.write(
-                        "  %s(L,%s);\n"
-                        %
-                        ( lua_push[ prop[ "type" ] ] , prop[ "name" ] ) 
-                    )
+                    if prop_type == "lstring":
+                        
+                        f.write(
+                            "  %s(L,%s,%s_len);\n"
+                            %
+                            ( lua_push[ prop[ "type" ] ] , prop[ "name" ] , prop[ "name" ] ) 
+                        )                        
+                        
+                    else:
+                        
+                        f.write(
+                            "  %s(L,%s);\n"
+                            %
+                            ( lua_push[ prop[ "type" ] ] , prop[ "name" ] ) 
+                        )
                     
                 f.write(
                     "  return 1;\n"
