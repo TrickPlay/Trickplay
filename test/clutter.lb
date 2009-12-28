@@ -87,6 +87,36 @@ void set_props_from_table(lua_State*L,int table)
 void wrap_concrete_actor(lua_State*L,ClutterActor*actor);
 const char * get_actor_metatable(ClutterActor*actor);
 
+// This lets us wrap something to be freed later - when the
+// instance is destroyed
+
+class g_free_later
+{
+public:
+    
+    g_free_later( )
+    :
+	data( NULL )
+    {}
+    
+    g_free_later( gpointer d )
+    :
+	data( d )
+    {}
+    
+    ~g_free_later()
+    {
+	g_free( data );
+    }
+        
+    gpointer data;
+    
+private:
+    
+    g_free_later( const g_free_later & other )
+    {}
+};
+
 ]]
 
 [[
@@ -893,20 +923,12 @@ class Text [[ClutterActor*]] actor
 	
     set_selection( int start_pos , int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
-	
-    # This is really a string, but we must deallocate it 
-    readonly table selected_text
+	    
+    readonly string selected_text
 	[[
-	    gchar * s=clutter_text_get_selection(CLUTTER_TEXT(self));
-	    if (!s)
-	    {
-		lua_pushnil(L);
-	    }
-	    else
-	    {
-		lua_pushstring(L,s);
-		g_free(s);
-	    }
+	    gchar * s = clutter_text_get_selection(CLUTTER_TEXT(self));
+	    selected_text = s;	    
+	    g_free_later later(s);	    
 	]];
 	
     int selection_end
@@ -933,20 +955,11 @@ class Text [[ClutterActor*]] actor
     bool delete_selection()
 	[[result=clutter_text_delete_selection(CLUTTER_TEXT(self));]];
 	
-    # Really a string
-    
-    table get_chars( int start_pos , int end_pos )
+    string get_chars( int start_pos , int end_pos )
 	[[
 	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
-	    if(!c)
-	    {
-		lua_pushnil(L);
-	    }
-	    else
-	    {
-		lua_pushstring(L,c);
-		g_free(c);
-	    }
+	    result = c;
+	    g_free_later later(c);
 	]];
 	
     table cursor_color
@@ -1060,7 +1073,7 @@ class Clone [[ClutterActor*]] actor
     ~Clone()
 	[[g_object_unref(G_OBJECT(self));]];
         
-    table source
+    udata source
         [[
 	    wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
@@ -1096,8 +1109,6 @@ void Image_response_callback(const Network::Response & response,gpointer t)
 	
 	if (gdk_pixbuf_loader_write(l,response.body->data,response.body->len,NULL))
 	{
-	    //g_debug("IMAGE SENT TO LOADER");
-	    
 	    if (gdk_pixbuf_loader_close(l,NULL))
 	    {	    
 		GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(l);
@@ -1113,7 +1124,7 @@ void Image_response_callback(const Network::Response & response,gpointer t)
 			gdk_pixbuf_get_has_alpha(p)?4:3,
 			CLUTTER_TEXTURE_NONE,NULL))
 		    {
-			//g_debug("TEXTURE DATA SET");
+			// Do nothing - everything is cool
 		    }
 		    else
 		    {
@@ -1324,9 +1335,9 @@ class Timeline [[ClutterTimeline*]]
 	[[clutter_timeline_set_delay(self,delay);]];
 	
     string direction
-	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"forward":"backward");]]
+	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"FORWARD":"BACKWARD");]]
 	[[
-	    static const char * directions[3] = { "forward" , "backward" , NULL };
+	    static const char * directions[3] = { "FORWARD" , "BACKWARD" , NULL };
 	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
 	]];
 	
@@ -1477,7 +1488,7 @@ class Alpha [[ClutterAlpha*]]
 	    g_object_unref(G_OBJECT(self));
 	]];
 	
-    table timeline
+    udata timeline
 	[[
 	    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
 	    if(wrap_Timeline(L,timeline))
@@ -1516,7 +1527,11 @@ class Alpha [[ClutterAlpha*]]
 	[[alpha=clutter_alpha_get_alpha(self);]];
 	
     callback on_alpha
-	[[clutter_alpha_set_func(self,Alpha_on_alpha,L,NULL);]];	    
+	[[
+	    clutter_alpha_set_func(self,NULL,NULL,NULL);
+	    if (on_alpha)
+		clutter_alpha_set_func(self,Alpha_on_alpha,L,NULL);
+	]];	    
 }
 
 [[
