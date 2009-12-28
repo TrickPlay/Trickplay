@@ -49,10 +49,12 @@ int main( int argc , char * argv[] )
         clutter_main();
     }
     
-    lua_close( L );
-
+    clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
+    
     Network::shutdown();
     
+    lua_close( L );
+
     return result;
 }
 
