@@ -117,6 +117,67 @@ private:
     {}
 };
 
+// This lets us bolt on a table of user data to all actors
+
+class actor_extra
+{
+public:
+
+    // Creates a new table, takes a ref on it and leaves it
+    // on the stack
+    
+    actor_extra(lua_State * l)
+    :
+	L(l)
+    {
+	lua_newtable(L);
+	lua_pushvalue(L,-1);
+	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    }
+    
+    // Takes a ref on a table that is already on the stack
+    // and leaves it on the stack
+    
+    actor_extra(lua_State * l,int t)
+    :
+	L(l)
+    {
+	lua_pushvalue(L,t);
+	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    }
+    
+    // Releases the ref
+    
+    ~actor_extra()
+    {
+	luaL_unref(L,LUA_REGISTRYINDEX,table_ref);
+    }
+    
+    // Pushes the referenced table onto the stack
+    
+    void push_table()
+    {
+	lua_rawgeti(L,LUA_REGISTRYINDEX,table_ref);
+    }
+    
+    // GDestroyNotify for it
+    
+    static void destroy(gpointer a)
+    {
+	delete (actor_extra*)a;
+    }
+    
+private:
+    actor_extra()
+    {}
+    
+    actor_extra(const actor_extra &)
+    {}
+    
+    lua_State * L;
+    int		table_ref;
+};
+
 ]]
 
 [[
@@ -556,6 +617,24 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,1);
 	    lua_pushnumber(L,y);
 	    lua_rawseti(L,-2,2);
+	]];
+	
+    table extra
+	[[
+	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    
+	    if (!e)
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L),actor_extra::destroy);
+	    }
+	    else
+	    {
+		e->push_table();
+	    }
+	]]
+	[[
+	    lb_checktable(L,2);
+	    g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
 	]];
 
     callback on_key_focus_in
