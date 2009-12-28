@@ -117,7 +117,7 @@ private:
     {}
 };
 
-// This lets us bolt on a table of user data to all actors
+// This lets us bolt on a table of user data 
 
 class actor_extra
 {
@@ -164,7 +164,8 @@ public:
     
     static void destroy(gpointer a)
     {
-	delete (actor_extra*)a;
+	if (a)
+	    delete (actor_extra*)a;
     }
     
 private:
@@ -633,8 +634,15 @@ interface actor [[ClutterActor*]]
 	    }
 	]]
 	[[
-	    lb_checktable(L,2);
-	    g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+	    if (lua_isnil(L,2))
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,actor_extra::destroy);
+	    }
+	    else
+	    {
+		lb_checktable(L,2);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+	    }
 	]];
 	
     string request_mode
@@ -847,12 +855,16 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
 global stage [[ClutterActor*]] actor , container
 {
     stage()
-    [[
-        *self = clutter_stage_get_default();
-	
-	#warning We may want to disable this on production builds - it quits clutter when you press escape	
-	g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);	    
-    ]];
+	[[
+	    *self = clutter_stage_get_default();
+	    
+	    #warning We may want to disable this on production builds - it quits clutter when you press escape	
+	    g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);	    
+	]];
+    
+    ~stage()
+	[[
+	]];
         
     table color
         [[
@@ -1506,6 +1518,30 @@ class Timeline [[ClutterTimeline*]]
     readonly table markers
 	[[Timeline_list_markers(L);]];
 	
+    table extra
+	[[
+	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    
+	    if (!e)
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L),actor_extra::destroy);
+	    }
+	    else
+	    {
+		e->push_table();
+	    }
+	]]
+	[[
+	    if (lua_isnil(L,2))
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,actor_extra::destroy);
+	    }
+	    else
+	    {
+		lb_checktable(L,2);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+	    }
+	]];
 	
     callback on_new_frame
 	[[
