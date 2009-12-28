@@ -42,6 +42,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /usr/include/gtk-2.0
         /usr/local/include/gtk-2.0
         /opt/include/gtk-2.0
+        /opt/local/include/gtk-2.0
         /opt/gnome/include/gtk-2.0
         /sw/include/gtk-2.0
     )
@@ -92,6 +93,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /opt/gnome/lib/gtk-2.0/include
         /opt/gnome/lib64/gtk-2.0/include
         /opt/lib/gtk-2.0/include
+        /opt/local/lib/gtk-2.0/include
         /usr/lib/gtk-2.0/include
         /usr/lib64/gtk-2.0/include
         /sw/lib/gtk-2.0/include
@@ -136,6 +138,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /usr/include/pango-1.0
         /opt/gnome/include/pango-1.0
         /opt/include/pango-1.0
+        /opt/local/include/pango-1.0
         /sw/include/pango-1.0
     )
     gtk2_debug_message("GTK2_PANGO_INCLUDE_DIR is ${GTK2_PANGO_INCLUDE_DIR}")
@@ -152,6 +155,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /usr/include/cairo
         /opt/include
         /opt/include/cairo
+        /opt/local/include/cairo
         /sw/include
         /sw/include/cairo
     )
@@ -167,6 +171,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /opt/gnome/include/atk-1.0
         /usr/include/atk-1.0
         /opt/include/atk-1.0
+        /opt/local/include/atk-1.0
         /sw/include/atk-1.0
     )
     gtk2_debug_message("GTK2_ATK_INCLUDE_DIR is ${GTK2_ATK_INCLUDE_DIR}")
@@ -197,6 +202,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /usr/X11R6/lib
         /opt/gnome/lib
         /opt/lib
+        /opt/local/lib
         /sw/lib
     )
     gtk2_debug_message("GTK2_GDK_LIBRARY is ${GTK2_GDK_LIBRARY}")
