@@ -1,14 +1,15 @@
 #ifndef TP_H
 #define TP_H
 
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
+#endif 
     
 typedef struct TPContext TPContext;
 
-                // One-time initialization, will return 0 if everything is OK
+                // One-time initialization
 
-int             tp_init(int * argc,char *** argv);
+void            tp_init(int * argc,char *** argv);
 
                 // Create a new context
                 
@@ -36,6 +37,8 @@ int             tp_context_run(TPContext * context);
                 
 void            tp_context_quit(TPContext * context);
 
+#ifdef __cplusplus
 }
+#endif 
 
 #endif

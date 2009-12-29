@@ -3,8 +3,7 @@
 
 int main(int argc,char * argv[])
 {
-    if (tp_init(&argc,&argv))
-	return 1;
+    tp_init(&argc,&argv);
     
     TPContext * context = tp_context_new();
     

@@ -52,7 +52,7 @@ const char * TPContext::get(const char * key)
 }
 
 int TPContext::run()
-{
+{    
     // So that run cannot be called while we are running
     g_assert(!L);
     
@@ -165,20 +165,22 @@ void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar *
 // External-facing functions
 //-----------------------------------------------------------------------------
 
-int tp_init(int * argc,char *** argv)
+void tp_init(int * argc,char *** argv)
 {
     if(!g_thread_supported())
 	g_thread_init(NULL);
         
-    if (clutter_init(argc,argv)!=CLUTTER_INIT_SUCCESS)
-        return 1;
+    ClutterInitError ce = clutter_init(argc,argv);
     
-    if (curl_global_init(CURL_GLOBAL_ALL))
-        return 2;
-
-    g_log_set_default_handler(log_handler,NULL);
+    if (ce != CLUTTER_INIT_SUCCESS)
+	g_error("Failed to initialize Clutter : %d",ce);
     
-    return 0;
+    CURLcode co = curl_global_init(CURL_GLOBAL_ALL);
+    
+    if (co != CURLE_OK)
+	g_error("Failed to initialize cURL : %s" , curl_easy_strerror(co));
+    
+    g_log_set_default_handler(log_handler,NULL);        
 }
 
 //-----------------------------------------------------------------------------

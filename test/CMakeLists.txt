@@ -114,7 +114,7 @@ add_executable(
     
     tp
     
-    main.cpp
+    main.c
     context.cpp
     network.cpp
     storage.cpp
