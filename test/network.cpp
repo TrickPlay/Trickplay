@@ -60,14 +60,19 @@ namespace Network
             get(true);
         }
         
-        static void perform_request_async(const Request & request,ResponseCallback callback,gpointer data)
+        static void perform_request_async_incremental(const Request & request,IncrementalResponseCallback callback,gpointer user)
         {
-            get()->submit_request(request,callback,data);
+            get()->submit_request(request,callback,user);
+        }
+
+        static void perform_request_async(const Request & request,ResponseCallback callback,gpointer user)
+        {
+            get()->submit_request(request,callback,user);
         }
         
         static Response perform_request(const Request & request)
         {
-            RequestClosure closure(request,NULL,NULL);
+            RequestClosure closure(request);
             
             CURL * eh=create_easy_handle(&closure);
             
@@ -118,31 +123,61 @@ namespace Network
         
         struct RequestClosure
         {
+            RequestClosure(const Request & req)
+            :
+                request(req),
+                callback(NULL),
+                incremental_callback(NULL),
+                data(NULL),
+                got_body(false),
+                put_offset(0)
+            {}
+
             RequestClosure(const Request & req,ResponseCallback cb,gpointer d)
             :
                 request(req),
                 callback(cb),
+                incremental_callback(NULL),
                 data(d),
                 got_body(false),
                 put_offset(0)
             {}
             
-            Request          request;
-            ResponseCallback callback;
-            gpointer         data;
-            Response         response;
-            bool             got_body;
-            size_t           put_offset;
+            RequestClosure(const Request & req,IncrementalResponseCallback icb,gpointer d)
+            :
+                request(req),
+                callback(NULL),
+                incremental_callback(icb),
+                data(d),
+                got_body(false),
+                put_offset(0)
+            {}
+
+            Request                     request;
+            ResponseCallback            callback;
+            IncrementalResponseCallback incremental_callback;
+            gpointer                    data;
+            Response                    response;
+            bool                        got_body;
+            size_t                      put_offset;
         };
         
         //.....................................................................
         // Puts a new request closure into the queue
         
-        void submit_request(const Request & request,ResponseCallback callback,gpointer data)
+        void submit_request(const Request & request,ResponseCallback callback,gpointer user)
         {
-            g_async_queue_push(queue,new RequestClosure(request,callback,data));
+            g_async_queue_push(queue,new RequestClosure(request,callback,user));
         }
         
+        //.....................................................................
+        // Puts a new incremental request closure into the queue
+
+        void submit_request(const Request & request,IncrementalResponseCallback callback,gpointer user)
+        {
+            g_async_queue_push(queue,new RequestClosure(request,callback,user));
+        }
+
         //.....................................................................
         // Callback to destroy request closures that are left in the queue
         
@@ -166,12 +201,24 @@ namespace Network
         
         static void request_finished(RequestClosure * closure)
         {
-            // Post the closure to the main thread
+            // If it is incremental, we invoke the callback right here and
+            // delete the closure
             
-            GSource * source = g_idle_source_new();
-            g_source_set_callback(source,response_notify,closure,NULL);
-            g_source_attach(source,g_main_context_default());
-            g_source_unref(source);
+            if (closure->incremental_callback)
+            {
+                closure->incremental_callback(closure->response,NULL,0,true,closure->data);
+                delete closure;
+            }
+            
+            // Otherwise, we post it to the main thread
+            
+            else
+            {
+                GSource * source = g_idle_source_new();
+                g_source_set_callback(source,response_notify,closure,NULL);
+                g_source_attach(source,g_main_context_default());
+                g_source_unref(source);
+            }
         }
         
         static void request_failed(RequestClosure * closure,CURLcode c)
@@ -193,9 +240,18 @@ namespace Network
             
             closure->got_body=true;
 
-            //g_debug("GOT %lu BYTES",result);
-            
-            g_byte_array_append(closure->response.body,(const guint8*)ptr,result);
+            if (closure->incremental_callback)
+            {
+                // If the callback returns false, we return 0 so that
+                // curl will abort the request
+                
+                if (!closure->incremental_callback(closure->response,ptr,result,false,closure->data))
+                    result = 0;                    
+            }
+            else
+            {
+                g_byte_array_append(closure->response.body,(const guint8*)ptr,result);
+            }
             
             return result;
         }
@@ -487,9 +543,14 @@ namespace Network
         NetworkThread::shutdown();
     }
     
-    void perform_request_async(const Request & request,ResponseCallback callback,gpointer data)
+    void perform_request_async_incremental(const Request & request,IncrementalResponseCallback callback,gpointer user)
     {
-        NetworkThread::perform_request_async(request,callback,data);
+        NetworkThread::perform_request_async_incremental(request,callback,user);    
+    }
+    
+    void perform_request_async(const Request & request,ResponseCallback callback,gpointer user)
+    {
+        NetworkThread::perform_request_async(request,callback,user);
     }
     
     Response perform_request(const Request & request)

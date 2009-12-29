@@ -1217,6 +1217,134 @@ class Group [[ClutterActor*]] actor , container
 
 [[
 
+struct ImageClosure
+{
+    ImageClosure(ClutterTexture*i)
+    :
+	image(i),
+	loader(gdk_pixbuf_loader_new()),
+	error(NULL)
+    {
+	g_assert(image);
+	g_assert(loader);
+	g_object_ref(G_OBJECT(image));
+    }
+    
+    ~ImageClosure()
+    {
+	g_object_unref(G_OBJECT(image));
+	g_object_unref(G_OBJECT(loader));
+	g_clear_error(&error);
+    }
+    
+    ClutterTexture * 	image;
+    GdkPixbufLoader * 	loader;
+    GError * 		error;
+};
+
+// Once the incremental request is done, we run this one
+// in the main thread
+
+gboolean Image_incremental_response_finished(gpointer user)
+{
+    ImageClosure * closure=(ImageClosure*)user;
+    
+    if (!closure->error)
+    {
+	GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(closure->loader);
+	
+	if (p)
+	{
+	    if ( ! clutter_texture_set_from_rgb_data(closure->image,
+		gdk_pixbuf_get_pixels(p),
+		gdk_pixbuf_get_has_alpha(p),
+		gdk_pixbuf_get_width(p),
+		gdk_pixbuf_get_height(p),
+		gdk_pixbuf_get_rowstride(p),
+		gdk_pixbuf_get_has_alpha(p)?4:3,
+		CLUTTER_TEXTURE_NONE,NULL))
+	    {
+		g_set_error(&closure->error,
+		    CLUTTER_TEXTURE_ERROR,
+		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		    "Failed to set texture data");
+	    }
+	}
+	else
+	{
+	    g_set_error(&closure->error,
+		CLUTTER_TEXTURE_ERROR,
+		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		"Failed to get pixbuf from loader");
+	}
+	
+    }
+    
+    if (closure->error)
+    {
+	g_warning("Failed to load image : %s",closure->error->message);
+	g_signal_emit_by_name(G_OBJECT(closure->image),"load-finished",closure->error);	
+    }
+    
+    // This will clear the error, if any, release the loader and the
+    // image
+    
+    delete closure;
+    
+    return FALSE;
+}
+
+// This one gets called directly by the network thread every time
+// we get a piece of the body - we take advantage of the thread to
+// decode the image one chunk at a time.
+
+bool Image_incremental_response_callback(const Network::Response & response,gpointer body,guint len,bool finished,gpointer user)
+{
+    ImageClosure * closure=(ImageClosure*)user;
+    
+    if (finished)
+    {
+	if (response.failed && !closure->error)
+	{
+	    g_set_error(&closure->error,
+		CLUTTER_TEXTURE_ERROR,
+		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		"Request failed : %s" , response.status.c_str() );
+	}
+	
+	// Close the loader. If there is an error already, we pass NULL
+	// so that we retain the old error - the loader has to be closed
+	// either way. Otherwise, we pass the error address so that close
+	// has a chance to fail.
+	
+	gdk_pixbuf_loader_close(closure->loader,closure->error?NULL:&closure->error);
+	
+	// Now, we post to the main thread
+	
+	GSource * source=g_idle_source_new();
+	g_source_set_callback(source,Image_incremental_response_finished,closure,NULL);
+	g_source_attach(source,g_main_context_default());
+	g_source_unref(source);
+    }
+    else
+    {
+	// If there was an error already, we do nothing
+	
+	if (!closure->error)
+	    gdk_pixbuf_loader_write(closure->loader,(const guchar*)body,len,&closure->error);    
+    }
+    
+    // If there is no error, we return true to carry on
+    
+    return !closure->error;
+}
+
+#if 0
+// This is the alternative callback for non-incremental requests.
+// The drawback of this one is that all the data is accumulated in
+// the HTTP thread until the request is done. Then, it is sent here
+// and all of this work is done in the main thread (image decoding)
+
 void Image_response_callback(const Network::Response & response,gpointer t)
 {
     GError * error = NULL;
@@ -1289,12 +1417,14 @@ void Image_response_callback(const Network::Response & response,gpointer t)
     
     if (error)
     {
-	g_signal_emit_by_name(CLUTTER_TEXTURE(t),"load-finished",error);
+	g_warning("Failed to load image : %s",error->message);
+	g_signal_emit_by_name(G_OBJECT(t),"load-finished",error);
 	g_clear_error(&error);
     }
     
     g_object_unref(G_OBJECT(t));    
 }
+#endif
 ]]
 
 [[
@@ -1329,8 +1459,15 @@ class Image [[ClutterActor*]] actor
 		{
 		    Network::Request request;
 		    request.url = src;
+#if 0		    
 		    g_object_ref(G_OBJECT(self));
 		    Network::perform_request_async(request,Image_response_callback,self);
+#else
+		    Network::perform_request_async_incremental(
+			request,
+			Image_incremental_response_callback,
+			new ImageClosure(CLUTTER_TEXTURE(self)));
+#endif
 		}
 		
 		g_free(scheme);
