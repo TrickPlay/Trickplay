@@ -17,6 +17,7 @@ extern void luaopen_clutter(lua_State*L);
 extern void luaopen_timer(lua_State*L);
 extern void luaopen_url_request(lua_State*L);
 extern void luaopen_storage(lua_State*L);
+extern void luaopen_globals(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -71,6 +72,7 @@ int TPContext::run()
     luaopen_timer(L);
     luaopen_url_request(L);
     luaopen_storage(L);
+    luaopen_globals(L);
     
     // Run the script
     int result = luaL_dofile(L,"tp.lua");

@@ -9,6 +9,7 @@ line = 1
 file_name = None
 module = None
 initializers = []
+globals = []
 options = None
 
 def parse( source ):
@@ -143,43 +144,62 @@ def parse( source ):
         
         if token == "{":
             
-            if len( tokens ) < 3:
+            if len( tokens ) == 1:
                 
-                sys.exit( "Bad bind" )
-                                                
-            if tokens[ 0 ] not in ( "class" , "global" , "interface" ):
-                
-                sys.exit( "Invalid type " + tokens[ 0 ] )
-                
-            inherits = None
-            
-            t = 3
-            
-            while t < len( tokens ):
-                
-                if tokens[ t ] != ",":
-                
-                    if inherits is None:
-                        
-                        inherits = []
+                if tokens[ 0 ] != "globals":
                     
-                    inherits.append( tokens[ t ] )
+                    sys.exit( "Band bind" )
+                    
+                else:
+                    
+                    output.append( dict(
+                        type = tokens[ 0 ] ,
+                        name = "<<<NONE>>>" ,
+                        udata = None ,
+                        inherits = None ,
+                        properties = [] ,
+                        functions = [] )
+                    )
+                    
+            else:
+                    
+                if len( tokens ) < 3:
+                    
+                    sys.exit( "Bad bind" )
+                                                    
+                if tokens[ 0 ] not in ( "class" , "global" , "interface" ):
+                    
+                    sys.exit( "Invalid type " + tokens[ 0 ] )
+                    
+                inherits = None
                 
-                t += 1
+                t = 3
                 
-            # This is to remove the #line directive we added earlier.
-            # It does not belong in the type
-            
-            udata = "\n".join(tokens[2].splitlines()[1:])
+                while t < len( tokens ):
+                    
+                    if tokens[ t ] != ",":
+                    
+                        if inherits is None:
+                            
+                            inherits = []
+                        
+                        inherits.append( tokens[ t ] )
+                    
+                    t += 1
+                    
+                # This is to remove the #line directive we added earlier.
+                # It does not belong in the type
                 
-            output.append( dict(
-                type = tokens[ 0 ] ,
-                name = tokens[ 1 ] ,
-                udata = udata ,
-                inherits = inherits ,
-                properties = [] ,
-                functions = [] )
-            )
+                udata = "\n".join(tokens[2].splitlines()[1:])
+                    
+                output.append( dict(
+                    type = tokens[ 0 ] ,
+                    name = tokens[ 1 ] ,
+                    udata = udata ,
+                    inherits = inherits ,
+                    properties = [] ,
+                    functions = [] )
+                )
             
             tokens = []
             
@@ -311,6 +331,8 @@ def parse( source ):
     
 def emit( stuff , f ):
     
+    global globals
+    
     def emit_code( code ):
 
         f.write( code[ "code" ] )
@@ -426,317 +448,347 @@ def emit( stuff , f ):
         destructors = []
         
         #-----------------------------------------------------------------------
-        # METATABLE
+        # GLOBALS
         #-----------------------------------------------------------------------
-        
-        f.write(
-            '\nstatic const char * %s = "%s";\n'
-            %
-            ( metatable_name , metatable_name )
-        )
-        
-        #-----------------------------------------------------------------------
-        # WRAPPER
-        #-----------------------------------------------------------------------
-        
-        f.write(
-            "\n"
-            "int wrap_%s(lua_State*L,%s self)\n"
-            "{\n"
-            %
-            (bind_name,udata_type)
-        )
-        
-        if options.instrument:
+                
+        if bind_type == "globals":
             
-            f.write(
-                "  int result=lb_wrap(L,self,%s);\n"
-                "  if(result)\n"
-                '    g_debug("CREATED %s %%p",self);\n'
-                "  return result;\n"
-                "}\n"
-                    %
-                    (metatable_name , bind_name )
-            )
-        else:
-            
-            f.write(
-                "  return lb_wrap(L,self,%s);\n"
-                "}\n"
-                %
-                metatable_name
-            )
-        
-        #-----------------------------------------------------------------------
-        # FUNCTIONS        
-        #-----------------------------------------------------------------------
-
-        for func in bind[ "functions" ]:
-            
-            if func[ "name" ] == bind_name:
+            for func in bind[ "functions" ]:
                 
-                # This is a constructor
-                
-                constructors.append( func )
-                
-                continue
-            
-            elif func[ "name" ] == "~" + bind_name:
-                
-                # Destructor
-                
-                destructors.append( func )
-                
-                continue
-            
-                            
-            f.write(
-                "\n"
-                "int %s_%s(lua_State*L)\n"
-                "{\n"
-                "  luaL_checktype(L,1,LUA_TUSERDATA);\n"
-                "  %s self(lb_get_self(L,%s));\n"
-                %
-                ( bind_name , func[ "name" ] , udata_type , udata_type )
-            )
-            
-            for index , param in enumerate( func[ "parameters" ] ):
-                
+                globals.append( func["name"] )
+                                                
                 f.write(
-                    "  %s\n"
+                    "\n"
+                    "int global_%s(lua_State*L)\n"
+                    "{\n"
                     %
-                    ( declare_local( param , index + 2 )  , )
+                    func[ "name" ]
                 )
                 
-            if func[ "type" ] not in [ None , "table" , "udata" ]:
-                
-                f.write(
-                    "  %s result;\n"
-                    % ( ctype[ func[ "type" ] ] ,  )
-                )
-                
-                if func[ "type" ] == "lstring":
+                for index , param in enumerate( func[ "parameters" ] ):
                     
-                    f.write( "  size_t result_len=0;\n" )
-                
-            if func[ "code" ] is not None:
-                
-                flow_code( func[ "code"] )
-                
-            else:
-                
-                # TODO - here we should invoke the function on self
-                
-                pass
-                
-            if func[ "type" ] is None:
-                
-                f.write( "  return 0;\n" )
-                
-            elif func[ "type" ] in [ "table" , "udata" ]:
-                
-                f.write( "  return 1;\n" );
-        
-            else:
-                
-                write_push_result( func[ "type" ] )
-                f.write( "  return 1;\n" )
-                
-            f.write( "}\n" )
-            
-        #-----------------------------------------------------------------------
-        # CONSTRUCTORS
-        #-----------------------------------------------------------------------
-        
-        if len( constructors ) > 1:
-            
-            sys.exit( "Cannot overload constructor for " + bind_name )
-            
-        for func in constructors:
-            
-            f.write(
-                "\n"
-                "int new_%s(lua_State*L)\n"
-                "{\n"
-                "  %s* self(lb_new_self(L,%s));\n"
-                "  luaL_getmetatable(L,%s);\n"
-	        "  lua_setmetatable(L,-2);\n"
-                "\n"
-                %
-                ( bind_name , udata_type , udata_type , metatable_name )
-            )
-            
-            for index , param in enumerate( func[ "parameters" ] ):
-                
-                f.write(
-                    "  %s\n"
-                    %
-                    ( declare_local( param , index + 1 )  , )
-                )
-                
-            if func[ "code" ] is not None:
-                
-                flow_code( func[ "code" ] )
-                
-            else:
-                
-                # TODO - default constructor behavior
-                
-                pass
-            
-            f.write("  lb_store_weak_ref(L,lua_gettop(L),*self);\n");
-            
-            if options.instrument:
-                
-                f.write(
-                    '  g_debug("CREATED %s %%p",*self);\n'
-                    %
-                    bind_name );
-            
-            f.write(
-                "  return 1;\n"
-            )
-                
-            
-                
-            f.write( "}\n" )
-            
-        #-----------------------------------------------------------------------
-        # DESTRUCTORS
-        #-----------------------------------------------------------------------
-
-        if len( destructors ) > 1:
-            
-            sys.exit( "Cannot overload destructor for " + bind_name )
-            
-        for func in destructors:
-            
-            f.write(
-                "\n"
-                "int delete_%s(lua_State*L)\n"
-                "{\n"
-                "  %s self(lb_get_self(L,%s));\n"
-                %
-                ( bind_name , udata_type , udata_type )
-            )
-            
-            if options.instrument:
-                
-                f.write(
-                    '  g_debug("DESTROYED %s %%p",self);\n'
-                    %
-                    bind_name );
-            
-                
-            if func[ "code" ] is not None:
-                
-                flow_code( func[ "code" ] )
-                
-            else:
-                
-                # TODO - default destructor behavior
-                
-                pass
-            
-            f.write( "  return 0;\n}\n" )
-        
-            
-        #-----------------------------------------------------------------------
-        # PROPERTIES
-        #-----------------------------------------------------------------------
-        
-        callbacks = []
-        
-        for prop in bind[ "properties" ]:
-            
-            prop_type = prop[ "type" ]
-            
-            if prop_type == "callback":
-                
-                callbacks.append( prop )
-                
-                continue
-            
-            f.write(
-                "\n"
-                "int get_%s_%s(lua_State*L)\n"
-                "{\n"
-                "  %s self(lb_get_self(L,%s));\n"
-                %
-                ( bind_name , prop[ "name" ] , udata_type , udata_type )
-            )
-          
-            if prop[ "get_code" ] is not None:
-                
-                if prop_type not in( "table" , "function" , "udata" ):
-                
                     f.write(
-                        "  %s %s;\n"
-                        % ( ctype[ prop_type ] , prop[ "name" ] )
+                        "  %s\n"
+                        %
+                        ( declare_local( param , index + 1 )  , )
                     )
                     
-                    if prop_type == "lstring":
+                if func[ "type" ] not in [ None , "table" , "udata" ]:
+                    
+                    f.write(
+                        "  %s result;\n"
+                        % ( ctype[ func[ "type" ] ] ,  )
+                    )
+                    
+                    if func[ "type" ] == "lstring":
                         
-                        f.write( "  size_t %s_len=0;\n" % prop[ "name" ] )
+                        f.write( "  size_t result_len=0;\n" )
+                    
+                if func[ "code" ] is not None:
+                    
+                    flow_code( func[ "code"] )
+                    
+                else:
+                    
+                    # TODO - here we should invoke the function on self
+                    
+                    pass
+                    
+                if func[ "type" ] is None:
+                    
+                    f.write( "  return 0;\n" )
+                    
+                elif func[ "type" ] in [ "table" , "udata" ]:
+                    
+                    f.write( "  return 1;\n" );
+            
+                else:
+                    
+                    write_push_result( func[ "type" ] )
+                    f.write( "  return 1;\n" )
+                    
+                f.write( "}\n" )
+            
+        else:
+        
+            #-----------------------------------------------------------------------
+            # METATABLE
+            #-----------------------------------------------------------------------
+            
+            f.write(
+                '\nstatic const char * %s = "%s";\n'
+                %
+                ( metatable_name , metatable_name )
+            )
+            
+            #-----------------------------------------------------------------------
+            # WRAPPER
+            #-----------------------------------------------------------------------
+            
+            f.write(
+                "\n"
+                "int wrap_%s(lua_State*L,%s self)\n"
+                "{\n"
+                %
+                (bind_name,udata_type)
+            )
+            
+            if options.instrument:
                 
-                flow_code( prop[ "get_code" ] )
-
-                if prop_type not in ( "table" , "function" , "udata" ):
-                    
-                    if prop_type == "lstring":
-                        
-                        f.write(
-                            "  %s(L,%s,%s_len);\n"
-                            %
-                            ( lua_push[ prop[ "type" ] ] , prop[ "name" ] , prop[ "name" ] ) 
-                        )                        
-                        
-                    else:
-                        
-                        f.write(
-                            "  %s(L,%s);\n"
-                            %
-                            ( lua_push[ prop[ "type" ] ] , prop[ "name" ] ) 
-                        )
-                    
                 f.write(
-                    "  return 1;\n"
+                    "  int result=lb_wrap(L,self,%s);\n"
+                    "  if(result)\n"
+                    '    g_debug("CREATED %s %%p",self);\n'
+                    "  return result;\n"
                     "}\n"
-                    
+                        %
+                        (metatable_name , bind_name )
                 )
-                
             else:
                 
-                # TODO : default property getter
-                
-                pass
+                f.write(
+                    "  return lb_wrap(L,self,%s);\n"
+                    "}\n"
+                    %
+                    metatable_name
+                )
             
-            if not prop[ "read_only" ]:
+            #-----------------------------------------------------------------------
+            # FUNCTIONS        
+            #-----------------------------------------------------------------------
+    
+            for func in bind[ "functions" ]:
+                
+                if func[ "name" ] == bind_name:
+                    
+                    # This is a constructor
+                    
+                    constructors.append( func )
+                    
+                    continue
+                
+                elif func[ "name" ] == "~" + bind_name:
+                    
+                    # Destructor
+                    
+                    destructors.append( func )
+                    
+                    continue
+                
+                                
+                f.write(
+                    "\n"
+                    "int %s_%s(lua_State*L)\n"
+                    "{\n"
+                    "  luaL_checktype(L,1,LUA_TUSERDATA);\n"
+                    "  %s self(lb_get_self(L,%s));\n"
+                    %
+                    ( bind_name , func[ "name" ] , udata_type , udata_type )
+                )
+                
+                for index , param in enumerate( func[ "parameters" ] ):
+                    
+                    f.write(
+                        "  %s\n"
+                        %
+                        ( declare_local( param , index + 2 )  , )
+                    )
+                    
+                if func[ "type" ] not in [ None , "table" , "udata" ]:
+                    
+                    f.write(
+                        "  %s result;\n"
+                        % ( ctype[ func[ "type" ] ] ,  )
+                    )
+                    
+                    if func[ "type" ] == "lstring":
+                        
+                        f.write( "  size_t result_len=0;\n" )
+                    
+                if func[ "code" ] is not None:
+                    
+                    flow_code( func[ "code"] )
+                    
+                else:
+                    
+                    # TODO - here we should invoke the function on self
+                    
+                    pass
+                    
+                if func[ "type" ] is None:
+                    
+                    f.write( "  return 0;\n" )
+                    
+                elif func[ "type" ] in [ "table" , "udata" ]:
+                    
+                    f.write( "  return 1;\n" );
+            
+                else:
+                    
+                    write_push_result( func[ "type" ] )
+                    f.write( "  return 1;\n" )
+                    
+                f.write( "}\n" )
+                
+            #-----------------------------------------------------------------------
+            # CONSTRUCTORS
+            #-----------------------------------------------------------------------
+            
+            if len( constructors ) > 1:
+                
+                sys.exit( "Cannot overload constructor for " + bind_name )
+                
+            for func in constructors:
                 
                 f.write(
                     "\n"
-                    "int set_%s_%s(lua_State*L)\n"
+                    "int new_%s(lua_State*L)\n"
+                    "{\n"
+                    "  %s* self(lb_new_self(L,%s));\n"
+                    "  luaL_getmetatable(L,%s);\n"
+                    "  lua_setmetatable(L,-2);\n"
+                    "\n"
+                    %
+                    ( bind_name , udata_type , udata_type , metatable_name )
+                )
+                
+                for index , param in enumerate( func[ "parameters" ] ):
+                    
+                    f.write(
+                        "  %s\n"
+                        %
+                        ( declare_local( param , index + 1 )  , )
+                    )
+                    
+                if func[ "code" ] is not None:
+                    
+                    flow_code( func[ "code" ] )
+                    
+                else:
+                    
+                    # TODO - default constructor behavior
+                    
+                    pass
+                
+                f.write("  lb_store_weak_ref(L,lua_gettop(L),*self);\n");
+                
+                if options.instrument:
+                    
+                    f.write(
+                        '  g_debug("CREATED %s %%p",*self);\n'
+                        %
+                        bind_name );
+                
+                f.write(
+                    "  return 1;\n"
+                )
+                    
+                
+                    
+                f.write( "}\n" )
+                
+            #-----------------------------------------------------------------------
+            # DESTRUCTORS
+            #-----------------------------------------------------------------------
+    
+            if len( destructors ) > 1:
+                
+                sys.exit( "Cannot overload destructor for " + bind_name )
+                
+            for func in destructors:
+                
+                f.write(
+                    "\n"
+                    "int delete_%s(lua_State*L)\n"
+                    "{\n"
+                    "  %s self(lb_get_self(L,%s));\n"
+                    %
+                    ( bind_name , udata_type , udata_type )
+                )
+                
+                if options.instrument:
+                    
+                    f.write(
+                        '  g_debug("DESTROYED %s %%p",self);\n'
+                        %
+                        bind_name );
+                
+                    
+                if func[ "code" ] is not None:
+                    
+                    flow_code( func[ "code" ] )
+                    
+                else:
+                    
+                    # TODO - default destructor behavior
+                    
+                    pass
+                
+                f.write( "  return 0;\n}\n" )
+            
+                
+            #-----------------------------------------------------------------------
+            # PROPERTIES
+            #-----------------------------------------------------------------------
+            
+            callbacks = []
+            
+            for prop in bind[ "properties" ]:
+                
+                prop_type = prop[ "type" ]
+                
+                if prop_type == "callback":
+                    
+                    callbacks.append( prop )
+                    
+                    continue
+                
+                f.write(
+                    "\n"
+                    "int get_%s_%s(lua_State*L)\n"
                     "{\n"
                     "  %s self(lb_get_self(L,%s));\n"
                     %
                     ( bind_name , prop[ "name" ] , udata_type , udata_type )
                 )
               
-                if prop[ "set_code" ] is not None:
+                if prop[ "get_code" ] is not None:
                     
+                    if prop_type not in( "table" , "function" , "udata" ):
+                    
+                        f.write(
+                            "  %s %s;\n"
+                            % ( ctype[ prop_type ] , prop[ "name" ] )
+                        )
+                        
+                        if prop_type == "lstring":
+                            
+                            f.write( "  size_t %s_len=0;\n" % prop[ "name" ] )
+                    
+                    flow_code( prop[ "get_code" ] )
+    
                     if prop_type not in ( "table" , "function" , "udata" ):
                         
-                        f.write(
-                            "  %s\n"
-                            %
-                            ( declare_local( prop , 2 )  , )
-                        )
-                    
-                    flow_code( prop[ "set_code" ] )
-                    
+                        if prop_type == "lstring":
+                            
+                            f.write(
+                                "  %s(L,%s,%s_len);\n"
+                                %
+                                ( lua_push[ prop[ "type" ] ] , prop[ "name" ] , prop[ "name" ] ) 
+                            )                        
+                            
+                        else:
+                            
+                            f.write(
+                                "  %s(L,%s);\n"
+                                %
+                                ( lua_push[ prop[ "type" ] ] , prop[ "name" ] ) 
+                            )
+                        
                     f.write(
-                        "  return 0;\n"
+                        "  return 1;\n"
                         "}\n"
+                        
                     )
                     
                 else:
@@ -745,238 +797,272 @@ def emit( stuff , f ):
                     
                     pass
                 
-        #-----------------------------------------------------------------------
-        # CALLBACKS
-        #-----------------------------------------------------------------------
-            
-        for cb in callbacks:
-
-            f.write(
-                "\n"
-                "int get_%s_%s(lua_State*L)\n"
-                "{\n"
-                '  return lb_get_callback(L,lb_get_self(L,%s),"%s",0);\n'
-                "}\n"
-                %
-                ( bind_name , cb[ "name" ] , udata_type , cb[ "name" ] )
-            )
-            
-            f.write(
-                "\n"
-                "int set_%s_%s(lua_State*L)\n"
-                "{\n"
-                "  %s self(lb_get_self(L,%s));\n"
-                '  int %s(!lb_set_callback(L,self,"%s"));\n'
-                %
-                ( bind_name , cb[ "name" ] , udata_type , udata_type , cb[ "name" ] , cb[ "name" ] )
-            )
-                
-            flow_code( cb[ "get_code" ] );                
-                
-            f.write(
-                "  return 0;\n"
-                "}\n"
-            )                
-            
-            f.write(
-                "\n"
-                "int invoke_%s_%s(lua_State*L,%s self,int nargs,int nresults)\n"
-                "{\n"
-                '  return lb_invoke_callback(L,self,%s,"%s",nargs,nresults);\n'
-                "}\n"
-                %
-                ( bind_name , cb[ "name" ] , udata_type , metatable_name , cb[ "name" ] )
-            )
-            
-        if len(callbacks) > 0:
-            
-            f.write(
-                "\n"
-                "void detach_%s(lua_State*L,%s self)\n"
-                "{\n"
-                "  lb_clear_callbacks(L,self,%s);\n"
-                "}\n"
-                %
-                (bind_name , udata_type , metatable_name )
-            )
-        #-----------------------------------------------------------------------
-        # INITIALIZER
-        #-----------------------------------------------------------------------
-                
-        f.write(
-            "\n"
-            "void luaopen_%s(lua_State*L)\n"
-            "{\n"
-            %
-            ( bind_name , )
-        )
-        
-        initializers.append( bind_name );
-        
-        # Create the metatable
-        
-        f.write(
-            "  luaL_newmetatable(L,%s);\n"
-            '  lua_pushstring(L,"type");\n'
-            '  lua_pushstring(L,"%s");\n'
-            "  lua_rawset(L,-3);\n"
-            %
-            (metatable_name,bind_name)
-        )
-
-        f.write(
-            "  const luaL_Reg meta_methods[]=\n"
-            "  {\n"
-        )
-        
-        if len( destructors ) > 0:
-            
-            f.write(
-                '    {"__gc",delete_%s},\n'
-                %
-                bind_name
-            )
-        
-        if len( bind[ "properties"  ] ) > 0 or bind[ "inherits" ] is not None:
-            
-            f.write(
-                '    {"__newindex",lb_newindex},\n'
-                '    {"__index",lb_index},\n'
-            )
-            
-        for func in bind[ "functions" ]:
-            if func in constructors:
-                continue
-            if func in destructors:
-                continue
-            f.write(
-                '    {"%s",%s_%s},\n'
-                %
-                ( func["name"] , bind_name , func["name"] )
-            )
+                if not prop[ "read_only" ]:
                     
-        f.write(
-            "    {NULL,NULL}\n"
-            "  };\n"
-        )
-        
-        f.write(
-            "  luaL_register(L,NULL,meta_methods);\n"
-        )
-        
-        # If there are no properties, we set the __index metafield to point to
-        # the metatable itself - the methods will be found there by Lua
-        
-        if len( bind[ "properties" ] ) == 0:
-            
-            if bind[ "inherits" ] is None:
+                    f.write(
+                        "\n"
+                        "int set_%s_%s(lua_State*L)\n"
+                        "{\n"
+                        "  %s self(lb_get_self(L,%s));\n"
+                        %
+                        ( bind_name , prop[ "name" ] , udata_type , udata_type )
+                    )
+                  
+                    if prop[ "set_code" ] is not None:
+                        
+                        if prop_type not in ( "table" , "function" , "udata" ):
+                            
+                            f.write(
+                                "  %s\n"
+                                %
+                                ( declare_local( prop , 2 )  , )
+                            )
+                        
+                        flow_code( prop[ "set_code" ] )
+                        
+                        f.write(
+                            "  return 0;\n"
+                            "}\n"
+                        )
+                        
+                    else:
+                        
+                        # TODO : default property getter
+                        
+                        pass
+                    
+            #-----------------------------------------------------------------------
+            # CALLBACKS
+            #-----------------------------------------------------------------------
+                
+            for cb in callbacks:
+    
+                f.write(
+                    "\n"
+                    "int get_%s_%s(lua_State*L)\n"
+                    "{\n"
+                    '  return lb_get_callback(L,lb_get_self(L,%s),"%s",0);\n'
+                    "}\n"
+                    %
+                    ( bind_name , cb[ "name" ] , udata_type , cb[ "name" ] )
+                )
                 
                 f.write(
-                    '  lua_pushstring(L,"__index");\n'
-                    "  lua_pushvalue(L,-2);\n"
-                    "  lua_rawset(L,-3);\n"
+                    "\n"
+                    "int set_%s_%s(lua_State*L)\n"
+                    "{\n"
+                    "  %s self(lb_get_self(L,%s));\n"
+                    '  int %s(!lb_set_callback(L,self,"%s"));\n'
+                    %
+                    ( bind_name , cb[ "name" ] , udata_type , udata_type , cb[ "name" ] , cb[ "name" ] )
                 )
-        
-        # Otherwise, we have to create the getters and setters tables and
-        # put them in the metatable
-        
-        else:
+                    
+                flow_code( cb[ "get_code" ] );                
+                    
+                f.write(
+                    "  return 0;\n"
+                    "}\n"
+                )                
+                
+                f.write(
+                    "\n"
+                    "int invoke_%s_%s(lua_State*L,%s self,int nargs,int nresults)\n"
+                    "{\n"
+                    '  return lb_invoke_callback(L,self,%s,"%s",nargs,nresults);\n'
+                    "}\n"
+                    %
+                    ( bind_name , cb[ "name" ] , udata_type , metatable_name , cb[ "name" ] )
+                )
+                
+            if len(callbacks) > 0:
+                
+                f.write(
+                    "\n"
+                    "void detach_%s(lua_State*L,%s self)\n"
+                    "{\n"
+                    "  lb_clear_callbacks(L,self,%s);\n"
+                    "}\n"
+                    %
+                    (bind_name , udata_type , metatable_name )
+                )
+            #-----------------------------------------------------------------------
+            # INITIALIZER
+            #-----------------------------------------------------------------------
+                    
+            f.write(
+                "\n"
+                "void luaopen_%s(lua_State*L)\n"
+                "{\n"
+                %
+                ( bind_name , )
+            )
+            
+            initializers.append( bind_name );
+            
+            # Create the metatable
             
             f.write(
-                '  lua_pushstring(L,"__getters__");\n'
-                "  lua_newtable(L);\n"
-                "  const luaL_Reg getters[]=\n"
+                "  luaL_newmetatable(L,%s);\n"
+                '  lua_pushstring(L,"type");\n'
+                '  lua_pushstring(L,"%s");\n'
+                "  lua_rawset(L,-3);\n"
+                %
+                (metatable_name,bind_name)
+            )
+    
+            f.write(
+                "  const luaL_Reg meta_methods[]=\n"
                 "  {\n"
             )
-                            
-            setters = []
             
-            for prop in bind[ "properties" ]:
+            if len( destructors ) > 0:
+                
                 f.write(
-                    '    {"%s",get_%s_%s},\n'
+                    '    {"__gc",delete_%s},\n'
                     %
-                    ( prop["name"] , bind_name , prop["name"] )
+                    bind_name
                 )
-                if not prop["read_only"]:
-                    setters.append( prop )
+            
+            if len( bind[ "properties"  ] ) > 0 or bind[ "inherits" ] is not None:
+                
+                f.write(
+                    '    {"__newindex",lb_newindex},\n'
+                    '    {"__index",lb_index},\n'
+                )
+                
+            for func in bind[ "functions" ]:
+                if func in constructors:
+                    continue
+                if func in destructors:
+                    continue
+                f.write(
+                    '    {"%s",%s_%s},\n'
+                    %
+                    ( func["name"] , bind_name , func["name"] )
+                )
                         
             f.write(
                 "    {NULL,NULL}\n"
                 "  };\n"
-                "  luaL_register(L,NULL,getters);\n"
-                "  lua_rawset(L,-3);\n"
             )
-
-            if len( setters ) > 0:
+            
+            f.write(
+                "  luaL_register(L,NULL,meta_methods);\n"
+            )
+            
+            # If there are no properties, we set the __index metafield to point to
+            # the metatable itself - the methods will be found there by Lua
+            
+            if len( bind[ "properties" ] ) == 0:
+                
+                if bind[ "inherits" ] is None:
+                    
+                    f.write(
+                        '  lua_pushstring(L,"__index");\n'
+                        "  lua_pushvalue(L,-2);\n"
+                        "  lua_rawset(L,-3);\n"
+                    )
+            
+            # Otherwise, we have to create the getters and setters tables and
+            # put them in the metatable
+            
+            else:
                 
                 f.write(
-                    '  lua_pushstring(L,"__setters__");\n'
+                    '  lua_pushstring(L,"__getters__");\n'
                     "  lua_newtable(L);\n"
-                    "  const luaL_Reg setters[]=\n"
+                    "  const luaL_Reg getters[]=\n"
                     "  {\n"
                 )
                                 
-                for prop in setters:
+                setters = []
+                
+                for prop in bind[ "properties" ]:
                     f.write(
-                        '    {"%s",set_%s_%s},\n'
+                        '    {"%s",get_%s_%s},\n'
                         %
                         ( prop["name"] , bind_name , prop["name"] )
                     )
+                    if not prop["read_only"]:
+                        setters.append( prop )
                             
                 f.write(
                     "    {NULL,NULL}\n"
                     "  };\n"
-                    "  luaL_register(L,NULL,setters);\n"
+                    "  luaL_register(L,NULL,getters);\n"
                     "  lua_rawset(L,-3);\n"
                 )
+    
+                if len( setters ) > 0:
+                    
+                    f.write(
+                        '  lua_pushstring(L,"__setters__");\n'
+                        "  lua_newtable(L);\n"
+                        "  const luaL_Reg setters[]=\n"
+                        "  {\n"
+                    )
+                                    
+                    for prop in setters:
+                        f.write(
+                            '    {"%s",set_%s_%s},\n'
+                            %
+                            ( prop["name"] , bind_name , prop["name"] )
+                        )
+                                
+                    f.write(
+                        "    {NULL,NULL}\n"
+                        "  };\n"
+                        "  luaL_register(L,NULL,setters);\n"
+                        "  lua_rawset(L,-3);\n"
+                    )
+                    
+            if bind[ "inherits" ] is not None:
                 
-        if bind[ "inherits" ] is not None:
+                for inh in bind[ "inherits" ]:
+                    
+                    f.write(
+                        '  lb_inherit(L,"%s_METATABLE");\n'
+                        %
+                        inh.upper()
+                    )
+    
+            # Pop the metatable
             
-            for inh in bind[ "inherits" ]:
+            f.write(
+                "  lua_pop(L,1);\n"
+            )
+            
+            # This is a global singleton
+            
+            if bind_type == "global":
+                
+                # Call its constructor, which will leave the user data
+                # on the stack
                 
                 f.write(
-                    '  lb_inherit(L,"%s_METATABLE");\n'
+                    "  new_%s(L);\n"
+                    '  lua_setglobal(L,"%s");\n'
                     %
-                    inh.upper()
+                    ( bind_name , bind_name )
                 )
-
-        # Pop the metatable
-        
-        f.write(
-            "  lua_pop(L,1);\n"
-        )
-        
-        # This is a global singleton
-        
-        if bind_type == "global":
             
-            # Call its constructor, which will leave the user data
-            # on the stack
+            # Otherwise, it is a class
             
-            f.write(
-                "  new_%s(L);\n"
-                '  lua_setglobal(L,"%s");\n'
-                %
-                ( bind_name , bind_name )
-            )
-        
-        # Otherwise, it is a class
-        
-        elif bind_type == "class":
-            
-            if len( constructors ) == 0:
+            elif bind_type == "class":
                 
-                sys.exit( "No constructor for " + bind_name )
+                if len( constructors ) == 0:
+                    
+                    sys.exit( "No constructor for " + bind_name )
+                    
+                f.write(
+                    "  lua_pushcfunction(L,new_%s);\n"
+                    '  lua_setglobal(L,"%s");\n'
+                    %
+                    ( bind_name , bind_name )                
+                )
                 
-            f.write(
-                "  lua_pushcfunction(L,new_%s);\n"
-                '  lua_setglobal(L,"%s");\n'
-                %
-                ( bind_name , bind_name )                
-            )
             
-        
-        f.write( "}\n" )
+            f.write( "}\n" )
         
         #-----------------------------------------------------------------------
         
@@ -985,6 +1071,7 @@ def emit( stuff , f ):
     
     module = None
     initializers  = []
+    globals = []
 
     for thing in stuff:
         
@@ -992,7 +1079,7 @@ def emit( stuff , f ):
             
             emit_code( thing )
         
-        elif thing[ "type" ] in [ "class" , "global" , "interface" ]:
+        elif thing[ "type" ] in [ "class" , "global" , "interface" , "globals" ]:
             
             emit_bind( thing )
             
@@ -1004,7 +1091,7 @@ def emit( stuff , f ):
             
             sys.exit( "Unknown " + thing[ "type" ] )
             
-    if ( module is not None ) and ( len( initializers ) > 0 ):
+    if ( module is not None ) and ( ( len( initializers ) > 0 ) or ( len(globals) >0 ) ):
         
         f.write(
             "\n"
@@ -1017,6 +1104,14 @@ def emit( stuff , f ):
             f.write(
                 "  luaopen_%s(L);\n"
                 % init
+            )
+            
+        for g in globals:
+            f.write(
+                "  lua_pushcfunction(L,global_%s);\n"
+                '  lua_setglobal(L,"%s");\n'
+                %
+                ( g , g )
             )
             
         f.write( "}\n" )

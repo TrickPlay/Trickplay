@@ -1,0 +1,54 @@
+module globals;
+
+[[
+#include "glib.h"
+#include <string>
+]]
+
+globals
+{
+    log()
+        [[
+            int c=lua_gettop(L);
+            std::string result;
+            for(int i=1;i<=c;++i)
+            {
+                const char * s = lua_tostring(L,i);
+                if (!s)
+                {
+                    switch(lua_type(L,i))
+                    {
+                        case LUA_TNIL:
+                            s = "<nil>";
+                            break;
+                        case LUA_TBOOLEAN:
+                            s = lua_toboolean(L,i)?"true":"false";
+                            break;
+                        case LUA_TTABLE:
+                            s = "<table>";
+                            break;
+                        case LUA_TFUNCTION:
+                            s = "<function>";
+                            break;
+                        
+                        case LUA_TUSERDATA:
+                            s = "<userdata>";
+                            break;
+                            
+                        case LUA_TTHREAD:
+                            s = "<thread>";
+                            break;
+                            
+                        case LUA_TLIGHTUSERDATA:
+                            s = "<lighuserdata>";
+                            break;
+                    }
+                }
+                if (i>1)
+                    result += ' ';
+                result += s;
+            }
+            g_message("%s",result.c_str());
+        ]];
+    
+}
