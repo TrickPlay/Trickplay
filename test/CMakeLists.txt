@@ -18,6 +18,7 @@ find_package(Clutter REQUIRED)
 # This one is temporary
 find_package(GTK2 REQUIRED)
 
+
 set(
     CLUTTER_LIBS
 
@@ -102,11 +103,18 @@ set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
 
 #------------------------------------------------------------------------------
 
+link_directories(
+    /opt/local/lib
+)
+
+
+
 add_executable(
     
     tp
     
     main.cpp
+    context.cpp
     network.cpp
     storage.cpp
 
