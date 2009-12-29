@@ -87,13 +87,12 @@ add_definitions( -DG_LOG_DOMAIN="TrickPlay" )
 foreach( LB_FILE ${LB_FILES} )
 
 	get_filename_component( LB_FILE_NAME ${LB_FILE} NAME )
-	get_filename_component( LB_FILE_NAME_NO_EXT ${LB_FILE} NAME_WE )
 
-	list( APPEND GENERATED_FILES ${LB_FILE_NAME_NO_EXT}.cpp )
+	list( APPEND GENERATED_FILES ${LB_FILE_NAME}.cpp )
         
 	file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 	add_custom_command( 
-		OUTPUT ${LB_FILE_NAME_NO_EXT}.cpp
+		OUTPUT ${LB_FILE_NAME}.cpp
 		COMMAND ${LB_GENERATOR} -i -l ${PROJECT_SOURCE_DIR}/${NATIVE_LB_FILE}
 		DEPENDS ${LB_FILE} ${LB_GENERATOR} )
         

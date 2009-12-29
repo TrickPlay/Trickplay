@@ -1126,7 +1126,7 @@ if __name__ == "__main__":
     
     for file_name in args:
         
-        output = open( os.path.splitext( os.path.basename( file_name ) )[ 0 ] + ".cpp" , "w")
+        output = open( os.path.basename( file_name ) + ".cpp" , "w")
         
         binding = parse( open( file_name ).read() )
         
