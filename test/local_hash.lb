@@ -35,36 +35,25 @@ class LocalHash [[Storage::LocalHash*]]
 			count = self->count();
 		]];
 
-	table get(table key=0)
+	lstring get(lstring key)
 		[[
-			size_t key_length;
-			const char *key_buf = luaL_checklstring(L, 2, &key_length);
-
-			Storage::String tKey = Storage::String(key_buf, key_length);
-			Storage::String value = self->get(tKey);
-			lua_pushlstring(L, value.data(), value.length());
+			Storage::String theKey( key , key_len );
+			Storage::String value = self->get(theKey);
+			result = value.data();
+			result_len = value.length();
 		]];
 
-	put(table key=0, table value=0)
+	put(lstring key, lstring value)
 		[[
-			size_t key_length;
-			const char *key_buf = luaL_checklstring(L, 2, &key_length);
-
-			size_t value_length;
-			const char *value_buf = luaL_checklstring(L, 3, &value_length);
-
-			Storage::String tKey = Storage::String(key_buf, key_length);
-			Storage::String tValue = Storage::String(value_buf, value_length);
-			self->put(tKey, tValue);
+			Storage::String theKey( key , key_len );
+			Storage::String theValue( value , value_len );
+			self->put(theKey, theValue);
 		]];
 
-	del(table key=0)
+	del(lstring key)
 		[[
-			size_t key_length;
-			const char *key_buf = luaL_checklstring(L, 2, &key_length);
-
-			Storage::String tKey = Storage::String(key_buf, key_length);
-			self->del(tKey);
+			Storage::String theKey( key , key_len );
+			self->del(theKey);
 		]];
 
 	nuke()

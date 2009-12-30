@@ -3,7 +3,6 @@ module clutter;
 
 [[    
 #include "clutter/clutter.h"
-#warning Using gdk-pixbuf directly, may not work on OSX
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cstring>
 #include <string>
@@ -87,6 +86,98 @@ void set_props_from_table(lua_State*L,int table)
 
 void wrap_concrete_actor(lua_State*L,ClutterActor*actor);
 const char * get_actor_metatable(ClutterActor*actor);
+
+// This lets us wrap something to be freed later - when the
+// instance is destroyed
+
+class g_free_later
+{
+public:
+    
+    g_free_later( )
+    :
+	data( NULL )
+    {}
+    
+    g_free_later( gpointer d )
+    :
+	data( d )
+    {}
+    
+    ~g_free_later()
+    {
+	g_free( data );
+    }
+        
+    gpointer data;
+    
+private:
+    
+    g_free_later( const g_free_later & other )
+    {}
+};
+
+// This lets us bolt on a table of user data 
+
+class actor_extra
+{
+public:
+
+    // Creates a new table, takes a ref on it and leaves it
+    // on the stack
+    
+    actor_extra(lua_State * l)
+    :
+	L(l)
+    {
+	lua_newtable(L);
+	lua_pushvalue(L,-1);
+	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    }
+    
+    // Takes a ref on a table that is already on the stack
+    // and leaves it on the stack
+    
+    actor_extra(lua_State * l,int t)
+    :
+	L(l)
+    {
+	lua_pushvalue(L,t);
+	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    }
+    
+    // Releases the ref
+    
+    ~actor_extra()
+    {
+	luaL_unref(L,LUA_REGISTRYINDEX,table_ref);
+    }
+    
+    // Pushes the referenced table onto the stack
+    
+    void push_table()
+    {
+	lua_rawgeti(L,LUA_REGISTRYINDEX,table_ref);
+    }
+    
+    // GDestroyNotify for it
+    
+    static void destroy(gpointer a)
+    {
+	if (a)
+	    delete (actor_extra*)a;
+    }
+    
+private:
+    actor_extra()
+    {}
+    
+    actor_extra(const actor_extra &)
+    {}
+    
+    lua_State * L;
+    int		table_ref;
+};
 
 ]]
 
@@ -528,6 +619,58 @@ interface actor [[ClutterActor*]]
 	    lua_pushnumber(L,y);
 	    lua_rawseti(L,-2,2);
 	]];
+	
+    table extra
+	[[
+	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    
+	    if (!e)
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L),actor_extra::destroy);
+	    }
+	    else
+	    {
+		e->push_table();
+	    }
+	]]
+	[[
+	    if (lua_isnil(L,2))
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,actor_extra::destroy);
+	    }
+	    else
+	    {
+		lb_checktable(L,2);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+	    }
+	]];
+	
+    string request_mode
+	[[
+	    ClutterRequestMode mode;
+	    g_object_get(G_OBJECT(self),"request-mode",&mode,NULL);
+	    switch(mode)
+	    {
+		case CLUTTER_REQUEST_HEIGHT_FOR_WIDTH:
+		    request_mode = "HEIGHT_FOR_WIDTH";
+		    break;
+		case CLUTTER_REQUEST_WIDTH_FOR_HEIGHT:
+		    request_mode = "WIDTH_FOR_HEIGHT";
+		    break;
+		default:
+		    request_mode = "";
+	    }
+	]]
+	[[
+	    ClutterRequestMode mode = CLUTTER_REQUEST_HEIGHT_FOR_WIDTH;
+	    if (!strcmp(request_mode,"HEIGHT_FOR_WIDTH"))
+		mode = CLUTTER_REQUEST_HEIGHT_FOR_WIDTH;
+	    else if (!strcmp(request_mode,"WIDTH_FOR_HEIGHT"))
+		mode = CLUTTER_REQUEST_WIDTH_FOR_HEIGHT;
+	    else
+		luaL_error(L,"Invalid request mode '%s'",request_mode);
+	    g_object_set(G_OBJECT(self),"request-mode",mode,NULL);
+	]];
 
     callback on_key_focus_in
 	[[
@@ -712,12 +855,16 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
 global stage [[ClutterActor*]] actor , container
 {
     stage()
-    [[
-        *self = clutter_stage_get_default();
-	
-	#warning We may want to disable this on production builds - it quits clutter when you press escape	
-	g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);	    
-    ]];
+	[[
+	    *self = clutter_stage_get_default();
+	    
+	    #warning We may want to disable this on production builds - it quits clutter when you press escape	
+	    g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);	    
+	]];
+    
+    ~stage()
+	[[
+	]];
         
     table color
         [[
@@ -894,20 +1041,12 @@ class Text [[ClutterActor*]] actor
 	
     set_selection( int start_pos , int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
-	
-    # This is really a string, but we must deallocate it 
-    readonly table selected_text
+	    
+    readonly string selected_text
 	[[
-	    gchar * s=clutter_text_get_selection(CLUTTER_TEXT(self));
-	    if (!s)
-	    {
-		lua_pushnil(L);
-	    }
-	    else
-	    {
-		lua_pushstring(L,s);
-		g_free(s);
-	    }
+	    gchar * s = clutter_text_get_selection(CLUTTER_TEXT(self));
+	    selected_text = s;	    
+	    g_free_later later(s);	    
 	]];
 	
     int selection_end
@@ -934,20 +1073,11 @@ class Text [[ClutterActor*]] actor
     bool delete_selection()
 	[[result=clutter_text_delete_selection(CLUTTER_TEXT(self));]];
 	
-    # Really a string
-    
-    table get_chars( int start_pos , int end_pos )
+    string get_chars( int start_pos , int end_pos )
 	[[
 	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
-	    if(!c)
-	    {
-		lua_pushnil(L);
-	    }
-	    else
-	    {
-		lua_pushstring(L,c);
-		g_free(c);
-	    }
+	    result = c;
+	    g_free_later later(c);
 	]];
 	
     table cursor_color
@@ -1061,7 +1191,7 @@ class Clone [[ClutterActor*]] actor
     ~Clone()
 	[[g_object_unref(G_OBJECT(self));]];
         
-    table source
+    udata source
         [[
 	    wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
@@ -1086,7 +1216,134 @@ class Group [[ClutterActor*]] actor , container
 }
 
 [[
-#warning Using gdk-pixbuf directly, may not work on OSX
+
+struct ImageClosure
+{
+    ImageClosure(ClutterTexture*i)
+    :
+	image(i),
+	loader(gdk_pixbuf_loader_new()),
+	error(NULL)
+    {
+	g_assert(image);
+	g_assert(loader);
+	g_object_ref(G_OBJECT(image));
+    }
+    
+    ~ImageClosure()
+    {
+	g_object_unref(G_OBJECT(image));
+	g_object_unref(G_OBJECT(loader));
+	g_clear_error(&error);
+    }
+    
+    ClutterTexture * 	image;
+    GdkPixbufLoader * 	loader;
+    GError * 		error;
+};
+
+// Once the incremental request is done, we run this one
+// in the main thread
+
+gboolean Image_incremental_response_finished(gpointer user)
+{
+    ImageClosure * closure=(ImageClosure*)user;
+    
+    if (!closure->error)
+    {
+	GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(closure->loader);
+	
+	if (p)
+	{
+	    if ( ! clutter_texture_set_from_rgb_data(closure->image,
+		gdk_pixbuf_get_pixels(p),
+		gdk_pixbuf_get_has_alpha(p),
+		gdk_pixbuf_get_width(p),
+		gdk_pixbuf_get_height(p),
+		gdk_pixbuf_get_rowstride(p),
+		gdk_pixbuf_get_has_alpha(p)?4:3,
+		CLUTTER_TEXTURE_NONE,NULL))
+	    {
+		g_set_error(&closure->error,
+		    CLUTTER_TEXTURE_ERROR,
+		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		    "Failed to set texture data");
+	    }
+	}
+	else
+	{
+	    g_set_error(&closure->error,
+		CLUTTER_TEXTURE_ERROR,
+		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		"Failed to get pixbuf from loader");
+	}
+	
+    }
+    
+    if (closure->error)
+    {
+	g_warning("Failed to load image : %s",closure->error->message);
+	g_signal_emit_by_name(G_OBJECT(closure->image),"load-finished",closure->error);	
+    }
+    
+    // This will clear the error, if any, release the loader and the
+    // image
+    
+    delete closure;
+    
+    return FALSE;
+}
+
+// This one gets called directly by the network thread every time
+// we get a piece of the body - we take advantage of the thread to
+// decode the image one chunk at a time.
+
+bool Image_incremental_response_callback(const Network::Response & response,gpointer body,guint len,bool finished,gpointer user)
+{
+    ImageClosure * closure=(ImageClosure*)user;
+    
+    if (finished)
+    {
+	if (response.failed && !closure->error)
+	{
+	    g_set_error(&closure->error,
+		CLUTTER_TEXTURE_ERROR,
+		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		"Request failed : %s" , response.status.c_str() );
+	}
+	
+	// Close the loader. If there is an error already, we pass NULL
+	// so that we retain the old error - the loader has to be closed
+	// either way. Otherwise, we pass the error address so that close
+	// has a chance to fail.
+	
+	gdk_pixbuf_loader_close(closure->loader,closure->error?NULL:&closure->error);
+	
+	// Now, we post to the main thread
+	
+	GSource * source=g_idle_source_new();
+	g_source_set_callback(source,Image_incremental_response_finished,closure,NULL);
+	g_source_attach(source,g_main_context_default());
+	g_source_unref(source);
+    }
+    else
+    {
+	// If there was an error already, we do nothing
+	
+	if (!closure->error)
+	    gdk_pixbuf_loader_write(closure->loader,(const guchar*)body,len,&closure->error);    
+    }
+    
+    // If there is no error, we return true to carry on
+    
+    return !closure->error;
+}
+
+#if 0
+// This is the alternative callback for non-incremental requests.
+// The drawback of this one is that all the data is accumulated in
+// the HTTP thread until the request is done. Then, it is sent here
+// and all of this work is done in the main thread (image decoding)
 
 void Image_response_callback(const Network::Response & response,gpointer t)
 {
@@ -1098,8 +1355,6 @@ void Image_response_callback(const Network::Response & response,gpointer t)
 	
 	if (gdk_pixbuf_loader_write(l,response.body->data,response.body->len,NULL))
 	{
-	    //g_debug("IMAGE SENT TO LOADER");
-	    
 	    if (gdk_pixbuf_loader_close(l,NULL))
 	    {	    
 		GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(l);
@@ -1115,7 +1370,7 @@ void Image_response_callback(const Network::Response & response,gpointer t)
 			gdk_pixbuf_get_has_alpha(p)?4:3,
 			CLUTTER_TEXTURE_NONE,NULL))
 		    {
-			//g_debug("TEXTURE DATA SET");
+			// Do nothing - everything is cool
 		    }
 		    else
 		    {
@@ -1162,12 +1417,14 @@ void Image_response_callback(const Network::Response & response,gpointer t)
     
     if (error)
     {
-	g_signal_emit_by_name(CLUTTER_TEXTURE(t),"load-finished",error);
+	g_warning("Failed to load image : %s",error->message);
+	g_signal_emit_by_name(G_OBJECT(t),"load-finished",error);
 	g_clear_error(&error);
     }
     
     g_object_unref(G_OBJECT(t));    
 }
+#endif
 ]]
 
 [[
@@ -1202,8 +1459,15 @@ class Image [[ClutterActor*]] actor
 		{
 		    Network::Request request;
 		    request.url = src;
+#if 0		    
 		    g_object_ref(G_OBJECT(self));
 		    Network::perform_request_async(request,Image_response_callback,self);
+#else
+		    Network::perform_request_async_incremental(
+			request,
+			Image_incremental_response_callback,
+			new ImageClosure(CLUTTER_TEXTURE(self)));
+#endif
 		}
 		
 		g_free(scheme);
@@ -1326,9 +1590,9 @@ class Timeline [[ClutterTimeline*]]
 	[[clutter_timeline_set_delay(self,delay);]];
 	
     string direction
-	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"forward":"backward");]]
+	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"FORWARD":"BACKWARD");]]
 	[[
-	    static const char * directions[3] = { "forward" , "backward" , NULL };
+	    static const char * directions[3] = { "FORWARD" , "BACKWARD" , NULL };
 	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
 	]];
 	
@@ -1391,6 +1655,30 @@ class Timeline [[ClutterTimeline*]]
     readonly table markers
 	[[Timeline_list_markers(L);]];
 	
+    table extra
+	[[
+	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    
+	    if (!e)
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L),actor_extra::destroy);
+	    }
+	    else
+	    {
+		e->push_table();
+	    }
+	]]
+	[[
+	    if (lua_isnil(L,2))
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,actor_extra::destroy);
+	    }
+	    else
+	    {
+		lb_checktable(L,2);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+	    }
+	]];
 	
     callback on_new_frame
 	[[
@@ -1479,7 +1767,7 @@ class Alpha [[ClutterAlpha*]]
 	    g_object_unref(G_OBJECT(self));
 	]];
 	
-    table timeline
+    udata timeline
 	[[
 	    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
 	    if(wrap_Timeline(L,timeline))
@@ -1518,7 +1806,11 @@ class Alpha [[ClutterAlpha*]]
 	[[alpha=clutter_alpha_get_alpha(self);]];
 	
     callback on_alpha
-	[[clutter_alpha_set_func(self,Alpha_on_alpha,L,NULL);]];	    
+	[[
+	    clutter_alpha_set_func(self,NULL,NULL,NULL);
+	    if (on_alpha)
+		clutter_alpha_set_func(self,Alpha_on_alpha,L,NULL);
+	]];	    
 }
 
 [[

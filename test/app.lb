@@ -1,0 +1,27 @@
+[[
+#include "context.h"
+]]
+
+global app [[TPContext*]]
+{
+    app()
+        [[*self=TPContext::get_from_lua(L);]];
+
+    ~app()
+        [[]];
+    
+    readonly string id
+        [[id=self->get(APP_ID);]];
+        
+    readonly string name
+        [[name=self->get(APP_NAME);]];
+        
+    readonly string author
+        [[author=self->get(APP_AUTHOR);]];
+        
+    readonly string description
+        [[description=self->get(APP_DESCRIPTION);]];
+    
+    readonly string copyright
+        [[copyright=self->get(APP_COPYRIGHT);]];
+}
