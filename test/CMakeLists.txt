@@ -78,6 +78,7 @@ set(
     url_request.lb
     local_hash.lb
     globals.lb
+    app.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
