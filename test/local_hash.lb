@@ -1,4 +1,4 @@
-module local_hash;
+module storage;
 
 [[
 #include "storage.h"
