@@ -1,25 +1,27 @@
 [[
 #include "context.h"
-
-#define ctx (TPContext::get_from_lua(L))
 ]]
 
-global app [[void*]]
+global app [[TPContext*]]
 {
-    app();
+    app()
+        [[*self=TPContext::get_from_lua(L);]];
+
+    ~app()
+        [[]];
     
     readonly string id
-        [[id=ctx->get(APP_ID);]];
+        [[id=self->get(APP_ID);]];
         
     readonly string name
-        [[name=ctx->get(APP_NAME);]];
+        [[name=self->get(APP_NAME);]];
         
     readonly string author
-        [[author=ctx->get(APP_AUTHOR);]];
+        [[author=self->get(APP_AUTHOR);]];
         
     readonly string description
-        [[description=ctx->get(APP_DESCRIPTION);]];
+        [[description=self->get(APP_DESCRIPTION);]];
     
     readonly string copyright
-        [[copyright=ctx->get(APP_COPYRIGHT);]];
+        [[copyright=self->get(APP_COPYRIGHT);]];
 }
