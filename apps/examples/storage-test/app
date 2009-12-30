@@ -1,0 +1,9 @@
+
+app=
+{
+    id          = "com.trickplay.examples.storage-test",
+    name        = "storage test",
+    author      = "Craig Hughes",
+    copyright   = "© Trickplay Inc."
+}
+

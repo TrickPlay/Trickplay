@@ -1,12 +1,9 @@
 
-cmake_minimum_required( VERSION 2.6 )
+set( ENGINE_SRC		${PROJECT_SOURCE_DIR}/engine )
 
-project( TP )
+set( LB_GENERATOR       ${ENGINE_SRC}/lb/bin/lb.py )
 
-set( LB                 ${PROJECT_SOURCE_DIR}/../lb )
-set( LB_GENERATOR       ${LB}/bin/lb.py )
-
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR} )
+list( APPEND CMAKE_MODULE_PATH ${ENGINE_SRC}/cmake )
 
 find_package(Lua51 REQUIRED)
 find_package(GLIB2 REQUIRED)
@@ -56,8 +53,9 @@ set(
 
 include_directories(
     
-    ${PROJECT_SOURCE_DIR}
-    ${LB}/include
+    ${ENGINE_SRC}/public/include
+    ${ENGINE_SRC}/source
+    ${ENGINE_SRC}/lb/include
 
     ${LUA_INCLUDE_DIR}    
     ${CLUTTER_INCLUDE_DIRS} 
@@ -68,17 +66,18 @@ include_directories(
     ${PANGO_INCLUDE_DIRS}
 )
 
+set( BINDINGS_SRC ${ENGINE_SRC}/bindings )
 
 set(
 
     LB_FILES
     
-    clutter.lb
-    timer.lb
-    url_request.lb
-    local_hash.lb
-    globals.lb
-    app.lb
+    ${BINDINGS_SRC}/clutter.lb
+    ${BINDINGS_SRC}/timer.lb
+    ${BINDINGS_SRC}/url_request.lb
+    ${BINDINGS_SRC}/local_hash.lb
+    ${BINDINGS_SRC}/globals.lb
+    ${BINDINGS_SRC}/app.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
@@ -92,11 +91,11 @@ foreach( LB_FILE ${LB_FILES} )
 	list( APPEND GENERATED_FILES ${LB_FILE_NAME}.cpp )
         
 	file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
+	
 	add_custom_command( 
 		OUTPUT ${LB_FILE_NAME}.cpp
-		COMMAND ${LB_GENERATOR} -i -l ${PROJECT_SOURCE_DIR}/${NATIVE_LB_FILE}
+		COMMAND ${LB_GENERATOR} -i -l ${NATIVE_LB_FILE}
 		DEPENDS ${LB_FILE} ${LB_GENERATOR} )
-        
 
 endforeach( LB_FILE )
 
@@ -109,25 +108,25 @@ link_directories(
 )
 
 
-
-add_executable(
+add_library(
     
-    tp
+    tpcore
     
-    main.c
-    context.cpp
-    network.cpp
-    storage.cpp
+    STATIC
+    
+    ${ENGINE_SRC}/source/context.cpp
+    ${ENGINE_SRC}/source/network.cpp
+    ${ENGINE_SRC}/source/storage.cpp
 
     ${GENERATED_FILES}
-    ${LB}/src/lb.c
-    
+    ${ENGINE_SRC}/lb/src/lb.c
 )
 
 target_link_libraries(
     
-    tp
+    tpcore
     
+    stdc++    
     dl
     
     ${LUA_LIBRARIES}

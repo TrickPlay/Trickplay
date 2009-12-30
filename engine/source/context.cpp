@@ -1,4 +1,4 @@
-#include "tp.h"
+#include "tp/tp.h"
 #include "context.h"
 #include "network.h"
 #include "lb.h"
@@ -93,7 +93,7 @@ int TPContext::run()
     luaopen_app(L);
     
     // Run the script
-    int result = luaL_dofile(L,"tp.lua");
+    int result = luaL_dofile(L,"main.lua");
 
     if (result)
     {

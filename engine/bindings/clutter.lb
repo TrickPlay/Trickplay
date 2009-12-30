@@ -839,6 +839,8 @@ interface container [[ClutterActor*]]
 [[
 gboolean Stage_on_key_press(ClutterActor*actor,ClutterEvent*event,lua_State*L);
 
+#ifndef TP_PRODUCTION
+
 gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
 {
     ClutterKeyEvent * k=(ClutterKeyEvent*)event;
@@ -850,6 +852,8 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
     }
     return FALSE;    
 }
+
+#endif
 ]]
 
 global stage [[ClutterActor*]] actor , container
@@ -858,8 +862,9 @@ global stage [[ClutterActor*]] actor , container
 	[[
 	    *self = clutter_stage_get_default();
 	    
-	    #warning We may want to disable this on production builds - it quits clutter when you press escape	
-	    g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);	    
+#ifndef TP_PRODUCTION
+	    g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);
+#endif
 	]];
     
     ~stage()

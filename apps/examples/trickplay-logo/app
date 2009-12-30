@@ -1,0 +1,9 @@
+
+app=
+{
+    id          = "com.trickplay.examples.trickplay-logo",
+    name        = "Trickplay logo",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+
