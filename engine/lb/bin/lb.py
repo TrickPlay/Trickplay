@@ -473,7 +473,7 @@ def emit( stuff , f ):
                         ( declare_local( param , index + 1 )  , )
                     )
                     
-                if func[ "type" ] not in [ None , "table" , "udata" ]:
+                if func[ "type" ] not in [ None , "table" , "udata" , "multi" ]:
                     
                     f.write(
                         "  %s result;\n"
@@ -494,7 +494,11 @@ def emit( stuff , f ):
                     
                     pass
                     
-                if func[ "type" ] is None:
+                if func[ "type" ] == "multi":
+                    
+                    pass
+                
+                elif func[ "type" ] is None:
                     
                     f.write( "  return 0;\n" )
                     
@@ -594,7 +598,7 @@ def emit( stuff , f ):
                         ( declare_local( param , index + 2 )  , )
                     )
                     
-                if func[ "type" ] not in [ None , "table" , "udata" ]:
+                if func[ "type" ] not in [ None , "table" , "udata" , "multi" ]:
                     
                     f.write(
                         "  %s result;\n"
@@ -614,8 +618,12 @@ def emit( stuff , f ):
                     # TODO - here we should invoke the function on self
                     
                     pass
+                
+                if func[ "type" ] == "multi":
                     
-                if func[ "type" ] is None:
+                    pass
+                    
+                elif func[ "type" ] is None:
                     
                     f.write( "  return 0;\n" )
                     
