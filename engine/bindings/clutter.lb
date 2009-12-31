@@ -9,6 +9,7 @@ module clutter;
 
 #include "network.h"
 #include "util.h"
+#include "context.h"
 ]]
 
 [[
@@ -1450,9 +1451,9 @@ class Image [[ClutterActor*]] actor
 	    }
 	    else
 	    {
-		// TODO: we must validate this path so they can't load an image
-		// from anywhere
-		clutter_texture_set_from_file(CLUTTER_TEXTURE(self),src,NULL);
+		gchar * path = Util::rebase_path(TPContext::get_from_lua(L)->get(APP_PATH),src);
+		Util::GFreeLater free_path(path);
+		clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path,NULL);
 	    }
 	    g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
 	]];
