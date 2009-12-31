@@ -94,7 +94,7 @@ foreach( LB_FILE ${LB_FILES} )
 	
 	add_custom_command( 
 		OUTPUT ${LB_FILE_NAME}.cpp
-		COMMAND ${LB_GENERATOR} -i -l ${NATIVE_LB_FILE}
+		COMMAND ${LB_GENERATOR} -l ${NATIVE_LB_FILE}
 		DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
 endforeach( LB_FILE )
@@ -117,6 +117,7 @@ add_library(
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/network.cpp
     ${ENGINE_SRC}/source/storage.cpp
+    ${ENGINE_SRC}/source/console.cpp
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c

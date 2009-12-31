@@ -1,9 +1,3 @@
-#include "tp/tp.h"
-#include "context.h"
-#include "network.h"
-#include "lb.h"
-#include "util.h"
-
 #include <cstdio>
 #include <cstring>
 #include <sstream>
@@ -11,6 +5,13 @@
 #include "glib.h"
 #include "curl/curl.h"
 #include "clutter/clutter.h"
+
+#include "tp/tp.h"
+#include "context.h"
+#include "network.h"
+#include "lb.h"
+#include "util.h"
+#include "console.h"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -106,6 +107,9 @@ int TPContext::run()
     }
     else
     {
+#ifndef TP_PRODUCTION	
+	Console console(L);
+#endif	
         clutter_actor_show_all(clutter_stage_get_default());
         clutter_main();
     }
