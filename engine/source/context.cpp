@@ -2,11 +2,9 @@
 #include <cstring>
 #include <sstream>
 
-#include "glib.h"
 #include "curl/curl.h"
 #include "clutter/clutter.h"
 
-#include "tp/tp.h"
 #include "context.h"
 #include "network.h"
 #include "lb.h"
@@ -30,22 +28,28 @@ extern void luaopen_app(lua_State*L);
 
 TPContext::TPContext()
 :
-    L(NULL)
+    L(NULL),
+    external_console_handler(NULL),
+    external_console_handler_data(NULL)
 {
 }
     
+//-----------------------------------------------------------------------------
+
 TPContext::~TPContext()
 {
 }
 
+//-----------------------------------------------------------------------------
+
 void TPContext::set(const char * key,const char * value)
 {
-    // Should not be called while we are running
-    
-    g_assert(!L);
+    g_assert(!running());
     
     config.insert(std::make_pair(String(key),String(value)));
 }
+
+//-----------------------------------------------------------------------------
 
 const char * TPContext::get(const char * key,const char * def)
 {    
@@ -56,10 +60,31 @@ const char * TPContext::get(const char * key,const char * def)
     return it->second.c_str();
 }
 
+//-----------------------------------------------------------------------------
+
+int TPContext::console_command_handler(const char * command,const char * parameters,void * self)
+{
+    TPContext * context = (TPContext*)self;
+    
+    if (!strcmp(command,"exit"))
+    {
+	context->quit();
+	return TRUE;
+    }
+    
+    return FALSE;
+}
+
+//-----------------------------------------------------------------------------
+
 int TPContext::run()
 {    
     // So that run cannot be called while we are running
-    g_assert(!L);
+    g_assert(!running());
+    
+    if (external_log_handler)
+	g_log_set_default_handler(log_handler,this);        
+	
     
     // Get the base path for the app
     const char * app_path = get( APP_PATH );
@@ -109,6 +134,10 @@ int TPContext::run()
     {
 #ifndef TP_PRODUCTION	
 	Console console(L);
+	console.add_command_handler(console_command_handler,this);
+	
+	if (external_console_handler)
+	    console.add_command_handler(external_console_handler,external_console_handler_data);
 #endif	
         clutter_actor_show_all(clutter_stage_get_default());
         clutter_main();
@@ -125,11 +154,17 @@ int TPContext::run()
     return result;
 }
 
+//-----------------------------------------------------------------------------
+
 void TPContext::quit()
 {
+    g_assert(running());
+    
     clutter_main_quit();
 }
    
+//-----------------------------------------------------------------------------
+
 TPContext * TPContext::get_from_lua(lua_State * L)
 {
     g_assert(L);
@@ -140,6 +175,8 @@ TPContext * TPContext::get_from_lua(lua_State * L)
     g_assert(result);
     return result;
 }
+
+//-----------------------------------------------------------------------------
 
 bool TPContext::load_app_metadata(const char * app_path)
 {
@@ -264,6 +301,36 @@ bool TPContext::load_app_metadata(const char * app_path)
 
 //-----------------------------------------------------------------------------
 
+void TPContext::set_command_handler(TPConsoleCommandHandler handler,void * data)
+{
+    g_assert(!running());
+    
+    external_console_handler = handler;    
+    external_console_handler_data = data;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self)
+{
+    TPContext * context=(TPContext*)self;
+    
+    context->external_log_handler(log_level,log_domain,message,context->external_log_handler_data);
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::set_log_handler(TPLogHandler handler,void * data)
+{
+    g_assert(!running());
+    
+    external_log_handler = handler;
+    external_log_handler_data = data;
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar *message,gpointer user_data)
 {
     gulong ms = clutter_get_timestamp() / 1000;
@@ -343,6 +410,9 @@ TPContext * tp_context_new()
 
 void tp_context_free(TPContext * context)
 {
+    g_assert(context);
+    g_assert(!context->running());
+    
     delete context;    
 }
 
@@ -358,6 +428,20 @@ void tp_context_set(TPContext * context,const char * key,const char * value)
 const char * tp_context_get(TPContext * context,const char * key)
 {
     return context->get(key);
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_console_command_handler(TPContext * context,TPConsoleCommandHandler handler,void * data)
+{
+    context->set_command_handler(handler,data);    
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_log_handler(TPContext * context,TPLogHandler handler,void * data)
+{
+    context->set_log_handler(handler,data);
 }
 
 //-----------------------------------------------------------------------------
