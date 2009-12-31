@@ -3,52 +3,61 @@ module globals;
 [[
 #include "glib.h"
 #include <string>
+
+#include "context.h"
+#include "util.h"
 ]]
 
 globals
 {
-    log()
+    print()
         [[
-            int c=lua_gettop(L);
             std::string result;
-            for(int i=1;i<=c;++i)
+            int n = lua_gettop(L);  /* number of arguments */
+            int i;
+            lua_getglobal(L, "tostring");
+            for (i=1; i<=n; i++)
             {
-                const char * s = lua_tostring(L,i);
-                if (!s)
-                {
-                    switch(lua_type(L,i))
-                    {
-                        case LUA_TNIL:
-                            s = "<nil>";
-                            break;
-                        case LUA_TBOOLEAN:
-                            s = lua_toboolean(L,i)?"true":"false";
-                            break;
-                        case LUA_TTABLE:
-                            s = "<table>";
-                            break;
-                        case LUA_TFUNCTION:
-                            s = "<function>";
-                            break;
-                        
-                        case LUA_TUSERDATA:
-                            s = "<userdata>";
-                            break;
-                            
-                        case LUA_TTHREAD:
-                            s = "<thread>";
-                            break;
-                            
-                        case LUA_TLIGHTUSERDATA:
-                            s = "<lighuserdata>";
-                            break;
-                    }
-                }
-                if (i>1)
-                    result += ' ';
-                result += s;
+              const char *s;
+              lua_pushvalue(L, -1);  /* function to be called */
+              lua_pushvalue(L, i);   /* value to print */
+              lua_call(L, 1, 1);
+              s = lua_tostring(L, -1);  /* get result */
+              if (s == NULL)
+                return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                                     LUA_QL("print"));
+              if (i>1)
+                result += ' ';
+              result += s;
+              lua_pop(L, 1);  /* pop result */
             }
-            g_message("%s",result.c_str());
+            g_message("%s",result.c_str());                
         ]];
     
+    multi dofile(string file_name)
+        [[
+            gchar * path = Util::rebase_path(TPContext::get_from_lua(L)->get(APP_PATH),file_name);
+            Util::GFreeLater free_path(path);
+            
+            int n = lua_gettop(L);
+            if (luaL_loadfile(L,path) != 0)
+                lua_error(L);
+            lua_call(L,0,LUA_MULTRET);
+            return lua_gettop(L) - n;            
+        ]];
+        
+    multi loadfile(string file_name)
+        [[
+            gchar * path = Util::rebase_path(TPContext::get_from_lua(L)->get(APP_PATH),file_name);
+            Util::GFreeLater free_path(path);
+            
+            if (luaL_loadfile(L,path) == 0)
+              return 1;
+            else
+            {
+              lua_pushnil(L);
+              lua_insert(L, -2);  
+              return 2;  
+            }            
+        ]];
 }
