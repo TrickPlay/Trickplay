@@ -27,7 +27,7 @@ void push_clutter_color(lua_State*L,ClutterColor*color)
     lua_pushnumber(L,color->alpha);
     lua_rawseti(L,-2,4);
     
-    LSG_END(0);
+    LSG_END(1);
 }
 
 void to_clutter_color(lua_State*L,int index,ClutterColor*color)
@@ -297,6 +297,14 @@ interface actor [[ClutterActor*]]
     double h
         [[ h = clutter_actor_get_height( self ); ]]
         [[ clutter_actor_set_height( self , h ); ]];
+
+    double width
+        [[ width = clutter_actor_get_width( self ); ]]
+        [[ clutter_actor_set_width( self , width ); ]];
+    
+    double height
+        [[ height = clutter_actor_get_height( self ); ]]
+        [[ clutter_actor_set_height( self , height ); ]];
 
     table position
         [[
