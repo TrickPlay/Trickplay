@@ -112,7 +112,7 @@ add_library(
     
     tpcore
     
-    STATIC
+    SHARED
     
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/network.cpp
@@ -123,11 +123,12 @@ add_library(
     ${ENGINE_SRC}/lb/src/lb.c
 )
 
+set_target_properties(tpcore PROPERTIES LINK_INTERFACE_LIBRARIES tpcore)
+
 target_link_libraries(
     
     tpcore
     
-    stdc++    
     dl
     
     ${LUA_LIBRARIES}
@@ -135,3 +136,6 @@ target_link_libraries(
     ${CURL_LIBS}
     ${TOKYO_LIBS}
 )
+
+
+
