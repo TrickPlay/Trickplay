@@ -2,6 +2,7 @@
 #include "context.h"
 #include "network.h"
 #include "lb.h"
+#include "util.h"
 
 #include <cstdio>
 #include <cstring>
@@ -93,7 +94,10 @@ int TPContext::run()
     luaopen_app(L);
     
     // Run the script
-    int result = luaL_dofile(L,"main.lua");
+    gchar * main_path=g_build_filename(app_path,"main.lua",NULL);
+    Util::GFreeLater free_main_path(main_path);
+    
+    int result = luaL_dofile(L,main_path);
 
     if (result)
     {
@@ -148,19 +152,14 @@ bool TPContext::load_app_metadata(const char * app_path)
 	
 	gchar * path = g_build_filename(app_path,APP_METADATA_FILENAME,NULL);
 	
+	Util::GFreeLater free_path(path);
+	
 	if (!g_file_test(path,G_FILE_TEST_IS_REGULAR))
-	{
-	    g_free(path);
 	    throw String("App metadata file does not exist");
-	}
 	
 	// Now, run it with Lua
 	
 	int result = luaL_dofile(L,path);
-	
-	// Free the path
-	
-	g_free(path);
 	
 	// Check that it ran OK
 	

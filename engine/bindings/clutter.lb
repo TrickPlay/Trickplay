@@ -8,6 +8,7 @@ module clutter;
 #include <string>
 
 #include "network.h"
+#include "util.h"
 ]]
 
 [[
@@ -86,36 +87,6 @@ void set_props_from_table(lua_State*L,int table)
 
 void wrap_concrete_actor(lua_State*L,ClutterActor*actor);
 const char * get_actor_metatable(ClutterActor*actor);
-
-// This lets us wrap something to be freed later - when the
-// instance is destroyed
-
-class g_free_later
-{
-public:
-    
-    g_free_later( )
-    :
-	data( NULL )
-    {}
-    
-    g_free_later( gpointer d )
-    :
-	data( d )
-    {}
-    
-    ~g_free_later()
-    {
-	g_free( data );
-    }
-        
-    gpointer data;
-    
-private:
-    
-    g_free_later( const g_free_later & other )
-    {}
-};
 
 // This lets us bolt on a table of user data 
 
@@ -1051,7 +1022,7 @@ class Text [[ClutterActor*]] actor
 	[[
 	    gchar * s = clutter_text_get_selection(CLUTTER_TEXT(self));
 	    selected_text = s;	    
-	    g_free_later later(s);	    
+	    Util::GFreeLater later(s);	    
 	]];
 	
     int selection_end
@@ -1082,7 +1053,7 @@ class Text [[ClutterActor*]] actor
 	[[
 	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
 	    result = c;
-	    g_free_later later(c);
+	    Util::GFreeLater later(c);
 	]];
 	
     table cursor_color
