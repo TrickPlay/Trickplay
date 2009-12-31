@@ -2,6 +2,8 @@
 app=
 {
     id          = "com.trickplay.examples.text-entry",
+    release     = "1",
+    version     = "1.0",
     name        = "text entry",
     author      = "Pablo Pissanetzky",
     copyright   = "© Trickplay Inc."

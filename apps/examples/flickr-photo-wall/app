@@ -2,6 +2,8 @@
 app=
 {
     id          = "com.trickplay.examples.flickr-photo-wall",
+    release     = "1",
+    version     = "1.0",
     name        = "flickr photo wall",
     author      = "Pablo Pissanetzky",
     copyright   = "© Trickplay Inc."

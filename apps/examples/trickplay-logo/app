@@ -2,6 +2,8 @@
 app=
 {
     id          = "com.trickplay.examples.trickplay-logo",
+    release     = "1",
+    version     = "1.0",
     name        = "Trickplay logo",
     author      = "Pablo Pissanetzky",
     copyright   = "© Trickplay Inc."

@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 
 #include "glib.h"
 #include "curl/curl.h"
@@ -215,6 +216,20 @@ bool TPContext::load_app_metadata(const char * app_path)
 	if (lua_type(L,-1)!=LUA_TSTRING)
 	    throw String("Missing or invalid app name");
 	set(APP_NAME,lua_tostring(L,-1));
+	lua_pop(L,1);
+	
+	lua_getfield(L,-1,APP_FIELD_RELEASE);
+	if (lua_tointeger(L,-1)<=0)
+	    throw String("Missing or invalid app release, it must be a number greater than 0");
+	std::stringstream str;
+	str << lua_tointeger(L,-1);
+	set(APP_RELEASE,str.str().c_str());
+	lua_pop(L,1);
+	
+	lua_getfield(L,-1,APP_FIELD_VERSION);
+	if (lua_type(L,-1)!=LUA_TSTRING)
+	    throw String("Missing or invalid app version");
+	set(APP_VERSION,lua_tostring(L,-1));
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_DESCRIPTION);

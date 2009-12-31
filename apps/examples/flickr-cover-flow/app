@@ -2,6 +2,8 @@
 app=
 {
     id          = "com.trickplay.examples.flickr-cover-flow",
+    release     = "1",
+    version     = "1.0",
     name        = "flickr cover flow",
     author      = "Pablo Pissanetzky",
     copyright   = "© Trickplay Inc."

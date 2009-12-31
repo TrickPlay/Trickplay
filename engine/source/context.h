@@ -23,6 +23,8 @@ typedef std::map<String,String> StringMap;
 #define APP_DESCRIPTION         "app.description"
 #define APP_AUTHOR              "app.author"
 #define APP_COPYRIGHT           "app.copyright"
+#define APP_RELEASE             "app.release"
+#define APP_VERSION             "app.version"
 
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
@@ -32,6 +34,8 @@ typedef std::map<String,String> StringMap;
 #define APP_FIELD_DESCRIPTION   "description"
 #define APP_FIELD_AUTHOR        "author"
 #define APP_FIELD_COPYRIGHT     "copyright"
+#define APP_FIELD_RELEASE       "release"
+#define APP_FIELD_VERSION       "version"
 //-----------------------------------------------------------------------------
 
 struct TPContext
