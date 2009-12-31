@@ -30,6 +30,7 @@ typedef std::map<String,String> StringMap;
 #define APP_RELEASE             "app.release"
 #define APP_VERSION             "app.version"
 
+#define CONSOLE_ENABLED         "console.enabled"
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
 #define APP_TABLE_NAME          "app"
@@ -50,7 +51,10 @@ public:
     ~TPContext();
     
     void set(const char * key,const char * value);
+    void set(const char * key,int value);
+    
     const char * get(const char * key,const char * def = NULL);
+    bool get_bool(const char * key,bool def=false);
     
     int run();    
     void quit();

@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
+#include <memory>
 
 #include "curl/curl.h"
 #include "clutter/clutter.h"
@@ -51,6 +52,15 @@ void TPContext::set(const char * key,const char * value)
 
 //-----------------------------------------------------------------------------
 
+void TPContext::set(const char * key,int value)
+{
+    std::stringstream str;
+    str << value;
+    set(key,str.str().c_str());
+}
+
+//-----------------------------------------------------------------------------
+
 const char * TPContext::get(const char * key,const char * def)
 {    
     StringMap::const_iterator it = config.find(String(key));
@@ -58,6 +68,24 @@ const char * TPContext::get(const char * key,const char * def)
     if (it==config.end())
         return def;
     return it->second.c_str();
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::get_bool(const char * key,bool def)
+{
+    const char * value=get(key);
+    
+    if(!value)
+	return def;
+    
+    return (!strcmp(value,"1")||
+	    !strcmp(value,"TRUE")||
+	    !strcmp(value,"true")||
+	    !strcmp(value,"YES")||
+	    !strcmp(value,"yes")||
+	    !strcmp(value,"Y")||
+	    !strcmp(value,"y"));
 }
 
 //-----------------------------------------------------------------------------
@@ -132,15 +160,21 @@ int TPContext::run()
     }
     else
     {
-#ifndef TP_PRODUCTION	
-	Console console(L);
-	console.add_command_handler(console_command_handler,this);
-	
-	if (external_console_handler)
-	    console.add_command_handler(external_console_handler,external_console_handler_data);
+#ifndef TP_PRODUCTION
+
+	std::auto_ptr<Console> console;
+
+	if (get_bool(CONSOLE_ENABLED,true))
+	{
+	    console.reset(new Console(L));
+	    console->add_command_handler(console_command_handler,this);
+	    
+	    if (external_console_handler)
+		console->add_command_handler(external_console_handler,external_console_handler_data);
+	}
 #endif	
-        clutter_actor_show_all(clutter_stage_get_default());
-        clutter_main();
+	clutter_actor_show_all(clutter_stage_get_default());
+	clutter_main();
     }
     
     clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
@@ -262,9 +296,7 @@ bool TPContext::load_app_metadata(const char * app_path)
 	lua_getfield(L,-1,APP_FIELD_RELEASE);
 	if (lua_tointeger(L,-1)<=0)
 	    throw String("Missing or invalid app release, it must be a number greater than 0");
-	std::stringstream str;
-	str << lua_tointeger(L,-1);
-	set(APP_RELEASE,str.str().c_str());
+	set(APP_RELEASE,lua_tointeger(L,-1));
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_VERSION);
