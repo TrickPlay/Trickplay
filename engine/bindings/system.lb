@@ -1,0 +1,43 @@
+[[
+#include "context.h"
+]]
+
+global system [[TPContext*]]
+{
+    system()
+        [[*self=TPContext::get_from_lua(L);]];
+
+    ~system()
+        [[]];
+        
+    bool acquire_numeric_keypad()
+        [[
+            result=self->request(TP_REQUEST_ACQUIRE_NUMERIC_KEYPAD);
+        ]];
+        
+    release_numeric_keypad()
+        [[
+            self->notify(TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD);    
+        ]];
+        
+    bool acquire_transport_control_keys()
+        [[
+            result=self->request(TP_REQUEST_ACQUIRE_TRANSPORT_CONTROL_KEYS);
+        ]];
+        
+    release_transport_control_keys()
+        [[
+            self->notify(TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS);    
+        ]];
+        
+    bool acquire_keyboard()
+        [[
+            result=self->request(TP_REQUEST_ACQUIRE_KEYBOARD);
+        ]];
+        
+    release_keyboard()
+        [[
+            self->notify(TP_NOTIFICATION_RELEASE_KEYBOARD);    
+        ]];
+    
+}

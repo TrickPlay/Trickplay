@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <sstream>
 #include <memory>
 
@@ -22,6 +23,7 @@ extern void luaopen_url_request(lua_State*L);
 extern void luaopen_storage(lua_State*L);
 extern void luaopen_globals(lua_State*L);
 extern void luaopen_app(lua_State*L);
+extern void luaopen_system(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -33,7 +35,11 @@ TPContext::TPContext()
     external_console_handler(NULL),
     external_console_handler_data(NULL),
     external_log_handler(NULL),
-    external_log_handler_data(NULL)
+    external_log_handler_data(NULL),
+    external_notification_handler(NULL),
+    external_notification_handler_data(NULL),
+    external_request_handler(NULL),
+    external_request_handler_data(NULL)    
 {
 }
     
@@ -92,6 +98,17 @@ bool TPContext::get_bool(const char * key,bool def)
 
 //-----------------------------------------------------------------------------
 
+int TPContext::get_int(const char * key,int def)
+{
+    const char * value=get(key);
+    
+    if (!value)
+	return def;
+    return atoi(value);
+}
+
+//-----------------------------------------------------------------------------
+
 int TPContext::console_command_handler(const char * command,const char * parameters,void * self)
 {
     TPContext * context = (TPContext*)self;
@@ -144,6 +161,7 @@ int TPContext::run()
     luaopen_storage(L);
     luaopen_globals(L);
     luaopen_app(L);
+    luaopen_system(L);
     
     // Run the script
     gchar * main_path=g_build_filename(app_path,"main.lua",NULL);
@@ -359,6 +377,42 @@ void TPContext::set_log_handler(TPLogHandler handler,void * data)
     external_log_handler_data = data;
 }
 
+//-----------------------------------------------------------------------------
+
+void TPContext::set_notification_handler(TPNotificationHandler handler,void * data)
+{
+    g_assert(!running());
+    
+    external_notification_handler = handler;
+    external_notification_handler_data = data;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::set_request_handler(TPRequestHandler handler,void * data)
+{
+    g_assert(!running());
+    
+    external_request_handler = handler;
+    external_request_handler_data = data;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::notify(const char * subject)
+{
+    if (external_notification_handler)
+	external_notification_handler(subject,external_notification_handler_data);
+}
+    
+//-----------------------------------------------------------------------------
+
+int TPContext::request(const char * subject)
+{
+    if (!external_request_handler)
+	return 1;
+    return external_request_handler(subject,external_request_handler_data);
+}
 
 //-----------------------------------------------------------------------------
 
@@ -642,6 +696,21 @@ void tp_context_set(TPContext * context,const char * key,const char * value)
 const char * tp_context_get(TPContext * context,const char * key)
 {
     return context->get(key);
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_notification_handler(TPContext * context,TPNotificationHandler handler,void * data)
+{
+    context->set_notification_handler(handler,data);
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_request_handler(TPContext * context,TPRequestHandler handler,void * data)
+{
+    context->set_request_handler(handler,data);
+    
 }
 
 //-----------------------------------------------------------------------------

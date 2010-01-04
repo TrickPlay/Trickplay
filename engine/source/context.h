@@ -53,12 +53,15 @@ public:
     
     const char * get(const char * key,const char * def = NULL);
     bool get_bool(const char * key,bool def=false);
+    int get_int(const char * key,int def=0);
     
     int run();    
     void quit();
     
     void set_command_handler(TPConsoleCommandHandler handler,void * data);
     void set_log_handler(TPLogHandler handler,void * data);
+    void set_notification_handler(TPNotificationHandler handler,void * data);
+    void set_request_handler(TPRequestHandler handler,void *data);
     
     static TPContext * get_from_lua(lua_State * L);
     
@@ -68,6 +71,10 @@ public:
     }
     
     String normalize_app_path(const gchar * path_or_uri,bool * is_uri=NULL);
+    
+    void notify(const char * subject);
+    
+    int request(const char * subject);
     
 protected:
     
@@ -91,6 +98,12 @@ private:
     
     TPLogHandler            external_log_handler;
     void *                  external_log_handler_data;
+    
+    TPNotificationHandler   external_notification_handler;
+    void *                  external_notification_handler_data;
+    
+    TPRequestHandler        external_request_handler;
+    void *                  external_request_handler_data;
 };
 
 

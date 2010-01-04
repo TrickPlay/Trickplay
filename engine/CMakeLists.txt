@@ -78,6 +78,7 @@ set(
     ${BINDINGS_SRC}/local_hash.lb
     ${BINDINGS_SRC}/globals.lb
     ${BINDINGS_SRC}/app.lb
+    ${BINDINGS_SRC}/system.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
