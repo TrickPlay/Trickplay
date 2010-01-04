@@ -50,14 +50,13 @@ gboolean Console::read_data()
         
         if (g_strv_length(parts) >= 1)
         {
-            gchar * command=parts[0];
-       
             for(CommandHandlerList::iterator it=handlers.begin();it!=handlers.end();++it)
             {
-                if (it->first(command,parts[1],it->second))
+                if (it->first(parts[0],parts[1],it->second))
                     break;
             }
         }
+        
         g_strfreev(parts);
     }
     else if (strlen(line->str))
@@ -99,7 +98,6 @@ gboolean Console::read_data()
         
         LSG_END(0);
     }
-    
     
     return TRUE;
 }

@@ -31,7 +31,9 @@ TPContext::TPContext()
 :
     L(NULL),
     external_console_handler(NULL),
-    external_console_handler_data(NULL)
+    external_console_handler_data(NULL),
+    external_log_handler(NULL),
+    external_log_handler_data(NULL)
 {
 }
     
@@ -426,7 +428,7 @@ void tp_init(int * argc,char *** argv)
     CURLcode co = curl_global_init(CURL_GLOBAL_ALL);
     
     if (co != CURLE_OK)
-	g_error("Failed to initialize cURL : %s" , curl_easy_strerror(co));
+	g_error("Failed to initialize cURL : %s",curl_easy_strerror(co));
     
     g_log_set_default_handler(log_handler,NULL);        
 }
