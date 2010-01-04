@@ -30,6 +30,10 @@ typedef std::map<String,String> StringMap;
 #define APP_RELEASE             "app.release"
 #define APP_VERSION             "app.version"
 
+#define SYSTEM_LANGUAGE         "system.language"   // ISO-639-2 http://www.loc.gov/standards/iso639-2/php/code_list.php
+#define SYSTEM_COUNTRY          "system.country"    // ISO-3166-1-alpha-2 http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm
+
+
 #define CONSOLE_ENABLED         "console.enabled"
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
@@ -68,6 +72,8 @@ public:
     {
         return L;
     }
+    
+    String normalize_app_path(const gchar * path_or_uri,bool * is_uri=NULL);
     
 protected:
     

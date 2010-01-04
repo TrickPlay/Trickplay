@@ -1436,32 +1436,27 @@ class Image [[ClutterActor*]] actor
 	    src=(char*)g_object_get_data(G_OBJECT(self),"tp-src");
 	]]
 	[[
-	    char * scheme=g_uri_parse_scheme(src);
+	    bool is_uri;
 	    
-	    if (scheme)
+	    String path = TPContext::get_from_lua(L)->normalize_app_path(src,&is_uri);
+
+	    if (is_uri)
 	    {
-		if(!strcmp(scheme,"http") || !strcmp(scheme,"https"))
-		{
-		    Network::Request request;
-		    request.url = src;
+		Network::Request request;
+		request.url = path;
 #if 0		    
-		    g_object_ref(G_OBJECT(self));
-		    Network::perform_request_async(request,Image_response_callback,self);
+		g_object_ref(G_OBJECT(self));
+		Network::perform_request_async(request,Image_response_callback,self);
 #else
-		    Network::perform_request_async_incremental(
-			request,
-			Image_incremental_response_callback,
-			new ImageClosure(CLUTTER_TEXTURE(self)));
+		Network::perform_request_async_incremental(
+		    request,
+		    Image_incremental_response_callback,
+		    new ImageClosure(CLUTTER_TEXTURE(self)));
 #endif
-		}
-		
-		g_free(scheme);
 	    }
 	    else
 	    {
-		gchar * path = Util::rebase_path(TPContext::get_from_lua(L)->get(APP_PATH),src);
-		Util::GFreeLater free_path(path);
-		clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path,NULL);
+		clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path.c_str(),NULL);
 	    }
 	    g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
 	]];

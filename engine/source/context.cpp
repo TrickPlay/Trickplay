@@ -113,9 +113,8 @@ int TPContext::run()
     g_assert(!running());
     
     if (external_log_handler)
-	g_log_set_default_handler(log_handler,this);        
-	
-    
+	g_log_set_default_handler(log_handler,this);
+		
     // Get the base path for the app
     const char * app_path = get( APP_PATH );
     
@@ -360,6 +359,135 @@ void TPContext::set_log_handler(TPLogHandler handler,void * data)
     
     external_log_handler = handler;
     external_log_handler_data = data;
+}
+
+
+//-----------------------------------------------------------------------------
+
+String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
+{
+    if (is_uri)
+	*is_uri=false;
+	
+    gchar * result=NULL;
+    
+    // First, see if there is a scheme
+    
+    gchar ** parts=g_strsplit(path_or_uri,":",2);
+    
+    guint count=g_strv_length(parts);
+    
+    if (count==0)
+    {
+	// What do we do? This is clearly not a good path
+	
+	g_error("Invalid empty path or uri");
+    }
+    
+    if (count==1)
+    {
+	// There is no scheme, so this is a simple path
+	
+	result=Util::rebase_path(get(APP_PATH),path_or_uri);
+    }
+    else
+    {
+	// There is a scheme
+	
+	gchar * scheme=parts[0];
+	gchar * uri=parts[1];
+	
+	// The scheme is only one character long - assume it
+	// is a windows drive letter
+	
+	if (strlen(scheme)==1)
+	{
+	    result=Util::rebase_path(get(APP_PATH),path_or_uri);
+	}
+	else
+	{
+	    // If it is HTTP or HTTPS, we just return the whole thing passed in
+	    
+	    if (!strcmp(scheme,"http")||!strcmp(scheme,"https"))
+	    {
+		if (is_uri)
+		    *is_uri=true;
+		    
+		result = g_strdup(path_or_uri);
+	    }
+
+	    // file scheme
+	    
+	    else if (!strcmp(scheme,"file"))
+	    {
+		if (g_strstr_len(uri,2,"//")==uri)
+		    result = Util::rebase_path(get(APP_PATH),uri+2);
+		else
+		    result = Util::rebase_path(get(APP_PATH),uri);
+	    }
+	    	    
+	    // Localized file
+	    
+	    else if (!strcmp(scheme,"localized"))
+	    {
+		const char * app_path=get(APP_PATH);
+		
+		const char * language=get(SYSTEM_LANGUAGE,"en");
+		const char * country=get(SYSTEM_COUNTRY,"US");
+
+		gchar * try_path=NULL;
+		
+		// Try <app>/localized/en/US/<path>
+		
+		try_path=g_build_filename(app_path,"localized",language,country,NULL);
+		
+		result=Util::rebase_path(try_path,uri);
+		
+		g_free(try_path);
+		
+		if (!g_file_test(result,G_FILE_TEST_EXISTS))
+		{
+		    // Try <app>/localized/en/<path>
+		    
+		    try_path=g_build_filename(app_path,"localized",language,NULL);
+		    
+		    result=Util::rebase_path(try_path,uri);
+		    
+		    g_free(try_path);
+		    
+		    if (!g_file_test(result,G_FILE_TEST_EXISTS))
+		    {
+			// Try <app>/localized/<path>
+			
+			try_path=g_build_filename(app_path,"localized",NULL);
+			
+			result=Util::rebase_path(try_path,uri);
+			
+			g_free(try_path);
+			
+			if (!g_file_test(result,G_FILE_TEST_EXISTS))
+			{
+			    // End up with <app>/<path>
+			    
+			    result=Util::rebase_path(app_path,uri);
+			}
+		    }
+		}
+	    }
+	    else
+	    {
+		g_error("Invalid scheme in '%s'",path_or_uri);
+	    }
+	}
+    }
+    
+    g_strfreev(parts);
+    
+    g_assert(result);
+    
+    Util::GFreeLater free_result(result);
+    
+    return String(result);
 }
 
 //-----------------------------------------------------------------------------

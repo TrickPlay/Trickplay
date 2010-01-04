@@ -226,6 +226,8 @@ namespace Network
             closure->response.failed=true;
             closure->response.code=c;
             closure->response.status=curl_easy_strerror(c);
+            
+            g_warning("URL REQUEST FAILED '%s' : %d : %s",closure->request.url.c_str(),c,closure->response.status.c_str());
         }
         
         //=====================================================================

@@ -36,11 +36,10 @@ globals
     
     multi dofile(string file_name)
         [[
-            gchar * path = Util::rebase_path(TPContext::get_from_lua(L)->get(APP_PATH),file_name);
-            Util::GFreeLater free_path(path);
+            String path=TPContext::get_from_lua(L)->normalize_app_path(file_name);
             
             int n = lua_gettop(L);
-            if (luaL_loadfile(L,path) != 0)
+            if (luaL_loadfile(L,path.c_str()) != 0)
                 lua_error(L);
             lua_call(L,0,LUA_MULTRET);
             return lua_gettop(L) - n;            
@@ -48,10 +47,9 @@ globals
         
     multi loadfile(string file_name)
         [[
-            gchar * path = Util::rebase_path(TPContext::get_from_lua(L)->get(APP_PATH),file_name);
-            Util::GFreeLater free_path(path);
-            
-            if (luaL_loadfile(L,path) == 0)
+            String path=TPContext::get_from_lua(L)->normalize_app_path(file_name);
+                        
+            if (luaL_loadfile(L,path.c_str()) == 0)
               return 1;
             else
             {
