@@ -108,25 +108,21 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 //-----------------------------------------------------------------------------
 
 int TPContext::run()
-{    
+{
     // So that run cannot be called while we are running
     g_assert(!running());
     
+    // Set the external log handler, if any
     if (external_log_handler)
 	g_log_set_default_handler(log_handler,this);
 		
+    // Validate our configuration
+    validate_configuration();
+    
     // Get the base path for the app
-    const char * app_path = get( APP_PATH );
+    const char * app_path = get(TP_APP_PATH);
     
-    if (!app_path)
-    {
-	gchar * c = g_get_current_dir();
-	set( APP_PATH , c );
-	g_free(c);
-	
-	app_path = get(APP_PATH);
-    }
-    
+    // Load metadata    
     if (!load_app_metadata(app_path))
 	return 1;
     
@@ -151,9 +147,11 @@ int TPContext::run()
     
     // Run the script
     gchar * main_path=g_build_filename(app_path,"main.lua",NULL);
-    Util::GFreeLater free_main_path(main_path);
-    
+        
     int result = luaL_dofile(L,main_path);
+
+    g_free(main_path);
+    main_path=NULL;
 
     if (result)
     {
@@ -165,7 +163,7 @@ int TPContext::run()
 
 	std::auto_ptr<Console> console;
 
-	if (get_bool(CONSOLE_ENABLED,true))
+	if (get_bool(TP_CONSOLE_ENABLED,true))
 	{
 	    console.reset(new Console(L));
 	    console->add_command_handler(console_command_handler,this);
@@ -369,6 +367,8 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     if (is_uri)
 	*is_uri=false;
 	
+    const char * app_path=get(TP_APP_PATH);
+	
     gchar * result=NULL;
     
     // First, see if there is a scheme
@@ -388,7 +388,7 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     {
 	// There is no scheme, so this is a simple path
 	
-	result=Util::rebase_path(get(APP_PATH),path_or_uri);
+	result=Util::rebase_path(app_path,path_or_uri);
     }
     else
     {
@@ -402,7 +402,7 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	
 	if (strlen(scheme)==1)
 	{
-	    result=Util::rebase_path(get(APP_PATH),path_or_uri);
+	    result=Util::rebase_path(app_path,path_or_uri);
 	}
 	else
 	{
@@ -421,19 +421,17 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	    else if (!strcmp(scheme,"file"))
 	    {
 		if (g_strstr_len(uri,2,"//")==uri)
-		    result = Util::rebase_path(get(APP_PATH),uri+2);
+		    result = Util::rebase_path(app_path,uri+2);
 		else
-		    result = Util::rebase_path(get(APP_PATH),uri);
+		    result = Util::rebase_path(app_path,uri);
 	    }
 	    	    
 	    // Localized file
 	    
 	    else if (!strcmp(scheme,"localized"))
 	    {
-		const char * app_path=get(APP_PATH);
-		
-		const char * language=get(SYSTEM_LANGUAGE,"en");
-		const char * country=get(SYSTEM_COUNTRY,"US");
+		const char * language=get(TP_SYSTEM_LANGUAGE,"en");
+		const char * country=get(TP_SYSTEM_COUNTRY,"US");
 
 		gchar * try_path=NULL;
 		
@@ -488,6 +486,60 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     Util::GFreeLater free_result(result);
     
     return String(result);
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::validate_configuration()
+{
+    // TP_APP_PATH
+    
+    const char * app_path=get(TP_APP_PATH);
+    
+    if (!app_path)
+    {
+	gchar * c=g_get_current_dir();
+	set(TP_APP_PATH,c);
+	g_warning("DEFAULT:%s=%s",TP_APP_PATH,c);
+	g_free(c);
+    }
+    
+    // TP_SYSTEM_LANGUAGE
+    
+    const char * language=get(TP_SYSTEM_LANGUAGE);
+    
+    if (!language)
+    {
+	set(TP_SYSTEM_LANGUAGE,"en");
+	g_warning("DEFAULT:%s=en",TP_SYSTEM_LANGUAGE);
+    }
+    else if (strlen(language)!=2)
+    {
+	g_error("Language must be a 2 character, lower case, ISO-639-1 code : '%s' is too long",language);
+    }
+    else if (!g_ascii_islower(language[0])||!g_ascii_islower(language[1]))
+    {
+	g_error("Language must be a 2 character, lower case, ISO-639-1 code : '%s' is invalid",language);
+    }
+    
+    // SYSTEM COUNTRY
+    
+    const char * country=get(TP_SYSTEM_COUNTRY);
+    
+    if (!country)
+    {
+	set(TP_SYSTEM_COUNTRY,"US");
+	g_warning("DEFAULT:%s=US",TP_SYSTEM_COUNTRY);
+    }
+    else if (strlen(country)!=2)
+    {
+	g_error("Country must be a 2 character, upper case, ISO-3166-1-alpha-2 code : '%s' is too long",country);
+    }
+    else if (!g_ascii_isupper(country[0])||!g_ascii_isupper(country[1]))
+    {
+	g_error("Country must be a 2 character, upper case, ISO-3166-1-alpha-2 code : '%s' is invalid",country);
+    }
+    
 }
 
 //-----------------------------------------------------------------------------

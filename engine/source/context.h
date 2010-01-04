@@ -19,9 +19,8 @@ typedef std::string String;
 typedef std::map<String,String> StringMap;
 
 //-----------------------------------------------------------------------------
-// Configuration variable names
+// Internal configuration keys
 
-#define APP_PATH                "app.path"
 #define APP_ID                  "app.id"
 #define APP_NAME                "app.name"
 #define APP_DESCRIPTION         "app.description"
@@ -30,11 +29,6 @@ typedef std::map<String,String> StringMap;
 #define APP_RELEASE             "app.release"
 #define APP_VERSION             "app.version"
 
-#define SYSTEM_LANGUAGE         "system.language"   // ISO-639-2 http://www.loc.gov/standards/iso639-2/php/code_list.php
-#define SYSTEM_COUNTRY          "system.country"    // ISO-3166-1-alpha-2 http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm
-
-
-#define CONSOLE_ENABLED         "console.enabled"
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
 #define APP_TABLE_NAME          "app"
@@ -82,6 +76,8 @@ protected:
     static int console_command_handler(const char * command,const char * parameters,void * self);
     
     static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
+    
+    void validate_configuration();
     
 private:
     

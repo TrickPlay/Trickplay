@@ -5,7 +5,7 @@
 extern "C" {
 #endif 
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // One-time initialization
 // NOTE: You may pass NULL for argc and argv
 
@@ -14,26 +14,48 @@ void            tp_init(
                     int * argc,
                     char *** argv);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Opaque type for a context
 
 typedef         struct TPContext
                     
                     TPContext;
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Create a new context
                 
 TPContext *     tp_context_new();
 
-//.............................................................................
-// Free a context
+//-----------------------------------------------------------------------------
+// Context configuration keys to be used with tp_context_set and tp_context_get
 
-void            tp_context_free(
-                    
-                    TPContext * context);
+    // Path to an application
+    // Defaults to the current working directory
 
-//.............................................................................
+    #define TP_APP_PATH             "app.path"
+
+    // System language
+    // This must be a two character, lower case ISO-639-1 code
+    // See http://www.loc.gov/standards/iso639-2/php/code_list.php
+    // Defaults to "en"
+    
+    #define TP_SYSTEM_LANGUAGE      "system.language"
+    
+    // System country
+    // This must be a two character, upper case ISO-3166-1-alpha-2 code
+    // See http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm
+    // Defaults to "US"
+    
+    #define TP_SYSTEM_COUNTRY       "system.country"
+    
+    // Console enabled
+    // Set to "1" if you want to enable the input console, or "0" otherwise
+    // Defaults to "1"
+    
+    #define TP_CONSOLE_ENABLED      "console.enabled"
+
+
+//-----------------------------------------------------------------------------
 // Set a context configuration value
                 
 void            tp_context_set(
@@ -42,7 +64,7 @@ void            tp_context_set(
                     const char * key,
                     const char * value);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Get a context configuration value.
 // The result should be copied if you wish to keep it
 
@@ -51,7 +73,7 @@ const char *    tp_context_get(
                     TPContext * context,
                     const char * key);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Set a command handler to respond to commands typed at the console. The
 // handler should return non-zero if it handled the command.
 //
@@ -71,7 +93,7 @@ void            tp_context_set_console_command_handler(
                     TPConsoleCommandHandler handler,
                     void * data);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Set a handler for log messages.
 
 typedef         void (*TPLogHandler)(
@@ -87,14 +109,14 @@ void            tp_context_set_log_handler(
                     TPLogHandler handler,
                     void * data);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Run the context - only returns when it is finished
                 
 int             tp_context_run(
     
                     TPContext * context);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
 // Terminate the context from another thread
 // Run will return after this is called
                 
@@ -102,7 +124,14 @@ void            tp_context_quit(
     
                     TPContext * context);
 
-//.............................................................................
+//-----------------------------------------------------------------------------
+// Free a context
+
+void            tp_context_free(
+                    
+                    TPContext * context);
+
+//-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }
