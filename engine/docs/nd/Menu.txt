@@ -46,14 +46,26 @@ Format: 1.4
 # --------------------------------------------------------------------------
 
 
-File: app  (app.lb)
-File: system  (system.lb)
+Group: Globals  {
+
+   File: app  (app.lb)
+   File: system  (system.lb)
+   }  # Group: Globals
+
+Group: Classes  {
+
+   File: URLResponse  (url_request.lb)
+   }  # Group: Classes
 
 Group: Index  {
 
    Index: Everything
+   Class Index: Classes
    Function Index: Functions
    Global Index: Globals
    Property Index: Properties
+   Event Index: Events
+   Constructor Index: Constructors
+   Interface Index: Interfaces
    }  # Group: Index
 

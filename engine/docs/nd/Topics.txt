@@ -90,3 +90,12 @@ Topic Type: Global
 
    Keywords:
       global
+
+
+Topic Type: Constructor
+
+   Plural: Constructors
+   Break Lists: Yes
+
+   Keywords:
+      constructor, constructors

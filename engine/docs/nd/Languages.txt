@@ -118,6 +118,8 @@ Language: lb
    Extension: *.lb
    Line Comment: #
    Block Comment: [[ ]]
-   Prototype Ender: \n
+   Prototype Enders: \n ;
    Function Prototype Ender: \n
    Property Prototype Ender: \n
+   Constructor Prototype Enders: ; \n
+   Event Prototype Enders: ; \n

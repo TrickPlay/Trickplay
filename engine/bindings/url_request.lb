@@ -5,6 +5,11 @@ module url_request;
 #include "network.h"
 ]]
 
+# Interface: URLResponse
+# URLResponse contains the results of a <URLRequest>.
+# URLResponse objects cannot be created, instead they are either returned by
+# <URLRequest.perform> or passed as the second parameter in <URLRequest.on_complete>.
+
 interface URLResponse [[Network::Response*]]
 {
     URLResponse()
@@ -17,24 +22,53 @@ interface URLResponse [[Network::Response*]]
             delete self;
         ]];
         
+    # Property: code
+    # This can either be an HTTP status code (such as 200) or an error code if
+    # the request failed.
+    
     readonly int code
         [[code=self->code;]];
-        
+    
+    # Property: status
+    # This can either be an HTTP status message (such as "OK") or an error message
+    # if the request failed.
+    
     readonly string status
         [[status=self->status.c_str();]];
-        
+    
+    # Property: failed
+    # This property is set to true if the request failed. Note that an HTTP 404
+    # or other HTTP status code is not considered a failure - since the request
+    # succeeded (it came back).
+    
     readonly bool failed
         [[failed=self->failed;]];
         
+    # Property: body
+    # This is the body of the response; it is a string that may contain embedded
+    # NULLs.
+    
     readonly lstring body
         [[
 	    body = (const char*) self->body->data;
 	    body_len = self->body->len;
         ]];
-        
+    
+    # Property: length
+    # The length of the body in bytes, so you don't have to measure the body.
+    
     readonly int length
         [[length=self->body->len;]];
-        
+    
+    # Property: headers
+    # The response headers. This is a table of tables, each of which has two
+    # elements: the header name and its value, for example:
+    # > { { "Content-Length" , 12 } , { "Set-Cookie" , "blahblah" } }
+    # If you plan on working with the headers, it is best to assign them to a local
+    # variable first, like this:
+    # > local headers = response.headers
+    # > print( #headers ) 
+    
     readonly table headers
         [[
             int i=1;
@@ -65,8 +99,25 @@ struct RequestInfo
 void URLRequest_response_callback(const Network::Response&response,gpointer info);
 ]]
 
+# Class: URLRequest
+
 class URLRequest [[Network::Request*]]
 {
+    # Constructor: URLRequest
+    # Lets you create a new URLRequest object. You can do this in several ways.
+    # The most common is to specify a URL as the single parameter, like this:
+    # > request = URLRequest( "http://www.trickplay.com" )
+    #
+    # You can also omit the URL parameter and create an empty URLRequest object
+    # and set its properties one by one, like this:
+    #
+    # > request = URLRequest()
+    # > request.url = "http://www.trickplay.com"
+    #
+    # Finally, you can create a URLRequest by passing a table which contains values
+    # for any of its properties, like this:
+    # > request = URLRequest{ url="http://www.trickplay.com" , method="PUT" }
+    
     URLRequest(string url=NULL)
         [[
             *self=new Network::Request();
@@ -88,38 +139,78 @@ class URLRequest [[Network::Request*]]
         [[
             delete self;
         ]];
-        
+    
+    # Property: url
+    # Lets you get and set the URL associated with this request
+    
     string url
         [[url=self->url.c_str();]]
         [[self->url=url;]];
+    
+    # Property: method
+    # Lets you specify the HTTP method for this request (GET,PUT,etc.). The
+    # default value is "GET"
     
     string method
         [[method=self->method.c_str();]]
         [[self->method=method;]];
         
+    # Property: timeout
+    # Lets you specify a timeout (in seconds) after which an unfinished request will
+    # fail. The default value is 30 seconds.
+    
     double timeout
         [[timeout=self->timeout_s;]]
         [[self->timeout_s=timeout;]];
-        
+    
+    # Property: redirect
+    # If set to true, the request will automatically follow redirects and return
+    # the headers and content for the final location. Otherwise, redirects will
+    # not be followed.
+    
     bool redirect
         [[redirect=self->redirect;]]
         [[self->redirect=redirect;]];
-        
+    
+    # Property: body
+    # Lets you set the body of the request as a string.
+    
     string body
         [[body=self->body.c_str();]]
         [[self->body=body;]];
-        
+
+    # Property: user_agent
+    # Lets you set the user agent for the request.
+    
     string user_agent
         [[user_agent=self->user_agent.c_str();]]
         [[self->user_agent=user_agent;]];
-        
+    
+    # Property: certificate
+    # If you are using HTTPS and your server requires client authentication, you
+    # can set this property to the required client certificate in PEM format.
+    
     string certificate
         [[certificate=self->client_certificate_pem.c_str();]]
         [[self->client_certificate_pem=certificate;]];
-        
+
+    # Property: private_key
+    # If you are using HTTPS and your server requires client authentication, you
+    # can set this property to the required private key in PEM format.
+    
     string private_key
         [[private_key=self->client_private_key_pem.c_str();]]
         [[self->client_private_key_pem=private_key;]];
+    
+    # Property: headers
+    # Lets you get and set the request's headers. Headers are set using a table
+    # with the header name as the key. Like this:
+    # > request.headers = { ["Content-Length"] = 12 , ["X-My-Header"] = "Hello!" }
+    #
+    # Note that you cannot modify this property in place; you can either get
+    # a table with all headers or replace all headers with a table of your own.
+    # You can use regular Lua table functions to create a complete list of headers
+    # and then hand that to the request.
     
     table headers
         [[
@@ -142,7 +233,14 @@ class URLRequest [[Network::Request*]]
             }
         ]];
     
-    table perform()
+    # Function: perform
+    # If you wish to execute the request synchronously, blocking execution of all
+    # other code, you can use this function. Once the request is finished (or fails),
+    # it will return a <URLResponse> object that will let you get the results.
+    # For example:
+    # > response = URLRequest( "http://www.trickplay.com" ):perform()
+    
+    udata perform()
         [[
 	    Network::Request request(*self);
 	    
@@ -157,8 +255,11 @@ class URLRequest [[Network::Request*]]
             new_URLResponse(L);
             lua_remove(L,-2);
         ]];
-        
-    callback on_complete;
+    
+    # Function: send
+    # To execute the request asynchronously (in the background), you call send.
+    # Once the request is finished or fails, you will receive the response in
+    # a call to the <on_complete> event handler.
     
     send()
         [[
@@ -173,6 +274,17 @@ class URLRequest [[Network::Request*]]
             Network::perform_request_async(request,URLRequest_response_callback,new RequestInfo(self,L));
         ]];
         
+    # Event: on_complete
+    # This property holds a function that is called when a request is finished
+    # or fails. The function receives as its parameters, the request as well as
+    # a <URLResponse> object.
+    # > request.on_complete = function( request , response ) print( "done!" ) end
+    # You can also do it like this:
+    # > function request.on_complete( request , response )
+    # >   print( "done!" )
+    # > end
+    
+    callback on_complete;    
 }
 
 [[
