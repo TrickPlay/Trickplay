@@ -24,6 +24,7 @@ extern void luaopen_storage(lua_State*L);
 extern void luaopen_globals(lua_State*L);
 extern void luaopen_app(lua_State*L);
 extern void luaopen_system(lua_State*L);
+extern void luaopen_settings(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -162,6 +163,7 @@ int TPContext::run()
     luaopen_globals(L);
     luaopen_app(L);
     luaopen_system(L);
+    luaopen_settings(L);
     
     // Run the script
     gchar * main_path=g_build_filename(app_path,"main.lua",NULL);

@@ -79,6 +79,7 @@ set(
     ${BINDINGS_SRC}/globals.lb
     ${BINDINGS_SRC}/app.lb
     ${BINDINGS_SRC}/system.lb
+    ${BINDINGS_SRC}/settings.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
