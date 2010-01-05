@@ -2,6 +2,9 @@
 #include "context.h"
 ]]
 
+# Global: system
+# Provides methods for interacting with the device
+
 global system [[TPContext*]]
 {
     system()
@@ -10,31 +13,71 @@ global system [[TPContext*]]
     ~system()
         [[]];
         
+    # Function: acquire_numeric_keypad
+    # Requests access to the numeric keypad. This can be used to allow the user
+    # to enter numbers directly (as opposed to using an on-screen keyboard). You
+    # should call <release_numeric_keypad> as soon as you are done using it.
+    #
+    # Returns:
+    # true - If the app can access the numeric keypad
+    # false - Otherwise
+        
     bool acquire_numeric_keypad()
         [[
             result=self->request(TP_REQUEST_ACQUIRE_NUMERIC_KEYPAD);
         ]];
+        
+    # Function: release_numeric_keypad
+    # Notifies the device that the application no longer requires the
+    # numeric keypad
         
     release_numeric_keypad()
         [[
             self->notify(TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD);    
         ]];
         
+    # Function: acquire_transport_control_keys
+    # Requests access to transport control keys such as play, pause, etc. You
+    # should call <release_transport_control_keys> when you are done using the
+    # transport control keys.
+    #
+    # Returns:
+    # true - If the app can access transport control keys
+    # false - Otherwise
+    
     bool acquire_transport_control_keys()
         [[
             result=self->request(TP_REQUEST_ACQUIRE_TRANSPORT_CONTROL_KEYS);
         ]];
         
+    # Function: release_transport_control_keys
+    # Notifies the device that the app no longer needs the transport control
+    # keys.
+    
     release_transport_control_keys()
         [[
             self->notify(TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS);    
         ]];
-        
+    
+    # Function: acquire_keyboard
+    # Requests access to a keyboard or keyboard-like input device. If the device
+    # does not have a keyboard or the app is not allowed to use it, it will
+    # return false. You can use this function to decide whether an on-screen
+    # keyboard is necessary. You should call <release_keyboard> when you are done
+    # using it.
+    #
+    # Returns:
+    # true - If the app can access the keyboard
+    # false - Otherwise
+    
     bool acquire_keyboard()
         [[
             result=self->request(TP_REQUEST_ACQUIRE_KEYBOARD);
         ]];
         
+    # Function: release_keyboard
+    # Notifies the device that the app no longer needs the keyboard.
+    
     release_keyboard()
         [[
             self->notify(TP_NOTIFICATION_RELEASE_KEYBOARD);    
