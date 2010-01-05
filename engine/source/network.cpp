@@ -306,7 +306,7 @@ namespace Network
                     
                     if(g_strv_length(parts)!=3)
                     {
-                        g_debug("BAD HEADER LINE '%s'",header.c_str());
+                        g_warning("BAD HEADER LINE '%s'",header.c_str());
                     }
                     else
                     {
