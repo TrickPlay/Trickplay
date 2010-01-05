@@ -931,12 +931,18 @@ def emit( stuff , f ):
                     bind_name
                 )
             
-            if len( bind[ "properties"  ] ) > 0 or bind[ "inherits" ] is not None:
+            if len( bind[ "properties"  ] ) > 0 or ( bind[ "inherits" ] is not None ):
                 
-                f.write(
-                    '    {"__newindex",lb_newindex},\n'
-                    '    {"__index",lb_index},\n'
-                )
+                if bind[ "inherits" ] is not None and "table" in bind[ "inherits" ] :
+                
+                    pass
+                
+                else:
+                
+                    f.write(
+                        '    {"__newindex",lb_newindex},\n'
+                        '    {"__index",lb_index},\n'
+                    )
                 
             for func in bind[ "functions" ]:
                 if func in constructors:
@@ -1028,11 +1034,13 @@ def emit( stuff , f ):
                 
                 for inh in bind[ "inherits" ]:
                     
-                    f.write(
-                        '  lb_inherit(L,"%s_METATABLE");\n'
-                        %
-                        inh.upper()
-                    )
+                    if inh != "table":
+                        
+                        f.write(
+                            '  lb_inherit(L,"%s_METATABLE");\n'
+                            %
+                            inh.upper()
+                        )
     
             # Pop the metatable
             
