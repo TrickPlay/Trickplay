@@ -137,6 +137,9 @@ int TPContext::run()
     // Validate our configuration
     validate_configuration();
     
+    //.......................................................
+    // The code below should execute each time we load an app
+    
     // Get the base path for the app
     const char * app_path = get(TP_APP_PATH);
     
@@ -198,7 +201,8 @@ int TPContext::run()
 	    console.reset(new Console(L));
 	    console->add_command_handler(console_command_handler,this);
 	}
-#endif	
+#endif
+
 	clutter_actor_show_all(clutter_stage_get_default());
 	clutter_main();
     }
@@ -211,7 +215,7 @@ int TPContext::run()
     
     L=NULL;
 
-    notify(TP_NOTIFICATION_APP_QUIT);
+    notify(TP_NOTIFICATION_APP_CLOSED);
         
     return result;
 }
@@ -221,6 +225,8 @@ int TPContext::run()
 void TPContext::quit()
 {
     g_assert(running());
+    
+    notify(TP_NOTIFICATION_APP_CLOSING);
     
     clutter_main_quit();
 }

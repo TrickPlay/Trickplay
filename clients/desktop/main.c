@@ -49,7 +49,8 @@ int main(int argc,char * argv[])
     tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_LOADING,app_notification_handler,0);
     tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_LOAD_FAILED,app_notification_handler,0);
     tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_LOADED,app_notification_handler,0);
-    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_QUIT,app_notification_handler,0);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_CLOSING,app_notification_handler,0);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_CLOSED,app_notification_handler,0);
     
     tp_context_set_request_handler(context,TP_REQUEST_ACQUIRE_KEYBOARD,keyboard_request_handler,0);
     

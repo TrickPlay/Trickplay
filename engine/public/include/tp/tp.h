@@ -143,9 +143,14 @@ void            tp_context_set_request_handler(
 #define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
 
 
+// The current application is about to be closed
+
+#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
+
+
 // The current application is finished
 
-#define TP_NOTIFICATION_APP_QUIT                        "app-quit"
+#define TP_NOTIFICATION_APP_CLOSED                      "app-closed"
 
 
 // The current profile is about to change
