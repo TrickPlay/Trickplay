@@ -44,7 +44,7 @@ public:
             g_warning("Failed to tune settings database : %s", tchdberrmsg(tchdbecode(db)));
         }
         
-        gchar * file_name=g_build_filename(TPContext::get_from_lua(L)->get(APP_DATA_PATH),"settings.tc",NULL);
+        gchar * file_name=g_build_filename(TPContext::get_from_lua(L)->get(APP_DATA_PATH),"settings.tch",NULL);
         Util::GFreeLater free_file_name(file_name);
         
 	if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
