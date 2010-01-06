@@ -82,7 +82,7 @@ public:
         {
             if (!tchdbout(db,key,key_len))
             {
-                g_warning("Failed to delete setting '%s'",key,tchdberrmsg(tchdbecode(db)));
+                g_warning("Failed to delete setting '%s' : %s",key,tchdberrmsg(tchdbecode(db)));
             }
         }
         else
@@ -102,7 +102,7 @@ public:
             
             if(!tchdbput(db,key,key_len,value,value_len))
             {
-                g_warning("Failed to store setting (%s, %s) : %s",key,value,tchdberrmsg(tchdbecode(db)));
+                g_warning("Failed to store setting '%s' = '%s' : %s",key,value,tchdberrmsg(tchdbecode(db)));
             }
         }
     }
@@ -163,10 +163,5 @@ global settings [[Settings*]] table
     __newindex()
         [[
             self->set();
-        ]];
-        
-    int __len()
-        [[
-            result = 0;
-        ]];
+        ]];        
 }
