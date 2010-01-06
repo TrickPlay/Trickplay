@@ -59,10 +59,10 @@ public:
     int run();    
     void quit();
     
-    void set_command_handler(TPConsoleCommandHandler handler,void * data);
+    void add_console_command_handler(const char * command,TPConsoleCommandHandler handler,void * data);
     void set_log_handler(TPLogHandler handler,void * data);
-    void set_notification_handler(TPNotificationHandler handler,void * data);
-    void set_request_handler(TPRequestHandler handler,void *data);
+    void add_notification_handler(const char * subject,TPNotificationHandler handler,void * data);
+    void set_request_handler(const char * subject,TPRequestHandler handler,void *data);
     
     static TPContext * get_from_lua(lua_State * L);
     
@@ -96,17 +96,24 @@ private:
     StringMap               config;
     lua_State *             L;
     
-    TPConsoleCommandHandler external_console_handler;
-    void *                  external_console_handler_data;
-    
     TPLogHandler            external_log_handler;
     void *                  external_log_handler_data;
+
+    typedef std::pair<TPConsoleCommandHandler,void*>            ConsoleCommandHandlerClosure;
+    typedef std::multimap<String,ConsoleCommandHandlerClosure>  ConsoleCommandHandlerMultiMap;
     
-    TPNotificationHandler   external_notification_handler;
-    void *                  external_notification_handler_data;
+    ConsoleCommandHandlerMultiMap                               console_command_handlers;
     
-    TPRequestHandler        external_request_handler;
-    void *                  external_request_handler_data;
+    typedef std::pair<TPNotificationHandler,void*>              NotificationHandlerClosure;
+    typedef std::multimap<String,NotificationHandlerClosure>    NotificationHandlerMultiMap;
+    
+    NotificationHandlerMultiMap                                 notification_handlers;
+    
+    typedef std::pair<TPRequestHandler,void*>                   RequestHandlerClosure;
+    typedef std::map<String,RequestHandlerClosure>              RequestHandlerMap;
+    
+    RequestHandlerMap                                           request_handlers;
+        
 };
 
 

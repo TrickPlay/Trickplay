@@ -85,8 +85,7 @@ const char *    tp_context_get(
                     const char * key);
 
 //-----------------------------------------------------------------------------
-// Request subjects received by a request handler.
-// NOTE: Request subjects are not limited to the ones defined below. 
+// Request subjects 
 
 // The app wishes to use the numeric keypad to allow the user to input
 // numbers directly. Return non-zero if the request can be satisfied.
@@ -106,7 +105,10 @@ const char *    tp_context_get(
 #define TP_REQUEST_ACQUIRE_KEYBOARD                     "acquire-keyboard"
     
 //-----------------------------------------------------------------------------
-// Set a request handler to respond to TrickPlay requests
+// Set a request handler to respond to TrickPlay requests for a given subject.
+// There can only be one request handler for each subject; if you set the same
+// one twice, the previous one will be removed.
+//
 // Request handlers should return 0 if the request is denied, or non-zero
 // otherwise.
 
@@ -118,12 +120,43 @@ typedef         int (*TPRequestHandler)(
 void            tp_context_set_request_handler(
                     
                     TPContext * context,
+                    const char * subject,
                     TPRequestHandler handler,
                     void * data);
 
 //-----------------------------------------------------------------------------
-// Notification subjects received by a notification handler.
-// NOTE: Notification subjects are not limited to the ones defined below.
+// Notification subjects 
+
+
+// An application is about to be loaded
+
+#define TP_NOTIFICATION_APP_LOADING                     "app-loading"
+
+
+// An application failed to load
+
+#define TP_NOTIFICATION_APP_LOAD_FAILED                 "app-load-failed"
+
+
+// An application finished loading
+
+#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
+
+
+// The current application is finished
+
+#define TP_NOTIFICATION_APP_QUIT                        "app-quit"
+
+
+// The current profile is about to change
+
+#define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
+
+
+// The current profile changed
+
+#define TP_NOTIFICATION_PROFILE_CHANGED                 "profile-changed"
+
 
 // The app no longer needs to use the numeric keypad
 
@@ -140,36 +173,38 @@ void            tp_context_set_request_handler(
 #define TP_NOTIFICATION_RELEASE_KEYBOARD                "release-keyboard"
     
 //-----------------------------------------------------------------------------
-// Set a notification handler to receive TrickPlay notifications
+// Add a notification handler to receive TrickPlay notifications for a given
+// subject.
 
 typedef         void (*TPNotificationHandler)(
-    
+                    
                     const char * subject,
                     void * data);
 
-void            tp_context_set_notification_handler(
+void            tp_context_add_notification_handler(
     
                     TPContext * context,
+                    const char * subject,
                     TPNotificationHandler handler,
                     void * data);
 
 //-----------------------------------------------------------------------------
-// Set a command handler to respond to commands typed at the console. The
-// handler should return non-zero if it handled the command.
+// Add a command handler to respond to a specific command typed at the console. 
 //
 // NOTE: parameters will be NULL if the command has no parameters
 // NOTE: the console is disabled in production builds, so this call has no
 //       effect in that case
 
-typedef         int (*TPConsoleCommandHandler)(
+typedef         void (*TPConsoleCommandHandler)(
                     
                     const char * command,
                     const char * parameters,
                     void * data);
 
-void            tp_context_set_console_command_handler(
+void            tp_context_add_console_command_handler(
     
                     TPContext * context,
+                    const char * command,
                     TPConsoleCommandHandler handler,
                     void * data);
 

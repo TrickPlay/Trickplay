@@ -5,35 +5,32 @@
 #include "tp/tp.h"
 
 //-----------------------------------------------------------------------------
-// Example of a console command handler
+// Example of a console command handler. It will be invoked when you type /test
+// at the console.
 
-int console_command_handler(const char * command,const char * parameters,void * data)
+void test_console_command_handler(const char * command,const char * parameters,void * data)
 {
-    if (!strcmp(command,"test"))
-    {
-        printf("this is the test command\n");
-        return 1;
-    }
-    return 0;    
+    printf("This is the test command\n");
 }
 
 //-----------------------------------------------------------------------------
-// Example of a request handler
+// Example notification handler
 
-int request_handler(const char * subject,void * data)
+void app_notification_handler(const char * subject,void * data)
 {
-    printf("got request for '%s'\n",subject);
+    printf("Got app notification '%s'\n",subject);
+}
+
+//-----------------------------------------------------------------------------
+// Example request handler
+
+int keyboard_request_handler(const char * subject,void * data)
+{
+    printf("Got request '%s'\n",subject);
+    
+    // Grant the request
     return 1;
 }
-
-//-----------------------------------------------------------------------------
-// Notification handler
-
-void notification_handler(const char * subject,void * data)
-{
-    printf("got notification for '%s'\n",subject);
-}
-
 //-----------------------------------------------------------------------------
 
 int main(int argc,char * argv[])
@@ -47,11 +44,14 @@ int main(int argc,char * argv[])
     
     // This is completely optional
     
-    tp_context_set_console_command_handler(context,console_command_handler,0);
+    tp_context_add_console_command_handler(context,"test",test_console_command_handler,0);
     
-    tp_context_set_request_handler(context,request_handler,0);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_LOADING,app_notification_handler,0);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_LOAD_FAILED,app_notification_handler,0);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_LOADED,app_notification_handler,0);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_APP_QUIT,app_notification_handler,0);
     
-    tp_context_set_notification_handler(context,notification_handler,0);
+    tp_context_set_request_handler(context,TP_REQUEST_ACQUIRE_KEYBOARD,keyboard_request_handler,0);
     
     int result = tp_context_run(context);
     

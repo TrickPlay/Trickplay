@@ -33,14 +33,8 @@ extern void luaopen_settings(lua_State*L);
 TPContext::TPContext()
 :
     L(NULL),
-    external_console_handler(NULL),
-    external_console_handler_data(NULL),
     external_log_handler(NULL),
-    external_log_handler_data(NULL),
-    external_notification_handler(NULL),
-    external_notification_handler_data(NULL),
-    external_request_handler(NULL),
-    external_request_handler_data(NULL)    
+    external_log_handler_data(NULL)
 {
 }
     
@@ -120,7 +114,13 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 	return TRUE;
     }
     
-    return FALSE;
+    std::pair<ConsoleCommandHandlerMultiMap::const_iterator,ConsoleCommandHandlerMultiMap::const_iterator>
+	range=context->console_command_handlers.equal_range(String(command));
+	
+    for (ConsoleCommandHandlerMultiMap::const_iterator it=range.first;it!=range.second;++it)
+	it->second.first(command,parameters,it->second.second);
+    
+    return range.first != range.second;
 }
 
 //-----------------------------------------------------------------------------
@@ -169,6 +169,8 @@ int TPContext::run()
     luaopen_system(L);
     luaopen_settings(L);
     
+    notify(TP_NOTIFICATION_APP_LOADING);
+    
     // Run the script
     gchar * main_path=g_build_filename(app_path,"main.lua",NULL);
         
@@ -179,10 +181,14 @@ int TPContext::run()
 
     if (result)
     {
+	notify(TP_NOTIFICATION_APP_LOAD_FAILED);
+	
         g_error("%s",lua_tostring(L,-1));
     }
     else
     {
+	notify(TP_NOTIFICATION_APP_LOADED);
+	
 #ifndef TP_PRODUCTION
 
 	std::auto_ptr<Console> console;
@@ -191,9 +197,6 @@ int TPContext::run()
 	{
 	    console.reset(new Console(L));
 	    console->add_command_handler(console_command_handler,this);
-	    
-	    if (external_console_handler)
-		console->add_command_handler(external_console_handler,external_console_handler_data);
 	}
 #endif	
 	clutter_actor_show_all(clutter_stage_get_default());
@@ -207,7 +210,9 @@ int TPContext::run()
     lua_close(L);
     
     L=NULL;
-    
+
+    notify(TP_NOTIFICATION_APP_QUIT);
+        
     return result;
 }
 
@@ -384,12 +389,9 @@ bool TPContext::prepare_app()
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_command_handler(TPConsoleCommandHandler handler,void * data)
+void TPContext::add_console_command_handler(const char * command,TPConsoleCommandHandler handler,void * data)
 {
-    g_assert(!running());
-    
-    external_console_handler = handler;    
-    external_console_handler_data = data;
+    console_command_handlers.insert(std::make_pair(String(command),ConsoleCommandHandlerClosure(handler,data)));
 }
 
 //-----------------------------------------------------------------------------
@@ -413,39 +415,36 @@ void TPContext::set_log_handler(TPLogHandler handler,void * data)
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_notification_handler(TPNotificationHandler handler,void * data)
+void TPContext::add_notification_handler(const char * subject,TPNotificationHandler handler,void * data)
 {
-    g_assert(!running());
-    
-    external_notification_handler = handler;
-    external_notification_handler_data = data;
+    notification_handlers.insert(std::make_pair(String(subject),NotificationHandlerClosure(handler,data)));
 }
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_request_handler(TPRequestHandler handler,void * data)
+void TPContext::set_request_handler(const char * subject,TPRequestHandler handler,void * data)
 {
-    g_assert(!running());
-    
-    external_request_handler = handler;
-    external_request_handler_data = data;
+    request_handlers.insert(std::make_pair(String(subject),RequestHandlerClosure(handler,data)));
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::notify(const char * subject)
 {
-    if (external_notification_handler)
-	external_notification_handler(subject,external_notification_handler_data);
+    std::pair<NotificationHandlerMultiMap::const_iterator,NotificationHandlerMultiMap::const_iterator>
+	range=notification_handlers.equal_range(String(subject));
+	
+    for (NotificationHandlerMultiMap::const_iterator it=range.first;it!=range.second;++it)
+	it->second.first(subject,it->second.second);
 }
     
 //-----------------------------------------------------------------------------
 
 int TPContext::request(const char * subject)
 {
-    if (!external_request_handler)
-	return 1;
-    return external_request_handler(subject,external_request_handler_data);
+    RequestHandlerMap::const_iterator it=request_handlers.find(String(subject));
+    
+    return it==request_handlers.end() ? 1 : it->second.first(subject,it->second.second);
 }
 
 //-----------------------------------------------------------------------------
@@ -753,24 +752,23 @@ const char * tp_context_get(TPContext * context,const char * key)
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_notification_handler(TPContext * context,TPNotificationHandler handler,void * data)
+void tp_context_add_notification_handler(TPContext * context,const char * subject,TPNotificationHandler handler,void * data)
 {
-    context->set_notification_handler(handler,data);
+    context->add_notification_handler(subject,handler,data);
 }
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_request_handler(TPContext * context,TPRequestHandler handler,void * data)
+void tp_context_set_request_handler(TPContext * context,const char * subject,TPRequestHandler handler,void * data)
 {
-    context->set_request_handler(handler,data);
-    
+    context->set_request_handler(subject,handler,data);
 }
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_console_command_handler(TPContext * context,TPConsoleCommandHandler handler,void * data)
+void tp_context_add_console_command_handler(TPContext * context,const char * command,TPConsoleCommandHandler handler,void * data)
 {
-    context->set_command_handler(handler,data);    
+    context->add_console_command_handler(command,handler,data);    
 }
 
 //-----------------------------------------------------------------------------
