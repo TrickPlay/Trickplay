@@ -1,5 +1,8 @@
 [[
 #include "context.h"
+
+void app_loaded_handler(const char *,void * l);
+void app_closing_handler(const char *,void * l);
 ]]
 
 # Global: app
@@ -9,7 +12,11 @@
 global app [[TPContext*]]
 {
     app()
-        [[*self=TPContext::get_from_lua(L);]];
+        [[
+            *self=TPContext::get_from_lua(L);
+            (*self)->add_notification_handler(TP_NOTIFICATION_APP_LOADED,app_loaded_handler,L);
+            (*self)->add_notification_handler(TP_NOTIFICATION_APP_CLOSING,app_closing_handler,L);
+        ]];
 
     ~app()
         [[]];
@@ -56,4 +63,28 @@ global app [[TPContext*]]
     
     readonly string version
         [[version=self->get(APP_VERSION);]];
+        
+    # Event: on_loaded
+    # This callback is invoked after the app has finished loading.
+    
+    callback on_loaded;
+    
+    # Event: on_closing
+    # This callback is invoked just before the app is about to close.
+    
+    callback on_closing;
 }
+
+[[
+void app_loaded_handler(const char *,void * l)
+{
+    lua_State * L=(lua_State*)l;
+    invoke_app_on_loaded(L,TPContext::get_from_lua(L),0,0);
+}
+
+void app_closing_handler(const char *,void * l)
+{
+    lua_State * L=(lua_State*)l;
+    invoke_app_on_closing(L,TPContext::get_from_lua(L),0,0);
+}
+]]
