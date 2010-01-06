@@ -17,8 +17,21 @@ public:
     
     Settings(lua_State*l)
     :
-        L(l)
+        L(l),
+	db(NULL)
     {
+    }
+    
+    ~Settings()
+    {
+	close();
+    }
+    
+    void open()
+    {
+	if (db)
+	    return;
+	
         db = tchdbnew();
         
         if (!db)
@@ -40,14 +53,19 @@ public:
         }
     }
     
-    ~Settings()
+    void close()
     {
-        tchdbclose(db);
-        tchdbdel(db);
+	if (db)
+	{
+	    tchdbclose(db);
+	    tchdbdel(db);
+	}	
     }
     
     void set()
     {
+	open();
+	
         size_t key_len;
         
         const char * key=lua_tolstring(L,2,&key_len);
@@ -91,6 +109,8 @@ public:
     
     bool get()
     {
+	open();
+	
         size_t key_len;
         
         const char * key=lua_tolstring(L,2,&key_len);
