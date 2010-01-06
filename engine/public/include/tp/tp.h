@@ -51,6 +51,14 @@ TPContext *     tp_context_new();
 #define TP_SYSTEM_COUNTRY       "system.country"
 
 
+// Data path
+// This must be a path where TrickPlay can create files and directories. TrickPlay
+// will create a subdirectory called "trickplay" and keep all of its data there.
+// Defaults to a system temporary directory 
+
+#define TP_DATA_PATH            "data.path"
+
+
 // Console enabled
 // Set to "1" if you want to enable the input console, or "0" otherwise
 // Defaults to "1"

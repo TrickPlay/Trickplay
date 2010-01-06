@@ -144,6 +144,10 @@ int TPContext::run()
     if (!load_app_metadata(app_path))
 	return 1;
     
+    // Prepare for the app
+    if (!prepare_app())
+	return 2;
+    
     // Start up a lua state
     L = lua_open();
     
@@ -348,6 +352,34 @@ bool TPContext::load_app_metadata(const char * app_path)
 	g_warning("Failed to load app metadata from '%s' : %s" , app_path , e.c_str() );
 	return false;	
     }
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::prepare_app()
+{
+    // Get its data directory ready
+    
+    gchar * id_hash=g_compute_checksum_for_string(G_CHECKSUM_SHA1,get(APP_ID),-1);
+    
+    Util::GFreeLater free_id_hash(id_hash);    
+    
+    gchar * app_data_path=g_build_filename(get(TP_DATA_PATH),"apps",id_hash,NULL);
+    
+    Util::GFreeLater free_app_data_path(app_data_path);
+    
+    if (!g_file_test(app_data_path,G_FILE_TEST_EXISTS))
+    {
+	if (g_mkdir_with_parents(app_data_path,0700)!=0)
+	{
+	    g_warning("Failed to create app data path '%s'",app_data_path);
+	    return false;
+	}
+    }
+    
+    set(APP_DATA_PATH,app_data_path);
+    
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -596,6 +628,25 @@ void TPContext::validate_configuration()
 	g_error("Country must be a 2 character, upper case, ISO-3166-1-alpha-2 code : '%s' is invalid",country);
     }
     
+    // DATA PATH
+    
+    const char * data_path=get(TP_DATA_PATH);
+    
+    if (!data_path)
+    {
+	data_path=g_get_tmp_dir();
+	g_assert(data_path);
+	g_warning("DEFAULT:%s=%s",TP_DATA_PATH,data_path);
+    }
+    
+    gchar * full_data_path=g_build_filename(data_path,"trickplay",NULL);
+    
+    if (g_mkdir_with_parents(full_data_path,0700)!=0)
+	g_error("Data path '%s' does not exist and could not be created",full_data_path);
+    
+    set(TP_DATA_PATH,full_data_path);
+    
+    g_free(full_data_path);
 }
 
 //-----------------------------------------------------------------------------

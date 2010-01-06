@@ -28,6 +28,7 @@ typedef std::map<String,String> StringMap;
 #define APP_COPYRIGHT           "app.copyright"
 #define APP_RELEASE             "app.release"
 #define APP_VERSION             "app.version"
+#define APP_DATA_PATH           "app.data.path"
 
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
@@ -79,6 +80,8 @@ public:
 protected:
     
     bool load_app_metadata(const char * app_path);
+    
+    bool prepare_app();
     
     static int console_command_handler(const char * command,const char * parameters,void * self);
     
