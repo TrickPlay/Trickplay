@@ -827,7 +827,7 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
     
     if (k->keyval==CLUTTER_Escape)
     {
-	clutter_main_quit();
+	TPContext::get_from_lua(L)->quit();
 	return TRUE;
     }
     return FALSE;    
