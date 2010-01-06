@@ -1,48 +1,152 @@
 [[
-#include "context.h"    
 
-struct Settings
+#include "glib.h"
+
+extern "C"
 {
-    int table_ref;    
+    #include "tcutil.h"
+    #include "tchdb.h"
+}
+
+#include "context.h"
+#include "util.h"
+
+class Settings
+{
+public:
+    
+    Settings(lua_State*l)
+    :
+        L(l)
+    {
+        db = tchdbnew();
+        
+        if (!db)
+        {
+            g_error("Failed to create settings database");
+        }
+        
+        if(!tchdbtune(db,256,-1,-1,0))
+        {
+            g_warning("Failed to tune settings database : %s", tchdberrmsg(tchdbecode(db)));
+        }
+        
+        gchar * file_name=g_build_filename(TPContext::get_from_lua(L)->get(APP_DATA_PATH),"settings.tc",NULL);
+        Util::GFreeLater free_file_name(file_name);
+        
+	if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
+        {
+            g_error("Failed to open settings file : %s", tchdberrmsg(tchdbecode(db)));
+        }
+    }
+    
+    ~Settings()
+    {
+        tchdbclose(db);
+        tchdbdel(db);
+    }
+    
+    void set()
+    {
+        size_t key_len;
+        
+        const char * key=lua_tolstring(L,2,&key_len);
+        
+        if (!key)
+        {
+            g_warning("Trying to add settings with non-string key");
+            return;
+        }
+        
+        // If they set it to nil, we delete the record
+        
+        if (lua_isnil(L,3))
+        {
+            if (!tchdbout(db,key,key_len))
+            {
+                g_warning("Failed to delete setting '%s'",key,tchdberrmsg(tchdbecode(db)));
+            }
+        }
+        else
+        {
+            size_t value_len;
+    
+            const char * value=lua_tolstring(L,3,&value_len);
+            
+            // If the value cannot be converted to a string, there
+            // is not much we can do. (we could try to serialize it)
+            
+            if (!value)
+            {
+                g_warning("Trying to add settings with non-string value");
+                return;
+            }
+            
+            if(!tchdbput(db,key,key_len,value,value_len))
+            {
+                g_warning("Failed to store setting (%s, %s) : %s",key,value,tchdberrmsg(tchdbecode(db)));
+            }
+        }
+    }
+    
+    bool get()
+    {
+        size_t key_len;
+        
+        const char * key=lua_tolstring(L,2,&key_len);
+        
+        if (!key)
+        {
+            g_warning("Trying to get settings with non-string key");
+            return false;
+        }
+        
+        int value_len;
+        void * value =tchdbget(db,key,key_len,&value_len);
+        
+        if (!value)
+            return false;
+        
+        lua_pushlstring(L,(const char *)value,value_len);
+        free(value);
+        
+        return true;
+    }
+    
+private:
+    
+    lua_State * L;
+    TCHDB *     db;
 };
+
 ]]
 
 global settings [[Settings*]] table
 {
     settings()
         [[
-            *self=new Settings();
-            lua_newtable(L);
-            (*self)->table_ref=luaL_ref(L,LUA_REGISTRYINDEX);
+            *self=new Settings(L);
         ]];
         
     ~settings()
         [[
-            luaL_unref(L,LUA_REGISTRYINDEX,self->table_ref);
             delete self;
         ]];
         
     multi __index()
         [[
-            lua_rawgeti(L,LUA_REGISTRYINDEX,self->table_ref);
-            lua_pushvalue(L,-2);
-            lua_rawget(L,-2);
-            lua_remove(L,-2);
+            if (!self->get())
+                lua_pushnil(L);
             return 1;
         ]];
         
     __newindex()
         [[
-            lua_rawgeti(L,LUA_REGISTRYINDEX,self->table_ref);
-            lua_insert(L,-3);
-            lua_rawset(L,-3);
-            lua_pop(L,1);
+            self->set();
         ]];
         
     int __len()
         [[
-            lua_rawgeti(L,LUA_REGISTRYINDEX,self->table_ref);
-            result=lua_objlen(L,-1);
-            lua_pop(L,1);
+            result = 0;
         ]];
 }
