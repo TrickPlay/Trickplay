@@ -221,6 +221,8 @@ int TPContext::run()
 
 void TPContext::quit()
 {
+    // TODO : this could get called in a differen thread
+    
     g_assert(running());
     
     notify(TP_NOTIFICATION_APP_CLOSING);
@@ -587,6 +589,8 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 		{
 		    // Try <app>/localized/en/<path>
 		    
+		    g_free(result);
+		    
 		    try_path=g_build_filename(app_path,"localized",language,NULL);
 		    
 		    result=Util::rebase_path(try_path,uri);
@@ -597,6 +601,8 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 		    {
 			// Try <app>/localized/<path>
 			
+			g_free(result);
+			
 			try_path=g_build_filename(app_path,"localized",NULL);
 			
 			result=Util::rebase_path(try_path,uri);
@@ -606,6 +612,8 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 			if (!g_file_test(result,G_FILE_TEST_EXISTS))
 			{
 			    // End up with <app>/<path>
+			    
+			    g_free(result);
 			    
 			    result=Util::rebase_path(app_path,uri);
 			}
