@@ -8,7 +8,6 @@
 
 #include "lb.h"
 
-typedef int (*ConsoleCommandHandler)(const char * command,const char * parameters,void * data);
 
 class Console
 {
@@ -17,11 +16,14 @@ public:
     Console(lua_State*,int port);
     ~Console();
     
-    void add_command_handler(ConsoleCommandHandler handler,void * data);
+    typedef int (*CommandHandler)(const char * command,const char * parameters,void * data);
+
+    void add_command_handler(CommandHandler handler,void * data);
     
 protected:
     
     gboolean read_data();
+    
     void process_line(gchar * line);
     
     static gboolean channel_watch(GIOChannel * source,GIOCondition condition,gpointer data);
@@ -31,8 +33,8 @@ private:
     Console() {}
     Console(const Console &) {}
     
-    typedef std::pair<ConsoleCommandHandler,void*> CommandHandlerClosure;
-    typedef std::list<CommandHandlerClosure> CommandHandlerList;
+    typedef std::pair<CommandHandler,void*>     CommandHandlerClosure;
+    typedef std::list<CommandHandlerClosure>    CommandHandlerList;
     
     lua_State *         L;
     GIOChannel *        channel;

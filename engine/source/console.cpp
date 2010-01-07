@@ -14,7 +14,7 @@ Console::Console(lua_State*l,int port)
     g_io_add_watch(channel,G_IO_IN,channel_watch,this);
     
 #if GLIB_CHECK_VERSION(2,22,0)
-
+    
     if (port)
     {
         listener=g_socket_listener_new();
@@ -23,6 +23,10 @@ Console::Console(lua_State*l,int port)
             g_socket_listener_accept_async(listener,NULL,accept_callback,this);
             g_debug("TELNET CONSOLE LISTENING ON PORT %d",port);
         }
+    }
+    else
+    {
+        listener=NULL;
     }
     
 #endif    
@@ -45,7 +49,7 @@ Console::~Console()
 #endif    
 }
 
-void Console::add_command_handler(ConsoleCommandHandler handler,void * data)
+void Console::add_command_handler(CommandHandler handler,void * data)
 {
     handlers.push_back(CommandHandlerClosure(handler,data));
 }
@@ -149,20 +153,34 @@ void Console::accept_callback(GObject * source,GAsyncResult * result,gpointer da
 
     if (connection)
     {
+        // Print the address
+        
         gchar * remote_address=g_inet_address_to_string(g_inet_socket_address_get_address(G_INET_SOCKET_ADDRESS(g_socket_connection_get_remote_address(connection,NULL))));
 
         g_debug("ACCEPTED CONSOLE CONNECTION FROM %s",remote_address);
         
         g_free(remote_address);
         
+        // Get the input stream for the connection
+        
         GInputStream * input_stream=g_io_stream_get_input_stream(G_IO_STREAM(connection));
         
+        // Allocate an input buffer and stick it to the input stream
+        
         gpointer buffer=g_malloc(256);
+        
         g_object_set_data_full(G_OBJECT(input_stream),"tp-buffer",buffer,g_free);
+        
+        // Start reading from the input stream
         
         g_input_stream_read_async(input_stream,buffer,255,G_PRIORITY_DEFAULT,NULL,data_read_callback,data);
         
+        // Add an output handler to the context, so that this connection will
+        // get output. Also, hook up a weak ref callback so we know when the
+        // connection is destroyed and we can remove its output handler.
+        
         lua_State * L =((Console*)data)->L;
+        
         TPContext::get_from_lua(L)->add_output_handler(output_handler,connection);
         
         g_object_weak_ref(G_OBJECT(connection),connection_destroyed,L);
@@ -175,15 +193,22 @@ void Console::data_read_callback(GObject * source,GAsyncResult * result,gpointer
 {
     GInputStream * input_stream=G_INPUT_STREAM(source);
     
+    // Finish the async read
+    
     gsize bytes_read=g_input_stream_read_finish(input_stream,result,NULL);
     
     if (bytes_read > 0)
     {
+        // We have some data - get the buffer from the input stream, append a
+        // NULL and process it
+        
         gchar * buffer=(gchar*)g_object_get_data(G_OBJECT(input_stream),"tp-buffer");
         
         buffer[bytes_read]=0;
         
         ((Console*)data)->process_line(buffer);
+        
+        // Read again
         
         g_input_stream_read_async(input_stream,buffer,255,G_PRIORITY_DEFAULT,NULL,data_read_callback,data);
     }
@@ -192,6 +217,9 @@ void Console::data_read_callback(GObject * source,GAsyncResult * result,gpointer
 void Console::output_handler(const gchar * line,gpointer data)
 {
     GOutputStream * output_stream=g_io_stream_get_output_stream(G_IO_STREAM(data));
+    
+    // Try to write - if we fail, we close the stream and unref the connection
+    // which will end up calling the weak ref callback
     
     if (!g_output_stream_write_all(output_stream,line,strlen(line),NULL,NULL,NULL))
     {
@@ -202,6 +230,8 @@ void Console::output_handler(const gchar * line,gpointer data)
 
 void Console::connection_destroyed(gpointer data,GObject*connection)
 {
+    // The connection has been destroyed, we remove its output handler
+    
     TPContext::get_from_lua((lua_State*)data)->remove_output_handler(Console::output_handler,connection);    
 }
 
