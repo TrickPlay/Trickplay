@@ -195,7 +195,7 @@ int TPContext::run()
 
 	if (get_bool(TP_CONSOLE_ENABLED,true))
 	{
-	    console.reset(new Console(L));
+	    console.reset(new Console(L,get_int(TP_TELNET_CONSOLE_PORT,8008)));
 	    console->add_command_handler(console_command_handler,this);
 	}
 #endif

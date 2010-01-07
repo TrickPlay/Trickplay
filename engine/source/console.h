@@ -4,6 +4,7 @@
 #include <list>
 
 #include "glib.h"
+#include "gio/gio.h"
 
 #include "lb.h"
 
@@ -13,7 +14,7 @@ class Console
 {
 public:
     
-    Console(lua_State*);
+    Console(lua_State*,int port);
     ~Console();
     
     void add_command_handler(ConsoleCommandHandler handler,void * data);
@@ -21,6 +22,7 @@ public:
 protected:
     
     gboolean read_data();
+    void process_line(gchar * line);
     
     static gboolean channel_watch(GIOChannel * source,GIOCondition condition,gpointer data);
     
@@ -34,8 +36,20 @@ private:
     
     lua_State *         L;
     GIOChannel *        channel;
-    GString *           line;
+    GString *           stdin_buffer;
     CommandHandlerList  handlers;
+
+#if GLIB_CHECK_VERSION(2,22,0)
+
+    static void accept_callback(GObject * source,GAsyncResult * result,gpointer data);
+    static void data_read_callback(GObject * source,GAsyncResult * result,gpointer data);
+    
+    static void output_handler(const gchar * line,gpointer data);
+    static void connection_destroyed(gpointer data,GObject*connection);
+    
+    GSocketListener *   listener;
+    
+#endif    
 };
 
 

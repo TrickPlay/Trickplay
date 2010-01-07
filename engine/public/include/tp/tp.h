@@ -66,6 +66,14 @@ TPContext *     tp_context_new();
 #define TP_CONSOLE_ENABLED      "console.enabled"
 
 
+// Telnet console port
+// Set to a port for the telnet console. If set to "0", the telnet console
+// will be disabled.
+// Defaults to "8008"
+
+#define TP_TELNET_CONSOLE_PORT  "console.port"
+
+
 //-----------------------------------------------------------------------------
 // Set a context configuration value
                 
