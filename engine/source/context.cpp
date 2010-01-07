@@ -36,6 +36,7 @@ TPContext::TPContext()
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
+    g_log_set_default_handler(TPContext::log_handler,this);            
 }
     
 //-----------------------------------------------------------------------------
@@ -129,11 +130,7 @@ int TPContext::run()
 {
     // So that run cannot be called while we are running
     g_assert(!running());
-    
-    // Set the external log handler, if any
-    if (external_log_handler)
-	g_log_set_default_handler(log_handler,this);
-		
+    		
     // Validate our configuration
     validate_configuration();
     
@@ -404,9 +401,45 @@ void TPContext::add_console_command_handler(const char * command,TPConsoleComman
 
 void TPContext::log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self)
 {
-    TPContext * context=(TPContext*)self;
+    gchar * line=NULL;
+	
+    // This is before a context is created, so we just print out the message
     
-    context->external_log_handler(log_level,log_domain,message,context->external_log_handler_data);
+    if (!self)
+    {
+	line=format_log_line(log_domain,log_level,message);
+	fprintf(stderr,"%s",line);
+    }
+    
+    // Otherwise, we have a context and more choices as to what we can do with
+    // the log messages
+    
+    else
+    {
+	TPContext * context=(TPContext*)self;
+	
+	if (context->external_log_handler)
+	{
+	    context->external_log_handler(log_level,log_domain,message,context->external_log_handler_data);
+	}
+	else
+	{
+	    line=format_log_line(log_domain,log_level,message);
+	    fprintf(stderr,"%s",line);
+	}
+	
+	if (context->output_handlers.size())
+	{
+	    if (!line)
+		line=format_log_line(log_domain,log_level,message);
+		
+	    for (OutputHandlerSet::const_iterator it=context->output_handlers.begin();
+		 it!=context->output_handlers.end();++it)
+		it->first(line,it->second);
+	}	
+    }
+    
+    g_free(line);
 }
 
 //-----------------------------------------------------------------------------
@@ -431,6 +464,20 @@ void TPContext::add_notification_handler(const char * subject,TPNotificationHand
 void TPContext::set_request_handler(const char * subject,TPRequestHandler handler,void * data)
 {
     request_handlers.insert(std::make_pair(String(subject),RequestHandlerClosure(handler,data)));
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::add_output_handler(OutputHandler handler,gpointer data)
+{
+    output_handlers.insert(OutputHandlerClosure(handler,data));
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::remove_output_handler(OutputHandler handler,gpointer data)
+{
+    output_handlers.erase(OutputHandlerClosure(handler,data));    
 }
 
 //-----------------------------------------------------------------------------
@@ -655,9 +702,8 @@ void TPContext::validate_configuration()
 }
 
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 
-void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar *message,gpointer user_data)
+gchar * TPContext::format_log_line(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message)
 {
     gulong ms = clutter_get_timestamp() / 1000;
     
@@ -698,9 +744,9 @@ void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar *
     else if (log_level&G_LOG_LEVEL_DEBUG)
         level = "DEBUG";
     
-    fprintf(stderr,"%p %2.2d:%2.2d:%2.2d:%3.3lu %s %s %s\n" ,
+    return g_strdup_printf("%p %2.2d:%2.2d:%2.2d:%3.3lu %s %s %s\n" ,
             g_thread_self() ,
-            hour , min , sec , ms , level , log_domain , message );
+            hour , min , sec , ms , level , log_domain , message );    
 }
 
 //-----------------------------------------------------------------------------
@@ -722,14 +768,14 @@ void tp_init(int * argc,char *** argv)
     if (co != CURLE_OK)
 	g_error("Failed to initialize cURL : %s",curl_easy_strerror(co));
     
-    g_log_set_default_handler(log_handler,NULL);        
+    g_log_set_default_handler(TPContext::log_handler,NULL);        
 }
 
 //-----------------------------------------------------------------------------
 
 TPContext * tp_context_new()
 {
-    return new TPContext;    
+    return new TPContext();    
 }
 
 //-----------------------------------------------------------------------------

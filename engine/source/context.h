@@ -8,6 +8,7 @@ extern "C"
 
 #include <map>
 #include <string>
+#include <set>
 
 #include "glib.h"
 
@@ -64,6 +65,10 @@ public:
     void add_notification_handler(const char * subject,TPNotificationHandler handler,void * data);
     void set_request_handler(const char * subject,TPRequestHandler handler,void *data);
     
+    typedef void (*OutputHandler)(const gchar * output,gpointer data);
+    void add_output_handler(OutputHandler handler,gpointer data);
+    void remove_output_handler(OutputHandler handler,gpointer data);
+    
     static TPContext * get_from_lua(lua_State * L);
     
     inline bool running() const
@@ -77,6 +82,9 @@ public:
     
     int request(const char * subject);
     
+    static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
+    
+    
 protected:
     
     bool load_app_metadata(const char * app_path);
@@ -84,8 +92,8 @@ protected:
     bool prepare_app();
     
     static int console_command_handler(const char * command,const char * parameters,void * self);
-    
-    static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
+       
+    static gchar * format_log_line(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message);
     
     void validate_configuration();
     
@@ -113,7 +121,11 @@ private:
     typedef std::map<String,RequestHandlerClosure>              RequestHandlerMap;
     
     RequestHandlerMap                                           request_handlers;
-        
+    
+    typedef std::pair<OutputHandler,void*>                      OutputHandlerClosure;
+    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
+    
+    OutputHandlerSet                                            output_handlers;        
 };
 
 
