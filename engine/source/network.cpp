@@ -1,9 +1,9 @@
-#include "network.h"
-
-#include "curl/curl.h"
-#include "glib-object.h"
 #include <cstring>
 #include <cstdlib>
+
+#include "curl/curl.h"
+
+#include "network.h"
 
 namespace Network
 {
@@ -92,30 +92,29 @@ namespace Network
     private:
         
         //.....................................................................
-        // This gets called by g_once to create the network thread instance
-        
-        static gpointer initialize(gpointer)
-        {
-            return new NetworkThread();    
-        }
-
-        //.....................................................................
         // Gets the network thread instance, creating it if it doesn't exist.
         // Or, destroys it.
         
         static NetworkThread * get(bool destroy=false)
         {
-            static GOnce once = G_ONCE_INIT;
+            static NetworkThread * thread=NULL;
+            
             if(!destroy)
             {
-                g_once(&once,initialize,NULL);
+                if (!thread)
+                {
+                    thread=new NetworkThread();
+                }
             }
-            else if(once.retval)
+            else 
             {
-                delete (NetworkThread*)once.retval;
-                once.retval=NULL;
+                if (thread)
+                {
+                    delete thread;
+                    thread=NULL;
+                }
             }
-            return (NetworkThread*)once.retval;
+            return thread;
         }
         
         //.....................................................................
