@@ -30,7 +30,6 @@ typedef std::map<String,String> StringMap;
 #define APP_RELEASE             "app.release"
 #define APP_VERSION             "app.version"
 #define APP_DATA_PATH           "app.data.path"
-
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
 #define APP_TABLE_NAME          "app"
@@ -42,6 +41,8 @@ typedef std::map<String,String> StringMap;
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 //-----------------------------------------------------------------------------
+
+class SystemDatabase;
 
 struct TPContext
 {
@@ -70,12 +71,7 @@ public:
     void remove_output_handler(OutputHandler handler,gpointer data);
     
     static TPContext * get_from_lua(lua_State * L);
-    
-    inline bool running() const
-    {
-        return L;
-    }
-    
+        
     String normalize_app_path(const gchar * path_or_uri,bool * is_uri=NULL);
     
     void notify(const char * subject);
@@ -84,25 +80,31 @@ public:
     
     static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
     
+    inline bool running() const { return is_running; }
     
 protected:
+    
+    void validate_configuration();
     
     bool load_app_metadata(const char * app_path);
     
     bool prepare_app();
     
+    int load_app();
+    
     static int console_command_handler(const char * command,const char * parameters,void * self);
        
     static gchar * format_log_line(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message);
     
-    void validate_configuration();
-    
 private:
     
     TPContext(const TPContext&);
+
+    bool                    is_running;
     
     StringMap               config;
-    lua_State *             L;
+    
+    SystemDatabase *        sysdb;
     
     TPLogHandler            external_log_handler;
     void *                  external_log_handler_data;

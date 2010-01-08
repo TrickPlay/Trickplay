@@ -12,6 +12,7 @@
 #include "lb.h"
 #include "util.h"
 #include "console.h"
+#include "sysdb.h"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -32,7 +33,8 @@ extern void luaopen_settings(lua_State*L);
 
 TPContext::TPContext()
 :
-    L(NULL),
+    is_running(false),
+    sysdb(NULL),
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
@@ -49,8 +51,6 @@ TPContext::~TPContext()
 
 void TPContext::set(const char * key,const char * value)
 {
-    g_assert(!running());
-    
     config.insert(std::make_pair(String(key),String(value)));
 }
 
@@ -129,27 +129,60 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 int TPContext::run()
 {
     // So that run cannot be called while we are running
-    g_assert(!running());
-    		
+    
+    if (is_running)
+	return TP_RUN_ALREADY_RUNNING;
+       
+    is_running=true;
+    
+    int result=TP_RUN_OK;
+
     // Validate our configuration
+    // Any problem here will just abort - these are likely programming errors.
+    
     validate_configuration();
     
-    //.......................................................
-    // The code below should execute each time we load an app
+    // Open the system database
+    
+    sysdb=SystemDatabase::open(get(TP_DATA_PATH));
+    
+    if (!sysdb)
+    {
+	result=TP_RUN_SYSTEM_DATABASE_CORRUPT;
+    }
+    else
+    {
+	result=load_app();
+	
+	delete sysdb;
+	sysdb=NULL;
+    }
+        
+    is_running = false;
+    
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+int TPContext::load_app()
+{
+    int result=TP_RUN_OK;
     
     // Get the base path for the app
     const char * app_path = get(TP_APP_PATH);
     
     // Load metadata    
     if (!load_app_metadata(app_path))
-	return 1;
+	return TP_RUN_APP_CORRUPT;
     
     // Prepare for the app
     if (!prepare_app())
-	return 2;
+	return TP_RUN_APP_PREPARE_FAILED;
     
     // Start up a lua state
-    L = lua_open();
+    lua_State * L = lua_open();
+    g_assert(L);
     
     // Put a pointer to us in Lua so bindings can get to it
     lua_pushstring(L,"tp_context");
@@ -173,17 +206,15 @@ int TPContext::run()
     
     // Run the script
     gchar * main_path=g_build_filename(app_path,"main.lua",NULL);
+    Util::GFreeLater free_main_path(main_path);
         
-    int result = luaL_dofile(L,main_path);
-
-    g_free(main_path);
-    main_path=NULL;
-
-    if (result)
+    if (luaL_dofile(L,main_path))
     {
 	notify(TP_NOTIFICATION_APP_LOAD_FAILED);
 	
-        g_error("%s",lua_tostring(L,-1));
+        g_warning("%s",lua_tostring(L,-1));
+	
+	result=TP_RUN_APP_ERROR;
     }
     else
     {
@@ -201,7 +232,10 @@ int TPContext::run()
 #endif
 
 	clutter_actor_show_all(clutter_stage_get_default());
+	
 	clutter_main();
+    
+	notify(TP_NOTIFICATION_APP_CLOSING);
     }
     
     clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
@@ -210,8 +244,6 @@ int TPContext::run()
     
     lua_close(L);
     
-    L=NULL;
-
     notify(TP_NOTIFICATION_APP_CLOSED);
         
     return result;
@@ -221,12 +253,9 @@ int TPContext::run()
 
 void TPContext::quit()
 {
-    // TODO : this could get called in a differen thread
-    
-    g_assert(running());
-    
-    notify(TP_NOTIFICATION_APP_CLOSING);
-    
+    if (!is_running)
+	return;
+       
     clutter_main_quit();
 }
    
@@ -706,7 +735,7 @@ void TPContext::validate_configuration()
     
     set(TP_DATA_PATH,full_data_path);
     
-    g_free(full_data_path);
+    g_free(full_data_path);    
 }
 
 //-----------------------------------------------------------------------------

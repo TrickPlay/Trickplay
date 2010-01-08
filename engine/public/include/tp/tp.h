@@ -239,10 +239,43 @@ void            tp_context_set_log_handler(
 
 //-----------------------------------------------------------------------------
 // Run the context - only returns when it is finished
-                
+               
 int             tp_context_run(
     
                     TPContext * context);
+
+// Error codes for tp_context_run
+
+#define TP_RUN_OK                       0
+
+// There was a serious problem with the TrickPlay system database - the only
+// way to correct this may be to do a factory reset
+
+#define TP_RUN_SYSTEM_DATABASE_CORRUPT  1
+
+
+// There was a problem loading an app, it may not have correct metadata or its
+// signature is invalid. You should not try to load this same app again.
+
+#define TP_RUN_APP_CORRUPT              2
+
+
+// There was a problem getting things ready to load the app. This is usually due
+// to serious errors creating files or databases and the problem may affect
+// all apps loaded in the future...a factory reset may be the only recourse.
+
+#define TP_RUN_APP_PREPARE_FAILED       3
+
+
+// There was a problem running the application - it may have a syntax error or
+// it crashed during the initial load.
+
+#define TP_RUN_APP_ERROR                4
+
+
+// The context is already running
+
+#define TP_RUN_ALREADY_RUNNING          5
 
 //-----------------------------------------------------------------------------
 // Terminate the context from another thread

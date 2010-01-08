@@ -120,6 +120,7 @@ add_library(
     ${ENGINE_SRC}/source/network.cpp
     ${ENGINE_SRC}/source/storage.cpp
     ${ENGINE_SRC}/source/console.cpp
+    ${ENGINE_SRC}/source/sysdb.cpp
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c
@@ -132,7 +133,7 @@ target_link_libraries(
     tpcore
     
     dl
-    
+    sqlite3
     ${LUA_LIBRARIES}
     ${CLUTTER_LIBS}
     ${CURL_LIBS}
