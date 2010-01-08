@@ -120,6 +120,7 @@ add_library(
     ${ENGINE_SRC}/source/network.cpp
     ${ENGINE_SRC}/source/storage.cpp
     ${ENGINE_SRC}/source/console.cpp
+    ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
 
     ${GENERATED_FILES}

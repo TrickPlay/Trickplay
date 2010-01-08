@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "sqlite3.h"
+#include "db.h"
 
 typedef std::string String;
 
@@ -30,23 +30,23 @@ class SystemDatabase
         
         int create_profile(const String & name,const String & pin);
         
-        void set(const char * key,int value);
-        void set(const char * key,const char * value);
-        void set(const char * key,const String & value);
+        bool set(const char * key,int value);
+        bool set(const char * key,const char * value);
+        bool set(const char * key,const String & value);
         
         String get_string(const char * key,const char * def="");
         int get_int(const char * key,int def=0);
 
     private:
         
-        static void insert_initial_data(sqlite3 * db);
+        bool insert_initial_data();
         
-        SystemDatabase(sqlite3 * d,const char * p);
-        SystemDatabase() {}
+        SystemDatabase(SQLite::DB & d,const char * p);
         SystemDatabase(const SystemDatabase &) {}
         
         String      path;
-        sqlite3 *   db; 
+        SQLite::DB  db;
+        bool        dirty;
 };
 
 

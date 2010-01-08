@@ -6,7 +6,7 @@
 
 #include "sysdb.h"
 #include "util.h"
-
+#include "db.h"
 
 //-----------------------------------------------------------------------------
 
@@ -19,285 +19,203 @@ static const char * schema_create=
 
 //-----------------------------------------------------------------------------
 
-inline int se(int c,const char * m)
-{
-    if (!(c==SQLITE_OK||c==SQLITE_DONE||c==SQLITE_ROW))
-        throw String(m);
-    return c;
-}
-
 SystemDatabase * SystemDatabase::open(const char * path)
 {
-    sqlite3 * db=NULL;
-
-    try
+    // Create the in-memory database
+    
+    SQLite::DB db(":memory:");
+    
+    // If that fails, there is not much we can do - a warning will have been
+    // printed out already
+    
+    if (!db.ok())
+        return NULL;
+    
+    // Construct the filename for the on-disk db
+    
+    gchar * filename=g_build_filename(path,"system.db",NULL);
+    Util::GFreeLater free_filename(filename);
+    
+    bool create=true;
+    
+    if (!g_file_test(filename,G_FILE_TEST_EXISTS))
     {
-        // Create the in-memory database
+        g_debug("SYSTEM DATABASE DOES NOT EXIST");    
+    }
+    
+    // Try to open the on-disk database in read-only mode
+    
+    else
+    {
+        SQLite::DB source(filename,SQLITE_OPEN_READONLY);
         
-        se(sqlite3_open(":memory:",&db),"Failed to create in-memory database");
-        
-        // Construct the filename for the on-disk db
-        
-        gchar * filename=g_build_filename(path,"system.db",NULL);
-        Util::GFreeLater free_filename(filename);
-        
-        bool create=false;
-        
-        // See if the on-disk db exists
-        
-        if (!g_file_test(filename,G_FILE_TEST_EXISTS))
+        if (!source.ok())
         {
-            g_debug("System database does not exist on disk, will be created");
-            create=true;
+            g_warning("FAILED TO OPEN EXISTING SYSTEM DATABASE");
         }
         else
         {
-            sqlite3 * sdb=NULL;
+            // Perform an integrity check on it
             
-            // Try to open the on-disk db in read only mode
+            SQLite::Statement integrity(source,"pragma integrity_check;");
+            integrity.step();
             
-            if (sqlite3_open_v2(filename,&sdb,SQLITE_OPEN_READONLY,NULL)!=SQLITE_OK)
+            if (!integrity.ok() || integrity.get_string(0)!="ok")
             {
-                g_debug("System database exists on disk but could not be opened : %s",sqlite3_errmsg(sdb));
-                create=true;
+                g_warning("FAILED INTEGRITY CHECK ON EXISTING SYSTEM DATABASE");    
             }
             else
             {
-                // Now do an integrity check by executing the "pragma integrity_check;" statement
+                // Backup the existing database into the in-memory database
                 
-                sqlite3_stmt * stmt=NULL;
-                
-                try
+                if (!SQLite::Backup(db,source).ok())
                 {
-                    se(sqlite3_prepare(sdb,"pragma integrity_check;",-1,&stmt,NULL),"Failed to prepare integrity check statement for system database");
-                    
-                    se(sqlite3_step(stmt),"Failed to get integrity check results for system database");
-                        
-                    if (strcmp((const char *)sqlite3_column_text(stmt,0),"ok"))
-                        throw String("System database on disk is corrupt");
+                    g_warning("FAILED TO RESTORE EXISTING SYSTEM DATABASE");
                 }
-                catch(const String & e)
+                else
                 {
-                    g_warning("%s : %s",e.c_str(),sqlite3_errmsg(sdb));
-                    create=true;
-                }
-                
-                if (stmt)
-                    sqlite3_finalize(stmt);
-                
-                // If the integrity check succeeded, continue
-                
-                if (!create)
-                {
-                    sqlite3_backup * backup=sqlite3_backup_init(db,"main",sdb,"main");
-                    
-                    if (!backup)
-                    {
-                        g_debug("Failed to initialize backup from system database : %s",sqlite3_errmsg(db));
-                        create=true;
-                    }
-                    else
-                    {
-                        if (sqlite3_backup_step(backup,-1)!=SQLITE_DONE)
-                        {
-                            g_debug("Failed to perform backup from system database : %s",sqlite3_errmsg(db));
-                            create=true;
-                        }
-                        
-                        if (sqlite3_backup_finish(backup)!=SQLITE_OK)
-                        {
-                            g_debug("Failed to finish backup from system database : %s",sqlite3_errmsg(db));
-                            create=true;
-                        }
-                        
-                        if (!create)
-                        {
-                            g_debug("SYSTEM DATABASE RESTORED");
-                        }
-                    }
+                    create = false;
+                    g_debug("SYSTEM DATABASE LOADED");
                 }
             }
-            
-            if (sdb)
-                sqlite3_close(sdb);
         }
-        
-        if (create)
-        {
-            se(sqlite3_exec(db,schema_create,NULL,NULL,NULL),"Failed to initialize system database schema");
-            g_debug("SYSTEM DATABASE CREATED");
-        }
-
-        // May throw String exceptions
-        
-        insert_initial_data(db);
-        
-        return new SystemDatabase(db,path);        
     }
-    catch( const String & e)
+    
+    // If anything failed above, we (re)create the database schema. If this
+    // fails, there is not much we can do
+    
+    if (create)
     {
-        g_warning("%s : %s",e.c_str(),sqlite3_errmsg(db));
+        db.exec(schema_create);
         
-        if(db)
+        if (!db.ok())
         {
-            sqlite3_close(db);
-            db = NULL;
+            g_warning("FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA");
+            return NULL;
         }
-        return NULL;        
+        
+        g_debug("SYSTEM DATABASE CREATED");
     }
+    
+    // Now, we create an instance of a system database - which will steal the
+    // underlying sqlite db from our local instance...we transfer ownership of it.
+    
+    SystemDatabase * result=new SystemDatabase(db,path);
+    
+    // If we fail to populate the database, we should not continue since we may
+    // have inconsistent data. Plus, if this fails, it is very likely that
+    // future stuff will also fail.
+    
+    if (!result->insert_initial_data())
+    {
+        g_warning("FAILED TO POPULATE SYSTEM DATABASE");
+        
+        // We reset dirty so that this bad database doesn't get flushed when
+        // we delete it
+        
+        result->dirty=false;
+        delete result;
+        return NULL;
+    }
+    
+    // Everything is OK
+    
+    return result;    
 }
 
-SystemDatabase::SystemDatabase(sqlite3 * d,const char * p)
+SystemDatabase::SystemDatabase(SQLite::DB & d,const char * p)
 :
+    db(d),
     path(p),
-    db(d)
+    dirty(false)
 {
-    g_assert(db);
 }
 
 SystemDatabase::~SystemDatabase()
 {
     flush();
-    sqlite3_close(db);
 }
 
 bool SystemDatabase::flush()
 {
-    bool result=false;
+    if (!dirty)
+        return true;
     
     gchar * backup_filename=g_build_filename(path.c_str(),"system.db.XXXXXX",NULL);
     Util::GFreeLater free_backup_filename(backup_filename);
     
-    sqlite3 * ddb=NULL;
+    // Make a temporary file to backup to
     
-    try
+    gint fd=g_mkstemp(backup_filename);
+    
+    if (fd==-1)
     {
-        gint fd=g_mkstemp(backup_filename);
-    
-        if (fd==-1)
-            throw String("Failed to create temporary file");
-            
-        close(fd);
-        
-        // Open the destination database
-        
-        se(sqlite3_open(backup_filename,&ddb),"Failed to open destination");
-
-        // Backup into it
-        
-        sqlite3_backup * backup=sqlite3_backup_init(ddb,"main",db,"main");
-        
-        if (!backup)
-            throw String("Failed to initialize backup");
-            
-        sqlite3_backup_step(backup,-1);
-        
-        se(sqlite3_backup_finish(backup),"Failed to finish backup");
-        
-        // Move the backup file name
-        
-        sqlite3_close(ddb);
-        ddb=NULL;
-        
-        gchar * target_filename=g_build_filename(path.c_str(),"system.db",NULL);
-        Util::GFreeLater free_target_filename(target_filename);
-        
-        if (g_rename(backup_filename,target_filename)!=0)
-            throw String("Failed to rename backup file");
-        
-        g_debug("SYSTEM DATABASE FLUSHED");
-        
-        result=true;
+        g_warning("FAILED TO CREATE TEMPORARY FILE FOR SYSTEM DATABASE");
+        return false;
     }
-    catch(const String & e)
+        
+    close(fd);
+    
+    SQLite::DB dest(backup_filename);
+    
+    if (!dest.ok())
     {
-        g_warning("Failed to flush system database : %s",e.c_str());
+        g_warning("FAILED TO OPEN TEMPORARY BACKUP FOR SYSTEM DATABASE");
+        g_unlink(backup_filename);
+        return false;
     }
     
-    if (ddb)
-        sqlite3_close(ddb);
-        
-    g_unlink(backup_filename);
+    if (!SQLite::Backup(dest,db).ok())
+    {
+        g_warning("FAILED TO BACKUP SYSTEM DATABASE");
+        g_unlink(backup_filename);
+        return false;
+    }
     
-    return result;
+    // Now move the backup file
+    
+    gchar * target_filename=g_build_filename(path.c_str(),"system.db",NULL);
+    Util::GFreeLater free_target_filename(target_filename);
+    
+    if (g_rename(backup_filename,target_filename)!=0)
+    {
+        g_warning("FAILED TO MOVE BACKUP SYSTEM DATABASE");
+        g_unlink(backup_filename);
+        return false;
+    }
+    
+    g_debug("SYSTEM DATABASE FLUSHED");
+    dirty=false;
+    return true;    
 }
 
-class SQLiteStatement
-{
-    public:
-        
-        SQLiteStatement() : stmt(NULL) {}
-        
-        ~SQLiteStatement()
-        {
-            if (stmt)
-                sqlite3_finalize(stmt);
-        }
-        
-        static int prepare(sqlite3 * db,const char * sql,SQLiteStatement & statement)
-        {
-            sqlite3_stmt * s=NULL;
-            int result=sqlite3_prepare(db,sql,-1,&s,NULL);
-            statement.set_stmt(s);
-            return result;
-        }
-        
-        int step() { return sqlite3_step(stmt);}
-        
-        int get_int(int col) { return sqlite3_column_int(stmt,col); }
-        String get_string(int col) { return String((const char *)sqlite3_column_text(stmt,col));}
-        
-        int bind(int pos) { return sqlite3_bind_null(stmt,pos);}
-        int bind(int pos,int value) { return sqlite3_bind_int(stmt,pos,value);}
-        int bind(int pos,const char * value) { return sqlite3_bind_text(stmt,pos,value,-1,SQLITE_TRANSIENT);}
-        int bind(int pos,const String & value) { return sqlite3_bind_text(stmt,pos,value.data(),value.length(),SQLITE_TRANSIENT);}
-        
-    private:
-        
-        void set_stmt(sqlite3_stmt * s)
-        {
-            if (stmt)
-                sqlite3_finalize(stmt);
-            stmt=s;
-        }
-        
-        sqlite3_stmt * stmt;
-};
-
-void SystemDatabase::insert_initial_data(sqlite3 * db)
+bool SystemDatabase::insert_initial_data()
 {
     // Collect a list of existing profile ids
     
     std::set<int> ids;
 
     {
-        SQLiteStatement s;
-    
-        se(SQLiteStatement::prepare(db,"select id from profiles;",s),"Failed to get list of profile IDs");
-        
-        while(s.step()==SQLITE_ROW)
-            ids.insert(s.get_int(0));
-    }
+        SQLite::Statement select(db,"select id from profiles;");
 
-    // There are no profiles, we must create one
+        while(select.ok() && select.step()==SQLITE_ROW)
+            ids.insert(select.get_int(0));
+            
+        if (!select.ok())
+            return false;
+    }
     
+    // There are no profiles, we must create one
+
     if (ids.size()==0)
     {
-        {
-            SQLiteStatement s;
-            se(SQLiteStatement::prepare(db,"insert into profiles (id,name,pin) values (NULL,?1,?2);",s),"Failed to create profile");
-            se(s.bind(1,TP_DB_FIRST_PROFILE_NAME),"Failed to bind profile name");
-            se(s.bind(2,""),"Failed to bind profile pin");
-            se(s.step(),"Failed to insert profile");
-        }
-        {        
-            int id=sqlite3_last_insert_rowid(db);
-            SQLiteStatement s;
-            se(SQLiteStatement::prepare(db,"insert or replace into generic (key,value) values (?1,?2);",s),"Failed to set generic value");
-            se(s.bind(1,TP_DB_CURRENT_PROFILE_ID),"Failed to bind generic key");
-            se(s.bind(2,id),"Failed to bind generic value");
-            se(s.step(),"Failed to insert generic value");
-        }
+        int id=create_profile(TP_DB_FIRST_PROFILE_NAME,"");
+
+        if (!id)
+            return false;
+        
+        if (!set(TP_DB_CURRENT_PROFILE_ID,id))
+            return false;        
     }
     
     // There are profiles, lets make sure the current profile id is set to one
@@ -305,83 +223,75 @@ void SystemDatabase::insert_initial_data(sqlite3 * db)
     
     else
     {
-        int id=-1;
-        {
-            SQLiteStatement s;
-            se(SQLiteStatement::prepare(db,"select value from generic where key=?1;",s),"Failed to get generic value");
-            se(s.bind(1,TP_DB_CURRENT_PROFILE_ID),"Failed to bind generic key");
-            if (se(s.step(),"Failed to step generic value")==SQLITE_ROW)
-                id=s.get_int(0);
-        }
-        
+        int id=get_int(TP_DB_CURRENT_PROFILE_ID,-1);
+                
         // There is no current profile id set, or the one that is set is not
         // in the list of ids
         
         if (id==-1 || ids.find(id)==ids.end())
         {
-            SQLiteStatement s;
-            se(SQLiteStatement::prepare(db,"insert or replace into generic (key,value) values (?1,?2);",s),"Failed to set generic value");
-            se(s.bind(1,TP_DB_CURRENT_PROFILE_ID),"Failed to bind generic key");
-            se(s.bind(2,*(ids.begin())),"Failed to bind generic value");
-            se(s.step(),"Failed to insert generic value");            
+            if (!set(TP_DB_CURRENT_PROFILE_ID,id))
+                return false;
         }
     }
+    
+    return true;
 }
 
-void SystemDatabase::set(const char * key,int value)
+bool SystemDatabase::set(const char * key,int value)
 {
-    SQLiteStatement s;
-    se(SQLiteStatement::prepare(db,"insert or replace into generic (key,value) values (?1,?2);",s),"Failed to set generic value");
-    se(s.bind(1,key),"Failed to bind generic key");
-    se(s.bind(2,value),"Failed to bind generic value");
-    se(s.step(),"Failed to insert generic value");
+    SQLite::Statement insert(db,"insert or replace into generic (key,value) values (?1,?2);");
+    insert.bind(1,key);
+    insert.bind(2,value);
+    insert.step();
+    dirty=true;
+    return insert.ok();
 }
 
-void SystemDatabase::set(const char * key,const char * value)
+bool SystemDatabase::set(const char * key,const char * value)
 {
-    SQLiteStatement s;
-    se(SQLiteStatement::prepare(db,"insert or replace into generic (key,value) values (?1,?2);",s),"Failed to set generic value");
-    se(s.bind(1,key),"Failed to bind generic key");
-    se(s.bind(2,value),"Failed to bind generic value");
-    se(s.step(),"Failed to insert generic value");    
+    SQLite::Statement insert(db,"insert or replace into generic (key,value) values (?1,?2);");
+    insert.bind(1,key);
+    insert.bind(2,value);
+    insert.step();
+    dirty=true;
+    return insert.ok();
 }
 
-void SystemDatabase::set(const char * key,const String & value)
+bool SystemDatabase::set(const char * key,const String & value)
 {
-    SQLiteStatement s;
-    se(SQLiteStatement::prepare(db,"insert or replace into generic (key,value) values (?1,?2);",s),"Failed to set generic value");
-    se(s.bind(1,key),"Failed to bind generic key");
-    se(s.bind(2,value),"Failed to bind generic value");
-    se(s.step(),"Failed to insert generic value");    
+    SQLite::Statement insert(db,"insert or replace into generic (key,value) values (?1,?2);");
+    insert.bind(1,key);
+    insert.bind(2,value);
+    insert.step();
+    dirty=true;
+    return insert.ok();
 }
 
 String SystemDatabase::get_string(const char * key,const char * def)
 {
-    SQLiteStatement s;
-    se(SQLiteStatement::prepare(db,"select value from generic where key=?1;",s),"Failed to get generic value");
-    se(s.bind(1,key),"Failed to bind generic key");
-    if (se(s.step(),"Failed to step generic value")==SQLITE_ROW)
-        return s.get_string(0);
+    SQLite::Statement select(db,"select value from generic where key=?1;");
+    select.bind(1,key);
+    if (select.ok() && select.step()==SQLITE_ROW)
+        return select.get_string(0);
     return String(def);
 }
 
 int SystemDatabase::get_int(const char * key,int def)
 {
-    SQLiteStatement s;
-    se(SQLiteStatement::prepare(db,"select value from generic where key=?1;",s),"Failed to get generic value");
-    se(s.bind(1,key),"Failed to bind generic key");
-    if (se(s.step(),"Failed to step generic value")==SQLITE_ROW)
-        return s.get_int(0);
+    SQLite::Statement select(db,"select value from generic where key=?1;");
+    select.bind(1,key);
+    if (select.ok() && select.step()==SQLITE_ROW)
+        return select.get_int(0);
     return def;    
 }
 
-
 int SystemDatabase::create_profile(const String & name,const String & pin)
 {
-    SQLiteStatement s;
-    se(SQLiteStatement::prepare(db,"insert into profiles (id,name,pin) values (NULL,?1,?2);",s),"Failed to create profile");
-    se(s.bind(1,name),"Failed to bind profile name");
-    se(s.bind(2,pin),"Failed to bind profile pin");
-    se(s.step(),"Failed to insert profile");
-    return sqlite3_last_insert_rowid(db);
+    SQLite::Statement insert(db,"insert into profiles (id,name,pin) values (NULL,?1,?2);");
+    insert.bind(1,name);
+    insert.bind(2,pin);
+    insert.step();
+    dirty=true;
+    return db.last_insert_rowid();
 }
