@@ -10,7 +10,7 @@
 
 void test_console_command_handler(const char * command,const char * parameters,void * data)
 {
-    printf("This is the test command\n");
+//    printf("This is the test command\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -18,7 +18,7 @@ void test_console_command_handler(const char * command,const char * parameters,v
 
 void app_notification_handler(const char * subject,void * data)
 {
-    printf("Got app notification '%s'\n",subject);
+//    printf("Got app notification '%s'\n",subject);
 }
 
 //-----------------------------------------------------------------------------
@@ -26,7 +26,7 @@ void app_notification_handler(const char * subject,void * data)
 
 int keyboard_request_handler(const char * subject,void * data)
 {
-    printf("Got request '%s'\n",subject);
+//    printf("Got request '%s'\n",subject);
     
     // Grant the request
     return 1;
