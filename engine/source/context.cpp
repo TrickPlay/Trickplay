@@ -218,8 +218,6 @@ int TPContext::load_app()
     }
     else
     {
-	notify(TP_NOTIFICATION_APP_LOADED);
-	
 #ifndef TP_PRODUCTION
 
 	std::auto_ptr<Console> console;
@@ -231,6 +229,10 @@ int TPContext::load_app()
 	}
 #endif
 
+	notify(TP_NOTIFICATION_APP_LOADED);
+	
+	// TODO: This will go away soon - apps will have to call show_all
+	
 	clutter_actor_show_all(clutter_stage_get_default());
 	
 	clutter_main();
