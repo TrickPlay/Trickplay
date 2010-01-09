@@ -42,7 +42,7 @@ set(
     
     ssl
     crypto
-    curl
+    ${CURL_LIBRARY}
 )
 
 set(
@@ -106,6 +106,7 @@ set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
 #------------------------------------------------------------------------------
 
 link_directories(
+    /usr/local/lib
     /opt/local/lib
 )
 
