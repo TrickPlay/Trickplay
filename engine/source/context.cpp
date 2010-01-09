@@ -114,6 +114,11 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 	context->quit();
 	return TRUE;
     }
+    else if (!strcmp(command,"config"))
+    {
+	for(StringMap::const_iterator it=context->config.begin();it!=context->config.end();++it)
+	    g_debug("%-15.15s %s",it->first.c_str(),it->second.c_str());
+    }
     
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator,ConsoleCommandHandlerMultiMap::const_iterator>
 	range=context->console_command_handlers.equal_range(String(command));
