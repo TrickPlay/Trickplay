@@ -228,7 +228,7 @@ class URLRequest [[Network::Request*]]
             lua_pushnil(L);
             while(lua_next(L,2))
             {
-                self->headers.insert(std::make_pair(std::string(lua_tostring(L,-2)),std::string(lua_tostring(L,-1))));
+                self->headers[std::string(lua_tostring(L,-2))]=std::string(lua_tostring(L,-1));
                 lua_pop(L,1);
             }
         ]];
