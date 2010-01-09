@@ -570,7 +570,7 @@ void TPContext::add_notification_handler(const char * subject,TPNotificationHand
 
 void TPContext::set_request_handler(const char * subject,TPRequestHandler handler,void * data)
 {
-    request_handlers.insert(std::make_pair(String(subject),RequestHandlerClosure(handler,data)));
+    request_handlers[String(subject)]=RequestHandlerClosure(handler,data);
 }
 
 //-----------------------------------------------------------------------------
