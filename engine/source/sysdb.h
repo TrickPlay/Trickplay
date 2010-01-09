@@ -17,6 +17,8 @@ class SystemDatabase
         
         struct Profile
         {
+            Profile() : id(0) {}
+            
             int     id;
             String  name;
             String  pin;
@@ -28,14 +30,16 @@ class SystemDatabase
         
         bool flush();
         
-        int create_profile(const String & name,const String & pin);
-        
         bool set(const char * key,int value);
         bool set(const char * key,const char * value);
         bool set(const char * key,const String & value);
         
         String get_string(const char * key,const char * def="");
         int get_int(const char * key,int def=0);
+        
+        int create_profile(const String & name,const String & pin);
+        Profile get_current_profile();
+        Profile get_profile(int id);
 
     private:
         

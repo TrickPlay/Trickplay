@@ -20,6 +20,7 @@ public:
         L(l),
 	db(NULL)
     {
+	TPContext::get_from_lua(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,this);
     }
     
     ~Settings()
@@ -43,8 +44,13 @@ public:
         {
             g_warning("Failed to tune settings database : %s", tchdberrmsg(tchdbecode(db)));
         }
+	
+	TPContext * c=TPContext::get_from_lua(L);
+	
+	gchar * name=g_strdup_printf("settings-%d.tch",c->get_int(PROFILE_ID));
+	Util::GFreeLater free_name(name);
         
-        gchar * file_name=g_build_filename(TPContext::get_from_lua(L)->get(APP_DATA_PATH),"settings.tch",NULL);
+        gchar * file_name=g_build_filename(c->get(APP_DATA_PATH),name,NULL);
         Util::GFreeLater free_file_name(file_name);
         
 	if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
@@ -59,6 +65,7 @@ public:
 	{
 	    tchdbclose(db);
 	    tchdbdel(db);
+	    db=NULL;
 	}	
     }
     
@@ -134,6 +141,14 @@ public:
     }
     
 private:
+    
+    static void profile_changed_handler(const char *,void * self)
+    {
+	// We just close the current database - so that a new one will be
+	// opened when needed using the new profile id
+	
+	((Settings*)self)->close();
+    }
     
     lua_State * L;
     TCHDB *     db;

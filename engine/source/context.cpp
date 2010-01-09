@@ -26,6 +26,7 @@ extern void luaopen_globals(lua_State*L);
 extern void luaopen_app(lua_State*L);
 extern void luaopen_system(lua_State*L);
 extern void luaopen_settings(lua_State*L);
+extern void luaopen_profile(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -51,7 +52,7 @@ TPContext::~TPContext()
 
 void TPContext::set(const char * key,const char * value)
 {
-    config.insert(std::make_pair(String(key),String(value)));
+    set(key,String(value));
 }
 
 //-----------------------------------------------------------------------------
@@ -60,9 +61,15 @@ void TPContext::set(const char * key,int value)
 {
     std::stringstream str;
     str << value;
-    set(key,str.str().c_str());
+    set(key,str.str());
 }
 
+//-----------------------------------------------------------------------------
+
+void TPContext::set(const char * key,const String & value)
+{
+    config[String(key)]=value;    
+}
 //-----------------------------------------------------------------------------
 
 const char * TPContext::get(const char * key,const char * def)
@@ -109,7 +116,7 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 {
     TPContext * context = (TPContext*)self;
     
-    if (!strcmp(command,"exit"))
+    if (!strcmp(command,"exit") || !strcmp(command,"quit"))
     {
 	context->quit();
 	return TRUE;
@@ -118,6 +125,52 @@ int TPContext::console_command_handler(const char * command,const char * paramet
     {
 	for(StringMap::const_iterator it=context->config.begin();it!=context->config.end();++it)
 	    g_debug("%-15.15s %s",it->first.c_str(),it->second.c_str());
+    }
+    else if (!strcmp(command,"profile"))
+    {
+	if (!parameters)
+	{
+	    SystemDatabase::Profile p=context->get_db()->get_current_profile();
+	    g_debug("%d '%s' '%s'",p.id,p.name.c_str(),p.pin.c_str());
+	}
+	else
+	{
+	    gchar ** parts=g_strsplit(parameters," ",2);
+	    guint count=g_strv_length(parts);
+	    if (count==2 && !strcmp(parts[0],"new"))
+	    {
+		int id=context->get_db()->create_profile(parts[1],"");
+		g_debug("Created profile %d",id);
+	    }
+	    else if (count==2 && !strcmp(parts[0],"switch"))
+	    {
+		int id=atoi(parts[1]);
+		
+		SystemDatabase::Profile profile=context->get_db()->get_profile(id);
+		
+		if (profile.id==0)
+		{
+		    g_debug("No such profile");
+		}
+		else
+		{
+		    context->notify(TP_NOTIFICATION_PROFILE_CHANGING);
+		    
+		    context->get_db()->set(TP_DB_CURRENT_PROFILE_ID,id);
+		    context->set(PROFILE_ID,id);
+		    context->set(PROFILE_NAME,profile.name);
+		    
+		    g_debug("Switched to profile %d '%s' '%s'",id,profile.name.c_str(),profile.pin.c_str());
+		    
+		    context->notify(TP_NOTIFICATION_PROFILE_CHANGED);
+		}
+	    }
+	    else
+	    {
+		g_debug("Usage: '/profile new <name>' or '/profile switch <id>'");
+	    }
+	    g_strfreev(parts);	    
+	}
     }
     
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator,ConsoleCommandHandlerMultiMap::const_iterator>
@@ -157,7 +210,22 @@ int TPContext::run()
     }
     else
     {
+	// Get the current profile from the database and set it into our
+	// configuration
+	
+	SystemDatabase::Profile profile=sysdb->get_current_profile();
+	set(PROFILE_ID,profile.id);
+	set(PROFILE_NAME,profile.name);
+	
+	// Let the world know that the profile has changed
+	
+	notify(TP_NOTIFICATION_PROFILE_CHANGED);
+	
+	// Load the app
+	
 	result=load_app();
+	
+	// Get rid of the system database
 	
 	delete sysdb;
 	sysdb=NULL;
@@ -206,6 +274,7 @@ int TPContext::load_app()
     luaopen_app(L);
     luaopen_system(L);
     luaopen_settings(L);
+    luaopen_profile(L);
     
     notify(TP_NOTIFICATION_APP_LOADING);
     
@@ -791,6 +860,14 @@ gchar * TPContext::format_log_line(const gchar * log_domain,GLogLevelFlags log_l
     return g_strdup_printf("%p %2.2d:%2.2d:%2.2d:%3.3lu %s %s %s\n" ,
             g_thread_self() ,
             hour , min , sec , ms , level , log_domain , message );    
+}
+
+//-----------------------------------------------------------------------------
+
+SystemDatabase * TPContext::get_db() const
+{
+    g_assert(sysdb);
+    return sysdb;
 }
 
 //-----------------------------------------------------------------------------

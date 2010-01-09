@@ -30,6 +30,10 @@ typedef std::map<String,String> StringMap;
 #define APP_RELEASE             "app.release"
 #define APP_VERSION             "app.version"
 #define APP_DATA_PATH           "app.data.path"
+
+#define PROFILE_ID              "profile.id"
+#define PROFILE_NAME            "profile.name"
+
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
 #define APP_TABLE_NAME          "app"
@@ -53,6 +57,7 @@ public:
     
     void set(const char * key,const char * value);
     void set(const char * key,int value);
+    void set(const char * key,const String & value);
     
     const char * get(const char * key,const char * def = NULL);
     bool get_bool(const char * key,bool def=false);
@@ -81,6 +86,8 @@ public:
     static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
     
     inline bool running() const { return is_running; }
+    
+    SystemDatabase * get_db() const;
     
 protected:
     

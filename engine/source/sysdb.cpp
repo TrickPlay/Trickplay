@@ -295,3 +295,33 @@ int SystemDatabase::create_profile(const String & name,const String & pin)
     dirty=true;
     return db.last_insert_rowid();
 }
+
+SystemDatabase::Profile SystemDatabase::get_current_profile()
+{
+    SystemDatabase::Profile result;
+    
+    SQLite::Statement select(db,"select p.id,p.name,p.pin from generic g,profiles p where g.key=?1 and g.value=p.id;");
+    select.bind(1,TP_DB_CURRENT_PROFILE_ID);
+    if (select.ok() && select.step()==SQLITE_ROW)
+    {
+        result.id=select.get_int(0);
+        result.name=select.get_string(1);
+        result.pin=select.get_string(2);
+    }
+    return result;
+}
+
+SystemDatabase::Profile SystemDatabase::get_profile(int id)
+{
+    SystemDatabase::Profile result;
+    
+    SQLite::Statement select(db,"select name,pin from profiles where id=?1;");
+    select.bind(1,id);
+    if (select.ok() && select.step()==SQLITE_ROW)
+    {
+        result.id=id;
+        result.name=select.get_string(0);
+        result.pin=select.get_string(1);
+    }
+    return result;    
+}
