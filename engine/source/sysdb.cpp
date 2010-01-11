@@ -230,7 +230,7 @@ bool SystemDatabase::insert_initial_data()
         
         if (id==-1 || ids.find(id)==ids.end())
         {
-            if (!set(TP_DB_CURRENT_PROFILE_ID,id))
+            if (!set(TP_DB_CURRENT_PROFILE_ID,*(ids.begin())))
                 return false;
         }
     }
