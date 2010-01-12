@@ -27,6 +27,7 @@ extern void luaopen_app(lua_State*L);
 extern void luaopen_system(lua_State*L);
 extern void luaopen_settings(lua_State*L);
 extern void luaopen_profile(lua_State*L);
+extern void luaopen_xml(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -275,6 +276,23 @@ int TPContext::load_app()
     luaopen_system(L);
     luaopen_settings(L);
     luaopen_profile(L);
+    luaopen_xml(L);
+    
+    // Start the console
+
+#ifndef TP_PRODUCTION
+
+    std::auto_ptr<Console> console;
+
+    if (get_bool(TP_CONSOLE_ENABLED,true))
+    {
+	console.reset(new Console(L,get_int(TP_TELNET_CONSOLE_PORT,8008)));
+	console->add_command_handler(console_command_handler,this);
+    }
+    
+#endif
+
+    // Load the app
     
     notify(TP_NOTIFICATION_APP_LOADING);
     
@@ -292,17 +310,6 @@ int TPContext::load_app()
     }
     else
     {
-#ifndef TP_PRODUCTION
-
-	std::auto_ptr<Console> console;
-
-	if (get_bool(TP_CONSOLE_ENABLED,true))
-	{
-	    console.reset(new Console(L,get_int(TP_TELNET_CONSOLE_PORT,8008)));
-	    console->add_command_handler(console_command_handler,this);
-	}
-#endif
-
 	notify(TP_NOTIFICATION_APP_LOADED);
 	
 	// TODO: This will go away soon - apps will have to call show_all

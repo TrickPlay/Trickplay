@@ -82,6 +82,7 @@ set(
     ${BINDINGS_SRC}/system.lb
     ${BINDINGS_SRC}/settings.lb
     ${BINDINGS_SRC}/profile.lb
+    ${BINDINGS_SRC}/xml.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 

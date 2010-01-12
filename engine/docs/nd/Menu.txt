@@ -49,12 +49,14 @@ Format: 1.4
 Group: Globals  {
 
    File: app  (app.lb)
+   File: profile  (profile.lb)
    File: system  (system.lb)
    }  # Group: Globals
 
 Group: Classes  {
 
    File: URLResponse  (url_request.lb)
+   File: XMLParser  (xml.lb)
    }  # Group: Classes
 
 Group: Index  {
