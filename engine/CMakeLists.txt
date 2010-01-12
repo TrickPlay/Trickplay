@@ -84,6 +84,7 @@ set(
     ${BINDINGS_SRC}/settings.lb
     ${BINDINGS_SRC}/profile.lb
     ${BINDINGS_SRC}/xml.lb
+    ${BINDINGS_SRC}/restricted.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
@@ -108,6 +109,8 @@ endforeach( LB_FILE )
 set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
 
 #------------------------------------------------------------------------------
+
+set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
 
 link_directories(
     /usr/local/lib

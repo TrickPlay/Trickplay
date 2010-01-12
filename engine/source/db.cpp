@@ -53,7 +53,7 @@ namespace SQLite
     
     int Error::check()
     {
-        check(sqlite3_errcode(db));
+        return check(sqlite3_errcode(db));
     }
     
     int Error::check(const Error & other)

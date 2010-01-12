@@ -156,6 +156,32 @@ private:
 
 ]]
 
+# Global: settings
+# Lets you store and retrieve key-value pairs. These are profile-specific, the
+# settings object will switch for you when the profile changes.
+#
+# The settings object masquerades as a Lua table, so you set values in the normal
+# Lua way
+#
+# > settings.something="Hello World"
+# > settings[ "something" ]="Hello World"
+#
+# Unlike Lua tables, settings only accepts strings as keys and the values
+# can be either numbers or strings. You cannot save tables, functions or other
+# types of data.
+#
+# If you set a key to nil, it is deleted from the settings database. Similarly,
+# if you ask for a key that does not exist, you will receive nil.
+#
+# This will delete the key "something" from the settings database
+# > settings[ "something" ] = nil
+#
+# So, this will print out nil
+# > print( settings.something )
+#
+# Also, since settings is not really a Lua table, you cannot use the standard
+# table functions, or table library to iterate over keys (pairs, ipairs, table.*)
+
 global settings [[Settings*]] table
 {
     settings()
