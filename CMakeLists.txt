@@ -5,6 +5,8 @@ project( TP )
 
 add_subdirectory( clients/desktop )
 
+#add_subdirectory( clients/lirc )
+
 add_subdirectory( engine )
 
 add_subdirectory( engine/docs )
