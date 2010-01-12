@@ -278,6 +278,14 @@ int             tp_context_run(
 #define TP_RUN_ALREADY_RUNNING          5
 
 //-----------------------------------------------------------------------------
+// Experimental
+
+void            tp_context_key_event(
+    
+                    TPContext * context,
+                    const char * key);
+
+//-----------------------------------------------------------------------------
 // Terminate the context from another thread
 // Run will return after this is called
                 

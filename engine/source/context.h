@@ -89,6 +89,8 @@ public:
     
     SystemDatabase * get_db() const;
     
+    void key_event(const char * key);
+    
 protected:
     
     void validate_configuration();
@@ -134,7 +136,11 @@ private:
     typedef std::pair<OutputHandler,void*>                      OutputHandlerClosure;
     typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
     
-    OutputHandlerSet                                            output_handlers;        
+    OutputHandlerSet                                            output_handlers;
+    
+    typedef std::map<String,guint>                              KeyMap;
+    
+    KeyMap                                                      key_map;
 };
 
 

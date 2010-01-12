@@ -871,6 +871,44 @@ SystemDatabase * TPContext::get_db() const
 }
 
 //-----------------------------------------------------------------------------
+
+void TPContext::key_event(const char * key)
+{
+    if (key_map.empty())
+    {
+	key_map["UP"	]=CLUTTER_Up;
+	key_map["DOWN"	]=CLUTTER_Down;
+	key_map["LEFT"	]=CLUTTER_Left;
+	key_map["RIGHT"	]=CLUTTER_Right;
+	key_map["OK"	]=CLUTTER_Return;
+    }
+    
+    KeyMap::const_iterator it=key_map.find(String(key));
+    
+    if (it==key_map.end())
+	return;
+    
+    clutter_threads_enter();
+    
+    ClutterEvent * event=clutter_event_new(CLUTTER_KEY_PRESS);
+    event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
+    event->any.time=clutter_get_timestamp();
+    event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->key.keyval=it->second;
+    
+    clutter_event_put(event);
+    
+    event->type=CLUTTER_KEY_RELEASE;
+    event->any.time=clutter_get_timestamp();
+    
+    clutter_event_put(event);
+    
+    clutter_event_free(event);
+    
+    clutter_threads_leave();
+}
+
+//-----------------------------------------------------------------------------
 // External-facing functions
 //-----------------------------------------------------------------------------
 
@@ -949,6 +987,13 @@ void tp_context_add_console_command_handler(TPContext * context,const char * com
 void tp_context_set_log_handler(TPContext * context,TPLogHandler handler,void * data)
 {
     context->set_log_handler(handler,data);
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_key_event(TPContext * context,const char * key)
+{
+    context->key_event(key);
 }
 
 //-----------------------------------------------------------------------------
