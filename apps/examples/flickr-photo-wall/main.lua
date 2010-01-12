@@ -84,6 +84,19 @@ wall.z = -10000
 
 screen:add( wall )
 
+local logo_url = "http://userlogos.org/files/logos/sandwiches/flickr0.png"
+local logo = Image {
+				src = logo_url,
+				keep_aspect_ratio = true,
+				x = 5 * (screen.w / 6) - 12,
+				y = 12,
+				width = screen.w / 6,
+}
+
+screen:add(logo)
+
+
+
 
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
 local --flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&format=json&nojsoncallback=1&extras=license,owner_name"
