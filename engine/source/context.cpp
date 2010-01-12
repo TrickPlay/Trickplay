@@ -28,6 +28,7 @@ extern void luaopen_system(lua_State*L);
 extern void luaopen_settings(lua_State*L);
 extern void luaopen_profile(lua_State*L);
 extern void luaopen_xml(lua_State*L);
+extern void luaopen_restricted(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -146,24 +147,13 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 	    else if (count==2 && !strcmp(parts[0],"switch"))
 	    {
 		int id=atoi(parts[1]);
-		
-		SystemDatabase::Profile profile=context->get_db()->get_profile(id);
-		
-		if (profile.id==0)
+		if (context->profile_switch(id))
 		{
-		    g_debug("No such profile");
+		    g_debug("Switched to profile %d",id);
 		}
 		else
 		{
-		    context->notify(TP_NOTIFICATION_PROFILE_CHANGING);
-		    
-		    context->get_db()->set(TP_DB_CURRENT_PROFILE_ID,id);
-		    context->set(PROFILE_ID,id);
-		    context->set(PROFILE_NAME,profile.name);
-		    
-		    g_debug("Switched to profile %d '%s' '%s'",id,profile.name.c_str(),profile.pin.c_str());
-		    
-		    context->notify(TP_NOTIFICATION_PROFILE_CHANGED);
+		    g_debug("No such profile");		    
 		}
 	    }
 	    else
@@ -277,6 +267,11 @@ int TPContext::load_app()
     luaopen_settings(L);
     luaopen_profile(L);
     luaopen_xml(L);
+    
+    // This should not be opened for all apps - only trusted ones. Since we
+    // don't have a mechanism for determining trustworthiness yet...
+    
+    luaopen_restricted(L);
     
     // Start the console
 
@@ -909,6 +904,28 @@ void TPContext::key_event(const char * key)
     clutter_event_free(event);
     
     clutter_threads_leave();
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::profile_switch(int id)
+{
+    SystemDatabase::Profile profile=get_db()->get_profile(id);
+    
+    if (profile.id==0)
+    {
+	return false;
+    }
+    
+    notify(TP_NOTIFICATION_PROFILE_CHANGING);
+    
+    get_db()->set(TP_DB_CURRENT_PROFILE_ID,id);
+    set(PROFILE_ID,id);
+    set(PROFILE_NAME,profile.name);
+    
+    notify(TP_NOTIFICATION_PROFILE_CHANGED);
+
+    return true;    
 }
 
 //-----------------------------------------------------------------------------

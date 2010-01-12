@@ -91,6 +91,8 @@ public:
     
     void key_event(const char * key);
     
+    bool profile_switch(int id);
+    
 protected:
     
     void validate_configuration();

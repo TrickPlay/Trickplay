@@ -1,0 +1,27 @@
+[[
+#include "context.h"
+#include "sysdb.h"
+]]
+
+global restricted [[TPContext*]]
+{
+    restricted()
+        [[
+            *self=TPContext::get_from_lua(L);
+        ]];
+        
+    ~restricted()
+        [[
+            self=NULL;
+        ]];
+        
+    bool profile_switch(int id)
+        [[
+            result=self->profile_switch(id);    
+        ]];
+        
+    int create_profile(string name,string pin)
+        [[
+            result=self->get_db()->create_profile(name,pin);
+        ]];
+}
