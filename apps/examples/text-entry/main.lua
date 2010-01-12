@@ -47,7 +47,8 @@ local airplane = "http://www.tuxpaint.org/stamps/stamps/vehicles/flight/planes/7
 ]]
 --------------------------------------------------------------------------------
 
-stage:set{ color = "000000" , size = { 960 , 540 } }
+screen:set{ color = "000000" , size = { 960 , 540 } }
+screen:show_all()
 
 t = Text
     {
@@ -62,7 +63,7 @@ t = Text
         
     }
 
-stage:add(
+screen:add(
     Rectangle{ color = "FF0000" , position = t.position , size = t.size } ,
     t
     )
@@ -75,8 +76,8 @@ print(t.selected_text)
 print(t.cursor_position,t.selection_end,t.cursor_visible)
 t:delete_selection()
 print(t.text)
-print(stage.key_focus.type)
-stage.key_focus = t
+print(screen.key_focus.type)
+screen.key_focus = t
 t.wants_enter=false
 t.reactive = true
 t.password_char = 42

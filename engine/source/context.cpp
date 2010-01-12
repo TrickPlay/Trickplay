@@ -311,11 +311,7 @@ int TPContext::load_app()
     else
     {
 	notify(TP_NOTIFICATION_APP_LOADED);
-	
-	// TODO: This will go away soon - apps will have to call show_all
-	
-	clutter_actor_show_all(clutter_stage_get_default());
-	
+		
 	clutter_main();
     
 	notify(TP_NOTIFICATION_APP_CLOSING);

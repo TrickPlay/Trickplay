@@ -44,7 +44,8 @@ end
 --------------------------------------------------------------------------------
 
 
-stage:set{ color = "000000FF" , size = { 960 , 540 } }
+screen:set{ color = "000000FF" , size = { 960 , 540 } }
+screen:show_all()
 
 local g = Group
     {
@@ -58,7 +59,7 @@ local g = Group
         
     }
 
-stage:add( g )
+screen:add( g )
 
 local ticks = 0
 
@@ -78,11 +79,11 @@ Group{
 
 g.children = { r , r2 , Text{ font = "Sans 46px" , markup = "TrickPlay" , color = "FFFFFF" , position = { 0 , 50 } } }
 
-print( to_string( stage.perspective , 2 ) )
+print( to_string( screen.perspective , 2 ) )
 
-local p = stage.perspective
+local p = screen.perspective
 p[1]=30
-stage.perspective = p
+screen.perspective = p
 
 local tim = Timeline{ duration = 5000 }
 

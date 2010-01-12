@@ -74,14 +74,15 @@ end
 local photo_index = {}
 
 
-stage.color = "000000";
-stage.size = { 960 , 540 }
+screen.color = "000000";
+screen.size = { 960 , 540 }
+screen:show_all()
 
-local wall = Group{ position = { 0 , 0 } , size = stage.size }
+local wall = Group{ position = { 0 , 0 } , size = screen.size }
 wall.y_rotation = { 80 , 480 , 0 }
 wall.z = -10000
 
-stage:add( wall )
+screen:add( wall )
 
 
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
@@ -219,7 +220,7 @@ function start_timeline.on_completed( )
     local d = Alpha{ timeline = t , mode = "EASE_OUT_ELASTIC" }
     
     function t.on_new_frame(t)
-        wall.y_rotation = { b:get_value( d.alpha ) , stage.w / 2 , 0 }
+        wall.y_rotation = { b:get_value( d.alpha ) , screen.w / 2 , 0 }
         under.opacity = 255 * t.progress
     end
         
@@ -237,7 +238,7 @@ local y_interval = nil
 local timeline = Timeline{ duration = 40 }
 
 function timeline.on_new_frame(t,msecs)
-    --stage.y_rotation = { interval:get_value(t.progress) , 480 , 0 }
+    
     if x_interval then
         under.x = x_interval:get_value( t.progress )
     end
@@ -266,7 +267,7 @@ local key_down  = 65364
 local key_up    = 65362
 local key_enter = 65293
 
-function stage.on_key_down(stage,keyval)
+function screen.on_key_down(screen,keyval)
 
     local function reset()
         if timeline.is_playing then
@@ -305,8 +306,6 @@ function stage.on_key_down(stage,keyval)
         x_interval = Interval( under.x , under.x + 120 )
         y_interval = nil
         selection_col = selection_col + 1
---        local yr = stage.y_rotation
---        interval = Interval( yr[1] , yr[1] + 30 )
         timeline:start()
         
         if selection_col + left_col > ( cols_we_have - 4 ) then
@@ -334,8 +333,6 @@ function stage.on_key_down(stage,keyval)
         y_interval = nil
         selection_col = selection_col - 1
         
---            local yr = stage.y_rotation
---            interval = Interval( yr[1] , yr[1] - 30 )
         timeline:start()
         
         if selection_col < left_col  and left_col > 0 then

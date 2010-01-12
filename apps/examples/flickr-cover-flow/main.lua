@@ -49,7 +49,8 @@ local airplane = "http://www.tuxpaint.org/stamps/stamps/vehicles/flight/planes/7
 
 dofile("Json.lua")
 
-stage:set{ color = "000000" , size = { 960 , 540 } }
+screen:set{ color = "000000" , size = { 960 , 540 } }
+screen:show_all()
 
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
 local flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&format=json&nojsoncallback=1"
@@ -101,28 +102,28 @@ positions = {}
 
 local g = Group{
     
-    position = { ( stage.w - center_w ) / 2 , (stage.h - center_h ) / 3 } , 
+    position = { ( screen.w - center_w ) / 2 , (screen.h - center_h ) / 3 } , 
     size = { center_w , center_h },
     children = { Image{ src = get_photo_url( table.remove( photos ) ) , on_size_changed = size_changed } }
     }
 
 positions[0] = g
 
-stage:add(g)
+screen:add(g)
 
 local pad = 70
-local l = ( stage.w / 2 ) - ( pad  )
+local l = ( screen.w / 2 ) - ( pad  )
 
 for i = 1 , 7 do
 
     local g = Group{
-        position = { l , ( stage.h - center_h ) / 3 },
+        position = { l , ( screen.h - center_h ) / 3 },
         size = { center_w , center_h },
         children = { Image{ src = get_photo_url( table.remove( photos ) ) , on_size_changed = size_changed } },
         y_rotation = { -85 , center_w , 0 }
     }
     
-    stage:add( g )
+    screen:add( g )
     
     g:lower_to_bottom()
     
@@ -134,18 +135,18 @@ for i = 1 , 7 do
 
 end
 
-local l = ( stage.w / 2 ) + ( pad  ) - center_w
+local l = ( screen.w / 2 ) + ( pad  ) - center_w
 
 for i = 1 , 7 do
 
     local g = Group{
-        position = { l , ( stage.h - center_h ) / 3 },
+        position = { l , ( screen.h - center_h ) / 3 },
         size = { center_w , center_h },
         children = { Image{ src = get_photo_url( table.remove( photos ) ) , on_size_changed = size_changed } },
         y_rotation = { 85 , 0 , 0 }
     }
     
-    stage:add( g )
+    screen:add( g )
     
     g:lower_to_bottom()
     
@@ -195,7 +196,7 @@ function timeline.on_completed()
     animations = {}
 end
 
-function stage.on_key_down(stage,keyval)
+function screen.on_key_down(screen,keyval)
     
     if keyval == key_left or keyval == key_right then
     

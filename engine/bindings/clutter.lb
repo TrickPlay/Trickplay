@@ -836,9 +836,9 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
 #endif
 ]]
 
-global stage [[ClutterActor*]] actor , container
+global screen [[ClutterActor*]] actor , container
 {
-    stage()
+    screen()
 	[[
 	    *self = clutter_stage_get_default();
 	    
@@ -847,7 +847,7 @@ global stage [[ClutterActor*]] actor , container
 #endif
 	]];
     
-    ~stage()
+    ~screen()
 	[[
 	]];
         
@@ -1855,7 +1855,7 @@ void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
     else if (CLUTTER_IS_TEXTURE(actor))
 	is_new = wrap_Image(L,actor);
     else if (CLUTTER_IS_STAGE(actor))
-	is_new = wrap_stage(L,actor);
+	is_new = wrap_screen(L,actor);
     else if (CLUTTER_IS_GROUP(actor))
 	is_new = wrap_Group(L,actor);
     else if (CLUTTER_IS_TEXT(actor))
@@ -1878,7 +1878,7 @@ const char * get_actor_metatable(ClutterActor*actor)
     else if (CLUTTER_IS_TEXTURE(actor))
 	return IMAGE_METATABLE;
     else if (CLUTTER_IS_STAGE(actor))
-	return STAGE_METATABLE;
+	return SCREEN_METATABLE;
     else if (CLUTTER_IS_GROUP(actor))
 	return GROUP_METATABLE;
     else if (CLUTTER_IS_TEXT(actor))
