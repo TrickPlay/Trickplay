@@ -5,8 +5,6 @@ module xml;
 
 #include "expat.h"
 
-#include "glib.h"
-
 class Parser
 {
 public:
@@ -44,6 +42,8 @@ public:
     
 protected:
     
+    void flush_character_data();
+    
     static void start_element_handler(void *userData,const XML_Char *name,const XML_Char **atts);
     static void end_element_handler(void *userData,const XML_Char *name);
     static void character_data_handler(void *userData,const XML_Char *s,int len);
@@ -64,6 +64,7 @@ private:
 class XMLParser [[Parser*]]
 {
     # Constructor: XMLParser
+    # Create an XMLParser.
     # You can create an XMLParser by passing nothing, a string for the encoding
     # or a table with some or all of its properties, like this:
     # > parser=XMLParser()
@@ -169,17 +170,22 @@ class XMLParser [[Parser*]]
 
 [[
 
+void Parser::flush_character_data()
+{
+    if (!char_data.empty())
+    {
+        lua_pushlstring(L,char_data.data(),char_data.length());
+        invoke_XMLParser_on_character_data(L,this,1,0);
+        char_data.clear();
+    }    
+}
+
 void Parser::start_element_handler(void *userData,const XML_Char *name,const XML_Char **atts)
 {
     Parser * self=(Parser*)userData;
     
-    if (!self->char_data.empty())
-    {
-        lua_pushlstring(self->L,self->char_data.data(),self->char_data.length());
-        invoke_XMLParser_on_character_data(self->L,self,1,0);
-        self->char_data.clear();
-    }
-
+    self->flush_character_data();
+    
     lua_pushstring(self->L,name);
     lua_newtable(self->L);
     while (*atts)
@@ -195,12 +201,7 @@ void Parser::end_element_handler(void *userData,const XML_Char *name)
 {
     Parser * self=(Parser*)userData;    
 
-    if (!self->char_data.empty())
-    {
-        lua_pushlstring(self->L,self->char_data.data(),self->char_data.length());
-        invoke_XMLParser_on_character_data(self->L,self,1,0);
-        self->char_data.clear();
-    }
+    self->flush_character_data();
     
     lua_pushstring(self->L,name);
     invoke_XMLParser_on_end_element(self->L,self,1,0);
