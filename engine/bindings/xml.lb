@@ -67,6 +67,7 @@ class XMLParser [[Parser*]]
     # Create an XMLParser.
     # You can create an XMLParser by passing nothing, a string for the encoding
     # or a table with some or all of its properties, like this:
+    #
     # > parser=XMLParser()
     # >
     # > parser=XMLParser("UTF-8")
@@ -107,7 +108,7 @@ class XMLParser [[Parser*]]
         ]];
     
     # Function: parse
-    # Parses a chunk of XML. If you wish to parse the XML in chunks, you can
+    # Parses XML. If you wish to parse the XML in chunks, you can
     # pass false for the second parameter and the parser will remain open - you
     # can call parse again with another chunk.
     #
