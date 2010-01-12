@@ -73,9 +73,6 @@ function get_photo_url(photo)
     return "http://farm"..photo.farm..".static.flickr.com/"..photo.server.."/"..photo.id.."_"..photo.secret..".jpg"
 end
 
---local logo_url = "http://l.yimg.com/g/images/en-us/flickr-yahoo-logo.png.v2"
-local logo_url = "http://userlogos.org/files/logos/sandwiches/flickr0.png"
-
 num_photos = 50
 
 -- make sure number is odd
@@ -116,10 +113,13 @@ function size_changed( image , width , height )
     end
 end
 
-local logo = Group {
-	position = { 12, 12 },
-	size = { screen.w / 6, screen.h / 6 },
-	children = { Image { src = logo_url , extra = { no_reflect = 1 } , on_size_changed = size_changed } }
+local logo_url = "http://userlogos.org/files/logos/sandwiches/flickr0.png"
+local logo = Image {
+				src = logo_url,
+				keep_aspect_ratio = true,
+				x = 12,
+				y = 12,
+				width = screen.w / 6,
 }
 
 screen:add(logo)
