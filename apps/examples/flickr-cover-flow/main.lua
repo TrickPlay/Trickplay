@@ -53,7 +53,8 @@ screen:set{ color = "000000" , size = { 960 , 540 } }
 screen:show_all()
 
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
-local flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&format=json&nojsoncallback=1"
+local --flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&format=json&nojsoncallback=1&extras=license,owner_name"
+flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.photos.search&license=4%2C5%2C6%2C7&sort=interestingness-desc&safe_search=1&content_type=1&media=photos&extras=license%2Cowner_name&format=json&nojsoncallback=1"
 
 function get_photo_page(per_page,page)
     local json = URLRequest( flickr_base_url.."&per_page="..per_page.."&page="..page.."&api_key="..flickr_api_key):perform().body
@@ -72,10 +73,25 @@ function get_photo_url(photo)
     return "http://farm"..photo.farm..".static.flickr.com/"..photo.server.."/"..photo.id.."_"..photo.secret..".jpg"
 end
 
-local photos = get_photo_page(15,1)
+--local logo_url = "http://l.yimg.com/g/images/en-us/flickr-yahoo-logo.png.v2"
+local logo_url = "http://userlogos.org/files/logos/sandwiches/flickr0.png"
 
-center_w = 300
-center_h = 300
+num_photos = 50
+
+-- make sure number is odd
+num_photos = math.floor(num_photos/2)*2 + 1
+-- make sure number is allowed by flickr API
+if num_photos > 499 then num_photos = 499 end
+
+local photos = get_photo_page(num_photos,1)
+
+center_w = 500
+center_h = 500
+z_front = 0
+z_back = -500
+pad = 100
+left_tilt = 85
+right_tilt = -left_tilt
 
 function size_changed( image , width , height )
     image.on_size_changed = nil
@@ -90,12 +106,23 @@ function size_changed( image , width , height )
     
     image.x = ( image.parent.w - image.w ) / 2
     image.y = ( image.parent.h - image.h )
-    
+
+
+    if not image.extra.no_reflect then
     image.parent:add(
         Clone{ source = image , position = image.position , size = image.size , x_rotation = { -180 , image.h , 0 } },
         Rectangle{ color = "000000CC" , w = image.w , h = image.h * 1.1 , x = image.x , y = image.y + image.h }
         )
+    end
 end
+
+local logo = Group {
+	position = { 12, 12 },
+	size = { screen.w / 6, screen.h / 6 },
+	children = { Image { src = logo_url , extra = { no_reflect = 1 } , on_size_changed = size_changed } }
+}
+
+screen:add(logo)
 
 positions = {}
 
@@ -111,23 +138,22 @@ positions[0] = g
 
 screen:add(g)
 
-local pad = 70
-local l = ( screen.w / 2 ) - ( pad  )
+local l = ( screen.w  / 2 ) - ( pad )
 
-for i = 1 , 7 do
+for i = 1 , math.floor(num_photos/2) do
 
     local g = Group{
         position = { l , ( screen.h - center_h ) / 3 },
         size = { center_w , center_h },
         children = { Image{ src = get_photo_url( table.remove( photos ) ) , on_size_changed = size_changed } },
-        y_rotation = { -85 , center_w , 0 }
+        y_rotation = { right_tilt , center_w , 0 }
     }
     
     screen:add( g )
     
     g:lower_to_bottom()
     
-    g.z = -200
+    g.z = z_back
     
     positions[ i ] = g
     
@@ -135,22 +161,22 @@ for i = 1 , 7 do
 
 end
 
-local l = ( screen.w / 2 ) + ( pad  ) - center_w
+local l = ( screen.w / 2 ) + ( pad ) - center_w
 
-for i = 1 , 7 do
+for i = 1 , math.floor(num_photos/2) do
 
     local g = Group{
         position = { l , ( screen.h - center_h ) / 3 },
         size = { center_w , center_h },
         children = { Image{ src = get_photo_url( table.remove( photos ) ) , on_size_changed = size_changed } },
-        y_rotation = { 85 , 0 , 0 }
+        y_rotation = { left_tilt , 0 , 0 }
     }
     
     screen:add( g )
     
     g:lower_to_bottom()
     
-    g.z = -200
+    g.z = z_back
     
     positions[ -i ] = g
     
@@ -168,9 +194,9 @@ local key_enter = 65293
 animations = {}
 index = 0
 
-timeline = Timeline{ duration = 100 }
+timeline = Timeline{ duration = 200 }
 
-alpha = Alpha{ timeline = timeline , mode = "EASE_OUT_CIRC" }
+alpha = Alpha{ timeline = timeline , mode = "EASE_OUT_SINE" }
 
 function timeline.on_new_frame( timeline , msecs , progress )
 
@@ -210,33 +236,48 @@ function screen.on_key_down(screen,keyval)
             d = -1
         end
         
-        if index == d * 7 then
+        -- index is the slot which is currently active
+        -- check if we are at the edge and can't move
+        if index == d * math.floor(num_photos/2) then
             return
         end
         
+        -- now index is moved to be the new active picture
         index = index + d
         
-        for i = -7 , 7 do
+        -- loop through all the images and move them to their new location
+        for i = -math.floor(num_photos/2) , math.floor(num_photos/2) do
         
+				-- a is the image we're considering's current location; b is the new location
+				-- NOTE that b might not exist if we're at the edge
             local a = positions[ i ]
             local b = positions[ i + d ]
             
             local animation = { g = a }
-            
+
+				-- check if in fact there IS a b element we can move to            
             if b then
+                -- if there is, then set the destination of this image to be the current location of the next one along
                 animation.x = Interval( a.x , b.x )
                 animation.z = Interval( a.z , b.z )
+					 -- rotate the image to its final orientation
                 animation.r = Interval( a.y_rotation[1] , b.y_rotation[1] )
-                animation.rx = b.y_rotation[2]
+					 -- rotate around a point cleverly chosen
+					 if index == i and 1 == d then
+					 	 animation.rx = a.x
+					 else
+	                animation.rx = b.x
+	             end
             else
+            	 -- if there is no b element (for the edges), then we need to just shift the image along by a fixed amount
                 animation.x = Interval( a.x , a.x + ( d * pad ) )
-                animation.z = Interval( a.z , -200 )
-                
+                animation.z = Interval( a.z , z_back )
+
                 if i > 0 then
-                    animation.r = Interval( a.y_rotation[1] , -85 )
+                    animation.r = Interval( a.y_rotation[1] , right_tilt )
                     animation.rx = center_w
                 else
-                    animation.r = Interval( a.y_rotation[1] , 85 )
+                    animation.r = Interval( a.y_rotation[1] , left_tilt )
                     animation.rx = 0
                 end
             end
