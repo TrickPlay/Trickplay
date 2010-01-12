@@ -89,7 +89,7 @@ center_w = 500
 center_h = 500
 z_front = 0
 z_back = -500
-pad = 100
+pad = 50
 left_tilt = 85
 right_tilt = -left_tilt
 
