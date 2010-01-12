@@ -278,11 +278,23 @@ class URLRequest [[Network::Request*]]
     # This property holds a function that is called when a request is finished
     # or fails. The function receives as its parameters, the request as well as
     # a <URLResponse> object.
+    #
+    # Arguments:
+    # request - The <URLRequest>
+    # response - A <URLResponse> object with the results
+    #
+    # Example:
     # > request.on_complete = function( request , response ) print( "done!" ) end
-    # You can also do it like this:
+    #
+    # You can also do it like this
     # > function request.on_complete( request , response )
-    # >   print( "done!" )
+    # >   if response.failed then
+    # >     print( "FAILED" )
+    # >   else
+    # >     print( "DONE" , response.code , response.status )
+    # >   end
     # > end
+    
     
     callback on_complete;    
 }

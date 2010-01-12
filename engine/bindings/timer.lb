@@ -39,8 +39,45 @@ private:
 
 ]]
 
+# Class: Timer
+# Quite simply; a timer. You can create a timer and set a callback that will run
+# every time it fires.
+
 class Timer [[timer*]]
 {
+    # Constructor: Timer
+    # Creates a new Timer object. There are several ways to create a timer.
+    # You can pass no parameters and have an empty timer. You can also pass
+    # an interval and a callback. And, finally you can pass a table that sets
+    # properties individually. As long as the interval and the callback are set
+    # when the timer is created, it will start right away.
+    #
+    # Arguments:
+    # interval - In seconds, how long until the timer fires. Note that this is
+    # a double, so you can specify fractions of seconds: for example, 0.5 is half
+    # a second.
+    # on_timer - A function that will be called when the timer fires.
+    #
+    # Examples:
+    # This one creates a timer that won't start right away (until we call <start>)
+    # > timer=Timer()
+    # > timer.interval=5
+    # > function timer.on_timer(timer)
+    # >   print("TICK")
+    # > end
+    # > timer:start()
+    #
+    # This one won't start either, because there is no callback
+    # > timer=Timer(5)
+    #
+    # This one will start right away and will call 'some_function' in about 5
+    # seconds
+    # > timer=Timer(5,some_function)
+    #
+    # You can also do it like this
+    # > timer=Timer{ interval=5 , on_timer=some_function }
+    
+    
     Timer( double interval = 0 , function on_timer = 0 )
         [[
             *self = new timer(L);
@@ -72,25 +109,42 @@ class Timer [[timer*]]
         [[
             delete self;
         ]];
+	
+    # Property: interval
+    # The interval, in seconds, after which the timer fires. 
         
     double interval
         [[interval=self->get_interval();]]
         [[self->set_interval(interval);]];
         
-    callback on_timer
-	[[
-	    if(!on_timer)
-		self->stop();
-	]];
-        
+    # Function: start
+    # Starts the timer if it has not started already
+    
     start()
         [[
 	    if (lb_callback_attached(L,self,"on_timer",1))
 		self->start();
 	]];
 	
+    # Function: stop
+    # Stops the timer. It won't tick again unless you start it.
+    
     stop()
 	[[self->stop();]];
+
+    # Event: on_timer
+    # This function gets called every time the timer fires. Timers keep firing
+    # until you do one of these things: set the on_timer callback to nil,
+    # call <stop> or return false from the on_timer callback.
+    #
+    # Arguments:
+    # timer - The associated Timer
+    
+    callback on_timer
+	[[
+	    if(!on_timer)
+		self->stop();
+	]];        
 }
 
 [[

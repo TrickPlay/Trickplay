@@ -50,12 +50,14 @@ Group: Globals  {
 
    File: app  (app.lb)
    File: profile  (profile.lb)
+   File: settings  (settings.lb)
    File: system  (system.lb)
    }  # Group: Globals
 
 Group: Classes  {
 
-   File: URLResponse  (url_request.lb)
+   File: Timer  (timer.lb)
+   File: URLRequest  (no auto-title, url_request.lb)
    File: XMLParser  (xml.lb)
    }  # Group: Classes
 
