@@ -125,8 +125,8 @@ SystemDatabase * SystemDatabase::open(const char * path)
 
 SystemDatabase::SystemDatabase(SQLite::DB & d,const char * p)
 :
-    db(d),
     path(p),
+    db(d),
     dirty(false)
 {
 }
