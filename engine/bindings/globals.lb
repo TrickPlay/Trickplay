@@ -58,6 +58,11 @@ globals
               return 2;  
             }            
         ]];
+        
+    exit()
+        [[
+            TPContext::get_from_lua(L)->quit();        
+        ]];
 /*        
     string serialize()
         [[
