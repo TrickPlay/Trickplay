@@ -285,6 +285,11 @@ local key_up    = 65362
 local key_enter = 65293
 
 local zoom_image
+local wall_zoom_back_z = -300
+local image_zoom_back_z = -200
+
+local wall_zoom_timeline = Timeline{ duration = 250 }
+local wall_zoom_alpha = Alpha{ timeline = wall_zoom_timeline , mode = "EASE_OUT_SINE" }
 
 function screen.on_key_down(screen,keyval)
 
@@ -298,7 +303,27 @@ function screen.on_key_down(screen,keyval)
                 under.y = y_interval.to
             end
             timeline:stop()
-        end        
+        end
+
+			if zoom_image then
+   	     if wall_zoom_timeline.is_playing then
+   	     	wall_zoom_timeline:stop()
+   	     end
+			  local wall_zoom_int = Interval( wall_enclosure.z, 0 )
+			  local image_zoom_z_int = Interval( zoom_image.z, image_zoom_back_z )
+			  local image_zoom_opacity_int = Interval( 255, 0 )
+				function wall_zoom_timeline.on_new_frame( t , msecs )
+					 wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
+					 zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
+					 zoom_image.opacity = image_zoom_opacity_int:get_value( wall_zoom_alpha.alpha )
+				end
+				function wall_zoom_timeline.on_completed( )
+			        zoom_image.parent:remove(zoom_image)
+		   	     zoom_image = nil
+		   	end
+
+				wall_zoom_timeline:start()
+   	   end
     end
     
     local function reset_wall()
@@ -385,16 +410,51 @@ function screen.on_key_down(screen,keyval)
         end
         
     elseif keyval == key_enter then
-    	reset()
-    	
-    	print("selected: (",table_print(photo_index[selection_col*rows_per_page + selection_row]),")")
-      local ok , url = pcall( get_photo_url , photo_index[selection_col*rows_per_page + selection_row] )
-      print("URL: ", url)
 
-      zoom_image = Image{ src = url , position = { 48 + (screen.w * 0.1), 24, 0 }, width = (screen.w * 0.8) - 96, keep_aspect_ratio = true, on_size_changed = image_size_changed }
-
-      screen:add( zoom_image )
-      
+		if not zoom_image then
+			reset()
+			
+			local the_photo = photo_index[selection_col*rows_per_page + selection_row] 
+	
+			local start_position = under.transformed_position
+	
+			local ok , url = pcall( get_photo_url , the_photo )
+	
+			zoom_image = Image{ src = url, on_size_changed = image_size_changed }
+			if (the_photo.width_m / 16) > ( the_photo.height_m / 9 )then
+				zoom_image.width = screen.w * 0.9
+				zoom_image.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
+			else
+				zoom_image.request_mode = "WIDTH_FOR_HEIGHT"
+				zoom_image.height = screen.h * 0.9
+				zoom_image.width = ( screen.h * 0.9 ) * ( the_photo.width_m / the_photo.height_m )
+			end
+			zoom_image.position = { ( screen.w - zoom_image.size[1] ) / 2,
+											( screen.h - zoom_image.size[2] ) / 2 }
+			zoom_image_scale = { 0.1, 0.1, zoom_image.size[1]/2, zoom_image.size[2]/2 }
+	
+			screen:add( zoom_image )
+   	     if wall_zoom_timeline.is_playing then
+   	     	wall_enclosure.z = wall_zoom_int.to
+   	     	wall_zoom_timeline:stop()
+   	     end
+			  local wall_zoom_int = Interval( wall_enclosure.z, wall_zoom_back_z )
+			  local image_zoom_z_int = Interval( image_zoom_back_z, 0 )
+			  local image_zoom_scale_int = Interval ( 0.1, 1.0 )
+				function wall_zoom_timeline.on_new_frame( t , msecs )
+					 zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
+					 zoom_image.scale = { image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
+					 								image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
+					 								zoom_image.size[1]/2,
+					 								zoom_image.size[2]/2 }
+					 wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
+				end
+				wall_zoom_timeline.on_completed = nil
+				wall_zoom_timeline:start()
+		else
+			
+			reset()
+		end
 	 
     else
         print( "KEY" , keyval )
