@@ -164,7 +164,6 @@ function populate_next_page(callback)
                         end
                         
                         local col = ( next_page_number - 1 ) * cols_per_page
-                        print("Starting at col: ",col)
                         local row = 0
                         
                         for i , photo in ipairs( json.photos.photo ) do
