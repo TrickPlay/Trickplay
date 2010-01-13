@@ -71,7 +71,7 @@ function inflate( position , size , dx , dy )
     return { position[ 1 ] + dx , position[ 2 ] + dy } , { size[ 1 ] - ( dx * 2 ) , size[ 2 ] - ( dy * 2 ) }
 end
 
-local photo_index = {}
+photo_index = {}
 
 
 screen.color = "000000";
@@ -157,10 +157,9 @@ function populate_next_page(callback)
                             max_pages = json.photos.pages
                         end
                         
-                        local start_col = cols_we_have
-                        local col = start_col
+                        local col = ( next_page_number - 1 ) * cols_per_page
+                        print("Starting at col: ",col)
                         local row = 0
-                        local cols = 0
                         
                         for i , photo in ipairs( json.photos.photo ) do
                         
@@ -175,19 +174,17 @@ function populate_next_page(callback)
                                 image.on_size_changed = image_size_changed
                                 
                                 wall:add( image )
-                                
-                                table.insert( photo_index , ( start_col * rows_per_page ) + i , photo )
+                                table.insert( photo_index , ( col * rows_per_page ) + row , photo )
                             end
                             
-                            col = col + 1
-                            if col == cols_per_page + start_col then
-                                col = start_col
-                                row = row + 1
-                                cols = cols_per_page
+                            row = row + 1
+                            if row == rows_per_page then
+                                row = 0
+                                col = col + 1
                             end
                         end
                         
-                        cols_we_have = cols_we_have + cols    
+                        cols_we_have = col
 
                         waiting = false
                         
@@ -219,7 +216,7 @@ populate_next_page( populate_next_page )
 local start_timeline = Timeline{ duration = 500 , delay = 800 }
 local a = Interval( wall.z , 0 )
 local b = Interval( wall.y_rotation[1] , tilt_angle )
-local c = Alpha{ timeline = start_timeline , mode = "EASE_OUT_CIRC" }
+local c = Alpha{ timeline = start_timeline , mode = "EASE_OUT_SINE" }
 
 function start_timeline.on_new_frame( t , msecs )
     wall.z = a:get_value( c.alpha )
@@ -279,6 +276,8 @@ local key_left  = 65361
 local key_down  = 65364
 local key_up    = 65362
 local key_enter = 65293
+
+local zoom_image
 
 function screen.on_key_down(screen,keyval)
 
@@ -379,8 +378,17 @@ function screen.on_key_down(screen,keyval)
         end
         
     elseif keyval == key_enter then
-    
+    	reset()
+    	
+    	print("selected: (",table_print(photo_index[selection_col*rows_per_page + selection_row]),")")
+      local ok , url = pcall( get_photo_url , photo_index[selection_col*rows_per_page + selection_row] )
+      print("URL: ", url)
 
+      zoom_image = Image{ src = url , position = { 48 + (screen.w * 0.1), 24, 0 }, width = (screen.w * 0.8) - 96, keep_aspect_ratio = true, on_size_changed = image_size_changed }
+
+      screen:add( zoom_image )
+      
+	 
     else
         print( "KEY" , keyval )
     end
