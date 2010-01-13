@@ -100,7 +100,7 @@ screen:add(logo)
 
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
 local --flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&format=json&nojsoncallback=1&extras=license,owner_name"
-flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.photos.search&license=4%2C5%2C6%2C7&sort=interestingness-desc&safe_search=1&content_type=1&media=photos&extras=license%2Cowner_name&format=json&nojsoncallback=1"
+flickr_base_url="http://api.flickr.com/services/rest/?method=flickr.photos.search&license=4%2C5%2C6%2C7&sort=interestingness-desc&safe_search=1&content_type=1&media=photos&extras=license%2Cowner_name%2Curl_t%2Curl_m&format=json&nojsoncallback=1"
 function get_photo_page(per_page,page)
     local json = URLRequest( flickr_base_url.."&per_page="..per_page.."&page="..page.."&api_key="..flickr_api_key):perform().body
     local result = {}
@@ -114,8 +114,14 @@ function get_photo_page(per_page,page)
     return result
 end
 
+function get_thumb_url(photo)
+--    return "http://farm"..photo.farm..".static.flickr.com/"..photo.server.."/"..photo.id.."_"..photo.secret.."_t.jpg"
+	return photo.url_t
+end
+
 function get_photo_url(photo)
-    return "http://farm"..photo.farm..".static.flickr.com/"..photo.server.."/"..photo.id.."_"..photo.secret.."_t.jpg"
+--    return "http://farm"..photo.farm..".static.flickr.com/"..photo.server.."/"..photo.id.."_"..photo.secret..".jpg"
+	return photo.url_m
 end
 
 local waiting = false
@@ -166,7 +172,7 @@ function populate_next_page(callback)
                             local ok
                             local url
 
-                            ok , url = pcall( get_photo_url , photo )
+                            ok , url = pcall( get_thumb_url , photo )
                             
                             if ok then 
                                 local image = Image{ src = url , position = get_tile_position( col , row ) }
