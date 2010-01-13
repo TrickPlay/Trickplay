@@ -18,7 +18,7 @@ def parse( source ):
     global file_name
     global options
     
-    operators = [ "[[" , "]]" , "(" , "," , ")" , "{" , "}" , ";" , "=" , "#" ]
+    operators = [ "[[" , "]]" , "(" , "," , ")" , "{" , "}" , ";" , "=" , "#" , "/*" , "*/"]
     
     def skip_white_space( i ):
 
@@ -124,6 +124,18 @@ def parse( source ):
             i = j + 2
             
             is_code = True
+            
+        elif token == "/*":
+            
+            j = source.find( "*/" , i )
+            
+            for c in token:
+                if c == "\n":
+                    line += 1
+                    
+            i = j + 2
+            
+            continue
             
         elif token == "#":
             
