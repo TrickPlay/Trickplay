@@ -58,4 +58,35 @@ globals
               return 2;  
             }            
         ]];
+/*        
+    string serialize()
+        [[
+            int n=lua_gettop(L);
+            switch(lua_type(L,n))
+            {
+                case LUA_TNUMBER:
+                    result=lua_tostring(L,n);
+                    break;
+                
+                case LUA_TSTRING:
+                {
+                    LSG;
+                    lua_getglobal(L,"string");
+                    lua_getfield(L,-1,"format");
+                    lua_pushstring(L,"%q");
+                    lua_pushvalue(L,n);
+                    lua_call(L,2,1);
+                    result=lua_tostring(L,-1);
+                    lua_pop(L,2);
+                    LSG_END(0);
+                    break;
+                }
+                
+                default:
+                    result=NULL;
+            }
+        ]];
+*/        
+        
 }
+
