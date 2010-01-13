@@ -82,7 +82,10 @@ local wall = Group{ position = { 0 , 0 } , size = screen.size }
 wall.y_rotation = { 80 , 480 , 0 }
 wall.z = -10000
 
-screen:add( wall )
+local wall_enclosure = Group{ position = { 0, 0 }, size = screen.size }
+wall_enclosure.add(wall)
+
+screen:add( wall_enclosure )
 
 local logo_url = "http://userlogos.org/files/logos/sandwiches/flickr0.png"
 local logo = Image {
