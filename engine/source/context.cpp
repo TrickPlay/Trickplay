@@ -609,9 +609,8 @@ int TPContext::request(const char * subject)
 
 String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 {
-    if (is_uri)
-	*is_uri=false;
-	
+    bool it_is_a_uri=false;
+    
     const char * app_path=get(TP_APP_PATH);
 	
     gchar * result=NULL;
@@ -655,8 +654,7 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	    
 	    if (!strcmp(scheme,"http")||!strcmp(scheme,"https"))
 	    {
-		if (is_uri)
-		    *is_uri=true;
+		it_is_a_uri=true;
 		    
 		result = g_strdup(path_or_uri);
 	    }
@@ -734,6 +732,20 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     
     g_assert(result);
     
+    if (is_uri)
+	*is_uri=it_is_a_uri;
+	
+#ifdef TP_PRODUCTION
+
+    // Check for links
+    
+    if (!it_is_a_uri && g_file_test(result,G_FILE_TEST_IS_SYMLINK))
+    {
+	g_error("SYMBOLIC LINKS NOT ALLOWED : %s",result );
+    }
+    
+#endif
+
     Util::GFreeLater free_result(result);
     
     return String(result);
