@@ -166,6 +166,11 @@ void            tp_context_set_request_handler(
 #define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
 
 
+// Internal notification to get things ready for the profile change
+
+#define TP_NOTIFICATION_PROFILE_CHANGE                  "profile-change"
+
+
 // The current profile changed
 
 #define TP_NOTIFICATION_PROFILE_CHANGED                 "profile-changed"

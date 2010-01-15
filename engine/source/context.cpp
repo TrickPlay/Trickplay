@@ -935,6 +935,8 @@ bool TPContext::profile_switch(int id)
     set(PROFILE_ID,id);
     set(PROFILE_NAME,profile.name);
     
+    notify(TP_NOTIFICATION_PROFILE_CHANGE);
+    
     notify(TP_NOTIFICATION_PROFILE_CHANGED);
 
     return true;    
