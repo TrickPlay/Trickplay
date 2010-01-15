@@ -330,7 +330,7 @@ function screen.on_key_down(screen,keyval)
     elseif keyval == key_down then
         reset()
         
-        if selection_row < 3 then
+        if selection_row < rows_per_column-1 then
             x_interval = nil
             y_interval = Interval( cursor.y , cursor.y + tile_size )
             selection_row = selection_row + 1        
