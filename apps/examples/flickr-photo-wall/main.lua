@@ -348,7 +348,13 @@ function screen.on_key_down(screen,keyval)
 			local start_position = cursor.transformed_position
 
 			zoom_image = Group { position = {0,0} }
-			local zoom_image_img = Image{ position = {0,0}, src = Flickr.get_medium_url(the_photo) }
+			local zoom_image_url
+			if screen.size[2] < 1080 then
+				zoom_image_url = Flickr.get_medium_url(the_photo)
+			else
+				zoom_image_url = Flickr.get_original_url(the_photo)
+			end
+			local zoom_image_img = Image{ position = {0,0}, src = zoom_image_url }
 			local zoom_image_txt_grp = Group { position = { 0, 0 } }
 			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
 			local photo_title = string.gsub(the_photo.title, "%c", "_")
