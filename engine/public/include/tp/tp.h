@@ -59,6 +59,27 @@ TPContext *     tp_context_new();
 #define TP_DATA_PATH            "data.path"
 
 
+// Environment configuration
+// If set to "1", TrickPlay will read additional configuration variables
+// from the environment. All environment variables that begin with "TP_" will
+// be read, all underscores will be changed to "." and the resulting variables
+// will be set in the context. For example, the environment variable
+// "TP_app_path" will be read and set as "app.path"
+// Defaults to "1"
+
+#define TP_CONFIG_FROM_ENV      "config.env"
+
+
+// File configuration
+// If set to the path to an existing file, TrickPlay will read configuration
+// variables from the file. The file should have one entry per line, with the
+// configuration variable followed by "=" and its value. Lines that start with
+// "#" are ignored. For example: app.path=/foo/bar
+// Defaults to "trickplay.cfg"
+
+#define TP_CONFIG_FROM_FILE     "config.file"
+
+
 // Console enabled
 // Set to "1" if you want to enable the input console, or "0" otherwise
 // Defaults to "1"

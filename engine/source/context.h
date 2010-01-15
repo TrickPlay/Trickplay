@@ -93,13 +93,29 @@ public:
     
     bool profile_switch(int id);
     
+    struct AppMetadata
+    {
+        AppMetadata() : release(0) {}
+        
+        String path;
+        String id;
+        String name;
+        int release;
+        String version;
+        String description;
+        String author;
+        String copyright;
+    };
+    
 protected:
+    
+    void load_external_configuration();
     
     void validate_configuration();
     
-    bool load_app_metadata(const char * app_path);
+    bool load_app_metadata(const char * app_path,AppMetadata & md);
     
-    bool prepare_app();
+    bool prepare_app(const AppMetadata & md);
     
     int load_app();
     

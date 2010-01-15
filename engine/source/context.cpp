@@ -185,6 +185,9 @@ int TPContext::run()
     is_running=true;
     
     int result=TP_RUN_OK;
+    
+    // Load external configuration variables (from the environment or a file)
+    load_external_configuration();
 
     // Validate our configuration
     // Any problem here will just abort - these are likely programming errors.
@@ -236,12 +239,13 @@ int TPContext::load_app()
     // Get the base path for the app
     const char * app_path = get(TP_APP_PATH);
     
-    // Load metadata    
-    if (!load_app_metadata(app_path))
+    // Load metadata
+    AppMetadata md;
+    if (!load_app_metadata(app_path,md))
 	return TP_RUN_APP_CORRUPT;
     
     // Prepare for the app
-    if (!prepare_app())
+    if (!prepare_app(md))
 	return TP_RUN_APP_PREPARE_FAILED;
     
     // Start up a lua state
@@ -348,9 +352,15 @@ TPContext * TPContext::get_from_lua(lua_State * L)
 
 //-----------------------------------------------------------------------------
 
-bool TPContext::load_app_metadata(const char * app_path)
+bool TPContext::load_app_metadata(const char * app_path,AppMetadata & md)
 {
     g_assert(app_path);
+    
+    // To clear the one passed in
+    
+    md=AppMetadata();
+    
+    md.path=app_path;
     
     // Open a state with no libraries - not even the base one
     
@@ -419,41 +429,41 @@ bool TPContext::load_app_metadata(const char * app_path)
 	    
 	
 	// Store it
-	set(APP_ID,s);
+	md.id=s;
 	lua_pop(L,1);
 
 	// Look for the other fields
 	lua_getfield(L,-1,APP_FIELD_NAME);
 	if (lua_type(L,-1)!=LUA_TSTRING)
 	    throw String("Missing or invalid app name");
-	set(APP_NAME,lua_tostring(L,-1));
+	md.name=lua_tostring(L,-1);
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_RELEASE);
 	if (lua_tointeger(L,-1)<=0)
 	    throw String("Missing or invalid app release, it must be a number greater than 0");
-	set(APP_RELEASE,lua_tointeger(L,-1));
+	md.release=lua_tointeger(L,-1);
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_VERSION);
 	if (lua_type(L,-1)!=LUA_TSTRING)
-	    throw String("Missing or invalid app version");
-	set(APP_VERSION,lua_tostring(L,-1));
+	    throw String("Missing or invalid app version");	
+	md.version=lua_tostring(L,-1);
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_DESCRIPTION);
 	if(lua_isstring(L,-1))
-	    set(APP_DESCRIPTION,lua_tostring(L,-1));
+	    md.description=lua_tostring(L,-1);
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_AUTHOR);
 	if(lua_isstring(L,-1))
-	    set(APP_AUTHOR,lua_tostring(L,-1));
+	    md.author=lua_tostring(L,-1);
 	lua_pop(L,1);
 	
 	lua_getfield(L,-1,APP_FIELD_COPYRIGHT);
 	if(lua_isstring(L,-1))
-	    set(APP_COPYRIGHT,lua_tostring(L,-1));
+	    md.copyright=lua_tostring(L,-1);
 	lua_pop(L,1);
 	
 	lua_close(L);
@@ -469,8 +479,16 @@ bool TPContext::load_app_metadata(const char * app_path)
 
 //-----------------------------------------------------------------------------
 
-bool TPContext::prepare_app()
+bool TPContext::prepare_app(const AppMetadata & md)
 {
+    set(APP_ID,md.id);
+    set(APP_NAME,md.name);
+    set(APP_DESCRIPTION,md.description);
+    set(APP_AUTHOR,md.author);
+    set(APP_COPYRIGHT,md.copyright);
+    set(APP_RELEASE,md.release);
+    set(APP_VERSION,md.version);
+    
     // Get its data directory ready
     
     gchar * id_hash=g_compute_checksum_for_string(G_CHECKSUM_SHA1,get(APP_ID),-1);
@@ -750,6 +768,68 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     
     return String(result);
 }
+
+//-----------------------------------------------------------------------------
+// Load configuration variables from the environment or a file
+
+void TPContext::load_external_configuration()
+{
+    if (get_bool(TP_CONFIG_FROM_ENV,true))
+    {
+	for(char ** e=environ;*e;++e)
+	{
+	    if (g_str_has_prefix(*e,"TP_"))
+	    {
+		gchar ** parts=g_strsplit((*e)+3,"=",2);
+		
+		if (g_strv_length(parts)==2)
+		{
+		    gchar * k=g_strstrip(g_strdelimit(parts[0],"_",'.'));
+		    gchar * v=g_strstrip(parts[1]);
+		    
+		    g_debug("ENV:%s=%s",k,v);
+		    set(k,v);    
+		}
+		
+		g_strfreev(parts);
+	    }
+	}
+    }
+    
+    const char * file_name=get(TP_CONFIG_FROM_FILE,"trickplay.cfg");
+    
+    gchar * contents=NULL;
+    
+    if (g_file_get_contents(file_name,&contents,NULL,NULL))
+    {
+	gchar ** lines=g_strsplit(contents,"\n",-1);
+	
+	for(gchar ** l=lines;*l;++l)
+	{
+	    gchar * line=g_strstrip(*l);
+
+	    if (g_str_has_prefix(line,"#"))
+		continue;
+	    
+	    gchar ** parts=g_strsplit(line,"=",2);
+	    
+	    if (g_strv_length(parts)==2)
+	    {
+		gchar * k=g_strstrip(parts[0]);
+		gchar * v=g_strstrip(parts[1]);
+		
+		g_debug("FILE:%s:%s=%s",file_name,k,v);
+		set(k,v);
+	    }
+	    
+	    g_strfreev(parts);
+	}
+	
+	g_strfreev(lines);
+	g_free(contents);
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 
