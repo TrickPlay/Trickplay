@@ -1,3 +1,6 @@
+screen.size = { 960 , 540 }
+--screen.size = { 1920, 1080 }
+
 dofile("debug-lib.lua")
 
 Timer{ interval = 2 , on_timer = function() collectgarbage() end }
@@ -7,11 +10,11 @@ dofile("Flickr.lua")
 -- How many images should we load at a time? More takes longer, fewer means more fetches
 local prefetch_images = 40
 -- How many images in each column?
-local rows_per_column = 4
+local rows_per_column = 2 + math.floor(screen.size[2] / 270)
 -- How much should the wall be padde on the left side?
-local left_pad = 90
+local left_pad = screen.size[1] / 10
 -- How much should the wall be padded on top?
-local top_pad = 60
+local top_pad = screen.size[2] / 10
 -- How big shold each image tile be?
 local tile_size = 120
 -- How much padding between adjacent tiles?
@@ -29,7 +32,6 @@ local selection_col = 0
 local selection_row = 0
 
 screen.color = "000000";
-screen.size = { 960 , 540 }
 screen:show_all()
 
 -- The wall will contain an array of Images which will slide around diagonally on the screen at an angle
