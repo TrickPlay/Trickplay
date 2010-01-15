@@ -350,13 +350,15 @@ function screen.on_key_down(screen,keyval)
 			zoom_image = Group { position = {0,0} }
 			local zoom_image_img = Image{ position = {0,0}, src = Flickr.get_medium_url(the_photo) }
 			local zoom_image_txt_grp = Group { position = { 0, 0 } }
-			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 20 }, position = { 0, 0} }
+			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
+			local photo_title = string.gsub(the_photo.title, "%c", "_")
+			local photo_owner = string.gsub(the_photo.ownername, "%c", "_")
 			local zoom_image_txt = Text {
-													position = { 10, -1 },
-													text = "\""..the_photo.title.."\" ©"..the_photo.ownername.." ("..licenses[the_photo.license].short..")",
+													position = { 10, 0 },
+													text = "\""..photo_title.."\" ©"..photo_owner.." ("..licenses[the_photo.license].short..")",
 													z = 1,
 													color = { 255, 255, 255 },
-													font = "DejaVu Sans,Sans 18px",
+													font = "Graublau Web,DejaVu Sans,Sans 18px",
 													wrap = false,
 												}
 			zoom_image_txt_grp:add(zoom_image_txt_rect)
