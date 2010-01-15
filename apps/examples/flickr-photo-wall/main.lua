@@ -21,6 +21,7 @@ local tilt_angle = 30
 local super_tilt_angle = 85
 -- API Key for flickr API access for this app
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
+local trickplay_red = { 150, 10, 4 }
 
 local cols_per_page = math.floor(prefetch_images / rows_per_column)
 local left_col = 0
@@ -91,7 +92,7 @@ function populate_next_page( completion )
 	-- table, and finally call us back by invoking :callback on the final argument
 	-- We store some state for the callback in the that table so it can be used without scoping issues in the callback's
 	-- context
-	Flickr.fetch_photos(flickr_api_key, Flickr.cc_interesting, cols_per_page*rows_per_column, pages_loaded, photo_index,
+	Flickr.fetch_photos(flickr_api_key, Flickr.cc_interesting_url, cols_per_page*rows_per_column, pages_loaded, photo_index,
 		{
 			start = #photo_index,
 			final = #photo_index + cols_per_page*rows_per_column,
@@ -122,7 +123,7 @@ function populate_next_page( completion )
 
 end
 
-local cursor = Rectangle{ color = { 150 , 10 , 4 } , opacity = 0 }
+local cursor = Rectangle{ color = trickplay_red , opacity = 0 }
 cursor.position , cursor.size = inflate( get_tile_position( selection_col , selection_row ) , { 100 , 100 } , -4 , -4 )
 
 wall:add( cursor )
@@ -139,6 +140,10 @@ populate_next_page({
 								})
 							end
 						})
+
+-- We also want to get the list of licenses for displaying along with images when zoomed
+local licenses = {}
+Flickr.license_info(flickr_api_key, licenses)
 
 -- The start_timeline will wait until the images are likely to have started loading, then rotate the
 -- wall to its tilted angle, from its original super-tilted angle
@@ -340,18 +345,40 @@ function screen.on_key_down(screen,keyval)
 
 			local start_position = cursor.transformed_position
 
-			zoom_image = Image{ src = Flickr.get_medium_url(the_photo) }
+			zoom_image = Group { position = {0,0} }
+			local zoom_image_img = Image{ position = {0,0}, src = Flickr.get_medium_url(the_photo) }
+			local zoom_image_txt_grp = Group { position = { 0, 0 } }
+			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 20 }, position = { 0, 0} }
+			local zoom_image_txt = Text {
+													position = { 10, -1 },
+													text = "\""..the_photo.title.."\" ©"..the_photo.ownername.." ("..licenses[the_photo.license].short..")",
+													z = 1,
+													color = { 255, 255, 255 },
+													font = "DejaVu Sans,Sans 18px",
+													wrap = false,
+												}
+			zoom_image_txt_grp:add(zoom_image_txt_rect)
+			zoom_image_txt_grp:add(zoom_image_txt)
+
+			zoom_image:add(zoom_image_img)
+			zoom_image:add(zoom_image_txt_grp)
 			if (the_photo.width_m / 16) > ( the_photo.height_m / 9 )then
-				zoom_image.width = screen.w * 0.9
-				zoom_image.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
+				zoom_image_img.width = screen.w * 0.9
+				zoom_image_img.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
 			else
-				zoom_image.request_mode = "WIDTH_FOR_HEIGHT"
-				zoom_image.height = screen.h * 0.9
-				zoom_image.width = ( screen.h * 0.9 ) * ( the_photo.width_m / the_photo.height_m )
+				zoom_image_img.request_mode = "WIDTH_FOR_HEIGHT"
+				zoom_image_img.height = screen.h * 0.9
+				zoom_image_img.width = ( screen.h * 0.9 ) * ( the_photo.width_m / the_photo.height_m )
 			end
-			zoom_image.position = { ( screen.w - zoom_image.size[1] ) / 2,
-											( screen.h - zoom_image.size[2] ) / 2 }
-			zoom_image_scale = { 0.1, 0.1, zoom_image.size[1]/2, zoom_image.size[2]/2 }
+			local max_txt_width = zoom_image_img.height - 40
+			if max_txt_width < zoom_image_txt.size[1] then
+				zoom_image_txt.scale = { max_txt_width/zoom_image_txt.size[1], 1.0 }
+			end
+			zoom_image_txt_rect.width = zoom_image_txt.transformed_size[1] + 20
+			zoom_image_txt_grp.z_rotation = { 90, 0, 0 }
+			zoom_image.position = { ( screen.w - zoom_image_img.size[1] ) / 2,
+											( screen.h - zoom_image_img.size[2] ) / 2 }
+			zoom_image_scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
 
 			screen:add( zoom_image )
    	     if wall_zoom_timeline.is_playing then
@@ -365,8 +392,8 @@ function screen.on_key_down(screen,keyval)
 					 zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
 					 zoom_image.scale = { image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
 					 								image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
-					 								zoom_image.size[1]/2,
-					 								zoom_image.size[2]/2 }
+					 								zoom_image_img.size[1]/2,
+					 								zoom_image_img.size[2]/2 }
 					 wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
 				end
 				wall_zoom_timeline.on_completed = nil
