@@ -100,7 +100,7 @@ SystemDatabase * SystemDatabase::open(const char * path)
     // Now, we create an instance of a system database - which will steal the
     // underlying sqlite db from our local instance...we transfer ownership of it.
     
-    SystemDatabase * result=new SystemDatabase(db,path);
+    SystemDatabase * result=new SystemDatabase(db,path,create);
     
     // If we fail to populate the database, we should not continue since we may
     // have inconsistent data. Plus, if this fails, it is very likely that
@@ -123,11 +123,12 @@ SystemDatabase * SystemDatabase::open(const char * path)
     return result;    
 }
 
-SystemDatabase::SystemDatabase(SQLite::DB & d,const char * p)
+SystemDatabase::SystemDatabase(SQLite::DB & d,const char * p,bool c)
 :
     path(p),
     db(d),
-    dirty(false)
+    dirty(false),
+    restored(!c)
 {
 }
 
@@ -187,6 +188,11 @@ bool SystemDatabase::flush()
     g_debug("SYSTEM DATABASE FLUSHED");
     dirty=false;
     return true;    
+}
+
+bool SystemDatabase::was_restored() const
+{
+    return restored;
 }
 
 bool SystemDatabase::insert_initial_data()

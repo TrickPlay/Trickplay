@@ -30,6 +30,8 @@ class SystemDatabase
         
         bool flush();
         
+        bool was_restored() const;
+        
         bool set(const char * key,int value);
         bool set(const char * key,const char * value);
         bool set(const char * key,const String & value);
@@ -45,12 +47,13 @@ class SystemDatabase
         
         bool insert_initial_data();
         
-        SystemDatabase(SQLite::DB & d,const char * p);
+        SystemDatabase(SQLite::DB & d,const char * p,bool c);
         SystemDatabase(const SystemDatabase &) {}
         
         String      path;
         SQLite::DB  db;
         bool        dirty;
+        bool        restored;
 };
 
 
