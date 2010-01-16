@@ -356,53 +356,56 @@ void TPContext::scan_app_sources()
 	}
     }
     
-    //.........................................................................
-    // Now we have a map of app ids - each entry has a list of versions found
-    
-    // We delete all the apps from the database
-    
-    sysdb->delete_all_apps();
-    
-    std::map< String,std::list<AppMetadata> >::iterator it=apps.begin();
-    
-    for(;it!=apps.end();++it)
+    if (!apps.empty())
     {
-	if (it->second.size()>1)
-	{    
-	    // We move the list to a new list and clear the original
-	    
-	    const std::list<AppMetadata> versions(it->second);
-	    
-	    it->second.clear();
-	    
-	    // Now, we point an iterator to the first one in the list. If one of the
-	    // others has a greater release number, we point the iterator at it.
-	    //
-	    // When we are done, this iterator will point to the app metadata
-	    // with the greatest release number.
-	    
-	    std::list<AppMetadata>::const_iterator latest=versions.begin();
-	    
-	    for(std::list<AppMetadata>::const_iterator vit=++(versions.begin());vit!=versions.end();++vit)
-	    {
-		if (vit->release > latest->release)
-		    latest=vit;
+	//.........................................................................
+	// Now we have a map of app ids - each entry has a list of versions found
+	
+	// We delete all the apps from the database
+	
+	sysdb->delete_all_apps();
+	
+	std::map< String,std::list<AppMetadata> >::iterator it=apps.begin();
+	
+	for(;it!=apps.end();++it)
+	{
+	    if (it->second.size()>1)
+	    {    
+		// We move the list to a new list and clear the original
+		
+		const std::list<AppMetadata> versions(it->second);
+		
+		it->second.clear();
+		
+		// Now, we point an iterator to the first one in the list. If one of the
+		// others has a greater release number, we point the iterator at it.
+		//
+		// When we are done, this iterator will point to the app metadata
+		// with the greatest release number.
+		
+		std::list<AppMetadata>::const_iterator latest=versions.begin();
+		
+		for(std::list<AppMetadata>::const_iterator vit=++(versions.begin());vit!=versions.end();++vit)
+		{
+		    if (vit->release > latest->release)
+			latest=vit;
+		}
+		
+		// Finally, we put the one pointed to by the iterator back in the map's list
+		
+		it->second.push_back(*latest);
 	    }
 	    
-	    // Finally, we put the one pointed to by the iterator back in the map's list
+	    const AppMetadata & md=it->second.front();
 	    
-	    it->second.push_back(*latest);
+	    sysdb->insert_app(md.id,md.path,md.release,md.version);
+	    
+	    g_debug("ADDING %s (%s/%d) @ %s",
+		    md.id.c_str(),
+		    md.version.c_str(),
+		    md.release,
+		    md.path.c_str() );
 	}
-	
-	const AppMetadata & md=it->second.front();
-	
-	sysdb->insert_app(md.id,md.path,md.release,md.version);
-	
-	g_debug("ADDING %s (%s/%d) @ %s",
-		md.id.c_str(),
-		md.version.c_str(),
-		md.release,
-		md.path.c_str() );
     }
 }
 
@@ -421,7 +424,10 @@ int TPContext::load_app()
     {
 	app_path=sysdb->get_app_path(app_id);
 	if (app_path.empty())
+	{
+	    g_warning("FAILED TO FIND %s IN THE SYSTEM DATABASE",app_id);
 	    return TP_RUN_APP_NOT_FOUND;
+	}
 	set(TP_APP_PATH,app_path);
     }
     else
