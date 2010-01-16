@@ -25,7 +25,7 @@ global app [[TPContext*]]
     # Returns the id of the current application
     
     readonly string id
-        [[id=self->get(APP_ID);]];
+        [[id=self->get(TP_APP_ID);]];
         
     # Property: name
     # Returns the name of the current application

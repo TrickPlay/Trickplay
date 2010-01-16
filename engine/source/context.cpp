@@ -204,6 +204,10 @@ int TPContext::run()
     }
     else
     {
+	// Scan for apps
+	
+	scan_app_sources();
+	
 	// Get the current profile from the database and set it into our
 	// configuration
 	
@@ -232,16 +236,203 @@ int TPContext::run()
 
 //-----------------------------------------------------------------------------
 
+void TPContext::scan_app_sources()
+{
+    bool force=get_bool(TP_SCAN_APP_SOURCES,false);
+    
+    // If the scan is not forced and we are launching with an app path, we
+    // don't need to do the scan
+    
+    if (!force && !get(TP_APP_ID))
+	return;
+    
+    // If the scan is not forced and we already have apps in the database, bail
+    
+    if (!force && sysdb->get_app_count()>0)
+	return;
+    
+    // Otherwise, let's do the scan
+    
+    const char * app_sources=get(TP_APP_SOURCES);
+    
+    if (!app_sources)
+    {
+	g_warning("NO APP SOURCES TO SCAN");
+	return;
+    }
+    
+    std::map< String,std::list<AppMetadata> > apps;
+    
+    //.........................................................................
+    // First scan app sources
+    
+    gchar ** paths=g_strsplit(app_sources,";",0);
+    
+    for(gchar**p=paths;*p;++p)
+    {
+	gchar * path=g_strstrip(*p);
+	
+	GDir * dir=g_dir_open(path,0,NULL);
+	
+	if (!dir)
+	{
+	    g_warning("FAILED TO SCAN APP SOURCE %s",path);
+	}
+	else
+	{
+	    while(const gchar * base=g_dir_read_name(dir))
+	    {
+		gchar * md_file_name=g_build_filename(path,base,"app",NULL);		
+		Util::GFreeLater free_md_file_name(md_file_name);
+		
+		if (!g_file_test(md_file_name,G_FILE_TEST_IS_REGULAR))
+		    continue;
+		
+		gchar * app_path=g_build_filename(path,base,NULL);
+		Util::GFreeLater free_app_path(app_path);
+		
+		AppMetadata md;
+		
+		if (load_app_metadata(app_path,md))
+		{
+		    g_debug("SCAN FOUND %s (%s/%d) @ %s",
+			    md.id.c_str(),
+			    md.version.c_str(),
+			    md.release,
+			    app_path);
+		
+		    apps[md.id].push_back(md);    
+		}
+	    }
+	    
+	    g_dir_close(dir);
+	}
+    }
+    
+    g_strfreev(paths);
+    
+    //.........................................................................
+    // Now scan the data directory - where apps may be installed
+    
+    gchar * installed_root=g_build_filename(get(TP_DATA_PATH),"apps",NULL);
+    Util::GFreeLater free_installed_root(installed_root);
+    
+    if (g_file_test(installed_root,G_FILE_TEST_EXISTS))
+    {
+	GDir * dir=g_dir_open(installed_root,0,NULL);
+	
+	if (!dir)
+	{
+	    g_warning("FAILED TO SCAN APP SOURCE %s",installed_root);
+	}
+	else
+	{
+	    while(const gchar * base=g_dir_read_name(dir))
+	    {
+		gchar * app_path=g_build_filename(installed_root,base,"source",NULL);
+		Util::GFreeLater free_app_path(app_path);
+		
+		gchar * md_file_name=g_build_filename(app_path,"app",NULL);
+		Util::GFreeLater free_md_file_name(md_file_name);
+		
+		if (!g_file_test(md_file_name,G_FILE_TEST_IS_REGULAR))
+		    continue;
+		
+		AppMetadata md;
+		
+		if (load_app_metadata(app_path,md))
+		{
+		    g_debug("SCAN FOUND %s (%s/%d) @ %s",
+			    md.id.c_str(),
+			    md.version.c_str(),
+			    md.release,
+			    app_path);
+		    
+		    apps[md.id].push_back(md);    
+		}
+	    }
+	    
+	    g_dir_close(dir);
+	}
+    }
+    
+    //.........................................................................
+    // Now we have a map of app ids - each entry has a list of versions found
+    
+    // We delete all the apps from the database
+    
+    sysdb->delete_all_apps();
+    
+    std::map< String,std::list<AppMetadata> >::iterator it=apps.begin();
+    
+    for(;it!=apps.end();++it)
+    {
+	if (it->second.size()>1)
+	{    
+	    // We move the list to a new list and clear the original
+	    
+	    const std::list<AppMetadata> versions(it->second);
+	    
+	    it->second.clear();
+	    
+	    // Now, we point an iterator to the first one in the list. If one of the
+	    // others has a greater release number, we point the iterator at it.
+	    //
+	    // When we are done, this iterator will point to the app metadata
+	    // with the greatest release number.
+	    
+	    std::list<AppMetadata>::const_iterator latest=versions.begin();
+	    
+	    for(std::list<AppMetadata>::const_iterator vit=++(versions.begin());vit!=versions.end();++vit)
+	    {
+		if (vit->release > latest->release)
+		    latest=vit;
+	    }
+	    
+	    // Finally, we put the one pointed to by the iterator back in the map's list
+	    
+	    it->second.push_back(*latest);
+	}
+	
+	const AppMetadata & md=it->second.front();
+	
+	sysdb->insert_app(md.id,md.path,md.release,md.version);
+	
+	g_debug("ADDING %s (%s/%d) @ %s",
+		md.id.c_str(),
+		md.version.c_str(),
+		md.release,
+		md.path.c_str() );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 int TPContext::load_app()
 {
     int result=TP_RUN_OK;
     
-    // Get the base path for the app
-    const char * app_path = get(TP_APP_PATH);
+    String app_path;
+    
+    // If an app id was specified, we will try to find the app by id
+    const char * app_id=get(TP_APP_ID);
+    
+    if(app_id)
+    {
+	app_path=sysdb->get_app_path(app_id);
+	if (app_path.empty())
+	    return TP_RUN_APP_NOT_FOUND;
+	set(TP_APP_PATH,app_path);
+    }
+    else
+    {
+	// Get the base path for the app
+	app_path=get(TP_APP_PATH);
+    }
     
     // Load metadata
     AppMetadata md;
-    if (!load_app_metadata(app_path,md))
+    if (!load_app_metadata(app_path.c_str(),md))
 	return TP_RUN_APP_CORRUPT;
     
     // Prepare for the app
@@ -249,7 +440,7 @@ int TPContext::load_app()
 	return TP_RUN_APP_PREPARE_FAILED;
     
     // Start up a lua state
-    lua_State * L = lua_open();
+    lua_State * L=lua_open();
     g_assert(L);
     
     // Put a pointer to us in Lua so bindings can get to it
@@ -296,7 +487,7 @@ int TPContext::load_app()
     notify(TP_NOTIFICATION_APP_LOADING);
     
     // Run the script
-    gchar * main_path=g_build_filename(app_path,"main.lua",NULL);
+    gchar * main_path=g_build_filename(app_path.c_str(),"main.lua",NULL);
     Util::GFreeLater free_main_path(main_path);
         
     if (luaL_dofile(L,main_path))
@@ -481,7 +672,7 @@ bool TPContext::load_app_metadata(const char * app_path,AppMetadata & md)
 
 bool TPContext::prepare_app(const AppMetadata & md)
 {
-    set(APP_ID,md.id);
+    set(TP_APP_ID,md.id);
     set(APP_NAME,md.name);
     set(APP_DESCRIPTION,md.description);
     set(APP_AUTHOR,md.author);
@@ -491,7 +682,7 @@ bool TPContext::prepare_app(const AppMetadata & md)
     
     // Get its data directory ready
     
-    gchar * id_hash=g_compute_checksum_for_string(G_CHECKSUM_SHA1,get(APP_ID),-1);
+    gchar * id_hash=g_compute_checksum_for_string(G_CHECKSUM_SHA1,md.id.c_str(),-1);
     
     Util::GFreeLater free_id_hash(id_hash);    
     
@@ -835,11 +1026,23 @@ void TPContext::load_external_configuration()
 
 void TPContext::validate_configuration()
 {
+    // TP_APP_SOURCES
+    
+    const char * app_sources=get(TP_APP_SOURCES);
+    
+    if (!app_sources)
+    {
+	gchar * s=g_build_filename(g_get_current_dir(),"apps",NULL);
+	set(TP_APP_SOURCES,s);
+	g_warning("DEFAULT:%s=%s",TP_APP_SOURCES,s);
+	g_free(s);
+    }
+    
     // TP_APP_PATH
     
     const char * app_path=get(TP_APP_PATH);
     
-    if (!app_path)
+    if (!app_path && !get(TP_APP_ID))
     {
 	gchar * c=g_get_current_dir();
 	set(TP_APP_PATH,c);

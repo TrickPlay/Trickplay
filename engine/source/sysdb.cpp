@@ -15,6 +15,11 @@ static const char * schema_create=
     "create table generic( key TEXT PRIMARY KEY NOT NULL , value TEXT );"
     "create table profiles( id INTEGER PRIMARY KEY AUTOINCREMENT,"
     "                       name TEXT,pin TEXT);"
+    
+    "create table apps( id TEXT PRIMARY KEY NOT NULL,"
+    "                   path TEXT NOT NULL, "
+    "                   release INTEGER NOT NULL,"
+    "                   version TEXT NOT NULL);"
 ;
 
 //-----------------------------------------------------------------------------
@@ -204,7 +209,7 @@ bool SystemDatabase::insert_initial_data()
     {
         SQLite::Statement select(db,"select id from profiles;");
 
-        while(select.ok() && select.step()==SQLITE_ROW)
+        while(select.step_row())
             ids.insert(select.get_int(0));
             
         if (!select.ok())
@@ -278,7 +283,7 @@ String SystemDatabase::get_string(const char * key,const char * def)
 {
     SQLite::Statement select(db,"select value from generic where key=?1;");
     select.bind(1,key);
-    if (select.ok() && select.step()==SQLITE_ROW)
+    if (select.step_row())
         return select.get_string(0);
     return String(def);
 }
@@ -287,10 +292,13 @@ int SystemDatabase::get_int(const char * key,int def)
 {
     SQLite::Statement select(db,"select value from generic where key=?1;");
     select.bind(1,key);
-    if (select.ok() && select.step()==SQLITE_ROW)
+    if (select.step_row())
         return select.get_int(0);
     return def;    
 }
+
+
+//-----------------------------------------------------------------------------
 
 int SystemDatabase::create_profile(const String & name,const String & pin)
 {
@@ -308,7 +316,7 @@ SystemDatabase::Profile SystemDatabase::get_current_profile()
     
     SQLite::Statement select(db,"select p.id,p.name,p.pin from generic g,profiles p where g.key=?1 and g.value=p.id;");
     select.bind(1,TP_DB_CURRENT_PROFILE_ID);
-    if (select.ok() && select.step()==SQLITE_ROW)
+    if (select.step_row())
     {
         result.id=select.get_int(0);
         result.name=select.get_string(1);
@@ -323,11 +331,50 @@ SystemDatabase::Profile SystemDatabase::get_profile(int id)
     
     SQLite::Statement select(db,"select name,pin from profiles where id=?1;");
     select.bind(1,id);
-    if (select.ok() && select.step()==SQLITE_ROW)
+    if (select.step_row())
     {
         result.id=id;
         result.name=select.get_string(0);
         result.pin=select.get_string(1);
     }
     return result;    
+}
+
+//-----------------------------------------------------------------------------
+
+int SystemDatabase::get_app_count()
+{
+    SQLite::Statement select(db,"select count(*) from apps;");
+    if (select.step_row())
+        return select.get_int(0);
+    return 0;
+}
+
+bool SystemDatabase::delete_all_apps()
+{
+    dirty=true;
+    SQLite::Statement select(db,"delete from apps;");
+    select.step();
+    return select.ok();
+}
+
+bool SystemDatabase::insert_app(const String & id,const String & path,int release,const String & version)
+{
+    dirty=true;
+    SQLite::Statement insert(db,"insert into apps (id,path,release,version) values (?1,?2,?3,?4);");
+    insert.bind(1,id);
+    insert.bind(2,path);
+    insert.bind(3,release);
+    insert.bind(4,version);
+    insert.step();
+    return insert.ok();
+}
+
+String SystemDatabase::get_app_path(const String & id)
+{
+    SQLite::Statement select(db,"select path from apps where id=?1;");
+    select.bind(1,id);
+    if (select.step_row())
+        return select.get_string(0);
+    return String();
 }

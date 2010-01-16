@@ -22,7 +22,6 @@ typedef std::map<String,String> StringMap;
 //-----------------------------------------------------------------------------
 // Internal configuration keys
 
-#define APP_ID                  "app.id"
 #define APP_NAME                "app.name"
 #define APP_DESCRIPTION         "app.description"
 #define APP_AUTHOR              "app.author"
@@ -112,6 +111,8 @@ protected:
     void load_external_configuration();
     
     void validate_configuration();
+    
+    void scan_app_sources();
     
     bool load_app_metadata(const char * app_path,AppMetadata & md);
     

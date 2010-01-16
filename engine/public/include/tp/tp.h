@@ -29,6 +29,35 @@ TPContext *     tp_context_new();
 //-----------------------------------------------------------------------------
 // Context configuration keys to be used with tp_context_set and tp_context_get
 
+
+// List of paths to applications
+// This is a semicolon (";") delimited list of paths where applications can be
+// sourced from.
+// Defaults to "apps" (in the current working directory)
+
+#define TP_APP_SOURCES          "app.sources"
+
+
+// Scan app sources
+// If set to "1" TrickPlay will scan the paths listed in app sources for
+// apps. If you attempt to launch an app using an id (instead of a path)
+// and the TrickPlay database does not have any apps, TrickPlay will scan
+// all of the app sources regardless of the value of this variable.
+// Defaults to "0"
+
+#define TP_SCAN_APP_SOURCES     "app.scan"
+
+
+// App id
+// The id of the first application to launch. Instead of specifying the id, you
+// can set TP_APP_PATH to open an application directly from a path. If you do
+// set TP_APP_ID, you should also set TP_APP_SOURCES so that TrickPlay can
+// find the app given its id.
+// Defaults to NULL
+
+#define TP_APP_ID               "app.id"
+
+
 // Path to an application
 // Defaults to the current working directory
 
@@ -71,11 +100,11 @@ TPContext *     tp_context_new();
 
 
 // File configuration
-// If set to the path to an existing file, TrickPlay will read configuration
+// If set to the path of an existing file, TrickPlay will read configuration
 // variables from the file. The file should have one entry per line, with the
 // configuration variable followed by "=" and its value. Lines that start with
 // "#" are ignored. For example: app.path=/foo/bar
-// Defaults to "trickplay.cfg"
+// Defaults to "trickplay.cfg" (in the current working directory)
 
 #define TP_CONFIG_FROM_FILE     "config.file"
 
@@ -280,28 +309,34 @@ int             tp_context_run(
 #define TP_RUN_SYSTEM_DATABASE_CORRUPT  1
 
 
+// An attempt was made to launch an app using its id, but the id was not
+// found in the system database. 
+
+#define TP_RUN_APP_NOT_FOUND            2
+
+
 // There was a problem loading an app, it may not have correct metadata or its
 // signature is invalid. You should not try to load this same app again.
 
-#define TP_RUN_APP_CORRUPT              2
+#define TP_RUN_APP_CORRUPT              3
 
 
 // There was a problem getting things ready to load the app. This is usually due
 // to serious errors creating files or databases and the problem may affect
 // all apps loaded in the future...a factory reset may be the only recourse.
 
-#define TP_RUN_APP_PREPARE_FAILED       3
+#define TP_RUN_APP_PREPARE_FAILED       4
 
 
 // There was a problem running the application - it may have a syntax error or
 // it crashed during the initial load.
 
-#define TP_RUN_APP_ERROR                4
+#define TP_RUN_APP_ERROR                5
 
 
 // The context is already running
 
-#define TP_RUN_ALREADY_RUNNING          5
+#define TP_RUN_ALREADY_RUNNING          6
 
 //-----------------------------------------------------------------------------
 // Experimental
