@@ -64,9 +64,11 @@ local setmetatable = setmetatable
 local pairs = pairs
 local ipairs = ipairs
 local assert = assert
+local print = print
 local Chipmunk = Chipmunk
 
 module("Json")
+
 
 local StringBuilder = {
 	buffer = {}
@@ -356,12 +358,40 @@ function JsonReader:ReadString()
                 result = result .. ch
 	end
         assert(self:Next() == '"')
+
+	-- Properly decode unicode codepoint to UTF-8 sequence.
+	-- NOTE: Json only seems to be able to encode up to U+FFFF and not the higher character, so the
+	-- "else" case below is superfluous here, but included for "be generous in what you accept"
 	local fromunicode = function(m)
-		return string.char(tonumber(m, 16))
+		local code_point = tonumber(m, 16)
+		local result
+		if code_point < 0x80 then
+			-- single byte: 0xxxxxxx
+			result = string.char(code_point)
+		elseif code_point < 0x800 then
+			-- double byte 110yyyxx 10xxxxxx
+			local byte1 = math.floor(code_point / 0x40)
+			local byte2 = code_point % 0x40
+			result = string.char(0xc0 + byte1) .. string.char(0x80 + byte2)
+		elseif code_point < 0x10000 then
+			-- triple byte 1110yyyy 10yyyyxx 10xxxxxx
+			local byte1 = math.floor(code_point / 0x1000)
+			local byte2 = math.floor((code_point % 0x1000) / 0x40)
+			local byte3 = code_point % 0x40
+			result = string.char(0xe0 + byte1) .. string.char(0x80 + byte2) .. string.char(0x80 + byte3)
+		else
+			-- quad byte 11110zzz 10zzyyyy 10yyyyxx 10xxxxxx
+			local byte1 = math.floor(code_point / 0x40000)
+			local byte2 = math.floor((code_point % 0x40000) / 0x1000)
+			local byte3 = math.floor((code_point % 0x1000) / 0x40)
+			local byte4 = code_point % 0x40
+			result = string.char(0xf0 + byte1) .. string.char(0x80 + byte2) .. string.char(0x80 + byte3) .. string.char(0x80 + byte4)
+		end
+		return result
 	end
 	return string.gsub(
 		result, 
-		"u%x%x(%x%x)", 
+		"u(%x%x%x%x)", 
 		fromunicode)
 end
 
