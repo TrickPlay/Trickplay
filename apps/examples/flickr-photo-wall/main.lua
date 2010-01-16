@@ -357,11 +357,9 @@ function screen.on_key_down(screen,keyval)
 			local zoom_image_img = Image{ position = {0,0}, src = zoom_image_url }
 			local zoom_image_txt_grp = Group { position = { 0, 0 } }
 			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
-			local photo_title = string.gsub(the_photo.title, "%c", "_")
-			local photo_owner = string.gsub(the_photo.ownername, "%c", "_")
 			local zoom_image_txt = Text {
 													position = { 10, 0 },
-													text = "\""..photo_title.."\" ©"..photo_owner.." ("..licenses[the_photo.license].short..")",
+													text = "\""..the_photo.title.."\" ©"..the_photo.ownername.." ("..licenses[the_photo.license].short..")",
 													z = 1,
 													color = { 255, 255, 255 },
 													font = "Graublau Web,DejaVu Sans,Sans 18px",
