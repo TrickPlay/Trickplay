@@ -78,6 +78,7 @@ namespace SQLite
         ~Statement();
         
         int step();
+        bool step_row();
         
         int reset();
         

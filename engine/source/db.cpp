@@ -157,6 +157,11 @@ namespace SQLite
         return !ok()?get_error():check(sqlite3_step(s));
     }
     
+    bool Statement::step_row()
+    {
+        return step()==SQLITE_ROW;
+    }
+    
     int Statement::reset()
     {
         return !ok()?get_error():check(sqlite3_reset(s));
