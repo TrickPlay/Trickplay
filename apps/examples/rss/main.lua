@@ -1,9 +1,20 @@
+-------------------------------------------------------------------------------
 
-function parse_rss_feed(url)
+function parse_rss_feed(rss,parts)
 
     local result={}
     local elements={}
     local item=nil
+    
+    local text_to_find={}
+    local attributes_to_find={}
+    for k,v in pairs(parts) do
+        if string.find(k,".",1,true) then
+            attributes_to_find["rss/channel/item/"..k]=v
+        else
+            text_to_find["rss/channel/item/"..k]=v
+        end
+    end
     
     local function path()
         return table.concat(elements,"/")
@@ -15,9 +26,19 @@ function parse_rss_feed(url)
             
                 function(parser,tag,attributes)
                     table.insert(elements,tag)
-                    --print(string.rep("  ",#elements),path())
-                    if path()=="rss/channel/item" then
+                    
+                    local p=path()
+                    --print(string.rep("  ",#elements),p)
+                    if p=="rss/channel/item" then
                         item={}
+                    elseif item then
+                        for k,v in pairs(attributes) do
+                            local s=attributes_to_find[p.."."..k]
+                            if s then
+                                item[s]=v
+                                break
+                            end
+                        end
                     end
                 end,
                 
@@ -36,28 +57,47 @@ function parse_rss_feed(url)
                 function(parser,data)
                     --print(string.rep("  ",#elements+1),"["..data.."]")
                     if item then
-                        local p=path()
-                        if p=="rss/channel/item/title" then
-                            item.title=data
-                        elseif p=="rss/channel/item/link" then
-                            item.link=data
+                        local s=text_to_find[path()]
+                        if s then
+                            item[s]=data
                         end
                     end
                 end
                 
-        }:parse(URLRequest(url):perform().body)
+        }:parse(rss)
 
     return result
 end
 
-local url="http://en-us.fxfeeds.mozilla.com/en-US/firefox/headlines.xml"
+-------------------------------------------------------------------------------
 
-local items=parse_rss_feed(url)
+function get_rss_feed(url,parts,callback)
 
-for i,item in ipairs(items) do
-    print(i)
-    for k,v in pairs(item) do
-        print("  ",k,"=",v)
+    URLRequest
+        {
+            url=url,
+            on_complete=
+            
+                function(request,response)
+                    request.on_complete=nil
+                    if response.failed then
+                        print("REQUEST FOR",url,"FAILED")
+                    else
+                        callback(parse_rss_feed(response.body,parts))
+                    end
+                end
+        }:send()
+end
+
+-------------------------------------------------------------------------------
+
+function process_items(items)
+    for i,item in pairs(items) do
+        print(i)
+        table.foreach(item,print)
     end
 end
 
+local discovery_parts={["title"]="title",["description"]="desc",["media:thumbnail.url"]="image"}
+
+get_rss_feed("http://animal.discovery.com/news/news.rss",discovery_parts,process_items)
