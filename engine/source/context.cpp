@@ -973,24 +973,23 @@ void TPContext::load_external_configuration()
 {
     if (get_bool(TP_CONFIG_FROM_ENV,true))
     {
-	for(char ** e=environ;*e;++e)
+	gchar ** env=g_listenv();
+	
+	for(gchar ** e=env;*e;++e)
 	{
 	    if (g_str_has_prefix(*e,"TP_"))
 	    {
-		gchar ** parts=g_strsplit((*e)+3,"=",2);
-		
-		if (g_strv_length(parts)==2)
+		if(const gchar * v=g_getenv(*e))
 		{
-		    gchar * k=g_strstrip(g_strdelimit(parts[0],"_",'.'));
-		    gchar * v=g_strstrip(parts[1]);
+		    gchar * k=g_strstrip(g_strdelimit((*e)+3,"_",'.'));
 		    
 		    g_debug("ENV:%s=%s",k,v);
-		    set(k,v);    
+		    set(k,v);
 		}
-		
-		g_strfreev(parts);
 	    }
 	}
+	
+	g_strfreev(env);
     }
     
     const char * file_name=get(TP_CONFIG_FROM_FILE,"trickplay.cfg");
@@ -999,7 +998,7 @@ void TPContext::load_external_configuration()
     
     if (g_file_get_contents(file_name,&contents,NULL,NULL))
     {
-	gchar ** lines=g_strsplit(contents,"\n",-1);
+	gchar ** lines=g_strsplit(contents,"\n",0);
 	
 	for(gchar ** l=lines;*l;++l)
 	{
