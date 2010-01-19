@@ -53,6 +53,14 @@ set(
     tokyocabinet
 )
 
+set(
+    AVAHI_LIBS
+    
+    avahi-client
+    avahi-common
+    avahi-glib
+)
+
 include_directories(
     
     ${ENGINE_SRC}/public/include
@@ -131,6 +139,7 @@ add_library(
     ${ENGINE_SRC}/source/console.cpp
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
+    ${ENGINE_SRC}/source/mdns.cpp
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c
@@ -148,6 +157,7 @@ target_link_libraries(
     ${CLUTTER_LIBS}
     ${CURL_LIBS}
     ${TOKYO_LIBS}
+    ${AVAHI_LIBS}
 )
 
 

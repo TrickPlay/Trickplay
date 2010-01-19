@@ -13,6 +13,7 @@
 #include "util.h"
 #include "console.h"
 #include "sysdb.h"
+#include "mdns.h"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -493,6 +494,10 @@ int TPContext::load_app()
     }
     
 #endif
+
+    // Start the MDNS stuff
+    
+    MDNS mdns;
 
     // Load the app
     
