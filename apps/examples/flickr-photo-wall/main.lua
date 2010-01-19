@@ -234,7 +234,8 @@ function screen.on_key_down(screen,keyval)
 
 			if zoom_image then
    	     if wall_zoom_timeline.is_playing then
-   	     	wall_zoom_timeline:stop()
+   	     	-- skip to end
+   	     	wall_zoom_timeline:advance(wall_zoom_timeline.duration)
    	     end
 			  local wall_zoom_int = Interval( wall_enclosure.z, 0 )
 			  local image_zoom_z_int = Interval( zoom_image.z, image_zoom_back_z )
@@ -244,6 +245,7 @@ function screen.on_key_down(screen,keyval)
 					 zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
 					 zoom_image.opacity = image_zoom_opacity_int:get_value( wall_zoom_alpha.alpha )
 				end
+
 				function wall_zoom_timeline.on_completed( )
 			        zoom_image.parent:remove(zoom_image)
 		   	     zoom_image = nil
