@@ -14,6 +14,7 @@
 #include "console.h"
 #include "sysdb.h"
 #include "mdns.h"
+#include "controllers.h"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -221,6 +222,10 @@ int TPContext::run()
 	// Let the world know that the profile has changed
 	
 	notify(TP_NOTIFICATION_PROFILE_CHANGED);
+	
+	// Create the controllers listener
+	
+	Controllers controllers;
 	
 	// Load the app
 	
@@ -494,10 +499,6 @@ int TPContext::load_app()
     }
     
 #endif
-
-    // Start the MDNS stuff
-    
-    MDNS mdns;
 
     // Load the app
     

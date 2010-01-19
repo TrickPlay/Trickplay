@@ -6,13 +6,17 @@
 #include <avahi-common/alternative.h>
 #include <avahi-glib/glib-malloc.h>
 
-MDNS::MDNS()
+
+#include <gio/gio.h>
+
+MDNS::MDNS(int p)
 :
     poll(NULL),
     server(NULL),
     group(NULL),
     name("TrickPlay"),
-    ready(false)
+    ready(false),
+    port(p)
 {
     avahi_set_allocator(avahi_glib_allocator());
 
@@ -83,10 +87,8 @@ void MDNS::create_service(AvahiServer * server)
             {
                 // TODO: this could loop forever...maybe we should bail at some stage
                 
-                // TODO: the port is hardwired
-
                 ret = avahi_server_add_service(server,group,AVAHI_IF_UNSPEC,AVAHI_PROTO_UNSPEC,
-                    AvahiPublishFlags(0),name.c_str(),"_tp-remote._tcp",NULL,NULL,8008,NULL);
+                    AvahiPublishFlags(0),name.c_str(),"_tp-remote._tcp",NULL,NULL,port,NULL);
                 
                 if (ret==AVAHI_ERR_COLLISION)
                 {

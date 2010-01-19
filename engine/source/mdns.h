@@ -13,7 +13,7 @@ class MDNS
 {
 public:
     
-    MDNS();
+    MDNS(int port);
     ~MDNS();
     
     bool is_ready() const;
@@ -32,6 +32,7 @@ private:
     AvahiSEntryGroup * 	group;
     String 		name;
     bool		ready;
+    int                 port;
 };
 
 #endif
