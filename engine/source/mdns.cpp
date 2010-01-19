@@ -9,7 +9,7 @@
 MDNS::MDNS()
 :
     poll(NULL),
-    client(NULL),
+    server(NULL),
     group(NULL),
     name("TrickPlay"),
     ready(false)
@@ -19,13 +19,18 @@ MDNS::MDNS()
     poll=avahi_glib_poll_new(NULL,G_PRIORITY_DEFAULT);
     g_assert(poll);
     
+    AvahiServerConfig config;
+    avahi_server_config_init(&config);
+    
+    config.publish_workstation=0;
+    
     int error;
 
-    client=avahi_client_new(avahi_glib_poll_get(poll),AvahiClientFlags(0),avahi_client_callback,this,&error);
+    server=avahi_server_new(avahi_glib_poll_get(poll),&config,avahi_server_callback,this,&error);
     
-    if (!client)
+    if (!server)
     {
-        g_warning("FAILED TO CREATE AVAHI CLIENT : %s",avahi_strerror(error));
+        g_warning("FAILED TO CREATE AVAHI SERVER : %s",avahi_strerror(error));
     }
 }
 
@@ -33,12 +38,12 @@ MDNS::~MDNS()
 {
     if (group)
     {
-        avahi_entry_group_free(group);
+        avahi_s_entry_group_free(group);
     }
 
-    if (client)
+    if (server)
     {
-        avahi_client_free(client);
+        avahi_server_free(server);
     }
 
     avahi_glib_poll_free(poll);
@@ -56,21 +61,21 @@ void MDNS::rename()
     avahi_free(new_name);
 }
 
-void MDNS::create_service(AvahiClient * client)
+void MDNS::create_service(AvahiServer * server)
 {
     if (!group)
     {
-        group=avahi_entry_group_new(client,avahi_entry_group_callback,this);
+        group=avahi_s_entry_group_new(server,avahi_entry_group_callback,this);
         
         if (!group)
         {
-            g_warning("FAILED TO CREATE AVAHI ENTRY GROUP : %s",avahi_strerror(avahi_client_errno(client)));
+            g_warning("FAILED TO CREATE AVAHI ENTRY GROUP : %s",avahi_strerror(avahi_server_errno(server)));
         }
     }
     
     if (group)
     {
-        if (avahi_entry_group_is_empty(group))
+        if (avahi_s_entry_group_is_empty(group))
         {
             int ret=AVAHI_OK;
             
@@ -80,7 +85,7 @@ void MDNS::create_service(AvahiClient * client)
                 
                 // TODO: the port is hardwired
 
-                ret = avahi_entry_group_add_service(group,AVAHI_IF_UNSPEC,AVAHI_PROTO_UNSPEC,
+                ret = avahi_server_add_service(server,group,AVAHI_IF_UNSPEC,AVAHI_PROTO_UNSPEC,
                     AvahiPublishFlags(0),name.c_str(),"_tp-remote._tcp",NULL,NULL,8008,NULL);
                 
                 if (ret==AVAHI_ERR_COLLISION)
@@ -99,7 +104,7 @@ void MDNS::create_service(AvahiClient * client)
             }
             else
             {
-                ret = avahi_entry_group_commit(group);
+                ret = avahi_s_entry_group_commit(group);
                 
                 if (ret!=AVAHI_OK)
                 {
@@ -110,40 +115,51 @@ void MDNS::create_service(AvahiClient * client)
     }
 }
 
-void MDNS::avahi_client_callback(AvahiClient *client, AvahiClientState state, void *userdata)
+void MDNS::avahi_server_callback(AvahiServer * server, AvahiServerState state, void *userdata)
 {
     MDNS * self=(MDNS*)userdata;
 
     switch (state)
     {
-        case AVAHI_CLIENT_S_RUNNING:
+        case AVAHI_SERVER_RUNNING:
         {
-            self->create_service(client);
+            self->create_service(server);
             break;
         }
         
-        case AVAHI_CLIENT_S_COLLISION:
-        case AVAHI_CLIENT_S_REGISTERING:
+        case AVAHI_SERVER_COLLISION:
+        {
+            char * new_name = avahi_alternative_host_name(avahi_server_get_host_name(server));
+            
+            int ret=avahi_server_set_host_name(server,new_name);
+            avahi_free(new_name);
+            
+            // TODO : check ret
+
+            break;
+        }
+        
+        case AVAHI_SERVER_REGISTERING:
         {
             if (self->group)
-                avahi_entry_group_reset(self->group);
+                avahi_s_entry_group_reset(self->group);
             break;
         }
         
-        case AVAHI_CLIENT_FAILURE:
+        case AVAHI_SERVER_FAILURE:
         {
-            g_warning("AVAHI CLIENT FAILURE : %s",avahi_strerror(avahi_client_errno(client)));
+            g_warning("AVAHI SERVER FAILURE : %s",avahi_strerror(avahi_server_errno(server)));
             break;    
         }
         
-        case AVAHI_CLIENT_CONNECTING:
+        case AVAHI_SERVER_INVALID:
         {
             break;
         }
     }	
 }
 
-void MDNS::avahi_entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata)
+void MDNS::avahi_entry_group_callback(AvahiServer * server,AvahiSEntryGroup *g, AvahiEntryGroupState state, void *userdata)
 {
     MDNS * self=(MDNS*)userdata;
 
@@ -156,7 +172,7 @@ void MDNS::avahi_entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState s
         
         case AVAHI_ENTRY_GROUP_COLLISION:
             self->rename();
-            self->create_service(avahi_entry_group_get_client(g));
+            self->create_service(server);
             break;
         
         case AVAHI_ENTRY_GROUP_FAILURE:

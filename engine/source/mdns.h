@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <avahi-client/client.h>
-#include <avahi-client/publish.h>
+#include <avahi-core/core.h>
+#include <avahi-core/publish.h>
 #include <avahi-glib/glib-watch.h>
 
 typedef std::string String;
@@ -22,14 +22,14 @@ private:
     
     void rename();
     
-    void create_service(AvahiClient * client);
+    void create_service(AvahiServer * server);
 
-    static void avahi_client_callback(AvahiClient *client, AvahiClientState state, void *userdata);
-    static void avahi_entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata);
+    static void avahi_server_callback(AvahiServer *server, AvahiServerState state, void *userdata);
+    static void avahi_entry_group_callback(AvahiServer * server,AvahiSEntryGroup *g, AvahiEntryGroupState state, void *userdata);
     
     AvahiGLibPoll * 	poll;
-    AvahiClient *   	client;
-    AvahiEntryGroup * 	group;
+    AvahiServer *       server;
+    AvahiSEntryGroup * 	group;
     String 		name;
     bool		ready;
 };

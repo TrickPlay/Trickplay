@@ -56,7 +56,7 @@ set(
 set(
     AVAHI_LIBS
     
-    avahi-client
+    avahi-core
     avahi-common
     avahi-glib
 )
