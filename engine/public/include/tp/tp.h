@@ -124,6 +124,14 @@ TPContext *     tp_context_new();
 #define TP_TELNET_CONSOLE_PORT  "console.port"
 
 
+// Controllers enabled
+// Set to "1" if you wish to enable support for remote controllers - this will
+// create a listener and establish an mDNS service for discovery.
+// Defaults to "0"
+
+#define TP_CONTROLLERS_ENABLED  "controllers.enabled"
+
+
 //-----------------------------------------------------------------------------
 // Set a context configuration value
                 

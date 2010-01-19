@@ -44,6 +44,18 @@ typedef std::map<String,String> StringMap;
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 //-----------------------------------------------------------------------------
+// Default values
+
+#define TP_SYSTEM_LANGUAGE_DEFAULT      "en"
+#define TP_SYSTEM_COUNTRY_DEFAULT       "US"
+#define TP_SCAN_APP_SOURCES_DEFAULT     false
+#define TP_CONFIG_FROM_ENV_DEFAULT      true
+#define TP_CONFIG_FROM_FILE_DEFAULT     "trickplay.cfg"
+#define TP_CONSOLE_ENABLED_DEFAULT      true
+#define TP_TELNET_CONSOLE_PORT_DEFAULT  8008
+#define TP_CONTROLLERS_ENABLED_DEFAULT  false
+
+//-----------------------------------------------------------------------------
 
 class SystemDatabase;
 

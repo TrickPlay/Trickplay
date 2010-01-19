@@ -225,7 +225,12 @@ int TPContext::run()
 	
 	// Create the controllers listener
 	
-	Controllers controllers;
+	std::auto_ptr<Controllers> controllers;
+	
+	if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
+	{
+	    controllers.reset(new Controllers());
+	}
 	
 	// Load the app
 	
@@ -246,7 +251,7 @@ int TPContext::run()
 
 void TPContext::scan_app_sources()
 {
-    bool force=get_bool(TP_SCAN_APP_SOURCES,false);
+    bool force=get_bool(TP_SCAN_APP_SOURCES,TP_SCAN_APP_SOURCES_DEFAULT);
     
     // If the scan is not forced and we are launching with an app path, we
     // don't need to do the scan
@@ -492,9 +497,9 @@ int TPContext::load_app()
 
     std::auto_ptr<Console> console;
 
-    if (get_bool(TP_CONSOLE_ENABLED,true))
+    if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
     {
-	console.reset(new Console(L,get_int(TP_TELNET_CONSOLE_PORT,8008)));
+	console.reset(new Console(L,get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT)));
 	console->add_command_handler(console_command_handler,this);
     }
     
@@ -900,8 +905,8 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	    
 	    else if (!strcmp(scheme,"localized"))
 	    {
-		const char * language=get(TP_SYSTEM_LANGUAGE,"en");
-		const char * country=get(TP_SYSTEM_COUNTRY,"US");
+		const char * language=get(TP_SYSTEM_LANGUAGE,TP_SYSTEM_LANGUAGE_DEFAULT);
+		const char * country=get(TP_SYSTEM_COUNTRY,TP_SYSTEM_COUNTRY_DEFAULT);
 
 		gchar * try_path=NULL;
 		
@@ -983,7 +988,7 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 
 void TPContext::load_external_configuration()
 {
-    if (get_bool(TP_CONFIG_FROM_ENV,true))
+    if (get_bool(TP_CONFIG_FROM_ENV,TP_CONFIG_FROM_ENV_DEFAULT))
     {
 	gchar ** env=g_listenv();
 	
@@ -1004,7 +1009,7 @@ void TPContext::load_external_configuration()
 	g_strfreev(env);
     }
     
-    const char * file_name=get(TP_CONFIG_FROM_FILE,"trickplay.cfg");
+    const char * file_name=get(TP_CONFIG_FROM_FILE,TP_CONFIG_FROM_FILE_DEFAULT);
     
     gchar * contents=NULL;
     
