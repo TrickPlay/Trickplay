@@ -28,7 +28,9 @@ extern void luaopen_system(lua_State*L);
 extern void luaopen_settings(lua_State*L);
 extern void luaopen_profile(lua_State*L);
 extern void luaopen_xml(lua_State*L);
+
 extern void luaopen_restricted(lua_State*L);
+extern void luaopen_apps(lua_State*L);
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -473,6 +475,10 @@ int TPContext::load_app()
     // don't have a mechanism for determining trustworthiness yet...
     
     luaopen_restricted(L);
+    
+    // This one should only be opened for the launcher and the store apps
+    
+    luaopen_apps(L);
     
     // Start the console
 

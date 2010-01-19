@@ -1,0 +1,50 @@
+
+[[
+#include "context.h"
+#include "sysdb.h"
+]]
+
+/*
+    This should only be available to the launcher and the store apps. It lets
+    them access the installed apps.
+*/
+
+global apps [[TPContext*]]
+{
+    apps()
+        [[
+            *self=TPContext::get_from_lua(L);    
+        ]];
+        
+    ~apps()
+        [[
+            self=NULL;
+        ]];
+        
+    table get_all()
+        [[
+            SystemDatabase::AppList list=self->get_db()->get_all_apps();
+                        
+            lua_newtable(L);
+            
+            for(SystemDatabase::AppList::const_iterator it=list.begin();it!=list.end();++it)
+            {
+                lua_pushstring(L,it->id.c_str());
+                
+                lua_newtable(L);
+                lua_pushstring(L,it->id.c_str());
+                lua_setfield(L,-2,"id");
+                
+                // TODO: Not sure the path is necessary, or wanted
+                lua_pushstring(L,it->path.c_str());
+                lua_setfield(L,-2,"path");
+                
+                lua_pushstring(L,it->version.c_str());
+                lua_setfield(L,-2,"version");
+                lua_pushinteger(L,it->release);
+                lua_setfield(L,-2,"release");
+                
+                lua_settable(L,-3);
+            }
+        ]];
+}
