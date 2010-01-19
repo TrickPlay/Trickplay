@@ -12,6 +12,9 @@ Flickr = {
 		local extract_short_license = function(url)
 			local result
 			_, _, result = string.find(url, "http:\/\/creativecommons.org\/licenses\/([%a%-]+)\/")
+			if(nil == result) then
+				result = "free"
+			end
 			return result
 		end
 	
