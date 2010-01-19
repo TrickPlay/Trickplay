@@ -378,3 +378,20 @@ String SystemDatabase::get_app_path(const String & id)
         return select.get_string(0);
     return String();
 }
+
+SystemDatabase::AppList SystemDatabase::get_all_apps()
+{
+    AppList result;
+    
+    SQLite::Statement select(db,"select id,path,release,version from apps;");
+    while (select.step_row())
+    {
+        App app;
+        app.id=select.get_string(0);
+        app.path=select.get_string(1);
+        app.release=select.get_int(2);
+        app.version=select.get_string(3);
+        result.push_back(app);
+    }
+    return result;
+}
