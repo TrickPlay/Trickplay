@@ -141,6 +141,7 @@ add_library(
     ${ENGINE_SRC}/source/sysdb.cpp
     ${ENGINE_SRC}/source/mdns.cpp
     ${ENGINE_SRC}/source/controllers.cpp
+    ${ENGINE_SRC}/source/keys.cpp
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c
