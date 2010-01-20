@@ -39,8 +39,6 @@ gboolean lirc_channel_watch(GIOChannel * channel,GIOCondition condition,gpointer
     }
     else
     {
-        //g_debug("%s",parts[2]);
-        
         tp_context_key_event((TPContext*)data,parts[2]);
     }
     
@@ -68,7 +66,7 @@ void start_lirc(TPContext * context)
     {
         GIOChannel * channel=g_io_channel_unix_new(fd);
         g_io_add_watch(channel,G_IO_IN,lirc_channel_watch,context);        
-        g_debug("LISTENING TO LIRC");
+        g_info("LISTENING TO LIRC");
     }    
 }
 

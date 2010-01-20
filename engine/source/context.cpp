@@ -130,14 +130,14 @@ int TPContext::console_command_handler(const char * command,const char * paramet
     else if (!strcmp(command,"config"))
     {
 	for(StringMap::const_iterator it=context->config.begin();it!=context->config.end();++it)
-	    g_debug("%-15.15s %s",it->first.c_str(),it->second.c_str());
+	    g_info("%-15.15s %s",it->first.c_str(),it->second.c_str());
     }
     else if (!strcmp(command,"profile"))
     {
 	if (!parameters)
 	{
 	    SystemDatabase::Profile p=context->get_db()->get_current_profile();
-	    g_debug("%d '%s' '%s'",p.id,p.name.c_str(),p.pin.c_str());
+	    g_info("%d '%s' '%s'",p.id,p.name.c_str(),p.pin.c_str());
 	}
 	else
 	{
@@ -146,23 +146,23 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 	    if (count==2 && !strcmp(parts[0],"new"))
 	    {
 		int id=context->get_db()->create_profile(parts[1],"");
-		g_debug("Created profile %d",id);
+		g_info("Created profile %d",id);
 	    }
 	    else if (count==2 && !strcmp(parts[0],"switch"))
 	    {
 		int id=atoi(parts[1]);
 		if (context->profile_switch(id))
 		{
-		    g_debug("Switched to profile %d",id);
+		    g_info("Switched to profile %d",id);
 		}
 		else
 		{
-		    g_debug("No such profile");		    
+		    g_info("No such profile");		    
 		}
 	    }
 	    else
 	    {
-		g_debug("Usage: '/profile new <name>' or '/profile switch <id>'");
+		g_info("Usage: '/profile new <name>' or '/profile switch <id>'");
 	    }
 	    g_strfreev(parts);	    
 	}
@@ -308,7 +308,7 @@ void TPContext::scan_app_sources()
 		
 		if (load_app_metadata(app_path,md))
 		{
-		    g_debug("SCAN FOUND %s (%s/%d) @ %s",
+		    g_info("SCAN FOUND %s (%s/%d) @ %s",
 			    md.id.c_str(),
 			    md.version.c_str(),
 			    md.release,
@@ -355,7 +355,7 @@ void TPContext::scan_app_sources()
 		
 		if (load_app_metadata(app_path,md))
 		{
-		    g_debug("SCAN FOUND %s (%s/%d) @ %s",
+		    g_info("SCAN FOUND %s (%s/%d) @ %s",
 			    md.id.c_str(),
 			    md.version.c_str(),
 			    md.release,
@@ -413,7 +413,7 @@ void TPContext::scan_app_sources()
 	    
 	    sysdb->insert_app(md.id,md.path,md.release,md.version);
 	    
-	    g_debug("ADDING %s (%s/%d) @ %s",
+	    g_info("ADDING %s (%s/%d) @ %s",
 		    md.id.c_str(),
 		    md.version.c_str(),
 		    md.release,
@@ -1000,7 +1000,7 @@ void TPContext::load_external_configuration()
 		{
 		    gchar * k=g_strstrip(g_strdelimit((*e)+3,"_",'.'));
 		    
-		    g_debug("ENV:%s=%s",k,v);
+		    g_info("ENV:%s=%s",k,v);
 		    set(k,v);
 		}
 	    }
@@ -1031,7 +1031,7 @@ void TPContext::load_external_configuration()
 		gchar * k=g_strstrip(parts[0]);
 		gchar * v=g_strstrip(parts[1]);
 		
-		g_debug("FILE:%s:%s=%s",file_name,k,v);
+		g_info("FILE:%s:%s=%s",file_name,k,v);
 		set(k,v);
 	    }
 	    

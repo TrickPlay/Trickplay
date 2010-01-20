@@ -45,7 +45,7 @@ SystemDatabase * SystemDatabase::open(const char * path)
     
     if (!g_file_test(filename,G_FILE_TEST_EXISTS))
     {
-        g_debug("SYSTEM DATABASE DOES NOT EXIST");    
+        g_info("SYSTEM DATABASE DOES NOT EXIST");    
     }
     
     // Try to open the on-disk database in read-only mode
@@ -80,7 +80,7 @@ SystemDatabase * SystemDatabase::open(const char * path)
                 else
                 {
                     create = false;
-                    g_debug("SYSTEM DATABASE LOADED");
+                    g_info("SYSTEM DATABASE LOADED");
                 }
             }
         }
@@ -99,7 +99,7 @@ SystemDatabase * SystemDatabase::open(const char * path)
             return NULL;
         }
         
-        g_debug("SYSTEM DATABASE CREATED");
+        g_info("SYSTEM DATABASE CREATED");
     }
     
     // Now, we create an instance of a system database - which will steal the
@@ -190,7 +190,7 @@ bool SystemDatabase::flush()
         return false;
     }
     
-    g_debug("SYSTEM DATABASE FLUSHED");
+    g_info("SYSTEM DATABASE FLUSHED");
     dirty=false;
     return true;    
 }

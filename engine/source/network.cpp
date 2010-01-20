@@ -28,12 +28,10 @@ namespace Network
         body(g_byte_array_new()),
         failed(false)
     {
-        //g_debug("CREATING RESPONSE %p",this);
     }
     
     Response::~Response()
     {
-        //g_debug("DESTROYING RESPONSE %p",this);
         g_byte_array_unref(body);
     }
     
@@ -45,7 +43,6 @@ namespace Network
         body(other.body),
         failed(other.failed)
     {
-        //g_debug("CREATING RESPONSE %p",this);
         g_byte_array_ref(body);
     }
     
@@ -285,7 +282,7 @@ namespace Network
             
             if (result==2)
             {
-                //g_debug("FINISHED HEADERS");
+                // do nothing
             }
             // This is to ignore trailer headers that may come after the body
             
@@ -311,14 +308,11 @@ namespace Network
                     {
                         closure->response.code=atoi(parts[1]);
                         closure->response.status=parts[2];
-                        
-                        //g_debug("STATUS %d '%s'",closure->response.code,closure->response.status.c_str());
                     }
                     g_strfreev(parts);
                 }
                 else
                 {
-                    //g_debug( "HEADER '%s'",header.c_str());
                     closure->response.headers.insert(
                         std::make_pair(header.substr(0,sep),header.substr(sep+2,header.length())));
                 }
@@ -453,8 +447,6 @@ namespace Network
                 {
                     // Initialize the new request
                     
-                    //g_debug("GOT A NEW REQUEST");
-                    
                     RequestClosure * closure=(RequestClosure*)new_request;
                     
                     // Create the easy handle for it
@@ -488,8 +480,6 @@ namespace Network
                     
                     if(!msg)
                         break;
-                    
-                    //g_debug("GOT A MESSAGE");
                     
                     if(msg->msg==CURLMSG_DONE)
                     {

@@ -21,7 +21,7 @@ Console::Console(lua_State*l,int port)
         if(g_socket_listener_add_inet_port(listener,port,NULL,NULL))
         {
             g_socket_listener_accept_async(listener,NULL,accept_callback,this);
-            g_debug("TELNET CONSOLE LISTENING ON PORT %d",port);
+            g_info("TELNET CONSOLE LISTENING ON PORT %d",port);
         }
     }
     else
@@ -106,14 +106,14 @@ void Console::process_line(gchar * line)
         // This is plain lua
         if (luaL_loadstring(L,line)!=0)
         {
-            g_message("%s",lua_tostring(L,-1));
+            g_warning("%s",lua_tostring(L,-1));
             lua_pop(L,1);
         }
         else
         {
             if (lua_pcall(L,0,LUA_MULTRET,0)!=0)
             {
-                g_message("%s",lua_tostring(L,-1));
+                g_warning("%s",lua_tostring(L,-1));
                 lua_pop(L,1);
             }
             else

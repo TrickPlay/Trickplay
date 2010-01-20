@@ -1,13 +1,12 @@
 
-#include "mdns.h"
-
 #include <avahi-common/error.h>
 #include <avahi-common/timeval.h>
 #include <avahi-common/alternative.h>
 #include <avahi-glib/glib-malloc.h>
 
+#include "mdns.h"
 
-#include <gio/gio.h>
+#include "util.h"
 
 MDNS::MDNS(int p)
 :
@@ -168,7 +167,7 @@ void MDNS::avahi_entry_group_callback(AvahiServer * server,AvahiSEntryGroup *g, 
     switch(state)
     {
         case AVAHI_ENTRY_GROUP_ESTABLISHED:
-            g_debug("AVAHI SERVICE '%s' ESTABLISHED",self->name.c_str());
+            g_info("AVAHI SERVICE '%s' ESTABLISHED",self->name.c_str());
             self->ready=true;
             break;
         
