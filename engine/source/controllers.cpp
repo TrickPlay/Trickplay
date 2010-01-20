@@ -1,5 +1,13 @@
 
+#include <cstring>
+#include <cstdio>
+
+#include "clutter/clutter.h"
+
 #include "controllers.h"
+#include "util.h"
+
+//-----------------------------------------------------------------------------
 
 Controllers::Controllers()
 :
@@ -34,7 +42,7 @@ Controllers::Controllers()
         
         g_socket_listener_accept_async(listener,NULL,accept_callback,this);
         
-        g_debug("CONTROLLER LISTENER READY ON PORT %d",port);
+        g_info("CONTROLLER LISTENER READY ON PORT %d",port);
         
         mdns=new MDNS(port);
     }
@@ -42,9 +50,11 @@ Controllers::Controllers()
     g_object_unref(G_OBJECT(ea));    
     
 #else
-#warning GLib 2.22 or later is required to support remote controllers
+#warning GLib 2.22 or later is required to support controllers
 #endif
 }
+
+//-----------------------------------------------------------------------------
 
 Controllers::~Controllers()
 {
@@ -64,7 +74,11 @@ Controllers::~Controllers()
     }
 }
 
+//-----------------------------------------------------------------------------
+
 #if GLIB_CHECK_VERSION(2,22,0)
+
+//-----------------------------------------------------------------------------
 
 void Controllers::connection_accepted(GSocketConnection * connection)
 {
@@ -72,7 +86,7 @@ void Controllers::connection_accepted(GSocketConnection * connection)
     
     gchar * remote_address=g_inet_address_to_string(g_inet_socket_address_get_address(G_INET_SOCKET_ADDRESS(g_socket_connection_get_remote_address(connection,NULL))));
 
-    g_debug("ACCEPTED CONTROLLER CONNECTION FROM %p %s",connection,remote_address);
+    g_debug("ACCEPTED CONTROLLER CONNECTION %p FROM %s",connection,remote_address);
     
     // This adds the connection to the map and sets its address at the same time
     
@@ -103,18 +117,118 @@ void Controllers::connection_accepted(GSocketConnection * connection)
     g_object_weak_ref(G_OBJECT(connection),connection_destroyed,this);
 }
 
+//-----------------------------------------------------------------------------
+
 void Controllers::connection_closed(GObject * connection)
 {
     connections.erase((GSocketConnection*)connection);
     
-    g_debug("CONNECTION GONE %p",connection);
+    g_debug("CONTROLLER CONNECTION CLOSED %p",connection);
 }
+
+//-----------------------------------------------------------------------------
 
 void Controllers::connection_data_received(GSocketConnection * connection,gchar * buffer)
 {
-    g_debug("GOT DATA %p [%s]",connection,g_strstrip(buffer));
+    ConnectionMap::iterator it=connections.find(connection);
+    
+    if (it==connections.end())
+        return;
+
+    // Get the input buffer for the connection and append the new data to it
+    
+    String & input_buffer=it->second.input_buffer;
+    
+    input_buffer.append(buffer);
+    
+    // Now, split it into lines
+    
+    gchar * b=g_strdup(input_buffer.c_str());
+    
+    gchar * s=b;
+    gchar * e=NULL;
+    
+    while((e=strchr(s,'\n')))
+    {
+        *e=0;
+        s=g_strstrip(s);
+        
+        if (strlen(s))
+        {
+            g_debug("GOT DATA %p [%s]",connection,s);
+            
+            gchar ** parts=g_strsplit(s,"\t",0);
+            
+            process_command(connection,parts);
+            
+            g_strfreev(parts);
+        }
+        
+        s=e+1;
+    }
+    
+    // Put the left overs back into the input buffer
+    
+    if (s!=b)
+    {
+        input_buffer=s;
+    }
+    
+    g_free(b);
 }
 
+//-----------------------------------------------------------------------------
+
+void Controllers::process_command(GSocketConnection * connection,gchar ** parts)
+{
+    guint count=g_strv_length(parts);
+    
+    if (count<1)
+        return;
+    
+    
+    switch(*(parts[0]))
+    {
+        // key input
+        
+        case 'K':
+        {
+            if (count>1)
+            {
+                unsigned long int k=0;
+                if (sscanf(parts[1],"%lx",&k)==1)
+                {
+                    g_debug("GOT KEY %ld",k);
+                    
+                    ClutterEvent * event=clutter_event_new(CLUTTER_KEY_PRESS);
+                    event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
+                    event->any.time=clutter_get_timestamp();
+                    event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
+                    event->key.keyval=k;
+                    
+                    clutter_event_put(event);
+                    
+                    event->type=CLUTTER_KEY_RELEASE;
+                    event->any.time=clutter_get_timestamp();
+                    
+                    clutter_event_put(event);
+                    
+                    clutter_event_free(event);
+                }
+            }
+            break;    
+        }
+        
+        // accelerometer data
+        
+        case 'A':
+        {
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
 
 void Controllers::accept_callback(GObject * source,GAsyncResult * result,gpointer data)
 {
@@ -127,6 +241,8 @@ void Controllers::accept_callback(GObject * source,GAsyncResult * result,gpointe
     
     g_socket_listener_accept_async(G_SOCKET_LISTENER(source),NULL,accept_callback,data);        
 }
+
+//-----------------------------------------------------------------------------
 
 void Controllers::data_read_callback(GObject * source,GAsyncResult * result,gpointer data)
 {    
@@ -162,9 +278,13 @@ void Controllers::data_read_callback(GObject * source,GAsyncResult * result,gpoi
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void Controllers::connection_destroyed(gpointer data,GObject*connection)
 {
     ((Controllers*)data)->connection_closed(connection);
 }
+
+//-----------------------------------------------------------------------------
 
 #endif

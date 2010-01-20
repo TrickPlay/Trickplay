@@ -25,6 +25,7 @@ public:
         String  address;
         String  name;
         String  capabilities;
+        String  input_buffer;
     };
     
 private:
@@ -43,6 +44,7 @@ private:
     void connection_accepted(GSocketConnection * connection);
     void connection_closed(GObject * connection);
     void connection_data_received(GSocketConnection * connection,gchar * buffer);
+    void process_command(GSocketConnection * connection,gchar ** parts);
     
     typedef std::map<GSocketConnection*,ConnectionInfo> ConnectionMap;
     
