@@ -63,15 +63,29 @@ globals
         [[
             TPContext::get_from_lua(L)->quit();        
         ]];
-/*        
+
     string serialize()
         [[
-            int n=lua_gettop(L);
+            String buffer;
+
+            int n=1;
+            
+            bool pretty=false;
+            int level=0;
+            
+            if (lua_gettop(L)>1)
+            {
+                pretty=lua_toboolean(L,2);
+                level=lua_tointeger(L,2);                
+            }
+            
             switch(lua_type(L,n))
             {
                 case LUA_TNUMBER:
-                    result=lua_tostring(L,n);
+                {
+                    buffer=lua_tostring(L,n);
                     break;
+                }
                 
                 case LUA_TSTRING:
                 {
@@ -81,17 +95,108 @@ globals
                     lua_pushstring(L,"%q");
                     lua_pushvalue(L,n);
                     lua_call(L,2,1);
-                    result=lua_tostring(L,-1);
+                    buffer=lua_tostring(L,-1);
                     lua_pop(L,2);
                     LSG_END(0);
                     break;
                 }
                 
+                case LUA_TBOOLEAN:
+                {
+                    buffer=lua_toboolean(L,n)?"true":"false";
+                    break;
+                }
+                
+                case LUA_TTABLE:
+                {
+                    if (pretty)
+                    {
+                        buffer += "\n" + String(2*level,' ');
+                    }
+                    
+                    buffer+="{";
+                    
+                    if (pretty)
+                    {
+                        buffer += "\n";
+                    }
+                    
+                    // Lookup the serialize function only once
+                    lua_getglobal(L,"serialize");
+                    int ser=lua_gettop(L);
+                    
+                    // Prepare to iterate over the table
+                    lua_pushnil(L);
+                    
+                    bool first=true;
+                    
+                    while (lua_next(L,n)!=0)
+                    {
+                        if (first)
+                        {
+                            first=false;
+                        }
+                        else
+                        {
+                            buffer+=",";
+                            
+                            if (pretty)
+                            {
+                                buffer += "\n";
+                            }
+                        }
+                        
+                        if (pretty)
+                        {
+                            buffer += String(2*(level+1),' ');                            
+                        }
+                        
+                        // Serialize the key
+                        buffer+="[";
+                        lua_pushvalue(L,ser);
+                        lua_pushvalue(L,-3);
+                        lua_call(L,1,1);
+                        buffer+=lua_isnil(L,-1)?"nil":lua_tostring(L,-1);
+                        lua_pop(L,1);
+                        buffer+="]=";
+
+                        // Serialize the value
+                        lua_pushvalue(L,ser);
+                        lua_pushvalue(L,-2);
+                        if (pretty)
+                        {
+                            lua_pushinteger(L,level+1);
+                            lua_call(L,2,1);
+                        }
+                        else
+                        {
+                            lua_call(L,1,1);
+                        }
+                        buffer+=lua_isnil(L,-1)?"nil":lua_tostring(L,-1);
+                        // Pop both the result of the call as well as the value
+                        // from lua_next
+                        lua_pop(L,2);
+                    }
+                    
+                    if (pretty)
+                    {
+                        buffer += "\n" + String(2*level,' ');
+                    }
+
+                    buffer+="}";
+                    
+                    lua_pop(L,1);
+                    
+                    break;
+                }
+                
                 default:
-                    result=NULL;
+                    break;
             }
+            
+            result=buffer.empty()?NULL:buffer.c_str();
         ]];
-*/        
+
         
 }
 
