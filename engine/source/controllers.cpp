@@ -44,7 +44,7 @@ Controllers::Controllers()
         
         g_info("CONTROLLER LISTENER READY ON PORT %d",port);
         
-        mdns=new MDNS(port);
+        mdns.reset(new MDNS(port));
     }
     
     g_object_unref(G_OBJECT(ea));    
@@ -67,11 +67,6 @@ Controllers::~Controllers()
     }
     
 #endif
-
-    if (mdns)
-    {
-        delete mdns;
-    }
 }
 
 //-----------------------------------------------------------------------------

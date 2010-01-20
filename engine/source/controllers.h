@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include "glib.h"
 #include "gio/gio.h"
@@ -32,7 +33,7 @@ private:
     
     Controllers(const Controllers &) {}
     
-    MDNS * mdns;
+    std::auto_ptr<MDNS> mdns;
         
 #if GLIB_CHECK_VERSION(2,22,0)
 
