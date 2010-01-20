@@ -326,19 +326,15 @@ function JsonReader:TestReservedWord(t)
 end
 
 function JsonReader:ReadNumber()
-        local result = self:Next()
-        local peek = self:Peek()
-        while peek ~= nil and string.find(
-		peek, 
-		"[%+%-%d%.eE]") do
-            result = result .. self:Next()
-            peek = self:Peek()
+	local result = self:Next()
+	local peek = self:Peek()
+	while peek ~= nil and string.find(peek, "[%+%-%d%.eE]") do
+		result = result .. self:Next()
+		peek = self:Peek()
 	end
 	result = tonumber(result)
 	if result == nil then
-	        error(string.format(
-			"Invalid number: '%s'", 
-			result))
+		error(string.format("Invalid number: '%s'", result))
 	else
 		return result
 	end
@@ -347,7 +343,7 @@ end
 function JsonReader:ReadString()
 	local result = ""
 	assert(self:Next() == '"')
-        while self:Peek() ~= '"' do
+	while self:Peek() ~= '"' do
 		local ch = self:Next()
 		if ch == '\\' then
 			ch = self:Next()
@@ -355,9 +351,9 @@ function JsonReader:ReadString()
 				ch = self.escapes[ch]
 			end
 		end
-                result = result .. ch
+		result = result .. ch
 	end
-        assert(self:Next() == '"')
+	assert(self:Next() == '"')
 
 	-- Properly decode unicode codepoint to UTF-8 sequence.
 	-- NOTE: Json only seems to be able to encode up to U+FFFF and not the higher character, so the
@@ -396,16 +392,14 @@ function JsonReader:ReadString()
 end
 
 function JsonReader:ReadComment()
-        assert(self:Next() == '/')
-        local second = self:Next()
-        if second == '/' then
-            self:ReadSingleLineComment()
-        elseif second == '*' then
-            self:ReadBlockComment()
-        else
-            error(string.format(
-		"Invalid comment: %s", 
-		self:All()))
+	assert(self:Next() == '/')
+	local second = self:Next()
+	if second == '/' then
+		self:ReadSingleLineComment()
+	elseif second == '*' then
+		self:ReadBlockComment()
+	else
+		error(string.format("Invalid comment: %s", self:All()))
 	end
 end
 
@@ -415,13 +409,11 @@ function JsonReader:ReadBlockComment()
 		local ch = self:Next()		
 		if ch == '*' and self:Peek() == '/' then
 			done = true
-                end
+		end
 		if not done and 
 			ch == '/' and 
 			self:Peek() == "*" then
-                    error(string.format(
-			"Invalid comment: %s, '/*' illegal.",  
-			self:All()))
+			error(string.format("Invalid comment: %s, '/*' illegal.", self:All()))
 		end
 	end
 	self:Next()
@@ -451,9 +443,7 @@ function JsonReader:ReadArray()
 		if not done then
 			local ch = self:Next()
 			if ch ~= ',' then
-				error(string.format(
-					"Invalid array: '%s' due to: '%s'", 
-					self:All(), ch))
+				error(string.format("Invalid array: '%s' due to: '%s'", self:All(), ch))
 			end
 		end
 	end
@@ -471,17 +461,12 @@ function JsonReader:ReadObject()
 	while not done do
 		local key = self:Read()
 		if type(key) ~= "string" then
-			error(string.format(
-				"Invalid non-string object key: %s", 
-				key))
+			error(string.format("Invalid non-string object key: %s", key))
 		end
 		self:SkipWhiteSpace()
 		local ch = self:Next()
 		if ch ~= ':' then
-			error(string.format(
-				"Invalid object: '%s' due to: '%s'", 
-				self:All(), 
-				ch))
+			error(string.format("Invalid object: '%s' due to: '%s'", self:All(), ch))
 		end
 		self:SkipWhiteSpace()
 		local val = self:Read()
@@ -492,11 +477,8 @@ function JsonReader:ReadObject()
 		end
 		if not done then
 			ch = self:Next()
-                	if ch ~= ',' then
-				error(string.format(
-					"Invalid array: '%s' near: '%s'", 
-					self:All(), 
-					ch))
+			if ch ~= ',' then
+				error(string.format("Invalid array: '%s' near: '%s'", self:All(), ch))
 			end
 		end
 	end
