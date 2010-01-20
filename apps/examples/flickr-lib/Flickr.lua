@@ -12,17 +12,20 @@ Flickr = {
 		local extract_short_license = function(url)
 			local result
 			_, _, result = string.find(url, "http:\/\/creativecommons.org\/licenses\/([%a%-]+)\/")
+			if(nil == result) then
+				result = "free"
+			end
 			return result
 		end
 	
 		local json = URLRequest( Flickr.license_info_url.."&api_key="..api_key):perform().body
-      json = Json.Decode( json )
-      for i, license in ipairs( json.licenses.license ) do
-      	licenses[license.id] =	{
-      										name = license.name,
-												url = license.url,
-												short = extract_short_license(license.url),
-											}
+		json = Json.Decode( json )
+		for i, license in ipairs( json.licenses.license ) do
+		licenses[license.id] =	{
+											name = license.name,
+											url = license.url,
+											short = extract_short_license(license.url),
+										}
 		end
 	end,
 
@@ -40,26 +43,25 @@ Flickr = {
 
 	-- Fetch some photo metadata from Flickr API, using the passed base URL.
 	-- Append the metadata for each image into "photos", and then execute completion:callback()
-	fetch_photos = function(api_key, base_url, per_page, page_num, photos, completion)
+	fetch_photos =
+	function(api_key, base_url, per_page, page_num, photos, completion)
 		-- Set up the request
-	   local request = URLRequest
-            {
-            	 url = base_url.."&per_page="..per_page.."&page="..page_num.."&api_key="..api_key,
-                on_complete =
-                    function( request , response )
-                
-                        local json = Json.Decode( response.body )
-                        
-                        for i , photo in ipairs( json.photos.photo ) do
-									 table.insert(photos, photo)
-                        end
-
-                        if completion then
-                            completion:callback()
-                        end
-                    end
-            }
-
+		local request = URLRequest
+		{
+			url = base_url.."&per_page="..per_page.."&page="..page_num.."&api_key="..api_key,
+			on_complete =
+			function( request , response )
+				local json = Json.Decode( response.body )
+				
+				for i , photo in ipairs( json.photos.photo ) do
+					table.insert(photos, photo)
+				end
+				
+				if completion then
+					completion:callback()
+				end
+			end
+		}
 		request:send()
 	end
 
