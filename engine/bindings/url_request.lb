@@ -242,15 +242,7 @@ class URLRequest [[Network::Request*]]
     
     udata perform()
         [[
-	    Network::Request request(*self);
-	    
-	    bool is_uri;
-	    String path=TPContext::get_from_lua(L)->normalize_app_path(request.url.c_str(),&is_uri);
-	    
-	    if (!is_uri)
-		request.url = "file://" + path;
-	    
-            Network::Response response=Network::perform_request(request);
+            Network::Response response=Network::perform_request(*self);
             lua_pushlightuserdata(L,new Network::Response(response));
             new_URLResponse(L);
             lua_remove(L,-2);
@@ -263,15 +255,7 @@ class URLRequest [[Network::Request*]]
     
     send()
         [[
-	    Network::Request request(*self);
-	    
-	    bool is_uri;
-	    String path=TPContext::get_from_lua(L)->normalize_app_path(request.url.c_str(),&is_uri);
-	    
-	    if (!is_uri)
-		request.url = "file://" + path;
-
-            Network::perform_request_async(request,URLRequest_response_callback,new RequestInfo(self,L));
+            Network::perform_request_async(*self,URLRequest_response_callback,new RequestInfo(self,L));
         ]];
         
     # Event: on_complete

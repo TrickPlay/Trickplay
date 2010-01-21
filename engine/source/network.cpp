@@ -356,6 +356,9 @@ namespace Network
             
             try
             {
+                // Limit to http and https - nothing else
+                cc(curl_easy_setopt(eh,CURLOPT_PROTOCOLS,CURLPROTO_HTTP|CURLPROTO_HTTPS));
+                
                 cc(curl_easy_setopt(eh,CURLOPT_PRIVATE,closure));
                 
                 cc(curl_easy_setopt(eh,CURLOPT_NOPROGRESS,1));
@@ -395,6 +398,12 @@ namespace Network
                 }
                 
                 cc(curl_easy_setopt(eh,CURLOPT_TIMEOUT_MS,closure->request.timeout_s*1000));
+                
+                //cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
+                
+                //cc(curl_easy_setopt(eh,CURLOPT_COOKIEFILE,""));
+                //cc(curl_easy_setopt(eh,CURLOPT_COOKIEJAR,"/home/pablo/build/cookies"));
+                
             }
             catch(CURLcode c)
             {

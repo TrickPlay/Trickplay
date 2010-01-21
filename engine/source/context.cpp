@@ -863,7 +863,7 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     {
 	// What do we do? This is clearly not a good path
 	
-	g_error("Invalid empty path or uri");
+	g_error("INVALID EMPTY PATH OR URI");
     }
     
     if (count==1)
@@ -897,16 +897,6 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 		result = g_strdup(path_or_uri);
 	    }
 
-	    // file scheme
-	    
-	    else if (!strcmp(scheme,"file"))
-	    {
-		if (g_strstr_len(uri,2,"//")==uri)
-		    result = Util::rebase_path(app_path,uri+2);
-		else
-		    result = Util::rebase_path(app_path,uri);
-	    }
-	    	    
 	    // Localized file
 	    
 	    else if (!strcmp(scheme,"localized"))
@@ -961,7 +951,7 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	    }
 	    else
 	    {
-		g_error("Invalid scheme in '%s'",path_or_uri);
+		g_error("INVALID SCHEME IN '%s'",path_or_uri);
 	    }
 	}
     }
@@ -1282,7 +1272,7 @@ void tp_init_version(int * argc,char *** argv,int major_version,int minor_versio
 	  minor_version==TP_MINOR_VERSION &&
 	  patch_version==TP_PATCH_VERSION))
     {
-	g_warning("TRICKPLAY VERSION MISMATCH : HOST VERSION (%d.%d.%d) : LIBRARY VERSION (%d.%d.%d)",
+	g_warning("TRICKPLAY VERSION MISMATCH : HOST (%d.%d.%d) : LIBRARY (%d.%d.%d)",
 		  major_version,minor_version,patch_version,
 		  TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION);
     }
