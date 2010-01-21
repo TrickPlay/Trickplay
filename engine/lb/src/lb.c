@@ -165,13 +165,15 @@ int lb_invoke_callback(lua_State*L,void*self,const char*metatable,const char*nam
     if (lua_isnil(L,-1))
     {
         lua_pop(L,nargs+1);
-        return LSG_END(0);
+        LSG_END(-nargs);
+        return 0;
     }
 
     if (lb_get_callback(L,self,name,1)==1)
     {
         lua_pop(L,nargs+2);
-        return LSG_END(0);
+        LSG_END(-nargs);
+        return 0;
     }
 
     // Get rid of the metatable
