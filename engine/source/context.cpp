@@ -1084,8 +1084,8 @@ void TPContext::validate_configuration()
     
     if (!language)
     {
-	set(TP_SYSTEM_LANGUAGE,"en");
-	g_warning("DEFAULT:%s=en",TP_SYSTEM_LANGUAGE);
+	set(TP_SYSTEM_LANGUAGE,TP_SYSTEM_LANGUAGE_DEFAULT);
+	g_warning("DEFAULT:%s=%s",TP_SYSTEM_LANGUAGE,TP_SYSTEM_LANGUAGE_DEFAULT);
     }
     else if (strlen(language)!=2)
     {
@@ -1102,8 +1102,8 @@ void TPContext::validate_configuration()
     
     if (!country)
     {
-	set(TP_SYSTEM_COUNTRY,"US");
-	g_warning("DEFAULT:%s=US",TP_SYSTEM_COUNTRY);
+	set(TP_SYSTEM_COUNTRY,TP_SYSTEM_COUNTRY_DEFAULT);
+	g_warning("DEFAULT:%s=%s",TP_SYSTEM_COUNTRY,TP_SYSTEM_COUNTRY_DEFAULT);
     }
     else if (strlen(country)!=2)
     {
@@ -1112,6 +1112,22 @@ void TPContext::validate_configuration()
     else if (!g_ascii_isupper(country[0])||!g_ascii_isupper(country[1]))
     {
 	g_error("Country must be a 2 character, upper case, ISO-3166-1-alpha-2 code : '%s' is invalid",country);
+    }
+    
+    // SYSTEM NAME
+    
+    if (!get(TP_SYSTEM_NAME))
+    {
+	set(TP_SYSTEM_NAME,TP_SYSTEM_NAME_DEFAULT);
+	g_warning("DEFAULT:%s=%s",TP_SYSTEM_NAME,TP_SYSTEM_NAME_DEFAULT);
+    }
+    
+    // SYSTEM VERSION
+
+    if (!get(TP_SYSTEM_VERSION))
+    {
+	set(TP_SYSTEM_VERSION,TP_SYSTEM_VERSION_DEFAULT);
+	g_warning("DEFAULT:%s=%s",TP_SYSTEM_VERSION,TP_SYSTEM_VERSION_DEFAULT);
     }
     
     // DATA PATH
@@ -1257,10 +1273,20 @@ bool TPContext::profile_switch(int id)
 // External-facing functions
 //-----------------------------------------------------------------------------
 
-void tp_init(int * argc,char *** argv)
+void tp_init_version(int * argc,char *** argv,int major_version,int minor_version,int patch_version)
 {
     if(!g_thread_supported())
 	g_thread_init(NULL);
+	
+    if (!(major_version==TP_MAJOR_VERSION &&
+	  minor_version==TP_MINOR_VERSION &&
+	  patch_version==TP_PATCH_VERSION))
+    {
+	g_warning("TRICKPLAY VERSION MISMATCH : HOST VERSION (%d.%d.%d) : LIBRARY VERSION (%d.%d.%d)",
+		  major_version,minor_version,patch_version,
+		  TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION);
+    }
+    
         
     ClutterInitError ce = clutter_init(argc,argv);
     
@@ -1270,9 +1296,9 @@ void tp_init(int * argc,char *** argv)
     CURLcode co = curl_global_init(CURL_GLOBAL_ALL);
     
     if (co != CURLE_OK)
-	g_error("Failed to initialize cURL : %s",curl_easy_strerror(co));
-    
-    g_log_set_default_handler(TPContext::log_handler,NULL);        
+	g_error("Failed to initialize cURL : %s",curl_easy_strerror(co));    
+
+    g_log_set_default_handler(TPContext::log_handler,NULL);        	
 }
 
 //-----------------------------------------------------------------------------

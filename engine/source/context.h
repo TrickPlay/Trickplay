@@ -48,6 +48,8 @@ typedef std::map<String,String> StringMap;
 
 #define TP_SYSTEM_LANGUAGE_DEFAULT      "en"
 #define TP_SYSTEM_COUNTRY_DEFAULT       "US"
+#define TP_SYSTEM_NAME_DEFAULT          "Desktop"
+#define TP_SYSTEM_VERSION_DEFAULT       "0.0.0"
 #define TP_SCAN_APP_SOURCES_DEFAULT     false
 #define TP_CONFIG_FROM_ENV_DEFAULT      true
 #define TP_CONFIG_FROM_FILE_DEFAULT     "trickplay.cfg"

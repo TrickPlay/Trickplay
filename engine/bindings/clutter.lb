@@ -1438,11 +1438,13 @@ class Image [[ClutterActor*]] actor
 	[[
 	    bool is_uri;
 	    
-	    String path = TPContext::get_from_lua(L)->normalize_app_path(src,&is_uri);
+	    TPContext * ctx=TPContext::get_from_lua(L);
+	    
+	    String path=ctx->normalize_app_path(src,&is_uri);
 
 	    if (is_uri)
 	    {
-		Network::Request request;
+		Network::Request request(ctx);
 		request.url = path;
 #if 0		    
 		g_object_ref(G_OBJECT(self));

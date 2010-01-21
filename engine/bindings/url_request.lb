@@ -120,7 +120,7 @@ class URLRequest [[Network::Request*]]
     
     URLRequest(string url=NULL)
         [[
-            *self=new Network::Request();
+            *self=new Network::Request(TPContext::get_from_lua(L));
             
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {

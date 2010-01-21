@@ -1,3 +1,6 @@
+
+
+
 #include <cstring>
 #include <cstdlib>
 
@@ -10,14 +13,28 @@ namespace Network
     
     //=========================================================================
     
-    Request::Request()
+    Request::Request(TPContext * context)
     :
         method("GET"),
         timeout_s(30),
         redirect(true)
-        // TODO : default user agent
     {
+        gchar * ua=g_strdup_printf("Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)",
+            context->get(TP_SYSTEM_LANGUAGE),
+            context->get(TP_SYSTEM_COUNTRY),
+            TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION,
+            context->get(TP_APP_ID),
+            context->get_int(APP_RELEASE,0),
+            context->get(TP_SYSTEM_NAME),
+            context->get(TP_SYSTEM_VERSION));
         
+        user_agent=ua;
+        
+        g_free(ua);
+        
+        // We're going to use this later to manage cookies
+        
+        app_id=context->get(TP_APP_ID);
     }
     
     //=========================================================================
@@ -260,14 +277,20 @@ namespace Network
             size_t result=size*nmemb;
             RequestClosure * closure = (RequestClosure*) c;
             
+            if (closure->request.body.length()==0)
+                return 0;
+            
             size_t left=closure->request.body.length()-closure->put_offset;
             
             if (left>result)
                 left=result;
                 
-            memcpy(ptr,closure->request.body.c_str(),left);
+            if (left)
+            {
+                memcpy(ptr,closure->request.body.c_str(),left);
             
-            closure->put_offset+=left;
+                closure->put_offset+=left;
+            }
 
             return left;
         }
@@ -323,7 +346,7 @@ namespace Network
 
         //=====================================================================
         // Set-up an easy handle
-        
+
         #define cc(f) if(CURLcode c=f) throw c
         
         static CURL * create_easy_handle(RequestClosure * closure)
@@ -361,8 +384,15 @@ namespace Network
                     cc(curl_easy_setopt(eh,CURLOPT_UPLOAD,1));
                     cc(curl_easy_setopt(eh,CURLOPT_INFILESIZE,closure->request.body.size()));
                 }
-                
-                // TODO: POST/DELETE
+                else if (closure->request.method=="POST")
+                {
+                    cc(curl_easy_setopt(eh,CURLOPT_POST,1));
+                    cc(curl_easy_setopt(eh,CURLOPT_POSTFIELDSIZE,1));
+                }
+                else if (closure->request.method!="GET")
+                {
+                    cc(curl_easy_setopt(eh,CURLOPT_CUSTOMREQUEST,closure->request.method.c_str()));
+                }
                 
                 cc(curl_easy_setopt(eh,CURLOPT_TIMEOUT_MS,closure->request.timeout_s*1000));
             }
@@ -375,6 +405,8 @@ namespace Network
             
             return eh;
         }
+
+#undef cc
 
         //=====================================================================
         // The thread function. It gets new requests from the queue and processes

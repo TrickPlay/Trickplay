@@ -1,9 +1,12 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "glib.h"
 #include <string>
 #include <map>
+
+#include "glib.h"
+
+#include "context.h"
 
 namespace Network
 {   
@@ -15,7 +18,7 @@ namespace Network
     {
     public:
         
-        Request();
+        Request(TPContext * context);
             
         String      url;
         String      method;
@@ -26,6 +29,12 @@ namespace Network
         String      body;
         bool        redirect;
         String      user_agent;
+        
+    private:
+        
+        String      app_id;
+        
+        Request() {}
     };
     
     class Response

@@ -6,13 +6,24 @@ extern "C" {
 #endif 
 
 //-----------------------------------------------------------------------------
+
+#define TP_MAJOR_VERSION    0
+#define TP_MINOR_VERSION    0
+#define TP_PATCH_VERSION    1
+
+//-----------------------------------------------------------------------------
 // One-time initialization
 // NOTE: You may pass NULL for argc and argv
 
-void            tp_init(
+void            tp_init_version(
     
                     int * argc,
-                    char *** argv);
+                    char *** argv,
+                    int major_version,
+                    int minor_version,
+                    int patch_version);
+
+#define tp_init(argc,argv) tp_init_version(argc,argv,TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION)
 
 //-----------------------------------------------------------------------------
 // Opaque type for a context
@@ -78,6 +89,22 @@ TPContext *     tp_context_new();
 // Defaults to "US"
 
 #define TP_SYSTEM_COUNTRY       "system.country"
+
+
+// System name
+// This should be a short and simple name for the platform with no special
+// characters, such as "AcmeTV"
+// Defaults to "Desktop"
+
+#define TP_SYSTEM_NAME          "system.name"
+
+
+// System version
+// This should be a version string that identifies this particular version of the
+// system, such as "1.3" or "2.0.1"
+// Defaults to "0.0.0"
+
+#define TP_SYSTEM_VERSION       "system.version"
 
 
 // Data path
