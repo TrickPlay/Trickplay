@@ -22,6 +22,8 @@ namespace Network
                 file_name(cookie_file_name),
                 mutex(g_mutex_new())
             {
+                g_debug("CREATED COOKIE JAR %p",this);
+                
                 if (g_file_test(cookie_file_name,G_FILE_TEST_EXISTS))
                 {
                     gchar * contents=NULL;
@@ -94,6 +96,8 @@ namespace Network
 
             ~CookieJar()
             {
+                g_debug("DESTROYING COOKIE JAR %p",this);
+                
                 save();
                 g_mutex_free(mutex);
             }
@@ -118,12 +122,11 @@ namespace Network
         
     //=========================================================================
     
-    Request::Request(TPContext * ctx)
+    Request::Request(TPContext * context)
     :
         method("GET"),
         timeout_s(30),
-        redirect(true),
-        context(ctx)
+        redirect(true)
     {
         gchar * ua=g_strdup_printf("Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)",
             context->get(TP_SYSTEM_LANGUAGE),
@@ -204,6 +207,11 @@ namespace Network
             
             return closure.response;
         }
+        
+        static void set_cookie_jar_file_name(const String & file_name)
+        {
+            get()->reset_cookie_jar(file_name);
+        }
 
     private:
         
@@ -232,6 +240,36 @@ namespace Network
             }
             return thread;
         }
+
+        //.....................................................................
+        
+        void reset_cookie_jar(const String & file_name)
+        {
+            cookie_jar_file_name=file_name;
+            
+            if (cookie_jar)
+            {
+                cookie_jar->unref();
+                cookie_jar=NULL;
+            }
+        }
+        
+        //.....................................................................
+        
+        CookieJar * ref_cookie_jar()
+        {
+            if (cookie_jar_file_name.empty())
+                return NULL;
+            
+            if (!cookie_jar)
+            {
+                cookie_jar=new CookieJar(cookie_jar_file_name.c_str());
+            }
+            
+            cookie_jar->ref();
+            
+            return cookie_jar;
+        }
         
         //.....................................................................
         // Internal structure to hold all the things we care about while we are
@@ -247,10 +285,8 @@ namespace Network
                 data(NULL),
                 got_body(false),
                 put_offset(0),
-                cookie_jar(request.context->get_cookie_jar())
+                cookie_jar(NetworkThread::get()->ref_cookie_jar())
             {
-                if (cookie_jar)
-                    cookie_jar->ref();
             }
 
             RequestClosure(const Request & req,ResponseCallback cb,gpointer d)
@@ -261,10 +297,8 @@ namespace Network
                 data(d),
                 got_body(false),
                 put_offset(0),
-                cookie_jar(request.context->get_cookie_jar())
+                cookie_jar(NetworkThread::get()->ref_cookie_jar())
             {
-                if (cookie_jar)
-                    cookie_jar->ref();                
             }
             
             RequestClosure(const Request & req,IncrementalResponseCallback icb,gpointer d)
@@ -275,10 +309,8 @@ namespace Network
                 data(d),
                 got_body(false),
                 put_offset(0),
-                cookie_jar(request.context->get_cookie_jar())
+                cookie_jar(NetworkThread::get()->ref_cookie_jar())
             {
-                if (cookie_jar)
-                    cookie_jar->ref();                
             }
             
             ~RequestClosure()
@@ -302,6 +334,7 @@ namespace Network
         
         void submit_request(const Request & request,ResponseCallback callback,gpointer user)
         {
+            start();
             g_async_queue_push(queue,new RequestClosure(request,callback,user));
         }
         
@@ -310,6 +343,7 @@ namespace Network
 
         void submit_request(const Request & request,IncrementalResponseCallback callback,gpointer user)
         {
+            start();
             g_async_queue_push(queue,new RequestClosure(request,callback,user));
         }
 
@@ -675,36 +709,52 @@ namespace Network
         }
         
         NetworkThread()
+        :
+            thread(NULL),
+            cookie_jar(NULL)
         {
             queue = g_async_queue_new_full(destroy_request_closure);
             g_assert(queue);
-            
-            thread = g_thread_create(process,queue,TRUE,NULL);
-            g_assert(thread);
         }
         
         ~NetworkThread()
         {
-            g_async_queue_push(queue,GINT_TO_POINTER(1));
-            g_thread_join(thread);
+            stop();
             g_async_queue_unref(queue);
+            if (cookie_jar)
+                cookie_jar->unref();
+        }
+        
+        void start()
+        {
+            if (thread)
+                return;
+            
+            thread = g_thread_create(process,queue,TRUE,NULL);
+            g_assert(thread);            
+        }
+        
+        void stop()
+        {
+            if (thread)
+            {
+                g_async_queue_push(queue,GINT_TO_POINTER(1));
+                g_thread_join(thread);
+                thread=NULL;
+            }
         }
         
         GAsyncQueue * queue;
         GThread *     thread;
+        String        cookie_jar_file_name;
+        CookieJar *   cookie_jar;
     };
 
     //=========================================================================
     
-    CookieJar * load_cookie_jar(const char * file_name)
+    void set_cookie_jar_file_name(const String & file_name)
     {
-        return new CookieJar(file_name);
-    }
-
-    void release_cookie_jar(CookieJar * cookie_jar)
-    {
-        if (cookie_jar)
-            cookie_jar->unref();
+        NetworkThread::set_cookie_jar_file_name(file_name);
     }
     
     void shutdown()

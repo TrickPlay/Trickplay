@@ -62,8 +62,6 @@ typedef std::map<String,String> StringMap;
 
 class SystemDatabase;
 
-namespace Network { class CookieJar; }
-
 //-----------------------------------------------------------------------------
 
 struct TPContext
@@ -107,8 +105,6 @@ public:
     
     SystemDatabase * get_db() const;
     
-    Network::CookieJar * get_cookie_jar();
-    
     void key_event(const char * key);
     
     bool profile_switch(int id);
@@ -141,6 +137,8 @@ protected:
     
     int load_app();
     
+    String get_cookie_jar_file_name();
+    
     static int console_command_handler(const char * command,const char * parameters,void * self);
        
     static gchar * format_log_line(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message);
@@ -154,8 +152,6 @@ private:
     StringMap               config;
     
     SystemDatabase *        sysdb;
-    
-    Network::CookieJar *    cookie_jar;
     
     TPLogHandler            external_log_handler;
     void *                  external_log_handler_data;

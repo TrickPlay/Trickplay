@@ -46,7 +46,6 @@ TPContext::TPContext()
 :
     is_running(false),
     sysdb(NULL),
-    cookie_jar(NULL),
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
@@ -463,6 +462,9 @@ int TPContext::load_app()
     if (!prepare_app(md))
 	return TP_RUN_APP_PREPARE_FAILED;
     
+    // Set its cookie jar    
+    Network::set_cookie_jar_file_name(get_cookie_jar_file_name());
+    
     // Start up a lua state
     lua_State * L=lua_open();
     g_assert(L);
@@ -540,10 +542,6 @@ int TPContext::load_app()
     clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
     
     Network::shutdown();
-    
-    Network::release_cookie_jar(cookie_jar);
-    
-    cookie_jar=NULL;
     
     lua_close(L);
     
@@ -1204,23 +1202,18 @@ SystemDatabase * TPContext::get_db() const
 
 //-----------------------------------------------------------------------------
 
-Network::CookieJar * TPContext::get_cookie_jar()
+String TPContext::get_cookie_jar_file_name()
 {
-    if (!cookie_jar)
-    {
-	if (!get(PROFILE_ID) || !get(APP_DATA_PATH))
-	    return NULL;
-	
-	gchar * name=g_strdup_printf("cookies-%d.txt",get_int(PROFILE_ID));
-	Util::GFreeLater free_name(name);
-        
-        gchar * file_name=g_build_filename(get(APP_DATA_PATH),name,NULL);
-        Util::GFreeLater free_file_name(file_name);
-	
-	cookie_jar=Network::load_cookie_jar(file_name);
-    }
+    if (!get(PROFILE_ID) || !get(APP_DATA_PATH))
+	return "";
     
-    return cookie_jar;
+    gchar * name=g_strdup_printf("cookies-%d.txt",get_int(PROFILE_ID));
+    Util::GFreeLater free_name(name);
+    
+    gchar * file_name=g_build_filename(get(APP_DATA_PATH),name,NULL);
+    Util::GFreeLater free_file_name(file_name);
+
+    return String(file_name);
 }
 
 //-----------------------------------------------------------------------------
@@ -1280,9 +1273,7 @@ bool TPContext::profile_switch(int id)
     
     notify(TP_NOTIFICATION_PROFILE_CHANGE);
     
-    Network::release_cookie_jar(cookie_jar);
-    
-    cookie_jar=NULL;
+    Network::set_cookie_jar_file_name(get_cookie_jar_file_name());
     
     notify(TP_NOTIFICATION_PROFILE_CHANGED);
 

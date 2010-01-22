@@ -16,8 +16,6 @@ namespace Network
     typedef std::multimap<std::string,std::string> StringMultiMap;
     typedef std::list<String> StringList;
     
-    class CookieJar;
-    
     class Request
     {
     public:
@@ -34,8 +32,6 @@ namespace Network
         bool        redirect;
         String      user_agent;
         
-        TPContext * context;
-
     private:
         
         Request() {}
@@ -59,9 +55,7 @@ namespace Network
     
     //.........................................................................
     
-    CookieJar * load_cookie_jar(const char * file_name);
-    
-    void release_cookie_jar(CookieJar * cookie_jar);
+    void set_cookie_jar_file_name(const String & file_name);
     
     //.........................................................................
 
