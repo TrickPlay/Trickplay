@@ -174,6 +174,11 @@ namespace Network
     {
     public:
             
+        static void set_cookie_jar_file_name(const String & file_name)
+        {
+            get()->reset_cookie_jar(file_name);
+        }
+
         static void shutdown()
         {
             get(true);
@@ -191,7 +196,7 @@ namespace Network
         
         static Response perform_request(const Request & request)
         {
-            RequestClosure closure(request);
+            RequestClosure closure(request,get()->ref_cookie_jar());
             
             CURL * eh=create_easy_handle(&closure);
             
@@ -208,11 +213,6 @@ namespace Network
             return closure.response;
         }
         
-        static void set_cookie_jar_file_name(const String & file_name)
-        {
-            get()->reset_cookie_jar(file_name);
-        }
-
     private:
         
         //.....................................................................
@@ -258,11 +258,11 @@ namespace Network
         
         CookieJar * ref_cookie_jar()
         {
-            if (cookie_jar_file_name.empty())
-                return NULL;
-            
             if (!cookie_jar)
             {
+                if (cookie_jar_file_name.empty())
+                    return NULL;
+            
                 cookie_jar=new CookieJar(cookie_jar_file_name.c_str());
             }
             
@@ -277,7 +277,7 @@ namespace Network
         
         struct RequestClosure
         {
-            RequestClosure(const Request & req)
+            RequestClosure(const Request & req,CookieJar * cj)
             :
                 request(req),
                 callback(NULL),
@@ -285,11 +285,11 @@ namespace Network
                 data(NULL),
                 got_body(false),
                 put_offset(0),
-                cookie_jar(NetworkThread::get()->ref_cookie_jar())
+                cookie_jar(cj)
             {
             }
 
-            RequestClosure(const Request & req,ResponseCallback cb,gpointer d)
+            RequestClosure(const Request & req,CookieJar * cj,ResponseCallback cb,gpointer d)
             :
                 request(req),
                 callback(cb),
@@ -297,11 +297,11 @@ namespace Network
                 data(d),
                 got_body(false),
                 put_offset(0),
-                cookie_jar(NetworkThread::get()->ref_cookie_jar())
+                cookie_jar(cj)
             {
             }
             
-            RequestClosure(const Request & req,IncrementalResponseCallback icb,gpointer d)
+            RequestClosure(const Request & req,CookieJar * cj,IncrementalResponseCallback icb,gpointer d)
             :
                 request(req),
                 callback(NULL),
@@ -309,7 +309,7 @@ namespace Network
                 data(d),
                 got_body(false),
                 put_offset(0),
-                cookie_jar(NetworkThread::get()->ref_cookie_jar())
+                cookie_jar(cj)
             {
             }
             
@@ -335,7 +335,7 @@ namespace Network
         void submit_request(const Request & request,ResponseCallback callback,gpointer user)
         {
             start();
-            g_async_queue_push(queue,new RequestClosure(request,callback,user));
+            g_async_queue_push(queue,new RequestClosure(request,ref_cookie_jar(),callback,user));
         }
         
         //.....................................................................
@@ -344,7 +344,7 @@ namespace Network
         void submit_request(const Request & request,IncrementalResponseCallback callback,gpointer user)
         {
             start();
-            g_async_queue_push(queue,new RequestClosure(request,callback,user));
+            g_async_queue_push(queue,new RequestClosure(request,ref_cookie_jar(),callback,user));
         }
 
         //.....................................................................
@@ -558,7 +558,7 @@ namespace Network
                 
                 cc(curl_easy_setopt(eh,CURLOPT_TIMEOUT_MS,closure->request.timeout_s*1000));
                 
-                cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
+                //cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
 
                 if (closure->cookie_jar)
                 {
