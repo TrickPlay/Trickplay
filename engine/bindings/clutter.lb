@@ -1506,6 +1506,45 @@ class Image [[ClutterActor*]] actor
 	[[load_async=clutter_texture_get_load_async(CLUTTER_TEXTURE(self));]]
 	[[clutter_texture_set_load_async(CLUTTER_TEXTURE(self),load_async);]];
 	
+    bool load_from_data(lstring data)
+	[[
+	    result = false;
+	    
+	    GdkPixbufLoader * loader = gdk_pixbuf_loader_new();
+	    
+	    if (loader)
+	    {
+		if (gdk_pixbuf_loader_write(loader,(const guchar *)data,data_len,NULL))
+		{
+		    if (gdk_pixbuf_loader_close(loader,NULL))
+		    {	    
+			GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(loader);
+			
+			if (p)
+			{
+			    if ( clutter_texture_set_from_rgb_data(CLUTTER_TEXTURE(self),
+				gdk_pixbuf_get_pixels(p),
+				gdk_pixbuf_get_has_alpha(p),
+				gdk_pixbuf_get_width(p),
+				gdk_pixbuf_get_height(p),
+				gdk_pixbuf_get_rowstride(p),
+				gdk_pixbuf_get_has_alpha(p)?4:3,
+				CLUTTER_TEXTURE_NONE,NULL))
+			    {
+				result=true;
+			    }
+			}
+		    }
+		}	
+		else
+		{
+		    gdk_pixbuf_loader_close(loader,NULL);
+		}
+		
+		g_object_unref(G_OBJECT(loader));
+	    }
+	]];
+	
     callback on_loaded
 	[[
 	    g_signal_handlers_disconnect_by_func(self,gpointer(Image_on_loaded),L);
