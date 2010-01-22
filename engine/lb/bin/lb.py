@@ -438,7 +438,12 @@ def emit( stuff , f ):
             
             if type == "lstring":
                 
-                f.write( "  %s(L,result,result_len);\n" % lua_push[ type ] )
+                f.write(
+                    "  if (!result)\n"
+                    "    lua_pushnil(L);\n"
+                    "  else\n"
+                    "    %s(L,result,result_len);\n" % lua_push[ type ]
+                )
                 
             else:
                 
@@ -792,9 +797,12 @@ def emit( stuff , f ):
                         if prop_type == "lstring":
                             
                             f.write(
-                                "  %s(L,%s,%s_len);\n"
+                                "  if (!%s)\n"
+                                "    lua_pushnil(L);\n"
+                                "  else\n"
+                                "    %s(L,%s,%s_len);\n"
                                 %
-                                ( lua_push[ prop[ "type" ] ] , prop[ "name" ] , prop[ "name" ] ) 
+                                ( prop["name"],lua_push[ prop[ "type" ] ] , prop[ "name" ] , prop[ "name" ] ) 
                             )                        
                             
                         else:
