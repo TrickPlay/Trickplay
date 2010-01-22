@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <list>
 
 #include "glib.h"
 
@@ -13,6 +14,9 @@ namespace Network
     typedef std::string String;
     typedef std::map<std::string,std::string> StringMap;
     typedef std::multimap<std::string,std::string> StringMultiMap;
+    typedef std::list<String> StringList;
+    
+    class CookieJar;
     
     class Request
     {
@@ -30,11 +34,12 @@ namespace Network
         bool        redirect;
         String      user_agent;
         
+        TPContext * context;
+
     private:
         
-        String      app_id;
-        
         Request() {}
+        
     };
     
     class Response
@@ -52,6 +57,14 @@ namespace Network
         bool            failed;
     };
     
+    //.........................................................................
+    
+    CookieJar * load_cookie_jar(const char * file_name);
+    
+    void release_cookie_jar(CookieJar * cookie_jar);
+    
+    //.........................................................................
+
     void shutdown();
     
     //.........................................................................

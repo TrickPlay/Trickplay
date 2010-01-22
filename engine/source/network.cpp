@@ -7,17 +7,123 @@
 #include "curl/curl.h"
 
 #include "network.h"
+#include "util.h"
 
 namespace Network
-{
-    
+{   
+    class CookieJar
+    {
+        public:
+            
+            CookieJar(const char * cookie_file_name)
+            :
+                ref_count(1),
+                new_session(true),
+                file_name(cookie_file_name),
+                mutex(g_mutex_new())
+            {
+                if (g_file_test(cookie_file_name,G_FILE_TEST_EXISTS))
+                {
+                    gchar * contents=NULL;
+                    GError * error=NULL;
+                
+                    g_file_get_contents(cookie_file_name,&contents,NULL,&error);
+                    
+                    if (error)
+                    {
+                        g_warning("FAILED TO READ COOKIE FILE '%s' : %s",cookie_file_name,error->message);
+                        g_clear_error(&error);
+                    }
+                    else
+                    {
+                        gchar ** lines=g_strsplit(contents,"\n",0);
+                        for(gchar**line=lines;*line;++line)
+                            cookies.push_back(String(*line));
+                        g_strfreev(lines);
+                    }
+                    
+                    g_free(contents);
+                }
+            }
+            
+            void set_cookie(const char * set_cookie_header)
+            {
+                Util::GMutexLock lock(mutex);
+                
+                cookies.push_back(set_cookie_header);    
+            }
+                        
+            void add_cookies_to_handle(CURL * eh,bool clear_session=false)
+            {
+                Util::GMutexLock lock(mutex);
+                
+                for(StringList::const_iterator it=cookies.begin();it!=cookies.end();++it)
+                    curl_easy_setopt(eh,CURLOPT_COOKIELIST,it->c_str());
+                    
+                if (new_session || clear_session)
+                {
+                    // This is to get around a bug in curl I reported. If you
+                    // call "SESS" when the cookie system has not been initialized
+                    // you will get a crash. Passing an empty string does nothing
+                    // aside from initializing curl's cookie system for the handle.
+                    // The bug is in cookie.c, Curl_cookie_clearsess
+                    
+                    if (cookies.empty())
+                    {
+                        curl_easy_setopt(eh,CURLOPT_COOKIELIST,"");
+                    }
+                        
+                    curl_easy_setopt(eh,CURLOPT_COOKIELIST,"SESS");
+                    new_session=false;  
+                }
+            }
+            
+            void ref()
+            {
+                g_atomic_int_inc(&ref_count);
+            }
+            
+            void unref()
+            {
+                if (g_atomic_int_dec_and_test(&ref_count))
+                    delete this;
+            }
+
+            
+        private:
+
+            ~CookieJar()
+            {
+                save();
+                g_mutex_free(mutex);
+            }
+                        
+            void save()
+            {
+                CURL * eh=curl_easy_init();
+                add_cookies_to_handle(eh,true);
+                curl_easy_setopt(eh,CURLOPT_COOKIEJAR,file_name.c_str());
+                // This causes curl to save all the cookies back to the file
+                // name we gave it above.
+                curl_easy_cleanup(eh);
+            }
+
+            gint        ref_count;
+            bool        new_session;  
+            String      file_name;
+            StringList  cookies;
+            GMutex *    mutex;
+            
+    };
+        
     //=========================================================================
     
-    Request::Request(TPContext * context)
+    Request::Request(TPContext * ctx)
     :
         method("GET"),
         timeout_s(30),
-        redirect(true)
+        redirect(true),
+        context(ctx)
     {
         gchar * ua=g_strdup_printf("Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)",
             context->get(TP_SYSTEM_LANGUAGE),
@@ -31,10 +137,6 @@ namespace Network
         user_agent=ua;
         
         g_free(ua);
-        
-        // We're going to use this later to manage cookies
-        
-        app_id=context->get(TP_APP_ID);
     }
     
     //=========================================================================
@@ -132,7 +234,8 @@ namespace Network
         }
         
         //.....................................................................
-        // Internal structure to hold all the things we care about
+        // Internal structure to hold all the things we care about while we are
+        // working on a request
         
         struct RequestClosure
         {
@@ -143,8 +246,12 @@ namespace Network
                 incremental_callback(NULL),
                 data(NULL),
                 got_body(false),
-                put_offset(0)
-            {}
+                put_offset(0),
+                cookie_jar(request.context->get_cookie_jar())
+            {
+                if (cookie_jar)
+                    cookie_jar->ref();
+            }
 
             RequestClosure(const Request & req,ResponseCallback cb,gpointer d)
             :
@@ -153,8 +260,12 @@ namespace Network
                 incremental_callback(NULL),
                 data(d),
                 got_body(false),
-                put_offset(0)
-            {}
+                put_offset(0),
+                cookie_jar(request.context->get_cookie_jar())
+            {
+                if (cookie_jar)
+                    cookie_jar->ref();                
+            }
             
             RequestClosure(const Request & req,IncrementalResponseCallback icb,gpointer d)
             :
@@ -163,8 +274,18 @@ namespace Network
                 incremental_callback(icb),
                 data(d),
                 got_body(false),
-                put_offset(0)
-            {}
+                put_offset(0),
+                cookie_jar(request.context->get_cookie_jar())
+            {
+                if (cookie_jar)
+                    cookie_jar->ref();                
+            }
+            
+            ~RequestClosure()
+            {
+                if (cookie_jar)
+                    cookie_jar->unref();
+            }
 
             Request                     request;
             ResponseCallback            callback;
@@ -173,6 +294,7 @@ namespace Network
             Response                    response;
             bool                        got_body;
             size_t                      put_offset;
+            CookieJar *                 cookie_jar;
         };
         
         //.....................................................................
@@ -336,6 +458,9 @@ namespace Network
                 }
                 else
                 {
+                    if (g_str_has_prefix(header.c_str(),"Set-Cookie:") && closure->cookie_jar)
+                        closure->cookie_jar->set_cookie(header.c_str());
+                        
                     closure->response.headers.insert(
                         std::make_pair(header.substr(0,sep),header.substr(sep+2,header.length())));
                 }
@@ -399,11 +524,12 @@ namespace Network
                 
                 cc(curl_easy_setopt(eh,CURLOPT_TIMEOUT_MS,closure->request.timeout_s*1000));
                 
-                //cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
-                
-                //cc(curl_easy_setopt(eh,CURLOPT_COOKIEFILE,""));
-                //cc(curl_easy_setopt(eh,CURLOPT_COOKIEJAR,"/home/pablo/build/cookies"));
-                
+                cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
+
+                if (closure->cookie_jar)
+                {
+                    closure->cookie_jar->add_cookies_to_handle(eh);
+                }
             }
             catch(CURLcode c)
             {
@@ -569,6 +695,17 @@ namespace Network
     };
 
     //=========================================================================
+    
+    CookieJar * load_cookie_jar(const char * file_name)
+    {
+        return new CookieJar(file_name);
+    }
+
+    void release_cookie_jar(CookieJar * cookie_jar)
+    {
+        if (cookie_jar)
+            cookie_jar->unref();
+    }
     
     void shutdown()
     {

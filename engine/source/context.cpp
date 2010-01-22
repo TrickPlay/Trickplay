@@ -46,6 +46,7 @@ TPContext::TPContext()
 :
     is_running(false),
     sysdb(NULL),
+    cookie_jar(NULL),
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
@@ -540,6 +541,10 @@ int TPContext::load_app()
     
     Network::shutdown();
     
+    Network::release_cookie_jar(cookie_jar);
+    
+    cookie_jar=NULL;
+    
     lua_close(L);
     
     notify(TP_NOTIFICATION_APP_CLOSED);
@@ -729,7 +734,7 @@ bool TPContext::prepare_app(const AppMetadata & md)
     }
     
     set(APP_DATA_PATH,app_data_path);
-    
+        
     return true;
 }
 
@@ -1199,6 +1204,27 @@ SystemDatabase * TPContext::get_db() const
 
 //-----------------------------------------------------------------------------
 
+Network::CookieJar * TPContext::get_cookie_jar()
+{
+    if (!cookie_jar)
+    {
+	if (!get(PROFILE_ID) || !get(APP_DATA_PATH))
+	    return NULL;
+	
+	gchar * name=g_strdup_printf("cookies-%d.txt",get_int(PROFILE_ID));
+	Util::GFreeLater free_name(name);
+        
+        gchar * file_name=g_build_filename(get(APP_DATA_PATH),name,NULL);
+        Util::GFreeLater free_file_name(file_name);
+	
+	cookie_jar=Network::load_cookie_jar(file_name);
+    }
+    
+    return cookie_jar;
+}
+
+//-----------------------------------------------------------------------------
+
 void TPContext::key_event(const char * key)
 {
     if (key_map.empty())
@@ -1253,6 +1279,10 @@ bool TPContext::profile_switch(int id)
     set(PROFILE_NAME,profile.name);
     
     notify(TP_NOTIFICATION_PROFILE_CHANGE);
+    
+    Network::release_cookie_jar(cookie_jar);
+    
+    cookie_jar=NULL;
     
     notify(TP_NOTIFICATION_PROFILE_CHANGED);
 

@@ -58,8 +58,13 @@ typedef std::map<String,String> StringMap;
 #define TP_CONTROLLERS_ENABLED_DEFAULT  false
 
 //-----------------------------------------------------------------------------
+// Forward declarations
 
 class SystemDatabase;
+
+namespace Network { class CookieJar; }
+
+//-----------------------------------------------------------------------------
 
 struct TPContext
 {
@@ -101,6 +106,8 @@ public:
     inline bool running() const { return is_running; }
     
     SystemDatabase * get_db() const;
+    
+    Network::CookieJar * get_cookie_jar();
     
     void key_event(const char * key);
     
@@ -147,6 +154,8 @@ private:
     StringMap               config;
     
     SystemDatabase *        sysdb;
+    
+    Network::CookieJar *    cookie_jar;
     
     TPLogHandler            external_log_handler;
     void *                  external_log_handler_data;
