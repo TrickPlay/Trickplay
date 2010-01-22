@@ -38,6 +38,40 @@ namespace Util
     };
     
     //-----------------------------------------------------------------------------
+    
+    class GStrFreevLater
+    {
+    public:
+        
+        GStrFreevLater(gchar**pointer) : p(pointer) {}
+        ~GStrFreevLater() {g_strfreev(p);}
+        
+    private:
+        
+        GStrFreevLater() {}
+        GStrFreevLater(const GStrFreevLater&) {}
+        
+        gchar ** p;
+    };
+    
+    //-----------------------------------------------------------------------------
+    
+    class GMutexLock
+    {
+    public:
+        
+        GMutexLock(GMutex * mutex) : m(mutex) {g_mutex_lock(m);}
+        ~GMutexLock() {g_mutex_unlock(m);}
+    
+    private:
+        
+        GMutexLock() {}
+        GMutexLock(const GMutexLock &) {}
+        
+        GMutex * m;
+    };
+    
+    //-----------------------------------------------------------------------------
     // Converts a path using / to a platform path in place - modifies the string
     // passed in.
     
