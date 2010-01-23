@@ -2,6 +2,7 @@
 [[
 #include "context.h"
 #include "sysdb.h"
+#include "util.h"
 ]]
 
 /*
@@ -20,7 +21,10 @@ global apps [[TPContext*]]
         [[
             self=NULL;
         ]];
-        
+    
+    #..........................................................................    
+    # Returns a table listing all the apps found in the database
+    
     table get_all()
         [[
             SystemDatabase::AppList list=self->get_db()->get_all_apps();
@@ -45,6 +49,44 @@ global apps [[TPContext*]]
                 lua_setfield(L,-2,"release");
                 
                 lua_settable(L,-3);
+            }
+        ]];
+        
+    #..........................................................................
+    # Lets the caller load the contents of a file that belongs to any app by
+    # passing the app id and a path into its bundle
+    
+    lstring load_app_file(string app_id,string file_name)
+        [[
+            result = NULL;
+            
+            String app_path=self->get_db()->get_app_path(app_id);
+            
+            if (app_path.empty())
+            {
+                lua_pushnil(L);
+                return 1;
+            }
+            
+            gchar * path=Util::rebase_path(app_path.c_str(),file_name);
+            Util::GFreeLater free_path(path);
+                
+            gchar * contents=NULL;            
+            GError * error=NULL;
+            gsize length=0;
+            
+            g_file_get_contents(path,&contents,&length,&error);
+            Util::GFreeLater free_contents(contents);
+            
+            if (error)
+            {
+                g_warning("FAILED TO LOAD APP FILE '%s' : %s",path,error->message);
+                g_clear_error(&error);
+            }
+            else
+            {
+                result=contents;
+                result_len=length;
             }
         ]];
 }
