@@ -26,6 +26,13 @@ local super_tilt_angle = 85
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
 local trickplay_red = { 150, 10, 4 }
 
+
+--[[
+
+TODO: Flush images not being used to free up memory
+
+]]--
+
 local cols_per_page = math.floor(prefetch_images / rows_per_column)
 local left_col = 0
 local selection_col = 0
@@ -86,7 +93,7 @@ function populate_next_page( completion )
 	-- If we're already loading a page, then just bail; it'll retry by calling again
 	if(waiting) then return end
 
-	-- Poor man's lock
+	-- Poor man's lock: really need a proper semaphore to avoid a potential race someday
 	waiting = true
 
 	pages_loaded = pages_loaded+1
@@ -113,6 +120,8 @@ function populate_next_page( completion )
 					-- center the image thumbnail inside the tile					
 					image.x = image.x + ( (tile_size - tile_pad) - tonumber(photo_index[i].width_t) ) / 2
 					image.y = image.y + ( (tile_size - tile_pad) - tonumber(photo_index[i].height_t) ) / 2
+
+					photo_index[i].thumbWallImage = image
 
 					wall:add( image )
 				end
@@ -355,7 +364,7 @@ function screen.on_key_down(screen,keyval)
 			else
 				zoom_image_url = Flickr.get_original_url(the_photo)
 			end
-			local zoom_image_img = Image{ position = {0,0}, src = zoom_image_url }
+			local zoom_thumb_img = Clone { source = the_photo.thumbWallImage }
 			local zoom_image_txt_grp = Group { position = { 0, 0 } }
 			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
 			local zoom_image_txt = Text	{
@@ -369,8 +378,18 @@ function screen.on_key_down(screen,keyval)
 			zoom_image_txt_grp:add(zoom_image_txt_rect)
 			zoom_image_txt_grp:add(zoom_image_txt)
 
-			zoom_image:add(zoom_image_img)
-			zoom_image:add(zoom_image_txt_grp)
+			local zoom_image_img = Image {
+									position = {0,0},
+									src = zoom_image_url ,
+			}
+			zoom_image_img.on_loaded = function()
+										zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
+									end
+
+
+			zoom_image.children = { zoom_thumb_img, zoom_image_txt_grp }
+
+
 			if (the_photo.width_m / 16) > ( the_photo.height_m / 9 )then
 				zoom_image_img.width = screen.w * 0.9
 				zoom_image_img.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
@@ -379,6 +398,10 @@ function screen.on_key_down(screen,keyval)
 				zoom_image_img.height = screen.h * 0.9
 				zoom_image_img.width = ( screen.h * 0.9 ) * ( the_photo.width_m / the_photo.height_m )
 			end
+			zoom_thumb_img.request_mode = zoom_image_img.request_mode
+			zoom_thumb_img.height = zoom_image_img.height
+			zoom_thumb_img.width = zoom_image_img.width
+
 			local max_txt_width = zoom_image_img.height - 40
 			if max_txt_width < zoom_image_txt.size[1] then
 				zoom_image_txt.scale = { max_txt_width/zoom_image_txt.size[1], 1.0 }
