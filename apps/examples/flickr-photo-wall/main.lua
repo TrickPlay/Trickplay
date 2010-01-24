@@ -380,7 +380,7 @@ function screen.on_key_down(screen,keyval)
 
 			local zoom_image_img = Image {
 									position = {0,0},
-									src = zoom_image_url ,
+									src = zoom_image_url,
 			}
 			zoom_image_img.on_loaded = function()
 										zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
