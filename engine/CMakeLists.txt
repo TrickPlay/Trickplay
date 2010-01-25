@@ -44,7 +44,8 @@ set(
     
     ssl
     crypto
-    ${CURL_LIBRARY}
+    curl
+#    ${CURL_LIBRARY}
 )
 
 set(
@@ -122,8 +123,8 @@ set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
 set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
 
 link_directories(
-    /usr/local/lib
     /opt/local/lib
+    /usr/local/lib
 )
 
 
