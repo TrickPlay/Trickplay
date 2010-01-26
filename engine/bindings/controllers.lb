@@ -29,6 +29,11 @@ public:
         return info;
     }
     
+    bool is_connected() const
+    {
+        return connected;
+    }
+    
     bool start_accelerometer(const char * filter,double interval);
     bool stop_accelerometer();
     bool reset();
@@ -37,6 +42,7 @@ public:
     
 private:
     
+    bool                        connected;
     lua_State *                 L;
     gpointer                    source;
     Controllers::ControllerInfo info;
@@ -60,6 +66,8 @@ public:
     }
     
     void controller_destroyed(gpointer source,Controller * controller);
+    
+    void push_connected_table();
         
 private:
 
@@ -70,9 +78,12 @@ private:
 
     typedef std::multimap<gpointer,Controller*>  ControllerMap;
         
+    typedef std::set<gpointer> GPointerSet;
+        
     lua_State *     L;
     Controllers *   controllers;
     ControllerMap   proxies;
+    GPointerSet     all_connected;
 };
 
 //=============================================================================
@@ -84,12 +95,16 @@ interface controller [[Controller*]]
     controller()
         [[
             *self=(Controller*)lua_touserdata(L,-2);
-            g_debug("VERSION %d",(*self)->get_info().version);
         ]];
         
     ~controller()
         [[
             delete self;    
+        ]];
+        
+    readonly bool is_connected
+        [[
+            is_connected=self->is_connected();    
         ]];
         
     readonly string name
@@ -171,6 +186,11 @@ global controllers [[ControllersDelegate*]]
             ready=self->is_ready();
         ]];
         
+    readonly table connected
+        [[
+            self->push_connected_table();    
+        ]];
+        
     callback on_controller_connected;    
 }
 
@@ -180,6 +200,7 @@ global controllers [[ControllersDelegate*]]
 
 Controller::Controller(lua_State *l,gpointer s,const Controllers::ControllerInfo & i,ControllersDelegate * d,Controllers * c)
 :
+    connected(true),
     L(l),
     source(s),
     info(i),
@@ -195,6 +216,7 @@ Controller::~Controller()
 
 void Controller::disconnected()
 {
+    connected=false;
     invoke_controller_on_disconnected(L,this,0,0);
     detach_controller(L,this);
 }
@@ -274,6 +296,8 @@ void ControllersDelegate::controller_destroyed(gpointer source,Controller * cont
 
 void ControllersDelegate::connected(gpointer source,const Controllers::ControllerInfo & info)
 {
+    all_connected.insert(source);
+    
     Controller * controller=new Controller(L,source,info,this,controllers);
     
     proxies.insert(std::make_pair(source,controller));
@@ -289,6 +313,10 @@ void ControllersDelegate::connected(gpointer source,const Controllers::Controlle
 
 void ControllersDelegate::disconnected(gpointer source)
 {
+    GPointerSet::iterator ait=all_connected.find(source);
+    if (ait!=all_connected.end())
+        all_connected.erase(ait);
+    
     std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
         range(proxies.equal_range(source));
         
@@ -320,5 +348,59 @@ void ControllersDelegate::ui_event(gpointer source,const gchar * event)
     }            
 }
 
+void ControllersDelegate::push_connected_table()
+{
+    LSG;
+    
+    lua_newtable(L);
+    
+    // These exist as Lua objects, so we should be able to find instances
+    // for all of them. However, the proxies may not be connected
+    
+    int i=1;
+    
+    for(ControllerMap::iterator it=proxies.begin();it!=proxies.end();++it,++i)
+    {
+        if (!it->second->is_connected())
+            continue;
+        
+        int is_new=wrap_controller(L,it->second);
+        g_assert(!is_new);
+        lua_rawseti(L,-2,i);
+    }
+    
+    // These may not exist as Lua objects but they are definitely connected
+    
+    for(GPointerSet::iterator it=all_connected.begin();it!=all_connected.end();++it)
+    {
+        gpointer source=*it;
+        
+        if (proxies.find(source)!=proxies.end())
+            continue;
+        
+        // It is not in our map, get its info
+        
+        Controllers::ControllerInfo * info=controllers->find_controller(source);
+        
+        if (!info)
+            continue;
+        
+        Controller * controller=new Controller(L,source,*info,this,controllers);
+        
+        proxies.insert(std::make_pair(source,controller));
+        
+        lua_pushlightuserdata(L,controller);
+        
+        new_controller(L);
+        
+        lua_remove(L,-2);
+        
+        lua_rawseti(L,-2,i++);
+    }
+    
+    // Only the new table should be on top
+    
+    LSG_END(1);
+}
 
 ]]

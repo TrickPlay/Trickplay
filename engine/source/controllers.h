@@ -70,9 +70,11 @@ public:
     bool ui_clear(gpointer source);
     bool ui_show_multiple_choice(gpointer source,const StringPairList & choices);
     
-
-    ControllerInfo * find_controller(gpointer source);
+    //..........................................................................
+    // Find info for a controller
     
+    ControllerInfo * find_controller(gpointer source);
+        
 private:
 
     Controllers(const Controllers &) {}
