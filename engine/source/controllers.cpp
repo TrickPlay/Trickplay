@@ -452,7 +452,7 @@ void Controllers::process_command(GSocketConnection * connection,ControllerInfo 
             if (delegate)
                 delegate->ui_event(connection,parts[1]);
             break;
-        }
+        }        
     }
 }
 
@@ -474,8 +474,6 @@ void Controllers::accept_callback(GObject * source,GAsyncResult * result,gpointe
 
 void Controllers::data_read_callback(GObject * source,GAsyncResult * result,gpointer data)
 {
-    g_debug("DATA READ");
-    
     GInputStream * input_stream=G_INPUT_STREAM(source);
     
     GSocketConnection * connection=G_SOCKET_CONNECTION(data);
