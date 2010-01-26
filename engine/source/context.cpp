@@ -30,6 +30,7 @@ extern void luaopen_system(lua_State*L);
 extern void luaopen_settings(lua_State*L);
 extern void luaopen_profile(lua_State*L);
 extern void luaopen_xml(lua_State*L);
+extern void luaopen_controllers_module(lua_State*L);
 
 extern void luaopen_restricted(lua_State*L);
 extern void luaopen_apps(lua_State*L);
@@ -46,6 +47,7 @@ TPContext::TPContext()
 :
     is_running(false),
     sysdb(NULL),
+    controllers(NULL),
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
@@ -229,16 +231,22 @@ int TPContext::run()
 	
 	// Create the controllers listener
 	
-	std::auto_ptr<Controllers> controllers;
-	
 	if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
 	{
-	    controllers.reset(new Controllers());
+	    controllers=new Controllers(get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
 	}
 	
 	// Load the app
 	
 	result=load_app();
+	
+	// Get rid of the controllers
+	
+	if (controllers)
+	{
+	    delete controllers;
+	    controllers=NULL;
+	}
 	
 	// Get rid of the system database
 	
@@ -488,6 +496,7 @@ int TPContext::load_app()
     luaopen_settings(L);
     luaopen_profile(L);
     luaopen_xml(L);
+    luaopen_controllers_module(L);
     
     luaopen_keys(L);
     
@@ -1198,6 +1207,14 @@ SystemDatabase * TPContext::get_db() const
 {
     g_assert(sysdb);
     return sysdb;
+}
+
+//-----------------------------------------------------------------------------
+
+Controllers * TPContext::get_controllers() const
+{
+    g_assert(controllers);
+    return controllers;
 }
 
 //-----------------------------------------------------------------------------

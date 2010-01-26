@@ -56,11 +56,13 @@ typedef std::map<String,String> StringMap;
 #define TP_CONSOLE_ENABLED_DEFAULT      true
 #define TP_TELNET_CONSOLE_PORT_DEFAULT  8008
 #define TP_CONTROLLERS_ENABLED_DEFAULT  false
+#define TP_CONTROLLERS_PORT_DEFAULT     0
 
 //-----------------------------------------------------------------------------
 // Forward declarations
 
 class SystemDatabase;
+class Controllers;
 
 //-----------------------------------------------------------------------------
 
@@ -104,6 +106,8 @@ public:
     inline bool running() const { return is_running; }
     
     SystemDatabase * get_db() const;
+    
+    Controllers * get_controllers() const;
     
     void key_event(const char * key);
     
@@ -152,6 +156,8 @@ private:
     StringMap               config;
     
     SystemDatabase *        sysdb;
+    
+    Controllers *           controllers;
     
     TPLogHandler            external_log_handler;
     void *                  external_log_handler_data;

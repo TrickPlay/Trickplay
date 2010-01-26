@@ -95,6 +95,7 @@ set(
     ${BINDINGS_SRC}/xml.lb
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
+    ${BINDINGS_SRC}/controllers.lb
 )
 
 add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 

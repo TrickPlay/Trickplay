@@ -159,6 +159,14 @@ TPContext *     tp_context_new();
 #define TP_CONTROLLERS_ENABLED  "controllers.enabled"
 
 
+// Controllers port
+// Set to non-zero to run the controllers listener on a fixed port.
+// Defaults to "0"
+
+#define TP_CONTROLLERS_PORT     "controllers.port"
+
+
+
 //-----------------------------------------------------------------------------
 // Set a context configuration value
                 
