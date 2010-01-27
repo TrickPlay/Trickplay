@@ -1916,6 +1916,11 @@ class Canvas [[ClutterActor*]] actor
 	    g_object_ref_sink(G_OBJECT(*self));
 	]];
 	
+    ~Canvas()
+	[[
+	    g_object_unref(G_OBJECT(self));    
+	]];
+	
     double w
         [[ w = clutter_actor_get_width( self ); ]]
         [[
