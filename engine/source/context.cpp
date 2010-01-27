@@ -1213,7 +1213,6 @@ SystemDatabase * TPContext::get_db() const
 
 Controllers * TPContext::get_controllers() const
 {
-    g_assert(controllers);
     return controllers;
 }
 

@@ -272,12 +272,18 @@ ControllersDelegate::ControllersDelegate(lua_State*l)
 {
     controllers=TPContext::get_from_lua(L)->get_controllers();
 
-    controllers->set_delegate(this);
+    if (controllers)
+    {
+        controllers->set_delegate(this);
+    }
 }
 
 ControllersDelegate::~ControllersDelegate()
 {
-    controllers->set_delegate(NULL);
+    if (controllers)
+    {
+        controllers->set_delegate(NULL);
+    }
 }
 
 void ControllersDelegate::controller_destroyed(gpointer source,Controller * controller)
@@ -350,9 +356,12 @@ void ControllersDelegate::ui_event(gpointer source,const gchar * event)
 
 void ControllersDelegate::push_connected_table()
 {
-    LSG;
-    
     lua_newtable(L);
+    
+    if (!controllers)
+    {
+        return;
+    }
     
     // These exist as Lua objects, so we should be able to find instances
     // for all of them. However, the proxies may not be connected
@@ -396,11 +405,7 @@ void ControllersDelegate::push_connected_table()
         lua_remove(L,-2);
         
         lua_rawseti(L,-2,i++);
-    }
-    
-    // Only the new table should be on top
-    
-    LSG_END(1);
+    }    
 }
 
 ]]
