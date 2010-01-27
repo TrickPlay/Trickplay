@@ -521,9 +521,10 @@ interface actor [[ClutterActor*]]
         [[depth=clutter_actor_get_depth(self);]]
         [[clutter_actor_set_depth(self,depth);]];
 	
-    set(table props)
+    udata set(table props)
 	[[
-	  set_props_from_table(L,props);
+	    set_props_from_table(L,props);
+	    lua_pushvalue(L,1);
 	]];
 
     show()
