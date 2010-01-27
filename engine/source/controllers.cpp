@@ -173,6 +173,8 @@ bool Controllers::write_line(gpointer source,const gchar * line)
     
     if (!find_connection(connection))
         return false;
+    
+    g_debug("WRITING %p [%s]",source,line);
        
     return g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(connection)),line,strlen(line),NULL,NULL,NULL);
 
