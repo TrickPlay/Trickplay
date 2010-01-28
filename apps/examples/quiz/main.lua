@@ -159,6 +159,9 @@ function player_left(controller)
     
     if player_table then
         
+		if player_table.answer_time > 0 then
+			game.num_answered = game.num_answered - 1
+		end
         local box=player_table.box
         local group=ui.players_box
         local children=group.children
@@ -205,7 +208,8 @@ function player_answered(controller,answer)
     else
         players[controller].answer_time=-1
     end
-    players[controller].ui.flash_box.color="00FF00"    
+    game.num_answered = game.num_answered+1
+    players[controller].ui.flash_box.color="00CCCC"    
 end
 
 -------------------------------------------------------------------------------
@@ -294,7 +298,8 @@ function game.ask_next_question()
     end
     
     ui.timer.text="30"
-    
+
+	game.num_answered = 0
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
         player_state.ui.flash_box.color="FF0000"
@@ -315,7 +320,8 @@ function game.ask_next_question()
     function game.timer.on_timer(timer)
         game.time=game.time+1
         ui.timer.text=tostring(30-game.time)
-        if game.time==30 then
+        print("ANSWERED SO FAR: "..game.num_answered)
+        if game.time==30 or game.num_answered >= player_count() then
             game.timer=nil
             game.times_up()
             return false
