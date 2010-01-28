@@ -174,6 +174,114 @@ private:
 ]]
 
 [[
+
+#if 0
+
+// An attempt at aligning actors inside their parent, feeble at best
+
+void actor_allocation_changed(ClutterActor * actor,ClutterActorBox * box,ClutterAllocationFlags flags,lua_State * L)
+{
+    g_debug("ALLOCATION CHANGED %p : %d : %f,%f %fx%f : %p",actor,flags,box->x1,box->y1,box->x2,box->y2,clutter_actor_get_parent(actor));
+    
+    ClutterActor * parent=clutter_actor_get_parent(actor);
+    
+    if (!parent)
+	return;
+    
+    const gchar * valign=(const gchar *)g_object_get_data(G_OBJECT(actor),"tp-valign");
+    const gchar * halign=(const gchar *)g_object_get_data(G_OBJECT(actor),"tp-halign");
+    
+    ClutterActorBox * new_box=clutter_actor_box_copy(box);
+    
+    if (valign)
+    {
+	gfloat parent_height=clutter_actor_get_height(parent);
+	gfloat height=clutter_actor_box_get_height(box);
+	
+	switch(*valign)
+	{
+	    case 'T':
+	    case 't':
+	    {
+		new_box->y1=0;
+		new_box->y2=new_box->y1+height;
+		break;
+	    }
+	    
+	    case 'C':
+	    case 'c':
+	    {
+		new_box->y1=(parent_height-height)/2;
+		new_box->y2=new_box->y1+height;
+		break;
+	    }
+	    
+	    case 'B':
+	    case 'b':
+	    {
+		new_box->y1=parent_height-height;
+		new_box->y2=new_box->y1+height;
+		break;
+	    }
+	}
+    }
+    
+    if (halign)
+    {
+	gfloat parent_width=clutter_actor_get_width(parent);
+	gfloat width=clutter_actor_box_get_width(box);
+	
+	switch(*halign)
+	{
+	    case 'L':
+	    case 'l':
+	    {
+		new_box->x1=0;
+		new_box->x2=new_box->x1+width;
+		break;
+	    }
+	    
+	    case 'C':
+	    case 'c':
+	    {
+		new_box->x1=(parent_width-width)/2;
+		new_box->x2=new_box->x1+width;
+		break;
+	    }
+	    
+	    case 'R':
+	    case 'r':
+	    {
+		new_box->x1=parent_width-width;
+		new_box->x2=new_box->x1+width;
+		break;
+	    }
+	}	
+    }
+    
+    if (!clutter_actor_box_equal(box,new_box))
+    {
+	ClutterGeometry g;
+	g.x=new_box->x1;
+	g.y=new_box->y1;
+	g.width=clutter_actor_box_get_width(new_box);
+	g.height=clutter_actor_box_get_height(new_box);
+	clutter_actor_set_geometry(actor,&g);
+    }
+    
+    clutter_actor_box_free(new_box);
+}
+
+#endif
+
+void initialize_actor(lua_State * L,ClutterActor*actor)
+{
+#if 0
+    g_signal_connect(actor,"allocation-changed",G_CALLBACK(actor_allocation_changed),L);
+#endif
+}
+    
+    
 void actor_on_show(ClutterActor*actor,lua_State*L)
 {
     lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_show",0,0);        
@@ -546,7 +654,23 @@ interface actor [[ClutterActor*]]
 	    set_props_from_table(L,props);
 	    lua_pushvalue(L,1);
 	]];
+#if 0	
+    string valign
+	[[
+	    valign=(const char *)g_object_get_data(G_OBJECT(self),"tp-valign");    
+	]]
+	[[
+	    g_object_set_data_full(G_OBJECT(self),"tp-valign",g_strdup(valign),g_free);
+	]];
 
+    string halign
+	[[
+	    halign=(const char *)g_object_get_data(G_OBJECT(self),"tp-halign");    
+	]]
+	[[
+	    g_object_set_data_full(G_OBJECT(self),"tp-halign",g_strdup(halign),g_free);
+	]];
+#endif
     show()
         [[clutter_actor_show(self);]];
         
@@ -984,6 +1108,7 @@ class Text [[ClutterActor*]] actor
     Text(table props =0)
         [[
             *self = clutter_text_new();
+	    initialize_actor(L,*self);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1183,7 +1308,7 @@ class Text [[ClutterActor*]] actor
 	    g_signal_handlers_disconnect_by_func(self,gpointer(Text_on_text_changed),L);	    
 	    if (on_text_changed)
 		g_signal_connect(self,"text-changed",G_CALLBACK(Text_on_text_changed),L);	    
-	]];	
+	]];
 }
 [[
 void Text_on_text_changed(ClutterText*text,lua_State*L)
@@ -1197,6 +1322,7 @@ class Rectangle [[ClutterActor*]] actor
     Rectangle(table props = 0)
         [[
             *self = clutter_rectangle_new();
+	    initialize_actor(L,*self);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1238,6 +1364,7 @@ class Clone [[ClutterActor*]] actor
     Clone(table props = 0)
         [[
             *self = clutter_clone_new(NULL);
+	    initialize_actor(L,*self);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1263,6 +1390,7 @@ class Group [[ClutterActor*]] actor , container
     Group(table props = 0 )
         [[
             *self = clutter_group_new();
+	    initialize_actor(L,*self);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1493,6 +1621,7 @@ class Image [[ClutterActor*]] actor
     Image(table props = 0 )
         [[
             *self = clutter_texture_new();
+	    initialize_actor(L,*self);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1988,6 +2117,7 @@ class Canvas [[ClutterActor*]] actor
     Canvas(table props=0)
 	[[
             *self = clutter_cairo_texture_new(0,0);
+	    initialize_actor(L,*self);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
 	]];
