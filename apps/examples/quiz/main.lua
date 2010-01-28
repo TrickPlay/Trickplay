@@ -4,7 +4,7 @@
 local trickplay_red = "960A04"
 
 game={
-		MAX_TIME = 30,
+		MAX_TIME = 15,
 		WIN_COLOR = "55FF55",
 		LOSE_COLOR = trickplay_red,
 		WAITING_FOR_ANSWER_COLOR = "000000",
