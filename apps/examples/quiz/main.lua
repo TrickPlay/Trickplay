@@ -32,7 +32,7 @@ layout(
                         size=240,
                         content=Text{
                             name="question",
-                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 48px" ,
+                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 40px" ,
                             text="Waiting for players to join..." ,
                             wrap=true,
                             color="FFFFFF"
