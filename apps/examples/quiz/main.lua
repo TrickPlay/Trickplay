@@ -72,14 +72,8 @@ layout(
                 {
                     {
                         size=120,
-                        padding={left=80},
-                        content=Text{
-                            name="timer",
-                            font="Diavlo,DejaVu Sans,Sans 96px",
-                            single_line=true,
-                            color="00FF00",
-                            text=tostring(game.MAX_TIME)
-                            }
+                        padding=0,
+						content=Group { name = "timer_group" }
                     }
                     ,
                     {
@@ -95,6 +89,47 @@ layout(
     ,
     ui
 ):show_all()
+
+ui.timer = Text{
+                            name="timer",
+                            font="Diavlo,DejaVu Sans,Sans 68px",
+                            single_line=true,
+                            color="00FF00",
+                            text=tostring(game.MAX_TIME),
+                            }
+ui.timer.position = {	(ui.timer_group.size[1] - ui.timer.size[1]) / 2,
+						(ui.timer_group.size[2] - ui.timer.size[2]) / 2
+					}
+ui.timer_label = Text{
+							color="FFFFFF",
+							font="Sans 24px",
+							single_line=true,
+							text="Countdown",
+				}
+ui.timer_label.position = { (ui.timer_group.size[1] - ui.timer_label.size[1]) / 2,
+						0
+					}
+ui.timer_box = Canvas{
+						size = { ui.timer_group.size[1], ui.timer_group.size[2] }
+					}
+ui.timer_box:begin_painting()
+ui.timer_box:set_source_color("FFFFFF")
+local timer_box_top = ui.timer_label.y + ui.timer_label.size[2]/2
+local timer_box_inset = 10
+local timer_box_bottom = ui.timer_group.size[2] - 1
+local timer_box_ratio = 4/5
+ui.timer_box:move_to(timer_box_ratio * ui.timer_label.x, timer_box_top)
+ui.timer_box:line_to(timer_box_inset, timer_box_top)
+ui.timer_box:line_to(timer_box_inset, timer_box_bottom)
+ui.timer_box:line_to(ui.timer_group.size[1] - timer_box_inset, timer_box_bottom)
+ui.timer_box:line_to(ui.timer_group.size[1] - timer_box_inset, timer_box_top)
+ui.timer_box:line_to(ui.timer_group.size[1] - timer_box_ratio * ui.timer_label.x, timer_box_top)
+ui.timer_box:stroke()
+ui.timer_box:finish_painting()
+
+ui.timer_group:add(ui.timer_box)
+ui.timer_group:add(ui.timer_label)
+ui.timer_group:add(ui.timer)
 
 -------------------------------------------------------------------------------
 -- table to hold our player information - the keys are the actual controller
@@ -266,6 +301,7 @@ function game.no_players()
     ui.answer3.text=""
     ui.answer4.text=""
     ui.timer.text=""
+	ui.timer_group.opacity = 0
     for controller,player_state in pairs(players) do
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
     end
@@ -279,6 +315,7 @@ end
 
 function game.ready_to_start()
     ui.question.text="\nTap for next question..."
+	ui.timer_group.opacity = 0
     game.ready=true
 end
 
@@ -315,7 +352,12 @@ function game.ask_next_question()
     end
     
     ui.timer.text=tostring(game.MAX_TIME)
+	ui.timer.position = { (ui.timer_group.size[1] - ui.timer.size[1]) / 2,
+							40
+						}
     ui.timer.color = "00FF00"
+    ui.timer_group.opacity = 255
+
 
 	game.num_answered = 0
     for controller,player_state in pairs(players) do
@@ -338,6 +380,9 @@ function game.ask_next_question()
     function game.timer.on_timer(timer)
         game.time=game.time+1
         ui.timer.text=tostring(game.MAX_TIME-game.time)
+		ui.timer.position = { (ui.timer_group.size[1] - ui.timer.size[1]) / 2,
+								40
+							}
 		if game.time<=game.MAX_TIME/3 then
 			ui.timer.color = "00FF00"
 		elseif game.time<=2*game.MAX_TIME/3 then
