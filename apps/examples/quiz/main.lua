@@ -26,7 +26,7 @@ layout(
                         size=240,
                         content=Text{
                             name="question",
-                            font="Sans 36px" ,
+                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 48px" ,
                             text="Waiting for players to join..." ,
                             wrap=true,
                             color="FFFFFF"
@@ -43,7 +43,7 @@ layout(
                                         {
                                             content=Text{
                                                 name="answer"..i,
-                                                font="Sans 28px",
+                                                font="Enchanted,Graublau Web,DejaVu Sans,Sans 36px",
                                                 wrap=true,
                                                 color="FFFFFF",
                                                 text="Answer "..i
@@ -66,7 +66,7 @@ layout(
                         padding={left=80},
                         content=Text{
                             name="timer",
-                            font="Sans 102px",
+                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 96px",
                             single_line=true,
                             color="FFFFFF",
                             text="30"
@@ -128,12 +128,12 @@ function player_joined(controller)
                 {
                     {
                         size=2/3,
-                        content=Text{font="Sans 18px",text=controller.name,color="FFFFFF"}
+                        content=Text{font="Enchanted,Graublau Web,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
                     }
                     ,
                     {
                         padding={left=8},
-                        content=Text{font="Sans 26px",text="0",color="FFFFFF",name="score"}
+                        content=Text{font="Enchanted,Graublau Web,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
                     }
                 }
             }
@@ -159,6 +159,9 @@ function player_left(controller)
     
     if player_table then
         
+		if player_table.answer_time > 0 then
+			game.num_answered = game.num_answered - 1
+		end
         local box=player_table.box
         local group=ui.players_box
         local children=group.children
@@ -205,7 +208,8 @@ function player_answered(controller,answer)
     else
         players[controller].answer_time=-1
     end
-    players[controller].ui.flash_box.color="00FF00"    
+    game.num_answered = game.num_answered+1
+    players[controller].ui.flash_box.color="00CCCC"    
 end
 
 -------------------------------------------------------------------------------
@@ -290,12 +294,13 @@ function game.ask_next_question()
     for i=1,4 do
         local answer_box=ui["answer"..i]
         answer_box.opacity=255
-        answer_box.text=scrambled_answers[i].text
+        answer_box.text=i..". "..scrambled_answers[i].text
         answer_box.extra.correct=scrambled_answers[i].id==1
     end
     
     ui.timer.text="30"
-    
+
+	game.num_answered = 0
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
         player_state.ui.flash_box.color="FF0000"
@@ -316,7 +321,8 @@ function game.ask_next_question()
     function game.timer.on_timer(timer)
         game.time=game.time+1
         ui.timer.text=tostring(30-game.time)
-        if game.time==30 then
+        print("ANSWERED SO FAR: "..game.num_answered)
+        if game.time==30 or game.num_answered >= player_count() then
             game.timer=nil
             game.times_up()
             return false
