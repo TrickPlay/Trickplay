@@ -1,7 +1,7 @@
 
 -------------------------------------------------------------------------------
 
-game={}
+game={ MAX_TIME = 30 }
 
 -------------------------------------------------------------------------------
 -- Setup the UI
@@ -68,8 +68,8 @@ layout(
                             name="timer",
                             font="Enchanted,Graublau Web,DejaVu Sans,Sans 96px",
                             single_line=true,
-                            color="FFFFFF",
-                            text="30"
+                            color="00FF00",
+                            text=tostring(game.MAX_TIME)
                             }
                     }
                     ,
@@ -298,7 +298,8 @@ function game.ask_next_question()
         answer_box.extra.correct=scrambled_answers[i].id==1
     end
     
-    ui.timer.text="30"
+    ui.timer.text=tostring(game.MAX_TIME)
+    ui.timer.color = "00FF00"
 
 	game.num_answered = 0
     for controller,player_state in pairs(players) do
@@ -320,9 +321,15 @@ function game.ask_next_question()
     game.timer=Timer(1)
     function game.timer.on_timer(timer)
         game.time=game.time+1
-        ui.timer.text=tostring(30-game.time)
-        print("ANSWERED SO FAR: "..game.num_answered)
-        if game.time==30 or game.num_answered >= player_count() then
+        ui.timer.text=tostring(game.MAX_TIME-game.time)
+		if game.time<=game.MAX_TIME/3 then
+			ui.timer.color = "00FF00"
+		elseif game.time<=2*game.MAX_TIME/3 then
+			ui.timer.color = "FFFF00"
+		else
+			ui.timer.color = "FF0000"
+		end
+        if game.time==game.MAX_TIME or game.num_answered >= player_count() then
             game.timer=nil
             game.times_up()
             return false
@@ -340,7 +347,7 @@ function game.times_up()
     for controller,player_state in pairs(players) do
         
         if player_state.answer_time > -1 then
-            player_state.score=player_state.score+30-player_state.answer_time
+            player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
         end
     end
