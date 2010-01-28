@@ -260,6 +260,7 @@ function game.no_players()
         game.timer.on_timer=nil
         game.timer=nil
     end
+    game.ready=false
 end
 
 function game.ready_to_start()

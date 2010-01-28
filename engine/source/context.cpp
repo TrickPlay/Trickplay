@@ -522,7 +522,21 @@ int TPContext::load_app()
     }
     
 #endif
-
+    // Set default size and color for the stage
+    
+    ClutterActor * stage=clutter_stage_get_default();
+    
+    clutter_actor_set_width(stage,get_int(TP_SCREEN_WIDTH));
+    clutter_actor_set_height(stage,get_int(TP_SCREEN_HEIGHT));
+    
+    ClutterColor color;
+    color.red=0;
+    color.green=0;
+    color.blue=0;
+    color.alpha=0;
+    
+    clutter_stage_set_color(CLUTTER_STAGE(stage),&color);
+    
     // Load the app
     
     notify(TP_NOTIFICATION_APP_LOADING);
@@ -1150,7 +1164,15 @@ void TPContext::validate_configuration()
     
     set(TP_DATA_PATH,full_data_path);
     
-    g_free(full_data_path);    
+    g_free(full_data_path);
+    
+    // SCREEN WIDTH AND HEIGHT
+    
+    if (!get(TP_SCREEN_WIDTH))
+	set(TP_SCREEN_WIDTH,TP_SCREEN_WIDTH_DEFAULT);
+	
+    if (!get(TP_SCREEN_HEIGHT))
+	set(TP_SCREEN_HEIGHT,TP_SCREEN_HEIGHT_DEFAULT);
 }
 
 //-----------------------------------------------------------------------------
