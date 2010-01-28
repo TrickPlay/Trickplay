@@ -273,9 +273,7 @@ function game.ask_next_question()
     game.ready=false
     
     -- pick a question
-    print("Before: "..#(game.questions))
     local question=table.remove(game.questions,math.random(#game.questions))
-    print("After: "..#(game.questions))
     
     ui.question.text=question[1]
     
