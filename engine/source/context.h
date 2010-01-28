@@ -57,6 +57,8 @@ typedef std::map<String,String> StringMap;
 #define TP_TELNET_CONSOLE_PORT_DEFAULT  8008
 #define TP_CONTROLLERS_ENABLED_DEFAULT  false
 #define TP_CONTROLLERS_PORT_DEFAULT     0
+#define TP_SCREEN_WIDTH_DEFAULT         960
+#define TP_SCREEN_HEIGHT_DEFAULT        540
 
 //-----------------------------------------------------------------------------
 // Forward declarations

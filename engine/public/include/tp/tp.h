@@ -115,6 +115,20 @@ TPContext *     tp_context_new();
 #define TP_DATA_PATH            "data.path"
 
 
+// Screen width
+// Set this to the maximum width of the graphics plane.
+// Defaults to "960"
+
+#define TP_SCREEN_WIDTH         "screen.width"
+
+
+// Screen height
+// Set this to the maximum height of the graphics plane.
+// Defaults to "540"
+
+#define TP_SCREEN_HEIGHT        "screen.height"
+
+
 // Environment configuration
 // If set to "1", TrickPlay will read additional configuration variables
 // from the environment. All environment variables that begin with "TP_" will
