@@ -49,8 +49,13 @@ void to_clutter_color(lua_State*L,int index,ClutterColor*color)
     else if (lua_isstring(L,index))
     {
         unsigned short int r(0),g(0),b(0),a(255);
+	
+	const char * s=lua_tostring(L,index);
+	
+	if (*s=='#')
+	    ++s;
 			
-	sscanf(lua_tostring(L,index),"%2hx%2hx%2hx%2hx",&r,&g,&b,&a);
+	sscanf(s,"%2hx%2hx%2hx%2hx",&r,&g,&b,&a);
         
         color->red = r;
         color->green = g;
