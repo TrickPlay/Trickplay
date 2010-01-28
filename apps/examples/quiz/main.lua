@@ -1,7 +1,16 @@
 
 -------------------------------------------------------------------------------
 
-game={}
+local trickplay_red = "960A04"
+
+game={
+		MAX_TIME = 30,
+		WIN_COLOR = "55FF55",
+		LOSE_COLOR = trickplay_red,
+		WAITING_FOR_ANSWER_COLOR = "000000",
+		ANSWERED_COLOR = trickplay_red.."33",
+	}
+
 
 -------------------------------------------------------------------------------
 -- Setup the UI
@@ -26,7 +35,7 @@ layout(
                         size=240,
                         content=Text{
                             name="question",
-                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 48px" ,
+                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 40px" ,
                             text="Waiting for players to join..." ,
                             wrap=true,
                             color="FFFFFF"
@@ -68,13 +77,13 @@ layout(
                             name="timer",
                             font="Enchanted,Graublau Web,DejaVu Sans,Sans 96px",
                             single_line=true,
-                            color="FFFFFF",
-                            text="30"
+                            color="00FF00",
+                            text=tostring(game.MAX_TIME)
                             }
                     }
                     ,
                     {
-                        background=Rectangle{color="FF000033"},
+                        background=Rectangle{color=game.ANSWERED_COLOR},
                         padding=10,
                         group=Group{name="players_box"}
                     }
@@ -123,7 +132,7 @@ function player_joined(controller)
             Group{position={0,top},size={group.w,group.h/8}},
             {
                 padding_bottom=4,
-                content=Rectangle{color="00000000",name="flash_box"},
+                content=Rectangle{color=game.ANSWERED_COLOR,name="flash_box"},
                 columns=
                 {
                     {
@@ -145,7 +154,8 @@ function player_joined(controller)
     
     players[controller]={box=player_box,ui=player_ui,score=0,answer_time=-1}
     
-    if player_count()==1 then
+    if player_count()>=1 then
+    	ui.answer1.text = ""
         game.ready_to_start()
     end
 end
@@ -209,7 +219,7 @@ function player_answered(controller,answer)
         players[controller].answer_time=-1
     end
     game.num_answered = game.num_answered+1
-    players[controller].ui.flash_box.color="00CCCC"    
+    players[controller].ui.flash_box.color=game.ANSWERED_COLOR;    
 end
 
 -------------------------------------------------------------------------------
@@ -246,14 +256,14 @@ end
 game.questions=dofile("questions.lua")
 
 function game.no_players()
-    ui.question.text="Waiting for players to join..."
-    ui.answer1.text=""
+    ui.question.text=""
+    ui.answer1.text="Waiting for players to join..."
     ui.answer2.text=""
     ui.answer3.text=""
     ui.answer4.text=""
     ui.timer.text=""
     for controller,player_state in pairs(players) do
-        player_state.ui.flash_box.color="00000000"
+        player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
     end
     if game.timer then
         game.timer:stop()
@@ -264,7 +274,7 @@ function game.no_players()
 end
 
 function game.ready_to_start()
-    ui.question.text="Tap to start..."
+    ui.question.text="Tap for next question..."
     game.ready=true
 end
 
@@ -294,16 +304,18 @@ function game.ask_next_question()
     for i=1,4 do
         local answer_box=ui["answer"..i]
         answer_box.opacity=255
+        answer_box.color = "FFFFFF"
         answer_box.text=i..". "..scrambled_answers[i].text
         answer_box.extra.correct=scrambled_answers[i].id==1
     end
     
-    ui.timer.text="30"
+    ui.timer.text=tostring(game.MAX_TIME)
+    ui.timer.color = "00FF00"
 
 	game.num_answered = 0
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
-        player_state.ui.flash_box.color="FF0000"
+        player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
         controller:show_multiple_choice_ui(
             scrambled_answers[1].id,
             scrambled_answers[1].text,
@@ -320,9 +332,15 @@ function game.ask_next_question()
     game.timer=Timer(1)
     function game.timer.on_timer(timer)
         game.time=game.time+1
-        ui.timer.text=tostring(30-game.time)
-        print("ANSWERED SO FAR: "..game.num_answered)
-        if game.time==30 or game.num_answered >= player_count() then
+        ui.timer.text=tostring(game.MAX_TIME-game.time)
+		if game.time<=game.MAX_TIME/3 then
+			ui.timer.color = "00FF00"
+		elseif game.time<=2*game.MAX_TIME/3 then
+			ui.timer.color = "FFFF00"
+		else
+			ui.timer.color = "FF0000"
+		end
+        if game.time==game.MAX_TIME or game.num_answered >= player_count() then
             game.timer=nil
             game.times_up()
             return false
@@ -340,8 +358,10 @@ function game.times_up()
     for controller,player_state in pairs(players) do
         
         if player_state.answer_time > -1 then
-            player_state.score=player_state.score+30-player_state.answer_time
+            player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
+        else
+        	controller:clear_ui()
         end
     end
     
@@ -350,7 +370,10 @@ function game.times_up()
         for i=1,4 do
             local a=ui["answer"..i]
             if not a.extra.correct then
-                a.opacity=255-(255*progress)
+                a.opacity=255-(200*progress)
+                a.color = { 255, 255-(255*progress), 255-(255*progress) }
+            else
+                a.color = { 255-(255*progress), 255, 255-(255*progress) }
             end
         end
     end
