@@ -293,7 +293,7 @@ function game.ask_next_question()
     for i=1,4 do
         local answer_box=ui["answer"..i]
         answer_box.opacity=255
-        answer_box.text=scrambled_answers[i].text
+        answer_box.text=i..". "..scrambled_answers[i].text
         answer_box.extra.correct=scrambled_answers[i].id==1
     end
     
