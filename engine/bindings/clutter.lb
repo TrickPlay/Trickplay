@@ -70,6 +70,21 @@ void to_clutter_color(lua_State*L,int index,ClutterColor*color)
     LSG_END(0);
 }
 
+ClutterActor * user_data_to_actor(lua_State*L,int n)
+{
+    void * udata=lua_touserdata(L,n);
+    
+    if (!udata)
+	return NULL;
+    
+    GObject * obj= *((GObject**)udata);
+    
+    if (!obj)
+	return NULL;
+    
+    return CLUTTER_IS_ACTOR(obj)?CLUTTER_ACTOR(obj):NULL;
+}
+
 void set_props_from_table(lua_State*L,int table)
 {
     LSG;
@@ -552,14 +567,20 @@ interface actor [[ClutterActor*]]
 	
     raise( udata above )
 	[[
-	    ClutterActor* source = *((ClutterActor**)lua_touserdata(L,above));
-            clutter_actor_raise(self,source);
+	    ClutterActor* source =user_data_to_actor(L,above);
+	    if(source)
+	    {
+		clutter_actor_raise(self,source);
+	    }
 	]];
 	
     lower( udata below )
 	[[
-	    ClutterActor* source = *((ClutterActor**)lua_touserdata(L,below));
-            clutter_actor_lower(self,source);
+	    ClutterActor* source=user_data_to_actor(L,below);
+	    if (source)
+	    {
+		clutter_actor_lower(self,source);
+	    }
 	]];
 	
     raise_to_top()
@@ -730,6 +751,7 @@ void container_foreach_callback(ClutterActor*actor,lua_State*L)
     wrap_concrete_actor(L,actor);
     lua_call(L,1,0);
 }
+
 ]]
 
 interface container [[ClutterActor*]]
@@ -738,8 +760,8 @@ interface container [[ClutterActor*]]
         [[
             for(int i=2;i<=lua_gettop(L);++i)
             {
-                if(ClutterActor* source = *((ClutterActor**)lua_touserdata(L,i)))
-                    clutter_container_add_actor(CLUTTER_CONTAINER(self),source);
+		if (ClutterActor * actor=user_data_to_actor(L,i))
+		        clutter_container_add_actor(CLUTTER_CONTAINER(self),actor);
             }
         ]];
 	
@@ -747,8 +769,8 @@ interface container [[ClutterActor*]]
 	[[
             for(int i=2;i<=lua_gettop(L);++i)
             {
-                if(ClutterActor* source = *((ClutterActor**)lua_touserdata(L,i)))
-                    clutter_container_remove_actor(CLUTTER_CONTAINER(self),source);
+		if (ClutterActor * actor=user_data_to_actor(L,i))
+		        clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
             }	    
 	]];
 	
@@ -769,18 +791,24 @@ interface container [[ClutterActor*]]
 	
     raise_child( udata child , udata sibling = 0 )
 	[[
-	    ClutterActor * c = *((ClutterActor**)lua_touserdata(L,child));
-	    ClutterActor * s = sibling?*((ClutterActor**)lua_touserdata(L,sibling)):NULL;
+	    ClutterActor * c = user_data_to_actor(L,child);
+	    ClutterActor * s = sibling?user_data_to_actor(L,sibling):NULL;
 	    
-	    clutter_container_raise_child(CLUTTER_CONTAINER(self),c,s);
+	    if (c)
+	    {
+		clutter_container_raise_child(CLUTTER_CONTAINER(self),c,s);
+	    }
 	]];
 	
     lower_child( udata child , udata sibling = 0 )
 	[[
-	    ClutterActor * c = *((ClutterActor**)lua_touserdata(L,child));
-	    ClutterActor * s = sibling?*((ClutterActor**)lua_touserdata(L,sibling)):NULL;
-	    
-	    clutter_container_lower_child(CLUTTER_CONTAINER(self),c,s);
+	    ClutterActor * c = user_data_to_actor(L,child);
+	    ClutterActor * s = sibling?user_data_to_actor(L,sibling):NULL;
+
+	    if (c)
+	    {
+		clutter_container_lower_child(CLUTTER_CONTAINER(self),c,s);
+	    }
 	]];
 
     # This one is very wasteful - it has to create and free the list as well as
@@ -813,9 +841,11 @@ interface container [[ClutterActor*]]
             lua_pushnil(L);
             while(lua_next(L,2))
             {
-                ClutterActor* source(*((ClutterActor**)lua_touserdata(L,-1)));
+                ClutterActor* source=user_data_to_actor(L,-1);
                 if(source)
+		{
                     clutter_container_add_actor(CLUTTER_CONTAINER(self),source);
+		}
                 lua_pop(L,1);
             }
         ]];
@@ -907,8 +937,11 @@ global screen [[ClutterActor*]] actor , container
 	    wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(self)));
 	]]
 	[[
-	    ClutterActor *k=*((ClutterActor**)lua_touserdata(L,2));
-	    clutter_stage_set_key_focus(CLUTTER_STAGE(self),k);
+	    ClutterActor *k=user_data_to_actor(L,2);
+	    if (k)
+	    {
+		clutter_stage_set_key_focus(CLUTTER_STAGE(self),k);
+	    }
 	]];
 }
 
@@ -1187,9 +1220,11 @@ class Clone [[ClutterActor*]] actor
 	    wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
         [[
-            ClutterActor* source(*((ClutterActor**)lua_touserdata(L,2)));
+            ClutterActor* source=user_data_to_actor(L,2);
             if(source)
+	    {
                 clutter_clone_set_source(CLUTTER_CLONE(self),source);
+	    }
         ]];
 }
 
@@ -1802,9 +1837,14 @@ class Alpha [[ClutterAlpha*]]
 	]]
 	[[
 	    luaL_checkudata(L,-1,TIMELINE_METATABLE);
-	    ClutterTimeline * timeline(*((ClutterTimeline**)lua_touserdata(L,-1)));
-	    if (timeline)
-		clutter_alpha_set_timeline(self,timeline);
+	    void * udata=lua_touserdata(L,-1);
+	    if (udata)
+	    {
+		GObject * timeline=*((GObject**)udata);
+		
+		if (timeline && CLUTTER_IS_TIMELINE(timeline))
+		    clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
+	    }
 	]];
 	
     string mode
