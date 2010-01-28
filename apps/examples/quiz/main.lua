@@ -1,7 +1,13 @@
 
 -------------------------------------------------------------------------------
 
-game={ MAX_TIME = 30 }
+game={
+		MAX_TIME = 30,
+		WIN_COLOR = "55FF55",
+		LOSE_COLOR = "FF5555",
+		WAITING_FOR_ANSWER_COLOR = "000000",
+		ANSWERED_COLOR = "FF555533",
+	}
 
 -------------------------------------------------------------------------------
 -- Setup the UI
@@ -74,7 +80,7 @@ layout(
                     }
                     ,
                     {
-                        background=Rectangle{color="FF000033"},
+                        background=Rectangle{color=game.ANSWERED_COLOR},
                         padding=10,
                         group=Group{name="players_box"}
                     }
@@ -123,7 +129,7 @@ function player_joined(controller)
             Group{position={0,top},size={group.w,group.h/8}},
             {
                 padding_bottom=4,
-                content=Rectangle{color="00000000",name="flash_box"},
+                content=Rectangle{color=game.ANSWERED_COLOR,name="flash_box"},
                 columns=
                 {
                     {
@@ -209,7 +215,7 @@ function player_answered(controller,answer)
         players[controller].answer_time=-1
     end
     game.num_answered = game.num_answered+1
-    players[controller].ui.flash_box.color="00CCCC"    
+    players[controller].ui.flash_box.color=game.ANSWERED_COLOR;    
 end
 
 -------------------------------------------------------------------------------
@@ -253,7 +259,7 @@ function game.no_players()
     ui.answer4.text=""
     ui.timer.text=""
     for controller,player_state in pairs(players) do
-        player_state.ui.flash_box.color="00000000"
+        player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
     end
     if game.timer then
         game.timer:stop()
@@ -294,6 +300,7 @@ function game.ask_next_question()
     for i=1,4 do
         local answer_box=ui["answer"..i]
         answer_box.opacity=255
+        answer_box.color = "FFFFFF"
         answer_box.text=i..". "..scrambled_answers[i].text
         answer_box.extra.correct=scrambled_answers[i].id==1
     end
@@ -304,7 +311,7 @@ function game.ask_next_question()
 	game.num_answered = 0
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
-        player_state.ui.flash_box.color="FF0000"
+        player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
         controller:show_multiple_choice_ui(
             scrambled_answers[1].id,
             scrambled_answers[1].text,
@@ -359,7 +366,10 @@ function game.times_up()
         for i=1,4 do
             local a=ui["answer"..i]
             if not a.extra.correct then
-                a.opacity=255-(255*progress)
+                a.opacity=255-(200*progress)
+                a.color = { 255, 255-(255*progress), 255-(255*progress) }
+            else
+                a.color = { 255-(255*progress), 255, 255-(255*progress) }
             end
         end
     end
