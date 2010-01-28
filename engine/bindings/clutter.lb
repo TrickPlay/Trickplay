@@ -627,6 +627,36 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
+    readonly table min_size
+	[[
+	    gfloat mw;
+	    gfloat mh;
+	    gfloat nw;
+	    gfloat nh;
+	    
+	    clutter_actor_get_preferred_size(self,&mw,&mh,&nw,&nh);
+	    lua_newtable(L);
+	    lua_pushnumber(L,mw);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,mh);
+	    lua_rawseti(L,-2,2);
+	]];
+
+    readonly table natural_size
+	[[
+	    gfloat mw;
+	    gfloat mh;
+	    gfloat nw;
+	    gfloat nh;
+	    
+	    clutter_actor_get_preferred_size(self,&mw,&mh,&nw,&nh);
+	    lua_newtable(L);
+	    lua_pushnumber(L,nw);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,nh);
+	    lua_rawseti(L,-2,2);
+	]];
+	
     table extra
 	[[
 	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
