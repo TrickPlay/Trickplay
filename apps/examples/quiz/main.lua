@@ -365,7 +365,9 @@ function game.times_up()
         if player_state.answer_time > -1 then
             player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
+            player_state.ui.flash_box.color = game.WIN_COLOR
         else
+        	player_state.ui.flash_box.color = game.LOSE_COLOR
         	controller:clear_ui()
         end
     end
