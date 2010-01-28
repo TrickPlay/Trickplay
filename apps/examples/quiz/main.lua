@@ -4,7 +4,7 @@
 local trickplay_red = "960A04"
 
 game={
-		MAX_TIME = 30,
+		MAX_TIME = 15,
 		WIN_COLOR = "55FF55",
 		LOSE_COLOR = trickplay_red,
 		WAITING_FOR_ANSWER_COLOR = "000000",
@@ -35,7 +35,7 @@ layout(
                         size=240,
                         content=Text{
                             name="question",
-                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 40px" ,
+                            font="Diavlo,DejaVu Sans,Sans 40px" ,
                             text="Waiting for players to join..." ,
                             wrap=true,
                             color="FFFFFF"
@@ -52,7 +52,7 @@ layout(
                                         {
                                             content=Text{
                                                 name="answer"..i,
-                                                font="Enchanted,Graublau Web,DejaVu Sans,Sans 36px",
+                                                font="Diavlo,DejaVu Sans,Sans 36px",
                                                 wrap=true,
                                                 color="FFFFFF",
                                                 text="Answer "..i
@@ -75,7 +75,7 @@ layout(
                         padding={left=80},
                         content=Text{
                             name="timer",
-                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 96px",
+                            font="Diavlo,DejaVu Sans,Sans 96px",
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME)
@@ -137,12 +137,12 @@ function player_joined(controller)
                 {
                     {
                         size=2/3,
-                        content=Text{font="Enchanted,Graublau Web,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
+                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
                     }
                     ,
                     {
                         padding={left=8},
-                        content=Text{font="Enchanted,Graublau Web,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
+                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
                     }
                 }
             }
@@ -156,6 +156,7 @@ function player_joined(controller)
     
     if player_count()>=1 then
     	ui.answer1.text = ""
+	    ui.answer1.font="Diavlo,DejaVu Sans,Sans 40px"
         game.ready_to_start()
     end
 end
@@ -258,6 +259,9 @@ game.questions=dofile("questions.lua")
 function game.no_players()
     ui.question.text=""
     ui.answer1.text="Waiting for players to join..."
+    ui.answer1.font="Diavlo,DejaVu Sans,Sans 40px"
+    ui.answer1.color="FFFFFF"
+    ui.answer1.opacity=255
     ui.answer2.text=""
     ui.answer3.text=""
     ui.answer4.text=""
@@ -274,7 +278,7 @@ function game.no_players()
 end
 
 function game.ready_to_start()
-    ui.question.text="Tap for next question..."
+    ui.question.text="\nTap for next question..."
     game.ready=true
 end
 
@@ -286,6 +290,7 @@ function game.ask_next_question()
     local question=table.remove(game.questions,math.random(#game.questions))
     
     ui.question.text=question[1]
+    ui.question.font="Diavlo,DejaVu Sans,Sans 40px"
     
     print("CORRECT ANSWER IS",question[2])
     
@@ -360,7 +365,9 @@ function game.times_up()
         if player_state.answer_time > -1 then
             player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
+            player_state.ui.flash_box.color = game.WIN_COLOR
         else
+        	player_state.ui.flash_box.color = game.LOSE_COLOR
         	controller:clear_ui()
         end
     end
