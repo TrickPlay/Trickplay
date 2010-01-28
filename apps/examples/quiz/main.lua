@@ -273,7 +273,9 @@ function game.ask_next_question()
     game.ready=false
     
     -- pick a question
+    print("Before: "..#(game.questions))
     local question=table.remove(game.questions,math.random(#game.questions))
+    print("After: "..#(game.questions))
     
     ui.question.text=question[1]
     
@@ -349,6 +351,8 @@ function game.times_up()
         if player_state.answer_time > -1 then
             player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
+        else
+        	controller:clear_ui()
         end
     end
     
