@@ -26,7 +26,7 @@ layout(
                         size=240,
                         content=Text{
                             name="question",
-                            font="Sans 36px" ,
+                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 48px" ,
                             text="Waiting for players to join..." ,
                             wrap=true,
                             color="FFFFFF"
@@ -43,7 +43,7 @@ layout(
                                         {
                                             content=Text{
                                                 name="answer"..i,
-                                                font="Sans 28px",
+                                                font="Enchanted,Graublau Web,DejaVu Sans,Sans 36px",
                                                 wrap=true,
                                                 color="FFFFFF",
                                                 text="Answer "..i
@@ -66,7 +66,7 @@ layout(
                         padding={left=80},
                         content=Text{
                             name="timer",
-                            font="Sans 102px",
+                            font="Enchanted,Graublau Web,DejaVu Sans,Sans 96px",
                             single_line=true,
                             color="FFFFFF",
                             text="30"
@@ -128,12 +128,12 @@ function player_joined(controller)
                 {
                     {
                         size=2/3,
-                        content=Text{font="Sans 18px",text=controller.name,color="FFFFFF"}
+                        content=Text{font="Enchanted,Graublau Web,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
                     }
                     ,
                     {
                         padding={left=8},
-                        content=Text{font="Sans 26px",text="0",color="FFFFFF",name="score"}
+                        content=Text{font="Enchanted,Graublau Web,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
                     }
                 }
             }
