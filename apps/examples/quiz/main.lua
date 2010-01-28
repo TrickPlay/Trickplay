@@ -278,7 +278,7 @@ function game.no_players()
 end
 
 function game.ready_to_start()
-    ui.question.text="Tap for next question..."
+    ui.question.text="\nTap for next question..."
     game.ready=true
 end
 
