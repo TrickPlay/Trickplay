@@ -1,13 +1,16 @@
 
 -------------------------------------------------------------------------------
 
+local trickplay_red = "960A04"
+
 game={
 		MAX_TIME = 30,
 		WIN_COLOR = "55FF55",
-		LOSE_COLOR = "FF5555",
+		LOSE_COLOR = trickplay_red,
 		WAITING_FOR_ANSWER_COLOR = "000000",
-		ANSWERED_COLOR = "FF555533",
+		ANSWERED_COLOR = trickplay_red.."33",
 	}
+
 
 -------------------------------------------------------------------------------
 -- Setup the UI
@@ -151,7 +154,8 @@ function player_joined(controller)
     
     players[controller]={box=player_box,ui=player_ui,score=0,answer_time=-1}
     
-    if player_count()==1 then
+    if player_count()>=1 then
+    	ui.answer1.text = ""
         game.ready_to_start()
     end
 end
@@ -252,8 +256,8 @@ end
 game.questions=dofile("questions.lua")
 
 function game.no_players()
-    ui.question.text="Waiting for players to join..."
-    ui.answer1.text=""
+    ui.question.text=""
+    ui.answer1.text="Waiting for players to join..."
     ui.answer2.text=""
     ui.answer3.text=""
     ui.answer4.text=""
@@ -270,7 +274,7 @@ function game.no_players()
 end
 
 function game.ready_to_start()
-    ui.question.text="Tap to start..."
+    ui.question.text="Tap for next question..."
     game.ready=true
 end
 
