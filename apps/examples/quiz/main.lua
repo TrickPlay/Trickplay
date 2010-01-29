@@ -377,6 +377,7 @@ function game.ask_next_question()
         player_state.answer_time=-1
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
         controller:show_multiple_choice_ui(
+        	"TP Quiz",
             scrambled_answers[1].id,
             scrambled_answers[1].text,
             scrambled_answers[2].id,
