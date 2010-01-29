@@ -78,7 +78,7 @@ layout(
                     }
                     ,
                     {
-                        background=Rectangle{border_color=game.ANSWERED_COLOR, border_width=1, color="00000000"},
+                        background=Rectangle{border_color=game.ANSWERED_COLOR, border_width=1, color="00000000", name = "players_box_rect", opacity=0 },
                         padding=10,
                         group=Group{name="players_box"}
                     }
@@ -196,6 +196,7 @@ function player_joined(controller)
     if player_count()>=1 then
     	ui.answer1.text = ""
 	    ui.answer1.font="Diavlo,DejaVu Sans,Sans 40px"
+	    ui.players_box_rect.opacity = 255
         game.ready_to_start()
     end
 end
@@ -298,6 +299,7 @@ game.questions=dofile("questions.lua")
 function game.no_players()
     ui.question.text=""
     ui.answer1.text="Waiting for players to join..."
+    ui.players_box_rect.opacity = 0
     ui.answer1.font="Diavlo,DejaVu Sans,Sans 40px"
     ui.answer1.color="FFFFFF"
     ui.answer1.opacity=255
