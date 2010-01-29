@@ -171,18 +171,21 @@ function player_joined(controller)
                 columns=
                 {
                     {
-                        size=2/3,
-                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
+                        size=5/6,
+                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF",name="label"}
                     }
                     ,
                     {
-                        padding={left=8},
                         content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
                     }
                 }
             }
         )
-        
+
+	-- Vertically center the elements in the container
+	player_ui.label.position = {player_ui.label.x + 8, player_ui.label.y + 10}
+	player_ui.score.position = {player_ui.score.x, player_ui.score.y + 10}
+
     -- TODO: animate
     
     group:add(player_box)
