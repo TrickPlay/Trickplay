@@ -689,6 +689,14 @@ interface actor [[ClutterActor*]]
     readonly udata parent
 	[[wrap_concrete_actor(L,clutter_actor_get_parent(self));]];
 	
+    unparent()
+	[[
+	    if(ClutterActor * parent=clutter_actor_get_parent(self))
+	    {
+		clutter_container_remove_actor(CLUTTER_CONTAINER(parent),self);
+	    }
+	]];
+	
     raise( udata above )
 	[[
 	    ClutterActor* source =user_data_to_actor(L,above);

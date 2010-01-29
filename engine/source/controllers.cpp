@@ -146,9 +146,11 @@ bool Controllers::ui_clear(gpointer source)
 
 //-----------------------------------------------------------------------------
 
-bool Controllers::ui_show_multiple_choice(gpointer source,const StringPairList & choices)
+bool Controllers::ui_show_multiple_choice(gpointer source,const String & label,const StringPairList & choices)
 {
-    String line("UI\tMC");
+    String line("UI\tMC\tMC_LABEL\t");
+    
+    line.append(label);
     
     for (StringPairList::const_iterator it=choices.begin();it!=choices.end();++it)
     {
