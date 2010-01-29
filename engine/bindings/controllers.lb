@@ -148,7 +148,7 @@ interface controller [[Controller*]]
             
             int count=lua_gettop(L);
             
-            for (int i=2;i+1<=count;i+=2)
+            for (int i=3;i+1<=count;i+=2)
             {
                 const char * id=lua_tostring(L,i);
                 const char * choice=lua_tostring(L,i+1);                
