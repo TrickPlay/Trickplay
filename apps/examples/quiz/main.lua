@@ -5,10 +5,10 @@ local trickplay_red = "960A04"
 
 game={
 		MAX_TIME = 15,
-		WIN_COLOR = "55FF55",
-		LOSE_COLOR = trickplay_red,
+		WIN_COLOR = "55FF5533",
+		LOSE_COLOR = trickplay_red.."99",
 		WAITING_FOR_ANSWER_COLOR = "000000",
-		ANSWERED_COLOR = trickplay_red.."33",
+		ANSWERED_COLOR = trickplay_red.."99",
 	}
 
 
@@ -77,7 +77,7 @@ layout(
                     }
                     ,
                     {
-                        background=Rectangle{color=game.ANSWERED_COLOR},
+                        background=Rectangle{border_color=game.ANSWERED_COLOR, border_width=1, color="00000000"},
                         padding=10,
                         group=Group{name="players_box"}
                     }
@@ -92,7 +92,7 @@ layout(
 
 ui.timer = Text{
                             name="timer",
-                            font="Diavlo,DejaVu Sans,Sans 68px",
+                            font="Diavlo,DejaVu Sans,Sans 64px",
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME),
@@ -115,8 +115,8 @@ ui.timer_box = Canvas{
 ui.timer_box:begin_painting()
 ui.timer_box:set_source_color("FFFFFF")
 local timer_box_top = ui.timer_label.y + ui.timer_label.size[2]/2
-local timer_box_inset = 10
-local timer_box_bottom = ui.timer_group.size[2] - 1
+local timer_box_inset = 0
+local timer_box_bottom = ui.timer_group.size[2] - (timer_box_inset + 10)
 local timer_box_ratio = 4/5
 ui.timer_box:move_to(timer_box_ratio * ui.timer_label.x, timer_box_top)
 ui.timer_box:line_to(timer_box_inset, timer_box_top)
@@ -377,6 +377,7 @@ function game.ask_next_question()
         player_state.answer_time=-1
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
         controller:show_multiple_choice_ui(
+        	"TP Quiz",
             scrambled_answers[1].id,
             scrambled_answers[1].text,
             scrambled_answers[2].id,
@@ -459,17 +460,18 @@ function game.times_up()
     ui.flying_answer=flying_answer
     
     local timeline=Timeline{duration=1000}
-    function timeline.on_new_frame(timeline,msecs,progress)
+    local progress = Alpha{ timeline = timeline, mode = "EASE_OUT_QUAD" }
+    function timeline.on_new_frame(timeline,msecs)
         for i=1,4 do
             local a=ui["answer"..i]
             if not a.extra.correct then
-                a.opacity=255-(255*progress)
-                a.color = { 255, 255-(255*progress), 255-(255*progress) }
+                a.opacity=255-(255*progress.alpha)
+                a.color = { 255, 255-(255*progress.alpha), 255-(255*progress.alpha) }
             elseif flying_answer then
-                flying_answer.y=flying_answer_interval:get_value(progress)
-                flying_answer.color = { 255-(255*progress), 255, 255-(255*progress) }
+                flying_answer.y=flying_answer_interval:get_value(progress.alpha)
+                flying_answer.color = { 255-(255*progress.alpha), 255, 255-(255*progress.alpha) }
             else
-                a.color = { 255-(255*progress), 255, 255-(255*progress) }
+                a.color = { 255-(255*progress.alpha), 255, 255-(255*progress.alpha) }
             end
         end
     end
