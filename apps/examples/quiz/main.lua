@@ -314,10 +314,15 @@ function game.no_players()
         game.timer=nil
     end
     game.ready=false
+    if ui.flying_answer then
+        ui.flying_answer.parent:remove(ui.flying_answer)
+        ui.flying_answer=nil
+    end
 end
 
 function game.ready_to_start()
-    ui.question.text="\nTap for next question..."
+    ui.answer4:set{color="FFFFFF",opacity=255,text="Tap for next question..."}
+    --ui.question.text="\nTap for next question..."
 	ui.timer_group.opacity = 0
     game.ready=true
 end
@@ -325,6 +330,11 @@ end
 function game.ask_next_question()
     
     game.ready=false
+    
+    if ui.flying_answer then
+        ui.flying_answer.parent:remove(ui.flying_answer)
+        ui.flying_answer=nil
+    end
     
     -- pick a question
     local question=table.remove(game.questions,math.random(#game.questions))
@@ -420,6 +430,34 @@ function game.times_up()
         end
     end
     
+    -- Get the text box for the right answer, ignoring the first one
+    
+    local correct_answer_text=nil
+    
+    for i=2,4 do
+        local a=ui["answer"..i]
+        if a.extra.correct then
+            correct_answer_text=a
+        end
+    end
+    
+    local flying_answer=nil
+    local flying_answer_interval=nil
+    
+    if correct_answer_text then
+        flying_answer=Text{
+            font=correct_answer_text.font,
+            text=correct_answer_text.text,
+            position=correct_answer_text.position,
+            size=correct_answer_text.position,
+            color=correct_answer_text.color}
+        correct_answer_text.parent:add(flying_answer)
+        correct_answer_text.opacity=0
+        flying_answer_interval=Interval(flying_answer.y,ui.answer1.y)
+    end
+    
+    ui.flying_answer=flying_answer
+    
     local timeline=Timeline{duration=1000}
     function timeline.on_new_frame(timeline,msecs,progress)
         for i=1,4 do
@@ -427,6 +465,9 @@ function game.times_up()
             if not a.extra.correct then
                 a.opacity=255-(255*progress)
                 a.color = { 255, 255-(255*progress), 255-(255*progress) }
+            elseif flying_answer then
+                flying_answer.y=flying_answer_interval:get_value(progress)
+                flying_answer.color = { 255-(255*progress), 255, 255-(255*progress) }
             else
                 a.color = { 255-(255*progress), 255, 255-(255*progress) }
             end
