@@ -425,7 +425,7 @@ function game.times_up()
         for i=1,4 do
             local a=ui["answer"..i]
             if not a.extra.correct then
-                a.opacity=255-(200*progress)
+                a.opacity=255-(255*progress)
                 a.color = { 255, 255-(255*progress), 255-(255*progress) }
             else
                 a.color = { 255-(255*progress), 255, 255-(255*progress) }
