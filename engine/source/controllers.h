@@ -68,7 +68,7 @@ public:
     bool stop_accelerometer(gpointer source);
     bool reset(gpointer source);
     bool ui_clear(gpointer source);
-    bool ui_show_multiple_choice(gpointer source,const StringPairList & choices);
+    bool ui_show_multiple_choice(gpointer source,const String & label,const StringPairList & choices);
     
     //..........................................................................
     // Find info for a controller

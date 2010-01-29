@@ -38,7 +38,7 @@ public:
     bool stop_accelerometer();
     bool reset();
     bool ui_clear();
-    bool ui_show_multiple_choice(const StringPairList & choices);
+    bool ui_show_multiple_choice(const String & label,const StringPairList & choices);
     
 private:
     
@@ -142,7 +142,7 @@ interface controller [[Controller*]]
             result=self->ui_clear();    
         ]];
         
-    bool show_multiple_choice_ui()
+    bool show_multiple_choice_ui(string label)
         [[
             StringPairList list;
             
@@ -157,7 +157,7 @@ interface controller [[Controller*]]
                     list.push_back(std::make_pair(String(id),String(choice)));
             }
             
-            result=list.empty()?false:self->ui_show_multiple_choice(list);
+            result=list.empty()?false:self->ui_show_multiple_choice(label,list);
         ]];
         
     callback on_disconnected;
@@ -259,9 +259,9 @@ bool Controller::ui_clear()
     return controllers->ui_clear(source);    
 }
 
-bool Controller::ui_show_multiple_choice(const StringPairList & choices)
+bool Controller::ui_show_multiple_choice(const String & label,const StringPairList & choices)
 {
-    return controllers->ui_show_multiple_choice(source,choices);
+    return controllers->ui_show_multiple_choice(source,label,choices);
 }
 
 //=============================================================================
