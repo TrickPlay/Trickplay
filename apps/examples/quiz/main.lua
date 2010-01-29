@@ -32,6 +32,7 @@ layout(
                 rows=
                 {
                     {
+	                	padding={top=20, left=20, right=20},
                         size=240,
                         content=Text{
                             name="question",
