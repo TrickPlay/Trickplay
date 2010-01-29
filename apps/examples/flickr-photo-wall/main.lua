@@ -274,172 +274,180 @@ function screen.on_key_down(screen,keyval)
 			wall.z = wall_z_interval.to
 		end
 	end
-		
-	if keyval == key_right then
 
-		reset()
-		reset_wall()
-
-		if selection_col >= pages_loaded*cols_per_page - 1 then
-			return
-		end
-
-		x_interval = Interval( cursor.x , cursor.x + tile_size )
-		y_interval = nil
-		selection_col = selection_col + 1
-		timeline:start()
-		
-		if selection_col + left_col > ( pages_loaded/cols_per_page - 8 ) then
-			-- Fetch another set of images
-			populate_next_page()
-		end
-		
-		if selection_col - left_col > 3 then
-			local dx = tile_size * math.cos( math.rad( tilt_angle ) )
-			wall_x_interval = Interval( wall.x , wall.x - dx )
-			wall_z_interval = Interval( wall.z , wall.z + ( dx * math.tan( math.rad( tilt_angle ) ) ) )
-			
-			left_col = left_col + 1
-			
-			wall_timeline:start()
-		end
-
-	elseif keyval == key_left then
-		reset()
-		reset_wall()
-		
-		if selection_col == 0 then
-			return
-		end
-		x_interval = Interval( cursor.x , cursor.x - tile_size )
-		y_interval = nil
-		selection_col = selection_col - 1
-		
-		timeline:start()
-		
-		if selection_col < left_col  and left_col > 0 then
-			local dx = tile_size * math.cos( math.rad( tilt_angle ) )
-			wall_x_interval = Interval( wall.x , wall.x + dx )
-			wall_z_interval = Interval( wall.z , wall.z - ( dx * math.tan( math.rad( tilt_angle ) ) ) )
-			
-			left_col = left_col - 1
-			
-			wall_timeline:start()
-		end
-
-	elseif keyval == key_up then
-		reset()
-		
-		if selection_row > 0 then
-			x_interval = nil
-			y_interval = Interval( cursor.y , cursor.y - tile_size )
-			selection_row = selection_row - 1
-			timeline:start()
-		end
-
-	elseif keyval == key_down then
-		reset()
-		
-		if selection_row < rows_per_column-1 then
-			x_interval = nil
-			y_interval = Interval( cursor.y , cursor.y + tile_size )
-			selection_row = selection_row + 1        
-			timeline:start()
-		end
-
-	elseif keyval == key_enter then
-
-		if not zoom_image then
+	key_actions = {
+	
+		[key_right] =  function()
 			reset()
-
-			-- identify the photo based on column & row
-			local the_photo = photo_index[image_position_to_index(selection_col, selection_row)]
-
-			local start_position = cursor.transformed_position
-
-			zoom_image = Group { position = {0,0} }
-			local zoom_image_url
-			if screen.size[2] < 1080 then
-				zoom_image_url = Flickr.get_medium_url(the_photo)
-			else
-				zoom_image_url = Flickr.get_original_url(the_photo)
+			reset_wall()
+	
+			if selection_col >= pages_loaded*cols_per_page - 1 then
+				return
 			end
-			local zoom_thumb_img = Clone { source = the_photo.thumbWallImage }
-			local zoom_image_txt_grp = Group { position = { 0, 0 } }
-			local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
-			local zoom_image_txt = Text	{
-											position = { 10, 0 },
-											text = "\""..the_photo.title.."\" ©"..the_photo.ownername.." ("..licenses[the_photo.license].short..")",
-											z = 1,
-											color = { 255, 255, 255 },
-											font = "Graublau Web,DejaVu Sans,Sans 18px",
-											wrap = false,
+	
+			x_interval = Interval( cursor.x , cursor.x + tile_size )
+			y_interval = nil
+			selection_col = selection_col + 1
+			timeline:start()
+			
+			if selection_col + left_col > ( pages_loaded/cols_per_page - 8 ) then
+				-- Fetch another set of images
+				populate_next_page()
+			end
+			
+			if selection_col - left_col > 3 then
+				local dx = tile_size * math.cos( math.rad( tilt_angle ) )
+				wall_x_interval = Interval( wall.x , wall.x - dx )
+				wall_z_interval = Interval( wall.z , wall.z + ( dx * math.tan( math.rad( tilt_angle ) ) ) )
+				
+				left_col = left_col + 1
+				
+				wall_timeline:start()
+			end
+		end,
+
+
+		[key_left] = function()
+			reset()
+			reset_wall()
+			
+			if selection_col == 0 then
+				return
+			end
+			x_interval = Interval( cursor.x , cursor.x - tile_size )
+			y_interval = nil
+			selection_col = selection_col - 1
+			
+			timeline:start()
+			
+			if selection_col < left_col  and left_col > 0 then
+				local dx = tile_size * math.cos( math.rad( tilt_angle ) )
+				wall_x_interval = Interval( wall.x , wall.x + dx )
+				wall_z_interval = Interval( wall.z , wall.z - ( dx * math.tan( math.rad( tilt_angle ) ) ) )
+				
+				left_col = left_col - 1
+				
+				wall_timeline:start()
+			end
+		end,
+
+		[key_up] = function()
+			reset()
+			
+			if selection_row > 0 then
+				x_interval = nil
+				y_interval = Interval( cursor.y , cursor.y - tile_size )
+				selection_row = selection_row - 1
+				timeline:start()
+			end
+		end,
+
+		[key_down] = function()
+			reset()
+			
+			if selection_row < rows_per_column-1 then
+				x_interval = nil
+				y_interval = Interval( cursor.y , cursor.y + tile_size )
+				selection_row = selection_row + 1        
+				timeline:start()
+			end
+		end,
+
+		[key_enter] = function()
+			if not zoom_image then
+				reset()
+	
+				-- identify the photo based on column & row
+				local the_photo = photo_index[image_position_to_index(selection_col, selection_row)]
+	
+				local start_position = cursor.transformed_position
+	
+				zoom_image = Group { position = {0,0} }
+				local zoom_image_url
+				if screen.size[2] < 1080 then
+					zoom_image_url = Flickr.get_medium_url(the_photo)
+				else
+					zoom_image_url = Flickr.get_original_url(the_photo)
+				end
+				local zoom_thumb_img = Clone { source = the_photo.thumbWallImage }
+				local zoom_image_txt_grp = Group { position = { 0, 0 } }
+				local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
+				local zoom_image_txt = Text	{
+												position = { 10, 0 },
+												text = "\""..the_photo.title.."\" ©"..the_photo.ownername.." ("..licenses[the_photo.license].short..")",
+												z = 1,
+												color = { 255, 255, 255 },
+												font = "Graublau Web,DejaVu Sans,Sans 18px",
+												wrap = false,
+											}
+				zoom_image_txt_grp:add(zoom_image_txt_rect)
+				zoom_image_txt_grp:add(zoom_image_txt)
+	
+				local zoom_image_img = Image {
+										position = {0,0},
+										src = zoom_image_url,
+				}
+				zoom_image_img.on_loaded = function()
+											zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
+										end
+	
+	
+				zoom_image.children = { zoom_thumb_img, zoom_image_txt_grp }
+	
+	
+				if (the_photo.width_m / 16) > ( the_photo.height_m / 9 )then
+					zoom_image_img.width = screen.w * 0.9
+					zoom_image_img.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
+				else
+					zoom_image_img.request_mode = "WIDTH_FOR_HEIGHT"
+					zoom_image_img.height = screen.h * 0.9
+					zoom_image_img.width = ( screen.h * 0.9 ) * ( the_photo.width_m / the_photo.height_m )
+				end
+				zoom_thumb_img.request_mode = zoom_image_img.request_mode
+				zoom_thumb_img.height = zoom_image_img.height
+				zoom_thumb_img.width = zoom_image_img.width
+	
+				local max_txt_width = zoom_image_img.height - 40
+				if max_txt_width < zoom_image_txt.size[1] then
+					zoom_image_txt.scale = { max_txt_width/zoom_image_txt.size[1], 1.0 }
+				end
+				zoom_image_txt_rect.width = zoom_image_txt.transformed_size[1] + 20
+				zoom_image_txt_grp.z_rotation = { 90, 0, 0 }
+				zoom_image.position = { ( screen.w - zoom_image_img.size[1] ) / 2,
+												( screen.h - zoom_image_img.size[2] ) / 2 }
+				zoom_image_scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
+	
+				screen:add( zoom_image )
+				if wall_zoom_timeline.is_playing then
+					wall_enclosure.z = wall_zoom_int.to
+					wall_zoom_timeline:stop()
+				end
+				local wall_zoom_int = Interval( wall_enclosure.z, wall_zoom_back_z )
+				local image_zoom_z_int = Interval( image_zoom_back_z, 0 )
+				local image_zoom_scale_int = Interval ( 0.1, 1.0 )
+	
+				function wall_zoom_timeline.on_new_frame( t , msecs )
+					zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
+					zoom_image.scale =	{
+											image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
+											image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
+											zoom_image_img.size[1]/2,
+											zoom_image_img.size[2]/2
 										}
-			zoom_image_txt_grp:add(zoom_image_txt_rect)
-			zoom_image_txt_grp:add(zoom_image_txt)
-
-			local zoom_image_img = Image {
-									position = {0,0},
-									src = zoom_image_url,
-			}
-			zoom_image_img.on_loaded = function()
-										zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
-									end
-
-
-			zoom_image.children = { zoom_thumb_img, zoom_image_txt_grp }
-
-
-			if (the_photo.width_m / 16) > ( the_photo.height_m / 9 )then
-				zoom_image_img.width = screen.w * 0.9
-				zoom_image_img.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
+					wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
+				end
+	
+				wall_zoom_timeline.on_completed = nil
+				wall_zoom_timeline:start()
 			else
-				zoom_image_img.request_mode = "WIDTH_FOR_HEIGHT"
-				zoom_image_img.height = screen.h * 0.9
-				zoom_image_img.width = ( screen.h * 0.9 ) * ( the_photo.width_m / the_photo.height_m )
+				reset()
 			end
-			zoom_thumb_img.request_mode = zoom_image_img.request_mode
-			zoom_thumb_img.height = zoom_image_img.height
-			zoom_thumb_img.width = zoom_image_img.width
+		end,
+	 }
 
-			local max_txt_width = zoom_image_img.height - 40
-			if max_txt_width < zoom_image_txt.size[1] then
-				zoom_image_txt.scale = { max_txt_width/zoom_image_txt.size[1], 1.0 }
-			end
-			zoom_image_txt_rect.width = zoom_image_txt.transformed_size[1] + 20
-			zoom_image_txt_grp.z_rotation = { 90, 0, 0 }
-			zoom_image.position = { ( screen.w - zoom_image_img.size[1] ) / 2,
-											( screen.h - zoom_image_img.size[2] ) / 2 }
-			zoom_image_scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
-
-			screen:add( zoom_image )
-			if wall_zoom_timeline.is_playing then
-				wall_enclosure.z = wall_zoom_int.to
-				wall_zoom_timeline:stop()
-			end
-			local wall_zoom_int = Interval( wall_enclosure.z, wall_zoom_back_z )
-			local image_zoom_z_int = Interval( image_zoom_back_z, 0 )
-			local image_zoom_scale_int = Interval ( 0.1, 1.0 )
-
-			function wall_zoom_timeline.on_new_frame( t , msecs )
-				zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
-				zoom_image.scale =	{
-										image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
-										image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
-										zoom_image_img.size[1]/2,
-										zoom_image_img.size[2]/2
-									}
-				wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
-			end
-
-			wall_zoom_timeline.on_completed = nil
-			wall_zoom_timeline:start()
-		else
-			reset()
-		end
-	 
+	if key_actions[keyval] then
+		key_actions[keyval]()
 	else
-		print( "KEY" , keyval )
+		print("KEY: "..keyval)
 	end
-
 end
