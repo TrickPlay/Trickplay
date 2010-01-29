@@ -92,7 +92,7 @@ layout(
 
 ui.timer = Text{
                             name="timer",
-                            font="Diavlo,DejaVu Sans,Sans 68px",
+                            font="Diavlo,DejaVu Sans,Sans 64px",
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME),
@@ -115,8 +115,8 @@ ui.timer_box = Canvas{
 ui.timer_box:begin_painting()
 ui.timer_box:set_source_color("FFFFFF")
 local timer_box_top = ui.timer_label.y + ui.timer_label.size[2]/2
-local timer_box_inset = 10
-local timer_box_bottom = ui.timer_group.size[2] - 5
+local timer_box_inset = 0
+local timer_box_bottom = ui.timer_group.size[2] - (timer_box_inset + 10)
 local timer_box_ratio = 4/5
 ui.timer_box:move_to(timer_box_ratio * ui.timer_label.x, timer_box_top)
 ui.timer_box:line_to(timer_box_inset, timer_box_top)
