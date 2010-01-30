@@ -93,7 +93,7 @@ TPContext *     tp_context_new();
 
 // System name
 // This should be a short and simple name for the platform with no special
-// characters, such as "AcmeTV"
+// characters, such as "Acme TV"
 // Defaults to "Desktop"
 
 #define TP_SYSTEM_NAME          "system.name"
@@ -424,4 +424,4 @@ void            tp_context_free(
 }
 #endif 
 
-#endif
+#endif  // TP_H
