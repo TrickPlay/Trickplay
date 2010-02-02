@@ -96,7 +96,7 @@ endmacro(TP_FIND_LIB_INCLUDE)
 #------------------------------------------------------------------------------
 # Finds a library, and adds its path to a variable passed in,
 # for example:
-#   TP_FIND_LIBRARY( glib-2.0 LIBRARY_DIRS)
+#   TP_FIND_LIBRARY( glib-2.0 LIBRARIES)
 
 macro(TP_FIND_LIBRARY NAME ADD_TO)
 
@@ -112,14 +112,12 @@ macro(TP_FIND_LIBRARY NAME ADD_TO)
     
     if (${DEST} STREQUAL DEST-NOTFOUND)
     
-        message(FATAL_ERROR "Library '${NAME}' not found")
+        message(STATUS "Library '${NAME}' not found")
         
     else (${DEST} STREQUAL DEST-NOTFOUND)
     
         message(STATUS "Found library '${DEST}'" )
-        get_filename_component(PATH ${DEST} PATH)
-        list(APPEND ${ADD_TO} ${PATH})
-        list(REMOVE_DUPLICATES ${ADD_TO})
+        list(APPEND ${ADD_TO} ${DEST})
         
     endif(${DEST} STREQUAL DEST-NOTFOUND)
 

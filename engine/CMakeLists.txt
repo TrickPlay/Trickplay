@@ -35,7 +35,7 @@ include_directories(
 #------------------------------------------------------------------------------
 
 set(
-    ENGINE_LIBRARIES
+    ENGINE_LIBRARY_NAMES
     
     #--------------
     # glib
@@ -71,7 +71,7 @@ set(
     # curl
     #--------------
     
-    ssl crypto curl
+    ssl crypto cares curl
 
     #--------------
     # tokyo
@@ -95,7 +95,7 @@ set(
     # lua
     #--------------
     
-    lua5.1
+    lua;lua5.1
     
     #--------------
     # others
@@ -104,13 +104,9 @@ set(
     m dl
 )
 
-foreach( LIB ${ENGINE_LIBRARIES} )
-    TP_FIND_LIBRARY( ${LIB} ENGINE_LIB_DIRS )
+foreach( LIB ${ENGINE_LIBRARY_NAMES} )
+    TP_FIND_LIBRARY( ${LIB} ENGINE_LIBRARIES )
 endforeach( LIB )
-
-TP_ORDER_PATHS( ENGINE_LIB_DIRS lib )
-
-link_directories( ${ENGINE_LIB_DIRS} )
 
 #------------------------------------------------------------------------------
 # all warnings
