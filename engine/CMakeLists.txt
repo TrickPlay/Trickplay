@@ -143,6 +143,7 @@ set(
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controllers.lb
+    ${BINDINGS_SRC}/mediaplayer.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
@@ -179,6 +180,7 @@ add_library(
     ${ENGINE_SRC}/source/mdns.cpp
     ${ENGINE_SRC}/source/controllers.cpp
     ${ENGINE_SRC}/source/keys.cpp
+    ${ENGINE_SRC}/source/mediaplayers.cpp
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c

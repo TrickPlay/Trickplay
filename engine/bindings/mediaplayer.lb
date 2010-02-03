@@ -1,0 +1,181 @@
+[[
+
+#include "mediaplayers.h"
+#include "context.h"
+
+//-----------------------------------------------------------------------------
+// Just a thin shell to hold a real MediaPlayer and act as its delegate
+
+class MP : private MediaPlayer::Delegate
+{
+    public:
+        
+        MP(lua_State * l)
+        :
+            player(NULL),
+            L(l)
+        {
+            TPMediaPlayerConstructor c=TPContext::get_from_lua(L)->get_media_player_constructor();
+            
+            if (!c)
+            {
+                g_warning("NO MEDIA PLAYER CONSTRUCTOR");
+            }
+            else
+            {
+                player=MediaPlayer::make(c);
+                
+                if (player)
+                {
+                    player->set_delegate(this);
+                }
+            }
+        }
+        
+        ~MP()
+        {
+            if (player)
+            {
+                delete player;
+            }
+        }
+
+        MediaPlayer * player;
+        
+    private:
+        
+        //......................................................................
+        // Delegate methods
+        
+        virtual void loaded(MediaPlayer * player);
+        virtual void error(MediaPlayer * player,int code,const char * message);
+        virtual void end_of_stream(MediaPlayer * player);
+        
+    private:
+        
+        lua_State *     L;   
+};
+
+]]
+
+global mediaplayer [[MP*]]
+{
+    mediaplayer()
+        [[
+            *self=new MP(L);    
+        ]];
+        
+    ~mediaplayer()
+        [[
+            delete self;    
+        ]];
+        
+    readonly int state
+        [[
+            state=self->player?self->player->get_state():TP_MEDIAPLAYER_IDLE;
+        ]];
+        
+    readonly double position
+        [[
+            int result=self->player?self->player->get_position(&position):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            
+            if (result)
+                position=0;
+        ]];
+        
+    readonly double duration
+        [[
+            int result=self->player?self->player->get_duration(&duration):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            
+            if (result)
+                duration=0;
+        ]];
+        
+    readonly table buffered_duration
+        [[
+            double start;
+            double end;
+            
+            int result=self->player?self->player->get_buffered_duration(&start,&end):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if (result)
+            {
+                lua_pushnil(L);
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,start);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,end);
+                lua_rawseti(L,-2,2);
+            }
+        ]];
+        
+    readonly table video_size
+        [[
+            int width;
+            int height;
+            
+            int result=self->player?self->player->get_video_size(&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if (result)
+            {
+                lua_pushnil(L);
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,2);
+            }
+        ]];
+
+    int load(string uri,string extra="")
+        [[
+            // TODO: normalize path and convert to file uri
+            
+            result=self->player?self->player->load(uri,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+        
+    int play()
+        [[
+            result=self->player?self->player->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+        
+    int pause()
+        [[
+            result=self->player?self->player->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+        
+    int seek(double seconds)
+        [[
+            result=self->player?self->player->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+    
+    int set_playback_rate(int rate)
+        [[
+            result=self->player?self->player->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+    
+}
+
+[[
+
+void MP::loaded(MediaPlayer * player)
+{
+    
+}
+
+void MP::error(MediaPlayer * player,int code,const char * message)
+{
+    
+}
+
+void MP::end_of_stream(MediaPlayer * player)
+{
+}
+
+]]

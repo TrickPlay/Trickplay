@@ -13,6 +13,7 @@ extern "C"
 #include "glib.h"
 
 #include "tp/tp.h"
+#include "tp/mediaplayer.h"
 
 //-----------------------------------------------------------------------------
 
@@ -95,6 +96,10 @@ public:
     void add_output_handler(OutputHandler handler,gpointer data);
     void remove_output_handler(OutputHandler handler,gpointer data);
     
+    void set_media_player_constructor(TPMediaPlayerConstructor constructor);
+    
+    TPMediaPlayerConstructor get_media_player_constructor() const;
+    
     static TPContext * get_from_lua(lua_State * L);
         
     String normalize_app_path(const gchar * path_or_uri,bool * is_uri=NULL);
@@ -153,16 +158,18 @@ private:
     
     TPContext(const TPContext&);
 
-    bool                    is_running;
+    bool                        is_running;
     
-    StringMap               config;
+    StringMap                   config;
     
-    SystemDatabase *        sysdb;
+    SystemDatabase *            sysdb;
     
-    Controllers *           controllers;
+    Controllers *               controllers;
     
-    TPLogHandler            external_log_handler;
-    void *                  external_log_handler_data;
+    TPMediaPlayerConstructor    mp_constructor;
+    
+    TPLogHandler                external_log_handler;
+    void *                      external_log_handler_data;
 
     typedef std::pair<TPConsoleCommandHandler,void*>            ConsoleCommandHandlerClosure;
     typedef std::multimap<String,ConsoleCommandHandlerClosure>  ConsoleCommandHandlerMultiMap;

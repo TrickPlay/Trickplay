@@ -13,8 +13,54 @@
 #include "util.h"
 #include "console.h"
 #include "sysdb.h"
-#include "mdns.h"
 #include "controllers.h"
+
+#if 0
+
+#include "clutter-gst/clutter-gst.h"
+
+ClutterActor * vt;
+
+void video_error(ClutterMedia *media,gpointer error,gpointer user_data)
+{
+    g_debug("VIDEO ERROR %s",((GError*)error)->message);
+}
+
+#endif
+
+void foo()
+{
+#if 0	
+    gst_init(NULL,NULL);
+    
+    vt=clutter_gst_video_texture_new();
+    
+	g_debug("CONNECT");
+    g_signal_connect(vt,"error",G_CALLBACK(video_error),NULL);
+
+    g_debug("VT %p",vt);
+    
+    //g_object_set(G_OBJECT(vt), "sync-size", FALSE, NULL);
+    
+	g_debug("SEY FILENAME");
+    clutter_media_set_filename(CLUTTER_MEDIA(vt),"/home/pablo/Downloads/ED_1024.avi");
+
+    
+	g_debug("SET AUDIO");
+	clutter_media_set_audio_volume(CLUTTER_MEDIA(vt),0.5);
+    
+	
+    clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()),vt);
+    
+
+	g_debug("SET PLAYING");
+    clutter_media_set_playing(CLUTTER_MEDIA(vt),TRUE);
+	
+	g_debug("PLAYING %d",clutter_media_get_playing(CLUTTER_MEDIA(vt)));
+#endif    
+    
+    
+}
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -31,6 +77,7 @@ extern void luaopen_settings(lua_State*L);
 extern void luaopen_profile(lua_State*L);
 extern void luaopen_xml(lua_State*L);
 extern void luaopen_controllers_module(lua_State*L);
+extern void luaopen_mediaplayer(lua_State*L);
 
 extern void luaopen_restricted(lua_State*L);
 extern void luaopen_apps(lua_State*L);
@@ -48,6 +95,7 @@ TPContext::TPContext()
     is_running(false),
     sysdb(NULL),
     controllers(NULL),
+    mp_constructor(NULL),
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
@@ -473,6 +521,21 @@ int TPContext::load_app()
     // Set its cookie jar    
     Network::set_cookie_jar_file_name(get_cookie_jar_file_name());
     
+    // Set default size and color for the stage
+    
+    ClutterActor * stage=clutter_stage_get_default();
+    
+    clutter_actor_set_width(stage,get_int(TP_SCREEN_WIDTH));
+    clutter_actor_set_height(stage,get_int(TP_SCREEN_HEIGHT));
+    
+    ClutterColor color;
+    color.red=0;
+    color.green=0;
+    color.blue=0;
+    color.alpha=0;
+    
+    clutter_stage_set_color(CLUTTER_STAGE(stage),&color);
+    
     // Start up a lua state
     lua_State * L=lua_open();
     g_assert(L);
@@ -497,14 +560,21 @@ int TPContext::load_app()
     luaopen_profile(L);
     luaopen_xml(L);
     luaopen_controllers_module(L);
-    
     luaopen_keys(L);
+        
+    // TODO
+    // This creates a new media player here - which we may not want to do.
+    // We probably want to create one earlier and keep it across app loads.
     
+    luaopen_mediaplayer(L);
+    
+    // TODO
     // This should not be opened for all apps - only trusted ones. Since we
     // don't have a mechanism for determining trustworthiness yet...
     
     luaopen_restricted(L);
     
+    // TODO
     // This one should only be opened for the launcher and the store apps
     
     luaopen_apps(L);
@@ -522,21 +592,7 @@ int TPContext::load_app()
     }
     
 #endif
-    // Set default size and color for the stage
-    
-    ClutterActor * stage=clutter_stage_get_default();
-    
-    clutter_actor_set_width(stage,get_int(TP_SCREEN_WIDTH));
-    clutter_actor_set_height(stage,get_int(TP_SCREEN_HEIGHT));
-    
-    ClutterColor color;
-    color.red=0;
-    color.green=0;
-    color.blue=0;
-    color.alpha=0;
-    
-    clutter_stage_set_color(CLUTTER_STAGE(stage),&color);
-    
+        
     // Load the app
     
     notify(TP_NOTIFICATION_APP_LOADING);
@@ -1319,6 +1375,19 @@ bool TPContext::profile_switch(int id)
 }
 
 //-----------------------------------------------------------------------------
+
+void TPContext::set_media_player_constructor(TPMediaPlayerConstructor constructor)
+{
+    mp_constructor=constructor;
+}
+
+
+TPMediaPlayerConstructor TPContext::get_media_player_constructor() const
+{
+    return mp_constructor;
+}
+
+//-----------------------------------------------------------------------------
 // External-facing functions
 //-----------------------------------------------------------------------------
 
@@ -1431,3 +1500,11 @@ void tp_context_quit(TPContext * context)
 }
 
 //-----------------------------------------------------------------------------
+// Media player
+//-----------------------------------------------------------------------------
+
+void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor)
+{
+    context->set_media_player_constructor(constructor);
+}
+
