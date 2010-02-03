@@ -24,6 +24,7 @@ public:
     // Functions that we can call from Lua
 
     int get_state();    
+    void reset();    
     int load(const char * uri,const char * extra);    
     int play();    
     int seek(double seconds);    
@@ -142,11 +143,6 @@ private:
     // Returns the pointer to the TPMediaPlayer inside our wrapper
     
     TPMediaPlayer * get_mp();
-    
-    //.........................................................................
-    // Calls reset on the TPMediaPlayer
-    
-    void reset();
     
     //.........................................................................
     
