@@ -1,0 +1,29 @@
+
+TP_FIND_INCLUDE( clutter-1.0 clutter-gst/clutter-gst.h  TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( gstreamer-0.10 gst/gst.h               TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( glib-2.0 glib.h 			TPCMP_INCLUDE_DIRS )
+TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h		TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( pango-1.0 pango/pango.h		TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( cairo cairo.h				TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( libxml2 libxml/parser.h       		TPCMP_INCLUDE_DIRS )
+
+
+
+
+TP_ORDER_PATHS( TPCMP_INCLUDE_DIRS include )
+
+include_directories(
+
+    ${PROJECT_SOURCE_DIR}/engine/public/include
+    
+    ${TPCMP_INCLUDE_DIRS}    
+    )
+
+add_executable( tp-cmp main.c )
+
+TP_FIND_LIBRARY( clutter-gst-0.10   TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( gstreamer-0.10     TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( xml2               TPCMP_LIBRARIES )
+
+target_link_libraries( tp-cmp tpcore ${TPCMP_LIBRARIES} )
