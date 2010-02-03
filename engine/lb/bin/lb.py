@@ -779,7 +779,7 @@ def emit( stuff , f ):
               
                 if prop[ "get_code" ] is not None:
                     
-                    if prop_type not in( "table" , "function" , "udata" ):
+                    if prop_type not in( "table" , "function" , "udata" , "multi" ):
                     
                         f.write(
                             "  %s %s;\n"
@@ -792,7 +792,7 @@ def emit( stuff , f ):
                     
                     flow_code( prop[ "get_code" ] )
     
-                    if prop_type not in ( "table" , "function" , "udata" ):
+                    if prop_type not in ( "table" , "function" , "udata" , "multi" ):
                         
                         if prop_type == "lstring":
                             
@@ -813,12 +813,12 @@ def emit( stuff , f ):
                                 ( lua_push[ prop[ "type" ] ] , prop[ "name" ] ) 
                             )
                         
-                    f.write(
-                        "  return 1;\n"
-                        "}\n"
+                    if prop_type not in ( "multi" ):
                         
-                    )
-                    
+                        f.write( "  return 1;\n" )
+                        
+                    f.write( "}\n" )
+                        
                 else:
                     
                     # TODO : default property getter
