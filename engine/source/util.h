@@ -72,6 +72,23 @@ namespace Util
     };
     
     //-----------------------------------------------------------------------------
+    
+    class GSRMutexLock
+    {
+    public:
+        
+        GSRMutexLock(GStaticRecMutex * mutex) : m(mutex) {g_static_rec_mutex_lock(m);}
+        ~GSRMutexLock() {g_static_rec_mutex_unlock(m);}
+    
+    private:
+        
+        GSRMutexLock() {}
+        GSRMutexLock(const GSRMutexLock &) {}
+        
+        GStaticRecMutex * m;
+    };
+    
+    //-----------------------------------------------------------------------------
     // Converts a path using / to a platform path in place - modifies the string
     // passed in.
     
