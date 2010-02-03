@@ -170,7 +170,8 @@ def parse( source ):
                         udata = None ,
                         inherits = None ,
                         properties = [] ,
-                        functions = [] )
+                        functions = [] ,
+                        constants = [] )
                     )
                     
             else:
@@ -210,7 +211,8 @@ def parse( source ):
                     udata = udata ,
                     inherits = inherits ,
                     properties = [] ,
-                    functions = [] )
+                    functions = [] ,
+                    constants = [] )
                 )
             
             tokens = []
@@ -287,6 +289,11 @@ def parse( source ):
                 
                 output[ -1 ][ "functions" ].append( dict( name = name , type = type , parameters = parameters , code = code ) )
                 
+            elif ( len( tokens ) == 5) and ( tokens[0] == "const" ):
+                
+                # A constant
+                
+                output[ -1 ][ "constants" ].append( dict( name=tokens[2] , type=tokens[1] , value=tokens[4] ) )
             
             else:
         
@@ -937,6 +944,19 @@ def emit( stuff , f ):
                 %
                 (metatable_name,bind_name)
             )
+            
+            # Put constants into the metatable
+            
+            for const in bind["constants"]:
+                
+                f.write(
+                    '  lua_pushstring(L,"%s");\n'
+                    "  %s(L,%s);\n"
+                    "  lua_rawset(L,-3);\n"
+                    %
+                    ( const["name"] , lua_push[ const[ "type" ] ] , const[ "value" ] ) 
+                )
+            
     
             f.write(
                 "  const luaL_Reg meta_methods[]=\n"
