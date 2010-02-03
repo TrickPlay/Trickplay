@@ -12,12 +12,14 @@
 
 static void mp_end_of_stream(ClutterMedia * cm,TPMediaPlayer * mp)
 {
-    tp_media_player_end_of_stream(mp);    
+    tp_media_player_end_of_stream(mp);
+    clutter_media_set_playing(cm,FALSE);
 }
 
-static void mp_error(ClutterMedia *media,GError * error,TPMediaPlayer * mp)
+static void mp_error(ClutterMedia * cm,GError * error,TPMediaPlayer * mp)
 {
     tp_media_player_error(mp,error->code,error->message);
+    clutter_media_set_playing(cm,FALSE);
 }
 
 //-----------------------------------------------------------------------------

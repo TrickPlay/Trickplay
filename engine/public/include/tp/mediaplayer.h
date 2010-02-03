@@ -8,234 +8,145 @@ extern "C" {
 #endif 
 
 /*
-    States
-    
-    IDLE
-    ----
-    
-        TrickPlay can call:
-        
-            load
-            
-                returns 0
-                    -> goes to LOADING state
-                    
-                returns non-zero
-                    -> stays in IDLE state
-                    
-            destroy
-            
-                destroys the media player
-                    
-            get_viewport_geometry
-            set_viewport_geometry
-            get_audio_volume
-            set_audio_volume
-            get_audio_mute
-            set_audio_mute
-                -> do not change state
-                
-        MediaPlayer can call:
-        
-            tp_media_player_get_state
-                -> does not change state
-            
-            
-    LOADING
-    -------
-    
-        TrickPlay can call:
-        
-            reset
-                -> goes to IDLE state (and drops all knowledge of the resource)
-            
-            get_viewport_geometry
-            set_viewport_geometry
-            get_audio_volume
-            set_audio_volume
-            get_audio_mute
-            set_audio_mute
-                -> do not change state
-
-        MediaPlayer can call:
-        
-            tp_media_player_get_state
-                -> does not change state
-                
-            tp_media_player_error
-                -> goes to IDLE state
-                
-            tp_media_player_loaded
-                -> goes to READY state
-            
-    READY
-    -----
-    
-        TrickPlay can call:
-        
-            play
-            
-                returns 0
-                    -> goes to PLAYING state
-                    
-                returns non-zero
-                    -> stays in READY state
-                
-            seek
-            
-                returns 0
-                    -> stays in READY state (at new position)
-                    
-                returns non-zero
-                    -> stays in READY state (does not change position)
-                
-            reset
-                -> goes to IDLE state (and drops all knowledge of the resource)
-                
-            get_viewport_geometry
-            set_viewport_geometry
-            get_position
-            get_media_type
-            get_duration
-            get_buffered_duration
-            get_video_size
-            get_tags
-            get_audio_volume
-            set_audio_volume
-            get_audio_mute
-            set_audio_mute
-                -> do not change state
-            
-        MediaPlayer can call:
-        
-            tp_media_player_get_state
-                -> does not change state
-            
-    PLAYING
-    -------
-    
-        TrickPlay can call:
-        
-            pause
-            
-                returns 0
-                    -> goes to PAUSED state
-                    
-                returns non-zero
-                    -> stays in PLAYING state (continues playing)
-                    
-            seek
-            
-                returns 0
-                    -> stays in PLAYING state (plays at new position)
-                    
-                returns non-zero
-                    -> stays in PLAYING state (does not change position)
-                    
-            set_playback_rate
-            
-                returns 0
-                    -> stays in PLAYING state (playing at the new rate)
-                    
-                return non-zero
-                    -> stays in PLAYING state (playing at the same rate)
-                                        
-            reset
-                -> goes to IDLE state (and drops all knowledge of the resource)
-                
-            get_viewport_geometry
-            set_viewport_geometry
-            get_position
-            get_media_type
-            get_duration
-            get_buffered_duration
-            get_video_size
-            get_tags
-            get_audio_volume
-            set_audio_volume
-            get_audio_mute
-            set_audio_mute
-                -> do not change state
-            
-        MediaPlayer can call:
-        
-            tp_media_player_get_state
-                -> does not change state
-
-            tp_media_player_end_of_stream            
-                -> goes to PAUSED state (position is reset to 0, rate is reset to 1)
-                
-            tp_media_player_error            
-                -> goes to PAUSED state (position and rate do not change)
-                
-    PAUSED
-    ------
-    
-        TrickPlay can call:
-        
-            play
-            
-                returns 0
-                    -> goes to PLAYING state
-                    
-                returns non-zero
-                    -> stays in PAUSED state
-                    
-            seek
-            
-                returns 0
-                    -> stays in PAUSED state (new position is set)
-                    
-                returns non-zero
-                    -> stays in PAUSED state (does not change position)
-                                                            
-            reset
-                -> goes to IDLE state (and drops all knowledge of the resource)
-    
-            get_viewport_geometry
-            set_viewport_geometry
-            get_position
-            get_media_type
-            get_duration
-            get_buffered_duration
-            get_video_size
-            get_tags
-            get_audio_volume
-            set_audio_volume
-            get_audio_mute
-            set_audio_mute
-                -> do not change state
-                
-        MediaPlayer can call:
-        
-            tp_media_player_get_state            
-                -> does not change state
-                    
- 
+    File: Media Player
 */
 
-//-----------------------------------------------------------------------------
 /*
-    File: Media Player
+    Section: State Transitions
+    
+    Topic: All states
+    
+    Calls that can be made in any state and never change state.
+
+        TrickPlay can always call:
+        
+            - <TPMediaPlayer.get_viewport_geometry>
+            - <TPMediaPlayer.set_viewport_geometry>
+            - <TPMediaPlayer.get_audio_volume>
+            - <TPMediaPlayer.set_audio_volume>
+            - <TPMediaPlayer.get_audio_mute>
+            - <TPMediaPlayer.set_audio_mute>
+            
+        Media player can always call:
+        
+            - <tp_media_player_get_state>:
+    
+    
+    Topic: IDLE state
+    
+    The initial state of all media players. In this state, the media player
+    should hold minimal resources.
+    
+        TrickPlay can call:
+        
+            - <TPMediaPlayer.load>:            
+                Returns zero, goes to <LOADING state>.
+                Returns non-zero, stays in <IDLE state>.                                
+            - <TPMediaPlayer.destroy>:
+                Does not change state.
+                            
+        Media player can call:
+        
+            - Nothing.
+            
+    Topic: LOADING state
+    
+    The media player is attempting to load a resource.
+    
+        TrickPlay can call:
+        
+            - <TPMediaPlayer.reset>:
+                Goes to <IDLE state> and drops all knowledge of the resource.
+            
+        Media player can call:
+        
+            - <tp_media_player_error>:
+                Goes to <IDLE state>.
+                
+            - <tp_media_player_loaded>:
+                Goes to <PAUSED state>.
+
+    Topic: PAUSED state
+    
+    The media player is paused and ready to play.
+    
+        TrickPlay can call:
+        
+            - <TPMediaPlayer.play>:
+                Returns zero, goes to <PLAYING state>.
+                Returns non-zero, stays in <PAUSED state>.
+                    
+            - <TPMediaPlayer.reset>:
+                Goes to <IDLE state> and drops all knowledge of the resource.
+    
+            *The following calls do not change state*
+
+            - <TPMediaPlayer.seek>            
+            - <TPMediaPlayer.get_position>
+            - <TPMediaPlayer.get_media_type>
+            - <TPMediaPlayer.get_duration>
+            - <TPMediaPlayer.get_buffered_duration>
+            - <TPMediaPlayer.get_video_size>
+            - <TPMediaPlayer.get_media_tags>
+                
+        Media player can call:
+        
+            - Nothing.
+
+    Topic: PLAYING state
+    
+    The media player is playing.
+    
+        TrickPlay can call:
+        
+            - <TPMediaPlayer.pause>:
+                Returns zero, goes to <PAUSED state>.                    
+                Returns non-zero, stays in <PLAYING state>. 
+                    
+            - <TPMediaPlayer.reset>:
+                Goes to <IDLE state> and drops all knowledge of the resource.
+
+            *The following calls do not change state*
+
+            - <TPMediaPlayer.set_playback_rate>
+            - <TPMediaPlayer.seek>
+            - <TPMediaPlayer.get_position>
+            - <TPMediaPlayer.get_media_type>
+            - <TPMediaPlayer.get_duration>
+            - <TPMediaPlayer.get_buffered_duration>
+            - <TPMediaPlayer.get_video_size>
+            - <TPMediaPlayer.get_media_tags>
+            
+        Media player can call:
+        
+            - <tp_media_player_end_of_stream>:
+                Goes to <PAUSED state>.
+                Position is reset to 0, rate is reset to 1.
+                
+            - <tp_media_player_error>:
+                Goes to <PAUSED state>.
+                Position and rate do not change.
+
+*/
+/*
+    Section: Global Interface    
 */
 //-----------------------------------------------------------------------------
 /*
     Constants: Media Player States
     
-    TP_MEDIAPLAYER_IDLE     - Idle state, when there is no resource loaded.     
-    TP_MEDIAPLAYER_LOADING  - The media player is trying to load a resource.
-    TP_MEDIAPLAYER_READY    - The resource is ready for playback.
-    TP_MEDIAPLAYER_PLAYING  - The media player is playing the resource.
-    TP_MEDIAPLAYER_PAUSED   - The media player is paused.
+    TP_MEDIAPLAYER_IDLE     - <IDLE state>.     
+    TP_MEDIAPLAYER_LOADING  - <LOADING state>.
+    TP_MEDIAPLAYER_PAUSED   - <PAUSED state>.
+    TP_MEDIAPLAYER_PLAYING  - <PLAYING state>.
 */
 
 #define TP_MEDIAPLAYER_IDLE         0x01
 #define TP_MEDIAPLAYER_LOADING      0x02
-#define TP_MEDIAPLAYER_READY        0x04
+#define TP_MEDIAPLAYER_PAUSED       0x04
 #define TP_MEDIAPLAYER_PLAYING      0x08
-#define TP_MEDIAPLAYER_PAUSED       0x10
 
-#define TP_MEDIAPLAYER_ANY_STATE    (TP_MEDIAPLAYER_IDLE|TP_MEDIAPLAYER_LOADING|TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)
+#define TP_MEDIAPLAYER_ANY_STATE    (TP_MEDIAPLAYER_IDLE|TP_MEDIAPLAYER_LOADING|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)
 
 //-----------------------------------------------------------------------------
 /*
@@ -251,6 +162,19 @@ extern "C" {
 #define TP_MEDIA_TYPE_AUDIO_VIDEO   (TP_MEDIA_TYPE_AUDIO|TP_MEDIA_TYPE_VIDEO)
 
 //-----------------------------------------------------------------------------
+/*
+    Constants: Basic Errors
+    
+    These are some pre-defined basic errors. Most of the functions in this API
+    return an integer, where zero indicates success. If appropriate, you can
+    return these errors. For custom error codes, it is suggested that you use
+    positive integers.
+
+    TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED    - The function is not implemented    
+    TP_MEDIAPLAYER_ERROR_INVALID_STATE      - The current state is invalid for this call
+    TP_MEDIAPLAYER_ERROR_BAD_PARAMETER      - A parameter is invalid
+    TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER     - Reserved    
+*/
 
 #define TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED    -1    
 #define TP_MEDIAPLAYER_ERROR_INVALID_STATE      -2
@@ -266,6 +190,7 @@ typedef struct TPMediaPlayer    TPMediaPlayer;
 
 /*
     Function: TPMediaPlayerConstructor
+    
     This is the prototype for a function that initializes a new media player. You
     should populate all of its functions.
     
@@ -283,6 +208,7 @@ typedef int (*TPMediaPlayerConstructor)(TPMediaPlayer * mp);
 
 /*
     Function: tp_context_set_media_player_constructor
+    
     Sets a function that TrickPlay will use to create new media players. This
     should only be called once; after a context is created and before it runs.
 */
@@ -291,6 +217,7 @@ void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerCo
 
 /*
     Function: tp_media_player_get_state
+    
     Returns the current state of the media player. The state is managed by
     TrickPlay based on callbacks invoked.
 */
@@ -299,6 +226,7 @@ int tp_media_player_get_state(TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_loaded
+    
     Invoked when the media player is ready to play and has valid information
     about the resource.
     
@@ -310,6 +238,7 @@ void tp_media_player_loaded(TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_error
+    
     Invoked when there is an error while loading or playing back.
     
     Valid States:
@@ -321,6 +250,7 @@ void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
 
 /*
     Callback: tp_media_player_end_of_stream
+    
     Invoked when the end of a resource is reached.
     
     Valid States:
@@ -338,16 +268,21 @@ void tp_media_player_end_of_stream(TPMediaPlayer * mp);
 struct TPMediaPlayer
 {
 /*
-    Property: user_data
-    A pointer to user data, which is opaque to TrickPlay.
+    Field: user_data
+    
+    A pointer to user data, which is opaque to TrickPlay. If you use this member,
+    you should dispose of it and any resources it holds in <destroy>. 
 */
 
     void * user_data;
     
 /*
     Function: destroy
+    
     Should release all resources associated with this media player. It should not
-    free the TPMediaPlayer structure, as it belongs to TrickPlay.
+    free the TPMediaPlayer structure, as it belongs to TrickPlay. If the media
+    player is in any state other than IDLE, TrickPlay will call <reset> before it
+    calls <destroy>.
     
     Parameters:
     
@@ -362,7 +297,8 @@ struct TPMediaPlayer
 
 /*
     Function: load
-    Should validate the uri and attempt to begin loading it asynchronously. It should
+    
+    Should validate the URI and attempt to begin loading it asynchronously. It should
     return as quickly as possible.
    
     Parameters:
@@ -378,14 +314,14 @@ struct TPMediaPlayer
    
     Returns:
     
-    0 -     The media player has started loading the uri and will invoke
+    0 -     The media player has started loading the URI and will invoke
             either <tp_media_player_loaded> when it is successful
             or <tp_media_player_error> if there is a problem. The state will
             switch to LOADING.
             It can begin buffering but should not start playback or otherwise
             show anything on the video plane.
                 
-    other - An error was detected immediately (such as a bad uri) and the
+    other - An error was detected immediately (such as a bad URI) and the
             the media player will not be able to continue. It should not invoke
             any callbacks. The state will remain IDLE.
             
@@ -398,9 +334,10 @@ struct TPMediaPlayer
     
 /*
     Function: reset
-    Must unconditionally stop playback, free all resources and forget all state,
-    except for the viewport geometry. It should not free the media player itself;
-    that is a job for <destroy>.
+    
+    Must unconditionally stop playback and free all resources associated with the
+    current URI. It should retain viewport geometry and volume/mute information.
+    It should not free the media player itself; that is a job for <destroy>.
     
     Parameters:
     
@@ -409,7 +346,6 @@ struct TPMediaPlayer
     Valid States:
     
     - LOADING
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -418,6 +354,7 @@ struct TPMediaPlayer
     
 /*
     Function: play
+    
     Should attempt to start playing the resource from the current position. If the
     current position is at the end of the stream, this call should succeed and
     <tp_media_player_end_of_stream> should be called.
@@ -432,12 +369,11 @@ struct TPMediaPlayer
             PLAYING state and can call <tp_media_player_error> or
             <tp_media_player_end_of_stream>.
             
-    other - Playback failed to start. The state will remain READY or PAUSED and
+    other - Playback failed to start. The state will remain PAUSED and
             no callbacks can be invoked.
     
     Valid States:
     
-    - READY
     - PAUSED
 */
     
@@ -445,8 +381,9 @@ struct TPMediaPlayer
     
 /*
     Function: seek
+    
     Should attempt to seek to the given position (in seconds) within the stream.
-    If the media player is in either READY or PAUSED states, the new position
+    If the media player is in the PAUSED state, the new position
     should be noted by the media player - and clamped if out of range - but the
     media player should do nothing else until <play> is called. Even if the new
     position is at the end of the stream, the media player should not invoke
@@ -471,7 +408,6 @@ struct TPMediaPlayer
     
     Valid States:
     
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -480,6 +416,7 @@ struct TPMediaPlayer
     
 /*
     Function: pause
+    
     Should attempt to pause the stream. If the playback rate is anything other than
     one, it should be reset to 1.
     
@@ -502,6 +439,7 @@ struct TPMediaPlayer
     
 /*
     Function: set_playback_rate
+    
     Should attempt to change the playback rate. Playback rates are integers denoting
     a speed multiplier. Negative playback rates should play backward. Zero is not
     a valid playback rate.
@@ -529,6 +467,7 @@ struct TPMediaPlayer
     
 /*
     Function: get_position
+    
     Should return the current playback position, in seconds, within the stream.
     
     Parameters:
@@ -545,7 +484,6 @@ struct TPMediaPlayer
     
     Valid States:
     
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -554,6 +492,7 @@ struct TPMediaPlayer
     
 /*
     Function: get_duration
+    
     Should return the duration of the stream, in seconds. 
 
     Parameters:
@@ -570,7 +509,6 @@ struct TPMediaPlayer
     
     Valid States:
     
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -579,6 +517,7 @@ struct TPMediaPlayer
     
 /*
     Function: get_buffered_duration
+    
     Returns two markers that denote the portion of the stream that is currently
     buffered, in seconds. 
     
@@ -601,7 +540,6 @@ struct TPMediaPlayer
     
     Valid States:
     
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -609,6 +547,7 @@ struct TPMediaPlayer
     int (*get_buffered_duration)(TPMediaPlayer * mp,double * start_seconds,double * end_seconds);
 /*
     Function: get_video_size
+    
     Returns the size of the video stream, if any. This is not the size of the view
     port used to display the video, but the actual resolution of the video itself.
         
@@ -628,7 +567,6 @@ struct TPMediaPlayer
     
     Valid States:
     
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -637,6 +575,7 @@ struct TPMediaPlayer
     
 /*
     Function: get_viewport_geometry
+    
     Returns the position and size, in pixels, of the viewport used to play video.
     
     Parameters:
@@ -661,7 +600,6 @@ struct TPMediaPlayer
     
     - IDLE
     - LOADING
-    - READY
     - PLAYING
     - PAUSED    
 */
@@ -670,6 +608,7 @@ struct TPMediaPlayer
     
 /*
     Function: set_viewport_geometry
+    
     Sets the position and size of the viewport.
     
     Parameters:
@@ -694,7 +633,6 @@ struct TPMediaPlayer
     
     - IDLE
     - LOADING
-    - READY
     - PLAYING
     - PAUSED    
 */
@@ -703,6 +641,7 @@ struct TPMediaPlayer
     
 /*
     Function: get_media_type
+    
     Returns the type of media; whether it has audio, video or both.
     
     Parameters:
@@ -719,7 +658,6 @@ struct TPMediaPlayer
     
     Valid States:
     
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -728,11 +666,13 @@ struct TPMediaPlayer
 
 /*
     Function: get_media_tags
+    
     TODO
 */
 
 /*
     Function: get_audio_volume
+    
     Returns the current audio volume as a floating point number between 0 and
     1, where 0 is the lowest volume.
     
@@ -752,7 +692,6 @@ struct TPMediaPlayer
     
     - IDLE
     - LOADING
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -761,6 +700,7 @@ struct TPMediaPlayer
 
 /*
     Function: set_audio_volume
+    
     Sets the audio volume as a floating point number between 0 and
     1, where 0 is the lowest volume.
     
@@ -780,7 +720,6 @@ struct TPMediaPlayer
     
     - IDLE
     - LOADING
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -790,6 +729,7 @@ struct TPMediaPlayer
 
 /*
     Function: get_audio_mute
+    
     Returns a value indicating whether audio is muted.
     
     Parameters:
@@ -809,7 +749,6 @@ struct TPMediaPlayer
     
     - IDLE
     - LOADING
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -819,6 +758,7 @@ struct TPMediaPlayer
 
 /*
     Function: set_audio_mute
+    
     Mutes audio.
     
     Parameters:
@@ -838,7 +778,6 @@ struct TPMediaPlayer
     
     - IDLE
     - LOADING
-    - READY
     - PLAYING
     - PAUSED
 */
@@ -847,6 +786,7 @@ struct TPMediaPlayer
     
 /*
     Function: get_viewport_texture
+    
     Should return NULL.
 */
 

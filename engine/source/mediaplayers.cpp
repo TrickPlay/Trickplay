@@ -167,7 +167,7 @@ void MediaPlayer::reset()
     {
         g_debug("MP[%p] <- reset",get_mp());
         
-        check(TP_MEDIAPLAYER_LOADING|TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED);
+        check(TP_MEDIAPLAYER_LOADING|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED);
         
         wrapper->mp.reset(get_mp());
     }
@@ -214,7 +214,7 @@ int MediaPlayer::play()
     
     TPMediaPlayer * mp=get_mp();
 
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    play CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -247,7 +247,7 @@ int MediaPlayer::seek(double seconds)
     
     TPMediaPlayer * mp=get_mp();
     
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    seek CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -350,7 +350,7 @@ int MediaPlayer::get_position(double * seconds)
 
     g_assert(seconds);
    
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    get_position CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -385,7 +385,7 @@ int MediaPlayer::get_duration(double * seconds)
 
     g_assert(seconds);
    
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    get_duration CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -421,7 +421,7 @@ int MediaPlayer::get_buffered_duration(double * start_seconds,double * end_secon
     g_assert(start_seconds);
     g_assert(end_seconds);
    
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    get_buffered_duration CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -457,7 +457,7 @@ int MediaPlayer::get_video_size(int * width,int * height)
     g_assert(width);
     g_assert(height);
    
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    get_video_size CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -561,7 +561,7 @@ int MediaPlayer::get_media_type(int * type)
 
     g_assert(type);
    
-    if (!(state&(TP_MEDIAPLAYER_READY|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
+    if (!(state&(TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)))
     {
         g_warning("MP[%p]    get_media_type CALLED IN INVALID STATE",mp);
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -777,50 +777,55 @@ void MediaPlayer::process_events()
     {
         Event * event=(Event*)e;
         
-        if (delegate)
+        switch(event->type)
         {
-            switch(event->type)
-            {
-                case Event::LOADED:
-                    
-                    if (state==TP_MEDIAPLAYER_LOADING)
-                    {
-                        state=TP_MEDIAPLAYER_READY;
+            case Event::LOADED:
+                
+                if (state==TP_MEDIAPLAYER_LOADING)
+                {
+                    state=TP_MEDIAPLAYER_PAUSED;
+
+                    if (delegate)
                         delegate->loaded(this);
-                    }
-                    break;
+                }
+                break;
+            
+            case Event::ERROR:
                 
-                case Event::ERROR:
+                if (state==TP_MEDIAPLAYER_LOADING)
+                {
+                    // Take it back to IDLE
+                    reset();
                     
-                    if (state==TP_MEDIAPLAYER_LOADING)
-                    {
-                        // Take it back to IDLE
-                        reset();
+                    if (delegate)
                         delegate->error(this,event->code,event->message);
-                    }
-                    else if (state==TP_MEDIAPLAYER_PLAYING)
-                    {
-                        pause();
-                        state=TP_MEDIAPLAYER_PAUSED;
+                }
+                else if (state==TP_MEDIAPLAYER_PLAYING)
+                {
+                    state=TP_MEDIAPLAYER_PAUSED;
+                    
+                    if (delegate)
                         delegate->error(this,event->code,event->message);
-                    }
-                    break;
+                }
+                break;
+            
+            case Event::EOS:
                 
-                case Event::EOS:
+                if (state==TP_MEDIAPLAYER_PLAYING)
+                {                    
+                    state=TP_MEDIAPLAYER_PAUSED;
                     
-                    if (state==TP_MEDIAPLAYER_PLAYING)
-                    {
-                        pause();
-                        state=TP_MEDIAPLAYER_PAUSED;
+                    if (delegate)
                         delegate->end_of_stream(this);
-                    }
-                    break;
-            }
+                }
+                break;
         }
         
         Event::destroy(event);
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void MediaPlayer::set_delegate(Delegate * new_delegate)
 {
