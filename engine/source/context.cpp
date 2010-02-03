@@ -15,53 +15,6 @@
 #include "sysdb.h"
 #include "controllers.h"
 
-#if 0
-
-#include "clutter-gst/clutter-gst.h"
-
-ClutterActor * vt;
-
-void video_error(ClutterMedia *media,gpointer error,gpointer user_data)
-{
-    g_debug("VIDEO ERROR %s",((GError*)error)->message);
-}
-
-#endif
-
-void foo()
-{
-#if 0	
-    gst_init(NULL,NULL);
-    
-    vt=clutter_gst_video_texture_new();
-    
-	g_debug("CONNECT");
-    g_signal_connect(vt,"error",G_CALLBACK(video_error),NULL);
-
-    g_debug("VT %p",vt);
-    
-    //g_object_set(G_OBJECT(vt), "sync-size", FALSE, NULL);
-    
-	g_debug("SEY FILENAME");
-    clutter_media_set_filename(CLUTTER_MEDIA(vt),"/home/pablo/Downloads/ED_1024.avi");
-
-    
-	g_debug("SET AUDIO");
-	clutter_media_set_audio_volume(CLUTTER_MEDIA(vt),0.5);
-    
-	
-    clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()),vt);
-    
-
-	g_debug("SET PLAYING");
-    clutter_media_set_playing(CLUTTER_MEDIA(vt),TRUE);
-	
-	g_debug("PLAYING %d",clutter_media_get_playing(CLUTTER_MEDIA(vt)));
-#endif    
-    
-    
-}
-
 //-----------------------------------------------------------------------------
 // Bindings
 //-----------------------------------------------------------------------------
