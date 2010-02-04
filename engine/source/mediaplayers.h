@@ -1,14 +1,15 @@
 #ifndef TP_MEDIAPLAYERS_H
 #define TP_MEDIAPLAYERS_H
 
-#include <map>
 #include <string>
+#include <list>
 
 #include "glib.h"
 
 #include "tp/mediaplayer.h"
 
 typedef std::string String;
+typedef std::list< std::pair<String,String> > StringPairList;
 
 class MediaPlayer
 {
@@ -66,6 +67,7 @@ private:
     void loaded();
     void error(int code,const char * message);
     void end_of_stream();
+    void tag_found(const char * name,const char * value);
     
     // The external functions are friends
     
@@ -73,20 +75,22 @@ private:
     friend void tp_media_player_loaded(TPMediaPlayer * mp);
     friend void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
     friend void tp_media_player_end_of_stream(TPMediaPlayer * mp);
+    friend void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value);
 
     //.........................................................................
     // Structure to hold an event
     
     struct Event
     {
-        enum Type {LOADED,ERROR,EOS};
+        enum Type {LOADED,ERROR,EOS,TAG};
         
-        static Event * make(Type type,int code=0,const gchar * message=NULL);
+        static Event * make(Type type,int code=0,const gchar * message=NULL,const gchar * value=NULL);
         static void destroy(Event * event);
         
         Type    type;
         int     code;
         gchar * message;
+        gchar * value;
     };
 
     // Post an event and add an idle source to process it later
@@ -155,6 +159,7 @@ private:
     GStaticRecMutex mutex;
     GAsyncQueue *   queue;
     Delegate *      delegate;
+    StringPairList  tags;
 };
 
 #endif // TP_MEDIAPLAYERS_H

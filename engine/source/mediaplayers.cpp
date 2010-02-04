@@ -6,20 +6,21 @@
 
 //=============================================================================
 
-MediaPlayer::Event * MediaPlayer::Event::make(Type type,int code,const gchar * message)
+MediaPlayer::Event * MediaPlayer::Event::make(Type type,int code,const gchar * message,const gchar * value)
 {
     Event * result=(Event*)g_malloc(sizeof(Event));
     result->type=type;
     result->code=code;
     result->message=message?g_strdup(message):NULL;
+    result->value=value?g_strdup(value):NULL;
     return result;
 }
 
 void MediaPlayer::Event::destroy(Event * event)
 {
     g_assert(event);
-    // g_free ignores NULL
     g_free(event->message);
+    g_free(event->value);
     g_free(event);
 }
 
@@ -178,6 +179,10 @@ void MediaPlayer::reset()
     
     clear_events();
         
+    // Clear tags
+    
+    tags.clear();
+    
     state=TP_MEDIAPLAYER_IDLE;
 }
 
@@ -751,6 +756,13 @@ void MediaPlayer::end_of_stream()
 }
 
 //-----------------------------------------------------------------------------
+
+void MediaPlayer::tag_found(const char * name,const char * value)
+{
+    post_event(Event::make(Event::TAG,0,name,value));    
+}
+
+//-----------------------------------------------------------------------------
 // Puts the event in the queue and adds an idle source that will process
 // events in the main thread
 
@@ -823,6 +835,13 @@ void MediaPlayer::process_events()
                         delegate->end_of_stream(this);
                 }
                 break;
+            
+            case Event::TAG:
+                
+                if (state==TP_MEDIAPLAYER_LOADING)
+                {
+                    tags.push_back(std::make_pair(String(event->message),String(event->value)));
+                }
         }
         
         Event::destroy(event);
@@ -883,4 +902,11 @@ void tp_media_player_end_of_stream(TPMediaPlayer * mp)
 }
 
 //-----------------------------------------------------------------------------
+
+void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value)
+{
+    g_debug("MP[%p] -> tp_media_player_tag_found:'%s':'%s'",mp,name,value);
+    if (name&&value)
+        MediaPlayer::get(mp)->tag_found(name,value);
+}
 
