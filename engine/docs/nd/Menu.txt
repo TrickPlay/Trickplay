@@ -49,6 +49,7 @@ Format: 1.4
 Group: Globals  {
 
    File: app  (app.lb)
+   File: mediaplayer  (mediaplayer.lb)
    File: profile  (profile.lb)
    File: settings  (settings.lb)
    File: system  (system.lb)
@@ -71,5 +72,6 @@ Group: Index  {
    Event Index: Events
    Constructor Index: Constructors
    Interface Index: Interfaces
+   Constant Index: Constants
    }  # Group: Index
 

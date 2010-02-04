@@ -117,7 +117,7 @@ Language: lb
 
    Extension: *.lb
    Line Comment: #
-   Block Comment: [[ ]]
+   Block Comments: [[ ]] /* */
    Prototype Enders: \n ;
    Function Prototype Ender: \n
    Property Prototype Ender: \n
