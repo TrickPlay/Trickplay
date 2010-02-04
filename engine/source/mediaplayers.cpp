@@ -99,6 +99,8 @@ MediaPlayer::~MediaPlayer()
         g_free(wrapper);
     
         wrapper=NULL;
+        
+        clear_events();
     
         g_async_queue_unref(queue);
     }
@@ -172,6 +174,10 @@ void MediaPlayer::reset()
         wrapper->mp.reset(get_mp());
     }
     
+    // Flush all pending events
+    
+    clear_events();
+        
     state=TP_MEDIAPLAYER_IDLE;
 }
 
@@ -773,10 +779,8 @@ void MediaPlayer::process_events()
 {
     MPLOCK;
     
-    while(gpointer e=g_async_queue_try_pop(queue))
+    while(Event * event=(Event*)g_async_queue_try_pop(queue))
     {
-        Event * event=(Event*)e;
-        
         switch(event->type)
         {
             case Event::LOADED:
@@ -821,6 +825,16 @@ void MediaPlayer::process_events()
                 break;
         }
         
+        Event::destroy(event);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void MediaPlayer::clear_events()
+{
+    while (Event * event=(Event*)g_async_queue_try_pop(queue))
+    {
         Event::destroy(event);
     }
 }

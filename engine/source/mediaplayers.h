@@ -101,6 +101,10 @@ private:
     
     void process_events();
     
+    // Clear all pending events
+    
+    void clear_events();
+    
 private:
     
     //.........................................................................
