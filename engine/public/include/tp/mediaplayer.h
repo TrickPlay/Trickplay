@@ -65,6 +65,9 @@ extern "C" {
                 
             - <tp_media_player_loaded>:
                 Goes to <PAUSED state>.
+                
+            - <tp_media_player_tag_found>:
+                Does not change state.
 
     Topic: PAUSED state
     
@@ -87,7 +90,6 @@ extern "C" {
             - <TPMediaPlayer.get_duration>
             - <TPMediaPlayer.get_buffered_duration>
             - <TPMediaPlayer.get_video_size>
-            - <TPMediaPlayer.get_media_tags>
                 
         Media player can call:
         
@@ -115,7 +117,6 @@ extern "C" {
             - <TPMediaPlayer.get_duration>
             - <TPMediaPlayer.get_buffered_duration>
             - <TPMediaPlayer.get_video_size>
-            - <TPMediaPlayer.get_media_tags>
             
         Media player can call:
         
@@ -180,6 +181,7 @@ extern "C" {
 #define TP_MEDIAPLAYER_ERROR_INVALID_STATE      -2
 #define TP_MEDIAPLAYER_ERROR_BAD_PARAMETER      -3
 #define TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER     -4
+#define TP_MEDIAPLAYER_ERROR_INVALID_URI        -5
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -194,7 +196,7 @@ typedef struct TPMediaPlayer    TPMediaPlayer;
     This is the prototype for a function that initializes a new media player. You
     should populate all of its functions.
     
-    Parameters:
+    Arguments:
     
     mp -    A pointer to an uninitialized TPMediaPlayer structure. 
     
@@ -211,6 +213,11 @@ typedef int (*TPMediaPlayerConstructor)(TPMediaPlayer * mp);
     
     Sets a function that TrickPlay will use to create new media players. This
     should only be called once; after a context is created and before it runs.
+
+    Arguments:
+    
+    context -       A pointer to the relevant TPContext structure.
+    constructor -   The function to call to initialize new media players.
 */
 
 void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
@@ -220,6 +227,15 @@ void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerCo
     
     Returns the current state of the media player. The state is managed by
     TrickPlay based on callbacks invoked.
+
+    Arguments:
+    
+    mp -        The TPMediaPlayer.
+    
+    Returns:
+    
+    The current state.
+
 */
 
 int tp_media_player_get_state(TPMediaPlayer * mp);
@@ -230,6 +246,10 @@ int tp_media_player_get_state(TPMediaPlayer * mp);
     Invoked when the media player is ready to play and has valid information
     about the resource.
     
+    Arguments:
+    
+    mp -        The TPMediaPlayer.
+
     Valid States:
     - LOADING
 */
@@ -241,6 +261,10 @@ void tp_media_player_loaded(TPMediaPlayer * mp);
     
     Invoked when there is an error while loading or playing back.
     
+    Arguments:
+    
+    mp -        The TPMediaPlayer.
+
     Valid States:
     - LOADING
     - PLAYING
@@ -253,12 +277,34 @@ void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
     
     Invoked when the end of a resource is reached.
     
+    Arguments:
+    
+    mp -        The TPMediaPlayer.
+    code -      An integer error code.
+    message -   A string describing the error. TrickPlay will make a copy.
+    
     Valid States:
     - PLAYING
 */
 
 void tp_media_player_end_of_stream(TPMediaPlayer * mp);
+
+/*
+    Callback: tp_media_player_tag_found
     
+    Invoked when a metadata tag is found in the stream.
+    
+    Arguments:
+    
+    mp -        The TPMediaPlayer.
+    name -      The name of the tag. TrickPlay will make a copy.
+    value -     The value of the tag as a string. TrickPlay will make a copy.
+    
+    Valid States:
+    - LOADING
+*/
+
+void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value);
 
 //-----------------------------------------------------------------------------
 /*
@@ -663,12 +709,6 @@ struct TPMediaPlayer
 */
 
     int (*get_media_type)(TPMediaPlayer * mp,int * type);
-
-/*
-    Function: get_media_tags
-    
-    TODO
-*/
 
 /*
     Function: get_audio_volume

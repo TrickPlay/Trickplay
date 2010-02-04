@@ -132,17 +132,14 @@ global mediaplayer [[MP*]]
     Property: buffered_duration
     
     Returns the amount of the stream that is currently buffered. This property
-    returns two numbers, both in seconds. The first is the start position of the
-    buffer and the second is the end position of the buffer.
+    returns a table with two numbers, both in seconds. The first is the start
+    position of the buffer and the second is the end position of the buffer.
     
     If there is a problem determining the buffered duration, this property will
     return nil.
-
-    You can get both numbers like this    
-    > local start_time , end_time = mediaplayer.buffered_duration
     */
     
-    readonly multi buffered_duration
+    readonly table buffered_duration
         [[
             double start;
             double end;
@@ -151,13 +148,16 @@ global mediaplayer [[MP*]]
 
             if (result)
             {
-                return 0;
+                lua_pushnil(L);
             }
-            
-            lua_pushnumber(L,start);
-            lua_pushnumber(L,end);
-                        
-            return 2;
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,start);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,end);
+                lua_rawseti(L,-2,2);
+            }
         ]];
     
     /*
@@ -166,11 +166,11 @@ global mediaplayer [[MP*]]
     Returns the dimensions of the video, if any. This is not the size of the
     viewport, but the actual resolution of the video.
     
-    This property returns two numbers, the width and height of the video. If there
-    is a problem getting these values, it will return nil.
+    This property returns a table with two numbers, the width and height of the
+    video. If there is a problem getting these values, it will return nil.
     */
     
-    readonly multi video_size
+    readonly table video_size
         [[
             int width;
             int height;
@@ -179,13 +179,16 @@ global mediaplayer [[MP*]]
 
             if (result)
             {
-                return 0;
+                lua_pushnil(L);
             }
-            
-            lua_pushnumber(L,width);
-            lua_pushnumber(L,height);
-            
-            return 2;
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,2);
+            }
         ]];
         
     /*
@@ -230,6 +233,34 @@ global mediaplayer [[MP*]]
             }
         ]];
         
+    /*
+    Property: tags
+    
+    Returns a table containing any metadata tags found in the stream while it
+    was being loaded. Each key in the table is the name of the tag. Each value
+    is the value of the tag as a string.
+    
+    If there are no tags, an empty table is returned.
+    */
+    
+    readonly table tags
+        [[
+            lua_newtable(L);
+            if (self->player)
+            {
+                StringPairList tags=self->player->get_tags();
+                
+                int i=1;
+                
+                for (StringPairList::const_iterator it=tags.begin();it!=tags.end();++it,++i)
+                {
+                    lua_pushstring(L,it->first.c_str());
+                    lua_pushstring(L,it->second.c_str());
+                    lua_rawset(L,-3);
+                }
+            }
+        ]];
+    
     /*
     Property: volume
     
@@ -314,9 +345,33 @@ global mediaplayer [[MP*]]
     
     int load(string uri,string extra="")
         [[
-            // TODO: normalize path and convert to file uri
+            // Normalize app path only accepts http and https by default, so we
+            // have to tell it to like others too.
             
-            result=self->player?self->player->load(uri,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            StringSet schemes;
+            schemes.insert("rtsp");
+            
+            bool is_uri=false;
+            
+            char * path=TPContext::get_from_lua(L)->normalize_app_path(uri,&is_uri,schemes);
+            
+            if (!path)
+            {
+                result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
+            }
+            else
+            {
+                if (!is_uri)
+                {
+                    gchar * file_uri=g_strdup_printf("file://%s",path);
+                    g_free(path);
+                    path=file_uri;
+                }
+                
+                result=self->player?self->player->load(path,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                
+                g_free(path);
+            }
         ]];
         
     /*
@@ -401,8 +456,8 @@ global mediaplayer [[MP*]]
     Function: get_viewport_geometry
     
     Returns the size and position of the video viewport. This function returns
-    4 integers, which are the left and top coordinates followed by the width and
-    height. If there is a problem, it returns nil.
+    a table with 4 integers, which are the left and top coordinates followed by
+    the width and height. If there is a problem, it returns nil.
     
     Returns:
     
@@ -410,7 +465,7 @@ global mediaplayer [[MP*]]
     nil - There was a problem getting the video viewport geometry.
     */
     
-    multi get_viewport_geometry()
+    table get_viewport_geometry()
         [[
             int left;
             int top;
@@ -421,15 +476,20 @@ global mediaplayer [[MP*]]
             
             if (result)
             {
-                return 0;
+                lua_pushnil(L);
             }
-            
-            lua_pushnumber(L,left);
-            lua_pushnumber(L,top);
-            lua_pushnumber(L,width);
-            lua_pushnumber(L,height);
-            
-            return 4;
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,left);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,top);
+                lua_rawseti(L,-2,2);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,3);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,4);
+            }
         ]];
         
     /*

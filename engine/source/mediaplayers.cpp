@@ -6,20 +6,21 @@
 
 //=============================================================================
 
-MediaPlayer::Event * MediaPlayer::Event::make(Type type,int code,const gchar * message)
+MediaPlayer::Event * MediaPlayer::Event::make(Type type,int code,const gchar * message,const gchar * value)
 {
     Event * result=(Event*)g_malloc(sizeof(Event));
     result->type=type;
     result->code=code;
     result->message=message?g_strdup(message):NULL;
+    result->value=value?g_strdup(value):NULL;
     return result;
 }
 
 void MediaPlayer::Event::destroy(Event * event)
 {
     g_assert(event);
-    // g_free ignores NULL
     g_free(event->message);
+    g_free(event->value);
     g_free(event);
 }
 
@@ -178,6 +179,10 @@ void MediaPlayer::reset()
     
     clear_events();
         
+    // Clear tags
+    
+    tags.clear();
+    
     state=TP_MEDIAPLAYER_IDLE;
 }
 
@@ -728,6 +733,15 @@ void * MediaPlayer::get_viewport_texture()
 }
 
 
+//-----------------------------------------------------------------------------
+
+StringPairList MediaPlayer::get_tags()
+{
+    MPLOCK;
+    
+    return tags;
+}
+
 //=============================================================================
 // Called by external callbacks - they all push an event into the queue
 
@@ -748,6 +762,13 @@ void MediaPlayer::error(int code,const char * message)
 void MediaPlayer::end_of_stream()
 {
     post_event(Event::make(Event::EOS));
+}
+
+//-----------------------------------------------------------------------------
+
+void MediaPlayer::tag_found(const char * name,const char * value)
+{
+    post_event(Event::make(Event::TAG,0,name,value));    
 }
 
 //-----------------------------------------------------------------------------
@@ -823,6 +844,13 @@ void MediaPlayer::process_events()
                         delegate->end_of_stream(this);
                 }
                 break;
+            
+            case Event::TAG:
+                
+                if (state==TP_MEDIAPLAYER_LOADING)
+                {
+                    tags.push_back(std::make_pair(String(event->message),String(event->value)));
+                }
         }
         
         Event::destroy(event);
@@ -869,7 +897,7 @@ void tp_media_player_loaded(TPMediaPlayer * mp)
 
 void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message)
 {
-    g_debug("MP[%p] -> tp_media_player_error:%d:%s",mp,code,message);
+    g_debug("MP[%p] -> tp_media_player_error(%d,'%s')",mp,code,message);
     MediaPlayer::get(mp)->error(code,message);
 }
 
@@ -883,4 +911,11 @@ void tp_media_player_end_of_stream(TPMediaPlayer * mp)
 }
 
 //-----------------------------------------------------------------------------
+
+void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value)
+{
+    g_debug("MP[%p] -> tp_media_player_tag_found('%s','%s')",mp,name,value);
+    if (name&&value)
+        MediaPlayer::get(mp)->tag_found(name,value);
+}
 

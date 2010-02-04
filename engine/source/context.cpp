@@ -880,13 +880,13 @@ int TPContext::request(const char * subject)
 
 //-----------------------------------------------------------------------------
 
-String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
+char * TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri,const StringSet & additional_uri_schemes)
 {
     bool it_is_a_uri=false;
     
     const char * app_path=get(TP_APP_PATH);
 	
-    gchar * result=NULL;
+    char * result=NULL;
     
     // First, see if there is a scheme
     
@@ -898,10 +898,10 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
     {
 	// What do we do? This is clearly not a good path
 	
-	g_error("INVALID EMPTY PATH OR URI");
+	g_critical("INVALID EMPTY PATH OR URI");
     }
     
-    if (count==1)
+    else if (count==1)
     {
 	// There is no scheme, so this is a simple path
 	
@@ -929,9 +929,18 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	    {
 		it_is_a_uri=true;
 		    
-		result = g_strdup(path_or_uri);
+		result=g_strdup(path_or_uri);
 	    }
-
+	    
+	    // If it is one of the additional schemes passed in, do the same
+	    
+	    else if (additional_uri_schemes.find(scheme)!=additional_uri_schemes.end())
+	    {
+		it_is_a_uri=true;
+		    
+		result=g_strdup(path_or_uri);		
+	    }
+	    
 	    // Localized file
 	    
 	    else if (!strcmp(scheme,"localized"))
@@ -986,32 +995,30 @@ String TPContext::normalize_app_path(const gchar * path_or_uri,bool * is_uri)
 	    }
 	    else
 	    {
-		g_error("INVALID SCHEME IN '%s'",path_or_uri);
+		g_critical("INVALID SCHEME IN '%s'",path_or_uri);
 	    }
 	}
     }
     
     g_strfreev(parts);
     
-    g_assert(result);
-    
-    if (is_uri)
+    if (result && is_uri)
 	*is_uri=it_is_a_uri;
 	
 #ifdef TP_PRODUCTION
 
     // Check for links
     
-    if (!it_is_a_uri && g_file_test(result,G_FILE_TEST_IS_SYMLINK))
+    if (result && !it_is_a_uri && g_file_test(result,G_FILE_TEST_IS_SYMLINK))
     {
-	g_error("SYMBOLIC LINKS NOT ALLOWED : %s",result );
+	g_critical("SYMBOLIC LINKS NOT ALLOWED : %s",result );
+	g_free(result);
+	result=NULL;
     }
     
 #endif
 
-    Util::GFreeLater free_result(result);
-    
-    return String(result);
+    return result;
 }
 
 //-----------------------------------------------------------------------------

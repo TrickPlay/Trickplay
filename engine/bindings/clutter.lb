@@ -1648,27 +1648,32 @@ class Image [[ClutterActor*]] actor
 	    
 	    TPContext * ctx=TPContext::get_from_lua(L);
 	    
-	    String path=ctx->normalize_app_path(src,&is_uri);
-
-	    if (is_uri)
+	    char * path=ctx->normalize_app_path(src,&is_uri);
+	    
+	    if (path)
 	    {
-		Network::Request request(ctx);
-		request.url = path;
+		Util::GFreeLater free_path(path);
+    
+		if (is_uri)
+		{
+		    Network::Request request(ctx);
+		    request.url = path;
 #if 0		    
-		g_object_ref(G_OBJECT(self));
-		Network::perform_request_async(request,Image_response_callback,self);
+		    g_object_ref(G_OBJECT(self));
+		    Network::perform_request_async(request,Image_response_callback,self);
 #else
-		Network::perform_request_async_incremental(
-		    request,
-		    Image_incremental_response_callback,
-		    new ImageClosure(CLUTTER_TEXTURE(self)));
+		    Network::perform_request_async_incremental(
+			request,
+			Image_incremental_response_callback,
+			new ImageClosure(CLUTTER_TEXTURE(self)));
 #endif
+		}
+		else
+		{
+		    clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path,NULL);
+		}
+		g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
 	    }
-	    else
-	    {
-		clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path.c_str(),NULL);
-	    }
-	    g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
 	]];
 	
     readonly table base_size

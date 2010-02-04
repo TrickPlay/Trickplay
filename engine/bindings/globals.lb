@@ -36,10 +36,18 @@ globals
     
     multi dofile(string file_name)
         [[
-            String path=TPContext::get_from_lua(L)->normalize_app_path(file_name);
+            bool is_uri=false;
+            char * path=TPContext::get_from_lua(L)->normalize_app_path(file_name,&is_uri);
+
+            Util::GFreeLater free_path(path);
+            
+            if (!path || is_uri)
+            {
+                return luaL_error(L,"Invalid path '%s'",file_name);
+            }
             
             int n = lua_gettop(L);
-            if (luaL_loadfile(L,path.c_str()) != 0)
+            if (luaL_loadfile(L,path) != 0)
                 lua_error(L);
             lua_call(L,0,LUA_MULTRET);
             return lua_gettop(L) - n;            
@@ -47,15 +55,27 @@ globals
         
     multi loadfile(string file_name)
         [[
-            String path=TPContext::get_from_lua(L)->normalize_app_path(file_name);
+            bool is_uri=false;
+            char * path=TPContext::get_from_lua(L)->normalize_app_path(file_name,&is_uri);
+            
+            Util::GFreeLater free_path(path);
                         
-            if (luaL_loadfile(L,path.c_str()) == 0)
-              return 1;
+            if (!path || is_uri)
+            {
+                lua_pushnil(L);
+                lua_pushfstring(L,"Invalid path '%s'",file_name);
+                return 2;
+            }
+            
+            if (luaL_loadfile(L,path)==0)
+            {
+                return 1;
+            }
             else
             {
-              lua_pushnil(L);
-              lua_insert(L, -2);  
-              return 2;  
+                lua_pushnil(L);
+                lua_insert(L, -2);  
+                return 2;  
             }            
         ]];
         
