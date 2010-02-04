@@ -58,6 +58,12 @@ class MP : private MediaPlayer::Delegate
 
 ]]
 
+/*
+    Global: mediaplayer
+    
+    Mediaplayer lets you play media...
+*/
+
 global mediaplayer [[MP*]]
 {
     mediaplayer()
@@ -70,11 +76,36 @@ global mediaplayer [[MP*]]
             delete self;    
         ]];
         
+    /*
+    Constant: States
+    IDLE -      The initial state of the media player.
+    LOADING -   After you call <load>.
+    PAUSED -    Paused.
+    PLAYING -   Playing.
+    */
+    
+    const int IDLE=TP_MEDIAPLAYER_IDLE;    
+    const int LOADING=TP_MEDIAPLAYER_LOADING;    
+    const int PAUSED=TP_MEDIAPLAYER_PAUSED;    
+    const int PLAYING=TP_MEDIAPLAYER_PLAYING;    
+        
+    /*
+    Property: state
+    
+    Returns the current state of the player.
+    */
+    
     readonly int state
         [[
             state=self->player?self->player->get_state():TP_MEDIAPLAYER_IDLE;
         ]];
-        
+    
+    /*
+    Property: position
+    
+    Returns the current playback position in seconds.
+    */
+    
     readonly double position
         [[
             int result=self->player?self->player->get_position(&position):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
@@ -82,7 +113,13 @@ global mediaplayer [[MP*]]
             if (result)
                 position=0;
         ]];
-        
+    
+    /*
+    Property: duration
+    
+    Returns the total duration of the loaded stream in seconds.
+    */
+    
     readonly double duration
         [[
             int result=self->player?self->player->get_duration(&duration):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
@@ -90,8 +127,22 @@ global mediaplayer [[MP*]]
             if (result)
                 duration=0;
         ]];
-        
-    readonly table buffered_duration
+    
+    /*
+    Property: buffered_duration
+    
+    Returns the amount of the stream that is currently buffered. This property
+    returns two numbers, both in seconds. The first is the start position of the
+    buffer and the second is the end position of the buffer.
+    
+    If there is a problem determining the buffered duration, this property will
+    return nil.
+
+    You can get both numbers like this    
+    > local start_time , end_time = mediaplayer.buffered_duration
+    */
+    
+    readonly multi buffered_duration
         [[
             double start;
             double end;
@@ -100,19 +151,26 @@ global mediaplayer [[MP*]]
 
             if (result)
             {
-                lua_pushnil(L);
+                return 0;
             }
-            else
-            {
-                lua_newtable(L);
-                lua_pushnumber(L,start);
-                lua_rawseti(L,-2,1);
-                lua_pushnumber(L,end);
-                lua_rawseti(L,-2,2);
-            }
+            
+            lua_pushnumber(L,start);
+            lua_pushnumber(L,end);
+                        
+            return 2;
         ]];
-        
-    readonly table video_size
+    
+    /*
+    Property: video_size
+    
+    Returns the dimensions of the video, if any. This is not the size of the
+    viewport, but the actual resolution of the video.
+    
+    This property returns two numbers, the width and height of the video. If there
+    is a problem getting these values, it will return nil.
+    */
+    
+    readonly multi video_size
         [[
             int width;
             int height;
@@ -121,18 +179,139 @@ global mediaplayer [[MP*]]
 
             if (result)
             {
-                lua_pushnil(L);
+                return 0;
+            }
+            
+            lua_pushnumber(L,width);
+            lua_pushnumber(L,height);
+            
+            return 2;
+        ]];
+        
+    /*
+    Property: has_video
+    
+    Returns true if the current stream has video. False otherwise.    
+    */
+    
+    readonly bool has_video
+        [[
+            int type;
+            int result=self->player?self->player->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            
+            if (result)
+            {
+                has_video=false;
             }
             else
             {
-                lua_newtable(L);
-                lua_pushnumber(L,width);
-                lua_rawseti(L,-2,1);
-                lua_pushnumber(L,height);
-                lua_rawseti(L,-2,2);
+                has_video=type&TP_MEDIA_TYPE_VIDEO;
             }
         ]];
 
+    /*
+    Property: has_audio
+    
+    Returns true if the current stream has audio. False otherwise.
+    */
+    
+    readonly bool has_audio
+        [[
+            int type;
+            int result=self->player?self->player->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            
+            if (result)
+            {
+                has_audio=false;
+            }
+            else
+            {
+                has_audio=type&TP_MEDIA_TYPE_AUDIO;
+            }
+        ]];
+        
+    /*
+    Property: volume
+    
+    Lets you set and get the volume. The volume is a floating point number where
+    0 is the lowest volume and 1 is the maximum volume.
+    */
+    
+    double volume
+        [[
+            int result=self->player?self->player->get_audio_volume(&volume):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            
+            if (result)
+            {
+                volume=0;
+            }
+        ]]
+        [[
+            if (self->player)
+                self->player->set_audio_volume(volume);
+        ]];
+        
+    /*
+    Property: mute
+    
+    Lets you set and get whether audio is muted. This property expects a boolean
+    value, where true means that audio is or should be muted and false means it
+    is not.
+    */
+    
+    bool mute
+        [[
+            int m;
+            
+            int result=self->player?self->player->get_audio_mute(&m):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            
+            if (result)
+            {
+                mute=false;
+            }
+            else
+            {
+                mute=m;
+            }
+        ]]
+        [[
+            if (self->player)
+                self->player->set_audio_mute(mute);
+        ]];
+       
+    /*
+    Function: reset
+    
+    Resets the media player to the idle state.    
+    */
+    
+    reset()
+        [[
+            if (self->player)
+                self->player->reset();
+        ]];
+    
+    /*
+    Function: load
+    
+    Instructs the media player to attempt to load a URI.
+    
+    Arguments:
+    
+    uri -   A string URI. Although the "file:" scheme is not allowed, you can
+            play files included in your app by just passing their path relative
+            to your app bundle.
+            
+    extra - Ignore this.
+    
+    Returns:
+    
+    0 -     Loading the URI started successfully. You will know for sure when either
+            <on_loaded> or <on_error> are invoked.
+            
+    other - There was an immediate failure and the URI cannot be loaded.
+    */
+    
     int load(string uri,string extra="")
         [[
             // TODO: normalize path and convert to file uri
@@ -140,42 +319,206 @@ global mediaplayer [[MP*]]
             result=self->player?self->player->load(uri,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
         
+    /*
+    Function: play
+    
+    Starts playing. Once <load> succeeds, you can call play. You can also call play
+    after it is paused.
+    
+    Returns:
+    
+    0 -     Everything is OK.
+    other - There was a problem playing.
+    */
+    
     int play()
         [[
             result=self->player?self->player->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
-        
+    
+    /*
+    Function: pause
+    
+    Pauses the stream.
+    
+    Returns:
+    
+    0 -     Everything is OK.
+    other - There was a problem pausing.
+    */
+    
     int pause()
         [[
             result=self->player?self->player->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
-        
+    
+    /*
+    Function: seek
+    
+    Lets you seek to a position within the stream. The position is specified in
+    seconds and you can seek when the stream is playing or paused.
+    
+    Arguments:
+    
+    seconds - The position to seek to, in seconds.
+    
+    Returns:
+    
+    0 -     Eveyrthing is OK.
+    other - There was a problem seeking, the current playback position did not change.
+    */
+    
     int seek(double seconds)
         [[
             result=self->player?self->player->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
+    
+    /*
+    Function: set_playback_rate
+    
+    Attempts to play the stream at different speeds and in different directions.
+    
+    Arguments:
+    
+    rate -  This is an integer speed multiplier that can be positive for forward
+            playback or negative for backward playback. Zero is not a valid rate.
+            A rate of -1, for example, will play backwards at normal speed. -2
+            will play backwards at twice the normal speed and 2 will play forward
+            at twice normal speed.
+            
+    Returns:
+    
+    0 -     Everything is OK
+    other - There was a problem playing back at the new rate.    
+    */
     
     int set_playback_rate(int rate)
         [[
             result=self->player?self->player->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
     
+    /*
+    Function: get_viewport_geometry
+    
+    Returns the size and position of the video viewport. This function returns
+    4 integers, which are the left and top coordinates followed by the width and
+    height. If there is a problem, it returns nil.
+    
+    Returns:
+    
+    left,top,width and height - Coordinates and dimensions of the video viewport.
+    nil - There was a problem getting the video viewport geometry.
+    */
+    
+    multi get_viewport_geometry()
+        [[
+            int left;
+            int top;
+            int width;
+            int height;
+            
+            int result=self->player?self->player->get_viewport_geometry(&left,&top,&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
+            
+            if (result)
+            {
+                return 0;
+            }
+            
+            lua_pushnumber(L,left);
+            lua_pushnumber(L,top);
+            lua_pushnumber(L,width);
+            lua_pushnumber(L,height);
+            
+            return 4;
+        ]];
+        
+    /*
+    Function: set_viewport_geometry
+    
+    Attempts to set the position and size of the video viewport.
+    
+    Arguments:
+    
+    left -      Integer left coordinate.
+    top -       Integer top coordinate.
+    width -     Integer width.
+    height -    Integer height.
+    
+    Returns:
+    
+    0 -     The viewport position and size were set.
+    other - There was a problem setting the viewport position and size.
+    */
+    
+    int set_viewport_geometry(int left,int top,int width,int height)
+        [[            
+            if (width<0)
+                width=0;
+            if (height<0)
+                height=0;
+                
+            result=self->player?self->player->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+        
+    /*
+    Event: on_loaded
+    
+    Invoked when a stream is loaded successfully. When you call <load>, you will
+    either get this event or <on_error>.
+    
+    Arguments:
+    
+    mediaplayer - The media player.
+    */
+    
+    callback on_loaded;
+    
+    /*
+    Event: on_error
+    
+    Invoked when there is an error loading or playing a stream.
+    
+    Arguments:
+    
+    mediaplayer -   The media player.
+    code -          An integer error code.
+    message -       The error message.
+    */
+    
+    callback on_error;
+    
+    /*
+    Event: on_end_of_stream
+    
+    Invoked when the stream reaches the end. This is only invoked while the
+    stream is playing. When a stream reaches the end, it is automatically
+    paused there.
+    
+    Arguments:
+    
+    mediaplayer -   The media player.
+    */
+    
+    callback on_end_of_stream;
 }
 
 [[
 
 void MP::loaded(MediaPlayer * player)
 {
-    
+    invoke_mediaplayer_on_loaded(L,this,0,0);
 }
 
 void MP::error(MediaPlayer * player,int code,const char * message)
 {
-    
+    lua_pushinteger(L,code);
+    lua_pushstring(L,message);
+    invoke_mediaplayer_on_error(L,this,2,0);
 }
 
 void MP::end_of_stream(MediaPlayer * player)
 {
+    invoke_mediaplayer_on_end_of_stream(L,this,0,0);
 }
 
 ]]
