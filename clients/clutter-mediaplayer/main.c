@@ -19,7 +19,7 @@ static void mp_end_of_stream(ClutterMedia * cm,TPMediaPlayer * mp)
 static void mp_error(ClutterMedia * cm,GError * error,TPMediaPlayer * mp)
 {
     tp_media_player_error(mp,error->code,error->message);
-    clutter_media_set_playing(cm,FALSE);
+    clutter_actor_hide(CLUTTER_ACTOR(cm));
 }
 
 //-----------------------------------------------------------------------------
@@ -74,12 +74,16 @@ static void mp_reset(TPMediaPlayer * mp)
     ClutterMedia * cm=CLUTTER_MEDIA(mp->user_data);
     clutter_media_set_playing(cm,FALSE);
     clutter_media_set_progress(cm,0);
+    
+    clutter_actor_hide(CLUTTER_ACTOR(cm));
 }
 
 static int mp_play(TPMediaPlayer * mp)
 {
     ClutterMedia * cm=CLUTTER_MEDIA(mp->user_data);
     clutter_media_set_playing(cm,TRUE);
+    
+    clutter_actor_show(CLUTTER_ACTOR(cm));
     return 0;
 }
 
@@ -211,6 +215,8 @@ static int mp_constructor(TPMediaPlayer * mp)
     g_object_ref_sink(G_OBJECT(video_texture));
     
     // Get the stage, size the video texture and add it to the stage
+    
+    clutter_actor_hide(video_texture);
     
     ClutterActor * stage=clutter_stage_get_default();
     
