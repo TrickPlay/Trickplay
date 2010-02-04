@@ -181,6 +181,7 @@ extern "C" {
 #define TP_MEDIAPLAYER_ERROR_INVALID_STATE      -2
 #define TP_MEDIAPLAYER_ERROR_BAD_PARAMETER      -3
 #define TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER     -4
+#define TP_MEDIAPLAYER_ERROR_INVALID_URI        -5
 
 //-----------------------------------------------------------------------------
 // Forward declarations
