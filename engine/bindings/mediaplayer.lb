@@ -132,17 +132,14 @@ global mediaplayer [[MP*]]
     Property: buffered_duration
     
     Returns the amount of the stream that is currently buffered. This property
-    returns two numbers, both in seconds. The first is the start position of the
-    buffer and the second is the end position of the buffer.
+    returns a table with two numbers, both in seconds. The first is the start
+    position of the buffer and the second is the end position of the buffer.
     
     If there is a problem determining the buffered duration, this property will
     return nil.
-
-    You can get both numbers like this    
-    > local start_time , end_time = mediaplayer.buffered_duration
     */
     
-    readonly multi buffered_duration
+    readonly table buffered_duration
         [[
             double start;
             double end;
@@ -151,13 +148,16 @@ global mediaplayer [[MP*]]
 
             if (result)
             {
-                return 0;
+                lua_pushnil(L);
             }
-            
-            lua_pushnumber(L,start);
-            lua_pushnumber(L,end);
-                        
-            return 2;
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,start);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,end);
+                lua_rawseti(L,-2,2);
+            }
         ]];
     
     /*
@@ -166,11 +166,11 @@ global mediaplayer [[MP*]]
     Returns the dimensions of the video, if any. This is not the size of the
     viewport, but the actual resolution of the video.
     
-    This property returns two numbers, the width and height of the video. If there
-    is a problem getting these values, it will return nil.
+    This property returns a table with two numbers, the width and height of the
+    video. If there is a problem getting these values, it will return nil.
     */
     
-    readonly multi video_size
+    readonly table video_size
         [[
             int width;
             int height;
@@ -179,13 +179,16 @@ global mediaplayer [[MP*]]
 
             if (result)
             {
-                return 0;
+                lua_pushnil(L);
             }
-            
-            lua_pushnumber(L,width);
-            lua_pushnumber(L,height);
-            
-            return 2;
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,2);
+            }
         ]];
         
     /*
@@ -453,8 +456,8 @@ global mediaplayer [[MP*]]
     Function: get_viewport_geometry
     
     Returns the size and position of the video viewport. This function returns
-    4 integers, which are the left and top coordinates followed by the width and
-    height. If there is a problem, it returns nil.
+    a table with 4 integers, which are the left and top coordinates followed by
+    the width and height. If there is a problem, it returns nil.
     
     Returns:
     
@@ -462,7 +465,7 @@ global mediaplayer [[MP*]]
     nil - There was a problem getting the video viewport geometry.
     */
     
-    multi get_viewport_geometry()
+    table get_viewport_geometry()
         [[
             int left;
             int top;
@@ -473,15 +476,20 @@ global mediaplayer [[MP*]]
             
             if (result)
             {
-                return 0;
+                lua_pushnil(L);
             }
-            
-            lua_pushnumber(L,left);
-            lua_pushnumber(L,top);
-            lua_pushnumber(L,width);
-            lua_pushnumber(L,height);
-            
-            return 4;
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,left);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,top);
+                lua_rawseti(L,-2,2);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,3);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,4);
+            }
         ]];
         
     /*
