@@ -342,9 +342,33 @@ global mediaplayer [[MP*]]
     
     int load(string uri,string extra="")
         [[
-            // TODO: normalize path and convert to file uri
+            // Normalize app path only accepts http and https by default, so we
+            // have to tell it to like others too.
             
-            result=self->player?self->player->load(uri,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            StringSet schemes;
+            schemes.insert("rtsp");
+            
+            bool is_uri=false;
+            
+            char * path=TPContext::get_from_lua(L)->normalize_app_path(uri,&is_uri,schemes);
+            
+            if (!path)
+            {
+                result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
+            }
+            else
+            {
+                if (!is_uri)
+                {
+                    gchar * file_uri=g_strdup_printf("file://%s",path);
+                    g_free(path);
+                    path=file_uri;
+                }
+                
+                result=self->player?self->player->load(path,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                
+                g_free(path);
+            }
         ]];
         
     /*
