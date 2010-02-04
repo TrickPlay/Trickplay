@@ -90,7 +90,6 @@ extern "C" {
             - <TPMediaPlayer.get_duration>
             - <TPMediaPlayer.get_buffered_duration>
             - <TPMediaPlayer.get_video_size>
-            - <TPMediaPlayer.get_media_tags>
                 
         Media player can call:
         
@@ -118,7 +117,6 @@ extern "C" {
             - <TPMediaPlayer.get_duration>
             - <TPMediaPlayer.get_buffered_duration>
             - <TPMediaPlayer.get_video_size>
-            - <TPMediaPlayer.get_media_tags>
             
         Media player can call:
         
@@ -710,12 +708,6 @@ struct TPMediaPlayer
 */
 
     int (*get_media_type)(TPMediaPlayer * mp,int * type);
-
-/*
-    Function: get_media_tags
-    
-    TODO
-*/
 
 /*
     Function: get_audio_volume
