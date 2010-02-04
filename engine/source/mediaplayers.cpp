@@ -733,6 +733,15 @@ void * MediaPlayer::get_viewport_texture()
 }
 
 
+//-----------------------------------------------------------------------------
+
+StringPairList MediaPlayer::get_tags()
+{
+    MPLOCK;
+    
+    return tags;
+}
+
 //=============================================================================
 // Called by external callbacks - they all push an event into the queue
 
@@ -888,7 +897,7 @@ void tp_media_player_loaded(TPMediaPlayer * mp)
 
 void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message)
 {
-    g_debug("MP[%p] -> tp_media_player_error:%d:%s",mp,code,message);
+    g_debug("MP[%p] -> tp_media_player_error(%d,'%s')",mp,code,message);
     MediaPlayer::get(mp)->error(code,message);
 }
 
@@ -905,7 +914,7 @@ void tp_media_player_end_of_stream(TPMediaPlayer * mp)
 
 void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value)
 {
-    g_debug("MP[%p] -> tp_media_player_tag_found:'%s':'%s'",mp,name,value);
+    g_debug("MP[%p] -> tp_media_player_tag_found('%s','%s')",mp,name,value);
     if (name&&value)
         MediaPlayer::get(mp)->tag_found(name,value);
 }

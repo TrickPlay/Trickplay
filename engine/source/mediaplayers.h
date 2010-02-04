@@ -43,6 +43,7 @@ public:
     int get_audio_mute(int * mute );    
     int set_audio_mute(int mute);
     void * get_viewport_texture();
+    StringPairList get_tags();
 
     //.........................................................................
     // Delegate class to handle events

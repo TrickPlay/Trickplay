@@ -231,6 +231,34 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
+    Property: tags
+    
+    Returns a table containing any metadata tags found in the stream while it
+    was being loaded. Each key in the table is the name of the tag. Each value
+    is the value of the tag as a string.
+    
+    If there are no tags, an empty table is returned.
+    */
+    
+    readonly table tags
+        [[
+            lua_newtable(L);
+            if (self->player)
+            {
+                StringPairList tags=self->player->get_tags();
+                
+                int i=1;
+                
+                for (StringPairList::const_iterator it=tags.begin();it!=tags.end();++it,++i)
+                {
+                    lua_pushstring(L,it->first.c_str());
+                    lua_pushstring(L,it->second.c_str());
+                    lua_rawset(L,-3);
+                }
+            }
+        ]];
+    
+    /*
     Property: volume
     
     Lets you set and get the volume. The volume is a floating point number where
