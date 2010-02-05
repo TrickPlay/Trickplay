@@ -18,7 +18,7 @@ add_subdirectory( clients/desktop )
 
 #add_subdirectory( clients/lirc )
 
-#add_subdirectory( clients/clutter-mediaplayer )
+add_subdirectory( clients/clutter-mediaplayer )
 
 add_subdirectory( engine )
 
