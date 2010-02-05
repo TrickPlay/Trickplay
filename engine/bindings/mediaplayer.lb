@@ -17,24 +17,9 @@ class MP : private MediaPlayer::Delegate
         
         MP(lua_State * l)
         :
-            player(NULL),
-            L(l)
+            L(l),
+            player(NULL)
         {
-            TPMediaPlayerConstructor c=TPContext::get_from_lua(L)->get_media_player_constructor();
-            
-            if (!c)
-            {
-                g_warning("NO MEDIA PLAYER CONSTRUCTOR");
-            }
-            else
-            {
-                player=MediaPlayer::make(c);
-                
-                if (player)
-                {
-                    player->set_delegate(this);
-                }
-            }
         }
         
         ~MP()
@@ -44,9 +29,17 @@ class MP : private MediaPlayer::Delegate
                 delete player;
             }
         }
-
-        MediaPlayer * player;
         
+        MediaPlayer * get_player()
+        {
+            if (!player)
+            {
+                player=MediaPlayer::make(TPContext::get_from_lua(L)->get_media_player_constructor(),this);
+            }
+            
+            return player;
+        }
+
     private:
         
         //......................................................................
@@ -59,6 +52,7 @@ class MP : private MediaPlayer::Delegate
     private:
         
         lua_State *     L;   
+        MediaPlayer *   player;        
 };
 
 ]]
@@ -131,7 +125,7 @@ global mediaplayer [[MP*]]
     
     readonly int state
         [[
-            state=self->player?self->player->get_state():TP_MEDIAPLAYER_IDLE;
+            state=self->get_player()?self->get_player()->get_state():TP_MEDIAPLAYER_IDLE;
         ]];
     
     /*
@@ -142,7 +136,7 @@ global mediaplayer [[MP*]]
     
     readonly double position
         [[
-            int result=self->player?self->player->get_position(&position):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_position(&position):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
             if (result)
                 position=0;
@@ -156,7 +150,7 @@ global mediaplayer [[MP*]]
     
     readonly double duration
         [[
-            int result=self->player?self->player->get_duration(&duration):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_duration(&duration):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
             if (result)
                 duration=0;
@@ -178,7 +172,7 @@ global mediaplayer [[MP*]]
             double start;
             double end;
             
-            int result=self->player?self->player->get_buffered_duration(&start,&end):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_buffered_duration(&start,&end):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -209,7 +203,7 @@ global mediaplayer [[MP*]]
             int width;
             int height;
             
-            int result=self->player?self->player->get_video_size(&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_video_size(&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -234,7 +228,7 @@ global mediaplayer [[MP*]]
     readonly bool has_video
         [[
             int type;
-            int result=self->player?self->player->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
             if (result)
             {
@@ -255,7 +249,7 @@ global mediaplayer [[MP*]]
     readonly bool has_audio
         [[
             int type;
-            int result=self->player?self->player->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
             if (result)
             {
@@ -280,9 +274,9 @@ global mediaplayer [[MP*]]
     readonly table tags
         [[
             lua_newtable(L);
-            if (self->player)
+            if (self->get_player())
             {
-                StringPairList tags=self->player->get_tags();
+                StringPairList tags=self->get_player()->get_tags();
                 
                 int i=1;
                 
@@ -305,13 +299,13 @@ global mediaplayer [[MP*]]
     
     readonly udata texture
         [[
-            if (!self->player)
+            if (!self->get_player())
             {
                 lua_pushnil(L);
             }
             else
             {
-                void * t=self->player->get_viewport_texture();
+                void * t=self->get_player()->get_viewport_texture();
                 
                 if (!t || !CLUTTER_IS_ACTOR(t))
                 {
@@ -338,7 +332,7 @@ global mediaplayer [[MP*]]
     
     double volume
         [[
-            int result=self->player?self->player->get_audio_volume(&volume):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_audio_volume(&volume):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
             if (result)
             {
@@ -346,8 +340,8 @@ global mediaplayer [[MP*]]
             }
         ]]
         [[
-            if (self->player)
-                self->player->set_audio_volume(volume);
+            if (self->get_player())
+                self->get_player()->set_audio_volume(volume);
         ]];
         
     /*
@@ -362,7 +356,7 @@ global mediaplayer [[MP*]]
         [[
             int m;
             
-            int result=self->player?self->player->get_audio_mute(&m):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=self->get_player()?self->get_player()->get_audio_mute(&m):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
             if (result)
             {
@@ -374,8 +368,8 @@ global mediaplayer [[MP*]]
             }
         ]]
         [[
-            if (self->player)
-                self->player->set_audio_mute(mute);
+            if (self->get_player())
+                self->get_player()->set_audio_mute(mute);
         ]];
        
     /*
@@ -386,8 +380,8 @@ global mediaplayer [[MP*]]
     
     reset()
         [[
-            if (self->player)
-                self->player->reset();
+            if (self->get_player())
+                self->get_player()->reset();
         ]];
     
     /*
@@ -436,7 +430,7 @@ global mediaplayer [[MP*]]
                     path=file_uri;
                 }
                 
-                result=self->player?self->player->load(path,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                result=self->get_player()?self->get_player()->load(path,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
                 
                 g_free(path);
             }
@@ -456,7 +450,7 @@ global mediaplayer [[MP*]]
     
     int play()
         [[
-            result=self->player?self->player->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=self->get_player()?self->get_player()->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
     
     /*
@@ -472,7 +466,7 @@ global mediaplayer [[MP*]]
     
     int pause()
         [[
-            result=self->player?self->player->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=self->get_player()?self->get_player()->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
     
     /*
@@ -493,7 +487,7 @@ global mediaplayer [[MP*]]
     
     int seek(double seconds)
         [[
-            result=self->player?self->player->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=self->get_player()?self->get_player()->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
     
     /*
@@ -517,7 +511,7 @@ global mediaplayer [[MP*]]
     
     int set_playback_rate(int rate)
         [[
-            result=self->player?self->player->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=self->get_player()?self->get_player()->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
     
     /*
@@ -540,7 +534,7 @@ global mediaplayer [[MP*]]
             int width;
             int height;
             
-            int result=self->player?self->player->get_viewport_geometry(&left,&top,&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
+            int result=self->get_player()?self->get_player()->get_viewport_geometry(&left,&top,&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
             
             if (result)
             {
@@ -585,7 +579,7 @@ global mediaplayer [[MP*]]
             if (height<0)
                 height=0;
                 
-            result=self->player?self->player->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=self->get_player()?self->get_player()->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
         
     /*
@@ -604,7 +598,7 @@ global mediaplayer [[MP*]]
         [[
             MP * mp=new MP(L);
             
-            if (!mp->player)
+            if (!mp->get_player())
             {
                 delete mp;
                 lua_pushnil(L);
