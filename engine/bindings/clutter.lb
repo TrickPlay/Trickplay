@@ -2489,12 +2489,6 @@ const char * get_actor_metatable(ClutterActor*actor)
 
 void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
 {
-    if (!actor)
-    {
-	lua_pushnil(L);
-	return;
-    }
-    
     const char * metatable=get_actor_metatable(actor);
     
     if (!metatable)
