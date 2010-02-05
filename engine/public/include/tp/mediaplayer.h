@@ -175,6 +175,8 @@ extern "C" {
     TP_MEDIAPLAYER_ERROR_INVALID_STATE      - The current state is invalid for this call
     TP_MEDIAPLAYER_ERROR_BAD_PARAMETER      - A parameter is invalid
     TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER     - Reserved    
+    TP_MEDIAPLAYER_ERROR_INVALID_URI        - Bad URI
+    TP_MEDIAPLAYER_ERROR_NA                 - Not applicable, like video size for an audio stream
 */
 
 #define TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED    -1    
@@ -182,6 +184,7 @@ extern "C" {
 #define TP_MEDIAPLAYER_ERROR_BAD_PARAMETER      -3
 #define TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER     -4
 #define TP_MEDIAPLAYER_ERROR_INVALID_URI        -5
+#define TP_MEDIAPLAYER_ERROR_NA                 -6
 
 //-----------------------------------------------------------------------------
 // Forward declarations
