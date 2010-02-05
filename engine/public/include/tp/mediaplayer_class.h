@@ -12,6 +12,11 @@ class MediaPlayer
             tp_context_set_media_player_constructor(context,mp_constructor);
         }
         
+        TPMediaPlayer * get_tp_media_player()
+        {
+            return &mp;
+        }
+        
     protected:
         
         MediaPlayer()
@@ -29,6 +34,11 @@ class MediaPlayer
             mp.get_video_size=mp_get_video_size;
             mp.get_viewport_geometry=mp_get_viewport_geometry;
             mp.set_viewport_geometry=mp_set_viewport_geometry;
+            mp.get_media_type=mp_get_media_type;
+            mp.get_audio_volume=mp_get_audio_volume;
+            mp.set_audio_volume=mp_set_audio_volume;
+            mp.get_audio_mute=mp_get_audio_mute;
+            mp.set_audio_mute=mp_set_audio_mute;
             mp.get_viewport_texture=mp_get_viewport_texture;
 
             mp.user_data=this;            
@@ -122,6 +132,31 @@ class MediaPlayer
             return 1;
         }
         
+        virtual int get_media_type(int * type)
+        {
+            return 1;
+        }
+        
+        virtual int get_audio_volume(double * volume)
+        {
+            return 1;
+        }
+        
+        virtual int set_audio_volume(double volume)
+        {
+            return 1;
+        }
+
+        virtual int get_audio_mute(int * mute)
+        {
+            return 1;
+        }
+
+        virtual int set_audio_mute(int mute)
+        {
+            return 1;
+        }
+        
         virtual void * get_viewport_texture()
         {
             return NULL;
@@ -135,6 +170,7 @@ class MediaPlayer
                 
         static TPMediaPlayer * mp_constructor()
         {
+            // WRONG - won't let you create derived instance
             return &((new MediaPlayer())->mp);
         }
         
@@ -203,6 +239,31 @@ class MediaPlayer
             return ((MediaPlayer*)mp->user_data)->set_viewport_geometry(left,top,width,height);                        
         }
         
+        static int mp_get_media_type(TPMediaPlayer * mp,int * type)
+        {
+            return ((MediaPlayer*)mp->user_data)->get_media_type(type);
+        }
+        
+        static int mp_get_audio_volume(TPMediaPlayer * mp,double * volume)
+        {
+            return ((MediaPlayer*)mp->user_data)->get_audio_volume(volume);
+        }
+        
+        static int mp_set_audio_volume(TPMediaPlayer * mp,double volume)
+        {
+            return ((MediaPlayer*)mp->user_data)->set_audio_volume(volume);
+        }
+        
+        static int mp_get_audio_mute(TPMediaPlayer * mp,int * mute)
+        {
+            return ((MediaPlayer*)mp->user_data)->get_audio_mute(mute);
+        }
+        
+        static int mp_set_audio_mute(TPMediaPlayer * mp,int mute)
+        {
+            return ((MediaPlayer*)mp->user_data)->set_audio_mute(mute);
+        }
+
         static void * mp_get_viewport_texture(TPMediaPlayer * mp)
         {
             return ((MediaPlayer*)mp->user_data)->get_viewport_texture();            
