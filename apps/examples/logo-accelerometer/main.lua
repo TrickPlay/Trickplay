@@ -1,12 +1,13 @@
 screen:set{ color = "00000000" , size = { 960 , 540 } }
 screen:show_all()
 
+-- Create the logo Image we'll spin
 local logo = Image { size = { screen.w, screen.h }, src = "trickplay_logo_dark_bg.svg" }
 
 -- We move the anchor point to the center of the logo so it'll spin in place when we rotate it below
 logo:move_anchor_point( logo.size[1]/2, logo.size[2]/2 )
 
--- And now position the anchor point in the middle of the screen
+-- And now position the anchor point (and image) in the middle of the screen
 logo.position = { screen.w/2, screen.h/2 }
 
 screen:add( logo )
@@ -41,6 +42,8 @@ function controllers.on_controller_connected(controllers,controller)
 			-- Angle the phone is titled relative to ground
 			local theta_for_tilt = math.deg(x, math.sqrt(x^2 + z^2))
 
+
+			-- And now do the rotations!
 			logo.y_rotation = { theta_to_xz_plane, 0, 0 }
 			logo.x_rotation = { theta_to_negative_y_axis, 0, 0 }
 			logo.z_rotation = { theta_for_tilt, 0, 0 }
