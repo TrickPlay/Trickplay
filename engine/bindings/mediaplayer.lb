@@ -1,4 +1,9 @@
+
+module mediaplayer_module;
+
 [[
+
+#include "clutter/clutter.h"
 
 #include "mediaplayers.h"
 #include "context.h"
@@ -57,6 +62,35 @@ class MP : private MediaPlayer::Delegate
 };
 
 ]]
+
+/*
+    This is an actor wrapper around the video texture.
+*/
+
+interface video_texture [[ClutterActor *]] actor
+{
+    video_texture()
+        [[
+            // We don't need to ref it because we do that when we wrap it
+        ]];
+        
+    ~video_texture()
+        [[
+            g_object_unref(G_OBJECT(self));
+        ]];
+        
+    readonly udata parent
+	[[
+	    lua_pushnil(L);
+	]];
+	
+    unparent()
+	[[
+	    // Cannot let the app developer remove his screen from the stage,
+	    // because he would not have a way to put it back
+	]];        
+}
+
 
 /*
     Global: mediaplayer
@@ -257,6 +291,40 @@ global mediaplayer [[MP*]]
                     lua_pushstring(L,it->first.c_str());
                     lua_pushstring(L,it->second.c_str());
                     lua_rawset(L,-3);
+                }
+            }
+        ]];
+    
+    /*
+    Property: texture
+    
+    If the media player exposes the video texture as a UI element that you can
+    manipulate, this property will return it. Otherwise, this property will be
+    nil.
+    */
+    
+    readonly udata texture
+        [[
+            if (!self->player)
+            {
+                lua_pushnil(L);
+            }
+            else
+            {
+                void * t=self->player->get_viewport_texture();
+                
+                if (!t || !CLUTTER_IS_ACTOR(t))
+                {
+                    lua_pushnil(L);
+                }
+                else
+                {
+                    int is_new=lb_wrap(L,CLUTTER_ACTOR(t),VIDEO_TEXTURE_METATABLE);
+                    
+                    if (is_new)
+                    {
+                        g_object_ref(G_OBJECT(t));
+                    }
                 }
             }
         ]];

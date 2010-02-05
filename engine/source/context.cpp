@@ -30,7 +30,7 @@ extern void luaopen_settings(lua_State*L);
 extern void luaopen_profile(lua_State*L);
 extern void luaopen_xml(lua_State*L);
 extern void luaopen_controllers_module(lua_State*L);
-extern void luaopen_mediaplayer(lua_State*L);
+extern void luaopen_mediaplayer_module(lua_State*L);
 
 extern void luaopen_restricted(lua_State*L);
 extern void luaopen_apps(lua_State*L);
@@ -519,7 +519,7 @@ int TPContext::load_app()
     // This creates a new media player here - which we may not want to do.
     // We probably want to create one earlier and keep it across app loads.
     
-    luaopen_mediaplayer(L);
+    luaopen_mediaplayer_module(L);
     
     // TODO
     // This should not be opened for all apps - only trusted ones. Since we
