@@ -2478,6 +2478,15 @@ class Canvas [[ClutterActor*]] actor
 
 
 [[
+
+const char * get_actor_metatable(ClutterActor*actor)
+{
+    if (!actor)
+	return NULL;
+    
+    return (const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
+}
+
 void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
 {
     if (!actor)
@@ -2486,7 +2495,7 @@ void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
 	return;
     }
     
-    const char * metatable=(const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
+    const char * metatable=get_actor_metatable(actor);
     
     if (!metatable)
     {
@@ -2498,14 +2507,6 @@ void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
     	
     if (is_new)
 	g_object_ref(G_OBJECT(actor));
-}
-
-const char * get_actor_metatable(ClutterActor*actor)
-{
-    if (!actor)
-	return NULL;
-    
-    return (const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
 }
 
 ]]
