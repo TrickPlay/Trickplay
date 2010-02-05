@@ -1,5 +1,5 @@
-#ifndef TP_H
-#define TP_H
+#ifndef _TRICKPLAY_H
+#define _TRICKPLAY_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -424,4 +424,4 @@ void            tp_context_free(
 }
 #endif 
 
-#endif  // TP_H
+#endif  // _TRICKPLAY_H

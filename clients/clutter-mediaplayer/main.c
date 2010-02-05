@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "tp/tp.h"
-#include "tp/mediaplayer.h"
+#include "trickplay/trickplay.h"
+#include "trickplay/mediaplayer.h"
 
 //-----------------------------------------------------------------------------
 

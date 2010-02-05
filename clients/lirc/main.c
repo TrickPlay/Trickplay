@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "tp/tp.h"
+#include "trickplay/trickplay.h"
 #include "glib.h"
 
 #include "lirc/lirc_client.h"

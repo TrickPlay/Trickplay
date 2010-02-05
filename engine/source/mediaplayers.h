@@ -6,7 +6,7 @@
 
 #include "glib.h"
 
-#include "tp/mediaplayer.h"
+#include "trickplay/mediaplayer.h"
 
 typedef std::string String;
 typedef std::list< std::pair<String,String> > StringPairList;

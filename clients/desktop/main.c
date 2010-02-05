@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "tp/tp.h"
+#include "trickplay/trickplay.h"
 
 //-----------------------------------------------------------------------------
 // Example of a console command handler. It will be invoked when you type /test
