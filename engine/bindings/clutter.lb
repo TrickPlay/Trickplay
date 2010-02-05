@@ -274,8 +274,10 @@ void actor_allocation_changed(ClutterActor * actor,ClutterActorBox * box,Clutter
 
 #endif
 
-void initialize_actor(lua_State * L,ClutterActor*actor)
+void initialize_actor(lua_State * L,ClutterActor*actor,const char * metatable)
 {
+    // Metatables are static, so we don't need to free it 
+    g_object_set_data(G_OBJECT(actor),"tp-metatable",(gpointer)metatable);
 #if 0
     g_signal_connect(actor,"allocation-changed",G_CALLBACK(actor_allocation_changed),L);
 #endif
@@ -1015,8 +1017,6 @@ interface container [[ClutterActor*]]
 }
 
 [[
-gboolean Stage_on_key_press(ClutterActor*actor,ClutterEvent*event,lua_State*L);
-
 #ifndef TP_PRODUCTION
 
 gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
@@ -1038,7 +1038,36 @@ global screen [[ClutterActor*]] actor , container
 {
     screen()
 	[[
-	    *self = clutter_stage_get_default();
+	    *self=clutter_group_new();
+
+	    g_object_ref_sink(G_OBJECT(*self));
+	    
+	    initialize_actor(L,*self,SCREEN_METATABLE);
+	    
+	    // Get the stage
+	    
+	    ClutterActor * stage=clutter_stage_get_default();
+	    
+	    // Add us to the stage
+	    
+	    clutter_container_add_actor(CLUTTER_CONTAINER(stage),*self);
+
+	    // Raise us to the top
+	    
+	    clutter_actor_raise_top(*self);
+	    
+	    // Set the position and size
+	    
+	    gfloat width,height;
+	    clutter_actor_get_size(stage,&width,&height);
+	    
+	    clutter_actor_set_position(*self,0,0);
+	    clutter_actor_set_size(*self,width,height);
+
+	    // Give us key focus
+	    
+	    clutter_actor_grab_key_focus(*self);
+	    
 	    
 #ifndef TP_PRODUCTION
 	    g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);
@@ -1047,8 +1076,73 @@ global screen [[ClutterActor*]] actor , container
     
     ~screen()
 	[[
+	    ClutterActor * parent=clutter_actor_get_parent(self);
+	    
+	    if (parent)
+	    {
+		clutter_container_remove_actor(CLUTTER_CONTAINER(parent),self);
+	    }
+	    
+	    g_object_unref(G_OBJECT(self));
+	]];
+
+    #..........................................................................
+    # We have to override these from regular actors, so that app developers
+    # cannot reach outside their screen
+    
+    show()
+        [[
+	    clutter_actor_show(self);
+	    // Show the stage as well
+	    clutter_actor_show(clutter_stage_get_default());
 	]];
         
+    show_all()
+        [[
+	    clutter_actor_show_all(self);
+	    // Show the stage as well
+	    clutter_actor_show(clutter_stage_get_default());
+	]];
+	
+    readonly udata parent
+	[[
+	    lua_pushnil(L);
+	]];
+	
+    unparent()
+	[[
+	    // Cannot let the app developer remove his screen from the stage,
+	    // because he would not have a way to put it back
+	]];
+	
+    #..........................................................................	
+    # These are stage properties
+    
+    udata key_focus
+	[[
+	    wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(clutter_stage_get_default())));
+	]]
+	[[
+	    ClutterActor *k=user_data_to_actor(L,2);
+	    if (k)
+	    {
+		clutter_stage_set_key_focus(CLUTTER_STAGE(clutter_stage_get_default()),k);
+	    }
+	]];
+
+    # This doesn't seem to work
+    
+    udata get_object_at( double x , double y )
+	[[
+	    wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(clutter_stage_get_default()),CLUTTER_PICK_ALL,x,y));
+	]];
+		
+    
+	
+/*
+    // App developers cannot control the color of the stage - and their new 'screen'
+    // doesn't have a color, since it is a group.
+    
     table color
         [[
             ClutterColor color;
@@ -1085,26 +1179,8 @@ global screen [[ClutterActor*]] actor , container
 		lua_tonumber(L,-2),lua_tonumber(L,-1)};
             clutter_stage_set_perspective(CLUTTER_STAGE(self),&p);
             lua_pop(L,4);
-	]];
-	
-    # This doesn't seem to work
-    
-    udata get_object_at( double x , double y )
-	[[
-	    wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(self),CLUTTER_PICK_ALL,x,y));
-	]];
-		
-    udata key_focus
-	[[
-	    wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(self)));
-	]]
-	[[
-	    ClutterActor *k=user_data_to_actor(L,2);
-	    if (k)
-	    {
-		clutter_stage_set_key_focus(CLUTTER_STAGE(self),k);
-	    }
-	]];
+	]];	
+ */	
 }
 
 [[
@@ -1116,7 +1192,7 @@ class Text [[ClutterActor*]] actor
     Text(table props =0)
         [[
             *self = clutter_text_new();
-	    initialize_actor(L,*self);
+	    initialize_actor(L,*self,TEXT_METATABLE);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1330,7 +1406,7 @@ class Rectangle [[ClutterActor*]] actor
     Rectangle(table props = 0)
         [[
             *self = clutter_rectangle_new();
-	    initialize_actor(L,*self);
+	    initialize_actor(L,*self,RECTANGLE_METATABLE);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1372,7 +1448,7 @@ class Clone [[ClutterActor*]] actor
     Clone(table props = 0)
         [[
             *self = clutter_clone_new(NULL);
-	    initialize_actor(L,*self);
+	    initialize_actor(L,*self,CLONE_METATABLE);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1398,7 +1474,7 @@ class Group [[ClutterActor*]] actor , container
     Group(table props = 0 )
         [[
             *self = clutter_group_new();
-	    initialize_actor(L,*self);
+	    initialize_actor(L,*self,GROUP_METATABLE);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -1629,7 +1705,7 @@ class Image [[ClutterActor*]] actor
     Image(table props = 0 )
         [[
             *self = clutter_texture_new();
-	    initialize_actor(L,*self);
+	    initialize_actor(L,*self,IMAGE_METATABLE);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
@@ -2130,7 +2206,7 @@ class Canvas [[ClutterActor*]] actor
     Canvas(table props=0)
 	[[
             *self = clutter_cairo_texture_new(0,0);
-	    initialize_actor(L,*self);
+	    initialize_actor(L,*self,CANVAS_METATABLE);
 	    set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
 	]];
@@ -2398,34 +2474,28 @@ class Canvas [[ClutterActor*]] actor
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 	    cairo_set_line_width(cr,width);	    
 	]];
-    
 }
 
 
 [[
 void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
 {
-    int is_new = 0;
-    
     if (!actor)
+    {
 	lua_pushnil(L);
-    else if (CLUTTER_IS_CAIRO_TEXTURE(actor))
-	is_new = wrap_Canvas(L,actor);
-    else if (CLUTTER_IS_TEXTURE(actor))
-	is_new = wrap_Image(L,actor);
-    else if (CLUTTER_IS_STAGE(actor))
-	is_new = wrap_screen(L,actor);
-    else if (CLUTTER_IS_GROUP(actor))
-	is_new = wrap_Group(L,actor);
-    else if (CLUTTER_IS_TEXT(actor))
-	is_new = wrap_Text(L,actor);
-    else if (CLUTTER_IS_RECTANGLE(actor))
-	is_new = wrap_Rectangle(L,actor);
-    else if (CLUTTER_IS_CLONE(actor))
-	is_new = wrap_Clone(L,actor);
-    else
+	return;
+    }
+    
+    const char * metatable=(const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
+    
+    if (!metatable)
+    {
 	lua_pushnil(L);
-	
+	return;
+    }
+    
+    int is_new=lb_wrap(L,actor,metatable);
+    	
     if (is_new)
 	g_object_ref(G_OBJECT(actor));
 }
@@ -2434,22 +2504,8 @@ const char * get_actor_metatable(ClutterActor*actor)
 {
     if (!actor)
 	return NULL;
-    else if (CLUTTER_IS_CAIRO_TEXTURE(actor))
-	return CANVAS_METATABLE;
-    else if (CLUTTER_IS_TEXTURE(actor))
-	return IMAGE_METATABLE;
-    else if (CLUTTER_IS_STAGE(actor))
-	return SCREEN_METATABLE;
-    else if (CLUTTER_IS_GROUP(actor))
-	return GROUP_METATABLE;
-    else if (CLUTTER_IS_TEXT(actor))
-	return TEXT_METATABLE;
-    else if (CLUTTER_IS_RECTANGLE(actor))
-	return RECTANGLE_METATABLE;
-    else if (CLUTTER_IS_CLONE(actor))
-	return CLONE_METATABLE;
-    else
-	return NULL;
+    
+    return (const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
 }
 
 ]]
