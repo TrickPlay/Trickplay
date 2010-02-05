@@ -7,6 +7,7 @@ TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( pango-1.0 pango/pango.h		TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h				TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( libxml2 libxml/parser.h       		TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( GL/gl.h                                TPCMP_INCLUDE_DIRS )
 
 
 
