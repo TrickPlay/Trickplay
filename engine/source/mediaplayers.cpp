@@ -34,10 +34,13 @@ void MediaPlayer::Event::destroy(Event * event)
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 
 
-MediaPlayer * MediaPlayer::make(TPMediaPlayerConstructor constructor)
+MediaPlayer * MediaPlayer::make(TPMediaPlayerConstructor constructor,Delegate * delegate)
 {
     if (!constructor)
+    {
+        g_warning("MP[]   NO MEDIA PLAYER CONSTRUCTOR");
         return NULL;
+    }
     
     Wrapper * wrapper=(Wrapper*)g_malloc0(sizeof(Wrapper));
     
@@ -57,17 +60,17 @@ MediaPlayer * MediaPlayer::make(TPMediaPlayerConstructor constructor)
         return NULL;
     }
 
-    return new MediaPlayer(wrapper);
+    return new MediaPlayer(wrapper,delegate);
 }
 
 //-----------------------------------------------------------------------------
 
-MediaPlayer::MediaPlayer(Wrapper * w)
+MediaPlayer::MediaPlayer(Wrapper * w,Delegate * d)
 :
     wrapper(w),
     state(TP_MEDIAPLAYER_IDLE),
     queue(g_async_queue_new_full((GDestroyNotify)Event::destroy)),
-    delegate(NULL)
+    delegate(d)
 {
     g_assert(wrapper);
     wrapper->player=this;
