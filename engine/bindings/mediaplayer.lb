@@ -589,6 +589,33 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
+    Function: new
+    
+    If the platform supports multiple media players, this function lets you create
+    a new one.
+    
+    Returns:
+    
+    a new media player -    If supported.
+    nil -                   Otherwise.
+    */
+    
+    udata new()
+        [[
+            MP * mp=new MP(L);
+            
+            if (!mp->player)
+            {
+                delete mp;
+                lua_pushnil(L);
+            }
+            else
+            {
+                lb_wrap(L,mp,MEDIAPLAYER_METATABLE);
+            }
+        ]];
+    
+    /*
     Event: on_loaded
     
     Invoked when a stream is loaded successfully. When you call <load>, you will
