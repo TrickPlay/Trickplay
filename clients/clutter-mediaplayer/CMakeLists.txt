@@ -23,8 +23,13 @@ include_directories(
 
 add_executable( tp-cmp main.c )
 
+TP_FIND_LIBRARY( clutter-0.10       TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( clutter-gst-0.10   TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstreamer-0.10     TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( gstvideo-0.10      TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( gstbase-0.10       TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( gstinterfaces-0.10 TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( gstaudio-0.10      TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( xml2               TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( glib-2.0           TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gobject-2.0        TPCMP_LIBRARIES )
