@@ -9,7 +9,7 @@ module clutter;
 
 #include "network.h"
 #include "util.h"
-#include "context.h"
+#include "app.h"
 ]]
 
 [[
@@ -1025,7 +1025,7 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
     
     if (k->keyval==CLUTTER_Escape)
     {
-	TPContext::get_from_lua(L)->quit();
+	tp_context_quit(App::get(L)->get_context());
 	return TRUE;
     }
     return FALSE;    
@@ -1722,9 +1722,9 @@ class Image [[ClutterActor*]] actor
 	[[
 	    bool is_uri;
 	    
-	    TPContext * ctx=TPContext::get_from_lua(L);
+	    App * app=App::get(L);
 	    
-	    char * path=ctx->normalize_app_path(src,&is_uri);
+	    char * path=app->normalize_path(src,&is_uri);
 	    
 	    if (path)
 	    {
@@ -1732,7 +1732,7 @@ class Image [[ClutterActor*]] actor
     
 		if (is_uri)
 		{
-		    Network::Request request(ctx);
+		    Network::Request request(app);
 		    request.url = path;
 #if 0		    
 		    g_object_ref(G_OBJECT(self));

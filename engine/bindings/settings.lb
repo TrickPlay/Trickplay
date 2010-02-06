@@ -8,7 +8,7 @@ extern "C"
     #include "tchdb.h"
 }
 
-#include "context.h"
+#include "app.h"
 #include "util.h"
 
 class Settings
@@ -20,7 +20,7 @@ public:
         L(l),
 	db(NULL)
     {
-	TPContext::get_from_lua(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
+	App::get(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
     }
     
     ~Settings()
@@ -45,12 +45,12 @@ public:
             g_warning("FAILED TO TUNE SETTINGS DATABASE : %s", tchdberrmsg(tchdbecode(db)));
         }
 	
-	TPContext * c=TPContext::get_from_lua(L);
+	App * app=App::get(L);
 	
-	gchar * name=g_strdup_printf("settings-%d.tch",c->get_int(PROFILE_ID));
+	gchar * name=g_strdup_printf("settings-%d.tch",app->get_profile_id());
 	Util::GFreeLater free_name(name);
         
-        gchar * file_name=g_build_filename(c->get(APP_DATA_PATH),name,NULL);
+        gchar * file_name=g_build_filename(app->get_data_path().c_str(),name,NULL);
         Util::GFreeLater free_file_name(file_name);
         
 	if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))

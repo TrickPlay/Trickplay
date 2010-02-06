@@ -7,20 +7,56 @@
 
 #include "glib.h"
 
-#include "context.h"
+//.............................................................................
 
+class App;
+
+//.............................................................................
+    
 namespace Network
 {   
     typedef std::string String;
     typedef std::map<std::string,std::string> StringMap;
     typedef std::multimap<std::string,std::string> StringMultiMap;
     typedef std::list<String> StringList;
+
+    //.........................................................................
+
+    class CookieJar
+    {
+    public:
+        
+        CookieJar(const char * file_name);
+        
+        void ref();
+        void unref();
+        
+        friend class NetworkThread;
+        
+    private:
+        
+        ~CookieJar();
+        
+        void set_cookie(const char * set_cookie_header);
+        void add_cookies_to_handle(void * handle,bool clear_session=false);
+        void save();
+        
+        gint        ref_count;
+        bool        new_session;  
+        String      file_name;
+        StringList  cookies;
+        GMutex *    mutex;
+    };
     
+    //.........................................................................
+
     class Request
     {
     public:
         
-        Request(TPContext * context);
+        Request(App * app);
+        Request(const Request & other);
+        ~Request();
             
         String      url;
         String      method;
@@ -31,6 +67,7 @@ namespace Network
         String      body;
         bool        redirect;
         String      user_agent;
+        CookieJar * cookie_jar;
         
     private:
         
@@ -38,6 +75,8 @@ namespace Network
         
     };
     
+    //.........................................................................
+
     class Response
     {
     public:
@@ -52,10 +91,6 @@ namespace Network
         GByteArray *    body;
         bool            failed;
     };
-    
-    //.........................................................................
-    
-    void set_cookie_jar_file_name(const String & file_name);
     
     //.........................................................................
 

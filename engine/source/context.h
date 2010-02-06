@@ -12,6 +12,8 @@ extern "C"
 
 #include "glib.h"
 
+#include "notify.h"
+
 #include "trickplay/trickplay.h"
 #include "trickplay/mediaplayer.h"
 
@@ -24,27 +26,9 @@ typedef std::set<String> StringSet;
 //-----------------------------------------------------------------------------
 // Internal configuration keys
 
-#define APP_NAME                "app.name"
-#define APP_DESCRIPTION         "app.description"
-#define APP_AUTHOR              "app.author"
-#define APP_COPYRIGHT           "app.copyright"
-#define APP_RELEASE             "app.release"
-#define APP_VERSION             "app.version"
-#define APP_DATA_PATH           "app.data.path"
-
 #define PROFILE_ID              "profile.id"
 #define PROFILE_NAME            "profile.name"
 
-//-----------------------------------------------------------------------------
-#define APP_METADATA_FILENAME   "app"
-#define APP_TABLE_NAME          "app"
-#define APP_FIELD_ID            "id"
-#define APP_FIELD_NAME          "name"
-#define APP_FIELD_DESCRIPTION   "description"
-#define APP_FIELD_AUTHOR        "author"
-#define APP_FIELD_COPYRIGHT     "copyright"
-#define APP_FIELD_RELEASE       "release"
-#define APP_FIELD_VERSION       "version"
 //-----------------------------------------------------------------------------
 // Default values
 
@@ -67,71 +51,13 @@ typedef std::set<String> StringSet;
 
 class SystemDatabase;
 class Controllers;
+class App;
 
 //-----------------------------------------------------------------------------
 
-struct TPContext
+struct TPContext : public Notify
 {
 public:
-    
-    TPContext();
-    ~TPContext();
-    
-    //.........................................................................
-    // Getting and setting context configuration variables
-    
-    void set(const char * key,const char * value);
-    void set(const char * key,int value);
-    void set(const char * key,const String & value);
-    
-    const char * get(const char * key,const char * def = NULL);
-    bool get_bool(const char * key,bool def=false);
-    int get_int(const char * key,int def=0);
-        
-    //.........................................................................
-    // Running and quitting the context
-    
-    int run();    
-    void quit();
-    
-    //.........................................................................
-    // Console command handlers
-    
-    void add_console_command_handler(const char * command,TPConsoleCommandHandler handler,void * data);
-    
-    //.........................................................................
-    // Log handler. This is what prints the messages in the outside world.
-    
-    void set_log_handler(TPLogHandler handler,void * data);
-    
-    // Our standard log handler if the one above is not set
-    
-    static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
-    
-    //.........................................................................
-    // Notification handlers
-    
-    void add_notification_handler(const char * subject,TPNotificationHandler handler,void * data);
-
-    //.........................................................................
-    // Request handlers
-    
-    void set_request_handler(const char * subject,TPRequestHandler handler,void *data);
-    
-    //.........................................................................
-    // Output handlers. They get everything before it is printed - so we can
-    // support multiple consoles
-    
-    typedef void (*OutputHandler)(const gchar * output,gpointer data);
-    void add_output_handler(OutputHandler handler,gpointer data);
-    void remove_output_handler(OutputHandler handler,gpointer data);
-    
-    //.........................................................................
-    // Media player constructor
-    
-    void set_media_player_constructor(TPMediaPlayerConstructor constructor);
-    
-    TPMediaPlayerConstructor get_media_player_constructor() const;
     
     //.........................................................................
     // Get the context from Lua
@@ -139,20 +65,30 @@ public:
     static TPContext * get_from_lua(lua_State * L);
         
     //.........................................................................
-    // Processes paths to ensure they are either URIs or valid paths within the
-    // app bundle. Also checks for links and handles custom schemes such as
-    // 'localized:'
-    //
-    // May return NULL if the path is invalid.
-    //
-    // CALLER HAS TO FREE RESULT
- 
-    char * normalize_app_path(const gchar * path_or_uri,bool * is_uri=NULL,const StringSet & additional_uri_schemes=StringSet());
+    // Getting context configuration variables
+    
+    const char * get(const char * key,const char * def = NULL);
+    bool get_bool(const char * key,bool def=false);
+    int get_int(const char * key,int def=0);
+        
+    //.........................................................................
+    // Console command handlers
+    
+    void add_console_command_handler(const char * command,TPConsoleCommandHandler handler,void * data);
     
     //.........................................................................
-    // Sends a notification to the outside world
+    // Output handlers. They get everything before it is printed - so we can
+    // support multiple consoles
     
-    void notify(const char * subject);
+    typedef void (*OutputHandler)(const gchar * output,gpointer data);
+    
+    void add_output_handler(OutputHandler handler,gpointer data);
+    void remove_output_handler(OutputHandler handler,gpointer data);
+    
+    //.........................................................................
+    // Media player constructor
+    
+    TPMediaPlayerConstructor get_media_player_constructor() const;
     
     //.........................................................................
     // Sends a request to the outside world
@@ -164,7 +100,7 @@ public:
     inline bool running() const { return is_running; }
     
     //.........................................................................
-    // The system database - only valid while an app is running
+    // The system database
     
     SystemDatabase * get_db() const;
     
@@ -174,32 +110,9 @@ public:
     Controllers * get_controllers() const;
     
     //.........................................................................
-    // Experimental - injects a key (by name) into Clutter
-    // TODO
-    
-    void key_event(const char * key);
-    
-    //.........................................................................
     // Switches profiles and handles all the associated notifications
     
     bool profile_switch(int id);
-    
-    //.........................................................................
-    // Structure to hold app metadata
-    
-    struct AppMetadata
-    {
-        AppMetadata() : release(0) {}
-        
-        String path;
-        String id;
-        String name;
-        int release;
-        String version;
-        String description;
-        String author;
-        String copyright;
-    };
     
 protected:
     
@@ -215,32 +128,9 @@ protected:
     void validate_configuration();
     
     //.........................................................................
-    // Scans application source directories for apps and adds them to the
-    // database.
+    // Load the app
     
-    void scan_app_sources();
-    
-    //.........................................................................
-    // Loads metadata for an app
-    
-    bool load_app_metadata(const char * app_path,AppMetadata & md);
-    
-    //.........................................................................
-    // Ensures that everything is ready to run the app. Creates its data
-    // directory, etc.
-    
-    bool prepare_app(const AppMetadata & md);
-    
-    //.........................................................................
-    // Loads the app and dips into the clutter main loop
-    
-    int load_app();
-    
-    //.........................................................................
-    // Returns the file name for the current's app coookie jar, taking into
-    // account the current profile.
-    
-    String get_cookie_jar_file_name();
+    int load_app(App ** app);
     
     //.........................................................................
     // A command handler to handle basic commands
@@ -251,6 +141,61 @@ protected:
     // Formats a log line
     
     static gchar * format_log_line(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message);
+    
+private:
+    
+    TPContext();
+    ~TPContext();
+    
+    //.........................................................................
+    // Setting configuration variables
+    
+    void set(const char * key,const char * value);
+    void set(const char * key,int value);
+    void set(const char * key,const String & value);
+    
+    //.........................................................................
+    // Running and quitting the context
+    
+    int run();    
+    void quit();
+    
+    //.........................................................................
+    // Log handler. This is what prints the messages in the outside world.
+    
+    void set_log_handler(TPLogHandler handler,void * data);
+    
+    // Our standard log handler if the one above is not set
+    
+    static void log_handler(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message,gpointer self);
+    
+    //.........................................................................
+    // Request handlers
+    
+    void set_request_handler(const char * subject,TPRequestHandler handler,void *data);
+    
+    //.........................................................................
+    // Experimental - injects a key (by name) into Clutter
+    // TODO
+    
+    void key_event(const char * key);
+    
+    //.........................................................................
+    // External functions are our friends
+    
+    friend void tp_init_version(int * argc,char *** argv,int major_version,int minor_version,int patch_version);
+    friend TPContext * tp_context_new();
+    friend void tp_context_free(TPContext * context);
+    friend void tp_context_set(TPContext * context,const char * key,const char * value);
+    friend const char * tp_context_get(TPContext * context,const char * key);
+    friend void tp_context_add_notification_handler(TPContext * context,const char * subject,TPNotificationHandler handler,void * data);
+    friend void tp_context_set_request_handler(TPContext * context,const char * subject,TPRequestHandler handler,void * data);
+    friend void tp_context_add_console_command_handler(TPContext * context,const char * command,TPConsoleCommandHandler handler,void * data);
+    friend void tp_context_set_log_handler(TPContext * context,TPLogHandler handler,void * data);
+    friend void tp_context_key_event(TPContext * context,const char * key);
+    friend int tp_context_run(TPContext * context);
+    friend void tp_context_quit(TPContext * context);
+    friend void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
     
 private:
     
@@ -273,11 +218,6 @@ private:
     typedef std::multimap<String,ConsoleCommandHandlerClosure>  ConsoleCommandHandlerMultiMap;
     
     ConsoleCommandHandlerMultiMap                               console_command_handlers;
-    
-    typedef std::pair<TPNotificationHandler,void*>              NotificationHandlerClosure;
-    typedef std::multimap<String,NotificationHandlerClosure>    NotificationHandlerMultiMap;
-    
-    NotificationHandlerMultiMap                                 notification_handlers;
     
     typedef std::pair<TPRequestHandler,void*>                   RequestHandlerClosure;
     typedef std::map<String,RequestHandlerClosure>              RequestHandlerMap;

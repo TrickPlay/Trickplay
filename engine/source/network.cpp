@@ -8,138 +8,143 @@
 
 #include "network.h"
 #include "util.h"
+#include "app.h"
 
 namespace Network
 {   
-    class CookieJar
+    //=========================================================================
+    
+    CookieJar::CookieJar(const char * cookie_file_name)
+    :
+        ref_count(1),
+        new_session(true),
+        file_name(cookie_file_name),
+        mutex(g_mutex_new())
     {
-        public:
+        g_debug("CREATED COOKIE JAR %p",this);
+        
+        if (g_file_test(cookie_file_name,G_FILE_TEST_EXISTS))
+        {
+            gchar * contents=NULL;
+            GError * error=NULL;
+        
+            g_file_get_contents(cookie_file_name,&contents,NULL,&error);
             
-            CookieJar(const char * cookie_file_name)
-            :
-                ref_count(1),
-                new_session(true),
-                file_name(cookie_file_name),
-                mutex(g_mutex_new())
+            if (error)
             {
-                g_debug("CREATED COOKIE JAR %p",this);
+                g_warning("FAILED TO READ COOKIE FILE '%s' : %s",cookie_file_name,error->message);
+                g_clear_error(&error);
+            }
+            else
+            {
+                gchar ** lines=g_strsplit(contents,"\n",0);
+                for(gchar**line=lines;*line;++line)
+                    cookies.push_back(String(*line));
+                g_strfreev(lines);
+            }
+            
+            g_free(contents);
+        }
+    }
+    
+    CookieJar::~CookieJar()
+    {
+        g_debug("DESTROYING COOKIE JAR %p",this);
+        
+        save();
+        g_mutex_free(mutex);
+    }
                 
-                if (g_file_test(cookie_file_name,G_FILE_TEST_EXISTS))
-                {
-                    gchar * contents=NULL;
-                    GError * error=NULL;
+    void CookieJar::ref()
+    {
+        g_atomic_int_inc(&ref_count);
+    }
+    
+    void CookieJar::unref()
+    {
+        if (g_atomic_int_dec_and_test(&ref_count))
+            delete this;
+    }
+    
+    void CookieJar::set_cookie(const char * set_cookie_header)
+    {
+        Util::GMutexLock lock(mutex);
+        
+        cookies.push_back(set_cookie_header);    
+    }
                 
-                    g_file_get_contents(cookie_file_name,&contents,NULL,&error);
-                    
-                    if (error)
-                    {
-                        g_warning("FAILED TO READ COOKIE FILE '%s' : %s",cookie_file_name,error->message);
-                        g_clear_error(&error);
-                    }
-                    else
-                    {
-                        gchar ** lines=g_strsplit(contents,"\n",0);
-                        for(gchar**line=lines;*line;++line)
-                            cookies.push_back(String(*line));
-                        g_strfreev(lines);
-                    }
-                    
-                    g_free(contents);
-                }
-            }
+    void CookieJar::add_cookies_to_handle(void * handle,bool clear_session)
+    {
+        Util::GMutexLock lock(mutex);
+        
+        for(StringList::const_iterator it=cookies.begin();it!=cookies.end();++it)
+            curl_easy_setopt((CURL*)handle,CURLOPT_COOKIELIST,it->c_str());
             
-            void set_cookie(const char * set_cookie_header)
+        if (new_session || clear_session)
+        {
+            // This is to get around a bug in curl I reported. If you
+            // call "SESS" when the cookie system has not been initialized
+            // you will get a crash. Passing an empty string does nothing
+            // aside from initializing curl's cookie system for the handle.
+            // The bug is in cookie.c, Curl_cookie_clearsess
+            
+            if (cookies.empty())
             {
-                Util::GMutexLock lock(mutex);
+                curl_easy_setopt((CURL*)handle,CURLOPT_COOKIELIST,"");
+            }
                 
-                cookies.push_back(set_cookie_header);    
-            }
-                        
-            void add_cookies_to_handle(CURL * eh,bool clear_session=false)
-            {
-                Util::GMutexLock lock(mutex);
-                
-                for(StringList::const_iterator it=cookies.begin();it!=cookies.end();++it)
-                    curl_easy_setopt(eh,CURLOPT_COOKIELIST,it->c_str());
-                    
-                if (new_session || clear_session)
-                {
-                    // This is to get around a bug in curl I reported. If you
-                    // call "SESS" when the cookie system has not been initialized
-                    // you will get a crash. Passing an empty string does nothing
-                    // aside from initializing curl's cookie system for the handle.
-                    // The bug is in cookie.c, Curl_cookie_clearsess
-                    
-                    if (cookies.empty())
-                    {
-                        curl_easy_setopt(eh,CURLOPT_COOKIELIST,"");
-                    }
-                        
-                    curl_easy_setopt(eh,CURLOPT_COOKIELIST,"SESS");
-                    new_session=false;  
-                }
-            }
-            
-            void ref()
-            {
-                g_atomic_int_inc(&ref_count);
-            }
-            
-            void unref()
-            {
-                if (g_atomic_int_dec_and_test(&ref_count))
-                    delete this;
-            }
-
-            
-        private:
-
-            ~CookieJar()
-            {
-                g_debug("DESTROYING COOKIE JAR %p",this);
-                
-                save();
-                g_mutex_free(mutex);
-            }
-                        
-            void save()
-            {
-                CURL * eh=curl_easy_init();
-                add_cookies_to_handle(eh,true);
-                curl_easy_setopt(eh,CURLOPT_COOKIEJAR,file_name.c_str());
-                // This causes curl to save all the cookies back to the file
-                // name we gave it above.
-                curl_easy_cleanup(eh);
-            }
-
-            gint        ref_count;
-            bool        new_session;  
-            String      file_name;
-            StringList  cookies;
-            GMutex *    mutex;
-            
-    };
+            curl_easy_setopt((CURL*)handle,CURLOPT_COOKIELIST,"SESS");
+            new_session=false;  
+        }
+    }
+    
+    void CookieJar::save()
+    {
+        CURL * eh=curl_easy_init();
+        add_cookies_to_handle(eh,true);
+        curl_easy_setopt(eh,CURLOPT_COOKIEJAR,file_name.c_str());
+        // This causes curl to save all the cookies back to the file
+        // name we gave it above.
+        curl_easy_cleanup(eh);
+    }
         
     //=========================================================================
     
-    Request::Request(TPContext * context)
+    Request::Request(App * app)
     :
         method("GET"),
         timeout_s(30),
-        redirect(true)
+        redirect(true),
+        user_agent(app->get_user_agent()),
+        cookie_jar(app->ref_cookie_jar())
     {
-        gchar * ua=g_strdup_printf("Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)",
-            context->get(TP_SYSTEM_LANGUAGE),
-            context->get(TP_SYSTEM_COUNTRY),
-            TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION,
-            context->get(TP_APP_ID),
-            context->get_int(APP_RELEASE,0),
-            context->get(TP_SYSTEM_NAME),
-            context->get(TP_SYSTEM_VERSION));
-        
-        user_agent=ua;
-        
-        g_free(ua);
+    }
+    
+    Request::Request(const Request & other)
+    :
+        url(other.url),
+        method(other.method),
+        headers(other.headers),
+        timeout_s(other.timeout_s),
+        client_certificate_pem(other.client_certificate_pem),
+        client_private_key_pem(other.client_private_key_pem),
+        body(other.body),
+        redirect(other.redirect),
+        user_agent(other.user_agent),
+        cookie_jar(other.cookie_jar)
+    {
+        if (cookie_jar)
+        {
+            cookie_jar->ref();
+        }
+    }
+    
+    Request::~Request()
+    {
+        if (cookie_jar)
+        {
+            cookie_jar->unref();
+        }
     }
     
     //=========================================================================
@@ -174,11 +179,6 @@ namespace Network
     {
     public:
             
-        static void set_cookie_jar_file_name(const String & file_name)
-        {
-            get()->reset_cookie_jar(file_name);
-        }
-
         static void shutdown()
         {
             get(true);
@@ -196,7 +196,7 @@ namespace Network
         
         static Response perform_request(const Request & request)
         {
-            RequestClosure closure(request,get()->ref_cookie_jar());
+            RequestClosure closure(request);
             
             CURL * eh=create_easy_handle(&closure);
             
@@ -242,83 +242,44 @@ namespace Network
         }
 
         //.....................................................................
-        
-        void reset_cookie_jar(const String & file_name)
-        {
-            cookie_jar_file_name=file_name;
-            
-            if (cookie_jar)
-            {
-                cookie_jar->unref();
-                cookie_jar=NULL;
-            }
-        }
-        
-        //.....................................................................
-        
-        CookieJar * ref_cookie_jar()
-        {
-            if (!cookie_jar)
-            {
-                if (cookie_jar_file_name.empty())
-                    return NULL;
-            
-                cookie_jar=new CookieJar(cookie_jar_file_name.c_str());
-            }
-            
-            cookie_jar->ref();
-            
-            return cookie_jar;
-        }
-        
-        //.....................................................................
         // Internal structure to hold all the things we care about while we are
         // working on a request
         
         struct RequestClosure
         {
-            RequestClosure(const Request & req,CookieJar * cj)
+            RequestClosure(const Request & req)
             :
                 request(req),
                 callback(NULL),
                 incremental_callback(NULL),
                 data(NULL),
                 got_body(false),
-                put_offset(0),
-                cookie_jar(cj)
+                put_offset(0)
             {
             }
 
-            RequestClosure(const Request & req,CookieJar * cj,ResponseCallback cb,gpointer d)
+            RequestClosure(const Request & req,ResponseCallback cb,gpointer d)
             :
                 request(req),
                 callback(cb),
                 incremental_callback(NULL),
                 data(d),
                 got_body(false),
-                put_offset(0),
-                cookie_jar(cj)
+                put_offset(0)
             {
             }
             
-            RequestClosure(const Request & req,CookieJar * cj,IncrementalResponseCallback icb,gpointer d)
+            RequestClosure(const Request & req,IncrementalResponseCallback icb,gpointer d)
             :
                 request(req),
                 callback(NULL),
                 incremental_callback(icb),
                 data(d),
                 got_body(false),
-                put_offset(0),
-                cookie_jar(cj)
+                put_offset(0)
             {
             }
             
-            ~RequestClosure()
-            {
-                if (cookie_jar)
-                    cookie_jar->unref();
-            }
-
             Request                     request;
             ResponseCallback            callback;
             IncrementalResponseCallback incremental_callback;
@@ -326,7 +287,6 @@ namespace Network
             Response                    response;
             bool                        got_body;
             size_t                      put_offset;
-            CookieJar *                 cookie_jar;
         };
         
         //.....................................................................
@@ -335,7 +295,7 @@ namespace Network
         void submit_request(const Request & request,ResponseCallback callback,gpointer user)
         {
             start();
-            g_async_queue_push(queue,new RequestClosure(request,ref_cookie_jar(),callback,user));
+            g_async_queue_push(queue,new RequestClosure(request,callback,user));
         }
         
         //.....................................................................
@@ -344,7 +304,7 @@ namespace Network
         void submit_request(const Request & request,IncrementalResponseCallback callback,gpointer user)
         {
             start();
-            g_async_queue_push(queue,new RequestClosure(request,ref_cookie_jar(),callback,user));
+            g_async_queue_push(queue,new RequestClosure(request,callback,user));
         }
 
         //.....................................................................
@@ -492,8 +452,8 @@ namespace Network
                 }
                 else
                 {
-                    if (g_str_has_prefix(header.c_str(),"Set-Cookie:") && closure->cookie_jar)
-                        closure->cookie_jar->set_cookie(header.c_str());
+                    if (g_str_has_prefix(header.c_str(),"Set-Cookie:") && closure->request.cookie_jar)
+                        closure->request.cookie_jar->set_cookie(header.c_str());
                         
                     closure->response.headers.insert(
                         std::make_pair(header.substr(0,sep),header.substr(sep+2,header.length())));
@@ -560,9 +520,9 @@ namespace Network
                 
                 //cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
 
-                if (closure->cookie_jar)
+                if (closure->request.cookie_jar)
                 {
-                    closure->cookie_jar->add_cookies_to_handle(eh);
+                    closure->request.cookie_jar->add_cookies_to_handle(eh);
                 }
             }
             catch(CURLcode c)
@@ -710,8 +670,7 @@ namespace Network
         
         NetworkThread()
         :
-            thread(NULL),
-            cookie_jar(NULL)
+            thread(NULL)
         {
             queue = g_async_queue_new_full(destroy_request_closure);
             g_assert(queue);
@@ -721,8 +680,6 @@ namespace Network
         {
             stop();
             g_async_queue_unref(queue);
-            if (cookie_jar)
-                cookie_jar->unref();
         }
         
         void start()
@@ -746,16 +703,9 @@ namespace Network
         
         GAsyncQueue * queue;
         GThread *     thread;
-        String        cookie_jar_file_name;
-        CookieJar *   cookie_jar;
     };
 
     //=========================================================================
-    
-    void set_cookie_jar_file_name(const String & file_name)
-    {
-        NetworkThread::set_cookie_jar_file_name(file_name);
-    }
     
     void shutdown()
     {

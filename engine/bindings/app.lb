@@ -1,5 +1,5 @@
 [[
-#include "context.h"
+#include "app.h"
 
 void app_loaded_handler(const char *,void * l);
 void app_closing_handler(const char *,void * l);
@@ -9,60 +9,62 @@ void app_closing_handler(const char *,void * l);
 # This global object represents the current application. It has properties for
 # accessing application metadata and events.
 
-global app [[TPContext*]]
+global app [[App*]]
 {
     app()
         [[
-            *self=TPContext::get_from_lua(L);
+            *self=App::get(L);
+
             (*self)->add_notification_handler(TP_NOTIFICATION_APP_LOADED,app_loaded_handler,L);
             (*self)->add_notification_handler(TP_NOTIFICATION_APP_CLOSING,app_closing_handler,L);
         ]];
 
     ~app()
-        [[]];
+        [[
+        ]];
     
     # Property: id
     # Returns the id of the current application
     
     readonly string id
-        [[id=self->get(TP_APP_ID);]];
+        [[id=self->get_metadata().id.c_str();]];
         
     # Property: name
     # Returns the name of the current application
     
     readonly string name
-        [[name=self->get(APP_NAME);]];
+        [[name=self->get_metadata().name.c_str();]];
         
     # Property: author
     # Returns the author, if any, of the current application
     
     readonly string author
-        [[author=self->get(APP_AUTHOR);]];
+        [[author=self->get_metadata().author.c_str();]];
     
     # Property: description
     # Returns the description, if any, of the current application
     
     readonly string description
-        [[description=self->get(APP_DESCRIPTION);]];
+        [[description=self->get_metadata().description.c_str();]];
     
     # Property: copyright
     # Returns the copyright information, if any, of the current application
     
     readonly string copyright
-        [[copyright=self->get(APP_COPYRIGHT);]];
+        [[copyright=self->get_metadata().copyright.c_str();]];
     
     # Property: release
     # Returns the release number of the current application. This number is for
     # internal use only and should not be displayed to users.
     
     readonly int release
-        [[release=self->get_int(APP_RELEASE);]];
+        [[release=self->get_metadata().release;]];
     
     # Property: version
     # Returns the version string of the current application
     
     readonly string version
-        [[version=self->get(APP_VERSION);]];
+        [[version=self->get_metadata().version.c_str();]];
         
     # Event: on_loaded
     # This callback is invoked after the app has finished loading.
@@ -79,12 +81,12 @@ global app [[TPContext*]]
 void app_loaded_handler(const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_app_on_loaded(L,TPContext::get_from_lua(L),0,0);
+    invoke_app_on_loaded(L,App::get(L),0,0);
 }
 
 void app_closing_handler(const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_app_on_closing(L,TPContext::get_from_lua(L),0,0);
+    invoke_app_on_closing(L,App::get(L),0,0);
 }
 ]]

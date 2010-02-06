@@ -6,6 +6,7 @@ module mediaplayer_module;
 #include "clutter/clutter.h"
 
 #include "mediaplayers.h"
+#include "app.h"
 #include "context.h"
 
 //-----------------------------------------------------------------------------
@@ -415,7 +416,7 @@ global mediaplayer [[MP*]]
             
             bool is_uri=false;
             
-            char * path=TPContext::get_from_lua(L)->normalize_app_path(uri,&is_uri,schemes);
+            char * path=App::get(L)->normalize_path(uri,&is_uri,schemes);
             
             if (!path)
             {

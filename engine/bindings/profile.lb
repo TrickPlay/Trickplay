@@ -1,5 +1,6 @@
 [[
 #include "context.h"
+#include "app.h"
 
 void profile_changing_handler(const char *,void * l);
 void profile_changed_handler(const char *,void * l);
@@ -9,11 +10,11 @@ void profile_changed_handler(const char *,void * l);
 # Contains information about the current profile and events to know when it is
 # about to change or has changed.
 
-global profile [[TPContext*]]
+global profile [[App*]]
 {
     profile()
         [[
-            *self=TPContext::get_from_lua(L);
+            *self=App::get(L);
             (*self)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGING,profile_changing_handler,L);
             (*self)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,L);            
         ]];
@@ -26,13 +27,13 @@ global profile [[TPContext*]]
     # The ID of the current profile
     
     readonly int id
-        [[id=self->get_int(PROFILE_ID);]];
+        [[id=self->get_profile_id();]];
     
     # Property: name
     # The name of the current profile
     
     readonly string name
-        [[name=self->get(PROFILE_NAME);]];
+        [[name=self->get_context()->get(PROFILE_NAME);]];
         
     # Event: on_changing
     # This callback is invoked immediately before the current profile is changed.
@@ -49,12 +50,12 @@ global profile [[TPContext*]]
 void profile_changing_handler(const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_profile_on_changing(L,TPContext::get_from_lua(L),0,0);
+    invoke_profile_on_changing(L,App::get(L),0,0);
 }
 
 void profile_changed_handler(const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_profile_on_changed(L,TPContext::get_from_lua(L),0,0);
+    invoke_profile_on_changed(L,App::get(L),0,0);
 }
 ]]
