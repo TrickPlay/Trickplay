@@ -1,7 +1,7 @@
-#ifndef TP_MEDIAPLAYER_H
-#define TP_MEDIAPLAYER_H
+#ifndef _TRICKPLAY_MEDIAPLAYER_H
+#define _TRICKPLAY_MEDIAPLAYER_H
 
-#include "tp/tp.h"
+#include "trickplay/trickplay.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -842,4 +842,4 @@ struct TPMediaPlayer
 }
 #endif 
 
-#endif  // TP_MEDIAPLAYER_H
+#endif  // _TRICKPLAY_MEDIAPLAYER_H

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "tp/tp.h"
+#include "trickplay/trickplay.h"
 #include "glib.h"
 
 #include "lirc/lirc_client.h"
@@ -66,7 +66,7 @@ void start_lirc(TPContext * context)
     {
         GIOChannel * channel=g_io_channel_unix_new(fd);
         g_io_add_watch(channel,G_IO_IN,lirc_channel_watch,context);        
-        g_info("LISTENING TO LIRC");
+        g_debug("LISTENING TO LIRC");
     }    
 }
 

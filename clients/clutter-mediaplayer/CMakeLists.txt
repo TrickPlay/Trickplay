@@ -36,3 +36,5 @@ TP_FIND_LIBRARY( gobject-2.0        TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gthread-2.0        TPCMP_LIBRARIES )
 
 target_link_libraries( tp-cmp tpcore ${TPCMP_LIBRARIES} )
+
+set_target_properties( tp-cmp PROPERTIES OUTPUT_NAME tp )

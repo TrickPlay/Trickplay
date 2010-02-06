@@ -6,7 +6,7 @@
 
 #include "glib.h"
 
-#include "tp/mediaplayer.h"
+#include "trickplay/mediaplayer.h"
 
 typedef std::string String;
 typedef std::list< std::pair<String,String> > StringPairList;
@@ -15,7 +15,24 @@ class MediaPlayer
 {
 public:
     
-    static MediaPlayer * make(TPMediaPlayerConstructor constructor);
+    //.........................................................................
+    // Delegate class to handle events
+    
+    class Delegate
+    {
+    public:
+        
+        virtual void loaded(MediaPlayer * player)=0;
+        virtual void error(MediaPlayer * player,int code,const char * message)=0;
+        virtual void end_of_stream(MediaPlayer * player)=0;
+    };
+    
+    //.........................................................................
+    // Constructing a media player
+    
+    static MediaPlayer * make(TPMediaPlayerConstructor constructor,Delegate * delegate=NULL);
+    
+    // Getting one from a TPMediaPlayer
     
     static MediaPlayer * get(TPMediaPlayer * mp);
 
@@ -46,24 +63,15 @@ public:
     StringPairList get_tags();
 
     //.........................................................................
-    // Delegate class to handle events
-    
-    class Delegate
-    {
-    public:
-        
-        virtual void loaded(MediaPlayer * player)=0;
-        virtual void error(MediaPlayer * player,int code,const char * message)=0;
-        virtual void end_of_stream(MediaPlayer * player)=0;
-    };
+    // Changing the delegate
     
     void set_delegate(Delegate * delegate);
     
 private:
     
     //.........................................................................
-    // The external callbacks. They push an event into a queue that we flush
-    // at certain points.
+    // The external callbacks. They push an event into the queue and post an
+    // idle source to process the event in the main thread.
     
     void loaded();
     void error(int code,const char * message);
@@ -118,16 +126,18 @@ private:
     
     struct Wrapper
     {
-        // DO NOT ADD ANYTHING ABOVE mp.
+        // DO NOT ADD ANYTHING ABOVE mp. We rely on the address of mp being the
+        // same as the address of the whole wrapper.
+        
         TPMediaPlayer   mp;
         void *          marker;
         MediaPlayer *   player;
     };
 
     //.........................................................................
-    // Constructor given a wrapper (from make)
+    // Constructor given a wrapper and a delegate (from make)
     
-    MediaPlayer(Wrapper *);
+    MediaPlayer(Wrapper *,Delegate *);
     
     //.........................................................................
     // Not allowed
