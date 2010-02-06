@@ -1905,6 +1905,12 @@ class Timeline [[ClutterTimeline*]]
 	    static const char * directions[3] = { "FORWARD" , "BACKWARD" , NULL };
 	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
 	]];
+
+	reverse()
+	[[clutter_timeline_set_direction(self,
+			clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
+			?CLUTTER_TIMELINE_BACKWARD
+			:CLUTTER_TIMELINE_FORWARD);]];
 	
     start()
 	[[clutter_timeline_start(self);]];
