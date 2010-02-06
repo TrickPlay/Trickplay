@@ -322,7 +322,7 @@ void Controllers::connection_data_received(GSocketConnection * connection,gchar 
         
         if (strlen(s))
         {
-            g_debug("GOT DATA %p [%s]",connection,s);
+//            g_debug("GOT DATA %p [%s]",connection,s);
             
             gchar ** parts=g_strsplit(s,"\t",0);
             
