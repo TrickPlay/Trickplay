@@ -530,17 +530,13 @@ const App::Metadata & App::get_metadata() const
 
 void App::release_cookie_jar()
 {
-    if (cookie_jar)
-    {
-        cookie_jar->unref();
-        cookie_jar=NULL;
-    }
+    // Will unref it and set it to NULL
+    cookie_jar=Network::cookie_jar_unref(cookie_jar);
 }
-
 
 //-----------------------------------------------------------------------------
 
-Network::CookieJar * App::ref_cookie_jar()
+Network::CookieJar * App::get_cookie_jar()
 {
     if (!cookie_jar)
     {
@@ -550,20 +546,15 @@ Network::CookieJar * App::ref_cookie_jar()
         gchar * file_name=g_build_filename(data_path.c_str(),name,NULL);
         Util::GFreeLater free_file_name(file_name);
         
-        cookie_jar=new Network::CookieJar(file_name);        
+        cookie_jar=Network::cookie_jar_new(file_name);        
     }
-    
-    if (cookie_jar)
-    {
-        cookie_jar->ref();
-    }
-    
+        
     return cookie_jar;
 }
 
 //-----------------------------------------------------------------------------
 
-String App::get_user_agent() const
+const String & App::get_user_agent() const
 {
     return user_agent;
 }

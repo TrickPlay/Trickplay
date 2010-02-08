@@ -9,12 +9,12 @@
 #include "trickplay/trickplay.h"
 
 #include "notify.h"
+#include "network.h"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
 
 class SystemDatabase;
-namespace Network{ class CookieJar; }
 
 //-----------------------------------------------------------------------------
 
@@ -98,14 +98,14 @@ public:
     int get_profile_id() const;
     
     //.........................................................................
-    // Get the cookie jar and take a reference on it. May return NULL.
+    // Get the cookie jar.
     
-    Network::CookieJar * ref_cookie_jar();
+    Network::CookieJar * get_cookie_jar();
 
     //.........................................................................
     // Get the user agent
     
-    String get_user_agent() const;
+    const String & get_user_agent() const;
     
     //.........................................................................
     // Get the Lua state

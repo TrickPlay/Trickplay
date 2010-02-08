@@ -1732,14 +1732,15 @@ class Image [[ClutterActor*]] actor
     
 		if (is_uri)
 		{
-		    Network::Request request(app);
+		    Network::Request request(app->get_user_agent());
 		    request.url = path;
 #if 0		    
 		    g_object_ref(G_OBJECT(self));
-		    Network::perform_request_async(request,Image_response_callback,self);
+		    Network::perform_request_async(request,app->get_cookie_jar(),Image_response_callback,self);
 #else
 		    Network::perform_request_async_incremental(
 			request,
+			app->get_cookie_jar(),
 			Image_incremental_response_callback,
 			new ImageClosure(CLUTTER_TEXTURE(self)));
 #endif

@@ -9,10 +9,6 @@
 
 //.............................................................................
 
-class App;
-
-//.............................................................................
-    
 namespace Network
 {   
     typedef std::string String;
@@ -21,42 +17,16 @@ namespace Network
     typedef std::list<String> StringList;
 
     //.........................................................................
-
-    class CookieJar
-    {
-    public:
-        
-        CookieJar(const char * file_name);
-        
-        void ref();
-        void unref();
-        
-        friend class NetworkThread;
-        
-    private:
-        
-        ~CookieJar();
-        
-        void set_cookie(const char * set_cookie_header);
-        void add_cookies_to_handle(void * handle,bool clear_session=false);
-        void save();
-        
-        gint        ref_count;
-        bool        new_session;  
-        String      file_name;
-        StringList  cookies;
-        GMutex *    mutex;
-    };
     
+    class CookieJar;
+
     //.........................................................................
 
     class Request
     {
     public:
         
-        Request(App * app);
-        Request(const Request & other);
-        ~Request();
+        Request(const String & user_agent);
             
         String      url;
         String      method;
@@ -67,12 +37,11 @@ namespace Network
         String      body;
         bool        redirect;
         String      user_agent;
-        CookieJar * cookie_jar;
         
     private:
         
-        Request() {}
-        
+        Request()
+        {}        
     };
     
     //.........................................................................
@@ -91,8 +60,20 @@ namespace Network
         GByteArray *    body;
         bool            failed;
     };
+
+    //.........................................................................
+    // Cookie jar functions
+    
+    CookieJar * cookie_jar_new(const char * file_name);
+    
+    CookieJar * cookie_jar_ref(CookieJar * cookie_jar);
+    
+    // This one always returns NULL
+    
+    CookieJar * cookie_jar_unref(CookieJar * cookie_jar);
     
     //.........................................................................
+    // Terminates the network thread and waits for it
 
     void shutdown();
     
@@ -102,7 +83,7 @@ namespace Network
     
     typedef void (*ResponseCallback)(const Response & response,gpointer user);
     
-    void perform_request_async(const Request & request,ResponseCallback callback,gpointer user);
+    void perform_request_async(const Request & request,CookieJar * cookie_jar,ResponseCallback callback,gpointer user);
     
     //.........................................................................
     // This performs the request asynchronously but invokes the callback every
@@ -114,13 +95,13 @@ namespace Network
     
     typedef bool (*IncrementalResponseCallback)(const Response & response,gpointer body,guint len,bool finished,gpointer user);
 
-    void perform_request_async_incremental(const Request & request,IncrementalResponseCallback callback,gpointer user);
+    void perform_request_async_incremental(const Request & request,CookieJar * cookie_jar,IncrementalResponseCallback callback,gpointer user);
     
     //.........................................................................
     // Performs the request in the calling thread and returns the complete
     // response
     
-    Response perform_request(const Request & request);
+    Response perform_request(const Request & request,CookieJar * cookie_jar);
 };
 
 #endif

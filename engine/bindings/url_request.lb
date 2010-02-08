@@ -120,7 +120,7 @@ class URLRequest [[Network::Request*]]
     
     URLRequest(string url=NULL)
         [[
-            *self=new Network::Request(App::get(L));
+            *self=new Network::Request(App::get(L)->get_user_agent());
             
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {
@@ -242,7 +242,8 @@ class URLRequest [[Network::Request*]]
     
     udata perform()
         [[
-            Network::Response response=Network::perform_request(*self);
+	    Network::CookieJar * cookie_jar=App::get(L)->get_cookie_jar();
+            Network::Response response=Network::perform_request(*self,cookie_jar);
             lua_pushlightuserdata(L,new Network::Response(response));
             new_URLResponse(L);
             lua_remove(L,-2);
@@ -255,7 +256,8 @@ class URLRequest [[Network::Request*]]
     
     send()
         [[
-            Network::perform_request_async(*self,URLRequest_response_callback,new RequestInfo(self,L));
+	    Network::CookieJar * cookie_jar=App::get(L)->get_cookie_jar();
+            Network::perform_request_async(*self,cookie_jar,URLRequest_response_callback,new RequestInfo(self,L));
         ]];
         
     # Event: on_complete
