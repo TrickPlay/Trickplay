@@ -1,13 +1,11 @@
-#ifndef _TP_MDNS_H
-#define _TP_MDNS_H
-
-#include <string>
+#ifndef _TRICKPLAY_MDNS_H
+#define _TRICKPLAY_MDNS_H
 
 #include <avahi-core/core.h>
 #include <avahi-core/publish.h>
 #include <avahi-glib/glib-watch.h>
 
-typedef std::string String;
+#include "common.h"
 
 class MDNS
 {

@@ -1,20 +1,11 @@
-#ifndef _TP_CONTROLLERS_H
-#define _TP_CONTROLLERS_H
-
-#include <string>
-#include <map>
-#include <memory>
-#include <set>
-#include <list>
+#ifndef _TRICKPLAY_CONTROLLERS_H
+#define _TRICKPLAY_CONTROLLERS_H
 
 #include "glib.h"
 #include "gio/gio.h"
 
 #include "mdns.h"
-
-typedef std::string                             String;
-typedef std::set<String>                        StringSet;
-typedef std::list<std::pair<String,String> >    StringPairList;
+#include "common.h"
 
 class Controllers
 {
@@ -161,4 +152,4 @@ private:
 };
 
 
-#endif
+#endif // _TRICKPLAY_CONTROLLERS_H

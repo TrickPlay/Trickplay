@@ -5,7 +5,6 @@
 #include <avahi-glib/glib-malloc.h>
 
 #include "mdns.h"
-
 #include "util.h"
 
 MDNS::MDNS(int p)

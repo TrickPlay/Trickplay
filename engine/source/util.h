@@ -1,10 +1,9 @@
-#ifndef UTIL_H
-#define UTIL_H
-
+#ifndef _TRICKPLAY_UTIL_H
+#define _TRICKPLAY_UTIL_H
+//-----------------------------------------------------------------------------
 #include <cstring>
-
-#include "glib.h"
-
+//-----------------------------------------------------------------------------
+#include "common.h"
 //-----------------------------------------------------------------------------
 
 inline void g_info(const gchar * format,...)
@@ -123,7 +122,6 @@ namespace Util
         return g_build_filename(first,last,NULL);
     }
     
-    
 }
 
-#endif
+#endif // _TRICKPLAY_UTIL_H

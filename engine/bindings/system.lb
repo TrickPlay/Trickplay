@@ -1,5 +1,6 @@
 [[
 #include "context.h"
+#include "app.h"
 ]]
 
 # Global: system
@@ -8,7 +9,7 @@
 global system [[TPContext*]]
 {
     system()
-        [[*self=TPContext::get_from_lua(L);]];
+        [[*self=App::get(L)->get_context();]];
 
     ~system()
         [[]];

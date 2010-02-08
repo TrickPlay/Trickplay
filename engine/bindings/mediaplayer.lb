@@ -6,6 +6,7 @@ module mediaplayer_module;
 #include "clutter/clutter.h"
 
 #include "mediaplayers.h"
+#include "app.h"
 #include "context.h"
 
 //-----------------------------------------------------------------------------
@@ -34,7 +35,7 @@ class MP : private MediaPlayer::Delegate
         {
             if (!player)
             {
-                player=MediaPlayer::make(TPContext::get_from_lua(L)->get_media_player_constructor(),this);
+                player=MediaPlayer::make(App::get(L)->get_context()->get_media_player_constructor(),this);
             }
             
             return player;
@@ -415,7 +416,7 @@ global mediaplayer [[MP*]]
             
             bool is_uri=false;
             
-            char * path=TPContext::get_from_lua(L)->normalize_app_path(uri,&is_uri,schemes);
+            char * path=App::get(L)->normalize_path(uri,&is_uri,schemes);
             
             if (!path)
             {

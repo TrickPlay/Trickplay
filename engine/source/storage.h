@@ -1,18 +1,16 @@
-#ifndef __TRICKPLAY_STORAGE__
-#define __TRICKPLAY_STORAGE__
+#ifndef _TRICKPLAY_STORAGE_H
+#define _TRICKPLAY_STORAGE_H
 
-#include <string>
-
-extern "C" {
+extern "C"
+{
 	#include "tcutil.h"
 	#include "tchdb.h"
 }
 
+#include "common.h"
 
 namespace Storage
 {
-	typedef std::string String;
-	
 	class LocalHash
 	{
 		public:
@@ -50,4 +48,4 @@ namespace Storage
 	uint64_t count(LocalHash & db);
 };
 
-#endif // __TRICKPLAY_STORAGE__
+#endif // _TRICKPLAY_STORAGE_H

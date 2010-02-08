@@ -1,8 +1,8 @@
 module storage;
 
 [[
+#include "common.h"
 #include "storage.h"
-#include "glib.h"
 ]]
 
 class LocalHash [[Storage::LocalHash*]]
@@ -37,22 +37,22 @@ class LocalHash [[Storage::LocalHash*]]
 
 	lstring get(lstring key)
 		[[
-			Storage::String theKey( key , key_len );
-			Storage::String value = self->get(theKey);
+			String theKey( key , key_len );
+			String value = self->get(theKey);
 			result = value.data();
 			result_len = value.length();
 		]];
 
 	put(lstring key, lstring value)
 		[[
-			Storage::String theKey( key , key_len );
-			Storage::String theValue( value , value_len );
+			String theKey( key , key_len );
+			String theValue( value , value_len );
 			self->put(theKey, theValue);
 		]];
 
 	del(lstring key)
 		[[
-			Storage::String theKey( key , key_len );
+			String theKey( key , key_len );
 			self->del(theKey);
 		]];
 

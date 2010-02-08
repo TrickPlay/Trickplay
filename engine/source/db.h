@@ -1,13 +1,12 @@
-#ifndef DB_H
-#define DB_H
+#ifndef _TRICKPLAY_DB_H
+#define _TRICKPLAY_DB_H
 
-#include <string>
 #include "sqlite3.h"
+
+#include "common.h"
 
 namespace SQLite
 {
-    typedef std::string String;
-    
     class Error
     {
     public:
@@ -118,4 +117,4 @@ namespace SQLite
 } // namespace DB
 
 
-#endif // DB_H
+#endif // _TRICKPLAY_DB_H

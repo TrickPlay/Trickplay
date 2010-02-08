@@ -1,7 +1,7 @@
 
 #include "clutter/clutter-keysyms.h"
 
-#include "lb.h"
+#include "common.h"
 
 
 // The function below creates a global table called "keys" that has two mappings.
@@ -2034,8 +2034,6 @@ void luaopen_keys(lua_State *L)
         {NULL,NULL}
     };
     
-    LSG;
-    
     lua_newtable(L);
     
     for(const ki * k=ks;k->name;++k)
@@ -2051,6 +2049,4 @@ void luaopen_keys(lua_State *L)
     }
     
     lua_setglobal(L,"keys");
-    
-    LSG_END(0);
 }

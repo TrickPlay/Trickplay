@@ -1,5 +1,6 @@
 
 [[
+#include "app.h"
 #include "context.h"
 #include "sysdb.h"
 #include "util.h"
@@ -14,7 +15,7 @@ global apps [[TPContext*]]
 {
     apps()
         [[
-            *self=TPContext::get_from_lua(L);    
+            *self=App::get(L)->get_context();    
         ]];
         
     ~apps()

@@ -171,7 +171,9 @@ add_library(
     
     SHARED
     
+    ${ENGINE_SRC}/source/notify.cpp
     ${ENGINE_SRC}/source/context.cpp
+    ${ENGINE_SRC}/source/app.cpp    
     ${ENGINE_SRC}/source/network.cpp
     ${ENGINE_SRC}/source/storage.cpp
     ${ENGINE_SRC}/source/console.cpp

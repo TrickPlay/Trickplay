@@ -1,26 +1,22 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef _TRICKPLAY_NETWORK_H
+#define _TRICKPLAY_NETWORK_H
 
-#include <string>
-#include <map>
-#include <list>
-
-#include "glib.h"
-
-#include "context.h"
+#include "common.h"
+//.............................................................................
 
 namespace Network
 {   
-    typedef std::string String;
-    typedef std::map<std::string,std::string> StringMap;
-    typedef std::multimap<std::string,std::string> StringMultiMap;
-    typedef std::list<String> StringList;
+    //.........................................................................
     
+    class CookieJar;
+
+    //.........................................................................
+
     class Request
     {
     public:
         
-        Request(TPContext * context);
+        Request(const String & user_agent);
             
         String      url;
         String      method;
@@ -34,10 +30,12 @@ namespace Network
         
     private:
         
-        Request() {}
-        
+        Request()
+        {}        
     };
     
+    //.........................................................................
+
     class Response
     {
     public:
@@ -52,12 +50,30 @@ namespace Network
         GByteArray *    body;
         bool            failed;
     };
+
+    //.........................................................................
+    // Format a user agent
+    
+    String get_user_agent(const char * language,
+                          const char * country,
+                          const char * app_id,
+                          int app_release,
+                          const char * system_name,
+                          const char * system_version);
     
     //.........................................................................
+    // Cookie jar functions
     
-    void set_cookie_jar_file_name(const String & file_name);
+    CookieJar * cookie_jar_new(const char * file_name);
+    
+    CookieJar * cookie_jar_ref(CookieJar * cookie_jar);
+    
+    // This one always returns NULL
+    
+    CookieJar * cookie_jar_unref(CookieJar * cookie_jar);
     
     //.........................................................................
+    // Terminates the network thread and waits for it
 
     void shutdown();
     
@@ -67,7 +83,7 @@ namespace Network
     
     typedef void (*ResponseCallback)(const Response & response,gpointer user);
     
-    void perform_request_async(const Request & request,ResponseCallback callback,gpointer user);
+    void perform_request_async(const Request & request,CookieJar * cookie_jar,ResponseCallback callback,gpointer user);
     
     //.........................................................................
     // This performs the request asynchronously but invokes the callback every
@@ -79,13 +95,13 @@ namespace Network
     
     typedef bool (*IncrementalResponseCallback)(const Response & response,gpointer body,guint len,bool finished,gpointer user);
 
-    void perform_request_async_incremental(const Request & request,IncrementalResponseCallback callback,gpointer user);
+    void perform_request_async_incremental(const Request & request,CookieJar * cookie_jar,IncrementalResponseCallback callback,gpointer user);
     
     //.........................................................................
     // Performs the request in the calling thread and returns the complete
     // response
     
-    Response perform_request(const Request & request);
+    Response perform_request(const Request & request,CookieJar * cookie_jar);
 };
 
-#endif
+#endif // _TRICKPLAY_NETWORK_H

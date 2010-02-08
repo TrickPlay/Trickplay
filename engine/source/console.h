@@ -1,13 +1,9 @@
-#ifndef CONSOLE_H
-#define CONSOLE_H
+#ifndef _TRICKPLAY_CONSOLE_H
+#define _TRICKPLAY_CONSOLE_H
 
-#include <list>
-
-#include "glib.h"
 #include "gio/gio.h"
 
-#include "lb.h"
-
+#include "common.h"
 
 class Console
 {
@@ -55,4 +51,4 @@ private:
 };
 
 
-#endif
+#endif // _TRICKPLAY_CONSOLE_H

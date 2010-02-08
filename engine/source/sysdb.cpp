@@ -1,7 +1,4 @@
 
-#include <set>
-
-#include "glib.h"
 #include "glib/gstdio.h"
 
 #include "sysdb.h"

@@ -1,7 +1,7 @@
 module url_request;
 
 [[
-#include "context.h"
+#include "app.h"
 #include "network.h"
 ]]
 
@@ -73,7 +73,7 @@ interface URLResponse [[Network::Response*]]
         [[
             int i=1;
             lua_newtable(L);
-            for(Network::StringMultiMap::const_iterator it=self->headers.begin();
+            for(StringMultiMap::const_iterator it=self->headers.begin();
                 it!=self->headers.end();++it)
             {
                 lua_newtable(L);
@@ -120,7 +120,7 @@ class URLRequest [[Network::Request*]]
     
     URLRequest(string url=NULL)
         [[
-            *self=new Network::Request(TPContext::get_from_lua(L));
+            *self=new Network::Request(App::get(L)->get_user_agent());
             
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {
@@ -215,7 +215,7 @@ class URLRequest [[Network::Request*]]
     table headers
         [[
             lua_newtable(L);
-            for(Network::StringMap::const_iterator it=self->headers.begin();
+            for(StringMap::const_iterator it=self->headers.begin();
                 it!=self->headers.end();++it)
             {
                 lua_pushstring(L,it->first.c_str());
@@ -242,7 +242,8 @@ class URLRequest [[Network::Request*]]
     
     udata perform()
         [[
-            Network::Response response=Network::perform_request(*self);
+	    Network::CookieJar * cookie_jar=App::get(L)->get_cookie_jar();
+            Network::Response response=Network::perform_request(*self,cookie_jar);
             lua_pushlightuserdata(L,new Network::Response(response));
             new_URLResponse(L);
             lua_remove(L,-2);
@@ -255,7 +256,8 @@ class URLRequest [[Network::Request*]]
     
     send()
         [[
-            Network::perform_request_async(*self,URLRequest_response_callback,new RequestInfo(self,L));
+	    Network::CookieJar * cookie_jar=App::get(L)->get_cookie_jar();
+            Network::perform_request_async(*self,cookie_jar,URLRequest_response_callback,new RequestInfo(self,L));
         ]];
         
     # Event: on_complete

@@ -1,15 +1,9 @@
-#ifndef TP_MEDIAPLAYERS_H
-#define TP_MEDIAPLAYERS_H
+#ifndef _TRICKPLAY_MEDIAPLAYERS_H
+#define _TRICKPLAY_MEDIAPLAYERS_H
 
-#include <string>
-#include <list>
-
-#include "glib.h"
-
-#include "trickplay/mediaplayer.h"
+#include "common.h"
 
 typedef std::string String;
-typedef std::list< std::pair<String,String> > StringPairList;
 
 class MediaPlayer
 {
@@ -173,4 +167,4 @@ private:
     StringPairList  tags;
 };
 
-#endif // TP_MEDIAPLAYERS_H
+#endif // _TRICKPLAY_MEDIAPLAYERS_H
