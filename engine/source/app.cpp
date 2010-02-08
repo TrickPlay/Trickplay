@@ -375,18 +375,13 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
         
     // Create the user agent
     
-    gchar * ua=g_strdup_printf("Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)",
+    user_agent=Network::get_user_agent(
         context->get(TP_SYSTEM_LANGUAGE),
         context->get(TP_SYSTEM_COUNTRY),
-        TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION,
         md.id.c_str(),
         md.release,
         context->get(TP_SYSTEM_NAME),
         context->get(TP_SYSTEM_VERSION));
-    
-    user_agent=ua;
-    
-    g_free(ua);
     
     // Register to get all notifications
     

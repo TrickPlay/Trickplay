@@ -52,6 +52,16 @@ namespace Network
     };
 
     //.........................................................................
+    // Format a user agent
+    
+    String get_user_agent(const char * language,
+                          const char * country,
+                          const char * app_id,
+                          int app_release,
+                          const char * system_name,
+                          const char * system_version);
+    
+    //.........................................................................
     // Cookie jar functions
     
     CookieJar * cookie_jar_new(const char * file_name);

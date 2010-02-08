@@ -731,6 +731,28 @@ namespace Network
 
     //=========================================================================
     
+    String get_user_agent(const char * language,
+                          const char * country,
+                          const char * app_id,
+                          int app_release,
+                          const char * system_name,
+                          const char * system_version)
+    {
+        static const char * user_agent_template="Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)";
+        
+        gchar * ua=g_strdup_printf(user_agent_template,
+            language,country,
+            TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION,
+            app_id,app_release,
+            system_name,system_version);
+        
+        String result(ua);
+        
+        g_free(ua);
+        
+        return result;
+    }
+
     CookieJar * cookie_jar_new(const char * file_name)
     {
         return new CookieJar(file_name);
