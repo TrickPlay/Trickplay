@@ -3,7 +3,7 @@
 ]]--
 
 local SAMPLE_PERIOD		= 0.02
-local MOMENTUM_DAMPING	= 10
+local MOMENTUM_DAMPING	= 3
 local MAX_MOMENTUM		= 1000
 
 function controllers.on_controller_connected(controllers,controller)
