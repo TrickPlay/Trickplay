@@ -93,7 +93,17 @@ public:
     
     bool profile_switch(int id);
     
-protected:
+private:
+    
+    TPContext();
+    ~TPContext();
+    
+    //.........................................................................
+    // Setting configuration variables
+    
+    void set(const char * key,const char * value);
+    void set(const char * key,int value);
+    void set(const char * key,const String & value);
     
     //.........................................................................
     // Loads configuration variables from the environment or a file
@@ -120,18 +130,6 @@ protected:
     // Formats a log line
     
     static gchar * format_log_line(const gchar * log_domain,GLogLevelFlags log_level,const gchar * message);
-    
-private:
-    
-    TPContext();
-    ~TPContext();
-    
-    //.........................................................................
-    // Setting configuration variables
-    
-    void set(const char * key,const char * value);
-    void set(const char * key,int value);
-    void set(const char * key,const String & value);
     
     //.........................................................................
     // Running and quitting the context
