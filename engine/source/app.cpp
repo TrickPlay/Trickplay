@@ -396,11 +396,6 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     L=lua_open();
     g_assert(L);
     
-    // Put a pointer to the context in Lua so bindings can get to it
-    lua_pushstring(L,"tp_context");
-    lua_pushlightuserdata(L,context);
-    lua_rawset(L,LUA_REGISTRYINDEX);
-    
     // Put a pointer to us in Lua so bindings can get to it
     lua_pushstring(L,"tp_app");
     lua_pushlightuserdata(L,this);

@@ -365,19 +365,6 @@ void TPContext::quit()
    
 //-----------------------------------------------------------------------------
 
-TPContext * TPContext::get_from_lua(lua_State * L)
-{
-    g_assert(L);
-    lua_pushstring(L,"tp_context");
-    lua_rawget(L,LUA_REGISTRYINDEX);
-    TPContext * result = (TPContext*)lua_touserdata(L,-1);
-    lua_pop(L,1);
-    g_assert(result);
-    return result;
-}
-
-//-----------------------------------------------------------------------------
-
 void TPContext::add_console_command_handler(const char * command,TPConsoleCommandHandler handler,void * data)
 {
     console_command_handlers.insert(std::make_pair(String(command),ConsoleCommandHandlerClosure(handler,data)));

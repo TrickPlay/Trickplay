@@ -2,8 +2,7 @@
 module controllers_module;
 
 [[
-#include <map>    
-    
+#include "app.h"    
 #include "context.h"
 #include "controllers.h"
 
@@ -270,7 +269,7 @@ ControllersDelegate::ControllersDelegate(lua_State*l)
 :
     L(l)
 {
-    controllers=TPContext::get_from_lua(L)->get_controllers();
+    controllers=App::get(L)->get_context()->get_controllers();
 
     // TODO: This won't work for multiple apps, since we are hogging the
     // one and only delegate

@@ -39,11 +39,6 @@ struct TPContext : public Notify
 public:
     
     //.........................................................................
-    // Get the context from Lua
-    
-    static TPContext * get_from_lua(lua_State * L);
-        
-    //.........................................................................
     // Getting context configuration variables
     
     const char * get(const char * key,const char * def = NULL);

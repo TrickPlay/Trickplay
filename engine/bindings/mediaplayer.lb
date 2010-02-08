@@ -35,7 +35,7 @@ class MP : private MediaPlayer::Delegate
         {
             if (!player)
             {
-                player=MediaPlayer::make(TPContext::get_from_lua(L)->get_media_player_constructor(),this);
+                player=MediaPlayer::make(App::get(L)->get_context()->get_media_player_constructor(),this);
             }
             
             return player;

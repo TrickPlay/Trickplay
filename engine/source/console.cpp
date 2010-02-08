@@ -2,6 +2,7 @@
 #include "console.h"
 #include "util.h"
 #include "context.h"
+#include "app.h"
 
 Console::Console(lua_State*l,int port)
 :
@@ -175,7 +176,7 @@ void Console::accept_callback(GObject * source,GAsyncResult * result,gpointer da
         
         lua_State * L =((Console*)data)->L;
         
-        TPContext::get_from_lua(L)->add_output_handler(output_handler,connection);
+        App::get(L)->get_context()->add_output_handler(output_handler,connection);
         
         g_object_weak_ref(G_OBJECT(connection),connection_destroyed,L);
     }       
@@ -226,7 +227,7 @@ void Console::connection_destroyed(gpointer data,GObject*connection)
 {
     // The connection has been destroyed, we remove its output handler
     
-    TPContext::get_from_lua((lua_State*)data)->remove_output_handler(Console::output_handler,connection);    
+    App::get((lua_State*)data)->get_context()->remove_output_handler(Console::output_handler,connection);    
 }
 
 #endif
