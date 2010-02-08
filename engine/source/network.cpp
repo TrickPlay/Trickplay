@@ -8,7 +8,6 @@
 
 #include "network.h"
 #include "util.h"
-#include "app.h"
 
 namespace Network
 {   

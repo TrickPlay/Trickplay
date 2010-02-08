@@ -1,5 +1,4 @@
 #include "storage.h"
-#include "glib.h"
 
 namespace Storage
 {

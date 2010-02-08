@@ -1,6 +1,4 @@
 
-#include "glib.h"
-
 #include "db.h"
 
 namespace SQLite

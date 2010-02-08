@@ -1,16 +1,12 @@
-#ifndef SYSDB_H
-#define SYSDB_H
+#ifndef _TRICKPLAY_SYSDB_H
+#define _TRICKPLAY_SYSDB_H
 
-#include <string>
-#include <list>
-
+#include "common.h"
 #include "db.h"
-
-typedef std::string String;
-
+//-----------------------------------------------------------------------------
 #define TP_DB_FIRST_PROFILE_NAME    "TrickPlay User"
-
 #define TP_DB_CURRENT_PROFILE_ID    "profile.current"
+//-----------------------------------------------------------------------------
 
 class SystemDatabase
 {
@@ -85,4 +81,4 @@ class SystemDatabase
 };
 
 
-#endif
+#endif // _TRICKPLAY_SYSDB_H

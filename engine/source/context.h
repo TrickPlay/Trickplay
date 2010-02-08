@@ -1,34 +1,14 @@
-#ifndef CONTEXT_H
-#define CONTEXT_H
-
-extern "C"
-{
-    #include "lua.h"
-}
-
-#include <map>
-#include <string>
-#include <set>
-
-#include "glib.h"
-
-#include "notify.h"
-
-#include "trickplay/trickplay.h"
-#include "trickplay/mediaplayer.h"
+#ifndef _TICKPLAY_CONTEXT_H
+#define _TICKPLAY_CONTEXT_H
 
 //-----------------------------------------------------------------------------
-
-typedef std::string String;
-typedef std::map<String,String> StringMap;
-typedef std::set<String> StringSet;
-
+#include "common.h"
+#include "notify.h"
 //-----------------------------------------------------------------------------
 // Internal configuration keys
 
 #define PROFILE_ID              "profile.id"
 #define PROFILE_NAME            "profile.name"
-
 //-----------------------------------------------------------------------------
 // Default values
 
@@ -45,7 +25,6 @@ typedef std::set<String> StringSet;
 #define TP_CONTROLLERS_PORT_DEFAULT     0
 #define TP_SCREEN_WIDTH_DEFAULT         960
 #define TP_SCREEN_HEIGHT_DEFAULT        540
-
 //-----------------------------------------------------------------------------
 // Forward declarations
 
@@ -237,4 +216,4 @@ private:
 
 
 
-#endif
+#endif // _TICKPLAY_CONTEXT_H

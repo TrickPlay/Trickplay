@@ -1,10 +1,7 @@
 #ifndef _TRICKPLAY_NOTIFY_H
 #define _TRICKPLAY_NOTIFY_H
 
-#include <map>
-#include <string>
-
-#include "trickplay/trickplay.h"
+#include "common.h"
 
 typedef std::string String;        
 

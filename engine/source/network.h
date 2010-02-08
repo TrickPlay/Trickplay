@@ -1,21 +1,11 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef _TRICKPLAY_NETWORK_H
+#define _TRICKPLAY_NETWORK_H
 
-#include <string>
-#include <map>
-#include <list>
-
-#include "glib.h"
-
+#include "common.h"
 //.............................................................................
 
 namespace Network
 {   
-    typedef std::string String;
-    typedef std::map<std::string,std::string> StringMap;
-    typedef std::multimap<std::string,std::string> StringMultiMap;
-    typedef std::list<String> StringList;
-
     //.........................................................................
     
     class CookieJar;
@@ -104,4 +94,4 @@ namespace Network
     Response perform_request(const Request & request,CookieJar * cookie_jar);
 };
 
-#endif
+#endif // _TRICKPLAY_NETWORK_H

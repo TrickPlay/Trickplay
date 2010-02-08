@@ -1,5 +1,5 @@
-#ifndef LB_H
-#define LB_H
+#ifndef _TRICKPLAY_LB_H
+#define _TRICKPLAY_LB_H
 
 #include "glib.h"
 #include "assert.h"
@@ -50,5 +50,5 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len);
 
 G_END_DECLS
 
-#endif
+#endif // _TRICKPLAY_LB_H
 

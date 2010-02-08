@@ -73,7 +73,7 @@ interface URLResponse [[Network::Response*]]
         [[
             int i=1;
             lua_newtable(L);
-            for(Network::StringMultiMap::const_iterator it=self->headers.begin();
+            for(StringMultiMap::const_iterator it=self->headers.begin();
                 it!=self->headers.end();++it)
             {
                 lua_newtable(L);
@@ -215,7 +215,7 @@ class URLRequest [[Network::Request*]]
     table headers
         [[
             lua_newtable(L);
-            for(Network::StringMap::const_iterator it=self->headers.begin();
+            for(StringMap::const_iterator it=self->headers.begin();
                 it!=self->headers.end();++it)
             {
                 lua_pushstring(L,it->first.c_str());

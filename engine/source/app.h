@@ -1,12 +1,7 @@
 #ifndef _TRICKPLAY_APP_H
 #define _TRICKPLAY_APP_H
 
-#include <string>
-#include <set>
-
-#include "lua.hpp"
-
-#include "trickplay/trickplay.h"
+#include "common.h"
 
 #include "notify.h"
 #include "network.h"
@@ -15,11 +10,6 @@
 // Forward declarations
 
 class SystemDatabase;
-
-//-----------------------------------------------------------------------------
-
-typedef std::string String;
-typedef std::set<String> StringSet;
 
 //-----------------------------------------------------------------------------
 

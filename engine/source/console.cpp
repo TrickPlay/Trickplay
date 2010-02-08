@@ -1,6 +1,4 @@
 
-#include <string>
-
 #include "console.h"
 #include "util.h"
 #include "context.h"
@@ -99,8 +97,6 @@ void Console::process_line(gchar * line)
     }
     else if (strlen(line))
     {
-        LSG;
-        
         int n=lua_gettop(L);
         
         // This is plain lua
@@ -133,8 +129,6 @@ void Console::process_line(gchar * line)
                 }
             }
         }
-        
-        LSG_END(0);
     }
 }
 

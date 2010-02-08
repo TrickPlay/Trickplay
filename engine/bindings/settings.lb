@@ -1,7 +1,4 @@
 [[
-
-#include "glib.h"
-
 extern "C"
 {
     #include "tcutil.h"

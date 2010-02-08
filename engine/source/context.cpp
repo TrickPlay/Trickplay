@@ -2,14 +2,12 @@
 #include <cstring>
 #include <cstdlib>
 #include <sstream>
-#include <memory>
 
-#include "curl/curl.h"
 #include "clutter/clutter.h"
+#include "curl/curl.h"
 
 #include "context.h"
 #include "network.h"
-#include "lb.h"
 #include "util.h"
 #include "console.h"
 #include "sysdb.h"
