@@ -44,26 +44,22 @@ player =	{
 -- Handle the jumper by his bottom-left corner (to align bottom with top of platforms more easily)
 player.jumper:move_anchor_point( 0, player.jumper.h )
 
-local platforms = Group {}
-for i = 1,10 do
-	local platform = Clone {
-								source = green_platform,
-	
-								position =
-								{
-									(screen.w - green_platform.size[1]) * math.random(),
-									(screen.h - green_platform.size[2]) * math.random()
-								},
-							}
-	platforms:add(platform)
-end
+dofile('placement.lua')
 
+local platforms = Group {}
+
+-- We need to place the first platform under the player's start location so he doesn't instantly die
 local start_platform = Clone { source = green_platform }
 start_platform.position = { screen.w/2, 5 * screen.h / 6 }
 platforms:add(start_platform)
 
 screen:add(platforms)
 
+
+-- Initially place 10 platforms randomly on screen
+for i = 1,10 do
+	place_new_platform(platforms, green_platform, Settings.JUMP_HEIGHT)
+end
 
 player.jumper.position =	{
 								start_platform.x + (start_platform.w - player.jumper.w)/2,
