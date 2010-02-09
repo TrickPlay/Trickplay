@@ -10,22 +10,25 @@ module mediaplayer_module;
 #include "context.h"
 
 //-----------------------------------------------------------------------------
-// Just a thin shell to hold a real MediaPlayer and act as its delegate
+// Just a thin shell to hold a real MediaPlayer and act as its delegate. It can
+// either use (and borrow) the default media player created by the context or
+// own (and dispose of) a new one.
 
 class MP : private MediaPlayer::Delegate
 {
     public:
         
-        MP(lua_State * l)
+        MP(lua_State * l,bool use_default=true)
         :
             L(l),
-            player(NULL)
+            player(NULL),
+            is_default(use_default)
         {
         }
         
         ~MP()
         {
-            if (player)
+            if (player && !is_default)
             {
                 delete player;
             }
@@ -35,7 +38,19 @@ class MP : private MediaPlayer::Delegate
         {
             if (!player)
             {
-                player=MediaPlayer::make(App::get(L)->get_context()->get_media_player_constructor(),this);
+                if (is_default)
+                {
+                    player=App::get(L)->get_context()->get_default_media_player();
+                    
+                    if (player)
+                    {
+                        player->set_delegate(this);
+                    }
+                }
+                else
+                {
+                    player=App::get(L)->get_context()->create_new_media_player(this);
+                }
             }
             
             return player;
@@ -53,7 +68,8 @@ class MP : private MediaPlayer::Delegate
     private:
         
         lua_State *     L;   
-        MediaPlayer *   player;        
+        MediaPlayer *   player;
+        bool            is_default;
 };
 
 ]]
@@ -597,7 +613,7 @@ global mediaplayer [[MP*]]
     
     udata new()
         [[
-            MP * mp=new MP(L);
+            MP * mp=new MP(L,false);
             
             if (!mp->get_player())
             {

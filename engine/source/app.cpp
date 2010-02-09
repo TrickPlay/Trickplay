@@ -418,10 +418,6 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     luaopen_controllers_module(L);
     luaopen_keys(L);
         
-    // TODO
-    // This creates a new media player here - which we may not want to do.
-    // We probably want to create one earlier and keep it across app loads.
-    
     luaopen_mediaplayer_module(L);
     
     // TODO

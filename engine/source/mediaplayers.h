@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-typedef std::string String;
-
 class MediaPlayer
 {
 public:

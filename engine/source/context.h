@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------
 #include "common.h"
 #include "notify.h"
+#include "mediaplayers.h"
 //-----------------------------------------------------------------------------
 // Internal configuration keys
 
@@ -61,10 +62,12 @@ public:
     void remove_output_handler(OutputHandler handler,gpointer data);
     
     //.........................................................................
-    // Media player constructor
+    // Media player
     
-    TPMediaPlayerConstructor get_media_player_constructor() const;
+    MediaPlayer * get_default_media_player();
     
+    MediaPlayer * create_new_media_player(MediaPlayer::Delegate * delegate);
+       
     //.........................................................................
     // Sends a request to the outside world
     
@@ -182,7 +185,8 @@ private:
     
     Controllers *               controllers;
     
-    TPMediaPlayerConstructor    mp_constructor;
+    TPMediaPlayerConstructor    media_player_constructor;
+    MediaPlayer *               media_player;
     
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;

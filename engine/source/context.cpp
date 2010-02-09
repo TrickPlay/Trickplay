@@ -7,12 +7,13 @@
 #include "curl/curl.h"
 
 #include "context.h"
+#include "app.h"
 #include "network.h"
 #include "util.h"
 #include "console.h"
 #include "sysdb.h"
 #include "controllers.h"
-#include "app.h"
+#include "mediaplayers.h"
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -23,7 +24,8 @@ TPContext::TPContext()
     is_running(false),
     sysdb(NULL),
     controllers(NULL),
-    mp_constructor(NULL),
+    media_player_constructor(NULL),
+    media_player(NULL),
     external_log_handler(NULL),
     external_log_handler_data(NULL)
 {
@@ -163,6 +165,7 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 
 int TPContext::run()
 {
+    //.........................................................................
     // So that run cannot be called while we are running
     
     if (is_running)
@@ -172,172 +175,219 @@ int TPContext::run()
     
     int result=TP_RUN_OK;
     
+    //.........................................................................
     // Load external configuration variables (from the environment or a file)
 
     load_external_configuration();
 
+    //.........................................................................
     // Validate our configuration
     // Any problem here will just abort - these are likely programming errors.
     
     validate_configuration();
     
+    //.........................................................................
     // Open the system database
     
     sysdb=SystemDatabase::open(get(TP_DATA_PATH));
     
     if (!sysdb)
     {
-	result=TP_RUN_SYSTEM_DATABASE_CORRUPT;
+	is_running=false;
+	return TP_RUN_SYSTEM_DATABASE_CORRUPT;
+    }
+
+    //.........................................................................
+    // Scan for apps
+    
+    {
+	bool force=get_bool(TP_SCAN_APP_SOURCES,TP_SCAN_APP_SOURCES_DEFAULT);
+	const char * app_sources=get(TP_APP_SOURCES);
+	gchar * installed_root=g_build_filename(get(TP_DATA_PATH),"apps",NULL);
+    
+	if (force||get(TP_APP_ID))
+	    App::scan_app_sources(sysdb,app_sources,installed_root,force);
+	
+	g_free(installed_root);
+    }
+    
+    //.........................................................................
+    // Get the current profile from the database and set it into our
+    // configuration
+    
+    SystemDatabase::Profile profile=sysdb->get_current_profile();
+    set(PROFILE_ID,profile.id);
+    set(PROFILE_NAME,profile.name);
+    
+    //.........................................................................
+    // Let the world know that the profile has changed
+    
+    notify(TP_NOTIFICATION_PROFILE_CHANGED);
+    
+    //.........................................................................
+    // Create the controllers listener
+    
+    if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
+    {
+	// Figure out the name for the controllers service. If one is passed
+	// in to the context, we use it. Otherwise, we look in the database.
+	// If the name is new, we store it in the database.
+	
+	String name;
+	String stored_name=sysdb->get_string(TP_CONTROLLERS_NAME);
+	
+	const char * new_name=get(TP_CONTROLLERS_NAME);
+	
+	if (new_name)
+	{
+	    name=new_name;
+	}	    
+	else
+	{
+	    if (!stored_name.empty())
+	    {
+		name=stored_name;
+	    }
+	    else
+	    {
+		name=TP_CONTROLLERS_NAME_DEFAULT;
+	    }
+	}
+	
+	if (name!=stored_name)
+	{
+	    sysdb->set(TP_CONTROLLERS_NAME,name);
+	}
+	
+	controllers=new Controllers(name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
+    }
+    
+    //.........................................................................
+    // Set default size and color for the stage
+    
+    ClutterActor * stage=clutter_stage_get_default();
+    
+    clutter_actor_set_width(stage,get_int(TP_SCREEN_WIDTH));
+    clutter_actor_set_height(stage,get_int(TP_SCREEN_HEIGHT));
+    
+    ClutterColor color;
+    color.red=0;
+    color.green=0;
+    color.blue=0;
+    color.alpha=0;
+    
+    clutter_stage_set_color(CLUTTER_STAGE(stage),&color);
+    
+    //.........................................................................
+    // Create the default media player. This may come back NULL.
+    
+    media_player=MediaPlayer::make(media_player_constructor);
+    
+    //.........................................................................
+    // Load the app
+    
+    notify(TP_NOTIFICATION_APP_LOADING);
+    
+    App * app=NULL;
+    
+    result=load_app(&app);
+
+    if (!app)
+    {
+	notify(TP_NOTIFICATION_APP_LOAD_FAILED);	
     }
     else
     {
-	// Scan for apps
-	
+	//.....................................................................
+	// Start the console
+    
+	Console * console=NULL;
+    
+#ifndef TP_PRODUCTION
+    
+	if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
 	{
-	    bool force=get_bool(TP_SCAN_APP_SOURCES,TP_SCAN_APP_SOURCES_DEFAULT);
-	    const char * app_sources=get(TP_APP_SOURCES);
-	    gchar * installed_root=g_build_filename(get(TP_DATA_PATH),"apps",NULL);
-	
-	    if (force||get(TP_APP_ID))
-	        App::scan_app_sources(sysdb,app_sources,installed_root,force);
-	    
-	    g_free(installed_root);
+	    console=new Console(app->get_lua_state(),get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
+	    console->add_command_handler(console_command_handler,this);
 	}
-	
-	// Get the current profile from the database and set it into our
-	// configuration
-	
-	SystemDatabase::Profile profile=sysdb->get_current_profile();
-	set(PROFILE_ID,profile.id);
-	set(PROFILE_NAME,profile.name);
-	
-	// Let the world know that the profile has changed
-	
-	notify(TP_NOTIFICATION_PROFILE_CHANGED);
-	
-	// Create the controllers listener
-	
-	if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
-	{
-	    // Figure out the name for the controllers service. If one is passed
-	    // in to the context, we use it. Otherwise, we look in the database.
-	    // If the name is new, we store it in the database.
-	    
-	    String name;
-	    String stored_name=sysdb->get_string(TP_CONTROLLERS_NAME);
-	    
-	    const char * new_name=get(TP_CONTROLLERS_NAME);
-	    
-	    if (new_name)
-	    {
-		name=new_name;
-	    }	    
-	    else
-	    {
-		if (!stored_name.empty())
-		{
-		    name=stored_name;
-		}
-		else
-		{
-		    name=TP_CONTROLLERS_NAME_DEFAULT;
-		}
-	    }
-	    
-	    if (name!=stored_name)
-	    {
-		sysdb->set(TP_CONTROLLERS_NAME,name);
-	    }
-	    
-	    controllers=new Controllers(name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
-	}
-	
-	// Set default size and color for the stage
-	
-	ClutterActor * stage=clutter_stage_get_default();
-	
-	clutter_actor_set_width(stage,get_int(TP_SCREEN_WIDTH));
-	clutter_actor_set_height(stage,get_int(TP_SCREEN_HEIGHT));
-	
-	ClutterColor color;
-	color.red=0;
-	color.green=0;
-	color.blue=0;
-	color.alpha=0;
-	
-	clutter_stage_set_color(CLUTTER_STAGE(stage),&color);
-    	
-	// Load the app
-	
-	notify(TP_NOTIFICATION_APP_LOADING);
-	
-	App * app=NULL;
-	
-	result=load_app(&app);
 
-	if (!app)
+#endif
+
+	//.....................................................................
+	// Execute the app's script
+	
+	result=app->run();
+	
+	if (result!=TP_RUN_OK)
 	{
-	    notify(TP_NOTIFICATION_APP_LOAD_FAILED);	
+	    notify(TP_NOTIFICATION_APP_LOAD_FAILED);
 	}
 	else
 	{
-	    // Start the console
-	
-	    Console * console=NULL;
-	
-#ifndef TP_PRODUCTION
-	
-	    if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
-	    {
-		console=new Console(app->get_lua_state(),get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
-		console->add_command_handler(console_command_handler,this);
-	    }
-
-#endif
-	    result=app->run();
+	    notify(TP_NOTIFICATION_APP_LOADED);
+		    
+	    //.................................................................
+	    // Dip into the loop
 	    
-	    if (result!=TP_RUN_OK)
-	    {
-		notify(TP_NOTIFICATION_APP_LOAD_FAILED);
-	    }
-	    else
-	    {
-		notify(TP_NOTIFICATION_APP_LOADED);
+	    clutter_main();
+	
+	    notify(TP_NOTIFICATION_APP_CLOSING);
 			
-		clutter_main();
-	    
-		notify(TP_NOTIFICATION_APP_CLOSING);
-			    
-		notify(TP_NOTIFICATION_APP_CLOSED);        		
-	    }
-	    
-	    clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
-	    
-	    Network::shutdown();
-	    
-	    if (console)
-	    {
-		delete console;
-	    }
-	
-	    delete app;
-	    app=NULL;
+	    notify(TP_NOTIFICATION_APP_CLOSED);        		
 	}
 	
-	// Get rid of the controllers
+	//.....................................................................
+	// Clean up the stage
 	
-	if (controllers)
+	clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
+	
+	//.....................................................................
+	// Kill the network thread
+	
+	Network::shutdown();
+	
+	//.....................................................................
+	// Delete the console
+	
+	if (console)
 	{
-	    delete controllers;
-	    controllers=NULL;
+	    delete console;
 	}
+
+	//.....................................................................
+	// Kill the media player
 	
-	// Get rid of the system database
+	if (media_player)
+	{
+	    delete media_player;
+	    media_player=NULL;
+	}
+    
+	//.....................................................................
+	// Shutdown the app
 	
-	delete sysdb;
-	sysdb=NULL;
+	delete app;
+	app=NULL;
     }
+    
+    //.........................................................................
+    // Get rid of the controllers
+    
+    if (controllers)
+    {
+	delete controllers;
+	controllers=NULL;
+    }
+    
+    //.........................................................................
+    // Get rid of the system database
+    
+    delete sysdb;
+    sysdb=NULL;
         
+    //.........................................................................
+    // Not running any more
+    
     is_running = false;
     
     return result;
@@ -786,9 +836,14 @@ bool TPContext::profile_switch(int id)
 
 //-----------------------------------------------------------------------------
 
-TPMediaPlayerConstructor TPContext::get_media_player_constructor() const
+MediaPlayer * TPContext::get_default_media_player()
 {
-    return mp_constructor;
+    return media_player;
+}
+
+MediaPlayer * TPContext::create_new_media_player(MediaPlayer::Delegate * delegate)
+{
+    return MediaPlayer::make(media_player_constructor,delegate);
 }
 
 //-----------------------------------------------------------------------------
@@ -909,6 +964,6 @@ void tp_context_quit(TPContext * context)
 
 void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor)
 {
-    context->mp_constructor=constructor;
+    context->media_player_constructor=constructor;
 }
 
