@@ -24,6 +24,19 @@ class MP : private MediaPlayer::Delegate
             player(NULL),
             is_default(use_default)
         {
+            if (is_default)
+            {
+                player=App::get(L)->get_context()->get_default_media_player();
+                
+                if (player)
+                {
+                    player->set_delegate(this);
+                }
+            }
+            else
+            {
+                player=App::get(L)->get_context()->create_new_media_player(this);                
+            }
         }
         
         ~MP()
@@ -36,23 +49,6 @@ class MP : private MediaPlayer::Delegate
         
         MediaPlayer * get_player()
         {
-            if (!player)
-            {
-                if (is_default)
-                {
-                    player=App::get(L)->get_context()->get_default_media_player();
-                    
-                    if (player)
-                    {
-                        player->set_delegate(this);
-                    }
-                }
-                else
-                {
-                    player=App::get(L)->get_context()->create_new_media_player(this);
-                }
-            }
-            
             return player;
         }
 
