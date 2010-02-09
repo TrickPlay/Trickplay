@@ -1,11 +1,10 @@
 #ifndef _TRICKPLAY_CONSOLE_H
 #define _TRICKPLAY_CONSOLE_H
 
-#include "gio/gio.h"
-
 #include "common.h"
+#include "server.h"
 
-class Console
+class Console : private Server::Delegate
 {
 public:
     
@@ -28,6 +27,13 @@ private:
     
     Console() {}
     Console(const Console &) {}
+
+    // Server delegate methods
+    
+    virtual void connection_accepted(gpointer connection,const char * remote_address);
+    virtual void connection_data_received(gpointer connection,const char * data);
+    
+    static void output_handler(const gchar * line,gpointer data);
     
     typedef std::pair<CommandHandler,void*>     CommandHandlerClosure;
     typedef std::list<CommandHandlerClosure>    CommandHandlerList;
@@ -36,18 +42,7 @@ private:
     GIOChannel *        channel;
     GString *           stdin_buffer;
     CommandHandlerList  handlers;
-
-#if GLIB_CHECK_VERSION(2,22,0)
-
-    static void accept_callback(GObject * source,GAsyncResult * result,gpointer data);
-    static void data_read_callback(GObject * source,GAsyncResult * result,gpointer data);
-    
-    static void output_handler(const gchar * line,gpointer data);
-    static void connection_destroyed(gpointer data,GObject*connection);
-    
-    GSocketListener *   listener;
-    
-#endif    
+    Server *            server;
 };
 
 

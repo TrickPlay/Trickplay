@@ -253,18 +253,17 @@ int TPContext::run()
 	{
 	    // Start the console
 	
-#ifndef TP_PRODUCTION
+	    Console * console=NULL;
 	
-	    std::auto_ptr<Console> console;
+#ifndef TP_PRODUCTION
 	
 	    if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
 	    {
-		console.reset(new Console(app->get_lua_state(),get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT)));
+		console=new Console(app->get_lua_state(),get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
 		console->add_command_handler(console_command_handler,this);
 	    }
 
 #endif
-	
 	    result=app->run();
 	    
 	    if (result!=TP_RUN_OK)
@@ -285,6 +284,11 @@ int TPContext::run()
 	    clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
 	    
 	    Network::shutdown();
+	    
+	    if (console)
+	    {
+		delete console;
+	    }
 	
 	    delete app;
 	    app=NULL;
