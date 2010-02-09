@@ -29,3 +29,11 @@ function controllers.on_controller_connected(controllers,controller)
     	end
     end
 end
+
+local key_enter = 65293
+
+function screen.on_key_down(screen,keyval)
+	if keyval == key_enter then
+		player.reset()
+	end
+end

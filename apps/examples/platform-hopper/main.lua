@@ -12,6 +12,8 @@ local Settings = {
 
 					JUMP_TIME				=	300,
 					JUMP_HEIGHT				=	screen.h/5,
+					
+					NUM_PLATFORMS			=	25,
 				}
 
 local bground = Image {
@@ -57,7 +59,7 @@ screen:add(platforms)
 
 
 -- Initially place 10 platforms randomly on screen
-for i = 1,10 do
+for i = 1,Settings.NUM_PLATFORMS do
 	place_new_platform(platforms, green_platform, Settings.JUMP_HEIGHT)
 end
 
@@ -68,42 +70,135 @@ player.jumper.position =	{
 
 screen:add(player.jumper)
 
+--[[
+	Controller functions are defined separately -- the controller will affect the player's x-direction momentum
+	in a way TBD by the capabilities of the controller device
+]]--
+dofile('controller.lua')
 
-local spin = false
-
+--[[
+	Bouncing up launches us to go up to a maximum jump height off where we started
+	over a period of time, on a quadratic curve, just like real gravity!
+]]--
 local bounce_up_timeline = Timeline { duration = Settings.JUMP_TIME }
-local bounce_up_interval = Interval ( player.jumper.y, player.jumper.y - Settings.JUMP_HEIGHT )
 local bounce_up_alpha = Alpha { timeline = bounce_up_timeline, mode = "EASE_OUT_QUAD" }
-
+local bounce_up_interval = Interval ( 0, 0 )
+local spin = false
+--[[
+	We need to move according to gravity in the y-direction, but also respond to the player's momentum to move in the x-direction.
+	This horizontal momentum will be controlled by the controller
+]]--
 function bounce_up_timeline.on_new_frame( t , msecs )
-    player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
+	-- The quadratic alpha simulates gravity quite nicely
+	player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
 
-    player.jumper.x = player.jumper.x + t.delta * player.horizontal_momentum/1000
-    if(player.jumper.x > screen.w) then
-    	player.jumper.x = 0
-    elseif player.jumper.x < 0 then
-    	player.jumper.x = screen.w
-    end
+	-- x movement is determined by momentum over time
+	player.jumper.x = player.jumper.x + t.delta * player.horizontal_momentum/1000
+	-- If you hit the edge of the screen, wrap around to the far side.
+	if(player.jumper.x > screen.w) then
+		player.jumper.x = (5-player.jumper.w)
+	elseif player.jumper.x < (5-player.jumper.w) then
+		player.jumper.x = screen.w
+	end
 
-    if spin then
-    	player.jumper.z_rotation = { -bounce_up_alpha.alpha * 360, player.jumper.w/2, -player.jumper.w/2 }
-    end
+	if spin then
+		player.jumper.z_rotation = { -bounce_up_alpha.alpha * 360, player.jumper.w/2, -player.jumper.w/2 }
+	end
 end
 
+--[[
+	Once we complete out bounce up, we're going to start falling.
+]]--
 function bounce_up_timeline.on_completed( )
-	bounce_up_timeline:reverse()
-	if bounce_up_timeline.direction == "FORWARD" then
-		if math.random() < 0.2 then
-			spin = true
-		else
-			spin = false
-		end
+	fall_down()
+end
+
+function bounce_up()
+	-- About 1/5 of the time, jumper will do a little piroutte on the way up
+	if math.random() < 0.2 then
+		spin = true
 	else
 		spin = false
 	end
+
+	-- Set up the starting and ending y-position for the player on this upward bounce, re-using the existing Interval object
+	bounce_up_interval.from, bounce_up_interval.to = player.jumper.y, player.jumper.y - Settings.JUMP_HEIGHT
+
+	bounce_up_timeline:rewind()
 	bounce_up_timeline:start()
 end
 
-bounce_up_timeline:start()
+--[[
+  Falling is aimed at the bottom of the screen, over a time period that depends on the height of the
+  player at the start.  If we hit a platform on the way down, then we stop the fall.  If we hit the
+  bottom of the screen, it's death.
+]]--
+local fall_timeline = Timeline { }
+local fall_alpha = Alpha { timeline = fall_timeline, mode = "EASE_IN_QUAD" }
+local fall_interval = Interval ( 0, 0 )
+--[[
+	We need to move according to gravity in the y-direction, but also respond to the player's momentum to move in the x-direction.
+	This horizontal momentum will be controlled by the controller
+]]--
+function fall_timeline.on_new_frame( t , msecs )
+	-- The quadratic alpha simulates gravity quite nicely
+	player.jumper.y = math.floor(fall_interval:get_value( fall_alpha.alpha ))
 
-dofile('controller.lua')
+	-- x movement is determined by momentum over time
+	player.jumper.x = player.jumper.x + t.delta * player.horizontal_momentum/1000
+	-- If you hit the edge of the screen, wrap around to the far side.
+	if(player.jumper.x > screen.w) then
+		player.jumper.x = (5-player.jumper.w)
+	elseif player.jumper.x < (5-player.jumper.w) then
+		player.jumper.x = screen.w
+	end
+
+	-- Check for each platform on the board if we're landing on it
+	local hit = false
+	platforms:foreach_child(
+								function (child)
+									-- If we're not in the right y-ballpark then no hit
+									if math.abs(child.y - player.jumper.y) > 10 then return end
+									-- If the left side of the player is to the right of the right of the platform, then no hit
+									if player.jumper.x > ( child.x + child.w ) then return end
+									-- If the right side of the player is to the left of the left of the platform, then no hit
+									if (player.jumper.x + player.jumper.w) < child.x then return end
+									-- Otherwise we have a hit!
+									hit = true
+								end
+							)
+
+	if hit then
+		-- We hit a platform, so stop falling, and start bouncing
+		t:stop()
+		bounce_up()
+	end
+	
+	-- If we didn't hit a platform, just keep falling on the timeline
+end
+
+--[[
+	Once we complete out falling, we then bounce up.
+]]--
+function fall_timeline.on_completed( )
+	print("AIYEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!")
+end
+
+
+function fall_down()
+	fall_timeline.duration = Settings.JUMP_TIME
+	fall_interval.from, fall_interval.to = player.jumper.y, screen.h
+
+	fall_timeline:rewind()
+	fall_timeline:start()
+end
+
+
+function player.reset()
+	player.jumper.position =	{
+									start_platform.x + (start_platform.w - player.jumper.w)/2,
+									start_platform.y
+								}
+	bounce_up()
+end
+

@@ -25,15 +25,15 @@ function place_new_platform( container, platform_prototype, jump_height )
 	while fail_count < 10 do
 		candidate_position =
 								{
-									x = (screen.w - platform_prototype.size[1]) * math.random(),
-									y = ((screen.h - min_height) - platform_prototype.size[2]) * math.random() + min_height
+									x = math.floor((screen.w - platform_prototype.size[1]) * math.random()),
+									y = math.floor(((screen.h - min_height) - platform_prototype.size[2]) * math.random()) + min_height
 								}
 
 		too_close = false
-		-- We're too close if we're within a platform width by 5 high of any existing platform
+		-- We're too close if we're within a platform width by 2 high of any existing platform
 		container:foreach_child(	function (child)
 										if (child.x - candidate_position.x)^2 + (child.y - candidate_position.y)^2 <
-											(child.w^2 + (5*child.h)^2) then
+											(child.w^2 + (2*child.h)^2) then
 											too_close=true
 										end
 									end
