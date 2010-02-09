@@ -17,7 +17,7 @@ bool Controllers::ControllerInfo::has_accelerometer() const
 
 //-----------------------------------------------------------------------------
 
-Controllers::Controllers(int port)
+Controllers::Controllers(const String & name,int port)
 :
     mdns(NULL),
     delegate(NULL),
@@ -39,7 +39,7 @@ Controllers::Controllers(int port)
         
         g_info("CONTROLLERS LISTENER READY ON PORT %d",server->get_port());
         
-        mdns.reset(new MDNS(server->get_port()));
+        mdns.reset(new MDNS(name,server->get_port()));
     }
 }
 

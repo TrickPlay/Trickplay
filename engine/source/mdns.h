@@ -11,7 +11,7 @@ class MDNS
 {
 public:
     
-    MDNS(int port);
+    MDNS(const String & name,int port);
     ~MDNS();
     
     bool is_ready() const;

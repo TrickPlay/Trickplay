@@ -219,7 +219,37 @@ int TPContext::run()
 	
 	if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
 	{
-	    controllers=new Controllers(get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
+	    // Figure out the name for the controllers service. If one is passed
+	    // in to the context, we use it. Otherwise, we look in the database.
+	    // If the name is new, we store it in the database.
+	    
+	    String name;
+	    String stored_name=sysdb->get_string(TP_CONTROLLERS_NAME);
+	    
+	    const char * new_name=get(TP_CONTROLLERS_NAME);
+	    
+	    if (new_name)
+	    {
+		name=new_name;
+	    }	    
+	    else
+	    {
+		if (!stored_name.empty())
+		{
+		    name=stored_name;
+		}
+		else
+		{
+		    name=TP_CONTROLLERS_NAME_DEFAULT;
+		}
+	    }
+	    
+	    if (name!=stored_name)
+	    {
+		sysdb->set(TP_CONTROLLERS_NAME,name);
+	    }
+	    
+	    controllers=new Controllers(name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
 	}
 	
 	// Set default size and color for the stage

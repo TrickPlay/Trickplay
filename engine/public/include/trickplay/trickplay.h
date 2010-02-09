@@ -146,6 +146,11 @@ typedef struct TPContext TPContext;
     TP_CONTROLLERS_PORT -   Controllers port. Set to non-zero to run the controllers
                             listener on a fixed port.
                             Defaults to "0".
+                            
+    TP_CONTROLLERS_NAME -   Service name for controllers. This is a string that is
+                            shown to the user when controllers discover the mDNS
+                            service.
+                            Defaults to "TrickPlay".
 */
 
 #define TP_APP_SOURCES          "app.sources"
@@ -165,6 +170,7 @@ typedef struct TPContext TPContext;
 #define TP_TELNET_CONSOLE_PORT  "console.port"
 #define TP_CONTROLLERS_ENABLED  "controllers.enabled"
 #define TP_CONTROLLERS_PORT     "controllers.port"
+#define TP_CONTROLLERS_NAME     "controllers.name"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

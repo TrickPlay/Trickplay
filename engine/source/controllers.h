@@ -13,7 +13,7 @@ public:
     //..........................................................................
     // Pass 0 for the port to have one automatically chosen
     
-    Controllers(int port);
+    Controllers(const String & name,int port);
     ~Controllers();
     
     //..........................................................................
