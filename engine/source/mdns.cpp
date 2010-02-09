@@ -7,12 +7,12 @@
 #include "mdns.h"
 #include "util.h"
 
-MDNS::MDNS(int p)
+MDNS::MDNS(const String & n,int p)
 :
     poll(NULL),
     server(NULL),
     group(NULL),
-    name("TrickPlay"),
+    name(n),
     ready(false),
     port(p)
 {

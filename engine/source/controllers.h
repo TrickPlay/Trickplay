@@ -1,20 +1,19 @@
 #ifndef _TRICKPLAY_CONTROLLERS_H
 #define _TRICKPLAY_CONTROLLERS_H
 
-#include "glib.h"
-#include "gio/gio.h"
 
-#include "mdns.h"
 #include "common.h"
+#include "mdns.h"
+#include "server.h"
 
-class Controllers
+class Controllers : private Server::Delegate
 {
 public:
     
     //..........................................................................
     // Pass 0 for the port to have one automatically chosen
     
-    Controllers(int port);
+    Controllers(const String & name,int port);
     ~Controllers();
     
     //..........................................................................
@@ -94,12 +93,21 @@ private:
     
     bool write_line(gpointer source,const gchar * line);
         
-#if GLIB_CHECK_VERSION(2,22,0)
-
+    //..........................................................................    
+    // The socket server
+    
+    std::auto_ptr<Server> server;
+    
+    // Server delegate methods
+    
+    virtual void connection_accepted(gpointer connection,const char * remote_address);
+    virtual void connection_data_received(gpointer connection,const char * data);
+    virtual void connection_closed(gpointer connection);
+            
     //..........................................................................
     // Find a connection in our map
     
-    ConnectionInfo * find_connection(GSocketConnection * connection);
+    ConnectionInfo * find_connection(gpointer connection);
 
     //..........................................................................
     // When a controller doesn't identify itself quickly by sending us a valid
@@ -108,47 +116,25 @@ private:
     
     struct TimerClosure
     {
-        TimerClosure(GSocketConnection * c,Controllers * s) : connection(c) , self(s) {}
+        TimerClosure(gpointer c,Controllers * s) : connection(c) , self(s) {}
         
-        GSocketConnection * connection;
-        Controllers *       self;
+        gpointer        connection;
+        Controllers *   self;
     };
     
     static gboolean timed_disconnect_callback(gpointer data);
     
     //..........................................................................
-    // gio callbacks for the clients/controllers
-    
-    static void accept_callback(GObject * source,GAsyncResult * result,gpointer data);
-    static void data_read_callback(GObject * source,GAsyncResult * result,gpointer data);
-    
-    //..........................................................................
-    // We ref to the connection so we know when it goes away
-    
-    static void connection_destroyed(gpointer data,GObject*connection);
-    
-    //..........................................................................
-    // Our internal routines for dealing with the controllers
-    
-    void connection_accepted(GSocketConnection * connection);
-    void connection_closed(GObject * connection);
-    void connection_data_received(GSocketConnection * connection,gchar * buffer);
-    void process_command(GSocketConnection * connection,ControllerInfo & info,gchar ** parts);
+    // Process a command sent in by a controller
+
+    void process_command(gpointer connection,ControllerInfo & info,gchar ** parts);
     
     //..........................................................................
     // The map of connections
     
-    typedef std::map<GSocketConnection*,ConnectionInfo> ConnectionMap;
+    typedef std::map<gpointer,ConnectionInfo> ConnectionMap;
     
-    ConnectionMap       connections;
-    
-    //..........................................................................
-    // Our listener 
-    
-    GSocketListener *   listener;
-    
-#endif    
-
+    ConnectionMap       connections;    
 };
 
 

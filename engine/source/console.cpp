@@ -24,6 +24,7 @@ Console::Console(lua_State*l,int port)
             delete server;
             server=NULL;
             g_warning("FAILED TO START TELNET CONSOLE ON PORT %d : %s",port,error->message);
+            g_clear_error(&error);
         }
         else
         {

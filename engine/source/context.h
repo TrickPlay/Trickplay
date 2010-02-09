@@ -25,6 +25,7 @@
 #define TP_CONTROLLERS_PORT_DEFAULT     0
 #define TP_SCREEN_WIDTH_DEFAULT         960
 #define TP_SCREEN_HEIGHT_DEFAULT        540
+#define TP_CONTROLLERS_NAME_DEFAULT     "TrickPlay"
 //-----------------------------------------------------------------------------
 // Forward declarations
 
