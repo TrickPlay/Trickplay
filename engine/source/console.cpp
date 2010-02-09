@@ -2,11 +2,11 @@
 #include "console.h"
 #include "util.h"
 #include "context.h"
-#include "app.h"
 
-Console::Console(lua_State*l,int port)
+Console::Console(TPContext * ctx,int port)
 :
-    L(l),
+    context(ctx),
+    L(NULL),
     channel(g_io_channel_unix_new(fileno(stdin))),
     stdin_buffer(g_string_new(NULL)),
     server(NULL)
@@ -17,22 +17,22 @@ Console::Console(lua_State*l,int port)
     {
         GError * error=NULL;
         
-        server=new Server(port,this,'\n',&error);
+        Server * new_server=new Server(port,this,'\n',&error);
         
         if (error)
         {
-            delete server;
-            server=NULL;
+            delete new_server;
             g_warning("FAILED TO START TELNET CONSOLE ON PORT %d : %s",port,error->message);
             g_clear_error(&error);
         }
         else
         {
+            server.reset(new_server);
             g_info("TELNET CONSOLE LISTENING ON PORT %d",server->get_port());            
         }
     }
 
-    App::get(L)->get_context()->add_output_handler(output_handler,this);
+    context->add_output_handler(output_handler,this);
 }
 
 Console::~Console()
@@ -40,13 +40,8 @@ Console::~Console()
     g_io_channel_shutdown(channel,FALSE,NULL);
     g_io_channel_unref(channel);
     g_string_free(stdin_buffer,TRUE);
-
-    if (server)
-    {
-        delete server;
-    }
     
-    App::get(L)->get_context()->remove_output_handler(output_handler,this);        
+    context->remove_output_handler(output_handler,this);        
 }
 
 void Console::add_command_handler(CommandHandler handler,void * data)
@@ -54,6 +49,10 @@ void Console::add_command_handler(CommandHandler handler,void * data)
     handlers.push_back(CommandHandlerClosure(handler,data));
 }
 
+void Console::attach_to_lua(lua_State * l)
+{
+    L=l;
+}
 
 gboolean Console::read_data()
 {
@@ -97,11 +96,12 @@ void Console::process_line(gchar * line)
         
         g_strfreev(parts);
     }
-    else if (strlen(line))
+    else if (strlen(line) && L)
     {
+        // This is plain lua
+
         int n=lua_gettop(L);
         
-        // This is plain lua
         if (luaL_loadstring(L,line)!=0)
         {
             g_warning("%s",lua_tostring(L,-1));
@@ -156,7 +156,7 @@ void Console::output_handler(const gchar * line,gpointer data)
 {
     Console * console=(Console*)data;
     
-    if (console->server)
+    if (console->server.get())
     {
         console->server->write_to_all(line);
     }

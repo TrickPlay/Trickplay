@@ -263,6 +263,21 @@ int TPContext::run()
     }
     
     //.........................................................................
+    // Start the console
+
+    Console * console=NULL;
+
+#ifndef TP_PRODUCTION
+
+    if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
+    {
+	console=new Console(this,get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
+	console->add_command_handler(console_command_handler,this);
+    }
+
+#endif
+
+    //.........................................................................
     // Set default size and color for the stage
     
     ClutterActor * stage=clutter_stage_get_default();
@@ -299,21 +314,6 @@ int TPContext::run()
     else
     {
 	//.....................................................................
-	// Start the console
-    
-	Console * console=NULL;
-    
-#ifndef TP_PRODUCTION
-    
-	if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
-	{
-	    console=new Console(app->get_lua_state(),get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
-	    console->add_command_handler(console_command_handler,this);
-	}
-
-#endif
-
-	//.....................................................................
 	// Execute the app's script
 	
 	result=app->run();
@@ -325,6 +325,14 @@ int TPContext::run()
 	else
 	{
 	    notify(TP_NOTIFICATION_APP_LOADED);
+
+	    //.................................................................
+	    // Attach the console to the app
+	    
+	    if (console)
+	    {
+		console->attach_to_lua(app->get_lua_state());
+	    }
 		    
 	    //.................................................................
 	    // Dip into the loop
@@ -347,20 +355,20 @@ int TPContext::run()
 	Network::shutdown();
 	
 	//.....................................................................
-	// Delete the console
-	
-	if (console)
-	{
-	    delete console;
-	}
-
-	//.....................................................................
 	// Kill the media player
 	
 	if (media_player)
 	{
 	    delete media_player;
 	    media_player=NULL;
+	}
+
+	//.....................................................................
+	// Detach the console
+	
+	if (console)
+	{
+	    console->attach_to_lua(NULL);
 	}
     
 	//.....................................................................
@@ -370,6 +378,14 @@ int TPContext::run()
 	app=NULL;
     }
     
+    //........................................................................
+    // Delete the console
+    
+    if (console)
+    {
+	delete console;
+    }
+
     //.........................................................................
     // Get rid of the controllers
     

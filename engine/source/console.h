@@ -8,12 +8,14 @@ class Console : private Server::Delegate
 {
 public:
     
-    Console(lua_State*,int port);
+    Console(TPContext * context,int port);
     ~Console();
     
     typedef int (*CommandHandler)(const char * command,const char * parameters,void * data);
 
     void add_command_handler(CommandHandler handler,void * data);
+    
+    void attach_to_lua(lua_State * l);
     
 protected:
     
@@ -37,12 +39,13 @@ private:
     
     typedef std::pair<CommandHandler,void*>     CommandHandlerClosure;
     typedef std::list<CommandHandlerClosure>    CommandHandlerList;
-    
-    lua_State *         L;
-    GIOChannel *        channel;
-    GString *           stdin_buffer;
-    CommandHandlerList  handlers;
-    Server *            server;
+
+    TPContext *             context;    
+    lua_State *             L;
+    GIOChannel *            channel;
+    GString *               stdin_buffer;
+    CommandHandlerList      handlers;
+    std::auto_ptr<Server>   server;
 };
 
 
