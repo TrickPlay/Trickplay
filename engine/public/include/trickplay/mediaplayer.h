@@ -9,9 +9,7 @@ extern "C" {
 
 /*
     File: Media Player
-*/
 
-/*
     Section: State Transitions
     
     Topic: All states
@@ -223,7 +221,7 @@ typedef int (*TPMediaPlayerConstructor)(TPMediaPlayer * mp);
     constructor -   The function to call to initialize new media players.
 */
 
-void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
+TP_API_EXPORT void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
 
 /*
     Function: tp_media_player_get_state
@@ -241,7 +239,7 @@ void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerCo
 
 */
 
-int tp_media_player_get_state(TPMediaPlayer * mp);
+TP_API_EXPORT int tp_media_player_get_state(TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_loaded
@@ -257,7 +255,7 @@ int tp_media_player_get_state(TPMediaPlayer * mp);
     - LOADING
 */
 
-void tp_media_player_loaded(TPMediaPlayer * mp);
+TP_API_EXPORT void tp_media_player_loaded(TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_error
@@ -273,7 +271,7 @@ void tp_media_player_loaded(TPMediaPlayer * mp);
     - PLAYING
 */
 
-void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
+TP_API_EXPORT void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
 
 /*
     Callback: tp_media_player_end_of_stream
@@ -290,7 +288,7 @@ void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
     - PLAYING
 */
 
-void tp_media_player_end_of_stream(TPMediaPlayer * mp);
+TP_API_EXPORT void tp_media_player_end_of_stream(TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_tag_found
@@ -307,7 +305,7 @@ void tp_media_player_end_of_stream(TPMediaPlayer * mp);
     - LOADING
 */
 
-void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value);
+TP_API_EXPORT void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value);
 
 //-----------------------------------------------------------------------------
 /*

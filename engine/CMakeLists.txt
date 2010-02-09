@@ -189,7 +189,13 @@ add_library(
     ${ENGINE_SRC}/lb/src/lb.c
 )
 
-set_target_properties( tpcore PROPERTIES LINK_INTERFACE_LIBRARIES tpcore )
+set_target_properties(
+    
+    tpcore
+    
+    PROPERTIES
+    LINK_INTERFACE_LIBRARIES tpcore
+    COMPILE_FLAGS -fvisibility=hidden)
 
 target_link_libraries( tpcore ${ENGINE_LIBRARIES} )
 
