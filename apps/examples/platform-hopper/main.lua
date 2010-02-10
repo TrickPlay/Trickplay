@@ -12,7 +12,7 @@ local Settings = {
 
 					JUMP_TIME				=	400,
 					JUMP_HEIGHT				=	screen.h/5,
-					
+
 					NUM_PLATFORMS			=	25,
 				}
 
@@ -180,8 +180,19 @@ end
 --[[
 	Once we complete out falling, we then bounce up.
 ]]--
-function fall_timeline.on_completed( )
+function fall_timeline.on_completed( t )
+	t:stop()
 	print("AIYEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!")
+	local fade_timeline = Timeline { duration = 100 }
+	local fade_alpha = Alpha { timeline = fade_timeline, mode = "EASE_OUT_BACK" }
+	local explode_interval = Interval ( 1, 3 )
+
+	function fade_timeline.on_new_frame( t, msecs )
+		player.jumper.scale = { explode_interval:get_value(fade_alpha.alpha), explode_interval:get_value(fade_alpha.alpha) }
+		player.jumper.opacity = 255 * (1 - t.progress)
+	end
+	
+	fade_timeline:start()
 end
 
 
@@ -195,10 +206,13 @@ end
 
 
 function player.reset()
+	-- Set the scale center to the bottom center point
+	player.jumper.scale = { 1, 1, player.jumper.w/2, player.jumper.h-10 }
 	player.jumper.position =	{
 									start_platform.x + (start_platform.w - player.jumper.w)/2,
 									start_platform.y
 								}
+	player.jumper.opacity = 255
 	bounce_up()
 end
 
