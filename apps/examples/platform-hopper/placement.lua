@@ -32,9 +32,12 @@ function place_new_platform( container, platform_prototype, jump_height )
 		too_close = false
 		-- We're too close if we're within a platform width by 2 high of any existing platform
 		container:foreach_child(	function (child)
-										if (child.x - candidate_position.x)^2 + (child.y - candidate_position.y)^2 <
-											(child.w^2 + (2*child.h)^2) then
-											too_close=true
+										-- If candidate is within 2 heights of existing
+										if math.abs(candidate_position.y - child.y) < 2 * child.h then
+											-- Check that it's not close horizontally then
+											if (candidate_position.x < child.x+1.5*child.w) and (candidate_position.x > child.x-2.5*child.w) then
+												too_close = true
+											end
 										end
 									end
 								)
