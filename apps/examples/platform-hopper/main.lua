@@ -206,8 +206,8 @@ end
 
 
 function player.reset()
-	-- Set the scale center to the bottom center point
-	player.jumper.scale = { 1, 1, player.jumper.w/2, player.jumper.h-10 }
+	-- Set the scale center to the bottom center point (relative to anchor point)
+	player.jumper.scale = { 1, 1, player.jumper.w/2, 0 }
 	player.jumper.position =	{
 									start_platform.x + (start_platform.w - player.jumper.w)/2,
 									start_platform.y
