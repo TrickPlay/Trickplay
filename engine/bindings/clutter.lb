@@ -70,6 +70,28 @@ void to_clutter_color(lua_State*L,int index,ClutterColor*color)
     LSG_END(0);
 }
 
+gulong to_clutter_animation_mode(const char * mode)
+{
+    if (!mode)
+	return CLUTTER_LINEAR;
+    
+    gulong result=CLUTTER_LINEAR;
+    
+    GEnumClass * ec=G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+    gchar * cm=g_strdup_printf("CLUTTER_%s",mode);    
+    GEnumValue * v=g_enum_get_value_by_name(ec,cm);
+    g_free(cm);
+    
+    if(v)
+    {
+	result=v->value;
+    }
+    
+    g_type_class_unref(ec);
+    
+    return result;
+}
+
 ClutterActor * user_data_to_actor(lua_State*L,int n)
 {
     void * udata=lua_touserdata(L,n);
@@ -395,6 +417,28 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     }
 
     return result;
+}
+
+static void actor_animation_completed(ClutterAnimation * animation,lua_State * L)
+{
+    // Get the ref to the callback, which we stored in the animation
+    
+    int function_ref=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(animation),"tp-completed"));
+    
+    if (function_ref)
+    {
+	// Get the function from the registry
+	lua_rawgeti(L,LUA_REGISTRYINDEX,function_ref);
+	
+	// Wrap the actor
+	wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
+
+	// Call the function	
+	lua_call(L,1,0);
+	
+	// Unref it
+	luaL_unref(L,LUA_REGISTRYINDEX,function_ref);
+    }
 }
 
 ]]
@@ -841,6 +885,246 @@ interface actor [[ClutterActor*]]
 	    else
 		luaL_error(L,"Invalid request mode '%s'",request_mode);
 	    g_object_set(G_OBJECT(self),"request-mode",mode,NULL);
+	]];
+
+    animate(table props)
+	[[
+	    lua_getfield(L,props,"duration");
+	    guint duration=lua_tonumber(L,-1);
+	    lua_pop(L,1);
+	    
+	    lua_getfield(L,props,"mode");
+	    gulong mode=to_clutter_animation_mode(lua_tostring(L,-1));
+	    lua_pop(L,1);
+	    
+	    GPtrArray * names=g_ptr_array_new_with_free_func(g_free);
+	    GValueArray * values=g_value_array_new(6);
+	    
+	    lua_pushnil(L);
+	    
+	    while(lua_next(L,props))
+	    {
+		GValue value={0};
+		
+		if (lua_isstring(L,-2)&&!lua_isnil(L,-2))
+		{
+		    const char * k=lua_tostring(L,-2);
+		
+		    if (!strcmp("x",k)||!strcmp("y",k))
+		    {
+			g_value_init(&value,G_TYPE_FLOAT);
+			g_value_set_float(&value,lua_tonumber(L,-1));
+			g_ptr_array_add(names,g_strdup(k));
+			g_value_array_append(values,&value);
+		    }
+		    else if (!strcmp("w",k)||!strcmp("width",k))
+		    {
+			g_value_init(&value,G_TYPE_FLOAT);
+			g_value_set_float(&value,lua_tonumber(L,-1));
+			g_ptr_array_add(names,g_strdup("width"));
+			g_value_array_append(values,&value);
+		    }
+		    else if (!strcmp("h",k)||!strcmp("height",k))
+		    {
+			g_value_init(&value,G_TYPE_FLOAT);
+			g_value_set_float(&value,lua_tonumber(L,-1));
+			g_ptr_array_add(names,g_strdup("height"));
+			g_value_array_append(values,&value);
+		    }
+		    else if (!strcmp("z",k)||!strcmp("depth",k))
+		    {
+			g_value_init(&value,G_TYPE_FLOAT);
+			g_value_set_float(&value,lua_tonumber(L,-1));			
+			g_ptr_array_add(names,g_strdup("depth"));
+			g_value_array_append(values,&value);			
+		    }
+		    else if (!strcmp("opacity",k))
+		    {
+			g_value_init(&value,G_TYPE_UCHAR);
+			g_value_set_uchar(&value,lua_tointeger(L,-1));
+			g_ptr_array_add(names,g_strdup(k));
+			g_value_array_append(values,&value);
+		    }
+		    else if (!strcmp("position",k))
+		    {
+			if (lua_type(L,-1)==LUA_TTABLE)
+			{
+			    g_ptr_array_add(names,g_strdup("x"));
+			    g_ptr_array_add(names,g_strdup("y"));
+			    
+			    lua_rawgeti(L,-1,1);
+			    g_value_init(&value,G_TYPE_FLOAT);
+			    g_value_set_float(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);			    
+			    lua_pop(L,1);
+			    
+			    lua_rawgeti(L,-1,2);
+			    g_value_unset(&value);
+			    g_value_init(&value,G_TYPE_FLOAT);
+			    g_value_set_float(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);
+			    lua_pop(L,1);
+			}
+		    }
+		    else if (!strcmp("size",k))
+		    {
+			if (lua_type(L,-1)==LUA_TTABLE)
+			{
+			    g_ptr_array_add(names,g_strdup("width"));
+			    g_ptr_array_add(names,g_strdup("height"));
+			    
+			    lua_rawgeti(L,-1,1);
+			    g_value_init(&value,G_TYPE_FLOAT);
+			    g_value_set_float(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);			    
+			    lua_pop(L,1);
+			    
+			    lua_rawgeti(L,-1,2);
+			    g_value_unset(&value);
+			    g_value_init(&value,G_TYPE_FLOAT);
+			    g_value_set_float(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);
+			    lua_pop(L,1);
+			}			
+		    }
+		    else if (!strcmp("scale",k))
+		    {
+			if (lua_type(L,-1)==LUA_TTABLE)
+			{
+			    g_ptr_array_add(names,g_strdup("scale-x"));
+			    g_ptr_array_add(names,g_strdup("scale-y"));
+			    
+			    lua_rawgeti(L,-1,1);
+			    g_value_init(&value,G_TYPE_DOUBLE);
+			    g_value_set_double(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);			    
+			    lua_pop(L,1);
+			    
+			    lua_rawgeti(L,-1,2);
+			    g_value_unset(&value);
+			    g_value_init(&value,G_TYPE_DOUBLE);
+			    g_value_set_double(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);
+			    lua_pop(L,1);
+			}			
+		    }
+		    else if (!strcmp("x_rotation",k))
+		    {
+			if (lua_type(L,-1)==LUA_TTABLE)
+			{
+			    
+			}
+			else
+			{
+			    g_ptr_array_add(names,g_strdup("rotation-angle-x"));
+			    g_value_init(&value,G_TYPE_DOUBLE);
+			    g_value_set_double(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);
+			}
+		    }
+		    else if (!strcmp("y_rotation",k))
+		    {
+			if (lua_type(L,-1)==LUA_TTABLE)
+			{
+			    
+			}
+			else
+			{
+			    g_ptr_array_add(names,g_strdup("rotation-angle-y"));
+			    g_value_init(&value,G_TYPE_DOUBLE);
+			    g_value_set_double(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);
+			}
+		    }
+		    else if (!strcmp("z_rotation",k))
+		    {
+			if (lua_type(L,-1)==LUA_TTABLE)
+			{
+			    
+			}
+			else
+			{
+			    g_ptr_array_add(names,g_strdup("rotation-angle-z"));
+			    g_value_init(&value,G_TYPE_DOUBLE);
+			    g_value_set_double(&value,lua_tonumber(L,-1));
+			    g_value_array_append(values,&value);
+			}
+		    }
+		}
+		
+		lua_pop(L,1);
+	    }
+	    
+	    ClutterAnimation * a=clutter_actor_animatev(self,mode,duration,
+							values->n_values,
+							(gchar**)names->pdata,
+							values->values);
+	    
+	    lua_getfield(L,props,"loop");
+	    if (!lua_isnil(L,-1))
+	    {
+		clutter_animation_set_loop(a,lua_toboolean(L,-1));
+	    }
+	    lua_pop(L,1);
+	    
+	    // If you call animate several times, clutter reuses the same
+	    // ClutterAnimation object. So, if we are not set to loop,
+	    // and the user passed an "on_completed" function, we may have
+	    // to unref the old function and disconnect the old handler.
+	    
+	    if (!clutter_animation_get_loop(a))
+	    {
+		lua_getfield(L,props,"on_completed");
+		
+		if (lua_type(L,-1)==LUA_TFUNCTION)
+		{
+		    int function_ref=luaL_ref(L,LUA_REGISTRYINDEX);
+		    
+		    // Remove the old one, if any
+		    
+		    int old_function_ref=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(a),"tp-completed"));
+		    
+		    if (old_function_ref)
+		    {
+			luaL_unref(L,LUA_REGISTRYINDEX,old_function_ref);
+		    }
+		    
+		    g_signal_handlers_disconnect_by_func(a,gpointer(actor_animation_completed),L);
+		    
+		    // Attach the new one
+		    
+		    g_object_set_data(G_OBJECT(a),"tp-completed",GINT_TO_POINTER(function_ref));
+		    
+		    g_signal_connect_after(a,"completed",G_CALLBACK(actor_animation_completed),L);
+		}
+		else
+		{
+		    lua_pop(L,1);
+		}
+	    }
+	    
+	    g_value_array_free(values);
+	    g_ptr_array_free(names,TRUE);
+	]];
+	
+    bool complete_animation()
+	[[
+	    ClutterAnimation * animation=clutter_actor_get_animation(self);
+	    g_debug("ANIMATION=%p",animation);
+	    if (animation)
+	    {
+		clutter_animation_completed(animation);
+		result=true;
+	    }
+	    else
+	    {
+		result=false;
+	    }
+	]];
+	
+    readonly bool is_animating
+	[[
+	    is_animating=clutter_actor_get_animation(self)!=NULL;    
 	]];
 
     callback on_key_focus_in
