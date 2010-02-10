@@ -30,7 +30,7 @@ class MP : private MediaPlayer::Delegate
                 
                 if (player)
                 {
-                    player->set_delegate(this);
+                    player->add_delegate(this);
                 }
             }
             else
@@ -41,9 +41,12 @@ class MP : private MediaPlayer::Delegate
         
         ~MP()
         {
-            if (player && !is_default)
+            if (player)
             {
-                delete player;
+                player->remove_delegate(this);
+                
+                if (!is_default)
+                    delete player;
             }
         }
         

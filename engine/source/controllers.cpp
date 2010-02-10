@@ -20,7 +20,6 @@ bool Controllers::ControllerInfo::has_accelerometer() const
 Controllers::Controllers(const String & name,int port)
 :
     mdns(NULL),
-    delegate(NULL),
     server(NULL)
 {
     GError * error=NULL;
@@ -62,9 +61,22 @@ bool Controllers::is_ready() const
 
 //-----------------------------------------------------------------------------
 
-void Controllers::set_delegate(Controllers::Delegate * d)
+void Controllers::add_delegate(Controllers::Delegate * delegate)
 {
-    delegate=d;
+    if (!delegate)
+        return;
+    
+    delegates.insert(delegate);
+}
+
+//-----------------------------------------------------------------------------
+
+void Controllers::remove_delegate(Controllers::Delegate * delegate)
+{
+    if (!delegate)
+        return;
+    
+    delegates.erase(delegate);
 }
 
 //-----------------------------------------------------------------------------
@@ -206,9 +218,9 @@ void Controllers::connection_closed(gpointer connection)
     
     g_debug("CONTROLLER CONNECTION CLOSED %p",connection);
     
-    if (delegate)
+    for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
-        delegate->disconnected(connection);    
+        (*it)->disconnected(connection);    
     }
 }
 
@@ -268,9 +280,9 @@ void Controllers::process_command(gpointer connection,ControllerInfo & info,gcha
                     info.caps.insert(cap);
             }
             
-            if (delegate)
+            for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
             {
-                delegate->connected(connection,info);
+                (*it)->connected(connection,info);
             }
             
             break;   
@@ -320,9 +332,9 @@ void Controllers::process_command(gpointer connection,ControllerInfo & info,gcha
             double y=atof(parts[2]);
             double z=atof(parts[3]);
             
-            if (delegate)
+            for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
             {
-                delegate->accelerometer(connection,x,y,z);
+                (*it)->accelerometer(connection,x,y,z);
             }
             
             break;
@@ -337,8 +349,10 @@ void Controllers::process_command(gpointer connection,ControllerInfo & info,gcha
             if (count<2)
                 return;
             
-            if (delegate)
-                delegate->ui_event(connection,parts[1]);
+            for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+            {
+                (*it)->ui_event(connection,parts[1]);
+            }
             break;
         }        
     }

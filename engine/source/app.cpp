@@ -400,7 +400,15 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     lua_pushstring(L,"tp_app");
     lua_pushlightuserdata(L,this);
     lua_rawset(L,LUA_REGISTRYINDEX);
+}
 
+
+//-----------------------------------------------------------------------------
+
+int App::run()
+{
+    int result=TP_RUN_OK;
+    
     // Open standard libs
     luaL_openlibs(L);
     
@@ -430,15 +438,7 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     // This one should only be opened for the launcher and the store apps
     
     luaopen_apps(L);    
-}
-
-
-//-----------------------------------------------------------------------------
-
-int App::run()
-{
-    int result=TP_RUN_OK;
-    
+        
     // Run the script
     gchar * main_path=g_build_filename(metadata.path.c_str(),"main.lua",NULL);
     Util::GFreeLater free_main_path(main_path);
@@ -462,7 +462,10 @@ App::~App()
 
     release_cookie_jar();
     
-    lua_close(L);
+    if (L)
+    {
+	lua_close(L);
+    }
 }
 
 //-----------------------------------------------------------------------------

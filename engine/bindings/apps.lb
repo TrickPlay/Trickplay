@@ -90,4 +90,14 @@ global apps [[TPContext*]]
                 result_len=length;
             }
         ]];
+        
+    #..........................................................................
+    # Launch an app...if it succeeds, it will never return, because this Lua
+    # state will be killed
+    
+    int launch(string app_id)
+        [[
+            result=self->launch_app(app_id);    
+        ]];
+    
 }

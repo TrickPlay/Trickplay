@@ -55,9 +55,10 @@ public:
     StringPairList get_tags();
 
     //.........................................................................
-    // Changing the delegate
+    // Add and remove delegates
     
-    void set_delegate(Delegate * delegate);
+    void add_delegate(Delegate * delegate);
+    void remove_delegate(Delegate * delegate);
     
 private:
     
@@ -157,11 +158,13 @@ private:
     
     //.........................................................................
     
+    typedef std::set<Delegate*> DelegateSet;
+    
     Wrapper *       wrapper;
     int             state;
     GStaticRecMutex mutex;
     GAsyncQueue *   queue;
-    Delegate *      delegate;
+    DelegateSet     delegates;
     StringPairList  tags;
 };
 

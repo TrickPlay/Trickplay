@@ -24,6 +24,8 @@ TPContext::TPContext()
     is_running(false),
     sysdb(NULL),
     controllers(NULL),
+    console(NULL),
+    current_app(NULL),
     media_player_constructor(NULL),
     media_player(NULL),
     external_log_handler(NULL),
@@ -265,8 +267,6 @@ int TPContext::run()
     //.........................................................................
     // Start the console
 
-    Console * console=NULL;
-
 #ifndef TP_PRODUCTION
 
     if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
@@ -303,11 +303,9 @@ int TPContext::run()
     
     notify(TP_NOTIFICATION_APP_LOADING);
     
-    App * app=NULL;
-    
-    result=load_app(&app);
+    result=load_app(&current_app);
 
-    if (!app)
+    if (!current_app)
     {
 	notify(TP_NOTIFICATION_APP_LOAD_FAILED);	
     }
@@ -316,7 +314,7 @@ int TPContext::run()
 	//.....................................................................
 	// Execute the app's script
 	
-	result=app->run();
+	result=current_app->run();
 	
 	if (result!=TP_RUN_OK)
 	{
@@ -331,7 +329,7 @@ int TPContext::run()
 	    
 	    if (console)
 	    {
-		console->attach_to_lua(app->get_lua_state());
+		console->attach_to_lua(current_app->get_lua_state());
 	    }
 		    
 	    //.................................................................
@@ -355,6 +353,28 @@ int TPContext::run()
 	Network::shutdown();
 	
 	//.....................................................................
+	// Detach the console
+	
+	if (console)
+	{
+	    console->attach_to_lua(NULL);
+	}
+
+	//.....................................................................
+	// Reset the media player, just in case
+	
+	if (media_player)
+	{
+	    media_player->reset();
+	}
+    
+	//.....................................................................
+	// Shutdown the app
+		
+	delete current_app;
+	current_app=NULL;
+
+	//.....................................................................
 	// Kill the media player
 	
 	if (media_player)
@@ -362,20 +382,6 @@ int TPContext::run()
 	    delete media_player;
 	    media_player=NULL;
 	}
-
-	//.....................................................................
-	// Detach the console
-	
-	if (console)
-	{
-	    console->attach_to_lua(NULL);
-	}
-    
-	//.....................................................................
-	// Shutdown the app
-	
-	delete app;
-	app=NULL;
     }
     
     //........................................................................
@@ -384,6 +390,7 @@ int TPContext::run()
     if (console)
     {
 	delete console;
+	console=NULL;
     }
 
     //.........................................................................
@@ -441,16 +448,82 @@ int TPContext::load_app(App ** app)
     App::Metadata md;
     
     if (!App::load_metadata(app_path.c_str(),md))
+    {
 	return TP_RUN_APP_CORRUPT;
+    }
     
     // Load the app
     
     *app=App::load(this,md);
     
     if (!*app)
+    {
 	return TP_RUN_APP_PREPARE_FAILED;
+    }
     
     return TP_RUN_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int TPContext::launch_app(const char * app_id)
+{
+    String app_path=get_db()->get_app_path(app_id);
+    
+    if (app_path.empty())
+    {
+	return TP_RUN_APP_NOT_FOUND;
+    }
+    
+    App::Metadata md;
+    
+    if (!App::load_metadata(app_path.c_str(),md))
+    {
+	return TP_RUN_APP_CORRUPT;
+    }
+    
+    App * new_app=App::load(this,md);
+    
+    if (!new_app)
+    {
+	return TP_RUN_APP_PREPARE_FAILED;	
+    }
+    
+    int result=new_app->run();
+    
+    if (result!=TP_RUN_OK)
+    {
+	delete new_app;
+	return result;
+    }
+    
+    g_idle_add_full(G_PRIORITY_HIGH,launch_app_callback,new_app,NULL);
+    
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+gboolean TPContext::launch_app_callback(gpointer app)
+{
+    App * new_app=(App*)app;
+    TPContext * context=new_app->get_context();
+    
+    if (context->console)
+    {
+	context->console->attach_to_lua(new_app->get_lua_state());
+    }
+
+    Network::shutdown();
+    
+    // TODO
+    // We should also reset the controllers
+    
+    delete context->current_app;
+    
+    context->current_app=new_app;
+    
+    return FALSE;
 }
 
 //-----------------------------------------------------------------------------

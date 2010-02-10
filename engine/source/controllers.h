@@ -49,7 +49,8 @@ public:
         virtual void ui_event(gpointer source,const gchar * event)=0;
     };
    
-    void set_delegate(Delegate * delegate);
+    void add_delegate(Delegate * delegate);
+    void remove_delegate(Delegate * delegate);
     
     //..........................................................................
     // Things we can tell a controller to do
@@ -84,9 +85,11 @@ private:
     std::auto_ptr<MDNS> mdns;
 
     //..........................................................................
-    // The delegate
+    // The delegates
     
-    Delegate * delegate;
+    typedef std::set<Delegate*> DelegateSet;
+    
+    DelegateSet delegates;
     
     //..........................................................................
     // Writes a line of output to the given controller

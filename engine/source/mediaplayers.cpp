@@ -69,13 +69,14 @@ MediaPlayer::MediaPlayer(Wrapper * w,Delegate * d)
 :
     wrapper(w),
     state(TP_MEDIAPLAYER_IDLE),
-    queue(g_async_queue_new_full((GDestroyNotify)Event::destroy)),
-    delegate(d)
+    queue(g_async_queue_new_full((GDestroyNotify)Event::destroy))
 {
     g_assert(wrapper);
     wrapper->player=this;
     
     g_static_rec_mutex_init(&mutex);
+    
+    add_delegate(d);
 }
 
 //-----------------------------------------------------------------------------
@@ -813,8 +814,8 @@ void MediaPlayer::process_events()
                 {
                     state=TP_MEDIAPLAYER_PAUSED;
 
-                    if (delegate)
-                        delegate->loaded(this);
+                    for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+                        (*it)->loaded(this);
                 }
                 break;
             
@@ -825,15 +826,15 @@ void MediaPlayer::process_events()
                     // Take it back to IDLE
                     reset();
                     
-                    if (delegate)
-                        delegate->error(this,event->code,event->message);
+                    for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+                        (*it)->error(this,event->code,event->message);
                 }
                 else if (state==TP_MEDIAPLAYER_PLAYING)
                 {
                     state=TP_MEDIAPLAYER_PAUSED;
                     
-                    if (delegate)
-                        delegate->error(this,event->code,event->message);
+                    for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+                        (*it)->error(this,event->code,event->message);
                 }
                 break;
             
@@ -843,8 +844,8 @@ void MediaPlayer::process_events()
                 {                    
                     state=TP_MEDIAPLAYER_PAUSED;
                     
-                    if (delegate)
-                        delegate->end_of_stream(this);
+                    for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+                        (*it)->end_of_stream(this);
                 }
                 break;
             
@@ -872,12 +873,25 @@ void MediaPlayer::clear_events()
 
 //-----------------------------------------------------------------------------
 
-void MediaPlayer::set_delegate(Delegate * new_delegate)
+void MediaPlayer::add_delegate(Delegate * delegate)
 {
+    if (!delegate)
+        return;
+    
     MPLOCK;
-    delegate=new_delegate;
+    delegates.insert(delegate);
 }
 
+//-----------------------------------------------------------------------------
+
+void MediaPlayer::remove_delegate(Delegate * delegate)
+{
+    if (!delegate)
+        return;
+    
+    MPLOCK;
+    delegates.erase(delegate);
+}
 //=============================================================================
 // External callbacks
 //=============================================================================

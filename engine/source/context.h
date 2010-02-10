@@ -33,6 +33,7 @@
 class SystemDatabase;
 class Controllers;
 class App;
+class Console;
 
 //-----------------------------------------------------------------------------
 
@@ -91,6 +92,11 @@ public:
     // Switches profiles and handles all the associated notifications
     
     bool profile_switch(int id);
+
+    //.........................................................................
+    // Launches one app from another, and kills the first.
+    
+    int launch_app(const char * app_id);
     
 private:
     
@@ -135,6 +141,11 @@ private:
     
     int run();    
     void quit();
+    
+    //.........................................................................
+    // This launches a new app in an idle source
+    
+    static gboolean launch_app_callback(gpointer new_app);    
     
     //.........................................................................
     // Log handler. This is what prints the messages in the outside world.
@@ -184,6 +195,10 @@ private:
     SystemDatabase *            sysdb;
     
     Controllers *               controllers;
+    
+    Console *                   console;
+    
+    App *                       current_app;
     
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
