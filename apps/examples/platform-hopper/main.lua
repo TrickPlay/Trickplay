@@ -73,7 +73,21 @@ local spin = false
 ]]--
 function bounce_up_timeline.on_new_frame( t , msecs )
 	-- The quadratic alpha simulates gravity quite nicely
-	player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
+
+	if player.jumper.y < screen.h/2 then
+		-- If the player is at or above the half-way point on the screen on the way up, scroll all the platforms, and not the player!
+		platforms:foreach_child(
+									function (child)
+										child.y = child.y - player.jumper_delta + (player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha ))
+									end
+								)
+		-- This delta tracks how far the player should have moved, so we can deal with that offset on the next frame
+		player.jumper_delta = player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha )
+	else
+		-- Otherwise, just move him up
+		player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
+	end
+	
 
 	-- x movement is determined by momentum over time
 	player.jumper.x = player.jumper.x + t.delta * player.horizontal_momentum/1000
@@ -106,6 +120,7 @@ function bounce_up()
 
 	-- Set up the starting and ending y-position for the player on this upward bounce, re-using the existing Interval object
 	bounce_up_interval.from, bounce_up_interval.to = player.jumper.y, player.jumper.y - Settings.JUMP_HEIGHT
+	player.jumper_delta = 0
 
 	bounce_up_timeline:rewind()
 	bounce_up_timeline:start()
