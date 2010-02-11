@@ -83,6 +83,8 @@ function bounce_up_timeline.on_new_frame( t , msecs )
 								)
 		-- This delta tracks how far the player should have moved, so we can deal with that offset on the next frame
 		player.jumper_delta = player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha )
+		
+		platform_cleanup()
 	else
 		-- Otherwise, just move him up
 		player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
@@ -140,10 +142,14 @@ local fall_interval = Interval ( 0, 0 )
 ]]--
 function fall_timeline.on_new_frame( t , msecs )
 	-- The quadratic alpha simulates gravity quite nicely
-	player.jumper.y = math.floor(fall_interval:get_value( fall_alpha.alpha ))
+	local old_player_y = player.jumper.y
+	player.jumper.y = fall_interval:get_value( fall_alpha.alpha )
 
 	-- x movement is determined by momentum over time
-	player.jumper.x = player.jumper.x + t.delta * player.horizontal_momentum/1000
+	local old_player_x = player.jumper.x
+	local theoretical_new_x = player.jumper.x + t.delta * player.horizontal_momentum/1000
+	player.jumper.x = theoretical_new_x
+
 	-- If you hit the edge of the screen, wrap around to the far side.
 	if(player.jumper.x > screen.w) then
 		player.jumper.x = (5-player.jumper.w)
@@ -151,7 +157,7 @@ function fall_timeline.on_new_frame( t , msecs )
 		player.jumper.x = screen.w
 	end
 
-	-- Check for each platform on the board if we're landing on it
+	-- Check for each platform on the board if the line segment we just travelled intersects any platform
 	local hit = false
 	platforms:foreach_child(
 								function (child)
@@ -202,6 +208,17 @@ function fall_down()
 	fall_timeline:start()
 end
 
+
+function platform_cleanup()
+	platforms:foreach_child(
+								function(child)
+									if child.y > screen.h + 10 then
+										child:unparent()
+										place_new_platform(platforms, green_platform, Settings.JUMP_HEIGHT)
+									end
+								end
+							)
+end
 
 function player.reset()
 	platforms:clear()
