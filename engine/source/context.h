@@ -97,6 +97,12 @@ public:
     // Launches one app from another, and kills the first.
     
     int launch_app(const char * app_id);
+
+    //.........................................................................
+    // Kills the current app and either goes back to the previous one, or
+    // quits altogether.
+    
+    void close_app();
     
 private:
     
@@ -199,6 +205,8 @@ private:
     Console *                   console;
     
     App *                       current_app;
+    
+    bool                        is_first_app;
     
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;

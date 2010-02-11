@@ -10,6 +10,7 @@ module clutter;
 #include "network.h"
 #include "util.h"
 #include "app.h"
+#include "context.h"
 ]]
 
 [[
@@ -1309,7 +1310,7 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
     
     if (k->keyval==CLUTTER_Escape)
     {
-	tp_context_quit(App::get(L)->get_context());
+	App::get(L)->get_context()->close_app();
 	return TRUE;
     }
     return FALSE;    

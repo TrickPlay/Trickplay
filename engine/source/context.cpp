@@ -26,6 +26,7 @@ TPContext::TPContext()
     controllers(NULL),
     console(NULL),
     current_app(NULL),
+    is_first_app(true),
     media_player_constructor(NULL),
     media_player(NULL),
     external_log_handler(NULL),
@@ -499,6 +500,11 @@ int TPContext::launch_app(const char * app_id)
     
     g_idle_add_full(G_PRIORITY_HIGH,launch_app_callback,new_app,NULL);
     
+    // TODO
+    // Not right to set this before the idle source fires
+    
+    is_first_app=false;
+    
     return 0;
 }
 
@@ -507,6 +513,7 @@ int TPContext::launch_app(const char * app_id)
 gboolean TPContext::launch_app_callback(gpointer app)
 {
     App * new_app=(App*)app;
+    
     TPContext * context=new_app->get_context();
     
     if (context->console)
@@ -524,6 +531,35 @@ gboolean TPContext::launch_app_callback(gpointer app)
     context->current_app=new_app;
     
     return FALSE;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::close_app()
+{
+    if (is_first_app)
+    {
+	quit();
+    }
+    else
+    {
+	App * new_app;
+	
+	load_app(&new_app);
+	
+	if (new_app)
+	{
+	    if (new_app->run()==TP_RUN_OK)
+	    {
+		g_idle_add_full(G_PRIORITY_HIGH,launch_app_callback,new_app,NULL);
+		
+		// TODO
+		// Not right to set here
+		
+		is_first_app=true;
+	    }
+	}
+    }
 }
 
 //-----------------------------------------------------------------------------

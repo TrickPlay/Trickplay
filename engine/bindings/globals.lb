@@ -1,11 +1,10 @@
 module globals;
 
 [[
-#include "glib.h"
-#include <string>
-
-#include "app.h"
+#include "common.h"
 #include "util.h"
+#include "app.h"
+#include "context.h"
 ]]
 
 globals
@@ -81,7 +80,7 @@ globals
         
     exit()
         [[
-            tp_context_quit(App::get(L)->get_context());        
+            App::get(L)->get_context()->close_app();        
         ]];
         
     multi choose()
