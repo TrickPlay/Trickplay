@@ -48,6 +48,24 @@ player.jumper:move_anchor_point( 0, player.jumper.h )
 
 dofile('placement.lua')
 
+local score = Group { position = { 20, 20, 5 } }
+local score_bg = Rectangle { color = "6ABE2F40", position = { 0, 0, -1 } }
+local score_label = Text { font="Diavlo,DejaVu Sans,Sans 24px", text="Score", color="000000", position = { 5, 5 } }
+local score_text = Text { font="Diavlo,DejaVu Sans,Sans 24px", text=player.score, color="000000", position = { 5+score_label.size[1]+10, 5 } }
+score_bg.h = 5+score_label.size[2]
+
+score:add(score_bg)
+score:add(score_label)
+score:add(score_text)
+screen:add(score)
+
+function player.set_score( newscore )
+	player.score = newscore
+	score_text.text = newscore
+	score_bg.w = 5+score_label.size[1]+10+score_text.size[1]+5
+end
+
+
 local platforms = Group {}
 screen:add(platforms)
 
@@ -75,6 +93,9 @@ function bounce_up_timeline.on_new_frame( t , msecs )
 	-- The quadratic alpha simulates gravity quite nicely
 
 	if player.jumper.y < screen.h/2 then
+		-- We moved up!  Score!
+		player.set_score(player.score + math.floor((bounce_up_interval:get_value( bounce_up_alpha.alpha ) - player.jumper_delta)*10)/10)
+
 		-- If the player is at or above the half-way point on the screen on the way up, scroll all the platforms, and not the player!
 		platforms:foreach_child(
 									function (child)
@@ -222,6 +243,7 @@ end
 
 function player.reset()
 	platforms:clear()
+	player.set_score(0)
 
 	-- We need to place the first platform under the player's start location so he doesn't instantly die
 	local start_platform = Clone { source = green_platform }
