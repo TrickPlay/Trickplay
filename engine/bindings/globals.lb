@@ -83,6 +83,19 @@ globals
         [[
             tp_context_quit(App::get(L)->get_context());        
         ]];
+        
+    multi choose()
+        [[
+            if (lua_gettop(L)<3)
+            {
+                lua_pushnil(L);
+            }
+            else
+            {
+                lua_pushvalue(L,lua_toboolean(L,1)?2:3);
+            }
+            return 1;
+        ]];
 
     string serialize()
         [[
