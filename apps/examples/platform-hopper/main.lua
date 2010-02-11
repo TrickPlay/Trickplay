@@ -10,8 +10,8 @@ local Settings = {
 					JUMPER_IMAGE			= "jumper.png",
 					GREEN_PLATFORM_IMAGE	= "platforms/green.png",
 
-					JUMP_TIME				=	400,
-					JUMP_HEIGHT				=	screen.h/5,
+					JUMP_TIME				=	500,
+					JUMP_HEIGHT				=	screen.h/4,
 
 					NUM_PLATFORMS			=	25,
 				}
