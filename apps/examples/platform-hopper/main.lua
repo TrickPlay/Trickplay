@@ -218,18 +218,15 @@ end
 ]]--
 function fall_timeline.on_completed( t )
 	t:stop()
-	print("AIYEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!")
-	local fade_timeline = Timeline { duration = 100 }
-	local fade_alpha = Alpha { timeline = fade_timeline, mode = "EASE_OUT_BACK" }
-	local explode_interval = Interval ( 1, 3 )
+	print('AIYEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!')
 
-	function fade_timeline.on_new_frame( t, msecs )
-		player.jumper.scale = { explode_interval:get_value(fade_alpha.alpha), explode_interval:get_value(fade_alpha.alpha) }
-		player.jumper.opacity = 255 * (1 - t.progress)
-	end
-	
-	fade_timeline:start()
-
+	player.jumper:animate({
+							duration = 100,
+							mode = "EASE_OUT_BACK",
+							scale = { 3, 3 },
+							opacity = 0,
+							on_completed = function () screen:add(start_text) end,
+						})
 	score:animate({
 					duration = 500,
 					mode = 'EASE_OUT_SINE',
