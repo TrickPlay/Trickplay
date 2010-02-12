@@ -3,8 +3,6 @@ screen:show_all()
 
 math.randomseed(os.time())
 
-Timer{ interval = 2 , on_timer = function() collectgarbage() end }
-
 local Settings = {
 					BGROUND_IMAGE			= "grid.gif",
 					JUMPER_IMAGE			= "jumper.png",
