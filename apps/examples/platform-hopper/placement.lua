@@ -34,7 +34,7 @@ function place_new_platform( container, platform_prototype, jump_height )
 										-- If candidate is within 2 heights of existing
 										if math.abs(candidate_position.y - child.y) < 2 * child.h then
 											-- Check that it's not close horizontally then
-											if (candidate_position.x < child.x+1.5*child.w) and (candidate_position.x > child.x-2.5*child.w) then
+											if (candidate_position.x < child.x+2.5*child.w) and (candidate_position.x > child.x-2.5*child.w) then
 												too_close = true
 											end
 										end
