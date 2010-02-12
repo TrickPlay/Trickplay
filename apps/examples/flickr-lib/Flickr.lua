@@ -30,15 +30,27 @@ Flickr = {
 	end,
 
 	get_thumb_url = function( photo )
-		return photo.url_t
+		if photo then
+			return photo.url_t
+		else
+			return nil
+		end
 	end,
 	
 	get_medium_url = function( photo )
-		return photo.url_m
+		if photo then
+			return photo.url_m
+		else
+			return nil
+		end
 	end,
 	
 	get_original_url = function( photo )
-		return photo.url_o
+		if photo then
+			return photo.url_o
+		else
+			return nil
+		end
 	end,
 
 	-- Fetch some photo metadata from Flickr API, using the passed base URL.

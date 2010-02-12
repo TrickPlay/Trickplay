@@ -359,6 +359,9 @@ function screen.on_key_down(screen,keyval)
 	
 				-- identify the photo based on column & row
 				local the_photo = photo_index[image_position_to_index(selection_col, selection_row)]
+				if the_photo == nil then
+					return
+				end
 	
 				local start_position = cursor.transformed_position
 	
@@ -388,6 +391,8 @@ function screen.on_key_down(screen,keyval)
 										src = zoom_image_url,
 				}
 				zoom_image_img.on_loaded = function()
+											-- The zoom might be cancelled before the image finished loading
+											if zoom_image == nil then return end
 											zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
 										end
 	
