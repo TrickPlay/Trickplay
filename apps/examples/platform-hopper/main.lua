@@ -9,6 +9,10 @@ local Settings = {
 					BGROUND_IMAGE			= "grid.gif",
 					JUMPER_IMAGE			= "jumper.png",
 					GREEN_PLATFORM_IMAGE	= "platforms/green.png",
+					
+					SCORE_GAME_BG			= "6ABE2F40",
+					SCORE_GAME_POS			= { 20, 20, 5 },
+					SCORE_DEAD_BG			= "BE2F2F80",
 
 					JUMP_TIME				=	500,
 					JUMP_HEIGHT				=	screen.h/4,
@@ -54,8 +58,8 @@ screen:add(start_text)
 
 dofile('placement.lua')
 
-local score = Group { position = { 20, 20, 5 } }
-local score_bg = Rectangle { color = "6ABE2F40", position = { 0, 0, -1 } }
+local score = Group { position = Settings.SCORE_GAME_POS }
+local score_bg = Rectangle { color = Settings.SCORE_GAME_BG, position = { 0, 0, -1 } }
 local score_label = Text { font="Diavlo,DejaVu Sans,Sans 24px", text="Score", color="000000", position = { 5, 5 } }
 local score_text = Text { font="Diavlo,DejaVu Sans,Sans 24px", text=player.score, color="000000", position = { 5+score_label.size[1]+10, 5 } }
 score_bg.h = 5+score_label.size[2]
@@ -224,6 +228,15 @@ function fall_timeline.on_completed( t )
 	end
 	
 	fade_timeline:start()
+
+	score:animate({
+					duration = 500,
+					mode = 'EASE_OUT_SINE',
+					x = (screen.w-score_bg.w)/2,
+					y = screen.h/2 - 80,
+ 					scale = { 1.5, 1.5 },
+				})
+	score_bg.color = Settings.SCORE_DEAD_BG
 end
 
 
@@ -260,6 +273,10 @@ function player.reset()
 	platforms:add(start_platform)
 
 	-- Set the scale center to the bottom center point (relative to anchor point)
+	score.scale = { 1, 1, score.w/2, score.h }
+	score.position = Settings.SCORE_GAME_POS
+	score_bg.color = Settings.SCORE_GAME_BG
+
 	player.jumper.scale = { 1, 1, player.jumper.w/2, 0 }
 	player.jumper.position =	{
 									start_platform.x + (start_platform.w - player.jumper.w)/2,
