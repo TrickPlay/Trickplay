@@ -93,7 +93,7 @@ dofile('controller.lua')
 ]]--
 local bounce_up_timeline = Timeline { duration = Settings.JUMP_TIME }
 local bounce_up_alpha = Alpha { timeline = bounce_up_timeline, mode = "EASE_OUT_QUAD" }
-local bounce_up_interval = Interval ( 0, 0 )
+local bounce_up_interval = Interval ( 0, 0 ) -- The actual interval will be set when we start bouncing up based on location at that time
 local spin = false
 --[[
 	We need to move according to gravity in the y-direction, but also respond to the player's momentum to move in the x-direction.
