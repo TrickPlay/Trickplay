@@ -263,7 +263,10 @@ function player.reset()
 	start_text:unparent()
 
 	platforms:clear()
+	platforms.opacity = 255
+
 	player.set_score(0)
+	player.horizontal_momentum = 0
 
 	-- We need to place the first platform under the player's start location so he doesn't instantly die
 	local start_platform = Clone { source = green_platform }
