@@ -214,7 +214,7 @@ function fall_timeline.on_new_frame( t , msecs )
 end
 
 --[[
-	Once we complete out falling, we then bounce up.
+	If the falling loop completes, it's because we're dead.
 ]]--
 function fall_timeline.on_completed( t )
 	t:stop()
