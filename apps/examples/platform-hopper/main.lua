@@ -113,8 +113,6 @@ function bounce_up_timeline.on_new_frame( t , msecs )
 								)
 		-- This delta tracks how far the player should have moved, so we can deal with that offset on the next frame
 		player.jumper_delta = player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha )
-		
-		platform_cleanup()
 	else
 		-- Otherwise, just move him up
 		player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
@@ -242,18 +240,26 @@ function fall_down()
 
 	fall_timeline:rewind()
 	fall_timeline:start()
+
+	platform_cleanup()
+
 end
 
 
 function platform_cleanup()
+	local platforms_to_clean = {}
 	platforms:foreach_child(
 								function(child)
 									if child.y > screen.h + 10 then
-										child:unparent()
+										table.insert(platforms_to_clean,child)
 										place_new_platform(platforms, green_platform, Settings.JUMP_HEIGHT)
 									end
 								end
 							)
+
+	for i,v in ipairs(platforms_to_clean) do
+		v:unparent()
+	end
 end
 
 function player.reset()
