@@ -46,6 +46,12 @@ player =	{
 -- Handle the jumper by his bottom-left corner (to align bottom with top of platforms more easily)
 player.jumper:move_anchor_point( 0, player.jumper.h )
 
+start_text = Text { font="Diavlo,DejaVu Sans,Sans 36px", text="Press ENTER to start", color="000000" }
+start_text.x = (screen.w-start_text.w)/2
+start_text.y = (screen.h-start_text.h)/2
+
+screen:add(start_text)
+
 dofile('placement.lua')
 
 local score = Group { position = { 20, 20, 5 } }
@@ -242,6 +248,9 @@ function platform_cleanup()
 end
 
 function player.reset()
+
+	start_text:unparent()
+
 	platforms:clear()
 	player.set_score(0)
 

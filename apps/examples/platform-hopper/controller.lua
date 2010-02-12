@@ -23,6 +23,8 @@ local function momentum_adjust(x)
 end
 
 function controllers.on_controller_connected(controllers,controller)
+	start_text.text = "Press ENTER or TAP to start"
+	start_text.x = (screen.w-start_text.size[1])/2
     if(controller.has_accelerometer) then
     	controller:start_accelerometer("H", SAMPLE_PERIOD)
 
@@ -32,6 +34,12 @@ function controllers.on_controller_connected(controllers,controller)
 			momentum_adjust(x)
     	end
     end
+
+	controller.on_disconnected = function ()
+		start_text.text = "Press ENTER to start"
+		start_text.x = (screen.w-start_text.size[1])/2
+	end
+
 end
 
 local key_enter = 65293
