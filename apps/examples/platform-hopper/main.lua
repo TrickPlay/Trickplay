@@ -104,7 +104,8 @@ function bounce_up_timeline.on_new_frame( t , msecs )
 
 	if player.jumper.y < screen.h/2 then
 		-- We moved up!  Score!
-		player.set_score(player.score + math.floor((bounce_up_interval:get_value( bounce_up_alpha.alpha ) - player.jumper_delta)*10)/10)
+		player.set_score(player.score +
+						math.floor(player.jumper_delta + (player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha ))*10)/10)
 
 		-- If the player is at or above the half-way point on the screen on the way up, scroll all the platforms, and not the player!
 		platforms:foreach_child(
