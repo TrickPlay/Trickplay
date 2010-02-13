@@ -493,6 +493,15 @@ function screen.on_key_down(screen,key)
             game.ask_next_question()
         end
     end
+    
+    if key == keys.space then
+    	mediaplayer.on_loaded = function () mediaplayer:play() end
+    	mediaplayer.on_end_of_stream = function ()
+    							mediaplayer:seek(0)
+    							mediaplayer:play()
+    						end
+    	mediaplayer:load('jeopardy.mp4')
+    end
 end
 
 game.no_players()
