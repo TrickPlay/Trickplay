@@ -3,4 +3,5 @@
 /build
 *.o
 *.a
-
+trickplay.cfg
+.DS_Store
