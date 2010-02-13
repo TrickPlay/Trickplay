@@ -1,11 +1,17 @@
 #ifndef _TRICKPLAY_NETWORK_H
 #define _TRICKPLAY_NETWORK_H
-
+//.............................................................................
 #include "common.h"
 //.............................................................................
+// Forward declarations
 
-namespace Network
-{   
+class EventGroup;
+//.............................................................................
+
+class Network
+{
+public:
+    
     //.........................................................................
     
     class CookieJar;
@@ -51,31 +57,33 @@ namespace Network
         bool            failed;
     };
 
+
+    //.........................................................................
+    
+    Network(EventGroup * event_group);
+    
+    ~Network();
+    
     //.........................................................................
     // Format a user agent
     
-    String get_user_agent(const char * language,
+    static String format_user_agent(const char * language,
                           const char * country,
                           const char * app_id,
                           int app_release,
                           const char * system_name,
                           const char * system_version);
-    
+
     //.........................................................................
     // Cookie jar functions
     
-    CookieJar * cookie_jar_new(const char * file_name);
+    static CookieJar * cookie_jar_new(const char * file_name);
     
-    CookieJar * cookie_jar_ref(CookieJar * cookie_jar);
+    static CookieJar * cookie_jar_ref(CookieJar * cookie_jar);
     
     // This one always returns NULL
     
-    CookieJar * cookie_jar_unref(CookieJar * cookie_jar);
-    
-    //.........................................................................
-    // Terminates the network thread and waits for it
-
-    void shutdown();
+    static CookieJar * cookie_jar_unref(CookieJar * cookie_jar);
     
     //.........................................................................
     // This performs the request asynchronously and invokes the callback exactly
@@ -83,25 +91,42 @@ namespace Network
     
     typedef void (*ResponseCallback)(const Response & response,gpointer user);
     
-    void perform_request_async(const Request & request,CookieJar * cookie_jar,ResponseCallback callback,gpointer user);
+    void perform_request_async(const Request & request,CookieJar * cookie_jar,ResponseCallback callback,gpointer user,GDestroyNotify notify);
     
     //.........................................................................
     // This performs the request asynchronously but invokes the callback every
     // time data is received and in the network thread. The data is not appended
     // to the response body, but passed directly to the callback. When the
-    // request is finished, the callback is invoked with finished set to true.
+    // request is finished, the callback is invoked one last time and in the MAIN
+    // thread with finished set to true.
+    //
     // If the callback returns false, the request is aborted early - but the
     // callback will still get called one last time with finished set to true.
     
     typedef bool (*IncrementalResponseCallback)(const Response & response,gpointer body,guint len,bool finished,gpointer user);
 
-    void perform_request_async_incremental(const Request & request,CookieJar * cookie_jar,IncrementalResponseCallback callback,gpointer user);
+    void perform_request_async_incremental(const Request & request,CookieJar * cookie_jar,IncrementalResponseCallback callback,gpointer user,GDestroyNotify notify);
     
     //.........................................................................
     // Performs the request in the calling thread and returns the complete
     // response
     
     Response perform_request(const Request & request,CookieJar * cookie_jar);
+    
+private:
+    
+    class RequestClosure;
+    class Event;
+    class Thread;
+    
+    //.........................................................................
+    // Starts the thread if it is not running
+    
+    void start();
+        
+    EventGroup *    event_group;
+    GAsyncQueue *   queue;
+    Thread *        thread;
 };
 
 #endif // _TRICKPLAY_NETWORK_H

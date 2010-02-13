@@ -323,6 +323,8 @@ int TPContext::run()
 	}
 	else
 	{
+	    current_app->animate_in();
+	    
 	    notify(TP_NOTIFICATION_APP_LOADED);
 
 	    //.................................................................
@@ -344,16 +346,6 @@ int TPContext::run()
 	}
 	
 	//.....................................................................
-	// Clean up the stage
-	
-	clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
-	
-	//.....................................................................
-	// Kill the network thread
-	
-	Network::shutdown();
-	
-	//.....................................................................
 	// Detach the console
 	
 	if (console)
@@ -369,6 +361,11 @@ int TPContext::run()
 	    media_player->reset();
 	}
     
+	//.....................................................................
+	// Clean up the stage
+	
+	clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
+	
 	//.....................................................................
 	// Shutdown the app
 		
@@ -521,14 +518,16 @@ gboolean TPContext::launch_app_callback(gpointer app)
 	context->console->attach_to_lua(new_app->get_lua_state());
     }
 
-    Network::shutdown();
-    
     // TODO
     // We should also reset the controllers
+    
+    context->current_app->animate_out();
     
     delete context->current_app;
     
     context->current_app=new_app;
+    
+    new_app->animate_in();
     
     return FALSE;
 }
@@ -543,7 +542,7 @@ void TPContext::close_app()
     }
     else
     {
-	App * new_app;
+	App * new_app=NULL;
 	
 	load_app(&new_app);
 	
@@ -751,6 +750,13 @@ void TPContext::validate_configuration()
 	set(TP_APP_PATH,c);
 	g_warning("DEFAULT:%s=%s",TP_APP_PATH,c);
 	g_free(c);
+    }
+    
+    if (app_path && !g_path_is_absolute(app_path))
+    {
+	gchar * new_app_path=g_build_filename(g_get_current_dir(),app_path,NULL);
+	set(TP_APP_PATH,new_app_path);
+	g_free(new_app_path);
     }
     
     // TP_SYSTEM_LANGUAGE

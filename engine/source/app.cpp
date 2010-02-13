@@ -1,4 +1,6 @@
 
+#include "clutter/clutter.h"
+
 #include "app.h"
 #include "sysdb.h"
 #include "util.h"
@@ -40,7 +42,143 @@ extern void luaopen_apps(lua_State*L);
 
 extern void luaopen_keys(lua_State*L);
 
-//-----------------------------------------------------------------------------
+//=============================================================================
+
+class EventGroup::IdleClosure
+{
+public:
+    
+    static guint add_idle(EventGroup * eg,gint priority,GSourceFunc f,gpointer d,GDestroyNotify dn)
+    {
+	return (new IdleClosure(eg,priority,f,d,dn))->id;
+    }
+    
+private:
+    
+    IdleClosure(EventGroup * eg,gint priority,GSourceFunc f,gpointer d,GDestroyNotify dn)
+    :
+	id(g_idle_add_full(priority,idle_callback,this,destroy_callback)),
+	event_group(eg),
+	function(f),
+	data(d),
+	destroy_notify(dn)
+    {
+	event_group->ref();
+    }
+    
+    ~IdleClosure()
+    {
+	event_group->unref();
+    }
+
+    static gboolean idle_callback(gpointer ic)
+    {
+	IdleClosure * closure=(IdleClosure*)ic;
+	
+	GSource * source=g_main_current_source();
+	
+	if (!g_source_is_destroyed(source))
+	{
+	    closure->function(closure->data);
+	}
+	else
+	{
+	    g_debug("NOT FIRING SOURCE %d",closure->id);	
+	}
+	
+	closure->event_group->remove(closure->id);
+	
+	return FALSE;
+    }
+    
+    static void destroy_callback(gpointer ic)
+    {
+	IdleClosure * closure=(IdleClosure*)ic;
+	
+	if (closure->destroy_notify)
+	{
+	    closure->destroy_notify(closure->data);
+	}
+	
+	delete closure;
+    }
+
+private:
+    
+    const guint		id;        
+    EventGroup *	event_group;
+    GSourceFunc		function;
+    gpointer		data;
+    GDestroyNotify	destroy_notify;
+};
+
+EventGroup::EventGroup()
+:
+    mutex(g_mutex_new())
+{   
+}
+
+EventGroup::~EventGroup()
+{
+    cancel_all();
+    g_mutex_free(mutex);
+}
+    
+guint EventGroup::add_idle(gint priority,GSourceFunc function,gpointer data,GDestroyNotify notify)
+{
+    Util::GMutexLock lock(mutex);
+    g_assert(function);
+    
+    guint id=IdleClosure::add_idle(this,priority,function,data,notify);
+
+    source_ids.insert(id);
+    
+    return id;
+}
+
+void EventGroup::cancel(guint id)
+{
+    Util::GMutexLock lock(mutex);
+    std::set<guint>::iterator it=source_ids.find(id);
+    
+    if (it==source_ids.end())
+    {
+	g_debug("CANNOT CANCEL SOURCE %d",id);	    
+    }
+    else
+    {
+	g_debug("CANCELLING SOURCE %d",id);
+	
+	source_ids.erase(it);
+	
+	g_source_remove(id);
+    }
+}
+
+void EventGroup::cancel_all()
+{
+    Util::GMutexLock lock(mutex);
+    
+    if (!source_ids.empty())
+    {
+	g_debug("CANCELLING %lu SOURCE(S)",source_ids.size());
+	
+	for (std::set<guint>::iterator it=source_ids.begin();it!=source_ids.end();++it)
+	{
+	    g_source_remove((*it));	    
+	}
+	
+	source_ids.clear();
+    }
+}
+
+void EventGroup::remove(guint id)
+{
+    Util::GMutexLock lock(mutex);
+    source_ids.erase(id);
+}
+
+//=============================================================================
 
 bool App::load_metadata(const char * app_path,App::Metadata & md)
 {
@@ -370,18 +508,25 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     metadata(md),
     data_path(dp),
     L(NULL),
-    cookie_jar(NULL)
+    network(NULL),
+    event_group(new EventGroup()),
+    cookie_jar(NULL),
+    screen_gid(0)
 {
         
     // Create the user agent
     
-    user_agent=Network::get_user_agent(
+    user_agent=Network::format_user_agent(
         context->get(TP_SYSTEM_LANGUAGE),
         context->get(TP_SYSTEM_COUNTRY),
         md.id.c_str(),
         md.release,
         context->get(TP_SYSTEM_NAME),
         context->get(TP_SYSTEM_VERSION));
+    
+    // Create the network
+    
+    network=new Network(event_group);
     
     // Register to get all notifications
     
@@ -408,6 +553,24 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
 int App::run()
 {
     int result=TP_RUN_OK;
+    
+    // Get the screen ready for the app
+    
+    ClutterActor * stage=clutter_stage_get_default();
+    g_assert(stage);
+
+    ClutterActor * screen=clutter_group_new();
+    g_assert(screen);
+    
+    gfloat width;
+    gfloat height;
+    
+    clutter_actor_get_size(stage,&width,&height);
+    
+    clutter_actor_set_position(screen,0,0);
+    clutter_actor_set_size(screen,width,height);
+    
+    screen_gid=clutter_actor_get_gid(screen);   
     
     // Open standard libs
     luaL_openlibs(L);
@@ -448,6 +611,20 @@ int App::run()
         g_warning("%s",lua_tostring(L,-1));
 	
 	result=TP_RUN_APP_ERROR;
+	
+	g_object_unref(G_OBJECT(screen));
+	
+	screen_gid=0;
+    }
+    else
+    {
+	// Make it small
+	
+	clutter_actor_set_scale(screen,0,0);
+	
+	// By adding it to the stage, the ref is maintained
+	
+	clutter_container_add_actor(CLUTTER_CONTAINER(stage),screen);	
     }
         
     return result;    
@@ -460,12 +637,28 @@ App::~App()
     context->remove_notification_handler("*",forward_notification_handler,this);    
     context->remove_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_notification_handler,this);    
 
+    // Stops the network thread and waits
+    
+    delete network;
+
+    // Cancels all outstanding idle callbacks
+    
+    event_group->cancel_all();
+    
+    // Release the cookie jar
+    
     release_cookie_jar();
+    
+    // Close Lua
     
     if (L)
     {
 	lua_close(L);
     }
+    
+    // Release the event group
+    
+    event_group->unref();
 }
 
 //-----------------------------------------------------------------------------
@@ -538,7 +731,14 @@ Network::CookieJar * App::get_cookie_jar()
 
 //-----------------------------------------------------------------------------
 
-const String & App::get_user_agent() const
+Network * App::get_network()
+{
+    return network;
+}
+
+//-----------------------------------------------------------------------------
+
+String App::get_user_agent() const
 {
     return user_agent;
 }
@@ -575,12 +775,19 @@ lua_State * App::get_lua_state()
 
 //-----------------------------------------------------------------------------
 
+EventGroup * App::get_event_group()
+{
+    return event_group;    
+}
+
+//-----------------------------------------------------------------------------
+
 char * App::normalize_path(const gchar * path_or_uri,bool * is_uri,const StringSet & additional_uri_schemes)
 {
     bool it_is_a_uri=false;
     
     const char * app_path=metadata.path.c_str();
-	
+    
     char * result=NULL;
     
     // First, see if there is a scheme
@@ -716,6 +923,79 @@ char * App::normalize_path(const gchar * path_or_uri,bool * is_uri,const StringS
     return result;
 }
 
+//-----------------------------------------------------------------------------
+
+guint32 App::get_screen_gid() const
+{
+    return screen_gid;
+}
+
+//-----------------------------------------------------------------------------
+
+void App::animate_in()
+{
+    if (!screen_gid)
+	return;
+    
+    ClutterActor * screen=clutter_get_actor_by_gid(screen_gid);
+    
+    if (!screen)
+	return;
+    
+    // TODO
+    // Here, we should ref the screen, create a timeline that animates the
+    // screen and unref it when the timeline completes.
+    
+    clutter_actor_raise_top(screen);
+
+    clutter_actor_set_scale(screen,1,1);
+
+    clutter_actor_grab_key_focus(screen);    
+}
+
+//-----------------------------------------------------------------------------
+
+void App::animate_out()
+{
+    if (!screen_gid)
+	return;
+    
+    ClutterActor * screen=clutter_get_actor_by_gid(screen_gid);
+    
+    if (!screen)
+	return;
+    
+    // So we can hold on to it until we are done
+    
+    g_object_ref(G_OBJECT(screen));
+    
+    g_idle_add_full(G_PRIORITY_HIGH,animate_out_callback,screen,NULL);    
+}
+
+//-----------------------------------------------------------------------------
+
+gboolean App::animate_out_callback(gpointer s)
+{
+    ClutterActor * screen=CLUTTER_ACTOR(s);
+    
+    ClutterActor * parent=clutter_actor_get_parent(screen);
+    
+    if (parent)
+    {
+	// TODO
+	// What we would actually do here is to animate the screen out
+	// and in the completed callback for that, remove it from its
+	// parent and unref it
+	
+	clutter_container_remove_actor(CLUTTER_CONTAINER(parent),screen);
+    }
+    
+    g_object_unref(G_OBJECT(screen));
+    
+    return FALSE;
+}
+
+//-----------------------------------------------------------------------------
 
 
 
