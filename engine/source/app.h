@@ -2,14 +2,41 @@
 #define _TRICKPLAY_APP_H
 
 #include "common.h"
-
 #include "notify.h"
 #include "network.h"
-
+#include "util.h"
 //-----------------------------------------------------------------------------
 // Forward declarations
 
 class SystemDatabase;
+
+//-----------------------------------------------------------------------------
+
+class EventGroup : public RefCounted
+{
+public:
+    
+    EventGroup();
+    
+    guint add_idle(gint priority,GSourceFunc function,gpointer data,GDestroyNotify notify);
+    
+    void cancel(guint id);
+    
+    void cancel_all();
+
+    void remove(guint id);
+
+protected:
+    
+    ~EventGroup();
+    
+private:
+    
+    class IdleClosure;    
+    
+    GMutex *        mutex;
+    std::set<guint> source_ids;
+};
 
 //-----------------------------------------------------------------------------
 
@@ -93,14 +120,24 @@ public:
     Network::CookieJar * get_cookie_jar();
 
     //.........................................................................
+    // Get the network for this app
+    
+    Network * get_network();
+    
+    //.........................................................................
     // Get the user agent
     
-    const String & get_user_agent() const;
+    String get_user_agent() const;
     
     //.........................................................................
     // Get the Lua state
     
     lua_State * get_lua_state();
+    
+    //.........................................................................
+    // Get the event group for the app
+    
+    EventGroup * get_event_group();
     
     //.........................................................................
     // Processes paths to ensure they are either URIs or valid paths within the
@@ -113,6 +150,21 @@ public:
  
     char * normalize_path(const gchar * path_or_uri,bool * is_uri=NULL,const StringSet & additional_uri_schemes=StringSet());
 
+    //.........................................................................
+    // This returns the clutter actor GID for this app's screen
+    
+    guint32 get_screen_gid() const;
+    
+    //.........................................................................
+    // This shows the app
+    
+    void animate_in();
+    
+    // This one hides it away. It does not depend on the app object after it
+    // returns, so the app can be deleted
+    
+    void animate_out();
+        
 private:
     
     App(TPContext * context,const Metadata & metadata,const char * data_path);
@@ -139,7 +191,11 @@ private:
     // Notification handler to forward everything to our listeners
     
     static void forward_notification_handler(const char * subject,void * data);
+        
+    //.........................................................................
+    // Gets called in an idle source to animate the screen out
     
+    static gboolean animate_out_callback(gpointer screen);    
     
     //.........................................................................
 
@@ -147,8 +203,11 @@ private:
     Metadata                metadata;
     String                  data_path;
     lua_State *             L;
-    Network::CookieJar *    cookie_jar;
     String                  user_agent;
+    Network *               network;
+    EventGroup *            event_group;
+    Network::CookieJar *    cookie_jar;
+    guint32                 screen_gid;
 };
 
 

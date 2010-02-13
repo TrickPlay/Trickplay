@@ -16,6 +16,56 @@ inline void g_info(const gchar * format,...)
 
 //-----------------------------------------------------------------------------
 
+class RefCounted
+{
+public:
+        
+    RefCounted()
+    :
+        ref_count(1)
+    {}
+        
+    inline void ref()
+    {
+        g_atomic_int_inc(&ref_count);
+    }
+    
+    inline void unref()
+    {
+        if (g_atomic_int_dec_and_test(&ref_count))
+            delete this;
+    }
+    
+    static RefCounted * ref(RefCounted * rc)
+    {
+        if (rc)
+        {
+            rc->ref();
+        }
+        return rc;
+    }
+    
+    static RefCounted * unref(RefCounted * rc)
+    {
+        if (rc)
+        {
+            rc->unref();
+        }
+        return NULL;
+    }
+
+protected:
+    
+    virtual ~RefCounted()
+    {}
+    
+private:
+    
+    gint ref_count;
+};
+
+//-----------------------------------------------------------------------------
+
 namespace Util
 {
     //-----------------------------------------------------------------------------
