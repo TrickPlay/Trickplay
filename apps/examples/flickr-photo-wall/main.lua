@@ -362,9 +362,9 @@ function screen.on_key_down(screen,keyval)
 				if the_photo == nil then
 					return
 				end
-	
+
 				local start_position = cursor.transformed_position
-	
+
 				zoom_image = Group { position = {0,0} }
 				local zoom_image_url
 				if screen.size[2] < 1080 then
@@ -422,6 +422,7 @@ function screen.on_key_down(screen,keyval)
 												( screen.h - zoom_image_img.size[2] ) / 2 }
 				zoom_image_scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
 	
+				zoom_image.scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
 				screen:add( zoom_image )
 				if wall_zoom_timeline.is_playing then
 					wall_enclosure.z = wall_zoom_int.to
