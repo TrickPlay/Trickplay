@@ -495,12 +495,16 @@ function screen.on_key_down(screen,key)
     end
     
     if key == keys.space then
-    	mediaplayer.on_loaded = function () mediaplayer:play() end
-    	mediaplayer.on_end_of_stream = function ()
-    							mediaplayer:seek(0)
-    							mediaplayer:play()
-    						end
-    	mediaplayer:load('jeopardy.mp4')
+    	if mediaplayer.state == mediaplayer.PLAYING then
+    		mediaplayer:reset()
+    	else
+			mediaplayer.on_loaded = function () mediaplayer:play() end
+			mediaplayer.on_end_of_stream = function ()
+									mediaplayer:seek(0)
+									mediaplayer:play()
+								end
+			mediaplayer:load('jeopardy.mp4')
+		end
     end
 end
 
