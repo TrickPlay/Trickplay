@@ -161,7 +161,7 @@ void EventGroup::cancel_all()
     
     if (!source_ids.empty())
     {
-	g_debug("CANCELLING %lu SOURCE(S)",source_ids.size());
+	g_debug("CANCELLING %u SOURCE(S)",source_ids.size());
 	
 	for (std::set<guint>::iterator it=source_ids.begin();it!=source_ids.end();++it)
 	{
