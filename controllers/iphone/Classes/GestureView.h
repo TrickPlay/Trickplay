@@ -32,6 +32,7 @@
 	BOOL mClickEventsAllowed;
 	BOOL mTouchEventsAllowed;
 	UIImageView *backgroundView;
+	NSMutableArray *mImageCollection;
 }
 
 @property NSTimeInterval mTouchedTime;
@@ -40,6 +41,7 @@
 @property (nonatomic, retain) UIActionSheet *mStyleAlert;
 @property (nonatomic, retain) IBOutlet UITextField *mTextField;
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
+@property (nonatomic, retain) NSMutableArray *mImageCollection;
 
 - (void)setupService:(NSInteger)port hostname:(NSString *)hostname thetitle:(NSString *)thetitle;
 - (void)setTheParent:(id)sender;

@@ -28,6 +28,7 @@
 @synthesize mStyleAlert;
 @synthesize mTextField;
 @synthesize backgroundView;
+@synthesize mImageCollection;
 
 /*
  // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -58,8 +59,8 @@
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 	
 	listenSocket = [[AsyncSocket alloc] initWithDelegate:self];
-	NSArray *runLoopModes = [NSArray arrayWithObjects:NSRunLoopCommonModes,NSDefaultRunLoopMode, nil]; 
-	[listenSocket setRunLoopModes:runLoopModes]; 
+	//NSArray *runLoopModes = [NSArray arrayWithObjects:NSRunLoopCommonModes,NSDefaultRunLoopMode, nil]; 
+	//[listenSocket setRunLoopModes:runLoopModes]; 
 	
 	//[listenSocket setRunLoopModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode,NSRunLoopCommonModes,nil]];
 	connectedSockets = [[NSMutableArray alloc] initWithCapacity:1];
@@ -70,6 +71,10 @@
 															delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil
 												   otherButtonTitles:nil];
 	mTextField.delegate = self;
+	mImageCollection = [[NSMutableArray alloc] init];
+	
+
+
 }
 
 - (void)setupService:(NSInteger)port  hostname:(NSString *)hostname thetitle:(NSString *)thetitle
@@ -460,6 +465,49 @@
 		{
 			mAccelMode = 0;
 		}
+		else if ([msg hasPrefix:@"RESOURCE"])
+		{
+			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			[mImageCollection addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[components objectAtIndex:1], @"name", [components objectAtIndex:2], @"link", @"", @"scale", nil]];
+			
+		}
+		else if ([msg hasPrefix:@"BACKGROUND"])
+		{
+			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			if ([mImageCollection count] > 0)
+			{
+				//Show the image
+				int index;
+				NSDictionary *itemAtIndex;
+				for (index = 0;index < [mImageCollection count];index++)
+				{
+					itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
+					{
+						//[NSURL URLWithString:aURL]
+						//NSData *data = [NSData dataWithContentsOfURL:url];
+						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
+						UIImage *tempImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]];
+						backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
+					}
+				}
+				if ([components count] > 2)
+				{
+					//Scale or tile it if necessary
+					//See if its scale or tile	
+					if ([[components objectAtIndex:2] compare:@"SCALE"] == 0)
+					{
+					
+					}
+					else if ([[components objectAtIndex:2] compare:@"TILE"] == 0)
+					{
+					
+					}
+				}
+			}
+			
+			
+		}
 		else if ([msg hasPrefix:@"UI"])
 		{
 			//NSArray *components = [msg componentsSeparatedByString:@"\t"];
@@ -555,8 +603,8 @@
 
 - (void)onKeyboardDisplay
 {
-	NSArray *runLoopModes = [NSArray arrayWithObjects:NSRunLoopCommonModes,NSDefaultRunLoopMode,[NSRunLoop currentRunLoop], nil]; 
-	[listenSocket setRunLoopModes:runLoopModes];
+	//NSArray *runLoopModes = [NSArray arrayWithObjects:NSRunLoopCommonModes,NSDefaultRunLoopMode,[NSRunLoop currentRunLoop], nil]; 
+	//[listenSocket setRunLoopModes:runLoopModes];
 	//NSRunLoop *aLoop = [NSRunLoop currentRunLoop];
 }
 
@@ -645,7 +693,10 @@
 	if (mTryingToConnect) return;
 	mAccelMode = 0;
 	[waitingView stopAnimating];
-	[connectedSockets removeObject:sock];
+	if ([connectedSockets count] > 0)
+	{
+		[connectedSockets removeObject:sock];
+	}
 	[self.navigationController popViewControllerAnimated:YES]; 
 	//[self.navigationController popToRootViewControllerAnimated:YES];
 	//[self dismissModalViewControllerAnimated:YES];
@@ -661,7 +712,7 @@
 	if ([connectedSockets count] > 0)
 	{
 		[listenSocket disconnect];
-		[connectedSockets removeObjectAtIndex:0];
+		//[connectedSockets removeObjectAtIndex:0];
 	}
 }
 
