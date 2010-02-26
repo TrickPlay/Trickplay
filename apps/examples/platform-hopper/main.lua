@@ -141,7 +141,7 @@ function bounce_up_timeline.on_completed( )
 end
 
 function bounce_up()
-	-- About 1/5 of the time, jumper will do a little piroutte on the way up
+	-- About 1/5 of the time, jumper will do a little summersault on the way up
 	if math.random() < 0.2 then
 		spin = true
 	else
