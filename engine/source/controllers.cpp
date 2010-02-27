@@ -142,6 +142,47 @@ bool Controllers::ui_show_multiple_choice(gpointer source,const String & label,c
 
 //-----------------------------------------------------------------------------
 
+bool Controllers::ui_declare_resource(gpointer source,const String &label, const String &url)
+{
+	String line("RESOURCE\t");
+	line.append(label);
+	line.append("\t");
+	line.append(url);
+	line.append("\n");
+	
+	return write_line(source, line.c_str());
+}
+
+//-----------------------------------------------------------------------------
+
+bool Controllers::ui_background_image(gpointer source,const String &resource_label)
+{
+	String line("BACKGROUND\t");
+	line.append(resource_label);
+	line.append("\n");
+	
+	return write_line(source, line.c_str());
+}
+
+//-----------------------------------------------------------------------------
+
+bool Controllers::ui_play_sound(gpointer source,const String &resource_label, unsigned int loop)
+{
+	gchar * line=g_strdup_printf("PLAYSOUND\t%s\t%d\n",resource_label,loop);
+    Util::GFreeLater free_line(line);
+
+    return write_line(source,line);
+}
+
+//-----------------------------------------------------------------------------
+
+bool Controllers::ui_stop_sound(gpointer source)
+{
+	return write_line(source, "STOPSOUND\n");
+}
+
+//-----------------------------------------------------------------------------
+
 bool Controllers::write_line(gpointer source,const gchar * line)
 {
     if (!server.get())
