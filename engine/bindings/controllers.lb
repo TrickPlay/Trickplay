@@ -36,9 +36,16 @@ public:
     bool start_accelerometer(const char * filter,double interval);
     bool stop_accelerometer();
     bool reset();
+
     bool ui_clear();
+
     bool ui_show_multiple_choice(const String & label,const StringPairList & choices);
-    
+
+	bool ui_declare_resource(const String &label, const String &url);
+    bool ui_background_image(const String &resource_label);
+    bool ui_play_sound(const String &resource_label, unsigned int loop=1);
+	bool ui_stop_sound();
+
 private:
     
     bool                        connected;
@@ -159,6 +166,27 @@ interface controller [[Controller*]]
             result=list.empty()?false:self->ui_show_multiple_choice(label,list);
         ]];
         
+
+	bool declare_resource(string label, string url)
+	[[
+		result = self->ui_declare_resource(label, url);
+	]];
+	
+    bool set_background(string label)
+    [[
+    	result = self->ui_background_image(label);
+    ]];
+
+    bool play_sound(string resource_label, int loop)
+    [[
+    	result = self->ui_play_sound(resource_label, loop);
+    ]];
+
+	bool stop_sound()
+	[[
+		result = self->ui_stop_sound();
+	]];
+
     callback on_disconnected;
     
     callback on_accelerometer;
@@ -262,6 +290,28 @@ bool Controller::ui_show_multiple_choice(const String & label,const StringPairLi
 {
     return controllers->ui_show_multiple_choice(source,label,choices);
 }
+
+
+bool Controller::ui_declare_resource(const String &label, const String &url)
+{
+	return controllers->ui_declare_resource(source, label, url);
+}
+
+bool Controller::ui_background_image(const String &resource_label)
+{
+	return controllers->ui_background_image(source, resource_label);
+}
+
+bool Controller::ui_play_sound(const String &resource_label, unsigned int loop)
+{
+	return controllers->ui_play_sound(source, resource_label, loop);
+}
+
+bool Controller::ui_stop_sound()
+{
+	return controllers->ui_stop_sound(source);
+}
+
 
 //=============================================================================
 
