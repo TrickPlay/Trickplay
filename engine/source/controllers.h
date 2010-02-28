@@ -60,6 +60,12 @@ public:
     bool reset(gpointer source);
     bool ui_clear(gpointer source);
     bool ui_show_multiple_choice(gpointer source,const String & label,const StringPairList & choices);
+
+	bool ui_declare_resource(gpointer source,const String &label, const String &url);
+    bool ui_background_image(gpointer source,const String &resource_label);
+    bool ui_play_sound(gpointer source,const String &resource_label, unsigned int loop=1);
+	bool ui_stop_sound(gpointer source);
+
     
     //..........................................................................
     // Find info for a controller
