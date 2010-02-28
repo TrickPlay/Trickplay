@@ -15,6 +15,10 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
 		28F335F11007B36200424DE2 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* RootViewController.xib */; };
+		B92DC1CD1135F91F005EEBA7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC1CC1135F91F005EEBA7 /* AudioToolbox.framework */; };
+		B92DC1EE1135FA74005EEBA7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */; };
+		B92DC21C11360C46005EEBA7 /* deep_forest.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = B92DC21A11360C46005EEBA7 /* deep_forest.mp3 */; };
+		B92DC21D11360C46005EEBA7 /* river_sounds.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = B92DC21B11360C46005EEBA7 /* river_sounds.mp3 */; };
 		B9D9A08A110927CD002FFCA4 /* GestureView.m in Sources */ = {isa = PBXBuildFile; fileRef = B9D9A088110927CD002FFCA4 /* GestureView.m */; };
 		B9D9A08B110927CD002FFCA4 /* GestureView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B9D9A089110927CD002FFCA4 /* GestureView.xib */; };
 		B9D9A08F110928F0002FFCA4 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = B9D9A08E110928F0002FFCA4 /* logo.png */; };
@@ -41,6 +45,10 @@
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayRemote-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayRemote-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		B92DC1CC1135F91F005EEBA7 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		B92DC21A11360C46005EEBA7 /* deep_forest.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = deep_forest.mp3; sourceTree = "<group>"; };
+		B92DC21B11360C46005EEBA7 /* river_sounds.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = river_sounds.mp3; sourceTree = "<group>"; };
 		B9D9A087110927CD002FFCA4 /* GestureView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureView.h; sourceTree = "<group>"; };
 		B9D9A088110927CD002FFCA4 /* GestureView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureView.m; sourceTree = "<group>"; };
 		B9D9A089110927CD002FFCA4 /* GestureView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GestureView.xib; sourceTree = "<group>"; };
@@ -64,6 +72,8 @@
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				B9D9A1EB110ABA0A002FFCA4 /* CFNetwork.framework in Frameworks */,
+				B92DC1CD1135F91F005EEBA7 /* AudioToolbox.framework in Frameworks */,
+				B92DC1EE1135FA74005EEBA7 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +128,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B92DC21A11360C46005EEBA7 /* deep_forest.mp3 */,
+				B92DC21B11360C46005EEBA7 /* river_sounds.mp3 */,
 				B9D9A13211095AE6002FFCA4 /* Default.png */,
 				B9D9A0C211093401002FFCA4 /* Default.jpg */,
 				B9D9A0C01109337A002FFCA4 /* icon.png */,
@@ -138,6 +150,8 @@
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
 				B9D9A1EA110ABA0A002FFCA4 /* CFNetwork.framework */,
+				B92DC1CC1135F91F005EEBA7 /* AudioToolbox.framework */,
+				B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -200,6 +214,8 @@
 				B9D9A0C311093401002FFCA4 /* Default.jpg in Resources */,
 				B9D9A13311095AE6002FFCA4 /* Default.png in Resources */,
 				B9D9A2D8110B2D1D002FFCA4 /* Entitlements.plist in Resources */,
+				B92DC21C11360C46005EEBA7 /* deep_forest.mp3 in Resources */,
+				B92DC21D11360C46005EEBA7 /* river_sounds.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
