@@ -9,6 +9,7 @@
 #import "GestureView.h"
 #import <Foundation/Foundation.h>
 #import <Foundation/NSRunLoop.h>
+#import <AudioToolbox/AudioToolbox.h>
 //#import <NSApplication/NSApplication.h>
 
 // Constant for the number of times per second (Hertz) to sample acceleration.
@@ -29,6 +30,8 @@
 @synthesize mTextField;
 @synthesize backgroundView;
 @synthesize mImageCollection;
+@synthesize mAudioPlayer;
+@synthesize mSoundLoopName;
 
 /*
  // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -393,7 +396,7 @@
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
 	//[self logInfo:FORMAT(@"Accepted client %@:%hu", host, port)];
-	NSData *welcomeData = [[NSString stringWithFormat:@"DEVICE\t1\t%@\tK\tAX\tCLICK=(320,410)\tTOUCH=(320,410)\tBACKGROUND=(320,410)\n",[UIDevice currentDevice].name ] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"DEVICE\t1\t%@\tK\tAX\tCLICK=(320,410)\tTOUCH=(320,410)\tBACKGROUND=(320,410)\tPLAYSOUND\n",[UIDevice currentDevice].name ] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	[connectedSockets addObject:sock];
 	[sock writeData:welcomeData withTimeout:-1 tag:0];
@@ -467,6 +470,7 @@
 		}
 		else if ([msg hasPrefix:@"RESOURCE"])
 		{
+			//http://downloads.flashkit.com/soundfx/Ambience/Space/Space_-SLrec-7832/Space_-SLrec-7832_hifi.mp3
 			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
 			[mImageCollection addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[components objectAtIndex:1], @"name", [components objectAtIndex:2], @"link", @"", @"scale", nil]];
 			
@@ -506,6 +510,45 @@
 				}
 			}
 			
+			
+		}
+		else if ([msg hasPrefix:@"PLAYSOUND"])
+		{
+			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			if ([mImageCollection count] > 0)
+			{
+				int index;
+				NSDictionary *itemAtIndex;
+				for (index = 0;index < [mImageCollection count];index++)
+				{
+					itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
+					{
+						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];	
+						
+						if ([components count] > 2)
+						{
+							//Loop parameter
+							NSString *loopvalue = [components objectAtIndex:2];
+							[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
+						}
+						else {
+							//Empty loop variable
+							[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",@"", @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
+						}
+						break;
+					}
+				}
+				
+
+			}
+		}
+		else if ([msg hasPrefix:@"STOPSOUND"])
+		{
+			[self.mAudioPlayer stop];
+			[self.mAudioPlayer release];
+			self.mAudioPlayer.delegate = nil;
+			self.mAudioPlayer = nil;
 			
 		}
 		else if ([msg hasPrefix:@"UI"])
@@ -599,6 +642,8 @@
 	// Even if we were unable to write the incoming data to the log,
 	// we're still going to echo it back to the client.
 	//[sock writeData:data withTimeout:-1 tag:1];
+	NSData *echoData = [@"ECHO\n" dataUsingEncoding:NSUTF8StringEncoding];
+	[listenSocket writeData:echoData withTimeout:-1 tag:0];
 }
 
 - (void)onKeyboardDisplay
@@ -709,6 +754,7 @@
 	[waitingView stopAnimating];
 	mTryingToConnect = NO;
 	mAccelMode = 0;
+	[mImageCollection removeAllObjects];
 	if ([connectedSockets count] > 0)
 	{
 		[listenSocket disconnect];
@@ -719,6 +765,118 @@
 - (void)setTheParent:(id)sender
 {
 	mSender = sender;
+}
+
+#pragma mark AVAudioPlayer delegate methods
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
+    if (flag == NO)
+        NSLog(@"Playback finished unsuccessfully");
+	else
+	{
+		NSLog(@"playback finished");
+	}
+    [player setCurrentTime:0.];
+	//See if the loop variable is set to repeat
+    //mSoundLoopIndex
+	NSDictionary *itemAtIndex;
+	int index;
+	for (index = 0;index < [mImageCollection count];index++)
+	{
+		itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+		if ([[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
+		{
+			//Found it
+			if ([[itemAtIndex objectForKey:@"loop"] length] == 0)
+			{
+				//Don't loop it, just send the COMPLETE message
+				[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:@"COMPLETE"];
+				[self.mAudioPlayer release];
+				self.mAudioPlayer.delegate = nil;
+				self.mAudioPlayer = nil;
+			}
+			else if ([[itemAtIndex objectForKey:@"loop"] rangeOfString:@"LOOP="].length > 0)
+			{
+				NSInteger loopvalue = [[[itemAtIndex objectForKey:@"loop"] stringByReplacingOccurrencesOfString:@"LOOP=" withString:@""] intValue];
+			    if (loopvalue > 0)
+				{
+					
+					[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:[NSString stringWithFormat: @"LOOP_COMPLETE=%d", loopvalue]];
+					loopvalue = loopvalue - 1;
+					NSString *loopvalStr = [NSString stringWithFormat: @"LOOP=%d", loopvalue];
+					
+					//Finite # of loops, get the number of loops left and reset that number
+					[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalStr, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];					
+				    [self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
+				}
+				else
+				{
+				    //Last loop, end the sound
+					[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:@"COMPLETE"];
+					[self.mAudioPlayer release];
+					self.mAudioPlayer.delegate = nil;
+					self.mAudioPlayer = nil;
+				}
+			}
+			else {
+				//Play it again Sam
+				[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
+			}
+
+			
+			break;
+		}
+	}
+	
+	
+	
+	
+}
+
+- (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message
+{
+	NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
+	[listenSocket writeData:sentData withTimeout:-1 tag:0];
+}
+
+- (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename
+{
+	//Might need to stop an existing sound loop possibly
+	mSoundLoopName = resourcename;
+	
+	if (self.mAudioPlayer != nil)
+	{
+		[self.mAudioPlayer release];
+		self.mAudioPlayer.delegate = nil;
+		self.mAudioPlayer = nil;
+	}
+	NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:filename ofType: @"mp3"];
+	NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:soundFilePath];
+	self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
+	//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]] error:nil]; 
+	
+	[self.mAudioPlayer prepareToPlay];
+	[self.mAudioPlayer setDelegate: self];
+	[self.mAudioPlayer play];
+	
+}
+
+- (void)playerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error
+{
+    NSLog(@"ERROR IN DECODE: %@\n", error); 
+}
+
+// we will only get these notifications if playback was interrupted
+- (void)audioPlayerBeginInterruption:(AVAudioPlayer *)player
+{
+    // the object has already been paused,    we just need to update UI
+    //[self updateViewForPlayerState];
+}
+
+- (void)audioPlayerEndInterruption:(AVAudioPlayer *)player
+{
+    //[self startPlayback];
 }
 
 

@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 #import "AsyncSocket.h"
 
-@interface GestureView : UIViewController <UITextFieldDelegate> {
+@interface GestureView : UIViewController <UITextFieldDelegate, AVAudioPlayerDelegate> {
     UIAccelerationValue accelerationY;
 	UIAccelerationValue accelerationX;
 	UIAccelerationValue accelerationZ;
@@ -33,15 +34,19 @@
 	BOOL mTouchEventsAllowed;
 	UIImageView *backgroundView;
 	NSMutableArray *mImageCollection;
+	AVAudioPlayer  *mAudioPlayer;
+	NSString *mSoundLoopName;
 }
 
 @property NSTimeInterval mTouchedTime;
+@property (nonatomic, retain) NSString *mSoundLoopName;
 @property (nonatomic, retain) id *mSender;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView *waitingView;
 @property (nonatomic, retain) UIActionSheet *mStyleAlert;
 @property (nonatomic, retain) IBOutlet UITextField *mTextField;
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
 @property (nonatomic, retain) NSMutableArray *mImageCollection;
+@property (nonatomic, retain) AVAudioPlayer  *mAudioPlayer;
 
 - (void)setupService:(NSInteger)port hostname:(NSString *)hostname thetitle:(NSString *)thetitle;
 - (void)setTheParent:(id)sender;
