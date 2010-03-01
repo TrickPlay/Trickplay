@@ -13,6 +13,186 @@ module clutter;
 #include "context.h"
 ]]
 
+
+[[
+// Forward declaration for generated constructor
+
+int new_signal_collector(lua_State *);    
+    
+class SignalCollector
+{
+public:
+    
+    static SignalCollector * get(lua_State * L)
+    {
+	LSG;
+	
+	SignalCollector * result=NULL;
+	
+	g_assert(L);
+	lua_pushstring(L,"tp_signalcollector");
+	lua_rawget(L,LUA_REGISTRYINDEX);
+	if (lua_isnil(L,-1))
+	{
+	    lua_pop(L,1);
+	    result=new SignalCollector(L);
+	    
+	    lua_pushlightuserdata(L,result);
+	    new_signal_collector(L);
+	    lua_setfield(L,LUA_REGISTRYINDEX,"tp_signalcollector");
+	    lua_pop(L,1);
+	}
+	else
+	{
+	    result = *(SignalCollector**)lua_touserdata(L,-1);
+	    lua_pop(L,1);
+	}
+	g_assert(result);
+	
+	LSG_END(0);
+	
+	return result;    
+    }
+
+    ~SignalCollector()
+    {
+	g_debug("DESTROYING SIGNAL COLLECTOR %p",this);
+	
+	// We need to disconnect all signals, because Lua is going away
+	
+	for (InstanceMap::const_iterator it=instances.begin();it!=instances.end();++it)
+	{
+	    for (NameToHandlerMap::const_iterator nt=it->second.begin();nt!=it->second.end();++nt)
+	    {
+		g_debug("  DISCONNECTING %p %s %lu",it->first,nt->first.c_str(),nt->second);
+
+		g_signal_handler_disconnect(it->first,nt->second);
+	    }
+	    
+	    // And we also detach our weak ref
+	    
+	    g_object_weak_unref(G_OBJECT(it->first),instance_destroyed_notify,this);
+	}
+    }
+
+    static void instance_destroyed_notify(gpointer data,GObject * instance)
+    {
+	((SignalCollector*)data)->instance_destroyed(instance);
+    }
+    
+    void instance_destroyed(gpointer instance)
+    {
+	g_debug("INSTANCE DESTROYED %p",instance);
+	
+	instances.erase(instance);	
+    }
+    
+    void connect(const gchar * name,gpointer instance,const gchar * detailed_signal,GCallback handler,gpointer data)
+    {
+	// See if we have any entries for this instance
+	
+	InstanceMap::iterator it=instances.find(instance);
+	
+	// If we don't..
+	
+	if (it==instances.end())
+	{
+	    // We add a weak ref to it so we can be told when it goes away
+	    
+	    g_object_weak_ref(G_OBJECT(instance),instance_destroyed_notify,this);
+	    
+	    // Inserts a new element in the instaces map and sets the iterator
+	    // to point to it
+	    
+	    it=instances.insert(std::make_pair(instance,NameToHandlerMap())).first;
+	}
+	
+	// The instance was found
+	
+	else
+	{
+	    // Disconnect the old one
+	    
+	    disconnect(name,it);    
+	}
+	
+	// Connect the new signal
+	
+	gulong id=g_signal_connect(instance,detailed_signal,handler,data);
+	
+	g_debug("CONNECTING %p %s %lu",instance,name,id);
+	
+	// Store it
+	
+	it->second[String(name)]=id;
+    }
+    
+    void disconnect(const gchar * name,gpointer instance)
+    {
+	InstanceMap::iterator it=instances.find(instance);
+	
+	if (it!=instances.end())
+	{
+	    disconnect(name,it);    
+	}
+    }
+
+    void connect_if(int condition,const gchar * name,gpointer instance,const gchar * detailed_signal,GCallback handler,gpointer data)
+    {
+	if (condition)
+	{
+	    connect(name,instance,detailed_signal,handler,data);
+	}
+	else
+	{
+	    disconnect(name,instance);
+	}
+    }
+    
+private:
+    
+    SignalCollector(lua_State * l)
+    :
+	L(l)
+    {
+	g_debug("CREATING SIGNAL COLLECTOR %p",this);
+    }
+    
+    typedef std::map<String,gulong> 		NameToHandlerMap;
+    typedef std::map<gpointer,NameToHandlerMap>	InstanceMap;
+
+    void disconnect(const gchar * name,const InstanceMap::iterator & it)
+    {
+	NameToHandlerMap::iterator nt=it->second.find(String(name));
+	
+	if (nt!=it->second.end())
+	{
+	    g_debug("DISCONNECTING %p %s %lu",it->first,name,nt->second);
+	    
+	    g_signal_handler_disconnect(it->first,nt->second);
+	    
+	    it->second.erase(nt);
+	}
+    }
+
+    lua_State * L;
+    InstanceMap	instances;
+};
+]]
+
+interface signal_collector [[SignalCollector*]]
+{
+    signal_collector()
+	[[
+	    *self=(SignalCollector*)lua_touserdata(L,-2);        
+	]];
+	
+    ~signal_collector()
+	[[
+	    delete self;    
+	]];
+}
+
 [[
 void push_clutter_color(lua_State*L,ClutterColor*color)
 {
@@ -141,9 +321,9 @@ public:
     // Creates a new table, takes a ref on it and leaves it
     // on the stack
     
-    actor_extra(lua_State * l)
+    actor_extra(lua_State * L)
     :
-	L(l)
+	lsp(App::get(L)->ref_lua_state_proxy())
     {
 	lua_newtable(L);
 	lua_pushvalue(L,-1);
@@ -153,26 +333,34 @@ public:
     // Takes a ref on a table that is already on the stack
     // and leaves it on the stack
     
-    actor_extra(lua_State * l,int t)
+    actor_extra(lua_State * L,int t)
     :
-	L(l)
+	lsp(App::get(L)->ref_lua_state_proxy())
     {
 	lua_pushvalue(L,t);
 	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
     }
     
     // Releases the ref
+    // This may happen after the lua state is closed, because extra is bolted
+    // on to a GObject...so we protect against that by using a lua state
+    // proxy and checking that it is still good.
     
     ~actor_extra()
     {
-	luaL_unref(L,LUA_REGISTRYINDEX,table_ref);
+	if (lsp->is_valid())
+	{
+	    luaL_unref(lsp->get_lua_state(),LUA_REGISTRYINDEX,table_ref);
+	}
+	
+	lsp->unref();
     }
     
     // Pushes the referenced table onto the stack
     
     void push_table()
     {
-	lua_rawgeti(L,LUA_REGISTRYINDEX,table_ref);
+	lua_rawgeti(lsp->get_lua_state(),LUA_REGISTRYINDEX,table_ref);
     }
     
     // GDestroyNotify for it
@@ -180,7 +368,9 @@ public:
     static void destroy(gpointer a)
     {
 	if (a)
+	{
 	    delete (actor_extra*)a;
+	}
     }
     
 private:
@@ -190,8 +380,8 @@ private:
     actor_extra(const actor_extra &)
     {}
     
-    lua_State * L;
-    int		table_ref;
+    LuaStateProxy *	lsp;
+    int			table_ref;
 };
 
 ]]
@@ -289,6 +479,8 @@ void actor_allocation_changed(ClutterActor * actor,ClutterActorBox * box,Clutter
 	g.y=new_box->y1;
 	g.width=clutter_actor_box_get_width(new_box);
 	g.height=clutter_actor_box_get_height(new_box);
+	// This is wrong, we should not set the width and height - they should
+	// remain as they were.
 	clutter_actor_set_geometry(actor,&g);
     }
     
@@ -316,7 +508,6 @@ void actor_on_hide(ClutterActor*actor,lua_State*L)
 {
     lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_hide",0,0);        
 }
-    
     
 void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
 {
@@ -1130,65 +1321,65 @@ interface actor [[ClutterActor*]]
 
     callback on_key_focus_in
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_focus_in),L);
-	    if (on_key_focus_in)
-		g_signal_connect(self,"key-focus-in",G_CALLBACK(actor_on_key_focus_in),L);
+	    SignalCollector::get(L)->connect_if(
+		on_key_focus_in,"on_key_focus_in",
+		self,"key-focus-in",G_CALLBACK(actor_on_key_focus_in),L);
 	]];
 
     callback on_key_focus_out
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_focus_out),L);
-	    if (on_key_focus_out)
-		g_signal_connect(self,"key-focus-out",G_CALLBACK(actor_on_key_focus_out),L);
+	    SignalCollector::get(L)->connect_if(
+		on_key_focus_out,"on_key_focus_out",
+		self,"key-focus-out",G_CALLBACK(actor_on_key_focus_out),L);
 	]];
 	
     callback on_key_down
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_down),L);	    
-	    if (on_key_down)
-		g_signal_connect(self,"key-press-event",G_CALLBACK(actor_on_key_down),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_key_down,"on_key_down",
+		self,"key-press-event",G_CALLBACK(actor_on_key_down),L);	    
 	]];
 	
     callback on_key_up
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_key_up),L);	    
-	    if (on_key_up)
-		g_signal_connect(self,"key-release-event",G_CALLBACK(actor_on_key_up),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_key_up,"on_key_up",
+		self,"key-release-event",G_CALLBACK(actor_on_key_up),L);	    
 	]];
 	
     callback on_scroll
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_scroll),L);	    
-	    if (on_scroll)
-		g_signal_connect(self,"scroll-event",G_CALLBACK(actor_on_scroll),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_scroll,"on_scroll",
+		self,"scroll-event",G_CALLBACK(actor_on_scroll),L);	    
 	]];
 	
     callback on_button_down
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_button_down),L);	    
-	    if (on_button_down)
-		g_signal_connect(self,"button-press-event",G_CALLBACK(actor_on_button_down),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_button_down,"on_button_down",
+		self,"button-press-event",G_CALLBACK(actor_on_button_down),L);	    
 	]];
 	
     callback on_button_up
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_button_up),L);	    
-	    if (on_button_up)
-		g_signal_connect(self,"button-release-event",G_CALLBACK(actor_on_button_up),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_button_up,"on_button_up",
+		self,"button-release-event",G_CALLBACK(actor_on_button_up),L);	    
 	]];
 	
     callback on_show
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_show),L);	    
-	    if (on_show)
-		g_signal_connect(self,"show",G_CALLBACK(actor_on_show),L);	    	    
+	    SignalCollector::get(L)->connect_if(
+		on_show,"on_show",
+		self,"show",G_CALLBACK(actor_on_show),L);	    	    
 	]];
 	
     callback on_hide
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(actor_on_hide),L);	    
-	    if (on_hide)
-		g_signal_connect(self,"hide",G_CALLBACK(actor_on_hide),L);	    	    
+	    SignalCollector::get(L)->connect_if(
+		on_hide,"on_hide",
+		self,"hide",G_CALLBACK(actor_on_hide),L);	    	    
 	]];
 }
 
@@ -1317,6 +1508,8 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
 }
 
 #endif
+
+
 ]]
 
 global screen [[ClutterActor*]] actor , container
@@ -1324,22 +1517,20 @@ global screen [[ClutterActor*]] actor , container
     screen()
 	[[
 	    *self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid());
-
-	    initialize_actor(L,*self,SCREEN_METATABLE);
-	    	    
-#ifndef TP_PRODUCTION
-	    g_signal_connect(*self,"key-press-event",G_CALLBACK(Stage_quit),L);
+	    
 	    g_object_ref(G_OBJECT(*self));
+	    
+	    initialize_actor(L,*self,SCREEN_METATABLE);
+	    	    	    
+#ifndef TP_PRODUCTION
+	    SignalCollector::get(L)->connect(
+		"screen-quit",*self,"key-press-event",G_CALLBACK(Stage_quit),L);
 #endif
 	]];
     
     ~screen()
 	[[
-	    
-#ifndef TP_PRODUCTION
-	    g_signal_handlers_disconnect_by_func(G_OBJECT(self),gpointer(Stage_quit),L);
 	    g_object_unref(G_OBJECT(self));
-#endif	    	    
 	]];
 
     #..........................................................................
@@ -1651,9 +1842,9 @@ class Text [[ClutterActor*]] actor
 	
     callback on_text_changed
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Text_on_text_changed),L);	    
-	    if (on_text_changed)
-		g_signal_connect(self,"text-changed",G_CALLBACK(Text_on_text_changed),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_text_changed,"on_text_changed",
+		self,"text-changed",G_CALLBACK(Text_on_text_changed),L);	    
 	]];
 }
 [[
@@ -1997,16 +2188,16 @@ class Image [[ClutterActor*]] actor
 	
     callback on_loaded
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Image_on_loaded),L);
-	    if (on_loaded)
-		g_signal_connect(self,"load-finished",G_CALLBACK(Image_on_loaded),L);
+	    SignalCollector::get(L)->connect_if(
+		on_loaded,"on_loaded",
+		self,"load-finished",G_CALLBACK(Image_on_loaded),L);
 	]];
 	
     callback on_size_changed
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Image_on_size_changed),L);
-	    if (on_size_changed)
-		g_signal_connect(self,"size-change",G_CALLBACK(Image_on_size_changed),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_size_changed,"on_size_changed",
+		self,"size-change",G_CALLBACK(Image_on_size_changed),L);	    
 	]];	
 }
 
@@ -2159,37 +2350,37 @@ class Timeline [[ClutterTimeline*]]
 	
     callback on_new_frame
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_new_frame),L);	    
-	    if (on_new_frame)
-		g_signal_connect(self,"new-frame",G_CALLBACK(Timeline_on_new_frame),L);
+	    SignalCollector::get(L)->connect_if(
+		on_new_frame,"on_new_frame",
+		self,"new-frame",G_CALLBACK(Timeline_on_new_frame),L);
 	]];
 	
     callback on_started
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_started),L);	    
-	    if (on_started)
-		g_signal_connect(self,"started",G_CALLBACK(Timeline_on_started),L);	    
+	    SignalCollector::get(L)->connect_if(
+		on_started,"on_started",
+		self,"started",G_CALLBACK(Timeline_on_started),L);	    
 	]];
     
     callback on_completed
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_completed),L);
-	    if (on_completed)
-		g_signal_connect(self,"completed",G_CALLBACK(Timeline_on_completed),L);	    	    
+	    SignalCollector::get(L)->connect_if(
+		on_completed,"on_completed",
+		self,"completed",G_CALLBACK(Timeline_on_completed),L);	    	    
 	]];
 	
     callback on_paused
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_paused),L);
-	    if (on_paused)
-		g_signal_connect(self,"paused",G_CALLBACK(Timeline_on_paused),L);	    	    
+	    SignalCollector::get(L)->connect_if(
+		on_paused,"on_paused",
+		self,"paused",G_CALLBACK(Timeline_on_paused),L);	    	    
 	]];
 	
     callback on_marker_reached
 	[[
-	    g_signal_handlers_disconnect_by_func(self,gpointer(Timeline_on_marker_reached),L);
-	    if (on_marker_reached)
-		g_signal_connect(self,"marker-reached",G_CALLBACK(Timeline_on_marker_reached),L);	    	    	    
+	    SignalCollector::get(L)->connect_if(
+		on_marker_reached,"on_marker_reached",
+		self,"marker-reached",G_CALLBACK(Timeline_on_marker_reached),L);	    	    	    
 	]];
 }
 
@@ -2226,7 +2417,8 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 ]]
 
 [[
-gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer l);    
+gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp);
+void Alpha_on_alpha_destroy(gpointer lsp);
 ]]
 
 class Alpha [[ClutterAlpha*]]
@@ -2291,14 +2483,31 @@ class Alpha [[ClutterAlpha*]]
 	[[
 	    clutter_alpha_set_func(self,NULL,NULL,NULL);
 	    if (on_alpha)
-		clutter_alpha_set_func(self,Alpha_on_alpha,L,NULL);
+	    {
+		clutter_alpha_set_func(
+		    self,
+		    Alpha_on_alpha,
+		    App::get(L)->ref_lua_state_proxy(),
+		    Alpha_on_alpha_destroy);
+	    }
 	]];	    
 }
 
 [[
-gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer l)
+
+void Alpha_on_alpha_destroy(gpointer lsp)
 {
-    lua_State * L((lua_State*)l);
+    ((LuaStateProxy*)lsp)->unref();
+}
+
+gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp)
+{
+    lua_State * L=((LuaStateProxy*)lsp)->get_lua_state();
+    
+    if (!L)
+    {
+	return 0;
+    }
     
     lua_pushnumber(L,clutter_timeline_get_progress(clutter_alpha_get_timeline(self)));
     
