@@ -151,6 +151,11 @@ typedef struct TPContext TPContext;
                             shown to the user when controllers discover the mDNS
                             service.
                             Defaults to "TrickPlay".
+                            
+    TP_LOG_DEBUG -          Whether to log DEBUG messages. Set to "0" to prevent
+                            DEBUG messages from being logged.
+                            Defaults to "1".
+                    
 */
 
 #define TP_APP_SOURCES          "app.sources"
@@ -171,6 +176,7 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_ENABLED  "controllers.enabled"
 #define TP_CONTROLLERS_PORT     "controllers.port"
 #define TP_CONTROLLERS_NAME     "controllers.name"
+#define TP_LOG_DEBUG            "log.debug"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
