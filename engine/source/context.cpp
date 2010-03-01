@@ -599,25 +599,35 @@ void TPContext::log_handler(const gchar * log_domain,GLogLevelFlags log_level,co
     {
 	TPContext * context=(TPContext*)self;
 	
-	if (context->external_log_handler)
+	bool output=true;
+	
+	if (log_level==G_LOG_LEVEL_DEBUG&&!context->get_bool(TP_LOG_DEBUG,true))
 	{
-	    context->external_log_handler(log_level,log_domain,message,context->external_log_handler_data);
-	}
-	else
-	{
-	    line=format_log_line(log_domain,log_level,message);
-	    fprintf(stderr,"%s",line);
+	    output = false;
 	}
 	
-	if (!context->output_handlers.empty())
+	if (output)
 	{
-	    if (!line)
+	    if (context->external_log_handler)
+	    {
+		context->external_log_handler(log_level,log_domain,message,context->external_log_handler_data);
+	    }
+	    else
+	    {
 		line=format_log_line(log_domain,log_level,message);
-		
-	    for (OutputHandlerSet::const_iterator it=context->output_handlers.begin();
-		 it!=context->output_handlers.end();++it)
-		it->first(line,it->second);
-	}	
+		fprintf(stderr,"%s",line);
+	    }
+	    
+	    if (!context->output_handlers.empty())
+	    {
+		if (!line)
+		    line=format_log_line(log_domain,log_level,message);
+		    
+		for (OutputHandlerSet::const_iterator it=context->output_handlers.begin();
+		     it!=context->output_handlers.end();++it)
+		    it->first(line,it->second);
+	    }
+	}
     }
     
     g_free(line);
