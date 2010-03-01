@@ -161,7 +161,7 @@ void EventGroup::cancel_all()
     
     if (!source_ids.empty())
     {
-	g_debug("CANCELLING %u SOURCE(S)",source_ids.size());
+	g_debug("CANCELLING %lu SOURCE(S)",source_ids.size());
 	
 	for (std::set<guint>::iterator it=source_ids.begin();it!=source_ids.end();++it)
 	{
@@ -176,6 +176,36 @@ void EventGroup::remove(guint id)
 {
     Util::GMutexLock lock(mutex);
     source_ids.erase(id);
+}
+
+//=============================================================================
+
+LuaStateProxy::LuaStateProxy(lua_State * l)
+:
+    L(l)
+{
+    g_debug("CREATED LSP %p",this);        
+}
+
+LuaStateProxy::~LuaStateProxy()
+{
+    g_debug("DESTROYED LSP %p",this);
+}
+
+void LuaStateProxy::invalidate()
+{        
+    L=NULL;
+    g_debug("INVALIDATED LSP %p",this);
+}
+
+lua_State * LuaStateProxy::get_lua_state()
+{
+    return L;
+}
+
+bool LuaStateProxy::is_valid()
+{
+    return L!=NULL;
 }
 
 //=============================================================================
@@ -508,6 +538,7 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     metadata(md),
     data_path(dp),
     L(NULL),
+    lua_state_proxy(NULL),
     network(NULL),
     event_group(new EventGroup()),
     cookie_jar(NULL),
@@ -541,12 +572,40 @@ App::App(TPContext * c,const App::Metadata & md,const char * dp)
     L=lua_open();
     g_assert(L);
     
+    // Create the lua state proxy
+    
+    lua_state_proxy=new LuaStateProxy(L);
+    
     // Put a pointer to us in Lua so bindings can get to it
+    
     lua_pushstring(L,"tp_app");
     lua_pushlightuserdata(L,this);
     lua_rawset(L,LUA_REGISTRYINDEX);
 }
 
+#if 0
+void debug_hook(lua_State *L, lua_Debug *ar)
+{
+    printf("DEBUG: %d\n",ar->event);
+    
+    switch (ar->event)
+    {
+	case LUA_HOOKCALL:
+	{
+	    lua_getstack(L,0,ar);
+	    lua_getinfo(L,"nsl",ar);
+	    printf("  CALL\n");	    
+	    break;   
+	}
+    }
+    
+    if (ar->event==LUA_HOOKLINE)
+    {
+	lua_getinfo(L,"nsl",ar);
+	printf("  LINE: %d : %s : %s\n",ar->currentline,ar->short_src,ar->source);
+    } 
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -600,7 +659,11 @@ int App::run()
     // TODO
     // This one should only be opened for the launcher and the store apps
     
-    luaopen_apps(L);    
+    luaopen_apps(L);
+
+    // TODO
+    // DEBUG HOOK
+//    lua_sethook(L,debug_hook,LUA_MASKCALL|LUA_MASKRET|LUA_MASKLINE|LUA_MASKCOUNT,1);
         
     // Run the script
     gchar * main_path=g_build_filename(metadata.path.c_str(),"main.lua",NULL);
@@ -651,10 +714,13 @@ App::~App()
     
     // Close Lua
     
-    if (L)
-    {
-	lua_close(L);
-    }
+    lua_close(L);
+    
+    // Invalidate and release the lua state proxy
+    
+    lua_state_proxy->invalidate();
+    
+    lua_state_proxy->unref();
     
     // Release the event group
     
@@ -771,6 +837,15 @@ void App::profile_switch()
 lua_State * App::get_lua_state()
 {
     return L;
+}
+
+//-----------------------------------------------------------------------------
+    
+LuaStateProxy * App::ref_lua_state_proxy()
+{
+    lua_state_proxy->ref();
+    
+    return lua_state_proxy;
 }
 
 //-----------------------------------------------------------------------------
