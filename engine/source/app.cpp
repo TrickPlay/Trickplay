@@ -161,7 +161,7 @@ void EventGroup::cancel_all()
     
     if (!source_ids.empty())
     {
-	g_debug("CANCELLING %lu SOURCE(S)",source_ids.size());
+	g_debug("CANCELLING %" G_GSIZE_FORMAT " SOURCE(S)",source_ids.size());
 	
 	for (std::set<guint>::iterator it=source_ids.begin();it!=source_ids.end();++it)
 	{
@@ -1071,6 +1071,3 @@ gboolean App::animate_out_callback(gpointer s)
 }
 
 //-----------------------------------------------------------------------------
-
-
-
