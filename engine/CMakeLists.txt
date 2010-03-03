@@ -6,15 +6,16 @@ set( LB_GENERATOR       ${ENGINE_SRC}/lb/bin/lb.py )
 # Include directories
 #------------------------------------------------------------------------------
 
+TP_FIND_INCLUDE( expat.h 				ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( curl/curl.h 				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( glib-2.0 glib.h 			ENGINE_INCLUDE_DIRS )
 TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( pango-1.0 pango/pango.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( gtk-2.0 gdk-pixbuf/gdk-pixbuf.h	ENGINE_INCLUDE_DIRS )
+#TP_FIND_INCLUDE( gtk-2.0 gdk-pixbuf/gdk-pixbuf.h	ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( ImageMagick Magick++.h                 ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( lua5.1 lua.h				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( expat.h 				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( curl/curl.h 				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-core core.h			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
@@ -53,7 +54,7 @@ set(
     # gdk
     #--------------
 
-    gdk_pixbuf-2.0
+#    gdk_pixbuf-2.0
     
     #--------------
     # pango/cairo
@@ -65,7 +66,9 @@ set(
     # clutter
     #--------------
     
-    clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes     
+    clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes
+
+#    clutter-eglnative-1.0
     
     #--------------
     # curl
@@ -95,13 +98,14 @@ set(
     # lua
     #--------------
     
-    lua5.1 lua
+    lua5.1
+    lua
     
     #--------------
-    # others
+    # ImageMagick
     #--------------
     
-    m dl
+    Magick++    
 )
 
 foreach( LIB ${ENGINE_LIBRARY_NAMES} )
@@ -130,7 +134,6 @@ set(
 
     LB_FILES
     
-    ${BINDINGS_SRC}/clutter.lb
     ${BINDINGS_SRC}/timer.lb
     ${BINDINGS_SRC}/url_request.lb
     ${BINDINGS_SRC}/local_hash.lb
@@ -144,6 +147,7 @@ set(
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/mediaplayer.lb
+    ${BINDINGS_SRC}/clutter.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
@@ -195,9 +199,18 @@ set_target_properties(
     
     PROPERTIES
     LINK_INTERFACE_LIBRARIES tpcore
-    COMPILE_FLAGS -fvisibility=hidden)
+    COMPILE_FLAGS -fvisibility=hidden
+)
 
-target_link_libraries( tpcore ${ENGINE_LIBRARIES} )
+
+target_link_libraries(
+
+    tpcore
+    
+    ${ENGINE_LIBRARIES}
+    m
+    dl    
+)
 
 
 
