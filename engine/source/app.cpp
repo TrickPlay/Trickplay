@@ -50,14 +50,13 @@ public:
     
     static guint add_idle(EventGroup * eg,gint priority,GSourceFunc f,gpointer d,GDestroyNotify dn)
     {
-	return (new IdleClosure(eg,priority,f,d,dn))->id;
+	return g_idle_add_full(priority,idle_callback,new IdleClosure(eg,f,d,dn),destroy_callback);
     }
     
 private:
     
-    IdleClosure(EventGroup * eg,gint priority,GSourceFunc f,gpointer d,GDestroyNotify dn)
+    IdleClosure(EventGroup * eg,GSourceFunc f,gpointer d,GDestroyNotify dn)
     :
-	id(g_idle_add_full(priority,idle_callback,this,destroy_callback)),
 	event_group(eg),
 	function(f),
 	data(d),
@@ -77,16 +76,18 @@ private:
 	
 	GSource * source=g_main_current_source();
 	
+	guint id=g_source_get_id(source);
+	
 	if (!g_source_is_destroyed(source))
 	{
 	    closure->function(closure->data);
 	}
 	else
 	{
-	    g_debug("NOT FIRING SOURCE %d",closure->id);	
+	    g_debug("NOT FIRING SOURCE %d",id);	
 	}
 	
-	closure->event_group->remove(closure->id);
+	closure->event_group->remove(id);
 	
 	return FALSE;
     }
@@ -105,7 +106,6 @@ private:
 
 private:
     
-    const guint		id;        
     EventGroup *	event_group;
     GSourceFunc		function;
     gpointer		data;
