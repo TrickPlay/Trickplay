@@ -1,9 +1,22 @@
 
 module clutter;
 
-[[    
+[[
+//-----------------------------------------------------------------------------
+// Use either GDK_PIXBUF or ImageMagick++ for loading images
+
+#define TP_USE_GDK_PIXBUF 0  
+  
+#if TP_USE_GDK_PIXBUF
+    #include <gdk-pixbuf/gdk-pixbuf.h>
+#else
+    #include <Magick++.h>
+#endif
+
+//-----------------------------------------------------------------------------
+
 #include "clutter/clutter.h"
-#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include <cstring>
 #include <string>
 
@@ -13,6 +26,63 @@ module clutter;
 #include "context.h"
 ]]
 
+[[
+
+#if !TP_USE_GDK_PIXBUF
+
+bool load_texture_from_data(ClutterTexture * texture,const void * data,size_t length)
+{
+    try
+    {
+	//g_debug("DECODING IMAGE %lu",length);
+	
+	Magick::Image image(Magick::Blob(data,length));
+	
+	Magick::Blob blob;
+	
+	image.write(&blob,"RGBA",8);
+	
+	//g_debug("  DECODED");
+	
+	clutter_texture_set_from_rgb_data(
+	    texture,
+	    (const guchar *)blob.data(),
+	    TRUE,
+	    image.columns(),
+	    image.rows(),
+	    image.columns()*4,
+	    4,
+	    CLUTTER_TEXTURE_NONE,NULL);
+	
+	return true;
+    }
+    catch(...)
+    {
+	return false;
+    }
+}
+
+bool load_texture_from_file(ClutterTexture * texture,const char * file_name)
+{
+    gchar * data=NULL;
+    gsize length=0;
+
+    //g_debug("LOADING FILE CONTENTS %s",file_name);
+    
+    if (!g_file_get_contents(file_name,&data,&length,NULL))
+	return false;
+    
+    //g_debug("LOADED");
+    
+    bool result=load_texture_from_data(texture,data,length);
+    
+    g_free(data);
+    
+    return result;
+}
+#endif
+
+]]
 
 [[
 // Forward declaration for generated constructor
@@ -1938,6 +2008,8 @@ class Group [[ClutterActor*]] actor , container
 
 [[
 
+#if TP_USE_GDK_PIXBUF
+
 struct ImageClosure
 {
     ImageClosure(ClutterTexture*i)
@@ -2047,6 +2119,47 @@ bool Image_incremental_response_callback(const Network::Response & response,gpoi
     
     return !closure->error;
 }
+#else
+
+static void Image_destroy_image_closure(gpointer texture)
+{
+    g_object_unref(G_OBJECT(texture));
+}
+
+void Image_response_callback(const Network::Response & response,gpointer texture)
+{
+    GError * error=NULL;
+    
+    if (response.failed)
+    {
+	g_set_error(&error,
+	    CLUTTER_TEXTURE_ERROR,
+	    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+	    "Request failed : %s" , response.status.c_str() );	
+    }
+    else
+    {
+	if (!load_texture_from_data(CLUTTER_TEXTURE(texture),response.body->data,response.body->len))
+	{
+	    g_set_error(&error,
+		CLUTTER_TEXTURE_ERROR,
+		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		"Failed to load texture data");
+	}
+    }
+    
+    if (error)
+    {
+	g_warning("Failed to load image : %s",error->message);
+	g_signal_emit_by_name(G_OBJECT(texture),"load-finished",error);
+	
+	g_clear_error(&error);
+    }
+}
+
+#endif
+
+
 ]]
 
 [[
@@ -2088,6 +2201,8 @@ class Image [[ClutterActor*]] actor
 		{
 		    Network::Request request(app->get_user_agent());
 		    request.url = path;
+		    
+#if TP_USE_GDK_PIXBUF
 
 		    app->get_network()->perform_request_async_incremental(
 			request,
@@ -2095,10 +2210,38 @@ class Image [[ClutterActor*]] actor
 			Image_incremental_response_callback,
 			new ImageClosure(CLUTTER_TEXTURE(self)),
 			Image_destroy_image_closure);
+#else
+
+		    g_object_ref(G_OBJECT(self));
+		    
+		    app->get_network()->perform_request_async(
+			request,
+			app->get_cookie_jar(),
+			Image_response_callback,
+			self,
+			Image_destroy_image_closure);
+		    
+#endif		    
 		}
 		else
 		{
+#if TP_USE_GDK_PIXBUF
 		    clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path,NULL);
+#else
+		    if (!load_texture_from_file(CLUTTER_TEXTURE(self),path))
+		    {
+			GError * error=NULL;
+
+			g_set_error(&error,
+			    CLUTTER_TEXTURE_ERROR,
+			    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+			    "Failed to load texture data");
+			
+			g_signal_emit_by_name(G_OBJECT(self),"load-finished",error);
+			
+			g_clear_error(&error);
+		    }
+#endif
 		}
 		g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
 	    }
@@ -2149,6 +2292,7 @@ class Image [[ClutterActor*]] actor
 	
     bool load_from_data(lstring data)
 	[[
+#if TP_USE_GDK_PIXBUF
 	    result = false;
 	    
 	    GdkPixbufLoader * loader = gdk_pixbuf_loader_new();
@@ -2184,6 +2328,9 @@ class Image [[ClutterActor*]] actor
 		
 		g_object_unref(G_OBJECT(loader));
 	    }
+#else
+	    result=load_texture_from_data(CLUTTER_TEXTURE(self),data,data_len);
+#endif	    
 	]];
 	
     callback on_loaded

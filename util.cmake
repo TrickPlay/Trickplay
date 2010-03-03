@@ -23,7 +23,8 @@ macro(TP_FIND_INCLUDE)
     find_path(
         DEST
         NAMES ${NAME}
-        PATH_SUFFIXES include/${PREFIX}
+        PATHS include
+        PATH_SUFFIXES ${PREFIX}
 
         ONLY_CMAKE_FIND_ROOT_PATH
     )
@@ -68,8 +69,9 @@ macro(TP_FIND_LIB_INCLUDE)
     find_path(
         DEST
         NAMES ${NAME}
-        PATH_SUFFIXES lib/${PREFIX}/include
-
+        PATHS ${CMAKE_FIND_ROOT_PATH}/lib
+        PATH_SUFFIXES ${PREFIX}/include
+        
         ONLY_CMAKE_FIND_ROOT_PATH
     )
     

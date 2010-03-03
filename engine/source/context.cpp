@@ -1107,4 +1107,3 @@ void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerCo
 {
     context->media_player_constructor=constructor;
 }
-
