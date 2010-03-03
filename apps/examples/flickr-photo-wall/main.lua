@@ -44,7 +44,7 @@ mediaplayer.on_end_of_stream = function ()
 						mediaplayer:play()
 					end
 mediaplayer:load('background.mp4')
-curtain = Rectangle { color = '000000C0', position = { -600, -600, -600 }, size = {1200+screen.w, 1200+screen.h} }
+curtain = Rectangle { color = '00000080', position = { -600, -600, -600 }, size = {1200+screen.w, 1200+screen.h} }
 screen:add(curtain)
 
 screen.color = "000000";
