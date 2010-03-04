@@ -12,6 +12,7 @@ if (NATURAL_DOCS)
             -i ${PROJECT_SOURCE_DIR}/engine/bindings
             -o HTML ${CMAKE_CURRENT_BINARY_DIR}/html
             -p ${PROJECT_SOURCE_DIR}/engine/docs/nd
+            -s Default Trickplay
     )
 
     file(
