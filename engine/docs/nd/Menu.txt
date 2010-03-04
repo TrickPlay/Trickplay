@@ -1,19 +1,13 @@
 Format: 1.4
 
 
-# You can add a title and sub-title to your menu like this:
-# Title: [project name]
-# SubTitle: [subtitle]
+Title: Trickplay
+SubTitle: Application Developer's Guide and Reference
 
 # You can add a footer to your documentation like this:
 # Footer: [text]
 # If you want to add a copyright notice, this would be the place to do it.
-
-# You can add a timestamp to your documentation like one of these:
-# Timestamp: Generated on month day, year
-# Timestamp: Updated mm/dd/yyyy
-# Timestamp: Last updated mon day
-#
+Timestamp: mm.d.yyyy
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
 #   mon   - Short month word.  January is "Jan"
@@ -43,35 +37,53 @@ Format: 1.4
 # time it is run.  When working with groups, just deal with the braces and
 # forget about the indentation and comments.
 # 
+# You can use this file on other computers even if they use different
+# directories.  As long as the command line points to the same source files,
+# Natural Docs will be able to correct the locations automatically.
+# 
 # --------------------------------------------------------------------------
 
 
-Group: Globals  {
+Group: Developer's Guide  {
 
-   File: app  (app.lb)
-   File: mediaplayer  (mediaplayer.lb)
-   File: profile  (profile.lb)
-   File: settings  (settings.lb)
-   File: system  (system.lb)
-   }  # Group: Globals
+   File: Getting Started  (/home/pablo/Dropbox/tp/engine/docs/text/getting_started.txt)
+   }  # Group: Developer's Guide
 
-Group: Classes  {
+Group: Reference  {
 
-   File: Timer  (timer.lb)
-   File: URLRequest  (no auto-title, url_request.lb)
-   File: XMLParser  (xml.lb)
-   }  # Group: Classes
+   Group: Globals  {
 
-Group: Index  {
+      File: app  (/home/pablo/Dropbox/tp/engine/bindings/app.lb)
+      File: mediaplayer  (/home/pablo/Dropbox/tp/engine/bindings/mediaplayer.lb)
+      File: profile  (/home/pablo/Dropbox/tp/engine/bindings/profile.lb)
+      File: settings  (/home/pablo/Dropbox/tp/engine/bindings/settings.lb)
+      File: system  (/home/pablo/Dropbox/tp/engine/bindings/system.lb)
+      }  # Group: Globals
 
-   Index: Everything
-   Class Index: Classes
-   Function Index: Functions
-   Global Index: Globals
-   Property Index: Properties
-   Event Index: Events
-   Constructor Index: Constructors
-   Interface Index: Interfaces
-   Constant Index: Constants
-   }  # Group: Index
+   Group: Classes  {
 
+      File: Timer  (/home/pablo/Dropbox/tp/engine/bindings/timer.lb)
+      File: URLRequest  (no auto-title, /home/pablo/Dropbox/tp/engine/bindings/url_request.lb)
+      File: XMLParser  (/home/pablo/Dropbox/tp/engine/bindings/xml.lb)
+      }  # Group: Classes
+
+   Group: Index  {
+
+      Index: Everything
+      Class Index: Classes
+      Function Index: Functions
+      Global Index: Globals
+      Property Index: Properties
+      Event Index: Events
+      Constructor Index: Constructors
+      Interface Index: Interfaces
+      Constant Index: Constants
+      }  # Group: Index
+
+   }  # Group: Reference
+
+
+
+##### Do not change or remove these lines. #####
+Data: 1(D3333RuEG3IpYou3BHuIYus3tI3G\`8\G3fu963tGst)
+Data: 1(h3333RuEG3IpYou3BHuIYus3tI3G\`8\G3Y8\f8\`6)
