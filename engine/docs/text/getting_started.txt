@@ -1,7 +1,7 @@
 
 Title: Getting Started
 
-Topic: The App Bundle
+Group: The App Bundle
 
 The first step in writing a new app is to create a directory for it. Your app's
 directory is called its *app bundle* - it contains metadata, source code and any
@@ -18,7 +18,8 @@ Topic: Metadata
 Metadata is information that describes your app. There are only a few pieces of
 information that are strictly required - because they are important.
 
-To set your app's metadata, create an empty text file called "app" and enter the information like this::
+To set your app's metadata, create an empty text file called "app" and enter
+the information like this:
 
 (code)
 app=
@@ -73,7 +74,7 @@ print("Hello World!")
 When you run your app, you should see "Hello World!" printed in the console.
 
 
-Topic: Running Your App
+Group: Running Your App
 
 Run Trickplay and pass it the path to your app.
 
@@ -134,7 +135,7 @@ TODO:
     REFERENCE ALL CONFIGURATION KEYS AND VALUES
 
 
-Topic: Including Files
+Group: Including Files
 
 When one file is not enough. Lua has two functions that let you use code in other
 files, "dofile" and "loadfile". Both of these functions take a path to the file as
