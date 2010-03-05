@@ -47,6 +47,7 @@ Timestamp: mm.d.yyyy
 Group: Developer's Guide  {
 
    File: Getting Started  (/home/pablo/Dropbox/tp/engine/docs/text/getting_started.txt)
+   File: User Interface  (/home/pablo/Dropbox/tp/engine/docs/text/user_interface.txt)
    }  # Group: Developer's Guide
 
 Group: Reference  {
