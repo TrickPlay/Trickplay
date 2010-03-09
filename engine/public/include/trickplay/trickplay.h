@@ -323,7 +323,7 @@ void            tp_init_version(
 */
                 
 TP_API_EXPORT
-TPContext *     tp_context_new();
+TPContext *     tp_context_new(void);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_set
