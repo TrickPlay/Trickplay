@@ -299,19 +299,41 @@ void to_clutter_color(lua_State*L,int index,ClutterColor*color)
     }
     else if (lua_isstring(L,index))
     {
-        unsigned short int r(0),g(0),b(0),a(255);
+        int colors[4]={0,0,0,255};
+	char buffer[3]={0,0,0};
 	
 	const char * s=lua_tostring(L,index);
 	
 	if (*s=='#')
 	    ++s;
-			
-	sscanf(s,"%2hx%2hx%2hx%2hx",&r,&g,&b,&a);
-        
-        color->red = r;
-        color->green = g;
-        color->blue = b;
-        color->alpha=a;
+	    
+	int len=strlen(s);
+	int i=0;
+	
+	while(len>=2)
+	{
+	    buffer[0]=*(s++);
+	    buffer[1]=*(s++);
+	    
+	    sscanf(buffer,"%x",&colors[i]);	    
+	    
+	    if (colors[i]<0)
+	    {
+		colors[i]=0;
+	    }
+	    else if(colors[i]>255)
+	    {
+		colors[i]=255;
+	    }
+	    
+	    len-=2;
+	    i++;		
+	}
+				
+        color->red   = colors[0];
+        color->green = colors[1];
+        color->blue  = colors[2];
+        color->alpha = colors[3];
     }
     else
     {
