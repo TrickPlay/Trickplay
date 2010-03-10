@@ -19,8 +19,12 @@ dofile("layout.lua")
 
 ui={}
 
+-- Place a semi-transparent curtain behind content
+screen:add(Rectangle { size={screen.w,screen.h}, color="00000080" })
+
+
 layout(
-    screen:set{size={960,540},color="000000"},
+    screen,
     {
         padding=10,
         columns=
