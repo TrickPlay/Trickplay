@@ -5,6 +5,7 @@
 
 #include "clutter/clutter.h"
 #include "curl/curl.h"
+#include "fontconfig.h"
 
 #include "context.h"
 #include "app.h"
@@ -166,6 +167,90 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 
 //-----------------------------------------------------------------------------
 
+void TPContext::setup_fonts()
+{
+    // Get the a directory where fonts live
+    
+    const char * fonts_path=get(TP_FONTS_PATH);
+    
+    if (!fonts_path)
+    {
+	g_warning("USING SYSTEM FONTS");
+	return;
+    }
+
+    // We create a directory called "fonts" in our data directory. There,
+    // we will have a tiny configuration file and the fontconfig cache.
+    
+    gchar * font_cache_path=g_build_filename(get(TP_DATA_PATH),"fonts",NULL);
+    Util::GFreeLater free_font_cache_path(font_cache_path);
+    
+    if (g_mkdir_with_parents(font_cache_path,0700)!=0)
+    {
+	g_error("FAILED TO CREATE FONT CACHE DIRECTORY '%s'",font_cache_path);
+    }
+    
+    // We write the configuration file that sets the cache directory
+    
+    gchar * font_conf_file_name=g_build_filename(font_cache_path,"fonts.conf",NULL);
+    Util::GFreeLater free_font_conf_file_name(font_conf_file_name);
+    
+    if (!g_file_test(font_conf_file_name,G_FILE_TEST_EXISTS))
+    {
+	gchar * conf=g_strdup_printf("<fontconfig><cachedir>%s</cachedir></fontconfig>",font_cache_path);
+	g_file_set_contents(font_conf_file_name,conf,-1,NULL);
+	g_free(conf);
+    }
+
+    // Create a new configuration
+    
+    FcConfig * config=FcConfigCreate();
+
+    g_assert(config);
+    
+    // Parse and load our tiny configuration file
+    
+    if (FcConfigParseAndLoad(config,(const FcChar8*)font_conf_file_name,FcTrue)==FcFalse)
+    {
+	g_warning("FAILED TO PARSE FONTCONFIG CONFIGURATION FILE");
+    }
+    else
+    {
+	FcConfigAppFontClear(config);
+    
+	g_info("READING FONTS FROM '%s'",fonts_path);
+	
+	// This adds all the fonts in the directory to the cache...it can take
+	// a long time the first time around. Once the cache exists, it will
+	// be very quick.
+    
+	if (FcConfigAppFontAddDir(config,(const FcChar8*)fonts_path)==FcFalse)
+	{
+	    g_warning("FAILED TO READ FONTS");
+	}
+	else
+	{
+	    // This transfers ownership of the config object over to FC, so we
+	    // don't have to destroy it or unref it.
+	    
+	    FcConfigSetCurrent(config);
+	    
+	    config=NULL;
+	    
+	    g_info("FONT CONFIGURATION COMPLETE");
+	}
+    }
+    
+    // If something went wrong, we destroy the config
+    
+    if (config)
+    {
+	FcConfigDestroy(config);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 int TPContext::run()
 {
     //.........................................................................
@@ -190,6 +275,11 @@ int TPContext::run()
     validate_configuration();
     
     //.........................................................................
+    // Setup fonts
+    
+    setup_fonts();
+    
+    //.........................................................................
     // Open the system database
     
     sysdb=SystemDatabase::open(get(TP_DATA_PATH));
@@ -202,6 +292,8 @@ int TPContext::run()
 
     //.........................................................................
     // Scan for apps
+    
+    g_info("SCANNING FOR APPS...");
     
     {
 	bool force=get_bool(TP_SCAN_APP_SOURCES,TP_SCAN_APP_SOURCES_DEFAULT);
@@ -218,6 +310,8 @@ int TPContext::run()
     // Get the current profile from the database and set it into our
     // configuration
     
+    g_info("GETTING CURRENT PROFILE...");
+    
     SystemDatabase::Profile profile=sysdb->get_current_profile();
     set(PROFILE_ID,profile.id);
     set(PROFILE_NAME,profile.name);
@@ -232,6 +326,8 @@ int TPContext::run()
     
     if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
     {
+	g_info("STARTING CONTROLLERS...");
+    
 	// Figure out the name for the controllers service. If one is passed
 	// in to the context, we use it. Otherwise, we look in the database.
 	// If the name is new, we store it in the database.
@@ -262,24 +358,27 @@ int TPContext::run()
 	    sysdb->set(TP_CONTROLLERS_NAME,name);
 	}
 	
-	controllers=new Controllers(name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
+	controllers=new Controllers(this,name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
     }
     
     //.........................................................................
     // Start the console
-
+    
 #ifndef TP_PRODUCTION
 
-    if (get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT))
-    {
-	console=new Console(this,get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
-	console->add_command_handler(console_command_handler,this);
-    }
+    g_info("STARTING CONSOLE...");
+
+    console=new Console(this,
+	get_bool(TP_CONSOLE_ENABLED,TP_CONSOLE_ENABLED_DEFAULT),
+	get_int(TP_TELNET_CONSOLE_PORT,TP_TELNET_CONSOLE_PORT_DEFAULT));
+    console->add_command_handler(console_command_handler,this);
 
 #endif
 
     //.........................................................................
     // Set default size and color for the stage
+    
+    g_info("INITIALIZING STAGE...");
     
     ClutterActor * stage=clutter_stage_get_default();
     
@@ -297,10 +396,14 @@ int TPContext::run()
     //.........................................................................
     // Create the default media player. This may come back NULL.
     
+    g_info("CREATING MEDIA PLAYER...");
+    
     media_player=MediaPlayer::make(media_player_constructor);
     
     //.........................................................................
     // Load the app
+    
+    g_info("LOADING APP...");
     
     notify(TP_NOTIFICATION_APP_LOADING);
     
@@ -337,6 +440,8 @@ int TPContext::run()
 		    
 	    //.................................................................
 	    // Dip into the loop
+	    
+	    g_info("ENTERING MAIN LOOP...");
 	    
 	    clutter_main();
 	
@@ -917,6 +1022,10 @@ Controllers * TPContext::get_controllers() const
 
 void TPContext::key_event(const char * key)
 {
+    typedef std::map<String,guint> KeyMap;
+    
+    static KeyMap key_map;
+
     if (key_map.empty())
     {
 	key_map["UP"	]=CLUTTER_Up;
@@ -931,13 +1040,31 @@ void TPContext::key_event(const char * key)
     if (it==key_map.end())
 	return;
     
+    key_event_keysym(it->second);    
+}
+
+//-----------------------------------------------------------------------------
+
+static gboolean event_pump(gpointer)
+{
+    while(ClutterEvent * event=clutter_event_get())
+    {
+	clutter_do_event (event);
+	clutter_event_free (event);
+    }
+    
+    return FALSE;    
+}
+
+void TPContext::key_event_keysym(guint keysym)
+{
     clutter_threads_enter();
     
     ClutterEvent * event=clutter_event_new(CLUTTER_KEY_PRESS);
     event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
     event->any.time=clutter_get_timestamp();
     event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
-    event->key.keyval=it->second;
+    event->key.keyval=keysym;
     
     clutter_event_put(event);
     
@@ -949,7 +1076,16 @@ void TPContext::key_event(const char * key)
     clutter_event_free(event);
     
     clutter_threads_leave();
+    
+    // TODO
+    // In EGL, there is nothing pumping clutter's event queue, so we add an
+    // idle source to do it. In theory, this should not interfere with other
+    // backends, but that is to be seen.
+    
+    g_idle_add_full(G_PRIORITY_HIGH_IDLE,event_pump,NULL,NULL);
 }
+
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 
@@ -1039,6 +1175,13 @@ void tp_context_free(TPContext * context)
 //-----------------------------------------------------------------------------
 
 void tp_context_set(TPContext * context,const char * key,const char * value)
+{
+    context->set(key,value);    
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_int(TPContext * context,const char * key,int value)
 {
     context->set(key,value);    
 }

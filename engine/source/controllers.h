@@ -5,6 +5,7 @@
 #include "common.h"
 #include "mdns.h"
 #include "server.h"
+#include "context.h"
 
 class Controllers : private Server::Delegate
 {
@@ -13,7 +14,7 @@ public:
     //..........................................................................
     // Pass 0 for the port to have one automatically chosen
     
-    Controllers(const String & name,int port);
+    Controllers(TPContext * context,const String & name,int port);
     ~Controllers();
     
     //..........................................................................
@@ -144,6 +145,10 @@ private:
     typedef std::map<gpointer,ConnectionInfo> ConnectionMap;
     
     ConnectionMap       connections;    
+
+    //..........................................................................
+    
+    TPContext * context;
 };
 
 
