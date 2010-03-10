@@ -1,5 +1,5 @@
 -- Create the logo Image we'll spin
-local logo = Image { size = { screen.w/2, screen.h/2 }, src = "trickplay_logo_dark_bg.svg" }
+local logo = Image { size = { screen.w/2, screen.h/2 }, src = "trickplay_logo_dark_bg.png" }
 
 -- We move the anchor point to the center of the logo so it'll spin in place when we rotate it below
 logo:move_anchor_point( logo.size[1]/2, logo.size[2]/2 )
