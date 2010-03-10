@@ -1045,6 +1045,8 @@ void TPContext::key_event(const char * key)
 
 //-----------------------------------------------------------------------------
 
+#ifdef TP_CLUTTER_BACKEND_EGL
+
 static gboolean event_pump(gpointer)
 {
     while(ClutterEvent * event=clutter_event_get())
@@ -1055,6 +1057,10 @@ static gboolean event_pump(gpointer)
     
     return FALSE;    
 }
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 void TPContext::key_event_keysym(guint keysym)
 {
@@ -1077,15 +1083,15 @@ void TPContext::key_event_keysym(guint keysym)
     
     clutter_threads_leave();
     
-    // TODO
-    // In EGL, there is nothing pumping clutter's event queue, so we add an
-    // idle source to do it. In theory, this should not interfere with other
-    // backends, but that is to be seen.
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
     
     g_idle_add_full(G_PRIORITY_HIGH_IDLE,event_pump,NULL,NULL);
-}
 
-//-----------------------------------------------------------------------------
+#endif
+}
 
 //-----------------------------------------------------------------------------
 
