@@ -19,6 +19,7 @@ TP_FIND_INCLUDE( lua5.1 lua.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-core core.h			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( fontconfig fontconfig.h                ENGINE_INCLUDE_DIRS )
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -57,10 +58,10 @@ set(
 #    gdk_pixbuf-2.0
     
     #--------------
-    # pango/cairo
+    # pango/cairo/fontconfig
     #--------------
     
-    cairo pango-1.0 pangocairo-1.0
+    cairo pango-1.0 pangocairo-1.0 fontconfig
 
     #--------------
     # clutter
