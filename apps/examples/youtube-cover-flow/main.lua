@@ -49,7 +49,6 @@ local airplane = "http://www.tuxpaint.org/stamps/stamps/vehicles/flight/planes/7
 
 dofile("Json.lua")
 
-screen:set{ color = "000000" , size = { 960 , 540 } }
 screen:show_all()
 
 json = URLRequest( "http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites?v=2&alt=json&max-results=20&prettyprint=false" ):perform().body

@@ -49,7 +49,6 @@ local airplane = "http://www.tuxpaint.org/stamps/stamps/vehicles/flight/planes/7
 
 dofile("Json.lua")
 
-screen:set{ color = "000000" , size = { 960 , 540 } }
 screen:show_all()
 
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"

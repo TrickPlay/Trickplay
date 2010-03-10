@@ -1,8 +1,5 @@
-screen:set{ color = "00000000" , size = { 960 , 540 } }
-screen:show_all()
-
 -- Create the logo Image we'll spin
-local logo = Image { size = { screen.w, screen.h }, src = "trickplay_logo_dark_bg.svg" }
+local logo = Image { size = { screen.w/2, screen.h/2 }, src = "trickplay_logo_dark_bg.svg" }
 
 -- We move the anchor point to the center of the logo so it'll spin in place when we rotate it below
 logo:move_anchor_point( logo.size[1]/2, logo.size[2]/2 )
@@ -11,6 +8,8 @@ logo:move_anchor_point( logo.size[1]/2, logo.size[2]/2 )
 logo.position = { screen.w/2, screen.h/2 }
 
 screen:add( logo )
+
+screen:show_all()
 
 function controllers.on_controller_connected(controllers,controller)
     if(controller.has_accelerometer) then
