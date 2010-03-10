@@ -139,17 +139,18 @@ end
 
 local cursor = Rectangle{ color = trickplay_red , opacity = 0 }
 cursor.position , cursor.size = inflate( get_tile_position( selection_col , selection_row ) , { 100 , 100 } , -4 , -4 )
+cursor.z = -1
 
 -- Fetch the first set of images
 -- We pass a callback which itself will load more images once first page is loaded
 -- ...with its own callback to load page 3 as well.  So we basically load the first 3 pages, one at a time at startup.
 populate_next_page({
 							callback = function( self )
+								wall:add( cursor )
 								populate_next_page({
 										callback = function( self )
 											populate_next_page({
 												callback = function( self )
-													wall:add( cursor )
 												end
 											})
 										end
