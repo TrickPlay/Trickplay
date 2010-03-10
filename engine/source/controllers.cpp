@@ -17,10 +17,11 @@ bool Controllers::ControllerInfo::has_accelerometer() const
 
 //-----------------------------------------------------------------------------
 
-Controllers::Controllers(const String & name,int port)
+Controllers::Controllers(TPContext * ctx,const String & name,int port)
 :
     mdns(NULL),
-    server(NULL)
+    server(NULL),
+    context(ctx)
 {
     GError * error=NULL;
     
@@ -341,20 +342,7 @@ void Controllers::process_command(gpointer connection,ControllerInfo & info,gcha
                 {
                     g_debug("GOT KEY %ld",k);
                     
-                    ClutterEvent * event=clutter_event_new(CLUTTER_KEY_PRESS);
-                    event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
-                    event->any.time=clutter_get_timestamp();
-                    event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
-                    event->key.keyval=k;
-                    
-                    clutter_event_put(event);
-                    
-                    event->type=CLUTTER_KEY_RELEASE;
-                    event->any.time=clutter_get_timestamp();
-                    
-                    clutter_event_put(event);
-                    
-                    clutter_event_free(event);
+                    context->key_event_keysym(k);                    
                 }
             }
             break;    
