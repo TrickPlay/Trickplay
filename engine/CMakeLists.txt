@@ -12,14 +12,13 @@ TP_FIND_INCLUDE( glib-2.0 glib.h 			ENGINE_INCLUDE_DIRS )
 TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( pango-1.0 pango/pango.h		ENGINE_INCLUDE_DIRS )
-#TP_FIND_INCLUDE( gtk-2.0 gdk-pixbuf/gdk-pixbuf.h	ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( ImageMagick Magick++.h                 ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( lua5.1 lua.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-core core.h			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( fontconfig fontconfig.h                ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( FreeImage.h                            ENGINE_INCLUDE_DIRS )
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -50,12 +49,6 @@ set(
     #--------------
     
     expat
-    
-    #--------------
-    # gdk
-    #--------------
-
-#    gdk_pixbuf-2.0
     
     #--------------
     # pango/cairo/fontconfig
@@ -103,10 +96,10 @@ set(
     lua
     
     #--------------
-    # ImageMagick
+    # FreeImage
     #--------------
     
-    Magick++    
+    freeimage
 )
 
 foreach( LIB ${ENGINE_LIBRARY_NAMES} )
