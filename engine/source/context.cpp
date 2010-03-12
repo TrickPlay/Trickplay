@@ -155,6 +155,21 @@ int TPContext::console_command_handler(const char * command,const char * paramet
 	    g_strfreev(parts);	    
 	}
     }
+    else if (!strcmp(command,"reload"))
+    {
+	context->reload_app();
+    }
+    else if (!strcmp(command,"close"))
+    {
+	if (!context->current_app)
+	{
+	    g_info("No app loaded");
+	}
+	else
+	{
+	    context->close_current_app();
+	}
+    }
     
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator,ConsoleCommandHandlerMultiMap::const_iterator>
 	range=context->console_command_handlers.equal_range(String(command));
@@ -474,8 +489,11 @@ int TPContext::run()
 	//.....................................................................
 	// Shutdown the app
 		
-	delete current_app;
-	current_app=NULL;
+	if (current_app)
+	{
+	    delete current_app;
+	    current_app=NULL;
+	}
 
 	//.....................................................................
 	// Kill the media player
@@ -618,17 +636,12 @@ gboolean TPContext::launch_app_callback(gpointer app)
     
     TPContext * context=new_app->get_context();
     
+    context->close_current_app();
+    
     if (context->console)
     {
 	context->console->attach_to_lua(new_app->get_lua_state());
     }
-
-    // TODO
-    // We should also reset the controllers
-    
-    context->current_app->animate_out();
-    
-    delete context->current_app;
     
     context->current_app=new_app;
     
@@ -662,9 +675,58 @@ void TPContext::close_app()
 		
 		is_first_app=true;
 	    }
+	    else
+	    {
+		delete new_app;
+	    }
 	}
     }
 }
+
+//-----------------------------------------------------------------------------
+
+void TPContext::close_current_app()
+{
+    if (console)
+    {
+	console->attach_to_lua(NULL);
+    }
+    
+    if (current_app)
+    {
+	current_app->animate_out();
+    
+	delete current_app;
+	
+	current_app=NULL;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::reload_app()
+{
+    App * new_app=NULL;
+    
+    load_app(&new_app);
+    
+    if (!new_app)
+    {
+	g_warning("FAILED TO RELOAD APP");
+    }
+    else
+    {
+	if (new_app->run()==TP_RUN_OK)
+	{
+	    g_idle_add_full(G_PRIORITY_HIGH,launch_app_callback,new_app,NULL);
+	}
+	else
+	{
+	    delete new_app;
+	}
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 

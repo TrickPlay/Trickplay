@@ -105,6 +105,13 @@ public:
     void close_app();
 
     //.........................................................................
+    
+    void reload_app();
+    
+    
+    void close_current_app();
+    
+    //.........................................................................
     // Experimental - injects a key (by name) into Clutter
     // TODO
     
