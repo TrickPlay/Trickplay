@@ -64,15 +64,19 @@ bool load_texture_from_data(ClutterTexture * texture,const void * data,size_t le
     unsigned int bpp=0;
     FIBITMAP * image2=NULL;
     
-    if (FreeImage_IsTransparent(image))
-    {
-	image2=FreeImage_ConvertTo32Bits(image);
-	bpp=32;
-    }
-    else
+    if (!FreeImage_IsTransparent(image))
     {
 	image2=FreeImage_ConvertTo24Bits(image);
 	bpp=24;
+    }
+ 
+    // Use this as a fallback in case we tried to convert it to 24 bits and that
+    // did not work.
+    
+    if (!image2)
+    {
+	image2=FreeImage_ConvertTo32Bits(image);
+	bpp=32;
     }
 
     // Dump the old image
