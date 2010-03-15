@@ -208,6 +208,7 @@ add_library(
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp    
+    ${ENGINE_SRC}/source/signal_collector.cpp    
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c
