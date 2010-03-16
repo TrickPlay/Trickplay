@@ -236,6 +236,11 @@ local image_zoom_back_z = -200
 local wall_zoom_timeline = Timeline{ duration = 250 }
 local wall_zoom_alpha = Alpha{ timeline = wall_zoom_timeline , mode = "EASE_OUT_SINE" }
 
+function controllers.on_controller_connected(controllers, controller)
+	controller:declare_resource("flickr","http://10.0.190.103/flickr.png")
+	controller:set_background("flickr")
+end
+
 function screen.on_key_down(screen,keyval)
 
 	local function reset()
