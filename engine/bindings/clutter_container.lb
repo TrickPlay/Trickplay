@@ -16,8 +16,11 @@ void container_foreach_callback(ClutterActor*actor,lua_State*L)
     ClutterUtil::wrap_concrete_actor(L,actor);
     lua_call(L,1,0);
 }
-
 ]]
+
+/*
+    Interface: Container
+*/
 
 interface container [[ClutterActor*]]
 {

@@ -1,0 +1,120 @@
+module clutter_alpha;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp);
+void Alpha_on_alpha_destroy(gpointer lsp);
+
+extern int wrap_Timeline(lua_State*L,ClutterTimeline* self);
+
+]]
+
+/*
+    Class: Alpha 
+*/
+
+class Alpha [[ClutterAlpha*]]
+{
+    Alpha(table props = 0)
+	[[
+	    *self=clutter_alpha_new();
+	    g_object_ref_sink(G_OBJECT(*self));
+    	    ClutterUtil::set_props_from_table(L,props);
+	]];
+
+    
+    ~Alpha()
+	[[
+	    g_object_unref(G_OBJECT(self));
+	]];
+	
+    udata timeline
+	[[
+	    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
+	    if(wrap_Timeline(L,timeline))
+		g_object_ref(G_OBJECT(timeline));
+	]]
+	[[
+	    luaL_checkudata(L,-1,"TIMELINE_METATABLE");
+	    void * udata=lua_touserdata(L,-1);
+	    if (udata)
+	    {
+		GObject * timeline=*((GObject**)udata);
+		
+		if (timeline && CLUTTER_IS_TIMELINE(timeline))
+		    clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
+	    }
+	]];
+	
+    string mode
+	[[
+	    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+	    GEnumValue * v  = g_enum_get_value(ec,clutter_alpha_get_mode(self));
+	    mode = (v?&(v->value_name[8]):"");
+	    g_type_class_unref(ec);	    
+	]]
+	[[
+	    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+	    std::string cm("CLUTTER_");
+	    cm+= mode;
+	    
+	    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
+	    
+	    if(!v)
+		luaL_error(L,"Invalid alpha mode '%s'",mode);
+		
+		
+	    clutter_alpha_set_mode(self,v->value);
+	    g_type_class_unref(ec);
+	]];
+	
+    readonly double alpha
+	[[alpha=clutter_alpha_get_alpha(self);]];
+	
+    callback on_alpha
+	[[
+	    clutter_alpha_set_func(self,NULL,NULL,NULL);
+	    if (on_alpha)
+	    {
+		clutter_alpha_set_func(
+		    self,
+		    Alpha_on_alpha,
+		    App::get(L)->ref_lua_state_proxy(),
+		    Alpha_on_alpha_destroy);
+	    }
+	]];	    
+}
+
+[[
+
+void Alpha_on_alpha_destroy(gpointer lsp)
+{
+    ((LuaStateProxy*)lsp)->unref();
+}
+
+gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp)
+{
+    lua_State * L=((LuaStateProxy*)lsp)->get_lua_state();
+    
+    if (!L)
+    {
+	return 0;
+    }
+    
+    lua_pushnumber(L,clutter_timeline_get_progress(clutter_alpha_get_timeline(self)));
+    
+    invoke_Alpha_on_alpha(L,self,1,1);
+    
+    gdouble result(lua_tonumber(L,-1));
+    lua_pop(L,1);
+    
+    return result;    
+}
+]]

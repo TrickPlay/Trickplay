@@ -8,6 +8,10 @@ module clutter_rectangle;
 #include "clutter_util.h"
 ]]
 
+/*
+    Class: Rectangle 
+*/
+
 class Rectangle [[ClutterActor*]] actor
 {
     Rectangle(table props = 0)

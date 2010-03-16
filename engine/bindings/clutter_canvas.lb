@@ -31,6 +31,10 @@ void destroy_cairo_t(gpointer t)
 
 ]]
 
+/*
+    Class: Canvas
+*/
+
 class Canvas [[ClutterActor*]] actor
 {
     Canvas(table props=0)

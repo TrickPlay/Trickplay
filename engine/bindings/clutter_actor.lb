@@ -146,6 +146,11 @@ static void actor_animation_completed(ClutterAnimation * animation,lua_State * L
 
 ]]
 
+/*
+    Interface: UI Element 
+ 
+*/
+
 interface actor [[ClutterActor*]]
 {
     string name

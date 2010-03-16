@@ -1,0 +1,50 @@
+module clutter_interval;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+struct interval
+{
+    interval(double aa , double bb) : a(aa),b(bb) {}
+    double a;
+    double b;
+};
+]]
+
+/*
+    Class: Interval
+*/
+
+class Interval [[interval*]]
+{
+    Interval( double from , double to )
+	[[
+	    *self = new interval(from,to);
+	]];
+    
+    ~Interval()
+	[[
+	    delete self;
+	]];
+	
+    double get_value(double factor)
+	[[
+	    result=(factor*(self->b-self->a))+self->a;
+	]];
+	
+    double from
+	[[from=self->a;]]
+	[[self->a=from;]];
+	
+    double to
+	[[to=self->b;]]
+	[[self->b=to;]];
+    
+}
+
