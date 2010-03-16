@@ -42,21 +42,18 @@ function controllers.on_controller_connected(controllers,controller)
 
 end
 
-local key_enter = 65293
-local key_left = 65361
-local key_right = 65363
 
 
 local key_handlers =	{
-				[key_enter] =
+				[keys.Return] =
 							function ()
 								player.reset()
 							end,
-				[key_left]  =
+				[keys.Left]  =
 							function ()
 								momentum_adjust(-1)
 							end,
-				[key_right] =
+				[keys.Right] =
 							function ()
 								momentum_adjust(1)
 							end
