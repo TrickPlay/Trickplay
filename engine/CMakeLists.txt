@@ -166,7 +166,17 @@ set(
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/mediaplayer.lb
-    ${BINDINGS_SRC}/clutter.lb
+
+    ${BINDINGS_SRC}/clutter_actor.lb
+    ${BINDINGS_SRC}/clutter_container.lb
+    ${BINDINGS_SRC}/clutter_screen.lb
+    ${BINDINGS_SRC}/clutter_text.lb
+    ${BINDINGS_SRC}/clutter_rectangle.lb
+    ${BINDINGS_SRC}/clutter_clone.lb
+    ${BINDINGS_SRC}/clutter_group.lb
+    ${BINDINGS_SRC}/clutter_image.lb
+    ${BINDINGS_SRC}/clutter_canvas.lb
+    ${BINDINGS_SRC}/clutter_animation.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )

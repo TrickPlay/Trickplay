@@ -1,0 +1,231 @@
+module clutter_text;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+void Text_on_text_changed(ClutterText*text,lua_State*L);
+]]
+
+class Text [[ClutterActor*]] actor
+{
+    Text(table props =0)
+        [[
+            *self = clutter_text_new();
+	    ClutterUtil::initialize_actor(L,*self,TEXT_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Text()
+	[[
+            g_object_unref(G_OBJECT(self));
+        ]];
+    
+    table color
+        [[
+            ClutterColor color;
+            clutter_text_get_color(CLUTTER_TEXT(self),&color);
+            ClutterUtil::push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            ClutterUtil::to_clutter_color(L,2,&color);
+            clutter_text_set_color(CLUTTER_TEXT(self),&color);
+        ]];
+        
+    string text
+        [[text=clutter_text_get_text(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_text(CLUTTER_TEXT(self),text);]];
+        
+    string markup
+        [[
+            // markup doesn't have a getter
+            markup=clutter_text_get_text(CLUTTER_TEXT(self));
+        ]]
+        [[clutter_text_set_markup(CLUTTER_TEXT(self),markup);]];
+        
+    string font
+        [[font=clutter_text_get_font_name(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_font_name(CLUTTER_TEXT(self),font);]];
+        
+    bool justify
+        [[justify=clutter_text_get_justify(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_justify(CLUTTER_TEXT(self),justify);]];
+        
+    bool wrap
+        [[wrap=clutter_text_get_line_wrap(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_line_wrap(CLUTTER_TEXT(self),wrap);]];
+        
+    bool use_markup
+        [[use_markup=clutter_text_get_use_markup(CLUTTER_TEXT(self));]]
+        [[clutter_text_set_use_markup(CLUTTER_TEXT(self),use_markup);]];
+	
+    string ellipsize
+	[[
+	    switch(clutter_text_get_ellipsize(CLUTTER_TEXT(self)))
+	    {
+		case PANGO_ELLIPSIZE_START:
+		    ellipsize="START";
+		    break;
+		case PANGO_ELLIPSIZE_MIDDLE:
+		    ellipsize="MIDDLE";
+		    break;
+		case PANGO_ELLIPSIZE_END:
+		    ellipsize="END";
+		    break;
+		default:
+		    ellipsize="NONE";
+	    }
+	]]
+	[[
+	    PangoEllipsizeMode mode = PANGO_ELLIPSIZE_NONE;
+	    if(!strcmp(ellipsize,"START"))
+		mode = PANGO_ELLIPSIZE_START;
+	    else if(!strcmp(ellipsize,"MIDDLE"))
+		mode = PANGO_ELLIPSIZE_MIDDLE;
+	    else if(!strcmp(ellipsize,"END"))
+		mode = PANGO_ELLIPSIZE_END;
+	    else if(!strcmp(ellipsize,"NONE"))
+		mode = PANGO_ELLIPSIZE_NONE;
+	    else
+		luaL_error(L,"Invalid ellipsize '%s'",ellipsize);
+	    clutter_text_set_ellipsize(CLUTTER_TEXT(self),mode);	
+	]];
+	
+    string alignment
+	[[
+	    switch(clutter_text_get_line_alignment(CLUTTER_TEXT(self)))
+	    {
+		case PANGO_ALIGN_CENTER:
+		    alignment="CENTER";
+		    break;
+		case PANGO_ALIGN_RIGHT:
+		    alignment="RIGHT";
+		    break;
+		default:
+		    alignment="LEFT";
+	    }	    
+	]]
+	[[
+	    PangoAlignment a=PANGO_ALIGN_LEFT;
+	    if(!strcmp(alignment,"LEFT"))
+		a=PANGO_ALIGN_LEFT;
+	    else if(!strcmp(alignment,"CENTER"))
+		a=PANGO_ALIGN_CENTER;
+	    else if(!strcmp(alignment,"RIGHT"))
+		a=PANGO_ALIGN_RIGHT;
+	    else
+		luaL_error(L,"Invalid alignment '%s'",alignment);
+	    clutter_text_set_line_alignment(CLUTTER_TEXT(self),a);
+	]];
+	
+    int max_length
+	[[max_length=clutter_text_get_max_length(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_max_length(CLUTTER_TEXT(self),max_length);]];
+	
+    set_selection( int start_pos , int end_pos )
+	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
+	    
+    readonly string selected_text
+	[[
+	    gchar * s = clutter_text_get_selection(CLUTTER_TEXT(self));
+	    selected_text = s;	    
+	    Util::GFreeLater later(s);	    
+	]];
+	
+    int selection_end
+	[[selection_end=clutter_text_get_selection_bound(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_selection_bound(CLUTTER_TEXT(self),selection_end);]];
+	
+    bool single_line
+	[[single_line=clutter_text_get_single_line_mode(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_single_line_mode(CLUTTER_TEXT(self),single_line);]];
+	
+    bool editable
+	[[editable=clutter_text_get_editable(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_editable(CLUTTER_TEXT(self),editable);]];
+	
+    insert_text( int pos , string text )
+	[[clutter_text_insert_text(CLUTTER_TEXT(self),text,pos);]];
+	
+    delete_chars( int count )
+	[[clutter_text_delete_chars(CLUTTER_TEXT(self),count);]];
+	
+    delete_text( int start_pos , int end_pos )
+	[[clutter_text_delete_text(CLUTTER_TEXT(self),start_pos,end_pos);]];
+	
+    bool delete_selection()
+	[[result=clutter_text_delete_selection(CLUTTER_TEXT(self));]];
+	
+    string get_chars( int start_pos , int end_pos )
+	[[
+	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
+	    result = c;
+	    Util::GFreeLater later(c);
+	]];
+	
+    table cursor_color
+	[[
+	    ClutterColor color;
+	    clutter_text_get_cursor_color(CLUTTER_TEXT(self),&color);
+	    ClutterUtil::push_clutter_color(L,&color);
+	]]
+	[[
+	    ClutterColor color;
+	    ClutterUtil::to_clutter_color(L,2,&color);
+	    clutter_text_set_cursor_color(CLUTTER_TEXT(self),&color);
+	]];
+	
+    table selection_color
+	[[
+	    ClutterColor color;
+	    clutter_text_get_selection_color(CLUTTER_TEXT(self),&color);
+	    ClutterUtil::push_clutter_color(L,&color);
+	]]
+	[[
+	    ClutterColor color;
+	    ClutterUtil::to_clutter_color(L,2,&color);
+	    clutter_text_set_selection_color(CLUTTER_TEXT(self),&color);
+	]];
+	
+    int cursor_position
+	[[cursor_position=clutter_text_get_cursor_position(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_cursor_position(CLUTTER_TEXT(self),cursor_position);]];
+	
+    bool cursor_visible
+	[[cursor_visible=clutter_text_get_cursor_visible(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_cursor_visible(CLUTTER_TEXT(self),cursor_visible);]];
+    
+    int cursor_size
+	[[cursor_size=clutter_text_get_cursor_size(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_cursor_size(CLUTTER_TEXT(self),cursor_size);]];
+	
+    bool wants_enter
+	[[wants_enter=!clutter_text_get_activatable(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_activatable(CLUTTER_TEXT(self),!wants_enter);]];
+	
+    int password_char
+	[[password_char=clutter_text_get_password_char(CLUTTER_TEXT(self));]]
+	[[clutter_text_set_password_char(CLUTTER_TEXT(self),password_char);]];
+	
+    callback on_text_changed
+	[[
+	    SignalCollector::get(L)->connect_if(
+		on_text_changed,"on_text_changed",
+		self,"text-changed",G_CALLBACK(Text_on_text_changed),L);	    
+	]];
+}
+
+[[
+void Text_on_text_changed(ClutterText*text,lua_State*L)
+{
+    invoke_Text_on_text_changed(L,CLUTTER_ACTOR(text),0,0);
+}
+]]
+
