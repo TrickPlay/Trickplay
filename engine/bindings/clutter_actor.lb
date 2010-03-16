@@ -147,47 +147,127 @@ static void actor_animation_completed(ClutterAnimation * animation,lua_State * L
 ]]
 
 /*
-    Interface: UI Element 
+    Interface: UI Element
+    
+    This is an interface that is supported by all UI classes, including screen.
  
 */
 
 interface actor [[ClutterActor*]]
 {
+    /*
+	Property: name
+	
+	Lets you set a name for this element.
+    */
+    
     string name
         [[name=clutter_actor_get_name(self);]]
         [[clutter_actor_set_name(self,name);]];
-        
+    
+    /*
+	Property: gid
+	
+	Every UI element has a unique identifier that is assigned automatically.
+    */
+    
     readonly long gid
         [[gid=clutter_actor_get_gid(self);]];
+    
+    /*
+	Property: x
+	
+	The x coodinate of the UI element.
+    */
     
     double x
         [[ x = clutter_actor_get_x( self ); ]]
         [[ clutter_actor_set_x( self , x ); ]];
     
+    /*
+	Property: y
+	
+	The y coordinate of the UI element.
+    */
+    
     double y
         [[ y = clutter_actor_get_y( self ); ]]
         [[ clutter_actor_set_y( self , y ); ]];
+    
+    /*
+	Property: z
+	
+	The z coordinate of the UI element. Negative z is farther away.
+    */
     
     double z
         [[ z = clutter_actor_get_depth( self ); ]]
         [[ clutter_actor_set_depth( self , z ); ]];
 
+    /*
+	Property: depth
+	
+	Another name for the z coordinate.
+    */
+    
+    double depth
+        [[depth=clutter_actor_get_depth(self);]]
+        [[clutter_actor_set_depth(self,depth);]];
+	
+    /*
+	Property: w
+	
+	The width of the UI element.
+    */
+    
     double w
         [[ w = clutter_actor_get_width( self ); ]]
         [[ clutter_actor_set_width( self , w ); ]];
+    
+    /*
+	Property: h
+	
+	The height of the UI element.
+    */
     
     double h
         [[ h = clutter_actor_get_height( self ); ]]
         [[ clutter_actor_set_height( self , h ); ]];
 
+    /*
+	Property: width
+	
+	Another name for the width of the UI element.
+    */
+    
     double width
         [[ width = clutter_actor_get_width( self ); ]]
         [[ clutter_actor_set_width( self , width ); ]];
+    
+    /*
+	Property: height
+	
+	Another name for the height of the UI element.
+    */
     
     double height
         [[ height = clutter_actor_get_height( self ); ]]
         [[ clutter_actor_set_height( self , height ); ]];
 
+    /*
+	Property: position
+	
+	A way to set the x and y coordinates of the UI element using a table.
+	
+	> element.position={10,20}
+	
+	Is the same as
+	
+	> element.x=10
+	> element.y=20
+	
+    */
+    
     table position
         [[
             lua_newtable(L);
@@ -207,7 +287,18 @@ interface actor [[ClutterActor*]]
 	    clutter_actor_set_depth(self,lua_tonumber(L,-1));
             lua_pop(L,3);
         ]];
-        
+            
+    /*
+	Property: anchor_point
+	
+	The handle to the UI element. All UI elements have their handle set to
+	0,0 initially. You can change this using the anchor_point property. A
+	common thing to do is to set the anchor point to the center of the UI
+	element, like this:
+	
+	> element.anchor_point={element.w/2,element.h/2}
+    */
+    
     table anchor_point
         [[
 	    gfloat x;
@@ -227,6 +318,12 @@ interface actor [[ClutterActor*]]
             lua_pop(L,2);
         ]];
 	
+    /*
+	Property: size
+	
+	The width and height of the UI element in a table. 
+    */
+        
     table size
         [[
             lua_newtable(L);
@@ -243,6 +340,15 @@ interface actor [[ClutterActor*]]
             lua_pop(L,2);
         ]];
         
+    /*
+	Property: scale
+	
+	The x and y scale of the UI element. For example, you can double the
+	scale of an element like this:
+	
+	> element.scale={2,2}
+    */
+    
     table scale
         [[
             gdouble scalex;
@@ -275,6 +381,16 @@ interface actor [[ClutterActor*]]
             lua_pop(L,4);
         ]];
         
+    /*
+	Property: x_rotation
+	
+	Rotation about the y axis. This is a table that has 3 entries: the rotation
+	angle in degrees, the y coordinate and the z coordinate for the center of
+	rotation. You can flip an element about the x axis like this:
+	
+	> element.x_rotation={-180,element.h,0}		
+    */
+        
     table x_rotation
         [[
             gfloat x;
@@ -298,6 +414,14 @@ interface actor [[ClutterActor*]]
             lua_pop(L,3);
         ]];
 
+    /*
+	Property: y_rotation
+	
+	Rotation about the y axis. This is a table that has 3 entries: the rotation
+	angle in degrees, the x coordinate and the z coordinate for the center of
+	rotation.
+    */
+    
     table y_rotation
         [[
             gfloat x;
@@ -321,6 +445,14 @@ interface actor [[ClutterActor*]]
             lua_pop(L,3);
         ]];
         
+    /*
+	Property: z_rotation
+	
+	Rotation about the z axis. This is a table that has 3 entries: the rotation
+	angle in degrees, the x coordinate and the y coordinate for the center of
+	rotation.
+    */
+
     table z_rotation
         [[
             gfloat x;
@@ -345,16 +477,46 @@ interface actor [[ClutterActor*]]
         ]];
         
         
+    /*
+	Property: is_scaled
+	
+	Returns true if the UI element is scaled.
+    */
+
     readonly bool is_scaled
         [[is_scaled=clutter_actor_is_scaled(self);]];
         
+    /*
+	Property: is_rotated
+	
+	Returns true if the UI element is rotated.
+    */
+
     readonly bool is_rotated
         [[is_rotated=clutter_actor_is_rotated(self);]];
         
+    /*
+	Property: opacity
+	
+	This is a number that specifies the transparency of a UI element. It
+	ranges from 0 (fully transparent) to 255 (fully opaque).
+    */
+
     int opacity
         [[opacity=clutter_actor_get_opacity(self);]]
         [[clutter_actor_set_opacity(self,opacity);]];
         
+    /*
+	Property: clip
+	
+	This is a table with x,y,width and height for a clipping rectangle. If
+	set, anything painted outside those bounds won't be visible. By
+	default, UI elements are not clipped, so their contents can spill outside
+	their bounds. You can clip an element like this:
+	
+	> element.clip={0,0,element.w,element.h}
+    */
+
     table clip
         [[
             if (!clutter_actor_has_clip(self))
@@ -396,99 +558,45 @@ interface actor [[ClutterActor*]]
             }
         ]];
         
+    /*
+	Property: has_clip
+	
+	Returns true if the element is clipped.
+    */
+
     readonly bool has_clip
         [[has_clip=clutter_actor_has_clip(self);]];
         
-    double depth
-        [[depth=clutter_actor_get_depth(self);]]
-        [[clutter_actor_set_depth(self,depth);]];
+    /*
+	Property: parent
 	
-    udata set(table props)
-	[[
-	    ClutterUtil::set_props_from_table(L,props);
-	    lua_pushvalue(L,1);
-	]];
-#if 0	
-    string valign
-	[[
-	    valign=(const char *)g_object_get_data(G_OBJECT(self),"tp-valign");    
-	]]
-	[[
-	    g_object_set_data_full(G_OBJECT(self),"tp-valign",g_strdup(valign),g_free);
-	]];
-
-    string halign
-	[[
-	    halign=(const char *)g_object_get_data(G_OBJECT(self),"tp-halign");    
-	]]
-	[[
-	    g_object_set_data_full(G_OBJECT(self),"tp-halign",g_strdup(halign),g_free);
-	]];
-#endif
-    show()
-        [[clutter_actor_show(self);]];
-        
-    show_all()
-        [[clutter_actor_show_all(self);]];
-        
-    hide()
-        [[clutter_actor_hide(self);]];
-        
-    hide_all()
-        [[clutter_actor_hide_all(self);]];
-	
-    move_by( double dx , double dy )
-	[[clutter_actor_move_by(self,dx,dy);]];
-	
+	If this UI element is inside a container, this property returns the
+	container. Otherwise, it returns nil.
+    */
+    
     readonly udata parent
 	[[ClutterUtil::wrap_concrete_actor(L,clutter_actor_get_parent(self));]];
 	
-    unparent()
-	[[
-	    if(ClutterActor * parent=clutter_actor_get_parent(self))
-	    {
-		clutter_container_remove_actor(CLUTTER_CONTAINER(parent),self);
-	    }
-	]];
+
+    /*
+	Property: reactive
 	
-    raise( udata above )
-	[[
-	    ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
-	    if(source)
-	    {
-		clutter_actor_raise(self,source);
-	    }
-	]];
+	Wether the UI element will react to events.
 	
-    lower( udata below )
-	[[
-	    ClutterActor* source=ClutterUtil::user_data_to_actor(L,below);
-	    if (source)
-	    {
-		clutter_actor_lower(self,source);
-	    }
-	]];
-	
-    raise_to_top()
-	[[
-	    clutter_actor_raise_top(self);    
-	]];
-	
-    lower_to_bottom()
-	[[
-	    clutter_actor_lower_bottom(self);    
-	]];
-	
-    move_anchor_point( double x , double y )
-	[[clutter_actor_move_anchor_point(self,x,y);]];
-	
-    grab_key_focus()
-	[[clutter_actor_grab_key_focus(self);]];
-	
+	TODO:explain
+    */
+    
     bool reactive
 	[[reactive=clutter_actor_get_reactive(self);]]
 	[[clutter_actor_set_reactive(self,reactive);]];
 	
+    /*
+	Property: transformed_size
+	
+	This is a table that has the width and height of the UI element after it
+	has been transformed. It may be an approximation if the element is rotated.
+    */
+    
     readonly table transformed_size
 	[[
 	    gfloat w;
@@ -501,6 +609,12 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
+    /*
+	Property: transformed_position
+	
+	The x and y coordinates of the UI element after it has been transformed.
+    */
+    
     readonly table transformed_position
 	[[
 	    gfloat x;
@@ -513,6 +627,15 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
+    /*
+	Property: min_size
+	
+	This is either the preferred size of a UI element or its natural size,
+	depending on how the element is transformed.
+	
+	TODO:explain
+    */
+    
     readonly table min_size
 	[[
 	    gfloat mw;
@@ -528,6 +651,13 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 
+    /*
+	Property: natural_size
+	
+	This is the original, or natural size of a UI element. For example, it
+	may be an image's orginal size before it was transformed.
+    */
+    
     readonly table natural_size
 	[[
 	    gfloat mw;
@@ -543,6 +673,21 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
+    /*
+	Property: extra
+	
+	This is a table that lets you add whatever you want to a UI element. By
+	default it is empty. TrickPlay ignores anything you attach to this
+	property, that is, it does not affect any behavior.
+	
+	Just be aware that anything you attach to the extra property will remain
+	"alive" as long as the element is alive.
+	
+	> element.extra.foo="bar"
+	> print(element.extra.foo)
+	
+    */
+    
     table extra
 	[[
 	    ClutterUtil::Extra * e = (ClutterUtil::Extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
@@ -568,6 +713,18 @@ interface actor [[ClutterActor*]]
 	    }
 	]];
 	
+    /*
+	Property: request_mode
+	
+	Mostly useful for images, this lets you specify how to resize UI elements.
+	It can have one of two values:
+	
+	"HEIGHT_FOR_WIDTH" - In this case, given a width, the height is
+			    computed automatically.
+			    
+	"WIDTH_FOR_HEIGHT" - Given a new height, the width is calculated.
+    */
+    
     string request_mode
 	[[
 	    ClutterRequestMode mode;
@@ -594,6 +751,244 @@ interface actor [[ClutterActor*]]
 		luaL_error(L,"Invalid request mode '%s'",request_mode);
 	    g_object_set(G_OBJECT(self),"request-mode",mode,NULL);
 	]];
+
+    /*
+	Property: is_animating
+	
+	Returns true if the UI element is being animated using the <animate>
+	function.	
+    */
+    
+    readonly bool is_animating
+	[[
+	    is_animating=clutter_actor_get_animation(self)!=NULL;    
+	]];
+
+
+    /*
+	Function: set
+	
+	This allows you to set any properties on a UI element using a table, the
+	same way that you construct a UI element. For example:
+	
+	> element:set{size={100,100},position={10,15}}
+	
+	Arguments:
+	
+	props - A table of properties and values to set on the UI element.
+	
+	Returns:
+	
+	element - The UI element that it was called on, so you can chain calls.
+    */
+
+    udata set(table props)
+	[[
+	    ClutterUtil::set_props_from_table(L,props);
+	    lua_pushvalue(L,1);
+	]];
+
+    /*
+	Function: show
+	
+	Shows the UI element.
+    */
+
+    show()
+        [[clutter_actor_show(self);]];
+        
+    /*
+	Function: show_all
+	
+	Shows the UI element and any children that were previously hidden.
+    */
+
+    show_all()
+        [[clutter_actor_show_all(self);]];
+        
+    /*
+	Function: hide
+	
+	Hides the UI element.
+    */
+
+    hide()
+        [[clutter_actor_hide(self);]];
+        
+    /*
+	Function: hide_all
+	
+	Hides the UI element and all of its children.
+    */
+
+    hide_all()
+        [[clutter_actor_hide_all(self);]];
+	
+    /*
+	Function: move_by
+	
+	Lets you change the position of the element using relative distance.
+	
+	Arguments:
+	
+	dx - How many pixels to move in the x direction.
+	dy - How many pixels to move in the y direction.
+    */
+
+    move_by( double dx , double dy )
+	[[clutter_actor_move_by(self,dx,dy);]];
+	
+    /*
+	Function: unparent
+	
+	If the UI element has a parent, this function removes the element from
+	its parent.
+    */
+
+    unparent()
+	[[
+	    if(ClutterActor * parent=clutter_actor_get_parent(self))
+	    {
+		clutter_container_remove_actor(CLUTTER_CONTAINER(parent),self);
+	    }
+	]];
+	
+    /*
+	Function: raise
+	
+	Raises the UI element above the one you pass in.
+	
+	Arguments:
+	
+	above - Another UI element that will end up just below this one.
+    */
+
+    raise( udata above )
+	[[
+	    ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
+	    if(source)
+	    {
+		clutter_actor_raise(self,source);
+	    }
+	]];
+	
+    /*
+	Function: lower
+	
+	Lowers the UI element below another one.
+	
+	Arguments:
+	
+	below - Another UI element that will end up just above this one.
+    */
+
+    lower( udata below )
+	[[
+	    ClutterActor* source=ClutterUtil::user_data_to_actor(L,below);
+	    if (source)
+	    {
+		clutter_actor_lower(self,source);
+	    }
+	]];
+	
+    /*
+	Function: raise_to_top
+	
+	Raises this element to the top.
+    */
+
+    raise_to_top()
+	[[
+	    clutter_actor_raise_top(self);    
+	]];
+	
+    /*
+	Function: lower_to_bottom
+	
+	Lowers this element to the bottom.
+    */
+
+    lower_to_bottom()
+	[[
+	    clutter_actor_lower_bottom(self);    
+	]];
+	
+    /*
+	Function: move_anchor_point
+	
+	Moves the anchor point to a new position within the UI element without
+	moving the UI element.
+	
+	Arguments:
+	
+	x - The new x coordinate of the anchor point.
+	y - The new y coordinate of the anchor point.
+    */
+
+    move_anchor_point( double x , double y )
+	[[clutter_actor_move_anchor_point(self,x,y);]];
+	
+    /*
+	Function: grab_key_focus
+	
+	Causes this element to receive input events. By default, all input events
+	are sent to the screen.
+    */
+
+    grab_key_focus()
+	[[clutter_actor_grab_key_focus(self);]];
+	
+    
+    /*
+	Function: animate
+	
+	This function lets you animate a UI element. The function accepts a table
+	with parameters that control the animation, for example:
+	
+	> element:animate{duration=1000,x=300,opacity=0}
+	
+	This will move the element to 300 and make it completely transparent
+	over a duration of 1 second.
+	
+	All properties are animated from their current values to the ones you
+	specify.
+	
+	Here are the possible values:
+	
+	duration - Required. How long the animation will run, in milliseconds.
+	
+	mode - A string describing the progression of the animation. TODO: explain and list.
+	
+	loop - If true, the animation will loop forever and will never call the
+		on_completed callback.
+		
+	on_completed - A function that is called when the animation is finished.
+	
+	x - The final x coordinate for the element.
+	
+	y - The final y coordinate.
+	
+	z or depth - The final z coordinate.
+
+	w or width - The final width.
+	
+	h or height - The final height.
+
+	opacity - The final opacity of the element (0-255).
+	
+	position - An alternative way to specify both x and y as a table.
+	
+	size - An alternative way to specify both width and height as a table.
+	
+	scale - A table with two values, one for the final x scale and another for
+		the final y scale of the element.
+		
+	x_rotation - The final angle of rotation around the x axis.
+	
+	y_rotation - The final angle of rotation around the y axis.
+	
+	z_rotation - The final angle of rotation around the z axis.	
+    */
 
     animate(table props)
 	[[
@@ -815,6 +1210,22 @@ interface actor [[ClutterActor*]]
 	    g_ptr_array_free(names,TRUE);
 	]];
 	
+	
+    /*
+	Function: complete_animation
+	
+	If the element is being animated using the <animate> function, you can
+	finish it early by calling complete_animation. All properties that were
+	animated will receive their final values and the on_completed callback,
+	if you set one, will be called.
+	
+	Returns:
+	
+	true - If the element was being animated.
+	false - Otherwise.
+	
+    */
+
     bool complete_animation()
 	[[
 	    ClutterAnimation * animation=clutter_actor_get_animation(self);
@@ -830,10 +1241,15 @@ interface actor [[ClutterActor*]]
 	    }
 	]];
 	
-    readonly bool is_animating
-	[[
-	    is_animating=clutter_actor_get_animation(self)!=NULL;    
-	]];
+    /*
+	Event: on_key_focus_in
+	
+	This event is fired whenever this UI element receives key focus.
+	
+	Arguments:
+	
+	self - The UI element.
+    */
 
     callback on_key_focus_in
 	[[
@@ -842,6 +1258,16 @@ interface actor [[ClutterActor*]]
 		self,"key-focus-in",G_CALLBACK(actor_on_key_focus_in),L);
 	]];
 
+    /*
+	Event: on_key_focus_out
+	
+	This event is fired when the UI element loses key focus.
+	
+	Arguments:
+	
+	self - The UI element.
+    */
+
     callback on_key_focus_out
 	[[
 	    SignalCollector::get(L)->connect_if(
@@ -849,6 +1275,20 @@ interface actor [[ClutterActor*]]
 		self,"key-focus-out",G_CALLBACK(actor_on_key_focus_out),L);
 	]];
 	
+    /*
+	Event: on_key_down
+	
+	This event fires when the element receives a key down.
+	
+	Arguments:
+	
+	self - The actor that received the event.
+	keyval - An integer key value. This can be compared with the <keys> global.
+	unicode - The unicode character, if any.
+	time - The time at which the event was generated.
+	
+    */
+
     callback on_key_down
 	[[
 	    SignalCollector::get(L)->connect_if(
@@ -856,6 +1296,20 @@ interface actor [[ClutterActor*]]
 		self,"key-press-event",G_CALLBACK(actor_on_key_down),L);	    
 	]];
 	
+    /*
+	Event: on_key_up
+	
+	This event fires when the element receives a key up.
+	
+	Arguments:
+	
+	self - The actor that received the event.
+	keyval - An integer key value. This can be compared with the <keys> global.
+	unicode - The unicode character, if any.
+	time - The time at which the event was generated.
+	
+    */
+
     callback on_key_up
 	[[
 	    SignalCollector::get(L)->connect_if(
@@ -883,7 +1337,17 @@ interface actor [[ClutterActor*]]
 		on_button_up,"on_button_up",
 		self,"button-release-event",G_CALLBACK(actor_on_button_up),L);	    
 	]];
+
+    /*
+	Event: on_show
 	
+	This event fires when the UI element is shown.
+	
+	Arguments:
+	
+	self - The UI element.
+    */
+    
     callback on_show
 	[[
 	    SignalCollector::get(L)->connect_if(
@@ -891,6 +1355,16 @@ interface actor [[ClutterActor*]]
 		self,"show",G_CALLBACK(actor_on_show),L);	    	    
 	]];
 	
+    /*
+	Event: on_hide
+	
+	This event fires when the UI element is hidden.
+	
+	Arguments:
+	
+	self - The UI element.
+    */
+    
     callback on_hide
 	[[
 	    SignalCollector::get(L)->connect_if(
