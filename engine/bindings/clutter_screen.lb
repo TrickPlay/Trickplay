@@ -1,0 +1,155 @@
+module clutter_screen;
+
+[[
+#include "clutter/clutter.h"
+
+#include "context.h"
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+#ifndef TP_PRODUCTION
+
+gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
+{
+    ClutterKeyEvent * k=(ClutterKeyEvent*)event;
+    
+    if (k->keyval==CLUTTER_Escape)
+    {
+	App::get(L)->get_context()->close_app();
+	return TRUE;
+    }
+    return FALSE;    
+}
+
+#endif
+
+
+]]
+
+global screen [[ClutterActor*]] actor , container
+{
+    screen()
+	[[
+	    *self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid());
+	    
+	    g_object_ref(G_OBJECT(*self));
+	    
+	    ClutterUtil::initialize_actor(L,*self,SCREEN_METATABLE);
+	    	    	    
+#ifndef TP_PRODUCTION
+	    SignalCollector::get(L)->connect(
+		"screen-quit",*self,"key-press-event",G_CALLBACK(Stage_quit),L);
+#endif
+	]];
+    
+    ~screen()
+	[[
+	    g_object_unref(G_OBJECT(self));
+	]];
+
+    #..........................................................................
+    # We have to override these from regular actors, so that app developers
+    # cannot reach outside their screen
+    
+    show()
+        [[
+	    clutter_actor_show(self);
+	    // Show the stage as well
+	    clutter_actor_show(clutter_stage_get_default());
+	]];
+        
+    show_all()
+        [[
+	    clutter_actor_show_all(self);
+	    // Show the stage as well
+	    clutter_actor_show(clutter_stage_get_default());
+	]];
+	
+    readonly udata parent
+	[[
+	    lua_pushnil(L);
+	]];
+	
+    unparent()
+	[[
+	    // Cannot let the app developer remove his screen from the stage,
+	    // because he would not have a way to put it back
+	]];
+	
+    #..........................................................................	
+    # These are stage properties
+    
+    # TODO
+    # This can potentionally let an app get an actor outside its group, so I'll
+    # have to rework it.
+    
+    /*
+    udata key_focus
+	[[
+	    wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(clutter_stage_get_default())));
+	]]
+	[[
+	    ClutterActor *k=user_data_to_actor(L,2);
+	    if (k)
+	    {
+		clutter_stage_set_key_focus(CLUTTER_STAGE(clutter_stage_get_default()),k);
+	    }
+	]];
+    
+    
+    # This doesn't seem to work
+    
+    udata get_object_at( double x , double y )
+	[[
+	    wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(clutter_stage_get_default()),CLUTTER_PICK_ALL,x,y));
+	]];
+    */		    
+    
+	
+/*
+    // App developers cannot control the color of the stage - and their new 'screen'
+    // doesn't have a color, since it is a group.
+    
+    table color
+        [[
+            ClutterColor color;
+            clutter_stage_get_color(CLUTTER_STAGE(self),&color);
+            push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            to_clutter_color(L,2,&color);
+            clutter_stage_set_color(CLUTTER_STAGE(self),&color);            
+        ]];
+	
+    table perspective
+	[[
+	    ClutterPerspective p;
+	    clutter_stage_get_perspective(CLUTTER_STAGE(self),&p);
+	    lua_newtable(L);
+	    lua_pushnumber(L,p.fovy);
+	    lua_rawseti(L,-2,1);
+	    lua_pushnumber(L,p.aspect);
+	    lua_rawseti(L,-2,2);
+	    lua_pushnumber(L,p.z_near);
+	    lua_rawseti(L,-2,3);
+	    lua_pushnumber(L,p.z_far);
+	    lua_rawseti(L,-2,4);
+	]]
+	[[
+	    luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            lua_rawgeti(L,2,4);
+	    ClutterPerspective p = {lua_tonumber(L,-4),lua_tonumber(L,-3),
+		lua_tonumber(L,-2),lua_tonumber(L,-1)};
+            clutter_stage_set_perspective(CLUTTER_STAGE(self),&p);
+            lua_pop(L,4);
+	]];	
+ */	
+}
+

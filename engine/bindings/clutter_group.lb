@@ -1,0 +1,22 @@
+module clutter_group;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "clutter_util.h"
+]]
+
+class Group [[ClutterActor*]] actor , container
+{
+    Group(table props = 0 )
+        [[
+            *self = clutter_group_new();
+	    ClutterUtil::initialize_actor(L,*self,GROUP_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Group()
+	[[g_object_unref(G_OBJECT(self));]];        
+}

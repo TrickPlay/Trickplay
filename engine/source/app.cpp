@@ -22,7 +22,17 @@
 // Bindings
 //-----------------------------------------------------------------------------
 
-extern void luaopen_clutter(lua_State*L);
+extern void luaopen_clutter_actor(lua_State*L);
+extern void luaopen_clutter_container(lua_State*L);
+extern void luaopen_clutter_screen(lua_State*L);
+extern void luaopen_clutter_text(lua_State*L);
+extern void luaopen_clutter_rectangle(lua_State*L);
+extern void luaopen_clutter_clone(lua_State*L);
+extern void luaopen_clutter_group(lua_State*L);
+extern void luaopen_clutter_image(lua_State*L);
+extern void luaopen_clutter_canvas(lua_State*L);
+extern void luaopen_clutter_animation(lua_State*L);
+
 extern void luaopen_timer(lua_State*L);
 extern void luaopen_url_request(lua_State*L);
 extern void luaopen_storage(lua_State*L);
@@ -635,7 +645,18 @@ int App::run()
     luaL_openlibs(L);
     
     // Open our stuff
-    luaopen_clutter(L);
+    luaopen_clutter_actor(L);
+    luaopen_clutter_container(L);
+    luaopen_clutter_screen(L);
+    luaopen_clutter_text(L);
+    luaopen_clutter_rectangle(L);
+    luaopen_clutter_clone(L);
+    luaopen_clutter_group(L);
+    luaopen_clutter_image(L);
+    luaopen_clutter_canvas(L);
+    luaopen_clutter_animation(L);
+
+
     luaopen_timer(L);
     luaopen_url_request(L);
     luaopen_storage(L);
