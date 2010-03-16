@@ -4,365 +4,36 @@ module clutter;
 [[
 #include "clutter/clutter.h"
 
-#include <cstring>
-#include <string>
-#include <cstdlib>
-
 #include "network.h"
 #include "util.h"
 #include "app.h"
 #include "context.h"
 #include "images.h"
 #include "signal_collector.h"
-
-]]
-
-[[
-void push_clutter_color(lua_State*L,ClutterColor*color)
-{
-    LSG;
-    
-    lua_newtable(L);
-    lua_pushnumber(L,color->red);
-    lua_rawseti(L,-2,1);
-    lua_pushnumber(L,color->green);
-    lua_rawseti(L,-2,2);
-    lua_pushnumber(L,color->blue);
-    lua_rawseti(L,-2,3);
-    lua_pushnumber(L,color->alpha);
-    lua_rawseti(L,-2,4);
-    
-    LSG_END(1);
-}
-
-void to_clutter_color(lua_State*L,int index,ClutterColor*color)
-{
-    LSG;
-    
-    if(lua_istable(L,index))
-    {
-        lua_rawgeti(L,2,1);
-        lua_rawgeti(L,2,2);
-        lua_rawgeti(L,2,3);
-        lua_rawgeti(L,2,4);
-        color->red = luaL_optint(L,-4,0);
-        color->green = luaL_optint(L,-3,0);
-        color->blue = luaL_optint(L,-2,0);
-        color->alpha = luaL_optint(L,-1,255);
-        lua_pop(L,4);
-    }
-    else if (lua_isstring(L,index))
-    {
-        int colors[4]={0,0,0,255};
-	char buffer[3]={0,0,0};
-	
-	const char * s=lua_tostring(L,index);
-	
-	if (*s=='#')
-	    ++s;
-	    
-	int len=strlen(s);
-	int i=0;
-	
-	while(len>=2)
-	{
-	    buffer[0]=*(s++);
-	    buffer[1]=*(s++);
-	    
-	    sscanf(buffer,"%x",&colors[i]);	    
-	    
-	    if (colors[i]<0)
-	    {
-		colors[i]=0;
-	    }
-	    else if(colors[i]>255)
-	    {
-		colors[i]=255;
-	    }
-	    
-	    len-=2;
-	    i++;		
-	}
-				
-        color->red   = colors[0];
-        color->green = colors[1];
-        color->blue  = colors[2];
-        color->alpha = colors[3];
-    }
-    else
-    {
-        luaL_error(L,"Expecting a color as a table or a string");
-    }
-    
-    LSG_END(0);
-}
-
-gulong to_clutter_animation_mode(const char * mode)
-{
-    if (!mode)
-	return CLUTTER_LINEAR;
-    
-    gulong result=CLUTTER_LINEAR;
-    
-    GEnumClass * ec=G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
-    gchar * cm=g_strdup_printf("CLUTTER_%s",mode);    
-    GEnumValue * v=g_enum_get_value_by_name(ec,cm);
-    g_free(cm);
-    
-    if(v)
-    {
-	result=v->value;
-    }
-    
-    g_type_class_unref(ec);
-    
-    return result;
-}
-
-ClutterActor * user_data_to_actor(lua_State*L,int n)
-{
-    void * udata=lua_touserdata(L,n);
-    
-    if (!udata)
-	return NULL;
-    
-    GObject * obj= *((GObject**)udata);
-    
-    if (!obj)
-	return NULL;
-    
-    return CLUTTER_IS_ACTOR(obj)?CLUTTER_ACTOR(obj):NULL;
-}
-
-void set_props_from_table(lua_State*L,int table)
-{
-    LSG;
-    
-    if (table)
-    {
-	if(table==lua_gettop(L))
-	{
-	    lb_set_props_from_table(L);	    
-	}
-	else
-	{
-	    lua_pushvalue(L,table);
-	    lb_set_props_from_table(L);
-	    lua_pop(L,1);
-	}
-    }
-    
-    LSG_END(0);
-}
-
-void wrap_concrete_actor(lua_State*L,ClutterActor*actor);
-const char * get_actor_metatable(ClutterActor*actor);
-
-// This lets us bolt on a table of user data 
-
-class actor_extra
-{
-public:
-
-    // Creates a new table, takes a ref on it and leaves it
-    // on the stack
-    
-    actor_extra(lua_State * L)
-    :
-	lsp(App::get(L)->ref_lua_state_proxy())
-    {
-	lua_newtable(L);
-	lua_pushvalue(L,-1);
-	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
-    }
-    
-    // Takes a ref on a table that is already on the stack
-    // and leaves it on the stack
-    
-    actor_extra(lua_State * L,int t)
-    :
-	lsp(App::get(L)->ref_lua_state_proxy())
-    {
-	lua_pushvalue(L,t);
-	table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
-    }
-    
-    // Releases the ref
-    // This may happen after the lua state is closed, because extra is bolted
-    // on to a GObject...so we protect against that by using a lua state
-    // proxy and checking that it is still good.
-    
-    ~actor_extra()
-    {
-	if (lsp->is_valid())
-	{
-	    luaL_unref(lsp->get_lua_state(),LUA_REGISTRYINDEX,table_ref);
-	}
-	
-	lsp->unref();
-    }
-    
-    // Pushes the referenced table onto the stack
-    
-    void push_table()
-    {
-	lua_rawgeti(lsp->get_lua_state(),LUA_REGISTRYINDEX,table_ref);
-    }
-    
-    // GDestroyNotify for it
-    
-    static void destroy(gpointer a)
-    {
-	if (a)
-	{
-	    delete (actor_extra*)a;
-	}
-    }
-    
-private:
-    actor_extra()
-    {}
-    
-    actor_extra(const actor_extra &)
-    {}
-    
-    LuaStateProxy *	lsp;
-    int			table_ref;
-};
+#include "clutter_util.h"
 
 ]]
 
 [[
 
-#if 0
-
-// An attempt at aligning actors inside their parent, feeble at best
-
-void actor_allocation_changed(ClutterActor * actor,ClutterActorBox * box,ClutterAllocationFlags flags,lua_State * L)
-{
-    g_debug("ALLOCATION CHANGED %p : %d : %f,%f %fx%f : %p",actor,flags,box->x1,box->y1,box->x2,box->y2,clutter_actor_get_parent(actor));
-    
-    ClutterActor * parent=clutter_actor_get_parent(actor);
-    
-    if (!parent)
-	return;
-    
-    const gchar * valign=(const gchar *)g_object_get_data(G_OBJECT(actor),"tp-valign");
-    const gchar * halign=(const gchar *)g_object_get_data(G_OBJECT(actor),"tp-halign");
-    
-    ClutterActorBox * new_box=clutter_actor_box_copy(box);
-    
-    if (valign)
-    {
-	gfloat parent_height=clutter_actor_get_height(parent);
-	gfloat height=clutter_actor_box_get_height(box);
-	
-	switch(*valign)
-	{
-	    case 'T':
-	    case 't':
-	    {
-		new_box->y1=0;
-		new_box->y2=new_box->y1+height;
-		break;
-	    }
-	    
-	    case 'C':
-	    case 'c':
-	    {
-		new_box->y1=(parent_height-height)/2;
-		new_box->y2=new_box->y1+height;
-		break;
-	    }
-	    
-	    case 'B':
-	    case 'b':
-	    {
-		new_box->y1=parent_height-height;
-		new_box->y2=new_box->y1+height;
-		break;
-	    }
-	}
-    }
-    
-    if (halign)
-    {
-	gfloat parent_width=clutter_actor_get_width(parent);
-	gfloat width=clutter_actor_box_get_width(box);
-	
-	switch(*halign)
-	{
-	    case 'L':
-	    case 'l':
-	    {
-		new_box->x1=0;
-		new_box->x2=new_box->x1+width;
-		break;
-	    }
-	    
-	    case 'C':
-	    case 'c':
-	    {
-		new_box->x1=(parent_width-width)/2;
-		new_box->x2=new_box->x1+width;
-		break;
-	    }
-	    
-	    case 'R':
-	    case 'r':
-	    {
-		new_box->x1=parent_width-width;
-		new_box->x2=new_box->x1+width;
-		break;
-	    }
-	}	
-    }
-    
-    if (!clutter_actor_box_equal(box,new_box))
-    {
-	ClutterGeometry g;
-	g.x=new_box->x1;
-	g.y=new_box->y1;
-	g.width=clutter_actor_box_get_width(new_box);
-	g.height=clutter_actor_box_get_height(new_box);
-	// This is wrong, we should not set the width and height - they should
-	// remain as they were.
-	clutter_actor_set_geometry(actor,&g);
-    }
-    
-    clutter_actor_box_free(new_box);
-}
-
-#endif
-
-void initialize_actor(lua_State * L,ClutterActor*actor,const char * metatable)
-{
-    // Metatables are static, so we don't need to free it 
-    g_object_set_data(G_OBJECT(actor),"tp-metatable",(gpointer)metatable);
-#if 0
-    g_signal_connect(actor,"allocation-changed",G_CALLBACK(actor_allocation_changed),L);
-#endif
-}
-    
-    
 void actor_on_show(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_show",0,0);        
+    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_show",0,0);        
 }
 
 void actor_on_hide(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_hide",0,0);        
+    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_hide",0,0);        
 }
     
 void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_focus_in",0,0);        
+    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_focus_in",0,0);        
 }
 
 void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_focus_out",0,0);        
+    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_focus_out",0,0);        
 }
 
 gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
@@ -373,7 +44,7 @@ gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
     
-    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_down",3,1))
+    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_down",3,1))
     {
 	if (lua_toboolean(L,-1))
 	    result = TRUE;
@@ -391,7 +62,7 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
     
-    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_key_up",3,1))
+    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_up",3,1))
     {
 	if (lua_toboolean(L,-1))
 	    result = TRUE;
@@ -410,7 +81,7 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
     
-    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_button_down",4,1))
+    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_button_down",4,1))
     {
 	if (lua_toboolean(L,-1))
 	    result = TRUE;
@@ -429,7 +100,7 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
     
-    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_button_up",4,1))
+    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_button_up",4,1))
     {
 	if (lua_toboolean(L,-1))
 	    result = TRUE;
@@ -447,7 +118,7 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     lua_pushnumber(L,event->y);
     lua_pushinteger(L,event->direction);
     
-    if(lb_invoke_callback(L,actor,get_actor_metatable(actor),"on_scroll",3,1))
+    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_scroll",3,1))
     {
 	if (lua_toboolean(L,-1))
 	    result = TRUE;
@@ -469,7 +140,7 @@ static void actor_animation_completed(ClutterAnimation * animation,lua_State * L
 	lua_rawgeti(L,LUA_REGISTRYINDEX,function_ref);
 	
 	// Wrap the actor
-	wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
+	ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
 
 	// Call the function	
 	lua_call(L,1,0);
@@ -735,7 +406,7 @@ interface actor [[ClutterActor*]]
 	
     udata set(table props)
 	[[
-	    set_props_from_table(L,props);
+	    ClutterUtil::set_props_from_table(L,props);
 	    lua_pushvalue(L,1);
 	]];
 #if 0	
@@ -771,7 +442,7 @@ interface actor [[ClutterActor*]]
 	[[clutter_actor_move_by(self,dx,dy);]];
 	
     readonly udata parent
-	[[wrap_concrete_actor(L,clutter_actor_get_parent(self));]];
+	[[ClutterUtil::wrap_concrete_actor(L,clutter_actor_get_parent(self));]];
 	
     unparent()
 	[[
@@ -783,7 +454,7 @@ interface actor [[ClutterActor*]]
 	
     raise( udata above )
 	[[
-	    ClutterActor* source =user_data_to_actor(L,above);
+	    ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
 	    if(source)
 	    {
 		clutter_actor_raise(self,source);
@@ -792,7 +463,7 @@ interface actor [[ClutterActor*]]
 	
     lower( udata below )
 	[[
-	    ClutterActor* source=user_data_to_actor(L,below);
+	    ClutterActor* source=ClutterUtil::user_data_to_actor(L,below);
 	    if (source)
 	    {
 		clutter_actor_lower(self,source);
@@ -875,11 +546,11 @@ interface actor [[ClutterActor*]]
 	
     table extra
 	[[
-	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    ClutterUtil::Extra * e = (ClutterUtil::Extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
 	    
 	    if (!e)
 	    {
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L),actor_extra::destroy);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L),ClutterUtil::Extra::destroy);
 	    }
 	    else
 	    {
@@ -889,12 +560,12 @@ interface actor [[ClutterActor*]]
 	[[
 	    if (lua_isnil(L,2))
 	    {
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,actor_extra::destroy);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,ClutterUtil::Extra::destroy);
 	    }
 	    else
 	    {
 		lb_checktable(L,2);
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L,2),ClutterUtil::Extra::destroy);
 	    }
 	]];
 	
@@ -932,7 +603,7 @@ interface actor [[ClutterActor*]]
 	    lua_pop(L,1);
 	    
 	    lua_getfield(L,props,"mode");
-	    gulong mode=to_clutter_animation_mode(lua_tostring(L,-1));
+	    gulong mode=ClutterUtil::to_clutter_animation_mode(lua_tostring(L,-1));
 	    lua_pop(L,1);
 	    
 	    GPtrArray * names=g_ptr_array_new_with_free_func(g_free);
@@ -1234,7 +905,7 @@ void container_foreach_callback(ClutterActor*actor,lua_State*L)
 {
     // The callback is always at 2
     lua_pushvalue(L,2);
-    wrap_concrete_actor(L,actor);
+    ClutterUtil::wrap_concrete_actor(L,actor);
     lua_call(L,1,0);
 }
 
@@ -1246,7 +917,7 @@ interface container [[ClutterActor*]]
         [[
             for(int i=2;i<=lua_gettop(L);++i)
             {
-		if (ClutterActor * actor=user_data_to_actor(L,i))
+		if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
 		        clutter_container_add_actor(CLUTTER_CONTAINER(self),actor);
             }
         ]];
@@ -1255,7 +926,7 @@ interface container [[ClutterActor*]]
 	[[
             for(int i=2;i<=lua_gettop(L);++i)
             {
-		if (ClutterActor * actor=user_data_to_actor(L,i))
+		if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
 		        clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
             }	    
 	]];
@@ -1272,13 +943,13 @@ interface container [[ClutterActor*]]
 	
     table find_child( string name )
 	[[
-	    wrap_concrete_actor(L,clutter_container_find_child_by_name(CLUTTER_CONTAINER(self),name));    
+	    ClutterUtil::wrap_concrete_actor(L,clutter_container_find_child_by_name(CLUTTER_CONTAINER(self),name));    
 	]];
 	
     raise_child( udata child , udata sibling = 0 )
 	[[
-	    ClutterActor * c = user_data_to_actor(L,child);
-	    ClutterActor * s = sibling?user_data_to_actor(L,sibling):NULL;
+	    ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
+	    ClutterActor * s = sibling?ClutterUtil::user_data_to_actor(L,sibling):NULL;
 	    
 	    if (c)
 	    {
@@ -1288,8 +959,8 @@ interface container [[ClutterActor*]]
 	
     lower_child( udata child , udata sibling = 0 )
 	[[
-	    ClutterActor * c = user_data_to_actor(L,child);
-	    ClutterActor * s = sibling?user_data_to_actor(L,sibling):NULL;
+	    ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
+	    ClutterActor * s = sibling?ClutterUtil::user_data_to_actor(L,sibling):NULL;
 
 	    if (c)
 	    {
@@ -1316,7 +987,7 @@ interface container [[ClutterActor*]]
 	    int n = 1;
 	    for(GList*item=g_list_first(list);item;item=g_list_next(item),++n)
 	    {
-		wrap_concrete_actor(L,CLUTTER_ACTOR(item->data));
+		ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(item->data));
 		lua_rawseti(L,-2,n);
 	    }
 	    g_list_free(list);
@@ -1327,7 +998,7 @@ interface container [[ClutterActor*]]
             lua_pushnil(L);
             while(lua_next(L,2))
             {
-                ClutterActor* source=user_data_to_actor(L,-1);
+                ClutterActor* source=ClutterUtil::user_data_to_actor(L,-1);
                 if(source)
 		{
                     clutter_container_add_actor(CLUTTER_CONTAINER(self),source);
@@ -1366,7 +1037,7 @@ global screen [[ClutterActor*]] actor , container
 	    
 	    g_object_ref(G_OBJECT(*self));
 	    
-	    initialize_actor(L,*self,SCREEN_METATABLE);
+	    ClutterUtil::initialize_actor(L,*self,SCREEN_METATABLE);
 	    	    	    
 #ifndef TP_PRODUCTION
 	    SignalCollector::get(L)->connect(
@@ -1491,8 +1162,8 @@ class Text [[ClutterActor*]] actor
     Text(table props =0)
         [[
             *self = clutter_text_new();
-	    initialize_actor(L,*self,TEXT_METATABLE);
-	    set_props_from_table(L,props);
+	    ClutterUtil::initialize_actor(L,*self,TEXT_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
 	
@@ -1503,11 +1174,11 @@ class Text [[ClutterActor*]] actor
         [[
             ClutterColor color;
             clutter_text_get_color(CLUTTER_TEXT(self),&color);
-            push_clutter_color(L,&color);
+            ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
-            to_clutter_color(L,2,&color);
+            ClutterUtil::to_clutter_color(L,2,&color);
             clutter_text_set_color(CLUTTER_TEXT(self),&color);
         ]];
         
@@ -1646,11 +1317,11 @@ class Text [[ClutterActor*]] actor
 	[[
 	    ClutterColor color;
 	    clutter_text_get_cursor_color(CLUTTER_TEXT(self),&color);
-	    push_clutter_color(L,&color);
+	    ClutterUtil::push_clutter_color(L,&color);
 	]]
 	[[
 	    ClutterColor color;
-	    to_clutter_color(L,2,&color);
+	    ClutterUtil::to_clutter_color(L,2,&color);
 	    clutter_text_set_cursor_color(CLUTTER_TEXT(self),&color);
 	]];
 	
@@ -1658,11 +1329,11 @@ class Text [[ClutterActor*]] actor
 	[[
 	    ClutterColor color;
 	    clutter_text_get_selection_color(CLUTTER_TEXT(self),&color);
-	    push_clutter_color(L,&color);
+	    ClutterUtil::push_clutter_color(L,&color);
 	]]
 	[[
 	    ClutterColor color;
-	    to_clutter_color(L,2,&color);
+	    ClutterUtil::to_clutter_color(L,2,&color);
 	    clutter_text_set_selection_color(CLUTTER_TEXT(self),&color);
 	]];
 	
@@ -1705,8 +1376,8 @@ class Rectangle [[ClutterActor*]] actor
     Rectangle(table props = 0)
         [[
             *self = clutter_rectangle_new();
-	    initialize_actor(L,*self,RECTANGLE_METATABLE);
-	    set_props_from_table(L,props);
+	    ClutterUtil::initialize_actor(L,*self,RECTANGLE_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
 	
@@ -1717,11 +1388,11 @@ class Rectangle [[ClutterActor*]] actor
         [[
             ClutterColor color;
             clutter_rectangle_get_color(CLUTTER_RECTANGLE(self),&color);
-            push_clutter_color(L,&color);
+            ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
-            to_clutter_color(L,2,&color);
+            ClutterUtil::to_clutter_color(L,2,&color);
             clutter_rectangle_set_color(CLUTTER_RECTANGLE(self),&color);            
         ]];
         
@@ -1733,11 +1404,11 @@ class Rectangle [[ClutterActor*]] actor
         [[
             ClutterColor color;
             clutter_rectangle_get_border_color(CLUTTER_RECTANGLE(self),&color);
-            push_clutter_color(L,&color);
+            ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
-            to_clutter_color(L,2,&color);
+            ClutterUtil::to_clutter_color(L,2,&color);
             clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(self),&color);
         ]];
 }
@@ -1747,8 +1418,8 @@ class Clone [[ClutterActor*]] actor
     Clone(table props = 0)
         [[
             *self = clutter_clone_new(NULL);
-	    initialize_actor(L,*self,CLONE_METATABLE);
-	    set_props_from_table(L,props);
+	    ClutterUtil::initialize_actor(L,*self,CLONE_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
 	
@@ -1757,10 +1428,10 @@ class Clone [[ClutterActor*]] actor
         
     udata source
         [[
-	    wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
+	    ClutterUtil::wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
         [[
-            ClutterActor* source=user_data_to_actor(L,2);
+            ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
             if(source)
 	    {
                 clutter_clone_set_source(CLUTTER_CLONE(self),source);
@@ -1773,8 +1444,8 @@ class Group [[ClutterActor*]] actor , container
     Group(table props = 0 )
         [[
             *self = clutter_group_new();
-	    initialize_actor(L,*self,GROUP_METATABLE);
-	    set_props_from_table(L,props);
+	    ClutterUtil::initialize_actor(L,*self,GROUP_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
 	
@@ -1948,8 +1619,8 @@ class Image [[ClutterActor*]] actor
     Image(table props = 0 )
         [[
             *self = clutter_texture_new();
-	    initialize_actor(L,*self,IMAGE_METATABLE);
-	    set_props_from_table(L,props);
+	    ClutterUtil::initialize_actor(L,*self,IMAGE_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
         ]];
 	
@@ -2154,7 +1825,7 @@ class Timeline [[ClutterTimeline*]]
     Timeline(table props = 0)
 	[[
 	    *self=clutter_timeline_new(1000);
-    	    set_props_from_table(L,props);
+    	    ClutterUtil::set_props_from_table(L,props);
 	]];
 	
     ~Timeline()
@@ -2248,11 +1919,11 @@ class Timeline [[ClutterTimeline*]]
 	
     table extra
 	[[
-	    actor_extra * e = (actor_extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    ClutterUtil::Extra* e = (ClutterUtil::Extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
 	    
 	    if (!e)
 	    {
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L),actor_extra::destroy);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L),ClutterUtil::Extra::destroy);
 	    }
 	    else
 	    {
@@ -2262,12 +1933,12 @@ class Timeline [[ClutterTimeline*]]
 	[[
 	    if (lua_isnil(L,2))
 	    {
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,actor_extra::destroy);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,ClutterUtil::Extra::destroy);
 	    }
 	    else
 	    {
 		lb_checktable(L,2);
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",new actor_extra(L,2),actor_extra::destroy);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L,2),ClutterUtil::Extra::destroy);
 	    }
 	]];
 	
@@ -2350,7 +2021,7 @@ class Alpha [[ClutterAlpha*]]
 	[[
 	    *self=clutter_alpha_new();
 	    g_object_ref_sink(G_OBJECT(*self));
-    	    set_props_from_table(L,props);
+    	    ClutterUtil::set_props_from_table(L,props);
 	]];
 
     
@@ -2505,8 +2176,8 @@ class Canvas [[ClutterActor*]] actor
     Canvas(table props=0)
 	[[
             *self = clutter_cairo_texture_new(0,0);
-	    initialize_actor(L,*self,CANVAS_METATABLE);
-	    set_props_from_table(L,props);
+	    ClutterUtil::initialize_actor(L,*self,CANVAS_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
 	    g_object_ref_sink(G_OBJECT(*self));
 	]];
 	
@@ -2635,7 +2306,7 @@ class Canvas [[ClutterActor*]] actor
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 		
 	    ClutterColor c;
-	    to_clutter_color(L,2,&c);
+	    ClutterUtil::to_clutter_color(L,2,&c);
 	    cairo_set_source_rgba(cr,c.red/255.0,c.green/255.0,c.blue/255.0,c.alpha/255.0);
 	]];
 	
@@ -2763,7 +2434,7 @@ class Canvas [[ClutterActor*]] actor
 	    if (p)
 	    {
 		ClutterColor c;
-		to_clutter_color(L,3,&c);
+		ClutterUtil::to_clutter_color(L,3,&c);
 		cairo_pattern_add_color_stop_rgba(p,offset,c.red/255.0,c.green/255.0,c.blue/255.0,c.alpha/255.0);
 	    }
 	]];
@@ -2851,33 +2522,4 @@ gboolean idle::on_idle(gpointer data)
     
     return TRUE;
 }   
-]]
-
-
-[[
-
-const char * get_actor_metatable(ClutterActor*actor)
-{
-    if (!actor)
-	return NULL;
-    
-    return (const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
-}
-
-void wrap_concrete_actor(lua_State*L,ClutterActor*actor)
-{
-    const char * metatable=get_actor_metatable(actor);
-    
-    if (!metatable)
-    {
-	lua_pushnil(L);
-	return;
-    }
-    
-    int is_new=lb_wrap(L,actor,metatable);
-    	
-    if (is_new)
-	g_object_ref(G_OBJECT(actor));
-}
-
 ]]
