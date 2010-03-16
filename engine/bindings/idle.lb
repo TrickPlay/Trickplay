@@ -1,0 +1,87 @@
+[[
+#include "clutter/clutter.h"
+#include "app.h"
+]]
+
+[[
+struct idle
+{
+    idle(lua_State * L)
+    :
+	source(0),
+	lsp(App::get(L)->ref_lua_state_proxy())	
+    {
+	
+    }
+    
+    ~idle()
+    {
+	clear();
+	lsp->unref();
+    }
+    
+    void set()
+    {
+	clear();
+	source=clutter_threads_add_idle(on_idle,this);
+    }
+    
+    void clear()
+    {
+	if (source)
+	{
+	    g_source_remove(source);
+	    source=0;
+	}
+    }
+    
+    static gboolean on_idle(gpointer data);
+
+    guint source;
+    LuaStateProxy * lsp;    
+};
+]]
+
+/*
+    Global: idle 
+*/
+
+global idle [[idle*]]
+{
+    idle()
+	[[
+	    *self=new idle(L);    
+	]];
+	
+    ~idle()
+	[[
+	    delete self;
+	]];
+	
+    callback on_idle
+	[[
+	    if (on_idle)
+	    {
+		self->set();
+	    }
+	    else
+	    {
+		self->clear();
+	    }
+	]];
+}
+
+[[
+gboolean idle::on_idle(gpointer data)
+{
+    idle * self=(idle*)data;
+    
+    if (self->lsp->is_valid())
+    {
+	lb_invoke_callback(self->lsp->get_lua_state(),self,IDLE_METATABLE,"on_idle",0,0);
+    }
+    
+    return TRUE;
+}   
+]]
+

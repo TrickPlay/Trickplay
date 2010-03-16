@@ -12,6 +12,10 @@ module clutter_text;
 void Text_on_text_changed(ClutterText*text,lua_State*L);
 ]]
 
+/*
+    Class: Text
+*/
+
 class Text [[ClutterActor*]] actor
 {
     Text(table props =0)

@@ -31,8 +31,12 @@ extern void luaopen_clutter_clone(lua_State*L);
 extern void luaopen_clutter_group(lua_State*L);
 extern void luaopen_clutter_image(lua_State*L);
 extern void luaopen_clutter_canvas(lua_State*L);
-extern void luaopen_clutter_animation(lua_State*L);
 
+extern void luaopen_clutter_timeline(lua_State*L);
+extern void luaopen_clutter_alpha(lua_State*L);
+extern void luaopen_clutter_interval(lua_State*L);
+
+extern void luaopen_idle(lua_State*L);
 extern void luaopen_timer(lua_State*L);
 extern void luaopen_url_request(lua_State*L);
 extern void luaopen_storage(lua_State*L);
@@ -654,9 +658,12 @@ int App::run()
     luaopen_clutter_group(L);
     luaopen_clutter_image(L);
     luaopen_clutter_canvas(L);
-    luaopen_clutter_animation(L);
+    
+    luaopen_clutter_timeline(L);
+    luaopen_clutter_alpha(L);
+    luaopen_clutter_interval(L);
 
-
+    luaopen_idle(L);
     luaopen_timer(L);
     luaopen_url_request(L);
     luaopen_storage(L);

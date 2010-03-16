@@ -7,6 +7,10 @@ module clutter_group;
 #include "clutter_util.h"
 ]]
 
+/*
+    Class: Group
+*/
+
 class Group [[ClutterActor*]] actor , container
 {
     Group(table props = 0 )

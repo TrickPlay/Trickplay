@@ -1,7 +1,7 @@
 Format: 1.4
 
 
-Title: Trickplay
+Title: TrickPlay
 SubTitle: Application Developer's Guide and Reference
 
 # You can add a footer to your documentation like this:
@@ -52,9 +52,42 @@ Group: Developer's Guide  {
 
 Group: Reference  {
 
+   Group: UI  {
+
+      Group: Interfaces  {
+
+         File: UI Element  (/home/pablo/Dropbox/tp/engine/bindings/clutter_actor.lb)
+         File: Container  (/home/pablo/Dropbox/tp/engine/bindings/clutter_container.lb)
+         }  # Group: Interfaces
+
+      Group: Globals  {
+
+         File: screen  (/home/pablo/Dropbox/tp/engine/bindings/clutter_screen.lb)
+         }  # Group: Globals
+
+      Group: Classes  {
+
+         File: Canvas  (/home/pablo/Dropbox/tp/engine/bindings/clutter_canvas.lb)
+         File: Clone  (/home/pablo/Dropbox/tp/engine/bindings/clutter_clone.lb)
+         File: Group  (/home/pablo/Dropbox/tp/engine/bindings/clutter_group.lb)
+         File: Image  (/home/pablo/Dropbox/tp/engine/bindings/clutter_image.lb)
+         File: Rectangle  (/home/pablo/Dropbox/tp/engine/bindings/clutter_rectangle.lb)
+         File: Text  (/home/pablo/Dropbox/tp/engine/bindings/clutter_text.lb)
+         }  # Group: Classes
+
+      Group: Animation  {
+
+         File: Alpha  (/home/pablo/Dropbox/tp/engine/bindings/clutter_alpha.lb)
+         File: Interval  (/home/pablo/Dropbox/tp/engine/bindings/clutter_interval.lb)
+         File: Timeline  (/home/pablo/Dropbox/tp/engine/bindings/clutter_timeline.lb)
+         }  # Group: Animation
+
+      }  # Group: UI
+
    Group: Globals  {
 
       File: app  (/home/pablo/Dropbox/tp/engine/bindings/app.lb)
+      File: idle  (/home/pablo/Dropbox/tp/engine/bindings/idle.lb)
       File: mediaplayer  (/home/pablo/Dropbox/tp/engine/bindings/mediaplayer.lb)
       File: profile  (/home/pablo/Dropbox/tp/engine/bindings/profile.lb)
       File: settings  (/home/pablo/Dropbox/tp/engine/bindings/settings.lb)

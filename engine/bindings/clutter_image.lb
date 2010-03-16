@@ -170,6 +170,10 @@ void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L);
 void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*L);
 ]]
 
+/*
+    Class: Image 
+*/
+
 class Image [[ClutterActor*]] actor
 {
     Image(table props = 0 )

@@ -8,6 +8,11 @@ module clutter_clone;
 #include "clutter_util.h"
 ]]
 
+/*
+    Class: Clone
+    
+*/
+
 class Clone [[ClutterActor*]] actor
 {
     Clone(table props = 0)

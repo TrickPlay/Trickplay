@@ -25,9 +25,11 @@ gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
 }
 
 #endif
-
-
 ]]
+
+/*
+    Global: screen 
+*/
 
 global screen [[ClutterActor*]] actor , container
 {
