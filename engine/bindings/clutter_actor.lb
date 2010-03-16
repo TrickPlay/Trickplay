@@ -147,7 +147,7 @@ static void actor_animation_completed(ClutterAnimation * animation,lua_State * L
 ]]
 
 /*
-    Interface: UI Element
+    Interface: UIElement
     
     This is an interface that is supported by all UI classes, including screen.
  
@@ -574,7 +574,7 @@ interface actor [[ClutterActor*]]
 	container. Otherwise, it returns nil.
     */
     
-    readonly udata parent
+    readonly UIElement parent
 	[[ClutterUtil::wrap_concrete_actor(L,clutter_actor_get_parent(self));]];
 	
 
@@ -782,7 +782,7 @@ interface actor [[ClutterActor*]]
 	element - The UI element that it was called on, so you can chain calls.
     */
 
-    udata set(table props)
+    UIElement set(table props)
 	[[
 	    ClutterUtil::set_props_from_table(L,props);
 	    lua_pushvalue(L,1);
@@ -863,7 +863,7 @@ interface actor [[ClutterActor*]]
 	above - Another UI element that will end up just below this one.
     */
 
-    raise( udata above )
+    raise( UIElement above )
 	[[
 	    ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
 	    if(source)
@@ -882,7 +882,7 @@ interface actor [[ClutterActor*]]
 	below - Another UI element that will end up just above this one.
     */
 
-    lower( udata below )
+    lower( UIElement below )
 	[[
 	    ClutterActor* source=ClutterUtil::user_data_to_actor(L,below);
 	    if (source)
