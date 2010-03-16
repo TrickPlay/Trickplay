@@ -419,11 +419,11 @@
 	if(msg)
 	{
 		//NSLog(msg);
-		msg = [ msg stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%C", 9] withString:@"<<TAB>>"];
+//		msg = [ msg stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%C", 9] withString:@"<<TAB>>"];
 		//NSLog(msg);
 		if ([msg hasPrefix:@"START"])
 		{
-			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([[components objectAtIndex:1] compare:@"AX"] == 0)
 			{
 				if ([[components objectAtIndex:2] compare:@"L"] == 0)
@@ -449,7 +449,7 @@
 		}
 		else if ([msg hasPrefix:@"STOP"])
 		{
-			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([[components objectAtIndex:1] compare:@"AX"] == 0)
 			{
 				mAccelMode = 0;
@@ -471,13 +471,13 @@
 		else if ([msg hasPrefix:@"RESOURCE"])
 		{
 			//http://downloads.flashkit.com/soundfx/Ambience/Space/Space_-SLrec-7832/Space_-SLrec-7832_hifi.mp3
-			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			[mImageCollection addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[components objectAtIndex:1], @"name", [components objectAtIndex:2], @"link", @"", @"scale", nil]];
 			
 		}
 		else if ([msg hasPrefix:@"BACKGROUND"])
 		{
-			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([mImageCollection count] > 0)
 			{
 				//Show the image
@@ -514,7 +514,7 @@
 		}
 		else if ([msg hasPrefix:@"PLAYSOUND"])
 		{
-			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([mImageCollection count] > 0)
 			{
 				int index;
@@ -558,7 +558,7 @@
 			//NSLog([NSString stringWithFormat:@"UI MC sent %C", 9]);
 			
 			//NSLog(msg);
-			NSArray *components = [msg componentsSeparatedByString:@"<<TAB>>"];
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([[components objectAtIndex:1] compare:@"MC"] == 0)
 			{
 				//multiple choice alertview
