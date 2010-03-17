@@ -41,6 +41,8 @@ function controllers.on_controller_connected(controllers,controller)
 	controller:declare_resource("jumper","http://10.0.190.103/jumper.png")
 	controller:declare_resource("splat","http://10.0.190.103/splat.png")
 
+	controller:set_background("jumper")
+
 	controller.on_disconnected = function ()
 		player.connected_controllers._[controller] = nil
 		start_text.text = "Press ENTER to start"
@@ -63,7 +65,10 @@ end
 local key_handlers =	{
 				[keys.Return] =
 							function ()
-								player.reset()
+								if not player.live then
+									player.live = true
+									player.reset()
+								end
 							end,
 				[keys.Left]  =
 							function ()
