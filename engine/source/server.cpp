@@ -256,14 +256,11 @@ void Server::data_read_callback(GObject * source,GAsyncResult * result,gpointer 
                 *e=0;
                 s=g_strstrip(s);
                 
-                if (strlen(s))
+//                g_debug("GOT DATA %p [%s]",connection,s);
+                
+                if (server->delegate)
                 {
-//                    g_debug("GOT DATA %p [%s]",connection,s);
-                    
-                    if (server->delegate)
-                    {
-                        server->delegate->connection_data_received(connection,s);
-                    }
+                    server->delegate->connection_data_received(connection,s);
                 }
                 
                 s=e+1;
