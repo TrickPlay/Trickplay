@@ -23,6 +23,9 @@ local function momentum_adjust(x)
 end
 
 function controllers.on_controller_connected(controllers,controller)
+
+	player.connected_controllers._[controller] = controller
+
 	start_text.text = "Press ENTER or TAP to start"
 	start_text.x = (screen.w-start_text.size[1])/2
     if(controller.has_accelerometer) then
@@ -35,28 +38,38 @@ function controllers.on_controller_connected(controllers,controller)
     	end
     end
 
+	controller:declare_resource("jumper","http://10.0.190.103/jumper.png")
+	controller:declare_resource("splat","http://10.0.190.103/splat.png")
+
 	controller.on_disconnected = function ()
+		player.connected_controllers._[controller] = nil
 		start_text.text = "Press ENTER to start"
 		start_text.x = (screen.w-start_text.size[1])/2
 	end
 
 end
 
-local key_enter = 65293
-local key_left = 65361
-local key_right = 65363
+
+
+function player.connected_controllers.game_on(self)
+	for key,controller in pairs(self._) do controller:set_background("jumper") end
+end
+
+function player.connected_controllers.death_splat(self)
+	for key,controller in pairs(self._) do controller:set_background("splat") end
+end
 
 
 local key_handlers =	{
-				[key_enter] =
+				[keys.Return] =
 							function ()
 								player.reset()
 							end,
-				[key_left]  =
+				[keys.Left]  =
 							function ()
 								momentum_adjust(-1)
 							end,
-				[key_right] =
+				[keys.Right] =
 							function ()
 								momentum_adjust(1)
 							end
