@@ -56,7 +56,7 @@ Group: Reference  {
 
       Group: Interfaces  {
 
-         File: UI Element  (/home/pablo/Dropbox/tp/engine/bindings/clutter_actor.lb)
+         File: UIElement  (no auto-title, /home/pablo/Dropbox/tp/engine/bindings/clutter_actor.lb)
          File: Container  (/home/pablo/Dropbox/tp/engine/bindings/clutter_container.lb)
          }  # Group: Interfaces
 
