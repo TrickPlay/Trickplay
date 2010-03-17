@@ -38,6 +38,8 @@ player =	{
 					-- Horizontal momentum is measured in pixels per second
 					horizontal_momentum = 0,
 
+					live = false,
+
 					jumper = Image {
 						src = Settings.JUMPER_IMAGE,
 						size = { 60, 60 }
@@ -233,6 +235,7 @@ function fall_timeline.on_completed( t )
  					scale = { 1.5, 1.5 },
 				})
 	score_bg.color = Settings.SCORE_DEAD_BG
+	player.live = false
 end
 
 

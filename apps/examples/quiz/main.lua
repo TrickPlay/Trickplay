@@ -273,6 +273,9 @@ end
 
 function controllers.on_controller_connected(controllers,controller)
 
+	controller:declare_resource("quiz","http://10.0.190.103/quiz.png")
+	controller:set_background("quiz")
+
     print("CONNECTED",controller.name)
     
     player_joined(controller)
