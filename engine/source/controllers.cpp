@@ -237,7 +237,7 @@ gboolean Controllers::timed_disconnect_callback(gpointer data)
     
     ConnectionInfo * ci=tc->self->find_connection(tc->connection);
     
-    if (ci && !ci->controller.version)
+    if (ci && !ci->is_http && !ci->controller.version)
     {
         g_debug("DROPPING UNIDENTIFIED CONNECTION %p",tc->connection);
         
@@ -274,12 +274,22 @@ void Controllers::connection_data_received(gpointer connection,const char * line
     
     if (it==connections.end())
         return;
-
-    gchar ** parts=g_strsplit(line,"\t",0);
-            
-    process_command(connection,it->second.controller,parts);
-            
-    g_strfreev(parts);
+    
+    if (it->second.is_http)
+    {
+        handle_http_line(connection,it->second,line);        
+    }
+    else
+    {
+        if (!strlen(line))
+            return;
+    
+        gchar ** parts=g_strsplit(line,"\t",0);
+                
+        process_command(connection,it->second.controller,parts);
+                
+        g_strfreev(parts);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -383,7 +393,134 @@ void Controllers::process_command(gpointer connection,ControllerInfo & info,gcha
                 (*it)->ui_event(connection,parts[1]);
             }
             break;
-        }        
+        }
+        
+        // http get?
+        
+        case 'G':
+        {
+            handle_http_get(connection,parts[0]);
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void Controllers::handle_http_get(gpointer connection,const gchar * line)
+{
+    ConnectionInfo * info=find_connection(connection);
+    
+    if (!info)
+    {
+        return;
+    }
+    
+    gchar ** parts=g_strsplit(line," ",3);
+
+    if (g_strv_length(parts)==3)
+    {
+        info->is_http=true;
+        info->http_info.method=parts[0];
+        info->http_info.url=parts[1];
+        info->http_info.version=parts[2];
+    }
+    
+    g_strfreev(parts);
+}
+
+//-----------------------------------------------------------------------------
+
+void Controllers::handle_http_line(gpointer connection,ConnectionInfo & info,const gchar * line)
+{
+    HTTPInfo & hi=info.http_info;
+    
+    if (!hi.headers_done)
+    {
+        if (strlen(line))
+        {
+            hi.headers.push_back(line);
+            
+            // Protect against too many headers
+            
+            if (hi.headers.size()>256)
+            {
+                server->close_connection(connection);
+            }
+        }
+        else
+        {
+            // We have received all the headers
+            
+            for(StringList::const_iterator it=hi.headers.begin();it!=hi.headers.end();++it)
+            {
+                g_debug("[%s]",it->c_str());    
+            }
+            
+            hi.headers_done=true;
+            
+            bool found=false;
+            
+            if (hi.url.size()>1)
+            {
+                String id(hi.url.substr(1));
+                
+                WebServerPathMap::const_iterator it=path_map.find(id);
+                
+                if (it!=path_map.end())
+                {
+                    String path(it->second.first);
+                    
+                    g_debug("WE SOULD SERVE : %s",path.c_str());
+                    
+                    found=true;
+                }
+            }
+            
+//            if (!found)
+            {
+                server->write_printf(connection,"%s 404 Not found\r\nContent-Length: 0\r\n\r\n",hi.version.c_str());
+            }
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+String Controllers::serve_path(const String & group,const String & path)
+{
+    String s=group+":"+path;
+    
+    gchar * id=g_compute_checksum_for_string(G_CHECKSUM_SHA1,s.c_str(),-1);
+    String result(id);
+    g_free(id);
+    
+    if (path_map.find(result)==path_map.end())
+    {
+        g_debug("SERVING %s : %s",result.c_str(),path.c_str());
+        
+        path_map[result]=StringPair(path,group);
+    }
+    
+    return result;
+}
+    
+//-----------------------------------------------------------------------------
+
+void Controllers::drop_web_server_group(const String & group)
+{
+    for(WebServerPathMap::iterator it=path_map.begin();it!=path_map.end();)
+    {
+        if (it->second.second==group)
+        {
+            g_debug("DROPPING %s: %s",it->first.c_str(),it->second.first.c_str());
+            
+            path_map.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
     }
 }
 
