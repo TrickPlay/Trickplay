@@ -237,7 +237,7 @@ gboolean Controllers::timed_disconnect_callback(gpointer data)
     
     ConnectionInfo * ci=tc->self->find_connection(tc->connection);
     
-    if (ci && !ci->is_http && !ci->controller.version)
+    if (ci && ci->disconnect && !ci->controller.version)
     {
         g_debug("DROPPING UNIDENTIFIED CONNECTION %p",tc->connection);
         
@@ -275,7 +275,7 @@ void Controllers::connection_data_received(gpointer connection,const char * line
     if (it==connections.end())
         return;
     
-    if (it->second.is_http)
+    if (it->second.http.is_http)
     {
         handle_http_line(connection,it->second,line);        
     }
@@ -420,10 +420,11 @@ void Controllers::handle_http_get(gpointer connection,const gchar * line)
 
     if (g_strv_length(parts)==3)
     {
-        info->is_http=true;
-        info->http_info.method=parts[0];
-        info->http_info.url=parts[1];
-        info->http_info.version=parts[2];
+        info->disconnect=false;
+        info->http.is_http=true;
+        info->http.method=parts[0];
+        info->http.url=parts[1];
+        info->http.version=parts[2];        
     }
     
     g_strfreev(parts);
@@ -433,12 +434,15 @@ void Controllers::handle_http_get(gpointer connection,const gchar * line)
 
 void Controllers::handle_http_line(gpointer connection,ConnectionInfo & info,const gchar * line)
 {
-    HTTPInfo & hi=info.http_info;
+    HTTPInfo & hi=info.http;
     
     if (!hi.headers_done)
     {
         if (strlen(line))
         {
+// We are not using the headers yet
+#if 0
+            
             hi.headers.push_back(line);
             
             // Protect against too many headers
@@ -447,17 +451,20 @@ void Controllers::handle_http_line(gpointer connection,ConnectionInfo & info,con
             {
                 server->close_connection(connection);
             }
+#endif            
         }
         else
         {
             // We have received all the headers
             
+#if 0
             for(StringList::const_iterator it=hi.headers.begin();it!=hi.headers.end();++it)
             {
                 g_debug("[%s]",it->c_str());    
             }
+#endif            
             
-            hi.headers_done=true;
+            g_debug("PROCESSING %s '%s'",hi.method.c_str(),hi.url.c_str());
             
             bool found=false;
             
@@ -470,17 +477,21 @@ void Controllers::handle_http_line(gpointer connection,ConnectionInfo & info,con
                 if (it!=path_map.end())
                 {
                     String path(it->second.first);
+                                        
+                    found=server->write_file(connection,path.c_str(),true);
                     
-                    g_debug("WE SOULD SERVE : %s",path.c_str());
-                    
-                    found=true;
+                    g_debug("  SERVED '%s'",path.c_str());
                 }
             }
             
-//            if (!found)
+            if (!found)
             {
                 server->write_printf(connection,"%s 404 Not found\r\nContent-Length: 0\r\n\r\n",hi.version.c_str());
+                
+                g_debug("  NOT FOUND");
             }
+            
+            hi.reset();
         }
     }
 }
@@ -513,7 +524,7 @@ void Controllers::drop_web_server_group(const String & group)
     {
         if (it->second.second==group)
         {
-            g_debug("DROPPING %s: %s",it->first.c_str(),it->second.first.c_str());
+            g_debug("DROPPING %s : %s",it->first.c_str(),it->second.first.c_str());
             
             path_map.erase(it++);
         }

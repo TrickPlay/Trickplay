@@ -138,6 +138,87 @@ void Server::write_to_all(const char * data)
 
 //------------------------------------------------------------------------------
 
+bool Server::write_file(gpointer connection,const char * path,bool http_headers)
+{
+#if GLIB_CHECK_VERSION(2,22,0)
+
+    // Get the output stream for the connection
+    
+    GOutputStream * output_stream=g_io_stream_get_output_stream(G_IO_STREAM(connection));
+
+    // Get the file
+    
+    GFile * file=g_file_new_for_path(path);
+    
+    if (!file)
+    {
+        return false;
+    }
+    
+    // Get the input stream
+    
+    GFileInputStream * input_stream=g_file_read(file,NULL,NULL);
+
+    if (!input_stream)
+    {
+        g_object_unref(file);
+        return false;
+    }
+    
+    // Get the size of the file and write http headers
+    
+    if (http_headers)
+    {
+        GFileInfo * info=g_file_query_info(file,
+            G_FILE_ATTRIBUTE_STANDARD_SIZE,
+            G_FILE_QUERY_INFO_NONE,
+            NULL,
+            NULL);
+        
+        if (!info)
+        {
+            g_object_unref(file);
+            return false;
+        }
+        
+        goffset size=g_file_info_get_size(info);
+    
+        g_object_unref(info);
+        
+        // TODO: It would be nice to send the Content-Type, but it doesn't look like
+        // we will have a mime type mapping on the TV.
+        // gio has GContentType, which uses xdgmime, but it relies on a system
+        // database of mime types.
+        
+        gchar * headers=g_strdup_printf("HTTP/1.1 200 OK\r\nContent-Length: %"G_GOFFSET_FORMAT"\r\n\r\n",size);
+        
+        g_output_stream_write_all(output_stream,headers,strlen(headers),NULL,NULL,NULL);
+        
+        g_free(headers);
+    }
+    
+        
+    g_output_stream_splice_async(
+        output_stream,
+        G_INPUT_STREAM(input_stream),
+        G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE,
+        G_PRIORITY_DEFAULT,
+        NULL,
+        splice_callback,
+        NULL);
+    
+    g_object_unref(input_stream);
+    g_object_unref(file);
+    
+    return true;
+#else
+    return false;
+#endif    
+
+}
+
+//------------------------------------------------------------------------------
+
 guint16 Server::get_port() const
 {
     return port;
@@ -306,6 +387,12 @@ void Server::destroy_gstring(gpointer s)
 }
 
 //------------------------------------------------------------------------------
+
+void Server::splice_callback(GObject * source,GAsyncResult * result,gpointer data)
+{
+    g_output_stream_splice_finish(G_OUTPUT_STREAM(source),result,NULL);
+}
+
 
 #endif
 
