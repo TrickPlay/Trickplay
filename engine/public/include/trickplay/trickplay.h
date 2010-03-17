@@ -136,7 +136,7 @@ typedef struct TPContext TPContext;
     TP_TELNET_CONSOLE_PORT - Telnet console port. Set to a port for the telnet console.
                             If set to "0", the telnet console will be disabled. In
                             production builds, the telnet console is always disabled.
-                            Defaults to "8008".
+                            Defaults to "7777".
                             
     TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "1" if you wish to enable
                             support for remote controllers. This will create a
@@ -158,8 +158,7 @@ typedef struct TPContext TPContext;
                             
     TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
                             TrickPlay will use the systems fonts.
-                            Defaults to NULL.
-                    
+                            Defaults to NULL.                            
 */
 
 #define TP_APP_SOURCES          "app.sources"
