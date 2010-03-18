@@ -261,7 +261,7 @@ end
 -------------------------------------------------------------------------------
 
 function player_answered(controller,answer)
-    if tonumber(answer)==1 then
+    if answer==game.answer then
         players[controller].answer_time=game.time
     else
         players[controller].answer_time=-1
@@ -292,12 +292,25 @@ function controllers.on_controller_connected(controllers,controller)
         
     end
     
-    function controller.on_ui_event(controller,event)
-    
-        print("ANSWERED",controller.name,event)
-        
-        player_answered(controller,event)
-        
+    function controller.on_click(controller, x, y)
+
+		local the_answer
+
+		-- The boundaries of the numbers are all on the 100s, rows and columns both
+		local row = math.floor(y/100)
+		local column = math.ceil(x/100)
+
+		-- 0 is in a special place
+		if row == 3 and column == 2 then
+			the_answer = 0
+		else
+			the_answer = row*3 + column
+		end
+
+        print("ANSWERED",controller.name,the_answer,x,y)
+
+        player_answered(controller,the_answer)
+
     end
 
 end
@@ -334,7 +347,7 @@ function game.ask_next_question()
     -- pick a question
     local littler_number = math.random(0,9)
     local bigger_number = math.random(littler_number,littler_number+9)
-    local answer = bigger_number - littler_number
+    game.answer = bigger_number - littler_number
     local question = bigger_number.." - "..littler_number.." = ___"
 
     ui.bigger_number.text=tostring(bigger_number)
@@ -375,7 +388,7 @@ function game.ask_next_question()
 		end
         if game.time==game.MAX_TIME or game.num_answered >= player_count() then
             game.timer=nil
-            game.times_up(answer)
+            game.times_up()
             return false
         end
     end
