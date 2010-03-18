@@ -358,6 +358,23 @@ void Controllers::process_command(gpointer connection,ControllerInfo & info,gcha
             break;    
         }
         
+
+		// clicks
+
+        case 'C':
+        {
+			// CLICK	x	y
+			if (count < 3) return;
+			
+			double x = atof(parts[1]);
+			double y = atof(parts[2]);
+			
+			for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+			{
+				(*it)->click(connection, x, y);
+			}
+        }
+
         // accelerometer data
         
         case 'A':

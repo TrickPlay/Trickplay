@@ -47,6 +47,7 @@ public:
         virtual void connected(gpointer source,const ControllerInfo & info)=0;
         virtual void disconnected(gpointer source)=0;
         virtual void accelerometer(gpointer source,double x,double y,double z)=0;
+	virtual void click(gpointer source, double x, double y)=0;
         virtual void ui_event(gpointer source,const gchar * event)=0;
     };
    

@@ -20,6 +20,8 @@ public:
     void disconnected();
     
     void accelerometer(double x,double y,double z);
+
+	void click(double x, double y);
     
     void ui_event(const gchar * event);
 
@@ -84,6 +86,7 @@ private:
 
     virtual void connected(gpointer source,const Controllers::ControllerInfo & info);
     virtual void disconnected(gpointer source);
+    virtual void click(gpointer source,double x,double y);
     virtual void accelerometer(gpointer source,double x,double y,double z);
     virtual void ui_event(gpointer source,const gchar * event);
 
@@ -195,6 +198,9 @@ interface controller [[Controller*]]
 
     callback on_disconnected;
     
+
+	callback on_click;
+
     callback on_accelerometer;
     
     callback on_ui_event;
@@ -252,6 +258,14 @@ void Controller::disconnected()
     connected=false;
     invoke_controller_on_disconnected(L,this,0,0);
     detach_controller(L,this);
+}
+
+void Controller::click(double x, double y)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    
+    invoke_controller_on_click(L,this,2,0);
 }
 
 void Controller::accelerometer(double x,double y,double z)
@@ -418,6 +432,17 @@ void ControllersDelegate::disconnected(gpointer source)
     {
         it->second->disconnected();
     }    
+}
+
+void ControllersDelegate::click(gpointer source,double x,double y)
+{
+    std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
+        range(proxies.equal_range(source));
+        
+    for(ControllerMap::const_iterator it=range.first;it!=range.second;++it)
+    {
+        it->second->click(x,y);
+    }
 }
 
 void ControllersDelegate::accelerometer(gpointer source,double x,double y,double z)
