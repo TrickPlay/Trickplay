@@ -297,6 +297,8 @@ end
 -- Get ready to play
 
 function game.no_players()
+	ui.bigger_number.text = ""
+	ui.answer.text = ""
     ui.littler_number.text="Waiting for players to join..."
     ui.players_box_rect.opacity = 0
     ui.timer.text=""
@@ -313,6 +315,8 @@ function game.no_players()
 end
 
 function game.ready_to_start()
+	ui.bigger_number.text = ""
+	ui.answer.text = ""
     ui.littler_number.text="Tap for next problem..."
 	ui.timer_group.opacity = 0
     game.ready=true
@@ -323,13 +327,12 @@ function game.ask_next_question()
     game.ready=false
 
     -- pick a question
-    local littler_number = math.random(0,9)
-    local bigger_number = math.random(littler_number,littler_number+9)
-    game.answer = bigger_number - littler_number
-    local question = bigger_number.." - "..littler_number.." = ___"
+    game.answer = math.random(0,9)
+    local littler_number = math.random(1,10)
+    local bigger_number = littler_number + game.answer
 
     ui.bigger_number.text=tostring(bigger_number)
-	ui.littler_number.text = tostring(littler_number)
+	ui.littler_number.text = tostring(littler_number).." -"
 	ui.answer.text = "???"
     
     print("CORRECT ANSWER IS",game.answer)
