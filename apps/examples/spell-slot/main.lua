@@ -291,28 +291,6 @@ function controllers.on_controller_connected(controllers,controller)
         player_left(controller)
         
     end
-    
-    function controller.on_click(controller, x, y)
-
-		local the_answer
-
-		-- The boundaries of the numbers are all on the 100s, rows and columns both
-		local row = math.floor(y/100)
-		local column = math.ceil(x/100)
-
-		-- 0 is in a special place
-		if row == 3 and column == 2 then
-			the_answer = 0
-		else
-			the_answer = row*3 + column
-		end
-
-        print("ANSWERED",controller.name,the_answer,x,y)
-
-        player_answered(controller,the_answer)
-
-    end
-
 end
 
 -------------------------------------------------------------------------------
@@ -354,7 +332,7 @@ function game.ask_next_question()
 	ui.littler_number.text = tostring(littler_number)
 	ui.answer.text = "???"
     
-    print("CORRECT ANSWER IS",answer)
+    print("CORRECT ANSWER IS",game.answer)
 
     ui.timer.text=tostring(game.MAX_TIME)
 	ui.timer.position = { (ui.timer_group.size[1] - ui.timer.size[1]) / 2,
@@ -369,6 +347,35 @@ function game.ask_next_question()
         player_state.answer_time=-1
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
 		controller:set_background("numbers")
+
+		function controller.on_click(controller, x, y)
+			if not game.got_tap then
+				game.got_tap = true
+				return
+			end
+			local the_answer
+	
+			-- The boundaries of the numbers are all on the 100s, rows and columns both
+			local row = math.floor(y/100)
+			local column = math.ceil(x/100)
+	
+			-- 0 is in a special place
+			if row == 3 and column == 2 then
+				the_answer = 0
+			else
+				the_answer = row*3 + column
+			end
+	
+			print("ANSWERED",controller.name,the_answer,x,y)
+	
+			player_answered(controller,the_answer)
+
+			-- disable additional clicks
+			controller.on_click = nil
+
+			-- reset background picture
+			controller:set_background("quiz")
+		end
     end
 
     game.time=0
@@ -412,12 +419,15 @@ function game.times_up(correct_answer)
 			controller:set_background("quiz")
         end
     end
+
+	game.ready_to_start()
 end
 
 
 function screen.on_key_down(screen,key)
     if key==keys.Return then
         if game.ready then
+       		game.got_tap = false
             game.ask_next_question()
         end
     end
