@@ -86,8 +86,19 @@ private:
     
     struct HTTPInfo
     {
-        HTTPInfo() : headers_done(false) {}
+        HTTPInfo() : is_http(false),headers_done(false) {}
         
+        void reset()
+        {
+            is_http=false;
+            method.clear();
+            url.clear();
+            version.clear();
+            headers.clear();
+            headers_done=false;
+        }
+        
+        bool        is_http;
         String      method;
         String      url;
         String      version;
@@ -100,12 +111,11 @@ private:
     
     struct ConnectionInfo
     {
-        ConnectionInfo() : is_http(false) {}
+        ConnectionInfo() : disconnect(true) {}
 
+        bool            disconnect;
         ControllerInfo  controller;
-
-        bool            is_http;        
-        HTTPInfo        http_info;
+        HTTPInfo        http;
     };
     
     //..........................................................................
