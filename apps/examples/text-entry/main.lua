@@ -47,7 +47,6 @@ local airplane = "http://www.tuxpaint.org/stamps/stamps/vehicles/flight/planes/7
 ]]
 --------------------------------------------------------------------------------
 
-screen:set{ color = "000000" , size = { 960 , 540 } }
 screen:show_all()
 
 t = Text

@@ -1,0 +1,220 @@
+module clutter_container;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+void container_foreach_callback(ClutterActor*actor,lua_State*L)
+{
+    // The callback is always at 2
+    lua_pushvalue(L,2);
+    ClutterUtil::wrap_concrete_actor(L,actor);
+    lua_call(L,1,0);
+}
+]]
+
+/*
+    Interface: Container
+    
+    This interface is supported by <Group> and <screen>. It lets you contain other
+    UI elements. Note that containers don't automatically clip their children; you
+    can create a container that is 1x1 and add all kinds of children to it. To
+    clip a container, you should use <UIElement.clip>.
+*/
+
+interface container [[ClutterActor*]]
+{
+    # This one is very wasteful - it has to create and free the list as well as
+    # traverse it to determine the number of children. Should consider removing
+    # it altogether
+    
+    readonly int count
+	[[
+            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
+	    count = g_list_length(list);
+	    g_list_free(list);
+	]];
+	
+    /*
+	Property: children
+	
+	Returns a table of UI elements that are in this container, or an empty
+	table if there are none. You can also set all children by passing a table
+	of UI elements. Doing so clears all existing children.
+	
+	For performance reasons, it is best to assign the children to a local
+	variable while you manipulate them, like this:
+	
+	> local children=screen.children
+	> print(#children)
+	> for _,child in ipairs(children) do
+	>   -- something
+	> end
+    */
+    
+    table children
+        [[
+            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
+	    
+	    lua_newtable(L);
+	    int n = 1;
+	    for(GList*item=g_list_first(list);item;item=g_list_next(item),++n)
+	    {
+		ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(item->data));
+		lua_rawseti(L,-2,n);
+	    }
+	    g_list_free(list);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            clutter_group_remove_all(CLUTTER_GROUP(self));
+            lua_pushnil(L);
+            while(lua_next(L,2))
+            {
+                ClutterActor* source=ClutterUtil::user_data_to_actor(L,-1);
+                if(source)
+		{
+                    clutter_container_add_actor(CLUTTER_CONTAINER(self),source);
+		}
+                lua_pop(L,1);
+            }
+        ]];
+    
+    /*
+	Function: add
+	
+	Adds all UI elements passed in to the container.
+	
+	> screen:add(a,b,c,d)
+	
+	Arguments:
+	
+	elements - Any number of elements to add to the container.
+    */
+    
+    add(...)
+        [[
+            for(int i=2;i<=lua_gettop(L);++i)
+            {
+		if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
+		        clutter_container_add_actor(CLUTTER_CONTAINER(self),actor);
+            }
+        ]];
+	
+    /*
+	Function: remove
+	
+	Removes all of the UI elements passed in from the container.
+	
+	Arguments:
+	
+	elements - Any number of elements to remove.
+    */
+    
+    remove(...)
+	[[
+            for(int i=2;i<=lua_gettop(L);++i)
+            {
+		if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
+		        clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
+            }	    
+	]];
+	
+    /*
+	Function: clear
+	
+	Removes all child elements from the container.
+    */
+    
+    clear()
+	[[
+            clutter_group_remove_all(CLUTTER_GROUP(self));	    
+	]];
+	
+    /*
+	Function: foreach_child
+	
+	Lets you execute a function on all children of the container. The function
+	receives the child UI element as its only argument.
+	
+	Arguments:
+	
+	function - A function to call for each child of the container.
+    */
+    
+    foreach_child( function f )
+	[[
+	    clutter_container_foreach(CLUTTER_CONTAINER(self),(ClutterCallback)container_foreach_callback,L);    
+	]];
+	
+    /*
+	Function: find_child
+	
+	Finds a child of the container by name.
+	
+	Arguments:
+	
+	name - The name of a child.
+	
+	Returns:
+	
+	element - The UI element, if it was found.
+	nil - Otherwise.
+    */
+    
+    UIElement find_child( string name )
+	[[
+	    ClutterUtil::wrap_concrete_actor(L,clutter_container_find_child_by_name(CLUTTER_CONTAINER(self),name));    
+	]];
+	
+    /*
+	Function: raise_child
+	
+	Raises the first child passed in above the second one. If the second one
+	is omitted, the first one will be raised to the top.
+	
+	Arguments:
+	
+	child - The child UI element to raise.
+	sibling - A second child to raise above or nothing.
+    */
+    
+    raise_child( UIElement child , UIElement sibling = 0 )
+	[[
+	    ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
+	    ClutterActor * s = sibling?ClutterUtil::user_data_to_actor(L,sibling):NULL;
+	    
+	    if (c)
+	    {
+		clutter_container_raise_child(CLUTTER_CONTAINER(self),c,s);
+	    }
+	]];
+	
+    /*
+	Function: lower_child
+	
+	Lowers the first child below the second one. If the second one is omitted,
+	the first one is lowered to the bottom.
+	
+	Arguments:
+	
+	child - The UI element to lower.
+	sibling - A second UI element to lower below, or nothing.
+    */
+    
+    lower_child( UIElement child , UIElement sibling = 0 )
+	[[
+	    ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
+	    ClutterActor * s = sibling?ClutterUtil::user_data_to_actor(L,sibling):NULL;
+
+	    if (c)
+	    {
+		clutter_container_lower_child(CLUTTER_CONTAINER(self),c,s);
+	    }
+	]];	
+}

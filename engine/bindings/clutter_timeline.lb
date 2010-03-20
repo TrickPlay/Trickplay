@@ -1,0 +1,211 @@
+module clutter_timeline;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L);
+void Timeline_on_started(ClutterTimeline*timeline,lua_State*L);
+void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L);
+void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L);
+void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L);
+]]
+
+/*
+    Class: Timeline
+*/
+
+class Timeline [[ClutterTimeline*]]
+{
+    Timeline(table props = 0)
+	[[
+	    *self=clutter_timeline_new(1000);
+    	    ClutterUtil::set_props_from_table(L,props);
+	]];
+	
+    ~Timeline()
+	[[
+	    g_object_unref(G_OBJECT(self));
+	]];
+	
+    int duration
+	[[duration=clutter_timeline_get_duration(self);]]
+	[[clutter_timeline_set_duration(self,duration);]];
+	
+    bool loop
+	[[loop=clutter_timeline_get_loop(self);]]
+	[[clutter_timeline_set_loop(self,loop);]];
+	
+    int delay
+	[[delay=clutter_timeline_get_delay(self);]]
+	[[clutter_timeline_set_delay(self,delay);]];
+	
+    string direction
+	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"FORWARD":"BACKWARD");]]
+	[[
+	    static const char * directions[3] = { "FORWARD" , "BACKWARD" , NULL };
+	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
+	]];
+
+	reverse()
+	[[clutter_timeline_set_direction(self,
+			clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
+			?CLUTTER_TIMELINE_BACKWARD
+			:CLUTTER_TIMELINE_FORWARD);]];
+	
+    start()
+	[[clutter_timeline_start(self);]];
+	
+    pause()
+	[[clutter_timeline_pause(self);]];
+	
+    stop()
+	[[clutter_timeline_stop(self);]];
+	
+    rewind()
+	[[clutter_timeline_rewind(self);]];
+	
+    skip(int msecs)
+	[[clutter_timeline_skip(self,msecs);]];
+	
+    advance(int msecs)
+	[[clutter_timeline_advance(self,msecs);]];
+	
+    readonly int elapsed
+	[[elapsed=clutter_timeline_get_elapsed_time(self);]];
+	
+    readonly int delta
+	[[delta=clutter_timeline_get_delta(self);]];
+	
+    readonly double progress
+	[[progress=clutter_timeline_get_progress(self);]];
+	
+    readonly bool is_playing
+	[[is_playing=clutter_timeline_is_playing(self);]];
+	
+    add_marker(string name,int msecs)
+	[[clutter_timeline_add_marker_at_time(self,name,msecs);]];
+	
+    remove_marker(string name)
+	[[clutter_timeline_remove_marker(self,name);]];
+	
+    bool has_marker(string name)
+	[[result=clutter_timeline_has_marker(self,name);]];
+	
+    advance_to_marker(string name)
+	[[clutter_timeline_advance_to_marker(self,name);]];
+    
+    table list_markers(int msecs = -1)
+	[[
+	    gsize len;
+	    gchar** markers=clutter_timeline_list_markers(self,msecs,&len);
+	    gchar** m = markers;
+	    lua_newtable(L);
+	    for(int i=1;len;--len,++m,++i)
+	    {
+		lua_pushstring(L,*m);
+		lua_rawseti(L,-2,i);
+	    }
+	    g_strfreev(markers);
+	]];
+	
+    readonly table markers
+	[[Timeline_list_markers(L);]];
+	
+    table extra
+	[[
+	    ClutterUtil::Extra* e = (ClutterUtil::Extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
+	    
+	    if (!e)
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L),ClutterUtil::Extra::destroy);
+	    }
+	    else
+	    {
+		e->push_table();
+	    }
+	]]
+	[[
+	    if (lua_isnil(L,2))
+	    {
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,ClutterUtil::Extra::destroy);
+	    }
+	    else
+	    {
+		lb_checktable(L,2);
+		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L,2),ClutterUtil::Extra::destroy);
+	    }
+	]];
+	
+    callback on_new_frame
+	[[
+	    SignalCollector::get(L)->connect_if(
+		on_new_frame,"on_new_frame",
+		self,"new-frame",G_CALLBACK(Timeline_on_new_frame),L);
+	]];
+	
+    callback on_started
+	[[
+	    SignalCollector::get(L)->connect_if(
+		on_started,"on_started",
+		self,"started",G_CALLBACK(Timeline_on_started),L);	    
+	]];
+    
+    callback on_completed
+	[[
+	    SignalCollector::get(L)->connect_if(
+		on_completed,"on_completed",
+		self,"completed",G_CALLBACK(Timeline_on_completed),L);	    	    
+	]];
+	
+    callback on_paused
+	[[
+	    SignalCollector::get(L)->connect_if(
+		on_paused,"on_paused",
+		self,"paused",G_CALLBACK(Timeline_on_paused),L);	    	    
+	]];
+	
+    callback on_marker_reached
+	[[
+	    SignalCollector::get(L)->connect_if(
+		on_marker_reached,"on_marker_reached",
+		self,"marker-reached",G_CALLBACK(Timeline_on_marker_reached),L);	    	    	    
+	]];
+}
+
+[[
+void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L)
+{
+    lua_pushinteger(L,msecs);
+    lua_pushnumber(L,clutter_timeline_get_progress(timeline));
+    invoke_Timeline_on_new_frame(L,timeline,2,0);
+}
+
+void Timeline_on_started(ClutterTimeline*timeline,lua_State*L)
+{
+    invoke_Timeline_on_started(L,timeline,0,0);    
+}
+
+void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L)
+{
+    invoke_Timeline_on_completed(L,timeline,0,0);    
+}
+
+void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L)
+{
+    invoke_Timeline_on_paused(L,timeline,0,0);    
+}
+
+void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L)
+{
+    lua_pushstring(L,marker_name);
+    lua_pushinteger(L,msecs);
+    invoke_Timeline_on_marker_reached(L,timeline,2,0);
+}
+
+]]

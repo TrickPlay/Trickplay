@@ -38,12 +38,15 @@ player =	{
 					-- Horizontal momentum is measured in pixels per second
 					horizontal_momentum = 0,
 
+					live = false,
+
 					jumper = Image {
 						src = Settings.JUMPER_IMAGE,
 						size = { 60, 60 }
 					},
 
 					score = 0,
+					connected_controllers = { _ = {}},
 				}
 -- Handle the jumper by his bottom-left corner (to align bottom with top of platforms more easily)
 player.jumper:move_anchor_point( 0, player.jumper.h )
@@ -215,6 +218,7 @@ end
 function fall_timeline.on_completed( t )
 	t:stop()
 	print('AIYEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!')
+	player.connected_controllers:death_splat()
 
 	player.jumper:animate({
 							duration = 100,
@@ -231,6 +235,7 @@ function fall_timeline.on_completed( t )
  					scale = { 1.5, 1.5 },
 				})
 	score_bg.color = Settings.SCORE_DEAD_BG
+	player.live = false
 end
 
 
@@ -276,6 +281,8 @@ function player.reset()
 	local start_platform = Clone { source = green_platform }
 	start_platform.position = { screen.w/2, 5 * screen.h / 6 }
 	platforms:add(start_platform)
+
+	player.connected_controllers:game_on()
 
 	-- Set the scale center to the bottom center point (relative to anchor point)
 	score.scale = { 1, 1, score.w/2, score.h }

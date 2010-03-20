@@ -283,7 +283,11 @@ def parse( source ):
                             
                     parameters.append( dict( type = param_type , name = param_name , default = param_default ) )
                                     
-                if len( params ) != 0:
+                if len( params ) == 1 and params[0]== "..." :
+                    
+                    pass
+                
+                elif len( params ) != 0:
                     
                     sys.exit( "Invalid parameters for " + name )
                 
@@ -356,7 +360,7 @@ def emit( stuff , f ):
 
         f.write( code[ "code" ] )
         f.write( "\n" )
-    
+            
     def emit_bind( bind ):
         
         ctype = {
@@ -413,9 +417,32 @@ def emit( stuff , f ):
         }
         
         
+        base_types= [
+            "int",
+            "double",
+            "bool",
+            "integer",
+            "long",
+            "string",
+            "lstring",
+            "table",
+            "function",
+            "udata",
+            "callback",
+            "multi"
+        ]
+            
+        def transform_type( type ):
+            if type is None:
+                return None
+            elif type in base_types:
+                return type
+            else:
+                return "udata"
+            
         def declare_local( param , index ):
             
-            type = param[ "type" ]
+            type = transform_type( param[ "type" ] )
             
             result = ""
             extra = ""
@@ -497,14 +524,16 @@ def emit( stuff , f ):
                         ( declare_local( param , index + 1 )  , )
                     )
                     
-                if func[ "type" ] not in [ None , "table" , "udata" , "multi" ]:
+                func_type=transform_type(func[ "type" ])
+                
+                if func_type not in [ None , "table" , "udata" , "multi" ]:
                     
                     f.write(
                         "  %s result;\n"
-                        % ( ctype[ func[ "type" ] ] ,  )
+                        % ( ctype[ func_type ] ,  )
                     )
                     
-                    if func[ "type" ] == "lstring":
+                    if func_type == "lstring":
                         
                         f.write( "  size_t result_len=0;\n" )
                     
@@ -518,21 +547,21 @@ def emit( stuff , f ):
                     
                     pass
                     
-                if func[ "type" ] == "multi":
+                if func_type == "multi":
                     
                     pass
                 
-                elif func[ "type" ] is None:
+                elif func_type is None:
                     
                     f.write( "  return 0;\n" )
                     
-                elif func[ "type" ] in [ "table" , "udata" ]:
+                elif func_type in [ "table" , "udata" ]:
                     
                     f.write( "  return 1;\n" );
             
                 else:
                     
-                    write_push_result( func[ "type" ] )
+                    write_push_result( func_type )
                     f.write( "  return 1;\n" )
                     
                 f.write( "}\n" )
@@ -622,14 +651,16 @@ def emit( stuff , f ):
                         ( declare_local( param , index + 2 )  , )
                     )
                     
-                if func[ "type" ] not in [ None , "table" , "udata" , "multi" ]:
+                func_type=transform_type(func[ "type" ])
+                
+                if func_type not in [ None , "table" , "udata" , "multi" ]:
                     
                     f.write(
                         "  %s result;\n"
-                        % ( ctype[ func[ "type" ] ] ,  )
+                        % ( ctype[ func_type ] ,  )
                     )
                     
-                    if func[ "type" ] == "lstring":
+                    if func_type == "lstring":
                         
                         f.write( "  size_t result_len=0;\n" )
                     
@@ -643,21 +674,21 @@ def emit( stuff , f ):
                     
                     pass
                 
-                if func[ "type" ] == "multi":
+                if func_type == "multi":
                     
                     pass
                     
-                elif func[ "type" ] is None:
+                elif func_type is None:
                     
                     f.write( "  return 0;\n" )
                     
-                elif func[ "type" ] in [ "table" , "udata" ]:
+                elif func_type in [ "table" , "udata" ]:
                     
                     f.write( "  return 1;\n" );
             
                 else:
                     
-                    write_push_result( func[ "type" ] )
+                    write_push_result( func_type )
                     f.write( "  return 1;\n" )
                     
                 f.write( "}\n" )
@@ -767,7 +798,7 @@ def emit( stuff , f ):
             
             for prop in bind[ "properties" ]:
                 
-                prop_type = prop[ "type" ]
+                prop_type = transform_type(prop[ "type" ])
                 
                 if prop_type == "callback":
                     
@@ -809,7 +840,7 @@ def emit( stuff , f ):
                                 "  else\n"
                                 "    %s(L,%s,%s_len);\n"
                                 %
-                                ( prop["name"],lua_push[ prop[ "type" ] ] , prop[ "name" ] , prop[ "name" ] ) 
+                                ( prop["name"],lua_push[ prop_type ] , prop[ "name" ] , prop[ "name" ] ) 
                             )                        
                             
                         else:
@@ -817,7 +848,7 @@ def emit( stuff , f ):
                             f.write(
                                 "  %s(L,%s);\n"
                                 %
-                                ( lua_push[ prop[ "type" ] ] , prop[ "name" ] ) 
+                                ( lua_push[ prop_type ] , prop[ "name" ] ) 
                             )
                         
                     f.write(

@@ -21,7 +21,7 @@
 #define TP_CONFIG_FROM_ENV_DEFAULT      true
 #define TP_CONFIG_FROM_FILE_DEFAULT     "trickplay.cfg"
 #define TP_CONSOLE_ENABLED_DEFAULT      true
-#define TP_TELNET_CONSOLE_PORT_DEFAULT  8008
+#define TP_TELNET_CONSOLE_PORT_DEFAULT  7777
 #define TP_CONTROLLERS_ENABLED_DEFAULT  false
 #define TP_CONTROLLERS_PORT_DEFAULT     0
 #define TP_SCREEN_WIDTH_DEFAULT         960
@@ -103,6 +103,21 @@ public:
     // quits altogether.
     
     void close_app();
+
+    //.........................................................................
+    
+    void reload_app();
+    
+    
+    void close_current_app();
+    
+    //.........................................................................
+    // Experimental - injects a key (by name) into Clutter
+    // TODO
+    
+    void key_event(const char * key);
+    
+    void key_event_keysym(guint key);    
     
 private:
     
@@ -126,6 +141,11 @@ private:
     // if they are not.
     
     void validate_configuration();
+    
+    //.........................................................................
+    // Gets fontconfig working
+    
+    void setup_fonts();
     
     //.........................................................................
     // Load the app
@@ -168,18 +188,13 @@ private:
     void set_request_handler(const char * subject,TPRequestHandler handler,void *data);
     
     //.........................................................................
-    // Experimental - injects a key (by name) into Clutter
-    // TODO
-    
-    void key_event(const char * key);
-    
-    //.........................................................................
     // External functions are our friends
     
     friend void tp_init_version(int * argc,char *** argv,int major_version,int minor_version,int patch_version);
     friend TPContext * tp_context_new();
     friend void tp_context_free(TPContext * context);
     friend void tp_context_set(TPContext * context,const char * key,const char * value);
+    friend void tp_context_set_int(TPContext * context,const char * key,int value);
     friend const char * tp_context_get(TPContext * context,const char * key);
     friend void tp_context_add_notification_handler(TPContext * context,const char * subject,TPNotificationHandler handler,void * data);
     friend void tp_context_set_request_handler(TPContext * context,const char * subject,TPRequestHandler handler,void * data);
@@ -227,11 +242,7 @@ private:
     typedef std::pair<OutputHandler,void*>                      OutputHandlerClosure;
     typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
     
-    OutputHandlerSet                                            output_handlers;
-    
-    typedef std::map<String,guint>                              KeyMap;
-    
-    KeyMap                                                      key_map;
+    OutputHandlerSet                                            output_handlers;    
 };
 
 

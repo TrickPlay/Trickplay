@@ -20,6 +20,8 @@ public:
     void disconnected();
     
     void accelerometer(double x,double y,double z);
+
+	void click(double x, double y);
     
     void ui_event(const gchar * event);
 
@@ -41,10 +43,10 @@ public:
 
     bool ui_show_multiple_choice(const String & label,const StringPairList & choices);
 
-	bool ui_declare_resource(const String &label, const String &url);
+    bool ui_declare_resource(const String &label, const String &url);
     bool ui_background_image(const String &resource_label);
     bool ui_play_sound(const String &resource_label, unsigned int loop=1);
-	bool ui_stop_sound();
+    bool ui_stop_sound();
 
 private:
     
@@ -74,11 +76,17 @@ public:
     void controller_destroyed(gpointer source,Controller * controller);
     
     void push_connected_table();
-        
+    
+    const String & get_web_server_group() const
+    {
+        return web_server_group;
+    }
+    
 private:
 
     virtual void connected(gpointer source,const Controllers::ControllerInfo & info);
     virtual void disconnected(gpointer source);
+    virtual void click(gpointer source,double x,double y);
     virtual void accelerometer(gpointer source,double x,double y,double z);
     virtual void ui_event(gpointer source,const gchar * event);
 
@@ -90,6 +98,7 @@ private:
     Controllers *   controllers;
     ControllerMap   proxies;
     GPointerSet     all_connected;
+    String          web_server_group;
 };
 
 //=============================================================================
@@ -167,10 +176,10 @@ interface controller [[Controller*]]
         ]];
         
 
-	bool declare_resource(string label, string url)
-	[[
-		result = self->ui_declare_resource(label, url);
-	]];
+    bool declare_resource(string label, string url)
+    [[
+            result = self->ui_declare_resource(label, url);
+    ]];
 	
     bool set_background(string label)
     [[
@@ -189,6 +198,9 @@ interface controller [[Controller*]]
 
     callback on_disconnected;
     
+
+	callback on_click;
+
     callback on_accelerometer;
     
     callback on_ui_event;
@@ -248,6 +260,14 @@ void Controller::disconnected()
     detach_controller(L,this);
 }
 
+void Controller::click(double x, double y)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    
+    invoke_controller_on_click(L,this,2,0);
+}
+
 void Controller::accelerometer(double x,double y,double z)
 {
     lua_pushnumber(L,x);
@@ -294,22 +314,50 @@ bool Controller::ui_show_multiple_choice(const String & label,const StringPairLi
 
 bool Controller::ui_declare_resource(const String &label, const String &url)
 {
-	return controllers->ui_declare_resource(source, label, url);
+    bool is_uri=false;
+    
+    char * path=App::get(L)->normalize_path(url.c_str(),&is_uri);
+
+    if (!path)
+    {
+        return false;
+    }
+    
+    Util::GFreeLater free_path(path);
+    
+    if (is_uri)
+    {
+        return controllers->ui_declare_resource(source, label, url);        
+    }
+
+    // It is a path to a local file
+    
+    if (!g_file_test(path,G_FILE_TEST_IS_REGULAR))
+    {
+        return false;
+    }
+    
+    // It exists
+    
+    String local_url=controllers->serve_path(delegate->get_web_server_group(),path);
+    
+    return controllers->ui_declare_resource(source,label,local_url);
+    
 }
 
 bool Controller::ui_background_image(const String &resource_label)
 {
-	return controllers->ui_background_image(source, resource_label);
+    return controllers->ui_background_image(source, resource_label);
 }
 
 bool Controller::ui_play_sound(const String &resource_label, unsigned int loop)
 {
-	return controllers->ui_play_sound(source, resource_label, loop);
+    return controllers->ui_play_sound(source, resource_label, loop);
 }
 
 bool Controller::ui_stop_sound()
 {
-	return controllers->ui_stop_sound(source);
+    return controllers->ui_stop_sound(source);
 }
 
 
@@ -319,12 +367,16 @@ ControllersDelegate::ControllersDelegate(lua_State*l)
 :
     L(l)
 {
-    controllers=App::get(L)->get_context()->get_controllers();
+    App * app=App::get(L);
+    
+    controllers=app->get_context()->get_controllers();
 
     if (controllers)
     {
         controllers->add_delegate(this);
     }
+    
+    web_server_group=app->get_metadata().id;
 }
 
 ControllersDelegate::~ControllersDelegate()
@@ -332,6 +384,7 @@ ControllersDelegate::~ControllersDelegate()
     if (controllers)
     {
         controllers->remove_delegate(this);
+        controllers->drop_web_server_group(web_server_group);
     }
 }
 
@@ -379,6 +432,17 @@ void ControllersDelegate::disconnected(gpointer source)
     {
         it->second->disconnected();
     }    
+}
+
+void ControllersDelegate::click(gpointer source,double x,double y)
+{
+    std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
+        range(proxies.equal_range(source));
+        
+    for(ControllerMap::const_iterator it=range.first;it!=range.second;++it)
+    {
+        it->second->click(x,y);
+    }
 }
 
 void ControllersDelegate::accelerometer(gpointer source,double x,double y,double z)

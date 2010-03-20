@@ -8,7 +8,7 @@ class Console : private Server::Delegate
 {
 public:
     
-    Console(TPContext * context,int port);
+    Console(TPContext * context,bool read_stdin,int port);
     ~Console();
     
     typedef int (*CommandHandler)(const char * command,const char * parameters,void * data);

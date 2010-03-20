@@ -20,7 +20,8 @@ typedef std::map<std::string,std::string>       StringMap;
 typedef std::multimap<std::string,std::string>  StringMultiMap;
 typedef std::list<String>                       StringList;
 typedef std::set<String>                        StringSet;
-typedef std::list< std::pair<String,String> >   StringPairList;
+typedef std::pair<String,String>                StringPair;
+typedef std::list<StringPair>                   StringPairList;
 
 
 #endif // _TRICKPLAY_COMMON_H

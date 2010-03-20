@@ -1,0 +1,56 @@
+module clutter_rectangle;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+/*
+    Class: Rectangle 
+*/
+
+class Rectangle [[ClutterActor*]] actor
+{
+    Rectangle(table props = 0)
+        [[
+            *self = clutter_rectangle_new();
+	    ClutterUtil::initialize_actor(L,*self,RECTANGLE_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+        ]];
+	
+    ~Rectangle()
+	[[g_object_unref(G_OBJECT(self));]];
+        
+    table color
+        [[
+            ClutterColor color;
+            clutter_rectangle_get_color(CLUTTER_RECTANGLE(self),&color);
+            ClutterUtil::push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            ClutterUtil::to_clutter_color(L,2,&color);
+            clutter_rectangle_set_color(CLUTTER_RECTANGLE(self),&color);            
+        ]];
+        
+    int border_width
+        [[border_width=clutter_rectangle_get_border_width(CLUTTER_RECTANGLE(self));]]
+        [[clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(self),border_width);]];
+        
+    table border_color
+        [[
+            ClutterColor color;
+            clutter_rectangle_get_border_color(CLUTTER_RECTANGLE(self),&color);
+            ClutterUtil::push_clutter_color(L,&color);
+        ]]
+        [[
+            ClutterColor color;
+            ClutterUtil::to_clutter_color(L,2,&color);
+            clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(self),&color);
+        ]];
+}
+
