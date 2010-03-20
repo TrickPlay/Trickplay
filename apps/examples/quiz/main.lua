@@ -19,8 +19,12 @@ dofile("layout.lua")
 
 ui={}
 
+-- Place a semi-transparent curtain behind content
+screen:add(Rectangle { size={screen.w,screen.h}, color="00000080" })
+
+
 layout(
-    screen:set{size={960,540},color="000000"},
+    screen,
     {
         padding=10,
         columns=
@@ -268,6 +272,9 @@ end
 -- the functions above
 
 function controllers.on_controller_connected(controllers,controller)
+
+	controller:declare_resource("quiz","http://10.0.190.103/quiz.png")
+	controller:set_background("quiz")
 
     print("CONNECTED",controller.name)
     

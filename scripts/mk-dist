@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+cd `dirname "${BASH_SOURCE}"`/..
+
+mkdir -p build
+cd build
+cmake .. || exit
+make || exit
+
+cd ..
+
+tar --version | head -1 | grep -q GNU && TAR_SUB_FLAG="--transform 's" || TAR_SUB_FLAG="-s '"
+
+echo -n Making tar file...
+echo COPY_EXTENDED_ATTRIBUTES_DISABLE=true COPYFILE_DISABLE=true tar cjvf trickplay-runtime.tbz --verbose --exclude .DS_Store ${TAR_SUB_FLAG},^,trickplay/,"'" trickplay.cfg apps -C scripts tp-launch -C ../build `cd build;echo engine/libtpcore*` -C clients/clutter-mediaplayer tp | bash
+echo DONE

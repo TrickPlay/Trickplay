@@ -1,0 +1,311 @@
+module clutter_canvas;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "signal_collector.h"
+#include "clutter_util.h"
+]]
+
+[[
+cairo_t * get_canvas_cairo_t(ClutterActor * canvas)
+{
+    return (cairo_t*) g_object_get_data(G_OBJECT(canvas),"tp-cairot");
+}
+
+cairo_t * check_canvas_cairo_t(lua_State * L,ClutterActor * canvas)
+{
+    cairo_t * result=(cairo_t*) g_object_get_data(G_OBJECT(canvas),"tp-cairot");
+    if(!result)
+    {
+	luaL_error(L,"You must call begin_painting first");
+    }
+    return result;
+}
+
+void destroy_cairo_t(gpointer t)
+{
+    cairo_destroy((cairo_t*)t);    
+}
+
+]]
+
+/*
+    Class: Canvas
+*/
+
+class Canvas [[ClutterActor*]] actor
+{
+    Canvas(table props=0)
+	[[
+            *self = clutter_cairo_texture_new(0,0);
+	    ClutterUtil::initialize_actor(L,*self,CANVAS_METATABLE);
+	    ClutterUtil::set_props_from_table(L,props);
+	    g_object_ref_sink(G_OBJECT(*self));
+	]];
+	
+    ~Canvas()
+	[[
+	    g_object_unref(G_OBJECT(self));    
+	]];
+	
+    double w
+        [[ w = clutter_actor_get_width( self ); ]]
+        [[
+	    clutter_actor_set_width( self , w );
+	    guint sw;
+	    guint sh;
+	    clutter_cairo_texture_get_surface_size(CLUTTER_CAIRO_TEXTURE(self),&sw,&sh);
+	    sw=w;
+	    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(self),sw,sh);
+	]];
+    
+    double h
+        [[ h = clutter_actor_get_height( self ); ]]
+        [[
+	    clutter_actor_set_height( self , h );
+	    guint sw;
+	    guint sh;
+	    clutter_cairo_texture_get_surface_size(CLUTTER_CAIRO_TEXTURE(self),&sw,&sh);
+	    sh=h;
+	    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(self),sw,sh);
+	]];
+
+    double width
+        [[ width = clutter_actor_get_width( self ); ]]
+        [[ set_Canvas_w(L);]];
+    
+    double height
+        [[ height = clutter_actor_get_height( self ); ]]
+        [[ set_Canvas_h(L);]];
+	
+    table size
+        [[
+            lua_newtable(L);
+            lua_pushnumber(L,clutter_actor_get_width(self));
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,clutter_actor_get_height(self));
+            lua_rawseti(L,-2,2);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            clutter_actor_set_size(self,lua_tonumber(L,-2),lua_tonumber(L,-1));
+	    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(self),lua_tonumber(L,-2),lua_tonumber(L,-1));
+            lua_pop(L,2);
+        ]];
+	
+    bool begin_painting(table region=0)
+	[[
+	    if (get_canvas_cairo_t(self))
+	    {
+		result=false;
+	    }
+	    else
+	    {
+		cairo_t * t=NULL;
+		
+		if (region)
+		{
+		    lua_rawgeti(L,region,1);
+		    lua_rawgeti(L,region,2);
+		    lua_rawgeti(L,region,3);
+		    lua_rawgeti(L,region,4);
+		    
+		    t=clutter_cairo_texture_create_region(CLUTTER_CAIRO_TEXTURE(self),
+			lua_tonumber(L,-4),lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1));
+		    lua_pop(L,4);
+		}
+		else
+		{
+		    t=clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(self));
+		}
+		
+		if (!t)
+		{
+		    result=false;
+		}
+		else
+		{
+		    g_object_set_data_full(G_OBJECT(self),"tp-cairot",t,destroy_cairo_t);
+		    result=true;
+		}
+	    }
+	]];
+	
+    bool finish_painting()
+	[[
+	    result=get_canvas_cairo_t(self)?true:false;
+	    
+	    if(result)
+	    {
+		// This should NULL it and call cairo_destroy on it
+		
+		g_object_set_data(G_OBJECT(self),"tp-cairot",NULL);
+	    }	    
+	]];
+	
+    clear_surface()
+	[[
+	    clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(self));
+	]];
+	
+    save()
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_save(cr);    
+	]];
+	
+    restore()
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_restore(cr);    	    
+	]];
+	
+    # TODO: Really a color argument
+    set_source_color()
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+		
+	    ClutterColor c;
+	    ClutterUtil::to_clutter_color(L,2,&c);
+	    cairo_set_source_rgba(cr,c.red/255.0,c.green/255.0,c.blue/255.0,c.alpha/255.0);
+	]];
+	
+    fill(bool preserve=false)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    if(preserve)
+		cairo_fill_preserve(cr);
+	    else
+		cairo_fill(cr);
+	]];
+	
+    paint(int alpha=255)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    if (alpha==255)
+		cairo_paint(cr);
+	    else
+		cairo_paint_with_alpha(cr,alpha/255.0);
+	]];
+	
+    stroke(bool preserve=false)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    if(preserve)
+		cairo_stroke_preserve(cr);	    
+	    else
+		cairo_stroke(cr);
+	]];
+	
+    new_path()
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_new_path(cr); 
+	]];
+
+    close_path()
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_close_path(cr); 
+	]];
+	
+    arc(double xc,double yc,double radius,double angle1,double angle2)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_arc(cr,xc,yc,radius,angle1,angle2);
+	]];
+	
+    arc_negative(double xc,double yc,double radius,double angle1,double angle2)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_arc_negative(cr,xc,yc,radius,angle1,angle2);
+	]];
+    
+    curve_to(double x1,double y1,double x2,double y2,double x3,double y3,bool relative=false)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    if (relative)
+		cairo_rel_curve_to(cr,x1,y1,x2,y2,x3,y3); 
+	    else
+		cairo_curve_to(cr,x1,y1,x2,y2,x3,y3); 
+	]];
+	
+    line_to(double x,double y,bool relative=false)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    if (relative)
+		cairo_rel_line_to(cr,x,y);
+	    else
+		cairo_line_to(cr,x,y);
+	]];
+	
+    move_to(double x,double y,bool relative=false)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    if (relative)
+		cairo_rel_move_to(cr,x,y);
+	    else
+		cairo_move_to(cr,x,y);
+	]];
+    
+    rectangle(double x,double y,double width,double height)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_rectangle(cr,x,y,width,height);
+	]];
+	
+    round_rectangle(double x,double y,double w,double h,double r)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	
+	    cairo_move_to(cr,x+r,y);
+	    cairo_line_to(cr,x+w-r,y);
+	    cairo_curve_to(cr,x+w,y,x+w,y,x+w,y+r);
+	    cairo_line_to(cr,x+w,y+h-r);
+	    cairo_curve_to(cr,x+w,y+h,x+w,y+h,x+w-r,y+h);
+	    cairo_line_to(cr,x+r,y+h);
+	    cairo_curve_to(cr,x,y+h,x,y+h,x,y+h-r);
+	    cairo_line_to(cr,x,y+r);     
+	    cairo_curve_to(cr,x,y,x,y,x+r,y);
+	]];	
+	
+    set_source_linear_pattern(double x1,double y1,double x2,double y2)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_pattern_t *p=cairo_pattern_create_linear(x1,y1,x2,y2);
+	    cairo_set_source(cr,p);
+	    cairo_pattern_destroy(p);
+	]];
+	
+    set_source_radial_pattern(double cx0,double cy0,double radius0,double cx1,double cy1,double radius1)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_pattern_t *p=cairo_pattern_create_radial(cx0,cy0,radius0,cx1,cy1,radius1);
+	    cairo_set_source(cr,p);
+	    cairo_pattern_destroy(p);
+	]];
+	
+    # TODO: second parameter is a color
+    
+    add_source_pattern_color_stop(double offset)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_pattern_t *p=cairo_get_source(cr);
+	    if (p)
+	    {
+		ClutterColor c;
+		ClutterUtil::to_clutter_color(L,3,&c);
+		cairo_pattern_add_color_stop_rgba(p,offset,c.red/255.0,c.green/255.0,c.blue/255.0,c.alpha/255.0);
+	    }
+	]];
+	
+    set_line_width(double width)
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_set_line_width(cr,width);	    
+	]];
+}

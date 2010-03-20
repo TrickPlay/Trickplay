@@ -5,6 +5,7 @@
 #include "common.h"
 #include "mdns.h"
 #include "server.h"
+#include "context.h"
 
 class Controllers : private Server::Delegate
 {
@@ -13,7 +14,7 @@ public:
     //..........................................................................
     // Pass 0 for the port to have one automatically chosen
     
-    Controllers(const String & name,int port);
+    Controllers(TPContext * context,const String & name,int port);
     ~Controllers();
     
     //..........................................................................
@@ -46,6 +47,7 @@ public:
         virtual void connected(gpointer source,const ControllerInfo & info)=0;
         virtual void disconnected(gpointer source)=0;
         virtual void accelerometer(gpointer source,double x,double y,double z)=0;
+	virtual void click(gpointer source, double x, double y)=0;
         virtual void ui_event(gpointer source,const gchar * event)=0;
     };
    
@@ -61,11 +63,16 @@ public:
     bool ui_clear(gpointer source);
     bool ui_show_multiple_choice(gpointer source,const String & label,const StringPairList & choices);
 
-	bool ui_declare_resource(gpointer source,const String &label, const String &url);
+    bool ui_declare_resource(gpointer source,const String &label, const String &url);
     bool ui_background_image(gpointer source,const String &resource_label);
     bool ui_play_sound(gpointer source,const String &resource_label, unsigned int loop=1);
-	bool ui_stop_sound(gpointer source);
+    bool ui_stop_sound(gpointer source);
 
+    //..........................................................................
+    
+    String serve_path(const String & group,const String & path);
+    
+    void drop_web_server_group(const String & group);
     
     //..........................................................................
     // Find info for a controller
@@ -77,12 +84,39 @@ private:
     Controllers(const Controllers &) {}
     
     //..........................................................................
+    
+    struct HTTPInfo
+    {
+        HTTPInfo() : is_http(false),headers_done(false) {}
+        
+        void reset()
+        {
+            is_http=false;
+            method.clear();
+            url.clear();
+            version.clear();
+            headers.clear();
+            headers_done=false;
+        }
+        
+        bool        is_http;
+        String      method;
+        String      url;
+        String      version;
+        StringList  headers;
+        bool        headers_done;
+    };
+    
+    //..........................................................................
     // Data for each connection
     
     struct ConnectionInfo
     {
+        ConnectionInfo() : disconnect(true) {}
+
+        bool            disconnect;
         ControllerInfo  controller;
-        String          input_buffer;
+        HTTPInfo        http;
     };
     
     //..........................................................................
@@ -139,11 +173,27 @@ private:
     void process_command(gpointer connection,ControllerInfo & info,gchar ** parts);
     
     //..........................................................................
+    
+    void handle_http_get(gpointer connection,const gchar * line);
+    void handle_http_line(gpointer connection,ConnectionInfo & info,const gchar * line);
+    
+    // The key is a hash we generate, the first string is the real path
+    // and the second string is the group.
+    
+    typedef std::map<String,StringPair> WebServerPathMap;
+    
+    WebServerPathMap    path_map;
+    
+    //..........................................................................
     // The map of connections
     
     typedef std::map<gpointer,ConnectionInfo> ConnectionMap;
     
     ConnectionMap       connections;    
+
+    //..........................................................................
+    
+    TPContext * context;
 };
 
 

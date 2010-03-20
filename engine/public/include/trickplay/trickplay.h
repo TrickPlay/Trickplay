@@ -136,7 +136,7 @@ typedef struct TPContext TPContext;
     TP_TELNET_CONSOLE_PORT - Telnet console port. Set to a port for the telnet console.
                             If set to "0", the telnet console will be disabled. In
                             production builds, the telnet console is always disabled.
-                            Defaults to "8008".
+                            Defaults to "7777".
                             
     TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "1" if you wish to enable
                             support for remote controllers. This will create a
@@ -151,6 +151,14 @@ typedef struct TPContext TPContext;
                             shown to the user when controllers discover the mDNS
                             service.
                             Defaults to "TrickPlay".
+                            
+    TP_LOG_DEBUG -          Whether to log DEBUG messages. Set to "0" to prevent
+                            DEBUG messages from being logged.
+                            Defaults to "1".
+                            
+    TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
+                            TrickPlay will use the systems fonts.
+                            Defaults to NULL.                            
 */
 
 #define TP_APP_SOURCES          "app.sources"
@@ -171,6 +179,8 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_ENABLED  "controllers.enabled"
 #define TP_CONTROLLERS_PORT     "controllers.port"
 #define TP_CONTROLLERS_NAME     "controllers.name"
+#define TP_LOG_DEBUG            "log.debug"
+#define TP_FONTS_PATH           "fonts.path"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -317,7 +327,7 @@ void            tp_init_version(
 */
                 
 TP_API_EXPORT
-TPContext *     tp_context_new();
+TPContext *     tp_context_new(void);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_set
@@ -339,6 +349,27 @@ void            tp_context_set(
                     TPContext * context,
                     const char * key,
                     const char * value);
+
+/*-----------------------------------------------------------------------------
+    Function: tp_context_set_int
+    
+    Set a context configuration value.
+    
+    Arguments:
+    
+    context -   A pointer to a TPContext.
+    
+    key -       A configuration key.
+    
+    value -     The value for the key. 
+*/
+                
+TP_API_EXPORT
+void            tp_context_set_int(
+                    
+                    TPContext * context,
+                    const char * key,
+                    int value);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_get

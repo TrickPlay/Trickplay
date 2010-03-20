@@ -3,15 +3,30 @@
 #include "util.h"
 #include "context.h"
 
-Console::Console(TPContext * ctx,int port)
+Console::Console(TPContext * ctx,bool read_stdin,int port)
 :
     context(ctx),
     L(NULL),
-    channel(g_io_channel_unix_new(fileno(stdin))),
-    stdin_buffer(g_string_new(NULL)),
+    channel(NULL),
+    stdin_buffer(NULL),
     server(NULL)
 {
-    g_io_add_watch(channel,G_IO_IN,channel_watch,this);
+    if (read_stdin)
+    {
+        int fd=fileno(stdin);
+        
+        if (fd>-1)
+        {
+            channel=g_io_channel_unix_new(fd);
+            
+            if (channel)
+            {
+                stdin_buffer=g_string_new(NULL);
+                
+                g_io_add_watch(channel,G_IO_IN,channel_watch,this);
+            }
+        }
+    }
 
     if (port)
     {
@@ -37,9 +52,16 @@ Console::Console(TPContext * ctx,int port)
 
 Console::~Console()
 {
-    g_io_channel_shutdown(channel,FALSE,NULL);
-    g_io_channel_unref(channel);
-    g_string_free(stdin_buffer,TRUE);
+    if (channel)
+    {
+        g_io_channel_shutdown(channel,FALSE,NULL);
+        g_io_channel_unref(channel);
+    }
+    
+    if (stdin_buffer)
+    {
+        g_string_free(stdin_buffer,TRUE);
+    }
     
     context->remove_output_handler(output_handler,this);        
 }

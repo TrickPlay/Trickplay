@@ -1,6 +1,3 @@
-screen.size = { 960 , 540 }
---screen.size = { 1920, 1080 }
-
 dofile("debug-lib.lua")
 
 Timer{ interval = 2 , on_timer = function() collectgarbage() end }
@@ -38,8 +35,14 @@ local left_col = 0
 local selection_col = 0
 local selection_row = 0
 
-screen.color = "000000";
-screen:show_all()
+mediaplayer.on_loaded = function () mediaplayer:play() end
+mediaplayer.on_end_of_stream = function ()
+						mediaplayer:seek(0)
+						mediaplayer:play()
+					end
+mediaplayer:load('background.mp4')
+curtain = Rectangle { color = '00000080', position = { -600, -600, -600 }, size = {1200+screen.w, 1200+screen.h} }
+screen:add(curtain)
 
 -- The wall will contain an array of Images which will slide around diagonally on the screen at an angle
 local wall = Group{ position = { left_pad , top_pad } , size = screen.size }
@@ -136,21 +139,27 @@ end
 
 local cursor = Rectangle{ color = trickplay_red , opacity = 0 }
 cursor.position , cursor.size = inflate( get_tile_position( selection_col , selection_row ) , { 100 , 100 } , -4 , -4 )
-
-wall:add( cursor )
+cursor.z = -1
 
 -- Fetch the first set of images
 -- We pass a callback which itself will load more images once first page is loaded
 -- ...with its own callback to load page 3 as well.  So we basically load the first 3 pages, one at a time at startup.
 populate_next_page({
 							callback = function( self )
+								wall:add( cursor )
 								populate_next_page({
 										callback = function( self )
-											populate_next_page()
+											populate_next_page({
+												callback = function( self )
+												end
+											})
 										end
 								})
 							end
 						})
+
+
+screen:show_all()
 
 -- We also want to get the list of licenses for displaying along with images when zoomed
 local licenses = {}
@@ -226,6 +235,11 @@ local image_zoom_back_z = -200
 
 local wall_zoom_timeline = Timeline{ duration = 250 }
 local wall_zoom_alpha = Alpha{ timeline = wall_zoom_timeline , mode = "EASE_OUT_SINE" }
+
+function controllers.on_controller_connected(controllers, controller)
+	controller:declare_resource("flickr","http://10.0.190.103/flickr.png")
+	controller:set_background("flickr")
+end
 
 function screen.on_key_down(screen,keyval)
 
@@ -367,10 +381,10 @@ function screen.on_key_down(screen,keyval)
 
 				zoom_image = Group { position = {0,0} }
 				local zoom_image_url
-				if screen.size[2] < 1080 then
-					zoom_image_url = Flickr.get_medium_url(the_photo)
-				else
+				if screen.size[2] > 540 then
 					zoom_image_url = Flickr.get_original_url(the_photo)
+				else
+					zoom_image_url = Flickr.get_medium_url(the_photo)
 				end
 				local zoom_thumb_img = Clone { source = the_photo.thumbWallImage }
 				local zoom_image_txt_grp = Group { position = { 0, 0 } }

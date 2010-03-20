@@ -1,0 +1,11 @@
+
+app=
+{
+    id          = "com.trickplay.examples.squares",
+    release     = 1,
+    version     = "1.0",
+    name        = "Squares",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+

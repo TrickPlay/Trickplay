@@ -25,6 +25,7 @@ public:
     bool write(gpointer connection,const char * data);
     bool write_printf(gpointer connection,const char * format,...);
     void write_to_all(const char * data);
+    bool write_file(gpointer connection,const char * path,bool http_headers);
     
     guint16 get_port() const;
     
@@ -34,6 +35,7 @@ private:
 
     static void accept_callback(GObject * source,GAsyncResult * result,gpointer data);
     static void data_read_callback(GObject * source,GAsyncResult * result,gpointer data);
+    static void splice_callback(GObject * source,GAsyncResult * result,gpointer data);
     static void connection_destroyed(gpointer data,GObject*connection);
     static void destroy_gstring(gpointer s);
 

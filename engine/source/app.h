@@ -11,6 +11,8 @@
 class SystemDatabase;
 
 //-----------------------------------------------------------------------------
+// An event group lets us track idle sources, so we can neuter them when the
+// app is closed (so that they won't fire once the lua state is gone).
 
 class EventGroup : public RefCounted
 {
@@ -36,6 +38,32 @@ private:
     
     GMutex *        mutex;
     std::set<guint> source_ids;
+};
+
+//-----------------------------------------------------------------------------
+// A LuaStateProxy wraps around a lua state and gets invalidated when the state
+// is closed - so that we can close the state and anyone that depends on it
+// can be aware.
+
+class LuaStateProxy : public RefCounted
+{
+public:
+    
+    lua_State * get_lua_state();
+    
+    bool is_valid();
+    
+    friend class App;
+    
+private:
+    
+    LuaStateProxy(lua_State * l);
+
+    virtual ~LuaStateProxy();
+    
+    void invalidate();
+    
+    lua_State * L;
 };
 
 //-----------------------------------------------------------------------------
@@ -135,6 +163,10 @@ public:
     lua_State * get_lua_state();
     
     //.........................................................................
+    
+    LuaStateProxy * ref_lua_state_proxy();
+    
+    //.........................................................................
     // Get the event group for the app
     
     EventGroup * get_event_group();
@@ -203,6 +235,7 @@ private:
     Metadata                metadata;
     String                  data_path;
     lua_State *             L;
+    LuaStateProxy *         lua_state_proxy;
     String                  user_agent;
     Network *               network;
     EventGroup *            event_group;

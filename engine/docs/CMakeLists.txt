@@ -8,9 +8,11 @@ if (NATURAL_DOCS)
         COMMENT "Generating documentation"
         COMMAND ${NATURAL_DOCS}
             -r
+            -i ${PROJECT_SOURCE_DIR}/engine/docs/text
             -i ${PROJECT_SOURCE_DIR}/engine/bindings
             -o HTML ${CMAKE_CURRENT_BINARY_DIR}/html
             -p ${PROJECT_SOURCE_DIR}/engine/docs/nd
+            -s Default Trickplay
     )
 
     file(

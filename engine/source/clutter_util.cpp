@@ -1,0 +1,255 @@
+#include <cstring>
+#include <string>
+#include <cstdlib>
+
+#include "clutter_util.h"
+#include "lb.h"
+
+//.............................................................................
+
+void ClutterUtil::push_clutter_color(lua_State*L,ClutterColor*color)
+{
+    LSG;
+    
+    lua_newtable(L);
+    lua_pushnumber(L,color->red);
+    lua_rawseti(L,-2,1);
+    lua_pushnumber(L,color->green);
+    lua_rawseti(L,-2,2);
+    lua_pushnumber(L,color->blue);
+    lua_rawseti(L,-2,3);
+    lua_pushnumber(L,color->alpha);
+    lua_rawseti(L,-2,4);
+    
+    LSG_END(1);
+}
+
+//.............................................................................
+
+void ClutterUtil::to_clutter_color(lua_State*L,int index,ClutterColor*color)
+{
+    LSG;
+    
+    if(lua_istable(L,index))
+    {
+        lua_rawgeti(L,2,1);
+        lua_rawgeti(L,2,2);
+        lua_rawgeti(L,2,3);
+        lua_rawgeti(L,2,4);
+        color->red = luaL_optint(L,-4,0);
+        color->green = luaL_optint(L,-3,0);
+        color->blue = luaL_optint(L,-2,0);
+        color->alpha = luaL_optint(L,-1,255);
+        lua_pop(L,4);
+    }
+    else if (lua_isstring(L,index))
+    {
+        int colors[4]={0,0,0,255};
+	char buffer[3]={0,0,0};
+	
+	const char * s=lua_tostring(L,index);
+	
+	if (*s=='#')
+        {
+            ++s;
+        }
+	    
+	int len=strlen(s);
+	int i=0;
+	
+	while(len>=2)
+	{
+	    buffer[0]=*(s++);
+	    buffer[1]=*(s++);
+	    
+	    sscanf(buffer,"%x",&colors[i]);	    
+	    
+	    if (colors[i]<0)
+	    {
+		colors[i]=0;
+	    }
+	    else if(colors[i]>255)
+	    {
+		colors[i]=255;
+	    }
+	    
+	    len-=2;
+	    i++;		
+	}
+				
+        color->red   = colors[0];
+        color->green = colors[1];
+        color->blue  = colors[2];
+        color->alpha = colors[3];
+    }
+    else
+    {
+        luaL_error(L,"Expecting a color as a table or a string");
+    }
+    
+    LSG_END(0);
+}
+
+//.............................................................................
+
+gulong ClutterUtil::to_clutter_animation_mode(const char * mode)
+{
+    if (!mode)
+    {
+	return CLUTTER_LINEAR;
+    }
+    
+    gulong result=CLUTTER_LINEAR;
+    
+    GEnumClass * ec=G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+    gchar * cm=g_strdup_printf("CLUTTER_%s",mode);    
+    GEnumValue * v=g_enum_get_value_by_name(ec,cm);
+    g_free(cm);
+    
+    if(v)
+    {
+	result=v->value;
+    }
+    
+    g_type_class_unref(ec);
+    
+    return result;
+}
+
+//.............................................................................
+
+ClutterActor * ClutterUtil::user_data_to_actor(lua_State*L,int n)
+{
+    void * udata=lua_touserdata(L,n);
+    
+    if (!udata)
+    {
+	return NULL;
+    }
+    
+    GObject * obj= *((GObject**)udata);
+    
+    if (!obj)
+    {
+	return NULL;
+    }
+    
+    return CLUTTER_IS_ACTOR(obj)?CLUTTER_ACTOR(obj):NULL;
+}
+
+//.............................................................................
+
+void ClutterUtil::set_props_from_table(lua_State*L,int table)
+{
+    LSG;
+    
+    if (table)
+    {
+	if(table==lua_gettop(L))
+	{
+	    lb_set_props_from_table(L);	    
+	}
+	else
+	{
+	    lua_pushvalue(L,table);
+	    lb_set_props_from_table(L);
+	    lua_pop(L,1);
+	}
+    }
+    
+    LSG_END(0);
+}
+
+//.............................................................................
+
+void ClutterUtil::initialize_actor(lua_State * L,ClutterActor*actor,const char * metatable)
+{
+    // Metatables are static, so we don't need to free it 
+    g_object_set_data(G_OBJECT(actor),"tp-metatable",(gpointer)metatable);
+}
+
+//.............................................................................
+
+const char * ClutterUtil::get_actor_metatable(ClutterActor*actor)
+{
+    if (!actor)
+    {
+	return NULL;
+    }
+    
+    return (const char *)g_object_get_data(G_OBJECT(actor),"tp-metatable");
+}
+
+//.............................................................................
+
+void ClutterUtil::wrap_concrete_actor(lua_State*L,ClutterActor*actor)
+{
+    const char * metatable=get_actor_metatable(actor);
+    
+    if (!metatable)
+    {
+	lua_pushnil(L);
+	return;
+    }
+    
+    int is_new=lb_wrap(L,actor,metatable);
+    	
+    if (is_new)
+    {
+	g_object_ref(G_OBJECT(actor));
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+ClutterUtil::Extra::Extra(lua_State * L)
+:
+    lsp(App::get(L)->ref_lua_state_proxy())
+{
+    lua_newtable(L);
+    lua_pushvalue(L,-1);
+    table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
+}
+
+// Takes a ref on a table that is already on the stack
+// and leaves it on the stack
+
+ClutterUtil::Extra::Extra(lua_State * L,int t)
+:
+    lsp(App::get(L)->ref_lua_state_proxy())
+{
+    lua_pushvalue(L,t);
+    table_ref = luaL_ref(L,LUA_REGISTRYINDEX);
+}
+
+// Releases the ref
+// This may happen after the lua state is closed, because extra is bolted
+// on to a GObject...so we protect against that by using a lua state
+// proxy and checking that it is still good.
+
+ClutterUtil::Extra::~Extra()
+{
+    if (lsp->is_valid())
+    {
+        luaL_unref(lsp->get_lua_state(),LUA_REGISTRYINDEX,table_ref);
+    }
+    
+    lsp->unref();
+}
+
+// Pushes the referenced table onto the stack
+
+void ClutterUtil::Extra::push_table()
+{
+    lua_rawgeti(lsp->get_lua_state(),LUA_REGISTRYINDEX,table_ref);
+}
+
+// GDestroyNotify for it
+
+void ClutterUtil::Extra::destroy(gpointer a)
+{
+    if (a)
+    {
+        delete (Extra*)a;
+    }
+}
