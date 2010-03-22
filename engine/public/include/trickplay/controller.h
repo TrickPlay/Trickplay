@@ -7,6 +7,7 @@
 extern "C" {
 #endif 
 
+//-----------------------------------------------------------------------------
 /*
     File: Controller
     
@@ -25,10 +26,11 @@ extern "C" {
     
     You then pass that structure to <tp_context_add_controller> along with a name
     for the controller and optional user data. <tp_context_add_controller> returns
-    an integer identifier that is uniquely tied to that controller. You can then
-    call the <Controller Events> functions with that identifier. Finally, if the
-    device is disconnected, you can call <tp_context_remove_controller>.    
+    a pointer to a controller structure. You can then call the <Controller Events>
+    functions with that pointer. Finally, if the device is disconnected, you can
+    call <tp_context_remove_controller>.    
 */
+//-----------------------------------------------------------------------------
 /*
     Section: Controller Specification
 */
@@ -60,8 +62,12 @@ extern "C" {
     TP_CONTROLLER_HAS_SOUND           - The controller can play sounds.
     
     TP_CONTROLLER_HAS_UI              - The controller is able to display images
-                                        overlaid on top of one another or as a
+                                        overlaid on top of one another or as a                                        
                                         background.
+                                        
+    TP_CONTROLLER_HAS_TEXT_ENTRY      - The controller can let the user edit text
+                                        sent by TrickPlay. This can be via an on
+                                        screen keyboard.
 */
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
@@ -70,7 +76,8 @@ extern "C" {
 #define TP_CONTROLLER_HAS_TOUCHES                   0x0008
 #define TP_CONTROLLER_HAS_MULTIPLE_CHOICE           0x0010
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
-#define TP_CONTROLLER_HAS_UI                        0x0040                
+#define TP_CONTROLLER_HAS_UI                        0x0040
+#define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
 
 //-----------------------------------------------------------------------------
 /*
@@ -80,19 +87,24 @@ extern "C" {
 */
 
 #define TP_CONTROLLER_COMMAND_RESET                 1
-#define TP_CONTROLLER_COMMAND_ACCELEROMETER_START   5
-#define TP_CONTROLLER_COMMAND_ACCELEROMETER_STOP    6
-#define TP_CONTROLLER_COMMAND_CLICKS_START          7
-#define TP_CONTROLLER_COMMAND_CLICKS_STOP           8
-#define TP_CONTROLLER_COMMAND_TOUCHES_START         9
-#define TP_CONTROLLER_COMMAND_TOUCHES_STOP          10
-#define TP_CONTROLLER_COMMAND_MULTIPLE_CHOICE_SHOW  11
-#define TP_CONTROLLER_COMMAND_UI_CLEAR              12
-#define TP_CONTROLLER_COMMAND_UI_SET_BACKGROUND     13
-#define TP_CONTROLLER_COMMAND_UI_SET_IMAGE          14
-#define TP_CONTROLLER_COMMAND_SOUND_PLAY            20
-#define TP_CONTROLLER_COMMAND_SOUND_STOP            21
+#define TP_CONTROLLER_COMMAND_START_ACCELEROMETER   5
+#define TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER    6
+#define TP_CONTROLLER_COMMAND_START_CLICKS          7
+#define TP_CONTROLLER_COMMAND_STOP_CLICKS           8
+#define TP_CONTROLLER_COMMAND_START_TOUCHES         9
+#define TP_CONTROLLER_COMMAND_STOP_TOUCHES          10
+#define TP_CONTROLLER_COMMAND_SHOW_MULTIPLE_CHOICE  11
+#define TP_CONTROLLER_COMMAND_CLEAR_UI              12
+#define TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND     13
+#define TP_CONTROLLER_COMMAND_SET_UI_IMAGE          14
+#define TP_CONTROLLER_COMMAND_PLAY_SOUND            20
+#define TP_CONTROLLER_COMMAND_STOP_SOUND            21
 #define TP_CONTROLLER_COMMAND_DECLARE_RESOURCE      30
+#define TP_CONTROLLER_COMMAND_ENTER_TEXT            31
+
+//-----------------------------------------------------------------------------
+
+typedef struct TPController TPController;
 
 //-----------------------------------------------------------------------------
 
@@ -158,6 +170,8 @@ struct TPControllerSpec
         
         Arguments:
         
+        controller -    The controller.
+        
         command -       One of the <Commands> constants.
         
         parameters -    A null terminated string of TAB separated parameters
@@ -172,7 +186,12 @@ struct TPControllerSpec
         other - The command failed.
     */
     
-    int (*execute_command)(unsigned int command,const char * parameters,void * data);
+    int (*execute_command)(
+                           
+        TPController * controller,
+        unsigned int command,
+        const char * parameters,
+        void * data);
 };
 
 //-----------------------------------------------------------------------------
@@ -191,14 +210,20 @@ struct TPControllerSpec
     
     Arguments:
     
-    controller -    The id of the controller returned by <tp_context_add_controller>.
+    controller -    The controller returned by <tp_context_add_controller>.
     
     key_code -      An identifier for the key. TODO: reference list with additions.
     
     unicode -       The unicode character for the key, if any, or zero.
 */    
     
-TP_API_EXPORT void tp_controller_key_down(int controller,unsigned int key_code,unsigned long int unicode);
+    TP_API_EXPORT
+    void
+    tp_controller_key_down(
+            
+        TPController * controller,
+        unsigned int key_code,
+        unsigned long int unicode);
 
 /*
     Callback: tp_controller_key_up
@@ -207,50 +232,92 @@ TP_API_EXPORT void tp_controller_key_down(int controller,unsigned int key_code,u
     
     Arguments:
     
-    controller -    The id of the controller returned by <tp_context_add_controller>.
+    controller -    The controller returned by <tp_context_add_controller>.
     
     key_code -      An identifier for the key. TODO: reference list with additions.
     
     unicode -       The unicode character for the key, if any, or zero.
 */    
 
-TP_API_EXPORT void tp_controller_key_up(int controller,unsigned int key_code,unsigned long int unicode);
+    TP_API_EXPORT
+    void
+    tp_controller_key_up(
+                              
+        TPController * controller,
+        unsigned int key_code,
+        unsigned long int unicode);
     
 /*
     Callback: tp_controller_accelerometer
 */
 
-TP_API_EXPORT void tp_controller_accelerometer(int controller,double x,double y,double z);
+    TP_API_EXPORT
+    void
+    tp_controller_accelerometer(
+                                     
+        TPController * controller,
+        double x,
+        double y,
+        double z);
 
 /*
     Callback: tp_controller_click
 */
 
-TP_API_EXPORT void tp_controller_click(int controller,int x,int y);
+    TP_API_EXPORT
+    void
+    tp_controller_click(
+                             
+        TPController * controller,
+        int x,
+        int y);
     
 /*
     Callback: tp_controller_touch_down
 */
 
-TP_API_EXPORT void tp_controller_touch_down(int controller,int x,int y);
+    TP_API_EXPORT
+    void
+    tp_controller_touch_down(
+                                  
+        TPController * controller,
+        int x,
+        int y);
 
 /*
     Callback: tp_controller_touch_move
 */
 
-TP_API_EXPORT void tp_controller_touch_move(int controller,int x,int y);
+    TP_API_EXPORT
+    void
+    tp_controller_touch_move(
+                                  
+        TPController * controller,
+        int x,
+        int y);
     
 /*
     Callback: tp_controller_touch_up
 */
 
-TP_API_EXPORT void tp_controller_touch_up(int controller,int x,int y);
+    TP_API_EXPORT
+    void
+    tp_controller_touch_up(
+                                
+        TPController * controller,
+        int x,
+        int y);
     
 /*
     Callback: tp_controller_ui_event
 */
 
-TP_API_EXPORT void tp_controller_ui_event(int controller,const char * parameters);
+    TP_API_EXPORT
+    void
+    tp_controller_ui_event(
+            
+        TPController * controller,
+        const char * parameters);
 
 //-----------------------------------------------------------------------------
 /*
@@ -261,12 +328,25 @@ TP_API_EXPORT void tp_controller_ui_event(int controller,const char * parameters
     Function: tp_context_add_controller
 */
 
-TP_API_EXPORT int tp_context_add_controller(TPContext * context,const char * name,const TPControllerSpec * spec,void * data);
+    TP_API_EXPORT
+    TPController *
+    tp_context_add_controller(
+                                             
+        TPContext * context,
+        const char * name,
+        const TPControllerSpec * spec,
+        void * data);
 
 /*
     Function: tp_context_remove_controller
 */
 
-TP_API_EXPORT void tp_context_remove_controller(TPContext * context,int controller);
+    TP_API_EXPORT
+    void
+    tp_context_remove_controller(
+                                      
+        TPContext * context,
+        TPController * controller);
+
 
 #endif // _TRICKPLAY_CONTROLLER_H
