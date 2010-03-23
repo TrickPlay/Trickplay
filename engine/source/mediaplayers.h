@@ -2,6 +2,7 @@
 #define _TRICKPLAY_MEDIAPLAYERS_H
 
 #include "common.h"
+#include "trickplay/mediaplayer.h"
 
 class MediaPlayer
 {

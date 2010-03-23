@@ -203,6 +203,7 @@ private:
     friend void tp_context_key_event(TPContext * context,const char * key);
     friend int tp_context_run(TPContext * context);
     friend void tp_context_quit(TPContext * context);
+    
     friend void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
     
 private:
