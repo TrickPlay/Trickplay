@@ -108,6 +108,75 @@ typedef struct TPController TPController;
 
 //-----------------------------------------------------------------------------
 
+typedef struct TPControllerMultipleChoice TPControllerMultipleChoice;
+
+struct TPControllerMultipleChoice
+{
+    const char *    label;
+    unsigned int    count;
+    const char **   ids;
+    const char **   choices;
+};
+
+//-----------------------------------------------------------------------------
+
+#define TP_CONTROLLER_UI_BACKGROUND_MODE_CENTER     1
+#define TP_CONTROLLER_UI_BACKGROUND_MODE_STRETCH    2
+#define TP_CONTROLLER_UI_BACKGROUND_MODE_TILE       3
+
+typedef struct TPControllerSetUIBackground TPControllerSetUIBackground;
+
+struct TPControllerSetUIBackground
+{
+    const char *    resource;
+    unsigned int    mode;
+};
+
+//-----------------------------------------------------------------------------
+
+typedef struct TPControllerSetUIImage TPControllerSetUIImage;
+
+struct TPControllerSetUIImage
+{
+    const char *    resource;
+    int             x;
+    int             y;
+    int             width;
+    int             height;
+};
+
+//-----------------------------------------------------------------------------
+
+typedef struct TPControllerPlaySound TPControllerPlaySound;
+
+struct TPControllerPlaySound
+{
+    const char *    resource;
+    unsigned int    loop;
+};
+
+//-----------------------------------------------------------------------------
+
+typedef struct TPControllerDeclareResource TPControllerDeclareResource;
+
+struct TPControllerDeclareResource
+{
+    const char *    resource;
+    const char *    uri;
+};
+
+//-----------------------------------------------------------------------------
+
+typedef struct TPControllerEnterText TPControllerEnterText;
+
+struct TPControllerEnterText
+{
+    const char *    label;
+    const char *    text;
+};
+
+//-----------------------------------------------------------------------------
+
 typedef struct TPControllerSpec TPControllerSpec;
 
 /*
@@ -174,8 +243,8 @@ struct TPControllerSpec
         
         command -       One of the <Commands> constants.
         
-        parameters -    A null terminated string of TAB separated parameters
-                        for some of the commands that require them, or NULL.
+        parameters -    A pointer to a structure with additional parameters for
+                        commands that require them, or NULL.
                         
         data -          Opaque user data that was passed to <tp_context_add_controller>.
         
@@ -190,7 +259,7 @@ struct TPControllerSpec
                            
         TPController * controller,
         unsigned int command,
-        const char * parameters,
+        void * parameters,
         void * data);
 };
 
@@ -348,5 +417,13 @@ struct TPControllerSpec
         TPContext * context,
         TPController * controller);
 
+
+//-----------------------------------------------------------------------------
+
+#ifdef __cplusplus
+}
+#endif 
+
+//-----------------------------------------------------------------------------
 
 #endif // _TRICKPLAY_CONTROLLER_H
