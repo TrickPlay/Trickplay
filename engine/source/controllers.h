@@ -154,7 +154,7 @@ private:
 
     //..........................................................................
     // When a controller doesn't identify itself quickly by sending us a valid
-    // "DEVICE" line, we disconnect it. This structire holds the information
+    // "DEVICE" line, we disconnect it. This structure holds the information
     // for the timer we use.
     
     struct TimerClosure
