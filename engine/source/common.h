@@ -13,7 +13,6 @@
 #include "lua.hpp"
 //-----------------------------------------------------------------------------
 #include "trickplay/trickplay.h"
-#include "trickplay/mediaplayer.h"
 //-----------------------------------------------------------------------------
 typedef std::string                             String;
 typedef std::map<std::string,std::string>       StringMap;
