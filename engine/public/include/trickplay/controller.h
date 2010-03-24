@@ -108,6 +108,22 @@ typedef struct TPController TPController;
 
 //-----------------------------------------------------------------------------
 
+typedef struct TPControllerStartAccelerometer TPControllerStartAccelerometer;
+
+#define TP_CONTROLLER_ACCELEROMETER_FILTER_NONE     0
+#define TP_CONTROLLER_ACCELEROMETER_FILTER_LOW      1
+#define TP_CONTROLLER_ACCELEROMETER_FILTER_HIGH     2
+
+
+struct TPControllerStartAccelerometer
+{
+    unsigned int    filter;
+    double          interval;
+};
+
+
+//-----------------------------------------------------------------------------
+
 typedef struct TPControllerMultipleChoice TPControllerMultipleChoice;
 
 struct TPControllerMultipleChoice
