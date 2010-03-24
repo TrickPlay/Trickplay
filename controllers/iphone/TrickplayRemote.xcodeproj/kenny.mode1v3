@@ -329,7 +329,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>B93260B7115307BC00C69405</string>
+										<string>B93260BD11544D0B00C69405</string>
 										<key>history</key>
 										<array>
 											<string>B9D9A0FB110937F3002FFCA4</string>
@@ -554,6 +554,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>1CD10A99069EF8BA00B06720</string>
 		<string>B9D9A09911092FB9002FFCA4</string>
 		<string>/Users/kenny/trickplay_assembla/controllers/iphone/TrickplayRemote.xcodeproj</string>
 	</array>
@@ -757,13 +758,13 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>B9326050115073F600C69405</string>
+				<string>B93260BE11544D0B00C69405</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>B9326051115073F600C69405</string>
-				<string>B9326052115073F600C69405</string>
-				<string>B9326053115073F600C69405</string>
-				<string>B9326054115073F600C69405</string>
-				<string>B9326055115073F600C69405</string>
+				<string>B93260BF11544D0B00C69405</string>
+				<string>B93260C011544D0B00C69405</string>
+				<string>B93260C111544D0B00C69405</string>
+				<string>B93260C211544D0B00C69405</string>
+				<string>B93260C311544D0B00C69405</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>
