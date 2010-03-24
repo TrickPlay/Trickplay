@@ -331,7 +331,7 @@ struct TPMediaPlayer
     player is in any state other than IDLE, TrickPlay will call <reset> before it
     calls <destroy>.
     
-    Parameters:
+    Arguments:
     
     mp -    The TPMediaPlayer instance to destroy.
     
@@ -348,7 +348,7 @@ struct TPMediaPlayer
     Should validate the URI and attempt to begin loading it asynchronously. It should
     return as quickly as possible.
    
-    Parameters:
+    Arguments:
     
     mp -    The TPMediaPlayer instance.
     
@@ -386,7 +386,7 @@ struct TPMediaPlayer
     current URI. It should retain viewport geometry and volume/mute information.
     It should not free the media player itself; that is a job for <destroy>.
     
-    Parameters:
+    Arguments:
     
     mp -    The TPMediaPlayer instance.
     
@@ -406,7 +406,7 @@ struct TPMediaPlayer
     current position is at the end of the stream, this call should succeed and
     <tp_media_player_end_of_stream> should be called.
     
-    Parameters:
+    Arguments:
 
     mp -    The TPMediaPlayer instance.
     
@@ -439,7 +439,7 @@ struct TPMediaPlayer
     
     In all cases, the state will remain as it was.
     
-    Parameters:
+    Arguments:
     
     mp -        The TPMediaPlayer instance.
     
@@ -467,7 +467,7 @@ struct TPMediaPlayer
     Should attempt to pause the stream. If the playback rate is anything other than
     one, it should be reset to 1.
     
-    Parameters:
+    Arguments:
 
     mp -    The TPMediaPlayer instance.
     
@@ -491,7 +491,7 @@ struct TPMediaPlayer
     a speed multiplier. Negative playback rates should play backward. Zero is not
     a valid playback rate.
     
-    Parameters:
+    Arguments:
 
     mp -    The TPMediaPlayer instance.
     
@@ -517,7 +517,7 @@ struct TPMediaPlayer
     
     Should return the current playback position, in seconds, within the stream.
     
-    Parameters:
+    Arguments:
 
     mp -        The TPMediaPlayer instance.
 
@@ -542,7 +542,7 @@ struct TPMediaPlayer
     
     Should return the duration of the stream, in seconds. 
 
-    Parameters:
+    Arguments:
 
     mp -        The TPMediaPlayer instance.
 
@@ -568,7 +568,7 @@ struct TPMediaPlayer
     Returns two markers that denote the portion of the stream that is currently
     buffered, in seconds. 
     
-    Parameters:
+    Arguments:
     
     mp -            The TPMediaPlayer instance.
 
@@ -598,7 +598,7 @@ struct TPMediaPlayer
     Returns the size of the video stream, if any. This is not the size of the view
     port used to display the video, but the actual resolution of the video itself.
         
-    Parameters:
+    Arguments:
     
     mp -        The TPMediaPlayer instance.
 
@@ -625,7 +625,7 @@ struct TPMediaPlayer
     
     Returns the position and size, in pixels, of the viewport used to play video.
     
-    Parameters:
+    Arguments:
     
     mp -        The TPMediaPlayer instance.
     
@@ -658,7 +658,7 @@ struct TPMediaPlayer
     
     Sets the position and size of the viewport.
     
-    Parameters:
+    Arguments:
     
     mp -        The TPMediaPlayer instance.
     
@@ -691,7 +691,7 @@ struct TPMediaPlayer
     
     Returns the type of media; whether it has audio, video or both.
     
-    Parameters:
+    Arguments:
     
     mp  -       The TPMediaPlayer instance.
     
@@ -717,7 +717,7 @@ struct TPMediaPlayer
     Returns the current audio volume as a floating point number between 0 and
     1, where 0 is the lowest volume.
     
-    Parameters:
+    Arguments:
     
     mp  -       The TPMediaPlayer instance.
     
@@ -745,7 +745,7 @@ struct TPMediaPlayer
     Sets the audio volume as a floating point number between 0 and
     1, where 0 is the lowest volume.
     
-    Parameters:
+    Arguments:
     
     mp  -       The TPMediaPlayer instance.
     
@@ -773,7 +773,7 @@ struct TPMediaPlayer
     
     Returns a value indicating whether audio is muted.
     
-    Parameters:
+    Arguments:
     
     mp  -       The TPMediaPlayer instance.
     
@@ -802,7 +802,7 @@ struct TPMediaPlayer
     
     Mutes audio.
     
-    Parameters:
+    Arguments:
     
     mp  -       The TPMediaPlayer instance.
     
