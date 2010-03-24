@@ -53,7 +53,7 @@ layout(
                         content=Text{
                             name="littler_number",
                             font="Diavlo,DejaVu Sans,Sans 40px" ,
-                            text="Waiting for players to join..." ,
+                            text="Press ENTER or join to play..." ,
                             wrap=true,
                             color="FFFFFF"
                             }
@@ -299,7 +299,7 @@ end
 function game.no_players()
 	ui.bigger_number.text = ""
 	ui.answer.text = ""
-    ui.littler_number.text="Waiting for players to join..."
+    ui.littler_number.text="Press ENTER or join to play..."
     ui.players_box_rect.opacity = 0
     ui.timer.text=""
 	ui.timer_group.opacity = 0
@@ -317,7 +317,7 @@ end
 function game.ready_to_start()
 	ui.bigger_number.text = ""
 	ui.answer.text = ""
-    ui.littler_number.text="Tap for next problem..."
+    ui.littler_number.text="ENTER or tap for next problem..."
 	ui.timer_group.opacity = 0
     game.ready=true
 end
@@ -426,14 +426,24 @@ function game.times_up(correct_answer)
 	game.ready_to_start()
 end
 
+local fake_controller_for_local_player = { name = "Player", set_background = function(self, name) end }
 
 function screen.on_key_down(screen,key)
     if key==keys.Return then
+    	if 0 == player_count() then
+    		player_joined(fake_controller_for_local_player)
+    	end
         if game.ready then
        		game.got_tap = false
             game.ask_next_question()
         end
-    end
+    elseif players[fake_controller_for_local_player] then
+		if key >= keys.KP_0 and key <= keys.KP_9 then
+			player_answered(fake_controller_for_local_player, key - keys.KP_0)
+		elseif key >= keys["0"] and key <= keys["9"] then
+			player_answered(fake_controller_for_local_player, key - keys["0"])
+		end
+	end
 end
 
 game.no_players()
