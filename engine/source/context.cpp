@@ -13,7 +13,7 @@
 #include "util.h"
 #include "console.h"
 #include "sysdb.h"
-#include "controllers.h"
+#include "controller_server.h"
 #include "mediaplayers.h"
 
 //-----------------------------------------------------------------------------
@@ -24,7 +24,7 @@ TPContext::TPContext()
 :
     is_running(false),
     sysdb(NULL),
-    controllers(NULL),
+    controller_server(NULL),
     console(NULL),
     current_app(NULL),
     is_first_app(true),
@@ -266,6 +266,63 @@ void TPContext::setup_fonts()
 
 //-----------------------------------------------------------------------------
 
+#ifndef TP_CLUTTER_BACKEND_EGL
+
+// In desktop builds, we catch all key events that are not synthetic and pass
+// them through a keyboard controller. That will generate an event for the
+// controller and re-inject the event into clutter as a synthetic event.
+
+gboolean controller_keys(ClutterActor *actor,ClutterEvent *event,gpointer controller)
+{
+    if (event)
+    {
+	switch(event->any.type)
+	{
+	    case CLUTTER_KEY_PRESS:
+	    {
+		if (!(event->key.flags&CLUTTER_EVENT_FLAG_SYNTHETIC))
+		{
+
+		    tp_controller_key_down((TPController*)controller,event->key.keyval,event->key.unicode_value);
+
+#ifndef TP_PRODUCTION
+
+		    if (event->key.keyval==CLUTTER_Escape)
+		    {
+			clutter_main_quit();
+		    }
+		    
+#endif
+		    
+		    return TRUE;
+		}
+		
+		break;
+	    }
+	    
+	    case CLUTTER_KEY_RELEASE:
+	    {	
+		if (!(event->key.flags&CLUTTER_EVENT_FLAG_SYNTHETIC))
+		{
+		    tp_controller_key_up((TPController*)controller,event->key.keyval,event->key.unicode_value);
+		    return TRUE;
+		}
+		break;
+	    }
+	    
+	    default:
+	    {
+		break;
+	    }
+	}
+    }
+    return FALSE;    
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
+
 int TPContext::run()
 {
     //.........................................................................
@@ -337,11 +394,11 @@ int TPContext::run()
     notify(TP_NOTIFICATION_PROFILE_CHANGED);
     
     //.........................................................................
-    // Create the controllers listener
+    // Create the controller server
     
     if (get_bool(TP_CONTROLLERS_ENABLED,TP_CONTROLLERS_ENABLED_DEFAULT))
     {
-	g_info("STARTING CONTROLLERS...");
+	g_info("STARTING CONTROLLER SERVER...");
     
 	// Figure out the name for the controllers service. If one is passed
 	// in to the context, we use it. Otherwise, we look in the database.
@@ -373,7 +430,7 @@ int TPContext::run()
 	    sysdb->set(TP_CONTROLLERS_NAME,name);
 	}
 	
-	controllers=new Controllers(this,name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
+	controller_server=new ControllerServer(this,name,get_int(TP_CONTROLLERS_PORT,TP_CONTROLLERS_PORT_DEFAULT));
     }
     
     //.........................................................................
@@ -407,6 +464,24 @@ int TPContext::run()
     color.alpha=0;
     
     clutter_stage_set_color(CLUTTER_STAGE(stage),&color);
+    
+#ifndef TP_CLUTTER_BACKEND_EGL
+
+    // We add a controller for the keyboard in non-egl builds
+    
+    TPControllerSpec spec;
+    
+    memset(&spec,0,sizeof(spec));
+    
+    spec.capabilities=TP_CONTROLLER_HAS_KEYS;
+    
+    // This controller won't leak because the controller list will free it
+    
+    TPController * keyboard=tp_context_add_controller(this,"Keyboard",&spec,NULL);
+    
+    g_signal_connect(stage,"captured-event",(GCallback)controller_keys,keyboard);
+    
+#endif    
     
     //.........................................................................
     // Create the default media player. This may come back NULL.
@@ -515,12 +590,12 @@ int TPContext::run()
     }
 
     //.........................................................................
-    // Get rid of the controllers
+    // Get rid of the controller server
     
-    if (controllers)
+    if (controller_server)
     {
-	delete controllers;
-	controllers=NULL;
+	delete controller_server;
+	controller_server=NULL;
     }
     
     //.........................................................................
@@ -1075,88 +1150,6 @@ SystemDatabase * TPContext::get_db() const
 
 //-----------------------------------------------------------------------------
 
-Controllers * TPContext::get_controllers() const
-{
-    return controllers;
-}
-
-//-----------------------------------------------------------------------------
-
-void TPContext::key_event(const char * key)
-{
-    typedef std::map<String,guint> KeyMap;
-    
-    static KeyMap key_map;
-
-    if (key_map.empty())
-    {
-	key_map["UP"	]=CLUTTER_Up;
-	key_map["DOWN"	]=CLUTTER_Down;
-	key_map["LEFT"	]=CLUTTER_Left;
-	key_map["RIGHT"	]=CLUTTER_Right;
-	key_map["OK"	]=CLUTTER_Return;
-    }
-    
-    KeyMap::const_iterator it=key_map.find(String(key));
-    
-    if (it==key_map.end())
-	return;
-    
-    key_event_keysym(it->second);    
-}
-
-//-----------------------------------------------------------------------------
-
-#ifdef TP_CLUTTER_BACKEND_EGL
-
-static gboolean event_pump(gpointer)
-{
-    while(ClutterEvent * event=clutter_event_get())
-    {
-	clutter_do_event (event);
-	clutter_event_free (event);
-    }
-    
-    return FALSE;    
-}
-
-#endif
-
-//-----------------------------------------------------------------------------
-
-void TPContext::key_event_keysym(guint keysym)
-{
-    clutter_threads_enter();
-    
-    ClutterEvent * event=clutter_event_new(CLUTTER_KEY_PRESS);
-    event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
-    event->any.time=clutter_get_timestamp();
-    event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
-    event->key.keyval=keysym;
-    
-    clutter_event_put(event);
-    
-    event->type=CLUTTER_KEY_RELEASE;
-    event->any.time=clutter_get_timestamp();
-    
-    clutter_event_put(event);
-    
-    clutter_event_free(event);
-    
-    clutter_threads_leave();
-    
-#ifdef TP_CLUTTER_BACKEND_EGL
-
-    // In the EGL backend, there is nothing pulling the events from
-    // the event queue, so we force that by adding an idle source
-    
-    g_idle_add_full(G_PRIORITY_HIGH_IDLE,event_pump,NULL,NULL);
-
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
 bool TPContext::profile_switch(int id)
 {
     SystemDatabase::Profile profile=get_db()->get_profile(id);
@@ -1186,14 +1179,24 @@ MediaPlayer * TPContext::get_default_media_player()
     return media_player;
 }
 
+//-----------------------------------------------------------------------------
+
 MediaPlayer * TPContext::create_new_media_player(MediaPlayer::Delegate * delegate)
 {
     return MediaPlayer::make(media_player_constructor,delegate);
 }
 
+
 //-----------------------------------------------------------------------------
+
+ControllerList * TPContext::get_controller_list()
+{
+    return &controller_list;    
+}
+
+//=============================================================================
 // External-facing functions
-//-----------------------------------------------------------------------------
+//=============================================================================
 
 void tp_init_version(int * argc,char *** argv,int major_version,int minor_version,int patch_version)
 {
@@ -1244,6 +1247,8 @@ void tp_context_free(TPContext * context)
 
 void tp_context_set(TPContext * context,const char * key,const char * value)
 {
+    g_assert(context);
+
     context->set(key,value);    
 }
 
@@ -1251,6 +1256,8 @@ void tp_context_set(TPContext * context,const char * key,const char * value)
 
 void tp_context_set_int(TPContext * context,const char * key,int value)
 {
+    g_assert(context);
+
     context->set(key,value);    
 }
 
@@ -1258,6 +1265,8 @@ void tp_context_set_int(TPContext * context,const char * key,int value)
 
 const char * tp_context_get(TPContext * context,const char * key)
 {
+    g_assert(context);
+
     return context->get(key);
 }
 
@@ -1265,6 +1274,8 @@ const char * tp_context_get(TPContext * context,const char * key)
 
 void tp_context_add_notification_handler(TPContext * context,const char * subject,TPNotificationHandler handler,void * data)
 {
+    g_assert(context);
+
     context->add_notification_handler(subject,handler,data);
 }
 
@@ -1272,6 +1283,8 @@ void tp_context_add_notification_handler(TPContext * context,const char * subjec
 
 void tp_context_set_request_handler(TPContext * context,const char * subject,TPRequestHandler handler,void * data)
 {
+    g_assert(context);
+
     context->set_request_handler(subject,handler,data);
 }
 
@@ -1279,6 +1292,8 @@ void tp_context_set_request_handler(TPContext * context,const char * subject,TPR
 
 void tp_context_add_console_command_handler(TPContext * context,const char * command,TPConsoleCommandHandler handler,void * data)
 {
+    g_assert(context);
+
     context->add_console_command_handler(command,handler,data);    
 }
 
@@ -1286,20 +1301,17 @@ void tp_context_add_console_command_handler(TPContext * context,const char * com
 
 void tp_context_set_log_handler(TPContext * context,TPLogHandler handler,void * data)
 {
+    g_assert(context);
+
     context->set_log_handler(handler,data);
-}
-
-//-----------------------------------------------------------------------------
-
-void tp_context_key_event(TPContext * context,const char * key)
-{
-    context->key_event(key);
 }
 
 //-----------------------------------------------------------------------------
 
 int tp_context_run(TPContext * context)
 {
+    g_assert(context);
+
     return context->run();
 }
 
@@ -1307,6 +1319,8 @@ int tp_context_run(TPContext * context)
 
 void tp_context_quit(TPContext * context)
 {
+    g_assert(context);
+
     context->quit();    
 }
 
@@ -1316,5 +1330,29 @@ void tp_context_quit(TPContext * context)
 
 void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor)
 {
+    g_assert(context);
+
     context->media_player_constructor=constructor;
 }
+
+//-----------------------------------------------------------------------------
+// Controllers
+//-----------------------------------------------------------------------------
+
+TPController * tp_context_add_controller(TPContext * context,const char * name,const TPControllerSpec * spec,void * data)
+{
+    g_assert(context);
+
+    return context->controller_list.add_controller(name,spec,data);
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_remove_controller(TPContext * context,TPController * controller)
+{
+    g_assert(context);
+
+    context->controller_list.remove_controller(controller);
+}
+
+//-----------------------------------------------------------------------------

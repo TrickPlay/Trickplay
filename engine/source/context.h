@@ -5,6 +5,7 @@
 #include "common.h"
 #include "notify.h"
 #include "mediaplayers.h"
+#include "controller_list.h"
 //-----------------------------------------------------------------------------
 // Internal configuration keys
 
@@ -31,7 +32,7 @@
 // Forward declarations
 
 class SystemDatabase;
-class Controllers;
+class ControllerServer;
 class App;
 class Console;
 
@@ -84,11 +85,6 @@ public:
     SystemDatabase * get_db() const;
     
     //.........................................................................
-    // The controllers system
-    
-    Controllers * get_controllers() const;
-    
-    //.........................................................................
     // Switches profiles and handles all the associated notifications
     
     bool profile_switch(int id);
@@ -112,12 +108,8 @@ public:
     void close_current_app();
     
     //.........................................................................
-    // Experimental - injects a key (by name) into Clutter
-    // TODO
     
-    void key_event(const char * key);
-    
-    void key_event_keysym(guint key);    
+    ControllerList * get_controller_list();
     
 private:
     
@@ -206,6 +198,9 @@ private:
     
     friend void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
     
+    friend TPController * tp_context_add_controller(TPContext * context,const char * name,const TPControllerSpec * spec,void * data);
+    friend void tp_context_remove_controller(TPContext * context,TPController * controller);
+
 private:
     
     TPContext(const TPContext&);
@@ -216,7 +211,9 @@ private:
     
     SystemDatabase *            sysdb;
     
-    Controllers *               controllers;
+    ControllerServer *          controller_server;
+    
+    ControllerList              controller_list;
     
     Console *                   console;
     

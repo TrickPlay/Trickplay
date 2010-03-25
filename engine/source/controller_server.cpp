@@ -5,19 +5,17 @@
 
 #include "clutter/clutter.h"
 
-#include "controllers.h"
+#include "controller_server.h"
 #include "util.h"
 
 //-----------------------------------------------------------------------------
+// This is how quickly we disconnect a controller that has not identified itself
 
-bool Controllers::ControllerInfo::has_accelerometer() const
-{
-    return caps.find(String("AX")) != caps.end();    
-}
+#define DISCONNECT_TIMEOUT_SEC  120
 
 //-----------------------------------------------------------------------------
 
-Controllers::Controllers(TPContext * ctx,const String & name,int port)
+ControllerServer::ControllerServer(TPContext * ctx,const String & name,int port)
 :
     mdns(NULL),
     server(NULL),
@@ -30,14 +28,14 @@ Controllers::Controllers(TPContext * ctx,const String & name,int port)
     if (error)
     {
         delete new_server;
-        g_warning("FAILED TO START CONTROLLERS LISTENER ON PORT %d : %s",port,error->message);
+        g_warning("FAILED TO START CONTROLLER SERVER ON PORT %d : %s",port,error->message);
         g_clear_error(&error);
     }
     else
     {
         server.reset(new_server);
         
-        g_info("CONTROLLERS LISTENER READY ON PORT %d",server->get_port());
+        g_info("CONTROLLER SERVER LISTENER READY ON PORT %d",server->get_port());
         
         mdns.reset(new MDNS(name,server->get_port()));
     }
@@ -45,13 +43,13 @@ Controllers::Controllers(TPContext * ctx,const String & name,int port)
 
 //-----------------------------------------------------------------------------
 
-Controllers::~Controllers()
+ControllerServer::~ControllerServer()
 {
 }
 
 //-----------------------------------------------------------------------------
 
-bool Controllers::is_ready() const
+bool ControllerServer::is_ready() const
 {
     if (!mdns.get())
         return false;
@@ -59,145 +57,211 @@ bool Controllers::is_ready() const
     return mdns->is_ready();
 }
 
-
 //-----------------------------------------------------------------------------
 
-void Controllers::add_delegate(Controllers::Delegate * delegate)
+int ControllerServer::execute_command(TPController * controller,unsigned int command,void * parameters,void * data)
 {
-    if (!delegate)
-        return;
+    g_assert(data);
     
-    delegates.insert(delegate);
+    return ((ControllerServer*)data)->execute_command(controller,command,parameters);    
 }
 
-//-----------------------------------------------------------------------------
-
-void Controllers::remove_delegate(Controllers::Delegate * delegate)
-{
-    if (!delegate)
-        return;
-    
-    delegates.erase(delegate);
-}
-
-//-----------------------------------------------------------------------------
-
-Controllers::ControllerInfo * Controllers::find_controller(gpointer source)
-{
-    ConnectionInfo * ci=find_connection(source);
-    
-    return ci?&ci->controller:NULL;
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::start_accelerometer(gpointer source,const char * filter,double interval)
-{
-    gchar * line=g_strdup_printf("START\tAX\t%s\t%f\n",filter,interval);
-    Util::GFreeLater free_line(line);
-    
-    return write_line(source,line);
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::stop_accelerometer(gpointer source)
-{
-    return write_line(source,"STOP\tAX\n");
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::reset(gpointer source)
-{
-    return write_line(source,"RESET\n");
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::ui_clear(gpointer source)
-{
-    return write_line(source,"UI\tCLEAR\n");
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::ui_show_multiple_choice(gpointer source,const String & label,const StringPairList & choices)
-{
-    String line("UI\tMC\tMC_LABEL\t");
-    
-    line.append(label);
-    
-    for (StringPairList::const_iterator it=choices.begin();it!=choices.end();++it)
-    {
-        line.append("\t");
-        line.append(it->first);
-        line.append("\t");
-        line.append(it->second);
-    }
-    
-    line.append("\n");
-    
-    return write_line(source,line.c_str());
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::ui_declare_resource(gpointer source,const String &label, const String &url)
-{
-    String line("RESOURCE\t");
-    line.append(label);
-    line.append("\t");
-    line.append(url);
-    line.append("\n");
-    
-    return write_line(source, line.c_str());
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::ui_background_image(gpointer source,const String &resource_label)
-{
-    String line("BACKGROUND\t");
-    line.append(resource_label);
-    line.append("\n");
-    
-    return write_line(source, line.c_str());
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::ui_play_sound(gpointer source,const String &resource_label, unsigned int loop)
-{
-    gchar * line=g_strdup_printf("PLAYSOUND\t%s\t%d\n",resource_label.c_str(),loop);
-    Util::GFreeLater free_line(line);
-
-    return write_line(source,line);
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::ui_stop_sound(gpointer source)
-{
-    return write_line(source, "STOPSOUND\n");
-}
-
-//-----------------------------------------------------------------------------
-
-bool Controllers::write_line(gpointer source,const gchar * line)
+int ControllerServer::execute_command(TPController * controller,unsigned int command,void * parameters)
 {
     if (!server.get())
-        return false;
+    {
+        return 1;
+    }
     
-    if (!find_connection(source))
-        return false;
+    gpointer connection=NULL;
     
-    return server->write(source,line);
+    for (ConnectionMap::const_iterator it=connections.begin();it!=connections.end();++it)
+    {
+        if (it->second.controller==controller)
+        {
+            connection=it->first;
+            break;
+        }
+    }
+    
+    if (!connection)
+    {
+        return 2;
+    }
+    
+    switch(command)
+    {
+        case TP_CONTROLLER_COMMAND_RESET                 :
+        {
+            server->write(connection,"RT\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_START_ACCELEROMETER   :
+        {
+            TPControllerStartAccelerometer * sa=(TPControllerStartAccelerometer*)parameters;
+            
+            const char * filter="N";
+            
+            switch(sa->filter)
+            {
+                case TP_CONTROLLER_ACCELEROMETER_FILTER_LOW:
+                    filter="L";
+                    break;
+                
+                case TP_CONTROLLER_ACCELEROMETER_FILTER_HIGH:
+                    filter="H";
+                    break;
+            }
+            
+            server->write_printf(connection,"SA\t%s\t%f\n",filter,sa->interval);
+               
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER    :
+        {
+            server->write(connection,"PA\n");    
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_START_CLICKS          :
+        {
+            server->write(connection,"SC\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_STOP_CLICKS           :
+        {
+            server->write(connection,"PC\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_START_TOUCHES         :
+        {
+            server->write(connection,"ST\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_STOP_TOUCHES          :
+        {
+            server->write(connection,"PT\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_SHOW_MULTIPLE_CHOICE  :
+        {
+            TPControllerMultipleChoice * mc=(TPControllerMultipleChoice*)parameters;
+            
+            String line;
+            
+            for(unsigned int i=0;i<mc->count;++i)
+            {
+                line+=mc->ids[i];
+                line+="\t";
+                line+=mc->choices[i];
+            }
+            
+            server->write_printf(connection,"MC\t%s\t%s\n",mc->label,line.c_str());
+            
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_CLEAR_UI              :
+        {
+            server->write(connection,"CU\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND     :
+        {
+            TPControllerSetUIBackground * sb=(TPControllerSetUIBackground*)parameters;
+            
+            const char * mode="S";
+            
+            switch(sb->mode)
+            {
+                case TP_CONTROLLER_UI_BACKGROUND_MODE_CENTER:
+                    mode="C";
+                    break;
+            
+                case TP_CONTROLLER_UI_BACKGROUND_MODE_TILE:
+                    mode="T";
+                    break;
+            }
+            
+            server->write_printf(connection,"UB\t%s\t%s\n",sb->resource,mode);
+            
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_SET_UI_IMAGE          :
+        {
+            TPControllerSetUIImage * im=(TPControllerSetUIImage*)parameters;
+            server->write_printf(connection,"UG\t%s\t%d\t%d\t%d\t%d\n",im->resource,im->x,im->y,im->width,im->height);
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_PLAY_SOUND            :
+        {   TPControllerPlaySound * ps=(TPControllerPlaySound*)parameters;
+            server->write_printf(connection,"SS\t%s\t%u\n",ps->resource,ps->loop);
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_STOP_SOUND            :
+        {
+            server->write(connection,"PS\n");
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_DECLARE_RESOURCE      :
+        {
+            TPControllerDeclareResource *ds=(TPControllerDeclareResource*)parameters;
+            
+            const char * uri=NULL;
+            
+            String path;
+                        
+            if (g_str_has_prefix(ds->uri,"http://")||g_str_has_prefix(ds->uri,"https://"))
+            {
+                uri=ds->uri;
+            }
+            else if (g_str_has_prefix(ds->uri,"file://"))
+            {
+                path=serve_path("",String((ds->uri)+7));
+                uri=path.c_str();
+            }
+            
+            if (!uri)
+            {
+                return 5;
+            }
+            
+            server->write_printf(connection,"DR\t%s\t%s\n",ds->resource,uri);
+            break;
+        }
+        
+        case TP_CONTROLLER_COMMAND_ENTER_TEXT            :
+        {
+            TPControllerEnterText * et=(TPControllerEnterText*)parameters;
+            server->write_printf(connection,"ET\t%s\t%s\n",et->label,et->text);
+            break;
+        }
+        
+        default:
+        {
+            return 3;
+        }
+    }
+    
+    // Success
+    
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
 
-Controllers::ConnectionInfo * Controllers::find_connection(gpointer connection)
+ControllerServer::ConnectionInfo * ControllerServer::find_connection(gpointer connection)
 {
     ConnectionMap::iterator it=connections.find(connection);
     
@@ -206,7 +270,7 @@ Controllers::ConnectionInfo * Controllers::find_connection(gpointer connection)
 
 //-----------------------------------------------------------------------------
 
-void Controllers::connection_accepted(gpointer connection,const char * remote_address)
+void ControllerServer::connection_accepted(gpointer connection,const char * remote_address)
 {
     g_debug("ACCEPTED CONTROLLER CONNECTION %p FROM %s",connection,remote_address);
     
@@ -214,12 +278,12 @@ void Controllers::connection_accepted(gpointer connection,const char * remote_ad
     
     ConnectionInfo & info=connections[connection];
     
-    info.controller.address=remote_address;
+    info.address=remote_address;
     
     // Now, set a timer to disconnect the connection if it has not identified
     // itself within a few seconds
     
-    GSource * source=g_timeout_source_new( 10 * 1000 ); // 10 seconds	    
+    GSource * source=g_timeout_source_new( DISCONNECT_TIMEOUT_SEC * 1000 );
     g_source_set_callback(source,timed_disconnect_callback,new TimerClosure(connection,this),NULL);
     g_source_attach(source,g_main_context_default());
     g_source_unref(source);    
@@ -227,7 +291,7 @@ void Controllers::connection_accepted(gpointer connection,const char * remote_ad
 
 //-----------------------------------------------------------------------------
 
-gboolean Controllers::timed_disconnect_callback(gpointer data)
+gboolean ControllerServer::timed_disconnect_callback(gpointer data)
 {
     g_debug("TIMED DISCONNECT");
     
@@ -237,7 +301,7 @@ gboolean Controllers::timed_disconnect_callback(gpointer data)
     
     ConnectionInfo * ci=tc->self->find_connection(tc->connection);
     
-    if (ci && ci->disconnect && !ci->controller.version)
+    if (ci && ci->disconnect && !ci->version)
     {
         g_debug("DROPPING UNIDENTIFIED CONNECTION %p",tc->connection);
         
@@ -254,21 +318,23 @@ gboolean Controllers::timed_disconnect_callback(gpointer data)
 
 //-----------------------------------------------------------------------------
 
-void Controllers::connection_closed(gpointer connection)
+void ControllerServer::connection_closed(gpointer connection)
 {
+    ConnectionInfo * info=find_connection(connection);
+    
+    if (info&&info->controller)
+    {
+        tp_context_remove_controller(context,info->controller);
+    }
+    
     connections.erase(connection);
     
-    g_debug("CONTROLLER CONNECTION CLOSED %p",connection);
-    
-    for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
-    {
-        (*it)->disconnected(connection);    
-    }
+    g_debug("CONTROLLER CONNECTION CLOSED %p",connection);    
 }
 
 //-----------------------------------------------------------------------------
 
-void Controllers::connection_data_received(gpointer connection,const char * line)
+void ControllerServer::connection_data_received(gpointer connection,const char * line)
 {
     ConnectionMap::iterator it=connections.find(connection);
     
@@ -286,7 +352,7 @@ void Controllers::connection_data_received(gpointer connection,const char * line
     
         gchar ** parts=g_strsplit(line,"\t",0);
                 
-        process_command(connection,it->second.controller,parts);
+        process_command(connection,it->second,parts);
                 
         g_strfreev(parts);
     }
@@ -294,137 +360,277 @@ void Controllers::connection_data_received(gpointer connection,const char * line
 
 //-----------------------------------------------------------------------------
 
-void Controllers::process_command(gpointer connection,ControllerInfo & info,gchar ** parts)
+static inline bool cmp2(const char * a,const char * b)
+{
+    return (a[0]==b[0])&&(a[1]==b[1]);
+}
+
+void ControllerServer::process_command(gpointer connection,ConnectionInfo & info,gchar ** parts)
 {
     guint count=g_strv_length(parts);
     
     if (count<1)
-        return;
-    
-    switch(*(parts[0]))
     {
-        // Identification line
-        // DEVICE   <version>   <name>  <cap1>  <cap2>
+        return;
+    }
+    
+    const gchar * cmd=parts[0];
+    
+    if (strlen(cmd)<2)
+    {
+        return;
+    }
+    
+    if (cmp2(cmd,"ID"))
+    {
+        // Device id line
+        // ID <version> <name> <cap>*
         
-        case 'D':
+        // Not enough parts
+        
+        if (count<3)
         {
-            // Not enough parts - bad command
-            if (count<3)
-                return;
-            
-            // Already have device info 
-            if (info.version)
-                return;
-            
-            info.version=atoi(parts[1]);
-            
-            // Version 0?
-            if (!info.version)
-                return;
-            
-            info.name=g_strstrip(parts[2]);
-            
-            // Capability entries
-            for (guint i=3;i<count;++i)
-            {
-                gchar * cap=g_strstrip(parts[i]);
-                if (strlen(cap))
-                    info.caps.insert(cap);
-            }
-            
-            for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
-            {
-                (*it)->connected(connection,info);
-            }
-            
-            break;   
+            return;
         }
-            
         
-        // key input
+        // Already have a version
         
-        case 'K':
+        if (info.version)
         {
-            if (count>1)
+            return;
+        }
+        
+        // It is http
+        
+        if (info.http.is_http)
+        {
+            return;
+        }
+        
+        info.version=atoi(parts[1]);
+        
+        if (!info.version)
+        {
+            return;
+        }
+        
+        if (info.version<2)
+        {
+            g_warning("CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 2");
+            return;
+        }
+        
+        const char * name=g_strstrip(parts[2]);
+
+        // Capability entries
+        
+        TPControllerSpec spec;
+        
+        memset(&spec,0,sizeof(spec));
+        
+        for (guint i=3;i<count;++i)
+        {
+            const gchar * cap=g_strstrip(parts[i]);
+            
+            size_t len=strlen(cap);
+            
+            if (len==2)
             {
-                unsigned long int k=0;
-                if (sscanf(parts[1],"%lx",&k)==1)
+                if (cmp2(cap,"KY"))      spec.capabilities|=TP_CONTROLLER_HAS_KEYS;                    
+                else if (cmp2(cap,"AX")) spec.capabilities|=TP_CONTROLLER_HAS_ACCELEROMETER;                        
+                else if (cmp2(cap,"CK")) spec.capabilities|=TP_CONTROLLER_HAS_CLICKS;    
+                else if (cmp2(cap,"TC")) spec.capabilities|=TP_CONTROLLER_HAS_TOUCHES;    
+                else if (cmp2(cap,"MC")) spec.capabilities|=TP_CONTROLLER_HAS_MULTIPLE_CHOICE;    
+                else if (cmp2(cap,"SD")) spec.capabilities|=TP_CONTROLLER_HAS_SOUND;    
+                else if (cmp2(cap,"UI")) spec.capabilities|=TP_CONTROLLER_HAS_UI;    
+                else if (cmp2(cap,"TE")) spec.capabilities|=TP_CONTROLLER_HAS_TEXT_ENTRY;
+                else
                 {
-                    g_debug("GOT KEY %ld",k);
-                    
-                    context->key_event_keysym(k);                    
+                    g_warning("UNKNOWN CONTROLLER CAPABILITY '%s'",cap);
                 }
             }
-            break;    
-        }
-        
-
-		// clicks
-
-        case 'C':
-        {
-			// CLICK	x	y
-			if (count < 3) return;
-			
-			double x = atof(parts[1]);
-			double y = atof(parts[2]);
-			
-			for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
-			{
-				(*it)->click(connection, x, y);
-			}
-        }
-
-        // accelerometer data
-        
-        case 'A':
-        {
-            // AX   x   y   z
-            
-            if (count<4)
-                return;
-            
-            double x=atof(parts[1]);
-            double y=atof(parts[2]);
-            double z=atof(parts[3]);
-            
-            for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
+            else if (len>3)
             {
-                (*it)->accelerometer(connection,x,y,z);
+                if (cmp2(cap,"IS"))
+                {
+                    sscanf(cap,"IS=%ux%u",&spec.input_width,&spec.input_height);                        
+                }
+                else if (cmp2(cap,"US"))
+                {
+                    sscanf(cap,"US=%ux%u",&spec.ui_width,&spec.ui_height);                                            
+                }
+                else
+                {
+                    g_warning("UNKNOWN CONTROLLER CAPABILITY '%s'",cap);                    
+                }
             }
-            
-            break;
         }
         
-        // ui event
+        spec.execute_command=execute_command;
         
-        case 'U':
+        info.controller=tp_context_add_controller(context,name,&spec,this);
+    }
+    else if (cmp2(cmd,"KP"))
+    {
+        // Key press
+        // KP <hex key code> <hex unicode>
+        
+        if (count<2||!info.controller)
         {
-            // UI   <event>
-            
-            if (count<2)
-                return;
-            
-            for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
-            {
-                (*it)->ui_event(connection,parts[1]);
-            }
-            break;
+            return;
         }
         
-        // http get?
+        unsigned int key_code=0;
+        unsigned long int unicode=0;
         
-        case 'G':
+        sscanf(parts[1],"%x",&key_code);
+        
+        if (count>2)
         {
-            handle_http_get(connection,parts[0]);
-            break;
+            sscanf(parts[2],"%lx",&unicode);
         }
+        
+        tp_controller_key_down(info.controller,key_code,unicode);
+        tp_controller_key_up(info.controller,key_code,unicode);
+    }
+    else if (cmp2(cmd,"KD"))
+    {
+        // Key down
+        // KD <hex key code> <hex unicode>
+        
+        if (count<2||!info.controller)
+        {
+            return;
+        }
+        
+        unsigned int key_code=0;
+        unsigned long int unicode=0;
+        
+        sscanf(parts[1],"%x",&key_code);
+        
+        if (count>2)
+        {
+            sscanf(parts[2],"%lx",&unicode);
+        }
+        
+        tp_controller_key_down(info.controller,key_code,unicode);
+    }
+    else if (cmp2(cmd,"KU"))
+    {
+        // Key up
+        // KU <hex key code> <hex unicode>
+        
+        if (count<2||!info.controller)
+        {
+            return;
+        }
+        
+        unsigned int key_code=0;
+        unsigned long int unicode=0;
+        
+        sscanf(parts[1],"%x",&key_code);
+        
+        if (count>2)
+        {
+            sscanf(parts[2],"%lx",&unicode);
+        }
+        
+        tp_controller_key_up(info.controller,key_code,unicode);
+    }
+    else if (cmp2(cmd,"CK"))
+    {
+        // Click
+        // CK <x> <y>
+        
+        if (count<3||!info.controller)
+        {
+            return;
+        }
+        
+        tp_controller_click(info.controller,atoi(parts[1]),atoi(parts[2]));
+    }
+    else if (cmp2(cmd,"AX"))
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+        
+        if (count<4||!info.controller)
+        {
+            return;
+        }
+        
+        tp_controller_accelerometer(info.controller,atof(parts[1]),atof(parts[2]),atof(parts[3]));
+    }
+    else if (cmp2(cmd,"UI"))
+    {
+        // UI
+        // UI <txt>
+        
+        if (count<2||!info.controller)
+        {
+            return;
+        }
+        
+        tp_controller_ui_event(info.controller,parts[1]);
+    }
+    else if (cmp2(cmd,"TD"))
+    {
+        // Touch down
+        // TD <x> <y>
+
+        if (count<3||!info.controller)
+        {
+            return;
+        }
+        
+        tp_controller_touch_down(info.controller,atoi(parts[1]),atoi(parts[2]));
+    }
+    else if (cmp2(cmd,"TM"))
+    {
+        // Touch move
+        // TM <x> <y>
+
+        if (count<3||!info.controller)
+        {
+            return;
+        }
+        
+        tp_controller_touch_move(info.controller,atoi(parts[1]),atoi(parts[2]));
+    }
+    else if (cmp2(cmd,"TU"))
+    {
+        // Touch up
+        // TU <x> <y>
+
+        if (count<3||!info.controller)
+        {
+            return;
+        }
+        
+        tp_controller_touch_up(info.controller,atoi(parts[1]),atoi(parts[2]));
+    }
+    else if (cmp2(cmd,"GE"))
+    {
+        // Possibly an HTTP get
+
+        // Cannot come from a connection that is already a controller
+        
+        if (info.controller)
+        {
+            return;
+        }
+        
+        handle_http_get(connection,parts[0]);
+    }
+    else
+    {
+        g_warning("UNKNOWN CONTROLLER COMMAND '%s'",cmd);
     }
 }
 
 //-----------------------------------------------------------------------------
 
-void Controllers::handle_http_get(gpointer connection,const gchar * line)
+void ControllerServer::handle_http_get(gpointer connection,const gchar * line)
 {
     ConnectionInfo * info=find_connection(connection);
     
@@ -435,7 +641,7 @@ void Controllers::handle_http_get(gpointer connection,const gchar * line)
     
     gchar ** parts=g_strsplit(line," ",3);
 
-    if (g_strv_length(parts)==3)
+    if (g_strv_length(parts)==3&&!strcmp(parts[0],"GET"))
     {
         info->disconnect=false;
         info->http.is_http=true;
@@ -449,7 +655,7 @@ void Controllers::handle_http_get(gpointer connection,const gchar * line)
 
 //-----------------------------------------------------------------------------
 
-void Controllers::handle_http_line(gpointer connection,ConnectionInfo & info,const gchar * line)
+void ControllerServer::handle_http_line(gpointer connection,ConnectionInfo & info,const gchar * line)
 {
     HTTPInfo & hi=info.http;
     
@@ -515,7 +721,7 @@ void Controllers::handle_http_line(gpointer connection,ConnectionInfo & info,con
 
 //-----------------------------------------------------------------------------
 
-String Controllers::serve_path(const String & group,const String & path)
+String ControllerServer::serve_path(const String & group,const String & path)
 {
     String s=group+":"+path;
     
@@ -535,7 +741,7 @@ String Controllers::serve_path(const String & group,const String & path)
     
 //-----------------------------------------------------------------------------
 
-void Controllers::drop_web_server_group(const String & group)
+void ControllerServer::drop_web_server_group(const String & group)
 {
     for(WebServerPathMap::iterator it=path_map.begin();it!=path_map.end();)
     {
