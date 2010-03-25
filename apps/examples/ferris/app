@@ -1,0 +1,11 @@
+
+app=
+{
+    id          = "com.trickplay.examples.ferris",
+    release     = "1",
+    version     = "1.0",
+    name        = "Ferris Wheel animation",
+    author      = "Craig Hughes",
+    copyright   = "© Trickplay Inc."
+}
+
