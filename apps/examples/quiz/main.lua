@@ -271,14 +271,22 @@ end
 -- Hook up the connect, disconnect and ui controller events and call
 -- the functions above
 
+-- If you set this to false, the "keyboard" player will be able to play
+
+MC_REQUIRED=true
+
 function controllers.on_controller_connected(controllers,controller)
 
 	controller:declare_resource("quiz","http://10.0.190.103/quiz.png")
-	controller:set_background("quiz")
+	controller:set_ui_background("quiz")
 
     print("CONNECTED",controller.name)
     
-    player_joined(controller)
+    if (MC_REQUIRED and controller.has_multiple_choice) or (not MC_REQUIRED) then
+    
+        player_joined(controller)
+        
+    end
     
     function controller.on_disconnected(controller)
         
@@ -294,6 +302,30 @@ function controllers.on_controller_connected(controllers,controller)
         
         player_answered(controller,event)
         
+    end
+    
+    function controller.on_key_up(controller,key_code,unicode)
+    
+        local n=tonumber(string.format("%c",unicode))
+        
+        if n and n >= 1 and n <= 4 then
+
+            -- The keyboard player does not have the answer
+            -- ids, so he will answer with a number between
+            -- 1 and 4. We have to check if that is the right
+            -- answer by looking at the UI. The id of the correct
+            -- answer is always 1, so we pass that. Otherwise, we
+            -- pass 5.
+
+            print("ANSWERED",controller.name,n)
+
+            if ui["answer"..n].extra.correct then
+                player_answered(controller,1)
+            else
+                player_answered(controller,5)
+            end
+        end
+    
     end
 
 end
@@ -386,7 +418,7 @@ function game.ask_next_question()
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
-        controller:show_multiple_choice_ui(
+        controller:show_multiple_choice(
         	"TP Quiz",
             scrambled_answers[1].id,
             scrambled_answers[1].text,
