@@ -617,16 +617,6 @@ int             tp_context_run(
                     TPContext * context);
 
 /*-----------------------------------------------------------------------------
-    Experimental, not documented
-*/
-
-TP_API_EXPORT
-void            tp_context_key_event(
-    
-                    TPContext * context,
-                    const char * key);
-
-/*-----------------------------------------------------------------------------
     Function: tp_context_quit
     
     Terminates the context from another thread. This causes <tp_context_run> to
