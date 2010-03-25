@@ -20,5 +20,11 @@ ferris.ferris.y = screen.h/2
 screen:add(ferris.ferris)
 
 function screen.on_key_down(screen, key)
-	ferris:rotate(3, 1500)
+
+	if key >= keys["1"] and key <= keys["9"] then
+		ferris:rotate(key - keys["0"], 1500)
+	else
+		ferris:rotate( -1, 1500 )
+	end
+
 end
