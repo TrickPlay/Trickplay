@@ -67,6 +67,12 @@ Server::~Server()
         g_socket_listener_close(listener);
         g_object_unref(G_OBJECT(listener));
     }
+    
+    for(ConnectionSet::iterator it=connections.begin();it!=connections.end();++it)
+    {
+        g_io_stream_close(G_IO_STREAM(*it),NULL,NULL);
+    }
+    
 #endif
 }    
 
