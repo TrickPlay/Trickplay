@@ -41,6 +41,12 @@ namespace ClutterUtil
     
     const char * get_actor_metatable(ClutterActor*actor);
     
+    // Inject key_down event
+    
+    void inject_key_down(guint key_code,gunichar unicode);
+    
+    void inject_key_up(guint key_code,gunichar unicode);
+    
     //--------------------------------------------------------------------------
     // This lets us bolt on a table of user data 
     
