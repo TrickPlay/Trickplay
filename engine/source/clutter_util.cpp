@@ -202,6 +202,78 @@ void ClutterUtil::wrap_concrete_actor(lua_State*L,ClutterActor*actor)
 
 //-----------------------------------------------------------------------------
 
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+static gboolean event_pump(gpointer)
+{
+    while(ClutterEvent * event=clutter_event_get())
+    {
+	clutter_do_event (event);
+	clutter_event_free (event);
+    }    
+    
+    return FALSE;    
+}
+
+#endif
+
+
+void ClutterUtil::inject_key_down(guint key_code,gunichar unicode)
+{
+    clutter_threads_enter();
+    
+    ClutterEvent * event=clutter_event_new(CLUTTER_KEY_PRESS);
+    event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
+    event->any.time=clutter_get_timestamp();
+    event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->key.keyval=key_code;
+    event->key.unicode_value=unicode;
+    
+    clutter_event_put(event);
+    
+    clutter_event_free(event);
+    
+    clutter_threads_leave();
+    
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+    
+    g_idle_add_full(G_PRIORITY_HIGH_IDLE,event_pump,NULL,NULL);
+
+#endif        
+}
+
+void ClutterUtil::inject_key_up(guint key_code,gunichar unicode)
+{
+    clutter_threads_enter();
+    
+    ClutterEvent * event=clutter_event_new(CLUTTER_KEY_RELEASE);
+    event->any.stage=CLUTTER_STAGE(clutter_stage_get_default());
+    event->any.time=clutter_get_timestamp();
+    event->any.flags=CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->key.keyval=key_code;
+    event->key.unicode_value=unicode;
+    
+    clutter_event_put(event);
+    
+    clutter_event_free(event);
+    
+    clutter_threads_leave();
+    
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+    
+    g_idle_add_full(G_PRIORITY_HIGH_IDLE,event_pump,NULL,NULL);
+
+#endif            
+}
+
+//-----------------------------------------------------------------------------
+
 ClutterUtil::Extra::Extra(lua_State * L)
 :
     lsp(App::get(L)->ref_lua_state_proxy())
