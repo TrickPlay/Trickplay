@@ -9,24 +9,6 @@ module clutter_screen;
 #include "clutter_util.h"
 ]]
 
-[[
-#ifndef TP_PRODUCTION
-
-gboolean Stage_quit(ClutterActor*actor,ClutterEvent*event,lua_State*L)
-{
-    ClutterKeyEvent * k=(ClutterKeyEvent*)event;
-    
-    if (k->keyval==CLUTTER_Escape)
-    {
-	App::get(L)->get_context()->close_app();
-	return TRUE;
-    }
-    return FALSE;    
-}
-
-#endif
-]]
-
 /*
     Global: screen 
 */
@@ -39,12 +21,7 @@ global screen [[ClutterActor*]] actor , container
 	    
 	    g_object_ref(G_OBJECT(*self));
 	    
-	    ClutterUtil::initialize_actor(L,*self,SCREEN_METATABLE);
-	    	    	    
-#ifndef TP_PRODUCTION
-	    SignalCollector::get(L)->connect(
-		"screen-quit",*self,"key-press-event",G_CALLBACK(Stage_quit),L);
-#endif
+	    ClutterUtil::initialize_actor(L,*self,SCREEN_METATABLE);	    	    	    
 	]];
     
     ~screen()
