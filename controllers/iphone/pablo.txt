@@ -1,0 +1,129 @@
+commit 2efbb835e8dd519fdb9e50bc8512eb0afbffb38a
+Author: Kenny Ham <kenny@kenny-hams-macbook-pro.local>
+Date:   Wed Mar 17 20:54:32 2010 -0400
+
+    Updated resource capability
+
+M	controllers/iphone/Classes/GestureView.m
+M	controllers/iphone/Classes/RootViewController.m
+M	controllers/iphone/TrickplayRemote.xcodeproj/kenny.mode1v3
+M	controllers/iphone/TrickplayRemote.xcodeproj/kenny.pbxuser
+
+commit 0ff3657842be7b300055aee8ac4a72b0e0ce6624
+Author: Kenny Ham <kenny@kenny-hams-macbook-pro.local>
+Date:   Sat Feb 27 22:42:30 2010 -0500
+
+    Added SOUNDPLAY and fixed issue with sending back to back messages
+
+M	controllers/iphone/.DS_Store
+M	controllers/iphone/Classes/GestureView.h
+M	controllers/iphone/Classes/GestureView.m
+M	controllers/iphone/TrickplayRemote.app/GestureView.nib
+M	controllers/iphone/TrickplayRemote.app/MainWindow.nib
+M	controllers/iphone/TrickplayRemote.app/RootViewController.nib
+M	controllers/iphone/TrickplayRemote.app/TrickplayRemote
+M	controllers/iphone/TrickplayRemote.app/_CodeSignature/CodeResources
+M	controllers/iphone/TrickplayRemote.app/icon.png
+M	controllers/iphone/TrickplayRemote.xcodeproj/kenny.mode1v3
+M	controllers/iphone/TrickplayRemote.xcodeproj/kenny.pbxuser
+M	controllers/iphone/TrickplayRemote.xcodeproj/project.pbxproj
+A	controllers/iphone/deep_forest.mp3
+A	controllers/iphone/river_sounds.mp3
+
+commit f783a4ffaa557d75b41a21392841dbd5b5eb1e09
+Author: Kenny Ham <kenny@kenny-hams-macbook-pro.local>
+Date:   Mon Feb 22 20:33:20 2010 -0500
+
+    Added Resource and Background for images
+
+M	controllers/iphone/.DS_Store
+M	controllers/iphone/Classes/GestureView.h
+M	controllers/iphone/Classes/GestureView.m
+M	controllers/iphone/TrickplayRemote.xcodeproj/kenny.mode1v3
+M	controllers/iphone/TrickplayRemote.xcodeproj/kenny.pbxuser
+
+commit bbb6ed6e14599a17ee3e5166b85903a04eae05a4
+Author: Craig R. Hughes <craig@trickplay.com>
+Date:   Mon Feb 22 15:01:05 2010 -0800
+
+    Add Craig iPhone project files; tweak icon; add .gitignore for build directory
+
+A	controllers/iphone/.gitignore
+A	controllers/iphone/TrickplayRemote.xcodeproj/craig.mode1v3
+A	controllers/iphone/TrickplayRemote.xcodeproj/craig.pbxuser
+M	controllers/iphone/icon.png
+
+commit a10595aadb747885df3585fabb4108a4ac824ca8
+Author: Kenny Ham <kenny@kenny-hams-macbook-pro.local>
+Date:   Fri Feb 12 13:21:45 2010 -0500
+
+    Adding iPhone source
+
+A	controllers/iphone/.DS_Store
+A	controllers/iphone/Classes/.DS_Store
+A	controllers/iphone/Classes/AppDelegate.h
+A	controllers/iphone/Classes/AppDelegate.m
+A	controllers/iphone/Classes/AsyncSocket Documentation.html
+A	controllers/iphone/Classes/AsyncSocket.h
+A	controllers/iphone/Classes/AsyncSocket.m
+A	controllers/iphone/Classes/GestureView.h
+A	controllers/iphone/Classes/GestureView.m
+A	controllers/iphone/Classes/GestureView.xib
+A	controllers/iphone/Classes/RootViewController.h
+A	controllers/iphone/Classes/RootViewController.m
+A	controllers/iphone/Default.jpg
+A	controllers/iphone/Default.png
+A	controllers/iphone/Entitlements.plist
+A	controllers/iphone/MainWindow.xib
+A	controllers/iphone/RootViewController.xib
+M	controllers/iphone/Trickplay.mobileprovision
+A	controllers/iphone/TrickplayRemote-Info.plist
+M	controllers/iphone/TrickplayRemote.app/GestureView.nib
+M	controllers/iphone/TrickplayRemote.app/MainWindow.nib
+M	controllers/iphone/TrickplayRemote.app/TrickplayRemote
+M	controllers/iphone/TrickplayRemote.app/_CodeSignature/CodeResources
+M	controllers/iphone/TrickplayRemote.app/embedded.mobileprovision
+A	controllers/iphone/TrickplayRemote.xcodeproj/kenny.mode1v3
+A	controllers/iphone/TrickplayRemote.xcodeproj/kenny.pbxuser
+A	controllers/iphone/TrickplayRemote.xcodeproj/project.pbxproj
+A	controllers/iphone/TrickplayRemote_Prefix.pch
+A	controllers/iphone/background.png
+A	controllers/iphone/icon.png
+A	controllers/iphone/logo.png
+A	controllers/iphone/main.m
+
+commit 40d99c672cbd1f73c1f9c7597eddb7b83800d314
+Author: Kenny Ham <kenny@kenny-hams-macbook-pro.local>
+Date:   Thu Feb 4 18:57:33 2010 -0500
+
+    Updating iphone controller app
+
+M	controllers/iphone/TrickplayRemote.app/GestureView.nib
+M	controllers/iphone/TrickplayRemote.app/MainWindow.nib
+M	controllers/iphone/TrickplayRemote.app/RootViewController.nib
+M	controllers/iphone/TrickplayRemote.app/TrickplayRemote
+M	controllers/iphone/TrickplayRemote.app/_CodeSignature/CodeResources
+
+commit 39a44f1f92a68366a329b3d3c0110ea5abed1d79
+Author: Kenny Ham <kenny@kenny-hams-macbook-pro.local>
+Date:   Thu Jan 28 20:22:23 2010 -0500
+
+    Adding iPhone app files
+
+A	controllers/iphone/Trickplay.mobileprovision
+A	controllers/iphone/TrickplayRemote.app/CodeResources
+A	controllers/iphone/TrickplayRemote.app/Default.jpg
+A	controllers/iphone/TrickplayRemote.app/Default.png
+A	controllers/iphone/TrickplayRemote.app/Entitlements.plist
+A	controllers/iphone/TrickplayRemote.app/GestureView.nib
+A	controllers/iphone/TrickplayRemote.app/Info.plist
+A	controllers/iphone/TrickplayRemote.app/MainWindow.nib
+A	controllers/iphone/TrickplayRemote.app/PkgInfo
+A	controllers/iphone/TrickplayRemote.app/ResourceRules.plist
+A	controllers/iphone/TrickplayRemote.app/RootViewController.nib
+A	controllers/iphone/TrickplayRemote.app/TrickplayRemote
+A	controllers/iphone/TrickplayRemote.app/_CodeSignature/CodeResources
+A	controllers/iphone/TrickplayRemote.app/background.png
+A	controllers/iphone/TrickplayRemote.app/embedded.mobileprovision
+A	controllers/iphone/TrickplayRemote.app/icon.png
+A	controllers/iphone/TrickplayRemote.app/logo.png

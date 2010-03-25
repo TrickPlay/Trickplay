@@ -491,8 +491,19 @@
 						//[NSURL URLWithString:aURL]
 						//NSData *data = [NSData dataWithContentsOfURL:url];
 						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
-						UIImage *tempImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]];
-						backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
+						if ([[itemAtIndex objectForKey:@"link"] hasPrefix:@"http"])
+						{
+							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]] autorelease];
+							backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
+						}
+						else {
+							//Use the hostname and port to construct the url
+							
+							//NSString *urlstr = [itemAtIndex objectForKey:@"link"]
+							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [listenSocket connectedHost],[listenSocket connectedPort],[itemAtIndex objectForKey:@"link"]]]]] autorelease];
+							backgroundView.image = tempImage;
+						}
+
 					}
 				}
 				if ([components count] > 2)
