@@ -216,13 +216,14 @@ add_library(
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
     ${ENGINE_SRC}/source/mdns.cpp
-    ${ENGINE_SRC}/source/controllers.cpp
     ${ENGINE_SRC}/source/keys.cpp
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp    
     ${ENGINE_SRC}/source/signal_collector.cpp    
     ${ENGINE_SRC}/source/clutter_util.cpp    
+    ${ENGINE_SRC}/source/controller_server.cpp
+    ${ENGINE_SRC}/source/controller_list.cpp    
 
     ${GENERATED_FILES}
     ${ENGINE_SRC}/lb/src/lb.c

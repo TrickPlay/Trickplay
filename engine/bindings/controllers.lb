@@ -4,112 +4,95 @@ module controllers_module;
 [[
 #include "app.h"    
 #include "context.h"
-#include "controllers.h"
+#include "controller_list.h"
+]]
 
-//=============================================================================
+#==============================================================================
 
-class ControllersDelegate;
+[[
 
-class Controller
+class ControllerListDelegate;
+
+class ControllerDelegate : public Controller::Delegate
 {
 public:
     
-    Controller(lua_State *,gpointer source,const Controllers::ControllerInfo & info,ControllersDelegate * delegate,Controllers * controllers);
-    ~Controller();
+    ControllerDelegate(lua_State * _L,Controller * _controller,ControllerListDelegate * _list);
+    ~ControllerDelegate();
     
-    void disconnected();
-    
-    void accelerometer(double x,double y,double z);
-
-	void click(double x, double y);
-    
-    void ui_event(const gchar * event);
-
-    const Controllers::ControllerInfo & get_info() const
+    inline Controller * get_controller()
     {
-        return info;
+        return controller;
     }
     
-    bool is_connected() const
+    inline bool has_cap(unsigned int cap)
     {
-        return connected;
+        return controller->get_capabilities()&cap;        
     }
     
-    bool start_accelerometer(const char * filter,double interval);
-    bool stop_accelerometer();
-    bool reset();
-
-    bool ui_clear();
-
-    bool ui_show_multiple_choice(const String & label,const StringPairList & choices);
-
-    bool ui_declare_resource(const String &label, const String &url);
-    bool ui_background_image(const String &resource_label);
-    bool ui_play_sound(const String &resource_label, unsigned int loop=1);
-    bool ui_stop_sound();
-
+    //.........................................................................
+    // Delegate functions
+    
+    virtual void disconnected();
+    virtual void key_down(unsigned int key_code,unsigned long int unicode);
+    virtual void key_up(unsigned int key_code,unsigned long int unicode);
+    virtual void accelerometer(double x,double y,double z);
+    virtual void click(int x,int y);
+    virtual void touch_down(int x,int y);
+    virtual void touch_move(int x,int y);  
+    virtual void touch_up(int x,int y);    
+    virtual void ui_event(const String & parameters);
+    
 private:
     
-    bool                        connected;
     lua_State *                 L;
-    gpointer                    source;
-    Controllers::ControllerInfo info;
-    ControllersDelegate *       delegate;
-    Controllers *               controllers;
-    
+    Controller *                controller;
+    ControllerListDelegate *    list;
 };
-
-//=============================================================================
-
-class ControllersDelegate : private Controllers::Delegate
-{
-public:
-    
-    ControllersDelegate(lua_State*);
-    ~ControllersDelegate();
-    
-    bool is_ready() const
-    {
-        return controllers->is_ready();
-    }
-    
-    void controller_destroyed(gpointer source,Controller * controller);
-    
-    void push_connected_table();
-    
-    const String & get_web_server_group() const
-    {
-        return web_server_group;
-    }
-    
-private:
-
-    virtual void connected(gpointer source,const Controllers::ControllerInfo & info);
-    virtual void disconnected(gpointer source);
-    virtual void click(gpointer source,double x,double y);
-    virtual void accelerometer(gpointer source,double x,double y,double z);
-    virtual void ui_event(gpointer source,const gchar * event);
-
-    typedef std::multimap<gpointer,Controller*>  ControllerMap;
-        
-    typedef std::set<gpointer> GPointerSet;
-        
-    lua_State *     L;
-    Controllers *   controllers;
-    ControllerMap   proxies;
-    GPointerSet     all_connected;
-    String          web_server_group;
-};
-
-//=============================================================================
 
 ]]
 
-interface controller [[Controller*]]
+#==============================================================================
+
+[[
+
+class ControllerListDelegate : public ControllerList::Delegate
+{
+public:
+    
+    ControllerListDelegate(lua_State * l);
+    ~ControllerListDelegate();
+
+    //.........................................................................
+    // Delegate function
+    
+    virtual void connected(Controller * controller);
+    
+    void push_connected();
+    
+    void proxy_destroyed(ControllerDelegate * proxy);
+    
+private:
+
+    lua_State *         L;
+    ControllerList *    list;
+    
+    typedef std::set<ControllerDelegate*> ProxySet;
+    
+    ProxySet            proxies;
+};
+    
+
+]]
+
+
+#==============================================================================
+
+interface controller [[ControllerDelegate*]]
 {
     controller()
         [[
-            *self=(Controller*)lua_touserdata(L,-2);
+            *self=(ControllerDelegate*)lua_touserdata(L,-2);
         ]];
         
     ~controller()
@@ -119,45 +102,142 @@ interface controller [[Controller*]]
         
     readonly bool is_connected
         [[
-            is_connected=self->is_connected();    
+            is_connected=self->get_controller()->is_connected();    
         ]];
         
     readonly string name
         [[
-            name=self->get_info().name.c_str();    
+            String s(self->get_controller()->get_name());
+            name=s.c_str();    
         ]];
         
-    readonly int version
+    readonly bool has_keys
         [[
-            version=self->get_info().version;    
+            has_keys=self->has_cap(TP_CONTROLLER_HAS_KEYS);    
         ]];
-        
+
     readonly bool has_accelerometer
         [[
-            has_accelerometer=self->get_info().has_accelerometer();    
+            has_accelerometer=self->has_cap(TP_CONTROLLER_HAS_ACCELEROMETER);
+        ]];
+        
+    readonly bool has_clicks
+        [[
+            has_clicks=self->has_cap(TP_CONTROLLER_HAS_CLICKS);
+        ]];
+        
+    readonly bool has_touches
+        [[
+            has_touches=self->has_cap(TP_CONTROLLER_HAS_TOUCHES);    
+        ]];
+        
+    readonly bool has_multiple_choice
+        [[
+            has_multiple_choice=self->has_cap(TP_CONTROLLER_HAS_MULTIPLE_CHOICE); 
+        ]];
+        
+    readonly bool has_sound
+        [[
+            has_sound=self->has_cap(TP_CONTROLLER_HAS_SOUND);    
+        ]];
+        
+    readonly bool has_ui
+        [[
+            has_ui=self->has_cap(TP_CONTROLLER_HAS_UI);
+        ]];
+        
+    readonly bool has_text_entry
+        [[
+            has_text_entry=self->has_cap(TP_CONTROLLER_HAS_TEXT_ENTRY);
+        ]];
+        
+    readonly table ui_size
+        [[
+            unsigned int w;
+            unsigned int h;
+            
+            self->get_controller()->get_ui_size(w,h);
+            
+            lua_newtable(L);
+            lua_pushinteger(L,w);
+            lua_rawseti(L,-2,1);
+            lua_pushinteger(L,h);
+            lua_rawseti(L,-2,2);
+        ]];
+        
+    readonly table input_size
+        [[
+            unsigned int w;
+            unsigned int h;
+            
+            self->get_controller()->get_input_size(w,h);
+            
+            lua_newtable(L);
+            lua_pushinteger(L,w);
+            lua_rawseti(L,-2,1);
+            lua_pushinteger(L,h);
+            lua_rawseti(L,-2,2);
+        ]];
+    
+        
+    bool reset()
+        [[
+            result=self->get_controller()->reset();    
         ]];
         
     bool start_accelerometer(string filter,double interval)
         [[
-            result=self->start_accelerometer(filter,interval);
+            Controller::AccelerometerFilter f=Controller::NONE;
+            
+            if (filter)
+            {
+                if (*filter=='L'||*filter=='l')
+                {
+                    f=Controller::LOW;
+                }
+                else if (*filter=='H'||*filter=='h')
+                {
+                    f=Controller::HIGH;
+                }
+            }
+
+            result=self->get_controller()->start_accelerometer(f,interval);
         ]];
         
     bool stop_accelerometer()
         [[
-            result=self->stop_accelerometer();    
+            result=self->get_controller()->stop_accelerometer();    
         ]];
         
-    bool reset()
+    bool start_clicks()
         [[
-            result=self->reset();    
+            result=self->get_controller()->start_clicks();
         ]];
         
-    bool clear_ui()
+    bool stop_clicks()
         [[
-            result=self->ui_clear();    
+            result=self->get_controller()->stop_clicks();
         ]];
         
-    bool show_multiple_choice_ui(string label)
+    bool start_touches()
+        [[
+            result=self->get_controller()->start_touches();
+        ]];
+        
+    bool stop_touches()
+        [[
+            result=self->get_controller()->stop_touches();
+        ]];
+
+    # Deprecated, use the other one
+    
+    bool show_multiple_choice_ui()
+        [[
+            g_warning("DEPRECATED CALL TO controller:show_multiple_choice_ui");
+            result=false;
+        ]];
+        
+    bool show_multiple_choice(string label,...)
         [[
             StringPairList list;
             
@@ -169,50 +249,206 @@ interface controller [[Controller*]]
                 const char * choice=lua_tostring(L,i+1);                
 
                 if (id && choice)
-                    list.push_back(std::make_pair(String(id),String(choice)));
+                    list.push_back(StringPair(String(id),String(choice)));
             }
             
-            result=list.empty()?false:self->ui_show_multiple_choice(label,list);
+            result=list.empty()?false:self->get_controller()->show_multiple_choice(label,list);
+        ]];
+
+    bool clear_ui()
+        [[
+            result=self->get_controller()->clear_ui();    
+        ]];
+    
+    # Deprecated, use the other one
+    
+    bool set_background(string resource)
+        [[
+            g_warning("DEPRECATED CALL TO controller:set_background");            
+            result=false;
+        ]];
+
+    bool set_ui_background(string resource,string mode="CENTER")
+        [[
+            Controller::UIBackgroundMode m=Controller::CENTER;
+            
+            if (mode)
+            {
+                if (*mode=='S'||*mode=='s')
+                {
+                    m=Controller::STRETCH;
+                }
+                else if (*mode=='T'||*mode=='t')
+                {
+                    m=Controller::TILE;
+                }
+            }
+            
+            result=self->get_controller()->set_ui_background(resource,m);
         ]];
         
+    bool set_ui_image(string resource,int x,int y,int width,int height)
+        [[
+            result=self->get_controller()->set_ui_image(resource,x,y,width,height);    
+        ]];
 
-    bool declare_resource(string label, string url)
-    [[
-            result = self->ui_declare_resource(label, url);
-    ]];
+    bool play_sound(string resource, int loop)
+        [[
+            result=self->get_controller()->play_sound(resource,loop);
+        ]];
+
+    bool stop_sound()
+        [[
+            result=self->get_controller()->stop_sound();
+        ]];
+
+
+    bool declare_resource(string resource, string url)
+        [[
+            result=false;
+            
+            bool is_uri=false;
+            
+            gchar * path=App::get(L)->normalize_path(url,&is_uri);
+            
+            if (path)
+            {
+                String final_uri(path);
+                g_free(path);
+                
+                if (!is_uri)
+                {
+                    final_uri="file://"+final_uri;
+                }
+                
+                result=self->get_controller()->declare_resource(resource,final_uri);
+            }
+        ]];
+        
+    bool enter_text(string label,string text)
+        [[
+            result=self->get_controller()->enter_text(label,text);    
+        ]];
 	
-    bool set_background(string label)
-    [[
-    	result = self->ui_background_image(label);
-    ]];
-
-    bool play_sound(string resource_label, int loop)
-    [[
-    	result = self->ui_play_sound(resource_label, loop);
-    ]];
-
-	bool stop_sound()
-	[[
-		result = self->ui_stop_sound();
-	]];
-
     callback on_disconnected;
     
-
-	callback on_click;
-
+    callback on_key_down;
+    
+    callback on_key_up;
+    
     callback on_accelerometer;
     
+    callback on_click;
+    
+    callback on_touch_down;
+    
+    callback on_touch_move;
+    
+    callback on_touch_up;
+
     callback on_ui_event;
 }
 
 #==============================================================================
 
-global controllers [[ControllersDelegate*]]
+[[
+
+//.........................................................................
+
+ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,ControllerListDelegate * _list)
+:
+    L(_L),
+    controller(_controller),
+    list(_list)
+{
+    controller->ref();
+    controller->add_delegate(this);        
+}
+
+//.........................................................................
+
+ControllerDelegate::~ControllerDelegate()
+{
+    controller->remove_delegate(this);
+    controller->unref();
+    
+    list->proxy_destroyed(this);
+}
+
+//.........................................................................
+// Delegate functions
+
+void ControllerDelegate::disconnected()
+{   
+    invoke_controller_on_disconnected(L,this,0,0);
+    detach_controller(L,this);
+}
+
+void ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
+{
+    lua_pushnumber(L,key_code);
+    lua_pushnumber(L,unicode);
+    invoke_controller_on_key_down(L,this,2,0);
+}
+
+void ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
+{
+    lua_pushnumber(L,key_code);
+    lua_pushnumber(L,unicode);
+    invoke_controller_on_key_up(L,this,2,0);
+}
+
+void ControllerDelegate::accelerometer(double x,double y,double z)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    lua_pushnumber(L,z);    
+    invoke_controller_on_accelerometer(L,this,3,0);    
+}
+
+void ControllerDelegate::click(int x,int y)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    invoke_controller_on_click(L,this,2,0);        
+}
+
+void ControllerDelegate::touch_down(int x,int y)
+{   
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    invoke_controller_on_touch_down(L,this,2,0);        
+}
+
+void ControllerDelegate::touch_move(int x,int y)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    invoke_controller_on_touch_move(L,this,2,0);            
+}
+
+void ControllerDelegate::touch_up(int x,int y)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    invoke_controller_on_touch_up(L,this,2,0);            
+}
+
+void ControllerDelegate::ui_event(const String & parameters)
+{
+    lua_pushstring(L,parameters.c_str());
+    invoke_controller_on_ui_event(L,this,1,0);
+}
+
+]]
+
+#==============================================================================
+
+global controllers [[ControllerListDelegate*]]
 {
     controllers()
         [[
-            *self=new ControllersDelegate(L);            
+            *self=new ControllerListDelegate(L);            
         ]];
         
     ~controllers()
@@ -220,14 +456,9 @@ global controllers [[ControllersDelegate*]]
             delete self;
         ]];
         
-    readonly bool ready
-        [[
-            ready=self->is_ready();
-        ]];
-        
     readonly table connected
         [[
-            self->push_connected_table();    
+            self->push_connected();
         ]];
         
     callback on_controller_connected;    
@@ -237,180 +468,33 @@ global controllers [[ControllersDelegate*]]
 
 [[
 
-Controller::Controller(lua_State *l,gpointer s,const Controllers::ControllerInfo & i,ControllersDelegate * d,Controllers * c)
-:
-    connected(true),
-    L(l),
-    source(s),
-    info(i),
-    delegate(d),
-    controllers(c)
-{   
-}
+//.........................................................................
 
-Controller::~Controller()
-{
-    delegate->controller_destroyed(source,this);    
-}
-
-void Controller::disconnected()
-{
-    connected=false;
-    invoke_controller_on_disconnected(L,this,0,0);
-    detach_controller(L,this);
-}
-
-void Controller::click(double x, double y)
-{
-    lua_pushnumber(L,x);
-    lua_pushnumber(L,y);
-    
-    invoke_controller_on_click(L,this,2,0);
-}
-
-void Controller::accelerometer(double x,double y,double z)
-{
-    lua_pushnumber(L,x);
-    lua_pushnumber(L,y);
-    lua_pushnumber(L,z);
-    
-    invoke_controller_on_accelerometer(L,this,3,0);
-}
-
-void Controller::ui_event(const gchar * event)
-{
-    lua_pushstring(L,event);
-    
-    invoke_controller_on_ui_event(L,this,1,0);
-}
-
-bool Controller::start_accelerometer(const char * filter,double interval)
-{
-    if (!info.has_accelerometer())
-        return false;
-    return controllers->start_accelerometer(source,filter,interval);        
-}
-
-bool Controller::stop_accelerometer()
-{
-    return controllers->stop_accelerometer(source);
-}
-
-bool Controller::reset()
-{
-    return controllers->reset(source);
-}
-
-bool Controller::ui_clear()
-{
-    return controllers->ui_clear(source);    
-}
-
-bool Controller::ui_show_multiple_choice(const String & label,const StringPairList & choices)
-{
-    return controllers->ui_show_multiple_choice(source,label,choices);
-}
-
-
-bool Controller::ui_declare_resource(const String &label, const String &url)
-{
-    bool is_uri=false;
-    
-    char * path=App::get(L)->normalize_path(url.c_str(),&is_uri);
-
-    if (!path)
-    {
-        return false;
-    }
-    
-    Util::GFreeLater free_path(path);
-    
-    if (is_uri)
-    {
-        return controllers->ui_declare_resource(source, label, url);        
-    }
-
-    // It is a path to a local file
-    
-    if (!g_file_test(path,G_FILE_TEST_IS_REGULAR))
-    {
-        return false;
-    }
-    
-    // It exists
-    
-    String local_url=controllers->serve_path(delegate->get_web_server_group(),path);
-    
-    return controllers->ui_declare_resource(source,label,local_url);
-    
-}
-
-bool Controller::ui_background_image(const String &resource_label)
-{
-    return controllers->ui_background_image(source, resource_label);
-}
-
-bool Controller::ui_play_sound(const String &resource_label, unsigned int loop)
-{
-    return controllers->ui_play_sound(source, resource_label, loop);
-}
-
-bool Controller::ui_stop_sound()
-{
-    return controllers->ui_stop_sound(source);
-}
-
-
-//=============================================================================
-
-ControllersDelegate::ControllersDelegate(lua_State*l)
+ControllerListDelegate::ControllerListDelegate(lua_State * l)
 :
     L(l)
 {
-    App * app=App::get(L);
-    
-    controllers=app->get_context()->get_controllers();
-
-    if (controllers)
-    {
-        controllers->add_delegate(this);
-    }
-    
-    web_server_group=app->get_metadata().id;
+    list=App::get(L)->get_context()->get_controller_list();
+    list->add_delegate(this);
 }
 
-ControllersDelegate::~ControllersDelegate()
+//.........................................................................
+
+ControllerListDelegate::~ControllerListDelegate()
 {
-    if (controllers)
-    {
-        controllers->remove_delegate(this);
-        controllers->drop_web_server_group(web_server_group);
-    }
+    list->remove_delegate(this);
 }
 
-void ControllersDelegate::controller_destroyed(gpointer source,Controller * controller)
-{
-    std::pair<ControllerMap::iterator,ControllerMap::iterator>
-        range(proxies.equal_range(source));
-        
-    for(ControllerMap::iterator it=range.first;it!=range.second;)
-    {
-        if (it->second==controller)
-            proxies.erase(it++);
-        else
-            ++it;
-    }
-}
+//.........................................................................
+// Delegate function
 
-void ControllersDelegate::connected(gpointer source,const Controllers::ControllerInfo & info)
+void ControllerListDelegate::connected(Controller * controller)
 {
-    all_connected.insert(source);
+    ControllerDelegate * d=new ControllerDelegate(L,controller,this);
     
-    Controller * controller=new Controller(L,source,info,this,controllers);
+    proxies.insert(d);
     
-    proxies.insert(std::make_pair(source,controller));
-    
-    lua_pushlightuserdata(L,controller);
+    lua_pushlightuserdata(L,d);
     
     new_controller(L);
     
@@ -419,106 +503,64 @@ void ControllersDelegate::connected(gpointer source,const Controllers::Controlle
     invoke_controllers_on_controller_connected(L,this,1,0);
 }
 
-void ControllersDelegate::disconnected(gpointer source)
+//.........................................................................
+
+void ControllerListDelegate::proxy_destroyed(ControllerDelegate * proxy)
 {
-    GPointerSet::iterator ait=all_connected.find(source);
-    if (ait!=all_connected.end())
-        all_connected.erase(ait);
-    
-    std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
-        range(proxies.equal_range(source));
-        
-    for(ControllerMap::const_iterator it=range.first;it!=range.second;++it)
-    {
-        it->second->disconnected();
-    }    
+    proxies.erase(proxy);
 }
 
-void ControllersDelegate::click(gpointer source,double x,double y)
-{
-    std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
-        range(proxies.equal_range(source));
-        
-    for(ControllerMap::const_iterator it=range.first;it!=range.second;++it)
-    {
-        it->second->click(x,y);
-    }
-}
+//.........................................................................
 
-void ControllersDelegate::accelerometer(gpointer source,double x,double y,double z)
-{
-    std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
-        range(proxies.equal_range(source));
-        
-    for(ControllerMap::const_iterator it=range.first;it!=range.second;++it)
-    {
-        it->second->accelerometer(x,y,z);
-    }        
-}
-
-void ControllersDelegate::ui_event(gpointer source,const gchar * event)
-{
-    std::pair<ControllerMap::const_iterator,ControllerMap::const_iterator>
-        range(proxies.equal_range(source));
-        
-    for(ControllerMap::const_iterator it=range.first;it!=range.second;++it)
-    {
-        it->second->ui_event(event);
-    }            
-}
-
-void ControllersDelegate::push_connected_table()
+void ControllerListDelegate::push_connected()
 {
     lua_newtable(L);
-    
-    if (!controllers)
-    {
-        return;
-    }
     
     // These exist as Lua objects, so we should be able to find instances
     // for all of them. However, the proxies may not be connected
     
     int i=1;
     
-    for(ControllerMap::iterator it=proxies.begin();it!=proxies.end();++it,++i)
+    ControllerList::ControllerSet found;
+    
+    for(ProxySet::iterator it=proxies.begin();it!=proxies.end();++it)
     {
-        if (!it->second->is_connected())
+        if (!(*it)->get_controller()->is_connected())
             continue;
         
-        int is_new=wrap_controller(L,it->second);
+        int is_new=wrap_controller(L,(*it));
         g_assert(!is_new);
-        lua_rawseti(L,-2,i);
+        lua_rawseti(L,-2,i++);
+        
+        found.insert((*it)->get_controller());
     }
     
     // These may not exist as Lua objects but they are definitely connected
     
-    for(GPointerSet::iterator it=all_connected.begin();it!=all_connected.end();++it)
+    ControllerList::ControllerSet controllers(list->get_controllers());
+        
+    for(ControllerList::ControllerSet::iterator it=controllers.begin();
+        it!=controllers.end();++it)
     {
-        gpointer source=*it;
-        
-        if (proxies.find(source)!=proxies.end())
+        if (found.find(*it)!=found.end())
+        {
             continue;
+        }
         
-        // It is not in our map, get its info
+        ControllerDelegate * d=new ControllerDelegate(L,*it,this);
         
-        Controllers::ControllerInfo * info=controllers->find_controller(source);
+        proxies.insert(d);
         
-        if (!info)
-            continue;
-        
-        Controller * controller=new Controller(L,source,*info,this,controllers);
-        
-        proxies.insert(std::make_pair(source,controller));
-        
-        lua_pushlightuserdata(L,controller);
+        lua_pushlightuserdata(L,d);
         
         new_controller(L);
         
         lua_remove(L,-2);
         
         lua_rawseti(L,-2,i++);
-    }    
+    }
 }
 
 ]]
+
+#==============================================================================

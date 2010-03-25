@@ -1,93 +1,52 @@
-#ifndef _TRICKPLAY_CONTROLLERS_H
-#define _TRICKPLAY_CONTROLLERS_H
+#ifndef _TRICKPLAY_CONTROLLER_SERVER_H
+#define _TRICKPLAY_CONTROLLER_SERVER_H
 
+
+#include "trickplay/controller.h"
 
 #include "common.h"
 #include "mdns.h"
 #include "server.h"
 #include "context.h"
 
-class Controllers : private Server::Delegate
+class ControllerServer : private Server::Delegate
 {
 public:
     
     //..........................................................................
     // Pass 0 for the port to have one automatically chosen
     
-    Controllers(TPContext * context,const String & name,int port);
-    ~Controllers();
+    ControllerServer(TPContext * context,const String & name,int port);
+    ~ControllerServer();
     
     //..........................................................................
     // Returns true if our listener is up and the mDNS service was established
     
     bool is_ready() const;
     
-    //..........................................................................
-    // Information we get from a controller when it connects
-    
-    struct ControllerInfo
-    {
-        ControllerInfo() : version(0) {}
-        
-        bool has_accelerometer() const;
-        
-        String      address;
-        String      name;
-        int         version;
-        StringSet   caps;
-    };
-    
-    //..........................................................................
-    // Delegate to handle controller events
-    
-    class Delegate
-    {
-    public:
-        
-        virtual void connected(gpointer source,const ControllerInfo & info)=0;
-        virtual void disconnected(gpointer source)=0;
-        virtual void accelerometer(gpointer source,double x,double y,double z)=0;
-	virtual void click(gpointer source, double x, double y)=0;
-        virtual void ui_event(gpointer source,const gchar * event)=0;
-    };
-   
-    void add_delegate(Delegate * delegate);
-    void remove_delegate(Delegate * delegate);
-    
-    //..........................................................................
-    // Things we can tell a controller to do
-    
-    bool start_accelerometer(gpointer source,const char * filter,double interval);
-    bool stop_accelerometer(gpointer source);
-    bool reset(gpointer source);
-    bool ui_clear(gpointer source);
-    bool ui_show_multiple_choice(gpointer source,const String & label,const StringPairList & choices);
+private:
 
-    bool ui_declare_resource(gpointer source,const String &label, const String &url);
-    bool ui_background_image(gpointer source,const String &resource_label);
-    bool ui_play_sound(gpointer source,const String &resource_label, unsigned int loop=1);
-    bool ui_stop_sound(gpointer source);
+    static int execute_command(TPController * controller,unsigned int command,void * parameters,void * data);
 
+    int execute_command(TPController * controller,unsigned int command,void * parameters);
+    
     //..........................................................................
     
     String serve_path(const String & group,const String & path);
     
     void drop_web_server_group(const String & group);
     
-    //..........................................................................
-    // Find info for a controller
-    
-    ControllerInfo * find_controller(gpointer source);
-        
-private:
-
-    Controllers(const Controllers &) {}
+    ControllerServer(const ControllerServer &) {}
     
     //..........................................................................
     
     struct HTTPInfo
     {
-        HTTPInfo() : is_http(false),headers_done(false) {}
+        HTTPInfo()
+	:
+	    is_http(false),
+	    headers_done(false)
+	{}
         
         void reset()
         {
@@ -112,11 +71,18 @@ private:
     
     struct ConnectionInfo
     {
-        ConnectionInfo() : disconnect(true) {}
+        ConnectionInfo()
+	:
+	    disconnect(true),
+	    version(0),
+	    controller(NULL)
+	{}
 
         bool            disconnect;
-        ControllerInfo  controller;
+	String		address;
+	int		version;
         HTTPInfo        http;
+	TPController *	controller;
     };
     
     //..........................................................................
@@ -124,18 +90,6 @@ private:
     
     std::auto_ptr<MDNS> mdns;
 
-    //..........................................................................
-    // The delegates
-    
-    typedef std::set<Delegate*> DelegateSet;
-    
-    DelegateSet delegates;
-    
-    //..........................................................................
-    // Writes a line of output to the given controller
-    
-    bool write_line(gpointer source,const gchar * line);
-        
     //..........................................................................    
     // The socket server
     
@@ -159,10 +113,10 @@ private:
     
     struct TimerClosure
     {
-        TimerClosure(gpointer c,Controllers * s) : connection(c) , self(s) {}
+        TimerClosure(gpointer c,ControllerServer * s) : connection(c) , self(s) {}
         
-        gpointer        connection;
-        Controllers *   self;
+        gpointer       		connection;
+        ControllerServer *	self;
     };
     
     static gboolean timed_disconnect_callback(gpointer data);
@@ -170,7 +124,7 @@ private:
     //..........................................................................
     // Process a command sent in by a controller
 
-    void process_command(gpointer connection,ControllerInfo & info,gchar ** parts);
+    void process_command(gpointer connection,ConnectionInfo & info,gchar ** parts);
     
     //..........................................................................
     
@@ -197,4 +151,4 @@ private:
 };
 
 
-#endif // _TRICKPLAY_CONTROLLERS_H
+#endif // _TRICKPLAY_CONTROLLER_SERVER_H
