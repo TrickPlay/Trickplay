@@ -115,6 +115,8 @@ protected:
         
 private:
     
+    unsigned int map_key_code(unsigned int key_code);
+    
     TPController *      tp_controller;
     
     bool                connected;    
@@ -125,6 +127,10 @@ private:
     typedef std::set<Delegate*> DelegateSet;
     
     DelegateSet         delegates;
+    
+    typedef std::map<unsigned int,unsigned int> KeyMap;
+    
+    KeyMap              key_map;
 };
 
 //-----------------------------------------------------------------------------
