@@ -203,7 +203,8 @@ int ControllerServer::execute_command(TPController * controller,unsigned int com
         }
         
         case TP_CONTROLLER_COMMAND_PLAY_SOUND            :
-        {   TPControllerPlaySound * ps=(TPControllerPlaySound*)parameters;
+        {
+            TPControllerPlaySound * ps=(TPControllerPlaySound*)parameters;
             server->write_printf(connection,"SS\t%s\t%u\n",ps->resource,ps->loop);
             break;
         }
