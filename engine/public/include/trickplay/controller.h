@@ -36,7 +36,6 @@ extern "C" {
 
 typedef struct TPController TPController;
 
-
 //-----------------------------------------------------------------------------
 /*
     Section: Controller Specification
@@ -85,6 +84,39 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
 #define TP_CONTROLLER_HAS_UI                        0x0040
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
+
+//-----------------------------------------------------------------------------
+
+typedef struct TPControllerKeyMap TPControllerKeyMap;
+
+/*
+    Struct: TPControllerKeyMap
+
+    This structure lets you map external key codes to TrickPlay key codes. You
+    simply create an array of entries and pass a pointer to it in your <TPControllerSpec>.
+    
+    When you call <tp_controller_key_down> or <tp_controller_key_up>, you can pass
+    your key code as the key_code parameter, and TrickPlay will map it accordingly.
+*/
+
+struct TPControllerKeyMap
+{
+    /*
+        Field: your_key_code
+        
+        The code you will use when reporting key up and down events.
+    */
+    
+    unsigned int your_key_code;
+    
+    /*
+        Field: trickplay_key_code
+        
+        The matching trickplay_key_code. There is a list of key codes in keys.h.
+    */
+    
+    unsigned int trickplay_key_code;
+};
 
 //-----------------------------------------------------------------------------
 
@@ -140,6 +172,19 @@ struct TPControllerSpec
     */
     
     unsigned int ui_height;
+    
+    /*
+        Field: key_map
+        
+        If you wish to map your key codes to standard TrickPlay codes automatically,
+        pass a pointer to an array of <TPControllerKeyMap> structures here. The array
+        should be terminated by zero values for both your key code and the trickplay
+        key code.
+        
+        TrickPlay will make a copy of this array when you call <tp_context_add_controller>.
+    */
+    
+    TPControllerKeyMap * key_map;
     
     /*
         Function: execute_command
@@ -748,7 +793,7 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
-        key_code -      An identifier for the key. TODO: reference list with additions.
+        key_code -      An identifier for the key. There is a list of key codes in keys.h.
         
         unicode -       The unicode character for the key, if any, or zero.
 */    
@@ -770,7 +815,7 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
-        key_code -      An identifier for the key. TODO: reference list with additions.
+        key_code -      An identifier for the key. There is a list of key codes in keys.h.
         
         unicode -       The unicode character for the key, if any, or zero.
 */    

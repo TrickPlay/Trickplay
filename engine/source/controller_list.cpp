@@ -54,6 +54,20 @@ Controller::Controller(ControllerList * _list,const char * _name,const TPControl
     {
         spec.execute_command=default_execute_command;
     }
+    
+    // If the spec has a key map, copy its contents into an stl map
+    
+    if (spec.key_map)
+    {
+        for(TPControllerKeyMap * k=spec.key_map;k->your_key_code||k->trickplay_key_code;++k)
+        {
+            key_map[k->your_key_code]=k->trickplay_key_code;    
+        }
+        
+        // NULL it because we don't own the memory past this call
+        
+        spec.key_map=NULL;
+    }
 }
 
 //.............................................................................
@@ -117,6 +131,23 @@ bool Controller::is_connected() const
 
 //.............................................................................
 
+unsigned int Controller::map_key_code(unsigned int key_code)
+{
+    if (!key_map.empty())
+    {
+        KeyMap::const_iterator it=key_map.find(key_code);
+        
+        if (it!=key_map.end())
+        {
+            return it->second;
+        }
+    }
+    
+    return key_code;
+}
+
+//.............................................................................
+
 void Controller::disconnected()
 {
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
@@ -136,6 +167,8 @@ void Controller::disconnected()
 
 void Controller::key_down(unsigned int key_code,unsigned long int unicode)
 {
+    key_code=map_key_code(key_code);
+    
     ClutterUtil::inject_key_down(key_code,unicode);
     
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
@@ -148,6 +181,8 @@ void Controller::key_down(unsigned int key_code,unsigned long int unicode)
 
 void Controller::key_up(unsigned int key_code,unsigned long int unicode)
 {
+    key_code=map_key_code(key_code);
+
     ClutterUtil::inject_key_up(key_code,unicode);
 
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
