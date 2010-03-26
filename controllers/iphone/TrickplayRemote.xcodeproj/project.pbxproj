@@ -259,11 +259,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Kenny Ham (2N78SC9N4W)";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayRemote_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayRemote-Info.plist";
 				PRODUCT_NAME = TrickplayRemote;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "415A3FC8-20D3-41B2-9902-BE41D705403E";
 			};
 			name = Release;
 		};
@@ -286,13 +288,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Kenny Ham";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayRemote_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayRemote-Info.plist";
 				PRODUCT_NAME = TrickplayRemote;
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B32EA9E5-5E51-495F-B5C5-96B5E015A646";
 			};
 			name = Distribution;
 		};
