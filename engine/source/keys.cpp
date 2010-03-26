@@ -1,8 +1,8 @@
 
 #include "clutter/clutter-keysyms.h"
 
+#include "trickplay/keys.h"
 #include "common.h"
-
 
 // The function below creates a global table called "keys" that has two mappings.
 // It maps the names to the key values as well as the key values to the names.
@@ -38,6 +38,38 @@ void luaopen_keys(lua_State *L)
     
     static const ki ks[]=
     {
+        // We start with the custom TV-CENTRIC codes we defined
+        // in trickplay/keys.h
+        
+        {"OK",TP_KEY_OK},
+        {"RED",TP_KEY_RED},
+        {"GREEN",TP_KEY_GREEN},
+        {"YELLOW",TP_KEY_YELLOW},
+        {"BLUE",TP_KEY_BLUE},
+        {"STOP",TP_KEY_STOP},
+        {"PLAY",TP_KEY_PLAY},
+        {"PAUSE",TP_KEY_PAUSE},
+        {"REW",TP_KEY_REW},
+        {"FFWD",TP_KEY_FFWD},
+        {"PREV",TP_KEY_PREV},
+        {"NEXT",TP_KEY_NEXT},
+        {"REC",TP_KEY_REC},
+        {"MENU",TP_KEY_MENU},
+        {"GUIDE",TP_KEY_GUIDE},
+        {"BACK",TP_KEY_BACK},
+        {"EXIT",TP_KEY_EXIT},
+        {"INFO",TP_KEY_INFO},
+        {"TOOLS",TP_KEY_TOOLS},
+        {"CHAN_UP",TP_KEY_CHAN_UP},
+        {"CHAN_DOWN",TP_KEY_CHAN_DOWN},
+        {"CHAN_LAST",TP_KEY_CHAN_LAST},
+        {"CHAN_LIST",TP_KEY_CHAN_LIST},
+        {"CHAN_FAV",TP_KEY_CHAN_FAV},
+        {"VOL_UP",TP_KEY_VOL_UP},
+        {"VOL_DOWN",TP_KEY_VOL_DOWN},
+        {"MUTE",TP_KEY_MUTE},
+        {"CC",TP_KEY_CC},
+        
         // The list below was created using the following sed command:
         // sed -n "s/^#define \(CLUTTER_\([^ ]*\)\).*/{\"\2\",\1},/p" clutter-keysyms.h
         
