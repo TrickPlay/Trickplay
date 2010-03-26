@@ -64,6 +64,17 @@ Ferris = {
 			circle.z_rotation = { a:get_value( c.alpha ), 0, 0 }
 		end
 
+		function t.on_completed()
+			self.frontmost = (self.frontmost + num_slots)
+			if (self.frontmost > num_items) then
+				self.frontmost = (self.frontmost % num_items)
+			end
+			while (self.frontmost <= 0) do
+				self.frontmost = self.frontmost + num_items
+			end
+			print("Frontmost: ",self.frontmost)
+		end
+
 		function t2.on_new_frame( t, msecs )
 			local child
 			for _,child in ipairs(children) do
@@ -80,6 +91,7 @@ Ferris = {
 				{
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
+					frontmost = 1,
 				}
 		obj.ferris.y_rotation = { tilt_angle, 0, 0 }
 		
