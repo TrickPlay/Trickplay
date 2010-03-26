@@ -157,6 +157,11 @@ int ControllerServer::execute_command(TPController * controller,unsigned int com
             
             for(unsigned int i=0;i<mc->count;++i)
             {
+                if (i>0)
+                {
+                    line+="\t";    
+                }
+                
                 line+=mc->ids[i];
                 line+="\t";
                 line+=mc->choices[i];
