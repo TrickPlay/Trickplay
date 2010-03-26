@@ -203,7 +203,7 @@
 	//Send the TOUCHDOWN event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TOUCHDOWN\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentTouchData = [[NSString stringWithFormat:@"TD\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
 		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
 	}
 }
@@ -217,7 +217,7 @@
 	//Send the TOUCHMOVE event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TOUCHMOVE\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentTouchData = [[NSString stringWithFormat:@"TM\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
 		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
 	}
 	
@@ -311,7 +311,7 @@
 	//Send the TOUCHUP event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TOUCHUP\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentTouchData = [[NSString stringWithFormat:@"TU\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
 		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
 	}
 	
@@ -328,7 +328,7 @@
 			//Send click event if click events are enabled
 			if (([connectedSockets count] > 0) && mClickEventsAllowed)
 			{
-				NSData *sentClickData = [[NSString stringWithFormat:@"CLICK\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+				NSData *sentClickData = [[NSString stringWithFormat:@"CK\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
 				[listenSocket writeData:sentClickData withTimeout:-1 tag:0];
 			}
 		}
@@ -362,7 +362,7 @@
 	if ([connectedSockets count] > 0)
 	{
 	    int index;	
-		NSData *sentData = [[NSString stringWithFormat:@"K\t%@\n", thekey] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentData = [[NSString stringWithFormat:@"KP\t%@\n", thekey] dataUsingEncoding:NSUTF8StringEncoding];
 
 		for (index = 1; index <= thecount; index++) {
 			[listenSocket writeData:sentData withTimeout:-1 tag:0];
@@ -395,8 +395,8 @@
 
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
-	//[self logInfo:FORMAT(@"Accepted client %@:%hu", host, port)];
-	NSData *welcomeData = [[NSString stringWithFormat:@"DEVICE\t1\t%@\tK\tAX\tCLICK=(320,410)\tTOUCH=(320,410)\tBACKGROUND=(320,410)\tPLAYSOUND\n",[UIDevice currentDevice].name ] dataUsingEncoding:NSUTF8StringEncoding];
+	//[self logInfo:FORMAT(@"Accepted client %@:%hu", host, port)]; //320x410
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t2\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=320x410\tUS=320x410\n",[UIDevice currentDevice].name ] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	[connectedSockets addObject:sock];
 	[sock writeData:welcomeData withTimeout:-1 tag:0];
@@ -421,61 +421,54 @@
 		//NSLog(msg);
 //		msg = [ msg stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%C", 9] withString:@"<<TAB>>"];
 		//NSLog(msg);
-		if ([msg hasPrefix:@"START"])
+		if ([msg hasPrefix:@"SA"])
 		{
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			if ([[components objectAtIndex:1] compare:@"AX"] == 0)
+			
+			if ([[components objectAtIndex:1] compare:@"L"] == 0)
 			{
-				if ([[components objectAtIndex:2] compare:@"L"] == 0)
-				{
 					mAccelMode = 1;
-					[[UIAccelerometer sharedAccelerometer] setUpdateInterval:[[components objectAtIndex:3] floatValue]];
-				}
-				else if ([[components objectAtIndex:2] compare:@"H"] == 0)
-				{
+					[[UIAccelerometer sharedAccelerometer] setUpdateInterval:[[components objectAtIndex:2] floatValue]];
+			}
+			else if ([[components objectAtIndex:1] compare:@"H"] == 0)
+			{
 					mAccelMode = 2;
-					[[UIAccelerometer sharedAccelerometer] setUpdateInterval:[[components objectAtIndex:3] floatValue]];
-				}
-			}
-			else if ([[components objectAtIndex:1] compare:@"TOUCH"] == 0)
-			{
-				mTouchEventsAllowed = YES;
-			}
-			else if ([[components objectAtIndex:1] compare:@"CLICK"] == 0)
-			{
-				mClickEventsAllowed = YES;
+					[[UIAccelerometer sharedAccelerometer] setUpdateInterval:[[components objectAtIndex:2] floatValue]];
 			}
 			
 		}
-		else if ([msg hasPrefix:@"STOP"])
-		{
-			NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			if ([[components objectAtIndex:1] compare:@"AX"] == 0)
-			{
-				mAccelMode = 0;
-			}
-			else if ([[components objectAtIndex:1] compare:@"TOUCH"] == 0)
-			{
-				mTouchEventsAllowed = NO;
-			}
-			else if ([[components objectAtIndex:1] compare:@"CLICK"] == 0)
-			{
-				mClickEventsAllowed = NO;
-			}
-			
-		}
-		else if ([msg hasPrefix:@"RESET"])
+		else if ([msg hasPrefix:@"PA"])
 		{
 			mAccelMode = 0;
 		}
-		else if ([msg hasPrefix:@"RESOURCE"])
+		else if ([msg hasPrefix:@"SC"])
+		{
+			mClickEventsAllowed = YES;
+		}
+		else if ([msg hasPrefix:@"PC"])
+		{
+			mClickEventsAllowed = NO;
+		}
+		else if ([msg hasPrefix:@"ST"])
+		{
+			mTouchEventsAllowed = YES;
+		}
+		else if ([msg hasPrefix:@"PT"])
+		{
+			mTouchEventsAllowed = NO;
+		}
+		else if ([msg hasPrefix:@"RT"])  //Reset
+		{
+			mAccelMode = 0;
+		}
+		else if ([msg hasPrefix:@"DR"])
 		{
 			//http://downloads.flashkit.com/soundfx/Ambience/Space/Space_-SLrec-7832/Space_-SLrec-7832_hifi.mp3
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			[mImageCollection addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[components objectAtIndex:1], @"name", [components objectAtIndex:2], @"link", @"", @"scale", nil]];
 			
 		}
-		else if ([msg hasPrefix:@"BACKGROUND"])
+		else if ([msg hasPrefix:@"UB"])
 		{
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([mImageCollection count] > 0)
@@ -491,7 +484,7 @@
 						//[NSURL URLWithString:aURL]
 						//NSData *data = [NSData dataWithContentsOfURL:url];
 						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
-						if ([[itemAtIndex objectForKey:@"link"] hasPrefix:@"http"])
+						if ([[itemAtIndex objectForKey:@"link"] hasPrefix:@"http:"] || [[itemAtIndex objectForKey:@"link"] hasPrefix:@"https:"])
 						{
 							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]] autorelease];
 							backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
@@ -506,24 +499,26 @@
 
 					}
 				}
-				if ([components count] > 2)
+				
+				//Scale or tile it if necessary
+				if ([[components objectAtIndex:2] compare:@"C"] == 0)  //Center
 				{
-					//Scale or tile it if necessary
-					//See if its scale or tile	
-					if ([[components objectAtIndex:2] compare:@"SCALE"] == 0)
-					{
 					
-					}
-					else if ([[components objectAtIndex:2] compare:@"TILE"] == 0)
-					{
-					
-					}
 				}
+				else if ([[components objectAtIndex:2] compare:@"S"] == 0)  //Stretch
+				{
+					
+				}
+				else if ([[components objectAtIndex:2] compare:@"T"] == 0)  //Tile
+				{
+					
+				}
+				
 			}
 			
 			
 		}
-		else if ([msg hasPrefix:@"PLAYSOUND"])
+		else if ([msg hasPrefix:@"SS"])
 		{
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([mImageCollection count] > 0)
@@ -536,17 +531,11 @@
 					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
 					{
 						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];	
+					
+						//Loop parameter
+						NSString *loopvalue = [components objectAtIndex:2];
+						[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
 						
-						if ([components count] > 2)
-						{
-							//Loop parameter
-							NSString *loopvalue = [components objectAtIndex:2];
-							[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
-						}
-						else {
-							//Empty loop variable
-							[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",@"", @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
-						}
 						break;
 					}
 				}
@@ -554,7 +543,7 @@
 
 			}
 		}
-		else if ([msg hasPrefix:@"STOPSOUND"])
+		else if ([msg hasPrefix:@"PS"])
 		{
 			[self.mAudioPlayer stop];
 			[self.mAudioPlayer release];
@@ -562,81 +551,67 @@
 			self.mAudioPlayer = nil;
 			
 		}
-		else if ([msg hasPrefix:@"UI"])
+		else if ([msg hasPrefix:@"CU"])
 		{
-			//NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			//NSLog([NSString stringWithFormat:@"<span style=%Ccolor: red;%C>", 39,39]);
-			//NSLog([NSString stringWithFormat:@"UI MC sent %C", 9]);
-			
-			//NSLog(msg);
-			NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			if ([[components objectAtIndex:1] compare:@"MC"] == 0)
+			[mTextField resignFirstResponder];
+			mTextField.hidden = YES;
+			NSLog(@"UI CLEAR occured");
+			if (mStyleAlert != nil)
 			{
-				//multiple choice alertview
-				//<id>,<text> pairs
-				int theindex = 2;
-				NSString *windowtitle = @"TrickPlay Multiple Choice";
-				//See if the MC_LABEL is in there, if so use it as the label for this box
-				if ([[components objectAtIndex:2] compare:@"MC_LABEL"] == 0)
-				{
-					windowtitle = [components objectAtIndex:3];
-					
-					theindex = 4;  //Start the button items at index 4 
-				}
-				
-				if (mStyleAlert != nil)
-				{
-					[mStyleAlert release];
-					mStyleAlert = nil;
-					mStyleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle
-								delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
-				}
-				mStyleAlert.title = windowtitle;
-				[multipleChoiceArray removeAllObjects];
-				while (theindex < [components count]) {
-					//First one is <id>
-					//Second is the text
-					//Theindex is the id
-					[multipleChoiceArray addObject:[components objectAtIndex:theindex]];
-					[mStyleAlert addButtonWithTitle:[components objectAtIndex:theindex+1]];
-					theindex = theindex + 2;
-				}
-				mStyleAlert.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
-				//[styleAlert addButtonWithTitle:@"Cancel"]; 
-				//[styleAlert showInView:self.view.superview];
-				[mStyleAlert showInView:self.view];
-				//[mStyleAlert release];
-			}
-			else if ([[components objectAtIndex:1] compare:@"EDIT"] == 0)
-			{
-				mTextField.hidden = NO;
-			    [mTextField becomeFirstResponder];	
-				//See if they passed in any text
-				if ([components count] > 2)
-				{
-				    mTextField.text = [components objectAtIndex:2];
-				}
-				else {
-					mTextField.text = @"";
-				}
-				NSTimer *atimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onKeyboardDisplay) userInfo:nil repeats:NO];
-
-			}
-			else if ([[components objectAtIndex:1] compare:@"CLEAR"] == 0)
-			{
-				//Close the stylealert
-				//[self actionSheet:nil clickedButtonAtIndex:10];
-				[mTextField resignFirstResponder];
-				mTextField.hidden = YES;
-				NSLog(@"UI CLEAR occured");
-				if (mStyleAlert != nil)
-				{
-				    [mStyleAlert dismissWithClickedButtonIndex:10 animated:YES];
-				}
+				[mStyleAlert dismissWithClickedButtonIndex:10 animated:YES];
 			}
 		}
+		else if ([msg hasPrefix:@"MC"])
+		{
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
+			NSString *windowtitle = [components objectAtIndex:1];
+			//multiple choice alertview
+			//<id>,<text> pairs
+			int theindex = 2;
+			if (mStyleAlert != nil)
+			{
+				[mStyleAlert release];
+				mStyleAlert = nil;
+				mStyleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle
+														  delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+			}
+			mStyleAlert.title = windowtitle;
+			[multipleChoiceArray removeAllObjects];
+			while (theindex < [components count]) {
+				//First one is <id>
+				//Second is the text
+				//Theindex is the id
+				[multipleChoiceArray addObject:[components objectAtIndex:theindex]];
+				[mStyleAlert addButtonWithTitle:[components objectAtIndex:theindex+1]];
+				theindex = theindex + 2;
+			}
+			mStyleAlert.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+			//[styleAlert addButtonWithTitle:@"Cancel"]; 
+			//[styleAlert showInView:self.view.superview];
+			[mStyleAlert showInView:self.view];
+			//[mStyleAlert release];
 			
-		//[self logMessage:msg];
+		}
+		else if ([msg hasPrefix:@"ET"])
+		{
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
+			mTextField.hidden = NO;
+			[mTextField becomeFirstResponder];	
+			//See if they passed in any text
+			//Label is at index 1
+			if ([components count] > 2)
+			{
+				mTextField.text = [components objectAtIndex:2];
+			}
+			else {
+				mTextField.text = @"";
+			}
+			NSTimer *atimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onKeyboardDisplay) userInfo:nil repeats:NO];
+			
+		}
+		
+			
+		
 	}
 	else
 	{
@@ -722,15 +697,12 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
 	
-	
 	[mTextField resignFirstResponder];
 	//Do a search now
 	mTextField.hidden = YES;
 	
 	//Once the results come back, we populate the table with the results
 	return YES;   
-	
-	
 }
 
 //- (void)textFieldDidEndEditing:(UITextField *)textField
@@ -754,10 +726,7 @@
 		[connectedSockets removeObject:sock];
 	}
 	[self.navigationController popViewControllerAnimated:YES]; 
-	//[self.navigationController popToRootViewControllerAnimated:YES];
-	//[self dismissModalViewControllerAnimated:YES];
-	//Tell the parent to remove this view
-	//[mSender removeTheChildview];
+	
 }
 
 - (void)removeServiceFromCollection
@@ -769,7 +738,6 @@
 	if ([connectedSockets count] > 0)
 	{
 		[listenSocket disconnect];
-		//[connectedSockets removeObjectAtIndex:0];
 	}
 }
 
@@ -799,23 +767,19 @@
 		if ([[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
 		{
 			//Found it
-			if ([[itemAtIndex objectForKey:@"loop"] length] == 0)
-			{
-				//Don't loop it, just send the COMPLETE message
-				[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:@"COMPLETE"];
-				[self.mAudioPlayer release];
-				self.mAudioPlayer.delegate = nil;
-				self.mAudioPlayer = nil;
+			if ([[itemAtIndex objectForKey:@"loop"] compare:@"0"] == 0) {
+				//Play it again Sam, forever
+				[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
 			}
-			else if ([[itemAtIndex objectForKey:@"loop"] rangeOfString:@"LOOP="].length > 0)
+			else
 			{
-				NSInteger loopvalue = [[[itemAtIndex objectForKey:@"loop"] stringByReplacingOccurrencesOfString:@"LOOP=" withString:@""] intValue];
-			    if (loopvalue > 0)
+				NSInteger loopvalue = [[itemAtIndex objectForKey:@"loop"] intValue];
+			    if (loopvalue > 1)
 				{
 					
 					[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:[NSString stringWithFormat: @"LOOP_COMPLETE=%d", loopvalue]];
 					loopvalue = loopvalue - 1;
-					NSString *loopvalStr = [NSString stringWithFormat: @"LOOP=%d", loopvalue];
+					NSString *loopvalStr = [NSString stringWithFormat: @"%d", loopvalue];
 					
 					//Finite # of loops, get the number of loops left and reset that number
 					[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalStr, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];					
@@ -830,10 +794,7 @@
 					self.mAudioPlayer = nil;
 				}
 			}
-			else {
-				//Play it again Sam
-				[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
-			}
+			
 
 			
 			break;
@@ -847,8 +808,8 @@
 
 - (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message
 {
-	NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
-	[listenSocket writeData:sentData withTimeout:-1 tag:0];
+	//NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
+	//[listenSocket writeData:sentData withTimeout:-1 tag:0];
 }
 
 - (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename
