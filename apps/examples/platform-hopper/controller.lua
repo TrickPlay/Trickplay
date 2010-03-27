@@ -38,10 +38,10 @@ function controllers.on_controller_connected(controllers,controller)
     	end
     end
 
-	controller:declare_resource("jumper","http://10.0.190.103/jumper.png")
-	controller:declare_resource("splat","http://10.0.190.103/splat.png")
+	controller:declare_resource("jumper","jumper.png")
+	controller:declare_resource("splat","splat.png")
 
-	controller:set_background("jumper")
+	controller:set_ui_background("jumper")
 
 	controller.on_disconnected = function ()
 		player.connected_controllers._[controller] = nil
@@ -54,11 +54,11 @@ end
 
 
 function player.connected_controllers.game_on(self)
-	for key,controller in pairs(self._) do controller:set_background("jumper") end
+	for key,controller in pairs(self._) do controller:set_ui_background("jumper") end
 end
 
 function player.connected_controllers.death_splat(self)
-	for key,controller in pairs(self._) do controller:set_background("splat") end
+	for key,controller in pairs(self._) do controller:set_ui_background("splat") end
 end
 
 
