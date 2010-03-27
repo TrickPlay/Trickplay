@@ -276,9 +276,9 @@ end
 
 function controllers.on_controller_connected(controllers,controller)
 
-	controller:declare_resource("quiz","http://10.0.190.103/quiz.png")
-	controller:declare_resource("numbers","http://10.0.190.103/numbers.png")
-	controller:set_background("quiz")
+	controller:declare_resource("quiz","quiz.png")
+	controller:declare_resource("numbers","letters/numbers.png")
+	controller:set_ui_background("quiz")
 
     print("CONNECTED",controller.name)
     
@@ -349,7 +349,7 @@ function game.ask_next_question()
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
-		controller:set_background("numbers")
+		controller:set_ui_background("numbers")
 
 		function controller.on_click(controller, x, y)
 			if not game.got_tap then
@@ -377,7 +377,7 @@ function game.ask_next_question()
 			controller.on_click = nil
 
 			-- reset background picture
-			controller:set_background("quiz")
+			controller:set_ui_background("quiz")
 		end
     end
 
@@ -419,14 +419,14 @@ function game.times_up(correct_answer)
             player_state.ui.flash_box.color = game.WIN_COLOR
         else
         	player_state.ui.flash_box.color = game.LOSE_COLOR
-			controller:set_background("quiz")
+			controller:set_ui_background("quiz")
         end
     end
 
 	game.ready_to_start()
 end
 
-local fake_controller_for_local_player = { name = "Player", set_background = function(self, name) end }
+local fake_controller_for_local_player = { name = "Player", set_ui_background = function(self, name) end }
 
 function screen.on_key_down(screen,key)
     if key==keys.Return then
