@@ -54,7 +54,7 @@ Ferris = {
 		num_to_move = (self.destination-self.frontmost)
 
 		-- Map onto a duration which it'll take to get where we want to be
-		time_to_move = 500*(1 + math.sqrt(math.abs(num_to_move)-1))
+		time_to_move = 500*(1 + math.log(math.abs(num_to_move)-1))
 
 		-- This is the on_new_frame function for the rotation timeline
 		local function tick( t, msecs )
