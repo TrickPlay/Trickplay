@@ -49,12 +49,12 @@ Ferris = {
 
 	-- The rotate function "kicks" the wheel to spin faster (or slower) based on the impulse size.
 	rotate = function ( self, impulse )
-		self.destination = self.destination + impulse
+		self.spin.destination = self.spin.destination + impulse
 
-		num_to_move = (self.destination-self.frontmost)
+		num_to_move = (self.spin.destination-self.spin.frontmost)
 
 		-- Map onto a duration which it'll take to get where we want to be
-		time_to_move = 500*(1 + math.log(math.abs(num_to_move)-1))
+		time_to_move = 500*(1 + math.log(math.abs(num_to_move)))
 
 		-- This is the on_new_frame function for the rotation timeline
 		local function tick( t, msecs )
@@ -67,14 +67,14 @@ Ferris = {
 			for _,child in ipairs(children) do
 				-- Child is rotated opposite to the wheel, plus an offset
 				child.z_rotation = { -self.spin.i:get_value(self.spin.a.alpha) +
-									(1-math.abs(self.spin.a.alpha + self.spin.a2.alpha - 1)) * 15
+									(1-math.abs(self.spin.a.alpha + self.spin.a2.alpha - 1)) * 30
 									, 0, 0 }
 			end
 		end
 		
 		local function wobble( t )
-			self.destination = self.destination % self.num_items
-			self.frontmost = self.destination
+			self.spin.destination = self.spin.destination % self.num_items
+			self.spin.frontmost = self.spin.destination
 		end
 
 		-- If we're not already spinning, then create a new timeline, interval, etc. otherwise adjust existing
@@ -86,27 +86,34 @@ Ferris = {
 								on_completed = wobble,
 							}
 			self.spin.a = Alpha { timeline = self.spin.t, mode = "EASE_IN_OUT_SINE" }
-			self.spin.a2 = Alpha { timeline = self.spin.t, mode = "EASE_IN_OUT_BACK" }
-			self.spin.i = Interval( self.frontmost*(360/self.num_items), self.destination*(360/self.num_items) )
+			self.spin.a2 = Alpha { timeline = self.spin.t, mode = "EASE_OUT_BACK" }
+			self.spin.i = Interval( self.spin.frontmost*(360/self.num_items), self.spin.destination*(360/self.num_items) )
 			self.spin.t:start()
 		else
 			-- Already spinning: just extend the timeline out and reset target rotation
 			-- We need to save the elapsed time then advance there, because otherwise timeline keeps progress, not absolute position
 			local elapsed = self.spin.t.elapsed
+			print(self.spin.t.elapsed,"out of",self.spin.t.duration)
 			self.spin.t.duration = time_to_move
 			self.spin.t:advance(elapsed)
-			self.spin.i.to = self.destination*(360/self.num_items)
+			print(self.spin.t.elapsed,"out of",self.spin.t.duration)
+			self.spin.i.to = self.spin.destination*(360/self.num_items)
 		end
+	end,
+
+	get_active = function ( self )
+		-- We have this if statement to protect us if num_items == 1, to avoid a division by zero in following line
+		if(self.spin.frontmost == 0) then return 1 end
+		return self.spin.frontmost%(self.num_items-1) + 1
 	end,
 
 	new = function ( radius, items, tilt_angle )
 		local obj =
 				{
-					spin = { t = nil, a = nil, a2 = nil, i = nil },
+					spin = { t = nil, a = nil, a2 = nil, i = nil, frontmost = 0, destination = 0 },
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
-					frontmost = 0,
-					destination = 0,
+					get_active = Ferris.get_active,
 					num_items = #items,
 				}
 		obj.ferris.y_rotation = { tilt_angle, 0, 0 }
