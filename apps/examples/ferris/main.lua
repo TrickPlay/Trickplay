@@ -44,6 +44,8 @@ function screen.on_key_down(screen, key)
 		ferris:rotate( 1 )
 	elseif key == keys["CHAN_DOWN"] then
 		ferris:rotate( -1 )
+	elseif key == keys["Return"] then
+		print(ferris:get_active(),":",items[ferris:get_active()].children[2].text)
 	end
 
 end
