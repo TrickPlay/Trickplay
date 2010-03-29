@@ -40,6 +40,10 @@ function screen.on_key_down(screen, key)
 		ferris:rotate( direction * (key - keys["0"]) )
 	elseif key == keys["minus"] then
 		direction = -direction
+	elseif key == keys["CHAN_UP"] then
+		ferris:rotate( 1 )
+	elseif key == keys["CHAN_DOWN"] then
+		ferris:rotate( -1 )
 	end
 
 end
