@@ -91,7 +91,8 @@ bool Images::load_texture_from_data(ClutterTexture * texture,const void * data,s
     
     FreeImage_Unload(image2);    
 
-#if 0    
+#if 0
+
     // Now, convert from BGR(A) to RGB(A) which is what GL wants
     
     unsigned char * line=pixels;
@@ -117,8 +118,20 @@ bool Images::load_texture_from_data(ClutterTexture * texture,const void * data,s
 	line+=pitch;
     }
     
-#endif
+    // Give it to clutter
     
+    clutter_texture_set_from_rgb_data(
+	texture,
+	(const guchar *)pixels,
+	depth==4,
+	width,
+	height,
+	pitch,
+	depth,
+	CLUTTER_TEXTURE_NONE,
+	NULL);
+    
+#else
     // Give it to clutter
     
     clutter_texture_set_from_rgb_data(
@@ -131,7 +144,9 @@ bool Images::load_texture_from_data(ClutterTexture * texture,const void * data,s
 	depth,
 	CLUTTER_TEXTURE_RGB_FLAG_BGR,
 	NULL);
-    
+
+#endif
+        
     // Free the pixels
     
     free(pixels);
