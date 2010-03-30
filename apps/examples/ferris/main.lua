@@ -7,27 +7,50 @@ local trickplay_red = "960A04"
 local items = {}
 
 local make_tile = function(name)
-	local item = Group {}
-	local image= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 80px", color="FFFFFF" }
-	item.size = { 58, 90 }
-	image.x = (item.w - image.w) / 2
-	image.y = (item.h - image.h) / 2
-	local bground = Rectangle { size = { item.w, item.h }, z = -1, color = trickplay_red }
-	item:add(bground)
+	local item = Group { }
+	local image = Image { src = "assets/"..name.."-off.png" }
 	item:add(image)
+
+	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF" }
+	label.x = (image.w - label.w) - 20
+	label.y = (image.h - label.h) / 2
+	label.z = 1
+
+	print(label.x, label.y, label.z)
+
+	item:add(label)
+
 	return item
 end
 
-local letters = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-letters:gsub(".",	function(c)
-						table.insert(items, make_tile(c))
-					end)
+local games =
+				{
+					"Bedazzled",
+					"Billiards",
+					"Chess",
+					"Frogger",
+					"Games",
+					"Rat Race",
+					"Space Invaders",
+					"Tetris",
+				}
+
+local game
+for _,game in ipairs(games) do
+	table.insert(items, make_tile(game))
+end
+for _,game in ipairs(games) do
+	table.insert(items, make_tile(game))
+end
+for _,game in ipairs(games) do
+	table.insert(items, make_tile(game))
+end
 
 local ferris = Ferris.new( 20*#items, items, -60 )
 
-ferris.ferris.x = screen.w/3
+ferris.ferris.x = 0
 ferris.ferris.y = screen.h/2
-ferris.ferris.z = -900
+ferris.ferris.z = -600
 
 screen:add(ferris.ferris)
 
