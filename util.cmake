@@ -66,14 +66,32 @@ macro(TP_FIND_LIB_INCLUDE)
         set(ADD_TO ${ARGV1})
     endif (${ARGC} STREQUAL 3)
     
-    find_path(
-        DEST
-        NAMES ${NAME}
-        PATHS ${CMAKE_FIND_ROOT_PATH}/lib
-        PATH_SUFFIXES ${PREFIX}/include
-        
-        ONLY_CMAKE_FIND_ROOT_PATH
-    )
+    # This is a cmake oddity. The first one works on Linux and when building
+    # with a toolchain, but not on Mac. The second one works on both - but not
+    # when using a toolchain.
+    
+    if (CMAKE_TOOLCHAIN_FILE)
+
+        find_path(
+            DEST
+            NAMES ${NAME}
+            PATHS ${CMAKE_FIND_ROOT_PATH}/lib
+            PATH_SUFFIXES ${PREFIX}/include
+            
+            ONLY_CMAKE_FIND_ROOT_PATH
+        )
+
+    else(CMAKE_TOOLCHAIN_FILE)
+
+        find_path(
+            DEST
+            NAMES ${NAME}
+            PATH_SUFFIXES lib/${PREFIX}/include
+            
+            ONLY_CMAKE_FIND_ROOT_PATH
+        )
+    
+    endif(CMAKE_TOOLCHAIN_FILE)
     
     if (${DEST} STREQUAL DEST-NOTFOUND)
     
