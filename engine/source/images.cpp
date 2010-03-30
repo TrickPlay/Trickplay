@@ -81,19 +81,23 @@ bool Images::load_texture_from_data(ClutterTexture * texture,const void * data,s
     int width  = FreeImage_GetWidth(image2);
     int height = FreeImage_GetHeight(image2);
     int pitch  = FreeImage_GetPitch(image2);
+    int depth  = (bpp==32?4:3);
     
     unsigned char * pixels=(unsigned char *)malloc(height*pitch);
     
     FreeImage_ConvertToRawBits((BYTE*)pixels,image2,pitch,bpp,FI_RGBA_RED_MASK,FI_RGBA_GREEN_MASK,FI_RGBA_BLUE_MASK,TRUE);
 
+    // Dump the image
+    
+    FreeImage_Unload(image2);    
+
+#if 0    
     // Now, convert from BGR(A) to RGB(A) which is what GL wants
     
     unsigned char * line=pixels;
     unsigned char r,g,b;
-    unsigned char * p;
-    
-    int depth=(bpp==32?4:3);
-    
+    unsigned char * p;   
+
     for(int row=0;row<height;++row)
     {
 	p=line;
@@ -112,10 +116,8 @@ bool Images::load_texture_from_data(ClutterTexture * texture,const void * data,s
 	}	
 	line+=pitch;
     }
-
-    // Dump the image
     
-    FreeImage_Unload(image2);    
+#endif
     
     // Give it to clutter
     
@@ -127,7 +129,8 @@ bool Images::load_texture_from_data(ClutterTexture * texture,const void * data,s
 	height,
 	pitch,
 	depth,
-	CLUTTER_TEXTURE_NONE,NULL);
+	CLUTTER_TEXTURE_RGB_FLAG_BGR,
+	NULL);
     
     // Free the pixels
     
