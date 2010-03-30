@@ -37,6 +37,7 @@ Ferris = {
 			item.y_rotation = { 90, 0, 0 }
 
 			circle:add(item)
+			item.opacity = ((1+math.cos(math.rad(- (p-1)*360/num_items)))/2)*255
 		end
 
 		circle:move_anchor_point( radius, radius )
@@ -64,11 +65,14 @@ Ferris = {
 			
 			circle.z_rotation = { self.spin.i:get_value(self.spin.a.alpha), 0, 0 }
 			local child
-			for _,child in ipairs(children) do
+			local num
+			for num,child in ipairs(children) do
 				-- Child is rotated opposite to the wheel, plus an offset
 				child.z_rotation = { -self.spin.i:get_value(self.spin.a.alpha) +
 									(1-math.abs(self.spin.a.alpha + self.spin.a2.alpha - 1)) * 30
 									, 0, 0 }
+				-- And now fade based on the depth from front
+				child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)*255
 			end
 		end
 		
@@ -111,6 +115,7 @@ Ferris = {
 		local obj =
 				{
 					spin = { t = nil, a = nil, a2 = nil, i = nil, frontmost = 0, destination = 0 },
+					radius = radius,
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
 					get_active = Ferris.get_active,
