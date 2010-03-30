@@ -62,10 +62,10 @@ photos = {}
 for i , entry in ipairs( j.feed.entry ) do
 
     for j , thumbnail in ipairs( entry[ "media$group" ][ "media$thumbnail" ] ) do
-    
-        table.insert( photos , thumbnail.url )
-
-        break        
+		if thumbnail.url:find("/hqdefault.jpg$") then
+			table.insert( photos , thumbnail.url )
+			break
+		end
     end
 
 end
