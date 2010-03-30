@@ -11,12 +11,10 @@ local make_tile = function(name)
 	local image = Image { src = "assets/"..name.."-off.png" }
 	item:add(image)
 
-	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF" }
+	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 58px", color="FFFFFF" }
 	label.x = (image.w - label.w) - 20
 	label.y = (image.h - label.h) / 2
 	label.z = 1
-
-	print(label.x, label.y, label.z)
 
 	item:add(label)
 
@@ -46,13 +44,16 @@ for _,game in ipairs(games) do
 	table.insert(items, make_tile(game))
 end
 
-local ferris = Ferris.new( 20*#items, items, -60 )
+local ferris = Ferris.new( 22*#items, items, -30 )
 
-ferris.ferris.x = 0
+ferris.ferris.x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1]))
 ferris.ferris.y = screen.h/2
-ferris.ferris.z = -600
+ferris.ferris.z = (64*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
 
 screen:add(ferris.ferris)
+
+mediaplayer.on_loaded = function( self ) self:play() end
+mediaplayer:load('jeopardy.mp4')
 
 -- 1 is forward, -1 is backward
 local direction = 1
