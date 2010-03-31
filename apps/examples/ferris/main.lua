@@ -7,29 +7,50 @@ local trickplay_red = "960A04"
 local items = {}
 
 local make_tile = function(name)
-	local item = Group {}
-	local image= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 80px", color="FFFFFF" }
-	item.size = { 58, 90 }
-	image.x = (item.w - image.w) / 2
-	image.y = (item.h - image.h) / 2
-	local bground = Rectangle { size = { item.w, item.h }, z = -1, color = trickplay_red }
-	item:add(bground)
+	local item = Group { }
+	local image = Image { src = "assets/"..name.."-off.png" }
 	item:add(image)
+
+	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 58px", color="FFFFFF" }
+	label.x = (image.w - label.w) - 20
+	label.y = (image.h - label.h) / 2
+	label.z = 1
+
+	item:add(label)
+
 	return item
 end
 
-local letters = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-letters:gsub(".",	function(c)
-						table.insert(items, make_tile(c))
-					end)
+local games =
+				{
+					"Games",
+					"Bedazzled",
+					"Billiards",
+					"Chess",
+					"Frogger",
+					"Rat Race",
+					"Space Invaders",
+					"Tetris",
+				}
 
-local ferris = Ferris.new( 20*#items, items, -60 )
+local game
+for i = 1,3 do
+	for _,game in ipairs(games) do
+		table.insert(items, make_tile(game))
+	end
+end
 
-ferris.ferris.x = screen.w/3
+local ferris = Ferris.new( 22*#items, items, -30 )
+
+ferris.ferris.x = -50*#items
 ferris.ferris.y = screen.h/2
-ferris.ferris.z = -900
+ferris.ferris.z = (64*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
 
 screen:add(ferris.ferris)
+
+
+mediaplayer.on_loaded = function( self ) self:play() end
+mediaplayer:load('jeopardy.mp4')
 
 -- 1 is forward, -1 is backward
 local direction = 1
@@ -48,6 +69,10 @@ function screen.on_key_down(screen, key)
 		ferris:rotate( 1 )
 	elseif key == keys["Down"] then
 		ferris:rotate( -1 )
+	elseif key == keys["Left"] then
+		ferris.ferris:animate({ duration = 500, x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1])), mode = "EASE_OUT_SINE" })
+	elseif key == keys["Right"] then
+		ferris.ferris:animate({ duration = 500, x = -500-50*#items, mode = "EASE_IN_SINE" })
 	elseif key == keys["Return"] then
 		print(ferris:get_active(),":",items[ferris:get_active()].children[2].text)
 	end
