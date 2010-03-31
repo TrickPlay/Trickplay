@@ -50,8 +50,17 @@ Ferris = {
 		return circle_group
 	end,
 
-	highlight = function ( self )
+	unhighlight = function ( self )
+		-- Pan current active item back to flat
 		local item = self.ferris.children[1].children[self.spin.frontmost+1]
+		item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
+		-- And turn "off" the frame
+		item.children[1].src = item.children[1].src:gsub("-on.png", "-off.png")
+	end,
+
+	highlight = function ( self )
+		local item = self.ferris.children[1].children[self:get_active()]
+		item.children[1].src = item.children[1].src:gsub("-off.png", "-on.png")
 		if self.highlight_on == true then
 			item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.5, 1.5}, mode = "EASE_IN_OUT_SINE" } )
 		else
@@ -95,9 +104,7 @@ Ferris = {
 
 		-- If we're not already spinning, then create a new timeline, interval, etc. otherwise adjust existing
 		if not (self.spin.t and self.spin.t.is_playing) then
-			-- Pan current active item back to flat
-			local item = self.ferris.children[1].children[self.spin.frontmost+1]
-			item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
+			self:unhighlight()
 
 			self.spin.t = Timeline
 							{
@@ -131,6 +138,7 @@ Ferris = {
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
 					highlight = Ferris.highlight,
+					unhighlight = Ferris.unhighlight,
 					highlight_on = false,
 					get_active = Ferris.get_active,
 					num_items = #items,

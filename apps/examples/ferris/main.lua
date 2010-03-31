@@ -75,7 +75,9 @@ function screen.on_key_down(screen, key)
 		elseif key == keys["Down"] then
 			ferris:rotate( -1 )
 		elseif key == keys["Return"] then
-			print(ferris:get_active(),":",items[ferris:get_active()].children[2].text)
+			local active = ferris:get_active()
+			-- Would launch the app here!
+			print(active,":",items[active].children[2].text)
 		end
 	end
 
