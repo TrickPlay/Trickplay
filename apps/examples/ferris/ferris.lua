@@ -30,7 +30,7 @@ Ferris = {
 
 		for p,item in ipairs(items) do
 			local point = point_location( radius, p, num_items )
-			item:move_anchor_point( item.w/2, 0 )
+			item:move_anchor_point( item.w/2, item.h/2 )
 
 			item.x = point.x
 			item.y = point.y
@@ -46,6 +46,11 @@ Ferris = {
 		circle_group:add(circle)
 
 		return circle_group
+	end,
+
+	highlight = function ( self )
+		local item = self.ferris.children[1].children[self.spin.frontmost+1]
+		item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.5, 1.5}, mode = "EASE_IN_OUT_SINE" } )
 	end,
 
 	-- The rotate function "kicks" the wheel to spin faster (or slower) based on the impulse size.
@@ -76,18 +81,23 @@ Ferris = {
 			end
 		end
 		
-		local function wobble( t )
+		local function complete( t )
 			self.spin.destination = self.spin.destination % self.num_items
 			self.spin.frontmost = self.spin.destination
+			self:highlight()
 		end
 
 		-- If we're not already spinning, then create a new timeline, interval, etc. otherwise adjust existing
 		if not (self.spin.t and self.spin.t.is_playing) then
+			-- Pan current active item back to flat
+			local item = self.ferris.children[1].children[self.spin.frontmost+1]
+			item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
+
 			self.spin.t = Timeline
 							{
 								duration = time_to_move,
 								on_new_frame = tick,
-								on_completed = wobble,
+								on_completed = complete,
 							}
 			self.spin.a = Alpha { timeline = self.spin.t, mode = "EASE_IN_OUT_SINE" }
 			self.spin.a2 = Alpha { timeline = self.spin.t, mode = "EASE_OUT_BACK" }
@@ -97,18 +107,14 @@ Ferris = {
 			-- Already spinning: just extend the timeline out and reset target rotation
 			-- We need to save the elapsed time then advance there, because otherwise timeline keeps progress, not absolute position
 			local elapsed = self.spin.t.elapsed
-			print(self.spin.t.elapsed,"out of",self.spin.t.duration)
 			self.spin.t.duration = time_to_move
 			self.spin.t:advance(elapsed)
-			print(self.spin.t.elapsed,"out of",self.spin.t.duration)
 			self.spin.i.to = self.spin.destination*(360/self.num_items)
 		end
 	end,
 
 	get_active = function ( self )
-		-- We have this if statement to protect us if num_items == 1, to avoid a division by zero in following line
-		if(self.spin.frontmost == 0) then return 1 end
-		return self.spin.frontmost%(self.num_items-1) + 1
+		return (self.spin.frontmost % self.num_items) + 1
 	end,
 
 	new = function ( radius, items, tilt_angle )
@@ -118,10 +124,12 @@ Ferris = {
 					radius = radius,
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
+					highlight = Ferris.highlight,
 					get_active = Ferris.get_active,
 					num_items = #items,
 				}
 		obj.ferris.y_rotation = { tilt_angle, 0, 0 }
+		obj:highlight()
 		
 		return obj
 	end,
