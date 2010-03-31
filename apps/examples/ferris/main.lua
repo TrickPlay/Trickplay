@@ -55,7 +55,6 @@ mediaplayer:load('jeopardy.mp4')
 -- 1 is forward, -1 is backward
 local direction = 1
 
-
 local state = "offscreen"
 
 function screen.on_key_down(screen, key)
@@ -106,6 +105,7 @@ function screen.on_key_down(screen, key)
 										x = screen.w - 20,
 										z = -44*#items,
 										mode = "EASE_IN_OUT_SINE",
+										on_completed = function() mediaplayer:pause() end,
 									}
 								)
 			state = "fullscreen"
@@ -135,7 +135,7 @@ function screen.on_key_down(screen, key)
 										x = -(18*#items)*math.cos(math.rad(-30)),
 										z = (64*#items)*math.sin(math.rad(-30)),
 										mode = "EASE_IN_OUT_SINE",
-										on_completed = function() ferris:highlight() end,
+										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
 								)
 			state = "onscreen"
