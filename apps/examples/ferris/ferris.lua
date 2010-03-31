@@ -5,6 +5,8 @@
 	
 	Functions to create a ferris-wheel like setup of flat images attached around a circle.  They can be rotated to spin a new item to the "front" slot.
 
+	TODO: Allow wheel to be "fixed number of slots", with extra items in the wheel either being duplicated if there are too few items, or magically disappearing/getting slotted in/out at the back of the rotation in the opacity=0 slot.
+
 ]]--
 
 Ferris = {
@@ -50,7 +52,11 @@ Ferris = {
 
 	highlight = function ( self )
 		local item = self.ferris.children[1].children[self.spin.frontmost+1]
-		item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.5, 1.5}, mode = "EASE_IN_OUT_SINE" } )
+		if self.highlight_on == true then
+			item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.5, 1.5}, mode = "EASE_IN_OUT_SINE" } )
+		else
+			item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
+		end
 	end,
 
 	-- The rotate function "kicks" the wheel to spin faster (or slower) based on the impulse size.
@@ -125,6 +131,7 @@ Ferris = {
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
 					highlight = Ferris.highlight,
+					highlight_on = false,
 					get_active = Ferris.get_active,
 					num_items = #items,
 				}
