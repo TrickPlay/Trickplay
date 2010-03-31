@@ -23,34 +23,31 @@ end
 
 local games =
 				{
+					"Games",
 					"Bedazzled",
 					"Billiards",
 					"Chess",
 					"Frogger",
-					"Games",
 					"Rat Race",
 					"Space Invaders",
 					"Tetris",
 				}
 
 local game
-for _,game in ipairs(games) do
-	table.insert(items, make_tile(game))
-end
-for _,game in ipairs(games) do
-	table.insert(items, make_tile(game))
-end
-for _,game in ipairs(games) do
-	table.insert(items, make_tile(game))
+for i = 1,3 do
+	for _,game in ipairs(games) do
+		table.insert(items, make_tile(game))
+	end
 end
 
 local ferris = Ferris.new( 22*#items, items, -30 )
 
-ferris.ferris.x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1]))
+ferris.ferris.x = -50*#items
 ferris.ferris.y = screen.h/2
 ferris.ferris.z = (64*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
 
 screen:add(ferris.ferris)
+
 
 mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer:load('jeopardy.mp4')
@@ -72,6 +69,10 @@ function screen.on_key_down(screen, key)
 		ferris:rotate( 1 )
 	elseif key == keys["Down"] then
 		ferris:rotate( -1 )
+	elseif key == keys["Left"] then
+		ferris.ferris:animate({ duration = 500, x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1])), mode = "EASE_OUT_SINE" })
+	elseif key == keys["Right"] then
+		ferris.ferris:animate({ duration = 500, x = -500-50*#items, mode = "EASE_IN_SINE" })
 	elseif key == keys["Return"] then
 		print(ferris:get_active(),":",items[ferris:get_active()].children[2].text)
 	end
