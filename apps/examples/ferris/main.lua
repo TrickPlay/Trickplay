@@ -55,26 +55,89 @@ mediaplayer:load('jeopardy.mp4')
 -- 1 is forward, -1 is backward
 local direction = 1
 
+
+local state = "offscreen"
+
 function screen.on_key_down(screen, key)
 
-	if key >= keys["1"] and key <= keys["9"] then
-		ferris:rotate( direction * (key - keys["0"]) )
-	elseif key == keys["minus"] then
-		direction = -direction
-	elseif key == keys["CHAN_UP"] then
-		ferris:rotate( 3 )
-	elseif key == keys["CHAN_DOWN"] then
-		ferris:rotate( -3 )
-	elseif key == keys["Up"] then
-		ferris:rotate( 1 )
-	elseif key == keys["Down"] then
-		ferris:rotate( -1 )
-	elseif key == keys["Left"] then
-		ferris.ferris:animate({ duration = 500, x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1])), mode = "EASE_OUT_SINE" })
-	elseif key == keys["Right"] then
-		ferris.ferris:animate({ duration = 500, x = -500-50*#items, mode = "EASE_IN_SINE" })
-	elseif key == keys["Return"] then
-		print(ferris:get_active(),":",items[ferris:get_active()].children[2].text)
+	-- Stuff to rotate the wheel and choose items
+	if( state == "onscreen" or state == "fullscreen" ) then
+		if key >= keys["1"] and key <= keys["9"] then
+			ferris:rotate( direction * (key - keys["0"]) )
+		elseif key == keys["minus"] then
+			direction = -direction
+		elseif key == keys["CHAN_UP"] then
+			ferris:rotate( 3 )
+		elseif key == keys["CHAN_DOWN"] then
+			ferris:rotate( -3 )
+		elseif key == keys["Up"] then
+			ferris:rotate( 1 )
+		elseif key == keys["Down"] then
+			ferris:rotate( -1 )
+		elseif key == keys["Return"] then
+			print(ferris:get_active(),":",items[ferris:get_active()].children[2].text)
+		end
+	end
+
+
+	-- Stuff to transition between states
+	if( state == "onscreen") then
+		if key == keys["Left"] or key == keys["Exit"] then
+			ferris.highlight_on = false
+			ferris:highlight()
+			ferris.ferris:animate(
+									{
+										duration = 500,
+										x = -50*#items,
+										mode = "EASE_IN_SINE",
+										on_completed = function() ferris:highlight() end,
+									}
+								)
+			state = "offscreen"
+		elseif key == keys["Right"] then
+			ferris.highlight_on = false
+			ferris:highlight()
+			ferris.ferris:animate(
+									{
+										duration = 1000,
+										y_rotation = -90,
+										x = screen.w - 20,
+										z = -44*#items,
+										mode = "EASE_IN_OUT_SINE",
+									}
+								)
+			state = "fullscreen"
+		end
+
+	elseif (state == "offscreen") then
+		if key == keys["Left"] or key == keys["Right"] then
+			ferris.highlight_on = true
+			ferris.ferris:animate(
+									{
+										duration = 500,
+										x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1])),
+										mode = "EASE_OUT_SINE",
+										on_completed = function() ferris:highlight() end,
+									}
+								)
+			state = "onscreen"
+		end
+
+	elseif (state == "fullscreen") then
+		if key == keys["Left"] then
+			ferris.highlight_on = true
+			ferris.ferris:animate(
+									{
+										duration = 1000,
+										y_rotation = -30,
+										x = -(18*#items)*math.cos(math.rad(-30)),
+										z = (64*#items)*math.sin(math.rad(-30)),
+										mode = "EASE_IN_OUT_SINE",
+										on_completed = function() ferris:highlight() end,
+									}
+								)
+			state = "onscreen"
+		end
 	end
 
 end
