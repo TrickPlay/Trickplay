@@ -6,7 +6,7 @@ local trickplay_red = "960A04"
 
 local items = {}
 
-local make_tile = function(name)
+local make_tile = function(id,name)
 	local item = Group { }
 	local image = Image { src = "assets/"..name.."-off.png", scale = { 0.5, 0.5 } }
 	item:add(image)
@@ -16,27 +16,18 @@ local make_tile = function(name)
 	label.y = (image.h/2 - label.h) / 2
 	label.z = 1
 
+	item.extra.id = id
 	item:add(label)
 
 	return item
 end
 
-local games =
-				{
-					"Games",
-					"Bedazzled",
-					"Billiards",
-					"Chess",
-					"Frogger",
-					"Rat Race",
-					"Space Invaders",
-					"Tetris",
-				}
-
-local game
-for i = 1,3 do
-	for _,game in ipairs(games) do
-		table.insert(items, make_tile(game))
+local app
+for i = 1,5 do
+	for _,app in pairs(apps:get_all()) do
+		if(app.id ~= "com.trickplay.launcher") then
+			table.insert(items, make_tile(app.id,app.name))
+		end
 	end
 end
 
@@ -81,7 +72,8 @@ function screen.on_key_down(screen, key)
 		elseif key == keys["Return"] then
 			local active = ferris:get_active()
 			-- Would launch the app here!
-			print(active,":",items[active].children[2].text)
+			print(active,":",items[active].extra.id)
+			apps:launch(items[active].extra.id)
 		end
 	end
 
