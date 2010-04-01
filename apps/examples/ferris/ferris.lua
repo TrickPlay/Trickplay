@@ -62,7 +62,7 @@ Ferris = {
 		local item = self.ferris.children[1].children[self:get_active()]
 		item.children[1].src = item.children[1].src:gsub("-off.png", "-on.png")
 		if self.highlight_on == true then
-			item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.5, 1.5}, mode = "EASE_IN_OUT_SINE" } )
+			item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.25, 1.25}, mode = "EASE_IN_OUT_SINE" } )
 		else
 			item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
 		end

@@ -8,12 +8,12 @@ local items = {}
 
 local make_tile = function(name)
 	local item = Group { }
-	local image = Image { src = "assets/"..name.."-off.png" }
+	local image = Image { src = "assets/"..name.."-off.png", scale = { 0.5, 0.5 } }
 	item:add(image)
 
-	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 58px", color="FFFFFF" }
-	label.x = (image.w - label.w) - 20
-	label.y = (image.h - label.h) / 2
+	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 24px", color="FFFFFF" }
+	label.x = (image.w/2 - label.w) - 20
+	label.y = (image.h/2 - label.h) / 2
 	label.z = 1
 
 	item:add(label)
@@ -40,14 +40,19 @@ for i = 1,3 do
 	end
 end
 
-local ferris = Ferris.new( 22*#items, items, -30 )
+local ferris = Ferris.new( 11*#items, items, -30 )
 
-ferris.ferris.x = -50*#items
+
+ferris.ferris.x = -25*#items
 ferris.ferris.y = screen.h/2
-ferris.ferris.z = (64*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
+ferris.ferris.z = (16*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
 
-screen:add(ferris.ferris)
+local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 
+local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+
+screen:add(backdrop)
+screen:add(ferris_group)
 
 mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer:load('jeopardy.mp4')
@@ -103,11 +108,19 @@ function screen.on_key_down(screen, key)
 										duration = 1000,
 										y_rotation = -90,
 										x = screen.w - 20,
-										z = -44*#items,
+										y = screen.h/2+70,
+										z = -12*#items,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() mediaplayer:pause() end,
 									}
 								)
+			backdrop:animate(
+								{
+									duration = 1000,
+									opacity = 255,
+									mode = "EASE_OUT_SINE",
+								}
+							)
 			state = "fullscreen"
 		end
 
@@ -117,7 +130,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = -(18*#items)*math.cos(math.rad(ferris.ferris.y_rotation[1])),
+										x = 80,
 										mode = "EASE_OUT_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -132,12 +145,20 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = -(18*#items)*math.cos(math.rad(-30)),
-										z = (64*#items)*math.sin(math.rad(-30)),
+										x = 80,
+										z = (16*#items)*math.sin(math.rad(-30)),
+										y = screen.h/2,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
 								)
+			backdrop:animate(
+								{
+									duration = 1000,
+									opacity = 0,
+									mode = "EASE_IN_SINE",
+								}
+							)
 			state = "onscreen"
 		end
 	end
