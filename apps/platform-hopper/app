@@ -1,10 +1,9 @@
-
 app=
 {
-    id          = "com.trickplay.examples.platform-hopper",
+    id          = "com.trickplay.platform-hopper",
     release     = "1",
     version     = "1.0",
-    name        = "Platform jumping game demo",
+    name        = "Hopper",
     author      = "Craig Hughes",
     copyright   = "© Trickplay Inc."
 }
