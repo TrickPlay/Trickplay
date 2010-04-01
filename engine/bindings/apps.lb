@@ -32,10 +32,14 @@ global apps [[TPContext*]]
                         
             lua_newtable(L);
             
+	    App::Metadata md;
+        
             for(SystemDatabase::AppList::const_iterator it=list.begin();it!=list.end();++it)
             {
-				App::Metadata md;
-				if(!App::load_metadata(it->path.c_str(), md)) continue;
+		if(!App::load_metadata(it->path.c_str(),md))
+                {
+                    continue;
+                }
 
                 lua_pushstring(L,it->id.c_str());
 
