@@ -34,21 +34,28 @@ global apps [[TPContext*]]
             
             for(SystemDatabase::AppList::const_iterator it=list.begin();it!=list.end();++it)
             {
+				App::Metadata md;
+				if(!App::load_metadata(it->path.c_str(), md)) continue;
+
                 lua_pushstring(L,it->id.c_str());
-                
+
                 lua_newtable(L);
                 lua_pushstring(L,it->id.c_str());
                 lua_setfield(L,-2,"id");
-                
+
                 // TODO: Not sure the path is necessary, or wanted
                 lua_pushstring(L,it->path.c_str());
                 lua_setfield(L,-2,"path");
-                
+
+				lua_pushstring(L,  md.name.c_str());
+				lua_setfield(L, -2, "name");
+
                 lua_pushstring(L,it->version.c_str());
                 lua_setfield(L,-2,"version");
+
                 lua_pushinteger(L,it->release);
                 lua_setfield(L,-2,"release");
-                
+
                 lua_settable(L,-3);
             }
         ]];
