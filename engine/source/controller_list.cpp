@@ -2,7 +2,7 @@
 #include "controller_list.h"
 #include "clutter_util.h"
 
-//-----------------------------------------------------------------------------
+//==============================================================================
 // This is the structure we give the outside world. To them, it is opaque.
 // It has a pointer to a Controller instance, the associated ControllerList
 // and a marker, which points to itself. The marker lets us do sanity checks
@@ -36,7 +36,170 @@ struct TPController
     TPController *      marker;
 };
 
-//-----------------------------------------------------------------------------
+//==============================================================================
+// This is a struct which encapsulates all of the events we receive from the
+// controller API. It is a struct so that it can use the glib slice allocator.
+// Because all events are the same size, come in from different threads and happen
+// fairly often, we can get some benefits that new/delete don't have.
+// The slice allocator keeps some instances around, so they can be re-used.
+
+struct Event
+{
+    enum Type
+    {
+        ADDED,REMOVED,
+        KEY_DOWN,KEY_UP,
+        ACCELEROMETER,
+        CLICK,
+        TOUCH_DOWN,TOUCH_MOVE,TOUCH_UP,
+        UI
+    };
+        
+public:
+    
+    inline static Event * make(Type type,Controller * controller)
+    {
+        g_assert(controller);
+        
+        controller->ref();
+        
+        Event * event=g_slice_new(Event);
+        
+        event->type=type;
+        event->controller=controller;
+        
+        if (type==UI)
+        {
+            event->ui.parameters=NULL;       
+        }
+        
+        return event;
+    }
+    
+    static void destroy(Event * event)
+    {
+        g_assert(event);
+        g_assert(event->controller);
+        
+        if (event->type==UI)
+        {
+            g_free(event->ui.parameters);
+        };
+        
+        event->controller->unref();
+        
+        g_slice_free(Event,event);
+    }
+    
+    inline static Event * make_key(Type type,Controller * controller,unsigned int key_code,unsigned long int unicode)
+    {
+        Event * event=make(type,controller);
+        
+        event->key.key_code=key_code;
+        event->key.unicode=unicode;
+        
+        return event;
+    }
+
+    inline static Event * make_accelerometer(Controller * controller,double x,double y,double z)
+    {
+        Event * event=make(ACCELEROMETER,controller);
+        
+        event->accelerometer.x=x;
+        event->accelerometer.y=y;
+        event->accelerometer.z=z;
+        
+        return event;
+    }
+    
+    inline static Event * make_click_touch(Type type,Controller * controller,int x,int y)
+    {
+        Event * event=make(type,controller);
+        
+        event->click_touch.x=x;
+        event->click_touch.y=y;
+        
+        return event;
+    }
+    
+    inline static Event * make_ui(Controller * controller,const char * parameters)
+    {
+        Event * event=make(UI,controller);
+        
+        event->ui.parameters=g_strdup(parameters);
+        
+        return event;
+    }
+    
+    inline void process()
+    {
+        switch(type)
+        {
+            case ADDED:
+                controller->get_tp_controller()->list->controller_added(controller);
+                break;
+            
+            case REMOVED:
+                controller->disconnected();
+                controller->unref();
+                break;
+            
+            case KEY_DOWN:
+                controller->key_down(key.key_code,key.unicode);
+                break;
+        
+            case KEY_UP:
+                controller->key_up(key.key_code,key.unicode);
+                break;
+            
+            case ACCELEROMETER:
+                controller->accelerometer(accelerometer.x,accelerometer.y,accelerometer.z);
+                break;
+            
+            case CLICK:
+                controller->click(click_touch.x,click_touch.y);
+                break;
+            
+            case TOUCH_DOWN:
+                controller->touch_down(click_touch.x,click_touch.y);
+                break;
+
+            case TOUCH_MOVE:
+                controller->touch_move(click_touch.x,click_touch.y);
+                break;
+
+            case TOUCH_UP:
+                controller->touch_up(click_touch.x,click_touch.y);
+                break;
+            
+            case UI:
+                controller->ui_event(ui.parameters);
+                break;
+        }
+    }
+
+private:
+    
+    Type            type;    
+    Controller *    controller;
+    
+    union
+    {
+        struct { unsigned int key_code;
+                 unsigned long int unicode; }    key;
+        
+        struct { double x;
+                 double y;
+                 double z; }                     accelerometer;
+        
+        struct { int x;
+                 int y; }                        click_touch;
+        
+        struct { char * parameters; }            ui;
+    };
+};
+
+//==============================================================================
 
 
 Controller::Controller(ControllerList * _list,const char * _name,const TPControllerSpec * _spec,void * _data)
@@ -167,6 +330,11 @@ void Controller::disconnected()
 
 void Controller::key_down(unsigned int key_code,unsigned long int unicode)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     key_code=map_key_code(key_code);
     
     ClutterUtil::inject_key_down(key_code,unicode);
@@ -181,6 +349,11 @@ void Controller::key_down(unsigned int key_code,unsigned long int unicode)
 
 void Controller::key_up(unsigned int key_code,unsigned long int unicode)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     key_code=map_key_code(key_code);
 
     ClutterUtil::inject_key_up(key_code,unicode);
@@ -195,6 +368,11 @@ void Controller::key_up(unsigned int key_code,unsigned long int unicode)
 
 void Controller::accelerometer(double x,double y,double z)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
         (*it)->accelerometer(x,y,z);
@@ -205,6 +383,11 @@ void Controller::accelerometer(double x,double y,double z)
 
 void Controller::click(int x,int y)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
         (*it)->click(x,y);
@@ -215,6 +398,11 @@ void Controller::click(int x,int y)
 
 void Controller::touch_down(int x,int y)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
         (*it)->touch_down(x,y);    
@@ -225,6 +413,11 @@ void Controller::touch_down(int x,int y)
 
 void Controller::touch_move(int x,int y)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
         (*it)->touch_move(x,y);    
@@ -235,6 +428,11 @@ void Controller::touch_move(int x,int y)
 
 void Controller::touch_up(int x,int y)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
         (*it)->touch_up(x,y);    
@@ -245,6 +443,11 @@ void Controller::touch_up(int x,int y)
 
 void Controller::ui_event(const String & parameters)
 {
+    if (!connected)
+    {
+        return;    
+    }
+    
     for(DelegateSet::iterator it=delegates.begin();it!=delegates.end();++it)
     {
         (*it)->ui_event(parameters);    
@@ -547,202 +750,6 @@ bool Controller::enter_text(const String & label,const String & text)
 }
 
 //==============================================================================
-// Event classes
-
-class Event
-{
-public:
-
-    Event(Controller * _controller)
-    {
-        _controller->ref();
-        controller=_controller;
-    }
-    
-    virtual ~Event()
-    {
-        controller->unref();    
-    }
-    
-    virtual void process(ControllerList * list)=0;
-    
-    static void destroy(Event * event)
-    {
-        delete event;
-    }
-    
-protected:
-    
-    Controller * controller;
-};
-
-//-----------------------------------------------------------------------------
-
-class ControllerAddedRemovedEvent : public Event
-{
-public:
-    
-    enum Type {ADDED,REMOVED};
-    
-    ControllerAddedRemovedEvent(Controller * _controller,Type _type)
-    :
-        Event(_controller),
-        type(_type)
-    {}
-
-    virtual void process(ControllerList * list)
-    {
-        switch(type)
-        {
-            case ADDED:
-                list->controller_added(controller);
-                break;
-            
-            case REMOVED:
-                controller->disconnected();
-                controller->unref();
-                break;
-        }
-    }
-    
-    const Type type;
-};
-
-//-----------------------------------------------------------------------------
-
-class KeyEvent : public Event
-{
-public:
-    
-    enum Type {KEY_DOWN,KEY_UP};
-
-    KeyEvent(Controller * _controller,Type _type,unsigned int _key_code,unsigned long int _unicode)
-    :
-        Event(_controller),
-        type(_type),
-        key_code(_key_code),
-        unicode(_unicode)
-    {}
-
-    virtual void process(ControllerList * list)
-    {
-        if (controller->is_connected())
-        {
-            switch(type)
-            {
-                case KEY_DOWN:
-                    controller->key_down(key_code,unicode);
-                    break;
-            
-                case KEY_UP:
-                    controller->key_up(key_code,unicode);
-                    break;
-            }
-        }        
-    }
-
-    const Type type;    
-    const unsigned int key_code;
-    const unsigned long int unicode;
-};
-
-//-----------------------------------------------------------------------------
-
-class AccelerometerEvent : public Event
-{
-public:
-    
-    AccelerometerEvent(Controller * _controller,double _x,double _y,double _z)
-    :
-        Event(_controller),
-        x(_x),
-        y(_y),
-        z(_z)
-    {}
-    
-    virtual void process(ControllerList * list)
-    {
-        if (controller->is_connected())
-        {
-            controller->accelerometer(x,y,z);
-        }        
-    }
-    
-    const double x;
-    const double y;
-    const double z;
-};
-
-//-----------------------------------------------------------------------------
-
-class ClickTouchEvent : public Event
-{
-public:
-    
-    enum Type {CLICK,TOUCH_DOWN,TOUCH_MOVE,TOUCH_UP};
-    
-    ClickTouchEvent(Controller * _controller,Type _type,int _x,int _y)
-    :
-        Event(_controller),
-        type(_type),
-        x(_x),
-        y(_y)
-    {}
-    
-    virtual void process(ControllerList * list)
-    {
-        if (controller->is_connected())
-        {
-            switch(type)
-            {
-                case CLICK:
-                    controller->click(x,y);
-                    break;
-                
-                case TOUCH_DOWN:
-                    controller->touch_down(x,y);
-                    break;
-
-                case TOUCH_MOVE:
-                    controller->touch_move(x,y);
-                    break;
-
-                case TOUCH_UP:
-                    controller->touch_up(x,y);
-                    break;
-            }
-        }        
-    }
-
-    const Type type;
-    const int x;
-    const int y;
-};
-
-//-----------------------------------------------------------------------------
-
-class UIEvent : public Event
-{
-public:
-    
-    UIEvent(Controller * _controller,const char * _parameters)
-    :
-        Event(_controller),
-        parameters(_parameters)
-    {}
-    
-    virtual void process(ControllerList * list)
-    {
-        if (controller->is_connected())
-        {
-            controller->ui_event(parameters);
-        }
-    }
-    
-    const String parameters;
-};
-
-//==============================================================================
 
 #define LOCK Util::GSRMutexLock _lock(&mutex)
 
@@ -772,7 +779,7 @@ ControllerList::~ControllerList()
 // Called in any thread. Adds event to queue and adds an idle source to pump
 // events.
 
-void ControllerList::post_event(Event * event)
+void ControllerList::post_event(gpointer event)
 {
     g_assert(event);
     
@@ -787,22 +794,17 @@ gboolean ControllerList::process_events(gpointer self)
 {
     g_assert(self);
     
-    ((ControllerList*)self)->process_events();
+    ControllerList * list=(ControllerList*)self;
+
+    while(Event * event=(Event*)g_async_queue_try_pop(list->queue))
+    {
+        event->process();
+        Event::destroy(event);
+    }
+
     return FALSE;
 }
     
-//.............................................................................
-// Called in main thread, by an idle source.
-
-void ControllerList::process_events()
-{
-    while(Event * event=(Event*)g_async_queue_try_pop(queue))
-    {
-        event->process(this);
-        delete event;
-    }
-}
-
 //.............................................................................
 // Most likely called in a different thread.
 // Adds the controller to our list and posts an event.
@@ -820,7 +822,7 @@ TPController * ControllerList::add_controller(const char * name,const TPControll
     
     controllers.insert(result);
     
-    post_event(new ControllerAddedRemovedEvent(controller,ControllerAddedRemovedEvent::ADDED));
+    post_event(Event::make(Event::ADDED,controller));
     
     return result;
 }    
@@ -837,7 +839,7 @@ void ControllerList::remove_controller(TPController * controller)
     
     if (controllers.erase(controller)==1)
     {
-        post_event(new ControllerAddedRemovedEvent(controller->controller,ControllerAddedRemovedEvent::REMOVED));        
+        post_event(Event::make(Event::REMOVED,controller->controller));
     }
 }
 
@@ -901,55 +903,55 @@ void tp_controller_key_down(TPController * controller,unsigned int key_code,unsi
 {
     TPController::check(controller);
     
-    controller->list->post_event(new KeyEvent(controller->controller,KeyEvent::KEY_DOWN,key_code,unicode));
+    controller->list->post_event(Event::make_key(Event::KEY_DOWN,controller->controller,key_code,unicode));
 }
 
 void tp_controller_key_up(TPController * controller,unsigned int key_code,unsigned long int unicode)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new KeyEvent(controller->controller,KeyEvent::KEY_UP,key_code,unicode));
+    controller->list->post_event(Event::make_key(Event::KEY_UP,controller->controller,key_code,unicode));
 }
 
 void tp_controller_accelerometer(TPController * controller,double x,double y,double z)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new AccelerometerEvent(controller->controller,x,y,z));
+    controller->list->post_event(Event::make_accelerometer(controller->controller,x,y,z));
 }
 
 void tp_controller_click(TPController * controller,int x,int y)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new ClickTouchEvent(controller->controller,ClickTouchEvent::CLICK,x,y));
+    controller->list->post_event(Event::make_click_touch(Event::CLICK,controller->controller,x,y));
 }
 
 void tp_controller_touch_down(TPController * controller,int x,int y)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new ClickTouchEvent(controller->controller,ClickTouchEvent::TOUCH_DOWN,x,y));
+    controller->list->post_event(Event::make_click_touch(Event::TOUCH_DOWN,controller->controller,x,y));
 }
 
 void tp_controller_touch_move(TPController * controller,int x,int y)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new ClickTouchEvent(controller->controller,ClickTouchEvent::TOUCH_MOVE,x,y));
+    controller->list->post_event(Event::make_click_touch(Event::TOUCH_MOVE,controller->controller,x,y));
 }
 
 void tp_controller_touch_up(TPController * controller,int x,int y)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new ClickTouchEvent(controller->controller,ClickTouchEvent::TOUCH_UP,x,y));
+    controller->list->post_event(Event::make_click_touch(Event::TOUCH_UP,controller->controller,x,y));
 }
 
 void tp_controller_ui_event(TPController * controller,const char * parameters)
 {
     TPController::check(controller);
     
-    controller->list->post_event(new UIEvent(controller->controller,parameters));    
+    controller->list->post_event(Event::make_ui(controller->controller,parameters));    
 }
 

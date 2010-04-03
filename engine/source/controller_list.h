@@ -7,7 +7,6 @@
 
 //-----------------------------------------------------------------------------
 
-class Event;
 class ControllerList;
 
 //-----------------------------------------------------------------------------
@@ -147,8 +146,6 @@ public:
     
     void remove_controller(TPController * controller);
 
-    void post_event(Event * event);
-    
     void controller_added(Controller * controller);
     
     class Delegate
@@ -167,12 +164,21 @@ public:
     
 private:
 
+    void post_event(gpointer event);
+
+    friend void tp_controller_key_down(TPController * controller,unsigned int key_code,unsigned long int unicode);    
+    friend void tp_controller_key_up(TPController * controller,unsigned int key_code,unsigned long int unicode);
+    friend void tp_controller_accelerometer(TPController * controller,double x,double y,double z);
+    friend void tp_controller_click(TPController * controller,int x,int y);
+    friend void tp_controller_touch_down(TPController * controller,int x,int y);
+    friend void tp_controller_touch_move(TPController * controller,int x,int y);
+    friend void tp_controller_touch_up(TPController * controller,int x,int y);
+    friend void tp_controller_ui_event(TPController * controller,const char * parameters);
+    
     //.........................................................................
 
     static gboolean process_events(gpointer self);
     
-    void process_events();
-
     //.........................................................................
     
     GStaticRecMutex mutex;
