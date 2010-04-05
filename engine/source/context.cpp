@@ -539,45 +539,45 @@ int TPContext::run()
 			
 	    notify(TP_NOTIFICATION_APP_CLOSED);        		
 	}
+    }
 	
-	//.....................................................................
-	// Detach the console
-	
-	if (console)
-	{
-	    console->attach_to_lua(NULL);
-	}
-
-	//.....................................................................
-	// Reset the media player, just in case
-	
-	if (media_player)
-	{
-	    media_player->reset();
-	}
+    //.....................................................................
+    // Detach the console
     
-	//.....................................................................
-	// Clean up the stage
-	
-	clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
-	
-	//.....................................................................
-	// Shutdown the app
-		
-	if (current_app)
-	{
-	    delete current_app;
-	    current_app=NULL;
-	}
+    if (console)
+    {
+	console->attach_to_lua(NULL);
+    }
 
-	//.....................................................................
-	// Kill the media player
-	
-	if (media_player)
-	{
-	    delete media_player;
-	    media_player=NULL;
-	}
+    //.....................................................................
+    // Reset the media player, just in case
+    
+    if (media_player)
+    {
+	media_player->reset();
+    }
+
+    //.....................................................................
+    // Clean up the stage
+    
+    clutter_group_remove_all(CLUTTER_GROUP(clutter_stage_get_default()));
+    
+    //.....................................................................
+    // Shutdown the app
+	    
+    if (current_app)
+    {
+	delete current_app;
+	current_app=NULL;
+    }
+
+    //.....................................................................
+    // Kill the media player
+    
+    if (media_player)
+    {
+	delete media_player;
+	media_player=NULL;
     }
     
     //........................................................................
