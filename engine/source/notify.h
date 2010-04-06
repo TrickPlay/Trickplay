@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-typedef std::string String;
-
 class Notify
 {
 public:
@@ -16,8 +14,8 @@ public:
 
 private:
 
-    typedef std::pair<TPNotificationHandler, void *>  HandlerClosure;
-    typedef std::multimap<String, HandlerClosure>    HandlerMultiMap;
+    typedef std::pair<TPNotificationHandler,void*>  HandlerClosure;
+    typedef std::multimap<String, HandlerClosure>   HandlerMultiMap;
 
     HandlerMultiMap handlers;
 };
