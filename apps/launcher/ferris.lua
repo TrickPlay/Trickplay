@@ -56,11 +56,13 @@ Ferris = {
 		item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
 		-- And turn "off" the frame
 		item.children[1].src = item.children[1].src:gsub("-on.png", "-off.png")
+		item.children[2].font = "Graublau Web,DejaVu Sans,Sans 24px"
 	end,
 
 	highlight = function ( self )
 		local item = self.ferris.children[1].children[self:get_active()]
 		item.children[1].src = item.children[1].src:gsub("-off.png", "-on.png")
+		item.children[2].font = "Graublau Web,DejaVu Sans,Sans bold 24px"
 		if self.highlight_on == true then
 			item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.25, 1.25}, mode = "EASE_IN_OUT_SINE" } )
 		else
