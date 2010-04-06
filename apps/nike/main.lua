@@ -1,3 +1,5 @@
+local opaque = 255*2/3
+
 local images = {
 		splash_image = Image { src = "assets/splash_image.png", keep_aspect_ratio = true, y = - 300, width = screen.w, opacity = 0 },
 		main_bground = Image { src = "assets/unselected_players.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
@@ -30,16 +32,16 @@ local state =
 		next_state = "splash_image",
 		off = function() end,
 		splash_image = function( self )
-							images.splash_image:animate( { duration = 500, opacity = 200, y = 0, mode = "EASE_OUT_BOUNCE" } )
+							images.splash_image:animate( { duration = 500, opacity = opaque, y = 0, mode = "EASE_OUT_BOUNCE" } )
 							self.next_state = "main_bground"
 						end,
 		main_bground = function ( self )
-							images.main_bground:animate( { duration = 250, opacity = 200 } )
+							images.main_bground:animate( { duration = 250, opacity = opaque } )
 							self.next_state = "1"
 						end,
 		['8'] = function ()
-						images['8']:animate( { duration = 250, opacity = 200 } )
-						products:animate( { duration = 250, opacity = 200 } )
+						images['8']:animate( { duration = 250, opacity = opaque } )
+						products:animate( { duration = 250, opacity = opaque } )
 				end,
 	}
 setmetatable(state, {
@@ -47,7 +49,7 @@ setmetatable(state, {
 		print("key:",key)
 		rawset(table,"next_state",tostring(tonumber(key)+1))
 		print("next_state:",rawget(table,"next_state"))
-		return function () images[key]:animate( { duration = 250, opacity = 200 } ) end
+		return function () images[key]:animate( { duration = 250, opacity = opaque } ) end
 	end
 })
 
