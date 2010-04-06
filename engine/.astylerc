@@ -1,0 +1,12 @@
+style=allman
+indent=spaces=4
+indent-switches
+indent-namespaces
+pad-header
+pad-oper
+pad-paren-in
+add-brackets
+align-pointer=middle
+
+-n
+
