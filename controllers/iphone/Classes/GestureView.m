@@ -11,6 +11,9 @@
 #import <Foundation/NSRunLoop.h>
 #import <AudioToolbox/AudioToolbox.h>
 //#import <NSApplication/NSApplication.h>
+#import "AudioStreamer.h"
+#import <QuartzCore/CoreAnimation.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 // Constant for the number of times per second (Hertz) to sample acceleration.
 #define kAccelerometerFrequency         40  //Try 60 for high pass
@@ -484,6 +487,7 @@
 						//[NSURL URLWithString:aURL]
 						//NSData *data = [NSData dataWithContentsOfURL:url];
 						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
+						NSString *imageurl = [itemAtIndex objectForKey:@"link"];
 						if ([[itemAtIndex objectForKey:@"link"] hasPrefix:@"http:"] || [[itemAtIndex objectForKey:@"link"] hasPrefix:@"https:"])
 						{
 							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]] autorelease];
@@ -530,6 +534,7 @@
 					itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
 					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
 					{
+						NSString *soundurl = [itemAtIndex objectForKey:@"link"];
 						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];	
 					
 						//Loop parameter
@@ -545,11 +550,7 @@
 		}
 		else if ([msg hasPrefix:@"PS"])
 		{
-			[self.mAudioPlayer stop];
-			[self.mAudioPlayer release];
-			self.mAudioPlayer.delegate = nil;
-			self.mAudioPlayer = nil;
-			
+			[self destroyAudioStreamer];
 		}
 		else if ([msg hasPrefix:@"CU"])
 		{
@@ -748,63 +749,7 @@
 
 #pragma mark AVAudioPlayer delegate methods
 
-- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
-{
-    if (flag == NO)
-        NSLog(@"Playback finished unsuccessfully");
-	else
-	{
-		NSLog(@"playback finished");
-	}
-    [player setCurrentTime:0.];
-	//See if the loop variable is set to repeat
-    //mSoundLoopIndex
-	NSDictionary *itemAtIndex;
-	int index;
-	for (index = 0;index < [mImageCollection count];index++)
-	{
-		itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
-		if ([[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
-		{
-			//Found it
-			if ([[itemAtIndex objectForKey:@"loop"] compare:@"0"] == 0) {
-				//Play it again Sam, forever
-				[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
-			}
-			else
-			{
-				NSInteger loopvalue = [[itemAtIndex objectForKey:@"loop"] intValue];
-			    if (loopvalue > 1)
-				{
-					
-					[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:[NSString stringWithFormat: @"LOOP_COMPLETE=%d", loopvalue]];
-					loopvalue = loopvalue - 1;
-					NSString *loopvalStr = [NSString stringWithFormat: @"%d", loopvalue];
-					
-					//Finite # of loops, get the number of loops left and reset that number
-					[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalStr, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];					
-				    [self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
-				}
-				else
-				{
-				    //Last loop, end the sound
-					[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:@"COMPLETE"];
-					[self.mAudioPlayer release];
-					self.mAudioPlayer.delegate = nil;
-					self.mAudioPlayer = nil;
-				}
-			}
-			
 
-			
-			break;
-		}
-	}
-	
-	
-	
-	
-}
 
 - (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message
 {
@@ -817,42 +762,111 @@
 	//Might need to stop an existing sound loop possibly
 	mSoundLoopName = resourcename;
 	
-	if (self.mAudioPlayer != nil)
+	
+	if ([filename hasPrefix:@"http:"] || [filename hasPrefix:@"https:"])
 	{
-		[self.mAudioPlayer release];
-		self.mAudioPlayer.delegate = nil;
-		self.mAudioPlayer = nil;
+		//NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:filename ofType: @"mp3"];
+		//NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:soundFilePath];
+		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
+		[self createAudioStreamer:filename];
 	}
-	NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:filename ofType: @"mp3"];
-	NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:soundFilePath];
-	self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
+	else
+	{
+		[self createAudioStreamer:[NSString stringWithFormat:@"http://%@:%d/%@", [listenSocket connectedHost],[listenSocket connectedPort],filename]];
+		//NSURL *fileURL = [NSURL URLWithString:];
+		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
+		//NSLog([fileURL absoluteString]);
+	}
 	//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]] error:nil]; 
 	
-	[self.mAudioPlayer prepareToPlay];
-	[self.mAudioPlayer setDelegate: self];
-	[self.mAudioPlayer play];
+	
 	
 }
 
-- (void)playerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error
-{
-    NSLog(@"ERROR IN DECODE: %@\n", error); 
-}
 
-// we will only get these notifications if playback was interrupted
-- (void)audioPlayerBeginInterruption:(AVAudioPlayer *)player
-{
-    // the object has already been paused,    we just need to update UI
-    //[self updateViewForPlayerState];
-}
 
-- (void)audioPlayerEndInterruption:(AVAudioPlayer *)player
+- (void)playbackStateChanged:(NSNotification *)aNotification
 {
-    //[self startPlayback];
+	if ([streamer isWaiting])
+	{
+		
+	}
+	else if ([streamer isPlaying])
+	{
+		
+	}
+	else if ([streamer isIdle])
+	{
+		//[self destroyStreamer];
+		NSDictionary *itemAtIndex;
+		int index;
+		for (index = 0;index < [mImageCollection count];index++)
+		{
+			itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+			if ([[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
+			{
+				//Found it
+				if ([[itemAtIndex objectForKey:@"loop"] compare:@"0"] == 0) {
+					//Play it again Sam, forever
+					[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
+				}
+				else
+				{
+					NSInteger loopvalue = [[itemAtIndex objectForKey:@"loop"] intValue];
+					
+					if (loopvalue > 1)
+					{
+						
+						[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:[NSString stringWithFormat: @"LOOP_COMPLETE=%d", loopvalue]];
+						loopvalue = loopvalue - 1;
+						NSString *loopvalStr = [NSString stringWithFormat: @"%d", loopvalue];
+						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
+						//Finite # of loops, get the number of loops left and reset that number
+						[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalStr, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];					
+						
+					}
+					else
+					{
+						//Last loop, end the sound
+						[self sendSoundStatusMessage:[itemAtIndex objectForKey:@"name"] message:@"COMPLETE"];
+						[self destroyAudioStreamer];
+					}
+				}
+				
+				break;
+			}
+		} //End of imagecollection for
+		
+	}
 }
-
+- (void)createAudioStreamer:(NSString *)audioURL
+{
+	if (streamer)
+	{
+        [self destroyAudioStreamer];
+	}
+	
+	NSURL *url = [NSURL URLWithString:audioURL];
+	streamer = [[AudioStreamer alloc] initWithURL:url];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+	 selector:@selector(playbackStateChanged:) name:ASStatusChangedNotification object:streamer];
+	[streamer start];
+}
+- (void)destroyAudioStreamer
+{
+	if (streamer)
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:ASStatusChangedNotification object:streamer];
+		
+		[streamer stop];
+		[streamer release];
+		streamer = nil;
+	}
+}
 
 - (void)dealloc {
+	[self destroyAudioStreamer];
 	[listenSocket disconnect];
 	[listenSocket release];
 	[connectedSockets release];
