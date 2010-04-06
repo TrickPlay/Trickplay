@@ -8,7 +8,7 @@
 
 MediaPlayer::Event * MediaPlayer::Event::make( Type type, int code, const gchar * message, const gchar * value )
 {
-    Event * result = ( Event * )g_malloc( sizeof( Event ) );
+    Event * result = g_slice_new( Event );
     result->type = type;
     result->code = code;
     result->message = message ? g_strdup( message ) : NULL;
@@ -21,7 +21,7 @@ void MediaPlayer::Event::destroy( Event * event )
     g_assert( event );
     g_free( event->message );
     g_free( event->value );
-    g_free( event );
+    g_slice_free( Event, event );
 }
 
 //=============================================================================
