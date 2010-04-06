@@ -2,45 +2,49 @@
 
 //-----------------------------------------------------------------------------
 
-void Notify::add_notification_handler(const char * subject,TPNotificationHandler handler,void * data)
+void Notify::add_notification_handler( const char * subject, TPNotificationHandler handler, void * data )
 {
-    handlers.insert(std::make_pair(String(subject),HandlerClosure(handler,data)));
+    handlers.insert( std::make_pair( String( subject ), HandlerClosure( handler, data ) ) );
 }
 
 //-----------------------------------------------------------------------------
 
-void Notify::remove_notification_handler(const char * subject,TPNotificationHandler handler,void * data)
+void Notify::remove_notification_handler( const char * subject, TPNotificationHandler handler, void * data )
 {
-    std::pair<HandlerMultiMap::iterator,HandlerMultiMap::iterator>
-	range=handlers.equal_range(String(subject));
-    
-    for (HandlerMultiMap::iterator it=range.first;it!=range.second;)
+    std::pair<HandlerMultiMap::iterator, HandlerMultiMap::iterator>
+    range = handlers.equal_range( String( subject ) );
+
+    for ( HandlerMultiMap::iterator it = range.first; it != range.second; )
     {
-	if (it->second.first==handler && it->second.second==data)
-	{
-	    handlers.erase(it++);
-	}
-	else
-	{
-	    ++it;
-	}
-    }    
+        if ( it->second.first == handler && it->second.second == data )
+        {
+            handlers.erase( it++ );
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
 
-void Notify::notify(const char * subject)
+void Notify::notify( const char * subject )
 {
-    std::pair<HandlerMultiMap::const_iterator,HandlerMultiMap::const_iterator>
-	range=handlers.equal_range(String(subject));
-	
-    for (HandlerMultiMap::const_iterator it=range.first;it!=range.second;++it)
-	it->second.first(subject,it->second.second);
+    std::pair<HandlerMultiMap::const_iterator, HandlerMultiMap::const_iterator>
+    range = handlers.equal_range( String( subject ) );
 
-    range=handlers.equal_range(String("*"));
-	
-    for (HandlerMultiMap::const_iterator it=range.first;it!=range.second;++it)
-	it->second.first(subject,it->second.second);
+    for ( HandlerMultiMap::const_iterator it = range.first; it != range.second; ++it )
+    {
+        it->second.first( subject, it->second.second );
+    }
+
+    range = handlers.equal_range( String( "*" ) );
+
+    for ( HandlerMultiMap::const_iterator it = range.first; it != range.second; ++it )
+    {
+        it->second.first( subject, it->second.second );
+    }
 }
-    
+
 
