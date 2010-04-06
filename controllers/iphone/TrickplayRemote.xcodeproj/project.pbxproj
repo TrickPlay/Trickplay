@@ -286,13 +286,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Kenny Ham";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayRemote_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayRemote-Info.plist";
 				PRODUCT_NAME = TrickplayRemote;
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B32EA9E5-5E51-495F-B5C5-96B5E015A646";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 			};
 			name = Distribution;
 		};

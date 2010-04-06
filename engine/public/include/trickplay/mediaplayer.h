@@ -199,15 +199,19 @@ typedef struct TPMediaPlayer    TPMediaPlayer;
     
     Arguments:
     
-    mp -    A pointer to an uninitialized TPMediaPlayer structure. 
+        mp -    A pointer to an uninitialized TPMediaPlayer structure.
     
     Returns:
     
-    0 -     If the media player was initialized.
-    other - The media player cannot be initialized.
+        0 -     If the media player was initialized.
+
+        other - The media player cannot be initialized.
 */
 
-typedef int (*TPMediaPlayerConstructor)(TPMediaPlayer * mp);
+    typedef
+    int (*TPMediaPlayerConstructor)(
+
+        TPMediaPlayer * mp);
 
 /*
     Function: tp_context_set_media_player_constructor
@@ -217,11 +221,16 @@ typedef int (*TPMediaPlayerConstructor)(TPMediaPlayer * mp);
 
     Arguments:
     
-    context -       A pointer to the relevant TPContext structure.
-    constructor -   The function to call to initialize new media players.
+        context -       A pointer to the relevant TPContext structure.
+        constructor -   The function to call to initialize new media players.
 */
 
-TP_API_EXPORT void tp_context_set_media_player_constructor(TPContext * context,TPMediaPlayerConstructor constructor);
+    TP_API_EXPORT
+    void
+    tp_context_set_media_player_constructor(
+
+        TPContext * context,
+        TPMediaPlayerConstructor constructor);
 
 /*
     Function: tp_media_player_get_state
@@ -231,15 +240,19 @@ TP_API_EXPORT void tp_context_set_media_player_constructor(TPContext * context,T
 
     Arguments:
     
-    mp -        The TPMediaPlayer.
+        mp -        The TPMediaPlayer.
     
     Returns:
     
-    The current state.
+        The current state.
 
 */
 
-TP_API_EXPORT int tp_media_player_get_state(TPMediaPlayer * mp);
+    TP_API_EXPORT
+    int
+    tp_media_player_get_state(
+
+        TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_loaded
@@ -249,13 +262,17 @@ TP_API_EXPORT int tp_media_player_get_state(TPMediaPlayer * mp);
     
     Arguments:
     
-    mp -        The TPMediaPlayer.
+        mp -        The TPMediaPlayer.
 
     Valid States:
     - LOADING
 */
 
-TP_API_EXPORT void tp_media_player_loaded(TPMediaPlayer * mp);
+    TP_API_EXPORT
+    void
+    tp_media_player_loaded(
+
+        TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_error
@@ -264,14 +281,20 @@ TP_API_EXPORT void tp_media_player_loaded(TPMediaPlayer * mp);
     
     Arguments:
     
-    mp -        The TPMediaPlayer.
+        mp -        The TPMediaPlayer.
 
     Valid States:
     - LOADING
     - PLAYING
 */
 
-TP_API_EXPORT void tp_media_player_error(TPMediaPlayer * mp,int code,const char * message);
+    TP_API_EXPORT
+    void
+    tp_media_player_error(
+
+        TPMediaPlayer * mp,
+        int code,
+        const char * message);
 
 /*
     Callback: tp_media_player_end_of_stream
@@ -280,15 +303,19 @@ TP_API_EXPORT void tp_media_player_error(TPMediaPlayer * mp,int code,const char 
     
     Arguments:
     
-    mp -        The TPMediaPlayer.
-    code -      An integer error code.
-    message -   A string describing the error. TrickPlay will make a copy.
+        mp -        The TPMediaPlayer.
+        code -      An integer error code.
+        message -   A string describing the error. TrickPlay will make a copy.
     
     Valid States:
     - PLAYING
 */
 
-TP_API_EXPORT void tp_media_player_end_of_stream(TPMediaPlayer * mp);
+    TP_API_EXPORT
+    void
+    tp_media_player_end_of_stream(
+
+        TPMediaPlayer * mp);
 
 /*
     Callback: tp_media_player_tag_found
@@ -297,15 +324,21 @@ TP_API_EXPORT void tp_media_player_end_of_stream(TPMediaPlayer * mp);
     
     Arguments:
     
-    mp -        The TPMediaPlayer.
-    name -      The name of the tag. TrickPlay will make a copy.
-    value -     The value of the tag as a string. TrickPlay will make a copy.
+        mp -        The TPMediaPlayer.
+        name -      The name of the tag. TrickPlay will make a copy.
+        value -     The value of the tag as a string. TrickPlay will make a copy.
     
     Valid States:
     - LOADING
 */
 
-TP_API_EXPORT void tp_media_player_tag_found(TPMediaPlayer * mp,const char * name,const char * value);
+    TP_API_EXPORT
+    void
+    tp_media_player_tag_found(
+
+        TPMediaPlayer * mp,
+        const char * name,
+        const char * value);
 
 //-----------------------------------------------------------------------------
 /*
@@ -333,14 +366,17 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp -    The TPMediaPlayer instance to destroy.
+        mp -    The TPMediaPlayer instance to destroy.
     
     Valid States:
     
     - IDLE
 */
 
-    void (*destroy)(TPMediaPlayer * mp);
+    void
+    (*destroy)(
+
+        TPMediaPlayer * mp);
 
 /*
     Function: load
@@ -350,34 +386,39 @@ struct TPMediaPlayer
    
     Arguments:
     
-    mp -    The TPMediaPlayer instance.
-    
-    uri -   The URI to load. It should be validated by the media player and
-            should be copied if it is to be used beyond this call.
-                
-    extra - Additional parameters specified by the application. This is
-            opaque to TrickPlay and should be copied if it is to be used
-            beyond this call.
-   
+        mp -    The TPMediaPlayer instance.
+
+        uri -   The URI to load. It should be validated by the media player and
+                should be copied if it is to be used beyond this call.
+
+        extra - Additional parameters specified by the application. This is
+                opaque to TrickPlay and should be copied if it is to be used
+                beyond this call.
+
     Returns:
     
-    0 -     The media player has started loading the URI and will invoke
-            either <tp_media_player_loaded> when it is successful
-            or <tp_media_player_error> if there is a problem. The state will
-            switch to LOADING.
-            It can begin buffering but should not start playback or otherwise
-            show anything on the video plane.
+        0 -     The media player has started loading the URI and will invoke
+                either <tp_media_player_loaded> when it is successful
+                or <tp_media_player_error> if there is a problem. The state will
+                switch to LOADING.
+                It can begin buffering but should not start playback or otherwise
+                show anything on the video plane.
+
+        other - An error was detected immediately (such as a bad URI) and the
+                the media player will not be able to continue. It should not invoke
+                any callbacks. The state will remain IDLE.
                 
-    other - An error was detected immediately (such as a bad URI) and the
-            the media player will not be able to continue. It should not invoke
-            any callbacks. The state will remain IDLE.
-            
     Valid States:
     
     - IDLE
 */
     
-    int (*load)(TPMediaPlayer * mp,const char * uri,const char * extra);
+    int
+    (*load)(
+
+        TPMediaPlayer * mp,
+        const char * uri,
+        const char * extra);
     
 /*
     Function: reset
@@ -388,7 +429,7 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp -    The TPMediaPlayer instance.
+        mp -    The TPMediaPlayer instance.
     
     Valid States:
     
@@ -397,7 +438,10 @@ struct TPMediaPlayer
     - PAUSED
 */
 
-    void (*reset)(TPMediaPlayer * mp);
+    void
+    (*reset)(
+
+        TPMediaPlayer * mp);
     
 /*
     Function: play
@@ -408,23 +452,26 @@ struct TPMediaPlayer
     
     Arguments:
 
-    mp -    The TPMediaPlayer instance.
+        mp -    The TPMediaPlayer instance.
     
     Returns:
     
-    0 -     Playback has started without problems. The media player will switch to
-            PLAYING state and can call <tp_media_player_error> or
-            <tp_media_player_end_of_stream>.
-            
-    other - Playback failed to start. The state will remain PAUSED and
-            no callbacks can be invoked.
-    
+        0 -     Playback has started without problems. The media player will switch to
+                PLAYING state and can call <tp_media_player_error> or
+                <tp_media_player_end_of_stream>.
+
+        other - Playback failed to start. The state will remain PAUSED and
+                no callbacks can be invoked.
+
     Valid States:
     
     - PAUSED
 */
     
-    int (*play)(TPMediaPlayer * mp);
+    int
+    (*play)(
+
+        TPMediaPlayer * mp);
     
 /*
     Function: seek
@@ -441,25 +488,29 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp -        The TPMediaPlayer instance.
-    
-    seconds -   A position, in seconds, within the stream. This parameters will
-                always be greater than or equal to zero. If it is greater than
-                the duration of the stream, it should be clamped.
+        mp -        The TPMediaPlayer instance.
+
+        seconds -   A position, in seconds, within the stream. This parameters will
+                    always be greater than or equal to zero. If it is greater than
+                    the duration of the stream, it should be clamped.
                 
     Returns:
     
-    0 -     The seek operation has started successfully.
-    
-    other - For whatever reason, the media player cannot seek.
-    
+        0 -     The seek operation has started successfully.
+
+        other - For whatever reason, the media player cannot seek.
+
     Valid States:
     
     - PLAYING
     - PAUSED
 */
     
-    int (*seek)(TPMediaPlayer * mp,double seconds);
+    int
+    (*seek)(
+
+        TPMediaPlayer * mp,
+        double seconds);
     
 /*
     Function: pause
@@ -469,20 +520,23 @@ struct TPMediaPlayer
     
     Arguments:
 
-    mp -    The TPMediaPlayer instance.
+        mp -    The TPMediaPlayer instance.
     
     Returns:
     
-    0 -     The stream was paused and the state will switch to PAUSED.
-    
-    other - There was a problem pausing the stream and the state will remain PLAYING.
-    
+        0 -     The stream was paused and the state will switch to PAUSED.
+
+        other - There was a problem pausing the stream and the state will remain PLAYING.
+
     Valid States:
     
     - PLAYING
 */
 
-    int (*pause)(TPMediaPlayer * mp);
+    int
+    (*pause)(
+
+        TPMediaPlayer * mp);
     
 /*
     Function: set_playback_rate
@@ -493,24 +547,28 @@ struct TPMediaPlayer
     
     Arguments:
 
-    mp -    The TPMediaPlayer instance.
-    
-    rate -  An integer multiplier, which will never be zero. 1 is normal speed,
-            -1 is normal speed backwards, 2 is twice the normal speed forward, etc...
-            
+        mp -    The TPMediaPlayer instance.
+
+        rate -  An integer multiplier, which will never be zero. 1 is normal speed,
+                -1 is normal speed backwards, 2 is twice the normal speed forward, etc...
+
     Returns:
     
-    0 -     The playback rate was set successfully.
-    
-    other - The playback rate cannot be changed to the given value, it remains
-            unchanged.
-            
+        0 -     The playback rate was set successfully.
+
+        other - The playback rate cannot be changed to the given value, it remains
+                unchanged.
+
     Valid States:
     
     - PLAYING    
 */
 
-    int (*set_playback_rate)(TPMediaPlayer * mp,int rate);
+    int
+    (*set_playback_rate)(
+
+        TPMediaPlayer * mp,
+        int rate);
     
 /*
     Function: get_position
@@ -519,15 +577,15 @@ struct TPMediaPlayer
     
     Arguments:
 
-    mp -        The TPMediaPlayer instance.
-
-    seconds -   A pointer to hold the playback position.
+        mp -        The TPMediaPlayer instance.
     
+        seconds -   A pointer to hold the playback position.
+
     Returns:
 
-    0 -     The position is known and was returned.
+        0 -     The position is known and was returned.
 
-    other - The position is not known.
+        other - The position is not known.
     
     Valid States:
     
@@ -535,7 +593,11 @@ struct TPMediaPlayer
     - PAUSED
 */
 
-    int (*get_position)(TPMediaPlayer * mp,double * seconds);
+    int
+    (*get_position)(
+
+        TPMediaPlayer * mp,
+        double * seconds);
     
 /*
     Function: get_duration
@@ -544,23 +606,27 @@ struct TPMediaPlayer
 
     Arguments:
 
-    mp -        The TPMediaPlayer instance.
-
-    seconds -   A pointer to hold the stream duration.
+        mp -        The TPMediaPlayer instance.
     
+        seconds -   A pointer to hold the stream duration.
+
     Returns:
     
-    0 -     The duration is known and was returned.
-
-    other - The duration is not known.
+        0 -     The duration is known and was returned.
     
+        other - The duration is not known.
+
     Valid States:
     
     - PLAYING
     - PAUSED
 */
 
-    int (*get_duration)(TPMediaPlayer * mp,double * seconds);
+    int
+    (*get_duration)(
+
+        TPMediaPlayer * mp,
+        double * seconds);
     
 /*
     Function: get_buffered_duration
@@ -570,28 +636,34 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp -            The TPMediaPlayer instance.
+        mp -            The TPMediaPlayer instance.
 
-    start_seconds - A pointer to hold the starting point of the buffer, in seconds,
-                    relative to the beginning of the stream (0).
+        start_seconds - A pointer to hold the starting point of the buffer, in seconds,
+                        relative to the beginning of the stream (0).
 
-    end_seconds -   A pointer to hold the ending point of the buffer, in seconds,
-                    relative to the beginning of the stream (0).
-                    
+        end_seconds -   A pointer to hold the ending point of the buffer, in seconds,
+                        relative to the beginning of the stream (0).
+
     Returns:
     
-    0 -     The buffered duration is known and both start_seconds and end_seconds
-            where set.
-            
-    other - The buffered duration is not known.
-    
+        0 -     The buffered duration is known and both start_seconds and end_seconds
+                where set.
+
+        other - The buffered duration is not known.
+
     Valid States:
     
     - PLAYING
     - PAUSED
 */
 
-    int (*get_buffered_duration)(TPMediaPlayer * mp,double * start_seconds,double * end_seconds);
+    int
+    (*get_buffered_duration)(
+
+        TPMediaPlayer * mp,
+        double * start_seconds,
+        double * end_seconds);
+
 /*
     Function: get_video_size
     
@@ -600,25 +672,30 @@ struct TPMediaPlayer
         
     Arguments:
     
-    mp -        The TPMediaPlayer instance.
+        mp -        The TPMediaPlayer instance.
 
-    width -     A pointer to hold the width of the video.
+        width -     A pointer to hold the width of the video.
 
-    height -    A pointer to hold the height of the video.
+        height -    A pointer to hold the height of the video.
                     
     Returns:
     
-    0 -     The video size is known and both width and height were set.
-            
-    other - The video size is not known or the stream contains no video.
-    
+        0 -     The video size is known and both width and height were set.
+
+        other - The video size is not known or the stream contains no video.
+
     Valid States:
     
     - PLAYING
     - PAUSED
 */
 
-    int (*get_video_size)(TPMediaPlayer * mp,int * width,int * height);
+    int
+    (*get_video_size)(
+
+        TPMediaPlayer * mp,
+        int * width,
+        int * height);
     
 /*
     Function: get_viewport_geometry
@@ -627,22 +704,22 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp -        The TPMediaPlayer instance.
-    
-    left -      A pointer to hold the left (x) coordinate of the viewport.
-    
-    top -       A pointer to hold the top (y) coordinate of the viewport.
+        mp -        The TPMediaPlayer instance.
 
-    width -     A pointer to hold the width of the viewport.
+        left -      A pointer to hold the left (x) coordinate of the viewport.
 
-    height -    A pointer to hold the height of the viewport.
-                    
+        top -       A pointer to hold the top (y) coordinate of the viewport.
+    
+        width -     A pointer to hold the width of the viewport.
+    
+        height -    A pointer to hold the height of the viewport.
+
     Returns:
     
-    0 -     The viewport size is known and left, top, width and height were set.
-            
-    other - The viewport size is not known.
-    
+        0 -     The viewport size is known and left, top, width and height were set.
+
+        other - The viewport size is not known.
+
     Valid States:
     
     - IDLE
@@ -651,7 +728,14 @@ struct TPMediaPlayer
     - PAUSED    
 */
 
-    int (*get_viewport_geometry)(TPMediaPlayer * mp,int * left,int * top,int * width,int * height);
+    int
+    (*get_viewport_geometry)(
+
+        TPMediaPlayer * mp,
+        int * left,
+        int * top,
+        int * width,
+        int * height);
     
 /*
     Function: set_viewport_geometry
@@ -660,22 +744,22 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp -        The TPMediaPlayer instance.
-    
-    left -      The desired left (x) coordinate of the viewport.
-    
-    top -       The desired top (y) coordinate of the viewport.
+        mp -        The TPMediaPlayer instance.
 
-    width -     The desired width of the viewport.
+        left -      The desired left (x) coordinate of the viewport.
 
-    height -    The desired height of the viewport.
-                    
+        top -       The desired top (y) coordinate of the viewport.
+    
+        width -     The desired width of the viewport.
+    
+        height -    The desired height of the viewport.
+
     Returns:
     
-    0 -     The viewport geometry was changed successfully.
-            
-    other - The viewport geometry cannot be changed.
-    
+        0 -     The viewport geometry was changed successfully.
+
+        other - The viewport geometry cannot be changed.
+
     Valid States:
     
     - IDLE
@@ -684,7 +768,14 @@ struct TPMediaPlayer
     - PAUSED    
 */
 
-    int (*set_viewport_geometry)(TPMediaPlayer * mp,int left,int top,int width,int height);
+    int
+    (*set_viewport_geometry)(
+
+        TPMediaPlayer * mp,
+        int left,
+        int top,
+        int width,
+        int height);
     
 /*
     Function: get_media_type
@@ -693,23 +784,27 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp  -       The TPMediaPlayer instance.
-    
-    type -      A pointer to hold the type.
-    
+        mp  -       The TPMediaPlayer instance.
+
+        type -      A pointer to hold the type.
+
     Returns:
     
-    0 -         The media type is known and type was set.
-    
-    other -     The media type is not known.
-    
+        0 -         The media type is known and type was set.
+
+        other -     The media type is not known.
+
     Valid States:
     
     - PLAYING
     - PAUSED
 */
 
-    int (*get_media_type)(TPMediaPlayer * mp,int * type);
+    int
+    (*get_media_type)(
+
+        TPMediaPlayer * mp,
+        int * type);
 
 /*
     Function: get_audio_volume
@@ -719,16 +814,16 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp  -       The TPMediaPlayer instance.
-    
-    volume -    A pointer to hold the volume.
-    
+        mp  -       The TPMediaPlayer instance.
+
+        volume -    A pointer to hold the volume.
+
     Returns:
     
-    0 -         The volume is known and was set.
-    
-    other -     The volume is not known.
-    
+        0 -         The volume is known and was set.
+
+        other -     The volume is not known.
+
     Valid States:
     
     - IDLE
@@ -737,7 +832,11 @@ struct TPMediaPlayer
     - PAUSED
 */
 
-    int (*get_audio_volume)(TPMediaPlayer * mp,double * volume);
+    int
+    (*get_audio_volume)(
+
+        TPMediaPlayer * mp,
+        double * volume);
 
 /*
     Function: set_audio_volume
@@ -747,16 +846,16 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp  -       The TPMediaPlayer instance.
-    
-    volume -    The new volume, between 0 and 1 inclusive.
-    
+        mp  -       The TPMediaPlayer instance.
+
+        volume -    The new volume, between 0 and 1 inclusive.
+
     Returns:
     
-    0 -         The volume was set.
-    
-    other -     There was a problem setting the volume.
-    
+        0 -         The volume was set.
+
+        other -     There was a problem setting the volume.
+
     Valid States:
     
     - IDLE
@@ -765,7 +864,11 @@ struct TPMediaPlayer
     - PAUSED
 */
 
-    int (*set_audio_volume)(TPMediaPlayer * mp,double volume);
+    int
+    (*set_audio_volume)(
+
+        TPMediaPlayer * mp,
+        double volume);
 
 
 /*
@@ -775,17 +878,17 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp  -       The TPMediaPlayer instance.
-    
-    mute -      Whether audio is muted. A value of zero, means audio is NOT muted;
-                anything else means it is MUTED.
-    
+        mp  -       The TPMediaPlayer instance.
+
+        mute -      Whether audio is muted. A value of zero, means audio is NOT muted;
+                    anything else means it is MUTED.
+
     Returns:
     
-    0 -         Mute was set successfully.
-    
-    other -     There was a problem getting the mute value.
-    
+        0 -         Mute was set successfully.
+
+        other -     There was a problem getting the mute value.
+
     Valid States:
     
     - IDLE
@@ -794,7 +897,11 @@ struct TPMediaPlayer
     - PAUSED
 */
 
-    int (*get_audio_mute)(TPMediaPlayer * mp,int * mute);
+    int
+    (*get_audio_mute)(
+
+        TPMediaPlayer * mp,
+        int * mute);
 
 
 /*
@@ -804,17 +911,17 @@ struct TPMediaPlayer
     
     Arguments:
     
-    mp  -       The TPMediaPlayer instance.
-    
-    mute -      Whether audio should be muted. A value of zero, means audio should
-                NOT be muted; anything else means it should be MUTED.
-    
+        mp  -       The TPMediaPlayer instance.
+
+        mute -      Whether audio should be muted. A value of zero, means audio should
+                    NOT be muted; anything else means it should be MUTED.
+
     Returns:
     
-    0 -         Mute was set successfully.
-    
-    other -     There was a problem setting the mute value.
-    
+        0 -         Mute was set successfully.
+
+        other -     There was a problem setting the mute value.
+
     Valid States:
     
     - IDLE
@@ -823,7 +930,11 @@ struct TPMediaPlayer
     - PAUSED
 */
 
-    int (*set_audio_mute)(TPMediaPlayer * mp,int mute);
+    int
+    (*set_audio_mute)(
+
+        TPMediaPlayer * mp,
+        int mute);
     
 /*
     Function: get_viewport_texture
@@ -831,7 +942,10 @@ struct TPMediaPlayer
     Should return NULL.
 */
 
-    void * (*get_viewport_texture)(TPMediaPlayer * mp);
+    void *
+    (*get_viewport_texture)(
+
+        TPMediaPlayer * mp);
     
 };
 

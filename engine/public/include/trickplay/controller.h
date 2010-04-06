@@ -211,7 +211,8 @@ struct TPControllerSpec
             other - The command failed.
     */
     
-    int (*execute_command)(
+    int
+    (*execute_command)(
                            
         TPController * controller,
         unsigned int command,

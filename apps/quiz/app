@@ -1,0 +1,11 @@
+
+app=
+{
+    id          = "com.trickplay.quiz",
+    release     = 1,
+    version     = "1.0",
+    name        = "Quiz",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+
