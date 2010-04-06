@@ -32,7 +32,7 @@ local state =
 		next_state = "splash_image",
 		off = function() end,
 		splash_image = function( self )
-							images.splash_image:animate( { duration = 500, opacity = opaque, y = 0, mode = "EASE_OUT_BOUNCE" } )
+							images.splash_image:animate( { duration = 500, opacity = opaque, y = 0, mode = "EASE_OUT_BACK" } )
 							self.next_state = "main_bground"
 						end,
 		main_bground = function ( self )
