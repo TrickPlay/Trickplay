@@ -11,9 +11,9 @@ class EventGroup;
 class Network
 {
 public:
-    
+
     //.........................................................................
-    
+
     class CookieJar;
 
     //.........................................................................
@@ -21,9 +21,9 @@ public:
     class Request
     {
     public:
-        
-        Request(const String & user_agent);
-            
+
+        Request( const String & user_agent );
+
         String      url;
         String      method;
         StringMap   headers;
@@ -33,66 +33,66 @@ public:
         String      body;
         bool        redirect;
         String      user_agent;
-        
+
     private:
-        
+
         Request()
-        {}        
+        {}
     };
-    
+
     //.........................................................................
 
     class Response
     {
     public:
-        
+
         Response();
         ~Response();
-        Response(const Response & other);
-        
+        Response( const Response & other );
+
         int             code;
         StringMultiMap  headers;
         String          status;
-        GByteArray *    body;
+        GByteArray   *  body;
         bool            failed;
     };
 
 
     //.........................................................................
-    
-    Network(EventGroup * event_group);
-    
+
+    Network( EventGroup * event_group );
+
     ~Network();
-    
+
     //.........................................................................
     // Format a user agent
-    
-    static String format_user_agent(const char * language,
-                          const char * country,
-                          const char * app_id,
-                          int app_release,
-                          const char * system_name,
-                          const char * system_version);
+
+    static String format_user_agent( const char * language,
+                                     const char * country,
+                                     const char * app_id,
+                                     int app_release,
+                                     const char * system_name,
+                                     const char * system_version );
 
     //.........................................................................
     // Cookie jar functions
-    
-    static CookieJar * cookie_jar_new(const char * file_name);
-    
-    static CookieJar * cookie_jar_ref(CookieJar * cookie_jar);
-    
+
+    static CookieJar * cookie_jar_new( const char * file_name );
+
+    static CookieJar * cookie_jar_ref( CookieJar * cookie_jar );
+
     // This one always returns NULL
-    
-    static CookieJar * cookie_jar_unref(CookieJar * cookie_jar);
-    
+
+    static CookieJar * cookie_jar_unref( CookieJar * cookie_jar );
+
     //.........................................................................
     // This performs the request asynchronously and invokes the callback exactly
     // once in the main thread when the request is finished.
-    
-    typedef void (*ResponseCallback)(const Response & response,gpointer user);
-    
-    void perform_request_async(const Request & request,CookieJar * cookie_jar,ResponseCallback callback,gpointer user,GDestroyNotify notify);
-    
+
+    typedef void ( *ResponseCallback )( const Response & response, gpointer user );
+
+    void perform_request_async( const Request & request, CookieJar * cookie_jar, ResponseCallback callback, gpointer user, GDestroyNotify notify );
+
     //.........................................................................
     // This performs the request asynchronously but invokes the callback every
     // time data is received and in the network thread. The data is not appended
@@ -102,31 +102,31 @@ public:
     //
     // If the callback returns false, the request is aborted early - but the
     // callback will still get called one last time with finished set to true.
-    
-    typedef bool (*IncrementalResponseCallback)(const Response & response,gpointer body,guint len,bool finished,gpointer user);
 
-    void perform_request_async_incremental(const Request & request,CookieJar * cookie_jar,IncrementalResponseCallback callback,gpointer user,GDestroyNotify notify);
-    
+    typedef bool ( *IncrementalResponseCallback )( const Response & response, gpointer body, guint len, bool finished, gpointer user );
+
+    void perform_request_async_incremental( const Request & request, CookieJar * cookie_jar, IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify );
+
     //.........................................................................
     // Performs the request in the calling thread and returns the complete
     // response
-    
-    Response perform_request(const Request & request,CookieJar * cookie_jar);
-    
+
+    Response perform_request( const Request & request, CookieJar * cookie_jar );
+
 private:
-    
+
     class RequestClosure;
     class Event;
     class Thread;
-    
+
     //.........................................................................
     // Starts the thread if it is not running
-    
+
     void start();
-        
-    EventGroup *    event_group;
-    GAsyncQueue *   queue;
-    Thread *        thread;
+
+    EventGroup   *  event_group;
+    GAsyncQueue  *  queue;
+    Thread     *    thread;
 };
 
 #endif // _TRICKPLAY_NETWORK_H
