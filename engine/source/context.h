@@ -230,17 +230,17 @@ private:
     TPLogHandler                external_log_handler;
     void            *           external_log_handler_data;
 
-    typedef std::pair<TPConsoleCommandHandler, void *>            ConsoleCommandHandlerClosure;
-    typedef std::multimap<String, ConsoleCommandHandlerClosure>  ConsoleCommandHandlerMultiMap;
+    typedef std::pair<TPConsoleCommandHandler, void *>          ConsoleCommandHandlerClosure;
+    typedef std::multimap<String, ConsoleCommandHandlerClosure> ConsoleCommandHandlerMultiMap;
 
     ConsoleCommandHandlerMultiMap                               console_command_handlers;
 
-    typedef std::pair<TPRequestHandler, void *>                   RequestHandlerClosure;
-    typedef std::map<String, RequestHandlerClosure>              RequestHandlerMap;
+    typedef std::pair<TPRequestHandler, void *>                 RequestHandlerClosure;
+    typedef std::map<String, RequestHandlerClosure>             RequestHandlerMap;
 
     RequestHandlerMap                                           request_handlers;
 
-    typedef std::pair<OutputHandler, void *>                      OutputHandlerClosure;
+    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
     typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
     OutputHandlerSet                                            output_handlers;
