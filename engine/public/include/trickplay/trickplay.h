@@ -299,22 +299,24 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-    argc -  A pointer to the argument count, or NULL.
-    
-    argv -  A pointer to the application's arguments or NULL.
+        argc -  A pointer to the argument count, or NULL.
+
+        argv -  A pointer to the application's arguments or NULL.
 */
 
-TP_API_EXPORT
-void            tp_init_version(
+    TP_API_EXPORT
+    void
+    tp_init_version(
                                 
-                    int * argc,
-                    char *** argv,
-                    int major_version,
-                    int minor_version,
-                    int patch_version);
+        int * argc,
+        char *** argv,
+        int major_version,
+        int minor_version,
+        int patch_version);
 
 
-#define tp_init(argc,argv) tp_init_version(argc,argv,TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION)
+#define tp_init(argc,argv) \
+    tp_init_version(argc,argv,TP_MAJOR_VERSION,TP_MINOR_VERSION,TP_PATCH_VERSION)
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_new
@@ -323,11 +325,12 @@ void            tp_init_version(
     
     Returns:
     
-    context -   A pointer to a new <TPContext>. 
+        context -   A pointer to a new <TPContext>.
 */
                 
-TP_API_EXPORT
-TPContext *     tp_context_new(void);
+    TP_API_EXPORT
+    TPContext *
+    tp_context_new(void);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_set
@@ -336,19 +339,20 @@ TPContext *     tp_context_new(void);
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    key -       A configuration key.
-    
-    value -     The value for the key. Trickplay will make a copy.
+        context -   A pointer to a TPContext.
+
+        key -       A configuration key.
+
+        value -     The value for the key. Trickplay will make a copy.
 */
                 
-TP_API_EXPORT
-void            tp_context_set(
+    TP_API_EXPORT
+    void
+    tp_context_set(
                     
-                    TPContext * context,
-                    const char * key,
-                    const char * value);
+        TPContext * context,
+        const char * key,
+        const char * value);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_set_int
@@ -357,19 +361,20 @@ void            tp_context_set(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    key -       A configuration key.
-    
-    value -     The value for the key. 
+        context -   A pointer to a TPContext.
+
+        key -       A configuration key.
+
+        value -     The value for the key.
 */
                 
-TP_API_EXPORT
-void            tp_context_set_int(
+    TP_API_EXPORT
+    void
+    tp_context_set_int(
                     
-                    TPContext * context,
-                    const char * key,
-                    int value);
+        TPContext * context,
+        const char * key,
+        int value);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_get
@@ -378,22 +383,23 @@ void            tp_context_set_int(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    key -       A configuration key.
+        context -   A pointer to a TPContext.
+
+        key -       A configuration key.
     
     Returns:
     
-    value -     The value of the given key. You should make a copy.
+        value -     The value of the given key. You should make a copy.
     
-    NULL -      If the given key does not exist.
+        NULL -      If the given key does not exist.
 */    
 
-TP_API_EXPORT
-const char *    tp_context_get(
+    TP_API_EXPORT
+    const char *
+    tp_context_get(
     
-                    TPContext * context,
-                    const char * key);
+        TPContext * context,
+        const char * key);
 
 /*-----------------------------------------------------------------------------
     Function: TPRequestHandler
@@ -404,21 +410,23 @@ const char *    tp_context_get(
     
     Arguments:
     
-    subject -   A string describing the nature of the request.
-    
-    data -      User data passed to <tp_context_set_request_handler>.
+        subject -   A string describing the nature of the request.
+
+        data -      User data passed to <tp_context_set_request_handler>.
     
     Returns:
     
-    0 -         If the request is denied.
-    
-    other -     If the request is accepted.
+        0 -         If the request is denied.
+
+        other -     If the request is accepted.
 */
 
-typedef         int (*TPRequestHandler)(
+    typedef
+    int
+    (*TPRequestHandler)(
     
-                    const char * subject,
-                    void * data);
+        const char * subject,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_set_request_handler
@@ -431,22 +439,23 @@ typedef         int (*TPRequestHandler)(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    subject -   A request subject.
-    
-    handler -   A <TPRequestHandler> function.
-    
-    data -      Opaque user data that is passed to the handler.
+        context -   A pointer to a TPContext.
+
+        subject -   A request subject.
+
+        handler -   A <TPRequestHandler> function.
+
+        data -      Opaque user data that is passed to the handler.
 */
 
-TP_API_EXPORT
-void            tp_context_set_request_handler(
+    TP_API_EXPORT
+    void
+    tp_context_set_request_handler(
                     
-                    TPContext * context,
-                    const char * subject,
-                    TPRequestHandler handler,
-                    void * data);
+        TPContext * context,
+        const char * subject,
+        TPRequestHandler handler,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: TPNotificationHandler
@@ -457,15 +466,18 @@ void            tp_context_set_request_handler(
     
     Arguments:
     
-    subject -   A string describing the specific notification.
-    
-    data -      Opaque user data passed to <tp_context_add_notification_handler>.
+        subject -   A string describing the specific notification.
+
+        data -      Opaque user data passed to <tp_context_add_notification_handler>.
 */    
 
-typedef         void (*TPNotificationHandler)(
+    typedef
+    void
+    (*TPNotificationHandler)(
                     
-                    const char * subject,
-                    void * data);
+        const char * subject,
+        void * data);
+
 /*-----------------------------------------------------------------------------
     Function: tp_context_add_notification_handler
     
@@ -474,22 +486,23 @@ typedef         void (*TPNotificationHandler)(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    subject -   A string describing the notification.
-    
-    handler -   A function with the <TPNotificationHandler> prototype.
-    
-    data -      A pointer to user data which is passed to the handler.
+        context -   A pointer to a TPContext.
+
+        subject -   A string describing the notification.
+
+        handler -   A function with the <TPNotificationHandler> prototype.
+
+        data -      A pointer to user data which is passed to the handler.
 */    
 
-TP_API_EXPORT
-void            tp_context_add_notification_handler(
+    TP_API_EXPORT
+    void
+    tp_context_add_notification_handler(
     
-                    TPContext * context,
-                    const char * subject,
-                    TPNotificationHandler handler,
-                    void * data);
+        TPContext * context,
+        const char * subject,
+        TPNotificationHandler handler,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: TPConsoleCommandHandler
@@ -503,21 +516,23 @@ void            tp_context_add_notification_handler(
     
     Arguments:
     
-    command -       A string describing the command. It does not include the initial
-                    / and will never be NULL.
-                    
-    parameters -    A string containing everything else typed at the console after
-                    the command and up to a new line, or NULL if there are no
-                    parameters.
-                    
-    data -          Opaque user data passed to <tp_context_add_console_command_handler>.
+        command -       A string describing the command. It does not include the initial
+                        / and will never be NULL.
+
+        parameters -    A string containing everything else typed at the console after
+                        the command and up to a new line, or NULL if there are no
+                        parameters.
+
+        data -          Opaque user data passed to <tp_context_add_console_command_handler>.
 */
 
-typedef         void (*TPConsoleCommandHandler)(
+    typedef
+    void
+    (*TPConsoleCommandHandler)(
                     
-                    const char * command,
-                    const char * parameters,
-                    void * data);
+        const char * command,
+        const char * parameters,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_add_console_command_handler
@@ -531,22 +546,23 @@ typedef         void (*TPConsoleCommandHandler)(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    command -   The specific command to handle, excluding the initial /.
-    
-    handler -   A function with the <TPConsoleCommandHandler> prototype.
-    
-    data -      Opaque user data passed to the handler.
+        context -   A pointer to a TPContext.
+
+        command -   The specific command to handle, excluding the initial /.
+
+        handler -   A function with the <TPConsoleCommandHandler> prototype.
+
+        data -      Opaque user data passed to the handler.
 */    
 
-TP_API_EXPORT
-void            tp_context_add_console_command_handler(
+    TP_API_EXPORT
+    void
+    tp_context_add_console_command_handler(
     
-                    TPContext * context,
-                    const char * command,
-                    TPConsoleCommandHandler handler,
-                    void * data);
+        TPContext * context,
+        const char * command,
+        TPConsoleCommandHandler handler,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: TPLogHandler
@@ -555,22 +571,24 @@ void            tp_context_add_console_command_handler(
     
     Arguments:
     
-    level -     An integer describing the information level of the log message,
-                such as DEBUG, INFO, WARNING, etc.
-                
-    domain -    A string describing the message domain.
-    
-    message -   The actual log message.
-    
-    data -      Opaque user data passed to <tp_context_set_log_handler>.
+        level -     An integer describing the information level of the log message,
+                    such as DEBUG, INFO, WARNING, etc.
+
+        domain -    A string describing the message domain.
+
+        message -   The actual log message.
+
+        data -      Opaque user data passed to <tp_context_set_log_handler>.
 */
 
-typedef         void (*TPLogHandler)(
+    typedef
+    void
+    (*TPLogHandler)(
     
-                    unsigned int level,
-                    const char * domain,
-                    const char * message,
-                    void * data);
+        unsigned int level,
+        const char * domain,
+        const char * message,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_set_log_handler
@@ -581,19 +599,20 @@ typedef         void (*TPLogHandler)(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
-    
-    handler -   A function with the <TPLogHandler> prototype.
-    
-    data -      Opaque user data passed to the handler.
+        context -   A pointer to a TPContext.
+
+        handler -   A function with the <TPLogHandler> prototype.
+
+        data -      Opaque user data passed to the handler.
 */    
 
-TP_API_EXPORT
-void            tp_context_set_log_handler(
+    TP_API_EXPORT
+    void
+    tp_context_set_log_handler(
     
-                    TPContext * context,
-                    TPLogHandler handler,
-                    void * data);
+        TPContext * context,
+        TPLogHandler handler,
+        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_run
@@ -603,18 +622,20 @@ void            tp_context_set_log_handler(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
+        context -   A pointer to a TPContext.
     
     Returns:
     
-    0 -         If everything is OK.
-    other -     One of the run errors listed above.
+        0 -         If everything is OK.
+
+        other -     One of the run errors listed above.
 */    
                
-TP_API_EXPORT
-int             tp_context_run(
+    TP_API_EXPORT
+    int
+    tp_context_run(
     
-                    TPContext * context);
+        TPContext * context);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_quit
@@ -624,13 +645,14 @@ int             tp_context_run(
     
     Arguments:
     
-    context -   A pointer to a TPContext.
+        context -   A pointer to a TPContext.
 */
                 
-TP_API_EXPORT
-void            tp_context_quit(
-    
-                    TPContext * context);
+    TP_API_EXPORT
+    void
+    tp_context_quit(
+
+        TPContext * context);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_free
@@ -639,13 +661,14 @@ void            tp_context_quit(
 
     Arguments:
     
-    context -   A pointer to a TPContext.
+        context -   A pointer to a TPContext.
 */    
 
-TP_API_EXPORT
-void            tp_context_free(
+    TP_API_EXPORT
+    void
+    tp_context_free(
                     
-                    TPContext * context);
+        TPContext * context);
 
 //-----------------------------------------------------------------------------
 

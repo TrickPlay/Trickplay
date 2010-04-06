@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.subtraction",
+    release     = "1",
+    version     = "1.0",
+    name        = "Subtraction",
+    author      = "Craig Hughes",
+    copyright   = "© Trickplay Inc."
+}
+
