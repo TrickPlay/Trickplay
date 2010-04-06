@@ -41,8 +41,12 @@ ferris.ferris.z = (16*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 
 local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, y = 5, z=1 }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, y = 5, z=1 }
 
 screen:add(backdrop)
+screen:add(playLabel)
+screen:add(getLabel)
 screen:add(ferris_group)
 
 mediaplayer.on_loaded = function( self ) self:play() end
@@ -113,6 +117,22 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_OUT_SINE",
 								}
 							)
+			playLabel:animate(
+								{
+									duration = 1000,
+									opacity = 255,
+									x = (screen.w-playLabel.w) - 150,
+									mode = "EASE_OUT_SINE",
+								}
+							)
+			getLabel:animate(
+								{
+									duration = 1000,
+									opacity = 255,
+									x = (screen.w-getLabel.w) - 480,
+									mode = "EASE_OUT_SINE",
+								}
+							)
 			state = "fullscreen"
 		end
 
@@ -148,6 +168,22 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 0,
+									mode = "EASE_IN_SINE",
+								}
+							)
+			playLabel:animate(
+								{
+									duration = 1000,
+									opacity = 0,
+									x = 30,
+									mode = "EASE_IN_SINE",
+								}
+							)
+			getLabel:animate(
+								{
+									duration = 1000,
+									opacity = 0,
+									x = 30,
 									mode = "EASE_IN_SINE",
 								}
 							)
