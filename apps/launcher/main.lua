@@ -50,6 +50,7 @@ screen:add(getLabel)
 screen:add(ferris_group)
 
 mediaplayer.on_loaded = function( self ) self:play() end
+mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
 mediaplayer:load('jeopardy.mp4')
 
 -- 1 is forward, -1 is backward
