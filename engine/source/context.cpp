@@ -294,16 +294,6 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
 
                     tp_controller_key_down( ( TPController * )controller, event->key.keyval, event->key.unicode_value );
-
-#ifndef TP_PRODUCTION
-
-                    if ( event->key.keyval == CLUTTER_Escape )
-                    {
-                        clutter_main_quit();
-                    }
-
-#endif
-
                     return TRUE;
                 }
 
@@ -328,6 +318,22 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
     }
     return FALSE;
 }
+
+#ifndef TP_PRODUCTION
+
+// This one deals with escape
+
+gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
+{
+    if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_Escape )
+    {
+        ( ( TPContext * )context )->close_app();
+    }
+
+    return FALSE;
+}
+
+#endif
 
 #endif
 
@@ -494,6 +500,12 @@ int TPContext::run()
     TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
+
+#ifndef TP_PRODUCTION
+
+    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
+
+#endif
 
 #endif
 
