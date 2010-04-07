@@ -52,10 +52,22 @@ local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
 local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, y = 5, z=1 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, y = 5, z=1 }
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, x = 10, y = 5, z=1 }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, x = 10, y = 5, z=1 }
+local LGLabel = Group
+						{
+							children =
+							{
+								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "000000C0", y = screen.h/16, z = 0 },
+								Image { src = "assets/label-LG.png", z = 1, x = 30, y = screen.h/16+5 },
+							},
+							x = 10,
+							z = 1,
+							opacity = 0,
+						}
 
 screen:add(backdrop)
+screen:add(LGLabel)
 screen:add(getLabel)
 screen:add(ferris2_group)
 screen:add(playLabel)
@@ -143,6 +155,14 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_OUT_SINE",
 								}
 							)
+			LGLabel:animate(
+								{
+									duration = 1000,
+									opacity = 255,
+									x = 20,
+									mode = "EASE_OUT_SINE",
+								}
+							)
 			playLabel:animate(
 								{
 									duration = 1000,
@@ -209,11 +229,19 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_IN_SINE",
 								}
 							)
+			LGLabel:animate(
+								{
+									duration = 1000,
+									opacity = 0,
+									x = 10,
+									mode = "EASE_IN_SINE",
+								}
+							)
 			playLabel:animate(
 								{
 									duration = 1000,
 									opacity = 0,
-									x = 30,
+									x = 10,
 									mode = "EASE_IN_SINE",
 								}
 							)
@@ -221,7 +249,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 0,
-									x = 30,
+									x = 10,
 									mode = "EASE_IN_SINE",
 								}
 							)
