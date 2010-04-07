@@ -243,7 +243,6 @@ end
 
 local controller
 for _,controller in pairs(controllers.connected) do
-	print("foo")
 	controllers:on_controller_connected( controller )
 end
 
