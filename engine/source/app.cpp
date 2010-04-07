@@ -751,7 +751,8 @@ int App::run()
 
         clutter_actor_set_scale( screen, 0, 0 );
 
-        // By adding it to the stage, the ref is maintained
+        // By adding it to the stage, the ref is sunk, so we don't need
+        // to unref it here.
 
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
     }
@@ -1125,6 +1126,17 @@ void App::animate_out()
 
 //-----------------------------------------------------------------------------
 
+static void animate_out_completed( ClutterAnimation * animation, ClutterActor * actor )
+{
+    ClutterActor * parent = clutter_actor_get_parent( actor );
+
+    if ( parent )
+    {
+        clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
+    }
+}
+
+
 gboolean App::animate_out_callback( gpointer s )
 {
     ClutterActor * screen = CLUTTER_ACTOR( s );
@@ -1138,7 +1150,23 @@ gboolean App::animate_out_callback( gpointer s )
         // and in the completed callback for that, remove it from its
         // parent and unref it
 
-        clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), screen );
+        //clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), screen );
+
+        gfloat width;
+        gfloat height;
+
+        clutter_actor_get_size( screen, &width, &height );
+
+        clutter_actor_move_anchor_point( screen, width / 2 , height / 2 );
+
+        clutter_actor_set_clip( screen, 0, 0, width, height );
+
+        clutter_actor_animate( screen, CLUTTER_EASE_IN_CUBIC, 250,
+                               "opacity", 0,
+                               "scale-x", ( gdouble ) 0,
+                               "scale-y", ( gdouble ) 0,
+                               "signal::completed", animate_out_completed, screen,
+                               NULL );
     }
 
     g_object_unref( G_OBJECT( screen ) );
