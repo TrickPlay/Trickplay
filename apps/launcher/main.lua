@@ -5,6 +5,7 @@ screen:show_all()
 local trickplay_red = "960A04"
 
 local items = {}
+local items2 = {}
 
 local make_tile = function(id,name)
 	local item = Group { }
@@ -27,26 +28,37 @@ for i = 1,5 do
 	for _,app in pairs(apps:get_all()) do
 		if(app.id ~= "com.trickplay.launcher") then
 			table.insert(items, make_tile(app.id,app.name))
+			table.insert(items2, make_tile(app.id,app.name))
 		end
 	end
 end
 
 local ferris = Ferris.new( 11*#items, items, -30 )
-
+local ferris2 = Ferris.new( 11*#items, items2, -30 )
 
 ferris.ferris.x = -25*#items
 ferris.ferris.y = screen.h/2
 ferris.ferris.z = (16*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
 
+ferris2.ferris.x = 10
+ferris2.ferris.y = ferris.ferris.y
+ferris2.ferris.z = ferris.ferris.z
+ferris2.ferris.opacity = 0
+ferris2.highlight = function () end
+
+-- These two are "fake" groups, to ensure that these elements are in front of the backdrop,
+-- regardless of their z-depth within these fake groups; the group itself stays above the background
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
+local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
 local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, y = 5, z=1 }
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, y = 5, z=1 }
 
 screen:add(backdrop)
-screen:add(playLabel)
 screen:add(getLabel)
+screen:add(ferris2_group)
+screen:add(playLabel)
 screen:add(ferris_group)
 
 mediaplayer.on_loaded = function( self ) self:play() end
@@ -104,13 +116,26 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -90,
-										x = screen.w - 20,
+										x = screen.w,
 										y = screen.h/2+70,
-										z = -12*#items,
+										z = -18*#items,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() mediaplayer:pause() end,
 									}
 								)
+			ferris2.ferris:animate(
+								{
+										duration = 1000,
+										y_rotation = -90,
+										x = screen.w/2+134,
+										y = screen.h/2+70,
+										z = -18*#items,
+										opacity = 255,
+										mode = "EASE_IN_OUT_SINE",
+								}
+							)
+			ferris:rotate(#items)
+			ferris2:rotate(math.random(#items/2,#items))
 			backdrop:animate(
 								{
 									duration = 1000,
@@ -143,7 +168,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = 80,
+										x = 10,
 										mode = "EASE_OUT_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -158,9 +183,21 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = 80,
+										x = 10,
 										z = (16*#items)*math.sin(math.rad(-30)),
 										y = screen.h/2,
+										mode = "EASE_IN_OUT_SINE",
+										on_completed = function() ferris:highlight() mediaplayer:play() end,
+									}
+								)
+			ferris2.ferris:animate(
+									{
+										duration = 1000,
+										y_rotation = -30,
+										x = 10,
+										z = (16*#items)*math.sin(math.rad(-30)),
+										y = screen.h/2,
+										opacity = 0,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
