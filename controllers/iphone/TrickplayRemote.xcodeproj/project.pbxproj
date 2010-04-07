@@ -18,8 +18,7 @@
 		447CA30C1151944C000BFABF /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 447CA30B1151944C000BFABF /* Entitlements.plist */; };
 		B92DC1CD1135F91F005EEBA7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC1CC1135F91F005EEBA7 /* AudioToolbox.framework */; };
 		B92DC1EE1135FA74005EEBA7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */; };
-		B92DC21C11360C46005EEBA7 /* deep_forest.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = B92DC21A11360C46005EEBA7 /* deep_forest.mp3 */; };
-		B92DC21D11360C46005EEBA7 /* river_sounds.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = B92DC21B11360C46005EEBA7 /* river_sounds.mp3 */; };
+		B92DF834116AA57000087E20 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = B92DF833116AA57000087E20 /* AudioStreamer.m */; };
 		B9D9A08A110927CD002FFCA4 /* GestureView.m in Sources */ = {isa = PBXBuildFile; fileRef = B9D9A088110927CD002FFCA4 /* GestureView.m */; };
 		B9D9A08B110927CD002FFCA4 /* GestureView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B9D9A089110927CD002FFCA4 /* GestureView.xib */; };
 		B9D9A08F110928F0002FFCA4 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = B9D9A08E110928F0002FFCA4 /* logo.png */; };
@@ -49,8 +48,8 @@
 		8D1107310486CEB800E47090 /* TrickplayRemote-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayRemote-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		B92DC1CC1135F91F005EEBA7 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		B92DC21A11360C46005EEBA7 /* deep_forest.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = deep_forest.mp3; sourceTree = "<group>"; };
-		B92DC21B11360C46005EEBA7 /* river_sounds.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = river_sounds.mp3; sourceTree = "<group>"; };
+		B92DF832116AA57000087E20 /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioStreamer.h; sourceTree = "<group>"; };
+		B92DF833116AA57000087E20 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
 		B9D9A087110927CD002FFCA4 /* GestureView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureView.h; sourceTree = "<group>"; };
 		B9D9A088110927CD002FFCA4 /* GestureView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureView.m; sourceTree = "<group>"; };
 		B9D9A089110927CD002FFCA4 /* GestureView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GestureView.xib; sourceTree = "<group>"; };
@@ -85,6 +84,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				B92DF832116AA57000087E20 /* AudioStreamer.h */,
+				B92DF833116AA57000087E20 /* AudioStreamer.m */,
 				B9D9A1CB110AB1E8002FFCA4 /* AsyncSocket.h */,
 				B9D9A1CC110AB1E8002FFCA4 /* AsyncSocket.m */,
 				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
@@ -131,8 +132,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				B92DC21A11360C46005EEBA7 /* deep_forest.mp3 */,
-				B92DC21B11360C46005EEBA7 /* river_sounds.mp3 */,
 				B9D9A13211095AE6002FFCA4 /* Default.png */,
 				B9D9A0C211093401002FFCA4 /* Default.jpg */,
 				B9D9A0C01109337A002FFCA4 /* icon.png */,
@@ -217,8 +216,6 @@
 				B9D9A0C311093401002FFCA4 /* Default.jpg in Resources */,
 				B9D9A13311095AE6002FFCA4 /* Default.png in Resources */,
 				B9D9A2D8110B2D1D002FFCA4 /* Entitlements.plist in Resources */,
-				B92DC21C11360C46005EEBA7 /* deep_forest.mp3 in Resources */,
-				B92DC21D11360C46005EEBA7 /* river_sounds.mp3 in Resources */,
 				447CA30C1151944C000BFABF /* Entitlements.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -235,6 +232,7 @@
 				28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */,
 				B9D9A08A110927CD002FFCA4 /* GestureView.m in Sources */,
 				B9D9A1CD110AB1E8002FFCA4 /* AsyncSocket.m in Sources */,
+				B92DF834116AA57000087E20 /* AudioStreamer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,6 +10,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import "AsyncSocket.h"
 
+@class AudioStreamer;
+
 @interface GestureView : UIViewController <UITextFieldDelegate, AVAudioPlayerDelegate> {
     UIAccelerationValue accelerationY;
 	UIAccelerationValue accelerationX;
@@ -36,6 +38,7 @@
 	NSMutableArray *mImageCollection;
 	AVAudioPlayer  *mAudioPlayer;
 	NSString *mSoundLoopName;
+	AudioStreamer *streamer;
 }
 
 @property NSTimeInterval mTouchedTime;
