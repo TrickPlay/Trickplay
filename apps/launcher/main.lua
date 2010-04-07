@@ -82,6 +82,10 @@ local direction = 1
 
 local state = "offscreen"
 
+if( settings.active ) then
+	ferris:goto( settings.active - 1)
+end
+
 function screen.on_key_down(screen, key)
 
 	-- Stuff to rotate the wheel and choose items
@@ -101,7 +105,7 @@ function screen.on_key_down(screen, key)
 		elseif key == keys["Return"] then
 			local active = ferris:get_active()
 			-- Would launch the app here!
-			print(active,":",items[active].extra.id)
+			settings.active = active
 			apps:launch(items[active].extra.id)
 		end
 	end

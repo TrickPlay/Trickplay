@@ -70,6 +70,24 @@ Ferris = {
 		end
 	end,
 
+	goto = function ( self, destination )
+		self:unhighlight()
+		local circle = self.ferris.children[1]
+		local children = circle.children
+
+		circle.z_rotation = { destination*(360/self.num_items), 0, 0 }
+		local child
+		local num
+		for num,child in ipairs(children) do
+			child.z_rotation = { -destination*(360/self.num_items), 0, 0 }
+			child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)*255
+		end
+
+		self.spin.destination = destination % self.num_items
+		self.spin.frontmost = self.spin.destination
+		self:highlight()
+	end,
+
 	-- The rotate function "kicks" the wheel to spin faster (or slower) based on the impulse size.
 	rotate = function ( self, impulse )
 		self.spin.destination = self.spin.destination + impulse
@@ -139,6 +157,7 @@ Ferris = {
 					radius = radius,
 					ferris = Ferris.create_circle( radius, items ),
 					rotate = Ferris.rotate,
+					goto = Ferris.goto,
 					highlight = Ferris.highlight,
 					unhighlight = Ferris.unhighlight,
 					highlight_on = false,
