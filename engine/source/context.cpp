@@ -178,6 +178,17 @@ int TPContext::console_command_handler( const char * command, const char * param
             context->close_current_app();
         }
     }
+    else if ( !strcmp( command, "stage" ) )
+    {
+        ClutterActor * stage = clutter_stage_get_default();
+
+        if ( stage )
+        {
+            gint count = clutter_group_get_n_children( CLUTTER_GROUP( stage ) );
+
+            g_info( "Stage has %d children", count );
+        }
+    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
@@ -328,6 +339,8 @@ gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer co
     if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_Escape )
     {
         ( ( TPContext * )context )->close_app();
+
+        return TRUE;
     }
 
     return FALSE;
@@ -487,6 +500,12 @@ int TPContext::run()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
+#ifndef TP_PRODUCTION
+
+    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
+
+#endif
+
     // We add a controller for the keyboard in non-egl builds
 
     TPControllerSpec spec;
@@ -500,12 +519,6 @@ int TPContext::run()
     TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
-
-#ifndef TP_PRODUCTION
-
-    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
-
-#endif
 
 #endif
 
