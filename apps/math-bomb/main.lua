@@ -32,8 +32,6 @@ layout(
         columns=
         {
             {
-                --left column has the question at the top and spinning numbers at the bottom
-                
                 size=660,
                 rows=
                 {
@@ -41,7 +39,7 @@ layout(
 	                	padding={top=20, left=20, right=20},
                         content=Text{
                             name="bigger_number",
-                            font="Diavlo,DejaVu Sans,Sans 40px" ,
+                            font="Eraser,DejaVu Sans,Sans 72px" ,
                             text="" ,
                             wrap=true,
                             color="FFFFFF",
@@ -52,7 +50,7 @@ layout(
 	                	padding={top=20, left=20, right=20},
                         content=Text{
                             name="littler_number",
-                            font="Diavlo,DejaVu Sans,Sans 40px" ,
+                            font="Eraser,DejaVu Sans,Sans 72px" ,
                             text="Press ENTER or join to play..." ,
                             wrap=true,
                             color="FFFFFF"
@@ -63,7 +61,7 @@ layout(
 	                	padding={top=20, left=20, right=20},
                         content=Text{
                             name="answer",
-                            font="Diavlo,DejaVu Sans,Sans 40px" ,
+                            font="Eraser,DejaVu Sans,Sans 72px" ,
                             text="" ,
                             wrap=true,
                             color="FFFFFF",
@@ -100,7 +98,7 @@ layout(
 
 ui.timer = Text{
                             name="timer",
-                            font="Diavlo,DejaVu Sans,Sans 64px",
+                            font="Eraser,DejaVu Sans,Sans 64px",
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME),
@@ -180,11 +178,11 @@ function player_joined(controller)
                 {
                     {
                         size=5/6,
-                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF",name="label"}
+                        content=Text{font="Eraser,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF",name="label"}
                     }
                     ,
                     {
-                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
+                        content=Text{font="Eraser,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
                     }
                 }
             }
@@ -202,7 +200,7 @@ function player_joined(controller)
     
     if player_count()>=1 then
     	ui.littler_number.text = ""
-	    ui.littler_number.font = "Diavlo,DejaVu Sans,Sans 40px"
+	    ui.littler_number.font = "Eraser,DejaVu Sans,Sans 72px"
 	    ui.players_box_rect.opacity = 255
         game.ready_to_start()
     end
@@ -276,9 +274,18 @@ end
 
 function controllers.on_controller_connected(controllers,controller)
 
-	controller:declare_resource("quiz","quiz.png")
-	controller:declare_resource("numbers","letters/numbers.png")
+	controller:declare_resource("quiz","assets/quiz.png")
+	controller:declare_resource("numbers","assets/numbers.png")
 	controller:set_ui_background("quiz")
+
+	controller.on_key_down = function ( controller, key )
+		if key >= keys.KP_0 and key <= keys.KP_9 then
+			player_answered(controller, key - keys.KP_0)
+		elseif key >= keys["0"] and key <= keys["9"] then
+			player_answered(controller, key - keys["0"])
+		end
+	end
+
 
     print("CONNECTED",controller.name)
     
@@ -437,12 +444,6 @@ function screen.on_key_down(screen,key)
        		game.got_tap = false
             game.ask_next_question()
         end
-    elseif players[fake_controller_for_local_player] then
-		if key >= keys.KP_0 and key <= keys.KP_9 then
-			player_answered(fake_controller_for_local_player, key - keys.KP_0)
-		elseif key >= keys["0"] and key <= keys["9"] then
-			player_answered(fake_controller_for_local_player, key - keys["0"])
-		end
 	end
 end
 

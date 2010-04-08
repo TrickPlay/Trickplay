@@ -1,9 +1,9 @@
 app=
 {
-    id          = "com.trickplay.subtraction",
+    id          = "com.trickplay.math-bomb",
     release     = "1",
     version     = "1.0",
-    name        = "Subtraction",
+    name        = "Math Bomb",
     author      = "Craig Hughes",
     copyright   = "© Trickplay Inc."
 }
