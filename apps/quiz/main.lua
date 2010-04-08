@@ -549,4 +549,9 @@ end
 
 game.no_players()
 
+local controller
+for _,controller in pairs(controllers.connected) do
+	controllers:on_controller_connected( controller )
+end
+
 math.randomseed(os.time())
