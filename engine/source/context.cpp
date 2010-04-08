@@ -112,6 +112,98 @@ int TPContext::get_int( const char * key, int def )
 
 //-----------------------------------------------------------------------------
 
+struct DumpInfo
+{
+    DumpInfo()
+    :
+        indent( 0 )
+    {}
+
+    guint indent;
+
+    std::map< String, std::list<ClutterActor*> > actors_by_type;
+};
+
+static void dump_actors( ClutterActor * actor, gpointer dump_info )
+{
+    if ( !actor )
+    {
+        return;
+    }
+
+    DumpInfo * info = ( DumpInfo * )dump_info;
+
+    ClutterGeometry g;
+
+    clutter_actor_get_geometry( actor, & g );
+
+    const gchar * name = clutter_actor_get_name( actor );
+    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
+
+    if ( g_str_has_prefix( type, "Clutter" ) )
+    {
+        type += 7;
+    }
+
+    info->actors_by_type[type].push_back(actor);
+
+    // Get extra info about the actor
+
+    String extra;
+
+    if ( CLUTTER_IS_TEXT( actor ) )
+    {
+        extra = String( "[text='" ) + clutter_text_get_text( CLUTTER_TEXT( actor ) ) + "']";
+    }
+    else if ( CLUTTER_IS_TEXTURE( actor ) )
+    {
+        const gchar * src = ( const gchar * )g_object_get_data( G_OBJECT( actor ) , "tp-src" );
+
+        if ( src )
+        {
+            extra = String( "[src='" ) + src + "']";
+        }
+    }
+    else if ( CLUTTER_IS_RECTANGLE( actor ) )
+    {
+        ClutterColor color;
+
+        clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &color );
+
+        gchar * c = g_strdup_printf( "[color=(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha );
+
+        extra = c;
+
+        g_free( c );
+    }
+
+    if ( !extra.empty() )
+    {
+        extra = String( " : " ) + extra;
+    }
+
+
+    g_info( "%s%s: '%s' : %u : (%d,%d %ux%u)%s",
+            String( info->indent, ' ' ).c_str(),
+            type,
+            name ? name : "",
+            clutter_actor_get_gid( actor ),
+            g.x,
+            g.y,
+            g.width,
+            g.height,
+            extra.empty() ? "" : extra.c_str() );
+
+    if ( CLUTTER_IS_CONTAINER( actor ) )
+    {
+        info->indent += 2;
+        clutter_container_foreach( CLUTTER_CONTAINER( actor ), dump_actors, info );
+        info->indent -= 2;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
     TPContext * context = ( TPContext * )self;
@@ -176,6 +268,22 @@ int TPContext::console_command_handler( const char * command, const char * param
         else
         {
             context->close_current_app();
+        }
+    }
+    else if ( !strcmp( command, "ui" ) )
+    {
+        DumpInfo info;
+
+        dump_actors( clutter_stage_get_default(), &info );
+
+        g_info( "" );
+        g_info( "SUMMARY" );
+
+        std::map< String, std::list< ClutterActor * > >::const_iterator it;
+
+        for ( it = info.actors_by_type.begin(); it != info.actors_by_type.end(); ++it )
+        {
+            g_info( "%15s %5u", it->first.c_str(), it->second.size() );
         }
     }
 
@@ -328,6 +436,8 @@ gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer co
     if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_Escape )
     {
         ( ( TPContext * )context )->close_app();
+
+        return TRUE;
     }
 
     return FALSE;
@@ -487,6 +597,12 @@ int TPContext::run()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
+#ifndef TP_PRODUCTION
+
+    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
+
+#endif
+
     // We add a controller for the keyboard in non-egl builds
 
     TPControllerSpec spec;
@@ -500,12 +616,6 @@ int TPContext::run()
     TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
-
-#ifndef TP_PRODUCTION
-
-    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
-
-#endif
 
 #endif
 
