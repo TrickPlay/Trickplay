@@ -238,7 +238,12 @@ local wall_zoom_alpha = Alpha{ timeline = wall_zoom_timeline , mode = "EASE_OUT_
 
 function controllers.on_controller_connected(controllers, controller)
 	controller:declare_resource("flickr","flickr.png")
-	controller:set_background("flickr")
+	controller:set_ui_background("flickr")
+end
+
+local controller
+for _,controller in pairs(controllers.connected) do
+	controllers:on_controller_connected( controller )
 end
 
 function screen.on_key_down(screen,keyval)
