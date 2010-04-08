@@ -162,6 +162,8 @@ public:
 
     ControllerSet get_controllers();
 
+    void reset_all();
+
 private:
 
     void post_event( gpointer event );
