@@ -15,6 +15,8 @@ game={
 -------------------------------------------------------------------------------
 -- Setup the UI
 
+math.randomseed(os.time())
+
 dofile("layout.lua")
 
 ui={}
@@ -30,43 +32,42 @@ layout(
         columns=
         {
             {
-                --left column has the question at the top and answers at the bottom
-                
                 size=660,
                 rows=
                 {
                     {
 	                	padding={top=20, left=20, right=20},
-                        size=240,
                         content=Text{
-                            name="question",
-                            font="Diavlo,DejaVu Sans,Sans 40px" ,
-                            text="Waiting for players to join..." ,
+                            name="bigger_number",
+                            font="Eraser,DejaVu Sans,Sans 72px" ,
+                            text="" ,
+                            wrap=true,
+                            color="FFFFFF",
+                            }
+                    }
+                    ,
+                    {
+	                	padding={top=20, left=20, right=20},
+                        content=Text{
+                            name="littler_number",
+                            font="Eraser,DejaVu Sans,Sans 72px" ,
+                            text="Press ENTER or join to play..." ,
                             wrap=true,
                             color="FFFFFF"
                             }
                     }
                     ,
                     {
-                        padding={left=40},
-                        rows=
-                            function()
-                                local result={}
-                                for i=1,4 do
-                                    table.insert(result,
-                                        {
-                                            content=Text{
-                                                name="answer"..i,
-                                                font="Diavlo,DejaVu Sans,Sans 36px",
-                                                wrap=true,
-                                                color="FFFFFF",
-                                                text="Answer "..i
-                                                }
-                                        })
-                                end
-                                return result
-                            end
+	                	padding={top=20, left=20, right=20},
+                        content=Text{
+                            name="answer",
+                            font="Eraser,DejaVu Sans,Sans 72px" ,
+                            text="" ,
+                            wrap=true,
+                            color="FFFFFF",
+                            }
                     }
+                    ,
                 }
             }
             ,
@@ -97,7 +98,7 @@ layout(
 
 ui.timer = Text{
                             name="timer",
-                            font="Diavlo,DejaVu Sans,Sans 64px",
+                            font="Eraser,DejaVu Sans,Sans 64px",
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME),
@@ -177,11 +178,11 @@ function player_joined(controller)
                 {
                     {
                         size=5/6,
-                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF",name="label"}
+                        content=Text{font="Eraser,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF",name="label"}
                     }
                     ,
                     {
-                        content=Text{font="Diavlo,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
+                        content=Text{font="Eraser,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
                     }
                 }
             }
@@ -198,8 +199,8 @@ function player_joined(controller)
     players[controller]={box=player_box,ui=player_ui,score=0,answer_time=-1}
     
     if player_count()>=1 then
-    	ui.answer1.text = ""
-	    ui.answer1.font="Diavlo,DejaVu Sans,Sans 40px"
+    	ui.littler_number.text = ""
+	    ui.littler_number.font = "Eraser,DejaVu Sans,Sans 72px"
 	    ui.players_box_rect.opacity = 255
         game.ready_to_start()
     end
@@ -258,7 +259,7 @@ end
 -------------------------------------------------------------------------------
 
 function player_answered(controller,answer)
-    if tonumber(answer)==1 then
+    if answer==game.answer then
         players[controller].answer_time=game.time
     else
         players[controller].answer_time=-1
@@ -271,22 +272,24 @@ end
 -- Hook up the connect, disconnect and ui controller events and call
 -- the functions above
 
--- If you set this to false, the "keyboard" player will be able to play
-
-MC_REQUIRED=true
-
 function controllers.on_controller_connected(controllers,controller)
 
-	controller:declare_resource("quiz","http://10.0.190.103/quiz.png")
+	controller:declare_resource("quiz","assets/quiz.png")
+	controller:declare_resource("numbers","assets/numbers.png")
 	controller:set_ui_background("quiz")
+
+	controller.on_key_down = function ( controller, key )
+		if key >= keys.KP_0 and key <= keys.KP_9 then
+			player_answered(controller, key - keys.KP_0)
+		elseif key >= keys["0"] and key <= keys["9"] then
+			player_answered(controller, key - keys["0"])
+		end
+	end
+
 
     print("CONNECTED",controller.name)
     
-    if (MC_REQUIRED and controller.has_multiple_choice) or (not MC_REQUIRED) then
-    
-        player_joined(controller)
-        
-    end
+    player_joined(controller)
     
     function controller.on_disconnected(controller)
         
@@ -295,56 +298,16 @@ function controllers.on_controller_connected(controllers,controller)
         player_left(controller)
         
     end
-    
-    function controller.on_ui_event(controller,event)
-    
-        print("ANSWERED",controller.name,event)
-        
-        player_answered(controller,event)
-        
-    end
-    
-    function controller.on_key_up(controller,key_code,unicode)
-    
-        local n=tonumber(string.format("%c",unicode))
-        
-        if n and n >= 1 and n <= 4 then
-
-            -- The keyboard player does not have the answer
-            -- ids, so he will answer with a number between
-            -- 1 and 4. We have to check if that is the right
-            -- answer by looking at the UI. The id of the correct
-            -- answer is always 1, so we pass that. Otherwise, we
-            -- pass 5.
-
-            print("ANSWERED",controller.name,n)
-
-            if ui["answer"..n].extra.correct then
-                player_answered(controller,1)
-            else
-                player_answered(controller,5)
-            end
-        end
-    
-    end
-
 end
 
 -------------------------------------------------------------------------------
 -- Get ready to play
 
-game.questions=dofile("questions.lua")
-
 function game.no_players()
-    ui.question.text=""
-    ui.answer1.text="Waiting for players to join..."
+	ui.bigger_number.text = ""
+	ui.answer.text = ""
+    ui.littler_number.text="Press ENTER or join to play..."
     ui.players_box_rect.opacity = 0
-    ui.answer1.font="Diavlo,DejaVu Sans,Sans 40px"
-    ui.answer1.color="FFFFFF"
-    ui.answer1.opacity=255
-    ui.answer2.text=""
-    ui.answer3.text=""
-    ui.answer4.text=""
     ui.timer.text=""
 	ui.timer_group.opacity = 0
     for controller,player_state in pairs(players) do
@@ -356,56 +319,31 @@ function game.no_players()
         game.timer=nil
     end
     game.ready=false
-    if ui.flying_answer then
-        ui.flying_answer.parent:remove(ui.flying_answer)
-        ui.flying_answer=nil
-    end
 end
 
 function game.ready_to_start()
-    ui.answer4:set{color="FFFFFF",opacity=255,text="Tap for next question..."}
-    --ui.question.text="\nTap for next question..."
+	ui.bigger_number.text = ""
+	ui.answer.text = ""
+    ui.littler_number.text="ENTER or tap for next problem..."
 	ui.timer_group.opacity = 0
     game.ready=true
 end
 
 function game.ask_next_question()
-    
+
     game.ready=false
-    
-    if ui.flying_answer then
-        ui.flying_answer.parent:remove(ui.flying_answer)
-        ui.flying_answer=nil
-    end
-    
+
     -- pick a question
-    local question=table.remove(game.questions,math.random(#game.questions))
+    game.answer = math.random(0,9)
+    local littler_number = math.random(1,10)
+    local bigger_number = littler_number + game.answer
+
+    ui.bigger_number.text=tostring(bigger_number)
+	ui.littler_number.text = tostring(littler_number).." -"
+	ui.answer.text = "???"
     
-    ui.question.text=question[1]
-    ui.question.font="Diavlo,DejaVu Sans,Sans 40px"
-    
-    print("CORRECT ANSWER IS",question[2])
-    
-    local answers={}
-    
-    for i=2,5 do
-        table.insert(answers,{id=i-1,text=question[i]})
-    end
-    
-    local scrambled_answers={}
-    
-    for i=1,4 do
-        table.insert(scrambled_answers,table.remove(answers,math.random(#answers)))
-    end
-    
-    for i=1,4 do
-        local answer_box=ui["answer"..i]
-        answer_box.opacity=255
-        answer_box.color = "FFFFFF"
-        answer_box.text=i..". "..scrambled_answers[i].text
-        answer_box.extra.correct=scrambled_answers[i].id==1
-    end
-    
+    print("CORRECT ANSWER IS",game.answer)
+
     ui.timer.text=tostring(game.MAX_TIME)
 	ui.timer.position = { (ui.timer_group.size[1] - ui.timer.size[1]) / 2,
 							40
@@ -418,19 +356,38 @@ function game.ask_next_question()
     for controller,player_state in pairs(players) do
         player_state.answer_time=-1
         player_state.ui.flash_box.color=game.WAITING_FOR_ANSWER_COLOR
-        controller:show_multiple_choice(
-        	"TP Quiz",
-            scrambled_answers[1].id,
-            scrambled_answers[1].text,
-            scrambled_answers[2].id,
-            scrambled_answers[2].text,
-            scrambled_answers[3].id,
-            scrambled_answers[3].text,
-            scrambled_answers[4].id,
-            scrambled_answers[4].text
-            )
+		controller:set_ui_background("numbers")
+
+		function controller.on_click(controller, x, y)
+			if not game.got_tap then
+				game.got_tap = true
+				return
+			end
+			local the_answer
+	
+			-- The boundaries of the numbers are all on the 100s, rows and columns both
+			local row = math.floor(y/100)
+			local column = math.ceil(x/100)
+	
+			-- 0 is in a special place
+			if row == 3 and column == 2 then
+				the_answer = 0
+			else
+				the_answer = row*3 + column
+			end
+	
+			print("ANSWERED",controller.name,the_answer,x,y)
+	
+			player_answered(controller,the_answer)
+
+			-- disable additional clicks
+			controller.on_click = nil
+
+			-- reset background picture
+			controller:set_ui_background("quiz")
+		end
     end
-    
+
     game.time=0
     game.timer=Timer(1)
     function game.timer.on_timer(timer)
@@ -455,103 +412,39 @@ function game.ask_next_question()
     game.timer:start()
 end
 
-function game.times_up()
-   
+function game.times_up(correct_answer)
+
     -- score and gather flash boxes
-   
+
     local player_boxes={}
-   
+
     for controller,player_state in pairs(players) do
-        
+
         if player_state.answer_time > -1 then
             player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
             player_state.ui.flash_box.color = game.WIN_COLOR
         else
         	player_state.ui.flash_box.color = game.LOSE_COLOR
-        	controller:clear_ui()
+			controller:set_ui_background("quiz")
         end
     end
-    
-    -- Get the text box for the right answer, ignoring the first one
-    
-    local correct_answer_text=nil
-    
-    for i=2,4 do
-        local a=ui["answer"..i]
-        if a.extra.correct then
-            correct_answer_text=a
-        end
-    end
-    
-    local flying_answer=nil
-    local flying_answer_interval=nil
-    
-    if correct_answer_text then
-        flying_answer=Text{
-            font=correct_answer_text.font,
-            text=correct_answer_text.text,
-            position=correct_answer_text.position,
-            size=correct_answer_text.position,
-            color=correct_answer_text.color}
-        correct_answer_text.parent:add(flying_answer)
-        correct_answer_text.opacity=0
-        flying_answer_interval=Interval(flying_answer.y,ui.answer1.y)
-    end
-    
-    ui.flying_answer=flying_answer
-    
-    local timeline=Timeline{duration=1000}
-    local progress = Alpha{ timeline = timeline, mode = "EASE_OUT_QUAD" }
-    function timeline.on_new_frame(timeline,msecs)
-        for i=1,4 do
-            local a=ui["answer"..i]
-            if not a.extra.correct then
-                a.opacity=255-(255*progress.alpha)
-                a.color = { 255, 255-(255*progress.alpha), 255-(255*progress.alpha) }
-            elseif flying_answer then
-                flying_answer.y=flying_answer_interval:get_value(progress.alpha)
-                flying_answer.color = { 255-(255*progress.alpha), 255, 255-(255*progress.alpha) }
-            else
-                a.color = { 255-(255*progress.alpha), 255, 255-(255*progress.alpha) }
-            end
-        end
-    end
-    function timeline.on_completed(timeline)
-        timeline.on_new_frame=nil
-        timeline.on_completed=nil
-        game.ready_to_start()
-    end
-    timeline:start()
+
+	game.ready_to_start()
 end
 
+local fake_controller_for_local_player = { name = "Player", set_ui_background = function(self, name) end }
 
 function screen.on_key_down(screen,key)
     if key==keys.Return then
+    	if 0 == player_count() then
+    		player_joined(fake_controller_for_local_player)
+    	end
         if game.ready then
+       		game.got_tap = false
             game.ask_next_question()
         end
-    end
-    
-    if key == keys.space then
-    	if mediaplayer.state == mediaplayer.PLAYING then
-    		mediaplayer:reset()
-    	else
-			mediaplayer.on_loaded = function () mediaplayer:play() end
-			mediaplayer.on_end_of_stream = function ()
-									mediaplayer:seek(0)
-									mediaplayer:play()
-								end
-			mediaplayer:load('jeopardy.mp4')
-		end
-    end
+	end
 end
 
 game.no_players()
-
-local controller
-for _,controller in pairs(controllers.connected) do
-	controllers:on_controller_connected( controller )
-end
-
-math.randomseed(os.time())

@@ -584,8 +584,8 @@ int TPContext::run()
 
     ClutterActor * stage = clutter_stage_get_default();
 
-    clutter_actor_set_width( stage, get_int( TP_SCREEN_WIDTH ) );
-    clutter_actor_set_height( stage, get_int( TP_SCREEN_HEIGHT ) );
+    clutter_actor_set_size( stage, get_int( TP_SCREEN_WIDTH ), get_int( TP_SCREEN_HEIGHT ) );
+    clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
 
     ClutterColor color;
     color.red = 0;
