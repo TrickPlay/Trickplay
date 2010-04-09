@@ -446,7 +446,7 @@ gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer co
 
 // This one deals with tilde to reload current app
 
-gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpoint context )
+gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
 	if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
 	{
