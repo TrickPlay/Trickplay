@@ -192,7 +192,7 @@ foreach( LB_FILE ${LB_FILES} )
 	
 	add_custom_command( 
 		OUTPUT ${LB_FILE_NAME}.cpp
-		COMMAND ${LB_GENERATOR} -l ${NATIVE_LB_FILE}
+		COMMAND ${LB_GENERATOR} -l -p ${NATIVE_LB_FILE}
 		DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
 endforeach( LB_FILE )
