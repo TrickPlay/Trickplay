@@ -514,3 +514,65 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
       *len = (def ? strlen(def) : 0);
     return def;
 }
+
+
+void lb_profiling_add(lua_State*L,const char *name,double ms)
+{
+    LSG;
+
+    lua_getfield(L,LUA_REGISTRYINDEX,LB_PROFILING_TABLE);
+
+    if (lua_isnil(L,-1))
+    {
+        // The profiling table is not there, we need to create it
+        lua_pop(L,1);
+        lua_newtable(L);
+        lua_pushvalue(L,-1);
+        lua_setfield(L,LUA_REGISTRYINDEX,LB_PROFILING_TABLE);
+    }
+
+    // Now the profiling table is on top of the stack
+
+    // See if the table has an entry for the name passed in
+
+    lua_getfield(L,-1,name);
+
+    if (lua_isnil(L,-1))
+    {
+        // There is no entry for this name, we add an entry
+
+        lua_pop(L,1);           // pop the nil
+
+        lua_newtable(L);        // create a new table for this name
+
+        lua_pushinteger(L,1);   // invocations, is 1 the first time
+        lua_rawseti(L,-2,1);
+
+        lua_pushnumber(L,ms);   // time
+        lua_rawseti(L,-2,2);
+
+        // Put the table in the profiling table
+        lua_setfield(L,-2,name);
+    }
+    else
+    {
+        lua_rawgeti(L,-1,1);    // Get the count
+        int count=lua_tointeger(L,-1)+1;
+        lua_pop(L,1);
+        lua_pushinteger(L,count);
+        lua_rawseti(L,-2,1);
+
+        lua_rawgeti(L,-1,2);    // Get the time
+        double t=lua_tonumber(L,-1)+ms;
+        lua_pop(L,1);
+        lua_pushnumber(L,t);
+        lua_rawseti(L,-2,2);
+
+        lua_pop(L,1);           // Pop the name table
+    }
+
+    // Pop the profiling table
+    lua_pop(L,1);
+
+    LSG_END(0);
+}
