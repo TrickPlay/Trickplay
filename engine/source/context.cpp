@@ -809,6 +809,8 @@ int TPContext::load_app( App ** app )
         return TP_RUN_APP_PREPARE_FAILED;
     }
 
+    controller_list.reset_all();
+
     return TP_RUN_OK;
 }
 
@@ -847,8 +849,7 @@ int TPContext::launch_app( const char * app_id )
 
     g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
 
-    // TODO
-    // Not right to set this before the idle source fires
+    // TODO: Not right to set this before the idle source fires
 
     is_first_app = false;
 
@@ -897,8 +898,7 @@ void TPContext::close_app()
             {
                 g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
 
-                // TODO
-                // Not right to set here
+                // TODO Not right to set here
 
                 is_first_app = true;
             }
