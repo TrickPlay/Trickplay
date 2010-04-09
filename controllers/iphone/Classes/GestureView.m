@@ -463,6 +463,7 @@
 		else if ([msg hasPrefix:@"RT"])  //Reset
 		{
 			mAccelMode = 0;
+			[self ClearUIElements];
 		}
 		else if ([msg hasPrefix:@"DR"])
 		{
@@ -554,13 +555,7 @@
 		}
 		else if ([msg hasPrefix:@"CU"])
 		{
-			[mTextField resignFirstResponder];
-			mTextField.hidden = YES;
-			NSLog(@"UI CLEAR occured");
-			if (mStyleAlert != nil)
-			{
-				[mStyleAlert dismissWithClickedButtonIndex:10 animated:YES];
-			}
+			[self ClearUIElements];
 		}
 		else if ([msg hasPrefix:@"MC"])
 		{
@@ -631,6 +626,20 @@
 	//[sock writeData:data withTimeout:-1 tag:1];
 	NSData *echoData = [@"ECHO\n" dataUsingEncoding:NSUTF8StringEncoding];
 	[listenSocket writeData:echoData withTimeout:-1 tag:0];
+}
+
+- (void)ClearUIElements
+{
+	[mTextField resignFirstResponder];
+	mTextField.hidden = YES;
+	NSLog(@"UI CLEAR occured");
+	if (mStyleAlert != nil)
+	{
+		[mStyleAlert dismissWithClickedButtonIndex:10 animated:YES];
+	}
+	//Clear the background and revert to default trickplay logo
+	backgroundView.image = [UIImage imageNamed:@"background.png"];
+	
 }
 
 - (void)onKeyboardDisplay
