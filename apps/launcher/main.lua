@@ -24,12 +24,10 @@ local make_tile = function(id,name)
 end
 
 local app
-for i = 1,5 do
-	for _,app in pairs(apps:get_all()) do
-		if(app.id ~= "com.trickplay.launcher") then
-			table.insert(items, make_tile(app.id,app.name))
-			table.insert(items2, make_tile(app.id,app.name))
-		end
+for _,app in pairs(apps:get_all()) do
+	if(app.id ~= "com.trickplay.launcher") then
+		table.insert(items, make_tile(app.id,app.name))
+		table.insert(items2, make_tile(app.id,app.name) )
 	end
 end
 
@@ -192,7 +190,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = 10,
+										x = ferris.ferris.w/2,
 										mode = "EASE_OUT_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -207,7 +205,7 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = 10,
+										x = ferris.ferris.w/2,
 										z = (16*#items)*math.sin(math.rad(-30)),
 										y = screen.h/2,
 										mode = "EASE_IN_OUT_SINE",
@@ -218,7 +216,7 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = 10,
+										x = ferris.ferris.w/2,
 										z = (16*#items)*math.sin(math.rad(-30)),
 										y = screen.h/2,
 										opacity = 0,
