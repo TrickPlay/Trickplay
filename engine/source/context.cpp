@@ -429,7 +429,7 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 #ifndef TP_PRODUCTION
 
-// This one deals with escape
+// This one deals with escape to exit current app
 
 gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
@@ -441,6 +441,21 @@ gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer co
     }
 
     return FALSE;
+}
+
+
+// This one deals with tilde to reload current app
+
+gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpoint context )
+{
+	if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
+	{
+		( ( TPContext * )context )->reload_app();
+		
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 #endif
@@ -600,6 +615,7 @@ int TPContext::run()
 #ifndef TP_PRODUCTION
 
     g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
+    g_signal_connect( stage, "captured-event", ( GCallback )tilde_handler, this );
 
 #endif
 
