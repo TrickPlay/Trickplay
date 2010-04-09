@@ -26,10 +26,9 @@ function controllers.on_controller_connected(controllers,controller)
 
 	player.connected_controllers._[controller] = controller
 
+    if controller.has_accelerometer then
 	start_text.text = "Press ENTER or TAP to start"
 	start_text.x = (screen.w-start_text.size[1])/2
-    if(controller.has_accelerometer) then
-    	controller:start_accelerometer("H", SAMPLE_PERIOD)
 
     	function controller.on_accelerometer(controller, x, y, z)
     		-- Accelerometer measurements are based on axes from http://www.switchonthecode.com/sites/default/files/825/images/device_axes.png
@@ -51,14 +50,22 @@ function controllers.on_controller_connected(controllers,controller)
 
 end
 
-
+for _,controller in pairs(controllers.connected) do
+    controllers:on_controller_connected(controller)
+end
 
 function player.connected_controllers.game_on(self)
-	for key,controller in pairs(self._) do controller:set_ui_background("jumper") end
+	for key,controller in pairs(self._) do
+            controller:set_ui_background("jumper")
+            controller:start_accelerometer("H", SAMPLE_PERIOD)
+        end
 end
 
 function player.connected_controllers.death_splat(self)
-	for key,controller in pairs(self._) do controller:set_ui_background("splat") end
+	for key,controller in pairs(self._) do
+            controller:set_ui_background("splat")
+            controller:stop_accelerometer()    
+        end
 end
 
 

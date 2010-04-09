@@ -908,6 +908,19 @@ ControllerList::ControllerSet ControllerList::get_controllers()
     return result;
 }
 
+//.............................................................................
+
+void ControllerList::reset_all()
+{
+    LOCK;
+
+    for ( TPControllerSet::iterator it = controllers.begin(); it != controllers.end(); ++it )
+    {
+        ( *it )->controller->reset();
+    }
+}
+
+
 //==============================================================================
 // External-facing functions. They all do a sanity check and then post an event.
 
