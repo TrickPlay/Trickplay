@@ -4,92 +4,106 @@
 
 #include "common.h"
 #include "images.h"
+#include "profiler.h"
 
 bool Images::load_texture_from_data( ClutterTexture * texture, const void * data, size_t length )
 {
-    // Wrap the data into a FreeImage memory stream. This does not copy the data
+    int width;
+    int height;
+    int pitch;
+    int depth;
 
-    FIMEMORY * mem = FreeImage_OpenMemory( ( BYTE * )data, length );
+    unsigned char * pixels = NULL;
 
-    if ( !mem )
     {
-        g_debug( "FAILED TO OPEN FREEIMAGE MEMORY STREAM" );
-        return false;
-    }
+        Profiler::Block _profiler( "Images::load_texture_from_data(decode)" );
 
-    // Get the image format and bail if it is unknown
+        // Wrap the data into a FreeImage memory stream. This does not copy the data
 
-    FREE_IMAGE_FORMAT format = FreeImage_GetFileTypeFromMemory( mem, 0 );
+        FIMEMORY * mem = FreeImage_OpenMemory( ( BYTE * )data, length );
 
-    if ( format == FIF_UNKNOWN )
-    {
-        g_debug( "UNKNOWN IMAGE FORMAT" );
+        if ( !mem )
+        {
+            g_debug( "FAILED TO OPEN FREEIMAGE MEMORY STREAM" );
+            return false;
+        }
+
+        // Get the image format and bail if it is unknown
+
+        FREE_IMAGE_FORMAT format = FreeImage_GetFileTypeFromMemory( mem, 0 );
+
+        if ( format == FIF_UNKNOWN )
+        {
+            g_debug( "UNKNOWN IMAGE FORMAT" );
+            FreeImage_CloseMemory( mem );
+            return false;
+        }
+
+        // Load the image
+
+        FIBITMAP * image = FreeImage_LoadFromMemory( format, mem, 0 );
+
+        // Close the memory stream
+
         FreeImage_CloseMemory( mem );
-        return false;
+
+        // Bail if the image is no good
+
+        if ( !image )
+        {
+            g_debug( "FAILED TO LOAD IMAGE" );
+            return false;
+        }
+
+        // Convert it to either 24 or 32 bits (if it has transparency)
+
+        unsigned int bpp = 0;
+        FIBITMAP * image2 = NULL;
+
+        if ( !FreeImage_IsTransparent( image ) )
+        {
+            image2 = FreeImage_ConvertTo24Bits( image );
+            bpp = 24;
+        }
+
+        // Use this as a fallback in case we tried to convert it to 24 bits and that
+        // did not work.
+
+        if ( !image2 )
+        {
+            image2 = FreeImage_ConvertTo32Bits( image );
+            bpp = 32;
+        }
+
+        // Dump the old image
+
+        FreeImage_Unload( image );
+
+        // Bail if the conversion fails
+
+        if ( !image2 )
+        {
+            g_debug( "FAILED TO CONVERT IMAGE TO %u BITS", bpp );
+            return false;
+        }
+
+        // Allocate a buffer and convert the image to raw bits
+
+        width  = FreeImage_GetWidth( image2 );
+        height = FreeImage_GetHeight( image2 );
+        pitch  = FreeImage_GetPitch( image2 );
+        depth  = ( bpp == 32 ? 4 : 3 );
+
+        pixels = ( unsigned char * )malloc( height * pitch );
+
+        FreeImage_ConvertToRawBits( ( BYTE * )pixels, image2, pitch, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, TRUE );
+
+        // Dump the image
+
+        FreeImage_Unload( image2 );
     }
 
-    // Load the image
-
-    FIBITMAP * image = FreeImage_LoadFromMemory( format, mem, 0 );
-
-    // Close the memory stream
-
-    FreeImage_CloseMemory( mem );
-
-    // Bail if the image is no good
-
-    if ( !image )
-    {
-        g_debug( "FAILED TO LOAD IMAGE" );
-        return false;
-    }
-
-    // Convert it to either 24 or 32 bits (if it has transparency)
-
-    unsigned int bpp = 0;
-    FIBITMAP * image2 = NULL;
-
-    if ( !FreeImage_IsTransparent( image ) )
-    {
-        image2 = FreeImage_ConvertTo24Bits( image );
-        bpp = 24;
-    }
-
-    // Use this as a fallback in case we tried to convert it to 24 bits and that
-    // did not work.
-
-    if ( !image2 )
-    {
-        image2 = FreeImage_ConvertTo32Bits( image );
-        bpp = 32;
-    }
-
-    // Dump the old image
-
-    FreeImage_Unload( image );
-
-    // Bail if the conversion fails
-
-    if ( !image2 )
-    {
-        g_debug( "FAILED TO CONVERT IMAGE TO %u BITS", bpp );
-        return false;
-    }
-
-    // Allocate a buffer and convert the image to raw bits
-
-    int width  = FreeImage_GetWidth( image2 );
-    int height = FreeImage_GetHeight( image2 );
-    int pitch  = FreeImage_GetPitch( image2 );
-    int depth  = ( bpp == 32 ? 4 : 3 );
-
-    unsigned char * pixels = ( unsigned char * )malloc( height * pitch );
-
-    FreeImage_ConvertToRawBits( ( BYTE * )pixels, image2, pitch, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, TRUE );
-
-    // Dump the image
-
-    FreeImage_Unload( image2 );
+    Profiler::Block _profiler( "Images::load_texture_from_data(clutter)" );
 
 #if 0
 
@@ -156,6 +170,8 @@ bool Images::load_texture_from_data( ClutterTexture * texture, const void * data
 
 bool Images::load_texture_from_file( ClutterTexture * texture, const char * file_name )
 {
+    Profiler::Block __profiler( "Images::load_texture_from_file" );
+
     gchar * data = NULL;
     gsize length = 0;
 
