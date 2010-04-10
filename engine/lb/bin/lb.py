@@ -490,24 +490,13 @@ def emit( stuff , f ):
                 for line in code.splitlines():
                     f.write( "  " + line.strip() + "\n" )
         
-        def profiling_header():
+        def profiling_header(name):
         
         	if options.profiling:
-        		return "  GTimeVal _start;\n  g_get_current_time(&_start);\n"
+        		return "  Profiler::Block _profiler(\"%s\");\n" % name
         	else:
         		return ""
         		
-        def profiling_footer(name):
-        	
-        	if options.profiling:
-        		return ("  GTimeVal _end;\n"+
-        		       "  g_get_current_time(&_end);\n"+
-        		       "  double ms=(((double)(_end.tv_sec*1000))+(_end.tv_usec/1000.0))-(((double)(_start.tv_sec*1000))+(_start.tv_usec/1000.0));\n"+
-        		       "  lb_profiling_add(L,\"%s\",ms);\n" % ( name , ) )
-        	else:
-        		return ""
-        
-        
         bind_name = bind[ "name" ]
         bind_type = bind[ "type" ]
         udata_type = bind[ "udata" ]
@@ -532,7 +521,7 @@ def emit( stuff , f ):
                     "{\n"
                     "%s"
                     %
-                    ( func[ "name" ] , profiling_header() )
+                    ( func[ "name" ] , profiling_header(func["name"]) )
                 )
                 
                 
@@ -573,17 +562,17 @@ def emit( stuff , f ):
                 
                 elif func_type is None:
                                         
-                    f.write( "%s  return 0;\n" % profiling_footer(func["name"]) )
+                    f.write( "  return 0;\n" )
                     
                 elif func_type in [ "table" , "udata" ]:
                     
-                    f.write( "%s  return 1;\n" % profiling_footer(func["name"]) );
+                    f.write( "  return 1;\n" );
             
                 else:
                     
                     write_push_result( func_type )
                     
-                    f.write( "%s  return 1;\n" %  profiling_footer(func["name"]) )
+                    f.write( "  return 1;\n" )
                     
                 f.write( "}\n" )
             
@@ -662,7 +651,7 @@ def emit( stuff , f ):
                     "  luaL_checktype(L,1,LUA_TUSERDATA);\n"
                     "  %s self(lb_get_self(L,%s));\n"
                     %
-                    ( bind_name , func[ "name" ] , profiling_header() , udata_type , udata_type )
+                    ( bind_name , func[ "name" ] , profiling_header("%s_%s"%(bind_name,func["name"])) , udata_type , udata_type )
                 )
                 
                 
@@ -703,16 +692,16 @@ def emit( stuff , f ):
                     
                 elif func_type is None:
                     
-                    f.write( "%s  return 0;\n" % profiling_footer("%s_%s"%(bind_name,func["name"])))
+                    f.write( "  return 0;\n" )
                     
                 elif func_type in [ "table" , "udata" ]:
                     
-                    f.write( "%s  return 1;\n" % profiling_footer("%s_%s"%(bind_name,func["name"])));
+                    f.write( "  return 1;\n" );
             
                 else:
                     
                     write_push_result( func_type )
-                    f.write( "%s  return 1;\n" % profiling_footer("%s_%s"%(bind_name,func["name"])))
+                    f.write( "  return 1;\n" )
                     
                 f.write( "}\n" )
                 
@@ -736,7 +725,7 @@ def emit( stuff , f ):
                     "  lua_setmetatable(L,-2);\n"
                     "\n"
                     %
-                    ( bind_name , profiling_header() , udata_type , udata_type , metatable_name )
+                    ( bind_name , profiling_header("new_%s"%bind_name) , udata_type , udata_type , metatable_name )
                 )
                 
                 for index , param in enumerate( func[ "parameters" ] ):
@@ -767,7 +756,7 @@ def emit( stuff , f ):
                         bind_name );
                 
                 f.write(
-                    "%s  return 1;\n" % profiling_footer("new_%s"%(bind_name))
+                    "  return 1;\n" 
                 )
                     
                 
@@ -791,7 +780,7 @@ def emit( stuff , f ):
                     "%s"
                     "  %s self(lb_get_self(L,%s));\n"
                     %
-                    ( bind_name , profiling_header() , udata_type , udata_type )
+                    ( bind_name , profiling_header("delete_%s"%bind_name) , udata_type , udata_type )
                 )
                 
                 if options.instrument:
@@ -812,7 +801,7 @@ def emit( stuff , f ):
                     
                     pass
                 
-                f.write( "%s  return 0;\n}\n" % profiling_footer("delete_%s"%(bind_name)))
+                f.write( "  return 0;\n}\n" )
             
                 
             #-----------------------------------------------------------------------
@@ -838,7 +827,7 @@ def emit( stuff , f ):
                     "%s"
                     "  %s self(lb_get_self(L,%s));\n"
                     %
-                    ( bind_name , prop[ "name" ] , profiling_header() , udata_type , udata_type )
+                    ( bind_name , prop[ "name" ] , profiling_header("get_%s_%s"%(bind_name,prop["name"])) , udata_type , udata_type )
                 )
               
                 if prop[ "get_code" ] is not None:
@@ -878,8 +867,8 @@ def emit( stuff , f ):
                             )
                         
                     f.write(
-                        "%s  return 1;\n"
-                        "}\n" % profiling_footer("get_%s_%s"%(bind_name,prop["name"]))
+                        "  return 1;\n"
+                        "}\n" 
                         
                     )
                     
@@ -898,7 +887,7 @@ def emit( stuff , f ):
                         "%s"
                         "  %s self(lb_get_self(L,%s));\n"
                         %
-                        ( bind_name , prop[ "name" ] , profiling_header() , udata_type , udata_type )
+                        ( bind_name , prop[ "name" ] , profiling_header("set_%s_%s"%(bind_name,prop["name"])) , udata_type , udata_type )
                     )
                   
                     if prop[ "set_code" ] is not None:
@@ -914,8 +903,8 @@ def emit( stuff , f ):
                         flow_code( prop[ "set_code" ] )
                         
                         f.write(
-                            "%s  return 0;\n"
-                            "}\n" % profiling_footer("set_%s_%s"%(bind_name,prop["name"]))
+                            "  return 0;\n"
+                            "}\n" 
                         )
                         
                     else:
@@ -1182,6 +1171,10 @@ def emit( stuff , f ):
         
     
     f.write( '#include "lb.h"\n' );
+    
+    if options.profiling:
+    
+    	f.write( '#include "profiler.h"\n' );
     
     module = None
     initializers  = []

@@ -16,6 +16,7 @@
 #include "sysdb.h"
 #include "controller_server.h"
 #include "mediaplayers.h"
+#include "profiler.h"
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -205,56 +206,6 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 
 //-----------------------------------------------------------------------------
 
-static void dump_profiling( lua_State * L )
-{
-    lua_getfield( L, LUA_REGISTRYINDEX, LB_PROFILING_TABLE );
-
-    if ( lua_isnil( L, -1 ) )
-    {
-        lua_pop( L, 1 );
-        g_info( "Profiling is not enabled, re-build passing --profiling to lb" );
-        return;
-    }
-
-    lua_pushnil( L );
-
-    int total_count = 0;
-    double total_time = 0;
-
-    while ( lua_next( L , -2 ) )
-    {
-        if ( lua_isstring( L, -2 ) )
-        {
-            const char * function = lua_tostring( L, -2 );
-
-            lua_rawgeti( L, -1, 1 );
-
-            int count = lua_tointeger( L, -1 );
-
-            lua_pop( L, 1 );
-
-            lua_rawgeti( L , -1, 2 );
-
-            double time = lua_tonumber( L, -1 );
-
-            lua_pop( L, 1 );
-
-            g_info( "%40s %6d %6.0f %6.0f", function, count, time, time / count );
-
-            total_count += count;
-            total_time += time;
-        }
-
-        lua_pop( L, 1 );
-    }
-
-    g_info( "%40s %6d %6.0f", String( 40 , '-' ).c_str(), total_count, total_time );
-
-    lua_pop( L, 1 );
-}
-
-//-----------------------------------------------------------------------------
-
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
     TPContext * context = ( TPContext * )self;
@@ -339,10 +290,7 @@ int TPContext::console_command_handler( const char * command, const char * param
     }
     else if ( ! strcmp( command , "prof" ) )
     {
-        if ( context->current_app )
-        {
-            dump_profiling( context->current_app->get_lua_state() );
-        }
+        Profiler::dump();
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
