@@ -59,7 +59,7 @@ ferris2.onscreen = {
 					y = ferris.onscreen.y
 				}
 ferris2.fullscreen = {
-						x = screen.w/2 + 134,
+						x = screen.w/2 + 170,
 						y = ferris.fullscreen.y
 					}
 
@@ -157,6 +157,7 @@ function screen.on_key_down(screen, key)
 										y_rotation = -90,
 										x = ferris.fullscreen.x,
 										y = ferris.fullscreen.y,
+										scale = { 1.4, 1.4 },
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() mediaplayer:pause() end,
 									}
@@ -167,6 +168,7 @@ function screen.on_key_down(screen, key)
 										y_rotation = -90,
 										x = ferris2.fullscreen.x,
 										y = ferris2.fullscreen.y,
+										scale = { 1.4, 1.4 },
 										opacity = 255,
 										mode = "EASE_IN_OUT_SINE",
 								}
@@ -230,6 +232,7 @@ function screen.on_key_down(screen, key)
 										y_rotation = -30,
 										x = ferris.onscreen.x,
 										y = ferris.onscreen.y,
+										scale = { 1.0, 1.0 },
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
@@ -240,6 +243,7 @@ function screen.on_key_down(screen, key)
 										y_rotation = -30,
 										x = ferris2.onscreen.x,
 										y = ferris2.onscreen.y,
+										scale = { 1.0, 1.0 },
 										opacity = 0,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
