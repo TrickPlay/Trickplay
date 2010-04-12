@@ -2,22 +2,40 @@ dofile("ferris.lua")
 
 screen:show_all()
 
-local trickplay_red = "960A04"
+local color_scheme = "blue"
+
+local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
+local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }
+
+screen:add(bar_off_image)
+screen:add(bar_on_image)
 
 local items = {}
 local items2 = {}
 
 local make_tile = function(id,name)
 	local item = Group { }
-	local image = Image { src = "assets/"..name.."-off.png", scale = { 0.5, 0.5 } }
+
+	local image = Image { x = 11/2, y = 10/2, z = 0, scale = { 0.5, 0.5 } }
+	local image_data = apps:load_app_file( id, "launcher-icon.png")
+	if not image_data then print ("NO IMAGE DATA") else
+		image:load_from_data( image_data )
+	end
 	item:add(image)
 
-	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 24px", color="FFFFFF" }
-	label.x = (image.w/2 - label.w) - 20
-	label.y = (image.h/2 - label.h) / 2
-	label.z = 1
+	local my_bar_off = Clone { source = bar_off_image, opacity = 255, z = 0, scale = { 0.5, 0.5 } }
+	local my_bar_on  = Clone { source = bar_on_image, opacity = 0, z = 0, scale = { 0.5, 0.5 } }
+	item:add(my_bar_off)
+	item:add(my_bar_on)
+
+	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 24px", color="FFFFFF", z = 1 }
+	label.x = (my_bar_off.w/2 - label.w) - 20
+	label.y = (my_bar_off.h/2 - label.h) / 2
 
 	item.extra.id = id
+	item.extra.label = label
+	item.extra.off = my_bar_off
+	item.extra.on = my_bar_on
 	item:add(label)
 
 	return item
@@ -74,7 +92,7 @@ ferris2.highlight = function () end
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
-local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+local backdrop = Image { src = "assets/background-"..color_scheme..".png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = 70, z=1 }
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = 70, z=1 }
 local LGLabel = Group
@@ -82,7 +100,7 @@ local LGLabel = Group
 							children =
 							{
 								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "000000C0", y = screen.h/16, z = 0 },
-								Image { src = "assets/label-LG.png", z = 1, x = 50, y = screen.h/16+5 },
+								Image { src = "assets/label-Samsung.png", z = 1, x = 50, y = screen.h/12 },
 							},
 							x = 10,
 							z = 1,
