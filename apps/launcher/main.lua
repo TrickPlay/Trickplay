@@ -24,23 +24,48 @@ local make_tile = function(id,name)
 end
 
 local app
-for _,app in pairs(apps:get_all()) do
-	if(app.id ~= "com.trickplay.launcher") then
-		table.insert(items, make_tile(app.id,app.name))
-		table.insert(items2, make_tile(app.id,app.name) )
+for i = 1,5 do
+	for _,app in pairs(apps:get_all()) do
+		if(app.id ~= "com.trickplay.launcher") then
+			table.insert(items, make_tile(app.id,app.name))
+			table.insert(items2, make_tile(app.id,app.name) )
+		end
 	end
 end
 
 local ferris = Ferris.new( 11*#items, items, -30 )
 local ferris2 = Ferris.new( 11*#items, items2, -30 )
 
-ferris.ferris.x = -25*#items
-ferris.ferris.y = screen.h/2
-ferris.ferris.z = (16*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
+-- Move a bit more than double the radius off-screen
+ferris.offscreen = {
+					x = -25*#items,
+					y = screen.h/2
+				}
+ferris.onscreen = {
+					x = 9*#items,
+					y = screen.h/2
+				}
+ferris.fullscreen = {
+					x = screen.w - 9*#items,
+					y = screen.h/2 + 70
+				}
 
-ferris2.ferris.x = 10
-ferris2.ferris.y = ferris.ferris.y
-ferris2.ferris.z = ferris.ferris.z
+ferris.ferris.x = ferris.offscreen.x
+ferris.ferris.y = ferris.offscreen.y
+
+
+ferris2.onscreen = {
+					x = ferris.onscreen.x,
+					y = ferris.onscreen.y
+				}
+ferris2.fullscreen = {
+						x = screen.w/2 + 134,
+						y = ferris.fullscreen.y
+					}
+
+ferris2.ferris.x = ferris2.onscreen.x
+ferris2.ferris.y = ferris2.onscreen.y
+-- Initially hide the 2nd wheel, and disable highlighting on it
 ferris2.ferris.opacity = 0
 ferris2.highlight = function () end
 
@@ -50,14 +75,14 @@ local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
 local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, x = 10, y = 5, z=1 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, x = 10, y = 5, z=1 }
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = 70, z=1 }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = 70, z=1 }
 local LGLabel = Group
 						{
 							children =
 							{
 								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "000000C0", y = screen.h/16, z = 0 },
-								Image { src = "assets/label-LG.png", z = 1, x = 30, y = screen.h/16+5 },
+								Image { src = "assets/label-LG.png", z = 1, x = 50, y = screen.h/16+5 },
 							},
 							x = 10,
 							z = 1,
@@ -117,7 +142,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = -50*#items,
+										x = ferris.offscreen.x,
 										mode = "EASE_IN_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -130,9 +155,8 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -90,
-										x = screen.w,
-										y = screen.h/2+70,
-										z = -18*#items,
+										x = ferris.fullscreen.x,
+										y = ferris.fullscreen.y,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() mediaplayer:pause() end,
 									}
@@ -141,9 +165,8 @@ function screen.on_key_down(screen, key)
 								{
 										duration = 1000,
 										y_rotation = -90,
-										x = screen.w/2+134,
-										y = screen.h/2+70,
-										z = -18*#items,
+										x = ferris2.fullscreen.x,
+										y = ferris2.fullscreen.y,
 										opacity = 255,
 										mode = "EASE_IN_OUT_SINE",
 								}
@@ -161,7 +184,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = 20,
+									x = 50,
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -169,7 +192,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = (screen.w-playLabel.w) - 150,
+									x = (screen.w-playLabel.w) - 250,
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -177,7 +200,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = (screen.w-getLabel.w) - 480,
+									x = (screen.w-getLabel.w)/2,
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -190,7 +213,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = ferris.ferris.w/2,
+										x = ferris.onscreen.x,
 										mode = "EASE_OUT_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -205,9 +228,8 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = ferris.ferris.w/2,
-										z = (16*#items)*math.sin(math.rad(-30)),
-										y = screen.h/2,
+										x = ferris.onscreen.x,
+										y = ferris.onscreen.y,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
@@ -216,9 +238,8 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = ferris.ferris.w/2,
-										z = (16*#items)*math.sin(math.rad(-30)),
-										y = screen.h/2,
+										x = ferris2.onscreen.x,
+										y = ferris2.onscreen.y,
 										opacity = 0,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
