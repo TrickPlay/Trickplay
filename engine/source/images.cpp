@@ -16,7 +16,7 @@ bool Images::load_texture_from_data( ClutterTexture * texture, const void * data
     unsigned char * pixels = NULL;
 
     {
-        Profiler::Block _profiler( "Images::load_texture_from_data(decode)" );
+        PROFILER( "Images::load_texture_from_data(decode)" );
 
         // Wrap the data into a FreeImage memory stream. This does not copy the data
 
@@ -103,7 +103,7 @@ bool Images::load_texture_from_data( ClutterTexture * texture, const void * data
         FreeImage_Unload( image2 );
     }
 
-    Profiler::Block _profiler( "Images::load_texture_from_data(clutter)" );
+    PROFILER( "Images::load_texture_from_data(clutter)" );
 
 #if 0
 
@@ -170,7 +170,7 @@ bool Images::load_texture_from_data( ClutterTexture * texture, const void * data
 
 bool Images::load_texture_from_file( ClutterTexture * texture, const char * file_name )
 {
-    Profiler::Block __profiler( "Images::load_texture_from_file" );
+    PROFILER( "Images::load_texture_from_file" );
 
     gchar * data = NULL;
     gsize length = 0;
