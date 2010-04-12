@@ -77,7 +77,7 @@ ferris2.onscreen = {
 					y = ferris.onscreen.y
 				}
 ferris2.fullscreen = {
-						x = screen.w/2 + 170,
+						x = screen.w/2 + 200,
 						y = ferris.fullscreen.y
 					}
 
@@ -93,14 +93,14 @@ local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
 local backdrop = Image { src = "assets/background-"..color_scheme..".png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = 70, z=1 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = 70, z=1 }
-local LGLabel = Group
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
+local OEMLabel = Group
 						{
 							children =
 							{
-								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "000000C0", y = screen.h/16, z = 0 },
-								Image { src = "assets/label-Samsung.png", z = 1, x = 50, y = screen.h/12 },
+								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "00000080", y = screen.h/16, z = 0 },
+								Image { src = "assets/label-Samsung.png", z = 1, x = screen.h/16, y = 2*screen.h/16 },
 							},
 							x = 10,
 							z = 1,
@@ -108,7 +108,7 @@ local LGLabel = Group
 						}
 
 screen:add(backdrop)
-screen:add(LGLabel)
+screen:add(OEMLabel)
 screen:add(getLabel)
 screen:add(ferris2_group)
 screen:add(playLabel)
@@ -200,7 +200,7 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_OUT_SINE",
 								}
 							)
-			LGLabel:animate(
+			OEMLabel:animate(
 								{
 									duration = 1000,
 									opacity = 255,
@@ -274,7 +274,7 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_IN_SINE",
 								}
 							)
-			LGLabel:animate(
+			OEMLabel:animate(
 								{
 									duration = 1000,
 									opacity = 0,
