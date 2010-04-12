@@ -39,7 +39,7 @@ Ferris = {
 			item.y_rotation = { 90, 0, 0 }
 
 			circle:add(item)
-			item.opacity = ((1+math.cos(math.rad(- (p-1)*360/num_items)))/2)*255
+			item.opacity = ((1+math.cos(math.rad(- (p-1)*360/num_items)))/2)^6*255
 		end
 
 		circle:move_anchor_point( radius, radius )
@@ -80,7 +80,7 @@ Ferris = {
 		local num
 		for num,child in ipairs(children) do
 			child.z_rotation = { -destination*(360/self.num_items), 0, 0 }
-			child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)*255
+			child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)^6*255
 		end
 
 		self.spin.destination = destination % self.num_items
@@ -112,7 +112,7 @@ Ferris = {
 									(1-math.abs(self.spin.a.alpha + self.spin.a2.alpha - 1)) * 30
 									, 0, 0 }
 				-- And now fade based on the depth from front
-				child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)*255
+				child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)^6*255
 			end
 		end
 		
