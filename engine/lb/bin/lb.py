@@ -493,7 +493,7 @@ def emit( stuff , f ):
         def profiling_header(name):
         
         	if options.profiling:
-        		return "  Profiler::Block _profiler(\"%s\");\n" % name
+        		return "  PROFILER(\"%s\");\n" % name
         	else:
         		return ""
         		
