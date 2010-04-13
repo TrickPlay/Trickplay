@@ -2,45 +2,90 @@ dofile("ferris.lua")
 
 screen:show_all()
 
-local trickplay_red = "960A04"
+local color_scheme = "blue"
+
+local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
+local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }
+
+screen:add(bar_off_image)
+screen:add(bar_on_image)
 
 local items = {}
 local items2 = {}
 
 local make_tile = function(id,name)
 	local item = Group { }
-	local image = Image { src = "assets/"..name.."-off.png", scale = { 0.5, 0.5 } }
+
+	local image = Image { x = 11/2, y = 10/2, z = 0, scale = { 0.5, 0.5 } }
+	local image_data = apps:load_app_file( id, "launcher-icon.png")
+	if not image_data then
+		image.src = "assets/generic-app-icon.png"
+	else
+		image:load_from_data( image_data )
+	end
 	item:add(image)
 
-	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 24px", color="FFFFFF" }
-	label.x = (image.w/2 - label.w) - 20
-	label.y = (image.h/2 - label.h) / 2
-	label.z = 1
+	local my_bar_off = Clone { source = bar_off_image, opacity = 255, z = 0, scale = { 0.5, 0.5 } }
+	local my_bar_on  = Clone { source = bar_on_image, opacity = 0, z = 0, scale = { 0.5, 0.5 } }
+	item:add(my_bar_off)
+	item:add(my_bar_on)
+
+	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 24px", color="FFFFFF", z = 1 }
+	label.x = (my_bar_off.w/2 - label.w) - 20
+	label.y = (my_bar_off.h/2 - label.h) / 2
 
 	item.extra.id = id
+	item.extra.label = label
+	item.extra.off = my_bar_off
+	item.extra.on = my_bar_on
 	item:add(label)
 
 	return item
 end
 
 local app
-for _,app in pairs(apps:get_all()) do
-	if(app.id ~= "com.trickplay.launcher") then
-		table.insert(items, make_tile(app.id,app.name))
-		table.insert(items2, make_tile(app.id,app.name) )
+for i = 1,5 do
+	for _,app in pairs(apps:get_all()) do
+		if(app.id ~= "com.trickplay.launcher") then
+			table.insert(items, make_tile(app.id,app.name))
+			table.insert(items2, make_tile(app.id,app.name) )
+		end
 	end
 end
 
 local ferris = Ferris.new( 11*#items, items, -30 )
 local ferris2 = Ferris.new( 11*#items, items2, -30 )
 
-ferris.ferris.x = -25*#items
-ferris.ferris.y = screen.h/2
-ferris.ferris.z = (16*#items)*math.sin(math.rad(ferris.ferris.y_rotation[1]))
+-- Move a bit more than double the radius off-screen
+ferris.offscreen = {
+					x = -25*#items,
+					y = screen.h/2
+				}
+ferris.onscreen = {
+					x = 9*#items,
+					y = screen.h/2
+				}
+ferris.fullscreen = {
+					x = screen.w - 9*#items,
+					y = screen.h/2 + 70
+				}
 
-ferris2.ferris.x = 10
-ferris2.ferris.y = ferris.ferris.y
-ferris2.ferris.z = ferris.ferris.z
+ferris.ferris.x = ferris.offscreen.x
+ferris.ferris.y = ferris.offscreen.y
+
+
+ferris2.onscreen = {
+					x = ferris.onscreen.x,
+					y = ferris.onscreen.y
+				}
+ferris2.fullscreen = {
+						x = screen.w/2 + 200,
+						y = ferris.fullscreen.y
+					}
+
+ferris2.ferris.x = ferris2.onscreen.x
+ferris2.ferris.y = ferris2.onscreen.y
+-- Initially hide the 2nd wheel, and disable highlighting on it
 ferris2.ferris.opacity = 0
 ferris2.highlight = function () end
 
@@ -49,15 +94,15 @@ ferris2.highlight = function () end
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
-local backdrop = Image { src = "assets/background-1.png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, x = 10, y = 5, z=1 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 48px", color="FFFFFF", opacity = 0, x = 10, y = 5, z=1 }
-local LGLabel = Group
+local backdrop = Image { src = "assets/background-"..color_scheme..".png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
+local OEMLabel = Group
 						{
 							children =
 							{
-								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "000000C0", y = screen.h/16, z = 0 },
-								Image { src = "assets/label-LG.png", z = 1, x = 30, y = screen.h/16+5 },
+								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "00000080", y = screen.h/16, z = 0 },
+								Image { src = "assets/label-Samsung.png", z = 1, x = screen.h/16, y = 2*screen.h/16 },
 							},
 							x = 10,
 							z = 1,
@@ -65,7 +110,7 @@ local LGLabel = Group
 						}
 
 screen:add(backdrop)
-screen:add(LGLabel)
+screen:add(OEMLabel)
 screen:add(getLabel)
 screen:add(ferris2_group)
 screen:add(playLabel)
@@ -117,7 +162,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = -50*#items,
+										x = ferris.offscreen.x,
 										mode = "EASE_IN_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -130,9 +175,9 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -90,
-										x = screen.w,
-										y = screen.h/2+70,
-										z = -18*#items,
+										x = ferris.fullscreen.x,
+										y = ferris.fullscreen.y,
+										scale = { 1.4, 1.4 },
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() mediaplayer:pause() end,
 									}
@@ -141,9 +186,9 @@ function screen.on_key_down(screen, key)
 								{
 										duration = 1000,
 										y_rotation = -90,
-										x = screen.w/2+134,
-										y = screen.h/2+70,
-										z = -18*#items,
+										x = ferris2.fullscreen.x,
+										y = ferris2.fullscreen.y,
+										scale = { 1.4, 1.4 },
 										opacity = 255,
 										mode = "EASE_IN_OUT_SINE",
 								}
@@ -157,11 +202,11 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_OUT_SINE",
 								}
 							)
-			LGLabel:animate(
+			OEMLabel:animate(
 								{
 									duration = 1000,
 									opacity = 255,
-									x = 20,
+									x = 50,
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -169,7 +214,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = (screen.w-playLabel.w) - 150,
+									x = (screen.w-playLabel.w) - 250,
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -177,7 +222,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = (screen.w-getLabel.w) - 480,
+									x = (screen.w-getLabel.w)/2,
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -190,7 +235,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 500,
-										x = ferris.ferris.w/2,
+										x = ferris.onscreen.x,
 										mode = "EASE_OUT_SINE",
 										on_completed = function() ferris:highlight() end,
 									}
@@ -205,9 +250,9 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = ferris.ferris.w/2,
-										z = (16*#items)*math.sin(math.rad(-30)),
-										y = screen.h/2,
+										x = ferris.onscreen.x,
+										y = ferris.onscreen.y,
+										scale = { 1.0, 1.0 },
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
@@ -216,9 +261,9 @@ function screen.on_key_down(screen, key)
 									{
 										duration = 1000,
 										y_rotation = -30,
-										x = ferris.ferris.w/2,
-										z = (16*#items)*math.sin(math.rad(-30)),
-										y = screen.h/2,
+										x = ferris2.onscreen.x,
+										y = ferris2.onscreen.y,
+										scale = { 1.0, 1.0 },
 										opacity = 0,
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
@@ -231,7 +276,7 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_IN_SINE",
 								}
 							)
-			LGLabel:animate(
+			OEMLabel:animate(
 								{
 									duration = 1000,
 									opacity = 0,
