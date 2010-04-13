@@ -1,3 +1,12 @@
+-- Play background loop
+mediaplayer.on_loaded = function () mediaplayer:play() end
+mediaplayer.on_end_of_stream = function ()
+						mediaplayer:seek(0)
+						mediaplayer:play()
+					end
+mediaplayer:load('background.mp4')
+
+
 -- Create the logo Image we'll spin
 local logo = Image { size = { screen.w/2, screen.h/2 }, src = "trickplay_logo_dark_bg.png" }
 
