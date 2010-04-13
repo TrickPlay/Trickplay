@@ -3,7 +3,9 @@
 
 #ifdef TP_PROFILING
 
-#define PROFILER(name) Profiler _profiler(name)
+#define PROFILER(name)  Profiler _profiler(name)
+#define PROFILER_DUMP   Profiler::dump()
+#define PROFILER_RESET  Profiler::reset()
 
 #include "common.h"
 
@@ -27,6 +29,8 @@ public:
 
     static void dump();
 
+    static void reset();
+
 private:
 
     Profiler( const Profiler & );
@@ -39,12 +43,16 @@ private:
     typedef std::pair< unsigned int , double > Entry;
     typedef std::map< String , Entry > EntryMap;
 
+    static bool compare( std::pair< String, Entry > a, std::pair< String, Entry > b );
+
     static EntryMap entries;
 };
 
 #else
 
 #define PROFILER(name)  while(0){}
+#define PROFILER_DUMP   g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
+#define PROFILER_RESET  while(0){}
 
 #endif // TP_PROFILING
 

@@ -755,6 +755,46 @@ void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & i
     }
 }
 
+String get_file_extension( const String & path, bool include_dot = true )
+{
+    String result;
+
+    if ( !path.empty() )
+    {
+        // See if the last character is a separator. If it is,
+        // we bail. Otherwise, g_path_get_basename would give us
+        // the element before the separator and not the last element.
+
+        if ( !g_str_has_suffix( path.c_str(), G_DIR_SEPARATOR_S ) )
+        {
+            gchar * basename = g_path_get_basename( path.c_str() );
+
+            if ( basename )
+            {
+                gchar * * parts = g_strsplit( basename, ".", 0 );
+
+                guint count = g_strv_length( parts );
+
+                if ( count > 1 )
+                {
+                    result = parts[count - 1];
+
+                    if ( !result.empty() && include_dot )
+                    {
+                        result = "." + result;
+                    }
+                }
+
+                g_strfreev( parts );
+
+                g_free( basename );
+            }
+        }
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------
 
 String ControllerServer::serve_path( const String & group, const String & path )
@@ -764,6 +804,8 @@ String ControllerServer::serve_path( const String & group, const String & path )
     gchar * id = g_compute_checksum_for_string( G_CHECKSUM_SHA1, s.c_str(), -1 );
     String result( id );
     g_free( id );
+
+    result += get_file_extension( path );
 
     if ( path_map.find( result ) == path_map.end() )
     {
