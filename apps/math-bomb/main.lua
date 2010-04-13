@@ -15,86 +15,74 @@ game={
 -------------------------------------------------------------------------------
 -- Setup the UI
 
+local NUMBER_FONT_SIZE = 120 * 1080/screen.h
+
 math.randomseed(os.time())
 
-dofile("layout.lua")
+-- Place blackboard behind content
+screen:add(Image { src="assets/chalkboard-background.png", size={screen.w,screen.h}, z = -1 })
 
-ui={}
+local ui ={}
 
--- Place a semi-transparent curtain behind content
-screen:add(Rectangle { size={screen.w,screen.h}, color="00000080" })
-
-
-layout(
-    screen,
-    {
-        padding=10,
-        columns=
-        {
-            {
-                size=660,
-                rows=
-                {
-                    {
-	                	padding={top=20, left=20, right=20},
-                        content=Text{
-                            name="bigger_number",
-                            font="Eraser,DejaVu Sans,Sans 72px" ,
+ui.question_answer = Group { x = 3*screen.w/12, y = 2*screen.h/6 }
+ui.bigger_number = Text{
+                            font="Eraser,DejaVu Sans,Sans "..NUMBER_FONT_SIZE.."px" ,
                             text="" ,
                             wrap=true,
-                            color="FFFFFF",
+                            color="FFFFFFC0",
+                            y = 0,
                             }
-                    }
-                    ,
-                    {
-	                	padding={top=20, left=20, right=20},
-                        content=Text{
-                            name="littler_number",
-                            font="Eraser,DejaVu Sans,Sans 72px" ,
-                            text="Press ENTER or join to play..." ,
-                            wrap=true,
-                            color="FFFFFF"
-                            }
-                    }
-                    ,
-                    {
-	                	padding={top=20, left=20, right=20},
-                        content=Text{
-                            name="answer",
-                            font="Eraser,DejaVu Sans,Sans 72px" ,
+ui.littler_number = Text{
+                            font="Eraser,DejaVu Sans,Sans "..NUMBER_FONT_SIZE.."px" ,
                             text="" ,
                             wrap=true,
-                            color="FFFFFF",
+                            color="FFFFFFC0",
+                            y = screen.h/6,
                             }
-                    }
-                    ,
-                }
-            }
-            ,
-            {
-                -- right column has the countdown timer and a group for players
-                
-                rows=
-                {
-                    {
-                        size=120,
-                        padding=0,
-						content=Group { name = "timer_group" }
-                    }
-                    ,
-                    {
-                        background=Rectangle{border_color=game.ANSWERED_COLOR, border_width=1, color="00000000", name = "players_box_rect", opacity=0 },
-                        padding=10,
-                        group=Group{name="players_box"}
-                    }
-                }
-            
-            }
-        }
-    }
-    ,
-    ui
-):show_all()
+ui.underline = Image {
+							src = "assets/underline.png",
+							x = -screen.w/12,
+							y = 2*screen.h/6,
+						}
+ui.answer = Text{
+						font="Eraser,DejaVu Sans,Sans "..NUMBER_FONT_SIZE.."px" ,
+						text="" ,
+						wrap=true,
+						color="FFFFFFC0",
+						y = 9*screen.h/24,
+					}
+ui.question_answer:add(ui.bigger_number)
+ui.question_answer:add(ui.littler_number)
+ui.question_answer:add(ui.underline)
+ui.question_answer:add(ui.answer)
+screen:add(ui.question_answer)
+
+ui.instructions_label = Text{
+							font = "Eraser,DejaVu Sans,Sans "..NUMBER_FONT_SIZE.."px" ,
+							text = "Press ENTER or join to play...",
+							wrap = true,
+							color = "FFFFFFC0",
+							x = screen.w/6,
+							y = screen.h/3,
+							width = 4*screen.w/6,
+					}
+screen:add(ui.instructions_label)
+
+ui.timer_group = Group { size = { screen.w/8, screen.h/8 }, position = { screen.w/2, screen.h/2 } }
+screen:add(ui.timer_group)
+
+ui.players_box_rect = Rectangle{
+									border_color=game.ANSWERED_COLOR,
+									border_width=1,
+									color="00000010",
+									size = { 2*screen.w/6, 3*screen.h/6 },
+									position = { 7*screen.w/12, 2*screen.h/6 },
+								}
+ui.players_box = Group{}
+screen:add(ui.players_box_rect)
+screen:add(ui.players_box)
+
+screen:show_all()
 
 ui.timer = Text{
                             name="timer",
@@ -102,7 +90,7 @@ ui.timer = Text{
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME),
-                            }
+				}
 ui.timer.position = {	(ui.timer_group.size[1] - ui.timer.size[1]) / 2,
 						(ui.timer_group.size[2] - ui.timer.size[2]) / 2
 					}
@@ -155,52 +143,37 @@ function player_joined(controller)
 
     -- When a player joins, we have to add a box for him, so we have to figure
     -- out where to put it
-    
+
     local group=ui.players_box
     local children=group.children
     local top=0
-    
+
     for k,child in pairs(children) do
         local bottom=child.y+child.h
         if bottom > top then
             top = bottom
         end
     end
-    
-    local player_box , player_ui=
-    
-        layout(
-            Group{position={0,top},size={group.w,group.h/8}},
-            {
-                padding_bottom=4,
-                content=Rectangle{color=game.ANSWERED_COLOR,name="flash_box"},
-                columns=
-                {
-                    {
-                        size=5/6,
-                        content=Text{font="Eraser,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF",name="label"}
-                    }
-                    ,
-                    {
-                        content=Text{font="Eraser,DejaVu Sans,Sans 24px",text="0",color="FFFFFF",name="score"}
-                    }
-                }
-            }
-        )
+
+	player_ui = {}
+
+	player_ui.flash_box = Rectangle{ color=game.ANSWERED_COLOR }
+	player_ui.label = Text{font="Eraser,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
+	player_ui.score = Text{font="Eraser,DejaVu Sans,Sans 24px",text="0",color="FFFFFF"}
+	player_ui.player_box = Group { position = {4*screen.w/6,top},size={group.w,group.h/8}, children = {player_ui.flash_box,player_ui.label,player_ui.score} }
 
 	-- Vertically center the elements in the container
 	player_ui.label.position = {player_ui.label.x + 8, player_ui.label.y + 10}
 	player_ui.score.position = {player_ui.score.x, player_ui.score.y + 10}
 
     -- TODO: animate
-    
-    group:add(player_box)
-    
-    players[controller]={box=player_box,ui=player_ui,score=0,answer_time=-1}
-    
+
+    group:add(player_ui.player_box)
+
+    players[controller]={box=player_ui.player_box,ui=player_ui,score=0,answer_time=-1}
+
     if player_count()>=1 then
-    	ui.littler_number.text = ""
-	    ui.littler_number.font = "Eraser,DejaVu Sans,Sans 72px"
+    	ui.instructions_label.opacity = 0
 	    ui.players_box_rect.opacity = 255
         game.ready_to_start()
     end
@@ -304,9 +277,9 @@ end
 -- Get ready to play
 
 function game.no_players()
-	ui.bigger_number.text = ""
-	ui.answer.text = ""
-    ui.littler_number.text="Press ENTER or join to play..."
+	ui.question_answer.opacity = 0
+	ui.instructions_label.opacity = 255
+	ui.instructions_label.text = "Press ENTER or join to play..."
     ui.players_box_rect.opacity = 0
     ui.timer.text=""
 	ui.timer_group.opacity = 0
@@ -322,9 +295,9 @@ function game.no_players()
 end
 
 function game.ready_to_start()
-	ui.bigger_number.text = ""
-	ui.answer.text = ""
-    ui.littler_number.text="ENTER or tap for next problem..."
+	ui.question_answer.opacity=0
+	ui.instructions_label.opacity = 255
+    ui.instructions_label.text="ENTER or tap for next problem..."
 	ui.timer_group.opacity = 0
     game.ready=true
 end
@@ -341,7 +314,10 @@ function game.ask_next_question()
     ui.bigger_number.text=tostring(bigger_number)
 	ui.littler_number.text = tostring(littler_number).." -"
 	ui.answer.text = "???"
-    
+
+	ui.instructions_label.opacity = 0
+	ui.question_answer.opacity = 255
+
     print("CORRECT ANSWER IS",game.answer)
 
     ui.timer.text=tostring(game.MAX_TIME)
