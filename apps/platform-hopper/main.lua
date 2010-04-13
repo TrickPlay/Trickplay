@@ -186,6 +186,8 @@ function fall_timeline.on_new_frame( t , msecs )
 	local hit = false
 	platforms:foreach_child(
 								function (child)
+									-- If the platform is below the bottom of the screen then no hit
+									if child.y > screen.h then return end
 									-- If we're not in the right y-ballpark then no hit
 									if math.abs(child.y - player.jumper.y) > 15 then return end
 									-- If the left side of the player is to the right of the right of the platform, then no hit
