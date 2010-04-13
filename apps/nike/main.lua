@@ -77,9 +77,8 @@ mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
 mediaplayer:load("assets/golf_game.mp4")
 
-
 function screen.on_key_down ( screen, key )
-	if key == keys.Right then
+	if key == keys.Right or key == keys.Return then
 		state[tostring(tonumber(state.state)+1)](state,tostring(tonumber(state.state)+1))
 	elseif key == keys.Left then
 		state[tostring(tonumber(state.state)-1)](state,tostring(tonumber(state.state)-1))
