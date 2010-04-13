@@ -1,6 +1,8 @@
 
 #ifdef TP_PROFILING
 
+#include <algorithm>
+
 #include "profiler.h"
 #include "util.h"
 
@@ -50,20 +52,48 @@ Profiler::~Profiler()
     g_timer_destroy( timer );
 }
 
+bool Profiler::compare( std::pair< String, Entry > a, std::pair< String, Entry > b )
+{
+    return a.second.second > b.second.second;
+}
+
 void Profiler::dump()
 {
-    unsigned int count = 0;
+    // Creates a vector from the entries
+
+    std::vector< std::pair< String, Entry > > v( entries.begin(), entries.end() );
+
+    // Sorts the vector in descending order by time taken
+
+    std::sort( v.begin(), v.end(), compare );
+
+    // Calculate totals
+
     double time = 0;
 
-    for( EntryMap::const_iterator it = entries.begin(); it != entries.end(); ++it )
-    {
-        g_info( "%40s %6d %6.0f %6.0f", it->first.c_str(), it->second.first, it->second.second , it->second.second / it->second.first );
+    std::vector< std::pair< String, Entry > >::const_iterator it;
 
-        count += it->second.first;
+    for( it = v.begin(); it != v.end(); ++it )
+    {
         time += it->second.second;
     }
 
-    g_info( "%40s %6d %6.0f", String( 40, '-' ).c_str(), count, time );
+    for( it = v.begin(); it != v.end(); ++it )
+    {
+        g_info( "%40s %6d %6.1f %6.1f %6.1f %%",
+                it->first.c_str(),
+                it->second.first,
+                it->second.second,
+                it->second.second / it->second.first,
+                time ? it->second.second / time * 100.0 : 0.0 );
+    }
+
+    g_info( "%40s        %6.1f", String( 40, '-' ).c_str(), time );
+}
+
+void Profiler::reset()
+{
+    entries.clear();
 }
 
 #endif // TP_PROFILING
