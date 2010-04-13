@@ -6,6 +6,18 @@ mediaplayer.on_end_of_stream = function ()
 					end
 mediaplayer:load('background.mp4')
 
+plane = Image{ src="plane.png" , position = { screen.w + 10 , 0 } }
+screen:add(plane)
+
+plane_timer=Timer( 8 )
+
+function plane_timer.on_timer()
+    plane.position={screen.w+10,math.random(0,screen.h-plane.h)}
+    plane.scale={0.2,0.2}
+    plane:animate{duration=4000,x=0-plane.w,y=math.random(0,screen.h-plane.h),scale={1,1}}
+end
+
+plane_timer:start()
 
 -- Create the logo Image we'll spin
 local logo = Image { size = { screen.w/2, screen.h/2 }, src = "trickplay_logo_dark_bg.png" }
