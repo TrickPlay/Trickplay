@@ -799,10 +799,7 @@ void MediaPlayer::post_event( Event * event )
 {
     g_async_queue_push( queue, event );
 
-    GSource * source = g_idle_source_new();
-    g_source_set_callback( source, process_events, this, NULL );
-    g_source_attach( source, g_main_context_default() );
-    g_source_unref( source );
+    g_idle_add_full( G_PRIORITY_HIGH_IDLE, process_events, this, NULL );
 }
 
 //-----------------------------------------------------------------------------
