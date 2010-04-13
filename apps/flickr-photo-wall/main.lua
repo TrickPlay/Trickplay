@@ -4,10 +4,10 @@ Timer{ interval = 2 , on_timer = function() collectgarbage() end }
 
 dofile("Flickr.lua")
 
--- How many images should we load at a time? More takes longer, fewer means more fetches
-local prefetch_images = 40
 -- How many images in each column?
-local rows_per_column = 2 + math.floor(screen.size[2] / 270)
+local rows_per_column = 2 + math.ceil(screen.h / 250)
+-- How many images should we load at a time? More takes longer, fewer means more fetches
+local prefetch_images = rows_per_column * 10
 -- How much should the wall be padde on the left side?
 local left_pad = screen.size[1] / 10
 -- How much should the wall be padded on top?
@@ -309,8 +309,9 @@ function screen.on_key_down(screen,keyval)
 			selection_col = selection_col + 1
 			timeline:start()
 			
-			if selection_col + left_col > ( pages_loaded/cols_per_page - 8 ) then
+			if selection_col > ( pages_loaded*cols_per_page - 20 ) then
 				-- Fetch another set of images
+				print("LOADING IMAGES")
 				populate_next_page()
 			end
 			
