@@ -18,7 +18,9 @@ local make_tile = function(id,name)
 
 	local image = Image { x = 11/2, y = 10/2, z = 0, scale = { 0.5, 0.5 } }
 	local image_data = apps:load_app_file( id, "launcher-icon.png")
-	if not image_data then print ("NO IMAGE DATA") else
+	if not image_data then
+		image.src = "assets/generic-app-icon.png"
+	else
 		image:load_from_data( image_data )
 	end
 	item:add(image)
