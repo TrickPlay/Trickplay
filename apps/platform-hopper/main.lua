@@ -1,15 +1,14 @@
-screen.size = { 960 , 540 }
 screen:show_all()
 
 math.randomseed(os.time())
 
 local Settings = {
-					BGROUND_IMAGE			= "grid.gif",
-					JUMPER_IMAGE			= "jumper.png",
-					GREEN_PLATFORM_IMAGE	= "platforms/green.png",
+					BGROUND_MOVIE			= "assets/clouds-loop.mp4",
+					JUMPER_IMAGE			= "assets/goat-medium.png",
+					GREEN_PLATFORM_IMAGE	= "assets/platform-rock-medium.png",
 					
 					SCORE_GAME_BG			= "6ABE2F40",
-					SCORE_GAME_POS			= { 20, 20, 5 },
+					SCORE_GAME_POS			= { screen.w/20, screen.h/20, 5 },
 					SCORE_DEAD_BG			= "BE2F2F80",
 
 					JUMP_TIME				=	500,
@@ -18,20 +17,16 @@ local Settings = {
 					NUM_PLATFORMS			=	25,
 				}
 
-local bground = Image {
-				src = Settings.BGROUND_IMAGE,
-				tile = {true, true},
-				size = { screen.w, screen.h },
-}
+mediaplayer.on_loaded = function( self ) self:play() end
+mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
+mediaplayer:load(Settings.BGROUND_MOVIE)
 
 local green_platform = Image {
 						src = Settings.GREEN_PLATFORM_IMAGE,
 						keep_aspect_ratio = true,
-						width = 100,
 						position = {-100, -100 },
 					}
 
-screen:add(bground)
 screen:add(green_platform)
 
 player =	{
@@ -42,7 +37,6 @@ player =	{
 
 					jumper = Image {
 						src = Settings.JUMPER_IMAGE,
-						size = { 60, 60 }
 					},
 
 					score = 0,
@@ -193,7 +187,7 @@ function fall_timeline.on_new_frame( t , msecs )
 	platforms:foreach_child(
 								function (child)
 									-- If we're not in the right y-ballpark then no hit
-									if math.abs(child.y - player.jumper.y) > 10 then return end
+									if math.abs(child.y - player.jumper.y) > 15 then return end
 									-- If the left side of the player is to the right of the right of the platform, then no hit
 									if player.jumper.x > ( child.x + child.w ) then return end
 									-- If the right side of the player is to the left of the left of the platform, then no hit
