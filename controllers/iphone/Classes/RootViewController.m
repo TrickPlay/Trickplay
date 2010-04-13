@@ -195,7 +195,7 @@
 	[gestureViewController setTheParent:self];
 	[self.navigationController pushViewController:gestureViewController animated:YES];
 	//[[self navigationController] presentModalViewController:gestureViewController animated:YES];
-	self.title = @"Services"; 
+	self.title = @"Disconnect"; 
 	NSData *portaddress = [service.addresses lastObject];
 	struct sockaddr *pSockAddr = (struct sockaddr *)[portaddress bytes];
 	
