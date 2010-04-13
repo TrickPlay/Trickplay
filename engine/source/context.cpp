@@ -290,15 +290,14 @@ int TPContext::console_command_handler( const char * command, const char * param
     }
     else if ( ! strcmp( command , "prof" ) )
     {
-#ifdef TP_PROFILING
-
-        Profiler::dump();
-
-#else
-
-        g_info( "Profiling is disabled. Build with TP_PROFILING defined." );
-
-#endif
+        if ( parameters && !strcmp( parameters, "reset" ) )
+        {
+            PROFILER_RESET;
+        }
+        else
+        {
+            PROFILER_DUMP;
+        }
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
