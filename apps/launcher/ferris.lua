@@ -39,7 +39,7 @@ Ferris = {
 			item.y_rotation = { 90, 0, 0 }
 
 			circle:add(item)
-			item.opacity = ((1+math.cos(math.rad(- (p-1)*360/num_items)))/2)*255
+			item.opacity = ((1+math.cos(math.rad(- (p-1)*360/num_items)))/2)^6*255
 		end
 
 		circle:move_anchor_point( radius, radius )
@@ -55,14 +55,16 @@ Ferris = {
 		local item = self.ferris.children[1].children[self.spin.frontmost+1]
 		item:animate( { duration = 200, y_rotation = 90, scale = { 1, 1 }, mode = "EASE_IN_OUT_SINE" } )
 		-- And turn "off" the frame
-		item.children[1].src = item.children[1].src:gsub("-on.png", "-off.png")
-		item.children[2].font = "Graublau Web,DejaVu Sans,Sans 24px"
+		item.extra.off.opacity = 255
+		item.extra.on.opacity  = 0
+		item.extra.label.font = "Graublau Web,DejaVu Sans,Sans 24px"
 	end,
 
 	highlight = function ( self )
 		local item = self.ferris.children[1].children[self:get_active()]
-		item.children[1].src = item.children[1].src:gsub("-off.png", "-on.png")
-		item.children[2].font = "Graublau Web,DejaVu Sans,Sans bold 24px"
+		item.extra.off.opacity = 0
+		item.extra.on.opacity  = 255
+		item.extra.label.font = "Graublau Web,DejaVu Sans,Sans bold 24px"
 		if self.highlight_on == true then
 			item:animate( { duration = 200, y_rotation = -1.5*self.ferris.y_rotation[1], scale = {1.25, 1.25}, mode = "EASE_IN_OUT_SINE" } )
 		else
@@ -80,7 +82,7 @@ Ferris = {
 		local num
 		for num,child in ipairs(children) do
 			child.z_rotation = { -destination*(360/self.num_items), 0, 0 }
-			child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)*255
+			child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)^6*255
 		end
 
 		self.spin.destination = destination % self.num_items
@@ -112,7 +114,7 @@ Ferris = {
 									(1-math.abs(self.spin.a.alpha + self.spin.a2.alpha - 1)) * 30
 									, 0, 0 }
 				-- And now fade based on the depth from front
-				child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)*255
+				child.opacity = ((1+math.cos(math.rad(circle.z_rotation[1] - (num-1)*360/self.num_items)))/2)^6*255
 			end
 		end
 		

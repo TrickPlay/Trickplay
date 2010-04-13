@@ -1,16 +1,16 @@
 local opaque = 255*2/3
 
 local images = {
-		splash_image = Image { src = "assets/splash_image.png", keep_aspect_ratio = true, y = - 300, width = screen.w, opacity = 0 },
-		main_bground = Image { src = "assets/unselected_players.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['1'] = Image { src = "assets/1_stephen_ames.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['2'] = Image { src = "assets/2_paul_casey.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['3'] = Image { src = "assets/3_stewart_cink.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['4'] = Image { src = "assets/4_david_duval.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['5'] = Image { src = "assets/5_anthony_kim.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['6'] = Image { src = "assets/6_justin_leonard.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['7'] = Image { src = "assets/7_carl_pettersson.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
-		['8'] = Image { src = "assets/8_tiger_woods.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['2'] = Image { src = "assets/splash_image.png", keep_aspect_ratio = true, y = - 300, width = screen.w, opacity = 0 },
+		['3'] = Image { src = "assets/unselected_players.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['4'] = Image { src = "assets/1_stephen_ames.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['5'] = Image { src = "assets/2_paul_casey.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['6'] = Image { src = "assets/3_stewart_cink.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['7'] = Image { src = "assets/4_david_duval.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['8'] = Image { src = "assets/5_anthony_kim.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['9'] = Image { src = "assets/6_justin_leonard.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['10'] = Image { src = "assets/7_carl_pettersson.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
+		['11'] = Image { src = "assets/8_tiger_woods.png", keep_aspect_ratio = true, width = screen.w, opacity = 0 },
 }
 
 local products = Group {
@@ -25,31 +25,43 @@ local products = Group {
 	y = screen.h / 5,
 }
 
-images.splash_image.y = -images.splash_image.h
+images['2'].y = -images['2'].h
 
 local state =
 	{
-		next_state = "splash_image",
-		off = function() end,
-		splash_image = function( self )
-							images.splash_image:animate( { duration = 500, opacity = opaque, y = 0, mode = "EASE_OUT_BACK" } )
-							self.next_state = "main_bground"
-						end,
-		main_bground = function ( self )
-							images.main_bground:animate( { duration = 250, opacity = opaque } )
-							self.next_state = "1"
-						end,
-		['8'] = function ()
-						images['8']:animate( { duration = 250, opacity = opaque } )
-						products:animate( { duration = 250, opacity = opaque } )
+		state = "1",
+		['0'] = function () end,
+		['1'] = function()
+					images['2']:animate( { duration = 500, opacity = 0, y = -images['2'].h, mode = "EASE_OUT_SINE" })
 				end,
+		['2'] = function( self )
+							images['2']:animate( { duration = 500, opacity = opaque, y = 0, mode = "EASE_OUT_BACK" } )
+							images['3']:animate( { duration = 250, opacity = 0 } )
+							self.state = "2"
+						end,
+		['10'] = function ( self )
+					images['9']:animate( { duration = 250, opacity = 0 } )
+					images['10']:animate( { duration = 250, opacity = opaque } )
+					images['11']:animate( { duration = 250, opacity = 0 } )
+					products:animate( { duration = 250, opacity = 0 } )
+					self.state = "10"
+				end,
+		['11'] = function ( self )
+						images['10']:animate( { duration = 250, opacity = 0 } )
+						images['11']:animate( { duration = 250, opacity = opaque } )
+						products:animate( { duration = 250, opacity = opaque } )
+						self.state = "11"
+				end,
+		['12'] = function ( self ) end,
 	}
 setmetatable(state, {
 	__index = function (table,key)
-		print("key:",key)
-		rawset(table,"next_state",tostring(tonumber(key)+1))
-		print("next_state:",rawget(table,"next_state"))
-		return function () images[key]:animate( { duration = 250, opacity = opaque } ) end
+		return function ( self, newstate )
+			images[tostring(tonumber(key)-1)]:animate( { duration = 250, opacity = 0 } )
+			images[tostring(key)]:animate( { duration = 250, opacity = opaque } )
+			images[tostring(tonumber(key)+1)]:animate( { duration = 250, opacity = 0 } )
+			rawset(self,"state",newstate)
+		end
 	end
 })
 
@@ -67,13 +79,9 @@ mediaplayer:load("assets/golf_game.mp4")
 
 
 function screen.on_key_down ( screen, key )
-	local name,image
-	for name,image in pairs(images) do
-		if name ~= state.next_state then
-			print("Fading "..name)
-			image:animate( { duration = 250, opacity = 0 } )
-		end
+	if key == keys.Right then
+		state[tostring(tonumber(state.state)+1)](state,tostring(tonumber(state.state)+1))
+	elseif key == keys.Left then
+		state[tostring(tonumber(state.state)-1)](state,tostring(tonumber(state.state)-1))
 	end
-	print("Next state:",state.next_state)
-	state[state.next_state](state)
 end

@@ -37,8 +37,8 @@ function controllers.on_controller_connected(controllers,controller)
     	end
     end
 
-	controller:declare_resource("jumper","jumper.png")
-	controller:declare_resource("splat","splat.png")
+	controller:declare_resource("jumper","assets/goat-medium.png")
+	controller:declare_resource("splat","assets/splat.png")
 
 	controller:set_ui_background("jumper")
 
