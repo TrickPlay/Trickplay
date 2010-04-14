@@ -40,7 +40,7 @@ mediaplayer.on_end_of_stream = function ()
 						mediaplayer:seek(0)
 						mediaplayer:play()
 					end
-mediaplayer:load('background.mp4')
+mediaplayer:load('assets/background.mp4')
 curtain = Rectangle { color = '00000080', position = { -600, -600, -600 }, size = {1200+screen.w, 1200+screen.h} }
 screen:add(curtain)
 
@@ -237,7 +237,7 @@ local wall_zoom_timeline = Timeline{ duration = 250 }
 local wall_zoom_alpha = Alpha{ timeline = wall_zoom_timeline , mode = "EASE_OUT_SINE" }
 
 function controllers.on_controller_connected(controllers, controller)
-	controller:declare_resource("flickr","flickr.png")
+	controller:declare_resource("flickr","assets/flickr-phone.png")
 	controller:set_ui_background("flickr")
 end
 
