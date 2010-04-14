@@ -250,7 +250,7 @@ end
 
 function controllers.on_controller_connected(controllers,controller)
 
-	controller:declare_resource("quiz","assets/quiz.png")
+	controller:declare_resource("quiz","assets/mathbomb.png")
 	controller:declare_resource("numbers","assets/numbers.png")
 	controller:set_ui_background("quiz")
 
