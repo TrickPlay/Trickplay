@@ -4,11 +4,12 @@
 local trickplay_red = "960A04"
 
 game={
-		MAX_TIME = 15,
+		MAX_TIME = 5,
 		WIN_COLOR = "55FF5533",
 		LOSE_COLOR = trickplay_red.."99",
 		WAITING_FOR_ANSWER_COLOR = "000000",
 		ANSWERED_COLOR = trickplay_red.."99",
+		BORDER_COLOR = "FFFFFF40",
 	}
 
 
@@ -24,7 +25,7 @@ screen:add(Image { src="assets/chalkboard-background.png", size={screen.w,screen
 
 local ui ={}
 
-ui.question_answer = Group { x = 3*screen.w/12, y = 2*screen.h/6 }
+ui.question_answer = Group { x = 2*screen.w/12, y = 2*screen.h/6 }
 ui.bigger_number = Text{
                             font="Eraser,DejaVu Sans,Sans "..NUMBER_FONT_SIZE.."px" ,
                             text="" ,
@@ -58,72 +59,59 @@ ui.question_answer:add(ui.answer)
 screen:add(ui.question_answer)
 
 ui.instructions_label = Text{
-							font = "Eraser,DejaVu Sans,Sans "..NUMBER_FONT_SIZE.."px" ,
-							text = "Press ENTER or join to play...",
+							font = "Eraser,DejaVu Sans,Sans "..(NUMBER_FONT_SIZE*2/3).."px" ,
+							text = "",
 							wrap = true,
 							color = "FFFFFFC0",
 							x = screen.w/6,
 							y = screen.h/3,
-							width = 4*screen.w/6,
+							width = screen.w*1/3,
 					}
 screen:add(ui.instructions_label)
 
-ui.timer_group = Group { size = { screen.w/8, screen.h/8 }, position = { screen.w/2, screen.h/2 } }
-screen:add(ui.timer_group)
-
-ui.players_box_rect = Rectangle{
-									border_color=game.ANSWERED_COLOR,
-									border_width=1,
-									color="00000010",
-									size = { 2*screen.w/6, 3*screen.h/6 },
-									position = { 7*screen.w/12, 2*screen.h/6 },
-								}
-ui.players_box = Group{}
-screen:add(ui.players_box_rect)
-screen:add(ui.players_box)
-
-screen:show_all()
-
+ui.timer_group = Group { position = { screen.w*1/3, screen.h*9/16 } }
+ui.bomb = Image {
+					src = "assets/bomb.png",
+					size = { 299*screen.w/2800, 471*screen.h/1575 },
+				}
+ui.timer_group:add(ui.bomb)
 ui.timer = Text{
                             name="timer",
-                            font="Eraser,DejaVu Sans,Sans 64px",
+                            font="Eraser,DejaVu Sans,Sans "..(NUMBER_FONT_SIZE*4/5).."px",
                             single_line=true,
                             color="00FF00",
                             text=tostring(game.MAX_TIME),
 				}
-ui.timer.position = {	(ui.timer_group.size[1] - ui.timer.size[1]) / 2,
-						(ui.timer_group.size[2] - ui.timer.size[2]) / 2
+ui.timer.position = {	1/2*(ui.bomb.w - ui.timer.w),
+						2/3*ui.bomb.h - 1/2*ui.timer.h
 					}
-ui.timer_label = Text{
-							color="FFFFFF",
-							font="Sans 24px",
-							single_line=true,
-							text="Countdown",
-				}
-ui.timer_label.position = { (ui.timer_group.size[1] - ui.timer_label.size[1]) / 2,
-						0
-					}
-ui.timer_box = Canvas{
-						size = { ui.timer_group.size[1], ui.timer_group.size[2] }
-					}
-ui.timer_box:begin_painting()
-ui.timer_box:set_source_color("FFFFFF")
-local timer_box_top = ui.timer_label.y + ui.timer_label.size[2]/2
-local timer_box_inset = 0
-local timer_box_bottom = ui.timer_group.size[2] - (timer_box_inset + 10)
-local timer_box_ratio = 4/5
-ui.timer_box:move_to(timer_box_ratio * ui.timer_label.x, timer_box_top)
-ui.timer_box:line_to(timer_box_inset, timer_box_top)
-ui.timer_box:line_to(timer_box_inset, timer_box_bottom)
-ui.timer_box:line_to(ui.timer_group.size[1] - timer_box_inset, timer_box_bottom)
-ui.timer_box:line_to(ui.timer_group.size[1] - timer_box_inset, timer_box_top)
-ui.timer_box:line_to(ui.timer_group.size[1] - timer_box_ratio * ui.timer_label.x, timer_box_top)
-ui.timer_box:stroke()
-ui.timer_box:finish_painting()
 
-ui.timer_group:add(ui.timer_box)
-ui.timer_group:add(ui.timer_label)
 ui.timer_group:add(ui.timer)
+ui.soot = Image {
+					src = "assets/soot.png",
+					opacity = 0,
+					z = 5,
+				}
+ui.soot:move_anchor_point(ui.timer_group.x + ui.bomb.w/2, ui.timer_group.y + ui.bomb.h/2)
+ui.soot.x = ui.timer_group.x + ui.bomb.w/2
+ui.soot.y = ui.timer_group.y + ui.bomb.h/2
+ui.soot.scale = { 0.01, 0.01, 0, 0 }
+screen:add(ui.soot)
+
+screen:add(ui.timer_group)
+
+ui.players_box_rect = Rectangle{
+									border_color=game.BORDER_COLOR,
+									border_width=1,
+									color="00000010",
+									size = { screen.w*7/16, screen.h/2 },
+									position = { screen.w*1/2, screen.h*1/3 },
+								}
+ui.players_box = Group { position = ui.players_box_rect.position, size = ui.players_box_rect.size }
+screen:add(ui.players_box_rect)
+screen:add(ui.players_box)
+
+screen:show_all()
 
 -------------------------------------------------------------------------------
 -- table to hold our player information - the keys are the actual controller
@@ -157,17 +145,32 @@ function player_joined(controller)
 
 	player_ui = {}
 
-	player_ui.flash_box = Rectangle{ color=game.ANSWERED_COLOR }
-	player_ui.label = Text{font="Eraser,DejaVu Sans,Sans 24px",text=controller.name,color="FFFFFF"}
-	player_ui.score = Text{font="Eraser,DejaVu Sans,Sans 24px",text="0",color="FFFFFF"}
-	player_ui.player_box = Group { position = {4*screen.w/6,top},size={group.w,group.h/8}, children = {player_ui.flash_box,player_ui.label,player_ui.score} }
+	player_ui.flash_box = Rectangle{
+										border_color = game.BORDER_COLOR,
+										border_width = 1,
+										color=game.ANSWERED_COLOR,
+										size = { group.w, group.h/4 }
+									}
+	player_ui.label = Text{font="Eraser,DejaVu Sans,Sans "..(NUMBER_FONT_SIZE*2/5).."px",text=controller.name,color="FFFFFF"}
+	player_ui.score = Text{font="Eraser,DejaVu Sans,Sans "..(NUMBER_FONT_SIZE*4/5).."px",text="0",color="FFFFFF"}
+	player_ui.player_box = Group {
+								position = {0, top},
+								size = { group.w, group.h/4 },
+								children = {
+												player_ui.flash_box,
+												player_ui.label,
+												player_ui.score
+											}
+								}
 
-	-- Vertically center the elements in the container
-	player_ui.label.position = {player_ui.label.x + 8, player_ui.label.y + 10}
-	player_ui.score.position = {player_ui.score.x, player_ui.score.y + 10}
+	-- Center the elements in the container
+	player_ui.label.x = (NUMBER_FONT_SIZE*2/5)/2
+	player_ui.label.y = (player_ui.player_box.h - player_ui.label.h)/2
+	player_ui.score.x = player_ui.player_box.w - player_ui.score.w - (NUMBER_FONT_SIZE*4/5)/2
+	player_ui.score.y = (player_ui.player_box.h - player_ui.score.h)/2
 
     -- TODO: animate
-
+	print("Adding stuff for player",controller.name)
     group:add(player_ui.player_box)
 
     players[controller]={box=player_ui.player_box,ui=player_ui,score=0,answer_time=-1}
@@ -279,7 +282,7 @@ end
 function game.no_players()
 	ui.question_answer.opacity = 0
 	ui.instructions_label.opacity = 255
-	ui.instructions_label.text = "Press ENTER or join to play..."
+	ui.instructions_label.text = "Press ENTER, or join to play..."
     ui.players_box_rect.opacity = 0
     ui.timer.text=""
 	ui.timer_group.opacity = 0
@@ -321,12 +324,20 @@ function game.ask_next_question()
     print("CORRECT ANSWER IS",game.answer)
 
     ui.timer.text=tostring(game.MAX_TIME)
-	ui.timer.position = { (ui.timer_group.size[1] - ui.timer.size[1]) / 2,
-							40
+	ui.timer.position = { 1/2*(ui.bomb.w - ui.timer.w),
+							2/3*ui.bomb.h - 1/2*ui.timer.h,
 						}
     ui.timer.color = "00FF00"
     ui.timer_group.opacity = 255
-
+    ui.timer_group.scale = { 1, 1 }
+    ui.timer_group.z = 0
+    ui.soot.opacity = 0
+	ui.bomb.z_rotation = {
+							45,
+							1/2*(ui.bomb.w),
+							2/3*(ui.bomb.h)
+						}
+--	ui.bomb:animate( { duration = 50, z_rotation = 40, loop = true } )
 
 	game.num_answered = 0
     for controller,player_state in pairs(players) do
@@ -369,8 +380,8 @@ function game.ask_next_question()
     function game.timer.on_timer(timer)
         game.time=game.time+1
         ui.timer.text=tostring(game.MAX_TIME-game.time)
-		ui.timer.position = { (ui.timer_group.size[1] - ui.timer.size[1]) / 2,
-								40
+		ui.timer.position = { 1/2*(ui.bomb.w - ui.timer.w),
+								2/3*ui.bomb.h - 1/2*ui.timer.h,
 							}
 		if game.time<=game.MAX_TIME/3 then
 			ui.timer.color = "00FF00"
@@ -399,6 +410,7 @@ function game.times_up(correct_answer)
         if player_state.answer_time > -1 then
             player_state.score=player_state.score+game.MAX_TIME-player_state.answer_time
             player_state.ui.score.text=tostring(player_state.score)
+			player_state.ui.score.x = player_state.ui.player_box.w - player_state.ui.score.w - (NUMBER_FONT_SIZE*4/5)/2
             player_state.ui.flash_box.color = game.WIN_COLOR
         else
         	player_state.ui.flash_box.color = game.LOSE_COLOR
@@ -406,16 +418,17 @@ function game.times_up(correct_answer)
         end
     end
 
+	if game.time==game.MAX_TIME then
+		ui.bomb:complete_animation()
+		ui.timer_group:animate({ duration = 500, z = 1000, opacity = 0, mode = "EASE_OUT_SINE" })
+		ui.soot:animate({ duration = 250, scale = { 1, 1 }, opacity = 200, mode = "EASE_OUT_SINE" })
+	end
+
 	game.ready_to_start()
 end
 
-local fake_controller_for_local_player = { name = "Player", set_ui_background = function(self, name) end }
-
 function screen.on_key_down(screen,key)
     if key==keys.Return then
-    	if 0 == player_count() then
-    		player_joined(fake_controller_for_local_player)
-    	end
         if game.ready then
        		game.got_tap = false
             game.ask_next_question()
@@ -424,3 +437,7 @@ function screen.on_key_down(screen,key)
 end
 
 game.no_players()
+
+for _,controller in pairs(controllers.connected) do
+    controllers:on_controller_connected(controller)
+end
