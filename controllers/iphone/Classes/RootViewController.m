@@ -224,6 +224,7 @@
 		{
 			[gestureViewController removeServiceFromCollection];
 		}
+		self.title = @"Remote Services";
 	}
     
 	
