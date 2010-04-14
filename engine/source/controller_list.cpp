@@ -796,7 +796,7 @@ void ControllerList::post_event( gpointer event )
     g_assert( event );
 
     g_async_queue_push( queue, event );
-    g_idle_add( process_events, this );
+    g_idle_add_full( G_PRIORITY_HIGH_IDLE, process_events, this, NULL );
 }
 
 //.............................................................................
