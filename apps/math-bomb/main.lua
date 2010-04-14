@@ -4,7 +4,7 @@
 local trickplay_red = "960A04"
 
 game={
-		MAX_TIME = 5,
+		MAX_TIME = 15,
 		WIN_COLOR = "55FF5533",
 		LOSE_COLOR = trickplay_red.."99",
 		WAITING_FOR_ANSWER_COLOR = "000000",
@@ -438,6 +438,10 @@ end
 
 game.no_players()
 
+
 for _,controller in pairs(controllers.connected) do
-    controllers:on_controller_connected(controller)
+	if controller.name ~= "Keyboard" then
+		print("Connected: *"..controller.name.."*")
+		controllers:on_controller_connected(controller)
+	end
 end
