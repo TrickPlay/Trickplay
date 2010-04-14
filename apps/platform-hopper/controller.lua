@@ -38,7 +38,7 @@ function controllers.on_controller_connected(controllers,controller)
     end
 
 	controller:declare_resource("start","assets/phone-start.png")
-	controller:declare_resource("play","assets/phone-splat.png")
+	controller:declare_resource("play","assets/phone-play.png")
 	controller:declare_resource("end", "assets/phone-end.png")
 
 	controller:set_ui_background("start")
