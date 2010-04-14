@@ -1,0 +1,65 @@
+module stopwatch;
+
+[[
+#include "glib.h"
+]]
+
+# Class: Stopwatch
+# Stopwatches let you measure elapsed time in milliseconds. When you
+# create one, it is started automatically. You can then read the value
+# of the <elapsed> property to see how much time has elapsed. You can
+# also <stop>, <continue> or restart them.
+
+class Stopwatch [[GTimer*]]
+{
+
+    # Constructor: Stopwatch
+    # Creates a new stopwatch.
+
+    Stopwatch()
+        [[
+            *self = g_timer_new();
+        ]];
+
+    ~Stopwatch()
+        [[
+            g_timer_destroy( self );
+        ]];
+
+    # Property: elapsed
+    # Returns the elapsed time, in milliseconds since the stopwatch was
+    # started. If the stopwatch is stopped, it will return the elapsed time
+    # between the time it was started and the time it was stopped.
+
+    readonly double elapsed
+        [[
+            elapsed = g_timer_elapsed( self, NULL ) * 1000;
+        ]];
+
+    # Function: start
+    # Starts a stopwatch. Stopwatches are started automatically when they are
+    # created. Calling start resets the start time of the stopwatch.
+
+    start()
+        [[
+            g_timer_start( self );
+        ]];
+
+    # Function: stop
+    # Stops the stopwatch. You can then reset it by calling <start> or resume
+    # it by calling <continue>.
+
+    stop()
+        [[
+            g_timer_stop( self );
+        ]];
+
+    # Function: continue
+    # Resumes a stopwatch that has been stopped.
+
+    continue()
+        [[
+            g_timer_continue( self );
+        ]];
+}
+
