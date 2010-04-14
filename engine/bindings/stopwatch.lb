@@ -36,6 +36,14 @@ class Stopwatch [[GTimer*]]
             elapsed = g_timer_elapsed( self, NULL ) * 1000;
         ]];
 
+    # Property: elapsed_seconds
+    # Same as <elapsed> but in fractional seconds.
+
+    readonly double elapsed_seconds
+        [[
+            elapsed_seconds = g_timer_elapsed( self, NULL );
+        ]];
+
     # Function: start
     # Starts a stopwatch. Stopwatches are started automatically when they are
     # created. Calling start resets the start time of the stopwatch.
