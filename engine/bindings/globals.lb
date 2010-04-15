@@ -229,6 +229,22 @@ globals
             result=buffer.empty()?NULL:buffer.c_str();
         ]];
 
+    string md5( lstring s )
+        [[
+            result = g_compute_checksum_for_string( G_CHECKSUM_MD5, s, s_len );
+            Util::GFreeLater free_result( ( char * )result );
+        ]];
         
+    string sha1( lstring s )
+        [[
+            result = g_compute_checksum_for_string( G_CHECKSUM_SHA1, s, s_len );
+            Util::GFreeLater free_result( ( char * )result );
+        ]];
+
+    string sha256( lstring s )
+        [[
+            result = g_compute_checksum_for_string( G_CHECKSUM_SHA256, s, s_len );
+            Util::GFreeLater free_result( ( char * )result );
+        ]];
 }
 
