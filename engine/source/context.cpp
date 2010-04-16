@@ -619,7 +619,7 @@ int TPContext::run()
     color.red = 0;
     color.green = 0;
     color.blue = 0;
-    color.alpha = 255;
+    color.alpha = 0;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
 
@@ -1018,11 +1018,6 @@ void TPContext::add_console_command_handler( const char * command, TPConsoleComm
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
-    if ( log_domain && *log_domain == 'C' )
-    {
-        return;
-    }
-
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message
