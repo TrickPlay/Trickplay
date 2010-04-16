@@ -17,7 +17,7 @@ local tile_size = 120
 -- How much padding between adjacent tiles?
 local tile_pad = 20
 -- At what angle to the screen should the image wall live?
-local tilt_angle = 30
+local tilt_angle = 40
 local super_tilt_angle = 85
 -- API Key for flickr API access for this app
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
@@ -134,10 +134,9 @@ function populate_next_page( completion )
 				if self.completion then completion:callback() end
 			end
 		})
-
 end
 
-local cursor = Rectangle{ color = trickplay_red , opacity = 0 }
+local cursor = Rectangle{ color = "FFFFFF80" , opacity = 0 }
 cursor.position , cursor.size = inflate( get_tile_position( selection_col , selection_row ) , { 100 , 100 } , -4 , -4 )
 cursor.z = -1
 
@@ -223,6 +222,11 @@ function wall_timeline.on_new_frame( t , msecs )
     end
 end
 
+function timeline.on_completed( t )
+	photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = -tilt_angle })
+	cursor:animate({ duration = 100, y_rotation = -tilt_angle })
+end
+
 local key_right = 65363
 local key_left  = 65361
 local key_down  = 65364
@@ -306,7 +310,9 @@ function screen.on_key_down(screen,keyval)
 	
 			x_interval = Interval( cursor.x , cursor.x + tile_size )
 			y_interval = nil
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
 			selection_col = selection_col + 1
+			cursor:animate({ duration = 100, y_rotation = tilt_angle })
 			timeline:start()
 			
 			if selection_col > ( pages_loaded*cols_per_page - 20 ) then
@@ -322,6 +328,7 @@ function screen.on_key_down(screen,keyval)
 				
 				left_col = left_col + 1
 				
+
 				wall_timeline:start()
 			end
 		end,
@@ -336,8 +343,10 @@ function screen.on_key_down(screen,keyval)
 			end
 			x_interval = Interval( cursor.x , cursor.x - tile_size )
 			y_interval = nil
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
 			selection_col = selection_col - 1
 			
+			cursor:animate({ duration = 100, y_rotation = tilt_angle })
 			timeline:start()
 			
 			if selection_col < left_col  and left_col > 0 then
@@ -357,7 +366,9 @@ function screen.on_key_down(screen,keyval)
 			if selection_row > 0 then
 				x_interval = nil
 				y_interval = Interval( cursor.y , cursor.y - tile_size )
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
 				selection_row = selection_row - 1
+			cursor:animate({ duration = 100, y_rotation = tilt_angle })
 				timeline:start()
 			end
 		end,
@@ -368,7 +379,9 @@ function screen.on_key_down(screen,keyval)
 			if selection_row < rows_per_column-1 then
 				x_interval = nil
 				y_interval = Interval( cursor.y , cursor.y + tile_size )
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
 				selection_row = selection_row + 1        
+			cursor:animate({ duration = 100, y_rotation = tilt_angle })
 				timeline:start()
 			end
 		end,
