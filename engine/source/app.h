@@ -220,6 +220,10 @@ private:
     void profile_switch();
 
     //.........................................................................
+
+    void secure_lua_state();
+
+    //.........................................................................
     // Notification handler to forward everything to our listeners
 
     static void forward_notification_handler( const char * subject, void * data );

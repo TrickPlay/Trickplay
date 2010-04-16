@@ -242,13 +242,13 @@ set( LUA_SOURCE_FILES
     ${LUA_ROOT}/src/lauxlib.c
     ${LUA_ROOT}/src/lbaselib.c
     ${LUA_ROOT}/src/ldblib.c
-    ${LUA_ROOT}/src/liolib.c
     ${LUA_ROOT}/src/lmathlib.c
     ${LUA_ROOT}/src/loslib.c
     ${LUA_ROOT}/src/ltablib.c
     ${LUA_ROOT}/src/lstrlib.c
     ${LUA_ROOT}/src/loadlib.c
-    ${LUA_ROOT}/src/linit.c
+#    ${LUA_ROOT}/src/liolib.c
+#    ${LUA_ROOT}/src/linit.c
 )
 
 set_source_files_properties(

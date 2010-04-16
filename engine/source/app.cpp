@@ -699,8 +699,7 @@ int App::run()
 
     screen_gid = clutter_actor_get_gid( screen );
 
-    // Open standard libs
-    luaL_openlibs( L );
+    secure_lua_state();
 
     // Open our stuff
     luaopen_clutter_actor( L );
@@ -811,6 +810,112 @@ App::~App()
     // Release the event group
 
     event_group->unref();
+}
+
+//-----------------------------------------------------------------------------
+
+void App::secure_lua_state()
+{
+    //.........................................................................
+    // Open standard libs
+
+    // We do NOT open these, as they pose security risks
+
+    //      {LUA_IOLIBNAME, luaopen_io},
+    //      {LUA_DBLIBNAME, luaopen_debug},
+
+    const luaL_Reg lualibs[] =
+    {
+        { "", luaopen_base },
+        { LUA_TABLIBNAME, luaopen_table },
+        { LUA_STRLIBNAME, luaopen_string },
+        { LUA_MATHLIBNAME, luaopen_math },
+        { LUA_OSLIBNAME, luaopen_os },
+        { LUA_LOADLIBNAME, luaopen_package },
+        { NULL, NULL }
+    };
+
+    for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
+    {
+        lua_pushcfunction( L, lib->func );
+        lua_pushstring( L, lib->name );
+        lua_call( L, 1, 0 );
+    }
+
+    //.........................................................................
+    // Now, we have to nuke some 'os' functions
+
+    lua_getglobal( L, "os" );
+
+    const char * os_nuke[] =
+    {
+        "execute",
+        "exit",
+        "getenv",
+        "remove",
+        "rename",
+        "setlocale",
+        "tmpname",
+        NULL
+    };
+
+    for( const char * * name = os_nuke; * name; ++name )
+    {
+        lua_pushstring( L, * name );
+        lua_pushnil( L );
+        lua_rawset( L, -3 );
+    }
+
+    lua_pop( L, 1 );
+
+    //.........................................................................
+    // Nuke package stuff
+
+    lua_getglobal( L, "package" );
+
+    const char * package_nuke[] =
+    {
+        "cpath",
+        "loaders",
+        "loadlib",
+        "path",
+        "preload",
+        NULL
+    };
+
+    for( const char * * name = package_nuke; * name; ++name )
+    {
+        lua_pushstring( L, * name );
+        lua_pushnil( L );
+        lua_rawset( L, -3 );
+    }
+
+#if 0
+    // Set "loaders" to an empty table
+    // We have to do this if we want 'require' to work
+
+    lua_pushstring( L, "loaders" );
+    lua_newtable( L );
+    lua_rawset( L, -3 );
+
+#endif
+
+    lua_pop( L, 1 );
+
+    //.........................................................................
+    // Nuke globals
+
+    const char * global_nuke[] =
+    {
+        "require",
+        NULL
+    };
+
+    for( const char * * name = global_nuke; * name; ++name )
+    {
+        lua_pushnil( L );
+        lua_setglobal( L, * name );
+    }
 }
 
 //-----------------------------------------------------------------------------
