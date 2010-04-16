@@ -515,3 +515,51 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
     return def;
 }
 
+static const char * TP_ALLOWED_TABLE = "TP_ALLOWED";
+
+int lb_is_allowed(lua_State*L,const char*name)
+{
+    int result=0;
+
+    LSG;
+
+    lua_pushstring(L,TP_ALLOWED_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+    if (lua_type(L,-1)==LUA_TTABLE)
+    {
+        lua_pushstring(L,name);
+        lua_rawget(L,-2);
+        result=lua_isboolean(L,-1)&&lua_toboolean(L,-1);
+        lua_pop(L,1);
+    }
+    lua_pop(L,1);
+
+    LSG_END(0);
+
+    return result;
+}
+
+void lb_allow(lua_State*L,const char*name)
+{
+    LSG;
+
+    lua_pushstring(L,TP_ALLOWED_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+        lua_newtable(L);
+        lua_pushstring(L,TP_ALLOWED_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    lua_pushstring(L,name);
+    lua_pushboolean(L,1);
+    lua_rawset(L,-3);
+
+    lua_pop(L,1);
+
+    LSG_END(0);
+}
