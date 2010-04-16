@@ -13,7 +13,6 @@ TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( pango-1.0 pango/pango.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( lua5.1 lua.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-core core.h			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
@@ -79,13 +78,6 @@ set(
     #--------------
     
     sqlite3
-    
-    #--------------
-    # lua
-    #--------------
-    
-    lua5.1
-    lua
     
     #--------------
     # FreeImage
@@ -215,6 +207,60 @@ endforeach( LB_FILE )
 set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
 
 #------------------------------------------------------------------------------
+# Lua has to be built as C++ in order to get exceptions. Since most distributions
+# do not already do that, we include Lua directly into our engine.
+
+set( LUA_VERSION 5.1.4 )
+
+set( LUA_ROOT ${PROJECT_SOURCE_DIR}/engine/lua/lua-${LUA_VERSION} )
+
+add_definitions( -DLUA_USE_LINUX=1 )
+
+include_directories( ${LUA_ROOT}/src ) 
+
+set( LUA_SOURCE_FILES
+
+    ${LUA_ROOT}/src/lapi.c
+    ${LUA_ROOT}/src/lcode.c
+    ${LUA_ROOT}/src/ldebug.c
+    ${LUA_ROOT}/src/ldo.c
+    ${LUA_ROOT}/src/ldump.c
+    ${LUA_ROOT}/src/lfunc.c
+    ${LUA_ROOT}/src/lgc.c
+    ${LUA_ROOT}/src/llex.c
+    ${LUA_ROOT}/src/lmem.c
+    ${LUA_ROOT}/src/lobject.c
+    ${LUA_ROOT}/src/lopcodes.c
+    ${LUA_ROOT}/src/lparser.c
+    ${LUA_ROOT}/src/lstate.c
+    ${LUA_ROOT}/src/lstring.c
+    ${LUA_ROOT}/src/ltable.c
+    ${LUA_ROOT}/src/ltm.c
+    ${LUA_ROOT}/src/lundump.c
+    ${LUA_ROOT}/src/lvm.c
+    ${LUA_ROOT}/src/lzio.c
+    ${LUA_ROOT}/src/lauxlib.c
+    ${LUA_ROOT}/src/lbaselib.c
+    ${LUA_ROOT}/src/ldblib.c
+    ${LUA_ROOT}/src/liolib.c
+    ${LUA_ROOT}/src/lmathlib.c
+    ${LUA_ROOT}/src/loslib.c
+    ${LUA_ROOT}/src/ltablib.c
+    ${LUA_ROOT}/src/lstrlib.c
+    ${LUA_ROOT}/src/loadlib.c
+    ${LUA_ROOT}/src/linit.c
+)
+
+set_source_files_properties(
+
+    ${LUA_SOURCE_FILES}
+    
+    PROPERTIES 
+        LANGUAGE CXX
+)
+
+
+#------------------------------------------------------------------------------
 
 add_library(
     
@@ -241,8 +287,11 @@ add_library(
     ${ENGINE_SRC}/source/controller_list.cpp    
     ${ENGINE_SRC}/source/profiler.cpp
 
+    ${ENGINE_SRC}/lb/src/lb.cpp
+
     ${GENERATED_FILES}
-    ${ENGINE_SRC}/lb/src/lb.c
+    
+    ${LUA_SOURCE_FILES}
 )
 
 set_target_properties(
@@ -261,7 +310,7 @@ target_link_libraries(
     
     ${ENGINE_LIBRARIES}
     m
-    dl    
+    dl
 )
 
 

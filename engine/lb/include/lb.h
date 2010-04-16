@@ -4,8 +4,6 @@
 #include "glib.h"
 #include "assert.h"
 
-G_BEGIN_DECLS
-
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -46,7 +44,6 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len);
 #define LSG             int _lsg_=lua_gettop(L)
 #define LSG_END(i)      (assert(_lsg_+(i)==lua_gettop(L)),(i))
 
-G_END_DECLS
 
 #endif // _TRICKPLAY_LB_H
 
