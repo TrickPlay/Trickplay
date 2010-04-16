@@ -28,6 +28,11 @@
 #define TP_SCREEN_WIDTH_DEFAULT         960
 #define TP_SCREEN_HEIGHT_DEFAULT        540
 #define TP_CONTROLLERS_NAME_DEFAULT     "TrickPlay"
+
+// TODO: Don't like hard-coding this app id here
+
+#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps"
+
 //-----------------------------------------------------------------------------
 // Forward declarations
 
@@ -244,6 +249,10 @@ private:
     typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
     OutputHandlerSet                                            output_handlers;
+
+    typedef std::map<String,StringSet>                          AppAllowedMap;
+
+    AppAllowedMap                                               app_allowed;
 };
 
 

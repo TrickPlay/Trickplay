@@ -673,7 +673,7 @@ int TPContext::run()
         //.....................................................................
         // Execute the app's script
 
-        result = current_app->run();
+        result = current_app->run( app_allowed[ current_app->get_id() ] );
 
         if ( result != TP_RUN_OK )
         {
@@ -879,7 +879,7 @@ int TPContext::launch_app( const char * app_id )
         return TP_RUN_APP_PREPARE_FAILED;
     }
 
-    int result = new_app->run();
+    int result = new_app->run( app_allowed[ new_app->get_id() ] );
 
     if ( result != TP_RUN_OK )
     {
@@ -934,7 +934,7 @@ void TPContext::close_app()
 
         if ( new_app )
         {
-            if ( new_app->run() == TP_RUN_OK )
+            if ( new_app->run( app_allowed[ new_app->get_id() ] ) == TP_RUN_OK )
             {
                 g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
 
@@ -983,7 +983,7 @@ void TPContext::reload_app()
     }
     else
     {
-        if ( new_app->run() == TP_RUN_OK )
+        if ( new_app->run( app_allowed[ new_app->get_id() ] ) == TP_RUN_OK )
         {
             g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
         }
@@ -1295,6 +1295,42 @@ void TPContext::validate_configuration()
     if ( !get( TP_SCREEN_HEIGHT ) )
     {
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
+    }
+
+    // Allowed secure objects
+
+    const gchar * allowed_config = get( TP_APP_ALLOWED, TP_APP_ALLOWED_DEFAULT );
+
+    if ( allowed_config )
+    {
+        gchar * * entries = g_strsplit( allowed_config, ":", 0 );
+
+        for ( gchar * * entry = entries; * entry; ++entry )
+        {
+            gchar * * parts = g_strsplit_set( g_strstrip( * entry ), "=,", 0 );
+
+            guint count = g_strv_length( parts );
+
+            if ( count < 2 )
+            {
+                g_warning( "BAD ALLOWED ENTRY '%s'", * entry );
+            }
+            else
+            {
+                StringSet names;
+
+                for ( guint i = 1; i < count; ++i )
+                {
+                    names.insert( g_strstrip( parts[i] ) );
+                }
+
+                app_allowed[ g_strstrip( parts[0] ) ] = names;
+            }
+
+            g_strfreev( parts );
+        }
+
+        g_strfreev( entries );
     }
 }
 

@@ -168,6 +168,7 @@ def parse( source ):
                         type = tokens[ 0 ] ,
                         name = "<<<NONE>>>" ,
                         udata = None ,
+                        restricted = False ,
                         inherits = None ,
                         properties = [] ,
                         functions = [] ,
@@ -175,10 +176,19 @@ def parse( source ):
                     )
                     
             else:
+            
+            	restricted = False
                     
                 if len( tokens ) < 3:
                     
                     sys.exit( "Bad bind" )
+                    
+                if tokens[ 0 ] == "restricted":
+                
+                	restricted = True
+                	
+                	del tokens[ 0 : 1 ]
+                	
                                                     
                 if tokens[ 0 ] not in ( "class" , "global" , "interface" ):
                     
@@ -209,6 +219,7 @@ def parse( source ):
                     type = tokens[ 0 ] ,
                     name = tokens[ 1 ] ,
                     udata = udata ,
+                    restricted = restricted ,
                     inherits = inherits ,
                     properties = [] ,
                     functions = [] ,
@@ -500,6 +511,7 @@ def emit( stuff , f ):
         bind_name = bind[ "name" ]
         bind_type = bind[ "type" ]
         udata_type = bind[ "udata" ]
+        bind_restricted = bind[ "restricted" ]
         metatable_name = "%s_METATABLE" % ( bind_name.upper() , )
         
         constructors = []
@@ -980,6 +992,17 @@ def emit( stuff , f ):
             )
             
             initializers.append( bind_name );
+            
+            # Deal with restricted things
+            
+            if bind_restricted:
+            
+            	f.write( 
+            		'  if (!lb_is_allowed(L,\"%s\"))\n'
+            		'    return;\n' 
+            		%
+            		bind_name 
+            	)
             
             # Create the metatable
             

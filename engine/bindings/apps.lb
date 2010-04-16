@@ -11,6 +11,7 @@
     them access the installed apps.
 */
 
+restricted
 global apps [[TPContext*]]
 {
     apps()

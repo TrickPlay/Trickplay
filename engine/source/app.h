@@ -120,12 +120,16 @@ public:
     //.........................................................................
     // Runs the app
 
-    int run();
+    int run( const StringSet & allowed_names );
 
     //.........................................................................
     // Get the metadata
 
     const Metadata & get_metadata() const;
+
+    //.........................................................................
+
+    const String & get_id() const;
 
     //.........................................................................
     // Get the context
@@ -221,7 +225,7 @@ private:
 
     //.........................................................................
 
-    void secure_lua_state();
+    void secure_lua_state( const StringSet & allowed_names );
 
     //.........................................................................
     // Notification handler to forward everything to our listeners

@@ -6,6 +6,7 @@
 #include "util.h"
 #include "context.h"
 #include "network.h"
+#include "lb.h"
 
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
@@ -677,7 +678,7 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 
 //-----------------------------------------------------------------------------
 
-int App::run()
+int App::run( const StringSet & allowed_names )
 {
     int result = TP_RUN_OK;
 
@@ -699,7 +700,7 @@ int App::run()
 
     screen_gid = clutter_actor_get_gid( screen );
 
-    secure_lua_state();
+    secure_lua_state( allowed_names );
 
     // Open our stuff
     luaopen_clutter_actor( L );
@@ -814,7 +815,7 @@ App::~App()
 
 //-----------------------------------------------------------------------------
 
-void App::secure_lua_state()
+void App::secure_lua_state( const StringSet & allowed_names )
 {
     //.........................................................................
     // Open standard libs
@@ -916,6 +917,14 @@ void App::secure_lua_state()
         lua_pushnil( L );
         lua_setglobal( L, * name );
     }
+
+    //.........................................................................
+
+    for ( StringSet::const_iterator it = allowed_names.begin(); it != allowed_names.end(); ++it )
+    {
+        lb_allow( L, it->c_str() );
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -958,6 +967,13 @@ int App::get_profile_id() const
 const App::Metadata & App::get_metadata() const
 {
     return metadata;
+}
+
+//-----------------------------------------------------------------------------
+
+const String & App::get_id() const
+{
+    return metadata.id;
 }
 
 //-----------------------------------------------------------------------------

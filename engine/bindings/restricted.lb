@@ -4,6 +4,7 @@
 #include "sysdb.h"
 ]]
 
+restricted
 global restricted [[TPContext*]]
 {
     restricted()

@@ -38,6 +38,9 @@ void lb_set_props_from_table(lua_State*L);
 #define lb_optstring(L,i,d) ((lua_isstring(L,i)?lua_tostring(L,i):d))
 const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len);
 
+int lb_is_allowed(lua_State*L,const char*name);
+void lb_allow(lua_State*L,const char*name);
+
 // These macros help to ensure the Lua stack is in order when
 // we leave a function
 

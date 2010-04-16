@@ -83,6 +83,12 @@ typedef struct TPContext TPContext;
                             purposes. In most cases, you should set <TP_APP_ID>.
                             Defaults to the current working directory.
                             
+    TP_APP_ALLOWED -        Lets you configure the restricted objects that are available
+                            to each app. This is a string of the form
+                            <app id>=<object>,<object>:<app id>=<object>,<object>.
+                            Each <object> is granted to each <app id> listed.
+                            Defaults to "com.trickplay.launcher=apps".
+
     TP_SYSTEM_LANGUAGE -    System language. This must be a two character, lower case
                             ISO-639-1 code. See <http://www.loc.gov/standards/iso639-2/php/code_list.php>.
                             Defaults to "en".
@@ -165,6 +171,7 @@ typedef struct TPContext TPContext;
 #define TP_SCAN_APP_SOURCES     "app.scan"
 #define TP_APP_ID               "app.id"
 #define TP_APP_PATH             "app.path"
+#define TP_APP_ALLOWED          "app.allowed"
 #define TP_SYSTEM_LANGUAGE      "system.language"
 #define TP_SYSTEM_COUNTRY       "system.country"
 #define TP_SYSTEM_NAME          "system.name"
