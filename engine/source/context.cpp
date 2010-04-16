@@ -619,7 +619,7 @@ int TPContext::run()
     color.red = 0;
     color.green = 0;
     color.blue = 0;
-    color.alpha = 0;
+    color.alpha = 255;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
 
@@ -698,7 +698,34 @@ int TPContext::run()
 
             g_info( "ENTERING MAIN LOOP..." );
 
-            clutter_main();
+            while ( true )
+            {
+                try
+                {
+                    clutter_main();
+
+                    // This means the run loop ended nicely, so we break
+
+                    break;
+                }
+                catch ( ... )
+                {
+                    if ( is_first_app )
+                    {
+                        g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
+
+                        result = TP_RUN_APP_ERROR;
+
+                        break;
+                    }
+                    else
+                    {
+                        g_warning( "CAUGHT EXCEPTION IN RUN LOOP, CLOSING APP" );
+
+                        close_app();
+                    }
+                }
+            }
 
             notify( TP_NOTIFICATION_APP_CLOSING );
 
@@ -991,6 +1018,11 @@ void TPContext::add_console_command_handler( const char * command, TPConsoleComm
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
+    if ( log_domain && *log_domain == 'C' )
+    {
+        return;
+    }
+
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message

@@ -230,6 +230,11 @@ private:
     static gboolean animate_out_callback( gpointer screen );
 
     //.........................................................................
+    // The panic handler for Lua, it just prints the message and throws
+
+    static int lua_panic_handler( lua_State * L );
+
+    //.........................................................................
 
     TPContext       *       context;
     Metadata                metadata;

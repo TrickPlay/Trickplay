@@ -585,6 +585,17 @@ App * App::load( TPContext * context, const App::Metadata & md )
 
 //-----------------------------------------------------------------------------
 
+int App::lua_panic_handler( lua_State * L )
+{
+    g_critical( "%s", String( 60, '=' ).c_str() );
+    g_critical( "LUA PANIC : %s", lua_tostring( L, -1 ) );
+    g_critical( "%s", String( 60, '=' ).c_str() );
+
+    throw LUA_ERRRUN;
+}
+
+//-----------------------------------------------------------------------------
+
 App::App( TPContext * c, const App::Metadata & md, const char * dp )
     :
     context( c ),
@@ -624,6 +635,10 @@ App::App( TPContext * c, const App::Metadata & md, const char * dp )
 
     L = lua_open();
     g_assert( L );
+
+    // Install panic handler that throws an exception
+
+    lua_atpanic( L, lua_panic_handler );
 
     // Create the lua state proxy
 
@@ -739,7 +754,9 @@ int App::run()
 
     if ( luaL_dofile( L, main_path ) )
     {
-        g_warning( "%s", lua_tostring( L, -1 ) );
+        g_critical( "%s", String( 60, '=' ).c_str() );
+        g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
+        g_critical( "%s", String( 60, '=' ).c_str() );
 
         result = TP_RUN_APP_ERROR;
 
