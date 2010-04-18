@@ -99,12 +99,11 @@ function populate_next_page( completion )
 	-- Poor man's lock: really need a proper semaphore to avoid a potential race someday
 	waiting = true
 
-	pages_loaded = pages_loaded+1
 	-- Call to the Flickr module to load the images.  It will populate the image meta-data into the photo_index
 	-- table, and finally call us back by invoking :callback on the final argument
 	-- We store some state for the callback in the that table so it can be used without scoping issues in the callback's
 	-- context
-	Flickr.fetch_photos(flickr_api_key, Flickr.cc_interesting_url, cols_per_page*rows_per_column, pages_loaded, photo_index,
+	Flickr.fetch_photos(flickr_api_key, Flickr.cc_interesting_url, cols_per_page*rows_per_column, pages_loaded+1, photo_index,
 		{
 			start = #photo_index,
 			final = #photo_index + cols_per_page*rows_per_column,
@@ -120,7 +119,7 @@ function populate_next_page( completion )
 					-- and with an appropriate offset position in the wall
 					local image = Image{ src = Flickr.get_thumb_url(photo_index[i]), position = get_tile_position( col , row ) }
 
-					-- center the image thumbnail inside the tile					
+					-- center the image thumbnail inside the tile
 					image.x = image.x + ( (tile_size - tile_pad) - tonumber(photo_index[i].width_t) ) / 2
 					image.y = image.y + ( (tile_size - tile_pad) - tonumber(photo_index[i].height_t) ) / 2
 
@@ -130,7 +129,8 @@ function populate_next_page( completion )
 				end
 
 				waiting = nil
-				
+
+				pages_loaded = pages_loaded+1
 				if self.completion then completion:callback() end
 			end
 		})
