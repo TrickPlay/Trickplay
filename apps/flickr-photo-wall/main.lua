@@ -310,9 +310,9 @@ function screen.on_key_down(screen,keyval)
 	
 			x_interval = Interval( cursor.x , cursor.x + tile_size )
 			y_interval = nil
-			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = 0 })
 			selection_col = selection_col + 1
-			cursor:animate({ duration = 100, y_rotation = tilt_angle })
+			cursor:animate({ duration = 100, y_rotation = 0 })
 			timeline:start()
 			
 			if selection_col > ( pages_loaded*cols_per_page - 20 ) then
@@ -343,10 +343,10 @@ function screen.on_key_down(screen,keyval)
 			end
 			x_interval = Interval( cursor.x , cursor.x - tile_size )
 			y_interval = nil
-			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = 0 })
 			selection_col = selection_col - 1
 			
-			cursor:animate({ duration = 100, y_rotation = tilt_angle })
+			cursor:animate({ duration = 100, y_rotation = 0 })
 			timeline:start()
 			
 			if selection_col < left_col  and left_col > 0 then
@@ -366,9 +366,9 @@ function screen.on_key_down(screen,keyval)
 			if selection_row > 0 then
 				x_interval = nil
 				y_interval = Interval( cursor.y , cursor.y - tile_size )
-			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = 0 })
 				selection_row = selection_row - 1
-			cursor:animate({ duration = 100, y_rotation = tilt_angle })
+			cursor:animate({ duration = 100, y_rotation = 0 })
 				timeline:start()
 			end
 		end,
@@ -379,9 +379,9 @@ function screen.on_key_down(screen,keyval)
 			if selection_row < rows_per_column-1 then
 				x_interval = nil
 				y_interval = Interval( cursor.y , cursor.y + tile_size )
-			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = tilt_angle })
+			photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage:animate({ duration = 100, y_rotation = 0 })
 				selection_row = selection_row + 1        
-			cursor:animate({ duration = 100, y_rotation = tilt_angle })
+			cursor:animate({ duration = 100, y_rotation = 0 })
 				timeline:start()
 			end
 		end,
