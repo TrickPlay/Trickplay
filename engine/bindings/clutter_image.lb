@@ -8,6 +8,8 @@ module clutter_image;
 #include "images.h"
 #include "signal_collector.h"
 #include "clutter_util.h"
+#include "context.h"
+#include "sysdb.h"
 ]]
 
 [[
@@ -339,6 +341,55 @@ class Image [[ClutterActor*]] actor
 	    result=Images::load_texture_from_data(CLUTTER_TEXTURE(self),data,data_len);
 #endif	    
 	]];
+
+    /*
+        This one lets you get an image from another app. We may want to leave it
+        undocumented. I don't think it is dangerous because we are not returning
+        the data to Lua, we are just sticking it into an image.
+    */
+
+    bool load_app_icon( string app_id, string file_name )
+        [[
+            result = false;
+
+            TPContext * context = App::get( L )->get_context();
+
+            String app_path=context->get_db()->get_app_path(app_id);
+
+            if ( !app_path.empty() )
+            {
+                gchar * path=Util::rebase_path( app_path.c_str() , file_name );
+                Util::GFreeLater free_path( path );
+
+                gsize length;
+                int width;
+                int height;
+                int pitch;
+                int depth;
+                int bgr;
+
+                guchar * pixels = context->load_icon( path, length, width, height, pitch, depth, bgr );
+
+                if ( pixels )
+                {
+                    clutter_texture_set_from_rgb_data(
+                        CLUTTER_TEXTURE( self ),
+                        pixels,
+                        depth == 4,
+                        width,
+                        height,
+                        pitch,
+                        depth,
+                        bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
+                        NULL );
+
+                    g_free( pixels );
+
+                    result = true;
+                }
+            }
+
+        ]];
 	
     callback on_loaded
 	[[
