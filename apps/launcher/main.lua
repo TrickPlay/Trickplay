@@ -7,22 +7,55 @@ local color_scheme = "blue"
 local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
 local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }
 
-screen:add(bar_off_image)
-screen:add(bar_on_image)
+-- Load the generic app image once and clone it 
+
+local generic_app_image = Image { src = "assets/generic-app-icon.png", opacity = 0 }
+
+screen:add(bar_off_image,bar_on_image,generic_app_image)
+
+my_id = app.id
 
 local items = {}
 local items2 = {}
 
+-- Cache the app icons
+
+icons = {}
+
 local make_tile = function(id,name)
+	
 	local item = Group { }
 
-	local image = Image { x = 11/2, y = 10/2, z = 0, scale = { 0.5, 0.5 } }
-	local image_data = apps:load_app_file( id, "launcher-icon.png")
-	if not image_data then
-		image.src = "assets/generic-app-icon.png"
+	-- See if we already have one in our cache 
+	
+	local image = icons[ id ]
+	
+	
+	if not image then
+	
+		-- If not, create it and put it in the cache
+
+		image = Image()
+	
+		if not image:load_app_icon( id, "launcher-icon.png" ) then
+		
+			image = Clone{ source = generic_app_image, opacity = 255 }
+			
+		end
+		
+		icons[ id ] = image
+		
 	else
-		image:load_from_data( image_data )
+	
+		-- If it exists in the cache, clone it
+		
+		image = Clone{ source = image }
+	
 	end
+	
+	image:set { x = 11/2, y = 10/2, z = 0, scale = { 0.5, 0.5 } }
+	
+	
 	item:add(image)
 
 	local my_bar_off = Clone { source = bar_off_image, opacity = 255, z = 0, scale = { 0.5, 0.5 } }
@@ -95,6 +128,7 @@ local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
 local backdrop = Image { src = "assets/background-"..color_scheme..".png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+
 local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
 local OEMLabel = Group
