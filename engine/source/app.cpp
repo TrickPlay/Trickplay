@@ -7,6 +7,7 @@
 #include "context.h"
 #include "network.h"
 #include "lb.h"
+#include "profiler.h"
 
 //-----------------------------------------------------------------------------
 #define APP_METADATA_FILENAME   "app"
@@ -680,6 +681,8 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 
 int App::run( const StringSet & allowed_names )
 {
+    PROFILER( "App::run" );
+
     int result = TP_RUN_OK;
 
     // Get the screen ready for the app
