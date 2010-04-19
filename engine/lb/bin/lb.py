@@ -504,7 +504,8 @@ def emit( stuff , f ):
         def profiling_header(name):
         
         	if options.profiling:
-        		return "  PROFILER(\"%s\");\n" % name
+#        		return "  PROFILER(\"%s\");\n" % name
+				return "  PROFILER(__FUNCTION__);\n"
         	else:
         		return ""
         		
