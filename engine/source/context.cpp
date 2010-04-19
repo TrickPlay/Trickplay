@@ -17,6 +17,7 @@
 #include "controller_server.h"
 #include "mediaplayers.h"
 #include "profiler.h"
+#include "images.h"
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -808,6 +809,8 @@ int TPContext::run()
 
 int TPContext::load_app( App ** app )
 {
+    PROFILER( "TPContext::load_app" );
+
     String app_path;
 
     // If an app id was specified, we will try to find the app by id, in the
@@ -1447,6 +1450,141 @@ ControllerList * TPContext::get_controller_list()
 {
     return &controller_list;
 }
+
+//-----------------------------------------------------------------------------
+
+guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, int & height, int & pitch, int & depth, int & bgr )
+{
+    PROFILER( "TPContext::load_icon" );
+
+    length = 0;
+    width = 0;
+    height = 0;
+    pitch = 0;
+    depth = 0;
+
+    static GChecksumType hash_type = G_CHECKSUM_MD5;
+
+    //.........................................................................
+    // First, we read the contents of the original file
+
+    gchar * contents = NULL;
+    gsize content_length = 0;
+
+    if ( !g_file_get_contents( path, &contents, &content_length, NULL ) )
+    {
+        return NULL;
+    }
+
+    Util::GFreeLater free_contents( contents );
+
+    //.........................................................................
+    // Now, we compute an md5 hash of the contents
+
+    gchar * data_hash = g_compute_checksum_for_string( hash_type, contents, content_length );
+
+    Util::GFreeLater free_data_hash( data_hash );
+
+    //.........................................................................
+    // Compute a hash for the full path to the file
+
+    gchar * path_hash = g_compute_checksum_for_string( hash_type, path, -1 );
+
+    Util::GFreeLater free_path_hash( path_hash );
+
+    //.........................................................................
+    // See if we have an entry in the icon cache for this path
+
+    gchar * icon_cache_path = g_build_filename( get( TP_DATA_PATH ), "icons", NULL );
+
+    Util::GFreeLater free_icon_cache_path( icon_cache_path );
+
+
+    //.........................................................................
+    // This is the file name for the raw file
+
+    gchar * icon_file_path = g_build_filename( icon_cache_path, path_hash, NULL );
+
+    Util::GFreeLater free_icon_file_path( icon_file_path );
+
+
+    //.........................................................................
+    // We also have an info file that has the data hash, width, height, pitch
+    // and depth for the image.
+
+    gchar * info_file_name = g_strdup_printf( "%s.info", icon_file_path );
+
+    Util::GFreeLater free_info_file_name( info_file_name );
+
+
+    gchar * info_contents = NULL;
+
+    gsize info_length = 0;
+
+    if ( g_file_get_contents( info_file_name, &info_contents, &info_length, NULL ) )
+    {
+        Util::GFreeLater free_info_contents( info_contents );
+
+
+        gchar * actual_data_hash = g_new0( gchar , info_length + 1 );
+
+        Util::GFreeLater free_actual_data_hash( actual_data_hash );
+
+        if ( sscanf( info_contents, "%s %d %d %d %d %d", actual_data_hash, &width, &height, &pitch, &depth, &bgr ) == 6 )
+        {
+            if ( !strcmp( actual_data_hash, data_hash ) )
+            {
+                PROFILER( "TPContext::load_icon(load raw)" );
+
+                gchar * raw_contents = NULL;
+
+                if ( g_file_get_contents( icon_file_path, &raw_contents, &length, NULL ) )
+                {
+                    return ( guchar *)raw_contents;
+                }
+            }
+        }
+    }
+
+
+    //.........................................................................
+    // If we got here, we need to create the icon file because it doesn't exist,
+    // doesn't match or we had a problem reading the information.
+
+    guchar * raw_contents = Images::decode_image( contents, content_length, width, height, pitch, depth, bgr );
+
+    // The length of the raw image
+
+    length = height * pitch;
+
+    // If the conversion succeeded, we need to write the info file and the
+    // raw icon file. Any failure below this point is simply a failure to cache,
+    // and even though it will affect performance, it is not considered critical.
+
+    if ( raw_contents )
+    {
+        PROFILER( "TPContext::load_icon(cache)" );
+
+        // Make sure the icon cache directory exists
+
+        if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
+        {
+            gchar * info = g_strdup_printf( "%s %d %d %d %d %d", data_hash, width, height, pitch, depth, bgr );
+
+            Util::GFreeLater free_info( info );
+
+            if ( g_file_set_contents( info_file_name, info, -1, NULL ) )
+            {
+                // Now we save the raw icon
+
+                g_file_set_contents( icon_file_path, ( gchar * )raw_contents, length, NULL );
+            }
+        }
+    }
+
+    return raw_contents;
+}
+
 
 //=============================================================================
 // External-facing functions

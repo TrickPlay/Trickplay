@@ -119,6 +119,10 @@ public:
 
     ControllerList * get_controller_list();
 
+    //.........................................................................
+
+    guchar * load_icon( const gchar * path, gsize & length, int & width, int & height, int & pitch, int & depth, int & bgr );
+
 private:
 
     TPContext();
