@@ -182,8 +182,14 @@ bool Images::load_texture_from_file( ClutterTexture * texture, const char * file
     gchar * data = NULL;
     gsize length = 0;
 
-    if ( !g_file_get_contents( file_name, &data, &length, NULL ) )
+    GError * error = NULL;
+
+    if ( !g_file_get_contents( file_name, &data, &length, &error ) )
     {
+        g_warning( "%s", error->message );
+
+        g_clear_error( &error );
+
         return false;
     }
 
