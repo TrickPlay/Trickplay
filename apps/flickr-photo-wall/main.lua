@@ -45,6 +45,8 @@ mediaplayer.on_end_of_stream = function ()
 						mediaplayer:play()
 					end
 mediaplayer:load('assets/background.mp4')
+curtain = Rectangle { color = '00000080', position = { -1.5*screen.w, -1.5*screen.h, -screen.h }, size = {3*screen.w, 3*screen.h} }
+screen:add(curtain)
 
 -- The wall will contain an array of Images which will slide around diagonally on the screen at an angle
 local wall = Group{ position = { left_pad , top_pad } , size = screen.size }
