@@ -289,6 +289,36 @@ interface actor [[ClutterActor*]]
         ]];
             
     /*
+
+    Property: center
+
+    Returns a table with the x and y coordinates of the element relative to its
+    parent.
+
+    */
+
+    readonly table center
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat w;
+            gfloat h;
+            gfloat ax;
+            gfloat ay;
+
+            clutter_actor_get_position(self,&x,&y);
+            clutter_actor_get_size(self,&w,&h);
+            clutter_actor_get_anchor_point(self,&ax,&ay);
+
+            lua_newtable(L);
+            lua_pushnumber(L,x-ax+(w/2));
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,y-ay+(h/2));
+            lua_rawseti(L,-2,2);
+        ]];
+
+
+    /*
 	Property: anchor_point
 	
 	The handle to the UI element. All UI elements have their handle set to
