@@ -20,6 +20,7 @@ assets =
     enemy1          = Image{ src = "assets/enemy1_strip3.png" },
     enemy2          = Image{ src = "assets/enemy2_strip3.png" },
     enemy3          = Image{ src = "assets/enemy3_strip3.png" },
+    enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
     island1         = Image{ src = "assets/island1.png" },
@@ -38,11 +39,13 @@ end
 
 -------------------------------------------------------------------------------
 
-ENEMY_PLANE_MIN_SPEED = 105
+ENEMY_PLANE_MIN_SPEED       = 105
 
-ENEMY_PLANE_MAX_SPEED = 150
+ENEMY_PLANE_MAX_SPEED       = 150
 
-ENEMY_FREQUENCY       = 0.8
+ENEMY_FREQUENCY             = 0.8
+
+ENEMY_SHOOTER_PERCENTAGE    = 50
 
 -------------------------------------------------------------------------------
 
@@ -757,7 +760,7 @@ enemies =
     
     new_enemy =
     
-        function( self )
+        function( self , image , speed , position )
         
             return
             {
@@ -767,23 +770,54 @@ enemies =
                 
                 speed = math.random( ENEMY_PLANE_MIN_SPEED , ENEMY_PLANE_MAX_SPEED ),
                 
-                image = Clone{ source = self.images[ math.random( #self.images ) ] , opacity = 255 },
+                image = nil,
                 
                 group = nil,
+                
+                shoots = false,
+                
+                shoot_time = 1.5, -- seconds
+                
+                last_shot_time = 0,
                 
                 setup =
                 
                     function( self )
                     
+                        if not image then
+                        
+                            self.image = Clone{ source = self.enemies.images[ math.random( #self.enemies.images ) ] , opacity = 255 }
+                            
+                        else
+                        
+                            self.image = Clone{ source = image , opacity = 255 }
+                        end
+                        
+                        if speed then
+                        
+                            self.speed = speed
+                            
+                        end
+                        
+                        local position = position
+                        
+                        if not position then
+                        
+                            position = { math.random( 0 , screen.w - self.image.w ) , - self.image.h }
+                        
+                        end
+                    
                         self.group = Group
                             {
                                 size = { self.image.w / 3 , self.image.h },
-                                position = { math.random( 0 , screen.w - self.image.w ) , - self.image.h },
+                                position = position,
                                 clip = { 0 , 0 , self.image.w / 3 , self.image.h },
                                 children = { self.image }
                             }
                             
                         screen:add( self.group )
+                        
+                        self.shoots = math.random( 100 ) < ENEMY_SHOOTER_PERCENTAGE
                     
                     end,
                     
@@ -828,6 +862,85 @@ enemies =
                         
                             self.group.y = y
                             
+                        end
+                        
+                        -- Shoot
+                        
+                        if self.shoots then
+                        
+                            self.last_shot_time = self.last_shot_time + seconds
+                            
+                            if self.last_shot_time >= self.shoot_time then
+                            
+                                self.last_shot_time = self.last_shot_time - self.shoot_time
+                                
+                                local enemy = self
+                                
+                                local bullet =
+                                    {
+                                        speed = enemy.speed * 1.5,
+                                        
+                                        image = Clone{ source = assets.enemy_bullet , opacity = 255 },
+                                        
+                                        setup =
+                                        
+                                            function( self )
+                                            
+                                                self.image.anchor_point = { self.image.w / 2 , self.image.h / 2 }
+                                                
+                                                self.image.position = enemy.group.center
+                                                
+                                                self.image.y = self.image.y + 10
+                                                
+                                                --self.image.y = self.image.y + 10
+                                                
+                                                screen:add( self.image )
+                                            
+                                            end,
+                                            
+                                        render =
+                                        
+                                            function( self , seconds )
+                                            
+                                                local y = self.image.y + self.speed * seconds
+                                                
+                                                if y > screen.h then
+                                                
+                                                    remove_from_render_list( self )
+                                                    
+                                                    screen:remove( self.image )
+                                                
+                                                else
+                                                
+                                                    local start_point = self.image.center
+                                                
+                                                    self.image.y = y
+                                                    
+                                                    add_to_collision_list(
+                                                    
+                                                        self , start_point , self.image.center , { 4 , 4 } , TYPE_MY_PLANE
+                                                    
+                                                    )
+                                                
+                                                end
+                                            
+                                            end,
+                                            
+                                        collision =
+                                        
+                                            function( self , other )
+                                            
+                                                remove_from_render_list( self )
+                                                
+                                                screen:remove( self.image )
+                                            
+                                            end
+                                    }
+                                    
+                                add_to_render_list( bullet )
+                                
+                            end
+                        
                         end
                     
                     end,
@@ -914,9 +1027,31 @@ enemies =
             
             if self.time >= self.enemy_seconds then
             
-                add_to_render_list( self:new_enemy() )
+                if math.random(100) < 10 then
                 
-                self.count = self.count + 1
+                    local image = self.images[ math.random( #self.images ) ]
+                    
+                    local speed = math.random( ENEMY_PLANE_MIN_SPEED , ENEMY_PLANE_MAX_SPEED )
+                    
+                    local count = 3
+                    
+                    local w = image.w / 3
+                    
+                    local left = math.random( 0 , screen.w - ( count * w ) )
+                    
+                    add_to_render_list( self:new_enemy( image , speed , { left , - image.h * 2 } ) )
+                    add_to_render_list( self:new_enemy( image , speed , { left + w , - image.h } ) )
+                    add_to_render_list( self:new_enemy( image , speed , { left + w * 2 , - image.h * 2 } ) )
+                    
+                    self.count = self.count + count
+                
+                else
+            
+                    add_to_render_list( self:new_enemy() )
+                
+                    self.count = self.count + 1
+                    
+                end
                 
                 self.time = self.time - self.enemy_seconds
             
