@@ -8,37 +8,41 @@ struct idle
 {
     idle(lua_State * L)
     :
-	source(0),
-	lsp(App::get(L)->ref_lua_state_proxy())	
+        source(0),
+        lsp(App::get(L)->ref_lua_state_proxy()),
+        timer(g_timer_new())
     {
-	
+
     }
-    
+
     ~idle()
     {
-	clear();
-	lsp->unref();
+        clear();
+        lsp->unref();
+        g_timer_destroy(timer);
     }
-    
+
     void set()
     {
-	clear();
-	source=clutter_threads_add_idle(on_idle,this);
+        clear();
+        source=clutter_threads_add_idle(on_idle,this);
+        //source=clutter_threads_add_frame_source(60,on_idle,this);
     }
-    
+
     void clear()
     {
-	if (source)
-	{
-	    g_source_remove(source);
-	    source=0;
-	}
+        if (source)
+        {
+            g_source_remove(source);
+            source=0;
+        }
     }
-    
+
     static gboolean on_idle(gpointer data);
 
-    guint source;
-    LuaStateProxy * lsp;    
+    guint           source;
+    LuaStateProxy * lsp;
+    GTimer *        timer;
 };
 ]]
 
@@ -78,7 +82,9 @@ gboolean idle::on_idle(gpointer data)
     
     if (self->lsp->is_valid())
     {
-	lb_invoke_callback(self->lsp->get_lua_state(),self,IDLE_METATABLE,"on_idle",0,0);
+        lua_pushnumber(self->lsp->get_lua_state(),g_timer_elapsed( self->timer, NULL ));
+        g_timer_start(self->timer);
+        lb_invoke_callback(self->lsp->get_lua_state(),self,IDLE_METATABLE,"on_idle",1,0);
     }
     
     return TRUE;

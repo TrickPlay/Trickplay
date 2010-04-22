@@ -96,6 +96,7 @@ Group: Reference  {
 
    Group: Classes  {
 
+      File: Stopwatch  (/home/pablo/Dropbox/tp/engine/bindings/stopwatch.lb)
       File: Timer  (/home/pablo/Dropbox/tp/engine/bindings/timer.lb)
       File: URLRequest  (no auto-title, /home/pablo/Dropbox/tp/engine/bindings/url_request.lb)
       File: XMLParser  (/home/pablo/Dropbox/tp/engine/bindings/xml.lb)
