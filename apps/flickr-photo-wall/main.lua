@@ -13,11 +13,12 @@ local left_pad = screen.size[1] / 10
 -- How much should the wall be padded on top?
 local top_pad = screen.size[2] / 10
 -- How big shold each image tile be?
-local tile_size = 120
+local tile_size = 160
 -- How much padding between adjacent tiles?
 local tile_pad = 20
 -- At what angle to the screen should the image wall live?
-local tilt_angle = 30
+local tilt_angle = 40
+
 local super_tilt_angle = 85
 -- API Key for flickr API access for this app
 local flickr_api_key="e68b53548e8e6a71565a1385dc99429f"
@@ -30,6 +31,9 @@ TODO: Flush images not being used to free up memory
 
 ]]--
 
+local dx = tile_size * math.cos( math.rad( tilt_angle ) )
+local dz = tile_size * math.sin( math.rad( tilt_angle ) )
+
 local cols_per_page = math.floor(prefetch_images / rows_per_column)
 local left_col = 0
 local selection_col = 0
@@ -41,7 +45,7 @@ mediaplayer.on_end_of_stream = function ()
 						mediaplayer:play()
 					end
 mediaplayer:load('assets/background.mp4')
-curtain = Rectangle { color = '00000080', position = { -600, -600, -600 }, size = {1200+screen.w, 1200+screen.h} }
+curtain = Rectangle { color = '00000080', position = { -1.5*screen.w, -1.5*screen.h, -screen.h }, size = {3*screen.w, 3*screen.h} }
 screen:add(curtain)
 
 -- The wall will contain an array of Images which will slide around diagonally on the screen at an angle
@@ -66,6 +70,15 @@ local logo = Image {
 				width = screen.w / 6,
 }
 screen:add(logo)
+
+local gridRect = Rectangle {
+					size = {tile_size-2, tile_size-2},
+					color = "808080",
+					position = { 1, 1 },
+					z = -1,
+					opacity = 0
+}
+screen:add(gridRect)
 
 -- Given an image index number, find it's column/row indices in the wall
 function image_index_to_position( i )
@@ -117,15 +130,22 @@ function populate_next_page( completion )
 					local col, row = image_index_to_position(i)
 					-- Create a new image from the thumbnail URL Flickr got for that image
 					-- and with an appropriate offset position in the wall
-					local image = Image{ src = Flickr.get_thumb_url(photo_index[i]), position = get_tile_position( col , row ) }
+					local image = Image{
+											src = Flickr.get_thumb_url(photo_index[i]),
+											position = {
+															(tile_size - tonumber(photo_index[i].width_t))/2,
+															(tile_size - tonumber(photo_index[i].height_t))/2
+														},
+											z = 1,
+										}
+					local grid = Clone { source = gridRect, opacity = 64 }
 
-					-- center the image thumbnail inside the tile
-					image.x = image.x + ( (tile_size - tile_pad) - tonumber(photo_index[i].width_t) ) / 2
-					image.y = image.y + ( (tile_size - tile_pad) - tonumber(photo_index[i].height_t) ) / 2
+					local igroup = Group { children = { grid, image }, position = get_tile_position( col, row ) }
 
-					photo_index[i].thumbWallImage = image
+					photo_index[i].thumbWallImage = igroup
 
-					wall:add( image )
+					print("PLACED #",i)
+					wall:add( igroup )
 				end
 
 				waiting = nil
@@ -134,29 +154,35 @@ function populate_next_page( completion )
 				if self.completion then completion:callback() end
 			end
 		})
-
 end
 
-local cursor = Rectangle{ color = trickplay_red , opacity = 0 }
-cursor.position , cursor.size = inflate( get_tile_position( selection_col , selection_row ) , { 100 , 100 } , -4 , -4 )
-cursor.z = -1
+local deactivate = function (image)
+	image:animate({ duration = 100, y_rotation = 0 })
+	image.children[1]:animate({ duration = 100, opacity = 64 })
+end
+
+local activate = function (image)
+	image:raise_to_top()
+	image:animate({ duration = 100, y_rotation = -tilt_angle })
+	image.children[1]:animate({ duration = 100, opacity = 220 })
+end
+
 
 -- Fetch the first set of images
 -- We pass a callback which itself will load more images once first page is loaded
 -- ...with its own callback to load page 3 as well.  So we basically load the first 3 pages, one at a time at startup.
 populate_next_page({
-							callback = function( self )
-								wall:add( cursor )
-								populate_next_page({
+					callback = function( self )
+						activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)						populate_next_page({
+								callback = function( self )
+									populate_next_page({
 										callback = function( self )
-											populate_next_page({
-												callback = function( self )
-												end
-											})
 										end
-								})
-							end
+									})
+								end
 						})
+					end
+				})
 
 
 screen:show_all()
@@ -165,76 +191,13 @@ screen:show_all()
 local licenses = {}
 Flickr.license_info(flickr_api_key, licenses)
 
--- The start_timeline will wait until the images are likely to have started loading, then rotate the
--- wall to its tilted angle, from its original super-tilted angle
-local start_timeline = Timeline{ duration = 500 , delay = 800 }
-local a = Interval( wall.z , 0 )
-local b = Interval( wall.y_rotation[1] , tilt_angle )
-local c = Alpha{ timeline = start_timeline , mode = "EASE_OUT_SINE" }
-
-function start_timeline.on_new_frame( t , msecs )
-    wall.z = a:get_value( c.alpha )
-    
-end
-
-function start_timeline.on_completed( )
-    
-    local t = Timeline{ duration = 1000 }
-    
-    local d = Alpha{ timeline = t , mode = "EASE_OUT_ELASTIC" }
-    
-    function t.on_new_frame(t)
-        wall.y_rotation = { b:get_value( d.alpha ) , screen.w / 2 , 0 }
-        cursor.opacity = 255 * t.progress
-    end
-        
-    t:start()
-end
-
-start_timeline:start()
-
-
-local x_interval = nil
-local y_interval = nil
-
-local timeline = Timeline{ duration = 40 }
-
-function timeline.on_new_frame(t,msecs)
-    
-    if x_interval then
-        cursor.x = x_interval:get_value( t.progress )
-    end
-    if y_interval then
-        cursor.y = y_interval:get_value( t.progress )
-    end
-end
-
-local wall_x_interval = nil
-local wall_z_interval = nil
-
-local wall_timeline = Timeline{ duration = 40 }
-
-function wall_timeline.on_new_frame( t , msecs )
-    if wall_x_interval then
-        wall.x = wall_x_interval:get_value( t.progress )
-    end
-    if wall_z_interval then
-        wall.z = wall_z_interval:get_value( t.progress )
-    end
-end
-
-local key_right = 65363
-local key_left  = 65361
-local key_down  = 65364
-local key_up    = 65362
-local key_enter = 65293
+wall:animate({ duration = 500, z = 0, mode = "EASE_OUT_SINE", on_completed = function()
+	wall:animate({ duration = 1000, y_rotation = tilt_angle, mode = "EASE_OUT_ELASTIC" })
+end })
 
 local zoom_image
 local wall_zoom_back_z = -300
 local image_zoom_back_z = -200
-
-local wall_zoom_timeline = Timeline{ duration = 250 }
-local wall_zoom_alpha = Alpha{ timeline = wall_zoom_timeline , mode = "EASE_OUT_SINE" }
 
 function controllers.on_controller_connected(controllers, controller)
 	controller:declare_resource("flickr","assets/flickr-phone.png")
@@ -248,67 +211,24 @@ end
 
 function screen.on_key_down(screen,keyval)
 
-	local function reset()
-		if timeline.is_playing then
-			--move_selection()
-			if x_interval then
-				cursor.x = x_interval.to
-			end
-			if y_interval then
-				cursor.y = y_interval.to
-			end
-			timeline:advance(timeline.duration)
-		end
-
-		if zoom_image then
-			if wall_zoom_timeline.is_playing then
-				wall_zoom_timeline:advance(wall_zoom_timeline.duration)
-			end
-			local wall_zoom_int = Interval( wall_enclosure.z, 0 )
-			local image_zoom_z_int = Interval( zoom_image.z, image_zoom_back_z )
-			local image_zoom_opacity_int = Interval( 255, 0 )
-			function wall_zoom_timeline.on_new_frame( t , msecs )
-				wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
-				zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
-				zoom_image.opacity = image_zoom_opacity_int:get_value( wall_zoom_alpha.alpha )
-			end
-
-			function wall_zoom_timeline.on_completed( )
-				zoom_image.parent:remove(zoom_image)
-				zoom_image = nil
-			end
-
-			wall_zoom_timeline:start()
-		end
-	end
-
-	local function reset_wall()
-		if not wall_timeline.is_playing then
-			return
-		end
-		if wall_x_interval then
-			wall.x = wall_x_interval.to
-		end
-		if wall_z_interval then
-			wall.z = wall_z_interval.to
+	local reset_zoom = function()
+		if(zoom_image) then
+			-- Zoom image back out and vanish
+			wall_enclosure:animate({ duration = 250, z = 0 })
+			zoom_image:animate({ duration = 250, z = image_zoom_back_z, scale = { 0.1, 0.1}, opacity = 0, on_completed = function () zoom_image = nil end })
 		end
 	end
 
 	key_actions = {
-	
-		[key_right] =  function()
-			reset()
-			reset_wall()
-	
+		[keys.Right] =  function()
 			if selection_col >= pages_loaded*cols_per_page - 1 then
 				return
 			end
-	
-			x_interval = Interval( cursor.x , cursor.x + tile_size )
-			y_interval = nil
+
+			deactivate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 			selection_col = selection_col + 1
-			timeline:start()
-			
+			activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
+
 			if selection_col > ( pages_loaded*cols_per_page - 20 ) then
 				-- Fetch another set of images
 				print("LOADING IMAGES")
@@ -316,74 +236,54 @@ function screen.on_key_down(screen,keyval)
 			end
 			
 			if selection_col - left_col > 3 then
-				local dx = tile_size * math.cos( math.rad( tilt_angle ) )
-				wall_x_interval = Interval( wall.x , wall.x - dx )
-				wall_z_interval = Interval( wall.z , wall.z + ( dx * math.tan( math.rad( tilt_angle ) ) ) )
-				
 				left_col = left_col + 1
-				
-				wall_timeline:start()
+				wall:animate({ duration = 250, x = left_pad-left_col*dx, z = left_col*dz })
 			end
 		end,
 
+		[keys.Left] = function()
 
-		[key_left] = function()
-			reset()
-			reset_wall()
-			
 			if selection_col == 0 then
 				return
 			end
-			x_interval = Interval( cursor.x , cursor.x - tile_size )
-			y_interval = nil
+
+			deactivate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 			selection_col = selection_col - 1
-			
-			timeline:start()
+			activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 			
 			if selection_col < left_col  and left_col > 0 then
-				local dx = tile_size * math.cos( math.rad( tilt_angle ) )
-				wall_x_interval = Interval( wall.x , wall.x + dx )
-				wall_z_interval = Interval( wall.z , wall.z - ( dx * math.tan( math.rad( tilt_angle ) ) ) )
-				
 				left_col = left_col - 1
-				
-				wall_timeline:start()
+				wall:animate({ duration = 250, x = left_pad-left_col*dx, z = left_col*dz })
 			end
 		end,
 
-		[key_up] = function()
-			reset()
+		[keys.Up] = function()
 			
 			if selection_row > 0 then
-				x_interval = nil
-				y_interval = Interval( cursor.y , cursor.y - tile_size )
+				deactivate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 				selection_row = selection_row - 1
-				timeline:start()
+				activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 			end
 		end,
 
-		[key_down] = function()
-			reset()
-			
+		[keys.Down] = function()
+
 			if selection_row < rows_per_column-1 then
-				x_interval = nil
-				y_interval = Interval( cursor.y , cursor.y + tile_size )
-				selection_row = selection_row + 1        
-				timeline:start()
+				deactivate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
+				selection_row = selection_row + 1
+				activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 			end
 		end,
 
-		[key_enter] = function()
+		[keys.Return] = function()
 			if not zoom_image then
-				reset()
-	
 				-- identify the photo based on column & row
 				local the_photo = photo_index[image_position_to_index(selection_col, selection_row)]
 				if the_photo == nil then
 					return
 				end
 
-				local start_position = cursor.transformed_position
+				local start_position = the_photo.thumbWallImage.transformed_position
 
 				zoom_image = Group { position = {0,0} }
 				local zoom_image_url
@@ -392,7 +292,7 @@ function screen.on_key_down(screen,keyval)
 				else
 					zoom_image_url = Flickr.get_medium_url(the_photo)
 				end
-				local zoom_thumb_img = Clone { source = the_photo.thumbWallImage }
+				local zoom_thumb_img = Clone { source = the_photo.thumbWallImage.children[2] }
 				local zoom_image_txt_grp = Group { position = { 0, 0 } }
 				local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
 				local zoom_image_txt = Text	{
@@ -415,11 +315,11 @@ function screen.on_key_down(screen,keyval)
 											if zoom_image == nil then return end
 											zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
 										end
-	
-	
+
+
 				zoom_image.children = { zoom_thumb_img, zoom_image_txt_grp }
-	
-	
+
+
 				if (the_photo.width_m / 16) > ( the_photo.height_m / 9 )then
 					zoom_image_img.width = screen.w * 0.9
 					zoom_image_img.height = ( screen.w * 0.9 ) * ( the_photo.height_m / the_photo.width_m )
@@ -440,37 +340,17 @@ function screen.on_key_down(screen,keyval)
 				zoom_image_txt_grp.z_rotation = { 90, 0, 0 }
 				zoom_image.position = { ( screen.w - zoom_image_img.size[1] ) / 2,
 												( screen.h - zoom_image_img.size[2] ) / 2 }
-				zoom_image_scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
-	
+				zoom_image.z = image_zoom_back_z
 				zoom_image.scale = { 0.1, 0.1, zoom_image_img.size[1]/2, zoom_image_img.size[2]/2 }
 				screen:add( zoom_image )
-				if wall_zoom_timeline.is_playing then
-					wall_enclosure.z = wall_zoom_int.to
-					wall_zoom_timeline:stop()
-				end
-				local wall_zoom_int = Interval( wall_enclosure.z, wall_zoom_back_z )
-				local image_zoom_z_int = Interval( image_zoom_back_z, 0 )
-				local image_zoom_scale_int = Interval ( 0.1, 1.0 )
-	
-				function wall_zoom_timeline.on_new_frame( t , msecs )
-					zoom_image.z = image_zoom_z_int:get_value( wall_zoom_alpha.alpha )
-					zoom_image.scale =	{
-											image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
-											image_zoom_scale_int:get_value( wall_zoom_alpha.alpha ),
-											zoom_image_img.size[1]/2,
-											zoom_image_img.size[2]/2
-										}
-					wall_enclosure.z = wall_zoom_int:get_value( wall_zoom_alpha.alpha )
-				end
-	
-				wall_zoom_timeline.on_completed = nil
-				wall_zoom_timeline:start()
-			else
-				reset()
+
+				wall_enclosure:animate({ duration = 250, z = wall_zoom_back_z })
+				zoom_image:animate({ duration = 250, z = 0, scale = { 1.0, 1.0 }, opacity = 255 })
 			end
 		end,
 	 }
 
+	reset_zoom()
 	if key_actions[keyval] then
 		key_actions[keyval]()
 	else
