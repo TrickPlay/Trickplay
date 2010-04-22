@@ -53,7 +53,7 @@ local make_tile = function(id,name)
 	
 	end
 	
-	image:set { x = 11/2, y = 10/2, z = 0, scale = { 0.5, 0.5 } }
+	image:set { x = 14/2, y = 14/2, z = 0, scale = { 0.5, 0.5 } }
 	
 	
 	item:add(image)
