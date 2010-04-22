@@ -178,6 +178,11 @@ namespace SQLite
         return step() == SQLITE_ROW;
     }
 
+    bool Statement::step_done()
+    {
+        return step() == SQLITE_DONE;
+    }
+
     int Statement::reset()
     {
         return !ok() ? get_error() : check( sqlite3_reset( s ) );

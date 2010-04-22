@@ -90,6 +90,7 @@ namespace SQLite
 
         int step();
         bool step_row();
+        bool step_done();
 
         int reset();
 
