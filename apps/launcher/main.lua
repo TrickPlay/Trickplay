@@ -3,6 +3,7 @@ dofile("ferris.lua")
 screen:show_all()
 
 local color_scheme = "blue"
+local oem_vendor = "samsung"
 
 local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
 local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }
@@ -136,11 +137,16 @@ local OEMLabel = Group
 							children =
 							{
 								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "00000080", y = screen.h/16, z = 0 },
-								Image { src = "assets/label-Samsung.png", z = 1, x = screen.h/16, y = 2*screen.h/16 },
+--								Image { src = "assets/label-oem-"..oem_vendor..".png", z = 1, x = screen.h/16, y = 2*screen.h/16 },
+								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.h/32, y = 2*screen.h/16 },
+								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.h/32, y = 13*screen.h/32 },
+								Image { src = "assets/settings.png", z = 1, x = screen.h/32, y = 13*screen.h/16, opacity = 128 },
+--								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.h/16, y = 13*screen.h/16 },
 							},
 							x = 10,
 							z = 1,
 							opacity = 0,
+							y_rotation = { 90, 0 ,0 },
 						}
 
 screen:add(backdrop)
@@ -242,6 +248,7 @@ function screen.on_key_down(screen, key)
 									opacity = 255,
 									x = 50,
 									mode = "EASE_OUT_SINE",
+									y_rotation = 0,
 								}
 							)
 			playLabel:animate(
@@ -316,6 +323,7 @@ function screen.on_key_down(screen, key)
 									opacity = 0,
 									x = 10,
 									mode = "EASE_IN_SINE",
+									y_rotation = 90,
 								}
 							)
 			playLabel:animate(
