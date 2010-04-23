@@ -29,7 +29,7 @@ assets =
     score           = Text{ font = "Sans 24px" , text = "+10" , color = "FFFF00" },
 }
 
-for k , v in pairs( assets ) do
+for _ , v in pairs( assets ) do
     
     v.opacity = 0
         
@@ -45,7 +45,7 @@ ENEMY_PLANE_MAX_SPEED       = 150
 
 ENEMY_FREQUENCY             = 0.8
 
-ENEMY_SHOOTER_PERCENTAGE    = 50
+ENEMY_SHOOTER_PERCENTAGE    = 20
 
 -------------------------------------------------------------------------------
 
@@ -768,7 +768,7 @@ enemies =
                 
                 enemies = self,
                 
-                speed = math.random( ENEMY_PLANE_MIN_SPEED , ENEMY_PLANE_MAX_SPEED ),
+                speed = nil, 
                 
                 image = nil,
                 
@@ -776,7 +776,7 @@ enemies =
                 
                 shoots = false,
                 
-                shoot_time = 1.5, -- seconds
+                shoot_time = 0.5 + math.random(), -- seconds
                 
                 last_shot_time = 0,
                 
@@ -796,6 +796,10 @@ enemies =
                         if speed then
                         
                             self.speed = speed
+                            
+                        else
+                        
+                            self.speed = math.random( ENEMY_PLANE_MIN_SPEED , ENEMY_PLANE_MAX_SPEED )
                             
                         end
                         
@@ -1089,7 +1093,7 @@ function idle.on_idle( idle , seconds )
         process_collisions( )
         
     end
-
+    
 end
 
 -------------------------------------------------------------------------------
@@ -1113,3 +1117,5 @@ function screen.on_key_down( screen , key )
 end
 
 -------------------------------------------------------------------------------
+
+math.randomseed( os.time() )
