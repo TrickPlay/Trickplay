@@ -25,8 +25,8 @@ struct idle
     void set()
     {
         clear();
-        source=clutter_threads_add_idle(on_idle,this);
-        //source=clutter_threads_add_frame_source(60,on_idle,this);
+        //source=clutter_threads_add_idle(on_idle,this);
+        source=clutter_threads_add_frame_source(60,on_idle,this);
     }
 
     void clear()
