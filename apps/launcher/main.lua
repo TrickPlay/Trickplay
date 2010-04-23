@@ -215,11 +215,8 @@ end
 
 function screen.on_key_down(screen, key)
 
-	if ( keys.Up == key ) then
-		storeMockup:animate({duration = 500, opacity = 255, mode = "EASE_IN_OUT_SINE" })
-		return
-	elseif ( keys.Down == key ) then
-		storeMockup:animate({duration = 500, opacity = 0, mode = "EASE_IN_OUT_SINE"})
+	if ( keys.s == key ) then
+		storeMockup:animate({duration = 500, opacity = 255-storeMockup.opacity, mode = "EASE_IN_OUT_SINE" })
 		return
 	end
 
