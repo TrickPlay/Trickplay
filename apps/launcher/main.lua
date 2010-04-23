@@ -128,6 +128,8 @@ ferris2.highlight = function () end
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
+local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity = 0 }
+
 local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
 local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 
@@ -174,6 +176,9 @@ screen:add(ferris2_group)
 screen:add(playLabel)
 screen:add(ferris_group)
 
+screen:add(storeMockup)
+storeMockup:raise_to_top()
+
 mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
 mediaplayer:load('jeopardy.mp4')
@@ -209,6 +214,14 @@ local backdrop_stop_wobble = function(backdrop)
 end
 
 function screen.on_key_down(screen, key)
+
+	if ( keys.Up == key ) then
+		storeMockup:animate({duration = 500, opacity = 255, mode = "EASE_IN_OUT_SINE" })
+		return
+	elseif ( keys.Down == key ) then
+		storeMockup:animate({duration = 500, opacity = 0, mode = "EASE_IN_OUT_SINE"})
+		return
+	end
 
 	-- Stuff to rotate the wheel and choose items
 	if( state == "onscreen" or state == "fullscreen" ) then
