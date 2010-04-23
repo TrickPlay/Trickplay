@@ -137,12 +137,9 @@ local OEMLabel = Group
 						{
 							children =
 							{
-								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "00000080", y = screen.h/16, z = 0 },
---								Image { src = "assets/label-oem-"..oem_vendor..".png", z = 1, x = screen.h/16, y = 2*screen.h/16 },
-								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.h/32, y = 2*screen.h/16 },
-								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.h/32, y = 13*screen.h/32 },
-								Image { src = "assets/settings.png", z = 1, x = screen.h/32, y = 13*screen.h/16, opacity = 128 },
---								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.h/16, y = 13*screen.h/16 },
+								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.h/32, y = 2*screen.h/32 },
+								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.h/32, y = 11*screen.h/32 },
+								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.h/32, y = 20*screen.h/32 },
 							},
 							x = 10,
 							z = 1,
@@ -153,6 +150,25 @@ local OEMLabel = Group
 screen:add(backdrop1)
 screen:add(backdrop2)
 screen:add(OEMLabel)
+
+local swap_tile = function(image, new_src, delay)
+	Timer { interval = delay, on_timer = function(timer)
+		image:move_anchor_point(image.w/2, image.h/2)
+		image:animate({ duration = 250, y_rotation = -90, mode = "EASE_IN_SINE", on_completed = function()
+			image.src = new_src
+			image:animate({ duration = 250, y_rotation = 0, mode = "EASE_OUT_SINE" })
+		timer:stop()
+		end})
+	end }
+end
+
+Timer { interval = 15, on_timer = function(timer)
+	local first = OEMLabel.children[1].src
+	swap_tile(OEMLabel.children[1], OEMLabel.children[2].src, .5)
+	swap_tile(OEMLabel.children[2], OEMLabel.children[3].src, 1)
+	swap_tile(OEMLabel.children[3], first, 1.5)
+end }
+
 screen:add(getLabel)
 screen:add(ferris2_group)
 screen:add(playLabel)
