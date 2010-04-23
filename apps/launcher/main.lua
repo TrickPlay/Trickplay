@@ -188,7 +188,7 @@ backdrop_fade_wobble = function(backdrop)
 					end })
 end
 
-local backdrop_wobble_stop = function(backdrop)
+local backdrop_stop_wobble = function(backdrop)
 	backdrop:animate({ duration = 1, opacity = 0 })
 end
 
