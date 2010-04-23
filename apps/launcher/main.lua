@@ -128,7 +128,8 @@ ferris2.highlight = function () end
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
-local backdrop = Image { src = "assets/background-"..color_scheme..".png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
+local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 
 local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
@@ -149,7 +150,8 @@ local OEMLabel = Group
 							y_rotation = { 90, 0 ,0 },
 						}
 
-screen:add(backdrop)
+screen:add(backdrop1)
+screen:add(backdrop2)
 screen:add(OEMLabel)
 screen:add(getLabel)
 screen:add(ferris2_group)
@@ -167,6 +169,27 @@ local state = "offscreen"
 
 if( settings.active ) then
 	ferris:goto( settings.active - 1)
+end
+
+backdrop_fade_wobble = function(backdrop)
+	backdrop:animate({
+					duration = 2500,
+					opacity = 255,
+					mode = "EASE_IN_OUT_SINE",
+					on_completed = function ()
+						backdrop:animate({
+											duration = 2500,
+											opacity = 0,
+											mode = "EASE_IN_OUT_SINE",
+											on_completed = function()
+												backdrop_fade_wobble(backdrop)
+											end
+										})
+					end })
+end
+
+local backdrop_wobble_stop = function(backdrop)
+	backdrop:animate({ duration = 1, opacity = 0 })
 end
 
 function screen.on_key_down(screen, key)
@@ -235,11 +258,12 @@ function screen.on_key_down(screen, key)
 							)
 			ferris:rotate(#items)
 			ferris2:rotate(math.random(#items/2,#items))
-			backdrop:animate(
+			backdrop1:animate(
 								{
 									duration = 1000,
 									opacity = 255,
 									mode = "EASE_OUT_SINE",
+									on_completed = backdrop_fade_wobble(backdrop2),
 								}
 							)
 			OEMLabel:animate(
@@ -310,13 +334,14 @@ function screen.on_key_down(screen, key)
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
 								)
-			backdrop:animate(
+			backdrop1:animate(
 								{
 									duration = 1000,
 									opacity = 0,
 									mode = "EASE_IN_SINE",
 								}
 							)
+			backdrop_stop_wobble(backdrop2)
 			OEMLabel:animate(
 								{
 									duration = 1000,
