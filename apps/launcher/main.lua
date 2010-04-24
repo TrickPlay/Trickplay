@@ -17,7 +17,6 @@ screen:add(bar_off_image,bar_on_image,generic_app_image)
 my_id = app.id
 
 local items = {}
-local items2 = {}
 
 -- Cache the app icons
 
@@ -82,13 +81,22 @@ for i = 1,5 do
 	for _,app in pairs(apps:get_all()) do
 		if(app.id ~= "com.trickplay.launcher") then
 			table.insert(items, make_tile(app.id,app.name))
-			table.insert(items2, make_tile(app.id,app.name) )
 		end
 	end
 end
 
 local ferris = Ferris.new( 11*#items, items, -30 )
-local ferris2 = Ferris.new( 11*#items, items2, -30 )
+local shop = Group {
+						opacity=0,
+						children = {
+							Image { src = "assets/featured-poker.png", z = 1, x = 0, y = 3*screen.h/32 },
+							Image { src = "assets/featured-abc.png", z = 1, x = 0, y = 14*screen.h/32 },
+							Image { src = "assets/featured-buzz.png", z = 1, x = 296, y = 14*screen.h/32 },
+							Image { src = "assets/featured-marvel.png", z = 1, x = 0, y = 20*screen.h/32 },
+							Image { src = "assets/featured-glory.png", z = 1, x = 296, y = 20*screen.h/32 },
+						},
+						y_rotation = { 45, 0, 0 }
+}
 
 -- Move a bit more than double the radius off-screen
 ferris.offscreen = {
@@ -108,25 +116,22 @@ ferris.ferris.x = ferris.offscreen.x
 ferris.ferris.y = ferris.offscreen.y
 
 
-ferris2.onscreen = {
+shop.extra.onscreen = {
 					x = ferris.onscreen.x,
-					y = ferris.onscreen.y
+					y = screen.h/16
 				}
-ferris2.fullscreen = {
-						x = screen.w/2 + 200,
-						y = ferris.fullscreen.y
+shop.extra.fullscreen = {
+						x = screen.w/2 - 295,
+						y = screen.h/16
 					}
 
-ferris2.ferris.x = ferris2.onscreen.x
-ferris2.ferris.y = ferris2.onscreen.y
--- Initially hide the 2nd wheel, and disable highlighting on it
-ferris2.ferris.opacity = 0
-ferris2.highlight = function () end
+shop.x = shop.extra.onscreen.x
+shop.y = shop.extra.onscreen.y
 
 -- These two are "fake" groups, to ensure that these elements are in front of the backdrop,
 -- regardless of their z-depth within these fake groups; the group itself stays above the background
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
-local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
+local shop_group = Group { children = { shop }, z = 2 }
 
 local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity = 0 }
 
@@ -172,7 +177,7 @@ Timer { interval = 15, on_timer = function(timer)
 end }
 
 screen:add(getLabel)
-screen:add(ferris2_group)
+screen:add(shop_group)
 screen:add(playLabel)
 screen:add(ferris_group)
 
@@ -271,19 +276,17 @@ function screen.on_key_down(screen, key)
 										on_completed = function() mediaplayer:pause() end,
 									}
 								)
-			ferris2.ferris:animate(
+			shop:animate(
 								{
 										duration = 1000,
-										y_rotation = -90,
-										x = ferris2.fullscreen.x,
-										y = ferris2.fullscreen.y,
-										scale = { 1.4, 1.4 },
+										y_rotation = 0,
+										x = shop.extra.fullscreen.x,
+										y = shop.extra.fullscreen.y,
 										opacity = 255,
 										mode = "EASE_IN_OUT_SINE",
 								}
 							)
 			ferris:rotate(#items)
-			ferris2:rotate(math.random(#items/2,#items))
 			backdrop1:animate(
 								{
 									duration = 1000,
@@ -348,16 +351,14 @@ function screen.on_key_down(screen, key)
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
 								)
-			ferris2.ferris:animate(
+			shop:animate(
 									{
 										duration = 1000,
-										y_rotation = -30,
-										x = ferris2.onscreen.x,
-										y = ferris2.onscreen.y,
-										scale = { 1.0, 1.0 },
+										y_rotation = 45,
+										x = shop.extra.onscreen.x,
+										y = shop.extra.onscreen.y,
 										opacity = 0,
 										mode = "EASE_IN_OUT_SINE",
-										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
 								)
 			backdrop1:animate(
