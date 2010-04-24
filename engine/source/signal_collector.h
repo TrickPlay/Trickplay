@@ -19,7 +19,7 @@ public:
 
     static SignalCollector * get( lua_State * L );
 
-    void connect( const gchar * name, gpointer instance, const gchar * detailed_signal, GCallback handler, gpointer data );
+    void connect( const gchar * name, gpointer instance, const gchar * detailed_signal, GCallback handler, gpointer data, int flags = 0 );
 
     void disconnect( const gchar * name, gpointer instance );
 

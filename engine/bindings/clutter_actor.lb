@@ -1226,7 +1226,7 @@ interface actor [[ClutterActor*]]
 		    
 		    g_object_set_data(G_OBJECT(a),"tp-completed",GINT_TO_POINTER(function_ref));
 		    
-		    SignalCollector::get(L)->connect("animation_completed",a,"completed",G_CALLBACK(actor_animation_completed),L);
+		    SignalCollector::get(L)->connect("animation_completed",a,"completed",G_CALLBACK(actor_animation_completed),L,G_CONNECT_AFTER);
 		}
 		else
 		{
