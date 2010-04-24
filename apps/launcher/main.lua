@@ -210,7 +210,7 @@ backdrop_fade_wobble = function(backdrop)
 end
 
 local backdrop_stop_wobble = function(backdrop)
-	backdrop:animate({ duration = 1, opacity = 0 })
+	backdrop:animate({ duration = 10, opacity = 0 })
 end
 
 function screen.on_key_down(screen, key)
@@ -289,7 +289,7 @@ function screen.on_key_down(screen, key)
 									duration = 1000,
 									opacity = 255,
 									mode = "EASE_OUT_SINE",
-									on_completed = backdrop_fade_wobble(backdrop2),
+									on_completed = function () backdrop2:show() backdrop_fade_wobble(backdrop2) end,
 								}
 							)
 			OEMLabel:animate(
@@ -367,7 +367,7 @@ function screen.on_key_down(screen, key)
 									mode = "EASE_IN_SINE",
 								}
 							)
-			backdrop_stop_wobble(backdrop2)
+			backdrop2:hide()
 			OEMLabel:animate(
 								{
 									duration = 1000,
