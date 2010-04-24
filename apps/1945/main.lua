@@ -1,4 +1,6 @@
 
+dofile( "controller.lua" )
+
 -------------------------------------------------------------------------------
 
 function clamp( v , min , max )
@@ -125,7 +127,7 @@ function process_collisions( )
     end
 
     -- Track all the items we have already looked at
-    
+
     local removed = {}
 
     for _ , source in ipairs( collision_list ) do
@@ -315,7 +317,7 @@ my_plane =
 {
     type = TYPE_MY_PLANE,
     
-    max_h_speed = 800,
+    max_h_speed = 600,
     
     max_v_speed = 175,
     
