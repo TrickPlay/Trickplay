@@ -73,7 +73,7 @@ void SignalCollector::instance_destroyed( gpointer instance )
     instances.erase( instance );
 }
 
-void SignalCollector::connect( const gchar * name, gpointer instance, const gchar * detailed_signal, GCallback handler, gpointer data )
+void SignalCollector::connect( const gchar * name, gpointer instance, const gchar * detailed_signal, GCallback handler, gpointer data, int flags )
 {
     // See if we have any entries for this instance
 
@@ -104,7 +104,16 @@ void SignalCollector::connect( const gchar * name, gpointer instance, const gcha
 
     // Connect the new signal
 
-    gulong id = g_signal_connect( instance, detailed_signal, handler, data );
+    gulong id = 0;
+
+    if ( flags & G_CONNECT_AFTER )
+    {
+        id = g_signal_connect_after( instance, detailed_signal, handler, data );
+    }
+    else
+    {
+        id = g_signal_connect( instance, detailed_signal, handler, data );
+    }
 
     g_debug( "CONNECTING %p %s %lu", instance, name, id );
 
