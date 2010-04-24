@@ -1222,13 +1222,11 @@ interface actor [[ClutterActor*]]
 			luaL_unref(L,LUA_REGISTRYINDEX,old_function_ref);
 		    }
 		    
-		    g_signal_handlers_disconnect_by_func(a,gpointer(actor_animation_completed),L);
-		    
 		    // Attach the new one
 		    
 		    g_object_set_data(G_OBJECT(a),"tp-completed",GINT_TO_POINTER(function_ref));
 		    
-		    g_signal_connect_after(a,"completed",G_CALLBACK(actor_animation_completed),L);
+		    SignalCollector::get(L)->connect("animation_completed",a,"completed",G_CALLBACK(actor_animation_completed),L);
 		}
 		else
 		{
