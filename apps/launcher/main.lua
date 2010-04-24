@@ -128,7 +128,10 @@ ferris2.highlight = function () end
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local ferris2_group = Group { children = { ferris2.ferris }, z = 2 }
 
-local backdrop = Image { src = "assets/background-"..color_scheme..".png", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
+local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity = 0 }
+
+local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
+local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 
 local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
@@ -136,12 +139,9 @@ local OEMLabel = Group
 						{
 							children =
 							{
-								Rectangle { size = { screen.w/3, screen.h*7/8 }, color = "00000080", y = screen.h/16, z = 0 },
---								Image { src = "assets/label-oem-"..oem_vendor..".png", z = 1, x = screen.h/16, y = 2*screen.h/16 },
-								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.h/32, y = 2*screen.h/16 },
-								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.h/32, y = 13*screen.h/32 },
-								Image { src = "assets/settings.png", z = 1, x = screen.h/32, y = 13*screen.h/16, opacity = 128 },
---								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.h/16, y = 13*screen.h/16 },
+								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.h/32, y = 2*screen.h/32 },
+								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.h/32, y = 11*screen.h/32 },
+								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.h/32, y = 20*screen.h/32 },
 							},
 							x = 10,
 							z = 1,
@@ -149,12 +149,35 @@ local OEMLabel = Group
 							y_rotation = { 90, 0 ,0 },
 						}
 
-screen:add(backdrop)
+screen:add(backdrop1)
+screen:add(backdrop2)
 screen:add(OEMLabel)
+
+local swap_tile = function(image, new_src, delay)
+	Timer { interval = delay, on_timer = function(timer)
+		image:move_anchor_point(image.w/2, image.h/2)
+		image:animate({ duration = 250, y_rotation = -90, mode = "EASE_IN_SINE", on_completed = function()
+			image.src = new_src
+			image:animate({ duration = 250, y_rotation = 0, mode = "EASE_OUT_SINE" })
+		timer:stop()
+		end})
+	end }
+end
+
+Timer { interval = 15, on_timer = function(timer)
+	local first = OEMLabel.children[1].src
+	swap_tile(OEMLabel.children[1], OEMLabel.children[2].src, .5)
+	swap_tile(OEMLabel.children[2], OEMLabel.children[3].src, 1)
+	swap_tile(OEMLabel.children[3], first, 1.5)
+end }
+
 screen:add(getLabel)
 screen:add(ferris2_group)
 screen:add(playLabel)
 screen:add(ferris_group)
+
+screen:add(storeMockup)
+storeMockup:raise_to_top()
 
 mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
@@ -169,7 +192,33 @@ if( settings.active ) then
 	ferris:goto( settings.active - 1)
 end
 
+backdrop_fade_wobble = function(backdrop)
+	backdrop:animate({
+					duration = 2500,
+					opacity = 255,
+					mode = "EASE_IN_OUT_SINE",
+					on_completed = function ()
+						backdrop:animate({
+											duration = 2500,
+											opacity = 0,
+											mode = "EASE_IN_OUT_SINE",
+											on_completed = function()
+												backdrop_fade_wobble(backdrop)
+											end
+										})
+					end })
+end
+
+local backdrop_stop_wobble = function(backdrop)
+	backdrop:animate({ duration = 1, opacity = 0 })
+end
+
 function screen.on_key_down(screen, key)
+
+	if ( keys.s == key ) then
+		storeMockup:animate({duration = 500, opacity = 255-storeMockup.opacity, mode = "EASE_IN_OUT_SINE" })
+		return
+	end
 
 	-- Stuff to rotate the wheel and choose items
 	if( state == "onscreen" or state == "fullscreen" ) then
@@ -235,11 +284,12 @@ function screen.on_key_down(screen, key)
 							)
 			ferris:rotate(#items)
 			ferris2:rotate(math.random(#items/2,#items))
-			backdrop:animate(
+			backdrop1:animate(
 								{
 									duration = 1000,
 									opacity = 255,
 									mode = "EASE_OUT_SINE",
+									on_completed = backdrop_fade_wobble(backdrop2),
 								}
 							)
 			OEMLabel:animate(
@@ -310,13 +360,14 @@ function screen.on_key_down(screen, key)
 										on_completed = function() ferris:highlight() mediaplayer:play() end,
 									}
 								)
-			backdrop:animate(
+			backdrop1:animate(
 								{
 									duration = 1000,
 									opacity = 0,
 									mode = "EASE_IN_SINE",
 								}
 							)
+			backdrop_stop_wobble(backdrop2)
 			OEMLabel:animate(
 								{
 									duration = 1000,
