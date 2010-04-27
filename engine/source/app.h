@@ -104,6 +104,10 @@ public:
                                   bool force );
 
     //.........................................................................
+
+    static String get_data_directory( TPContext * context, const String & app_id );
+
+    //.........................................................................
     // Loads an app
 
     static App * load( TPContext * context, const Metadata & metadata );
@@ -203,7 +207,7 @@ public:
 
 private:
 
-    App( TPContext * context, const Metadata & metadata, const char * data_path );
+    App( TPContext * context, const Metadata & metadata, const String & data_path );
 
     App()
     {}
