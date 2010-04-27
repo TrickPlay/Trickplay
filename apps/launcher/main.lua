@@ -104,11 +104,11 @@ ferris.offscreen = {
 					y = screen.h/2
 				}
 ferris.onscreen = {
-					x = 9*#items,
+					x = 6*#items,
 					y = screen.h/2
 				}
 ferris.fullscreen = {
-					x = screen.w - 9*#items,
+					x = screen.w - 8*#items,
 					y = screen.h/2 + 70
 				}
 
