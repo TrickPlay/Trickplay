@@ -555,17 +555,17 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
 }
 
 
-
-
 //-----------------------------------------------------------------------------
 
-App * App::load( TPContext * context, const App::Metadata & md )
+String App::get_data_directory( TPContext * context, const String & app_id )
 {
     g_assert( context );
 
+    String result;
+
     // Get the data directory ready
 
-    gchar * id_hash = g_compute_checksum_for_string( G_CHECKSUM_SHA1, md.id.c_str(), -1 );
+    gchar * id_hash = g_compute_checksum_for_string( G_CHECKSUM_SHA1, app_id.c_str(), -1 );
 
     Util::GFreeLater free_id_hash( id_hash );
 
@@ -578,8 +578,26 @@ App * App::load( TPContext * context, const App::Metadata & md )
         if ( g_mkdir_with_parents( app_data_path, 0700 ) != 0 )
         {
             g_warning( "FAILED TO CREATE APP DATA PATH '%s'", app_data_path );
-            return NULL;
         }
+        else
+        {
+            result = app_data_path;
+        }
+    }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+
+App * App::load( TPContext * context, const App::Metadata & md )
+{
+    String app_data_path = get_data_directory( context, md.id );
+
+    if ( app_data_path.empty() )
+    {
+        return NULL;
     }
 
     return new App( context, md, app_data_path );
@@ -598,7 +616,7 @@ int App::lua_panic_handler( lua_State * L )
 
 //-----------------------------------------------------------------------------
 
-App::App( TPContext * c, const App::Metadata & md, const char * dp )
+App::App( TPContext * c, const App::Metadata & md, const String & dp )
     :
     context( c ),
     metadata( md ),
