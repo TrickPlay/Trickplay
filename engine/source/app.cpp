@@ -427,8 +427,6 @@ String App::get_data_directory( TPContext * context, const String & app_id )
 {
     g_assert( context );
 
-    String result;
-
     // Get the data directory ready
 
     gchar * id_hash = g_compute_checksum_for_string( G_CHECKSUM_SHA1, app_id.c_str(), -1 );
@@ -444,14 +442,12 @@ String App::get_data_directory( TPContext * context, const String & app_id )
         if ( g_mkdir_with_parents( app_data_path, 0700 ) != 0 )
         {
             g_warning( "FAILED TO CREATE APP DATA PATH '%s'", app_data_path );
-        }
-        else
-        {
-            result = app_data_path;
+
+            return String();
         }
     }
 
-    return result;
+    return String( app_data_path );
 }
 
 
