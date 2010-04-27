@@ -286,6 +286,7 @@ add_library(
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
     ${ENGINE_SRC}/source/profiler.cpp
+    ${ENGINE_SRC}/source/event_group.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 

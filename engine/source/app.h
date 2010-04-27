@@ -5,40 +5,12 @@
 #include "notify.h"
 #include "network.h"
 #include "util.h"
+#include "event_group.h"
+
 //-----------------------------------------------------------------------------
 // Forward declarations
 
 class SystemDatabase;
-
-//-----------------------------------------------------------------------------
-// An event group lets us track idle sources, so we can neuter them when the
-// app is closed (so that they won't fire once the lua state is gone).
-
-class EventGroup : public RefCounted
-{
-public:
-
-    EventGroup();
-
-    guint add_idle( gint priority, GSourceFunc function, gpointer data, GDestroyNotify notify );
-
-    void cancel( guint id );
-
-    void cancel_all();
-
-    void remove( guint id );
-
-protected:
-
-    ~EventGroup();
-
-private:
-
-    class IdleClosure;
-
-    GMutex     *    mutex;
-    std::set<guint> source_ids;
-};
 
 //-----------------------------------------------------------------------------
 // A LuaStateProxy wraps around a lua state and gets invalidated when the state
