@@ -2,15 +2,15 @@ dofile("ferris.lua")
 
 screen:show_all()
 
-local color_scheme = "blue"
-local oem_vendor = "samsung"
+local color_scheme = "red"
+local oem_vendor = "lg"
 
-local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
-local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }
+local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0,scale={screen.w/1920, screen.h/1080} }
+local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0,scale={screen.w/1920, screen.h/1080} }
 
 -- Load the generic app image once and clone it 
 
-local generic_app_image = Image { src = "assets/generic-app-icon.png", opacity = 0 }
+local generic_app_image = Image { src = "assets/generic-app-icon.png", opacity = 0,scale={screen.w/1920, screen.h/1080} }
 
 screen:add(bar_off_image,bar_on_image,generic_app_image)
 
@@ -29,8 +29,8 @@ local make_tile = function(id,name)
 	-- See if we already have one in our cache 
 	
 	local image = icons[ id ]
-	
-	
+
+
 	if not image then
 	
 		-- If not, create it and put it in the cache
@@ -53,19 +53,26 @@ local make_tile = function(id,name)
 	
 	end
 	
-	image:set { x = 14/2, y = 14/2, z = 0, scale = { 0.5, 0.5 } }
+	image:set { x = 14*(screen.w/1920)/2, y = 14*(screen.h/1080)/2, z = 0, scale={screen.w/3840, screen.h/2160} }
 	
 	
 	item:add(image)
 
-	local my_bar_off = Clone { source = bar_off_image, opacity = 255, z = 0, scale = { 0.5, 0.5 } }
-	local my_bar_on  = Clone { source = bar_on_image, opacity = 0, z = 0, scale = { 0.5, 0.5 } }
+	local my_bar_off = Clone { source = bar_off_image, opacity = 255, z = 0,scale={screen.w/3840, screen.h/2160} }
+	local my_bar_on  = Clone { source = bar_on_image, opacity = 0, z = 0,scale={screen.w/3840, screen.h/2160} }
 	item:add(my_bar_off)
 	item:add(my_bar_on)
 
-	local label= Text { text = name, font="Graublau Web,DejaVu Sans,Sans 24px", color="FFFFFF", z = 1 }
-	label.x = (my_bar_off.w/2 - label.w) - 20
-	label.y = (my_bar_off.h/2 - label.h) / 2
+
+	local label= Text {
+						text = name,
+						font="Graublau Web,DejaVu Sans,Sans "..24*(screen.h/1080).."px",
+						color="FFFFFF",
+						z = 1,
+						scale={screen.w/1920, screen.h/1080}
+					}
+	label.x = (my_bar_off.w*(screen.w/1920)/2 - label.w*(screen.w/1920)) - 20*(screen.w/1920)
+	label.y = (my_bar_off.h*(screen.h/1080)/2 - label.h*(screen.h/1080)) / 2
 
 	item.extra.id = id
 	item.extra.label = label
@@ -85,31 +92,31 @@ for i = 1,5 do
 	end
 end
 
-local ferris = Ferris.new( 11*#items, items, -30 )
+local ferris = Ferris.new( (11*(screen.w/1920))*#items, items, -30 )
 local shop = Group {
 						opacity=0,
 						children = {
-							Image { src = "assets/featured-poker.png", z = 1, x = 0, y = 3*screen.h/32 },
-							Image { src = "assets/featured-abc.png", z = 1, x = 0, y = 14*screen.h/32 },
-							Image { src = "assets/featured-buzz.png", z = 1, x = 296, y = 14*screen.h/32 },
-							Image { src = "assets/featured-marvel.png", z = 1, x = 0, y = 20*screen.h/32 },
-							Image { src = "assets/featured-glory.png", z = 1, x = 296, y = 20*screen.h/32 },
+							Image { src = "assets/featured-poker.png", z = 1, x = 0, y = 3*screen.h/32,scale={screen.w/1920, screen.h/1080} },
+							Image { src = "assets/featured-abc.png", z = 1, x = 0, y = 14*screen.h/32,scale={screen.w/1920, screen.h/1080} },
+							Image { src = "assets/featured-buzz.png", z = 1, x = 296*(screen.w/1920), y = 14*screen.h/32,scale={screen.w/1920, screen.h/1080} },
+							Image { src = "assets/featured-marvel.png", z = 1, x = 0, y = 20*screen.h/32,scale={screen.w/1920, screen.h/1080} },
+							Image { src = "assets/featured-glory.png", z = 1, x = 296*(screen.w/1920), y = 20*screen.h/32,scale={screen.w/1920, screen.h/1080} },
 						},
 						y_rotation = { 45, 0, 0 }
 }
 
 -- Move a bit more than double the radius off-screen
 ferris.offscreen = {
-					x = -25*#items,
+					x = (-25*(screen.w/1920))*#items,
 					y = screen.h/2
 				}
 ferris.onscreen = {
-					x = 6*#items,
+					x = (11*(screen.w/1920))*#items,
 					y = screen.h/2
 				}
 ferris.fullscreen = {
-					x = screen.w - 8*#items,
-					y = screen.h/2 + 70
+					x = screen.w - (3*(screen.w/1920))*#items,
+					y = screen.h/2 + 70*(screen.h/1080)
 				}
 
 ferris.ferris.x = ferris.offscreen.x
@@ -121,7 +128,7 @@ shop.extra.onscreen = {
 					y = screen.h/16
 				}
 shop.extra.fullscreen = {
-						x = screen.w/2 - 295,
+						x = screen.w/2 - 295*(screen.w/1920),
 						y = screen.h/16
 					}
 
@@ -133,22 +140,23 @@ shop.y = shop.extra.onscreen.y
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local shop_group = Group { children = { shop }, z = 2 }
 
-local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity = 0 }
+local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity = 0,scale={screen.w/1920, screen.h/1080} }
 
 local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
 local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1,scale={screen.w/1920, screen.h/1080} }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1,scale={screen.w/1920, screen.h/1080} }
+
 local OEMLabel = Group
 						{
 							children =
 							{
-								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.h/32, y = 2*screen.h/32 },
-								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.h/32, y = 11*screen.h/32 },
-								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.h/32, y = 20*screen.h/32 },
+								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.w/32, y = 2*screen.h/32,scale={screen.w/1920, screen.h/1080} },
+								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.w/32, y = 11*screen.h/32,scale={screen.w/1920, screen.h/1080} },
+								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.w/32, y = 20*screen.h/32,scale={screen.w/1920, screen.h/1080} },
 							},
-							x = 10,
+							x = 10*(screen.w/1920),
 							z = 1,
 							opacity = 0,
 							y_rotation = { 90, 0 ,0 },
@@ -299,7 +307,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = 50,
+									x = 20*(screen.w/1920),
 									mode = "EASE_OUT_SINE",
 									y_rotation = 0,
 								}
@@ -308,7 +316,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 255,
-									x = (screen.w-playLabel.w) - 250,
+									x = (screen.w-playLabel.w) - 250*(screen.w/1920),
 									mode = "EASE_OUT_SINE",
 								}
 							)
@@ -373,7 +381,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 0,
-									x = 10,
+									x = 10*(screen.w/1920),
 									mode = "EASE_IN_SINE",
 									y_rotation = 90,
 								}
@@ -382,7 +390,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 0,
-									x = 10,
+									x = 10*(screen.w/1920),
 									mode = "EASE_IN_SINE",
 								}
 							)
@@ -390,7 +398,7 @@ function screen.on_key_down(screen, key)
 								{
 									duration = 1000,
 									opacity = 0,
-									x = 10,
+									x = 10*(screen.w/1920),
 									mode = "EASE_IN_SINE",
 								}
 							)
