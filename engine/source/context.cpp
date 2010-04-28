@@ -18,6 +18,7 @@
 #include "mediaplayers.h"
 #include "profiler.h"
 #include "images.h"
+#include "downloads.h"
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -29,6 +30,7 @@ TPContext::TPContext()
     sysdb( NULL ),
     controller_server( NULL ),
     console( NULL ),
+    downloads( NULL ),
     current_app( NULL ),
     is_first_app( true ),
     media_player_constructor( NULL ),
@@ -289,7 +291,7 @@ int TPContext::console_command_handler( const char * command, const char * param
             g_info( "%15s %5u", it->first.c_str(), it->second.size() );
         }
     }
-    else if ( ! strcmp( command , "prof" ) )
+    else if ( !strcmp( command, "prof" ) )
     {
         if ( parameters && !strcmp( parameters, "reset" ) )
         {
@@ -298,6 +300,26 @@ int TPContext::console_command_handler( const char * command, const char * param
         else
         {
             PROFILER_DUMP;
+        }
+    }
+    else if ( ! strcmp( command, "download" ) )
+    {
+        if ( parameters )
+        {
+            Network::Request request( "Mozilla/5.0" );
+
+            request.url = parameters;
+
+            unsigned int id = context->downloads->start_download( "console", request, NULL );
+
+            if ( !id )
+            {
+                g_info( "FAILED TO START DOWNLOAD" );
+            }
+            else
+            {
+                g_info( "STARTED DOWNLOAD %d", id );
+            }
         }
     }
 
@@ -593,6 +615,11 @@ int TPContext::run()
     }
 
     //.........................................................................
+    // Create the downloads
+
+    downloads = new Downloads( get( TP_DOWNLOADS_PATH ) );
+
+    //.........................................................................
     // Start the console
 
 #ifndef TP_PRODUCTION
@@ -740,6 +767,15 @@ int TPContext::run()
     if ( console )
     {
         console->attach_to_lua( NULL );
+    }
+
+    //.....................................................................
+    // Clean up the downloads
+
+    if ( downloads )
+    {
+        delete downloads;
+        downloads = NULL;
     }
 
     //.....................................................................
@@ -1288,6 +1324,28 @@ void TPContext::validate_configuration()
 
     g_free( full_data_path );
 
+    // DOWNLOADS PATH
+
+    const char * downloads_path = get( TP_DOWNLOADS_PATH );
+
+    if ( !downloads_path )
+    {
+        gchar * path = g_build_filename( get( TP_DATA_PATH ), "downloads", NULL );
+
+        g_warning( "DEFAULT:%s=%s", TP_DOWNLOADS_PATH, path );
+
+        set( TP_DOWNLOADS_PATH, path );
+
+        g_free( path );
+
+        downloads_path = get( TP_DOWNLOADS_PATH );
+    }
+
+    if ( g_mkdir_with_parents( downloads_path, 0700 ) != 0 )
+    {
+        g_error( "DOWNLOADS PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED", downloads_path );
+    }
+
     // SCREEN WIDTH AND HEIGHT
 
     if ( !get( TP_SCREEN_WIDTH ) )
@@ -1403,6 +1461,14 @@ SystemDatabase * TPContext::get_db() const
 {
     g_assert( sysdb );
     return sysdb;
+}
+
+//-----------------------------------------------------------------------------
+
+Downloads * TPContext::get_downloads() const
+{
+    g_assert( downloads );
+    return downloads;
 }
 
 //-----------------------------------------------------------------------------
