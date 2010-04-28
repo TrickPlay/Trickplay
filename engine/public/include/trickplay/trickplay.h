@@ -164,7 +164,11 @@ typedef struct TPContext TPContext;
                             
     TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
                             TrickPlay will use the systems fonts.
-                            Defaults to NULL.                            
+                            Defaults to NULL.
+
+    TP_DOWNLOADS_PATH -     Path to a directory that TrickPlay will use to download
+                            files.
+                            Defaults to "<TP_DATA_PATH>/downloads"
 */
 
 #define TP_APP_SOURCES          "app.sources"
@@ -188,6 +192,7 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_NAME     "controllers.name"
 #define TP_LOG_DEBUG            "log.debug"
 #define TP_FONTS_PATH           "fonts.path"
+#define TP_DOWNLOADS_PATH       "downloads.path"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
