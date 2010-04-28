@@ -40,6 +40,7 @@ class SystemDatabase;
 class ControllerServer;
 class App;
 class Console;
+class Downloads;
 
 //-----------------------------------------------------------------------------
 
@@ -118,6 +119,10 @@ public:
     //.........................................................................
 
     ControllerList * get_controller_list();
+
+    //.........................................................................
+
+    Downloads * get_downloads() const;
 
     //.........................................................................
 
@@ -221,23 +226,25 @@ private:
 
     StringMap                   config;
 
-    SystemDatabase       *      sysdb;
+    SystemDatabase *            sysdb;
 
-    ControllerServer      *     controller_server;
+    ControllerServer *          controller_server;
 
     ControllerList              controller_list;
 
-    Console          *          console;
+    Console *                   console;
 
-    App            *            current_app;
+    Downloads *                 downloads;
+
+    App *                       current_app;
 
     bool                        is_first_app;
 
     TPMediaPlayerConstructor    media_player_constructor;
-    MediaPlayer        *        media_player;
+    MediaPlayer *               media_player;
 
     TPLogHandler                external_log_handler;
-    void            *           external_log_handler_data;
+    void *                      external_log_handler_data;
 
     typedef std::pair<TPConsoleCommandHandler, void *>          ConsoleCommandHandlerClosure;
     typedef std::multimap<String, ConsoleCommandHandlerClosure> ConsoleCommandHandlerMultiMap;
