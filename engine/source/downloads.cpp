@@ -139,11 +139,26 @@ bool Downloads::get_download_info( unsigned int id, Info & info )
 
 //-----------------------------------------------------------------------------
 
+void Downloads::add_delegate( Delegate * delegate )
+{
+    delegates.insert( delegate );
+}
+
+//-----------------------------------------------------------------------------
+
+void Downloads::remove_delegate( Delegate * delegate )
+{
+    delegates.erase( delegate );
+}
+
+//-----------------------------------------------------------------------------
+
 bool Downloads::incremental_callback( const Network::Response & response, gpointer body, guint len, bool finished, gpointer user )
 {
     Closure * closure = ( Closure * )user;
 
     g_assert( closure );
+    g_assert( closure->downloads );
     g_assert( closure->file );
     g_assert( closure->stream );
 
@@ -151,6 +166,8 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
     {
         // This happens in the network thread, all we need to do is write the
         // chunk to the file.
+
+        // WE CANNOT TOUCH THE DOWNLOADS OBJECT HERE, SINCE IT IS NOT THREAD SAFE
 
         GOutputStream * stream = G_OUTPUT_STREAM( closure->stream );
 
@@ -185,8 +202,18 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
 
         closure->written += written;
 
-        g_debug( "WROTE %" G_GUINT64_FORMAT "/%" G_GUINT64_FORMAT " BYTES FOR DOWNLOAD %d", closure->written, closure->content_length, closure->id );
+        // Now, see if we are due for a progress update. We only do this once per second.
 
+        if ( g_timer_elapsed( closure->timer, NULL ) >= 1 )
+        {
+            // Send a progress report to the main thread
+
+            g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, progress_callback, Progress::make( closure ), Progress::destroy );
+
+            // Reset the timer
+
+            g_timer_start( closure->timer );
+        }
     }
     else
     {
@@ -198,25 +225,67 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
 
         g_debug( "FINISHED DOWNLOAD %d : %s", closure->id, response.failed ? "FAILED" : "OK" );
 
+
+        Downloads * self = closure->downloads;
+
         // Clean up the closure. If the request failed, this will delete the underlying file.
         // In either case, it frees the closure's file and stream members.
 
         closure->close( response.failed );
 
-        // Update our info map
+        // Update the Info entry
 
-        Info & info = closure->downloads->info_map[ closure->id ];
+        Info & info = self->info_map[ closure->id ];
 
-        info.status = response.failed ? Downloads::Info::FAILED : Downloads::Info::FINISHED;
+        info.progress( closure->content_length, closure->written, g_timer_elapsed( closure->timer, NULL ) );
 
-        info.code = response.code;
+        info.finished( response );
 
-        info.message = response.status;
+        // Tell the delegates
 
-        info.headers = response.headers;
+        for ( DelegateSet::iterator it = self->delegates.begin(); it != self->delegates.end(); ++it )
+        {
+            (*it)->download_finished( info );
+        }
 
         // The closure will be deleted by its destroy notify
     }
 
     return true;
+}
+
+//-----------------------------------------------------------------------------
+
+gboolean Downloads::progress_callback( gpointer _progress )
+{
+    Progress * progress = ( Progress * )_progress;
+
+    Downloads * self = progress->downloads;
+
+    InfoMap::iterator it = self->info_map.find( progress->id );
+
+    if ( it != self->info_map.end() )
+    {
+        Info & info = it->second;
+
+        info.progress( progress->content_length, progress->written, progress->seconds );
+
+        g_debug( "PROGRESS %" G_GUINT64_FORMAT "/%" G_GUINT64_FORMAT " BYTES FOR DOWNLOAD %d : %1.1f %% : %1.0f s : %1.0f s LEFT : %1.0f TOTAL",
+                info.written,
+                info.content_length,
+                info.id,
+                info.percent_downloaded(),
+                info.elapsed_seconds,
+                info.seconds_left,
+                info.elapsed_seconds + info.seconds_left );
+
+        // Tell the delegates
+
+        for ( DelegateSet::iterator dit = self->delegates.begin(); dit != self->delegates.end(); ++dit )
+        {
+            (*dit)->download_progress( info );
+        }
+    }
+
+    return FALSE;
 }
