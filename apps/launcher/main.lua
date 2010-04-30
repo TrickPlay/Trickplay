@@ -162,13 +162,16 @@ local OEMLabel = Group
 							y_rotation = { 90, 0 ,0 },
 						}
 
+for k,v in pairs(OEMLabel.children) do
+	v.y_rotation = { 0, v.w/2, v.h/2 }
+end
+
 screen:add(backdrop1)
 screen:add(backdrop2)
 screen:add(OEMLabel)
 
 local swap_tile = function(image, new_src, delay)
 	Timer { interval = delay, on_timer = function(timer)
-		image:move_anchor_point(image.w/2, image.h/2)
 		image:animate({ duration = 250, y_rotation = -90, mode = "EASE_IN_SINE", on_completed = function()
 			image.src = new_src
 			image:animate({ duration = 250, y_rotation = 0, mode = "EASE_OUT_SINE" })
