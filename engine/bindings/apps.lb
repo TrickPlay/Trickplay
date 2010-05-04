@@ -152,13 +152,21 @@ global apps [[Apps*]]
         ]];
 
     #..........................................................................
-    # Returns true if the app is in the system database
+    # Returns true if the app is in the system database. If check_metadata is
+    # true, it also tries to load the app's metadata from disk.
 
-    bool is_app_installed( string app_id )
+    bool is_app_installed( string app_id , bool check_metadata )
         [[
             String path = self->get_context()->get_db()->get_app_path( app_id );
 
             result = ! path.empty();
+
+            if ( result && check_metadata )
+            {
+                App::Metadata md;
+
+                result = App::load_metadata( path.c_str() , md );
+            }
         ]];
 
         
