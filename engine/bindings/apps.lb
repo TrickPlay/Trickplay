@@ -4,24 +4,110 @@
 #include "context.h"
 #include "sysdb.h"
 #include "util.h"
+#include "installer.h"
 ]]
 
-/*
-    This should only be available to the launcher and the store apps. It lets
-    them access the installed apps.
-*/
+[[
+
+class Apps : private Installer::Delegate
+{
+public:
+
+    Apps( lua_State * _L )
+    :
+        L( _L ),
+        context( App::get( _L )->get_context() )
+    {
+        context->get_installer()->add_delegate( this );
+    }
+
+    virtual ~Apps()
+    {
+        context->get_installer()->remove_delegate( this );
+    }
+
+    TPContext * get_context()
+    {
+        return context;
+    }
+
+    void push_installer_info( const Installer::Info & info )
+    {
+        lua_newtable( L );
+
+        int t = lua_gettop( L );
+
+        lua_pushinteger( L, info.id );
+        lua_setfield( L, t, "id" );
+
+        const char * status = "UNKNOWN";
+
+        switch( info.status )
+        {
+            case Installer::Info::DOWNLOADING:  status = "DOWNLOADING"; break;
+            case Installer::Info::INSTALLING:   status = "INSTALLING"; break;
+            case Installer::Info::FAILED:       status = "FAILED"; break;
+            case Installer::Info::FINISHED:     status = "FINISHED"; break;
+        }
+
+        lua_pushstring( L, status );
+        lua_setfield( L, t, "status" );
+
+        lua_pushstring( L, info.owner.c_str() );
+        lua_setfield( L, t, "owner" );
+
+        lua_pushstring( L, info.app_id.c_str() );
+        lua_setfield( L, t, "app_id" );
+
+        lua_pushnumber( L, info.percent_downloaded );
+        lua_setfield( L, t, "percent_downloaded" );
+
+        lua_pushnumber( L, info.percent_installed );
+        lua_setfield( L, t, "percent_installed" );
+
+        lua_newtable( L );
+
+        int et = lua_gettop( L );
+
+        for ( StringMap::const_iterator it = info.extra.begin(); it != info.extra.end(); ++it )
+        {
+            lua_pushstring( L, it->second.c_str() );
+            lua_setfield( L, et, it->first.c_str() );
+        }
+
+        lua_setfield( L, t, "extra" );
+    }
+
+private:
+
+
+    virtual void download_progress( const Installer::Info & install_info, const Downloads::Info & download_info );
+
+    virtual void download_finished( const Installer::Info & install_info, const Downloads::Info & download_info );
+
+    virtual void install_progress( const Installer::Info & install_info );
+
+    virtual void install_finished( const Installer::Info & install_info );
+
+    lua_State *     L;
+    TPContext *     context;
+};
+
+]]
+
+
 
 restricted
-global apps [[TPContext*]]
+global apps [[Apps*]]
 {
     apps()
         [[
-            *self=App::get(L)->get_context();    
+            *self = new Apps( L );
         ]];
         
     ~apps()
         [[
-            self=NULL;
+            delete self;
         ]];
     
     #..........................................................................    
@@ -29,15 +115,15 @@ global apps [[TPContext*]]
     
     table get_all()
         [[
-            SystemDatabase::AppList list=self->get_db()->get_all_apps();
+            SystemDatabase::AppList list = self->get_context()->get_db()->get_all_apps();
                         
             lua_newtable(L);
             
-	    App::Metadata md;
+            App::Metadata md;
         
-            for(SystemDatabase::AppList::const_iterator it=list.begin();it!=list.end();++it)
+            for ( SystemDatabase::AppList::const_iterator it = list.begin(); it != list.end(); ++it )
             {
-		if(!App::load_metadata(it->path.c_str(),md))
+                if ( ! App::load_metadata( it->path.c_str(), md ) )
                 {
                     continue;
                 }
@@ -69,11 +155,11 @@ global apps [[TPContext*]]
     # Lets the caller load the contents of a file that belongs to any app by
     # passing the app id and a path into its bundle
     
-    lstring load_app_file(string app_id,string file_name)
+    lstring load_app_file( string app_id, string file_name )
         [[
             result = NULL;
             
-            String app_path=self->get_db()->get_app_path(app_id);
+            String app_path=self->get_context()->get_db()->get_app_path( app_id );
             
             if (app_path.empty())
             {
@@ -107,9 +193,117 @@ global apps [[TPContext*]]
     # Launch an app...if it succeeds, it will never return, because this Lua
     # state will be killed
     
-    int launch(string app_id)
+    int launch( string app_id )
         [[
-            result=self->launch_app(app_id);    
+            result=self->get_context()->launch_app( app_id );
         ]];
+
+    #..........................................................................
+    # Start downloading and installing an app. Returns a download id or zero if
+    # it fails to start.
     
+    int download_and_install_app( string app_id, bool locked, string url, table extra = 0 )
+        [[
+            StringMap extra_map;
+
+            if ( extra )
+            {
+                lua_pushnil( L );
+
+                while ( lua_next( L, extra ) )
+                {
+                    if ( lua_isstring( L, -2 ) )
+                    {
+                        const char * k = lua_tostring( L, -2 );
+                        const char * v = lua_tostring( L, -1 );
+
+                        if ( k && v )
+                        {
+                            extra_map[ k ] = v;
+                        }
+                    }
+
+                    lua_pop( L, 1 );
+                }
+            }
+
+            App * app( App::get( L ) );
+
+            Network::Request request( app->get_user_agent() );
+
+            request.url = url;
+
+            result = app->get_context()->get_installer()->download_and_install_app(
+                    app->get_id(),          // the app that is making the request
+                    app_id,                 // the app to install
+                    locked,
+                    request,
+                    app->get_cookie_jar(),
+                    extra_map );
+        ]];
+
+    #..........................................................................
+    # Returns a table with all installs
+
+    table get_all_installs()
+        [[
+            lua_newtable( L );
+
+            Installer::InfoList list = self->get_context()->get_installer()->get_all_installs();
+
+            int i = 1;
+
+            for ( Installer::InfoList::const_iterator it = list.begin(); it != list.end(); ++it, ++i )
+            {
+                self->push_installer_info( *it );
+
+                lua_rawseti( L, -2, i );
+            }
+        ]];
+
+    #..........................................................................
+    # Finish up an install
+
+    bool complete_install( int id )
+        [[
+            result = self->get_context()->get_installer()->complete_install( id );
+        ]];
+
+    #..........................................................................
+    # Abandon an install
+
+    abandon_install( int id )
+        [[
+            self->get_context()->get_installer()->abandon_install( id );
+        ]];
+
+    callback on_install_progress;
+
+    callback on_install_finished;
 }
+
+
+[[
+void Apps::download_progress( const Installer::Info & install_info, const Downloads::Info & download_info )
+{
+    install_progress( install_info );
+}
+
+void Apps::download_finished( const Installer::Info & install_info, const Downloads::Info & download_info )
+{
+    install_progress( install_info );
+}
+
+void Apps::install_progress( const Installer::Info & install_info )
+{
+    push_installer_info( install_info );
+    invoke_apps_on_install_progress( L, this, 1, 0 );
+}
+
+void Apps::install_finished( const Installer::Info & install_info )
+{
+    push_installer_info( install_info );
+    invoke_apps_on_install_finished( L, this, 1, 0 );
+}
+
+]]

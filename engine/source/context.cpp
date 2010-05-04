@@ -19,6 +19,7 @@
 #include "profiler.h"
 #include "images.h"
 #include "downloads.h"
+#include "installer.h"
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -31,6 +32,7 @@ TPContext::TPContext()
     controller_server( NULL ),
     console( NULL ),
     downloads( NULL ),
+    installer( NULL ),
     current_app( NULL ),
     is_first_app( true ),
     media_player_constructor( NULL ),
@@ -302,7 +304,7 @@ int TPContext::console_command_handler( const char * command, const char * param
             PROFILER_DUMP;
         }
     }
-    else if ( ! strcmp( command, "download" ) )
+    else if ( !strcmp( command, "download" ) )
     {
         if ( parameters )
         {
@@ -318,8 +320,25 @@ int TPContext::console_command_handler( const char * command, const char * param
             }
             else
             {
-                g_info( "STARTED DOWNLOAD %d", id );
+                g_info( "STARTED DOWNLOAD %u", id );
             }
+        }
+    }
+    else if ( !strcmp( command, "inst" ) )
+    {
+        Network::Request request( "Mozilla/5.0" );
+
+        request.url = "http://localhost/launcher3.zip";
+
+        unsigned int id = context->installer->download_and_install_app( "console", "com.trickplay.launcher", true, request, NULL );
+
+        if ( !id )
+        {
+            g_info( "FAILED TO START INSTALL" );
+        }
+        else
+        {
+            g_info( "STARTED INSTALL %u", id );
         }
     }
 
@@ -620,6 +639,10 @@ int TPContext::run()
     downloads = new Downloads( get( TP_DOWNLOADS_PATH ) );
 
     //.........................................................................
+
+    installer = new Installer( this );
+
+    //.........................................................................
     // Start the console
 
 #ifndef TP_PRODUCTION
@@ -770,15 +793,6 @@ int TPContext::run()
     }
 
     //.....................................................................
-    // Clean up the downloads
-
-    if ( downloads )
-    {
-        delete downloads;
-        downloads = NULL;
-    }
-
-    //.....................................................................
     // Reset the media player, just in case
 
     if ( media_player )
@@ -798,6 +812,23 @@ int TPContext::run()
     {
         delete current_app;
         current_app = NULL;
+    }
+
+    //.....................................................................
+
+    if ( installer )
+    {
+        delete installer;
+        installer = NULL;
+    }
+
+    //.....................................................................
+    // Clean up the downloads
+
+    if ( downloads )
+    {
+        delete downloads;
+        downloads = NULL;
     }
 
     //.....................................................................
@@ -1469,6 +1500,14 @@ Downloads * TPContext::get_downloads() const
 {
     g_assert( downloads );
     return downloads;
+}
+
+//-----------------------------------------------------------------------------
+
+Installer * TPContext::get_installer() const
+{
+    g_assert( installer );
+    return installer;
 }
 
 //-----------------------------------------------------------------------------
