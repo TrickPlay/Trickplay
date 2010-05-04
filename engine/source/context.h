@@ -41,6 +41,7 @@ class ControllerServer;
 class App;
 class Console;
 class Downloads;
+class Installer;
 
 //-----------------------------------------------------------------------------
 
@@ -123,6 +124,10 @@ public:
     //.........................................................................
 
     Downloads * get_downloads() const;
+
+    //.........................................................................
+
+    Installer * get_installer() const;
 
     //.........................................................................
 
@@ -235,6 +240,8 @@ private:
     Console *                   console;
 
     Downloads *                 downloads;
+
+    Installer *                 installer;
 
     App *                       current_app;
 
