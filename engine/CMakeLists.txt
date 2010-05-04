@@ -270,7 +270,7 @@ add_library(
     
     tpcore
     
-    SHARED
+    STATIC
     
     ${ENGINE_SRC}/source/notify.cpp
     ${ENGINE_SRC}/source/context.cpp
