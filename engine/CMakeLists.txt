@@ -2,6 +2,10 @@
 set( ENGINE_SRC		${PROJECT_SOURCE_DIR}/engine )
 set( LB_GENERATOR       ${ENGINE_SRC}/lb/bin/lb.py )
 
+set( 3RD_PARTY_SOURCE_FILES )
+
+include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
+
 #------------------------------------------------------------------------------
 # Include directories
 #------------------------------------------------------------------------------
@@ -294,6 +298,8 @@ add_library(
     ${GENERATED_FILES}
     
     ${LUA_SOURCE_FILES}
+    
+    ${3RD_PARTY_SOURCE_FILES}
 )
 
 set_target_properties(
