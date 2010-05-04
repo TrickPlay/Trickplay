@@ -378,7 +378,7 @@ bool SystemDatabase::delete_all_apps()
 bool SystemDatabase::insert_app( const String & id, const String & path, int release, const String & version )
 {
     dirty = true;
-    SQLite::Statement insert( db, "insert into apps (id,path,release,version) values (?1,?2,?3,?4);" );
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,release,version) values (?1,?2,?3,?4);" );
     insert.bind( 1, id );
     insert.bind( 2, path );
     insert.bind( 3, release );
