@@ -66,6 +66,8 @@ public:
 
     static bool load_metadata( const char * app_path, Metadata & metadata );
 
+    static bool load_metadata_from_data( const gchar * data, Metadata & metadata );
+
     //.........................................................................
     // Scans application source directories for apps and adds them to the
     // database.
