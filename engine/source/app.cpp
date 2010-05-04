@@ -93,15 +93,11 @@ bool LuaStateProxy::is_valid()
 
 //=============================================================================
 
-bool App::load_metadata( const char * app_path, App::Metadata & md )
+bool App::load_metadata_from_data( const gchar * data, Metadata & md)
 {
-    g_assert( app_path );
-
-    // To clear the one passed in
+    // To clear the incoming metadata
 
     md = Metadata();
-
-    md.path = app_path;
 
     // Open a state with no libraries - not even the base one
 
@@ -111,26 +107,15 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
     try
     {
-        // Build the path to the metadata file and test that it exists
-
-        gchar * path = g_build_filename( app_path, APP_METADATA_FILENAME, NULL );
-
-        Util::GFreeLater free_path( path );
-
-        if ( !g_file_test( path, G_FILE_TEST_IS_REGULAR ) )
-        {
-            throw String( "App metadata file does not exist" );
-        }
-
         // Now, run it with Lua
 
-        int result = luaL_dofile( L, path );
+        int result = luaL_dostring( L, data );
 
         // Check that it ran OK
 
         if ( result )
         {
-            throw String( "Failed to parse app metadata : " ) + lua_tostring( L, -1 );
+            throw String( "FAILED TO PARSE APP METADATA : " ) + lua_tostring( L, -1 );
         }
 
         // Look for the 'app' global
@@ -138,14 +123,14 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
         lua_getglobal( L, APP_TABLE_NAME );
         if ( !lua_istable( L, -1 ) )
         {
-            throw String( "Missing or invalid app table" );
+            throw String( "MISSING OR INVALID 'app' TABLE" );
         }
 
         // Look for the id
         lua_getfield( L, -1, APP_FIELD_ID );
         if ( lua_type( L, -1 ) != LUA_TSTRING )
         {
-            throw String( "Missing or invalid app id" );
+            throw String( "MISSING OR INVALID APP ID" );
         }
 
         // Validate the id
@@ -155,7 +140,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
         if ( len > 64 )
         {
-            throw String( "App id is too long" );
+            throw String( "APP ID IS TOO LONG" );
         }
 
         static const char * valid_id_characters = "_-.";
@@ -166,24 +151,24 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
             {
                 if ( !strchr( valid_id_characters, *c ) )
                 {
-                    throw String( "App id contains invalid characters" );
+                    throw String( "APP ID CONTAINS INVALID CHARACTERS" );
                 }
             }
         }
 
         if ( strstr( s, ".." ) )
         {
-            throw String( "App id contains two dots" );
+            throw String( "APP ID CONTAINS TWO DOTS" );
         }
 
         if ( strstr( s, "--" ) )
         {
-            throw String( "App id contains two dashes" );
+            throw String( "APP ID CONTAINS TWO DASHES" );
         }
 
         if ( strstr( s, "__" ) )
         {
-            throw String( "App id contains two underscores" );
+            throw String( "APP ID CONTAINS TWO UNDERSCORES" );
         }
 
 
@@ -195,7 +180,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
         lua_getfield( L, -1, APP_FIELD_NAME );
         if ( lua_type( L, -1 ) != LUA_TSTRING )
         {
-            throw String( "Missing or invalid app name" );
+            throw String( "MISSING OR INVALID APP NAME" );
         }
         md.name = lua_tostring( L, -1 );
         lua_pop( L, 1 );
@@ -203,7 +188,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
         lua_getfield( L, -1, APP_FIELD_RELEASE );
         if ( lua_tointeger( L, -1 ) <= 0 )
         {
-            throw String( "Missing or invalid app release, it must be a number greater than 0" );
+            throw String( "MISSING OR INVALID APP RELEASE, IT MUST BE A NUMBER GREATER THAN 0" );
         }
         md.release = lua_tointeger( L, -1 );
         lua_pop( L, 1 );
@@ -211,7 +196,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
         lua_getfield( L, -1, APP_FIELD_VERSION );
         if ( lua_type( L, -1 ) != LUA_TSTRING )
         {
-            throw String( "Missing or invalid app version" );
+            throw String( "MISSING OR INVALID APP VERSION" );
         }
         md.version = lua_tostring( L, -1 );
         lua_pop( L, 1 );
@@ -243,9 +228,47 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
     catch ( const String & e )
     {
         lua_close( L );
-        g_warning( "Failed to load app metadata from '%s' : %s" , app_path , e.c_str() );
+        g_warning( "FAILED TO LOAD APP METADATA FILE : %s", e.c_str() );
         return false;
     }
+}
+
+
+bool App::load_metadata( const char * app_path, App::Metadata & md )
+{
+    g_assert( app_path );
+
+    // Build the path to the metadata file and load its contents
+
+    gchar * path = g_build_filename( app_path, APP_METADATA_FILENAME, NULL );
+
+    Util::GFreeLater free_path( path );
+
+    GError * error = NULL;
+
+    gchar * contents = NULL;
+
+    g_file_get_contents( path, &contents, NULL, &error );
+
+    Util::GFreeLater free_contents( contents );
+
+    if ( error )
+    {
+        g_warning( "FAILED TO LOAD APP METADATA FROM '%s' : %s", path, error->message );
+
+        g_clear_error( &error );
+
+        return false;
+    }
+
+    bool result = App::load_metadata_from_data( contents, md );
+
+    if ( result )
+    {
+        md.path = app_path;
+    }
+
+    return result;
 }
 
 
