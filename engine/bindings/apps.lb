@@ -150,6 +150,17 @@ global apps [[Apps*]]
                 lua_settable(L,-3);
             }
         ]];
+
+    #..........................................................................
+    # Returns true if the app is in the system database
+
+    bool is_app_installed( string app_id )
+        [[
+            String path = self->get_context()->get_db()->get_app_path( app_id );
+
+            result = ! path.empty();
+        ]];
+
         
     #..........................................................................
     # Lets the caller load the contents of a file that belongs to any app by
