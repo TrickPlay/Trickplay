@@ -324,23 +324,6 @@ int TPContext::console_command_handler( const char * command, const char * param
             }
         }
     }
-    else if ( !strcmp( command, "inst" ) )
-    {
-        Network::Request request( "Mozilla/5.0" );
-
-        request.url = "http://localhost/launcher3.zip";
-
-        unsigned int id = context->installer->download_and_install_app( "console", "com.trickplay.launcher", true, request, NULL );
-
-        if ( !id )
-        {
-            g_info( "FAILED TO START INSTALL" );
-        }
-        else
-        {
-            g_info( "STARTED INSTALL %u", id );
-        }
-    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
