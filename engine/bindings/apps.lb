@@ -59,6 +59,9 @@ public:
         lua_pushstring( L, info.app_id.c_str() );
         lua_setfield( L, t, "app_id" );
 
+        lua_pushstring( L, info.app_name.c_str() );
+        lua_setfield( L, t, "app_name" );
+
         lua_pushnumber( L, info.percent_downloaded );
         lua_setfield( L, t, "percent_downloaded" );
 
@@ -221,7 +224,7 @@ global apps [[Apps*]]
     # Start downloading and installing an app. Returns a download id or zero if
     # it fails to start.
     
-    int download_and_install_app( string app_id, bool locked, string url, table extra = 0 )
+    int download_and_install_app( string app_id, string app_name, bool locked, string url, table extra = 0 )
         [[
             StringMap extra_map;
 
@@ -255,6 +258,7 @@ global apps [[Apps*]]
             result = app->get_context()->get_installer()->download_and_install_app(
                     app->get_id(),          // the app that is making the request
                     app_id,                 // the app to install
+                    app_name,
                     locked,
                     request,
                     app->get_cookie_jar(),

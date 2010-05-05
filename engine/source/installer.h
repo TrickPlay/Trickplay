@@ -27,6 +27,7 @@ public:
     guint download_and_install_app(
             const String & owner,
             const String & app_id,
+            const String & app_name,
             bool locked,
             const Network::Request & request,
             Network::CookieJar * cookie_jar,
@@ -64,11 +65,12 @@ public:
             moved( false )
         {}
 
-        Info( guint _id, const String & _app_id, const String & _owner, bool _locked, guint _download_id, const StringMap & _extra )
+        Info( guint _id, const String & _app_id, const String & _app_name, const String & _owner, bool _locked, guint _download_id, const StringMap & _extra )
         :
             id( _id ),
             status( DOWNLOADING ),
             app_id( _app_id ),
+            app_name( _app_name ),
             owner( _owner ),
             locked( _locked ),
             download_id( _download_id ),
@@ -81,6 +83,7 @@ public:
         guint       id;
         Status      status;
         String      app_id;
+        String      app_name;
         String      owner;
         bool        locked;
         guint       download_id;
