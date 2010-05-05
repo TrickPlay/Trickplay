@@ -18,12 +18,167 @@ my_id = app.id
 
 local items = {}
 
+--------------------------------------------------------------------------------
+-- Functions to update tiles when apps are being installed
+
+function update_installing_tile( install_info , tile )
+    
+    local app_id = install_info.app_id
+    
+    -- Find the tile for this app id, if the one passed in is nil
+    
+    -- If it does not exist, add it
+    
+    -- If the tile is not in "installing" mode, switch it to that mode
+    
+    -- Finally, update the progress from the install info using
+    -- status, percent_downloaded and percent_installed
+    
+end
+
+function remove_tile( app_id )
+
+    -- An app failed to install, so we need to remove its tile
+
+end
+
+function clear_installing_tile( app_id )
+
+    -- An installation finished, so we need to take its tile from
+    -- "installing" mode back to normal. 
+end
+
+--------------------------------------------------------------------------------
 -- Cache the app icons
 
 icons = {}
 
+--------------------------------------------------------------------------------
+-- Apps that are being installed, keyed by id
+
+installs = nil
+
+--[[    
+    install info has the following fields:
+    
+    id - integer. Identifier for the install
+    status - string. One of "DOWNLOADING", "INSTALLING", "FAILED", "FINISHED"
+    owner - string. The owner of the install (the app id of the app that started it)
+    app_id - string. The id of the app that is being installed.
+    percent_downloaded - double.
+    percent_installed - double.
+    extra - table. Extra payload passed by the app that started it. This has string keys and values.
+]]    
+
+
+-- This populates the installs table if it has not been populated already
+
+function populate_installs()
+
+    if installs == nil then
+    
+        installs = {}
+    
+        local installs_info = apps:get_all_installs()
+    
+        for _ , install_info in ipairs( installs_info ) do
+        
+            if install_info.status == "FINISHED" then
+            
+                -- We just finish it up right here.
+                -- This could increase load time for the launcher, so we may
+                -- want to rethink.
+                
+                if not apps:complete_install( install_info.id ) then
+                
+                    apps:abandon_install( install_info.id )
+                
+                end
+                
+            elseif install_info.status == "DOWNLOADING" or install_info.status == "INSTALLING" then
+            
+                -- We put it in the installs table, so we can track it
+                
+                installs[ install_info.app_id ] = install_info
+            
+            end
+        
+        end
+    
+    end    
+end
+
+-- We do it right here
+
+populate_installs()
+
+-- Callback for install progress
+
+function apps.on_install_progress( apps , install_info )
+
+    -- installs should have been populated
+
+    assert( installs )
+    
+    -- Update the info in the installs table (or insert new info)
+    
+    installs[ install_info.app_id ] = install_info
+    
+    -- Now update the tile for this one
+    
+    update_installing_tile( install_info )
+    
+end
+
+-- Callback for install completion
+
+function apps.on_install_finished( apps , install_info )
+
+    local check_it = install_info.status == "FAILED"
+
+    if install_info.status == "FINISHED" then
+    
+        if not apps:complete_install( install_info.id ) then
+        
+            check_it = true
+            
+            apps:abandon_install( install_info.id )
+        
+        end
+    
+    end
+    
+    --[[
+    
+    If it failed completely, or finished but the final step went
+    wrong, we do a little sanity check to decide whether to remove the
+    tile.
+    
+    It is possible that the download failed, and if there was a previous
+    version of the app installed, it may remain intact.
+    
+    ]]
+    
+    if check_it and not apps:is_app_installed( install_info.app_id , true ) then
+    
+        remove_tile( install_info.app_id )
+        
+    else
+    
+        clear_installing_tile( install_info.app_id )
+        
+    end
+    
+    -- Finally, we remove it from our installs table
+    
+    installs[ install_info.app_id ] = nil
+    
+end
+
+--------------------------------------------------------------------------------
+
 local make_tile = function(id,name)
-	
+               
 	local item = Group { }
 
 	-- See if we already have one in our cache 
@@ -79,6 +234,19 @@ local make_tile = function(id,name)
 	item.extra.off = my_bar_off
 	item.extra.on = my_bar_on
 	item:add(label)
+
+
+        -- Check to see if this app is being installed
+        
+        local install_info = installs[ id ]
+        
+        -- If so, update its tile
+        
+        if install_info then
+        
+            update_installing_tile( install_info , item )
+            
+        end
 
 	return item
 end
@@ -253,8 +421,17 @@ function screen.on_key_down(screen, key)
 		elseif key == keys["Return"] then
 			local active = ferris:get_active()
 			-- Would launch the app here!
-			settings.active = active
-			apps:launch(items[active].extra.id)
+                        
+                        -- Check to see if it is being installed
+                        
+                        local app_id = items[active].extra.id
+                        
+                        if installs[ app_id ] == nil then
+                        
+                            settings.active = active
+                            apps:launch(app_id)
+                        
+                        end
 		end
 	end
 
