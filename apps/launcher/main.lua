@@ -16,36 +16,231 @@ screen:add(bar_off_image,bar_on_image,generic_app_image)
 
 my_id = app.id
 
-local items = {}
+--------------------------------------------------------------------------------
+-- Table of all the tiles in the wheels
+
+items = {}
+
+--------------------------------------------------------------------------------
+-- Assets for installation. We lazy-load them.
+
+installing_assets =
+{
+    load =  function( self )
+    
+                self.progress_left = Image{ src = "assets/loading-progress-left.png" , opacity = 0 }
+                self.progress_center = Image{ src = "assets/loading-progress-center.png" , opacity = 0, tile = { true , false } }
+                self.progress_right = Image{ src = "assets/loading-progress-right.png" , opacity = 0 }
+                self.icon = Image{ src = "assets/loading-icon.png" , opacity = 0 }
+                
+                screen:add( self.progress_left, self.progress_center, self.progress_right, self.icon )
+                
+                -- This is a simple way to make sure the code above only runs once
+                
+                self.load = function() end
+    
+            end            
+}
 
 --------------------------------------------------------------------------------
 -- Functions to update tiles when apps are being installed
 
 function update_installing_tile( install_info , tile )
     
+    assert( install_info )
+    
     local app_id = install_info.app_id
     
-    -- Find the tile for this app id, if the one passed in is nil
+    local tiles = {}
     
-    -- If it does not exist, add it
+    local tiles_to_add_to_ui = {}
     
-    -- If the tile is not in "installing" mode, switch it to that mode
+    -- Find the tiles for this app id, if the one passed in is nil
     
-    -- Finally, update the progress from the install info using
-    -- status, percent_downloaded and percent_installed
+    if tile ~= nil then
+    
+        table.insert( tiles , tile )
+        
+    else
+    
+        for _ , item in ipairs( items ) do
+        
+            if item.extra.id == app_id then
+            
+                table.insert( tiles , item )
+                
+            end
+        
+        end
+    
+    end
+    
+    -- If it does not exist, create a new tile and mark it to be added to
+    -- the UI
+    
+    if #tiles == 0 then
+    
+        tile = make_tile( app_id , install_info.app_name )
+        
+        table.insert( tiles , tile )
+        
+        table.insert( tiles_to_add_to_ui , tile )
+    
+    end
+    
+    -- If the tiles are not in "installing" mode, switch them to that mode
+    
+    for _ , tile in ipairs( tiles ) do
+    
+        local extra = tile.extra
+        
+        if not extra.installing then
+        
+            extra.installing = true
+            
+            -- Make the UI changes
+            
+            assert( extra.image )
+            
+            -- Load the installing assets if they have not been loaded already
+            
+            installing_assets:load()
+            
+            -- An icon that covers the app icon
+            
+            local icon = Clone{
+                source = installing_assets.icon,
+                size = extra.image.size,
+                scale = extra.image.scale,
+                position = extra.image.position }
+            
+            tile:add( icon )
+            
+            icon:raise( extra.image )
+            
+            -- The progress bar pieces
+            
+            local x_scale , y_scale = unpack( icon.scale , 1 , 2 )
+            
+            -- Left cap
+            
+            local p_left = Clone{
+                source = installing_assets.progress_left,
+                scale = icon.scale,
+                position = { icon.x + 7 * x_scale , icon.y + 49 * y_scale }
+                }
+            
+            tile:add( p_left )
+            p_left:raise( icon )
+            
+            -- Center
+            
+            local p_center = Clone{
+                source = installing_assets.progress_center,
+                scale = icon.scale,
+                position = { p_left.x + p_left.w * x_scale , p_left.y },
+                width = 0,
+                }
+                
+            tile:add( p_center )
+            p_center:raise( icon )
+            
+            -- Right cap
+            
+            local p_right = Clone{
+                source = installing_assets.progress_right,
+                scale = icon.scale,
+                position = { p_center.x + p_center.w * x_scale , p_center.y }
+            }
+            
+            tile:add( p_right )
+            p_right:raise( icon )
+            
+            -- Now, note all the things that will need to be removed to clear the
+            -- installing mode of the tile.
+            
+            extra.installing_ui = { icon = icon , p_left = p_left , p_center = p_center, p_right = p_right }
+        
+        end
+        
+        local percent = ( install_info.percent_downloaded + install_info.percent_installed ) / 200
+        
+        -- The well is actually 138 pixels wide, but the right cap has an extra 3 pixels of
+        -- transparency on its right side. That's where we get 141.
+        
+        local center_width = math.ceil( ( 141 * percent ) - ( extra.installing_ui.p_left.w + extra.installing_ui.p_right.w ) )
+        
+        if center_width > 0 and center_width ~= extra.installing_ui.p_center.w then
+        
+            extra.installing_ui.p_center.w = center_width
+            
+            extra.installing_ui.p_right.x = extra.installing_ui.p_center.x + center_width * extra.installing_ui.p_center.scale[ 1 ]
+        
+        end
+    
+    end
+    
+    -- Add any new tiles to the UI
+    
+    for _ , tile in ipairs( tiles_to_add_to_ui ) do
+    
+        -- TODO: add it to the UI
+    
+    end
     
 end
 
 function remove_tile( app_id )
 
-    -- An app failed to install, so we need to remove its tile
+    -- TODO: An app failed to install, so we need to remove its tile
 
 end
 
-function clear_installing_tile( app_id )
+function clear_installing_tile( install_info )
 
     -- An installation finished, so we need to take its tile from
-    -- "installing" mode back to normal. 
+    -- "installing" mode back to normal.
+
+    for _ , tile in ipairs( items ) do
+    
+        if tile.extra.id == install_info.app_id then
+  
+            tile.extra.installing = false
+            
+            if tile.extra.installing_ui then
+            
+                for _ , thing in pairs( tile.extra.installing_ui ) do
+                
+                    thing:unparent()
+                    
+                end
+                
+                tile.extra.installing_ui = nil
+                
+                -- TODO: We should re-load the app's icon because
+                -- it could be different now.
+            
+            end
+            
+        end
+    
+    end
+end
+
+function tu( percent )
+
+    update_installing_tile(
+        {
+            app_id = "com.trickplay.flickr-photo-wall" ,
+            percent_downloaded = percent or 0 ,
+            percent_installed = percent or 0 } )
+
+end
+
+function tc()
+
+    clear_installing_tile( { app_id = "com.trickplay.flickr-photo-wall" } )
+    
 end
 
 --------------------------------------------------------------------------------
@@ -65,6 +260,7 @@ installs = nil
     status - string. One of "DOWNLOADING", "INSTALLING", "FAILED", "FINISHED"
     owner - string. The owner of the install (the app id of the app that started it)
     app_id - string. The id of the app that is being installed.
+    app_name - string. The name of the app being installed.
     percent_downloaded - double.
     percent_installed - double.
     extra - table. Extra payload passed by the app that started it. This has string keys and values.
@@ -120,13 +316,13 @@ function apps.on_install_progress( apps , install_info )
 
     assert( installs )
     
+    -- Update the tile for this one, adding it if necessary
+    
+    update_installing_tile( install_info )
+    
     -- Update the info in the installs table (or insert new info)
     
     installs[ install_info.app_id ] = install_info
-    
-    -- Now update the tile for this one
-    
-    update_installing_tile( install_info )
     
 end
 
@@ -165,7 +361,7 @@ function apps.on_install_finished( apps , install_info )
         
     else
     
-        clear_installing_tile( install_info.app_id )
+        clear_installing_tile( install_info )
         
     end
     
@@ -177,7 +373,7 @@ end
 
 --------------------------------------------------------------------------------
 
-local make_tile = function(id,name)
+function make_tile(id,name)
                
 	local item = Group { }
 
@@ -233,6 +429,7 @@ local make_tile = function(id,name)
 	item.extra.label = label
 	item.extra.off = my_bar_off
 	item.extra.on = my_bar_on
+        item.extra.image = image
 	item:add(label)
 
 
@@ -260,7 +457,7 @@ for i = 1,5 do
 	end
 end
 
-local ferris = Ferris.new( (11*(screen.w/1920))*#items, items, -30 )
+ferris = Ferris.new( (11*(screen.w/1920))*#items, items, -30 )
 local shop = Group {
 						opacity=0,
 						children = {
@@ -419,17 +616,18 @@ function screen.on_key_down(screen, key)
 		elseif key == keys["Down"] then
 			ferris:rotate( -1 )
 		elseif key == keys["Return"] then
-			local active = ferris:get_active()
-			-- Would launch the app here!
-                        
+			
+                        local active = ferris:get_active()
+			
                         -- Check to see if it is being installed
                         
-                        local app_id = items[active].extra.id
+                        local extra = items[ active ].extra
                         
-                        if installs[ app_id ] == nil then
+                        if not extra.installing then
                         
                             settings.active = active
-                            apps:launch(app_id)
+                            
+                            apps:launch( extra.id )
                         
                         end
 		end
@@ -475,7 +673,8 @@ function screen.on_key_down(screen, key)
 								}
 							)
 			ferris:rotate(#items)
-			backdrop1:animate(
+                        
+                        backdrop1:animate(
 								{
 									duration = 1000,
 									opacity = 255,
