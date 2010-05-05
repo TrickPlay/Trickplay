@@ -527,6 +527,7 @@ Installer::~Installer()
 guint Installer::download_and_install_app(
         const String & owner,
         const String & app_id,
+        const String & app_name,
         bool locked,
         const Network::Request & request,
         Network::CookieJar * cookie_jar,
@@ -541,7 +542,7 @@ guint Installer::download_and_install_app(
 
     guint result = next_id++;
 
-    info_map[ result ] = Info( result, app_id, owner, locked, download_id, extra );
+    info_map[ result ] = Info( result, app_id, app_name, owner, locked, download_id, extra );
 
     return result;
 }
