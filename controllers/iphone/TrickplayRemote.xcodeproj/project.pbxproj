@@ -19,6 +19,7 @@
 		B92DC1CD1135F91F005EEBA7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC1CC1135F91F005EEBA7 /* AudioToolbox.framework */; };
 		B92DC1EE1135FA74005EEBA7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */; };
 		B92DF834116AA57000087E20 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = B92DF833116AA57000087E20 /* AudioStreamer.m */; };
+		B98A83A111935E090011513F /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = B98A83A011935E090011513F /* MainWindow-iPad.xib */; };
 		B9D9A08A110927CD002FFCA4 /* GestureView.m in Sources */ = {isa = PBXBuildFile; fileRef = B9D9A088110927CD002FFCA4 /* GestureView.m */; };
 		B9D9A08B110927CD002FFCA4 /* GestureView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B9D9A089110927CD002FFCA4 /* GestureView.xib */; };
 		B9D9A08F110928F0002FFCA4 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = B9D9A08E110928F0002FFCA4 /* logo.png */; };
@@ -50,6 +51,7 @@
 		B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		B92DF832116AA57000087E20 /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioStreamer.h; sourceTree = "<group>"; };
 		B92DF833116AA57000087E20 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
+		B98A83A011935E090011513F /* MainWindow-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "MainWindow-iPad.xib"; path = "Resources-iPad/MainWindow-iPad.xib"; sourceTree = "<group>"; };
 		B9D9A087110927CD002FFCA4 /* GestureView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureView.h; sourceTree = "<group>"; };
 		B9D9A088110927CD002FFCA4 /* GestureView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureView.m; sourceTree = "<group>"; };
 		B9D9A089110927CD002FFCA4 /* GestureView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GestureView.xib; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				B98A839F11935E060011513F /* Resources-iPad */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				447CA30B1151944C000BFABF /* Entitlements.plist */,
@@ -156,6 +159,14 @@
 				B92DC1ED1135FA74005EEBA7 /* AVFoundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B98A839F11935E060011513F /* Resources-iPad */ = {
+			isa = PBXGroup;
+			children = (
+				B98A83A011935E090011513F /* MainWindow-iPad.xib */,
+			);
+			name = "Resources-iPad";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,6 +228,7 @@
 				B9D9A13311095AE6002FFCA4 /* Default.png in Resources */,
 				B9D9A2D8110B2D1D002FFCA4 /* Entitlements.plist in Resources */,
 				447CA30C1151944C000BFABF /* Entitlements.plist in Resources */,
+				B98A83A111935E090011513F /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,13 +255,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayRemote_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayRemote-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.2;
 				PRODUCT_NAME = TrickplayRemote;
+				SDKROOT = iphoneos3.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -257,13 +273,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Kenny Ham (2N78SC9N4W)";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayRemote_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayRemote-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.2;
 				PRODUCT_NAME = TrickplayRemote;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "415A3FC8-20D3-41B2-9902-BE41D705403E";
+				SDKROOT = iphoneos3.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -286,13 +306,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayRemote_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayRemote-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.2;
 				PRODUCT_NAME = TrickplayRemote;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos3.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Distribution;
 		};
