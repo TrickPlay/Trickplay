@@ -158,6 +158,50 @@ namespace Util
     };
 
     //-----------------------------------------------------------------------------
+
+    class GTimer
+    {
+    public:
+
+        GTimer()
+        :
+            timer( g_timer_new() )
+        {}
+
+        ~GTimer()
+        {
+            g_timer_destroy( timer );
+        }
+
+        gdouble elapsed() const
+        {
+            return g_timer_elapsed( timer, NULL );
+        }
+
+        void stop()
+        {
+            g_timer_stop( timer );
+        }
+
+        void go()
+        {
+            g_timer_continue( timer );
+        }
+
+        void reset()
+        {
+            g_timer_start( timer );
+        }
+
+    private:
+
+        GTimer( const GTimer & )
+        {}
+
+        ::GTimer *  timer;
+    };
+
+    //-----------------------------------------------------------------------------
     // Converts a path using / to a platform path in place - modifies the string
     // passed in.
 

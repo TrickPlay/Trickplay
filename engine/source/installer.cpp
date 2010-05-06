@@ -349,63 +349,52 @@ public:
 
             guint64 total_processed = 0;
 
-            GTimer * progress_timer = g_timer_new();
+            Util::GTimer progress_timer;
 
-            try
+            for ( int i = 0; i < entry_count; ++i )
             {
-                for ( int i = 0; i < entry_count; ++i )
+                if ( ZR_OK != GetZipItem( zip, i, &entry ) )
                 {
-                    if ( ZR_OK != GetZipItem( zip, i, &entry ) )
+                    throw String( "FAILED TO GET ZIP ENTRY" );
+                }
+
+                gchar * destination_file_name = NULL;
+
+                if ( no_zip_root )
+                {
+                    destination_file_name = g_build_filename( unzip_path, entry.name, NULL );
+                }
+                else if ( g_str_has_prefix( entry.name, app_file_zip_dirname ) )
+                {
+                    destination_file_name = g_build_filename( unzip_path, entry.name + app_file_zip_dirname_length, NULL );
+                }
+
+                if ( ! destination_file_name )
+                {
+                    g_debug( "  SKIPPING %s", entry.name );
+                }
+                else
+                {
+                    Util::GFreeLater free_destination_file_name( destination_file_name );
+
+                    g_debug( "  UNZIPPING %s TO %s", entry.name, destination_file_name );
+
+                    if ( ZR_OK != UnzipItem( zip, i, destination_file_name ) )
                     {
-                        throw String( "FAILED TO GET ZIP ENTRY" );
-                    }
-
-                    gchar * destination_file_name = NULL;
-
-                    if ( no_zip_root )
-                    {
-                        destination_file_name = g_build_filename( unzip_path, entry.name, NULL );
-                    }
-                    else if ( g_str_has_prefix( entry.name, app_file_zip_dirname ) )
-                    {
-                        destination_file_name = g_build_filename( unzip_path, entry.name + app_file_zip_dirname_length, NULL );
-                    }
-
-                    if ( ! destination_file_name )
-                    {
-                        g_debug( "  SKIPPING %s", entry.name );
-                    }
-                    else
-                    {
-                        Util::GFreeLater free_destination_file_name( destination_file_name );
-
-                        g_debug( "  UNZIPPING %s TO %s", entry.name, destination_file_name );
-
-                        if ( ZR_OK != UnzipItem( zip, i, destination_file_name ) )
-                        {
-                            throw String( "FAILED TO UNZIP" );
-                        }
-                    }
-
-                    // Report progress
-
-                    total_processed += entry.unc_size;
-
-                    if ( g_timer_elapsed( progress_timer, NULL ) >= 1 )
-                    {
-                        g_timer_start( progress_timer );
-
-                        send_progress( Installer::ProgressClosure::make_progress( installer, id, gdouble( total_processed ) / gdouble( total_uncompressed_size ) * 100.0 ) );
+                        throw String( "FAILED TO UNZIP" );
                     }
                 }
 
-                g_timer_destroy( progress_timer );
-            }
-            catch( const String & e )
-            {
-                g_timer_destroy( progress_timer );
+                // Report progress
 
-                throw e;
+                total_processed += entry.unc_size;
+
+                if ( progress_timer.elapsed() >= 1 )
+                {
+                    progress_timer.reset();
+
+                    send_progress( Installer::ProgressClosure::make_progress( installer, id, gdouble( total_processed ) / gdouble( total_uncompressed_size ) * 100.0 ) );
+                }
             }
 
             //.................................................................
