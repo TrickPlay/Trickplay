@@ -50,6 +50,12 @@ public:
             case Installer::Info::FINISHED:     status = "FINISHED"; break;
         }
 
+        lua_pushboolean( L, info.status == Installer::Info::FAILED );
+        lua_setfield( L, t, "failed" );
+
+        lua_pushboolean( L, info.status == Installer::Info::FAILED || info.status == Installer::Info::FINISHED );
+        lua_setfield( L, t, "finished" );
+
         lua_pushstring( L, status );
         lua_setfield( L, t, "status" );
 
