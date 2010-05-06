@@ -31,7 +31,7 @@
 
 // TODO: Don't like hard-coding this app id here
 
-#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps"
+#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps:com.trickplay.store=apps"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
