@@ -87,7 +87,7 @@ typedef struct TPContext TPContext;
                             to each app. This is a string of the form
                             <app id>=<object>,<object>:<app id>=<object>,<object>.
                             Each <object> is granted to each <app id> listed.
-                            Defaults to "com.trickplay.launcher=apps".
+                            Defaults to "com.trickplay.launcher=apps:com.trickplay.store=apps".
 
     TP_SYSTEM_LANGUAGE -    System language. This must be a two character, lower case
                             ISO-639-1 code. See <http://www.loc.gov/standards/iso639-2/php/code_list.php>.
