@@ -32,9 +32,10 @@
 @synthesize mStyleAlert;
 @synthesize mTextField;
 @synthesize backgroundView;
-@synthesize mImageCollection;
+@synthesize mResourceNameCollection;
 @synthesize mAudioPlayer;
 @synthesize mSoundLoopName;
+@synthesize mResourceDataCollection;
 
 /*
  // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -77,10 +78,20 @@
 															delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil
 												   otherButtonTitles:nil];
 	mTextField.delegate = self;
-	mImageCollection = [[NSMutableArray alloc] init];
-	
+	mResourceNameCollection = [[NSMutableArray alloc] init];
+	mResourceDataCollection = [[NSMutableArray alloc] init];
 
+	UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc]
+									initWithTitle:NSLocalizedString(@"Exit", @"") style:UIBarButtonItemStyleBordered
+									target:self action:@selector(exitAppAction:)] autorelease]; 
+	self.navigationItem.rightBarButtonItem = exitItem;
 
+}
+
+- (void)exitAppAction:(id)sender
+{
+	//Send Escape key to exit whatever app is currently running
+	[self sendKeyToTrickplay:@"FF1B" thecount:1];
 }
 
 - (void)setupService:(NSInteger)port  hostname:(NSString *)hostname thetitle:(NSString *)thetitle
@@ -206,7 +217,7 @@
 	//Send the TOUCHDOWN event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TD\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentTouchData = [[NSString stringWithFormat:@"TD\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,mTouchedTime] dataUsingEncoding:NSUTF8StringEncoding];
 		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
 	}
 }
@@ -220,7 +231,7 @@
 	//Send the TOUCHMOVE event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TM\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentTouchData = [[NSString stringWithFormat:@"TM\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]] dataUsingEncoding:NSUTF8StringEncoding];
 		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
 	}
 	
@@ -314,7 +325,7 @@
 	//Send the TOUCHUP event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TU\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+		NSData *sentTouchData = [[NSString stringWithFormat:@"TU\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]] dataUsingEncoding:NSUTF8StringEncoding];
 		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
 	}
 	
@@ -331,7 +342,7 @@
 			//Send click event if click events are enabled
 			if (([connectedSockets count] > 0) && mClickEventsAllowed)
 			{
-				NSData *sentClickData = [[NSString stringWithFormat:@"CK\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y] dataUsingEncoding:NSUTF8StringEncoding];
+				NSData *sentClickData = [[NSString stringWithFormat:@"CK\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]] dataUsingEncoding:NSUTF8StringEncoding];
 				[listenSocket writeData:sentClickData withTimeout:-1 tag:0];
 			}
 		}
@@ -399,7 +410,12 @@
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
 	//[self logInfo:FORMAT(@"Accepted client %@:%hu", host, port)]; //320x410
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t2\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=320x410\tUS=320x410\n",[UIDevice currentDevice].name ] dataUsingEncoding:NSUTF8StringEncoding];
+	//Get the actual width and height of the available area
+	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
+	NSInteger theheight = mainframe.size.height;
+	theheight = theheight - 45;  //subtract the height of navbar
+	NSInteger thewidth = mainframe.size.width;
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t2\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n",[UIDevice currentDevice].name,thewidth,theheight,thewidth,theheight ] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	[connectedSockets addObject:sock];
 	[sock writeData:welcomeData withTimeout:-1 tag:0];
@@ -469,20 +485,25 @@
 		{
 			//http://downloads.flashkit.com/soundfx/Ambience/Space/Space_-SLrec-7832/Space_-SLrec-7832_hifi.mp3
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			[mImageCollection addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[components objectAtIndex:1], @"name", [components objectAtIndex:2], @"link", @"", @"scale", nil]];
-			
+			[mResourceNameCollection addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[components objectAtIndex:1], @"name", [components objectAtIndex:2], @"link", @"", @"scale", nil]];
+			//Download the asset to a local copy as a NSData
+			//[[NSMutableData alloc] initWithLength:0];
+			//	NSURLRequest *theRequest= [NSURLRequest requestWithURL:[NSURL URLWithString:aURL]];
+			//  NSURLConnection *theConnection=[[NSURLConnection alloc] initWithRequest:theRequest delegate:self];
+
+			//[mResourceDataCollection addObject:
 		}
 		else if ([msg hasPrefix:@"UB"])
 		{
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			if ([mImageCollection count] > 0)
+			if ([mResourceNameCollection count] > 0)
 			{
 				//Show the image
 				int index;
 				NSDictionary *itemAtIndex;
-				for (index = 0;index < [mImageCollection count];index++)
+				for (index = 0;index < [mResourceNameCollection count];index++)
 				{
-					itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+					itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
 					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
 					{
 						//[NSURL URLWithString:aURL]
@@ -526,13 +547,13 @@
 		else if ([msg hasPrefix:@"SS"])
 		{
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
-			if ([mImageCollection count] > 0)
+			if ([mResourceNameCollection count] > 0)
 			{
 				int index;
 				NSDictionary *itemAtIndex;
-				for (index = 0;index < [mImageCollection count];index++)
+				for (index = 0;index < [mResourceNameCollection count];index++)
 				{
-					itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+					itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
 					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
 					{
 						NSString *soundurl = [itemAtIndex objectForKey:@"link"];
@@ -540,7 +561,7 @@
 					
 						//Loop parameter
 						NSString *loopvalue = [components objectAtIndex:2];
-						[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
+						[mResourceNameCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
 						
 						break;
 					}
@@ -731,6 +752,7 @@
 	if (mTryingToConnect) return;
 	mAccelMode = 0;
 	[waitingView stopAnimating];
+	[self ClearUIElements];
 	if ([connectedSockets count] > 0)
 	{
 		[connectedSockets removeObject:sock];
@@ -744,7 +766,8 @@
 	[waitingView stopAnimating];
 	mTryingToConnect = NO;
 	mAccelMode = 0;
-	[mImageCollection removeAllObjects];
+	[mResourceNameCollection removeAllObjects];
+	[mResourceDataCollection removeAllObjects];
 	if ([connectedSockets count] > 0)
 	{
 		[listenSocket disconnect];
@@ -809,9 +832,9 @@
 		//[self destroyStreamer];
 		NSDictionary *itemAtIndex;
 		int index;
-		for (index = 0;index < [mImageCollection count];index++)
+		for (index = 0;index < [mResourceNameCollection count];index++)
 		{
-			itemAtIndex = (NSDictionary *)[mImageCollection objectAtIndex:index];
+			itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
 			if ([[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
 			{
 				//Found it
@@ -831,7 +854,7 @@
 						NSString *loopvalStr = [NSString stringWithFormat: @"%d", loopvalue];
 						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
 						//Finite # of loops, get the number of loops left and reset that number
-						[mImageCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalStr, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];					
+						[mResourceNameCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalStr, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];					
 						
 					}
 					else
