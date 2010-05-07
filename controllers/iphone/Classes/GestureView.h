@@ -35,7 +35,8 @@
 	BOOL mClickEventsAllowed;
 	BOOL mTouchEventsAllowed;
 	UIImageView *backgroundView;
-	NSMutableArray *mImageCollection;
+	NSMutableArray *mResourceNameCollection;
+	NSMutableArray *mResourceDataCollection;
 	AVAudioPlayer  *mAudioPlayer;
 	NSString *mSoundLoopName;
 	AudioStreamer *streamer;
@@ -48,8 +49,9 @@
 @property (nonatomic, retain) UIActionSheet *mStyleAlert;
 @property (nonatomic, retain) IBOutlet UITextField *mTextField;
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
-@property (nonatomic, retain) NSMutableArray *mImageCollection;
+@property (nonatomic, retain) NSMutableArray *mResourceNameCollection;
 @property (nonatomic, retain) AVAudioPlayer  *mAudioPlayer;
+@property (nonatomic, retain) NSMutableArray *mResourceDataCollection;
 
 - (void)setupService:(NSInteger)port hostname:(NSString *)hostname thetitle:(NSString *)thetitle;
 - (void)setTheParent:(id)sender;
