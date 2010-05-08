@@ -596,13 +596,8 @@ int App::run( const StringSet & allowed_names )
     ClutterActor * screen = clutter_group_new();
     g_assert( screen );
 
-    gfloat width;
-    gfloat height;
-
-    clutter_actor_get_size( stage, &width, &height );
-
     clutter_actor_set_position( screen, 0, 0 );
-    clutter_actor_set_size( screen, width, height );
+    clutter_actor_set_size( screen, 1920, 1080 );
 
     screen_gid = clutter_actor_get_gid( screen );
 
@@ -1136,13 +1131,21 @@ void App::animate_in()
         return;
     }
 
+    ClutterActor * stage = clutter_stage_get_default();
+
+    gfloat width;
+    gfloat height;
+
+    clutter_actor_get_size( stage, &width , &height );
+
+
     // TODO
     // Here, we should ref the screen, create a timeline that animates the
     // screen and unref it when the timeline completes.
 
     clutter_actor_raise_top( screen );
 
-    clutter_actor_set_scale( screen, 1, 1 );
+    clutter_actor_set_scale( screen, width / 1920, height / 1080 );
 
     clutter_actor_grab_key_focus( screen );
 }
@@ -1201,11 +1204,13 @@ gboolean App::animate_out_callback( gpointer s )
         gfloat width;
         gfloat height;
 
-        clutter_actor_get_size( screen, &width, &height );
+        clutter_actor_get_size( parent, &width, &height );
 
-        clutter_actor_move_anchor_point( screen, width / 2 , height / 2 );
+        clutter_actor_set_anchor_point( screen, 960, 540 );
 
-        clutter_actor_set_clip( screen, 0, 0, width, height );
+        clutter_actor_set_position( screen, width / 2, height / 2 );
+
+        clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
 
         clutter_actor_animate( screen, CLUTTER_EASE_IN_CUBIC, 250,
                                "opacity", 0,
