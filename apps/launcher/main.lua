@@ -589,7 +589,7 @@ end
 
 function screen.on_key_down(screen, key)
 
-	if ( keys.s == key or keys.BLUE == key) then
+	if ( keys.s == key or keys.BLUE == key ) then
 		apps:launch("com.trickplay.store")
 	end
 
