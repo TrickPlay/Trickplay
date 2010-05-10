@@ -695,6 +695,29 @@ public:
                 {
                     break;
                 }
+
+#ifndef TP_PRODUCTION
+
+                static float slow = -1;
+
+                if ( slow == -1 )
+                {
+                    if ( const char * e = g_getenv( "TP_NETWORK_DELAY" ) )
+                    {
+                        slow = atof( e );
+                    }
+                    else
+                    {
+                        slow = 0;
+                    }
+                }
+
+                if ( slow )
+                {
+                    usleep( slow * G_USEC_PER_SEC );
+                }
+#endif
+
             }
 
             // Check for requests that are finished, whether completed or
