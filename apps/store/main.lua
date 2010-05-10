@@ -126,14 +126,11 @@ ui =
 {
     main =
     {
-        background          = { f = "background-blue-curtain.jpg" , position = { 0 , 0 } },
-        floor               = { f = "floor.png" ,                   position = { 0 , 0 } },
-        featured            = { f = "featured-apps.png",            position = { 0 , 0 } },
-        castle_info         = { f = "featured-app-castle-info.png", position = { 0 , 0 } , name = "castle_info" },
-        zombie_info         = { f = "featured-app-zombie-info.png", position = { 0 , 0 } , name = "zombie_info" },
-        stroke              = { f = "featured-apps-stroke-white.png", position = { 0 , 0 } },
-        categories          = { f = "categories.png" ,              position = { 0 , 0 } },
-        focus               = { f = "focus-yellow-all.png" ,        position = { 0 , 0 } }
+        background          = { f = "appshop-all-background-LG.tif",    position = { 0 , 0 } },
+        castle_info         = { f = "featured-app-castle-info.tif",     position = { 978 , 290 + 140 } , name = "castle_info" },
+        zombie_info         = { f = "featured-app-zombie-info.tif",     position = { 52 , 290 + 140 } , name = "zombie_info" },
+        stroke              = { f = "featured-apps-stroke-white.tif",   position = { 48 , 132 } },
+        focus               = { f = "focus-yellow-all.tif" ,            position = { 0 , 0 } }
         
     },
     
@@ -166,28 +163,18 @@ ui =
     
     app_screen = nil,   -- A group that holds the app details screen
     
-    x_scale = screen.w / 1920,
-    
-    y_scale = screen.h / 1080,
-    
-    app_screen_focus = "buy_on",
+    app_screen_focus = nil,
     
     prepare_image = 
     
-        function( self , base , style , hide , no_scale )
+        function( self , base , style , hide )
         
             local image = Image()
-            
-            if not no_scale then
-            
-                image.scale = { self.x_scale , self.y_scale }
-                
-            end
-            
+                       
             image.src = base.."/"..style.f
             
-            image.x = style.position[ 1 ] * self.x_scale
-            image.y = style.position[ 2 ] * self.y_scale
+            image.x = style.position[ 1 ] 
+            image.y = style.position[ 2 ] 
             
             if style.name then
                 
@@ -230,7 +217,9 @@ ui =
                 self:prepare_image( app_id, self.app.screen3_on , true )
             )
             
-            screen:add( self.app_screen )
+            self.app_screen_focus = "buy_on"
+            
+            return self.app_screen
     
         end,
         
@@ -280,8 +269,6 @@ ui =
     
         function( self , old , new )
         
-            print( "FOCUS CHANGE" , old , new )
-        
             local info_down = nil
             
             local info_up = nil
@@ -308,13 +295,13 @@ ui =
             
             if info_up then
             
-                info_up:animate{ duration = 150 , y = -140 }
+                info_up:animate{ duration = 150 , y = 290 }
             
             end
             
             if info_down then
             
-                info_down:animate{ duration = 150 , y = 0 }
+                info_down:animate{ duration = 150 , y = 290 + 140 }
                 
             end
         
@@ -337,6 +324,12 @@ ui =
             self:main_focus_change( old_focus , self.main_focus )
         end,
         
+    main_tiles = {},
+    
+    main_tile_positions = {},
+    
+    main_focused_tile = 11,
+        
     load_main_screen =
     
         function( self )
@@ -347,25 +340,20 @@ ui =
                         
             self.main_screen:add(
                 self:prepare_image( base , self.main.background ),
-                self:prepare_image( base , self.main.floor ),
-                self:prepare_image( base , self.main.featured ),
                 
                 Group{
                     size = screen.size ,
                     position = { 0 , 0 } ,
-                    scale = { self.x_scale , self.y_scale } ,
                     clip = { 53 , 0 , 885 , 559 } ,
                     children = { self:prepare_image( base , self.main.zombie_info , false , true ) } },
 
                 Group{
                     size = screen.size ,
                     position = { 0 , 0 } ,
-                    scale = { self.x_scale , self.y_scale } ,
                     clip = { 978 , 0 , 886 , 559 },
                     children = { self:prepare_image( base , self.main.castle_info , false , true ) } },
                 
-                self:prepare_image( base , self.main.stroke ),
-                self:prepare_image( base , self.main.categories )
+                self:prepare_image( base , self.main.stroke )
             )
             
             
@@ -374,13 +362,28 @@ ui =
                 Group{
                     name = "tiles",
                     size = { screen.w , 275 },
-                    position = { 0 , 696 * self.y_scale },
-                    scale = { self.x_scale , self.y_scale }
+                    position = { 0 , 696 }
                 }
+                
+            local function add_reflection( image )
+            
+                local clone = Clone{
+                    source = image ,
+                    position = image.position ,
+                    anchor_point = image.anchor_point ,
+                    x_rotation = { 180 , image.h , 0 } ,
+                    scale = image.scale ,
+                    opacity = 40 }
+                    
+                image.parent:add( clone )
+                
+                image.extra.reflection = clone
+            
+            end
             
             local x = 0
             
-            local image = self:prepare_image( base .."/tiles" , { f = "1.png" , position = { 0 , 0 } } , false , true )
+            local image = self:prepare_image( base .."/tiles" , { f = "1.tif" , position = { 0 , 0 } } , false , true )
             
             image.anchor_point = { image.w / 2 , 0 }
             
@@ -390,16 +393,18 @@ ui =
             
             tile_group:add( image )
             
-            
-            local images = {}
+            add_reflection( image )
 
-            local lx = image.x - image.w * self.x_scale + 2
+            table.insert( self.main_tiles , image )
+            
+
+            local lx = image.x - image.w + 2
             
             local rx = image.x + image.w - 2
             
-            for i = 2 , 2 do
+            for i = 2 , 11 do
             
-                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".png" , position = { lx , 31 } } , false , true )
+                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".tif" , position = { lx , 31 } } , false , true )
             
                 image.anchor_point = { image.w / 2 , 0 }
                 
@@ -407,13 +412,18 @@ ui =
                 
                 tile_group:add( image )
 
-                lx = lx - ( ( image.w * 0.75 ) + 14 * self.x_scale )
+                add_reflection( image )
+
+                lx = lx - ( ( image.w * 0.75 ) + 14 )
+                
+                table.insert( self.main_tiles , 1 , image )
 
             end
-if false then            
+            
+
             for i = 12 , 20 do
             
-                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".png" , position = { rx , 31 } } , false , true )
+                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".tif" , position = { rx , 31 } } , false , true )
             
                 image.anchor_point = { image.w / 2 , 0 }
                 
@@ -421,13 +431,27 @@ if false then
                 
                 tile_group:add( image )
 
+                add_reflection( image )
+
                 rx = rx + ( ( image.w * 0.75 ) + 14 )
+                
+                table.insert( self.main_tiles , image )
+                
+                if i == 20 then
+                
+                    image.extra.app_id = "com.trickplay.1945"
+                
+                end
 
             end
-end            
-            
-            
+                        
             self.main_screen:add( tile_group )
+            
+            for i = 1 , 11 do
+            
+                table.insert( self.main_tile_positions , self.main_tiles[ 5 + i ].position )
+            
+            end
             
             self.main_focus_rings =
 
@@ -435,7 +459,6 @@ end
                     name = "focus",
                     size = screen.size,
                     position = { 0 , 0 },
-                    scale = { self.x_scale , self.y_scale } ,
                     children = { self:prepare_image( base , self.main.focus , false , true ) } 
                 }
             
@@ -445,6 +468,215 @@ end
             self:main_set_focus( 4 )                        
             
             screen:add( self.main_screen )
+        
+        end,
+        
+    main_scrolling = false,
+        
+    main_tile_key_down =
+    
+        function( self , keyval )
+        
+            if self.main_scrolling then
+            
+                return
+                
+            end
+        
+            if keyval == keys.Right then
+            
+                -- first, we move a tile to the offscreen position
+                
+                local far_right_tile = self.main_focused_tile + 5
+                
+                if far_right_tile > #self.main_tiles then
+                
+                    far_right_tile = far_right_tile - #self.main_tiles 
+                
+                end
+                
+                self.main_tiles[ far_right_tile ].position = self.main_tile_positions[ 11 ]
+                
+                self.main_tiles[ far_right_tile ].extra.reflection.position = self.main_tile_positions[ 11 ]
+                
+                local timeline = Timeline{ duration = 150 }
+                
+                function timeline.on_new_frame( timeline , delta, progress )
+                
+                    local index = self.main_focused_tile - 4
+                    
+                    if index < 1 then
+                    
+                        index = index + #self.main_tiles
+                    
+                    end
+                    
+                    for i = 2 , 11 do
+                    
+                        local start_x = self.main_tile_positions[ i ][ 1 ]
+                        local end_x = self.main_tile_positions[ i - 1 ][ 1 ]
+                        
+                        local tile = self.main_tiles[ index ]
+                        
+                        tile.x = start_x - ( start_x - end_x ) * progress
+                        
+                        tile.extra.reflection.x = tile.x
+                        
+                        if i == 6 then
+                        
+                            tile.y = 0 + 31 * progress                            
+                            tile.scale = { 1 - 0.25 * progress , 1 - 0.25 * progress }
+                            
+                            tile.extra.reflection.y = tile.y
+                            tile.extra.reflection.scale = tile.scale
+                            
+                        elseif i == 7 then
+                        
+                            tile.y = 31 - 31 * progress                            
+                            tile.scale = { 0.75 + 0.25 * progress , 0.75 + 0.25 * progress }
+
+                            tile.extra.reflection.y = tile.y
+                            tile.extra.reflection.scale = tile.scale                        
+                        end
+                        
+                        index = index + 1
+                        
+                        if index > #self.main_tiles then
+                        
+                            index = index - #self.main_tiles
+                        
+                        end
+                    
+                    end
+                
+                end
+                
+                function timeline.on_completed( timeline )
+                
+                    timeline.on_new_frame = nil
+                    timeline.on_completed = nil
+                    
+                    self.main_focused_tile = self.main_focused_tile + 1
+                    
+                    self.main_scrolling = false
+                    
+                    if self.main_focused_tile > #self.main_tiles then
+                    
+                        self.main_focused_tile = self.main_focused_tile - #self.main_tiles
+                    
+                    end
+                
+                end
+                
+                timeline:start()
+
+                self.main_scrolling = true
+            
+            elseif keyval == keys.Left then
+
+                -- first, we move a tile to the offscreen position
+                
+                local far_left_tile = self.main_focused_tile - 5
+                
+                if far_left_tile < 1 then
+                
+                    far_left_tile = far_left_tile + #self.main_tiles 
+                
+                end
+                
+                self.main_tiles[ far_left_tile ].position = self.main_tile_positions[ 1 ]                
+                self.main_tiles[ far_left_tile ].extra.reflection.position = self.main_tile_positions[ 1 ]
+
+                local timeline = Timeline{ duration = 150 }
+                
+                function timeline.on_new_frame( timeline , delta, progress )
+                
+                    local index = self.main_focused_tile - 5
+                    
+                    if index < 1 then
+                    
+                        index = index + #self.main_tiles
+                    
+                    end
+                    
+                    for i = 1 , 10 do
+                    
+                        local start_x = self.main_tile_positions[ i ][ 1 ]
+                        local end_x = self.main_tile_positions[ i + 1 ][ 1 ]
+                        
+                        local tile = self.main_tiles[ index ]
+                        
+                        tile.x = start_x + ( end_x - start_x ) * progress
+                        tile.extra.reflection.x = tile.x
+                        
+                        if i == 6 then
+                        
+                            tile.y = 0 + 31 * progress                            
+                            tile.scale = { 1 - 0.25 * progress , 1 - 0.25 * progress }
+
+                            tile.extra.reflection.y = tile.y
+                            tile.extra.reflection.scale = tile.scale                        
+                            
+                        elseif i == 5 then
+                        
+                            tile.y = 31 - 31 * progress                            
+                            tile.scale = { 0.75 + 0.25 * progress , 0.75 + 0.25 * progress }
+                        
+                            tile.extra.reflection.y = tile.y
+                            tile.extra.reflection.scale = tile.scale                                                
+                        end
+                        
+                        index = index + 1
+                        
+                        if index > #self.main_tiles then
+                        
+                            index = index - #self.main_tiles
+                        
+                        end
+                    
+                    end
+                
+                end
+                
+                function timeline.on_completed( timeline )
+                
+                    timeline.on_new_frame = nil
+                    timeline.on_completed = nil
+                    
+                    self.main_focused_tile = self.main_focused_tile - 1
+                    
+                    self.main_scrolling = false
+
+                    if self.main_focused_tile < 1 then
+                    
+                        self.main_focused_tile = self.main_focused_tile + #self.main_tiles
+                    
+                    end
+                
+                end
+                
+                timeline:start()
+
+                self.main_scrolling = true
+            
+            elseif keyval == keys.Return then
+            
+                local app_id = self.main_tiles[ self.main_focused_tile ].extra.app_id
+                
+                if app_id then
+                
+                    local app_screen = self:load_app_screen( app_id )
+                    
+                    app_screen.y = screen.h
+                    
+                    screen:add( app_screen )
+                    
+                    self.main_screen:animate{ duration = 500 , y = -screen.h }
+                    app_screen:animate{ duration = 500 , y = 0 }
+                    
+                end
+            
+            end
         
         end,
         
@@ -458,50 +690,68 @@ end
                 
                 if focused then
                 
-                    local nav = focused.extra.nav
+                    if keyval == keys.Return and focused.name == "menu_apps_on" then
                     
-                    if nav then
+                        self.main_screen.position = { -screen.w , 0 }
+                        
+                        self.app_screen:animate{
+                            duration = 250 ,
+                            x = screen.w ,
+                            on_completed =
+                                function()
+                                    self.app_screen:unparent()
+                                    self.app_screen = nil
+                                end
+                                }
+                                
+                        self.main_screen:animate{ duration = 250 , x = 0 }
                     
-                        local new_one = nil
+                    else
+                    
+                        local nav = focused.extra.nav
                         
-                        if keyval == keys.Right then new_one = nav.r                            
-                        elseif keyval == keys.Left then new_one = nav.l                            
-                        elseif keyval == keys.Up then new_one = nav.u                            
-                        elseif keyval == keys.Down then new_one = nav.d
-                        end
+                        if nav then
                         
-                        if new_one then
-                        
-                            local hide = false
+                            local new_one = nil
                             
-                            if type( new_one ) == "table" then
-                            
-                                hide = new_one.hide or false
-                                
-                                new_one = new_one.target
-                            
-                            end
-    
-                        
-                            self:app_screen_swap( self.app_screen_focus , hide )
-                            
-                            if hide then
-                            
-                                self.app_screen_focus = new_one
-                                
-                                self.app_screen:find_child( new_one ):show()
-                                
-                            else
-                            
-                                self.app_screen_focus = self:app_screen_swap( new_one )
-                                
+                            if keyval == keys.Right then new_one = nav.r                            
+                            elseif keyval == keys.Left then new_one = nav.l                            
+                            elseif keyval == keys.Up then new_one = nav.u                            
+                            elseif keyval == keys.Down then new_one = nav.d
                             end
                             
+                            if new_one then
+                            
+                                local hide = false
+                                
+                                if type( new_one ) == "table" then
+                                
+                                    hide = new_one.hide or false
+                                    
+                                    new_one = new_one.target
+                                
+                                end
+        
+                            
+                                self:app_screen_swap( self.app_screen_focus , hide )
+                                
+                                if hide then
+                                
+                                    self.app_screen_focus = new_one
+                                    
+                                    self.app_screen:find_child( new_one ):show()
+                                    
+                                else
+                                
+                                    self.app_screen_focus = self:app_screen_swap( new_one )
+                                    
+                                end
+                                
+                            end
+                        
                         end
-                    
-                    end
                 
-            
+                    end            
                 
                 end
                 
@@ -520,6 +770,9 @@ end
                 
                     self:main_set_focus( target )
                     
+                elseif self.main_focus == 4 then
+                
+                    self:main_tile_key_down( keyval )
                 end
                 
             end
