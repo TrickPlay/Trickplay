@@ -64,7 +64,14 @@ Flickr = {
 			on_complete =
 			function( request , response )
 				local json = Json.Decode( response.body )
-				
+
+				if(0 == #(json.photos.photo)) then
+					-- Bug in flickr API sometimes returns no results: RESEND
+					print("FLICKR BUG!!  RESEND: ",request.url)
+					request:send()
+					return
+				end
+
 				for i , photo in ipairs( json.photos.photo ) do
 					table.insert(photos, photo)
 				end
