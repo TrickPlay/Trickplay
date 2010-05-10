@@ -61,6 +61,21 @@ global screen [[ClutterActor*]] actor , container
     #..........................................................................	
     # These are stage properties
     
+    readonly table display_size
+        [[
+
+            gfloat w;
+            gfloat h;
+
+            clutter_actor_get_size( clutter_stage_get_default(), &w, &h );
+
+            lua_newtable( L );
+            lua_pushnumber( L, w );
+            lua_rawseti( L, -2, 1 );
+            lua_pushnumber( L, h );
+            lua_rawseti( L, -2, 2 );
+        ]];
+
     # TODO
     # This can potentionally let an app get an actor outside its group, so I'll
     # have to rework it.
