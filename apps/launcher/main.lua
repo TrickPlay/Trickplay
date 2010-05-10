@@ -449,7 +449,7 @@ end
 local app
 for i = 1,5 do
 	for _,app in pairs(apps:get_all()) do
-		if(app.id ~= "com.trickplay.launcher") then
+		if(app.id ~= "com.trickplay.launcher" and app.id ~= "com.trickplay.store") then
 			table.insert(items, make_tile(app.id,app.name))
 		end
 	end
@@ -474,7 +474,7 @@ ferris.offscreen = {
 					y = screen.h/2
 				}
 ferris.onscreen = {
-					x = bar_off_image.w / 6,
+					x = bar_off_image.w / 5,
 					y = screen.h/2,
 				}
 ferris.fullscreen = {
@@ -502,8 +502,6 @@ shop.y = shop.extra.onscreen.y
 -- regardless of their z-depth within these fake groups; the group itself stays above the background
 local ferris_group = Group { children = { ferris.ferris }, z = 1 }
 local shop_group = Group { children = { shop }, z = 2 }
-
-local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity = 0 }
 
 local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
 local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
@@ -555,9 +553,6 @@ screen:add(shop_group)
 screen:add(playLabel)
 screen:add(ferris_group)
 
-screen:add(storeMockup)
-storeMockup:raise_to_top()
-
 mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
 mediaplayer:load('jeopardy.mp4')
@@ -594,9 +589,8 @@ end
 
 function screen.on_key_down(screen, key)
 
-	if ( keys.s == key ) then
-		storeMockup:animate({duration = 500, opacity = 255-storeMockup.opacity, mode = "EASE_IN_OUT_SINE" })
-		return
+	if ( keys.s == key or keys.BLUE == key) then
+		apps:launch("com.trickplay.store")
 	end
 
 	-- Stuff to rotate the wheel and choose items
