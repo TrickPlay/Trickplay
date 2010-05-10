@@ -5,7 +5,7 @@ dofile("Flickr.lua")
 -- How many images in each column?
 local rows_per_column = 6
 -- How many images should we load at a time? More takes longer, fewer means more fetches
-local prefetch_images = rows_per_column * 10
+local prefetch_images = rows_per_column * 6
 -- How much should the wall be padde on the left side?
 local left_pad = screen.size[1] / 10
 -- How much should the wall be padded on top?
@@ -174,6 +174,10 @@ populate_next_page({
 								callback = function( self )
 									populate_next_page({
 										callback = function( self )
+											populate_next_page({
+												callback = function( self )
+												end
+											})
 										end
 									})
 								end
@@ -226,7 +230,7 @@ function screen.on_key_down(screen,keyval)
 			selection_col = selection_col + 1
 			activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 
-			if selection_col > ( pages_loaded*cols_per_page - 20 ) then
+			if selection_col > ( pages_loaded*cols_per_page - 30 ) then
 				-- Fetch another set of images
 				populate_next_page()
 			end
