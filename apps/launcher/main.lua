@@ -455,7 +455,7 @@ for i = 1,5 do
 	end
 end
 
-ferris = Ferris.new( 11*#items, items, -30 )
+ferris = Ferris.new( 11*#items, items, -35 )
 local shop = Group {
 						opacity=0,
 						children = {
@@ -465,26 +465,26 @@ local shop = Group {
 							Image { src = "assets/featured-marvel.png", z = 1, x = 0, y = 19*screen.h/32 },
 							Image { src = "assets/featured-glory.png", z = 1, x = 296, y = 19*screen.h/32 },
 						},
-						y_rotation = { 45, 0, 0 }
+						y_rotation = { 35, 0, 0 }
 }
 
 -- Move a bit more than double the radius off-screen
 ferris.offscreen = {
-					x = -25*#items,
+					x = -bar_off_image.w * 2,
 					y = screen.h/2
 				}
 ferris.onscreen = {
-					x = bar_off_image.w * 9 / 24,
-					y = screen.h/2
+					x = bar_off_image.w / 6,
+					y = screen.h/2,
 				}
 ferris.fullscreen = {
-					x = screen.w - bar_off_image.w * 3/5,
+					x = screen.w - bar_off_image.w * 4 / 11,
 					y = screen.h/2 + 70
 				}
 
 ferris.ferris.x = ferris.offscreen.x
 ferris.ferris.y = ferris.offscreen.y
-
+ferris.ferris.z = -11*#items*math.sin(math.rad(35))
 
 shop.extra.onscreen = {
 					x = ferris.onscreen.x,
@@ -508,8 +508,8 @@ local storeMockup = Image { src = "assets/store_mock_poker.jpg", z = 0, opacity 
 local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
 local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
 
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=1 }
+local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
+local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
 
 local OEMLabel = Group
 						{
@@ -655,7 +655,7 @@ function screen.on_key_down(screen, key)
 										y_rotation = -90,
 										x = ferris.fullscreen.x,
 										y = ferris.fullscreen.y,
-										scale = { 1.2, 1.2 },
+										scale = { 1.5, 1.5 },
 										mode = "EASE_IN_OUT_SINE",
 										on_completed = function() mediaplayer:pause() end,
 									}
@@ -728,7 +728,7 @@ function screen.on_key_down(screen, key)
 			ferris.ferris:animate(
 									{
 										duration = 1000,
-										y_rotation = -30,
+										y_rotation = -35,
 										x = ferris.onscreen.x,
 										y = ferris.onscreen.y,
 										scale = { 1.0, 1.0 },
@@ -739,7 +739,7 @@ function screen.on_key_down(screen, key)
 			shop:animate(
 									{
 										duration = 1000,
-										y_rotation = 45,
+										y_rotation = 35,
 										x = shop.extra.onscreen.x,
 										y = shop.extra.onscreen.y,
 										opacity = 0,
