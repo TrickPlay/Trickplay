@@ -1,8 +1,8 @@
 dofile("Json.lua")
 
 Flickr = {
-	logo_url = "http://userlogos.org/files/logos/sandwiches/flickr0.png",
-	cc_interesting_url = "http://api.flickr.com/services/rest/?method=flickr.photos.search&license=4%2C5%2C6%2C7&sort=interestingness-desc&safe_search=1&content_type=1&media=photos&extras=license%2Cowner_name%2Curl_t%2Curl_m%2Curl_o&format=json&nojsoncallback=1",
+	logo_url = "assets/flickr0.tif",
+	cc_interesting_url = "http://api.flickr.com/services/rest/?method=flickr.photos.search&license=4%2C5%2C6%2C7%2C8&sort=interestingness-desc&safe_search=1&content_type=1&media=photos&extras=license%2Cowner_name%2Curl_t%2Curl_m%2Curl_o&format=json&nojsoncallback=1",
 
 	license_info_url = "http://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&format=json&nojsoncallback=1",
 
