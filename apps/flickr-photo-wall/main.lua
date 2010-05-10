@@ -1,5 +1,3 @@
-dofile("debug-lib.lua")
-
 Timer{ interval = 2 , on_timer = function() collectgarbage() end }
 
 dofile("Flickr.lua")
