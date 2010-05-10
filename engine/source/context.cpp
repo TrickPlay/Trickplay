@@ -465,6 +465,8 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
     return FALSE;
 }
 
+#endif
+
 #ifndef TP_PRODUCTION
 
 // This one deals with escape to exit current app
@@ -486,17 +488,15 @@ gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer co
 
 gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
-	if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
-	{
-		( ( TPContext * )context )->reload_app();
-		
-		return TRUE;
-	}
+    if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
+    {
+        ( ( TPContext * )context )->reload_app();
 
-	return FALSE;
+        return TRUE;
+    }
+
+    return FALSE;
 }
-
-#endif
 
 #endif
 
@@ -657,14 +657,14 @@ int TPContext::run()
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
 
-#ifndef TP_CLUTTER_BACKEND_EGL
-
 #ifndef TP_PRODUCTION
 
     g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
     g_signal_connect( stage, "captured-event", ( GCallback )tilde_handler, this );
 
 #endif
+
+#ifndef TP_CLUTTER_BACKEND_EGL
 
     // We add a controller for the keyboard in non-egl builds
 
@@ -968,6 +968,8 @@ gboolean TPContext::launch_app_callback( gpointer app )
 
     new_app->animate_in();
 
+    context->notify( TP_NOTIFICATION_APP_LOADED );
+
     return FALSE;
 }
 
@@ -1015,6 +1017,8 @@ void TPContext::close_current_app()
     if ( current_app )
     {
         current_app->animate_out();
+
+        notify( TP_NOTIFICATION_APP_CLOSING );
 
         delete current_app;
 
