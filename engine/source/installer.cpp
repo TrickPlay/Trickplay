@@ -1,3 +1,6 @@
+
+#include <cstdlib>
+
 #include <glib/gstdio.h>
 
 #include "unzip.h"
@@ -351,8 +354,36 @@ public:
 
             Util::GTimer progress_timer;
 
+#ifndef TP_PRODUCTION
+
+            static float slow = -1;
+
+            if ( slow == -1 )
+            {
+                if ( const char * e = g_getenv( "TP_INSTALL_DELAY" ) )
+                {
+                    slow = atof( e );
+                }
+                else
+                {
+                    slow = 0;
+                }
+            }
+
+#endif
+
             for ( int i = 0; i < entry_count; ++i )
             {
+
+#ifndef TP_PRODUCTION
+
+                if ( slow )
+                {
+                    usleep( slow * G_USEC_PER_SEC );
+                }
+
+#endif
+
                 if ( ZR_OK != GetZipItem( zip, i, &entry ) )
                 {
                     throw String( "FAILED TO GET ZIP ENTRY" );
