@@ -1,13 +1,11 @@
-dofile("debug-lib.lua")
-
 Timer{ interval = 2 , on_timer = function() collectgarbage() end }
 
 dofile("Flickr.lua")
 
 -- How many images in each column?
-local rows_per_column = 2 + math.ceil(screen.h / 250)
+local rows_per_column = 6
 -- How many images should we load at a time? More takes longer, fewer means more fetches
-local prefetch_images = rows_per_column * 10
+local prefetch_images = rows_per_column * 6
 -- How much should the wall be padde on the left side?
 local left_pad = screen.size[1] / 10
 -- How much should the wall be padded on top?
@@ -17,7 +15,7 @@ local tile_size = 160
 -- How much padding between adjacent tiles?
 local tile_pad = 20
 -- At what angle to the screen should the image wall live?
-local tilt_angle = 40
+local tilt_angle = 30
 
 local super_tilt_angle = 85
 -- API Key for flickr API access for this app
@@ -144,7 +142,6 @@ function populate_next_page( completion )
 
 					photo_index[i].thumbWallImage = igroup
 
-					print("PLACED #",i)
 					wall:add( igroup )
 				end
 
@@ -177,6 +174,10 @@ populate_next_page({
 								callback = function( self )
 									populate_next_page({
 										callback = function( self )
+											populate_next_page({
+												callback = function( self )
+												end
+											})
 										end
 									})
 								end
@@ -229,9 +230,8 @@ function screen.on_key_down(screen,keyval)
 			selection_col = selection_col + 1
 			activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 
-			if selection_col > ( pages_loaded*cols_per_page - 20 ) then
+			if selection_col > ( pages_loaded*cols_per_page - 30 ) then
 				-- Fetch another set of images
-				print("LOADING IMAGES")
 				populate_next_page()
 			end
 			
