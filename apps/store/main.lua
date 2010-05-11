@@ -409,14 +409,28 @@ ui =
                 local clone = Clone{
                     source = image ,
                     position = image.position ,
-                    anchor_point = image.anchor_point ,
+                    anchor_point = { image.anchor_point[ 1 ] , image.anchor_point[ 2 ] + 10 } ,
                     x_rotation = { 180 , image.h , 0 } ,
                     scale = image.scale ,
                     opacity = 40 }
                     
+                
+                    
                 image.parent:add( clone )
                 
                 image.extra.reflection = clone
+            
+            end
+            
+            local function load_label( image , index )
+            
+                local label = Image{ src = "main/tiles/label"..tostring( index )..".tif" , anchor_point = { 230 , 0 } , position = { 960 , 962 - 696 } , opacity = 0 }
+                
+                image.extra.label = label
+                
+                image.parent:add( label )
+                
+                return label
             
             end
             
@@ -435,6 +449,8 @@ ui =
             add_reflection( image )
 
             table.insert( self.main_tiles , image )
+            
+            load_label( image , 1 ).opacity = 255
             
 
             local lx = image.x - image.w + 2
@@ -456,6 +472,8 @@ ui =
                 lx = lx - ( ( image.w * 0.75 ) + 14 )
                 
                 table.insert( self.main_tiles , 1 , image )
+                
+                load_label( image , i )
 
             end
             
@@ -476,6 +494,8 @@ ui =
                 
                 table.insert( self.main_tiles , image )
                 
+                load_label( image , i )
+
                 if i == 20 then
                 
                     image.extra.app_id = "com.trickplay.1945"
@@ -569,13 +589,17 @@ ui =
                             tile.extra.reflection.y = tile.y
                             tile.extra.reflection.scale = tile.scale
                             
+                            tile.extra.label.opacity = 255 * ( 1 - progress )
+                            
                         elseif i == 7 then
                         
                             tile.y = 31 - 31 * progress                            
                             tile.scale = { 0.75 + 0.25 * progress , 0.75 + 0.25 * progress }
 
                             tile.extra.reflection.y = tile.y
-                            tile.extra.reflection.scale = tile.scale                        
+                            tile.extra.reflection.scale = tile.scale
+                            
+                            tile.extra.label.opacity = 255 * progress
                         end
                         
                         index = index + 1
@@ -654,7 +678,9 @@ ui =
                             tile.scale = { 1 - 0.25 * progress , 1 - 0.25 * progress }
 
                             tile.extra.reflection.y = tile.y
-                            tile.extra.reflection.scale = tile.scale                        
+                            tile.extra.reflection.scale = tile.scale
+                            
+                            tile.extra.label.opacity = 255 * ( 1 - progress )
                             
                         elseif i == 5 then
                         
@@ -662,7 +688,9 @@ ui =
                             tile.scale = { 0.75 + 0.25 * progress , 0.75 + 0.25 * progress }
                         
                             tile.extra.reflection.y = tile.y
-                            tile.extra.reflection.scale = tile.scale                                                
+                            tile.extra.reflection.scale = tile.scale
+                            
+                            tile.extra.label.opacity = 255 * progress
                         end
                         
                         index = index + 1
