@@ -509,13 +509,21 @@ local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z 
 local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
 
+local OEMAds = {
+	Image { src = "assets/"..oem_vendor.."-oem-1.tif", opacity = 0 },
+	Image { src = "assets/"..oem_vendor.."-oem-2.tif", opacity = 0 },
+	Image { src = "assets/"..oem_vendor.."-oem-3.tif", opacity = 0 },
+}
+
+screen:add(OEMAds[1],OEMAds[2],OEMAds[3])
+
 local OEMLabel = Group
 						{
 							children =
 							{
-								Image { src = "assets/"..oem_vendor.."-oem-1.png", z = 1, x = screen.w/32, y = 3*screen.h/32 },
-								Image { src = "assets/"..oem_vendor.."-oem-2.png", z = 1, x = screen.w/32, y = 12*screen.h/32 },
-								Image { src = "assets/"..oem_vendor.."-oem-3.png", z = 1, x = screen.w/32, y = 21*screen.h/32 },
+								Clone { source = OEMAds[1], z = 1, x = screen.w/32, y =  5*screen.h/64, opacity = 255, extra = { number = 1 } },
+								Clone { source = OEMAds[2], z = 1, x = screen.w/32, y = 24*screen.h/64, opacity = 255, extra = { number = 2 } },
+								Clone { source = OEMAds[3], z = 1, x = screen.w/32, y = 43*screen.h/64, opacity = 255, extra = { number = 3 } },
 							},
 							x = 10,
 							z = 1,
@@ -531,21 +539,21 @@ screen:add(backdrop1)
 screen:add(backdrop2)
 screen:add(OEMLabel)
 
-local swap_tile = function(image, new_src, delay)
+local swap_tile = function(image, delay)
 	Timer { interval = delay, on_timer = function(timer)
 		image:animate({ duration = 250, y_rotation = -90, mode = "EASE_IN_SINE", on_completed = function()
-			image.src = new_src
+			image.extra.number = (image.extra.number % 3) + 1
+			image.source = OEMAds[image.extra.number]
 			image:animate({ duration = 250, y_rotation = 0, mode = "EASE_OUT_SINE" })
 		timer:stop()
 		end})
 	end }
 end
 
-Timer { interval = 15, on_timer = function(timer)
-	local first = OEMLabel.children[1].src
-	swap_tile(OEMLabel.children[1], OEMLabel.children[2].src, .5)
-	swap_tile(OEMLabel.children[2], OEMLabel.children[3].src, 1)
-	swap_tile(OEMLabel.children[3], first, 1.5)
+Timer { interval = 5, on_timer = function(timer)
+	swap_tile(OEMLabel.children[1], .5)
+	swap_tile(OEMLabel.children[2], 1)
+	swap_tile(OEMLabel.children[3], 1.5)
 end }
 
 screen:add(getLabel)
