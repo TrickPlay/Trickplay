@@ -91,6 +91,8 @@ function apps.on_install_finished( apps , info )
     else
     
         print( "FINISHED INSTALL OF" , info.app_id )
+        
+        ui:finished_install( info.app_id )
     
     end
 
@@ -106,6 +108,7 @@ function test()
 
     screen:show()
 end
+]]
 
 function install( index )
 
@@ -119,7 +122,7 @@ function install( index )
     local install_id = apps:download_and_install_app( app_id , app_name , true , url , extra )
 
 end
-]]
+
 -------------------------------------------------------------------------------
 
 ui =
@@ -136,24 +139,25 @@ ui =
     
     app =
     {
-        background          = { f = "background.jpg" ,            position = { 0 , 0 }      },
-        buy_off             = { f = "button-buy-off.png",         position = { 96 , 919 }   , name = "buy_off"  , other = "buy_on" },
-        buy_on              = { f = "button-buy-on.png",          position = { 96 , 919 }   , name = "buy_on"   , other = "buy_off" , nav = { u = "menu_off" , r = "screen1" } },
-        loading             = { f = "button-loading.png",         position = { 96 , 919 }   , name = "loading"  },
+        background          = { f = "background.tif" ,            position = { 0 , 0 }      },
+        buy_off             = { f = "button-free-off.tif",        position = { 96 , 919 }   , name = "buy_off"  , other = "buy_on" },
+        buy_on              = { f = "button-free-on.tif",         position = { 96 , 919 }   , name = "buy_on"   , other = "buy_off" , nav = { u = "menu_off" , r = "screen1" } },
+        loading             = { f = "button-loading.png",         position = { 96 , 919 }   , name = "loading"  , other = "loading_off" , nav = { u = "menu_off" , r = "screen1" } },
+        loading_off         = { f = "button-loading-off.png",     position = { 96 , 919 }   , name = "loading_off" , other = "loading" , nav = { u = "menu_off" , r = "screen1" } },
         play_off            = { f = "button-play-off.png",        position = { 96 , 919 }   , name = "play_off" , other = "play_on"  },
         play_on             = { f = "button-play-on.png",         position = { 96 , 919 }   , name = "play_on"  , other = "play_off" , nav = { u = "menu_off" , r = "screen1" } },
         
         search_off          = { f = "menu-search-off.png",        position = { 40 , 14 }    , name = "search_off" , other = "search_on" },
-        search_on           = { f = "menu-search-on.png",         position = { 40 , 14 }    , name = "search_on"  , other = "search_off" , nav = { d = "buy_off" , r = "menu_off" } },
+        search_on           = { f = "menu-search-on.png",         position = { 40 , 14 }    , name = "search_on"  , other = "search_off" , nav = { d = { target = { "buy_off" , "play_off" , "loading_off" } }, r = "menu_off" } },
         
-        menu_off            = { f = "menu-all-off.png" ,          position = { 121 , 14 }   , name = "menu_off" , other = "menu_apps_on" , nav = { d = "buy_off"  } },
-        menu_apps_on        = { f = "menu-apps-on.png" ,          position = { 121 , 14 }   , name = "menu_apps_on" , other = "menu_off" , nav = { l = "search_off" , d = "buy_off" , r = { hide = true , target = "menu_games_on" } } },
+        menu_off            = { f = "menu-all-off.png" ,          position = { 121 , 14 }   , name = "menu_off" , other = "menu_apps_on" , nav = { d = { target = { "buy_off" , "play_off" , "loading_off" } } } },
+        menu_apps_on        = { f = "menu-apps-on.png" ,          position = { 121 , 14 }   , name = "menu_apps_on" , other = "menu_off" , nav = { l = "search_off" , d = { target = { "buy_off" , "play_off" , "loading_off" } } , r = { hide = true , target = "menu_games_on" } } },
         
-        menu_games_on       = { f = "menu-games-on.png",          position = { 121 , 14 }   , name = "menu_games_on" , other = "menu_off" , nav = { d = "buy_off" , l = { hide = true, target = "menu_apps_on" } } },
+        menu_games_on       = { f = "menu-games-on.png",          position = { 121 , 14 }   , name = "menu_games_on" , other = "menu_off" , nav = { d = { target = { "buy_off" , "play_off" , "loading_off" } } , l = { hide = true, target = "menu_apps_on" } } },
         
-        screen1_on          = { f = "screenshot-1-on.png",        position = { 1285 , 609 } , name = "screen1_on" , other = "screen1" , nav = { u = "menu_off" , d = "screen2" , l = "buy_off" } },
-        screen2_on          = { f = "screenshot-2-on.png",        position = { 1285 , 753 } , name = "screen2_on" , other = "screen2" , nav = { u = "screen1" , d = "screen3" , l = "buy_off" } },
-        screen3_on          = { f = "screenshot-3-on.png",        position = { 1285 , 897 } , name = "screen3_on" , other = "screen3" , nav = { u = "screen2" , l = "buy_off" } },
+        screen1_on          = { f = "screenshot-1-on.png",        position = { 1285 , 609 } , name = "screen1_on" , other = "screen1" , nav = { u = "menu_off" , d = "screen2" , l = { target = { "buy_off" , "play_off" , "loading_off" } } } },
+        screen2_on          = { f = "screenshot-2-on.png",        position = { 1285 , 753 } , name = "screen2_on" , other = "screen2" , nav = { u = "screen1" , d = "screen3" , l = { target = { "buy_off" , "play_off" , "loading_off" } } } },
+        screen3_on          = { f = "screenshot-3-on.png",        position = { 1285 , 897 } , name = "screen3_on" , other = "screen3" , nav = { u = "screen2" , l = { target = { "buy_off" , "play_off" , "loading_off" } } } },
         screen1             = { f = "screenshot-1.png",           position = { 1285 , 609 } , name = "screen1" , other = "screen1_on" },
         screen2             = { f = "screenshot-2.png",           position = { 1285 , 753 } , name = "screen2" , other = "screen2_on" },
         screen3             = { f = "screenshot-3.png",           position = { 1285 , 897 } , name = "screen3" , other = "screen3_on" },
@@ -209,6 +213,10 @@ ui =
                 self:prepare_image( app_id, self.app.menu_games_on , true ),
                 self:prepare_image( app_id, self.app.buy_on ),
                 self:prepare_image( app_id, self.app.buy_off , true ),
+                self:prepare_image( app_id, self.app.loading , true ),
+                self:prepare_image( app_id, self.app.loading_off , true ),
+                self:prepare_image( app_id, self.app.play_off , true ),
+                self:prepare_image( app_id, self.app.play_on , true ),
                 self:prepare_image( app_id, self.app.screen1 ),
                 self:prepare_image( app_id, self.app.screen1_on , true ),
                 self:prepare_image( app_id, self.app.screen2 ),
@@ -259,6 +267,37 @@ ui =
             
                 end
                 
+            end
+        
+        end,
+        
+    finished_install =
+    
+        function( self , app_id )
+        
+            if not self.app_screen then
+            
+                return
+                
+            end
+            
+            local l_on = self.app_screen:find_child( "loading" )
+            local l_off = self.app_screen:find_child( "loading_off" )
+            
+            if l_on.is_visible then
+            
+                l_on:hide()
+                
+                self.app_screen:find_child( "play_on" ):show()
+            
+                self.app_screen_focus = "play_on"
+                
+            else
+                
+                l_off:hide()
+
+                self.app_screen:find_child( "play_off" ):show()
+            
             end
         
         end,
@@ -661,7 +700,8 @@ ui =
             
             elseif keyval == keys.Return then
             
-                local app_id = self.main_tiles[ self.main_focused_tile ].extra.app_id
+                --local app_id = self.main_tiles[ self.main_focused_tile ].extra.app_id
+                local app_id = "com.trickplay.1945"
                 
                 if app_id then
                 
@@ -690,21 +730,39 @@ ui =
                 
                 if focused then
                 
-                    if keyval == keys.Return and focused.name == "menu_apps_on" then
+                    if keyval == keys.Return then
                     
-                        self.main_screen.position = { -screen.w , 0 }
+                        if focused.name == "menu_apps_on" then
+                    
+                            self.main_screen.position = { -screen.w , 0 }
+                            
+                            self.app_screen:animate{
+                                duration = 250 ,
+                                x = screen.w ,
+                                on_completed =
+                                    function()
+                                        self.app_screen:unparent()
+                                        self.app_screen = nil
+                                    end
+                                    }
+                                    
+                            self.main_screen:animate{ duration = 250 , x = 0 }
+                            
+                        elseif focused.name == "buy_on" then
                         
-                        self.app_screen:animate{
-                            duration = 250 ,
-                            x = screen.w ,
-                            on_completed =
-                                function()
-                                    self.app_screen:unparent()
-                                    self.app_screen = nil
-                                end
-                                }
-                                
-                        self.main_screen:animate{ duration = 250 , x = 0 }
+                            install( 1 )
+                            
+                            focused:hide()
+                            
+                            self.app_screen:find_child( "loading" ):show()
+                            
+                            self.app_screen_focus = "loading"
+                        
+                        elseif focused.name == "play_on" then
+                        
+                            apps:launch( "com.trickplay.1945" )
+                        
+                        end
                     
                     else
                     
@@ -729,6 +787,26 @@ ui =
                                     hide = new_one.hide or false
                                     
                                     new_one = new_one.target
+                                    
+                                    if type( new_one ) == "table" then
+                                    
+                                        local foo = nil
+                                        
+                                        for _ , t in ipairs( new_one ) do
+                                        
+                                            if self.app_screen:find_child( t ).is_visible then
+                                            
+                                                foo = t
+                                                
+                                                break
+                                            
+                                            end
+                                        
+                                        end
+                                        
+                                        new_one = foo
+                                    
+                                    end
                                 
                                 end
         
