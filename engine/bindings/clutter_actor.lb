@@ -794,6 +794,16 @@ interface actor [[ClutterActor*]]
 	    is_animating=clutter_actor_get_animation(self)!=NULL;    
 	]];
 
+    /*
+    Property: is_visible
+
+    Returns true if the UI element is visible.
+    */
+
+    readonly bool is_visible
+    [[
+        is_visible = CLUTTER_ACTOR_IS_VISIBLE(self);
+    ]];
 
     /*
 	Function: set
