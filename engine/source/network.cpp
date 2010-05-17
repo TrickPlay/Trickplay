@@ -3,6 +3,7 @@
 #include <cstdlib>
 
 #include "curl/curl.h"
+#include "openssl/ssl.h"
 
 #include "network.h"
 #include "util.h"
@@ -18,8 +19,9 @@ class Network::RequestClosure
 
 public:
 
-    RequestClosure( const Request & req, CookieJar * cj )
-        :
+    RequestClosure( const Settings & _settings, const Request & req, CookieJar * cj )
+    :
+        settings( _settings ),
         event_group( NULL ),
         request( req ),
         callback( NULL ),
@@ -37,8 +39,9 @@ public:
         }
     }
 
-    RequestClosure( EventGroup * eg, const Request & req, CookieJar * cj, ResponseCallback cb, gpointer d, GDestroyNotify dn )
-        :
+    RequestClosure( const Settings & _settings, EventGroup * eg, const Request & req, CookieJar * cj, ResponseCallback cb, gpointer d, GDestroyNotify dn )
+    :
+        settings( _settings ),
         event_group( eg ),
         request( req ),
         callback( cb ),
@@ -55,8 +58,9 @@ public:
         }
     }
 
-    RequestClosure( EventGroup * eg, const Request & req, CookieJar * cj, IncrementalResponseCallback icb, gpointer d, GDestroyNotify dn )
-        :
+    RequestClosure( const Settings & _settings, EventGroup * eg, const Request & req, CookieJar * cj, IncrementalResponseCallback icb, gpointer d, GDestroyNotify dn )
+    :
+        settings( _settings ),
         event_group( eg ),
         request( req ),
         callback( NULL ),
@@ -88,6 +92,7 @@ public:
         }
     }
 
+    Settings                    settings;
     EventGroup         *        event_group;
     Request                     request;
     ResponseCallback            callback;
@@ -490,6 +495,115 @@ public:
         return result;
     }
 
+    // The SSL callback to set client certificates
+
+    static int ssl_client_cert_callback( SSL * ssl, X509 ** x509, EVP_PKEY ** pkey)
+    {
+        SSL_CTX * ctx = SSL_get_SSL_CTX( ssl );
+
+        if ( ! ctx )
+        {
+            g_warning( "FAILED TO GET SSL CONTEXT IN CLIENT CERT CALLBACK" );
+            return 0;
+        }
+
+        RequestClosure * closure = ( RequestClosure * ) SSL_CTX_get_app_data( ctx );
+
+        if ( ! closure )
+        {
+            g_warning( "FAILED TO GET REQUEST CLOSURE IN CLIENT CERT CALLBACK" );
+            return 0;
+        }
+
+        // Read and set the client certificate
+
+        if ( ! closure->request.client_certificate_pem.empty() )
+        {
+            BIO * bio = BIO_new_mem_buf( const_cast< char * >( closure->request.client_certificate_pem.c_str() ), -1 );
+
+            X509 * cert = PEM_read_bio_X509( bio, x509, NULL, NULL );
+
+            if ( ! cert )
+            {
+                g_warning( "FAILED TO READ CLIENT CERTIFICATE" );
+            }
+            else
+            {
+                g_debug( "SSL CLIENT CERTIFICATE SET" );
+            }
+
+            BIO_free( bio );
+        }
+
+        // Read and set the client private key
+
+        if ( ! closure->request.client_private_key_pem.empty() )
+        {
+            BIO * bio = BIO_new_mem_buf( const_cast< char * >( closure->request.client_private_key_pem.c_str() ), -1 );
+
+            EVP_PKEY * key = PEM_read_bio_PrivateKey( bio, pkey, NULL, NULL );
+
+            if ( ! key )
+            {
+                g_warning( "FAILED TO READ CLIENT PRIVATE KEY" );
+            }
+            else
+            {
+                g_debug( "SSL CLIENT PRIVATE KEY SET" );
+            }
+
+            BIO_free( bio );
+        }
+
+        // If they are both OK, return 1
+
+        if ( *x509 && *pkey )
+        {
+            return 1;
+        }
+
+        // Otherwise, clear and free the other one
+
+        if ( *x509 )
+        {
+            X509_free( *x509 );
+            *x509 = NULL;
+        }
+
+        if ( *pkey )
+        {
+            EVP_PKEY_free( *pkey );
+            *pkey = NULL;
+        }
+
+        return 0;
+    }
+
+    // The SSL callback
+
+    static CURLcode curl_ssl_ctx_callback( CURL * eh, void * sslctx , void * c )
+    {
+        SSL_CTX * ctx = ( SSL_CTX * )sslctx;
+
+        // If the request has a client certificate and a private key, we set
+        // another callback to read them.
+
+        RequestClosure * closure = ( RequestClosure * ) c;
+
+        if ( ! closure->request.client_certificate_pem.empty() && ! closure->request.client_private_key_pem.empty() )
+        {
+            SSL_CTX_set_client_cert_cb( ctx, ssl_client_cert_callback );
+            SSL_CTX_set_app_data( ctx, c );
+        }
+
+#if 0
+        ctx->cert_store->param->check_time = time_t( our_time / 1000 );
+        ctx->cert_store->param->flags |= X509_V_FLAG_USE_CHECK_TIME;
+#endif
+
+        return CURLE_OK;
+    }
+
     //=========================================================================
     // Set-up an easy handle
     //=========================================================================
@@ -516,8 +630,19 @@ public:
             cc( curl_easy_setopt( eh, CURLOPT_READDATA, closure ) );
             cc( curl_easy_setopt( eh, CURLOPT_HEADERFUNCTION, curl_header_callback ) );
             cc( curl_easy_setopt( eh, CURLOPT_HEADERDATA, closure ) );
-            // TODO: SSL CTX function
+
             cc( curl_easy_setopt( eh, CURLOPT_URL, closure->request.url.c_str() ) );
+
+            cc( curl_easy_setopt( eh, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_callback ) );
+            cc( curl_easy_setopt( eh, CURLOPT_SSL_CTX_DATA, closure ) );
+
+            cc( curl_easy_setopt( eh, CURLOPT_SSL_VERIFYPEER, closure->settings.ssl_verify_peer ? 1 : 0 ) );
+
+            if ( closure->settings.ssl_verify_peer && ! closure->settings.ssl_cert_bundle.empty() )
+            {
+                cc( curl_easy_setopt( eh, CURLOPT_CAINFO, closure->settings.ssl_cert_bundle.c_str() ) );
+            }
+
             // TODO: proxy
             cc( curl_easy_setopt( eh, CURLOPT_FOLLOWLOCATION, closure->request.redirect ? 1 : 0 ) );
             cc( curl_easy_setopt( eh, CURLOPT_USERAGENT, closure->request.user_agent.c_str() ) );
@@ -548,12 +673,15 @@ public:
 
             cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
 
-            //cc(curl_easy_setopt(eh,CURLOPT_VERBOSE,1));
-
             if ( closure->cookie_jar )
             {
                 closure->cookie_jar->add_cookies_to_handle( eh );
             }
+
+#ifndef TP_PRODUCTION
+
+            cc( curl_easy_setopt( eh, CURLOPT_VERBOSE, closure->settings.debug ? 1 : 0 ) );
+#endif
         }
         catch ( CURLcode c )
         {
@@ -774,9 +902,10 @@ private:
 
 //*****************************************************************************
 
-Network::Network( EventGroup * eg )
-    :
-    event_group( eg ),
+Network::Network( const Settings & _settings, EventGroup * _event_group )
+:
+    settings( _settings ),
+    event_group( _event_group ),
     queue( g_async_queue_new_full( Event::destroy ) ),
     thread( NULL )
 {
@@ -862,7 +991,7 @@ Network::CookieJar * Network::cookie_jar_unref( CookieJar * cookie_jar )
 
 Network::Response Network::perform_request( const Request & request, CookieJar * cookie_jar )
 {
-    RequestClosure closure( request, cookie_jar );
+    RequestClosure closure( settings, request, cookie_jar );
 
     CURL * eh = Thread::create_easy_handle( &closure );
 
@@ -887,7 +1016,7 @@ void Network::perform_request_async( const Network::Request & request, Network::
 {
     start();
 
-    g_async_queue_push( queue, Event::request( new RequestClosure( event_group, request, cookie_jar, callback, user, notify ) ) );
+    g_async_queue_push( queue, Event::request( new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify ) ) );
 }
 
 //.............................................................................
@@ -896,7 +1025,7 @@ void Network::perform_request_async_incremental( const Network::Request & reques
 {
     start();
 
-    g_async_queue_push( queue, Event::request( new RequestClosure( event_group, request, cookie_jar, callback, user, notify ) ) );
+    g_async_queue_push( queue, Event::request( new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify ) ) );
 }
 
 //.............................................................................

@@ -526,7 +526,11 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp )
 
     // Create the network
 
-    network = new Network( event_group );
+    network = new Network(
+            Network::Settings( context->get_bool( TP_NETWORK_DEBUG, false ),
+                    context->get_bool( TP_SSL_VERIFY_PEER, true ),
+                    context->get( TP_SSL_CA_CERT_FILE, "" ) ),
+            event_group );
 
     // Register to get all notifications
 
