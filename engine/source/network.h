@@ -60,7 +60,23 @@ public:
 
     //.........................................................................
 
-    Network( EventGroup * event_group );
+    struct Settings
+    {
+        Settings( bool _debug = false, bool _ssl_verify_peer = true, const String & _ssl_cert_bundle = String() )
+        :
+            debug( _debug ),
+            ssl_verify_peer( _ssl_verify_peer ),
+            ssl_cert_bundle( _ssl_cert_bundle )
+        {}
+
+        bool    debug;
+        bool    ssl_verify_peer;
+        String  ssl_cert_bundle;
+    };
+
+    //.........................................................................
+
+    Network( const Settings & settings, EventGroup * event_group );
 
     ~Network();
 
@@ -124,6 +140,7 @@ private:
 
     void start();
 
+    Settings        settings;
     EventGroup   *  event_group;
     GAsyncQueue  *  queue;
     Thread     *    thread;

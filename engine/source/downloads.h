@@ -10,7 +10,7 @@ class Downloads
 {
 public:
 
-    Downloads( const String & path );
+    Downloads( TPContext * context );
 
     //.........................................................................
     // Starts a download. Returns zero if it failed to start. Otherwise,

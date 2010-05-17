@@ -169,30 +169,45 @@ typedef struct TPContext TPContext;
     TP_DOWNLOADS_PATH -     Path to a directory that TrickPlay will use to download
                             files.
                             Defaults to "<TP_DATA_PATH>/downloads"
+
+    TP_NETWORK_DEBUG -      Whether to show debug information for URL requests. Note
+                            that this is always disabled on production builds.
+                            Defaults to "0".
+
+    TP_SSL_VERIFY_PEER -    Whether server certificates are verified for SSL connections.
+                            Defaults to "1".
+
+    TP_SSL_CA_CERT_FILE -   Path to a file that contains top level certificates for
+                            certificate authorities in PEM format.
+                            Defaults to empty, which implies use of system certificates.
+
 */
 
-#define TP_APP_SOURCES          "app.sources"
-#define TP_SCAN_APP_SOURCES     "app.scan"
-#define TP_APP_ID               "app.id"
-#define TP_APP_PATH             "app.path"
-#define TP_APP_ALLOWED          "app.allowed"
-#define TP_SYSTEM_LANGUAGE      "system.language"
-#define TP_SYSTEM_COUNTRY       "system.country"
-#define TP_SYSTEM_NAME          "system.name"
-#define TP_SYSTEM_VERSION       "system.version"
-#define TP_DATA_PATH            "data.path"
-#define TP_SCREEN_WIDTH         "screen.width"
-#define TP_SCREEN_HEIGHT        "screen.height"
-#define TP_CONFIG_FROM_ENV      "config.env"
-#define TP_CONFIG_FROM_FILE     "config.file"
-#define TP_CONSOLE_ENABLED      "console.enabled"
-#define TP_TELNET_CONSOLE_PORT  "console.port"
-#define TP_CONTROLLERS_ENABLED  "controllers.enabled"
-#define TP_CONTROLLERS_PORT     "controllers.port"
-#define TP_CONTROLLERS_NAME     "controllers.name"
-#define TP_LOG_DEBUG            "log.debug"
-#define TP_FONTS_PATH           "fonts.path"
-#define TP_DOWNLOADS_PATH       "downloads.path"
+#define TP_APP_SOURCES                  "app.sources"
+#define TP_SCAN_APP_SOURCES             "app.scan"
+#define TP_APP_ID                       "app.id"
+#define TP_APP_PATH                     "app.path"
+#define TP_APP_ALLOWED                  "app.allowed"
+#define TP_SYSTEM_LANGUAGE              "system.language"
+#define TP_SYSTEM_COUNTRY               "system.country"
+#define TP_SYSTEM_NAME                  "system.name"
+#define TP_SYSTEM_VERSION               "system.version"
+#define TP_DATA_PATH                    "data.path"
+#define TP_SCREEN_WIDTH                 "screen.width"
+#define TP_SCREEN_HEIGHT                "screen.height"
+#define TP_CONFIG_FROM_ENV              "config.env"
+#define TP_CONFIG_FROM_FILE             "config.file"
+#define TP_CONSOLE_ENABLED              "console.enabled"
+#define TP_TELNET_CONSOLE_PORT          "console.port"
+#define TP_CONTROLLERS_ENABLED          "controllers.enabled"
+#define TP_CONTROLLERS_PORT             "controllers.port"
+#define TP_CONTROLLERS_NAME             "controllers.name"
+#define TP_LOG_DEBUG                    "log.debug"
+#define TP_FONTS_PATH                   "fonts.path"
+#define TP_DOWNLOADS_PATH               "downloads.path"
+#define TP_NETWORK_DEBUG                "network.debug"
+#define TP_SSL_VERIFY_PEER              "ssl.verifypeer"
+#define TP_SSL_CA_CERT_FILE             "ssl.cacertfile"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

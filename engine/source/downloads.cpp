@@ -1,12 +1,13 @@
 
 #include "downloads.h"
+#include "context.h"
 #include "event_group.h"
 
 //-----------------------------------------------------------------------------
 
-Downloads::Downloads( const String & _path )
+Downloads::Downloads( TPContext * context )
 :
-    path( _path ),
+    path( context->get( TP_DOWNLOADS_PATH ) ),
     next_id( 1 )
 {
     // The path must already exist
@@ -15,7 +16,11 @@ Downloads::Downloads( const String & _path )
 
     EventGroup * event_group = new EventGroup();
 
-    network.reset( new Network( event_group ) );
+    network.reset( new Network(
+            Network::Settings( context->get_bool( TP_NETWORK_DEBUG, false ),
+                    context->get_bool( TP_SSL_VERIFY_PEER, true ),
+                    context->get( TP_SSL_CA_CERT_FILE, "" ) ),
+            event_group ) );
 
     event_group->unref();
 

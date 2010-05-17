@@ -619,7 +619,7 @@ int TPContext::run()
     //.........................................................................
     // Create the downloads
 
-    downloads = new Downloads( get( TP_DOWNLOADS_PATH ) );
+    downloads = new Downloads( this );
 
     //.........................................................................
 
