@@ -160,7 +160,18 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 
     if ( CLUTTER_IS_TEXT( actor ) )
     {
-        extra = String( "[text='" ) + clutter_text_get_text( CLUTTER_TEXT( actor ) ) + "']";
+        extra = String( "[text='" ) + clutter_text_get_text( CLUTTER_TEXT( actor ) ) + "'";
+
+        ClutterColor color;
+
+        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
+
+        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
+
+        extra = extra + "," + c + "]";
+
+        g_free( c );
+
     }
     else if ( CLUTTER_IS_TEXTURE( actor ) )
     {
@@ -184,13 +195,43 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         g_free( c );
     }
 
+    String details;
+
+    gdouble sx;
+    gdouble sy;
+
+    clutter_actor_get_scale( actor, &sx, &sy );
+
+    if ( sx != 1 || sy != 1 )
+    {
+        gchar * c = g_strdup_printf( " scale(%1.2f,%1.2f)", sx, sy );
+
+        details = c;
+
+        g_free( c );
+    }
+
+    gfloat ax;
+    gfloat ay;
+
+    clutter_actor_get_anchor_point( actor, &ax, &ay );
+
+    if ( ax != 0 || ay != 0 )
+    {
+        gchar * c = g_strdup_printf( " anchor(%1.0f,%1.0f)", ax, ay );
+
+        details += c;
+
+        g_free( c );
+    }
+
     if ( !extra.empty() )
     {
         extra = String( " : " ) + extra;
     }
 
 
-    g_info( "%s%s: '%s' : %u : (%d,%d %ux%u)%s",
+    g_info( "%s%s: '%s' : %u : (%d,%d %ux%u)%s%s",
             String( info->indent, ' ' ).c_str(),
             type,
             name ? name : "",
@@ -199,6 +240,7 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
             g.y,
             g.width,
             g.height,
+            details.empty() ? "" : details.c_str(),
             extra.empty() ? "" : extra.c_str() );
 
     if ( CLUTTER_IS_CONTAINER( actor ) )
