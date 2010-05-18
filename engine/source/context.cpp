@@ -20,6 +20,7 @@
 #include "images.h"
 #include "downloads.h"
 #include "installer.h"
+#include "versions.h"
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -345,6 +346,10 @@ int TPContext::console_command_handler( const char * command, const char * param
         {
             PROFILER_DUMP;
         }
+    }
+    else if ( !strcmp( command, "ver" ) )
+    {
+        dump_versions();
     }
     else if ( !strcmp( command, "download" ) )
     {

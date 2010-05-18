@@ -22,6 +22,7 @@ TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( fontconfig fontconfig.h                ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( FreeImage.h                            ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -293,6 +294,7 @@ add_library(
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp
     ${ENGINE_SRC}/source/installer.cpp
+    ${ENGINE_SRC}/source/versions.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
