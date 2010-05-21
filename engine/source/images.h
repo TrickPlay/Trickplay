@@ -5,7 +5,9 @@
 
 namespace Images
 {
-    bool load_texture_from_data( ClutterTexture * texture, const void * data, size_t length );
+    class Cache;
+
+    bool load_texture_from_data( ClutterTexture * texture, const void * data, size_t length, const char * name = NULL, Cache * cache = NULL);
     bool load_texture_from_file( ClutterTexture * texture, const char * file_name );
 
     // Takes the data passed in and decodes it to an image. Results must be
