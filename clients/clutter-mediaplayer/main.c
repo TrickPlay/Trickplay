@@ -142,6 +142,8 @@ static void get_stream_information(TPMediaPlayer * mp)
     g_object_get(G_OBJECT(pipeline), "n-video", &n_video, NULL);
     g_object_get(G_OBJECT(pipeline), "n-audio", &n_audio, NULL);
 
+	g_debug("Identified %d audio and %d video streams",n_audio,n_video);
+
     if(n_video) ud->media_type|=TP_MEDIA_TYPE_VIDEO;
     if(n_audio) ud->media_type|=TP_MEDIA_TYPE_AUDIO;
 #endif
@@ -177,6 +179,24 @@ static void get_stream_information(TPMediaPlayer * mp)
             gst_object_unref(GST_OBJECT(video_sink));
         }
     }    
+
+	g_debug("About to do AUDIO stuff!");
+
+#if 1
+    if (ud->media_type&TP_MEDIA_TYPE_AUDIO)
+    {
+        GstElement * audio_sink= gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
+        
+        if(!audio_sink)
+        {
+        	g_debug("Failed to create autoaudiosink");
+        } else {
+			g_object_set(G_OBJECT(pipeline),"audio-sink",audio_sink,NULL);
+        	g_debug("autoaudiosink set");
+		}
+    }    
+#endif
+
 }
 
 //-----------------------------------------------------------------------------
