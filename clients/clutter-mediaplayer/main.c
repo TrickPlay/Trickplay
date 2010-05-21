@@ -83,7 +83,8 @@ static void get_stream_information(TPMediaPlayer * mp)
     
     //.........................................................................
     // Use stream info to get the type of each stream
-    
+
+#if (CLUTTER_GST_MAJOR_VERSION < 0)    
     GValueArray * info_array=NULL;
     
     g_object_get(G_OBJECT(pipeline),"stream-info-value-array",&info_array,NULL);
@@ -136,6 +137,14 @@ static void get_stream_information(TPMediaPlayer * mp)
         
         g_value_array_free(info_array);
     }
+#else
+    gint n_audio, n_video;
+    g_object_get(G_OBJECT(pipeline), "n-video", &n_video, NULL);
+    g_object_get(G_OBJECT(pipeline), "n-audio", &n_audio, NULL);
+
+    if(n_video) ud->media_type|=TP_MEDIA_TYPE_VIDEO;
+    if(n_audio) ud->media_type|=TP_MEDIA_TYPE_AUDIO;
+#endif
     
     //.........................................................................
     // If there is a video stream, we get the video sink and try to find the
