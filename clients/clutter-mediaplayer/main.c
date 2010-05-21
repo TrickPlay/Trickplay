@@ -72,7 +72,7 @@ static void get_stream_information(TPMediaPlayer * mp)
     USERDATA(mp);
     CM(ud);
 
-#if (CLUTTER_GST_MAJOR_VERSION < 0)
+#if (CLUTTER_GST_MAJOR_VERSION < 1)
     GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
 #else
     GstElement *pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
@@ -84,7 +84,7 @@ static void get_stream_information(TPMediaPlayer * mp)
     //.........................................................................
     // Use stream info to get the type of each stream
 
-#if (CLUTTER_GST_MAJOR_VERSION < 0)    
+#if (CLUTTER_GST_MAJOR_VERSION < 1)
     GValueArray * info_array=NULL;
     
     g_object_get(G_OBJECT(pipeline),"stream-info-value-array",&info_array,NULL);
