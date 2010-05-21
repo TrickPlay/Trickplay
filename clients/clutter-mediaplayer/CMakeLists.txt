@@ -25,6 +25,7 @@ add_executable( tp-cmp main.c )
 
 TP_FIND_LIBRARY( clutter-glx-1.0    TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( clutter-gst-0.10   TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( clutter-gst-1.0   TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstreamer-0.10     TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstvideo-0.10      TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstbase-0.10       TPCMP_LIBRARIES )
