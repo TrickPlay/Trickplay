@@ -72,9 +72,13 @@ static void get_stream_information(TPMediaPlayer * mp)
     USERDATA(mp);
     CM(ud);
 
-    GstElement * playbin=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#if (CLUTTER_GST_MAJOR_VERSION < 0)
+    GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#else
+    GstElement *pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#endif
     
-    if (!playbin)
+    if (!pipeline)
         return;
     
     //.........................................................................
@@ -82,7 +86,7 @@ static void get_stream_information(TPMediaPlayer * mp)
     
     GValueArray * info_array=NULL;
     
-    g_object_get(G_OBJECT(playbin),"stream-info-value-array",&info_array,NULL);
+    g_object_get(G_OBJECT(pipeline),"stream-info-value-array",&info_array,NULL);
     
     if (info_array)
     {
@@ -141,7 +145,7 @@ static void get_stream_information(TPMediaPlayer * mp)
     {
         GstElement * video_sink=NULL;
         
-        g_object_get(G_OBJECT(playbin),"video-sink",&video_sink,NULL);
+        g_object_get(G_OBJECT(pipeline),"video-sink",&video_sink,NULL);
         
         if (video_sink)
         {
@@ -176,13 +180,17 @@ static void disconnect_loading_messages(TPMediaPlayer * mp)
     
     if (!ud->load_signal)
         return;
+
+#if (CLUTTER_GST_MAJOR_VERSION<1)    
+    GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#else
+    GstElement * pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#endif
     
-    GstElement * playbin=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
-    
-    if (!playbin)
+    if (!pipeline)
         return;
     
-    GstBus * bus=gst_pipeline_get_bus(GST_PIPELINE(playbin));
+    GstBus * bus=gst_pipeline_get_bus(GST_PIPELINE(pipeline));
     
     if (!bus)
         return;
@@ -259,13 +267,17 @@ static int mp_load(TPMediaPlayer * mp,const char * uri,const char * extra)
     CM(ud);
     
     clutter_media_set_uri(cm,uri);
+
+#if (CLUTTER_GST_MAJOR_VERSION<1)    
+    GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#else
+    GstElement * pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#endif
     
-    GstElement * playbin=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
-    
-    if (!playbin)
+    if (!pipeline)
         return 1;
     
-    GstStateChangeReturn r=gst_element_set_state(playbin,GST_STATE_PAUSED);
+    GstStateChangeReturn r=gst_element_set_state(pipeline,GST_STATE_PAUSED);
     
     g_debug("STATE CHANGE RETURN IS %d",r);
     
@@ -289,7 +301,7 @@ static int mp_load(TPMediaPlayer * mp,const char * uri,const char * extra)
             // The state change happens asynchronously, so we connect a signal
             // handler to see when it is done
             
-            GstBus * bus=gst_pipeline_get_bus(GST_PIPELINE(playbin));
+            GstBus * bus=gst_pipeline_get_bus(GST_PIPELINE(pipeline));
             
             if (!bus)
                 return 3;
