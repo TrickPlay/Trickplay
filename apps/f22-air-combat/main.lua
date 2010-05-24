@@ -325,7 +325,7 @@ my_plane =
     
     friction = 0.85,
     
-    friction_bump = 1000, -- per second
+    friction_bump = 500, -- per second
     
     speed_bump = 200,
         
