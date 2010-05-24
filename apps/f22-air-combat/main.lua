@@ -367,6 +367,8 @@ my_plane =
             screen:add( self.group )
             
             self.group.position = { screen.w / 2 - tw / 2 , screen.h - th }
+            self.group.x_rotation = { 0, self.image.w/6, self.image.h/2 }
+            self.group.y_rotation = { 0, self.image.w/6, self.image.h/2 }
             
         end,
         
@@ -399,6 +401,8 @@ my_plane =
             
                 local start_point = self.group.center
                 
+               	self.group:animate({ duration=50, y_rotation = self.h_speed/30, x_rotation = self.v_speed/20 })
+
                 if self.h_speed > 0 then
                 
                     local x = self.group.x + ( self.h_speed * seconds )
@@ -479,6 +483,9 @@ my_plane =
             
             else
             
+				self.group.x_rotation = { 0, self.image.w/6, self.image.h/2 }
+				self.group.y_rotation = { 0, self.image.w/6, self.image.h/2 }
+
                 -- Figure the total time we have been dead
                 
                 self.dead_time = self.dead_time + seconds
