@@ -33,3 +33,8 @@ function controllers.on_controller_connected( controllers , controller )
     end
 
 end
+
+local controller
+for _,controller in pairs(controllers.connected) do
+	controllers:on_controller_connected( controller )
+end
