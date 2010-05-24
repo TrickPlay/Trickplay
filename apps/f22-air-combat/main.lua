@@ -964,7 +964,11 @@ enemies =
                                 
                                 end
                                 
-                                add_to_render_list( bullet )
+                                if bullet then
+                                    
+                                    add_to_render_list( bullet )
+                                    
+                                end
                                 
                             end
                         
