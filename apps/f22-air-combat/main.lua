@@ -669,11 +669,11 @@ my_plane =
             local explosion =
                 
                 {
-                    image = Clone{ source = assets.explosion2 , opacity = 255 },
+                    image = Clone{ source = assets.explosion2 , opacity = 180 },
                     
                     group = nil,
                     
-                    duration = 0.4, 
+                    duration = 0.8, 
                     
                     time = 0,
                     
@@ -1000,11 +1000,11 @@ enemies =
                         local explosion =
                             
                             {
-                                image = Clone{ source = assets.explosion1 , opacity = 255 },
+                                image = Clone{ source = assets.explosion1 , opacity = 180 },
                                 
                                 group = nil,
                                 
-                                duration = 0.4, 
+                                duration = 0.8, 
                                 
                                 time = 0,
                                 
