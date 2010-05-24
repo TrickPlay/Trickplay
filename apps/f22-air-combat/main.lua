@@ -29,7 +29,7 @@ assets =
     island1         = Image{ src = "assets/island1.png" },
     island2         = Image{ src = "assets/island2.png" },
     island3         = Image{ src = "assets/island3.png" },
-    score           = Text{ font = "Sans 24px" , text = "+10" , color = "FFFF00" },
+    score           = Text{ font = "Mail Ray Stuff,Sans 48px" , text = "+10" , color = "FFFF00" },
 }
 
 for _ , v in pairs( assets ) do
