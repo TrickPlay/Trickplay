@@ -321,7 +321,7 @@ my_plane =
     
     max_h_speed = 600,
     
-    max_v_speed = 175,
+    max_v_speed = 600 * 9 / 16,
     
     friction = 0.85,
     
