@@ -444,9 +444,9 @@ void Images::destroy_image( TPImage * image )
 
 //-----------------------------------------------------------------------------
 
-void Images::set_clutter_texture( ClutterTexture * texture, TPImage * image )
+void Images::load_texture( ClutterTexture * texture, TPImage * image )
 {
-    PROFILER( "Images::set_clutter_texture" );
+    PROFILER( "Images::load_texture/clutter" );
 
     g_assert( texture );
     g_assert( image );
@@ -474,7 +474,7 @@ bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, 
         return false;
     }
 
-    set_clutter_texture( texture, image );
+    load_texture( texture, image );
 
     destroy_image( image );
 
@@ -492,7 +492,7 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
         return false;
     }
 
-    set_clutter_texture( texture, image );
+    load_texture( texture, image );
 
     destroy_image( image );
 
