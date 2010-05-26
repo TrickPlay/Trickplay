@@ -1601,15 +1601,9 @@ ControllerList * TPContext::get_controller_list()
 
 //-----------------------------------------------------------------------------
 
-guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, int & height, int & pitch, int & depth, int & bgr )
+TPImage * TPContext::load_icon( const gchar * path )
 {
     PROFILER( "TPContext::load_icon" );
-
-    length = 0;
-    width = 0;
-    height = 0;
-    pitch = 0;
-    depth = 0;
 
     static GChecksumType hash_type = G_CHECKSUM_MD5;
 
@@ -1678,7 +1672,11 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
 
         Util::GFreeLater free_actual_data_hash( actual_data_hash );
 
-        if ( sscanf( info_contents, "%s %d %d %d %d %d", actual_data_hash, &width, &height, &pitch, &depth, &bgr ) == 6 )
+        TPImage result;
+        memset( &result, 0, sizeof( TPImage ) );
+
+
+        if ( sscanf( info_contents, "%s %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr ) == 6 )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
@@ -1686,9 +1684,14 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
 
                 gchar * raw_contents = NULL;
 
+                gsize length = 0;
+
                 if ( g_file_get_contents( icon_file_path, &raw_contents, &length, NULL ) )
                 {
-                    return ( guchar *)raw_contents;
+                    result.pixels = raw_contents;
+                    result.free_pixels = g_free;
+
+                    return g_slice_dup( TPImage, &result );
                 }
             }
         }
@@ -1699,21 +1702,13 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
     // If we got here, we need to create the icon file because it doesn't exist,
     // doesn't match or we had a problem reading the information.
 
-    guchar * raw_contents = NULL;
-
     TPImage * image = Images::decode_image( contents, content_length, path );
 
     if ( image )
     {
-        width = image->width;
-        height = image->height;
-        pitch = image->pitch;
-        depth = image->depth;
-        bgr = image->bgr;
-
         // The length of the raw image
 
-        length = height * pitch;
+        gsize length = image->height * image->pitch;
 
         // If the conversion succeeded, we need to write the info file and the
         // raw icon file. Any failure below this point is simply a failure to cache,
@@ -1725,7 +1720,7 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
 
         if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
         {
-            gchar * info = g_strdup_printf( "%s %d %d %d %d %d", data_hash, width, height, pitch, depth, bgr );
+            gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width, image->height, image->pitch, image->depth, image->bgr );
 
             Util::GFreeLater free_info( info );
 
@@ -1737,12 +1732,9 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
             }
         }
 
-        raw_contents = ( guchar * )g_memdup( image->pixels, length );
-
-        Images::destroy_image( image );
     }
 
-    return raw_contents;
+    return image;
 }
 
 

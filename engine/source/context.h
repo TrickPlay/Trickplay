@@ -132,7 +132,7 @@ public:
 
     //.........................................................................
 
-    guchar * load_icon( const gchar * path, gsize & length, int & width, int & height, int & pitch, int & depth, int & bgr );
+    TPImage * load_icon( const gchar * path );
 
 private:
 

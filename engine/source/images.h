@@ -20,6 +20,11 @@ public:
     static bool load_texture( ClutterTexture * texture, const char * filename );
 
     //.........................................................................
+    // Loads the the decoded image into a Clutter texture.
+
+    static void load_texture( ClutterTexture * texture, TPImage * image );
+
+    //.........................................................................
     // Decode an image and return the resulting TPImage, which must be freed
     // with destroy_image. The pixels of a TPImage cannot be stolen - because
     // there may be a custom function required to free them.
@@ -60,11 +65,6 @@ private:
     // Gets the singleton or deletes it
 
     static Images * get( bool destroy = false );
-
-    //.........................................................................
-    // Internal method to hand the TPImage data to a Clutter texture
-
-    static void set_clutter_texture( ClutterTexture * texture, TPImage * image );
 
     //.........................................................................
     // List of decoders
