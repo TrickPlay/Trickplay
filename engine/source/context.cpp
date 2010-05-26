@@ -895,6 +895,10 @@ int TPContext::run()
     sysdb = NULL;
 
     //.........................................................................
+
+    Images::shutdown();
+
+    //.........................................................................
     // Not running any more
 
     is_running = false;
@@ -1695,18 +1699,26 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
     // If we got here, we need to create the icon file because it doesn't exist,
     // doesn't match or we had a problem reading the information.
 
-    guchar * raw_contents = Images::decode_image( contents, content_length, width, height, pitch, depth, bgr );
+    guchar * raw_contents = NULL;
 
-    // The length of the raw image
+    TPImage * image = Images::decode_image( contents, content_length, path );
 
-    length = height * pitch;
-
-    // If the conversion succeeded, we need to write the info file and the
-    // raw icon file. Any failure below this point is simply a failure to cache,
-    // and even though it will affect performance, it is not considered critical.
-
-    if ( raw_contents )
+    if ( image )
     {
+        width = image->width;
+        height = image->height;
+        pitch = image->pitch;
+        depth = image->depth;
+        bgr = image->bgr;
+
+        // The length of the raw image
+
+        length = height * pitch;
+
+        // If the conversion succeeded, we need to write the info file and the
+        // raw icon file. Any failure below this point is simply a failure to cache,
+        // and even though it will affect performance, it is not considered critical.
+
         PROFILER( "TPContext::load_icon(cache)" );
 
         // Make sure the icon cache directory exists
@@ -1721,9 +1733,13 @@ guchar * TPContext::load_icon( const gchar * path, gsize & length, int & width, 
             {
                 // Now we save the raw icon
 
-                g_file_set_contents( icon_file_path, ( gchar * )raw_contents, length, NULL );
+                g_file_set_contents( icon_file_path, ( gchar * )image->pixels, length, NULL );
             }
         }
+
+        raw_contents = ( guchar * )g_memdup( image->pixels, length );
+
+        Images::destroy_image( image );
     }
 
     return raw_contents;
@@ -1895,6 +1911,18 @@ void tp_context_remove_controller( TPContext * context, TPController * controlle
     g_assert( context );
 
     context->controller_list.remove_controller( controller );
+}
+
+//-----------------------------------------------------------------------------
+// Image Decoder
+//-----------------------------------------------------------------------------
+
+void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user)
+{
+    g_assert( context );
+    g_assert( decoder );
+
+    Images::set_external_decoder( decoder, user );
 }
 
 //-----------------------------------------------------------------------------

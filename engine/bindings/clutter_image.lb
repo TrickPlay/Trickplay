@@ -13,119 +13,6 @@ module clutter_image;
 ]]
 
 [[
-#if TP_USE_GDK_PIXBUF
-
-struct ImageClosure
-{
-    ImageClosure(ClutterTexture*i)
-    :
-	image(i),
-	loader(gdk_pixbuf_loader_new()),
-	error(NULL)
-    {
-	g_assert(image);
-	g_assert(loader);
-	g_object_ref(G_OBJECT(image));
-    }
-    
-    ~ImageClosure()
-    {
-	g_object_unref(G_OBJECT(image));
-	gdk_pixbuf_loader_close(loader,NULL);
-	g_object_unref(G_OBJECT(loader));
-	g_clear_error(&error);
-    }
-    
-    ClutterTexture * 	image;
-    GdkPixbufLoader * 	loader;
-    GError * 		error;
-};
-
-static void Image_destroy_image_closure(gpointer ic)
-{
-    delete (ImageClosure*)ic;
-}
-
-// This one gets called directly by the network thread every time
-// we get a piece of the body - we take advantage of the thread to
-// decode the image one chunk at a time.
-
-bool Image_incremental_response_callback(const Network::Response & response,gpointer body,guint len,bool finished,gpointer user)
-{
-    ImageClosure * closure=(ImageClosure*)user;
-    
-    // If it is finished, we are running in the main thread, otherwise, we are
-    // running in the network thread.
-    
-    if (finished)
-    {
-	if (response.failed && !closure->error)
-	{
-	    g_set_error(&closure->error,
-		CLUTTER_TEXTURE_ERROR,
-		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-		"Request failed : %s" , response.status.c_str() );
-	}
-	
-	// Close the loader. If there is an error already, we pass NULL
-	// so that we retain the old error - the loader has to be closed
-	// either way. Otherwise, we pass the error address so that close
-	// has a chance to fail.
-	
-	gdk_pixbuf_loader_close(closure->loader,closure->error?NULL:&closure->error);
-
-	if (!closure->error)
-	{
-	    GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(closure->loader);
-	    
-	    if (p)
-	    {
-		if ( ! clutter_texture_set_from_rgb_data(closure->image,
-		    gdk_pixbuf_get_pixels(p),
-		    gdk_pixbuf_get_has_alpha(p),
-		    gdk_pixbuf_get_width(p),
-		    gdk_pixbuf_get_height(p),
-		    gdk_pixbuf_get_rowstride(p),
-		    gdk_pixbuf_get_has_alpha(p)?4:3,
-		    CLUTTER_TEXTURE_NONE,NULL))
-		{
-		    g_set_error(&closure->error,
-			CLUTTER_TEXTURE_ERROR,
-			CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-			"Failed to set texture data");
-		}
-	    }
-	    else
-	    {
-		g_set_error(&closure->error,
-		    CLUTTER_TEXTURE_ERROR,
-		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-		    "Failed to get pixbuf from loader");
-	    }
-	}
-	
-	if (closure->error)
-	{
-	    g_warning("Failed to load image : %s",closure->error->message);
-	    g_signal_emit_by_name(G_OBJECT(closure->image),"load-finished",closure->error);	
-	}
-    }
-    else
-    {
-	// If there was an error already, we do nothing
-	
-	if (!closure->error)
-	{
-	    gdk_pixbuf_loader_write(closure->loader,(const guchar*)body,len,&closure->error);    
-	}
-    }
-    
-    // If there is no error, we return true to carry on
-    
-    return !closure->error;
-}
-#else
-
 static void Image_destroy_image_closure(gpointer texture)
 {
     g_object_unref(G_OBJECT(texture));
@@ -137,20 +24,29 @@ void Image_response_callback(const Network::Response & response,gpointer texture
     
     if (response.failed)
     {
-	g_set_error(&error,
-	    CLUTTER_TEXTURE_ERROR,
-	    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-	    "Request failed : %s" , response.status.c_str() );	
+		g_set_error(&error,
+		    CLUTTER_TEXTURE_ERROR,
+		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		    "Request failed : %s" , response.status.c_str() );	
     }
     else
     {
-	if (!Images::load_texture_from_data(CLUTTER_TEXTURE(texture),response.body->data,response.body->len))
-	{
-	    g_set_error(&error,
-		CLUTTER_TEXTURE_ERROR,
-		CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-		"Failed to load texture data");
-	}
+    	const char * content_type = NULL;
+    	
+    	StringMultiMap::const_iterator it = response.headers.find( "Content-Type" );
+    	
+    	if ( it != response.headers.end() )
+    	{
+    		content_type = it->second.c_str();
+    	}
+    	    	
+		if ( ! Images::load_texture(CLUTTER_TEXTURE(texture),response.body->data,response.body->len, content_type ) )
+		{
+		    g_set_error(&error,
+			CLUTTER_TEXTURE_ERROR,
+			CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+			"Failed to load texture data");
+		}
     }
     
     if (error)
@@ -161,9 +57,6 @@ void Image_response_callback(const Network::Response & response,gpointer texture
 	g_clear_error(&error);
     }
 }
-
-#endif
-
 
 ]]
 
@@ -211,16 +104,6 @@ class Image [[ClutterActor*]] actor
 		    Network::Request request(app->get_user_agent());
 		    request.url = path;
 		    
-#if TP_USE_GDK_PIXBUF
-
-		    app->get_network()->perform_request_async_incremental(
-			request,
-			app->get_cookie_jar(),
-			Image_incremental_response_callback,
-			new ImageClosure(CLUTTER_TEXTURE(self)),
-			Image_destroy_image_closure);
-#else
-
 		    g_object_ref(G_OBJECT(self));
 		    
 		    app->get_network()->perform_request_async(
@@ -228,16 +111,11 @@ class Image [[ClutterActor*]] actor
 			app->get_cookie_jar(),
 			Image_response_callback,
 			self,
-			Image_destroy_image_closure);
-		    
-#endif		    
+			Image_destroy_image_closure);		    
 		}
 		else
 		{
-#if TP_USE_GDK_PIXBUF
-		    clutter_texture_set_from_file(CLUTTER_TEXTURE(self),path,NULL);
-#else
-		    if (!Images::load_texture_from_file(CLUTTER_TEXTURE(self),path))
+		    if (!Images::load_texture(CLUTTER_TEXTURE(self),path))
 		    {
 			GError * error=NULL;
 
@@ -250,7 +128,6 @@ class Image [[ClutterActor*]] actor
 			
 			g_clear_error(&error);
 		    }
-#endif
 		}
 		g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
 	    }
@@ -301,45 +178,7 @@ class Image [[ClutterActor*]] actor
 	
     bool load_from_data(lstring data)
 	[[
-#if TP_USE_GDK_PIXBUF
-	    result = false;
-	    
-	    GdkPixbufLoader * loader = gdk_pixbuf_loader_new();
-	    
-	    if (loader)
-	    {
-		if (gdk_pixbuf_loader_write(loader,(const guchar *)data,data_len,NULL))
-		{
-		    if (gdk_pixbuf_loader_close(loader,NULL))
-		    {	    
-			GdkPixbuf * p = gdk_pixbuf_loader_get_pixbuf(loader);
-			
-			if (p)
-			{
-			    if ( clutter_texture_set_from_rgb_data(CLUTTER_TEXTURE(self),
-				gdk_pixbuf_get_pixels(p),
-				gdk_pixbuf_get_has_alpha(p),
-				gdk_pixbuf_get_width(p),
-				gdk_pixbuf_get_height(p),
-				gdk_pixbuf_get_rowstride(p),
-				gdk_pixbuf_get_has_alpha(p)?4:3,
-				CLUTTER_TEXTURE_NONE,NULL))
-			    {
-				result=true;
-			    }
-			}
-		    }
-		}	
-		else
-		{
-		    gdk_pixbuf_loader_close(loader,NULL);
-		}
-		
-		g_object_unref(G_OBJECT(loader));
-	    }
-#else
-	    result=Images::load_texture_from_data(CLUTTER_TEXTURE(self),data,data_len);
-#endif	    
+	    result=Images::load_texture(CLUTTER_TEXTURE(self),(gpointer)data,data_len);
 	]];
 
     /*

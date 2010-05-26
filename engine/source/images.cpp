@@ -1,505 +1,608 @@
 #include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <sstream>
-
-#include "FreeImage.h"
-//#include "tiffio.h"
-//#include "tiffio.hxx"
+#include <fstream>
 
 #include "common.h"
 #include "images.h"
 #include "profiler.h"
+#include "util.h"
+#include "image_decoders.h"
+
+//-----------------------------------------------------------------------------
+// Set to 1 to get debug output
+
+#define TP_IMAGES_DEBUG         1
+
+//-----------------------------------------------------------------------------
+// Set to 1 to enable caching of images (not hooked up yet)
 
 #define TP_IMAGES_CACHE_ENABLED 0
 
-namespace Images
+//-----------------------------------------------------------------------------
+
+inline void images_debug( const gchar * format, ... )
 {
-
-    //-------------------------------------------------------------------------
-
-    class Cache
-    {
-    public:
-
-        virtual ~Cache();
-
-        struct Entry
-        {
-        public:
-
-            static Entry * make( guchar * pixels, int width, int height, int pitch, int depth, int bgr )
-            {
-                Entry * entry = g_slice_new( Entry );
-
-                entry->pixels = pixels;
-                entry->width = width;
-                entry->height = height;
-                entry->pitch = pitch;
-                entry->depth = depth;
-                entry->bgr = bgr;
-
-                return entry;
-            }
-
-            static void destroy( Entry * entry )
-            {
-                if ( entry )
-                {
-                    g_free( entry->pixels );
-                    g_slice_free( Entry, entry );
-                }
-            }
-
-            guchar *    pixels;
-            int         width;
-            int         height;
-            int         pitch;
-            int         depth;
-            int         bgr;
-
-        private:
-
-            Entry()
-            {}
-
-            Entry( const Entry & )
-            {}
-
-            ~Entry()
-            {}
-        };
-
-        Entry * find( const char * name ) const;
-
-        void insert( const char * name, Entry * entry );
-
-    private:
-
-        typedef std::map< String, Entry * >   EntryMap;
-
-        EntryMap    entries;
-    };
-
-    Cache::~Cache()
-    {
-        for ( EntryMap::iterator it = entries.begin(); it != entries.end(); ++it )
-        {
-            Entry::destroy( it->second );
-        }
-    }
-
-    Cache::Entry * Cache::find( const char * name ) const
-    {
-        EntryMap::const_iterator it = entries.find( name );
-
-        if ( it == entries.end() )
-        {
-            g_debug( "IMAGE CACHE : MISS %s", name );
-
-            return NULL;
-        }
-
-        g_debug( "IMAGE CACHE : HIT %s", name );
-
-        return it->second;
-    }
-
-    void Cache::insert( const char * name, Entry * entry )
-    {
-        g_assert( name );
-        g_assert( entry );
-
-        Entry::destroy( entries[ name ] );
-
-        entries[ name ] = entry;
-
-        g_debug( "IMAGE CACHE : ADDED %s", name );
-    }
-
-    //-------------------------------------------------------------------------
-
-    unsigned char * decode_image( FIBITMAP * image, int & width, int & height, int & pitch, int & depth , int & bgr )
-    {
-        g_assert( image );
-
-        unsigned char * result = NULL;
-
-        // Convert it to either 24 or 32 bits (if it has transparency)
-
-        unsigned int bpp = FreeImage_GetBPP( image );
-
-        FIBITMAP * final_image = image;
-
-        bool unload_final_image = false;
-
-        if ( bpp != 32 && bpp != 24 )
-        {
-            PROFILER( "Images::convert_bpp" );
-
-            FIBITMAP * image2 = NULL;
-
-            if ( !FreeImage_IsTransparent( image ) )
-            {
-                image2 = FreeImage_ConvertTo24Bits( image );
-                bpp = 24;
-            }
-
-            // Use this as a fallback in case we tried to convert it to 24 bits and that
-            // did not work.
-
-            if ( !image2 )
-            {
-                image2 = FreeImage_ConvertTo32Bits( image );
-                bpp = 32;
-            }
-
-            // Bail if the conversion fails
-
-            if ( ! image2 )
-            {
-                g_debug( "FAILED TO CONVERT IMAGE TO %u BITS", bpp );
-                return NULL;
-            }
-
-            final_image = image2;
-
-            unload_final_image = true;
-        }
-
-        // Allocate a buffer and convert the image to raw bits
-
-        width  = FreeImage_GetWidth( final_image );
-        height = FreeImage_GetHeight( final_image );
-        pitch  = FreeImage_GetPitch( final_image );
-        depth  = ( bpp == 32 ? 4 : 3 );
-
-        result = g_new( unsigned char , height * pitch );
-
-        {
-            PROFILER( "Images::convert_to_raw" );
-
-            FreeImage_ConvertToRawBits( ( BYTE * )result, final_image, pitch, bpp, FI_RGBA_BLUE_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_RED_MASK, TRUE );
-
-            // Dump the image
-
-            if ( unload_final_image )
-            {
-                FreeImage_Unload( final_image );
-            }
-        }
-
-#if 1
-        {
-
-            PROFILER( "Images::convert_to_rgba" );
-
-            // Now, convert from BGR(A) to RGB(A) which is what GL wants
-            // Note that clutter also accepts BGR, but its conversion seems
-            // slower than this.
-
-            guchar * line = result;
-            guchar * p;
-            guchar px[3];
-
-
-            for ( int row = 0; row < height; ++row )
-            {
-                p = line;
-
-                for ( int col = 0; col < width; ++col )
-                {
-                    px[0] = p[0];
-                    px[1] = p[1];
-                    px[2] = p[2];
-
-                    p[0] = px[2];
-                    p[1] = px[1];
-                    p[2] = px[0];
-
-                    p += depth;
-                }
-                line += pitch;
-            }
-
-            bgr = 0;
-        }
-
+#if TP_IMAGES_DEBUG
+    va_list args;
+    va_start( args, format );
+    g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
+    va_end( args );
 #else
-
-        bgr = 1;
-
 #endif
+}
+
+//=============================================================================
+// Wraps around an external decoder
+
+class ExternalDecoder : public Images::Decoder
+{
+public:
+
+    ExternalDecoder( TPImageDecoder _decoder, gpointer _decoder_data )
+    :
+        decoder( _decoder ),
+        decoder_data( _decoder_data )
+    {
+        g_assert( decoder );
+    }
+
+    virtual const char * name()
+    {
+        return "External Decoder";
+    }
+
+    virtual int decode( gpointer data, gsize size, TPImage * image )
+    {
+        images_debug( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
+
+        int result = decoder( data, size, image, decoder_data );
+
+        images_debug( "    EXTERNAL DECODER RETURNED %d", result );
+
+        if ( result == TP_IMAGE_DECODE_OK )
+        {
+            images_debug( "      pixels      : %p", image->pixels );
+            images_debug( "      width       : %u", image->width );
+            images_debug( "      height      : %u", image->height );
+            images_debug( "      pitch       : %u", image->pitch );
+            images_debug( "      depth       : %u", image->depth );
+            images_debug( "      bgr         : %u", image->bgr );
+            images_debug( "      free_pixels : %p", image->free_pixels );
+
+            g_assert( image->pixels != NULL );
+            g_assert( image->pitch >= image->width * image->depth );
+            g_assert( image->depth == 3 || image->depth == 4 );
+            g_assert( image->bgr == 0 );
+        }
+        else
+        {
+            g_assert( image->pixels == NULL );
+        }
 
         return result;
     }
 
-
-    unsigned char * decode_image( const void * data, size_t length, int & width, int & height, int & pitch, int & depth , int & bgr )
+    virtual int decode( const char * filename, TPImage * image )
     {
-        PROFILER( "Images::decode_memory" );
+        std::ifstream stream;
 
-        // Wrap the data into a FreeImage memory stream. This does not copy the data
+        stream.open( filename, std::ios_base::in | std::ios_base::binary );
 
-        FIMEMORY * mem = FreeImage_OpenMemory( ( BYTE * )data, length );
-
-        if ( !mem )
+        if ( ! stream.good() )
         {
-            g_debug( "FAILED TO OPEN FREEIMAGE MEMORY STREAM" );
-            return NULL;
+            stream.close();
+            return TP_IMAGE_DECODE_FAILED;
         }
 
-        // Get the image format and bail if it is unknown
+        // We read the first few bytes of the file and pass that to the decoder
+        // to see if it can detect the image format and tell us that it is
+        // supported.
 
-        FREE_IMAGE_FORMAT format = FreeImage_GetFileTypeFromMemory( mem, 0 );
+        // This attempts to optimize by not reading in the whole file before we
+        // know whether the decoder supports it.
 
-        if ( format == FIF_UNKNOWN )
+        static gsize header_size = 128;
+
+        char header[ header_size ];
+
+        stream.read( header, header_size );
+
+        images_debug( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", header_size );
+
+        int r = decoder( header, stream.gcount(), NULL, decoder_data );
+
+        images_debug( "    EXTERNAL DECODER RETURNED %d", r );
+
+        if ( r != TP_IMAGE_SUPPORTED_FORMAT )
         {
-            g_debug( "UNKNOWN IMAGE FORMAT" );
-            FreeImage_CloseMemory( mem );
-            return NULL;
+            stream.close();
+
+            // Return unsupported format so that we will try other decoders
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
         }
 
-        // Load the image
+        // The decoder says that it supports the format, so we load
+        // the whole file into memory and call the decoder again.
 
-        FIBITMAP * image = FreeImage_LoadFromMemory( format, mem, 0 );
+        stream.seekg( 0, std::ios::end );
 
-        // Close the memory stream
-
-        FreeImage_CloseMemory( mem );
-
-        // Bail if the image is no good
-
-        if ( !image )
+        if ( stream.fail() )
         {
-            g_debug( "FAILED TO LOAD IMAGE" );
-            return NULL;
+            stream.close();
+            return TP_IMAGE_DECODE_FAILED;
         }
 
-        unsigned char * result = decode_image( image, width, height, pitch, depth, bgr );
+        std::ios::streampos pos = stream.tellg();
 
-        FreeImage_Unload( image );
+        if ( pos == -1 )
+        {
+            stream.close();
+            return TP_IMAGE_DECODE_FAILED;
+        }
 
-        return result;
+        gchar * buffer = g_new( gchar, pos );
+
+        if ( ! buffer )
+        {
+            stream.close();
+            return TP_IMAGE_DECODE_FAILED;
+        }
+
+        Util::GFreeLater free_buffer( buffer );
+
+        stream.seekg( 0 );
+
+        stream.read( buffer, pos );
+
+        if ( stream.fail() )
+        {
+            stream.close();
+            return TP_IMAGE_DECODE_FAILED;
+        }
+
+        return decode( buffer, pos, image );
     }
 
+private:
 
-    //-------------------------------------------------------------------------
+    TPImageDecoder  decoder;
+    gpointer        decoder_data;
+};
 
-    bool load_texture_from_data( ClutterTexture * texture, FIBITMAP * image, const char * name = NULL, Cache * cache = NULL )
+//=============================================================================
+
+Images::Images()
+:
+    external_decoder( NULL )
+{
+    Decoder * png  = ImageDecoders::make_png_decoder();
+    Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
+    Decoder * tiff = ImageDecoders::make_tiff_decoder();
+
+    // This is the default order of decoders. The most common
+    // type should go first. This order may be affected
+    // dynamically by "hints" - see below.
+
+    decoders.push_back( png );
+    decoders.push_back( jpeg );
+    decoders.push_back( tiff );
+
+    // This maps the last 4 characters of a file name or mime type
+    // to specific decoders. It lets us rearrange the decoders so
+    // that we may hit the correct one sooner.
+
+    hints[ ".tif" ] = tiff;
+    hints[ ".TIF" ] = tiff;
+    hints[ "tiff" ] = tiff;
+    hints[ "TIFF" ] = tiff;
+
+    hints[ ".png" ] = png;
+    hints[ ".PNG" ] = png;
+    hints[ "/png" ] = png;
+    hints[ "/PNG" ] = png;
+
+    hints[ ".jpg" ] = jpeg;
+    hints[ ".JPG" ] = jpeg;
+    hints[ "jpeg" ] = jpeg;
+    hints[ "JPEG" ] = jpeg;
+}
+
+//-----------------------------------------------------------------------------
+
+Images::~Images()
+{
+    while ( ! decoders.empty() )
     {
-        int width;
-        int height;
-        int pitch;
-        int depth;
-        int bgr;
-
-        unsigned char * pixels = decode_image( image, width, height, pitch, depth, bgr );
-
-        if ( !pixels )
-        {
-            return false;
-        }
-
-        PROFILER( "Images::pass_to_clutter" );
-
-        // Give it to clutter
-
-        clutter_texture_set_from_rgb_data(
-            texture,
-            ( const guchar * )pixels,
-            depth == 4,
-            width,
-            height,
-            pitch,
-            depth,
-            bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
-            NULL );
-
-        if ( name && cache )
-        {
-            cache->insert( name, Cache::Entry::make( pixels, width, height, pitch, depth, bgr ) );
-        }
-        else
-        {
-            // Free the pixels
-
-            g_free( pixels );
-        }
-
-        return true;
+        delete decoders.front();
+        decoders.pop_front();
     }
 
-    bool load_texture_from_data( ClutterTexture * texture, const void * data, size_t length, const char * name, Cache * cache )
+    if ( external_decoder )
     {
-        int width;
-        int height;
-        int pitch;
-        int depth;
-        int bgr;
+        delete external_decoder;
+    }
+}
 
-        unsigned char * pixels = decode_image( data, length, width, height, pitch, depth, bgr );
+//-----------------------------------------------------------------------------
 
-        if ( !pixels )
+Images::Images( const Images & )
+{
+    g_assert( false );
+}
+
+//-----------------------------------------------------------------------------
+
+Images::Images * Images::get( bool destroy )
+{
+    static Images * self = NULL;
+
+    if ( ! destroy )
+    {
+        if ( ! self )
         {
-            return false;
+            self = new Images();
         }
 
-        PROFILER( "Images::pass_to_clutter" );
-
-        // Give it to clutter
-
-        clutter_texture_set_from_rgb_data(
-            texture,
-            ( const guchar * )pixels,
-            depth == 4,
-            width,
-            height,
-            pitch,
-            depth,
-            bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
-            NULL );
-
-        if ( name && cache )
+        g_assert( self );
+    }
+    else
+    {
+        if ( self )
         {
-            cache->insert( name, Cache::Entry::make( pixels, width, height, pitch, depth, bgr ) );
+            delete self;
+            self = NULL;
         }
-        else
-        {
-            // Free the pixels
-
-            g_free( pixels );
-        }
-
-        return true;
     }
 
-    //-------------------------------------------------------------------------
+    return self;
+}
 
-    bool load_texture_from_file( ClutterTexture * texture, const char * file_name )
+//-----------------------------------------------------------------------------
+
+void Images::shutdown()
+{
+    Images::get( true );
+}
+
+//-----------------------------------------------------------------------------
+
+void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data )
+{
+    Images * self( Images::get() );
+
+    if ( self->external_decoder )
     {
-        static Cache * cache = NULL;
+        delete self->external_decoder;
+        self->external_decoder = NULL;
+    }
 
-#if TP_IMAGES_CACHE_ENABLED
+    self->external_decoder = new ExternalDecoder( decoder, decoder_data );
+}
 
-        if ( ! cache )
+//-----------------------------------------------------------------------------
+
+Images::DecoderList Images::get_decoders( const char * _hint )
+{
+    Images * self( Images::get() );
+
+    DecoderList result( self->decoders );
+
+    if ( _hint )
+    {
+        String hint( _hint );
+
+        if ( hint.length() >= 4 )
         {
-            cache = new Cache();
-        }
+            hint = hint.substr( hint.length() - 4 , 4 );
 
-        if ( cache )
-        {
-            if ( Cache::Entry * entry = cache->find( file_name ) )
+            HintMap::const_iterator it = self->hints.find( hint );
+
+            // If we find a decoder that matches the hint, we just insert
+            // an instance of it at the head of the list. Yes, this means there
+            // will be two of the same in the list, but chances are that the
+            // first one will succeed, so we don't bother making sure the list
+            // is perfect.
+
+            if ( it != self->hints.end() )
             {
-                clutter_texture_set_from_rgb_data(
-                    texture,
-                    entry->pixels,
-                    entry->depth == 4,
-                    entry->width,
-                    entry->height,
-                    entry->pitch,
-                    entry->depth,
-                    entry->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
-                    NULL );
-
-                return true;
+                result.push_front( it->second );
             }
+
+        }
+    }
+
+    // The external decoder always goes first
+
+    if ( self->external_decoder )
+    {
+        result.push_front( self->external_decoder );
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+TPImage * Images::decode_image( gpointer data, gsize size, const char * content_type )
+{
+    PROFILER( "Images::decode_image/data" );
+
+    TPImage image;
+    memset( &image, 0, sizeof( TPImage ) );
+
+    DecoderList decoders = get_decoders( content_type );
+
+    for ( DecoderList::const_iterator it = decoders.begin(); it != decoders.end(); ++it )
+    {
+        images_debug( "TRYING TO DECODE '%s' USING %s", content_type ? content_type : "<unknown>", ( * it )->name() );
+
+        int r = ( * it )->decode( ( gpointer ) data, size, &image );
+
+        if ( r == TP_IMAGE_UNSUPPORTED_FORMAT )
+        {
+            images_debug( "  UNSUPPORTED" );
+            continue;
         }
 
-#endif
-
-#if 0
-        if ( g_str_has_suffix( file_name, ".tifCC" ) )
+        if ( r == TP_IMAGE_DECODE_FAILED )
         {
-            PROFILER( "Images::load_tif" );
+            images_debug( "  FAILED" );
+            break;
+        }
 
-#if 1
-            // Directly from a file
+        images_debug( "  DECODED" );
 
-            TIFF * tif = TIFFOpen( file_name, "r" );
-#else
-            // Using an input string stream
+        // It was decoded
 
-            gchar * data = NULL;
-            gsize length = 0;
+        g_assert( image.pixels );
+        g_assert( image.depth == 3 || image.depth == 4 );
+        g_assert( image.width * image.depth >= image.pitch );
+        g_assert( image.bgr == 0 || image.bgr == 1 );
 
-            GError * error = NULL;
+        return g_slice_dup( TPImage, &image );
+    }
 
-            if ( !g_file_get_contents( file_name, &data, &length, &error ) )
+    g_warning( "FAILED TO DECODE IMAGE FROM MEMORY" );
+
+    return NULL;
+}
+
+//-----------------------------------------------------------------------------
+
+TPImage * Images::decode_image( const char * filename )
+{
+    PROFILER( "Images::decode_image/file" );
+
+    if ( ! g_file_test( filename, G_FILE_TEST_IS_REGULAR ) )
+    {
+        g_warning( "IMAGE DOES NOT EXIST %s", filename );
+        return NULL;
+    }
+
+    TPImage image;
+    memset( &image, 0, sizeof( TPImage ) );
+
+    DecoderList decoders = get_decoders( filename );
+
+    for ( DecoderList::const_iterator it = decoders.begin(); it != decoders.end(); ++it )
+    {
+        images_debug( "TRYING TO DECODE '%s' USING %s", filename, ( * it )->name() );
+
+        int r = ( * it )->decode( filename, &image );
+
+        if ( r == TP_IMAGE_UNSUPPORTED_FORMAT )
+        {
+            images_debug( "  UNSUPPORTED" );
+            continue;
+        }
+
+        if ( r == TP_IMAGE_DECODE_FAILED )
+        {
+            images_debug( "  FAILED" );
+            break;
+        }
+
+        images_debug( "  DECODED" );
+
+        // It was decoded
+
+        g_assert( image.pixels );
+        g_assert( image.depth == 3 || image.depth == 4 );
+        g_assert( image.width * image.depth >= image.pitch );
+        g_assert( image.bgr == 0 || image.bgr == 1 );
+
+        return g_slice_dup( TPImage, &image );
+    }
+
+    g_warning( "FAILED TO DECODE %s", filename );
+
+    return NULL;
+}
+
+//-----------------------------------------------------------------------------
+
+void Images::destroy_image( TPImage * image )
+{
+    if ( image )
+    {
+        if ( image->pixels )
+        {
+            if ( image->free_pixels )
             {
-                return false;
-            }
-
-            std::istringstream s( String( data, length ) );
-
-
-            TIFF * tif = TIFFStreamOpen( file_name , & s );
-#endif
-
-            if ( !tif )
-            {
-                g_debug( "FAILED FOR %s", file_name );
+                image->free_pixels( image->pixels );
             }
             else
             {
-                g_debug("OPENED %s", file_name );
-
-                uint32 width;
-                uint32 height;
-
-                TIFFGetField( tif, TIFFTAG_IMAGEWIDTH, &width );
-                TIFFGetField( tif, TIFFTAG_IMAGELENGTH, &height );
-
-                size_t npixels = width * height;
-
-                uint32 * raster = (uint32*) _TIFFmalloc( width * height * sizeof( uint32 ) );
-
-                if ( raster )
-                {
-                    g_debug( "GOT RASTER" );
-
-                    if ( TIFFReadRGBAImageOriented( tif, width, height, raster, ORIENTATION_TOPLEFT, 1 ) )
-                    {
-                        g_debug( "DECODED" );
-
-                        PROFILER( "Images::load_texture_from_data" );
-
-                        clutter_texture_set_from_rgb_data(
-                            texture,
-                            (const guchar *)raster,
-                            TRUE,
-                            width,
-                            height,
-                            width * 4,
-                            4,
-                            CLUTTER_TEXTURE_NONE,
-                            NULL );
-
-                        result = true;
-                    }
-                    _TIFFfree(raster);
-                }
-                TIFFClose(tif);
+                free( image->pixels );
             }
         }
-#endif
 
-        PROFILER( "Images::decode_file" );
-
-        FREE_IMAGE_FORMAT f = FreeImage_GetFileType(file_name);
-
-        FIBITMAP * image = FreeImage_Load(f,file_name);
-
-        if ( ! image )
-        {
-            g_warning( "FAILED TO LOAD IMAGE %s", file_name );
-            return false;
-        }
-
-        bool result = load_texture_from_data( texture, image, file_name, cache );
-
-        FreeImage_Unload( image );
-
-        return result;
+        g_slice_free( TPImage, image );
     }
 }
+
+//-----------------------------------------------------------------------------
+
+void Images::set_clutter_texture( ClutterTexture * texture, TPImage * image )
+{
+    PROFILER( "Images::set_clutter_texture" );
+
+    g_assert( texture );
+    g_assert( image );
+
+    clutter_texture_set_from_rgb_data(
+        texture,
+        ( const guchar * ) image->pixels,
+        image->depth == 4,
+        image->width,
+        image->height,
+        image->pitch,
+        image->depth,
+        image->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
+        NULL );
+}
+
+//-----------------------------------------------------------------------------
+
+bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, const char * content_type )
+{
+    TPImage * image = decode_image( data, size, content_type );
+
+    if ( ! image )
+    {
+        return false;
+    }
+
+    set_clutter_texture( texture, image );
+
+    destroy_image( image );
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Images::load_texture( ClutterTexture * texture, const char * filename )
+{
+    TPImage * image = decode_image( filename );
+
+    if ( ! image )
+    {
+        return false;
+    }
+
+    set_clutter_texture( texture, image );
+
+    destroy_image( image );
+
+    return true;
+}
+
+
+
+    //-------------------------------------------------------------------------
+
+ #if TP_IMAGES_CACHE_ENABLED
+
+class Cache
+{
+public:
+
+    virtual ~Cache();
+
+    struct Entry
+    {
+    public:
+
+        static Entry * make( guchar * pixels, int width, int height, int pitch, int depth, int bgr )
+        {
+            Entry * entry = g_slice_new( Entry );
+
+            entry->pixels = pixels;
+            entry->width = width;
+            entry->height = height;
+            entry->pitch = pitch;
+            entry->depth = depth;
+            entry->bgr = bgr;
+
+            return entry;
+        }
+
+        static void destroy( Entry * entry )
+        {
+            if ( entry )
+            {
+                g_free( entry->pixels );
+                g_slice_free( Entry, entry );
+            }
+        }
+
+        guchar *    pixels;
+        int         width;
+        int         height;
+        int         pitch;
+        int         depth;
+        int         bgr;
+
+    private:
+
+        Entry()
+        {}
+
+        Entry( const Entry & )
+        {}
+
+        ~Entry()
+        {}
+    };
+
+    Entry * find( const char * name ) const;
+
+    void insert( const char * name, Entry * entry );
+
+private:
+
+    typedef std::map< String, Entry * >   EntryMap;
+
+    EntryMap    entries;
+};
+
+Cache::~Cache()
+{
+    for ( EntryMap::iterator it = entries.begin(); it != entries.end(); ++it )
+    {
+        Entry::destroy( it->second );
+    }
+}
+
+Cache::Entry * Cache::find( const char * name ) const
+{
+    EntryMap::const_iterator it = entries.find( name );
+
+    if ( it == entries.end() )
+    {
+        images_debug( "IMAGE CACHE : MISS %s", name );
+
+        return NULL;
+    }
+
+    images_debug( "IMAGE CACHE : HIT %s", name );
+
+    return it->second;
+}
+
+void Cache::insert( const char * name, Entry * entry )
+{
+    g_assert( name );
+    g_assert( entry );
+
+    Entry::destroy( entries[ name ] );
+
+    entries[ name ] = entry;
+
+    images_debug( "IMAGE CACHE : ADDED %s", name );
+}
+
+#endif
+

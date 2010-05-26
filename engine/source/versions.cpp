@@ -8,7 +8,6 @@
 #include "cairo/cairo-version.h"
 #include "pango/pango.h"
 #include "clutter/clutter.h"
-#include "FreeImage.h"
 #include "ft2build.h"
 #include "freetype/freetype.h"
 
@@ -32,5 +31,4 @@ void dump_versions()
     g_info( "\tcairo        %d.%d.%d", CAIRO_VERSION_MAJOR, CAIRO_VERSION_MINOR, CAIRO_VERSION_MICRO );
     g_info( "\tpango        %s (%s)", PANGO_VERSION_STRING, pango_version_string() );
     g_info( "\tclutter      %s [%s-%s]", CLUTTER_VERSION_S, CLUTTER_FLAVOUR, CLUTTER_COGL );
-    g_info( "\tfreeimage    %d.%d.%d", FREEIMAGE_MAJOR_VERSION, FREEIMAGE_MINOR_VERSION, FREEIMAGE_RELEASE_SERIAL );
 }
