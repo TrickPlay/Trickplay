@@ -11,6 +11,7 @@
 #define TP_KEY_RIGHT            0xff53  
 #define TP_KEY_DOWN             0xff54  
 #define TP_KEY_RETURN           0xff0d
+#define TP_KEY_ESCAPE		0xff1b
 
 #define TP_KEY_0                0x0030  
 #define TP_KEY_1                0x0031  
