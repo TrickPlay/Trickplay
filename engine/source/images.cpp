@@ -461,6 +461,62 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
         image->depth,
         image->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
         NULL );
+
+#ifndef TP_PRODUCTION
+
+    Images * self( Images::get() );
+
+    ImageInfo info( image );
+
+    ImageMap::iterator it( self->images.find( texture ) );
+
+    if ( it == self->images.end() )
+    {
+        self->images[ texture ] = info;
+
+        g_object_weak_ref( G_OBJECT( texture ), texture_destroyed_notify, self );
+    }
+    else
+    {
+        it->second = info;
+    }
+
+#endif
+
+}
+
+#ifndef TP_PRODUCTION
+
+void Images::texture_destroyed_notify( gpointer data, GObject * instance )
+{
+    ( ( Images * ) data )->images.erase( ( gpointer ) instance );
+}
+
+#endif
+
+void Images::dump()
+{
+#ifndef TP_PRODUCTION
+
+    Images * self( Images::get() );
+
+    gsize total = 0;
+    int i = 1;
+
+    for( ImageMap::const_iterator it = self->images.begin(); it != self->images.end(); ++it, ++i )
+    {
+        gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
+
+        g_info( "  %3d) %ux%u : %1.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
+
+        total += it->second.bytes;
+    }
+
+    g_info( "" );
+    g_info( "%d image(s), %1.2f KB, %1.2f MB", --i, total / 1024.0, total / ( 1024.0 * 1024.0 ) );
+    g_info( "" );
+
+#endif
 }
 
 //-----------------------------------------------------------------------------

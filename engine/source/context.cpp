@@ -351,6 +351,10 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         dump_versions();
     }
+    else if ( !strcmp( command , "images" ) )
+    {
+        Images::dump();
+    }
     else if ( !strcmp( command, "download" ) )
     {
         if ( parameters )
