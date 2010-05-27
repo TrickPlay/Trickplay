@@ -401,7 +401,7 @@ my_plane =
             
                 local start_point = self.group.center
                 
-               	self.group:animate({ duration=50, y_rotation = self.h_speed/30, x_rotation = self.v_speed/20 })
+               	self.group:animate({ duration=50, y_rotation = self.h_speed/20, x_rotation = self.v_speed/30 })
 
                 if self.h_speed > 0 then
                 
@@ -669,7 +669,7 @@ my_plane =
             local explosion =
                 
                 {
-                    image = Clone{ source = assets.explosion2 , opacity = 180 },
+                    image = Clone{ source = assets.explosion2 , opacity = 255 },
                     
                     group = nil,
                     
@@ -1000,7 +1000,7 @@ enemies =
                         local explosion =
                             
                             {
-                                image = Clone{ source = assets.explosion1 , opacity = 180 },
+                                image = Clone{ source = assets.explosion1 , opacity = 255 },
                                 
                                 group = nil,
                                 
