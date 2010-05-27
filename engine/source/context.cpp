@@ -1605,7 +1605,7 @@ ControllerList * TPContext::get_controller_list()
 
 //-----------------------------------------------------------------------------
 
-TPImage * TPContext::load_icon( const gchar * path )
+Image * TPContext::load_icon( const gchar * path )
 {
     PROFILER( "TPContext::load_icon" );
 
@@ -1695,7 +1695,7 @@ TPImage * TPContext::load_icon( const gchar * path )
                     result.pixels = raw_contents;
                     result.free_pixels = g_free;
 
-                    return g_slice_dup( TPImage, &result );
+                    return Image::make( result );
                 }
             }
         }
@@ -1706,13 +1706,13 @@ TPImage * TPContext::load_icon( const gchar * path )
     // If we got here, we need to create the icon file because it doesn't exist,
     // doesn't match or we had a problem reading the information.
 
-    TPImage * image = Images::decode_image( contents, content_length, path );
+    Image * image = Image::decode( contents, content_length, path );
 
     if ( image )
     {
         // The length of the raw image
 
-        gsize length = image->height * image->pitch;
+        gsize length = image->size();
 
         // If the conversion succeeded, we need to write the info file and the
         // raw icon file. Any failure below this point is simply a failure to cache,
@@ -1724,7 +1724,7 @@ TPImage * TPContext::load_icon( const gchar * path )
 
         if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
         {
-            gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width, image->height, image->pitch, image->depth, image->bgr );
+            gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() );
 
             Util::GFreeLater free_info( info );
 
@@ -1732,7 +1732,7 @@ TPImage * TPContext::load_icon( const gchar * path )
             {
                 // Now we save the raw icon
 
-                g_file_set_contents( icon_file_path, ( gchar * )image->pixels, length, NULL );
+                g_file_set_contents( icon_file_path, ( const gchar * )image->pixels(), length, NULL );
             }
         }
 

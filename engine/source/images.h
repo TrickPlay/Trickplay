@@ -5,6 +5,44 @@
 #include "trickplay/image.h"
 #include "common.h"
 
+//=============================================================================
+
+class Image
+{
+public:
+
+    static Image * make( const TPImage & image );
+
+    static Image * decode( gpointer data, gsize size, const gchar * content_type = NULL );
+
+    static Image * decode( const gchar * filename );
+
+    ~Image();
+
+    inline const guchar * pixels() const { return ( const guchar * ) image->pixels; }
+    inline guint width() const { return image->width; }
+    inline guint height() const { return image->height; }
+    inline guint pitch() const { return image->pitch; }
+    inline guint depth() const { return image->depth; }
+    inline bool bgr() const { return image->bgr; }
+
+    inline guint size() const { return image->height * image->pitch; }
+
+private:
+
+    friend class Images;
+
+    Image();
+
+    Image( TPImage * );
+
+    Image( const Image & );
+
+    TPImage * image;
+};
+
+//=============================================================================
+
 class Images
 {
 public:
@@ -17,25 +55,13 @@ public:
     // Decodes an image and gives it to the Clutter texture.
 
     static bool load_texture( ClutterTexture * texture, gpointer data, gsize size, const char * content_type = NULL );
+
     static bool load_texture( ClutterTexture * texture, const char * filename );
 
     //.........................................................................
     // Loads the the decoded image into a Clutter texture.
 
-    static void load_texture( ClutterTexture * texture, TPImage * image );
-
-    //.........................................................................
-    // Decode an image and return the resulting TPImage, which must be freed
-    // with destroy_image. The pixels of a TPImage cannot be stolen - because
-    // there may be a custom function required to free them.
-
-    static TPImage * decode_image( gpointer data, gsize size, const char * content_type = NULL );
-    static TPImage * decode_image( const char * filename );
-
-    //.........................................................................
-    // Destroys a TPImage and frees its pixels.
-
-    static void destroy_image( TPImage * image );
+    static void load_texture( ClutterTexture * texture, const Image * image );
 
     //.........................................................................
     // Destroys the Images singleton and frees all the decoders.
@@ -53,15 +79,40 @@ public:
         virtual int decode( const char * filename, TPImage * image ) = 0;
     };
 
+    //.........................................................................
+    // Prints out a list of all loaded Clutter textures along with their
+    // dimension and size
+
     static void dump();
 
 private:
+
+    friend class Image;
 
     Images();
 
     ~Images();
 
     Images( const Images & );
+
+    //.........................................................................
+    // Loads the the decoded image into a Clutter texture.
+
+    static void load_texture( ClutterTexture * texture, TPImage * image );
+
+    //.........................................................................
+    // Decode an image and return the resulting TPImage, which must be freed
+    // with destroy_image. The pixels of a TPImage cannot be stolen - because
+    // there may be a custom function required to free them.
+
+    static TPImage * decode_image( gpointer data, gsize size, const char * content_type = NULL );
+
+    static TPImage * decode_image( const char * filename );
+
+    //.........................................................................
+    // Destroys a TPImage and frees its pixels.
+
+    static void destroy_image( TPImage * image );
 
     //.........................................................................
     // Gets the singleton or deletes it
