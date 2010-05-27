@@ -101,13 +101,13 @@ public:
         // This attempts to optimize by not reading in the whole file before we
         // know whether the decoder supports it.
 
-        static gsize header_size = 128;
+        static gsize header_size = 64;
 
         char header[ header_size ];
 
         stream.read( header, header_size );
 
-        images_debug( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", header_size );
+        images_debug( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", stream.gcount() );
 
         int r = decoder( header, stream.gcount(), NULL, decoder_data );
 
@@ -169,6 +169,62 @@ private:
     TPImageDecoder  decoder;
     gpointer        decoder_data;
 };
+
+//=============================================================================
+// Wraps around a TPImage to make it a little safer
+
+Image * Image::make( const TPImage & image )
+{
+    return new Image( g_slice_dup( TPImage,  &image ) );
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::decode( gpointer data, gsize size, const gchar * content_type )
+{
+    TPImage * image = Images::decode_image( data, size, content_type );
+
+    return image ? new Image( image ) : NULL;
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::decode( const gchar * filename )
+{
+    TPImage * image = Images::decode_image( filename );
+
+    return image ? new Image( image ) : NULL;
+}
+
+//-----------------------------------------------------------------------------
+
+Image::Image()
+{
+    g_assert( false );
+}
+
+//-----------------------------------------------------------------------------
+
+Image::Image( TPImage * _image )
+:
+    image( _image )
+{
+    g_assert( image );
+}
+
+//-----------------------------------------------------------------------------
+
+Image::Image( const Image & )
+{
+    g_assert( false );
+}
+
+//-----------------------------------------------------------------------------
+
+Image::~Image()
+{
+    Images::destroy_image( image );
+}
 
 //=============================================================================
 
@@ -464,6 +520,10 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
 
 #ifndef TP_PRODUCTION
 
+    // If the image does not exist in our map, we add it and also set
+    // a weak ref so we know when it is destroyed. If it is already in
+    // the map, we just update its information.
+
     Images * self( Images::get() );
 
     ImageInfo info( image );
@@ -485,7 +545,12 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
 
 }
 
+//-----------------------------------------------------------------------------
+
 #ifndef TP_PRODUCTION
+
+// This gets called when an image is destroyed - we just remove it from
+// the map.
 
 void Images::texture_destroyed_notify( gpointer data, GObject * instance )
 {
@@ -493,6 +558,8 @@ void Images::texture_destroyed_notify( gpointer data, GObject * instance )
 }
 
 #endif
+
+//-----------------------------------------------------------------------------
 
 void Images::dump()
 {
@@ -517,6 +584,15 @@ void Images::dump()
     g_info( "" );
 
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+void Images::load_texture( ClutterTexture * texture, const Image * image )
+{
+    g_assert( image );
+
+    load_texture( texture, image->image );
 }
 
 //-----------------------------------------------------------------------------
@@ -555,9 +631,8 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
     return true;
 }
 
+//-----------------------------------------------------------------------------
 
-
-    //-------------------------------------------------------------------------
 
  #if TP_IMAGES_CACHE_ENABLED
 
