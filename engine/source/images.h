@@ -53,6 +53,8 @@ public:
         virtual int decode( const char * filename, TPImage * image ) = 0;
     };
 
+    static void dump();
+
 private:
 
     Images();
@@ -86,7 +88,7 @@ private:
     //.........................................................................
     // Map of "hints" to specific decoders.
 
-    typedef std::map< String, Decoder * >   HintMap;
+    typedef std::map< String, Decoder * > HintMap;
 
     HintMap         hints;
 
@@ -94,6 +96,42 @@ private:
     // The external decoder, if any
 
     Decoder *       external_decoder;
+
+    //.........................................................................
+
+#ifndef TP_PRODUCTION
+
+    // Stuff to keep track of images and display a list
+
+    static void texture_destroyed_notify( gpointer data, GObject * instance );
+
+    struct ImageInfo
+    {
+        ImageInfo()
+        :
+            width( 0 ),
+            height( 0 ),
+            bytes( 0 )
+        {}
+
+        ImageInfo( TPImage * image )
+        :
+            width( image->width ),
+            height( image->height ),
+            bytes( image->pitch * image->height )
+        {}
+
+        guint width;
+        guint height;
+        guint bytes;
+    };
+
+    typedef std::map< gpointer, ImageInfo > ImageMap;
+
+    ImageMap        images;
+
+#endif
+
 };
 
 #endif // _TRICKPLAY_IMAGES_H
