@@ -3,7 +3,6 @@
 
 //-----------------------------------------------------------------------------
 #include "common.h"
-#include "trickplay/image.h"
 #include "notify.h"
 #include "mediaplayers.h"
 #include "controller_list.h"
@@ -43,6 +42,7 @@ class App;
 class Console;
 class Downloads;
 class Installer;
+class Image;
 
 //-----------------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ public:
 
     //.........................................................................
 
-    TPImage * load_icon( const gchar * path );
+    Image * load_icon( const gchar * path );
 
 private:
 
@@ -223,8 +223,6 @@ private:
 
     friend TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data );
     friend void tp_context_remove_controller( TPContext * context, TPController * controller );
-
-    friend void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user);
 
 private:
 
