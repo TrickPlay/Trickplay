@@ -202,13 +202,13 @@ class Image [[ClutterActor*]] actor
 	
                 if ( path )
                 {
-					TPImage * image = context->load_icon( path );
+					Image * image = context->load_icon( path );
 					
 	                if ( image )
 	                {
 	                	Images::load_texture( CLUTTER_TEXTURE( self ), image );
 	                	
-	                	Images::destroy_image( image );
+	                	delete image;
 	
 	                    result = true;
 	                }

@@ -1158,7 +1158,7 @@ function missile_test()
                 
                 if math.abs( da ) > ( 90 * seconds ) then
                 
-                    print( string.format( "%1.2f : %1.2f" , da , 90 * seconds ) )
+--                    print( string.format( "%1.2f : %1.2f" , da , 90 * seconds ) )
                     
                 end
                 
