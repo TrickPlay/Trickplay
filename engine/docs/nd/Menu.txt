@@ -88,6 +88,7 @@ Group: Reference  {
 
       File: app  (/home/pablo/Dropbox/tp/engine/bindings/app.lb)
       File: idle  (/home/pablo/Dropbox/tp/engine/bindings/idle.lb)
+      File: json  (/home/pablo/Dropbox/tp/engine/bindings/json.lb)
       File: mediaplayer  (/home/pablo/Dropbox/tp/engine/bindings/mediaplayer.lb)
       File: profile  (/home/pablo/Dropbox/tp/engine/bindings/profile.lb)
       File: settings  (/home/pablo/Dropbox/tp/engine/bindings/settings.lb)
