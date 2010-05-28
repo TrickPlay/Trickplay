@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include "common.h"
 #include "images.h"
@@ -12,11 +13,6 @@
 // Set to 1 to get debug output
 
 #define TP_IMAGES_DEBUG         1
-
-//-----------------------------------------------------------------------------
-// Set to 1 to enable caching of images (not hooked up yet)
-
-#define TP_IMAGES_CACHE_ENABLED 0
 
 //-----------------------------------------------------------------------------
 
@@ -262,6 +258,14 @@ Images::Images()
     hints[ ".JPG" ] = jpeg;
     hints[ "jpeg" ] = jpeg;
     hints[ "JPEG" ] = jpeg;
+
+#if TP_IMAGE_CACHE_ENABLED
+
+    cache_limit = TP_IMAGE_CACHE_DEFAULT_LIMIT_BYTES;
+
+    cache_size = 0;
+
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -278,6 +282,16 @@ Images::~Images()
     {
         delete external_decoder;
     }
+
+#if TP_IMAGE_CACHE_ENABLED
+
+    for( CacheMap::iterator it = cache.begin(); it != cache.end(); ++it )
+    {
+        destroy_image( it->second.first );
+    }
+
+#endif
+
 }
 
 //-----------------------------------------------------------------------------
@@ -570,6 +584,8 @@ void Images::dump()
     gsize total = 0;
     int i = 1;
 
+    g_info( "Loaded images:" );
+
     for( ImageMap::const_iterator it = self->images.begin(); it != self->images.end(); ++it, ++i )
     {
         gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
@@ -583,6 +599,49 @@ void Images::dump()
     g_info( "%d image(s), %1.2f KB, %1.2f MB", --i, total / 1024.0, total / ( 1024.0 * 1024.0 ) );
     g_info( "" );
 
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+void Images::dump_cache()
+{
+#if TP_IMAGE_CACHE_ENABLED
+
+    Images * self( Images::get() );
+
+    gsize total = 0;
+    int i = 1;
+
+    g_info( "Image cache:" );
+
+    for ( CacheMap::const_iterator it = self->cache.begin(); it != self->cache.end(); ++it, ++i )
+    {
+        gsize bytes = it->second.first->pitch * it->second.first->height;
+
+        g_info( "  %3d) %ux%u : %1.2f KB : %u hit(s) : %s", i, it->second.first->width, it->second.first->height, bytes / 1024.0, it->second.second, it->first.c_str() );
+
+        total += bytes;
+    }
+
+    g_info( "" );
+    g_info( "%d image(s), %1.2f KB, %1.2f MB", --i, total / 1024.0, total / ( 1024.0 * 1024.0 ) );
+    g_info( "" );
+
+#else
+
+    g_info( "Image cache is disabled" );
+
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+void Images::set_cache_limit( guint bytes )
+{
+#if TP_IMAGE_CACHE_ENABLED
+
+        Images::get()->cache_limit = bytes;
 #endif
 }
 
@@ -617,6 +676,25 @@ bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, 
 
 bool Images::load_texture( ClutterTexture * texture, const char * filename )
 {
+
+#if TP_IMAGE_CACHE_ENABLED
+
+    Images * self( Images::get() );
+
+    CacheMap::iterator it = self->cache.find( filename );
+
+    if ( it != self->cache.end() )
+    {
+        load_texture( texture, it->second.first );
+
+        it->second.second++;
+
+        return true;
+    }
+
+#endif
+
+
     TPImage * image = decode_image( filename );
 
     if ( ! image )
@@ -626,114 +704,78 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
 
     load_texture( texture, image );
 
+#if TP_IMAGE_CACHE_ENABLED
+
+    CacheEntry & entry( self->cache[ filename ] );
+
+    entry.first = image;
+    entry.second = 0;
+
+    self->cache_size += image->height * image->pitch;
+
+    self->prune_cache();
+
+#else
+
     destroy_image( image );
+
+#endif
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
 
+#if TP_IMAGE_CACHE_ENABLED
 
- #if TP_IMAGES_CACHE_ENABLED
+#define TPImageSize( t ) ( t->height * t->pitch )
 
-class Cache
+bool Images::prune_sort( const PruneEntry & a, const PruneEntry & b )
 {
-public:
-
-    virtual ~Cache();
-
-    struct Entry
-    {
-    public:
-
-        static Entry * make( guchar * pixels, int width, int height, int pitch, int depth, int bgr )
-        {
-            Entry * entry = g_slice_new( Entry );
-
-            entry->pixels = pixels;
-            entry->width = width;
-            entry->height = height;
-            entry->pitch = pitch;
-            entry->depth = depth;
-            entry->bgr = bgr;
-
-            return entry;
-        }
-
-        static void destroy( Entry * entry )
-        {
-            if ( entry )
-            {
-                g_free( entry->pixels );
-                g_slice_free( Entry, entry );
-            }
-        }
-
-        guchar *    pixels;
-        int         width;
-        int         height;
-        int         pitch;
-        int         depth;
-        int         bgr;
-
-    private:
-
-        Entry()
-        {}
-
-        Entry( const Entry & )
-        {}
-
-        ~Entry()
-        {}
-    };
-
-    Entry * find( const char * name ) const;
-
-    void insert( const char * name, Entry * entry );
-
-private:
-
-    typedef std::map< String, Entry * >   EntryMap;
-
-    EntryMap    entries;
-};
-
-Cache::~Cache()
-{
-    for ( EntryMap::iterator it = entries.begin(); it != entries.end(); ++it )
-    {
-        Entry::destroy( it->second );
-    }
+    return ( a.second.second < b.second.second || ( ( b.second.second == a.second.second ) && ( TPImageSize( a.second.first ) < TPImageSize( b.second.first ) ) ) );
 }
 
-Cache::Entry * Cache::find( const char * name ) const
+void Images::prune_cache()
 {
-    EntryMap::const_iterator it = entries.find( name );
-
-    if ( it == entries.end() )
+    if ( cache_size < cache_limit )
     {
-        images_debug( "IMAGE CACHE : MISS %s", name );
-
-        return NULL;
+        return;
     }
 
-    images_debug( "IMAGE CACHE : HIT %s", name );
+    PruneVector prune;
 
-    return it->second;
-}
+    prune.reserve( cache.size() );
 
-void Cache::insert( const char * name, Entry * entry )
-{
-    g_assert( name );
-    g_assert( entry );
+    for( CacheMap::const_iterator it = cache.begin(); it != cache.end(); ++it )
+    {
+        prune.push_back( PruneEntry( it->first, it->second ) );
+    }
 
-    Entry::destroy( entries[ name ] );
+    std::sort( prune.begin(), prune.end(), prune_sort );
 
-    entries[ name ] = entry;
+    images_debug( "PRUNE LIST:" );
 
-    images_debug( "IMAGE CACHE : ADDED %s", name );
+    for( PruneVector::const_iterator it = prune.begin(); it != prune.end(); ++it )
+    {
+        images_debug( "%d : %u : %s", it->second.second, TPImageSize( it->second.first ) , it->first.c_str() );
+    }
+
+    guint target_limit = cache_limit * 0.85;
+
+    for( PruneVector::const_iterator it = prune.begin(); it != prune.end() && cache_size > target_limit; ++it )
+    {
+        cache.erase( it->first );
+
+        cache_size -= TPImageSize( it->second.first );
+
+        images_debug( "DROPPING %s : %u", it->first.c_str(), TPImageSize( it->second.first ) );
+
+        destroy_image( it->second.first );
+    }
+
+    images_debug( "CACHE SIZE IS NOW %u", cache_size );
 }
 
 #endif
 
+//-----------------------------------------------------------------------------

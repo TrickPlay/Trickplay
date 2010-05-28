@@ -355,25 +355,9 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         Images::dump();
     }
-    else if ( !strcmp( command, "download" ) )
+    else if ( !strcmp( command, "cache" ) )
     {
-        if ( parameters )
-        {
-            Network::Request request( "Mozilla/5.0" );
-
-            request.url = parameters;
-
-            unsigned int id = context->downloads->start_download( "console", request, NULL );
-
-            if ( !id )
-            {
-                g_info( "FAILED TO START DOWNLOAD" );
-            }
-            else
-            {
-                g_info( "STARTED DOWNLOAD %u", id );
-            }
-        }
+        Images::dump_cache();
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
