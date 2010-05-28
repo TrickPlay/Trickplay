@@ -510,9 +510,9 @@ local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px
 local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
 
 local OEMAds = {
-	Image { src = "assets/"..oem_vendor.."-oem-1.tif", opacity = 0 },
-	Image { src = "assets/"..oem_vendor.."-oem-2.tif", opacity = 0 },
-	Image { src = "assets/"..oem_vendor.."-oem-3.tif", opacity = 0 },
+	Image { src = "assets/"..oem_vendor.."-oem-1.png", opacity = 0 },
+	Image { src = "assets/"..oem_vendor.."-oem-2.png", opacity = 0 },
+	Image { src = "assets/"..oem_vendor.."-oem-3.png", opacity = 0 },
 }
 
 screen:add(OEMAds[1],OEMAds[2],OEMAds[3])
