@@ -1093,6 +1093,13 @@ void TPContext::reload_app()
 
 //-----------------------------------------------------------------------------
 
+gboolean delayed_quit( gpointer )
+{
+    clutter_main_quit();
+
+    return FALSE;
+}
+
 void TPContext::quit()
 {
     if ( !is_running )
@@ -1100,7 +1107,14 @@ void TPContext::quit()
         return;
     }
 
-    clutter_main_quit();
+    if ( g_main_depth() > 0 )
+    {
+        clutter_main_quit();
+    }
+    else
+    {
+        g_idle_add( delayed_quit, NULL );
+    }
 }
 
 //-----------------------------------------------------------------------------
