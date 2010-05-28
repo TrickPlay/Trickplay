@@ -1,4 +1,3 @@
-dofile("Json.lua")
 
 Flickr = {
 	logo_url = "assets/flickr0.tif",
@@ -18,9 +17,8 @@ Flickr = {
 			return result
 		end
 	
-		local json = URLRequest( Flickr.license_info_url.."&api_key="..api_key):perform().body
-		json = Json.Decode( json )
-		for i, license in ipairs( json.licenses.license ) do
+		local data = json:parse( URLRequest( Flickr.license_info_url.."&api_key="..api_key):perform().body )
+		for i, license in ipairs( data.licenses.license ) do
 		licenses[license.id] =	{
 											name = license.name,
 											url = license.url,
@@ -63,16 +61,17 @@ Flickr = {
 			url = base_url.."&per_page="..per_page.."&page="..page_num.."&api_key="..api_key,
 			on_complete =
 			function( request , response )
-				local json = Json.Decode( response.body )
 
-				if(0 == #(json.photos.photo)) then
+				local data = json:parse( response.body )
+
+				if(0 == #(data.photos.photo)) then
 					-- Bug in flickr API sometimes returns no results: RESEND
 					print("FLICKR BUG!!  RESEND: ",request.url)
 					request:send()
 					return
 				end
 
-				for i , photo in ipairs( json.photos.photo ) do
+				for i , photo in ipairs( data.photos.photo ) do
 					table.insert(photos, photo)
 				end
 				
