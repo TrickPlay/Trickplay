@@ -27,6 +27,7 @@ TP_FIND_INCLUDE( jpeglib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -96,6 +97,12 @@ set(
     png
     tiff
     tiffxx
+    
+    #--------------
+    # json-glib
+    #--------------
+    
+    json-glib-1.0
 )
 
 #------------------------------------------------------------------------------
@@ -186,6 +193,7 @@ set(
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/stopwatch.lb
+    ${BINDINGS_SRC}/json.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb

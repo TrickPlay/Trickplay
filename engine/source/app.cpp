@@ -51,6 +51,7 @@ extern void luaopen_xml( lua_State * L );
 extern void luaopen_controllers_module( lua_State * L );
 extern void luaopen_mediaplayer_module( lua_State * L );
 extern void luaopen_stopwatch( lua_State * L );
+extern void luaopen_json( lua_State * L );
 
 extern void luaopen_restricted( lua_State * L );
 extern void luaopen_apps( lua_State * L );
@@ -637,6 +638,7 @@ int App::run( const StringSet & allowed_names )
     luaopen_controllers_module( L );
     luaopen_keys( L );
     luaopen_stopwatch( L );
+    luaopen_json( L );
 
     luaopen_mediaplayer_module( L );
 

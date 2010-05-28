@@ -1,0 +1,244 @@
+
+[[
+#include <json-glib/json-glib.h>
+
+#if ! JSON_CHECK_VERSION(0,5,0)
+#error "NEED JSON-GLIB VERSION 0.5.0 OR GREATER"
+#endif
+
+//-----------------------------------------------------------------------------
+// This is a static we use as a light user data to represent a JSON null.
+// Its address will never change, so equality testing works. It is also the 
+// readonly property JSON.null
+
+void * json_null()
+{
+	static char null = 0;
+	
+	return &null;
+}
+
+//-----------------------------------------------------------------------------
+// Forward declaration
+
+void json_to_lua( lua_State * L, JsonNode * node );
+
+//-----------------------------------------------------------------------------
+// Adds a member of an object to a Lua table at the top of the stack
+
+void object_member_to_lua( JsonObject * object, const gchar *member_name, JsonNode * member_node, gpointer user_data)
+{
+	g_assert( object );
+	g_assert( member_name );
+	g_assert( member_node );
+	g_assert( user_data );
+	
+	lua_State * L = ( lua_State * ) user_data;
+	
+	lua_pushstring( L, member_name );
+	json_to_lua( L, member_node );
+	lua_rawset( L, -3 );
+}
+
+//-----------------------------------------------------------------------------
+// Adds an element of an array to a Lua table at the top of the stack
+
+void array_element_to_lua( JsonArray * array, guint index, JsonNode * element_node, gpointer user_data)
+{
+	g_assert( array );
+	g_assert( element_node );
+	g_assert( user_data );
+	
+	lua_State * L = ( lua_State * ) user_data;
+	
+	json_to_lua( L, element_node );
+	lua_rawseti( L, -2, index + 1 );
+}
+
+//-----------------------------------------------------------------------------
+// Converts all the possible types to Lua types
+
+void json_to_lua( lua_State * L, JsonNode * node )
+{	
+	switch( JSON_NODE_TYPE( node ) )
+	{
+		case JSON_NODE_OBJECT:
+		{
+			lua_newtable( L );
+			
+			json_object_foreach_member( json_node_get_object( node ), object_member_to_lua, L );
+			
+			break;
+		}
+		
+		case JSON_NODE_ARRAY:
+		{
+			lua_newtable( L );
+			
+			json_array_foreach_element( json_node_get_array( node ), array_element_to_lua, L );
+			
+			break;
+		}
+		
+		case JSON_NODE_VALUE:
+		{
+			switch( json_node_get_value_type( node ) )
+			{
+				case G_TYPE_BOOLEAN:
+				{
+					lua_pushboolean( L, json_node_get_boolean( node ) );
+					break;
+				}
+				
+				case G_TYPE_DOUBLE:
+				{
+					lua_pushnumber( L, json_node_get_double( node ) );
+					break;
+				}
+				
+				case G_TYPE_INT:
+				case G_TYPE_INT64:
+				{
+					lua_pushinteger( L, json_node_get_int( node ) );
+					break;
+				}
+				
+				case G_TYPE_STRING:
+				{
+					lua_pushstring( L, json_node_get_string( node ) );
+					break;
+				}
+				
+				default:
+				{
+					g_warning( "INVALID JSON VALUE TYPE : %s", json_node_type_name( node ) );
+					lua_pushlightuserdata( L, json_null() );
+					break;
+				}
+			}
+			
+			break;
+		}
+		
+		case JSON_NODE_NULL:
+		{
+			lua_pushlightuserdata( L, json_null() );
+			break;
+		}
+		
+		default:
+		{
+			g_assert( false );
+		}
+	}
+}
+
+]]
+
+/*
+	Global: json
+	
+	This global object lets you convert JSON strings to Lua objects. 
+	You invoke it like this
+	
+	> local t = json:parse( "<some JSON string>" )
+	
+	The parser is strict in that it requires the top level JSON element to be either an array
+	or an object. 
+*/
+
+global json [[void*]]
+{
+	json()
+		[[
+			
+		]];
+		
+	/*
+		Property: null
+		
+		This property is used to represent a null value. It is not the same as Lua's nil, 
+		and is only useful for comparisons. For example:
+		
+		> local j = json:parse( "[null]" )
+		> j[ 1 ] == nil -- False, it is not equal to nil.
+		> j[ 1 ] == json.null -- True, this is a JSON null value. 
+	*/
+		
+	readonly lightuserdata null
+		[[
+			lua_pushlightuserdata( L, json_null() );
+		]];
+		
+	/*
+		Function: parse
+		
+		Decodes the JSON string and returns a Lua table, or nil if decoding failed.
+		
+		Arguments:
+		
+			data - A JSON string to parse
+			
+		Returns:
+		
+			A Lua table - If decoding succeeded.
+						
+			nil - If there was a problem parsing the string.
+	*/
+	
+	table parse( lstring data )
+		[[
+			int top = lua_gettop( L );
+			
+			JsonParser * parser = json_parser_new();
+			
+			GError * error = NULL;
+			
+			if ( ! json_parser_load_from_data( parser, data, data_len, &error ) )
+			{
+				g_warning( "FAILED TO PARSE JSON : %s", error->message );
+				
+				g_clear_error( &error );
+			}	
+			else
+			{
+				JsonNode * root = json_parser_get_root( parser );
+				
+				if ( ! root )
+				{
+					g_warning( "FAILED TO PARSE JSON : INVALID ROOT ELEMENT '%s'", data );
+				}
+				else
+				{				
+					JsonNodeType type = JSON_NODE_TYPE( root );
+
+					if ( type != JSON_NODE_OBJECT && type != JSON_NODE_ARRAY )
+					{
+						g_warning( "FAILED TO PARSE JSON : INVALID ROOT ELEMENT '%s'", data );
+					}
+					else
+					{
+						json_to_lua( L, root );
+					}
+				}
+			}
+			
+			g_object_unref( G_OBJECT( parser ) );
+			
+			int new_top = lua_gettop( L );
+			
+			if ( new_top == top )
+			{
+				lua_pushnil( L );
+			}
+			else if ( new_top != top + 1 )
+			{
+				// We pushed more than one thing
+				
+				g_assert( false );
+			}
+			
+		]];
+}
+
+
