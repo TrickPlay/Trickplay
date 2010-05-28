@@ -5,6 +5,13 @@
 #include "trickplay/image.h"
 #include "common.h"
 
+//-----------------------------------------------------------------------------
+// Set to 1 to enable caching of images
+
+#define TP_IMAGE_CACHE_ENABLED                  0
+
+#define TP_IMAGE_CACHE_DEFAULT_LIMIT_BYTES      ( 20 * 1024 * 1024 )
+
 //=============================================================================
 
 class Image
@@ -85,6 +92,15 @@ public:
 
     static void dump();
 
+    //.........................................................................
+
+    static void set_cache_limit( guint bytes );
+
+    //.........................................................................
+    // Prints out the cache contents, when the cache is enabled
+
+    static void dump_cache();
+
 private:
 
     friend class Image;
@@ -149,6 +165,28 @@ private:
     Decoder *       external_decoder;
 
     //.........................................................................
+
+#if TP_IMAGE_CACHE_ENABLED
+
+    typedef std::pair< TPImage *, guint > CacheEntry;
+
+    typedef std::map< String, CacheEntry > CacheMap;
+
+    CacheMap         cache;
+
+    typedef std::pair< String, CacheEntry > PruneEntry;
+
+    typedef std::vector< PruneEntry > PruneVector;
+
+    static bool prune_sort( const PruneEntry & a, const PruneEntry & b );
+
+    void prune_cache();
+
+    guint cache_limit;
+
+    guint cache_size;
+
+#endif
 
 #ifndef TP_PRODUCTION
 
