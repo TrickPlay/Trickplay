@@ -1,6 +1,9 @@
 
 dofile( "Json.lua" )
 
+--oem_name = "LG"
+oem_name = "Samsung"
+
 STORE_URL="http://store.trickplay.com"
 
 app_list = nil
@@ -129,19 +132,19 @@ ui =
 {
     main =
     {
-        background          = { f = "appshop-all-background-LG.tif",    position = { 0 , 0 } },
-        castle_info         = { f = "featured-app-castle-info.tif",     position = { 978 , 290 + 140 } , name = "castle_info" },
-        zombie_info         = { f = "featured-app-zombie-info.tif",     position = { 52 , 290 + 140 } , name = "zombie_info" },
-        stroke              = { f = "featured-apps-stroke-white.tif",   position = { 48 , 132 } },
-        focus               = { f = "focus-yellow-all.tif" ,            position = { 0 , 0 } }
+        background          = { f = "appshop-all-background-"..oem_name..".jpg",    position = { 0 , 0 } },
+        castle_info         = { f = "featured-app-castle-info.png",     position = { 978 , 290 + 140 } , name = "castle_info" },
+        zombie_info         = { f = "featured-app-zombie-info.png",     position = { 52 , 290 + 140 } , name = "zombie_info" },
+        stroke              = { f = "featured-apps-stroke-white.png",   position = { 48 , 132 } },
+        focus               = { f = "focus-yellow-all.png" ,            position = { 0 , 0 } }
         
     },
     
     app =
     {
-        background          = { f = "background.tif" ,            position = { 0 , 0 }      },
-        buy_off             = { f = "button-free-off.tif",        position = { 96 , 919 }   , name = "buy_off"  , other = "buy_on" },
-        buy_on              = { f = "button-free-on.tif",         position = { 96 , 919 }   , name = "buy_on"   , other = "buy_off" , nav = { u = "menu_off" , r = "screen1" } },
+        background          = { f = "background-"..oem_name..".jpg" ,            position = { 0 , 0 }      },
+        buy_off             = { f = "button-free-off.png",        position = { 96 , 919 }   , name = "buy_off"  , other = "buy_on" },
+        buy_on              = { f = "button-free-on.png",         position = { 96 , 919 }   , name = "buy_on"   , other = "buy_off" , nav = { u = "menu_off" , r = "screen1" } },
         loading             = { f = "button-loading.png",         position = { 96 , 919 }   , name = "loading"  , other = "loading_off" , nav = { u = "menu_off" , r = "screen1" } },
         loading_off         = { f = "button-loading-off.png",     position = { 96 , 919 }   , name = "loading_off" , other = "loading" , nav = { u = "menu_off" , r = "screen1" } },
         play_off            = { f = "button-play-off.png",        position = { 96 , 919 }   , name = "play_off" , other = "play_on"  },
@@ -424,7 +427,7 @@ ui =
             
             local function load_label( image , index )
             
-                local label = Image{ src = "main/tiles/label"..tostring( index )..".tif" , anchor_point = { 230 , 0 } , position = { 960 , 962 - 696 } , opacity = 0 }
+                local label = Image{ src = "main/tiles/label"..tostring( index )..".png" , anchor_point = { 230 , 0 } , position = { 960 , 962 - 696 } , opacity = 0 }
                 
                 image.extra.label = label
                 
@@ -436,7 +439,7 @@ ui =
             
             local x = 0
             
-            local image = self:prepare_image( base .."/tiles" , { f = "1.tif" , position = { 0 , 0 } } , false , true )
+            local image = self:prepare_image( base .."/tiles" , { f = "1.png" , position = { 0 , 0 } } , false , true )
             
             image.anchor_point = { image.w / 2 , 0 }
             
@@ -459,7 +462,7 @@ ui =
             
             for i = 2 , 11 do
             
-                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".tif" , position = { lx , 31 } } , false , true )
+                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".png" , position = { lx , 31 } } , false , true )
             
                 image.anchor_point = { image.w / 2 , 0 }
                 
@@ -480,7 +483,7 @@ ui =
 
             for i = 12 , 20 do
             
-                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".tif" , position = { rx , 31 } } , false , true )
+                image = self:prepare_image( base .."/tiles" , { f = tostring( i )..".png" , position = { rx , 31 } } , false , true )
             
                 image.anchor_point = { image.w / 2 , 0 }
                 
