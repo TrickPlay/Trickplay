@@ -2,6 +2,7 @@
 #define _TRICKPLAY_UTIL_H
 //-----------------------------------------------------------------------------
 #include <cstring>
+#include <iostream>
 //-----------------------------------------------------------------------------
 #include "common.h"
 //-----------------------------------------------------------------------------
@@ -64,6 +65,52 @@ protected:
 private:
 
     gint ref_count;
+};
+
+//=============================================================================
+// An input stream that does not copy the buffer
+
+class imstream : private std::streambuf, public std::istream
+{
+
+public:
+
+    imstream( char * buf, size_t size )
+    :
+        std::istream( this )
+    {
+        setg( buf, buf, buf + size );
+    }
+
+protected:
+
+    virtual std::streampos seekpos( std::streampos sp, std::ios_base::openmode which = ios_base::in | ios_base::out )
+    {
+        if ( which & std::ios_base::in )
+        {
+            char * b = eback();
+            char * p = b + sp;
+
+            if ( p >= b && p < egptr() )
+            {
+                setg( b, p, egptr() );
+                return p - b;
+            }
+        }
+
+        return -1;
+    }
+
+    virtual std::streampos seekoff( std::streamoff off, std::ios_base::seekdir way, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out )
+    {
+        switch ( way )
+        {
+            case std::ios_base::beg: return seekpos( off, which );
+            case std::ios_base::cur: return seekpos( gptr() + off - eback(), which );
+            case std::ios_base::end: return seekpos( egptr() + off - eback(), which );
+            default: return -1;
+        }
+    }
 };
 
 //-----------------------------------------------------------------------------
