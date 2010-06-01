@@ -311,6 +311,7 @@ add_library(
     ${ENGINE_SRC}/source/installer.cpp
     ${ENGINE_SRC}/source/versions.cpp
     ${ENGINE_SRC}/source/image_decoders.cpp
+    ${ENGINE_SRC}/source/signature.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
