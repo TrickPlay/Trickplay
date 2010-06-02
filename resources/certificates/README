@@ -1,0 +1,14 @@
+
+# Create a private key
+# (You can encrypt the key with -des3 and provide a password)
+
+openssl genrsa -out my.key 1024
+
+# Create a CSR
+
+openssl req -new -key my.key -out my.csr
+
+# Give the CSR to trickplay
+# TrickPlay creates the certificate, signed by the TrickPlay CA
+
+openssl x509 -req -days 365 -CA trickplay-ca.crt -CAkey trickplay-ca.key -CAserial trickplay-ca.srl -in my.csr -out my.crt 
