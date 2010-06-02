@@ -12,7 +12,7 @@ namespace Signature
         typedef std::list< Info > List;
 
         String  fingerprint;
-        String  common_name;
+        String  subject_name;
     };
 
     // A TRUE result means that either the file has no signatures, or that all
