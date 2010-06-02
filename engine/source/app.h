@@ -49,6 +49,8 @@ public:
 
     struct Metadata
     {
+        typedef std::list< Metadata > List;
+
         Metadata() : release( 0 ) {}
 
         String path;

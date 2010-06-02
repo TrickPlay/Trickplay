@@ -124,11 +124,11 @@ global apps [[Apps*]]
     
     table get_all()
         [[
-            SystemDatabase::AppList list = self->get_context()->get_db()->get_all_apps();
+            SystemDatabase::AppInfo::List list = self->get_context()->get_db()->get_all_apps();
                         
             lua_newtable(L);
             
-            for ( SystemDatabase::AppList::const_iterator it = list.begin(); it != list.end(); ++it )
+            for ( SystemDatabase::AppInfo::List::const_iterator it = list.begin(); it != list.end(); ++it )
             {
                 lua_pushstring(L,it->id.c_str());
 
