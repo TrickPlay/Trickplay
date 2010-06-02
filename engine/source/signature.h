@@ -21,11 +21,11 @@ namespace Signature
     // FALSE means that something went wrong checking the signatures, or that
     // at least one of them is invalid.
 
-    bool get_signatures( const gchar * filename, Info::List & signatures );
+    bool get_signatures( const gchar * filename, Info::List & signatures, gsize * signature_length = NULL );
 
-    bool get_signatures( gpointer data, gsize size, Info::List & signatures );
+    bool get_signatures( gpointer data, gsize size, Info::List & signatures, gsize * signature_length = NULL );
 
-    bool get_signatures( std::istream & stream, Info::List & signatures );
+    bool get_signatures( std::istream & stream, Info::List & signatures, gsize * signature_length = NULL );
 };
 
 #endif // _TRICKPLAY_SIGNATURE_H
