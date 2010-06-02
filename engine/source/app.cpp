@@ -293,7 +293,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
         return;
     }
 
-    std::map< String, std::list<Metadata> > apps;
+    std::map< String, Metadata::List > apps;
 
     //.........................................................................
     // First scan app sources
@@ -393,22 +393,19 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
     {
         //.........................................................................
         // Now we have a map of app ids - each entry has a list of versions found
+        // We are going to gather the latest version of each into a final list.
 
-        // We delete all the apps from the database
+        Metadata::List final_list;
 
-        sysdb->delete_all_apps();
-
-        std::map< String, std::list<Metadata> >::iterator it = apps.begin();
+        std::map< String, Metadata::List >::iterator it = apps.begin();
 
         for ( ; it != apps.end(); ++it )
         {
             if ( it->second.size() > 1 )
             {
-                // We move the list to a new list and clear the original
+                // Get a reference to the list, so it is easier to deal with
 
-                const std::list<Metadata> versions( it->second );
-
-                it->second.clear();
+                const Metadata::List & versions( it->second );
 
                 // Now, we point an iterator to the first one in the list. If one of the
                 // others has a greater release number, we point the iterator at it.
@@ -416,9 +413,9 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
                 // When we are done, this iterator will point to the app metadata
                 // with the greatest release number.
 
-                std::list<Metadata>::const_iterator latest = versions.begin();
+                Metadata::List::const_iterator latest = versions.begin();
 
-                for ( std::list<Metadata>::const_iterator vit = ++( versions.begin() ); vit != versions.end(); ++vit )
+                for ( Metadata::List::const_iterator vit = ++( versions.begin() ); vit != versions.end(); ++vit )
                 {
                     if ( vit->release > latest->release )
                     {
@@ -426,21 +423,19 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
                     }
                 }
 
-                // Finally, we put the one pointed to by the iterator back in the map's list
+                // Now, we put the latest one into the final list
 
-                it->second.push_back( *latest );
+                final_list.push_back( *latest );
             }
+            else
+            {
+                // The list only has one element
 
-            const Metadata & md = it->second.front();
-
-            sysdb->insert_app( md.id, md.name, md.path, md.release, md.version );
-
-            g_info( "ADDING %s (%s/%d) @ %s",
-                    md.id.c_str(),
-                    md.version.c_str(),
-                    md.release,
-                    md.path.c_str() );
+                final_list.push_back( it->second.front() );
+            }
         }
+
+        sysdb->update_all_apps( final_list );
     }
 }
 

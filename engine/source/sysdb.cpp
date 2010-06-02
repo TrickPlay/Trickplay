@@ -377,7 +377,7 @@ bool SystemDatabase::delete_all_apps()
     return select.ok();
 }
 
-bool SystemDatabase::insert_app( const String & id, const String & name, const String & path, int release, const String & version, const StringSet & fingerprints )
+bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet & fingerprints )
 {
     dirty = true;
 
@@ -394,11 +394,11 @@ bool SystemDatabase::insert_app( const String & id, const String & name, const S
     }
 
     SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints) values (?1,?2,?3,?4,?5,?6);" );
-    insert.bind( 1, id );
-    insert.bind( 2, path );
-    insert.bind( 3, name );
-    insert.bind( 4, release );
-    insert.bind( 5, version );
+    insert.bind( 1, metadata.id );
+    insert.bind( 2, metadata.path );
+    insert.bind( 3, metadata.name );
+    insert.bind( 4, metadata.release );
+    insert.bind( 5, metadata.version );
     insert.bind( 6, fingerprint_list );
 
     insert.step();
@@ -416,14 +416,14 @@ String SystemDatabase::get_app_path( const String & id )
     return String();
 }
 
-SystemDatabase::AppList SystemDatabase::get_all_apps()
+SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    AppList result;
+    AppInfo::List result;
 
     SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
     while ( select.step_row() )
     {
-        App app;
+        AppInfo app;
         app.id = select.get_string( 0 );
         app.path = select.get_string( 1 );
         app.name = select.get_string( 2 );
@@ -442,4 +442,54 @@ SystemDatabase::AppList SystemDatabase::get_all_apps()
         result.push_back( app );
     }
     return result;
+}
+
+void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
+{
+    // First, gather a set of all existing app ids
+
+    StringSet existing_ids;
+
+    SQLite::Statement select_ids( db, "select id from apps" );
+
+    while ( select_ids.step_row() )
+    {
+        existing_ids.insert( select_ids.get_string( 0 ) );
+    }
+
+    // Now, iterate over the apps passed in. Update each one and
+    // take it out of the existing ids.
+
+    for ( App::Metadata::List::const_iterator it = apps.begin(); it != apps.end(); ++it )
+    {
+        insert_app( *it );
+
+        bool existed = existing_ids.erase( it->id );
+
+        g_info( "%s %s (%s/%d) @ %s",
+                existed ? "UPDATING" : "ADDING",
+                it->id.c_str(),
+                it->version.c_str(),
+                it->release,
+                it->path.c_str() );
+    }
+
+    // If there are any remaining, they should be deleted
+
+    if ( ! existing_ids.empty() )
+    {
+        dirty = true;
+
+        SQLite::Statement del( db, "delete from apps where id = ?1" );
+
+        for ( StringSet::const_iterator it = existing_ids.begin(); it != existing_ids.end(); ++it )
+        {
+            del.bind( 1, *it );
+            del.step();
+            del.reset();
+            del.clear();
+
+            g_info( "DELETING %s", it->c_str() );
+        }
+    }
 }

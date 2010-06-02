@@ -3,6 +3,8 @@
 
 #include "common.h"
 #include "db.h"
+#include "app.h"
+
 //-----------------------------------------------------------------------------
 #define TP_DB_FIRST_PROFILE_NAME    "TrickPlay User"
 
@@ -50,9 +52,14 @@ public:
     //.....................................................................
     // Apps
 
-    struct App
+    struct AppInfo
     {
-        App() : release( 0 ) {}
+        typedef std::list<AppInfo> List;
+
+        AppInfo()
+        :
+            release( 0 )
+        {}
 
         String      id;
         String      path;
@@ -62,13 +69,12 @@ public:
         StringSet   fingerprints;
     };
 
-    typedef std::list<App> AppList;
-
     int get_app_count();
     bool delete_all_apps();
-    bool insert_app( const String & id, const String & name, const String & path, int release, const String & version, const StringSet & fingerprints = StringSet() );
+    bool insert_app( const App::Metadata & metadata, const StringSet & fingerprints = StringSet() );
     String get_app_path( const String & id );
-    AppList get_all_apps();
+    AppInfo::List get_all_apps();
+    void update_all_apps( const App::Metadata::List & apps );
 
 private:
 
