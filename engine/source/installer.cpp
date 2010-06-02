@@ -789,15 +789,12 @@ bool Installer::complete_install( guint id )
         return false;
     }
 
-    // TODO: We also need to store the fingerprints we found
-
-    if ( ! context->get_db()->insert_app( metadata.id, metadata.path, metadata.release, metadata.version ) )
+    if ( ! context->get_db()->insert_app( metadata.id, metadata.path, metadata.release, metadata.version, info.fingerprints ) )
     {
         g_warning( "FAILED TO UPDATE SYSTEM DATABASE FOR %s", metadata.id.c_str() );
 
         return false;
     }
-
 
     info_map.erase( it );
 

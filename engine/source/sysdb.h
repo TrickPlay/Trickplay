@@ -64,7 +64,7 @@ public:
 
     int get_app_count();
     bool delete_all_apps();
-    bool insert_app( const String & id, const String & path, int release, const String & version );
+    bool insert_app( const String & id, const String & path, int release, const String & version, const StringSet & fingerprints = StringSet() );
     String get_app_path( const String & id );
     AppList get_all_apps();
 
