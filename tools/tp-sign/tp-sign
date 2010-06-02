@@ -1,0 +1,329 @@
+#!/usr/bin/env python
+
+#------------------------------------------------------------------------------
+# Given an input file or stdin, this tool signs it.
+#
+#   Options:
+#   -r,--remove     Removes all signatures before it signs or lists
+#   -s,--sign       (Default) Signs the input
+#   -l,--list       Lists and verifies all signatures after removing and signing
+#
+#   -c,--cert       The filename of the certificate used to sign (PEM)
+#   -k,--key        The filename of the private key used to sign (PEM)
+#   -p,--password   The password for the private key if any
+#------------------------------------------------------------------------------
+
+
+import M2Crypto
+import struct
+import base64
+import cStringIO
+import sys
+
+from optparse import OptionParser
+
+TP_SIGN_MARKER = "tp-sign"
+TP_SIGN_VERSION = 1
+
+#------------------------------------------------------------------------------
+# Takes the data to sign, the certificate, private key and private
+# key password (all strings).
+# Returns the entire signature block ready to be appended to the
+# data and written out.
+
+def sign( in_data , in_cert , in_pkey , in_pkey_password = None ):
+    
+    def password_callback( * args ):
+        
+        return in_pkey_password
+
+    try:
+        
+        cert = M2Crypto.X509.load_cert_string( in_cert, M2Crypto.X509.FORMAT_PEM )
+    
+        cert = cert.as_pem()
+        
+    except:
+        
+        sys.exit( "FAILED TO LOAD CERTIFICATE" )
+        
+    
+    try:
+        
+        key = M2Crypto.EVP.load_key_string( in_pkey , password_callback )
+        
+    except:
+        
+        sys.exit( "FAILED TO LOAD PRIVATE KEY" )
+        
+    
+    try:
+        
+        key.sign_init()
+    
+        key.sign_update( in_data )
+    
+        signature = key.sign_final()
+        
+    except:
+        
+        sys.exit( "FAILED TO SIGN" )
+
+    output = cStringIO.StringIO()
+
+    # The signature (binary)    
+    output.write( signature )
+    
+    # The cert (pem)
+    output.write( cert )
+    
+    # The length of the signature and cert as little endian
+    # unsigned 32 bit ints    
+    output.write( struct.pack( "<LL" , len( signature ) , len( cert ) ) )
+    
+    # The marker
+    output.write( TP_SIGN_MARKER )
+
+    # The signature version as a single byte
+    output.write( struct.pack( "B" , TP_SIGN_VERSION ) )
+    
+    return output.getvalue()
+
+#------------------------------------------------------------------------------
+# Returns the original data without any signature blocks
+
+def remove_signatures( in_data ):
+
+    data = in_data
+    
+    while len( data ) >= 16:
+        
+        marker = data[ -8 : -1 ]
+        
+        if marker != TP_SIGN_MARKER:
+            
+            break
+        
+        version = ord( data[ -1 ] )
+        
+        if version != TP_SIGN_VERSION:
+            
+            print( "Unrecognized signature version %d" % version )
+            
+            break
+        
+
+        ( signature_size , cert_size ) = struct.unpack( "<LL" , data[ -16 : -8 ] )
+        
+        data = data[ : - ( 16 + signature_size + cert_size ) ]
+
+    return data                    
+
+#------------------------------------------------------------------------------
+# Prints and verifies all the signatures in data
+
+def list_and_verify( in_data ):
+    
+    found = 0
+    
+    data = in_data
+    
+    while len( data ) >= 16:
+        
+        marker = data[ -8 : -1 ]
+        
+        if marker != TP_SIGN_MARKER:
+            
+            break
+        
+        version = ord( data[ -1 ] )
+        
+        if version != TP_SIGN_VERSION:
+            
+            print( "Unrecognized signature version %d" % version )
+            
+            break
+        
+        found = found + 1        
+
+        ( signature_size , cert_size ) = struct.unpack( "<LL" , data[ -16 : -8 ] )
+        
+        signature = data[ - ( 16 + signature_size + cert_size ) : - ( 16 + cert_size ) ]
+        
+        cert = data[ - ( 16 + cert_size ) : -16 ]
+
+        data = data[ : - ( 16 + signature_size + cert_size ) ]
+                    
+        cert = M2Crypto.X509.load_cert_string( cert, M2Crypto.X509.FORMAT_PEM )
+        
+        pub_key = cert.get_pubkey()
+        pub_key.verify_init()
+        pub_key.verify_update( data )
+        
+        r = pub_key.verify_final( signature )
+
+        if r == 1:
+            
+            print( "SIGNATURE IS GOOD" )
+            
+        else:
+        
+            print( "SIGNATURE IS INVALID" )
+            
+        print( "  FINGERPRINT  : %s" % cert.get_fingerprint( md = "sha1" ) )
+        print( "  SUBJECT NAME : %s" % cert.get_subject() )
+       
+    if found == 0:
+        
+        print( "NO SIGNATURES FOUND" )
+    
+    
+#------------------------------------------------------------------------------
+# Read and return the contents of a file
+
+def read_file( filename ):
+    
+    try:
+        
+        f = open( filename , "rb" )
+        result = f.read()
+        f.close()
+        
+    except:
+        
+        sys.exit( "FAILED TO READ '%s'" % filename )
+        
+    return result
+    
+#------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+
+    parser = OptionParser( usage = "Usage: %prog [options] input_file" )
+    
+    parser.add_option( "-s" , "--sign"      , dest = "sign"     , action = "store_true" , help = "Sign the input file" )
+    parser.add_option( "-r" , "--remove"    , dest = "remove"   , action = "store_true" , help = "Remove all signatures" )
+    parser.add_option( "-l" , "--list"      , dest = "list"     , action = "store_true" , help = "List and verify signatures" )
+
+    parser.add_option( "-c" , "--cert"      , dest = "cert"     , help = "Certificate in PEM format" , metavar = "CERT" )
+    parser.add_option( "-k" , "--key"       , dest = "key"      , help = "Private key in PEM format" , metavar = "KEY" )
+    parser.add_option( "-p" , "--password"  , dest = "pwd"      , help = "Private key password" , metavar = "PASSWORD" )
+    parser.add_option( "-o" , "--output"    , dest = "output"   , help = "Output file name" , metavar = "FILE" )
+    
+    ( options , args ) = parser.parse_args()
+    
+    #..........................................................................
+    # Make --sign the default if no other action was given
+    
+    if options.remove is None and options.list is None:
+        
+        options.sign = True
+    
+    #..........................................................................
+
+    source_filename = None
+    output_filename = None
+    
+    source_data = None
+    
+    #..........................................................................
+    # No input file, so we process stdin
+    
+    if len( args ) == 0:
+        
+        source_data = sys.stdin.read()
+        
+    elif len( args ) == 1:
+        
+        source_filename = args[ 0 ]
+        source_data = read_file( source_filename )
+            
+    else:
+        
+        sys.exit( "Too many input files." )
+        
+    
+    #..........................................................................
+    # Set the output file name. It could end up as None, which means stdout
+    
+    output_filename = options.output
+        
+    if output_filename is None:
+        
+        output_filename = source_filename
+        
+        
+    #..........................................................................
+    # First, we remove all signatures
+    
+    if options.remove:
+        
+        source_data = remove_signatures( source_data )
+        
+        if not options.sign:
+            
+            try:
+                
+                output = sys.stdout
+                
+                if output_filename is not None:
+                    
+                    output = open( output_filename , "wb" )
+                    
+                output.write( source_data )
+                
+                if output != sys.stdout:
+                    
+                    output.close()
+                    
+            except:
+                
+                sys.exit( "FAILED TO WRITE OUTPUT" )
+            
+    
+    #..........................................................................
+    # Now, we sign
+    
+    if options.sign:
+        
+        if options.cert is None:
+            
+            sys.exit( "Missing CERT filename" )
+            
+        if options.key is None:
+            
+            sys.exit( "Missing KEY filename" )
+
+        cert = read_file( options.cert )
+        
+        key = read_file( options.key )
+        
+        sig_block = sign( source_data , cert , key , options.pwd )
+        
+        source_data = source_data + sig_block
+        
+        try:
+            
+            output = sys.stdout
+            
+            if output_filename is not None:
+                
+                output = open( output_filename , "wb" )
+                
+            output.write( source_data )
+            
+            if output != sys.stdout:
+                
+                output.close()
+                
+        except:
+            
+            sys.exit( "FAILED TO WRITE OUTPUT" )
+        
+    #..........................................................................
+    # Now we list
+    
+    if options.list:
+        
+        list_and_verify( source_data )
+        
