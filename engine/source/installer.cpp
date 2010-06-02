@@ -789,7 +789,7 @@ bool Installer::complete_install( guint id )
         return false;
     }
 
-    if ( ! context->get_db()->insert_app( metadata.id, metadata.path, metadata.release, metadata.version, info.fingerprints ) )
+    if ( ! context->get_db()->insert_app( metadata.id, metadata.name, metadata.path, metadata.release, metadata.version, info.fingerprints ) )
     {
         g_warning( "FAILED TO UPDATE SYSTEM DATABASE FOR %s", metadata.id.c_str() );
 

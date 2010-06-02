@@ -54,17 +54,19 @@ public:
     {
         App() : release( 0 ) {}
 
-        String  id;
-        String  path;
-        int     release;
-        String  version;
+        String      id;
+        String      path;
+        String      name;
+        int         release;
+        String      version;
+        StringSet   fingerprints;
     };
 
     typedef std::list<App> AppList;
 
     int get_app_count();
     bool delete_all_apps();
-    bool insert_app( const String & id, const String & path, int release, const String & version, const StringSet & fingerprints = StringSet() );
+    bool insert_app( const String & id, const String & name, const String & path, int release, const String & version, const StringSet & fingerprints = StringSet() );
     String get_app_path( const String & id );
     AppList get_all_apps();
 

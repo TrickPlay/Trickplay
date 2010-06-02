@@ -15,6 +15,7 @@ static const char * schema_create =
 
     "create table apps( id TEXT PRIMARY KEY NOT NULL,"
     "                   path TEXT NOT NULL, "
+    "                   name TEXT,"
     "                   release INTEGER NOT NULL,"
     "                   version TEXT NOT NULL,"
     "                   fingerprints TEXT );"
@@ -376,7 +377,7 @@ bool SystemDatabase::delete_all_apps()
     return select.ok();
 }
 
-bool SystemDatabase::insert_app( const String & id, const String & path, int release, const String & version, const StringSet & fingerprints )
+bool SystemDatabase::insert_app( const String & id, const String & name, const String & path, int release, const String & version, const StringSet & fingerprints )
 {
     dirty = true;
 
@@ -392,12 +393,13 @@ bool SystemDatabase::insert_app( const String & id, const String & path, int rel
         fingerprint_list += *it;
     }
 
-    SQLite::Statement insert( db, "insert or replace into apps (id,path,release,version,fingerprints) values (?1,?2,?3,?4,?5);" );
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints) values (?1,?2,?3,?4,?5,?6);" );
     insert.bind( 1, id );
     insert.bind( 2, path );
-    insert.bind( 3, release );
-    insert.bind( 4, version );
-    insert.bind( 5, fingerprint_list );
+    insert.bind( 3, name );
+    insert.bind( 4, release );
+    insert.bind( 5, version );
+    insert.bind( 6, fingerprint_list );
 
     insert.step();
     return insert.ok();
@@ -418,14 +420,25 @@ SystemDatabase::AppList SystemDatabase::get_all_apps()
 {
     AppList result;
 
-    SQLite::Statement select( db, "select id,path,release,version from apps;" );
+    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
     while ( select.step_row() )
     {
         App app;
         app.id = select.get_string( 0 );
         app.path = select.get_string( 1 );
-        app.release = select.get_int( 2 );
-        app.version = select.get_string( 3 );
+        app.name = select.get_string( 2 );
+        app.release = select.get_int( 3 );
+        app.version = select.get_string( 4 );
+
+        gchar * * fingerprints = g_strsplit( select.get_string( 5 ).c_str(), ",", 0 );
+
+        for ( gchar * * f = fingerprints; *f; ++f )
+        {
+            app.fingerprints.insert( String( *f ) );
+        }
+
+        g_strfreev( fingerprints );
+
         result.push_back( app );
     }
     return result;
