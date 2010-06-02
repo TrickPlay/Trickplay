@@ -796,6 +796,8 @@ bool Installer::complete_install( guint id )
         return false;
     }
 
+    context->get_db()->add_app_to_current_profile( metadata.id );
+
     info_map.erase( it );
 
     return true;

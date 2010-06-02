@@ -46,7 +46,9 @@ public:
     };
 
     int create_profile( const String & name, const String & pin );
+
     Profile get_current_profile();
+
     Profile get_profile( int id );
 
     //.....................................................................
@@ -70,13 +72,35 @@ public:
     };
 
     int get_app_count();
-    bool delete_all_apps();
+
     bool insert_app( const App::Metadata & metadata, const StringSet & fingerprints = StringSet() );
+
     String get_app_path( const String & id );
+
     AppInfo::List get_all_apps();
+
     void update_all_apps( const App::Metadata::List & apps );
 
+    //.....................................................................
+    // Profile Apps
+
+    bool add_app_to_all_profiles( const String & app_id );
+
+    bool add_app_to_current_profile( const String & app_id );
+
+    AppInfo::List get_apps_for_current_profile();
+
+    bool remove_app_from_all_profiles( const String & app_id );
+
+    bool remove_app_from_current_profile( const String & app_id );
+
+    std::list<int> get_profiles_for_app( const String & app_id );
+
 private:
+
+    AppInfo::List get_app_list( SQLite::Statement * select );
+
+    bool delete_all_apps();
 
     bool insert_initial_data();
 

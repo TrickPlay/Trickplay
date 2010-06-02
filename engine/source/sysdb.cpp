@@ -10,6 +10,7 @@
 static const char * schema_create =
 
     "create table generic( key TEXT PRIMARY KEY NOT NULL , value TEXT );"
+
     "create table profiles( id INTEGER PRIMARY KEY AUTOINCREMENT,"
     "                       name TEXT,pin TEXT);"
 
@@ -19,6 +20,40 @@ static const char * schema_create =
     "                   release INTEGER NOT NULL,"
     "                   version TEXT NOT NULL,"
     "                   fingerprints TEXT );"
+
+    "create table profile_apps( profile_id INTEGER NOT NULL,"
+    "                           app_id TEXT NOT NULL,"
+    "                           PRIMARY KEY( profile_id, app_id) );"
+
+    // When a profile is deleted, all of its apps are also deleted
+
+    "create trigger profiles_profile_apps_delete after delete on profiles"
+    "   begin"
+    "       delete from profile_apps where profile_id = OLD.id; "
+    "   end;"
+
+    // When an app is deleted, it is removed from all profiles
+
+    "create trigger apps_profile_apps_delete after delete on apps"
+    "   begin"
+    "       delete from profile_apps where app_id = OLD.id;"
+    "   end;"
+
+#if 0
+    // When an app is inserted, we add it to all profiles - if it belongs to none
+    "create trigger apps_profile_apps_insert after insert on apps"
+    "   when ( select 1 from profile_apps where app_id = NEW.id limit 1 ) IS NULL"
+    "   begin"
+    "       insert into profile_apps ( profile_id , app_id ) select id , NEW.id from profiles;"
+    "   end;"
+#endif
+
+    // When an new profile is created, it gets all apps
+
+    "create trigger profiles_profile_apps_insert after insert on profiles"
+    "   begin"
+    "       insert into profile_apps ( profile_id , app_id ) select NEW.id , id from apps;"
+    "   end;"
     ;
 
 //-----------------------------------------------------------------------------
@@ -129,6 +164,8 @@ SystemDatabase * SystemDatabase::open( const char * path )
     return result;
 }
 
+//.............................................................................
+
 SystemDatabase::SystemDatabase( SQLite::DB & d, const char * p, bool c )
     :
     path( p ),
@@ -138,10 +175,14 @@ SystemDatabase::SystemDatabase( SQLite::DB & d, const char * p, bool c )
 {
 }
 
+//.............................................................................
+
 SystemDatabase::~SystemDatabase()
 {
     flush();
 }
+
+//.............................................................................
 
 bool SystemDatabase::flush()
 {
@@ -198,10 +239,14 @@ bool SystemDatabase::flush()
     return true;
 }
 
+//.............................................................................
+
 bool SystemDatabase::was_restored() const
 {
     return restored;
 }
+
+//.............................................................................
 
 bool SystemDatabase::insert_initial_data()
 {
@@ -262,6 +307,8 @@ bool SystemDatabase::insert_initial_data()
     return true;
 }
 
+//.............................................................................
+
 bool SystemDatabase::set( const char * key, int value )
 {
     SQLite::Statement insert( db, "insert or replace into generic (key,value) values (?1,?2);" );
@@ -271,6 +318,8 @@ bool SystemDatabase::set( const char * key, int value )
     dirty = true;
     return insert.ok();
 }
+
+//.............................................................................
 
 bool SystemDatabase::set( const char * key, const char * value )
 {
@@ -282,6 +331,8 @@ bool SystemDatabase::set( const char * key, const char * value )
     return insert.ok();
 }
 
+//.............................................................................
+
 bool SystemDatabase::set( const char * key, const String & value )
 {
     SQLite::Statement insert( db, "insert or replace into generic (key,value) values (?1,?2);" );
@@ -291,6 +342,8 @@ bool SystemDatabase::set( const char * key, const String & value )
     dirty = true;
     return insert.ok();
 }
+
+//.............................................................................
 
 String SystemDatabase::get_string( const char * key, const char * def )
 {
@@ -303,6 +356,8 @@ String SystemDatabase::get_string( const char * key, const char * def )
     return String( def );
 }
 
+//.............................................................................
+
 int SystemDatabase::get_int( const char * key, int def )
 {
     SQLite::Statement select( db, "select value from generic where key=?1;" );
@@ -314,8 +369,7 @@ int SystemDatabase::get_int( const char * key, int def )
     return def;
 }
 
-
-//-----------------------------------------------------------------------------
+//.............................................................................
 
 int SystemDatabase::create_profile( const String & name, const String & pin )
 {
@@ -326,6 +380,8 @@ int SystemDatabase::create_profile( const String & name, const String & pin )
     dirty = true;
     return db.last_insert_rowid();
 }
+
+//.............................................................................
 
 SystemDatabase::Profile SystemDatabase::get_current_profile()
 {
@@ -342,6 +398,8 @@ SystemDatabase::Profile SystemDatabase::get_current_profile()
     return result;
 }
 
+//.............................................................................
+
 SystemDatabase::Profile SystemDatabase::get_profile( int id )
 {
     SystemDatabase::Profile result;
@@ -357,7 +415,7 @@ SystemDatabase::Profile SystemDatabase::get_profile( int id )
     return result;
 }
 
-//-----------------------------------------------------------------------------
+//.............................................................................
 
 int SystemDatabase::get_app_count()
 {
@@ -369,6 +427,8 @@ int SystemDatabase::get_app_count()
     return 0;
 }
 
+//.............................................................................
+
 bool SystemDatabase::delete_all_apps()
 {
     dirty = true;
@@ -376,6 +436,8 @@ bool SystemDatabase::delete_all_apps()
     select.step();
     return select.ok();
 }
+
+//.............................................................................
 
 bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet & fingerprints )
 {
@@ -402,8 +464,11 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
     insert.bind( 6, fingerprint_list );
 
     insert.step();
+
     return insert.ok();
 }
+
+//.............................................................................
 
 String SystemDatabase::get_app_path( const String & id )
 {
@@ -416,21 +481,25 @@ String SystemDatabase::get_app_path( const String & id )
     return String();
 }
 
-SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
+//.............................................................................
+
+SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * select )
 {
+    g_assert( select );
+
     AppInfo::List result;
 
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
-    while ( select.step_row() )
+    while ( select->step_row() )
     {
         AppInfo app;
-        app.id = select.get_string( 0 );
-        app.path = select.get_string( 1 );
-        app.name = select.get_string( 2 );
-        app.release = select.get_int( 3 );
-        app.version = select.get_string( 4 );
 
-        gchar * * fingerprints = g_strsplit( select.get_string( 5 ).c_str(), ",", 0 );
+        app.id = select->get_string( 0 );
+        app.path = select->get_string( 1 );
+        app.name = select->get_string( 2 );
+        app.release = select->get_int( 3 );
+        app.version = select->get_string( 4 );
+
+        gchar * * fingerprints = g_strsplit( select->get_string( 5 ).c_str(), ",", 0 );
 
         for ( gchar * * f = fingerprints; *f; ++f )
         {
@@ -441,8 +510,20 @@ SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 
         result.push_back( app );
     }
+
     return result;
 }
+
+//.............................................................................
+
+SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
+{
+    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
+
+    return get_app_list( &select );
+}
+
+//.............................................................................
 
 void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 {
@@ -472,6 +553,11 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
                 it->version.c_str(),
                 it->release,
                 it->path.c_str() );
+
+        if ( ! existed )
+        {
+            add_app_to_all_profiles( it->id );
+        }
     }
 
     // If there are any remaining, they should be deleted
@@ -493,3 +579,111 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
         }
     }
 }
+
+//.............................................................................
+
+bool SystemDatabase::add_app_to_all_profiles( const String & app_id )
+{
+    dirty = true;
+
+    SQLite::Statement insert( db, "insert or ignore into profile_apps ( profile_id , app_id ) select id , ?1 from profiles;" );
+
+    insert.bind( 1, app_id );
+
+    return insert.step_done();
+}
+
+//.............................................................................
+
+bool SystemDatabase::add_app_to_current_profile( const String & app_id )
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return false;
+    }
+
+    dirty = true;
+
+    SQLite::Statement insert( db, "insert or ignore into profile_apps ( profile_id , app_id ) values ( ?1 , ?2 );" );
+
+    insert.bind( 1, profile.id );
+    insert.bind( 2, app_id );
+
+    return insert.step_done();
+}
+
+//.............................................................................
+
+SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return AppInfo::List();
+    }
+
+    SQLite::Statement select( db,
+            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
+            " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id;" );
+
+    select.bind( 1, profile.id );
+
+    return get_app_list( &select );
+}
+
+//.............................................................................
+
+bool SystemDatabase::remove_app_from_all_profiles( const String & app_id )
+{
+    dirty = true;
+
+    SQLite::Statement del( db, "delete from profile_apps where app_id = ?1;" );
+
+    del.bind( 1, app_id );
+
+    return del.step_done();
+}
+
+//.............................................................................
+
+bool SystemDatabase::remove_app_from_current_profile( const String & app_id )
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return false;
+    }
+
+    dirty = true;
+
+    SQLite::Statement del( db, "delete from profile_apps where app_id = ?1 and profile_id = ?2;" );
+
+    del.bind( 1, app_id );
+    del.bind( 2, profile.id );
+
+    return del.step_done();
+}
+
+//.............................................................................
+
+std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
+{
+    std::list<int> result;
+
+    SQLite::Statement select( db, "select profile_id from profile_apps where app_id = ?1;" );
+
+    select.bind( 1, app_id );
+
+    while( select.step_row() )
+    {
+        result.push_back( select.get_int( 0 ) );
+    }
+
+    return result;
+}
+
+//.............................................................................
