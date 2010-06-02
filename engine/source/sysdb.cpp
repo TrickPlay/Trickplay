@@ -16,7 +16,8 @@ static const char * schema_create =
     "create table apps( id TEXT PRIMARY KEY NOT NULL,"
     "                   path TEXT NOT NULL, "
     "                   release INTEGER NOT NULL,"
-    "                   version TEXT NOT NULL);"
+    "                   version TEXT NOT NULL,"
+    "                   fingerprints TEXT );"
     ;
 
 //-----------------------------------------------------------------------------
@@ -375,14 +376,29 @@ bool SystemDatabase::delete_all_apps()
     return select.ok();
 }
 
-bool SystemDatabase::insert_app( const String & id, const String & path, int release, const String & version )
+bool SystemDatabase::insert_app( const String & id, const String & path, int release, const String & version, const StringSet & fingerprints )
 {
     dirty = true;
-    SQLite::Statement insert( db, "insert or replace into apps (id,path,release,version) values (?1,?2,?3,?4);" );
+
+    String fingerprint_list;
+
+    for ( StringSet::const_iterator it = fingerprints.begin(); it != fingerprints.end(); ++it )
+    {
+        if ( ! fingerprint_list.empty() )
+        {
+            fingerprint_list += ",";
+        }
+
+        fingerprint_list += *it;
+    }
+
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,release,version,fingerprints) values (?1,?2,?3,?4,?5);" );
     insert.bind( 1, id );
     insert.bind( 2, path );
     insert.bind( 3, release );
     insert.bind( 4, version );
+    insert.bind( 5, fingerprint_list );
+
     insert.step();
     return insert.ok();
 }
