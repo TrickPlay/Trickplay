@@ -9,6 +9,7 @@
 #include "context.h"
 #include "app.h"
 #include "sysdb.h"
+#include "signature.h"
 
 //=============================================================================
 
@@ -119,14 +120,21 @@ class InstallAppEvent : public Event
 {
 public:
 
-    InstallAppEvent( Installer * _installer, guint _id, const String & _source_file, const String & _app_id, bool _locked, const String & _app_directory )
+    InstallAppEvent( Installer * _installer,
+            guint _id,
+            const String & _source_file,
+            const String & _app_id,
+            bool _locked,
+            const String & _app_directory,
+            const StringSet & _required_fingerprints )
     :
         installer( _installer ),
         id( _id ),
         source_file( _source_file ),
         app_id( _app_id ),
         locked( _locked ),
-        app_directory( _app_directory )
+        app_directory( _app_directory ),
+        required_fingerprints( _required_fingerprints )
 
     {}
 
@@ -158,6 +166,110 @@ public:
 
     //.........................................................................
 
+    bool verify_and_strip_signatures()
+    {
+        g_debug( "CHECKING SIGNATURE(S)" );
+
+        Signature::Info::List signatures;
+
+        gsize signature_length = 0;
+
+        // This means that the signatures are invalid or we had a problem
+        // dealing with them. If there are no signatures, this will return
+        // true and give us an empty list.
+
+        if ( ! Signature::get_signatures( source_file.c_str(), signatures, &signature_length ) )
+        {
+            return false;
+        }
+
+        unsigned int found = 0;
+
+        if ( signatures.empty() )
+        {
+            g_debug( "  NOT SIGNED" );
+        }
+        else
+        {
+            for ( Signature::Info::List::const_iterator it = signatures.begin(); it != signatures.end(); ++it )
+            {
+                fingerprints.insert( it->fingerprint );
+            }
+
+            // Now, see how many of the required ones are found in the signatures
+
+            for ( StringSet::const_iterator it = required_fingerprints.begin(); it != required_fingerprints.end(); ++it )
+            {
+                found += fingerprints.count( *it );
+            }
+        }
+
+        if ( found != required_fingerprints.size() )
+        {
+            // Signature(s) missing
+
+            g_warning( "APP IS MISSING AT LEAST ONE REQUIRED SIGNATURE" );
+
+            return false;
+        }
+
+        // If there were no signatures, we are done
+
+        if ( signatures.empty() )
+        {
+            return true;
+        }
+
+        // Otherwise, we need to strip the signature block from the file
+
+        bool result = false;
+
+        GFile * file = g_file_new_for_path( source_file.c_str() );
+
+        if ( file )
+        {
+
+            GFileIOStream * stream = g_file_open_readwrite( file, NULL, NULL );
+
+            if ( stream )
+            {
+                GSeekable * seekable = G_SEEKABLE( stream );
+
+                if ( g_seekable_can_seek( seekable ) && g_seekable_can_truncate( seekable ) )
+                {
+                    if ( g_seekable_seek( seekable, 0, G_SEEK_END, NULL, NULL ) )
+                    {
+                        goffset file_size = g_seekable_tell( seekable );
+
+                        file_size -= signature_length;
+
+                        if ( g_seekable_truncate( seekable, file_size, NULL, NULL ) )
+                        {
+                            g_debug( "TRUNCATING FILE TO %" G_GOFFSET_FORMAT " BYTES", file_size );
+                            result = true;
+                        }
+                    }
+                }
+
+                g_io_stream_close( G_IO_STREAM( stream ), NULL, NULL );
+
+                g_object_unref( G_OBJECT( stream ) );
+            }
+
+            g_object_unref( G_OBJECT( file ) );
+        }
+
+        if ( ! result )
+        {
+            g_warning( "FAILED TO STRIP SIGNATURE(S)" );
+        }
+
+        return result;
+    }
+
+
+    //.........................................................................
+
     virtual bool process()
     {
         // This happens in the installer thread, so we cannot mess with
@@ -168,6 +280,13 @@ public:
         try
         {
             g_debug( "STARTING INSTALL OF %s", source_file.c_str() );
+
+            //.................................................................
+
+            if ( ! verify_and_strip_signatures() )
+            {
+                throw String( "SIGNATURE CHECK FAILED" );
+            }
 
             //.................................................................
             // Open the source file to make sure it is ok
@@ -408,7 +527,7 @@ public:
                 {
                     Util::GFreeLater free_destination_file_name( destination_file_name );
 
-                    g_debug( "  UNZIPPING %s TO %s", entry.name, destination_file_name );
+                    g_debug( "  UNZIPPING %s", entry.name );
 
                     if ( ZR_OK != UnzipItem( zip, i, destination_file_name ) )
                     {
@@ -476,6 +595,8 @@ public:
 
             g_debug( "FINISHED INSTALL OF %s TO %s", app_id.c_str(), moved ? source_path : unzip_path );
 
+            // TODO: We need to send the fingerprints we found
+
             send_progress( Installer::ProgressClosure::make_finished( installer, id, moved, unzip_path, source_path ) );
 
             // Caller is also reponsible for getting rid of the original zip file.
@@ -507,6 +628,8 @@ private:
     String      app_id;
     bool        locked;
     String      app_directory;
+    StringSet   required_fingerprints;
+    StringSet   fingerprints;
 };
 
 //=============================================================================
@@ -551,6 +674,7 @@ guint Installer::download_and_install_app(
         bool locked,
         const Network::Request & request,
         Network::CookieJar * cookie_jar,
+        const StringSet & required_fingerprints,
         const StringMap & extra )
 {
     guint download_id = context->get_downloads()->start_download( owner, request, cookie_jar );
@@ -562,7 +686,7 @@ guint Installer::download_and_install_app(
 
     guint result = next_id++;
 
-    info_map[ result ] = Info( result, app_id, app_name, owner, locked, download_id, extra );
+    info_map[ result ] = Info( result, app_id, app_name, owner, locked, download_id, required_fingerprints, extra );
 
     return result;
 }
@@ -739,7 +863,9 @@ gpointer Installer::process( gpointer _queue )
 
     GAsyncQueue * queue = ( GAsyncQueue * )_queue;
 
-    while ( true )
+    bool done = false;
+
+    while ( ! done )
     {
         Event * event = ( Event * )g_async_queue_pop( queue );
 
@@ -747,8 +873,10 @@ gpointer Installer::process( gpointer _queue )
         {
             if ( ! event->process() )
             {
-                break;
+                done = true;
             }
+
+            Event::destroy( event );
         }
     }
 
@@ -814,7 +942,7 @@ void Installer::download_finished( const Downloads::Info & dl_info )
 
             start_thread();
 
-            g_async_queue_push( queue, new InstallAppEvent( this, info->id, dl_info.file_name, info->app_id, info->locked, app_directory ) );
+            g_async_queue_push( queue, new InstallAppEvent( this, info->id, dl_info.file_name, info->app_id, info->locked, app_directory, info->required_fingerprints ) );
 
             // Update the info status and tell the delegates we are installing
 
