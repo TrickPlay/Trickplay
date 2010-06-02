@@ -475,7 +475,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
 //-----------------------------------------------------------------------------
 
-bool Signature::get_signatures( std::istream & stream, Signature::Info::List & signatures )
+bool Signature::get_signatures( std::istream & stream, Signature::Info::List & signatures, gsize * signature_length )
 {
     signatures.clear();
 
@@ -494,6 +494,11 @@ bool Signature::get_signatures( std::istream & stream, Signature::Info::List & s
             signatures.push_back( info );
         }
 
+        if ( signature_length )
+        {
+            * signature_length = skip_trailing_bytes;
+        }
+
         return true;
     }
     catch( const String & e )
@@ -506,7 +511,7 @@ bool Signature::get_signatures( std::istream & stream, Signature::Info::List & s
 
 //-----------------------------------------------------------------------------
 
-bool Signature::get_signatures( const gchar * filename, Signature::Info::List & signatures )
+bool Signature::get_signatures( const gchar * filename, Signature::Info::List & signatures, gsize * signature_length )
 {
     std::ifstream stream;
 
@@ -519,7 +524,7 @@ bool Signature::get_signatures( const gchar * filename, Signature::Info::List & 
         return false;
     }
 
-    bool result = get_signatures( stream, signatures );
+    bool result = get_signatures( stream, signatures, signature_length );
 
     stream.close();
 
@@ -528,11 +533,11 @@ bool Signature::get_signatures( const gchar * filename, Signature::Info::List & 
 
 //-----------------------------------------------------------------------------
 
-bool Signature::get_signatures( gpointer data, gsize size, Signature::Info::List & signatures )
+bool Signature::get_signatures( gpointer data, gsize size, Signature::Info::List & signatures, gsize * signature_length )
 {
     imstream stream( ( char * ) data, size );
 
-    return get_signatures( stream, signatures );
+    return get_signatures( stream, signatures, signature_length );
 }
 
 //-----------------------------------------------------------------------------
