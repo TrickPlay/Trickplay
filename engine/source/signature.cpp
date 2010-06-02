@@ -24,34 +24,36 @@ void fail( const gchar * format, ... )
     throw result;
 }
 
-static const char * ca_certs[] =
-{
-    // This is the TrickPlay App Signing CA (self signed)
-
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIICnzCCAggCCQCYvWYB237yhjANBgkqhkiG9w0BAQUFADCBkzELMAkGA1UEBhMC\n"
-    "VVMxEzARBgNVBAgTCkNhbGlmb3JuaWExEjAQBgNVBAcTCVBhbG8gQWx0bzEXMBUG\n"
-    "A1UEChMOVHJpY2tQbGF5IEluYy4xITAfBgNVBAMTGFRyaWNrUGxheSBBcHAgU2ln\n"
-    "bmluZyBDQTEfMB0GCSqGSIb3DQEJARYQaXRAdHJpY2twbGF5LmNvbTAeFw0xMDA1\n"
-    "MzExOTA1NTNaFw0yMDA1MjgxOTA1NTNaMIGTMQswCQYDVQQGEwJVUzETMBEGA1UE\n"
-    "CBMKQ2FsaWZvcm5pYTESMBAGA1UEBxMJUGFsbyBBbHRvMRcwFQYDVQQKEw5Ucmlj\n"
-    "a1BsYXkgSW5jLjEhMB8GA1UEAxMYVHJpY2tQbGF5IEFwcCBTaWduaW5nIENBMR8w\n"
-    "HQYJKoZIhvcNAQkBFhBpdEB0cmlja3BsYXkuY29tMIGfMA0GCSqGSIb3DQEBAQUA\n"
-    "A4GNADCBiQKBgQDdV72r8+UfEuK1KmNbTxfriK+o0IqB6ssyiET2Qj7v9GRSWIqM\n"
-    "bYI06lT/ZchNzyQS9Em6I/XGiFyHVt1anIfjE2ncDxzLjHbZkx+3rRAiK17fQGea\n"
-    "hlsibjVY08Z1qLNIEwIxlXZF+ThoxV9CNtszE81uqX68Z1x6VdKZrdV0jwIDAQAB\n"
-    "MA0GCSqGSIb3DQEBBQUAA4GBAAc2H82jJInmASfvju7ygjDpYZ/G9vgHUwFor/Uz\n"
-    "j7QZeujfIHSAZ2qnQppyvOi2SIj46fYcHkwHOZGBrE1LLf19tj719DFdC9Ho2WSf\n"
-    "kWLGm3zUwKIqjS1mQGKPDV4H4SbBlQ9Hn8O/ZUi1dCXUpHVMlUoo78O1s2xrLq1K\n"
-    "pgki\n"
-    "-----END CERTIFICATE-----\n"
-    ,
-    NULL
-};
+//-----------------------------------------------------------------------------
 
 bool verify_certificate( X509 * cert )
 {
     g_assert( cert );
+
+    static const char * ca_certs[] =
+    {
+        // This is the TrickPlay App Signing CA (self signed)
+
+        "-----BEGIN CERTIFICATE-----\n"
+        "MIICnzCCAggCCQCYvWYB237yhjANBgkqhkiG9w0BAQUFADCBkzELMAkGA1UEBhMC\n"
+        "VVMxEzARBgNVBAgTCkNhbGlmb3JuaWExEjAQBgNVBAcTCVBhbG8gQWx0bzEXMBUG\n"
+        "A1UEChMOVHJpY2tQbGF5IEluYy4xITAfBgNVBAMTGFRyaWNrUGxheSBBcHAgU2ln\n"
+        "bmluZyBDQTEfMB0GCSqGSIb3DQEJARYQaXRAdHJpY2twbGF5LmNvbTAeFw0xMDA1\n"
+        "MzExOTA1NTNaFw0yMDA1MjgxOTA1NTNaMIGTMQswCQYDVQQGEwJVUzETMBEGA1UE\n"
+        "CBMKQ2FsaWZvcm5pYTESMBAGA1UEBxMJUGFsbyBBbHRvMRcwFQYDVQQKEw5Ucmlj\n"
+        "a1BsYXkgSW5jLjEhMB8GA1UEAxMYVHJpY2tQbGF5IEFwcCBTaWduaW5nIENBMR8w\n"
+        "HQYJKoZIhvcNAQkBFhBpdEB0cmlja3BsYXkuY29tMIGfMA0GCSqGSIb3DQEBAQUA\n"
+        "A4GNADCBiQKBgQDdV72r8+UfEuK1KmNbTxfriK+o0IqB6ssyiET2Qj7v9GRSWIqM\n"
+        "bYI06lT/ZchNzyQS9Em6I/XGiFyHVt1anIfjE2ncDxzLjHbZkx+3rRAiK17fQGea\n"
+        "hlsibjVY08Z1qLNIEwIxlXZF+ThoxV9CNtszE81uqX68Z1x6VdKZrdV0jwIDAQAB\n"
+        "MA0GCSqGSIb3DQEBBQUAA4GBAAc2H82jJInmASfvju7ygjDpYZ/G9vgHUwFor/Uz\n"
+        "j7QZeujfIHSAZ2qnQppyvOi2SIj46fYcHkwHOZGBrE1LLf19tj719DFdC9Ho2WSf\n"
+        "kWLGm3zUwKIqjS1mQGKPDV4H4SbBlQ9Hn8O/ZUi1dCXUpHVMlUoo78O1s2xrLq1K\n"
+        "pgki\n"
+        "-----END CERTIFICATE-----\n"
+        ,
+        NULL
+    };
 
     bool result = false;
 
@@ -97,8 +99,11 @@ bool verify_certificate( X509 * cert )
         // Now create the context we will use to validate the incoming
         // certificate and validate it.
 
-        // To customize the validation, we will have to add a verify
+        // TODO: To customize the validation, we will have to add a verify
         // callback.
+        //
+        // We will need to account for the system time not being correct
+        // and cert validation failing because of it.
 
         X509_STORE_CTX * ctx = X509_STORE_CTX_new();
 
@@ -131,6 +136,86 @@ bool verify_certificate( X509 * cert )
 }
 
 //-----------------------------------------------------------------------------
+// Returns the SHA1 fingerprint of the certificate in upper case hex.
+
+
+bool get_certificate_fingerprint( X509 * cert, String & fingerprint )
+{
+    g_assert( cert );
+
+    unsigned char buffer[ EVP_MAX_MD_SIZE ];
+
+    unsigned int fingerprint_size = 0;
+
+    if ( ! X509_digest( cert, EVP_sha1(), buffer, &fingerprint_size ) )
+    {
+        return false;
+    }
+
+    char hex[ 4 ];
+
+    fingerprint.clear();
+
+    fingerprint.reserve( fingerprint_size * 2 );
+
+    for( unsigned int i = 0; i < fingerprint_size; ++i )
+    {
+
+        // WARNING: Fingerprints will be incorrect if sprintf is broken
+
+        sprintf( hex, "%2.2X", buffer[ i ] );
+
+        fingerprint += hex;
+    }
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool get_certificate_subject_name( X509 * cert, String & subject_name )
+{
+    g_assert( cert );
+
+    bool result = false;
+
+    X509_NAME * name = X509_get_subject_name( cert );
+
+    if ( name )
+    {
+        BIO * bio = BIO_new( BIO_s_mem() );
+
+        if ( bio )
+        {
+            if ( X509_NAME_print_ex( bio, name, 0, XN_FLAG_ONELINE | ASN1_STRFLGS_UTF8_CONVERT | ASN1_STRFLGS_ESC_CTRL ) )
+            {
+                subject_name.clear();
+
+                char buffer[ 512 ];
+
+                while ( true )
+                {
+                    int read = BIO_read( bio, buffer, 512 );
+
+                    if ( read <= 0 )
+                    {
+                        break;
+                    }
+
+                    subject_name += String( buffer, read );
+                }
+
+                result = true;
+            }
+
+            BIO_free( bio );
+        }
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
 // Get the signature at the end of the stream and put its info in info.
 //
 // TRUE - Means there was one valid signature
@@ -148,7 +233,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     // Determine the size of the stream
 
-    stream.seekg( skip_trailing_bytes , std::ios_base::end );
+    stream.seekg( - std::streamoff( skip_trailing_bytes ) , std::ios_base::end );
 
     goffset stream_size = stream.tellg();
 
@@ -210,7 +295,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     goffset data_size = stream_size - ( TP_SIGN_MARKER_LENGTH + 1 + 8 + cert_size + signature_size );
 
-    g_debug( "SIGNATURE IS %u BYTES : CERT IS %u BYTES : DATA IS %" G_GOFFSET_FORMAT " BYTES", signature_size, cert_size, data_size );
+//    g_debug( "SIGNATURE IS %u BYTES : CERT IS %u BYTES : DATA IS %" G_GOFFSET_FORMAT " BYTES", signature_size, cert_size, data_size );
 
     if ( data_size < 0 )
     {
@@ -270,11 +355,35 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
         fail( "FAILED TO READ X509 CERTIFICATE" );
     }
 
+    // Verify that the certificate is valid
+
     if ( ! verify_certificate( cert ) )
     {
         X509_free( cert );
         fail( "CERTIFICATE IS INVALID" );
     }
+
+    // Get the certificate's fingerprint
+
+    String fingerprint;
+
+    if ( ! get_certificate_fingerprint( cert, fingerprint ) )
+    {
+        X509_free( cert );
+        fail( "FAILED TO GET CERTIFICATE FINGERPRINT" );
+    }
+
+    // Get the certificate's subject name
+
+    String subject_name;
+
+    if ( ! get_certificate_subject_name( cert, subject_name ) )
+    {
+        X509_free( cert );
+        fail( "FAILED TO GET CERTIFICATE SUBJECT NAME" );
+    }
+
+    // Get the public key
 
     EVP_PKEY * public_key = X509_get_pubkey( cert );
 
@@ -346,7 +455,14 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     // Now, we know that the signature is correct.
 
-    // We need to get the cert's fingerprint and put it in the info
+    // Set the fingerprint and subject name
+
+    info.fingerprint = fingerprint;
+    info.subject_name = subject_name;
+
+    g_debug( "SIGNATURE IS GOOD" );
+    g_debug( "  FINGERPRINT  : %s", info.fingerprint.c_str() );
+    g_debug( "  SUBJECT NAME : %s", info.subject_name.c_str() );
 
     // This is the total size of the signature block, so that the
     // caller can call us again skipping this and get the next/inner
@@ -357,18 +473,20 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
     return true;
 }
 
+//-----------------------------------------------------------------------------
+
 bool Signature::get_signatures( std::istream & stream, Signature::Info::List & signatures )
 {
     signatures.clear();
 
-    gsize skip_trailing_bytes = 0;
-
-    gsize signature_size = 0;
-
-    Info info;
-
     try
     {
+        gsize skip_trailing_bytes = 0;
+
+        gsize signature_size = 0;
+
+        Info info;
+
         while ( get_signature( stream, skip_trailing_bytes, info, signature_size ) )
         {
             skip_trailing_bytes += signature_size;
@@ -381,10 +499,12 @@ bool Signature::get_signatures( std::istream & stream, Signature::Info::List & s
     catch( const String & e )
     {
         g_warning( "SIGNATURE VERIFICATION FAILED : %s", e.c_str() );
-
-        return false;
     }
+
+    return false;
 }
+
+//-----------------------------------------------------------------------------
 
 bool Signature::get_signatures( const gchar * filename, Signature::Info::List & signatures )
 {
@@ -406,10 +526,14 @@ bool Signature::get_signatures( const gchar * filename, Signature::Info::List & 
     return result;
 }
 
+//-----------------------------------------------------------------------------
+
 bool Signature::get_signatures( gpointer data, gsize size, Signature::Info::List & signatures )
 {
     imstream stream( ( char * ) data, size );
 
     return get_signatures( stream, signatures );
 }
+
+//-----------------------------------------------------------------------------
 
