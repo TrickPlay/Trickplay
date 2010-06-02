@@ -433,7 +433,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
 
             const Metadata & md = it->second.front();
 
-            sysdb->insert_app( md.id, md.path, md.release, md.version );
+            sysdb->insert_app( md.id, md.name, md.path, md.release, md.version );
 
             g_info( "ADDING %s (%s/%d) @ %s",
                     md.id.c_str(),

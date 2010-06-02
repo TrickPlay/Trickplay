@@ -128,15 +128,8 @@ global apps [[Apps*]]
                         
             lua_newtable(L);
             
-            App::Metadata md;
-        
             for ( SystemDatabase::AppList::const_iterator it = list.begin(); it != list.end(); ++it )
             {
-                if ( ! App::load_metadata( it->path.c_str(), md ) )
-                {
-                    continue;
-                }
-
                 lua_pushstring(L,it->id.c_str());
 
                 lua_newtable(L);
@@ -147,7 +140,7 @@ global apps [[Apps*]]
                 lua_pushstring(L,it->path.c_str());
                 lua_setfield(L,-2,"path");
 
-				lua_pushstring(L,  md.name.c_str());
+				lua_pushstring(L,  it->name.c_str());
 				lua_setfield(L, -2, "name");
 
                 lua_pushstring(L,it->version.c_str());
@@ -155,6 +148,17 @@ global apps [[Apps*]]
 
                 lua_pushinteger(L,it->release);
                 lua_setfield(L,-2,"release");
+                
+                lua_newtable(L);
+                int i = 1;
+                
+                for ( StringSet::const_iterator fit = it->fingerprints.begin(); fit != it->fingerprints.end(); ++fit, ++i )
+                {
+                	lua_pushstring(L,fit->c_str() );
+                	lua_rawseti(L,-2,i);
+                }
+                
+                lua_setfield(L,-2,"fingerprints");
 
                 lua_settable(L,-3);
             }
