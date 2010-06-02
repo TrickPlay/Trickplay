@@ -31,6 +31,7 @@ public:
             bool locked,
             const Network::Request & request,
             Network::CookieJar * cookie_jar,
+            const StringSet & required_fingerprints = StringSet(),
             const StringMap & extra = StringMap() );
 
     //.........................................................................
@@ -65,7 +66,14 @@ public:
             moved( false )
         {}
 
-        Info( guint _id, const String & _app_id, const String & _app_name, const String & _owner, bool _locked, guint _download_id, const StringMap & _extra )
+        Info( guint _id,
+                const String & _app_id,
+                const String & _app_name,
+                const String & _owner,
+                bool _locked,
+                guint _download_id,
+                const StringSet & _required_fingerprints,
+                const StringMap & _extra )
         :
             id( _id ),
             status( DOWNLOADING ),
@@ -74,6 +82,7 @@ public:
             owner( _owner ),
             locked( _locked ),
             download_id( _download_id ),
+            required_fingerprints( _required_fingerprints ),
             extra( _extra ),
             percent_downloaded( 0 ),
             percent_installed( 0 ),
@@ -87,6 +96,7 @@ public:
         String      owner;
         bool        locked;
         guint       download_id;
+        StringSet   required_fingerprints;
         StringMap   extra;
         gdouble     percent_downloaded;
         gdouble     percent_installed;
