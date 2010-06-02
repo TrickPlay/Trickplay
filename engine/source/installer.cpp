@@ -595,9 +595,7 @@ public:
 
             g_debug( "FINISHED INSTALL OF %s TO %s", app_id.c_str(), moved ? source_path : unzip_path );
 
-            // TODO: We need to send the fingerprints we found
-
-            send_progress( Installer::ProgressClosure::make_finished( installer, id, moved, unzip_path, source_path ) );
+            send_progress( Installer::ProgressClosure::make_finished( installer, id, moved, unzip_path, source_path, fingerprints ) );
 
             // Caller is also reponsible for getting rid of the original zip file.
         }
@@ -790,6 +788,8 @@ bool Installer::complete_install( guint id )
 
         return false;
     }
+
+    // TODO: We also need to store the fingerprints we found
 
     if ( ! context->get_db()->insert_app( metadata.id, metadata.path, metadata.release, metadata.version ) )
     {
@@ -990,7 +990,7 @@ void Installer::install_progress( ProgressClosure * closure )
 
     if ( it == info_map.end() )
     {
-        g_debug( "THIS SHOULD NEVER HAPPEN - IT GOT PROGRESS FOR UNKNOWN INSTALL %u", closure->id );
+        g_debug( "THIS SHOULD NEVER HAPPEN - I GOT PROGRESS FOR UNKNOWN INSTALL %u", closure->id );
 
         return;
     }
@@ -1026,6 +1026,14 @@ void Installer::install_progress( ProgressClosure * closure )
             info.moved = closure->moved;
             info.app_directory = closure->app_directory;
             info.install_directory = closure->install_directory;
+
+            if ( closure->fingerprints )
+            {
+                for ( guint i = 0; i < closure->fingerprints->len; ++i )
+                {
+                    info.fingerprints.insert( String( ( gchar * ) g_ptr_array_index( closure->fingerprints, i ) ) );
+                }
+            }
         }
 
         // Get rid of the download and the file.

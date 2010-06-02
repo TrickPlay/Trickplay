@@ -103,6 +103,7 @@ public:
         bool        moved;
         String      install_directory;
         String      app_directory;
+        StringSet   fingerprints;
     };
 
     //.........................................................................
@@ -185,7 +186,13 @@ private:
             return result;
         }
 
-        static ProgressClosure * make_finished( Installer * installer, guint id, bool moved, const gchar * install_directory, const gchar * app_directory )
+        static ProgressClosure * make_finished(
+                Installer * installer,
+                guint id,
+                bool moved,
+                const gchar * install_directory,
+                const gchar * app_directory,
+                const StringSet & fingerprints )
         {
             ProgressClosure * result = g_slice_new0( ProgressClosure );
 
@@ -197,6 +204,13 @@ private:
             result->install_directory = g_strdup( install_directory );
             result->app_directory = g_strdup( app_directory );
 
+            result->fingerprints = g_ptr_array_new_with_free_func( g_free );
+
+            for ( StringSet::const_iterator it = fingerprints.begin(); it != fingerprints.end(); ++it )
+            {
+                g_ptr_array_add( result->fingerprints, g_strdup( it->c_str() ) );
+            }
+
             return result;
         }
 
@@ -206,6 +220,11 @@ private:
 
             g_free( self->install_directory );
             g_free( self->app_directory );
+
+            if ( self->fingerprints )
+            {
+                g_ptr_array_unref( self->fingerprints );
+            }
 
             g_slice_free( ProgressClosure, self );
         }
@@ -217,6 +236,7 @@ private:
         bool        moved;
         gchar *     install_directory;
         gchar *     app_directory;
+        GPtrArray * fingerprints;
     };
 
     void install_progress( ProgressClosure * progress_closure );
