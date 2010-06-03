@@ -27,6 +27,7 @@ static const char * schema_create =
 
     "create table app_actions( app_id TEXT NOT NULL,"
     "                          action TEXT NOT NULL,"
+    "                          description TEXT,"
     "                          uri TEXT,"
     "                          type TEXT,"
     "                          PRIMARY KEY( app_id, action ) );"
@@ -488,14 +489,15 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
         return false;
     }
 
-    SQLite::Statement insert_action( db, "insert or ignore into app_actions ( app_id, action, uri, type) values (?1,?2,?3,?4);" );
+    SQLite::Statement insert_action( db, "insert or ignore into app_actions ( app_id, action, description, uri, type) values (?1,?2,?3,?4,?5);" );
 
     for ( App::Action::Map::const_iterator it = metadata.actions.begin(); it != metadata.actions.end(); ++it )
     {
         insert_action.bind( 1, metadata.id );
         insert_action.bind( 2, it->first );
-        insert_action.bind( 3, it->second.uri );
-        insert_action.bind( 4, it->second.type );
+        insert_action.bind( 3, it->second.description );
+        insert_action.bind( 4, it->second.uri );
+        insert_action.bind( 5, it->second.type );
 
         insert_action.step();
         insert_action.reset();
@@ -734,14 +736,14 @@ SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile
     if ( profile.id )
     {
         SQLite::Statement select( db,
-            "select a.app_id, a.action, a.uri, a.type from app_actions a, profile_apps p"
+            "select a.app_id, a.action, a.description, a.uri, a.type from app_actions a, profile_apps p"
             "    where p.profile_id = ?1 and p.app_id = a.app_id;" );
 
         select.bind( 1, profile.id );
 
         while ( select.step_row() )
         {
-            result[ select.get_string( 0 ) ][ select.get_string( 1 ) ] = App::Action( select.get_string( 2 ), select.get_string( 3 ) );
+            result[ select.get_string( 0 ) ][ select.get_string( 1 ) ] = App::Action( select.get_string( 2 ), select.get_string( 3 ), select.get_string( 4 ) );
         }
     }
 
