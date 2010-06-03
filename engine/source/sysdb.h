@@ -23,6 +23,16 @@ public:
 
     bool was_restored() const;
 
+    bool is_dirty() const
+    {
+        return dirt > 0;
+    }
+
+    guint64 get_dirt() const
+    {
+        return dirt;
+    }
+
     //.....................................................................
     // Generic
 
@@ -96,6 +106,7 @@ public:
 
     std::list<int> get_profiles_for_app( const String & app_id );
 
+
 private:
 
     AppInfo::List get_app_list( SQLite::Statement * select );
@@ -107,9 +118,14 @@ private:
     SystemDatabase( SQLite::DB & d, const char * p, bool c );
     SystemDatabase( const SystemDatabase & ) {}
 
+    inline void make_dirty()
+    {
+        ++dirt;
+    }
+
     String      path;
     SQLite::DB  db;
-    bool        dirty;
+    guint64     dirt;
     bool        restored;
 };
 

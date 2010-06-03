@@ -154,7 +154,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
         // We reset dirty so that this bad database doesn't get flushed when
         // we delete it
 
-        result->dirty = false;
+        result->dirt = 0;
         delete result;
         return NULL;
     }
@@ -170,7 +170,7 @@ SystemDatabase::SystemDatabase( SQLite::DB & d, const char * p, bool c )
     :
     path( p ),
     db( d ),
-    dirty( false ),
+    dirt( 0 ),
     restored( !c )
 {
 }
@@ -186,7 +186,7 @@ SystemDatabase::~SystemDatabase()
 
 bool SystemDatabase::flush()
 {
-    if ( !dirty )
+    if ( ! dirt )
     {
         return true;
     }
@@ -235,7 +235,7 @@ bool SystemDatabase::flush()
     }
 
     g_info( "SYSTEM DATABASE FLUSHED" );
-    dirty = false;
+    dirt = 0;
     return true;
 }
 
@@ -315,7 +315,7 @@ bool SystemDatabase::set( const char * key, int value )
     insert.bind( 1, key );
     insert.bind( 2, value );
     insert.step();
-    dirty = true;
+    make_dirty();
     return insert.ok();
 }
 
@@ -327,7 +327,7 @@ bool SystemDatabase::set( const char * key, const char * value )
     insert.bind( 1, key );
     insert.bind( 2, value );
     insert.step();
-    dirty = true;
+    make_dirty();
     return insert.ok();
 }
 
@@ -339,7 +339,7 @@ bool SystemDatabase::set( const char * key, const String & value )
     insert.bind( 1, key );
     insert.bind( 2, value );
     insert.step();
-    dirty = true;
+    make_dirty();
     return insert.ok();
 }
 
@@ -377,7 +377,7 @@ int SystemDatabase::create_profile( const String & name, const String & pin )
     insert.bind( 1, name );
     insert.bind( 2, pin );
     insert.step();
-    dirty = true;
+    make_dirty();
     return db.last_insert_rowid();
 }
 
@@ -431,7 +431,7 @@ int SystemDatabase::get_app_count()
 
 bool SystemDatabase::delete_all_apps()
 {
-    dirty = true;
+    make_dirty();
     SQLite::Statement select( db, "delete from apps;" );
     select.step();
     return select.ok();
@@ -441,7 +441,7 @@ bool SystemDatabase::delete_all_apps()
 
 bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet & fingerprints )
 {
-    dirty = true;
+    make_dirty();
 
     String fingerprint_list;
 
@@ -564,7 +564,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
     if ( ! existing_ids.empty() )
     {
-        dirty = true;
+        make_dirty();
 
         SQLite::Statement del( db, "delete from apps where id = ?1" );
 
@@ -584,7 +584,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
 bool SystemDatabase::add_app_to_all_profiles( const String & app_id )
 {
-    dirty = true;
+    make_dirty();
 
     SQLite::Statement insert( db, "insert or ignore into profile_apps ( profile_id , app_id ) select id , ?1 from profiles;" );
 
@@ -604,7 +604,7 @@ bool SystemDatabase::add_app_to_current_profile( const String & app_id )
         return false;
     }
 
-    dirty = true;
+    make_dirty();
 
     SQLite::Statement insert( db, "insert or ignore into profile_apps ( profile_id , app_id ) values ( ?1 , ?2 );" );
 
@@ -638,7 +638,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
 
 bool SystemDatabase::remove_app_from_all_profiles( const String & app_id )
 {
-    dirty = true;
+    make_dirty();
 
     SQLite::Statement del( db, "delete from profile_apps where app_id = ?1;" );
 
@@ -658,7 +658,7 @@ bool SystemDatabase::remove_app_from_current_profile( const String & app_id )
         return false;
     }
 
-    dirty = true;
+    make_dirty();
 
     SQLite::Statement del( db, "delete from profile_apps where app_id = ?1 and profile_id = ?2;" );
 
