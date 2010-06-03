@@ -45,6 +45,26 @@ class App : public Notify
 public:
 
     //.........................................................................
+    // Structure to hold app actions
+
+    struct Action
+    {
+        typedef std::map< String, Action > Map;
+
+        Action()
+        {}
+
+        Action( const String & _uri, const String & _type )
+        :
+            uri( _uri ),
+            type( _type )
+        {}
+
+        String uri;
+        String type;
+    };
+
+    //.........................................................................
     // Structure to hold app metadata
 
     struct Metadata
@@ -53,14 +73,16 @@ public:
 
         Metadata() : release( 0 ) {}
 
-        String path;
-        String id;
-        String name;
-        int release;
-        String version;
-        String description;
-        String author;
-        String copyright;
+        String      path;
+        String      id;
+        String      name;
+        int         release;
+        String      version;
+        String      description;
+        String      author;
+        String      copyright;
+
+        Action::Map actions;
     };
 
     //.........................................................................
