@@ -19,6 +19,7 @@
 #define APP_FIELD_COPYRIGHT     "copyright"
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
+#define APP_FIELD_ACTIONS       "actions"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -223,7 +224,47 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
         }
         lua_pop( L, 1 );
 
+        // Look for actions
+
+        lua_getfield( L, -1, APP_FIELD_ACTIONS );
+        if ( lua_type( L, -1 ) == LUA_TTABLE )
+        {
+            lua_pushnil( L );
+
+            while ( lua_next( L, -2 ) )
+            {
+                if ( lua_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
+                {
+                    String action_name = lua_tostring( L, -2 );
+                    String uri;
+                    String type;
+
+                    lua_getfield( L, -1, "uri" );
+                    if ( lua_isstring( L, -1 ) )
+                    {
+                        uri = lua_tostring( L, -1 );
+                    }
+                    lua_pop( L, 1 );
+
+                    lua_getfield( L, -1, "type" );
+                    if ( lua_isstring( L, -1 ) )
+                    {
+                        type = lua_tostring( L , -1 );
+                    }
+                    lua_pop( L, 1 );
+
+                    md.actions[ action_name ] = Action( uri, type );
+
+                    lua_pop( L, 1 );
+                }
+            }
+        }
+        lua_pop( L, 1 );
+
+
+
         lua_close( L );
+
         return true;
     }
     catch ( const String & e )
