@@ -106,6 +106,12 @@ public:
 
     std::list<int> get_profiles_for_app( const String & app_id );
 
+    //.....................................................................
+    // App actions
+
+    typedef std::map< String , App::Action::Map > AppActionMap;
+
+    AppActionMap get_app_actions_for_current_profile();
 
 private:
 

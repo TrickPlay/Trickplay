@@ -25,6 +25,12 @@ static const char * schema_create =
     "                           app_id TEXT NOT NULL,"
     "                           PRIMARY KEY( profile_id, app_id) );"
 
+    "create table app_actions( app_id TEXT NOT NULL,"
+    "                          action TEXT NOT NULL,"
+    "                          uri TEXT,"
+    "                          type TEXT,"
+    "                          PRIMARY KEY( app_id, action ) );"
+
     // When a profile is deleted, all of its apps are also deleted
 
     "create trigger profiles_profile_apps_delete after delete on profiles"
@@ -33,10 +39,12 @@ static const char * schema_create =
     "   end;"
 
     // When an app is deleted, it is removed from all profiles
+    // and all of its actions are deleted
 
     "create trigger apps_profile_apps_delete after delete on apps"
     "   begin"
     "       delete from profile_apps where app_id = OLD.id;"
+    "       delete from app_actions where app_id = OLD.id;"
     "   end;"
 
 #if 0
@@ -465,7 +473,36 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
 
     insert.step();
 
-    return insert.ok();
+    if ( ! insert.ok() )
+    {
+        return false;
+    }
+
+    SQLite::Statement del( db, "delete from app_actions where app_id = ?1;" );
+
+    del.bind( 1, metadata.id );
+    del.step();
+
+    if ( ! del.ok() )
+    {
+        return false;
+    }
+
+    SQLite::Statement insert_action( db, "insert or ignore into app_actions ( app_id, action, uri, type) values (?1,?2,?3,?4);" );
+
+    for ( App::Action::Map::const_iterator it = metadata.actions.begin(); it != metadata.actions.end(); ++it )
+    {
+        insert_action.bind( 1, metadata.id );
+        insert_action.bind( 2, it->first );
+        insert_action.bind( 3, it->second.uri );
+        insert_action.bind( 4, it->second.type );
+
+        insert_action.step();
+        insert_action.reset();
+        insert_action.clear();
+    }
+
+    return insert_action.ok();
 }
 
 //.............................................................................
@@ -687,3 +724,26 @@ std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
 }
 
 //.............................................................................
+
+SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile()
+{
+    AppActionMap result;
+
+    Profile profile = get_current_profile();
+
+    if ( profile.id )
+    {
+        SQLite::Statement select( db,
+            "select a.app_id, a.action, a.uri, a.type from app_actions a, profile_apps p"
+            "    where p.profile_id = ?1 and p.app_id = a.app_id;" );
+
+        select.bind( 1, profile.id );
+
+        while ( select.step_row() )
+        {
+            result[ select.get_string( 0 ) ][ select.get_string( 1 ) ] = App::Action( select.get_string( 2 ), select.get_string( 3 ) );
+        }
+    }
+
+    return result;
+}
