@@ -238,6 +238,14 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
                     String action_name = lua_tostring( L, -2 );
                     String uri;
                     String type;
+                    String description;
+
+                    lua_getfield( L, -1, "description" );
+                    if ( lua_isstring( L, -1 ) )
+                    {
+                        description = lua_tostring( L, -1 );
+                    }
+                    lua_pop( L, 1 );
 
                     lua_getfield( L, -1, "uri" );
                     if ( lua_isstring( L, -1 ) )
@@ -253,7 +261,7 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
                     }
                     lua_pop( L, 1 );
 
-                    md.actions[ action_name ] = Action( uri, type );
+                    md.actions[ action_name ] = Action( description, uri, type );
 
                     lua_pop( L, 1 );
                 }

@@ -54,12 +54,14 @@ public:
         Action()
         {}
 
-        Action( const String & _uri, const String & _type )
+        Action( const String & _description, const String & _uri, const String & _type )
         :
+            description( _description ),
             uri( _uri ),
             type( _type )
         {}
 
+        String description;
         String uri;
         String type;
     };
