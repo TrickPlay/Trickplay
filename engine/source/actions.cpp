@@ -64,12 +64,6 @@ bool Actions::launch_action(
         return false;
     }
 
-    String app_to_launch;
-    String action_to_launch;
-    String uri_to_launch( uri ? uri : "" );
-    String type_to_launch( type ? type : "" );
-    String parameters_to_launch( parameters ? parameters : "" );
-
     matches.clear();
 
     SystemDatabase::AppActionMap actions = context->get_db()->get_app_actions_for_current_profile();
@@ -84,6 +78,13 @@ bool Actions::launch_action(
         // If an app id was provided and it does not match this app, skip the rest
 
         if ( app_id && String( app_id ) != it->first )
+        {
+            continue;
+        }
+
+        // Skip my own actions
+
+        if ( it->first == caller )
         {
             continue;
         }
@@ -123,6 +124,9 @@ bool Actions::launch_action(
         }
     }
 
+    String app_to_launch;
+    String action_to_launch;
+
     // Now check the matches.
 
     if ( matches.empty() )
@@ -159,10 +163,9 @@ bool Actions::launch_action(
 
     actions_debug( "  WILL LAUNCH : app = '%s' : action = '%s'", app_to_launch.c_str(), action_to_launch.c_str() );
 
-    // TODO: populate a launch info structure that has the caller, action, uri, type and parameters
-    // Launch the app with that information.
+    App::LaunchInfo launch( caller, action_to_launch, uri, type, parameters );
 
-    return false;
+    return TP_RUN_OK == context->launch_app( app_to_launch.c_str(), launch );
 }
 
 //.............................................................................

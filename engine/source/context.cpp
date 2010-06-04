@@ -934,7 +934,7 @@ int TPContext::load_app( App ** app )
 
     // Load the app
 
-    *app = App::load( this, md );
+    *app = App::load( this, md , App::LaunchInfo() );
 
     if ( !*app )
     {
@@ -948,7 +948,7 @@ int TPContext::load_app( App ** app )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::launch_app( const char * app_id )
+int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch )
 {
     String app_path = get_db()->get_app_path( app_id );
 
@@ -964,7 +964,7 @@ int TPContext::launch_app( const char * app_id )
         return TP_RUN_APP_CORRUPT;
     }
 
-    App * new_app = App::load( this, md );
+    App * new_app = App::load( this, md, launch );
 
     if ( !new_app )
     {

@@ -88,6 +88,34 @@ public:
     };
 
     //.........................................................................
+    // Launch information
+
+    struct LaunchInfo
+    {
+        LaunchInfo()
+        {}
+
+        LaunchInfo( const String & _caller,
+                const String & _action = String(),
+                const char * _uri = NULL,
+                const char * _type = NULL,
+                const char * _parameters = NULL )
+        :
+            caller( _caller ),
+            action( _action ),
+            uri( _uri ? _uri : "" ),
+            type( _type ? _type : "" ),
+            parameters( _parameters ? _parameters : "" )
+        {}
+
+        String  caller;
+        String  action;
+        String  uri;
+        String  type;
+        String  parameters; // serialized Lua
+    };
+
+    //.........................................................................
     // Loads metadata for an app
 
     static bool load_metadata( const char * app_path, Metadata & metadata );
@@ -110,7 +138,7 @@ public:
     //.........................................................................
     // Loads an app
 
-    static App * load( TPContext * context, const Metadata & metadata );
+    static App * load( TPContext * context, const Metadata & metadata, const LaunchInfo & launch );
 
     //.........................................................................
     // Get the app from the Lua state
@@ -134,6 +162,10 @@ public:
     //.........................................................................
 
     const String & get_id() const;
+
+    //.........................................................................
+
+    const LaunchInfo & get_launch_info() const;
 
     //.........................................................................
     // Get the context
@@ -207,7 +239,7 @@ public:
 
 private:
 
-    App( TPContext * context, const Metadata & metadata, const String & data_path );
+    App( TPContext * context, const Metadata & metadata, const String & data_path, const LaunchInfo & launch );
 
     App()
     {}
@@ -258,6 +290,7 @@ private:
     EventGroup       *      event_group;
     Network::CookieJar   *  cookie_jar;
     guint32                 screen_gid;
+    LaunchInfo              launch;
 };
 
 

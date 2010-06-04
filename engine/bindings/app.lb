@@ -66,6 +66,71 @@ global app [[App*]]
     readonly string version
         [[version=self->get_metadata().version.c_str();]];
         
+    # Property: launch
+    # Returns information about how this app was launched. The
+    # result is a table that has the fields below. All of them may
+    # be nil.
+    #
+    # caller - 	The id of the launched this one.
+    #
+    # action - 	The name of the action that was invoked. 
+    #
+    # uri -     If the app was invoked by an action, the URI attached 
+    #			to the action.
+    #
+    # type -	The mime type for the URI. 
+    #
+    # parameters - Any parameters that the caller passed.
+    
+    readonly table launch
+    	[[
+    		const App::LaunchInfo & info( App::get( L )->get_launch_info() );
+    		
+    		lua_newtable( L );
+    		
+    		if ( ! info.caller.empty() )
+    		{
+    			lua_pushstring( L, info.caller.c_str() );
+    			lua_setfield( L, -2, "caller" );
+    		}
+    		
+    		if ( ! info.action.empty() )
+    		{
+    			lua_pushstring( L, info.action.c_str() );
+    			lua_setfield( L, -2, "action" );
+    		}
+    		
+    		if ( ! info.uri.empty() )
+    		{
+    			lua_pushstring( L, info.uri.c_str() );
+    			lua_setfield( L, -2, "uri" );
+    		}
+    		
+    		if ( ! info.type.empty() )
+    		{
+    			lua_pushstring( L, info.type.c_str() );
+    			lua_setfield( L, -2, "type" );
+    		}
+    		
+    		if ( ! info.parameters.empty() )
+    		{
+				String statement( "carp return " + info.parameters );
+	
+				if ( luaL_dostring( L, statement.c_str() ) != 0 )
+				{
+					// Pop the error
+
+					lua_pop( L, 1 );
+				}
+				else
+				{
+				    // The result of dostring should be at the top of the stack
+				    	    
+    				lua_setfield( L, -2, "parameters" );
+			    }
+    		}
+    	]];
+        
     # Event: on_loaded
     # This callback is invoked after the app has finished loading.
     
