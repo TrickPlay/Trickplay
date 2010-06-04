@@ -729,7 +729,7 @@ int App::run( const StringSet & allowed_names )
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
     }
 
-    g_info( "APP RUN %s : %1.2f s", metadata.id.c_str(), t.elapsed() );
+    g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
 
     return result;
 }
