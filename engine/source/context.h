@@ -6,6 +6,8 @@
 #include "notify.h"
 #include "mediaplayers.h"
 #include "controller_list.h"
+#include "app.h"
+
 //-----------------------------------------------------------------------------
 // Internal configuration keys
 
@@ -38,7 +40,6 @@
 
 class SystemDatabase;
 class ControllerServer;
-class App;
 class Console;
 class Downloads;
 class Installer;
@@ -103,7 +104,7 @@ public:
     //.........................................................................
     // Launches one app from another, and kills the first.
 
-    int launch_app( const char * app_id );
+    int launch_app( const char * app_id, const App::LaunchInfo & launch );
 
     //.........................................................................
     // Kills the current app and either goes back to the previous one, or

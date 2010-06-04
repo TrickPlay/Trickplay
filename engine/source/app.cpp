@@ -521,7 +521,7 @@ String App::get_data_directory( TPContext * context, const String & app_id )
 
 //-----------------------------------------------------------------------------
 
-App * App::load( TPContext * context, const App::Metadata & md )
+App * App::load( TPContext * context, const App::Metadata & md, const LaunchInfo & launch )
 {
     String app_data_path = get_data_directory( context, md.id );
 
@@ -530,7 +530,7 @@ App * App::load( TPContext * context, const App::Metadata & md )
         return NULL;
     }
 
-    return new App( context, md, app_data_path );
+    return new App( context, md, app_data_path, launch );
 }
 
 //-----------------------------------------------------------------------------
@@ -546,7 +546,7 @@ int App::lua_panic_handler( lua_State * L )
 
 //-----------------------------------------------------------------------------
 
-App::App( TPContext * c, const App::Metadata & md, const String & dp )
+App::App( TPContext * c, const App::Metadata & md, const String & dp, const LaunchInfo & _launch )
     :
     context( c ),
     metadata( md ),
@@ -556,7 +556,8 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp )
     network( NULL ),
     event_group( new EventGroup() ),
     cookie_jar( NULL ),
-    screen_gid( 0 )
+    screen_gid( 0 ),
+    launch( _launch )
 {
 
     // Create the user agent
@@ -929,6 +930,13 @@ const App::Metadata & App::get_metadata() const
 const String & App::get_id() const
 {
     return metadata.id;
+}
+
+//-----------------------------------------------------------------------------
+
+const App::LaunchInfo & App::get_launch_info() const
+{
+    return launch;
 }
 
 //-----------------------------------------------------------------------------

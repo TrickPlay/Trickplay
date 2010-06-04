@@ -251,7 +251,7 @@ global apps [[Apps*]]
     
     int launch( string app_id )
         [[
-            result=self->get_context()->launch_app( app_id );
+            result=self->get_context()->launch_app( app_id , App::LaunchInfo( App::get( L )->get_id() ) );
         ]];
 
     #..........................................................................
