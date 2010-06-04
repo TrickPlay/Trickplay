@@ -139,6 +139,8 @@ public:
 	if (luaL_dostring(L,statement.c_str())!=0)
 	{
 	    g_warning("FAILED TO EVALUATE SETTING VALUE");
+	    // pop the error
+	    lua_pop( L, 1 );
 	    return false;
 	}
 	else
