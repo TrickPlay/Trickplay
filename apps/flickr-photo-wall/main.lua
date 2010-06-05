@@ -274,9 +274,32 @@ function screen.on_key_down(screen,keyval)
 				activate(photo_index[image_position_to_index(selection_col, selection_row)].thumbWallImage)
 			end
 		end,
+		
+		[keys.space] = function()
+		
+                        local start_index = image_position_to_index(selection_col, selection_row)  
+			
+			if not photo_index[ start_index ] then
+			
+				return
+                        end
+			
+                        local slides = {}
+				
+			for i = start_index , # photo_index do
+				
+				table.insert( slides, Flickr.get_original_url( photo_index[ i ] ) )
+				
+			end
+				
+			launch_action( nil , "SLIDESHOW" , nil , "image/jpeg" , slides )
+			
+		end,
 
 		[keys.Return] = function()
+                        
 			if not zoom_image then
+		
 				-- identify the photo based on column & row
 				local the_photo = photo_index[image_position_to_index(selection_col, selection_row)]
 				if the_photo == nil then
