@@ -1,0 +1,15 @@
+app=
+{
+    id          = "com.trickplay.slideshow",
+    release     = "1",
+    version     = "1.0",
+    name        = "Slideshow",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc.",
+    
+    actions =
+    {
+        SLIDESHOW = { description = "Play a photo slideshow" , uri = ".*" , type = "image/*" }
+    }
+}
+
