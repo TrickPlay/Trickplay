@@ -309,6 +309,19 @@ Network::Response::Response( const Response & other )
     g_byte_array_ref( body );
 }
 
+const Network::Response & Network::Response::operator =( const Network::Response & other )
+{
+    code = other.code;
+    headers = other.headers;
+    status = other.status;
+    body = other.body;
+    failed = other.failed;
+
+    g_byte_array_ref( body );
+
+    return * this;
+}
+
 //*****************************************************************************
 
 class Network::Thread
