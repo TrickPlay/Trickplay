@@ -5,6 +5,11 @@ app=
     version     = "1.0",
     name        = "Flickr Wall",
     author      = "Pablo Pissanetzky",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    
+    actions =
+    {
+        LAUNCH = {}
+    }
 }
 
