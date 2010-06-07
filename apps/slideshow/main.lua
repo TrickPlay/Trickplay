@@ -10,82 +10,90 @@ if launch.action ~= "SLIDESHOW" or launch.parameters == nil then
     
 end    
 
-url_list = launch.parameters
-
---[[
-url_list =
-{
-    "http://farm1.static.flickr.com/29/60950480_a297fd04d3_o.jpg",
-    "http://farm4.static.flickr.com/3636/3517315415_354a090962_o.jpg"
-}
-]]
-
-next_url = 1
-
-image_queue = {}
-
-image_request_max = 1
-
-image_requests = 0
-
 -------------------------------------------------------------------------------
--- When an image is loaded, we add it to the queue and decrement the number
--- of outstanding requests
+-- A queue of images - you feed it an array of URLs and then call get_next_image
+-- to get the next one.
 
-function image_loaded( image , failed )
+function ImageQueue( url_list )
 
-    if not failed then
-    
-        table.insert( image_queue , image )
-        
-    end
-    
-    image_requests = image_requests - 1
-    
-    image.on_loaded = nil
-
-end
-
--------------------------------------------------------------------------------
--- Returns the next image in the queue (or nil) and starts up requests for more
--- images until it reaches image_request_max.
-
-function get_next_image()
-
-    local result = nil
-    
-    if #image_queue > 0 then
-    
-        result = image_queue[ 1 ]
-        
-        table.remove( image_queue, 1 )
-    
-    end
-
-    if not result and image_requests < image_request_max then
-    
-        for i = 1 , image_request_max - image_requests do
-    
-            if next_url > # url_list then
+    local result =
+        {
+            url_list = url_list,
             
-                break
+            next_url = 1,
+            
+            images = {},
+            
+            max_requests = 1,
+            
+            outstanding_requests = 0,
+        }
+    
+    function result.get_next_image( self )
+    
+        local result = nil
+        
+        -- Pick the next image from the queue
+        
+        if # self.images > 0 then
+        
+            result = self.images[ 1 ]
+            
+            table.remove( self.images , 1 )
+        
+        end
+        
+        -- Now, start new requests if necessary
+        
+        if self.outstanding_requests < self.max_requests then
+        
+            for i = 1 , self.max_requests - self.outstanding_requests do
+        
+                if self.next_url > # self.url_list then
+                
+                    break
+                    
+                end
+            
+                -- Create the image
+            
+                local image = Image{ src = self.url_list[ self.next_url ] }
+                
+                -- Callback when the image is loaded
+                
+                function image.on_loaded( image , failed )
+                
+                    if not failed then
+                    
+                        table.insert( self.images , image )
+                        
+                    end
+                    
+                    self.outstanding_requests = self.outstanding_requests - 1
+                    
+                    image.on_loaded = nil
+                
+                end
+                
+                self.outstanding_requests = self.outstanding_requests + 1
+                
+                self.next_url = self.next_url + 1
                 
             end
         
-            Image{ src = url_list[ next_url ] , on_loaded = image_loaded }
-            
-            image_requests = image_requests + 1
-            
-            next_url = next_url + 1
-            
         end
+        
+        return result
     
     end
-
-    return result
     
+    return result
+
 end
 
+-------------------------------------------------------------------------------
+
+image_queue = ImageQueue( launch.parameters )
 
 current_image = nil
 
@@ -118,7 +126,7 @@ function idle.on_idle( idle , seconds )
 
     if not current_image then
     
-        current_image = get_next_image()
+        current_image = image_queue:get_next_image()
         
         if current_image then
         
@@ -126,8 +134,6 @@ function idle.on_idle( idle , seconds )
             
             image_time:start()
             
-            print( "GOT IMAGE" )
-        
         end
         
     else
