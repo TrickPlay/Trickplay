@@ -49,6 +49,7 @@ public:
         Response();
         ~Response();
         Response( const Response & other );
+        const Response & operator =( const Response & other );
 
         int             code;
         StringMultiMap  headers;
