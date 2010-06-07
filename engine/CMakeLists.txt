@@ -313,6 +313,7 @@ add_library(
     ${ENGINE_SRC}/source/image_decoders.cpp
     ${ENGINE_SRC}/source/signature.cpp
     ${ENGINE_SRC}/source/actions.cpp
+    ${ENGINE_SRC}/source/thread_pool.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
