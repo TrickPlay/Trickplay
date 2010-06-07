@@ -33,12 +33,14 @@ public:
 
 private:
 
+    static GQueue * get_queue();
+
+    static void lock( bool _lock );
+
     Profiler( const Profiler & );
 
     const char *    name;
     GTimer *        timer;
-
-    static GQueue   queue;
 
     typedef std::pair< unsigned int , double > Entry;
     typedef std::map< String , Entry > EntryMap;
