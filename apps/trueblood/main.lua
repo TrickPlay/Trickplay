@@ -1,3 +1,5 @@
+mediaplayer:pause()
+
 local SHADOW_COLOR = "000000"
 local SHADOW_OPACITY = 255 * 1/4
 
@@ -18,6 +20,11 @@ local ShadowText = function(properties, offset)
 	return Group { children = { shadow, maintext } }
 end
 
+
+local curtain = Rectangle { x=-100, y=-100, w = screen.w*2, h = screen.h*2, z = -10, color = "000000", opacity = 255 }
+local media = Group {}
+
+screen:add(media,curtain)
 
 local assets = {
 	credits = {
@@ -85,7 +92,7 @@ assets.shirt[10].children[3].x = (assets.shirt[10].w - assets.shirt[10].children
 
 local states = { assets.credits, assets.drink, assets.shirt, current=1 }
 
-screen:add(unpack(states[states.current]))
+media:add(unpack(states[states.current]))
 screen:show()
 
 function screen.on_key_down ( screen, key )
@@ -93,7 +100,11 @@ function screen.on_key_down ( screen, key )
 		states.current = math.min(states.current + 1, #states)
 	elseif key == keys.Left or key == keys.Up then
 		states.current = math.max(states.current - 1, 1)
+	else return
 	end
-	screen:clear()
-	screen:add(unpack(states[states.current]))
+	media:animate({duration = 250, opacity = 0, y = screen.h, mode = "EASE_OUT_SINE", on_completed = function()
+		media:clear()
+		media:add(unpack(states[states.current]))
+		media:animate({duration = 250, mode = "EASE_IN_SINE", opacity = 255, y = 0 })
+	end})
 end
