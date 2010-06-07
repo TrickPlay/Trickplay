@@ -10,27 +10,41 @@ module clutter_image;
 #include "clutter_util.h"
 #include "context.h"
 #include "sysdb.h"
+#include "thread_pool.h"
 ]]
 
 [[
+
 static void Image_destroy_image_closure(gpointer texture)
 {
     g_object_unref(G_OBJECT(texture));
 }
 
-void Image_response_callback(const Network::Response & response,gpointer texture)
+class DecodeTask : public ThreadPool::Task
 {
-    GError * error=NULL;
-    
-    if (response.failed)
-    {
-		g_set_error(&error,
-		    CLUTTER_TEXTURE_ERROR,
-		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-		    "Request failed : %s" , response.status.c_str() );	
-    }
-    else
-    {
+public:
+
+	DecodeTask( const Network::Response & _response, ClutterTexture * _texture )
+	:
+		response( _response ),
+		texture( _texture ),
+		image( NULL )
+	{
+		g_object_ref( G_OBJECT( texture ) );
+	}
+	
+	~DecodeTask()
+	{
+		g_object_unref( G_OBJECT( texture ) );
+
+		if ( image )
+		{
+			delete image;
+		}
+	}
+	
+	virtual void process()
+	{
     	const char * content_type = NULL;
     	
     	StringMultiMap::const_iterator it = response.headers.find( "Content-Type" );
@@ -39,22 +53,65 @@ void Image_response_callback(const Network::Response & response,gpointer texture
     	{
     		content_type = it->second.c_str();
     	}
-    	    	
-		if ( ! Images::load_texture(CLUTTER_TEXTURE(texture),response.body->data,response.body->len, content_type ) )
-		{
-		    g_set_error(&error,
-			CLUTTER_TEXTURE_ERROR,
-			CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-			"Failed to load texture data");
-		}
-    }
-    
-    if (error)
-    {
-	g_warning("Failed to load image : %s",error->message);
-	g_signal_emit_by_name(G_OBJECT(texture),"load-finished",error);
+    	
+    	image = Image::decode( response.body->data, response.body->len, content_type );
+	}
 	
-	g_clear_error(&error);
+	virtual void process_main_thread()
+	{
+		if ( ! image )
+		{
+			GError * error = NULL;
+		
+		    g_set_error(&error,
+				CLUTTER_TEXTURE_ERROR,
+				CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+				"Failed to load texture data");
+				
+			g_warning("FAILED TO LOAD IMAGE : %s",error->message);
+			
+			g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
+			
+			g_clear_error( &error );
+		}
+		else
+		{
+			Images::load_texture( texture, image );
+		}		
+	} 
+	
+	Network::Response response;
+	ClutterTexture *  texture;
+	Image *		      image;
+};
+
+void Image_response_callback(const Network::Response & response,gpointer texture)
+{
+    if ( response.failed )
+    {
+    	GError * error=NULL;
+    
+		g_set_error(&error,
+		    CLUTTER_TEXTURE_ERROR,
+		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+		    "Request failed : %s" , response.status.c_str() );	
+
+		g_warning("FAILED TO LOAD IMAGE : %s",error->message);
+	
+		g_signal_emit_by_name(G_OBJECT(texture),"load-finished",error);
+	
+		g_clear_error(&error);    
+    }
+    else
+    {
+    	static ThreadPool * thread_pool = NULL;
+    	
+    	if ( ! thread_pool )
+    	{
+    		thread_pool = new ThreadPool( 2 );
+    	}
+    	
+    	thread_pool->push( new DecodeTask( response , CLUTTER_TEXTURE( texture ) ) );    			
     }
 }
 
