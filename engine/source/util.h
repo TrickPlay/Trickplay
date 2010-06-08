@@ -138,6 +138,51 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// This class lets you push things to free into it - when this instance is
+// destroyed, it frees all the things you pushed into it. Makes it easier
+// to deal with cleaning up multiple allocations across early returns and
+// when exceptions are thrown.
+
+class FreeLater
+{
+public:
+
+    FreeLater()
+    {
+    }
+
+    ~FreeLater()
+    {
+        for( FreeList::reverse_iterator it = list.rbegin(); it != list.rend(); ++it )
+        {
+            it->second( it->first );
+        }
+    }
+
+    void operator()( gpointer data, GDestroyNotify destroy = g_free )
+    {
+        list.push_back( FreePair( data, destroy ) );
+    }
+
+    void operator()( gchar ** data )
+    {
+        list.push_back( FreePair( data, ( GDestroyNotify ) g_strfreev ) );
+    }
+
+private:
+
+    FreeLater( const FreeLater & ) {}
+
+    const FreeLater & operator = ( const FreeLater & ) { return * this; }
+
+    typedef std::pair< gpointer, GDestroyNotify > FreePair;
+
+    typedef std::list< FreePair > FreeList;
+
+    FreeList list;
+};
+
+//-----------------------------------------------------------------------------
 
 namespace Util
 {
