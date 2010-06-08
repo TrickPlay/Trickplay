@@ -115,6 +115,30 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+class DebugLog
+{
+public:
+
+    DebugLog( bool _on ) : on( _on ) {}
+
+    inline void operator()( const gchar * format, ...)
+    {
+        if ( on )
+        {
+            va_list args;
+            va_start( args, format );
+            g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
+            va_end( args );
+        }
+    }
+
+private:
+
+    bool on;
+};
+
+//-----------------------------------------------------------------------------
+
 namespace Util
 {
     //-----------------------------------------------------------------------------
