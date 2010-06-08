@@ -9,23 +9,10 @@
 #include "util.h"
 #include "image_decoders.h"
 
-//-----------------------------------------------------------------------------
-// Set to 1 to get debug output
+//=============================================================================
+// Set to false to stop image debug log
 
-#define TP_IMAGES_DEBUG         1
-
-//-----------------------------------------------------------------------------
-
-inline void images_debug( const gchar * format, ... )
-{
-#if TP_IMAGES_DEBUG
-    va_list args;
-    va_start( args, format );
-    g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
-    va_end( args );
-#else
-#endif
-}
+DebugLog images_debug( true );
 
 //=============================================================================
 // Wraps around an external decoder
@@ -228,6 +215,8 @@ Images::Images()
 :
     external_decoder( NULL )
 {
+    g_static_rec_mutex_init( & mutex );
+
     Decoder * png  = ImageDecoders::make_png_decoder();
     Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
     Decoder * tiff = ImageDecoders::make_tiff_decoder();
@@ -292,6 +281,7 @@ Images::~Images()
 
 #endif
 
+    g_static_rec_mutex_free( & mutex );
 }
 
 //-----------------------------------------------------------------------------
@@ -341,6 +331,8 @@ void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data
 {
     Images * self( Images::get() );
 
+    Util::GSRMutexLock lock( & self->mutex );
+
     if ( self->external_decoder )
     {
         delete self->external_decoder;
@@ -355,6 +347,8 @@ void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data
 Images::DecoderList Images::get_decoders( const char * _hint )
 {
     Images * self( Images::get() );
+
+    Util::GSRMutexLock lock( & self->mutex );
 
     DecoderList result( self->decoders );
 
@@ -540,6 +534,8 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
 
     Images * self( Images::get() );
 
+    Util::GSRMutexLock lock( & self->mutex );
+
     ImageInfo info( image );
 
     ImageMap::iterator it( self->images.find( texture ) );
@@ -568,7 +564,11 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
 
 void Images::texture_destroyed_notify( gpointer data, GObject * instance )
 {
-    ( ( Images * ) data )->images.erase( ( gpointer ) instance );
+    Images * self = ( Images *) data;
+
+    Util::GSRMutexLock lock( & self->mutex );
+
+    self->images.erase( ( gpointer ) instance );
 }
 
 #endif
@@ -580,6 +580,8 @@ void Images::dump()
 #ifndef TP_PRODUCTION
 
     Images * self( Images::get() );
+
+    Util::GSRMutexLock lock( & self->mutex );
 
     gsize total = 0;
     int i = 1;
@@ -609,6 +611,8 @@ void Images::dump_cache()
 #if TP_IMAGE_CACHE_ENABLED
 
     Images * self( Images::get() );
+
+    Util::GSRMutexLock lock( & self->mutex );
 
     gsize total = 0;
     int i = 1;
@@ -641,7 +645,12 @@ void Images::set_cache_limit( guint bytes )
 {
 #if TP_IMAGE_CACHE_ENABLED
 
-        Images::get()->cache_limit = bytes;
+    Images * self( Images::get() );
+
+    Util::GSRMutexLock lock( & self->mutex );
+
+    self->cache_limit = bytes;
+
 #endif
 }
 
@@ -680,6 +689,8 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
 #if TP_IMAGE_CACHE_ENABLED
 
     Images * self( Images::get() );
+
+    Util::GSRMutexLock lock( & self->mutex );
 
     CacheMap::iterator it = self->cache.find( filename );
 
@@ -737,6 +748,8 @@ bool Images::prune_sort( const PruneEntry & a, const PruneEntry & b )
 
 void Images::prune_cache()
 {
+    Util::GSRMutexLock lock( & mutex );
+
     if ( cache_size < cache_limit )
     {
         return;

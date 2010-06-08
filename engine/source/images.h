@@ -148,6 +148,10 @@ private:
     static DecoderList get_decoders( const char * hint = NULL );
 
     //.........................................................................
+
+    GStaticRecMutex mutex;
+
+    //.........................................................................
     // List of our standard decoders
 
     DecoderList     decoders;
