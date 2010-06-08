@@ -22,12 +22,10 @@ end
 
 
 local curtain = Rectangle { x=-100, y=-100, w = screen.w*2, h = screen.h*2, z = -10, color = "000000", opacity = 255 }
-local media = Group {}
-
-screen:add(media,curtain)
+screen:add(curtain)
 
 local assets = {
-	credits = {
+	credits = Group { children = {
 		Image { src = "assets/credits/background-image-credits.png",		x = 0,		y = 0 },
 		Image { src = "assets/credits/trueblood-credits-background.png",	x = 1254,	y = 0 },
 		Group { children = {
@@ -39,9 +37,9 @@ local assets = {
 		Image { src = "assets/credits/button-shopnow.png",			x = 1480, y = 223 },
 		Image { src = "assets/credits/product-shirt-medium.png",	x = 1480, y = 297 },
 		Image { src = "assets/credits/product-drink-medium.png",	x = 1480, y = 707 },
-	},
+	} },
 
-	drink = {
+	drink = Group { children = {
 		Image { src = "assets/shop-drink/background-image-drinks.jpg",		x = 0,		y = 0 },
 
 		Image { src = "assets/shop-common/trueblood-shop-bkgd.png",			x = 0,		y = 0 },
@@ -59,9 +57,9 @@ local assets = {
 					ShadowText({ font = "Fontin 58px", color = "ffffff", text = "$17.95", x = 0, y=550},	{x=3, y=3})
 				},
 				w=477,														x = 1442,	y = 29 },
-	},
+	} },
 	
-	shirt = {
+	shirt = Group { children = {
 		Image { src = "assets/shop-shirt/background-image-shirt.jpg",		x = 0,		y = 0 },
 
 		Image { src = "assets/shop-common/trueblood-shop-bkgd.png",			x = 0,		y = 0 },
@@ -80,31 +78,35 @@ local assets = {
 				},
 				w=477,														x = 1442,	y = 29 },
 		Image { src = "assets/shop-shirt/button-size-small.png",			x = 1402,	y = 579 },
-	},
+	} },
 }
 
-for _,child in pairs(assets.credits[3].children) do
-	child.x = (assets.credits[3].w - child.w) / 2
+for _,child in pairs(assets.credits.children[3].children) do
+	child.x = (assets.credits.children[3].w - child.w) / 2
 end
 
-assets.drink[10].children[3].x = (assets.drink[10].w - assets.drink[10].children[3].w)/2
-assets.shirt[10].children[3].x = (assets.shirt[10].w - assets.shirt[10].children[3].w)/2
+assets.drink.children[10].children[3].x = (assets.drink.children[10].w - assets.drink.children[10].children[3].w)/2
+assets.shirt.children[10].children[3].x = (assets.shirt.children[10].w - assets.shirt.children[10].children[3].w)/2
 
 local states = { assets.credits, assets.drink, assets.shirt, current=1 }
 
-media:add(unpack(states[states.current]))
+assets.drink.opacity = 0
+assets.shirt.opacity = 0
+screen:add(assets.credits, assets.drink, assets.shirt)
 screen:show()
 
 function screen.on_key_down ( screen, key )
+
+	local old = states[states.current]
+
 	if key == keys.Right or key == keys.Return or key == keys.Down then
 		states.current = math.min(states.current + 1, #states)
 	elseif key == keys.Left or key == keys.Up then
 		states.current = math.max(states.current - 1, 1)
 	else return
 	end
-	media:animate({duration = 250, opacity = 0, y = screen.h, mode = "EASE_OUT_SINE", on_completed = function()
-		media:clear()
-		media:add(unpack(states[states.current]))
-		media:animate({duration = 250, mode = "EASE_IN_SINE", opacity = 255, y = 0 })
-	end})
+
+	old:animate({ duration = 150, opacity = 0, mode = "EASE_OUT_SINE", on_completed = function()
+		states[states.current]:animate({ duration = 150, opacity = 255, mode = "EASE_IN_SINE" })
+	end })
 end
