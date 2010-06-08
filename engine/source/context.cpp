@@ -375,6 +375,8 @@ int TPContext::console_command_handler( const char * command, const char * param
 
 void TPContext::setup_fonts()
 {
+    FreeLater free_later;
+
     // Get the a directory where fonts live
 
     const char * fonts_path = get( TP_FONTS_PATH );
@@ -389,7 +391,7 @@ void TPContext::setup_fonts()
     // we will have a tiny configuration file and the fontconfig cache.
 
     gchar * font_cache_path = g_build_filename( get( TP_DATA_PATH ), "fonts", NULL );
-    Util::GFreeLater free_font_cache_path( font_cache_path );
+    free_later( font_cache_path );
 
     if ( g_mkdir_with_parents( font_cache_path, 0700 ) != 0 )
     {
@@ -399,7 +401,7 @@ void TPContext::setup_fonts()
     // We write the configuration file that sets the cache directory
 
     gchar * font_conf_file_name = g_build_filename( font_cache_path, "fonts.conf", NULL );
-    Util::GFreeLater free_font_conf_file_name( font_conf_file_name );
+    free_later( font_conf_file_name );
 
     if ( !g_file_test( font_conf_file_name, G_FILE_TEST_EXISTS ) )
     {
@@ -896,6 +898,47 @@ int TPContext::run()
 
 //-----------------------------------------------------------------------------
 
+String TPContext::make_fake_app()
+{
+    String result;
+
+#ifndef TP_PRODUCTION
+
+    String data_directory = App::get_data_directory( this, "com.trickplay.empty" );
+
+    if ( ! data_directory.empty() )
+    {
+        FreeLater free_later;
+
+        gchar * app_path = g_build_filename( data_directory.c_str(), "source", NULL );
+
+        free_later( app_path );
+
+        if ( 0 == g_mkdir_with_parents( app_path, 0700 ) )
+        {
+            gchar * app = g_build_filename( app_path, "app", NULL );
+
+            free_later( app );
+
+            g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+
+            gchar * main = g_build_filename( app_path, "main.lua", NULL );
+
+            free_later( main );
+
+            g_file_set_contents( main, "--Automatically Created", -1, NULL );
+
+            result = app_path;
+        }
+    }
+
+#endif
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
 int TPContext::load_app( App ** app )
 {
     PROFILER( "TPContext::load_app" );
@@ -920,7 +963,24 @@ int TPContext::load_app( App ** app )
     else
     {
         // Get the base path for the app
-        app_path = get( TP_APP_PATH );
+
+        const char * ap = get( TP_APP_PATH );
+
+        if ( ! ap )
+        {
+            app_path = make_fake_app();
+
+            if ( app_path.empty() )
+            {
+                g_warning( "NO APP WAS GIVEN - FAILED TO CREATE TEST APP" );
+
+                return TP_RUN_APP_PREPARE_FAILED;
+            }
+        }
+        else
+        {
+            app_path = ap;
+        }
     }
 
     // Load metadata
@@ -1310,7 +1370,7 @@ void TPContext::validate_configuration()
     // TP_APP_PATH
 
     const char * app_path = get( TP_APP_PATH );
-
+#if 0
     if ( !app_path && !get( TP_APP_ID ) )
     {
         gchar * c = g_get_current_dir();
@@ -1318,7 +1378,7 @@ void TPContext::validate_configuration()
         g_warning( "DEFAULT:%s=%s", TP_APP_PATH, c );
         g_free( c );
     }
-
+#endif
     if ( app_path && !g_path_is_absolute( app_path ) )
     {
         gchar * new_app_path = g_build_filename( g_get_current_dir(), app_path, NULL );
@@ -1607,6 +1667,8 @@ Image * TPContext::load_icon( const gchar * path )
 {
     PROFILER( "TPContext::load_icon" );
 
+    FreeLater free_later;
+
     static GChecksumType hash_type = G_CHECKSUM_MD5;
 
     //.........................................................................
@@ -1620,37 +1682,35 @@ Image * TPContext::load_icon( const gchar * path )
         return NULL;
     }
 
-    Util::GFreeLater free_contents( contents );
+    free_later( contents );
 
     //.........................................................................
     // Now, we compute an md5 hash of the contents
 
     gchar * data_hash = g_compute_checksum_for_string( hash_type, contents, content_length );
 
-    Util::GFreeLater free_data_hash( data_hash );
+    free_later( data_hash );
 
     //.........................................................................
     // Compute a hash for the full path to the file
 
     gchar * path_hash = g_compute_checksum_for_string( hash_type, path, -1 );
 
-    Util::GFreeLater free_path_hash( path_hash );
+    free_later( path_hash );
 
     //.........................................................................
     // See if we have an entry in the icon cache for this path
 
     gchar * icon_cache_path = g_build_filename( get( TP_DATA_PATH ), "icons", NULL );
 
-    Util::GFreeLater free_icon_cache_path( icon_cache_path );
-
+    free_later( icon_cache_path );
 
     //.........................................................................
     // This is the file name for the raw file
 
     gchar * icon_file_path = g_build_filename( icon_cache_path, path_hash, NULL );
 
-    Util::GFreeLater free_icon_file_path( icon_file_path );
-
+    free_later( icon_file_path );
 
     //.........................................................................
     // We also have an info file that has the data hash, width, height, pitch
@@ -1658,7 +1718,7 @@ Image * TPContext::load_icon( const gchar * path )
 
     gchar * info_file_name = g_strdup_printf( "%s.info", icon_file_path );
 
-    Util::GFreeLater free_info_file_name( info_file_name );
+    free_later( info_file_name );
 
 
     gchar * info_contents = NULL;
@@ -1667,12 +1727,12 @@ Image * TPContext::load_icon( const gchar * path )
 
     if ( g_file_get_contents( info_file_name, &info_contents, &info_length, NULL ) )
     {
-        Util::GFreeLater free_info_contents( info_contents );
+        free_later( info_contents );
 
 
         gchar * actual_data_hash = g_new0( gchar , info_length + 1 );
 
-        Util::GFreeLater free_actual_data_hash( actual_data_hash );
+        free_later( actual_data_hash );
 
         TPImage result;
         memset( &result, 0, sizeof( TPImage ) );
@@ -1724,7 +1784,7 @@ Image * TPContext::load_icon( const gchar * path )
         {
             gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() );
 
-            Util::GFreeLater free_info( info );
+            free_later( info );
 
             if ( g_file_set_contents( info_file_name, info, -1, NULL ) )
             {
