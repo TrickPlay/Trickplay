@@ -15,14 +15,45 @@ module clutter_image;
 
 [[
 
-static void Image_destroy_image_closure(gpointer texture)
+//-----------------------------------------------------------------------------
+// A structure we attach to the image to keep track of extra stuff
+
+struct ImageExtra
 {
-    g_object_unref(G_OBJECT(texture));
-}
+	static ImageExtra * get( gpointer texture )
+	{
+		ImageExtra * result = ( ImageExtra * ) g_object_get_data( G_OBJECT( texture ), "tp-image-extra" );
+		
+		if ( ! result )
+		{
+			result = g_new0( ImageExtra , 1 );
+			
+			g_object_set_data_full( G_OBJECT( texture ), "tp-image-extra", result, g_free );
+		}
+		
+		return result;
+	}
+	
+	int constructing;
+	int loaded;
+	int async;
+};
+
+//-----------------------------------------------------------------------------
+// ThreadPool task that decodes images
 
 class DecodeTask : public ThreadPool::Task
 {
 public:
+
+	DecodeTask( const char * _path, ClutterTexture * _texture )
+	:
+		path( _path ),
+		texture( _texture ),
+		image( NULL )
+	{
+		g_object_ref( G_OBJECT( texture ) );		
+	}
 
 	DecodeTask( const Network::Response & _response, ClutterTexture * _texture )
 	:
@@ -45,16 +76,14 @@ public:
 	
 	virtual void process()
 	{
-    	const char * content_type = NULL;
-    	
-    	StringMultiMap::const_iterator it = response.headers.find( "Content-Type" );
-    	
-    	if ( it != response.headers.end() )
-    	{
-    		content_type = it->second.c_str();
-    	}
-    	
-    	image = Image::decode( response.body->data, response.body->len, content_type );
+		if ( ! path.empty() )
+		{
+			image = Image::decode( path.c_str() ); 
+		}
+		else
+		{
+	    	image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+	    }
 	}
 	
 	virtual void process_main_thread()
@@ -76,14 +105,32 @@ public:
 		}
 		else
 		{
+			ImageExtra::get( texture )->loaded = TRUE;
+
 			Images::load_texture( texture, image );
 		}		
 	} 
 	
-	Network::Response response;
-	ClutterTexture *  texture;
-	Image *		      image;
+	static void push( DecodeTask * task )
+	{
+		static ThreadPool * thread_pool = NULL;
+		
+		if ( ! thread_pool )
+		{
+			thread_pool = new ThreadPool( 2 );
+		}
+		
+		thread_pool->push( task );
+	}
+	
+	String				path;
+	Network::Response	response;
+	ClutterTexture *  	texture;
+	Image *		      	image;
 };
+
+//-----------------------------------------------------------------------------
+// Callback for network requests
 
 void Image_response_callback(const Network::Response & response,gpointer texture)
 {
@@ -104,20 +151,111 @@ void Image_response_callback(const Network::Response & response,gpointer texture
     }
     else
     {
-    	static ThreadPool * thread_pool = NULL;
-    	
-    	if ( ! thread_pool )
-    	{
-    		thread_pool = new ThreadPool( 2 );
-    	}
-    	
-    	thread_pool->push( new DecodeTask( response , CLUTTER_TEXTURE( texture ) ) );    			
+    	DecodeTask::push( new DecodeTask( response , CLUTTER_TEXTURE( texture ) ) );    			
     }
 }
 
 ]]
 
 [[
+
+bool load_image( lua_State * L, ClutterTexture * texture )
+{
+	g_assert( L );
+	g_assert( texture );
+	
+	ImageExtra * extra = ImageExtra::get( texture );
+	
+	//.........................................................................
+	// If we are constructing, we don't load - because not all
+	// properties may have been set yet.
+	
+	if ( extra->constructing )
+	{
+		return false;
+	}
+	
+	//.........................................................................
+	// Get the image source 
+	
+	char * src = ( char * ) g_object_get_data( G_OBJECT( texture ), "tp-src" );
+	
+	if ( ! src )
+	{
+		return false;
+	}
+	
+	//.........................................................................
+	// Sanitize it, convert it to an app path or determine whether it is a valid
+	// uri.
+	
+    App * app = App::get( L );
+
+    bool is_uri = false;
+    
+    char * path = app->normalize_path( src, & is_uri );
+    
+    if ( ! path ) 
+    {
+    	return false;
+    }
+    
+    Util::GFreeLater free_path( path );
+
+	//.........................................................................
+	// Synchronous loading
+	
+	if ( ! extra->async )
+	{
+		bool result = false;
+		
+		if ( is_uri )
+		{
+			Network::Request request( app->get_user_agent(), path );
+
+			Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
+			
+			if ( ! response.failed )
+			{
+				result = Images::load_texture( texture, response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+			}
+		}
+		else
+		{
+			result = Images::load_texture( texture, path );
+		}
+		
+		extra->loaded = result;
+		
+		return result;
+	}
+
+	//.........................................................................
+	// Asynchronous loading
+	
+	if ( is_uri )
+	{
+		Network::Request request( app->get_user_agent(), path );
+		
+		g_object_ref( G_OBJECT( texture ) );
+		    
+		app->get_network()->perform_request_async(
+			request,
+			app->get_cookie_jar(),
+			Image_response_callback,
+			texture,
+			g_object_unref );		    
+	}
+	else
+	{
+		DecodeTask::push( new DecodeTask( path, texture ) );
+	} 
+	
+	extra->loaded = false;
+	
+	return true;
+} 
+
 void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L);
 void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*L);
 ]]
@@ -131,113 +269,100 @@ class Image [[ClutterActor*]] actor
     Image(table props = 0 )
         [[
             *self = clutter_texture_new();
-	    ClutterUtil::initialize_actor(L,*self,IMAGE_METATABLE);
-	    ClutterUtil::set_props_from_table(L,props);
-	    g_object_ref_sink(G_OBJECT(*self));
+	    	g_object_ref_sink( G_OBJECT( *self ) );
+	    	ClutterUtil::initialize_actor( L, *self, IMAGE_METATABLE );
+	    	
+	    	ImageExtra * extra = ImageExtra::get( *self );
+	    	 
+	    	extra->constructing = TRUE;
+	    	
+	    	ClutterUtil::set_props_from_table( L, props );
+
+	    	extra->constructing = FALSE;
+	    	
+			load_image( L, CLUTTER_TEXTURE( * self ) );	    	
         ]];
 	
     ~Image()
-	[[
-	    g_object_unref(G_OBJECT(self));
-	]];
+		[[
+		    g_object_unref( G_OBJECT( self ) );
+		]];
     
     string src
-	[[
-	    src=(char*)g_object_get_data(G_OBJECT(self),"tp-src");
-	]]
-	[[
-	    bool is_uri;
-	    
-	    App * app=App::get(L);
-	    
-	    char * path=app->normalize_path(src,&is_uri);
-	    
-	    if (path)
-	    {
-		Util::GFreeLater free_path(path);
-    
-		if (is_uri)
-		{
-		    Network::Request request(app->get_user_agent());
-		    request.url = path;
-		    
-		    g_object_ref(G_OBJECT(self));
-		    
-		    app->get_network()->perform_request_async(
-			request,
-			app->get_cookie_jar(),
-			Image_response_callback,
-			self,
-			Image_destroy_image_closure);		    
-		}
-		else
-		{
-		    if (!Images::load_texture(CLUTTER_TEXTURE(self),path))
-		    {
-			GError * error=NULL;
-
-			g_set_error(&error,
-			    CLUTTER_TEXTURE_ERROR,
-			    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-			    "Failed to load texture data");
+		[[
+		    src=( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
+		]]
+		[[
+			g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free);
 			
-			g_signal_emit_by_name(G_OBJECT(self),"load-finished",error);
-			
-			g_clear_error(&error);
-		    }
-		}
-		g_object_set_data_full(G_OBJECT(self),"tp-src",g_strdup(src),g_free);
-	    }
-	]];
+			load_image( L, CLUTTER_TEXTURE( self ) );
+		]];
 	
     readonly table base_size
-	[[
-	    gint w;
-	    gint h;
-	    clutter_texture_get_base_size(CLUTTER_TEXTURE(self),&w,&h);
-	    lua_newtable(L);
-	    lua_pushnumber(L,w);
-	    lua_rawseti(L,-2,1);
-	    lua_pushnumber(L,h);
-	    lua_rawseti(L,-2,2);
-	]];
+		[[
+		    gint w;
+		    gint h;
+		    clutter_texture_get_base_size(CLUTTER_TEXTURE(self),&w,&h);
+		    lua_newtable(L);
+		    lua_pushnumber(L,w);
+		    lua_rawseti(L,-2,1);
+		    lua_pushnumber(L,h);
+		    lua_rawseti(L,-2,2);
+		]];
 	
     bool sync_size
-	[[sync_size=clutter_texture_get_sync_size(CLUTTER_TEXTURE(self));]]
-	[[clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);]];
+		[[
+			sync_size=clutter_texture_get_sync_size(CLUTTER_TEXTURE(self));
+		]]
+		[[
+			clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);
+		]];
 	
     table tile
-	[[
-	    gboolean rx;
-	    gboolean ry;
-	    clutter_texture_get_repeat(CLUTTER_TEXTURE(self),&rx,&ry);
-	    lua_newtable(L);
-	    lua_pushboolean(L,rx);
-	    lua_rawseti(L,-2,1);
-	    lua_pushboolean(L,ry);
-	    lua_rawseti(L,-2,2);
-	]]
-	[[
-	    lb_checktable(L,2);
-	    lua_rawgeti(L,2,1);
-	    lua_rawgeti(L,2,2);
-	    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));
-	    lua_pop(L,2);
-	]];
+		[[
+		    gboolean rx;
+		    gboolean ry;
+		    clutter_texture_get_repeat(CLUTTER_TEXTURE(self),&rx,&ry);
+		    lua_newtable(L);
+		    lua_pushboolean(L,rx);
+		    lua_rawseti(L,-2,1);
+		    lua_pushboolean(L,ry);
+		    lua_rawseti(L,-2,2);
+		]]
+		[[
+		    lb_checktable(L,2);
+		    lua_rawgeti(L,2,1);
+		    lua_rawgeti(L,2,2);
+		    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));
+		    lua_pop(L,2);
+		]];
 	
     bool keep_aspect_ratio
-	[[keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));]]
-	[[clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);]];
+		[[
+			keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));
+		]]
+		[[
+			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
+		]];
 	
-    bool load_async
-	[[load_async=clutter_texture_get_load_async(CLUTTER_TEXTURE(self));]]
-	[[clutter_texture_set_load_async(CLUTTER_TEXTURE(self),load_async);]];
+    bool async
+		[[
+			async=ImageExtra::get( self )->async;
+		]]
+		[[
+			ImageExtra::get( self )->async = async;
+		]];
+		
+	readonly bool loaded
+		[[
+			loaded = ImageExtra::get( self )->loaded;
+		]];
 	
     bool load_from_data(lstring data)
-	[[
-	    result=Images::load_texture(CLUTTER_TEXTURE(self),(gpointer)data,data_len);
-	]];
-
+		[[
+		    result = Images::load_texture(CLUTTER_TEXTURE(self),(gpointer)data,data_len);
+		]];
+	
     /*
         This one lets you get an image from another app. We may want to leave it
         undocumented. I don't think it is dangerous because we are not returning
@@ -275,25 +400,36 @@ class Image [[ClutterActor*]] actor
         ]];
 	
     callback on_loaded
-	[[
-	    SignalCollector::get(L)->connect_if(
-		on_loaded,"on_loaded",
-		self,"load-finished",G_CALLBACK(Image_on_loaded),L);
-	]];
+		[[
+		    SignalCollector::get(L)->connect_if(
+				on_loaded,
+				"on_loaded",
+				self,
+				"load-finished",
+				G_CALLBACK(Image_on_loaded),
+				L);
+		]];
 	
     callback on_size_changed
-	[[
-	    SignalCollector::get(L)->connect_if(
-		on_size_changed,"on_size_changed",
-		self,"size-change",G_CALLBACK(Image_on_size_changed),L);	    
-	]];	
+		[[
+		    SignalCollector::get(L)->connect_if(
+				on_size_changed,
+				"on_size_changed",
+				self,
+				"size-change",
+				G_CALLBACK(Image_on_size_changed),
+				L);	    
+		]];	
 }
 
 [[
 void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L)
 {
-    lua_pushboolean(L,error?1:0);
-    invoke_Image_on_loaded(L,CLUTTER_ACTOR(self),1,0);
+	if ( ImageExtra::get( self )->async )
+	{
+    	lua_pushboolean(L,error?1:0);
+    	invoke_Image_on_loaded(L,CLUTTER_ACTOR(self),1,0);
+    }
 }
 
 void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*L)
@@ -303,6 +439,4 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
     invoke_Image_on_size_changed(L,CLUTTER_ACTOR(self),2,0);
 }
 ]]
-
-
 
