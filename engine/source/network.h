@@ -22,7 +22,7 @@ public:
     {
     public:
 
-        Request( const String & user_agent );
+        Request( const String & user_agent, const String & url = String() );
 
         String      url;
         String      method;
@@ -50,6 +50,8 @@ public:
         ~Response();
         Response( const Response & other );
         const Response & operator =( const Response & other );
+
+        const char * get_header( const String & name );
 
         int             code;
         StringMultiMap  headers;
