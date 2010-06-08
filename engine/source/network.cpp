@@ -273,12 +273,13 @@ private:
 //*****************************************************************************
 // Request
 
-Network::Request::Request( const String & ua )
+Network::Request::Request( const String & _user_agent, const String & _url )
     :
+    url( _url ),
     method( "GET" ),
     timeout_s( 30 ),
     redirect( true ),
-    user_agent( ua )
+    user_agent( _user_agent )
 {
 }
 
@@ -321,6 +322,14 @@ const Network::Response & Network::Response::operator =( const Network::Response
 
     return * this;
 }
+
+const char * Network::Response::get_header( const String & name )
+{
+    StringMultiMap::const_iterator it = headers.find( name );
+
+    return it == headers.end() ? NULL : it->second.c_str();
+}
+
 
 //*****************************************************************************
 
