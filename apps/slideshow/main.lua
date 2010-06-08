@@ -57,7 +57,7 @@ function ImageQueue( url_list )
             
                 -- Create the image
             
-                local image = Image{ src = self.url_list[ self.next_url ] }
+                local image = Image{ src = self.url_list[ self.next_url ] , async = true }
                 
                 -- Callback when the image is loaded
                 

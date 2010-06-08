@@ -130,6 +130,7 @@ function populate_next_page( completion )
 					-- and with an appropriate offset position in the wall
 					local image = Image{
 											src = Flickr.get_thumb_url(photo_index[i]),
+											async = true,
 											position = {
 															(tile_size - tonumber(photo_index[i].width_t))/2,
 															(tile_size - tonumber(photo_index[i].height_t))/2
@@ -332,6 +333,7 @@ function screen.on_key_down(screen,keyval)
 				local zoom_image_img = Image {
 										position = {0,0},
 										src = zoom_image_url,
+										async = true,
 				}
 				zoom_image_img.on_loaded = function()
 											-- The zoom might be cancelled before the image finished loading
