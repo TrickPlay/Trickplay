@@ -1,5 +1,8 @@
 mediaplayer:pause()
 
+-- Import the credits text
+dofile("assets/credits/credits.lua")
+
 local SHADOW_COLOR = "000000"
 local SHADOW_OPACITY = 255 * 1/4
 
@@ -22,11 +25,13 @@ end
 
 
 local curtain = Rectangle { x=-100, y=-100, w = screen.w*2, h = screen.h*2, z = -10, color = "000000", opacity = 255 }
-screen:add(curtain)
+local media = Group {}
+
+screen:add(media,curtain)
 
 local assets = {
 	credits = Group { children = {
-		Image { src = "assets/credits/background-image-credits.png",		x = 0,		y = 0 },
+		credits:get_page(),
 		Image { src = "assets/credits/trueblood-credits-background.png",	x = 1254,	y = 0 },
 		Group { children = {
 					ShadowText({ font = "Fontin Small Caps 58px", color = "ffffff", text = "Get Exclusive", x = 0, y = 0 },	{ x=3, y=3 }),
@@ -81,9 +86,24 @@ local assets = {
 	} },
 }
 
+assets.credits.children[1].x = (screen.w-assets.credits.children[1].w)/2
+assets.credits.children[1].y = (screen.h-assets.credits.children[1].h)/2
 for _,child in pairs(assets.credits.children[3].children) do
 	child.x = (assets.credits.children[3].w - child.w) / 2
 end
+
+local timer = Timer {
+						interval = 2,
+						on_timer = function ()
+							local new_credits = credits:get_page(true)
+							assets.credits:remove(assets.credits.children[1])
+							assets.credits:add(new_credits)
+							assets.credits:lower_child(new_credits)
+							assets.credits.children[1].x = (screen.w-assets.credits.children[1].w)/2
+							assets.credits.children[1].y = (screen.h-assets.credits.children[1].h)/2
+						end
+					}
+
 
 assets.drink.children[10].children[3].x = (assets.drink.children[10].w - assets.drink.children[10].children[3].w)/2
 assets.shirt.children[10].children[3].x = (assets.shirt.children[10].w - assets.shirt.children[10].children[3].w)/2
