@@ -1,5 +1,7 @@
 [[
 #include "app.h"
+#include "context.h"
+#include "sysdb.h"
 
 void app_loaded_handler(const char *,void * l);
 void app_closing_handler(const char *,void * l);
@@ -130,6 +132,27 @@ global app [[App*]]
 			    }
     		}
     	]];
+    	
+	# Function: set_badge
+	# Sets a badge that will be visible in the app launcher. Badges 
+	# can surface important information to the user.
+	#
+	# Arguments:
+	# style - A named badge style.
+	# text - The text to include in the badge. This should be short.
+	
+	set_badge( string style, string text )
+		[[
+			self->get_context()->get_db()->set_app_badge( self->get_id(), style, text );
+		]];    	
+		
+	# Function: clear_badge
+	# Clears the app's badge, if any.
+	
+	clear_badge()
+		[[
+			self->get_context()->get_db()->set_app_badge( self->get_id(), "", "" );
+		]];
         
     # Event: on_loaded
     # This callback is invoked after the app has finished loading.

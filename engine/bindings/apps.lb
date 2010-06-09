@@ -116,6 +116,12 @@ public:
         }
         
         lua_setfield(L,-2,"fingerprints");
+        
+        lua_pushstring(L,info.badge_style.c_str() );
+        lua_setfield(L, -2,"badge_style" );
+        
+        lua_pushstring(L,info.badge_text.c_str() );
+        lua_setfield(L,-2,"badge_text" );
     }
 
 private:
