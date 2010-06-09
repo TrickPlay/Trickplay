@@ -79,6 +79,8 @@ public:
         int         release;
         String      version;
         StringSet   fingerprints;
+        String      badge_style;
+        String      badge_text;
     };
 
     int get_app_count();
@@ -90,6 +92,8 @@ public:
     AppInfo::List get_all_apps();
 
     void update_all_apps( const App::Metadata::List & apps );
+
+    void set_app_badge( const String & id, const String & badge_style, const String & badge_text );
 
     //.....................................................................
     // Profile Apps

@@ -19,7 +19,9 @@ static const char * schema_create =
     "                   name TEXT,"
     "                   release INTEGER NOT NULL,"
     "                   version TEXT NOT NULL,"
-    "                   fingerprints TEXT );"
+    "                   fingerprints TEXT, "
+    "                   badge_style TEXT, "
+    "                   badge_text TEXT );"
 
     "create table profile_apps( profile_id INTEGER NOT NULL,"
     "                           app_id TEXT NOT NULL,"
@@ -547,6 +549,9 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
         g_strfreev( fingerprints );
 
+        app.badge_style = select->get_string( 6 );
+        app.badge_text = select->get_string( 7 );
+
         result.push_back( app );
     }
 
@@ -557,7 +562,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
 SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
+    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints,badge_style,badge_text from apps;" );
 
     return get_app_list( &select );
 }
@@ -621,6 +626,21 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
 //.............................................................................
 
+void SystemDatabase::set_app_badge( const String & id, const String & badge_style, const String & badge_text )
+{
+    make_dirty();
+
+    SQLite::Statement update( db, "update or ignore apps set badge_style = ?1, badge_text = ?2 where id = ?3;" );
+
+    update.bind( 3, id );
+    update.bind( 1, badge_style );
+    update.bind( 2, badge_text );
+
+    update.step();
+}
+
+//.............................................................................
+
 bool SystemDatabase::add_app_to_all_profiles( const String & app_id )
 {
     make_dirty();
@@ -665,7 +685,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
     }
 
     SQLite::Statement select( db,
-            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
+            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints,a.badge_style,a.badge_text"
             " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id;" );
 
     select.bind( 1, profile.id );
