@@ -105,7 +105,16 @@ MOTION_PER_SECOND   = 16
 SLIDE_SECONDS       = 5
 OVERZOOM            = 1.05
 
+old_image_time = 0
+
+paused = false
+
 function idle.on_idle( idle , seconds )
+
+	if(math.random(1000) == 5) then print(image_time.elapsed_seconds - old_image_time, seconds) end
+	old_image_time=image_time.elapsed_seconds
+
+	if paused then return end
 
     local function place_image( image )
     
@@ -202,3 +211,9 @@ function idle.on_idle( idle , seconds )
 end
 
 screen:show()
+
+function screen.on_key_down(screen, key)
+	if key == keys.space then
+		paused = not paused
+	end
+end
