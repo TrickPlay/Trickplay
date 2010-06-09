@@ -19,9 +19,7 @@ static const char * schema_create =
     "                   name TEXT,"
     "                   release INTEGER NOT NULL,"
     "                   version TEXT NOT NULL,"
-    "                   fingerprints TEXT, "
-    "                   badge_style TEXT, "
-    "                   badge_text TEXT );"
+    "                   fingerprints TEXT);"
 
     "create table profile_apps( profile_id INTEGER NOT NULL,"
     "                           app_id TEXT NOT NULL,"
@@ -34,20 +32,28 @@ static const char * schema_create =
     "                          type TEXT,"
     "                          PRIMARY KEY( app_id, action ) );"
 
-    // When a profile is deleted, all of its apps are also deleted
+    "create table badges( app_id TEXT NOT NULL,"
+    "                     profile_id INTEGER NOT NULL,"
+    "                     style TEXT,"
+    "                     message TEXT,"
+    "                     PRIMARY KEY( app_id, profile_id ) );"
 
-    "create trigger profiles_profile_apps_delete after delete on profiles"
+    // When a profile is deleted, all of its apps are also deleted.
+
+    "create trigger profiles_delete after delete on profiles"
     "   begin"
     "       delete from profile_apps where profile_id = OLD.id; "
+    "       delete from badges where profile_id = OLD.id; "
     "   end;"
 
     // When an app is deleted, it is removed from all profiles
     // and all of its actions are deleted
 
-    "create trigger apps_profile_apps_delete after delete on apps"
+    "create trigger apps_delete after delete on apps"
     "   begin"
     "       delete from profile_apps where app_id = OLD.id;"
     "       delete from app_actions where app_id = OLD.id;"
+    "       delete from badges where app_id = OLD.id;"
     "   end;"
 
 #if 0
@@ -549,9 +555,6 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
         g_strfreev( fingerprints );
 
-        app.badge_style = select->get_string( 6 );
-        app.badge_text = select->get_string( 7 );
-
         result.push_back( app );
     }
 
@@ -562,7 +565,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
 SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints,badge_style,badge_text from apps;" );
+    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
 
     return get_app_list( &select );
 }
@@ -628,13 +631,21 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
 void SystemDatabase::set_app_badge( const String & id, const String & badge_style, const String & badge_text )
 {
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return;
+    }
+
     make_dirty();
 
-    SQLite::Statement update( db, "update or ignore apps set badge_style = ?1, badge_text = ?2 where id = ?3;" );
+    SQLite::Statement update( db, "insert or replace into badges (app_id,profile_id,style,message) values (?1,?2,?3,?4);" );
 
-    update.bind( 3, id );
-    update.bind( 1, badge_style );
-    update.bind( 2, badge_text );
+    update.bind( 1, id );
+    update.bind( 2, profile.id );
+    update.bind( 3, badge_style );
+    update.bind( 4, badge_text );
 
     update.step();
 }
@@ -685,12 +696,30 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
     }
 
     SQLite::Statement select( db,
-            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints,a.badge_style,a.badge_text"
+            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
             " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id;" );
 
     select.bind( 1, profile.id );
 
-    return get_app_list( &select );
+    AppInfo::List result = get_app_list( &select );
+
+    SQLite::Statement badge( db, "select style,message from badges where app_id = ?1 and profile_id = ?2;" );
+
+    badge.bind( 2, profile.id );
+
+    for ( AppInfo::List::iterator it = result.begin(); it != result.end(); ++it )
+    {
+        badge.reset();
+        badge.bind( 1, it->id );
+
+        if ( badge.step_row() )
+        {
+            it->badge_style = badge.get_string( 0 );
+            it->badge_text = badge.get_string( 1 );
+        }
+    }
+
+    return result;
 }
 
 //.............................................................................
