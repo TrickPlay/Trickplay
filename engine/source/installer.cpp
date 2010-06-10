@@ -11,6 +11,7 @@
 #include "sysdb.h"
 #include "signature.h"
 
+
 //=============================================================================
 
 bool recursive_delete_path( GFile * file )
@@ -87,81 +88,43 @@ bool recursive_delete_path( const gchar * path )
 
 //=============================================================================
 
-class Event
+class InstallAppTask : public ThreadPool::Task
 {
 public:
 
-    virtual ~Event()
-    {}
-
-    virtual bool process() = 0;
-
-    static void destroy( gpointer event )
-    {
-        delete ( Event *)event;
-    }
-};
-
-//.............................................................................
-
-class QuitEvent : public Event
-{
-public:
-
-    virtual bool process()
-    {
-        return false;
-    }
-};
-
-//.............................................................................
-
-class InstallAppEvent : public Event
-{
-public:
-
-    InstallAppEvent( Installer * _installer,
-            guint _id,
-            const String & _source_file,
-            const String & _app_id,
-            bool _locked,
-            const String & _app_directory,
-            const StringSet & _required_fingerprints )
+    InstallAppTask( Installer * _installer, Installer::Info * _info )
     :
         installer( _installer ),
-        id( _id ),
-        source_file( _source_file ),
-        app_id( _app_id ),
-        locked( _locked ),
-        app_directory( _app_directory ),
-        required_fingerprints( _required_fingerprints )
-
+        info( * _info )
     {}
-
-    //.........................................................................
-    // Calls the installer in the main thread with a progress closure
-
-    static gboolean progress( gpointer pc )
-    {
-        Installer::ProgressClosure * closure = ( Installer::ProgressClosure * )pc;
-
-        g_assert( closure );
-        g_assert( closure->installer );
-
-        closure->installer->install_progress( closure );
-
-        return FALSE;
-    }
 
     //.........................................................................
     // Adds an idle for the given progress
 
-    void send_progress( Installer::ProgressClosure * closure )
+    class ProgressTask : public ThreadPool::Task
     {
-        g_assert( closure );
-        g_assert( closure->installer );
+    public:
 
-        g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, progress, closure, Installer::ProgressClosure::destroy );
+        ProgressTask( Installer * _installer, const Installer::Info & _info )
+        :
+            installer( _installer ),
+            info( _info )
+        {}
+
+        void process_main_thread()
+        {
+            installer->install_progress( info );
+        }
+
+    private:
+
+        Installer *     installer;
+        Installer::Info info;
+    };
+
+    void send_progress()
+    {
+        installer->thread_pool.push( new ProgressTask( installer, info ) );
     }
 
     //.........................................................................
@@ -178,7 +141,7 @@ public:
         // dealing with them. If there are no signatures, this will return
         // true and give us an empty list.
 
-        if ( ! Signature::get_signatures( source_file.c_str(), signatures, &signature_length ) )
+        if ( ! Signature::get_signatures( info.source_file.c_str(), signatures, &signature_length ) )
         {
             return false;
         }
@@ -193,18 +156,18 @@ public:
         {
             for ( Signature::Info::List::const_iterator it = signatures.begin(); it != signatures.end(); ++it )
             {
-                fingerprints.insert( it->fingerprint );
+                info.fingerprints.insert( it->fingerprint );
             }
 
             // Now, see how many of the required ones are found in the signatures
 
-            for ( StringSet::const_iterator it = required_fingerprints.begin(); it != required_fingerprints.end(); ++it )
+            for ( StringSet::const_iterator it = info.required_fingerprints.begin(); it != info.required_fingerprints.end(); ++it )
             {
-                found += fingerprints.count( *it );
+                found += info.fingerprints.count( *it );
             }
         }
 
-        if ( found != required_fingerprints.size() )
+        if ( found != info.required_fingerprints.size() )
         {
             // Signature(s) missing
 
@@ -224,7 +187,7 @@ public:
 
         bool result = false;
 
-        GFile * file = g_file_new_for_path( source_file.c_str() );
+        GFile * file = g_file_new_for_path( info.source_file.c_str() );
 
         if ( file )
         {
@@ -270,7 +233,7 @@ public:
 
     //.........................................................................
 
-    virtual bool process()
+    virtual void process()
     {
         // This happens in the installer thread, so we cannot mess with
         // anything else.
@@ -279,7 +242,7 @@ public:
 
         try
         {
-            g_debug( "STARTING INSTALL OF %s", source_file.c_str() );
+            g_debug( "STARTING INSTALL OF %s", info.source_file.c_str() );
 
             //.................................................................
 
@@ -291,7 +254,7 @@ public:
             //.................................................................
             // Open the source file to make sure it is ok
 
-            zip = OpenZip( source_file.c_str(), NULL );
+            zip = OpenZip( info.source_file.c_str(), NULL );
 
             if ( ! zip )
             {
@@ -403,7 +366,7 @@ public:
                 throw String( "FAILED TO READ METADATA" );
             }
 
-            if ( metadata.id != app_id )
+            if ( metadata.id != info.app_id )
             {
                 throw String( "APP ID DOES NOT MATCH" );
             }
@@ -422,7 +385,7 @@ public:
             //      This puts it event closer to its final destination, but we would
             //      have to do more work to clean up. CHOOSING THIS ONE FOR NOW
 
-            gchar * unzip_path = g_build_filename( app_directory.c_str(), "installing", NULL );
+            gchar * unzip_path = g_build_filename( info.app_directory.c_str(), "installing", NULL );
 
             free_later( unzip_path );
 
@@ -545,7 +508,10 @@ public:
                 {
                     progress_timer.reset();
 
-                    send_progress( Installer::ProgressClosure::make_progress( installer, id, gdouble( total_processed ) / gdouble( total_uncompressed_size ) * 100.0 ) );
+                    info.status = Installer::Info::INSTALLING;
+                    info.percent_installed = gdouble( total_processed ) / gdouble( total_uncompressed_size ) * 100.0;
+
+                    send_progress();
                 }
             }
 
@@ -557,9 +523,9 @@ public:
             // Finally, under the right conditions, we delete the existing install
             // of the app and move the "installing" directory over it.
 
-            bool moved = false;
+            info.moved = false;
 
-            gchar * source_path = g_build_filename( app_directory.c_str(), "source", NULL );
+            gchar * source_path = g_build_filename( info.app_directory.c_str(), "source", NULL );
 
             free_later( source_path );
 
@@ -568,7 +534,7 @@ public:
             // If the source directory exists and the app is locked, we can
             // delete the source directory
 
-            if ( source_exists && locked )
+            if ( source_exists && info.locked )
             {
                 if ( ! recursive_delete_path( source_path ) )
                 {
@@ -588,24 +554,32 @@ public:
                     throw String( "FAILED TO RENAME INSTALL DIRECTORY TO SOURCE DIRECTORY" );
                 }
 
-                moved = true;
+                info.moved = true;
             }
 
             // Once this is done, the caller needs to call 'complete_install'. This will
             // move the app to its final resting place (if necessary) and also add its
             // entry to the system database.
 
-            g_debug( "FINISHED INSTALL OF %s TO %s", app_id.c_str(), moved ? source_path : unzip_path );
+            g_debug( "FINISHED INSTALL OF %s TO %s", info.app_id.c_str(), info.moved ? source_path : unzip_path );
 
-            send_progress( Installer::ProgressClosure::make_finished( installer, id, moved, unzip_path, source_path, fingerprints ) );
+            info.status = Installer::Info::FINISHED;
+
+            info.install_directory = unzip_path;
+
+            info.app_directory = source_path;
+
+            send_progress();
 
             // Caller is also reponsible for getting rid of the original zip file.
         }
         catch( const String & e )
         {
-            g_warning( "FAILED TO INSTALL %s FROM %s : %s", app_id.c_str(), source_file.c_str(), e.c_str() );
+            g_warning( "FAILED TO INSTALL %s FROM %s : %s", info.app_id.c_str(), info.source_file.c_str(), e.c_str() );
 
-            send_progress( Installer::ProgressClosure::make_failed( installer, id ) );
+            info.status = Installer::Info::FAILED;
+
+            send_progress( );
         }
 
         // Close the zip file
@@ -616,20 +590,12 @@ public:
         }
 
         // Always return true - to keep the thread running
-
-        return true;
     }
 
 private:
 
-    Installer * installer;
-    guint       id;
-    String      source_file;
-    String      app_id;
-    bool        locked;
-    String      app_directory;
-    StringSet   required_fingerprints;
-    StringSet   fingerprints;
+    Installer *         installer;
+    Installer::Info     info;
 };
 
 //=============================================================================
@@ -637,12 +603,10 @@ private:
 Installer::Installer( TPContext * _context )
 :
     context( _context ),
-    queue( g_async_queue_new_full( Event::destroy ) ),
-    thread( NULL ),
-    next_id( 1 )
+    next_id( 1 ),
+    thread_pool( 2 )
 {
     g_assert( context );
-    g_assert( queue );
 
     context->get_downloads()->add_delegate( this );
 }
@@ -652,17 +616,6 @@ Installer::Installer( TPContext * _context )
 Installer::~Installer()
 {
     context->get_downloads()->remove_delegate( this );
-
-    if ( thread )
-    {
-        // Pushing a 1 tells the thread to exit
-
-        g_async_queue_push( queue, new QuitEvent() );
-
-        g_thread_join( thread );
-    }
-
-    g_async_queue_unref( queue );
 }
 
 //-----------------------------------------------------------------------------
@@ -718,16 +671,6 @@ Installer::Info * Installer::get_info_for_download( guint download_id )
         }
     }
     return NULL;
-}
-
-//-----------------------------------------------------------------------------
-
-void Installer::start_thread()
-{
-    if ( ! thread )
-    {
-        thread = g_thread_create( process, queue, TRUE, NULL );
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -858,36 +801,6 @@ Installer::InfoList Installer::get_all_installs() const
 
 //-----------------------------------------------------------------------------
 
-gpointer Installer::process( gpointer _queue )
-{
-    g_debug( "STARTING INSTALLER THREAD" );
-
-    GAsyncQueue * queue = ( GAsyncQueue * )_queue;
-
-    bool done = false;
-
-    while ( ! done )
-    {
-        Event * event = ( Event * )g_async_queue_pop( queue );
-
-        if ( event )
-        {
-            if ( ! event->process() )
-            {
-                done = true;
-            }
-
-            Event::destroy( event );
-        }
-    }
-
-    g_debug( "INSTALLER THREAD EXITING" );
-
-    return NULL;
-}
-
-//-----------------------------------------------------------------------------
-
 void Installer::download_progress( const Downloads::Info & dl_info )
 {
     if ( Info * info = get_info_for_download( dl_info.id ) )
@@ -939,15 +852,13 @@ void Installer::download_finished( const Downloads::Info & dl_info )
         }
         else
         {
-            // Start the thread and put the install event into the queue
+            info->app_directory = app_directory;
 
-            start_thread();
-
-            g_async_queue_push( queue, new InstallAppEvent( this, info->id, dl_info.file_name, info->app_id, info->locked, app_directory, info->required_fingerprints ) );
-
-            // Update the info status and tell the delegates we are installing
+            info->source_file = dl_info.file_name;
 
             info->status = Info::INSTALLING;
+
+            thread_pool.push( new InstallAppTask( this, info ) );
 
             for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
             {
@@ -983,26 +894,24 @@ void Installer::download_finished( const Downloads::Info & dl_info )
 
 //-----------------------------------------------------------------------------
 
-void Installer::install_progress( ProgressClosure * closure )
+void Installer::install_progress( const Installer::Info & progress )
 {
-    g_assert( closure );
-
-    InfoMap::iterator it = info_map.find( closure->id );
+    InfoMap::iterator it = info_map.find( progress.id );
 
     if ( it == info_map.end() )
     {
-        g_debug( "THIS SHOULD NEVER HAPPEN - I GOT PROGRESS FOR UNKNOWN INSTALL %u", closure->id );
+        g_debug( "THIS SHOULD NEVER HAPPEN - I GOT PROGRESS FOR UNKNOWN INSTALL %u", progress.id );
 
         return;
     }
 
     Info & info( it->second );
 
-    if ( closure->status == ProgressClosure::INSTALLING )
+    if ( progress.status == Info::INSTALLING )
     {
-        g_debug( "INSTALL PROGRESS FOR %u IS %1.2f %%", closure->id, closure->percent_complete );
+        g_debug( "INSTALL PROGRESS FOR %u IS %1.2f %%", progress.id, progress.percent_installed );
 
-        info.percent_installed = closure->percent_complete;
+        info.percent_installed = progress.percent_installed;
 
         for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
         {
@@ -1011,30 +920,23 @@ void Installer::install_progress( ProgressClosure * closure )
     }
     else
     {
-        bool failed = ( closure->status == ProgressClosure::FAILED );
+        bool failed = ( progress.status == Info::FAILED );
 
         if ( failed )
         {
-            g_debug( "INSTALL %u FAILED", closure->id );
+            g_debug( "INSTALL %u FAILED", progress.id );
 
             info.status = Info::FAILED;
         }
         else
         {
-            g_debug( "INSTALL %u FINISHED", closure->id );
+            g_debug( "INSTALL %u FINISHED", progress.id );
 
             info.status = Info::FINISHED;
-            info.moved = closure->moved;
-            info.app_directory = closure->app_directory;
-            info.install_directory = closure->install_directory;
-
-            if ( closure->fingerprints )
-            {
-                for ( guint i = 0; i < closure->fingerprints->len; ++i )
-                {
-                    info.fingerprints.insert( String( ( gchar * ) g_ptr_array_index( closure->fingerprints, i ) ) );
-                }
-            }
+            info.moved = progress.moved;
+            info.app_directory = progress.app_directory;
+            info.install_directory = progress.install_directory;
+            info.fingerprints = progress.fingerprints;
         }
 
         // Get rid of the download and the file.

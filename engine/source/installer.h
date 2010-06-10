@@ -4,6 +4,7 @@
 #include "common.h"
 #include "network.h"
 #include "downloads.h"
+#include "thread_pool.h"
 
 class Installer : private Downloads::Delegate
 {
@@ -101,6 +102,7 @@ public:
         gdouble     percent_downloaded;
         gdouble     percent_installed;
         bool        moved;
+        String      source_file;
         String      install_directory;
         String      app_directory;
         StringSet   fingerprints;
@@ -139,16 +141,6 @@ private:
     Info * get_info_for_download( guint download_id );
 
     //.........................................................................
-    // Starts the thread if it has not been started already
-
-    void start_thread();
-
-    //.........................................................................
-    // The thread function. It sits around waiting for an event in the queue
-
-    static gpointer process( gpointer _queue );
-
-    //.........................................................................
     // Downloads::Delegate methods
 
     virtual void download_progress( const Downloads::Info & dl_info );
@@ -156,101 +148,18 @@ private:
     virtual void download_finished( const Downloads::Info & dl_info );
 
     //.........................................................................
-    // InstallEvent sends us progress using this closure
 
-    struct ProgressClosure
-    {
-        enum Status { INSTALLING, FINISHED, FAILED };
-
-        static ProgressClosure * make_progress( Installer * installer, guint id, gdouble percent_complete )
-        {
-            ProgressClosure * result = g_slice_new0( ProgressClosure );
-
-            result->installer = installer;
-            result->id = id;
-            result->status = INSTALLING;
-            result->percent_complete = percent_complete;
-
-            return result;
-        }
-
-        static ProgressClosure * make_failed( Installer * installer, guint id )
-        {
-            ProgressClosure * result = g_slice_new0( ProgressClosure );
-
-            result->installer = installer;
-            result->id = id;
-            result->status = FAILED;
-            result->percent_complete = 100;
-
-            return result;
-        }
-
-        static ProgressClosure * make_finished(
-                Installer * installer,
-                guint id,
-                bool moved,
-                const gchar * install_directory,
-                const gchar * app_directory,
-                const StringSet & fingerprints )
-        {
-            ProgressClosure * result = g_slice_new0( ProgressClosure );
-
-            result->installer = installer;
-            result->id = id;
-            result->status = FINISHED;
-            result->percent_complete = 100;
-            result->moved = moved;
-            result->install_directory = g_strdup( install_directory );
-            result->app_directory = g_strdup( app_directory );
-
-            result->fingerprints = g_ptr_array_new_with_free_func( g_free );
-
-            for ( StringSet::const_iterator it = fingerprints.begin(); it != fingerprints.end(); ++it )
-            {
-                g_ptr_array_add( result->fingerprints, g_strdup( it->c_str() ) );
-            }
-
-            return result;
-        }
-
-        static void destroy( gpointer pc )
-        {
-            ProgressClosure * self = ( ProgressClosure * )pc;
-
-            g_free( self->install_directory );
-            g_free( self->app_directory );
-
-            if ( self->fingerprints )
-            {
-                g_ptr_array_unref( self->fingerprints );
-            }
-
-            g_slice_free( ProgressClosure, self );
-        }
-
-        Installer * installer;
-        guint       id;
-        Status      status;
-        gdouble     percent_complete;
-        bool        moved;
-        gchar *     install_directory;
-        gchar *     app_directory;
-        GPtrArray * fingerprints;
-    };
-
-    void install_progress( ProgressClosure * progress_closure );
+    void install_progress( const Installer::Info & progress_info );
 
     //.........................................................................
 
-    friend class InstallAppEvent;
+    friend class InstallAppTask;
 
     //.........................................................................
 
     TPContext *     context;
-    GAsyncQueue  *  queue;
-    GThread *       thread;
     guint           next_id;
+    ThreadPool      thread_pool;
 
     //.........................................................................
     // A map of Info structures by id
