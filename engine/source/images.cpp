@@ -132,7 +132,7 @@ public:
             return TP_IMAGE_DECODE_FAILED;
         }
 
-        Util::GFreeLater free_buffer( buffer );
+        FreeLater free_later( buffer );
 
         stream.seekg( 0 );
 

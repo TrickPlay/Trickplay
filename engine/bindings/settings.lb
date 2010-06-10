@@ -45,10 +45,10 @@ public:
 	App * app=App::get(L);
 	
 	gchar * name=g_strdup_printf("settings-%d.tch",app->get_profile_id());
-	Util::GFreeLater free_name(name);
+	FreeLater free_later(name);
         
         gchar * file_name=g_build_filename(app->get_data_path().c_str(),name,NULL);
-        Util::GFreeLater free_file_name(file_name);
+        free_later(file_name);
         
 	if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
         {

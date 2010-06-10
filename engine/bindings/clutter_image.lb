@@ -200,7 +200,7 @@ bool load_image( lua_State * L, ClutterTexture * texture )
     	return false;
     }
     
-    Util::GFreeLater free_path( path );
+    FreeLater free_later( path );
 
 	//.........................................................................
 	// Synchronous loading
@@ -380,7 +380,7 @@ class Image [[ClutterActor*]] actor
             if ( !app_path.empty() )
             {
                 gchar * path=Util::rebase_path( app_path.c_str() , file_name );                
-	            Util::GFreeLater free_path( path );
+	            FreeLater free_later( path );
 	
                 if ( path )
                 {

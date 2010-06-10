@@ -77,6 +77,8 @@ static const char * schema_create =
 
 SystemDatabase * SystemDatabase::open( const char * path )
 {
+    FreeLater free_later;
+
     // Create the in-memory database
 
     SQLite::DB db( ":memory:" );
@@ -92,7 +94,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
     // Construct the filename for the on-disk db
 
     gchar * filename = g_build_filename( path, "system.db", NULL );
-    Util::GFreeLater free_filename( filename );
+    free_later( filename );
 
     bool create = true;
 
@@ -203,13 +205,15 @@ SystemDatabase::~SystemDatabase()
 
 bool SystemDatabase::flush()
 {
+    FreeLater free_later;
+
     if ( ! dirt )
     {
         return true;
     }
 
     gchar * backup_filename = g_build_filename( path.c_str(), "system.db.XXXXXX", NULL );
-    Util::GFreeLater free_backup_filename( backup_filename );
+    free_later( backup_filename );
 
     // Make a temporary file to backup to
 
@@ -242,7 +246,7 @@ bool SystemDatabase::flush()
     // Now move the backup file
 
     gchar * target_filename = g_build_filename( path.c_str(), "system.db", NULL );
-    Util::GFreeLater free_target_filename( target_filename );
+    free_later( target_filename );
 
     if ( g_rename( backup_filename, target_filename ) != 0 )
     {

@@ -387,7 +387,9 @@ public:
                 throw String( "FAILED TO ALLOCATE MEMORY TO UNCOMPRESS APP FILE" );
             }
 
-            Util::GFreeLater free_app_file_buffer( app_file_buffer );
+            FreeLater free_later;
+
+            free_later( app_file_buffer );
 
             if ( ZR_OK != UnzipItem( zip, app_file_zip_index, app_file_buffer, app_file_uncompressed_size * 2 ) )
             {
@@ -422,7 +424,7 @@ public:
 
             gchar * unzip_path = g_build_filename( app_directory.c_str(), "installing", NULL );
 
-            Util::GFreeLater free_unzip_path( unzip_path );
+            free_later( unzip_path );
 
             //.................................................................
             // If our destination directory already exists, it is probably
@@ -457,7 +459,7 @@ public:
 
             gchar * app_file_zip_dirname = g_path_get_dirname( app_file_zip_path.c_str() );
 
-            Util::GFreeLater free_app_file_zip_dirname( app_file_zip_dirname );
+            free_later( app_file_zip_dirname );
 
             guint app_file_zip_dirname_length = strlen( app_file_zip_dirname );
 
@@ -525,7 +527,7 @@ public:
                 }
                 else
                 {
-                    Util::GFreeLater free_destination_file_name( destination_file_name );
+                    free_later( destination_file_name );
 
                     g_debug( "  UNZIPPING %s", entry.name );
 
@@ -559,7 +561,7 @@ public:
 
             gchar * source_path = g_build_filename( app_directory.c_str(), "source", NULL );
 
-            Util::GFreeLater free_source_path( source_path );
+            free_later( source_path );
 
             bool source_exists = g_file_test( source_path, G_FILE_TEST_EXISTS );
 

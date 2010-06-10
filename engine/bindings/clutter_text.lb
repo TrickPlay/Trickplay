@@ -140,7 +140,7 @@ class Text [[ClutterActor*]] actor
 	[[
 	    gchar * s = clutter_text_get_selection(CLUTTER_TEXT(self));
 	    selected_text = s;	    
-	    Util::GFreeLater later(s);	    
+	    FreeLater free_later(s);	    
 	]];
 	
     int selection_end
@@ -171,7 +171,7 @@ class Text [[ClutterActor*]] actor
 	[[
 	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
 	    result = c;
-	    Util::GFreeLater later(c);
+	    FreeLater free_later(c);
 	]];
 	
     table cursor_color
