@@ -147,8 +147,9 @@ class FreeLater
 {
 public:
 
-    FreeLater()
+    FreeLater( gpointer data = NULL, GDestroyNotify destroy = g_free )
     {
+        (*this)( data, destroy );
     }
 
     ~FreeLater()
@@ -159,14 +160,20 @@ public:
         }
     }
 
-    void operator()( gpointer data, GDestroyNotify destroy = g_free )
+    inline void operator()( gpointer data, GDestroyNotify destroy = g_free )
     {
-        list.push_back( FreePair( data, destroy ) );
+        if ( data && destroy )
+        {
+            list.push_back( FreePair( data, destroy ) );
+        }
     }
 
-    void operator()( gchar ** data )
+    inline void operator()( gchar ** data )
     {
-        list.push_back( FreePair( data, ( GDestroyNotify ) g_strfreev ) );
+        if ( data )
+        {
+            list.push_back( FreePair( data, ( GDestroyNotify ) g_strfreev ) );
+        }
     }
 
 private:
@@ -186,47 +193,6 @@ private:
 
 namespace Util
 {
-    //-----------------------------------------------------------------------------
-    // This is like an auto_ptr that uses g_free and cannot be copied
-
-    class GFreeLater
-    {
-    public:
-
-        GFreeLater( gpointer pointer ) : p( pointer ) {}
-        ~GFreeLater()
-        {
-            g_free( p );
-        }
-
-    private:
-
-        GFreeLater() {}
-        GFreeLater( const GFreeLater & ) {}
-
-        gpointer p;
-    };
-
-    //-----------------------------------------------------------------------------
-
-    class GStrFreevLater
-    {
-    public:
-
-        GStrFreevLater( gchar ** pointer ) : p( pointer ) {}
-        ~GStrFreevLater()
-        {
-            g_strfreev( p );
-        }
-
-    private:
-
-        GStrFreevLater() {}
-        GStrFreevLater( const GStrFreevLater & ) {}
-
-        gchar ** p;
-    };
-
     //-----------------------------------------------------------------------------
 
     class GMutexLock
@@ -340,18 +306,20 @@ namespace Util
 
     inline gchar * rebase_path( const gchar * root, const gchar * path )
     {
+        FreeLater free_later;
+
         if ( strstr( path, ".." ) )
         {
             g_error( "Invalid relative path '%s'", path );
         }
 
         gchar * p = path_to_native_path( g_strdup( path ) );
-        GFreeLater free_p( p );
+        free_later( p );
 
         const gchar * last = g_path_is_absolute( p ) ? g_path_skip_root( p ) : p;
 
         gchar * first = path_to_native_path( g_strdup( root ) );
-        GFreeLater free_first( first );
+        free_later( first );
 
         return g_build_filename( first, last, NULL );
     }

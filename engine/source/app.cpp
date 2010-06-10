@@ -286,13 +286,15 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
 
 bool App::load_metadata( const char * app_path, App::Metadata & md )
 {
+    FreeLater free_later;
+
     g_assert( app_path );
 
     // Build the path to the metadata file and load its contents
 
     gchar * path = g_build_filename( app_path, APP_METADATA_FILENAME, NULL );
 
-    Util::GFreeLater free_path( path );
+    free_later( path );
 
     GError * error = NULL;
 
@@ -300,7 +302,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
     g_file_get_contents( path, &contents, NULL, &error );
 
-    Util::GFreeLater free_contents( contents );
+    free_later( contents );
 
     if ( error )
     {
@@ -327,6 +329,8 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
 void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, const char * installed_apps_root, bool force )
 {
+    FreeLater free_later;
+
     // If the scan is not forced and we already have apps in the database, bail
 
     if ( !force && sysdb->get_app_count() > 0 )
@@ -364,7 +368,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
             while ( const gchar * base = g_dir_read_name( dir ) )
             {
                 gchar * md_file_name = g_build_filename( path, base, "app", NULL );
-                Util::GFreeLater free_md_file_name( md_file_name );
+                free_later( md_file_name );
 
                 if ( !g_file_test( md_file_name, G_FILE_TEST_IS_REGULAR ) )
                 {
@@ -372,7 +376,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
                 }
 
                 gchar * app_path = g_build_filename( path, base, NULL );
-                Util::GFreeLater free_app_path( app_path );
+                free_later( app_path );
 
                 Metadata md;
 
@@ -410,10 +414,10 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
             while ( const gchar * base = g_dir_read_name( dir ) )
             {
                 gchar * app_path = g_build_filename( installed_apps_root, base, "source", NULL );
-                Util::GFreeLater free_app_path( app_path );
+                free_later( app_path );
 
                 gchar * md_file_name = g_build_filename( app_path, "app", NULL );
-                Util::GFreeLater free_md_file_name( md_file_name );
+                free_later( md_file_name );
 
                 if ( !g_file_test( md_file_name, G_FILE_TEST_IS_REGULAR ) )
                 {
@@ -493,17 +497,19 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
 
 String App::get_data_directory( TPContext * context, const String & app_id )
 {
+    FreeLater free_later;
+
     g_assert( context );
 
     // Get the data directory ready
 
     gchar * id_hash = g_compute_checksum_for_string( G_CHECKSUM_SHA1, app_id.c_str(), -1 );
 
-    Util::GFreeLater free_id_hash( id_hash );
+    free_later( id_hash );
 
     gchar * app_data_path = g_build_filename( context->get( TP_DATA_PATH ), "apps", id_hash, NULL );
 
-    Util::GFreeLater free_app_data_path( app_data_path );
+    free_later( app_data_path );
 
     if ( !g_file_test( app_data_path, G_FILE_TEST_EXISTS ) )
     {
@@ -703,8 +709,11 @@ int App::run( const StringSet & allowed_names )
 //    lua_sethook(L,debug_hook,LUA_MASKCALL|LUA_MASKRET|LUA_MASKLINE|LUA_MASKCOUNT,1);
 
     // Run the script
+
+    FreeLater free_later;
+
     gchar * main_path = g_build_filename( metadata.path.c_str(), "main.lua", NULL );
-    Util::GFreeLater free_main_path( main_path );
+    free_later( main_path );
 
     if ( luaL_dofile( L, main_path ) )
     {
@@ -953,11 +962,13 @@ Network::CookieJar * App::get_cookie_jar()
 {
     if ( !cookie_jar )
     {
+        FreeLater free_later;
+
         gchar * name = g_strdup_printf( "cookies-%d.txt", get_profile_id() );
-        Util::GFreeLater free_name( name );
+        free_later( name );
 
         gchar * file_name = g_build_filename( data_path.c_str(), name, NULL );
-        Util::GFreeLater free_file_name( file_name );
+        free_later( file_name );
 
         cookie_jar = Network::cookie_jar_new( file_name );
     }

@@ -34,7 +34,8 @@ unsigned int Downloads::start_download( const String & owner, const Network::Req
     // First, we need a file name for the download
 
     gchar * dest_filename = g_build_filename( path.c_str(), "download.XXXXXX", NULL );
-    Util::GFreeLater free_dest_filename( dest_filename );
+
+    FreeLater free_later( dest_filename );
 
     // Create and open the destination file
 

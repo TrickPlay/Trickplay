@@ -230,14 +230,14 @@ global apps [[Apps*]]
             }
             
             gchar * path=Util::rebase_path(app_path.c_str(),file_name);
-            Util::GFreeLater free_path(path);
+            FreeLater free_later(path);
                 
             gchar * contents=NULL;            
             GError * error=NULL;
             gsize length=0;
             
             g_file_get_contents(path,&contents,&length,&error);
-            Util::GFreeLater free_contents(contents);
+            free_later(contents);
             
             if (error)
             {

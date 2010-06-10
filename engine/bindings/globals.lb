@@ -39,7 +39,7 @@ globals
             bool is_uri=false;
             char * path=App::get(L)->normalize_path(file_name,&is_uri);
 
-            Util::GFreeLater free_path(path);
+            FreeLater free_later(path);
             
             if (!path || is_uri)
             {
@@ -58,7 +58,7 @@ globals
             bool is_uri=false;
             char * path=App::get(L)->normalize_path(file_name,&is_uri);
             
-            Util::GFreeLater free_path(path);
+            FreeLater free_later(path);
                         
             if (!path || is_uri)
             {
@@ -297,19 +297,19 @@ globals
     string md5( lstring s )
         [[
             result = g_compute_checksum_for_string( G_CHECKSUM_MD5, s, s_len );
-            Util::GFreeLater free_result( ( char * )result );
+            FreeLater free_later( ( char * )result );
         ]];
         
     string sha1( lstring s )
         [[
             result = g_compute_checksum_for_string( G_CHECKSUM_SHA1, s, s_len );
-            Util::GFreeLater free_result( ( char * )result );
+            FreeLater free_later( ( char * )result );
         ]];
 
     string sha256( lstring s )
         [[
             result = g_compute_checksum_for_string( G_CHECKSUM_SHA256, s, s_len );
-            Util::GFreeLater free_result( ( char * )result );
+            FreeLater free_later( ( char * )result );
         ]];
 }
 
