@@ -49,6 +49,8 @@ public:
 
     void push( Task * task );
 
+    static void push_main_thread( Task * task );
+
 private:
 
     static void thread_function( gpointer task, gpointer pool_data );

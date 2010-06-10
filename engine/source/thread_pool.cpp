@@ -106,20 +106,31 @@ ThreadPool::~ThreadPool()
 
 //.............................................................................
 
-void ThreadPool::thread_function( gpointer task, gpointer )
+void ThreadPool::thread_function( gpointer _task, gpointer )
 {
-    ( ( ThreadPool::Task * ) task )->do_process();
+    Task * task = ( Task * ) _task;
 
-    g_idle_add_full( G_PRIORITY_LOW, idle_function, task, destroy_task );
+    task->do_process();
+
+    push_main_thread( task );
 }
 
 //.............................................................................
 
-gboolean ThreadPool::idle_function( gpointer task )
+gboolean ThreadPool::idle_function( gpointer _task )
 {
-    ( ( ThreadPool::Task * ) task )->do_process_main_thread();
+    Task * task = ( Task * ) _task;
+
+    task->do_process_main_thread();
 
     return FALSE;
+}
+
+//.............................................................................
+
+void ThreadPool::push_main_thread( Task * task )
+{
+    g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, idle_function, task, destroy_task );
 }
 
 //.............................................................................
