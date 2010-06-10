@@ -2,6 +2,9 @@
 #define _TRICKPLAY_THREAD_POOL_H
 
 #include "common.h"
+#include "util.h"
+
+#define TP_THREADPOOL_DEBUG 0
 
 class ThreadPool
 {
@@ -15,11 +18,33 @@ public:
     {
     public:
 
+        Task();
+
         virtual ~Task();
 
         virtual void process();
 
         virtual void process_main_thread();
+
+    private:
+
+        friend class ThreadPool;
+
+        void do_process();
+
+        void do_process_main_thread();
+
+#if TP_THREADPOOL_DEBUG
+
+        guint64         id;
+        Util::GTimer    timer;
+        gdouble         time_to_pool;
+        gdouble         time_to_process;
+        gdouble         time_to_main_thread;
+        gdouble         end_time;
+
+#endif
+
     };
 
     void push( Task * task );
