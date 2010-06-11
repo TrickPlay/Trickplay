@@ -1,0 +1,6 @@
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=54
+Name: trickplay-sdk
+Contact: TrickPlay <info@trickplay.com>
+
+Files: *
+Copyright: 2009-2010, TrickPlay Inc.

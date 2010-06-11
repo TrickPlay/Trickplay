@@ -1,0 +1,19 @@
+
+1. Build the documentation and put it here in a directory called "html".
+
+2. Build the 64 bit clutter-gst client and put it here calling it "trickplay.amd64".
+   Make sure you strip it.
+
+3. Build the 32 bit clutter-gst client and put it here calling it "trickplay.i386".
+   Make sure you strip it.
+
+4. Edit "changelog" - updating the TrickPlay version and adding an entry.
+
+5. Edit "build" and update the TrickPlay version. See if any dependencies have 
+   been added or removed.
+
+6. Run "build". It should spit out two .deb files. Lintian reports a problem with 
+   the changelog format (which I have not been able to solve) and an issue with 
+   zlib - which is because of the unzip source code.
+   
+   
