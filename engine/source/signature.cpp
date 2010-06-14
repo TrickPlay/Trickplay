@@ -317,7 +317,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     stream.read( signature, signature_size );
 
-    if ( stream.fail() || stream.gcount() != signature_size )
+    if ( stream.fail() || stream.gcount() != std::streamsize( signature_size ) )
     {
         fail( "FAILED TO READ SIGNATURE" );
     }
@@ -330,7 +330,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     stream.read( cert_pem, cert_size );
 
-    if ( stream.fail() || stream.gcount() != cert_size )
+    if ( stream.fail() || stream.gcount() != std::streamsize( cert_size ) )
     {
         fail( "FAILED TO READ PEM CERTIFICATE" );
     }
