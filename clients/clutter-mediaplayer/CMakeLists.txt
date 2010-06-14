@@ -38,4 +38,10 @@ TP_FIND_LIBRARY( gthread-2.0        TPCMP_LIBRARIES )
 
 target_link_libraries( tp-cmp tpcore ${TPCMP_LIBRARIES} )
 
-set_target_properties( tp-cmp PROPERTIES OUTPUT_NAME tp )
+set_target_properties( tp-cmp 
+    PROPERTIES 
+        LINKER_LANGUAGE CXX
+        OUTPUT_NAME trickplay )
+
+install(TARGETS tp-cmp RUNTIME DESTINATION bin)
+
