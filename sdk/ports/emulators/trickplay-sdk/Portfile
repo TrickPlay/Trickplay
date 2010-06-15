@@ -27,7 +27,7 @@ depends_lib		\
 				port:gst-plugins-bad \
 				port:openssl \
 				port:curl \
-				port:glib2-devel \
+				port:glib2 \
 				port:avahi \
 				port:libpng \
 				port:tiff \
