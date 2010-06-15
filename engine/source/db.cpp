@@ -1,8 +1,14 @@
 
+#include <algorithm>
+
 #include "db.h"
+#include "common.h"
+#include "util.h"
 
 namespace SQLite
 {
+    DebugLog db_debug( true );
+
     Error::Error()
         :
         db( NULL ),
@@ -121,6 +127,18 @@ namespace SQLite
         reset_db( other.steal_db() );
     }
 
+    DB & DB::operator = ( DB & other )
+    {
+        if ( sqlite3 * db = get_db() )
+        {
+            sqlite3_close( db );
+        }
+
+        reset_db( other.steal_db() );
+
+        return *this;
+    }
+
     DB::~DB()
     {
         if ( sqlite3 * db = get_db() )
@@ -147,16 +165,234 @@ namespace SQLite
         return db;
     }
 
+    bool DB::migrate_schema( const char * schema )
+    {
+        FreeLater free_later;
+
+        // Calculate the hash for the new schema
+
+        gchar * schema_hash = g_compute_checksum_for_string( G_CHECKSUM_MD5, schema, -1 );
+
+        free_later( schema_hash );
+
+        try
+        {
+            // Get the old schema hash
+
+            Statement select_hash( *this, "select value from schema_version where name='hash';" );
+
+            if ( select_hash.step_row() && ( select_hash.get_string( 0 ) == schema_hash ) )
+            {
+                // They have the same schema hash, we are done
+
+                db_debug( "SCHEMA HASH MATCHES, NO MIGRATION NEEDED" );
+
+                return false;
+            }
+
+            // It is possible that this database does not have a schema version table - which is OK
+
+            if ( ! select_hash.ok() )
+            {
+                db_debug( "UNABLE TO FETCH OLD SCHEMA VERSION, MIGRATING" );
+            }
+            else
+            {
+                db_debug( "SCHEMA VERSION DOES NOT MATCH, MIGRATING" );
+            }
+
+            // OK, the schema hash is not the same, we need to migrate
+
+            // Create the new database
+
+            DB new_db( ":memory:" );
+
+            new_db.exec( schema );
+
+            new_db.exception( "FAILED TO CREATE NEW DATABASE SCHEMA" );
+
+
+            // Get a list of tables from the 'old' database
+
+            StringList tables;
+
+            Statement select_tables( *this, "select name from sqlite_master where type='table' and name not like 'sqlite%' and name != 'schema_version';" );
+
+            while( select_tables.step_row() )
+            {
+                tables.push_back( select_tables.get_string( 0 ) );
+            }
+
+            select_tables.exception( "FAILED TO LOAD LIST OF TABLES FOR MIGRATION" );
+
+
+            // Now, migrate each table
+
+            for ( StringList::const_iterator it = tables.begin(); it != tables.end(); ++it )
+            {
+                String table_name( *it );
+
+                db_debug( "MIGRATING TABLE '%s'", table_name.c_str() );
+
+                // Get the columns for this table in the source database
+
+                Statement get_source_columns( *this, Util::format( "pragma table_info(%s);", table_name.c_str() ) );
+
+                StringSet source_columns;
+
+                while ( get_source_columns.step_row() )
+                {
+                    source_columns.insert( get_source_columns.get_string( 1 ) );
+                }
+
+                get_source_columns.exception( "FAILED TO GET SOURCE TABLE COLUMNS" );
+
+                // Get the columns in the dest database
+
+                Statement get_dest_columns( new_db, Util::format( "pragma table_info(%s);", table_name.c_str() ) );
+
+                StringSet dest_columns;
+
+                while ( get_dest_columns.step_row() )
+                {
+                    dest_columns.insert( get_dest_columns.get_string( 1 ) );
+                }
+
+                get_dest_columns.exception( "FAILED TO GET DESTINATION TABLE COLUMNS" );
+
+                // If this is empty, the table does not exist in the destination database
+
+                if ( dest_columns.empty() )
+                {
+                    db_debug( "  DOES NOT EXIST IN DESTINATION DB, SKIPPING" );
+
+                    continue;
+                }
+
+                // Now, figure out which columns we will migrate - only those that exist in
+                // both tables.
+
+                StringList columns;
+
+                std::set_intersection(
+                        source_columns.begin(),
+                        source_columns.end(),
+                        dest_columns.begin(),
+                        dest_columns.end(),
+                        std::inserter( columns, columns.begin() ) );
+
+                if ( columns.empty() )
+                {
+                    db_debug( "  NO COLUMNS IN COMMON, SKIPPING" );
+
+                    continue;
+                }
+
+                // Create a comma separated list of columns and bind values
+
+                String column_list;
+                String value_list;
+
+                int i = 1;
+
+                for ( StringList::const_iterator cit = columns.begin(); cit != columns.end(); ++cit, ++i )
+                {
+                    if ( ! column_list.empty() )
+                    {
+                        column_list += ",";
+                    }
+
+                    column_list += *cit;
+
+                    if ( ! value_list.empty() )
+                    {
+                        value_list += ",";
+                    }
+
+                    value_list += Util::format( "?%d", i );
+                }
+
+                // Create the select statement
+
+                Statement select_source( *this, Util::format( "select %s from %s;", column_list.c_str(), table_name.c_str() ) );
+
+                Statement insert_dest( new_db, Util::format( "insert into %s (%s) values (%s);", table_name.c_str(), column_list.c_str(), value_list.c_str() ) );
+
+                int rows = 0;
+
+                while ( select_source.step_row() )
+                {
+                    insert_dest.reset();
+                    insert_dest.clear();
+
+                    int i = 1;
+
+                    for ( StringList::const_iterator cit = columns.begin(); cit != columns.end(); ++cit, ++i )
+                    {
+                        insert_dest.bind( i, select_source.get_string( i - 1 ) );
+                    }
+
+                    insert_dest.step();
+
+                    insert_dest.exception( "FAILED TO INSERT DESTINATION ROW" );
+
+                    ++rows;
+                }
+
+                db_debug( "  MIGRATED %d ROW(S)", rows );
+            }
+
+            // Now create the schema version in the new database
+
+            new_db.exec( "create table if not exists schema_version (name TEXT NOT NULL PRIMARY KEY, value TEXT);" );
+
+            new_db.exception( "FAILED TO CREATE SCHEMA VERSION TABLE IN DESTINATION DB" );
+
+            Statement insert_hash( new_db, "insert into schema_version (name,value) values ('hash',?1);" );
+
+            insert_hash.bind( 1, schema_hash );
+
+            insert_hash.step();
+
+            insert_hash.exception( "FAILED TO INSERT SCHEMA HASH IN DESTINATION DB" );
+
+            // Close the source database and replace it with the new database
+
+            sqlite3_close( get_db() );
+
+            reset_db( new_db.steal_db() );
+
+            return true;
+        }
+        catch( const String & e )
+        {
+            g_warning( "DATABASE MIGRATION FAILED : %s", e.c_str() );
+        }
+
+        return false;
+    }
+
     //-------------------------------------------------------------------------
 
     Statement::Statement( const DB & db, const char * sql )
-        :
+    :
         Error( db ),
         s( NULL )
     {
         if ( ok() )
         {
             check( sqlite3_prepare( get_db(), sql, -1, &s, NULL ) );
+        }
+    }
+
+    Statement::Statement( const DB & db, const String & sql )
+    :
+        Error( db ),
+        s( NULL )
+    {
+        if ( ok() )
+        {
+            check( sqlite3_prepare( get_db(), sql.c_str(), -1, &s, NULL ) );
         }
     }
 

@@ -72,11 +72,18 @@ namespace SQLite
         DB( DB & other );
         ~DB();
 
+        DB & operator = ( DB & other );
+
         int exec( const char * sql );
 
         int last_insert_rowid() const;
 
         sqlite3 * steal_db();
+
+        // If the migration happens, this database will be replaced
+        // with a new in-memory database.
+
+        bool migrate_schema( const char * schema );
     };
 
     //-------------------------------------------------------------------------
@@ -86,6 +93,7 @@ namespace SQLite
     public:
 
         Statement( const DB & db, const char * sql );
+        Statement( const DB & db, const String & sql );
         ~Statement();
 
         int step();
