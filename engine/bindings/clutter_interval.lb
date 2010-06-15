@@ -19,32 +19,64 @@ struct interval
 
 /*
     Class: Interval
+    
+    An interval lets you set two numbers; a starting number and an ending number
+    and get the value given a progress between 0 and 1.
 */
 
 class Interval [[interval*]]
 {
+	/*
+		Constructor: Interval
+		
+		Creates a new interval with starting and ending numbers.
+	*/ 
+
     Interval( double from , double to )
-	[[
-	    *self = new interval(from,to);
-	]];
+		[[
+		    *self = new interval(from,to);
+		]];
     
     ~Interval()
-	[[
-	    delete self;
-	]];
+		[[
+		    delete self;
+		]];
+
+	/*
+		Property: from
+		
+		Lets you set or get the starting value of the interval.
+	*/
+		
+    double from
+		[[from=self->a;]]
+		[[self->a=from;]];
+	
+	/*
+		Property: to
+		
+		Lets you set or get the ending value of an interval.
+	*/
+	 
+    double to
+		[[to=self->b;]]
+		[[self->b=to;]];    
+
+	/*
+		Function: get_value
+		
+		Given a factor, calculates the value for it.
+		
+		(code)
+		local t = Interval( -10, 20 )
+		t.get_value( 0.5 ) -- Will return the value at 50%, which will be 5
+		(end) 
+	*/
 	
     double get_value(double factor)
-	[[
-	    result=(factor*(self->b-self->a))+self->a;
-	]];
+		[[
+		    result=(factor*(self->b-self->a))+self->a;
+		]];
 	
-    double from
-	[[from=self->a;]]
-	[[self->a=from;]];
-	
-    double to
-	[[to=self->b;]]
-	[[self->b=to;]];
-    
 }
 

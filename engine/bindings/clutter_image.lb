@@ -261,7 +261,14 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 ]]
 
 /*
-    Class: Image 
+    Class: Image
+    
+    Images let you load and display images...wether from local files or URIs. They have
+    all the functions and methods of <UIElement>.
+    
+    All images are, by default, loaded synchronously; you have to set the <async> property
+    to true if you want to override that behavior. If you do, you can attach a function to
+    the <on_loaded> event. This will tell you when, and if, the image data is loaded.   
 */
 
 class Image [[ClutterActor*]] actor
@@ -288,6 +295,36 @@ class Image [[ClutterActor*]] actor
 		    g_object_unref( G_OBJECT( self ) );
 		]];
     
+    /*
+    
+    	Property: src
+    	
+    	This is a string that specifies where the image will be loaded from. It can
+    	be a path into your app bundle or a URI. 
+    	
+    	If the <async> property is not set or is false, the image will be loaded 
+    	immediately after you set this property. You can then consult the <loaded> 
+    	property to make sure it was loaded succesfully.
+    	
+    	If the <async> property is set to true, the image will begin loading in 
+    	the background and the <on_loaded> event will fire when it is finished. In the
+    	meantime, the <loaded> property will be false. If you set the src more than once
+    	before you receive the <on_loaded> event, there are no guarantees as to which 
+    	one will be loaded last, so be careful.
+    	
+    	(code)
+    	local my_image = Image()
+    	my_image.src = "assets/foo.png"
+    	(end)
+    	
+    	or
+    	
+    	(code)
+    	local my_image = Image{ src = "assets/foo.png" }
+    	(end)
+    
+    */
+    
     string src
 		[[
 		    src=( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
@@ -297,6 +334,13 @@ class Image [[ClutterActor*]] actor
 			
 			load_image( L, CLUTTER_TEXTURE( self ) );
 		]];
+	
+	/*
+		Property: base_size
+		
+		This is a table containing the width and height of the image as it was when 
+		you loaded it; not its current dimension on screen.
+	*/
 	
     readonly table base_size
 		[[
@@ -317,6 +361,17 @@ class Image [[ClutterActor*]] actor
 		[[
 			clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);
 		]];
+	
+	/*
+		Property: tile
+		
+		This property is a table of two boolean values which determine whether the
+		image will be tiled horizontally and vertically to fill its width and height.
+		
+		So, for example, if you load an image that is 50 pixels wide, set its
+		width to 200 and tile to { true, fale }, the image will be tiled 4 times, to fill
+		the 200 pixels. 
+	*/
 	
     table tile
 		[[
@@ -345,6 +400,14 @@ class Image [[ClutterActor*]] actor
 			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
 		]];
 	
+	/*
+		Property: async
+		
+		This is a boolean value that determines how the image is loaded. If set to true, the
+		image will be loaded in the background. You should set this before you set the <src> 
+		property.
+	*/
+	
     bool async
 		[[
 			async=ImageExtra::get( self )->async;
@@ -352,7 +415,14 @@ class Image [[ClutterActor*]] actor
 		[[
 			ImageExtra::get( self )->async = async;
 		]];
+	
+	/*
+		Property: loaded
 		
+		This will be true if an image was loaded successfully. It can be false if the last image
+		failed to load or while a new image is being loaded asynchronously. 
+	*/	
+	
 	readonly bool loaded
 		[[
 			loaded = ImageExtra::get( self )->loaded;
@@ -399,6 +469,21 @@ class Image [[ClutterActor*]] actor
 
         ]];
 	
+	/*
+		Event: on_loaded
+		
+		If an image is loaded asynchronously, this event will fire when it is done loading
+		or if it fails to load.
+		
+		It is recommended that you detach this event when you are done with it by setting
+		it to nil.
+		
+		Arguments:
+		
+			image - The image that finished loading.
+			failed - A boolean value that is true if the image failed to load.
+	*/
+	
     callback on_loaded
 		[[
 		    SignalCollector::get(L)->connect_if(
@@ -409,6 +494,18 @@ class Image [[ClutterActor*]] actor
 				G_CALLBACK(Image_on_loaded),
 				L);
 		]];
+	
+	/*
+		Event: on_size_changed
+		
+		This event fires every time the image size changes.
+		
+		Arguments:
+		
+			image - The image that the event applies to.
+			width - The new width of the image.
+			height - The new height of the image.
+	*/
 	
     callback on_size_changed
 		[[

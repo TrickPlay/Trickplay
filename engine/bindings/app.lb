@@ -73,7 +73,7 @@ global app [[App*]]
     # result is a table that has the fields below. All of them may
     # be nil.
     #
-    # caller - 	The id of the launched this one.
+    # caller - 	The id of the app that launched this one.
     #
     # action - 	The name of the action that was invoked. 
     #

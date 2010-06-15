@@ -18,6 +18,9 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 
 /*
     Class: Timeline
+    
+    A timeline is an object that lets you animate UIElements. You create one, set
+    a function for the <on_new_frame> event and then start it.
 */
 
 class Timeline [[ClutterTimeline*]]
@@ -33,17 +36,46 @@ class Timeline [[ClutterTimeline*]]
 	    g_object_unref(G_OBJECT(self));
 	]];
 	
+	/*
+		Property: duration
+		
+		The duration of the timeline in milliseconds.
+	*/
+	
     int duration
 	[[duration=clutter_timeline_get_duration(self);]]
 	[[clutter_timeline_set_duration(self,duration);]];
+	
+	/*
+		Property: loop
+		
+		Whether the timeline should loop forever.
+	*/
 	
     bool loop
 	[[loop=clutter_timeline_get_loop(self);]]
 	[[clutter_timeline_set_loop(self,loop);]];
 	
+	/*
+		Property: delay
+		
+		A delay, in milliseconds after which the timeline will start.
+	*/
+	
     int delay
 	[[delay=clutter_timeline_get_delay(self);]]
 	[[clutter_timeline_set_delay(self,delay);]];
+	
+	/*
+		Property: direction
+		
+		The direction of the timeline.
+		
+		Possible Values:
+		
+			FORWARD - The timeline will move from 0 to 1.
+			BACKWARD - The timeline will move from 1 to 0.
+	*/
 	
     string direction
 	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"FORWARD":"BACKWARD");]]
@@ -52,70 +84,58 @@ class Timeline [[ClutterTimeline*]]
 	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
 	]];
 
-	reverse()
-	[[clutter_timeline_set_direction(self,
-			clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
-			?CLUTTER_TIMELINE_BACKWARD
-			:CLUTTER_TIMELINE_FORWARD);]];
-	
-    start()
-	[[clutter_timeline_start(self);]];
-	
-    pause()
-	[[clutter_timeline_pause(self);]];
-	
-    stop()
-	[[clutter_timeline_stop(self);]];
-	
-    rewind()
-	[[clutter_timeline_rewind(self);]];
-	
-    skip(int msecs)
-	[[clutter_timeline_skip(self,msecs);]];
-	
-    advance(int msecs)
-	[[clutter_timeline_advance(self,msecs);]];
+	/*
+		Property: elapsed
+		
+		The number of milliseconds elapsed since the timeline was started.
+	*/
 	
     readonly int elapsed
 	[[elapsed=clutter_timeline_get_elapsed_time(self);]];
 	
+	/*
+		Property: delta
+		
+		This value is only valid inside the <on_new_frame> event. It tells you
+		how many milliseconds have elapsed since on_new_frame was called last.
+	*/
+	
     readonly int delta
 	[[delta=clutter_timeline_get_delta(self);]];
 	
+	/*
+		Property: progress
+		
+		The progress of the timeline as a value between 0 and 1.
+	*/
     readonly double progress
 	[[progress=clutter_timeline_get_progress(self);]];
+	
+	/*
+		Property: is_playing
+		
+		True if the timeline is running.
+	*/
 	
     readonly bool is_playing
 	[[is_playing=clutter_timeline_is_playing(self);]];
 	
-    add_marker(string name,int msecs)
-	[[clutter_timeline_add_marker_at_time(self,name,msecs);]];
-	
-    remove_marker(string name)
-	[[clutter_timeline_remove_marker(self,name);]];
-	
-    bool has_marker(string name)
-	[[result=clutter_timeline_has_marker(self,name);]];
-	
-    advance_to_marker(string name)
-	[[clutter_timeline_advance_to_marker(self,name);]];
-    
-    table list_markers(int msecs = -1)
-	[[
-	    gsize len;
-	    gchar** markers=clutter_timeline_list_markers(self,msecs,&len);
-	    gchar** m = markers;
-	    lua_newtable(L);
-	    for(int i=1;len;--len,++m,++i)
-	    {
-		lua_pushstring(L,*m);
-		lua_rawseti(L,-2,i);
-	    }
-	    g_strfreev(markers);
-	]];
+	/*
+		Property: markers
+		
+		A table listing all the markers that have been set on the timeline.
+		The table contains the names of all the markers.
+	*/
 	
     readonly table markers
 	[[Timeline_list_markers(L);]];
+
+	/*
+		Property: extra
+		
+		This is a table that can hold your own data. It is useful to attach
+		additional information to a timeline.
+	*/
 	
     table extra
 	[[
@@ -141,13 +161,198 @@ class Timeline [[ClutterTimeline*]]
 		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L,2),ClutterUtil::Extra::destroy);
 	    }
 	]];
+
+	/*
+		Function: reverse
+		
+		Reverses the <direction> of the timeline.
+	*/
+	reverse()
+	[[clutter_timeline_set_direction(self,
+			clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
+			?CLUTTER_TIMELINE_BACKWARD
+			:CLUTTER_TIMELINE_FORWARD);]];
 	
+	/*
+		Function: start
+		
+		Starts the timeline.
+	*/
+	
+    start()
+	[[clutter_timeline_start(self);]];
+	
+	/*
+		Function: pause
+		
+		Pauses the timeline.
+	*/
+    pause()
+	[[clutter_timeline_pause(self);]];
+	
+	/*
+		Function: stop
+		
+		Stops the timeline and resets it to the beginning (or end, if direction is backward).
+	*/
+	
+    stop()
+	[[clutter_timeline_stop(self);]];
+	
+	/*
+		Function: rewind
+		
+		Rewinds the timeline to the beginning  (or end, if direction is backward).
+	*/
+	
+    rewind()
+	[[clutter_timeline_rewind(self);]];
+	
+	/*
+		Function: skip
+		
+		Skips a number of milliseconds.
+		
+		Arguments:
+		
+			msecs - The milliseconds to skip.
+		
+	*/
+	
+    skip(int msecs)
+	[[clutter_timeline_skip(self,msecs);]];
+	
+	/*
+		Function: advance
+		
+		Advances the timeline by a number of milliseconds.
+		
+		Arguments:
+		
+			msecs - The milliseconds to advance.
+	*/
+	
+    advance(int msecs)
+	[[clutter_timeline_advance(self,msecs);]];
+	
+	/*
+		Function: add_marker
+		
+		Adds a named marker at the desired position.
+		
+		Arguments:
+		
+			name - The name of the new marker.
+			
+			msecs - The position at which to add the marker.
+	*/
+
+    add_marker(string name,int msecs)
+	[[clutter_timeline_add_marker_at_time(self,name,msecs);]];
+
+	/*
+		Function: remove_marker
+		
+		Removes a marker by name.
+		
+		Arguments:
+		
+			name - The name of the marker to remove.
+	*/
+		
+    remove_marker(string name)
+	[[clutter_timeline_remove_marker(self,name);]];
+	
+	/*
+		Function: has_marker
+		
+		Tells you whether the timeline has a marker by this name.
+		
+		Arguments:
+		
+			name - The name of the marker to check.
+			
+		Returns:
+		
+			true - If that marker exists.
+			false - Otherwise.
+	*/
+	
+    bool has_marker(string name)
+	[[result=clutter_timeline_has_marker(self,name);]];
+	
+	/*
+		Function: advance_to_marker
+		
+		Advances to a marker by name.
+		
+		Arguments:
+		
+			name - The name of the marker.
+	*/
+	
+    advance_to_marker(string name)
+	[[clutter_timeline_advance_to_marker(self,name);]];
+    
+    /*
+    	Function: list_markers
+    	
+    	Returns a table of all markers at the given position. 
+    	
+    	Arguments:
+    	
+    		msecs - The position, in milliseconds, for which to list markers.
+    		
+    	Returns:
+    	
+    		table - A table of marker names at that position.  
+    */
+    
+    table list_markers(int msecs = -1)
+	[[
+	    gsize len;
+	    gchar** markers=clutter_timeline_list_markers(self,msecs,&len);
+	    gchar** m = markers;
+	    lua_newtable(L);
+	    for(int i=1;len;--len,++m,++i)
+	    {
+		lua_pushstring(L,*m);
+		lua_rawseti(L,-2,i);
+	    }
+	    g_strfreev(markers);
+	]];
+	
+	/*
+		Event: on_new_frame
+		
+		Called as often as possible while a timeline is running. This is where
+		you would adjust values for your UIElements.
+		
+		Arguments:
+		
+			timeline - The timeline the event applies to.
+			
+			elapsed - The current time, in milliseconds of the timeline. Same as <elapsed>.
+			
+			progress - The progress of the timeline, same as <progress>. 
+	*/
+		
     callback on_new_frame
 	[[
 	    SignalCollector::get(L)->connect_if(
 		on_new_frame,"on_new_frame",
 		self,"new-frame",G_CALLBACK(Timeline_on_new_frame),L);
 	]];
+	
+	/*
+		Event: on_started
+		
+		Called whenever the timeline is started.
+		
+		Arguments:
+		
+			timeline - The timeline.
+	*/
 	
     callback on_started
 	[[
@@ -156,6 +361,16 @@ class Timeline [[ClutterTimeline*]]
 		self,"started",G_CALLBACK(Timeline_on_started),L);	    
 	]];
     
+    /*
+    	Event: on_completed
+    	
+    	Called whenever the timeline reaches the end.
+		
+		Arguments:
+		
+			timeline - The timeline.
+    */
+    
     callback on_completed
 	[[
 	    SignalCollector::get(L)->connect_if(
@@ -163,12 +378,36 @@ class Timeline [[ClutterTimeline*]]
 		self,"completed",G_CALLBACK(Timeline_on_completed),L);	    	    
 	]];
 	
+	/*
+		Event: on paused
+		
+		Called whenever the timeline is paused.
+			
+		Arguments:
+		
+			timeline - The timeline.
+	*/
+	
     callback on_paused
 	[[
 	    SignalCollector::get(L)->connect_if(
 		on_paused,"on_paused",
 		self,"paused",G_CALLBACK(Timeline_on_paused),L);	    	    
 	]];
+	
+	/*
+		Event: on_marker_reached
+		
+		Called whenever the timeline reaches a marker.
+				
+		Arguments:
+		
+			timeline - The timeline.
+			
+			name - The name of the marker reached.
+			
+			msecs - The position of the marker.
+	*/
 	
     callback on_marker_reached
 	[[

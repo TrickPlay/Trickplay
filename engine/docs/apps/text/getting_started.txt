@@ -79,14 +79,14 @@ Group: Running Your App
 Run Trickplay and pass it the path to your app.
 
 (code)
-./tp /path/to/the/app
+trickplay /path/to/the/app
 (end)
 
-Trickplay will first look for the app metadata file and then read and validate its contents.
+TrickPlay will first look for the app metadata file and then read and validate its contents.
 If all is well, it will then execute your app's main file ("main.lua").
 
 Since our hello world app does not have a user interface, no additional windows are
-opened; only the Trickplay console.
+opened; only the TrickPlay console.
 
 
 Topic: The Console
@@ -110,16 +110,16 @@ return a
 This code sets a global variable "a" with a value of 12. The second line returns
 the value of a to the console, which prints it.
 
-You can also use the console to run Trickplay commands, which are prefixed with
+You can also use the console to run TrickPlay commands, which are prefixed with
 a slash. The most common one is "/exit". You can try "/config" which shows
-you details about the configuration of Trickplay.
+you details about the configuration of TrickPlay.
 
 
-Topic: Configuring Trickplay
+Topic: Configuring TrickPlay
 
-You can change what Trickplay knows. This can be done in several ways, but the
-easiest is to create a text file called "trickplay.cfg" in the same directory as the
-Trickplay executable (not in your app bundle). This file contains any number of
+You can change what TrickPlay knows. This can be done in several ways, but the
+easiest is to create a text file called "trickplay.cfg" in a directory where you
+run the TrickPlay executable. This file contains any number of
 keys and values, where the value is separated from the key by an equal sign.
 Any line that starts with a # is ignored, so you can add comments. For example, try this:
 
@@ -128,7 +128,7 @@ system.language=es
 system.country=AR
 (end)
 
-This tells Trickplay that it should run in Spanish and the country is Argentina.
+This tells TrickPlay that it should run in Spanish and the country is Argentina.
 
 
 TODO:
@@ -139,8 +139,8 @@ Group: Including Files
 
 When one file is not enough. Lua has two functions that let you use code in other
 files, "dofile" and "loadfile". Both of these functions take a path to the file as
-a string. The big difference when using them with Trickplay is that the path should
-always be relative - because Trickplay will only let you access files inside your
+a string. The big difference when using them with TrickPlay is that the path should
+always be relative - because TrickPlay will only let you access files inside your
 app bundle. For example:
 
 (code)
@@ -172,7 +172,7 @@ This technique is very powerful and can be used to localize strings.
 
 Topic: Localized Stuff
 
-Trickplay helps you localize resources. Trickplay is aware of two pieces of information,
+TrickPlay helps you localize resources. TrickPlay is aware of two pieces of information,
 a language code and a country code. The language code is a two letter, lower case
 ISO-639-1 code. See <http://www.loc.gov/standards/iso639-2/php/code_list.php> for the list.
 The country code is a two letter, upper case, ISO-3166-1-alpha-2 code.
@@ -190,7 +190,7 @@ by using the special scheme "localized:", like this:
 local strings=dofile("localized:strings.lua")
 (end)
 
-Trickplay will look for the file "strings.lua" in the following directories,
+TrickPlay will look for the file "strings.lua" in the following directories,
 in order:
 
 (code)

@@ -18,6 +18,13 @@ extern int wrap_Timeline(lua_State*L,ClutterTimeline* self);
 
 /*
     Class: Alpha 
+    
+    An alpha is an object that converts progress values from a <Timeline>. It is used
+    to implement different animation modes, such as ease-in. It has nothing to do with
+    color alpha values.
+    
+    You can attach your own function to <on_alpha> which lets you create 
+    your own conversions.  
 */
 
 class Alpha [[ClutterAlpha*]]
@@ -35,61 +42,140 @@ class Alpha [[ClutterAlpha*]]
 	    g_object_unref(G_OBJECT(self));
 	]];
 	
-    udata timeline
-	[[
-	    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
-	    if(wrap_Timeline(L,timeline))
-		g_object_ref(G_OBJECT(timeline));
-	]]
-	[[
-	    luaL_checkudata(L,-1,"TIMELINE_METATABLE");
-	    void * udata=lua_touserdata(L,-1);
-	    if (udata)
-	    {
-		GObject * timeline=*((GObject**)udata);
+	/*
+		Property: timeline
 		
-		if (timeline && CLUTTER_IS_TIMELINE(timeline))
-		    clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
-	    }
-	]];
+		The Timeline this alpha is attached to. 
+	*/
+	
+    Timeline timeline
+		[[
+		    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
+		    if(wrap_Timeline(L,timeline))
+			g_object_ref(G_OBJECT(timeline));
+		]]
+		[[
+		    luaL_checkudata(L,-1,"TIMELINE_METATABLE");
+		    void * udata=lua_touserdata(L,-1);
+		    if (udata)
+		    {
+			GObject * timeline=*((GObject**)udata);
+			
+			if (timeline && CLUTTER_IS_TIMELINE(timeline))
+			    clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
+		    }
+		]];
+		
+	/*
+		Property: mode
+		
+		To use one of the built-in modes, you can pass its name to this property.
+		
+		Possible Values:
+		
+		  LINEAR - Linear.
+		  EASE_IN_QUAD - Ease in quadratic.
+		  EASE_OUT_QUAD - Ease out quadratic.
+		  EASE_IN_OUT_QUAD - Ease in and out quadratic.
+		  EASE_IN_CUBIC - Ease in cubic.
+		  EASE_OUT_CUBIC - Ease out cubic.
+		  EASE_IN_OUT_CUBIC - Ease in and out cubic.
+		  EASE_IN_QUART - Ease in quartic.
+		  EASE_OUT_QUART - Ease out quartic.
+		  EASE_IN_OUT_QUART - Ease in and out quartic.
+		  EASE_IN_QUINT - Ease in quintic.
+		  EASE_OUT_QUINT - Ease out quintic.
+		  EASE_IN_OUT_QUINT - Ease in and out quintic.
+		  EASE_IN_SINE - Ease in sinusoidal.
+		  EASE_OUT_SINE - Ease out sinusoidal
+		  EASE_IN_OUT_SINE - Ease in and out sinusoidal
+		  EASE_IN_EXPO - Ease in exponential.
+		  EASE_OUT_EXPO - Ease out exponential.
+		  EASE_IN_OUT_EXPO - Ease in and out exponential.
+		  EASE_IN_CIRC - Ease in circular.
+		  EASE_OUT_CIRC - Ease out circular.
+		  EASE_IN_OUT_CIRC - Ease in and out circular.
+		  EASE_IN_ELASTIC - Ease in elastic.
+		  EASE_OUT_ELASTIC - Ease out elastic.
+		  EASE_IN_OUT_ELASTIC - Ease in and out elastic.
+		  EASE_IN_BACK - Ease in overshooting cubic.
+		  EASE_OUT_BACK - Ease out overshooting cubic.
+		  EASE_IN_OUT_BACK - Ease in and out overshooting cubic.
+		  EASE_IN_BOUNCE - Ease in exponentially decaying parabolic.
+		  EASE_OUT_BOUNCE - Ease out exponentially decaying parabolic.
+		  EASE_IN_OUT_BOUNCE - Ease in and out exponentially decaying parabolic.
+			
+	*/
 	
     string mode
-	[[
-	    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
-	    GEnumValue * v  = g_enum_get_value(ec,clutter_alpha_get_mode(self));
-	    mode = (v?&(v->value_name[8]):"");
-	    g_type_class_unref(ec);	    
-	]]
-	[[
-	    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
-	    std::string cm("CLUTTER_");
-	    cm+= mode;
-	    
-	    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
-	    
-	    if(!v)
-		luaL_error(L,"Invalid alpha mode '%s'",mode);
+		[[
+		    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+		    GEnumValue * v  = g_enum_get_value(ec,clutter_alpha_get_mode(self));
+		    mode = (v?&(v->value_name[8]):"");
+		    g_type_class_unref(ec);	    
+		]]
+		[[
+		    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+		    std::string cm("CLUTTER_");
+		    cm+= mode;
+		    
+		    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
+		    
+		    if(!v)
+			luaL_error(L,"Invalid alpha mode '%s'",mode);
+			
+			
+		    clutter_alpha_set_mode(self,v->value);
+		    g_type_class_unref(ec);
+		]];
+	
+	/*
+		Property: alpha
 		
-		
-	    clutter_alpha_set_mode(self,v->value);
-	    g_type_class_unref(ec);
-	]];
+		Returns the current value of this alpha.
+	*/
 	
     readonly double alpha
-	[[alpha=clutter_alpha_get_alpha(self);]];
+		[[alpha=clutter_alpha_get_alpha(self);]];
 	
+	/*
+		Event: on_alpha
+		
+		This is a function that receives a number between 0 and 1 and returns
+		a new number. If you return the same number you received as an argument,
+		it would be a linear alpha.
+		
+		(code)
+		local my_alpha = Alpha()
+		
+		function my_alpha.on_alpha( alpha, progress )
+			return progress
+		end 
+		(end)
+		
+		Arguments:
+		
+			alpha - The alpha object this event applies to.
+			
+			progress - A number between 0 and 1 - the timeline's progress value.
+			
+		Returns:
+		
+			number - The converted result.
+	*/
+    
     callback on_alpha
-	[[
-	    clutter_alpha_set_func(self,NULL,NULL,NULL);
-	    if (on_alpha)
-	    {
-		clutter_alpha_set_func(
-		    self,
-		    Alpha_on_alpha,
-		    App::get(L)->ref_lua_state_proxy(),
-		    Alpha_on_alpha_destroy);
-	    }
-	]];	    
+		[[
+		    clutter_alpha_set_func(self,NULL,NULL,NULL);
+		    if (on_alpha)
+		    {
+			clutter_alpha_set_func(
+			    self,
+			    Alpha_on_alpha,
+			    App::get(L)->ref_lua_state_proxy(),
+			    Alpha_on_alpha_destroy);
+		    }
+		]];	    
 }
 
 [[

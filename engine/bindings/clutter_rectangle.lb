@@ -9,7 +9,10 @@ module clutter_rectangle;
 ]]
 
 /*
-    Class: Rectangle 
+    Class: Rectangle
+    
+    This is a simple rectangle that can have color and a border. It has 
+    all the methods and properties of <UIElement>.  
 */
 
 class Rectangle [[ClutterActor*]] actor
@@ -25,6 +28,32 @@ class Rectangle [[ClutterActor*]] actor
     ~Rectangle()
 	[[g_object_unref(G_OBJECT(self));]];
         
+    /*
+    	Property: color
+    	
+    	The color of the rectangle. This can be set as either a string or a table
+    	with 3 or 4 numbers. It is always returned as a table with 4 numbers.
+    	
+    	When setting it as a string, you should use hex values for red, green, blue
+    	and alpha. You can omit alpha, which will default to fully opaque. You can
+    	also include a "#" as the first character, which will be ignored.
+    	
+    	(code)
+    		r.color = "#FF0000"
+    		r.color = "FF0000"
+    		r.color = "FF0000FF"
+    	(end)
+    	
+    	When setting it as a table, you pass a table with 3 or 4 integers, up to 255 each
+    	for red, green blue and alpha. If you pass only 3, alpha is assumed to be 
+    	255 (fully opaque).
+    	
+    	(code)
+    		r.color = { 255, 0 , 0 }
+    		r.color = { 255, 0 , 0, 255 }
+    	(end)
+    */
+    
     table color
         [[
             ClutterColor color;
@@ -36,11 +65,23 @@ class Rectangle [[ClutterActor*]] actor
             ClutterUtil::to_clutter_color(L,2,&color);
             clutter_rectangle_set_color(CLUTTER_RECTANGLE(self),&color);            
         ]];
-        
+    
+    /*
+    	Property: border_width
+    	
+    	The width of the rectangle's border.
+    */    
+    
     int border_width
         [[border_width=clutter_rectangle_get_border_width(CLUTTER_RECTANGLE(self));]]
         [[clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(self),border_width);]];
         
+    /*
+    	Property: border_color
+    	
+    	The color of the rectangle's border.
+    */
+    
     table border_color
         [[
             ClutterColor color;
