@@ -10,7 +10,10 @@ module clutter_clone;
 
 /*
     Class: Clone
-    
+  
+  	A clone is a <UIElement> that "mirrors" another one. To use a clone, you create another
+  	<UIElement>, add it to the screen and then create a clone of it. A common trick is to
+  	add the element to be cloned to the screen and set its opacity to 0, so it won't be visible.
 */
 
 class Clone [[ClutterActor*]] actor
@@ -18,24 +21,32 @@ class Clone [[ClutterActor*]] actor
     Clone(table props = 0)
         [[
             *self = clutter_clone_new(NULL);
-	    ClutterUtil::initialize_actor(L,*self,CLONE_METATABLE);
-	    ClutterUtil::set_props_from_table(L,props);
-	    g_object_ref_sink(G_OBJECT(*self));
+		    ClutterUtil::initialize_actor(L,*self,CLONE_METATABLE);
+		    ClutterUtil::set_props_from_table(L,props);
+		    g_object_ref_sink(G_OBJECT(*self));
         ]];
 	
     ~Clone()
-	[[g_object_unref(G_OBJECT(self));]];
+		[[
+			g_object_unref(G_OBJECT(self));
+		]];
+		
+	/*
+		Property: source
+		
+		This is the UIElement that the clone is "mirroring".  
+	*/
         
-    udata source
+    UIElement source
         [[
-	    ClutterUtil::wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
+	    	ClutterUtil::wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
         [[
             ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
             if(source)
-	    {
-                clutter_clone_set_source(CLUTTER_CLONE(self),source);
-	    }
+		    {
+	                clutter_clone_set_source(CLUTTER_CLONE(self),source);
+		    }
         ]];
 }
 

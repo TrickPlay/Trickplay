@@ -11,6 +11,17 @@ module clutter_screen;
 
 /*
     Global: screen 
+    
+    The screen is a <UIElement> and also a <Container>. TrickPlay creates it 
+    for you automatically before your app is loaded. 
+    
+    Initially, the screen has the fixed dimension of 1920x1080 (1080p). It also
+    has x and y scale factors such that it will be automatically scaled to fit the
+    real display dimensions. There is a property called <display_size> which gives
+    you the actual dimensions of the display.
+    
+    Although screen has all the properties and methods of a <UIElement>, some are
+    overriden. For example, the screen's <parent> property will always return nil.
 */
 
 global screen [[ClutterActor*]] actor , container
@@ -33,34 +44,51 @@ global screen [[ClutterActor*]] actor , container
     # We have to override these from regular actors, so that app developers
     # cannot reach outside their screen
     
+    /*
+    	Function: show
+    	
+    	Shows the screen. Unlike <show_all>, calling this function does not 
+    	show any elements that were explicitly hidden.
+    */
+    
     show()
         [[
-	    clutter_actor_show(self);
-	    // Show the stage as well
-	    clutter_actor_show(clutter_stage_get_default());
-	]];
+	    	clutter_actor_show(self);
+	    	// Show the stage as well
+	    	clutter_actor_show(clutter_stage_get_default());
+		]];
         
+    /*
+    	Function: show_all
+    	
+    	Shows the screen and all of its child elements, including hidden ones.
+   	*/
+   	
     show_all()
         [[
-	    clutter_actor_show_all(self);
-	    // Show the stage as well
-	    clutter_actor_show(clutter_stage_get_default());
-	]];
+	    	clutter_actor_show_all(self);
+	    	// Show the stage as well
+	    	clutter_actor_show(clutter_stage_get_default());
+		]];
 	
-    readonly udata parent
-	[[
-	    lua_pushnil(L);
-	]];
+	/*
+		Property: parent
+		
+		This property always returns nil, because the screen's parent is private to
+		TrickPlay.
+	*/
 	
-    unparent()
-	[[
-	    // Cannot let the app developer remove his screen from the stage,
-	    // because he would not have a way to put it back
-	]];
+    readonly UIElement parent
+		[[
+		    lua_pushnil(L);
+		]];
+
+	/*
+		Property: display_size
+		
+		Returns a table containing the width and height of the underlying display.
+	*/	
 	
-    #..........................................................................	
-    # These are stage properties
-    
     readonly table display_size
         [[
 
@@ -75,6 +103,23 @@ global screen [[ClutterActor*]] actor , container
             lua_pushnumber( L, h );
             lua_rawseti( L, -2, 2 );
         ]];
+
+	/*
+		Function: unparent
+		
+		Calling unparent on the screen has no effect, because the screen's parent
+		is private to TrickPlay.
+	*/
+	
+    unparent()
+		[[
+		    // Cannot let the app developer remove his screen from the stage,
+		    // because he would not have a way to put it back
+		]];
+	
+    #..........................................................................	
+    # These are stage properties
+    
 
     # TODO
     # This can potentionally let an app get an actor outside its group, so I'll
