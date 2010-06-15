@@ -193,6 +193,18 @@ private:
 
 namespace Util
 {
+    inline String format( const gchar * format, ... )
+    {
+        va_list args;
+        va_start( args, format );
+        gchar * s = g_strdup_vprintf( format, args );
+        va_end( args );
+
+        String result( s );
+        g_free( s );
+        return result;
+    }
+
     //-----------------------------------------------------------------------------
 
     class GMutexLock
