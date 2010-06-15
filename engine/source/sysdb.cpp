@@ -98,6 +98,8 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
     bool create = true;
 
+    bool migrated = false;
+
     if ( !g_file_test( filename, G_FILE_TEST_EXISTS ) )
     {
         g_info( "SYSTEM DATABASE DOES NOT EXIST" );
@@ -135,7 +137,15 @@ SystemDatabase * SystemDatabase::open( const char * path )
                 else
                 {
                     create = false;
+
                     g_info( "SYSTEM DATABASE LOADED" );
+
+                    migrated = db.migrate_schema( schema_create );
+
+                    if ( migrated )
+                    {
+                        g_info( "SYSTEM DATABASE MIGRATED" );
+                    }
                 }
             }
         }
@@ -176,6 +186,13 @@ SystemDatabase * SystemDatabase::open( const char * path )
         result->dirt = 0;
         delete result;
         return NULL;
+    }
+    else
+    {
+        if ( ! result->is_dirty() && migrated )
+        {
+            result->make_dirty();
+        }
     }
 
     // Everything is OK
