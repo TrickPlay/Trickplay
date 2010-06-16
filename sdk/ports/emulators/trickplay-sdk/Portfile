@@ -17,7 +17,7 @@ long_description	TrickPlay is an application platform for televisions.  This pac
 
 fetch.type		git
 #git.url			git@git.assembla.com:trickplay.git
-git.url			file:///Users/craig/code/trickplay/.git
+git.url			file://${portpath}/../../../../.git
 git.branch		origin/stable
 
 depends_lib		\
@@ -49,5 +49,13 @@ build.pre_args	-C build
 
 destroot {
 	xinstall -m 755 -d ${destroot}${prefix}/bin
-	xinstall -m 755 ${worksrcpath}/build/client/clutter-mediaplayer/trickplay ${destroot}${prefix}/bin
+	xinstall -m 755 -d ${destroot}${prefix}/etc
+	xinstall -m 755 -d ${destroot}${prefix}/share/trickplay
+	xinstall -m 755 ${worksrcpath}/build/clients/clutter-mediaplayer/trickplay ${destroot}${prefix}/bin
+	file copy ${worksrcpath}/apps ${destroot}${prefix}/share/trickplay/apps
+	file copy ${worksrcpath}/fonts ${destroot}${prefix}/share/trickplay/fonts
+	file copy ${worksrcpath}/build/engine/docs ${destroot}${prefix}/share/trickplay/docs
+	file copy ${worksrcpath}/sdk/trickplay-example.cfg ${destroot}${prefix}/etc/trickplay.cfg
+	reinplace "s|@@REPLACE_ME_FONT_PATH@@|${destroot}${prefix}/share/trickplay/fonts|g" ${destroot}${prefix}/etc/trickplay.cfg
+	reinplace "s|@@REPLACE_ME_APP_PATH@@|${destroot}${prefix}/share/trickplay/apps|g" ${destroot}${prefix}/etc/trickplay.cfg
 }
