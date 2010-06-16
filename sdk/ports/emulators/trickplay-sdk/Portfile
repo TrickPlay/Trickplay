@@ -16,7 +16,8 @@ long_description	TrickPlay is an application platform for televisions.  This pac
 
 
 fetch.type		git
-git.url			git@git.assembla.com:trickplay.git
+#git.url			git@git.assembla.com:trickplay.git
+git.url			file:///Users/craig/code/trickplay/.git
 git.branch		origin/stable
 
 depends_lib		\
@@ -36,20 +37,15 @@ depends_lib		\
 				port:fontconfig \
 				port:expat
 
-use_configure		no
 
-pre-build {
-	mkdir ${worksrcpath}/build
-	cd ${worksrcpath}/build
-	cmake ..
+configure.args	-DTP_PROFILING=1
+
+configure {
+	xinstall -m 755 -d ${worksrcpath}/build
+	system "cd ${worksrcpath}/build && ${configure.env} cmake ${configure.args} ${worksrcpath}"
 }
 
-build {
-	cd ${worksrcpath}/build
-	make
-}
-
-test {}
+build.pre_args	-C build
 
 destroot {
 	xinstall -m 755 -d ${destroot}${prefix}/bin
