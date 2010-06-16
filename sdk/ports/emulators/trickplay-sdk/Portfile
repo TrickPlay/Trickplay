@@ -55,6 +55,6 @@ destroot {
 	file copy ${worksrcpath}/apps ${destroot}${prefix}/share/trickplay/apps
 	file copy ${worksrcpath}/fonts ${destroot}${prefix}/share/trickplay/fonts
 	file copy ${worksrcpath}/sdk/trickplay-example.cfg ${destroot}${prefix}/etc/trickplay.cfg
-	reinplace "s|@@REPLACE_ME_FONT_PATH@@|${destroot}${prefix}/share/trickplay/fonts|g" ${prefix}/etc/trickplay.cfg
-	reinplace "s|@@REPLACE_ME_APP_PATH@@|${destroot}${prefix}/share/trickplay/apps|g" ${prefix}/etc/trickplay.cfg
+	reinplace "s|@@REPLACE_ME_FONT_PATH@@|${prefix}/share/trickplay/fonts|g" ${destroot}${prefix}/etc/trickplay.cfg
+	reinplace "s|@@REPLACE_ME_APP_PATH@@|${prefix}/share/trickplay/apps|g" ${destroot}${prefix}/etc/trickplay.cfg
 }
