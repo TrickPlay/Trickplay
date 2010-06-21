@@ -63,10 +63,6 @@ if (UNIX AND NOT APPLE)
 
         include(CPack)
 
-    else (NATURAL_DOCS)
-
-        message(FATAL_ERROR "Please run cmake with -DNATURAL_DOCS=<path to natural docs> to build documentation" )
-        
     endif (NATURAL_DOCS)		
 		
 
