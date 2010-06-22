@@ -1,0 +1,61 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+PortSystem		1.0
+
+
+categories		emulators
+name			trickplay-sdk
+version			0.0.4
+platforms		darwin
+
+maintainers		trickplay.com:craig
+homepage		http://developer.trickplay.com/sdk/
+
+description		Television platform emulator for the TrickPlay engine
+long_description	TrickPlay is an application platform for televisions.  This package provides a computer-based emulator for the engine running on a TV.
+
+
+fetch.type		git
+#git.url			git@git.assembla.com:trickplay.git
+git.url			file://${portpath}/../../../../.git
+git.branch		origin/stable
+#git.branch		origin/RELEASE_${version}
+
+depends_lib		\
+				port:tokyocabinet \
+				port:sqlite3 \
+				port:clutter-gst \
+				port:gst-plugins-good \
+				port:gst-plugins-bad \
+				port:openssl \
+				port:curl \
+				port:glib2 \
+				port:avahi \
+				port:libpng \
+				port:tiff \
+				port:jpeg \
+				port:json-glib \
+				port:fontconfig \
+				port:expat
+
+
+configure.args	-DTP_PROFILING=1
+
+configure {
+	xinstall -m 755 -d ${worksrcpath}/build
+	system "cd ${worksrcpath}/build && ${configure.env} cmake ${configure.args} ${worksrcpath}"
+}
+
+build.pre_args	-C build
+
+destroot {
+	xinstall -m 755 -d ${destroot}${prefix}/bin
+	xinstall -m 755 -d ${destroot}${prefix}/etc
+	xinstall -m 755 -d ${destroot}${prefix}/share/trickplay
+	xinstall -m 755 ${worksrcpath}/build/clients/clutter-mediaplayer/trickplay ${destroot}${prefix}/bin
+	file copy ${worksrcpath}/apps ${destroot}${prefix}/share/trickplay/apps
+	file copy ${worksrcpath}/fonts ${destroot}${prefix}/share/trickplay/fonts
+	file copy ${worksrcpath}/sdk/trickplay-example.cfg ${destroot}${prefix}/etc/trickplay.cfg
+	reinplace "s|@@REPLACE_ME_FONT_PATH@@|${prefix}/share/trickplay/fonts|g" ${destroot}${prefix}/etc/trickplay.cfg
+	reinplace "s|@@REPLACE_ME_APP_PATH@@|${prefix}/share/trickplay/apps|g" ${destroot}${prefix}/etc/trickplay.cfg
+}
