@@ -311,5 +311,50 @@ globals
             result = g_compute_checksum_for_string( G_CHECKSUM_SHA256, s, s_len );
             FreeLater free_later( ( char * )result );
         ]];
+        
+	lstring uint32_to_be( int n )
+		[[
+			guint32 i = GUINT32_TO_BE( n );
+			
+			result = ( char * ) & i;
+			result_len = 4;
+		]];
+		
+	lstring uint32_to_le( int n )
+		[[
+			guint32 i = GUINT32_TO_LE( n );
+			
+			result = ( char * ) & i;
+			result_len = 4;
+		]];       
+		
+	int uint32_from_be( lstring s )
+		[[
+			if ( s_len >= 4 )
+			{
+				// TODO: Could have alignment problems
+				
+				result = GUINT32_FROM_BE( * ( ( guint32 * ) s ) );
+			}
+			else
+			{
+				result = 0;
+			} 
+		]];		
+
+	int uint32_from_le( lstring s )
+		[[
+			if ( s_len >= 4 )
+			{
+				// TODO: Could have alignment problems
+				
+				result = GUINT32_FROM_LE( * ( ( guint32 * ) s ) );
+			}
+			else
+			{
+				result = 0;
+			} 
+		]];		
+		       
 }
 
