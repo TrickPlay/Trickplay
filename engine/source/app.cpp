@@ -54,6 +54,8 @@ extern void luaopen_mediaplayer_module( lua_State * L );
 extern void luaopen_stopwatch( lua_State * L );
 extern void luaopen_json( lua_State * L );
 
+extern void luaopen_socket( lua_State * L );
+
 extern void luaopen_restricted( lua_State * L );
 extern void luaopen_apps( lua_State * L );
 
@@ -692,6 +694,8 @@ int App::run( const StringSet & allowed_names )
     luaopen_json( L );
 
     luaopen_mediaplayer_module( L );
+
+    luaopen_socket( L );
 
     // TODO
     // This should not be opened for all apps - only trusted ones. Since we

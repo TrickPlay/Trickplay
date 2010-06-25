@@ -1,0 +1,115 @@
+module socket;
+
+[[
+#include "socket.h"
+
+class SocketDelegate : public Socket::Delegate
+{
+public:
+
+	SocketDelegate( lua_State * _L )
+	:
+		L( _L )
+	{
+		socket.set_delegate( this );
+	}
+	
+	Socket socket;
+	
+    virtual void on_connected();
+    
+    virtual void on_connect_failed();
+
+    virtual void on_disconnected();
+
+    virtual void on_write_failed();
+
+    virtual void on_data_read( const guint8 * data, gsize count );
+    
+    virtual void on_read_failed();
+    
+private:
+
+	lua_State * L;
+};
+	
+]]
+
+class Socket [[ SocketDelegate * ]]
+{
+	Socket()
+		[[
+			*self = new SocketDelegate( L );
+		]];
+		
+	~Socket()
+		[[
+			delete self;
+		]];
+		
+	readonly bool is_connected
+		[[
+			is_connected = self->socket.is_connected();
+		]];
+		
+	connect( string host_and_port, int default_port = 80 )
+		[[
+			self->socket.connect( host_and_port, default_port );
+		]];
+		
+	disconnect()
+		[[
+			self->socket.disconnect();
+		]];
+		
+	write( lstring data )
+		[[
+			self->socket.write( ( const guint8 * ) data, data_len );
+		]];
+		
+	callback on_connected;
+	
+	callback on_connect_failed;
+	
+	callback on_disconnected;
+	
+	callback on_write_failed;
+	
+	callback on_data_read;
+	
+	callback on_read_failed;
+}
+
+[[
+void SocketDelegate::on_connected()
+{
+	invoke_Socket_on_connected( L, this, 0, 0 );
+}
+
+void SocketDelegate::on_connect_failed()
+{
+	invoke_Socket_on_connect_failed( L, this, 0, 0 );
+}
+
+void SocketDelegate::on_disconnected()
+{
+	invoke_Socket_on_disconnected( L, this, 0, 0 );
+}
+
+void SocketDelegate::on_write_failed()
+{
+	invoke_Socket_on_write_failed( L, this, 0, 0 );
+}
+
+void SocketDelegate::on_data_read( const guint8 * data, gsize count )
+{
+	lua_pushlstring( L, ( const char * ) data, count );
+	invoke_Socket_on_data_read( L, this, 1, 0 );
+}
+
+void SocketDelegate::on_read_failed()
+{
+	invoke_Socket_on_read_failed( L, this, 0, 0 );
+}
+	
+]]

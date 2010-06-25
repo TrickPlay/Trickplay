@@ -28,6 +28,7 @@ TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
+#TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -102,7 +103,7 @@ set(
     # json-glib
     #--------------
     
-    json-glib-1.0
+    json-glib-1.0    
 )
 
 #------------------------------------------------------------------------------
@@ -207,6 +208,8 @@ set(
     ${BINDINGS_SRC}/clutter_timeline.lb
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb
+    
+    ${BINDINGS_SRC}/socket.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
@@ -314,6 +317,7 @@ add_library(
     ${ENGINE_SRC}/source/signature.cpp
     ${ENGINE_SRC}/source/actions.cpp
     ${ENGINE_SRC}/source/thread_pool.cpp
+    ${ENGINE_SRC}/source/socket.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
