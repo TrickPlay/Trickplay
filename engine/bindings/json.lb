@@ -6,6 +6,8 @@
 #error "NEED JSON-GLIB VERSION 0.5.0 OR GREATER"
 #endif
 
+#include "util.h"
+
 //-----------------------------------------------------------------------------
 // This is a static we use as a light user data to represent a JSON null.
 // Its address will never change, so equality testing works. It is also the 
@@ -133,6 +135,101 @@ void json_to_lua( lua_State * L, JsonNode * node )
 	}
 }
 
+JsonNode * lua_value_to_json( lua_State * L, int index )
+{
+	JsonNode * result = NULL;
+	
+	switch( lua_type( L, index ) )
+	{
+		case LUA_TNUMBER:
+			
+			result = json_node_new( JSON_NODE_VALUE );
+			
+			if ( lua_tointeger( L, index ) == lua_tonumber( L, index ) )
+			{
+				json_node_set_int( result, lua_tointeger( L, index ) );
+			}
+			else
+			{
+				json_node_set_double( result, lua_tonumber( L, index ) );
+			}
+			
+			break;
+			
+		case LUA_TBOOLEAN:
+		
+			result = json_node_new( JSON_NODE_VALUE );
+			
+			json_node_set_boolean( result, lua_toboolean( L, index ) );
+			
+			break;
+			
+		case LUA_TSTRING:
+		
+			result = json_node_new( JSON_NODE_VALUE );
+			
+			json_node_set_string( result, lua_tostring( L, index ) );
+			
+			break;
+			
+		case LUA_TTABLE:
+
+			// If it has a length, we treat it as an array
+						
+			if ( lua_objlen( L, index ) > 0 ) 
+			{
+				JsonArray * array = json_array_new();
+				
+				lua_pushnil( L );
+				
+				while ( lua_next( L, index ) )
+				{
+					json_array_add_element( array, lua_value_to_json( L, lua_gettop( L ) ) );
+					
+					lua_pop( L, 1 );
+				}
+				
+				result = json_node_new( JSON_NODE_ARRAY );
+				
+				json_node_take_array( result, array );
+			}
+			else
+			{
+				JsonObject * object = json_object_new();
+				
+				lua_pushnil( L );
+				
+				while( lua_next( L, index ) )
+				{
+					if ( lua_isstring( L, -2 ) )
+					{
+						json_object_set_member( object, lua_tostring( L, -2 ), lua_value_to_json( L, lua_gettop( L ) ) ); 
+					}
+					
+					lua_pop( L, 1 );
+				}
+				
+				result = json_node_new( JSON_NODE_OBJECT );
+				
+				json_node_take_object( result, object );
+			}
+			
+			break;
+			
+		default:
+		
+			break;
+	}
+	
+	
+	if ( ! result )
+	{
+		result = json_node_new( JSON_NODE_NULL );
+	}
+	
+	return result;
+}
+
 ]]
 
 /*
@@ -239,6 +336,72 @@ global json [[void*]]
 			}
 			
 		]];
+		
+	/*	
+		Function: stringify
+		
+		Converts a table to a JSON string. 
+		
+		Lua tables can have a mixture of 
+		numerically indexed entries and key/value entries. This is not possible 
+		with JSON; Lua tables that have indexed entries will become JSON arrays
+		and those that don't will become JSON objects. JSON objects only support
+		string keys, so members of Lua tables that have other types of keys will
+		not be present in the output. Functions, user data or other types that 
+		cannot be converted to JSON will be represented as nulls.
+		
+		Arguments:
+		
+			t - A table to convert to JSON.
+			
+		Returns:
+		
+			string - A JSON representation of the table.
+			
+			nil - If there is a problem. 
+	*/
+	
+	lstring stringify( table t )
+		[[
+			JsonNode * root = lua_value_to_json( L, t );
+			
+			g_assert( root );
+			
+			result = NULL;
+			result_len = 0;
+			
+			FreeLater free_later;
+			
+			switch ( json_node_get_node_type( root ) )
+			{
+				case JSON_NODE_OBJECT:
+				case JSON_NODE_ARRAY:
+				
+					{
+						JsonGenerator * g = json_generator_new();
+						
+						json_generator_set_root( g, root );
+						
+						gsize length = 0;
+						
+						gchar * json = json_generator_to_data( g, & length );
+						
+						g_object_unref( G_OBJECT( g ) );
+						
+						free_later( json );
+						
+						result = json;
+						result_len = length;
+					}
+				
+					break;
+				
+				default:
+					
+					break;
+			}
+			
+			json_node_free( root );
+			
+		]];
 }
-
-
