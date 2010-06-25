@@ -6,3 +6,4 @@
 trickplay.cfg
 .DS_Store
 trickplay-runtime.tbz
+engine/source/stash/*
