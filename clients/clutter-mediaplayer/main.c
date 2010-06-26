@@ -503,6 +503,36 @@ static int mp_set_audio_mute(TPMediaPlayer * mp,int mute)
     return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
 }
 
+static void play_sound_done(GstBus * bus, GstMessage * message, GstElement * playbin)
+{
+    gst_element_set_state(playbin, GST_STATE_NULL);
+
+    gst_object_unref(GST_OBJECT( playbin ));
+}
+
+static int mp_play_sound(TPMediaPlayer * mp, const char * uri)
+{
+    GstElement * playbin = gst_element_factory_make( "playbin" , "play" );
+
+    GstBus * bus = gst_pipeline_get_bus( GST_PIPELINE( playbin ) );
+
+    g_object_set( G_OBJECT( playbin ), "uri", uri, NULL );
+
+    gst_bus_add_signal_watch( bus );
+
+    g_signal_connect_object( bus, "message::error" , G_CALLBACK( play_sound_done ), playbin, G_CONNECT_AFTER );
+    g_signal_connect_object( bus, "message::eos", G_CALLBACK( play_sound_done ), playbin, G_CONNECT_AFTER );
+
+    gst_object_unref( GST_OBJECT( bus ) );
+
+    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( playbin, GST_STATE_PLAYING ) )
+    {
+        return 2;
+    }
+
+    return 0;
+}
+
 static void * mp_get_viewport_texture(TPMediaPlayer * mp)
 {
     USERDATA(mp);
@@ -581,6 +611,7 @@ static int mp_constructor(TPMediaPlayer * mp)
     mp->set_audio_volume=mp_set_audio_volume;
     mp->get_audio_mute=mp_get_audio_mute;
     mp->set_audio_mute=mp_set_audio_mute;
+    mp->play_sound=mp_play_sound;
     mp->get_viewport_texture=mp_get_viewport_texture;
     
     return 0;
