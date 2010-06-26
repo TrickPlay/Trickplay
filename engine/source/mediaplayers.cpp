@@ -738,6 +738,28 @@ int MediaPlayer::set_audio_mute( int mute )
 
 //-----------------------------------------------------------------------------
 
+int MediaPlayer::play_sound( const char * uri )
+{
+    TPMediaPlayer * mp = get_mp();
+
+    if ( !mp->play_sound )
+    {
+        g_warning( "MP[%p]    play_sound NOT IMPLEMENTED", mp );
+        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
+    }
+
+    g_debug( "MP[%p] <- play_sound('%s')", mp, uri );
+
+    if ( int result = mp->play_sound( mp, uri ) )
+    {
+        g_warning( "MP[%p]    FAILED %d", mp, result );
+        return result;
+    }
+
+    return 0;
+}
+//-----------------------------------------------------------------------------
+
 void * MediaPlayer::get_viewport_texture()
 {
     MPLOCK;

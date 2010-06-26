@@ -935,6 +935,38 @@ struct TPMediaPlayer
 
         TPMediaPlayer * mp,
         int mute);
+
+/*
+    Function: play_sound
+
+    Plays a sound file. The sound should be played asynchronously and should
+    not affect anything else the media player is doing.
+
+    Arguments:
+
+        mp -    The TPMediaPlayer instance.
+
+        uri -   The URI of the sound to play. It should be validated by the media
+                player and should be copied if it is to be used beyond this call.
+
+    Returns:
+
+        0 -     The media player has started playing the sound.
+
+        other - An error was detected immediately (such as a bad URI) and the
+                the media player will not be able to play the sound.
+
+    Valid States:
+
+    - any
+
+*/
+
+    int
+    (*play_sound)(
+
+        TPMediaPlayer * mp,
+        const char * uri);
     
 /*
     Function: get_viewport_texture
