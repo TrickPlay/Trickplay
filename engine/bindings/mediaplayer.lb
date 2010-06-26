@@ -599,6 +599,56 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
+    Function: play_sound
+    
+    Instructs the media player to play a sound.
+    
+    Arguments:
+    
+    uri -   A string URI. Although the "file:" scheme is not allowed, you can
+            play files included in your app by just passing their path relative
+            to your app bundle.
+            
+    Returns:
+    
+    0 -     The sound started playing.
+            
+    other - There was an immediate failure and the sound cannot be played.
+    
+    */
+    
+    int play_sound(string uri)
+        [[
+            // Normalize app path only accepts http and https by default, so we
+            // have to tell it to like others too.
+            
+            StringSet schemes;
+            schemes.insert("rtsp");
+            
+            bool is_uri=false;
+            
+            char * path=App::get(L)->normalize_path(uri,&is_uri,schemes);
+            
+            if (!path)
+            {
+                result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
+            }
+            else
+            {
+                if (!is_uri)
+                {
+                    gchar * file_uri=g_strdup_printf("file://%s",path);
+                    g_free(path);
+                    path=file_uri;
+                }
+                
+                result=self->get_player()?self->get_player()->play_sound(path):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                
+                g_free(path);
+            }
+        ]];
+
+    /*
     Function: new
     
     If the platform supports multiple media players, this function lets you create

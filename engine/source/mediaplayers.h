@@ -52,6 +52,7 @@ public:
     int set_audio_volume( double volume );
     int get_audio_mute( int * mute );
     int set_audio_mute( int mute );
+    int play_sound( const char * uri );
     void * get_viewport_texture();
     StringPairList get_tags();
 
