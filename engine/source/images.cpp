@@ -12,7 +12,7 @@
 //=============================================================================
 // Set to false to stop image debug log
 
-DebugLog images_debug( true );
+DebugLog images_debug( false );
 
 //=============================================================================
 // Wraps around an external decoder
