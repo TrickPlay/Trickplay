@@ -34,7 +34,7 @@ extern "C" {
 
 #define TP_MAJOR_VERSION    0
 #define TP_MINOR_VERSION    0
-#define TP_PATCH_VERSION    4
+#define TP_PATCH_VERSION    5
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
