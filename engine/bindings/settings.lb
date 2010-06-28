@@ -15,20 +15,22 @@ public:
     Settings(lua_State*l)
     :
         L(l),
-	db(NULL)
+		db(NULL)
     {
-	App::get(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
+		App::get(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
     }
     
     ~Settings()
     {
-	close();
+		close();
     }
     
     void open()
     {
-	if (db)
-	    return;
+		if (db)
+		{
+	    	return;
+	    }
 	
         db = tchdbnew();
         
@@ -42,15 +44,15 @@ public:
             g_warning("FAILED TO TUNE SETTINGS DATABASE : %s", tchdberrmsg(tchdbecode(db)));
         }
 	
-	App * app=App::get(L);
+		App * app=App::get(L);
 	
-	gchar * name=g_strdup_printf("settings-%d.tch",app->get_profile_id());
-	FreeLater free_later(name);
+		gchar * name=g_strdup_printf("settings-%d.tch",app->get_profile_id());
+		FreeLater free_later(name);
         
         gchar * file_name=g_build_filename(app->get_data_path().c_str(),name,NULL);
         free_later(file_name);
         
-	if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
+		if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
         {
             g_error("FAILED TO OPEN SETTINGS DATABASE : %s", tchdberrmsg(tchdbecode(db)));
         }
@@ -58,17 +60,17 @@ public:
     
     void close()
     {
-	if (db)
-	{
-	    tchdbclose(db);
-	    tchdbdel(db);
-	    db=NULL;
-	}	
+		if (db)
+		{
+		    tchdbclose(db);
+		    tchdbdel(db);
+		    db=NULL;
+		}	
     }
     
     void set()
     {
-	open();
+		open();
 	
         size_t key_len;
         
@@ -91,12 +93,12 @@ public:
         }
         else
         {
-	    LSG;
-	    
-	    lua_getglobal(L,"serialize");
-	    lua_pushvalue(L,3);
-	    lua_call(L,1,1);
-	    
+		    LSG;
+		    
+		    lua_getglobal(L,"serialize");
+		    lua_pushvalue(L,3);
+		    lua_call(L,1,1);
+		    
             size_t value_len;
     
             const char * value=lua_tolstring(L,-1,&value_len);
@@ -105,16 +107,16 @@ public:
             {
                 g_warning("FAILED TO STORE SETTING '%s' = '%s' : %s",key,value,tchdberrmsg(tchdbecode(db)));
             }
-	    
-	    lua_pop(L,1);
-	    
-	    LSG_END(0);
+		    
+		    lua_pop(L,1);
+		    
+		    LSG_END(0);
         }
     }
     
     bool get()
     {
-	open();
+		open();
 	
         size_t key_len;
         
@@ -130,22 +132,24 @@ public:
         void * value =tchdbget(db,key,key_len,&value_len);
         
         if (!value)
+        {
             return false;
+        }
         
-	String statement="return "+String((const char *)value,value_len);
-	
-	free(value);
-	
-	if (luaL_dostring(L,statement.c_str())!=0)
-	{
-	    g_warning("FAILED TO EVALUATE SETTING VALUE");
-	    // pop the error
-	    lua_pop( L, 1 );
-	    return false;
-	}
-	else
-	{
-	    // The result of dostring should be at the top of the stack	    
+		String statement="return "+String((const char *)value,value_len);
+		
+		free(value);
+		
+		if (luaL_dostring(L,statement.c_str())!=0)
+		{
+		    g_warning("FAILED TO EVALUATE SETTING VALUE");
+		    // pop the error
+		    lua_pop( L, 1 );
+		    return false;
+		}
+		else
+		{
+	    	// The result of dostring should be at the top of the stack	    
     	}
         
         return true;
@@ -155,10 +159,10 @@ private:
     
     static void profile_change_handler(const char *,void * self)
     {
-	// We just close the current database - so that a new one will be
-	// opened when needed using the new profile id
-	
-	((Settings*)self)->close();
+		// We just close the current database - so that a new one will be
+		// opened when needed using the new profile id
+		
+		((Settings*)self)->close();
     }
     
     lua_State * L;
