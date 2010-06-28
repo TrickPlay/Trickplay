@@ -230,7 +230,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
 
     gssize bytes_written = g_output_stream_write_finish( self->output, res, & error );
 
-    g_debug( "WROTE %ld BYTES", bytes_written );
+    g_debug( "WROTE %" G_GSSIZE_FORMAT " BYTES", bytes_written );
 
     if ( error || bytes_written <= 0 )
     {
@@ -254,9 +254,9 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
     {
         GByteArray * write_buffer = ( GByteArray * ) g_object_get_data( G_OBJECT( self->output ), OUTPUT_BUFFER_KEY );
 
-        g_debug( "BYTES LEFT IN BUFFER %ld", write_buffer->len - bytes_written );
+        g_debug( "BYTES LEFT IN BUFFER %" G_GSSIZE_FORMAT , write_buffer->len - bytes_written );
 
-        if ( bytes_written < write_buffer->len )
+        if ( bytes_written < gssize( write_buffer->len ) )
         {
             // Any bytes that were not written are prepended to the output buffer
 
