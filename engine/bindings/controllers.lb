@@ -87,6 +87,66 @@ private:
 
 
 #==============================================================================
+/*
+	Global: controllers
+	
+	Controllers are human interface devices. The simple examples are the keyboard
+	on the TrickPlay emulator or the remote control on a TV. TrickPlay also supports
+	clients that run on other devices and connect to TrickPlay to act as controllers.
+	
+	The controllers global lets you enumerate all the controllers that are currently
+	connected, using the <connected> property. You can also be notified when a new 
+	controller is connected by using the <on_controller_connected> event.
+*/
+
+global controllers [[ControllerListDelegate*]]
+{
+    controllers()
+        [[
+            *self=new ControllerListDelegate(L);            
+        ]];
+        
+    ~controllers()
+        [[
+            delete self;
+        ]];
+        
+    /*
+    	Property: connected
+    	
+    	This property returns a table of <controller> objects containing all the 
+    	controllers that are currently connected.
+    */
+    
+    readonly table connected
+        [[
+            self->push_connected();
+        ]];
+    
+    /*
+    	Event: on_controller_connected
+    	
+    	This event happens any time a new controller connects to TrickPlay.
+    	
+    	Arguments:
+    	
+    		controllers - The <controllers> global.
+    		
+    		controller - The <controller> that connected.
+    */    
+    
+    callback on_controller_connected;    
+}
+
+#==============================================================================
+
+/*
+	Class: controller
+	
+	This class represents a controller that is connected to TrickPlay. You cannot
+	create new controllers, they are created automatically by TrickPlay when they
+	connect.
+*/
 
 interface controller [[ControllerDelegate*]]
 {
@@ -100,10 +160,23 @@ interface controller [[ControllerDelegate*]]
             delete self;    
         ]];
         
+    /*
+    	Property: is_connected
+    	
+    	Lets you know if this controller is still connected to TrickPlay. It is possible
+    	for a controller to disconnect but its object to remain alive in your app.
+    */
+    
     readonly bool is_connected
         [[
             is_connected=self->get_controller()->is_connected();    
         ]];
+    
+    /*
+    	Property: name
+    	
+    	The name that the controller reports, which could be something like "Bill's phone".
+    */
         
     readonly string name
         [[
@@ -111,46 +184,101 @@ interface controller [[ControllerDelegate*]]
             name=s.c_str();    
         ]];
         
+    /*
+    	Property: has_keys
+    	
+    	This property tells you whether the controller can send key events.
+    */
+    
     readonly bool has_keys
         [[
             has_keys=self->has_cap(TP_CONTROLLER_HAS_KEYS);    
         ]];
 
+	/*
+		Property: has_accelerometer
+		
+		Whether the controller has an accelerometer.
+	*/
+	
     readonly bool has_accelerometer
         [[
             has_accelerometer=self->has_cap(TP_CONTROLLER_HAS_ACCELEROMETER);
         ]];
         
+    /*
+    	Property: has_clicks
+    	
+    	Whether the controller can send click events.
+    */
+    
     readonly bool has_clicks
         [[
             has_clicks=self->has_cap(TP_CONTROLLER_HAS_CLICKS);
         ]];
-        
+    
+    /*
+    	Property: has_touches
+    	
+    	Whether the controller can send touch events.
+    */    
+    
     readonly bool has_touches
         [[
             has_touches=self->has_cap(TP_CONTROLLER_HAS_TOUCHES);    
         ]];
+    
+    /*
+    	Property: has_multiple_choice
+    	
+    	Whether the controller supports a multiple choice UI.
+    */
         
     readonly bool has_multiple_choice
         [[
             has_multiple_choice=self->has_cap(TP_CONTROLLER_HAS_MULTIPLE_CHOICE); 
         ]];
         
+	/*
+		Property: has_sound
+		
+		Whether the controller can play sounds.
+	*/        
+	
     readonly bool has_sound
         [[
             has_sound=self->has_cap(TP_CONTROLLER_HAS_SOUND);    
         ]];
+    
+    /*
+    	Property: has_ui
+    	
+    	Whether the controller supports a user interface display.
+    */
         
     readonly bool has_ui
         [[
             has_ui=self->has_cap(TP_CONTROLLER_HAS_UI);
         ]];
         
+	/*
+		Property: has_text_entry
+		
+		Whether the controller supports text entry.
+	*/
+	       
     readonly bool has_text_entry
         [[
             has_text_entry=self->has_cap(TP_CONTROLLER_HAS_TEXT_ENTRY);
         ]];
-        
+    
+    /*
+    	Property: ui_size
+    	
+    	This property returns a table containing the width and height 
+    	of the controller's UI display area.
+    */    
+    
     readonly table ui_size
         [[
             unsigned int w;
@@ -165,6 +293,13 @@ interface controller [[ControllerDelegate*]]
             lua_rawseti(L,-2,2);
         ]];
         
+    /*
+    	Property: input_size
+    	
+    	Returns a table containing the width and height of the controller's
+    	input area - the area for touch and click events.
+    */
+    
     readonly table input_size
         [[
             unsigned int w;
@@ -179,12 +314,44 @@ interface controller [[ControllerDelegate*]]
             lua_rawseti(L,-2,2);
         ]];
     
+    /*
+    	Function: reset
+    	
+    	Resets the controller to its default state. The controller will 
+    	stop sending all events other than key events and its UI, if any,
+    	will be cleared.
+    	
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+    */
         
     bool reset()
         [[
             result=self->get_controller()->reset();    
         ]];
         
+    /*
+    	Function: start_accelerometer
+    	
+    	Tells the controller to start sending accelerometer events.
+    	
+    	Arguments:
+    	
+    		filter - A string that can be "L" for a low-pass filter
+    				 or "H" for a high pass filter.
+    				 
+    		interval - The interval, in seconds, between events.
+    	
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+    */
+
     bool start_accelerometer(string filter,double interval)
         [[
             Controller::AccelerometerFilter f=Controller::NONE;
@@ -203,27 +370,89 @@ interface controller [[ControllerDelegate*]]
 
             result=self->get_controller()->start_accelerometer(f,interval);
         ]];
-        
+
+	/*
+		Function: stop_accelerometer
+		
+		Tells the controller to stop sending accelerometer events.
+    	
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	        
     bool stop_accelerometer()
         [[
             result=self->get_controller()->stop_accelerometer();    
         ]];
         
+
+	/*
+		Function: start_clicks
+		
+		Instructs the controller to start sending click events.
+		
+	    Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.		
+	*/
+	
     bool start_clicks()
         [[
             result=self->get_controller()->start_clicks();
         ]];
         
+	/*
+		Function: stop_clicks
+		
+		Tells the controller to stop sending click events.
+		
+    	
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+			        
     bool stop_clicks()
         [[
             result=self->get_controller()->stop_clicks();
         ]];
+    
+    /*
+    	Function: start_touches
+    	
+    	Tells the controller to start sending touch events.
+    	
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+    */
         
     bool start_touches()
         [[
             result=self->get_controller()->start_touches();
         ]];
         
+    /*
+    	Function: stop_touches
+    	
+    	Stop sending touch events.
+    		
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	
     bool stop_touches()
         [[
             result=self->get_controller()->stop_touches();
@@ -237,6 +466,36 @@ interface controller [[ControllerDelegate*]]
             result=false;
         ]];
         
+    /*
+    	Function: show_multiple_choice
+    	
+    	Tells the controller to show a simple UI with a list of choices. The
+    	user of the controller will be able to click on the choices and the
+    	controller will generate an <on_ui_event> with the identifier of the 
+    	choice.
+    	
+    	Note that the controller will not automatically dismiss the multiple
+    	choice UI when the user makes a choice; you have to call <clear_ui>.
+    	
+    	> controller.show_multiple_choice( "Pick a state" , "1" , "California" , "2" , "Texas" )
+    	
+    	Arguments:
+    	
+    		label - A string that describes the list of choices. The controller 
+    				will usually display this label above the list of choices.
+    				
+    		others - After the label, you can pass a number of identifier/label
+    				 pairs. The controller will display each label as a choice 
+    				 and will retain its associated identifier to send back 
+    				 in an <on_ui_event>.
+    		
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	        
     bool show_multiple_choice(string label,...)
         [[
             StringPairList list;
@@ -255,6 +514,18 @@ interface controller [[ControllerDelegate*]]
             result=list.empty()?false:self->get_controller()->show_multiple_choice(label,list);
         ]];
 
+	/*
+		Function: clear_ui
+		
+		Removes all UI elements from the controller's screen.
+		    		
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	
     bool clear_ui()
         [[
             result=self->get_controller()->clear_ui();    
@@ -268,6 +539,26 @@ interface controller [[ControllerDelegate*]]
             result=false;
         ]];
 
+	/*
+		Function: set_ui_background
+		
+		Tells the controller to set its background to an image that
+		you specify. Images are declared to the controller 
+		using <declare_resource>.
+		
+		Arguments:
+		
+			resource - Name of the image resource.
+			
+			mode - One of "CENTER", "TILE" or "STRETCH".
+
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	
     bool set_ui_background(string resource,string mode="CENTER")
         [[
             Controller::UIBackgroundMode m=Controller::CENTER;
@@ -286,22 +577,97 @@ interface controller [[ControllerDelegate*]]
             
             result=self->get_controller()->set_ui_background(resource,m);
         ]];
-        
+
+	/*
+		Function: set_ui_image
+		
+		Tells the controller to place the given image at the given coordinates
+		with the given size.
+		
+		Arguments:
+		
+			resource - Name of an image resource declared with <declare_resource>.
+			
+			x,y - The position of the image.
+			
+			width,height - The size of the image.
+
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	        
     bool set_ui_image(string resource,int x,int y,int width,int height)
         [[
             result=self->get_controller()->set_ui_image(resource,x,y,width,height);    
         ]];
 
+	/*
+		Function: play_sound
+		
+		Tells the controller to play a sound.
+		
+		Arguments:
+		
+			resource - Name of a sound resource declared with <declare_resource>.
+			
+			loop - How many times to play the sound. 
+
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.
+	*/
+	
     bool play_sound(string resource, int loop)
         [[
             result=self->get_controller()->play_sound(resource,loop);
         ]];
 
+	/*
+		Function: stop_sound
+		
+		Tells the controller to stop playing sounds.
+		
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.		
+	*/
+	
     bool stop_sound()
         [[
             result=self->get_controller()->stop_sound();
         ]];
 
+	/*
+		Function: declare_resource
+		
+		This function is used to associate a name with a resource,
+		such as an image or a sound file. You can also use a URL
+		as the second parameter.
+		
+		Declaring a resource gives it a name that can be used in
+		future calls. The controller may need to download the resource
+		before it is used, so it is a good idea to declare resources
+		early.
+		
+		Arguments:
+		
+			resource - A name for the resource.
+			
+			url - A path or URL to the resource.
+			 		
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.		
+	*/
 
     bool declare_resource(string resource, string url)
         [[
@@ -325,27 +691,160 @@ interface controller [[ControllerDelegate*]]
             }
         ]];
         
+	/*
+		Function: enter_text
+		
+		Tells the controller to show a text entry UI, such as a keyboard, and 
+		allow the user to enter or edit text. Once the text has been entered, it
+		will be sent back to your app via <on_ui_event>.
+		
+		Arguments:
+		
+			label - A caption for the text.
+			
+			text - The initial text to edit.
+		 
+    	Returns:
+    	
+    		true - If it was successful.
+    		
+    		false - Otherwise.		
+	*/
+	        
     bool enter_text(string label,string text)
         [[
             result=self->get_controller()->enter_text(label,text);    
         ]];
+
+	/*
+		Event: on_disconnected
+		
+		This event is triggered when the controller is disconnected from
+		TrickPlay.
+		
+		Arguments:
+		
+			controller - The controller that was disconnected.			
+	*/	
 	
     callback on_disconnected;
     
+    /*
+    	Event: on_key_down
+    	
+    	A key down event.
+    	
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		key code - The numeric code of the key.
+    		
+    		unicode - The unicode value of the key or 0.
+    */
+    
     callback on_key_down;
     
+    /*
+    	Event: on_key_up
+    	
+    	A key up event.
+    	
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		key code - The numeric code of the key.
+    		
+    		unicode - The unicode value of the key or 0.
+    */
+
     callback on_key_up;
     
+    /*
+    	Event: on_accelerometer
+    	
+    	An accelerometer event.
+    	
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		x,y,z - The three values of the accelerometer.
+    */
+    
     callback on_accelerometer;
-    
+
+	/*
+		Event: on_click
+		
+		A click event.
+		
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		x,y - The coordinates of the event.
+	*/
+	    
     callback on_click;
-    
+
+	/*
+		Event: on_touch_down
+		
+		A touch down event.
+
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		x,y - The coordinates of the event.
+	*/
+	    
     callback on_touch_down;
     
+	/*
+		Event: on_touch_move
+		
+		A touch move event.
+
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		x,y - The coordinates of the event.
+	*/
+
     callback on_touch_move;
     
+	/*
+		Event: on_touch_up
+		
+		A touch up event.
+
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		x,y - The coordinates of the event.
+	*/
+
     callback on_touch_up;
 
+    /*
+    	Event: on_ui_event
+    	
+    	A UI event. This is sent when you use <show_multiple_choice> or 
+    	<enter_text>.
+    	
+    	Arguments:
+    	
+    		controller - The controller that generated the event.
+    		
+    		text - The text of the event. Either an identifier for a 
+    		       multiple choice, or the resulting text of <enter_text>.
+    */
+    
     callback on_ui_event;
 }
 
@@ -441,28 +940,6 @@ void ControllerDelegate::ui_event(const String & parameters)
 }
 
 ]]
-
-#==============================================================================
-
-global controllers [[ControllerListDelegate*]]
-{
-    controllers()
-        [[
-            *self=new ControllerListDelegate(L);            
-        ]];
-        
-    ~controllers()
-        [[
-            delete self;
-        ]];
-        
-    readonly table connected
-        [[
-            self->push_connected();
-        ]];
-        
-    callback on_controller_connected;    
-}
 
 #==============================================================================
 

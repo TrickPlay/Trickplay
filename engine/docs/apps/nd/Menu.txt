@@ -46,8 +46,8 @@ Timestamp: mm.d.yyyy
 
 Group: Developer's Guide  {
 
-   File: Getting Started  (/home/pablo/work/tp-clean/trickplay/engine/docs/apps/text/getting_started.txt)
-   File: User Interface  (/home/pablo/work/tp-clean/trickplay/engine/docs/apps/text/user_interface.txt)
+   File: Getting Started  (/home/pablo/Dropbox/tp/engine/docs/apps/text/getting_started.txt)
+   File: User Interface  (/home/pablo/Dropbox/tp/engine/docs/apps/text/user_interface.txt)
    }  # Group: Developer's Guide
 
 Group: Reference  {
@@ -56,51 +56,52 @@ Group: Reference  {
 
       Group: Interfaces  {
 
-         File: UIElement  (no auto-title, /home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_actor.lb)
-         File: Container  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_container.lb)
+         File: UIElement  (no auto-title, /home/pablo/Dropbox/tp/engine/bindings/clutter_actor.lb)
+         File: Container  (/home/pablo/Dropbox/tp/engine/bindings/clutter_container.lb)
          }  # Group: Interfaces
 
       Group: Globals  {
 
-         File: screen  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_screen.lb)
+         File: screen  (/home/pablo/Dropbox/tp/engine/bindings/clutter_screen.lb)
          }  # Group: Globals
 
       Group: Classes  {
 
-         File: Canvas  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_canvas.lb)
-         File: Clone  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_clone.lb)
-         File: Group  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_group.lb)
-         File: Image  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_image.lb)
-         File: Rectangle  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_rectangle.lb)
-         File: Text  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_text.lb)
+         File: Canvas  (/home/pablo/Dropbox/tp/engine/bindings/clutter_canvas.lb)
+         File: Clone  (/home/pablo/Dropbox/tp/engine/bindings/clutter_clone.lb)
+         File: Group  (/home/pablo/Dropbox/tp/engine/bindings/clutter_group.lb)
+         File: Image  (/home/pablo/Dropbox/tp/engine/bindings/clutter_image.lb)
+         File: Rectangle  (/home/pablo/Dropbox/tp/engine/bindings/clutter_rectangle.lb)
+         File: Text  (/home/pablo/Dropbox/tp/engine/bindings/clutter_text.lb)
          }  # Group: Classes
 
       Group: Animation  {
 
-         File: Alpha  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_alpha.lb)
-         File: Interval  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_interval.lb)
-         File: Timeline  (/home/pablo/work/tp-clean/trickplay/engine/bindings/clutter_timeline.lb)
+         File: Alpha  (/home/pablo/Dropbox/tp/engine/bindings/clutter_alpha.lb)
+         File: Interval  (/home/pablo/Dropbox/tp/engine/bindings/clutter_interval.lb)
+         File: Timeline  (/home/pablo/Dropbox/tp/engine/bindings/clutter_timeline.lb)
          }  # Group: Animation
 
       }  # Group: UI
 
    Group: Globals  {
 
-      File: app  (/home/pablo/work/tp-clean/trickplay/engine/bindings/app.lb)
-      File: idle  (/home/pablo/work/tp-clean/trickplay/engine/bindings/idle.lb)
-      File: json  (/home/pablo/work/tp-clean/trickplay/engine/bindings/json.lb)
-      File: mediaplayer  (/home/pablo/work/tp-clean/trickplay/engine/bindings/mediaplayer.lb)
-      File: profile  (/home/pablo/work/tp-clean/trickplay/engine/bindings/profile.lb)
-      File: settings  (/home/pablo/work/tp-clean/trickplay/engine/bindings/settings.lb)
-      File: system  (/home/pablo/work/tp-clean/trickplay/engine/bindings/system.lb)
+      File: app  (/home/pablo/Dropbox/tp/engine/bindings/app.lb)
+      File: controllers  (/home/pablo/Dropbox/tp/engine/bindings/controllers.lb)
+      File: idle  (/home/pablo/Dropbox/tp/engine/bindings/idle.lb)
+      File: json  (/home/pablo/Dropbox/tp/engine/bindings/json.lb)
+      File: mediaplayer  (/home/pablo/Dropbox/tp/engine/bindings/mediaplayer.lb)
+      File: profile  (/home/pablo/Dropbox/tp/engine/bindings/profile.lb)
+      File: settings  (/home/pablo/Dropbox/tp/engine/bindings/settings.lb)
+      File: system  (/home/pablo/Dropbox/tp/engine/bindings/system.lb)
       }  # Group: Globals
 
    Group: Classes  {
 
-      File: Stopwatch  (/home/pablo/work/tp-clean/trickplay/engine/bindings/stopwatch.lb)
-      File: Timer  (/home/pablo/work/tp-clean/trickplay/engine/bindings/timer.lb)
-      File: URLRequest  (no auto-title, /home/pablo/work/tp-clean/trickplay/engine/bindings/url_request.lb)
-      File: XMLParser  (/home/pablo/work/tp-clean/trickplay/engine/bindings/xml.lb)
+      File: Stopwatch  (/home/pablo/Dropbox/tp/engine/bindings/stopwatch.lb)
+      File: Timer  (/home/pablo/Dropbox/tp/engine/bindings/timer.lb)
+      File: URLRequest  (no auto-title, /home/pablo/Dropbox/tp/engine/bindings/url_request.lb)
+      File: XMLParser  (/home/pablo/Dropbox/tp/engine/bindings/xml.lb)
       }  # Group: Classes
 
    Group: Index  {
@@ -121,5 +122,5 @@ Group: Reference  {
 
 
 ##### Do not change or remove these lines. #####
-Data: 1(D3333RuEG3IpYou37uHA3tIz9oGp\3tH89AIopQ3G\`8\G3fu963pII63tGst)
-Data: 1(h3333RuEG3IpYou37uHA3tIz9oGp\3tH89AIopQ3G\`8\G3Y8\f8\`6)
+Data: 1(D3333RuEG3IpYou3BHuIYus3tI3G\`8\G3fu963pII63tGst)
+Data: 1(h3333RuEG3IpYou3BHuIYus3tI3G\`8\G3Y8\f8\`6)
