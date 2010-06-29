@@ -355,6 +355,13 @@ globals
 				result = 0;
 			} 
 		]];		
-		       
+
+	debug()
+		[[
+		    if ( Debugger * debugger = App::get( L )->get_debugger() )
+		    {
+		        debugger->break_next_line();
+		    }		
+		]];		       
 }
 
