@@ -6,6 +6,7 @@
 #include "network.h"
 #include "util.h"
 #include "event_group.h"
+#include "debugger.h"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -237,15 +238,14 @@ public:
 
     void animate_out();
 
+    //.........................................................................
+
+    Debugger * get_debugger();
+
+
 private:
 
     App( TPContext * context, const Metadata & metadata, const String & data_path, const LaunchInfo & launch );
-
-    App()
-    {}
-
-    App( const App & )
-    {}
 
     //.........................................................................
     // Drop the cookie jar
@@ -291,6 +291,12 @@ private:
     Network::CookieJar   *  cookie_jar;
     guint32                 screen_gid;
     LaunchInfo              launch;
+
+#ifndef TP_PRODUCTION
+
+    Debugger                debugger;
+
+#endif
 };
 
 

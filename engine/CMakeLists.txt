@@ -327,6 +327,7 @@ add_library(
     ${ENGINE_SRC}/source/signature.cpp
     ${ENGINE_SRC}/source/actions.cpp
     ${ENGINE_SRC}/source/thread_pool.cpp
+    ${ENGINE_SRC}/source/debugger.cpp
     ${ENGINE_SRC}/source/socket.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp

@@ -566,6 +566,12 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
     cookie_jar( NULL ),
     screen_gid( 0 ),
     launch( _launch )
+
+#ifndef TP_PRODUCTION
+
+    ,debugger( this )
+
+#endif
 {
 
     // Create the user agent
@@ -1190,6 +1196,21 @@ char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const Stri
 guint32 App::get_screen_gid() const
 {
     return screen_gid;
+}
+
+//-----------------------------------------------------------------------------
+
+Debugger * App::get_debugger()
+{
+#ifndef TP_PRODUCTION
+
+    return & debugger;
+
+#else
+
+    return NULL;
+
+#endif
 }
 
 //-----------------------------------------------------------------------------
