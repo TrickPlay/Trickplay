@@ -63,6 +63,8 @@ public:
 
     void add_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data );
 
+    void remove_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data );
+
     //.........................................................................
     // Output handlers. They get everything before it is printed - so we can
     // support multiple consoles
