@@ -464,6 +464,7 @@ local shop = Group {
 							Image { src = "assets/featured-buzz.png", z = 1, x = 296, y = 13*screen.h/32 },
 							Image { src = "assets/featured-marvel.png", z = 1, x = 0, y = 19*screen.h/32 },
 							Image { src = "assets/featured-glory.png", z = 1, x = 296, y = 19*screen.h/32 },
+							Image { src = "assets/app-shop-"..oem_vendor..".png", z = 1, x = 6, y = 50*screen.h/64 },
 						},
 						y_rotation = { 35, 0, 0 }
 }
