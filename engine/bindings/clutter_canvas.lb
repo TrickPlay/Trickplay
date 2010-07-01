@@ -96,6 +96,61 @@ class Canvas [[ClutterActor*]] actor
 	    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(self),lua_tonumber(L,-2),lua_tonumber(L,-1));
             lua_pop(L,2);
         ]];
+        
+    string op
+    	[[
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+	    	
+	    	switch ( cairo_get_operator(cr) ) 
+	    	{
+			   	case CAIRO_OPERATOR_CLEAR:		op = "CLEAR"; break;
+			    case CAIRO_OPERATOR_SOURCE:		op = "SOURCE"; break;
+			    case CAIRO_OPERATOR_OVER:		op = "OVER"; break;
+			    case CAIRO_OPERATOR_IN:			op = "IN"; break;
+			    case CAIRO_OPERATOR_OUT:		op = "OUT"; break;
+			    case CAIRO_OPERATOR_ATOP:		op = "ATOP"; break;
+			    case CAIRO_OPERATOR_DEST:		op = "DEST"; break;
+			    case CAIRO_OPERATOR_DEST_OVER:	op = "DEST_OVER"; break;
+			    case CAIRO_OPERATOR_DEST_IN:	op = "DEST_IN"; break;
+			    case CAIRO_OPERATOR_DEST_OUT:	op = "DEST_OUT"; break;
+			    case CAIRO_OPERATOR_DEST_ATOP:	op = "DEST_ATOP"; break;
+			    case CAIRO_OPERATOR_XOR:		op = "XOR"; break;
+			    case CAIRO_OPERATOR_ADD:		op = "ADD"; break;
+			    case CAIRO_OPERATOR_SATURATE:	op = "SATURATE"; break;	    			
+	    	}
+    	]]
+    	[[
+    		static std::map< String , cairo_operator_t > op_map;
+    		
+    		if ( op_map.empty() )
+    		{
+			   	op_map[ "CLEAR" ] = CAIRO_OPERATOR_CLEAR;
+			    op_map[ "SOURCE" ] = CAIRO_OPERATOR_SOURCE;
+			    op_map[ "OVER" ] = CAIRO_OPERATOR_OVER;
+			    op_map[ "IN" ] = CAIRO_OPERATOR_IN;
+			    op_map[ "OUT" ] = CAIRO_OPERATOR_OUT;
+			    op_map[ "ATOP" ] = CAIRO_OPERATOR_ATOP;
+			    op_map[ "DEST" ] = CAIRO_OPERATOR_DEST;
+			    op_map[ "DEST_OVER" ] = CAIRO_OPERATOR_DEST_OVER;
+			    op_map[ "DEST_IN" ] = CAIRO_OPERATOR_DEST_IN;
+			    op_map[ "DEST_OUT" ] = CAIRO_OPERATOR_DEST_OUT;
+			    op_map[ "DEST_ATOP" ] = CAIRO_OPERATOR_DEST_ATOP;
+			    op_map[ "XOR" ] = CAIRO_OPERATOR_XOR;
+			    op_map[ "ADD" ] = CAIRO_OPERATOR_ADD;
+			    op_map[ "SATURATE" ] = CAIRO_OPERATOR_SATURATE;	    			
+    		}
+    		
+    		std::map< String, cairo_operator_t >::const_iterator it = op_map.find( op );
+    		
+    		if ( it == op_map.end() )
+    		{
+    			luaL_error(L,"Invalid canvas op '%s'", op );
+    		}
+    		
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+	    	
+	    	cairo_set_operator(cr,it->second);
+    	]];
 	
     bool begin_painting(table region=0)
 	[[
@@ -178,9 +233,13 @@ class Canvas [[ClutterActor*]] actor
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 	    if(preserve)
-		cairo_fill_preserve(cr);
+	    {
+			cairo_fill_preserve(cr);
+		}
 	    else
-		cairo_fill(cr);
+	    {
+			cairo_fill(cr);
+		}
 	]];
 	
     paint(int alpha=255)
