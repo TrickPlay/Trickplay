@@ -36,6 +36,7 @@ void lb_set_props_from_table(lua_State*L);
 #define lb_optint(L,i,d) ((lua_tointeger(L,i)?lua_tointeger(L,i):(lua_isnumber(L,i)?0:d)))
 #define lb_optnumber(L,i,d) ((lua_tonumber(L,i)?lua_tonumber(L,i):(lua_isnumber(L,i)?0:d)))
 #define lb_optstring(L,i,d) ((lua_isstring(L,i)?lua_tostring(L,i):d))
+#define lb_optbool(L,i,d) ((lua_isboolean(L,i)?lua_toboolean(L,i):d))
 const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len);
 
 int lb_is_allowed(lua_State*L,const char*name);
