@@ -2,6 +2,7 @@ module clutter_canvas;
 
 [[
 #include "clutter/clutter.h"
+#include "pango/pangocairo.h"
 
 #include "util.h"
 #include "signal_collector.h"
@@ -151,6 +152,22 @@ class Canvas [[ClutterActor*]] actor
 	    	
 	    	cairo_set_operator(cr,it->second);
     	]];
+    	
+    readonly table current_point
+    	[[
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+			
+			double x;
+			double y;
+			
+			cairo_get_current_point( cr, &x, &y );
+			
+			lua_newtable( L );    		
+			lua_pushnumber( L, x );
+			lua_rawseti( L, -2, 1 );
+			lua_pushnumber( L, y );
+			lua_rawseti( L, -2, 2 );
+    	]];
 	
     bool begin_painting(table region=0)
 	[[
@@ -200,6 +217,24 @@ class Canvas [[ClutterActor*]] actor
 		
 		g_object_set_data(G_OBJECT(self),"tp-cairot",NULL);
 	    }	    
+	]];
+	
+	translate( double tx, double ty )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_translate( cr, tx , ty );
+	]];
+
+	rotate( double angle )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_rotate( cr, angle );
+	]];
+
+	scale( double sx, double sy )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_scale( cr, sx , sy );
 	]];
 	
     clear_surface()
@@ -366,5 +401,24 @@ class Canvas [[ClutterActor*]] actor
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 	    cairo_set_line_width(cr,width);	    
+	]];
+	
+	text_path( string font, string text )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    
+		PangoLayout * layout = pango_cairo_create_layout( cr );
+		
+		pango_layout_set_text( layout, text, -1 );
+		
+		PangoFontDescription * fd = pango_font_description_from_string( font );
+		
+ 		pango_layout_set_font_description( layout, fd );
+  
+  		pango_font_description_free( fd );		
+			    
+		pango_cairo_layout_path( cr, layout );
+		
+		g_object_unref( G_OBJECT( layout ) );			    	
 	]];
 }
