@@ -7,6 +7,8 @@ module clutter_canvas;
 #include "util.h"
 #include "signal_collector.h"
 #include "clutter_util.h"
+#include "network.h"
+#include "images.h"
 ]]
 
 [[
@@ -28,6 +30,11 @@ cairo_t * check_canvas_cairo_t(lua_State * L,ClutterActor * canvas)
 void destroy_cairo_t(gpointer t)
 {
     cairo_destroy((cairo_t*)t);    
+}
+
+void destroy_image(void * i)
+{
+	delete ( Image * ) i;
 }
 
 ]]
@@ -382,6 +389,67 @@ class Canvas [[ClutterActor*]] actor
 	    cairo_set_source(cr,p);
 	    cairo_pattern_destroy(p);
 	]];
+	
+	bool set_source_image( string src )
+		[[
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+	    	
+			result = false;
+			
+			App * app = App::get( L );
+			
+		    bool is_uri = false;
+		    
+		    char * path = app->normalize_path( src, & is_uri );
+		    
+		    if ( path ) 
+		    {		    
+			    FreeLater free_later( path );
+			    
+			    Image * image;
+			
+				if ( is_uri )
+				{
+					Network::Request request( app->get_user_agent(), path );
+		
+					Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
+					
+					if ( ! response.failed )
+					{
+						image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+					}
+				}
+				else
+				{
+					image = Image::decode( path );
+				}
+				
+				if ( image )
+				{
+					result = true;
+					
+					image->convert_to_cairo_argb32();
+					
+					cairo_surface_t * surface = cairo_image_surface_create_for_data( 
+						(unsigned char *) image->pixels(), 
+						CAIRO_FORMAT_ARGB32, 
+						image->width(), 
+						image->height(), 
+						image->pitch() );
+
+					// We attach the image to the cairo surface so that it will be
+					// destroyed when the surface is destroyed.
+											
+					static cairo_user_data_key_t image_key;
+					
+					cairo_surface_set_user_data( surface, & image_key, image, destroy_image );
+					
+					cairo_set_source_surface( cr, surface, 0, 0 );
+					
+					cairo_surface_destroy( surface );					
+				}
+			}
+		]];
 	
     # TODO: second parameter is a color
     
