@@ -209,6 +209,75 @@ Image::~Image()
     Images::destroy_image( image );
 }
 
+//-----------------------------------------------------------------------------
+
+void Image::convert_to_cairo_argb32()
+{
+    TPImage * result = g_slice_new0( TPImage );
+
+    result->bgr = FALSE;
+    result->depth = 4;
+    result->height = image->height;
+    result->width = image->width;
+    result->pitch = image->width * 4;
+    result->pixels = malloc( image->width * image->height * 4 );
+    result->free_pixels = NULL;
+
+    guint8 * dest_pixel = ( guint8 * ) result->pixels;
+
+    guint8 * source_pixel;
+
+    double mult;
+
+    for ( unsigned int r = 0; r < image->height; ++r )
+    {
+        source_pixel = ( ( guint8 * ) image->pixels ) + ( image->pitch * r );
+
+        for ( unsigned int c = 0; c < image->width; ++c )
+        {
+            if ( image->depth == 3 )
+            {
+#if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
+                *(dest_pixel++) = source_pixel[2];
+                *(dest_pixel++) = source_pixel[1];
+                *(dest_pixel++) = source_pixel[0];
+                *(dest_pixel++) = 255;
+#else
+                *(dest_pixel++) = 255;
+                *(dest_pixel++) = source_pixel[0];
+                *(dest_pixel++) = source_pixel[1];
+                *(dest_pixel++) = source_pixel[2];
+#endif
+                source_pixel += 3;
+
+            }
+            else
+            {
+                mult = source_pixel[ 3 ] / 255.0;
+
+#if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
+
+                *(dest_pixel++) = source_pixel[2] * mult;
+                *(dest_pixel++) = source_pixel[1] * mult;
+                *(dest_pixel++) = source_pixel[0] * mult;
+                *(dest_pixel++) = source_pixel[3];
+#else
+                *(dest_pixel++) = source_pixel[3];
+                *(dest_pixel++) = source_pixel[0] * mult;
+                *(dest_pixel++) = source_pixel[1] * mult;
+                *(dest_pixel++) = source_pixel[2] * mult;
+#endif
+                source_pixel += 4;
+            }
+        }
+    }
+
+    Images::destroy_image( image );
+
+    image = result;
+}
+
+
 //=============================================================================
 
 Images::Images()
