@@ -37,6 +37,11 @@ void destroy_image(void * i)
 	delete ( Image * ) i;
 }
 
+double degrees_to_radians( double degrees )
+{
+	return degrees * ( G_PI / 180.0 );
+}
+
 ]]
 
 /*
@@ -235,7 +240,7 @@ class Canvas [[ClutterActor*]] actor
 	rotate( double angle )
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
-	    cairo_rotate( cr, angle );
+	    cairo_rotate( cr, degrees_to_radians( angle ) );
 	]];
 
 	scale( double sx, double sy )
@@ -317,13 +322,13 @@ class Canvas [[ClutterActor*]] actor
     arc(double xc,double yc,double radius,double angle1,double angle2)
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
-	    cairo_arc(cr,xc,yc,radius,angle1,angle2);
+	    cairo_arc(cr,xc,yc,radius,degrees_to_radians(angle1),degrees_to_radians(angle2));
 	]];
 	
     arc_negative(double xc,double yc,double radius,double angle1,double angle2)
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
-	    cairo_arc_negative(cr,xc,yc,radius,angle1,angle2);
+	    cairo_arc_negative(cr,xc,yc,radius,degrees_to_radians(angle1),degrees_to_radians(angle2));
 	]];
     
     curve_to(double x1,double y1,double x2,double y2,double x3,double y3,bool relative=false)
@@ -390,7 +395,7 @@ class Canvas [[ClutterActor*]] actor
 	    cairo_pattern_destroy(p);
 	]];
 	
-	bool set_source_image( string src )
+	bool set_source_image( string src, double x=0, double y=0 )
 		[[
 	    	cairo_t * cr=check_canvas_cairo_t(L,self);
 	    	
@@ -444,7 +449,7 @@ class Canvas [[ClutterActor*]] actor
 					
 					cairo_surface_set_user_data( surface, & image_key, image, destroy_image );
 					
-					cairo_set_source_surface( cr, surface, 0, 0 );
+					cairo_set_source_surface( cr, surface, x, y );
 					
 					cairo_surface_destroy( surface );					
 				}
@@ -471,13 +476,20 @@ class Canvas [[ClutterActor*]] actor
 	    cairo_set_line_width(cr,width);	    
 	]];
 	
-	text_path( string font, string text )
+	text_path( string font, string text, bool markup = true )
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 	    
 		PangoLayout * layout = pango_cairo_create_layout( cr );
 		
-		pango_layout_set_text( layout, text, -1 );
+		if ( markup )
+		{ 
+			pango_layout_set_markup( layout, text, -1 );
+		}
+		else
+		{
+			pango_layout_set_text( layout, text, -1 );
+		}
 		
 		PangoFontDescription * fd = pango_font_description_from_string( font );
 		
