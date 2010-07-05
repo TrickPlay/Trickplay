@@ -490,7 +490,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
         g_assert( image.pixels );
         g_assert( image.depth == 3 || image.depth == 4 );
-        g_assert( image.width * image.depth >= image.pitch );
+        g_assert( image.width * image.depth <= image.pitch );
         g_assert( image.bgr == 0 || image.bgr == 1 );
 
         return g_slice_dup( TPImage, &image );
@@ -542,7 +542,7 @@ TPImage * Images::decode_image( const char * filename )
 
         g_assert( image.pixels );
         g_assert( image.depth == 3 || image.depth == 4 );
-        g_assert( image.width * image.depth >= image.pitch );
+        g_assert( image.width * image.depth <= image.pitch );
         g_assert( image.bgr == 0 || image.bgr == 1 );
 
         return g_slice_dup( TPImage, &image );
