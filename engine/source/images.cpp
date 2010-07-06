@@ -289,6 +289,7 @@ Images::Images()
     Decoder * png  = ImageDecoders::make_png_decoder();
     Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
     Decoder * tiff = ImageDecoders::make_tiff_decoder();
+    Decoder * gif  = ImageDecoders::make_gif_decoder();
 
     // This is the default order of decoders. The most common
     // type should go first. This order may be affected
@@ -296,6 +297,7 @@ Images::Images()
 
     decoders.push_back( png );
     decoders.push_back( jpeg );
+    decoders.push_back( gif );
     decoders.push_back( tiff );
 
     // This maps the last 4 characters of a file name or mime type
@@ -316,6 +318,12 @@ Images::Images()
     hints[ ".JPG" ] = jpeg;
     hints[ "jpeg" ] = jpeg;
     hints[ "JPEG" ] = jpeg;
+
+    hints[ ".gif" ] = gif;
+    hints[ ".GIF" ] = gif;
+    hints[ "/gif" ] = gif;
+    hints[ "/GIF" ] = gif;
+
 
 #if TP_IMAGE_CACHE_ENABLED
 

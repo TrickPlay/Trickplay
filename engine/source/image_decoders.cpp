@@ -14,6 +14,8 @@
 
 #include "png.h"
 
+#include "gif_lib.h"
+
 #include "image_decoders.h"
 #include "common.h"
 #include "profiler.h"
@@ -527,6 +529,268 @@ namespace ImageDecoders
         }
     };
 
+    class GIFDecoder : public Images::Decoder
+    {
+    public:
+
+        virtual const char * name()
+        {
+            return "GIF Decoder";
+        }
+
+        virtual int decode( gpointer data, gsize size, TPImage * image )
+        {
+            PROFILER( "Images::GIF_decode/memory" );
+
+            UserData user_data = { ( guchar * ) data, size };
+
+            GifFileType * g = DGifOpen( & user_data , input_function );
+
+            if ( ! g )
+            {
+                return TP_IMAGE_DECODE_FAILED;
+            }
+
+            int result = decode( g, image );
+
+            DGifCloseFile( g );
+
+            return result;
+        }
+
+        virtual int decode( const char * filename, TPImage * image )
+        {
+            PROFILER( "Images::GIF_decode/file" );
+
+            GifFileType * g = DGifOpenFileName( filename );
+
+            if ( ! g )
+            {
+                return TP_IMAGE_DECODE_FAILED;
+            }
+
+            int result = decode( g, image );
+
+            DGifCloseFile( g );
+
+            return result;
+        }
+
+    private:
+
+        struct UserData
+        {
+            guchar *    source;
+            gssize      size;
+        };
+
+        static int input_function( GifFileType * g, GifByteType * buffer, int count )
+        {
+            UserData * user_data = ( UserData * ) g->UserData;
+
+            if ( count > user_data->size )
+            {
+                count = user_data->size;
+            }
+
+            if ( count > 0 )
+            {
+                memcpy( buffer, user_data->source, count );
+
+                user_data->source += count;
+                user_data->size -= count;
+            }
+
+            return count;
+        }
+
+        int decode( GifFileType * g, TPImage * image )
+        {
+            g_assert( g );
+
+            try
+            {
+                // Allocate and prepare the 'screen'
+
+                failif( g->SWidth <= 0 || g->SHeight <= 0 , "INVALID SCREEN DIMENSIONS" );
+
+                GifPixelType * screen = g_new( GifPixelType, g->SWidth * g->SHeight );
+
+                failif( ! screen , "FAILED TO ALLOCATE SCREEN MEMORY" );
+
+                FreeLater free_later( screen );
+
+                // Fill it with the background color
+
+                GifPixelType * last  = screen + ( g->SWidth * g->SHeight );
+
+                for ( GifPixelType * pixel = screen ; pixel < last; ++pixel )
+                {
+                    * pixel = g->SBackGroundColor;
+                }
+
+                // Store the screen's color map - each frame may have its own
+
+                ColorMapObject * color_map = g->SColorMap;
+
+                // No transparent color by default
+
+                int transparent_color = -1;
+
+                // Look at each record
+
+                bool done = false;
+
+                while( ! done )
+                {
+                    GifRecordType record_type;
+
+                    failif( GIF_ERROR == DGifGetRecordType( g, & record_type ), "FAILED TO GET RECORD TYPE" );
+
+                    switch( record_type )
+                    {
+
+                        case TERMINATE_RECORD_TYPE:
+
+                            done = true;
+                            break;
+
+                        case EXTENSION_RECORD_TYPE:
+
+                            {
+                                int extension_code;
+
+                                GifByteType * extension;
+
+                                failif( GIF_ERROR == DGifGetExtension( g, & extension_code, & extension ), "FAILED TO GET EXTENSION" );
+
+                                // Look for the transparent color in the graphics control extension
+
+                                if ( extension_code == GRAPHICS_EXT_FUNC_CODE && extension[ 0 ] >= 4 && ( extension[ 1 ] & 1 ) )
+                                {
+                                    transparent_color = extension[ 3 ];
+                                }
+
+                                while ( extension )
+                                {
+                                    failif( GIF_ERROR == DGifGetExtensionNext( g, & extension ), "FAILED TO READ EXTENSION" );
+                                }
+                            }
+                            break;
+
+                        case IMAGE_DESC_RECORD_TYPE:
+
+                            {
+                                failif( GIF_ERROR == DGifGetImageDesc( g ), "FAILED TO READ IMAGE DESCRIPTION" );
+
+                                int row = g->Image.Top;
+                                int col = g->Image.Left;
+                                int width = g->Image.Width;
+                                int height = g->Image.Height;
+
+                                failif( row < 0 || col < 0 || width < 0 || height < 0, "INVALID IMAGE DIMENSIONS" );
+                                failif( col + width > g->SWidth || row + height > g->SHeight, "IMAGE DIMENSIONS OUTSIDE OF SCREEN" );
+
+                                GifPixelType * destination;
+
+                                if ( g->Image.Interlace )
+                                {
+                                    static int interlaced_offset[ 4 ] = { 0, 4, 2, 1 };
+                                    static int interlaced_jumps[ 4] = { 8, 8, 4, 2 };
+
+                                    for ( int i = 0; i < 4; ++i )
+                                    {
+                                        for ( int j = row + interlaced_offset[i]; j < row + height; j += interlaced_jumps[i] )
+                                        {
+                                            destination = screen + ( j * g->SWidth ) +col;
+
+                                            failif( GIF_ERROR == DGifGetLine( g, destination, width ), "FAILED TO GET SCAN LINE" );
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    for ( int i = 0; i < height; ++i )
+                                    {
+                                        destination = screen + ( ( row + i ) * g->SWidth ) + col;
+
+                                        failif( GIF_ERROR == DGifGetLine( g, destination, width ), "FAILED TO GET SCAN LINE" );
+                                    }
+                                }
+
+                                if ( g->Image.ColorMap )
+                                {
+                                    color_map = g->Image.ColorMap;
+                                }
+
+                                // We bail after we read the first frame
+
+                                done = true;
+                            }
+
+                            break;
+
+                        default:
+
+                            break;
+                    }
+                }
+
+                failif( ! color_map, "MISSING COLOR MAP" );
+
+                image->bgr = 0;
+                image->width = g->SWidth;
+                image->height = g->SHeight;
+                image->depth = transparent_color >= 0 ? 4 : 3;
+                image->pitch = g->SWidth * image->depth;
+
+                image->pixels = malloc( image->height * image->width * image->depth );
+
+                failif( ! image->pixels, "FAILED TO ALLOCATE PIXEL MEMORY" );
+
+                guchar * destination = ( guchar * ) image->pixels;
+
+                GifPixelType * source = screen;
+
+                for( unsigned int i = 0; i < image->width * image->height; ++source, ++i )
+                {
+                    if ( * source < color_map->ColorCount )
+                    {
+                        GifColorType * color = & color_map->Colors[ * source ];
+
+                        *(destination++) = color->Red;
+                        *(destination++) = color->Green;
+                        *(destination++) = color->Blue;
+
+                        if ( image->depth == 4 )
+                        {
+                            *(destination++) = ( * source == transparent_color ) ? 0 : 255;
+                        }
+                    }
+                    else
+                    {
+                        *(destination++) = 0;
+                        *(destination++) = 0;
+                        *(destination++) = 0;
+
+                        if ( image->depth == 4 )
+                        {
+                            *(destination++) = 255;
+                        }
+                    }
+                }
+
+                return TP_IMAGE_DECODE_OK;
+            }
+            catch( const String & e )
+            {
+                g_warning( "FAILED TO DECODE GIF : %s", e.c_str() );
+
+                return TP_IMAGE_DECODE_FAILED;
+            }
+        }
+    };
+
     Images::Decoder * make_png_decoder()
     {
         return new PNGDecoder();
@@ -542,4 +806,8 @@ namespace ImageDecoders
         return new TIFFDecoder();
     }
 
+    Images::Decoder * make_gif_decoder()
+    {
+        return new GIFDecoder();
+    }
 };
