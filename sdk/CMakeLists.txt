@@ -27,7 +27,7 @@ if (UNIX AND NOT APPLE)
         
         set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "TrickPlay SDK\n The TrickPlay SDK allows you to build and test TrickPlay apps.")
         
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7),libcairo2 (>= 1.4.10),libgl1-mesa-glx | libgl1,libglib2.0-0 (>= 2.18.0),libgtk2.0-0 (>= 2.8.0),libpango1.0-0 (>= 1.20.0),libx11-6,libxcomposite1 (>= 1:0.3-1),libxdamage1 (>= 1:1.1),libxext6,libxfixes3 (>= 1:4.0.1),libcurl3 (>=7.19.0),libavahi-common3 (>= 0.6.25),libavahi-core6 (>= 0.6.25),libavahi-glib1(>= 0.6.25),libclutter-1.0-0 (>= 1.0.6),libtokyocabinet8,libexpat1,libsqlite3-0 (>= 3.6.0),libclutter-gst-0.10-0,libtiff4,libjson-glib-1.0-0 (>= 0.5.0),libjpeg62,libtiffxx0c2")
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7),libcairo2 (>= 1.4.10),libgl1-mesa-glx | libgl1,libglib2.0-0 (>= 2.18.0),libgtk2.0-0 (>= 2.8.0),libpango1.0-0 (>= 1.20.0),libx11-6,libxcomposite1 (>= 1:0.3-1),libxdamage1 (>= 1:1.1),libxext6,libxfixes3 (>= 1:4.0.1),libcurl3 (>=7.19.0),libavahi-common3 (>= 0.6.25),libavahi-core6 (>= 0.6.25),libavahi-glib1(>= 0.6.25),libclutter-1.0-0 (>= 1.0.6),libtokyocabinet8,libexpat1,libsqlite3-0 (>= 3.6.0),libclutter-gst-0.10-0,libtiff4,libjson-glib-1.0-0 (>= 0.5.0),libjpeg62,libtiffxx0c2,libgif")
 
         # Custom target that:
         # 1. Generates the man file
