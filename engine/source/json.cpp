@@ -290,7 +290,7 @@ bool JSON::parse( lua_State * L, const gchar * json_string )
 
 //-----------------------------------------------------------------------------
 
-String JSON::stringify( lua_State * L, int index )
+String JSON::stringify( lua_State * L, int index, bool pretty )
 {
     String result;
 
@@ -305,6 +305,8 @@ String JSON::stringify( lua_State * L, int index )
 
             {
                 JsonGenerator * g = json_generator_new();
+
+                g_object_set( G_OBJECT( g ), "pretty", gboolean( pretty ), NULL );
 
                 json_generator_set_root( g, root );
 

@@ -41,7 +41,7 @@ namespace JSON
     // Converts the Lua value at index to a JSON string. If anything goes
     // wrong, the resulting string will be empty.
 
-    String stringify( lua_State * L, int index );
+    String stringify( lua_State * L, int index, bool pretty = false );
 };
 
 #endif // _TRICKPLAY_JSON_H
