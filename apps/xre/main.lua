@@ -351,6 +351,15 @@ function commands.NEW( command )
         
     end
     
+    function constructors.XRESound()
+    
+        -- {"url":"http://partner.xcal.tv:4530/com/comcast/samples/suite/AG_1107_Hipster.mp3","contentType":null,"position":0,"speed":1.0,"volume":100,"autoPlay":false}
+
+        resources[ command.id ] = { type = command.klass , params = command.params }
+        
+    end
+    
+    
     ---------------------------------------------------------------------------
 
     if not epcall( constructors[ command.klass ] ) then
@@ -554,6 +563,31 @@ function commands.CALL( command )
             end
         
         end
+    
+    end
+    
+    function methods.play()
+    
+        local resource = resources[ command.targetId ]
+        
+        if not resource then
+        
+            print( "ASKED TO PLAY INVALID RESOURCE", command.targetId )
+            
+            return
+            
+        end
+        
+        if resource.type == "XRESound" then
+        
+            if resource.params.url then
+            
+                mediaplayer:play_sound( resource.params.url )
+            
+            end
+        
+        end
+    
     
     end
 
