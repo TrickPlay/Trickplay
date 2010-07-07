@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.examples.test_rotate",
+    release     = "1",
+    version     = "1.0",
+    name        = "Testing Rotation",
+    author      = "Sam Wood",
+    copyright   = "Trickplay Inc."
+}
