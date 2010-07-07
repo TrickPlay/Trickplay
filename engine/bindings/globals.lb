@@ -79,6 +79,33 @@ globals
             }            
         ]];
         
+	lstring readfile(string file_name )
+		[[
+			result = NULL;
+			result_len = 0;
+			
+            bool is_uri=false;
+            
+            char * path=App::get(L)->normalize_path(file_name,&is_uri);
+            
+            FreeLater free_later(path);
+            
+            if ( path && ! is_uri )
+            {
+            	gsize length = 0;
+            	
+            	gchar * contents = NULL;
+            	
+            	if ( g_file_get_contents( path, & contents, & length, NULL ) )
+            	{
+            		result = contents;
+            		result_len = length;
+            		
+            		free_later( contents );
+            	} 
+            }                        
+		]];       
+        
     exit()
         [[
             App::get(L)->get_context()->close_app();        
