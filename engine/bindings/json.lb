@@ -76,6 +76,8 @@ global json [[void*]]
 		
 			t - A table to convert to JSON.
 			
+			pretty - Whether to indent the output and make it more readable.
+			
 		Returns:
 		
 			string - A JSON representation of the table.
@@ -83,9 +85,9 @@ global json [[void*]]
 			nil - If there is a problem. 
 	*/
 	
-	lstring stringify( table t )
+	lstring stringify( table t, bool pretty = false )
 		[[
-			String s = JSON::stringify( L, t );
+			String s = JSON::stringify( L, t, pretty );
 			
 			if ( s.empty() )
 			{
