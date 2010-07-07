@@ -335,6 +335,7 @@ add_library(
     ${ENGINE_SRC}/source/thread_pool.cpp
     ${ENGINE_SRC}/source/debugger.cpp
     ${ENGINE_SRC}/source/socket.cpp
+    ${ENGINE_SRC}/source/json.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
