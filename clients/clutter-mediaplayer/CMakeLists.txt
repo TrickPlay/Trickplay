@@ -23,6 +23,11 @@ include_directories(
 
 add_executable( tp-cmp main.c )
 
+# This one must come before the clutter libraries - so we
+# get the json symbols from here
+
+TP_FIND_LIBRARY( json-glib-1.0      TPCMP_LIBRARIES )
+
 TP_FIND_LIBRARY( clutter-glx-1.0    TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( clutter-gst-0.10   TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( clutter-gst-1.0   TPCMP_LIBRARIES )
@@ -35,6 +40,7 @@ TP_FIND_LIBRARY( xml2               TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( glib-2.0           TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gobject-2.0        TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gthread-2.0        TPCMP_LIBRARIES )
+
 
 target_link_libraries( tp-cmp tpcore ${TPCMP_LIBRARIES} )
 

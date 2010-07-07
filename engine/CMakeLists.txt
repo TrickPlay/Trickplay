@@ -100,12 +100,16 @@ set(
     tiff
     tiffxx
     gif
-    
+
     #--------------
     # json-glib
     #--------------
     
+    # Make sure this one comes before the clutter libraries, otherwise
+    # we will get json symbols from them - and those are outdated
+    
     json-glib-1.0    
+        
 )
 
 #------------------------------------------------------------------------------
