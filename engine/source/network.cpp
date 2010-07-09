@@ -686,7 +686,7 @@ public:
             else if ( closure->request.method == "POST" )
             {
                 cc( curl_easy_setopt( eh, CURLOPT_POST, 1 ) );
-                cc( curl_easy_setopt( eh, CURLOPT_POSTFIELDSIZE, 1 ) );
+                cc( curl_easy_setopt( eh, CURLOPT_POSTFIELDSIZE, closure->request.body.size() ) );
             }
             else if ( closure->request.method != "GET" )
             {

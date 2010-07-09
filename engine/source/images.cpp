@@ -209,6 +209,75 @@ Image::~Image()
     Images::destroy_image( image );
 }
 
+//-----------------------------------------------------------------------------
+
+void Image::convert_to_cairo_argb32()
+{
+    TPImage * result = g_slice_new0( TPImage );
+
+    result->bgr = FALSE;
+    result->depth = 4;
+    result->height = image->height;
+    result->width = image->width;
+    result->pitch = image->width * 4;
+    result->pixels = malloc( image->width * image->height * 4 );
+    result->free_pixels = NULL;
+
+    guint8 * dest_pixel = ( guint8 * ) result->pixels;
+
+    guint8 * source_pixel;
+
+    double mult;
+
+    for ( unsigned int r = 0; r < image->height; ++r )
+    {
+        source_pixel = ( ( guint8 * ) image->pixels ) + ( image->pitch * r );
+
+        for ( unsigned int c = 0; c < image->width; ++c )
+        {
+            if ( image->depth == 3 )
+            {
+#if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
+                *(dest_pixel++) = source_pixel[2];
+                *(dest_pixel++) = source_pixel[1];
+                *(dest_pixel++) = source_pixel[0];
+                *(dest_pixel++) = 255;
+#else
+                *(dest_pixel++) = 255;
+                *(dest_pixel++) = source_pixel[0];
+                *(dest_pixel++) = source_pixel[1];
+                *(dest_pixel++) = source_pixel[2];
+#endif
+                source_pixel += 3;
+
+            }
+            else
+            {
+                mult = source_pixel[ 3 ] / 255.0;
+
+#if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
+
+                *(dest_pixel++) = source_pixel[2] * mult;
+                *(dest_pixel++) = source_pixel[1] * mult;
+                *(dest_pixel++) = source_pixel[0] * mult;
+                *(dest_pixel++) = source_pixel[3];
+#else
+                *(dest_pixel++) = source_pixel[3];
+                *(dest_pixel++) = source_pixel[0] * mult;
+                *(dest_pixel++) = source_pixel[1] * mult;
+                *(dest_pixel++) = source_pixel[2] * mult;
+#endif
+                source_pixel += 4;
+            }
+        }
+    }
+
+    Images::destroy_image( image );
+
+    image = result;
+}
+
+
 //=============================================================================
 
 Images::Images()
@@ -220,6 +289,7 @@ Images::Images()
     Decoder * png  = ImageDecoders::make_png_decoder();
     Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
     Decoder * tiff = ImageDecoders::make_tiff_decoder();
+    Decoder * gif  = ImageDecoders::make_gif_decoder();
 
     // This is the default order of decoders. The most common
     // type should go first. This order may be affected
@@ -227,6 +297,7 @@ Images::Images()
 
     decoders.push_back( png );
     decoders.push_back( jpeg );
+    decoders.push_back( gif );
     decoders.push_back( tiff );
 
     // This maps the last 4 characters of a file name or mime type
@@ -247,6 +318,12 @@ Images::Images()
     hints[ ".JPG" ] = jpeg;
     hints[ "jpeg" ] = jpeg;
     hints[ "JPEG" ] = jpeg;
+
+    hints[ ".gif" ] = gif;
+    hints[ ".GIF" ] = gif;
+    hints[ "/gif" ] = gif;
+    hints[ "/GIF" ] = gif;
+
 
 #if TP_IMAGE_CACHE_ENABLED
 
@@ -421,7 +498,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
         g_assert( image.pixels );
         g_assert( image.depth == 3 || image.depth == 4 );
-        g_assert( image.width * image.depth >= image.pitch );
+        g_assert( image.width * image.depth <= image.pitch );
         g_assert( image.bgr == 0 || image.bgr == 1 );
 
         return g_slice_dup( TPImage, &image );
@@ -473,7 +550,7 @@ TPImage * Images::decode_image( const char * filename )
 
         g_assert( image.pixels );
         g_assert( image.depth == 3 || image.depth == 4 );
-        g_assert( image.width * image.depth >= image.pitch );
+        g_assert( image.width * image.depth <= image.pitch );
         g_assert( image.bgr == 0 || image.bgr == 1 );
 
         return g_slice_dup( TPImage, &image );

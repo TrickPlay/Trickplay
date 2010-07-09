@@ -16,6 +16,25 @@ inline void g_info( const gchar * format, ... )
 }
 
 //-----------------------------------------------------------------------------
+// If the expression is true, this throws a string exception
+
+inline void failif( bool expression, const gchar * format, ... )
+{
+    if ( expression )
+    {
+        va_list args;
+        va_start( args, format );
+        gchar * s = g_strdup_vprintf( format, args );
+        va_end( args );
+
+        String result( s );
+        g_free( s );
+
+        throw result;
+    }
+}
+
+//-----------------------------------------------------------------------------
 
 class RefCounted
 {

@@ -10,6 +10,8 @@ namespace ImageDecoders
     Images::Decoder * make_jpeg_decoder();
 
     Images::Decoder * make_tiff_decoder();
+
+    Images::Decoder * make_gif_decoder();
 };
 
 #endif // _TRICKPLAY_IMAGE_DECODERS_H

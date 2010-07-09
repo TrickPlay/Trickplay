@@ -403,7 +403,7 @@ def emit( stuff , f ):
         lua_opt  = {
             "int"       : "lb_optint",
             "double"    : "lb_optnumber",
-            "bool"      : "lb_optint",
+            "bool"      : "lb_optbool",
             "integer"   : "lb_optint",
             "long"      : "lb_optint",
             "string"    : "lb_optstring",

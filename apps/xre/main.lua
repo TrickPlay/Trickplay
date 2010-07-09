@@ -29,7 +29,7 @@ end
 
 function xre.on_command( xre, command )
 
-    if not pcall( commands[ command.command ] , command ) then
+    if not epcall( commands[ command.command ] , command ) then
 
         print( "NO HANDLER FOR COMMAND", command.command )
     
@@ -50,12 +50,26 @@ xre_app = {}
 
 function int_to_color( i )
 
-    local s = string.sub( string.format( "%x" , i ) , -8 )
+    local s = string.sub( string.format( "%8.8x" , i ) , -8 )
     
-    return { tonumber( string.sub( s , -6 , -5 ) , 16 ),
-             tonumber( string.sub( s , -4 , -3 ) , 16 ),
-             tonumber( string.sub( s , -2 , -1 ) , 16 ),
+    return { tonumber( string.sub( s , -6 , -5 ) , 16 ) ,
+             tonumber( string.sub( s , -4 , -3 ) , 16 ) ,
+             tonumber( string.sub( s , -2 , -1 ) , 16 ) ,
              tonumber( string.sub( s , -8 , -7 ) , 16 ) }
+
+end
+
+function epcall( f , ... )
+
+    if not f then
+    
+        return false
+        
+    end
+    
+    f( ... )
+    
+    return true
 
 end
 
@@ -116,13 +130,135 @@ function commands.NEW( command )
     
         -- Create a new view and add it to the views table
         
-        local view = { group = Group() }
+        local view =
+        {
+            id = command.id,
+            
+            group = Group
+            {
+                name = "XREView-"..tostring( command.id ),
+                
+                extra =
+                {
+                    xre_id = command.id
+                }
+            }
+        }
         
+        function view:apply_resource_options()
+        
+            -- The view has resource options but it doesn't have a resource
+            -- yet, so we bail.
+            
+            if not view.resource then
+            
+                return
+                
+            end
+            
+            -- {"textWrap":"NONE","verticalAlign":"CENTER","horizontalAlign":"CENTER","stretch":"NONE","textTruncStyle":"NONE"}
+            
+            --print( "\t\t\tAPPLYING RESOURCE OPTIONS" , view.id , view.resource , view.resource_id , json:stringify( view.resource_options ) )
+            
+            if view.resource_options.textWrap == "WRAP" then
+            
+                if view.resource and view.resource_type == "XREText" then
+                
+                    view.resource.wrap = true
+                    
+                    view.resource.w = view.group.w
+                    
+                    view.resource.alignment = view.resource_options.horizontalAlign
+                
+                end
+            
+            end
+            
+
+            -- Get the resource's size. For images, we use their base size
+            
+            local rw , rh = unpack( view.resource.base_size or view.resource.size )
+            
+            -- Now, stretch
+            
+            local stretchers =
+            {
+                NONE =              function()
+                                        -- do nothing
+                                    end,
+                    
+                FIT_WIDTH =         function()                        
+                                        local scale = view.group.w / rw
+                                        view.resource.size = { rw * scale , rh * scale }
+                                    end,
+                    
+                FIT_HEIGHT =        function()
+                                        local scale = view.group.h / rh
+                                        view.resource.size = { rw * scale , rh * scale }
+                                    end,
+                    
+                FILL =              function()
+                                        view.resource.size = view.group.size
+                                    end,
+                    
+                FIT_BEST =          function()                    
+                                        local scale = math.min( view.group.w / rw , view.group.h / rh )
+                                        view.resource.size = { rw * scale , rh * scale }
+                                    end,
+                    
+                FILL_WITH_CLIP =    function()
+                                        local scale = math.max( view.group.w / rw , view.group.h / rh )
+                                        view.resource.size = { rw * scale , rh * scale }
+                                    end
+            }
+
+            epcall( stretchers[ view.resource_options.stretch ] )
+            
+            -- Now, align horizontally
+            
+            local horizontal_aligners =
+            {
+                LEFT    =   function()
+                                view.resource.x = 0
+                            end,
+                    
+                CENTER  =   function()
+                                view.resource.x = ( view.group.w - view.resource.w ) / 2
+                            end,
+                    
+                RIGHT   =   function()
+                                view.resource.x = view.group.w - view.resource.w
+                            end
+            }
+            
+            epcall( horizontal_aligners[ view.resource_options.horizontalAlign ] )
+            
+            -- Align vertically
+            
+            local vertical_aligners =
+            {
+                TOP     =   function()
+                                view.resource.y = 0
+                            end,
+                    
+                CENTER  =   function()
+                                view.resource.y = ( view.group.h - view.resource.h ) / 2
+                            end,
+                    
+                BOTTOM  =   function()
+                                view.resource.y = view.group.h - view.resource.h
+                            end
+            }
+            
+            epcall( vertical_aligners[ view.resource_options.verticalAlign ] )
+        
+            
+            
+            -- TODO : textTruncStyle and textWrap
+            
+        end
+
         views[ command.id ] = view
-        
-        view.group.name = "XREView-"..tostring( command.id )
-        
-        view.group.extra.xre_id = command.id
         
         set_view_properties( view , command.params )
     
@@ -130,35 +266,121 @@ function commands.NEW( command )
     
     function constructors.XREFont()
     
-        resources[ command.id ] = { type = "font" , params = command.params }
+        resources[ command.id ] =
+        {
+            type = command.klass ,
+            params = command.params
+        }
     
     end
     
     function constructors.XRERectangle()
             
-        resources[ command.id ] = { type = "rectangle" , params = command.params }
+        resources[ command.id ] =
+        {
+            type = command.klass ,
+            params = command.params
+        }
         
     end
     
     function constructors.XREText()
     
-        resources[ command.id ] = { type = "text" , params = command.params }
+        resources[ command.id ] =
+        {
+            type = command.klass ,
+            params = command.params
+        }
     
     end
     
     function constructors.XREImage()
     
-        local image = Image{ src = command.params.url , async = true , opacity = 0 }
+        local image =
         
+            Image
+            {
+                src = command.params.url ,
+                async = true ,
+                opacity = 0
+            }
+            
         screen:add( image )
     
-        resources[ command.id ] = { type = "image" , params = command.params, image = image }
+        resources[ command.id ] =
+        {
+            type = command.klass ,
+            params = command.params,
+            image = image,
+        }
+        
+        function image.on_loaded( image , failed )
+        
+            image.on_loaded = nil
+            
+            -- Since the image is loaded asynchronously, we
+            -- have to revisit the view that use it and re-apply
+            -- their resource options
+            
+            for id , view in pairs( views ) do
+            
+                if view.resource_id == command.id then
+                
+                    view:apply_resource_options()
+                    
+                end
+                
+            end
+            
+        end
     
     end
     
+    function constructors.XREAbsoluteTranslationAnimation()
+
+        -- "params":{"easing":"LINEAR_IN_OUT","duration":1000,"x":422.0,"y":104.0}
+        
+        resources[ command.id ] = { type = command.klass , params = command.params }
+    
+    end
+    
+    function constructors.XREAlphaAnimation()
+    
+        -- {"easing":"LINEAR_IN_OUT","duration":2000,"alpha":1.0}
+        
+        resources[ command.id ] = { type = command.klass , params = command.params }
+        
+    end
+    
+    function constructors.XRETransformAnimation()
+    
+        -- {"easing":"LINEAR_IN_OUT","duration":2000,"x":0.0,"y":0.0,"scaleX":1.0,"scaleY":1.0,
+        -- "rotation":6.283185307179586,"actionPointX":100.0,"actionPointY":100.0}
+        
+        resources[ command.id ] = { type = command.klass , params = command.params }
+        
+    end
+      
+    function constructors.XREDimensionsAnimation()
+    
+        -- {"easing":"LINEAR_IN_OUT","duration":2000,"width":200.0,"height":200.0}
+
+        resources[ command.id ] = { type = command.klass , params = command.params }
+        
+    end
+    
+    function constructors.XRESound()
+    
+        -- {"url":"http://partner.xcal.tv:4530/com/comcast/samples/suite/AG_1107_Hipster.mp3","contentType":null,"position":0,"speed":1.0,"volume":100,"autoPlay":false}
+
+        resources[ command.id ] = { type = command.klass , params = command.params }
+        
+    end
+    
+    
     ---------------------------------------------------------------------------
 
-    if not pcall( constructors[ command.klass ] ) then
+    if not epcall( constructors[ command.klass ] ) then
 
         print( "DON'T KNOW HOW TO CREATE" , command.klass )
         
@@ -173,8 +395,6 @@ function commands.DELETE( command )
     local view = views[ command.targetId ]
     
     if view then
-    
-        print( "DELETING" , view.group.name )
     
         view.group:unparent()
         
@@ -206,15 +426,49 @@ function commands.SET( command )
     
         local view = views[ command.targetId ]
         
-        if not view then
+        if view then
+        
+            set_view_properties( view , command.props )
+        
+        else
+        
+            local resource = resources[ command.targetId ]
             
-            print( "SET COMMAND FOR UNKNOWN VIEW" , command.targetId )
+            if resource then
+                
+                -- Not sure if these props should completely replace
+                -- existing props or if individual members of 'props'
+                -- should be set
+                
+                if command.props then
+                
+                    resource.props = command.props
+                    
+                    -- Hack to propagate setting the text
+                    
+                    if command.props.text ~= nil then
+                    
+                        for id , view in pairs( views ) do
+                        
+                            if view.resource and view.resource_id == command.targetId then
+                            
+                                view.resource.text = command.props.text
+                            
+                            end
+                        
+                        end
+                    
+                    end
+                    
+                end
             
-            return
+            else
+            
+                print( "SET COMMAND FOR UNKNOWN TARGET" , command.targetId )
+            
+            end
         
         end
-        
-        set_view_properties( view , command.props )
             
     end
 
@@ -224,6 +478,143 @@ end
 
 function commands.CALL( command )
 
+    local methods = {}
+    
+    function methods.activate()
+    
+        local view = views[ command.targetId ]
+        
+        if view then
+        
+            view.group:grab_key_focus()
+            
+        end
+    
+    end
+    
+    function methods.animate()
+    
+        -- "method":"animate","params":[2368],"targetId":2362    
+        
+        local view = views[ command.targetId ]
+        
+        -- params is an array, so there could be multiple
+        
+        assert( #command.params == 1 )
+        
+        local animation_id = command.params[ 1 ]
+            
+        local animation = resources[ animation_id ]
+        
+        local function animation_completed()
+        
+            if animation.props and animation.props.onComplete then
+               
+                local event =
+                {
+                    name = "onComplete",
+                    handler = animation_id,
+                    source = animation_id,
+                    phase = "STANDARD",
+                    params =
+                    {
+                    }        
+                }
+                
+                xre:send_event( event )
+                
+            end
+        
+        end
+        
+        if view and animation then
+        
+            if animation.type == "XREAbsoluteTranslationAnimation" then
+            
+                view.group:animate
+                {
+                    mode = animation.params.easing,
+                    duration = animation.params.duration,
+                    x = animation.params.x,
+                    y = animation.params.y,
+                    on_completed = animation_completed
+                }
+
+            elseif animation.type == "XREAlphaAnimation" then
+            
+                view.group:animate
+                {
+                    mode = animation.params.easing,
+                    duration = animation.params.duration,
+                    opacity = 255 * animation.params.alpha,
+                    on_completed = animation_completed
+                }
+
+            elseif animation.type == "XRETransformAnimation" then
+            
+            -- {"easing":"LINEAR_IN_OUT","duration":2000,"x":0.0,"y":0.0,"scaleX":1.0,"scaleY":1.0,"rotation":6.283185307179586,"actionPointX":100.0,"actionPointY":100.0}
+                        
+                view.group.z_rotation = { view.group.z_rotation[1] , animation.params.actionPointX , animation.params.actionPointY }
+            
+                view.group:animate
+                {
+                    mode = animation.params.easing,
+                    duration = animation.params.duration,
+                    x = view.group.x + animation.params.x,
+                    y = view.group.y + animation.params.y,
+                    scale = { animation.params.scaleX or 1 , animation.params.scaleY or 1 },
+                    z_rotation = math.deg( animation.params.rotation ) + view.group.z_rotation[1] or 0,
+                    on_completed = animation_completed
+                }
+                
+            elseif animation.type == "XREDimensionsAnimation" then
+
+                view.group:animate
+                {
+                    mode = animation.params.easing,
+                    duration = animation.params.duration,
+                    w = animation.params.width,
+                    h = animation.params.height,
+                    on_completed = animation_completed
+                }
+                
+            end
+        
+        end
+    
+    end
+    
+    function methods.play()
+    
+        local resource = resources[ command.targetId ]
+        
+        if not resource then
+        
+            print( "ASKED TO PLAY INVALID RESOURCE", command.targetId )
+            
+            return
+            
+        end
+        
+        if resource.type == "XRESound" then
+        
+            if resource.params.url then
+            
+                mediaplayer:play_sound( resource.params.url )
+            
+            end
+        
+        end
+    
+    
+    end
+
+    if not epcall( methods[ command.method ] ) then
+    
+        print( "UNHANDLED COMMAND '"..command.method.."'" )
+    
+    end
+    
 end
 
 -------------------------------------------------------------------------------
@@ -266,6 +657,20 @@ function set_view_properties( view , props )
     function setters.dimensions( view , value )
     
         view.group.size = { value[ 1 ] , value[ 2 ] }
+        
+        view:apply_resource_options()
+        
+        if view.resource then
+        
+            local resource = resources[ view.resource_id ]
+            
+            if resource.type == "XRERectangle" then
+            
+                view.resource.size = view.group.size
+            
+            end
+        
+        end
     
     end
     
@@ -305,59 +710,136 @@ function set_view_properties( view , props )
     
     end
     
-    function setters.resource( view , value )
+    function setters.resource( view , resource_id )
     
-        -- Remove previous children
+        -- Find the resource
         
-        view.group:clear()
-        
-        local resource = resources[ value ]
+        local resource = resources[ resource_id ]
         
         if not resource then
         
-            print( "INVALID RESOURCE" , value )
+            print( "INVALID RESOURCE" , resource_id )
         
             return
             
         end
         
-        if resource.type == "image" then
+        -- Remove a previous resource
         
-            view.group:add( Clone{ source = resource.image , opacity = 255 } )
+        if view.resource then
         
-        elseif resource.type == "rectangle" then
+            view.resource:unparent()
+            
+            view.resource_id = nil
+            
+            view.resource = nil
         
-            local rectangle =
+        end
+        
+        
+        if resource.type == "XREImage" then
+        
+            view.resource =
+            
+                Clone
+                {
+                    name = "XREImage-"..tostring( resource_id ),
+                    source = resource.image,
+                    opacity = 255,
+                    --size = view.group.size
+                }
+            
+        
+        elseif resource.type == "XRERectangle" then
+        
+            view.resource =
             
                 Rectangle
                 {
+                    name = "XRERectangle-"..tostring( resource_id ),
                     border_width = resource.params.borderThickness,
                     color = int_to_color( resource.params.color ),
                     border_color = int_to_color( resource.params.borderColor ),
                     size = view.group.size
                 }
-                
-            view.group:add( rectangle )
+                            
             
-        elseif resource.type == "text" then
+        elseif resource.type == "XREText" then
         
             -- TODO: find the font resource and use it
             
-            --local font = resources[ resource.params.font ]
+            local font = resources[ resource.params.font ]
             
-            local text =
+            local font_family
+            
+            local font_style
+            
+            if font then
+            
+                local font_map =
+                    
+                    {
+                        [ "with-serif"   ] = "DejaVu Serif",
+                        [ "without-serif"] = "DejaVu Sans",
+                        [ "monospaced"   ] = "DejaVu Sans Mono"
+                    }
+                    
+                font_family = font_map[ font.params.family ]
+                
+                local style_map =
+                    
+                    {
+                        [ "NORMAL"      ] = "",
+                        [ "BOLD"        ] = "bold",
+                        [ "ITALIC"      ] = "italic",
+                        [ "BOLDITALIC"  ] = "bold italic"
+                    }
+                
+                font_style = style_map[ font.params.style ]
+                
+            end
+                        
+            font_family = font_family or "DejaVu Sans"
+            
+            font_style = font_style or ""
+            
+            view.resource =
             
                 Text
                 {
-                    font = "Sans "..tostring( resource.params.size ).."px",
+                    name = "XREText-"..tostring( resource_id ),
+                    font = font_family.." "..font_style.." "..tostring( resource.params.size ).."px",
                     text = resource.params.text,
                     color = int_to_color( resource.params.color ),
-                    size = view.group.size,
-                    clip = { 0 , 0 , view.group.w , view.group.h }
+                    --size = view.group.size,
+                    --clip = { 0 , 0 , view.group.w , view.group.h }
                 }
                 
-            view.group:add( text )
+            view.group.clip = { 0 , 0 , view.group.w , view.group.h }
+                        
+        end
+    
+        -- Now add the resource to the group
         
+        if view.resource then
+                
+            view.group:add( view.resource )
+            
+            -- The resource is the 'background' of the view - so we lower
+            -- it to the bottom, so it is under child views.
+            
+            view.resource:lower_to_bottom()
+            
+            -- Set its id
+            
+            view.resource_id = resource_id
+            
+            view.resource_type = resource.type
+            
+            -- Apply resource options
+            
+            view:apply_resource_options()
+            
         end
     
     end
@@ -382,10 +864,12 @@ function set_view_properties( view , props )
         view.group.reactive = not ignore
     
     end
-    
+        
     function setters.resourceOptions( view , options )
     
-        -- TODO
+        view.resource_options = options
+        
+        view:apply_resource_options()
     
     end
     
@@ -407,12 +891,65 @@ function set_view_properties( view , props )
         end
     
     end
+    
+    function setters.onKeyDown( view , props )
+    
+        function view.group.on_key_down( group , key , unicode )
+        
+            local event =
+            {
+                name = "onKeyDown",
+                handler = group.extra.xre_id,
+                source = group.extra.xre_id,
+                phase = "STANDARD",
+                params =
+                {
+                    virtualKeyCode = string.upper( keys[ key ] ),
+                    shift = false,
+                    control = false,
+                    rawCode = string.byte( string.upper( keys[ key ] ) ),
+                    alt = false
+                }        
+            }
+            
+            xre:send_event( event )
+        
+        end
+    
+    end
+
+
+    function setters.onKeyUp( view , props )
+    
+        function view.group.on_key_up( group , key , unicode )
+        
+            local event =
+            {
+                name = "onKeyUp",
+                handler = group.extra.xre_id,
+                source = group.extra.xre_id,
+                phase = "STANDARD",
+                params =
+                {
+                    virtualKeyCode = string.upper( keys[ key ] ),
+                    shift = false,
+                    control = false,
+                    rawCode = string.byte( string.upper( keys[ key ] ) ),
+                    alt = false
+                }        
+            }
+            
+            xre:send_event( event )
+        
+        end
+    
+    end
 
     ---------------------------------------------------------------------------
 
     for name , value in pairs( props ) do
     
-        if not pcall( setters[ name ] , view , value ) then
+        if not epcall( setters[ name ] , view , value ) then
     
             print( "NO SETTER FOR PROPERTY" , name )
         
@@ -422,21 +959,27 @@ function set_view_properties( view , props )
 
 end
 
---[[
 
-function screen.on_key_down( screen , key )
+function screen.on_key_down( screen , key , u )
+    
+    print( keys[ key ] , key , u )
     
     if key == keys.BackSpace then
     
         local event =
         {
-            name = "onKeyDown",
+            name = "onPreviewKeyDown",
             handler = 2,
             source = 2,
-            phase = "STANDARD",
-            virtualKeyCode = "ESCAPE",
---            rawCode = keys.Escape,
-            params = {}
+            phase = "PREVIEW",
+            params =
+            {
+                virtualKeyCode = "ESCAPE",
+                shift = false,
+                control = false,
+                rawCode = 27,
+                alt = false
+            }
         }
     
         xre:send_event( event )
@@ -445,4 +988,3 @@ function screen.on_key_down( screen , key )
     
 end
  
-]]
