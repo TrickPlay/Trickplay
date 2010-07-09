@@ -1,6 +1,8 @@
 
 function XRE( )
 
+    local debug_protocol = false
+
     local xre =
         
         {
@@ -124,6 +126,12 @@ function XRE( )
             
             local json_command = string.sub( xre.input_buffer, 5, 4 + message_length )
             
+            if debug_protocol then
+            
+                print( "RECEIVED:", json_command)
+                
+            end
+            
             xre.input_buffer = string.sub( xre.input_buffer , 5 + message_length )
             
             local command = json:parse( json_command )
@@ -164,6 +172,12 @@ function XRE( )
         end
         
         local json_event = json:stringify( event )
+        
+        if debug_protocol then
+        
+            print( "SENDING:" , json_event )
+            
+        end
 
         xre.socket:write( output..uint32_to_be( # json_event )..json_event )
     

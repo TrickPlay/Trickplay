@@ -2,10 +2,13 @@ module clutter_canvas;
 
 [[
 #include "clutter/clutter.h"
+#include "pango/pangocairo.h"
 
 #include "util.h"
 #include "signal_collector.h"
 #include "clutter_util.h"
+#include "network.h"
+#include "images.h"
 ]]
 
 [[
@@ -27,6 +30,16 @@ cairo_t * check_canvas_cairo_t(lua_State * L,ClutterActor * canvas)
 void destroy_cairo_t(gpointer t)
 {
     cairo_destroy((cairo_t*)t);    
+}
+
+void destroy_image(void * i)
+{
+	delete ( Image * ) i;
+}
+
+double degrees_to_radians( double degrees )
+{
+	return degrees * ( G_PI / 180.0 );
 }
 
 ]]
@@ -96,6 +109,77 @@ class Canvas [[ClutterActor*]] actor
 	    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(self),lua_tonumber(L,-2),lua_tonumber(L,-1));
             lua_pop(L,2);
         ]];
+        
+    string op
+    	[[
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+	    	
+	    	switch ( cairo_get_operator(cr) ) 
+	    	{
+			   	case CAIRO_OPERATOR_CLEAR:		op = "CLEAR"; break;
+			    case CAIRO_OPERATOR_SOURCE:		op = "SOURCE"; break;
+			    case CAIRO_OPERATOR_OVER:		op = "OVER"; break;
+			    case CAIRO_OPERATOR_IN:			op = "IN"; break;
+			    case CAIRO_OPERATOR_OUT:		op = "OUT"; break;
+			    case CAIRO_OPERATOR_ATOP:		op = "ATOP"; break;
+			    case CAIRO_OPERATOR_DEST:		op = "DEST"; break;
+			    case CAIRO_OPERATOR_DEST_OVER:	op = "DEST_OVER"; break;
+			    case CAIRO_OPERATOR_DEST_IN:	op = "DEST_IN"; break;
+			    case CAIRO_OPERATOR_DEST_OUT:	op = "DEST_OUT"; break;
+			    case CAIRO_OPERATOR_DEST_ATOP:	op = "DEST_ATOP"; break;
+			    case CAIRO_OPERATOR_XOR:		op = "XOR"; break;
+			    case CAIRO_OPERATOR_ADD:		op = "ADD"; break;
+			    case CAIRO_OPERATOR_SATURATE:	op = "SATURATE"; break;	    			
+	    	}
+    	]]
+    	[[
+    		static std::map< String , cairo_operator_t > op_map;
+    		
+    		if ( op_map.empty() )
+    		{
+			   	op_map[ "CLEAR" ] = CAIRO_OPERATOR_CLEAR;
+			    op_map[ "SOURCE" ] = CAIRO_OPERATOR_SOURCE;
+			    op_map[ "OVER" ] = CAIRO_OPERATOR_OVER;
+			    op_map[ "IN" ] = CAIRO_OPERATOR_IN;
+			    op_map[ "OUT" ] = CAIRO_OPERATOR_OUT;
+			    op_map[ "ATOP" ] = CAIRO_OPERATOR_ATOP;
+			    op_map[ "DEST" ] = CAIRO_OPERATOR_DEST;
+			    op_map[ "DEST_OVER" ] = CAIRO_OPERATOR_DEST_OVER;
+			    op_map[ "DEST_IN" ] = CAIRO_OPERATOR_DEST_IN;
+			    op_map[ "DEST_OUT" ] = CAIRO_OPERATOR_DEST_OUT;
+			    op_map[ "DEST_ATOP" ] = CAIRO_OPERATOR_DEST_ATOP;
+			    op_map[ "XOR" ] = CAIRO_OPERATOR_XOR;
+			    op_map[ "ADD" ] = CAIRO_OPERATOR_ADD;
+			    op_map[ "SATURATE" ] = CAIRO_OPERATOR_SATURATE;	    			
+    		}
+    		
+    		std::map< String, cairo_operator_t >::const_iterator it = op_map.find( op );
+    		
+    		if ( it == op_map.end() )
+    		{
+    			luaL_error(L,"Invalid canvas op '%s'", op );
+    		}
+    		
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+	    	
+	    	cairo_set_operator(cr,it->second);
+    	]];
+    	
+    readonly table current_point
+    	[[
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+			
+			double x;
+			double y;
+			
+			cairo_get_current_point( cr, &x, &y );
+			
+			lua_newtable( L );    		
+			lua_pushnumber( L, x );
+			lua_rawseti( L, -2, 1 );
+			lua_pushnumber( L, y );
+			lua_rawseti( L, -2, 2 );
+    	]];
 	
     bool begin_painting(table region=0)
 	[[
@@ -147,6 +231,24 @@ class Canvas [[ClutterActor*]] actor
 	    }	    
 	]];
 	
+	translate( double tx, double ty )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_translate( cr, tx , ty );
+	]];
+
+	rotate( double angle )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_rotate( cr, degrees_to_radians( angle ) );
+	]];
+
+	scale( double sx, double sy )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    cairo_scale( cr, sx , sy );
+	]];
+	
     clear_surface()
 	[[
 	    clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(self));
@@ -178,9 +280,13 @@ class Canvas [[ClutterActor*]] actor
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 	    if(preserve)
-		cairo_fill_preserve(cr);
+	    {
+			cairo_fill_preserve(cr);
+		}
 	    else
-		cairo_fill(cr);
+	    {
+			cairo_fill(cr);
+		}
 	]];
 	
     paint(int alpha=255)
@@ -216,13 +322,13 @@ class Canvas [[ClutterActor*]] actor
     arc(double xc,double yc,double radius,double angle1,double angle2)
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
-	    cairo_arc(cr,xc,yc,radius,angle1,angle2);
+	    cairo_arc(cr,xc,yc,radius,degrees_to_radians(angle1),degrees_to_radians(angle2));
 	]];
 	
     arc_negative(double xc,double yc,double radius,double angle1,double angle2)
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
-	    cairo_arc_negative(cr,xc,yc,radius,angle1,angle2);
+	    cairo_arc_negative(cr,xc,yc,radius,degrees_to_radians(angle1),degrees_to_radians(angle2));
 	]];
     
     curve_to(double x1,double y1,double x2,double y2,double x3,double y3,bool relative=false)
@@ -289,6 +395,67 @@ class Canvas [[ClutterActor*]] actor
 	    cairo_pattern_destroy(p);
 	]];
 	
+	bool set_source_image( string src, double x=0, double y=0 )
+		[[
+	    	cairo_t * cr=check_canvas_cairo_t(L,self);
+	    	
+			result = false;
+			
+			App * app = App::get( L );
+			
+		    bool is_uri = false;
+		    
+		    char * path = app->normalize_path( src, & is_uri );
+		    
+		    if ( path ) 
+		    {		    
+			    FreeLater free_later( path );
+			    
+			    Image * image;
+			
+				if ( is_uri )
+				{
+					Network::Request request( app->get_user_agent(), path );
+		
+					Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
+					
+					if ( ! response.failed )
+					{
+						image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+					}
+				}
+				else
+				{
+					image = Image::decode( path );
+				}
+				
+				if ( image )
+				{
+					result = true;
+					
+					image->convert_to_cairo_argb32();
+					
+					cairo_surface_t * surface = cairo_image_surface_create_for_data( 
+						(unsigned char *) image->pixels(), 
+						CAIRO_FORMAT_ARGB32, 
+						image->width(), 
+						image->height(), 
+						image->pitch() );
+
+					// We attach the image to the cairo surface so that it will be
+					// destroyed when the surface is destroyed.
+											
+					static cairo_user_data_key_t image_key;
+					
+					cairo_surface_set_user_data( surface, & image_key, image, destroy_image );
+					
+					cairo_set_source_surface( cr, surface, x, y );
+					
+					cairo_surface_destroy( surface );					
+				}
+			}
+		]];
+	
     # TODO: second parameter is a color
     
     add_source_pattern_color_stop(double offset)
@@ -307,5 +474,31 @@ class Canvas [[ClutterActor*]] actor
 	[[
 	    cairo_t * cr=check_canvas_cairo_t(L,self);
 	    cairo_set_line_width(cr,width);	    
+	]];
+	
+	text_path( string font, string text, bool markup = true )
+	[[
+	    cairo_t * cr=check_canvas_cairo_t(L,self);
+	    
+		PangoLayout * layout = pango_cairo_create_layout( cr );
+		
+		if ( markup )
+		{ 
+			pango_layout_set_markup( layout, text, -1 );
+		}
+		else
+		{
+			pango_layout_set_text( layout, text, -1 );
+		}
+		
+		PangoFontDescription * fd = pango_font_description_from_string( font );
+		
+ 		pango_layout_set_font_description( layout, fd );
+  
+  		pango_font_description_free( fd );		
+			    
+		pango_cairo_layout_path( cr, layout );
+		
+		g_object_unref( G_OBJECT( layout ) );			    	
 	]];
 }

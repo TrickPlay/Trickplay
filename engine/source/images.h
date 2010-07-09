@@ -24,6 +24,8 @@ public:
 
     static Image * decode( const gchar * filename );
 
+    void convert_to_cairo_argb32();
+
     ~Image();
 
     inline const guchar * pixels() const { return ( const guchar * ) image->pixels; }

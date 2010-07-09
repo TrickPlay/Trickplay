@@ -1184,6 +1184,23 @@ void TPContext::add_console_command_handler( const char * command, TPConsoleComm
     console_command_handlers.insert( std::make_pair( String( command ), ConsoleCommandHandlerClosure( handler, data ) ) );
 }
 
+void TPContext::remove_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data )
+{
+    std::pair<ConsoleCommandHandlerMultiMap::iterator, ConsoleCommandHandlerMultiMap::iterator>
+
+    range = console_command_handlers.equal_range( String( command ) );
+
+    for ( ConsoleCommandHandlerMultiMap::iterator it = range.first; it != range.second; ++it )
+    {
+        if ( it->second.first == handler && it->second.second == data )
+        {
+            console_command_handlers.erase( it );
+
+            break;
+        }
+    }
+}
+
 //-----------------------------------------------------------------------------
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )

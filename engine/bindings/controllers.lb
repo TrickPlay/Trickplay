@@ -477,7 +477,7 @@ interface controller [[ControllerDelegate*]]
     	Note that the controller will not automatically dismiss the multiple
     	choice UI when the user makes a choice; you have to call <clear_ui>.
     	
-    	> controller.show_multiple_choice( "Pick a state" , "1" , "California" , "2" , "Texas" )
+    	> controller:show_multiple_choice( "Pick a state" , "1" , "California" , "2" , "Texas" )
     	
     	Arguments:
     	

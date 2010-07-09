@@ -27,6 +27,7 @@ TP_FIND_INCLUDE( jpeglib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 #TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 
@@ -98,12 +99,17 @@ set(
     png
     tiff
     tiffxx
-    
+    gif
+
     #--------------
     # json-glib
     #--------------
     
+    # Make sure this one comes before the clutter libraries, otherwise
+    # we will get json symbols from them - and those are outdated
+    
     json-glib-1.0    
+        
 )
 
 #------------------------------------------------------------------------------
@@ -154,6 +160,16 @@ if (TP_CLUTTER_BACKEND_EGL)
     add_definitions( -DTP_CLUTTER_BACKEND_EGL=1 )
 
 endif (TP_CLUTTER_BACKEND_EGL)
+
+#------------------------------------------------------------------------------
+# Add define for TP_PRODUCTION
+#------------------------------------------------------------------------------
+
+if (TP_PRODUCTION)
+
+	add_definitions( -DTP_PRODUCTION=1 )
+	
+endif (TP_PRODUCTION)
 
 #------------------------------------------------------------------------------
 # Profiling
@@ -317,7 +333,9 @@ add_library(
     ${ENGINE_SRC}/source/signature.cpp
     ${ENGINE_SRC}/source/actions.cpp
     ${ENGINE_SRC}/source/thread_pool.cpp
+    ${ENGINE_SRC}/source/debugger.cpp
     ${ENGINE_SRC}/source/socket.cpp
+    ${ENGINE_SRC}/source/json.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
