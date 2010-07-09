@@ -12,6 +12,17 @@
 
 	would be expressed as: { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 }
 
+	We make some assumptions to make the math tractable:
+
+	We assume that the matrix is composed of:
+
+	Z = RotationTransform[z, {0, 0, 1}
+	S = ScalingTransform[{sx, sy, 1}]
+	L = TranslationTransform[{dx, dy, 0}]
+	M = L.S.Z;
+
+	In other words, the matrix is a combination of a rotation about the Z-axis, a scaling in x- and y- directions, and an (x,y) translation ONLY.  There are no rotations in other axes, and no scaling in z.  In other words, the transformed actor will remain completly in the same x-y plane that is started in.
+
 ]]--
 
 local function matrix_to_string( a )
@@ -41,72 +52,26 @@ local function matrix_multiply( a, b )
 end
 
 
-function apply_matrix_to_actor( matrix, actor )
+function apply_matrix_to_actor( M, actor )
 
-	local A = math.cos(math.rad(actor.x_rotation[1]))
-	local B = math.sin(math.rad(actor.x_rotation[1]))
-	local C = math.cos(math.rad(actor.y_rotation[1]))
-	local D = math.sin(math.rad(actor.y_rotation[1]))
-	local E = math.cos(math.rad(actor.z_rotation[1]))
-	local F = math.sin(math.rad(actor.z_rotation[1]))
+	local sx,sy,dx,dy,z
 
-	local current = {
-								actor.scale[1] * C*E,
-								B*D*E + A*F,
-								-A*D*E + B*F,
-								0,
-								-C*F,
-								actor.scale[2] * (-B*D*F + A*E),
-								A*D*F + B*E,
-								0,
-								D,
-								-B*C,
-								A*C,
-								0,
-								actor.x,
-								actor.y,
-								actor.z,
-								1
-							}
+	sx = math.sqrt(M[1]*M[1]+M[5]*M[5])
+	sy = M[2]/M[5] * sx
 
+	dx = M[13]
+	dy = M[14]
 
-	local result = matrix_multiply( matrix, current )
+	z = 2 * math.atan2((M[1] - sx),M[5])
 
+	print("Transform was: (",sx,sy,dx,dy,360+math.deg(z),")")
 
-	assert(
-				result[4] == 0 and
-				result[8] == 0 and
-				result[12] == 0 and
-				result[16] == 1,
-				"Bottom row of compound matrix is not (0,0,0,1):\n"..matrix_to_string(result)
-		)
+	actor.z_rotation = {actor.z_rotation[1]+360+math.deg(z), 0, 0}
 
-	actor.x = result[13]
-	actor.y = result[14]
-	actor.z = result[15]
+	actor.scale = { actor.scale[1]*sx, actor.scale[2]*sy }
 
-	local angle_x,angle_y,angle_z
-	angle_y = math.asin(result[3])
-	local D = angle_y
-	local C = math.cos(angle_y)
-	if(math.abs(C) > 0.005) then
-		local trx = result[11] / C;
-		local try = -result[7] / C;
-		angle_x = math.atan2(try, trx)
-
-		trx = result[1] / C;
-		try = -result[2] / C;
-		angle_z = math.atan2(try, trx)
-	else
-		angle_x = 0
-		local trx = result[6]
-		local try = result[5]
-		angle_z = math.atan2(try, trx)
-	end
-
-	actor.z_rotation = { -math.deg(angle_z), 0, 0 }
-	actor.y_rotation = { math.deg(angle_y), 0, 0 }
-	actor.x_rotation = { math.deg(angle_x), 0, 0 }
+	actor.x = actor.x + dx
+	actor.y = actor.y + dy
 
 end
 
@@ -165,6 +130,8 @@ Relative Coordinates app
 3581 [ 0.980067, -0.198669, 0, 0, 0.198669, 0.980067, 0, 0, 0, 0, 1, 0, 99.993351, -10.066267, 0, 1 ]
 
 m[1]=x*cos(a)*cos(b), m[2]=sin(a)*cos(b), m[3]=-sin(b), m[5]=cos(a)*sin(b)*sin(c)-sin(a)*cos(c), m[6]=y*sin(a)*sin(b)*sin(c)+cos(a)*cos(c), m[7]=cos(b)*sin(c), m[9]=cos(a)*sin(b)*cos(c)+sin(a)*sin(c), m[10]=sin(a)*sin(b)*cos(c)-cos(a)*sin(c), m[11]=z*cos(b)*cos(c)
+
+
 ]]--
 
 
