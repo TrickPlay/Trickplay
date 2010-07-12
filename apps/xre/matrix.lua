@@ -56,22 +56,35 @@ function apply_matrix_to_actor( M, actor )
 
 	local sx,sy,dx,dy,z
 
-	sx = math.sqrt(M[1]*M[1]+M[5]*M[5])
-	sy = M[2]/M[5] * sx
+	if(M[5] == 0) then
+		sx = M[1]
+		sy = M[6]
+		
+		dx = M[13]
+		dy = M[14]
+		
+		z = 0
+	else
+		assert(M[6] == -M[1]*M[2]/M[5], "M[6] should be -M[1]*M[2]/M[5]")
 
-	dx = M[13]
-	dy = M[14]
+		sx = math.sqrt(M[1]*M[1]+M[5]*M[5])
+		sy = -M[2] * sx / M[5]
 
-	z = 2 * math.atan2((M[1] - sx),M[5])
+		z = 2 * math.atan2((M[1] - sx),M[5])
 
-	print("Transform was: (",sx,sy,dx,dy,360+math.deg(z),")")
+		dx = M[13]
+		dy = M[14]
+	end
 
-	actor.z_rotation = {actor.z_rotation[1]+360+math.deg(z), 0, 0}
+	print("Matrix was:\n",matrix_to_string(M))
+	print("Transform was: (",serialize({sx=sx,sy=sy,dx=dx,dy=dy,z=math.deg(z)}),")")
 
-	actor.scale = { actor.scale[1]*sx, actor.scale[2]*sy }
+	actor.z_rotation = {math.deg(z), 0, 0}
 
-	actor.x = actor.x + dx
-	actor.y = actor.y + dy
+	actor.scale = { sx, sy }
+
+	actor.x = dx
+	actor.y = dy
 
 end
 
