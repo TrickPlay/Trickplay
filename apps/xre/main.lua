@@ -1,5 +1,6 @@
 
 dofile( "xre.lua" )
+dofile( "matrix.lua" )
 
 -------------------------------------------------------------------------------
 
@@ -845,11 +846,9 @@ function set_view_properties( view , props )
     end
     
     function setters.matrix( view , value )
-    
-        view.group.x = value[ 13 ]
-        view.group.y = value[ 14 ]
-        view.group.z = value[ 15 ]
-    
+
+    	apply_matrix_to_actor( value, view.group )
+
     end
     
     function setters.painting( view , value )
