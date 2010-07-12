@@ -76,8 +76,8 @@ function apply_matrix_to_actor( M, actor )
 		dy = M[14]
 	end
 
-	print("Matrix was:\n",matrix_to_string(M))
-	print("Transform was: (",serialize({sx=sx,sy=sy,dx=dx,dy=dy,z=math.deg(z)}),")")
+--	print("Matrix was:\n",matrix_to_string(M))
+--	print("Transform was: (",serialize({sx=sx,sy=sy,dx=dx,dy=dy,z=math.deg(z)}),")")
 
 	actor.z_rotation = {math.deg(z), 0, 0}
 
@@ -141,10 +141,6 @@ Relative Coordinates app
 3581 [ 0.980067, -0.198669, 0, 0, 0.198669, 0.980067, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]
 3581 [ 0.980067, -0.198669, 0, 0, 0.198669, 0.980067, 0, 0, 0, 0, 1, 0, 98.006658, -19.866933, 0, 1 ]
 3581 [ 0.980067, -0.198669, 0, 0, 0.198669, 0.980067, 0, 0, 0, 0, 1, 0, 99.993351, -10.066267, 0, 1 ]
-
-m[1]=x*cos(a)*cos(b), m[2]=sin(a)*cos(b), m[3]=-sin(b), m[5]=cos(a)*sin(b)*sin(c)-sin(a)*cos(c), m[6]=y*sin(a)*sin(b)*sin(c)+cos(a)*cos(c), m[7]=cos(b)*sin(c), m[9]=cos(a)*sin(b)*cos(c)+sin(a)*sin(c), m[10]=sin(a)*sin(b)*cos(c)-cos(a)*sin(c), m[11]=z*cos(b)*cos(c)
-
-
 ]]--
 
 
