@@ -70,7 +70,7 @@ function apply_matrix_to_actor( M, actor )
 		sx = math.sqrt(M[1]*M[1]+M[5]*M[5])
 		sy = -M[2] * sx / M[5]
 
-		z = 2 * math.atan2((M[1] - sx),M[5])
+		z = 2 * (math.pi + math.atan2((M[1] - sx),M[5]))
 
 		dx = M[13]
 		dy = M[14]
