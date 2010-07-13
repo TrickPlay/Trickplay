@@ -154,6 +154,34 @@ void lb_clear_callbacks(lua_State*L,void*self,const char*metatable)
     LSG_END(0);
 }
 
+// This one does it for a user data at index
+
+void lb_clear_callbacks(lua_State*L,int index)
+{
+    LSG;
+
+    if (0 != lua_getmetatable(L,index))
+    {
+        lua_pushstring(L,"__callbacks__" );
+        lua_rawget(L,-2);
+
+        if(!lua_isnil(L,-1))
+        {
+            void ** o = (void**)lua_touserdata(L,index);
+            if (o)
+            {
+                lua_pushlightuserdata(L,*o);
+                lua_pushnil(L);
+                lua_rawset(L,-3);
+            }
+        }
+        lua_pop(L,2);
+    }
+
+    LSG_END(0);
+}
+
+
 // Assumes that nargs are already at the top of the stack. Returns 0 if the callback is not there
 // or 1 otherwise. Upon return, it pops nargs from the stack and pushes nresults (like lua_call).
 
