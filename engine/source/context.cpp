@@ -347,6 +347,10 @@ int TPContext::console_command_handler( const char * command, const char * param
             PROFILER_DUMP;
         }
     }
+    else if ( !strcmp( command, "obj" ) )
+    {
+        PROFILER_OBJECTS;
+    }
     else if ( !strcmp( command, "ver" ) )
     {
         dump_versions();
