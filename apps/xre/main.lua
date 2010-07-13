@@ -175,7 +175,6 @@ function commands.NEW( command )
             
             end
             
-
             -- Get the resource's size. For images, we use their base size
             
             local rw , rh = unpack( view.resource.base_size or view.resource.size )
@@ -214,7 +213,7 @@ function commands.NEW( command )
             }
 
             epcall( stretchers[ view.resource_options.stretch ] )
-            
+                        
             -- Now, align horizontally
             
             local horizontal_aligners =
@@ -320,13 +319,19 @@ function commands.NEW( command )
             image.on_loaded = nil
             
             -- Since the image is loaded asynchronously, we
-            -- have to revisit the view that use it and re-apply
-            -- their resource options
+            -- have to revisit the view that uses it and re-apply
+            -- its resource options
             
             for id , view in pairs( views ) do
             
                 if view.resource_id == command.id then
                 
+                    if view.resource then
+                    
+                        view.resource.size = image.size
+                    
+                    end
+                    
                     view:apply_resource_options()
                     
                 end
@@ -606,9 +611,34 @@ function commands.CALL( command )
             end
         
         end
+        
+    end
     
+    function methods.generateEvent()
+    
+        if command.params and command.params[ 1 ] then
+        
+            local event =
+            {
+                name = command.params[ 1 ].name,
+                params = command.params[ 1 ].params,
+                handler = 1,
+                source = 1,
+                phase = "STANDARD"
+            }
+        
+            xre:send_event( event )    
+        
+        end
+        
+    end
+
+    function methods.generateAppEvent()
+    
+        methods.generateEvent()
     
     end
+
 
     if not epcall( methods[ command.method ] ) then
     
@@ -986,4 +1016,18 @@ function screen.on_key_down( screen , key , u )
     end
     
 end
- 
+
+--[[ 
+function cleanit()
+    screen:clear()
+    for k,v in pairs(views) do
+        detach( v.group )
+        --v.group.on_key_down = nil
+        --v.group.on_button_down = nil
+        --v.group.on_key_up = nil
+    end
+    views = {}
+    resources = {}
+    collectgarbage()
+end
+]]
