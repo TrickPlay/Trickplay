@@ -389,6 +389,11 @@ globals
 		    {
 		        debugger->break_next_line();
 		    }		
+		]];
+		
+	detach( udata o )
+		[[
+			lb_clear_callbacks(L,o);
 		]];		       
 }
 
