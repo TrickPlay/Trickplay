@@ -1,9 +1,9 @@
 app=
 {
-    id          = "com.trickplay.examples.test_rotate",
+    id          = "com.trickplay.examples.darwins_factory",
     release     = "1",
     version     = "1.0",
-    name        = "Testing Rotation",
-    author      = "Sam Wood",
+    name        = "Darwin's Factory",
+    author      = "Alex, Sam, Nicolai",
     copyright   = "Trickplay Inc."
 }

@@ -1,14 +1,19 @@
 states = {
     splash = 0,
     init = 1,
-    populateBoard = 2,
-    setTimer = 3,
-    move = 4,
-    setEffects = 5,
-    applyEffects = 6,
-    checkWinner = 7,
-    tally = 8,
-    reset = 9
+    moveBoard = 2,
+    populateBoard = 3,
+    setTimer = 4,
+    stopTimer = 5,
+    pickPosition = 6,
+    interval = 7,
+    setEffects = 8,
+    applyEffects = 9,
+    checkWinner = 10,
+    tally = 11,
+    reset = 12,
+    menu = 13,
+    tutorial = 14
 }
 states.current = states.splash
 
@@ -19,27 +24,50 @@ function StateMachine()
             splashScreen = {"Play Game", "Instructions", "Go Away"}
             splashScreen.marker = 1
             printSplash()
+            menuView:showStart()
             screen.on_key_down = function(screen, key)
-                
                 if(key == keys.Up) then
                     splashScreen.marker = splashScreen.marker - 1
-                    splashScreen.marker = Utils.clamp(1, splashScreen.marker, 3)
+                    splashScreen.marker = Utils.clamp(1, splashScreen.marker, #splashScreen)
                     printSplash()
+                    menuView:selectOption(splashScreen.marker)
                 elseif(key == keys.Down) then
                     splashScreen.marker = splashScreen.marker + 1
-                    splashScreen.marker = Utils.clamp(1, splashScreen.marker, 3)
+                    splashScreen.marker = Utils.clamp(1, splashScreen.marker, #splashScreen)
                     printSplash()
+                    menuView:selectOption(splashScreen.marker)
                 elseif(key == keys.Return) then
-                    if(splashScreen[splashScreen.marker] == "Play Game") then
-                        screen.on_key_down = nil
-                        splashScreen = nil
+                    screen.on_key_down = nil
+                    menuView:clear()
+                    if(splashScreen.marker == MenuViewConstants.PLAY) then
                         states.current = states.init
-                        stateMachine[states.current]()
+                    elseif(splashScreen.marker == MenuViewConstants.DIRECTIONS) then
+                        menuView:directions()
+                        states.current = states.tutorial
+                    else
+                        states.current = states.init
+                        exit()
                     end
+                    splashScreen = nil
+                    stateMachine[states.current]()
                 end
             end
         end,
 
+        [states.tutorial] = function()
+            screen.on_key_down = function(screen, key)
+                    print("\n\nreading")
+                    if(key == keys.Down) then
+                         print("\n\n\n\nDOWNNNNN")
+                        menuView.tut:hide()
+                        menuView.tut = nil
+                        states.current = states.init
+                    else
+                        states.current = states.tutorial
+                    end
+                    stateMachine[states.current]()
+            end
+        end,
 
         --This state initializes everything
         [states.init] = function()
@@ -51,21 +79,38 @@ function StateMachine()
             for i = 1, 2 do
                 board:enQRow(board:generateRow())
             end
-            states.current = states.populateBoard
+            init = true
+            states.current = states.moveBoard
+            boardView:showArrow()
             stateMachine[states.current]()
+        end,
+
+        
+        [states.moveBoard] = function()
+            print("STATE: move board")
+            --move players down with board
+            if(not init) then
+                board:movePlayersDown()
+            end
+            init = nil
+            --Update effects plane in view
+            local newRow = board:generateRow()
+            boardView:updateBoard(board, newRow,
+                function ()
+                    --enQ the new row, DQ an old one
+                    board:enQRow(newRow)
+                    if(board:getQSize() > BarneyConstants.rows) then
+                        board:DQRow()
+                    end
+                    moveBoard = true
+                    states.current = states.checkWinner
+                    stateMachine[states.current]()
+                end)
         end,
 
 
         [states.populateBoard] = function()
-            --Update effects plane in view
-            local newRow = board:generateRow()
-            boardView:update_board(board, newRow)
-            --enQ the new row, DQ an old one
-            board:enQRow(newRow)
-            if(board:getQSize() > BarneyConstants.rows) then
-                board:DQRow()
-            end
-
+            print("STATE: populate board")
             --Add all information to textBoard
             clearTextScreen()
             local currentRowIndex = board:getFirstRowIndex() - 1
@@ -75,7 +120,7 @@ function StateMachine()
             while(currentRow) do
                 currentRowIndex = currentRowIndex + 1
                 for i = 1, BarneyConstants.cols do
-                    if(currentRow[i] ~= 0) then
+                    if(currentRow[i].name ~= "null") then
                         textScreen[currentRowIndex-board:getFirstRowIndex()+1][i] = currentRow[i].name
                     end
                 end
@@ -92,85 +137,104 @@ function StateMachine()
                     textScreen[board.players[i].y][board.players[i].x] = node..board.players[i].number
                 end
                 --set players to boardView
-                boardView:movePlayer(board.players[i].number, board.players[i].y, board.players[i].x, board.players[i].marker.y, board.players[i].marker.x)
+                boardView:movePlayer(board.players[i].number, board.players[i].y,
+                    board.players[i].x, board.players[i].marker.y,
+                    board.players[i].marker.x, nil)
             end
             textShow()
-            states.current = states.setTimer
-            --[[Set Pause Game
-            screen.on_key_down = function(screen, key)
-                if(key = keys.Return) then
-                    if(paused) then
-                        paused = not paused
-                        states.current = states.previous
-                    else
-                        paused = not paused
-
-                    end
-                end
+            if(gameTimer) then
+                states.current = states.pickPosition
+            else
+                states.current = states.setTimer
             end
-            --]]
             --states.current = states.setEffects
             stateMachine[states.current]()
         end,
 
 
         [states.setTimer] = function()
-            print("Setting Timer")
-            local timer = Timer()
+            print("STATE: Set Timer")
+            --timer and timer counter
+            gameTimer = {timer = Timer(), counter = 0}
 
-            timer.interval = BarneyConstants.clockLength
-            function timer.on_timer(timer)
+            gameTimer.timer.interval = BarneyConstants.clockLength
+            gameTimer.timer.on_timer = function(timer)
+                print("clock tick")
                 screen.on_key_down = nil
-                for i = 1, board.numberOfPlayers do
-                    --Clear the text where the player(s) were previously
-                    --to not overload textScreen
-                    textScreen[board.players[i].y][board.players[i].x] = 0
-                    --Set players to the new position
-                        --Set Movement Pattern
-                    --local pattern = board.players[i]:setMovePattern()
-                        --in View
-                    boardView:movePlayer(board.players[i].number, board.players[i].y, board.players[i].x, board.players[i].marker.y, board.players[i].marker.x)
-                        --in Model
-                    board.players[i].x = board.players[i].marker.x
-                    board.players[i].y = board.players[i].marker.y
-                end
-                boardView:clear_selection()
+                gameTimer.counter = gameTimer.counter + 1
                 timer:stop()
-                --states.current = states.populateBoard
-                states.current = states.setEffects
+                boardView:clockTock()
+                states.current = states.interval
                 stateMachine[states.current]()
             end
-            timer:start()
-            boardView:startClock(BarneyConstants.clockLength)
-            states.current = states.move
+            --boardView:startClock(BarneyConstants.clockLength)
+            states.current = states.pickPosition
             stateMachine[states.current]()
         end,
 
 
-        [states.move] = function()
-            print("Player Moves")
-            ---[[
+        [states.interval] = function()
+            print("STATE: interval")
+            --Players actually move on the board
             for i = 1, board.numberOfPlayers do
-                if(board.players[i].personality == "AI") then
-                    --Move AI characters
-                    board.players[i]:randomMove()
-                else
-                    --Move Player characters
-                    board.players[i]:normalMove()
+                boardView:movePlayer(board.players[i].number, board.players[i].y,
+                    board.players[i].x, board.players[i].marker.y,
+                    board.players[i].marker.x,
+                    function()
+                        board:playersMoved(board.players[i])
+                    end)
+            end
+        end,
+
+        
+        [states.stopTimer] = function()
+            boardView:clockReset()
+            screen.on_key_down = nil
+            gameTimer.timer = nil
+            gameTimer = nil
+            boardView:clearFocus()
+            --states.current = states.populateBoard
+            states.current = states.setEffects
+            --states.current = states.pickPosition
+            stateMachine[states.current]()
+        end,
+
+
+        [states.pickPosition] = function()
+            print("STATE:pick position")
+            gameTimer.timer:start()
+            --generate a table of taken positions to avoid collisions
+            local positions = {}
+            for i = 1, BarneyConstants.rows do
+                positions[i] = {}
+                for j = 1, BarneyConstants.cols do
+                    positions[i][j] = false
                 end
             end
-            --]]
-            --[[
-            --Move AI characters
-            for i = 2, board.numberOfPlayers do
-                board.players[i]:randomMove()
-            end
 
-            --Move Player characteres
-            if(board.players[1].number == 1) then
-                board.players[1]:normalMove()
+            for i = 1, board.numberOfPlayers do
+                positions[board.players[i].y][board.players[i].x] = true
             end
-            --]]
+            --randomize turn selection
+            local moved = {}
+            for i = 1, board.numberOfPlayers do
+                local number = math.random(board.numberOfPlayers)
+                --check to see if person already chose position to move to
+                while(moved[number]) do
+                    number = math.random(board.numberOfPlayers)
+                end
+                --mark off player as already chosen their position
+                moved[number] = true
+                --player chooses position to move to
+                if(board.players[i].personality == "AI") then
+                    print("AI moves")
+                    --Move AI characters
+                    board.players[i]:aiMove(positions)
+                else
+                    --Set on_key_down for player
+                    board.players[i]:normalMove(positions)
+                end
+            end
         end,
 
 
@@ -179,11 +243,20 @@ function StateMachine()
                 local x = board.players[i].x
                 local y = board.players[i].y
                 local localRow = board._rowsqueue[board:getFirstRowIndex()+y-1]
-                    if(localRow) then
-                        local localEffect = localRow[x]
-                        if(localEffect ~= 0) then
-                            board.players[i]:addEffect(localEffect)
-                            board._rowsqueue[board:getFirstRowIndex()+y-1][x] = 0
+                if(localRow) then
+                    local localEffect = localRow[x]
+                    --delete from text screen
+                    textScreen[y][x] = board.players[i].number
+                    --absorb power
+                    if(localEffect.name ~= "null") then
+                        board.players[i]:addEffect(localEffect)
+
+                        --increments/decrements appropriate effect tallys
+                        board.num[string.lower(localEffect.name)] = 
+                               board.num[string.lower(localEffect.name)] - 1
+                        board.num["null"] = board.num["null"] + 1
+
+                        board._rowsqueue[board:getFirstRowIndex()+y-1][x] = effectConstructor["Null"]()
                     end
                 end
             end
@@ -194,21 +267,17 @@ function StateMachine()
 
         [states.applyEffects] = function()
             print("STATE: apply effects")
-            --[[
-            board.players[1]:useEffects()
-            --]]
-            ---[[
-            for i = 1, board.numberOfPlayers do
-                board.players[i]:useEffects()
-            end
-            states.current = states.checkWinner
-            stateMachine[states.current]()
-            --]]
+            board.players[1]:useEffects(nil, 1)
         end,
 
 
         [states.checkWinner] = function()
             print("STATE: check winner")
+            --make sure players can get hit next round
+            for i = 1, board.numberOfPlayers do
+                board.players[i].hit = false
+            end
+
             local i = 1
             while(i <= board.numberOfPlayers) do
                 if(board.players[i].health <= 0) then
@@ -221,13 +290,21 @@ function StateMachine()
                 i = i + 1
             end
             if(board.numberOfPlayers == 1) then
+                board.players[1]:PlayerWins()
                 board:gameOver()
             elseif(board.numberOfPlayers <= 0) then
                 board:tieGame()
             else
                 board:reapZombies()
-                --states.current = states.setTimer
-                states.current = states.populateBoard
+                if(moveBoard) then
+                    moveBoard = nil
+                    states.current = states.populateBoard
+                elseif(playersMovedState) then
+                    playersMovedState = nil
+                    states.current = states.pickPosition
+                else
+                    states.current = states.moveBoard
+                end
                 stateMachine[states.current]()
             end
         end,
@@ -235,14 +312,16 @@ function StateMachine()
 
         [states.tally] = function()
             print("STATE: tally")
+            print("\n\n\nplayers: "..board.numberOfPlayers.."\n\n\n")
             printScores()
-            screen.on_key_down  = function(screen, key)
-                if(key == keys.Return) then
-                    states.current = states.reset
-                    screen.on_key_down = nil
-                    stateMachine[states.current]()
-                end
-            end
+            screen.on_key_down = nil
+            local timer = Timer{interval = 5,
+            on_timer = function(timer)
+            timer:stop()
+            --states.current = states.reset
+            states.current = states.menu
+            stateMachine[states.current]()
+            end}
         end,
 
 
@@ -253,12 +332,44 @@ function StateMachine()
             end
             Images = nil
             boardView = nil
-            --board = nil
             timer = nil
             textScreen = nil
             stateMachine = nil
             states.current = states.init
-            main()
+            start_game()
+        end,
+
+        [states.menu] = function()
+            splashScreen = {"Play Game", "Go Away"}
+            splashScreen.marker = 1
+            printSplash()
+            menuView:showMenu()
+            screen.on_key_down = function(screen, key)
+                if(key == keys.Up) then
+                    splashScreen.marker = splashScreen.marker - 1
+                    splashScreen.marker = Utils.clamp(1, splashScreen.marker, #splashScreen)
+                    assert(splashScreen)
+                    printSplash()
+                    menuView:selectOption(splashScreen.marker)
+                elseif(key == keys.Down) then
+                    splashScreen.marker = splashScreen.marker + 1
+                    splashScreen.marker = Utils.clamp(1, splashScreen.marker, #splashScreen)
+                    assert(splashScreen)
+                    printSplash()
+                    menuView:selectOption(splashScreen.marker)
+                elseif(key == keys.Return) then
+                    screen.on_key_down = nil
+                    menuView:clear()
+                    if(splashScreen.marker == MenuViewConstants.PLAY) then
+                        states.current = states.reset
+                    else
+                        states.current = states.reset
+                        exit()
+                    end
+                    splashScreen = nil
+                    stateMachine[states.current]()
+                end
+            end
         end
     }
 
@@ -291,7 +402,7 @@ end
 
 function printSplash()
     local splashText = "\n"
-    for i = 1, 3 do
+    for i = 1, #splashScreen do
         if(splashScreen.marker == i) then
             splashText = splashText.."#"
         end

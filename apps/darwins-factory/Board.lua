@@ -28,6 +28,36 @@ Board = class(function(board, kwargs)
     end
     --The grave yard
     board.graveYard = {}
+
+    board.num =  {nuke = 0, 
+                   saw = 0, 
+                shield = 0,
+                health = 0,  
+                 laser = 0, 
+                 water = 0, 
+                 surge = 0,
+               recycle = 0, 
+                  tele = 0, 
+                   jet = 0,
+                bigred = 0,
+                  null = 0,
+                  acid = 0}
+
+
+    board.max =  {nuke = 0, 
+                   saw = 2, 
+                shield = 2,
+                health = 1,  
+                 laser = 3, 
+                 water = 3, 
+                 surge = 2,
+               recycle = 2, 
+                  tele = 2, 
+                   jet = 2,
+                bigred = 1,
+                  null = BarneyConstants.rows*
+                         BarneyConstants.cols,
+                  acid = 8}
 end)
 
 --Methods
@@ -45,13 +75,19 @@ function Board:generateRow()
 
     for i = 1, BarneyConstants.cols do
         --nil/zero means no power up/weapon
-        effect = BarneyConstants.effects[math.random(BarneyConstants.numberOfEffects+1) - 1]
-        if(effect == nil or effect.name == "0") then
-            effectsRow[i] = 0
-        else
+        local effect = math.random(1,2)
+        if effect == 1 then
+            while true do
+                effect = BarneyConstants.effects[math.random(#BarneyConstants.effects)]
+                if board.num[string.lower(effect)] < board.max[string.lower(effect)] then break end
+            end
+            board.num[string.lower(effect)] = board.num[string.lower(effect)] + 1
             effectsRow[i] = effectConstructor[effect]()
-            assert(effectsRow[i].name)
+        else
+            board.num["null"] = board.num["null"] + 1
+            effectsRow[i] = effectConstructor["Null"]()
         end
+        assert(effectsRow[i].name)
     end
     return effectsRow
 end
@@ -80,6 +116,12 @@ function Board:DQRow()
         error("queue is empty")
     end
     local effectsRow = self._rowsqueue[last]
+    for i=1,#effectsRow do
+        board.num[string.lower(effectsRow[i].name)] = 
+                               board.num[string.lower(effectsRow[i].name)] - 1
+        assert(board.num[string.lower(effectsRow[i].name)] >= 0, 
+          "decremented effect counter below zero, effect: "..effectsRow[i].name.." at "..i)
+    end
     self._rowsqueue[last] = nil
     self._rowsqueue.last = last - 1
     return effectsRow
@@ -130,7 +172,7 @@ function Board:getEffectAt(row, col)
     if(self._rowsqueue[row]) then
         return self._rowsqueue[row][col]
     end
-    return 0
+    return effectConstructor["Null"]()
 end
 
 --[[
@@ -143,8 +185,20 @@ end
 --]]
 function Board:removePlayer(playerNumber)
     assert(playerNumber >= 1 and playerNumber <= self.numberOfPlayers)
+    local player = self.players[playerNumber]
     --remove the player from the game
+        --Logical
     self.players[playerNumber] = nil
+        --View
+    boardView:animateKillPlayer(player.number, player.y, player.x)
+    --Play death sound
+    if(player.number == 1) then     --human
+        mediaplayer:play_sound("sounds/human_death.wav")
+    else
+        mediaplayer:play_sound("sounds/ai_death.wav")
+    end
+    
+    --change ordering of player linked list
     for i = playerNumber+1, self.numberOfPlayers do
         self.players[i-1] = self.players[i]
         self.players[i] = nil
@@ -175,4 +229,46 @@ function Board:reapZombies()
     end
     --reset grave yard
     board.graveYard = {}
+end
+
+function Board:playersMoved(player)
+    textScreen[player.y][player.x] = string.sub(textScreen[player.y][player.x],1,1)
+    --set player to new position
+    player.x = player.marker.x
+    player.y = player.marker.y
+    if(self:getEffectAt(player.y, player.x).name == "acid") then
+        player:getsHit()
+        player.hit = false
+    end
+    --update in textScreen
+    textScreen[player.y][player.x] = textScreen[player.y][player.x]..player.number
+    
+    --Check for all players have moved
+    if(movedFlag >= board.numberOfPlayers - 1) then
+        movedFlag = 0
+        textShow()
+        if(gameTimer.counter < BarneyConstants.intervals) then
+            playersMovedState = true
+            states.current = states.checkWinner
+            --states.current = states.pickPosition
+            --states.current = states.populateBoard
+        else
+            states.current = states.stopTimer
+        end
+        stateMachine[states.current]()
+    else
+        movedFlag = movedFlag + 1 
+    end
+end
+
+function Board:movePlayersDown()
+    for i = 1, self.numberOfPlayers do
+        self.players[i].y = self.players[i].y + 1
+        --Check for player falling off the board
+        if(self.players[i].y > BarneyConstants.rows) then
+            self.players[i].y = BarneyConstants.rows
+            self.players[i]:getsHit()
+        end
+        self.players[i].marker.y = self.players[i].y
+    end
 end
