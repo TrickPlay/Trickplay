@@ -160,6 +160,21 @@ function commands.NEW( command )
             
             --print( "\t\t\tAPPLYING RESOURCE OPTIONS" , view.id , view.resource , view.resource_id , json:stringify( view.resource_options ) )
             
+            if view.resource_options.textWrap == "WRAP" then
+            
+                if view.resource and view.resource_type == "XREText" then
+                
+                    view.resource.wrap = true
+                    
+                    view.resource.w = view.group.w
+                    
+                    view.resource.alignment = view.resource_options.horizontalAlign
+                
+                end
+            
+            end
+            
+
             -- Get the resource's size. For images, we use their base size
             
             local rw , rh = unpack( view.resource.base_size or view.resource.size )
@@ -237,7 +252,10 @@ function commands.NEW( command )
             
             epcall( vertical_aligners[ view.resource_options.verticalAlign ] )
         
+            
+            
             -- TODO : textTruncStyle and textWrap
+            
         end
 
         views[ command.id ] = view
@@ -750,14 +768,47 @@ function set_view_properties( view , props )
         
             -- TODO: find the font resource and use it
             
-            --local font = resources[ resource.params.font ]
+            local font = resources[ resource.params.font ]
+            
+            local font_family
+            
+            local font_style
+            
+            if font then
+            
+                local font_map =
+                    
+                    {
+                        [ "with-serif"   ] = "DejaVu Serif",
+                        [ "without-serif"] = "DejaVu Sans",
+                        [ "monospaced"   ] = "DejaVu Sans Mono"
+                    }
+                    
+                font_family = font_map[ font.params.family ]
+                
+                local style_map =
+                    
+                    {
+                        [ "NORMAL"      ] = "",
+                        [ "BOLD"        ] = "bold",
+                        [ "ITALIC"      ] = "italic",
+                        [ "BOLDITALIC"  ] = "bold italic"
+                    }
+                
+                font_style = style_map[ font.params.style ]
+                
+            end
+                        
+            font_family = font_family or "DejaVu Sans"
+            
+            font_style = font_style or ""
             
             view.resource =
             
                 Text
                 {
                     name = "XREText-"..tostring( resource_id ),
-                    font = "Sans "..tostring( resource.params.size ).."px",
+                    font = font_family.." "..font_style.." "..tostring( resource.params.size ).."px",
                     text = resource.params.text,
                     color = int_to_color( resource.params.color ),
                     --size = view.group.size,
@@ -782,6 +833,8 @@ function set_view_properties( view , props )
             -- Set its id
             
             view.resource_id = resource_id
+            
+            view.resource_type = resource.type
             
             -- Apply resource options
             
