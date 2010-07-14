@@ -237,6 +237,7 @@ function Board:playersMoved(player)
     player.x = player.marker.x
     player.y = player.marker.y
     if(self:getEffectAt(player.y, player.x).name == "acid") then
+        mediaplayer:play_sound("sounds/acid.wav")
         player:getsHit()
         player.hit = false
     end

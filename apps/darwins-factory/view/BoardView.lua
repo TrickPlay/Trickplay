@@ -228,6 +228,7 @@ function BoardView:doAnimate(effect_name, attacking_player, attacked_players, ca
         self:animateBigRed(callback)
     elseif effect_name == "surge" then
         callback = Utils.makeCallbackCounter(2, callback)
+        mediaplayer:play_sound("sounds/surge.wav")
         assert(1 == #attacked_players_cords, "surge attacking more than one player")
         local attacked_row, attacked_col = attacked_players_cords[1][1], attacked_players_cords[1][2]
         player_layer:animateSurge(attacked_row, attacked_col, callback)
