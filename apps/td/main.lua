@@ -28,4 +28,10 @@ function app.on_loaded()
 	MainMenu:update_cursor_position()
 	MainMenu.hl.opacity = 255
 
+	MainMenu.buttons.extra.r = function()
+		MainMenu.container.opacity = 0
+		game = Game:new{}
+		game:startGame()
+	end
+
 end
