@@ -1,3 +1,7 @@
+dofile ("Game.lua")
+dofile ("Board.lua")
+dofile ("Globals.lua")
+
 screen:show()
 
 function app.on_loaded()
