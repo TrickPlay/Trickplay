@@ -14,4 +14,7 @@ function Game:new(args)
    return object
 end
 
+function Game:startGame()
+	self.board.init()
+end
 
