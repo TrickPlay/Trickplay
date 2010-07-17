@@ -32,10 +32,10 @@ void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * col
 
     if ( lua_istable( L, index ) )
     {
-        lua_rawgeti( L, 2, 1 );
-        lua_rawgeti( L, 2, 2 );
-        lua_rawgeti( L, 2, 3 );
-        lua_rawgeti( L, 2, 4 );
+        lua_rawgeti( L, index, 1 );
+        lua_rawgeti( L, index, 2 );
+        lua_rawgeti( L, index, 3 );
+        lua_rawgeti( L, index, 4 );
         color->red = luaL_optint( L, -4, 0 );
         color->green = luaL_optint( L, -3, 0 );
         color->blue = luaL_optint( L, -2, 0 );
