@@ -92,7 +92,8 @@ function Board:createBoard()
 	
 	BoardMenu.buttons.extra.space = function()
 		local c = self:getPathData()
-		print("Path?", pathExists(c, {BoardMenu.y,BoardMenu.x} , {3,3}) )
+		--print("Path?", pathExists(c, {BoardMenu.y,BoardMenu.x} , {3,3}) )
+		print("Path?", recordPath(c, {BoardMenu.y,BoardMenu.x} , {3,3}) )
 	end
 	
 end
@@ -139,7 +140,7 @@ function Board:getPathData()
 			if self.squareGrid[i][j].state == FULL then
 				t[i][j] = "X"
 			else
-				t[i][j] = "0"
+				t[i][j] = 0
 			end
 		end
 	end
@@ -159,20 +160,77 @@ function pathExists(board, st, fn)
 	if st[1] == fn[1] and st[2] == fn[2] then return true
 	else board[ st[1] ][ st[2] ] = " " end
 		
-	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] ~= " " and board[ st[1]-1 ][ st[2] ] ~= "X" then
-		return pathExists(board, { st[1]-1 , st[2] }, fn)
+	local found = false
 		
-	elseif st[1] < 18 and board[ st[1]+1 ][ st[2] ] ~= " "  and board[ st[1]+1 ][ st[2] ] ~= "X" then
-		return pathExists(board, { st[1]+1 , st[2] }, fn)
+	-- Check all directions
+	if st[2] > 1 and board[ st[1] ][ st[2]-1 ] == 0 and not found then
+		print("Right") found = pathExists(board, { st[1] , st[2]-1 }, fn) end
 		
-	elseif st[2] > 1 and board[ st[1] ][ st[2]-1 ] ~= " "  and board[ st[1] ][ st[2]-1 ] ~= "X"  then
-		return pathExists(board, { st[1] , st[2]-1 }, fn)
+	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] == 0 and not found then
+		print("Down") found = pathExists(board, { st[1]-1 , st[2] }, fn) end
 		
-	elseif st[2] < 32 and board[ st[1] ][ st[2]+1 ] ~= " "  and board[ st[1] ][ st[2]+1 ] ~= "X"  then
-		return pathExists(board, { st[1] , st[2]+1 }, fn)
-	end
+	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] == 0 and not found then
+		print("Up") found = pathExists(board, { st[1]+1 , st[2] }, fn) end
+		
+	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] == 0 and not found then
+		print("Left") found = pathExists(board, { st[1] , st[2]+1 }, fn) end
 	
-	return false
+	return found
 end
 
+function ninePrint(table)
+	for i = 1, #table do
+		local total = ""
+		for j = 1, #table[i] do
+			if table[i][j] == "X" then total = total.."X" elseif table[i][j] > 9 then total = total..9 else total = total..table[i][j] end
+		end
+		print(total)
+	end
+end
+
+-- Start and finish are {y, x}
 function recordPath(board, st, fn)
+
+	-- Some assertions
+	assert(type(st) == "table", "Start must have an x and a y coordinate")
+	assert(type(fn) == "table", "Finish must have an x and a y coordinate")
+	--ninePrint(board)
+	
+	local c = board[ st[1] ][ st[2] ]
+	if board[ st[1] ][ st[2]-1 ] and board[ st[1] ][ st[2]-1 ] ~= "X" and board[ st[1] ][ st[2]-1 ] < (c + 2) then board[ st[1] ][ st[2]-1 ] = c + 1 end
+	if board[ st[1] ][ st[2]+1 ] and board[ st[1] ][ st[2]+1 ] ~= "X" and board[ st[1] ][ st[2]+1 ] < (c + 2) then board[ st[1] ][ st[2]+1 ] = c + 1 end
+	if board[ st[1]-1 ][ st[2] ] and board[ st[1]-1 ][ st[2] ] ~= "X" and board[ st[1]-1 ][ st[2] ] < (c + 2) then board[ st[1]-1 ][ st[2] ] = c + 1 end
+	if board[ st[1]+1 ][ st[2] ] and board[ st[1]+1 ][ st[2] ] ~= "X" and board[ st[1]+1 ][ st[2] ] < (c + 2) then board[ st[1]+1 ][ st[2] ] = c + 1 end
+	
+	print(c)
+	
+	-- Check all directions
+	if st[2] > 1 and board[ st[1] ][ st[2]-1 ]~= "X" then
+		recordPath(board, { st[1] , st[2]-1 }, fn) 
+	end
+		
+	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] ~= "X" then
+		recordPath(board, { st[1]-1 , st[2] }, fn) 
+	end
+		
+	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] ~= "X" then
+		recordPath(board, { st[1]+1 , st[2] }, fn) 
+	end
+		
+	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] ~= "X" then
+		recordPath(board, { st[1] , st[2]+1 }, fn) 
+	end
+	
+	
+end
+
+
+
+
+
+
+
+
+
+
+
