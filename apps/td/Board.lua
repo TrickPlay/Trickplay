@@ -1,17 +1,29 @@
 dofile ("Square.lua")
 
-Board = {}
+Board = {
+	render = function (self, seconds)
+		for i=1,#self.creepWave do
+			self.creepWave[i]:render(seconds)
+		end
+	end
+}
 
 function Board:new(args)
 	local w = BOARD_WIDTH
 	local h = BOARD_HEIGHT
 	local squareGrid = {}
+	local creepWave = {}
 	local squaresWithTowers = {}
 	local theme = args.theme
 	for i = 1, h do
       squareGrid[i] = {}
 	end
-	
+	for i =1, CREEP_WAVE_LENGTH do
+		creepWave[i] = Creep:new(theme.creeps.normalCreep)
+		creepWave[i].x = -100
+		creepWave[i].y = 400
+
+	end
 	for i = 1, h do
 		for j = 1, w do
 			squareGrid[i][j] = Square:new {x = j, y = i}
@@ -25,13 +37,13 @@ function Board:new(args)
 			end
 	   end
 	end
-	
 	local object = {
 		w = w,
 		h = h,
 		squareGrid = squareGrid,
 		squaresWithTowers = squaresWithTowers,
-		theme = theme
+		theme = theme,
+		creepWave = creepWave
    }
    setmetatable(object, self)
    self.__index = self
@@ -46,10 +58,6 @@ function Board:init()
 		end
 		print(total)
 	end
-end
-
-function Board:render()
-	
 end
 
 function Board:createBoard()
@@ -68,7 +76,6 @@ function Board:createBoard()
 
 	local b = Group{}
 	screen:add(backgroundImage, b)
-	
 	local hl = Rectangle{h=70, w=70, color="FF00CC"}
 
 	BoardMenu = Menu.create(b, groups, hl)
@@ -84,7 +91,13 @@ function Board:createBoard()
 	BoardMenu.buttons.extra.r = function()
 		if (self.squareGrid[BoardMenu.y][BoardMenu.x].state == EMPTY) then
 			self.squareGrid[BoardMenu.y][BoardMenu.x].tower = Tower:new(self.theme.towers.normalTower)
+			table.insert(self.squaresWithTowers, self.squareGrid[BoardMenu.y][BoardMenu.x])
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
 		end
+	end
+	add_to_render_list(self)
+	for i=1,#self.creepWave do
+		--self.creepWave[i].creepImage.x = i*100
+		screen:add(self.creepWave[i].creepImage)
 	end
 end

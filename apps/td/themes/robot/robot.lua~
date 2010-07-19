@@ -1,10 +1,10 @@
 local robot = {
 		mainMenuBackground = "",
 		creeps = {
---			normalCreep = Creeps:new {hp = 50, creepType = "assets/normalRobot.jpg"}
+			normalCreep = { hp = 50, creepType = "assets/normalRobot.jpg", speed = 700}
 		},
 		towers = {
-			normalTower = {towerType = "assets/normalTower.jpg", damage = 10, range = 100, cd = 1000}
+			normalTower = {towerType = "assets/normalTower.png", damage = 10, range = 100, cd = 1000}
 		},
 		obstacles = { },
 		boardBackground = "assets/robotBackground.jpg"						
