@@ -19,9 +19,9 @@ function Board:new(args)
       squareGrid[i] = {}
 	end
 	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep)
-		creepWave[i].x = -100
-		creepWave[i].y = 400
+		creepWave[i] = Creep:new(theme.creeps.normalCreep, -180*i, 420)
+--		creepWave[i].creepImage.x = -60*i
+--		creepWave[i].creepImage.y = 400
 
 	end
 	for i = 1, h do

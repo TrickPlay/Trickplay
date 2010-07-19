@@ -19,9 +19,9 @@ function Board:new(args)
       squareGrid[i] = {}
 	end
 	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep)
-		creepWave[i].x = -100
-		creepWave[i].y = 400
+		creepWave[i] = Creep:new(theme.creeps.normalCreep, -180*i, 400)
+--		creepWave[i].creepImage.x = -60*i
+--		creepWave[i].creepImage.y = 400
 
 	end
 	for i = 1, h do
@@ -250,98 +250,5 @@ function tracePath(board, fn, step, path)
 	elseif board[ fn[1]+1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]+1, fn[2] }, step-1, path) end
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---[[
-
--- Start and finish are {y, x}
-function recordPath(board, st, fn)
-
-	-- Some assertions
-	assert(type(st) == "table", "Start must have an x and a y coordinate")
-	assert(type(fn) == "table", "Finish must have an x and a y coordinate")
-	--ninePrint(board)
-	
-	local c = board[ st[1] ][ st[2] ]
-	if board[ st[1] ][ st[2]-1 ] and board[ st[1] ][ st[2]-1 ] ~= "X" and board[ st[1] ][ st[2]-1 ] < (c + 2) then board[ st[1] ][ st[2]-1 ] = c + 1 end
-	if board[ st[1] ][ st[2]+1 ] and board[ st[1] ][ st[2]+1 ] ~= "X" and board[ st[1] ][ st[2]+1 ] < (c + 2) then board[ st[1] ][ st[2]+1 ] = c + 1 end
-	if board[ st[1]-1 ][ st[2] ] and board[ st[1]-1 ][ st[2] ] ~= "X" and board[ st[1]-1 ][ st[2] ] < (c + 2) then board[ st[1]-1 ][ st[2] ] = c + 1 end
-	if board[ st[1]+1 ][ st[2] ] and board[ st[1]+1 ][ st[2] ] ~= "X" and board[ st[1]+1 ][ st[2] ] < (c + 2) then board[ st[1]+1 ][ st[2] ] = c + 1 end
-	
-	print(c)
-	
-	-- Check all directions
-	if st[2] > 1 and board[ st[1] ][ st[2]-1 ]~= "X" then
-		recordPath(board, { st[1] , st[2]-1 }, fn) 
-	end
-		
-	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] ~= "X" then
-		recordPath(board, { st[1]-1 , st[2] }, fn) 
-	end
-		
-	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] ~= "X" then
-		recordPath(board, { st[1]+1 , st[2] }, fn) 
-	end
-		
-	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] ~= "X" then
-		recordPath(board, { st[1] , st[2]+1 }, fn) 
-	end
-	
-	
->>>>>>> 867839cb41c8a735905adf26809d556e31043299:apps/td/Board.lua
-end
-
-]]
-
-
-
-
 
 

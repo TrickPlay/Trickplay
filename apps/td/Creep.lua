@@ -1,13 +1,13 @@
 Creep = { }
 
-function Creep:new(args)
-	local x = args.x
-	local y = args.y
+function Creep:new(args, x, y)
+	local x = x
+	local y = y
 	local creepType = args.creepType
 	local hp = args.hp
 	local speed = args.speed
 	local direction = args.direction or {1,0}
-	local creepImage = Image { src = creepType , x = -100, y = 600}
+	local creepImage = Image { src = creepType , x = x, y = y}
 	local object = {
 		x = x,
 		y = y,
@@ -23,7 +23,9 @@ function Creep:new(args)
 end
 
 function Creep:render(seconds)
-	if (self.direction[1] ==1) then
-		self.creepImage.x = self.creepImage.x + seconds*self.speed
+	if (not self.creepImage.is_animating) then 	
+		self.creepImage:animate {duration = 1/self.speed * 10000, x = self.creepImage.x + self.direction[1] * 60}
 	end
+--	self.creepImage.x = self.creepImage.x + self.direction[1]*seconds*self.speed
+--	self.creepImage.y = self.creepImage.y + self.direction[2]*seconds*self.speed
 end
