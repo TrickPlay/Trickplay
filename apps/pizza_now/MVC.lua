@@ -1,6 +1,6 @@
 Model = Class(nil, -- base class
    function(model, ...) -- constructor, called with Model(...)
-      -- class fields
+      -- (private) class fields
       registry = {}
       controllers = {}
       active_component = nil
