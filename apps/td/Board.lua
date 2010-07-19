@@ -19,7 +19,7 @@ function Board:new(args)
       squareGrid[i] = {}
 	end
 	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep, -180*i, 420)
+		creepWave[i] = Creep:new(theme.creeps.normalCreep, -1920*i, 420)
 --		creepWave[i].creepImage.x = -60*i
 --		creepWave[i].creepImage.y = 400
 
@@ -96,18 +96,24 @@ function Board:createBoard()
 			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
 		end
+--[[		local c = game.board:getPathData()
+		for i = 1, #self.creepWave do
+			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
+				c[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1] = 1
+				recordPath(c, {math.floor(self.creepWave[i].creepImage.y/60)+1, math.floor(self.creepWave[i].creepImage.x/60)+1} , {7, 32}, 1)
+				self.creepWave[i].path = {}
+				tracePath(c, {7, 32}, c[7][32], self.creepWave[i].path)
+			end
+		end]]
 	end
 	
 	BoardMenu.buttons.extra.space = function()
 		local c = self:getPathData()
-		--print("Path?", pathExists(c, {BoardMenu.y,BoardMenu.x} , {3,3}) )
 		c[BoardMenu.y][BoardMenu.x] = 1
-		print("Path?", recordPath(c, {BoardMenu.y,BoardMenu.x} , {3,3}, 1) )
+		recordPath(c, {7, 1} , {7, 32}, 1)
 		local path = {}
-		tracePath(c, {3, 3}, c[3][3], path)
-		print(#path)
-		for i=1,#path do print(path[i][1]..","..path[i][2]) end
-		--ninePrint(c)
+		tracePath(c, {7, 32}, c[7][32], path)
+		--for i=1,#path do print(path[i][1]..","..path[i][2]) end
 	end
 	
 	add_to_render_list(self)
@@ -213,6 +219,8 @@ function recordPath(board, st, fn, step)
 	-- Some assertions
 	assert(type(st) == "table", "Start must have an x and a y coordinate")
 	assert(type(fn) == "table", "Finish must have an x and a y coordinate")
+	if st[1] <= 0 or st[1] >= 19 or st[2] <= 0 or st[2] >= 33 then print(st[1]..", "..st[2]) end
+	assert(st[1] > 0 and st[1] < 19 and st[2] > 0 and st[2] < 33)
 	
 	-- Left
 	if st[2] > 1 and board[ st[1] ][ st[2]-1 ] ~= "X" and (board[ st[1] ][ st[2]-1 ] == 0 or board[ st[1] ][ st[2]-1 ] > step + 1) then 
