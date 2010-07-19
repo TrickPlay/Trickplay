@@ -7,13 +7,15 @@ function Tower:new(args)
 	local direction = args.direction
 	local cooldown = args.cooldown
 	local towerImage = Image {src = towerType}
-
+	local isAttacking = false
+	
 	local object = {
 		towerType = towerType,
 		damage = damage,
 		range = range,
 		direction = direction,
-		cooldown = cooldown
+		cooldown = cooldown,
+		towerImage = towerImage
    }
    setmetatable(object, self)
    self.__index = self
