@@ -93,7 +93,13 @@ function Board:createBoard()
 	BoardMenu.buttons.extra.space = function()
 		local c = self:getPathData()
 		--print("Path?", pathExists(c, {BoardMenu.y,BoardMenu.x} , {3,3}) )
-		print("Path?", recordPath(c, {BoardMenu.y,BoardMenu.x} , {3,3}) )
+		c[BoardMenu.y][BoardMenu.x] = 1
+		print("Path?", recordPath(c, {BoardMenu.y,BoardMenu.x} , {3,3}, 1) )
+		local path = {}
+		tracePath(c, {3, 3}, c[3][3], path)
+		print(#path)
+		for i=1,#path do print(path[i][1]..","..path[i][2]) end
+		--ninePrint(c)
 	end
 	
 end
@@ -189,6 +195,100 @@ function ninePrint(table)
 end
 
 -- Start and finish are {y, x}
+function recordPath(board, st, fn, step)
+
+	-- Some assertions
+	assert(type(st) == "table", "Start must have an x and a y coordinate")
+	assert(type(fn) == "table", "Finish must have an x and a y coordinate")
+	
+	-- Left
+	if st[2] > 1 and board[ st[1] ][ st[2]-1 ] ~= "X" and (board[ st[1] ][ st[2]-1 ] == 0 or board[ st[1] ][ st[2]-1 ] > step + 1) then 
+		board[ st[1] ][ st[2]-1 ] = step + 1
+		recordPath(board, { st[1] , st[2]-1 }, fn, step + 1)
+	end
+	
+	-- Right
+	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] ~= "X" and (board[ st[1] ][ st[2]+1 ] == 0 or board[ st[1] ][ st[2]+1 ] > step + 1) then 
+		board[ st[1] ][ st[2]+1 ] = step + 1
+		recordPath(board, { st[1] , st[2]+1 }, fn, step + 1)
+	end
+	
+	-- Down
+	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] ~= "X" and (board[ st[1]-1 ][ st[2] ] == 0 or board[ st[1]-1 ][ st[2] ] > step + 1) then
+		board[ st[1]-1 ][ st[2] ] = step + 1
+		recordPath(board, { st[1]-1 , st[2] }, fn, step + 1)
+	end
+	
+	-- Up
+	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] ~= "X" and (board[ st[1]+1 ][ st[2] ] == 0 or board[ st[1]+1 ][ st[2] ] > step + 1) then
+		board[ st[1]+1 ][ st[2] ] = step + 1
+		recordPath(board, { st[1]+1 , st[2] }, fn, step + 1)
+	end
+	
+end
+
+function tracePath(board, fn, step, path)
+
+	path[#path + 1] = { fn[1], fn[2] }
+
+	if board[ fn[1] ][ fn[2]-1 ] == step-1 then tracePath(board, { fn[1], fn[2]-1 }, step-1, path)
+	elseif board[ fn[1] ][ fn[2]+1 ] == step-1 then tracePath(board, { fn[1], fn[2]+1 }, step-1, path)
+	elseif board[ fn[1]-1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]-1, fn[2] }, step-1, path)
+	elseif board[ fn[1]+1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]+1, fn[2] }, step-1, path) end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--[[
+
+-- Start and finish are {y, x}
 function recordPath(board, st, fn)
 
 	-- Some assertions
@@ -224,10 +324,7 @@ function recordPath(board, st, fn)
 	
 end
 
-
-
-
-
+]]
 
 
 
