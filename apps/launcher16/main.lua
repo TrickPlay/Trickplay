@@ -174,6 +174,10 @@ local function build_ui( show_it )
         
         ui.bar:add( section.button , section.text )
         
+        section.button:lower( ui.button_focus )
+        
+        section.text:raise( ui.button_focus )
+        
         screen:add( section.dropdown )
         
     end
