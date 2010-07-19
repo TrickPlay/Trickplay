@@ -1,7 +1,7 @@
 local robot = {
 		mainMenuBackground = "",
 		creeps = {
-			normalCreep = { hp = 50, creepType = "assets/normalRobot.jpg", speed = 700}
+			normalCreep = { hp = 50, creepType = "assets/normalRobot.jpg", speed = 10}
 		},
 		towers = {
 			normalTower = {towerType = "assets/normalTower.png", damage = 10, range = 100, cd = 1000}
