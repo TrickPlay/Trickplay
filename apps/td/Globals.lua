@@ -44,5 +44,7 @@ end
 
 
 bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
+healthbar = Rectangle {color = "00FF00", width = 60, height = 10}
  
-screen:add(bulletImage)
+ 
+screen:add(bulletImage, healthbar)

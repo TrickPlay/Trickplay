@@ -1,5 +1,4 @@
 Tower = {}
-local tower_elapsed_time = 0
 
 function Tower:new(args)
 	local towerType = args.towerType
@@ -10,12 +9,9 @@ function Tower:new(args)
 	local cooldown = args.cooldown
 	local towerImage = Image {src = towerType}
 	local isAttacking = false
-	local bullet = {}
-
-	bullet[1] = Clone { source = bulletImage }
-
---	screen:add(bullet)
-
+	local bullets = {}
+	local tower_elapsed_time = 0
+	
 	local object = {
 		towerType = towerType,
 		damage = damage,
@@ -25,7 +21,8 @@ function Tower:new(args)
 		cost = cost,
 		towerImage = towerImage,
 		isAttacking = isAttacking,
-		bullet = bullet
+		bullets = bullets,
+		tower_elapsed_time = tower_elapsed_time
    }
    setmetatable(object, self)
    self.__index = self
@@ -41,17 +38,35 @@ function Tower:attack()
 end
 
 function Tower:render(seconds, creeps)
-	tower_elapsed_time = tower_elapsed_time + seconds
-	if (math.floor(elapsed_time) % 3 == 0) then
-		elapsed_time = elapsed_time + 1
-		print ("shoot")
-	end
-	for i =1, self.bullet do
-		if (self.bullet[i].x <= -50) then
-			--screen:remove(self.bullet)
-			self.bullet[i].x = -50
-		else
-			self.bullet[i]:animate {duration = 100, x = self.bullet[i].x - self.cooldown}
+	self.tower_elapsed_time = self.tower_elapsed_time + seconds
+	local creep_in_range = false	
+	local creep_to_kill
+	for i = 1, #creeps do
+		if (creeps[i].creepImage.x > self.towerImage.x - self.range and creeps[i].creepImage.x < self.towerImage.x + self.range
+				and creeps[i].creepImage.y > self.towerImage.y - self.range and creeps[i].creepImage.y < self.towerImage.y + self.range and creeps[i].hp ~=0) then
+			print ("creep "..i.." in range")
+			creep_in_range = true
+			creeps[i].hp = creeps[i].hp - self.damage
+			if (creeps[i].hp <=0) then creeps[i].hp =0 end
+			break
 		end
 	end
+	if (math.floor(self.tower_elapsed_time) % 2 == 0 and creep_in_range) then
+			self.tower_elapsed_time = self.tower_elapsed_time + 1
+	end
+
 end
+
+
+--			local temp_bullet = Clone { source = bulletImage, x = self.towerImage.x, y = self.towerImage.y }
+--			screen:add(temp_bullet)
+--			table.insert(self.bullets,temp_bullet)
+			
+
+	--[[for k,v in pairs(self.bullets) do
+		v:animate {duration = 500, x = x_velocity, y = y_velocity}
+		if (v.x <= -50) then
+			v.x = -50
+		end
+	end]]
+	

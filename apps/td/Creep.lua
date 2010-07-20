@@ -3,16 +3,22 @@ Creep = { }
 function Creep:new(args, x, y)
 	local creepType = args.creepType
 	local hp = args.hp
+	local max_hp = hp
 	local speed = args.speed
 	local direction = args.direction or {0,1}
 	local creepImage = Image { src = creepType , x = x, y = y}
+	local greenBar = Clone {source = healthbar, color = "00FF00", x = x, y = y}
+	local redBar = Clone {source = healthbar, color = "FF0000", width = 0, x = x , y = y} 
 	local path = {}
 	local object = {
 		hp = hp,
+		max_hp = max_hp,
 		speed = speed,
 		direction = direction,
 		creepType = creepType,
 		creepImage = creepImage,
+		greenBar = greenBar,
+		redBar = redBar,
 		path = path
    }
    setmetatable(object, self)
@@ -24,7 +30,7 @@ function Creep:render(seconds)
 
 	local cx = self.creepImage.x
 	local cy = self.creepImage.y
-
+	
 	if (cx >= 0) then
 		if (#self.path==0) then
 			local found
@@ -45,10 +51,11 @@ function Creep:render(seconds)
 		local size = #path
 		if size > 0 then
 			self.creepImage:animate {duration = 1/self.speed * 10000, x = GTP( path[size][2] ), y = GTP( path[size][1] ) }
+			self.greenBar:animate {duration = 1/self.speed * 10000, x = GTP( path[size][2] ), y = GTP( path[size][1] ), width = 60*self.hp/self.max_hp}
 			path[size] = nil
 		end
 	end
-
+	
 end
 
 function Creep:reset()
