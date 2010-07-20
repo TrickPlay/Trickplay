@@ -1,4 +1,5 @@
 dofile ("Square.lua")
+dofile ("aStar.lua")
 
 Board = {
 	render = function (self, seconds)
@@ -43,7 +44,7 @@ function Board:new(args)
 		squareGrid = squareGrid,
 		squaresWithTowers = squaresWithTowers,
 		theme = theme,
-		creepWave = creepWave
+		creepWave = creepWave,
    }
    setmetatable(object, self)
    self.__index = self
@@ -77,6 +78,8 @@ function Board:createBoard()
 	local b = Group{}
 	screen:add(backgroundImage, b)
 	local hl = Rectangle{h=70, w=70, color="FF00CC"}
+	
+
 
 	BoardMenu = Menu.create(b, groups, hl)
 	BoardMenu:create_key_functions()
@@ -96,24 +99,24 @@ function Board:createBoard()
 			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
 		end
---[[		local c = game.board:getPathData()
+		local c = game.board:getPathData()
 		for i = 1, #self.creepWave do
 			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
 				c[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1] = 1
-				recordPath(c, {math.floor(self.creepWave[i].creepImage.y/60)+1, math.floor(self.creepWave[i].creepImage.x/60)+1} , {7, 32}, 1)
-				self.creepWave[i].path = {}
-				tracePath(c, {7, 32}, c[7][32], self.creepWave[i].path)
+				--recordPath(c, {math.floor(self.creepWave[i].creepImage.y/60)+1, math.floor(self.creepWave[i].creepImage.x/60)+1} , {7, 32}, 1)
+				self.nodes = self:createNodes()
+				local found
+				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+				--tracePath(c, {7, 32}, c[7][32], self.creepWave[i].path)
 			end
-		end]]
+		end
 	end
 	
 	BoardMenu.buttons.extra.space = function()
-		local c = self:getPathData()
-		c[BoardMenu.y][BoardMenu.x] = 1
-		recordPath(c, {7, 1} , {7, 32}, 1)
-		local path = {}
-		tracePath(c, {7, 32}, c[7][32], path)
-		--for i=1,#path do print(path[i][1]..","..path[i][2]) end
+		self.nodes = self:createNodes()
+		local found, path = astar.CalculatePath(self.nodes[BoardMenu.y][BoardMenu.x], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+		print(found)
+		for k,v in pairs(path) do print(v[1]..", "..v[2]) end
 	end
 	
 	add_to_render_list(self)
@@ -257,6 +260,53 @@ function tracePath(board, fn, step, path)
 	elseif board[ fn[1]-1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]-1, fn[2] }, step-1, path)
 	elseif board[ fn[1]+1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]+1, fn[2] }, step-1, path) end
 
+end
+
+function Board:createNodes()
+
+	--local self.nodes = {}
+	--local nodes = self.nodes
+	
+	local nodes = {}
+	
+	for i = 1, self.h do
+		nodes[i] = {}
+		for j = 1, self.w do
+			nodes[i][j] = { i, j, self.squareGrid[i][j].state }
+			print(nodes[i][j][1], nodes[i][j][2], nodes[i][j][3])
+		end
+	end
+	
+	return nodes
+
+end
+
+function MyNeighbourIterator(node)
+	local e = {}
+	local c = game.board.nodes
+	
+	if node[1] > 1 then e[#e+1] = c[ node[1]-1 ][ node[2] ] end
+	if node[1] < 18 then e[#e+1] = c[ node[1]+1 ][ node[2] ] end
+	if node[2] > 1 then e[#e+1] = c[ node[1] ][ node[2]-1 ] end
+	if node[2] < 32 then e[#e+1] = c[ node[1] ][ node[2]+1 ] end
+	
+	return ipairs(e)
+end
+
+function MyWalkableCheck(current_node)
+	if current_node[3] == FULL then
+		return false
+	else
+		return true
+	end
+end
+
+function MyHeuristic(node_a, node_b)
+	return ( math.abs(node_a[1]-node_b[1]) + math.abs(node_a[2]-node_b[2]) )
+end
+
+function MyConditional()
+	return 1
 end
 
 
