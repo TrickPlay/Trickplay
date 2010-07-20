@@ -39,26 +39,34 @@ end
 
 function Tower:render(seconds, creeps)
 	self.tower_elapsed_time = self.tower_elapsed_time + seconds
-	
+	local creep_in_range = false	
+	local creep_to_kill
 	for i = 1, #creeps do
 		if (creeps[i].creepImage.x > self.towerImage.x - self.range and creeps[i].creepImage.x < self.towerImage.x + self.range
-				and creeps[i].creepImage.y > self.towerImage.y - self.range and creeps[i].creepImage.y < self.towerImage.y + self.range) then
+				and creeps[i].creepImage.y > self.towerImage.y - self.range and creeps[i].creepImage.y < self.towerImage.y + self.range and creeps[i].hp ~=0) then
 			print ("creep "..i.." in range")
+			creep_in_range = true
+			creeps[i].hp = creeps[i].hp - self.damage
+			if (creeps[i].hp <=0) then creeps[i].hp =0 end
+			break
 		end
 	end
-	
-	if (math.floor(self.tower_elapsed_time) % 2 == 0) then
-		local temp_bullet = Clone { source = bulletImage, x = self.towerImage.x, y = self.towerImage.y }
-		screen:add(temp_bullet)
-		table.insert(self.bullets,temp_bullet)
-		self.tower_elapsed_time = self.tower_elapsed_time + 1
+	if (math.floor(self.tower_elapsed_time) % 2 == 0 and creep_in_range) then
+			self.tower_elapsed_time = self.tower_elapsed_time + 1
 	end
-	for i=1, #self.bullets do
-		self.bullets[i]:animate {duration = 100, x = self.bullets[i].x - self.cooldown}
-		if (self.bullets[i].x <= -50) then
-			--screen:remove(self.bullet)
-			self.bullets[i].x = -50
-		end
-	end
-	
+
 end
+
+
+--			local temp_bullet = Clone { source = bulletImage, x = self.towerImage.x, y = self.towerImage.y }
+--			screen:add(temp_bullet)
+--			table.insert(self.bullets,temp_bullet)
+			
+
+	--[[for k,v in pairs(self.bullets) do
+		v:animate {duration = 500, x = x_velocity, y = y_velocity}
+		if (v.x <= -50) then
+			v.x = -50
+		end
+	end]]
+	
