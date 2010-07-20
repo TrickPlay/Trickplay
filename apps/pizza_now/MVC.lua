@@ -1,38 +1,38 @@
-Model = Class(nil, -- base class
+Model = Class(
    function(model, ...) -- constructor, called with Model(...)
       -- (private) class fields
-      registry = {}
-      controllers = {}
-      active_component = nil
+      model.registry = {}
+      model.controllers = {}
+      model.active_component = nil
 
       -- class methods
       function model:attach(observer, controller_id)
-         registry[observer] = true
+         self.registry[observer] = true
          if controller_id then
-            controllers[controller_id] = observer
+            self.controllers[controller_id] = observer
          end
       end
 
       function model:detach(observer)
-         registry[observer] = nil
+         self.registry[observer] = nil
       end
 
       function model:notify()
-         for observer, bool in pairs(registry) do
-            observer:update()
-         end
+          for observer, bool in pairs(self.registry) do
+             observer:update()
+          end
       end
 
       function model:get_active_controller()
-         return controllers[active_component]
+         return self.controllers[self.active_component]
       end
 
       function model:get_active_component()
-         return active_component
+         return self.active_component
       end
 
       function model:start_app(comp)
-         active_component = comp
+         self.active_component = comp
          screen:show()
          self:notify()
       end
@@ -40,23 +40,14 @@ Model = Class(nil, -- base class
       function model:set_active_component(comp)
          self.previous_component = self.active_component
          self.active_component = comp
+         print("set active component")
       end
    end)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-Observer = Class(nil,
+Observer = Class(
    function(observer, ...)
       -- class fields
 
@@ -71,27 +62,27 @@ View = Class(Observer,
       -- COMMON VIEW LOGIC
       
       -- (private) class fields
-      local model = model
-      local controller = nil
+      view.model = model
+      view.controller = nil
       model:attach(view)
 
       -- class methods
       function view:initialize()
          error("Initializing empty controller", 2)
-         controller = Controller(self)
+         self.controller = Controller(self)
       end
 
       function view:get_model()
-         return model
+         return self.model
       end
 
       function view:set_controller(cont)
-         controller = cont
-         view.set_controller = nil
+         self.controller = cont
+         self.set_controller = nil
       end
 
       function view:get_controller()
-         return controller
+         return self.controller
       end
 
       function view:update()
@@ -105,18 +96,18 @@ Controller = Class(Observer,
       assert(controller_id)
 
       -- class fields
-      local model = view:get_model()
-      local view = view
-      model:attach(controller, controller_id)
+      controller.model = view:get_model()
+      controller.view = view
+      controller.model:attach(controller, controller_id)
 
       function controller:update()
       end
 
       function controller:get_model()
-         return model
+         return self.model
       end
 
       function controller:get_view()
-         return view
+         return self.view
       end
    end)
