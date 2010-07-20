@@ -53,12 +53,10 @@ AddressInputView = Class(View,
       end
 
       function view:update()
-         print("updating")
          local controller = view:get_controller()
          local comp = model:get_active_component()
-         print("Component: "..comp)
          if comp == Components.ADDRESS_INPUT then
-         print("hhhheerree")
+            print("Showing AddressInputView UI")
             ui.opacity = 255
             for i,item in ipairs(menu_items) do
                if i == controller:get_selected_index() then
@@ -68,7 +66,8 @@ AddressInputView = Class(View,
                end
             end
          else
-            ui.opacity = 255
+            print("Hiding AddressInputView UI")
+            ui.opacity = 0
          end
       end
 
