@@ -96,11 +96,11 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-			if (s[j].square[3] == FULL) then
+			--if (s[j].square[3] == FULL) then
 				g[j] = Group{w=SPW, h=SPH, name=""}
-			else
-				g[j] = Group{w=SPW, h=SPH, name=s[j].square[3]}
-			end
+			--else
+			--	g[j] = Group{w=SPW, h=SPH, name=s[j].square[3]}
+			--end
 	   end
 	end
 	backgroundImage = Image {src = self.theme.boardBackground }
@@ -135,6 +135,7 @@ function Board:createBoard()
 			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
 				local found
 				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+				self.creepWave[i].path[#self.creepWave[i].path] = nil
 			end
 		end
 	end
