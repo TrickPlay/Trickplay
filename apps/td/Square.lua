@@ -6,11 +6,14 @@ function Square:new(args)
 	local state = args.state
 	local isSelected = false
 	local tower = nil
+	local hasTower = false
 	local object = {
 		x = x,
 		y = y,
 		state = state,
-		isSelected = isSelected
+		isSelected = isSelected,
+		tower = tower,
+		hasTower = hasTower		
 	}
    setmetatable(object, self)
    self.__index = self

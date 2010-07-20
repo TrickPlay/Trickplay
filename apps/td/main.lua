@@ -1,6 +1,6 @@
+dofile ("Globals.lua")
 dofile ("Game.lua")
 dofile ("Board.lua")
-dofile ("Globals.lua")
 dofile ("themes/Themes.lua")
 dofile ("Creep.lua")
 dofile ("Tower.lua")

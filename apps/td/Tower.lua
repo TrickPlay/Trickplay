@@ -4,6 +4,7 @@ function Tower:new(args)
 	local towerType = args.towerType
 	local damage = args.damage
 	local range = args.range
+	local cost = args.cost
 	local direction = args.direction
 	local cooldown = args.cooldown
 	local towerImage = Image {src = towerType}
@@ -15,6 +16,7 @@ function Tower:new(args)
 		range = range,
 		direction = direction,
 		cooldown = cooldown,
+		cost = cost,
 		towerImage = towerImage,
 		isAttacking = isAttacking
    }
@@ -24,7 +26,7 @@ function Tower:new(args)
 end
 
 function Tower:destroy()
-
+	
 end
 
 function Tower:attack()

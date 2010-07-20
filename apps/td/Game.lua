@@ -4,6 +4,7 @@ Game = {}
 
 function Game:new(args)
 	local theme = Themes.robot
+	
 	local board = Board:new {
 		--board args to be passed in
 		theme = theme
