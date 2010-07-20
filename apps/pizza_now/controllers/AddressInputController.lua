@@ -38,6 +38,9 @@
          [MenuItems.CONFIRM]=
             function(self)
                print("confirm?")
+               self:get_model():set_active_component(Components.PROVIDER_SELECTION)
+               screen:show()
+               self:get_model():notify()
             end,
          [MenuItems.EXIT]=
             function(self)
@@ -75,7 +78,7 @@
          if 1 <= new_selected and new_selected <= MenuSize then
             selected = new_selected
          end
-         MenuItemCallbacks[selected]()
+         print("\n\nhere\n\n")
          self:get_model():notify()
       end
    end)

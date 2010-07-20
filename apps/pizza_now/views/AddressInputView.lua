@@ -43,7 +43,7 @@ AddressInputView = Class(View,
          text = "Exit App?"
       }
 
-      local menu_items = {street, apartment, city, zip_code}
+      local menu_items = {street, apartment, city, zip_code, confirm, exit}
       local ui=Group{name="address_ui", position={660,180}, opacity=0}
       ui:add(unpack(menu_items))
       screen:add(ui)
