@@ -1,4 +1,5 @@
 Tower = {}
+local tower_elapsed_time = 0
 
 function Tower:new(args)
 	local towerType = args.towerType
@@ -9,8 +10,8 @@ function Tower:new(args)
 	local cooldown = args.cooldown
 	local towerImage = Image {src = towerType}
 	local isAttacking = false
-	local bullet = Rectangle { color = "FF0000", x = towerImage.x, y = towerImage.y, z = 2, width = 15, height = 15}
-	screen:add(bullet)
+	local bullet = {}
+--	screen:add(bullet)
 
 	local object = {
 		towerType = towerType,
@@ -36,9 +37,14 @@ function Tower:attack()
 
 end
 
-function Tower:render(seconds)
-	self.bullet.x = self.bullet.x - seconds * self.cooldown
---	if (self.bullet.x <= 0) then
---		remove(self.bullet)
---	end	
+function Tower:render(seconds, creeps)
+	--tower_elapsed_time = tower_elapsed_time + seconds
+	--print (tower_elapsed_time)
+	if (self.bullet.x <= 0) then
+		--screen:remove(self.bullet)
+		self.bullet.x = 0
+	end
+	print (creeps.creepImage[1].x)
+	self.bullet:animate {duration = 100, x = self.bullet.x - self.cooldown}
+	
 end
