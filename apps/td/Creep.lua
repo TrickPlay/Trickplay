@@ -5,7 +5,7 @@ function Creep:new(args, x, y)
 	local hp = args.hp
 	local speed = args.speed
 	local direction = args.direction or {0,1}
-	local creepImage = Image { src = creepType , x = x, y = y-60}
+	local creepImage = Image { src = creepType , x = x, y = y}
 	local path = {}
 	local object = {
 		hp = hp,
@@ -24,11 +24,9 @@ function Creep:render(seconds)
 
 	if (self.creepImage.x >= 0) then
 		if (#self.path==0) then
-			local c = game.board:getPathData()
-			c[7][1] = 1
-			recordPath(c, {7, 1} , {7, 32}, 1)
-			self.path = {}
-			tracePath(c, {7, 32}, c[7][32], self.path)
+			game.board.nodes = game.board:createNodes()
+			local found
+			found, self.path = astar.CalculatePath(game.board.nodes[ math.floor(self.creepImage.y/60)+1 ][ math.floor(self.creepImage.x/60)+1 ], game.board.nodes[ 7 ][ 32 ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
 		end
 	end
 	
