@@ -143,9 +143,13 @@ function Board:createBoard()
 	goldtext.text = self.player.gold
 		
 	BoardMenu.buttons.extra.space = function()
-		--local found, path = astar.CalculatePath(self.nodes[BoardMenu.y][BoardMenu.x], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
-		--print(found)
-		--for k,v in pairs(path) do print(v[1]..", "..v[2]) end
+		if not self.zoom then
+			self:zoomIn()
+			self.zoom = true
+		else
+			self:zoomOut()
+			self.zoom = nil
+		end
 	end
 	
 	add_to_render_list(self)
@@ -153,6 +157,18 @@ function Board:createBoard()
 		--self.creepWave[i].creepImage.x = i*100
 		screen:add(self.creepWave[i].creepImage)
 	end
+end
+
+function Board:zoomIn()
+	print("in")
+	screen.scale={2,2}
+	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
+end
+
+function Board:zoomOut()
+	print("out")
+	screen.position = {0, 0}
+	screen.scale={.5,.5}
 end
 
 function Board:buildTower()
