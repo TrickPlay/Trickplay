@@ -1,8 +1,9 @@
+
+dofile ("Globals.lua")
 dofile ("Game.lua")
 dofile ("Board.lua")
-dofile ("Globals.lua")
 dofile ("themes/Themes.lua")
-dofile ("Creeps.lua")
+dofile ("Creep.lua")
 dofile ("Tower.lua")
 
 screen:show()

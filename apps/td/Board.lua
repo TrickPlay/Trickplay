@@ -1,9 +1,29 @@
 dofile ("Square.lua")
-
+dofile ("Player.lua")
 Board = {
 	render = function (self, seconds)
-		for i=1,#self.creepWave do
-			self.creepWave[i]:render(seconds)
+		seconds_elapsed = seconds_elapsed + seconds
+		if (seconds_elapsed >= 20) then
+			for i=1,#self.creepWave do
+				if (self.creepWave[i].hp ~= 0) then
+					self.creepWave[i]:render(seconds)
+				end
+			end
+			phasetext.text = "Wave Phase!"
+		else
+			countdowntimer.text = "Time till next wave: "..19 - math.floor(seconds_elapsed)
+			phasetext.text = "Build Phase!"
+		end
+		if (wave_counter == CREEP_WAVE_LENGTH) then
+			print (" in here")
+			for i =1, CREEP_WAVE_LENGTH do
+				self.creepWave[i].hp = 100
+				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
+				self.creepWave[i].path = {}
+			end
+			phasetext.text = "Build Phase!"
+			wave_counter = 0
+			seconds_elapsed = 0
 		end
 	end
 }
@@ -15,14 +35,15 @@ function Board:new(args)
 	local creepWave = {}
 	local squaresWithTowers = {}
 	local theme = args.theme
+	local player = Player:new {
+		name = "Player 1",
+		gold = 500
+	}
 	for i = 1, h do
       squareGrid[i] = {}
 	end
 	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep, -1920*i, 420)
---		creepWave[i].creepImage.x = -60*i
---		creepWave[i].creepImage.y = 400
-
+		creepWave[i] = Creep:new(theme.creeps.normalCreep, -240*i, 420)
 	end
 	for i = 1, h do
 		for j = 1, w do
@@ -40,6 +61,7 @@ function Board:new(args)
 	local object = {
 		w = w,
 		h = h,
+		player = player,
 		squareGrid = squareGrid,
 		squaresWithTowers = squaresWithTowers,
 		theme = theme,
@@ -69,11 +91,15 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-			g[j] = Group{w=SPW, h=SPH, name=s[j].state}
+			if (s[j].state == FULL) then
+				g[j] = Group{w=SPW, h=SPH, name=""}
+			else
+				g[j] = Group{w=SPW, h=SPH, name=s[j].state}
+			end
 	   end
 	end
 	backgroundImage = Image {src = self.theme.boardBackground }
-
+	
 	local b = Group{}
 	screen:add(backgroundImage, b)
 	local hl = Rectangle{h=70, w=70, color="FF00CC"}
@@ -91,11 +117,20 @@ function Board:createBoard()
 	BoardMenu.buttons.extra.r = function()
 		if (self.squareGrid[BoardMenu.y][BoardMenu.x].state == EMPTY) then
 			self.squareGrid[BoardMenu.y][BoardMenu.x].tower = Tower:new(self.theme.towers.normalTower)
+			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = true
 			table.insert(self.squaresWithTowers, self.squareGrid[BoardMenu.y][BoardMenu.x])
 			self.squareGrid[BoardMenu.y][BoardMenu.x].state = FULL
 			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
+			self.player.gold = self.player.gold - 50
+		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].state == FULL) then
+			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = false
+			self.squareGrid[BoardMenu.y][BoardMenu.x].tower.towerImage.opacity = 0
+			self.squareGrid[BoardMenu.y][BoardMenu.x].state = EMPTY		
 		end
+		playertext.text = self.player.name
+		goldtext.text = self.player.gold
+
 --[[		local c = game.board:getPathData()
 		for i = 1, #self.creepWave do
 			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
@@ -107,6 +142,9 @@ function Board:createBoard()
 		end]]
 	end
 	
+	playertext.text = self.player.name
+	goldtext.text = self.player.gold
+		
 	BoardMenu.buttons.extra.space = function()
 		local c = self:getPathData()
 		c[BoardMenu.y][BoardMenu.x] = 1
@@ -139,6 +177,7 @@ function printTable(table)
 		for j = 1, #table[i] do
 			total = total..table[i][j]
 		end
+	
 		print(total)
 	end
 end

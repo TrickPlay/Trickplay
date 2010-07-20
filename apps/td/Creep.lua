@@ -31,8 +31,12 @@ function Creep:render(seconds)
 			tracePath(c, {7, 32}, c[7][32], self.path)
 		end
 	end
-
-	if (not self.creepImage.is_animating) then
+	
+	if (self.creepImage.x >1920) then
+		self.hp = 0
+		wave_counter = wave_counter + 1
+		self.creepImage.x = wave_counter*-240
+	elseif (not self.creepImage.is_animating) then
 		local path = self.path
 		if #path > 1 then self.direction = {  - path[#path][1] + path[#path-1][1], - path[#path][2] + path[#path-1][2] } path[#path] = nil end
 --		print (self.direction[1], self.direction[2])
@@ -41,7 +45,10 @@ function Creep:render(seconds)
 --		self.creepImage.y = self.creepImage.y + self.direction[1]*60*seconds
 
 	end
-	
 	--	self.creepImage.x = self.creepImage.x + self.direction[1]*seconds*self.speed
 --	self.creepImage.y = self.creepImage.y + self.direction[2]*seconds*self.speed
+end
+
+function Creep:reset()
+	
 end

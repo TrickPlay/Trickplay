@@ -4,6 +4,7 @@ Game = {}
 
 function Game:new(args)
 	local theme = Themes.robot
+	
 	local board = Board:new {
 		--board args to be passed in
 		theme = theme
@@ -12,6 +13,7 @@ function Game:new(args)
 	local object = {
 		-- properties of game
 		board = board,
+	
 		theme = theme
    }
    setmetatable(object, self)
@@ -41,7 +43,6 @@ function idle.on_idle( idle , seconds )
 	if not paused then    
 		for _ , item in ipairs( render_list ) do 
 			pcall( item.render , item , seconds ) 
-			print (item)
 		end        
 	end    
 end
