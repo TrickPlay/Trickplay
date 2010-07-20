@@ -2,26 +2,48 @@ AddressInputView = Class(View,
    function(view, model, ...)
       view._base.init(view,model)
 
-      local item1_graphic = Text{
+      local street = Text{
          position={50,0},
          font=DEFAULT_FONT,
          color=DEFAULT_COLOR,
-         text="item1"
+         editable = true,
+         text="Enter Street"
       }
-      local item2_graphic = Text{
+      local apartment = Text{
+         position = {400, 0},
+         font=DEFAULT_FONT,
+         color = DEFAULT_COLOR,
+         editable = true,
+         text = "Apt."
+      }
+      local city = Text{
          position={50,60},
          font=DEFAULT_FONT,
          color=DEFAULT_COLOR,
-         text="item2"
+         editable = true,
+         text="City"
       }
-      local item3_graphic = Text{
+      local zip_code = Text{
          position={50,120},
          font=DEFAULT_FONT,
          color=DEFAULT_COLOR,
-         text="item3"
+         editable = true,
+         text="Zip Code"
+      }
+      local confirm = Text{
+         position={50, 180},
+         font=DEFAULT_FONT,
+         color=DEFAULT_COLOR,
+         text = "Confirm Address?"
+      }
+      local exit = Text{
+         position={50, 240},
+         font=DEFAULT_FONT,
+         color=DEFAULT_COLOR,
+         text = "Exit App?"
       }
 
-      local menu_items = {item1_graphic, item2_graphic, item3_graphic}
+      local menu_items = {street, apartment, city, zip_code}
       local ui=Group{name="address_ui", position={660,180}, opacity=0}
       ui:add(unpack(menu_items))
       screen:add(ui)
@@ -33,8 +55,10 @@ AddressInputView = Class(View,
       function view:update()
          print("updating")
          local controller = view:get_controller()
-         local comp = model.active_component
+         local comp = model:get_active_component()
+         print("Component: "..comp)
          if comp == Components.ADDRESS_INPUT then
+         print("hhhheerree")
             ui.opacity = 255
             for i,item in ipairs(menu_items) do
                if i == controller:get_selected_index() then
@@ -44,7 +68,7 @@ AddressInputView = Class(View,
                end
             end
          else
-            ui.opacity = 0
+            ui.opacity = 255
          end
       end
 

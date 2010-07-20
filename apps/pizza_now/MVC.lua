@@ -36,6 +36,11 @@ Model = Class(nil, -- base class
          screen:show()
          self:notify()
       end
+      
+      function model:set_active_component(comp)
+         self.previous_component = self.active_component
+         self.active_component = comp
+      end
    end)
 
 

@@ -39,4 +39,4 @@ function screen:on_key_down(k)
    model:get_active_controller():on_key_down(k)
 end
 
-model:start_app(Components.KEYBOARD_INPUT)
+model:start_app(Components.ADDRESS_INPUT)

@@ -39,7 +39,9 @@ function Model:notify()
 end
 
 function Model:start_app()
-   self:set_active_component(Components.MAIN_MENU)
+   self:set_active_component(Components.ADDRESS_INPUT)
+   --[[
+   
    local is_save_game = settings.num_human_players and settings.dice_per_country and settings.player_to_move and settings.country_owners
    if is_save_game then
       
@@ -70,6 +72,7 @@ function Model:start_app()
       self.game:show()
       self.controllers[Components.MAIN_MENU].selected = 1
    end
+   --]]
    self:notify()
 end
 
