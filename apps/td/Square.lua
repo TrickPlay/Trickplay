@@ -1,16 +1,16 @@
 Square = {}
 
 function Square:new(args)
+	local square = {args.y, args.x, args.state}
 	local x = args.x
 	local y = args.y
-	local state = args.state
 	local isSelected = false
 	local tower = nil
 	local hasTower = false
 	local object = {
+		square = square,
 		x = x,
 		y = y,
-		state = state,
 		isSelected = isSelected,
 		tower = tower,
 		hasTower = hasTower		

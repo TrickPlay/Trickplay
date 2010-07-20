@@ -37,7 +37,7 @@ function Tower:attack()
 end
 
 function Tower:render(seconds)
-	self.bullet.x = self.bullet.x - seconds * self.cooldown
+	--self.bullet.x = self.bullet.x - seconds * self.cooldown
 --	if (self.bullet.x <= 0) then
 --		remove(self.bullet)
 --	end	
