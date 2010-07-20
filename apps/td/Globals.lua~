@@ -38,3 +38,10 @@ end
 function PTG (x)
 	return math.floor(x/60)+1
 end
+
+
+-- ASSETS
+
+bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
+ 
+screen:add(bulletImage)

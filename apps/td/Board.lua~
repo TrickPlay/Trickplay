@@ -131,11 +131,12 @@ function Board:createBoard()
 			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
 			self.player.gold = self.player.gold - self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost
-		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].state == FULL) then
+		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].state == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
 			-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
 			self.squareGrid[BoardMenu.y][BoardMenu.x].tower:destroy()
 			self.squareGrid[BoardMenu.y][BoardMenu.x].state = EMPTY		
 			self.player.gold = self.player.gold + self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost * 0.5
+			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = false
 		end
 		playertext.text = self.player.name
 		goldtext.text = self.player.gold
