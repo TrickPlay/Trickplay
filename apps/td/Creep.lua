@@ -26,12 +26,9 @@ function Creep:render(seconds)
 	local cy = self.creepImage.y
 
 	if (cx >= 0) then
-		print("path1")
 		if (#self.path==0) then
-			print("path2")
-			game.board.nodes = game.board:createNodes()
 			local found
-			found, self.path = astar.CalculatePath(game.board.nodes[ PTG(cy) ][ PTG(cx) ], game.board.nodes[ 8 ][ 32 ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+			found, self.path = astar.CalculatePath(game.board.nodes[ PTG(cy) ][ PTG(cx) ], game.board.nodes[ 8 ][ 32 ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
 		end
 	end
 	

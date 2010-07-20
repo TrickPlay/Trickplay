@@ -109,7 +109,7 @@ function Board:createBoard()
 	screen:add(backgroundImage, b)
 	local hl = Rectangle{h=70, w=70, color="FF00CC"}
 	
-
+	self.nodes = self:createNodes()
 
 	BoardMenu = Menu.create(b, groups, hl)
 	BoardMenu:create_key_functions()
@@ -123,27 +123,16 @@ function Board:createBoard()
 	
 	BoardMenu.buttons.extra.r = function()
 		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
-			-- in reality this would call the circle menu asking for what to do with the square
-			self.squareGrid[BoardMenu.y][BoardMenu.x].tower = Tower:new(self.theme.towers.normalTower)
-			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = true
-			table.insert(self.squaresWithTowers, self.squareGrid[BoardMenu.y][BoardMenu.x])
-			self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] = FULL
-			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
-			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
-			self.player.gold = self.player.gold - self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost
+			self:buildTower()
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
-			-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
-			self.squareGrid[BoardMenu.y][BoardMenu.x].tower:destroy()
-			self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] = EMPTY	
-			self.player.gold = self.player.gold + self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost * 0.5
-			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = false
+			self:removeTower()
 		end
+		
 		playertext.text = self.player.name
 		goldtext.text = self.player.gold
 
 		for i = 1, #self.creepWave do
 			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
-				self.nodes = self:createNodes()
 				local found
 				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
 			end
@@ -154,10 +143,9 @@ function Board:createBoard()
 	goldtext.text = self.player.gold
 		
 	BoardMenu.buttons.extra.space = function()
-		self.nodes = self:createNodes()
-		local found, path = astar.CalculatePath(self.nodes[BoardMenu.y][BoardMenu.x], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
-		print(found)
-		for k,v in pairs(path) do print(v[1]..", "..v[2]) end
+		--local found, path = astar.CalculatePath(self.nodes[BoardMenu.y][BoardMenu.x], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+		--print(found)
+		--for k,v in pairs(path) do print(v[1]..", "..v[2]) end
 	end
 	
 	add_to_render_list(self)
@@ -165,6 +153,47 @@ function Board:createBoard()
 		--self.creepWave[i].creepImage.x = i*100
 		screen:add(self.creepWave[i].creepImage)
 	end
+end
+
+function Board:buildTower()
+
+	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
+
+	-- in reality this would call the circle menu asking for what to do with the square
+	current.tower = Tower:new(self.theme.towers.normalTower)
+	current.hasTower = true
+	table.insert(self.squaresWithTowers, current)
+	current.square[3] = FULL
+	current:render()
+	self.player.gold = self.player.gold - current.tower.cost
+	
+	local n = current.square.children
+	local m = current.square.cut
+
+	if n.north then m.north = n.north n.north.children.south = nil end
+	if n.south then m.south = n.south n.south.children.north = nil end
+	if n.east then m.east = n.east n.east.children.west = nil end
+	if n.west then m.west = n.west n.west.children.east = nil end
+	
+end
+
+function Board:removeTower()
+
+	-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
+	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
+	
+	current.tower:destroy()
+	current.square[3] = EMPTY	
+	self.player.gold = self.player.gold + current.tower.cost * 0.5
+	current.hasTower = false
+	
+	local m = current.square.cut
+	
+	if m.north then m.north.children.south = current.square m.north = nil end
+	if m.south then m.south.children.north = current.square m.south = nil end
+	if m.east then m.east.children.west = current.square m.east = nil end
+	if m.west then m.west.children.east = current.square m.west = nil end	
+
 end
 
 function Board:p()
@@ -311,7 +340,17 @@ function Board:createNodes()
 	for i = 1, self.h do
 		nodes[i] = {}
 		for j = 1, self.w do
-			nodes[i][j] = self.squareGrid[i][j].square
+			local n = self.squareGrid[i][j].square
+			nodes[i][j] = n
+			n.children = {}
+			n.cut = {}
+			local c = n.children
+			
+			if n[1] > 1 and self.squareGrid[i-1][j].square[3] ~= FULL then c.north = self.squareGrid[i-1][j].square end
+			if n[1] < 18 and self.squareGrid[i+1][j].square[3] ~= FULL then c.south = self.squareGrid[i+1][j].square end
+			if n[2] > 1 and self.squareGrid[i][j-1].square[3] ~= FULL then c.west = self.squareGrid[i][j-1].square end			
+			if n[2] < 32 and self.squareGrid[i][j+1].square[3] ~= FULL then c.east = self.squareGrid[i][j+1].square end			
+			
 		end
 	end
 	
@@ -320,31 +359,17 @@ function Board:createNodes()
 end
 
 function MyNeighbourIterator(node)
-	local e = {}
-	local c = game.board.nodes
-	
-	if node[1] > 1 then e[#e+1] = c[ node[1]-1 ][ node[2] ] end
-	if node[1] < 18 then e[#e+1] = c[ node[1]+1 ][ node[2] ] end
-	if node[2] > 1 then e[#e+1] = c[ node[1] ][ node[2]-1 ] end
-	if node[2] < 32 then e[#e+1] = c[ node[1] ][ node[2]+1 ] end
-	
-	return ipairs(e)
+	return pairs(node.children)
 end
 
 function MyWalkableCheck(current_node)
-	if current_node[3] == FULL then
-		return false
-	else
+	if current_node[3] ~= FULL then
 		return true
+	else
+		return false
 	end
 end
 
 function MyHeuristic(node_a, node_b)
 	return ( math.abs(node_a[1]-node_b[1]) + math.abs(node_a[2]-node_b[2]) )
 end
-
-function MyConditional()
-	return 1
-end
-
-
