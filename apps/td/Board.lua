@@ -155,7 +155,7 @@ function Board:createBoard()
 	add_to_render_list(self)
 	for i=1,#self.creepWave do
 		--self.creepWave[i].creepImage.x = i*100
-		screen:add(self.creepWave[i].creepImage)
+		screen:add(self.creepWave[i].creepImage, self.creepWave[i].greenBar, self.creepWave[i].redBar)
 	end
 end
 
