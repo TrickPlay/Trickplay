@@ -3,9 +3,12 @@
       self._base.init(self, view, Components.ADDRESS_INPUT)
 
       local MenuItems = {
-         OPTION_1 = 1,
-         OPTION_2 = 2,
-         OPTION_3 = 3
+         STREET = 1,
+         APT = 2,
+         CITY = 3,
+         ZIP = 4,
+         CONFIRM = 5,
+         EXIT = 6
       }
       local MenuSize = 0
       for k, v in pairs(MenuItems) do
@@ -16,18 +19,30 @@
       local selected = 1
 
       local MenuItemCallbacks = {
-         [MenuItems.OPTION_1]=
+         [MenuItems.STREET]=
             function(self)
-               print("option_1 selected")
+               print("street selected")
             end,
-         [MenuItems.OPTION_2]=
+         [MenuItems.APT]=
             function(self)
-               print("option_2 selected")
+               print("apartment selected")
             end,
-         [MenuItems.OPTION_3]=
+         [MenuItems.CITY]=
             function(self)
-               print("option_3 selected")
+               print("city selected")
             end,
+         [MenuItems.ZIP]=
+            function(self)
+               print("zip selected")
+            end,
+         [MenuItems.CONFIRM]=
+            function(self)
+               print("confirm?")
+            end,
+         [MenuItems.EXIT]=
+            function(self)
+               print("exit?")
+            end
       }
       
       local AddressInputKeyTable = {
@@ -60,6 +75,7 @@
          if 1 <= new_selected and new_selected <= MenuSize then
             selected = new_selected
          end
+         MenuItemCallbacks[selected]()
          self:get_model():notify()
       end
    end)
