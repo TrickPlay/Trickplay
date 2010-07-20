@@ -54,12 +54,12 @@ function Board:new(args)
 		for j = 1, w do
 			squareGrid[i][j] = Square:new {x = j, y = i}
 			if (i <= 2 or j <= 2 or i > h - 2 or j > w - 2) then
-				squareGrid[i][j].state = FULL
+				squareGrid[i][j].square[3] = FULL
 			else
-				squareGrid[i][j].state = EMPTY
+				squareGrid[i][j].square[3] = EMPTY
 			end
 			if (i >= 6 and i <= 13 and (j <=2 or j > w-2)) then
-				squareGrid[i][j].state = WALKABLE
+				squareGrid[i][j].square[3] = WALKABLE
 			end
 	   end
 	end
@@ -81,7 +81,7 @@ function Board:init()
 	for i = 1, self.h do
 		local total = ""
 		for j = 1, self.w do
-			total = total..self.squareGrid[i][j].state
+			total = total..self.squareGrid[i][j].square[3]
 		end
 		print(total)
 	end
@@ -96,10 +96,10 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-			if (s[j].state == FULL) then
+			if (s[j].square[3] == FULL) then
 				g[j] = Group{w=SPW, h=SPH, name=""}
 			else
-				g[j] = Group{w=SPW, h=SPH, name=s[j].state}
+				g[j] = Group{w=SPW, h=SPH, name=s[j].square[3]}
 			end
 	   end
 	end
@@ -122,19 +122,19 @@ function Board:createBoard()
 	BoardMenu.container.opacity=255
 	
 	BoardMenu.buttons.extra.r = function()
-		if (self.squareGrid[BoardMenu.y][BoardMenu.x].state == EMPTY) then
+		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
 			-- in reality this would call the circle menu asking for what to do with the square
 			self.squareGrid[BoardMenu.y][BoardMenu.x].tower = Tower:new(self.theme.towers.normalTower)
 			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = true
 			table.insert(self.squaresWithTowers, self.squareGrid[BoardMenu.y][BoardMenu.x])
-			self.squareGrid[BoardMenu.y][BoardMenu.x].state = FULL
+			self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] = FULL
 			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
 			self.player.gold = self.player.gold - self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost
-		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].state == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
+		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
 			-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
 			self.squareGrid[BoardMenu.y][BoardMenu.x].tower:destroy()
-			self.squareGrid[BoardMenu.y][BoardMenu.x].state = EMPTY		
+			self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] = EMPTY	
 			self.player.gold = self.player.gold + self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost * 0.5
 			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = false
 		end
@@ -171,7 +171,7 @@ function Board:p()
 	for i = 1, self.h do
 		local total = ""
 		for j = 1, self.w do
-			total = total..self.squareGrid[i][j].state
+			total = total..self.squareGrid[i][j].square[3]
 		end
 		print(total)
 	end
@@ -207,7 +207,7 @@ function Board:getPathData()
 	for i = 1, self.h do
 		t[i] = {}
 		for j = 1, self.w do
-			if self.squareGrid[i][j].state == FULL then
+			if self.squareGrid[i][j].square[3] == FULL then
 				t[i][j] = "X"
 			else
 				t[i][j] = 0
@@ -305,17 +305,13 @@ function tracePath(board, fn, step, path)
 end
 
 function Board:createNodes()
-
-	--local self.nodes = {}
-	--local nodes = self.nodes
 	
 	local nodes = {}
 	
 	for i = 1, self.h do
 		nodes[i] = {}
 		for j = 1, self.w do
-			nodes[i][j] = { i, j, self.squareGrid[i][j].state }
-			--print(nodes[i][j][1], nodes[i][j][2], nodes[i][j][3])
+			nodes[i][j] = self.squareGrid[i][j].square
 		end
 	end
 	
