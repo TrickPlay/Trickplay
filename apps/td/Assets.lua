@@ -56,3 +56,4 @@ function AssetLoader:construct()
 	self.assets = {}
 end
 
+
