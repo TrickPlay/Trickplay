@@ -9,7 +9,9 @@ function Tower:new(args)
 	local cooldown = args.cooldown
 	local towerImage = Image {src = towerType}
 	local isAttacking = false
-	
+	local bullet = Rectangle { color = "FF0000", x = towerImage.x, y = towerImage.y, z = 2, width = 15, height = 15}
+	screen:add(bullet)
+
 	local object = {
 		towerType = towerType,
 		damage = damage,
@@ -18,7 +20,8 @@ function Tower:new(args)
 		cooldown = cooldown,
 		cost = cost,
 		towerImage = towerImage,
-		isAttacking = isAttacking
+		isAttacking = isAttacking,
+		bullet = bullet
    }
    setmetatable(object, self)
    self.__index = self
@@ -26,13 +29,16 @@ function Tower:new(args)
 end
 
 function Tower:destroy()
-	
+	self.towerImage.opacity = 0
 end
 
 function Tower:attack()
 
 end
 
-function Tower:render()
-	
+function Tower:render(seconds)
+	self.bullet.x = self.bullet.x - seconds * self.cooldown
+--	if (self.bullet.x <= 0) then
+--		remove(self.bullet)
+--	end	
 end

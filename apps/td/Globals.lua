@@ -25,3 +25,16 @@ phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1000, y = 50, z
 playertext = Text {font = "Sans 30px", text = "", x =700, y = 950, z=3, color = "FFFFFF"}
 goldtext = Text {font = "Sans 30px", text = "", x =600, y = 950, z=3, color = "FFFFFF" }
 screen:add(countdowntimer, phasetext, playertext, goldtext)
+
+
+-- global functions
+
+--convert from grid coord to pixel coord
+
+function GTP (x)
+	return (x-1)*60
+end
+
+function PTG (x)
+	return math.floor(x/60)+1
+end

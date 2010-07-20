@@ -27,6 +27,9 @@ Board = {
 			wave_counter = 0
 			seconds_elapsed = 0
 		end
+		for i = 1, #self.squaresWithTowers do
+			self.squaresWithTowers[i].tower:render(seconds)
+		end
 	end
 }
 
@@ -120,17 +123,19 @@ function Board:createBoard()
 	
 	BoardMenu.buttons.extra.r = function()
 		if (self.squareGrid[BoardMenu.y][BoardMenu.x].state == EMPTY) then
+			-- in reality this would call the circle menu asking for what to do with the square
 			self.squareGrid[BoardMenu.y][BoardMenu.x].tower = Tower:new(self.theme.towers.normalTower)
 			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = true
 			table.insert(self.squaresWithTowers, self.squareGrid[BoardMenu.y][BoardMenu.x])
 			self.squareGrid[BoardMenu.y][BoardMenu.x].state = FULL
 			BoardMenu.list[BoardMenu.y][BoardMenu.x].extra.text.text = 0
 			self.squareGrid[BoardMenu.y][BoardMenu.x]:render()
-			self.player.gold = self.player.gold - 50
+			self.player.gold = self.player.gold - self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].state == FULL) then
-			self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower = false
-			self.squareGrid[BoardMenu.y][BoardMenu.x].tower.towerImage.opacity = 0
+			-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
+			self.squareGrid[BoardMenu.y][BoardMenu.x].tower:destroy()
 			self.squareGrid[BoardMenu.y][BoardMenu.x].state = EMPTY		
+			self.player.gold = self.player.gold + self.squareGrid[BoardMenu.y][BoardMenu.x].tower.cost * 0.5
 		end
 		playertext.text = self.player.name
 		goldtext.text = self.player.gold

@@ -5,7 +5,7 @@ local robot = {
 			mediumCreep = { hp = 100, creepType = "assets/mediumRobot.jpg", speed = 200}
 		},
 		towers = {
-			normalTower = {towerType = "assets/normalTower.png", damage = 10, range = 100, cd = 1000, cost = 50}
+			normalTower = {towerType = "assets/normalTower.png", damage = 10, range = 100, cooldown = 1000, cost = 50}
 		},
 		obstacles = { },
 		boardBackground = "assets/robotBackground.jpg"
