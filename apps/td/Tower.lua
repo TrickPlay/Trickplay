@@ -44,7 +44,6 @@ function Tower:render(seconds, creeps)
 	for i = 1, #creeps do
 		if (creeps[i].creepImage.x > self.towerImage.x - self.range and creeps[i].creepImage.x < self.towerImage.x + self.range
 				and creeps[i].creepImage.y > self.towerImage.y - self.range and creeps[i].creepImage.y < self.towerImage.y + self.range and creeps[i].hp ~=0) then
-			print ("creep "..i.." in range")
 			creep_in_range = true
 			creeps[i].hp = creeps[i].hp - self.damage
 			if (creeps[i].hp <=0) then creeps[i].hp =0 end
