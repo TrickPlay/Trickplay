@@ -1,42 +1,26 @@
 ProviderSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
-    local dominos_1 = Text{
-        position={50,0},
-        font=DEFAULT_FONT,
-        color=DEFAULT_COLOR,
-        editable = true,
-        text="Dominos?"
+    view.deliveryOptions = Group{
+        position={0,0},
+        width = Dimensions.WIDTH,
+        height = Dimensions.HEIGHT * 1/5
     }
-    local dominos_2 = Text{
-        position={50,60},
-        font=DEFAULT_FONT,
-        color=DEFAULT_COLOR,
-        text="Dominos!"
+    view.providers = Group{
+        position={Dimensions.HEIGHT * 1/5,0},
+        width = Dimensions.WIDTH,
+        height = Dimensions.HEIGHT * 3/5
     }
-    local dominos_3 = Text{
-        position={50,120},
-        font=DEFAULT_FONT,
-        color=DEFAULT_COLOR,
-        text=":)"
-    }
-    local pizza_hut = Text{
-        position={50, 180},
-        font=DEFAULT_FONT,
-        color=DEFAULT_COLOR,
-        text = "Pizza Hut"
-    }
-    local go_back = Text{
-        position={50, 240},
-        font=DEFAULT_FONT,
-        color=DEFAULT_COLOR,
-        text = "Go Back"
+    view.taskBar = Group{
+        position={Dimensions.HEIGHT * 4/5,0},
+        width = Dimensions.WIDTH,
+        height = Dimensions.HEIGHT * 1/5
     }
 
-    local menu_items = {dominos_1, dominos_2, dominos_3, pizza_hut, go_back}
-    local provider_ui=Group{name="provider_ui", position={660,180}, opacity=0}
-    provider_ui:add(unpack(menu_items))
-    screen:add(provider_ui)
+    local items = {view.deliveryOptions, view.providers, view.taskBar}
+    view.provider_ui=Group{name="provider_ui", position={0,0}, opacity=0}
+    view.provider_ui:add(unpack(items))
+    screen:add(view.provider_ui)
 
     function view:initialize()
         self:set_controller(ProviderSelectionController(self))
@@ -47,17 +31,17 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
             print("Showing ProviderSelectionView UI")
-            provider_ui.opacity = 255
-            for i,item in ipairs(menu_items) do
+            self.provider_ui.opacity = 255
+            for i,item in ipairs(items) do
                 if i == controller:get_selected_index() then
                     item:animate{duration=1000, mode="EASE_OUT_EXPO", opacity=255}
                 else
-                    item:animate{duration=1000, mode="EASE_OUT_BOUNCE", opacity=0}
+                    item:animate{duration=1000, mode="EASE_OUT_BOUNCE", opacity=100}
                 end
             end
         else
             print("Hiding ProviderSelectionView UI")
-            provider_ui.opacity = 0
+            self.provider_ui.opacity = 0
         end
     end
 

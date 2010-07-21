@@ -42,7 +42,13 @@ Model = Class(
          self.active_component = comp
          print("set active component")
       end
-   end)
+
+        function model:set_keys()
+            function screen:on_key_down(k)
+                assert(model:get_active_controller())
+            end
+        end
+    end)
 
 
 
