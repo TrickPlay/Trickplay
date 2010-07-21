@@ -1,10 +1,12 @@
 dofile ("Assets.lua")
 dofile ("Globals.lua")
+dofile ("menu/menu.lua")
 dofile ("Game.lua")
 dofile ("Board.lua")
 dofile ("themes/Themes.lua")
 dofile ("Creep.lua")
 dofile ("Tower.lua")
+dofile ("Circle.lua")
 
 screen:show()
 
@@ -13,7 +15,7 @@ function app.on_loaded()
 	-- Everything is loaded
 	AssetLoader.on_preload_ready = function()
 
-		dofile("menu/menu.lua")
+
 
 		local mainMenuList = {
 										{ Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
@@ -49,5 +51,7 @@ function app.on_loaded()
 	AssetLoader:construct()
 	AssetLoader:preloadImage("normalRobot","assets/normalRobot.jpg")
 	AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.jpg")
+		
+	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
 
 end

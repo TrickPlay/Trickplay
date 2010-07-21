@@ -1,13 +1,13 @@
 Tower = {}
 
-function Tower:new(args)
+function Tower:new(args, name)
 	local towerType = args.towerType
 	local damage = args.damage
 	local range = args.range
 	local cost = args.cost
 	local direction = args.direction
 	local cooldown = args.cooldown
-	local towerImage = AssetLoader:getImage("normalRobot",{ clip={0,0,SP,SP} })
+	local towerImage = AssetLoader:getImage(name,{ clip={0,0,SP,SP} })
 	local isAttacking = false
 	local bullets = {}
 	local tower_elapsed_time = 0
@@ -48,7 +48,7 @@ function Tower:render(seconds, creeps)
 	
 	for i = 1, #creeps do
 		if (creeps[i].creepImage.x > self.x - self.range and creeps[i].creepImage.x < self.x + self.range
-				and creeps[i].creepImage.y > self.y - self.range and creeps[i].creepImage.y < self.y + self.range and creeps[i].hp ~=0) then
+				and creeps[i].creepImage.y > self.y - self.range and creeps[i].creepImage.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
 			--print ("creep "..i.." in range")
 			--print(self.x, self.y)
 			
