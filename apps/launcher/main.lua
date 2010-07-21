@@ -1,789 +1,448 @@
-dofile("ferris.lua")
 
-screen:show_all()
+-------------------------------------------------------------------------------
+-- Build the UI
+-------------------------------------------------------------------------------
 
-local color_scheme = "red"
-local oem_vendor = "trickplay"
+local function build_ui( show_it )
 
-local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
-local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }
-
--- Load the generic app image once and clone it 
-
-local generic_app_image = Image { src = "assets/generic-app-icon.png", opacity = 0 }
-
-screen:add(bar_off_image,bar_on_image,generic_app_image)
-
-my_id = app.id
-
---------------------------------------------------------------------------------
--- Table of all the tiles in the wheels
-
-items = {}
-
---------------------------------------------------------------------------------
--- Assets for installation. We lazy-load them.
-
-installing_assets =
-{
-    load =  function( self )
+    -------------------------------------------------------------------------------
+    -- Localized string table
+    -------------------------------------------------------------------------------
     
-                self.progress_left = Image{ src = "assets/loading-progress-left.png" , opacity = 0 }
-                self.progress_center = Image{ src = "assets/loading-progress-center.png" , opacity = 0, tile = { true , false } }
-                self.progress_right = Image{ src = "assets/loading-progress-right.png" , opacity = 0 }
-                self.icon = Image{ src = "assets/loading-icon.png" , opacity = 0 }
-                
-                screen:add( self.progress_left, self.progress_center, self.progress_right, self.icon )
-                
-                -- This is a simple way to make sure the code above only runs once
-                
-                self.load = function() end
-    
-            end            
-}
+    local strings = dofile( "localized:strings.lua" ) or {}
 
---------------------------------------------------------------------------------
--- Functions to update tiles when apps are being installed
-
-function update_installing_tile( install_info , tile )
+    -- Set an __index function to warn and return the original string
     
-    assert( install_info )
-    
-    local app_id = install_info.app_id
-    
-    local tiles = {}
-    
-    local tiles_to_add_to_ui = {}
-    
-    -- Find the tiles for this app id, if the one passed in is nil
-    
-    if tile ~= nil then
-    
-        table.insert( tiles , tile )
-        
-    else
-    
-        for _ , item in ipairs( items ) do
-        
-            if item.extra.id == app_id then
-            
-                table.insert( tiles , item )
-                
-            end
-        
-        end
-    
+    local function missing_localized_string( t , s )
+        print( "\t*** MISSING LOCALIZED STRING '"..s.."'" )
+        return s
     end
     
-    -- If it does not exist, create a new tile and mark it to be added to
-    -- the UI
-    
-    if #tiles == 0 then
-    
-        tile = make_tile( app_id , install_info.app_name )
-        
-        table.insert( tiles , tile )
-        
-        table.insert( tiles_to_add_to_ui , tile )
-    
-    end
-    
-    -- If the tiles are not in "installing" mode, switch them to that mode
-    
-    for _ , tile in ipairs( tiles ) do
-    
-        local extra = tile.extra
-        
-        if not extra.installing then
-        
-            extra.installing = true
-            
-            -- Make the UI changes
-            
-            assert( extra.image )
-            
-            -- Load the installing assets if they have not been loaded already
-            
-            installing_assets:load()
-            
-            -- An icon that covers the app icon
-            
-            local icon = Clone{
-                source = installing_assets.icon,
-                size = extra.image.size,
-                scale = extra.image.scale,
-                position = extra.image.position }
-            
-            tile:add( icon )
-            
-            icon:raise( extra.image )
-            
-            -- The progress bar pieces
-            
-            local x_scale , y_scale = unpack( icon.scale , 1 , 2 )
-            
-            -- Left cap
-            
-            local p_left = Clone{
-                source = installing_assets.progress_left,
-                scale = icon.scale,
-                position = { icon.x + 7 * x_scale , icon.y + 49 * y_scale }
-                }
-            
-            tile:add( p_left )
-            p_left:raise( icon )
-            
-            -- Center
-            
-            local p_center = Clone{
-                source = installing_assets.progress_center,
-                scale = icon.scale,
-                position = { p_left.x + p_left.w * x_scale , p_left.y },
-                width = 0,
-                }
-                
-            tile:add( p_center )
-            p_center:raise( icon )
-            
-            -- Right cap
-            
-            local p_right = Clone{
-                source = installing_assets.progress_right,
-                scale = icon.scale,
-                position = { p_center.x + p_center.w * x_scale , p_center.y }
-            }
-            
-            tile:add( p_right )
-            p_right:raise( icon )
-            
-            -- Now, note all the things that will need to be removed to clear the
-            -- installing mode of the tile.
-            
-            extra.installing_ui = { icon = icon , p_left = p_left , p_center = p_center, p_right = p_right }
-        
-        end
-        
-        local percent = ( install_info.percent_downloaded + install_info.percent_installed ) / 200
-        
-        -- The well is actually 138 pixels wide, but the right cap has an extra 3 pixels of
-        -- transparency on its right side. That's where we get 141.
-        
-        local center_width = math.ceil( ( 141 * percent ) - ( extra.installing_ui.p_left.w + extra.installing_ui.p_right.w ) )
-        
-        if center_width > 0 and center_width ~= extra.installing_ui.p_center.w then
-        
-            extra.installing_ui.p_center.w = center_width
-            
-            extra.installing_ui.p_right.x = extra.installing_ui.p_center.x + center_width * extra.installing_ui.p_center.scale[ 1 ]
-        
-        end
-    
-    end
-    
-    -- Add any new tiles to the UI
-    
-    for _ , tile in ipairs( tiles_to_add_to_ui ) do
-    
-        -- TODO: add it to the UI
-    
-    end
-    
-end
+    setmetatable( strings , { __index = missing_localized_string } )
 
-function remove_tile( app_id )
-
-    -- TODO: An app failed to install, so we need to remove its tile
-
-end
-
-function clear_installing_tile( install_info )
-
-    -- An installation finished, so we need to take its tile from
-    -- "installing" mode back to normal.
-
-    for _ , tile in ipairs( items ) do
+    -------------------------------------------------------------------------------
+    -- Style constants
+    -------------------------------------------------------------------------------
     
-        if tile.extra.id == install_info.app_id then
-  
-            tile.extra.installing = false
-            
-            if tile.extra.installing_ui then
-            
-                for _ , thing in pairs( tile.extra.installing_ui ) do
-                
-                    thing:unparent()
-                    
-                end
-                
-                tile.extra.installing_ui = nil
-                
-                -- TODO: We should re-load the app's icon because
-                -- it could be different now.
-            
-            end
-            
-        end
+    local BUTTON_FONT               = "DejaVu Sans 28px"
+    local BUTTON_FONT_COLOR         = "FFFFFFFF"
+     
+    -------------------------------------------------------------------------------
+    -- All the initial assets
+    -------------------------------------------------------------------------------
     
-    end
-end
-
-function tu( percent )
-
-    update_installing_tile(
+    local ui =
+    {
+        bar                 = Group {},
+        
+        bar_background      = Image { src = "assets/menu-background-lg.png" },
+        
+        button_focus        = Image { src = "assets/button-focus.png" },
+    
+        apps_button         = Image { src = "assets/button-myapps-blank.png" },
+        
+        apps_text           = Text  {
+                                        font = BUTTON_FONT ,
+                                        color = BUTTON_FONT_COLOR ,
+                                        text = strings[ "My Apps" ]
+                                    },
+                                    
+        apps_dropdown       = Image { src = "assets/dropdown-myapps.png" },
+        
+        shop_button         = Image { src = "assets/button-appshop-blank.png" },
+        
+        shop_text           = Text  {
+                                        font = BUTTON_FONT ,
+                                        color = BUTTON_FONT_COLOR ,
+                                        text = strings[ "App Shop" ]
+                                    },
+                                    
+        shop_dropdown       = Image { src = "assets/dropdown-appshop.png" },
+        
+        settings_button     = Image { src = "assets/button-settings-blank.png" },
+        
+        settings_text       = Text  {
+                                        font = BUTTON_FONT ,
+                                        color = BUTTON_FONT_COLOR ,
+                                        text = strings[ "Settings" ]                                        
+                                    },
+                                    
+        settings_dropdown   = Image { src = "assets/dropdown-settings.png" },
+    
+        showcase_button     = Image { src = "assets/button-showcase-blank.png" },
+        
+        showcase_text       = Text  {
+                                        font = BUTTON_FONT ,
+                                        color = BUTTON_FONT_COLOR ,
+                                        text = strings[ "Heineken Showcase" ]
+                                    },
+                                    
+        showcase_dropdown   = Image { src = "assets/dropdown-showcase.png" }
+    }
+    
+    -------------------------------------------------------------------------------
+    -- Position constants
+    -------------------------------------------------------------------------------
+    
+    local BUTTON_TEXT_X_OFFSET      = 20
+    local BUTTON_TEXT_Y_OFFSET      = 22
+    local FIRST_BUTTON_X            = 13                    -- x coordinate of first button
+    local FIRST_BUTTON_Y            = 9                     -- y coordinate of first button
+    local BUTTON_X_OFFSET           = ui.apps_button.w + 7  -- distance between left side of buttons
+    local DROPDOWN_POINT_Y_OFFSET   = -4                     -- how far to raise or lower the drop downs
+    
+    -------------------------------------------------------------------------------
+    -- Now, create structure an position everything
+    -------------------------------------------------------------------------------
+    
+    ----------------------------------------------------------------------------
+    -- The group that holds the bar background and the buttons
+    
+    ui.bar:set
+    {
+        size = ui.bar_background.size,
+        
+        position = { 0 , 0 },
+        
+        children =
         {
-            app_id = "com.trickplay.flickr-photo-wall" ,
-            percent_downloaded = percent or 0 ,
-            percent_installed = percent or 0 } )
+            ui.bar_background:set
+            {
+                position = { 0 , 0 }
+            },
+            
+            ui.button_focus:set
+            {
+                position = { FIRST_BUTTON_X , FIRST_BUTTON_Y },        
+            }
+        }
+    }
 
-end
-
-function tc()
-
-    clear_installing_tile( { app_id = "com.trickplay.flickr-photo-wall" } )
+    screen:add( ui.bar )    
     
-end
-
---------------------------------------------------------------------------------
--- Cache the app icons
-
-icons = {}
-
---------------------------------------------------------------------------------
--- Apps that are being installed, keyed by id
-
-installs = nil
-
---[[    
-    install info has the following fields:
+    ----------------------------------------------------------------------------
+    -- Put the buttons, dropdowns and text into an array, in order of appearance
     
-    id - integer. Identifier for the install
-    status - string. One of "DOWNLOADING", "INSTALLING", "FAILED", "FINISHED"
-    owner - string. The owner of the install (the app id of the app that started it)
-    app_id - string. The id of the app that is being installed.
-    app_name - string. The name of the app being installed.
-    percent_downloaded - double.
-    percent_installed - double.
-    extra - table. Extra payload passed by the app that started it. This has string keys and values.
-]]    
-
-
--- This populates the installs table if it has not been populated already
-
-function populate_installs()
-
-    if installs == nil then
+    ui.sections =
+    {
+        {
+            button = ui.apps_button,
+            dropdown = ui.apps_dropdown,
+            text = ui.apps_text
+        },
+        {
+            button = ui.showcase_button,
+            dropdown = ui.showcase_dropdown,
+            text = ui.showcase_text
+        },
+        {
+            button = ui.shop_button,
+            dropdown = ui.shop_dropdown,
+            text = ui.shop_text
+        },
+        {
+            button = ui.settings_button,
+            dropdown = ui.settings_dropdown,
+            text = ui.settings_text
+        }
+    }
     
-        installs = {}
+    ----------------------------------------------------------------------------
+    -- Now, add and position everything
     
-        local installs_info = apps:get_all_installs()
+    for i , section in ipairs( ui.sections ) do
     
-        for _ , install_info in ipairs( installs_info ) do
+        section.button.position =
+        {
+            FIRST_BUTTON_X + ( BUTTON_X_OFFSET * ( i - 1 ) ),
+            FIRST_BUTTON_Y
+        }
+    
+        section.text.position =
+        {
+            section.button.x + BUTTON_TEXT_X_OFFSET ,
+            section.button.y + BUTTON_TEXT_Y_OFFSET
+        }
         
-            if install_info.status == "FINISHED" then
+        section.dropdown.anchor_point = { section.dropdown.w / 2 , 0 }
+        
+        section.dropdown.position =
+        {
+            section.button.x + section.button.w / 2,
+            ui.bar.h + DROPDOWN_POINT_Y_OFFSET
+        }
+        
+        ui.bar:add( section.button , section.text )
+        
+        section.button:lower( ui.button_focus )
+        
+        section.text:raise( ui.button_focus )
+        
+        screen:add( section.dropdown )
+        
+    end
+
+    -------------------------------------------------------------------------------
+    -- UI state information
+    -------------------------------------------------------------------------------
+    
+    local DROPDOWN_TIMEOUT = 200    -- How many milliseconds one has to stay
+                                    -- on a button for the dropdown to show up
+                        
+    ui.strings = strings    -- Store the string table
+
+    ui.focus = 1            -- The section # that has focus
+    
+    ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
+    
+    ui.color_keys =             -- Which section # to focus with the given key
+    {
+        [ keys.YELLOW ] = 1,
+        [ keys.GREEN  ] = 2,
+        [ keys.RED    ] = 3,
+        [ keys.BLUE   ] = 4
+    }
+
+    -------------------------------------------------------------------------------
+    -- Internal functions
+    -------------------------------------------------------------------------------
+
+    local function reset_dropdown_timer()
+    
+        ui.dropdown_timer:stop()
+        ui.dropdown_timer:start()
+    
+    end
+
+    local function animate_out_dropdown( )
+        
+        local ANIMATION_DURATION = 200
+        
+        local section = ui.sections[ ui.focus ]
+        
+        if not section.dropdown.is_visible then return end
+        
+        section.dropdown:animate
+        {
+            duration = ANIMATION_DURATION,
+            opacity = 0,
+            y_rotation = -90,
+            on_completed = function() section.dropdown:hide() end
+        }
+    
+    end
+
+    local function animate_in_dropdown( )
+        
+        local ANIMATION_DURATION = 150
+        
+        local section = ui.sections[ ui.focus ]
+        
+        if section.dropdown.is_visible then return end
+        
+        section.dropdown.opacity = 0
+        
+        section.dropdown:show()
+        
+        section.dropdown.y_rotation = { 90 , 0 , 0 }
+        
+        section.dropdown:animate
+        {
+            duration = ANIMATION_DURATION,
+            opacity = 255,
+            y_rotation = 0
+        }
+    
+    end
+    
+    local function move_focus( new_focus )
+
+        -- Bad focus. Your focus needs more focus.
+        
+        if not new_focus then return end
+        
+        -- Same focus. Laser focus.
+        
+        if new_focus == ui.focus then return end
+        
+        local section = ui.sections[ new_focus ]
+        
+        -- Focus out of range. Blurred.
+        
+        if not section then return end -- The new section is out of range
+        
+        animate_out_dropdown()
+        
+        ui.focus = new_focus
+        
+        ui.button_focus.position = section.button.position
+        
+        reset_dropdown_timer()    
+    end
+
+
+    -------------------------------------------------------------------------------
+    -- Handlers
+    -------------------------------------------------------------------------------
+        
+    function ui.bar.on_key_down( _ , key )
             
-                -- We just finish it up right here.
-                -- This could increase load time for the launcher, so we may
-                -- want to rethink.
-                
-                if not apps:complete_install( install_info.id ) then
-                
-                    apps:abandon_install( install_info.id )
-                
-                end
-                
-            elseif install_info.status == "DOWNLOADING" or install_info.status == "INSTALLING" then
+        local key_map =
+        {
+            [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
+            [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
             
-                -- We put it in the installs table, so we can track it
-                
-                installs[ install_info.app_id ] = install_info
+            [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ key ] ) end,
+            [ keys.GREEN    ] = function() move_focus( ui.color_keys[ key ] ) end,
+            [ keys.RED      ] = function() move_focus( ui.color_keys[ key ] ) end,
+            [ keys.BLUE     ] = function() move_focus( ui.color_keys[ key ] ) end,
             
+            -- For keyboards
+            
+            [ keys.F5       ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
+            [ keys.F6       ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
+            [ keys.F7       ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
+            [ keys.F8       ] = function() move_focus( ui.color_keys[ keys.BLUE ] ) end,
+            
+            -- TODO : Pressing OK on a button may do something else
+            
+            [ keys.Return   ] = function() animate_in_dropdown() end,
+        }
+        
+        if not pcall( key_map[ key ] ) then
+        
+            print( keys[ key ] )
+        
+        end
+    
+    end
+    
+    function ui.dropdown_timer.on_timer( )
+    
+        animate_in_dropdown()
+        
+        return false
+    
+    end
+    
+    -------------------------------------------------------------------------------
+    -- Define ui functions
+    -------------------------------------------------------------------------------
+    
+    ----------------------------------------------------------------------------
+    -- Utility to iterate over all sections
+    
+    function ui:foreach_section( f )
+    
+        if f then for _,section in ipairs( self.sections ) do f( section ) end end
+    
+    end
+    
+    ----------------------------------------------------------------------------
+    -- Hides everything with no animation
+    
+    function ui:hide()
+    
+        self.button_focus:hide()
+
+        self.bar:hide()
+        
+        self:foreach_section( function( section ) section.dropdown:hide() end )
+            
+    end
+    
+    ----------------------------------------------------------------------------
+    -- Animates the bar into view
+    
+    function ui:animate_in( callback )
+    
+        -- Make sure everthing that needs to be hidden is hidden
+        
+        self:hide()
+        
+        self.bar:show()
+        
+        self.button_focus:show()
+        
+        -- Constants
+
+        local INITIAL_BAR_ANGLE     = -120
+        local ANIMATION_DURATION    = 250
+        
+        -- Set the initial values for the bar and the focus ring
+        
+        self.bar:set
+        {
+            x_rotation = { INITIAL_BAR_ANGLE , 0 , 0 },
+            opacity = 0
+        }
+        
+        self.button_focus.opacity = 0
+        
+        -- Completion function
+            
+        local function animation_completed()
+        
+            -- The bar gets key focus after we animate
+            
+            self.bar:grab_key_focus()
+            
+            self.dropdown_timer:start()
+            
+            if callback then
+            
+                callback( self )
+                
             end
-        
-        end
-    
-    end    
-end
-
--- We do it right here
-
-populate_installs()
-
--- Callback for install progress
-
-function apps.on_install_progress( apps , install_info )
-
-    -- installs should have been populated
-
-    assert( installs )
-    
-    -- Update the tile for this one, adding it if necessary
-    
-    update_installing_tile( install_info )
-    
-    -- Update the info in the installs table (or insert new info)
-    
-    installs[ install_info.app_id ] = install_info
-    
-end
-
--- Callback for install completion
-
-function apps.on_install_finished( apps , install_info )
-
-    local check_it = install_info.status == "FAILED"
-
-    if install_info.status == "FINISHED" then
-    
-        if not apps:complete_install( install_info.id ) then
-        
-            check_it = true
             
-            apps:abandon_install( install_info.id )
-        
         end
-    
-    end
-    
-    --[[
-    
-    If it failed completely, or finished but the final step went
-    wrong, we do a little sanity check to decide whether to remove the
-    tile.
-    
-    It is possible that the download failed, and if there was a previous
-    version of the app installed, it may remain intact.
-    
-    ]]
-    
-    if check_it and not apps:is_app_installed( install_info.app_id , true ) then
-    
-        remove_tile( install_info.app_id )
         
-    else
-    
-        clear_installing_tile( install_info )
+        -- Animate
+        
+        self.bar:animate
+        {
+            duration = ANIMATION_DURATION,
+            x_rotation = 0,
+            opacity = 255,
+            on_completed = animation_completed
+        }
+        
+        self.button_focus:animate
+        {
+            duration = ANIMATION_DURATION,
+            opacity = 255
+        }
         
     end
     
-    -- Finally, we remove it from our installs table
+    ----------------------------------------------------------------------------
+    -- Hide everything unless show_it is true (only for debugging)
     
-    installs[ install_info.app_id ] = nil
+    if not show_it then
+    
+        ui:hide()
+    
+    end
+    
+    return ui
     
 end
 
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Main
+-------------------------------------------------------------------------------
 
-function make_tile(id,name)
-               
-	local item = Group { }
+function main()
 
-	-- See if we already have one in our cache 
-	
-	local image = icons[ id ]
+    screen:show()
 
-
-	if not image then
-	
-		-- If not, create it and put it in the cache
-
-		image = Image()
-	
-		if not image:load_app_icon( id, "launcher-icon.png" ) then
-		
-			image = Clone{ source = generic_app_image, opacity = 255 }
-			
-		end
-		
-		icons[ id ] = image
-		
-	else
-
-		-- If it exists in the cache, clone it
-		
-		image = Clone{ source = image }
-
-	end
-
-	image:set { x = 14/2, y = 14/2, z = 0, scale = { 1/2, 1/2 } }
-
-	item:add(image)
-
-	local my_bar_off = Clone { source = bar_off_image, opacity = 255, z = 0, scale={ 1/2, 1/2} }
-	local my_bar_on  = Clone { source = bar_on_image, opacity = 0, z = 0, scale={ 1/2, 1/2 } }
-	item:add(my_bar_off)
-	item:add(my_bar_on)
-
-
-	local label= Text {
-						text = name,
-						font="Graublau Web,DejaVu Sans,Sans 24px",
-						color="FFFFFF",
-						z = 1,
-					}
-	label.x = (my_bar_off.w/2 - label.w) - 20
-	label.y = (my_bar_off.h/2 - label.h) / 2
-
-	item.extra.id = id
-	item.extra.label = label
-	item.extra.off = my_bar_off
-	item.extra.on = my_bar_on
-        item.extra.image = image
-	item:add(label)
-
-
-        -- Check to see if this app is being installed
-        
-        local install_info = installs[ id ]
-        
-        -- If so, update its tile
-        
-        if install_info then
-        
-            update_installing_tile( install_info , item )
-            
-        end
-
-	return item
+    local ui = build_ui()
+       
+    ui:animate_in()
+    
 end
 
-local app
-for i = 1,5 do
-	for _,app in pairs(apps:get_all()) do
-		if(app.id ~= "com.trickplay.launcher" and app.id ~= "com.trickplay.store") then
-			table.insert(items, make_tile(app.id,app.name))
-		end
-	end
-end
-
-ferris = Ferris.new( 11*#items, items, -35 )
-local shop = Group {
-						opacity=0,
-						children = {
-							Image { src = "assets/featured-poker.png", z = 1, x = 0, y = 3*screen.h/32 },
-							Image { src = "assets/featured-abc.png", z = 1, x = 0, y = 13*screen.h/32 },
-							Image { src = "assets/featured-buzz.png", z = 1, x = 296, y = 13*screen.h/32 },
-							Image { src = "assets/featured-marvel.png", z = 1, x = 0, y = 19*screen.h/32 },
-							Image { src = "assets/featured-glory.png", z = 1, x = 296, y = 19*screen.h/32 },
-							Image { src = "assets/app-shop-"..oem_vendor..".png", z = 1, x = 6, y = 50*screen.h/64 },
-						},
-						y_rotation = { 35, 0, 0 }
-}
-
--- Move a bit more than double the radius off-screen
-ferris.offscreen = {
-					x = -bar_off_image.w * 2,
-					y = screen.h/2
-				}
-ferris.onscreen = {
-					x = bar_off_image.w / 5,
-					y = screen.h/2,
-				}
-ferris.fullscreen = {
-					x = screen.w - bar_off_image.w * 4 / 11,
-					y = screen.h/2 + 70
-				}
-
-ferris.ferris.x = ferris.offscreen.x
-ferris.ferris.y = ferris.offscreen.y
-ferris.ferris.z = -11*#items*math.sin(math.rad(35))
-
-shop.extra.onscreen = {
-					x = ferris.onscreen.x,
-					y = screen.h/16
-				}
-shop.extra.fullscreen = {
-						x = screen.w/2 - 295,
-						y = screen.h/16
-					}
-
-shop.x = shop.extra.onscreen.x
-shop.y = shop.extra.onscreen.y
-
--- These two are "fake" groups, to ensure that these elements are in front of the backdrop,
--- regardless of their z-depth within these fake groups; the group itself stays above the background
-local ferris_group = Group { children = { ferris.ferris }, z = 1 }
-local shop_group = Group { children = { shop }, z = 2 }
-
-local backdrop1 = Image { src = "assets/background-"..color_scheme.."-1.jpg", z = -1,  size = { screen.w, screen.h}, opacity = 0 }
-local backdrop2 = Image { src = "assets/background-"..color_scheme.."-2.jpg", z = 0,  size = { screen.w, screen.h}, opacity = 0 }
-
-local playLabel = Text { text = "play", font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
-local getLabel  = Text { text = "get",  font="Graublau Web,DejaVu Sans,Sans 72px", color="FFFFFF", opacity = 0, x = 10, y = screen.h/16, z=2 }
-
-local OEMAds = {
-	Image { src = "assets/"..oem_vendor.."-oem-1.png", opacity = 0 },
-	Image { src = "assets/"..oem_vendor.."-oem-2.png", opacity = 0 },
-	Image { src = "assets/"..oem_vendor.."-oem-3.png", opacity = 0 },
-}
-
-screen:add(OEMAds[1],OEMAds[2],OEMAds[3])
-
-local OEMLabel = Group
-						{
-							children =
-							{
-								Clone { source = OEMAds[1], z = 1, x = screen.w/32, y =  5*screen.h/64, opacity = 255, extra = { number = 1 } },
-								Clone { source = OEMAds[2], z = 1, x = screen.w/32, y = 24*screen.h/64, opacity = 255, extra = { number = 2 } },
-								Clone { source = OEMAds[3], z = 1, x = screen.w/32, y = 43*screen.h/64, opacity = 255, extra = { number = 3 } },
-							},
-							x = 10,
-							z = 1,
-							opacity = 0,
-							y_rotation = { 90, 0 ,0 },
-						}
-
-for k,v in pairs(OEMLabel.children) do
-	v.y_rotation = { 0, v.w/2, v.h/2 }
-end
-
-screen:add(backdrop1)
-screen:add(backdrop2)
-screen:add(OEMLabel)
-
-local swap_tile = function(image, delay)
-	Timer { interval = delay, on_timer = function(timer)
-		image:animate({ duration = 250, y_rotation = -90, mode = "EASE_IN_SINE", on_completed = function()
-			image.extra.number = (image.extra.number % 3) + 1
-			image.source = OEMAds[image.extra.number]
-			image:animate({ duration = 250, y_rotation = 0, mode = "EASE_OUT_SINE" })
-		timer:stop()
-		end})
-	end }
-end
-
-Timer { interval = 15, on_timer = function(timer)
-	swap_tile(OEMLabel.children[1], .5)
-	swap_tile(OEMLabel.children[2], 1)
-	swap_tile(OEMLabel.children[3], 1.5)
-end }
-
-screen:add(getLabel)
-screen:add(shop_group)
-screen:add(playLabel)
-screen:add(ferris_group)
-
-mediaplayer.on_loaded = function( self ) self:play() end
-mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
-mediaplayer:load('jeopardy.mp4')
-
--- 1 is forward, -1 is backward
-local direction = 1
-
-local state = "offscreen"
-
-if( settings.active ) then
-	ferris:goto( settings.active - 1)
-end
-
-backdrop_fade_wobble = function(backdrop)
-	backdrop:animate({
-					duration = 2500,
-					opacity = 255,
-					mode = "EASE_IN_OUT_SINE",
-					on_completed = function ()
-						backdrop:animate({
-											duration = 2500,
-											opacity = 0,
-											mode = "EASE_IN_OUT_SINE",
-											on_completed = function()
-												backdrop_fade_wobble(backdrop)
-											end
-										})
-					end })
-end
-
-local backdrop_stop_wobble = function(backdrop)
-	backdrop:animate({ duration = 10, opacity = 0 })
-end
-
-function screen.on_key_down(screen, key)
-
-	if ( keys.s == key or keys.BLUE == key ) then
-		apps:launch("com.trickplay.store")
-	end
-
-	-- Stuff to rotate the wheel and choose items
-	if( state == "onscreen" or state == "fullscreen" ) then
-		if key >= keys["1"] and key <= keys["9"] then
-			ferris:rotate( direction * (key - keys["0"]) )
-		elseif key == keys["minus"] then
-			direction = -direction
-		elseif key == keys["CHAN_UP"] then
-			ferris:rotate( 3 )
-		elseif key == keys["CHAN_DOWN"] then
-			ferris:rotate( -3 )
-		elseif key == keys["Up"] then
-			ferris:rotate( 1 )
-		elseif key == keys["Down"] then
-			ferris:rotate( -1 )
-		elseif key == keys["Return"] then
-			
-                        local active = ferris:get_active()
-			
-                        -- Check to see if it is being installed
-                        
-                        local extra = items[ active ].extra
-                        
-                        if not extra.installing then
-                        
-                            settings.active = active
-                            
-                            apps:launch( extra.id )
-                        
-                        end
-		end
-	end
+main()
 
 
-	-- Stuff to transition between states
-	if( state == "onscreen") then
-		if key == keys["Left"] or key == keys["Exit"] then
-			ferris.highlight_on = false
-			ferris:highlight()
-			ferris.ferris:animate(
-									{
-										duration = 500,
-										x = ferris.offscreen.x,
-										mode = "EASE_IN_SINE",
-										on_completed = function() ferris:highlight() end,
-									}
-								)
-			state = "offscreen"
-		elseif key == keys["Right"] then
-			ferris.highlight_on = false
-			ferris:highlight()
-			ferris.ferris:animate(
-									{
-										duration = 1000,
-										y_rotation = -90,
-										x = ferris.fullscreen.x,
-										y = ferris.fullscreen.y,
-										scale = { 1.5, 1.5 },
-										mode = "EASE_IN_OUT_SINE",
-										on_completed = function() mediaplayer:pause() end,
-									}
-								)
-			shop:animate(
-								{
-										duration = 1000,
-										y_rotation = 0,
-										x = shop.extra.fullscreen.x,
-										y = shop.extra.fullscreen.y,
-										opacity = 255,
-										mode = "EASE_IN_OUT_SINE",
-								}
-							)
-			ferris:rotate(#items)
-                        
-                        backdrop1:animate(
-								{
-									duration = 1000,
-									opacity = 255,
-									mode = "EASE_OUT_SINE",
-									on_completed = function () backdrop2:show() backdrop_fade_wobble(backdrop2) end,
-								}
-							)
-			OEMLabel:animate(
-								{
-									duration = 1000,
-									opacity = 255,
-									x = 20,
-									mode = "EASE_OUT_SINE",
-									y_rotation = 0,
-								}
-							)
-			playLabel:animate(
-								{
-									duration = 1000,
-									opacity = 255,
-									x = (screen.w-playLabel.w) - 250,
-									mode = "EASE_OUT_SINE",
-								}
-							)
-			getLabel:animate(
-								{
-									duration = 1000,
-									opacity = 255,
-									x = (screen.w-getLabel.w)/2,
-									mode = "EASE_OUT_SINE",
-								}
-							)
-			state = "fullscreen"
-		end
 
-	elseif (state == "offscreen") then
-		if key == keys["Left"] or key == keys["Right"] then
-			ferris.highlight_on = true
-			ferris.ferris:animate(
-									{
-										duration = 500,
-										x = ferris.onscreen.x,
-										mode = "EASE_OUT_SINE",
-										on_completed = function() ferris:highlight() end,
-									}
-								)
-			state = "onscreen"
-		end
-
-	elseif (state == "fullscreen") then
-		if key == keys["Left"] then
-			ferris.highlight_on = true
-			ferris.ferris:animate(
-									{
-										duration = 1000,
-										y_rotation = -35,
-										x = ferris.onscreen.x,
-										y = ferris.onscreen.y,
-										scale = { 1.0, 1.0 },
-										mode = "EASE_IN_OUT_SINE",
-										on_completed = function() ferris:highlight() mediaplayer:play() end,
-									}
-								)
-			shop:animate(
-									{
-										duration = 1000,
-										y_rotation = 35,
-										x = shop.extra.onscreen.x,
-										y = shop.extra.onscreen.y,
-										opacity = 0,
-										mode = "EASE_IN_OUT_SINE",
-									}
-								)
-			backdrop1:animate(
-								{
-									duration = 1000,
-									opacity = 0,
-									mode = "EASE_IN_SINE",
-								}
-							)
-			backdrop2:hide()
-			OEMLabel:animate(
-								{
-									duration = 1000,
-									opacity = 0,
-									x = 10,
-									mode = "EASE_IN_SINE",
-									y_rotation = 90,
-								}
-							)
-			playLabel:animate(
-								{
-									duration = 1000,
-									opacity = 0,
-									x = 10,
-									mode = "EASE_IN_SINE",
-								}
-							)
-			getLabel:animate(
-								{
-									duration = 1000,
-									opacity = 0,
-									x = 10,
-									mode = "EASE_IN_SINE",
-								}
-							)
-			state = "onscreen"
-		end
-	end
-
-end
