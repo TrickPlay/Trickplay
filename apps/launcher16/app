@@ -1,9 +1,0 @@
-app=
-{
-    id          = "com.trickplay.launcher16",
-    release     = "1",
-    version     = "1.0",
-    name        = "TrickPlay Launcher",
-    copyright   = "© Trickplay Inc."
-}
-
