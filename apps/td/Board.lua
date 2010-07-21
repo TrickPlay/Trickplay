@@ -5,10 +5,15 @@ dofile ("aStar.lua")
 Board = {
 	render = function (self, seconds)
 		seconds_elapsed = seconds_elapsed + seconds
+		wave_counter = 0
 		if (seconds_elapsed >= 20) then
 			for i=1,#self.creepWave do
 				if (self.creepWave[i].hp ~= 0) then
 					self.creepWave[i]:render(seconds)
+				else
+					wave_counter = wave_counter + 1
+					self.creepWave[i].greenBar.width = 0
+					self.creepWave[i].creepImage.opacity = 0
 				end
 			end
 			phasetext.text = "Wave Phase!"
@@ -16,15 +21,23 @@ Board = {
 			countdowntimer.text = "Time till next wave: "..19 - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 		end
+--		print (wave_counter)
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			print (" in here")
 			for i =1, CREEP_WAVE_LENGTH do
-				self.creepWave[i].hp = 100
-				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
-				self.creepWave[i].path = {}
+--				self.creepWave[i].hp = self.creepWave[i].max_hp
+--				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
+--				self.creepWave[i].path = {}
+				self.creepWave[i].creepImage.opacity = 0
+				table.remove(self.creepWave, i)
+				print ("removing "..i)
 			end
+			for i =1, CREEP_WAVE_LENGTH do
+				self.creepWave[i] = Creep:new(self.theme.creeps.mediumCreep, -240*i,420)
+				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
+			end
+			
 			phasetext.text = "Build Phase!"
-			wave_counter = 0
 			seconds_elapsed = 0
 		end
 		for i = 1, #self.squaresWithTowers do

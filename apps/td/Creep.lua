@@ -10,6 +10,7 @@ function Creep:new(args, x, y)
 	local greenBar = Clone {source = healthbar, color = "00FF00", x = x, y = y}
 	local redBar = Clone {source = healthbar, color = "FF0000", width = 0, x = x , y = y} 
 	local path = {}
+	local dead = false
 	local object = {
 		hp = hp,
 		max_hp = max_hp,
@@ -19,7 +20,8 @@ function Creep:new(args, x, y)
 		creepImage = creepImage,
 		greenBar = greenBar,
 		redBar = redBar,
-		path = path
+		path = path,
+		dead = dead,
    }
    setmetatable(object, self)
    self.__index = self
@@ -30,7 +32,6 @@ function Creep:render(seconds)
 
 	local cx = self.creepImage.x
 	local cy = self.creepImage.y
-	
 	if (cx >= 0) then
 		if (#self.path==0) then
 			local found
@@ -56,6 +57,11 @@ function Creep:render(seconds)
 		end
 	end
 	
+	if (self.hp == 0) then 
+		dead = true
+		self.greenBar.width = 0
+		self.creepImage.opacity = 0
+	end
 end
 
 function Creep:reset()

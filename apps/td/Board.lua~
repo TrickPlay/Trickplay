@@ -5,10 +5,15 @@ dofile ("aStar.lua")
 Board = {
 	render = function (self, seconds)
 		seconds_elapsed = seconds_elapsed + seconds
+		wave_counter = 0
 		if (seconds_elapsed >= 20) then
 			for i=1,#self.creepWave do
 				if (self.creepWave[i].hp ~= 0) then
 					self.creepWave[i]:render(seconds)
+				else
+					wave_counter = wave_counter + 1
+					self.creepWave[i].greenBar.width = 0
+					self.creepWave[i].creepImage.opacity = 0
 				end
 			end
 			phasetext.text = "Wave Phase!"
@@ -16,15 +21,23 @@ Board = {
 			countdowntimer.text = "Time till next wave: "..19 - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 		end
+--		print (wave_counter)
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			print (" in here")
 			for i =1, CREEP_WAVE_LENGTH do
-				self.creepWave[i].hp = 100
-				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
-				self.creepWave[i].path = {}
+--				self.creepWave[i].hp = self.creepWave[i].max_hp
+--				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
+--				self.creepWave[i].path = {}
+				self.creepWave[i].creepImage.opacity = 0
+				table.remove(self.creepWave, i)
+				print ("removing "..i)
 			end
+			for i =1, CREEP_WAVE_LENGTH do
+				self.creepWave[i] = Creep:new(self.theme.creeps.mediumCreep, -240*i,420)
+				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
+			end
+			
 			phasetext.text = "Build Phase!"
-			wave_counter = 0
 			seconds_elapsed = 0
 		end
 		for i = 1, #self.squaresWithTowers do
@@ -96,11 +109,11 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-			if (s[j].square[3] == FULL) then
+			--if (s[j].square[3] == FULL) then
 				g[j] = Group{w=SPW, h=SPH, name=""}
-			else
-				g[j] = Group{w=SPW, h=SPH, name=s[j].square[3]}
-			end
+			--else
+			--	g[j] = Group{w=SPW, h=SPH, name=s[j].square[3]}
+			--end
 	   end
 	end
 	backgroundImage = Image {src = self.theme.boardBackground }
@@ -135,6 +148,7 @@ function Board:createBoard()
 			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
 				local found
 				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+				self.creepWave[i].path[#self.creepWave[i].path] = nil
 			end
 		end
 	end
@@ -143,16 +157,32 @@ function Board:createBoard()
 	goldtext.text = self.player.gold
 		
 	BoardMenu.buttons.extra.space = function()
-		--local found, path = astar.CalculatePath(self.nodes[BoardMenu.y][BoardMenu.x], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
-		--print(found)
-		--for k,v in pairs(path) do print(v[1]..", "..v[2]) end
+		if not self.zoom then
+			self:zoomIn()
+			self.zoom = true
+		else
+			self:zoomOut()
+			self.zoom = nil
+		end
 	end
 	
 	add_to_render_list(self)
 	for i=1,#self.creepWave do
 		--self.creepWave[i].creepImage.x = i*100
-		screen:add(self.creepWave[i].creepImage)
+		screen:add(self.creepWave[i].creepImage, self.creepWave[i].greenBar, self.creepWave[i].redBar)
 	end
+end
+
+function Board:zoomIn()
+	print("in")
+	screen.scale={2,2}
+	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
+end
+
+function Board:zoomOut()
+	print("out")
+	screen.position = {0, 0}
+	screen.scale={.5,.5}
 end
 
 function Board:buildTower()
