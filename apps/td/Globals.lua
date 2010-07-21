@@ -53,6 +53,11 @@ end
 
 bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
 healthbar = Rectangle {color = "00FF00", width = SP, height = 10}
- 
+
+creepGold = {}
+
+for i = 1, CREEP_WAVE_LENGTH do
+	creepGold[i] = 0
+end
  
 screen:add(bulletImage, healthbar)

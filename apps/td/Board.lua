@@ -6,16 +6,20 @@ Board = {
 	render = function (self, seconds)
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
+		
 		if (seconds_elapsed >= 20) then
 			for i=1,#self.creepWave do
 				if (self.creepWave[i].hp ~= 0) then
 					self.creepWave[i]:render(seconds)
 				else
-					self.player.gold = self.player.gold + self.creepWave[i].bounty
-					self.player.goldtext = self.player.gold
 					wave_counter = wave_counter + 1
 					self.creepWave[i].greenBar.width = 0
 					self.creepWave[i].creepImage.opacity = 0
+					if (creepGold[i] ==0) then
+						creepGold[i] = 1
+						self.player.gold = self.player.gold + self.creepWave[i].bounty
+						goldtext.text = self.player.gold
+					end
 				end
 			end
 			phasetext.text = "Wave Phase!"
@@ -23,10 +27,7 @@ Board = {
 			countdowntimer.text = "Time till next wave: "..19 - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 		end
---		print (wave_counter)
 		if (wave_counter == CREEP_WAVE_LENGTH) then
-			print (" in here")
-			print (CREEP_WAVE_LENGTH)
 			for i =1, CREEP_WAVE_LENGTH do
 				local wave = self.theme.creeps.mediumCreep
 				local creep = self.creepWave[i]
@@ -188,7 +189,7 @@ end
 
 function Board:zoomIn()
 	print("in")
-	screen:animate { duration = 500, scale={2,2}, position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}}
+	screen:animate { duration = 500, scale={math.sqrt(2),2}, position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}}
 
 --	screen.scale={2,2}
 --	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
@@ -206,6 +207,7 @@ function Board:buildTower()
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
 	-- in reality this would call the circle menu asking for what to do with the square
+	-- if you switch the arguments to current.tower it will switch the tower selected for the square
 	current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
 --	current.tower = Tower:new(self.theme.towers.wall, "wall")
 
