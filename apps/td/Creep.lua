@@ -1,12 +1,12 @@
 Creep = { }
 
-function Creep:new(args, x, y)
+function Creep:new(args, x, y, name)
 	local creepType = args.creepType
 	local hp = args.hp
 	local max_hp = hp
 	local speed = args.speed
 	local direction = args.direction or {0,1}
-	local creepImage = Image { src = creepType , x = x, y = y}
+	local creepImage = AssetLoader:getImage(name, {x = x, y = y})
 	local greenBar = Clone {source = healthbar, color = "00FF00", x = x, y = y}
 	local redBar = Clone {source = healthbar, color = "FF0000", width = 0, x = x , y = y} 
 	local path = {}
@@ -37,7 +37,8 @@ function Creep:render(seconds)
 	if (cx >= 0) then
 		if (#self.path==0) then
 			local found
-			found, self.path = astar.CalculatePath(game.board.nodes[ PTG(cy) ][ PTG(cx) ], game.board.nodes[ 8 ][ BW ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
+			found, self.path = astar.CalculatePath(game.board.nodes[ PTG(cy) ][ PTG(cx) ], game.board.nodes[ 4 ][ BW ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
+			
 		end
 	end
 	
