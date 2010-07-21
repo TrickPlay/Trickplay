@@ -1,3 +1,8 @@
+Dimensions = {
+    HEIGHT = 1080,
+    WIDTH = 1920
+}
+
 Directions = {
    RIGHT = {1,0},
    LEFT = {-1,0},

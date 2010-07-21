@@ -18,7 +18,6 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     local ProviderCallbacks = {
         [ProviderGroups.DELIVERY_OPTIONS] = function(self)
             print("delivery options")
-
         end,
         [ProviderGroups.PROVIDERS] = function(self)
             print("providers")
