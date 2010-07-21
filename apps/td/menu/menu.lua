@@ -221,18 +221,20 @@ function Menu:create_buttons(margin, m_font, position)
 											
 end
 
-function Menu:create_circle()
+function Menu:create_circle(offset, distance)
 	
 	-- 2 pi divided by number of objects
 	local rotation=( 2*math.pi ) / self.max_x[1]
 	
 	for i=1,self.max_x[1] do
 		local obj = self.list[1][i]
+		
+		i = i - 1
 	
 		-- Update values
 		obj.anchor_point = {obj.w/2,obj.h/2}
-		obj.x = screen.w/2 + 300*math.sin(rotation*i)
-		obj.y = screen.h/2 - 300*math.cos(rotation*i)
+		obj.x = offset[2] + distance*math.sin(rotation*i)
+		obj.y = offset[1] - distance*math.cos(rotation*i)
 		obj.extra.angle = rotation*i
 		
 		self.container:add(obj)
@@ -243,5 +245,52 @@ function Menu:create_circle()
 		
 end
 
+function Menu:circle_directions(offset, distance)
 
+	local container = self.buttons
 
+	-- Update positions on left
+	container.extra.left = function()
+	
+		print("Left")
+	
+		self.x = self.x - 1
+		if self.x == 0 then self.x = self.max_x[1] end
+		
+		local rotation=( 2*math.pi ) / self.max_x[1]
+		for i=1,self.max_x[1] do
+			local obj = self.list[1][i]
+			local new_angle = obj.extra.angle + rotation
+			local new_x = offset[2] + distance*math.sin(new_angle)
+			local new_y = offset[1] - distance*math.cos(new_angle)
+			
+			obj:animate{ duration=1000, x=new_x, y=new_y, mode="EASE_OUT_QUAD" }
+			obj.extra.angle = new_angle
+			
+		end
+		
+	end
+	
+	-- Update positions on right
+	container.extra.right = function()
+	
+		print("Right")
+	
+		self.x = self.x + 1
+		if self.x > self.max_x[1] then self.x = 1 end
+		
+		local rotation=( 2*math.pi ) / self.max_x[1]
+		for i=1,self.max_x[1] do
+			local obj = self.list[1][i]
+			local new_angle = obj.extra.angle - rotation
+			local new_x = offset[2] + distance*math.sin(new_angle)
+			local new_y = offset[1] - distance*math.cos(new_angle)
+			
+			obj:animate{ duration=1000, x=new_x, y=new_y, mode="EASE_OUT_QUAD" }
+			obj.extra.angle = new_angle
+			
+		end
+		
+	end
+
+end
