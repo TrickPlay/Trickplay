@@ -75,17 +75,17 @@ function Board:new(args)
       squareGrid[i] = {}
 	end
 	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep, -240*i, 420)
+		creepWave[i] = Creep:new(theme.creeps.normalCreep, -240*i, 420, "normal")
 	end
 	for i = 1, h do
 		for j = 1, w do
 			squareGrid[i][j] = Square:new {x = j, y = i}
-			if (i <= 2 or j <= 2 or i > h - 2 or j > w - 2) then
+			if (i <= 1 or j <= 1 or i > h - 1 or j > w - 1) then
 				squareGrid[i][j].square[3] = FULL
 			else
 				squareGrid[i][j].square[3] = EMPTY
 			end
-			if (i >= 6 and i <= 13 and (j <=2 or j > w-2)) then
+			if (i >= 3 and i <= 7 and (j <=1 or j > w-1)) then
 				squareGrid[i][j].square[3] = WALKABLE
 			end
 	   end
@@ -123,7 +123,7 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-				g[j] = Group{w=SP, h=SP}
+				g[j] = Group{w=SP, h=SP, name=self.squareGrid[i][j].square[3]}
 	   end
 	end
 	backgroundImage = Image {src = self.theme.boardBackground }
