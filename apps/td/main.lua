@@ -6,7 +6,7 @@ dofile ("Board.lua")
 dofile ("themes/Themes.lua")
 dofile ("Creep.lua")
 dofile ("Tower.lua")
-dofile ("Circle.lua")
+
 
 screen:show()
 
@@ -15,7 +15,7 @@ function app.on_loaded()
 	-- Everything is loaded
 	AssetLoader.on_preload_ready = function()
 
-
+		dofile ("Circle.lua")
 
 		local mainMenuList = {
 										{ Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
@@ -34,6 +34,9 @@ function app.on_loaded()
 		MainMenu:create_buttons(10, "Sans 34px")
 		MainMenu:apply_color_change("FFFFFF", "000000")
 		MainMenu.buttons:grab_key_focus()
+		
+		--CircleMenu.buttons:grab_key_focus()
+		
 		MainMenu:update_cursor_position()
 		MainMenu.hl.opacity = 255
 
@@ -51,7 +54,8 @@ function app.on_loaded()
 	AssetLoader:construct()
 	AssetLoader:preloadImage("normal","assets/normalRobot.png")
 	AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
-		
+	
+	AssetLoader:preloadImage("normalRobotBuy","assets/robots/normalRobot/buy.png")
 	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
-	AssetLoader:preloadImage("wall","assets/normalTower.png")
+	AssetLoader:preloadImage("wall","assets/wall.jpg")
 end
