@@ -26,18 +26,30 @@ Board = {
 --		print (wave_counter)
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			print (" in here")
+			print (CREEP_WAVE_LENGTH)
 			for i =1, CREEP_WAVE_LENGTH do
---				self.creepWave[i].hp = self.creepWave[i].max_hp
---				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
---				self.creepWave[i].path = {}
-				self.creepWave[i].creepImage.opacity = 0
-				table.remove(self.creepWave, i)
+				local wave = self.theme.creeps.mediumCreep
+				local creep = self.creepWave[i]
+				creep.hp = wave.hp
+				creep.max_hp = wave.hp
+				creep.creepImage.src = wave.creepType
+				creep.bounty = wave.bounty
+				creep.creepImage.x = -240*i
+				creep.creepImage.y = 420
+				creep.speed = wave.speed
+				creep.greenBar.x = -240*i
+				creep.greenBar.y = -240*i
+				
+				creep.path = {}
+				creep.creepImage.opacity = 255
+--				table.remove(self.creepWave[i], i)
 				print ("removing "..i)
 			end
-			for i =1, CREEP_WAVE_LENGTH do
-				self.creepWave[i] = Creep:new(self.theme.creeps.mediumCreep, -240*i,420)
-				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
-			end
+--			for i =1, CREEP_WAVE_LENGTH do
+--				print ("making new creeps")
+--				self.creepWave[i] = Creep:new(self.theme.creeps.normalCreep, 240*i,420)
+--				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
+--			end
 			
 			phasetext.text = "Build Phase!"
 			seconds_elapsed = 0
