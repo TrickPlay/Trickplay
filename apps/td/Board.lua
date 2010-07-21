@@ -123,7 +123,7 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-				g[j] = Group{w=SP, h=SP, name=self.squareGrid[i][j].square[3]}
+				g[j] = Group{w=SP, h=SP}--, name=self.squareGrid[i][j].square[3]}
 	   end
 	end
 	backgroundImage = Image {src = self.theme.boardBackground }
@@ -146,9 +146,10 @@ function Board:createBoard()
 	BoardMenu.buttons.extra.r = function()
 		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
 		
-			local board = self:getPathData()
-			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{7,1},{7,BW}) then self:buildTower() end
+			--local board = self:getPathData()
+			--board[BoardMenu.y][BoardMenu.x] = "X"
+			createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150 )
+			--if pathExists(board,{7,1},{7,BW}) then self:buildTower() end
 			
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
 			self:removeTower()
@@ -201,13 +202,13 @@ function Board:zoomOut()
 	screen.scale={.5,.5}
 end
 
-function Board:buildTower()
+function Board:buildTower(selection)
 
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
 	-- in reality this would call the circle menu asking for what to do with the square
-	current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
---	current.tower = Tower:new(self.theme.towers.wall, "wall")
+	if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
+	elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, "wall") end
 
 	current.tower.x = GTP(current.x)
 	current.tower.y = GTP(current.y)
