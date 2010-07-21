@@ -221,5 +221,27 @@ function Menu:create_buttons(margin, m_font, position)
 											
 end
 
+function Menu:create_circle()
+	
+	-- 2 pi divided by number of objects
+	local rotation=( 2*math.pi ) / self.max_x[1]
+	
+	for i=1,self.max_x[1] do
+		local obj = self.list[1][i]
+	
+		-- Update values
+		obj.anchor_point = {obj.w/2,obj.h/2}
+		obj.x = screen.w/2 + 300*math.sin(rotation*i)
+		obj.y = screen.h/2 - 300*math.cos(rotation*i)
+		obj.extra.angle = rotation*i
+		
+		self.container:add(obj)
+		
+		obj.extra.x = obj.x
+		obj.extra.y = obj.y
+	end
+		
+end
+
 
 

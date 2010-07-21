@@ -35,7 +35,7 @@ function Creep:render(seconds)
 	if (cx >= 0) then
 		if (#self.path==0) then
 			local found
-			found, self.path = astar.CalculatePath(game.board.nodes[ PTG(cy) ][ PTG(cx) ], game.board.nodes[ 8 ][ 32 ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
+			found, self.path = astar.CalculatePath(game.board.nodes[ PTG(cy) ][ PTG(cx) ], game.board.nodes[ 8 ][ BW ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
 		end
 	end
 	
@@ -52,7 +52,7 @@ function Creep:render(seconds)
 		local size = #path
 		if size > 0 then
 			self.creepImage:animate {duration = 1/self.speed * 10000, x = GTP( path[size][2] ), y = GTP( path[size][1] ) }
-			self.greenBar:animate {duration = 1/self.speed * 10000, x = GTP( path[size][2] ), y = GTP( path[size][1] ), width = 60*self.hp/self.max_hp}
+			self.greenBar:animate {duration = 1/self.speed * 10000, x = GTP( path[size][2] ), y = GTP( path[size][1] ), width = SP*self.hp/self.max_hp}
 			path[size] = nil
 		end
 	end
