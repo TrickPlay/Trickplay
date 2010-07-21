@@ -62,8 +62,6 @@ function Tower:render(seconds, creeps)
 					local di = d[i]
 					if cy >= di[1] and cy <= di[2] and cx >= di[3] and cx <= di[4] then dir = i break end
 				end
-	
-				print(dir)
 				if dir == nil then print (cx, cy) end
 				
 				self.towerImage.x = self.x - SP * (dir - 1)

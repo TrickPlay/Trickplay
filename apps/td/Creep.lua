@@ -12,6 +12,7 @@ function Creep:new(args, x, y, name)
 	local path = {}
 	local dead = false
 	local bounty = args.bounty
+	local flying = args.flying
 	local object = {
 		hp = hp,
 		max_hp = max_hp,
@@ -23,7 +24,8 @@ function Creep:new(args, x, y, name)
 		redBar = redBar,
 		path = path,
 		dead = dead,
-		bounty = bounty
+		bounty = bounty,
+		flying = flying
    }
    setmetatable(object, self)
    self.__index = self
