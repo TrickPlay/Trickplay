@@ -11,6 +11,7 @@ function Creep:new(args, x, y)
 	local redBar = Clone {source = healthbar, color = "FF0000", width = 0, x = x , y = y} 
 	local path = {}
 	local dead = false
+	local bounty = args.bounty
 	local object = {
 		hp = hp,
 		max_hp = max_hp,
@@ -22,6 +23,7 @@ function Creep:new(args, x, y)
 		redBar = redBar,
 		path = path,
 		dead = dead,
+		bounty = bounty
    }
    setmetatable(object, self)
    self.__index = self
