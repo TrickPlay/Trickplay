@@ -44,11 +44,33 @@ function Tower:render(seconds, creeps)
 	
 	local current
 	
+	--print("1")
+	
 	for i = 1, #creeps do
 		if (creeps[i].creepImage.x > self.x - self.range and creeps[i].creepImage.x < self.x + self.range
 				and creeps[i].creepImage.y > self.y - self.range and creeps[i].creepImage.y < self.y + self.range and creeps[i].hp ~=0) then
-			print ("creep "..i.." in range")
-			print(self.x, self.y)
+			--print ("creep "..i.." in range")
+			--print(self.x, self.y)
+			
+			if self.directionTable then 
+				--print("creep "..i.." in range") 
+				print ("creep is at ("..creeps[i].creepImage.x..","..creeps[i].creepImage.y..")")
+				local cx = creeps[i].creepImage.x
+				local cy = creeps[i].creepImage.y
+				local d = self.directionTable
+				local dir
+				for i = 1, #d do
+					local di = d[i]
+					if cy >= di[1] and cy <= di[2] and cx >= di[3] and cx <= di[4] then dir = i break end
+				end
+	
+				print(dir)
+				if dir == nil then print (cx, cy) end
+				
+				self.towerImage.x = self.x - 60 * (dir - 1)
+				self.towerImage.clip = { 60 * (dir - 1), 0, 60, 60 }
+			
+			end
 			
 			current = i		
 		
@@ -59,16 +81,34 @@ function Tower:render(seconds, creeps)
 		end
 	end
 	
-	if creeps[current].creepImage.x > self.x then 
+
+	
+	if not self.directionTable then
+		print("CREATED DIRECTION TABLE")
+		self.directionTable = {}	
+		self.directionTable[1] = { self.y, 		self.y+60, 	0, 			self.x }
+		self.directionTable[2] = { 0, 			self.y, 		0, 			self.x }		
+		self.directionTable[3] = { 0, 			self.y, 		self.x-30, 		self.x+60 }
+		self.directionTable[4] = { 0, 			self.y, 		self.x+60, 	1920 }
+		self.directionTable[5] = { self.y, 		self.y+60, 	self.x+60, 	1920 }
+		self.directionTable[6] = { self.y+60, 	1080, 		self.x+60, 	1920 }
+		self.directionTable[7] = { self.y+60, 	1080, 		self.x-30, 		self.x+60 }
+		self.directionTable[8] = { self.y+60, 	1080, 		0, 			self.x }	
+	end
+	
+
+	
+	--print("CHANGE")
+	
+	--[[if creeps[current].creepImage.x > self.x then 
 		self.towerImage.x = self.x - 60*4
 		self.towerImage.clip = { 60*4,0,60,60 }
-	end
-		
+	end	
 		
 	if creeps[current].creepImage.x < self.x then 
 		self.towerImage.x = self.x 
 		self.towerImage.clip = {0,0,60,60}
-	end
+	end]]
 	
 	if (math.floor(self.tower_elapsed_time) % 2 == 0 and creep_in_range) then
 			self.tower_elapsed_time = self.tower_elapsed_time + 1
