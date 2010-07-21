@@ -1,16 +1,20 @@
 -- All Global Variables
 
-BOARD_WIDTH  = 32
-BOARD_HEIGHT = 18
+BOARD_WIDTH  = 16
+BOARD_HEIGHT = 9
+BW = 16
+BH = 9
 
 FULL = 0
 EMPTY = 1
 WALKABLE = 2
 
-SQUARE_PIXEL_WIDTH = 60
-SQUARE_PIXEL_HEIGHT = 60
-SPW = 60
-SPH = 60
+SQUARE_PIXEL_WIDTH = 120
+SQUARE_PIXEL_HEIGHT = 120
+
+SP = 120
+SPW = SP
+SPH = SP
 
 CREEP_WAVE_LENGTH = 30
 
@@ -32,11 +36,11 @@ screen:add(countdowntimer, phasetext, playertext, goldtext)
 --convert from grid coord to pixel coord
 
 function GTP (x)
-	return (x-1)*60
+	return (x-1)*SP
 end
 
 function PTG (x)
-	return math.floor(x/60)+1
+	return math.floor(x/SP)+1
 end
 
 
@@ -44,7 +48,7 @@ end
 
 
 bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
-healthbar = Rectangle {color = "00FF00", width = 60, height = 10}
+healthbar = Rectangle {color = "00FF00", width = SP, height = 10}
  
  
 screen:add(bulletImage, healthbar)

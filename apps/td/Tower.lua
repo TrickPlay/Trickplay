@@ -7,7 +7,7 @@ function Tower:new(args)
 	local cost = args.cost
 	local direction = args.direction
 	local cooldown = args.cooldown
-	local towerImage = AssetLoader:getImage("normalRobot",{ clip={0,0,60,60} })
+	local towerImage = AssetLoader:getImage("normalRobot",{ clip={0,0,SP,SP} })
 	local isAttacking = false
 	local bullets = {}
 	local tower_elapsed_time = 0
@@ -52,7 +52,7 @@ function Tower:render(seconds, creeps)
 			--print ("creep "..i.." in range")
 			--print(self.x, self.y)
 			
-			if self.directionTable then print("creep "..i.." in range") 
+			if self.directionTable then --print("creep "..i.." in range") 
 			
 				local cx = creeps[i].creepImage.x
 				local cy = creeps[i].creepImage.y
@@ -66,8 +66,8 @@ function Tower:render(seconds, creeps)
 				print(dir)
 				if dir == nil then print (cx, cy) end
 				
-				self.towerImage.x = self.x - 60 * (dir - 1)
-				self.towerImage.clip = { 60 * (dir - 1), 0, 60, 60 }
+				self.towerImage.x = self.x - SP * (dir - 1)
+				self.towerImage.clip = { SP * (dir - 1), 0, SP, SP }
 			
 			end
 			
@@ -80,34 +80,18 @@ function Tower:render(seconds, creeps)
 		end
 	end
 	
-
-	
 	if not self.directionTable then
 		print("CREATED DIRECTION TABLE")
 		self.directionTable = {}	
-		self.directionTable[1] = { self.y, 		self.y+60, 	0, 			self.x }
+		self.directionTable[1] = { self.y, 		self.y+SP, 	0, 			self.x }
 		self.directionTable[2] = { 0, 			self.y, 		0, 			self.x }		
-		self.directionTable[3] = { 0, 			self.y, 		self.x-30, 		self.x+60 }
-		self.directionTable[4] = { 0, 			self.y, 		self.x+60, 	1920 }
-		self.directionTable[5] = { self.y, 		self.y+60, 	self.x+60, 	1920 }
-		self.directionTable[6] = { self.y+60, 	1080, 		self.x+60, 	1920 }
-		self.directionTable[7] = { self.y+60, 	1080, 		self.x-30, 		self.x+60 }
-		self.directionTable[8] = { self.y+60, 	1080, 		0, 			self.x }	
+		self.directionTable[3] = { 0, 			self.y, 		self.x-30, 	self.x+SP }
+		self.directionTable[4] = { 0, 			self.y, 		self.x+SP, 	1920 }
+		self.directionTable[5] = { self.y, 		self.y+SP, 	self.x+SP, 	1920 }
+		self.directionTable[6] = { self.y+50, 	1080, 		self.x+SP, 	1920 }
+		self.directionTable[7] = { self.y+50, 	1080, 		self.x-30, 	self.x+SP }
+		self.directionTable[8] = { self.y+50, 	1080, 		0, 			self.x }	
 	end
-	
-
-	
-	--print("CHANGE")
-	
-	--[[if creeps[current].creepImage.x > self.x then 
-		self.towerImage.x = self.x - 60*4
-		self.towerImage.clip = { 60*4,0,60,60 }
-	end	
-		
-	if creeps[current].creepImage.x < self.x then 
-		self.towerImage.x = self.x 
-		self.towerImage.clip = {0,0,60,60}
-	end]]
 	
 	if (math.floor(self.tower_elapsed_time) % 2 == 0 and creep_in_range) then
 			self.tower_elapsed_time = self.tower_elapsed_time + 1
