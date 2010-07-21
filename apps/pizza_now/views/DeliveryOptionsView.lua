@@ -1,4 +1,4 @@
-AddressInputView = Class(View, function(view, model, ...)
+DeliveryOptionsView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
     local street = Text{
