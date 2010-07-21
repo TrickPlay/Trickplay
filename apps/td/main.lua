@@ -49,5 +49,7 @@ function app.on_loaded()
 	AssetLoader:construct()
 	AssetLoader:preloadImage("normalRobot","assets/normalRobot.jpg")
 	AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.jpg")
+		
+	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
 
 end

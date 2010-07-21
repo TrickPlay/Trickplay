@@ -123,7 +123,11 @@ function Board:createBoard()
 	
 	BoardMenu.buttons.extra.r = function()
 		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
-			self:buildTower()
+		
+			local board = self:getPathData()
+			board[BoardMenu.y][BoardMenu.x] = "X"
+			if pathExists(board,{7,1},{7,32}) then self:buildTower() end
+			
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
 			self:removeTower()
 		end
@@ -178,6 +182,12 @@ function Board:buildTower()
 
 	-- in reality this would call the circle menu asking for what to do with the square
 	current.tower = Tower:new(self.theme.towers.normalTower)
+	current.tower.x = GTP(current.x)
+	current.tower.y = GTP(current.y)
+	
+	print(GTP(current.x), GTP(current.y))
+	--assert(nil)
+	
 	current.hasTower = true
 	table.insert(self.squaresWithTowers, current)
 	current.square[3] = FULL
@@ -270,7 +280,7 @@ function pathExists(board, st, fn)
 	-- Some assertions
 	assert(type(st) == "table", "Start must have an x and a y coordinate")
 	assert(type(fn) == "table", "Finish must have an x and a y coordinate")
-	printTable(board)
+	--printTable(board)
 	
 	-- If start == finish
 	if st[1] == fn[1] and st[2] == fn[2] then return true
@@ -280,16 +290,16 @@ function pathExists(board, st, fn)
 		
 	-- Check all directions
 	if st[2] > 1 and board[ st[1] ][ st[2]-1 ] == 0 and not found then
-		print("Right") found = pathExists(board, { st[1] , st[2]-1 }, fn) end
+		found = pathExists(board, { st[1] , st[2]-1 }, fn) end
 		
 	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] == 0 and not found then
-		print("Down") found = pathExists(board, { st[1]-1 , st[2] }, fn) end
+		found = pathExists(board, { st[1]-1 , st[2] }, fn) end
 		
 	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] == 0 and not found then
-		print("Up") found = pathExists(board, { st[1]+1 , st[2] }, fn) end
+		found = pathExists(board, { st[1]+1 , st[2] }, fn) end
 		
 	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] == 0 and not found then
-		print("Left") found = pathExists(board, { st[1] , st[2]+1 }, fn) end
+		found = pathExists(board, { st[1] , st[2]+1 }, fn) end
 	
 	return found
 end
