@@ -11,6 +11,8 @@ Board = {
 				if (self.creepWave[i].hp ~= 0) then
 					self.creepWave[i]:render(seconds)
 				else
+					self.player.gold = self.player.gold + self.creepWave[i].bounty
+					self.player.goldtext = self.player.gold
 					wave_counter = wave_counter + 1
 					self.creepWave[i].greenBar.width = 0
 					self.creepWave[i].creepImage.opacity = 0
@@ -179,12 +181,15 @@ end
 
 function Board:zoomIn()
 	print("in")
-	screen.scale={2,2}
-	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
+	screen:animate { duration = 500, scale={2,2}, position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}}
+
+--	screen.scale={2,2}
+--	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
 end
 
 function Board:zoomOut()
 	print("out")
+	screen:animate { duration = 500, scale = {0.5,0.5}, position = {0,0}}
 	screen.position = {0, 0}
 	screen.scale={.5,.5}
 end
