@@ -162,7 +162,8 @@ interface audiosample [[AudioSample*]]
 
 	string __tostring()
 		[[
-			result = self->to_string().c_str();
+			String s(self->to_string());
+			result = s.c_str();
 		]];
 }
 
