@@ -21,7 +21,7 @@ function Square:new(args)
 end
 
 function Square:render()
-	self.tower.towerImage.x = (self.x-1) * SPW
-	self.tower.towerImage.y = (self.y-1) * SPH
+	self.tower.towerImage.x = (self.x-1) * SP
+	self.tower.towerImage.y = (self.y-1) * SP
 	screen:add(self.tower.towerImage)
 end

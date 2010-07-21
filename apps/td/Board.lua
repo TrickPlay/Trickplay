@@ -61,8 +61,8 @@ Board = {
 }
 
 function Board:new(args)
-	local w = BOARD_WIDTH
-	local h = BOARD_HEIGHT
+	local w = BW
+	local h = BH
 	local squareGrid = {}
 	local creepWave = {}
 	local squaresWithTowers = {}
@@ -123,11 +123,7 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-			--if (s[j].square[3] == FULL) then
-				g[j] = Group{w=SPW, h=SPH, name=""}
-			--else
-			--	g[j] = Group{w=SPW, h=SPH, name=s[j].square[3]}
-			--end
+				g[j] = Group{w=SP, h=SP}
 	   end
 	end
 	backgroundImage = Image {src = self.theme.boardBackground }
@@ -153,7 +149,7 @@ function Board:createBoard()
 		
 			local board = self:getPathData()
 			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{7,1},{7,32}) then self:buildTower() end
+			if pathExists(board,{7,1},{7,BW}) then self:buildTower() end
 			
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
 			self:removeTower()
@@ -165,7 +161,7 @@ function Board:createBoard()
 		for i = 1, #self.creepWave do
 			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
 				local found
-				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[math.floor(self.creepWave[i].creepImage.y/60)+1][math.floor(self.creepWave[i].creepImage.x/60)+1], self.nodes[7][32], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepImage.y) ][PTG( self.creepWave[i].creepImage.x) ], self.nodes[7][BW], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
 				self.creepWave[i].path[#self.creepWave[i].path] = nil
 			end
 		end
@@ -325,10 +321,10 @@ function pathExists(board, st, fn)
 	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] == 0 and not found then
 		found = pathExists(board, { st[1]-1 , st[2] }, fn) end
 		
-	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] == 0 and not found then
+	if st[1] < BH and board[ st[1]+1 ][ st[2] ] == 0 and not found then
 		found = pathExists(board, { st[1]+1 , st[2] }, fn) end
 		
-	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] == 0 and not found then
+	if st[2] < BW and board[ st[1] ][ st[2]+1 ] == 0 and not found then
 		found = pathExists(board, { st[1] , st[2]+1 }, fn) end
 	
 	return found
@@ -360,7 +356,7 @@ function recordPath(board, st, fn, step)
 	end
 	
 	-- Right
-	if st[2] < 32 and board[ st[1] ][ st[2]+1 ] ~= "X" and (board[ st[1] ][ st[2]+1 ] == 0 or board[ st[1] ][ st[2]+1 ] > step + 1) then 
+	if st[2] < BW and board[ st[1] ][ st[2]+1 ] ~= "X" and (board[ st[1] ][ st[2]+1 ] == 0 or board[ st[1] ][ st[2]+1 ] > step + 1) then 
 		board[ st[1] ][ st[2]+1 ] = step + 1
 		recordPath(board, { st[1] , st[2]+1 }, fn, step + 1)
 	end
@@ -372,7 +368,7 @@ function recordPath(board, st, fn, step)
 	end
 	
 	-- Up
-	if st[1] < 18 and board[ st[1]+1 ][ st[2] ] ~= "X" and (board[ st[1]+1 ][ st[2] ] == 0 or board[ st[1]+1 ][ st[2] ] > step + 1) then
+	if st[1] < BH and board[ st[1]+1 ][ st[2] ] ~= "X" and (board[ st[1]+1 ][ st[2] ] == 0 or board[ st[1]+1 ][ st[2] ] > step + 1) then
 		board[ st[1]+1 ][ st[2] ] = step + 1
 		recordPath(board, { st[1]+1 , st[2] }, fn, step + 1)
 	end
@@ -404,9 +400,9 @@ function Board:createNodes()
 			local c = n.children
 			
 			if n[1] > 1 and self.squareGrid[i-1][j].square[3] ~= FULL then c.north = self.squareGrid[i-1][j].square end
-			if n[1] < 18 and self.squareGrid[i+1][j].square[3] ~= FULL then c.south = self.squareGrid[i+1][j].square end
+			if n[1] < BH and self.squareGrid[i+1][j].square[3] ~= FULL then c.south = self.squareGrid[i+1][j].square end
 			if n[2] > 1 and self.squareGrid[i][j-1].square[3] ~= FULL then c.west = self.squareGrid[i][j-1].square end			
-			if n[2] < 32 and self.squareGrid[i][j+1].square[3] ~= FULL then c.east = self.squareGrid[i][j+1].square end			
+			if n[2] < BW and self.squareGrid[i][j+1].square[3] ~= FULL then c.east = self.squareGrid[i][j+1].square end			
 			
 		end
 	end
