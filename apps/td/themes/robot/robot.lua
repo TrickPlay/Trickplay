@@ -6,7 +6,7 @@ local robot = {
 		},
 		towers = {
 			normalTower = {towerType = "assets/robots/normalRobot/01.png", damage = 5, range = 300, cooldown = 50, cost = 50},
-			wall = {}
+			wall = {towerType = "assets/normalTower.png", damage = 0, range = 0, cooldown = 1000, cost = 5}
 		},
 		obstacles = { },
 		boardBackground = "assets/robotBackground.png"

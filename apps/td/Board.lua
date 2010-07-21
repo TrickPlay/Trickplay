@@ -130,8 +130,7 @@ function Board:createBoard()
 	
 	local b = Group{}
 	screen:add(backgroundImage, b)
-	local hl = Rectangle{h=70, w=70, color="FF00CC"}
-	
+	local hl = Rectangle{h=SP, w=SP, color="A52A2A"}
 	self.nodes = self:createNodes()
 
 	BoardMenu = Menu.create(b, groups, hl)
@@ -207,7 +206,9 @@ function Board:buildTower()
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
 	-- in reality this would call the circle menu asking for what to do with the square
-	current.tower = Tower:new(self.theme.towers.normalTower)
+	current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
+--	current.tower = Tower:new(self.theme.towers.wall, "wall")
+
 	current.tower.x = GTP(current.x)
 	current.tower.y = GTP(current.y)
 	

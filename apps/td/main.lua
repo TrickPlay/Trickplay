@@ -53,5 +53,5 @@ function app.on_loaded()
 	AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.jpg")
 		
 	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
-
+	AssetLoader:preloadImage("wall","assets/normalTower.png")
 end
