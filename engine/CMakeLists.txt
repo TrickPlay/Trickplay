@@ -212,6 +212,8 @@ set(
     ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/json.lb
 
+	${BINDINGS_SRC}/audiosampler.lb
+
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
     ${BINDINGS_SRC}/clutter_screen.lb
