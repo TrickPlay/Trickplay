@@ -13,7 +13,6 @@ function Game:new(args)
 	local object = {
 		-- properties of game
 		board = board,
-	
 		theme = theme
    }
    setmetatable(object, self)
