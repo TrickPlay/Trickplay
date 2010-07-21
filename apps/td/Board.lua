@@ -6,7 +6,7 @@ Board = {
 	render = function (self, seconds)
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
-		if (seconds_elapsed >= 20) then
+		if (seconds_elapsed >= 5) then
 			for i=1,#self.creepWave do
 				if (self.creepWave[i].hp ~= 0) then
 					self.creepWave[i]:render(seconds)
