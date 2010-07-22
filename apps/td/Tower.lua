@@ -53,7 +53,6 @@ function Tower:render(seconds, creeps)
 		if (creeps[i].creepImage.x > self.x - self.range and creeps[i].creepImage.x < self.x + self.range
 				and creeps[i].creepImage.y > self.y - self.range and creeps[i].creepImage.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
 			creeps[i].speed = creeps[i].max_speed - self.slow
-			print (creeps[i].speed)
 			
 			if self.directionTable then --print("creep "..i.." in range") 
 			
@@ -75,6 +74,8 @@ function Tower:render(seconds, creeps)
 			current = i		
 		
 			creep_in_range = true
+			
+			print (math.floor(self.tower_elapsed_time))
 			creeps[i].hp = creeps[i].hp - self.damage
 			
 			if (creeps[i].hp <=0) then creeps[i].hp =0 end
