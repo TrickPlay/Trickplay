@@ -46,6 +46,10 @@ Board = {
 		for i = 1, #self.squaresWithTowers do
 			self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
 		end
+		
+		if self.circle then
+			circleRender(self.circle, seconds)
+		end
 	end
 }
 
@@ -135,19 +139,40 @@ function Board:createBoard()
 	BoardMenu.container.opacity=255
 	
 	BoardMenu.buttons.extra.r = function()
-		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
-		
-			--local board = self:getPathData()
-			--board[BoardMenu.y][BoardMenu.x] = "X"
-			createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150 )
-			--if pathExists(board,{7,1},{7,BW}) then self:buildTower() end
-			
-		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
-			self:removeTower()
-		end
-		
+	
 		playertext.text = self.player.name
 		goldtext.text = self.player.gold
+	
+		-- Populate the circle menu with buttons
+		local list = {}
+		
+		-- Towers
+		local towers = {"normalRobot", "wall", "slowTower"}
+		local icons = {"normalRobotBuy","wall","slowTowerIcon"}
+		
+		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
+		
+			for i=1,#towers do
+			
+				list[#list+1] = AssetLoader:getImage( icons[i], { } )
+				list[#list].extra.f = function()
+					buildTowerIfEmpty( towers[i] )
+				end
+			end
+		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
+		
+			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
+			list[#list].extra.f = function()
+				self:removeTower()
+			end
+		
+		end
+		
+		-- Put this list within a table... for menu purposes
+		local params = {list}
+			
+		-- Create the circular menu
+		self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params )
 		
 	end
 	
@@ -179,7 +204,7 @@ function Board:findPaths()
 	for i = 1, #self.creepWave do
 		if (self.creepWave[i].creepGroup.x >= 0 and self.creepWave[i].creepGroup.x <= 1800) then
 			local found
-			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepGroup.y) ][PTG( self.creepWave[i].creepGroup.x) ], self.nodes[7][BW], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepGroup.y) ][PTG( self.creepWave[i].creepGroup.x) ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
 			self.creepWave[i].path[#self.creepWave[i].path] = nil
 		end
 	end
@@ -332,62 +357,6 @@ function pathExists(board, st, fn)
 		found = pathExists(board, { st[1] , st[2]+1 }, fn) end
 	
 	return found
-end
-
-function ninePrint(table)
-	for i = 1, #table do
-		local total = ""
-		for j = 1, #table[i] do
-			if table[i][j] == "X" then total = total.."X" elseif table[i][j] > 9 then total = total..9 else total = total..table[i][j] end
-		end
-		print(total)
-	end
-end
-
--- Start and finish are {y, x}
-function recordPath(board, st, fn, step)
-
-	-- Some assertions
-	assert(type(st) == "table", "Start must have an x and a y coordinate")
-	assert(type(fn) == "table", "Finish must have an x and a y coordinate")
-	if st[1] <= 0 or st[1] >= 19 or st[2] <= 0 or st[2] >= 33 then print(st[1]..", "..st[2]) end
-	assert(st[1] > 0 and st[1] < 19 and st[2] > 0 and st[2] < 33)
-	
-	-- Left
-	if st[2] > 1 and board[ st[1] ][ st[2]-1 ] ~= "X" and (board[ st[1] ][ st[2]-1 ] == 0 or board[ st[1] ][ st[2]-1 ] > step + 1) then 
-		board[ st[1] ][ st[2]-1 ] = step + 1
-		recordPath(board, { st[1] , st[2]-1 }, fn, step + 1)
-	end
-	
-	-- Right
-	if st[2] < BW and board[ st[1] ][ st[2]+1 ] ~= "X" and (board[ st[1] ][ st[2]+1 ] == 0 or board[ st[1] ][ st[2]+1 ] > step + 1) then 
-		board[ st[1] ][ st[2]+1 ] = step + 1
-		recordPath(board, { st[1] , st[2]+1 }, fn, step + 1)
-	end
-	
-	-- Down
-	if st[1] > 1 and board[ st[1]-1 ][ st[2] ] ~= "X" and (board[ st[1]-1 ][ st[2] ] == 0 or board[ st[1]-1 ][ st[2] ] > step + 1) then
-		board[ st[1]-1 ][ st[2] ] = step + 1
-		recordPath(board, { st[1]-1 , st[2] }, fn, step + 1)
-	end
-	
-	-- Up
-	if st[1] < BH and board[ st[1]+1 ][ st[2] ] ~= "X" and (board[ st[1]+1 ][ st[2] ] == 0 or board[ st[1]+1 ][ st[2] ] > step + 1) then
-		board[ st[1]+1 ][ st[2] ] = step + 1
-		recordPath(board, { st[1]+1 , st[2] }, fn, step + 1)
-	end
-	
-end
-
-function tracePath(board, fn, step, path)
-
-	path[#path + 1] = { fn[1], fn[2] }
-
-	if board[ fn[1] ][ fn[2]-1 ] == step-1 then tracePath(board, { fn[1], fn[2]-1 }, step-1, path)
-	elseif board[ fn[1] ][ fn[2]+1 ] == step-1 then tracePath(board, { fn[1], fn[2]+1 }, step-1, path)
-	elseif board[ fn[1]-1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]-1, fn[2] }, step-1, path)
-	elseif board[ fn[1]+1 ][ fn[2] ] == step-1 then tracePath(board, { fn[1]+1, fn[2] }, step-1, path) end
-
 end
 
 function Board:createNodes()
