@@ -23,6 +23,11 @@
 #include "versions.h"
 
 //-----------------------------------------------------------------------------
+
+static int * g_argc     = NULL;
+static char *** g_argv  = NULL;
+
+//-----------------------------------------------------------------------------
 // Internal context
 //-----------------------------------------------------------------------------
 
@@ -346,6 +351,10 @@ int TPContext::console_command_handler( const char * command, const char * param
         {
             PROFILER_DUMP;
         }
+    }
+    else if ( !strcmp( command, "obj" ) )
+    {
+        PROFILER_OBJECTS;
     }
     else if ( !strcmp( command, "ver" ) )
     {
@@ -1320,7 +1329,7 @@ void TPContext::load_external_configuration()
             {
                 if ( const gchar * v = g_getenv( *e ) )
                 {
-                    gchar * k = g_strstrip( g_strdelimit( ( *e ) + 3, "_", '.' ) );
+                    gchar * k = g_strstrip( ( *e ) + 3 );
 
                     g_info( "ENV:%s=%s", k, v );
                     set( k, v );
@@ -1331,40 +1340,175 @@ void TPContext::load_external_configuration()
         g_strfreev( env );
     }
 
-    const char * file_name = get( TP_CONFIG_FROM_FILE, TP_CONFIG_FROM_FILE_DEFAULT );
+    FreeLater free_later;
 
-    gchar * contents = NULL;
+    const char * file_name = get( TP_CONFIG_FROM_FILE );
 
-    if ( g_file_get_contents( file_name, &contents, NULL, NULL ) )
+    // If a specific file name was given and it does not exist, we
+    // bail with an error. If no file name was given and the default one
+    // does not exist, we just skip processing it.
+
+    if ( file_name && ! g_file_test( file_name , G_FILE_TEST_EXISTS ) )
     {
-        gchar ** lines = g_strsplit( contents, "\n", 0 );
-
-        for ( gchar ** l = lines; *l; ++l )
-        {
-            gchar * line = g_strstrip( *l );
-
-            if ( g_str_has_prefix( line, "#" ) )
-            {
-                continue;
-            }
-
-            gchar ** parts = g_strsplit( line, "=", 2 );
-
-            if ( g_strv_length( parts ) == 2 )
-            {
-                gchar * k = g_strstrip( parts[0] );
-                gchar * v = g_strstrip( parts[1] );
-
-                g_info( "FILE:%s:%s=%s", file_name, k, v );
-                set( k, v );
-            }
-
-            g_strfreev( parts );
-        }
-
-        g_strfreev( lines );
-        g_free( contents );
+        g_error( "CONFIG FILE %s DOES NOT EXIST", file_name );
     }
+
+    if ( ! file_name )
+    {
+        file_name = TP_CONFIG_FROM_FILE_DEFAULT;
+
+        if ( ! g_file_test( file_name , G_FILE_TEST_EXISTS ) )
+        {
+            // See if there is one in the user's home directory
+
+            const gchar * home = g_getenv( "HOME" );
+
+            if ( ! home )
+            {
+                home = g_get_home_dir();
+
+                if ( ! home )
+                {
+                    return;
+                }
+            }
+
+            gchar * path = g_build_filename( home , TP_CONFIG_FROM_FILE_DEFAULT , NULL );
+
+            free_later( path );
+
+            if ( ! g_file_test( path , G_FILE_TEST_EXISTS ) )
+            {
+                return;
+            }
+
+            file_name = path;
+
+            g_info( "%s=%s" , TP_CONFIG_FROM_FILE , file_name );
+        }
+    }
+
+    // Now open the Lua state
+
+    lua_State * L = lua_open();
+
+    const luaL_Reg lualibs[] =
+    {
+
+// TODO: Not sure if these should be enabled all the time - they would give us
+// some interesting capabilities.
+
+#if 1
+
+        { "", luaopen_base },
+        { LUA_IOLIBNAME, luaopen_io},
+        { LUA_OSLIBNAME, luaopen_os },
+        { LUA_LOADLIBNAME, luaopen_package },
+
+#endif
+
+        { LUA_TABLIBNAME, luaopen_table },
+        { LUA_STRLIBNAME, luaopen_string },
+        { LUA_MATHLIBNAME, luaopen_math },
+        { NULL, NULL }
+    };
+
+    for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
+    {
+        lua_pushcfunction( L, lib->func );
+        lua_pushstring( L, lib->name );
+        lua_call( L, 1, 0 );
+    }
+
+    //.....................................................................
+    // Create a new table to hold command line options
+
+    lua_newtable( L );
+
+    if ( g_argc && g_argv )
+    {
+        for( int i = 1; i < * g_argc; ++i )
+        {
+            lua_pushstring( L , ( * g_argv )[ i ] );
+            lua_rawseti( L , -2 , i );
+        }
+    }
+
+    lua_setglobal( L, "args" );
+
+    //.....................................................................
+    // Push a global holding the trickplay version
+
+    lua_pushstring( L, Util::format( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION ).c_str() );
+    lua_setglobal( L, "_TRICKPLAY_VERSION" );
+
+    //.....................................................................
+    // Run the config file
+
+    if ( luaL_dofile( L, file_name ) )
+    {
+        g_error( "FAILED TO PARSE CONFIGURATION FILE : %s", lua_tostring( L , -1 ) );
+
+        lua_close( L );
+    }
+
+    // Pull these names from the globals
+
+    const char * names[] =
+    {
+        TP_APP_SOURCES,
+        TP_SCAN_APP_SOURCES,
+        TP_APP_ID,
+        TP_APP_PATH,
+        TP_APP_ALLOWED,
+        TP_SYSTEM_LANGUAGE,
+        TP_SYSTEM_COUNTRY,
+        TP_SYSTEM_NAME,
+        TP_SYSTEM_VERSION,
+        TP_DATA_PATH,
+        TP_SCREEN_WIDTH,
+        TP_SCREEN_HEIGHT,
+        TP_CONFIG_FROM_ENV,
+        TP_CONFIG_FROM_FILE,
+        TP_CONSOLE_ENABLED,
+        TP_TELNET_CONSOLE_PORT,
+        TP_CONTROLLERS_ENABLED,
+        TP_CONTROLLERS_PORT,
+        TP_CONTROLLERS_NAME,
+        TP_LOG_DEBUG,
+        TP_FONTS_PATH,
+        TP_DOWNLOADS_PATH,
+        TP_NETWORK_DEBUG,
+        TP_SSL_VERIFY_PEER,
+        TP_SSL_CA_CERT_FILE,
+
+        NULL
+    };
+
+    for ( const char * * name = names; *name; ++name )
+    {
+        lua_getglobal( L, * name );
+
+        if ( ! lua_isnil( L, -1 ) )
+        {
+            const char * value = lua_tostring( L, -1 );
+
+            if ( ! value && lua_isboolean( L , -1 ) )
+            {
+                value = lua_toboolean( L , -1 ) ? "true" : "false";
+            }
+
+            if ( value )
+            {
+                g_info( "FILE:%s:%s=%s", file_name, * name, value );
+
+                set( * name, value );
+            }
+        }
+        lua_pop( L, 1 );
+    }
+
+    lua_close( L );
 }
 
 
@@ -1823,6 +1967,9 @@ Image * TPContext::load_icon( const gchar * path )
 
 void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
 {
+    g_argc = argc;
+    g_argv = argv;
+
     if ( !g_thread_supported() )
     {
         g_thread_init( NULL );
@@ -1853,6 +2000,8 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
     }
 
     g_log_set_default_handler( TPContext::log_handler, NULL );
+
+    g_info( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
 }
 
 //-----------------------------------------------------------------------------
