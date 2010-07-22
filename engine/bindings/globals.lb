@@ -6,6 +6,85 @@ module globals;
 #include "app.h"
 #include "context.h"
 #include "actions.h"
+
+struct DoLater
+{
+	static void add(lua_State * L,int function_ref,int args_table_ref)
+	{
+		DoLater * dl = g_new0( DoLater , 1 );
+		
+		dl->lsp = App::get(L)->ref_lua_state_proxy();
+		dl->function_ref = function_ref;
+		dl->args_table_ref = args_table_ref;
+		
+		g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy ); 
+	}  
+	
+	static gboolean do_it( DoLater * self )
+	{
+		lua_State * L = self->lsp->get_lua_state();
+		
+		if ( L )
+		{
+			// Get the function
+			
+			lua_rawgeti(L,LUA_REGISTRYINDEX,self->function_ref);
+			
+			// Count and push the arguments
+			
+			int nargs = 0;
+			
+			if ( self->args_table_ref != LUA_NOREF )
+			{
+				lua_rawgeti(L,LUA_REGISTRYINDEX,self->args_table_ref);
+				
+				if ( lua_type(L,-1) == LUA_TTABLE )
+				{
+					lua_pushnil(L);
+					
+					while( lua_next(L,-2) )
+					{
+						// Move the value below the table
+						lua_insert(L,-3);
+						++nargs;
+					}
+				}
+				
+				// Pop the table
+				
+				lua_pop(L,1);
+			}
+			
+			// Now call it
+			
+			lua_call(L,nargs,0);
+		}
+		
+		return FALSE;
+	} 
+	
+	static void destroy( DoLater * self )
+	{
+		lua_State * L = self->lsp->get_lua_state();
+		
+		if ( L )
+		{
+			luaL_unref(L,LUA_REGISTRYINDEX,self->function_ref);
+			luaL_unref(L,LUA_REGISTRYINDEX,self->args_table_ref);
+		}
+		
+		self->lsp->unref();
+		
+		g_free( self );
+	}
+
+private:
+
+	LuaStateProxy * lsp;
+	int 			function_ref;
+	int				args_table_ref;
+};
+
 ]]
 
 globals
@@ -389,6 +468,36 @@ globals
 		    {
 		        debugger->break_next_line();
 		    }		
+		]];
+		
+	detach( udata o )
+		[[
+			lb_clear_callbacks(L,o);
 		]];		       
+		
+	dolater( function f , ... )
+		[[
+			int nargs = lua_gettop(L)-f;
+			int args = LUA_NOREF;
+			
+			// If there are args, we put them into a table and
+			// get a ref to the table
+			
+			if ( nargs > 0 )
+			{
+				lua_newtable(L);
+				for (int i=1; i<=nargs; ++i)
+				{
+					lua_pushvalue(L,i+f);
+					lua_rawseti(L,-2,i);
+				}
+				args = luaL_ref(L,LUA_REGISTRYINDEX);
+			}
+			
+			lua_pushvalue(L,f);
+			int func = luaL_ref(L,LUA_REGISTRYINDEX);
+			
+			DoLater::add(L,func,args);
+		]];
 }
 

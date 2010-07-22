@@ -41,6 +41,8 @@ void Profiler::lock( bool _lock )
 
 Profiler::EntryMap Profiler::entries;
 
+Profiler::ObjectMap Profiler::objects;
+
 Profiler::Profiler( const char * _name )
 {
 
@@ -141,6 +143,28 @@ void Profiler::reset()
     entries.clear();
 
     lock( false );
+}
+
+void Profiler::created( const char * name, gpointer p )
+{
+    objects[ name ].created += 1;
+}
+
+void Profiler::destroyed( const char * name, gpointer p )
+{
+    objects[ name ].destroyed += 1;
+}
+
+void Profiler::dump_objects()
+{
+    for( ObjectMap::const_iterator it = objects.begin(); it != objects.end(); ++it )
+    {
+        g_info( "%24s  %5d %5d %5d",
+                it->first.c_str(),
+                it->second.created,
+                it->second.destroyed,
+                it->second.created - it->second.destroyed );
+    }
 }
 
 #endif // TP_PROFILING

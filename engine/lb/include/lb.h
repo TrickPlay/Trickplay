@@ -15,6 +15,7 @@ int lb_get_callback(lua_State*L,void*self,const char*name,int metatable_on_top);
 int lb_set_callback(lua_State*L,void*self,const char*name);
 int lb_invoke_callback(lua_State*L,void*self,const char*metatable,const char*name,int nargs,int nresults);
 void lb_clear_callbacks(lua_State*L,void*self,const char*metatable);
+void lb_clear_callbacks(lua_State*L,int index);
 int lb_callback_attached(lua_State*L,void*self,const char*name,int index);
 
 void lb_store_weak_ref(lua_State*L,int udata,void*self);

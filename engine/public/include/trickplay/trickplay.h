@@ -107,7 +107,7 @@ typedef struct TPContext TPContext;
                             Defaults to "0.0.0".
                             
     TP_DATA_PATH -          Data path. This must be a path where TrickPlay can create
-                            files and directories. TrickPlay will create a subdirectory
+                            files and directories. TrickPlay will create a sub-directory
                             called "trickplay" and keep all of its data there.
                             Defaults to a system temporary directory.
                             
@@ -121,18 +121,17 @@ typedef struct TPContext TPContext;
     TP_CONFIG_FROM_ENV -    Environment configuration. If set to "1", TrickPlay
                             will read additional configuration variables from the
                             environment. All environment variables that begin with
-                            "TP_" will be read, all underscores will be changed to
-                            "." and the resulting variables will be set in the context.
+                            "TP_" will be read and the resulting variables
+                            will be set in the context.
                             For example, the environment variable "TP_app_path"
-                            will be read and set as "app.path". Defaults to "1".
+                            will be read and set as "app_path". Defaults to "1".
 
     TP_CONFIG_FROM_FILE -   Configuration file. If set to the path of an existing
                             file, TrickPlay will read configuration variables from
-                            the file. The file should have one entry per line, with the
-                            configuration variable followed by "=" and its value.
-                            Lines that start with "#" are ignored. For example:
-                            app.path=/foo/bar.
-                            Defaults to "trickplay.cfg" (in the current working directory).
+                            the file. This file is a Lua file and has access to
+                            TrickPlay's command line options.
+                            Defaults to ".trickplay" in the current working directory
+                            or the user's home directory.
                             
     TP_CONSOLE_ENABLED -    Console enabled. Set to "1" if you want to enable the
                             input console, or "0" otherwise. In production builds,
@@ -183,31 +182,31 @@ typedef struct TPContext TPContext;
 
 */
 
-#define TP_APP_SOURCES                  "app.sources"
-#define TP_SCAN_APP_SOURCES             "app.scan"
-#define TP_APP_ID                       "app.id"
-#define TP_APP_PATH                     "app.path"
-#define TP_APP_ALLOWED                  "app.allowed"
-#define TP_SYSTEM_LANGUAGE              "system.language"
-#define TP_SYSTEM_COUNTRY               "system.country"
-#define TP_SYSTEM_NAME                  "system.name"
-#define TP_SYSTEM_VERSION               "system.version"
-#define TP_DATA_PATH                    "data.path"
-#define TP_SCREEN_WIDTH                 "screen.width"
-#define TP_SCREEN_HEIGHT                "screen.height"
-#define TP_CONFIG_FROM_ENV              "config.env"
-#define TP_CONFIG_FROM_FILE             "config.file"
-#define TP_CONSOLE_ENABLED              "console.enabled"
-#define TP_TELNET_CONSOLE_PORT          "console.port"
-#define TP_CONTROLLERS_ENABLED          "controllers.enabled"
-#define TP_CONTROLLERS_PORT             "controllers.port"
-#define TP_CONTROLLERS_NAME             "controllers.name"
-#define TP_LOG_DEBUG                    "log.debug"
-#define TP_FONTS_PATH                   "fonts.path"
-#define TP_DOWNLOADS_PATH               "downloads.path"
-#define TP_NETWORK_DEBUG                "network.debug"
-#define TP_SSL_VERIFY_PEER              "ssl.verifypeer"
-#define TP_SSL_CA_CERT_FILE             "ssl.cacertfile"
+#define TP_APP_SOURCES                  "app_sources"
+#define TP_SCAN_APP_SOURCES             "app_scan"
+#define TP_APP_ID                       "app_id"
+#define TP_APP_PATH                     "app_path"
+#define TP_APP_ALLOWED                  "app_allowed"
+#define TP_SYSTEM_LANGUAGE              "system_language"
+#define TP_SYSTEM_COUNTRY               "system_country"
+#define TP_SYSTEM_NAME                  "system_name"
+#define TP_SYSTEM_VERSION               "system_version"
+#define TP_DATA_PATH                    "data_path"
+#define TP_SCREEN_WIDTH                 "screen_width"
+#define TP_SCREEN_HEIGHT                "screen_height"
+#define TP_CONFIG_FROM_ENV              "config_env"
+#define TP_CONFIG_FROM_FILE             "config_file"
+#define TP_CONSOLE_ENABLED              "console_enabled"
+#define TP_TELNET_CONSOLE_PORT          "console_port"
+#define TP_CONTROLLERS_ENABLED          "controllers_enabled"
+#define TP_CONTROLLERS_PORT             "controllers_port"
+#define TP_CONTROLLERS_NAME             "controllers_name"
+#define TP_LOG_DEBUG                    "log_debug"
+#define TP_FONTS_PATH                   "fonts_path"
+#define TP_DOWNLOADS_PATH               "downloads_path"
+#define TP_NETWORK_DEBUG                "network_debug"
+#define TP_SSL_VERIFY_PEER              "ssl_verifypeer"
+#define TP_SSL_CA_CERT_FILE             "ssl_cacertfile"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

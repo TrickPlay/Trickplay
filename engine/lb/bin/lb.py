@@ -613,12 +613,12 @@ def emit( stuff , f ):
                 (bind_name,udata_type)
             )
             
-            if options.instrument:
+            if options.profiling:
                 
                 f.write(
                     "  int result=lb_wrap(L,self,%s);\n"
                     "  if(result)\n"
-                    '    g_debug("CREATED %s %%p",self);\n'
+                    '    PROFILER_CREATED("%s",self);\n'
                     "  return result;\n"
                     "}\n"
                         %
@@ -761,10 +761,10 @@ def emit( stuff , f ):
                 
                 f.write("  lb_store_weak_ref(L,lua_gettop(L),*self);\n");
                 
-                if options.instrument:
+                if options.profiling:
                     
                     f.write(
-                        '  g_debug("CREATED %s %%p",*self);\n'
+                        '  PROFILER_CREATED("%s",*self);\n'
                         %
                         bind_name );
                 
@@ -796,10 +796,10 @@ def emit( stuff , f ):
                     ( bind_name , profiling_header("delete_%s"%bind_name) , udata_type , udata_type )
                 )
                 
-                if options.instrument:
+                if options.profiling:
                     
                     f.write(
-                        '  g_debug("DESTROYED %s %%p",self);\n'
+                        '  PROFILER_DESTROYED("%s",self);\n'
                         %
                         bind_name );
                 
@@ -1252,7 +1252,6 @@ if __name__ == "__main__":
     
     parser = OptionParser()
     parser.add_option( "-l" , "--lines" , action="store_true" , default=False , help="Include #line directives" )
-    parser.add_option( "-i" , "--instrument" , action="store_true" , default=False , help="Add instrumentation" )
     parser.add_option( "-p" , "--profiling" , action="store_true" , default=False , help="Enable profiling" ) 
     (options,args) = parser.parse_args()
     
