@@ -35,8 +35,8 @@ Board = {
 				creep.max_hp = wave.hp
 				creep.creepImage.src = wave.creepType
 				creep.bounty = wave.bounty
-				creep.creepImage.x = -240*i
-				creep.creepImage.y = 420
+				creep.creepImage.x = -SP*2*i
+				--creep.creepImage.y = GTP(CREEP_START[1])
 				creep.speed = wave.speed
 				creep.greenBar.x = -240*i
 				creep.greenBar.y = -240*i
@@ -76,7 +76,7 @@ function Board:new(args)
       squareGrid[i] = {}
 	end
 	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep, -240*i, 420, "normal")
+		creepWave[i] = Creep:new(theme.creeps.normalCreep, -240*i, GTP(CREEP_START[1]), "normal")
 	end
 	for i = 1, h do
 		for j = 1, w do
@@ -158,14 +158,7 @@ function Board:createBoard()
 		
 		playertext.text = self.player.name
 		goldtext.text = self.player.gold
-
-		for i = 1, #self.creepWave do
-			if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
-				local found
-				found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepImage.y) ][PTG( self.creepWave[i].creepImage.x) ], self.nodes[7][BW], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
-				self.creepWave[i].path[#self.creepWave[i].path] = nil
-			end
-		end
+		
 	end
 	
 	playertext.text = self.player.name
@@ -186,6 +179,18 @@ function Board:createBoard()
 		--self.creepWave[i].creepImage.x = i*100
 		screen:add(self.creepWave[i].creepImage, self.creepWave[i].greenBar, self.creepWave[i].redBar)
 	end
+end
+
+function Board:findPaths()
+
+	for i = 1, #self.creepWave do
+		if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
+			local found
+			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepImage.y) ][PTG( self.creepWave[i].creepImage.x) ], self.nodes[7][BW], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+			self.creepWave[i].path[#self.creepWave[i].path] = nil
+		end
+	end
+
 end
 
 function Board:zoomIn()
