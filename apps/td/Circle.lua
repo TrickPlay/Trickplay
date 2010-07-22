@@ -1,20 +1,11 @@
 --Circle
 
-function createCircleMenu(offset, distance)
+function createCircleMenu(offset, distance, params)
 
 	local c = Group{}
 	screen:add(c)
-
-	local list = {
-					{
-					AssetLoader:getImage( "normalRobotBuy", { } ),--clip={0,0,SP,SP} } ), 
-					AssetLoader:getImage( "wall", { } ), 
-					AssetLoader:getImage( "slowTowerIcon", { } ), 
-					Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
-					Rectangle{color="FFFFFF", opacity=50, w=100, h=100},	
-					Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
-					Rectangle{color="FFFFFF", opacity=50, w=100, h=100} }
-					}
+	
+	local list = params
 
 	CircleMenu = Menu.create(c, list)
 	CircleMenu:create_key_functions()
@@ -23,38 +14,21 @@ function createCircleMenu(offset, distance)
 	CircleMenu:circle_directions(offset, distance)
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
-
-
 	CircleMenu.buttons:grab_key_focus()
-
 	CircleMenu.container.opacity=150
 	
-	
-	
+	-- What happens when you press enter...
 	CircleMenu.buttons.extra.r = function()
 	
-		-- Temporary way to build a tower
-		if CircleMenu.x == 1 then
-			local board = game.board:getPathData()
-			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("normalRobot") game.board:findPaths() end
-		elseif CircleMenu.x == 2 then
-			local board = game.board:getPathData()
-			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("wall") game.board:findPaths() end
-		elseif CircleMenu.x == 3 then
-			local board = game.board:getPathData()
-			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("slowTower") game.board:findPaths() end
-		end
-		
+		-- Call the current button's function
+		list[1][CircleMenu.x].extra.f()
+
+		-- Then destroy the menu and return to the board
 		destroyCircleMenu(CircleMenu)
 		BoardMenu.buttons:grab_key_focus()
-	
+
 	end
-	
-	
-	
+
 	return CircleMenu
 
 end
@@ -63,5 +37,36 @@ function destroyCircleMenu(obj)
 
 	screen:remove(obj.container)
 	obj = nil
+	game.board.circle = nil
 
 end
+
+function buildTowerIfEmpty(name)
+
+	local board = game.board:getPathData()
+	board[BoardMenu.y][BoardMenu.x] = "X"
+	
+	if pathExists(board,{4,1},{4,BW}) then
+		game.board:buildTower(name)
+		game.board:findPaths()
+		return true
+	else
+		return false
+	end
+
+end
+
+function circleRender(c, seconds)
+
+	if c.container.z_rotation[1] < c.container.extra.angle then
+		local change = math.sqrt(math.abs(c.container.z_rotation[1] - c.container.extra.angle))
+		c.container.z_rotation = {c.container.z_rotation[1] + 100*seconds*change,c.container.z_rotation[2], c.container.z_rotation[3]}
+		if c.container.z_rotation[1] > c.container.extra.angle then c.container.z_rotation = {c.container.extra.angle,c.container.z_rotation[2], c.container.z_rotation[3]} end
+	elseif c.container.z_rotation[1] > c.container.extra.angle then
+		local change = math.sqrt(math.abs(c.container.z_rotation[1] - c.container.extra.angle))
+		c.container.z_rotation = {c.container.z_rotation[1] - 100*seconds*change,c.container.z_rotation[2], c.container.z_rotation[3]}
+		if c.container.z_rotation[1] < c.container.extra.angle then c.container.z_rotation = {c.container.extra.angle,c.container.z_rotation[2], c.container.z_rotation[3]} end
+	end
+	
+end
+

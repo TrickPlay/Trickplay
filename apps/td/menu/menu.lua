@@ -236,11 +236,16 @@ function Menu:create_circle(offset, distance)
 		obj.x = offset[2] + distance*math.sin(rotation*i)
 		obj.y = offset[1] - distance*math.cos(rotation*i)
 		obj.extra.angle = rotation*i
+                obj.z_rotation = {360/self.max_x[1] *i, 0, 0}
 		
 		self.container:add(obj)
 		
 		obj.extra.x = obj.x
 		obj.extra.y = obj.y
+                
+                self.container.z_rotation = {0, offset[2], offset[1]}
+                self.container.extra.angle = 0
+
 	end
 		
 end
@@ -249,48 +254,20 @@ function Menu:circle_directions(offset, distance)
 
 	local container = self.buttons
 
-	-- Update positions on left
-	container.extra.left = function()
-	
-		print("Left")
-	
-		self.x = self.x - 1
-		if self.x == 0 then self.x = self.max_x[1] end
-		
-		local rotation=( 2*math.pi ) / self.max_x[1]
-		for i=1,self.max_x[1] do
-			local obj = self.list[1][i]
-			local new_angle = obj.extra.angle + rotation
-			local new_x = offset[2] + distance*math.sin(new_angle)
-			local new_y = offset[1] - distance*math.cos(new_angle)
-			
-			obj.position = {new_x, new_y}
-			obj.extra.angle = new_angle
-			
-		end
-		
-	end
-	
 	-- Update positions on right
 	container.extra.right = function()
+            print("Left")
+	    self.x = self.x - 1
+	    if self.x == 0 then self.x = self.max_x[1] end
+	    self.container.extra.angle = self.container.extra.angle + 360/self.max_x[1]
+	end
 	
-		print("Right")
-	
-		self.x = self.x + 1
-		if self.x > self.max_x[1] then self.x = 1 end
-		
-		local rotation=( 2*math.pi ) / self.max_x[1]
-		for i=1,self.max_x[1] do
-			local obj = self.list[1][i]
-			local new_angle = obj.extra.angle - rotation
-			local new_x = offset[2] + distance*math.sin(new_angle)
-			local new_y = offset[1] - distance*math.cos(new_angle)
-			
-			obj.position = {new_x, new_y}
-			obj.extra.angle = new_angle
-			
-		end
-		
+	-- Update positions on left
+	container.extra.left = function()
+	    print("Right")
+	    self.x = self.x + 1
+	    if self.x > self.max_x[1] then self.x = 1 end
+	    self.container.extra.angle = self.container.extra.angle - 360/self.max_x[1]
 	end
 
 end
