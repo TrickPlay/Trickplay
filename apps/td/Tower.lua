@@ -75,7 +75,6 @@ function Tower:render(seconds, creeps)
 		
 			creep_in_range = true
 			
-			print (math.floor(self.tower_elapsed_time))
 			creeps[i].hp = creeps[i].hp - self.damage
 			
 			if (creeps[i].hp <=0) then creeps[i].hp =0 end

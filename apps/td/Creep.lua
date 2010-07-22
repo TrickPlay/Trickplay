@@ -43,7 +43,6 @@ end
 function Creep:render(seconds)
 
 	local MOVE = self.speed*seconds*10
-
 	-- Current x and y values
 	local cx = self.creepGroup.x
 	local cy = self.creepGroup.y
@@ -62,6 +61,7 @@ function Creep:render(seconds)
 	elseif cx >= 0 and #self.path == 0 then
 		self.hp = 0
 		wave_counter = wave_counter + 1
+		print (wave_counter)
 		self.creepGroup.x = wave_counter*-240
 		
 	-- Otherwise, move the creep
