@@ -5,6 +5,7 @@ function Creep:new(args, x, y, name)
 	local hp = args.hp
 	local max_hp = hp
 	local speed = args.speed
+	local max_speed = speed
 	local direction = args.direction or {0,1}
 	local creepImage = AssetLoader:getImage(name, {x = x, y = y})
 	local greenBar = Clone {source = healthbar, color = "00FF00", x = x, y = y}
@@ -17,6 +18,7 @@ function Creep:new(args, x, y, name)
 		hp = hp,
 		max_hp = max_hp,
 		speed = speed,
+		max_speed = max_speed,
 		direction = direction,
 		creepType = creepType,
 		creepImage = creepImage,
@@ -33,7 +35,7 @@ function Creep:new(args, x, y, name)
 end
 
 function Creep:render(seconds)
-
+	
 	local cx = self.creepImage.x
 	local cy = self.creepImage.y
 	if (cx >= 0) then

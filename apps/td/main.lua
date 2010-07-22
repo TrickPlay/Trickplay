@@ -58,4 +58,5 @@ function app.on_loaded()
 	AssetLoader:preloadImage("normalRobotBuy","assets/robots/normalRobot/buy.png")
 	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
 	AssetLoader:preloadImage("wall","assets/wall.jpg")
+	AssetLoader:preloadImage("slowTower","assets/slowTower.png")
 end

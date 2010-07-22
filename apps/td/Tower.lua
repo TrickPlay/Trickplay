@@ -7,6 +7,7 @@ function Tower:new(args, name)
 	local cost = args.cost
 	local direction = args.direction
 	local cooldown = args.cooldown
+	local slow = args.slow
 	local towerImage = AssetLoader:getImage(name,{ clip={0,0,SP,SP} })
 	local isAttacking = false
 	local bullets = {}
@@ -17,6 +18,7 @@ function Tower:new(args, name)
 		damage = damage,
 		range = range,
 		direction = direction,
+		slow = slow,
 		cooldown = cooldown,
 		cost = cost,
 		towerImage = towerImage,
@@ -31,6 +33,7 @@ end
 
 function Tower:destroy()
 	self.towerImage.opacity = 0
+	self.damage = 0
 end
 
 function Tower:attack()
@@ -49,8 +52,8 @@ function Tower:render(seconds, creeps)
 	for i = 1, #creeps do
 		if (creeps[i].creepImage.x > self.x - self.range and creeps[i].creepImage.x < self.x + self.range
 				and creeps[i].creepImage.y > self.y - self.range and creeps[i].creepImage.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
-			--print ("creep "..i.." in range")
-			--print(self.x, self.y)
+			creeps[i].speed = creeps[i].max_speed - self.slow
+			print (creeps[i].speed)
 			
 			if self.directionTable then --print("creep "..i.." in range") 
 			
@@ -73,6 +76,7 @@ function Tower:render(seconds, creeps)
 		
 			creep_in_range = true
 			creeps[i].hp = creeps[i].hp - self.damage
+			
 			if (creeps[i].hp <=0) then creeps[i].hp =0 end
 			break
 		end
