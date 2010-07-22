@@ -18,10 +18,10 @@ function app.on_loaded()
 		dofile ("Circle.lua")
 
 		local mainMenuList = {
-										{ Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
-										{ Rectangle{color="CC00FF", w=400, h=150, name="Cooperative", x=500} },
-										{ Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
-									}
+								{ Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
+								{ Rectangle{color="CC00FF", w=400, h=150, name="Cooperative", x=500} },
+								{ Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
+		}
 							
 		local mainMenuFocus = Rectangle{color="FF00CC", w=420, h=170}
 							

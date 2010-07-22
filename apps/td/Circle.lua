@@ -17,6 +17,15 @@ function createCircleMenu(offset, distance, params)
 	CircleMenu.buttons:grab_key_focus()
 	CircleMenu.container.opacity=150
 	
+	if not game.board.lastSelected then game.board.lastSelected = 1
+	elseif game.board.lastSelected > CircleMenu.max_x[1] then game.board.lastSelected = 1 end
+	
+	while game.board.lastSelected > CircleMenu.x do
+		CircleMenu.buttons.extra.left()
+		print("THIS")
+		CircleMenu.container.z_rotation = {CircleMenu.container.extra.angle, CircleMenu.container.z_rotation[2], CircleMenu.container.z_rotation[3]}
+	end
+	
 	-- What happens when you press enter...
 	CircleMenu.buttons.extra.r = function()
 	
@@ -24,6 +33,7 @@ function createCircleMenu(offset, distance, params)
 		list[1][CircleMenu.x].extra.f()
 
 		-- Then destroy the menu and return to the board
+		game.board.lastSelected = CircleMenu.x
 		destroyCircleMenu(CircleMenu)
 		BoardMenu.buttons:grab_key_focus()
 
@@ -38,7 +48,7 @@ function destroyCircleMenu(obj)
 	screen:remove(obj.container)
 	obj = nil
 	game.board.circle = nil
-
+	
 end
 
 function buildTowerIfEmpty(name)
