@@ -6,14 +6,15 @@ function createCircleMenu(offset, distance)
 	screen:add(c)
 
 	local list = {
-						{	AssetLoader:getImage( "normalRobotBuy", { } ),--clip={0,0,SP,SP} } ), 
-							AssetLoader:getImage( "wall", { } ), 
-							AssetLoader:getImage( "slowTower", { } ), 
-							Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
-							Rectangle{color="FFFFFF", opacity=50, w=100, h=100},	
-							Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
-							Rectangle{color="FFFFFF", opacity=50, w=100, h=100} }
-					 }
+					{
+					AssetLoader:getImage( "normalRobotBuy", { } ),--clip={0,0,SP,SP} } ), 
+					AssetLoader:getImage( "wall", { } ), 
+					AssetLoader:getImage( "slowTower", { } ), 
+					Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
+					Rectangle{color="FFFFFF", opacity=50, w=100, h=100},	
+					Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
+					Rectangle{color="FFFFFF", opacity=50, w=100, h=100} }
+					}
 
 	CircleMenu = Menu.create(c, list)
 	CircleMenu:create_key_functions()

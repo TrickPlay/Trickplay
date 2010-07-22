@@ -19,7 +19,7 @@ Board = {
 				else
 					wave_counter = wave_counter + 1
 					self.creepWave[i].greenBar.width = 0
-					self.creepWave[i].creepImage.opacity = 0
+					self.creepWave[i].creepGroup.opacity = 0
 					if (creepGold[i] ==0) then
 						creepGold[i] = 1
 						self.player.gold = self.player.gold + self.creepWave[i].bounty
@@ -41,14 +41,14 @@ Board = {
 				creep.max_hp = wave.hp
 				creep.creepImage.src = wave.creepType
 				creep.bounty = wave.bounty
-				creep.creepImage.x = -SP*2*i
-				--creep.creepImage.y = GTP(CREEP_START[1])
+				creep.creepGroup.x = -SP*2*i
+				--creep.creepGroup.y = GTP(CREEP_START[1])
 				creep.speed = wave.speed
 				creep.greenBar.x = -240*i
 				creep.greenBar.y = -240*i
 				creepGold[i] = 0
 				creep.path = {}
-				creep.creepImage.opacity = 255
+				creep.creepGroup.opacity = 255
 --				table.remove(self.creepWave[i], i)
 				print ("removing "..i)
 			end
@@ -184,17 +184,19 @@ function Board:createBoard()
 	
 	add_to_render_list(self)
 	for i=1,#self.creepWave do
-		--self.creepWave[i].creepImage.x = i*100
-		screen:add(self.creepWave[i].creepImage, self.creepWave[i].greenBar, self.creepWave[i].redBar)
+		--self.creepWave[i].creepGroup.x = i*100
+		print(self.creepWave[i].creepGroup)
+		screen:add(self.creepWave[i].creepGroup)
+		assert(self.creepWave[i])
 	end
 end
 
 function Board:findPaths()
 
 	for i = 1, #self.creepWave do
-		if (self.creepWave[i].creepImage.x >= 0 and self.creepWave[i].creepImage.x <= 1800) then
+		if (self.creepWave[i].creepGroup.x >= 0 and self.creepWave[i].creepGroup.x <= 1800) then
 			local found
-			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepImage.y) ][PTG( self.creepWave[i].creepImage.x) ], self.nodes[7][BW], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepGroup.y) ][PTG( self.creepWave[i].creepGroup.x) ], self.nodes[7][BW], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
 			self.creepWave[i].path[#self.creepWave[i].path] = nil
 		end
 	end
