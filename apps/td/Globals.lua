@@ -29,6 +29,8 @@ creep_spawn_timer = 0
 
 wave_counter = 0
 
+level = 1
+
 creep_image_table = {}
 
 

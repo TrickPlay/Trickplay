@@ -61,7 +61,9 @@ function Creep:render(seconds)
 	elseif cx >= 0 and #self.path == 0 then
 		self.hp = 0
 		wave_counter = wave_counter + 1
-		print (wave_counter)
+		game.board.player.lives = game.board.player.lives - 1
+		game.board.player.gold = game.board.player.gold - self.bounty
+		print (game.board.player.lives)
 		self.creepGroup.x = wave_counter*-240
 		
 	-- Otherwise, move the creep

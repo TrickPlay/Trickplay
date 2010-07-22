@@ -7,12 +7,6 @@ Board = {
 		local s =self.timer.elapsed_seconds 
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
---[[		if (math.floor(seconds_elapsed) % 3 == 0) then
-			if (self.creepWave[creepnum] == nil and creepnum <= CREEP_WAVE_LENGTH) then
-				self.creepWave[creepnum] = Creep:new(self.theme.creeps.normalCreep, -240, 420, "normal")
-				creepnum = creepnum + 1
-			end
-		end]]
 		if (seconds_elapsed >= WAIT_TIME) then
 			if (s > 1) then 
 				self.timer:start() 
@@ -46,10 +40,9 @@ Board = {
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			creepnum = 1
-			phasetext.text = "Build Phase!"
 			seconds_elapsed = 0
 		end
-		local creepsActive = {}
+		
 		for i = 1, #self.squaresWithTowers do
 			self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
 		end
