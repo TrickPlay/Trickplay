@@ -11,7 +11,7 @@ Board = {
 			if (s > 1) then 
 				self.timer:start() 
 				if (creepnum <= CREEP_WAVE_LENGTH) then
-					self.creepWave[creepnum] = Creep:new(self.theme.creeps.normalCreep, -240, GTP(CREEP_START[1]) , "normal")
+					self.creepWave[creepnum] = Creep:new(self.theme.creeps[level], -240, GTP(CREEP_START[1]) , image_to_load[level])
 					screen:add(self.creepWave[creepnum].creepGroup)
 					creepnum = creepnum + 1
 				end
@@ -41,6 +41,8 @@ Board = {
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			creepnum = 1
 			seconds_elapsed = 0
+			level = level + 1
+			
 		end
 		
 		for i = 1, #self.squaresWithTowers do
