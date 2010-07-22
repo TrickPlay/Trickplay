@@ -4,6 +4,7 @@ dofile ("aStar.lua")
 
 Board = {
 	render = function (self, seconds)
+		local s =self.timer.elapsed_seconds 
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
 --[[		if (math.floor(seconds_elapsed) % 3 == 0) then
@@ -13,18 +14,29 @@ Board = {
 			end
 		end]]
 		if (seconds_elapsed >= WAIT_TIME) then
-			for i=1,#self.creepWave do
-				if (self.creepWave[i].hp ~= 0) then
-					self.creepWave[i]:render(seconds)
+			if (s > 1) then 
+				self.timer:start() 
+				if (creepnum <= CREEP_WAVE_LENGTH) then
+					self.creepWave[creepnum] = Creep:new(self.theme.creeps.normalCreep, -240, GTP(CREEP_START[1]) , "normal")
+					screen:add(self.creepWave[creepnum].creepGroup)
+					creepnum = creepnum + 1
+				end
+			end
+
+			for k,v in pairs(self.creepWave) do
+				if (v.hp ~= 0) then
+					v:render(seconds)
 				else
 					wave_counter = wave_counter + 1
-					self.creepWave[i].greenBar.width = 0
-					self.creepWave[i].creepGroup.opacity = 0
-					if (creepGold[i] ==0) then
-						creepGold[i] = 1
-						self.player.gold = self.player.gold + self.creepWave[i].bounty
+					v.greenBar.width = 0
+					v.creepGroup.opacity = 0
+					
+					if (creepGold[k] ==0) then
+						creepGold[k] = 1
+						self.player.gold = self.player.gold + v.bounty
 						goldtext.text = self.player.gold
 					end
+					table.remove(v,k)
 				end
 			end
 			phasetext.text = "Wave Phase!"
@@ -33,31 +45,14 @@ Board = {
 			phasetext.text = "Build Phase!"
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
-			print ("here")
+			print ("ALL ARE DEAD")
 			for i =1, CREEP_WAVE_LENGTH do
-				local wave = self.theme.creeps.mediumCreep
-				local creep = self.creepWave[i]
-				creep.hp = wave.hp
-				creep.max_hp = wave.hp
-				creep.creepImage.src = wave.creepType
-				creep.bounty = wave.bounty
-				creep.creepGroup.x = -SP*2*i
-				--creep.creepGroup.y = GTP(CREEP_START[1])
-				creep.speed = wave.speed
-				creep.greenBar.x = -240*i
-				creep.greenBar.y = -240*i
-				creepGold[i] = 0
-				creep.path = {}
-				creep.creepGroup.opacity = 255
---				table.remove(self.creepWave[i], i)
-				print ("removing "..i)
-			end
---			for i =1, CREEP_WAVE_LENGTH do
---				print ("making new creeps")
---				self.creepWave[i] = Creep:new(self.theme.creeps.normalCreep, 240*i,420)
+--				table.remove(self.creepWave,i)
+				print ("making new creeps"..i)
+				--self.creepWave[i] = Creep:new(self.theme.creeps.mediumCreep, -240,360)
 --				self.creepWave[i].creepImage.src = self.theme.creeps.mediumCreep.creepType
---			end
-			
+			end
+			creepnum = 1
 			phasetext.text = "Build Phase!"
 			seconds_elapsed = 0
 		end
@@ -75,15 +70,15 @@ function Board:new(args)
 	local creepWave = {}
 	local squaresWithTowers = {}
 	local theme = args.theme
+	local timer = 	Stopwatch()
+
 	local player = Player:new {
 		name = "Player 1",
-		gold = 200
+		gold = 2000,
+		lives = 30
 	}
 	for i = 1, h do
       squareGrid[i] = {}
-	end
-	for i =1, CREEP_WAVE_LENGTH do
-		creepWave[i] = Creep:new(theme.creeps.normalCreep, -240*i, GTP(CREEP_START[1]), "normal")
 	end
 	for i = 1, h do
 		for j = 1, w do
@@ -105,6 +100,7 @@ function Board:new(args)
 		squareGrid = squareGrid,
 		squaresWithTowers = squaresWithTowers,
 		theme = theme,
+		timer = timer,
 		creepWave = creepWave,
    }
    setmetatable(object, self)
@@ -125,7 +121,7 @@ end
 function Board:createBoard()
 
 	local groups = {}
-	
+	self.timer:start()
 	for i = 1, self.h do
 		groups[i] = {}
 		local g = groups[i]
@@ -180,7 +176,7 @@ function Board:createBoard()
 			self:zoomOut()
 			self.zoom = nil
 		end]]
-		WAIT_TIME = 0
+		seconds_elapsed = WAIT_TIME
 	end
 	
 	add_to_render_list(self)

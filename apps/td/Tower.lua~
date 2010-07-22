@@ -50,14 +50,14 @@ function Tower:render(seconds, creeps)
 	--print("1")
 	
 	for i = 1, #creeps do
-		if (creeps[i].creepImage.x > self.x - self.range and creeps[i].creepImage.x < self.x + self.range
-				and creeps[i].creepImage.y > self.y - self.range and creeps[i].creepImage.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
+		if (creeps[i].creepGroup.x > self.x - self.range and creeps[i].creepGroup.x < self.x + self.range
+				and creeps[i].creepGroup.y > self.y - self.range and creeps[i].creepGroup.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
 			creeps[i].speed = creeps[i].max_speed - self.slow
 			
 			if self.directionTable then --print("creep "..i.." in range") 
 			
-				local cx = creeps[i].creepImage.x
-				local cy = creeps[i].creepImage.y
+				local cx = creeps[i].creepGroup.x
+				local cy = creeps[i].creepGroup.y
 				local d = self.directionTable
 				local dir
 				for i = 1, #d do
@@ -85,14 +85,14 @@ function Tower:render(seconds, creeps)
 	if not self.directionTable then
 		print("CREATED DIRECTION TABLE")
 		self.directionTable = {}	
-		self.directionTable[1] = { self.y, 		self.y+SP, 	0, 			self.x }
-		self.directionTable[2] = { 0, 			self.y, 		0, 			self.x }		
-		self.directionTable[3] = { 0, 			self.y, 		self.x-30, 	self.x+SP }
-		self.directionTable[4] = { 0, 			self.y, 		self.x+SP, 	1920 }
-		self.directionTable[5] = { self.y, 		self.y+SP, 	self.x+SP, 	1920 }
-		self.directionTable[6] = { self.y+50, 	1080, 		self.x+SP, 	1920 }
-		self.directionTable[7] = { self.y+50, 	1080, 		self.x-30, 	self.x+SP }
-		self.directionTable[8] = { self.y+50, 	1080, 		0, 			self.x }	
+		self.directionTable[1] = { self.y,	self.y+SP,	0		,self.x }
+		self.directionTable[2] = { 0,		self.y,		0		,self.x }		
+		self.directionTable[3] = { 0,		self.y,		self.x-30,	self.x+SP }
+		self.directionTable[4] = { 0,		self.y,		self.x+SP,	1920 }
+		self.directionTable[5] = { self.y,	self.y+SP,	self.x+SP, 	1920 }
+		self.directionTable[6] = { self.y+50,	1080,		self.x+SP,	1920 }
+		self.directionTable[7] = { self.y+50,	1080,		self.x-30,	self.x+SP }
+		self.directionTable[8] = { self.y+50,	1080,		0,		self.x }	
 	end
 	
 	if (math.floor(self.tower_elapsed_time) % 2 == 0 and creep_in_range) then

@@ -40,6 +40,10 @@ paused = false
 
 function idle.on_idle( idle , seconds )   
 	if not paused then    
+		local s = Stopwatch()
+		s:start()
+		print (s.elapsed)
+
 		for _ , item in ipairs( render_list ) do 
 			pcall( item.render , item , seconds ) 
 		end        
