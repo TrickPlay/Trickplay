@@ -7,9 +7,14 @@ function Creep:new(args, x, y, name)
 	local speed = args.speed
 	local max_speed = speed
 	local direction = args.direction or {0,1}
-	local creepImage = AssetLoader:getImage(name, {x = x, y = y})
-	local greenBar = Clone {source = healthbar, color = "00FF00", x = x, y = y}
-	local redBar = Clone {source = healthbar, color = "FF0000", width = 0, x = x , y = y} 
+	
+	-- Image/Group stuff
+	local creepImage = AssetLoader:getImage(name, {})
+	local greenBar = Clone {source = healthbar, color = "00FF00"}
+	local redBar = Clone {source = healthbar, color = "FF0000", width = 0}
+	local creepGroup = Group{opacity=255, x = x, y = y}
+	creepGroup:add(creepImage, greenBar, redBar)
+	
 	--local path = {}
 	local dead = false
 	local bounty = args.bounty
@@ -27,7 +32,8 @@ function Creep:new(args, x, y, name)
 		--path = path,
 		dead = dead,
 		bounty = bounty,
-		flying = flying
+		flying = flying,
+		creepGroup = creepGroup
    }
    setmetatable(object, self)
    self.__index = self
@@ -39,12 +45,12 @@ function Creep:render(seconds)
 	local MOVE = self.speed*seconds*10
 
 	-- Current x and y values
-	local cx = self.creepImage.x
-	local cy = self.creepImage.y
+	local cx = self.creepGroup.x
+	local cy = self.creepGroup.y
 	
 	-- When the creep is off the board
 	if not self.found and cx < 0 then
-		self.creepImage.x = cx + MOVE
+		self.creepGroup.x = cx + MOVE
 		
 	-- Find a path if none exists and the creep is on the board
 	elseif cx >= 0 and not self.path then
@@ -56,7 +62,7 @@ function Creep:render(seconds)
 	elseif cx >= 0 and #self.path == 0 then
 		self.hp = 0
 		wave_counter = wave_counter + 1
-		self.creepImage.x = wave_counter*-240
+		self.creepGroup.x = wave_counter*-240
 		
 	-- Otherwise, move the creep
 	else 
@@ -72,13 +78,13 @@ function Creep:render(seconds)
 			-- If the new position would overshoot
 			if pos >= order[2] then
 				-- Find the remainder and move in the other axis that much
-				local d = math.abs(order[2] - self.creepImage.x)
+				local d = math.abs(order[2] - self.creepGroup.x)
 				self:pop()
 				local new = self:pathTop()
 				-- Check which direction the next order would have it move
-				if self.creepImage.x < new[2] then self:step(d, 0)
-				elseif self.creepImage.y > new[1] then self.creepImage.x = order[2] self:step(0, d)
-				elseif self.creepImage.y < new[1] then self.creepImage.x = order[2] self:step(0, -d)
+				if self.creepGroup.x < new[2] then self:step(d, 0)
+				elseif self.creepGroup.y > new[1] then self.creepGroup.x = order[2] self:step(0, d)
+				elseif self.creepGroup.y < new[1] then self.creepGroup.x = order[2] self:step(0, -d)
 				end
 			else
 			-- If the new position doesn't overshoot, move normally
@@ -90,11 +96,11 @@ function Creep:render(seconds)
 			local pos = cx - MOVE
 			
 			if pos <= order[2] then
-				local d = math.abs(order[2] - self.creepImage.x)
+				local d = math.abs(order[2] - self.creepGroup.x)
 				self:pop()
 				local new = self:pathTop()
-				if self.creepImage.y > new[1] then self.creepImage.x = order[2] self:step(0, d)
-				elseif self.creepImage.y < new[1] then self.creepImage.x = order[2] self:step(0, -d)
+				if self.creepGroup.y > new[1] then self.creepGroup.x = order[2] self:step(0, d)
+				elseif self.creepGroup.y < new[1] then self.creepGroup.x = order[2] self:step(0, -d)
 				end
 			else
 				self:step(-MOVE, 0)
@@ -105,38 +111,40 @@ function Creep:render(seconds)
 			local pos = cy + MOVE
 			
 			if pos >= order[1] then
-				local d = math.abs(order[1] - self.creepImage.y)
+				local d = math.abs(order[1] - self.creepGroup.y)
 				self:pop()
 				local new = self:pathTop()
-				if self.creepImage.x > new[2] then self.creepImage.y = order[1] self:step(d, 0)
-				elseif self.creepImage.x < new[2] then self.creepImage.y = order[1] self:step(-d, 0)
+				if self.creepGroup.x > new[2] then self.creepGroup.y = order[1] self:step(d, 0)
+				elseif self.creepGroup.x < new[2] then self.creepGroup.y = order[1] self:step(-d, 0)
 				end
 			else
 				self:step(0, MOVE)
 			end
 			
 		elseif cy > order[1] then 
-			--print("up", self.creepImage.y, self.creepImage.x, order[1], order[2])
+			--print("up", self.creepGroup.y, self.creepGroup.x, order[1], order[2])
 			local pos = cy - MOVE
 			
 			if pos <= order[1] then
-				local d = math.abs(order[1] - self.creepImage.y)
+				local d = math.abs(order[1] - self.creepGroup.y)
 				self:pop()
 				local new = self:pathTop()
-				if self.creepImage.x > new[2] then self.creepImage.y = order[1] self:step(d, 0)
-				elseif self.creepImage.x < new[2] then self.creepImage.y = order[1] self:step(-d, 0)
+				if self.creepGroup.x > new[2] then self.creepGroup.y = order[1] self:step(d, 0)
+				elseif self.creepGroup.x < new[2] then self.creepGroup.y = order[1] self:step(-d, 0)
 				end
 			else
 				self:step(0, -MOVE)
 			end
 		end
 		
+		self.greenBar.width = SP*(self.hp/self.max_hp)
+		
 	end
 	
 	if (self.hp == 0) then 
 		dead = true
 		self.greenBar.width = 0
-		self.creepImage.opacity = 0
+		self.creepGroup.opacity = 0
 	end
 end
 
@@ -146,8 +154,8 @@ end
 
 function Creep:step(x, y)
 
-	self.creepImage.x = self.creepImage.x + x
-	self.creepImage.y = self.creepImage.y + y
+	self.creepGroup.x = self.creepGroup.x + x
+	self.creepGroup.y = self.creepGroup.y + y
 
 end
 
