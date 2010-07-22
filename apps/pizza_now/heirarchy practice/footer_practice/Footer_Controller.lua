@@ -72,7 +72,7 @@ Directions = {
       end
 
       function self:get_selected_index()
-         print("index:",selected)
+         print("\tFooter index:",selected)
          return selected
       end
 

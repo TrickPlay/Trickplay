@@ -18,12 +18,10 @@ Directions = {
       for k, v in pairs(MenuItems) do
          MenuSize = MenuSize + 1
       end
-      
-      self.h = header_view:get_controller()
-      self.f = footer_view:get_controller()
-      self.child = self.h
+      --initialize it to the carousel
+      self.child = carousel_view:get_controller()
       -- the default selected index
-      local selected = 1
+      local selected = 2
 
       local MenuItemCallbacks = {
          [MenuItems.HEADER]=
@@ -52,8 +50,8 @@ Directions = {
       local MenuKeyTable = {
          [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
          [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
-         [keys.Left]  = function(self) self.child:move_selector(Directions.LEFT) end,
-         [keys.Right] = function(self) self.child:move_selector(Directions.RIGHT) end,
+         [keys.Left]  = function(self) self.child:on_key_down(keys.Left) end,
+         [keys.Right] = function(self) self.child:on_key_down(keys.Right) end,
          [keys.Return] =
             function(self)
                -- compromise so that there's not a full-on lua panic,
@@ -70,7 +68,7 @@ Directions = {
       end
 
       function self:get_selected_index()
-         print("index:",selected)
+         print("\tTopLevel index:",selected)
          return selected
       end
 
