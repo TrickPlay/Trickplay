@@ -173,13 +173,14 @@ function Board:createBoard()
 	goldtext.text = self.player.gold
 		
 	BoardMenu.buttons.extra.space = function()
-		if not self.zoom then
+		--[[if not self.zoom then
 			self:zoomIn()
 			self.zoom = true
 		else
 			self:zoomOut()
 			self.zoom = nil
-		end
+		end]]
+		WAIT_TIME = 0
 	end
 	
 	add_to_render_list(self)
