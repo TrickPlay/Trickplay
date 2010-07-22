@@ -264,7 +264,7 @@ function Menu:circle_directions(offset, distance)
 			local new_x = offset[2] + distance*math.sin(new_angle)
 			local new_y = offset[1] - distance*math.cos(new_angle)
 			
-			obj:animate{ duration=1000, x=new_x, y=new_y, mode="EASE_OUT_QUAD" }
+			obj.position = {new_x, new_y}
 			obj.extra.angle = new_angle
 			
 		end
@@ -286,7 +286,7 @@ function Menu:circle_directions(offset, distance)
 			local new_x = offset[2] + distance*math.sin(new_angle)
 			local new_y = offset[1] - distance*math.cos(new_angle)
 			
-			obj:animate{ duration=1000, x=new_x, y=new_y, mode="EASE_OUT_QUAD" }
+			obj.position = {new_x, new_y}
 			obj.extra.angle = new_angle
 			
 		end
