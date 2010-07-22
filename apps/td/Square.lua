@@ -25,3 +25,4 @@ function Square:render()
 	self.tower.towerImage.y = (self.y-1) * SP
 	screen:add(self.tower.towerImage)
 end
+

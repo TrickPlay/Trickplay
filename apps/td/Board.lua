@@ -6,8 +6,13 @@ Board = {
 	render = function (self, seconds)
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
-		
-		if (seconds_elapsed >= 20) then
+--[[		if (math.floor(seconds_elapsed) % 3 == 0) then
+			if (self.creepWave[creepnum] == nil and creepnum <= CREEP_WAVE_LENGTH) then
+				self.creepWave[creepnum] = Creep:new(self.theme.creeps.normalCreep, -240, 420, "normal")
+				creepnum = creepnum + 1
+			end
+		end]]
+		if (seconds_elapsed >= WAIT_TIME) then
 			for i=1,#self.creepWave do
 				if (self.creepWave[i].hp ~= 0) then
 					self.creepWave[i]:render(seconds)
@@ -24,7 +29,7 @@ Board = {
 			end
 			phasetext.text = "Wave Phase!"
 		else
-			countdowntimer.text = "Time till next wave: "..19 - math.floor(seconds_elapsed)
+			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
@@ -40,7 +45,7 @@ Board = {
 				creep.speed = wave.speed
 				creep.greenBar.x = -240*i
 				creep.greenBar.y = -240*i
-				
+				creepGold[i] = 0
 				creep.path = {}
 				creep.creepImage.opacity = 255
 --				table.remove(self.creepWave[i], i)
@@ -55,6 +60,7 @@ Board = {
 			phasetext.text = "Build Phase!"
 			seconds_elapsed = 0
 		end
+		local creepsActive = {}
 		for i = 1, #self.squaresWithTowers do
 			self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
 		end
@@ -70,7 +76,7 @@ function Board:new(args)
 	local theme = args.theme
 	local player = Player:new {
 		name = "Player 1",
-		gold = 500
+		gold = 200
 	}
 	for i = 1, h do
       squareGrid[i] = {}
@@ -142,6 +148,7 @@ function Board:createBoard()
 	BoardMenu.buttons:grab_key_focus()
 	BoardMenu:update_cursor_position()
 	BoardMenu.hl.opacity = 255
+	
 	BoardMenu.container.opacity=255
 	
 	BoardMenu.buttons.extra.r = function()
@@ -204,33 +211,36 @@ function Board:zoomOut()
 end
 
 function Board:buildTower(selection)
-
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
 	-- in reality this would call the circle menu asking for what to do with the square
-	if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
-	elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, "wall") end
+		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
+		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, "wall")
+		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, "slowTower")
+		end
 
-	current.tower.x = GTP(current.x)
-	current.tower.y = GTP(current.y)
-	
-	print(GTP(current.x), GTP(current.y))
-	--assert(nil)
-	
-	current.hasTower = true
-	table.insert(self.squaresWithTowers, current)
-	current.square[3] = FULL
-	current:render()
-	self.player.gold = self.player.gold - current.tower.cost
-	
-	local n = current.square.children
-	local m = current.square.cut
+	if (self.player.gold - current.tower.cost >=0) then
 
-	if n.north then m.north = n.north n.north.children.south = nil end
-	if n.south then m.south = n.south n.south.children.north = nil end
-	if n.east then m.east = n.east n.east.children.west = nil end
-	if n.west then m.west = n.west n.west.children.east = nil end
+		current.tower.x = GTP(current.x)
+		current.tower.y = GTP(current.y)
 	
+		print(GTP(current.x), GTP(current.y))
+		--assert(nil)
+	
+		current.hasTower = true
+		table.insert(self.squaresWithTowers, current)
+		current.square[3] = FULL
+		current:render()
+		self.player.gold = self.player.gold - current.tower.cost
+	
+		local n = current.square.children
+		local m = current.square.cut
+
+		if n.north then m.north = n.north n.north.children.south = nil end
+		if n.south then m.south = n.south n.south.children.north = nil end
+		if n.east then m.east = n.east n.east.children.west = nil end
+		if n.west then m.west = n.west n.west.children.east = nil end
+	end	
 end
 
 function Board:removeTower()
