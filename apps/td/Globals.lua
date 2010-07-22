@@ -30,6 +30,7 @@ creep_spawn_timer = 0
 wave_counter = 0
 
 level = 1
+image_to_load = {"normal","mediumRobot"}
 
 creep_image_table = {}
 
