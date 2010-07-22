@@ -36,15 +36,15 @@ function createCircleMenu(offset, distance)
 		if CircleMenu.x == 1 then
 			local board = game.board:getPathData()
 			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("normalRobot") end
+			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("normalRobot") game.board:findPaths() end
 		elseif CircleMenu.x == 2 then
 			local board = game.board:getPathData()
 			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("wall") end
+			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("wall") game.board:findPaths() end
 		elseif CircleMenu.x == 3 then
 			local board = game.board:getPathData()
 			board[BoardMenu.y][BoardMenu.x] = "X"
-			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("slowTower") end
+			if pathExists(board,{4,1},{4,BW}) then game.board:buildTower("slowTower") game.board:findPaths() end
 		end
 		
 		destroyCircleMenu(CircleMenu)
