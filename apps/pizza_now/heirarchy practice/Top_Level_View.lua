@@ -3,7 +3,7 @@ DEFAULT_COLOR="FFFFFF" --WHITE
 TopLevelView = Class(View, function(view, model, ...)
     view._base.init(view,model)
      
-    view.umbrella_ui=Group{name="umbrella ui", position={10,10}, opacity=0}
+    view.umbrella_ui=Group{name="umbrella ui", position={10,10}, opacity=255}
 
     header_view = HeaderView(model)
     header_view:initialize()
@@ -30,21 +30,22 @@ TopLevelView = Class(View, function(view, model, ...)
         local controller = view:get_controller()
         local comp = model:get_active_component()
         if comp == Component.FOOD then
-            print("Showing HeaderView UI")
-            view.umbrella_ui.opacity = 255
+            print("Showing TopView UI")
+--            view.umbrella_ui.opacity = 255
             for i,c_view in ipairs(umbrella_items) do
                 if i == controller:get_selected_index() then
-                    c_view.ui:animate{duration=1000, opacity=255}
-                    c_view.menu_items[prev_selection[i]]:animate{duration=1000, opacity=255}
+                    print("\t",i,"opacity to 255")
+                    c_view.ui:animate{duration=500, opacity=255}
+                    --c_view.menu_items[prev_selection[i]]:animate{duration=500, opacity=255}
                     view:get_controller().child = c_view:get_controller()
                 else
-                    print("opacity to 0")
-                    c_view.ui:animate{duration=1000, opacity=100}
+                    print("\t",i,"opacity to 0")
+                    c_view.ui:animate{duration=500, opacity=100}
                     prev_selection[i] = c_view:get_controller():get_selected_index()
                 end
             end
         else
-            print("Hiding HeaderView UI")
+            print("Hiding TopView UI")
             view.umbrella_ui.opacity = 0
         end
     end

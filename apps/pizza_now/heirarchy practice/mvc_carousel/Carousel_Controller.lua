@@ -28,7 +28,7 @@ CarouselController = Class(Controller, function(self, view, ...)
         return selected
     end		
     function self:move_selector(dir)
-        print("carousel move called")
+        print("\tcarousel move called")
         if     dir == Directions.LEFT then view:move_left()
         elseif dir == Directions.RIGHT then view:move_right()
         end

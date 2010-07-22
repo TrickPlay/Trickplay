@@ -47,7 +47,7 @@ CarouselView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Component.FOOD then
             print("Showing CarouselView UI")
-            self.ui.opacity = 255
+--            self.ui.opacity = 255
             --[[
             for i,item in ipairs(car_items) do
                 if i == controller:get_selected_index() then
@@ -59,11 +59,11 @@ CarouselView = Class(View, function(view, model, ...)
             --]]
         else
             print("Hiding CarouselView UI")
-            self.ui.opacity = 255
+            self.ui.opacity = 0
         end
     end
     function view:move_left()
-		
+		print("\t\tleft")
 		--local rotation=( 2*math.pi ) / #car_items
         for i=1,#view.menu_items do
             local obj = view.menu_items[i]
@@ -73,13 +73,13 @@ CarouselView = Class(View, function(view, model, ...)
             local new_z = 200*math.cos(new_angle)
             local new_o = 80 + 175*math.cos(new_angle)
 			
-            obj:animate{ duration=1000, x=new_x, y=new_y, z=new_z,
+            obj:animate{ duration=500, x=new_x, y=new_y, z=new_z,
                             opacity=new_o}
             obj.extra.angle = new_angle
         end
     end
     function view:move_right()
-		
+		print("\t\tright")
 		--local rotation=( 2*math.pi ) / #car_items
 		for i=1,#view.menu_items do
 			local obj = view.menu_items[i]
@@ -89,9 +89,9 @@ CarouselView = Class(View, function(view, model, ...)
 			local new_z = 200*math.cos(new_angle)
 			local new_o = 80 + 175*math.cos(new_angle)
 			
-			obj:animate{ duration=1000, x=new_x, y=new_y, z=new_z, 
+			obj:animate{ duration=500, x=new_x, y=new_y, z=new_z, 
                                      opacity=new_o}
 			obj.extra.angle = new_angle	
 		end
-    end
+	end
 end)
