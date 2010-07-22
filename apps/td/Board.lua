@@ -33,6 +33,7 @@ Board = {
 			phasetext.text = "Build Phase!"
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
+			print ("here")
 			for i =1, CREEP_WAVE_LENGTH do
 				local wave = self.theme.creeps.mediumCreep
 				local creep = self.creepWave[i]

@@ -45,7 +45,6 @@ function Creep:render(seconds)
 	-- When the creep is off the board
 	if not self.found and cx < 0 then
 		self.creepImage.x = cx + MOVE
-		print(self.creepImage.y)
 		
 	-- Find a path if none exists and the creep is on the board
 	elseif cx >= 0 and not self.path then
