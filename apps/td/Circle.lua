@@ -9,7 +9,7 @@ function createCircleMenu(offset, distance)
 					{
 					AssetLoader:getImage( "normalRobotBuy", { } ),--clip={0,0,SP,SP} } ), 
 					AssetLoader:getImage( "wall", { } ), 
-					AssetLoader:getImage( "slowTower", { } ), 
+					AssetLoader:getImage( "slowTowerIcon", { } ), 
 					Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
 					Rectangle{color="FFFFFF", opacity=50, w=100, h=100},	
 					Rectangle{color="FFFFFF", opacity=50, w=100, h=100}, 
