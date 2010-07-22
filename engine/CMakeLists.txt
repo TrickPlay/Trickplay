@@ -212,6 +212,8 @@ set(
     ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/json.lb
 
+	${BINDINGS_SRC}/audiosampler.lb
+
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
     ${BINDINGS_SRC}/clutter_screen.lb
@@ -286,7 +288,7 @@ set( LUA_SOURCE_FILES
     ${LUA_ROOT}/src/ltablib.c
     ${LUA_ROOT}/src/lstrlib.c
     ${LUA_ROOT}/src/loadlib.c
-#    ${LUA_ROOT}/src/liolib.c
+    ${LUA_ROOT}/src/liolib.c
 #    ${LUA_ROOT}/src/linit.c
 )
 

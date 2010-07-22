@@ -3,7 +3,7 @@ dofile("ferris.lua")
 screen:show_all()
 
 local color_scheme = "red"
-local oem_vendor = "lg"
+local oem_vendor = "trickplay"
 
 local bar_off_image = Image { src = "assets/bar-"..color_scheme.."-off.png", opacity = 0 }
 local bar_on_image  = Image { src = "assets/bar-"..color_scheme.."-on.png", opacity = 0 }

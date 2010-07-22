@@ -1,8 +1,7 @@
 
 dofile( "Json.lua" )
 
-oem_name = "LG"
---oem_name = "Samsung"
+oem_name = "TrickPlay"
 
 STORE_URL="http://store.trickplay.com"
 
