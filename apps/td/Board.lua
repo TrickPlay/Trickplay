@@ -160,9 +160,12 @@ function Board:createBoard()
 		-- Populate the circle menu with buttons
 		local list = {}
 		
-		-- Towers
-		local towers = {"normalRobot", "wall", "slowTower"}
-		local icons = {"normalRobotBuy","wall","slowTowerIcon"}
+		-- Towers		
+		local towers = self.theme.towers
+		--local icons = {"normalRobotBuy","wall","slowTowerIcon"}
+		--for k,v in pairs(towers) do print(k,v) end
+		--assert(nil)
+		
 		
 		local menuType
 		
@@ -175,11 +178,12 @@ function Board:createBoard()
 			
 			if pathExists(board,{4,1},{4,BW}) then
 				
-				for i=1,#towers do
+				for i,v in pairs(towers) do
 				
-					list[#list+1] = AssetLoader:getImage( icons[i], { } )
+					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { } )
 					list[#list].extra.f = function()
-						buildTowerIfEmpty( towers[i] )
+						self:buildTower(towers[i])
+						--buildTowerIfEmpty( self.theme.themeName..towers[i].name )
 					end
 				end
 			end
@@ -276,13 +280,10 @@ end
 function Board:buildTower(selection)
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
---self.theme.themeName .. self.theme.creeps[level].name
-
-	-- in reality this would call the circle menu asking for what to do with the square
-		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, self.theme.themeName)
-		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, self.theme.themeName)
-		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, self.theme.themeName)
-		end
+	-- Selection is the proper table in self.theme.towers
+	current.tower = Tower:new(selection, self.theme.themeName)
+	
+	print(selection)
 
 	if (self.player.gold - current.tower.cost >=0) then
 

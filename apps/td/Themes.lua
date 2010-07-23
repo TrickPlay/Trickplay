@@ -11,12 +11,13 @@ for themeName, t in pairs(Themes) do
 
 	for i=1, #t.creeps do
 		AssetLoader:preloadImage(themeName..t.creeps[i].name, "themes/"..themeName.."/assets/"..t.creeps[i].name..".png")
-		print(themeName..t.creeps[i].name)
+		--print(themeName..t.creeps[i].name)
 	end
 	
 	for k, v in pairs(t.towers) do
-		print("themes/"..themeName.."/assets/"..t.towers[k].name..".png")
-		AssetLoader:preloadImage(themeName..t.towers[k].name, "themes/"..themeName.."/assets/"..t.towers[k].name..".png")
+		--print("themes/"..themeName.."/assets/"..v.name..".png")
+		AssetLoader:preloadImage(themeName..v.name, "themes/"..themeName.."/assets/"..v.name..".png")
+		AssetLoader:preloadImage(themeName..v.name.."Icon", "themes/"..themeName.."/assets/"..v.name.."Icon.png")
 		
 		if v.upgrades then
 			for key,val in ipairs(v.upgrades) do
