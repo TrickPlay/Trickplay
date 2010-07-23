@@ -3,8 +3,8 @@ local robot = {
 		mainMenuBackground = "",
 		creeps = {
 				{ hp = 100, speed = 30, bounty = 10, flying = false, name = "NormalCreep"},
-				{ hp = 200, speed = 50, bounty = 15, flying = false, name = "MediumCreep"},
-                                { hp = 300, speed = 50, bounty = 15, flying = false, name = "MediumCreep"}
+				{ hp = 300, speed = 50, bounty = 15, flying = false, name = "MediumCreep"},
+                                { hp = 1000, speed = 40, bounty = 15, flying = false, name = "HardCreep"}
 		},
 		towers = {
 				normalTower =
@@ -62,12 +62,31 @@ local robot = {
 					size = 50
 				},
 				size = 50
-			}
+			},
+                        
+                        -- Wave 4
+                        {
+                                {
+                                                {name = "NormalCreep"},
+                                                {name = "MediumCreep"},
+                                                {name = "HardCreep"},
+                                                size = 75
+                                },
+                                {
+                                                {name = "HardCreep"},
+                                                size = 100
+                                
+                                },
+                                size = 175
+                        
+                        
+                        }
 		},
 		
 		waveTable = {
 			["NormalCreep"] = 1,
-			["MediumCreep"] = 2
+			["MediumCreep"] = 2,
+                        ["HardCreep"] = 3
 		}           
 	 
 }
