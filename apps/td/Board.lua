@@ -7,13 +7,20 @@ Board = {
 		local s =self.timer.elapsed_seconds 
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
+		
+--		for i=1, #self.theme.wave do
+--			print(self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]].name)
+--		end
+		CREEP_WAVE_LENGTH = self.theme.wave[level].size
 		if (seconds_elapsed >= WAIT_TIME) then
 			if (s > 1) then 
 				self.timer:start() 
 				if (creepnum <= CREEP_WAVE_LENGTH) then
-					self.creepWave[creepnum] = Creep:new(self.theme.creeps[level], -240, GTP(CREEP_START[1]) , self.theme.themeName .. self.theme.creeps[level].name)
-					screen:add(self.creepWave[creepnum].creepGroup)
-					creepnum = creepnum + 1
+					for i=1, #self.theme.wave do
+						self.creepWave[creepnum] = Creep:new(self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]], -240, GTP(CREEP_START[1]) , self.theme.themeName .. self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]].name)
+						screen:add(self.creepWave[creepnum].creepGroup)
+						creepnum = creepnum + 1
+					end
 				end
 			end
 
