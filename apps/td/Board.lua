@@ -252,7 +252,7 @@ function Board:buildTower(selection)
 		current.square[3] = FULL
 		current:render()
 		self.player.gold = self.player.gold - current.tower.cost
-	
+		current.tower.timer:start()
 		local n = current.square.children
 		local m = current.square.cut
 
