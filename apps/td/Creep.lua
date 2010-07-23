@@ -197,7 +197,6 @@ end
 function Creep:animate()
 
 	--self.timer:start()
-
 	
 	local anim = {
 	{ 0, {0,0,SP,SP} },
