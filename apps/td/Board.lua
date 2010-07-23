@@ -20,6 +20,7 @@ Board = {
 						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]]
 						self.creepWave[creepnum] = Creep:new(wave, -240, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
 						screen:add(self.creepWave[creepnum].creepGroup)
+						creepGold[creepnum] = 0
 						creepnum = creepnum + 1
 					end
 				end
@@ -50,7 +51,6 @@ Board = {
 			creepnum = 1
 			seconds_elapsed = 0
 			level = level + 1
-			
 		end
 		
 		for i = 1, #self.squaresWithTowers do
@@ -268,6 +268,7 @@ function Board:buildTower(selection)
 		current.square[3] = FULL
 		current:render()
 		self.player.gold = self.player.gold - current.tower.cost
+		goldtext.text = self.player.gold
 		current.tower.timer:start()
 		local n = current.square.children
 		local m = current.square.cut
