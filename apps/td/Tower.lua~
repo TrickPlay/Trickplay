@@ -52,12 +52,12 @@ function Tower:render(seconds, creeps)
 		for i = 1, #creeps do
 			if (creeps[i].creepGroup.x > self.x - self.range and creeps[i].creepGroup.x < self.x + self.range
 					and creeps[i].creepGroup.y > self.y - self.range and creeps[i].creepGroup.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
-				creeps[i].speed = creeps[i].max_speed - self.slow
+				creeps[i].speed = creeps[i].max_speed*(self.slow/100)
 			
 				if self.directionTable then --print("creep "..i.." in range") 
 			
 					local cx = creeps[i].creepGroup.x
-					local cy = creeps[i].creepGroup.y
+					local cy = creeps[i].creepGroup.y					
 					local d = self.directionTable
 					local dir
 					for i = 1, #d do
