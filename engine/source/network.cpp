@@ -463,6 +463,41 @@ public:
         return left;
     }
 
+    static int curl_seek_callback(void * c, curl_off_t offset, int origin )
+    {
+        g_assert( c );
+
+        RequestClosure * closure = ( RequestClosure * ) c;
+
+        gssize new_offset = -1;
+
+        switch( origin )
+        {
+            case SEEK_SET:
+                new_offset = offset;
+                break;
+
+            case SEEK_CUR:
+                new_offset = closure->put_offset;
+                new_offset += offset;
+                break;
+
+            case SEEK_END:
+                new_offset = closure->request.body.length();
+                new_offset += offset;
+                break;
+        }
+
+        if ( new_offset < 0 || new_offset > gssize( closure->request.body.length() ) )
+        {
+            return CURL_SEEKFUNC_CANTSEEK;
+        }
+
+        closure->put_offset = new_offset;
+
+        return CURL_SEEKFUNC_OK;
+    }
+
     static size_t curl_header_callback( void * ptr, size_t size, size_t nmemb, void * c )
     {
         g_assert( c );
@@ -649,6 +684,10 @@ public:
             cc( curl_easy_setopt( eh, CURLOPT_WRITEFUNCTION, curl_write_callback ) );
             cc( curl_easy_setopt( eh, CURLOPT_WRITEDATA, closure ) );
             cc( curl_easy_setopt( eh, CURLOPT_READFUNCTION, curl_read_callback ) );
+
+            cc( curl_easy_setopt( eh, CURLOPT_SEEKDATA, closure ) );
+            cc( curl_easy_setopt( eh, CURLOPT_SEEKFUNCTION, curl_seek_callback ) );
+
             cc( curl_easy_setopt( eh, CURLOPT_READDATA, closure ) );
             cc( curl_easy_setopt( eh, CURLOPT_HEADERFUNCTION, curl_header_callback ) );
             cc( curl_easy_setopt( eh, CURLOPT_HEADERDATA, closure ) );
