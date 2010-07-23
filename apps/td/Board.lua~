@@ -17,7 +17,8 @@ Board = {
 				self.timer:start() 
 				if (creepnum <= CREEP_WAVE_LENGTH) then
 					for i=1, #self.theme.wave do
-						self.creepWave[creepnum] = Creep:new(self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]], -240, GTP(CREEP_START[1]) , self.theme.themeName .. self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]].name)
+						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]]
+						self.creepWave[creepnum] = Creep:new(wave, -240, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
 						screen:add(self.creepWave[creepnum].creepGroup)
 						creepnum = creepnum + 1
 					end
@@ -173,6 +174,7 @@ function Board:createBoard()
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
 			list[#list].extra.f = function()
 				self:removeTower()
+				self:findPaths()
 			end
 		
 		end
@@ -213,8 +215,11 @@ function Board:findPaths()
 	for i = 1, #self.creepWave do
 		if (self.creepWave[i].creepGroup.x >= 0 and self.creepWave[i].creepGroup.x <= 1800) then
 			local found
-			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepGroup.y) ][PTG( self.creepWave[i].creepGroup.x) ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
-			self.creepWave[i].path[#self.creepWave[i].path] = nil
+			local size = #self.creepWave[i].path
+			if size > 0 then
+				found, self.creepWave[i].path = astar.CalculatePath( self.nodes[ self.creepWave[i].path[size][1] ][ self.creepWave[i].path[size][2] ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+			end
+			--self.creepWave[i].path[#self.creepWave[i].path] = nil
 		end
 	end
 
