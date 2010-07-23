@@ -13,28 +13,39 @@ local robot = {
 		},
 		obstacles = { },
 		boardBackground = "assets/robotBackground.png",
+
 		wave = {
-				        -- Wave 1
-				        {
-	                        {name = "NormalCreep", num = 10},
-	                        {name = "MediumCreep", num = 10},
-	                        size = 20           
-				        },
-				        
-				        -- Wave 2
-				        {
-				                        {name = "NormalCreep", num = 15},
-				                        {name = "MediumCreep", num = 15},
-				                        size = 30
-				        },
-				        
-				        -- Wave 3
-				        {
-				                        {name = "NormalCreep", num = 25},
-				                        {name = "MediumCreep", num = 25},
-				                        size = 50
-				        }
+			-- Wave 1
+			{
+				{
+					{name = "NormalCreep"},
+					size = 10
+				},
+				size = 10           
+			},
+
+			-- Wave 2
+			{
+				{
+					{name = "NormalCreep", num = 15},
+					{name = "MediumCreep", num = 15},
+					size = 30
+				},
+				size = 30
+
+			},
+
+			-- Wave 3
+			{
+				{
+					{name = "NormalCreep", num = 25},
+					{name = "MediumCreep", num = 25},
+					size = 50
+				},
+				size = 50
+			}
 		},
+		
 		waveTable = {
 			["NormalCreep"] = 1,
 			["MediumCreep"] = 2
