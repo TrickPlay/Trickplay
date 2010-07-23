@@ -15,6 +15,7 @@ local function build_ui( show_it )
     
     local function missing_localized_string( t , s )
         print( "\t*** MISSING LOCALIZED STRING '"..s.."'" )
+        rawset(t,s,s) -- only warn once per string
         return s
     end
     
