@@ -16,7 +16,9 @@ local robot = {
 		wave = {
 				        -- Wave 1
 				        {
-				                        {name = "NormalCreep", num = 30},size = 30
+				                        {name = "NormalCreep", num = 1},
+				                        {name = "MediumCreep", num = 20},
+				                        size = 21
 				        },
 				        
 				        -- Wave 2
