@@ -11,7 +11,7 @@ function Creep:new(args, x, y, name)
 	timer:start()
 	
 	-- Image/Group stuff
-	local creepImage = AssetLoader:getImage(name, {})
+	local creepImage = AssetLoader:getImage(name, {clip={0,0,SP,SP} })
 	local greenBar = Clone {source = healthbar, color = "00FF00"}
 	local redBar = Clone {source = healthbar, color = "FF0000", width = 0}
 	local creepGroup = Group{opacity=255, x = x, y = y}
