@@ -38,10 +38,8 @@ creep_image_table = {}
 creepGold = {}
 spawnCreep = {}
 creepnum = 1
-for i = 1, CREEP_WAVE_LENGTH do
-	creepGold[i] = 0
-	spawnCreep[i] = 0
-end
+wavePartCounter = 1
+creeppartnum = 1
 
 countdowntimer = Text { font = "Sans 30px", text = ""..seconds_elapsed, x = 1400, y = 50, z=3, color = "FFFFFF"}
 phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1000, y = 50, z=3, color = "FFFFFF"}
