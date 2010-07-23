@@ -16,21 +16,23 @@ local robot = {
 		wave = {
 				        -- Wave 1
 				        {
-				                        {name = "NormalCreep", num = 30},length = 30
+				                        {name = "NormalCreep", num = 1},
+				                        {name = "MediumCreep", num = 20},
+				                        size = 21
 				        },
 				        
 				        -- Wave 2
 				        {
 				                        {name = "NormalCreep", num = 15},
 				                        {name = "MediumCreep", num = 15},
-				                        length = 30
+				                        size = 30
 				        },
 				        
 				        -- Wave 3
 				        {
 				                        {name = "NormalCreep", num = 25},
 				                        {name = "MediumCreep", num = 25},
-				                        length = 50
+				                        size = 50
 				        }
 		},
 		waveTable = {
