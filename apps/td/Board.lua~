@@ -11,7 +11,7 @@ Board = {
 			if (s > 1) then 
 				self.timer:start() 
 				if (creepnum <= CREEP_WAVE_LENGTH) then
-					self.creepWave[creepnum] = Creep:new(self.theme.creeps[level], -240, GTP(CREEP_START[1]) , image_to_load[level])
+					self.creepWave[creepnum] = Creep:new(self.theme.creeps[level], -240, GTP(CREEP_START[1]) , self.theme.themeName .. self.theme.creeps[level].name)
 					screen:add(self.creepWave[creepnum].creepGroup)
 					creepnum = creepnum + 1
 				end
@@ -231,10 +231,12 @@ end
 function Board:buildTower(selection)
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
+--self.theme.themeName .. self.theme.creeps[level].name
+
 	-- in reality this would call the circle menu asking for what to do with the square
-		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, "normalRobot")
+		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, self.theme.themeName.."NormalTower")
 		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, "wall")
-		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, "slowTower")
+		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, self.theme.themeName.."SlowTower")
 		end
 
 	if (self.player.gold - current.tower.cost >=0) then
@@ -250,7 +252,7 @@ function Board:buildTower(selection)
 		current.square[3] = FULL
 		current:render()
 		self.player.gold = self.player.gold - current.tower.cost
-	
+		current.tower.timer:start()
 		local n = current.square.children
 		local m = current.square.cut
 

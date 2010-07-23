@@ -18,10 +18,10 @@ function app.on_loaded()
 		dofile ("Circle.lua")
 
 		local mainMenuList = {
-										{ Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
-										{ Rectangle{color="CC00FF", w=400, h=150, name="Cooperative", x=500} },
-										{ Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
-									}
+								{ Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
+								{ Rectangle{color="CC00FF", w=400, h=150, name="Cooperative", x=500} },
+								{ Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
+		}
 							
 		local mainMenuFocus = Rectangle{color="FF00CC", w=420, h=170}
 							
@@ -59,4 +59,9 @@ function app.on_loaded()
 	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
 	AssetLoader:preloadImage("wall","assets/wall.jpg")
 	AssetLoader:preloadImage("slowTower","assets/slowTowerstrip8.png")
+	AssetLoader:preloadImage("slowTowerIcon","assets/slowTower.png")
+	
+	AssetLoader:preloadImage("sellIcon","assets/sell.png")
+
+
 end
