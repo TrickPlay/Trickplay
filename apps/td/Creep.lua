@@ -46,7 +46,7 @@ function Creep:render(seconds)
 	-- Current x and y values
 	local cx = self.creepGroup.x
 	local cy = self.creepGroup.y
-	
+--	CREEP_START[1] = math.random(5)+2
 	-- When the creep is off the board
 	if not self.found and cx < 0 then
 		self.creepGroup.x = cx + MOVE
