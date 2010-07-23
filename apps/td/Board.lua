@@ -217,11 +217,12 @@ function Board:findPaths()
 	for i = 1, #self.creepWave do
 		if (self.creepWave[i].creepGroup.x >= 0 and self.creepWave[i].creepGroup.x <= 1800) then
 			local found
-			local size = #self.creepWave[i].path
-			if size > 0 then
-				found, self.creepWave[i].path = astar.CalculatePath( self.nodes[ self.creepWave[i].path[size][1] ][ self.creepWave[i].path[size][2] ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+			if self.creepWave[i].path then
+				local size = #self.creepWave[i].path
+				if size > 0 then
+					found, self.creepWave[i].path = astar.CalculatePath( self.nodes[ self.creepWave[i].path[size][1] ][ self.creepWave[i].path[size][2] ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+				end
 			end
-			--self.creepWave[i].path[#self.creepWave[i].path] = nil
 		end
 	end
 
