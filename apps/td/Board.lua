@@ -235,7 +235,7 @@ function Board:buildTower(selection)
 
 	-- in reality this would call the circle menu asking for what to do with the square
 		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, self.theme.themeName.."NormalTower")
-		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, "wall")
+		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, self.theme.themeName.."Wall")
 		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, self.theme.themeName.."SlowTower")
 		end
 
