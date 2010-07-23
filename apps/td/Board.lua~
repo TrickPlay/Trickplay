@@ -7,20 +7,34 @@ Board = {
 		local s =self.timer.elapsed_seconds 
 		seconds_elapsed = seconds_elapsed + seconds
 		wave_counter = 0
+
+--					for i=1, #self.theme.wave do
+--						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]]
+--						self.creepWave[creepnum] = Creep:new(wave, -240, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
+--						screen:add(self.creepWave[creepnum].creepGroup)
+--						creepGold[creepnum] = 0
+--						creepnum = creepnum + 1
+--					end
 		
---		for i=1, #self.theme.wave do
---			print(self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]].name)
---		end
 		CREEP_WAVE_LENGTH = self.theme.wave[level].size
 		if (seconds_elapsed >= WAIT_TIME) then
 			if (s > 1) then 
 				self.timer:start() 
 				if (creepnum <= CREEP_WAVE_LENGTH) then
-					for i=1, #self.theme.wave do
-						self.creepWave[creepnum] = Creep:new(self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]], -240, GTP(CREEP_START[1]) , self.theme.themeName .. self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]].name)
+					local i = wavePartCounter
+--					for i=1, #self.theme.wave do
+						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i].name)]]
+						self.creepWave[creepnum] = Creep:new(wave, -240, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
 						screen:add(self.creepWave[creepnum].creepGroup)
+						creepGold[creepnum] = 0
 						creepnum = creepnum + 1
-					end
+						creeppartnum = creeppartnum +1
+						if (creeppartnum == self.theme.wave[level][i].num+1) then
+							creeppartnum = 1
+							wavePartCounter = wavePartCounter + 1
+						end
+--					end
+					print (creepnum)
 				end
 			end
 
@@ -45,11 +59,14 @@ Board = {
 			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 		end
+		print ("wave_counter : "..wave_counter.." wave length: "..CREEP_WAVE_LENGTH)
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			creepnum = 1
 			seconds_elapsed = 0
 			level = level + 1
-			
+			wavePartCounter = 1
+			creeppartnum = 1
+			print ("in here")
 		end
 		
 		for i = 1, #self.squaresWithTowers do
@@ -159,29 +176,48 @@ function Board:createBoard()
 		local towers = {"normalRobot", "wall", "slowTower"}
 		local icons = {"normalRobotBuy","wall","slowTowerIcon"}
 		
-		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
+		local menuType
 		
-			for i=1,#towers do
+		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
+			menuType = "Empty"
 			
-				list[#list+1] = AssetLoader:getImage( icons[i], { } )
-				list[#list].extra.f = function()
-					buildTowerIfEmpty( towers[i] )
+			-- Make sure it's possible to build here without blocking the path
+			local board = game.board:getPathData()
+			board[BoardMenu.y][BoardMenu.x] = "X"
+			
+			if pathExists(board,{4,1},{4,BW}) then
+				
+				for i=1,#towers do
+				
+					list[#list+1] = AssetLoader:getImage( icons[i], { } )
+					list[#list].extra.f = function()
+						buildTowerIfEmpty( towers[i] )
+					end
 				end
 			end
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
+			menuType = "Full"
 		
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
 			list[#list].extra.f = function()
 				self:removeTower()
+				self:findPaths()
 			end
 		
 		end
 		
-		-- Put this list within a table... for menu purposes
-		local params = {list}
+		if #list > 0 then
+		
+			list[#list+1] = AssetLoader:getImage( "backIcon", { } )
+			list[#list].extra.f = function()
+			end
 			
-		-- Create the circular menu
-		self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params )
+			-- Put this list within a table... for menu purposes
+			local params = {list}
+				
+			-- Create the circular menu
+			self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params, menuType )
+		end
 		
 	end
 	
@@ -213,8 +249,12 @@ function Board:findPaths()
 	for i = 1, #self.creepWave do
 		if (self.creepWave[i].creepGroup.x >= 0 and self.creepWave[i].creepGroup.x <= 1800) then
 			local found
-			found, self.creepWave[i].path = astar.CalculatePath(self.nodes[ PTG(self.creepWave[i].creepGroup.y) ][PTG( self.creepWave[i].creepGroup.x) ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
-			self.creepWave[i].path[#self.creepWave[i].path] = nil
+			if self.creepWave[i].path then
+				local size = #self.creepWave[i].path
+				if size > 0 then
+					found, self.creepWave[i].path = astar.CalculatePath( self.nodes[ self.creepWave[i].path[size][1] ][ self.creepWave[i].path[size][2] ], self.nodes[CREEP_END[1]][CREEP_END[2]], MyNeighbourIterator, MyWalkableCheck, MyHeuristic, MyConditional)
+				end
+			end
 		end
 	end
 
@@ -259,6 +299,7 @@ function Board:buildTower(selection)
 		current.square[3] = FULL
 		current:render()
 		self.player.gold = self.player.gold - current.tower.cost
+		goldtext.text = self.player.gold
 		current.tower.timer:start()
 		local n = current.square.children
 		local m = current.square.cut
