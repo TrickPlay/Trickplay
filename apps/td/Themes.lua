@@ -29,6 +29,7 @@ AssetLoader:preloadImage("wall","assets/wall.jpg")
 AssetLoader:preloadImage("slowTower","assets/slowTowerstrip8.png")
 AssetLoader:preloadImage("slowTowerIcon","assets/slowTower.png")
 AssetLoader:preloadImage("backIcon","assets/backIcon.png")
+AssetLoader:preloadImage("upgradeIcon","assets/upgradeIcon.png")
 
 	
 AssetLoader:preloadImage("sellIcon","assets/sell.png")

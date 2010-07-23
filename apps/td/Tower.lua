@@ -11,6 +11,8 @@ function Tower:new(args, name)
 	local towerImage = AssetLoader:getImage(name,{ clip={0,0,SP,SP} })
 	local isAttacking = false
 	local bullets = {}
+	--local levels = game.board.theme
+	
 	local timer = Stopwatch()
 	
 	local object = {
