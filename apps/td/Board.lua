@@ -204,8 +204,7 @@ function Board:createBoard()
 			
 			list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
 			list[#list].extra.f = function()
-				--self:removeTower()
-				--self:findPaths()
+				self:upgradeTower()
 			end
 		
 		end
@@ -285,9 +284,9 @@ function Board:buildTower(selection)
 --self.theme.themeName .. self.theme.creeps[level].name
 
 	-- in reality this would call the circle menu asking for what to do with the square
-		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, self.theme.themeName.."NormalTower")
-		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, self.theme.themeName.."Wall")
-		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, self.theme.themeName.."SlowTower")
+		if selection == "normalRobot" then current.tower = Tower:new(self.theme.towers.normalTower, self.theme.themeName)
+		elseif selection == "wall" then current.tower = Tower:new(self.theme.towers.wall, self.theme.themeName)
+		elseif selection == "slowTower" then current.tower = Tower:new(self.theme.towers.slowTower, self.theme.themeName)
 		end
 
 	if (self.player.gold - current.tower.cost >=0) then
@@ -331,6 +330,15 @@ function Board:removeTower()
 	if m.south then m.south.children.north = current.square m.south = nil end
 	if m.east then m.east.children.west = current.square m.east = nil end
 	if m.west then m.west.children.east = current.square m.west = nil end	
+
+end
+
+function Board:upgradeTower()
+
+	-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
+	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
+	
+	current.tower:upgrade()
 
 end
 
