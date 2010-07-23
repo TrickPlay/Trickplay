@@ -192,9 +192,14 @@ function Board:createBoard()
 				self:findPaths()
 			end
 			
-			list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
-			list[#list].extra.f = function()
-				self:upgradeTower()
+			local tower = self.squareGrid[BoardMenu.y][BoardMenu.x].tower
+			if tower.level < tower.levels then 
+
+				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
+				list[#list].extra.f = function()
+					self:upgradeTower()
+				end
+				
 			end
 		
 		end
