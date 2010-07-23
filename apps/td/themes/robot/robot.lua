@@ -11,7 +11,25 @@ local robot = {
 			slowTower = {towerType = "assets/slowTower.png", damage = 1, range = 400, cooldown = 35, cost = 80, slow = 20, name = "SlowTower"}
 		},
 		obstacles = { },
-		boardBackground = "assets/robotBackground.png"
+		boardBackground = "assets/robotBackground.png",
+                wave = {
+                                -- Wave 1
+                                {
+                                                {type = "NormalCreep", num = 30}
+                                },
+                                
+                                -- Wave 2
+                                {
+                                                {type = "NormalCreep", num = 15},
+                                                {type = "MediumCreep", num = 15}
+                                },
+                                
+                                -- Wave 3
+                                {
+                                                {type = "NormalCreep", num = 25},
+                                                {type = "MediumCreep", num = 25}
+                                }
+                }
 }
 
 return robot
