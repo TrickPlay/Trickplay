@@ -11,11 +11,13 @@ function Creep:new(args, x, y, name)
 	timer:start()
 	
 	-- Image/Group stuff
-	local creepImage = AssetLoader:getImage(name, {clip={0,0,SP,SP} })
-	local greenBar = Clone {source = healthbar, color = "00FF00"}
+	local creepImage = AssetLoader:getImage(name, {clip={0,0,SP*2,SP*2} })
+	local creepImageGroup = Group{x = -SP/2, y=-SP, z=1}
+	creepImageGroup:add(creepImage)
+	local greenBar = Clone {source = healthbar, y=-SP, color = "00FF00"}
 	local redBar = Clone {source = healthbar, color = "FF0000", width = 0}
 	local creepGroup = Group{opacity=255, x = x, y = y}
-	creepGroup:add(creepImage, greenBar, redBar)
+	creepGroup:add(creepImageGroup, greenBar, redBar)
 	
 	--local path = {}
 	local dead = false
@@ -198,17 +200,19 @@ function Creep:animate()
 
 	--self.timer:start()
 	
-	local anim = {
+	--[[local anim = {
 	{ 0, {0,0,SP,SP} },
 	{ -SP, {SP,0,SP,SP} },
 	{ 0, {0,0,SP,SP} },
 	{ -SP*2, {SP*2,0,SP,SP} },
-	}
+	}]]
 	
-	for i=1, #anim do
-		if self.timer.elapsed_seconds < ( 1/#anim ) * i and self.timer.elapsed_seconds > ( 1/#anim) * (i-1) then
-			self.creepImage.x = anim[i][1]
-			self.creepImage.clip = {anim[i][2][1], anim[i][2][2], anim[i][2][3], anim[i][2][4]}
+	local frames = self.creepImage.w/(SP*2)
+	
+	for i=1, frames do
+		if self.timer.elapsed_seconds < ( 1/frames ) * i and self.timer.elapsed_seconds > ( 1/frames) * (i-1) then
+			self.creepImage.x = - SP*2 * (i-1)
+			self.creepImage.clip = {SP*2 * (i-1),0,SP*2,SP*2}
 			--print("Using image: ", i)
 			--print(self.has_clip)
 		end
