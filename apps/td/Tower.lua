@@ -1,19 +1,32 @@
 Tower = {}
 
-function Tower:new(args, name)
-	local towerType = args.towerType
+function Tower:new(args, prefix)
+	-- Tower knows where it came from, so it can access its own data in "table"
+	local table = args
+	local levels = #table.upgrades
+	local level = 0
+	local prefix = prefix
+	
+	--local towerType = args.towerType
 	local damage = args.damage
 	local range = args.range
 	local cost = args.cost
 	local direction = args.direction
 	local cooldown = args.cooldown
 	local slow = args.slow
-	local towerImage = AssetLoader:getImage(name,{ clip={0,0,SP,SP} })
+	local towerImage = AssetLoader:getImage(prefix..table.name,{ clip={0,0,SP,SP} })
 	local isAttacking = false
 	local bullets = {}
+	--local levels = game.board.theme
+	
 	local timer = Stopwatch()
 	
 	local object = {
+		table = table,
+		levels = levels,
+		level = level,
+		prefix = prefix,
+		
 		towerType = towerType,
 		damage = damage,
 		range = range,
@@ -96,7 +109,27 @@ function Tower:render(seconds, creeps)
 	end
 end
 
+function Tower:upgrade()
 
+	assert(self.level < self.levels)
+	self.level = self.level + 1
+	
+	local r = self.table.upgrades[self.level]
+	
+	self.damage = r.damage
+	self.range = r.range
+	self.cooldown = r.cooldown
+	self.slow = r.slow
+	self.cost = r.cost
+	screen:remove(self.towerImage)
+	self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
+	screen:add(self.towerImage)
+	print(self.prefix..self.table.name..self.level)
+
+	game.board.player.gold = game.board.player.gold - r.cost
+	goldtext.text = game.board.player.gold
+
+end
 
 
 
