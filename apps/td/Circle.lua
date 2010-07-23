@@ -53,20 +53,20 @@ function destroyCircleMenu(obj)
 	
 end
 
-function buildTowerIfEmpty(name)
+--[[unction buildTowerIfEmpty(name)
 
-	local board = game.board:getPathData()
-	board[BoardMenu.y][BoardMenu.x] = "X"
+	--local board = game.board:getPathData()
+	--board[BoardMenu.y][BoardMenu.x] = "X"
 	
-	if pathExists(board,{4,1},{4,BW}) then
+	--if pathExists(board,{4,1},{4,BW}) then
 		game.board:buildTower(name)
 		game.board:findPaths()
-		return true
-	else
-		return false
-	end
+	--	return true
+	--else
+	--	return false
+	--end
 
-end
+end]]
 
 function circleRender(c, seconds)
 
