@@ -183,6 +183,7 @@ function Board:createBoard()
 					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { } )
 					list[#list].extra.f = function()
 						self:buildTower(towers[i])
+						self:findPaths()
 						--buildTowerIfEmpty( self.theme.themeName..towers[i].name )
 					end
 				end
@@ -282,6 +283,7 @@ function Board:buildTower(selection)
 
 	-- Selection is the proper table in self.theme.towers
 	current.tower = Tower:new(selection, self.theme.themeName)
+	--self:findPaths()
 	
 	print(selection)
 
