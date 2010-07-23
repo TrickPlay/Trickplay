@@ -24,9 +24,11 @@ local robot = {
                                 wall =
                                                 { damage = 0, range = 0, cooldown = 1000, cost = 5,slow = 0, name = "Wall"
                                                 }
-			--normalTower = {towerType = "assets/robots/normalRobot/01.png", damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = 100, name = "NormalTower"	},
-			--wall = {towerType = "assets/normalTower.png", damage = 0, range = 0, cooldown = 1000, cost = 5,slow = 0, name = "Wall"},
-			--slowTower = {towerType = "assets/slowTower.png", damage = 1, range = 400, cooldown = 1, cost = 80, slow = 75, name = "SlowTower"}
+                                                
+		--normalTower = {towerType = "assets/robots/normalRobot/01.png", damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = 100, name = "NormalTower"	},
+		--wall = {towerType = "assets/normalTower.png", damage = 0, range = 0, cooldown = 1000, cost = 5,slow = 0, name = "Wall"},
+		--slowTower = {towerType = "assets/slowTower.png", damage = 1, range = 400, cooldown = 1, cost = 80, slow = 75, name = "SlowTower"}
+                
 		},
 		obstacles = { },
 		boardBackground = "assets/robotBackground.png",
