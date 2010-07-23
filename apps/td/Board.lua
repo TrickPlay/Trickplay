@@ -171,11 +171,14 @@ function Board:createBoard()
 		
 		end
 		
-		-- Put this list within a table... for menu purposes
-		local params = {list}
+		if #list > 0 then
 			
-		-- Create the circular menu
-		self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params )
+			-- Put this list within a table... for menu purposes
+			local params = {list}
+				
+			-- Create the circular menu
+			self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params )
+		end
 		
 	end
 	
