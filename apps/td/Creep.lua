@@ -7,6 +7,8 @@ function Creep:new(args, x, y, name)
 	local speed = args.speed
 	local max_speed = speed
 	local direction = args.direction or {0,1}
+	local timer = Stopwatch()
+	timer:start()
 	
 	-- Image/Group stuff
 	local creepImage = AssetLoader:getImage(name, {})
@@ -33,7 +35,8 @@ function Creep:new(args, x, y, name)
 		dead = dead,
 		bounty = bounty,
 		flying = flying,
-		creepGroup = creepGroup
+		creepGroup = creepGroup,
+		timer = timer
    }
    setmetatable(object, self)
    self.__index = self
@@ -70,8 +73,14 @@ function Creep:render(seconds)
 	else 
 		local path = self.path
 		local size = #path
-		local order = self:pathTop()
+		
+		if self.complete or (not self.order) then
+			self.complete = nil
+			self.order = self:pathTop()
+		end
 				
+		local order = self.order
+		
 		-- Pick a direction
 		if cx < order[2] then
 			-- If it's less, then calculate the new position
@@ -88,6 +97,8 @@ function Creep:render(seconds)
 				elseif self.creepGroup.y > new[1] then self.creepGroup.x = order[2] self:step(0, d)
 				elseif self.creepGroup.y < new[1] then self.creepGroup.x = order[2] self:step(0, -d)
 				end
+				
+				self.complete = true
 			else
 			-- If the new position doesn't overshoot, move normally
 				self:step(MOVE, 0)
@@ -104,6 +115,9 @@ function Creep:render(seconds)
 				if self.creepGroup.y > new[1] then self.creepGroup.x = order[2] self:step(0, d)
 				elseif self.creepGroup.y < new[1] then self.creepGroup.x = order[2] self:step(0, -d)
 				end
+				
+				self.complete = true
+
 			else
 				self:step(-MOVE, 0)
 			end
@@ -119,6 +133,8 @@ function Creep:render(seconds)
 				if self.creepGroup.x > new[2] then self.creepGroup.y = order[1] self:step(d, 0)
 				elseif self.creepGroup.x < new[2] then self.creepGroup.y = order[1] self:step(-d, 0)
 				end
+				
+				self.complete = true
 			else
 				self:step(0, MOVE)
 			end
@@ -134,6 +150,8 @@ function Creep:render(seconds)
 				if self.creepGroup.x > new[2] then self.creepGroup.y = order[1] self:step(d, 0)
 				elseif self.creepGroup.x < new[2] then self.creepGroup.y = order[1] self:step(-d, 0)
 				end
+				
+				self.complete = true
 			else
 				self:step(0, -MOVE)
 			end
@@ -148,6 +166,8 @@ function Creep:render(seconds)
 		self.greenBar.width = 0
 		self.creepGroup.opacity = 0
 	end
+	
+	self:animate()
 end
 
 function Creep:reset()
@@ -172,4 +192,33 @@ function Creep:pop()
 	--print("pop", self.path[#self.path][1], self.path[#self.path][2] , #self.path)
 	self.path[#self.path] = nil
 
+end
+
+function Creep:animate()
+
+	--self.timer:start()
+
+	
+	local anim = {
+	{ 0, {0,0,SP,SP} },
+	{ -SP, {SP,0,SP,SP} },
+	{ 0, {0,0,SP,SP} },
+	{ -SP*2, {SP*2,0,SP,SP} },
+	}
+	
+	for i=1, #anim do
+		if self.timer.elapsed_seconds < ( 1/#anim ) * i and self.timer.elapsed_seconds > ( 1/#anim) * (i-1) then
+			self.creepImage.x = anim[i][1]
+			self.creepImage.clip = {anim[i][2][1], anim[i][2][2], anim[i][2][3], anim[i][2][4]}
+			--print("Using image: ", i)
+			--print(self.has_clip)
+		end
+	end
+	
+	--print(self.timer.elapsed_seconds)
+	
+	if self.timer.elapsed_seconds > 1 then
+		self.timer:start()
+	end
+	
 end
