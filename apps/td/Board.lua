@@ -159,16 +159,27 @@ function Board:createBoard()
 		local towers = {"normalRobot", "wall", "slowTower"}
 		local icons = {"normalRobotBuy","wall","slowTowerIcon"}
 		
-		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
+		local menuType
 		
-			for i=1,#towers do
+		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
+			menuType = "Empty"
 			
-				list[#list+1] = AssetLoader:getImage( icons[i], { } )
-				list[#list].extra.f = function()
-					buildTowerIfEmpty( towers[i] )
+			-- Make sure it's possible to build here without blocking the path
+			local board = game.board:getPathData()
+			board[BoardMenu.y][BoardMenu.x] = "X"
+			
+			if pathExists(board,{4,1},{4,BW}) then
+				
+				for i=1,#towers do
+				
+					list[#list+1] = AssetLoader:getImage( icons[i], { } )
+					list[#list].extra.f = function()
+						buildTowerIfEmpty( towers[i] )
+					end
 				end
 			end
 		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
+			menuType = "Full"
 		
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
 			list[#list].extra.f = function()
@@ -179,12 +190,16 @@ function Board:createBoard()
 		end
 		
 		if #list > 0 then
+		
+			list[#list+1] = AssetLoader:getImage( "backIcon", { } )
+			list[#list].extra.f = function()
+			end
 			
 			-- Put this list within a table... for menu purposes
 			local params = {list}
 				
 			-- Create the circular menu
-			self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params )
+			self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params, menuType )
 		end
 		
 	end
