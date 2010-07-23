@@ -1,4 +1,4 @@
-
+local OEM = "trickplay"
 -------------------------------------------------------------------------------
 -- Build the UI
 -------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ local function build_ui( show_it )
     {
         bar                 = Group {},
         
-        bar_background      = Image { src = "assets/menu-background-lg.png" },
+        bar_background      = Image { src = "assets/menu-background-"..OEM..".png" },
         
         button_focus        = Image { src = "assets/button-focus.png" },
     
