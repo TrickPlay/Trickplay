@@ -3,7 +3,8 @@ Tower = {}
 function Tower:new(args, prefix)
 	-- Tower knows where it came from, so it can access its own data in "table"
 	local table = args
-	local levels = #table.upgrades
+	local levels
+	if table.upgrades then levels = #table.upgrades else levels = 0 end
 	local level = 0
 	local prefix = prefix
 	
@@ -120,7 +121,7 @@ function Tower:upgrade()
 	self.range = r.range
 	self.cooldown = r.cooldown
 	self.slow = r.slow
-	self.cost = r.cost
+	self.cost = self.cost + r.cost
 	screen:remove(self.towerImage)
 	self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
 	screen:add(self.towerImage)
