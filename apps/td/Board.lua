@@ -186,6 +186,12 @@ function Board:createBoard()
 				self:removeTower()
 				self:findPaths()
 			end
+			
+			list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
+			list[#list].extra.f = function()
+				--self:removeTower()
+				--self:findPaths()
+			end
 		
 		end
 		
