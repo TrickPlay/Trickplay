@@ -55,6 +55,8 @@ struct UserData
     static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
 
 
+    static void dump_cb( lua_State * L , int index = 1 );
+
 private:
 
     //.........................................................................
@@ -163,9 +165,11 @@ private:
     //.........................................................................
     // Callbacks
 
-    typedef std::map< String , int > CallbackMap;
+//    typedef std::map< String , int > CallbackMap;
 
-    CallbackMap *   callbacks;
+//    CallbackMap *   callbacks;
+
+    int callbacks_ref;
 };
 
 

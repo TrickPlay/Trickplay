@@ -11,12 +11,16 @@
 #define lb_new_self(L,t)    ((t*)lua_newuserdata(L,sizeof(t*)))
 #define lb_get_self(L,t)    (*((t*)lua_touserdata(L,1)))
 
+#if 0
 int lb_get_callback(lua_State*L,void*self,const char*name,int metatable_on_top);
 int lb_set_callback(lua_State*L,void*self,const char*name);
 int lb_invoke_callback(lua_State*L,void*self,const char*metatable,const char*name,int nargs,int nresults);
+int lb_callback_attached(lua_State*L,void*self,const char*name,int index);
+#endif
+
 void lb_clear_callbacks(lua_State*L,void*self,const char*metatable);
 void lb_clear_callbacks(lua_State*L,int index);
-int lb_callback_attached(lua_State*L,void*self,const char*name,int index);
+
 
 void lb_store_weak_ref(lua_State*L,int udata,void*self);
 int lb_wrap(lua_State*L,void*self,const char*metatable);
@@ -47,7 +51,8 @@ void lb_allow(lua_State*L,const char*name);
 // we leave a function
 
 #define LSG             int _lsg_=lua_gettop(L)
-#define LSG_END(i)      (assert(_lsg_+(i)==lua_gettop(L)),(i))
+#define LSG_CHECK(i)    (assert(_lsg_+(i)==lua_gettop(L)))
+#define LSG_END(i)      (LSG_CHECK(i),(i))
 
 
 #endif // _TRICKPLAY_LB_H
