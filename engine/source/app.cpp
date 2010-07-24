@@ -671,6 +671,8 @@ int App::run( const StringSet & allowed_names )
     secure_lua_state( allowed_names );
 
     // Open our stuff
+    luaopen_globals( L );
+#if 0
     luaopen_clutter_actor( L );
     luaopen_clutter_container( L );
     luaopen_clutter_screen( L );
@@ -686,10 +688,11 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_interval( L );
 
     luaopen_idle( L );
+#endif
     luaopen_timer( L );
+#if 0
     luaopen_url_request( L );
     luaopen_storage( L );
-    luaopen_globals( L );
     luaopen_app( L );
     luaopen_system( L );
     luaopen_settings( L );
@@ -720,6 +723,7 @@ int App::run( const StringSet & allowed_names )
     // TODO
     // DEBUG HOOK
 //    lua_sethook(L,debug_hook,LUA_MASKCALL|LUA_MASKRET|LUA_MASKLINE|LUA_MASKCOUNT,1);
+#endif
 
     // Run the script
 

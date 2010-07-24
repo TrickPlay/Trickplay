@@ -23,7 +23,7 @@ gpointer * UserData::make( lua_State * L )
     result->master = 0;
     result->client = 0;
     result->initialized = false;
-    result->callbacks = 0;
+    result->callbacks_ref = LUA_NOREF;
 
     // Duplicate the user data that is already on top of the stack and take a
     // strong reference to it.
@@ -235,16 +235,12 @@ void UserData::finalize( lua_State * L , int index )
         g_hash_table_remove( get_client_map() , self->client );
     }
 
-    // Delete the callback map
+    // Unref the callback table. We don't care if it is LUA_NOREF, because
+    // luaL_unref will deal with it gracefully.
 
-    if ( self->callbacks )
-    {
-        udlog( "  CLEARING CALLBACKS" );
+    udlog( "  CLEARING CALLBACKS" );
 
-        // TODO : we should unref the functions
-
-        delete self->callbacks;
-    }
+    lb2_strong_unref( L , self->callbacks_ref );
 
     // Clear everything so double frees are easier to spot.
 
@@ -252,12 +248,36 @@ void UserData::finalize( lua_State * L , int index )
     self->master = ( GObject * ) 0xDEADBEEF;
     self->client = ( gpointer ) 0xDEADBEEF;
     self->proxy_ref = LUA_NOREF;
-    self->callbacks = ( CallbackMap * ) 0xDEADBEEF;
+    self->callbacks_ref = LUA_NOREF;
 
     udlog( "FINALIZED" );
 }
 
 //.............................................................................
+// Copied from lauxlib.c
+
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
+//.............................................................................
+
+/*
+
+    If the functions reference the user data, they won't be collected. This is
+    a known problem that is solved by Ephemerons in 5.2.
+
+    http://www.inf.puc-rio.br/~roberto/docs/ry08-06.pdf
+
+
+    callbacks_ref ( strong ) =
+    {
+        user data (weak) =
+        {
+            callback name 1 = function ,
+            callback name 2 = function
+        }
+    }
+
+*/
 
 int UserData::set_callback( const char * name , lua_State * L , int index , int function_index )
 {
@@ -265,45 +285,82 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
     UserData * self = UserData::get( L , index );
 
-    if ( 0 == self->callbacks )
+    int fn = abs_index( L , function_index );
+
+    lb2_strong_deref( L , self->callbacks_ref );
+
+    if ( lua_isnil( L , -1 ) )
     {
-        self->callbacks = new CallbackMap;
+        LSG;
+
+        // The callbacks table does not exist, we need to create it
+
+        // Get rid of the nil
+
+        lua_pop( L , 1 );
+
+        // Create the table
+
+        // This table will have a single entry:
+        // The key is a ref to our proxy, and it is weak
+        // The value is a table of callbacks, where each key is the name and the value is the function
+
+        lua_newtable( L );
+
+        // Create a metatable for it so that the key is weak
+
+        lua_newtable( L );
+        lua_pushstring( L , "__mode" );
+        lua_pushstring( L , "k" );
+        lua_rawset( L , -3 );
+        lua_setmetatable( L , -2 );
+
+        // Get a ref to the table and save it
+
+        lua_pushvalue( L , -1 );
+        self->callbacks_ref = lb2_strong_ref( L );
+
+        LSG_CHECK( 0 );
     }
 
-    int isnil = lua_isnil( L , function_index );
+    // Now the callbacks table is at the top of the stack. We need to use our
+    // proxy Lua object to get the table of functions.
 
-    CallbackMap::iterator it = self->callbacks->find( name );
+    self->deref_proxy();
 
-    // If it already exists
+    lua_rawget( L , -2 );
 
-    if ( it != self->callbacks->end() )
+    if ( lua_isnil( L , -1  ) )
     {
-        // unref the old one
+        // The table of functions is not there, we have to create it
 
-        lb2_strong_unref( L , it->second );
+        lua_pop( L , 1 );
 
-        // If it is being unset, we remove it
+        lua_newtable( L );
 
-        if ( isnil )
-        {
-            self->callbacks->erase( it );
-        }
-
-        // Otherwise, we set it to the new one
-
-        else
-        {
-            lua_pushvalue( L , function_index );
-
-            it->second = lb2_strong_ref( L );
-        }
+        self->deref_proxy();
+        lua_pushvalue( L , -2 );
+        lua_rawset( L , -4 );
     }
-    else if ( ! isnil )
-    {
-        lua_pushvalue( L , function_index );
 
-        self->callbacks->insert( std::make_pair( name , lb2_strong_ref( L ) ) );
-    }
+    // Now, we have the callbacks table followed by the functions table
+
+    lua_remove( L , -2 );
+
+    // Only the functions table left on top
+
+
+    int isnil = lua_isnil( L , fn );
+
+    // Set the new function in the functions table
+
+    lua_pushstring( L , name );
+    lua_pushvalue( L , fn );
+    lua_rawset( L , -3 );
+
+    // Pop the functions table
+
+    lua_pop( L , 1 );
 
     LSG_CHECK( 0 );
 
@@ -314,26 +371,41 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
 int UserData::get_callback( const char * name )
 {
+    LSG;
+
     g_assert( name );
 
-    if ( 0 == callbacks )
-    {
-        lua_pushnil( L );
-    }
-    else
-    {
-        CallbackMap::const_iterator it = callbacks->find( name );
+    lb2_strong_deref( L , callbacks_ref );
 
-        if ( it == callbacks->end() )
-        {
-            lua_pushnil( L );
-        }
-        else
-        {
-            lb2_strong_deref( L , it->second );
-        }
+    // We don't have a callbacks table, so we just leave the nil on the stack
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        LSG_CHECK( 1 );
+        return 1;
     }
 
+    // We do have a callbacks table, fetch the functions table
+
+    deref_proxy();
+    lua_rawget( L , -2 );
+
+    lua_remove( L , -2 );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        LSG_CHECK( 1 );
+        return 1;
+    }
+
+    // We do have the functions table, get the function
+
+    lua_pushstring( L , name );
+    lua_rawget( L , -2 );
+
+    lua_remove( L , -2 );
+
+    LSG_CHECK( 1 );
     return 1;
 }
 
@@ -456,3 +528,45 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
     return 1;
 }
 
+
+void UserData::dump_cb( lua_State * L , int index )
+{
+    int cb = UserData::get( L , index )->callbacks_ref;
+
+    g_debug( "DUMPING CALLBACKS" );
+
+    lb2_strong_deref( L , cb );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_pop( L , 1 );
+        g_debug( "  NO CALLBACKS TABLE" );
+        return;
+    }
+
+    lua_pushnil( L );
+
+    if ( ! lua_next( L , -2 ) )
+    {
+        lua_pop( L , 1 );
+        g_debug( "  NO ENTRY IN CALLBACKS TABLE" );
+        return;
+    }
+
+    g_debug( "  USER DATA IS %p" , lua_touserdata( L , -2 ) );
+
+    lua_remove( L , -2 );
+    lua_remove( L , -2 );
+
+    lua_pushnil( L );
+
+    while( lua_next( L , -2 ) )
+    {
+        g_debug( "    %s : SET" , lua_tostring( L , -2 ) );
+        lua_pop( L , 1 );
+    }
+
+    lua_pop( L , 1 );
+
+    g_debug( "END OF CALLBACKS" );
+}

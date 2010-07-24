@@ -195,39 +195,40 @@ set(
 
     LB_FILES
     
-    ${BINDINGS_SRC}/timer.lb
-    ${BINDINGS_SRC}/url_request.lb
-    ${BINDINGS_SRC}/local_hash.lb
     ${BINDINGS_SRC}/globals.lb
-    ${BINDINGS_SRC}/app.lb
-    ${BINDINGS_SRC}/system.lb
-    ${BINDINGS_SRC}/settings.lb
-    ${BINDINGS_SRC}/profile.lb
-    ${BINDINGS_SRC}/xml.lb
-    ${BINDINGS_SRC}/restricted.lb
-    ${BINDINGS_SRC}/apps.lb
-    ${BINDINGS_SRC}/controllers.lb
-    ${BINDINGS_SRC}/mediaplayer.lb
-    ${BINDINGS_SRC}/idle.lb
-    ${BINDINGS_SRC}/stopwatch.lb
-    ${BINDINGS_SRC}/json.lb
 
-	${BINDINGS_SRC}/audiosampler.lb
+#    ${BINDINGS_SRC}/timer.lb
+#    ${BINDINGS_SRC}/url_request.lb
+#    ${BINDINGS_SRC}/local_hash.lb
+#    ${BINDINGS_SRC}/app.lb
+#    ${BINDINGS_SRC}/system.lb
+#    ${BINDINGS_SRC}/settings.lb
+#    ${BINDINGS_SRC}/profile.lb
+#    ${BINDINGS_SRC}/xml.lb
+#    ${BINDINGS_SRC}/restricted.lb
+#    ${BINDINGS_SRC}/apps.lb
+#    ${BINDINGS_SRC}/controllers.lb
+#    ${BINDINGS_SRC}/mediaplayer.lb
+#    ${BINDINGS_SRC}/idle.lb
+#    ${BINDINGS_SRC}/stopwatch.lb
+#    ${BINDINGS_SRC}/json.lb
 
-    ${BINDINGS_SRC}/clutter_actor.lb
-    ${BINDINGS_SRC}/clutter_container.lb
-    ${BINDINGS_SRC}/clutter_screen.lb
-    ${BINDINGS_SRC}/clutter_text.lb
-    ${BINDINGS_SRC}/clutter_rectangle.lb
-    ${BINDINGS_SRC}/clutter_clone.lb
-    ${BINDINGS_SRC}/clutter_group.lb
-    ${BINDINGS_SRC}/clutter_image.lb
-    ${BINDINGS_SRC}/clutter_canvas.lb
-    ${BINDINGS_SRC}/clutter_timeline.lb
-    ${BINDINGS_SRC}/clutter_alpha.lb
-    ${BINDINGS_SRC}/clutter_interval.lb
+#	${BINDINGS_SRC}/audiosampler.lb
+
+#    ${BINDINGS_SRC}/clutter_actor.lb
+#    ${BINDINGS_SRC}/clutter_container.lb
+#    ${BINDINGS_SRC}/clutter_screen.lb
+#    ${BINDINGS_SRC}/clutter_text.lb
+#    ${BINDINGS_SRC}/clutter_rectangle.lb
+#    ${BINDINGS_SRC}/clutter_clone.lb
+#    ${BINDINGS_SRC}/clutter_group.lb
+#    ${BINDINGS_SRC}/clutter_image.lb
+#    ${BINDINGS_SRC}/clutter_canvas.lb
+#    ${BINDINGS_SRC}/clutter_timeline.lb
+#    ${BINDINGS_SRC}/clutter_alpha.lb
+#    ${BINDINGS_SRC}/clutter_interval.lb
     
-    ${BINDINGS_SRC}/socket.lb
+#    ${BINDINGS_SRC}/socket.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
@@ -340,6 +341,11 @@ add_library(
     ${ENGINE_SRC}/source/json.cpp
 
     ${ENGINE_SRC}/lb/src/lb.cpp
+
+    ${ENGINE_SRC}/source/user_data.cpp
+    ${ENGINE_SRC}/source/lb2.cpp
+    
+	timer_new.cpp
 
     ${GENERATED_FILES}
     
