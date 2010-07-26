@@ -7,7 +7,7 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
         SORT = 3
     }
     local OptionSize = 0
-    for k, v in pairs(MenuItems) do
+    for k, v in pairs(Options) do
         OptionSize = OptionSize + 1
     end
 
@@ -17,9 +17,13 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
     local OptionCallbacks = {
         [Options.DELIVERY_OR_PICKUP] = function(self)
             print("delivery or pickup selected")
+            self:get_model():set_delivery()
+            self:get_model():notify()
         end,
         [Options.ARRIVAL_TIME] = function(self)
             print("arrival time selected")
+            self:get_model():set_arrival_time()
+            self:get_model():notify()
         end,
         [Options.SORT] = function(self)
             print("sort selected")
@@ -28,8 +32,6 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
     }
 
     local OptionsInputKeyTable = {
-        [keys.Up] = function(self) self:move_selector(Directions.UP) end,
-        [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] =
@@ -52,13 +54,16 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
     end
 
     function self:move_selector(dir)
-        screen:grab_key_focus()
-        table.foreach(dir, print)
         local new_selected = selected + dir[1]
         if 1 <= new_selected and new_selected <= OptionSize then
             selected = new_selected
         end
         self:get_model():notify()
+    end
+
+    function self:run_callback()
+        local success, error_msg = pcall(OptionCallbacks[selected], self)
+        if not success then print(error_msg) end
     end
 
 end)

@@ -39,6 +39,7 @@ AddressInputController = Class(Controller, function(self, view, ...)
         end,
         [MenuItems.EXIT] = function(self)
             print("exit?")
+            exit()
         end
     }
 

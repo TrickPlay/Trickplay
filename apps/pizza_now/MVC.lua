@@ -5,6 +5,10 @@ Model = Class(
       model.controllers = {}
       model.active_component = nil
 
+      --pizza data
+      model.delivery = nil
+      model.arrival_time = 12
+
       -- class methods
       function model:attach(observer, controller_id)
          self.registry[observer] = true
@@ -48,7 +52,22 @@ Model = Class(
                 assert(model:get_active_controller())
             end
         end
-    end)
+
+        function model:set_delivery()
+            if(self.delivery) then
+                self.delivery = not self.delivery
+            else
+                self.delivery = true
+            end
+        end
+
+        function model:set_arrival_time()
+            self.arrival_time = self.arrival_time + .5
+            if(self.arrival_time >= 24) then
+                self.arrival_time = 0
+            end
+        end
+end)
 
 
 
@@ -115,5 +134,9 @@ Controller = Class(Observer,
 
       function controller:get_view()
          return self.view
+      end
+
+      function controller:run_callback()
+        error("run_callback() not defined for controller")
       end
    end)

@@ -4,7 +4,7 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     local ProviderGroups = {
         DELIVERY_OPTIONS = 1,
         PROVIDERS = 2,
-        GO_BACK = 3
+        FOOTER = 3
     }
 
     local GroupSize = 0
@@ -13,25 +13,32 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = 1
+    local selected = ProviderGroups.PROVIDERS
+
+    --initialize the focus to the carousel
+    assert(view.items[selected], "view child with index " .. selected .. " is nil!")
+    self.child = view.items[selected]:get_controller()
 
     local ProviderCallbacks = {
         [ProviderGroups.DELIVERY_OPTIONS] = function(self)
             print("delivery options")
+            assert(self.child)
+            self.child:run_callback()
         end,
         [ProviderGroups.PROVIDERS] = function(self)
             print("providers")
         end,
-        [ProviderGroups.GO_BACK] = function(self)
+        [ProviderGroups.FOOTER] = function(self)
             print("go back?")
+            self.child:run_callback()
         end
     }
 
     local ProviderInputKeyTable = {
         [keys.Up] = function(self) self:move_selector(Directions.UP) end,
         [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
-        [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
-        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Left] = function(self) self.child:on_key_down(keys.Left) end,
+        [keys.Right] = function(self) self.child:on_key_down(keys.Right) end,
         [keys.Return] = function(self)
             -- compromise so that there's not a full-on lua panic,
             -- but the error message still displays on screen
@@ -56,8 +63,6 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
         if 1 <= new_selected and new_selected <= GroupSize then
             selected = new_selected
         end
-        print("selected: "..selected)
-        ProviderCallbacks[selected]()
         self:get_model():notify()
     end
 
