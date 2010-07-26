@@ -11,8 +11,10 @@ function Creep:new(args, x, y, name)
 	timer:start()
 	
 	-- Image/Group stuff
-	local creepImage = AssetLoader:getImage(name, {clip={0,0,SP*2,SP*2} })
-	local creepImageGroup = Group{x = -SP/2, y=-SP, z=1}
+	local creepImage = AssetLoader:getImage(name, {})
+	--local creepImageGroup = Group{x = -SP/2, y=-SP, z=1, clip={0,0,SP*2,SP*2} }
+	local creepImageGroup = Group{anchor_point={SP/2, SP}, z=1, clip={0,0,SP*2,SP*2} }
+
 	creepImageGroup:add(creepImage)
 	local greenBar = Clone {source = healthbar, y=-SP, color = "00FF00"}
 	local redBar = Clone {source = healthbar, color = "FF0000", width = 0}
@@ -31,6 +33,7 @@ function Creep:new(args, x, y, name)
 		direction = direction,
 		creepType = creepType,
 		creepImage = creepImage,
+		creepImageGroup = creepImageGroup,
 		greenBar = greenBar,
 		redBar = redBar,
 		--path = path,
@@ -83,13 +86,20 @@ function Creep:render(seconds)
 				
 		local order = self.order
 		
-		-- Pick a direction
+		-- Pick a direction [right]
 		if cx < order[2] then
 			-- If it's less, then calculate the new position
 			local pos = cx + MOVE
-		
+			
+			self.creepImageGroup.y_rotation = {0, SP/2, 0}
+			
+			--self.creepImageGroup.y_rotation = {0, self.creepImageGroup.w/4, 0}
+			
 			-- If the new position would overshoot
 			if pos >= order[2] then
+				--self.creepImageGroup.y_rotation = {180, self.creepImageGroup.w/4, 0}
+
+			
 				-- Find the remainder and move in the other axis that much
 				local d = math.abs(order[2] - self.creepGroup.x)
 				self:pop()
@@ -110,6 +120,9 @@ function Creep:render(seconds)
 			--print("left")
 			local pos = cx - MOVE
 			
+			self.creepImageGroup.y_rotation = {180, SP/2, 0}
+			--self.creepImageGroup.opacity = 100
+						
 			if pos <= order[2] then
 				local d = math.abs(order[2] - self.creepGroup.x)
 				self:pop()
@@ -212,7 +225,8 @@ function Creep:animate()
 	for i=1, frames do
 		if self.timer.elapsed_seconds < ( 1/frames ) * i and self.timer.elapsed_seconds > ( 1/frames) * (i-1) then
 			self.creepImage.x = - SP*2 * (i-1)
-			self.creepImage.clip = {SP*2 * (i-1),0,SP*2,SP*2}
+			
+			--self.creepImage.clip = {SP*2 * (i-1),0,SP*2,SP*2}
 			--print("Using image: ", i)
 			--print(self.has_clip)
 		end
