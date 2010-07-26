@@ -21,9 +21,12 @@ local address_input_view = AddressInputView(model)
 address_input_view:initialize()
 local provider_selection_view = ProviderSelectionView(model)
 provider_selection_view:initialize()
-local customize_view = CustomizeView(model, EmptyPizza())
+
+model.current_item = EmptyPizza()
+
+local customize_view = CustomizeView(model)
 customize_view:initialize()
-local tab_view = TabView(model)
+local tab_view = TabView(model,customize_view)
 tab_view:initialize()
 
 function screen:on_key_down(k)
