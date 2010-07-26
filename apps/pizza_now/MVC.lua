@@ -9,6 +9,8 @@ Model = Class(
       model.delivery = nil
       model.arrival_time = 12
 
+      model.current_item = nil
+
       -- class methods
       function model:attach(observer, controller_id)
          self.registry[observer] = true
