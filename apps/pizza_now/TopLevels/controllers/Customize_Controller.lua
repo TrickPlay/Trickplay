@@ -75,7 +75,7 @@ CustomizeController = Class(Controller,
             --table.foreach(dir, print)
             --move into the Tab sub group
             if dir[2] == 0 then
-               if dir == Directions.RIGHT then
+               if dir == Directions.RIGHT and view:get_model().current_item.Tabs[selected].Options ~= nil then
                   self.in_tab_group = true
                   view:enter_sub_group()
                end
