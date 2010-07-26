@@ -78,7 +78,7 @@ All_Options = {
    }
 }
 
-Empty_Pizza = Class(--[[Menu_Item,]]function(self)
+EmptyPizza = Class(--[[Menu_Item,]]function(self)
    --self._base.init(self)
    self.Name = "Build Your Own Pizza"
    self.Tabs = {}

@@ -1,10 +1,3 @@
-Directions = {
-   RIGHT = { 1, 0},
-   LEFT  = {-1, 0},
-   DOWN  = { 0, 1},
-   UP    = { 0,-1}
-}
-
 TabController = Class(Controller,
    function(self, view, ...)
       self._base.init(self, view, Component.TAB)
