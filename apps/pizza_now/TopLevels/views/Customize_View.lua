@@ -1,11 +1,13 @@
 DEFAULT_FONT="DejaVu Sans Mono 40px"
 DEFAULT_COLOR="FFFFFF" --WHITE
-CustomizeView = Class(View, function(view, model, food_item, ...)
+CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
+
+    assert(model.current_item,"no item selected for Customization")
      
     view.ui=Group{name="Tab ui", position={10,60}, opacity=255}
 
-    view.item = food_item
+    --view.item = food_item
     view.menu_items      = {}
     view.sub_group       = {}
     view.sub_group_items = {}
@@ -14,7 +16,7 @@ CustomizeView = Class(View, function(view, model, food_item, ...)
 ----------------------------------------------------------------------------
     --Build Tabs and their sub groups
     function view:Create_Menu_Items()
-    for tab_index,tab in ipairs(view.item.Tabs) do
+    for tab_index,tab in ipairs(model.current_item.Tabs) do
          
         view.menu_items[tab_index] = Text {
             position = {0, 80*(tab_index-1)},

@@ -1,13 +1,13 @@
 TabController = Class(Controller,
    function(self, view, ...)
-      self._base.init(self, view, Component.TAB)
+      self._base.init(self, view, Components.TAB)
 
       -- the default selected index
       local selected = 1
       local i = 1
 
       local MenuItemCallbacks = {}
-      for tab_index,tab in ipairs(customize_view.item.Tabs) do
+      for tab_index,tab in ipairs(view:get_model().current_item.Tabs) do
          MenuItemCallbacks[tab_index] = {}
          if tab.Options ~= nil then
             for opt_index,option in ipairs(tab.Options) do
@@ -50,15 +50,15 @@ TabController = Class(Controller,
       function self:move_selector(dir)
          --move out of the Tab sub group
          if dir == Directions.LEFT then
-            customize_view:get_controller().in_tab_group = false
+            view.parent:get_controller().in_tab_group = false
             view:leave_sub_group()
          --move up and down through the options
          elseif dir[2] ~= 0 then
             local new_selected = selected + dir[2]
-            if 1 <= new_selected and new_selected <= #view.menu_items[customize_view:get_controller():get_selected_index()] then
+            if 1 <= new_selected and new_selected <= #view.menu_items[view.parent:get_controller():get_selected_index()] then
                selected = new_selected
             end
-            MenuItemCallbacks[customize_view:get_controller():get_selected_index()][selected]()
+            MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected]()
             self:get_model():notify()
          end
          

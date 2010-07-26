@@ -7,14 +7,14 @@ CustomizeController = Class(Controller,
 
       local MenuItems = {}
       local MenuItemCallbacks = {}
-      for i,opt in ipairs(view.item.Tabs) do
+      for i,opt in ipairs(view:get_model().current_item.Tabs) do
          MenuItems[opt.Tab_Text] = i
          MenuItemCallbacks[i] = 
             function(self)
                print(opt.Tab_Text.." selected")
             end
       end
-      local MenuSize = #view.item.Tabs
+      local MenuSize = #view:get_model().current_item.Tabs
 
       MenuItemCallbacks["Go Back"] = function()
          --jump back to Food Menu
