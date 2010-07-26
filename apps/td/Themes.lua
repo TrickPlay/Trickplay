@@ -18,6 +18,7 @@ for themeName, t in pairs(Themes) do
 		--print("themes/"..themeName.."/assets/"..v.name..".png")
 		AssetLoader:preloadImage(themeName..v.name, "themes/"..themeName.."/assets/"..v.name..".png")
 		AssetLoader:preloadImage(themeName..v.name.."Icon", "themes/"..themeName.."/assets/"..v.name.."Icon.png")
+		AssetLoader:preloadImage(themeName..v.name.."Fire", "themes/"..themeName.."/assets/"..v.name.."Fire.png")
 		
 		if v.upgrades then
 			for key,val in ipairs(v.upgrades) do
