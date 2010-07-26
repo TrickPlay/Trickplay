@@ -1,4 +1,4 @@
-dofile("Class.lua")
+--dofile("Class.lua")
 Meat_Toppings = {"Pepperoni","XL Pepperoni","Sliced Italian Sausage", 
     "Italian Sausage", "Beef", "Ham","Bacon","Premium Chicken","Salami",
     "Philly Steak"}
@@ -87,9 +87,10 @@ Empty_Pizza = Class(--[[Menu_Item,]]function(self)
       --Radio Buttons
       Options = {
          {Name = "Cheese", Image = "", 
-                        Coverage = All_Options.Coverage.REGULAR},
+                        Placement = All_Options.Placement.ENTIRE,
+                        CoverageX = All_Options.Coverage.REGULAR},
          {Name = "Sauce",  Image = "", 
-                        Coverage = All_Options.Coverage.REGULAR,
+                       CoverageX = All_Options.Coverage.REGULAR,
                       Sauce_Type = All_Options.Sauce_Type.TOMATO},
          {Name = "Crust",  Image = "", 
                      Crust_Style = All_Options.Crust_Style.HANDTOSSED},
@@ -122,7 +123,7 @@ Empty_Pizza = Class(--[[Menu_Item,]]function(self)
       self.Tabs[2].Options[i] = {
          Name  = Meat_Toppings[i],
          Image = "",
-         Coverage  = All_Options.Coverage.REGULAR,
+         CoverageX  = All_Options.Coverage.REGULAR,
          Placement = All_Options.Placement.NONE
       }
    end
@@ -130,7 +131,7 @@ Empty_Pizza = Class(--[[Menu_Item,]]function(self)
       self.Tabs[3].Options[i] = {
          Name  = Veggie_Toppings[i],
          Image = "",
-         Coverage  = All_Options.Coverage.REGULAR,
+         CoverageX  = All_Options.Coverage.REGULAR,
          Placement = All_Options.Placement.NONE
       }
    end

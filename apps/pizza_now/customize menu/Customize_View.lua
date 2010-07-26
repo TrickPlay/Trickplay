@@ -1,19 +1,20 @@
 DEFAULT_FONT="DejaVu Sans Mono 40px"
 DEFAULT_COLOR="FFFFFF" --WHITE
-CustomizeView = Class(View, function(view, model, ...)
+CustomizeView = Class(View, function(view, model, food_item, ...)
     view._base.init(view,model)
      
     view.ui=Group{name="Tab ui", position={10,60}, opacity=255}
 
-    view.pizza = Empty_Pizza()
+    view.item = food_item
     view.menu_items      = {}
     view.sub_group       = {}
     view.sub_group_items = {}
     
 
--------------------------------------------------------------------
+----------------------------------------------------------------------------
     --Build Tabs and their sub groups
-    for tab_index,tab in ipairs(view.pizza.Tabs) do
+    function view:Create_Menu_Items()
+    for tab_index,tab in ipairs(view.item.Tabs) do
          
         view.menu_items[tab_index] = Text {
             position = {0, 80*(tab_index-1)},
@@ -21,23 +22,11 @@ CustomizeView = Class(View, function(view, model, ...)
             color    = DEFAULT_COLOR,
             text     = tab.Tab_Text
         }
-        --[[
-        view.sub_group[tab_index] = Group(name="Tab "..tab_index.." sub-group",
-                                                  position={300,60}, opacity=0)
-        --]]
         view.sub_group_items[tab_index] = {}
-        view.sub_group[tab_index] = Group{name="Tab "..tab_index.." sub-group",
-                                                  position={400,60}, opacity=0}
+        view.sub_group[tab_index] = Group{name="Tab ",tab_index," sub-group",
+                                                position={400,60}, opacity=0}
         if tab.Options ~= nil then
             for opt_index,option in ipairs(tab.Options) do
-                --[[
-                view.sub_group[tab_index]:add(Text {
-                    position = {0, 60*(opt_index-1)},
-                    font     = DEFAULT_FONT,
-                    color    = DEFAULT_COLOR,
-                    text     = option.Name
-                })
-                --]]
                 local indent = 1
                 view.sub_group_items[tab_index][opt_index] = {}
                 view.sub_group_items[tab_index][opt_index][indent] = Text {
@@ -68,7 +57,9 @@ CustomizeView = Class(View, function(view, model, ...)
         screen:add(view.sub_group[tab_index])
 
     end
---------------------------------------------------------------------------------------
+    end
+    view:Create_Menu_Items()
+----------------------------------------------------------------------------
     view.ui:add(unpack(view.menu_items))
     screen:add(view.ui)
 

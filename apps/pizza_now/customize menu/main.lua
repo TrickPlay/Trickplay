@@ -12,7 +12,7 @@ Component = {
 }
 
 local model = Model()
-customize_view = CustomizeView(model)
+customize_view = CustomizeView(model,Empty_Pizza())
 customize_view:initialize()
 tab_view = TabView(model)
 tab_view:initialize()
