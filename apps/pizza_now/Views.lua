@@ -1,8 +1,8 @@
 dofile("TopLevels/views/AddressInputView.lua")
 dofile("TopLevels/controllers/AddressInputController.lua")
 
-dofile("views/FooterView.lua")
-dofile("controllers/FooterController.lua")
+dofile("views/ProviderFooterView.lua")
+dofile("controllers/ProviderFooterController.lua")
 
 dofile("views/ProvidersCarouselView.lua")
 dofile("controllers/ProvidersCarouselController.lua")

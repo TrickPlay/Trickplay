@@ -1,9 +1,9 @@
 DEFAULT_FONT="DejaVu Sans Mono 40px"
 DEFAULT_COLOR="FFFFFF" --WHITE
-FooterView = Class(View, function(view, model, ...)
+ProviderFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)
      
-    view.ui=Group{name="footer ui", position={10,1000}, opacity=255}
+    view.ui=Group{name="providerfooter_ui", position={10,1000}, opacity=255}
 
     view.items = {
         Text{
@@ -22,14 +22,14 @@ FooterView = Class(View, function(view, model, ...)
     view.ui:add(unpack(view.items))
     screen:add(view.ui)
     function view:initialize()
-        self:set_controller(FooterController(self))
+        self:set_controller(ProviderFooterController(self))
     end
 
     function view:update()
         local controller = view:get_controller()
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
-            print("Showing FooterView UI")
+            print("Showing ProviderFooterView UI")
 --            view.ui.opacity = 255
             for i,item in ipairs(view.items) do
                 if i == controller:get_selected_index() then
@@ -41,7 +41,7 @@ FooterView = Class(View, function(view, model, ...)
                 end
             end
         else
-            print("Hiding HeaderView UI")
+            print("Hiding ProviderFooterView UI")
             view.ui:complete_animation()
             view.ui.opacity = 0
         end
