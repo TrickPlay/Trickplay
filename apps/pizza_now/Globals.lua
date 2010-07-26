@@ -1,3 +1,5 @@
+CHANGE_VIEW_TIME = 500
+
 Dimensions = {
     HEIGHT = 1080,
     WIDTH = 1920
