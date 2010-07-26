@@ -17,7 +17,7 @@ function Creep:new(args, x, y, name)
 
 	creepImageGroup:add(creepImage)
 	local greenBar = Clone {source = healthbar, y=-SP, color = "00FF00"}
-	local redBar = Clone {source = healthbar, color = "000000", width = SP}
+	--local redBar = Clone {source = healthbar, color = "000000", width = SP}
 	local creepGroup = Group{opacity=255, x = x, y = y}
 	creepGroup:add(creepImageGroup, redBar, greenBar)
 	

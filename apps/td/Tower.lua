@@ -15,7 +15,14 @@ function Tower:new(args, prefix)
 	local direction = args.direction
 	local cooldown = args.cooldown
 	local slow = args.slow
-	local towerImage = AssetLoader:getImage(prefix..table.name,{ clip={0,0,SP,SP} })
+
+	-- Image stuff
+	local towerImage = AssetLoader:getImage(prefix..table.name,{})
+	local towerImageGroup = Group{ clip={0,0,SP,SP} }
+	local fireImage = AssetLoader:getImage(prefix..table.name.."Fire",{})
+	towerImageGroup:add(towerImage)
+	screen:add(towerImageGroup)
+	
 	local isAttacking = false
 	local bullet = Clone {source = shootAnimation}
 	screen:add(bullet)
@@ -37,8 +44,10 @@ function Tower:new(args, prefix)
 		cooldown = cooldown,
 		cost = cost,
 		towerImage = towerImage,
+		towerImageGroup = towerImageGroup,
 		isAttacking = isAttacking,
 		timer = timer,
+		fireImage = fireImage,
    }
    setmetatable(object, self)
    self.__index = self
@@ -64,6 +73,7 @@ function Tower:render(seconds, creeps)
 	self.bullet.y = self.y
 	self.bullet.z = 2	
 	self.bullet.opacity = 0
+	if self.fired then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
 	--print("1")
 	if (s > self.cooldown) then
 		self.timer:start()
@@ -72,7 +82,7 @@ function Tower:render(seconds, creeps)
 			local cy = creeps[i].creepGroup.y					
 
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
-				self.bullet.opacity = 255
+				--self.bullet.opacity = 255
 				creeps[i].speed = creeps[i].max_speed*(self.slow/100)
 			
 				if self.directionTable then --print("creep "..i.." in range") 
@@ -84,9 +94,16 @@ function Tower:render(seconds, creeps)
 						if cy >= di[1] and cy <= di[2] and cx >= di[3] and cx <= di[4] then dir = i break end
 					end
 					if dir == nil then print (cx, cy) end
-				
-					self.towerImage.x = self.x - SP * (dir - 1)
-					self.towerImage.clip = { SP * (dir - 1), 0, SP, SP }
+					
+					self.towerImage.x = - SP * (dir - 1)
+					
+					self.fireImage.x = self.towerImage.x
+					
+					self.towerImageGroup:add(self.fireImage)
+					self.fired = true
+					
+					--self.towerImage.x = self.x - SP * (dir - 1)
+					--self.towerImage.clip = { SP * (dir - 1), 0, SP, SP }
 			
 				end
 							
@@ -127,9 +144,9 @@ function Tower:upgrade()
 	self.cooldown = r.cooldown
 	self.slow = r.slow
 	self.cost = self.cost + r.cost
-	screen:remove(self.towerImage)
+	self.towerImageGroup:remove(self.towerImage)
 	self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
-	screen:add(self.towerImage)
+	self.towerImageGroup:add(self.towerImage)
 	print(self.prefix..self.table.name..self.level)
 
 	game.board.player.gold = game.board.player.gold - r.cost
