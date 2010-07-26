@@ -17,7 +17,8 @@ function Tower:new(args, prefix)
 	local slow = args.slow
 	local towerImage = AssetLoader:getImage(prefix..table.name,{ clip={0,0,SP,SP} })
 	local isAttacking = false
-	local bullets = {}
+	local bullet = Clone {source = shootAnimation}
+	screen:add(bullet)
 	--local levels = game.board.theme
 	
 	local timer = Stopwatch()
@@ -27,7 +28,7 @@ function Tower:new(args, prefix)
 		levels = levels,
 		level = level,
 		prefix = prefix,
-		
+		bullet = bullet,
 		towerType = towerType,
 		damage = damage,
 		range = range,
@@ -37,7 +38,6 @@ function Tower:new(args, prefix)
 		cost = cost,
 		towerImage = towerImage,
 		isAttacking = isAttacking,
-		bullets = bullets,
 		timer = timer,
    }
    setmetatable(object, self)
@@ -60,18 +60,23 @@ function Tower:render(seconds, creeps)
 	
 	local current
 	local s = self.timer.elapsed_seconds
+	self.bullet.x = self.x
+	self.bullet.y = self.y
+	self.bullet.z = 2	
+	self.bullet.opacity = 0
 	--print("1")
 	if (s > self.cooldown) then
 		self.timer:start()
 		for i = 1, #creeps do
-			if (creeps[i].creepGroup.x > self.x - self.range and creeps[i].creepGroup.x < self.x + self.range
-					and creeps[i].creepGroup.y > self.y - self.range and creeps[i].creepGroup.y < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
+			local cx = creeps[i].creepGroup.x
+			local cy = creeps[i].creepGroup.y					
+
+			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
+				self.bullet.opacity = 255
 				creeps[i].speed = creeps[i].max_speed*(self.slow/100)
 			
 				if self.directionTable then --print("creep "..i.." in range") 
 			
-					local cx = creeps[i].creepGroup.x
-					local cy = creeps[i].creepGroup.y					
 					local d = self.directionTable
 					local dir
 					for i = 1, #d do
@@ -84,7 +89,7 @@ function Tower:render(seconds, creeps)
 					self.towerImage.clip = { SP * (dir - 1), 0, SP, SP }
 			
 				end
-			
+							
 				current = i		
 		
 				creep_in_range = true

@@ -36,7 +36,6 @@ function app.on_loaded()
 		MainMenu:create_buttons(10, "Sans 34px")
 		MainMenu:apply_color_change("FFFFFF", "000000")
 		MainMenu.buttons:grab_key_focus()
-		
 		--CircleMenu.buttons:grab_key_focus()
 		
 		MainMenu:update_cursor_position()
