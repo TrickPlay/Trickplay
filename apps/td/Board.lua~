@@ -33,9 +33,10 @@ Board = {
 					v:render(seconds)
 				else
 					wave_counter = wave_counter + 1
+					v:deathAnimation()
+
 					v.greenBar.width = 0
-					v.creepGroup.opacity = 0
-					
+					v.dead = true					
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
 						self.player.gold = self.player.gold + v.bounty
@@ -44,6 +45,7 @@ Board = {
 					table.remove(v,k)
 				end
 			end
+
 			phasetext.text = "Wave Phase!"
 		else
 			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
