@@ -5,7 +5,7 @@ CustomizeView = Class(View, function(view, model, ...)
      
     view.ui=Group{name="Tab ui", position={10,60}, opacity=255}
 
-    pizza = Empty_Pizza()
+    view.pizza = Empty_Pizza()
     view.menu_items      = {}
     view.sub_group       = {}
     view.sub_group_items = {}
@@ -13,7 +13,7 @@ CustomizeView = Class(View, function(view, model, ...)
 
 -------------------------------------------------------------------
     --Build Tabs and their sub groups
-    for tab_index,tab in ipairs(pizza.Tabs) do
+    for tab_index,tab in ipairs(view.pizza.Tabs) do
          
         view.menu_items[tab_index] = Text {
             position = {0, 80*(tab_index-1)},
@@ -82,6 +82,8 @@ CustomizeView = Class(View, function(view, model, ...)
         view.sub_group[view:get_controller():get_selected_index()]:animate{duration = 100, opacity = 255}
         model:set_active_component(Component.TAB)
         --print("entering sub group")
+
+        self:get_model():notify()
     end
 
     function view:update()
