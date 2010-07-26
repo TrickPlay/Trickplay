@@ -21,6 +21,7 @@ TabView = Class(View, function(view, model, ...)
         model:set_active_component(Component.CUSTOMIZE)
         view:get_controller():reset_selected_index()
         --print("leaving sub group")
+        self:get_model():notify()
     end
 
     function view:update()

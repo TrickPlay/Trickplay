@@ -9,37 +9,22 @@ Directions = {
    function(self, view, ...)
       self._base.init(self, view, Component.CUSTOMIZE)
 
-   local selected = 1
-   local MenuSize = 5
-
---[[
-      local MenuItems = {}
-      for i,opt in ipairs(view.menu_items) do
-         MenuItems[opt.text] = i
-      end
-      local MenuSize = #view.menu_items
-
-
       -- the default selected index
       local selected = 1
 
+
+      local MenuItems = {}
       local MenuItemCallbacks = {}
-      for opt,i in pairs(MenuItems) do
+      for i,opt in ipairs(view.pizza.Tabs) do
+         MenuItems[opt.Tab_Text] = i
          MenuItemCallbacks[i] = 
             function(self)
-               print(opt.." selected")
+               print(opt.Tab_Text.." selected")
             end
       end
---]]
---[[
-      local MenuItemCallbacks)
-      for i = 1,#food_menu.Selections do
-         local item = "MenuItems."..i
-         MenuItemCallbacks[item] = function(self)
-            print(food_menu[i].Name.." selected")
---            food_menu[i].Select()
-         end
-      end]]
+      local MenuSize = #view.pizza.Tabs
+
+
       local MenuKeyTable = {
          [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
          [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
@@ -101,7 +86,7 @@ Directions = {
                   selected = new_selected
                   --print(selected)
                end
-               --MenuItemCallbacks[selected]()
+               MenuItemCallbacks[selected]()
                self:get_model():notify()
             end
          end
