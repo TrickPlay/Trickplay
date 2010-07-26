@@ -40,23 +40,30 @@ void lb2_strong_deref( lua_State * L , int ref );
 
 #undef lb_get_self
 
-#define lb_new_self(L,t) ( (t*) UserData::make( L ) )
 
-#define lb_get_self(L,t) ( (t) UserData::get_client( L , 1 ) )
+#define lb_construct( t , p )           ( (t*) __ud__->initialize_with_client( p ) )
 
-#define lb_initialize_user_data( L ) ( UserData::initialize( L , -1 ) )
+#define lb_construct_empty( )           ( (void) __ud__->initialize_empty( ) )
 
-#define lb_set_userdata_master( L , m ) ( UserData::set_master( m , L , 1 ) )
+#define lb_construct_gobject( t , p )   ( (t*) __ud__->initialize_with_master( p ) )
 
-#define lb_finalize_user_data( L ) ( UserData::finalize( L , 1 ) )
 
-#define lb_get_callback(L,self,name,metatable_on_top) ( UserData::get_callback( name , L , -1 ) )
+#define lb_check_initialized()          ( __ud__->check_initialized() )
 
-#define lb_set_callback(L,self,name) ( UserData::set_callback( name , L ) )
 
-#define lb_invoke_callback(L,self,metatable,name,nargs,nresults) ( UserData::invoke_callback(self,name,nargs,nresults,L) )
+#define lb_get_self(L,t)                ( (t) UserData::get_client( L , 1 ) )
 
-#define lb_callback_attached(L,self,name,index) ( UserData::is_callback_attached(name,L,index))
+
+#define lb_finalize_user_data( L )      ( UserData::finalize( L , 1 ) )
+
+
+#define lb_get_callback(L,self,name,metatable_on_top)               ( UserData::get_callback( name , L , -1 ) )
+
+#define lb_set_callback(L,self,name)                                ( UserData::set_callback( name , L ) )
+
+#define lb_invoke_callback(L,self,metatable,name,nargs,nresults)    ( UserData::invoke_callback(self,name,nargs,nresults,L) )
+
+#define lb_callback_attached(L,self,name,index)                     ( UserData::is_callback_attached(name,L,index))
 
 
 //.........................................................................

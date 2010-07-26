@@ -7,9 +7,72 @@
 
 static DebugLog udlog( true );
 
-//.............................................................................
+//=============================================================================
 
-gpointer * UserData::make( lua_State * L )
+UserData::Handle * UserData::Handle::make( UserData * user_data , gpointer user , GDestroyNotify user_destroy )
+{
+    g_assert( user_data );
+
+    Handle * result = g_slice_new( Handle );
+
+    udlog( "CREATING UD HANDLE %p : UD %p : MASTER : %p" , result , user_data , user_data->master );
+
+    result->master = user_data->master;
+
+    g_assert( result->master );
+
+    g_object_ref( result->master );
+
+    result->user = user;
+    result->user_destroy = user_destroy;
+
+    udlog( "CREATED UD HANDLE" );
+
+    return result;
+}
+
+UserData::Handle * UserData::Handle::make( lua_State * L , int index , gpointer user , GDestroyNotify user_destroy )
+{
+    return make( UserData::get( L , index ) , user , user_destroy );
+}
+
+void UserData::Handle::destroy( gpointer _handle )
+{
+    g_assert( _handle );
+
+    Handle * handle = Handle::get( _handle );
+
+    udlog( "DESTROYING UD HANDLE %p : MASTER %p" , handle , handle->master );
+
+    if ( handle->user_destroy )
+    {
+        handle->user_destroy( handle->user );
+    }
+
+    g_object_unref( handle->master );
+
+    g_slice_free( Handle , handle );
+
+    udlog( "DESTROYED UD HANDLE" );
+}
+
+lua_State * UserData::Handle::get_lua_state()
+{
+    UserData * ud = UserData::get( master );
+
+    return ud ? ud->L : 0;
+}
+
+int UserData::Handle::invoke_callback( const char * name , int nresults )
+{
+    UserData * ud = UserData::get( master );
+
+    return ud ? ud->invoke_callback( name , 0 , nresults ) : 0;
+}
+
+//=============================================================================
+
+UserData * UserData::make( lua_State * L )
 {
     LSG;
 
@@ -39,87 +102,90 @@ gpointer * UserData::make( lua_State * L )
 
     LSG_CHECK( 1 );
 
-    return & result->client;
+    return result;
 }
 
 //.............................................................................
 
-void UserData::set_master( gpointer new_master , lua_State * L , int index )
+gpointer UserData::initialize_empty()
 {
-    UserData * self = UserData::get( L , index );
+    return UserData::initialize_with_client( 0 );
+}
 
-    udlog( "SETTING MASTER FOR UD %p TO %p", self , new_master );
+//.............................................................................
 
-    g_assert( new_master );
-    g_assert( G_IS_OBJECT( new_master ) );
+gpointer UserData::initialize_with_master( GObject * _master )
+{
+    udlog( "SETTING MASTER FOR UD %p TO %p", this , _master );
+
+    g_assert( _master );
 
     // This can only be called once. We fail if a master already exists
 
-    g_assert( self->master == 0 );
+    g_assert( master == 0 );
 
-    g_assert( ! self->initialized );
+    g_assert( ! initialized );
 
-    self->master = G_OBJECT( new_master );
+    master = _master;
 
     // If the new master has a floating ref, we sink it now. If it is
     // not floating, it should have at least one ref and we assume
     // ownership of it.
 
-    if ( g_object_is_floating( self->master ) )
+    if ( g_object_is_floating( master ) )
     {
-        g_object_ref_sink( self->master );
+        g_object_ref_sink( master );
     }
+
+    return initialize_with_client( _master );
 }
 
 //.............................................................................
 
-void UserData::initialize( lua_State * L , int index )
+gpointer UserData::initialize_with_client( gpointer _client )
 {
-    UserData * self = UserData::get( L , index );
-
-    udlog( "INITIALIZING UD %p : MASTER %p : CLIENT %p" , self , self->master , self->client );
+    udlog( "INITIALIZING UD %p : MASTER %p : CLIENT %p" , this , master , _client );
 
     // Make sure it only gets called once
 
-    g_assert( ! self->initialized );
+    g_assert( ! initialized );
 
-    self->initialized = true;
+    initialized = true;
 
-    g_assert( self->proxy_ref_type == STRONG );
+    g_assert( proxy_ref_type == STRONG );
 
     // If there is no master object, create one now
 
-    if ( ! self->master )
+    if ( ! master )
     {
-        self->master = G_OBJECT( g_object_new( G_TYPE_OBJECT , 0 ) );
+        master = G_OBJECT( g_object_new( G_TYPE_OBJECT , 0 ) );
 
-        g_assert( self->master );
+        g_assert( master );
 
-        udlog( "  CREATED NEW MASTER %p" , self->master );
-    }
-    else
-    {
-        udlog( "  USING MASTER %p" , self->master );
+        udlog( "  CREATED NEW MASTER %p" , master );
     }
 
-    // Add the client to the client map, so we can get the master from
-    // the client.
+    client = _client;
 
-    if ( self->client )
+    if ( ! client )
     {
-        g_hash_table_insert( get_client_map() , self->client , self->master );
+        client = master;
+
+        udlog( "  USING MASTER AS CLIENT" );
     }
+
+    g_hash_table_insert( get_client_map() , client , master );
 
     // Add us to the master - so we can be reached through it while
     // we are alive.
 
-    g_object_set_qdata( self->master , get_key_quark() , self );
+    g_object_set_qdata( master , get_key_quark() , this );
 
     // The object should have at least one strong ref. We add our toggle ref.
 
     udlog( "  ADDING MASTER TOGGLE REF" );
 
-    g_object_add_toggle_ref( self->master , ( GToggleNotify ) toggle_notify , self );
+    g_object_add_toggle_ref( master , ( GToggleNotify ) toggle_notify , this );
 
     // Now, remove the strong ref
 
@@ -128,9 +194,23 @@ void UserData::initialize( lua_State * L , int index )
 
     udlog( "  REMOVING MASTER STRONG REF" );
 
-    g_object_unref( self->master );
+    g_object_unref( master );
 
     udlog( "INITIALIZED" );
+
+    return client;
+}
+
+//.............................................................................
+
+void UserData::check_initialized()
+{
+    g_assert( initialized );
+    g_assert( L );
+    g_assert( master );
+    g_assert( client );
+    g_assert( UserData::get( master ) == this );
+    g_assert( g_hash_table_lookup( get_client_map() , client ) == master );
 }
 
 //.............................................................................
@@ -451,48 +531,15 @@ void UserData::deref_proxy()
 
 //.............................................................................
 
-int UserData::invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L )
+int UserData::invoke_callback( const char * name , int nargs , int nresults )
 {
-    g_assert( client );
     g_assert( name );
-    g_assert( L );
 
     LSG;
 
-    // Using the client pointer, we get the master from the client map
-    // If it is not there, we bail. Because of that, this cannot be called
-    // before finalize.
-
-    gpointer master = g_hash_table_lookup( get_client_map() , client );
-
-    if ( ! master )
-    {
-        lua_pop( L , nargs );
-
-        LSG_CHECK( -nargs );
-
-        return 0;
-    }
-
-    // Now, we get the user data from the master object. If Lua has gone away,
-    // it won't be there. (But neither will the master in the client map).
-
-    UserData * self = ( UserData * ) g_object_get_qdata( G_OBJECT( master ) , get_key_quark() );
-
-    if ( ! self )
-    {
-        lua_pop( L , nargs );
-
-        LSG_CHECK( -nargs );
-
-        return 0;
-    }
-
-    g_assert( L == self->L );
-
     // This will push the callback (or nil) onto the stack
 
-    self->get_callback( name );
+    get_callback( name );
 
     if ( lua_isnil( L , -1 ) )
     {
@@ -505,7 +552,7 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
 
     // nargs : callback
 
-    self->deref_proxy();
+    deref_proxy();
 
     // nargs : callback : proxy
 
@@ -528,6 +575,61 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
     return 1;
 }
 
+//.............................................................................
+
+int UserData::invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
+{
+    g_assert( master );
+    g_assert( L );
+
+    LSG;
+
+    // Now, we get the user data from the master object. If Lua has gone away,
+    // it won't be there. (But neither will the master in the client map).
+
+    UserData * self = UserData::get( master );
+
+    if ( ! self )
+    {
+        lua_pop( L , nargs );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    g_assert( L == self->L );
+
+    return self->invoke_callback( name , nargs , nresults );
+}
+
+//.............................................................................
+
+int UserData::invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L )
+{
+    g_assert( client );
+
+    LSG;
+
+    // Using the client pointer, we get the master from the client map
+    // If it is not there, we bail. Because of that, this cannot be called
+    // before initialize.
+
+    gpointer master = g_hash_table_lookup( get_client_map() , client );
+
+    if ( ! master )
+    {
+        lua_pop( L , nargs );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    return UserData::invoke_callback( G_OBJECT( master ) , name , nargs , nresults , L );
+}
+
+//.............................................................................
 
 void UserData::dump_cb( lua_State * L , int index )
 {
