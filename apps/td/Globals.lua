@@ -29,6 +29,7 @@ creep_spawn_timer = 0
 
 wave_counter = 0
 
+
 level = 1
 image_to_load = {"normal","mediumRobot"}
 
@@ -66,6 +67,6 @@ end
 
 bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
 healthbar = Rectangle {color = "00FF00", width = SP, height = 10}
-
+shootAnimation = Rectangle {color = {200,200,0}, x = -100, y = -100, width = 10, height = 10}
  
-screen:add(bulletImage, healthbar)
+screen:add(bulletImage, healthbar, shootAnimation)

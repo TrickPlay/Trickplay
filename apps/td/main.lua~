@@ -3,15 +3,17 @@ dofile ("Globals.lua")
 dofile ("menu/menu.lua")
 dofile ("Game.lua")
 dofile ("Board.lua")
-dofile ("themes/Themes.lua")
 dofile ("Creep.lua")
 dofile ("Tower.lua")
 
-
 screen:show()
 
-function app.on_loaded()
 
+	
+function app.on_loaded()
+	dofile ("Themes.lua")
+	print("DId theme")
+	
 	-- Everything is loaded
 	AssetLoader.on_preload_ready = function()
 
@@ -34,7 +36,15 @@ function app.on_loaded()
 		MainMenu:create_buttons(10, "Sans 34px")
 		MainMenu:apply_color_change("FFFFFF", "000000")
 		MainMenu.buttons:grab_key_focus()
-		
+		local c = Canvas{color="FFFFFF", x=0, y=0, width=1920, height=1080}
+		c:begin_painting()
+		c:move_to(100,100)
+		c:line_to(100,300)
+		c:line_to(300,300)
+		c:line_to(300,100)
+		c:fill() -- or c:stroke()
+		c:finish_painting()
+		screen:add(c)
 		--CircleMenu.buttons:grab_key_focus()
 		
 		MainMenu:update_cursor_position()
@@ -49,19 +59,4 @@ function app.on_loaded()
 		screen:add( AssetLoader:getImage("normalRobot",{name="robot", x=200, y=200}) )
 		
 	end
-	
-	-- Load images
-	AssetLoader:construct()
-	AssetLoader:preloadImage("normal","assets/normalRobot.png")
-	AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
-	
-	AssetLoader:preloadImage("normalRobotBuy","assets/robots/normalRobot/buy.png")
-	AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
-	AssetLoader:preloadImage("wall","assets/wall.jpg")
-	AssetLoader:preloadImage("slowTower","assets/slowTowerstrip8.png")
-	AssetLoader:preloadImage("slowTowerIcon","assets/slowTower.png")
-	
-	AssetLoader:preloadImage("sellIcon","assets/sell.png")
-
-
 end

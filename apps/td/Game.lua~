@@ -23,7 +23,17 @@ end
 function Game:startGame()
 	self.board:init()
 	self.board:createBoard()
-	
+		local c = Canvas{color="FFFFFF", x=0, y=0, width=1920, height=1080}
+		c:begin_painting()
+		c:set_source_color("FF0000")
+		c:move_to(100,100)
+		c:line_to(100,300)
+		c:line_to(110,300)
+		c:line_to(110,100)
+		c:fill() -- or c:stroke()
+		c:finish_painting()
+		screen:add(c)
+
 end
 
 
@@ -40,10 +50,6 @@ paused = false
 
 function idle.on_idle( idle , seconds )   
 	if not paused then    
-		local s = Stopwatch()
-		s:start()
-		print (s.elapsed)
-
 		for _ , item in ipairs( render_list ) do 
 			pcall( item.render , item , seconds ) 
 		end        

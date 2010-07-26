@@ -23,7 +23,7 @@ end
 function Game:startGame()
 	self.board:init()
 	self.board:createBoard()
-	
+
 end
 
 
