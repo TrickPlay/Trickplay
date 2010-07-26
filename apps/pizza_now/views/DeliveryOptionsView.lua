@@ -46,10 +46,8 @@ DeliveryOptionsView = Class(View, function(view, model, ...)
 
             arrivalTime.text = "Arrival Time: "..model.arrival_time
         else
-            print("opacity: "..self.ui.opacity)
-            self.ui:complete_animation()
             print("Hiding DeliveryOptionsView UI")
-            print("opacity: "..self.ui.opacity)
+            self.ui:complete_animation()
             self.ui.opacity = 0
         end
     end

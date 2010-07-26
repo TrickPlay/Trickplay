@@ -1,4 +1,4 @@
-FooterController = Class(Controller, function(self, view, ...)
+ProviderFooterController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PROVIDER_SELECTION)
 
     local MenuItems = {

@@ -5,7 +5,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
     deliveryOptionsView:initialize()
     local providersView = ProvidersCarouselView(model)
     providersView:initialize()
-    local footerView = FooterView(model)
+    local footerView = ProviderFooterView(model)
     footerView:initialize()
 
     view.items = {deliveryOptionsView, providersView, footerView}
