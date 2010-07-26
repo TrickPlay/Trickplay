@@ -17,7 +17,7 @@ TabView = Class(View, function(view, model, ...)
 
     function view:leave_sub_group()
         customize_view.sub_group[customize_view:get_controller():get_selected_index()]:animate{duration = 100, opacity = 100}
-        model:set_active_component(Component.CUSTOMIZE)
+        model:set_active_component(Components.CUSTOMIZE)
         view:get_controller():reset_selected_index()
         self:get_model():notify()
     end
@@ -25,7 +25,7 @@ TabView = Class(View, function(view, model, ...)
     function view:update()
         local controller = view:get_controller()
         local comp = model:get_active_component()
-        if comp == Component.TAB then
+        if comp == Components.TAB then
             print("Showing TabView UI")
             view.ui.opacity = 255
             for i,option in ipairs(view.menu_items[customize_view:get_controller():get_selected_index()]) do
@@ -37,7 +37,7 @@ TabView = Class(View, function(view, model, ...)
                     end
                 end
             end
-        elseif comp == Component.CUSTOMIZE then
+        elseif comp == Components.CUSTOMIZE then
             print("Greying TabView UI")
             view.ui.opacity = 100
         else

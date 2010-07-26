@@ -71,7 +71,7 @@ CustomizeView = Class(View, function(view, model, food_item, ...)
     function view:enter_sub_group()
         --view.menu_items[view:get_controller():get_selected_index()]:animate{duration=500, opacity = 100}
         view.sub_group[view:get_controller():get_selected_index()]:animate{duration = 100, opacity = 255}
-        model:set_active_component(Component.TAB)
+        model:set_active_component(Components.TAB)
         --print("entering sub group")
 
         self:get_model():notify()
@@ -81,7 +81,7 @@ CustomizeView = Class(View, function(view, model, food_item, ...)
         local controller = view:get_controller()
         local comp = model:get_active_component()
         --print("Active Component: "..comp)
-        if comp == Component.CUSTOMIZE then
+        if comp == Components.CUSTOMIZE then
             print("Showing CustomizeView UI")
             view.ui.opacity = 255
             for i,item in ipairs(view.menu_items) do
@@ -95,7 +95,7 @@ CustomizeView = Class(View, function(view, model, food_item, ...)
                     view.sub_group[i]:animate{duration = 100, opacity = 0}
                 end
             end
-        elseif comp == Component.TAB then
+        elseif comp == Components.TAB then
             print("Greying CustomizeView UI")
             view.ui.opacity = 100
         else

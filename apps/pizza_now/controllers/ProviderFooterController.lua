@@ -19,10 +19,11 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
             print("Backing up")
             self:get_model():set_active_component(Components.ADDRESS_INPUT)
             self:get_model():notify()
-            screen:show()
         end,
         [MenuItems.CONTINUE] = function(self)
             print("continuing")
+            self:get_model():set_active_component(Component.CUSTOMIZE)
+            self:get_model():notify()
         end
     }
 

@@ -13,3 +13,8 @@ dofile("controllers/DeliveryOptionsController.lua")
 dofile("TopLevels/views/ProviderSelectionView.lua")
 dofile("TopLevels/controllers/ProviderSelectionController.lua")
 
+dofile("TopLevels/views/Customize_View.lua")
+dofile("TopLevels/controllers/Customize_Controller.lua")
+
+dofile("views/Tab_View.lua")
+dofile("controllers/Tab_Controller.lua")

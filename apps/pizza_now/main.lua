@@ -1,5 +1,6 @@
 dofile("Utils.lua")
 dofile("Globals.lua")
+dofile("Menu/EmptyPizza.lua")
 dofile("Class.lua")
 dofile("MVC.lua")
 dofile("Views.lua")
@@ -7,6 +8,8 @@ dofile("Views.lua")
 Components = {
    ADDRESS_INPUT = 1,
    PROVIDER_SELECTION = 2,
+   CUSTOMIZE = 3,
+   TAB = 4
 }
 
 -- Model initialization
@@ -18,6 +21,10 @@ local address_input_view = AddressInputView(model)
 address_input_view:initialize()
 local provider_selection_view = ProviderSelectionView(model)
 provider_selection_view:initialize()
+local customize_view = CustomizeView(model, EmptyPizza())
+customize_view:initialize()
+local tab_view = TabView(model)
+tab_view:initialize()
 
 function screen:on_key_down(k)
     assert(model:get_active_controller())
