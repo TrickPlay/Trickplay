@@ -25,18 +25,17 @@ class timer
 {
 public:
 
-    timer( lua_State * l );
+    timer( );
     ~timer();
     static gboolean timer_fired( gpointer data );
-    void start();
+    void start( UserData * ud );
     void stop();
-    void set_interval( lua_Number new_interval );
+    void set_interval( UserData * ud , lua_Number new_interval );
     lua_Number get_interval() const;
     void cancel();
 
 private:
 
-    lua_State * L;
     GSource * source;
     lua_Number interval;
 };
@@ -57,7 +56,7 @@ int wrap_Timer( lua_State*L, timer* self )
 int new_Timer( lua_State*L )
 {
     PROFILER(__FUNCTION__);
-    timer** self( lb_new_self(L,timer*) );
+    UserData * __ud__ = UserData::make( L );
     luaL_getmetatable(L,TIMER_METATABLE);
     lua_setmetatable( L, -2 );
 
@@ -65,7 +64,7 @@ int new_Timer( lua_State*L )
     int on_timer( lb_optfunction(L,2,0) );
     //*****************************************************************************
 
-    *self = new timer( L );
+    timer * self = lb_construct( timer , new timer );
 
     if ( lua_gettop( L ) == 2 && lua_istable(L,-2) )
     {
@@ -77,27 +76,27 @@ int new_Timer( lua_State*L )
     {
         if ( interval > 0 )
         {
-            ( *self )->set_interval( interval );
+            self->set_interval( __ud__ , interval );
         }
 
         if ( on_timer )
         {
             lua_pushvalue( L, on_timer );
-            lb_set_callback( L, *self, "on_timer" );
+            lb_set_callback( L, self, "on_timer" );
             lua_pop(L,1);
         }
     }
 
-    if ( lb_callback_attached( L, *self, "on_timer", -1 ) )
+    if ( lb_callback_attached( L, self, "on_timer", -1 ) )
     {
-        ( *self )->start();
+        self->start( __ud__ );
     }
 
 //    lb_store_weak_ref( L, lua_gettop( L ), *self );
 
-    lb_initialize_user_data( L );
+    lb_check_initialized();
 
-    PROFILER_CREATED("Timer",*self);
+    PROFILER_CREATED("Timer",self);
 
     return 1;
 }
@@ -126,7 +125,7 @@ int Timer_start( lua_State*L )
     //*****************************************************************************
 
     if ( lb_callback_attached( L, self, "on_timer", 1 ) )
-        self->start();
+        self->start( UserData::get( L ) );
     return 0;
 }
 
@@ -158,7 +157,7 @@ int set_Timer_interval( lua_State*L )
     timer* self( lb_get_self(L,timer*) );
     lua_Number interval( luaL_checknumber( L, 2 ) );
     //*****************************************************************************
-    self->set_interval( interval );
+    self->set_interval( UserData::get( L ) , interval );
     return 0;
 }
 
@@ -252,8 +251,10 @@ void luaopen_Timer( lua_State*L )
 }
 //*****************************************************************************
 
-timer::timer( lua_State * l ) :
-    L( l ), source( NULL ), interval( 0 )
+timer::timer( )
+:
+    source( NULL ),
+    interval( 0 )
 {
 }
 
@@ -262,7 +263,7 @@ timer::~timer()
     cancel();
 }
 
-void timer::start()
+void timer::start( UserData * ud )
 {
     if ( source )
         return;
@@ -272,7 +273,7 @@ void timer::start()
 
     source = g_timeout_source_new( interval * 1000 );
 
-    g_source_set_callback( source, timer_fired, this, NULL );
+    g_source_set_callback( source, timer_fired, UserData::Handle::make( ud , this ), UserData::Handle::destroy );
     g_source_attach( source, g_main_context_default() );
 }
 
@@ -286,7 +287,7 @@ void timer::stop()
     source = NULL;
 }
 
-void timer::set_interval( lua_Number new_interval )
+void timer::set_interval( UserData * ud , lua_Number new_interval )
 {
     if ( new_interval == interval )
         return;
@@ -296,7 +297,7 @@ void timer::set_interval( lua_Number new_interval )
     if ( source )
     {
         stop();
-        start();
+        start( ud );
     }
 }
 
@@ -310,23 +311,29 @@ void timer::cancel()
     stop();
 }
 
-gboolean timer::timer_fired( gpointer data )
+gboolean timer::timer_fired( gpointer _handle )
 {
-    timer * self = ( timer* ) data;
+    UserData::Handle * handle = UserData::Handle::get( _handle );
 
-    if ( !invoke_Timer_on_timer( self->L, self, 0, 1 ) )
+    lua_State * L = handle->get_lua_state();
+
+    g_assert( L );
+
+    timer * self = ( timer* ) handle->get_user();
+
+    if ( ! handle->invoke_callback( "on_timer" , 1 ) )
     {
         self->cancel();
         return FALSE;
     }
 
-    if ( lua_isboolean(self->L,-1) && !lua_toboolean( self->L, -1 ) )
+    if ( lua_isboolean(L,-1) && !lua_toboolean( L, -1 ) )
     {
         self->cancel();
-        lua_pop(self->L,1);
+        lua_pop(L,1);
         return FALSE;
     }
-    lua_pop(self->L,1);
+    lua_pop(L,1);
     return TRUE;
 }
 

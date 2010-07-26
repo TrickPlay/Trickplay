@@ -9,10 +9,104 @@
 struct UserData
 {
     //.........................................................................
-    // Creates a new user data and sets it initial state. It is not complete
-    // until you call initialize. It returns a pointer to its 'client'.
+    // A handle to a user data takes a strong ref on the user data's master
+    // object - therefore keeping everything alive as long as it is
+    // outstanding.
+    //
+    // Handles have a destroy function, so it is easy to create one and put it
+    // in the glib main loop. When you do that, always pass the handle's own
+    // 'destroy' as the destroy notify for glib.
+    //
+    // You can also chain a different pointer and your own destroy notify to it.
 
-    static gpointer * make( lua_State * L );
+    struct Handle
+    {
+        //.....................................................................
+
+        static Handle * make( UserData * user_data , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
+
+        //.....................................................................
+        // Creates one with additional user pointer and destroy notify
+
+        static Handle * make( lua_State * L , int index = 1 , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
+
+        //.....................................................................
+
+        inline static Handle * get( gpointer handle )
+        {
+            return ( Handle * ) handle;
+        }
+
+        //.....................................................................
+        // Destroys one
+
+        static void destroy( gpointer handle );
+
+        //.....................................................................
+        // Gets the user pointer
+
+        inline gpointer get_user()
+        {
+            return user;
+        }
+
+        //.....................................................................
+        // Gets the Lua state for it. It can be NULL if the Lua state is gone
+
+        lua_State * get_lua_state();
+
+        //.....................................................................
+        // A shortcut to invoke a callback using the handle. It doesn't take
+        // arguments because it assumes the owner of the handle doesn't keep
+        // the Lua state - and therefore cannot push arguments.
+
+        int invoke_callback( const char * name , int nresults = 0 );
+
+    private:
+
+        GObject *       master;
+        gpointer        user;
+        GDestroyNotify  user_destroy;
+    };
+
+    //.........................................................................
+    // Creates a new user data and sets it initial state. It is not complete
+    // until you call initialize.
+
+    static UserData * make( lua_State * L );
+
+    //.........................................................................
+    // Initializes the user data with a newly created GObject which is used
+    // as both the master and the client pointer. Returns that new GObject.
+
+    gpointer initialize_empty( );
+
+    //.........................................................................
+    // Initialize the user data with the given client. This one creates a new
+    // master GObject. Returns the client.
+
+    gpointer initialize_with_client( gpointer client );
+
+    //.........................................................................
+    // This one uses the provided master ( which cannot be NULL ) as both the
+    // master and the client. It does not create a new GObject to serve as the
+    // master. Returns the master.
+    //
+    // This call assumes ownership of the GObject. If it is floating, it will
+    // sink it.
+    //
+    // master = master passed in
+    // client = master passed in
+    // return master passed in
+
+    gpointer initialize_with_master( GObject * master );
+
+    //.........................................................................
+    // Does a few checks to ensure a UserData is sane after it has been
+    // constructed and initialized. These checks may not be valid later in the
+    // life of the user data.
+
+    void check_initialized();
 
     //.........................................................................
     // Returns the client associated with it.
@@ -23,46 +117,9 @@ struct UserData
     }
 
     //.........................................................................
-    // Sets the master GObject to the one provided. This can only be done
-    // once before the user data is initialized. Ownership of the master
-    // object is transferred to us - so it should not be unrefed after you
-    // call this.
-
-    static void set_master( gpointer new_master , lua_State * L , int index = 1 );
-
-    //.........................................................................
-    // Sets up the rest of the user data - creating a master if one has not
-    // been set already.
-
-    static void initialize( lua_State * L , int index = 1 );
-
-    //.........................................................................
-    // This is called when the Lua object is destroyed.
-
-    static void finalize( lua_State * L , int index = 1 );
-
-    //.........................................................................
-    //
-
-    static int set_callback( const char * name , lua_State * L , int index = -2 , int function_index = -1 );
-
-    static int get_callback( const char * name , lua_State * L , int index = -1 );
-
-    static int is_callback_attached( const char * name , lua_State * L , int index = -1 );
-
-
-
-    static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
-
-
-    static void dump_cb( lua_State * L , int index = 1 );
-
-private:
-
-    //.........................................................................
     // Gets the user data from the Lua stack given the index.
 
-    inline static UserData * get( lua_State * L , int index )
+    inline static UserData * get( lua_State * L , int index = 1 )
     {
         g_assert( L );
 
@@ -73,6 +130,63 @@ private:
         g_assert( result->L == L );
 
         return result;
+    }
+
+    //.........................................................................
+    // This is called when the Lua object is destroyed.
+
+    static void finalize( lua_State * L , int index = 1 );
+
+    //.........................................................................
+    // Install a callback on this user data
+
+    static int set_callback( const char * name , lua_State * L , int index = -2 , int function_index = -1 );
+
+    //.........................................................................
+    // Retrieve a callback - will always push a value, nil or otherwise.
+
+    static int get_callback( const char * name , lua_State * L , int index = -1 );
+
+    //.........................................................................
+    // Returns true if the given callback is attached to this user data.
+
+    static int is_callback_attached( const char * name , lua_State * L , int index = -1 );
+
+    //.........................................................................
+    // This one looks up a user data given a client pointer and invokes the
+    // given callback. It expects that nargs have been pushed on to the stack
+    // already. In any case, it pops nargs.
+
+    static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
+
+    //.........................................................................
+    // Same as above, but can be used when you already know the master object,
+    // so it skips the client lookup.
+
+    static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
+
+    //.........................................................................
+
+    int invoke_callback( const char * name , int nargs , int nresults );
+
+    //.........................................................................
+    // Debugging.
+
+    static void dump_cb( lua_State * L , int index = 1 );
+
+private:
+
+    friend class Handle;
+
+    //.........................................................................
+    // Gets the user data given a master object - can return NULL if the
+    // user data/Lua state are gone.
+
+    inline static UserData * get( GObject * master)
+    {
+        g_assert( master );
+
+        return ( UserData * ) g_object_get_qdata( master , get_key_quark() );
     }
 
     //.........................................................................
