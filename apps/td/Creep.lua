@@ -8,6 +8,7 @@ function Creep:new(args, x, y, name)
 	local max_speed = speed
 	local direction = args.direction or {0,1}
 	local timer = Stopwatch()
+	local deathtimer = Stopwatch()
 	timer:start()
 	
 	-- Image/Group stuff
@@ -17,12 +18,13 @@ function Creep:new(args, x, y, name)
 
 	creepImageGroup:add(creepImage)
 	local greenBar = Clone {source = healthbar, y=-SP, color = "00FF00"}
-	local redBar = Clone {source = healthbar, color = "000000", width = SP}
+	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = -SP}
 	local creepGroup = Group{opacity=255, x = x, y = y}
 	creepGroup:add(creepImageGroup, redBar, greenBar)
 	
 	--local path = {}
 	local dead = false
+	local deadanimate = false
 	local bounty = args.bounty
 	local flying = args.flying
 	local object = {
@@ -38,6 +40,7 @@ function Creep:new(args, x, y, name)
 		redBar = redBar,
 		--path = path,
 		dead = dead,
+		deadanimate = deadanimate,
 		bounty = bounty,
 		flying = flying,
 		creepGroup = creepGroup,
@@ -56,7 +59,7 @@ function Creep:render(seconds)
 	local cy = self.creepGroup.y
 --	CREEP_START[1] = math.random(5)+2
 	-- When the creep is off the board
-	if not self.found and cx < 0 then
+	if (not self.found and cx < 0) or self.flying then
 		self.creepGroup.x = cx + MOVE
 		
 	-- Find a path if none exists and the creep is on the board
@@ -172,17 +175,23 @@ function Creep:render(seconds)
 			end
 		end
 		
-		self.greenBar.width = SP*(self.hp/self.max_hp)
 		
 	end
-	
-	if (self.hp == 0) then 
-		dead = true
-		self.greenBar.width = 0
-		self.creepGroup.opacity = 0
-	end
-	
+	self.greenBar.width = SP*(self.hp/self.max_hp)
+		
 	self:animate()
+end
+
+function Creep:bleed()
+	local x = self.creepGroup.x + math.random(SP)
+	local y = self.creepGroup.y + math.random(SP)
+--	local blood = Rectangle {color = "FF0000", width = 10, height = 10, x = x, y = y}
+--	print ("bleed")
+--	screen:add(blood)
+end
+
+function Creep:deathAnimation(seconds)
+	self.creepGroup.opacity = 0
 end
 
 function Creep:reset()

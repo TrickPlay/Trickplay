@@ -95,8 +95,10 @@ function Tower:render(seconds, creeps)
 				creep_in_range = true
 			
 				creeps[i].hp = creeps[i].hp - self.damage
+				creeps[i]:bleed()
 				self:checkSplash(creeps,i)
 				if (creeps[i].hp <=0) then creeps[i].hp =0 end
+
 				break
 			end
 		end
@@ -140,14 +142,15 @@ end
 -- TODO: something is horribly wrong with collision detection
 function Tower:checkSplash(creeps,i)
 	-- if self.splash is true or something
-	--[[
 	local radius = 60
+	local cx = creeps[i].creepGroup.x
+	local cy = creeps[i].creepGroup.y
 	for j =1, #creeps do
 		if (creeps[j].creepImage.x > creeps[i].creepImage.x -radius and creeps[j].creepImage.x < creeps[i].creepImage.x +radius and creeps[j].creepImage.y > creeps[i].creepImage.y -radius and creeps[j].creepImage.y < creeps[i].creepImage.y +radius ) then
 			creeps[j].hp = creeps[j].hp - self.damage
 --			creeps[j].speed = creeps[j].max_speed*(self.slow/100)
 		end
-	end]]
+	end
 	
 end
 
