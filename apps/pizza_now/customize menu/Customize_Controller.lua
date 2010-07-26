@@ -12,17 +12,25 @@ Directions = {
       -- the default selected index
       local selected = 1
 
-
       local MenuItems = {}
       local MenuItemCallbacks = {}
-      for i,opt in ipairs(view.pizza.Tabs) do
+      for i,opt in ipairs(view.item.Tabs) do
          MenuItems[opt.Tab_Text] = i
          MenuItemCallbacks[i] = 
             function(self)
                print(opt.Tab_Text.." selected")
             end
       end
-      local MenuSize = #view.pizza.Tabs
+      local MenuSize = #view.item.Tabs
+
+      MenuItemCallbacks["Go Back"] = function()
+         --jump back to Food Menu
+      end
+
+      MenuItemCallbacks["Add to Cart"] = function()
+         --cart[#cart + 1] = pizza
+         --jump back to Food Menu
+      end
 
 
       local MenuKeyTable = {
@@ -71,7 +79,7 @@ Directions = {
          --otherwise
          else
             --print("Customize move_selector()",dir[1],dir[2])
-            table.foreach(dir, print)
+            --table.foreach(dir, print)
             --move into the Tab sub group
             if dir[2] == 0 then
                if dir == Directions.RIGHT then
