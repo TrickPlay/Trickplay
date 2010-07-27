@@ -199,7 +199,7 @@ set(
 
     ${BINDINGS_SRC}/timer.lb
     
-#    ${BINDINGS_SRC}/url_request.lb
+    ${BINDINGS_SRC}/url_request.lb
 #    ${BINDINGS_SRC}/local_hash.lb
 #    ${BINDINGS_SRC}/app.lb
 #    ${BINDINGS_SRC}/system.lb
