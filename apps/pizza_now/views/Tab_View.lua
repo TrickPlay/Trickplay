@@ -4,10 +4,16 @@ TabView = Class(View, function(view, model,parent, ...)
     view._base.init(view,model)
     view.parent = parent
     view.ui=Group{name="Tab ui", position={300,60}, opacity=255}
+    view.menu_items = {}
 
-    view.menu_items = view.parent.sub_group_items
-    for i, t in ipairs(view.menu_items) do
-        view.ui:add(unpack(view.menu_items[i]))
+    function view:Create_Menu_Items()
+        view.menu_items = {}
+        --gut the UI
+        view.ui:clear()
+        view.menu_items = view.parent.sub_group_items
+        for i, t in ipairs(view.menu_items) do
+            view.ui:add(unpack(view.menu_items[i]))
+        end
     end
 
     screen:add(view.ui)

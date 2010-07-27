@@ -2,8 +2,6 @@ DEFAULT_FONT="DejaVu Sans Mono 40px"
 DEFAULT_COLOR="FFFFFF" --WHITE
 CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
-
-    assert(model.current_item,"no item selected for Customization")
      
     view.ui=Group{name="Tab ui", position={10,60}, opacity=255}
 
@@ -16,54 +14,68 @@ CustomizeView = Class(View, function(view, model, ...)
 ----------------------------------------------------------------------------
     --Build Tabs and their sub groups
     function view:Create_Menu_Items()
-    for tab_index,tab in ipairs(model.current_item.Tabs) do
-         
-        view.menu_items[tab_index] = Text {
-            position = {0, 80*(tab_index-1)},
-            font     = DEFAULT_FONT,
-            color    = DEFAULT_COLOR,
-            text     = tab.Tab_Text
-        }
-        view.sub_group_items[tab_index] = {}
-        view.sub_group[tab_index] = Group{name="Tab ",tab_index," sub-group",
-                                                position={400,60}, opacity=0}
-        if tab.Options ~= nil then
-            for opt_index,option in ipairs(tab.Options) do
-                local indent = 1
-                view.sub_group_items[tab_index][opt_index] = {}
-                view.sub_group_items[tab_index][opt_index][indent] = Text {
-                    position = {0, 60*(opt_index-1)},
-                    font     = DEFAULT_FONT,
-                    color    = DEFAULT_COLOR,
-                    text     = option.Name
-                }
-                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
-                for item, selection in pairs(option) do
-                    if item ~= "Name" and item ~= "Image" then
-                        indent = indent + 1
-                        for pick, val in pairs(All_Options[item]) do
-                            if val == selection then
-                            view.sub_group_items[tab_index][opt_index][indent] = Text {
-                                position = {400*(indent-1), 60*(opt_index-1)},
-                                font     = DEFAULT_FONT,
-                                color    = DEFAULT_COLOR,
-                                text     = pick
-                            }
-                            view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
+        --clear it out
+        view.menu_items      = {}
+        view.sub_group       = {}
+        view.sub_group_items = {}
+    
+        --gut the UI
+        view.ui:clear()
+        view.ui.opacity = 255
+        for tab_index,tab in ipairs(model.current_item.Tabs) do
+
+    
+            --check to see if there is an item selected
+            assert(model.current_item,"no item selected for Customization")
+    
+            --build the customization menu
+            view.menu_items[tab_index] = Text {
+                position = {0, 80*(tab_index-1)},
+                font     = DEFAULT_FONT,
+                color    = DEFAULT_COLOR,
+                text     = tab.Tab_Text
+            }
+            view.sub_group_items[tab_index] = {}
+            view.sub_group[tab_index] = Group{name="Tab ",tab_index," sub-group",
+                                                    position={400,60}, opacity=0}
+            if tab.Options ~= nil then
+                for opt_index,option in ipairs(tab.Options) do
+                    local indent = 1
+                    view.sub_group_items[tab_index][opt_index] = {}
+                    view.sub_group_items[tab_index][opt_index][indent] = Text {
+                        position = {0, 60*(opt_index-1)},
+                        font     = DEFAULT_FONT,
+                        color    = DEFAULT_COLOR,
+                        text     = option.Name
+                    }
+                    view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
+                    for item, selection in pairs(option) do
+                        if item ~= "Name" and item ~= "Image" then
+                            indent = indent + 1
+                            for pick, val in pairs(All_Options[item]) do
+                                if val == selection then
+                                view.sub_group_items[tab_index][opt_index][indent] = Text {
+                                    position = {400*(indent-1), 60*(opt_index-1)},
+                                    font     = DEFAULT_FONT,
+                                    color    = DEFAULT_COLOR,
+                                    text     = pick
+                                }
+                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
+                                end
                             end
                         end
                     end
                 end
             end
+            screen:add(view.sub_group[tab_index])
         end
-        screen:add(view.sub_group[tab_index])
-
+        --view:get_controller():init_shit()
+        view.ui:add(unpack(view.menu_items))
+        screen:add(view.ui)
     end
-    end
-    view:Create_Menu_Items()
+    --view:Create_Menu_Items()
 ----------------------------------------------------------------------------
-    view.ui:add(unpack(view.menu_items))
-    screen:add(view.ui)
+
 
     function view:initialize()
         view:set_controller(CustomizeController(self))
