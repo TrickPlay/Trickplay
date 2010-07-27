@@ -14,23 +14,25 @@ struct UserData
     // outstanding.
     //
     // Handles have a destroy function, so it is easy to create one and put it
-    // in the glib main loop. When you do that, always pass the handle's own
-    // 'destroy' as the destroy notify for glib.
+    // in the glib main loop. When you do that, always pass
+    // UserData::Handle::destroy as the destroy notify for glib.
     //
     // You can also chain a different pointer and your own destroy notify to it.
 
     struct Handle
     {
         //.....................................................................
+        // Create one from a user data you have.
 
         static Handle * make( UserData * user_data , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
 
         //.....................................................................
-        // Creates one with additional user pointer and destroy notify
+        // Creates one from a user data on the stack.
 
         static Handle * make( lua_State * L , int index = 1 , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
 
         //.....................................................................
+        // Just a cast.
 
         inline static Handle * get( gpointer handle )
         {
@@ -70,7 +72,7 @@ struct UserData
     };
 
     //.........................................................................
-    // Creates a new user data and sets it initial state. It is not complete
+    // Creates a new user data and sets its initial state. It is not complete
     // until you call initialize.
 
     static UserData * make( lua_State * L );
@@ -94,10 +96,6 @@ struct UserData
     //
     // This call assumes ownership of the GObject. If it is floating, it will
     // sink it.
-    //
-    // master = master passed in
-    // client = master passed in
-    // return master passed in
 
     gpointer initialize_with_master( GObject * master );
 
@@ -153,6 +151,10 @@ struct UserData
     static int is_callback_attached( const char * name , lua_State * L , int index = -1 );
 
     //.........................................................................
+
+    static void clear_callbacks( lua_State * L , int index = 1 );
+
+    //.........................................................................
     // This one looks up a user data given a client pointer and invokes the
     // given callback. It expects that nargs have been pushed on to the stack
     // already. In any case, it pops nargs.
@@ -166,8 +168,23 @@ struct UserData
     static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
 
     //.........................................................................
+    // If you already have the user data pointer, you can call this one.
 
     int invoke_callback( const char * name , int nargs , int nresults );
+
+    //.........................................................................
+    // Connect a signal handler to the master. We do this so that we can
+    // track the connected handlers and disconnect them all when the proxy
+    // object goes away.
+
+    void connect_signal( const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags = 0 );
+
+    void connect_signal_if( bool condition , const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags = 0 );
+
+    //.........................................................................
+    // Disconnect a signal by name
+
+    void disconnect_signal( const gchar * name );
 
     //.........................................................................
     // Debugging.
@@ -240,6 +257,10 @@ private:
 
     //.........................................................................
 
+    void disconnect_all_signals();
+
+    //.........................................................................
+
     lua_State *     L;
 
     //.........................................................................
@@ -277,13 +298,17 @@ private:
     RefType         proxy_ref_type;
 
     //.........................................................................
-    // Callbacks
-
-//    typedef std::map< String , int > CallbackMap;
-
-//    CallbackMap *   callbacks;
+    // Callbacks are kept in a table we reference.
 
     int callbacks_ref;
+
+    //.........................................................................
+    // A map to signals we have connected to the master. Each entry has our own
+    // callback name and the signal handler id.
+
+    typedef std::map< String , gulong > SignalMap;
+
+    SignalMap * signals;
 };
 
 

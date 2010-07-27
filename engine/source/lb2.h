@@ -65,6 +65,7 @@ void lb2_strong_deref( lua_State * L , int ref );
 
 #define lb_callback_attached(L,self,name,index)                     ( UserData::is_callback_attached(name,L,index))
 
+#define lb_clear_callbacks(L)                                       ( UserData::clear_callbacks( L , 1 ) )
 
 //.........................................................................
 

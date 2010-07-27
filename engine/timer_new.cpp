@@ -185,7 +185,6 @@ int invoke_Timer_on_timer( lua_State*L, timer* self, int nargs, int nresults )
 
 void detach_Timer( lua_State*L, timer* self )
 {
-    lb_clear_callbacks( L, self, TIMER_METATABLE );
 }
 
 int timer_sref( lua_State * L )
