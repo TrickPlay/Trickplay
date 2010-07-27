@@ -61,7 +61,15 @@ function Creep:render(seconds)
 	-- When the creep is off the board
 	if (not self.found and cx < 0) or self.flying then
 		self.creepGroup.x = cx + MOVE
-		
+		if (self.flying and cx >1920) then
+			self.hp = 0
+			wave_counter = wave_counter + 1
+			game.board.player.lives = game.board.player.lives - 1
+			game.board.player.gold = game.board.player.gold - self.bounty
+			print (game.board.player.lives)
+			self.creepGroup.x = wave_counter*-240
+		end
+	
 	-- Find a path if none exists and the creep is on the board
 	elseif cx >= 0 and not self.path then
 		self.found, self.path = astar.CalculatePath(game.board.nodes[ CREEP_START[1] ][ CREEP_START[2] ], game.board.nodes[ CREEP_END[1] ][ CREEP_END[2] ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
@@ -174,7 +182,8 @@ function Creep:render(seconds)
 				self:step(0, -MOVE)
 			end
 		end
-		
+		self.creepGroup.z = 1 + PTG(self.creepGroup.y)*0.1
+		if (self.flying) then self.creepGroup.z = 3 end
 		
 	end
 	self.greenBar.width = SP*(self.hp/self.max_hp)
@@ -182,6 +191,7 @@ function Creep:render(seconds)
 	self:animate()
 end
 
+--insert whatever happens when you hit a creep, e.g body parts fall or blood drips
 function Creep:bleed()
 	local x = self.creepGroup.x + math.random(SP)
 	local y = self.creepGroup.y + math.random(SP)
@@ -190,6 +200,7 @@ function Creep:bleed()
 --	screen:add(blood)
 end
 
+-- insert whatever happens on death here, you can use seconds or deathtimer
 function Creep:deathAnimation(seconds)
 	self.creepGroup.opacity = 0
 end
