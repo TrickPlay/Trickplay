@@ -109,7 +109,7 @@ CustomizeView = Class(View, function(view, model, ...)
                     view.sub_group[i]:animate{duration = 100, opacity = 0}
                 end
             end
-        elseif comp == Components.TAB then
+        elseif comp == Components.TAB or comp == Components.CUSTOMIZE_ITEM then
             print("Greying CustomizeView UI")
             view.ui.opacity = 100
         else

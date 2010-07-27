@@ -54,7 +54,7 @@ Model = Class(
       function model:set_active_component(comp)
          self.previous_component = self.active_component
          self.active_component = comp
-         print("set active component")
+         print("set active component to",comp)
       end
 
         function model:set_keys()
