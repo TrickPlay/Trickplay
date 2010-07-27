@@ -24,8 +24,8 @@ address_input_view:initialize()
 local provider_selection_view = ProviderSelectionView(model)
 provider_selection_view:initialize()
 
-local food_selection_view = FoodSelectionView(model)
-food_selection_view:initialize()
+--local food_selection_view = FoodSelectionView(model)
+--food_selection_view:initialize()
 
 model.current_item = EmptyPizza()
 
@@ -33,8 +33,8 @@ local customize_view = CustomizeView(model)
 customize_view:initialize()
 local tab_view = TabView(model,customize_view)
 tab_view:initialize()
---local windmill_view = WindMillView(model)
---windmill_view:initialize()
+local windmill_view = WindMillView(model)
+windmill_view:initialize()
 
 function screen:on_key_down(k)
     assert(model:get_active_controller())

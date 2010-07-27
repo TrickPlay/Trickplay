@@ -1,6 +1,24 @@
 WindMillController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.CUSTOMIZE_ITEM)
 
+    local amountSelection = false
+    local topping = {
+        amount = 0,
+        side = 0
+    }
+
+    local Amount = {
+        LIGHT = 1,
+        NORMAL = 2,
+        EXTRA = 3
+    }
+
+    local Side = {
+        LEFT = 1,
+        WHOLE = 2,
+        RIGHT = 3
+    }
+
     local CustomizeItems = {
         LEFT = 1,
         UP = 2,
@@ -18,13 +36,35 @@ WindMillController = Class(Controller, function(self, view, ...)
 
     local CustomizeItemCallbacks = {
         [CustomizeItems.LEFT] = function(self)
+            if(not amountSelection) then
+                topping.side = Side.LEFT
+                amountSelection = true
+            else
+                topping.amount = Amount.LIGHT
+                amountSelection = false
+            end
         end,
         [CustomizeItems.UP] = function(self)
+            if(not amountSelection) then
+                topping.side = Side.WHOLE
+                amountSelection = true
+            else
+                topping.amount = Amount.NORMAL
+                amountSelection = false
+            end
         end,
         [CustomizeItems.RIGHT] = function(self)
+            if(not amountSelection) then
+                topping.side = Side.RIGHT
+                amountSelection = true
+            else
+                topping.amount = Amount.EXTRA
+                amountSelection = false
+            end
         end,
         [CustomizeItems.DOWN] = function(self)
             print("canceling")
+
         end
     }
 
