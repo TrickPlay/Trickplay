@@ -59,20 +59,20 @@ CustomizeController = Class(Controller,
          local topping = self:get_model().current_item.Tabs[selected].Options[topping_index]
          topping.CoverageX = cov
          topping.Placement = place
-         view.ui:remove(view.sub_group_items[selected][topping_index][2])
-         view.ui:remove(view.sub_group_items[selected][topping_index][3])
+         view.sub_group_items[selected][topping_index][2]:unparent()
+         view.sub_group_items[selected][topping_index][3]:unparent()
          view.sub_group_items[selected][topping_index][2] = Text {
                         position = {400*(2-1), 60*(topping_index-1)},
                         font     = DEFAULT_FONT,
                         color    = DEFAULT_COLOR,
-                        text     = place
+                        text     = All_Options.Placement_r[place]
                     }
 view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
          view.sub_group_items[selected][topping_index][3] = Text {
                         position = {400*(3-1), 60*(topping_index-1)},
                         font     = DEFAULT_FONT,
                         color    = DEFAULT_COLOR,
-                        text     = cov
+                        text     = All_Options.CoverageX_r[cov]
                     }
 view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
       end
