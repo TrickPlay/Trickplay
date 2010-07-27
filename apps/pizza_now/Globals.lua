@@ -115,5 +115,6 @@ Characters={
    [keys.minus] = '-',
 }
 
-DEFAULT_FONT="DejaVu Sans Mono 40px"
+DEFAULT_FONT="Sans 40px"
+TAB_FONT="Sans 30px"
 DEFAULT_COLOR=Colors.WHITE

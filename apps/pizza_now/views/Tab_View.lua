@@ -1,5 +1,4 @@
-DEFAULT_FONT="DejaVu Sans Mono 40px"
-DEFAULT_COLOR="FFFFFF" --WHITE
+
 TabView = Class(View, function(view, model,parent, ...)
     view._base.init(view,model)
     view.parent = parent
@@ -22,6 +21,7 @@ TabView = Class(View, function(view, model,parent, ...)
     end
 
     function view:leave_sub_group()
+        view.parent.menu_items[view.parent:get_controller():get_selected_index()]:animate{duration= 100, opacity = 255}
         view.parent.sub_group[view.parent:get_controller():get_selected_index()]:animate{duration = 100, opacity = 100}
         model:set_active_component(Components.CUSTOMIZE)
         view:get_controller():reset_selected_index()
@@ -45,7 +45,7 @@ TabView = Class(View, function(view, model,parent, ...)
             end
         elseif comp == Components.CUSTOMIZE or comp == Components.CUSTOMIZE_ITEM then
             print("Greying TabView UI")
-            view.ui.opacity = 100
+            --view.ui.opacity = 100
         else
             print("Hiding TabView UI")
             view.ui.opacity = 0

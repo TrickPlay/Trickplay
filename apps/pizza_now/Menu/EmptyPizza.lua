@@ -95,7 +95,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
    self.Name = "Build Your Own Pizza"
    self.Tabs = {}
    self.Tabs[1] = {
-      Tab_Text = "Crust & Size",
+      Tab_Text = "Crust",
       --Radio Buttons
       Options = {
          {Name = "Cheese", Image = "", 
@@ -128,22 +128,22 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
    }
    --Meat Toppings
    self.Tabs[2] = {
-      Tab_Text = "Meat Toppings",
+      Tab_Text = "Meat",
       Options = {}
    }
    --Veggie Toppings
    self.Tabs[3] = {
-      Tab_Text = "Veggie Toppings",
+      Tab_Text = "Veggie",
       Options = {}
    }
    --Add to Order
    self.Tabs[4] = {
-      Tab_Text = "Add to Order"
+      Tab_Text = "Add"
     --Options = {}??
    }
    --Back to Food Menu
    self.Tabs[5] = {
-      Tab_Text = "Go Back"
+      Tab_Text = "Back"
     --Options = {}??
    }
 
