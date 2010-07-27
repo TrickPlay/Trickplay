@@ -36,3 +36,6 @@ dofile("controllers/Tab_Controller.lua")
 
 dofile("views/WindMillView.lua")
 dofile("controllers/WindMillController.lua")
+
+dofile("TopLevels/views/CheckoutView.lua")
+dofile("TopLevels/controllers/CheckoutController.lua")
