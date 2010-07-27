@@ -19,12 +19,24 @@ All_Options = {
        RIGHT  = 3,
        ENTIRE = 4
    },
+   Placement_r  = {
+       "NONE",
+       "LEFT",
+       "RIGHT",
+       "ENTIRE"
+   },
    CoverageX  = {
       NONE    = 1,
       LIGHT   = 2,
       REGULAR = 3,
       EXTRA   = 4
    },
+   CoverageX_r  = {
+      "NONE"    ,
+      "LIGHT"   ,
+      "REGULAR" ,
+      "EXTRA"   
+   },  
    Coverage   = {
       NONE    = 1,
       LIGHT   = 2,
