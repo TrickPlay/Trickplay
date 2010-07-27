@@ -75,7 +75,9 @@ WindMillController = Class(Controller, function(self, view, ...)
         end,
         [CustomizeItems.DOWN] = function(self)
             print("canceling")
-
+                self:get_model():get_controller(Components.CUSTOMIZE):update_field(1,1)
+                self:get_model():set_active_component(Components.TAB)
+                self:get_model():notify()
         end
     }
 

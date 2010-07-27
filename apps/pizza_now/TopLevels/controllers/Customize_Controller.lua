@@ -23,12 +23,12 @@ CustomizeController = Class(Controller,
           end
           MenuSize = #view:get_model().current_item.Tabs
     
-          MenuItemCallbacks[MenuItems["Go Back"]] = function()
+          MenuItemCallbacks[MenuItems["Back"]] = function()
               self:get_model():set_active_component(Components.FOOD_SELECTION)
               self:get_model():notify()
           end
 
-          MenuItemCallbacks[MenuItems["Add to Order"]] = function()
+          MenuItemCallbacks[MenuItems["Add"]] = function()
              --cart[#cart + 1] = pizza
              self:get_model():set_active_component(Components.FOOD_SELECTION)
              self:get_model():notify()
@@ -59,22 +59,21 @@ CustomizeController = Class(Controller,
          local topping = self:get_model().current_item.Tabs[selected].Options[topping_index]
          topping.CoverageX = cov
          topping.Placement = place
+
          view.sub_group_items[selected][topping_index][2]:unparent()
          view.sub_group_items[selected][topping_index][3]:unparent()
-         view.sub_group_items[selected][topping_index][2] = Text {
-                        position = {400*(2-1), 60*(topping_index-1)},
-                        font     = DEFAULT_FONT,
-                        color    = DEFAULT_COLOR,
-                        text     = All_Options.Placement_r[place]
-                    }
-view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
-         view.sub_group_items[selected][topping_index][3] = Text {
-                        position = {400*(3-1), 60*(topping_index-1)},
-                        font     = DEFAULT_FONT,
-                        color    = DEFAULT_COLOR,
-                        text     = All_Options.CoverageX_r[cov]
-                    }
-view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
+
+         view.sub_group_items[selected][topping_index][2] = Image {
+             position = {-70*(2-1), 60*(topping_index-1)},
+             src      = "assets/Placement/"..All_Options.Placement_r[place]..".png"
+         }
+         view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
+
+         view.sub_group_items[selected][topping_index][3] = Image {
+             position = {-70*(3-1), 60*(topping_index-1)},
+             src      = "assets/CoverageX/"..All_Options.CoverageX_r[cov]..".png"
+         }
+         view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
       end
 
       function self:on_key_down(k)
