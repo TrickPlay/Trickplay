@@ -110,7 +110,31 @@ WindMillView = Class(View, function(view, model, ...)
     function view:initialize()
         self:set_controller(WindMillController(self))
     end
-    
+
+    local function popIn()
+        view.directionIcon[1].x = 70
+        view.directionIcon[1].y = 100
+        view.directionIcon[2].x = 100
+        view.directionIcon[2].y = 70
+        view.directionIcon[3].x = 200
+        view.directionIcon[3].y = 100
+        view.directionIcon[4].x = 100
+        view.directionIcon[4].y = 200
+
+        view.amountItemsGray[1].x = 90
+        view.amountItemsGray[1].y = 100
+        view.amountItemsGray[2].x = 110
+        view.amountItemsGray[2].y = 110
+        view.amountItemsGray[3].x = 110
+        view.amountItemsGray[3].y = 100
+        view.amountItemsColor[1].x = 90
+        view.amountItemsColor[1].y = 90
+        view.amountItemsColor[2].x = 110
+        view.amountItemsColor[2].y = 100
+        view.amountItemsColor[3].x = 110
+        view.amountItemsColor[3].y = 90
+    end
+
     --reset the ui components to their original state
     function view:reset()
         print("Customize item RESET()")
@@ -119,13 +143,16 @@ WindMillView = Class(View, function(view, model, ...)
         self.ui.opacity = 0
     end
     local function set()
-        print("Customize item SET()")
+        print("\n\nCustomize item SET()")
+        popIn()
         amountSelection = false
-	view.ui.opacity = 255
+	    view.ui.opacity = 255
         view.directionIcon.opacity = 255
         view.amountItemsGray.opacity = 255
         view.amountItemsColor.opacity = 0
-        view.sideItems.opacity = 0
+        for i,v in ipairs(view.sideItems) do
+            view.sideItems[i].opacity = 0
+        end
         view.sideItems[5].opacity = 255
     end
 
@@ -139,17 +166,18 @@ WindMillView = Class(View, function(view, model, ...)
         end
     end
     local function popOut()
-        view.directionIcon[1]:animate{x = 40, y = 100, duration = 500}
-        view.directionIcon[2]:animate{x = 100, y = 30, duration = 500}
-        view.directionIcon[3]:animate{x = 250, y = 100, duration = 500}
-        view.amountItemsGray[1]:animate{x = 60, y = 70, duration = 500}
-        view.amountItemsGray[2]:animate{x = 110, y = 70, duration = 500}
-        view.amountItemsGray[3]:animate{x = 160, y = 70, duration = 500}
-        view.amountItemsColor[1]:animate{x = 60, y = 60, duration = 500}
-        view.amountItemsColor[2]:animate{x = 110, y = 60, duration = 500}
-        view.amountItemsColor[3]:animate{x = 160, y = 60, duration = 500}
+        view.directionIcon[1]:animate{x = 40, y = 100, duration = 400}
+        view.directionIcon[2]:animate{x = 100, y = 30, duration = 400}
+        view.directionIcon[3]:animate{x = 250, y = 100, duration = 400}
+        view.amountItemsGray[1]:animate{x = 60, y = 70, duration = 400}
+        view.amountItemsGray[2]:animate{x = 110, y = 70, duration = 400}
+        view.amountItemsGray[3]:animate{x = 160, y = 70, duration = 400}
+        view.amountItemsColor[1]:animate{x = 60, y = 60, duration = 400}
+        view.amountItemsColor[2]:animate{x = 110, y = 60, duration = 400}
+        view.amountItemsColor[3]:animate{x = 160, y = 60, duration = 400}
         amountSelection = true
     end
+    
 
     local CustomizeItemAnimations = {
         [0] = function() set() end,
