@@ -90,6 +90,7 @@ WindMillController = Class(Controller, function(self, view, ...)
 
     function self:move_selector(dir)
         selected = dir
+        self:run_callback()
         self:get_model():notify()
         selected = 0
     end
