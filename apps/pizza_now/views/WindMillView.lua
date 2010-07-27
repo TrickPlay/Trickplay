@@ -58,27 +58,50 @@ WindMillView = Class(View, function(view, model, ...)
     }
     view.amountItemsColor = {
         Image{
-            position = {60, 60},
+            position = {90, 90},
             src = "assets/PizzaRadialUI/LightColor.png",
             name = "light",
             opacity = 0
         },
         Image{
-            position={110, 60},
+            position={110, 100},
             src = "assets/PizzaRadialUI/NormalColor.png",
             name = "normal",
             opacity = 0
         },
         Image{
-            position={160, 60},
+            position={110, 90},
             src = "assets/PizzaRadialUI/ExtraColor.png",
             name = "extra",
             opacity = 0
         },
     }
+    view.directionIcon = {
+        Image{
+            position = {70, 100},
+            src = "assets/PizzaRadialUI/LeftIcon.png",
+            name = "left_icon",
+        },
+        Image{
+            position = {100, 70},
+            src = "assets/PizzaRadialUI/UpIcon.png",
+            name = "up_icon",
+        },
+        Image{
+            position = {200, 100},
+            src = "assets/PizzaRadialUI/RightIcon.png",
+            name = "right_icon",
+        },
+        Image{
+            position = {100, 200},
+            src = "assets/PizzaRadialUI/DownIcon.png",
+            name = "down_icon"
+        }
+    }
     view.ui:add(unpack(view.amountItemsGray))
     view.ui:add(unpack(view.amountItemsColor))
     view.ui:add(unpack(view.sideItems))
+    view.ui:add(unpack(view.directionIcon))
     screen:add(view.ui)
     view.ui:raise_to_top()
     for i = 5, 1, -1 do
@@ -96,6 +119,7 @@ WindMillView = Class(View, function(view, model, ...)
     end
     local function set()
         amountSelection = false
+        view.directionIcon.opacity = 255
         view.amountItemsGray.opacity = 255
         view.amountItemsColor.opacity = 0
         view.sideItems.opacity = 0
@@ -112,9 +136,15 @@ WindMillView = Class(View, function(view, model, ...)
         end
     end
     local function popOut()
-        view.amountItemsGray[1]:animate{x = 60, y = 70, duration = 700}
-        view.amountItemsGray[2]:animate{x = 110, y = 70, duration = 700}
-        view.amountItemsGray[3]:animate{x = 160, y = 70, duration = 700}
+        view.directionIcon[1]:animate{x = 40, y = 100, duration = 500}
+        view.directionIcon[2]:animate{x = 100, y = 30, duration = 500}
+        view.directionIcon[3]:animate{x = 250, y = 100, duration = 500}
+        view.amountItemsGray[1]:animate{x = 60, y = 70, duration = 500}
+        view.amountItemsGray[2]:animate{x = 110, y = 70, duration = 500}
+        view.amountItemsGray[3]:animate{x = 160, y = 70, duration = 500}
+        view.amountItemsColor[1]:animate{x = 60, y = 60, duration = 500}
+        view.amountItemsColor[2]:animate{x = 110, y = 60, duration = 500}
+        view.amountItemsColor[3]:animate{x = 160, y = 60, duration = 500}
         amountSelection = true
     end
 
