@@ -10,18 +10,21 @@ local robot = {
 		},
 		towers = {
 				normalTower =
-						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = 100, name = "NormalTower",
+						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = 100, splash = false, name = "NormalTower",
 								upgrades =      {
 												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = 100},
 												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = 100}
 										}
 						},
 				slowTower =
-						{ damage = 1, range = 400, cooldown = 1, cost = 80, slow = 75, name = "SlowTower",
+						{ damage = 5, range = 400, cooldown = 1, cost = 80, slow = 75, splash = true, splashradius = 240, name = "SlowTower",
 								upgrades =      {
-												{damage = 1, range = 400, cooldown = 1, cost = 40, slow = 50},
+												{damage = 5, range = 400, cooldown = 1, cost = 40, slow = 50},
 												{damage = 10, range = 400, cooldown = 1, cost = 40, slow = 25}
 										}
+						},
+				nukeTower =
+						{ damage = 2000, range = 600, cooldown = 5, cost = 2000, slow = 100, splash = true, splashradius = 360, name = "NukeTower"
 						},
 				wall =
 						{ damage = 0, range = 0, cooldown = 1000, cost = 5,slow = 0, name = "Wall"

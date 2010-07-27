@@ -15,7 +15,8 @@ Board = {
 					local i = wavePartCounter
 					for j=1, #self.theme.wave[level][i] do
 						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i][j].name)]]
-						self.creepWave[creepnum] = Creep:new(wave, -240, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
+						CREEP_START[1] = math.random(5)+2
+						self.creepWave[creepnum] = Creep:new(wave, -SP*2, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
 						screen:add(self.creepWave[creepnum].creepGroup)
 						creepGold[creepnum] = 0
 						creepnum = creepnum + 1
@@ -33,16 +34,16 @@ Board = {
 					v:render(seconds)
 				else
 					wave_counter = wave_counter + 1
-					v:deathAnimation()
-
 					v.greenBar.width = 0
 					v.dead = true					
+					v:deathAnimation()					
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
 						self.player.gold = self.player.gold + v.bounty
 						goldtext.text = self.player.gold
 					end
 					table.remove(v,k)
+					
 				end
 			end
 
@@ -184,9 +185,11 @@ function Board:createBoard()
 				
 					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { } )
 					list[#list].extra.f = function()
-						self:buildTower(towers[i])
-						self:findPaths()
-						--buildTowerIfEmpty( self.theme.themeName..towers[i].name )
+						if (self.player.gold - towers[i].cost >=0) then
+							self:buildTower(towers[i])
+							self:findPaths()
+							--buildTowerIfEmpty( self.theme.themeName..towers[i].name )
+						end
 					end
 				end
 			end
@@ -288,12 +291,11 @@ function Board:buildTower(selection)
 	--self:findPaths()
 	
 	print(selection)
-
 	if (self.player.gold - current.tower.cost >=0) then
 
 		current.tower.x = GTP(current.x)
 		current.tower.y = GTP(current.y)
-	
+		current.tower.z = 1+GTP(current.tower.y)	
 		print(GTP(current.x), GTP(current.y))
 		--assert(nil)
 	
@@ -322,6 +324,7 @@ function Board:removeTower()
 	current.tower:destroy()
 	current.square[3] = EMPTY	
 	self.player.gold = self.player.gold + current.tower.cost * 0.5
+	goldtext.text = self.player.gold
 	current.hasTower = false
 	
 	local m = current.square.cut
