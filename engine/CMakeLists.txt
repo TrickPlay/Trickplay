@@ -197,7 +197,8 @@ set(
     
     ${BINDINGS_SRC}/globals.lb
 
-#    ${BINDINGS_SRC}/timer.lb
+    ${BINDINGS_SRC}/timer.lb
+    
 #    ${BINDINGS_SRC}/url_request.lb
 #    ${BINDINGS_SRC}/local_hash.lb
 #    ${BINDINGS_SRC}/app.lb
@@ -343,9 +344,8 @@ add_library(
     ${ENGINE_SRC}/lb/src/lb.cpp
 
     ${ENGINE_SRC}/source/user_data.cpp
-    ${ENGINE_SRC}/source/lb2.cpp
     
-	timer_new.cpp
+#	timer_new.cpp
 
     ${GENERATED_FILES}
     

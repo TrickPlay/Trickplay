@@ -1,6 +1,8 @@
 #ifndef _TRICKPLAY_SIGNAL_COLLECTOR_H
 #define _TRICKPLAY_SIGNAL_COLLECTOR_H
 
+#if 0
+
 #include "common.h"
 
 /*
@@ -46,5 +48,7 @@ private:
     lua_State * L;
     InstanceMap	instances;
 };
+
+#endif
 
 #endif // _TRICKPLAY_SIGNAL_COLLECTOR_H

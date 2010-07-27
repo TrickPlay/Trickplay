@@ -1,29 +1,68 @@
 #ifndef _TRICKPLAY_LB_H
 #define _TRICKPLAY_LB_H
 
-#include "glib.h"
+#include "user_data.h"
 #include "assert.h"
 
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+//.........................................................................
+// Like luaL_ref - takes the item at the top of the stack and adds
+// a weak ref to it. It pops the item and returns the ref.
 
-#define lb_new_self(L,t)    ((t*)lua_newuserdata(L,sizeof(t*)))
-#define lb_get_self(L,t)    (*((t*)lua_touserdata(L,1)))
+int lb_weak_ref( lua_State * L );
 
-#if 0
-int lb_get_callback(lua_State*L,void*self,const char*name,int metatable_on_top);
-int lb_set_callback(lua_State*L,void*self,const char*name);
-int lb_invoke_callback(lua_State*L,void*self,const char*metatable,const char*name,int nargs,int nresults);
-int lb_callback_attached(lua_State*L,void*self,const char*name,int index);
-#endif
+//.........................................................................
+// Like luaL_unref - takes the ref and removes it from the weak refs table.
+// If the ref is not valid, it does nothing.
 
-void lb_clear_callbacks(lua_State*L,void*self,const char*metatable);
-void lb_clear_callbacks(lua_State*L,int index);
+void lb_weak_unref( lua_State * L , int ref );
+
+//.........................................................................
+// Pushes the value pointed to by the weak ref. If the ref is not valid, it
+// will push a nil.
+
+void lb_weak_deref( lua_State * L , int ref );
+
+//.........................................................................
+
+#define lb_strong_ref( L ) ( luaL_ref( L , LUA_REGISTRYINDEX ) )
+
+#define lb_strong_unref( L , ref ) ( luaL_unref( L , LUA_REGISTRYINDEX , ref ) )
+
+//.........................................................................
+// Pushes the value pointed to by the strong ref. If the ref is not valid, it
+// will push a nil.
+
+void lb_strong_deref( lua_State * L , int ref );
+
+//.........................................................................
+
+#define lb_construct( t , p )           ( (t*) __ud__->initialize_with_client( p ) )
+
+#define lb_construct_empty( )           ( (void) __ud__->initialize_empty( ) )
+
+#define lb_construct_gobject( t , p )   ( (t*) __ud__->initialize_with_master( p ) )
 
 
-void lb_store_weak_ref(lua_State*L,int udata,void*self);
-int lb_wrap(lua_State*L,void*self,const char*metatable);
+#define lb_check_initialized()          ( __ud__->check_initialized() )
+
+
+#define lb_get_self(L,t)                ( (t) UserData::get_client( L , 1 ) )
+
+
+#define lb_finalize_user_data( L )      ( UserData::finalize( L , 1 ) )
+
+
+#define lb_get_callback(L,self,name,metatable_on_top)               ( UserData::get_callback( name , L , -1 ) )
+
+#define lb_set_callback(L,name)                                     ( UserData::set_callback( name , L ) )
+
+#define lb_invoke_callback(L,self,metatable,name,nargs,nresults)    ( UserData::invoke_callback(self,name,nargs,nresults,L) )
+
+#define lb_callback_attached(L,self,name,index)                     ( UserData::is_callback_attached(name,L,index))
+
+#define lb_clear_callbacks(L,index)                                 ( UserData::clear_callbacks( L , index ) )
+
+#define lb_wrap(L,self,metatable)    (assert(false),0)
 
 int lb_index(lua_State*L);
 int lb_newindex(lua_State*L);
