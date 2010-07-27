@@ -411,7 +411,7 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
     // Now the callbacks table is at the top of the stack. We need to use our
     // proxy Lua object to get the table of functions.
 
-    self->deref_proxy();
+    self->push_proxy();
 
     lua_rawget( L , -2 );
 
@@ -423,7 +423,7 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
         lua_newtable( L );
 
-        self->deref_proxy();
+        self->push_proxy();
         lua_pushvalue( L , -2 );
         lua_rawset( L , -4 );
     }
@@ -472,7 +472,7 @@ int UserData::get_callback( const char * name )
 
     // We do have a callbacks table, fetch the functions table
 
-    deref_proxy();
+    push_proxy();
     lua_rawget( L , -2 );
 
     lua_remove( L , -2 );
@@ -532,7 +532,7 @@ void UserData::clear_callbacks( lua_State * L , int index )
 
 //.............................................................................
 
-void UserData::deref_proxy()
+void UserData::push_proxy()
 {
     if ( proxy_ref_type == STRONG )
     {
@@ -569,7 +569,7 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
 
     // nargs : callback
 
-    deref_proxy();
+    push_proxy();
 
     // nargs : callback : proxy
 

@@ -184,19 +184,13 @@ const char * ClutterUtil::get_actor_metatable( ClutterActor * actor )
 
 void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
 {
-    const char * metatable = get_actor_metatable( actor );
-
-    if ( !metatable )
+    if ( UserData * ud = UserData::get( G_OBJECT( actor ) ) )
+    {
+        ud->push_proxy();
+    }
+    else
     {
         lua_pushnil( L );
-        return;
-    }
-
-    int is_new = lb_wrap( L, actor, metatable );
-
-    if ( is_new )
-    {
-        g_object_ref( G_OBJECT( actor ) );
     }
 }
 

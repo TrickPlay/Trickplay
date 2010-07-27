@@ -62,7 +62,7 @@ void lb_strong_deref( lua_State * L , int ref );
 
 #define lb_clear_callbacks(L,index)                                 ( UserData::clear_callbacks( L , index ) )
 
-#define lb_wrap(L,self,metatable)    (assert(false),0)
+//#define lb_wrap(L,self,metatable)    (assert(false),0)
 
 int lb_index(lua_State*L);
 int lb_newindex(lua_State*L);

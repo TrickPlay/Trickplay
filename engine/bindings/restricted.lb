@@ -9,12 +9,7 @@ global restricted [[TPContext*]]
 {
     restricted()
         [[
-            *self=App::get(L)->get_context();
-        ]];
-        
-    ~restricted()
-        [[
-            self=NULL;
+            self=lb_construct( TPContext , App::get(L)->get_context() );
         ]];
         
     bool profile_switch(int id)

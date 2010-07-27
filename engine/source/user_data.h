@@ -49,11 +49,22 @@ struct UserData
         static void destroy( gpointer handle );
 
         //.....................................................................
-        // Gets the user pointer
+        // Gets the user pointer. If the Lua state is gone, this pointer can
+        // be invalid - because it was destroyed during the finalizer for the
+        // proxy object.
 
         inline gpointer get_user()
         {
             return user;
+        }
+
+        //.....................................................................
+        // Gets the user data associated with this handle. May return NULL if
+        // the Lua state is gone.
+
+        UserData * get_user_data()
+        {
+            return UserData::get( master );
         }
 
         //.....................................................................
@@ -135,6 +146,31 @@ struct UserData
     }
 
     //.........................................................................
+    // Gets the user data given a master object - can return NULL if the
+    // user data/Lua state are gone.
+
+    inline static UserData * get( GObject * master)
+    {
+        g_assert( master );
+
+        return ( UserData * ) g_object_get_qdata( master , get_key_quark() );
+    }
+
+    //.........................................................................
+#if 0
+    inline static UserData * get_from_client( gpointer client )
+    {
+        gpointer master = g_hash_table_lookup( get_client_map() , client );
+
+        return master ? UserData::get( G_OBJECT( master ) ) : 0;
+    }
+#endif
+    //.........................................................................
+    // Pushes the Lua proxy onto the stack - whether it is weak or strong
+
+    void push_proxy();
+
+    //.........................................................................
     // This is called when the Lua object is destroyed.
 
     static void finalize( lua_State * L , int index = 1 );
@@ -200,17 +236,6 @@ private:
     friend class Handle;
 
     //.........................................................................
-    // Gets the user data given a master object - can return NULL if the
-    // user data/Lua state are gone.
-
-    inline static UserData * get( GObject * master)
-    {
-        g_assert( master );
-
-        return ( UserData * ) g_object_get_qdata( master , get_key_quark() );
-    }
-
-    //.........................................................................
 
     inline static GHashTable * get_client_map()
     {
@@ -246,11 +271,6 @@ private:
     // Non-static version.
 
     int get_callback( const char * name );
-
-    //.........................................................................
-    // Pushes the Lua proxy onto the stack - whether it is weak or strong
-
-    void deref_proxy();
 
     //.........................................................................
     // This gets called when our toggle ref is the last one or is not. When it

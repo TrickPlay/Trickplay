@@ -17,11 +17,6 @@
 
 global json [[void*]]
 {
-	json()
-		[[
-			
-		]];
-		
 	/*
 		Property: null
 		

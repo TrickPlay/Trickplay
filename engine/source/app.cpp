@@ -687,25 +687,31 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
 
-    luaopen_idle( L );
 #endif
+    luaopen_idle( L );
     luaopen_timer( L );
     luaopen_url_request( L );
     luaopen_xml( L );
-#if 0
     luaopen_storage( L );
     luaopen_app( L );
     luaopen_system( L );
     luaopen_settings( L );
     luaopen_profile( L );
-    luaopen_controllers_module( L );
-    luaopen_keys( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
 
+//    luaopen_keys( L );
+
+    luaopen_controllers_module( L );
+
+    luaopen_audiosampler_module( L );
+
+#if 0
     luaopen_mediaplayer_module( L );
 
-	luaopen_audiosampler_module( L );
+
+
+#endif
 
     luaopen_socket( L );
 
@@ -723,7 +729,6 @@ int App::run( const StringSet & allowed_names )
     // TODO
     // DEBUG HOOK
 //    lua_sethook(L,debug_hook,LUA_MASKCALL|LUA_MASKRET|LUA_MASKLINE|LUA_MASKCOUNT,1);
-#endif
 
     // Run the script
 
