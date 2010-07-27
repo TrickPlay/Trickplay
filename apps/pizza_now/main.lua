@@ -37,6 +37,7 @@ local customize_view = CustomizeView(model)
 customize_view:initialize()
 local tab_view = TabView(model,customize_view)
 tab_view:initialize()
+customize_view:get_controller():set_child_controller(tab_view:get_controller())
 
 local windmill_view = WindMillView(model)
 windmill_view:initialize()

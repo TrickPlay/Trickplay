@@ -142,9 +142,9 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
          CoverageX  = All_Options.Coverage.REGULAR,
          Placement = All_Options.Placement.NONE,
          Selected = 
-            function(self)
-             self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
-             self:get_model():notify()
+            function(itself)
+             itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+             itself:get_model():notify()
             end
       }
    end

@@ -52,29 +52,29 @@ CustomizeController = Class(Controller,
          
       }
 
-      function update_field(cov,place)
+      function self:update_field(cov,place)
          assert(self:get_model():get_active_component() == Components.CUSTOMIZE_ITEM,
                                   "updating a field when not in customize item mode")
          local topping_index = self:get_model():get_controller(Components.TAB):get_selected_index()
          local topping = self:get_model().current_item.Tabs[selected].Options[topping_index]
          topping.CoverageX = cov
          topping.Placement = place
-         view.ui:unparent(view.sub_group_items[selected][topping_index][2])
-         view.ui:unparent(view.sub_group_items[selected][topping_index][3])
+         view.ui:remove(view.sub_group_items[selected][topping_index][2])
+         view.ui:remove(view.sub_group_items[selected][topping_index][3])
          view.sub_group_items[selected][topping_index][2] = Text {
-                        position = {0, 60*(opt_index-1)},
+                        position = {400*(2-1), 60*(topping_index-1)},
                         font     = DEFAULT_FONT,
                         color    = DEFAULT_COLOR,
                         text     = place
                     }
-view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
          view.sub_group_items[selected][topping_index][3] = Text {
-                        position = {0, 60*(opt_index-1)},
+                        position = {400*(3-1), 60*(topping_index-1)},
                         font     = DEFAULT_FONT,
                         color    = DEFAULT_COLOR,
                         text     = cov
                     }
-view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
+view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
       end
 
       function self:on_key_down(k)
@@ -90,6 +90,8 @@ view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
       end
 
       function self:set_child_controller(control)
+         print("\n\n\nSetting child controller")
+         assert(control,"trying to set tab controller in customize controller to be nil")
  	--print(selected .. " in set_child_controller")
          self.tab_controller = control
       end
@@ -106,6 +108,7 @@ view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
          --if you are already in the Tab sub group, pass the call down
          if(self.in_tab_group) then
             --print("self.in_tab_group true")
+            assert(self.tab_controller,"tab controller is nil")
             self.tab_controller:move_selector(dir)
          --otherwise
          else

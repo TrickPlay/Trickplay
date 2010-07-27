@@ -15,8 +15,7 @@ TabController = Class(Controller,
                 MenuItemCallbacks[tab_index] = {}
                 if tab.Options ~= nil then
                     for opt_index,option in ipairs(tab.Options) do
-                        MenuItemCallbacks[tab_index][opt_index] = 
-                            option.Selected
+                        MenuItemCallbacks[tab_index][opt_index] = option.Selected
                         i = i + 1
                     end
                 end
@@ -29,13 +28,24 @@ TabController = Class(Controller,
          [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
          [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
 
-         [keys.Return] =
+         [keys.Return] = 
+             function(self)
+                 print("\n\n\nreturn registered in Tab Controller")
+                 assert(MenuItemCallbacks,
+                       "MenuItemCallbacks is nil")
+                 assert(MenuItemCallbacks[view.parent:get_controller():get_selected_index()],
+                       "MenuItemCallbacks[view.parent:get_controller():get_selected_index()] is nil")
+                 assert(MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected],
+                       "MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected] is nil")
+                 MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected](self)
+             end
+--[[
             function(self)
              
              self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
              self:get_model():notify()
             end
-
+--]]
         }
 
         function self:on_key_down(k)
@@ -60,7 +70,7 @@ TabController = Class(Controller,
                 if 1 <= new_selected and new_selected <= #view.menu_items[view.parent:get_controller():get_selected_index()] then
                     selected = new_selected
                 end
-                MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected]()
+                --MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected]()
                 self:get_model():notify()
             end
          

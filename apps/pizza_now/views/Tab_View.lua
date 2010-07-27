@@ -43,7 +43,7 @@ TabView = Class(View, function(view, model,parent, ...)
                     end
                 end
             end
-        elseif comp == Components.CUSTOMIZE then
+        elseif comp == Components.CUSTOMIZE or comp == Components.CUSTOMIZE_ITEM then
             print("Greying TabView UI")
             view.ui.opacity = 100
         else
