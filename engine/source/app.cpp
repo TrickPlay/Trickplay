@@ -691,13 +691,13 @@ int App::run( const StringSet & allowed_names )
 #endif
     luaopen_timer( L );
     luaopen_url_request( L );
+    luaopen_xml( L );
 #if 0
     luaopen_storage( L );
     luaopen_app( L );
     luaopen_system( L );
     luaopen_settings( L );
     luaopen_profile( L );
-    luaopen_xml( L );
     luaopen_controllers_module( L );
     luaopen_keys( L );
     luaopen_stopwatch( L );
