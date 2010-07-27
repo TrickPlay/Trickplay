@@ -87,6 +87,7 @@ UserData * UserData::make( lua_State * L )
     result->client = 0;
     result->initialized = false;
     result->callbacks_ref = LUA_NOREF;
+    result->signals = 0;
 
     // Duplicate the user data that is already on top of the stack and take a
     // strong reference to it.
@@ -297,6 +298,10 @@ void UserData::finalize( lua_State * L , int index )
         // Remove us from the master
 
         g_object_set_qdata( self->master , get_key_quark() , 0 );
+
+        // Disconnect all signals
+
+        self->disconnect_all_signals();
 
         // Remove the toggle ref, which should then free the master object
         // (Unless someone else still has a ref to it)
@@ -513,6 +518,18 @@ int UserData::is_callback_attached( const char * name , lua_State * L , int inde
     return result;
 }
 
+
+//.............................................................................
+
+void UserData::clear_callbacks( lua_State * L , int index )
+{
+    UserData * self = UserData::get( L , index );
+
+    lb2_strong_unref( L , self->callbacks_ref );
+
+    self->callbacks_ref = LUA_NOREF;
+}
+
 //.............................................................................
 
 void UserData::deref_proxy()
@@ -631,6 +648,91 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
 
 //.............................................................................
 
+void UserData::connect_signal( const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags )
+{
+    g_assert( master );
+
+    SignalMap::iterator it;
+
+    if ( ! signals )
+    {
+        signals = new SignalMap;
+
+        it = signals->end();
+    }
+    else
+    {
+        it = signals->find( name );
+    }
+
+    gulong id = g_signal_connect_data( master , detailed_signal , handler , data , 0 , GConnectFlags( flags ) );
+
+    if ( it != signals->end() )
+    {
+        g_signal_handler_disconnect( master , it->second );
+
+        it->second = id;
+    }
+    else
+    {
+        signals->insert( std::make_pair( name , id ) );
+    }
+}
+
+//.............................................................................
+
+void UserData::connect_signal_if( bool condition , const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags )
+{
+    g_assert( master );
+
+    if ( condition )
+    {
+        connect_signal( name , detailed_signal , handler , data , flags );
+    }
+    else
+    {
+        disconnect_signal( name );
+    }
+}
+
+//.............................................................................
+
+void UserData::disconnect_signal( const gchar * name )
+{
+    g_assert( master );
+
+    if ( signals )
+    {
+        SignalMap::iterator it = signals->find( name );
+
+        if ( it != signals->end() )
+        {
+            g_signal_handler_disconnect( master , it->second );
+
+            signals->erase( it );
+        }
+    }
+}
+
+//.............................................................................
+
+void UserData::disconnect_all_signals()
+{
+    if ( signals )
+    {
+        for ( SignalMap::const_iterator it = signals->begin(); it != signals->end(); ++it )
+        {
+            g_signal_handler_disconnect( master , it->second );
+        }
+
+        delete signals;
+
+        signals = 0;
+    }
+}
+
+//.............................................................................
+
 void UserData::dump_cb( lua_State * L , int index )
 {
     int cb = UserData::get( L , index )->callbacks_ref;
@@ -672,3 +774,5 @@ void UserData::dump_cb( lua_State * L , int index )
 
     g_debug( "END OF CALLBACKS" );
 }
+
+
