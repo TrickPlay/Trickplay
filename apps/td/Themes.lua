@@ -33,7 +33,7 @@ end
 
 AssetLoader:preloadImage("normal","assets/normalRobot.png")
 AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
-	
+AssetLoader:preloadImage("explosion","themes/robot/assets/explosion.png")
 AssetLoader:preloadImage("normalRobotBuy","assets/robots/normalRobot/buy.png")
 AssetLoader:preloadImage("normalRobot","assets/robots/normalRobot/strip8.png")
 AssetLoader:preloadImage("wall","assets/wall.jpg")

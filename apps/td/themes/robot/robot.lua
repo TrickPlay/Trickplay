@@ -10,89 +10,32 @@ local robot = {
 		},
 		towers = {
 				normalTower =
-						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = 100, splash = false, name = "NormalTower",
-								upgrades =      {
-												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = 100},
-												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = 100}
+						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, name = "NormalTower",
+								upgrades =   	{
+												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = false},
+												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = false}
 										}
 						},
 				slowTower =
-						{ damage = 5, range = 400, cooldown = 1, cost = 80, slow = 75, splash = true, splashradius = 240, name = "SlowTower",
+						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 75, slow = true, splash = true, splashradius = 240, name = "SlowTower",
 								upgrades =      {
-												{damage = 5, range = 400, cooldown = 1, cost = 40, slow = 50},
-												{damage = 10, range = 400, cooldown = 1, cost = 40, slow = 25}
+												{damage = 5, range = 400, cooldown = 1, cost = 40, slowammount = 50},
+												{damage = 10, range = 400, cooldown = 1, cost = 40, slowammount = 25}
 										}
 						},
 				nukeTower =
-						{ damage = 2000, range = 600, cooldown = 5, cost = 2000, slow = 100, splash = true, splashradius = 360, name = "NukeTower"
+						{ damage = 2000, range = 600, cooldown = 5, cost = 500, slowammount = 100, slow = true, splash = true, splashradius = 360, name = "NukeTower"
 						},
 				wall =
-						{ damage = 0, range = 0, cooldown = 1000, cost = 5,slow = 0, name = "Wall"
+						{ damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, slow = false, name = "Wall"
 						}
 						
-		--normalTower = {towerType = "assets/robots/normalRobot/01.png", damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = 100, name = "NormalTower"  },
-		--wall = {towerType = "assets/normalTower.png", damage = 0, range = 0, cooldown = 1000, cost = 5,slow = 0, name = "Wall"},
-		--slowTower = {towerType = "assets/slowTower.png", damage = 1, range = 400, cooldown = 1, cost = 80, slow = 75, name = "SlowTower"}
-		
+	
 		},
 		obstacles = { },
 		boardBackground = "assets/robotBackground.png",
 
-		wave = {
-			-- Wave 1
-			{
-				{
-					{name = "NormalCreep"},
-					size = 10
-				},
-				size = 10           
-			},
-
-			-- Wave 2
-			{
-				{
-					{name = "NormalCreep", num = 15},
-					{name = "MediumCreep", num = 15},
-					size = 30
-				},
-				size = 30
-
-			},
-
-			-- Wave 3
-			{
-				{
-					{name = "NormalCreep", num = 25},
-					{name = "MediumCreep", num = 25},
-					size = 50
-				},
-				size = 50
-			},
-                        
-			-- Wave 4
-			{
-				{
-					{name = "NormalCreep"},
-					{name = "MediumCreep"},
-					{name = "HardCreep"},
-					size = 75
-				},
-				{
-					{name = "FlyingCreep"},
-					size = 10
-				},
-				size = 85
-			},
-                       
-       -- Wave 5
-         {
-                 {
-                                 {name = "BossCreep"},
-                                 size = 1
-                 },
-                 size = 1
-         }
-		},
+		wave = dofile("round1.lua"),
 		
 		waveTable = {
 			["NormalCreep"] = 1,

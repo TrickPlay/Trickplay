@@ -14,13 +14,14 @@ function Tower:new(args, prefix)
 	local cost = args.cost
 	local direction = args.direction
 	local cooldown = args.cooldown
+	local slowammount = args.slowammount
 	local slow = args.slow
 	local splash = args.splash
 	local splashradius = args.splashradius
 
 	-- Image stuff
 	local towerImage = AssetLoader:getImage(prefix..table.name,{})
-	local towerImageGroup = Group{ clip={0,0,SP,SP} }
+	local towerImageGroup = Group{ clip={0,0,SP,SP}}
 	local fireImage = AssetLoader:getImage(prefix..table.name.."Fire",{})
 	towerImageGroup:add(towerImage)
 	screen:add(towerImageGroup)
@@ -42,6 +43,7 @@ function Tower:new(args, prefix)
 		damage = damage,
 		range = range,
 		direction = direction,
+		slowammount = slowammount,
 		slow = slow,
 		splash = splash,
 		splashradius = splashradius,
@@ -76,6 +78,7 @@ function Tower:render(seconds, creeps)
 	self.bullet.y = self.y
 	self.bullet.z = 2	
 	self.bullet.opacity = 0
+	
 	if self.fired and s > self.cooldown/4 then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
 	--print("1")
 	if (s > self.cooldown) then
@@ -83,10 +86,12 @@ function Tower:render(seconds, creeps)
 		for i = 1, #creeps do
 			local cx = creeps[i].creepGroup.x
 			local cy = creeps[i].creepGroup.y					
-
+			creeps[i].speed = creeps[i].max_speed
+	
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
 				self:attackCreep(creeps,i,1)
 				if (self.splash) then
+					self:animateFire()
 					self:checkSplash(creeps,i)
 				end
 				break
@@ -119,7 +124,7 @@ function Tower:upgrade()
 		self.damage = r.damage
 		self.range = r.range
 		self.cooldown = r.cooldown
-		self.slow = r.slow
+		self.slowammount = r.slowammount
 		self.cost = self.cost + r.cost
 		self.towerImageGroup:remove(self.towerImage)
 		self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
@@ -134,7 +139,10 @@ function Tower:upgrade()
 	
 end
 
--- TODO: something is horribly wrong with collision detection
+function Tower:animateFire()
+	
+end
+
 function Tower:checkSplash(creeps,i)
 	-- if self.splash is true or something
 	local cx = creeps[i].creepGroup.x
@@ -147,8 +155,8 @@ function Tower:checkSplash(creeps,i)
 		local distance = math.sqrt(((cxj-cx)*(cxj-cx))+((cyj-cy)*(cyj-cy)))
 		local intensity = 1-(radius-distance)/radius
 		if (cxj > cx - radius and cxj < cx + radius and cyj > cy - radius and cyj < cy + radius and j ~= i) then
-			print ("Distance: "..distance)
-			print ("Intensity: "..intensity)
+			--print ("Distance: "..distance)
+			--print ("Intensity: "..intensity)
 			self:attackCreep(creeps,j,intensity)
 		end
 	end
@@ -158,7 +166,7 @@ function Tower:attackCreep(creeps, i, intensity)
 	--self.bullet.opacity = 255
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y
-	creeps[i].speed = creeps[i].max_speed*(self.slow/100)*intensity
+	if (self.slow) then creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity end
 
 	if self.directionTable and not self.splash then 
 		local d = self.directionTable
