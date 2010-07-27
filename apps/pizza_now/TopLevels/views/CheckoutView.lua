@@ -86,6 +86,7 @@ CheckoutView = Class(View, function(view, model, ...)
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
         if comp == Components.CHECKOUT then
+            self.ui.opacity = 255
             print("Showing Checkout UI")
             for i,item in ipairs(menu_items) do
                 if i == controller:get_selected_index() then
