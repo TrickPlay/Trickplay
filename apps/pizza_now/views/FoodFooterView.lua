@@ -1,5 +1,4 @@
-DEFAULT_FONT="DejaVu Sans Mono 40px"
-DEFAULT_COLOR="FFFFFF" --WHITE
+
 FoodFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)
      
