@@ -113,12 +113,15 @@ WindMillView = Class(View, function(view, model, ...)
     
     --reset the ui components to their original state
     function view:reset()
+        print("Customize item RESET()")
         amountSelection = false
         self.ui:complete_animation()
         self.ui.opacity = 0
     end
     local function set()
+        print("Customize item SET()")
         amountSelection = false
+	view.ui.opacity = 255
         view.directionIcon.opacity = 255
         view.amountItemsGray.opacity = 255
         view.amountItemsColor.opacity = 0
@@ -185,6 +188,7 @@ WindMillView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.CUSTOMIZE_ITEM then
             print("Showing Customize Item UI")
+	    set()
             CustomizeItemAnimations[controller:get_selected_index()]()
         else
             print("Hiding Customize Item UI")

@@ -13,17 +13,17 @@ dofile("controllers/DeliveryOptionsController.lua")
 dofile("TopLevels/views/ProviderSelectionView.lua")
 dofile("TopLevels/controllers/ProviderSelectionController.lua")
 
---dofile("views/FoodFooterView.lua")
---dofile("controllers/FoodFooterController.lua")
+dofile("views/FoodFooterView.lua")
+dofile("controllers/FoodFooterController.lua")
 
---dofile("views/FoodCarouselView.lua")
---dofile("controllers/FoodCarouselController.lua")
+dofile("views/FoodCarouselView.lua")
+dofile("controllers/FoodCarouselController.lua")
 
---dofile("views/FoodHeaderView.lua")
---dofile("controllers/FoodHeaderController.lua")
+dofile("views/FoodHeaderView.lua")
+dofile("controllers/FoodHeaderController.lua")
 
---dofile("TopLevels/views/FoodSelectionView.lua")
---dofile("TopLevels/controllers/FoodSelectionController.lua")
+dofile("TopLevels/views/FoodSelectionView.lua")
+dofile("TopLevels/controllers/FoodSelectionController.lua")
 
 dofile("TopLevels/views/ItemSelectionView.lua")
 dofile("TopLevels/controllers/ItemSelectionController.lua")

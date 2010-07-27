@@ -8,15 +8,17 @@ WindMillController = Class(Controller, function(self, view, ...)
     }
 
     local Amount = {
-        LIGHT = 1,
-        NORMAL = 2,
-        EXTRA = 3
+      NONE    = 1,
+      LIGHT   = 2,
+      NORMAL = 3,
+      EXTRA   = 4
     }
 
     local Side = {
-        LEFT = 1,
-        WHOLE = 2,
-        RIGHT = 3
+       NONE   = 1,
+       LEFT   = 2,
+       RIGHT  = 3,
+       WHOLE = 4
     }
 
     local CustomizeItems = {
@@ -42,6 +44,7 @@ WindMillController = Class(Controller, function(self, view, ...)
             else
                 topping.amount = Amount.LIGHT
                 amountSelection = false
+                self:get_model():get_controller(Components.CUSTOMIZE):update_field(topping.amount,topping.side)
             end
         end,
         [CustomizeItems.UP] = function(self)
