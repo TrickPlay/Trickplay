@@ -11,6 +11,11 @@ CustomizeView = Class(View, function(view, model, ...)
     view.sub_group       = {}
     view.sub_group_items = {}
     view.hor_lines       = {}
+    view.arrow           = Image{                
+                position = {100, 0},
+                scale    = {1,1.5},
+                src      = "assets/SubmenuArrow.png"
+            }
 
 ----------------------------------------------------------------------------
     --Build Tabs and their sub groups
