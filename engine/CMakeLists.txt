@@ -205,7 +205,7 @@ set(
 #    ${BINDINGS_SRC}/system.lb
 #    ${BINDINGS_SRC}/settings.lb
 #    ${BINDINGS_SRC}/profile.lb
-#    ${BINDINGS_SRC}/xml.lb
+    ${BINDINGS_SRC}/xml.lb
 #    ${BINDINGS_SRC}/restricted.lb
 #    ${BINDINGS_SRC}/apps.lb
 #    ${BINDINGS_SRC}/controllers.lb
