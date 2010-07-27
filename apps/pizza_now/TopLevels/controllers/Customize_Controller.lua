@@ -7,26 +7,34 @@ CustomizeController = Class(Controller,
 
       local MenuItems = {}
       local MenuItemCallbacks = {}
-      for i,opt in ipairs(view:get_model().current_item.Tabs) do
-         MenuItems[opt.Tab_Text] = i
-         MenuItemCallbacks[i] = 
-            function(self)
-               print(opt.Tab_Text.." selected")
-            end
-      end
-      local MenuSize = #view:get_model().current_item.Tabs
+      local MenuSize = 0
+      
+      function self:init_shit()
+          view:Create_Menu_Items()
 
-      MenuItemCallbacks[MenuItems["Go Back"]] = function()
-          self:get_model():set_active_component(Components.FOOD_SELECTION)
-          self:get_model():notify()
-      end
+          MenuItems = {}
+          MenuItemCallbacks = {}
+          for i,opt in ipairs(self:get_model().current_item.Tabs) do
+             MenuItems[opt.Tab_Text] = i
+             MenuItemCallbacks[i] = 
+                function(self)
+                   print(opt.Tab_Text.." selected")
+                end
+          end
+          MenuSize = #view:get_model().current_item.Tabs
+    
+          MenuItemCallbacks[MenuItems["Go Back"]] = function()
+              self:get_model():set_active_component(Components.FOOD_SELECTION)
+              self:get_model():notify()
+          end
 
-      MenuItemCallbacks[MenuItems["Add to Order"]] = function()
-         --cart[#cart + 1] = pizza
-         self:get_model():set_active_component(Components.FOOD_SELECTION)
-         self:get_model():notify()
+          MenuItemCallbacks[MenuItems["Add to Order"]] = function()
+             --cart[#cart + 1] = pizza
+             self:get_model():set_active_component(Components.FOOD_SELECTION)
+             self:get_model():notify()
+          end
+          self:reset_selected_index()
       end
-
 
       local MenuKeyTable = {
          [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
@@ -44,6 +52,31 @@ CustomizeController = Class(Controller,
          
       }
 
+      function update_field(cov,place)
+         assert(self:get_model():get_active_component() == Components.CUSTOMIZE_ITEM,
+                                  "updating a field when not in customize item mode")
+         local topping_index = self:get_model():get_controller(Components.TAB):get_selected_index()
+         local topping = self:get_model().current_item.Tabs[selected].Options[topping_index]
+         topping.CoverageX = cov
+         topping.Placement = place
+         view.ui:unparent(view.sub_group_items[selected][topping_index][2])
+         view.ui:unparent(view.sub_group_items[selected][topping_index][3])
+         view.sub_group_items[selected][topping_index][2] = Text {
+                        position = {0, 60*(opt_index-1)},
+                        font     = DEFAULT_FONT,
+                        color    = DEFAULT_COLOR,
+                        text     = place
+                    }
+view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+         view.sub_group_items[selected][topping_index][3] = Text {
+                        position = {0, 60*(opt_index-1)},
+                        font     = DEFAULT_FONT,
+                        color    = DEFAULT_COLOR,
+                        text     = cov
+                    }
+view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
+      end
+
       function self:on_key_down(k)
          --print("Customize_controller on_key_down called with key", k)
          if MenuKeyTable[k] then
@@ -60,6 +93,9 @@ CustomizeController = Class(Controller,
  	--print(selected .. " in set_child_controller")
          self.tab_controller = control
       end
+        function self:reset_selected_index()
+            selected = 1
+        end
 
       self.in_tab_group = false
 

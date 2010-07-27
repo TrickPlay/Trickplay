@@ -51,7 +51,6 @@ WindMillView = Class(View, function(view, model, ...)
     local CustomizeItemAnimations = {
         [1] = function() --left
            if(not amountSelection) then
-               --TODO: highlight
                popOut()
            else
                animateWindmill(1)
@@ -59,7 +58,6 @@ WindMillView = Class(View, function(view, model, ...)
         end,
         [2] = function() --up
            if(not amountSelection) then
-               --TODO: highlight
                popOut()
            else
                animateWindmill(2)
@@ -67,7 +65,6 @@ WindMillView = Class(View, function(view, model, ...)
         end,
         [3] = function() --right
            if(not amountSelection) then
-               --TODO: highlight
                popOut()
            else
                animateWindmill(3)

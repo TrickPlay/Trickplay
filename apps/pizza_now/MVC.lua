@@ -29,6 +29,14 @@ Model = Class(
           end
       end
 
+      function model:get_controller(comp)
+         if self.controllers[comp] then
+            return self.controllers[comp]
+         else
+            error("component doesn't exist.")
+         end
+      end
+
       function model:get_active_controller()
          return self.controllers[self.active_component]
       end
