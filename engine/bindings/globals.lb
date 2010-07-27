@@ -472,7 +472,7 @@ globals
 		
 	detach( udata o )
 		[[
-			lb_clear_callbacks(L,o);
+			UserData::clear_callbacks( L , o );
 		]];		       
 		
 	dolater( function f , ... )

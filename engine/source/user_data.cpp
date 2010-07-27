@@ -1,7 +1,7 @@
 
-#include "app.h" // To get LSP
-
-#include "lb2.h"
+#include "user_data.h"
+#include "lb.h"
+#include "util.h"
 
 //.............................................................................
 
@@ -94,7 +94,7 @@ UserData * UserData::make( lua_State * L )
 
     lua_pushvalue( L , -1 );
 
-    result->proxy_ref = lb2_strong_ref( L );
+    result->proxy_ref = lb_strong_ref( L );
     result->proxy_ref_type = STRONG;
 
     g_assert( result->proxy_ref != LUA_REFNIL && result->proxy_ref != LUA_NOREF );
@@ -231,19 +231,19 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
         // Get the value for the strong ref
 
-        lb2_strong_deref( self->L , self->proxy_ref );
+        lb_strong_deref( self->L , self->proxy_ref );
 
         g_assert( ! lua_isnil( self->L , -1 ) );
 
         // Create a weak ref to it - which pops it
 
-        int weak_ref = lb2_weak_ref( self->L );
+        int weak_ref = lb_weak_ref( self->L );
 
         g_assert( weak_ref != LUA_REFNIL && weak_ref != LUA_NOREF );
 
         // Remove the strong ref
 
-        lb2_strong_unref( self->L , self->proxy_ref );
+        lb_strong_unref( self->L , self->proxy_ref );
 
         // Set our state
 
@@ -261,19 +261,19 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
         // Get the value for the weak ref
 
-        lb2_weak_deref( self->L , self->proxy_ref );
+        lb_weak_deref( self->L , self->proxy_ref );
 
         g_assert( ! lua_isnil( self->L , -1 ) );
 
         // Create a strong ref to it - which pops it
 
-        int strong_ref = lb2_strong_ref( self->L );
+        int strong_ref = lb_strong_ref( self->L );
 
         g_assert( strong_ref != LUA_REFNIL && strong_ref != LUA_NOREF );
 
         // Remove the weak ref
 
-        lb2_weak_unref( self->L , self->proxy_ref );
+        lb_weak_unref( self->L , self->proxy_ref );
 
         // Set our state
 
@@ -325,7 +325,7 @@ void UserData::finalize( lua_State * L , int index )
 
     udlog( "  CLEARING CALLBACKS" );
 
-    lb2_strong_unref( L , self->callbacks_ref );
+    lb_strong_unref( L , self->callbacks_ref );
 
     // Clear everything so double frees are easier to spot.
 
@@ -372,7 +372,7 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
     int fn = abs_index( L , function_index );
 
-    lb2_strong_deref( L , self->callbacks_ref );
+    lb_strong_deref( L , self->callbacks_ref );
 
     if ( lua_isnil( L , -1 ) )
     {
@@ -403,7 +403,7 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
         // Get a ref to the table and save it
 
         lua_pushvalue( L , -1 );
-        self->callbacks_ref = lb2_strong_ref( L );
+        self->callbacks_ref = lb_strong_ref( L );
 
         LSG_CHECK( 0 );
     }
@@ -460,7 +460,7 @@ int UserData::get_callback( const char * name )
 
     g_assert( name );
 
-    lb2_strong_deref( L , callbacks_ref );
+    lb_strong_deref( L , callbacks_ref );
 
     // We don't have a callbacks table, so we just leave the nil on the stack
 
@@ -525,7 +525,7 @@ void UserData::clear_callbacks( lua_State * L , int index )
 {
     UserData * self = UserData::get( L , index );
 
-    lb2_strong_unref( L , self->callbacks_ref );
+    lb_strong_unref( L , self->callbacks_ref );
 
     self->callbacks_ref = LUA_NOREF;
 }
@@ -536,11 +536,11 @@ void UserData::deref_proxy()
 {
     if ( proxy_ref_type == STRONG )
     {
-        lb2_strong_deref( L , proxy_ref );
+        lb_strong_deref( L , proxy_ref );
     }
     else
     {
-        lb2_weak_deref( L , proxy_ref );
+        lb_weak_deref( L , proxy_ref );
     }
 
     g_assert( ! lua_isnil( L , -1 ) );
@@ -739,7 +739,7 @@ void UserData::dump_cb( lua_State * L , int index )
 
     g_debug( "DUMPING CALLBACKS" );
 
-    lb2_strong_deref( L , cb );
+    lb_strong_deref( L , cb );
 
     if ( lua_isnil( L , -1 ) )
     {

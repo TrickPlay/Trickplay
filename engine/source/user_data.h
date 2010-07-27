@@ -4,7 +4,11 @@
 #include "glib.h"
 #include "glib-object.h"
 
-#include "common.h"
+#include "lua.h"
+#include "lauxlib.h"
+
+#include <string>
+#include <map>
 
 struct UserData
 {
@@ -305,6 +309,8 @@ private:
     //.........................................................................
     // A map to signals we have connected to the master. Each entry has our own
     // callback name and the signal handler id.
+
+    typedef std::string String;
 
     typedef std::map< String , gulong > SignalMap;
 

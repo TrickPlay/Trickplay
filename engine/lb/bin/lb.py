@@ -605,33 +605,33 @@ def emit( stuff , f ):
             # WRAPPER
             #-----------------------------------------------------------------------
             
-            f.write(
-                "\n"
-                "int wrap_%s(lua_State*L,%s self)\n"
-                "{\n"
-                %
-                (bind_name,udata_type)
-            )
-            
-            if options.profiling:
-                
-                f.write(
-                    "  int result=lb_wrap(L,self,%s);\n"
-                    "  if(result)\n"
-                    '    PROFILER_CREATED("%s",self);\n'
-                    "  return result;\n"
-                    "}\n"
-                        %
-                        (metatable_name , bind_name )
-                )
-            else:
-                
-                f.write(
-                    "  return lb_wrap(L,self,%s);\n"
-                    "}\n"
-                    %
-                    metatable_name
-                )
+            #f.write(
+            #    "\n"
+            #    "int wrap_%s(lua_State*L,%s self)\n"
+            #    "{\n"
+            #    %
+            #    (bind_name,udata_type)
+            #)
+            #
+            #if options.profiling:
+            #    
+            #    f.write(
+            #        "  int result=lb_wrap(L,self,%s);\n"
+            #        "  if(result)\n"
+            #        '    PROFILER_CREATED("%s",self);\n'
+            #        "  return result;\n"
+            #        "}\n"
+            #            %
+            #            (metatable_name , bind_name )
+            #    )
+            #else:
+            #    
+            #    f.write(
+            #        "  return lb_wrap(L,self,%s);\n"
+            #        "}\n"
+            #        %
+            #        metatable_name
+            #    )
             
             #-----------------------------------------------------------------------
             # FUNCTIONS        
@@ -725,6 +725,10 @@ def emit( stuff , f ):
             if len( constructors ) > 1:
                 
                 sys.exit( "Cannot overload constructor for " + bind_name )
+		
+	    elif len ( constructors ) == 0:
+		
+		constructors.append( dict( code = None , parameters = [] ) )
                 
             for func in constructors:
                 
@@ -733,12 +737,15 @@ def emit( stuff , f ):
                     "int new_%s(lua_State*L)\n"
                     "{\n"
                     "%s"
-                    "  %s* self(lb_new_self(L,%s));\n"
+                    "  UserData * __ud__ = UserData::make( L );\n"
                     "  luaL_getmetatable(L,%s);\n"
                     "  lua_setmetatable(L,-2);\n"
+		    "  %s self=0;\n"
                     "\n"
                     %
-                    ( bind_name , profiling_header("new_%s"%bind_name) , udata_type , udata_type , metatable_name )
+                    ( bind_name ,
+		     profiling_header("new_%s"%bind_name) ,
+		     metatable_name, udata_type )
                 )
                 
                 for index , param in enumerate( func[ "parameters" ] ):
@@ -754,17 +761,16 @@ def emit( stuff , f ):
                     flow_code( func[ "code" ] )
                     
                 else:
+		    
+		    f.write( "  lb_construct_empty();\n" )
                     
-                    # TODO - default constructor behavior
-                    
-                    pass
                 
-                f.write("  lb_store_weak_ref(L,lua_gettop(L),*self);\n");
+                f.write("  lb_check_initialized();\n")
                 
                 if options.profiling:
                     
                     f.write(
-                        '  PROFILER_CREATED("%s",*self);\n'
+                        '  PROFILER_CREATED("%s",self);\n'
                         %
                         bind_name );
                 
@@ -783,6 +789,11 @@ def emit( stuff , f ):
             if len( destructors ) > 1:
                 
                 sys.exit( "Cannot overload destructor for " + bind_name )
+		
+	    elif len( destructors ) == 0:
+		
+		destructors.append( dict( code = None ) )
+	    
                 
             for func in destructors:
                 
@@ -814,6 +825,7 @@ def emit( stuff , f ):
                     
                     pass
                 
+		f.write( "  lb_finalize_user_data(L);\n" )
                 f.write( "  return 0;\n}\n" )
             
                 
@@ -936,10 +948,10 @@ def emit( stuff , f ):
                     "\n"
                     "int get_%s_%s(lua_State*L)\n"
                     "{\n"
-                    '  return lb_get_callback(L,lb_get_self(L,%s),"%s",0);\n'
+		    '  return UserData::get_callback( "%s" , L , -1 );'
                     "}\n"
                     %
-                    ( bind_name , cb[ "name" ] , udata_type , cb[ "name" ] )
+                    ( bind_name , cb[ "name" ] , cb[ "name" ] )
                 )
                 
                 f.write(
@@ -947,7 +959,7 @@ def emit( stuff , f ):
                     "int set_%s_%s(lua_State*L)\n"
                     "{\n"
                     "  %s self(lb_get_self(L,%s));\n"
-                    '  int %s(!lb_set_callback(L,self,"%s"));\n'
+                    '  int %s(!lb_set_callback(L,"%s"));\n'
                     %
                     ( bind_name , cb[ "name" ] , udata_type , udata_type , cb[ "name" ] , cb[ "name" ] )
                 )
@@ -969,17 +981,17 @@ def emit( stuff , f ):
                     ( bind_name , cb[ "name" ] , udata_type , metatable_name , cb[ "name" ] )
                 )
                 
-            if len(callbacks) > 0:
-                
-                f.write(
-                    "\n"
-                    "void detach_%s(lua_State*L,%s self)\n"
-                    "{\n"
-                    "  lb_clear_callbacks(L,self,%s);\n"
-                    "}\n"
-                    %
-                    (bind_name , udata_type , metatable_name )
-                )
+            #if len(callbacks) > 0:
+            #    
+            #    f.write(
+            #        "\n"
+            #        "void detach_%s(lua_State*L,%s self)\n"
+            #        "{\n"
+            #        "  lb_clear_callbacks(L,self,%s);\n"
+            #        "}\n"
+            #        %
+            #        (bind_name , udata_type , metatable_name )
+            #    )
             #-----------------------------------------------------------------------
             # INITIALIZER
             #-----------------------------------------------------------------------

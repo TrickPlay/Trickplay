@@ -1,4 +1,6 @@
 
+#if 0
+
 #include "glib-object.h"
 
 #include "signal_collector.h"
@@ -191,3 +193,5 @@ int SignalCollector::delete_signal_collector( lua_State * L )
     delete lb_get_self( L, SignalCollector * );
     return 0;
 }
+
+#endif
