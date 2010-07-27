@@ -22,7 +22,7 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         end,
         [MenuItems.CONTINUE] = function(self)
             print("continuing")
-            self:get_model():set_active_component(Components.CUSTOMIZE)
+            self:get_model():set_active_component(Components.FOOD_SELECTION)
             self:get_model():notify()
         end
     }
