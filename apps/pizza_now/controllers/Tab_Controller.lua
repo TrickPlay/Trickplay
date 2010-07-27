@@ -29,16 +29,14 @@ TabController = Class(Controller,
          [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
          [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
          [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
-         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end
---[[
+         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+
          [keys.Return] =
             function(self)
-               -- compromise so that there's not a full-on lua panic,
-               -- but the error message still displays on screen
-               local success, error_msg = pcall(MenuItemCallbacks[selected], self)
-               if not success then print(error_msg) end
+             self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+             self:get_model():notify()
             end
---]]
+
         }
 
         function self:on_key_down(k)
