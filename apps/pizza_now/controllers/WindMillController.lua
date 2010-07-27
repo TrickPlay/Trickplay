@@ -45,7 +45,7 @@ WindMillController = Class(Controller, function(self, view, ...)
                 topping.amount = Amount.LIGHT
                 amountSelection = false
                 self:get_model():get_controller(Components.CUSTOMIZE):update_field(topping.amount,topping.side)
-                self:get_model():set_active_component(Components.CUSTOMIZE)
+                self:get_model():set_active_component(Components.TAB)
                 self:get_model():notify()
             end
         end,
@@ -57,7 +57,7 @@ WindMillController = Class(Controller, function(self, view, ...)
                 topping.amount = Amount.NORMAL
                 amountSelection = false
                 self:get_model():get_controller(Components.CUSTOMIZE):update_field(topping.amount,topping.side)
-                self:get_model():set_active_component(Components.CUSTOMIZE)
+                self:get_model():set_active_component(Components.TAB)
                 self:get_model():notify()
             end
         end,
@@ -69,7 +69,7 @@ WindMillController = Class(Controller, function(self, view, ...)
                 topping.amount = Amount.EXTRA
                 amountSelection = false
                 self:get_model():get_controller(Components.CUSTOMIZE):update_field(topping.amount,topping.side)
-                self:get_model():set_active_component(Components.CUSTOMIZE)
+                self:get_model():set_active_component(Components.TAB)
                 self:get_model():notify()
             end
         end,
