@@ -50,7 +50,7 @@ CustomizeView = Class(View, function(view, model, ...)
                     }
                     view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
                     for item, selection in pairs(option) do
-                        if item ~= "Name" and item ~= "Image" then
+                        if item ~= "Name" and item ~= "Image" and item ~= "Selected" then
                             indent = indent + 1
                             for pick, val in pairs(All_Options[item]) do
                                 if val == selection then
