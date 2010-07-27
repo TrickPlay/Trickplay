@@ -690,8 +690,8 @@ int App::run( const StringSet & allowed_names )
     luaopen_idle( L );
 #endif
     luaopen_timer( L );
-#if 0
     luaopen_url_request( L );
+#if 0
     luaopen_storage( L );
     luaopen_app( L );
     luaopen_system( L );
