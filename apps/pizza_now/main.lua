@@ -13,7 +13,8 @@ Components = {
    ITEM_SELECTION = 4,
    CUSTOMIZE = 5,
    TAB = 6,
-   CUSTOMIZE_ITEM = 7
+   CUSTOMIZE_ITEM = 7,
+   CHECKOUT = 8
 }
 
 -- Model initialization
@@ -42,11 +43,15 @@ customize_view:get_controller():set_child_controller(tab_view:get_controller())
 local windmill_view = WindMillView(model)
 windmill_view:initialize()
 
+local checkout_view = CheckoutView(model)
+checkout_view:initialize()
+
 function screen:on_key_down(k)
     assert(model:get_active_controller())
     model:get_active_controller():on_key_down(k)
 end
 
 model:start_app(Components.ADDRESS_INPUT)
+--model:start_app(Components.CHECKOUT)
 --model:start_app(Components.CUSTOMIZE_ITEM)
 --model:start_app(Components.PROVIDER_SELECTION)
