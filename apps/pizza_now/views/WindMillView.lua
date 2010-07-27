@@ -188,7 +188,7 @@ WindMillView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.CUSTOMIZE_ITEM then
             print("Showing Customize Item UI")
-	    set()
+            set()
             CustomizeItemAnimations[controller:get_selected_index()]()
         else
             print("Hiding Customize Item UI")

@@ -87,15 +87,31 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       --Radio Buttons
       Options = {
          {Name = "Cheese", Image = "", 
-                        Placement = All_Options.Placement.ENTIRE,
-                        CoverageX = All_Options.Coverage.REGULAR},
+                       Placement = All_Options.Placement.ENTIRE,
+                       CoverageX = All_Options.Coverage.REGULAR,
+                        Selected = 
+                         function(self)
+                            print("Selection not yet handled")
+                         end},
          {Name = "Sauce",  Image = "", 
                        CoverageX = All_Options.Coverage.REGULAR,
-                      Sauce_Type = All_Options.Sauce_Type.TOMATO},
+                      Sauce_Type = All_Options.Sauce_Type.TOMATO,
+                        Selected = 
+                         function(self)
+                            print("Selection not yet handled")
+                         end},
          {Name = "Crust",  Image = "", 
-                     Crust_Style = All_Options.Crust_Style.HANDTOSSED},
+                     Crust_Style = All_Options.Crust_Style.HANDTOSSED,
+                        Selected = 
+                         function(self)
+                            print("Selection not yet handled")
+                         end},
          {Name = "Size",   Image = "",
-                            Size = All_Options.Size.LARGE}
+                            Size = All_Options.Size.LARGE,
+                        Selected = 
+                         function(self)
+                            print("Selection not yet handled")
+                         end}
       }
    }
    --Meat Toppings
@@ -124,7 +140,12 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
          Name  = Meat_Toppings[i],
          Image = "",
          CoverageX  = All_Options.Coverage.REGULAR,
-         Placement = All_Options.Placement.NONE
+         Placement = All_Options.Placement.NONE,
+         Selected = 
+            function(self)
+             self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+             self:get_model():notify()
+            end
       }
    end
    for i =1,#Veggie_Toppings do
@@ -132,7 +153,12 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
          Name  = Veggie_Toppings[i],
          Image = "",
          CoverageX  = All_Options.Coverage.REGULAR,
-         Placement = All_Options.Placement.NONE
+         Placement = All_Options.Placement.NONE,
+         Selected = 
+            function(self)
+             self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+             self:get_model():notify()
+            end
       }
    end
 end)

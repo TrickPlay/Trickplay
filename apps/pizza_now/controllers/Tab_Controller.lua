@@ -16,9 +16,7 @@ TabController = Class(Controller,
                 if tab.Options ~= nil then
                     for opt_index,option in ipairs(tab.Options) do
                         MenuItemCallbacks[tab_index][opt_index] = 
-                            function(self)
-                                print(option.Name.." selected")
-                            end
+                            option.Selected
                         i = i + 1
                     end
                 end
@@ -33,6 +31,7 @@ TabController = Class(Controller,
 
          [keys.Return] =
             function(self)
+             
              self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
              self:get_model():notify()
             end
