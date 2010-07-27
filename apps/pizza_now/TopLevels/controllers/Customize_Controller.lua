@@ -16,13 +16,15 @@ CustomizeController = Class(Controller,
       end
       local MenuSize = #view:get_model().current_item.Tabs
 
-      MenuItemCallbacks["Go Back"] = function()
-         --jump back to Food Menu
+      MenuItemCallbacks[MenuItems["Go Back"]] = function()
+          self:get_model():set_active_component(Components.FOOD_SELECTION)
+          self:get_model():notify()
       end
 
-      MenuItemCallbacks["Add to Cart"] = function()
+      MenuItemCallbacks[MenuItems["Add to Order"]] = function()
          --cart[#cart + 1] = pizza
-         --jump back to Food Menu
+         self:get_model():set_active_component(Components.FOOD_SELECTION)
+         self:get_model():notify()
       end
 
 
@@ -30,8 +32,8 @@ CustomizeController = Class(Controller,
          [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
          [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
          [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
-         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end--,
-         --[[
+         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+         
          [keys.Return] =
             function(self)
                -- compromise so that there's not a full-on lua panic,
@@ -39,7 +41,7 @@ CustomizeController = Class(Controller,
                local success, error_msg = pcall(MenuItemCallbacks[selected], self)
                if not success then print(error_msg) end
             end
-         --]]
+         
       }
 
       function self:on_key_down(k)
@@ -75,7 +77,7 @@ CustomizeController = Class(Controller,
             --table.foreach(dir, print)
             --move into the Tab sub group
             if dir[2] == 0 then
-               if dir == Directions.RIGHT then
+               if dir == Directions.RIGHT and view:get_model().current_item.Tabs[selected].Options ~= nil then
                   self.in_tab_group = true
                   view:enter_sub_group()
                end
@@ -87,7 +89,7 @@ CustomizeController = Class(Controller,
                   selected = new_selected
                   --print(selected)
                end
-               MenuItemCallbacks[selected]()
+               --MenuItemCallbacks[selected]()
                self:get_model():notify()
             end
          end
