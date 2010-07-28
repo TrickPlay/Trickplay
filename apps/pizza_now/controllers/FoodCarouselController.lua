@@ -26,6 +26,7 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
         function(self)
             print("Constructing PIZZA")
             self:get_model().current_item = EmptyPizza()
+            self:get_model().current_item.Name = "Pizza"
             self:get_model():set_active_component(Components.CUSTOMIZE)
             self:get_model():get_active_controller():init_shit()
             self:get_model():get_controller(Components.TAB):init_shit()
