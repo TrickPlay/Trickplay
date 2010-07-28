@@ -72,7 +72,7 @@ int UserData::Handle::invoke_callback( const char * name , int nresults )
 
 //=============================================================================
 
-UserData * UserData::make( lua_State * L )
+UserData * UserData::make( lua_State * L , const gchar * type )
 {
     LSG;
 
@@ -83,6 +83,7 @@ UserData * UserData::make( lua_State * L )
     g_assert( result );
 
     result->L = L;
+    result->type = type ? g_strdup( type ) : 0;
     result->master = 0;
     result->client = 0;
     result->initialized = false;
@@ -99,7 +100,7 @@ UserData * UserData::make( lua_State * L )
 
     g_assert( result->proxy_ref != LUA_REFNIL && result->proxy_ref != LUA_NOREF );
 
-    udlog( "CREATED USER DATA %p" , result );
+    udlog( "CREATED '%s' USER DATA %p" , result->type , result );
 
     LSG_CHECK( 1 );
 
@@ -117,8 +118,6 @@ gpointer UserData::initialize_empty()
 
 gpointer UserData::initialize_with_master( gpointer _master )
 {
-    udlog( "SETTING MASTER FOR UD %p TO %p", this , _master );
-
     g_assert( _master );
 
     g_assert( G_IS_OBJECT( _master ) );
@@ -145,9 +144,19 @@ gpointer UserData::initialize_with_master( gpointer _master )
 
 //.............................................................................
 
+void UserData::master_destroyed( UserData * self , GObject * master )
+{
+    self->master = 0;
+
+    udlog( "- DESTROYED MASTER FOR UD %p : MASTER %p" , self , master );
+}
+
+
+//.............................................................................
+
 gpointer UserData::initialize_with_client( gpointer _client )
 {
-    udlog( "INITIALIZING UD %p : MASTER %p : CLIENT %p" , this , master , _client );
+    udlog( "INITIALIZING '%s' UD %p : MASTER %p : CLIENT %p" , type , this , master , _client );
 
     // Make sure it only gets called once
 
@@ -167,6 +176,10 @@ gpointer UserData::initialize_with_client( gpointer _client )
 
         udlog( "  CREATED NEW MASTER %p" , master );
     }
+
+    // We add a weak ref so we can tell when it is detroyed
+
+    g_object_weak_ref( master , ( GWeakNotify ) master_destroyed , this );
 
     client = _client;
 
@@ -220,10 +233,10 @@ void UserData::check_initialized()
 
 void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_last_ref )
 {
-    udlog( "TOGGLE PROXY REF FOR UD %p : MASTER %p : LAST = %s" , self , master , is_last_ref ? "TRUE" : "FALSE" );
-
     g_assert( self );
     g_assert( self->master == master );
+
+    udlog( "TOGGLE PROXY REF FOR '%s' UD %p : MASTER %p : LAST = %s" , self->type , self , master , is_last_ref ? "TRUE" : "FALSE" );
 
     if ( is_last_ref )
     {
@@ -289,11 +302,18 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
 //.............................................................................
 
+static void leaky_master( gpointer , GObject * o )
+{
+    udlog( "LEAKY MASTER IS NOW GONE %p" , o );
+}
+
+//.............................................................................
+
 void UserData::finalize( lua_State * L , int index )
 {
     UserData * self = UserData::get( L , index );
 
-    udlog( "FINALIZING UD %p : MASTER %p : CLIENT %p" , self , self->master , self->client );
+    udlog( "FINALIZING '%s' UD %p : MASTER %p : CLIENT %p" , self->type , self , self->master , self->client );
 
     if ( self->master )
     {
@@ -311,6 +331,24 @@ void UserData::finalize( lua_State * L , int index )
         udlog( "  REMOVING TOGGLE REF" );
 
         g_object_remove_toggle_ref( self->master , ( GToggleNotify ) toggle_notify , self );
+
+        // If the toggle ref was the last one, our own weak ref notify will be called and will
+        // set our master to NULL. If it is not NULL by now, the master object is still
+        // outstanding (which is ok).
+
+        if ( self->master )
+        {
+            udlog( "* OUR MASTER IS STILL AROUND %p" , self->master );
+
+            g_object_weak_unref( self->master , ( GWeakNotify ) master_destroyed , self );
+
+            // This one is just for debugging - so we can get a message printed when it
+            // goes away.
+
+            g_object_weak_ref( self->master , leaky_master , 0 );
+
+            self->master = 0;
+        }
     }
 
     // Remove the client from the client map
@@ -329,9 +367,14 @@ void UserData::finalize( lua_State * L , int index )
 
     lb_strong_unref( L , self->callbacks_ref );
 
+    // Get rid of the type
+
+    g_free( self->type );
+
     // Clear everything so double frees are easier to spot.
 
     self->L = ( lua_State * ) 0xDEADBEEF;
+    self->type = ( gchar * ) 0xDEADBEEF;
     self->master = ( GObject * ) 0xDEADBEEF;
     self->client = ( gpointer ) 0xDEADBEEF;
     self->proxy_ref = LUA_NOREF;
