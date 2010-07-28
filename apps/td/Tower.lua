@@ -20,7 +20,7 @@ function Tower:new(args, prefix)
 	local splashradius = args.splashradius
 	local frames = args.frames
 	local blt = args.bullet
-	local bltframes = args.bulletframes
+	--local bltframes = args.bulletframes
 	--for k,v in pairs(args) do print(k, v) end
 	--print(args.bullet, blt)
 
@@ -45,7 +45,7 @@ function Tower:new(args, prefix)
 		level = level,
 		prefix = prefix,
 		blt = blt,
-		bltframes = bltframes,
+		--bltframes = bltframes,
 		bullet = bullet,
 		towerType = towerType,
 		damage = damage,
@@ -154,23 +154,14 @@ end
 
 function Tower:animateFire(seconds)
 
-	--print(self.blt)
-
+	-- Creep needs a bullet number in order to fire
 	if self.blt then
 	
-		--print("bullet")
-		--local btimer = Stopwatch()
-
-		--local bullet = Bullet:new( {name=self.prefix.."Bullet"..self.blt, frames=self.bltframes} )
-		--print(game.board.theme.bullets[self.blt])
 		local bullet = Bullet:new( game.board.theme.bullets[self.blt] )
-		--print(bullet.image)
 
-		--print("Created bullet")
-
+		-- Create a bullet group if none exists
 		if not self.bgroup then
-			self.bgroup = Group{x = self.x + SP/2, y=self.y + SP/2, h = bullet.image.h, w=bullet.image.w/self.bltframes, anchor_point = { bullet.image.w/(self.bltframes*2), bullet.image.h/2 }, clip={0, 0, bullet.image.w/(self.bltframes), bullet.image.h} }
-			--print("Created", self.bgroup)
+			self.bgroup = Group{x = self.x + SP/2, y=self.y + SP/2, h = bullet.image.h, w=bullet.image.w/bullet.frames, anchor_point = { bullet.image.w/(bullet.frames*2), bullet.image.h/2 }, clip={0, 0, bullet.image.w/(bullet.frames), bullet.image.h} }
 			screen:add(self.bgroup)
 		end
 

@@ -69,18 +69,11 @@ function Creep:render(seconds)
 	local cy = self.creepGroup.y
 --	CREEP_START[1] = math.random(5)+2
 	-- When the creep is off the board
-	if (not self.found and cx < 0) or self.flying then
-		local new = cx + MOVE
-		
-		if new > 0 then
-			self.creepGroup.x = 0.1
-		else
-			self.creepGroup.x = new
-		end
-		
-		--print(self.creepGroup.x)
-		
-		if (self.flying and cx >1920) then
+	if self.flying then
+	
+		self.creepGroup.x = cx + MOVE
+	
+		if cx > 1920 then
 			self.hp = 0
 			wave_counter = wave_counter + 1
 			self.dead = true
@@ -90,6 +83,14 @@ function Creep:render(seconds)
 			self.creepGroup.x = wave_counter*-240
 		end
 	
+	elseif (not self.found and cx < 0) then
+		local new = cx + MOVE
+		if new > 0 then
+			self.creepGroup.x = .1
+		else
+			self.creepGroup.x = new
+		end
+
 	-- Find a path if none exists and the creep is on the board
 	elseif cx >= 0 and not self.path then
 		self.found, self.path = astar.CalculatePath(game.board.nodes[ CREEP_START[1] ][ CREEP_START[2] ], game.board.nodes[ CREEP_END[1] ][ CREEP_END[2] ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
