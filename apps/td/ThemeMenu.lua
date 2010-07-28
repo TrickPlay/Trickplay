@@ -24,12 +24,16 @@ ThemeMenu:apply_color_change("FFFFFF", "00CCCC")
 
 ThemeMenu.buttons.extra.r = function()
 
-	MainMenu.container.opacity = 0
+	game = Game:new{ theme = Themes[ names[ThemeMenu.y] ] }
+	game:startGame()
+
+
+	--[[MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
 	LevelMenu.buttons:grab_key_focus()
 	LevelMenu.container.opacity = 255
 	LevelMenu.hl.opacity = 255
-	LevelMenu:update_cursor_position()
+	LevelMenu:update_cursor_position()]]
 
 end
 

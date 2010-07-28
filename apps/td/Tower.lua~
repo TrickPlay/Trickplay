@@ -18,10 +18,12 @@ function Tower:new(args, prefix)
 	local slow = args.slow
 	local splash = args.splash
 	local splashradius = args.splashradius
+	local frames = args.frames
 
 	-- Image stuff
 	local towerImage = AssetLoader:getImage(prefix..table.name,{})
-	local towerImageGroup = Group{ clip={0,0,SP,SP}}
+	local towerImageGroup = Group{ clip={0,0,towerImage.w/frames,towerImage.h}}
+--	towerImageGroup.y = towerImageGroup.y - ((towerImage.h/SP)-1)*SP
 	local fireImage = AssetLoader:getImage(prefix..table.name.."Fire",{})
 	towerImageGroup:add(towerImage)
 	screen:add(towerImageGroup)
@@ -45,6 +47,7 @@ function Tower:new(args, prefix)
 		direction = direction,
 		slowammount = slowammount,
 		slow = slow,
+		frames = frames,
 		splash = splash,
 		splashradius = splashradius,
 		cooldown = cooldown,
@@ -141,9 +144,9 @@ end
 
 function Tower:animateFire()
 	
+	
 end
 
--- TODO: something is horribly wrong with collision detection
 function Tower:checkSplash(creeps,i)
 	-- if self.splash is true or something
 	local cx = creeps[i].creepGroup.x

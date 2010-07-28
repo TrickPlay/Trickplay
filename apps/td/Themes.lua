@@ -1,6 +1,7 @@
 Themes = {
 	zombie = dofile("themes/zombie/zombie.lua"),
-	robot = dofile("themes/robot/robot.lua")
+	robot = dofile("themes/robot/robot.lua"),
+	pacman = dofile("themes/pacman/pacman.lua")
 }
 
 -- Load images
@@ -28,6 +29,9 @@ for themeName, t in pairs(Themes) do
 		end
 		
 	end
+	
+	AssetLoader:preloadImage(themeName.."Background", "themes/"..themeName.."/assets/Background.png")
+	AssetLoader:preloadImage(themeName.."Overlay", "themes/"..themeName.."/assets/Overlay.png")
 
 end
 

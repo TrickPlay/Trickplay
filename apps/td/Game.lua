@@ -3,7 +3,7 @@ render_list = {}
 Game = {}
 
 function Game:new(args)
-	local theme = Themes.robot
+	local theme = args.theme
 	
 	local board = Board:new {
 		--board args to be passed in
@@ -23,7 +23,6 @@ end
 function Game:startGame()
 	self.board:init()
 	self.board:createBoard()
-
 end
 
 
