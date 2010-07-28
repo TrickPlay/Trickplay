@@ -151,7 +151,14 @@ function Board:createBoard()
 	end
 	backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
 	overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
-	
+	for i =1, #self.theme.obstacles do
+
+		local obstacle = AssetLoader:getImage("obstacles", {})
+		local obstacleGroup = Group{x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1]), z = 1, clip = {0,0,SP,SP}}
+		obstacleGroup:add(obstacle)
+		 
+		screen:add(obstacleGroup)
+	end
 	local b = Group{}
 	screen:add(backgroundImage, overlayImage, b)
 	local hl = Rectangle{h=SP, w=SP, color="A52A2A"}

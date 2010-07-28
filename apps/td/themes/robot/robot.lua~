@@ -31,7 +31,7 @@ local robot = {
 						}
 		},
 		boardBackground = "assets/robotBackground.png",
-		obstacles = {},
+		obstacles = dofile("themes/robot/obstacles.lua",
 		wave = dofile("round1.lua"),
 		
 		waveTable = {
