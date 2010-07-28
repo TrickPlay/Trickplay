@@ -2,7 +2,7 @@
 TabView = Class(View, function(view, model,parent, ...)
     view._base.init(view,model)
     view.parent = parent
-    view.ui=Group{name="Tab ui", position={300,60}, opacity=255}
+    view.ui=Group{name="Tab ui", position={425,60}, opacity=255}
     view.menu_items = {}
     view.selector = Image{
         position={-70,0},
