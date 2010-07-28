@@ -168,6 +168,7 @@ endif (TP_CLUTTER_BACKEND_EGL)
 if (TP_PRODUCTION)
 
 	add_definitions( -DTP_PRODUCTION=1 )
+	add_definitions( -DG_DISABLE_ASSERT=1 )
 	
 endif (TP_PRODUCTION)
 
