@@ -100,6 +100,9 @@ function Board:new(args)
 			end
 	   end
 	end
+	for i =1, #theme.obstacles do
+		squareGrid[theme.obstacles[i][1]][theme.obstacles[i][2]] = FULL
+	end
 	local object = {
 		w = w,
 		h = h,
@@ -137,10 +140,11 @@ function Board:createBoard()
 				g[j] = Group{w=SP, h=SP}--, name=self.squareGrid[i][j].square[3]}
 	   end
 	end
-	backgroundImage = Image {src = self.theme.boardBackground }
+	backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
+	overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
 	
 	local b = Group{}
-	screen:add(backgroundImage, b)
+	screen:add(backgroundImage, overlayImage, b)
 	local hl = Rectangle{h=SP, w=SP, color="A52A2A"}
 	self.nodes = self:createNodes()
 

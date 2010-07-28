@@ -18,10 +18,12 @@ function Tower:new(args, prefix)
 	local slow = args.slow
 	local splash = args.splash
 	local splashradius = args.splashradius
+	local frames = args.frames
 
 	-- Image stuff
 	local towerImage = AssetLoader:getImage(prefix..table.name,{})
-	local towerImageGroup = Group{ clip={0,0,SP,SP}}
+	local towerImageGroup = Group{ clip={0,0,towerImage.w/frames,towerImage.h}}
+--	towerImageGroup.y = towerImageGroup.y - ((towerImage.h/SP)-1)*SP
 	local fireImage = AssetLoader:getImage(prefix..table.name.."Fire",{})
 	towerImageGroup:add(towerImage)
 	screen:add(towerImageGroup)
@@ -45,6 +47,7 @@ function Tower:new(args, prefix)
 		direction = direction,
 		slowammount = slowammount,
 		slow = slow,
+		frames = frames,
 		splash = splash,
 		splashradius = splashradius,
 		cooldown = cooldown,
@@ -141,6 +144,7 @@ end
 
 function Tower:animateFire()
 	
+	
 end
 
 function Tower:checkSplash(creeps,i)
@@ -168,7 +172,7 @@ function Tower:attackCreep(creeps, i, intensity)
 	local cy = creeps[i].creepGroup.y
 	if (self.slow) then creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity end
 
-	if self.directionTable and not self.splash then 
+	if self.directionTable then 
 		local d = self.directionTable
 		local dir
 		for i = 1, #d do

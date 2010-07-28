@@ -4,21 +4,24 @@ function Creep:new(args, x, y, name)
 	local creepType = args.creepType
 	local hp = args.hp
 	local max_hp = hp
+	local x_offset = args.x_offset or 0
+	local y_offset = args.y_offset or 0
 	local speed = args.speed
 	local max_speed = speed
 	local direction = args.direction or {0,1}
 	local timer = Stopwatch()
 	local deathtimer = Stopwatch()
+	local frames = args.frames
 	timer:start()
 	
 	-- Image/Group stuff
 	local creepImage = AssetLoader:getImage(name, {})
 	--local creepImageGroup = Group{x = -SP/2, y=-SP, z=1, clip={0,0,SP*2,SP*2} }
-	local creepImageGroup = Group{anchor_point={SP/2, SP}, z=1, clip={0,0,SP*2,SP*2} }
-
+	local creepImageGroup = Group{z=1, clip={0,0,creepImage.w/frames,creepImage.h}, x = x_offset, y = y_offset }
+	
 	creepImageGroup:add(creepImage)
-	local greenBar = Clone {source = healthbar, y=-SP, color = "00FF00"}
-	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = -SP}
+	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset-10}
+	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset-10}
 	local creepGroup = Group{opacity=255, x = x, y = y}
 	creepGroup:add(creepImageGroup, redBar, greenBar)
 	
@@ -27,6 +30,8 @@ function Creep:new(args, x, y, name)
 	local deadanimate = false
 	local bounty = args.bounty
 	local flying = args.flying
+	if (flying) then creepGroup.z = 2 end
+
 	local object = {
 		hp = hp,
 		max_hp = max_hp,
@@ -38,7 +43,9 @@ function Creep:new(args, x, y, name)
 		creepImageGroup = creepImageGroup,
 		greenBar = greenBar,
 		redBar = redBar,
-		--path = path,
+		x_offset = x_offset,
+		y_offset = y_offset,
+		frames = frames,
 		dead = dead,
 		deadanimate = deadanimate,
 		bounty = bounty,
@@ -183,11 +190,11 @@ function Creep:render(seconds)
 			end
 		end
 		self.creepGroup.z = 1 + PTG(self.creepGroup.y)*0.1
-		if (self.flying) then self.creepGroup.z = 3 end
+		if (self.flying) then self.creepGroup.z = 2 end
 		
 	end
 	self.greenBar.width = SP*(self.hp/self.max_hp)
-		
+	self.creepImageGroup.z = PTG(self.creepImageGroup.y) * 0.1
 	self:animate()
 end
 
@@ -195,8 +202,7 @@ end
 function Creep:bleed()
 	local x = self.creepGroup.x + math.random(SP)
 	local y = self.creepGroup.y + math.random(SP)
---	local blood = Rectangle {color = "FF0000", width = 10, height = 10, x = x, y = y}
---	print ("bleed")
+--	local blood = Rectangle {color = "FF0000", width = 1, height = 1, x = x, y = y}
 --	screen:add(blood)
 end
 
@@ -240,11 +246,14 @@ function Creep:animate()
 	{ -SP*2, {SP*2,0,SP,SP} },
 	}]]
 	
-	local frames = self.creepImage.w/(SP*2)
+	--local frames = self.creepImage.w/(SP*2)
 	
-	for i=1, frames do
-		if self.timer.elapsed_seconds < ( 1/frames ) * i and self.timer.elapsed_seconds > ( 1/frames) * (i-1) then
-			self.creepImage.x = - SP*2 * (i-1)
+	local time = self.frames/7
+	--print(time)
+	
+	for i=1, self.frames do
+		if self.timer.elapsed_seconds < ( 1/self.frames ) * i * time and self.timer.elapsed_seconds > ( 1/self.frames) * (i-1) * time then
+			self.creepImage.x = - self.creepImage.w/self.frames * (i-1)
 			
 			--self.creepImage.clip = {SP*2 * (i-1),0,SP*2,SP*2}
 			--print("Using image: ", i)
@@ -254,7 +263,7 @@ function Creep:animate()
 	
 	--print(self.timer.elapsed_seconds)
 	
-	if self.timer.elapsed_seconds > 1 then
+	if self.timer.elapsed_seconds > time then
 		self.timer:start()
 	end
 	
