@@ -10,6 +10,7 @@ Model = Class(
       model.arrival_time = 12
 
       model.current_item = nil
+      model.cart = {}
 
       -- class methods
       function model:attach(observer, controller_id)
