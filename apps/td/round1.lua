@@ -2,7 +2,7 @@ wave = {
 			-- Wave 1
 			{
 				{
-					{name = "FlyingCreep"},
+					{name = "NormalCreep"},
 					size = 10
 				},
 				size = 10           

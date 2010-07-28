@@ -172,7 +172,7 @@ function Tower:attackCreep(creeps, i, intensity)
 	local cy = creeps[i].creepGroup.y
 	if (self.slow) then creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity end
 
-	if self.directionTable then 
+	if self.directionTable and not self.splash then 
 		local d = self.directionTable
 		local dir
 		for i = 1, #d do
@@ -189,7 +189,6 @@ function Tower:attackCreep(creeps, i, intensity)
 		self.fired = true
 		--self.towerImage.x = self.x - SP * (dir - 1)
 		--self.towerImage.clip = { SP * (dir - 1), 0, SP, SP }
-
 	end
 			
 	creep_in_range = true
