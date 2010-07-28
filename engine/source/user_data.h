@@ -112,7 +112,7 @@ struct UserData
     // This call assumes ownership of the GObject. If it is floating, it will
     // sink it.
 
-    gpointer initialize_with_master( GObject * master );
+    gpointer initialize_with_master( gpointer master );
 
     //.........................................................................
     // Does a few checks to ensure a UserData is sane after it has been
@@ -127,6 +127,13 @@ struct UserData
     inline static gpointer get_client( lua_State * L , int index = 1 )
     {
         return UserData::get( L , index )->client;
+    }
+
+    //.........................................................................
+
+    inline GObject * get_master()
+    {
+        return master;
     }
 
     //.........................................................................

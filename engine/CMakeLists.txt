@@ -210,24 +210,24 @@ set(
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controllers.lb
-#    ${BINDINGS_SRC}/mediaplayer.lb
+    ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
 
 	${BINDINGS_SRC}/audiosampler.lb
 
-#    ${BINDINGS_SRC}/clutter_actor.lb
-#    ${BINDINGS_SRC}/clutter_container.lb
-#    ${BINDINGS_SRC}/clutter_screen.lb
-#    ${BINDINGS_SRC}/clutter_text.lb
-#    ${BINDINGS_SRC}/clutter_rectangle.lb
-#    ${BINDINGS_SRC}/clutter_clone.lb
-#    ${BINDINGS_SRC}/clutter_group.lb
-#    ${BINDINGS_SRC}/clutter_image.lb
-#    ${BINDINGS_SRC}/clutter_canvas.lb
-#    ${BINDINGS_SRC}/clutter_timeline.lb
-#    ${BINDINGS_SRC}/clutter_alpha.lb
-#    ${BINDINGS_SRC}/clutter_interval.lb
+    ${BINDINGS_SRC}/clutter_actor.lb
+    ${BINDINGS_SRC}/clutter_container.lb
+    ${BINDINGS_SRC}/clutter_screen.lb
+    ${BINDINGS_SRC}/clutter_rectangle.lb
+    ${BINDINGS_SRC}/clutter_text.lb
+    ${BINDINGS_SRC}/clutter_clone.lb
+    ${BINDINGS_SRC}/clutter_group.lb
+    ${BINDINGS_SRC}/clutter_image.lb
+    ${BINDINGS_SRC}/clutter_canvas.lb
+    ${BINDINGS_SRC}/clutter_timeline.lb
+    ${BINDINGS_SRC}/clutter_alpha.lb
+    ${BINDINGS_SRC}/clutter_interval.lb
     
     ${BINDINGS_SRC}/socket.lb
 )
@@ -324,7 +324,6 @@ add_library(
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp    
-    ${ENGINE_SRC}/source/signal_collector.cpp    
     ${ENGINE_SRC}/source/clutter_util.cpp    
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
@@ -345,8 +344,6 @@ add_library(
 
     ${ENGINE_SRC}/source/user_data.cpp
     
-#	timer_new.cpp
-
     ${GENERATED_FILES}
     
     ${LUA_SOURCE_FILES}

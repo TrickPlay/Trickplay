@@ -4,7 +4,6 @@ module clutter_text;
 #include "clutter/clutter.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -22,15 +21,14 @@ class Text [[ClutterActor*]] actor
 {
     Text(table props =0)
         [[
-            *self = clutter_text_new();
-		    ClutterUtil::initialize_actor(L,*self,TEXT_METATABLE);
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_text_new ) );
+		    ClutterUtil::initialize_actor(L,self,TEXT_METATABLE);
 		    ClutterUtil::set_props_from_table(L,props);
-		    g_object_ref_sink(G_OBJECT(*self));
+		    g_object_unref( self );
         ]];
 	
     ~Text()
 		[[
-            g_object_unref(G_OBJECT(self));
         ]];
     
     /*
@@ -385,16 +383,19 @@ class Text [[ClutterActor*]] actor
 	
     callback on_text_changed
 		[[
-		    SignalCollector::get(L)->connect_if(
-			on_text_changed,"on_text_changed",
-			self,"text-changed",G_CALLBACK(Text_on_text_changed),L);	    
+		    UserData::get(L)->connect_signal_if(
+				on_text_changed,
+				"on_text_changed",
+				"text-changed",
+				G_CALLBACK(Text_on_text_changed),
+				L);	    
 		]];
 }
 
 [[
 void Text_on_text_changed(ClutterText*text,lua_State*L)
 {
-    invoke_Text_on_text_changed(L,CLUTTER_ACTOR(text),0,0);
+	UserData::invoke_callback( G_OBJECT( text ) , "on_text_changed" , 0 , 0 , L );
 }
 ]]
 

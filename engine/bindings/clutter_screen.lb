@@ -5,7 +5,6 @@ module clutter_screen;
 
 #include "context.h"
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -28,16 +27,13 @@ global screen [[ClutterActor*]] actor , container
 {
     screen()
 	[[
-	    *self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid());
+	    self=lb_construct_gobject( ClutterActor , G_OBJECT( clutter_get_actor_by_gid(App::get(L)->get_screen_gid() ) ) );
 	    
-	    g_object_ref(G_OBJECT(*self));
-	    
-	    ClutterUtil::initialize_actor(L,*self,SCREEN_METATABLE);	    	    	    
+	    ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
 	]];
     
     ~screen()
 	[[
-	    g_object_unref(G_OBJECT(self));
 	]];
 
     #..........................................................................
