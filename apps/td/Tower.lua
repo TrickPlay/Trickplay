@@ -89,7 +89,7 @@ function Tower:render(seconds, creeps)
 	self.bullet.opacity = 0
 	
 	if self.bgroup then
-		self.bgroup:foreach_child( function(child) child.extra.parent:render()  end )
+		self.bgroup:foreach_child( function(child) child.extra.parent:render(seconds)  end )
 	end
 	
 	if self.fired and s > self.cooldown/4 then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
@@ -103,8 +103,8 @@ function Tower:render(seconds, creeps)
 	
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
 				self:attackCreep(creeps,i,1)
+				self:animateFire(seconds, creeps[i])
 				if (self.splash) then
-					self:animateFire(seconds)
 					self:checkSplash(creeps,i)
 				end
 				break
@@ -152,20 +152,35 @@ function Tower:upgrade()
 	
 end
 
-function Tower:animateFire(seconds)
+function Tower:animateFire(seconds, creep)
+
+	--print("Fire")
 
 	-- Creep needs a bullet number in order to fire
 	if self.blt then
 	
-		local bullet = Bullet:new( game.board.theme.bullets[self.blt] )
+		--print(self.blt)
+	
+		local bullet = Bullet:new( game.board.theme.bullets[self.blt], creep )
+		
+		local frames = bullet.frames or 1
 
 		-- Create a bullet group if none exists
 		if not self.bgroup then
-			self.bgroup = Group{x = self.x + SP/2, y=self.y + SP/2, h = bullet.image.h, w=bullet.image.w/bullet.frames, anchor_point = { bullet.image.w/(bullet.frames*2), bullet.image.h/2 }, clip={0, 0, bullet.image.w/(bullet.frames), bullet.image.h} }
+			self.bgroup = Group{}
 			screen:add(self.bgroup)
 		end
-
-		self.bgroup:add(bullet.image)
+		
+		bullet.imageGroup = Group{x = self.x + SP/2, y=self.y + SP/2, h = bullet.image.h, w=bullet.image.w/frames, anchor_point = { bullet.image.w/(frames*2), bullet.image.h/2 }, clip={0, 0, bullet.image.w/(frames), bullet.image.h} }
+		bullet.imageGroup:add(bullet.image)
+		bullet.imageGroup.extra.parent = bullet
+		self.bgroup:add(bullet.imageGroup)
+		--bullet.image.extra.parent = bullet.imageGroup
+		--else
+		--	self.bgroup:add(bullet.image)
+		--end
+		
+		--self.towerImageGroup.opacity = 2
 	
 	end
 
