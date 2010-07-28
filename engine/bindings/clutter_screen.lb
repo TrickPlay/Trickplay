@@ -27,14 +27,18 @@ global screen [[ClutterActor*]] actor , container
 {
     screen()
 	[[
+		// Screen is a global and we don't want its reference toggling all the
+		// time, so we take an extra one and hold on to it.
+		
 		self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid() );		
-	    self=lb_construct_gobject( ClutterActor , self );
+	    self=lb_construct_gobject( ClutterActor , g_object_ref( self ) );
 	    
 	    ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
 	]];
     
     ~screen()
 	[[
+		g_object_unref( self );
 	]];
 
     #..........................................................................
