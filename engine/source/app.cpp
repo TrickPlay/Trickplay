@@ -698,7 +698,7 @@ int App::run( const StringSet & allowed_names )
     luaopen_stopwatch( L );
     luaopen_json( L );
 
-//    luaopen_keys( L );
+    luaopen_keys( L );
 
     luaopen_controllers_module( L );
 
