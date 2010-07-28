@@ -51,6 +51,7 @@ Board = {
 		else
 			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
+			
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			for k,v in pairs(self.creepWave) do
@@ -59,6 +60,7 @@ Board = {
 			for k,v in pairs(self.creepWave) do
 				table.remove(self.creepWave,k)
 			end
+			bloodGroup:clear()
 			wave_counter = 0
 			creepnum = 1
 			seconds_elapsed = 0
