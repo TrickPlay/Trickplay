@@ -4,7 +4,6 @@ module clutter_rectangle;
 #include "clutter/clutter.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -19,14 +18,19 @@ class Rectangle [[ClutterActor*]] actor
 {
     Rectangle(table props = 0)
         [[
-            *self = clutter_rectangle_new();
-	    ClutterUtil::initialize_actor(L,*self,RECTANGLE_METATABLE);
-	    ClutterUtil::set_props_from_table(L,props);
-	    g_object_ref_sink(G_OBJECT(*self));
+        	// This call adds an extra ref to the created actor.
+        	// We do this to avoid triggering the toggle ref a bunch of
+        	// times during construction.
+        	
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_rectangle_new ) );
+	    	ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
+	    	ClutterUtil::set_props_from_table(L,props);
+	    	g_object_unref( self );
         ]];
 	
     ~Rectangle()
-	[[g_object_unref(G_OBJECT(self));]];
+		[[
+		]];
         
     /*
     	Property: color

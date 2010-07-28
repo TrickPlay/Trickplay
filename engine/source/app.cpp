@@ -672,22 +672,20 @@ int App::run( const StringSet & allowed_names )
 
     // Open our stuff
     luaopen_globals( L );
-#if 0
+
     luaopen_clutter_actor( L );
     luaopen_clutter_container( L );
     luaopen_clutter_screen( L );
-    luaopen_clutter_text( L );
     luaopen_clutter_rectangle( L );
+    luaopen_clutter_text( L );
     luaopen_clutter_clone( L );
     luaopen_clutter_group( L );
     luaopen_clutter_image( L );
     luaopen_clutter_canvas( L );
-
     luaopen_clutter_timeline( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
 
-#endif
     luaopen_idle( L );
     luaopen_timer( L );
     luaopen_url_request( L );
@@ -706,12 +704,7 @@ int App::run( const StringSet & allowed_names )
 
     luaopen_audiosampler_module( L );
 
-#if 0
     luaopen_mediaplayer_module( L );
-
-
-
-#endif
 
     luaopen_socket( L );
 

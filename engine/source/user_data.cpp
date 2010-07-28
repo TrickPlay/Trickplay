@@ -115,11 +115,13 @@ gpointer UserData::initialize_empty()
 
 //.............................................................................
 
-gpointer UserData::initialize_with_master( GObject * _master )
+gpointer UserData::initialize_with_master( gpointer _master )
 {
     udlog( "SETTING MASTER FOR UD %p TO %p", this , _master );
 
     g_assert( _master );
+
+    g_assert( G_IS_OBJECT( _master ) );
 
     // This can only be called once. We fail if a master already exists
 
@@ -127,7 +129,7 @@ gpointer UserData::initialize_with_master( GObject * _master )
 
     g_assert( ! initialized );
 
-    master = _master;
+    master = G_OBJECT( _master );
 
     // If the new master has a floating ref, we sink it now. If it is
     // not floating, it should have at least one ref and we assume
