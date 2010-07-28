@@ -157,6 +157,40 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+
+class Debug_ON
+{
+public:
+
+    inline void operator()( const gchar * format, ...)
+    {
+        va_list args;
+        va_start( args, format );
+        g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
+        va_end( args );
+    }
+
+    inline operator bool()
+    {
+        return true;
+    }
+};
+
+class Debug_OFF
+{
+public:
+
+    inline void operator()( const gchar * format, ...)
+    {
+    }
+
+    inline operator bool()
+    {
+        return false;
+    }
+};
+
+//-----------------------------------------------------------------------------
 // This class lets you push things to free into it - when this instance is
 // destroyed, it frees all the things you pushed into it. Makes it easier
 // to deal with cleaning up multiple allocations across early returns and
