@@ -116,5 +116,5 @@ Characters={
 }
 
 DEFAULT_FONT="Sans 40px"
-TAB_FONT="Sans 30px"
+TAB_FONT="Courier 10 Pitch 32px"
 DEFAULT_COLOR=Colors.WHITE

@@ -6,8 +6,7 @@ Veggie_Toppings = {"Green Peppers","Black Olives", "Pineapple",
     "Mushrooms","Onions","Jalapeno Peppers","Banana Peppers","Spinach",
     "Roasted Red Peppers","Cheddar Cheese","Shredded Provolone Cheese",
     "Shredded Parmesan","Feta Cheese","Garlic","Sliced Tomatoes",
-    "Hot Sauce","Cheddar Cheese","Shredded Provolone Cheese",
-    "Shredded Parmesan", "Parsley", "American Cheese"}
+    "Hot Sauce", "Parsley"}
 
 All_Options = {
 
