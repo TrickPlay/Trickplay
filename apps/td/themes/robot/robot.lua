@@ -10,7 +10,7 @@ local robot = {
 		},
 		towers = {
 				normalTower =
-						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 1, name = "NormalTower",
+						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 8, name = "NormalTower",
 								upgrades =   	{
 												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = false},
 												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = false}
@@ -31,7 +31,7 @@ local robot = {
 						}
 		},
 		boardBackground = "assets/robotBackground.png",
-		obstacles = {},
+		obstacles = dofile("themes/robot/obstacles.lua"),
 		wave = dofile("round1.lua"),
 		
 		waveTable = {
