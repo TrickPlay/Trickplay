@@ -59,13 +59,13 @@ CustomizeView = Class(View, function(view, model, ...)
                 src      = "assets/BackArrowFilled.png"
             }
         view.add_to_order = Text{
-              position    = {155, 880},
+              position    = {155, 850},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
               text        = "Add to Order"
            }
         view.hor_sep =  Image {
-                position = {150, 875},
+                position = {150, 840},
                 width    = 960-150,
                 scale    = {1,1.5},
                 tiled    = {true,false},
@@ -85,7 +85,7 @@ CustomizeView = Class(View, function(view, model, ...)
             --build the customization menu
             view.menu_items[tab_index] = Text {
                 position = {155, 120*(tab_index-1)+30},
-                font     = CUSTOMIZE_TAB_FONT,
+                font     = CUSTOMIZE_SUB_FONT,
                 color    = Colors.BLACK,
                 text     = tab.Tab_Text
             }
@@ -148,7 +148,7 @@ CustomizeView = Class(View, function(view, model, ...)
             view.vert_lines[#view.menu_items+1] = Image {
                 position = {300, 120*(#view.menu_items+1-1)},
                 width    = 20,
-                height   = 875-120*(#view.menu_items+1-1),
+                height   = 840-120*(#view.menu_items+1-1),
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
