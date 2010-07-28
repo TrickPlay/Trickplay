@@ -646,7 +646,7 @@ def mergeAttributes (parsed_conf, username, password, pizza):
 def findMissingAttributes (data_list):
     """ Find the first attribute that is blank, print what the missing
         attribute is, and then exit """
-    index = data_list.index ('')
+    index = data_list.index (None)
 
     failed_value = ''
     if index == 0:
@@ -1169,6 +1169,8 @@ def main (argv):
     page = Login (page, username, password)
     username = ""
     password = ""
+
+    print "coupon:",coupon
 
     if coupon and coupon.lower() == 'x':
         # Get coupons page, print the available coupons, and exit
