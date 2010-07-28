@@ -998,7 +998,7 @@ def emit( stuff , f ):
                     
             f.write(
                 "\n"
-                "void luaopen_%s(lua_State*L)\n"
+                "int luaopen_%s(lua_State*L)\n"
                 "{\n"
                 %
                 ( bind_name , )
@@ -1012,11 +1012,24 @@ def emit( stuff , f ):
             
             	f.write( 
             		'  if (!lb_is_allowed(L,\"%s\"))\n'
-            		'    return;\n' 
+            		'    return 0;\n' 
             		%
             		bind_name 
             	)
             
+	    # Lazy load?
+	    
+	    if bind_type in [ "global" , "class" ]:
+		
+		f.write(
+		    '  if ( lua_tointeger( L , -1 ) == LB_LAZY_LOAD )\n'
+		    '  {\n'
+		    '    lb_set_lazy_loader( L , "%s" , luaopen_%s );\n'
+		    '    return 0;\n'
+		    '  }\n\n'
+		    % ( bind_name , bind_name )
+	    )
+
             # Create the metatable
             
             f.write(
@@ -1200,7 +1213,7 @@ def emit( stuff , f ):
                     ( bind_name , bind_name )                
                 )
                 
-            
+            f.write( "  return 0;\n" )
             f.write( "}\n" )
         
         #-----------------------------------------------------------------------
@@ -1238,7 +1251,7 @@ def emit( stuff , f ):
         
         f.write(
             "\n"
-            "void luaopen_%s(lua_State*L)\n"
+            "int luaopen_%s(lua_State*L)\n"
             "{\n"            
             % module
         )
@@ -1257,6 +1270,7 @@ def emit( stuff , f ):
                 ( g , g )
             )
             
+	f.write( "  return 0;\n" )
         f.write( "}\n" )
         
         

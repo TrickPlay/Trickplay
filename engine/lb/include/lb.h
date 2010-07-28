@@ -93,6 +93,18 @@ void lb_allow(lua_State*L,const char*name);
 #define LSG_CHECK(i)    (assert(_lsg_+(i)==lua_gettop(L)))
 #define LSG_END(i)      (LSG_CHECK(i),(i))
 
+//.........................................................................
+// Lazy loading
+
+#define LB_LAZY_LOAD    4224
+
+// This function takes a name and a loading function - it will use this function
+// to load the given global name when it is requested.
+
+void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader );
+
+//.........................................................................
+
 
 #endif // _TRICKPLAY_LB_H
 
