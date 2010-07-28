@@ -48,6 +48,10 @@ CustomizeController = Class(Controller,
                 if self.on_back_arrow then
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     self:get_model():notify()
+                elseif self.add_to_order then
+                    self:get_model().cart[#self:get_model().cart + 1] = view:get_model().current_item
+                    self:get_model():set_active_component(Components.FOOD_SELECTION)
+                    self:get_model():notify()
                 end
             end
          
@@ -60,6 +64,8 @@ CustomizeController = Class(Controller,
          local topping = self:get_model().current_item.Tabs[selected].Options[topping_index]
          topping.CoverageX = cov
          topping.Placement = place
+         
+         topping_dropping(topping.Image, place, cov, topping.ToppingGroup, self:get_model().current_item.pizzagroup)
 
          view.sub_group_items[selected][topping_index][2]:unparent()
          view.sub_group_items[selected][topping_index][3]:unparent()
@@ -115,6 +121,9 @@ CustomizeController = Class(Controller,
             --print("self.in_tab_group true")
             assert(self.tab_controller,"tab controller is nil")
             self.tab_controller:move_selector(dir)
+         elseif self.add_to_order then
+             self.add_to_order = false
+             self:get_model():notify()
          --otherwise
          else
             --print("Customize move_selector()",dir[1],dir[2])
@@ -132,9 +141,12 @@ CustomizeController = Class(Controller,
             else
                local new_selected = selected + dir[2]
                --print("switching Tabs from",selected," to ",new_selected)
-               if 1 <= new_selected and new_selected <= MenuSize then
+               if 1 <= new_selected then
                   selected = new_selected
                   --print(selected)
+               elseif new_selected <= MenuSize then
+                  self.add_to_order = true
+                  self:get_model():notify()
                end
                --MenuItemCallbacks[selected]()
                self:get_model():notify()
