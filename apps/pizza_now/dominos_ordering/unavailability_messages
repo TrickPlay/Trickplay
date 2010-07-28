@@ -1,0 +1,20 @@
+Stays on same page.
+http://www18.order.dominos.com/olo/faces/customer/currentLocation.jsp
+<div style="clear: left;" class="mediumerror">There is no store currently delivering to your address.&nbsp;Select any of the stores below to place an order online that you can carryout.<br><br></div>
+
+Goes to ordering page.
+http://www18.order.dominos.com/olo/faces/customer/currentLocation.jsp
+<div id="storeClosedNotification" class="notification">
+  <div class="closeNotification noText"><a href="#">&nbsp;</a></div>
+  <div class="noticeCopy wide">
+    YOUR STORE IS CURRENTLY CLOSED.
+    <div class="noticeSubCopy">
+      But you can still place an order now and receive it as early as 11:30AM.
+    </div>
+    <ul class="noticeCta">
+      <li class="first">
+	<a class="smallNotice chooseNewLocation" onclick="document.forms['choose_pizza']['choose_pizza:_idcl'].value='choose_pizza:findNewLocation'; document.forms['choose_pizza'].submit(); return false;" href="#" id="choose_pizza:findNewLocation">Choose a new location</a></li>
+      <li><a class="makeFutureOrder" href="#">MAKE A FUTURE ORDER</a></li>
+    </ul>
+  </div>
+</div>
