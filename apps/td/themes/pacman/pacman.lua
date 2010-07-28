@@ -3,7 +3,7 @@ local pacman = {
 		mainMenuBackground = "",
 		bullets = {
 			{id = 1, frames = 5, im = "Ringwave"},
-			{id = 2, im = "Normal"},
+			{id = 2, im = "Bullet", speed = 10},
 		},
 		creeps = {
 			{ hp = 100, speed = 30, bounty = 10, flying = false, frames = 3, name = "NormalCreep"},

@@ -6,14 +6,26 @@ function Bullet:new(args)
 		image = AssetLoader:getImage(game.board.theme.themeName.."Bullet"..args.id,{}),
 		frames = args.frames,
 		time = .2,
+		speed = args.speed,
 	}
 	
-	print(game.board.theme.themeName.."Bullet"..args.id)
-	
-	if args.frames then object.animation = true end
-	object.timer:start()
-	object.image.extra.parent = object
 	object.length = object.image.w/object.frames
+	object.image.extra.parent = object
+	
+	-- Animate the bullet if it has frames
+	if args.frames then object.animation = true end
+	
+	-- If it has speed, then create a group for it to move in
+	if object.speed then
+	
+		self.image.parent:remove(self.image)
+		self.imageGroup = Group{}
+		self.imageGroup:add(self.image)
+		self.image.parent:add(self.imageGroup)
+	
+	end
+	
+	object.timer:start()
 	
 	setmetatable(object, self)
 	self.__index = self
