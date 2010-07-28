@@ -461,3 +461,124 @@ void lb_allow(lua_State*L,const char*name)
 
     LSG_END(0);
 }
+
+//.........................................................................
+
+static int lb_lazy_globals_index( lua_State * L )
+{
+    LSG;
+
+    if ( lua_type( L , 2 ) == LUA_TSTRING )
+    {
+        // Duplicate the key we were called with and get its loader from
+        // our first upvalue (the table of mappings from name to loader).
+
+        lua_pushvalue( L , 2 );
+        lua_rawget( L , lua_upvalueindex( 1 ) );
+
+        if ( ! lua_isnil( L , -1 ) )
+        {
+            g_debug( "LAZY LOADING '%s'" , lua_tostring( L , 2 ) );
+
+            lua_call( L , 0 , 0 );
+
+            // That function should have installed the named global into
+            // the globals table.
+
+            // We can now get rid of the function from the mapping table.
+
+            lua_pushvalue( L , 2 );
+            lua_pushnil( L );
+            lua_rawset( L , lua_upvalueindex( 1 ) );
+
+            // The function should have installed the global, so we fetch it.
+
+            lua_pushvalue( L , 2 );
+            lua_rawget( L , 1 );
+
+            if ( lua_isnil( L , -1 ) )
+            {
+                g_warning( "LAZY LOADER FOR '%s' DID NOT WORK - GLOBAL IS NOT THERE"  , lua_tostring( L , 2 ) );
+            }
+        }
+
+        return LSG_END(1);
+    }
+
+    return LSG_END(0);
+}
+
+
+void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader )
+{
+    LSG;
+
+    lua_pushvalue( L , LUA_GLOBALSINDEX );
+
+    // There is no metatable on the globals table, so we create it and plug in
+    // our own index function.
+
+    if ( 0 == lua_getmetatable( L , -1 ) )
+    {
+        g_debug( "INSTALLING LAZY LOADER" );
+        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
+
+        // Create the metatable
+
+        lua_newtable( L );
+        lua_pushstring( L , "__index" );
+
+        // Create a new table mapping name to loader which will be stored as
+        // an upvalue for the index function
+
+        lua_newtable( L );
+        lua_pushstring( L , name );
+        lua_pushcfunction( L , loader );
+        lua_rawset( L , -3 );
+
+        // Push the index function with its upvalue
+
+        lua_pushcclosure( L , lb_lazy_globals_index , 1 );
+
+        // Set it as _index on the metatable
+
+        lua_rawset( L , -3 );
+
+        // Set the metatable on the global table
+
+        lua_setmetatable( L , -2 );
+
+        // Pop the global table
+
+        lua_pop( L , 1 );
+    }
+    else
+    {
+        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
+
+        // Get the lazy load function from the global metatable
+
+        lua_pushstring( L , "__index" );
+        lua_rawget( L , -2 );
+
+        // Get its mapping table from the upvalue
+
+        lua_getupvalue( L , -1 , 1 );
+
+        g_assert( lua_type( L , -1 ) == LUA_TTABLE );
+
+        // Set the new name and loader function
+
+        lua_pushstring( L , name );
+        lua_pushcfunction( L , loader );
+        lua_rawset( L , -3 );
+
+        // Pop the globals table, its metatable, the index function and its upvalue table
+
+        lua_pop( L , 4 );
+    }
+
+    LSG_CHECK(0);
+}
+
+//.........................................................................
