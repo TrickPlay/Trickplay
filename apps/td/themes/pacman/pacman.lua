@@ -3,7 +3,7 @@ local pacman = {
 		mainMenuBackground = "",
 		bullets = {
 			{id = 1, frames = 5, im = "Ringwave"},
-			{id = 2, im = "Bullet", speed = 10},
+			{id = 2, im = "PelletBig", speed = 1000},
 		},
 		creeps = {
 			{ hp = 100, speed = 30, bounty = 10, flying = false, frames = 3, name = "NormalCreep"},
@@ -14,7 +14,7 @@ local pacman = {
 		},
 		towers = {
 				normalTower =
-						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 8, name = "NormalTower",
+						{ damage = 2, range = 800, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 8, name = "NormalTower", bullet = 2,
 								upgrades =   	{
 												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = false},
 												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = false}

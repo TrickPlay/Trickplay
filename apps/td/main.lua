@@ -56,7 +56,7 @@ function app.on_loaded()
         
     	end
     
-    --screen:add( AssetLoader:getImage("normalRobot",{name="robot", x=200, y=200}) )
+    --screen:add( AssetLoader:getImage("pacmanBullet2",{name="robot", x=200, y=200}) )
     
     end
 end
