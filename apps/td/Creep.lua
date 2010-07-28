@@ -138,7 +138,7 @@ function Creep:render(seconds)
 			--print("left")
 			local pos = cx - MOVE
 			
-			self.creepImageGroup.y_rotation = {180, SP/2, 0}
+			self.creepImageGroup.y_rotation = {180, SP, 0}
 			--self.creepImageGroup.opacity = 100
 						
 			if pos <= order[2] then
@@ -189,12 +189,10 @@ function Creep:render(seconds)
 				self:step(0, -MOVE)
 			end
 		end
-		self.creepGroup.z = 1 + PTG(self.creepGroup.y)*0.1
-		if (self.flying) then self.creepGroup.z = 2 end
-		
 	end
 	self.greenBar.width = SP*(self.hp/self.max_hp)
-	self.creepImageGroup.z = PTG(self.creepImageGroup.y) * 0.1
+	self.creepGroup.z = 0.9 + PTG(self.creepGroup.y) * 0.1
+	if (self.flying) then self.creepGroup.z = 2 end
 	self:animate()
 end
 
