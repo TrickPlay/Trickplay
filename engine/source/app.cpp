@@ -707,26 +707,17 @@ int App::run( const StringSet & allowed_names )
     luaopen_audiosampler_module( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
+    luaopen_url_request( L );
+
+    luaopen_apps( L );
+    luaopen_restricted( L );
 
     lua_pop( L , 1 );
 
     //.........................................................................
 
-    luaopen_url_request( L );
 
     luaopen_keys( L );
-
-
-    // TODO
-    // This should not be opened for all apps - only trusted ones. Since we
-    // don't have a mechanism for determining trustworthiness yet...
-
-    luaopen_restricted( L );
-
-    // TODO
-    // This one should only be opened for the launcher and the store apps
-
-    luaopen_apps( L );
 
     // TODO
     // DEBUG HOOK
