@@ -22,7 +22,7 @@ CustomizeController = Class(Controller,
                 end
           end
           MenuSize = #view:get_model().current_item.Tabs
-    
+    --[=[
           MenuItemCallbacks[MenuItems["Back"]] = function()
               self:get_model():set_active_component(Components.FOOD_SELECTION)
               self:get_model():notify()
@@ -33,6 +33,7 @@ CustomizeController = Class(Controller,
              self:get_model():set_active_component(Components.FOOD_SELECTION)
              self:get_model():notify()
           end
+--]=]
           self:reset_selected_index()
       end
 
@@ -44,10 +45,10 @@ CustomizeController = Class(Controller,
          
          [keys.Return] =
             function(self)
-               -- compromise so that there's not a full-on lua panic,
-               -- but the error message still displays on screen
-               local success, error_msg = pcall(MenuItemCallbacks[selected], self)
-               if not success then print(error_msg) end
+                if self.on_back_arrow then
+                    self:get_model():set_active_component(Components.FOOD_SELECTION)
+                    self:get_model():notify()
+                end
             end
          
       }
@@ -63,17 +64,17 @@ CustomizeController = Class(Controller,
          view.sub_group_items[selected][topping_index][2]:unparent()
          view.sub_group_items[selected][topping_index][3]:unparent()
 
-         view.sub_group_items[selected][topping_index][2] = Image {
-             position = {-70*(2-1), 60*(topping_index-1)},
-             src      = "assets/Placement/"..All_Options.Placement_r[place]..".png"
-         }
-         view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
-
          view.sub_group_items[selected][topping_index][3] = Image {
              position = {-70*(3-1), 60*(topping_index-1)},
-             src      = "assets/CoverageX/"..All_Options.CoverageX_r[cov]..".png"
+             src      = "assets/Placement/"..All_Options.Placement_r[place]..".png"
          }
          view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
+
+         view.sub_group_items[selected][topping_index][2] = Image {
+             position = {-70*(2-1), 60*(topping_index-1)},
+             src      = "assets/CoverageX/"..All_Options.CoverageX_r[cov]..".png"
+         }
+         view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
       end
 
       function self:on_key_down(k)
@@ -98,14 +99,19 @@ CustomizeController = Class(Controller,
             selected = 1
         end
 
-      self.in_tab_group = false
+      self.in_tab_group  = false
+      self.on_back_arrow = false
+      self.add_to_order  = false
 
 
       function self:move_selector(dir)
-	--print(selected .. " in move_selector")
-	--print(self:get_selected_index() .. " is in move_selector")
+         if(self.on_back_arrow) then
+            if dir == Directions.RIGHT then
+               self.on_back_arrow = false
+               self:get_model():notify()
+            end
          --if you are already in the Tab sub group, pass the call down
-         if(self.in_tab_group) then
+         elseif(self.in_tab_group) then
             --print("self.in_tab_group true")
             assert(self.tab_controller,"tab controller is nil")
             self.tab_controller:move_selector(dir)
@@ -118,6 +124,9 @@ CustomizeController = Class(Controller,
                if dir == Directions.RIGHT and view:get_model().current_item.Tabs[selected].Options ~= nil then
                   self.in_tab_group = true
                   view:enter_sub_group()
+               elseif dir == Directions.LEFT then
+                  self.on_back_arrow = true
+                  self:get_model():notify()
                end
             --move up and down through the tabs
             else
