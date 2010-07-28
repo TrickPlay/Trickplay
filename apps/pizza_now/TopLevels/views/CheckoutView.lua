@@ -1,6 +1,22 @@
 CheckoutView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
+    --first add the background shiz
+    local back = Image{
+        position = {0,0},
+        src = "assets/MenuBg.jpg"
+    }
+    local junkInDaTrunk = Clone(back)
+    local verticalDividerRight = Image{
+        position = {1770,0},
+        height = 960,
+        tile = {false, true},
+        src = "assets/MenuLine.png"
+    }
+    local verticalDividerLeft = Clone(verticalDividerRight)
+    verticalDividerLeft.x = 150
+    background = {back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight}
+
     local street = Text{
         position={50,0},
         font=DEFAULT_FONT,
@@ -74,6 +90,7 @@ CheckoutView = Class(View, function(view, model, ...)
     local menu_items = {street, apartment, city, zip_code, card_type, card_number, card_secret_code, card_expiration, confirm, exit}
 
     view.ui=Group{name="checkout_ui", position={660,180}}
+    view.ui:add(unpack(background))
     view.ui:add(unpack(menu_items))
     assert(view.ui.children[1])
     screen:add(view.ui)
