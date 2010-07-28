@@ -135,7 +135,13 @@ CustomizeView = Class(View, function(view, model, ...)
                             
                         end
                     --end
+                    if opt_index > 13 then
+                        view.sub_group_items[tab_index][opt_index][1].opacity = 0
+                        view.sub_group_items[tab_index][opt_index][2].opacity = 0
+                        view.sub_group_items[tab_index][opt_index][3].opacity = 0
+                    end
                 end
+
             end
             view.ui:add(view.sub_group[tab_index])
         end
