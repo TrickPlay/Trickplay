@@ -23,6 +23,8 @@ function Creep:new(args, x, y, name)
 	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset-10}
 	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset-10}
 	local creepGroup = Group{opacity=255, x = x, y = y}
+	creepGroup.z_rotation = {0,SP,0}
+
 	creepGroup:add(creepImageGroup, redBar, greenBar)
 	
 	--local path = {}
@@ -47,6 +49,7 @@ function Creep:new(args, x, y, name)
 		y_offset = y_offset,
 		frames = frames,
 		dead = dead,
+		deathtimer = deathtimer,
 		deadanimate = deadanimate,
 		bounty = bounty,
 		flying = flying,
@@ -71,6 +74,7 @@ function Creep:render(seconds)
 		if (self.flying and cx >1920) then
 			self.hp = 0
 			wave_counter = wave_counter + 1
+			self.dead = true
 			game.board.player.lives = game.board.player.lives - 1
 			game.board.player.gold = game.board.player.gold - self.bounty
 			print (game.board.player.lives)
@@ -87,6 +91,7 @@ function Creep:render(seconds)
 	elseif cx >= 0 and #self.path == 0 then
 		self.hp = 0
 		wave_counter = wave_counter + 1
+		self.dead = true
 		game.board.player.lives = game.board.player.lives - 1
 		game.board.player.gold = game.board.player.gold - self.bounty
 		print (game.board.player.lives)
@@ -110,7 +115,8 @@ function Creep:render(seconds)
 			local pos = cx + MOVE
 			
 			self.creepImageGroup.y_rotation = {0, SP/2, 0}
-			
+			self.face = 1
+
 			--self.creepImageGroup.y_rotation = {0, self.creepImageGroup.w/4, 0}
 			
 			-- If the new position would overshoot
@@ -140,7 +146,8 @@ function Creep:render(seconds)
 			
 			self.creepImageGroup.y_rotation = {180, SP, 0}
 			--self.creepImageGroup.opacity = 100
-						
+			self.face = -1
+
 			if pos <= order[2] then
 				local d = math.abs(order[2] - self.creepGroup.x)
 				self:pop()
@@ -205,8 +212,23 @@ function Creep:bleed()
 end
 
 -- insert whatever happens on death here, you can use seconds or deathtimer
-function Creep:deathAnimation(seconds)
-	self.creepGroup.opacity = 0
+function Creep:deathAnimation()
+--	self.creepGroup.opacity = 0
+	print (self.face)
+	if self.face == 1 then
+		self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/2,0}
+		if self.creepGroup.z_rotation[1] <= -90 then
+			self.creepGroup.opacity = 0
+			return true
+		end
+	elseif self.face == -1 then
+		self.creepGroup.z_rotation = {180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/8,0}
+
+		if self.creepGroup.z_rotation[1] >= 90 then
+			self.creepGroup.opacity = 0
+		end
+	end
+	return false
 end
 
 function Creep:reset()

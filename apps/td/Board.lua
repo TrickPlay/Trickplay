@@ -6,7 +6,7 @@ Board = {
 	render = function (self, seconds)
 		local s =self.timer.elapsed_seconds 
 		seconds_elapsed = seconds_elapsed + seconds
-		wave_counter = 0
+--		wave_counter = 0
 		CREEP_WAVE_LENGTH = self.theme.wave[level].size
 		if (seconds_elapsed >= WAIT_TIME) then
 			if (s > 1) then 
@@ -28,31 +28,35 @@ Board = {
 					end
 				end
 			end
-
+			
 			for k,v in pairs(self.creepWave) do
-				if (v.hp ~= 0) then
+				if (v.hp ~= 0 and v.dead == false) then
 					v:render(seconds)
-				else
-					wave_counter = wave_counter + 1
+				elseif (v.dead == false) then
 					v.greenBar.width = 0
-					v.dead = true					
-					v:deathAnimation()					
+					v.dead = true	
+					v.deathtimer:start()				
+					wave_counter = wave_counter + 1
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
 						self.player.gold = self.player.gold + v.bounty
 						goldtext.text = self.player.gold
 					end
-					table.remove(v,k)
-					
+				end
+				if (v.dead) then
+					local done = v:deathAnimation()					
 				end
 			end
-
 			phasetext.text = "Wave Phase!"
 		else
 			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
+			for k,v in pairs(self.creepWave) do
+				v.creepGroup.opacity = 0
+			end
+			wave_counter = 0
 			creepnum = 1
 			seconds_elapsed = 0
 			level = level + 1
