@@ -33,9 +33,6 @@ CHECKOUT_URL = urllib2.urlparse.urljoin (TEST_ROOT, "/olo/faces/order/step3_choo
 SUBMIT_ORDER_URL = urllib2.urlparse.urljoin (TEST_ROOT, "/olo/faces/order/placeOrder.jsp")
 LOGOUT_URL = urllib2.urlparse.urljoin (TEST_ROOT, "/olo/servlet/init_servlet?target=logout")
 CALCULATE_TOTAL_URL = urllib2.urlparse.urljoin (TEST_ROOT, "/olo/servlet/ajax_servlet")
-#LOGIN_URL = "https://order.dominos.com/olo/faces/login/login.jsp"
-#LOGIN_URL = "https://www01.order.dominos.com/olo/faces/login/login.jsp"
-#CALCULATE_TOTAL_URL = "https://www01.order.dominos.com/olo/servlet/ajax_servlet"
 CALCULATE_TOTAL_URL_POST_VARS = {
     "cmd": "priceOrder",
     "formName": "orderSummaryForm:",
@@ -43,27 +40,6 @@ CALCULATE_TOTAL_URL_POST_VARS = {
     "runCouponPicker": "N",
     "runPriceOrder": "Y",
 }
-#SUBMIT_ORDER_URL = "https://www01.order.dominos.com/olo/faces/order/placeOrder.jsp"
-#LOGOUT_URL = "http://www01.order.dominos.com/olo/servlet/init_servlet?target=logout"
-
-
-#LOGIN_URL = "https://www01.order.dominos.com/olo/faces/login/login.jsp"
-#ADD_COUPON_URL = "https://www01.order.dominos.com/olo/faces/order/coupons.jsp"
-#BUILD_PIZZA_URL = "https://www01.order.dominos.com/olo/faces/order/step2_choose_pizza.jsp"
-#ADD_PIZZA_URL = "https://www01.order.dominos.com/olo/faces/order/step2_build_pizza.jsp"
-#CALCULATE_TOTAL_URL = "https://www01.order.dominos.com/olo/servlet/ajax_servlet"
-#CALCULATE_TOTAL_URL_POST_VARS = {
-#    "cmd": "priceOrder",
-#    "formName": "orderSummaryForm:",
-#    "getFreeDeliveryOffer": "N",
-#    "runCouponPicker": "N",
-#    "runPriceOrder": "Y",
-#}
-#ADD_SIDES_URL = ADD_PIZZA_URL
-#CHECKOUT_URL = "https://www01.order.dominos.com/olo/faces/order/step3_choose_drinks.jsp"
-#SUBMIT_ORDER_URL = "https://www01.order.dominos.com/olo/faces/order/placeOrder.jsp"
-#LOGOUT_URL = "http://www01.order.dominos.com/olo/servlet/init_servlet?target=logout"
-
 
 # Set User Agent
 __version__ = "0.2.2"
@@ -73,8 +49,8 @@ USER_AGENT = {'User-agent' : 'PizzaPyParty/%s' % __version__}
 # Lists with default pizza attributes. Used when parsing pizza options passed
 sizes = ("small", "medium", "large", "x-large")
 crusts = ("handtoss", "deepdish", "thin", "brooklyn")
-TOPPING_CHEESE, TOPPPING_SAUCE = ("toppingC", "toppingX")
-#TOPPING_CHEESE, TOPPPING_SAUCE = ("topping-#-C-#-", "topping-#-X-#-")
+TOPPING_CHEESE, TOPPING_SAUCE = ("toppingC", "toppingX")
+#TOPPING_CHEESE, TOPPING_SAUCE = ("topping-#-C-#-", "topping-#-X-#-")
 
 ###################################
 ####                           ####
@@ -168,7 +144,7 @@ TOPPINGS = [
     Topping ("m", "mushrooms",        "M",  "Mushrooms"),
     Topping ("o", "onions",           "O",  "Onions"),
     Topping ("j", "jalapeno-peppers", "J",  "Jalapeno Peppers"),
-    Topping ("e", "banana-peppers",   "Z",  "Bananan Peppers"),
+    Topping ("e", "banana-peppers",   "Z",  "Banana Peppers"),
     Topping ("d", "cheddar-cheese",   "E",  "Cheddar Cheese"),
     Topping ("n", "provolone-cheese", "Cp", "Provolone Cheese"),
     Topping ("v", "green-olives",     "V",  "Green Olives"),
@@ -197,8 +173,6 @@ help_text = (
 # Hack to associate the aligned help text with the topping.
 for i, topping in enumerate (TOPPINGS):
     topping.help_text = help_text[i]
-
-
 del help_text
 
 # Dictionary used for pizza
@@ -612,7 +586,15 @@ def getPage (url, data=None):
     if data != None:
         data = urlencode (data)
     try:
+        print "request:"
+        print "url:", url
+        print "data:", data
+        print "\n"
+#        print("USER_AGENT:", USER_AGENT)
         req = urllib2.Request (url, data, USER_AGENT)
+#        req = urllib2.Request (url, data)
+
+ #       print req.header_items()
         handle = urllib2.urlopen (req)
     except:
         raise Exception ("Could not get page %s." % url)
@@ -736,6 +718,9 @@ def Login (current_page, username, password):
 
     print "Logging in as %s..." % username
 
+    # for k in sorted(formdata.keys()):
+    #     print k, '=', formdata[k]
+    # exit()
     #next_url = urllib2.urlparse.urljoin (TEST_ROOT, form.form_action)
     #newpage = getPage (next_url, formdata)
     newpage = getPage (LOGIN_URL, formdata)
@@ -746,7 +731,7 @@ def startBuildPizza (current_page):
     """ Gets the page that holds the main form for specifying a pizza """
     form = getFormData (current_page, "choose_pizza")
     formdata = form.form_data
-
+    assert formdata, "formdata is empty"
     setFormField (formdata, 'choose_pizza:_idcl', 'choose_pizza:goToBuildOwn')
     #next_url = urllib2.urlparse.urljoin (TEST_ROOT, form.form_action)
     #print next_url
@@ -764,14 +749,17 @@ def addPizza (current_page, pizza, check_coupon=''):
     formdata_temp = formdata.copy ()
     topping_re = re.compile (r"topping(?!Side|Amount).*")
     temp_topping_keys = [t.cryptic_name for t in TOPPINGS]
+    print "temp_topping_keys:", temp_topping_keys
     for key, value in formdata_temp.iteritems ():
         # If key is cheese or sauce, skip
-        if key == TOPPING_CHEESE or key == TOPPPING_SAUCE:
+        if key == TOPPING_CHEESE or key == TOPPING_SAUCE:
             continue
         elif topping_re.match (key) and key not in temp_topping_keys:
+            print "removing key:", key
             del formdata[key]
     del formdata_temp
 
+    print "pizza.toppings:", pizza.toppings
     for topping in TOPPINGS:
         if topping in pizza.toppings:
             # Fill field with topping settings.
@@ -788,6 +776,10 @@ def addPizza (current_page, pizza, check_coupon=''):
     setFormField (formdata, "builderQuantity", pizza.order["quantity"])
     setFormField (formdata, "build_own:_idcl", "build_own:doAdd")
     #print formdata
+    # print("GOOD STUFF")
+    # for k in sorted(formdata.keys()):
+    #     print k, '=', formdata[k]
+    # exit()
 
     newpage = getPage (ADD_PIZZA_URL, formdata)
     #next_url = urllib2.urlparse.urljoin (TEST_ROOT, form.form_action)
@@ -813,6 +805,9 @@ def getSidesPage (current_page, check_coupon=''):
 
     setFormField (formdata, 'build_own:_idcl', 'build_own:navSidesLink')
 #    print formdata
+    # for k in sorted(formdata.keys()):
+    #     print k, '=', formdata[k]
+    # exit()
 
     newpage = getPage (ADD_SIDES_URL, formdata)
     #next_url = urllib2.urlparse.urljoin (TEST_ROOT, form.form_action)
@@ -849,7 +844,7 @@ def submitFinalOrder (current_page, total, check_force):
         # the order is complete. Comment the getPage line below if you want
         # to test the entire program, including this function,
         # without submitting the final order
-        newpage = getPage (SUBMIT_ORDER_URL, formdata)
+        # newpage = getPage (SUBMIT_ORDER_URL, formdata)
         return True
     elif choice.lower () == 'n' or choice.lower () == 'no':
         return False
