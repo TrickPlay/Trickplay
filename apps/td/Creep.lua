@@ -74,7 +74,7 @@ function Creep:render(seconds)
 		self.creepGroup.x = cx + MOVE
 		self.face = 1
 			
-		if cx > 1920 then
+		if cx > 2200 then
 			self.hp = 0
 			wave_counter = wave_counter + 1
 			self.dead = true
@@ -106,7 +106,7 @@ function Creep:render(seconds)
 		game.board.player.lives = game.board.player.lives - 1
 		game.board.player.gold = game.board.player.gold - self.bounty
 		--print (game.board.player.lives)
-		self.creepGroup.x = wave_counter*-240
+		--self.creepGroup.x = wave_counter*-240
 		
 	-- Otherwise, move the creep
 	else 
