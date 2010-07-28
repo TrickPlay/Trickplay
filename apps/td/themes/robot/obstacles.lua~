@@ -1,0 +1,7 @@
+local obstacles = {
+	{2,2},
+	{2,4},
+
+}
+
+return obstacles
