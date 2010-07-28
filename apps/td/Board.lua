@@ -56,6 +56,9 @@ Board = {
 			for k,v in pairs(self.creepWave) do
 				v.creepGroup.opacity = 0
 			end
+			for k,v in pairs(self.creepWave) do
+				table.remove(self.creepWave,k)
+			end
 			wave_counter = 0
 			creepnum = 1
 			seconds_elapsed = 0

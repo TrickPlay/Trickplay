@@ -86,7 +86,7 @@ function Creep:render(seconds)
 			self.dead = true
 			game.board.player.lives = game.board.player.lives - 1
 			game.board.player.gold = game.board.player.gold - self.bounty
-			print (game.board.player.lives)
+			--print (game.board.player.lives)
 			self.creepGroup.x = wave_counter*-240
 		end
 	
@@ -103,7 +103,7 @@ function Creep:render(seconds)
 		self.dead = true
 		game.board.player.lives = game.board.player.lives - 1
 		game.board.player.gold = game.board.player.gold - self.bounty
-		print (game.board.player.lives)
+		--print (game.board.player.lives)
 		self.creepGroup.x = wave_counter*-240
 		
 	-- Otherwise, move the creep
@@ -224,7 +224,7 @@ end
 -- insert whatever happens on death here, you can use seconds or deathtimer
 function Creep:deathAnimation()
 --	self.creepGroup.opacity = 0
-	print (self.face)
+	--print (self.face)
 	if self.face == 1 then
 		self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/2,0}
 		if self.creepGroup.z_rotation[1] <= -90 then
