@@ -15,6 +15,12 @@ for themeName, t in pairs(Themes) do
 		--print(themeName..t.creeps[i].name)
 	end
 	
+	if t.bullets then
+		for k, v in pairs(t.bullets) do
+			AssetLoader:preloadImage(themeName.."Bullet"..k, "themes/"..themeName.."/assets/"..v.im..".png")
+		end
+	end
+	
 	for k, v in pairs(t.towers) do
 		--print("themes/"..themeName.."/assets/"..v.name..".png")
 		AssetLoader:preloadImage(themeName..v.name, "themes/"..themeName.."/assets/"..v.name..".png")

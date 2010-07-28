@@ -5,6 +5,7 @@ dofile ("Game.lua")
 dofile ("Board.lua")
 dofile ("Creep.lua")
 dofile ("Tower.lua")
+dofile ("Bullet.lua")
 
 screen:show()
 

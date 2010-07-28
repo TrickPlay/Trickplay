@@ -2,33 +2,28 @@ wave = {
 			-- Wave 1
 			{
 				{
-					{name = "FlyingCreep"},
-					size = 10
+					{name = "NormalCreep"},
+					size = 5
 				},
-				size = 10           
+				size = 5           
 			},
 
 			-- Wave 2
 			{
 				{
-					{name = "NormalCreep", num = 15},
-					{name = "MediumCreep", num = 15},
+					{name = "NormalCreep"},
+					{name = "MediumCreep"},
 					size = 30
 				},
-				size = 30
-
-			},
-
-			-- Wave 3
-			{
 				{
-					{name = "NormalCreep", num = 25},
-					{name = "MediumCreep", num = 25},
-					size = 50
+					{name = "MediumCreep"},
+					{name = "HardCreep"},
+					size = 10
 				},
-				size = 50
+				size = 40
+
 			},
-                        
+
 			-- Wave 4
 			{
 				{
@@ -44,7 +39,7 @@ wave = {
 				size = 85
 			},
                        
-       -- Wave 5
+      		-- Wave 5
 			{
 				  {
 					  {name = "BossCreep"},
