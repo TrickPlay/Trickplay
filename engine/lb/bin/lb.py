@@ -737,7 +737,7 @@ def emit( stuff , f ):
                     "int new_%s(lua_State*L)\n"
                     "{\n"
                     "%s"
-                    "  UserData * __ud__ = UserData::make( L );\n"
+                    '  UserData * __ud__ = UserData::make( L , "%s" );\n'
                     "  luaL_getmetatable(L,%s);\n"
                     "  lua_setmetatable(L,-2);\n"
 		    "  %s self=0;\n"
@@ -745,6 +745,7 @@ def emit( stuff , f ):
                     %
                     ( bind_name ,
 		     profiling_header("new_%s"%bind_name) ,
+		     bind_name,
 		     metatable_name, udata_type )
                 )
                 

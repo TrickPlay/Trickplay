@@ -27,7 +27,8 @@ global screen [[ClutterActor*]] actor , container
 {
     screen()
 	[[
-	    self=lb_construct_gobject( ClutterActor , G_OBJECT( clutter_get_actor_by_gid(App::get(L)->get_screen_gid() ) ) );
+		self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid() );		
+	    self=lb_construct_gobject( ClutterActor , self );
 	    
 	    ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
 	]];
