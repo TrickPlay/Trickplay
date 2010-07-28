@@ -135,6 +135,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       Tab_Text = "Veggie",
       Options = {}
    }
+--[[
    --Add to Order
    self.Tabs[4] = {
       Tab_Text = "Add"
@@ -145,7 +146,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       Tab_Text = "Back"
     --Options = {}??
    }
-
+--]]
    for i =1,#Meat_Toppings do
       self.Tabs[2].Options[i] = {
          Name  = Meat_Toppings[i],
