@@ -19,15 +19,16 @@ topping = Image{
 }
 
 Sides = {
-    LEFT = 1,
-    WHOLE = 2,
-    RIGHT = 3
+    NONE = 1,
+    LEFT = 2,
+    WHOLE = 3,
+    RIGHT = 4
 }
 Amount = {
-    LIGHT = 1,
-    NORMAL = 2,
-    EXTRA = 3,
-    NONE = 4
+    NONE = 1,
+    LIGHT = 2,
+    NORMAL = 3,
+    EXTRA = 4
 }
 
 pizzagroup:add(pizza)
@@ -112,6 +113,9 @@ function topping_dropping(topping, side, amount, toppinggroup, pizzagroup)
     assert(side)
     assert(amount)
     assert(pizzagroup)
+    if(Sides.NONE == side) then
+	amount = Amount.NONE
+    end
     --add group for type
     if(not toppinggroup) then
         toppinggroup = Group()
