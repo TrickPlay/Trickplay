@@ -6,8 +6,7 @@ Veggie_Toppings = {"Green Peppers","Black Olives", "Pineapple",
     "Mushrooms","Onions","Jalapeno Peppers","Banana Peppers","Spinach",
     "Roasted Red Peppers","Cheddar Cheese","Shredded Provolone Cheese",
     "Shredded Parmesan","Feta Cheese","Garlic","Sliced Tomatoes",
-    "Hot Sauce","Cheddar Cheese","Shredded Provolone Cheese",
-    "Shredded Parmesan", "Parsley", "American Cheese"}
+    "Hot Sauce", "Parsley"}
 
 All_Options = {
 
@@ -136,6 +135,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       Tab_Text = "Veggie",
       Options = {}
    }
+--[[
    --Add to Order
    self.Tabs[4] = {
       Tab_Text = "Add"
@@ -146,7 +146,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       Tab_Text = "Back"
     --Options = {}??
    }
-
+--]]
    for i =1,#Meat_Toppings do
       self.Tabs[2].Options[i] = {
          Name  = Meat_Toppings[i],
