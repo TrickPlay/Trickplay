@@ -5,7 +5,7 @@
 
 //.............................................................................
 
-static DebugLog udlog( true );
+Debug_OFF udlog;
 
 //=============================================================================
 
@@ -342,10 +342,13 @@ void UserData::finalize( lua_State * L , int index )
 
             g_object_weak_unref( self->master , ( GWeakNotify ) master_destroyed , self );
 
-            // This one is just for debugging - so we can get a message printed when it
-            // goes away.
+            if ( udlog )
+            {
+                // This one is just for debugging - so we can get a message printed when it
+                // goes away.
 
-            g_object_weak_ref( self->master , leaky_master , 0 );
+                g_object_weak_ref( self->master , leaky_master , 0 );
+            }
 
             self->master = 0;
         }
