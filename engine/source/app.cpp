@@ -747,7 +747,10 @@ int App::run( const StringSet & allowed_names )
 
         result = TP_RUN_APP_ERROR;
 
-        g_object_unref( G_OBJECT( screen ) );
+        if ( g_object_is_floating( screen ) )
+        {
+            g_object_unref( G_OBJECT( screen ) );
+        }
 
         screen_gid = 0;
     }

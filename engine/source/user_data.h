@@ -90,7 +90,7 @@ struct UserData
     // Creates a new user data and sets its initial state. It is not complete
     // until you call initialize.
 
-    static UserData * make( lua_State * L );
+    static UserData * make( lua_State * L , const gchar * type );
 
     //.........................................................................
     // Initializes the user data with a newly created GObject which is used
@@ -290,9 +290,18 @@ private:
 
     void disconnect_all_signals();
 
+
+    //.........................................................................
+
+    static void master_destroyed( UserData * self , GObject * master );
+
     //.........................................................................
 
     lua_State *     L;
+
+    //.........................................................................
+
+    gchar *         type;
 
     //.........................................................................
     // The controlling GObject - if one is not provided, we create one. This
