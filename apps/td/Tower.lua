@@ -19,6 +19,10 @@ function Tower:new(args, prefix)
 	local splash = args.splash
 	local splashradius = args.splashradius
 	local frames = args.frames
+	local blt = args.bullet
+	local bltframes = args.bulletframes
+	--for k,v in pairs(args) do print(k, v) end
+	--print(args.bullet, blt)
 
 	-- Image stuff
 	local towerImage = AssetLoader:getImage(prefix..table.name,{})
@@ -40,6 +44,8 @@ function Tower:new(args, prefix)
 		levels = levels,
 		level = level,
 		prefix = prefix,
+		blt = blt,
+		bltframes = bltframes,
 		bullet = bullet,
 		towerType = towerType,
 		damage = damage,
@@ -82,6 +88,10 @@ function Tower:render(seconds, creeps)
 	self.bullet.z = 2	
 	self.bullet.opacity = 0
 	
+	if self.bgroup then
+		self.bgroup:foreach_child( function(child) child.extra.parent:render()  end )
+	end
+	
 	if self.fired and s > self.cooldown/4 then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
 	--print("1")
 	if (s > self.cooldown) then
@@ -94,7 +104,7 @@ function Tower:render(seconds, creeps)
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
 				self:attackCreep(creeps,i,1)
 				if (self.splash) then
-					self:animateFire()
+					self:animateFire(seconds)
 					self:checkSplash(creeps,i)
 				end
 				break
@@ -142,9 +152,32 @@ function Tower:upgrade()
 	
 end
 
-function Tower:animateFire()
+function Tower:animateFire(seconds)
+
+	--print(self.blt)
+
+	if self.blt then
 	
+		--print("bullet")
+		--local btimer = Stopwatch()
+
+		--local bullet = Bullet:new( {name=self.prefix.."Bullet"..self.blt, frames=self.bltframes} )
+		--print(game.board.theme.bullets[self.blt])
+		local bullet = Bullet:new( game.board.theme.bullets[self.blt] )
+		--print(bullet.image)
+
+		--print("Created bullet")
+
+		if not self.bgroup then
+			self.bgroup = Group{x = self.x + SP/2, y=self.y + SP/2, h = bullet.image.h, w=bullet.image.w/self.bltframes, anchor_point = { bullet.image.w/(self.bltframes*2), bullet.image.h/2 }, clip={0, 0, bullet.image.w/(self.bltframes), bullet.image.h} }
+			--print("Created", self.bgroup)
+			screen:add(self.bgroup)
+		end
+
+		self.bgroup:add(bullet.image)
 	
+	end
+
 end
 
 function Tower:checkSplash(creeps,i)

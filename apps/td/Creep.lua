@@ -67,7 +67,16 @@ function Creep:render(seconds)
 --	CREEP_START[1] = math.random(5)+2
 	-- When the creep is off the board
 	if (not self.found and cx < 0) or self.flying then
-		self.creepGroup.x = cx + MOVE
+		local new = cx + MOVE
+		
+		if new > 0 then
+			self.creepGroup.x = 0.1
+		else
+			self.creepGroup.x = new
+		end
+		
+		--print(self.creepGroup.x)
+		
 		if (self.flying and cx >1920) then
 			self.hp = 0
 			wave_counter = wave_counter + 1
@@ -94,6 +103,7 @@ function Creep:render(seconds)
 		
 	-- Otherwise, move the creep
 	else 
+		--print("Moving")
 		local path = self.path
 		local size = #path
 		
@@ -138,7 +148,7 @@ function Creep:render(seconds)
 			--print("left")
 			local pos = cx - MOVE
 			
-			self.creepImageGroup.y_rotation = {180, SP, 0}
+			if cx > 5 then self.creepImageGroup.y_rotation = {180, SP, 0} end
 			--self.creepImageGroup.opacity = 100
 						
 			if pos <= order[2] then
