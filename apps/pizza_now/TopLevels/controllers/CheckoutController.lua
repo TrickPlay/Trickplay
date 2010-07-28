@@ -27,12 +27,15 @@ CheckoutController = Class(Controller, function(self, view, ...)
             print("street selected")
         end,
         [MenuItems.APT] = function(self)
+            view.ui.children[MenuItems.APT]:grab_key_focus()
             print("apartment selected")
         end,
         [MenuItems.CITY] = function(self)
+            view.ui.children[MenuItems.CITY]:grab_key_focus()
             print("city selected")
         end,
         [MenuItems.ZIP] = function(self)
+            view.ui.children[MenuItems.ZIP]:grab_key_focus()
             print("zip selected")
         end,
         [MenuItems.CARD_TYPE] = function(self)
@@ -45,13 +48,11 @@ CheckoutController = Class(Controller, function(self, view, ...)
         end,
         [MenuItems.CONFIRM] = function(self)
             print("confirm?")
-            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
-            screen:show()
-            self:get_model():notify()
         end,
         [MenuItems.GO_BACK] = function(self)
             print("exit?")
-            exit()
+            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
+            self:get_model():notify()
         end
     }
 
