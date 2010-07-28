@@ -30,7 +30,56 @@ TabView = Class(View, function(view, model,parent, ...)
         --view.parent.sub_group[view.parent:get_controller():get_selected_index()]:animate{duration = 100, opacity = 100}
         model:set_active_component(Components.CUSTOMIZE)
         view:get_controller():reset_selected_index()
+        view.selector.y = 0
+        view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = 60
+        for i=1,#view.parent.sub_group_items[view.parent:get_controller():get_selected_index()] do
+            if i <= 13 then
+                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
+                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
+                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 255
+            else
+                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 0
+                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 0
+                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 0
+            end
+        end
         self:get_model():notify()
+    end
+
+    function view:move_selector_up(i)
+        local bound = 13--#view.menu_items[view.parent:get_controller():get_selected_index()]
+        if view.selector.y ~= 0 then view.selector.y = view.selector.y-60
+        else
+             print("\n\n1",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
+             view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-2)
+
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 255
+
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+bound][1].opacity= 0
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+bound][2].opacity= 0
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+bound][3].opacity= 0
+
+        end
+    end
+
+    function view:move_selector_down(i)
+        local bound = 13--#view.menu_items[view.parent:get_controller():get_selected_index()]
+        if view.selector.y ~= 60*(bound-1) then view.selector.y = view.selector.y+60
+        else
+             print("\n\n2",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
+             view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-1-13)
+
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 255
+
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-bound][1].opacity= 0
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-bound][2].opacity= 0
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-bound][3].opacity= 0
+
+        end
     end
 
     function view:update()
@@ -43,6 +92,7 @@ TabView = Class(View, function(view, model,parent, ...)
             for i,option in ipairs(view.menu_items[view.parent:get_controller():get_selected_index()]) do
                 for j,item in ipairs(option) do
                     if i == controller:get_selected_index() then
+--[[
                         --if the cursor is at the bottom and the selected index moved to the next line down
                         if     view.selector.y == 60*(13-1) and i > 13 then
                             print("\n\n1")
@@ -72,6 +122,7 @@ TabView = Class(View, function(view, model,parent, ...)
                             print("\n\n3")
                             view.selector.y = 60*(i-1)
                         end
+--]]
 --[[
                         --item:animate{duration=100, opacity = 255}
                         if i > 13 then

@@ -115,7 +115,7 @@ Characters={
    [keys.minus] = '-',
 }
 
-CUSTOMIZE_TAB_FONT  = "Courier 10 Pitch 40px"
+CUSTOMIZE_TAB_FONT  = "Courier 10 Pitch 48px"
 CUSTOMIZE_SUB_FONT  = "Courier 10 Pitch 32px"
 CUSTOMIZE_NAME_FONT = "Courier 10 Pitch 144px"
 DEFAULT_FONT="Sans 40px"

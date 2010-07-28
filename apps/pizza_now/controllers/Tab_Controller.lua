@@ -70,6 +70,8 @@ TabController = Class(Controller,
                 if 1 <= new_selected and new_selected <= #view.menu_items[view.parent:get_controller():get_selected_index()] then
                     selected = new_selected
                 end
+                if dir == Directions.UP then view:move_selector_up(selected)
+                else                         view:move_selector_down(selected) end
                 --MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected]()
                 self:get_model():notify()
             end
