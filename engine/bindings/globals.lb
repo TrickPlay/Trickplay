@@ -502,7 +502,11 @@ globals
 		
 	table registry()
 		[[
+#ifdef TP_PRODUCTION		
+			lua_pushnil( L );
+#else
 			lua_pushvalue( L , LUA_REGISTRYINDEX );
+#endif			
 		]];		
 }
 
