@@ -1,7 +1,17 @@
 local obstacles = {
+<<<<<<< HEAD:apps/td/themes/robot/obstacles.lua
 	{2,2},
 	{2,4},
-	frames = 5
+	frames = 5,
+=======
+	{2,1},
+	{2,16},
+	{8,1},
+	{8,16},
+	frames = 5,
+	insert = true
+
+>>>>>>> cee968811f358bcfc935a73714d81df2a8ab783a:apps/td/themes/robot/obstacles.lua
 }
 
 return obstacles

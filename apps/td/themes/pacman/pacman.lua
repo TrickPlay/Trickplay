@@ -14,14 +14,14 @@ local pacman = {
 		},
 		towers = {
 				normalTower =
-						{ damage = 2, range = 800, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 8, name = "NormalTower", bullet = 2,
+						{ damage = 2, range = 800, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 8, name = "NormalTower", bullet = 2, mode = "sprite",
 								upgrades =   	{
 												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = false},
 												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = false}
 										}
 						},
 				slowTower =
-						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 75, slow = true, splash = true, frames = 8, splashradius = 240, name = "SlowTower",
+						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 75, slow = true, splash = true, frames = 8, splashradius = 240, name = "SlowTower", mode = "sprite",
 								upgrades =      {
 												{damage = 5, range = 400, cooldown = 1, cost = 40, slowammount = 50},
 												{damage = 10, range = 400, cooldown = 1, cost = 40, slowammount = 25}

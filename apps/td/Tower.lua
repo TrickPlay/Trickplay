@@ -1,69 +1,81 @@
 Tower = {}
 
-function Tower:new(args, prefix)
-	-- Tower knows where it came from, so it can access its own data in "table"
-	local table = args
-	local levels
-	if table.upgrades then levels = #table.upgrades else levels = 0 end
-	local level = 0
-	local prefix = prefix
-	
-	--local towerType = args.towerType
-	local damage = args.damage
-	local range = args.range
-	local cost = args.cost
-	local direction = args.direction
-	local cooldown = args.cooldown
-	local slowammount = args.slowammount
-	local slow = args.slow
-	local splash = args.splash
-	local splashradius = args.splashradius
-	local frames = args.frames
-	local blt = args.bullet
-	--local bltframes = args.bulletframes
-	--for k,v in pairs(args) do print(k, v) end
-	--print(args.bullet, blt)
-
-	-- Image stuff
-	local towerImage = AssetLoader:getImage(prefix..table.name,{})
-	local towerImageGroup = Group{ clip={0,0,towerImage.w/frames,towerImage.h}}
---	towerImageGroup.y = towerImageGroup.y - ((towerImage.h/SP)-1)*SP
-	local fireImage = AssetLoader:getImage(prefix..table.name.."Fire",{})
-	towerImageGroup:add(towerImage)
-	screen:add(towerImageGroup)
-	
-	local isAttacking = false
-	local bullet = Clone {source = shootAnimation, opacity = 0}
-	screen:add(bullet)
-	--local levels = game.board.theme
-	
-	local timer = Stopwatch()
+function Tower:new(args, prefix, square)
 	
 	local object = {
-		table = table,
-		levels = levels,
-		level = level,
+		-- Tower defaults
+		table = args,
+		levels = 0,
+		level = 0,
 		prefix = prefix,
-		blt = blt,
-		--bltframes = bltframes,
-		bullet = bullet,
-		towerType = towerType,
-		damage = damage,
-		range = range,
-		direction = direction,
-		slowammount = slowammount,
-		slow = slow,
-		frames = frames,
-		splash = splash,
-		splashradius = splashradius,
-		cooldown = cooldown,
-		cost = cost,
+		square = square,
+		
+		-- Position
+		x = GTP(square.x),
+		y = GTP(square.y),
+		z = 1+GTP(GTP(square.y)),
+		rotation = 0,
+		
+		-- Tower properties (from theme)
+		bullet = args.bullet,
+		damage = args.damage,
+		range = args.range,
+		direction = args.direction,
+		slowammount = args.slowammount,
+		slow = args.slow,
+		frames = args.frames,
+		splash = args.splash,
+		splashradius = args.splashradius,
+		cooldown = args.cooldown,
+		cost = args.cost,
+		simpleRotate = args.simpleRotate,
+		mode = args.mode or "none",
+		
+		-- Images
 		towerImage = towerImage,
 		towerImageGroup = towerImageGroup,
-		isAttacking = isAttacking,
-		timer = timer,
 		fireImage = fireImage,
+		
+		-- Stopwatch
+		timer = Stopwatch(),
    }
+   
+   	if args.upgrades then object.levels = #args.upgrades end
+
+	-- Instructions for rotating through 8 sprites
+	if args.mode == "sprite" then
+	
+		object.directionTable = {}
+		local od = object.directionTable
+		local x = object.x
+		local y = object.y
+		
+		od[1] = { y,	y+SP,	0,		x }
+		od[2] = { 0,	y,		0,		x }		
+		od[3] = { 0,	y,		x-30,	x+SP }
+		od[4] = { 0,	y,		x+SP,	1920 }
+		od[5] = { y,	y+SP,	x+SP, 	1920 }
+		od[6] = { y+50,	1080,	x+SP,	1920 }
+		od[7] = { y+50,	1080,	x-30,	x+SP }
+		od[8] = { y+50,	1080,	0,		x }	
+
+	end
+	
+	-- If it has bullets, create the bullet group and add it to the screen
+	if self.bullet then self.bgroup = Group{} screen:add(self.bgroup) end
+   
+	-- This is the actual image
+	object.towerImage = AssetLoader:getImage(prefix..args.name,{})
+	
+	-- This is the clipping group
+	object.towerImageGroup = Group{ clip={0,0,object.towerImage.w/object.frames,object.towerImage.h}}
+	
+	-- This is the firing overlay
+	object.fireImage = AssetLoader:getImage(prefix..args.name.."Fire",{})
+	
+	object.towerImageGroup:add(object.towerImage)
+	screen:add(object.towerImageGroup)
+   
    setmetatable(object, self)
    self.__index = self
    return object
@@ -74,23 +86,12 @@ function Tower:destroy()
 	self.damage = 0
 end
 
-function Tower:attack()
-
-end
-
 function Tower:render(seconds, creeps)
-	local creep_in_range = false	
-	local creep_to_kill
 
 	local s = self.timer.elapsed_seconds
-	self.bullet.x = self.x
-	self.bullet.y = self.y
-	self.bullet.z = 2	
-	self.bullet.opacity = 0
 	
-	if self.bgroup then
-		self.bgroup:foreach_child( function(child) child.extra.parent:render(seconds)  end )
-	end
+	-- Render bullets
+	if self.bgroup then self.bgroup:foreach_child( function(child) child.extra.parent:render(seconds)  end ) end
 	
 	if self.fired and s > self.cooldown/4 then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
 	--print("1")
@@ -111,26 +112,16 @@ function Tower:render(seconds, creeps)
 			end
 			
 		end
-		if not self.directionTable then
-			print("CREATED DIRECTION TABLE")
-			self.directionTable = {}	
-			self.directionTable[1] = { self.y,	self.y+SP,	0		,self.x }
-			self.directionTable[2] = { 0,		self.y,		0		,self.x }		
-			self.directionTable[3] = { 0,		self.y,		self.x-30,	self.x+SP }
-			self.directionTable[4] = { 0,		self.y,		self.x+SP,	1920 }
-			self.directionTable[5] = { self.y,	self.y+SP,	self.x+SP, 	1920 }
-			self.directionTable[6] = { self.y+50,	1080,		self.x+SP,	1920 }
-			self.directionTable[7] = { self.y+50,	1080,		self.x-30,	self.x+SP }
-			self.directionTable[8] = { self.y+50,	1080,		0,		self.x }	
-		end
+
 	end
 end
 
 function Tower:upgrade()
-		assert(self.level < self.levels)
-		self.level = self.level + 1
+
+	assert(self.level < self.levels)
+	self.level = self.level + 1
 	
-		local r = self.table.upgrades[self.level]
+	local r = self.table.upgrades[self.level]
 	
 	if (game.board.player.gold - r.cost >0) then
 	
@@ -139,10 +130,13 @@ function Tower:upgrade()
 		self.cooldown = r.cooldown
 		self.slowammount = r.slowammount
 		self.cost = self.cost + r.cost
-		self.towerImageGroup:remove(self.towerImage)
+		self.towerImageGroup:remove(self.towerImage, self.fireImage)
+		self.fireImage = AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y, clip=self.fireImage.clip})
 		self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
 		self.towerImageGroup:add(self.towerImage)
 		print(self.prefix..self.table.name..self.level)
+		
+		--screen:add(AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y}))
 
 		game.board.player.gold = game.board.player.gold - r.cost
 		goldtext.text = game.board.player.gold
@@ -157,11 +151,9 @@ function Tower:animateFire(seconds, creep)
 	--print("Fire")
 
 	-- Creep needs a bullet number in order to fire
-	if self.blt then
+	if self.bullet then
 	
-		--print(self.blt)
-	
-		local bullet = Bullet:new( game.board.theme.bullets[self.blt], creep )
+		local bullet = Bullet:new( game.board.theme.bullets[self.bullet], creep, self.rotation )
 		
 		local frames = bullet.frames or 1
 
@@ -171,14 +163,21 @@ function Tower:animateFire(seconds, creep)
 			screen:add(self.bgroup)
 		end
 		
-		bullet.imageGroup = Group{x = self.x + SP/2, y=self.y + SP/2, h = bullet.image.h, w=bullet.image.w/frames, anchor_point = { bullet.image.w/(frames*2), bullet.image.h/2 }, clip={0, 0, bullet.image.w/(frames), bullet.image.h} }
+		-- This group handles position, clipping, and rotation for the bullet
+		bullet.imageGroup = 
+			Group {
+				x = self.x + SP/2, 
+				y = self.y + SP/2, 
+				h = bullet.image.h, 
+				w = bullet.image.w/frames, 
+				anchor_point = { bullet.image.w/(frames*2), bullet.image.h/2 }, 
+				clip={0, 0, bullet.image.w/(frames), bullet.image.h},
+			}
+		bullet.imageGroup.z_rotation = {self.rotation, 0, 0}
+			
 		bullet.imageGroup:add(bullet.image)
 		bullet.imageGroup.extra.parent = bullet
 		self.bgroup:add(bullet.imageGroup)
-		--bullet.image.extra.parent = bullet.imageGroup
-		--else
-		--	self.bgroup:add(bullet.image)
-		--end
 		
 		--self.towerImageGroup.opacity = 2
 	
@@ -206,12 +205,32 @@ function Tower:checkSplash(creeps,i)
 end
 
 function Tower:attackCreep(creeps, i, intensity)
-	--self.bullet.opacity = 255
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y
 	if (self.slow) then creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity end
 
-	if self.directionTable and not self.splash then 
+	-- Simple rotation
+	if self.mode == "rotate" then
+		
+		local dx = cx - (self.towerImageGroup.x + SP/2)
+		local dy = cy - (self.towerImageGroup.y + SP/2)
+		--print("rotating!")
+		
+		local dir = (180/math.pi) * math.atan((dy)/(dx)) + 180
+		if dx >= 0 then dir = dir + 180 end
+		
+		self.rotation = dir
+		
+		--print(dir )
+		self.towerImage.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
+		
+		self.fireImage.z_rotation = self.towerImage.z_rotation
+		self.towerImageGroup:add(self.fireImage)
+		self.fired = true
+	
+	-- Sprites with a direction table
+	elseif self.mode == "sprite" then 
+	
 		local d = self.directionTable
 		local dir
 		for i = 1, #d do
@@ -226,11 +245,8 @@ function Tower:attackCreep(creeps, i, intensity)
 		
 		self.towerImageGroup:add(self.fireImage)
 		self.fired = true
-		--self.towerImage.x = self.x - SP * (dir - 1)
-		--self.towerImage.clip = { SP * (dir - 1), 0, SP, SP }
+
 	end
-			
-	creep_in_range = true
 
 	creeps[i].hp = creeps[i].hp - self.damage*intensity
 	creeps[i]:bleed()
@@ -238,24 +254,3 @@ function Tower:attackCreep(creeps, i, intensity)
 	if (creeps[i].hp <=0) then creeps[i].hp =0 end
 
 end
-
-
-
-
-
-
-
-
-
---			local temp_bullet = Clone { source = bulletImage, x = self.towerImage.x, y = self.towerImage.y }
---			screen:add(temp_bullet)
---			table.insert(self.bullets,temp_bullet)
-			
-
-	--[[for k,v in pairs(self.bullets) do
-		v:animate {duration = 500, x = x_velocity, y = y_velocity}
-		if (v.x <= -50) then
-			v.x = -50
-		end
-	end]]
-	
