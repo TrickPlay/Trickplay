@@ -48,11 +48,13 @@ CustomizeController = Class(Controller,
                 if self.on_back_arrow then
                     self.selected = 1
                     self.on_back_arrow = false
+                    view:get_model().current_item.pizzagroup:hide_all()
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     self:get_model():notify()
                 elseif self.add_to_order then
                     self.selected = 1
                     self.add_to_order = false
+                    view:get_model().current_item.pizzagroup:hide_all()
                     self:get_model().cart[#self:get_model().cart + 1] = view:get_model().current_item
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     self:get_model():notify()
