@@ -3,8 +3,10 @@ CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
      
     view.ui=Group{name="Customize ui", position={0,0}, opacity=255}
-    bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
+    view.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
+    view.bg2 = Clone{src=bg,position={960,0}}
     view.ui:add(bg)
+    view.ui:add(bg2)
         screen:add(view.ui)
 
     --view.item = food_item
@@ -29,7 +31,8 @@ CustomizeView = Class(View, function(view, model, ...)
     
         --gut the UI
         view.ui:clear()
-        view.ui:add(bg)
+        view.ui:add(view.bg)
+        view.ui:add(view.bg2)
 
         view.arrow = Image{                
                 position = {300, 0},
@@ -207,6 +210,7 @@ CustomizeView = Class(View, function(view, model, ...)
                 view.selector.opacity = 0
                 view.add_to_order_selector.opacity = 0
             elseif controller.add_to_order then
+                print("addd to order")
                 view.add_to_order_selector.opacity = 255
                 view.back_arrow_selected.opacity = 0
                 view.selector.opacity = 0
