@@ -179,10 +179,11 @@ function Tower:animateTower(creeps,i)
 		self.rotation = dir
 		
 		-- Rotate the image group only, not the image or the fire image
-		self.towerImageGroup.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
-		self.towerImageGroup:add(self.fireImage)
 		
-		self.fired = true
+		self.towerImageGroup.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
+		
+		if self.attackMode == "none" then self.towerImageGroup:add(self.fireImage) self.fired = true end
+		
 	
 	-- Sprites with a direction table
 	elseif self.mode == "sprite" then 
@@ -204,7 +205,7 @@ function Tower:animateTower(creeps,i)
 
 	end
 	
-	if self.mode == "fire" or self.attackMode == "fire" then
+	if self.attackMode == "fire" then
 		
 		self.fireImage.x = self.towerImage.x
 		self.towerImageGroup:add(self.fireImage)

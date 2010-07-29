@@ -78,7 +78,8 @@ function Bullet:render(seconds)
 		
 		--self.imageGroup.x = self.imageGroup.x + self.speed*seconds --end if self.imageGroup.x < self.creepGroup.x then
 		
-		if (dx < 5 and dy < 5) or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 then 
+		if (math.abs(dx) < 5 and math.abs(dy) < 5) or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 then 
+			--print(dx, dy, self.imageGroup.x, self.imageGroup.y)
 			self.imageGroup:remove(self.image)
 			self.imageGroup.parent:remove(self.imageGroup)
 			self = nil 
