@@ -264,7 +264,7 @@ function Board:createBoard()
 	
 	playertext.text = self.player.name
 	goldtext.text = self.player.gold
-		
+			
 	BoardMenu.buttons.extra.space = function()
 		--[[if not self.zoom then
 			self:zoomIn()
@@ -277,6 +277,7 @@ function Board:createBoard()
 		bloodGroup:clear()
 	end
 	
+	
 	add_to_render_list(self)
 	for i=1,#self.creepWave do
 		--self.creepWave[i].creepGroup.x = i*100
@@ -285,7 +286,6 @@ function Board:createBoard()
 		assert(self.creepWave[i])
 	end
 end
-
 function Board:findPaths()
 
 	for i = 1, #self.creepWave do
