@@ -174,7 +174,7 @@
     else if (mAccelMode == 2) //high pass filter
 	{
 		//Method 2 for high pass filter
-		UIAccelerationValue				length,
+		UIAccelerationValue
 		 x,
 		 y,
 		 z;
@@ -510,9 +510,9 @@
 						//NSData *data = [NSData dataWithContentsOfURL:url];
 						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
 						NSString *imageurl = [itemAtIndex objectForKey:@"link"];
-						if ([[itemAtIndex objectForKey:@"link"] hasPrefix:@"http:"] || [[itemAtIndex objectForKey:@"link"] hasPrefix:@"https:"])
+						if ([imageurl hasPrefix:@"http:"] || [imageurl hasPrefix:@"https:"])
 						{
-							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]] autorelease];
+							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageurl]]] autorelease];
 							backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
 						}
 						else {
@@ -554,14 +554,15 @@
 				for (index = 0;index < [mResourceNameCollection count];index++)
 				{
 					itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
-					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
+                    NSString *soundname = [itemAtIndex objectForKey:@"name"];
+					if ([soundname compare:[components objectAtIndex:1]] == 0)
 					{
 						NSString *soundurl = [itemAtIndex objectForKey:@"link"];
-						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];	
+						[self playSoundFile:soundname filename:soundurl];	
 					
 						//Loop parameter
 						NSString *loopvalue = [components objectAtIndex:2];
-						[mResourceNameCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
+						[mResourceNameCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:soundname, @"name",loopvalue, @"loop",soundurl,@"link", nil]];
 						
 						break;
 					}
