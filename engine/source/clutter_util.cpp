@@ -5,6 +5,14 @@
 #include "clutter_util.h"
 #include "lb.h"
 
+
+//.............................................................................
+
+ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
+{
+    return CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
+}
+
 //.............................................................................
 
 void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
@@ -120,19 +128,19 @@ gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
 
 ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 {
-    void * udata = lua_touserdata( L, n );
-
-    if ( !udata )
+    if ( lua_type( L , n ) != LUA_TUSERDATA )
     {
         return NULL;
     }
 
-    GObject * obj = *( ( GObject ** )udata );
+    UserData * ud = UserData::get( L , n );
 
-    if ( !obj )
+    if ( ! ud )
     {
         return NULL;
     }
+
+    GObject * obj = ud->get_master();
 
     return CLUTTER_IS_ACTOR( obj ) ? CLUTTER_ACTOR( obj ) : NULL;
 }
@@ -184,19 +192,17 @@ const char * ClutterUtil::get_actor_metatable( ClutterActor * actor )
 
 void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
 {
-    const char * metatable = get_actor_metatable( actor );
-
-    if ( !metatable )
+    if ( ! actor )
     {
         lua_pushnil( L );
-        return;
     }
-
-    int is_new = lb_wrap( L, actor, metatable );
-
-    if ( is_new )
+    else if ( UserData * ud = UserData::get( G_OBJECT( actor ) ) )
     {
-        g_object_ref( G_OBJECT( actor ) );
+        ud->push_proxy();
+    }
+    else
+    {
+        lua_pushnil( L );
     }
 }
 

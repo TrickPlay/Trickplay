@@ -4,7 +4,6 @@ module clutter_actor;
 #include "clutter/clutter.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -12,22 +11,22 @@ module clutter_actor;
 
 void actor_on_show(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_show",0,0);        
+	UserData::invoke_callback( G_OBJECT( actor ) , "on_show" , 0 , 0 , L );
 }
 
 void actor_on_hide(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_hide",0,0);        
+	UserData::invoke_callback( G_OBJECT( actor ) , "on_hide" , 0 , 0 , L );
 }
     
 void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_focus_in",0,0);        
+	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_focus_in" , 0 , 0 , L );
 }
 
 void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
 {
-    lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_focus_out",0,0);        
+	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_focus_out" , 0 , 0 , L );
 }
 
 gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
@@ -38,11 +37,13 @@ gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
     
-    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_down",3,1))
+    if (UserData::invoke_callback( G_OBJECT( actor ) , "on_key_down" , 3 , 1 , L ))    
     {
-	if (lua_toboolean(L,-1))
-	    result = TRUE;
-	lua_pop(L,1);
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
     }
 
     return result;
@@ -56,11 +57,13 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
     
-    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_key_up",3,1))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_up" , 3 , 1 , L ))
     {
-	if (lua_toboolean(L,-1))
-	    result = TRUE;
-	lua_pop(L,1);
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
     }
 
     return result;
@@ -75,11 +78,13 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
     
-    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_button_down",4,1))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_down" , 4 , 1 , L ))
     {
-	if (lua_toboolean(L,-1))
-	    result = TRUE;
-	lua_pop(L,1);
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
     }
 
     return result;
@@ -94,11 +99,13 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
     
-    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_button_up",4,1))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_up" , 4 , 1 , L ))
     {
-	if (lua_toboolean(L,-1))
-	    result = TRUE;
-	lua_pop(L,1);
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
     }
 
     return result;
@@ -112,39 +119,35 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     lua_pushnumber(L,event->y);
     lua_pushinteger(L,event->direction);
     
-    if(lb_invoke_callback(L,actor,ClutterUtil::get_actor_metatable(actor),"on_scroll",3,1))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_scroll" , 3 , 1 , L ))
     {
-	if (lua_toboolean(L,-1))
-	    result = TRUE;
-	lua_pop(L,1);
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
     }
 
     return result;
 }
 
-static void actor_animation_completed(ClutterAnimation * animation,lua_State * L)
+static void animation_completed(ClutterAnimation * animation,lua_State * L)
 {
-    // Get the ref to the callback, which we stored in the animation
-    
-    int function_ref=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(animation),"tp-completed"));
-    
-    if (function_ref)
-    {
-	// Get the function from the registry
-	lua_rawgeti(L,LUA_REGISTRYINDEX,function_ref);
-	
-	// Wrap the actor
 	ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
-
-	// Call the function	
-	lua_call(L,1,0);
 	
-	// Unref it
-	luaL_unref(L,LUA_REGISTRYINDEX,function_ref);
-    }
+	UserData::invoke_callback(G_OBJECT(animation),"on_completed",1,0,L);
 }
 
 ]]
+
+interface Animation [[ClutterAnimation*]]
+{
+	Animation()
+		[[
+			self = lb_construct_gobject( ClutterAnimation , lua_touserdata( L , -2 ) );
+		]];		
+}
+
 
 /*
     Interface: UIElement
@@ -1030,7 +1033,7 @@ interface actor [[ClutterActor*]]
 	z_rotation - The final angle of rotation around the z axis.	
     */
 
-    animate(table props)
+    Animation animate(table props)
 	[[
 	    lua_getfield(L,props,"duration");
 	    guint duration=lua_tonumber(L,-1);
@@ -1202,48 +1205,62 @@ interface actor [[ClutterActor*]]
 							values->n_values,
 							(gchar**)names->pdata,
 							values->values);
-	    
-	    lua_getfield(L,props,"loop");
-	    if (!lua_isnil(L,-1))
-	    {
-		clutter_animation_set_loop(a,lua_toboolean(L,-1));
-	    }
-	    lua_pop(L,1);
-	    
-	    // If you call animate several times, clutter reuses the same
-	    // ClutterAnimation object. So, if we are not set to loop,
-	    // and the user passed an "on_completed" function, we may have
-	    // to unref the old function and disconnect the old handler.
-	    
-	    if (!clutter_animation_get_loop(a))
-	    {
-		lua_getfield(L,props,"on_completed");
-		
-		if (lua_type(L,-1)==LUA_TFUNCTION)
+							
+		if ( ! a )
 		{
-		    int function_ref=luaL_ref(L,LUA_REGISTRYINDEX);
-		    
-		    // Remove the old one, if any
-		    
-		    int old_function_ref=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(a),"tp-completed"));
-		    
-		    if (old_function_ref)
-		    {
-			luaL_unref(L,LUA_REGISTRYINDEX,old_function_ref);
-		    }
-		    
-		    // Attach the new one
-		    
-		    g_object_set_data(G_OBJECT(a),"tp-completed",GINT_TO_POINTER(function_ref));
-		    
-		    SignalCollector::get(L)->connect("animation_completed",a,"completed",G_CALLBACK(actor_animation_completed),L,G_CONNECT_AFTER);
-		}
+			lua_pushnil( L );
+		}					
 		else
-		{
+		{	
+			UserData * ud = UserData::get( G_OBJECT( a ) );
+			
+			if ( ud )
+			{
+				ud->push_proxy();
+			}
+			else
+			{			 
+				g_object_ref( a );
+								
+				lua_pushlightuserdata( L , a );
+				new_Animation( L );
+				lua_remove( L , -2 );
+			}
+			
+			int animation = lua_gettop( L );						
+		    
+		    lua_getfield(L,props,"loop");
+		    
+		    if (!lua_isnil(L,-1))
+		    {
+				clutter_animation_set_loop(a,lua_toboolean(L,-1));
+		    }
 		    lua_pop(L,1);
+		    
+		    // If you call animate several times, clutter reuses the same
+		    // ClutterAnimation object. So, if we are not set to loop,
+		    // and the user passed an "on_completed" function, we may have
+		    // to unref the old function and disconnect the old handler.
+		    
+		    if (!clutter_animation_get_loop(a))
+		    {
+				lua_getfield(L,props,"on_completed");
+				
+				if (lua_type(L,-1)==LUA_TFUNCTION)
+				{
+					UserData::set_callback( "on_completed" , L , animation , -1 );
+					
+					UserData * ud = UserData::get( L , animation );
+					
+					ud->connect_signal( "on_completed" , "completed" , G_CALLBACK( animation_completed ) , L , G_CONNECT_AFTER ); 							
+				}
+				else
+				{
+				    lua_pop(L,1);
+				}
+		    }
 		}
-	    }
-	    
+			    
 	    g_value_array_free(values);
 	    g_ptr_array_free(names,TRUE);
 	]];
@@ -1291,9 +1308,12 @@ interface actor [[ClutterActor*]]
 
     callback on_key_focus_in
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_key_focus_in,"on_key_focus_in",
-		self,"key-focus-in",G_CALLBACK(actor_on_key_focus_in),L);
+		UserData::get(L)->connect_signal_if( 
+	    	on_key_focus_in,
+	    	"on_key_focus_in",
+			"key-focus-in",
+			G_CALLBACK(actor_on_key_focus_in),
+			L);
 	]];
 
     /*
@@ -1308,9 +1328,12 @@ interface actor [[ClutterActor*]]
 
     callback on_key_focus_out
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_key_focus_out,"on_key_focus_out",
-		self,"key-focus-out",G_CALLBACK(actor_on_key_focus_out),L);
+		UserData::get(L)->connect_signal_if( 
+			on_key_focus_out,
+			"on_key_focus_out",
+			"key-focus-out",
+			G_CALLBACK(actor_on_key_focus_out),
+			L);
 	]];
 	
     /*
@@ -1329,9 +1352,12 @@ interface actor [[ClutterActor*]]
 
     callback on_key_down
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_key_down,"on_key_down",
-		self,"key-press-event",G_CALLBACK(actor_on_key_down),L);	    
+		UserData::get(L)->connect_signal_if( 
+			on_key_down,
+			"on_key_down",
+			"key-press-event",
+			G_CALLBACK(actor_on_key_down),
+			L);	    
 	]];
 	
     /*
@@ -1350,30 +1376,42 @@ interface actor [[ClutterActor*]]
 
     callback on_key_up
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_key_up,"on_key_up",
-		self,"key-release-event",G_CALLBACK(actor_on_key_up),L);	    
+		UserData::get(L)->connect_signal_if( 
+			on_key_up,
+			"on_key_up",
+			"key-release-event",
+			G_CALLBACK(actor_on_key_up),
+			L);	    
 	]];
 	
     callback on_scroll
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_scroll,"on_scroll",
-		self,"scroll-event",G_CALLBACK(actor_on_scroll),L);	    
+		UserData::get(L)->connect_signal_if( 
+			on_scroll,
+			"on_scroll",
+			"scroll-event",
+			G_CALLBACK(actor_on_scroll),
+			L);	    
 	]];
 	
     callback on_button_down
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_button_down,"on_button_down",
-		self,"button-press-event",G_CALLBACK(actor_on_button_down),L);	    
+		UserData::get(L)->connect_signal_if( 
+			on_button_down,
+			"on_button_down",
+			"button-press-event",
+			G_CALLBACK(actor_on_button_down),
+			L);	    
 	]];
 	
     callback on_button_up
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_button_up,"on_button_up",
-		self,"button-release-event",G_CALLBACK(actor_on_button_up),L);	    
+		UserData::get(L)->connect_signal_if( 
+			on_button_up,
+			"on_button_up",
+			"button-release-event",
+			G_CALLBACK(actor_on_button_up),
+			L);	    
 	]];
 
     /*
@@ -1388,9 +1426,12 @@ interface actor [[ClutterActor*]]
     
     callback on_show
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_show,"on_show",
-		self,"show",G_CALLBACK(actor_on_show),L);	    	    
+		UserData::get(L)->connect_signal_if( 
+			on_show,
+			"on_show",
+			"show",
+			G_CALLBACK(actor_on_show),
+			L);	    	    
 	]];
 	
     /*
@@ -1405,8 +1446,11 @@ interface actor [[ClutterActor*]]
     
     callback on_hide
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_hide,"on_hide",
-		self,"hide",G_CALLBACK(actor_on_hide),L);	    	    
+		UserData::get(L)->connect_signal_if( 
+			on_hide,
+			"on_hide",
+			"hide",
+			G_CALLBACK(actor_on_hide),
+			L);	    	    
 	]];
 }
