@@ -4,7 +4,7 @@ local robot = {
 		bullets = {
 			--{id = 1, frames = 5, im = "Ringwave"},
 			{id = 1, im = "Cannon", speed = 1000},
-			{id = 2, im = "laserbeam", speed = 1000},
+			{id = 2, im = "Laser", speed = 1000},
 		},
 		creeps = {
 			{ hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
@@ -29,7 +29,7 @@ local robot = {
 										}
 						},
 				nukeTower =
-						{ damage = 2000, range = 600, cooldown = 5, cost = 500, slowammount = 100, slow = false, splash = true, frames = 8, splashradius = 360, name = "NukeTower",
+						{ damage = 30, range = 200, cooldown = .5, cost = 70, slowammount = 100, slow = false, splash = true, frames = 1, splashradius = 360, name = "NukeTower", mode = "fire", attackFrames = 4,
 						},
 				laserTower = 
 						{damage = 50, range = 500, cooldown = 1, cost = 100, slow = false, splash = false, frames = 1, name = "LaserTower", simpleRotate = true, mode = "rotate", bullet = 2,
