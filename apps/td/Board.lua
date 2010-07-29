@@ -174,7 +174,8 @@ function Board:createBoard()
 	end
 	local b = Group{}
 	screen:add(backgroundImage, overlayImage, b)
-	local hl = Rectangle{h=SP, w=SP, color="A52A2A"}
+	local hl = AssetLoader:getImage( "select", { scale={.9,.9}, opacity=200 } )
+	--Rectangle{h=SP, w=SP, color="A52A2A"}
 	self.nodes = self:createNodes()
 
 	BoardMenu = Menu.create(b, groups, hl)
