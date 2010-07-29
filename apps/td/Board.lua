@@ -51,7 +51,11 @@ Board = {
 		else
 			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
-			
+--			bloodGroup:clear()
+			bloodGroup.opacity = 255 - s*(255/WAIT_TIME)
+			if (bloodGroup.opacity <=10) then
+				bloodGroup:clear()
+			end	
 		end
 		if (wave_counter == CREEP_WAVE_LENGTH) then
 			for k,v in pairs(self.creepWave) do
@@ -60,7 +64,6 @@ Board = {
 			for k,v in pairs(self.creepWave) do
 				table.remove(self.creepWave,k)
 			end
-			bloodGroup:clear()
 			wave_counter = 0
 			creepnum = 1
 			seconds_elapsed = 0
@@ -87,7 +90,7 @@ function Board:new(args)
 	local squaresWithTowers = {}
 	local theme = args.theme
 	local timer = 	Stopwatch()
-
+	local obstacleImages = {}
 	local player = Player:new {
 		name = "Player 1",
 		gold = 2000,
@@ -118,6 +121,7 @@ function Board:new(args)
 		player = player,
 		squareGrid = squareGrid,
 		squaresWithTowers = squaresWithTowers,
+		obstacleImages = obstacleImages,
 		theme = theme,
 		timer = timer,
 		creepWave = creepWave,
@@ -151,13 +155,15 @@ function Board:createBoard()
 	end
 	backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
 	overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
-	for i =1, #self.theme.obstacles do
+	if (self.theme.obstacles.insert) then
+		for i =1, #self.theme.obstacles do
 
-		local obstacle = AssetLoader:getImage("obstacles", {})
-		local obstacleGroup = Group{x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1]), z = 1, clip = {0,0,SP,SP}}
-		obstacleGroup:add(obstacle)
-		 
-		screen:add(obstacleGroup)
+			local obstacle = AssetLoader:getImage("obstacles", {})
+			local obstacleGroup = Group{x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1]), z = 1, clip = {0,0,SP,SP}}
+			table.insert(self.obstacleImages,obstacleGroup)
+			obstacleGroup:add(obstacle)
+			screen:add(obstacleGroup)
+		end
 	end
 	local b = Group{}
 	screen:add(backgroundImage, overlayImage, b)
@@ -261,6 +267,7 @@ function Board:createBoard()
 			self.zoom = nil
 		end]]
 		seconds_elapsed = WAIT_TIME
+		bloodGroup:clear()
 	end
 	
 	add_to_render_list(self)
