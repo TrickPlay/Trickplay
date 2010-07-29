@@ -53,7 +53,7 @@ Board = {
 			countdowntimer.text = "Time till next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 			phasetext.text = "Build Phase!"
 --			bloodGroup:clear()
-			bloodGroup.opacity = 255 - s*(255/WAIT_TIME)
+			bloodGroup.opacity = 155 - s*(155/WAIT_TIME)
 			if (bloodGroup.opacity <=10) then
 				bloodGroup:clear()
 			end	
