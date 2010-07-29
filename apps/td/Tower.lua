@@ -30,6 +30,7 @@ function Tower:new(args, prefix, square)
 		cost = args.cost,
 		simpleRotate = args.simpleRotate,
 		mode = args.mode or "none",
+		attackMode = args.attackMode or "none",
 		attackFrames = args.attackFrames or 1,
 		
 		-- Images
@@ -96,7 +97,7 @@ function Tower:render(seconds, creeps)
 	
 	
 	--print(self.mode, self.fired, self.attackFrames > 1, s < self.cooldown/4)
-	if self.mode == "fire" and self.fired and self.attackFrames > 1 and s < self.cooldown/4 then
+	if (self.mode == "fire" or self.attackMode == "fire") and self.fired and self.attackFrames > 1 and s < self.cooldown/4 then
 		
 		local w = self.fireImage.w/self.attackFrames
 		
@@ -234,11 +235,10 @@ function Tower:attackCreep(creeps, i, intensity)
 		
 		self.rotation = dir
 		
-		--print(dir )
-		self.towerImage.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
-		
-		self.fireImage.z_rotation = self.towerImage.z_rotation
+		-- Rotate the image group only, not the image or the fire image
+		self.towerImageGroup.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
 		self.towerImageGroup:add(self.fireImage)
+		
 		self.fired = true
 	
 	-- Sprites with a direction table
@@ -259,8 +259,10 @@ function Tower:attackCreep(creeps, i, intensity)
 		self.towerImageGroup:add(self.fireImage)
 		self.fired = true
 
-	elseif self.mode == "fire" then
+	end
 	
+	if self.mode == "fire" or self.attackMode == "fire" then
+		
 		self.fireImage.x = self.towerImage.x
 		self.towerImageGroup:add(self.fireImage)
 		self.fired = true
