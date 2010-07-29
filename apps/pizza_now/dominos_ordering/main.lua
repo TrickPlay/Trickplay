@@ -1,3 +1,6 @@
+if not Class then
+   dofile("../Class.lua")
+end
 dofile("Utils.lua")
 
 local CHEESE_PIZZA_TOPPINGS = {}
