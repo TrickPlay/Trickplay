@@ -156,7 +156,7 @@ function Creep:render(seconds)
 			--print("left")
 			local pos = cx - MOVE
 			
-			if cx > 5 then self.creepImageGroup.y_rotation = {180, SP, 0} end
+			if cx > 5 then self.creepImageGroup.y_rotation = {180, ((self.creepImage.w/self.frames)/SP)*SP/2, 0} end
 			--self.creepImageGroup.opacity = 100
 			self.face = -1
 
@@ -220,7 +220,7 @@ function Creep:bleed()
 	local x = self.creepGroup.x + math.random(SP)
 	local y = self.creepGroup.y + math.random(SP)
 --	local blood = Rectangle {color = "FF0000", width = math.random(8), height = math.random(8), x = x, y = y}
-	local rand = 7+math.random(7)
+	local rand = 2+math.random(7)
 	local blood = Canvas{color="FF0000", x=x, y=y, width=rand, height=rand}
 	blood:begin_painting()
 	blood:set_source_color("FF0000")
@@ -228,6 +228,7 @@ function Creep:bleed()
 	blood:fill() -- or c:stroke()
 	blood:finish_painting()
 	bloodGroup:add(blood)
+	bloodGroup.opacity = 255
 end
 
 -- insert whatever happens on death here, you can use seconds or deathtimer
@@ -244,16 +245,16 @@ function Creep:deathAnimation()
 			return true
 		end
 	elseif self.face == 1 then
-		self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/2,0}
+		self.creepGroup.z_rotation = {180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/4,(self.creepImage.h/SP) * (SP/2)-25}
 		self.creepGroup.opacity = 255 - self.deathtimer.elapsed_seconds * 90
-		if self.creepGroup.z_rotation[1] <= -90 then
+		if self.creepGroup.z_rotation[1] >=90 then
 			self.creepGroup.opacity = 0
 			return true
 		end
 	elseif self.face == -1 then
-		self.creepGroup.z_rotation = {180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/8,0}
+		self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/16,(self.creepImage.h/SP) * (SP/2)-25}
 		
-		if self.creepGroup.z_rotation[1] >= 90 then
+		if self.creepGroup.z_rotation[1] <= -90 then
 			self.creepGroup.opacity = 0
 			return true
 		end
