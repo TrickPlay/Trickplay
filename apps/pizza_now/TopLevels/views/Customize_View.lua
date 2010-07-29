@@ -4,7 +4,8 @@ CustomizeView = Class(View, function(view, model, ...)
      
     view.ui=Group{name="Customize ui", position={0,0}, opacity=255}
     view.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
-    view.bg2 = Clone{src=bg,position={960,0}}
+    view.bg2 = Clone{source=view.bg}
+    view.bg2.position = {960,0}
     view.ui:add(bg)
     view.ui:add(bg2)
         screen:add(view.ui)
@@ -169,7 +170,7 @@ CustomizeView = Class(View, function(view, model, ...)
         end
         view.ui:add(unpack(view.vert_lines))
         --bg:lower_to_bottom()
-        view.ui:lower(bg)
+        view.ui:lower(view.bg)
         view.ui:add(view.arrow)
         view.ui:add(view.food_name)
         view.ui:add(view.vert_sep)

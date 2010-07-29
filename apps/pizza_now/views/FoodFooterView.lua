@@ -54,6 +54,7 @@ src="assets/OrderBarBase.png"
         elseif comp == Components.CUSTOMIZE or comp == Components.TAB or
                comp == Components.CUSTOMIZE_ITEM then
             print("Graying FoodFooterView UI")
+            view.ui:raise_to_top()
             view.ui:complete_animation()
             view.items[controller:get_selected_index()].opacity = 100
         else
