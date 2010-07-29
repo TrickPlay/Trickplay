@@ -5,7 +5,6 @@ module clutter_canvas;
 #include "pango/pangocairo.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 #include "network.h"
 #include "images.h"
@@ -22,7 +21,7 @@ cairo_t * check_canvas_cairo_t(lua_State * L,ClutterActor * canvas)
     cairo_t * result=(cairo_t*) g_object_get_data(G_OBJECT(canvas),"tp-cairot");
     if(!result)
     {
-	luaL_error(L,"You must call begin_painting first");
+		luaL_error(L,"You must call begin_painting first");
     }
     return result;
 }
@@ -52,15 +51,17 @@ class Canvas [[ClutterActor*]] actor
 {
     Canvas(table props=0)
 	[[
-            *self = clutter_cairo_texture_new(0,0);
-	    ClutterUtil::initialize_actor(L,*self,CANVAS_METATABLE);
+		self=clutter_cairo_texture_new(0,0);
+		g_object_ref_sink( self );
+		g_object_ref( self );
+    	self = lb_construct_gobject( ClutterActor , self );
+	    ClutterUtil::initialize_actor(L,self,CANVAS_METATABLE);
 	    ClutterUtil::set_props_from_table(L,props);
-	    g_object_ref_sink(G_OBJECT(*self));
+	    g_object_unref(self);
 	]];
 	
     ~Canvas()
 	[[
-	    g_object_unref(G_OBJECT(self));    
 	]];
 	
     double w

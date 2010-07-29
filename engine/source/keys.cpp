@@ -1,5 +1,6 @@
 
 #include "clutter/clutter-keysyms.h"
+#include <cstring>
 
 #include "trickplay/keys.h"
 #include "common.h"
@@ -28,7 +29,7 @@
 //
 //  pcall(handlers[keyval])
 
-void luaopen_keys( lua_State * L )
+static int find_key( lua_State * L )
 {
     struct ki
     {
@@ -2066,19 +2067,68 @@ void luaopen_keys( lua_State * L )
         {NULL, NULL}
     };
 
+    int top = lua_gettop( L );
+
+    switch( lua_type( L , 2 ) )
+    {
+        case LUA_TSTRING:
+        {
+            const char * name = lua_tostring( L , 2 );
+
+            for ( const ki * k = ks; k->name; ++k )
+            {
+                if ( ! strcmp( name , k->name ) )
+                {
+                    lua_pushvalue( L , 2 );
+                    lua_pushinteger( L , k->value );
+                    lua_rawset( L , 1 );
+
+                    lua_pushinteger( L , k->value );
+                    break;
+                }
+            }
+        }
+        break;
+
+        case LUA_TNUMBER:
+        {
+            unsigned int value = lua_tointeger( L , 2 );
+
+            for ( const ki * k = ks; k->name; ++k )
+            {
+                if ( k->value == value )
+                {
+                    lua_pushvalue( L , 2 );
+                    lua_pushstring( L , k->name );
+                    lua_rawset( L , 1 );
+
+                    lua_pushstring( L , k->name );
+                    break;
+                }
+            }
+
+        }
+        break;
+    }
+
+    if ( lua_gettop( L ) == top )
+    {
+        lua_pushnil( L );
+    }
+
+    return 1;
+}
+
+void luaopen_keys( lua_State * L )
+{
     lua_newtable( L );
 
-    for ( const ki * k = ks; k->name; ++k )
-    {
-        // name to value mapping
-        lua_pushstring( L, k->name );
-        lua_pushinteger( L, k->value );
-        lua_rawset( L, -3 );
-
-        // value to name mapping
-        lua_pushstring( L, k->name );
-        lua_rawseti( L, -2, k->value );
-    }
+    lua_newtable( L );
+    lua_pushstring( L , "__index" );
+    lua_pushcfunction( L , find_key );
+    lua_rawset( L , -3 );
+    lua_setmetatable( L , -2 );
 
     lua_setglobal( L, "keys" );
 }
+

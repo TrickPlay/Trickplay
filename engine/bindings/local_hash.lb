@@ -9,20 +9,19 @@ class LocalHash [[Storage::LocalHash*]]
 {
 	LocalHash(string name="DEFAULT_DB")
 		[[
-				*self = new Storage::LocalHash();
+			self = lb_construct( Storage::LocalHash , new Storage::LocalHash() );
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {
                 lua_pushvalue(L,-2);
                 lb_set_props_from_table(L);
                 lua_pop(L,1);
             }
-				else
-				{
-					g_debug("Name is: %p (%s)",name,name);
-					(*self)->name = name;
-				}
+			else
+			{
+				self->name = name;
+			}
 
-				(*self)->connect();
+			self->connect();
 		]];
 
 	~LocalHash()

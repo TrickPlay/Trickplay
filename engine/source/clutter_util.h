@@ -8,6 +8,12 @@
 
 namespace ClutterUtil
 {
+    // Returns an actor created from the constructor function. It sinks
+    // the original ref and then adds another, so you have to unref the
+    // result.
+
+    ClutterActor * make_actor( ClutterActor * ( constructor )() );
+
     // Pushes a clutter color as a table with 4 integers
 
     void push_clutter_color( lua_State * L, ClutterColor * color );
