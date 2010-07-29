@@ -58,27 +58,27 @@ Model = Class(
          print("set active component to",comp)
       end
 
-        function model:set_keys()
-            function screen:on_key_down(k)
-                assert(model:get_active_controller())
-            end
-        end
-
-        function model:set_delivery()
-            if(self.delivery) then
-                self.delivery = not self.delivery
-            else
-                self.delivery = true
-            end
-        end
-
-        function model:set_arrival_time()
-            self.arrival_time = self.arrival_time + .5
-            if(self.arrival_time >= 24) then
-                self.arrival_time = 0
-            end
-        end
-end)
+      function model:set_keys()
+         function screen:on_key_down(k)
+            assert(model:get_active_controller())
+         end
+      end
+      
+      function model:set_delivery()
+         if(self.delivery) then
+            self.delivery = not self.delivery
+         else
+            self.delivery = true
+         end
+      end
+      
+      function model:set_arrival_time()
+         self.arrival_time = self.arrival_time + .5
+         if(self.arrival_time >= 24) then
+            self.arrival_time = 0
+         end
+      end
+   end)
 
 
 
