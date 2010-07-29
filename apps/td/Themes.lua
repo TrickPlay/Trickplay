@@ -42,6 +42,7 @@ for themeName, t in pairs(Themes) do
 
 end
 
+AssetLoader:preloadImage("death","themes/robot/assets/NormalCreepBlood.png")
 AssetLoader:preloadImage("normal","assets/normalRobot.png")
 AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
 AssetLoader:preloadImage("explosion","themes/robot/assets/explosion.png")
@@ -53,5 +54,5 @@ AssetLoader:preloadImage("slowTowerIcon","assets/slowTower.png")
 AssetLoader:preloadImage("backIcon","assets/backIcon.png")
 AssetLoader:preloadImage("upgradeIcon","assets/upgradeIcon.png")
 AssetLoader:preloadImage("obstacles","themes/robot/assets/obstacles.png")
-	
+AssetLoader:preloadImage("shadow","themes/robot/assets/CreepShadow.png")	
 AssetLoader:preloadImage("sellIcon","assets/sell.png")

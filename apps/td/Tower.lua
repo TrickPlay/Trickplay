@@ -164,7 +164,7 @@ end
 function Tower:animateTower(creeps,i)
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y	
-	creeps[i]:bleed()
+	--creeps[i]:bleed()
 	
 	-- Simple rotation
 	if self.mode == "rotate" then
