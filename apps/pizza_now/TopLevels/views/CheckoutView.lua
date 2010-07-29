@@ -6,17 +6,70 @@ CheckoutView = Class(View, function(view, model, ...)
         position = {0,0},
         src = "assets/MenuBg.jpg"
     }
-    local junkInDaTrunk = Clone(back)
-    local verticalDividerRight = Image{
-        position = {1770,0},
+    local junkInDaTrunk = Clone{source = back}
+    junkInDaTrunk.position = {960, 0}
+    local verticalDividerLeft = Image{
+        position = {150,0},
         height = 960,
         tile = {false, true},
         src = "assets/MenuLine.png"
     }
-    local verticalDividerLeft = Clone(verticalDividerRight)
-    verticalDividerLeft.x = 150
-    background = {back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight}
+    local verticalDividerRight = Clone{source = verticalDividerLeft}
+    verticalDividerRight.position = {1770, 0}
+    local verticalDividerCenter = Clone{source = verticalDividerLeft}
+    verticalDividerCenter.position = {960, 0}
+    local horizontalDividerLeft = Image{
+        position = {150, 840},
+        height = 960-150,
+        tile = {false, true},
+        src = "assets/MenuLine.png",
+        z_rotation = {270,0,0}
+    }
+    local horizontalDividerRight = Clone{source = horizontalDividerLeft}
+    horizontalDividerRight.position = {960, 220}
+    horizontalDividerRight.z_rotation = {270, 0, 0}
+    local orderText = Text{
+        position = {140, 20},
+        font = CUSTOMIZE_NAME_FONT,
+        color = Colors.BLACK,
+        z_rotation = {90,0,0},
+        text = "Order",
+    }
+    local detailsText = Text{
+        position = {1920, 20},
+        font = CUSTOMIZE_NAME_FONT,
+        color = Colors.BLACK,
+        z_rotation = {90,0,0},
+        text = "Details",
+    }
+    local passwordText = Text{
+        position = {970, 260},
+        font = CUSTOMIZE_TAB_FONT,
+        color = Colors.BLACK,
+        text = "Trickplay Password:",
+    }
+    local passwordFormLeft = Image{
+        position = {1460, 260},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local passwordFormCenter = Image{
+        position = {1470,260},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1730-1470,
+        tile = {true, false}
+    }
+    passwordFormRight = Image{
+        position = {1730,260},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    local background = {
+        back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
+        verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
+        orderText, detailsText, passwordText, passwordFormLeft, passwordFormCenter,
+        passwordFormRight
+    }
 
+    --next add the form shiz
     local street = Text{
         position={50,0},
         font=DEFAULT_FONT,
@@ -89,7 +142,7 @@ CheckoutView = Class(View, function(view, model, ...)
 
     local menu_items = {street, apartment, city, zip_code, card_type, card_number, card_secret_code, card_expiration, confirm, exit}
 
-    view.ui=Group{name="checkout_ui", position={660,180}}
+    view.ui=Group{name="checkout_ui", position={0,0}}
     view.ui:add(unpack(background))
     view.ui:add(unpack(menu_items))
     assert(view.ui.children[1])
