@@ -65,7 +65,6 @@ end
 -- ASSETS
 bloodGroup = Group{z = 1, opacity = 255}
 
-obstacleAnimation = Group {z=1, opacity = 255}
 
 bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
 healthbar = Rectangle {color = "00FF00", width = SP, height = 10}

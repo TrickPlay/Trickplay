@@ -1,4 +1,5 @@
 dofile ("Square.lua")
+dofile ("Obstacle.lua")
 dofile ("Player.lua")
 dofile ("aStar.lua")
 
@@ -75,7 +76,9 @@ Board = {
 		for i = 1, #self.squaresWithTowers do
 			self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
 		end
-		
+		for i = 1, #self.obstacleImages do
+			self.obstacleImages[i]:animate()
+		end
 		if self.circle then
 			circleRender(self.circle, seconds)
 		end
@@ -157,12 +160,16 @@ function Board:createBoard()
 	overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
 	if (self.theme.obstacles.insert) then
 		for i =1, #self.theme.obstacles do
-
+			self.obstacleImages[i] = Obstacle:new { x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1])}
+--[[
+			
 			local obstacle = AssetLoader:getImage("obstacles", {})
 			local obstacleGroup = Group{x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1]), z = 1, clip = {0,0,SP,SP}}
 			table.insert(self.obstacleImages,obstacleGroup)
-			obstacleGroup:add(obstacle)
-			screen:add(obstacleGroup)
+			obstacleGroup:add(obstacle)]]
+			
+			screen:add(self.obstacleImages[i].obstacleGroup)
+			self.obstacleImages[i].timer:start()
 		end
 	end
 	local b = Group{}
