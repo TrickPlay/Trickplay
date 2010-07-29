@@ -86,6 +86,8 @@
 									target:self action:@selector(exitAppAction:)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
 
+	backgroundView.image = [UIImage imageNamed:@"background.png"];
+
 }
 
 - (void)exitAppAction:(id)sender
@@ -660,7 +662,7 @@
 		[mStyleAlert dismissWithClickedButtonIndex:10 animated:YES];
 	}
 	//Clear the background and revert to default trickplay logo
-	backgroundView.image = [UIImage imageNamed:@"background"];
+	backgroundView.image = [UIImage imageNamed:@"background.png"];
 	
 }
 
