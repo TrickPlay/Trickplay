@@ -228,7 +228,7 @@ function Creep:bleed()
 	blood:fill() -- or c:stroke()
 	blood:finish_painting()
 	bloodGroup:add(blood)
-	bloodGroup.opacity = 255
+	bloodGroup.opacity = 155
 end
 
 -- insert whatever happens on death here, you can use seconds or deathtimer

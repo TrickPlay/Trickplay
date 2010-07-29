@@ -116,7 +116,8 @@ function Tower:render(seconds, creeps)
 			local cy = creeps[i].creepGroup.y					
 			creeps[i].speed = creeps[i].max_speed
 	
-			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0) then
+			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0 and cx > 0) then
+				self:animateTower(creeps,i)
 				self:attackCreep(creeps,i,1)
 				self:animateFire(seconds, creeps[i])
 				if (self.splash) then
@@ -158,6 +159,58 @@ function Tower:upgrade()
 		self.level = self.level -1 	
 	end
 	
+end
+
+function Tower:animateTower(creeps,i)
+	local cx = creeps[i].creepGroup.x
+	local cy = creeps[i].creepGroup.y	
+	creeps[i]:bleed()
+	
+	-- Simple rotation
+	if self.mode == "rotate" then
+		
+		local dx = cx - (self.towerImageGroup.x + SP/2)
+		local dy = cy - (self.towerImageGroup.y + SP/2)
+		--print("rotating!")
+		
+		local dir = (180/math.pi) * math.atan((dy)/(dx)) + 180
+		if dx >= 0 then dir = dir + 180 end
+		
+		self.rotation = dir
+		
+		-- Rotate the image group only, not the image or the fire image
+		self.towerImageGroup.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
+		self.towerImageGroup:add(self.fireImage)
+		
+		self.fired = true
+	
+	-- Sprites with a direction table
+	elseif self.mode == "sprite" then 
+	
+		local d = self.directionTable
+		local dir
+		for i = 1, #d do
+			local di = d[i]
+			if cy >= di[1] and cy <= di[2] and cx >= di[3] and cx <= di[4] then dir = i break end
+		end
+		if dir == nil then print (cx, cy) end
+	
+		self.towerImage.x = - SP * (dir - 1)
+	
+		self.fireImage.x = self.towerImage.x
+		
+		self.towerImageGroup:add(self.fireImage)
+		self.fired = true
+
+	end
+	
+	if self.mode == "fire" or self.attackMode == "fire" then
+		
+		self.fireImage.x = self.towerImage.x
+		self.towerImageGroup:add(self.fireImage)
+		self.fired = true
+	
+	end
 end
 
 function Tower:animateFire(seconds, creep)
@@ -223,54 +276,7 @@ function Tower:attackCreep(creeps, i, intensity)
 	local cy = creeps[i].creepGroup.y
 	if (self.slow) then creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity end
 
-	-- Simple rotation
-	if self.mode == "rotate" then
-		
-		local dx = cx - (self.towerImageGroup.x + SP/2)
-		local dy = cy - (self.towerImageGroup.y + SP/2)
-		--print("rotating!")
-		
-		local dir = (180/math.pi) * math.atan((dy)/(dx)) + 180
-		if dx >= 0 then dir = dir + 180 end
-		
-		self.rotation = dir
-		
-		-- Rotate the image group only, not the image or the fire image
-		self.towerImageGroup.z_rotation = { dir , self.towerImage.w/2 , self.towerImage.h/2 }
-		self.towerImageGroup:add(self.fireImage)
-		
-		self.fired = true
-	
-	-- Sprites with a direction table
-	elseif self.mode == "sprite" then 
-	
-		local d = self.directionTable
-		local dir
-		for i = 1, #d do
-			local di = d[i]
-			if cy >= di[1] and cy <= di[2] and cx >= di[3] and cx <= di[4] then dir = i break end
-		end
-		if dir == nil then print (cx, cy) end
-	
-		self.towerImage.x = - SP * (dir - 1)
-	
-		self.fireImage.x = self.towerImage.x
-		
-		self.towerImageGroup:add(self.fireImage)
-		self.fired = true
-
-	end
-	
-	if self.mode == "fire" or self.attackMode == "fire" then
-		
-		self.fireImage.x = self.towerImage.x
-		self.towerImageGroup:add(self.fireImage)
-		self.fired = true
-	
-	end
-
 	creeps[i].hp = creeps[i].hp - self.damage*intensity
-	creeps[i]:bleed()
 	
 	if (creeps[i].hp <=0) then creeps[i].hp =0 end
 

@@ -63,7 +63,7 @@ end
 
 
 -- ASSETS
-bloodGroup = Group{z = 1, opacity = 255}
+bloodGroup = Group{z = 1, opacity = 155}
 
 
 bulletImage = Rectangle { color = "FF0000", x = -100, y = -100, z = 2, width = 15, height = 15}
