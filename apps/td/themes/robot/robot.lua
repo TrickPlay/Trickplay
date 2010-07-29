@@ -15,7 +15,7 @@ local robot = {
 		},
 		towers = {
 				normalTower =
-						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 1, name = "NormalTower", simpleRotate = true, mode = "rotate", bullet = 1,
+						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 1, name = "NormalTower", mode = "rotate", bullet = 1,
 								upgrades = {
 												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = false},
 												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = false}
@@ -32,7 +32,7 @@ local robot = {
 						{ damage = 30, range = 200, cooldown = .5, cost = 70, slowammount = 100, slow = false, splash = true, frames = 1, splashradius = 360, name = "NukeTower", mode = "fire", attackFrames = 4,
 						},
 				laserTower = 
-						{damage = 50, range = 500, cooldown = 1, cost = 100, slow = false, splash = false, frames = 1, name = "LaserTower", simpleRotate = true, mode = "rotate", bullet = 2,
+						{damage = 50, range = 500, cooldown = 1, cost = 100, slow = false, splash = false, frames = 1, name = "LaserTower", mode = "rotate", bullet = 2, attackFrames = 5, attackMode = "fire",
 								upgrades = {
 											{damage = 100, range = 500, cooldown = 0.8, cost = 100, slow = false},
 											{damage = 200, range = 500, cooldown = 0.8, cost = 100, slow = false},
