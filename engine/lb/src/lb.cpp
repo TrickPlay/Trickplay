@@ -521,7 +521,7 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
     if ( 0 == lua_getmetatable( L , -1 ) )
     {
         g_debug( "INSTALLING LAZY LOADER" );
-        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
+//        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
 
         // Create the metatable
 
@@ -554,7 +554,7 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
     }
     else
     {
-        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
+//        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
 
         // Get the lazy load function from the global metatable
 
