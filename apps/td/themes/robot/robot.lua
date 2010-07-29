@@ -45,7 +45,7 @@ local robot = {
 		},
 		boardBackground = "assets/robotBackground.png",
 		obstacles = dofile("themes/robot/obstacles.lua"),
-		wave = dofile("round1.lua"),
+		wave = nil,
 		
 		waveTable = {
 			["NormalCreep"] = 1,
