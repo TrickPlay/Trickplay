@@ -122,8 +122,9 @@ function Board:new(args)
 			end
 	   end
 	end
-	for i =1, #theme.obstacles do
-		squareGrid[theme.obstacles[i][1]][theme.obstacles[i][2]].square[3] = FULL
+	for i =1, #theme.obstacles[round] do
+		print(theme.obstacles[1][i][1], theme.obstacles[1][i][2])
+		squareGrid[theme.obstacles[round][i][1]][theme.obstacles[round][i][2]].square[3] = FULL
 	end
 	local object = {
 		w = w,
@@ -165,16 +166,9 @@ function Board:createBoard()
 	end
 	backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
 	overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
-	if (self.theme.obstacles.insert) then
-		for i =1, #self.theme.obstacles do
-			self.obstacleImages[i] = Obstacle:new { x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1]), frames = self.theme.obstacles.frames}
---[[
-			
-			local obstacle = AssetLoader:getImage("obstacles", {})
-			local obstacleGroup = Group{x = GTP(self.theme.obstacles[i][2]), y = GTP(self.theme.obstacles[i][1]), z = 1, clip = {0,0,SP,SP}}
-			table.insert(self.obstacleImages,obstacleGroup)
-			obstacleGroup:add(obstacle)]]
-			
+	if (self.theme.obstacles[round].insert) then
+		for i =1, #self.theme.obstacles[round] do
+			self.obstacleImages[i] = Obstacle:new { x = GTP(self.theme.obstacles[round][i][2]), y = GTP(self.theme.obstacles[round][i][1]), frames = self.theme.obstacles[round].frames}
 			screen:add(self.obstacleImages[i].obstacleGroup)
 			self.obstacleImages[i].timer:start()
 		end

@@ -27,12 +27,9 @@ function Obstacle:animate()
 	
 	for i=1, self.frames do
 		if self.timer.elapsed_seconds < ( 1/self.frames ) * i * time and self.timer.elapsed_seconds > ( 1/self.frames) * (i-1) * time then
-			--print (- SP * (i-1))
+
 			self.obstacleImage.x = - SP * (i-1)
-			--print ("move image")
-			--self.creepImage.clip = {SP*2 * (i-1),0,SP*2,SP*2}
-			--print("Using image: ", i)
-			--print(self.has_clip)
+
 		end
 	end
 	
