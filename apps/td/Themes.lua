@@ -42,6 +42,8 @@ for themeName, t in pairs(Themes) do
 
 end
 
+AssetLoader:preloadImage("select","assets/Selector.png")
+
 AssetLoader:preloadImage("normal","assets/normalRobot.png")
 AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
 AssetLoader:preloadImage("explosion","themes/robot/assets/explosion.png")
