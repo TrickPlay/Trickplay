@@ -1,6 +1,6 @@
 Bullet = {}
 
-function Bullet:new(args, creep)
+function Bullet:new(args, creep, rotation)
 
 	--print(game.board.theme.themeName.."Bullet"..args.id)
 
@@ -13,26 +13,15 @@ function Bullet:new(args, creep)
 		creep = creep,
 	}
 	
+	--object.image.z_rotation = { rotation, object.image.w/2, object.image.h/2}
+	
 	--screen:add(AssetLoader:getImage(game.board.theme.themeName.."Bullet"..args.id,{z = 10, x=200, y=200}))
 	
 	
 	if object.frames then object.length = object.image.w/object.frames else object.length = object.image.w end
-	--object.image.extra.parent = object
 	
 	-- Animate the bullet if it has frames
 	if args.frames then object.animation = true end
-	
-	-- If it has speed, then create a group for it to move in
-	--if object.speed then
-	
-		--local container = object.image.parent
-		--print(container, ":)")
-		--container:remove(object.image)
-		--object.imageGroup = Group{}
-		--object.imageGroup:add(object.image)
-		--container:add(object.imageGroup)
-	
-	--end
 	
 	--print(object.image, "!")
 	

@@ -30,6 +30,7 @@ for themeName, t in pairs(Themes) do
 		if v.upgrades then
 			for key,val in ipairs(v.upgrades) do
 				AssetLoader:preloadImage(themeName..v.name..key, "themes/"..themeName.."/assets/"..v.name..key..".png")
+				AssetLoader:preloadImage(themeName..v.name.."Fire"..key, "themes/"..themeName.."/assets/"..v.name.."Fire"..key..".png")
 				print(themeName..v.name..key)
 			end
 		end

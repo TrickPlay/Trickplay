@@ -3,17 +3,9 @@ wave = {
 			{
 				{
 					{name = "NormalCreep"},
-					size = 10
+					size = 1
 				},
-				{
-					{name = "MediumCreep"},
-					size = 10
-				},
-				{
-					{name = "FlyingCreep"},
-					size = 10
-				},
-				size = 30          
+				size = 1          
 			},
 
 			-- Wave 2
