@@ -660,7 +660,7 @@
 		[mStyleAlert dismissWithClickedButtonIndex:10 animated:YES];
 	}
 	//Clear the background and revert to default trickplay logo
-	backgroundView.image = [UIImage imageNamed:@"background.png"];
+	backgroundView.image = [UIImage imageNamed:@"background"];
 	
 }
 
