@@ -168,6 +168,7 @@ endif (TP_CLUTTER_BACKEND_EGL)
 if (TP_PRODUCTION)
 
 	add_definitions( -DTP_PRODUCTION=1 )
+	add_definitions( -DG_DISABLE_ASSERT=1 )
 	
 endif (TP_PRODUCTION)
 
@@ -195,21 +196,23 @@ set(
 
     LB_FILES
     
+    ${BINDINGS_SRC}/globals.lb
+
     ${BINDINGS_SRC}/timer.lb
+    
     ${BINDINGS_SRC}/url_request.lb
     ${BINDINGS_SRC}/local_hash.lb
-    ${BINDINGS_SRC}/globals.lb
     ${BINDINGS_SRC}/app.lb
     ${BINDINGS_SRC}/system.lb
     ${BINDINGS_SRC}/settings.lb
     ${BINDINGS_SRC}/profile.lb
     ${BINDINGS_SRC}/xml.lb
+    ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
-    ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/json.lb
 
 	${BINDINGS_SRC}/audiosampler.lb
@@ -217,8 +220,8 @@ set(
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
     ${BINDINGS_SRC}/clutter_screen.lb
-    ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_rectangle.lb
+    ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_clone.lb
     ${BINDINGS_SRC}/clutter_group.lb
     ${BINDINGS_SRC}/clutter_image.lb
@@ -322,7 +325,6 @@ add_library(
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp    
-    ${ENGINE_SRC}/source/signal_collector.cpp    
     ${ENGINE_SRC}/source/clutter_util.cpp    
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
@@ -341,6 +343,8 @@ add_library(
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
+    ${ENGINE_SRC}/source/user_data.cpp
+    
     ${GENERATED_FILES}
     
     ${LUA_SOURCE_FILES}
