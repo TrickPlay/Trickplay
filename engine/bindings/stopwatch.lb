@@ -18,7 +18,7 @@ class Stopwatch [[GTimer*]]
 
     Stopwatch()
         [[
-            *self = g_timer_new();
+            self = lb_construct( GTimer , g_timer_new() );
         ]];
 
     ~Stopwatch()
