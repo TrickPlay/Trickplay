@@ -46,9 +46,13 @@ CustomizeController = Class(Controller,
          [keys.Return] =
             function(self)
                 if self.on_back_arrow then
+                    self.selected = 1
+                    self.on_back_arrow = false
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     self:get_model():notify()
                 elseif self.add_to_order then
+                    self.selected = 1
+                    self.add_to_order = false
                     self:get_model().cart[#self:get_model().cart + 1] = view:get_model().current_item
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     self:get_model():notify()
@@ -122,8 +126,10 @@ CustomizeController = Class(Controller,
             assert(self.tab_controller,"tab controller is nil")
             self.tab_controller:move_selector(dir)
          elseif self.add_to_order then
-             self.add_to_order = false
-             self:get_model():notify()
+            if dir == Directions.UP then
+                self.add_to_order = false
+                self:get_model():notify()
+            end
          --otherwise
          else
             --print("Customize move_selector()",dir[1],dir[2])
@@ -140,11 +146,13 @@ CustomizeController = Class(Controller,
             --move up and down through the tabs
             else
                local new_selected = selected + dir[2]
+               print(new_selected, MenuSize)
                --print("switching Tabs from",selected," to ",new_selected)
-               if 1 <= new_selected then
+               if 1 <= new_selected and new_selected <= MenuSize then
                   selected = new_selected
                   --print(selected)
-               elseif new_selected <= MenuSize then
+               elseif new_selected > MenuSize then
+                  print("add??")
                   self.add_to_order = true
                   self:get_model():notify()
                end

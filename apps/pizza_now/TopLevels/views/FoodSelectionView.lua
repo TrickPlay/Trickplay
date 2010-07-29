@@ -39,6 +39,9 @@ FoodSelectionView = Class(View, function(view, model, ...)
                     c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
 
                     self:get_controller().child = c_view:get_controller()
+                elseif i == 3 then
+                    c_view.ui.opacity = 255
+                    c_view.items[c_view:get_controller():get_selected_index()].opacity = 100
                 else
                     c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
                     prev_selection[i] = c_view:get_controller():get_selected_index()
