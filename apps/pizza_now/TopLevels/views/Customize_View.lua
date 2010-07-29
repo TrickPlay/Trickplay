@@ -59,21 +59,26 @@ CustomizeView = Class(View, function(view, model, ...)
                 src      = "assets/BackArrowFilled.png"
             }
         view.add_to_order = Text{
-              position    = {155, 880},
+              position    = {155, 850},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
               text        = "Add to Order"
            }
         view.hor_sep =  Image {
-                position = {150, 875},
-                width    = 960-150,
+                position = {150, 840},
+                height   = 960-150,
                 scale    = {1,1.5},
-                tiled    = {true,false},
-                src      = "assets/MenuHorzLine.png"
+              z_rotation = {-90,0,0},
+                tiled    = {false,true},
+                src      = "assets/MenuLine.png"
             }
         view.selector = Image {
                 position  = {150, 0},
                 src       = "assets/SubmenuHighlight.png"
+            }
+        view.add_to_order_selector = Image {
+                position  = {150, 845},
+                src       = "assets/EditOrderHighlight.png"
             }
         view.ui.opacity = 255
         for tab_index,tab in ipairs(model.current_item.Tabs) do
@@ -85,7 +90,7 @@ CustomizeView = Class(View, function(view, model, ...)
             --build the customization menu
             view.menu_items[tab_index] = Text {
                 position = {155, 120*(tab_index-1)+30},
-                font     = CUSTOMIZE_TAB_FONT,
+                font     = CUSTOMIZE_SUB_FONT,
                 color    = Colors.BLACK,
                 text     = tab.Tab_Text
             }
@@ -148,7 +153,7 @@ CustomizeView = Class(View, function(view, model, ...)
             view.vert_lines[#view.menu_items+1] = Image {
                 position = {300, 120*(#view.menu_items+1-1)},
                 width    = 20,
-                height   = 875-120*(#view.menu_items+1-1),
+                height   = 840-120*(#view.menu_items+1-1),
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
@@ -170,6 +175,7 @@ CustomizeView = Class(View, function(view, model, ...)
         view.ui:add(view.add_to_order)
         view.ui:add(view.hor_sep)
         view.ui:add(view.selector)
+        view.ui:add(view.add_to_order_selector)
     end
     --view:Create_Menu_Items()
 ----------------------------------------------------------------------------
@@ -199,9 +205,15 @@ CustomizeView = Class(View, function(view, model, ...)
             if controller.on_back_arrow then
                 view.back_arrow_selected.opacity = 255
                 view.selector.opacity = 0
+                view.add_to_order_selector.opacity = 0
+            elseif controller.add_to_order then
+                view.add_to_order_selector.opacity = 255
+                view.back_arrow_selected.opacity = 0
+                view.selector.opacity = 0
             else
                 view.selector.opacity = 255
                 view.back_arrow_selected.opacity = 0
+                view.add_to_order_selector.opacity = 0
                 for i,item in ipairs(view.menu_items) do
                     if i == controller:get_selected_index() then
                         --print("\t",i,"opacity to 255")

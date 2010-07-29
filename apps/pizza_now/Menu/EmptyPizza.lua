@@ -97,28 +97,32 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       Tab_Text = "Crust",
       --Radio Buttons
       Options = {
-         {Name = "Cheese", Image = "", 
+         {Name = "Cheese", Image = Image{src="assets/Topping_Pepperoni.png"}, 
                        Placement = All_Options.Placement.ENTIRE,
                        CoverageX = All_Options.Coverage.REGULAR,
+                            ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
                          end},
-         {Name = "Sauce",  Image = "", 
+         {Name = "Sauce",  Image = Image{src="assets/Topping_Pepperoni.png"}, 
                        CoverageX = All_Options.Coverage.REGULAR,
                       Sauce_Type = All_Options.Sauce_Type.TOMATO,
+                            ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
                          end},
-         {Name = "Crust",  Image = "", 
+         {Name = "Crust",  Image = Image{src="assets/Topping_Pepperoni.png"}, 
                      Crust_Style = All_Options.Crust_Style.HANDTOSSED,
+                            ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
                          end},
-         {Name = "Size",   Image = "",
+         {Name = "Size",   Image = Image{src="assets/Topping_Pepperoni.png"},
                             Size = All_Options.Size.LARGE,
+                            ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
@@ -150,9 +154,10 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
    for i =1,#Meat_Toppings do
       self.Tabs[2].Options[i] = {
          Name  = Meat_Toppings[i],
-         Image = "",
+         Image = Image{src="assets/Topping_Pepperoni.png"},
          CoverageX  = All_Options.Coverage.REGULAR,
          Placement = All_Options.Placement.NONE,
+         ToppingGroup = nil,
          Selected = 
             function(itself)
              itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
@@ -163,9 +168,10 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
    for i =1,#Veggie_Toppings do
       self.Tabs[3].Options[i] = {
          Name  = Veggie_Toppings[i],
-         Image = "",
+         Image = Image{src="assets/Topping_Pepperoni.png"},
          CoverageX  = All_Options.Coverage.REGULAR,
          Placement = All_Options.Placement.NONE,
+         ToppingGroup = nil,
          Selected = 
             function(self)
              self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
@@ -173,30 +179,158 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
             end
       }
    end
+
+
+local pizza = Image{
+    position = {0, 0},
+    src = "assets/Crust_HandTossed.png",
+    name = "pizza"
+}
+local cheese = Image{
+    position = {0, 0},
+    src = "assets/Cheese_Normal.png"
+}
+local sauce = Image{
+    position = {0, 0},
+    src = "assets/Sauce_Tomato.png"
+}
+
+self.pizzagroup = Group{position = {960,500}}
+
+
+self.pizzagroup:add(pizza)
+self.pizzagroup:add(sauce)
+self.pizzagroup:add(cheese)
+fthis = self.pizzagroup
+print("\n\n\n\nhererere")
+screen:add(self.pizzagroup)
 end)
 
-function print_empty_pizza()
-   pzza = Empty_Pizza()
-   print("Empty Pizza Item:",pzza.Name)
-      for tab_index,tab in ipairs(pzza.Tabs) do
-         --display options.image
-         print("\n"..tab.Tab_Text..": choose\n")
-         if tab.Options ~= nil then
-            for opt_index,option in ipairs(tab.Options) do
-               print(option.Name,": ")
-               for item, selection in pairs(option) do
-                  if item ~= "Name" and item ~= "Image" then
-                     print("\t"..item,":")
-                     for pick, val in pairs(All_Options[item]) do
-                        print("\t",pick)
-                     end
-                     print("\tcurrently selected:", selection)
-                  end
-               end
+
+
+
+
+
+
+
+function distribute_topping(topping, side, amount, group, pizzagroup)
+    --set up random variables
+    local distribution = 1
+    local slices = 8
+
+    local range = 180/slices
+    local toppingsPerSlice = 3
+    --Groups for the left and right side of the pizza && amount of topping
+    local toppingLightRightGroup = Group{name = "topping_light_right"}
+    local toppingNormalRightGroup = Group{name = "topping_normal_right"}
+    local toppingExtraRightGroup = Group{name = "topping_extra_right"}
+    local toppingRightGroup = Group{name = "right_side"}
+
+    local toppingLightLeftGroup = Group{name = "topping_light_left"}
+    local toppingNormalLeftGroup = Group{name = "topping_normal_left"}
+    local toppingExtraLeftGroup = Group{name = "topping_extra_left"}
+    local toppingLeftGroup = Group{name = "left_side"}
+
+    toppingRightGroup:add(toppingLightRightGroup)
+    toppingRightGroup:add(toppingNormalRightGroup)
+    toppingRightGroup:add(toppingExtraRightGroup)
+
+    toppingLeftGroup:add(toppingLightLeftGroup)
+    toppingLeftGroup:add(toppingNormalLeftGroup)
+    toppingLeftGroup:add(toppingExtraLeftGroup)
+
+    group:add(toppingRightGroup)
+    group:add(toppingLeftGroup)
+
+    pizzagroup:add(group)
+
+    --determine distribution
+    for slice = 1, slices do
+        for top = 1, toppingsPerSlice do
+            local seed = math.random(toppingsPerSlice+1-top)
+            local radius = top * 140 * (seed+toppingsPerSlice+1)/(toppingsPerSlice+4)
+            local degrees = math.random(range)
+            local angle = (degrees + range*(slice-1)) * math.pi/180
+
+            local clone = Clone{source = topping}
+            local x = radius*math.cos(angle)+400
+            local y = -1*radius*math.sin(angle)+400
+            clone.position = {x, y}
+            print("radians: "..angle..", degrees: "..degrees..", radius: "..radius)
+            local groupseed = math.random(2,4)
+            if(All_Options.CoverageX.LIGHT == groupseed) then
+                if(slice <= 4) then
+                    toppingLightRightGroup:add(clone)
+                else
+                    toppingLightLeftGroup:add(clone)
+                end
+            elseif(All_Options.CoverageX.REGULAR == groupseed) then
+                if(slice <= 4) then
+                    toppingNormalRightGroup:add(clone)
+                    print("here1")
+                else
+                    print("here2")
+                    toppingNormalLeftGroup:add(clone)
+                end
+            elseif(All_Options.CoverageX.EXTRA == groupseed) then
+                if(slice <= 4) then
+                    toppingExtraRightGroup:add(clone)
+                else
+                    toppingExtraLeftGroup:add(clone)
+                end
+            else
+                error("error: a topping was not added correctly!")
             end
-         end
-      end
--- until item.IsReady()
-   return true
+        end
+    end
+    --TODO: add one in the very center
+
 end
---print_empty_pizza()
+function topping_dropping(topping, side, amount, toppinggroup, pizzagroup)
+    assert(topping)
+    assert(side)
+    assert(amount)
+    assert(pizzagroup)
+    if(All_Options.Placement.NONE == side) then
+	amount = All_Options.CoverageX.NONE
+    end
+    --add group for type
+    if(not toppinggroup) then
+        toppinggroup = Group()
+        distribute_topping(topping, side, amount, toppinggroup, pizzagroup)
+    end
+    --add topping to screen to make it clonable
+    if not topping.parent then
+        screen:add(topping)
+        topping:hide()
+    end
+
+        
+    --determine how many should be shown
+    toppinggroup:find_child("right_side"):hide_all()
+    toppinggroup:find_child("left_side"):hide_all()
+    --show the correct side of the pizza
+    if(All_Options.Placement.RIGHT == side or All_Options.Placement.ENTIRE == side) then
+        toppinggroup:find_child("right_side"):show()
+    end
+    if(All_Options.Placement.LEFT == side or All_Options.Placement.ENTIRE == side) then
+        toppinggroup:find_child("left_side"):show()
+    end
+    --show the correct amount
+    if(All_Options.CoverageX.LIGHT == amount) then
+        toppinggroup:find_child("topping_light_left"):show()
+        toppinggroup:find_child("topping_light_right"):show()
+    elseif(All_Options.CoverageX.REGULAR == amount) then
+        toppinggroup:find_child("topping_light_left"):show()
+        toppinggroup:find_child("topping_light_right"):show()
+        toppinggroup:find_child("topping_normal_left"):show()
+        toppinggroup:find_child("topping_normal_right"):show()
+    elseif(All_Options.CoverageX.EXTRA == amount) then
+        toppinggroup:find_child("topping_light_left"):show()
+        toppinggroup:find_child("topping_light_right"):show()
+        toppinggroup:find_child("topping_normal_left"):show()
+        toppinggroup:find_child("topping_normal_right"):show()
+        toppinggroup:find_child("topping_extra_left"):show()
+        toppinggroup:find_child("topping_extra_right"):show()
+    end
+end

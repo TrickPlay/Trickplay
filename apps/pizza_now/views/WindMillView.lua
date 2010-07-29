@@ -77,26 +77,41 @@ WindMillView = Class(View, function(view, model, ...)
     }
     view.directionIcon = {
         Image{
-            position = {70, 100},
+            position = {60, 100},
             src = "assets/PizzaRadialUI/LeftIcon.png",
             name = "left_icon",
         },
         Image{
-            position = {100, 70},
+            position = {100, 60},
             src = "assets/PizzaRadialUI/UpIcon.png",
             name = "up_icon",
         },
         Image{
-            position = {200, 100},
+            position = {210, 100},
             src = "assets/PizzaRadialUI/RightIcon.png",
             name = "right_icon",
         },
         Image{
-            position = {100, 200},
+            position = {100, 210},
             src = "assets/PizzaRadialUI/DownIcon.png",
             name = "down_icon"
         }
     }
+    view.shadows = {
+        Image{
+            position = {0, 10},
+            src = "assets/PizzaRadialUI/PrimaryShadow.png",
+            name = "primary_shadow",
+            opacity = 255
+        },
+        Image{
+            position = {-10, 10},
+            src = "assets/PizzaRadialUI/SecondaryShadow.png",
+            name = "secondary_shadow",
+            opacity = 0
+        }
+    }
+    view.ui:add(unpack(view.shadows))
     view.ui:add(unpack(view.amountItemsGray))
     view.ui:add(unpack(view.amountItemsColor))
     view.ui:add(unpack(view.sideItems))
@@ -111,14 +126,14 @@ WindMillView = Class(View, function(view, model, ...)
     end
 
     local function popIn()
-        view.directionIcon[1].x = 70
+        view.directionIcon[1].x = 60
         view.directionIcon[1].y = 100
         view.directionIcon[2].x = 100
-        view.directionIcon[2].y = 70
-        view.directionIcon[3].x = 200
+        view.directionIcon[2].y = 60
+        view.directionIcon[3].x = 210
         view.directionIcon[3].y = 100
         view.directionIcon[4].x = 100
-        view.directionIcon[4].y = 200
+        view.directionIcon[4].y = 210
 
         view.amountItemsGray[1].x = 90
         view.amountItemsGray[1].y = 100
@@ -146,6 +161,8 @@ WindMillView = Class(View, function(view, model, ...)
         popIn()
         amountSelection = false
 	    view.ui.opacity = 255
+        view.shadows[1].opacity = 255
+        view.shadows[2].opacity = 0
         view.directionIcon.opacity = 255
         view.amountItemsGray.opacity = 255
         view.amountItemsColor.opacity = 0
@@ -165,6 +182,8 @@ WindMillView = Class(View, function(view, model, ...)
         end
     end
     local function popOut()
+        view.shadows[1]:animate{opacity = 0, duration = 400}
+        view.shadows[2]:animate{opacity = 255, duration = 400}
         view.directionIcon[1]:animate{x = 40, y = 100, duration = 400}
         view.directionIcon[2]:animate{x = 100, y = 30, duration = 400}
         view.directionIcon[3]:animate{x = 250, y = 100, duration = 400}
