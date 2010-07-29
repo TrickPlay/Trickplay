@@ -201,7 +201,6 @@ self.pizzagroup = Group{position = {960,500}}
 self.pizzagroup:add(pizza)
 self.pizzagroup:add(sauce)
 self.pizzagroup:add(cheese)
-fthis = self.pizzagroup
 print("\n\n\n\nhererere")
 screen:add(self.pizzagroup)
 end)
