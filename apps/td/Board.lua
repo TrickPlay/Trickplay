@@ -304,20 +304,13 @@ function Board:zoomOut()
 end
 
 function Board:buildTower(selection)
+	
 	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
 
-	-- Selection is the proper table in self.theme.towers
-	current.tower = Tower:new(selection, self.theme.themeName)
-	--self:findPaths()
+	if self.player.gold - selection.cost >= 0 then
 	
-	print(selection)
-	if (self.player.gold - current.tower.cost >=0) then
-
-		current.tower.x = GTP(current.x)
-		current.tower.y = GTP(current.y)
-		current.tower.z = 1+GTP(current.tower.y)	
-		print(GTP(current.x), GTP(current.y))
-		--assert(nil)
+		-- Build a new tower if the player has enough money
+		current.tower = Tower:new(selection, self.theme.themeName, current)
 	
 		current.hasTower = true
 		table.insert(self.squaresWithTowers, current)
