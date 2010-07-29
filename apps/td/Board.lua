@@ -36,7 +36,12 @@ Board = {
 				elseif (v.dead == false) then
 					v.greenBar.width = 0
 					v.dead = true	
-					v.deathtimer:start()				
+					v.deathtimer:start()
+					v.creepImageGroup:remove(v.creepImage)
+					v.redBar.opacity = 0
+					v.greenBar.opacity = 0
+					v.creepImageGroup:add(v.deathImage)
+				
 					wave_counter = wave_counter + 1
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
@@ -63,6 +68,8 @@ Board = {
 				v.creepGroup.opacity = 0
 			end
 			for k,v in pairs(self.creepWave) do
+				screen:remove(self.creepWave[k].creepGroup)
+--				screen:remove(self.creepWave[k].creepImageGroup)
 				table.remove(self.creepWave,k)
 			end
 			wave_counter = 0
@@ -265,7 +272,14 @@ function Board:createBoard()
 	
 	playertext.text = self.player.name
 	goldtext.text = self.player.gold
-			
+	BoardMenu.buttons.extra.p = function()
+		paused = not paused
+		if (paused) then
+			screen:animate {duration = 500, y_rotation = 180}
+		else
+			screen:animate {duration = 500, y_rotation = 0}
+		end
+	end	
 	BoardMenu.buttons.extra.space = function()
 		--[[if not self.zoom then
 			self:zoomIn()

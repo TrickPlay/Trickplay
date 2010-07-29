@@ -8,10 +8,13 @@ function Creep:new(args, x, y, name)
 	local y_offset = args.y_offset or 0
 	local speed = args.speed
 	local max_speed = speed
+	local flying = args.flying
+
 	local direction = args.direction or {0,1}
 	local timer = Stopwatch()
 	local deathtimer = Stopwatch()
 	local frames = args.frames
+	local deathImage = AssetLoader:getImage("death", {})
 	timer:start()
 	
 	-- Image/Group stuff
@@ -22,16 +25,17 @@ function Creep:new(args, x, y, name)
 	creepImageGroup:add(creepImage)
 	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset-10}
 	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset-10}
+	local shadow = AssetLoader:getImage("shadow" ,{y = -y_offset-40, opacity = 0})
+	
 	local creepGroup = Group{opacity=255, x = x, y = y}
 	creepGroup.z_rotation = {0,SP,0}
 
-	creepGroup:add(creepImageGroup, redBar, greenBar)
+	creepGroup:add(shadow, creepImageGroup, redBar, greenBar)
 	
 	--local path = {}
 	local dead = false
 	local deadanimate = false
 	local bounty = args.bounty
-	local flying = args.flying
 	if (flying) then creepGroup.z = 2 end
 
 	local object = {
@@ -49,6 +53,7 @@ function Creep:new(args, x, y, name)
 		y_offset = y_offset,
 		frames = frames,
 		dead = dead,
+		deathImage = deathImage,
 		deathtimer = deathtimer,
 		deadanimate = deadanimate,
 		bounty = bounty,
@@ -235,13 +240,31 @@ end
 function Creep:deathAnimation()
 --	self.creepGroup.opacity = 0
 	--print (self.face)
-	if self.flying then
+	local frames = 11
+	local time = frames/20
+	
+	for i=1, frames do
+		if self.deathtimer.elapsed_seconds < ( 1/frames ) * i * time and self.deathtimer.elapsed_seconds > ( 1/frames) * (i-1) * time then
+			self.deathImage.x = - self.deathImage.w/frames * (i-1)
+			self.deathImage.opacity = 255 - i*(255/frames)
+		end
+	end
+
+	if self.deathtimer.elapsed_seconds > time then
+		self.deathtimer:start()
+		self.creepGroup.opacity = 0
+		self.creepGroup:clear()
+		return true
+	end
+	
+--[[	if self.flying then
 		--self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.w/(self.frames*2),self.creepImage.h/2}
 		local xscale = self.creepGroup.scale[1]
 		local yscale = self.creepGroup.scale[2]
 		self.creepGroup.scale = {xscale - 0.05, yscale - 0.05}
 		if self.creepGroup.scale[1] <= 0.1 then
 			self.creepGroup.opacity = 0
+			self.creepGroup:clear()
 			return true
 		end
 	elseif self.face == 1 then
@@ -249,6 +272,7 @@ function Creep:deathAnimation()
 		self.creepGroup.opacity = 255 - self.deathtimer.elapsed_seconds * 90
 		if self.creepGroup.z_rotation[1] >=90 then
 			self.creepGroup.opacity = 0
+			self.creepGroup:clear()
 			return true
 		end
 	elseif self.face == -1 then
@@ -256,9 +280,10 @@ function Creep:deathAnimation()
 		
 		if self.creepGroup.z_rotation[1] <= -90 then
 			self.creepGroup.opacity = 0
+			self.creepGroup:clear()
 			return true
 		end
-	end
+	end]]
 	return false
 end
 
