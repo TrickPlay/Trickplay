@@ -5,6 +5,7 @@ local robot = {
 			--{id = 1, frames = 5, im = "Ringwave"},
 			{id = 1, im = "Cannon", speed = 1000},
 			{id = 2, im = "Laser", speed = 1000},
+			{id = 3, im = "Snowball", speed = 800},
 		},
 		creeps = {
 			{ hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
@@ -22,7 +23,7 @@ local robot = {
 										}
 						},
 				slowTower =
-						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 75, slow = true, splash = true, frames = 8, splashradius = 240, name = "SlowTower", mode = "rotate",
+						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 75, slow = true, splash = true, frames = 1, splashradius = 240, name = "SlowTower", mode = "rotate", bullet = 3,
 								upgrades = {
 												{damage = 5, range = 400, cooldown = 1, cost = 40, slowammount = 50},
 												{damage = 10, range = 400, cooldown = 1, cost = 40, slowammount = 25}

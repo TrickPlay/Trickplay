@@ -54,7 +54,8 @@ function Menu:create_key_functions(container)
 		elseif k == keys.Up and container.extra.up then print("UP") container.extra.up() print("y: ", self.y) self:update_cursor_position()	
 		elseif k == keys.Down and container.extra.down then print("DOWN") container.extra.down() print("y: ", self.y) self:update_cursor_position()
 		elseif k == keys.Return and container.extra.r then print("ENTER") container.extra.r()
-		elseif k == keys.space and container.extra.space then print("BACK") container.extra.space() end
+		elseif k == keys.space and container.extra.space then print("BACK") container.extra.space()
+		elseif k == keys.p and container.extra.p then print("p") container.extra.p() end
 		print("CHILD",k)
 		return true -- Prevent bubble upward to screen
 	end
