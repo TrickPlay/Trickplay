@@ -30,6 +30,7 @@ function Tower:new(args, prefix, square)
 		cost = args.cost,
 		simpleRotate = args.simpleRotate,
 		mode = args.mode or "none",
+		attackFrames = args.attackFrames or 1,
 		
 		-- Images
 		towerImage = towerImage,
@@ -92,6 +93,18 @@ function Tower:render(seconds, creeps)
 	
 	-- Render bullets
 	if self.bgroup then self.bgroup:foreach_child( function(child) child.extra.parent:render(seconds)  end ) end
+	
+	
+	--print(self.mode, self.fired, self.attackFrames > 1, s < self.cooldown/4)
+	if self.mode == "fire" and self.fired and self.attackFrames > 1 and s < self.cooldown/4 then
+		
+		local w = self.fireImage.w/self.attackFrames
+		
+		local percentage = s / (self.cooldown/4)
+		
+		self.fireImage.x = - w * ( math.floor( self.attackFrames * percentage ) )
+		
+	end
 	
 	if self.fired and s > self.cooldown/4 then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
 	--print("1")
@@ -246,6 +259,12 @@ function Tower:attackCreep(creeps, i, intensity)
 		self.towerImageGroup:add(self.fireImage)
 		self.fired = true
 
+	elseif self.mode == "fire" then
+	
+		self.fireImage.x = self.towerImage.x
+		self.towerImageGroup:add(self.fireImage)
+		self.fired = true
+	
 	end
 
 	creeps[i].hp = creeps[i].hp - self.damage*intensity

@@ -29,7 +29,7 @@ local robot = {
 										}
 						},
 				nukeTower =
-						{ damage = 2000, range = 600, cooldown = 5, cost = 500, slowammount = 100, slow = false, splash = true, frames = 8, splashradius = 360, name = "NukeTower",
+						{ damage = 30, range = 200, cooldown = .5, cost = 70, slowammount = 100, slow = false, splash = true, frames = 1, splashradius = 360, name = "NukeTower", mode = "fire", attackFrames = 4,
 						},
 				laserTower = 
 						{damage = 50, range = 500, cooldown = 1, cost = 100, slow = false, splash = false, frames = 1, name = "LaserTower", simpleRotate = true, mode = "rotate", bullet = 2,
