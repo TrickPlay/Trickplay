@@ -22,10 +22,10 @@ end
 
 function Square:render()
 
-	if not self.tower.simpleRotate then
+	if self.tower.mode == "sprite" then
 		self.tower.towerImageGroup.x = (self.x-1) * SP
 		self.tower.towerImageGroup.y = (self.y-1) * SP - (self.tower.towerImage.h/SP - 1)*SP
-	else
+	elseif self.tower.mode == "rotate" or self.tower.mode == "fire" then
 		self.tower.towerImageGroup.x = GTP(self.x-1) + self.tower.towerImage.w/2 - SP/2
 		self.tower.towerImageGroup.y = GTP(self.y-1) + self.tower.towerImage.h/2 - SP/2
 	end
