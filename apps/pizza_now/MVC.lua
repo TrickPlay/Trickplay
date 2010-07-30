@@ -10,6 +10,8 @@ Model = Class(function(model, ...)
     model.arrival_time = 12
     
     model.current_item = nil
+    model.current_item_is_in_cart = false
+
     model.cart = {}
     
     --address info

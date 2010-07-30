@@ -1,16 +1,35 @@
 FoodFooterController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.FOOD_SELECTION)
 
-    local MenuItems = {
-        GO_BACK  = 1,
-        CART     = 2,
-        CONTINUE = 3
-    }
-    
-    local MenuSize = 0
-    for k, v in pairs(MenuItems) do
-        MenuSize = MenuSize + 1
+    local selected = 1
+    local MenuItemCallbacks = {}
+    function self:refresh()
+        MenuSize = #view.items
+        MenuItemCallbacks[1] = function(self)
+            print("Backing up")
+            self:get_model():set_active_component(Components.PROVIDER_SELECTOR)
+            self:get_model():notify()
+        end
+        for i =  2,MenuSize-1 do 
+            MenuItemCallbacks[i] = function(self)
+                print("editing cart item",MenuSize-i)
+                self:get_model().current_item = self:get_model().cart[MenuSize-i]
+                self:get_model().current_item_is_in_cart = true
+                self:get_model():set_active_component(Components.CUSTOMIZE)
+                self:get_model():get_active_controller():init_shit()
+                self:get_model():get_controller(Components.TAB):init_shit()
+                self:get_model():notify()
+
+            end
+        end
+        MenuItemCallbacks[MenuSize] = function(self)
+            print("Checking OUT")
+            self:get_model():set_active_component(Components.CHECKOUT)
+            self:get_model():notify()
+        end
+
     end
+--[[ 
 
     -- the default selected index
     local selected = 1
@@ -32,6 +51,7 @@ FoodFooterController = Class(Controller, function(self, view, ...)
             self:get_model():notify()
         end
     }
+--]]
 
     local MenuKeyTable = {
         --[keys.Up]    = function(self) self:move_selector(Directions.UP) end,
@@ -54,6 +74,9 @@ FoodFooterController = Class(Controller, function(self, view, ...)
 
     function self:get_selected_index()
         return selected
+    end
+    function self:reset_index()
+        selected = 1
     end
 
     function self:move_selector(dir)

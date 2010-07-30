@@ -55,8 +55,13 @@ CustomizeController = Class(Controller,
                     self.selected = 1
                     self.add_to_order = false
                     view:get_model().current_item.pizzagroup:hide_all()
-                    self:get_model().cart[#self:get_model().cart + 1] = view:get_model().current_item
+                    if view:get_model().current_item_is_in_cart == false then
+                       self:get_model().cart[#self:get_model().cart + 1] = view:get_model().current_item
+                    end
+
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
+                    print("size of cart",#self:get_model().cart)
+                    print(self:get_model().cart[1].Name)
                     self:get_model():notify()
                 end
             end
@@ -130,6 +135,10 @@ CustomizeController = Class(Controller,
          elseif self.add_to_order then
             if dir == Directions.UP then
                 self.add_to_order = false
+                self:get_model():notify()
+            elseif dir == Directions.LEFT then
+                self.on_back_arrow = true
+                self.add_to_order  = false
                 self:get_model():notify()
             end
          --otherwise
