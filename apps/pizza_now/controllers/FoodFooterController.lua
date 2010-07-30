@@ -29,6 +29,7 @@ FoodFooterController = Class(Controller, function(self, view, ...)
         end
 
     end
+    self:refresh()
 --[[ 
 
     -- the default selected index

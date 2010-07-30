@@ -57,6 +57,21 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
+        view.center_sep    = Image {
+                position = {960, 0},
+                width    = 20,
+                height   = 960,
+                tiled    = {false,true},
+                src      = "assets/MenuLine.png"
+            }
+        view.nutrition   = Image {
+                position = {960, 0},
+                src      = "assets/NutritionMockup.png"
+            }
+        view.slice_lines = Image {
+                position = {960, 500},
+                src      = "assets/PizzaSliceLines_12.png"
+            }
         view.back_arrow = Image{                
                 position = {5, 800},
                 src      = "assets/BackArrowOutline.png"
@@ -204,6 +219,8 @@ All_Options.CoverageX_r[option.CoverageX]..".png"
         view.ui:add(view.price)
         view.ui:add(view.food_name)
         view.ui:add(view.vert_sep)
+        view.ui:add(view.center_sep)
+        view.ui:add(view.nutrition)
         view.ui:add(view.back_arrow)
         view.ui:add(view.back_arrow_selected)
         view.ui:add(view.add_to_order)
@@ -213,6 +230,7 @@ All_Options.CoverageX_r[option.CoverageX]..".png"
         fthis = model.current_item.pizzagroup
         view.ui:add(model.current_item.pizzagroup)
         model.current_item.pizzagroup:show_all()
+        view.ui:add(view.slice_lines)
     end
     --view:Create_Menu_Items()
 ----------------------------------------------------------------------------
