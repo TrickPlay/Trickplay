@@ -99,13 +99,13 @@ WindMillView = Class(View, function(view, model, ...)
     }
     view.shadows = {
         Image{
-            position = {0, 10},
+            position = {10, 10},
             src = "assets/PizzaRadialUI/PrimaryShadow.png",
             name = "primary_shadow",
             opacity = 255
         },
         Image{
-            position = {-10, 10},
+            position = {-40, -20},
             src = "assets/PizzaRadialUI/SecondaryShadow.png",
             name = "secondary_shadow",
             opacity = 0
@@ -183,10 +183,10 @@ WindMillView = Class(View, function(view, model, ...)
     end
     local function popOut()
         view.shadows[1]:animate{opacity = 0, duration = 400}
-        view.shadows[2]:animate{opacity = 255, duration = 400}
-        view.directionIcon[1]:animate{x = 40, y = 100, duration = 400}
+        view.directionIcon[1]:animate{x = 15, y = 75, duration = 400}
         view.directionIcon[2]:animate{x = 100, y = 30, duration = 400}
-        view.directionIcon[3]:animate{x = 250, y = 100, duration = 400}
+        view.directionIcon[3]:animate{x = 260, y = 75, duration = 400}
+        view.shadows[2]:animate{opacity = 255, duration = 1000}
         view.amountItemsGray[1]:animate{x = 60, y = 70, duration = 400}
         view.amountItemsGray[2]:animate{x = 110, y = 70, duration = 400}
         view.amountItemsGray[3]:animate{x = 160, y = 70, duration = 400}

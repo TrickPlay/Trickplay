@@ -18,7 +18,7 @@ Components = {
 }
 
 -- Model initialization
-local model = Model()
+model = Model()
 
 
 -- View/Controller initialization

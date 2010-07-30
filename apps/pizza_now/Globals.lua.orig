@@ -115,9 +115,14 @@ Characters={
    [keys.minus] = '-',
 }
 
-CUSTOMIZE_TINY_FONT = "KacstArt 24px"
+<<<<<<< HEAD:apps/pizza_now/Globals.lua
+CUSTOMIZE_TAB_FONT  = "KacstArt 10 Pitch 48px"
+CUSTOMIZE_SUB_FONT  = "KacstArt 10 Pitch 32px"
+CUSTOMIZE_NAME_FONT = "KacstArt 10 Pitch 144px"
+=======
 CUSTOMIZE_TAB_FONT  = "KacstArt 48px"
 CUSTOMIZE_SUB_FONT  = "KacstArt 32px"
 CUSTOMIZE_NAME_FONT = "KacstArt 144px"
+>>>>>>> 33a1c2ad05588b0f4225e8b3365a26b56b09a8c6:apps/pizza_now/Globals.lua
 DEFAULT_FONT="Sans 40px"
 DEFAULT_COLOR=Colors.WHITE
