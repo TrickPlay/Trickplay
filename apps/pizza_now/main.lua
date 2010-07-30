@@ -1,5 +1,6 @@
-dofile("Class.lua")
+dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("Globals.lua")
+dofile("Utils.lua")
 dofile("Menu/EmptyPizza.lua")
 dofile("Menu/Selection_Menu.lua")
 dofile("MVC.lua")
@@ -21,7 +22,6 @@ Components = {
 
 -- Model initialization
 model = Model()
-
 
 -- View/Controller initialization
 local address_input_view = AddressInputView(model)

@@ -1,4 +1,3 @@
-
 TabView = Class(View, function(view, model,parent, ...)
     view._base.init(view,model)
     view.parent = parent
@@ -28,22 +27,24 @@ TabView = Class(View, function(view, model,parent, ...)
     function view:leave_sub_group()
         --view.parent.menu_items[view.parent:get_controller():get_selected_index()]:animate{duration= 100, opacity = 255}
         --view.parent.sub_group[view.parent:get_controller():get_selected_index()]:animate{duration = 100, opacity = 100}
-        model:set_active_component(Components.CUSTOMIZE)
-        view:get_controller():reset_selected_index()
-        view.selector.y = 0
-        view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = 80
-        for i=1,#view.parent.sub_group_items[view.parent:get_controller():get_selected_index()] do
-            if i <= CUSTOMIZE_SCROLL_THRESHOLD then
-                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
-                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
-                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 255
-            else
-                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 0
-                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 0
-                view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 0
-            end
-        end
-        self:get_model():notify()
+       model:set_active_component(Components.CUSTOMIZE)
+       view:get_controller():reset_selected_index()
+       view.selector.y = 0
+       local sel = view.parent:get_controller():get_selected_index()
+       view.parent.sub_group[sel].y = 80
+       local sub_group_items = view.parent.sub_group_items
+       for i=1,#sub_group_items[sel] do
+          if i <= CUSTOMIZE_SCROLL_THRESHOLD then
+             for _, item in ipairs(sub_group_items[sel][i]) do
+                item.opacity = 255
+             end
+          else
+             for _, item in ipairs(sub_group_items[sel][i]) do
+                item.opacity = 0
+             end
+          end
+       end
+       self:get_model():notify()
     end
 
     function view:move_selector_up(i)

@@ -78,9 +78,9 @@ AddressInputView = Class(View, function(view, model, ...)
             self.ui.opacity = 255
             for i,item in ipairs(menu_items) do
                 if i == controller:get_selected_index() then
-                    item:animate{duration=1000, mode="EASE_OUT_EXPO", opacity=255}
+                   item.opacity = 255
                 else
-                    item:animate{duration=1000, mode="EASE_OUT_BOUNCE", opacity=0}
+                   item.opacity = 160
                 end
             end
         else

@@ -1,4 +1,7 @@
---dofile("Class.lua")
+if not Class then
+   dofile("Class.lua")
+end
+
 Meat_Toppings = {"Pepperoni","XL Pepperoni","Sliced Italian Sausage", 
     "Italian Sausage", "Beef", "Ham","Bacon","Premium Chicken","Salami",
     "Philly Steak"}
