@@ -1,10 +1,7 @@
--- dofile("Utils.lua")
+dofile("Class.lua")
 dofile("Globals.lua")
 dofile("Menu/EmptyPizza.lua")
 dofile("Menu/Selection_Menu.lua")
-if not Class then
-   dofile("Class.lua")
-end
 dofile("MVC.lua")
 dofile("Views.lua")
 
