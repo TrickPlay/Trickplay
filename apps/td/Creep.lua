@@ -9,6 +9,7 @@ function Creep:new(args, x, y, name)
 	local speed = args.speed
 	local max_speed = speed
 	local flying = args.flying
+	local hit = false
 	local slowed = false
 	local attacked = false
 	local slowtimer = Stopwatch()
@@ -51,6 +52,7 @@ function Creep:new(args, x, y, name)
 		creepImageGroup = creepImageGroup,
 		greenBar = greenBar,
 		redBar = redBar,
+		hit = hit,
 		x_offset = x_offset,
 		y_offset = y_offset,
 		slowed = slowed,
@@ -218,10 +220,19 @@ function Creep:render(seconds)
 			end
 		end
 	end
+
 	self.greenBar.width = SP*(self.hp/self.max_hp)
 	self.creepGroup.z = 0.9 + PTG(self.creepGroup.y) * 0.1
 	if (self.flying) then self.creepGroup.z = 2 end
 	self:animate()
+end
+
+function Creep:getHit(damage, intensity)
+	if (self.hit) then
+		self.hp = self.hp - damage*intensity
+		self.hit = false
+		if (self.hp <=0) then self.hp =0 end
+	end	
 end
 
 --insert whatever happens when you hit a creep, e.g body parts fall or blood drips
