@@ -1,6 +1,6 @@
 Creep = { }
 
-function Creep:new(args, x, y, name)
+function Creep:new(args, x, y, name, buffs)
 	local creepType = args.creepType
 	local hp = args.hp
 	local max_hp = hp
@@ -68,6 +68,15 @@ function Creep:new(args, x, y, name)
 		creepGroup = creepGroup,
 		timer = timer
    }
+   
+   if buffs then
+	   for k, v in pairs(buffs) do
+	   		object[k] = object[k] * v
+	   end
+   end
+   
+   object.max_hp = object.hp
+   
    setmetatable(object, self)
    self.__index = self
    return object
