@@ -29,7 +29,7 @@
 	NSNetServiceBrowser *aNetServiceBrowser = [[NSNetServiceBrowser alloc] init];
 	if(!aNetServiceBrowser) {
         // The NSNetServiceBrowser couldn't be allocated and initialized.
-		return NO;
+		return;
 	}
 	self.services = [[NSMutableArray alloc] init];
     self.navigationController.delegate = self;
@@ -196,8 +196,6 @@
 	[self.navigationController pushViewController:gestureViewController animated:YES];
 	//[[self navigationController] presentModalViewController:gestureViewController animated:YES];
 	self.title = @"Disconnect"; 
-	NSData *portaddress = [service.addresses lastObject];
-	struct sockaddr *pSockAddr = (struct sockaddr *)[portaddress bytes];
 	
 	[gestureViewController setupService:theport hostname:[service hostName] thetitle:[service name]];
 	
