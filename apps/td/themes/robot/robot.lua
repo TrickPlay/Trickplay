@@ -24,7 +24,7 @@ local robot = {
 										}
 						},
 				slowTower =
-						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 75, slow = true, splash = true, frames = 1, splashradius = 240, name = "SlowTower", mode = "rotate", bullet = 3,
+						{ damage = 5, range = 400, cooldown = 1, cost = 80, slowammount = 65, slow = true, slowlength = 2, splash = true, frames = 1, splashradius = 240, name = "SlowTower", mode = "rotate", bullet = 3,
 								upgrades = {
 												{damage = 5, range = 400, cooldown = 1, cost = 40, slowammount = 50},
 												{damage = 10, range = 400, cooldown = 1, cost = 40, slowammount = 25}

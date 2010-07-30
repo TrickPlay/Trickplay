@@ -1,4 +1,5 @@
 wave = {
+			money = 2000,
 			-- Wave 1
 			{
 				{
