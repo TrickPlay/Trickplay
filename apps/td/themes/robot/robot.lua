@@ -37,7 +37,7 @@ local robot = {
 				range = 400, 
 				cooldown = 1, 
 				cost = 80, 
-				slowammount = 65, 
+				slowammount = 70, 
 				slow = true, 
 				slowlength = 2, 
 				splash = false, 
@@ -47,8 +47,8 @@ local robot = {
 				mode = "rotate", 
 				bullet = 3,
 				upgrades = {
-					{damage = 5, range = 400, cooldown = 1, cost = 40, slowammount = 50},
-					{damage = 10, range = 400, cooldown = 1, cost = 40, slowammount = 25, splash = true}
+					{damage = 5, range = 450, cooldown = 1, cost = 30, slowammount = 55},
+					{damage = 10, range = 450, cooldown = 1, cost = 200, slowammount = 40, splash = true}
 				}
 			},
 			nukeTower =	{
@@ -58,7 +58,8 @@ local robot = {
 				cost = 70, 
 				slowammount = 100, 
 				slow = false, 
-				splash = true, 
+				splash = true,
+				damageAroundSelf = true, 
 				frames = 1, 
 				splashradius = 360, 
 				name = "NukeTower", 
