@@ -227,7 +227,7 @@ function Tower:animateFire(seconds, creep)
 	-- Creep needs a bullet number in order to fire
 	if self.bullet then
 	
-		local bullet = Bullet:new( game.board.theme.bullets[self.bullet], creep, self.rotation )
+		local bullet = Bullet:new( game.board.theme.bullets[self.bullet], creep, self.rotation, self.damage )
 		
 		local frames = bullet.frames or 1
 
@@ -273,7 +273,9 @@ function Tower:checkSplash(creeps,i)
 		if (cxj > cx - radius and cxj < cx + radius and cyj > cy - radius and cyj < cy + radius and j ~= i) then
 			--print ("Distance: "..distance)
 			--print ("Intensity: "..intensity)
-			self:attackCreep(creeps,j,intensity)
+			if (not self.bullet) then
+				self:attackCreep(creeps,j,intensity)
+			end
 		end
 	end
 end
@@ -289,8 +291,10 @@ function Tower:attackCreep(creeps, i, intensity)
 			creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity 
 		end
 	end
-	creeps[i].hp = creeps[i].hp - self.damage*intensity
+	if (not self.bullet) then
+		creeps[i].hp = creeps[i].hp - self.damage*intensity
+		if (creeps[i].hp <=0 ) then creeps[i].hp = 0 end
+--		creeps[i].hit = false
+	end	
 	
-	if (creeps[i].hp <=0) then creeps[i].hp =0 end
-
 end

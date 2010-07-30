@@ -1,6 +1,6 @@
 Bullet = {}
 
-function Bullet:new(args, creep, rotation)
+function Bullet:new(args, creep, rotation, damage)
 
 	--print(game.board.theme.themeName.."Bullet"..args.id)
 
@@ -8,6 +8,7 @@ function Bullet:new(args, creep, rotation)
 		timer = Stopwatch(),
 		image = AssetLoader:getImage(game.board.theme.themeName.."Bullet"..args.id,{z = 4} ),
 		frames = args.frames,
+		damage = damage,
 		time = .2,
 		speed = args.speed,
 		creep = creep,
@@ -85,6 +86,8 @@ function Bullet:render(seconds)
 		
 		if (math.abs(dx) < 5 and math.abs(dy) < 5) or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 then 
 			--print(dx, dy, self.imageGroup.x, self.imageGroup.y)
+			self.creep.hit = true
+			self.creep:getHit(self.damage, 1)
 			self.imageGroup:remove(self.image)
 			self.imageGroup.parent:remove(self.imageGroup)
 			self = nil 
