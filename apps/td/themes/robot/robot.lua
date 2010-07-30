@@ -63,7 +63,11 @@ local robot = {
 				splashradius = 360, 
 				name = "NukeTower", 
 				attackMode = "fire",
-				attackFrames = 4
+				attackFrames = 4,
+				upgrades = {
+					{damage = 40, range = 200, cooldown = 0.45, cost = 150, splash = true},
+					{damage = 70, range = 230, cooldown = 0.35, cost = 200, splash = true}
+				}
 			},
 			laserTower = {
 				damage = 50, 

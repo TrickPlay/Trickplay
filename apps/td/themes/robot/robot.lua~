@@ -4,7 +4,7 @@ local robot = {
 		bullets = {
 			--{id = 1, frames = 5, im = "Ringwave"},
 			{id = 1, im = "Cannon", speed = 1000},
-			{id = 2, im = "Laser", speed = 1000},
+			{id = 2, im = "Laser", speed = 3000},
 			{id = 3, im = "Snowball", speed = 800},
 		},
 		creeps = {
@@ -64,9 +64,9 @@ local robot = {
 				name = "NukeTower", 
 				attackMode = "fire",
 				attackFrames = 4,
-				upgrades = {
-					{damage = 50, range = 200, cooldown = cooldown = 0.45, cost = 150, slow = false, splash = true},
-					{damage = 80, range = 230, cooldown = cooldown = 0.35, cost = 250, slow = false, splash = true}
+				upgrades {
+					{damage = 40, range = 200, cooldown = 0.45, cost = 150, splash = true},
+					{damage = 70, range = 230, cooldown = 0.35, cost = 200, splash = true}
 				}
 			},
 			laserTower = {
