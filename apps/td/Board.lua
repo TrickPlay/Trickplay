@@ -47,6 +47,7 @@ Board = {
 					v.creepImageGroup:add(v.deathImage)
 				
 					wave_counter = wave_counter + 1
+					print (wave_counter,#self.theme.wave)
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
 						self.player.gold = self.player.gold + v.bounty
