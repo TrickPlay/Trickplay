@@ -179,6 +179,8 @@ function Tower:animateTower(creeps,i)
 		local dy = cy - (self.towerImageGroup.y + SP/2)
 		--print("rotating!")
 		
+		if dx == 0 then dx = 0.1 end
+		
 		local dir = (180/math.pi) * math.atan((dy)/(dx)) + 180
 		if dx >= 0 then dir = dir + 180 end
 		
