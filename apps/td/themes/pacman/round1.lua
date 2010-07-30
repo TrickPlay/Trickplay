@@ -1,9 +1,11 @@
 wave = {
+			money = 2000,
 			-- Wave 1
 			{
 				{
 					{name = "NormalCreep"},
-					size = 1
+					size = 1,
+					speed = 1,
 				},
 				size = 1   
 			},
@@ -13,12 +15,14 @@ wave = {
 				{
 					{name = "NormalCreep"},
 					{name = "MediumCreep"},
-					size = 30
+					size = 30,
+					speed = 1,
 				},
 				{
 					{name = "MediumCreep"},
 					{name = "HardCreep"},
-					size = 10
+					size = 10,
+					speed = 1,
 				},
 				size = 40
 
@@ -30,11 +34,13 @@ wave = {
 					{name = "NormalCreep"},
 					{name = "MediumCreep"},
 					{name = "HardCreep"},
-					size = 75
+					size = 75,
+					speed = 1,
 				},
 				{
 					{name = "FlyingCreep"},
-					size = 10
+					size = 10,
+					speed = 1,
 				},
 				size = 85
 			},
@@ -43,7 +49,8 @@ wave = {
 			{
 				  {
 					  {name = "BossCreep"},
-					  size = 1
+					  size = 1,
+					  speed = 1,
 				  },
 				  size = 1
          }

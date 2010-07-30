@@ -182,6 +182,8 @@ function Board:createBoard()
 	--Rectangle{h=SP, w=SP, color="A52A2A"}
 	self.nodes = self:createNodes()
 
+		print("Board created")
+
 	BoardMenu = Menu.create(b, groups, hl)
 	BoardMenu:create_key_functions()
 	BoardMenu:button_directions()
@@ -297,6 +299,8 @@ function Board:createBoard()
 		screen:add(self.creepWave[i].creepGroup)
 		assert(self.creepWave[i])
 	end
+	
+
 end
 function Board:findPaths()
 
