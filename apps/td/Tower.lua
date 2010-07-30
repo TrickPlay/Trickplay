@@ -149,6 +149,7 @@ function Tower:upgrade()
 		self.range = r.range
 		self.cooldown = r.cooldown
 		self.slowammount = r.slowammount
+		self.splash = r.splash or self.splash
 		self.cost = self.cost + r.cost
 		self.towerImageGroup:remove(self.towerImage, self.fireImage)
 		self.fireImage = AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y, clip=self.fireImage.clip})
