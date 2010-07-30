@@ -24,6 +24,7 @@ local robot = {
 				slow = false,
 				splash = false,
 				frames = 1,
+				attacksFlying = true,
 				name = "NormalTower",
 				mode = "rotate",
 				bullet = 1,
@@ -43,6 +44,7 @@ local robot = {
 				splash = false, 
 				frames = 1, 
 				splashradius = 240, 
+				attacksFlying = false,
 				name = "SlowTower", 
 				mode = "rotate", 
 				bullet = 3,
@@ -64,7 +66,8 @@ local robot = {
 				name = "NukeTower", 
 				attackMode = "fire",
 				attackFrames = 4,
-				upgrades {
+				attacksFlying = false,
+				upgrades = {
 					{damage = 40, range = 200, cooldown = 0.45, cost = 150, splash = true},
 					{damage = 70, range = 230, cooldown = 0.35, cost = 200, splash = true}
 				}
