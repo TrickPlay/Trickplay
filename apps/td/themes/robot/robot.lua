@@ -12,14 +12,15 @@ local robot = {
 			{ hp = 300, speed = 50, bounty = 15, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "MediumCreep"},
             { hp = 1000, speed = 40, bounty = 15, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "HardCreep"},
             { hp = 20000, speed = 40, bounty = 200, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep"},
-            { hp = 80, speed = 35, bounty = 40, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"}
+            { hp = 80, speed = 35, bounty = 40, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"},
+            { hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
 		},
 		towers = {
 				normalTower =
-						{ damage = 20, range = 300, cooldown = 0.5, cost = 50, slow = false, splash = false, frames = 1, name = "NormalTower", mode = "rotate", bullet = 1,
+						{ damage = 20, range = 300, cooldown = 0.5, cost = 30, slow = false, splash = false, frames = 1, name = "NormalTower", mode = "rotate", bullet = 1,
 								upgrades = {
-												{damage = 30, range = 400, cooldown = 0.5, cost = 35, slow = false},
-												{damage = 40, range = 500, cooldown = 0.5, cost = 35, slow = false}
+												{damage = 40, range = 350, cooldown = 0.5, cost = 20, slow = false},
+												{damage = 90, range = 400, cooldown = 0.5, cost = 50, slow = false}
 										}
 						},
 				slowTower =
@@ -53,6 +54,7 @@ local robot = {
 		    ["HardCreep"] = 3,
 		    ["BossCreep"] = 4,
 		    ["FlyingCreep"] = 5,
+		    ["SlowCreep"] = 6,
 		}           
 	 
 }

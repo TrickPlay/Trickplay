@@ -1,14 +1,47 @@
 wave = {
 			-- Wave 1
+			money = 40,
 			{
 				{
-					{name = "NormalCreep"},
-					size = 1
+					{name = "SlowCreep"},
+					size = 5,
+					speed = 4,
 				},
-				size = 1          
+				size = 5,
+			},
+			
+			-- Wave 2
+			{
+				{
+					{name = "SlowCreep"},
+					size = 10,
+					speed = 3.5,
+				},
+				size = 10,
+			},
+			
+			-- Wave 3
+			{
+				{
+					{name = "SlowCreep"},
+					size = 15,
+					speed = 3,
+				},
+				size = 15,
 			},
 
-			-- Wave 2
+
+		}
+return wave
+
+
+
+
+
+
+
+
+--[[			-- Wave 2
 			{
 				{
 					{name = "NormalCreep", num = 15},
@@ -51,6 +84,4 @@ wave = {
 					  size = 1
 				  },
 				  size = 1
-         }
-		}
-return wave
+         }]]

@@ -10,21 +10,24 @@ Board = {
 --		wave_counter = 0
 		CREEP_WAVE_LENGTH = self.theme.wave[level].size
 		if (seconds_elapsed >= WAIT_TIME) then
-			if (s > 1) then 
-				self.timer:start() 
+			if (s > self.theme.wave[level][wavePartCounter].speed) then 
+				self.timer:start()
 				if (creepnum <= CREEP_WAVE_LENGTH) then
 					local i = wavePartCounter
 					for j=1, #self.theme.wave[level][i] do
 						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i][j].name)]]
-						CREEP_START[1] = math.random(5)+2
+						CREEP_START[1] = math.random(3)+3
 						self.creepWave[creepnum] = Creep:new(wave, -SP*2, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
+						self.creepWave[creepnum].start = CREEP_START[1]
 						screen:add(self.creepWave[creepnum].creepGroup)
 						creepGold[creepnum] = 0
 						creepnum = creepnum + 1
 						creeppartnum = creeppartnum +1
 						if (creeppartnum == self.theme.wave[level][i].size+1) then
 							creeppartnum = 1
-							wavePartCounter = wavePartCounter + 1
+							if (wavePartCounter < #self.theme.wave[level]) then
+								wavePartCounter = wavePartCounter + 1
+							end
 						end
 					end
 				end
@@ -103,7 +106,7 @@ function Board:new(args)
 	local obstacleImages = {}
 	local player = Player:new {
 		name = "Player 1",
-		gold = 2000,
+		gold = args.gold,
 		lives = 30
 	}
 	for i = 1, h do

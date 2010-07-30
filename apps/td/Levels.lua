@@ -35,13 +35,13 @@ end
 LevelMenu.buttons.extra.r = function()
 
 
-
 	round = tonumber( list[LevelMenu.y][LevelMenu.x].name )
 	
 	LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
 
-	game = Game:new{ theme = LevelMenu.theme }
+	game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
 	game:startGame()
-
+	
+	
 
 end

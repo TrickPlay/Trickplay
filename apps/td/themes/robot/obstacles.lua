@@ -17,4 +17,11 @@ local obstacles = {
 						},
 }
 
+for i=2, 16 do
+	table.insert(obstacles[1], {2, i})
+	table.insert(obstacles[1], {3, i})
+	table.insert(obstacles[1], {7, i})
+	table.insert(obstacles[1], {8, i})
+end
+
 return obstacles
