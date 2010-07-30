@@ -33,7 +33,7 @@ CustomizeController = Class(Controller,
              self:get_model():set_active_component(Components.FOOD_SELECTION)
              self:get_model():notify()
           end
---]=]
+    --]=]
           self:reset_selected_index()
       end
 
@@ -112,9 +112,9 @@ CustomizeController = Class(Controller,
  	--print(selected .. " in set_child_controller")
          self.tab_controller = control
       end
-        function self:reset_selected_index()
-            selected = 1
-        end
+      function self:reset_selected_index()
+         selected = 1
+      end
 
       self.in_tab_group  = false
       self.on_back_arrow = false
