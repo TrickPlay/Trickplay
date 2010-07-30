@@ -4,7 +4,7 @@ local robot = {
 		bullets = {
 			--{id = 1, frames = 5, im = "Ringwave"},
 			{id = 1, im = "Cannon", speed = 1000},
-			{id = 2, im = "Laser", speed = 1000},
+			{id = 2, im = "Laser", speed = 3000},
 			{id = 3, im = "Snowball", speed = 800},
 		},
 		creeps = {
