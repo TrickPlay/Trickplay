@@ -25,7 +25,7 @@ DeliveryOptionsView = Class(View, function(view, model, ...)
     view.ui = Group{name="deliveryOptions_ui", position={10, 10}, opacity=255}
     view.ui:add(unpack(view.options))
     assert(view.ui.children[1])
-    screen:add(view.ui)
+    --screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(DeliveryOptionsController(self))
