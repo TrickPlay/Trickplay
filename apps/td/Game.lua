@@ -28,6 +28,13 @@ end
 
 function Game:killGame()
 	print ("kill me")
+	screen:clear()
+	self = nil
+	screen:add(LevelMenu.container)
+	screen:add(MainMenu.container)
+	screen:add(ThemeMenu.container)
+	
+	LevelMenu.buttons:grab_key_focus()
 end
 
 function add_to_render_list( item )
