@@ -45,6 +45,8 @@ Board = {
 					v.redBar.opacity = 0
 					v.greenBar.opacity = 0
 					v.creepImageGroup:add(v.deathImage)
+				
+					wave_counter = wave_counter + 1
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
 						self.player.gold = self.player.gold + v.bounty
@@ -78,9 +80,8 @@ Board = {
 			creepnum = 1
 			seconds_elapsed = 0
 			level = level + 1
-			print(level,#self.theme.wave)
 			if (level-1 == #self.theme.wave) then
-				game:killgame()
+				game:killGame()
 			end
 			wavePartCounter = 1
 			creeppartnum = 1
