@@ -61,8 +61,13 @@ function Bullet:render(seconds)
 	
 	if self.speed then
 	
-		local xtarget = self.creep.creepGroup.x + self.creep.creepImageGroup.clip[3]/2
-		local ytarget = self.creep.creepGroup.y + self.creep.creepImageGroup.clip[4]/2
+		--local xtarget = self.creep.creepGroup.x + self.creep.creepImageGroup.clip[3]/4
+		--local ytarget = self.creep.creepGroup.y + self.creep.creepImageGroup.clip[4]/4
+		
+		local xtarget = self.creep.creepGroup.x + self.creep.creepImageGroup.x + ( self.creep.creepImage.w/self.creep.frames ) / 2
+		local ytarget = self.creep.creepGroup.y + self.creep.creepImageGroup.y + ( self.creep.creepImage.h ) / 2
+	
+		--print(self.creep.creepGroup.x, self.creep.creepImage.x, self.creep.creepImageGroup.x)
 	
 		--local d = math.sqrt( (self.creep.creepGroup.x-self.imageGroup.x)^2 + (self.creep.creepGroup.y-self.imageGroup.y)^2 )
 		--print(d)
