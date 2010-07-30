@@ -79,7 +79,7 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
             local y = -1*radius*math.sin(angle)+400
             clone.position = {x, y}
             print("radians: "..angle..", degrees: "..degrees..", radius: "..radius)
-            local groupseed = math.random(3)
+            local groupseed = math.random(2,4)
             if(Amount.LIGHT == groupseed) then
                 if(slice <= 4) then
                     toppingLightRightGroup:add(clone)
@@ -114,10 +114,11 @@ function topping_dropping(topping, side, amount, toppinggroup, pizzagroup)
     assert(amount)
     assert(pizzagroup)
     if(Sides.NONE == side) then
-	amount = Amount.NONE
+	    amount = Amount.NONE
     end
     --add group for type
     if(not toppinggroup) then
+        print("here")
         toppinggroup = Group()
         distribute_topping(topping, side, amount, toppinggroup, pizzagroup)
     end
@@ -155,8 +156,20 @@ function topping_dropping(topping, side, amount, toppinggroup, pizzagroup)
         toppinggroup:find_child("topping_extra_left"):show()
         toppinggroup:find_child("topping_extra_right"):show()
     end
+
+    return toppinggroup
 end
 
 pepporonigroup = nil
-topping_dropping(topping, Sides.RIGHT, Amount.EXTRA, pepporonigroup, pizzagroup)
+pepporonigroup = topping_dropping(topping, Sides.RIGHT, Amount.EXTRA, pepporonigroup, pizzagroup)
 screen:show()
+---[[
+timer = Timer()
+timer.interval = 3
+function timer.on_timer(timer)
+    side = math.random(4)
+    amount = math.random(4)
+    topping_dropping(topping, side, amount, pepporonigroup, pizzagroup)
+end
+--]]
+timer:start()

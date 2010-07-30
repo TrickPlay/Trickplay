@@ -1,6 +1,8 @@
 CheckoutController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.CHECKOUT)
 
+    model = view:get_model()
+
     local MenuItems = {
         STREET = 1,
         APT = 2,
@@ -21,33 +23,56 @@ CheckoutController = Class(Controller, function(self, view, ...)
     -- the default selected index
     local selected = 1
 
+    local function itemSelection(item, name)
+        local textObject = view.entry_ui.children[item]
+        textObject:grab_key_focus()
+        function textObject:on_key_focus_out()
+            self.on_key_focus_out = nil
+            args = {}
+            args[name] = self.text
+            model:set_creditInfo(args)
+        end
+    end
+
     local MenuItemCallbacks = {
         [MenuItems.STREET] = function(self)
-            view.ui.children[MenuItems.STREET]:grab_key_focus()
+            itemSelection(MenuItems.STREET, "street")
             print("street selected")
         end,
         [MenuItems.APT] = function(self)
-            view.ui.children[MenuItems.APT]:grab_key_focus()
+            itemSelection(MenuItems.APT, "apartment")
             print("apartment selected")
         end,
         [MenuItems.CITY] = function(self)
-            view.ui.children[MenuItems.CITY]:grab_key_focus()
+            itemSelection(MenuItems.CITY, "city")
             print("city selected")
         end,
         [MenuItems.ZIP] = function(self)
+            itemSelection(MenuItems.ZIP, "zip")
             view.ui.children[MenuItems.ZIP]:grab_key_focus()
             print("zip selected")
         end,
         [MenuItems.CARD_TYPE] = function(self)
+            itemSelection(MenuItems.CARD_TYPE, "card_type")
         end,
         [MenuItems.CARD_NUMBER] = function(self)
+            itemSelection(MenuItems.CARD_NUMBER, "card_number")
         end,
         [MenuItems.CARD_CODE] = function(self)
+            itemSelection(MenuItems.CARD_CODE, "card_code")
         end,
         [MenuItems.CARD_EXPIRATION] = function(self)
+            itemSelection(MenuItems.CARD_EXPIRATION, "card_expiration")
         end,
         [MenuItems.CONFIRM] = function(self)
             print("confirm?")
+            for k,v in pairs(model.address) do
+                if(not model.creditInfo[k]) then
+                    --TODO: Display this on screen
+                    print("FORM NOT COMPLETE")
+                    return
+                end
+            end
         end,
         [MenuItems.GO_BACK] = function(self)
             print("exit?")
@@ -82,7 +107,6 @@ CheckoutController = Class(Controller, function(self, view, ...)
 
     function self:move_selector(dir)
         screen:grab_key_focus()
-        table.foreach(dir, print)
         local new_selected = selected + dir[2]
         if 1 <= new_selected and new_selected <= MenuSize then
             selected = new_selected

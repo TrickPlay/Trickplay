@@ -71,7 +71,7 @@ CustomizeController = Class(Controller,
          topping.CoverageX = cov
          topping.Placement = place
          
-         topping_dropping(topping.Image, place, cov, topping.ToppingGroup, self:get_model().current_item.pizzagroup)
+         topping.ToppingGroup = topping_dropping(topping.Image, place, cov, topping.ToppingGroup, self:get_model().current_item.pizzagroup)
 
          view.sub_group_items[selected][topping_index][2]:unparent()
          view.sub_group_items[selected][topping_index][3]:unparent()

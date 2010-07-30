@@ -1,6 +1,20 @@
 AddressInputView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
+    local back = Image{
+        position = {0,0},
+        src = "assets/MenuBg.jpg"
+    }
+    local junkInDaTrunk = Clone{source = back}
+    junkInDaTrunk.position = {960, 0}
+    local verticalDividerLeft = Image{
+        position = {150,0},
+        height = 960,
+        tile = {false, true},
+        src = "assets/MenuLine.png"
+    }
+    local background = {back, junkInDaTrunk}
+
     local street = Text{
         position={50,0},
         font=DEFAULT_FONT,
@@ -44,10 +58,13 @@ AddressInputView = Class(View, function(view, model, ...)
     }
 
     local menu_items = {street, apartment, city, zip_code, confirm, exit}
-    view.address_ui=Group{name="address_ui", position={660,180}, opacity=0}
-    view.address_ui:add(unpack(menu_items))
-    assert(view.address_ui.children[1])
-    screen:add(view.address_ui)
+    view.entry_ui = Group{name = "addressEntry_ui", position = {660, 180}}
+    view.entry_ui:add(unpack(menu_items))
+    view.static_ui = Group{name = "addressStatic_ui", position = {0,0}}
+    view.static_ui:add(unpack(background))
+    view.ui=Group{name="address_ui", position={0,0}, opacity=0}
+    view.ui:add(view.static_ui, view.entry_ui)
+    screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(AddressInputController(self))
@@ -58,7 +75,7 @@ AddressInputView = Class(View, function(view, model, ...)
         local comp = self.model:get_active_component()
         if comp == Components.ADDRESS_INPUT then
             print("Showing AddressInputView UI")
-            self.address_ui.opacity = 255
+            self.ui.opacity = 255
             for i,item in ipairs(menu_items) do
                 if i == controller:get_selected_index() then
                     item:animate{duration=1000, mode="EASE_OUT_EXPO", opacity=255}
@@ -68,7 +85,7 @@ AddressInputView = Class(View, function(view, model, ...)
             end
         else
             print("Hiding AddressInputView UI")
-            self.address_ui.opacity = 0
+            self.ui.opacity = 0
         end
     end
 

@@ -1,15 +1,20 @@
-AddressInputController = Class(Controller, function(self, view, ...)
-    self._base.init(self, view, Components.ADDRESS_INPUT)
+CheckoutController = Class(Controller, function(self, view, ...)
+    self._base.init(self, view, Components.CHECKOUT)
 
-    local model = view:get_model()
+    model = view:get_model()
 
     local MenuItems = {
         STREET = 1,
         APT = 2,
         CITY = 3,
         ZIP = 4,
-        CONFIRM = 5,
-        EXIT = 6
+        CARD_TYPE = 5,
+        CARD_NUMBER = 6,
+        CARD_CODE = 7,
+        CARD_EXPIRATION_MONTH = 8,
+        CARD_EXPIRATION_YEAR = 9,
+        CONFIRM = 10,
+        GO_BACK = 11
     }
     local MenuSize = 0
     for k, v in pairs(MenuItems) do
@@ -26,7 +31,7 @@ AddressInputController = Class(Controller, function(self, view, ...)
             self.on_key_focus_out = nil
             args = {}
             args[name] = self.text
-            view:get_model():set_address(args)
+            model:set_creditInfo(args)
         end
     end
 
@@ -45,30 +50,42 @@ AddressInputController = Class(Controller, function(self, view, ...)
         end,
         [MenuItems.ZIP] = function(self)
             itemSelection(MenuItems.ZIP, "zip")
+            view.ui.children[MenuItems.ZIP]:grab_key_focus()
             print("zip selected")
+        end,
+        [MenuItems.CARD_TYPE] = function(self)
+            itemSelection(MenuItems.CARD_TYPE, "card_type")
+        end,
+        [MenuItems.CARD_NUMBER] = function(self)
+            itemSelection(MenuItems.CARD_NUMBER, "card_number")
+        end,
+        [MenuItems.CARD_CODE] = function(self)
+            itemSelection(MenuItems.CARD_CODE, "card_code")
+        end,
+        [MenuItems.CARD_EXPIRATION_MONTH] = function(self)
+            itemSelection(MenuItems.CARD_EXPIRATION_MONTH, "card_expiration_month")
+        end,
+        [MenuItems.CARD_EXPIRATION_YEAR] = function(self)
+            itemSelection(MenuItems.CARD_EXPIRATION_YEAR, "card_expiration_year")
         end,
         [MenuItems.CONFIRM] = function(self)
             print("confirm?")
-            --[[
             for k,v in pairs(model.address) do
-                if(not model.address[k]) then
+                if(not model.creditInfo[k]) then
                     --TODO: Display this on screen
                     print("FORM NOT COMPLETE")
                     return
                 end
             end
-            --]]
-            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
-            screen:show()
-            self:get_model():notify()
         end,
-        [MenuItems.EXIT] = function(self)
+        [MenuItems.GO_BACK] = function(self)
             print("exit?")
-            exit()
+            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
+            self:get_model():notify()
         end
     }
 
-    local AddressInputKeyTable = {
+    local CheckoutKeyTable = {
         [keys.Up] = function(self) self:move_selector(Directions.UP) end,
         [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
@@ -83,8 +100,8 @@ AddressInputController = Class(Controller, function(self, view, ...)
     }
 
     function self:on_key_down(k)
-        if AddressInputKeyTable[k] then
-            AddressInputKeyTable[k](self)
+        if CheckoutKeyTable[k] then
+            CheckoutKeyTable[k](self)
         end
     end
 

@@ -332,4 +332,6 @@ function topping_dropping(topping, side, amount, toppinggroup, pizzagroup)
         toppinggroup:find_child("topping_extra_left"):show()
         toppinggroup:find_child("topping_extra_right"):show()
     end
+
+    return toppinggroup
 end
