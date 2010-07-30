@@ -36,7 +36,7 @@ local robot = {
 				damage = 5,
 				range = 400, 
 				cooldown = 1, 
-				cost = 80, 
+				cost = 40, 
 				slowammount = 70, 
 				slow = true, 
 				slowlength = 2, 
@@ -47,16 +47,15 @@ local robot = {
 				mode = "rotate", 
 				bullet = 3,
 				upgrades = {
-					{damage = 5, range = 450, cooldown = 1, cost = 30, slowammount = 55},
+					{damage = 10, range = 450, cooldown = 1, cost = 30, slowammount = 55},
 					{damage = 10, range = 450, cooldown = 1, cost = 200, slowammount = 40, splash = true}
 				}
 			},
 			nukeTower =	{
 				damage = 30, 
 				range = 200, 
-				cooldown = .5, 
+				cooldown = 1, 
 				cost = 70, 
-				slowammount = 100, 
 				slow = false, 
 				splash = true,
 				damageAroundSelf = true, 
@@ -66,14 +65,14 @@ local robot = {
 				attackMode = "fire",
 				attackFrames = 4,
 				upgrades = {
-					{damage = 40, range = 200, cooldown = 0.45, cost = 150, splash = true},
-					{damage = 70, range = 230, cooldown = 0.35, cost = 200, splash = true}
+					{damage = 50, range = 250, cooldown = .9, cost = 150, splash = true},
+					{damage = 70, range = 300, cooldown = .8, cost = 200, splash = true}
 				}
 			},
 			laserTower = {
-				damage = 50, 
+				damage = 15, 
 				range = 500, 
-				cooldown = 1, 
+				cooldown = 0.25, 
 				cost = 100, 
 				slow = false, 
 				splash = false, 
@@ -84,8 +83,8 @@ local robot = {
 				attackFrames = 5, 
 				attackMode = "fire",
 				upgrades = {
-					{damage = 100, range = 500, cooldown = 0.8, cost = 100, slow = false},
-					{damage = 200, range = 500, cooldown = 0.8, cost = 100, slow = false},
+					{damage = 25, range = 550, cooldown = 0.25, cost = 100, slow = false},
+					{damage = 40, range = 700, cooldown = 0.25, cost = 300, slow = false},
 				}							
 			},
 			wall = { damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, frames = 1, slow = false, name = "Wall",	}
