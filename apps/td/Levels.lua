@@ -43,7 +43,7 @@ LevelMenu.buttons.extra.r = function()
 	game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
 	game:startGame()
 	
-	screen:add(countdowntimer, phasetext, playertext, goldtext)
+	screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
 	screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
 	
 	

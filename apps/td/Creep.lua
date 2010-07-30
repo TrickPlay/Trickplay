@@ -98,6 +98,8 @@ function Creep:render(seconds)
 			wave_counter = wave_counter + 1
 			self.dead = true
 			game.board.player.lives = game.board.player.lives - 1
+			livestext.text = game.board.player.lives
+
 			--print (game.board.player.lives)
 			self.creepGroup.x = wave_counter*-240
 		end
@@ -125,6 +127,7 @@ function Creep:render(seconds)
 		wave_counter = wave_counter + 1
 		self.dead = true
 		game.board.player.lives = game.board.player.lives - 1
+		livestext.text = game.board.player.lives
 		--print (game.board.player.lives)
 		--self.creepGroup.x = wave_counter*-240
 		
