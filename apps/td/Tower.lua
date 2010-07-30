@@ -23,6 +23,7 @@ function Tower:new(args, prefix, square)
 		direction = args.direction,
 		slowammount = args.slowammount,
 		slow = args.slow,
+		slowlength = args.slowlength or 0,
 		frames = args.frames,
 		splash = args.splash,
 		splashradius = args.splashradius,
@@ -107,6 +108,7 @@ function Tower:render(seconds, creeps)
 		
 	end
 	
+	
 	if self.fired and s > self.cooldown/4 then self.towerImageGroup:remove(self.fireImage) self.fired = nil end
 	--print("1")
 	if (s > self.cooldown) then
@@ -114,8 +116,9 @@ function Tower:render(seconds, creeps)
 		for i = 1, #creeps do
 			local cx = creeps[i].creepGroup.x
 			local cy = creeps[i].creepGroup.y					
-			creeps[i].speed = creeps[i].max_speed
-	
+			if (creeps[i].slowtimer.elapsed_seconds > self.slowlength and self.slow) then
+				creeps[i].speed = creeps[i].max_speed
+			end
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0 and cx > 0) then
 				self:animateTower(creeps,i)
 				self:attackCreep(creeps,i,1)
@@ -123,9 +126,11 @@ function Tower:render(seconds, creeps)
 				if (self.splash) then
 					self:checkSplash(creeps,i)
 				end
+				creeps[i].attacked = true
 				break
+			else
+				creeps[i].attacked = false
 			end
-			
 		end
 
 	end
@@ -275,8 +280,14 @@ end
 function Tower:attackCreep(creeps, i, intensity)
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y
-	if (self.slow) then creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity end
-
+	if (self.slow) then 
+		creeps[i].slowtimer:start()
+--		creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity 
+		if (creeps[i].slowed == false) then
+			creeps[i].slowed = true
+			creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity 
+		end
+	end
 	creeps[i].hp = creeps[i].hp - self.damage*intensity
 	
 	if (creeps[i].hp <=0) then creeps[i].hp =0 end

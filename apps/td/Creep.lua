@@ -9,7 +9,9 @@ function Creep:new(args, x, y, name)
 	local speed = args.speed
 	local max_speed = speed
 	local flying = args.flying
-
+	local slowed = false
+	local attacked = false
+	local slowtimer = Stopwatch()
 	local direction = args.direction or {0,1}
 	local timer = Stopwatch()
 	local deathtimer = Stopwatch()
@@ -51,6 +53,9 @@ function Creep:new(args, x, y, name)
 		redBar = redBar,
 		x_offset = x_offset,
 		y_offset = y_offset,
+		slowed = slowed,
+		attacked = attacked,
+		slowtimer = slowtimer,
 		frames = frames,
 		dead = dead,
 		deathImage = deathImage,
@@ -72,8 +77,6 @@ function Creep:render(seconds)
 	-- Current x and y values
 	local cx = self.creepGroup.x
 	local cy = self.creepGroup.y
---	CREEP_START[1] = math.random(5)+2
-	-- When the creep is off the board
 	if self.flying then
 	
 		self.creepGroup.x = cx + MOVE
