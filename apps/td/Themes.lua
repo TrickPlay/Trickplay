@@ -57,3 +57,5 @@ AssetLoader:preloadImage("upgradeIcon","assets/upgradeIcon.png")
 AssetLoader:preloadImage("obstacles","themes/robot/assets/obstacles.png")
 AssetLoader:preloadImage("shadow","themes/robot/assets/CreepShadow.png")	
 AssetLoader:preloadImage("sellIcon","assets/sell.png")
+AssetLoader:preloadImage("InfoBar","assets/InfoBar.png")
+

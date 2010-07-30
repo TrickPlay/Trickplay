@@ -42,11 +42,12 @@ creepnum = 1
 wavePartCounter = 1
 creeppartnum = 1
 
-countdowntimer = Text { font = "Sans 30px", text = ""..seconds_elapsed, x = 1400, y = 50, z=3, color = "FFFFFF"}
-phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1000, y = 50, z=3, color = "FFFFFF"}
-playertext = Text {font = "Sans 30px", text = "", x =700, y = 1000, z=3, color = "FFFFFF"}
-goldtext = Text {font = "Sans 30px", text = "", x =1000, y = 1000, z=3, color = "FFFFFF" }
-screen:add(countdowntimer, phasetext, playertext, goldtext)
+countdowntimer = Text { font = "Sans 30px", text = ""..seconds_elapsed, x = 900, y = 1015, z=3, color = "000000"}
+phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1200, y = 1015, z=3, color = "000000"}
+livestext = Text { font = "Sans 30px", text = "", x =1570, y = 1015, z=3, color = "000000"}
+playertext = Text {font = "Sans 30px", text = "", x =700, y = 1015, z=3, color = "000000"}
+goldtext = Text {font = "Sans 30px", text = "", x =1800, y = 1015, z=3, color = "000000" }
+screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
 
 
 -- global functions
