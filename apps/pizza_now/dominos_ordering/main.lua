@@ -6,9 +6,8 @@ dofile("Globals.lua")
 dofile("Navigator.lua")
 dofile("DominosPizza.lua")
 
-local ADDRESS = "411 Acacia Avenue"
-local CITY = "Palo Alto"
-local STATE = "CA"
+NEXTHOUSE_ADDRESS = {"77 Massachusetts Avenue", "Cambridge", "MA"}
+local ADDRESS, CITY, STATE = unpack(NEXTHOUSE_ADDRESS)
 
 local sizes = {"small", "medium", "large", "x-large"}
 local crusts = {"handtoss", "deepdish", "thin", "brooklyn"}
@@ -58,7 +57,9 @@ page = Navigator.goto_build_pizza(page)
 page = Navigator.add_pizza(page, CHEESE_PIZZA)
 page = Navigator.add_pizza(page, PEPPERONI_PIZZA)
 -- page = Navigator.goto_sides(page)
-Navigator.get_total()
+local total = Navigator.get_total()
+page = Navigator.goto_confirm(page)
+
 
 --local formdata = parse_form(page, nil, true)
 error()
