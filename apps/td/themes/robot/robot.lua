@@ -10,9 +10,9 @@ local robot = {
 		creeps = {
 			{ hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
 			{ hp = 300, speed = 50, bounty = 15, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "MediumCreep"},
-            { hp = 1000, speed = 40, bounty = 15, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "HardCreep"},
+            { hp = 1000, speed = 40, bounty = 20, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "HardCreep"},
             { hp = 20000, speed = 40, bounty = 200, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep"},
-            { hp = 80, speed = 35, bounty = 40, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"},
+            { hp = 80, speed = 35, bounty = 10, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"},
             { hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
 		},
 		towers = {
@@ -83,8 +83,8 @@ local robot = {
 				attackFrames = 5, 
 				attackMode = "fire",
 				upgrades = {
-					{damage = 25, range = 550, cooldown = 0.25, cost = 100, slow = false},
-					{damage = 40, range = 700, cooldown = 0.25, cost = 300, slow = false},
+					{damage = 25, range = 550, cooldown = 0.20, cost = 100, slow = false},
+					{damage = 40, range = 700, cooldown = 0.15, cost = 300, slow = false},
 				}							
 			},
 			wall = { damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, frames = 1, slow = false, name = "Wall",	}
