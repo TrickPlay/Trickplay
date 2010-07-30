@@ -150,3 +150,20 @@ function Navigator.get_total()
    assert(total, "Couldn't get total!")
    return total
 end
+
+function Navigator.goto_confirm(page)
+   print("heading to confirm page")
+   local formdata = parse_form(page, "orderSummaryForm", true)
+   assert(formdata["orderSummaryForm:_idcl"])
+   formdata["orderSummaryForm:_idcl"] = "orderSummaryForm:osCheckout"
+   local response = get_response(CHECKOUT_URL, formdata)
+   return response.body
+end
+
+function Navigator.submit_order(page)
+   print("submitting final order")
+   local formdata = parse_form(page, "pricingEnabled", true)
+   assert(formdata["pricingEnabled:_idcl"])
+   formdata["pricingEnabled:_idcl"] = "pricingEnabled:placeOrdeLinkHIDDEN"
+   print("Didn't actually submit order.")
+end
