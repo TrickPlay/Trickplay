@@ -29,7 +29,23 @@ end
 function Game:killGame()
 	print ("kill me")
 	screen:clear()
-	self = nil
+	
+	deleteAll(game)
+	print("hi")
+	
+	--[[for k,v in pairs(game) do
+	
+		print(k, v)
+		v = nil
+	
+	end]]
+	
+	--BoardMenu = nil
+	--game = nil
+	
+	assert(not game)
+	assert(not BoardMenu)
+	
 	screen:add(LevelMenu.container)
 	screen:add(MainMenu.container)
 	screen:add(ThemeMenu.container)
@@ -56,3 +72,33 @@ function idle.on_idle( idle , seconds )
 end
 
 -------------------------------------------------------------------------------
+
+function deleteAll(tab)
+
+	if type(tab) == "table" then
+	
+		for k,v in pairs(tab) do
+		
+			deleteAll(v)
+		
+			v = nil
+			
+			assert(#tab == 0)
+			
+			for key,val in pairs(tab) do
+			
+				print(key,val)
+				--assert(not val)
+			
+			end
+		
+			--print("Removing", v, "from table", tab, ".")
+			--table.remove(tab, k)
+		
+			
+		
+		end
+	
+	end
+
+end

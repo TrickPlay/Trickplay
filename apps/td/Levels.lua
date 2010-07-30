@@ -34,6 +34,7 @@ end
 
 LevelMenu.buttons.extra.r = function()
 
+	--dofile("Globals.lua")
 
 	round = tonumber( list[LevelMenu.y][LevelMenu.x].name )
 	
@@ -41,6 +42,9 @@ LevelMenu.buttons.extra.r = function()
 
 	game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
 	game:startGame()
+	
+	screen:add(countdowntimer, phasetext, playertext, goldtext)
+	screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
 	
 	
 

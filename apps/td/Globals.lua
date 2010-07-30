@@ -46,7 +46,7 @@ countdowntimer = Text { font = "Sans 30px", text = ""..seconds_elapsed, x = 1400
 phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1000, y = 50, z=3, color = "FFFFFF"}
 playertext = Text {font = "Sans 30px", text = "", x =700, y = 1000, z=3, color = "FFFFFF"}
 goldtext = Text {font = "Sans 30px", text = "", x =1000, y = 1000, z=3, color = "FFFFFF" }
-screen:add(countdowntimer, phasetext, playertext, goldtext)
+
 
 
 -- global functions
@@ -71,4 +71,4 @@ healthbar = Rectangle {color = "00FF00", width = SP, height = 10}
 healthbarblack = Rectangle {color = {34,139,34}, width = SP, height = 10}
 shootAnimation = Rectangle {color = {200,200,0}, x = -100, y = -100, width = 10, height = 10}
  
-screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+
