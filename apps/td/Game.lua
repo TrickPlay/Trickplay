@@ -4,10 +4,10 @@ Game = {}
 
 function Game:new(args)
 	local theme = args.theme
-	
+	local gold = args.gold
 	local board = Board:new {
 		--board args to be passed in
-		theme = theme
+		theme = theme, gold = gold
 	}
 	
 	local object = {
