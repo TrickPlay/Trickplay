@@ -26,6 +26,9 @@ function Game:startGame()
 end
 
 
+function Game:killGame()
+	print ("kill me")
+end
 
 function add_to_render_list( item )
 	if item then
