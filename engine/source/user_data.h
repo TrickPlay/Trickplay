@@ -290,11 +290,6 @@ private:
 
     void disconnect_all_signals();
 
-
-    //.........................................................................
-
-    static void master_destroyed( UserData * self , GObject * master );
-
     //.........................................................................
 
     lua_State *     L;
