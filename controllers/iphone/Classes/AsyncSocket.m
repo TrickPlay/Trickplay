@@ -3513,7 +3513,7 @@ Failed:
 		
 		// Write.
 		CFIndex bytesWritten = CFWriteStreamWrite(theWriteStream, writestart, bytesToWrite);
-        NSLog([NSString stringWithFormat: @"Just wrote %d bytes", bytesWritten]);
+        NSLog(@"Just wrote %d bytes", bytesWritten);
 		
 		// Unset the "can accept bytes" flag
 		theFlags &= ~kSocketCanAcceptBytes;
