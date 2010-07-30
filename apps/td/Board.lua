@@ -10,7 +10,8 @@ Board = {
 --		wave_counter = 0
 		CREEP_WAVE_LENGTH = self.theme.wave[level].size
 		if (seconds_elapsed >= WAIT_TIME) then
-			if (s > self.theme.wave[level][wavePartCounter].speed) then 
+			local sp = self.theme.wave[level][wavePartCounter].speed or 1 
+			if (s > sp) then 
 				self.timer:start()
 				if (creepnum <= CREEP_WAVE_LENGTH) then
 					local i = wavePartCounter
