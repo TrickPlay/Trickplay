@@ -21,6 +21,7 @@ function Tower:new(args, prefix, square)
 		damage = args.damage,
 		range = args.range,
 		direction = args.direction,
+		attacksFlying = args.attacksFlying,
 		slowammount = args.slowammount,
 		slow = args.slow,
 		slowlength = args.slowlength or 0,
@@ -120,6 +121,7 @@ function Tower:render(seconds, creeps)
 				creeps[i].speed = creeps[i].max_speed
 			end
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0 and cx > 0) then
+				if (creeps[i].flying and self.attacksFlying == false) then break end
 				self:animateTower(creeps,i)
 				self:attackCreep(creeps,i,1)
 				self:animateFire(seconds, creeps[i])
@@ -170,7 +172,7 @@ end
 function Tower:animateTower(creeps,i)
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y	
-	--creeps[i]:bleed()
+	creeps[i]:bleed()
 	
 	-- Simple rotation
 	if self.mode == "rotate" then
@@ -285,6 +287,9 @@ end
 function Tower:attackCreep(creeps, i, intensity)
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y
+	if (creeps[i].flying and self.attacksFlying == false) then
+		return
+	end
 	if (self.slow) then 
 		creeps[i].slowtimer:start()
 --		creeps[i].speed = creeps[i].max_speed*(self.slowammount/100)*intensity 
