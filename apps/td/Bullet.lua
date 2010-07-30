@@ -73,15 +73,39 @@ function Bullet:render(seconds)
 		local dx = self.imageGroup.x - xtarget
 		local dy = self.imageGroup.y - ytarget
 		
+		--local sx = dx / math.abs(dx)
+		--local sy = dy / math.abs(dy)
+		
 		local xratio = dx/( math.abs(dx) + math.abs(dy) )
 		local yratio = dy/( math.abs(dx) + math.abs(dy) )
 		
 		self.imageGroup.x = self.imageGroup.x - xratio * seconds * self.speed
 		self.imageGroup.y = self.imageGroup.y - yratio * seconds * self.speed
 		
-		--self.imageGroup.x = self.imageGroup.x + self.speed*seconds --end if self.imageGroup.x < self.creepGroup.x then
+		local pastx
+		local pasty
 		
-		if (math.abs(dx) < 20 and math.abs(dy) < 20) or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 or self.creep.hp <= 0 then 
+		if dx > 0 then
+			if dx < 20 then
+				pastx = true
+			end
+		elseif dx < 0 then
+			if dx > -20 then
+				pastx = true
+			end
+		end
+		
+		if dy > 0 then
+			if dy < 20 then
+				pasty = true
+			end
+		elseif dy < 0 then
+			if dy > -20 then
+				pasty = true
+			end
+		end
+		
+		if pastx or pasty or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 or self.creep.hp <= 0 then 
 			--print(dx, dy, self.imageGroup.x, self.imageGroup.y)
 			self.creep.hit = true
 			self.creep:getHit(self.damage, 1)
@@ -95,4 +119,5 @@ function Bullet:render(seconds)
 
 end
 
+--if math.abs(dx) < 20 and dy < 20 or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 or self.creep.hp <= 0 then 
 --math.sqrt( ( (self.creepGroup.x-self.imageGroup.x)(self.creepGroup.x-self.imageGroup.x) ) + ( (self.creepGroup.y-self.imageGroup.y)(self.creepGroup.y-self.imageGroup.y) )  )
