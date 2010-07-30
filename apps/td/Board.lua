@@ -171,8 +171,8 @@ function Board:createBoard()
 				g[j] = Group{w=SP, h=SP}--, name=self.squareGrid[i][j].square[3]}
 	   end
 	end
-	backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
-	overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
+	self.backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
+	self.overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
 	if (self.theme.obstacles[round].insert) then
 		for i =1, #self.theme.obstacles[round] do
 			self.obstacleImages[i] = Obstacle:new { x = GTP(self.theme.obstacles[round][i][2]), y = GTP(self.theme.obstacles[round][i][1]), frames = self.theme.obstacles[round].frames}
@@ -181,7 +181,7 @@ function Board:createBoard()
 		end
 	end
 	local b = Group{}
-	screen:add(backgroundImage, overlayImage, b)
+	screen:add(self.backgroundImage, self.overlayImage, b)
 	local hl = AssetLoader:getImage( "select", { scale={.9,.9}, opacity=200 } )
 	--Rectangle{h=SP, w=SP, color="A52A2A"}
 	self.nodes = self:createNodes()
