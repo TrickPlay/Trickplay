@@ -18,7 +18,7 @@ Board = {
 					for j=1, #self.theme.wave[level][i] do
 						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i][j].name)]]
 						CREEP_START[1] = math.random(3)+3
-						self.creepWave[creepnum] = Creep:new(wave, -SP*2, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name)
+						self.creepWave[creepnum] = Creep:new(wave, -SP*2, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name, self.theme.wave[level][i].buffs)
 						self.creepWave[creepnum].start = CREEP_START[1]
 						screen:add(self.creepWave[creepnum].creepGroup)
 						creepGold[creepnum] = 0

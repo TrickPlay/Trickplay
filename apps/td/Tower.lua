@@ -34,6 +34,7 @@ function Tower:new(args, prefix, square)
 		mode = args.mode or "none",
 		attackMode = args.attackMode or "none",
 		attackFrames = args.attackFrames or 1,
+		damageAroundSelf = args.damageAroundSelf,
 		
 		-- Images
 		towerImage = towerImage,
@@ -268,13 +269,19 @@ function Tower:checkSplash(creeps,i)
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y	
 	local radius = self.splashradius
+	
+
 
 	for j =1, #creeps do
 		local cxj = creeps[j].creepGroup.x
 		local cyj = creeps[j].creepGroup.y
 		local distance = math.sqrt(((cxj-cx)*(cxj-cx))+((cyj-cy)*(cyj-cy)))
 		local intensity = 1-(radius-distance)/radius
-		if (cxj > cx - radius and cxj < cx + radius and cyj > cy - radius and cyj < cy + radius and j ~= i) then
+		
+		if self.damageAroundSelf and cxj > self.x - radius and cxj < self.x + radius and cyj > self.y - radius and cyj < self.y + radius then
+			self:attackCreep(creeps,j,intensity)			
+		
+		elseif (cxj > cx - radius and cxj < cx + radius and cyj > cy - radius and cyj < cy + radius and j ~= i) then
 			--print ("Distance: "..distance)
 			--print ("Intensity: "..intensity)
 			if (not self.bullet) then

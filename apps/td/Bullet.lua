@@ -81,7 +81,7 @@ function Bullet:render(seconds)
 		
 		--self.imageGroup.x = self.imageGroup.x + self.speed*seconds --end if self.imageGroup.x < self.creepGroup.x then
 		
-		if (math.abs(dx) < 5 and math.abs(dy) < 5) or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 or self.creep.hp <= 0 then 
+		if (math.abs(dx) < 20 and math.abs(dy) < 20) or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 or self.creep.hp <= 0 then 
 			--print(dx, dy, self.imageGroup.x, self.imageGroup.y)
 			self.creep.hit = true
 			self.creep:getHit(self.damage, 1)
