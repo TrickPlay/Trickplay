@@ -10,6 +10,8 @@ Model = Class(function(model, ...)
     model.arrival_time = 12
     
     model.current_item = nil
+    model.current_item_is_in_cart = false
+
     model.cart = {}
     
     --address info
@@ -59,7 +61,8 @@ Model = Class(function(model, ...)
     end
 
     function model:get_active_controller()
-        return self.controllers[self.active_component]
+       assert(self.controllers[self.active_component])
+       return self.controllers[self.active_component]
     end
 
     function model:get_active_component()
@@ -73,9 +76,14 @@ Model = Class(function(model, ...)
     end
     
     function model:set_active_component(comp)
-        self.previous_component = self.active_component
-        self.active_component = comp
-        print("set active component to",comp)
+       if type(comp) ~= "number" then
+          error("Component " .. tostring(comp) .. " is not a number", 2)
+       elseif comp < Components.COMPONENTS_FIRST or Components.COMPONENTS_LAST < comp then
+          error("Component " .. comp .. " does not exist", 2)
+       end
+       self.previous_component = self.active_component
+       self.active_component = comp
+       print("set active component to",comp)
     end
 
     function model:set_keys()

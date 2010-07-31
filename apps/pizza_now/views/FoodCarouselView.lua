@@ -39,7 +39,7 @@ FoodCarouselView = Class(View, function(view, model, ...)
 ---------------------------------------------------------
     --view.carousel_ui:add(unpack(menu_items))
     --assert(view.carousel_ui.children[1])
-    screen:add(view.ui)
+    --screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(FoodCarouselController(self))

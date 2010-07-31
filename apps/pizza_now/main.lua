@@ -1,12 +1,15 @@
-dofile("Utils.lua")
+-- dofile("Utils.lua")
 dofile("Globals.lua")
 dofile("Menu/EmptyPizza.lua")
 dofile("Menu/Selection_Menu.lua")
-dofile("Class.lua")
+if not Class then
+   dofile("Class.lua")
+end
 dofile("MVC.lua")
 dofile("Views.lua")
 
 Components = {
+   COMPONENTS_FIRST = 1,
    ADDRESS_INPUT = 1,
    PROVIDER_SELECTION = 2,
    FOOD_SELECTION = 3,
@@ -14,8 +17,10 @@ Components = {
    CUSTOMIZE = 5,
    TAB = 6,
    CUSTOMIZE_ITEM = 7,
-   CHECKOUT = 8
+   CHECKOUT = 8,
+   COMPONENTS_LAST = 8
 }
+
 
 -- Model initialization
 model = Model()
