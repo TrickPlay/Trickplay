@@ -30,18 +30,28 @@ function Game:killGame()
 	print ("kill me")
 	screen:clear()
 	
-	deleteAll(game)
-	print("hi")
+	--deleteAll(game)
+	--print("hi")
 	
-	--[[for k,v in pairs(game) do
+	--[[for i=1,#game.board.squareGrid do
+		for j=1, #game.board.squareGrid[i] do
+			game.board.squareGrid[i][j].tower = nil
+		end
+	end
 	
-		print(k, v)
+	for k,v in pairs(game.board) do
+	
 		v = nil
 	
-	end]]
+	end
 	
-	--BoardMenu = nil
-	--game = nil
+	print("done")]]
+	
+	render_list = {}
+	
+	game.board = nil
+	game = nil
+	BoardMenu = nil
 	
 	assert(not game)
 	assert(not BoardMenu)
@@ -73,32 +83,22 @@ end
 
 -------------------------------------------------------------------------------
 
-function deleteAll(tab)
+--[[function deleteAll(tab)
 
 	if type(tab) == "table" then
 	
 		for k,v in pairs(tab) do
 		
 			deleteAll(v)
-		
 			v = nil
 			
-			assert(#tab == 0)
-			
-			for key,val in pairs(tab) do
-			
-				print(key,val)
-				--assert(not val)
-			
-			end
-		
-			--print("Removing", v, "from table", tab, ".")
-			--table.remove(tab, k)
-		
-			
+			--assert(#tab == 0)
+			--tab = nil
 		
 		end
+		
+		tab = nil
 	
 	end
 
-end
+end]]
