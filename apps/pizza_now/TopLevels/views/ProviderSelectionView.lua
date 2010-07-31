@@ -32,7 +32,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
             print("Showing ProviderSelectionView UI")
---            self.provider_ui.opacity = 255
+            self.provider_ui.opacity = 255
             for i,c_view in ipairs(view.items) do
                 if i == controller:get_selected_index() then
                     c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}

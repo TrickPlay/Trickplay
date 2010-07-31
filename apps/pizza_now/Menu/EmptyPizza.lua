@@ -18,10 +18,10 @@ All_Options = {
        RIGHT  = 3,
        ENTIRE = 4
    },
-   Placement_r  = {
-       "NONE",
-       "LEFT",
-       "RIGHT",
+   Placement_r= {
+       "NONE"   ,
+       "LEFT"   ,
+       "RIGHT"  ,
        "ENTIRE"
    },
    CoverageX  = {
@@ -30,7 +30,7 @@ All_Options = {
       REGULAR = 3,
       EXTRA   = 4
    },
-   CoverageX_r  = {
+   CoverageX_r= {
       "NONE"    ,
       "LIGHT"   ,
       "REGULAR" ,
@@ -41,11 +41,11 @@ All_Options = {
       LIGHT   = 2,
       REGULAR = 3
    },
-   Size      = {
-      SMALL  = 1,
-      MEDIUM = 2,
-      LARGE  = 3,
-      XLARGE = 4
+   Size       = {
+      SMALL   = 1,
+      MEDIUM  = 2,
+      LARGE   = 3,
+      XLARGE  = 4
    },
    Crust_Style = {
       HANDTOSSED     = 1,
@@ -92,6 +92,7 @@ All_Options = {
 EmptyPizza = Class(--[[Menu_Item,]]function(self)
    --self._base.init(self)
    self.Name = "Build Your Own Pizza"
+   self.Price = "$16.50"
    self.Tabs = {}
    self.Tabs[1] = {
       Tab_Text = "Crust",
@@ -155,7 +156,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       self.Tabs[2].Options[i] = {
          Name  = Meat_Toppings[i],
          Image = Image{src="assets/Topping_Pepperoni.png"},
-         CoverageX  = All_Options.Coverage.REGULAR,
+         CoverageX  = All_Options.Coverage.NONE,
          Placement = All_Options.Placement.NONE,
          ToppingGroup = nil,
          Selected = 
@@ -169,7 +170,7 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       self.Tabs[3].Options[i] = {
          Name  = Veggie_Toppings[i],
          Image = Image{src="assets/Topping_Pepperoni.png"},
-         CoverageX  = All_Options.Coverage.REGULAR,
+         CoverageX  = All_Options.Coverage.NONE,
          Placement = All_Options.Placement.NONE,
          ToppingGroup = nil,
          Selected = 
@@ -202,7 +203,7 @@ self.pizzagroup:add(pizza)
 self.pizzagroup:add(sauce)
 self.pizzagroup:add(cheese)
 print("\n\n\n\nhererere")
-screen:add(self.pizzagroup)
+--screen:add(self.pizzagroup)
 end)
 
 

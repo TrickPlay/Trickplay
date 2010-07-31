@@ -1,3 +1,7 @@
+CUSTOMIZE_SCROLL_THRESHOLD = 12
+CUSTOMIZE_OPT_NAME = 1
+CUSTOMIZE_OPT_COV = 2
+CUSTOMIZE_OPT_PLACEMENT = 3
 
 CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
@@ -53,6 +57,21 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
+        view.center_sep    = Image {
+                position = {960, 0},
+                width    = 20,
+                height   = 960,
+                tiled    = {false,true},
+                src      = "assets/MenuLine.png"
+            }
+        view.nutrition   = Image {
+                position = {960, 0},
+                src      = "assets/NutritionMockup.png"
+            }
+        view.slice_lines = Image {
+                position = {960, 500},
+                src      = "assets/PizzaSliceLines_12.png"
+            }
         view.back_arrow = Image{                
                 position = {5, 800},
                 src      = "assets/BackArrowOutline.png"
@@ -67,7 +86,13 @@ CustomizeView = Class(View, function(view, model, ...)
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
               text        = "Add to Order"
-           }
+            }
+        view.price = Text{
+              position    = {800, 850},
+              font        = CUSTOMIZE_TAB_FONT,
+              color       = Colors.BLACK,
+              text        = model.current_item.Price
+            }
         view.hor_sep =  Image {
                 position = {150, 840},
                 height   = 960-150,
@@ -113,7 +138,7 @@ CustomizeView = Class(View, function(view, model, ...)
 
             view.sub_group_items[tab_index] = {}
             view.sub_group[tab_index] = Group{name="Tab "..tab_index.." sub-group",
-                                                    position={500,60}, opacity=0}
+                                                    position={500,80}, opacity=0}
             if tab.Options ~= nil then
                 for opt_index,option in ipairs(tab.Options) do
                     local indent = 1
@@ -128,23 +153,26 @@ CustomizeView = Class(View, function(view, model, ...)
                     --for item, selection in pairs(option) do
                         if item ~= "Name" and item ~= "Image" and item ~= "Selected" then
                             indent = indent + 1
+                            if option.Placement then
                                 view.sub_group_items[tab_index][opt_index][3] = Image {
                                       position = {-70*(3-1), 60*(opt_index-1)},
-                                      src      = "assets/Placement/NONE.png"
+                                      src      = "assets/Placement/"..
+All_Options.Placement_r[option.Placement]..".png"
                                 }
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
 
                                 view.sub_group_items[tab_index][opt_index][2] = Image {
-                                     position = {-70*(3-1), 60*(opt_index-1)},
-                                     src      = "assets/CoverageX/bullshit.png"
+                                     position = {-70*(2-1), 60*(opt_index-1)},
+                                     src      = "assets/CoverageX/"..
+All_Options.CoverageX_r[option.CoverageX]..".png"
                                 }
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
 
                                 
-                            
+                           end
                         end
                     --end
-                    if opt_index > 13 then
+                    if opt_index > CUSTOMIZE_SCROLL_THRESHOLD then
                         view.sub_group_items[tab_index][opt_index][1].opacity = 0
                         view.sub_group_items[tab_index][opt_index][2].opacity = 0
                         view.sub_group_items[tab_index][opt_index][3].opacity = 0
@@ -169,17 +197,40 @@ CustomizeView = Class(View, function(view, model, ...)
             view.ui:raise(view.hor_lines[i])
         end
         view.ui:add(unpack(view.vert_lines))
+        view.up_arrow = Image{
+            position = {850, 60*(1-1)- 25+view.sub_group[1].y},
+                 src = "assets/UpScrollArrow.png"
+            }
+        view.ui:add(view.up_arrow)
+        view.down_arrow = Image{
+            position = {850,60*(CUSTOMIZE_SCROLL_THRESHOLD-0)+5+view.sub_group[1].y},
+                 src = "assets/DownScrollArrow.png"
+             }
+        view.ui:add(view.down_arrow)
+        view.ui:add(Image{
+            position = {view.sub_group[1].x-70*(3-1)-20,0},
+                 src = "assets/PizzaLR.png"
+            })
+ 
+
         --bg:lower_to_bottom()
         view.ui:lower(view.bg)
         view.ui:add(view.arrow)
+        view.ui:add(view.price)
         view.ui:add(view.food_name)
         view.ui:add(view.vert_sep)
+        view.ui:add(view.center_sep)
+        view.ui:add(view.nutrition)
         view.ui:add(view.back_arrow)
         view.ui:add(view.back_arrow_selected)
         view.ui:add(view.add_to_order)
         view.ui:add(view.hor_sep)
         view.ui:add(view.selector)
         view.ui:add(view.add_to_order_selector)
+        fthis = model.current_item.pizzagroup
+        view.ui:add(model.current_item.pizzagroup)
+        model.current_item.pizzagroup:show_all()
+        view.ui:add(view.slice_lines)
     end
     --view:Create_Menu_Items()
 ----------------------------------------------------------------------------
@@ -226,6 +277,15 @@ CustomizeView = Class(View, function(view, model, ...)
                         --item:animate{duration=100, opacity = 255}
                         --item.opacity = 255
                         view.sub_group[i]:animate{duration = 100, opacity = 255}
+                        if #view.sub_group_items[i] > 
+                            CUSTOMIZE_SCROLL_THRESHOLD then
+ 
+                            view.up_arrow.opacity = 255
+                            view.down_arrow.opacity = 255
+                        else
+                            view.up_arrow.opacity = 0
+                            view.down_arrow.opacity = 0
+                        end
                         view.vert_lines[i].opacity = 0
                         view.selector.y = 120*(i-1)
                     else
