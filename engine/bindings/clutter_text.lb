@@ -330,7 +330,8 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: wants_enter
 		
-		TODO	
+                Whether the user needs to first press Enter to activate text box editing.
+		See http://docs.clutter-project.org/docs/clutter/stable/ClutterText.html#ClutterText--activatable
 	*/
 	
     bool wants_enter
