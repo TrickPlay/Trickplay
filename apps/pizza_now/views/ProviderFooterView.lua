@@ -1,4 +1,3 @@
-
 ProviderFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)
      
