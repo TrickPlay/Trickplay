@@ -34,8 +34,8 @@ public:
     // Delegate functions
     
     virtual void disconnected();
-    virtual void key_down(unsigned int key_code,unsigned long int unicode);
-    virtual void key_up(unsigned int key_code,unsigned long int unicode);
+    virtual bool key_down(unsigned int key_code,unsigned long int unicode);
+    virtual bool key_up(unsigned int key_code,unsigned long int unicode);
     virtual void accelerometer(double x,double y,double z);
     virtual void click(int x,int y);
     virtual void touch_down(int x,int y);
@@ -741,6 +741,10 @@ interface controller [[ControllerDelegate*]]
     		key code - The numeric code of the key.
     		
     		unicode - The unicode value of the key or 0.
+    		
+    	Returns:
+    	
+    		false - If you don't want the event to be propagated.
     */
     
     callback on_key_down;
@@ -757,6 +761,10 @@ interface controller [[ControllerDelegate*]]
     		key code - The numeric code of the key.
     		
     		unicode - The unicode value of the key or 0.
+
+    	Returns:
+    	
+    		false - If you don't want the event to be propagated.
     */
 
     callback on_key_up;
@@ -882,18 +890,45 @@ void ControllerDelegate::disconnected()
     list->proxy_disconnected(this);    
 }
 
-void ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
-    invoke_controller_on_key_down(L,this,2,0);
+
+    bool result = true;
+
+    if ( invoke_controller_on_key_down(L,this,2,1) )
+    {
+	    if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+	    {
+	    	result = false;
+	    } 
+	    
+	    lua_pop( L , 1 );
+	}    
+    
+    return result;
 }
 
-void ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
-    invoke_controller_on_key_up(L,this,2,0);
+
+    bool result = true;
+
+    if ( invoke_controller_on_key_up(L,this,2,1) )
+    {
+    
+    	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+    	{
+    		result = false;
+    	} 
+    
+    	lua_pop( L , 1 );
+    }
+    
+    return result;
 }
 
 void ControllerDelegate::accelerometer(double x,double y,double z)
