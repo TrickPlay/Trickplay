@@ -144,16 +144,6 @@ gpointer UserData::initialize_with_master( gpointer _master )
 
 //.............................................................................
 
-void UserData::master_destroyed( UserData * self , GObject * master )
-{
-    self->master = 0;
-
-    udlog( "- DESTROYED MASTER FOR UD %p : MASTER %p" , self , master );
-}
-
-
-//.............................................................................
-
 gpointer UserData::initialize_with_client( gpointer _client )
 {
     udlog( "INITIALIZING '%s' UD %p : MASTER %p : CLIENT %p" , type , this , master , _client );
@@ -176,10 +166,6 @@ gpointer UserData::initialize_with_client( gpointer _client )
 
         udlog( "  CREATED NEW MASTER %p" , master );
     }
-
-    // We add a weak ref so we can tell when it is detroyed
-
-    g_object_weak_ref( master , ( GWeakNotify ) master_destroyed , this );
 
     client = _client;
 
@@ -302,13 +288,6 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
 //.............................................................................
 
-static void leaky_master( gpointer , GObject * o )
-{
-    udlog( "LEAKY MASTER IS NOW GONE %p" , o );
-}
-
-//.............................................................................
-
 void UserData::finalize( lua_State * L , int index )
 {
     UserData * self = UserData::get( L , index );
@@ -331,27 +310,6 @@ void UserData::finalize( lua_State * L , int index )
         udlog( "  REMOVING TOGGLE REF" );
 
         g_object_remove_toggle_ref( self->master , ( GToggleNotify ) toggle_notify , self );
-
-        // If the toggle ref was the last one, our own weak ref notify will be called and will
-        // set our master to NULL. If it is not NULL by now, the master object is still
-        // outstanding (which is ok).
-
-        if ( self->master )
-        {
-            udlog( "* OUR MASTER IS STILL AROUND %p" , self->master );
-
-            g_object_weak_unref( self->master , ( GWeakNotify ) master_destroyed , self );
-
-            if ( udlog )
-            {
-                // This one is just for debugging - so we can get a message printed when it
-                // goes away.
-
-                g_object_weak_ref( self->master , leaky_master , 0 );
-            }
-
-            self->master = 0;
-        }
     }
 
     // Remove the client from the client map

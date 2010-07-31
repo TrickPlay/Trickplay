@@ -215,7 +215,7 @@
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
-	NSLog([NSString stringWithFormat:@"navcontroller tag=%d",viewController.view.tag] );
+	NSLog(@"navcontroller tag=%d",viewController.view.tag );
 	if (viewController.view.tag == 1)
 	{
 		if (gestureViewController != nil)
