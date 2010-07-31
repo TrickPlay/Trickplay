@@ -60,3 +60,41 @@ function app.on_loaded()
     	--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))
     end
 end
+   
+    
+    function my_key_down( k )
+
+
+	end
+
+
+	function controllers.on_controller_connected( controllers , controller )
+
+
+		print( "NEW ONE CONNECTED" , controller.name )
+		
+		function controller.on_disconnected( controller )
+		end
+		
+		function controller.on_key_down( controller , k )
+		
+		    if controller.name == "Keyboard" then
+		    
+		        my_key_down( k )
+		
+		    else
+		    
+		
+		        print( "FROM" , controller.name , "KEY DOWN" , k )
+		        
+		    end
+		    
+		
+		end
+
+
+	end
+
+    
+    
+
