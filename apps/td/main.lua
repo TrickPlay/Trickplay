@@ -23,7 +23,7 @@ function app.on_loaded()
         local mainMenuList = {
             { Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
             { Rectangle{color="CC00FF", w=400, h=150, name="Cooperative", x=500} },
-            { Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
+            --{ Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
         }
         
         local mainMenuFocus = Rectangle{color="FF00CC", w=420, h=170}
@@ -48,15 +48,22 @@ function app.on_loaded()
 
 				LevelMenu.theme = Themes.robot
 				LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/coop.lua")
-
-				game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
+				
+				round = 2
+				
+				game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money/2}
 				game:startGame()
 				
 				local hl2 = AssetLoader:getImage( "select2",{} )
 				BoardMenu:add_hl( hl2 )
 				BoardMenu:update_cursor_position(hl2)
 				BoardMenu:controller_directions(hl2)
+				
+				local player = game.board:addPlayer{name = "Player 2", gold = LevelMenu.theme.wave.money/2, lives = 30}
+				
+				hl2.extra.r = function() BoardMenu.buttons.extra.r{ x=hl2.extra.x, y=hl2.extra.y, player=player } end
 				ipod_keys(hl2)
+				
 	
 				screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
 				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
