@@ -202,7 +202,7 @@ function Board:createBoard()
 	BoardMenu:button_directions()
 	BoardMenu:create_buttons(0, "Sans 34px")
 	BoardMenu:apply_color_change("FFFFFF", "000000")
-	BoardMenu.buttons:grab_key_focus()
+	--BoardMenu.buttons:grab_key_focus()
 	BoardMenu:update_cursor_position()
 	BoardMenu.hl.opacity = 255
 	
@@ -218,10 +218,6 @@ function Board:createBoard()
 		
 		-- Towers		
 		local towers = self.theme.towers
-		--local icons = {"normalRobotBuy","wall","slowTowerIcon"}
-		--for k,v in pairs(towers) do print(k,v) end
-		--assert(nil)
-		
 		
 		local menuType
 		
@@ -293,13 +289,7 @@ function Board:createBoard()
 		end
 	end	
 	BoardMenu.buttons.extra.space = function()
-		--[[if not self.zoom then
-			self:zoomIn()
-			self.zoom = true
-		else
-			self:zoomOut()
-			self.zoom = nil
-		end]]
+
 		seconds_elapsed = WAIT_TIME
 		bloodGroup:clear()
 	end
@@ -313,8 +303,12 @@ function Board:createBoard()
 		assert(self.creepWave[i])
 	end
 	
+	ACTIVE_CONTAINER = BoardMenu
+	keyboard_key_down = BoardMenu.buttons.on_key_down
 
 end
+
+
 function Board:findPaths()
 
 	for i = 1, #self.creepWave do
@@ -522,3 +516,12 @@ end
 function MyHeuristic(node_a, node_b)
 	return ( math.abs(node_a[1]-node_b[1]) + math.abs(node_a[2]-node_b[2]) )
 end
+
+
+		--[[if not self.zoom then
+			self:zoomIn()
+			self.zoom = true
+		else
+			self:zoomOut()
+			self.zoom = nil
+		end]]
