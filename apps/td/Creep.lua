@@ -119,7 +119,7 @@ function Creep:render(seconds)
 		self.found, self.path = astar.CalculatePath(game.board.nodes[ self.start ][ CREEP_START[2] ], game.board.nodes[ CREEP_END[1] ][ CREEP_END[2] ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
 		--self.creepImage.position = { GTP(self.path[#self.path][2]), GTP(self.path[#self.path][1]) }
 		--self:pop()
-		print(self.found, self.path[1][1], self.path[1][2])
+		--print(self.found, self.path[1][1], self.path[1][2])
 	 
 	-- If the creep runs out of steps
 	elseif cx >= 0 and #self.path == 0 then

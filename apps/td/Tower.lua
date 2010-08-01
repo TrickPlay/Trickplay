@@ -1,6 +1,6 @@
 Tower = {}
 
-function Tower:new(args, prefix, square)
+function Tower:new(args, prefix, square, player)
 	
 	local object = {
 		-- Tower defaults
@@ -9,6 +9,7 @@ function Tower:new(args, prefix, square)
 		level = 0,
 		prefix = prefix,
 		square = square,
+		owner = player,
 		
 		-- Position
 		x = GTP(square.x),
@@ -146,7 +147,7 @@ function Tower:upgrade()
 	
 	local r = self.table.upgrades[self.level]
 	
-	if (game.board.player.gold - r.cost >0) then
+	if (self.owner.gold - r.cost >0) then
 	
 		self.damage = r.damage
 		self.range = r.range
@@ -162,14 +163,21 @@ function Tower:upgrade()
 		
 		--screen:add(AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y}))
 
-		game.board.player.gold = game.board.player.gold - r.cost
-		goldtext.text = game.board.player.gold
+		self.owner.gold = self.owner.gold - r.cost
+		
+		if self.owner == game.board.player then
+			goldtext.text = self.owner.gold
+		end
+		
+		return true
 	else
-		self.level = self.level -1 	
+		self.level = self.level -1
 	end
 	
 end
 
+-- Tower rotation
+-- or sprite movement
 function Tower:animateTower(creeps,i)
 	local cx = creeps[i].creepGroup.x
 	local cy = creeps[i].creepGroup.y	
