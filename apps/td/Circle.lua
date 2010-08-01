@@ -14,7 +14,7 @@ function createCircleMenu(offset, distance, params, menuType)
 	CircleMenu:circle_directions(offset, distance)
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
-	CircleMenu.buttons:grab_key_focus()
+	--CircleMenu.buttons:grab_key_focus()
 	CircleMenu.container.opacity=150
 	
 	-- Remember which item was last selected for the different menus and initialize by pressing left until this item is reached
@@ -37,9 +37,17 @@ function createCircleMenu(offset, distance, params, menuType)
 		-- Then destroy the menu and return to the board
 		last[menuType] = CircleMenu.x
 		destroyCircleMenu(CircleMenu)
-		BoardMenu.buttons:grab_key_focus()
-
+		--BoardMenu.buttons:grab_key_focus()
+		
+		ACTIVE_CONTAINER = BoardMenu
+		keyboard_key_down = BoardMenu.buttons.on_key_down
+	
 	end
+	
+	
+	ACTIVE_CONTAINER = CircleMenu
+	keyboard_key_down = CircleMenu.buttons.on_key_down
+	
 
 	return CircleMenu
 

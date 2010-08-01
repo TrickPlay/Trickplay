@@ -29,11 +29,14 @@ ThemeMenu.buttons.extra.r = function()
 
 	MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
-	LevelMenu.buttons:grab_key_focus()
+	--LevelMenu.buttons:grab_key_focus()
 	LevelMenu.container.opacity = 255
 	LevelMenu.hl.opacity = 255
 	LevelMenu:update_cursor_position()
 	LevelMenu.theme = Themes[ names[ThemeMenu.y] ]
+	
+	ACTIVE_CONTAINER = LevelMenu
+	keyboard_key_down = LevelMenu.buttons.on_key_down
 
 end
 

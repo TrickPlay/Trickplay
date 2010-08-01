@@ -31,9 +31,10 @@ wave_counter = 0
 
 round = 1
 level = 1
-image_to_load = {"normal","mediumRobot"}
 
-creep_image_table = {}
+--image_to_load = {"normal","mediumRobot"}
+
+--creep_image_table = {}
 
 
 creepGold = {}
