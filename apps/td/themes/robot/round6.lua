@@ -1,53 +1,48 @@
 wave = {
 	
-	money = 15,
+	money = 10,
 	
 	-- Wave 1
 	{
 		{
 			{name = "SlowCreep"},
-			size = 10,
-			speed = 1.5,
+			size = 5,
+			speed = 1,
 			buffs = {hp = 1},
 		},
-		size = 10,
+		size = 5,
 	},
 	
 	 -- Wave 2
 	{
 		{
-			{name = "SlowCreep"},
-			size = 10,
-			speed = 1.5,
-			buffs = {hp = 1.5, speed = 1.5},
+			{name = "HardCreep"},
+			size = 5,
+			speed = 3,
+			buffs = {hp = .4, speed = .5},
 		},
-		size = 10,
+		size = 5,
 	},
 	
 	 -- Wave 3
 	{
 		{
-			{name = "SlowCreep"},
-			size = 5,
-			speed = 1.5,
-			buffs = {hp = 1.75, speed = 1.5},
-		},
-		{
 			{name = "MediumCreep"},
-			size = 5,
-			speed = 2.5,  
+			size = 10,
+			speed = 3,
+			buffs = {hp = 1, speed = .5},
 		},
-		size = 10,
+                size = 10,
 	},
 	
 	-- Wave 4
 	{
 		{
-			{name = "SlowCreep"},
+			{name = "NormalCreep"},
 			{name = "MediumCreep"},
 			size = 20,
 			speed = 1.5,
-			buffs = {hp = 1, speed = 1.25},
+			buffs = {hp = 1, speed = .75},
 		},
 		size = 20,
 	},
@@ -59,7 +54,7 @@ wave = {
 			{name = "MediumCreep"},
 			size = 30,
 			speed = 1.5,
-			buffs = {hp = 1.25, speed = 1.25},
+			buffs = {hp = 1, speed = 1},
 		},
 		size = 30,
 	},
@@ -67,16 +62,20 @@ wave = {
 	-- Wave 6
 	{
 		{
-			{name = "SlowCreep"},
-                        {name = "SlowCreep"},
-			{name = "MediumCreep"},
-			size = 41,
-			speed = 2,
-			buffs = {hp = 1, speed = 1},
+			{name = "HardCreep"},
+			size = 3,
+			speed = 4,
+			buffs = {hp = 1.25, speed = .5},
 		},
-		size = 41,
+                {
+			{name = "NormalCreep"},
+                        {name = "NormalCreep"},
+			size = 20,
+			speed = 1,
+			buffs = {hp = .75, speed = 1},
+		},
+		size = 20,
 	},
-	
         
 	-- Wave 7
 	{
@@ -84,7 +83,7 @@ wave = {
 			{name = "HardCreep"},
 			size = 20,
 			speed = 1.5,
-                        buffs = {hp = 1.5, speed = 1},
+                        buffs = {hp = 1, speed = 1},
 		},
 		size = 20,
 	},

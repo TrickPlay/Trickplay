@@ -28,7 +28,7 @@ LevelMenu.buttons.extra.space = function()
 
 	LevelMenu.container.opacity = 0
 	MainMenu.container.opacity = 255
-	MainMenu.buttons:grab_key_focus()
+	--MainMenu.buttons:grab_key_focus()
 
 end
 

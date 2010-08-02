@@ -46,7 +46,7 @@ function Game:killGame()
 	
 	MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
-	LevelMenu.container = 255
+	LevelMenu.container.opacity = 255
 
 	--LevelMenu.buttons:grab_key_focus()
 	
