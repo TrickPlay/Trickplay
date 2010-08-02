@@ -319,16 +319,16 @@ private:
 
     //.........................................................................
     // A reference to the Lua object. We keep a weak reference all the time
-    // and a strong one only when the toggle ref is the last.
+    // and a strong one only when the toggle ref is not the last.
 
-    int weak_ref;
+    int             weak_ref;
 
-    int strong_ref;
+    int             strong_ref;
 
     //.........................................................................
     // Callbacks are kept in a table we reference.
 
-    int callbacks_ref;
+    int             callbacks_ref;
 
     //.........................................................................
     // A map to signals we have connected to the master. Each entry has our own
@@ -338,7 +338,7 @@ private:
 
     typedef std::map< String , gulong > SignalMap;
 
-    SignalMap * signals;
+    SignalMap *     signals;
 };
 
 
