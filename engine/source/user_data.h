@@ -318,19 +318,12 @@ private:
     bool            initialized;
 
     //.........................................................................
-    // A reference to the Lua object. We flip this between a strong
-    // reference and a weak reference. The only time it can go away
-    // is when the Lua state goes away - in that case this object will
-    // be uninstalled and deleted.
+    // A reference to the Lua object. We keep a weak reference all the time
+    // and a strong one only when the toggle ref is the last.
 
-    int             proxy_ref;
+    int weak_ref;
 
-    //.........................................................................
-    // Whether the reference above is weak or strong, so we can toggle it
-
-    enum RefType { STRONG , WEAK };
-
-    RefType         proxy_ref_type;
+    int strong_ref;
 
     //.........................................................................
     // Callbacks are kept in a table we reference.
