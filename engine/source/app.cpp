@@ -666,6 +666,8 @@ int App::run( const StringSet & allowed_names )
     clutter_actor_set_position( screen, 0, 0 );
     clutter_actor_set_size( screen, 1920, 1080 );
 
+    clutter_actor_set_name( screen , "screen" );
+
     screen_gid = clutter_actor_get_gid( screen );
 
     secure_lua_state( allowed_names );
