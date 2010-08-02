@@ -44,10 +44,15 @@ function Game:killGame()
 	screen:add(MainMenu.container)
 	screen:add(ThemeMenu.container)
 	
+	MainMenu.container.opacity = 0
+	ThemeMenu.container.opacity = 0
+	LevelMenu.container = 255
+
 	--LevelMenu.buttons:grab_key_focus()
 	
 	ACTIVE_CONTAINER = LevelMenu
 	keyboard_key_down = LevelMenu.buttons.on_key_down
+	
 end
 
 function add_to_render_list( item )
