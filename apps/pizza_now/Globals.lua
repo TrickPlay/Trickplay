@@ -116,7 +116,9 @@ Characters={
 }
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"
+CUSTOMIZE_TINIER_FONT = "KacstArt 20px"
 CUSTOMIZE_TAB_FONT  = "KacstArt 48px"
+CUSTOMIZE_ENTRY_FONT = "KacstArt 28px"
 CUSTOMIZE_SUB_FONT  = "KacstArt 32px"
 CUSTOMIZE_SUB_FONT_SP  = "KacstArt 42px"
 CUSTOMIZE_NAME_FONT = "KacstArt 144px"

@@ -23,15 +23,29 @@ Model = Class(function(model, ...)
     }
 
     model.creditInfo = {
-        street =false,
+        driverInstructions = false,
+        password = false,
+        firstName = false,
+        lastName = false,
+        phone_areaCode = false,
+        phone_first = false,
+        phone_last = false,
+        phone_ext = false,
+        email_alias = false,
+        email_at = false,
+        cardNumber_first = false,
+        cardNumber_second = false,
+        cardNumber_third = false,
+        cardNumber_forth = false,
+        card_expiration_month = false,
+        card_expiration_year = false
+        card_code = false,
+        street = false,
         apartment = false,
         city = false,
         zip = false,
         card_type = false,
         card_number = false,
-        card_code = false,
-        card_expiration_month = false,
-        card_expiration_year = false
     }
 
     -- class methods
@@ -61,7 +75,8 @@ Model = Class(function(model, ...)
     end
 
     function model:get_active_controller()
-        return self.controllers[self.active_component]
+       assert(self.controllers[self.active_component])
+       return self.controllers[self.active_component]
     end
 
     function model:get_active_component()
@@ -75,9 +90,14 @@ Model = Class(function(model, ...)
     end
     
     function model:set_active_component(comp)
-        self.previous_component = self.active_component
-        self.active_component = comp
-        print("set active component to",comp)
+       if type(comp) ~= "number" then
+          error("Component " .. tostring(comp) .. " is not a number", 2)
+       elseif comp < Components.COMPONENTS_FIRST or Components.COMPONENTS_LAST < comp then
+          error("Component " .. comp .. " does not exist", 2)
+       end
+       self.previous_component = self.active_component
+       self.active_component = comp
+       print("set active component to",comp)
     end
 
     function model:set_keys()
@@ -113,6 +133,10 @@ Model = Class(function(model, ...)
             model.creditInfo[k] = v
             assert(model.creditInfo[k])
         end
+    end
+    
+    function model:selected_card()
+        return model.creditInfo.card_type
     end
 
 end)

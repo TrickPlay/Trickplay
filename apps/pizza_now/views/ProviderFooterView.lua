@@ -1,4 +1,3 @@
-
 ProviderFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)
      
@@ -19,7 +18,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
         }
     }
     view.ui:add(unpack(view.items))
-    screen:add(view.ui)
+    --screen:add(view.ui)
     function view:initialize()
         self:set_controller(ProviderFooterController(self))
     end

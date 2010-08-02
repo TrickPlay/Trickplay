@@ -42,3 +42,12 @@ dofile("controllers/WindMillController.lua")
 
 dofile("TopLevels/views/CheckoutView.lua")
 dofile("TopLevels/controllers/CheckoutController.lua")
+
+dofile("views/CreditInfoView.lua")
+dofile("controllers/CreditInfoController.lua")
+
+dofile("views/FinalOrderView.lua")
+dofile("controllers/FinalOrderController.lua")
+
+dofile("views/FinalFooterView.lua")
+dofile("controllers/FinalFooterController.lua")

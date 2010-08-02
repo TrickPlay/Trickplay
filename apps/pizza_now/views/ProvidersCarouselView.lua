@@ -1,11 +1,11 @@
 ProvidersCarouselView = Class(View, function(view, model, ...)
     view._base.init(view,model, Components.PROVIDER_SELECTION)
 
-    view.menu_items = { Image{src="views/match.png", scale={.7,.7}, y=-50  },
-                        Image{src="views/match.png", scale={.7,.7}, y=-50  },
-                        Image{src="views/match.png", scale={.7,.7}, y=-50  },
-                        Image{src="views/match.png", scale={.7,.7}, y=-50  },
-                        Image{src="views/match.png", scale={.7,.7}, y=-50  },
+    view.menu_items = { Image{src="assets/dominos_logo.png", y=-50  },
+                        Image{src="assets/ph_logo.png", y=-50  },
+                        Image{src="assets/rtp_logo.jpg", y=-50  },
+                        Image{src="assets/pmh_logo.jpg", y=-50  },
+                        Image{src="assets/pj_logo.gif", y=-50  },
     }
 
     view.ui = Group{name="providersCarousel_ui", position={1,1}, opacity=255}
@@ -36,7 +36,7 @@ ProvidersCarouselView = Class(View, function(view, model, ...)
 ---------------------------------------------------------
     --view.carousel_ui:add(unpack(menu_items))
     --assert(view.carousel_ui.children[1])
-    screen:add(view.ui)
+    --screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(ProvidersCarouselController(self))

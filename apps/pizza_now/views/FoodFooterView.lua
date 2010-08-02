@@ -26,7 +26,7 @@ src="assets/OrderBarBase.png"
     view.items = {view.back, view.checkout}
     view.ui:add(view.bar)
     view.ui:add(unpack(view.items))
-    screen:add(view.ui)
+    --screen:add(view.ui)
     function view:initialize()
         self:set_controller(FoodFooterController(self))
     end
