@@ -45,20 +45,28 @@ CustomizeController = Class(Controller,
          
          [keys.Return] =
             function(self)
+               local model = self:get_model()
                 if self.on_back_arrow then
                     self.selected = 1
                     self.on_back_arrow = false
-                    view:get_model().current_item.pizzagroup:hide_all()
-                    self:get_model():set_active_component(Components.FOOD_SELECTION)
-                    self:get_model():notify()
+                    model.current_item.pizzagroup:hide_all()
+                    model:set_active_component(Components.FOOD_SELECTION)
+                    model:notify()
                 elseif self.add_to_order then
                     self.selected = 1
                     self.add_to_order = false
-                    view:get_model().current_item.pizzagroup:hide_all()
-                    if view:get_model().current_item_is_in_cart == false then
-                       self:get_model().cart[#self:get_model().cart + 1] = view:get_model().current_item
+                    model.current_item.pizzagroup:hide_all()
+                    if model.current_item_is_in_cart == false then
+                       model.cart[#self:get_model().cart + 1] = view:get_model().current_item
                     end
 
+                    Navigator:add_pizza(model.current_item:as_dominos_pizza())
+                    local total, price = Navigator:get_total()
+                    print("\n\n\n\n\n\n\n\n\n\n" ..
+                          "Current Total: $" .. total .. "\n" ..
+                          "Price of just-added pizza: $" .. price .. "\n" ..
+                          "\n\n\n\n\n\n\n\n\n")
+                    model.current_item.Price = "$" .. price
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     print("size of cart",#self:get_model().cart)
                     print(self:get_model().cart[1].Name)

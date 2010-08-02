@@ -3,42 +3,11 @@ if not Class then
 end
 dofile("Utils.lua")
 dofile("Globals.lua")
-dofile("Navigator.lua")
 dofile("DominosPizza.lua")
+dofile("Navigator.lua")
 
 NEXTHOUSE_ADDRESS = {"77 Massachusetts Avenue", "Cambridge", "MA"}
 local ADDRESS, CITY, STATE = unpack(NEXTHOUSE_ADDRESS)
-
-local sizes = {"small", "medium", "large", "x-large"}
-local crusts = {"handtoss", "deepdish", "thin", "brooklyn"}
-local TOPPING_CHEESE, TOPPING_SAUCE = unpack({"toppingC", "toppingX"})
-
-TOPPINGS = {
-   {"p", "pepperoni",        "P",  "Pepperoni"},
-    {"x", "xlarge-pepperoni", "Pl", "Extra Large Pepperoni"},
-    {"i", "italian-sausage",  "S",  "Italian Sausage"},
-    {"b", "beef",             "B",  "Beef"},
-    {"h", "ham",              "H",  "Ham"},
-    {"c", "bacon",            "K",  "Bacon"},
-    {"k", "chicken",          "Du", "Chicken"},
-    {"s", "philly-steak",     "Pm", "Philly Steak"},
-    {"g", "green-peppers",    "G",  "Green Peppers"},
-    {"l", "black-olives",     "R",  "Black Olives"},
-    {"a", "pineapple",        "N",  "Pineapple"},
-    {"m", "mushrooms",        "M",  "Mushrooms"},
-    {"o", "onions",           "O",  "Onions"},
-    {"j", "jalapeno-peppers", "J",  "Jalapeno Peppers"},
-    {"e", "banana-peppers",   "Z",  "Bananan Peppers"},
-    {"d", "cheddar-cheese",   "E",  "Cheddar Cheese"},
-    {"n", "provolone-cheese", "Cp", "Provolone Cheese"},
-    {"v", "green-olives",     "V",  "Green Olives"},
-    {"t", "tomatoes",         "Td", "Diced Tomatoes"},
-}
-
-TOPPING_CODES = {}
-for i, topping in ipairs(TOPPINGS) do
-   TOPPING_CODES[topping[3]] = true
-end
 
 ------------------------
 -- TEST PIZZAS
@@ -51,14 +20,16 @@ end
 
 
 
-local page = Navigator.init_session()
-page = Navigator.submit_address(page, ADDRESS, CITY, STATE)
-page = Navigator.goto_build_pizza(page)
-page = Navigator.add_pizza(page, CHEESE_PIZZA)
-page = Navigator.add_pizza(page, PEPPERONI_PIZZA)
--- page = Navigator.goto_sides(page)
-local total = Navigator.get_total()
-page = Navigator.goto_confirm(page)
+Navigator:init_session()
+Navigator:submit_address(ADDRESS, CITY, STATE)
+Navigator:goto_build_pizza()
+Navigator:add_pizza(CHEESE_PIZZA)
+Navigator:add_pizza(PEPPERONI_PIZZA)
+-- Navigator:add_pizza(MASSIVE_PIZZA)
+-- print(to_string(MASSIVE_PIZZA))
+Navigator:goto_sides()
+local total = Navigator:get_total()
+Navigator:goto_confirm()
 
 
 --local formdata = parse_form(page, nil, true)

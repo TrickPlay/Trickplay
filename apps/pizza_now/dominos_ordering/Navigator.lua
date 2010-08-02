@@ -20,13 +20,19 @@ local CALCULATE_TOTAL_URL_POST_VARS = {
 
 local USER_AGENT = {["User-agent"] = 'PizzaLuaParty'}
 
-Navigator = {}
-function Navigator.init_session()
+Navigator = {
+   page=nil
+}
+setmetatable(Navigator, Navigator)
+function Navigator:init_session()
+   print("Initializing session")
    local response = get_response(ADDRESS_INPUT)
-   return response.body
+   self.page = response.body
+   self.cartsize = 0
 end
 
-function Navigator.submit_address(page, address, city, state)
+function Navigator:submit_address(address, city, state)
+   local page = self.page or error("Must call init_session first")
    print("submitting address")
    local formdata = parse_form(page, "startOrder")
    
@@ -48,19 +54,21 @@ function Navigator.submit_address(page, address, city, state)
    elseif string.find(response.body, "YOUR STORE IS CURRENTLY CLOSED.") then
       error("Your store is currently closed.")
    end
-   return response.body
+   self.page = response.body
 end
 
-function Navigator.goto_build_pizza(page)
+function Navigator:goto_build_pizza()
+   local page = self.page or error("Must call init_session first")
    print("navigating to pizza builder")
    local formdata = parse_form(page, "choose_pizza")
    assert(formdata["choose_pizza:_idcl"])
    formdata["choose_pizza:_idcl"] = "choose_pizza:goToBuildOwn"
    local response = get_response(BUILD_PIZZA_URL, formdata)
-   return response.body
+   self.page = response.body
 end
 
-function Navigator.add_pizza(page, pizza)
+function Navigator:add_pizza(pizza)
+   local page = self.page or error("Must call init_session first")
    print("adding pizza")
    local formdata = parse_form(page, "build_own")
 
@@ -120,50 +128,67 @@ function Navigator.add_pizza(page, pizza)
       formdata[topping.amt_str] = tweaks.coverage
    end
 
+
    -- then set the tag for the request
    assert(formdata["build_own:_idcl"])
    formdata["build_own:_idcl"] = "build_own:doAdd"
-   local response = get_response(ADD_PIZZA_URL, formdata)
-   return page
+   self.cartsize = self.cartsize+1
+
+   local MAX_ATTEMPTS = 5
+   local response = nil
+   for i=1,MAX_ATTEMPTS do
+      print("submitting pizza, attempt " .. i)
+      response = get_response(ADD_PIZZA_URL, formdata)
+      if response.body then break end
+   end
+   assert(response.body, "Status:" .. response.status)
+   self.page = response.body
 end
 
-function Navigator.goto_sides(page)
+function Navigator:goto_sides()
+   local page = self.page or error("Must call init_session first")
    print("going to sides")
    local formdata = parse_form(page, "build_own")
    assert(formdata["build_own:_idcl"])
    formdata["build_own:_idcl"] = "build_own:navSidesLink"
    local response = get_response(ADD_SIDES_URL, formdata)
-   return response.body
+   self.page = response.body
 end
 
-function Navigator.get_total()
+function Navigator:get_total()
+   local page = self.page or error("Must call init_session first")
    local MAX_ATTEMPTS = 5
    local total = nil
+   local product_price = nil
    local response
    local i = 1
    while i <= MAX_ATTEMPTS and total == nil do
       response = get_response(CALCULATE_TOTAL_URL, CALCULATE_TOTAL_URL_POST_VARS)
       print(response.body)
       total = tonumber(string.match(response.body, "<total>$(.-)</total>"))
+      product_price = tonumber(string.match(response.body, "<product".. self.cartsize-1 .."price>$(.-)</product"))
       i = i+1
    end
    assert(total, "Couldn't get total!")
-   return total
+   return total, product_price
 end
 
-function Navigator.goto_confirm(page)
+function Navigator:goto_confirm()
+   local page = self.page or error("Must call init_session first")
    print("heading to confirm page")
    local formdata = parse_form(page, "orderSummaryForm", true)
    assert(formdata["orderSummaryForm:_idcl"])
    formdata["orderSummaryForm:_idcl"] = "orderSummaryForm:osCheckout"
    local response = get_response(CHECKOUT_URL, formdata)
-   return response.body
+   self.page = response.body
 end
 
-function Navigator.submit_order(page)
+function Navigator:submit_order()
+   local page = self.page or error("Must call init_session first")
    print("submitting final order")
    local formdata = parse_form(page, "pricingEnabled", true)
    assert(formdata["pricingEnabled:_idcl"])
    formdata["pricingEnabled:_idcl"] = "pricingEnabled:placeOrdeLinkHIDDEN"
    print("Didn't actually submit order.")
+   self.page = nil
 end

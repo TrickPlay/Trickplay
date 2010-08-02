@@ -1,6 +1,17 @@
+local old_print = print
+function print(...)
+   a,b,c = ...
+   if not string.find(a,"^Graying") and not string.find(a,"^Hiding") and not string.find(a,"^Showing") then
+      old_print(...)
+   end
+end
+
+dofile("SuppressErrors.lua")
 dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("Globals.lua")
 dofile("Utils.lua")
+dofile("dominos_ordering/DominosPizza.lua")
+dofile("dominos_ordering/Navigator.lua")
 dofile("Menu/EmptyPizza.lua")
 dofile("Menu/Selection_Menu.lua")
 dofile("MVC.lua")
@@ -53,6 +64,7 @@ function screen:on_key_down(k)
     model:get_active_controller():on_key_down(k)
 end
 
+Navigator:init_session()
 model:start_app(Components.ADDRESS_INPUT)
 --model:start_app(Components.CHECKOUT)
 --model:start_app(Components.CUSTOMIZE_ITEM)
