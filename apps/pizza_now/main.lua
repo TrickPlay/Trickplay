@@ -67,7 +67,9 @@ function screen:on_key_down(k)
     model:get_active_controller():on_key_down(k)
 end
 
-Navigator:init_session()
+if NETWORKING then
+   Navigator:init_session()
+end
 model:start_app(Components.ADDRESS_INPUT)
 --model:start_app(Components.CHECKOUT)
 --model:start_app(Components.CUSTOMIZE_ITEM)

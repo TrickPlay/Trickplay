@@ -1,3 +1,5 @@
+NETWORKING = true
+
 if not Coverage then
    dofile("PizzaGlobals.lua")
 end

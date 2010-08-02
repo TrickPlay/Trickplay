@@ -27,6 +27,7 @@ setmetatable(Navigator, Navigator)
 function Navigator:init_session()
    print("Initializing session")
    local response = get_response(ADDRESS_INPUT)
+   assert(response.body)
    self.page = response.body
    self.cartsize = 0
 end
@@ -45,6 +46,7 @@ function Navigator:submit_address(address, city, state)
    formdata["startOrder:_idcl"] = "startOrder:locationOrderNowBtn"
 
    local response = get_response(LANDING_PAGE, formdata)
+   assert(response.body)
    if string.find(response.body, "Please enter the street address") then
       error("Didn't enter a street address")
    elseif string.find(response.body, "Please enter City&#47;State or Zip Code") then
@@ -64,6 +66,7 @@ function Navigator:goto_build_pizza()
    assert(formdata["choose_pizza:_idcl"])
    formdata["choose_pizza:_idcl"] = "choose_pizza:goToBuildOwn"
    local response = get_response(BUILD_PIZZA_URL, formdata)
+   assert(response.body)
    self.page = response.body
 end
 
