@@ -191,20 +191,20 @@ CheckoutView = Class(View, function(view, model, ...)
     }
     --card number entry forms
     local cardGroup1 = Clone{source = phoneGroup3}
-    cardGroup1.position = {1140, 760}
+    cardGroup1.position = {1140, 720}
     local cardGroup2 = Clone{source = phoneGroup3}
-    cardGroup2.position = {1250, 760}
+    cardGroup2.position = {1250, 720}
     local cardGroup3 = Clone{source = phoneGroup3}
-    cardGroup3.position = {1360, 760}
+    cardGroup3.position = {1360, 720}
     local cardGroup4 = Clone{source = phoneGroup3}
-    cardGroup4.position = {1470, 760}
+    cardGroup4.position = {1470, 720}
     local cardNumberText = Text{
-        position = {1000,780},
+        position = {1000,740},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Card #"
     }
-    local expirationGroup = Group{position = {1140, 820}}
+    local expirationGroup = Group{position = {1140, 780}}
     local expirationMonthForm = Group()
     local expirationMonthFormLeft = Image{
         position = {0, 0},
@@ -226,25 +226,72 @@ CheckoutView = Class(View, function(view, model, ...)
     expirationYearForm.position = {1210-1120, 0}
     expirationGroup:add(expirationMonthForm, expirationYearForm)
     local expirationText = Text{
-        position = {1000,840},
+        position = {1000,800},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Expires",
     }
     local secretCodeGroup = Clone{source = phoneGroup}
-    secretCodeGroup.position = {1140, 880}
+    secretCodeGroup.position = {1490, 780}
     local secretCodeText = Text{
-        position = {1000,900},
+        position = {1400,800},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "CVC",
     }
-    local creditInstructionsText = Text{
-        position = {1320,890},
-        font = CUSTOMIZE_TINY_FONT,
-        color = Colors.BLACK,
-        text = "Please have your legal photo ID and\ncredit card available for verification.",
+    --Billing Address
+    local addressBillingGroup = Group{position = {1140,840}}
+    local streetBillingForm = Group()
+    local streetBillingFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
     }
+    local streetBillingFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1740-1150,
+        tile = {true, false}
+    }
+    local streetBillingFormRight = Image{
+        position = {1740-1140, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    streetBillingForm:add(streetBillingFormLeft, streetBillingFormCenter, streetBillingFormRight)
+    local cityBillingForm = Group{position = {0, 900-840}}
+    local cityBillingFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local cityBillingFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1510-1150,
+        tile = {true, false}
+    }
+    local cityBillingFormRight = Image{
+        position = {1510-1140, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    cityBillingForm:add(cityBillingFormLeft, cityBillingFormCenter, cityBillingFormRight)
+    local stateBillingForm = Clone{source = expirationMonthForm}
+    stateBillingForm.position = {1530-1140, 900-840}
+    local zipBillingForm = Group{position = {1620-1140, 900-840}}
+    local zipBillingFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local zipBillingFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1740-1630,
+        tile = {true, false}
+    }
+    local zipBillingFormRight = Image{
+        position = {1740-1620, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    zipBillingForm:add(zipBillingFormLeft, zipBillingFormCenter, zipBillingFormRight)
+    addressBillingGroup:add(streetBillingForm, cityBillingForm, stateBillingForm, zipBillingForm)
     --Instructions for driver
     local driverInstructionsText = Text{
         position = {1060,80},
@@ -301,8 +348,14 @@ CheckoutView = Class(View, function(view, model, ...)
         tile = {true, false},
         width = 1920
     }
+    local creditInstructionsText = Text{
+        position = {990,990},
+        font = CUSTOMIZE_TINY_FONT,
+        color = Colors.BLACK,
+        text = "Please have your legal photo ID and\ncredit card available for verification.",
+    }
     local termsText = Text{
-        position = {720, 990},
+        position = {20, 990},
         font = CUSTOMIZE_TINY_FONT,
         color = Colors.BLACK,
         text = "By ordering, I implicitly agree to the Terms and\nConditions of Domino's Pizza and Pizza Now."
@@ -316,9 +369,9 @@ CheckoutView = Class(View, function(view, model, ...)
         phoneText, emailText, phoneGroup, phoneGroup2, phoneGroup3, extText, phoneGroup4,
         cash, masterCard, visaCard, americanExpressCard, discoverCard, cardGroup1,
         cardGroup2, cardGroup3, cardGroup4, cardNumberText, expirationGroup,
-        expirationText, secretCodeGroup, secretCodeText, creditInstructionsText,
-        driverInstructionsText, driverInstructionsForm, editOrderText,
-        addCouponText, taxText, totalCostText, orderBar, termsText
+        expirationText, secretCodeGroup, secretCodeText, addressBillingGroup,
+        driverInstructionsText, driverInstructionsForm, editOrderText, addCouponText,
+        taxText, totalCostText, orderBar, creditInstructionsText, termsText
     }
     
     --create the components
