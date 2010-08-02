@@ -269,8 +269,22 @@ function Creep:deathAnimation()
 	--print (self.face)
 	local frames = 11
 	local time = frames/20
+	
+	for i=1, frames do
+		if self.deathtimer.elapsed_seconds < ( 1/frames ) * i * time and self.deathtimer.elapsed_seconds > ( 1/frames) * (i-1) * time then
+			self.deathImage.x = - self.deathImage.w/frames * (i-1)
+			self.deathImage.opacity = 255 - i*(255/frames)
+		end
+	end
 
-	if self.flying then
+	if self.deathtimer.elapsed_seconds > time then
+		self.deathtimer:start()
+		self.creepGroup.opacity = 0
+		self.creepGroup:clear()
+		return true
+	end
+	
+--[[	if self.flying then
 		--self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.w/(self.frames*2),self.creepImage.h/2}
 		local xscale = self.creepGroup.scale[1]
 		local yscale = self.creepGroup.scale[2]
@@ -280,21 +294,23 @@ function Creep:deathAnimation()
 			self.creepGroup:clear()
 			return true
 		end
-	else
-		for i=1, frames do
-			if self.deathtimer.elapsed_seconds < ( 1/frames ) * i * time and self.deathtimer.elapsed_seconds > ( 1/frames) * (i-1) * time then
-				self.deathImage.x = - self.deathImage.w/frames * (i-1)
-				self.deathImage.opacity = 255 - i*(255/frames)
-			end
-		end
-
-		if self.deathtimer.elapsed_seconds > time then
-			self.deathtimer:start()
+	elseif self.face == 1 then
+		self.creepGroup.z_rotation = {180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/4,(self.creepImage.h/SP) * (SP/2)-25}
+		self.creepGroup.opacity = 255 - self.deathtimer.elapsed_seconds * 90
+		if self.creepGroup.z_rotation[1] >=90 then
 			self.creepGroup.opacity = 0
 			self.creepGroup:clear()
 			return true
 		end
-	end	
+	elseif self.face == -1 then
+		self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/16,(self.creepImage.h/SP) * (SP/2)-25}
+		
+		if self.creepGroup.z_rotation[1] <= -90 then
+			self.creepGroup.opacity = 0
+			self.creepGroup:clear()
+			return true
+		end
+	end]]
 	return false
 end
 

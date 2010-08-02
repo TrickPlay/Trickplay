@@ -39,14 +39,13 @@ Board = {
 					v:render(seconds)
 				elseif (v.dead == false) then
 					v.greenBar.width = 0
-					v.dead = true
+					v.dead = true	
 					v.deathtimer:start()
+					v.creepImageGroup:remove(v.creepImage)
 					v.redBar.opacity = 0
 					v.greenBar.opacity = 0
-					if (not v.flying) then
-						v.creepImageGroup:remove(v.creepImage)
-						v.creepImageGroup:add(v.deathImage)
-					end			
+					v.creepImageGroup:add(v.deathImage)
+				
 					wave_counter = wave_counter + 1
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
@@ -81,12 +80,11 @@ Board = {
 			creepnum = 1
 			seconds_elapsed = 0
 			level = level + 1
-			wavePartCounter = 1
-			creeppartnum = 1
-
 			if (level-1 == #self.theme.wave) then
 				game:killGame()
 			end
+			wavePartCounter = 1
+			creeppartnum = 1
 		end
 		
 		for i = 1, #self.squaresWithTowers do
