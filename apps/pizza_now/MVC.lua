@@ -120,6 +120,10 @@ Model = Class(function(model, ...)
             assert(model.creditInfo[k])
         end
     end
+    
+    function model:selected_card()
+        return model.creditInfo.card_type
+    end
 
 end)
 

@@ -1,5 +1,5 @@
 CreditInfoController = Class(Controller, function(self, view, ...)
-    self._base.init(self, view, Components.CHECKOUT, parent)
+    self._base.init(self, view, Components.CHECKOUT)
 
     local Info = {
         DRIVER_INSTRUCTIONS = 1,
@@ -28,21 +28,27 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         ALIAS = 1,
         AT = 2
     }
-    local CardTypeSub = {}
-    local CardNumberSub{
+    local CardTypeSub = {
+        CASH = 1,
+        MASTER_CARD = 2,
+        VISA = 3,
+        AMERICAN_EXPRESS = 4,
+        DISCOVER = 5
+    }
+    local CardNumberSub = {
         FIRST = 1,
         SECOND = 2,
         THIRD = 3,
         FORTH = 4
     }
-    local CardExpirationSub{
+    local CardExpirationSub = {
         MONTH = 1,
         YEAR = 2
     }
     local CardCodeSub = {}
     local SubSelections = {
         DriverSub, PasswordSub, NameSub, PhoneSub, EmailSub, CardTypeSub,
-        CardNumberSub, CardExpirationSub
+        CardNumberSub, CardExpirationSub, CardCodeSub
     }
 
     local InfoSize = 0
@@ -95,6 +101,18 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         end,
         [Info.CARD_TYPE] = function(self)
             print("card type selected")
+            local i = 0
+            --get the number of different card types
+            for k,v in pairs(CardTypeSub) do
+                i = i + 1
+            end
+            --set the model to carry which card type is selected
+            if(sub_selection <= i and sub_selection > 0) then
+                local args = {card_type = sub_selection}
+                model:set_creditInfo(args)
+            else
+                error("card type eff'd up")
+            end
         end,
         [Info.CARD_NUMBER] = function(self)
             print("card number entry")
@@ -110,6 +128,7 @@ CreditInfoController = Class(Controller, function(self, view, ...)
                 error("error selecting card entry")
             end
         end,
+
         [Info.CARD_EXPIRATION] = function(self)
             print("card expiration entry")
             if(CardExpirationSub.MONTH == sub_selection) then
@@ -149,22 +168,40 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         return selected
     end
 
+    function self:get_sub_selection_index()
+        return sub_selection
+    end
+
+    function self:set_parent_controller(parent_controller)
+        self.parent_controller = parent_controller
+    end
+
     function self:move_selector(dir)
+        screen:grab_key_focus()
+        if(not self.parent_controller) then
+            self:set_parent_controller(view.parent_view:get_controller())
+        end
         if(0 ~= dir[2]) then
             local new_selected = selected + dir[2]
             if 1 <= new_selected and new_selected <= InfoSize then
                 selected = new_selected
                 sub_selection = 1
+            elseif(new_selected == InfoSize + 1) then
+                --change focus to footer
+                self.parent_controller:move_selector(dir)
             end
         elseif(0 ~= dir[1]) then
             local new_selected = sub_selection + dir[1]
             local subs = 0
-            assert(SubSelections[selected])
+            assert(SubSelections[selected], "selected = "..selected)
             for k,v in pairs(SubSelections[selected]) do
                 subs = subs + 1
             end
             if(1 <= new_selected and new_selected <= subs) then
                 sub_selection = new_selected
+            elseif(0 == new_selected) then
+                --change focus to order
+                self.parent_controller:move_selector(dir)
             end
         else
             error("something eff'd up")
