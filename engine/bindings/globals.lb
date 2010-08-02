@@ -472,7 +472,7 @@ globals
 		
 	detach( udata o )
 		[[
-			lb_clear_callbacks(L,o);
+			UserData::clear_callbacks( L , o );
 		]];		       
 		
 	dolater( function f , ... )
@@ -499,5 +499,14 @@ globals
 			
 			DoLater::add(L,func,args);
 		]];
+		
+	table registry()
+		[[
+#ifdef TP_PRODUCTION		
+			lua_pushnil( L );
+#else
+			lua_pushvalue( L , LUA_REGISTRYINDEX );
+#endif			
+		]];		
 }
 
