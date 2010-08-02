@@ -40,7 +40,7 @@ function Board:new(args)
 	local object = {
 		w = w,
 		h = h,
-		player = Player:new { name = "Player 1", gold = args.gold, lives = 30 },
+		player = Player:new { name = "Player 1", gold = args.gold, lives = 30, color = "00FF32" },
 		squareGrid = squareGrid,
 		squaresWithTowers = {},
 		obstacleImages = obstacleImages,
@@ -94,13 +94,19 @@ Board.render = function (self, seconds)
 				v.redBar.opacity = 0
 				v.greenBar.opacity = 0
 				v.creepImageGroup:add(v.deathImage)
-			
+				
 				wave_counter = wave_counter + 1
 				if (creepGold[k] ==0) then
 					creepGold[k] = 1
+					
 					self.player.gold = self.player.gold + v.bounty
-					if self.player2 then self.player2.gold = self.player2.gold + v.bounty end
-					goldtext.text = self.player.gold
+					self:updateGold(self.player)
+					
+					if self.player2 then 
+						self.player2.gold = self.player2.gold + v.bounty 
+						self:updateGold(self.player2)
+					end
+					
 				end
 			end
 			if (v.dead) then
@@ -140,12 +146,15 @@ Board.render = function (self, seconds)
 	for i = 1, #self.squaresWithTowers do
 		self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
 	end
+	
 	for i = 1, #self.obstacleImages do
 		self.obstacleImages[i]:animate()
 	end
+	
 	if self.player.circle then
 		circleRender(self.player.circle, seconds)
 	end
+	
 	if self.player2.circle then
 		circleRender(self.player2.circle, seconds)
 	end
@@ -164,7 +173,7 @@ end
 function Board:addPlayer(args)
 
 	if not self.player2 then
-		self.player2 = Player:new { name = args.name, gold = args.gold, lives = args.lives }
+		self.player2 = Player:new { name = args.name, gold = args.gold, lives = args.lives, color = args.color }
 	else
 		print( "There is already a player 2" )
 	end
@@ -367,7 +376,15 @@ function Board:findPaths()
 
 end
 
+function Board:updateGold(player)
 
+	if player == self.player then
+		goldtext.text = player.gold
+	else
+		game.gold2.text = player.gold
+	end
+
+end
 
 function Board:buildTower(selection, player)
 	
@@ -386,9 +403,7 @@ function Board:buildTower(selection, player)
 		current:render()
 		player.gold = player.gold - current.tower.cost
 		
-		if player == self.player then
-			goldtext.text = player.gold
-		end
+		self:updateGold(player)
 		
 		current.tower.timer:start()
 		local n = current.square.children
@@ -410,10 +425,10 @@ function Board:removeTower(player)
 	current.square[3] = EMPTY	
 	player.gold = player.gold + current.tower.cost * 0.5
 	
-	if player == self.player then
-		goldtext.text = self.player.gold
-		current.hasTower = false
-	end
+	self:updateGold(player)
+	
+	current.hasTower = false
+
 	
 	local m = current.square.cut
 	
