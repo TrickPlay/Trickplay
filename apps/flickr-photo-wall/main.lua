@@ -334,10 +334,11 @@ function screen.on_key_down(screen,keyval)
 										position = {0,0},
 										src = zoom_image_url,
 										async = true,
+										extra = { zoom_image },
 				}
-				zoom_image_img.on_loaded = function()
+				zoom_image_img.on_loaded = function(image)
 											-- The zoom might be cancelled before the image finished loading
-											if zoom_image == nil then return end
+											if zoom_image ~= image.extra[1] then return end
 											zoom_image.children = { zoom_image_img, zoom_image_txt_grp }
 										end
 

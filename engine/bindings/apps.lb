@@ -148,7 +148,7 @@ global apps [[Apps*]]
 {
     apps()
         [[
-            *self = new Apps( L );
+            self = lb_construct( Apps , new Apps( L ) );
         ]];
         
     ~apps()

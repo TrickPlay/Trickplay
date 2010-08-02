@@ -134,27 +134,46 @@ protected:
 
 //-----------------------------------------------------------------------------
 
-class DebugLog
+class _Debug_ON
 {
 public:
 
-    DebugLog( bool _on ) : on( _on ) {}
+    inline void operator()( const gchar * format, ...)
+    {
+        va_list args;
+        va_start( args, format );
+        g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
+        va_end( args );
+    }
+
+    inline operator bool()
+    {
+        return true;
+    }
+};
+
+class _Debug_OFF
+{
+public:
 
     inline void operator()( const gchar * format, ...)
     {
-        if ( on )
-        {
-            va_list args;
-            va_start( args, format );
-            g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
-            va_end( args );
-        }
     }
 
-private:
-
-    bool on;
+    inline operator bool()
+    {
+        return false;
+    }
 };
+
+#ifdef TP_PRODUCTION
+#define Debug_ON    _Debug_OFF
+#define Debug_OFF   _Debug_OFF
+#else
+#define Debug_ON    _Debug_ON
+#define Debug_OFF   _Debug_OFF
+#endif
+
 
 //-----------------------------------------------------------------------------
 // This class lets you push things to free into it - when this instance is

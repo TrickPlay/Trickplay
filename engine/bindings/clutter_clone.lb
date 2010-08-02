@@ -4,7 +4,6 @@ module clutter_clone;
 #include "clutter/clutter.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -20,15 +19,18 @@ class Clone [[ClutterActor*]] actor
 {
     Clone(table props = 0)
         [[
-            *self = clutter_clone_new(NULL);
-		    ClutterUtil::initialize_actor(L,*self,CLONE_METATABLE);
+            self = clutter_clone_new(NULL);
+            g_object_ref_sink( self );
+            g_object_ref( self );
+            self = lb_construct_gobject( ClutterActor , self );
+            
+		    ClutterUtil::initialize_actor(L,self,CLONE_METATABLE);
 		    ClutterUtil::set_props_from_table(L,props);
-		    g_object_ref_sink(G_OBJECT(*self));
+		    g_object_unref( self );
         ]];
 	
     ~Clone()
 		[[
-			g_object_unref(G_OBJECT(self));
 		]];
 		
 	/*
@@ -43,10 +45,7 @@ class Clone [[ClutterActor*]] actor
         ]]
         [[
             ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
-            if(source)
-		    {
-	                clutter_clone_set_source(CLUTTER_CLONE(self),source);
-		    }
+	        clutter_clone_set_source(CLUTTER_CLONE(self),source);
         ]];
 }
 

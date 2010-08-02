@@ -12,7 +12,10 @@
 
 @class AudioStreamer;
 
-@interface GestureView : UIViewController <UITextFieldDelegate, AVAudioPlayerDelegate> {
+@interface GestureView : UIViewController <UITextFieldDelegate,
+                                           AVAudioPlayerDelegate,
+                                           UIAccelerometerDelegate,
+                                           UIActionSheetDelegate> {
     UIAccelerationValue accelerationY;
 	UIAccelerationValue accelerationX;
 	UIAccelerationValue accelerationZ;
