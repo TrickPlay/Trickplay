@@ -110,9 +110,11 @@ CustomizeView = Class(View, function(view, model, ...)
                 src       = "assets/EditOrderHighlight.png"
             }
         view.ui.opacity = 255
+
+        view.accordian_group = {}
+        view.accordian_group_items = {}
         for tab_index,tab in ipairs(model.current_item.Tabs) do
 
-    
             --check to see if there is an item selected
             assert(model.current_item,"no item selected for Customization")
     
@@ -137,49 +139,160 @@ CustomizeView = Class(View, function(view, model, ...)
             }
 
             view.sub_group_items[tab_index] = {}
+            view.accordian_group[tab_index] = {}
+            view.accordian_group_items[tab_index] = {}
             view.sub_group[tab_index] = Group{name="Tab "..tab_index.." sub-group",
                                                     position={500,80}, opacity=0}
             if tab.Options ~= nil then
+                --view.accordian_group[tab_index][opt_index] = {}
+                --view.accordian_group_items[tab_index][opt_index] = {}
+
                 for opt_index,option in ipairs(tab.Options) do
-                    local indent = 1
-                    view.sub_group_items[tab_index][opt_index] = {}
-                    view.sub_group_items[tab_index][opt_index][1] = Text {
-                        position = {0, 60*(opt_index-1)+10},
-                        font     = CUSTOMIZE_SUB_FONT,
-                        color    = Colors.BLACK,
-                        text     = option.Name
-                    }
-                    view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
-                    --for item, selection in pairs(option) do
-                        if item ~= "Name" and item ~= "Image" and item ~= "Selected" then
+                    if option.Radio then
+                        view.sub_group_items[tab_index][opt_index] = {}
+                        view.sub_group_items[tab_index][opt_index][1] = Text {
+                            position = {0, 60*(opt_index-1)+10},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = option.Name
+                        }
+                        view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][1])
+                        view.sub_group_items[tab_index][opt_index][2] = {}
+
+                        view.accordian_group_items[tab_index][opt_index] = {}
+                        view.accordian_group[tab_index][opt_index] = Group{
+                                name = option.Name.." accordian",
+                            position = {120, 60*(opt_index)+10},
+                             opacity = 0
+                        }
+                        local acc_index = 1
+                        local acc_adjust = 0                        
+                        for item,curr_selection in pairs(option) do
+                            if item ~= "Name" and item ~= "Image" and item ~= "Selected" 
+                               and item ~= "Radio" and item ~= "ToppingGroup" then
+                                view.accordian_group_items[tab_index][opt_index][acc_index] = {}
+                                local radio_index = 1  
+                                view.accordian_group[tab_index][opt_index]:add(Text{
+                                          position = {0, --[[60*(radio_index-1)+]]acc_adjust},
+                                          font     = CUSTOMIZE_SUB_FONT,
+                                          color    = Colors.BLACK,
+                                          text     = item..":"
+                                })
+                                acc_adjust = acc_adjust+50
+                                for r=1,#All_Options[item.."_r"] do
+                                    view.accordian_group_items[tab_index][opt_index][acc_index][radio_index]={}
+                                    view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][1] = Text {
+                                          position = {60, --[[60*(radio_index-1)+]]acc_adjust},
+                                          font     = CUSTOMIZE_SUB_FONT,
+                                          color    = Colors.BLACK,
+                                          text     = All_Options[item.."_r"][r]
+                                    }
+                                    if r == curr_selection then
+                                        view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][2] = Image {
+                                          position = {0, --[[60*(radio_index-1)+]]acc_adjust-15},
+                                          src      = "assets/RadioOn.png"
+                                        }
+                                    else
+                                        view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][2] = Image {
+                                          position = {0,--[[ 60*(radio_index-1)+]]acc_adjust-15},
+                                          src      = "assets/RadioOff.png"
+                                        }
+                                    end
+                                    view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][1])
+                                    view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][2])
+                                    radio_index = radio_index + 1
+                                    acc_adjust = acc_adjust+50
+
+                                end
+                               -- acc_adjust = acc_adjust +radio_index*60
+                                acc_index = acc_index + 1
+
+                            end
+                        end
+--[[
+                        --radio_index = radio_index + 1
+                                --acc_adjust = acc_adjust+60
+                        view.accordian_group_items[tab_index][opt_index][acc_index]={}
+                        view.accordian_group_items[tab_index][opt_index][acc_index][1]={}
+                        view.accordian_group_items[tab_index][opt_index][acc_index][1][1] = Text {
+                                          position = {0, --[=[60*(radio_index-1)+]=]acc_adjust},
+                                          font     = CUSTOMIZE_SUB_FONT_SP,
+                                          color    = Colors.BLACK,
+                                          text     = "Continue"
+                                    }
+                        --acc_adjust = acc_adjust +radio_index*60
+                        view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][1][1])--]]
+
+                        view.sub_group[tab_index]:add(view.accordian_group[tab_index][opt_index])
+                                    --acc_adjust = acc_adjust+60
+
+                        option.Selected = function()
+                            if opt_index < #tab.Options then
+                                for i=opt_index+1,#tab.Options do
+                                    view.sub_group_items[tab_index][i][1].y = view.sub_group_items[tab_index][i][1].y + acc_adjust
+                                end
+                            end
+                            view.accordian_group[tab_index][opt_index].opacity = 255
+                            self:get_model():set_active_component(Components.ACCORDIAN)
+                            self:get_model():get_active_controller():init_shit(view.accordian_group_items[tab_index][opt_index],tab_index,opt_index,option,view.accordian_group[tab_index][opt_index])
+
+                            self:get_model():notify()
+
+                            --model.accordian
+                            --init accordian
+                        end
+                --[[        option.UnSelected = function()
+                            print("\n\nunselecting")
+                            if opt_index < #tab.Options then
+                                for i=opt_index+1,#tab.Options do
+                                    view.sub_group_items[tab_index][i][1].y = view.sub_group_items[tab_index][i][1].y - acc_adjust
+                                end
+                            end
+                            view.accordian_group[tab_index][opt_index].opacity = 0
+                            model:set_active_component(Components.TAB)
+                            self:get_model():notify()
+
+                        end--]]
+                    else
+                        local indent = 1
+                        view.sub_group_items[tab_index][opt_index] = {}
+                        view.sub_group_items[tab_index][opt_index][1] = Text {
+                            position = {0, 60*(opt_index-1)+10},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = option.Name
+                        }
+                        view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][indent])
+                        --if item ~= "Name" and item ~= "Image" and item ~= "Selected" 
+                        --                  and item ~= "ToppingGroup" then
                             indent = indent + 1
-                            if option.Placement then
+                            if option.Placement ~= nil then
                                 view.sub_group_items[tab_index][opt_index][3] = Image {
                                       position = {-70*(3-1), 60*(opt_index-1)},
                                       src      = "assets/Placement/"..
-All_Options.Placement_r[option.Placement]..".png"
+                                       All_Options.Placement_r[option.Placement]..".png"
                                 }
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
-
                                 view.sub_group_items[tab_index][opt_index][2] = Image {
                                      position = {-70*(2-1), 60*(opt_index-1)},
                                      src      = "assets/CoverageX/"..
-All_Options.CoverageX_r[option.CoverageX]..".png"
+                                      All_Options.CoverageX_r[option.CoverageX]..".png"
                                 }
-                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])                            
+                                if opt_index > CUSTOMIZE_SCROLL_THRESHOLD then
+                                    assert(option.Placement ~= nil,"shit "..option.Name)
+                                    view.sub_group_items[tab_index][opt_index][1].opacity = 0
+                                    view.sub_group_items[tab_index][opt_index][2].opacity = 0
+                                    view.sub_group_items[tab_index][opt_index][3].opacity = 0
+                                end
+                            end
+                        --end
+                    
 
-                                
-                           end
-                        end
-                    --end
-                    if opt_index > CUSTOMIZE_SCROLL_THRESHOLD then
-                        view.sub_group_items[tab_index][opt_index][1].opacity = 0
-                        view.sub_group_items[tab_index][opt_index][2].opacity = 0
-                        view.sub_group_items[tab_index][opt_index][3].opacity = 0
                     end
                 end
 
-            end
+            end 
             view.ui:add(view.sub_group[tab_index])
         end
             view.vert_lines[#view.menu_items+1] = Image {
@@ -296,7 +409,8 @@ All_Options.CoverageX_r[option.CoverageX]..".png"
                     end
                 end
             end
-        elseif comp == Components.TAB or comp == Components.CUSTOMIZE_ITEM then
+        elseif comp == Components.TAB or comp == Components.CUSTOMIZE_ITEM or
+               comp == Components.ACCORDIAN then
             print("Greying CustomizeView UI")
             --view.ui.opacity = 100
             view.selector.opacity = 0
