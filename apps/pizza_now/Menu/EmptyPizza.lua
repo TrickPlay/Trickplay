@@ -12,54 +12,66 @@ All_Options = {
 
    --NA = -1,
 
-   Placement  = {
-       NONE   = 1,
-       LEFT   = 2,
-       RIGHT  = 3,
-       ENTIRE = 4
+   Placement = {
+       ["None"]   = 1,
+       ["Left"]   = 2,
+       ["Right"]  = 3,
+       ["Entire"] = 4
    },
-   Placement_r= {
-       "NONE"   ,
-       "LEFT"   ,
-       "RIGHT"  ,
-       "ENTIRE"
+   Placement_r = {
+       "None"   ,
+       "Left"   ,
+       "Right"  ,
+       "Entire"
    },
-   CoverageX  = {
-      NONE    = 1,
-      LIGHT   = 2,
-      REGULAR = 3,
-      EXTRA   = 4
+   CoverageX = {
+      ["None"]    = 1,
+      ["Light"]   = 2,
+      ["Regular"] = 3,
+      ["Extra"]   = 4
    },
-   CoverageX_r= {
-      "NONE"    ,
-      "LIGHT"   ,
-      "REGULAR" ,
-      "EXTRA"   
+   CoverageX_r = {
+      "None"    ,
+      "Light"   ,
+      "Regular" ,
+      "Extra"   
    },  
-   Coverage   = {
-      NONE    = 1,
-      LIGHT   = 2,
-      REGULAR = 3
+   Coverage = {
+      ["Light"]   = 2,
+      ["Regular"] = 3,
+      ["Extra"]   = 4
    },
-   Size       = {
-      SMALL   = 1,
-      MEDIUM  = 2,
-      LARGE   = 3,
-      XLARGE  = 4
+   Size = {
+      ["Small"]        = 1,
+      ["Medium"]       = 2,
+      ["Large"]        = 3,
+      ["Extra Large"]  = 4
    },
    Crust_Style = {
-      HANDTOSSED     = 1,
-      DEEP_DISH      = 2,
-      CRUNCHY_THIN   = 3,
-      BROOKLYN_STYLE = 4
+      ["Handtossed"]     = 1,
+      ["Deep Dish"]      = 2,
+      ["Crunchy Thin"]   = 3,
+      ["Brooklyn Style"] = 4
+   },
+   Crust_Style_r = {
+      "Handtossed"     ,
+      "Deep Dish"      ,
+      "Crunchy Thin"   ,
+      "Brooklyn Style" 
    },
    Sauce_Type = {
-      TOMATO   = 1,
-      WHITE    = 2,
-      MARINARA = 3,
-      BBQ      = 4
+      ["Tomato"]   = 1,
+      ["White"]    = 2,
+      ["Marinara"] = 3,
+      ["Barbeque"] = 4
    },
-   Size_r = {"SMALL","MEDIUM","LARGE","XLARGE"},
+   Sauce_Type_r = {
+      "Tomato"   ,
+      "White"    ,
+      "Marinara" ,
+      "Barbeque"
+   },
+   Size_r = {"Small","Medium","Large","Extra Large"},
 
    Pizza_Toppings_r = {
     "Pepperoni","XL_Pepperoni","Sliced_Italian_Sausage", 
@@ -98,36 +110,51 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       Tab_Text = "Crust",
       --Radio Buttons
       Options = {
-         {Name = "Cheese", Image = Image{src="assets/Topping_Pepperoni.png"}, 
-                       Placement = All_Options.Placement.ENTIRE,
-                       CoverageX = All_Options.Coverage.REGULAR,
-                            ToppingGroup = nil,
+         {
+                            Name = "Cheese", 
+                           Image = Image{src="assets/Topping_Pepperoni.png"}, 
+                       Placement = All_Options.Placement.Entire,
+                       CoverageX = All_Options.Coverage.Regular,
+                    ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
-                         end},
-         {Name = "Sauce",  Image = Image{src="assets/Topping_Pepperoni.png"}, 
-                       CoverageX = All_Options.Coverage.REGULAR,
-                      Sauce_Type = All_Options.Sauce_Type.TOMATO,
-                            ToppingGroup = nil,
+                         end
+         },
+         {
+                            Name = "Sauce",
+                           Image = Image{src="assets/Topping_Pepperoni.png"},
+                           Radio = true,
+                       CoverageX = All_Options.Coverage.Regular,
+                      Sauce_Type = All_Options.Sauce_Type.Tomato,
+                    ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
-                         end},
-         {Name = "Crust",  Image = Image{src="assets/Topping_Pepperoni.png"}, 
-                     Crust_Style = All_Options.Crust_Style.HANDTOSSED,
-                            ToppingGroup = nil,
+                         end
+         },
+         {
+                            Name = "Crust",
+                           Image = Image{src="assets/Topping_Pepperoni.png"},
+                           Radio = true,
+                     Crust_Style = All_Options.Crust_Style.Handtossed,
+                    ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
-                         end},
-         {Name = "Size",   Image = Image{src="assets/Topping_Pepperoni.png"},
-                            Size = All_Options.Size.LARGE,
-                            ToppingGroup = nil,
+                         end
+         },
+         {
+                            Name = "Size",
+                           Image = Image{src="assets/Topping_Pepperoni.png"},
+                           Radio = true,
+                            Size = All_Options.Size.Large,
+                    ToppingGroup = nil,
                         Selected = 
                          function(self)
                             print("Selection not yet handled")
-                         end}
+                         end
+         }
       }
    }
    --Meat Toppings
@@ -156,8 +183,8 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       self.Tabs[2].Options[i] = {
          Name  = Meat_Toppings[i],
          Image = Image{src="assets/Topping_Pepperoni.png"},
-         CoverageX  = All_Options.Coverage.NONE,
-         Placement = All_Options.Placement.NONE,
+         CoverageX  = All_Options.CoverageX.None,
+         Placement = All_Options.Placement.None,
          ToppingGroup = nil,
          Selected = 
             function(itself)
@@ -170,8 +197,8 @@ EmptyPizza = Class(--[[Menu_Item,]]function(self)
       self.Tabs[3].Options[i] = {
          Name  = Veggie_Toppings[i],
          Image = Image{src="assets/Topping_Pepperoni.png"},
-         CoverageX  = All_Options.Coverage.NONE,
-         Placement = All_Options.Placement.NONE,
+         CoverageX  = All_Options.CoverageX.None,
+         Placement  = All_Options.Placement.None,
          ToppingGroup = nil,
          Selected = 
             function(self)
@@ -258,13 +285,13 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
             clone.position = {x, y}
             print("radians: "..angle..", degrees: "..degrees..", radius: "..radius)
             local groupseed = math.random(2,4)
-            if(All_Options.CoverageX.LIGHT == groupseed) then
+            if(All_Options.CoverageX.Light == groupseed) then
                 if(slice <= 4) then
                     toppingLightRightGroup:add(clone)
                 else
                     toppingLightLeftGroup:add(clone)
                 end
-            elseif(All_Options.CoverageX.REGULAR == groupseed) then
+            elseif(All_Options.CoverageX.Regular == groupseed) then
                 if(slice <= 4) then
                     toppingNormalRightGroup:add(clone)
                     print("here1")
@@ -272,7 +299,7 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
                     print("here2")
                     toppingNormalLeftGroup:add(clone)
                 end
-            elseif(All_Options.CoverageX.EXTRA == groupseed) then
+            elseif(All_Options.CoverageX.Extra == groupseed) then
                 if(slice <= 4) then
                     toppingExtraRightGroup:add(clone)
                 else
@@ -310,22 +337,22 @@ function topping_dropping(topping, side, amount, toppinggroup, pizzagroup)
     toppinggroup:find_child("right_side"):hide_all()
     toppinggroup:find_child("left_side"):hide_all()
     --show the correct side of the pizza
-    if(All_Options.Placement.RIGHT == side or All_Options.Placement.ENTIRE == side) then
+    if(All_Options.Placement.Right == side or All_Options.Placement.Entire == side) then
         toppinggroup:find_child("right_side"):show()
     end
-    if(All_Options.Placement.LEFT == side or All_Options.Placement.ENTIRE == side) then
+    if(All_Options.Placement.Left == side or All_Options.Placement.Entire == side) then
         toppinggroup:find_child("left_side"):show()
     end
     --show the correct amount
-    if(All_Options.CoverageX.LIGHT == amount) then
+    if(All_Options.CoverageX.Light == amount) then
         toppinggroup:find_child("topping_light_left"):show()
         toppinggroup:find_child("topping_light_right"):show()
-    elseif(All_Options.CoverageX.REGULAR == amount) then
+    elseif(All_Options.CoverageX.Regular == amount) then
         toppinggroup:find_child("topping_light_left"):show()
         toppinggroup:find_child("topping_light_right"):show()
         toppinggroup:find_child("topping_normal_left"):show()
         toppinggroup:find_child("topping_normal_right"):show()
-    elseif(All_Options.CoverageX.EXTRA == amount) then
+    elseif(All_Options.CoverageX.Extra == amount) then
         toppinggroup:find_child("topping_light_left"):show()
         toppinggroup:find_child("topping_light_right"):show()
         toppinggroup:find_child("topping_normal_left"):show()
