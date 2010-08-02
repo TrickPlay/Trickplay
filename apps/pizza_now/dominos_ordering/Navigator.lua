@@ -67,7 +67,9 @@ function Navigator:goto_build_pizza()
    formdata["choose_pizza:_idcl"] = "choose_pizza:goToBuildOwn"
    local response = get_response(BUILD_PIZZA_URL, formdata)
    assert(response.body)
-   self.page = response.body
+   if response.body then
+      self.page = response.body
+   end
 end
 
 function Navigator:add_pizza(pizza)
@@ -145,7 +147,9 @@ function Navigator:add_pizza(pizza)
       if response.body then break end
    end
    assert(response.body, "Status:" .. response.status)
-   self.page = response.body
+   if response.body then
+      self.page = response.body
+   end
 end
 
 function Navigator:goto_sides()
