@@ -41,11 +41,12 @@ Board = {
 					v.greenBar.width = 0
 					v.dead = true	
 					v.deathtimer:start()
-					v.creepImageGroup:remove(v.creepImage)
 					v.redBar.opacity = 0
 					v.greenBar.opacity = 0
-					v.creepImageGroup:add(v.deathImage)
-				
+					if (not v.flying) then
+						v.creepImageGroup:remove(v.creepImage)
+						v.creepImageGroup:add(v.deathImage)
+					end			
 					wave_counter = wave_counter + 1
 					if (creepGold[k] ==0) then
 						creepGold[k] = 1
