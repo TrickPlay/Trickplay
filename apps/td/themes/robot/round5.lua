@@ -1,5 +1,5 @@
 wave = {
-	
+	-- This is a copy of round 4.. didn't get around to  finishing
 	money = 10,
 	
 	-- Wave 1
