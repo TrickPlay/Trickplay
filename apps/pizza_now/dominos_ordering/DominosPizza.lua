@@ -86,7 +86,7 @@ PEPPERONI_PIZZA = DominosPizza(
 local massive_toppings = {}
 for _,v in pairs(Toppings) do
    massive_toppings[v]={
-      coverage=Coverage.NORMAL,
+      coverage=Coverage.EXTRA,
       placement=Placement.WHOLE
    }
 end

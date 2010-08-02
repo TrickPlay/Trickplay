@@ -60,13 +60,15 @@ CustomizeController = Class(Controller,
                        model.cart[#self:get_model().cart + 1] = view:get_model().current_item
                     end
 
-                    Navigator:add_pizza(model.current_item:as_dominos_pizza())
-                    local total, price = Navigator:get_total()
-                    print("\n\n\n\n\n\n\n\n\n\n" ..
-                          "Current Total: $" .. total .. "\n" ..
-                          "Price of just-added pizza: $" .. price .. "\n" ..
-                          "\n\n\n\n\n\n\n\n\n")
-                    model.current_item.Price = "$" .. price
+                    if NETWORKING then
+                       Navigator:add_pizza(model.current_item:as_dominos_pizza())
+                       local total, price = Navigator:get_total()
+                       print("\n\n\n\n\n\n\n\n\n\n" ..
+                             "Current Total: $" .. tostring(total) .. "\n" ..
+                             "Price of just-added pizza: $" .. tostring(price) .. "\n" ..
+                             "\n\n\n\n\n\n\n\n\n")
+                       model.current_item.Price = "$" .. tostring(price)
+                    end
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     print("size of cart",#self:get_model().cart)
                     print(self:get_model().cart[1].Name)
