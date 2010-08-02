@@ -95,10 +95,16 @@ UserData * UserData::make( lua_State * L , const gchar * type )
 
     lua_pushvalue( L , -1 );
 
-    result->proxy_ref = lb_strong_ref( L );
-    result->proxy_ref_type = STRONG;
+    result->strong_ref = lb_strong_ref( L );
 
-    g_assert( result->proxy_ref != LUA_REFNIL && result->proxy_ref != LUA_NOREF );
+    // Now take a weak ref
+
+    lua_pushvalue( L , -1 );
+
+    result->weak_ref = lb_weak_ref( L );
+
+    g_assert( result->strong_ref != LUA_REFNIL && result->strong_ref != LUA_NOREF );
+    g_assert( result->weak_ref != LUA_REFNIL && result->weak_ref != LUA_NOREF );
 
     udlog( "CREATED '%s' USER DATA %p" , result->type , result );
 
@@ -153,8 +159,6 @@ gpointer UserData::initialize_with_client( gpointer _client )
     g_assert( ! initialized );
 
     initialized = true;
-
-    g_assert( proxy_ref_type == STRONG );
 
     // If there is no master object, create one now
 
@@ -228,29 +232,15 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
     {
         // Switch to a weak ref to the proxy object
 
-        g_assert( self->proxy_ref_type == STRONG );
-
-        // Get the value for the strong ref
-
-        lb_strong_deref( self->L , self->proxy_ref );
-
-        g_assert( ! lua_isnil( self->L , -1 ) );
-
-        // Create a weak ref to it - which pops it
-
-        int weak_ref = lb_weak_ref( self->L );
-
-        g_assert( weak_ref != LUA_REFNIL && weak_ref != LUA_NOREF );
+        g_assert( self->strong_ref != LUA_NOREF );
 
         // Remove the strong ref
 
-        lb_strong_unref( self->L , self->proxy_ref );
+        lb_strong_unref( self->L , self->strong_ref );
 
         // Set our state
 
-        self->proxy_ref = weak_ref;
-
-        self->proxy_ref_type = WEAK;
+        self->strong_ref = LUA_NOREF;
 
         udlog( "  SWITCHED TO WEAK PROXY REF" );
     }
@@ -258,29 +248,19 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
     {
         // Switch to a strong ref to the proxy object
 
-        g_assert( self->proxy_ref_type == WEAK );
+        g_assert( self->strong_ref == LUA_NOREF );
 
         // Get the value for the weak ref
 
-        lb_weak_deref( self->L , self->proxy_ref );
+        lb_weak_deref( self->L , self->weak_ref );
 
         g_assert( ! lua_isnil( self->L , -1 ) );
 
         // Create a strong ref to it - which pops it
 
-        int strong_ref = lb_strong_ref( self->L );
+        self->strong_ref = lb_strong_ref( self->L );
 
-        g_assert( strong_ref != LUA_REFNIL && strong_ref != LUA_NOREF );
-
-        // Remove the weak ref
-
-        lb_weak_unref( self->L , self->proxy_ref );
-
-        // Set our state
-
-        self->proxy_ref = strong_ref;
-
-        self->proxy_ref_type = STRONG;
+        g_assert( self->strong_ref != LUA_REFNIL && self->strong_ref != LUA_NOREF );
 
         udlog( "  SWITCHED TO STRONG PROXY REF" );
     }
@@ -338,7 +318,8 @@ void UserData::finalize( lua_State * L , int index )
     self->type = ( gchar * ) 0xDEADBEEF;
     self->master = ( GObject * ) 0xDEADBEEF;
     self->client = ( gpointer ) 0xDEADBEEF;
-    self->proxy_ref = LUA_NOREF;
+    self->weak_ref = LUA_NOREF;
+    self->strong_ref = LUA_NOREF;
     self->callbacks_ref = LUA_NOREF;
 
     udlog( "FINALIZED" );
@@ -540,13 +521,13 @@ void UserData::clear_callbacks( lua_State * L , int index )
 
 void UserData::push_proxy()
 {
-    if ( proxy_ref_type == STRONG )
+    if ( strong_ref != LUA_NOREF )
     {
-        lb_strong_deref( L , proxy_ref );
+        lb_strong_deref( L , strong_ref );
     }
     else
     {
-        lb_weak_deref( L , proxy_ref );
+        lb_weak_deref( L , weak_ref );
     }
 
     g_assert( ! lua_isnil( L , -1 ) );
