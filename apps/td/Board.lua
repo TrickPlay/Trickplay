@@ -39,7 +39,7 @@ Board = {
 					v:render(seconds)
 				elseif (v.dead == false) then
 					v.greenBar.width = 0
-					v.dead = true	
+					v.dead = true
 					v.deathtimer:start()
 					v.redBar.opacity = 0
 					v.greenBar.opacity = 0
@@ -81,11 +81,12 @@ Board = {
 			creepnum = 1
 			seconds_elapsed = 0
 			level = level + 1
+			wavePartCounter = 1
+			creeppartnum = 1
+
 			if (level-1 == #self.theme.wave) then
 				game:killGame()
 			end
-			wavePartCounter = 1
-			creeppartnum = 1
 		end
 		
 		for i = 1, #self.squaresWithTowers do
