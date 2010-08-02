@@ -9,14 +9,106 @@ ProviderSelectionView = Class(View, function(view, model, ...)
     footerView:initialize()
 
     view.items = {deliveryOptionsView, providersView, footerView}
-  
-    view.provider_ui=Group{name="provider_ui", position={10,10}, opacity=255}
+
+    --Background junk
+    local back = Image{
+        position = {0,0},
+        src = "assets/MenuBg.jpg"
+    }
+    local junkInDaTrunk = Clone{source = back}
+    junkInDaTrunk.position = {960, 0}
+    local orderBar = Image{
+        src = "assets/OrderBarBase.png",
+        position = {0, 960},
+        tile = {true, false},
+        width = 1920
+    }
+    --Delivery Address
+    local addressBillingGroup = Group{position = {690,965}}
+    local streetBillingForm = Group()
+    local streetBillingFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local streetBillingFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1740-1150,
+        tile = {true, false}
+    }
+    local streetBillingFormRight = Image{
+        position = {1740-1140, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    streetBillingForm:add(streetBillingFormLeft, streetBillingFormCenter, streetBillingFormRight)
+    local cityBillingForm = Group{position = {0, 900-840}}
+    local cityBillingFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local cityBillingFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1510-1150,
+        tile = {true, false}
+    }
+    local cityBillingFormRight = Image{
+        position = {1510-1140, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    local expirationMonthForm = Group{position = {1100, 1030}}
+    local expirationMonthFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local expirationMonthFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1200-1140,
+        tile = {true, false}
+    }
+    local expirationMonthFormRight = Image{
+        position = {1210-1140, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    expirationMonthForm:add(expirationMonthFormLeft, expirationMonthFormCenter,
+        expirationMonthFormRight)
+
+    cityBillingForm:add(cityBillingFormLeft, cityBillingFormCenter, cityBillingFormRight)
+    local stateBillingForm = Clone{source = expirationMonthForm}
+    stateBillingForm.position = {1530-1140, 900-840}
+    local zipBillingForm = Group{position = {1620-1140, 900-840}}
+    local zipBillingFormLeft = Image{
+        position = {0, 0},
+        src = "assets/credit_stuff/TextBoxLeft.png",
+    }
+    local zipBillingFormCenter = Image{
+        position = {10, 0},
+        src = "assets/credit_stuff/TextBoxCenter.png",
+        width = 1740-1630,
+        tile = {true, false}
+    }
+    local zipBillingFormRight = Image{
+        position = {1740-1620, 0},
+        src = "assets/credit_stuff/TextBoxRight.png",
+    }
+    zipBillingForm:add(zipBillingFormLeft, zipBillingFormCenter, zipBillingFormRight)
+    addressBillingGroup:add(streetBillingForm, cityBillingForm, stateBillingForm, zipBillingForm, expirationMonthForm)
+
+    view.background_ui = Group{name="provider_background_ui", position={0,0}, opacity=255}
+    view.background_ui:add(back, junkInDaTrunk, orderBar, addressBillingGroup)
+    view.provider_ui=Group{name="provider_components_ui", position={10,10}, opacity=255}
 
     for i,v in ipairs(view.items) do
         view.provider_ui:add(v.ui)
     end
 
-    screen:add(view.provider_ui)
+    view.ui = Group{name="provider_ui", position = {0,0}, opacity=255}
+
+    view.ui:add(view.background_ui)
+    view.ui:add(view.provider_ui)
+
+    screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(ProviderSelectionController(self))
@@ -28,11 +120,12 @@ ProviderSelectionView = Class(View, function(view, model, ...)
     end
 
     function view:update()
+        screen:grab_key_focus()
         local controller = self:get_controller()
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
             print("Showing ProviderSelectionView UI")
-            self.provider_ui.opacity = 255
+            self.ui.opacity = 255
             for i,c_view in ipairs(view.items) do
                 if i == controller:get_selected_index() then
                     c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
@@ -45,7 +138,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
             end
         else
             print("Hiding ProviderSelectionView UI")
-            self.provider_ui.opacity = 0
+            self.ui.opacity = 0
         end
     end
 
