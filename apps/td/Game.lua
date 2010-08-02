@@ -46,7 +46,6 @@ function Game:killGame()
 	end
 	
 	print("done")]]
-	
 	render_list = {}
 	
 	game.board = nil
