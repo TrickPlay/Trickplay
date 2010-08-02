@@ -34,6 +34,7 @@ end
 
 LevelMenu.buttons.extra.r = function()
 
+	--dofile("Globals.lua")
 
 	round = tonumber( list[LevelMenu.y][LevelMenu.x].name )
 	
