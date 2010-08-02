@@ -1,10 +1,11 @@
-DeliveryOptionsController = Class(Controller, function(self, view, ...)
-    self._base.init(self, view, Components.PROVIDER_SELECTION)
+FinalOrderController = Class(Controller, function(self, view, ...)
+    self._base.init(self, view, Components.CHECKOUT)
+
+    local model = self.model
 
     local Options = {
-        DELIVERY_OR_PICKUP = 1,
-        ARRIVAL_TIME = 2,
-        SORT = 3
+        EDIT_ORDER = 1,
+        ADD_COUPON = 2
     }
     local OptionSize = 0
     for k, v in pairs(Options) do
@@ -15,24 +16,19 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
     local selected = 1
 
     local OptionCallbacks = {
-        [Options.DELIVERY_OR_PICKUP] = function(self)
-            print("delivery or pickup selected")
-            self:get_model():set_delivery()
-            self:get_model():notify()
+        [Options.EDIT_ORDER] = function(self)
+            print("edit order")
+            model:set_active_component(Components.FOOD_SELECTION)
+            model:notify()
         end,
-        [Options.ARRIVAL_TIME] = function(self)
-            print("arrival time selected")
-            self:get_model():set_arrival_time()
-            self:get_model():notify()
-        end,
-        [Options.SORT] = function(self)
-            print("sort selected")
-            self:get_model():notify()
+        [Options.ADD_COUPON] = function(self)
+            print("adding coupon")
         end
     }
 
     local OptionsInputKeyTable = {
-        [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
+        [keys.Up] = function(self) self:move_selector(Directions.UP) end,
+        [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] =
         function(self)
@@ -53,10 +49,27 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
         return selected
     end
 
+    function self:set_parent_controller(parent_controller)
+        self.parent_controller = parent_controller
+    end
+
     function self:move_selector(dir)
-        local new_selected = selected + dir[1]
-        if 1 <= new_selected and new_selected <= OptionSize then
-            selected = new_selected
+        if(not self.parent_controller) then
+            self:set_parent_controller(view.parent_view:get_controller())
+        end
+        if(0 ~= dir[2]) then
+            local new_selected = selected + dir[2]
+            if(1 <= new_selected and new_selected <= OptionSize) then
+                selected = new_selected
+            elseif(new_selected == OptionSize + 1) then
+                --change focus to footer
+                self.parent_controller:move_selector(dir)
+            end
+        elseif(0 ~= dir[1]) then
+            --change focus to credit info
+            self.parent_controller:move_selector(dir)
+        else
+            error("something sucks")
         end
         self:get_model():notify()
     end

@@ -38,7 +38,7 @@ FoodFooterController = Class(Controller, function(self, view, ...)
     local MenuItemCallbacks = {
         [MenuItems.GO_BACK] = function(self)
             print("Backing up")
-            self:get_model():set_active_component(Components.PROVIDER_SELECTOR)
+            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
             self:get_model():notify()
         end,
         [MenuItems.CART] = function(self)
