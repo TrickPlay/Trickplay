@@ -1,8 +1,5 @@
 
-#include <cstdlib>
-
 #include "glib/gstdio.h"
-#include "ossp/uuid.h"
 
 #include "sysdb.h"
 #include "util.h"
@@ -351,19 +348,9 @@ bool SystemDatabase::insert_initial_data()
 
     if ( uuid.empty() )
     {
-        uuid_t * u = 0;
+        uuid = Util::make_v1_uuid();
 
-        uuid_create( & u );
-        uuid_make( u , UUID_MAKE_V1 );
-
-        char * result = 0;
-
-        uuid_export( u , UUID_FMT_STR , & result , 0 );
-        uuid_destroy( u );
-
-        set( TP_DB_UUID , result );
-
-        free( result );
+        set( TP_DB_UUID , uuid );
     }
 
     return true;

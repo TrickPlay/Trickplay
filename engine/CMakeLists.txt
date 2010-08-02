@@ -379,6 +379,7 @@ list( APPEND
     ${ENGINE_SRC}/lb/src/lb.cpp
 
     ${ENGINE_SRC}/source/user_data.cpp
+    ${ENGINE_SRC}/source/util.cpp
 )
 
 #------------------------------------------------------------------------------
