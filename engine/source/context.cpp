@@ -1465,6 +1465,7 @@ void TPContext::load_external_configuration()
         TP_SYSTEM_COUNTRY,
         TP_SYSTEM_NAME,
         TP_SYSTEM_VERSION,
+        TP_SYSTEM_SN,
         TP_DATA_PATH,
         TP_SCREEN_WIDTH,
         TP_SCREEN_HEIGHT,
@@ -1597,6 +1598,14 @@ void TPContext::validate_configuration()
     {
         set( TP_SYSTEM_VERSION, TP_SYSTEM_VERSION_DEFAULT );
         g_warning( "DEFAULT:%s=%s", TP_SYSTEM_VERSION, TP_SYSTEM_VERSION_DEFAULT );
+    }
+
+    // SYSTEM SN
+
+    if ( !get( TP_SYSTEM_SN ) )
+    {
+        set( TP_SYSTEM_SN, TP_SYSTEM_SN_DEFAULT );
+        g_warning( "DEFAULT:%s=%s", TP_SYSTEM_SN, TP_SYSTEM_SN_DEFAULT );
     }
 
     // DATA PATH
