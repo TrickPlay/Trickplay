@@ -17,6 +17,7 @@ local robot = {
 		towers = {
                         
 			normalTower = {
+                                name = "normalTower",
 				damage = 20,
 				range = 300,
 				cooldown = 0.5,
@@ -35,6 +36,7 @@ local robot = {
 			},
                         
 			slowTower = {
+                                name = "slowTower",
 				damage = 5,
 				range = 400, 
 				cooldown = 1, 
@@ -56,6 +58,7 @@ local robot = {
 			},
                         
 			nukeTower =	{
+                                name = "nukeTower",
 				damage = 60, 
 				range = 200, 
 				cooldown = 1, 
@@ -76,6 +79,7 @@ local robot = {
 			},
                         
 			laserTower = {
+                                name = "laserTower",
 				damage = 100, 
 				range = 500, 
 				cooldown = 0.25, 

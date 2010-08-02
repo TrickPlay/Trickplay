@@ -45,6 +45,8 @@ function app.on_loaded()
 		
         	if MainMenu.y == 2 then
 			
+			createLevelMenu(1)
+			
 			LevelMenu.theme = Themes.robot
 			LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/coop.lua")
 			

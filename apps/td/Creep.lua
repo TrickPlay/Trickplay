@@ -269,7 +269,7 @@ function Creep:deathAnimation()
 	--print (self.face)
 	local frames = 11
 	local time = frames/20
-	if self.flying then
+	if self.flying or game.board.theme.themeName == "pacman" then
 		--self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.w/(self.frames*2),self.creepImage.h/2}
 		local xscale = self.creepGroup.scale[1]
 		local yscale = self.creepGroup.scale[2]
@@ -277,8 +277,12 @@ function Creep:deathAnimation()
 		if self.creepGroup.scale[1] <= 0.1 then
 			self.creepGroup.opacity = 0
 			self.creepGroup:clear()
+			self.creepImageGroup:remove(self.creepImage)
+
 			return true
+			
 		end
+		
 	else	
 		for i=1, frames do
 			if self.deathtimer.elapsed_seconds < ( 1/frames ) * i * time and self.deathtimer.elapsed_seconds > ( 1/frames) * (i-1) * time then

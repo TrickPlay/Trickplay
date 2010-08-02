@@ -34,28 +34,44 @@ function TowerInfo:new(args)
    return object
 end
 
-function TowerInfo:update(tower, player)
+function TowerInfo:update(tower, player, isNew)
 
         if game.board.player2 and player == game.board.player2 then self.group.x = 40 self.group.y = 20 end
-        --print(self.group.x, self.group.y, self.group.opacity)
 
-        self.group:remove(self.icon)
-        
-        local name = tower.prefix..tower.name
-        if tower.level > 0 then name = name..tower.level end
-        
-        self.icon = AssetLoader:getImage(name,{x=-15, y=-15, scale={.6, .6}} )
-        
-        self.group:add(self.icon)
-        
-        self.level.text = "Current Level: " .. tower.level + 1
-        self.damage.text = "Damage: " .. tower.damage
-        self.range.text = "Range: " .. tower.range
-        self.cooldown.text = "Cooldown time: " .. tower.cooldown
-        if tower.level < tower.levels then self.upgrade.text = "Upgrade for: " .. tower.upgradeCost .. " Gold" else self.upgrade.text = "" end
-        self.sell.text = "Sell for: " .. tower.cost * .5 .. " Gold"
-        
-        --print(self.sell.font)
+        if not isNew then
+                
+                self.group:remove(self.icon)
+                
+                local name = tower.prefix..tower.name
+                
+                if tower.level > 0 then name = name..tower.level end
+                
+                self.icon = AssetLoader:getImage(name,{x=-15, y=-15, scale={.6, .6}} )
+                
+                self.group:add(self.icon)
+                
+                self.level.text = "Current Level: " .. tower.level + 1
+                self.damage.text = "Damage: " .. tower.damage
+                self.range.text = "Range: " .. tower.range
+                self.cooldown.text = "Cooldown time: " .. tower.cooldown
+                if tower.level < tower.levels then self.upgrade.text = "Upgrade for: " .. tower.upgradeCost .. " Gold" else self.upgrade.text = "" end
+                self.sell.text = "Sell for: " .. tower.cost * .5 .. " Gold"
+                
+        else
+                
+                self.group:remove(self.icon)
+                
+                self.icon = AssetLoader:getImage(game.board.theme.themeName..tower.name,{x=-15, y=-15, scale={.6, .6}} )
+                
+                self.group:add(self.icon)
+                
+                self.level.text = "Current Level: 1"
+                self.damage.text = "Damage: " .. tower.damage
+                self.range.text = "Range: " .. tower.range
+                self.cooldown.text = "Cooldown time: " .. tower.cooldown
+                self.upgrade.text = "Price: " .. tower.cost .. " Gold"
+                self.sell.text = "Sell for: " .. tower.cost * .5 .. " Gold"
+        end
 
 end
 
