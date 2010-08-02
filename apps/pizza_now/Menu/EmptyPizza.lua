@@ -121,8 +121,9 @@ EmptyPizza = Class(
                CoverageX = All_Options.Coverage.Regular,
                ToppingGroup = nil,
                Selected = 
-                  function(self)
-                     print("Selection not yet handled")
+                  function(itself)
+                     itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+                     itself:get_model():notify()
                   end
             },
             {

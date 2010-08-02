@@ -67,7 +67,9 @@ CustomizeController = Class(Controller,
                              "Current Total: $" .. tostring(total) .. "\n" ..
                              "Price of just-added pizza: $" .. tostring(price) .. "\n" ..
                              "\n\n\n\n\n\n\n\n\n")
-                       model.current_item.Price = "$" .. tostring(price)
+                       if price then
+                          model.current_item.Price = "$" .. tostring(price)
+                       end
                     end
                     self:get_model():set_active_component(Components.FOOD_SELECTION)
                     print("size of cart",#self:get_model().cart)
