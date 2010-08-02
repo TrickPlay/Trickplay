@@ -81,6 +81,12 @@ function Tower:new(args, prefix, square, player)
 	
 	object.towerImageGroup:add(object.towerImage)
 	screen:add(object.towerImageGroup)
+        
+        -- Add a colored rectangle behind the tower
+        if game.board.player2 then
+                object.color = Rectangle{w=SP,h=SP,x=object.x, y=object.y, opacity = 50, color=player.color}
+                screen:add(object.color)
+        end
    
    setmetatable(object, self)
    self.__index = self
@@ -88,6 +94,7 @@ function Tower:new(args, prefix, square, player)
 end
 
 function Tower:destroy()
+        screen:remove(self.color)
 	self.towerImage.opacity = 0
 	self.damage = 0
 end
@@ -147,7 +154,7 @@ function Tower:upgrade()
 	
 	local r = self.table.upgrades[self.level]
 	
-	if (self.owner.gold - r.cost >0) then
+	if (self.owner.gold - r.cost > 0) then
 	
 		self.damage = r.damage
 		self.range = r.range
@@ -162,12 +169,10 @@ function Tower:upgrade()
 		print(self.prefix..self.table.name..self.level)
 		
 		--screen:add(AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y}))
-
+	
 		self.owner.gold = self.owner.gold - r.cost
 		
-		if self.owner == game.board.player then
-			goldtext.text = self.owner.gold
-		end
+		game.board:updateGold(self.owner)
 		
 		return true
 	else

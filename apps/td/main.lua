@@ -11,7 +11,6 @@ screen:show()
 
 function app.on_loaded()
     dofile ("Themes.lua")
-    print("DId theme")
     
     -- Everything is loaded
     AssetLoader.on_preload_ready = function()
@@ -30,58 +29,66 @@ function app.on_loaded()
         
         local g = Group{}
         screen:add(g)
-								
+
         MainMenu = Menu.create(g, mainMenuList, mainMenuFocus)
         MainMenu:create_key_functions()
         MainMenu:button_directions()
         MainMenu:create_buttons(10, "Sans 34px")
         MainMenu:apply_color_change("FFFFFF", "000000")
         --MainMenu.buttons:grab_key_focus()
-
         
         MainMenu:update_cursor_position()
         MainMenu.hl.opacity = 255
         
         MainMenu.buttons.extra.r = function()
-        
+		
         	if MainMenu.y == 2 then
-
-				LevelMenu.theme = Themes.robot
-				LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/coop.lua")
-				
-				round = 2
-				
-				game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money/2}
-				game:startGame()
-				
-				local hl2 = AssetLoader:getImage( "select2",{} )
-				BoardMenu:add_hl( hl2 )
-				BoardMenu:update_cursor_position(hl2)
-				BoardMenu:controller_directions(hl2)
-				
-				local player = game.board:addPlayer{name = "Player 2", gold = LevelMenu.theme.wave.money/2, lives = 30}
-				
-				hl2.extra.r = function() BoardMenu.buttons.extra.r{ x=hl2.extra.x, y=hl2.extra.y, player=player } end
-				ipod_keys(hl2)
-				
-	
-				screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
-				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
-	
-		    else
+			
+			LevelMenu.theme = Themes.robot
+			LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/coop.lua")
+			
+			round = 2
+			
+			game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money/2}
+			game:startGame()
+			
+			local hl2 = AssetLoader:getImage( "select2",{} )
+			BoardMenu:add_hl( hl2 )
+			BoardMenu:update_cursor_position(hl2)
+			BoardMenu:controller_directions(hl2)
+			
+			local player = game.board:addPlayer{name = "Player 2", gold = LevelMenu.theme.wave.money/2, lives = 30, color = "008AFE"}
+			
+			hl2.extra.r = function() BoardMenu.buttons.extra.r{ x=hl2.extra.x, y=hl2.extra.y, player=player } end
+			ipod_keys(hl2)
+			
+			game.p2info = Group{}
+			game.infobar2 = AssetLoader:getImage("InfoBar2",{y = 1005, z = 2.5})
+			game.name2 = Text {font = "Sans 30px", text = player.name, x =320, y = 1015, z=3, color = "000000"}
+			game.gold2 = Text {font = "Sans 30px", text = player.gold, x =100, y = 1015, z=3, color = "000000" }
+			
+			game.p2info:add(game.infobar2, game.name2, game.gold2)
+			screen:add(game.p2info)
+			
+			screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
+			screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+			
+		else
+		    
 		    	print("Switching to theme menu")
 		    	ACTIVE_CONTAINER = ThemeMenu
 		    	keyboard_key_down = ThemeMenu.buttons.on_key_down
 		    	--ThemeMenu.buttons:grab_key_focus()
-				ThemeMenu.container.opacity = 255
-		    end
-        
+			ThemeMenu.container.opacity = 255
+			
+		end
+		
     	end
     	
     	ACTIVE_CONTAINER = MainMenu
     	keyboard_key_down = MainMenu.buttons.on_key_down
     
-    --screen:add( AssetLoader:getImage("pacmanBullet2",{name="robot", x=200, y=200}) )
+    	--screen:add( AssetLoader:getImage("InfoBar2",{name="robot", x=200, y=200}) )
     	--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))
     end
 end
