@@ -23,17 +23,31 @@ ThemeMenu:create_buttons(10, "Sans 34px")
 ThemeMenu:apply_color_change("FFFFFF", "00CCCC")
 
 ThemeMenu.buttons.extra.r = function()
-
-	--game = Game:new{ theme = Themes[ names[ThemeMenu.y] ] }
-	--game:startGame()
+        
+        local t = Themes[ names[ThemeMenu.y] ]
+        local n = t.themeName
+        
+        if not settings.currentLevel then
+                
+                settings.currentLevel = 1
+                
+        end
+        
+        --settings[n] = {}
+        --settings.currentLevel = 1
+        
+        --print(settings.t)
+        --print(settings.t.currentLevel)
+        
+        createLevelMenu(settings.currentLevel)
 
 	MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
 	--LevelMenu.buttons:grab_key_focus()
 	LevelMenu.container.opacity = 255
-	LevelMenu.hl.opacity = 255
+	LevelMenu.hl.opacity = 100
 	LevelMenu:update_cursor_position()
-	LevelMenu.theme = Themes[ names[ThemeMenu.y] ]
+	LevelMenu.theme = t
 	
 	ACTIVE_CONTAINER = LevelMenu
 	keyboard_key_down = LevelMenu.buttons.on_key_down

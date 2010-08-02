@@ -17,10 +17,8 @@ end
 
 function Player:render(seconds)
 
-	if not self.circle then
+	if not self.circle or not self.circle.list[1][self.circle.x].extra.t then
 	
-		
-		
 		local x
 		local y
 		
@@ -41,6 +39,17 @@ function Player:render(seconds)
 			
 			self.towerInfo.fade = "in"
 			self.towerInfo:update( current.tower , self )
+		else
+			self.towerInfo.fade = "out"
+		end
+		
+	else
+		
+		if self.circle.list[1][self.circle.x].extra.t then
+						
+			self.towerInfo.fade = "in"
+			self.towerInfo:update( self.circle.list[1][self.circle.x].extra.t , self , true)
+			
 		else
 			self.towerInfo.fade = "out"
 		end

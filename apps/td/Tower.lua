@@ -193,8 +193,11 @@ end
 -- or sprite movement
 function Tower:animateTower(creeps,i)
 	local cx = creeps[i].creepGroup.x
-	local cy = creeps[i].creepGroup.y	
-	creeps[i]:bleed()
+	local cy = creeps[i].creepGroup.y
+        
+        if game.board.theme.themeName ~= "pacman" then
+                creeps[i]:bleed()
+        end
 	
 	-- Simple rotation
 	if self.mode == "rotate" then

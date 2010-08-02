@@ -18,6 +18,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.container.opacity=150
         CircleMenu.container.z=5
         CircleMenu.owner = player
+        CircleMenu.list = list
 	
 	-- Remember which item was last selected for the different menus and initialize by pressing left until this item is reached
 	if not player.lastSelected then player.lastSelected = {} end
@@ -56,6 +57,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         end
                         
                         player.position = nil
+                        player.towerInfo.fade = "out"
                         
                 end
                 

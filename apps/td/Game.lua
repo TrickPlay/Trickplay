@@ -53,6 +53,8 @@ function Game:killGame()
 	ACTIVE_CONTAINER = LevelMenu
 	keyboard_key_down = LevelMenu.buttons.on_key_down
 	
+	if currentLevel and currentLevel == settings.currentLevel then currentLevel = currentLevel + 1 end
+	
 end
 
 function add_to_render_list( item )

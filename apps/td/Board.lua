@@ -92,7 +92,7 @@ Board.render = function (self, seconds)
 				v.deathtimer:start()
 				v.redBar.opacity = 0
 				v.greenBar.opacity = 0
-				if (not v.flying) then
+				if (not v.flying and game.board.theme.themeName ~= "pacman") then
 					v.creepImageGroup:remove(v.creepImage)
 					v.creepImageGroup:add(v.deathImage)
 				end				
@@ -265,11 +265,11 @@ function Board:createBoard()
 		-- Make sure the players aren't building on the same square
 		if self.player and self.player2 then
 			
-			print("Both players exist")
+			--print("Both players exist")
 			
 			if self.player.position and self.player2.position then
 				
-				print("Both players have positions")
+				--print("Both players have positions")
 				
 				if self.player.position[1] == self.player2.position[1] and self.player.position[2] == self.player2.position[2] then
 					
@@ -293,6 +293,7 @@ function Board:createBoard()
 				for i,v in pairs(towers) do
 				
 					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { } )
+					list[#list].extra.t = towers[i]
 					list[#list].extra.f = function()
 						if (player.gold - towers[i].cost >=0) then
 							self:buildTower(towers[i], player)
