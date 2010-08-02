@@ -10,6 +10,7 @@ function Tower:new(args, prefix, square, player)
 		prefix = prefix,
 		square = square,
 		owner = player,
+                name = args.name,
 		
 		-- Position
 		x = GTP(square.x),
@@ -46,7 +47,10 @@ function Tower:new(args, prefix, square, player)
 		timer = Stopwatch(),
    }
    
-   	if args.upgrades then object.levels = #args.upgrades end
+   	if args.upgrades then
+                object.levels = #args.upgrades
+                object.upgradeCost = args.upgrades[1].cost
+        end
 
 	-- Instructions for rotating through 8 sprites
 	if args.mode == "sprite" then
@@ -68,7 +72,7 @@ function Tower:new(args, prefix, square, player)
 	end
 	
 	-- If it has bullets, create the bullet group and add it to the screen
-	if self.bullet then self.bgroup = Group{} screen:add(self.bgroup) end
+	if object.bullet then object.bgroup = Group{} screen:add(object.bgroup) end
    
 	-- This is the actual image
 	object.towerImage = AssetLoader:getImage(prefix..args.name,{})
@@ -167,6 +171,10 @@ function Tower:upgrade()
 		self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
 		self.towerImageGroup:add(self.towerImage)
 		print(self.prefix..self.table.name..self.level)
+                
+                if self.table.upgrades[self.level+1] then
+                        self.upgradeCost = self.table.upgrades[self.level+1].cost
+                end
 		
 		--screen:add(AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y}))
 	

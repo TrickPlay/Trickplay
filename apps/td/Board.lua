@@ -90,11 +90,12 @@ Board.render = function (self, seconds)
 				v.greenBar.width = 0
 				v.dead = true	
 				v.deathtimer:start()
-				v.creepImageGroup:remove(v.creepImage)
 				v.redBar.opacity = 0
 				v.greenBar.opacity = 0
-				v.creepImageGroup:add(v.deathImage)
-				
+				if (not v.flying) then
+					v.creepImageGroup:remove(v.creepImage)
+					v.creepImageGroup:add(v.deathImage)
+				end				
 				wave_counter = wave_counter + 1
 				if (creepGold[k] ==0) then
 					creepGold[k] = 1
@@ -136,11 +137,15 @@ Board.render = function (self, seconds)
 		creepnum = 1
 		seconds_elapsed = 0
 		level = level + 1
-		if (level-1 == #self.theme.wave) then
-			game:killGame()
-		end
+		
 		wavePartCounter = 1
 		creeppartnum = 1
+		
+		if (level-1 == #self.theme.wave) then
+			game:killGame()
+			level = 1
+		end
+		
 	end
 	
 	for i = 1, #self.squaresWithTowers do
@@ -155,9 +160,15 @@ Board.render = function (self, seconds)
 		circleRender(self.player.circle, seconds)
 	end
 	
-	if self.player2.circle then
-		circleRender(self.player2.circle, seconds)
+	if self.player2 then
+		if self.player2.circle then
+			circleRender(self.player2.circle, seconds)
+		end
 	end
+	
+	--print("render!")
+	self.player:render(seconds)
+	if self.player2 then self.player2:render(seconds) end
 end
 
 function Board:init()

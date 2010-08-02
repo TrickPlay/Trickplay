@@ -6,6 +6,7 @@ dofile ("Board.lua")
 dofile ("Creep.lua")
 dofile ("Tower.lua")
 dofile ("Bullet.lua")
+dofile ("TowerInfo.lua")
 
 screen:show()
 
@@ -112,12 +113,12 @@ function controllers:on_controller_connected(controller)
 
 end
 
-function grab_focus(controller, k)
+--[[function grab_focus(controller, k)
 
 	print(controller, k)
 	if k == keys.Up then print("UP!!!") end
 
-end
+end]]
 
 function ipod_key_down( k )
     
