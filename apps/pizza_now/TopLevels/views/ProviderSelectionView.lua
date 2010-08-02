@@ -16,7 +16,6 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         view.provider_ui:add(v.ui)
     end
 
-    view.provider_ui:add(unpack(view.items))
     screen:add(view.provider_ui)
 
     function view:initialize()

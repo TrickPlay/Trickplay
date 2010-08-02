@@ -3,94 +3,52 @@ CheckoutController = Class(Controller, function(self, view, ...)
 
     model = view:get_model()
 
-    local MenuItems = {
-        STREET = 1,
-        APT = 2,
-        CITY = 3,
-        ZIP = 4,
-        CARD_TYPE = 5,
-        CARD_NUMBER = 6,
-        CARD_CODE = 7,
-        CARD_EXPIRATION = 8,
-        CONFIRM = 9,
-        GO_BACK = 10
+    local CheckoutGroups = {
+        ORDER = 1,
+        DETAILS = 2,
+        FOOTER = 3
     }
-    local MenuSize = 0
-    for k, v in pairs(MenuItems) do
-        MenuSize = MenuSize + 1
+
+    local GroupSize = 0
+    for k, v in pairs(CheckoutGroups) do
+        GroupSize = GroupSize + 1
     end
 
     -- the default selected index
-    local selected = 1
+    local selected = CheckoutGroups.ORDER
 
-    local function itemSelection(item, name)
-        local textObject = view.entry_ui.children[item]
-        textObject:grab_key_focus()
-        function textObject:on_key_focus_out()
-            self.on_key_focus_out = nil
-            args = {}
-            args[name] = self.text
-            model:set_creditInfo(args)
-        end
-    end
+    --initialize the focus to the ORDER group
+    assert(view.items[selected]:get_controller(), "view child with index "..selected.."is nil!")
+    self.child = view.items[selected]:get_controller()
 
-    local MenuItemCallbacks = {
-        [MenuItems.STREET] = function(self)
-            itemSelection(MenuItems.STREET, "street")
-            print("street selected")
+    local CheckoutCallbacks = {
+        [CheckoutGroups.ORDER] = function(self)
+            print("your order")
+            assert(self.child)
+            self.child:run_callback()
         end,
-        [MenuItems.APT] = function(self)
-            itemSelection(MenuItems.APT, "apartment")
-            print("apartment selected")
+        [CheckoutGroups.DETAILS] = function(self)
+            print("your details")
+            assert(self.child)
+            self.child:run_callback()
         end,
-        [MenuItems.CITY] = function(self)
-            itemSelection(MenuItems.CITY, "city")
-            print("city selected")
-        end,
-        [MenuItems.ZIP] = function(self)
-            itemSelection(MenuItems.ZIP, "zip")
-            view.ui.children[MenuItems.ZIP]:grab_key_focus()
-            print("zip selected")
-        end,
-        [MenuItems.CARD_TYPE] = function(self)
-            itemSelection(MenuItems.CARD_TYPE, "card_type")
-        end,
-        [MenuItems.CARD_NUMBER] = function(self)
-            itemSelection(MenuItems.CARD_NUMBER, "card_number")
-        end,
-        [MenuItems.CARD_CODE] = function(self)
-            itemSelection(MenuItems.CARD_CODE, "card_code")
-        end,
-        [MenuItems.CARD_EXPIRATION] = function(self)
-            itemSelection(MenuItems.CARD_EXPIRATION, "card_expiration")
-        end,
-        [MenuItems.CONFIRM] = function(self)
-            print("confirm?")
-            for k,v in pairs(model.address) do
-                if(not model.creditInfo[k]) then
-                    --TODO: Display this on screen
-                    print("FORM NOT COMPLETE")
-                    return
-                end
-            end
-        end,
-        [MenuItems.GO_BACK] = function(self)
-            print("exit?")
-            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
-            self:get_model():notify()
+        [CheckoutGroups.FOOTER] = function(self)
+            print("your footer")
+            assert(self.child)
+            self.child:run_callback()
         end
     }
 
     local CheckoutKeyTable = {
-        [keys.Up] = function(self) self:move_selector(Directions.UP) end,
-        [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
-        [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
-        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Up] = function(self) self.child:on_key_down(keys.Up) end,
+        [keys.Down] = function(self) self.child:on_key_down(keys.Down) end,
+        [keys.Left] = function(self) self.child:on_key_down(keys.Left) end,
+        [keys.Right] = function(self) self.child:on_key_down(keys.Right) end,
         [keys.Return] =
         function(self)
             -- compromise so that there's not a full-on lua panic,
             -- but the error message still displays on screen
-            local success, error_msg = pcall(MenuItemCallbacks[selected], self)
+            local success, error_msg = pcall(CheckoutCallbacks[selected], self)
             if not success then print(error_msg) end
         end
     }
@@ -105,11 +63,23 @@ CheckoutController = Class(Controller, function(self, view, ...)
         return selected
     end
 
+    local previousSelection = selected
+
     function self:move_selector(dir)
         screen:grab_key_focus()
-        local new_selected = selected + dir[2]
-        if 1 <= new_selected and new_selected <= MenuSize then
-            selected = new_selected
+        if(0 ~= dir[1]) then
+            local new_selected = selected + dir[1]
+            if 1 <= new_selected and new_selected <= GroupSize-1 then
+                selected = new_selected
+                previousSelection = selected
+            end
+        elseif(0 ~= dir[2]) then
+            if(CheckoutGroups.ORDER == selected) or
+              (CheckoutGroups.DETAILS == selected) then
+                selected = CheckoutGroups.FOOTER
+            else
+                selected = previousSelection
+            end
         end
         self:get_model():notify()
     end
