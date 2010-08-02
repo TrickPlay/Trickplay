@@ -23,15 +23,29 @@ Model = Class(function(model, ...)
     }
 
     model.creditInfo = {
-        street =false,
+        driverInstructions = false,
+        password = false,
+        firstName = false,
+        lastName = false,
+        phone_areaCode = false,
+        phone_first = false,
+        phone_last = false,
+        phone_ext = false,
+        email_alias = false,
+        email_at = false,
+        cardNumber_first = false,
+        cardNumber_second = false,
+        cardNumber_third = false,
+        cardNumber_forth = false,
+        card_expiration_month = false,
+        card_expiration_year = false
+        card_code = false,
+        street = false,
         apartment = false,
         city = false,
         zip = false,
         card_type = false,
         card_number = false,
-        card_code = false,
-        card_expiration_month = false,
-        card_expiration_year = false
     }
 
     -- class methods

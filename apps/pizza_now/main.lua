@@ -25,9 +25,10 @@ Components = {
    ITEM_SELECTION = 4,
    CUSTOMIZE = 5,
    TAB = 6,
-   CUSTOMIZE_ITEM = 7,
-   CHECKOUT = 8,
-   COMPONENTS_LAST = 8
+   ACCORDIAN = 7,
+   CUSTOMIZE_ITEM = 8,
+   COMPONENTS_LAST = 9,
+   CHECKOUT = 9
 }
 
 
@@ -52,6 +53,8 @@ customize_view:initialize()
 local tab_view = TabView(model,customize_view)
 tab_view:initialize()
 customize_view:get_controller():set_child_controller(tab_view:get_controller())
+local acc_view = AccordianView(model,customize_view)
+acc_view:initialize()
 
 local windmill_view = WindMillView(model)
 windmill_view:initialize()
