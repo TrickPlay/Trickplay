@@ -12,51 +12,52 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         CARD_TYPE = 6,
         CARD_NUMBER = 7,
         CARD_EXPIRATION = 8,
-        CARD_CODE = 9
+        BILL_STREET = 9,
+        BILL_CITY = 10
     }
 
     --entry for instructions for the driver
     local driverInstructionsEntry = Text{
         position = {1030, 135},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
-        text = "Anything you want to tell the driver?",
-        max_length = 40,
+        text = "Note to the driver?",
+        max_length = 24,
         wants_enter = false
     }
     local driverInstructionsTable = {driverInstructionsEntry}
     --password entry place
     local passwordEntry = Text{
         position = {1475, 280},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_TINIER_FONT,
         color = Colors.BLACK,
         text = "Password?",
-        max_length = 20,
+        max_length = 14,
         wants_enter = false
     }
     local passwordTable = {passwordEntry}
     --name entry places
     local firstName = Text{
         position = {1150, 415},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "First",
-        max_length = 15,
+        max_length = 10,
         wants_enter = false
     }
     local lastName = Text{
         position = {1450, 415},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "Last",
-        max_length = 15,
+        max_length = 10,
         wants_enter = false
     }
     local nameTable = {firstName, lastName}
     --phone entry places
     local areaCode = Text{
         position = {1150, 475},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "###",
         max_length = 3,
@@ -64,7 +65,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     }
     local firstThreeDigits = Text{
         position = {1240, 475},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "###",
         max_length = 3,
@@ -72,13 +73,13 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     }
     local lastFourDigits = Text{
         position = {1330, 475},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "####"
     }
     local extension = Text{
         position = {1470, 480},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "###",
         max_lengt = 3,
@@ -88,7 +89,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     --email entry stuff
     local emailHandle = Text{
         position = {1150, 535},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "email",
         max_length = 20,
@@ -96,7 +97,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     }
     local emailAt = Text{
         position = {1470, 535},
-        font = CUSTOMIZE_SUB_FONT,
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "trickplay.com",
         max_length = 20,
@@ -121,32 +122,32 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     }
     --credit number
     local credit1 = Text{
-        position = {1150, 775},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1150, 740},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "####",
         max_length = 4,
         wants_enter = false
     }
     local credit2 = Text{
-        position = {1260, 775},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1260, 740},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "####",
         max_length = 4,
         wants_enter = false
     }
     local credit3 = Text{
-        position = {1370, 775},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1370, 740},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "####",
         max_length = 4,
         wants_enter = false
     }
     local credit4 = Text{
-        position = {1480, 775},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1480, 740},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "####",
         max_length = 4,
@@ -156,36 +157,70 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     local creditTable = {credit1, credit2, credit3, credit4}
     --expiration date
     local expMonth = Text{
-        position = {1150, 835},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1150, 800},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "MM",
         max_length = 2,
         wants_enter = false
     }
     local expYear = Text{
-        position = {1240, 835},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1240, 800},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "YYYY",
         max_length = 4,
         wants_enter = 2
     }
-    local expirationTable = {expMonth, expYear}
     --card code junk
     local cardCode = Text{
-        position = {1150, 895},
-        font = CUSTOMIZE_SUB_FONT,
+        position = {1500, 795},
+        font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "###",
         max_length = 3,
         wants_enter = false
     }
-    local cardCodeTable = {cardCode}
+    local expirationTable = {expMonth, expYear, cardCode}
+    local streetBilling = Text{
+        position = {1150, 855},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = "Enter Street/Apt.",
+        max_length = 22,
+        wants_enter = false
+    }
+    local streetBillingTable = {streetBilling}
+    local cityBilling = Text{
+        position = {1150, 915},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = "Enter City",
+        max_length = 13,
+        wants_enter = false
+    }
+    local stateBilling = Text{
+        position = {1545, 915},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = "CA",
+        max_length = 2,
+        wants_enter = false
+    }
+    local zipBilling = Text{
+        position = {1630, 915},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = "#####",
+        max_length = 5,
+        wants_enter = false
+    }
+    local cityStateZipBillingTable = {cityBilling, stateBilling, zipBilling}
 
     view.info = {
         driverInstructionsTable, passwordTable, nameTable, phoneTable, emailTable,
-        dottedSquareTable, creditTable, expirationTable, cardCodeTable
+        dottedSquareTable, creditTable, expirationTable, streetBillingTable,
+        cityStateZipBillingTable
     }
     view.ui = Group{name="creditInfo_ui", position={0, 0}, opacity=255}
     for i,table in ipairs(view.info) do

@@ -1,10 +1,10 @@
 -- dofile("Utils.lua")
-dofile("Globals.lua")
-dofile("Menu/EmptyPizza.lua")
-dofile("Menu/Selection_Menu.lua")
 if not Class then
    dofile("Class.lua")
 end
+dofile("Globals.lua")
+dofile("Menu/EmptyPizza.lua")
+dofile("Menu/Selection_Menu.lua")
 dofile("MVC.lua")
 dofile("Views.lua")
 
