@@ -70,7 +70,7 @@ end
 if NETWORKING then
    Navigator:init_session()
 end
-model:start_app(Components.ADDRESS_INPUT)
+--model:start_app(Components.ADDRESS_INPUT)
 --model:start_app(Components.CHECKOUT)
 --model:start_app(Components.CUSTOMIZE_ITEM)
---model:start_app(Components.PROVIDER_SELECTION)
+model:start_app(Components.PROVIDER_SELECTION)
