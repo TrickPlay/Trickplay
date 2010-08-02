@@ -128,6 +128,9 @@ function get_response(url, formdata)
 end
 
 function parse_form(html, form_id, debug)
+   if type(html) ~= "string" then
+      error("html was " .. type(html) .. ", not string", 2)
+   end
    local match = string.match
    local gmatch = string.gmatch
    local formdata = {}

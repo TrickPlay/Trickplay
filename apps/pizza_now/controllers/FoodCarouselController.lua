@@ -25,6 +25,7 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
         [keys.Return] =
         function(self)
             print("Constructing PIZZA")
+--            Navigator:goto_build_pizza() moved this logic to ProviderFooterController
             self:get_model().current_item = EmptyPizza()
             self:get_model().current_item.Name = "Pizza"
             self:get_model():set_active_component(Components.CUSTOMIZE)
