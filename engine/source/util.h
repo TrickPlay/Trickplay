@@ -374,6 +374,12 @@ namespace Util
         return g_build_filename( first, last, NULL );
     }
 
+    //-----------------------------------------------------------------------------
+
+    String make_v1_uuid();
+
+    String make_v4_uuid();
+
 }
 
 #endif // _TRICKPLAY_UTIL_H

@@ -1,8 +1,6 @@
 module globals;
 
 [[
-#include <ossp/uuid.h>
-
 #include "common.h"
 #include "util.h"
 #include "app.h"
@@ -513,28 +511,8 @@ globals
 		
 	string uuid()
 		[[
-	        uuid_t * u = 0;
-	
-	        uuid_create( & u );
-	        uuid_make( u , UUID_MAKE_V4 );
-	
-	        char buffer[ UUID_LEN_STR + 1 ];
-	        
-	        size_t len = UUID_LEN_STR + 1;
+			String uuid( Util::make_v4_uuid() );
 			
-			void * up = & buffer[0];
-	
-	        uuid_rc_t r = uuid_export( u , UUID_FMT_STR , & up , & len );
-	        
-	        uuid_destroy( u );
-			
-			if ( r == UUID_RC_OK )
-			{
-				result = buffer;
-			}
-			else
-			{
-				result = 0;
-			}
+			result = uuid.c_str();
 		]];				
 }
