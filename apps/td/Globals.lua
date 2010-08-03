@@ -48,9 +48,6 @@ phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1200, y = 1015,
 livestext = Text { font = "Sans 30px", text = "", x =1570, y = 1015, z=3, color = "000000"}
 playertext = Text {font = "Sans 30px", text = "", x =1300, y = 1015, z=3, color = "000000"}
 goldtext = Text {font = "Sans 30px", text = "", x =1800, y = 1015, z=3, color = "000000" }
---screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
--->>>>>>> 58de10ec48bbf6b63038599b20920d1d11e99014
-
 
 -- global functions
 
