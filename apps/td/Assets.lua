@@ -42,18 +42,16 @@ function AssetLoader:preloadImage( name , location )
 	end
 end
 
-
-function AssetLoader:_safeValue(valuevalue)
-	if valuevalue ~= json.null then
-		return valuevalue
-	else
-		return nil
-	end
-end
-
 function AssetLoader:construct()
 	self.preloaded = {}
 	self.assets = {}
+end
+
+function AssetLoader:addAllToScreen()
+        for k,image in pairs(self.assets) do
+                image:hide()
+                screen:add(image)
+        end
 end
 
 

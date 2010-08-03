@@ -26,10 +26,30 @@ function Game:startGame()
 end
 
 
-function Game:killGame()
+function Game:killGame(status)
+
+	if status == 1 then
+		
+		local n = game.theme.themeName
+		
+		--Global
+		lastThemePlayed = n
+		
+		if settings[n].currentLevel == currentLevel then
+			
+			currentLevel = currentLevel + 1
+			settings[n] = { currentLevel = currentLevel }
+			createLevelMenu(currentLevel)
+			
+			LevelMenu.container.opacity = 255
+			LevelMenu.hl.opacity = 100
+			LevelMenu:update_cursor_position()
+			LevelMenu.theme = game.theme
+		end
+	end
+
 	print ("kill me")
 	screen:clear()
-
 	
 	render_list = {}
 	
@@ -40,6 +60,8 @@ function Game:killGame()
 	assert(not game)
 	assert(not BoardMenu)
 	
+	AssetLoader:addAllToScreen()
+	
 	screen:add(LevelMenu.container)
 	screen:add(MainMenu.container)
 	screen:add(ThemeMenu.container)
@@ -47,13 +69,11 @@ function Game:killGame()
 	MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
 	LevelMenu.container.opacity = 255
-
-	--LevelMenu.buttons:grab_key_focus()
 	
 	ACTIVE_CONTAINER = LevelMenu
 	keyboard_key_down = LevelMenu.buttons.on_key_down
 	
-	if currentLevel and currentLevel == settings.currentLevel then currentLevel = currentLevel + 1 end
+	
 	
 end
 

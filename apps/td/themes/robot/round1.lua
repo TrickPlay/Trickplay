@@ -1,4 +1,19 @@
 wave = {
+
+        -- temp wave
+        
+        money = 1000,
+        {
+                {
+                        {name = "MediumCreep"},
+                        size = 1,
+                        speed = .1,
+                        buffs = {hp = .01, speed = 100},
+                },
+                size = 1,
+        },
+
+                        --[[
 			-- Wave 1
 			money = 5,
 			{
@@ -11,6 +26,7 @@ wave = {
 				size = 5,
 			},
 			
+                        
 			-- Wave 2
 			{
 				{
@@ -53,7 +69,7 @@ wave = {
 				},
 				size = 10,
 			},
-
+                        ]]
 
 		}
 return wave

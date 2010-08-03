@@ -143,3 +143,13 @@ function ipod_keys(object)
 	ipod_k[keys.Return] = object.extra.r
 
 end
+
+function app.on_closing()
+
+	if currentLevel and lastThemePlayed then
+	
+		settings[lastThemePlayed] = {currentLevel = currentLevel}
+	
+	end
+	
+end
