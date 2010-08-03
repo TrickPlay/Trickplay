@@ -1,12 +1,12 @@
-local old_print = print
-function print(...)
-   a,b,c = ...
-   if not string.find(a,"^Graying") and not string.find(a,"^Hiding") and not string.find(a,"^Showing") then
-      old_print(...)
-   end
-end
+-- local old_print = print
+-- function print(...)
+--    a,b,c = ...
+--    if not string.find(a,"^Graying") and not string.find(a,"^Hiding") and not string.find(a,"^Showing") then
+--       old_print(...)
+--    end
+-- end
 
-dofile("SuppressErrors.lua")
+-- dofile("SuppressErrors.lua")
 dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("Globals.lua")
 dofile("Utils.lua")
