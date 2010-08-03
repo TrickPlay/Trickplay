@@ -57,7 +57,10 @@ CustomizeController = Class(Controller,
                     self.add_to_order = false
                     model.current_item.pizzagroup:hide_all()
                     if model.current_item_is_in_cart == false then
+                       print("adding new item")
                        model.cart[#self:get_model().cart + 1] = view:get_model().current_item
+                    else
+                        print("Not adding,item is already in cart")
                     end
 
                     if NETWORKING then
