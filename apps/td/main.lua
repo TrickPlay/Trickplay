@@ -12,7 +12,9 @@ screen:show()
 
 function app.on_loaded()
     dofile ("Themes.lua")
-    
+ 	TitleBackground = Image {src = "themes/robot/background.png", x = 0, y = 0}
+	screen:add(TitleBackground)
+
     -- Everything is loaded
     AssetLoader.on_preload_ready = function()
 
@@ -49,7 +51,6 @@ function app.on_loaded()
 			
 			LevelMenu.theme = Themes.robot
 			LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/coop.lua")
-			
 			round = 2
 			
 			game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money/2}

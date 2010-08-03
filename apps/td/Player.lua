@@ -17,8 +17,6 @@ end
 
 function Player:render(seconds)
 
-	if not self.circle or not self.circle.list[1][self.circle.x].extra.t then
-	
 		local x
 		local y
 		
@@ -30,17 +28,18 @@ function Player:render(seconds)
 			x = BoardMenu.hl2.extra.x
 			y = BoardMenu.hl2.extra.y
 		end
-		
-		
-		
 		local current = game.board.squareGrid[ y ][ x ]
+
+	if not self.circle or not self.circle.list[1][self.circle.x].extra.t then
+	
 		
 		if current.hasTower then
-			
+			current.tower.rangeCircle.opacity = 25
 			self.towerInfo.fade = "in"
 			self.towerInfo:update( current.tower , self )
 		else
 			self.towerInfo.fade = "out"
+			
 		end
 		
 	else
@@ -48,7 +47,8 @@ function Player:render(seconds)
 		if self.circle.list[1][self.circle.x].extra.t then
 						
 			self.towerInfo.fade = "in"
-			self.towerInfo:update( self.circle.list[1][self.circle.x].extra.t , self , true)
+			
+			self.towerInfo:update( self.circle.list[1][self.circle.x].extra.t , self , true, GTP(x), GTP(y), 300 )
 			
 		else
 			self.towerInfo.fade = "out"

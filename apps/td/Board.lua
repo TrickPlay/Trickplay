@@ -344,11 +344,14 @@ function Board:createBoard()
 	playertext.text = self.player.name
 	goldtext.text = self.player.gold
 	BoardMenu.buttons.extra.p = function()
-		paused = not paused
+	paused = not paused
 		if (paused) then
-			screen:animate {duration = 500, y_rotation = 180}
+--			screen:animate {duration = 500, y_rotation = 180}
+			screen:animate {duration = 500, scale = {0.1,0.1}}
 		else
-			screen:animate {duration = 500, y_rotation = 0}
+--			screen:animate {duration = 500, y_rotation = 0}
+			screen:animate {duration = 500, scale = {0.5,0.5}}
+
 		end
 	end	
 	BoardMenu.buttons.extra.space = function()
