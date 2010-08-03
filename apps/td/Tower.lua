@@ -1,6 +1,6 @@
 Tower = {}
 
-function Tower:new(args, prefix, square)
+function Tower:new(args, prefix, square, player)
 	
 	local object = {
 		-- Tower defaults
@@ -9,6 +9,8 @@ function Tower:new(args, prefix, square)
 		level = 0,
 		prefix = prefix,
 		square = square,
+		owner = player,
+                name = args.name,
 		
 		-- Position
 		x = GTP(square.x),
@@ -45,7 +47,10 @@ function Tower:new(args, prefix, square)
 		timer = Stopwatch(),
    }
    
-   	if args.upgrades then object.levels = #args.upgrades end
+   	if args.upgrades then
+                object.levels = #args.upgrades
+                object.upgradeCost = args.upgrades[1].cost
+        end
 
 	-- Instructions for rotating through 8 sprites
 	if args.mode == "sprite" then
@@ -67,7 +72,7 @@ function Tower:new(args, prefix, square)
 	end
 	
 	-- If it has bullets, create the bullet group and add it to the screen
-	if self.bullet then self.bgroup = Group{} screen:add(self.bgroup) end
+	if object.bullet then object.bgroup = Group{} screen:add(object.bgroup) end
    
 	-- This is the actual image
 	object.towerImage = AssetLoader:getImage(prefix..args.name,{})
@@ -80,6 +85,12 @@ function Tower:new(args, prefix, square)
 	
 	object.towerImageGroup:add(object.towerImage)
 	screen:add(object.towerImageGroup)
+        
+        -- Add a colored rectangle behind the tower
+        if game.board.player2 then
+                object.color = Rectangle{w=SP,h=SP,x=object.x, y=object.y, opacity = 50, color=player.color}
+                screen:add(object.color)
+        end
    
    setmetatable(object, self)
    self.__index = self
@@ -87,6 +98,7 @@ function Tower:new(args, prefix, square)
 end
 
 function Tower:destroy()
+        screen:remove(self.color)
 	self.towerImage.opacity = 0
 	self.damage = 0
 end
@@ -146,7 +158,7 @@ function Tower:upgrade()
 	
 	local r = self.table.upgrades[self.level]
 	
-	if (game.board.player.gold - r.cost >0) then
+	if (self.owner.gold - r.cost > 0) then
 	
 		self.damage = r.damage
 		self.range = r.range
@@ -159,21 +171,33 @@ function Tower:upgrade()
 		self.towerImage = AssetLoader:getImage(self.prefix..self.table.name..self.level,{x=self.towerImage.x, y=self.towerImage.y, clip=self.towerImage.clip})
 		self.towerImageGroup:add(self.towerImage)
 		print(self.prefix..self.table.name..self.level)
+                
+                if self.table.upgrades[self.level+1] then
+                        self.upgradeCost = self.table.upgrades[self.level+1].cost
+                end
 		
 		--screen:add(AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y}))
-
-		game.board.player.gold = game.board.player.gold - r.cost
-		goldtext.text = game.board.player.gold
+	
+		self.owner.gold = self.owner.gold - r.cost
+		
+		game.board:updateGold(self.owner)
+		
+		return true
 	else
-		self.level = self.level -1 	
+		self.level = self.level -1
 	end
 	
 end
 
+-- Tower rotation
+-- or sprite movement
 function Tower:animateTower(creeps,i)
 	local cx = creeps[i].creepGroup.x
-	local cy = creeps[i].creepGroup.y	
-	creeps[i]:bleed()
+	local cy = creeps[i].creepGroup.y
+        
+        if game.board.theme.themeName ~= "pacman" then
+                creeps[i]:bleed()
+        end
 	
 	-- Simple rotation
 	if self.mode == "rotate" then

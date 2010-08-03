@@ -2,25 +2,26 @@ local robot = {
 		themeName = "robot",
 		mainMenuBackground = "",
 		bullets = {
-			--{id = 1, frames = 5, im = "Ringwave"},
 			{id = 1, im = "Cannon", speed = 1000},
 			{id = 2, im = "Laser", speed = 3000},
 			{id = 3, im = "Snowball", speed = 800},
 		},
 		creeps = {
-			{ hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
-			{ hp = 300, speed = 50, bounty = 15, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "MediumCreep"},
-            { hp = 1000, speed = 40, bounty = 20, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "HardCreep"},
-            { hp = 20000, speed = 40, bounty = 200, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep"},
-            { hp = 80, speed = 35, bounty = 10, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"},
-            { hp = 100, speed = 20, bounty = 10, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
+			{ hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
+			{ hp = 300, speed = 30, bounty = 1, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "MediumCreep"},
+                        { hp = 1000, speed = 25, bounty = 2, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "HardCreep"},
+                        { hp = 20000, speed = 20, bounty = 20, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep"},
+                        { hp = 80, speed = 35, bounty = 1, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"},
+                        { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
 		},
 		towers = {
+                        
 			normalTower = {
+                                name = "normalTower",
 				damage = 20,
 				range = 300,
 				cooldown = 0.5,
-				cost = 30,
+				cost = 5,
 				slow = false,
 				splash = false,
 				frames = 1,
@@ -29,15 +30,17 @@ local robot = {
 				mode = "rotate",
 				bullet = 1,
 				upgrades = {
-					{damage = 40, range = 350, cooldown = 0.5, cost = 20, slow = false},
-					{damage = 90, range = 400, cooldown = 0.5, cost = 50, slow = false}
+					{damage = 40, range = 350, cooldown = 0.5, cost = 4, slow = false},
+					{damage = 90, range = 400, cooldown = 0.5, cost = 10, slow = false}
 				}
 			},
+                        
 			slowTower = {
+                                name = "slowTower",
 				damage = 5,
 				range = 400, 
 				cooldown = 1, 
-				cost = 40, 
+				cost = 10, 
 				slowammount = 70, 
 				slow = true, 
 				slowlength = 2, 
@@ -49,15 +52,17 @@ local robot = {
 				mode = "rotate", 
 				bullet = 3,
 				upgrades = {
-					{damage = 10, range = 450, cooldown = 1, cost = 30, slowammount = 55},
-					{damage = 10, range = 450, cooldown = 1, cost = 200, slowammount = 40, splash = true}
+					{damage = 10, range = 450, cooldown = 1, cost = 10, slowammount = 55},
+					{damage = 10, range = 450, cooldown = 1, cost = 50, slowammount = 40, splash = true}
 				}
 			},
+                        
 			nukeTower =	{
-				damage = 30, 
+                                name = "nukeTower",
+				damage = 60, 
 				range = 200, 
 				cooldown = 1, 
-				cost = 70, 
+				cost = 30, 
 				slow = false, 
 				splash = true,
 				damageAroundSelf = true, 
@@ -68,15 +73,17 @@ local robot = {
 				attackFrames = 4,
 				attacksFlying = false,
 				upgrades = {
-					{damage = 50, range = 250, cooldown = .9, cost = 150, splash = true},
-					{damage = 70, range = 300, cooldown = .8, cost = 200, splash = true}
+					{damage = 120, range = 250, cooldown = .9, cost = 40, splash = true},
+					{damage = 200, range = 300, cooldown = .8, cost = 50, splash = true}
 				}
 			},
+                        
 			laserTower = {
-				damage = 15, 
+                                name = "laserTower",
+				damage = 100, 
 				range = 500, 
 				cooldown = 0.25, 
-				cost = 100, 
+				cost = 70, 
 				slow = false, 
 				splash = false, 
 				frames = 1, 
@@ -87,11 +94,13 @@ local robot = {
 				attackFrames = 5, 
 				attackMode = "fire",
 				upgrades = {
-					{damage = 25, range = 550, cooldown = 0.20, cost = 100, slow = false},
-					{damage = 40, range = 700, cooldown = 0.15, cost = 300, slow = false},
+					{damage = 200, range = 550, cooldown = 0.20, cost = 70, slow = false},
+					{damage = 450, range = 700, cooldown = 0.15, cost = 250, slow = false},
 				}							
 			},
-			wall = { damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, frames = 1, slow = false, name = "Wall",	}
+                        
+			--wall = { damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, frames = 1, slow = false, name = "Wall",	}
+                        
 		},
 		boardBackground = "assets/robotBackground.png",
 		obstacles = dofile("themes/robot/obstacles.lua"),
@@ -100,10 +109,10 @@ local robot = {
 		waveTable = {
 			["NormalCreep"] = 1,
 			["MediumCreep"] = 2,
-		   ["HardCreep"] = 3,
-		   ["BossCreep"] = 4,
-		   ["FlyingCreep"] = 5,
-		   ["SlowCreep"] = 6,
+                        ["HardCreep"] = 3,
+                        ["BossCreep"] = 4,
+                        ["FlyingCreep"] = 5,
+                        ["SlowCreep"] = 6,
 		}           
 	 
 }

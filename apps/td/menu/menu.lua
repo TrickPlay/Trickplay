@@ -32,7 +32,7 @@ function Menu:create_hl(hl)
 	if not hl then return end
 	self.hl = hl
 	self.hl.opacity=0
-	self.hl.extra={ loc=1 }
+	--self.hl.extra={ loc=1 }
 	self.hl.anchor_point = {self.hl.w/2, self.hl.h/2}
 end
 
@@ -61,6 +61,20 @@ function Menu:create_key_functions(container)
 	end
 end
 
+function Menu:pass_focus_to_controller( controller )
+
+	assert(controller, "There is no controller")
+	
+	if container.extra.right then keyboardRight = container.extra.right end
+	if container.extra.left then keyboardLeft = container.extra.left end
+	if container.extra.up then keyboardUp = container.extra.up end
+	if container.extra.down then keyboardDown = container.extra.down end
+	if container.extra.r then keyboardReturn = container.extra.r end
+	if container.extra.space then keyboardSpace = container.extra.space end
+	if container.extra.p then keyboardp = container.extra.p end
+
+end
+
 -- Hmm.. might use this?
 function Menu:kill_key_functions(container)
 	if not container then container = self.buttons end
@@ -87,7 +101,7 @@ end
 
 -- Add directional movement to x and y according to the sizes of the buttons list
 function Menu:button_directions()
-	container = self.buttons
+	local container = self.buttons
 	
 	container.extra.up = function() -- Up function
 		if self.y > 1 and self.x <= self.max_x[self.y-1] then self.y = self.y - 1 end 
@@ -114,42 +128,23 @@ dofile("menu/menu_playerstats.lua")
 dofile("menu/menu_photoreel.lua")
 dofile("menu/menu_carousel.lua")
 dofile("menu/menu_extra.lua")
+dofile("menu/menu_controller.lua")
 
-function Menu:update_cursor_position()
-	if self.hl == nil then print("No cursor available") return end
-	cursor = self.hl
+function Menu:update_cursor_position(obj)
+	if not self.hl and not obj then print("No cursor available") return end
+	local cursor = obj or self.hl
 	
-	if self.button == nil then print("No buttons available") end
-	cursor.x = self.button[self.y].children[self.x].x + self.button[self.y].children[self.x].w/2
-	cursor.y = self.button[self.y].children[self.x].y + self.button[self.y].children[self.x].h/2
+	local x = self.x
+	local y = self.y
 	
-	-- This is a mess, TODO use timeline instead
-	if self.wiggle then
-		local o = self.anim
-		local tempx = self.x
-		local tempy = self.y
-		if o then o:complete_animation() o.x = o.extra.old[1] o.y = o.extra.old[2] o.z_rotation={0, o.w/2, o.h/2} end
-		self.anim = self.button[self.y].children[self.x]
-		o = self.anim
-		o.extra.old = {o.x, o.y}
-		o.extra.animate = function()
-			o.z_rotation={o.z_rotation[1],o.w/2, o.h/2}
-			o:animate{y=o.extra.old[2]-15, duration=450, mode="EASE_IN_SINE", 
-				on_completed = function() 
-					print("2nd anim") 
-					if tempx == self.x and tempy == self.y then 
-						print("same spot") --o.y = o.extra.old[2] + 40
-						o:animate{y=o.extra.old[2], duration=450, mode="EASE_OUT_SINE", 
-							on_completed = function() 
-								if tempx == self.x and tempy == self.y then
-									o.extra.animate()
-								end  
-							end}
-					end 
-			end} 
-		end
-		o.extra.animate()
-	end --end wiggle
+	--print("Updated!")
+	--if obj then print(obj.x, obj.y) end
+	
+	if obj then x = obj.extra.x y = obj.extra.y end
+	
+	if not self.button then print("No buttons available") end
+	cursor.x = self.button[y].children[x].x + self.button[y].children[x].w/2
+	cursor.y = self.button[y].children[x].y + self.button[y].children[x].h/2
 
 end
 

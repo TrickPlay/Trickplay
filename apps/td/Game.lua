@@ -29,23 +29,7 @@ end
 function Game:killGame()
 	print ("kill me")
 	screen:clear()
-	
-	--deleteAll(game)
-	--print("hi")
-	
-	--[[for i=1,#game.board.squareGrid do
-		for j=1, #game.board.squareGrid[i] do
-			game.board.squareGrid[i][j].tower = nil
-		end
-	end
-	
-	for k,v in pairs(game.board) do
-	
-		v = nil
-	
-	end
-	
-	print("done")]]
+
 	
 	render_list = {}
 	
@@ -60,7 +44,17 @@ function Game:killGame()
 	screen:add(MainMenu.container)
 	screen:add(ThemeMenu.container)
 	
-	LevelMenu.buttons:grab_key_focus()
+	MainMenu.container.opacity = 0
+	ThemeMenu.container.opacity = 0
+	LevelMenu.container.opacity = 255
+
+	--LevelMenu.buttons:grab_key_focus()
+	
+	ACTIVE_CONTAINER = LevelMenu
+	keyboard_key_down = LevelMenu.buttons.on_key_down
+	
+	if currentLevel and currentLevel == settings.currentLevel then currentLevel = currentLevel + 1 end
+	
 end
 
 function add_to_render_list( item )
@@ -83,22 +77,3 @@ end
 
 -------------------------------------------------------------------------------
 
---[[function deleteAll(tab)
-
-	if type(tab) == "table" then
-	
-		for k,v in pairs(tab) do
-		
-			deleteAll(v)
-			v = nil
-			
-			--assert(#tab == 0)
-			--tab = nil
-		
-		end
-		
-		tab = nil
-	
-	end
-
-end]]

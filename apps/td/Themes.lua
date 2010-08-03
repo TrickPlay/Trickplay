@@ -42,7 +42,16 @@ for themeName, t in pairs(Themes) do
 
 end
 
+AssetLoader:preloadImage("smallWindow","assets/SmallWindow.png")
+AssetLoader:preloadImage("largeWindow","assets/LargeWindow.png")
+AssetLoader:preloadImage("InfoBar2","assets/player2InfoBar.png")
+
+AssetLoader:preloadImage("levelWindow","assets/levelWindow.png")
+AssetLoader:preloadImage("levelWindowLocked","assets/levelWindowLocked.png")
+AssetLoader:preloadImage("levelWindowCompleted","assets/levelWindowCompleted.png")
+
 AssetLoader:preloadImage("select","assets/Selector.png")
+AssetLoader:preloadImage("select2","assets/Selector2.png")
 AssetLoader:preloadImage("death","themes/robot/assets/NormalCreepBlood.png")
 AssetLoader:preloadImage("normal","assets/normalRobot.png")
 AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
@@ -57,5 +66,5 @@ AssetLoader:preloadImage("upgradeIcon","assets/upgradeIcon.png")
 AssetLoader:preloadImage("obstacles","themes/robot/assets/obstacles.png")
 AssetLoader:preloadImage("shadow","themes/robot/assets/CreepShadow.png")	
 AssetLoader:preloadImage("sellIcon","assets/sell.png")
-AssetLoader:preloadImage("InfoBar","assets/InfoBar.png")
+AssetLoader:preloadImage("InfoBar","assets/InfoBar1.png")
 
