@@ -707,46 +707,6 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Property: extra
-	
-	This is a table that lets you add whatever you want to a UI element. By
-	default it is empty. TrickPlay ignores anything you attach to this
-	property, that is, it does not affect any behavior.
-	
-	Just be aware that anything you attach to the extra property will remain
-	"alive" as long as the element is alive.
-	
-	> element.extra.foo="bar"
-	> print(element.extra.foo)
-	
-    */
-    
-    table extra
-	[[
-	    ClutterUtil::Extra * e = (ClutterUtil::Extra*)g_object_get_data(G_OBJECT(self),"tp-extra");
-	    
-	    if (!e)
-	    {
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L),ClutterUtil::Extra::destroy);
-	    }
-	    else
-	    {
-		e->push_table();
-	    }
-	]]
-	[[
-	    if (lua_isnil(L,2))
-	    {
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",NULL,ClutterUtil::Extra::destroy);
-	    }
-	    else
-	    {
-		lb_checktable(L,2);
-		g_object_set_data_full(G_OBJECT(self),"tp-extra",new ClutterUtil::Extra(L,2),ClutterUtil::Extra::destroy);
-	    }
-	]];
-	
-    /*
 	Property: request_mode
 	
 	Mostly useful for images, this lets you specify how to resize UI elements.
