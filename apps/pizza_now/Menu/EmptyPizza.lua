@@ -1,4 +1,7 @@
---dofile("Class.lua")
+if not Class then
+   dofile("Class.lua")
+end
+
 Meat_Toppings = {"Pepperoni","XL Pepperoni","Sliced Italian Sausage", 
     "Italian Sausage", "Beef", "Ham","Bacon","Premium Chicken","Salami",
     "Philly Steak"}
@@ -101,137 +104,327 @@ All_Options = {
    }
 }
 
-EmptyPizza = Class(--[[Menu_Item,]]function(self)
-   --self._base.init(self)
-   self.Name = "Build Your Own Pizza"
-   self.Price = "$16.50"
-   self.Tabs = {}
-   self.Tabs[1] = {
-      Tab_Text = "Crust",
-      --Radio Buttons
-      Options = {
-         {
-                            Name = "Cheese", 
-                           Image = Image{src="assets/Topping_Pepperoni.png"}, 
+EmptyPizza = Class(
+   function(self)
+      --self._base.init(self)
+      self.Name = "Build Your Own Pizza"
+      self.Price = "$16.50"
+      self.Tabs = {}
+      self.Tabs[1] = {
+         Tab_Text = "Crust",
+         --Radio Buttons
+         Options = {
+            {
+               Name = "Cheese", 
+               Image = Image{src="assets/Topping_Pepperoni.png"}, 
                        Placement = All_Options.Placement.Entire,
-                       CoverageX = All_Options.Coverage.Regular,
-                    ToppingGroup = nil,
-                        Selected = 
-                         function(self)
-                            print("Selection not yet handled")
-                         end
-         },
-         {
-                            Name = "Sauce",
-                           Image = Image{src="assets/Topping_Pepperoni.png"},
-                           Radio = true,
-                       CoverageX = All_Options.Coverage.Regular,
-                      Sauce_Type = All_Options.Sauce_Type.Tomato,
-                    ToppingGroup = nil,
-                        Selected = 
-                         function(self)
-                            print("Selection not yet handled")
-                         end
-         },
-         {
-                            Name = "Crust",
-                           Image = Image{src="assets/Topping_Pepperoni.png"},
-                           Radio = true,
-                     Crust_Style = All_Options.Crust_Style.Handtossed,
-                    ToppingGroup = nil,
-                        Selected = 
-                         function(self)
-                            print("Selection not yet handled")
-                         end
-         },
-         {
-                            Name = "Size",
-                           Image = Image{src="assets/Topping_Pepperoni.png"},
-                           Radio = true,
-                            Size = All_Options.Size.Large,
-                    ToppingGroup = nil,
-                        Selected = 
-                         function(self)
-                            print("Selection not yet handled")
-                         end
+               CoverageX = All_Options.Coverage.Regular,
+               ToppingGroup = nil,
+               Selected = 
+                  function(itself)
+                     itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+                     itself:get_model():notify()
+                  end
+            },
+            {
+               Name = "Sauce",
+               Image = Image{src="assets/Topping_Pepperoni.png"},
+               Radio = true,
+               CoverageX = All_Options.Coverage.Regular,
+               Sauce_Type = All_Options.Sauce_Type.Tomato,
+               ToppingGroup = nil,
+               Selected = 
+                  function(self)
+                     print("Selection not yet handled")
+                  end
+            },
+            {
+               Name = "Crust",
+               Image = Image{src="assets/Topping_Pepperoni.png"},
+               Radio = true,
+               Crust_Style = All_Options.Crust_Style.Handtossed,
+               ToppingGroup = nil,
+               Selected = 
+                  function(self)
+                     print("Selection not yet handled")
+                  end
+            },
+            {
+               Name = "Size",
+               Image = Image{src="assets/Topping_Pepperoni.png"},
+               Radio = true,
+               Size = All_Options.Size.Large,
+               ToppingGroup = nil,
+               Selected = 
+                  function(self)
+                     print("Selection not yet handled")
+                  end
+            }
          }
       }
-   }
-   --Meat Toppings
-   self.Tabs[2] = {
-      Tab_Text = "Meat",
-      Options = {}
-   }
-   --Veggie Toppings
-   self.Tabs[3] = {
-      Tab_Text = "Veggie",
-      Options = {}
-   }
---[[
-   --Add to Order
-   self.Tabs[4] = {
-      Tab_Text = "Add"
-    --Options = {}??
-   }
-   --Back to Food Menu
-   self.Tabs[5] = {
-      Tab_Text = "Back"
-    --Options = {}??
-   }
---]]
-   for i =1,#Meat_Toppings do
-      self.Tabs[2].Options[i] = {
-         Name  = Meat_Toppings[i],
-         Image = Image{src="assets/Topping_Pepperoni.png"},
-         CoverageX  = All_Options.CoverageX.None,
-         Placement = All_Options.Placement.None,
-         ToppingGroup = nil,
-         Selected = 
-            function(itself)
-             itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
-             itself:get_model():notify()
-            end
+      --Meat Toppings
+      self.Tabs[2] = {
+         Tab_Text = "Meat",
+         Options = {}
       }
-   end
-   for i =1,#Veggie_Toppings do
-      self.Tabs[3].Options[i] = {
-         Name  = Veggie_Toppings[i],
-         Image = Image{src="assets/Topping_Pepperoni.png"},
-         CoverageX  = All_Options.CoverageX.None,
-         Placement  = All_Options.Placement.None,
-         ToppingGroup = nil,
-         Selected = 
-            function(self)
-             self:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
-             self:get_model():notify()
-            end
+      --Veggie Toppings
+      self.Tabs[3] = {
+         Tab_Text = "Veggie",
+         Options = {}
       }
-   end
+      --[[
+      --Add to Order
+      self.Tabs[4] = {
+         Tab_Text = "Add"
+         --Options = {}??
+      }
+      --Back to Food Menu
+      self.Tabs[5] = {
+         Tab_Text = "Back"
+         --Options = {}??
+      }
+      --]]
+      for i =1,#Meat_Toppings do
+         self.Tabs[2].Options[i] = {
+            Name  = Meat_Toppings[i],
+            Image = Image{src="assets/Topping_Pepperoni.png"},
+            CoverageX  = All_Options.CoverageX.None,
+            Placement = All_Options.Placement.None,
+            ToppingGroup = nil,
+            Selected = 
+               function(itself)
+                  itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+                  itself:get_model():notify()
+               end
+         }
+      end
+      for i =1,#Veggie_Toppings do
+         self.Tabs[3].Options[i] = {
+            Name  = Veggie_Toppings[i],
+            Image = Image{src="assets/Topping_Pepperoni.png"},
+            CoverageX  = All_Options.CoverageX.None,
+            Placement = All_Options.Placement.None,
+            ToppingGroup = nil,
+            Selected = 
+               function(itself)
+                  itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+                  itself:get_model():notify()
+               end
+         }
+      end
+      local cheese = Image{
+         position = {0, 0},
+         src = "assets/Cheese_Normal.png"
+      }
+      local sauce = Image{
+         position = {0, 0},
+         src = "assets/Sauce_Tomato.png"
+      }
+
+         self.pizzagroup = Group{position = {960,500}}
 
 
-local pizza = Image{
-    position = {0, 0},
-    src = "assets/Crust_HandTossed.png",
-    name = "pizza"
-}
-local cheese = Image{
-    position = {0, 0},
-    src = "assets/Cheese_Normal.png"
-}
-local sauce = Image{
-    position = {0, 0},
-    src = "assets/Sauce_Tomato.png"
-}
+         self.pizzagroup:add(pizza)
+         self.pizzagroup:add(sauce)
+         self.pizzagroup:add(cheese)
+         print("\n\n\n\nhererere")
+         --screen:add(self.pizzagroup)
 
-self.pizzagroup = Group{position = {960,500}}
+         local coverage_lut = {
+            [All_Options.CoverageX.None] = nil,
+            [All_Options.CoverageX.Light] = Coverage.LIGHT,
+            [All_Options.CoverageX.Regular] = Coverage.NORMAL,
+            [All_Options.CoverageX.Extra] = Coverage.EXTRA
+         }
+
+         local placement_lut = {
+            [All_Options.Placement.None] = nil,
+            [All_Options.Placement.Left] = Placement.LEFT,
+            [All_Options.Placement.Right] = Placement.RIGHT,
+            [All_Options.Placement.Entire] = Placement.WHOLE
+         }
+
+         local crust_lut = {
+            [All_Options.Crust_Style["Handtossed"]] = Crusts.HAND_TOSSED,
+            [All_Options.Crust_Style["Deep Dish"]] = Crusts.DEEP_DISH,
+            [All_Options.Crust_Style["Crunchy Thin"]] = Crusts.CRUNCHY_THIN,
+            [All_Options.Crust_Style["Brooklyn Style"]] = Crusts.BROOKLYN_STYLE,
+         }
+         function self:get_crust()
+            return crust_lut[self.Tabs[1].Options[3].Crust_Style]
+         end
 
 
-self.pizzagroup:add(pizza)
-self.pizzagroup:add(sauce)
-self.pizzagroup:add(cheese)
-print("\n\n\n\nhererere")
---screen:add(self.pizzagroup)
-end)
+         local size_lut = {
+            [All_Options.Size.Small] = Sizes.SMALL,
+            [All_Options.Size.Medium] = Sizes.MEDIUM,
+            [All_Options.Size.Large] = Sizes.LARGE,
+            [All_Options.Size["Extra Large"]] = Sizes.XLARGE,
+         }
+         function self:get_size()
+            return size_lut[self.Tabs[1].Options[4].Size]
+         end
+
+         local sauce_lut = {
+            [All_Options.Sauce_Type.Tomato] = Sauces.ROBUST,
+            [All_Options.Sauce_Type.White] = Sauces.WHITE,
+            [All_Options.Sauce_Type.Marinara] = Sauces.MARINARA,
+            [All_Options.Sauce_Type.Barbeque] = Sauces.BBQ,
+         }
+         function self:get_sauce_customization()
+            local sauce_cust = self.Tabs[1].Options[2]
+            local enabled = true
+            local sauce = Sauces.ROBUST
+            local coverage = Coverage.NORMAL
+            if sauce_cust.CoverageX == All_Options.CoverageX.None then
+               enabled = false
+            else
+               enabled = true
+               sauce = sauce_lut[sauce_cust.Sauce_Type]
+               coverage = coverage_lut[sauce_cust.CoverageX]
+            end
+            return {
+               enabled=enabled,
+               sauce=sauce,
+               coverage=coverage
+            }
+         end
+
+         function self:get_cheese_customization()
+            local cheese_cust = self.Tabs[1].Options[1]
+            local enabled = true
+            local placement = Placement.WHOLE
+            local coverage = Coverage.NORMAL
+            if cheese_cust.CoverageX == All_Options.CoverageX.None or
+               cheese_cust.Placement == All_Options.Placement.None then
+               enabled = false
+            else
+               enabled = true
+               placement = placement_lut[cheese_cust.Placement]
+               coverage = coverage_lut[cheese_cust.CoverageX]
+            end
+            return {
+               enabled=enabled,
+               placement=placement,
+               coverage=coverage
+            }
+         end
+         
+         local topping_lut = {
+            ["Pepperoni"] = Toppings.PEPPERONI,
+            ["XL Pepperoni"] = Toppings.XL_PEPPERONI,
+            ["Sliced Italian Sausage"] = Toppings.SLICED_ITALIAN_SAUSAGE,
+            ["Italian Sausage"] = Toppings.ITALIAN_SAUSAGE,
+            ["Beef"] = Toppings.BEEF,
+            ["Ham"] = Toppings.HAM,
+            ["Bacon"] = Toppings.BACON,
+            ["Premium Chicken"] = Toppings.CHICKEN,
+            ["Salami"] = Toppings.SALAMI,
+            ["Philly Steak"] = Toppings.PHILLY_STEAK,
+            ["Green Peppers"] = Toppings.GREEN_PEPPERS,
+            ["Black Olives"] = Toppings.BLACK_OLIVES,
+            ["Pineapple"] = Toppings.PINEAPPLE,
+            ["Mushrooms"] = Toppings.MUSHROOMS,
+            ["Onions"] = Toppings.ONIONS,
+            ["Jalapeno Peppers"] = Toppings.JALAPENOS,
+            ["Banana Peppers"] = Toppings.BANANA_PEPPERS,
+            ["Spinach"] = Toppings.SPINACH,
+            ["Roasted Red Peppers"] = Toppings.RED_PEPPERS,
+            ["Cheddar Cheese"] = Toppings.CHEDDAR_CHEESE,
+            ["Shredded Provolone Cheese"] = Toppings.PROVOLONE,
+            ["Shredded Parmesan"] = Toppings.PARMESAN,
+            ["Feta Cheese"] = Toppings.FETA,
+            ["Garlic"] = Toppings.GARLIC,
+            ["Sliced Tomatoes"] = Toppings.TOMATOES,
+            ["Hot Sauce"] = Toppings.HOT_SAUCE,
+            ["Parsley"] = nil
+         }
+         function self:get_toppings()
+            local TOPPING_LIMIT = 10
+            local toppings = {}
+            local topping, coverage, placement
+
+            local left_topping_count = 0
+            local right_topping_count = 0
+            local new_left_topping_count = 0
+            local new_right_topping_count = 0
+            -- handle meats
+            for i, topping_cust in ipairs(self.Tabs[2].Options) do
+               if topping_cust.CoverageX ~= All_Options.Coverage.None and
+                  topping_cust.Placement ~= All_Options.Placement.None then
+                  topping = topping_lut[topping_cust.Name]
+                  coverage = coverage_lut[topping_cust.CoverageX]
+                  placement = placement_lut[topping_cust.Placement]
+
+                  if placement == Placement.WHOLE or Placement.LEFT then
+                     new_left_topping_count = left_topping_count + tonumber(coverage)
+                  end
+                  if placement == Placement.WHOLE or Placement.RIGHT then
+                     new_right_topping_count = right_topping_count + tonumber(coverage)
+                  end
+
+                  if new_left_topping_count > TOPPING_LIMIT then
+                     print("\n\nLEFT SIDE TOPPING OVERFLOW! " .. topping.name .. " not added\n\n")
+                  elseif new_right_topping_count > TOPPING_LIMIT then
+                     print("\n\nRIGHT SIDE TOPPING OVERFLOW! " .. topping.name .. " not added\n\n")
+                  else
+                     left_topping_count = new_left_topping_count
+                     right_topping_count = new_right_topping_count
+                     print("Adding " .. topping.name)
+                     toppings[topping] = {coverage=coverage, placement=placement}
+                  end
+               end
+            end
+
+            -- handle unmeats
+            for i, topping_cust in ipairs(self.Tabs[3].Options) do
+               if topping_cust.CoverageX ~= All_Options.Coverage.None and
+                  topping_cust.Placement ~= All_Options.Placement.None then
+                  topping = topping_lut[topping_cust.Name]
+                  coverage = coverage_lut[topping_cust.CoverageX]
+                  placement = placement_lut[topping_cust.Placement]
+
+                  if placement == Placement.WHOLE or Placement.LEFT then
+                     new_left_topping_count = left_topping_count + tonumber(coverage)
+                  end
+                  if placement == Placement.WHOLE or Placement.RIGHT then
+                     new_right_topping_count = right_topping_count + tonumber(coverage)
+                  end
+
+                  if new_left_topping_count > TOPPING_LIMIT then
+                     print("\n\nLEFT SIDE TOPPING OVERFLOW! " .. topping.name .. " not added\n\n")
+                  elseif new_right_topping_count > TOPPING_LIMIT then
+                     print("\n\nRIGHT SIDE TOPPING OVERFLOW! " .. topping.name .. " not added\n\n")
+                  else
+                     left_topping_count = new_left_topping_count
+                     right_topping_count = new_right_topping_count
+                     print("Adding " .. topping.name)
+                     toppings[topping] = {coverage=coverage, placement=placement}
+                  end
+               end
+            end
+
+            for topping, tweaks in pairs(toppings) do
+               print(topping.name)
+               print(tweaks.coverage)
+               print(tweaks.placement)
+               --            print(topping.name .. " topping with " .. tweaks.coverage .. " coverage and " .. tweaks.placement .. " placement")
+            end
+            return toppings
+         end
+
+         function self:as_dominos_pizza()
+            local pizza = DominosPizza(
+               self:get_crust(),
+               self:get_size(),
+               self:get_cheese_customization(),
+               self:get_sauce_customization(),
+               self:get_toppings()
+            )
+            return pizza
+         end
+
+      end)
 
 
 

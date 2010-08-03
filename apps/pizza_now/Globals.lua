@@ -1,3 +1,9 @@
+NETWORKING = false
+
+if not Coverage then
+   dofile("PizzaGlobals.lua")
+end
+
 CHANGE_VIEW_TIME = 500
 
 Dimensions = {
@@ -124,3 +130,8 @@ CUSTOMIZE_SUB_FONT_SP  = "KacstArt 42px"
 CUSTOMIZE_NAME_FONT = "KacstArt 144px"
 DEFAULT_FONT="Sans 40px"
 DEFAULT_COLOR=Colors.WHITE
+OFFICE = {
+   address="411 Acacia Avenue",
+   city="Palo Alto",
+   state="CA"
+}
