@@ -7,6 +7,8 @@
 
 static const char * TP_WEAK_REFS_TABLE = "__TP_WEAK_REFS__";
 
+static const char * TP_EXTRA_TABLE = "__TP_EXTRA__";
+
 //.........................................................................
 // Like luaL_ref - takes the item at the top of the stack and adds
 // a weak ref to it. It pops the item and returns the ref.
@@ -181,6 +183,26 @@ int lb_index(lua_State*L)
         lua_pushvalue(L,1);         // push the user data
         lua_call(L,1,1);            // call the value as a function
     }
+    else
+    {
+        lua_pop(L,1);                           // pop nil
+        lua_pushstring(L,TP_EXTRA_TABLE);       // get the extra table
+        lua_rawget(L,LUA_REGISTRYINDEX);
+
+        if (!lua_isnil(L,-1))
+        {
+            lua_pushvalue(L,1);                 // Get the table for this usedata
+            lua_rawget(L,-2);
+            lua_remove(L,-2);                   // Drop the extra table
+
+            if (!lua_isnil(L,-1))
+            {
+                lua_pushvalue(L,2);             // Push the key
+                lua_gettable(L,-2);             // Get the value for the key
+                lua_remove(L,-2);               // Drop the table - leaving the value
+            }
+        }
+    }
     return LSG_END(1);
 }
 
@@ -205,7 +227,14 @@ int lb_newindex(lua_State*L)
     lua_replace(L,-2);              // get rid of the setters table
     if(lua_isnil(L,-1))
     {
-        lua_pop(L,1);               // if the setter function is not found, do nothing
+        lua_pop(L,1);               // if the setter function is not found, look in the extra table
+
+        lb_get_extra(L);            // pushes the extra table, creating it if needed
+        lua_pushvalue(L,2);         // push the key
+        lua_pushvalue(L,3);         // push the value
+        lua_settable(L,-3);         // set it - using metamethods
+        lua_pop(L,1);               // pop the table
+
         return LSG_END(0);
     }
     lua_pushvalue(L,1);             // push the original user data
@@ -589,3 +618,95 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 }
 
 //.........................................................................
+// The extras table is in the registry and uses the user data as a weak
+// key to point to the user supplied extra table. We create this table
+// if it doesn't already exist.
+//
+// REGISTRY
+// --------
+// TP_EXTRA_TABLE = { <user data> (weak) = <user supplied table> }
+
+int lb_get_extra(lua_State * L)
+{
+    LSG;
+
+    lua_pushstring(L,TP_EXTRA_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+        lua_newtable(L);
+
+        lua_newtable(L);
+        lua_pushstring(L,"__mode");
+        lua_pushstring(L,"k");
+        lua_rawset(L,-3);
+
+        lua_setmetatable(L,-2);
+
+        lua_pushstring(L,TP_EXTRA_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    // table is on top
+
+    lua_pushvalue(L,1);
+    lua_rawget(L,-2);
+
+    if(lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+
+        lua_newtable(L);
+        lua_pushvalue(L,1);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,-4);
+    }
+
+    lua_remove(L,-2);
+
+    g_assert( lua_type(L,-1)==LUA_TTABLE);
+
+    return LSG_END(1);
+}
+
+//-----------------------------------------------------------------------------
+// This one expects the user data at 1 and the table at 2 - it sets the new
+// table as the extra table for this user data.
+
+int lb_set_extra(lua_State * L)
+{
+    lb_checktable(L,2);
+
+    LSG;
+
+    lua_pushstring(L,TP_EXTRA_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+        lua_newtable(L);
+
+        lua_newtable(L);
+        lua_pushstring(L,"__mode");
+        lua_pushstring(L,"k");
+        lua_rawset(L,-3);
+
+        lua_setmetatable(L,-2);
+
+        lua_pushstring(L,TP_EXTRA_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    lua_pushvalue(L,1);
+    lua_pushvalue(L,2);
+    lua_rawset(L,-3);
+
+    lua_pop(L,1);
+
+    return LSG_END(0);
+}
