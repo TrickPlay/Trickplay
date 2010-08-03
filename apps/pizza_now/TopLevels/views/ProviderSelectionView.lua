@@ -13,7 +13,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
     --Background junk
     local back = Image{
         position = {0,0},
-        src = "assets/MenuBg.jpg"
+        src = "assets/StoreScreenBg.png"
     }
     local junkInDaTrunk = Clone{source = back}
     junkInDaTrunk.position = {960, 0}

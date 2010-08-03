@@ -1,12 +1,14 @@
+local PEP_IMG_PATH = "assets/Topping_Pepperoni.png"
+
 if not Class then
    dofile("Class.lua")
 end
 
-Meat_Toppings = {"Pepperoni","XL Pepperoni","Sliced Italian Sausage", 
-    "Italian Sausage", "Beef", "Ham","Bacon","Premium Chicken","Salami",
+Meat_Toppings = {{name="Pepperoni",image=Image{src="assets/Topping_Pepperoni.png"}},"XL Pepperoni","Sliced Italian Sausage", 
+                 "Italian Sausage", "Beef", {name="Ham",image=Image{src="assets/Topping_Ham.png"}},"Bacon","Premium Chicken","Salami",
     "Philly Steak"}
-Veggie_Toppings = {"Green Peppers","Black Olives", "Pineapple", 
-    "Mushrooms","Onions","Jalapeno Peppers","Banana Peppers","Spinach",
+Veggie_Toppings = {"Green Peppers",{name="Black Olives",image=Image{src="assets/Topping_Olives.png"}}, "Pineapple", 
+                   {name="Mushrooms",image=Image{src="assets/Topping_Mushroom.png"}},"Onions","Jalapeno Peppers","Banana Peppers","Spinach",
     "Roasted Red Peppers","Cheddar Cheese","Shredded Provolone Cheese",
     "Shredded Parmesan","Feta Cheese","Garlic","Sliced Tomatoes",
     "Hot Sauce", "Parsley"}
@@ -192,10 +194,18 @@ EmptyPizza = Class(
          --Options = {}??
       }
       --]]
+      local name, image
       for i =1,#Meat_Toppings do
+         if type(Meat_Toppings[i]) == "table" then
+            name = Meat_Toppings[i].name
+            image = Meat_Toppings[i].image
+         else
+            name = Meat_Toppings[i]
+            image = Image{src=PEP_IMG_PATH}
+         end
          self.Tabs[2].Options[i] = {
-            Name  = Meat_Toppings[i],
-            Image = Image{src="assets/Topping_Pepperoni.png"},
+            Name  = name,
+            Image = image,
             CoverageX  = All_Options.CoverageX.None,
             Placement = All_Options.Placement.None,
             ToppingGroup = nil,
@@ -207,9 +217,19 @@ EmptyPizza = Class(
          }
       end
       for i =1,#Veggie_Toppings do
+         -- TODO stop hacking and change the Veggie_Toppings table to contain the image, same with Meat
+         if type(Veggie_Toppings[i]) == "table" then
+            name = Veggie_Toppings[i].name
+            image = Veggie_Toppings[i].image
+         else
+            name = Veggie_Toppings[i]
+            image = Image{src=PEP_IMG_PATH}
+         end
+
+
          self.Tabs[3].Options[i] = {
-            Name  = Veggie_Toppings[i],
-            Image = Image{src="assets/Topping_Pepperoni.png"},
+            Name  = name,
+            Image = image,
             CoverageX  = All_Options.CoverageX.None,
             Placement = All_Options.Placement.None,
             ToppingGroup = nil,
