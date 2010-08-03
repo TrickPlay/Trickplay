@@ -193,6 +193,13 @@ int lb_newindex(lua_State*L)
     lua_pushstring(L,"__setters__");// push "_setters_"
     lua_rawget(L,-2);               // get the setters table from the mt
     lua_replace(L,-2);              // get rid of the metatable
+
+    if (lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+        return LSG_END(0);
+    }
+
     lua_pushvalue(L,2);             // push the original key
     lua_rawget(L,-2);               // get the setter function for this key
     lua_replace(L,-2);              // get rid of the setters table
