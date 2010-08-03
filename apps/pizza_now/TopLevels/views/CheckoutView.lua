@@ -51,6 +51,8 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Trickplay Password:",
     }
+    passwordForm = Form(1460, 260, 1740-1460)
+    --[[
     local passwordFormLeft = Image{
         position = {1460, 260},
         src = "assets/credit_stuff/TextBoxLeft.png",
@@ -65,6 +67,7 @@ CheckoutView = Class(View, function(view, model, ...)
         position = {1730,260},
         src = "assets/credit_stuff/TextBoxRight.png",
     }
+    --]]
     --title of enter credit payment form
     local enterPaymentText = Text{
         position = {1000, 340},
@@ -387,8 +390,9 @@ CheckoutView = Class(View, function(view, model, ...)
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
-        orderText, detailsText, passwordText, passwordFormLeft, passwordFormCenter,
-        passwordFormRight, formGroup, enterPaymentText, firstNameGroup,
+        orderText, detailsText, passwordText, passwordForm.group,
+        --passwordFormLeft, passwordFormCenter, passwordFormRight,
+        formGroup, enterPaymentText, firstNameGroup,
         lastNameGroup, emailNameGroup, emailAtGroup, atSymbolText, nameText,
         phoneText, emailText, phoneGroup, phoneGroup2, phoneGroup3, extText, phoneGroup4,
         cash, masterCard, visaCard, americanExpressCard, discoverCard, cardGroup1,

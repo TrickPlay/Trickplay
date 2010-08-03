@@ -75,7 +75,9 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         position = {1330, 475},
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
-        text = "####"
+        text = "####",
+        max_length = 4,
+        wants_enter = false
     }
     local extension = Text{
         position = {1470, 480},

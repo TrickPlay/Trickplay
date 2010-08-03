@@ -130,7 +130,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
 
                     self:get_controller().child = c_view:get_controller()
                 else
-                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
+                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=BOTTOM_OPACITY}
                     prev_selection[i] = c_view:get_controller():get_selected_index()
                 end
             end
