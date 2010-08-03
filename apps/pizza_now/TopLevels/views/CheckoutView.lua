@@ -1,6 +1,8 @@
+EDIT_ORDER_Y = 460
+
 CheckoutView = Class(View, function(view, model, ...)
     view._base.init(view,model)
-
+    view.cart_items = {}
     --first add the background shiz
     local back = Image{
         position = {0,0},
@@ -319,11 +321,33 @@ CheckoutView = Class(View, function(view, model, ...)
         driverInstructionsFormRight)
     --stuff describing the persons order
     local editOrderText = Text{
-        position = {410,460},
+        position = {410,EDIT_ORDER_Y},
         font = CUSTOMIZE_TAB_FONT,
         color = Colors.BLACK,
         text = "Edit Order",
     }
+    --placing the cart items in between the top of the screen and edit order
+    local currentCart = Text{
+        position = {160,0},
+        font = CUSTOMIZE_TAB_FONT,
+        color = Colors.BLACK,
+        text = "Current Cart:",
+    }
+--[[
+    local next_y = 160
+    local cart_index = 1
+    while model.cart[cart_index] ~= nil and
+          next_y > editOrder.y do
+        cart_items[#cart_items+1] = Text{
+            position = {160,next_y},
+            font = CUSTOMIZE_TAB_FONT,
+            color = Colors.BLACK,
+            text = model.cart.Name,--model.cart[cart_index].Description
+        }
+        next_y = next_y +60 -- + model.cart[cart_index].Desc_height
+        cart_index = cart_index+1
+    end
+--]]
     local addCouponText = Text{
         position = {390,550},
         font = CUSTOMIZE_TAB_FONT,
@@ -371,7 +395,7 @@ CheckoutView = Class(View, function(view, model, ...)
         cardGroup2, cardGroup3, cardGroup4, cardNumberText, expirationGroup,
         expirationText, secretCodeGroup, secretCodeText, addressBillingGroup,
         driverInstructionsText, driverInstructionsForm, editOrderText, addCouponText,
-        taxText, totalCostText, orderBar, creditInstructionsText, termsText
+        taxText, totalCostText, orderBar, creditInstructionsText, termsText, currentCart
     }
     
     --create the components
@@ -399,6 +423,31 @@ CheckoutView = Class(View, function(view, model, ...)
 
     function view:initialize()
         self:set_controller(CheckoutController(self))
+    end
+    function view:refresh_cart()
+        print("refreshing cart on checkout screen, cart has "
+               ..#model.cart.." item(s)")
+        --if nil ~= #view.cart_items then
+            for i=1,#view.cart_items do
+                view.cart_items[i]:unparent()
+            end
+        --end
+        view.cart_items = {}
+        local next_y = 60
+        local cart_index = 1
+        while cart_index <= #model.cart and
+              next_y <= EDIT_ORDER_Y do
+            print("adding "..model.cart[cart_index].Name.." from cart to screen")
+            view.cart_items[#view.cart_items+1] = Text{
+                position = {200,next_y},
+                font = CUSTOMIZE_SUB_FONT,
+                color = Colors.BLACK,
+                text = model.cart[cart_index].CheckOutDesc()
+            }
+            next_y = next_y +120 -- + model.cart[cart_index].Desc_height
+            cart_index = cart_index+1
+        end
+        view.ui:add(unpack(view.cart_items))
     end
     
     local prev_selection = {}
