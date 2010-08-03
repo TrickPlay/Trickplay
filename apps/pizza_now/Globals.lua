@@ -4,7 +4,8 @@ if not Coverage then
    dofile("PizzaGlobals.lua")
 end
 
-CHANGE_VIEW_TIME = 500
+CHANGE_VIEW_TIME = 300
+BOTTOM_OPACITY = 50
 
 Dimensions = {
     HEIGHT = 1080,
