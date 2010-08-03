@@ -72,6 +72,21 @@ CustomizeView = Class(View, function(view, model, ...)
                 position = {960, 500},
                 src      = "assets/PizzaSliceLines_12.png"
             }
+        if self:get_model().current_item_is_in_cart == false then
+            view.back_arrow_text = Text {
+                  position = {5, 750},
+                  font     = CUSTOMIZE_TAB_FONT,
+                  color    = Colors.BLACK,
+                  text     = "Back"
+                }
+        else
+            view.back_arrow_text = Text {
+                  position = {5, 750},
+                  font     = CUSTOMIZE_TAB_FONT,
+                  color    = Colors.BLACK,
+                  text     = "Remove"
+                }
+        end
         view.back_arrow = Image{                
                 position = {5, 800},
                 src      = "assets/BackArrowOutline.png"
@@ -81,12 +96,21 @@ CustomizeView = Class(View, function(view, model, ...)
                 opacity  = 0,
                 src      = "assets/BackArrowFilled.png"
             }
-        view.add_to_order = Text{
-              position    = {155, 850},
-              font        = CUSTOMIZE_TAB_FONT,
-              color       = Colors.BLACK,
-              text        = "Add to Order"
-            }
+        if self:get_model().current_item_is_in_cart == false then
+            view.add_to_order = Text{
+                  position    = {155, 850},
+                  font        = CUSTOMIZE_TAB_FONT,
+                  color       = Colors.BLACK,
+                  text        = "Add to Order"
+                }
+        else
+            view.add_to_order = Text{
+                  position    = {155, 850},
+                  font        = CUSTOMIZE_TAB_FONT,
+                  color       = Colors.BLACK,
+                  text        = "Confirm Item"
+                }
+        end
         view.price = Text{
               position    = {800, 850},
               font        = CUSTOMIZE_TAB_FONT,
@@ -335,12 +359,12 @@ CustomizeView = Class(View, function(view, model, ...)
         view.ui:add(view.center_sep)
         view.ui:add(view.nutrition)
         view.ui:add(view.back_arrow)
+        view.ui:add(view.back_arrow_text)
         view.ui:add(view.back_arrow_selected)
         view.ui:add(view.add_to_order)
         view.ui:add(view.hor_sep)
         view.ui:add(view.selector)
         view.ui:add(view.add_to_order_selector)
-        fthis = model.current_item.pizzagroup
         view.ui:add(model.current_item.pizzagroup)
         model.current_item.pizzagroup:show_all()
         view.ui:add(view.slice_lines)
