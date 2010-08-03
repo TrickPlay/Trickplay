@@ -6,8 +6,7 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         STREET = 2,
         CITY = 3,
         STATE = 4,
-        ZIP = 5,
-        CONTINUE = 6
+        ZIP = 5
     }
     
     local MenuSize = 0
@@ -46,15 +45,6 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         end,
         [MenuItems.ZIP] = function(self)
             itemSelection(MenuItems.ZIP, "zip")
-        end,
-        [MenuItems.CONTINUE] = function(self)
-            print("continuing")
-            if NETWORKING then
-               Navigator:submit_address(OFFICE.address,OFFICE.city,OFFICE.state)
-               Navigator:goto_build_pizza()
-            end
-            self:get_model():set_active_component(Components.FOOD_SELECTION)
-            self:get_model():notify()
         end
     }
 

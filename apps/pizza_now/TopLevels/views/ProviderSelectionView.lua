@@ -24,8 +24,8 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         width = 1920
     }
     --Delivery Address
-    local addressBillingGroup = Group{position = {690,965}}
-    local streetBillingForm = Group()
+    local addressBillingGroup = Group{position = {100,990}}
+    local streetBillingForm = Group{position = {230, 0}}
     local streetBillingFormLeft = Image{
         position = {0, 0},
         src = "assets/credit_stuff/TextBoxLeft.png",
@@ -41,7 +41,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         src = "assets/credit_stuff/TextBoxRight.png",
     }
     streetBillingForm:add(streetBillingFormLeft, streetBillingFormCenter, streetBillingFormRight)
-    local cityBillingForm = Group{position = {0, 900-840}}
+    local cityBillingForm = Group{position = {850, 0}}
     local cityBillingFormLeft = Image{
         position = {0, 0},
         src = "assets/credit_stuff/TextBoxLeft.png",
@@ -56,28 +56,25 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         position = {1510-1140, 0},
         src = "assets/credit_stuff/TextBoxRight.png",
     }
-    local expirationMonthForm = Group{position = {1100, 1030}}
-    local expirationMonthFormLeft = Image{
+    cityBillingForm:add(cityBillingFormLeft, cityBillingFormCenter, cityBillingFormRight)
+    local stateBillingForm = Group{position = {1240, 0}}
+    local stateBillingFormLeft = Image{
         position = {0, 0},
         src = "assets/credit_stuff/TextBoxLeft.png",
     }
-    local expirationMonthFormCenter = Image{
+    local stateBillingFormCenter = Image{
         position = {10, 0},
         src = "assets/credit_stuff/TextBoxCenter.png",
         width = 1200-1140,
         tile = {true, false}
     }
-    local expirationMonthFormRight = Image{
+    local stateBillingFormRight = Image{
         position = {1210-1140, 0},
         src = "assets/credit_stuff/TextBoxRight.png",
     }
-    expirationMonthForm:add(expirationMonthFormLeft, expirationMonthFormCenter,
-        expirationMonthFormRight)
-
-    cityBillingForm:add(cityBillingFormLeft, cityBillingFormCenter, cityBillingFormRight)
-    local stateBillingForm = Clone{source = expirationMonthForm}
-    stateBillingForm.position = {1530-1140, 900-840}
-    local zipBillingForm = Group{position = {1620-1140, 900-840}}
+    stateBillingForm:add(stateBillingFormLeft, stateBillingFormCenter,
+        stateBillingFormRight)
+    local zipBillingForm = Group{position = {1330, 0}}
     local zipBillingFormLeft = Image{
         position = {0, 0},
         src = "assets/credit_stuff/TextBoxLeft.png",
@@ -93,6 +90,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         src = "assets/credit_stuff/TextBoxRight.png",
     }
     zipBillingForm:add(zipBillingFormLeft, zipBillingFormCenter, zipBillingFormRight)
+
     addressBillingGroup:add(streetBillingForm, cityBillingForm, stateBillingForm, zipBillingForm, expirationMonthForm)
 
     view.background_ui = Group{name="provider_background_ui", position={0,0}, opacity=255}
