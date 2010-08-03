@@ -142,7 +142,7 @@ Board.render = function (self, seconds)
 		creeppartnum = 1
 		
 		if (level-1 == #self.theme.wave) then
-			game:killGame()
+			game:killGame(1)
 			level = 1
 		end
 		

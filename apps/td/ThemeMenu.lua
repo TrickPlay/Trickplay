@@ -27,23 +27,17 @@ ThemeMenu.buttons.extra.r = function()
         local t = Themes[ names[ThemeMenu.y] ]
         local n = t.themeName
         
-        if not settings.currentLevel then
+        if not settings[n] then
                 
-                settings.currentLevel = 1
+                settings[n] = { currentLevel = 1 }
                 
         end
         
-        --settings[n] = {}
-        --settings.currentLevel = 1
-        
-        --print(settings.t)
-        --print(settings.t.currentLevel)
-        
-        createLevelMenu(settings.currentLevel)
+        createLevelMenu(settings[n].currentLevel)
 
 	MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
-	--LevelMenu.buttons:grab_key_focus()
+
 	LevelMenu.container.opacity = 255
 	LevelMenu.hl.opacity = 100
 	LevelMenu:update_cursor_position()
@@ -57,6 +51,7 @@ end
 ThemeMenu.buttons.extra.space = function()
 
 	ThemeMenu.container.opacity = 0
-	MainMenu.buttons:grab_key_focus()
+	ACTIVE_CONTAINER = MainMenu
+	keyboard_key_down = MainMenu.buttons.on_key_down
 
 end

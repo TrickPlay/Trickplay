@@ -1,8 +1,6 @@
 -- levels
 
 function createLevelMenu(l)
-
-        currentLevel = l
         
         local list =	{
                                 {
@@ -34,9 +32,9 @@ function createLevelMenu(l)
                 
                         local b = list[i][j]
                 
-                        if a < currentLevel then
+                        if a < l then
                                 list[i][j] = AssetLoader:getImage("levelWindowCompleted",{extra={level=b.extra.level}, x = b.x, y = b.y})
-                        elseif a == currentLevel then
+                        elseif a == l then
                                 list[i][j] = AssetLoader:getImage("levelWindow",{extra={level=b.extra.level}, x = b.x, y = b.y})
                         else
                                 list[i][j] = AssetLoader:getImage("levelWindowLocked",{extra={level=b.extra.level}, x = b.x, y = b.y})
@@ -72,7 +70,9 @@ function createLevelMenu(l)
         
                 LevelMenu.container.opacity = 0
                 MainMenu.container.opacity = 255
-                --MainMenu.buttons:grab_key_focus()
+                
+                ACTIVE_CONTAINER = MainMenu
+                keyboard_key_down = MainMenu.buttons.on_key_down
         
         end
         
@@ -82,7 +82,11 @@ function createLevelMenu(l)
         
                 round = tonumber( list[LevelMenu.y][LevelMenu.x].extra.level )
                 
-                LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
+                -- Global current level
+                currentLevel = round
+                
+                --LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
+                LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round".."1"..".lua")
         
                 game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
                 game:startGame()
