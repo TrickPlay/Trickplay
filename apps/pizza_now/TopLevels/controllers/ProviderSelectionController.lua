@@ -27,9 +27,12 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
         end,
         [ProviderGroups.PROVIDERS] = function(self)
             print("providers")
+            assert(self.child)
+            self.child:run_callback()
         end,
         [ProviderGroups.FOOTER] = function(self)
             print("go back?")
+            assert(self.child)
             self.child:run_callback()
         end
     }

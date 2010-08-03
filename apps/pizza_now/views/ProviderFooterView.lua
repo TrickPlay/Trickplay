@@ -14,7 +14,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             text = "Exit"
         },
         Text{
-            position={700, 975},
+            position={340, 1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             text="Enter Street",
@@ -22,7 +22,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 20
         },
         Text{
-            position={700,1030},
+            position={965,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
@@ -30,7 +30,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 15
         },
         Text{
-            position={1090,1030},
+            position={1350,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
@@ -38,18 +38,12 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 2
         },
         Text{
-            position={1180,1030},
+            position={1440,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
             text="ZIP",
             max_length = 5
-        },
-        Text{
-            position={1570, 1000},
-            font  = DEFAULT_FONT,
-            color = DEFAULT_COLOR,
-            text = "Continue"
         },
     }
     view.ui:add(unpack(view.items))
@@ -69,9 +63,11 @@ ProviderFooterView = Class(View, function(view, model, ...)
                 if i == controller:get_selected_index() then
                     print("\t",i,"opacity to 255")
                     item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                    item.color = Colors.RED
                 else
                     print("\t",i,"opacity to 0")
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
+                    item:animate{duration=CHANGE_VIEW_TIME, opacity=50}
+                    item.color = Colors.BLACK
                 end
             end
         else
