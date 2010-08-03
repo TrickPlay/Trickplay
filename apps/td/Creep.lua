@@ -119,7 +119,7 @@ function Creep:render(seconds)
 		self.found, self.path = astar.CalculatePath(game.board.nodes[ self.start ][ CREEP_START[2] ], game.board.nodes[ CREEP_END[1] ][ CREEP_END[2] ], MyNeighbourIterator, MyWalkableCheck, MyHeuristic)
 		--self.creepImage.position = { GTP(self.path[#self.path][2]), GTP(self.path[#self.path][1]) }
 		--self:pop()
-		print(self.found, self.path[1][1], self.path[1][2])
+		--print(self.found, self.path[1][1], self.path[1][2])
 	 
 	-- If the creep runs out of steps
 	elseif cx >= 0 and #self.path == 0 then
@@ -259,7 +259,11 @@ function Creep:bleed()
 	blood:round_rectangle(0,0,blood.w,blood.h,blood.w/2)
 	blood:fill() -- or c:stroke()
 	blood:finish_painting()
-	bloodGroup:add(blood)
+	if (#bloodGroup.children < 200) then
+		bloodGroup:add(blood)
+
+	end
+	print (#bloodGroup.children)
 	bloodGroup.opacity = 155
 end
 
@@ -269,22 +273,7 @@ function Creep:deathAnimation()
 	--print (self.face)
 	local frames = 11
 	local time = frames/20
-	
-	for i=1, frames do
-		if self.deathtimer.elapsed_seconds < ( 1/frames ) * i * time and self.deathtimer.elapsed_seconds > ( 1/frames) * (i-1) * time then
-			self.deathImage.x = - self.deathImage.w/frames * (i-1)
-			self.deathImage.opacity = 255 - i*(255/frames)
-		end
-	end
-
-	if self.deathtimer.elapsed_seconds > time then
-		self.deathtimer:start()
-		self.creepGroup.opacity = 0
-		self.creepGroup:clear()
-		return true
-	end
-	
---[[	if self.flying then
+	if self.flying or game.board.theme.themeName == "pacman" then
 		--self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.w/(self.frames*2),self.creepImage.h/2}
 		local xscale = self.creepGroup.scale[1]
 		local yscale = self.creepGroup.scale[2]
@@ -292,25 +281,27 @@ function Creep:deathAnimation()
 		if self.creepGroup.scale[1] <= 0.1 then
 			self.creepGroup.opacity = 0
 			self.creepGroup:clear()
+			self.creepImageGroup:remove(self.creepImage)
+
 			return true
+			
 		end
-	elseif self.face == 1 then
-		self.creepGroup.z_rotation = {180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/4,(self.creepImage.h/SP) * (SP/2)-25}
-		self.creepGroup.opacity = 255 - self.deathtimer.elapsed_seconds * 90
-		if self.creepGroup.z_rotation[1] >=90 then
-			self.creepGroup.opacity = 0
-			self.creepGroup:clear()
-			return true
-		end
-	elseif self.face == -1 then
-		self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.h/SP * SP/16,(self.creepImage.h/SP) * (SP/2)-25}
 		
-		if self.creepGroup.z_rotation[1] <= -90 then
+	else	
+		for i=1, frames do
+			if self.deathtimer.elapsed_seconds < ( 1/frames ) * i * time and self.deathtimer.elapsed_seconds > ( 1/frames) * (i-1) * time then
+				self.deathImage.x = - self.deathImage.w/frames * (i-1)
+				self.deathImage.opacity = 255 - i*(255/frames)
+			end
+		end
+	
+		if self.deathtimer.elapsed_seconds > time then
+			self.deathtimer:start()
 			self.creepGroup.opacity = 0
 			self.creepGroup:clear()
 			return true
 		end
-	end]]
+	end	
 	return false
 end
 

@@ -15,6 +15,7 @@ local obstacles = {
 
 				frames = 1
 		},
+
 }
 
 return obstacles

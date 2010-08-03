@@ -1,6 +1,6 @@
 wave = {
 			-- Wave 1
-			money = 40,
+			money = 5,
 			{
 				{
 					{name = "SlowCreep"},

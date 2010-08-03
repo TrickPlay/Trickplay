@@ -6,6 +6,9 @@
 function Menu:apply_color_change(color1, color2)
 	self.text_color1 = color1
 	self.text_color2 = color2
+	
+	local container = self.buttons
+	
 	local change = {container.extra.up, container.extra.down, container.extra.left, container.extra.right}
 	for i=1,4 do
 		local temp = change[i]

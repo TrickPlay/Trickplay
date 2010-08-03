@@ -3,118 +3,18 @@ dofile ("Obstacle.lua")
 dofile ("Player.lua")
 dofile ("aStar.lua")
 
-Board = {
-	render = function (self, seconds)
-		local s =self.timer.elapsed_seconds 
-		seconds_elapsed = seconds_elapsed + seconds
---		wave_counter = 0
-		CREEP_WAVE_LENGTH = self.theme.wave[level].size
-		if (seconds_elapsed >= WAIT_TIME) then
-			local sp = self.theme.wave[level][wavePartCounter].speed or 1 
-			if (s > sp) then 
-				self.timer:start()
-				if (creepnum <= CREEP_WAVE_LENGTH) then
-					local i = wavePartCounter
-					for j=1, #self.theme.wave[level][i] do
-						local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i][j].name)]]
-						CREEP_START[1] = math.random(3)+3
-						self.creepWave[creepnum] = Creep:new(wave, -SP*2, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name, self.theme.wave[level][i].buffs)
-						self.creepWave[creepnum].start = CREEP_START[1]
-						screen:add(self.creepWave[creepnum].creepGroup)
-						creepGold[creepnum] = 0
-						creepnum = creepnum + 1
-						creeppartnum = creeppartnum +1
-						if (creeppartnum == self.theme.wave[level][i].size+1) then
-							creeppartnum = 1
-							if (wavePartCounter < #self.theme.wave[level]) then
-								wavePartCounter = wavePartCounter + 1
-							end
-						end
-					end
-				end
-			end
-			
-			for k,v in pairs(self.creepWave) do
-				if (v.hp ~= 0 and v.dead == false) then
-					v:render(seconds)
-				elseif (v.dead == false) then
-					v.greenBar.width = 0
-					v.dead = true	
-					v.deathtimer:start()
-					v.creepImageGroup:remove(v.creepImage)
-					v.redBar.opacity = 0
-					v.greenBar.opacity = 0
-					v.creepImageGroup:add(v.deathImage)
-				
-					wave_counter = wave_counter + 1
-					if (creepGold[k] ==0) then
-						creepGold[k] = 1
-						self.player.gold = self.player.gold + v.bounty
-						goldtext.text = self.player.gold
-					end
-				end
-				if (v.dead) then
-					local done = v:deathAnimation()					
-				end
-			end
-			phasetext.text = "Wave Phase!"
-		else
-			countdowntimer.text = "Next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
-			phasetext.text = "Build Phase!"
---			bloodGroup:clear()
-			bloodGroup.opacity = 155 - s*(155/WAIT_TIME)
-			if (bloodGroup.opacity <=10) then
-				bloodGroup:clear()
-			end	
-		end
-		if (wave_counter == CREEP_WAVE_LENGTH) then
-			for k,v in pairs(self.creepWave) do
-				v.creepGroup.opacity = 0
-			end
-			for k,v in pairs(self.creepWave) do
-				screen:remove(self.creepWave[k].creepGroup)
---				screen:remove(self.creepWave[k].creepImageGroup)
-				table.remove(self.creepWave,k)
-			end
-			wave_counter = 0
-			creepnum = 1
-			seconds_elapsed = 0
-			level = level + 1
-			if (level-1 == #self.theme.wave) then
-				game:killGame()
-			end
-			wavePartCounter = 1
-			creeppartnum = 1
-		end
-		
-		for i = 1, #self.squaresWithTowers do
-			self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
-		end
-		for i = 1, #self.obstacleImages do
-			self.obstacleImages[i]:animate()
-		end
-		if self.circle then
-			circleRender(self.circle, seconds)
-		end
-	end
-}
+Board = {}
 
+-- Create a new board
 function Board:new(args)
+
 	local w = BW
 	local h = BH
+
+	-- Initialize squares
 	local squareGrid = {}
-	local creepWave = {}
-	local squaresWithTowers = {}
-	local theme = args.theme
-	local timer = 	Stopwatch()
-	local obstacleImages = {}
-	local player = Player:new {
-		name = "Player 1",
-		gold = args.gold,
-		lives = 30
-	}
 	for i = 1, h do
-      squareGrid[i] = {}
+	squareGrid[i] = {}
 	end
 	for i = 1, h do
 		for j = 1, w do
@@ -127,26 +27,148 @@ function Board:new(args)
 			if (i >= 3 and i <= 7 and (j <=1 or j > w-1)) then
 				squareGrid[i][j].square[3] = WALKABLE
 			end
-	   end
+		end
 	end
+	
+	-- Initialize obstacles
+	local theme = args.theme	
+	local obstacleImages = {}
 	for i =1, #theme.obstacles[round] do
-		print(theme.obstacles[1][i][1], theme.obstacles[1][i][2])
 		squareGrid[theme.obstacles[round][i][1]][theme.obstacles[round][i][2]].square[3] = FULL
 	end
+	
 	local object = {
 		w = w,
 		h = h,
-		player = player,
+		player = Player:new { name = "Player 1", gold = args.gold, lives = 30, color = "00FF32" },
 		squareGrid = squareGrid,
-		squaresWithTowers = squaresWithTowers,
+		squaresWithTowers = {},
 		obstacleImages = obstacleImages,
 		theme = theme,
-		timer = timer,
-		creepWave = creepWave,
-   }
-   setmetatable(object, self)
-   self.__index = self
-   return object
+		timer = Stopwatch(),
+		creepWave = {},
+	}
+	setmetatable(object, self)
+	self.__index = self
+	return object
+end
+
+Board.render = function (self, seconds)
+	local s =self.timer.elapsed_seconds 
+	seconds_elapsed = seconds_elapsed + seconds
+	--wave_counter = 0
+	CREEP_WAVE_LENGTH = self.theme.wave[level].size
+	if (seconds_elapsed >= WAIT_TIME) then
+		local sp = self.theme.wave[level][wavePartCounter].speed or 1 
+		if (s > sp) then 
+			self.timer:start()
+			if (creepnum <= CREEP_WAVE_LENGTH) then
+				local i = wavePartCounter
+				for j=1, #self.theme.wave[level][i] do
+					local wave = self.theme.creeps[self.theme.waveTable[(self.theme.wave[level][i][j].name)]]
+					CREEP_START[1] = math.random(3)+3
+					self.creepWave[creepnum] = Creep:new(wave, -SP*2, GTP(CREEP_START[1]) , self.theme.themeName .. wave.name, self.theme.wave[level][i].buffs)
+					self.creepWave[creepnum].start = CREEP_START[1]
+					screen:add(self.creepWave[creepnum].creepGroup)
+					creepGold[creepnum] = 0
+					creepnum = creepnum + 1
+					creeppartnum = creeppartnum +1
+					if (creeppartnum == self.theme.wave[level][i].size+1) then
+						creeppartnum = 1
+						if (wavePartCounter < #self.theme.wave[level]) then
+							wavePartCounter = wavePartCounter + 1
+						end
+					end
+				end
+			end
+		end
+		
+		for k,v in pairs(self.creepWave) do
+			if (v.hp ~= 0 and v.dead == false) then
+				v:render(seconds)
+			elseif (v.dead == false) then
+				v.greenBar.width = 0
+				v.dead = true	
+				v.deathtimer:start()
+				v.redBar.opacity = 0
+				v.greenBar.opacity = 0
+				if (not v.flying and game.board.theme.themeName ~= "pacman") then
+					v.creepImageGroup:remove(v.creepImage)
+					v.creepImageGroup:add(v.deathImage)
+				end				
+				wave_counter = wave_counter + 1
+				if (creepGold[k] ==0) then
+					creepGold[k] = 1
+					
+					self.player.gold = self.player.gold + v.bounty
+					self:updateGold(self.player)
+					
+					if self.player2 then 
+						self.player2.gold = self.player2.gold + v.bounty 
+						self:updateGold(self.player2)
+					end
+					
+				end
+			end
+			if (v.dead) then
+				local done = v:deathAnimation()					
+			end
+		end
+		phasetext.text = "Wave Phase!"
+	else
+		countdowntimer.text = "Next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
+		phasetext.text = "Build Phase!"
+		--bloodGroup:clear()
+		bloodGroup.opacity = 155 - s*(155/WAIT_TIME)
+		if (bloodGroup.opacity <=10) then
+			bloodGroup:clear()
+		end	
+	end
+	if (wave_counter == CREEP_WAVE_LENGTH) then
+		for k,v in pairs(self.creepWave) do
+			v.creepGroup.opacity = 0
+		end
+		for k,v in pairs(self.creepWave) do
+			screen:remove(self.creepWave[k].creepGroup)
+			--screen:remove(self.creepWave[k].creepImageGroup)
+			table.remove(self.creepWave,k)
+		end
+		wave_counter = 0
+		creepnum = 1
+		seconds_elapsed = 0
+		level = level + 1
+		
+		wavePartCounter = 1
+		creeppartnum = 1
+		
+		if (level-1 == #self.theme.wave) then
+			game:killGame()
+			level = 1
+		end
+		
+	end
+	
+	for i = 1, #self.squaresWithTowers do
+		self.squaresWithTowers[i].tower:render(seconds, self.creepWave)
+	end
+	
+	for i = 1, #self.obstacleImages do
+		self.obstacleImages[i]:animate()
+	end
+	
+	if self.player.circle then
+		circleRender(self.player.circle, seconds)
+	end
+	
+	if self.player2 then
+		if self.player2.circle then
+			circleRender(self.player2.circle, seconds)
+		end
+	end
+	
+	--print("render!")
+	self.player:render(seconds)
+	if self.player2 then self.player2:render(seconds) end
 end
 
 function Board:init()
@@ -159,6 +181,18 @@ function Board:init()
 	end
 end
 
+function Board:addPlayer(args)
+
+	if not self.player2 then
+		self.player2 = Player:new { name = args.name, gold = args.gold, lives = args.lives, color = args.color }
+	else
+		print( "There is already a player 2" )
+	end
+	
+	return self.player2
+
+end
+
 function Board:createBoard()
 
 	local groups = {}
@@ -168,7 +202,7 @@ function Board:createBoard()
 		local g = groups[i]
 		local s = self.squareGrid[i]
 		for j = 1, self.w do
-				g[j] = Group{w=SP, h=SP}--, name=self.squareGrid[i][j].square[3]}
+		g[j] = Group{w=SP, h=SP} --, name=self.squareGrid[i][j].square[3]}
 	   end
 	end
 
@@ -195,89 +229,114 @@ function Board:createBoard()
 	--Rectangle{h=SP, w=SP, color="A52A2A"}
 	self.nodes = self:createNodes()
 
-		print("Board created")
+	--print("Board created")
 
 	BoardMenu = Menu.create(b, groups, hl)
 	BoardMenu:create_key_functions()
 	BoardMenu:button_directions()
 	BoardMenu:create_buttons(0, "Sans 34px")
 	BoardMenu:apply_color_change("FFFFFF", "000000")
-	BoardMenu.buttons:grab_key_focus()
+	--BoardMenu.buttons:grab_key_focus()
 	BoardMenu:update_cursor_position()
 	BoardMenu.hl.opacity = 255
 	
 	BoardMenu.container.opacity=255
 	
-	BoardMenu.buttons.extra.r = function()
+	BoardMenu.buttons.extra.r = function(args)
 	
-		playertext.text = self.player.name
-		goldtext.text = self.player.gold
-	
+		if not args then args = {} end
+		
+		local x = args.x or BoardMenu.x
+		local y = args.y or BoardMenu.y
+		
 		-- Populate the circle menu with buttons
 		local list = {}
 		
 		-- Towers		
 		local towers = self.theme.towers
-		--local icons = {"normalRobotBuy","wall","slowTowerIcon"}
-		--for k,v in pairs(towers) do print(k,v) end
-		--assert(nil)
-		
 		
 		local menuType
 		
-		if (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == EMPTY) then
+		local player = args.player or self.player
+		
+		-- To place the tower in the proper place
+		player.position = {y, x}
+		
+		-- Make sure the players aren't building on the same square
+		if self.player and self.player2 then
+			
+			--print("Both players exist")
+			
+			if self.player.position and self.player2.position then
+				
+				--print("Both players have positions")
+				
+				if self.player.position[1] == self.player2.position[1] and self.player.position[2] == self.player2.position[2] then
+					
+					player.position = nil
+					return
+				end
+				
+			end
+			
+		end
+		
+		if (self.squareGrid[y][x].square[3] == EMPTY) then
 			menuType = "Empty"
 			
 			-- Make sure it's possible to build here without blocking the path
 			local board = game.board:getPathData()
-			board[BoardMenu.y][BoardMenu.x] = "X"
+			board[y][x] = "X"
 			
 			if pathExists(board,{4,1},{4,BW}) then
 				
 				for i,v in pairs(towers) do
 				
 					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { } )
+					list[#list].extra.t = towers[i]
 					list[#list].extra.f = function()
-						if (self.player.gold - towers[i].cost >=0) then
-							self:buildTower(towers[i])
+						if (player.gold - towers[i].cost >=0) then
+							self:buildTower(towers[i], player)
 							self:findPaths()
-							--buildTowerIfEmpty( self.theme.themeName..towers[i].name )
+							return true
 						end
 					end
 				end
 			end
-		elseif (self.squareGrid[BoardMenu.y][BoardMenu.x].square[3] == FULL and self.squareGrid[BoardMenu.y][BoardMenu.x].hasTower == true) then
+		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner == player) then
 			menuType = "Full"
-		
+			
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
 			list[#list].extra.f = function()
-				self:removeTower()
+				self:removeTower(player)
 				self:findPaths()
+				return true
 			end
 			
-			local tower = self.squareGrid[BoardMenu.y][BoardMenu.x].tower
+			local tower = self.squareGrid[y][x].tower
 			if tower.level < tower.levels then 
-
+				
 				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
 				list[#list].extra.f = function()
-					self:upgradeTower()
+					return self:upgradeTower(player)
 				end
 				
 			end
-		
+			
 		end
 		
 		if #list > 0 then
-		
+			
 			list[#list+1] = AssetLoader:getImage( "backIcon", { } )
 			list[#list].extra.f = function()
+				return true
 			end
 			
 			-- Put this list within a table... for menu purposes
 			local params = {list}
 				
 			-- Create the circular menu
-			self.circle = createCircleMenu( { GTP(BoardMenu.y)+SP/2, GTP(BoardMenu.x)+SP/2 }, 150, params, menuType )
+			player.circle = createCircleMenu( { GTP(y)+SP/2, GTP(x)+SP/2 }, 150, params, menuType, player)
 		end
 		
 	end
@@ -293,13 +352,7 @@ function Board:createBoard()
 		end
 	end	
 	BoardMenu.buttons.extra.space = function()
-		--[[if not self.zoom then
-			self:zoomIn()
-			self.zoom = true
-		else
-			self:zoomOut()
-			self.zoom = nil
-		end]]
+
 		seconds_elapsed = WAIT_TIME
 		bloodGroup:clear()
 	end
@@ -313,8 +366,12 @@ function Board:createBoard()
 		assert(self.creepWave[i])
 	end
 	
+	ACTIVE_CONTAINER = BoardMenu
+	keyboard_key_down = BoardMenu.buttons.on_key_down
 
 end
+
+
 function Board:findPaths()
 
 	for i = 1, #self.creepWave do
@@ -331,40 +388,39 @@ function Board:findPaths()
 
 end
 
-function Board:zoomIn()
-	print("in")
-	screen:animate { duration = 500, scale={math.sqrt(2),2}, position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}}
+function Board:updateGold(player)
 
---	screen.scale={2,2}
---	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
+	if player == self.player then
+		goldtext.text = player.gold
+	else
+		game.gold2.text = player.gold
+	end
+
 end
 
-function Board:zoomOut()
-	print("out")
-	screen:animate { duration = 500, scale = {0.5,0.5}, position = {0,0}}
-	screen.position = {0, 0}
-	screen.scale={.5,.5}
-end
-
-function Board:buildTower(selection)
+function Board:buildTower(selection, player)
 	
-	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
+	if self.squareGrid[ player.position[1] ][ player.position[2] ].square[3] ~= EMPTY then return end
+	
+	local current = self.squareGrid[ player.position[1] ][ player.position[2] ]
 
-	if self.player.gold - selection.cost >= 0 then
+	if player.gold - selection.cost >= 0 then
 	
 		-- Build a new tower if the player has enough money
-		current.tower = Tower:new(selection, self.theme.themeName, current)
-	
+		current.tower = Tower:new(selection, self.theme.themeName, current, player)
+		
 		current.hasTower = true
 		table.insert(self.squaresWithTowers, current)
 		current.square[3] = FULL
 		current:render()
-		self.player.gold = self.player.gold - current.tower.cost
-		goldtext.text = self.player.gold
+		player.gold = player.gold - current.tower.cost
+		
+		self:updateGold(player)
+		
 		current.tower.timer:start()
 		local n = current.square.children
 		local m = current.square.cut
-
+		
 		if n.north then m.north = n.north n.north.children.south = nil end
 		if n.south then m.south = n.south n.south.children.north = nil end
 		if n.east then m.east = n.east n.east.children.west = nil end
@@ -372,32 +428,37 @@ function Board:buildTower(selection)
 	end	
 end
 
-function Board:removeTower()
+function Board:removeTower(player)
 
 	-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
-	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
+	local current = self.squareGrid[ player.position[1] ][ player.position[2] ]
 	
 	current.tower:destroy()
 	current.square[3] = EMPTY	
-	self.player.gold = self.player.gold + current.tower.cost * 0.5
-	goldtext.text = self.player.gold
+	player.gold = player.gold + current.tower.cost * 0.5
+	
+	self:updateGold(player)
+	
 	current.hasTower = false
+
 	
 	local m = current.square.cut
 	
 	if m.north then m.north.children.south = current.square m.north = nil end
 	if m.south then m.south.children.north = current.square m.south = nil end
 	if m.east then m.east.children.west = current.square m.east = nil end
-	if m.west then m.west.children.east = current.square m.west = nil end	
+	if m.west then m.west.children.east = current.square m.west = nil end
+	
+	return true
 
 end
 
-function Board:upgradeTower()
+function Board:upgradeTower(player)
 
 	-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
-	local current = self.squareGrid[BoardMenu.y][BoardMenu.x]
+	local current = self.squareGrid[ player.position[1] ][ player.position[2] ]
 	
-	current.tower:upgrade()
+	return current.tower:upgrade()
 
 end
 
@@ -522,3 +583,28 @@ end
 function MyHeuristic(node_a, node_b)
 	return ( math.abs(node_a[1]-node_b[1]) + math.abs(node_a[2]-node_b[2]) )
 end
+
+
+
+--[[function Board:zoomIn()
+	print("in")
+	screen:animate { duration = 500, scale={math.sqrt(2),2}, position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}}
+
+--	screen.scale={2,2}
+--	screen.position = {-GTP(BoardMenu.x-4)*2,-GTP(BoardMenu.y-2)*2}
+end
+
+function Board:zoomOut()
+	print("out")
+	screen:animate { duration = 500, scale = {0.5,0.5}, position = {0,0}}
+	screen.position = {0, 0}
+	screen.scale={.5,.5}
+end]]
+
+--[[if not self.zoom then
+	self:zoomIn()
+	self.zoom = true
+else
+	self:zoomOut()
+	self.zoom = nil
+end]]
