@@ -7,7 +7,7 @@ FoodFooterController = Class(Controller, function(self, view, ...)
         MenuSize = #view.items
         MenuItemCallbacks[1] = function(self)
             print("Backing up")
-            self:get_model():set_active_component(Components.PROVIDER_SELECTOR)
+            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
             self:get_model():notify()
         end
         for i =  2,MenuSize-1 do 
