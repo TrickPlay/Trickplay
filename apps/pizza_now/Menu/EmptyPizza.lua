@@ -107,7 +107,15 @@ All_Options = {
 EmptyPizza = Class(
    function(self)
       --self._base.init(self)
-      self.Name = "Build Your Own Pizza"
+      self.Name = "Pizza"
+      self.CheckOutDesc = function()
+          return "One "..All_Options.Size_r[self.Tabs[1].Options[4].Size]
+                 .." "..All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]
+                 .." Pizza with:\n\t"
+                 ..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "
+                 ..All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "
+                 ..All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce\n"
+      end
       self.Price = "$16.50"
       self.Tabs = {}
       self.Tabs[1] = {
@@ -220,11 +228,15 @@ EmptyPizza = Class(
          position = {0, 0},
          src = "assets/Sauce_Tomato.png"
       }
+      local crust = Image{
+         position = {0, 0},
+         src = "assets/Crust_HandTossed.png"
+      }
 
          self.pizzagroup = Group{position = {960,500}}
 
 
-         self.pizzagroup:add(pizza)
+         self.pizzagroup:add(crust)
          self.pizzagroup:add(sauce)
          self.pizzagroup:add(cheese)
          print("\n\n\n\nhererere")

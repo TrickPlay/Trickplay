@@ -6,6 +6,7 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
     MenuItemCallBacks = {
         function(self) --Build Your Own Pizza
             model.current_item = EmptyPizza()
+            model.current_item_is_in_cart = false
             self:get_model():set_active_component(Components.CUSTOMIZE)
             self:get_model():get_active_controller():init_shit()
             self:get_model():get_controller(Components.TAB):init_shit()
@@ -30,6 +31,7 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
             end
             self:get_model().current_item = EmptyPizza()
             self:get_model().current_item.Name = "Pizza"
+            self:get_model().current_item_is_in_cart = false
             self:get_model():set_active_component(Components.CUSTOMIZE)
             self:get_model():get_active_controller():init_shit()
             self:get_model():get_controller(Components.TAB):init_shit()
