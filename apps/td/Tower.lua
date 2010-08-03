@@ -1,7 +1,8 @@
 Tower = {}
 
 function Tower:new(args, prefix, square, player)
-	
+
+
 	local object = {
 		-- Tower defaults
 		table = args,
@@ -42,11 +43,16 @@ function Tower:new(args, prefix, square, player)
 		towerImage = towerImage,
 		towerImageGroup = towerImageGroup,
 		fireImage = fireImage,
-		
 		-- Stopwatch
 		timer = Stopwatch(),
    }
-   
+   	local rangeCircle = Canvas{color="00FF00", x=0, y=0, width=1920, height=1080, z = 0, opacity = 0}
+		rangeCircle:begin_painting()
+		rangeCircle:set_source_color("00FF00")
+		rangeCircle:arc(object.x+SP/2,object.y+SP/2,object.range,0,360)
+		rangeCircle:fill() -- or c:stroke()
+		rangeCircle:finish_painting()
+		object.rangeCircle = rangeCircle
    	if args.upgrades then
                 object.levels = #args.upgrades
                 object.upgradeCost = args.upgrades[1].cost
@@ -84,7 +90,7 @@ function Tower:new(args, prefix, square, player)
 	object.fireImage = AssetLoader:getImage(prefix..args.name.."Fire",{})
 	
 	object.towerImageGroup:add(object.towerImage)
-	screen:add(object.towerImageGroup)
+	screen:add(object.towerImageGroup, rangeCircle)
         
         -- Add a colored rectangle behind the tower
         if game.board.player2 then
@@ -107,6 +113,7 @@ function Tower:render(seconds, creeps)
 
 	local s = self.timer.elapsed_seconds
 	
+	self.rangeCircle.opacity = 0
 	-- Render bullets
 	if self.bgroup then self.bgroup:foreach_child( function(child) child.extra.parent:render(seconds)  end ) end
 	
@@ -162,6 +169,12 @@ function Tower:upgrade()
 	
 		self.damage = r.damage
 		self.range = r.range
+		self.rangeCircle:clear_surface()
+		self.rangeCircle:begin_painting()
+		self.rangeCircle:set_source_color("00FF00")
+		self.rangeCircle:arc(self.x+SP/2,self.y+SP/2,self.range,0,360)
+		self.rangeCircle:fill() -- or c:stroke()
+		self.rangeCircle:finish_painting()
 		self.cooldown = r.cooldown
 		self.slowammount = r.slowammount
 		self.splash = r.splash or self.splash

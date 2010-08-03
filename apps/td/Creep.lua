@@ -259,11 +259,9 @@ function Creep:bleed()
 	blood:round_rectangle(0,0,blood.w,blood.h,blood.w/2)
 	blood:fill() -- or c:stroke()
 	blood:finish_painting()
-	if (#bloodGroup.children < 200) then
+	if (#bloodGroup.children < 400) then
 		bloodGroup:add(blood)
-
 	end
-	print (#bloodGroup.children)
 	bloodGroup.opacity = 155
 end
 
