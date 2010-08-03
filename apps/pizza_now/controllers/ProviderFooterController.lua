@@ -49,6 +49,10 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         end,
         [MenuItems.CONTINUE] = function(self)
             print("continuing")
+            if NETWORKING then
+               Navigator:submit_address(OFFICE.address,OFFICE.city,OFFICE.state)
+               Navigator:goto_build_pizza()
+            end
             self:get_model():set_active_component(Components.FOOD_SELECTION)
             self:get_model():notify()
         end

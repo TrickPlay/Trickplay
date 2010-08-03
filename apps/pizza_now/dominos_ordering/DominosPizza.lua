@@ -81,3 +81,19 @@ PEPPERONI_PIZZA = DominosPizza(
       }
    }
 )
+
+-- invalid pizza, > 10 toppings
+local massive_toppings = {}
+for _,v in pairs(Toppings) do
+   massive_toppings[v]={
+      coverage=Coverage.EXTRA,
+      placement=Placement.WHOLE
+   }
+end
+MASSIVE_PIZZA = DominosPizza(
+   DEFAULT_CRUST,
+   DEFAULT_SIZE,
+   DEFAULT_CHEESE_CUSTOMIZATION,
+   DEFAULT_SAUCE_CUSTOMIZATION,
+   massive_toppings
+)
