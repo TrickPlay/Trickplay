@@ -75,13 +75,14 @@ src="assets/OrderBarBase.png"
                     item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
                 end
             end
-        elseif comp == Components.CUSTOMIZE or comp == Components.TAB or
+    --[[    elseif comp == Components.CUSTOMIZE or comp == Components.TAB or
                comp == Components.CUSTOMIZE_ITEM then
             print("Graying FoodFooterView UI")
             controller:reset_index()
             view.ui:raise_to_top()
             view.ui:complete_animation()
             view.items[controller:get_selected_index()].opacity = 100
+--]]
         else
             print("Hiding FoodFooterView UI")
             controller:reset_index()

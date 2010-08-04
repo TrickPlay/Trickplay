@@ -5,13 +5,16 @@ CUSTOMIZE_OPT_PLACEMENT = 3
 
 CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
+
+
+
      
     view.ui=Group{name="Customize ui", position={0,0}, opacity=255}
     view.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
-    view.bg2 = Clone{source=view.bg}
-    view.bg2.position = {960,0}
+    --view.bg2 = Clone{source=view.bg}
+    --view.bg2.position = {960,0}
     view.ui:add(bg)
-    view.ui:add(bg2)
+   -- view.ui:add(bg2)
         screen:add(view.ui)
 
     --view.item = food_item
@@ -37,12 +40,13 @@ CustomizeView = Class(View, function(view, model, ...)
         --gut the UI
         view.ui:clear()
         view.ui:add(view.bg)
-        view.ui:add(view.bg2)
-
+        --view.ui:add(view.bg2)
+--[[
         view.arrow = Image{                
                 position = {300, 0},
                 src      = "assets/SubmenuArrow.png"
             }
+--]]
         view.food_name = Text {
               position = {140, 20},
               font     = CUSTOMIZE_NAME_FONT,
@@ -57,6 +61,7 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
+--[[
         view.center_sep    = Image {
                 position = {960, 0},
                 width    = 20,
@@ -64,14 +69,16 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
+--]]
         view.nutrition   = Image {
                 position = {960, 0},
                 src      = "assets/NutritionMockup.png"
             }
         view.slice_lines = Image {
-                position = {960, 500},
+                position = {960, 480},
                 src      = "assets/PizzaSliceLines_12.png"
             }
+--[[
         if self:get_model().current_item_is_in_cart == false then
             view.back_arrow_text = Text {
                   position = {5, 750},
@@ -111,12 +118,14 @@ CustomizeView = Class(View, function(view, model, ...)
                   text        = "Confirm Item"
                 }
         end
+--]]
         view.price = Text{
-              position    = {800, 850},
+              position    = {1400, 100},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
               text        = model.current_item.Price
             }
+--[[
         view.hor_sep =  Image {
                 position = {150, 840},
                 height   = 960-150,
@@ -125,14 +134,17 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
+--]]
         view.selector = Image {
                 position  = {150, 0},
-                src       = "assets/SubmenuHighlight.png"
+                src       = "assets/TabFocus.png"
             }
+--[[
         view.add_to_order_selector = Image {
                 position  = {150, 845},
                 src       = "assets/EditOrderHighlight.png"
             }
+--]]
         view.ui.opacity = 255
 
         view.accordian_group = {}
@@ -166,7 +178,7 @@ CustomizeView = Class(View, function(view, model, ...)
             view.accordian_group[tab_index] = {}
             view.accordian_group_items[tab_index] = {}
             view.sub_group[tab_index] = Group{name="Tab "..tab_index.." sub-group",
-                                                    position={500,80}, opacity=0}
+                                                    position={500,100}, opacity=0}
             if tab.Options ~= nil then
                 --view.accordian_group[tab_index][opt_index] = {}
                 --view.accordian_group_items[tab_index][opt_index] = {}
@@ -322,7 +334,7 @@ CustomizeView = Class(View, function(view, model, ...)
             view.vert_lines[#view.menu_items+1] = Image {
                 position = {300, 120*(#view.menu_items+1-1)},
                 width    = 20,
-                height   = 840-120*(#view.menu_items+1-1),
+                height   = 960-120*(#view.menu_items+1-1),
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
@@ -352,30 +364,54 @@ CustomizeView = Class(View, function(view, model, ...)
 
         --bg:lower_to_bottom()
         view.ui:lower(view.bg)
-        view.ui:add(view.arrow)
+--        view.ui:add(view.arrow)
         view.ui:add(view.price)
         view.ui:add(view.food_name)
         view.ui:add(view.vert_sep)
-        view.ui:add(view.center_sep)
+       -- view.ui:add(view.center_sep)
         view.ui:add(view.nutrition)
-        view.ui:add(view.back_arrow)
-        view.ui:add(view.back_arrow_text)
-        view.ui:add(view.back_arrow_selected)
-        view.ui:add(view.add_to_order)
-        view.ui:add(view.hor_sep)
+        --view.ui:add(view.back_arrow)
+        --view.ui:add(view.back_arrow_text)
+        --view.ui:add(view.back_arrow_selected)
+        --view.ui:add(view.add_to_order)
+        --view.ui:add(view.hor_sep)
         view.ui:add(view.selector)
-        view.ui:add(view.add_to_order_selector)
+        --view.ui:add(view.add_to_order_selector)
         view.ui:add(model.current_item.pizzagroup)
         model.current_item.pizzagroup:show_all()
         view.ui:add(view.slice_lines)
+        view.vert_sep:raise_to_top()
+        for i=1,#view.menu_items do
+            view.menu_items[i]:raise_to_top()
+            view.hor_lines[i]:raise_to_top()
+        end
     end
     --view:Create_Menu_Items()
 ----------------------------------------------------------------------------
 
 
     function view:initialize()
-        view:set_controller(CustomizeController(self))
+local foot_view = CustomizeFooterView(model,view)
+foot_view:initialize()
+
+        view:set_controller(CustomizeController(self,foot_view))
         view.initialize = nil
+------------------------
+-- Child view/controllers
+------------------------
+local tab_view = TabView(model,view)
+tab_view:initialize()
+view:get_controller():set_child_controller(tab_view:get_controller())
+local acc_view = AccordianView(model,view)
+acc_view:initialize()
+local windmill_view = WindMillView(model)
+windmill_view:initialize()
+
+        view:get_controller():set_children({self:get_controller(),
+                                        tab_view:get_controller(),
+                                       foot_view:get_controller(),
+                                   windmill_view:get_controller(),
+                                        acc_view:get_controller()})
     end
 
     function view:enter_sub_group()
@@ -394,6 +430,7 @@ CustomizeView = Class(View, function(view, model, ...)
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeView UI")
             view.ui.opacity = 255
+--[[
             if controller.on_back_arrow then
                 view.back_arrow_selected.opacity = 255
                 view.selector.opacity = 0
@@ -404,13 +441,12 @@ CustomizeView = Class(View, function(view, model, ...)
                 view.back_arrow_selected.opacity = 0
                 view.selector.opacity = 0
             else
-                view.selector.opacity = 255
-                view.back_arrow_selected.opacity = 0
-                view.add_to_order_selector.opacity = 0
+--]]
+                --view.back_arrow_selected.opacity = 0
+                --view.add_to_order_selector.opacity = 0
                 for i,item in ipairs(view.menu_items) do
                     if i == controller:get_selected_index() then
                         --print("\t",i,"opacity to 255")
-                        view.arrow.y = (i-1)*120
                         --item:animate{duration=100, opacity = 255}
                         --item.opacity = 255
                         view.sub_group[i]:animate{duration = 100, opacity = 255}
@@ -423,8 +459,14 @@ CustomizeView = Class(View, function(view, model, ...)
                             view.up_arrow.opacity = 0
                             view.down_arrow.opacity = 0
                         end
-                        view.vert_lines[i].opacity = 0
-                        view.selector.y = 120*(i-1)
+                        if controller.curr_comp == view:get_controller().ChildComponents.TAB_BAR then
+                            --view.arrow.y = (i-1)*120
+                            view.selector.opacity = 255
+                            view.vert_lines[i].opacity = 0
+                            view.selector.y = 120*(i-1)
+                        else
+                            view.selector.opacity = 0
+                        end
                     else
                         --print("\t",i,"opacity to 0")
                         --item:animate{duration=100, opacity = 100}
@@ -432,7 +474,7 @@ CustomizeView = Class(View, function(view, model, ...)
                         view.vert_lines[i].opacity = 255
                     end
                 end
-            end
+            --end
         elseif comp == Components.TAB or comp == Components.CUSTOMIZE_ITEM or
                comp == Components.ACCORDIAN then
             print("Greying CustomizeView UI")
