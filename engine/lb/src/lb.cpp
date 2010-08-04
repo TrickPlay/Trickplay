@@ -5,9 +5,38 @@
 
 //.........................................................................
 
-static const char * TP_WEAK_REFS_TABLE = "__TP_WEAK_REFS__";
+void lb_get_extras_table( lua_State * L , bool create );
 
-static const char * TP_EXTRA_TABLE = "__TP_EXTRA__";
+void lb_get_weak_refs_table( lua_State * L , bool create )
+{
+    static char TP_WEAK_REFS_TABLE = 0; // We only use the address
+
+    LSG;
+
+    lua_pushlightuserdata(L,&TP_WEAK_REFS_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1) && create)
+    {
+        lua_pop(L,1);
+        lua_createtable(L,50,0);
+
+        lua_newtable(L);
+        lua_pushstring(L,"__mode");
+        lua_pushstring(L,"v");
+        lua_rawset(L,-3);
+
+        lua_setmetatable(L,-2);
+
+        lua_pushlightuserdata(L,&TP_WEAK_REFS_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    LSG_CHECK(1);
+}
+
+
 
 //.........................................................................
 // Like luaL_ref - takes the item at the top of the stack and adds
@@ -19,36 +48,7 @@ int lb_weak_ref( lua_State * L )
 
     LSG;
 
-    lua_pushstring( L , TP_WEAK_REFS_TABLE );
-    lua_rawget( L , LUA_REGISTRYINDEX );
-
-    // The weak refs table does not yet exist, so we create it
-
-    if ( lua_isnil( L , -1 ) )
-    {
-        lua_pop( L , 1 );
-
-        // Create the table itself
-
-        lua_newtable( L );
-
-        // Create a metatable for it and set the mode
-
-        lua_newtable( L );
-        lua_pushstring( L , "__mode" );
-        lua_pushstring( L , "v" );
-        lua_rawset( L , -3 );
-
-        // Set its metatable
-
-        lua_setmetatable( L , -2 );
-
-        // Put it in the registry
-
-        lua_pushstring( L , TP_WEAK_REFS_TABLE );
-        lua_pushvalue( L , -2 );
-        lua_rawset( L , LUA_REGISTRYINDEX );
-    }
+    lb_get_weak_refs_table( L , true );
 
     // At this point, we should have the thing to ref
     // at -2 and the weak refs table at -1
@@ -87,8 +87,7 @@ void lb_weak_unref( lua_State * L , int ref )
 
     LSG;
 
-    lua_pushstring( L , TP_WEAK_REFS_TABLE );
-    lua_rawget( L , LUA_REGISTRYINDEX );
+    lb_get_weak_refs_table( L , false );
 
     g_assert( ! lua_isnil( L , -1 ) );
 
@@ -115,8 +114,7 @@ void lb_weak_deref( lua_State * L , int ref )
     }
     else
     {
-        lua_pushstring( L , TP_WEAK_REFS_TABLE );
-        lua_rawget( L , LUA_REGISTRYINDEX );
+        lb_get_weak_refs_table( L , false );
 
         g_assert( ! lua_isnil( L , -1 ) );
 
@@ -185,21 +183,20 @@ int lb_index(lua_State*L)
     }
     else
     {
-        lua_pop(L,1);                           // pop nil
-        lua_pushstring(L,TP_EXTRA_TABLE);       // get the extra table
-        lua_rawget(L,LUA_REGISTRYINDEX);
+        lua_pop(L,1);                               // pop nil
+        lb_get_extras_table( L , false );
 
         if (!lua_isnil(L,-1))
         {
-            lua_pushvalue(L,1);                 // Get the table for this usedata
+            lua_pushvalue(L,1);                     // Get the table for this usedata
             lua_rawget(L,-2);
-            lua_remove(L,-2);                   // Drop the extra table
+            lua_remove(L,-2);                       // Drop the extra table
 
             if (!lua_isnil(L,-1))
             {
-                lua_pushvalue(L,2);             // Push the key
-                lua_gettable(L,-2);             // Get the value for the key
-                lua_remove(L,-2);               // Drop the table - leaving the value
+                lua_pushvalue(L,2);                 // Push the key
+                lua_gettable(L,-2);                 // Get the value for the key
+                lua_remove(L,-2);                   // Drop the table - leaving the value
             }
         }
     }
@@ -449,7 +446,27 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
     return def;
 }
 
-static const char * TP_ALLOWED_TABLE = "TP_ALLOWED";
+void lb_get_allowed_table( lua_State * L , bool create )
+{
+    static char TP_ALLOWED_TABLE = 0; // We only use the address
+
+    LSG;
+
+    lua_pushlightuserdata( L , & TP_ALLOWED_TABLE );
+    lua_rawget( L , LUA_REGISTRYINDEX );
+
+    if (lua_isnil( L , -1 ) && create )
+    {
+        lua_pop(L,1);
+        lua_newtable(L);
+        lua_pushlightuserdata(L,&TP_ALLOWED_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    LSG_CHECK(1);
+}
+
 
 int lb_is_allowed(lua_State*L,const char*name)
 {
@@ -457,8 +474,8 @@ int lb_is_allowed(lua_State*L,const char*name)
 
     LSG;
 
-    lua_pushstring(L,TP_ALLOWED_TABLE);
-    lua_rawget(L,LUA_REGISTRYINDEX);
+    lb_get_allowed_table( L , false );
+
     if (lua_type(L,-1)==LUA_TTABLE)
     {
         lua_pushstring(L,name);
@@ -477,17 +494,7 @@ void lb_allow(lua_State*L,const char*name)
 {
     LSG;
 
-    lua_pushstring(L,TP_ALLOWED_TABLE);
-    lua_rawget(L,LUA_REGISTRYINDEX);
-
-    if (lua_isnil(L,-1))
-    {
-        lua_pop(L,1);
-        lua_newtable(L);
-        lua_pushstring(L,TP_ALLOWED_TABLE);
-        lua_pushvalue(L,-2);
-        lua_rawset(L,LUA_REGISTRYINDEX);
-    }
+    lb_get_allowed_table( L , true );
 
     lua_pushstring(L,name);
     lua_pushboolean(L,1);
@@ -626,14 +633,16 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 // --------
 // TP_EXTRA_TABLE = { <user data> (weak) = <user supplied table> }
 
-int lb_get_extra(lua_State * L)
+void lb_get_extras_table( lua_State * L , bool create )
 {
+    static char TP_EXTRA_TABLE=0; // We only use the address of this
+
     LSG;
 
-    lua_pushstring(L,TP_EXTRA_TABLE);
+    lua_pushlightuserdata(L,&TP_EXTRA_TABLE);   // get the extra table
     lua_rawget(L,LUA_REGISTRYINDEX);
 
-    if (lua_isnil(L,-1))
+    if (lua_isnil(L,-1) && create)
     {
         lua_pop(L,1);
         lua_newtable(L);
@@ -645,10 +654,20 @@ int lb_get_extra(lua_State * L)
 
         lua_setmetatable(L,-2);
 
-        lua_pushstring(L,TP_EXTRA_TABLE);
+        lua_pushlightuserdata(L,&TP_EXTRA_TABLE);   // get the extra table
         lua_pushvalue(L,-2);
         lua_rawset(L,LUA_REGISTRYINDEX);
     }
+
+    LSG_CHECK(1);
+}
+
+
+int lb_get_extra(lua_State * L)
+{
+    LSG;
+
+    lb_get_extras_table( L , true );
 
     // table is on top
 
@@ -667,40 +686,25 @@ int lb_get_extra(lua_State * L)
 
     lua_remove(L,-2);
 
-    g_assert( lua_type(L,-1)==LUA_TTABLE);
+    g_assert(lua_type(L,-1)==LUA_TTABLE);
 
     return LSG_END(1);
 }
 
 //-----------------------------------------------------------------------------
-// This one expects the user data at 1 and the table at 2 - it sets the new
+// This one expects the user data at 1 and the table (or nil) at 2 - it sets the new
 // table as the extra table for this user data.
 
 int lb_set_extra(lua_State * L)
 {
-    lb_checktable(L,2);
+    if (!lua_isnil(L,2))
+    {
+        lb_checktable(L,2);
+    }
 
     LSG;
 
-    lua_pushstring(L,TP_EXTRA_TABLE);
-    lua_rawget(L,LUA_REGISTRYINDEX);
-
-    if (lua_isnil(L,-1))
-    {
-        lua_pop(L,1);
-        lua_newtable(L);
-
-        lua_newtable(L);
-        lua_pushstring(L,"__mode");
-        lua_pushstring(L,"k");
-        lua_rawset(L,-3);
-
-        lua_setmetatable(L,-2);
-
-        lua_pushstring(L,TP_EXTRA_TABLE);
-        lua_pushvalue(L,-2);
-        lua_rawset(L,LUA_REGISTRYINDEX);
-    }
+    lb_get_extras_table( L , true );
 
     lua_pushvalue(L,1);
     lua_pushvalue(L,2);
