@@ -1,5 +1,7 @@
 NETWORKING = false
 
+MENU_ITEMS_SEP = 15
+
 if not Coverage then
    dofile("PizzaGlobals.lua")
 end
