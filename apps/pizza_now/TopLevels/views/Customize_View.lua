@@ -61,15 +61,7 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
---[[
-        view.center_sep    = Image {
-                position = {960, 0},
-                width    = 20,
-                height   = 960,
-                tiled    = {false,true},
-                src      = "assets/MenuLine.png"
-            }
---]]
+
         view.nutrition   = Image {
                 position = {960, 0},
                 src      = "assets/NutritionMockup.png"
@@ -78,73 +70,19 @@ CustomizeView = Class(View, function(view, model, ...)
                 position = {960, 480},
                 src      = "assets/PizzaSliceLines_12.png"
             }
---[[
-        if self:get_model().current_item_is_in_cart == false then
-            view.back_arrow_text = Text {
-                  position = {5, 750},
-                  font     = CUSTOMIZE_TAB_FONT,
-                  color    = Colors.BLACK,
-                  text     = "Back"
-                }
-        else
-            view.back_arrow_text = Text {
-                  position = {5, 750},
-                  font     = CUSTOMIZE_TAB_FONT,
-                  color    = Colors.BLACK,
-                  text     = "Remove"
-                }
-        end
-        view.back_arrow = Image{                
-                position = {5, 800},
-                src      = "assets/BackArrowOutline.png"
-            }
-        view.back_arrow_selected = Image{                
-                position = {5, 800},
-                opacity  = 0,
-                src      = "assets/BackArrowFilled.png"
-            }
-        if self:get_model().current_item_is_in_cart == false then
-            view.add_to_order = Text{
-                  position    = {155, 850},
-                  font        = CUSTOMIZE_TAB_FONT,
-                  color       = Colors.BLACK,
-                  text        = "Add to Order"
-                }
-        else
-            view.add_to_order = Text{
-                  position    = {155, 850},
-                  font        = CUSTOMIZE_TAB_FONT,
-                  color       = Colors.BLACK,
-                  text        = "Confirm Item"
-                }
-        end
---]]
+
         view.price = Text{
               position    = {1400, 100},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
               text        = model.current_item.Price
             }
---[[
-        view.hor_sep =  Image {
-                position = {150, 840},
-                height   = 960-150,
-                scale    = {1,1.5},
-              z_rotation = {-90,0,0},
-                tiled    = {false,true},
-                src      = "assets/MenuLine.png"
-            }
---]]
+
         view.selector = Image {
                 position  = {150, 0},
                 src       = "assets/TabFocus.png"
             }
---[[
-        view.add_to_order_selector = Image {
-                position  = {150, 845},
-                src       = "assets/EditOrderHighlight.png"
-            }
---]]
+
         view.ui.opacity = 255
 
         view.accordian_group = {}
@@ -303,6 +241,11 @@ CustomizeView = Class(View, function(view, model, ...)
                         --                  and item ~= "ToppingGroup" then
                             indent = indent + 1
                             if option.Placement ~= nil then
+                                view.sub_group_items[tab_index][opt_index][4] = TextBox(-70*(3-1)-10, 
+                                                                                         60*(opt_index-1),
+                                                                                         70*(3-1))
+                                view.sub_group_items[tab_index][opt_index][4].opacity = 255
+                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][4].group)
                                 view.sub_group_items[tab_index][opt_index][3] = Image {
                                       position = {-70*(3-1), 60*(opt_index-1)},
                                       src      = "assets/Placement/"..
@@ -314,12 +257,14 @@ CustomizeView = Class(View, function(view, model, ...)
                                      src      = "assets/CoverageX/"..
                                       All_Options.CoverageX_r[option.CoverageX]..".png"
                                 }
-                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])                            
+                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+                            
                                 if opt_index > CUSTOMIZE_SCROLL_THRESHOLD then
                                     assert(option.Placement ~= nil,"shit "..option.Name)
                                     view.sub_group_items[tab_index][opt_index][1].opacity = 0
                                     view.sub_group_items[tab_index][opt_index][2].opacity = 0
                                     view.sub_group_items[tab_index][opt_index][3].opacity = 0
+                                    view.sub_group_items[tab_index][opt_index][4].group.opacity = 0
                                 end
                             end
                         --end
