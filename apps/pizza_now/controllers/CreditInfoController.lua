@@ -64,7 +64,7 @@ CreditInfoController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = 1
+    local selected = 2
     local sub_selection = 1
 
     local function itemSelection(selection, sub, name)

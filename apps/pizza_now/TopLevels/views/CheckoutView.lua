@@ -174,51 +174,16 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Total",
     }
-    
-    --driverInstructionsTextbox
-    local driverInstructionsTextbox = TextBox(1020, 120, 1760-1040)
-    --password Textbox
-    local passwordTextbox = TextBox(1460, 260, 1740-1460)
-    --credit card forms
-    local firstNameTextbox = TextBox(1140, 400, 1420-1140)
-    local lastNameTextbox = TextBox(1440, 400, 1440-1140)
-    local emailNameTextbox = TextBox(1140, 520, 1420-1140)
-    local emailAtTextbox = TextBox(1460, 520, 1420-1140)
-    --more credit form stuff for entering phone number
-    local phoneTextbox1 = TextBox(1140, 460, THREE_CHARACTERS)
-    local phoneTextbox2 = TextBox(1230, 460, THREE_CHARACTERS)
-    local phoneTextbox3 = TextBox(1320, 460, FOUR_CHARACTERS)
-    local phoneTextbox4 = TextBox(1460, 460, THREE_CHARACTERS)
-    --card number entry forms
-    local cardTextbox1 = TextBox(1140, 720, FOUR_CHARACTERS)
-    local cardTextbox2 = TextBox(1250, 720, FOUR_CHARACTERS)
-    local cardTextbox3 = TextBox(1360, 720, FOUR_CHARACTERS)
-    local cardTextbox4 = TextBox(1470, 720, FOUR_CHARACTERS)
-    --card expiration forms
-    local expirationMonthTextbox = TextBox(1140, 780, TWO_CHARACTERS)
-    local expirationYearTextbox = TextBox(1220, 780, FOUR_CHARACTERS)
-    --CVC
-    local secretCodeTextbox = TextBox(1490, 780, THREE_CHARACTERS)
-    --Billing Address
-    local streetBillingTextbox = TextBox(1140, 840, 1750-1140)
-    local cityBillingTextbox = TextBox(1140, 900, 1540-1150)
-    local stateBillingTextbox = TextBox(1540, 900, TWO_CHARACTERS)
-    local zipBillingTextbox = TextBox(1620, 900, 1760-1630)
-
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
-        orderText, detailsText, passwordText, driverInstructionsTextbox.group, passwordTextbox.group, formGroup,
-        enterPaymentText, firstNameTextbox.group, lastNameTextbox.group, emailNameTextbox.group,
-        emailAtTextbox.group, atSymbolText, nameText, phoneText, emailText, phoneTextbox1.group,
-        phoneTextbox2.group, phoneTextbox3.group, phoneTextbox4.group, extText, cash, masterCard,
-        visaCard, americanExpressCard, discoverCard, cardTextbox1.group, cardTextbox2.group,
-        cardTextbox3.group, cardTextbox4.group, cardNumberText, expirationMonthTextbox.group, expirationYearTextbox.group, expirationText,
-        secretCodeTextbox.group, secretCodeText, streetBillingTextbox.group, cityBillingTextbox.group, stateBillingTextbox.group, zipBillingTextbox.group, driverInstructionsText,
-        editOrderText, addCouponText, taxText, totalCostText,
-        currentCart
+        orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
+        nameText, phoneText, emailText, extText, cash, masterCard, visaCard,
+        americanExpressCard, discoverCard, cardNumberText, expirationText,
+        secretCodeText, driverInstructionsText, editOrderText, addCouponText,
+        taxText, totalCostText, currentCart
     }
-    
+     
     --create the components
     local creditInfoView = CreditInfoView(model, view)
     local finalOrderView = FinalOrderView(model, view)

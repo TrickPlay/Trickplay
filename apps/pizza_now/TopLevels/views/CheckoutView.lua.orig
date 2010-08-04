@@ -3,6 +3,7 @@ EDIT_ORDER_Y = 460
 CheckoutView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     view.cart_items = {}
+    view.icons = {}
     --first add the background shiz
     local back = Image{
         position = {0,0},
@@ -51,26 +52,6 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Trickplay Password:",
     }
-<<<<<<< HEAD:apps/pizza_now/TopLevels/views/CheckoutView.lua
-=======
-    passwordForm = Textbox(1460, 260, 1740-1460)
-    --[[
-    local passwordFormLeft = Image{
-        position = {1460, 260},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local passwordFormCenter = Image{
-        position = {1470,260},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1730-1470,
-        tile = {true, false}
-    }
-    local passwordFormRight = Image{
-        position = {1730,260},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    --]]
->>>>>>> 6a29825ecad9df581c03b259aee46aca3fc0e997:apps/pizza_now/TopLevels/views/CheckoutView.lua
     --title of enter credit payment form
     local enterPaymentText = Text{
         position = {1000, 340},
@@ -193,51 +174,50 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Total",
     }
+<<<<<<< HEAD:apps/pizza_now/TopLevels/views/CheckoutView.lua
     
-    --driverInstructionsForm
-    local driverInstructionsForm = Form(1020, 120, 1760-1040)
-    --password Form
-    local passwordForm = Form(1460, 260, 1740-1460)
+    --driverInstructionsTextbox
+    local driverInstructionsTextbox = TextBox(1020, 120, 1760-1040)
+    --password Textbox
+    local passwordTextbox = TextBox(1460, 260, 1740-1460)
     --credit card forms
-    local firstNameForm = Form(1140, 400, 1420-1140)
-    local lastNameForm = Form(1440, 400, 1440-1140)
-    local emailNameForm = Form(1140, 520, 1420-1140)
-    local emailAtForm = Form(1460, 520, 1420-1140)
+    local firstNameTextbox = TextBox(1140, 400, 1420-1140)
+    local lastNameTextbox = TextBox(1440, 400, 1440-1140)
+    local emailNameTextbox = TextBox(1140, 520, 1420-1140)
+    local emailAtTextbox = TextBox(1460, 520, 1420-1140)
     --more credit form stuff for entering phone number
-    local phoneForm1 = Form(1140, 460, THREE_CHARACTERS)
-    local phoneForm2 = Form(1230, 460, THREE_CHARACTERS)
-    local phoneForm3 = Form(1320, 460, FOUR_CHARACTERS)
-    local phoneForm4 = Form(1460, 460, THREE_CHARACTERS)
+    local phoneTextbox1 = TextBox(1140, 460, THREE_CHARACTERS)
+    local phoneTextbox2 = TextBox(1230, 460, THREE_CHARACTERS)
+    local phoneTextbox3 = TextBox(1320, 460, FOUR_CHARACTERS)
+    local phoneTextbox4 = TextBox(1460, 460, THREE_CHARACTERS)
     --card number entry forms
-    local cardForm1 = Form(1140, 720, FOUR_CHARACTERS)
-    local cardForm2 = Form(1250, 720, FOUR_CHARACTERS)
-    local cardForm3 = Form(1360, 720, FOUR_CHARACTERS)
-    local cardForm4 = Form(1470, 720, FOUR_CHARACTERS)
+    local cardTextbox1 = TextBox(1140, 720, FOUR_CHARACTERS)
+    local cardTextbox2 = TextBox(1250, 720, FOUR_CHARACTERS)
+    local cardTextbox3 = TextBox(1360, 720, FOUR_CHARACTERS)
+    local cardTextbox4 = TextBox(1470, 720, FOUR_CHARACTERS)
     --card expiration forms
-    local expirationMonthForm = Form(1140, 780, TWO_CHARACTERS)
-    local expirationYearForm = Form(1220, 780, FOUR_CHARACTERS)
+    local expirationMonthTextbox = TextBox(1140, 780, TWO_CHARACTERS)
+    local expirationYearTextbox = TextBox(1220, 780, FOUR_CHARACTERS)
     --CVC
-    local secretCodeForm = Form(1490, 780, THREE_CHARACTERS)
+    local secretCodeTextbox = TextBox(1490, 780, THREE_CHARACTERS)
     --Billing Address
-    local streetBillingForm = Form(1140, 840, 1750-1140)
-    local cityBillingForm = Form(1140, 900, 1540-1150)
-    local stateBillingForm = Form(1540, 900, TWO_CHARACTERS)
-    local zipBillingForm = Form(1620, 900, 1760-1630)
+    local streetBillingTextbox = TextBox(1140, 840, 1750-1140)
+    local cityBillingTextbox = TextBox(1140, 900, 1540-1150)
+    local stateBillingTextbox = TextBox(1540, 900, TWO_CHARACTERS)
+    local zipBillingTextbox = TextBox(1620, 900, 1760-1630)
 
+=======
+>>>>>>> 34e4f6365cbeecf3219f527db672b35d2a7579a0:apps/pizza_now/TopLevels/views/CheckoutView.lua
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
-        orderText, detailsText, passwordText, driverInstructionsForm.group, passwordForm.group, formGroup,
-        enterPaymentText, firstNameForm.group, lastNameForm.group, emailNameForm.group,
-        emailAtForm.group, atSymbolText, nameText, phoneText, emailText, phoneForm1.group,
-        phoneForm2.group, phoneForm3.group, phoneForm4.group, extText, cash, masterCard,
-        visaCard, americanExpressCard, discoverCard, cardForm1.group, cardForm2.group,
-        cardForm3.group, cardForm4.group, cardNumberText, expirationMonthForm.group, expirationYearForm.group, expirationText,
-        secretCodeForm.group, secretCodeText, streetBillingForm.group, cityBillingForm.group, stateBillingForm.group, zipBillingForm.group, driverInstructionsText,
-        editOrderText, addCouponText, taxText, totalCostText,
-        currentCart
+        orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
+        nameText, phoneText, emailText, extText, cash, masterCard, visaCard,
+        americanExpressCard, discoverCard, cardNumberText, expirationText,
+        secretCodeText, driverInstructionsText, editOrderText, addCouponText,
+        taxText, totalCostText, currentCart
     }
-    
+     
     --create the components
     local creditInfoView = CreditInfoView(model, view)
     local finalOrderView = FinalOrderView(model, view)
@@ -282,6 +262,12 @@ CheckoutView = Class(View, function(view, model, ...)
             print("adding "..model.cart[cart_index].Name.." from cart to screen")
             view.cart_items[#view.cart_items+1] = Text{
                 position = {200,next_y},
+                font = CUSTOMIZE_SUB_FONT_B,
+                color = Colors.BLACK,
+                text = lines.top
+            }
+            view.cart_items[#view.cart_items+1] = Text{
+                position = {200,next_y+50},
                 font = CUSTOMIZE_SUB_FONT,
                 color = Colors.BLACK,
                 text = model.cart[cart_index].CheckOutDesc()
@@ -290,6 +276,7 @@ CheckoutView = Class(View, function(view, model, ...)
             cart_index = cart_index+1
         end
         view.ui:add(unpack(view.cart_items))
+        view.ui:add(unpack(view.icons))
     end
     
     local prev_selection = {}
