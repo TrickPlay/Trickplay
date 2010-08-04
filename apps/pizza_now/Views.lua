@@ -31,6 +31,9 @@ dofile("TopLevels/controllers/ItemSelectionController.lua")
 dofile("TopLevels/views/Customize_View.lua")
 dofile("TopLevels/controllers/Customize_Controller.lua")
 
+dofile("views/CustomizeFooterView.lua")
+dofile("controllers/CustomizeFooterController.lua")
+
 dofile("views/Tab_View.lua")
 dofile("controllers/Tab_Controller.lua")
 

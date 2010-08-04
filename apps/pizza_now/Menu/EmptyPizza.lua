@@ -118,12 +118,63 @@ EmptyPizza = Class(
       --self._base.init(self)
       self.Name = "Pizza"
       self.CheckOutDesc = function()
-          return "One "..All_Options.Size_r[self.Tabs[1].Options[4].Size]
-                 .." "..All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]
-                 .." Pizza with:\n\t"
-                 ..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "
-                 ..All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "
-                 ..All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce\n"
+          local lines = {}
+          --top line
+          lines.top = "- "..All_Options.Size_r[self.Tabs[1].Options[4].Size].." "
+                         ..All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]
+                         .." Pizza with:\t\t",self.Price,""
+                    --pizza base info
+          lines.crust = "\t"..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "
+                    ..All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "
+                    ..All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce"
+
+          --sides
+          lines.entire = ""
+          lines.left  = ""
+          lines.right = ""
+          for i = 1,#self.Tabs[2].Options do
+              if self.Tabs[2].Options[i].Placement == All_Options.Placement.Entire then
+                  if lines.entire ~= "" then
+                      lines.entire = lines.entire..", "..self.Tabs[2].Options[i].Name
+                  else
+                      lines.entire = "\t\t"..self.Tabs[2].Options[i].Name
+                  end
+              elseif self.Tabs[2].Options[i].Placement == All_Options.Placement.Left then
+                  if lines.left ~= "" then
+                      lines.left = lines.left..", "..self.Tabs[2].Options[i].Name
+                  else
+                      lines.left = "\t\t"..self.Tabs[2].Options[i].Name
+                  end
+              elseif self.Tabs[2].Options[i].Placement == All_Options.Placement.Right then
+                  if lines.right ~= "" then
+                      lines.right = lines.right..", "..self.Tabs[2].Options[i].Name
+                  else
+                      lines.right = "\t\t"..self.Tabs[2].Options[i].Name
+                  end
+              end
+          end
+          for i = 1,#self.Tabs[3].Options do
+              if self.Tabs[3].Options[i].Placement == All_Options.Placement.Entire then
+                  if lines.entire ~= "" then
+                      lines.entire = lines.entire..", "..self.Tabs[3].Options[i].Name
+                  else
+                      lines.entire = "\t\t"..self.Tabs[3].Options[i].Name
+                  end
+              elseif self.Tabs[3].Options[i].Placement == All_Options.Placement.Left then
+                  if lines.left ~= "" then
+                      lines.left = lines.left..", "..self.Tabs[3].Options[i].Name
+                  else
+                      lines.left = "\t\t"..self.Tabs[3].Options[i].Name
+                  end
+              elseif self.Tabs[3].Options[i].Placement == All_Options.Placement.Right then
+                  if lines.right ~= "" then
+                      lines.right = lines.right..", "..self.Tabs[3].Options[i].Name
+                  else
+                      lines.right = "\t\t"..self.Tabs[3].Options[i].Name
+                  end
+              end
+          end
+          return lines
       end
       self.Price = "$16.50"
       self.Tabs = {}
@@ -254,7 +305,7 @@ EmptyPizza = Class(
       local sauce = SAUCE_ROBUST
       local crust = CRUST_HANDTOSSED
       
-      self.pizzagroup = Group{position = {960,500}}
+      self.pizzagroup = Group{position = {960,480}}
 
 
       self.pizzagroup:add(crust)
