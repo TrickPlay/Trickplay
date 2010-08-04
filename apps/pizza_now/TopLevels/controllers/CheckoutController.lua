@@ -70,17 +70,24 @@ CheckoutController = Class(Controller, function(self, view, ...)
         if(0 ~= dir[1]) then
             local new_selected = selected + dir[1]
             if 2 <= new_selected and new_selected <= GroupSize-1 then
+                view.items[selected]:get_controller():out_focus()
                 selected = new_selected
                 previousSelection = selected
+                view.items[selected]:get_controller():on_focus()
             end
         elseif(0 ~= dir[2]) then
             if(CheckoutGroups.ORDER == selected) or
               (CheckoutGroups.DETAILS == selected) then
+                view.items[selected]:get_controller():out_focus()
                 selected = CheckoutGroups.FOOTER
+                view.items[selected]:get_controller():on_focus()
             else
+                view.items[selected]:get_controller():out_focus()
                 selected = previousSelection
+                view.items[selected]:get_controller():on_focus()
             end
         end
+        --self.child = view.items[selected]:get_controller()
         self:get_model():notify()
     end
 
