@@ -768,7 +768,7 @@ void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter
 
     std::string indent( 2 * depth , ' ' );
 
-    g_debug("%s{",indent.c_str());
+    g_message("%s{",indent.c_str());
 
     lua_pushnil(L);
 
@@ -794,7 +794,7 @@ void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter
         std::string k = lb_value_desc(L,lua_gettop(L)-1);
         std::string v = lb_value_desc(L,lua_gettop(L));
 
-        g_debug( "%s  %s = %s",indent.c_str(),k.c_str(),v.c_str());
+        g_message( "%s  %s = %s",indent.c_str(),k.c_str(),v.c_str());
 
         if (lua_type(L,-1)==LUA_TTABLE)
         {
@@ -803,7 +803,7 @@ void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter
             lua_rawget(L,-2);
             if (lua_toboolean(L,-1))
             {
-                g_debug("%s  { *CYCLE* }",indent.c_str() );
+                g_message("%s  { *CYCLE* }",indent.c_str() );
                 lua_pop(L,2); // the boolean and the visited table
             }
             else
@@ -816,7 +816,7 @@ void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter
         lua_pop(L,1); // the value
     }
 
-    g_debug("%s}",indent.c_str());
+    g_message("%s}",indent.c_str());
 
     LSG_END(0);
 }
@@ -837,7 +837,7 @@ void lb_dump_table( lua_State * L )
     lua_getglobal(L,"tostring");
     lua_pushvalue(L,1);
     lua_call(L,1,1);
-    g_debug("%s",lua_tostring(L,-1));
+    g_message("%s",lua_tostring(L,-1));
     lua_pop(L,1);
 
     lua_newtable(L);
