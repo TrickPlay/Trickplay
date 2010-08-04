@@ -1,5 +1,6 @@
 
 #include <cstring>
+#include <string>
 
 #include "lb.h"
 
@@ -713,4 +714,140 @@ int lb_set_extra(lua_State * L)
     lua_pop(L,1);
 
     return LSG_END(0);
+}
+
+//-----------------------------------------------------------------------------
+// Table dumping functions
+
+std::string lb_value_desc( lua_State * L , int index )
+{
+    LSG;
+
+    lua_getglobal(L,"tostring");
+    lua_pushvalue(L,index);
+    lua_call(L,1,1);
+    std::string result = lua_tostring(L,-1);
+    lua_pop(L,1);
+
+    bool add_type = false;
+
+    switch(lua_type(L,index))
+    {
+        case LUA_TSTRING:
+            result = "\"" + result + "\"";
+            break;
+
+        case LUA_TUSERDATA:
+            result = result + " (" + UserData::get(L,index)->get_type() + ")";
+            break;
+    }
+
+    if ( add_type )
+    {
+        result = result + " (" + lua_typename(L,lua_type(L,index)) + ")";
+    }
+
+    LSG_CHECK(0);
+
+    return result;
+}
+
+void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter )
+{
+    LSG;
+
+    int t = lua_gettop( L );
+
+    lb_checktable(L,t);
+
+    lb_strong_deref(L,visited);
+    lua_pushvalue(L,t);
+    lua_pushboolean(L,true);
+    lua_rawset(L,-3);
+    lua_pop(L,1);
+
+    std::string indent( 2 * depth , ' ' );
+
+    g_debug("%s{",indent.c_str());
+
+    lua_pushnil(L);
+
+    while(lua_next(L,t))
+    {
+        if (filter)
+        {
+            lua_pushvalue(L,filter);
+            lua_pushvalue(L,-3);
+            lua_pushvalue(L,-3);
+            lua_pushinteger(L,depth+1);
+            lua_call(L,3,1);
+            bool skip=!lua_toboolean(L,-1);
+            lua_pop(L,1);
+
+            if (skip)
+            {
+                lua_pop(L,1);
+                continue;
+            }
+        }
+
+        std::string k = lb_value_desc(L,lua_gettop(L)-1);
+        std::string v = lb_value_desc(L,lua_gettop(L));
+
+        g_debug( "%s  %s = %s",indent.c_str(),k.c_str(),v.c_str());
+
+        if (lua_type(L,-1)==LUA_TTABLE)
+        {
+            lb_strong_deref(L,visited);
+            lua_pushvalue(L,-2);
+            lua_rawget(L,-2);
+            if (lua_toboolean(L,-1))
+            {
+                g_debug("%s  { *CYCLE* }",indent.c_str() );
+                lua_pop(L,2); // the boolean and the visited table
+            }
+            else
+            {
+                lua_pop(L,2); // the nil and the visited table
+                lb_dump_table_recurse(L,visited,depth+1,filter);
+            }
+        }
+
+        lua_pop(L,1); // the value
+    }
+
+    g_debug("%s}",indent.c_str());
+
+    LSG_END(0);
+}
+
+void lb_dump_table( lua_State * L )
+{
+    LSG;
+
+    lb_checktable(L,1);
+
+    int filter = 0;
+
+    if (lua_gettop(L)>1&&lua_type(L,2)==LUA_TFUNCTION)
+    {
+        filter = 2;
+    }
+
+    lua_getglobal(L,"tostring");
+    lua_pushvalue(L,1);
+    lua_call(L,1,1);
+    g_debug("%s",lua_tostring(L,-1));
+    lua_pop(L,1);
+
+    lua_newtable(L);
+    int visited = lb_strong_ref(L);
+
+    lua_pushvalue(L,1);
+    lb_dump_table_recurse(L,visited,0,filter);
+    lua_pop(L,1);
+
+    lb_strong_unref(L,visited);
+
+    LSG_CHECK(0);
 }
