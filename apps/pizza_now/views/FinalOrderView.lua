@@ -2,7 +2,7 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
     view._base.init(view, model)
 
     view.parent_view = parent_view
-
+--[[
     local editOrder = Image{
         position={375,445},
         src = "assets/EditOrderHighlight.png"
@@ -11,11 +11,10 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
         position = {375,535},
         src = "assets/EditOrderHighlight.png"
     }
-
-    view.options = {editOrder, addCoupon}
+--]]
+    view.options = {}--{editOrder, addCoupon}
     view.ui = Group{name="finalOrder_ui", position={10, 10}, opacity=255}
     view.ui:add(unpack(view.options))
-    assert(view.ui.children[1])
 
     function view:initialize()
         self:set_controller(FinalOrderController(self))

@@ -142,12 +142,14 @@ CheckoutView = Class(View, function(view, model, ...)
         text = "Instructions for driver:",
     }
     --stuff describing the persons order
+    --[[
     local editOrderText = Text{
         position = {410,EDIT_ORDER_Y},
         font = CUSTOMIZE_TAB_FONT,
         color = Colors.BLACK,
         text = "Edit Order",
     }
+    --]]
     --placing the cart items in between the top of the screen and edit order
     local currentCart = Text{
         position = {160,0},
@@ -156,12 +158,14 @@ CheckoutView = Class(View, function(view, model, ...)
         text = "Current Cart:",
     }
     --more text
+    --[[
     local addCouponText = Text{
         position = {390,550},
         font = CUSTOMIZE_TAB_FONT,
         color = Colors.BLACK,
         text = "Add Coupon",
     }
+    --]]
     local taxText = Text{
         position = {190, 800},
         font = CUSTOMIZE_SUB_FONT,
@@ -272,7 +276,6 @@ CheckoutView = Class(View, function(view, model, ...)
             self.ui:complete_animation()
             self.footer_ui.opacity = 0
             self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_POSITION}
-            --self.ui.opacity = 0
         end
     end
 
