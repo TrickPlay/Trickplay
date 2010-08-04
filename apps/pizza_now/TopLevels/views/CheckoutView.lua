@@ -51,23 +51,6 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Trickplay Password:",
     }
-    passwordForm = Form(1460, 260, 1740-1460)
-    --[[
-    local passwordFormLeft = Image{
-        position = {1460, 260},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local passwordFormCenter = Image{
-        position = {1470,260},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1730-1470,
-        tile = {true, false}
-    }
-    local passwordFormRight = Image{
-        position = {1730,260},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    --]]
     --title of enter credit payment form
     local enterPaymentText = Text{
         position = {1000, 340},
@@ -75,76 +58,13 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Or enter payment data:",
     }
-    --credit card forms
-    local formGroup = Group{position = {1140, 400}}
-    local formLeft = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local formCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1420-1160,
-        tile = {true, false}
-    }
-    local formRight = Image{
-        position = {1420-1150, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    formGroup:add(formLeft, formCenter, formRight)
-    formGroup:hide()
-    local firstNameGroup = Clone{source = formGroup}
-    firstNameGroup.position = {1140, 400}
-    local lastNameGroup = Clone{source = formGroup}
-    lastNameGroup.position = {1440, 400}
-    local emailNameGroup = Clone{source = formGroup}
-    emailNameGroup.position = {1140, 520}
-    local emailAtGroup = Clone{source = formGroup}
-    emailAtGroup.position = {1460, 520}
-    --more credit form stuff for entering phone number
-    local phoneGroup = Group{position = {1140, 460}}
-    local phoneFormLeft = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local phoneFormCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1220-1160,
-        tile = {true, false}
-    }
-    local phoneFormRight = Image{
-        position = {1220-1150, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    phoneGroup:add(phoneFormLeft, phoneFormCenter, phoneFormRight)
-    local phoneGroup2 = Clone{source = phoneGroup}
-    phoneGroup2.position = {1230, 460}
-    local phoneGroup3 = Group{position = {1320,460}}
-    local phoneFormLeft3 = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local phoneFormCenter3 = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1410-1330,
-        tile = {true, false}
-    }
-    local phoneFormRight3 = Image{
-        position = {1400-1310, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    phoneGroup3:add(phoneFormLeft3, phoneFormCenter3, phoneFormRight3)
+        --the x symbol for "extention"
     local extText = Text{
         position = {1430, 475},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "x"
     }
-    local phoneGroup4 = Clone{source = phoneGroup}
-    phoneGroup4.position = {1460, 460}
-
     --the @ symbol
     local atSymbolText = Text{
         position = {1425,530},
@@ -194,109 +114,25 @@ CheckoutView = Class(View, function(view, model, ...)
         src = "assets/credit_stuff/Payment_Disc.png",
         position = {1590, 600}
     }
-    --card number entry forms
-    local cardGroup1 = Clone{source = phoneGroup3}
-    cardGroup1.position = {1140, 720}
-    local cardGroup2 = Clone{source = phoneGroup3}
-    cardGroup2.position = {1250, 720}
-    local cardGroup3 = Clone{source = phoneGroup3}
-    cardGroup3.position = {1360, 720}
-    local cardGroup4 = Clone{source = phoneGroup3}
-    cardGroup4.position = {1470, 720}
+    --credit card text stuff
     local cardNumberText = Text{
         position = {1000,740},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Card #"
     }
-    local expirationGroup = Group{position = {1140, 780}}
-    local expirationMonthForm = Group()
-    local expirationMonthFormLeft = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local expirationMonthFormCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1200-1140,
-        tile = {true, false}
-    }
-    local expirationMonthFormRight = Image{
-        position = {1210-1140, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    expirationMonthForm:add(expirationMonthFormLeft, expirationMonthFormCenter,
-        expirationMonthFormRight)
-    local expirationYearForm = Clone{source = phoneGroup3}
-    expirationYearForm.position = {1210-1120, 0}
-    expirationGroup:add(expirationMonthForm, expirationYearForm)
     local expirationText = Text{
         position = {1000,800},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Expires",
     }
-    local secretCodeGroup = Clone{source = phoneGroup}
-    secretCodeGroup.position = {1490, 780}
     local secretCodeText = Text{
         position = {1400,800},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "CVC",
     }
-    --Billing Address
-    local addressBillingGroup = Group{position = {1140,840}}
-    local streetBillingForm = Group()
-    local streetBillingFormLeft = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local streetBillingFormCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1740-1150,
-        tile = {true, false}
-    }
-    local streetBillingFormRight = Image{
-        position = {1740-1140, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    streetBillingForm:add(streetBillingFormLeft, streetBillingFormCenter, streetBillingFormRight)
-    local cityBillingForm = Group{position = {0, 900-840}}
-    local cityBillingFormLeft = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local cityBillingFormCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1510-1150,
-        tile = {true, false}
-    }
-    local cityBillingFormRight = Image{
-        position = {1510-1140, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    cityBillingForm:add(cityBillingFormLeft, cityBillingFormCenter, cityBillingFormRight)
-    local stateBillingForm = Clone{source = expirationMonthForm}
-    stateBillingForm.position = {1530-1140, 900-840}
-    local zipBillingForm = Group{position = {1620-1140, 900-840}}
-    local zipBillingFormLeft = Image{
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local zipBillingFormCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1740-1630,
-        tile = {true, false}
-    }
-    local zipBillingFormRight = Image{
-        position = {1740-1620, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    zipBillingForm:add(zipBillingFormLeft, zipBillingFormCenter, zipBillingFormRight)
-    addressBillingGroup:add(streetBillingForm, cityBillingForm, stateBillingForm, zipBillingForm)
     --Instructions for driver
     local driverInstructionsText = Text{
         position = {1060,80},
@@ -304,24 +140,6 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Instructions for driver:",
     }
-    local driverInstructionsForm = Group()
-    driverInstructionsForm.position = {1020,120}
-    local driverInstructionsFormLeft = Image{ 
-        position = {0, 0},
-        src = "assets/credit_stuff/TextBoxLeft.png",
-    }
-    local driverInstructionsFormCenter = Image{
-        position = {10, 0},
-        src = "assets/credit_stuff/TextBoxCenter.png",
-        width = 1680-1040,
-        tile = {true, false}
-    }
-    local driverInstructionsFormRight = Image{
-        position = {1680-1030, 0},
-        src = "assets/credit_stuff/TextBoxRight.png",
-    }
-    driverInstructionsForm:add(driverInstructionsFormLeft, driverInstructionsFormCenter,
-        driverInstructionsFormRight)
     --stuff describing the persons order
     local editOrderText = Text{
         position = {410,EDIT_ORDER_Y},
@@ -336,21 +154,7 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Current Cart:",
     }
---[[
-    local next_y = 160
-    local cart_index = 1
-    while model.cart[cart_index] ~= nil and
-          next_y > editOrder.y do
-        cart_items[#cart_items+1] = Text{
-            position = {160,next_y},
-            font = CUSTOMIZE_TAB_FONT,
-            color = Colors.BLACK,
-            text = model.cart.Name,--model.cart[cart_index].Description
-        }
-        next_y = next_y +60 -- + model.cart[cart_index].Desc_height
-        cart_index = cart_index+1
-    end
---]]
+    --more text
     local addCouponText = Text{
         position = {390,550},
         font = CUSTOMIZE_TAB_FONT,
@@ -369,37 +173,49 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Total",
     }
-    local orderBar = Image{
-        src = "assets/OrderBarBase.png",
-        position = {0, 960},
-        tile = {true, false},
-        width = 1920
-    }
-    local creditInstructionsText = Text{
-        position = {990,990},
-        font = CUSTOMIZE_TINY_FONT,
-        color = Colors.BLACK,
-        text = "Please have your legal photo ID and\ncredit card available for verification.",
-    }
-    local termsText = Text{
-        position = {20, 990},
-        font = CUSTOMIZE_TINY_FONT,
-        color = Colors.BLACK,
-        text = "By ordering, I implicitly agree to the Terms and\nConditions of Domino's Pizza and Pizza Now."
-    }
+    
+    --driverInstructionsForm
+    local driverInstructionsForm = Form(1020, 120, 1760-1040)
+    --password Form
+    local passwordForm = Form(1460, 260, 1740-1460)
+    --credit card forms
+    local firstNameForm = Form(1140, 400, 1420-1140)
+    local lastNameForm = Form(1440, 400, 1440-1140)
+    local emailNameForm = Form(1140, 520, 1420-1140)
+    local emailAtForm = Form(1460, 520, 1420-1140)
+    --more credit form stuff for entering phone number
+    local phoneForm1 = Form(1140, 460, THREE_CHARACTERS)
+    local phoneForm2 = Form(1230, 460, THREE_CHARACTERS)
+    local phoneForm3 = Form(1320, 460, FOUR_CHARACTERS)
+    local phoneForm4 = Form(1460, 460, THREE_CHARACTERS)
+    --card number entry forms
+    local cardForm1 = Form(1140, 720, FOUR_CHARACTERS)
+    local cardForm2 = Form(1250, 720, FOUR_CHARACTERS)
+    local cardForm3 = Form(1360, 720, FOUR_CHARACTERS)
+    local cardForm4 = Form(1470, 720, FOUR_CHARACTERS)
+    --card expiration forms
+    local expirationMonthForm = Form(1140, 780, TWO_CHARACTERS)
+    local expirationYearForm = Form(1220, 780, FOUR_CHARACTERS)
+    --CVC
+    local secretCodeForm = Form(1490, 780, THREE_CHARACTERS)
+    --Billing Address
+    local streetBillingForm = Form(1140, 840, 1750-1140)
+    local cityBillingForm = Form(1140, 900, 1540-1150)
+    local stateBillingForm = Form(1540, 900, TWO_CHARACTERS)
+    local zipBillingForm = Form(1620, 900, 1760-1630)
+
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
-        orderText, detailsText, passwordText, passwordForm.group,
-        --passwordFormLeft, passwordFormCenter, passwordFormRight,
-        formGroup, enterPaymentText, firstNameGroup,
-        lastNameGroup, emailNameGroup, emailAtGroup, atSymbolText, nameText,
-        phoneText, emailText, phoneGroup, phoneGroup2, phoneGroup3, extText, phoneGroup4,
-        cash, masterCard, visaCard, americanExpressCard, discoverCard, cardGroup1,
-        cardGroup2, cardGroup3, cardGroup4, cardNumberText, expirationGroup,
-        expirationText, secretCodeGroup, secretCodeText, addressBillingGroup,
-        driverInstructionsText, driverInstructionsForm, editOrderText, addCouponText,
-        taxText, totalCostText, orderBar, creditInstructionsText, termsText, currentCart
+        orderText, detailsText, passwordText, driverInstructionsForm.group, passwordForm.group, formGroup,
+        enterPaymentText, firstNameForm.group, lastNameForm.group, emailNameForm.group,
+        emailAtForm.group, atSymbolText, nameText, phoneText, emailText, phoneForm1.group,
+        phoneForm2.group, phoneForm3.group, phoneForm4.group, extText, cash, masterCard,
+        visaCard, americanExpressCard, discoverCard, cardForm1.group, cardForm2.group,
+        cardForm3.group, cardForm4.group, cardNumberText, expirationMonthForm.group, expirationYearForm.group, expirationText,
+        secretCodeForm.group, secretCodeText, streetBillingForm.group, cityBillingForm.group, stateBillingForm.group, zipBillingForm.group, driverInstructionsText,
+        editOrderText, addCouponText, taxText, totalCostText,
+        currentCart
     }
     
     --create the components
@@ -412,17 +228,19 @@ CheckoutView = Class(View, function(view, model, ...)
 
     view.items = {finalOrderView, creditInfoView, finalFooterView}
 
-    view.static_ui = Group{name = "checkoutStatic_ui", position = {0, 0}, opacity=255}
-    view.static_ui:add(unpack(background))
+    --background ui
+    view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
+    view.background_ui:add(unpack(background))
+    --ui that actually moves
+    view.moving_ui=Group{name="checkoutMoving_ui", position={0,0}}
+    view.moving_ui:add(view.background_ui, finalOrderView.ui, creditInfoView.ui)
+    --redundant bottom bar ui group, does not move
+    view.footer_ui=Group{name="checkoutFooter_ui", position={0,0}}
+    view.footer_ui:add(finalFooterView.ui)
+    --all ui junk for this view
     view.ui=Group{name="checkout_ui", position={0,0}}
-    view.ui:add(view.static_ui)
+    view.ui:add(view.moving_ui, view.footer_ui)
 
-    view.entry_ui=Group{name="checkoutEntry_ui", position={0,0}}
-    for i,v in ipairs(view.items) do
-        view.entry_ui:add(v.ui)
-    end
-
-    view.ui:add(view.entry_ui)
     screen:add(view.ui)
 
     function view:initialize()
@@ -463,9 +281,8 @@ CheckoutView = Class(View, function(view, model, ...)
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
         if comp == Components.CHECKOUT then
-            self.ui.opacity = 255
-            self.entry_ui.opacity = 255
-            self.entry_ui:raise_to_top()
+            self.footer_ui.opacity = 255
+            self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=SHOW_POSITION}
             print("Showing Checkout UI")
             for i,c_view in ipairs(view.items) do
                 if i == controller:get_selected_index() then
@@ -480,7 +297,9 @@ CheckoutView = Class(View, function(view, model, ...)
         else
             print("Hiding Checkout UI")
             self.ui:complete_animation()
-            self.ui.opacity = 0
+            self.footer_ui.opacity = 0
+            self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_POSITION}
+            --self.ui.opacity = 0
         end
     end
 

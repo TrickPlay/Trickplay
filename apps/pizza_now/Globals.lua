@@ -4,8 +4,15 @@ if not Coverage then
    dofile("PizzaGlobals.lua")
 end
 
-CHANGE_VIEW_TIME = 300
-BOTTOM_OPACITY = 50
+CHANGE_VIEW_TIME = 500
+BOTTOM_OPACITY = 90
+HIDE_POSITION = {0, -1920}
+SHOW_POSITION = {0, 0}
+
+--Globals for form lengths
+FOUR_CHARACTERS = 100
+THREE_CHARACTERS = 80
+TWO_CHARACTERS = 70
 
 Dimensions = {
     HEIGHT = 1080,
