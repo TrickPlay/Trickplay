@@ -4,8 +4,8 @@ function Player:new(args)
 
 	local object = {
 		name = args.name,
-		gold = args.gold,
-		lives = args.lives,
+		gold = settings.gold or args.gold,
+		lives = settings.lives or args.lives,
 		color = args.color,
 		towerInfo = TowerInfo:new{}
 	}

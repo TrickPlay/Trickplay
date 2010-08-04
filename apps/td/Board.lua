@@ -137,7 +137,9 @@ Board.render = function (self, seconds)
 		creepnum = 1
 		seconds_elapsed = 0
 		level = level + 1
-		
+		savedLevel = level
+		savedGold = self.player.gold
+		savedLives = self.player.lives
 		wavePartCounter = 1
 		creeppartnum = 1
 		

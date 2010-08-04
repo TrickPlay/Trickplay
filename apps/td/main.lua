@@ -38,6 +38,7 @@ function app.on_loaded()
         MainMenu:button_directions()
         MainMenu:create_buttons(10, "Sans 34px")
         MainMenu:apply_color_change("FFFFFF", "000000")
+        MainMenu.container.name = os.time()
         --MainMenu.buttons:grab_key_focus()
         
         MainMenu:update_cursor_position()
@@ -94,7 +95,18 @@ function app.on_loaded()
     
     	--screen:add( AssetLoader:getImage("InfoBar2",{name="robot", x=200, y=200}) )
     	--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))
+    	
+    	AssetLoader.on_preload_ready = nil
+    	
     end
+   function app.on_closing()
+   	settings.round = savedRound
+		settings.level = savedLevel
+		settings.gold = savedGold
+		settings.lives = savedLives
+		print ("\n\n\n\n\n\n\n\n\n"..settings.level)
+	end
+
 end
 
 function controllers:on_controller_connected(controller)

@@ -86,7 +86,7 @@ function createLevelMenu(l)
                 currentLevel = round
                 
                 --LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
-                LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round".."1"..".lua")
+                LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
         
                 game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
                 game:startGame()
