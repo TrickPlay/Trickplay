@@ -14,27 +14,47 @@ FinalFooterView = Class(View, function(view, model, parent_view, ...)
         width = 1920
     }
     local creditInstructionsText = Text{
-        position = {990,30},
+        position = {170,60},
         font = CUSTOMIZE_TINY_FONT,
         color = Colors.BLACK,
-        text = "Please have your legal photo ID and\ncredit card available for verification.",
+        text = "Please have your legal photo ID and credit card available for verification.",
     }
     local termsText = Text{
-        position = {20, 30},
+        position = {170, 30},
         font = CUSTOMIZE_TINY_FONT,
         color = Colors.BLACK,
-        text = "By ordering, I implicitly agree to the Terms and\nConditions of Domino's Pizza and Pizza Now."
+        text = "By ordering, I implicitly agree to the Terms and Conditions of Domino's Pizza and Pizza Now."
     }
     view.background_ui:add(orderBar, creditInstructionsText, termsText)
     view.items = {
-        Text{
-            position={1610, 40},
-            font  = CUSTOMIZE_TAB_FONT,
-            color = Colors.BLACK,
-            text = "Place Order"
-        }
+        {
+            Image{
+                position={30, 30},
+                src = "assets/BackArrow.png"
+            },
+            Image{
+                position={30, 30},
+                src = "assets/BackArrowFocus.png"
+            }
+        },
+        {
+            Text{
+                position={1610, 40},
+                font  = CUSTOMIZE_TAB_FONT,
+                color = Colors.BLACK,
+                text = "Place Order"
+            },
+            Text{
+                position={1610, 40},
+                font  = CUSTOMIZE_TAB_FONT,
+                color = Colors.RED,
+                text = "Place Order"
+            }
+        },
     }
-    view.entry_ui:add(unpack(view.items))
+    items = view.items
+    view.entry_ui:add(unpack(view.items[1]))
+    view.entry_ui:add(unpack(view.items[2]))
     view.ui:add(view.background_ui, view.entry_ui)
     function view:initialize()
         self:set_controller(FinalFooterController(self))
@@ -45,14 +65,13 @@ FinalFooterView = Class(View, function(view, model, parent_view, ...)
         local comp = model:get_active_component()
         if comp == Components.CHECKOUT then
             print("Showing FinalFooterView UI")
---            view.ui.opacity = 255
             for i,item in ipairs(view.items) do
                 if i == controller:get_selected_index() then
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                    item.color = Colors.RED
+                    item[2]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                    item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
                 else
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                    item.color = Colors.BLACK
+                    item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                    item[2]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
                 end
             end
         else
