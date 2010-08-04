@@ -13,7 +13,8 @@ FinalOrderController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = 1
+    local selected = 0
+    local previous_selected = 1
 
     local OptionCallbacks = {
         [Options.EDIT_ORDER] = function(self)
@@ -51,6 +52,15 @@ FinalOrderController = Class(Controller, function(self, view, ...)
 
     function self:set_parent_controller(parent_controller)
         self.parent_controller = parent_controller
+    end
+
+    function self:on_focus()
+        selected = previous_selected
+    end
+
+    function self:out_focus()
+        previous_selected = selected
+        selected = 0
     end
 
     function self:move_selector(dir)
