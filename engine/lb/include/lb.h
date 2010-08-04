@@ -111,5 +111,7 @@ int lb_set_extra(lua_State * L);
 
 //.........................................................................
 
+void lb_dump_table( lua_State * L );
+
 #endif // _TRICKPLAY_LB_H
 
