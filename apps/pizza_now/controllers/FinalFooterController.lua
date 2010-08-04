@@ -2,7 +2,8 @@ FinalFooterController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.CHECKOUT)
 
     local MenuItems = {
-        PLACE_ORDER = 1
+        GO_BACK = 1,
+        PLACE_ORDER = 2
     }
     
     local MenuSize = 0
@@ -14,15 +15,19 @@ FinalFooterController = Class(Controller, function(self, view, ...)
     local selected = 1
 
     local MenuItemCallbacks = {
-        [MenuItems.PLACE_ORDER] = function(self)
-            print("continuing")
+        [MenuItems.GO_BACK] = function(self)
+            print("back dat shit up")
             self:get_model():set_active_component(Components.FOOD_SELECTION)
             self:get_model():notify()
-        end
+        end,
+        [MenuItems.PLACE_ORDER] = function(self)
+        end,
     }
 
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
+        [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
+        [keys.Right]  = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self)
             -- compromise so that there's not a full-on lua panic,
             -- but the error message still displays on screen
@@ -50,7 +55,16 @@ FinalFooterController = Class(Controller, function(self, view, ...)
         if(not self.parent_controller) then
             self:set_parent_controller(view.parent_view:get_controller())
         end
-        self.parent_controller:move_selector(dir)
+        if(0 ~= dir[2]) then
+            self.parent_controller:move_selector(dir)
+        elseif(0 ~= dir[1]) then
+            local new_selected = selected + dir[1]
+            if(1 <= new_selected and new_selected <= MenuSize) then
+                selected = new_selected
+            end
+        else
+            error("someth'n eff'd up")
+        end
         self:get_model():notify()
     end
 
