@@ -4,11 +4,10 @@ FoodCarouselView = Class(View,
       
       local menu_items = {
          Image{src="assets/SelectPizzaLarge.png", scale={.5,.5}},
-         Image{src="assets/SelectNormalLarge.png", scale={.5,.5}},
-         Image{src="assets/SelectNormalLarge.png", scale={.5,.5}},
-         Image{src="assets/SelectNormalLarge.png", scale={.5,.5}},
-         Image{src="assets/SelectNormalLarge.png", scale={.5,.5}},
-         Image{src="assets/SelectNormalLarge.png", scale={.5,.5}},
+         Image{src="assets/SelectSidesLarge.png", scale={.5,.5}},
+         Image{src="assets/SelectSaladLarge.png", scale={.5,.5}},
+         Image{src="assets/SelectDrinksLarge.png", scale={.5,.5}},
+         Image{src="assets/SelectDessertLarge.png", scale={.5,.5}},
       }
 
       view.ui = Group{name="Food Carousel UI", position={0,0}, opacity=0}
