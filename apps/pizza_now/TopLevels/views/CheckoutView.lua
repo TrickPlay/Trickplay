@@ -173,7 +173,7 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Total",
     }
-    
+   --[[ 
     --driverInstructionsTextBox
     local driverInstructionsTextBox = TextBox(1020, 120, 1760-1040)
     --password TextBox
@@ -203,19 +203,15 @@ CheckoutView = Class(View, function(view, model, ...)
     local cityBillingTextBox = TextBox(1140, 900, 1540-1150)
     local stateBillingTextBox = TextBox(1540, 900, TWO_CHARACTERS)
     local zipBillingTextBox = TextBox(1620, 900, 1760-1630)
-
+--]]
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
-        orderText, detailsText, passwordText, driverInstructionsTextBox.group, passwordTextBox.group, 
-        enterPaymentText, firstNameTextBox.group, lastNameTextBox.group, emailNameTextBox.group,
-        emailAtTextBox.group, atSymbolText, nameText, phoneText, emailText, phoneTextBox1.group,
-        phoneTextBox2.group, phoneTextBox3.group, phoneTextBox4.group, extText, cash, masterCard,
-        visaCard, americanExpressCard, discoverCard, cardTextBox1.group, cardTextBox2.group,
-        cardTextBox3.group, cardTextBox4.group, cardNumberText, expirationMonthTextBox.group, expirationYearTextBox.group, expirationText,
-        secretCodeTextBox.group, secretCodeText, streetBillingTextBox.group, cityBillingTextBox.group, stateBillingTextBox.group, zipBillingTextBox.group, driverInstructionsText,
-        editOrderText, addCouponText, taxText, totalCostText,
-        currentCart
+        orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
+        nameText, phoneText, emailText, extText, cash, masterCard, visaCard,
+        americanExpressCard, discoverCard, cardNumberText, expirationText,
+        secretCodeText, driverInstructionsText, editOrderText, addCouponText,
+        taxText, totalCostText, currentCart
     }
     
     --create the components
