@@ -12,23 +12,25 @@ screen:show()
 
 function app.on_loaded()
     dofile ("Themes.lua")
- 	TitleBackground = Image {src = "themes/robot/background.png", x = 0, y = 0}
+ 	TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
 	screen:add(TitleBackground)
 
     -- Everything is loaded
     AssetLoader.on_preload_ready = function()
 
         dofile ("Circle.lua")
-        dofile ("ThemeMenu.lua")
-        dofile ("Levels.lua")
         
         local mainMenuList = {
-            { Rectangle{color="CC00FF", w=400, h=150, name="Single Player", x=500, y=400} },
-            { Rectangle{color="CC00FF", w=400, h=150, name="Cooperative", x=500} },
+            { AssetLoader:getImage("levelWindow",{ name="Single Player", x=700, y=100}) },
+            { AssetLoader:getImage("levelWindow",{ name="Cooperative", x=700, y=-80}) },
             --{ Rectangle{color="CC00FF", w=400, h=150, name="Competetive", x=500} }
         }
-        
-        local mainMenuFocus = Rectangle{color="FF00CC", w=420, h=170}
+	
+	if settings.saved then mainMenuList[3] = { AssetLoader:getImage( "levelWindow",{ name="Resume Game", x=700, y=-80} ) } end
+        --assert(#mainMenuList == )
+	
+	
+        local mainMenuFocus = Rectangle{color="FF00CC", w=300, h=250}
         
         local g = Group{}
         screen:add(g)
@@ -40,9 +42,9 @@ function app.on_loaded()
         MainMenu:apply_color_change("FFFFFF", "000000")
         MainMenu.container.name = os.time()
         --MainMenu.buttons:grab_key_focus()
-        
+	        
         MainMenu:update_cursor_position()
-        MainMenu.hl.opacity = 255
+        MainMenu.hl.opacity = 100
         
         MainMenu.buttons.extra.r = function()
 		
@@ -89,11 +91,17 @@ function app.on_loaded()
 		end
 		
     	end
+	
+	dofile ("ThemeMenu.lua")
+        dofile ("Levels.lua")
     	
     	ACTIVE_CONTAINER = MainMenu
     	keyboard_key_down = MainMenu.buttons.on_key_down
     
-    	--screen:add( AssetLoader:getImage("InfoBar2",{name="robot", x=200, y=200}) )
+    
+    
+	AssetLoader.on_preload_ready = nil
+    	--screen:add( AssetLoader:getImage("TitleBackground",{name="robot", x=200, y=200}) )
     	--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))
     	
     	AssetLoader.on_preload_ready = nil
