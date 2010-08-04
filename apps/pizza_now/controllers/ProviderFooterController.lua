@@ -1,6 +1,8 @@
 ProviderFooterController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PROVIDER_SELECTION)
 
+    local controller = self
+
     local MenuItems = {
         GO_BACK = 1,
         STREET = 2,
@@ -21,6 +23,13 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         local textObject = view.ui.children[item]
         textObject.editable = true
         textObject:grab_key_focus()
+        function textObject:on_key_down(k)
+            if(keys.Left == k or keys.Right == k) then
+                screen:grab_key_focus()
+                controller:on_key_down(k)
+                return true
+            end
+        end
         function textObject:on_key_focus_out()
             self.on_key_focus_out = nil
             args = {}
