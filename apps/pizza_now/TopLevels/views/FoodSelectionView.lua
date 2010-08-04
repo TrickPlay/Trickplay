@@ -1,6 +1,7 @@
 FoodSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
+    local bg = Image{src="assets/MenuScreenBg.png"}
     local foodHeaderView = FoodHeaderView(model)
     foodHeaderView:initialize()
     local foodCarouselView = FoodCarouselView(model)
@@ -10,13 +11,14 @@ FoodSelectionView = Class(View, function(view, model, ...)
 
     view.items = {foodHeaderView, foodCarouselView, foodFooterView}
   
-    view.provider_ui=Group{name="Food UI", position={10,10}, opacity=255}
+    view.provider_ui=Group{name="Food UI", position={0,0}, opacity=255}
 
     for i,v in ipairs(view.items) do
         view.provider_ui:add(v.ui)
     end
 
-    view.provider_ui:add(unpack(view.items))
+    view.provider_ui:add(bg, unpack(view.items))
+    view.provider_ui:lower_child(bg)
     screen:add(view.provider_ui)
 
     function view:initialize()

@@ -174,46 +174,46 @@ CheckoutView = Class(View, function(view, model, ...)
         text = "Total",
     }
     
-    --driverInstructionsForm
-    local driverInstructionsForm = Form(1020, 120, 1760-1040)
-    --password Form
-    local passwordForm = Form(1460, 260, 1740-1460)
+    --driverInstructionsTextbox
+    local driverInstructionsTextbox = Textbox(1020, 120, 1760-1040)
+    --password Textbox
+    local passwordTextbox = Textbox(1460, 260, 1740-1460)
     --credit card forms
-    local firstNameForm = Form(1140, 400, 1420-1140)
-    local lastNameForm = Form(1440, 400, 1440-1140)
-    local emailNameForm = Form(1140, 520, 1420-1140)
-    local emailAtForm = Form(1460, 520, 1420-1140)
+    local firstNameTextbox = Textbox(1140, 400, 1420-1140)
+    local lastNameTextbox = Textbox(1440, 400, 1440-1140)
+    local emailNameTextbox = Textbox(1140, 520, 1420-1140)
+    local emailAtTextbox = Textbox(1460, 520, 1420-1140)
     --more credit form stuff for entering phone number
-    local phoneForm1 = Form(1140, 460, THREE_CHARACTERS)
-    local phoneForm2 = Form(1230, 460, THREE_CHARACTERS)
-    local phoneForm3 = Form(1320, 460, FOUR_CHARACTERS)
-    local phoneForm4 = Form(1460, 460, THREE_CHARACTERS)
+    local phoneTextbox1 = Textbox(1140, 460, THREE_CHARACTERS)
+    local phoneTextbox2 = Textbox(1230, 460, THREE_CHARACTERS)
+    local phoneTextbox3 = Textbox(1320, 460, FOUR_CHARACTERS)
+    local phoneTextbox4 = Textbox(1460, 460, THREE_CHARACTERS)
     --card number entry forms
-    local cardForm1 = Form(1140, 720, FOUR_CHARACTERS)
-    local cardForm2 = Form(1250, 720, FOUR_CHARACTERS)
-    local cardForm3 = Form(1360, 720, FOUR_CHARACTERS)
-    local cardForm4 = Form(1470, 720, FOUR_CHARACTERS)
+    local cardTextbox1 = Textbox(1140, 720, FOUR_CHARACTERS)
+    local cardTextbox2 = Textbox(1250, 720, FOUR_CHARACTERS)
+    local cardTextbox3 = Textbox(1360, 720, FOUR_CHARACTERS)
+    local cardTextbox4 = Textbox(1470, 720, FOUR_CHARACTERS)
     --card expiration forms
-    local expirationMonthForm = Form(1140, 780, TWO_CHARACTERS)
-    local expirationYearForm = Form(1220, 780, FOUR_CHARACTERS)
+    local expirationMonthTextbox = Textbox(1140, 780, TWO_CHARACTERS)
+    local expirationYearTextbox = Textbox(1220, 780, FOUR_CHARACTERS)
     --CVC
-    local secretCodeForm = Form(1490, 780, THREE_CHARACTERS)
+    local secretCodeTextbox = Textbox(1490, 780, THREE_CHARACTERS)
     --Billing Address
-    local streetBillingForm = Form(1140, 840, 1750-1140)
-    local cityBillingForm = Form(1140, 900, 1540-1150)
-    local stateBillingForm = Form(1540, 900, TWO_CHARACTERS)
-    local zipBillingForm = Form(1620, 900, 1760-1630)
+    local streetBillingTextbox = Textbox(1140, 840, 1750-1140)
+    local cityBillingTextbox = Textbox(1140, 900, 1540-1150)
+    local stateBillingTextbox = Textbox(1540, 900, TWO_CHARACTERS)
+    local zipBillingTextbox = Textbox(1620, 900, 1760-1630)
 
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
-        orderText, detailsText, passwordText, driverInstructionsForm.group, passwordForm.group, formGroup,
-        enterPaymentText, firstNameForm.group, lastNameForm.group, emailNameForm.group,
-        emailAtForm.group, atSymbolText, nameText, phoneText, emailText, phoneForm1.group,
-        phoneForm2.group, phoneForm3.group, phoneForm4.group, extText, cash, masterCard,
-        visaCard, americanExpressCard, discoverCard, cardForm1.group, cardForm2.group,
-        cardForm3.group, cardForm4.group, cardNumberText, expirationMonthForm.group, expirationYearForm.group, expirationText,
-        secretCodeForm.group, secretCodeText, streetBillingForm.group, cityBillingForm.group, stateBillingForm.group, zipBillingForm.group, driverInstructionsText,
+        orderText, detailsText, passwordText, driverInstructionsTextbox.group, passwordTextbox.group, formGroup,
+        enterPaymentText, firstNameTextbox.group, lastNameTextbox.group, emailNameTextbox.group,
+        emailAtTextbox.group, atSymbolText, nameText, phoneText, emailText, phoneTextbox1.group,
+        phoneTextbox2.group, phoneTextbox3.group, phoneTextbox4.group, extText, cash, masterCard,
+        visaCard, americanExpressCard, discoverCard, cardTextbox1.group, cardTextbox2.group,
+        cardTextbox3.group, cardTextbox4.group, cardNumberText, expirationMonthTextbox.group, expirationYearTextbox.group, expirationText,
+        secretCodeTextbox.group, secretCodeText, streetBillingTextbox.group, cityBillingTextbox.group, stateBillingTextbox.group, zipBillingTextbox.group, driverInstructionsText,
         editOrderText, addCouponText, taxText, totalCostText,
         currentCart
     }
