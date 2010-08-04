@@ -51,7 +51,7 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Trickplay Password:",
     }
-    passwordForm = Form(1460, 260, 1740-1460)
+    passwordForm = Textbox(1460, 260, 1740-1460)
     --[[
     local passwordFormLeft = Image{
         position = {1460, 260},
