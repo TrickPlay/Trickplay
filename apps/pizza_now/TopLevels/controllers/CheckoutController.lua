@@ -15,7 +15,7 @@ CheckoutController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = CheckoutGroups.ORDER
+    local selected = CheckoutGroups.DETAILS
 
     --initialize the focus to the ORDER group
     assert(view.items[selected]:get_controller(), "view child with index "..selected.."is nil!")
@@ -69,7 +69,7 @@ CheckoutController = Class(Controller, function(self, view, ...)
         screen:grab_key_focus()
         if(0 ~= dir[1]) then
             local new_selected = selected + dir[1]
-            if 1 <= new_selected and new_selected <= GroupSize-1 then
+            if 2 <= new_selected and new_selected <= GroupSize-1 then
                 selected = new_selected
                 previousSelection = selected
             end
