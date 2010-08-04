@@ -12,7 +12,7 @@ function AssetLoader:checkPreload(calledFrom)
 		end
 	end
 	if ready == 1 then
-		self.on_preload_ready()
+		pcall( self.on_preload_ready )
 	end
 end
 

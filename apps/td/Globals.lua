@@ -1,3 +1,6 @@
+-- Loaded Game Variables
+
+
 -- All Global Variables
 
 
@@ -30,7 +33,7 @@ creep_spawn_timer = 0
 wave_counter = 0
 
 round = 1
-level = 1
+level = settings.level or 1
 
 --image_to_load = {"normal","mediumRobot"}
 
