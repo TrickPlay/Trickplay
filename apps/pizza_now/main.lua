@@ -33,19 +33,17 @@ Components = {
 }
 
 --Background junk
-    local back = Image{
-        position = {0,0},
-        src = "assets/MenuBg.jpg"
-    }
-    local junkInDaTrunk = Clone{source = back}
-    junkInDaTrunk.position = {960, 0}
-    local orderBar = Image{
-        src = "assets/OrderBarBase.png",
-        position = {0, 960},
-        tile = {true, false},
-        width = 1920
-    }
-screen:add(back, junkInDaTrunk, orderBar)
+local back = Image{
+   position = {0,0},
+   src = "assets/MenuBg.jpg"
+}
+local orderBar = Image{
+   src = "assets/OrderBarBase.png",
+   position = {0, 960},
+   tile = {true, false},
+   width = 1920
+}
+screen:add(back, orderBar)
 
 -- Model initialization
 model = Model()

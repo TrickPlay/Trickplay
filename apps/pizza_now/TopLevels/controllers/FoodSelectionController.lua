@@ -2,9 +2,9 @@ FoodSelectionController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.FOOD_SELECTION)
 
     local FoodMenuGroups  = {
-        FOOD_HEADER   = 1,
-        FOOD_CAROUSEL = 2,
-        FOOD_FOOTER   = 3
+       --FOOD_HEADER   = 1,
+       FOOD_CAROUSEL = 1,
+       FOOD_FOOTER   = 2
     }
 
     local GroupSize = 0
@@ -12,19 +12,21 @@ FoodSelectionController = Class(Controller, function(self, view, ...)
         GroupSize = GroupSize + 1
     end
 
+    local default_selected = FoodMenuGroups.FOOD_CAROUSEL
+
     -- the default selected index
-    local selected = FoodMenuGroups.FOOD_CAROUSEL
+    local selected = default_selected
 
     --initialize the focus to the carousel
     assert(view.items[selected], "view child with index " .. selected .. " is nil!")
     self.child = view.items[selected]:get_controller()
 
     local FoodMenuCallbacks = {
-        [FoodMenuGroups.FOOD_HEADER] = function(self)
-            print("delivery options")
-            assert(self.child)
-            self.child:run_callback()
-        end,
+        -- [FoodMenuGroups.FOOD_HEADER] = function(self)
+        --     print("delivery options")
+        --     assert(self.child)
+        --     self.child:run_callback()
+        -- end,
         [FoodMenuGroups.FOOD_CAROUSEL] = function(self)
             print("providers")
         end,
@@ -61,4 +63,7 @@ FoodSelectionController = Class(Controller, function(self, view, ...)
         self:get_model():notify()
     end
 
+    function self:reset()
+       selected=default_selected
+    end
 end)

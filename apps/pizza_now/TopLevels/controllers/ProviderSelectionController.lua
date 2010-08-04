@@ -2,9 +2,9 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PROVIDER_SELECTION)
 
     local ProviderGroups = {
-        DELIVERY_OPTIONS = 1,
-        PROVIDERS = 2,
-        FOOTER = 3
+--        DELIVERY_OPTIONS = 1,
+        PROVIDERS = 1,
+        FOOTER = 2
     }
 
     local GroupSize = 0
@@ -20,11 +20,11 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     self.child = view.items[selected]:get_controller()
 
     local ProviderCallbacks = {
-        [ProviderGroups.DELIVERY_OPTIONS] = function(self)
-            print("delivery options")
-            assert(self.child)
-            self.child:run_callback()
-        end,
+        -- [ProviderGroups.DELIVERY_OPTIONS] = function(self)
+        --     print("delivery options")
+        --     assert(self.child)
+        --     self.child:run_callback()
+        -- end,
         [ProviderGroups.PROVIDERS] = function(self)
             print("providers")
             assert(self.child)
