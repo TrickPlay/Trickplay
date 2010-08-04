@@ -2,14 +2,15 @@ FoodSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
     local bg = Image{src="assets/MenuScreenBg.png"}
-    local foodHeaderView = FoodHeaderView(model)
-    foodHeaderView:initialize()
+    -- local foodHeaderView = FoodHeaderView(model)
+    -- foodHeaderView:initialize()
     local foodCarouselView = FoodCarouselView(model)
     foodCarouselView:initialize()
     local foodFooterView = FoodFooterView(model)
     foodFooterView:initialize()
 
-    view.items = {foodHeaderView, foodCarouselView, foodFooterView}
+    -- view.items = {foodHeaderView, foodCarouselView, foodFooterView}
+    view.items = {foodCarouselView, foodFooterView}
   
     view.provider_ui=Group{name="Food UI", position={0,0}, opacity=255}
 
@@ -37,16 +38,12 @@ FoodSelectionView = Class(View, function(view, model, ...)
             print("Showing FoodSelectionView UI")
             self.provider_ui.opacity = 255
             for i,c_view in ipairs(view.items) do
-                if i == controller:get_selected_index() then
-                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-
-                    self:get_controller().child = c_view:get_controller()
-                elseif i == 3 then
-                    c_view.ui.opacity = 255
-                    c_view.items[c_view:get_controller():get_selected_index()].opacity = 100
+                 if i == controller:get_selected_index() then
+                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                   controller.child = c_view:get_controller()
                 else
-                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                    prev_selection[i] = c_view:get_controller():get_selected_index()
+                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
+                   prev_selection[i] = c_view:get_controller():get_selected_index()
                 end
             end
         else

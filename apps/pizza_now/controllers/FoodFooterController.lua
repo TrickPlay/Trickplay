@@ -7,6 +7,12 @@ FoodFooterController = Class(Controller, function(self, view, ...)
         MenuSize = #view.items
         MenuItemCallbacks[1] = function(self)
             print("Backing up")
+
+            -- hack to get rid of the provider image at the top of this menu
+            local provider_img = screen:find_child("provider_img_clone")
+            if provider_img then
+               provider_img:unparent()
+            end
             self:get_model():set_active_component(Components.PROVIDER_SELECTION)
             self:get_model():notify()
         end

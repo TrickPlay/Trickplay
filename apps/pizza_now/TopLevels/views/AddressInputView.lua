@@ -5,15 +5,13 @@ AddressInputView = Class(View, function(view, model, ...)
         position = {0,0},
         src = "assets/MenuBg.jpg"
     }
-    local junkInDaTrunk = Clone{source = back}
-    junkInDaTrunk.position = {960, 0}
     local verticalDividerLeft = Image{
         position = {150,0},
         height = 960,
         tile = {false, true},
         src = "assets/MenuLine.png"
     }
-    local background = {back, junkInDaTrunk}
+    local background = {back}
 
     local street = Text{
         position={50,0},

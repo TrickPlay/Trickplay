@@ -1,22 +1,21 @@
 ProviderSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
-    local deliveryOptionsView = DeliveryOptionsView(model)
-    deliveryOptionsView:initialize()
+    -- local deliveryOptionsView = DeliveryOptionsView(model)
+    -- deliveryOptionsView:initialize()
     local providersView = ProvidersCarouselView(model)
     providersView:initialize()
     local footerView = ProviderFooterView(model)
     footerView:initialize()
 
-    view.items = {deliveryOptionsView, providersView, footerView}
+    -- view.items = {deliveryOptionsView, providersView, footerView}
+    view.items = {providersView, footerView}
 
     --Background junk
     local back = Image{
         position = {0,0},
         src = "assets/StoreScreenBg.png"
     }
-    local junkInDaTrunk = Clone{source = back}
-    junkInDaTrunk.position = {960, 0}
     local orderBar = Image{
         src = "assets/OrderBarBase.png",
         position = {0, 960},
@@ -94,8 +93,8 @@ ProviderSelectionView = Class(View, function(view, model, ...)
     addressBillingGroup:add(streetBillingForm, cityBillingForm, stateBillingForm, zipBillingForm, expirationMonthForm)
 
     view.background_ui = Group{name="provider_background_ui", position={0,0}, opacity=255}
-    view.background_ui:add(back, junkInDaTrunk, orderBar, addressBillingGroup)
-    view.provider_ui=Group{name="provider_components_ui", position={10,10}, opacity=255}
+    view.background_ui:add(back, orderBar, addressBillingGroup)
+    view.provider_ui=Group{name="provider_components_ui", position={0,0}, opacity=255}
 
     for i,v in ipairs(view.items) do
         view.provider_ui:add(v.ui)

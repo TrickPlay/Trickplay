@@ -16,30 +16,39 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
     local MenuItemCallbacks = {
         [MenuItems.DOMINOS] =
            function(self)
-              self:get_model():set_active_component(Components.FOOD_SELECTION)
-              self:get_model():notify()
+              local model = self:get_model()
+              local view = self:get_view()
+              model:set_active_component(Components.FOOD_SELECTION)
+              view:animate_to_food(model:get_active_controller())
            end,
         [MenuItems.PIZZA_HUT] =
            function(self)
-              self:get_model():set_active_component(Components.FOOD_SELECTION)
-              self:get_model():notify()
+              local model = self:get_model()
+              local view = self:get_view()
+              model:set_active_component(Components.FOOD_SELECTION)
+              view:animate_to_food(model:get_active_controller())
            end,
         [MenuItems.ROUND_TABLE] =
            function(self)
-              self:get_model():set_active_component(Components.FOOD_SELECTION)
-              self:get_model():notify()
+              local model = self:get_model()
+              local view = self:get_view()
+              model:set_active_component(Components.FOOD_SELECTION)
+              view:animate_to_food(model:get_active_controller())
            end,
         [MenuItems.PIZZA_MY_HEART] =
            function(self)
-              self:get_model():set_active_component(Components.FOOD_SELECTION)
-              self:get_model():notify()
+              local model = self:get_model()
+              local view = self:get_view()
+              model:set_active_component(Components.FOOD_SELECTION)
+              view:animate_to_food(model:get_active_controller())
            end,
         [MenuItems.PAPA_JOHNS] =
            function(self)
-              self:get_model():set_active_component(Components.FOOD_SELECTION)
-              self:get_model():notify()
+              local model = self:get_model()
+              local view = self:get_view()
+              model:set_active_component(Components.FOOD_SELECTION)
+              view:animate_to_food(model:get_active_controller())
            end,
-
     }
 
     local CarouselKeyTable = {
@@ -77,6 +86,6 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
 
     
     function self:run_callback()
-        CarouselKeyTable[keys.Return](view)
+        CarouselKeyTable[keys.Return](self)
     end
 end)
