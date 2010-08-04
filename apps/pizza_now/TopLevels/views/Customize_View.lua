@@ -87,6 +87,7 @@ CustomizeView = Class(View, function(view, model, ...)
 
         view.accordian_group = {}
         view.accordian_group_items = {}
+        view.first_tab_groups = {}
         for tab_index,tab in ipairs(model.current_item.Tabs) do
 
             --check to see if there is an item selected
@@ -117,12 +118,106 @@ CustomizeView = Class(View, function(view, model, ...)
             view.accordian_group_items[tab_index] = {}
             view.sub_group[tab_index] = Group{name="Tab "..tab_index.." sub-group",
                                                     position={500,100}, opacity=0}
-            if tab.Options ~= nil then
-                --view.accordian_group[tab_index][opt_index] = {}
-                --view.accordian_group_items[tab_index][opt_index] = {}
+            
+            --the crust cheese and sauce page
+            if tab.Radio == true then
+                --everything is hardcoded...
+                view.first_tab_groups[1] = {}
+                view.first_tab_groups[2] = {}
+                view.first_tab_groups[3] = {}
 
-                for opt_index,option in ipairs(tab.Options) do
-                    if option.Radio then
+                --Cheese is on the top
+                view.sub_group[tab_index]:add(Text {
+                            position = {0, 0},
+                            font     = CUSTOMIZE_SUB_FONT_B,
+                            color    = Colors.BLACK,
+                            text     = "Cheese:"
+                })
+                view.sub_group[tab_index]:add(Image{
+                    position = {100, 0},
+                    scale    = {1,1.5},
+                    tiled    = {true,false},
+                    width    = 300,
+                    src      = "assets/MenuHorzLine.png"
+                })
+                --Cheese Placement
+                view.first_tab_groups[1][1] = {}
+                view.first_tab_groups[1][1][-2] = Text{
+                            position = {40, 60},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = "Placement on Pizza:"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-2])
+                view.first_tab_groups[1][1][-1] = Image{
+                            position = {40, 120},
+                            src      = "assets/CrustSelect4.png"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-1])
+                for i=1,#All_Options["Placement_r"] do
+                    view.first_tab_groups[1][1][i] ={}
+                    view.first_tab_groups[1][1][i][1] = Text{
+                            position = {120, 60*i+60},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = All_Options["Placement_r"][i]
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
+                    if i == tab.Options[1].Placement then
+                        view.first_tab_groups[1][1][i][2] = Image {
+                            position = {60, 60*i+60},
+                            src      = "assets/RadioOn.png"
+                        }
+                    else
+                        view.first_tab_groups[1][1][i][2] = Image {
+                            position = {60,60*i+60},
+                            src      = "assets/RadioOff.png"
+                        }
+                    end
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][2])
+                end
+                --Cheese Coverage
+                view.first_tab_groups[1][2] = {}
+                view.first_tab_groups[1][2][-2] = Text{
+                            position = {200, 60},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = "Coverage on Pizza:"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-2])
+                view.first_tab_groups[1][2][-1] = Image{
+                            position = {200, 120},
+                            src      = "assets/CrustSelect4.png"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-1])
+                for i=1,#All_Options["CoverageX_r"] do
+                    view.first_tab_groups[1][2][i] ={}                    
+                    view.first_tab_groups[1][2][i][1] = Text{
+                            position = {320, 60*i+60},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = All_Options["CoverageX_r"][i]
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
+                    if i == tab.Options[1].CoverageX then
+                        view.first_tab_groups[1][2][i][2] = Image {
+                            position = {260, 60*i+60},
+                            src      = "assets/RadioOn.png"
+                        }
+                    else
+                        view.first_tab_groups[1][2][i][2] = Image {
+                            position = {260,60*i+60},
+                            src      = "assets/RadioOff.png"
+                        }
+                    end
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][2])
+                end
+
+
+                --Crust and Size are in the middle
+                --Sauce is bottom left
+
+--[===[
                         view.sub_group_items[tab_index][opt_index] = {}
                         view.sub_group_items[tab_index][opt_index][1] = Text {
                             position = {0, 60*(opt_index-1)+10},
@@ -183,7 +278,7 @@ CustomizeView = Class(View, function(view, model, ...)
 
                             end
                         end
---[[
+--[==[
                         --radio_index = radio_index + 1
                                 --acc_adjust = acc_adjust+60
                         view.accordian_group_items[tab_index][opt_index][acc_index]={}
@@ -195,7 +290,7 @@ CustomizeView = Class(View, function(view, model, ...)
                                           text     = "Continue"
                                     }
                         --acc_adjust = acc_adjust +radio_index*60
-                        view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][1][1])--]]
+                        view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][1][1])--]==]
 
                         view.sub_group[tab_index]:add(view.accordian_group[tab_index][opt_index])
                                     --acc_adjust = acc_adjust+60
@@ -214,7 +309,7 @@ CustomizeView = Class(View, function(view, model, ...)
 
                             --model.accordian
                             --init accordian
-                        end
+                        end--]]
                 --[[        option.UnSelected = function()
                             print("\n\nunselecting")
                             if opt_index < #tab.Options then
@@ -226,8 +321,15 @@ CustomizeView = Class(View, function(view, model, ...)
                             model:set_active_component(Components.TAB)
                             self:get_model():notify()
 
-                        end--]]
-                    else
+                        end--]===]
+                    
+
+            --the Topping pages
+            elseif tab.Options ~= nil then
+                --view.accordian_group[tab_index][opt_index] = {}
+                --view.accordian_group_items[tab_index][opt_index] = {}
+
+                for opt_index,option in ipairs(tab.Options) do
                         local indent = 1
                         view.sub_group_items[tab_index][opt_index] = {}
                         view.sub_group_items[tab_index][opt_index][1] = Text {
@@ -270,7 +372,7 @@ CustomizeView = Class(View, function(view, model, ...)
                         --end
                     
 
-                    end
+                    
                 end
 
             end 
@@ -375,18 +477,6 @@ windmill_view:initialize()
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeView UI")
             view.ui.opacity = 255
---[[
-            if controller.on_back_arrow then
-                view.back_arrow_selected.opacity = 255
-                view.selector.opacity = 0
-                view.add_to_order_selector.opacity = 0
-            elseif controller.add_to_order then
-                print("addd to order")
-                view.add_to_order_selector.opacity = 255
-                view.back_arrow_selected.opacity = 0
-                view.selector.opacity = 0
-            else
---]]
                 --view.back_arrow_selected.opacity = 0
                 --view.add_to_order_selector.opacity = 0
                 for i,item in ipairs(view.menu_items) do
