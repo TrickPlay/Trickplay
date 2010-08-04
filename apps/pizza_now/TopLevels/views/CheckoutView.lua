@@ -3,6 +3,7 @@ EDIT_ORDER_Y = 460
 CheckoutView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     view.cart_items = {}
+    view.icons = {}
     --first add the background shiz
     local back = Image{
         position = {0,0},
@@ -173,6 +174,7 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Total",
     }
+<<<<<<< HEAD:apps/pizza_now/TopLevels/views/CheckoutView.lua
    --[[ 
     --driverInstructionsTextBox
     local driverInstructionsTextBox = TextBox(1020, 120, 1760-1040)
@@ -196,9 +198,35 @@ CheckoutView = Class(View, function(view, model, ...)
     --card expiration textboxs
     local expirationMonthTextBox = TextBox(1140, 780, TWO_CHARACTERS)
     local expirationYearTextBox = TextBox(1220, 780, FOUR_CHARACTERS)
+=======
+    
+    --driverInstructionsTextbox
+    local driverInstructionsTextbox = Textbox(1020, 120, 1760-1040)
+    --password Textbox
+    local passwordTextbox = Textbox(1460, 260, 1740-1460)
+    --credit card forms
+    local firstNameTextbox = Textbox(1140, 400, 1420-1140)
+    local lastNameTextbox = Textbox(1440, 400, 1440-1140)
+    local emailNameTextbox = Textbox(1140, 520, 1420-1140)
+    local emailAtTextbox = Textbox(1460, 520, 1420-1140)
+    --more credit form stuff for entering phone number
+    local phoneTextbox1 = Textbox(1140, 460, THREE_CHARACTERS)
+    local phoneTextbox2 = Textbox(1230, 460, THREE_CHARACTERS)
+    local phoneTextbox3 = Textbox(1320, 460, FOUR_CHARACTERS)
+    local phoneTextbox4 = Textbox(1460, 460, THREE_CHARACTERS)
+    --card number entry forms
+    local cardTextbox1 = Textbox(1140, 720, FOUR_CHARACTERS)
+    local cardTextbox2 = Textbox(1250, 720, FOUR_CHARACTERS)
+    local cardTextbox3 = Textbox(1360, 720, FOUR_CHARACTERS)
+    local cardTextbox4 = Textbox(1470, 720, FOUR_CHARACTERS)
+    --card expiration forms
+    local expirationMonthTextbox = Textbox(1140, 780, TWO_CHARACTERS)
+    local expirationYearTextbox = Textbox(1220, 780, FOUR_CHARACTERS)
+>>>>>>> 41c9d21613929e61eb2cd390ecf8a876165e2ac9:apps/pizza_now/TopLevels/views/CheckoutView.lua
     --CVC
-    local secretCodeTextBox = TextBox(1490, 780, THREE_CHARACTERS)
+    local secretCodeTextbox = Textbox(1490, 780, THREE_CHARACTERS)
     --Billing Address
+<<<<<<< HEAD:apps/pizza_now/TopLevels/views/CheckoutView.lua
     local streetBillingTextBox = TextBox(1140, 840, 1750-1140)
     local cityBillingTextBox = TextBox(1140, 900, 1540-1150)
     local stateBillingTextBox = TextBox(1540, 900, TWO_CHARACTERS)
@@ -212,6 +240,25 @@ CheckoutView = Class(View, function(view, model, ...)
         americanExpressCard, discoverCard, cardNumberText, expirationText,
         secretCodeText, driverInstructionsText, editOrderText, addCouponText,
         taxText, totalCostText, currentCart
+=======
+    local streetBillingTextbox = Textbox(1140, 840, 1750-1140)
+    local cityBillingTextbox = Textbox(1140, 900, 1540-1150)
+    local stateBillingTextbox = Textbox(1540, 900, TWO_CHARACTERS)
+    local zipBillingTextbox = Textbox(1620, 900, 1760-1630)
+
+    local background = {
+        back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
+        verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
+        orderText, detailsText, passwordText, driverInstructionsTextbox.group, passwordTextbox.group, formGroup,
+        enterPaymentText, firstNameTextbox.group, lastNameTextbox.group, emailNameTextbox.group,
+        emailAtTextbox.group, atSymbolText, nameText, phoneText, emailText, phoneTextbox1.group,
+        phoneTextbox2.group, phoneTextbox3.group, phoneTextbox4.group, extText, cash, masterCard,
+        visaCard, americanExpressCard, discoverCard, cardTextbox1.group, cardTextbox2.group,
+        cardTextbox3.group, cardTextbox4.group, cardNumberText, expirationMonthTextbox.group, expirationYearTextbox.group, expirationText,
+        secretCodeTextbox.group, secretCodeText, streetBillingTextbox.group, cityBillingTextbox.group, stateBillingTextbox.group, zipBillingTextbox.group, driverInstructionsText,
+        editOrderText, addCouponText, taxText, totalCostText,
+        currentCart
+>>>>>>> 41c9d21613929e61eb2cd390ecf8a876165e2ac9:apps/pizza_now/TopLevels/views/CheckoutView.lua
     }
     
     --create the components
@@ -258,6 +305,12 @@ CheckoutView = Class(View, function(view, model, ...)
             print("adding "..model.cart[cart_index].Name.." from cart to screen")
             view.cart_items[#view.cart_items+1] = Text{
                 position = {200,next_y},
+                font = CUSTOMIZE_SUB_FONT_B,
+                color = Colors.BLACK,
+                text = lines.top
+            }
+            view.cart_items[#view.cart_items+1] = Text{
+                position = {200,next_y+50},
                 font = CUSTOMIZE_SUB_FONT,
                 color = Colors.BLACK,
                 text = model.cart[cart_index].CheckOutDesc()
@@ -266,6 +319,7 @@ CheckoutView = Class(View, function(view, model, ...)
             cart_index = cart_index+1
         end
         view.ui:add(unpack(view.cart_items))
+        view.ui:add(unpack(view.icons))
     end
     
     local prev_selection = {}

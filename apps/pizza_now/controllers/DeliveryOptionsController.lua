@@ -50,7 +50,7 @@ DeliveryOptionsController = Class(Controller, function(self, view, ...)
     end
 
     function self:get_selected_index()
-        return selected
+       return selected
     end
 
     function self:move_selector(dir)

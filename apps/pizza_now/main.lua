@@ -66,14 +66,7 @@ item_selection_view:initialize()
 
 local customize_view = CustomizeView(model)
 customize_view:initialize()
-local tab_view = TabView(model,customize_view)
-tab_view:initialize()
-customize_view:get_controller():set_child_controller(tab_view:get_controller())
-local acc_view = AccordianView(model,customize_view)
-acc_view:initialize()
 
-local windmill_view = WindMillView(model)
-windmill_view:initialize()
 
 local checkout_view = CheckoutView(model)
 checkout_view:initialize()

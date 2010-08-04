@@ -43,8 +43,12 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
     }
 
     local CarouselKeyTable = {
-        [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
-        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Left]  = function(self)
+                          self:move_selector(Directions.LEFT)
+                       end,
+        [keys.Right] = function(self)
+                          self:move_selector(Directions.RIGHT)
+                       end,
         [keys.Return] =
         function(self)
             local success, error_msg = pcall(MenuItemCallbacks[selected], self)
@@ -59,16 +63,16 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
     end
 
     function self:move_selector(dir)
-        screen:grab_key_focus()
-        local new_selected = selected + dir[1]
-        if 1 <= new_selected and new_selected <= MenuSize then
-            selected = new_selected
-        end
-        self:get_model():notify()
+       screen:grab_key_focus()
+       local new_selected = selected + dir[1]
+       if 1 <= new_selected and new_selected <= MenuSize then
+          selected = new_selected
+       end
+       self:get_model():notify()
     end
 
     function self:get_selected_index()
-        return selected
+       return selected
     end		
 
     
