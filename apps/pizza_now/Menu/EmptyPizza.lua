@@ -179,6 +179,7 @@ EmptyPizza = Class(
       self.Price = "$16.50"
       self.Tabs = {}
       self.Tabs[1] = {
+         Radio = true,
          Tab_Text = "Crust",
          --Radio Buttons
          Options = {
@@ -232,11 +233,13 @@ EmptyPizza = Class(
       }
       --Meat Toppings
       self.Tabs[2] = {
+         Radio = false,
          Tab_Text = "Meat",
          Options = {}
       }
       --Veggie Toppings
       self.Tabs[3] = {
+         Radio = false,
          Tab_Text = "Veggie",
          Options = {}
       }

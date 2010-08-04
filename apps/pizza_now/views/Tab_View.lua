@@ -49,10 +49,14 @@ TabView = Class(View, function(view, model,parent, ...)
     end
 
     function view:move_selector_up(i)
+
         local bound = #view.menu_items[view.parent:get_controller():get_selected_index()]
         print("\n\nbound",bound,"i",i)
         --if bound > 13 then bound = 13 end
-        if view.selector.y ~= 0 then view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10---view.selector.y-60
+        if view.selector.y ~= 0 then 
+           view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10---view.selector.y-60
+           view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
+           view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+1][4]:out_focus()
         elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
              print("\n\n1",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
              view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-2)+20
@@ -60,11 +64,13 @@ TabView = Class(View, function(view, model,parent, ...)
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 255
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4].group.opacity = 255
              
              if view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+CUSTOMIZE_SCROLL_THRESHOLD] ~= nil then
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+CUSTOMIZE_SCROLL_THRESHOLD][1].opacity= 0
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+CUSTOMIZE_SCROLL_THRESHOLD][2].opacity= 0
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+CUSTOMIZE_SCROLL_THRESHOLD][3].opacity= 0
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+CUSTOMIZE_SCROLL_THRESHOLD][4].group.opacity= 0
              end
 
         end
@@ -77,6 +83,8 @@ TabView = Class(View, function(view, model,parent, ...)
         if bound < edge then edge = bound end
         if i <= CUSTOMIZE_SCROLL_THRESHOLD
 --[[view.selector.y <= 60*(edge-1)]] then view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y - view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10--view.selector.y+60
+           view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
+           view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-1][4]:out_focus()
         elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
              print("\n\n2",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
              view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-1-CUSTOMIZE_SCROLL_THRESHOLD)+20
@@ -84,11 +92,13 @@ TabView = Class(View, function(view, model,parent, ...)
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][3].opacity = 255
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4].group.opacity = 255
 
              if view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-edge] ~= nil then
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-edge][1].opacity= 0
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-edge][2].opacity= 0
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-edge][3].opacity= 0
+             view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-edge][4].group.opacity= 0
              end
 
         end

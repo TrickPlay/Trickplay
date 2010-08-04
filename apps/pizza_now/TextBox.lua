@@ -38,11 +38,11 @@ TextBox = Class(function(textbox, x, y, length, ...)
     textbox.group:add(textbox.black, textbox.red)
 
     function textbox:on_focus()
-       textbox.red:animate{opacity = 255}
-       textbox.black:animate{opacity = 0}
+       textbox.red:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
+       textbox.black:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
     end
     function textbox:out_focus()
-       textbox.red:animate{opacity = 0}
-       textbox.black:animate{opacity = 255}
+       textbox.red:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
+       textbox.black:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
     end
 end)
