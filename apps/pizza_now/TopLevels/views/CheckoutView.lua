@@ -3,6 +3,7 @@ EDIT_ORDER_Y = 460
 CheckoutView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     view.cart_items = {}
+    view.icons = {}
     --first add the background shiz
     local back = Image{
         position = {0,0},
@@ -253,23 +254,80 @@ CheckoutView = Class(View, function(view, model, ...)
             for i=1,#view.cart_items do
                 view.cart_items[i]:unparent()
             end
+            for i=1,#view.icons do
+                view.icons[i]:unparent()
+            end
         --end
         view.cart_items = {}
-        local next_y = 60
+        local next_y = 50
         local cart_index = 1
+        view.icons = {}
+        local icon_index = 1
         while cart_index <= #model.cart and
               next_y <= EDIT_ORDER_Y do
+
             print("adding "..model.cart[cart_index].Name.." from cart to screen")
+            local lines = {}
+            local y_adjust = 100
+            lines = model.cart[cart_index].CheckOutDesc()
+
             view.cart_items[#view.cart_items+1] = Text{
                 position = {200,next_y},
+                font = CUSTOMIZE_SUB_FONT_B,
+                color = Colors.BLACK,
+                text = lines.top
+            }
+            view.cart_items[#view.cart_items+1] = Text{
+                position = {200,next_y+50},
                 font = CUSTOMIZE_SUB_FONT,
                 color = Colors.BLACK,
-                text = model.cart[cart_index].CheckOutDesc()
+                text = lines.crust
             }
-            next_y = next_y +120 -- + model.cart[cart_index].Desc_height
+            if lines.entire ~= "" then
+                view.icons[#view.icons+1] = Image{
+                    position = {260,next_y+y_adjust-15},
+                    src = "assets/Placement/Entire.png"
+                }
+                view.cart_items[#view.cart_items+1] = Text{
+                    position = {200,next_y+y_adjust},
+                    font = CUSTOMIZE_SUB_FONT,
+                    color = Colors.BLACK,
+                    text = lines.entire
+                }
+                y_adjust = y_adjust+50
+            end
+            if lines.left ~= "" then
+                view.icons[#view.icons+1] = Image{
+                    position = {270,next_y+y_adjust-15},
+                    src = "assets/Placement/Left.png"
+                }
+                view.cart_items[#view.cart_items+1] = Text{
+                    position = {200,next_y+y_adjust},
+                    font = CUSTOMIZE_SUB_FONT,
+                    color = Colors.BLACK,
+                    text = lines.left
+                }
+                y_adjust = y_adjust+50
+            end
+            if lines.right ~= "" then
+                view.icons[#view.icons+1] = Image{
+                    position = {250,next_y+y_adjust-15},
+                    src = "assets/Placement/Right.png"
+                }
+                view.cart_items[#view.cart_items+1] = Text{
+                    position = {200,next_y+y_adjust},
+                    font = CUSTOMIZE_SUB_FONT,
+                    color = Colors.BLACK,
+                    text = lines.right
+                }
+                y_adjust = y_adjust+50
+            end
+
+            next_y = next_y + y_adjust+10
             cart_index = cart_index+1
         end
         view.ui:add(unpack(view.cart_items))
+        view.ui:add(unpack(view.icons))
     end
     
     local prev_selection = {}
