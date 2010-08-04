@@ -1,6 +1,6 @@
 -- Call this Textbox or Formfield, but not Form cause Form implies that this class encapsulates an entire Form
 
-Textbox = Class(function(textbox, x, y, length, ...)
+TextBox = Class(function(textbox, x, y, length, ...)
     textbox.black = Group{position = {x, y}}
     textbox.red = Group{position = {x, y}, opacity = 0}
     textbox.group = Group{}

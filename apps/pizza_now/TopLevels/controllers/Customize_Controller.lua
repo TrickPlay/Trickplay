@@ -2,6 +2,19 @@ CustomizeController = Class(Controller,
    function(self, view, ...)
       self._base.init(self, view, Components.CUSTOMIZE)
 
+      self.ChildComponents = {
+          TAB_BAR = 1,
+          TAB_ITEMS = 2,
+          FOOT = 3,
+          WINDMILL_SELECTOR = 4,
+          RADIO_SELECTOR
+      }
+      self.curr_comp = self.ChildComponents.TAB_BAR
+      self.conches = {}
+      function self:set_children(children)
+          self.conches = {}
+          self.conches = children
+      end
       -- the default selected index
       local selected = 1
 
@@ -111,8 +124,10 @@ CustomizeController = Class(Controller,
 
       function self:on_key_down(k)
          --print("Customize_controller on_key_down called with key", k)
-         if MenuKeyTable[k] then
+         if self.curr_comp == self.ChildComponents.TAB_BAR then
             MenuKeyTable[k](self)
+         elseif self.curr_comp == self.ChildComponents.FOOT then
+            self.conches[self.curr_comp]:on_key_down(k)
          end
       end
 
@@ -137,16 +152,18 @@ CustomizeController = Class(Controller,
 
 
       function self:move_selector(dir)
+--[[
          if(self.on_back_arrow) then
             if dir == Directions.RIGHT then
                self.on_back_arrow = false
                self:get_model():notify()
             end
          --if you are already in the Tab sub group, pass the call down
-         elseif(self.in_tab_group) then
+         else--]]if(self.in_tab_group) then
             --print("self.in_tab_group true")
             assert(self.tab_controller,"tab controller is nil")
             self.tab_controller:move_selector(dir)
+--[[
          elseif self.add_to_order then
             if dir == Directions.UP then
                 self.add_to_order = false
@@ -156,8 +173,10 @@ CustomizeController = Class(Controller,
                 self.add_to_order  = false
                 self:get_model():notify()
             end
+--]]
          --otherwise
          else
+           if self.curr_comp == self.ChildComponents.TAB_BAR then
             --print("Customize move_selector()",dir[1],dir[2])
             --table.foreach(dir, print)
             --move into the Tab sub group
@@ -179,12 +198,13 @@ CustomizeController = Class(Controller,
                   --print(selected)
                elseif new_selected > MenuSize then
                   print("add??")
-                  self.add_to_order = true
-                  self:get_model():notify()
+                  self.curr_comp = self.ChildComponents.FOOT
+                  --self:get_model():notify()
                end
                --MenuItemCallbacks[selected]()
                self:get_model():notify()
             end
+           end
          end
       end
    end)
