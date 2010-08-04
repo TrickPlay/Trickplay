@@ -176,34 +176,34 @@ CheckoutView = Class(View, function(view, model, ...)
     }
     
     --driverInstructionsTextbox
-    local driverInstructionsTextbox = Textbox(1020, 120, 1760-1040)
+    local driverInstructionsTextbox = TextBox(1020, 120, 1760-1040)
     --password Textbox
-    local passwordTextbox = Textbox(1460, 260, 1740-1460)
+    local passwordTextbox = TextBox(1460, 260, 1740-1460)
     --credit card forms
-    local firstNameTextbox = Textbox(1140, 400, 1420-1140)
-    local lastNameTextbox = Textbox(1440, 400, 1440-1140)
-    local emailNameTextbox = Textbox(1140, 520, 1420-1140)
-    local emailAtTextbox = Textbox(1460, 520, 1420-1140)
+    local firstNameTextbox = TextBox(1140, 400, 1420-1140)
+    local lastNameTextbox = TextBox(1440, 400, 1440-1140)
+    local emailNameTextbox = TextBox(1140, 520, 1420-1140)
+    local emailAtTextbox = TextBox(1460, 520, 1420-1140)
     --more credit form stuff for entering phone number
-    local phoneTextbox1 = Textbox(1140, 460, THREE_CHARACTERS)
-    local phoneTextbox2 = Textbox(1230, 460, THREE_CHARACTERS)
-    local phoneTextbox3 = Textbox(1320, 460, FOUR_CHARACTERS)
-    local phoneTextbox4 = Textbox(1460, 460, THREE_CHARACTERS)
+    local phoneTextbox1 = TextBox(1140, 460, THREE_CHARACTERS)
+    local phoneTextbox2 = TextBox(1230, 460, THREE_CHARACTERS)
+    local phoneTextbox3 = TextBox(1320, 460, FOUR_CHARACTERS)
+    local phoneTextbox4 = TextBox(1460, 460, THREE_CHARACTERS)
     --card number entry forms
-    local cardTextbox1 = Textbox(1140, 720, FOUR_CHARACTERS)
-    local cardTextbox2 = Textbox(1250, 720, FOUR_CHARACTERS)
-    local cardTextbox3 = Textbox(1360, 720, FOUR_CHARACTERS)
-    local cardTextbox4 = Textbox(1470, 720, FOUR_CHARACTERS)
+    local cardTextbox1 = TextBox(1140, 720, FOUR_CHARACTERS)
+    local cardTextbox2 = TextBox(1250, 720, FOUR_CHARACTERS)
+    local cardTextbox3 = TextBox(1360, 720, FOUR_CHARACTERS)
+    local cardTextbox4 = TextBox(1470, 720, FOUR_CHARACTERS)
     --card expiration forms
-    local expirationMonthTextbox = Textbox(1140, 780, TWO_CHARACTERS)
-    local expirationYearTextbox = Textbox(1220, 780, FOUR_CHARACTERS)
+    local expirationMonthTextbox = TextBox(1140, 780, TWO_CHARACTERS)
+    local expirationYearTextbox = TextBox(1220, 780, FOUR_CHARACTERS)
     --CVC
-    local secretCodeTextbox = Textbox(1490, 780, THREE_CHARACTERS)
+    local secretCodeTextbox = TextBox(1490, 780, THREE_CHARACTERS)
     --Billing Address
-    local streetBillingTextbox = Textbox(1140, 840, 1750-1140)
-    local cityBillingTextbox = Textbox(1140, 900, 1540-1150)
-    local stateBillingTextbox = Textbox(1540, 900, TWO_CHARACTERS)
-    local zipBillingTextbox = Textbox(1620, 900, 1760-1630)
+    local streetBillingTextbox = TextBox(1140, 840, 1750-1140)
+    local cityBillingTextbox = TextBox(1140, 900, 1540-1150)
+    local stateBillingTextbox = TextBox(1540, 900, TWO_CHARACTERS)
+    local zipBillingTextbox = TextBox(1620, 900, 1760-1630)
 
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
