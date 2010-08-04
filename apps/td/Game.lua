@@ -62,9 +62,13 @@ function Game:killGame(status)
 	
 	AssetLoader:addAllToScreen()
 	
+	screen:add(TitleBackground)
+
+	
 	screen:add(LevelMenu.container)
 	screen:add(MainMenu.container)
 	screen:add(ThemeMenu.container)
+	
 	
 	MainMenu.container.opacity = 0
 	ThemeMenu.container.opacity = 0
