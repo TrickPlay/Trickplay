@@ -45,14 +45,16 @@ function Tower:new(args, prefix, square, player)
 		fireImage = fireImage,
 		-- Stopwatch
 		timer = Stopwatch(),
-   }
+        }
+        
    	local rangeCircle = Canvas{color="00FF00", x=0, y=0, width=1920, height=1080, z = 0, opacity = 0}
-		rangeCircle:begin_painting()
-		rangeCircle:set_source_color("00FF00")
-		rangeCircle:arc(object.x+SP/2,object.y+SP/2,object.range,0,360)
-		rangeCircle:fill() -- or c:stroke()
-		rangeCircle:finish_painting()
-		object.rangeCircle = rangeCircle
+        rangeCircle:begin_painting()
+        rangeCircle:set_source_color(player.color)
+        rangeCircle:arc(object.x+SP/2,object.y+SP/2,object.range,0,360)
+        rangeCircle:fill() -- or c:stroke()
+        rangeCircle:finish_painting()
+        object.rangeCircle = rangeCircle
+                
    	if args.upgrades then
                 object.levels = #args.upgrades
                 object.upgradeCost = args.upgrades[1].cost

@@ -7,7 +7,10 @@ local names = {}
 
 for k,v in pairs(Themes) do
 	themeMenuList[ #themeMenuList + 1 ] = {}
-	themeMenuList[ #themeMenuList][1] = Rectangle{color = "CC00FF", w=300, h=80, name = k, x = 950}
+	--themeMenuList[ #themeMenuList][1] = Rectangle{color = "CC00FF", w=300, h=80, name = k, x = 950}
+        themeMenuList[ #themeMenuList][1] = AssetLoader:getImage("levelWindow",{w=300, h=100, name = k, x = 1200} )
+        
+        
 	names[#names+1] = k
 end
 
@@ -20,7 +23,7 @@ ThemeMenu.container.opacity = 0
 ThemeMenu:create_key_functions()
 ThemeMenu:button_directions()
 ThemeMenu:create_buttons(10, "Sans 34px")
-ThemeMenu:apply_color_change("FFFFFF", "00CCCC")
+ThemeMenu:apply_color_change("FFFFFF", "000000")
 
 ThemeMenu.buttons.extra.r = function()
         
