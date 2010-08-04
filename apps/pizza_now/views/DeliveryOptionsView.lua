@@ -36,8 +36,9 @@ DeliveryOptionsView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
             print("Showing DeliveryOptionsView UI")
+            local selected = controller:get_selected_index()
             for i,item in ipairs(self.options) do
-                if i == controller:get_selected_index() then
+                if i == selected then
                     item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                 else
                     item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
