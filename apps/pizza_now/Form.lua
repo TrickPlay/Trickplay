@@ -1,7 +1,9 @@
-Form = Class(function(form, x, y, length, ...)
-    form.black = Group{position = {x, y}}
-    form.red = Group{position = {x, y}, opacity = 0}
-    form.group = Group{}
+-- Call this Textbox or Formfield, but not Form cause Form implies that this class encapsulates an entire Form
+
+Textbox = Class(function(textbox, x, y, length, ...)
+    textbox.black = Group{position = {x, y}}
+    textbox.red = Group{position = {x, y}, opacity = 0}
+    textbox.group = Group{}
     local blackLeft = Image{
         position = {0, 0},
         src = "assets/credit_stuff/TextBoxLeft.png"
@@ -16,7 +18,7 @@ Form = Class(function(form, x, y, length, ...)
         position = {length - 10, 0},
         src = "assets/credit_stuff/TextBoxRight.png"
     }
-    form.black:add(blackLeft, blackCenter, blackRight)
+    textbox.black:add(blackLeft, blackCenter, blackRight)
     local redLeft = Image{
         position = {0, 0},
         src = "assets/credit_stuff/TextBoxLeftFocus.png"
@@ -31,18 +33,16 @@ Form = Class(function(form, x, y, length, ...)
         position = {length - 10, 0},
         src = "assets/credit_stuff/TextBoxRightFocus.png"
     }
-    form.red:add(redLeft, redCenter, redRight)
+    textbox.red:add(redLeft, redCenter, redRight)
 
-    function form:add(...)
-       form.group:add(...)
-    end
-    form:add(form.black, form.red)
+    textbox.group:add(textbox.black, textbox.red)
 
-    function form:on_focus()
-        form.red.opacity = 255
+    function textbox:on_focus()
+       textbox.red:animate{opacity = 255}
+       textbox.black:animate{opacity = 0}
     end
-    function form:out_focus()
-        form.red.opacity = 0
+    function textbox:out_focus()
+       textbox.red:animate{opacity = 0}
+       textbox.black:animate{opacity = 255}
     end
-
 end)

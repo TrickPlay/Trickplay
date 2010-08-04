@@ -1,5 +1,12 @@
 local PEP_IMG_PATH = "assets/Topping_Pepperoni.png"
 
+local CRUST_HANDTOSSED = Image{src="assets/Crust_HandTossed.png"}
+local CRUST_THIN = Image{src="assets/Crust_HandTossed.png"}
+local SAUCE_ROBUST = Image{src="assets/Sauce_Robust.png"}
+local SAUCE_BBQ = Image{src="assets/Sauce_BBQ.png"}
+local SAUCE_WHITE = Image{src="assets/Sauce_White.png"}
+local SAUCE_MARINARA = Image{src="assets/Sauce_Marinara.png"}
+
 if not Class then
    dofile("Class.lua")
 end
@@ -244,30 +251,24 @@ EmptyPizza = Class(
          position = {0, 0},
          src = "assets/Cheese_Normal.png"
       }
-      local sauce = Image{
-         position = {0, 0},
-         src = "assets/Sauce_Tomato.png"
+      local sauce = SAUCE_ROBUST
+      local crust = CRUST_HANDTOSSED
+      
+      self.pizzagroup = Group{position = {960,500}}
+
+
+      self.pizzagroup:add(crust)
+      self.pizzagroup:add(sauce)
+      self.pizzagroup:add(cheese)
+      print("\n\n\n\nhererere")
+      --screen:add(self.pizzagroup)
+      
+      local coverage_lut = {
+         [All_Options.CoverageX.None] = nil,
+         [All_Options.CoverageX.Light] = Coverage.LIGHT,
+         [All_Options.CoverageX.Regular] = Coverage.NORMAL,
+         [All_Options.CoverageX.Extra] = Coverage.EXTRA
       }
-      local crust = Image{
-         position = {0, 0},
-         src = "assets/Crust_HandTossed.png"
-      }
-
-         self.pizzagroup = Group{position = {960,500}}
-
-
-         self.pizzagroup:add(crust)
-         self.pizzagroup:add(sauce)
-         self.pizzagroup:add(cheese)
-         print("\n\n\n\nhererere")
-         --screen:add(self.pizzagroup)
-
-         local coverage_lut = {
-            [All_Options.CoverageX.None] = nil,
-            [All_Options.CoverageX.Light] = Coverage.LIGHT,
-            [All_Options.CoverageX.Regular] = Coverage.NORMAL,
-            [All_Options.CoverageX.Extra] = Coverage.EXTRA
-         }
 
          local placement_lut = {
             [All_Options.Placement.None] = nil,
