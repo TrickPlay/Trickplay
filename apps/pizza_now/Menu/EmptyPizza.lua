@@ -303,7 +303,13 @@ EmptyPizza = Class(
          src = "assets/Cheese_Normal.png"
       }
       local sauce = SAUCE_ROBUST
+      sauce:unparent()
+      sauce:show()
+      sauce.opacity=255
       local crust = CRUST_HANDTOSSED
+      crust:unparent()
+      crust:show()
+      crust.opacity=255
       
       self.pizzagroup = Group{position = {960,480}}
 

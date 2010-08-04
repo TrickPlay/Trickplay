@@ -44,6 +44,7 @@ Colors={
    ORANGE                       ="FFA500",
    PURPLE                       ="A020F0",
    PERU                         ="CD853F",
+   FOCUS_RED                    ="602020"
 }
 
 Characters={
