@@ -55,12 +55,18 @@ function createLevelMenu(l)
         
         local levelFocus = Rectangle{color="FF00CC", w=320, h=220}
         
-        LevelMenu = Menu.create(g, list, levelFocus)
+        --LevelMenu = Menu.create(g, list, levelFocus)
+        
+        LevelMenu = Menu:new{container = g, list = list, hl = levelFocus}
+        
         LevelMenu.container.opacity = 0
         LevelMenu:create_key_functions()
         LevelMenu:button_directions()
+        --debug()
         LevelMenu:create_buttons(10, "Sans 62px")
+        --debug()
         LevelMenu:apply_color_change("FFFFFF", "000000")
+        
         
         LevelMenu.container.x = 450
         LevelMenu.container.y = 70

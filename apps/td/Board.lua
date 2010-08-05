@@ -375,7 +375,8 @@ function Board:createBoard()
 				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
 				list[#list].extra.f = function()
 					
-					print(player.gold, tower.table.upgrades[tower.level+1].cost, player.gold - tower.table.upgrades[tower.level+1].cost)
+					--print(player.gold, tower.table.upgrades[tower.level+1].cost, player.gold - tower.table.upgrades[tower.level+1].cost)
+					
 					if (player.gold - tower.table.upgrades[tower.level+1].cost >= 0) then
 							
 						return self:upgradeTower(player)
