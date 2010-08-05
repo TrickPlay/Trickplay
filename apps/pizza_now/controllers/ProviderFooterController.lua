@@ -21,20 +21,28 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
 
     local function itemSelection(item, name)
         local textObject = view.ui.children[item]
+        local defaultText = textObject.text
         textObject.editable = true
         textObject:grab_key_focus()
+        textObject.text = ""
         function textObject:on_key_down(k)
             if(keys.Left == k or keys.Right == k) then
+                self.on_key_down = nil
                 screen:grab_key_focus()
                 controller:on_key_down(k)
                 return true
             end
         end
         function textObject:on_key_focus_out()
+            self.editable = false
             self.on_key_focus_out = nil
-            args = {}
-            args[name] = self.text
-            view:get_model():set_address(args)
+            if(self.text == "") then
+                self.text = defaultText
+            else
+                args = {}
+                args[name] = self.text
+                view:get_model():set_address(args)
+            end
         end
     end
 

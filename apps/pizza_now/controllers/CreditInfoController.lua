@@ -10,10 +10,12 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         PHONE = 4,
         EMAIL = 5,
         CARD_TYPE = 6,
+        CASH = 6,
         CARD_NUMBER = 7,
         CARD_EXPIRATION = 8,
         BILL_STREET = 9,
-        BILL_CITY = 10
+        BILL_CITY = 10,
+        CREDIT = 10
     }
     local DriverSub = {}
     local PasswordSub = {}
@@ -61,8 +63,12 @@ CreditInfoController = Class(Controller, function(self, view, ...)
     }
 
     local InfoSize = 0
-    for k, v in pairs(Info) do
-        InfoSize = InfoSize + 1
+    local function setInfoSize()
+        if(1 == model:selected_card()) then
+            InfoSize = Info.CASH
+        else
+            InfoSize = Info.CREDIT
+        end
     end
 
     -- the default selected index
@@ -72,10 +78,13 @@ CreditInfoController = Class(Controller, function(self, view, ...)
 
     local function itemSelection(selection, sub, name)
         local textObject = view.info[selection][sub][1]
+        local defaultText = textObject.text
         textObject.editable = true
         textObject:grab_key_focus()
+        textObject.text = ""
         function textObject:on_key_down(k)
             if(keys.Left == k or keys.Right == k) then
+                self.on_key_down = nil
                 screen:grab_key_focus()
                 controller:on_key_down(k)
                 return true
@@ -84,9 +93,13 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         function textObject:on_key_focus_out()
             self.editable = false
             self.on_key_focus_out = nil
-            args = {}
-            args[name] = self.text
-            view:get_model():set_creditInfo(args)
+            if(self.text == "") then
+                self.text = defaultText
+            else
+                args = {}
+                args[name] = self.text
+                view:get_model():set_creditInfo(args)
+            end
         end
     end
     local CreditCallbacks = {
@@ -152,6 +165,8 @@ CreditInfoController = Class(Controller, function(self, view, ...)
             else
                 error("card type eff'd up")
             end
+            setInfoSize()
+            controller:get_model():notify()
         end,
         [Info.CARD_NUMBER] = function(self)
             print("card number entry")
@@ -164,7 +179,7 @@ CreditInfoController = Class(Controller, function(self, view, ...)
             elseif(CardNumberSub.THIRD == sub_selection) then
                 --enter third 4 digits of phone number
                 itemSelection(Info.CARD_NUMBER, CardNumberSub.THIRD, "cardNumber_third")
-            elseif(CardNubmerSub.FORTH == sub_selection) then
+            elseif(CardNumberSub.FORTH == sub_selection) then
                 --enter forth 4 digits of phone number
                 itemSelection(Info.CARD_NUMBER, CardNumberSub.FORTH, "cardNumber_forth")
             else
@@ -286,5 +301,9 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         local success, error_msg = pcall(CreditCallbacks[selected], self)
         if not success then print(error_msg) end
     end
+
+    local args = {card_type = sub_selection}
+    model:set_creditInfo(args)
+    setInfoSize()
 
 end)
