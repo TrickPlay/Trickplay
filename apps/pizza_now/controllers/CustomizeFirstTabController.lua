@@ -60,8 +60,19 @@ CustomizeFirstTabController = Class(Controller, function(self, view, ...)
     tabs_mapping = {}
     tabs_mapping[1] = {function (x) self:get_model().current_item.Tabs[1].Options[1].Placement = x end,
                        function (x) self:get_model().current_item.Tabs[1].Options[1].CoverageX = x+1 end}
-    tabs_mapping[2] = {function (x) self:get_model().current_item.Tabs[1].Options[3].Crust_Style = x end,
-                       function (x) self:get_model().current_item.Tabs[1].Options[4].Size = x end}
+    tabs_mapping[2] = {function (x) self:get_model().current_item.Tabs[1].Options[3].Crust_Style = x 
+         view.parent.ingredientbox_top = All_Options.Size_r[model.current_item.Tabs[1].Options[4].Size].." "..
+                                         All_Options.Crust_Style_r[model.current_item.Tabs[1].Options[3].Crust_Style].." "..
+                                         model.current_item.Name
+         view.parent:rebuild_ingredient_box()
+end,
+                       function (x) self:get_model().current_item.Tabs[1].Options[4].Size = x 
+         view.parent.ingredientbox_top = All_Options.Size_r[model.current_item.Tabs[1].Options[4].Size].." "..
+                                         All_Options.Crust_Style_r[model.current_item.Tabs[1].Options[3].Crust_Style].." "..
+                                         model.current_item.Name
+         view.parent:rebuild_ingredient_box()
+
+end}
     tabs_mapping[3] = {function (x) self:get_model().current_item.Tabs[1].Options[2].Sauce_Type = x end}
     end
     local MenuKeyTable = {
@@ -87,6 +98,12 @@ CustomizeFirstTabController = Class(Controller, function(self, view, ...)
                             view.parent.first_tab_groups[selected[1]][selected[2]][i][3].opacity = 255
                         end
                             view.parent.first_tab_groups[selected[1]][selected[2]][i][1].color = Colors.BLACK
+                        if selected[1] == 2 and selected[2] == 2 then
+                            view.parent.first_tab_groups[2][2][i][4].opacity = 0
+                            view.parent.first_tab_groups[2][2][i][1].opacity = 255
+                            
+                        end
+
                     end
             else
                 view.parent.first_tab_groups[selected[1]][selected[2]][-2].color = Colors.BLACK

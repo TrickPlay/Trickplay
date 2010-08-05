@@ -3,13 +3,33 @@ local DEFAULT_COLOR = Colors.BLACK
 
 ProviderFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)
+
+    local bottomBar = Image{
+        src = "assets/OrderBarBase.png",
+        position = {0, 960},
+        tile = {true, false},
+        width = 1920
+    }
      
     view.ui=Group{name="providerfooter_ui", position={0,0}, opacity=255}
 
+    local exitItem = FocusableImage(30, 980,
+        "assets/Exit.png",
+        "assets/ExitFocus.png")
+    local streetBillingTextBox = TextBox(330, 990, 600)
+    local apartmentBillingTextBox = TextBox(950, 990, 120)
+    local cityBillingTextBox = TextBox(1090, 990, 370)
+    local zipBillingTextBox = TextBox(1480, 990, 120)
+
+    view.boxes = {
+        exitItem, streetBillingTextBox, apartmentBillingTextBox, cityBillingTextBox, 
+        zipBillingTextBox
+    }
+
     view.items = {
         Text{
-            position={0, 1000},
-            font  = DEFAULT_FONT,
+            position={120, 970},
+            font  = CUSTOMIZE_TINY_FONT,
             color = DEFAULT_COLOR,
             text = "Exit"
         },
@@ -19,10 +39,18 @@ ProviderFooterView = Class(View, function(view, model, ...)
             color=DEFAULT_COLOR,
             text="Enter Street",
             wants_enter = false,
-            max_length = 20
+            max_length = 26
         },
         Text{
             position={965,1000},
+            font=DEFAULT_FONT,
+            color=DEFAULT_COLOR,
+            wants_enter = false,
+            text="Apt.",
+            max_length = 5
+        },
+        Text{
+            position={1105,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
@@ -30,15 +58,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 15
         },
         Text{
-            position={1350,1000},
-            font=DEFAULT_FONT,
-            color=DEFAULT_COLOR,
-            wants_enter = false,
-            text="CA",
-            max_length = 2
-        },
-        Text{
-            position={1440,1000},
+            position={1495,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
@@ -46,6 +66,11 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 5
         },
     }
+
+    view.ui:add(bottomBar)
+    for i,v in ipairs(view.boxes) do
+        view.ui:add(v.group)
+    end
     view.ui:add(unpack(view.items))
     --screen:add(view.ui)
     function view:initialize()
@@ -57,17 +82,14 @@ ProviderFooterView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
             print("Showing ProviderFooterView UI")
---            view.ui.opacity = 255
             view.ui:raise_to_top()
-            for i,item in ipairs(view.items) do
+            for i,box in ipairs(view.boxes) do
                 if i == controller:get_selected_index() then
                     print("\t",i,"opacity to 255")
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                    item.color = Colors.RED
+                    box.on_focus()
                 else
                     print("\t",i,"opacity to 0")
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=50}
-                    item.color = Colors.BLACK
+                    box.out_focus()
                 end
             end
         else

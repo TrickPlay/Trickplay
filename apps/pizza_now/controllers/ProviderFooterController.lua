@@ -2,12 +2,13 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PROVIDER_SELECTION)
 
     local controller = self
+    local model = view:get_model()
 
     local MenuItems = {
         GO_BACK = 1,
         STREET = 2,
-        CITY = 3,
-        STATE = 4,
+        APT = 3,
+        CITY = 4,
         ZIP = 5
     }
     
@@ -17,10 +18,11 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = 1
+    local selected = 2
+    local previous_selected = 2
 
     local function itemSelection(item, name)
-        local textObject = view.ui.children[item]
+        local textObject = view.items[item]
         local defaultText = textObject.text
         textObject.editable = true
         textObject:grab_key_focus()
@@ -54,11 +56,11 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         [MenuItems.STREET] = function(self)
             itemSelection(MenuItems.STREET, "street")
         end,
+        [MenuItems.APT] = function(self)
+            itemSelection(MenuItems.APT, "apartment")
+        end,
         [MenuItems.CITY] = function(self)
             itemSelection(MenuItems.CITY, "city")
-        end,
-        [MenuItems.STATE] = function(self)
-            itemSelection(MenuItems.STATE, "state")
         end,
         [MenuItems.ZIP] = function(self)
             itemSelection(MenuItems.ZIP, "zip")
@@ -86,6 +88,15 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
 
     function self:get_selected_index()
         return selected
+    end
+
+    function self:on_focus()
+        selected = previous_selected
+    end
+
+    function self:out_focus()
+        previous_selected = selected
+        selected = 0
     end
 
     function self:move_selector(dir)

@@ -28,12 +28,30 @@ CustomizeFirstTabView = Class(View, function(view, model,parent, ...)
                     view.selector.opacity = 100
                     view.selector:raise_to_top()
                     for i=1,#view.parent.first_tab_groups[sel[1]][sel[2]] do
-                        if i == controller:get_in_tab_index() then
-                            view.parent.first_tab_groups[sel[1]][sel[2]][i][1].color = "602020"
-                            view.selector.x = view.parent.first_tab_groups[sel[1]][sel[2]][i][2].x + view.parent.sub_group[1].x
-                            view.selector.y = view.parent.first_tab_groups[sel[1]][sel[2]][i][2].y + view.parent.sub_group[1].y
+                        --size
+                        if sel[1] == 2 and sel[2] == 2 then
+                            
+                            if i == controller:get_in_tab_index() then
+                                view.parent.first_tab_groups[2][2][i][4].opacity = 255
+                                view.parent.first_tab_groups[2][2][i][1].opacity = 0
+                                view.selector.x = view.parent.first_tab_groups[sel[1]][sel[2]][i][2].x +
+                                                  view.parent.sub_group[1].x
+                                view.selector.y = view.parent.first_tab_groups[sel[1]][sel[2]][i][2].y +
+                                                  view.parent.sub_group[1].y
+                            else
+                                view.parent.first_tab_groups[2][2][i][4].opacity = 0
+                                view.parent.first_tab_groups[2][2][i][1].opacity = 255
+                            end
                         else
-                            view.parent.first_tab_groups[sel[1]][sel[2]][i][1].color = Colors.BLACK
+                            if i == controller:get_in_tab_index() then
+                                view.parent.first_tab_groups[sel[1]][sel[2]][i][1].color = "602020"
+                                view.selector.x = view.parent.first_tab_groups[sel[1]][sel[2]][i][2].x +
+                                                  view.parent.sub_group[1].x
+                                view.selector.y = view.parent.first_tab_groups[sel[1]][sel[2]][i][2].y +
+                                                  view.parent.sub_group[1].y
+                            else
+                                view.parent.first_tab_groups[sel[1]][sel[2]][i][1].color = Colors.BLACK
+                            end
                         end
                     end
                 else

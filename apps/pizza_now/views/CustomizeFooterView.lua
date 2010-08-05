@@ -9,6 +9,37 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                 tile = {false,true},
                 src="assets/OrderBarBase.png"
     }
+    
+    view.save = Image{
+        position = {0,0},
+        src      = "assets/SavePizza.png"
+    }
+    view.yes_sel = Image{
+        position = {50,100},
+        src      = "assets/SavePizza_YesFocus.png"
+    }
+    view.yes_unsel = Image{
+        position = {50,100},
+        src      = "assets/SavePizza_Yes.png"
+    }
+    view.no_sel = Image{
+        position = {190,100},
+        src      = "assets/SavePizza_NoFocus.png"
+    }
+    view.no_unsel  = Image{
+        position = {190,100},
+        src      = "assets/SavePizza_No.png"
+    }
+    view.areyousure = Group{name="Are You Sure",
+                            position = {1500,-250},
+                            opacity = 0}
+    view.ui:add(view.areyousure)
+    view.areyousure:add(view.save)
+    view.areyousure:add(view.yes_sel)
+    view.areyousure:add(view.yes_unsel)
+    view.areyousure:add(view.no_sel)
+    view.areyousure:add(view.no_unsel)
+
     view.items_selected = {
         Image{
             position={0, 20},
@@ -42,19 +73,19 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
     view.text = {
         Text{
             position={100, 40},
-            font  = DEFAULT_FONT,
+            font  = CUSTOMIZE_TAB_FONT,
             color = Colors.BLACK,
-            text = "Back"
+            text = ""
         },
         Text{
             position={300, 40},
-            font  = DEFAULT_FONT,
+            font  = CUSTOMIZE_TAB_FONT,
             color = Colors.BLACK,
             text = "Add to Order"
         },
         Text{
-            position={1300, 40},
-            font  = DEFAULT_FONT,
+            position={1250, 40},
+            font  = CUSTOMIZE_TAB_FONT,
             color = Colors.BLACK,
             text = "View Cart & Checkout"
         }
@@ -79,17 +110,33 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
             view.ui:raise_to_top()
             --if this child had the focus
             if p_controller.curr_comp == p_controller.ChildComponents.FOOT then
-                for i=1,#view.items_selected do
-                    if i == controller:get_selected_index() then
-                        print("\t",i,"opacity to 255")
-                        --item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                        view.items_selected[i].opacity   = 255
-                        view.items_unselected[i].opacity = 0
+                if controller.areyousure then
+                    view.areyousure.opacity = 255
+                    if controller:get_YNselected_index() == 1 then
+                        view.yes_sel.opacity   = 255
+                        view.yes_unsel.opacity = 0
+                        view.no_sel.opacity    = 0
+                        view.no_unsel.opacity  = 255
                     else
-                        print("\t",i,"opacity to 0")
-                        --item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                        view.items_selected[i].opacity   = 0
-                        view.items_unselected[i].opacity = 255
+                        view.yes_sel.opacity   = 0
+                        view.yes_unsel.opacity = 255
+                        view.no_sel.opacity    = 255
+                        view.no_unsel.opacity  = 0
+                    end
+                else
+                    view.areyousure.opacity = 0
+                    for i=1,#view.items_selected do
+                        if i == controller:get_selected_index() then
+                            print("\t",i,"opacity to 255")
+                            --item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                            view.items_selected[i].opacity   = 255
+                            view.items_unselected[i].opacity = 0
+                        else
+                            print("\t",i,"opacity to 0")
+                            --item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
+                            view.items_selected[i].opacity   = 0
+                            view.items_unselected[i].opacity = 255
+                        end
                     end
                 end
             --if this child doesn't have the focus
