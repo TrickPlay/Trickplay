@@ -172,6 +172,7 @@ function Tower:upgrade()
 		local b = savedTowerUpgrades[self.tnum]
 		savedTowerUpgrades[self.tnum] = b + 1
 	
+		savedGold = self.player.gold
 		self.damage = r.damage
 		self.range = r.range
 		self.rangeCircle:clear_surface()
