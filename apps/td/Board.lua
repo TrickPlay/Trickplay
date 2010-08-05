@@ -192,7 +192,7 @@ end
 
 function Board:init()
 
-	Popup:new{text = "Get Ready!"}
+	--Popup:new{text = "Get Ready!"}
 
 	for i = 1, self.h do
 		local total = ""
