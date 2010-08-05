@@ -7,11 +7,13 @@ CustomizeController = Class(Controller,
           TAB_ITEMS = 2,
           FOOT = 3,
           WINDMILL_SELECTOR = 4,
-          RADIO_SELECTOR
+          RADIO_SELECTOR = 5,
+          FIRST_TAB = 6
       }
       self.curr_comp = self.ChildComponents.TAB_BAR
       self.conches = {}
       function self:set_children(children)
+          print("All",#children,"set")
           self.conches = {}
           self.conches = children
       end
@@ -126,7 +128,9 @@ CustomizeController = Class(Controller,
          --print("Customize_controller on_key_down called with key", k)
          if self.curr_comp == self.ChildComponents.TAB_BAR then
             MenuKeyTable[k](self)
-         elseif self.curr_comp == self.ChildComponents.FOOT then
+         else
+            print(self,self.curr_comp)
+            assert(self.conches[self.curr_comp],"Controller  was not set")
             self.conches[self.curr_comp]:on_key_down(k)
          end
       end
@@ -147,11 +151,12 @@ CustomizeController = Class(Controller,
       end
 
       self.in_tab_group  = false
-      self.on_back_arrow = false
-      self.add_to_order  = false
+      self.in_first      = false
+      --self.add_to_order  = false
 
 
       function self:move_selector(dir)
+         print("Customize View move_selector()")
 --[[
          if(self.on_back_arrow) then
             if dir == Directions.RIGHT then
@@ -182,10 +187,18 @@ CustomizeController = Class(Controller,
             --move into the Tab sub group
             if dir[2] == 0 then
                if dir == Directions.RIGHT and view:get_model().current_item.Tabs[selected].Options ~= nil then
-                  self.in_tab_group = true
-                  view:enter_sub_group()
+                  if selected == 1 then
+                      print("going into first")
+                      self.in_first = true
+                  self.curr_comp = self.ChildComponents.FIRST_TAB
+                  self:get_model():notify()
+                  else
+                      self.in_tab_group = true
+                      view:enter_sub_group()
+                  end
                elseif dir == Directions.LEFT then
-                  self.on_back_arrow = true
+                  --self.on_back_arrow = true
+                  self.curr_comp = self.ChildComponents.FOOT
                   self:get_model():notify()
                end
             --move up and down through the tabs
@@ -204,6 +217,9 @@ CustomizeController = Class(Controller,
                --MenuItemCallbacks[selected]()
                self:get_model():notify()
             end
+           else
+               print("using child move_selector()")
+               self.conches[self.curr_comp]:move_selector(dir)
            end
          end
       end

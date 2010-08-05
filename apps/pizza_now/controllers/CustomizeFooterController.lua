@@ -3,7 +3,8 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
 
     local MenuItems = {
         GO_BACK = 1,
-        ADD = 2
+        ADD = 2,
+        CHECKOUT = 3
     }
     
     local MenuSize = 0
@@ -59,6 +60,11 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
                     print("size of cart",#self:get_model().cart)
                     print(self:get_model().cart[1].Name)
                     self:get_model():notify()
+        end,
+        [MenuItems.CHECKOUT] = function(self)
+                    model.current_item.pizzagroup:hide_all()
+                    model:set_active_component(Components.CHECKOUT)
+                    model:notify()
         end
     }
 
