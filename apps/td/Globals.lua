@@ -27,12 +27,20 @@ CREEP_END = {4, BW}
 
 CREEP_WAVE_LENGTH = 30
 
-seconds_elapsed = 0
+seconds_elapsed = Stopwatch()
 creep_spawn_timer = 0
 
 wave_counter = 0
 
 round = 1
+tnum = 1
+
+savedTowerType = settings.towerType or {}
+savedTowerOwner = settings.towerOwner or {}
+savedTowerPos = settings.towerPos or {}
+savedTowerUpgrades = settings.towerUpgrades or {}
+
+
 level = settings.level or 1
 
 --image_to_load = {"normal","mediumRobot"}
@@ -46,7 +54,7 @@ creepnum = 1
 wavePartCounter = 1
 creeppartnum = 1
 
-countdowntimer = Text { font = "Sans 30px", text = ""..seconds_elapsed, x = 900, y = 1015, z=3, color = "000000", opacity=0}
+countdowntimer = Text { font = "Sans 30px", text = "", x = 900, y = 1015, z=3, color = "000000", opacity=0}
 phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =1200, y = 1015, z=3, color = "000000", opacity=0}
 livestext = Text { font = "Sans 30px", text = "", x =1570, y = 1015, z=3, color = "000000"}
 playertext = Text {font = "Sans 30px", text = "", x =1300, y = 1015, z=3, color = "000000"}

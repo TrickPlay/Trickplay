@@ -6,24 +6,24 @@ wave = {
 	{
 		{
 			{name = "SlowCreep"},
-			size = 10,
+			size = 1,
 			speed = 2,
 			buffs = {hp = 1},
 		},
-		size = 10,
+		size = 5,
 	},
 	
 	 -- Wave 2
 	{
 		{
 			{name = "SlowCreep"},
-			size = 10,
+			size = 1,
 			speed = 1.5,
 			buffs = {hp = 1.25, speed = 1.25},
 		},
-		size = 10,
+		size = 5,
 	},
-	
+	--[[
 	 -- Wave 3
 	{
 		{
@@ -132,7 +132,7 @@ wave = {
 			buffs = { hp = .25 }
 		},
 		size = 1,
-	},
+	},]]
 }
 	
 return wave

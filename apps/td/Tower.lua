@@ -162,13 +162,14 @@ end
 
 function Tower:upgrade()
 
+
 	assert(self.level < self.levels)
 	self.level = self.level + 1
 	
 	local r = self.table.upgrades[self.level]
 	
 	if (self.owner.gold - r.cost > 0) then
-	
+
 		self.damage = r.damage
 		self.range = r.range
 		self.rangeCircle:clear_surface()

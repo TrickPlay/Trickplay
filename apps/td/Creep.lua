@@ -252,11 +252,11 @@ function Creep:bleed()
 	local x = self.creepGroup.x + math.random(SP)
 	local y = self.creepGroup.y + math.random(SP)
 --	local blood = Rectangle {color = "FF0000", width = math.random(8), height = math.random(8), x = x, y = y}
-	local rand = 2+math.random(7)
-	local blood = Canvas{color="FF0000", x=x, y=y, width=rand, height=rand}
+	local rand = 2+math.random(4)
+	local blood = Canvas{color="FF0000", x=x, y=y, width=rand*2, height=rand*2}
 	blood:begin_painting()
 	blood:set_source_color("FF0000")
-	blood:round_rectangle(0,0,blood.w,blood.h,blood.w/2)
+	blood:arc(rand,rand,rand,0,360)
 	blood:fill() -- or c:stroke()
 	blood:finish_painting()
 	if (#bloodGroup.children < 400) then

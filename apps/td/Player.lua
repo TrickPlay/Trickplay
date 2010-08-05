@@ -9,7 +9,7 @@ function Player:new(args)
 		color = args.color,
 		towerInfo = TowerInfo:new{}
 	}
-	
+	print (object.gold)
    setmetatable(object, self)
    self.__index = self
    return object

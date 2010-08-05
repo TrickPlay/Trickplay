@@ -79,12 +79,12 @@ function createLevelMenu(l)
         LevelMenu.buttons.extra.r = function()
         
                 --dofile("Globals.lua")
-        
-                round = tonumber( list[LevelMenu.y][LevelMenu.x].extra.level )
+                
+                round = settings.round or tonumber( list[LevelMenu.y][LevelMenu.x].extra.level )
                 
                 -- Global current level
                 currentLevel = round
-                
+                savedRound = round
                 --LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
                 LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
         
