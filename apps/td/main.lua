@@ -18,7 +18,7 @@ function app.on_loaded()
 
     -- Everything is loaded
     AssetLoader.on_preload_ready = function()
-    
+        
     		TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
 			screen:add(TitleBackground)
 
@@ -122,7 +122,7 @@ function app.on_loaded()
     
     
 	AssetLoader.on_preload_ready = nil
-    	--screen:add( AssetLoader:getImage("TitleBackground",{name="robot", x=200, y=200}) )
+    	--screen:add( AssetLoader:getImage("BuyFocus",{name="robot", x=200, y=200, z=20}) )
     	--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))
    end
    function app.on_closing()

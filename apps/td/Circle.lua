@@ -11,7 +11,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	
 	local list = params
         
-        local hl = Rectangle{w=200,h=200,color="00FF00"}
+        local hl = AssetLoader:getImage("BuyFocus",{})
         local CircleMenu = Menu.create(c, list, hl)
         CircleMenu:create_key_functions()
         CircleMenu:button_directions()
@@ -32,7 +32,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
         
-        CircleMenu.hl.opacity = 50
+        CircleMenu.hl.opacity = 255
 	CircleMenu.container.opacity=230
         CircleMenu.container.z=5
         CircleMenu.owner = player
@@ -41,7 +41,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
         
         print("ADDED LIST")
         
-        CircleMenu.container.scale = {.6,.6}
+        --CircleMenu.container.scale = {.6,.6}
         
         CircleMenu.container.anchor_point = { CircleMenu.container.w, 0 }
         CircleMenu.container.x = 1920
