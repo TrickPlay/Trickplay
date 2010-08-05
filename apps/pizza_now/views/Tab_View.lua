@@ -3,11 +3,12 @@ TabView = Class(View, function(view, model,parent, ...)
     view.parent = parent
     view.ui=Group{name="Tab ui", position={425,80}, opacity=255}
     view.menu_items = {}
+--[[
     view.selector = Image{
         position={-70,0},
         src = "assets/OptionHighlight.png"
     }
-
+--]]
     function view:Create_Menu_Items()
         view.menu_items = {}
         --gut the UI
@@ -29,10 +30,11 @@ TabView = Class(View, function(view, model,parent, ...)
         --view.parent.menu_items[view.parent:get_controller():get_selected_index()]:animate{duration= 100, opacity = 255}
         --view.parent.sub_group[view.parent:get_controller():get_selected_index()]:animate{duration = 100, opacity = 100}
        model:set_active_component(Components.CUSTOMIZE)
-       view:get_controller():reset_selected_index()
-       view.selector.y = 0
        local sel = view.parent:get_controller():get_selected_index()
-       view.parent.sub_group[sel].y = 80
+       view.parent.sub_group_items[sel][view:get_controller():get_selected_index()][4]:out_focus()
+       view:get_controller():reset_selected_index()
+       --view.selector.y = 0
+       view.parent.sub_group[sel].y = 100
        local sub_group_items = view.parent.sub_group_items
        for i=1,#sub_group_items[sel] do
           if i <= CUSTOMIZE_SCROLL_THRESHOLD then
@@ -53,8 +55,8 @@ TabView = Class(View, function(view, model,parent, ...)
         local bound = #view.menu_items[view.parent:get_controller():get_selected_index()]
         print("\n\nbound",bound,"i",i)
         --if bound > 13 then bound = 13 end
-        if view.selector.y ~= 0 then 
-           view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10---view.selector.y-60
+       if view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y >= 100--[[view.selector.y]] ~= 0 then 
+           --view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10---view.selector.y-60
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+1][4]:out_focus()
         elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
@@ -82,7 +84,7 @@ TabView = Class(View, function(view, model,parent, ...)
         local edge = CUSTOMIZE_SCROLL_THRESHOLD
         if bound < edge then edge = bound end
         if i <= CUSTOMIZE_SCROLL_THRESHOLD
---[[view.selector.y <= 60*(edge-1)]] then view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y - view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10--view.selector.y+60
+--[=[view.selector.y <= 60*(edge-1)]=] then --view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y - view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10--view.selector.y+60
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-1][4]:out_focus()
         elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
@@ -110,7 +112,7 @@ TabView = Class(View, function(view, model,parent, ...)
         if comp == Components.TAB then
             print("Showing TabView UI")
             view.ui.opacity = 255
-            view.selector.opacity = 255
+            --view.selector.opacity = 255
             for i,option in ipairs(view.menu_items[view.parent:get_controller():get_selected_index()]) do
                 for j,item in ipairs(option) do
                     if i == controller:get_selected_index() then
@@ -128,7 +130,7 @@ TabView = Class(View, function(view, model,parent, ...)
         else
             print("Hiding TabView UI")
             view.ui.opacity = 0
-            view.selector.opacity = 0
+            --view.selector.opacity = 0
         end
     end
     

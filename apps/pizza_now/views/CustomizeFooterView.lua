@@ -3,7 +3,12 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
     view.parent = parent
      
     view.ui=Group{name="customize_footer_ui", position={0,960}, opacity=255}
-
+    view.bar = Image{
+                position = {0,0},
+                width = 1920,
+                tile = {false,true},
+                src="assets/OrderBarBase.png"
+    }
     view.items_selected = {
         Image{
             position={0, 20},
@@ -12,7 +17,12 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         Image{
             position={200, 20},
             src = "assets/AddButtonFocus.png"
+        },
+        Image{
+            position={1800, 20},
+            src = "assets/CartButtonFocus.png"
         }
+
     }
     view.items_unselected = {
         Image{
@@ -22,7 +32,12 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         Image{
             position={200, 20},
             src = "assets/AddButton.png"
+        },
+        Image{
+            position={1800, 20},
+            src = "assets/CartButton.png"
         }
+
     }
     view.text = {
         Text{
@@ -36,8 +51,16 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
             font  = DEFAULT_FONT,
             color = Colors.BLACK,
             text = "Add to Order"
+        },
+        Text{
+            position={1300, 40},
+            font  = DEFAULT_FONT,
+            color = Colors.BLACK,
+            text = "View Cart & Checkout"
         }
+
     }
+    view.ui:add(view.bar)
     view.ui:add(unpack(view.items_selected))
     view.ui:add(unpack(view.items_unselected))
     view.ui:add(unpack(view.text))
@@ -77,7 +100,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                     view.items_unselected[i].opacity = 255
                 end
             end
-        else
+        elseif comp ~= Components.TAB and comp ~= Components.CUSTOMIZE_ITEM then
             print("Hiding CustomizeFooterView UI")
             --view.ui:complete_animation()
             view.ui.opacity = 0
