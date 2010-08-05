@@ -11,14 +11,37 @@ if not Class then
    dofile("Class.lua")
 end
 
-Meat_Toppings = {{name="Pepperoni",image=Image{src="assets/Topping_Pepperoni.png"}},"XL Pepperoni","Sliced Italian Sausage", 
-                 "Italian Sausage", "Beef", {name="Ham",image=Image{src="assets/Topping_Ham.png"}},"Bacon","Premium Chicken","Salami",
-    "Philly Steak"}
-Veggie_Toppings = {"Green Peppers",{name="Black Olives",image=Image{src="assets/Topping_Olives.png"}}, "Pineapple", 
-                   {name="Mushrooms",image=Image{src="assets/Topping_Mushroom.png"}},"Onions","Jalapeno Peppers","Banana Peppers","Spinach",
-    "Roasted Red Peppers","Cheddar Cheese","Shredded Provolone Cheese",
-    "Shredded Parmesan","Feta Cheese","Garlic","Sliced Tomatoes",
-    "Hot Sauce", "Parsley"}
+Meat_Toppings = {
+   {name="Pepperoni",image=Image{src="assets/Topping_Pepperoni.png"}},
+   "XL Pepperoni",
+   {name="Sliced Italian Sausage",image=Image{src="assets/Topping_SlicedItalian.png"}}, 
+   "Italian Sausage",
+   "Beef",
+   {name="Ham",image=Image{src="assets/Topping_Ham.png"}},
+   "Bacon",
+   "Premium Chicken",
+   "Salami",
+   "Philly Steak"
+}
+Veggie_Toppings = {
+   "Green Peppers",
+   {name="Black Olives",image=Image{src="assets/Topping_Olives.png"}},
+   "Pineapple",
+   {name="Mushrooms",image=Image{src="assets/Topping_Mushroom.png"}},
+   {name="Onions",image=Image{src="assets/Topping_Onion.png"}},
+   "Jalapeno Peppers",
+   "Banana Peppers",
+   "Spinach",
+   "Roasted Red Peppers",
+   "Cheddar Cheese",
+   "Shredded Provolone Cheese",
+   "Shredded Parmesan",
+   "Feta Cheese",
+   "Garlic",
+   "Sliced Tomatoes",
+   "Hot Sauce",
+   "Parsley"
+}
 
 All_Options = {
 
