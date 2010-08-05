@@ -168,8 +168,8 @@ function Tower:upgrade()
 	
 	local r = self.table.upgrades[self.level]
 	
-	if (self.owner.gold - r.cost > 0) then
-
+	if (self.owner.gold - r.cost >= 0) then
+	
 		self.damage = r.damage
 		self.range = r.range
 		self.rangeCircle:clear_surface()
