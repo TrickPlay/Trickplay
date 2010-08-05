@@ -38,7 +38,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         addressText.text = ""
         deliverToText.text = "Deliver To: "
         if(model.address.street) then
-            deliverToText.text = deliverToText.text..model.address.street.." "
+            deliverToText.text = deliverToText.text..model.address.street.."   "
         end
         if(model.address.apartment) then
             deliverToText.text = deliverToText.text.."Apt. "..model.address.apartment..", "
