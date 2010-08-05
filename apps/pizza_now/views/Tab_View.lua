@@ -53,15 +53,16 @@ TabView = Class(View, function(view, model,parent, ...)
     function view:move_selector_up(i)
 
         local bound = #view.menu_items[view.parent:get_controller():get_selected_index()]
-        print("\n\nbound",bound,"i",i)
+        print("\n\nfrom: bound",bound,"i",i,"s_g y pos",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y,
+              "s_g_item y pos",view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y,"   addition",
+               view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
+              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y)
         --if bound > 13 then bound = 13 end
-       if view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y >= 100--[[view.selector.y]] ~= 0 then 
-           --view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y- view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10---view.selector.y-60
-           --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
-           --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i+1][4]:out_focus()
-        elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
+       if bound > CUSTOMIZE_SCROLL_THRESHOLD  and view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
+              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y  < 110
+              then
              print("\n\n1",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
-             view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-2)+20
+             view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-2)+40
 
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
@@ -76,11 +77,21 @@ TabView = Class(View, function(view, model,parent, ...)
              end
 
         end
+        print("\nto: bound",bound,"i",i,"s_g y pos",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y,
+              "s_g_item y pos",view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y,"   addition",
+               view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
+              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y)
+
+
     end
 
     function view:move_selector_down(i)
         local bound = #view.menu_items[view.parent:get_controller():get_selected_index()]
-        print("\n\nbound",bound,"i",i)
+        print("\n\nbound",bound,"i",i,"s_g y pos",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y,
+              "s_g_item y pos",view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y,"   addition",
+               view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
+              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y)
+
         local edge = CUSTOMIZE_SCROLL_THRESHOLD
         if bound < edge then edge = bound end
         if i <= CUSTOMIZE_SCROLL_THRESHOLD
@@ -89,7 +100,7 @@ TabView = Class(View, function(view, model,parent, ...)
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-1][4]:out_focus()
         elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
              print("\n\n2",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
-             view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-1-CUSTOMIZE_SCROLL_THRESHOLD)+20
+             view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-1-CUSTOMIZE_SCROLL_THRESHOLD)+40
 
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].opacity = 255
              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][2].opacity = 255
@@ -104,6 +115,13 @@ TabView = Class(View, function(view, model,parent, ...)
              end
 
         end
+        print("\nto: bound",bound,"i",i,"s_g y pos",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y,
+              "s_g_item y pos",view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y,"   addition",
+               view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
+              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y)
+
+
+
     end
 
     function view:update()

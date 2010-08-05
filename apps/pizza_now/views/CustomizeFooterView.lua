@@ -9,6 +9,17 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                 tile = {false,true},
                 src="assets/OrderBarBase.png"
     }
+--[[
+    view.save = Image{
+        position = {1800,-100},
+        src      = "assets/SavePizza.png"
+    }
+    view.yes_sel = Image{
+    }
+    view.yes_un = Image{}
+    view.no_sel = Image{}
+    view.no_en  = Image{}
+--]]
     view.items_selected = {
         Image{
             position={0, 20},

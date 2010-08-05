@@ -122,6 +122,38 @@ CustomizeController = Class(Controller,
              src      = "assets/CoverageX/"..All_Options.CoverageX_r[cov]..".png"
          }
          view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
+         
+         local found = false
+         for i=1,#view.ingredientbox_left do
+             if view.ingredientbox_left[i] == topping.Name then
+                 found = true
+             end
+             if found then
+                 view.ingredientbox_left[i] = view.ingredientbox_left[i+1]
+             end
+         end         
+
+         local found = false
+         for i=1,#view.ingredientbox_right do
+             if view.ingredientbox_right[i] == topping.Name then
+                 found = true
+             end
+             if found then
+                 view.ingredientbox_right[i] = view.ingredientbox_right[i+1]
+             end
+         end    
+         if place == All_Options.Placement.Entire or
+            place == All_Options.Placement.Left then
+             print("is left")
+             view.ingredientbox_left[#view.ingredientbox_left+1] = topping.Name
+         end
+         if place == All_Options.Placement.Entire or
+            place == All_Options.Placement.Right then
+             print("is right")
+             view.ingredientbox_right[#view.ingredientbox_right+1]=topping.Name
+         end
+
+         view.rebuild_ingredient_box()
       end
 
       function self:on_key_down(k)
