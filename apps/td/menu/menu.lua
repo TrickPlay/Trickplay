@@ -4,31 +4,31 @@ Menu = {}
 Menu.__index = Menu
 
 function Menu.create(container, list, highlight)
-   local menu = {}
-   setmetatable(menu,Menu)
-   
-	-- Default position is 1, 1
-	menu.x = 1		menu.y = 1
-
-	if list[1][1] ~= nil then
-		menu.max_y = #list
-		menu.max_x = {}
-		for i=1,#list do
-			menu.max_x[i] = #list[i]
-		end
-	end
-
-   menu.container = container	-- Container holds the buttons and the focus highlight
-   menu.list = list				-- List used to create the menu 
-	
-   menu.buttons = Group{}		-- Buttons group
-	menu:create_key_functions()	-- Create keypress functions
-
-   container:add(menu.buttons)
-   
-   menu:create_hl(highlight)	-- TODO not sure if I still use this
-   
-   return menu
+        local menu = {}
+        setmetatable(menu,Menu)
+        
+                -- Default position is 1, 1
+                menu.x = 1		menu.y = 1
+        
+                if list[1][1] ~= nil then
+                        menu.max_y = #list
+                        menu.max_x = {}
+                        for i=1,#list do
+                                menu.max_x[i] = #list[i]
+                        end
+                end
+     
+        menu.container = container	-- Container holds the buttons and the focus highlight
+        menu.list = list				-- List used to create the menu 
+             
+        menu.buttons = Group{}		-- Buttons group
+             menu:create_key_functions()	-- Create keypress functions
+     
+        container:add(menu.buttons)
+        
+        menu:create_hl(highlight)	-- TODO not sure if I still use this
+        
+        return menu
 end
 
 function Menu:new(args)
@@ -104,7 +104,7 @@ function Menu:create_key_functions(container)
         -- On key down function
 	container.on_key_down = function(container, k)	
 		
-                pcall ( self.actions[k] )
+                pcall ( self.actions[k], container )
                 
 		return true -- Prevent bubble upward to screen
 	end
@@ -117,6 +117,7 @@ function Menu:create_key_functions(container)
         self.actions[keys.Down] = function() pcall ( container.extra.down ) if self.debug then print("Down", "-", "y:", self.y) end pcall ( self.update_cursor_position, self ) end
         self.actions[keys.space] = function() pcall ( container.extra.space ) if self.debug then print("Space") end pcall ( self.update_cursor_position, self ) end
         self.actions[keys.Return] = function() pcall ( container.extra.r ) if self.debug then print("Return/Enter") end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.p] = function() pcall ( container.extra.p ) if self.debug then print("You pressed: p") end pcall ( self.update_cursor_position, self ) end
         
 end
 
@@ -190,7 +191,7 @@ dofile("menu/menu_extra.lua")
 dofile("menu/menu_controller.lua")
 
 function Menu:update_cursor_position(obj)
-	if not self.hl and not obj then print("No cursor available") return end
+	if not self.hl and not obj then if self.debug then print("No cursor available") end return end
 	local cursor = obj or self.hl
 	
 	local x = self.x
