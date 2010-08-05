@@ -31,7 +31,7 @@ function Menu.create(container, list, highlight)
    return menu
 end
 
-function Menu:create2(args)
+function Menu:new(args)
 
         -- The only necessary thing is a list
         if not args then
@@ -242,7 +242,7 @@ function Menu:create_buttons(margin, m_font, position)
 			-- Leave the first where it is, find the y value for the rest
 			if i > 1 then
 				list[i][j].y = list[i][j].y + prev + list[1][1].h + margin
-				self.button[i]:add( list[i][j] )
+				--self.button[i]:add( list[i][j] ) -- Don't think this is ever needed... and it makes tons of clutter warnings
 			end
 			
 			if not self.max_y_movement[j] then self.max_y_movement[j] = 0 end
