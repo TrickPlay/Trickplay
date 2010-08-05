@@ -4,11 +4,15 @@ function Player:new(args)
 
 	local object = {
 		name = args.name,
-		gold = settings.gold or args.gold,
-		lives = settings.lives or args.lives,
+		gold = args.gold,
+		lives = args.lives,
 		color = args.color,
 		towerInfo = TowerInfo:new{}
 	}
+	if (resumed) then
+		object.gold = settings.gold
+		object.lives = settings.lives
+	end
 	print (object.gold)
    setmetatable(object, self)
    self.__index = self

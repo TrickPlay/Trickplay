@@ -84,7 +84,25 @@ function app.on_loaded()
 			screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
 			screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
 			
-		else
+			elseif MainMenu.y == 3 then
+				resumed = true
+				
+				round = settings.round
+            currentLevel = round
+            
+            savedRound = round
+
+            Themes.robot.wave = dofile("themes/".."robot".."/round"..round..".lua")
+        
+            game = Game:new{ theme = Themes.robot , gold = settings.gold}
+            game:startGame()
+                
+            screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
+            screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+                
+            Popup:new{text = "Resuming round "..round}				
+								
+			else
 		    
 		    	print("Switching to theme menu")
 		    	ACTIVE_CONTAINER = ThemeMenu

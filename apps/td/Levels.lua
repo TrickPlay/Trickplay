@@ -79,9 +79,11 @@ function createLevelMenu(l)
         LevelMenu.buttons.extra.r = function()
         
                 --dofile("Globals.lua")
-                
-                round = settings.round or tonumber( list[LevelMenu.y][LevelMenu.x].extra.level )
-                
+					 if (resumed) then
+					 	round = settings.round
+					 else
+	               round = tonumber( list[LevelMenu.y][LevelMenu.x].extra.level )
+                end
                 -- Global current level
                 currentLevel = round
                 savedRound = round

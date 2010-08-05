@@ -265,26 +265,32 @@ function Board:createBoard()
 	BoardMenu.hl.opacity = 255
 	
 	BoardMenu.container.opacity=255
-	if (settings.towerType) then
-		for i=1, #settings.towerType do
-			 local selection = settings.towerType[i]
-			 self.player.position = settings.towerPos[i]
-			 self.player.gold = self.player.gold + selection.cost
-			 self:buildTower(selection,self.player)
-			 if (settings.towerUpgrades[i] == 1) then
-			 	 self.player.gold = self.player.gold + selection.upgrades[1].cost
-				 self:upgradeTower(self.player)
- 			 elseif (settings.towerUpgrades[i] == 2) then
-				 self.player.gold = self.player.gold + selection.upgrades[1].cost
-			 	 self.player.gold = self.player.gold + selection.upgrades[2].cost
+	if (resumed) then
+		savedTowerType = settings.towerType
+		savedTowerOwner = settings.towerOwner
+		savedTowerPos = settings.towerPos
+		savedTowerUpgrades = settings.towerUpgrades
+		level = settings.level
+		if (settings.towerType) then
+			for i=1, #settings.towerType do
+				 local selection = settings.towerType[i]
+				 self.player.position = settings.towerPos[i]
+				 self.player.gold = self.player.gold + selection.cost
+				 self:buildTower(selection,self.player)
+				 if (settings.towerUpgrades[i] == 1) then
+				 	 self.player.gold = self.player.gold + selection.upgrades[1].cost
+					 self:upgradeTower(self.player)
+	 			 elseif (settings.towerUpgrades[i] == 2) then
+					 self.player.gold = self.player.gold + selection.upgrades[1].cost
+				 	 self.player.gold = self.player.gold + selection.upgrades[2].cost
 
-				 self:upgradeTower(self.player)
-				 self:upgradeTower(self.player)
-			 end
+					 self:upgradeTower(self.player)
+					 self:upgradeTower(self.player)
+				 end
 
+			end
 		end
 	end
-
 		
 	BoardMenu.buttons.extra.r = function(args)
 	

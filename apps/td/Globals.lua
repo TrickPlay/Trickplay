@@ -34,16 +34,17 @@ creep_spawn_timer = 0
 
 wave_counter = 0
 
+resumed = false
 round = 1
 tnum = 1
 
-savedTowerType = settings.towerType or {}
-savedTowerOwner = settings.towerOwner or {}
-savedTowerPos = settings.towerPos or {}
-savedTowerUpgrades = settings.towerUpgrades or {}
+savedTowerType = {}
+savedTowerOwner = {}
+savedTowerPos = {}
+savedTowerUpgrades = {}
 
 
-level = settings.level or 1
+level = 1
 
 --image_to_load = {"normal","mediumRobot"}
 
