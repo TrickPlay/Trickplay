@@ -468,7 +468,7 @@ function Board:buildTower(selection, player)
 		current.square[3] = FULL
 		current:render()
 		player.gold = player.gold - current.tower.cost
-		
+		savedGold = self.player.gold		
 		
 		self:updateGold(self.player)
 		
