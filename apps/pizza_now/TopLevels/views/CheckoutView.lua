@@ -94,27 +94,6 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Email",
     }
-    --Credit Companies or Cash Images
-    local cash = Image{
-        src = "assets/credit_stuff/Payment_Cash.png",
-        position = {990, 600}
-    }
-    local masterCard = Image{
-        src = "assets/credit_stuff/Payment_MC.png",
-        position = {1140, 600}
-    }
-    local visaCard = Image{
-        src = "assets/credit_stuff/Payment_Visa.png",
-        position = {1300, 600}
-    }
-    local americanExpressCard = Image{
-        src = "assets/credit_stuff/Payment_AM.png",
-        position = {1450, 600}
-    }
-    local discoverCard = Image{
-        src = "assets/credit_stuff/Payment_Disc.png",
-        position = {1590, 600}
-    }
     --credit card text stuff
     local cardNumberText = Text{
         position = {1000,740},
@@ -182,8 +161,7 @@ CheckoutView = Class(View, function(view, model, ...)
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
         orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
-        nameText, phoneText, emailText, extText, cash, masterCard, visaCard,
-        americanExpressCard, discoverCard, cardNumberText, expirationText,
+        nameText, phoneText, emailText, extText, cardNumberText, expirationText,
         secretCodeText, driverInstructionsText, editOrderText, addCouponText,
         taxText, totalCostText, currentCart
     }

@@ -16,7 +16,6 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         BILL_CITY = 10
     }
 
-    
     --driverInstructionsTextBox
     local driverInstructionsTextBox = TextBox(1020, 120, 1760-1040)
     --entry for instructions for the driver
@@ -133,6 +132,27 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     local emailTable = {{emailHandle,emailNameTextBox}, {emailAt,emailAtTextBox}}
 
     --credit type
+    --Credit Companies or Cash Images
+    local cashFocus = FocusableImage(990, 600,
+        "assets/credit_stuff/Payment_Cash.png",
+        "assets/credit_stuff/Payment_Cash_Focus.png"
+    )
+    local masterCardFocus = FocusableImage(1140, 600,
+        "assets/credit_stuff/Payment_MC.png",
+        "assets/credit_stuff/Payment_MC_Focus.png"
+    )
+    local visaCardFocus = FocusableImage(1300, 600,
+        "assets/credit_stuff/Payment_Visa.png",
+        "assets/credit_stuff/Payment_Visa_Focus.png"
+    )
+    local americanExpressCardFocus = FocusableImage(1450, 600,
+        "assets/credit_stuff/Payment_AM.png",
+        "assets/credit_stuff/Payment_AM_Focus.png"
+    )
+    local discoverCardFocus = FocusableImage(1590, 600,
+        "assets/credit_stuff/Payment_Disc.png",
+        "assets/credit_stuff/Payment_Disc_Focus.png"
+    )
     local dottedSquare1 = Image{
         src = "assets/credit_stuff/PaymentHighlight.png",
         position = {990,600}
@@ -146,7 +166,9 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     local dottedSquare5 = Clone{source = dottedSquare1}
     dottedSquare5.position = {1590, 600}
     local dottedSquareTable = {
-        {dottedSquare1}, {dottedSquare2}, {dottedSquare3}, {dottedSquare4}, {dottedSquare5}
+        {dottedSquare1, cashFocus}, {dottedSquare2, masterCardFocus},
+        {dottedSquare3, visaCardFocus}, {dottedSquare4, americanExpressCardFocus},
+        {dottedSquare5, discoverCardFocus}
     }
 
     --card number entry textboxs
@@ -311,20 +333,21 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_sub_selection_index()) then
-                        item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                        if(item[2]) then
-                            item[2]:on_focus()
+                        item[2]:on_focus()
+                        if(Info.CARD_TYPE ~= i) then
+                            item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                         end
-                    elseif(Info.CARD_TYPE == i) then
+                    else
+                        item[2]:out_focus()
+                        if(Info.CARD_TYPE ~= i) then
+                            item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=100}
+                        end
+                    end
+                    if(Info.CARD_TYPE == i) then
                         if(model:selected_card() == j) then
                             item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                         else
                             item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
-                        end
-                    else
-                        item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                        if(item[2]) then
-                            item[2]:out_focus()
                         end
                     end
                 end

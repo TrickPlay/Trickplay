@@ -18,8 +18,16 @@ FinalFooterController = Class(Controller, function(self, view, ...)
     local MenuItemCallbacks = {
         [MenuItems.GO_BACK] = function(self)
             print("back dat shit up")
-            self:get_model():set_active_component(Components.FOOD_SELECTION)
-            self:get_model():notify()
+            view.items[1][2]:animate{duration = 200, opacity = 0}
+            view.pressed_button:animate{
+                duration = 200, opacity = 255,
+                on_completed = function()
+                    view.items[1][2]:animate{duration = 100, opacity = 255}
+                    view.pressed_button:animate{duration = 100, opacity = 0}
+                    self:get_model():set_active_component(Components.FOOD_SELECTION)
+                    self:get_model():notify()
+                end
+            }
         end,
         [MenuItems.PLACE_ORDER] = function(self)
         end,

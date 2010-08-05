@@ -11,6 +11,7 @@ dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("Globals.lua")
 dofile("Utils.lua")
 dofile("TextBox.lua")
+dofile("FocusableImage.lua")
 dofile("dominos_ordering/DominosPizza.lua")
 dofile("dominos_ordering/Navigator.lua")
 dofile("Menu/EmptyPizza.lua")

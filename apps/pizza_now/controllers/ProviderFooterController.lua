@@ -23,7 +23,6 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         local textObject = view.ui.children[item]
         local defaultText = textObject.text
         textObject.editable = true
-        textObject.cursor_visible = true
         textObject:grab_key_focus()
         textObject.text = ""
         function textObject:on_key_down(k)
@@ -35,10 +34,10 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
             end
         end
         function textObject:on_key_focus_out()
-            self.cursor_visible = false
+            self.editable = false
             self.on_key_focus_out = nil
-            if(textObject.text == "") then
-                textObject.text = defaultText
+            if(self.text == "") then
+                self.text = defaultText
             else
                 args = {}
                 args[name] = self.text
