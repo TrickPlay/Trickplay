@@ -94,7 +94,7 @@ function createLevelMenu(l)
                 screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
                 screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
                 
-                
+                Popup:new{text = "Round "..round}
         
         end
         
