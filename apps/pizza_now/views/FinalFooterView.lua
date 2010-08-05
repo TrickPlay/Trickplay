@@ -52,10 +52,15 @@ FinalFooterView = Class(View, function(view, model, parent_view, ...)
             }
         },
     }
-    items = view.items
+    view.pressed_button = Image{
+        position = {30, 30},
+        src = "assets/BackArrowPress.png",
+        opacity = 0
+    }
+
     view.entry_ui:add(unpack(view.items[1]))
     view.entry_ui:add(unpack(view.items[2]))
-    view.ui:add(view.background_ui, view.entry_ui)
+    view.ui:add(view.background_ui, view.entry_ui, view.pressed_button)
     function view:initialize()
         self:set_controller(FinalFooterController(self))
     end
