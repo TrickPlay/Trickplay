@@ -14,7 +14,7 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = ProviderGroups.PROVIDERS
+    local selected = ProviderGroups.FOOTER
 
     --initialize the focus to the carousel
     assert(view.items[selected], "view child with index " .. selected .. " is nil!")
@@ -65,7 +65,9 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
         table.foreach(dir, print)
         local new_selected = selected + dir[2]
         if 1 <= new_selected and new_selected <= GroupSize then
+            view.items[selected]:get_controller():out_focus()
             selected = new_selected
+            view.items[selected]:get_controller():on_focus()
         end
         self:get_model():notify()
     end

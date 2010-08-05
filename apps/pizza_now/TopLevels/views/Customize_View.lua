@@ -7,6 +7,22 @@ CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     view.first_tab_groups = {}
 
+    view.ingredientbox_right = {}
+    view.ingredientbox_left  = {}
+    view.ingredientbox_top   = ""
+ 
+    view.ingredient_top_text   = Text{
+        position = {1000,70},
+        text     = ""
+    }
+    view.ingredient_left_text  = Text{
+        position = {1000,140},
+        text     = ""
+    }
+    view.ingredient_right_text = Text{
+        position = {1500,140},
+        text     = ""
+    }
 
 
      
@@ -37,10 +53,34 @@ CustomizeView = Class(View, function(view, model, ...)
         view.hor_lines       = {}
         view.vert_lines      = {}
 
+        view.ingredientbox_right = {}
+        view.ingredientbox_left  = {}
+        view.ingredientbox_top   = ""
+
     
         --gut the UI
         view.ui:clear()
         view.ui:add(view.bg)
+
+        view.ingredient_top_text   = Text{
+            position = {1080,70},
+              font        = CUSTOMIZE_SUB_FONT_B,
+
+            text     = ""
+        }
+        view.ingredient_left_text  = Text{
+            position = {1100,200},
+              font        = CUSTOMIZE_SUB_FONT,
+
+            text     = ""
+        }
+        view.ingredient_right_text = Text{
+            position = {1450,200},
+              font        = CUSTOMIZE_SUB_FONT,
+
+            text     = ""
+        }
+
         --view.ui:add(view.bg2)
 --[[
         view.arrow = Image{                
@@ -65,7 +105,7 @@ CustomizeView = Class(View, function(view, model, ...)
 
         view.nutrition   = Image {
                 position = {960, 0},
-                src      = "assets/NutritionMockup.png"
+                src      = "assets/IngredientsBox.png"
             }
         view.slice_lines = Image {
                 position = {960, 480},
@@ -73,7 +113,7 @@ CustomizeView = Class(View, function(view, model, ...)
             }
 
         view.price = Text{
-              position    = {1400, 100},
+              position    = {1630, 70},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
               text        = model.current_item.Price
@@ -319,6 +359,12 @@ CustomizeView = Class(View, function(view, model, ...)
                             position = {300, retarded[i]+265 + 10*(i-1)},
                             src      = "assets/Size"..All_Options["Size_r"][i]..".png"
                     }
+                    view.first_tab_groups[2][2][i][4] = Image{
+                            position = {300, retarded[i]+265 + 10*(i-1)},
+                            opacity  = 0,
+                            src      = "assets/Size"..All_Options["Size_r"][i].."Focus.png"
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][4])
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][1])
 
                     view.first_tab_groups[2][2][i][2] = Image {
@@ -390,113 +436,9 @@ CustomizeView = Class(View, function(view, model, ...)
                     view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][3])
 
                 end
-
---[===[
-                        view.sub_group_items[tab_index][opt_index] = {}
-                        view.sub_group_items[tab_index][opt_index][1] = Text {
-                            position = {0, 60*(opt_index-1)+10},
-                            font     = CUSTOMIZE_SUB_FONT,
-                            color    = Colors.BLACK,
-                            text     = option.Name
-                        }
-                        view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][1])
-                        view.sub_group_items[tab_index][opt_index][2] = {}
-
-                        view.accordian_group_items[tab_index][opt_index] = {}
-                        view.accordian_group[tab_index][opt_index] = Group{
-                                name = option.Name.." accordian",
-                            position = {120, 60*(opt_index)+10},
-                             opacity = 0
-                        }
-                        local acc_index = 1
-                        local acc_adjust = 0                        
-                        for item,curr_selection in pairs(option) do
-                            if item ~= "Name" and item ~= "Image" and item ~= "Selected" 
-                               and item ~= "Radio" and item ~= "ToppingGroup" then
-                                view.accordian_group_items[tab_index][opt_index][acc_index] = {}
-                                local radio_index = 1  
-                                view.accordian_group[tab_index][opt_index]:add(Text{
-                                          position = {0, --[[60*(radio_index-1)+]]acc_adjust},
-                                          font     = CUSTOMIZE_SUB_FONT,
-                                          color    = Colors.BLACK,
-                                          text     = item..":"
-                                })
-                                acc_adjust = acc_adjust+50
-                                for r=1,#All_Options[item.."_r"] do
-                                    view.accordian_group_items[tab_index][opt_index][acc_index][radio_index]={}
-                                    view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][1] = Text {
-                                          position = {60, --[[60*(radio_index-1)+]]acc_adjust},
-                                          font     = CUSTOMIZE_SUB_FONT,
-                                          color    = Colors.BLACK,
-                                          text     = All_Options[item.."_r"][r]
-                                    }
-                                    if r == curr_selection then
-                                        view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][2] = Image {
-                                          position = {0, --[[60*(radio_index-1)+]]acc_adjust-15},
-                                          src      = "assets/RadioOn.png"
-                                        }
-                                    else
-                                        view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][2] = Image {
-                                          position = {0,--[[ 60*(radio_index-1)+]]acc_adjust-15},
-                                          src      = "assets/RadioOff.png"
-                                        }
-                                    end
-                                    view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][1])
-                                    view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][radio_index][2])
-                                    radio_index = radio_index + 1
-                                    acc_adjust = acc_adjust+50
-
-                                end
-                               -- acc_adjust = acc_adjust +radio_index*60
-                                acc_index = acc_index + 1
-
-                            end
-                        end
---[==[
-                        --radio_index = radio_index + 1
-                                --acc_adjust = acc_adjust+60
-                        view.accordian_group_items[tab_index][opt_index][acc_index]={}
-                        view.accordian_group_items[tab_index][opt_index][acc_index][1]={}
-                        view.accordian_group_items[tab_index][opt_index][acc_index][1][1] = Text {
-                                          position = {0, --[=[60*(radio_index-1)+]=]acc_adjust},
-                                          font     = CUSTOMIZE_SUB_FONT_SP,
-                                          color    = Colors.BLACK,
-                                          text     = "Continue"
-                                    }
-                        --acc_adjust = acc_adjust +radio_index*60
-                        view.accordian_group[tab_index][opt_index]:add(view.accordian_group_items[tab_index][opt_index][acc_index][1][1])--]==]
-
-                        view.sub_group[tab_index]:add(view.accordian_group[tab_index][opt_index])
-                                    --acc_adjust = acc_adjust+60
-
-                        option.Selected = function()
-                            if opt_index < #tab.Options then
-                                for i=opt_index+1,#tab.Options do
-                                    view.sub_group_items[tab_index][i][1].y = view.sub_group_items[tab_index][i][1].y + acc_adjust
-                                end
-                            end
-                            view.accordian_group[tab_index][opt_index].opacity = 255
-                            self:get_model():set_active_component(Components.ACCORDIAN)
-                            self:get_model():get_active_controller():init_shit(view.accordian_group_items[tab_index][opt_index],tab_index,opt_index,option,view.accordian_group[tab_index][opt_index])
-
-                            self:get_model():notify()
-
-                            --model.accordian
-                            --init accordian
-                        end--]]
-                --[[        option.UnSelected = function()
-                            print("\n\nunselecting")
-                            if opt_index < #tab.Options then
-                                for i=opt_index+1,#tab.Options do
-                                    view.sub_group_items[tab_index][i][1].y = view.sub_group_items[tab_index][i][1].y - acc_adjust
-                                end
-                            end
-                            view.accordian_group[tab_index][opt_index].opacity = 0
-                            model:set_active_component(Components.TAB)
-                            self:get_model():notify()
-
-                        end--]===]
-                    
+                view.ingredientbox_top = All_Options.Size_r[model.current_item.Tabs[1].Options[4].Size].." "..
+                                         All_Options.Crust_Style_r[model.current_item.Tabs[1].Options[3].Crust_Style].." "..
+                                         model.current_item.Name                  
 
             --the Topping pages
             elseif tab.Options ~= nil then
@@ -527,6 +469,15 @@ CustomizeView = Class(View, function(view, model, ...)
                                       src      = "assets/Placement/"..
                                        All_Options.Placement_r[option.Placement]..".png"
                                 }
+                                if option.Placement == All_Options.Placement.Entire or
+                                   option.Placement == All_Options.Placement.Left then
+                                    view.ingredientbox_left[#view.ingredientbox_left+1] = option.Name
+                                end
+                                if option.Placement == All_Options.Placement.Entire or
+                                   option.Placement == All_Options.Placement.Right then
+                                    view.ingredientbox_right[#view.ingredientbox_right+1] = option.Name
+                                end
+ 
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
                                 view.sub_group_items[tab_index][opt_index][2] = Image {
                                      position = {-70*(2-1), 60*(opt_index-1)},
@@ -583,6 +534,11 @@ CustomizeView = Class(View, function(view, model, ...)
             }
         view.ui:add(view.pzzaLR)
  
+        view.rebuild_ingredient_box()    
+        view.ui:add(view.ingredient_top_text)
+        view.ui:add(view.ingredient_left_text)
+        view.ui:add(view.ingredient_right_text)
+
 
         --bg:lower_to_bottom()
         view.ui:lower(view.bg)
@@ -643,6 +599,23 @@ windmill_view:initialize()
                                         acc_view:get_controller(),
                                   first_tab_view:get_controller()})
         --first_tab_view:initing()
+    end
+    function view:rebuild_ingredient_box()
+        print("\n\nRebuilding ingredientbox: # left",#view.ingredientbox_left,"# right",#view.ingredientbox_right)
+        --top
+        view.ingredient_top_text.text = view.ingredientbox_top
+        --left
+        local left = ""
+        for i=1,#view.ingredientbox_left do
+            left = left..view.ingredientbox_left[i].."\n"
+        end
+        view.ingredient_left_text.text = left
+        --right
+        local right = ""
+        for i=1,#view.ingredientbox_right do
+            right = right..view.ingredientbox_right[i].."\n"
+        end
+        view.ingredient_right_text.text = right
     end
 
     function view:enter_sub_group()

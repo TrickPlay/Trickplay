@@ -17,7 +17,41 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     }
 
     --Static text
-        --credit card text
+    --address entered from first page
+    deliverToText = Text{
+        position = {1000, 20},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = "Deliver to: "
+    }
+    addressText = Text{
+        position = {1150, 50},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = ""
+    }
+
+    view.deliverTo_ui = Group{name = "deliverTo_ui"}
+    view.deliverTo_ui:add(deliverToText, addressText)
+
+    local function set_address()
+        addressText.text = ""
+        deliverToText.text = "Deliver To: "
+        if(model.address.street) then
+            deliverToText.text = deliverToText.text..model.address.street.."   "
+        end
+        if(model.address.apartment) then
+            deliverToText.text = deliverToText.text.."Apt. "..model.address.apartment..", "
+        end
+        if(model.address.city) then
+            addressText.text = addressText.text..model.address.city.." "
+        end
+        if(model.address.zip) then
+            addressText.text = addressText.text..model.address.zip
+        end
+    end
+
+    --credit card text
     local cardNumberText = Text{
         position = {1000,740},
         font = CUSTOMIZE_SUB_FONT,
@@ -38,10 +72,10 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     }
 
     --driverInstructionsTextBox
-    local driverInstructionsTextBox = TextBox(1020, 120, 1760-1040)
+    local driverInstructionsTextBox = TextBox(1020, 125, 1760-1040)
     --entry for instructions for the driver
     local driverInstructionsEntry = Text{
-        position = {1030, 135},
+        position = {1030, 140},
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "Note to the driver?",
@@ -350,7 +384,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         end
     end
     
-view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui)
+view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui, view.deliverTo_ui)
 
     function view:initialize()
         self:set_controller(CreditInfoController(self))
@@ -364,6 +398,7 @@ view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui)
             assert(controller:get_selected_index())
             assert(controller:get_sub_selection_index())
             print("Showing CreditInfoView UI")
+            set_address()
             if(model:selected_card() == 1) then
                 view.credit_ui.opacity = 0
             else

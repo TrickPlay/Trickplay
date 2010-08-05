@@ -13,6 +13,7 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
     end
 
     local selected = 1
+    local previous_selected = 1
     local MenuItemCallbacks = {
         [MenuItems.DOMINOS] =
            function(self)
@@ -82,7 +83,13 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
 
     function self:get_selected_index()
        return selected
-    end		
+    end
+
+    function self:on_focus()
+    end
+
+    function self:out_focus()
+    end
 
     
     function self:run_callback()
