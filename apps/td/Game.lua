@@ -4,6 +4,8 @@ Game = {}
 
 function Game:new(args)
 	local theme = args.theme
+	savedTheme = theme
+         
 	local gold = args.gold
 	local board = Board:new {
 		--board args to be passed in
@@ -22,6 +24,7 @@ function Game:new(args)
 end
 
 function Game:startGame()
+	gamestarted = true
 	self.board:init()
 	self.board:createBoard()
 end
@@ -73,6 +76,7 @@ function Game:killGame(status)
 	settings.towerType = {}
 	settings.towerUpgrades = {}
 	tnum = 1
+	gamestarted = false
 
 	game.board = nil
 	game = nil

@@ -141,6 +141,7 @@ function Tower:render(seconds, creeps)
 			local cy = creeps[i].creepGroup.y					
 			if (creeps[i].slowtimer.elapsed_seconds > self.slowlength and self.slow) then
 				creeps[i].speed = creeps[i].max_speed
+				creeps[i].slowed = false
 			end
 			if (cx > self.x - self.range and cx < self.x + self.range and cy > self.y - self.range and cy < self.y + self.range and creeps[i].hp ~=0 and self.damage ~=0 and cx > 0) then
 				if (creeps[i].flying and self.attacksFlying == false) then break end
