@@ -1,6 +1,8 @@
---Circle
+local print = function() end
 
 function createCircleMenu(offset, distance, params, menuType, player)
+
+        
 
         print("Should create a button menu")
 
@@ -15,6 +17,8 @@ function createCircleMenu(offset, distance, params, menuType, player)
         CircleMenu:button_directions()
         CircleMenu:create_buttons(-20)	        
         CircleMenu:update_cursor_position()
+        
+        CircleMenu.debug = true -- TURN THIS OFF LATER
         
 	--local CircleMenu = Menu.create(c, list)
 	--CircleMenu:create_key_functions()
@@ -98,7 +102,8 @@ function createCircleMenu(offset, distance, params, menuType, player)
                 keyboard_key_down = CircleMenu.buttons.on_key_down
         elseif player == game.board.player2 then
                 print("Player 2 aquired CircleMenu")
-                ipod_keys(CircleMenu.buttons)
+                --ipod_keys(CircleMenu.buttons)
+                ipod_k = CircleMenu.actions
         end
         
         -- To destroy
