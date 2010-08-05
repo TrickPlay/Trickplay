@@ -188,7 +188,7 @@ function createRedArrow()
                 
                 game.board.redArrow = true
                 
-                local a = AssetLoader:getImage( "RedArrow",{x = 200, y = screen.h/2, opacity = 0} )
+                local a = AssetLoader:getImage( "RedArrow",{x = 200, y = screen.h/2, opacity = 0, z = 5} )
                 a.anchor_point = {a.w/2, a.h/2}
                 
                 Popup:new{
