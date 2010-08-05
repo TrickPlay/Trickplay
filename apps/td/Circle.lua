@@ -2,23 +2,48 @@
 
 function createCircleMenu(offset, distance, params, menuType, player)
 
+        print("Should create a button menu")
+
 	local c = Group{}
 	screen:add(c)
 	
 	local list = params
         
-	local CircleMenu = Menu.create(c, list)
-	CircleMenu:create_key_functions()
-	CircleMenu:button_directions()
-	CircleMenu:create_circle(offset, distance)
-	CircleMenu:circle_directions(offset, distance)
+        local hl = Rectangle{w=200,h=200,color="00FF00"}
+        local CircleMenu = Menu.create(c, list, hl)
+        CircleMenu:create_key_functions()
+        CircleMenu:button_directions()
+        CircleMenu:create_buttons(-20)	        
+        CircleMenu:update_cursor_position()
+        
+	--local CircleMenu = Menu.create(c, list)
+	--CircleMenu:create_key_functions()
+	--CircleMenu:button_directions()
+	--CircleMenu:create_circle(offset, distance)
+	--CircleMenu:circle_directions(offset, distance)
+        
+        print("Created a button menu")
+
+        
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
-	--CircleMenu.buttons:grab_key_focus()
-	CircleMenu.container.opacity=150
+        
+        CircleMenu.hl.opacity = 50
+	CircleMenu.container.opacity=230
         CircleMenu.container.z=5
         CircleMenu.owner = player
+        
         CircleMenu.list = list
+        
+        print("ADDED LIST")
+        
+        CircleMenu.container.scale = {.6,.6}
+        
+        CircleMenu.container.anchor_point = { CircleMenu.container.w, 0 }
+        CircleMenu.container.x = 1920
+        
+        
+        print("Modified parameters")
 	
 	-- Remember which item was last selected for the different menus and initialize by pressing left until this item is reached
 	if not player.lastSelected then player.lastSelected = {} end
@@ -27,9 +52,13 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	if (not last[menuType]) or (last[menuType] > CircleMenu.max_x[1]) then last[menuType] = 1 end
 		
 	while last[menuType] > CircleMenu.x do
-		CircleMenu.buttons.extra.left()
-		CircleMenu.container.z_rotation = {CircleMenu.container.extra.angle, CircleMenu.container.z_rotation[2], CircleMenu.container.z_rotation[3]}
+		CircleMenu.buttons.extra.right()
+                CircleMenu:update_cursor_position()
+
+		--CircleMenu.container.z_rotation = {CircleMenu.container.extra.angle, CircleMenu.container.z_rotation[2], CircleMenu.container.z_rotation[3]}
 	end
+        
+        print("Changled selection")
 	
 	-- What happens when you press enter...
 	CircleMenu.buttons.extra.r = function()
@@ -88,7 +117,7 @@ end
 
 
 -- Render circle rotation
-function circleRender(c, seconds)
+--[[function circleRender(c, seconds)
 
 	if c.container.z_rotation[1] < c.container.extra.angle then
                 
@@ -104,5 +133,5 @@ function circleRender(c, seconds)
                 
 	end
 	
-end
+end]]
 

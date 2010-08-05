@@ -7,6 +7,8 @@ function TowerInfo:new(args)
 
 	local object = {
                 
+                x = g.x,
+                y = g.y,
 		group = g,
                 background = AssetLoader:getImage("smallWindow", {scale={1.20, 1.25} } ),
                 --icon = 	AssetLoader:getImage(args.tower.prefix..args.tower.name,{x = g.x + 20, scale={.4, .4}} )
@@ -40,6 +42,9 @@ function TowerInfo:update(tower, player, isNew, x, y, range)
         if game.board.player2 and player == game.board.player2 then self.group.x = 40 self.group.y = 20 end
 
         if not isNew then
+        
+                self.group.x = self.x
+                self.group.y = self.y
                 
                 self.group:remove(self.icon)
 --					 self.group:remove(self.rangeCircle)                
@@ -65,6 +70,13 @@ function TowerInfo:update(tower, player, isNew, x, y, range)
                 self.sell.text = "Sell for: " .. tower.cost * .5 .. " Gold"
                 
         else
+        
+                --self.group.y = player.circle.container.h * player.circle.container.scale[2] - 30
+                --self.group.x = self.x - 100
+                
+                self.group.x = 1920 - player.circle.container.w*2 * player.circle.container.scale[1]
+                
+                --print("rendering towerinfo")
                 
                 self.group:remove(self.icon)
                 --self:drawRangeCircle(x,y,range)
@@ -93,34 +105,38 @@ end
 
 function TowerInfo:changeOpacity(seconds)
 
-        --print(1)
+        local limit = 220
 
-        if self.fade == "in" then
-
-                --print("2")
-        
-                local limit = 220
+        if self.fade == "in" and self.group.opacity ~= limit then
+                
                 if self.group.opacity <= limit then
 	                        
                         local new = self.group.opacity + 800 * seconds
                         if new > limit then
                                 self.group.opacity = limit
-                        else
-                                self.group.opacity = new
+                                --print("Fade should now be nil")
                                 self.fade = nil
+                        else
+                                self.group.opacity = new                                
                         end
                 
                 end
         
-        else
+        elseif self.fade == "out" and self.group.opacity ~= 0 then
+                
                 local new = self.group.opacity - 800 * seconds
                 
                 if new > 0 then
                         self.group.opacity = new
                 else
                         self.group.opacity = 0
+                        --print("Fade should now be nil")
                         self.fade = nil
                 end
+        
+        else
+        
+                self.fade = nil
         
         end
 
