@@ -3,12 +3,32 @@ local DEFAULT_COLOR = Colors.BLACK
 
 ProviderFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)
+
+    local bottomBar = Image{
+        src = "assets/OrderBarBase.png",
+        position = {0, 960},
+        tile = {true, false},
+        width = 1920
+    }
      
     view.ui=Group{name="providerfooter_ui", position={0,0}, opacity=255}
 
+    local exitItem = FocusableImage(30, 980,
+        "assets/Exit.png",
+        "assets/ExitFocus.png")
+    local streetBillingTextBox = TextBox(330, 990, 600)
+    local cityBillingTextBox = TextBox(950, 990, 370)
+    local stateBillingTextBox = TextBox(1340, 990, 70)
+    local zipBillingTextBox = TextBox(1430, 990, 120)
+
+    view.boxes = {
+        exitItem, streetBillingTextBox, cityBillingTextBox, stateBillingTextBox,
+        zipBillingTextBox
+    }
+
     view.items = {
         Text{
-            position={0, 1000},
+            position={0, 1100},
             font  = DEFAULT_FONT,
             color = DEFAULT_COLOR,
             text = "Exit"
@@ -19,7 +39,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             color=DEFAULT_COLOR,
             text="Enter Street",
             wants_enter = false,
-            max_length = 20
+            max_length = 22
         },
         Text{
             position={965,1000},
@@ -46,6 +66,10 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 5
         },
     }
+    view.ui:add(bottomBar)
+    for i,v in ipairs(view.boxes) do
+        view.ui:add(v.group)
+    end
     view.ui:add(unpack(view.items))
     --screen:add(view.ui)
     function view:initialize()
@@ -57,17 +81,14 @@ ProviderFooterView = Class(View, function(view, model, ...)
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
             print("Showing ProviderFooterView UI")
---            view.ui.opacity = 255
             view.ui:raise_to_top()
-            for i,item in ipairs(view.items) do
+            for i,box in ipairs(view.boxes) do
                 if i == controller:get_selected_index() then
                     print("\t",i,"opacity to 255")
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                    item.color = Colors.RED
+                    box.on_focus()
                 else
                     print("\t",i,"opacity to 0")
-                    item:animate{duration=CHANGE_VIEW_TIME, opacity=50}
-                    item.color = Colors.BLACK
+                    box.out_focus()
                 end
             end
         else

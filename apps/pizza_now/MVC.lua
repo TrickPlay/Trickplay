@@ -211,4 +211,12 @@ Controller = Class(Observer, function(controller, view, controller_id)
         error("run_callback() not defined for controller")
     end
 
+    function controller:on_focus()
+        error("self:on_focus() not defined for controller")
+    end
+    
+    function controller:out_focus()
+        error("self:out_focus() not defined for controller")
+    end
+
 end)
