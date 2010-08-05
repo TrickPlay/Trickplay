@@ -121,43 +121,45 @@ CustomizeView = Class(View, function(view, model, ...)
             
             --the crust cheese and sauce page
             if tab.Radio == true then
-                --everything is hardcoded...
+                --and everything is hardcoded.....
                 view.first_tab_groups[1] = {}
                 view.first_tab_groups[2] = {}
                 view.first_tab_groups[3] = {}
 
+                
                 --Cheese is on the top
+                -----------------------
                 view.sub_group[tab_index]:add(Text {
-                            position = {0, 0},
+                            position = {-180, -80},
                             font     = CUSTOMIZE_SUB_FONT_B,
                             color    = Colors.BLACK,
                             text     = "Cheese:"
                 })
                 view.sub_group[tab_index]:add(Image{
-                    position = {100, 0},
+                    position = {-40, -60},
                     scale    = {1,1.5},
                     tiled    = {true,false},
-                    width    = 300,
+                    width    = 400,
                     src      = "assets/MenuHorzLine.png"
                 })
                 --Cheese Placement
                 view.first_tab_groups[1][1] = {}
                 view.first_tab_groups[1][1][-2] = Text{
-                            position = {40, 60},
+                            position = {-160, -40},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
                             text     = "Placement on Pizza:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-2])
                 view.first_tab_groups[1][1][-1] = Image{
-                            position = {40, 120},
+                            position = {-160, 0},
                             src      = "assets/CrustSelect4.png"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-1])
                 for i=1,#All_Options["Placement_r"] do
                     view.first_tab_groups[1][1][i] ={}
                     view.first_tab_groups[1][1][i][1] = Text{
-                            position = {120, 60*i+60},
+                            position = {-60, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
                             text     = All_Options["Placement_r"][i]
@@ -165,12 +167,12 @@ CustomizeView = Class(View, function(view, model, ...)
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
                     if i == tab.Options[1].Placement then
                         view.first_tab_groups[1][1][i][2] = Image {
-                            position = {60, 60*i+60},
+                            position = {-120, 45*(i-1)-15},
                             src      = "assets/RadioOn.png"
                         }
                     else
                         view.first_tab_groups[1][1][i][2] = Image {
-                            position = {60,60*i+60},
+                            position = {-120,45*(i-1)-15},
                             src      = "assets/RadioOff.png"
                         }
                     end
@@ -179,43 +181,171 @@ CustomizeView = Class(View, function(view, model, ...)
                 --Cheese Coverage
                 view.first_tab_groups[1][2] = {}
                 view.first_tab_groups[1][2][-2] = Text{
-                            position = {200, 60},
+                            position = {200, -40},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
                             text     = "Coverage on Pizza:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-2])
                 view.first_tab_groups[1][2][-1] = Image{
-                            position = {200, 120},
+                            position = {200, 0},
                             src      = "assets/CrustSelect4.png"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-1])
                 for i=1,#All_Options["CoverageX_r"] do
                     view.first_tab_groups[1][2][i] ={}                    
                     view.first_tab_groups[1][2][i][1] = Text{
-                            position = {320, 60*i+60},
+                            position = {300, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
                             text     = All_Options["CoverageX_r"][i]
                     }
-                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][1])
                     if i == tab.Options[1].CoverageX then
                         view.first_tab_groups[1][2][i][2] = Image {
-                            position = {260, 60*i+60},
+                            position = {240, 45*(i-1)-15},
                             src      = "assets/RadioOn.png"
                         }
                     else
                         view.first_tab_groups[1][2][i][2] = Image {
-                            position = {260,60*i+60},
+                            position = {240,45*(i-1)-15},
                             src      = "assets/RadioOff.png"
                         }
                     end
-                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][2])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][2])
                 end
 
 
                 --Crust and Size are in the middle
+                ----------------------------------
+                view.sub_group[tab_index]:add(Text {
+                            position = {-180, 180},
+                            font     = CUSTOMIZE_SUB_FONT_B,
+                            color    = Colors.BLACK,
+                            text     = "Crust:"
+                })
+                view.sub_group[tab_index]:add(Image{
+                    position = {-40, 200},
+                    scale    = {1,1.5},
+                    tiled    = {true,false},
+                    width    = 400,
+                    src      = "assets/MenuHorzLine.png"
+                })
+                --Crust Style
+                view.first_tab_groups[2][1] = {}
+                view.first_tab_groups[2][1][-2] = Text{
+                            position = {-160, 220},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = "Styles:"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[2][1][-2])
+                view.first_tab_groups[2][1][-1] = Image{
+                            position = {-160, 265},
+                            src      = "assets/CrustSelect4.png"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[2][1][-1])
+                for i=1,#All_Options["Crust_Style_r"] do
+                    view.first_tab_groups[2][1][i] ={}
+                    view.first_tab_groups[2][1][i][1] = Text{
+                            position = {-60, 45*(i-1)+265},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = All_Options["Crust_Style_r"][i]
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][1][i][1])
+                    if i == tab.Options[1].Placement then
+                        view.first_tab_groups[2][1][i][2] = Image {
+                            position = {-120, 45*(i-1)+250},
+                            src      = "assets/RadioOn.png"
+                        }
+                    else
+                        view.first_tab_groups[2][1][i][2] = Image {
+                            position = {-120,45*(i-1)+250},
+                            src      = "assets/RadioOff.png"
+                        }
+                    end
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][1][i][2])
+                end
+                --Size
+                view.first_tab_groups[2][2] = {}
+                view.first_tab_groups[2][2][-2] = Text{
+                            position = {200, 220},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = "Available Size:"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[2][2][-2])
+                view.first_tab_groups[2][2][-1] = Image{
+                            position = {200, 265},
+                            src      = "assets/CrustSelectSize.png"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[2][2][-1])
+                local retarded = {0,80,180,300}
+                local half_retarded = {40-30,50-30,60-30,70-30}
+                for i=1,#All_Options["Size_r"] do
+                    view.first_tab_groups[2][2][i] ={}
+                    --print(80*(i-1)+20*((i-1)/2))
+                    view.first_tab_groups[2][2][i][1] = Image{
+                            position = {300, retarded[i]+265 + 10*(i-1)},
+                            src      = "assets/Size"..All_Options["Size_r"][i]..".png"
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][1])
+                    if i == tab.Options[1].Placement then
+                        view.first_tab_groups[2][2][i][2] = Image {
+                            position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)},
+                            src      = "assets/RadioOn.png"
+                        }
+                    else
+                        view.first_tab_groups[2][2][i][2] = Image {
+                            position = {240, half_retarded[i]+retarded[i]+265 + 10*(i-1)},
+                            src      = "assets/RadioOff.png"
+                        }
+                    end
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][2])
+                end
+
+
+
+
                 --Sauce is bottom left
+                ----------------------------------
+                view.first_tab_groups[3][1] = {}
+
+                view.first_tab_groups[3][1][-2]=Text {
+                            position = {-160, 500},
+                            font     = CUSTOMIZE_SUB_FONT_B,
+                            color    = Colors.BLACK,
+                            text     = "Sauce:"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[3][1][-2])
+                view.first_tab_groups[3][1][-1] = Image{
+                            position = {-160, 540},
+                            src      = "assets/CrustSelect4.png"
+                }
+                view.sub_group[tab_index]:add(view.first_tab_groups[3][1][-1])
+                for i=1,#All_Options["Sauce_Type_r"] do
+                    view.first_tab_groups[3][1][i] ={}
+                    view.first_tab_groups[3][1][i][1] = Text{
+                            position = {-60, 45*(i-1)+535},
+                            font     = CUSTOMIZE_SUB_FONT,
+                            color    = Colors.BLACK,
+                            text     = All_Options["Sauce_Type_r"][i]
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][1])
+                    if i == tab.Options[1].Placement then
+                        view.first_tab_groups[3][1][i][2] = Image {
+                            position = {-120, 45*(i-1)+520},
+                            src      = "assets/RadioOn.png"
+                        }
+                    else
+                        view.first_tab_groups[3][1][i][2] = Image {
+                            position = {-120,45*(i-1)+520},
+                            src      = "assets/RadioOff.png"
+                        }
+                    end
+                    view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][2])
+                end
 
 --[===[
                         view.sub_group_items[tab_index][opt_index] = {}
