@@ -1,5 +1,3 @@
-DEFAULT_FONT="DejaVu Sans Mono 40px"
-DEFAULT_COLOR="FFFFFF" --WHITE
 TopLevelView = Class(View, function(view, model, ...)
     view._base.init(view,model)
      

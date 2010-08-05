@@ -1,12 +1,13 @@
 ProviderSelectionController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PROVIDER_SELECTION)
 
+    -- Made providergroups public for ProviderSelectionView's benefit.
     local ProviderGroups = {
 --        DELIVERY_OPTIONS = 1,
         PROVIDERS = 1,
         FOOTER = 2
     }
-
+    self.ProviderGroups = ProviderGroups
     local GroupSize = 0
     for k, v in pairs(ProviderGroups) do
         GroupSize = GroupSize + 1
