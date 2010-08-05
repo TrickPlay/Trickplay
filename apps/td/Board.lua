@@ -272,9 +272,12 @@ function Board:createBoard()
 			 self.player.gold = self.player.gold + selection.cost
 			 self:buildTower(selection,self.player)
 			 if (settings.towerUpgrades[i] == 1) then
+			 	 self.player.gold = self.player.gold + selection.upgrades[1].cost
 				 self:upgradeTower(self.player)
-			 end
- 			 if (settings.towerUpgrades[i] == 2) then
+ 			 elseif (settings.towerUpgrades[i] == 2) then
+				 self.player.gold = self.player.gold + selection.upgrades[1].cost
+			 	 self.player.gold = self.player.gold + selection.upgrades[2].cost
+
 				 self:upgradeTower(self.player)
 				 self:upgradeTower(self.player)
 			 end
@@ -509,9 +512,6 @@ function Board:upgradeTower(player)
 
 	-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
 	local current = self.squareGrid[ player.position[1] ][ player.position[2] ]
-	print ("\n\n\n\n\n"..savedTowerUpgrades[current.tower.tnum])
-	local b = savedTowerUpgrades[current.tower.tnum]
-	savedTowerUpgrades[current.tower.tnum] = b + 1
 	return current.tower:upgrade()
 
 end
