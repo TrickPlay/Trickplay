@@ -8,6 +8,8 @@ Board = {}
 -- Create a new board
 function Board:new(args)
 
+	
+
 	local w = BW
 	local h = BH
 
@@ -55,10 +57,15 @@ end
 
 Board.render = function (self, seconds)
 	local s =self.timer.elapsed_seconds 
-	seconds_elapsed = seconds_elapsed + seconds
-	--wave_counter = 0
+	
+	--if not self.gameIsStarting then self.gameIsStarting = Popup:new{text = "Get Ready!", fade = "in"} end
+
 	CREEP_WAVE_LENGTH = self.theme.wave[level].size
-	if (seconds_elapsed >= WAIT_TIME) then
+	
+	if seconds_elapsed.elapsed_seconds > WAIT_TIME - 3 and seconds_elapsed.elapsed_seconds < WAIT_TIME - 2 then createRedArrow() end
+	
+	if (seconds_elapsed.elapsed_seconds >= WAIT_TIME) then
+		WAIT_TIME = WAIT
 		local sp = self.theme.wave[level][wavePartCounter].speed or 1 
 		if (s > sp) then 
 			self.timer:start()
@@ -116,7 +123,7 @@ Board.render = function (self, seconds)
 		end
 		phasetext.text = "Wave Phase!"
 	else
-		countdowntimer.text = "Next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
+		--countdowntimer.text = "Next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
 		phasetext.text = "Build Phase!"
 		--bloodGroup:clear()
 		bloodGroup.opacity = 155 - s*(155/WAIT_TIME)
@@ -124,6 +131,8 @@ Board.render = function (self, seconds)
 			bloodGroup:clear()
 		end	
 	end
+	
+	
 	if (wave_counter == CREEP_WAVE_LENGTH) then
 		for k,v in pairs(self.creepWave) do
 			v.creepGroup.opacity = 0
@@ -135,15 +144,19 @@ Board.render = function (self, seconds)
 		end
 		wave_counter = 0
 		creepnum = 1
-		seconds_elapsed = 0
+		seconds_elapsed:start()
 		level = level + 1
 		
 		wavePartCounter = 1
 		creeppartnum = 1
 		
 		if (level-1 == #self.theme.wave) then
-			game:killGame(1)
+			--game:killGame(1)
+			
 			level = 1
+			
+			endGamePopup(1, "You win!")
+			
 		end
 		
 	end
@@ -156,7 +169,7 @@ Board.render = function (self, seconds)
 		self.obstacleImages[i]:animate()
 	end
 	
-	if self.player.circle then
+	--[[if self.player.circle then
 		circleRender(self.player.circle, seconds)
 	end
 	
@@ -164,14 +177,22 @@ Board.render = function (self, seconds)
 		if self.player2.circle then
 			circleRender(self.player2.circle, seconds)
 		end
-	end
+	end]]
 	
 	--print("render!")
 	self.player:render(seconds)
 	if self.player2 then self.player2:render(seconds) end
+	
+	for k,v in pairs(game.popups) do
+		v:render(seconds)
+	end
+		
 end
 
 function Board:init()
+
+	Popup:new{text = "Get Ready!"}
+
 	for i = 1, self.h do
 		local total = ""
 		for j = 1, self.w do
@@ -197,6 +218,7 @@ function Board:createBoard()
 
 	local groups = {}
 	self.timer:start()
+	seconds_elapsed:start()
 	for i = 1, self.h do
 		groups[i] = {}
 		local g = groups[i]
@@ -356,7 +378,7 @@ function Board:createBoard()
 	end	
 	BoardMenu.buttons.extra.space = function()
 
-		seconds_elapsed = WAIT_TIME
+		--seconds_elapsed.elapsed_seconds = WAIT_TIME
 		bloodGroup:clear()
 	end
 	

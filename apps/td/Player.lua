@@ -17,39 +17,38 @@ end
 
 function Player:render(seconds)
 
-		local x
-		local y
-		
-		if self == game.board.player then
-			x = BoardMenu.x
-			y = BoardMenu.y
-			
-		else
-			x = BoardMenu.hl2.extra.x
-			y = BoardMenu.hl2.extra.y
-		end
-		local current = game.board.squareGrid[ y ][ x ]
+	--print(1)
 
-	if not self.circle or not self.circle.list[1][self.circle.x].extra.t then
+	local x
+	local y
 	
+	if self == game.board.player then
+		x = BoardMenu.x
+		y = BoardMenu.y
+		
+	else
+		x = BoardMenu.hl2.extra.x
+		y = BoardMenu.hl2.extra.y
+	end
+		
+	local current = game.board.squareGrid[ y ][ x ]
+
+	if not self.circle then --or not self.circle.list[1][self.circle.x].extra.t then
 		
 		if current.hasTower then
 			current.tower.rangeCircle.opacity = 25
 			self.towerInfo.fade = "in"
 			self.towerInfo:update( current.tower , self )
+			--print("Update")
 		else
 			self.towerInfo.fade = "out"
-			
 		end
 		
 	else
 		
 		if self.circle.list[1][self.circle.x].extra.t then
-						
 			self.towerInfo.fade = "in"
-			
 			self.towerInfo:update( self.circle.list[1][self.circle.x].extra.t , self , true, GTP(x), GTP(y), 300 )
-			
 		else
 			self.towerInfo.fade = "out"
 		end

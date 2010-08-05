@@ -7,13 +7,16 @@ dofile ("Creep.lua")
 dofile ("Tower.lua")
 dofile ("Bullet.lua")
 dofile ("TowerInfo.lua")
+dofile ("Popup.lua")
 
 screen:show()
 
 function app.on_loaded()
-    dofile ("Themes.lua")
+	dofile ("Themes.lua")
  	TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
 	screen:add(TitleBackground)
+	
+	Popup:new{text = "Welcome to Robots vs Zombies!", draw = true, fadeSpeed = 500}:render()
 
     -- Everything is loaded
     AssetLoader.on_preload_ready = function()
@@ -102,6 +105,11 @@ function app.on_loaded()
 	AssetLoader.on_preload_ready = nil
     	--screen:add( AssetLoader:getImage("TitleBackground",{name="robot", x=200, y=200}) )
     	--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))
+	
+
+	
+	
+	
     end
 end
 
@@ -113,7 +121,7 @@ function controllers:on_controller_connected(controller)
 	
 	function controller.on_key_down( controller , k )
 	    if controller.name == "Keyboard" then
-	        keyboard_key_down( ACTIVE_CONTAINER.buttons, k )
+	        pcall( keyboard_key_down, ACTIVE_CONTAINER.buttons, k )
 	    else
 	        print( "FROM" , controller.name , "KEY DOWN" , k )
 	        print("-"..controller.name.."-")

@@ -43,6 +43,8 @@ for themeName, t in pairs(Themes) do
 end
 
 
+AssetLoader:preloadImage("RedArrow","assets/RedArrow.png")
+
 AssetLoader:preloadImage("TitleBackground","themes/robot/background.png")
 AssetLoader:preloadImage("smallWindow","assets/SmallWindow.png")
 AssetLoader:preloadImage("largeWindow","assets/LargeWindow.png")
