@@ -38,14 +38,15 @@ resumed = false
 round = 1
 tnum = 1
 
+gamestarted = false
+
 savedTowerType = {}
 savedTowerOwner = {}
 savedTowerPos = {}
 savedTowerUpgrades = {}
-
+ipaused = false
 
 level = 1
-
 --image_to_load = {"normal","mediumRobot"}
 
 --creep_image_table = {}

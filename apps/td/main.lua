@@ -91,9 +91,8 @@ function app.on_loaded()
             currentLevel = round
             
             savedRound = round
-
-            Themes.robot.wave = dofile("themes/".."robot".."/round"..round..".lua")
-        
+				local themesave = settings.theme
+			   Themes.robot.wave = dofile("themes/"..themesave.themeName.."/round"..round..".lua")
             game = Game:new{ theme = Themes.robot , gold = settings.gold}
             game:startGame()
                 
@@ -128,16 +127,21 @@ function app.on_loaded()
    end
    function app.on_closing()
 		print (savedRound, savedLevel, savedGold, savedLives)
-   	settings.saved = true
-   	settings.round = savedRound
-		settings.level = savedLevel
-		settings.gold = savedGold
-		settings.lives = savedLives
-		settings.towerPos = savedTowerPos
-		settings.towerUpgrades = savedTowerUpgrades
---		settings.towerOwner = savedTowerOwner
-		settings.towerType = savedTowerType
---		settings.player = game.board.player
+   	if (gamestarted) then
+	   	settings.saved = true
+			settings.round = savedRound
+			settings.level = savedLevel
+			settings.theme = savedTheme
+			settings.gold = savedGold
+			settings.lives = savedLives
+			settings.towerPos = savedTowerPos
+			settings.towerUpgrades = savedTowerUpgrades
+	--		settings.towerOwner = savedTowerOwner
+			settings.towerType = savedTowerType
+	--		settings.player = game.board.player
+		else
+			settings.saved = false		
+		end
 	end
 
 end

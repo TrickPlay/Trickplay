@@ -410,8 +410,8 @@ function Board:createBoard()
 	playertext.text = self.player.name
 	goldtext.text = self.player.gold
 	BoardMenu.buttons.extra.p = function()
-	paused = not paused
-		if (paused) then
+	ipaused = not ipaused
+		if (ipaused) then
 --			screen:animate {duration = 500, y_rotation = 180}
 			screen:animate {duration = 500, scale = {0.1,0.1}}
 		else
@@ -512,7 +512,7 @@ function Board:removeTower(player)
 	
 	current.tower:destroy()
 	current.square[3] = EMPTY	
-	player.gold = player.gold + current.tower.cost * 0.5
+	player.gold = math.ceil(player.gold + current.tower.cost * 0.5)
 	
 	self:updateGold(player)
 	
