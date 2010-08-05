@@ -7,8 +7,8 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     local MenuItems = {
         GO_BACK = 1,
         STREET = 2,
-        CITY = 3,
-        STATE = 4,
+        APT = 3,
+        CITY = 4,
         ZIP = 5
     }
     
@@ -56,11 +56,11 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
         [MenuItems.STREET] = function(self)
             itemSelection(MenuItems.STREET, "street")
         end,
+        [MenuItems.APT] = function(self)
+            itemSelection(MenuItems.APT, "apartment")
+        end,
         [MenuItems.CITY] = function(self)
             itemSelection(MenuItems.CITY, "city")
-        end,
-        [MenuItems.STATE] = function(self)
-            itemSelection(MenuItems.STATE, "state")
         end,
         [MenuItems.ZIP] = function(self)
             itemSelection(MenuItems.ZIP, "zip")

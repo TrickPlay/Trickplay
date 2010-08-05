@@ -590,7 +590,7 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
          local angle = (degrees + range*(slice-1)) * math.pi/180
 
          local clone = Clone{source = topping}
-         local x = radius*math.cos(angle)+400
+         local x = radius*math.cos(angle)+420
          local y = -1*radius*math.sin(angle)+400
          clone.position = {x, y}
          print("radians: "..angle..", degrees: "..degrees..", radius: "..radius)
