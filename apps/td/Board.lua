@@ -424,7 +424,7 @@ function Board:updateGold(player)
 	if player == self.player then
 		goldtext.text = player.gold
 	else
---		game.gold2.text = player.gold
+		game.gold2.text = player.gold
 	end
 
 end
