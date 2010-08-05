@@ -17,19 +17,19 @@ ProviderFooterView = Class(View, function(view, model, ...)
         "assets/Exit.png",
         "assets/ExitFocus.png")
     local streetBillingTextBox = TextBox(330, 990, 600)
-    local cityBillingTextBox = TextBox(950, 990, 370)
-    local stateBillingTextBox = TextBox(1340, 990, 70)
-    local zipBillingTextBox = TextBox(1430, 990, 120)
+    local apartmentBillingTextBox = TextBox(950, 990, 120)
+    local cityBillingTextBox = TextBox(1090, 990, 370)
+    local zipBillingTextBox = TextBox(1480, 990, 120)
 
     view.boxes = {
-        exitItem, streetBillingTextBox, cityBillingTextBox, stateBillingTextBox,
+        exitItem, streetBillingTextBox, apartmentBillingTextBox, cityBillingTextBox, 
         zipBillingTextBox
     }
 
     view.items = {
         Text{
-            position={0, 1100},
-            font  = DEFAULT_FONT,
+            position={120, 970},
+            font  = CUSTOMIZE_TINY_FONT,
             color = DEFAULT_COLOR,
             text = "Exit"
         },
@@ -39,10 +39,18 @@ ProviderFooterView = Class(View, function(view, model, ...)
             color=DEFAULT_COLOR,
             text="Enter Street",
             wants_enter = false,
-            max_length = 22
+            max_length = 26
         },
         Text{
             position={965,1000},
+            font=DEFAULT_FONT,
+            color=DEFAULT_COLOR,
+            wants_enter = false,
+            text="Apt.",
+            max_length = 5
+        },
+        Text{
+            position={1105,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
@@ -50,15 +58,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 15
         },
         Text{
-            position={1350,1000},
-            font=DEFAULT_FONT,
-            color=DEFAULT_COLOR,
-            wants_enter = false,
-            text="CA",
-            max_length = 2
-        },
-        Text{
-            position={1440,1000},
+            position={1495,1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
@@ -66,6 +66,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             max_length = 5
         },
     }
+
     view.ui:add(bottomBar)
     for i,v in ipairs(view.boxes) do
         view.ui:add(v.group)
