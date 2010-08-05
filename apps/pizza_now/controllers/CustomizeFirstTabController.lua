@@ -98,6 +98,12 @@ end}
                             view.parent.first_tab_groups[selected[1]][selected[2]][i][3].opacity = 255
                         end
                             view.parent.first_tab_groups[selected[1]][selected[2]][i][1].color = Colors.BLACK
+                        if selected[1] == 2 and selected[2] == 2 then
+                            view.parent.first_tab_groups[2][2][i][4].opacity = 0
+                            view.parent.first_tab_groups[2][2][i][1].opacity = 255
+                            
+                        end
+
                     end
             else
                 view.parent.first_tab_groups[selected[1]][selected[2]][-2].color = Colors.BLACK

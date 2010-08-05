@@ -359,6 +359,12 @@ CustomizeView = Class(View, function(view, model, ...)
                             position = {300, retarded[i]+265 + 10*(i-1)},
                             src      = "assets/Size"..All_Options["Size_r"][i]..".png"
                     }
+                    view.first_tab_groups[2][2][i][4] = Image{
+                            position = {300, retarded[i]+265 + 10*(i-1)},
+                            opacity  = 0,
+                            src      = "assets/Size"..All_Options["Size_r"][i].."Focus.png"
+                    }
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][4])
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][1])
 
                     view.first_tab_groups[2][2][i][2] = Image {
