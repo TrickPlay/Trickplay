@@ -172,7 +172,6 @@ function Tower:upgrade()
 		local b = savedTowerUpgrades[self.tnum]
 		savedTowerUpgrades[self.tnum] = b + 1
 	
-		savedGold = self.player.gold
 		self.damage = r.damage
 		self.range = r.range
 		self.rangeCircle:clear_surface()
@@ -198,6 +197,7 @@ function Tower:upgrade()
 		--screen:add(AssetLoader:getImage(self.prefix..self.table.name.."Fire"..self.level,{x=self.fireImage.x, y=self.fireImage.y}))
 	
 		self.owner.gold = self.owner.gold - r.cost
+		savedGold = self.owner.gold
 		
 		game.board:updateGold(self.owner)
 		
