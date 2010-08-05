@@ -192,7 +192,7 @@ end
 
 function Board:init()
 
-	Popup:new{text = "Get Ready!"}
+	--Popup:new{text = "Get Ready!"}
 
 	for i = 1, self.h do
 		local total = ""
@@ -342,6 +342,10 @@ function Board:createBoard()
 							self:buildTower(towers[i], player)
 							self:findPaths()
 							return true
+						else
+						
+							Popup:new{text="You need "..towers[i].cost.. " gold for that!", fadeSpeed = 400, time=.5, opacity = 150}
+						
 						end
 					end
 				end
@@ -359,9 +363,22 @@ function Board:createBoard()
 			local tower = self.squareGrid[y][x].tower
 			if tower.level < tower.levels then 
 				
+				--print(player.gold)
+				--print(tower.table.upgrades[tower.level+1].cost)
+				
 				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
 				list[#list].extra.f = function()
-					return self:upgradeTower(player)
+					
+					print(player.gold, tower.table.upgrades[tower.level+1].cost, player.gold - tower.table.upgrades[tower.level+1].cost)
+					if (player.gold - tower.table.upgrades[tower.level+1].cost >= 0) then
+							
+						return self:upgradeTower(player)
+					else
+						
+						Popup:new{text="Not enough gold!", fadeSpeed = 400, time=.5, opacity = 150}
+						
+					end
+					
 				end
 				
 			end
