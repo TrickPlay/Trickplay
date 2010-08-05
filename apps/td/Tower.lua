@@ -169,6 +169,8 @@ function Tower:upgrade()
 	local r = self.table.upgrades[self.level]
 	
 	if (self.owner.gold - r.cost >= 0) then
+		local b = savedTowerUpgrades[self.tnum]
+		savedTowerUpgrades[self.tnum] = b + 1
 	
 		self.damage = r.damage
 		self.range = r.range
