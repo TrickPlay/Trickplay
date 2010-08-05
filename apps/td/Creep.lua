@@ -279,8 +279,6 @@ function Creep:deathAnimation()
 		if self.creepGroup.scale[1] <= 0.1 then
 			self.creepGroup.opacity = 0
 			self.creepGroup:clear()
-			self.creepImageGroup:remove(self.creepImage)
-
 			return true
 			
 		end

@@ -460,7 +460,6 @@ function Board:buildTower(selection, player)
 		-- Build a new tower if the player has enough money
 		current.tower = Tower:new(selection, self.theme.themeName, current, player)
 		current.tower.tnum = tnum
-		print ("\n\n\n\n\n\n\n",current.tower.tnum)
 		tnum = tnum + 1
 
 		current.hasTower = true
