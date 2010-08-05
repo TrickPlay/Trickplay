@@ -2,6 +2,7 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PROVIDER_SELECTION)
 
     local controller = self
+    local model = view:get_model()
 
     local MenuItems = {
         GO_BACK = 1,
@@ -17,10 +18,11 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = 1
+    local selected = 2
+    local previous_selected = 2
 
     local function itemSelection(item, name)
-        local textObject = view.ui.children[item]
+        local textObject = view.items[item]
         local defaultText = textObject.text
         textObject.editable = true
         textObject:grab_key_focus()
@@ -86,6 +88,15 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
 
     function self:get_selected_index()
         return selected
+    end
+
+    function self:on_focus()
+        selected = previous_selected
+    end
+
+    function self:out_focus()
+        previous_selected = selected
+        selected = 0
     end
 
     function self:move_selector(dir)

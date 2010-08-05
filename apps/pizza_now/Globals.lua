@@ -6,7 +6,7 @@ if not Coverage then
    dofile("PizzaGlobals.lua")
 end
 
-CHANGE_VIEW_TIME = 500
+CHANGE_VIEW_TIME = 400
 BOTTOM_OPACITY = 90
 BACKGROUND_FADE_OPACITY = 150
 HIDE_POSITION = {0, -1920}
