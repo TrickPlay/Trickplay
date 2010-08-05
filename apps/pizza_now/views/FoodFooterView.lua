@@ -1,3 +1,5 @@
+local DEFAULT_FONT = CUSTOMIZE_ENTRY_FONT
+local DEFAULT_COLOR = Colors.BLACK
 
 FoodFooterView = Class(View, function(view, model, ...)
     view._base.init(view, model)

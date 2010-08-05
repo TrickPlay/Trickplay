@@ -121,17 +121,22 @@ ProviderSelectionView = Class(View, function(view, model, ...)
         local controller = self:get_controller()
         local comp = model:get_active_component()
         if comp == Components.PROVIDER_SELECTION then
+           local selected = controller:get_selected_index()
             print("Showing ProviderSelectionView UI")
             self.ui.opacity = 255
             for i,c_view in ipairs(view.items) do
-                if i == controller:get_selected_index() then
-                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-
-                    self:get_controller().child = c_view:get_controller()
-                else
-                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=BOTTOM_OPACITY}
-                    prev_selection[i] = c_view:get_controller():get_selected_index()
-                end
+               if i == controller.ProviderGroups.FOOTER then
+                  c_view.ui.opacity=255
+                  if i == selected then
+                     self:get_controller().child = c_view:get_controller()
+                  end
+               elseif i == selected then
+                  c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                  self:get_controller().child = c_view:get_controller()
+               else
+                  c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=BOTTOM_OPACITY}
+                  prev_selection[i] = c_view:get_controller():get_selected_index()
+               end
             end
         else
             print("Hiding ProviderSelectionView UI")

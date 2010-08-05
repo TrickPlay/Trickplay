@@ -16,7 +16,27 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         BILL_CITY = 10
     }
 
-    
+    --Static text
+        --credit card text
+    local cardNumberText = Text{
+        position = {1000,740},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "Card #"
+    }
+    local expirationText = Text{
+        position = {1000,800},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "Expires",
+    }
+    local secretCodeText = Text{
+        position = {1400,800},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "CVC",
+    }
+
     --driverInstructionsTextBox
     local driverInstructionsTextBox = TextBox(1020, 120, 1760-1040)
     --entry for instructions for the driver
@@ -100,7 +120,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "###",
-        max_lengt = 3,
+        max_length = 3,
         wants_enter = false
     }
     local phoneTable = {
@@ -119,7 +139,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "email",
-        max_length = 20,
+        max_length = 17,
         wants_enter = false
     }
     local emailAt = Text{
@@ -133,6 +153,27 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     local emailTable = {{emailHandle,emailNameTextBox}, {emailAt,emailAtTextBox}}
 
     --credit type
+    --Credit Companies or Cash Images
+    local cashFocus = FocusableImage(990, 600,
+        "assets/credit_stuff/Payment_Cash.png",
+        "assets/credit_stuff/Payment_Cash_Focus.png"
+    )
+    local masterCardFocus = FocusableImage(1140, 600,
+        "assets/credit_stuff/Payment_MC.png",
+        "assets/credit_stuff/Payment_MC_Focus.png"
+    )
+    local visaCardFocus = FocusableImage(1300, 600,
+        "assets/credit_stuff/Payment_Visa.png",
+        "assets/credit_stuff/Payment_Visa_Focus.png"
+    )
+    local americanExpressCardFocus = FocusableImage(1450, 600,
+        "assets/credit_stuff/Payment_AM.png",
+        "assets/credit_stuff/Payment_AM_Focus.png"
+    )
+    local discoverCardFocus = FocusableImage(1590, 600,
+        "assets/credit_stuff/Payment_Disc.png",
+        "assets/credit_stuff/Payment_Disc_Focus.png"
+    )
     local dottedSquare1 = Image{
         src = "assets/credit_stuff/PaymentHighlight.png",
         position = {990,600}
@@ -146,7 +187,9 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
     local dottedSquare5 = Clone{source = dottedSquare1}
     dottedSquare5.position = {1590, 600}
     local dottedSquareTable = {
-        {dottedSquare1}, {dottedSquare2}, {dottedSquare3}, {dottedSquare4}, {dottedSquare5}
+        {dottedSquare1, cashFocus}, {dottedSquare2, masterCardFocus},
+        {dottedSquare3, visaCardFocus}, {dottedSquare4, americanExpressCardFocus},
+        {dottedSquare5, discoverCardFocus}
     }
 
     --card number entry textboxs
@@ -206,7 +249,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         wants_enter = false
     }
     local expYear = Text{
-        position = {1240, 800},
+        position = {1235, 800},
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "YYYY",
@@ -279,20 +322,35 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         dottedSquareTable, creditTable, expirationTable, streetBillingTable,
         cityStateZipBillingTable
     }
-
+    
+    --stuff that will disappear when cash is selected
+    view.credit_ui = Group{name="credit_ui", position = {0,0}}
+    view.credit_ui:add(cardNumberText, expirationText, secretCodeText)
+    view.creditTextBoxes_ui = Group{name="creditTextBoxes_ui"}
+    view.creditTextElements_ui = Group{name="creditTextElements_ui"}
+    for i = 7,10 do
+        for j,sub_t in ipairs(view.info[i]) do
+            view.creditTextElements_ui:add(sub_t[1])
+            if(sub_t[2]) then
+                view.creditTextBoxes_ui:add(sub_t[2].group)
+            end
+        end
+    end
+    view.credit_ui:add(view.creditTextBoxes_ui, view.creditTextElements_ui)
+    --other stuff
     view.textBoxes_ui = Group{name="textBoxes_ui", position = {0,0}}
     view.textElements_ui = Group{name="textElements_ui", position = {0,0}}
     view.ui = Group{name="creditInfo_ui", position={0, 0}, opacity=255}
-    for i,t in ipairs(view.info) do
-        for j,sub_t in ipairs(t) do
+    for i = 1,6 do
+        for j,sub_t in ipairs(view.info[i]) do
             view.textElements_ui:add(sub_t[1])
             if(sub_t[2]) then
                 view.textBoxes_ui:add(sub_t[2].group)
             end
         end
     end
-    view.ui:add(view.textBoxes_ui, view.textElements_ui)
-    view.ui:raise_to_top()
+    
+view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui)
 
     function view:initialize()
         self:set_controller(CreditInfoController(self))
@@ -306,24 +364,30 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
             assert(controller:get_selected_index())
             assert(controller:get_sub_selection_index())
             print("Showing CreditInfoView UI")
+            if(model:selected_card() == 1) then
+                view.credit_ui.opacity = 0
+            else
+                view.credit_ui.opacity = 255
+            end
             for i,t in ipairs(self.info) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_sub_selection_index()) then
-                        item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                        if(item[2]) then
-                            item[2]:on_focus()
+                        item[2]:on_focus()
+                        if(Info.CARD_TYPE ~= i) then
+                            item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                         end
-                    elseif(Info.CARD_TYPE == i) then
+                    else
+                        item[2]:out_focus()
+                        if(Info.CARD_TYPE ~= i) then
+                            item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=100}
+                        end
+                    end
+                    if(Info.CARD_TYPE == i) then
                         if(model:selected_card() == j) then
                             item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                         else
                             item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
-                        end
-                    else
-                        item[1]:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                        if(item[2]) then
-                            item[2]:out_focus()
                         end
                     end
                 end
