@@ -349,8 +349,8 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
             end
         end
     end
-    view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui)
-    view.ui:raise_to_top()
+    
+view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui)
 
     function view:initialize()
         self:set_controller(CreditInfoController(self))
