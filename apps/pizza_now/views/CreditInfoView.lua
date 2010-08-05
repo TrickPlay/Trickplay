@@ -16,6 +16,27 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         BILL_CITY = 10
     }
 
+    --Static text
+        --credit card text
+    local cardNumberText = Text{
+        position = {1000,740},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "Card #"
+    }
+    local expirationText = Text{
+        position = {1000,800},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "Expires",
+    }
+    local secretCodeText = Text{
+        position = {1400,800},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "CVC",
+    }
+
     --driverInstructionsTextBox
     local driverInstructionsTextBox = TextBox(1020, 120, 1760-1040)
     --entry for instructions for the driver
@@ -99,7 +120,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "###",
-        max_lengt = 3,
+        max_length = 3,
         wants_enter = false
     }
     local phoneTable = {
@@ -118,7 +139,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "email",
-        max_length = 20,
+        max_length = 17,
         wants_enter = false
     }
     local emailAt = Text{
@@ -228,7 +249,7 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         wants_enter = false
     }
     local expYear = Text{
-        position = {1240, 800},
+        position = {1235, 800},
         font = CUSTOMIZE_ENTRY_FONT,
         color = Colors.BLACK,
         text = "YYYY",
@@ -301,19 +322,34 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
         dottedSquareTable, creditTable, expirationTable, streetBillingTable,
         cityStateZipBillingTable
     }
-
+    
+    --stuff that will disappear when cash is selected
+    view.credit_ui = Group{name="credit_ui", position = {0,0}}
+    view.credit_ui:add(cardNumberText, expirationText, secretCodeText)
+    view.creditTextBoxes_ui = Group{name="creditTextBoxes_ui"}
+    view.creditTextElements_ui = Group{name="creditTextElements_ui"}
+    for i = 7,10 do
+        for j,sub_t in ipairs(view.info[i]) do
+            view.creditTextElements_ui:add(sub_t[1])
+            if(sub_t[2]) then
+                view.creditTextBoxes_ui:add(sub_t[2].group)
+            end
+        end
+    end
+    view.credit_ui:add(view.creditTextBoxes_ui, view.creditTextElements_ui)
+    --other stuff
     view.textBoxes_ui = Group{name="textBoxes_ui", position = {0,0}}
     view.textElements_ui = Group{name="textElements_ui", position = {0,0}}
     view.ui = Group{name="creditInfo_ui", position={0, 0}, opacity=255}
-    for i,t in ipairs(view.info) do
-        for j,sub_t in ipairs(t) do
+    for i = 1,6 do
+        for j,sub_t in ipairs(view.info[i]) do
             view.textElements_ui:add(sub_t[1])
             if(sub_t[2]) then
                 view.textBoxes_ui:add(sub_t[2].group)
             end
         end
     end
-    view.ui:add(view.textBoxes_ui, view.textElements_ui)
+    view.ui:add(view.credit_ui, view.textBoxes_ui, view.textElements_ui)
     view.ui:raise_to_top()
 
     function view:initialize()
@@ -328,6 +364,11 @@ CreditInfoView = Class(View, function(view, model, parent_view, ...)
             assert(controller:get_selected_index())
             assert(controller:get_sub_selection_index())
             print("Showing CreditInfoView UI")
+            if(model:selected_card() == 1) then
+                view.credit_ui.opacity = 0
+            else
+                view.credit_ui.opacity = 255
+            end
             for i,t in ipairs(self.info) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 

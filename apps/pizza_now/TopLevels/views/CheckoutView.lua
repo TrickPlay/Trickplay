@@ -95,6 +95,7 @@ CheckoutView = Class(View, function(view, model, ...)
         text = "Email",
     }
     --credit card text stuff
+    --[[
     local cardNumberText = Text{
         position = {1000,740},
         font = CUSTOMIZE_SUB_FONT,
@@ -113,6 +114,7 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "CVC",
     }
+    --]]
     --Instructions for driver
     local driverInstructionsText = Text{
         position = {1060,80},
@@ -145,8 +147,9 @@ CheckoutView = Class(View, function(view, model, ...)
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
         orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
-        nameText, phoneText, emailText, extText, cardNumberText, expirationText,
-        secretCodeText, driverInstructionsText, taxText, totalCostText, currentCart
+        nameText, phoneText, emailText, extText, 
+        --cardNumberText, expirationText, secretCodeText,
+        driverInstructionsText, taxText, totalCostText, currentCart
     }
      
     --create the components
