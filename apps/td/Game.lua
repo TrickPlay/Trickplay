@@ -54,7 +54,7 @@ function Game:killGame(status)
 	bloodGroup:clear()
 	print ("kill me")
 	screen:clear()
-		
+	resumed = false
 	render_list = {}
 	savedTowerType = {}
 	savedTowerOwner = {}
