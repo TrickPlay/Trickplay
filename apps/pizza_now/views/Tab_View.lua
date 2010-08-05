@@ -38,13 +38,16 @@ TabView = Class(View, function(view, model,parent, ...)
        local sub_group_items = view.parent.sub_group_items
        for i=1,#sub_group_items[sel] do
           if i <= CUSTOMIZE_SCROLL_THRESHOLD then
-             for _, item in ipairs(sub_group_items[sel][i]) do
-                item.opacity = 255
-             end
+             sub_group_items[sel][i][1].opacity = 255
+             sub_group_items[sel][i][2].opacity = 255
+             sub_group_items[sel][i][3].opacity = 255
+             sub_group_items[sel][i][4].group.opacity = 255
+
           else
-             for _, item in ipairs(sub_group_items[sel][i]) do
-                item.opacity = 0
-             end
+             sub_group_items[sel][i][1].opacity = 0
+             sub_group_items[sel][i][2].opacity = 0
+             sub_group_items[sel][i][3].opacity = 0
+             sub_group_items[sel][i][4].group.opacity = 0
           end
        end
        self:get_model():notify()
