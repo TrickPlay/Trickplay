@@ -144,13 +144,13 @@ EmptyPizza = Class(
          function()
             local lines = {}
             --top line
-            lines.top = "- "..All_Options.Size_r[self.Tabs[1].Options[4].Size].." "
-               ..All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]
-               .." Pizza with:\t\t",self.Price,""
+            lines.top = "- "..All_Options.Size_r[self.Tabs[1].Options[4].Size].." "..
+               All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]..
+               " Pizza with:\t\t",self.Price,""
             --pizza base info
-            lines.crust = "\t"..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "
-               ..All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "
-               ..All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce"
+            lines.crust = "\t"..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "..
+               All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "..
+               All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce"
 
             --sides
             lines.entire = ""
@@ -542,13 +542,6 @@ EmptyPizza = Class(
       end
 
    end)
-
-
-
-
-
-
-
 
 function distribute_topping(topping, side, amount, group, pizzagroup)
    --set up random variables
