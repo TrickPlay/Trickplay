@@ -5,6 +5,7 @@ CUSTOMIZE_OPT_PLACEMENT = 3
 
 CustomizeView = Class(View, function(view, model, ...)
     view._base.init(view,model)
+    view.first_tab_groups = {}
 
 
 
@@ -148,7 +149,7 @@ CustomizeView = Class(View, function(view, model, ...)
                             position = {-160, -40},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
-                            text     = "Placement on Pizza:"
+                            text     = "Placement:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-2])
                 view.first_tab_groups[1][1][-1] = Image{
@@ -159,24 +160,34 @@ CustomizeView = Class(View, function(view, model, ...)
                 for i=1,#All_Options["Placement_r"] do
                     view.first_tab_groups[1][1][i] ={}
                     view.first_tab_groups[1][1][i][1] = Text{
-                            position = {-60, 45*(i-1)},
+                            position = {10, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
                             text     = All_Options["Placement_r"][i]
                     }
+                    view.sub_group[tab_index]:add(Image{
+                        position = {-60, 45*(i-1)-15},
+                        src      = "assets/Placement/"..All_Options["Placement_r"][i]..".png"
+                    })
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
+                    view.first_tab_groups[1][1][i][2] = Image {
+                        position = {-120, 45*(i-1)-15},
+                        src      = "assets/RadioOn.png"
+                    }
+                    view.first_tab_groups[1][1][i][3] = Image {
+                        position = {-120,45*(i-1)-15},
+                        src      = "assets/RadioOff.png"
+                    }
+
                     if i == tab.Options[1].Placement then
-                        view.first_tab_groups[1][1][i][2] = Image {
-                            position = {-120, 45*(i-1)-15},
-                            src      = "assets/RadioOn.png"
-                        }
+                        view.first_tab_groups[1][1][i][2].opacity = 255
+                        view.first_tab_groups[1][1][i][3].opacity = 0
                     else
-                        view.first_tab_groups[1][1][i][2] = Image {
-                            position = {-120,45*(i-1)-15},
-                            src      = "assets/RadioOff.png"
-                        }
+                        view.first_tab_groups[1][1][i][2].opacity = 0
+                        view.first_tab_groups[1][1][i][3].opacity = 255
                     end
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][2])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][3])
                 end
                 --Cheese Coverage
                 view.first_tab_groups[1][2] = {}
@@ -184,7 +195,7 @@ CustomizeView = Class(View, function(view, model, ...)
                             position = {200, -40},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
-                            text     = "Coverage on Pizza:"
+                            text     = "Coverage:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-2])
                 view.first_tab_groups[1][2][-1] = Image{
@@ -192,27 +203,39 @@ CustomizeView = Class(View, function(view, model, ...)
                             src      = "assets/CrustSelect4.png"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-1])
-                for i=1,#All_Options["CoverageX_r"] do
-                    view.first_tab_groups[1][2][i] ={}                    
+                for i=1,#All_Options["CoverageX_r"]-1 do
+                    view.first_tab_groups[1][2][i] ={} 
+                    view.sub_group[tab_index]:add(Image{
+                        position = {300, 45*(i-1)-15},
+                        src      = "assets/CoverageX/"..All_Options["CoverageX_r"][i+1]..".png"
+                    })
+                   
                     view.first_tab_groups[1][2][i][1] = Text{
-                            position = {300, 45*(i-1)},
+                            position = {370, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
-                            text     = All_Options["CoverageX_r"][i]
+                            text     = All_Options["CoverageX_r"][i+1]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][1])
-                    if i == tab.Options[1].CoverageX then
-                        view.first_tab_groups[1][2][i][2] = Image {
-                            position = {240, 45*(i-1)-15},
-                            src      = "assets/RadioOn.png"
-                        }
+
+                    view.first_tab_groups[1][2][i][2] = Image {
+                        position = {240, 45*(i-1)-15},
+                        src      = "assets/RadioOn.png"
+                    }
+                    view.first_tab_groups[1][2][i][3] = Image {
+                        position = {240, 45*(i-1)-15},
+                        src      = "assets/RadioOff.png"
+                    }
+
+                    if i == tab.Options[1].CoverageX-1 then
+                        view.first_tab_groups[1][2][i][2].opacity = 255
+                        view.first_tab_groups[1][2][i][3].opacity = 0
                     else
-                        view.first_tab_groups[1][2][i][2] = Image {
-                            position = {240,45*(i-1)-15},
-                            src      = "assets/RadioOff.png"
-                        }
+                        view.first_tab_groups[1][2][i][2].opacity = 0
+                        view.first_tab_groups[1][2][i][3].opacity = 255
                     end
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][2])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][3])
                 end
 
 
@@ -254,18 +277,24 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = All_Options["Crust_Style_r"][i]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][1][i][1])
-                    if i == tab.Options[1].Placement then
-                        view.first_tab_groups[2][1][i][2] = Image {
-                            position = {-120, 45*(i-1)+250},
-                            src      = "assets/RadioOn.png"
-                        }
+                    view.first_tab_groups[2][1][i][2] = Image {
+                        position = {-120, 45*(i-1)+250},
+                        src      = "assets/RadioOn.png"
+                    }
+                    view.first_tab_groups[2][1][i][3] = Image {
+                        position = {-120,45*(i-1)+250},
+                        src      = "assets/RadioOff.png"
+                    }
+
+                    if i == tab.Options[3].Crust_Style then
+                        view.first_tab_groups[2][1][i][2].opacity = 255
+                        view.first_tab_groups[2][1][i][3].opacity = 0
                     else
-                        view.first_tab_groups[2][1][i][2] = Image {
-                            position = {-120,45*(i-1)+250},
-                            src      = "assets/RadioOff.png"
-                        }
+                        view.first_tab_groups[2][1][i][2].opacity = 0
+                        view.first_tab_groups[2][1][i][3].opacity = 255
                     end
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][1][i][2])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][1][i][3])
                 end
                 --Size
                 view.first_tab_groups[2][2] = {}
@@ -291,18 +320,25 @@ CustomizeView = Class(View, function(view, model, ...)
                             src      = "assets/Size"..All_Options["Size_r"][i]..".png"
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][1])
-                    if i == tab.Options[1].Placement then
-                        view.first_tab_groups[2][2][i][2] = Image {
-                            position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)},
-                            src      = "assets/RadioOn.png"
-                        }
+
+                    view.first_tab_groups[2][2][i][2] = Image {
+                        position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)},
+                        src      = "assets/RadioOn.png"
+                    }
+                    view.first_tab_groups[2][2][i][3] = Image {
+                        position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)},
+                        src      = "assets/RadioOff.png"
+                    }
+
+                    if i == tab.Options[4].Size then
+                        view.first_tab_groups[2][2][i][2].opacity = 255
+                        view.first_tab_groups[2][2][i][3].opacity = 0
                     else
-                        view.first_tab_groups[2][2][i][2] = Image {
-                            position = {240, half_retarded[i]+retarded[i]+265 + 10*(i-1)},
-                            src      = "assets/RadioOff.png"
-                        }
+                        view.first_tab_groups[2][2][i][2].opacity = 0
+                        view.first_tab_groups[2][2][i][3].opacity = 255
                     end
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][2])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][3])
                 end
 
 
@@ -333,18 +369,26 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = All_Options["Sauce_Type_r"][i]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][1])
-                    if i == tab.Options[1].Placement then
-                        view.first_tab_groups[3][1][i][2] = Image {
-                            position = {-120, 45*(i-1)+520},
-                            src      = "assets/RadioOn.png"
-                        }
+
+                    view.first_tab_groups[3][1][i][2] = Image {
+                        position = {-120,45*(i-1)+520},
+                        src      = "assets/RadioOn.png"
+                    }
+                    view.first_tab_groups[3][1][i][3] = Image {
+                        position = {-120,45*(i-1)+520},
+                        src      = "assets/RadioOff.png"
+                    }
+
+                    if i == tab.Options[2].Sauce_Type then
+                        view.first_tab_groups[3][1][i][2].opacity = 255
+                        view.first_tab_groups[3][1][i][3].opacity = 0
                     else
-                        view.first_tab_groups[3][1][i][2] = Image {
-                            position = {-120,45*(i-1)+520},
-                            src      = "assets/RadioOff.png"
-                        }
+                        view.first_tab_groups[3][1][i][2].opacity = 0
+                        view.first_tab_groups[3][1][i][3].opacity = 255
                     end
                     view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][2])
+                    view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][3])
+
                 end
 
 --[===[
@@ -533,10 +577,11 @@ CustomizeView = Class(View, function(view, model, ...)
                  src = "assets/DownScrollArrow.png"
              }
         view.ui:add(view.down_arrow)
-        view.ui:add(Image{
+        view.pzzaLR = Image{
             position = {view.sub_group[1].x-70*(3-1)-20,0},
                  src = "assets/PizzaLR.png"
-            })
+            }
+        view.ui:add(view.pzzaLR)
  
 
         --bg:lower_to_bottom()
@@ -562,6 +607,11 @@ CustomizeView = Class(View, function(view, model, ...)
             view.menu_items[i]:raise_to_top()
             view.hor_lines[i]:raise_to_top()
         end
+        assert(view:get_controller().conches,"shit")
+        assert(view:get_controller().conches[6],"shitballs")
+
+        view:get_controller().conches[6]:refresh_mapping()
+        --view:get_controller().conches[view:get_controller().ChildComponents.FIRST_TAB]:refresh_mapping()
     end
     --view:Create_Menu_Items()
 ----------------------------------------------------------------------------
@@ -570,6 +620,8 @@ CustomizeView = Class(View, function(view, model, ...)
     function view:initialize()
 local foot_view = CustomizeFooterView(model,view)
 foot_view:initialize()
+local first_tab_view = CustomizeFirstTabView(model,view)
+first_tab_view:initialize()
 
         view:set_controller(CustomizeController(self,foot_view))
         view.initialize = nil
@@ -588,7 +640,9 @@ windmill_view:initialize()
                                         tab_view:get_controller(),
                                        foot_view:get_controller(),
                                    windmill_view:get_controller(),
-                                        acc_view:get_controller()})
+                                        acc_view:get_controller(),
+                                  first_tab_view:get_controller()})
+        --first_tab_view:initing()
     end
 
     function view:enter_sub_group()
@@ -614,6 +668,11 @@ windmill_view:initialize()
                         --print("\t",i,"opacity to 255")
                         --item:animate{duration=100, opacity = 255}
                         --item.opacity = 255
+                        if i == 1 then
+                            view.pzzaLR.opacity = 0
+                        else
+                            view.pzzaLR.opacity = 255
+                        end
                         view.sub_group[i]:animate{duration = 100, opacity = 255}
                         if #view.sub_group_items[i] > 
                             CUSTOMIZE_SCROLL_THRESHOLD then
@@ -630,6 +689,7 @@ windmill_view:initialize()
                             view.vert_lines[i].opacity = 0
                             view.selector.y = 120*(i-1)
                         else
+                            view.vert_lines[i].opacity = 0
                             view.selector.opacity = 0
                         end
                     else

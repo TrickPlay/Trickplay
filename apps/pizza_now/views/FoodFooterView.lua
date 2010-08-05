@@ -10,7 +10,7 @@ FoodFooterView = Class(View, function(view, model, ...)
                 position = {0,0},
                 width = 1920,
                 tile = {false,true},
-src="assets/OrderBarBase.png"
+                src="assets/OrderBarBase.png"
     }
     view.back = Text{
             position={0, 0},
