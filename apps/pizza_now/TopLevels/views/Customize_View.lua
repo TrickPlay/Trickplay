@@ -160,11 +160,15 @@ CustomizeView = Class(View, function(view, model, ...)
                 for i=1,#All_Options["Placement_r"] do
                     view.first_tab_groups[1][1][i] ={}
                     view.first_tab_groups[1][1][i][1] = Text{
-                            position = {-60, 45*(i-1)},
+                            position = {10, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
                             text     = All_Options["Placement_r"][i]
                     }
+                    view.sub_group[tab_index]:add(Image{
+                        position = {-60, 45*(i-1)-15},
+                        src      = "assets/Placement/"..All_Options["Placement_r"][i]..".png"
+                    })
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
                     view.first_tab_groups[1][1][i][2] = Image {
                         position = {-120, 45*(i-1)-15},
@@ -199,13 +203,18 @@ CustomizeView = Class(View, function(view, model, ...)
                             src      = "assets/CrustSelect4.png"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-1])
-                for i=1,#All_Options["CoverageX_r"] do
-                    view.first_tab_groups[1][2][i] ={}                    
+                for i=1,#All_Options["CoverageX_r"]-1 do
+                    view.first_tab_groups[1][2][i] ={} 
+                    view.sub_group[tab_index]:add(Image{
+                        position = {300, 45*(i-1)-15},
+                        src      = "assets/CoverageX/"..All_Options["CoverageX_r"][i+1]..".png"
+                    })
+                   
                     view.first_tab_groups[1][2][i][1] = Text{
-                            position = {300, 45*(i-1)},
+                            position = {370, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
                             color    = Colors.BLACK,
-                            text     = All_Options["CoverageX_r"][i]
+                            text     = All_Options["CoverageX_r"][i+1]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][1])
 
@@ -218,7 +227,7 @@ CustomizeView = Class(View, function(view, model, ...)
                         src      = "assets/RadioOff.png"
                     }
 
-                    if i == tab.Options[1].CoverageX then
+                    if i == tab.Options[1].CoverageX-1 then
                         view.first_tab_groups[1][2][i][2].opacity = 255
                         view.first_tab_groups[1][2][i][3].opacity = 0
                     else
@@ -680,6 +689,7 @@ windmill_view:initialize()
                             view.vert_lines[i].opacity = 0
                             view.selector.y = 120*(i-1)
                         else
+                            view.vert_lines[i].opacity = 0
                             view.selector.opacity = 0
                         end
                     else

@@ -100,7 +100,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                     view.items_unselected[i].opacity = 255
                 end
             end
-        else
+        elseif comp ~= Components.TAB and comp ~= Components.CUSTOMIZE_ITEM then
             print("Hiding CustomizeFooterView UI")
             --view.ui:complete_animation()
             view.ui.opacity = 0
