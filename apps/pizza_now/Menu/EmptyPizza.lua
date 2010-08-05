@@ -344,7 +344,6 @@ EmptyPizza = Class(
       self.pizzagroup:add(crust)
       self.pizzagroup:add(sauce)
       self.pizzagroup:add(cheese)
-      print("\n\n\n\nhererere")
       --screen:add(self.pizzagroup)
       
       local coverage_lut = {
@@ -549,7 +548,11 @@ EmptyPizza = Class(
 
 
 
-
+--[[
+    Creates a group, "group", which holds the distribution of "topping" clones.
+    side and amount are value constants, topping is an image. pizzagroup is a group
+    containing all the different "topping" Images for this specific pizza
+--]]
 function distribute_topping(topping, side, amount, group, pizzagroup)
    --set up random variables
    local distribution = 1
@@ -557,6 +560,10 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
 
    local range = 180/slices
    local toppingsPerSlice = 3
+   --some image based constants
+   local topping_center = {x = topping.base_size[1]/2, y = topping.base_size[2]/2}
+   local pizza_center = {x = 960/2, y = 480}
+
    --Groups for the left and right side of the pizza && amount of topping
    local toppingLightRightGroup = Group{name = "topping_light_right"}
    local toppingNormalRightGroup = Group{name = "topping_normal_right"}
@@ -590,9 +597,10 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
          local angle = (degrees + range*(slice-1)) * math.pi/180
 
          local clone = Clone{source = topping}
-         local x = radius*math.cos(angle)+420
-         local y = -1*radius*math.sin(angle)+400
+         local x = radius*math.cos(angle) + pizza_center.x - topping_center.x
+         local y = -1*radius*math.sin(angle)+pizza_center.y - topping_center.y
          clone.position = {x, y}
+         clone.z_rotation = {math.random(360), topping_center.x, topping_center.y}
          print("radians: "..angle..", degrees: "..degrees..", radius: "..radius)
          local groupseed = math.random(2,4)
          if(All_Options.CoverageX.Light == groupseed) then
@@ -604,9 +612,7 @@ function distribute_topping(topping, side, amount, group, pizzagroup)
             elseif(All_Options.CoverageX.Regular == groupseed) then
             if(slice <= 4) then
                toppingNormalRightGroup:add(clone)
-               print("here1")
             else
-               print("here2")
                toppingNormalLeftGroup:add(clone)
             end
             elseif(All_Options.CoverageX.Extra == groupseed) then
