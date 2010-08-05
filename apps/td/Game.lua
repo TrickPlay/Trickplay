@@ -50,7 +50,8 @@ function Game:killGame(status)
 			LevelMenu.theme = game.theme
 		end
 	end
-
+	
+	bloodGroup:clear()
 	print ("kill me")
 	screen:clear()
 		
