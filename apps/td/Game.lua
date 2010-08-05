@@ -13,7 +13,8 @@ function Game:new(args)
 	local object = {
 		-- properties of game
 		board = board,
-		theme = theme
+		theme = theme,
+		popups = {},
    }
    setmetatable(object, self)
    self.__index = self
@@ -27,6 +28,8 @@ end
 
 
 function Game:killGame(status)
+
+	paused = false
 
 	if status == 1 then
 		
@@ -77,6 +80,7 @@ function Game:killGame(status)
 	ACTIVE_CONTAINER = LevelMenu
 	keyboard_key_down = LevelMenu.buttons.on_key_down
 	
+	WAIT_TIME = FIRST_WAIT
 	
 	
 end
