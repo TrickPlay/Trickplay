@@ -39,7 +39,7 @@ function app.on_loaded()
         local g = Group{}
         screen:add(g)
 
-        MainMenu = Menu:create2{container = g, list = mainMenuList, hl = mainMenuFocus}
+        MainMenu = Menu:new{container = g, list = mainMenuList, hl = mainMenuFocus}
         --MainMenu:create_key_functions()
         MainMenu:button_directions()
         MainMenu:create_buttons(10, "Sans 34px")
