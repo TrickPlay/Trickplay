@@ -121,14 +121,6 @@ CheckoutView = Class(View, function(view, model, ...)
         text = "Instructions for driver:",
     }
     --stuff describing the persons order
-    --[[
-    local editOrderText = Text{
-        position = {410,EDIT_ORDER_Y},
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLACK,
-        text = "Edit Order",
-    }
-    --]]
     --placing the cart items in between the top of the screen and edit order
     local currentCart = Text{
         position = {160,0},
@@ -137,21 +129,13 @@ CheckoutView = Class(View, function(view, model, ...)
         text = "Current Cart:",
     }
     --more text
-    --[[
-    local addCouponText = Text{
-        position = {390,550},
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLACK,
-        text = "Add Coupon",
-    }
-    --]]
     local taxText = Text{
         position = {190, 800},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Tax, Processing, & Delivery",
     }
-    local totalCostText = Text{
+    totalCostText = Text{
         position = {170,880},
         font = CUSTOMIZE_TAB_FONT,
         color = Colors.BLACK,
@@ -162,8 +146,7 @@ CheckoutView = Class(View, function(view, model, ...)
         verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
         orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
         nameText, phoneText, emailText, extText, cardNumberText, expirationText,
-        secretCodeText, driverInstructionsText, editOrderText, addCouponText,
-        taxText, totalCostText, currentCart
+        secretCodeText, driverInstructionsText, taxText, totalCostText, currentCart
     }
      
     --create the components
