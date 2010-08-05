@@ -94,30 +94,9 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Email",
     }
-    --credit card text stuff
-    --[[
-    local cardNumberText = Text{
-        position = {1000,740},
-        font = CUSTOMIZE_SUB_FONT,
-        color = Colors.BLACK,
-        text = "Card #"
-    }
-    local expirationText = Text{
-        position = {1000,800},
-        font = CUSTOMIZE_SUB_FONT,
-        color = Colors.BLACK,
-        text = "Expires",
-    }
-    local secretCodeText = Text{
-        position = {1400,800},
-        font = CUSTOMIZE_SUB_FONT,
-        color = Colors.BLACK,
-        text = "CVC",
-    }
-    --]]
     --Instructions for driver
     local driverInstructionsText = Text{
-        position = {1060,80},
+        position = {1060,85},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Instructions for driver:",
