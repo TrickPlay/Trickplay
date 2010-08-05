@@ -1,6 +1,8 @@
 CreditInfoController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.CHECKOUT)
 
+    local controller = self
+
     local Info = {
         DRIVER_INSTRUCTIONS = 1,
         PASSWORD = 2,
@@ -65,12 +67,20 @@ CreditInfoController = Class(Controller, function(self, view, ...)
 
     -- the default selected index
     local selected = 2
+    local previous_selected = 2
     local sub_selection = 1
 
     local function itemSelection(selection, sub, name)
-        local textObject = view.info[selection][sub]
+        local textObject = view.info[selection][sub][1]
         textObject.editable = true
         textObject:grab_key_focus()
+        function textObject:on_key_down(k)
+            if(keys.Left == k or keys.Right == k) then
+                screen:grab_key_focus()
+                controller:on_key_down(k)
+                return true
+            end
+        end
         function textObject:on_key_focus_out()
             self.editable = false
             self.on_key_focus_out = nil
@@ -228,6 +238,15 @@ CreditInfoController = Class(Controller, function(self, view, ...)
 
     function self:set_parent_controller(parent_controller)
         self.parent_controller = parent_controller
+    end
+
+    function self:on_focus()
+        selected = previous_selected
+    end
+
+    function self:out_focus()
+        previous_selected = selected
+        selected = 0
     end
 
     function self:move_selector(dir)
