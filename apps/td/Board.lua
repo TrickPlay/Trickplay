@@ -424,7 +424,7 @@ function Board:updateGold(player)
 	if player == self.player then
 		goldtext.text = player.gold
 	else
-		game.gold2.text = player.gold
+	--	game.gold2.text = player.gold
 	end
 
 end
@@ -453,6 +453,7 @@ function Board:buildTower(selection, player)
 		current.square[3] = FULL
 		current:render()
 		player.gold = player.gold - current.tower.cost
+		
 		
 		self:updateGold(player)
 		
