@@ -137,11 +137,13 @@ ProvidersCarouselView = Class(View,
             opacity=0,
             on_completed=
                function(anim,ui)
+                  if not ui then ui=anim end
                   ui.extra.food_ui:animate{
                      duration=100,
                      opacity=255,
                      on_completed=
                         function(anim,ui)
+                           if not ui then ui=anim end
                            ui.extra.orig_item.opacity=255
                            local clone = ui.extra.clone
                            clone:unparent()
