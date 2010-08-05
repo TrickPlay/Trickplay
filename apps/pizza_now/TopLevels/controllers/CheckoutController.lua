@@ -9,6 +9,8 @@ CheckoutController = Class(Controller, function(self, view, ...)
         FOOTER = 3
     }
 
+    self.CheckoutGroups = CheckoutGroups
+
     local GroupSize = 0
     for k, v in pairs(CheckoutGroups) do
         GroupSize = GroupSize + 1

@@ -31,7 +31,7 @@ FoodFooterController = Class(Controller, function(self, view, ...)
         MenuItemCallbacks[MenuSize] = function(self)
             print("Checking OUT")
             self:get_model():set_active_component(Components.CHECKOUT)
-            self:get_model():get_active_controller().view:refresh_cart()
+            --self:get_model():get_active_controller().view:refresh_cart()
             self:get_model():notify()
         end
 
