@@ -39,8 +39,8 @@ function app.on_loaded()
         local g = Group{}
         screen:add(g)
 
-        MainMenu = Menu.create(g, mainMenuList, mainMenuFocus)
-        MainMenu:create_key_functions()
+        MainMenu = Menu:new{container = g, list = mainMenuList, hl = mainMenuFocus}
+        --MainMenu:create_key_functions()
         MainMenu:button_directions()
         MainMenu:create_buttons(10, "Sans 34px")
         MainMenu:apply_color_change("FFFFFF", "000000")

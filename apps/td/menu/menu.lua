@@ -4,36 +4,91 @@ Menu = {}
 Menu.__index = Menu
 
 function Menu.create(container, list, highlight)
-   local m_menu = {}
-   setmetatable(m_menu,Menu)
-   
-	-- Default position is 1, 1
-	m_menu.x = 1		m_menu.y = 1
+        local menu = {}
+        setmetatable(menu,Menu)
+        
+                -- Default position is 1, 1
+                menu.x = 1		menu.y = 1
+        
+                if list[1][1] ~= nil then
+                        menu.max_y = #list
+                        menu.max_x = {}
+                        for i=1,#list do
+                                menu.max_x[i] = #list[i]
+                        end
+                end
+     
+        menu.container = container	-- Container holds the buttons and the focus highlight
+        menu.list = list				-- List used to create the menu 
+             
+        menu.buttons = Group{}		-- Buttons group
+             menu:create_key_functions()	-- Create keypress functions
+     
+        container:add(menu.buttons)
+        
+        menu:create_hl(highlight)	-- TODO not sure if I still use this
+        
+        return menu
+end
 
-	if list[1][1] ~= nil then
-		m_menu.max_y = #list
-		m_menu.max_x = {}
-		for i=1,#list do
-			m_menu.max_x[i] = #list[i]
-		end
-	end
+function Menu:new(args)
 
-   m_menu.container = container	-- Container holds the buttons and the focus highlight
-   m_menu.list = list				-- List used to create the menu 
-	m_menu:create_hl(highlight)	-- TODO not sure if I still use this
-   m_menu.buttons = Group{}		-- Buttons group
-	m_menu:create_key_functions()	-- Create keypress functions
+        -- The only necessary thing is a list
+        if not args then
+                print("No empty menus!")
+                debug()
+                return
+        elseif not args.list then
+                print("Need buttons in a list")
+                debug()
+                return
+        end
 
-   container:add(m_menu.buttons, m_menu.hl)
-   return m_menu
+        -- Create the menu object
+        local menu = {
+                x = 1,
+                y = 1,
+                list = args.list,
+                container = args.container or Group{},
+                buttons = Group{},
+                hl = args.hl or nil
+        }
+        
+        setmetatable(menu, Menu)
+        
+        menu.container:add(menu.buttons)
+                
+        -- Add the focus, if there is one
+        if menu.hl then
+                menu.hl.opacity=255
+                menu.hl.anchor_point = {menu.hl.w/2, menu.hl.h/2}
+                menu.container:add(menu.hl)
+        end
+                
+        -- Make the x and y map of the button list
+        local list = menu.list
+        if list[1][1] ~= nil then
+                
+                menu.max_y = #list
+                menu.max_x = {}
+                for i=1,#list do
+                        menu.max_x[i] = #list[i]
+                end
+        end
+        
+        -- Create button press functions
+        menu:create_key_functions()
+                
+        return menu
 end
 
 function Menu:create_hl(hl)
 	if not hl then return end
 	self.hl = hl
-	self.hl.opacity=0
+	self.hl.opacity=255
 	--self.hl.extra={ loc=1 }
 	self.hl.anchor_point = {self.hl.w/2, self.hl.h/2}
+        self.container:add(self.hl)
 end
 
 function Menu:set_opacity(opacity)
@@ -42,23 +97,28 @@ end
 
 -- Create commands for each button press
 function Menu:create_key_functions(container)
+
+        -- Defaults to buttons
 	if container == nil then container = self.buttons end
 	
-	--container:grab_key_focus()
-	print("Creating key functions")
-	print(type(container))
-
+        -- On key down function
 	container.on_key_down = function(container, k)	
-		if k == keys.Right and container.extra.right then print("RIGHT") container.extra.right() print("x: ", self.x) self:update_cursor_position()
-		elseif k == keys.Left and container.extra.left then print("LEFT") container.extra.left() print("x: ", self.x) self:update_cursor_position()	
-		elseif k == keys.Up and container.extra.up then print("UP") container.extra.up() print("y: ", self.y) self:update_cursor_position()	
-		elseif k == keys.Down and container.extra.down then print("DOWN") container.extra.down() print("y: ", self.y) self:update_cursor_position()
-		elseif k == keys.Return and container.extra.r then print("ENTER") container.extra.r()
-		elseif k == keys.space and container.extra.space then print("BACK") container.extra.space()
-		elseif k == keys.p and container.extra.p then print("p") container.extra.p() end
-		print("CHILD",k)
+		
+                pcall ( self.actions[k], container )
+                
 		return true -- Prevent bubble upward to screen
 	end
+        
+        -- This is what the on key down function does
+        self.actions = {}
+        self.actions[keys.Right] = function() pcall ( container.extra.right ) if self.debug then print("Right", "-", "x:", self.x) end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.Left] = function() pcall ( container.extra.left ) if self.debug then print("Left", "-", "x:", self.x) end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.Up] = function() pcall ( container.extra.up ) if self.debug then print("Up", "-", "y:", self.y) end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.Down] = function() pcall ( container.extra.down ) if self.debug then print("Down", "-", "y:", self.y) end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.space] = function() pcall ( container.extra.space ) if self.debug then print("Space") end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.Return] = function() pcall ( container.extra.r ) if self.debug then print("Return/Enter") end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.p] = function() pcall ( container.extra.p ) if self.debug then print("You pressed: p") end pcall ( self.update_cursor_position, self ) end
+        
 end
 
 function Menu:pass_focus_to_controller( controller )
@@ -131,7 +191,7 @@ dofile("menu/menu_extra.lua")
 dofile("menu/menu_controller.lua")
 
 function Menu:update_cursor_position(obj)
-	if not self.hl and not obj then print("No cursor available") return end
+	if not self.hl and not obj then if self.debug then print("No cursor available") end return end
 	local cursor = obj or self.hl
 	
 	local x = self.x
@@ -183,7 +243,7 @@ function Menu:create_buttons(margin, m_font, position)
 			-- Leave the first where it is, find the y value for the rest
 			if i > 1 then
 				list[i][j].y = list[i][j].y + prev + list[1][1].h + margin
-				self.button[i]:add( list[i][j] )
+				--self.button[i]:add( list[i][j] ) -- Don't think this is ever needed... and it makes tons of clutter warnings
 			end
 			
 			if not self.max_y_movement[j] then self.max_y_movement[j] = 0 end
