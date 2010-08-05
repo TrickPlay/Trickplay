@@ -50,9 +50,26 @@ function Game:killGame(status)
 
 	print ("kill me")
 	screen:clear()
-	
+		
 	render_list = {}
-	
+	savedTowerType = {}
+	savedTowerOwner = {}
+	savedTowerPos = {}
+	savedTowerUpgrades = {}
+	savedGold = nil
+	savedRound = nil
+	savedLives = nil
+	savedLevel = nil
+	settings.level = nil
+	settings.round = nil
+	settings.gold = nil
+	settings.lives = nil
+	settings.towerPos = {}
+	settings.towerOwner = {}
+	settings.towerType = {}
+	settings.towerUpgrades = {}
+	tnum = 1
+
 	game.board = nil
 	game = nil
 	BoardMenu = nil

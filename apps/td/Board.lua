@@ -54,11 +54,17 @@ function Board:new(args)
 end
 
 Board.render = function (self, seconds)
-	local s =self.timer.elapsed_seconds 
-	seconds_elapsed = seconds_elapsed + seconds
+	local s =self.timer.elapsed_seconds
+	--if (settings.towerPos) then
+	--	for k,v in pairs (settings.towerPos[1]) do
+	--		print (k,v)
+	--	end
+	--end
+--	seconds_elapsed = seconds_elapsed + seconds
+
 	--wave_counter = 0
 	CREEP_WAVE_LENGTH = self.theme.wave[level].size
-	if (seconds_elapsed >= WAIT_TIME) then
+	if (seconds_elapsed.elapsed_seconds >= WAIT_TIME) then
 		local sp = self.theme.wave[level][wavePartCounter].speed or 1 
 		if (s > sp) then 
 			self.timer:start()
@@ -116,7 +122,7 @@ Board.render = function (self, seconds)
 		end
 		phasetext.text = "Wave Phase!"
 	else
-		countdowntimer.text = "Next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed)
+		--countdowntimer.text = "Next wave: "..(WAIT_TIME-1) - math.floor(seconds_elapsed.elapsed_seconds)
 		phasetext.text = "Build Phase!"
 		--bloodGroup:clear()
 		bloodGroup.opacity = 155 - s*(155/WAIT_TIME)
@@ -135,11 +141,13 @@ Board.render = function (self, seconds)
 		end
 		wave_counter = 0
 		creepnum = 1
-		seconds_elapsed = 0
+		seconds_elapsed:start()
 		level = level + 1
+		
 		savedLevel = level
 		savedGold = self.player.gold
 		savedLives = self.player.lives
+		
 		wavePartCounter = 1
 		creeppartnum = 1
 		
@@ -199,6 +207,7 @@ function Board:createBoard()
 
 	local groups = {}
 	self.timer:start()
+	seconds_elapsed:start()
 	for i = 1, self.h do
 		groups[i] = {}
 		local g = groups[i]
@@ -207,13 +216,14 @@ function Board:createBoard()
 		g[j] = Group{w=SP, h=SP} --, name=self.squareGrid[i][j].square[3]}
 	   end
 	end
-
+	
 	self.backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
 	self.overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
-
+	savedLevel = level
+	savedGold = self.player.gold
+	savedLives = self.player.lives
 	livestext.text = game.board.player.lives
 	infobar = AssetLoader:getImage("InfoBar",{x = 600, y = 1000, z = 2.5})
-
 	if (self.theme.obstacles[round].insert) then
 		for i =1, #self.theme.obstacles[round] do
 			self.obstacleImages[i] = Obstacle:new { x = GTP(self.theme.obstacles[round][i][2]), y = GTP(self.theme.obstacles[round][i][1]), frames = self.theme.obstacles[round].frames}
@@ -243,7 +253,24 @@ function Board:createBoard()
 	BoardMenu.hl.opacity = 255
 	
 	BoardMenu.container.opacity=255
-	
+	if (settings.towerType) then
+		for i=1, #settings.towerType do
+			 local selection = settings.towerType[i]
+			 self.player.position = settings.towerPos[i]
+			 self.player.gold = self.player.gold + selection.cost
+			 self:buildTower(selection,self.player)
+			 if (settings.towerUpgrades[i] == 1) then
+				 self:upgradeTower(self.player)
+			 end
+ 			 if (settings.towerUpgrades[i] == 2) then
+				 self:upgradeTower(self.player)
+				 self:upgradeTower(self.player)
+			 end
+
+		end
+	end
+
+		
 	BoardMenu.buttons.extra.r = function(args)
 	
 		if not args then args = {} end
@@ -282,7 +309,6 @@ function Board:createBoard()
 			end
 			
 		end
-		
 		if (self.squareGrid[y][x].square[3] == EMPTY) then
 			menuType = "Empty"
 			
@@ -305,7 +331,7 @@ function Board:createBoard()
 					end
 				end
 			end
-		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner == player) then
+		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner.name == player.name) then
 			menuType = "Full"
 			
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
@@ -358,7 +384,7 @@ function Board:createBoard()
 	end	
 	BoardMenu.buttons.extra.space = function()
 
-		seconds_elapsed = WAIT_TIME
+		--seconds_elapsed = WAIT_TIME
 		bloodGroup:clear()
 	end
 	
@@ -398,7 +424,7 @@ function Board:updateGold(player)
 	if player == self.player then
 		goldtext.text = player.gold
 	else
-		game.gold2.text = player.gold
+--		game.gold2.text = player.gold
 	end
 
 end
@@ -408,12 +434,20 @@ function Board:buildTower(selection, player)
 	if self.squareGrid[ player.position[1] ][ player.position[2] ].square[3] ~= EMPTY then return end
 	
 	local current = self.squareGrid[ player.position[1] ][ player.position[2] ]
-
-	if player.gold - selection.cost >= 0 then
 	
+	if player.gold - selection.cost >= 0 then
+		
+		savedTowerType[tnum] = selection
+		savedTowerPos[tnum] = player.position
+		savedTowerUpgrades[tnum] = 0
+
+		
 		-- Build a new tower if the player has enough money
 		current.tower = Tower:new(selection, self.theme.themeName, current, player)
-		
+		current.tower.tnum = tnum
+		print ("\n\n\n\n\n\n\n",current.tower.tnum)
+		tnum = tnum + 1
+
 		current.hasTower = true
 		table.insert(self.squaresWithTowers, current)
 		current.square[3] = FULL
@@ -462,7 +496,9 @@ function Board:upgradeTower(player)
 
 	-- in reality this would call the circle menu asking for whether you want to sell or upgrade tower
 	local current = self.squareGrid[ player.position[1] ][ player.position[2] ]
-	
+	print ("\n\n\n\n\n"..savedTowerUpgrades[current.tower.tnum])
+	local b = savedTowerUpgrades[current.tower.tnum]
+	savedTowerUpgrades[current.tower.tnum] = b + 1
 	return current.tower:upgrade()
 
 end

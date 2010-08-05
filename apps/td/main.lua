@@ -44,10 +44,10 @@ function app.on_loaded()
         --MainMenu.buttons:grab_key_focus()
 	        
         MainMenu:update_cursor_position()
-        MainMenu.hl.opacity = 100
-        
+        MainMenu.hl.opacity = 50
+        MainMenu.hl.color = "FFFFFF"
         MainMenu.buttons.extra.r = function()
-		
+			
         	if MainMenu.y == 2 then
 			
 			createLevelMenu(1)
@@ -108,11 +108,17 @@ function app.on_loaded()
     	
     end
    function app.on_closing()
+		print (savedRound, savedLevel, savedGold, savedLives)
+   	settings.saved = true
    	settings.round = savedRound
 		settings.level = savedLevel
 		settings.gold = savedGold
 		settings.lives = savedLives
-		print ("\n\n\n\n\n\n\n\n\n"..settings.level)
+		settings.towerPos = savedTowerPos
+		settings.towerUpgrades = savedTowerUpgrades
+--		settings.towerOwner = savedTowerOwner
+		settings.towerType = savedTowerType
+--		settings.player = game.board.player
 	end
 
 end
