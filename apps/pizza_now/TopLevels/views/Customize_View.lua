@@ -245,7 +245,7 @@ CustomizeView = Class(View, function(view, model, ...)
               position    = {1630, 70},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
-              text        = model.current_item.Price
+              text        = model.current_item.PriceString()
             }
 ---[[
         view.selector = Image {
