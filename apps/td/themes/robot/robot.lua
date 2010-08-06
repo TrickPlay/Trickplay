@@ -7,12 +7,12 @@ local robot = {
 			{id = 3, im = "Snowball", speed = 800},
 		},
 		creeps = {
-			{ hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
-			{ hp = 300, speed = 30, bounty = 1, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "MediumCreep"},
-                        { hp = 1000, speed = 25, bounty = 2, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "HardCreep"},
+			{ hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP+60, name = "NormalCreep"},
+			{ hp = 300, speed = 30, bounty = 1, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP+60, name = "MediumCreep"},
+                        { hp = 1000, speed = 25, bounty = 2, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP+60, name = "HardCreep"},
                         { hp = 20000, speed = 20, bounty = 20, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep"},
-                        { hp = 80, speed = 35, bounty = 1, flying = true, frames = 4,  x_offset = -SP, y_offset = 0, name = "FlyingCreep"},
-                        { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP, name = "NormalCreep"},
+                        { hp = 80, speed = 35, bounty = 1, flying = true, frames = 4,  x_offset = -SP, y_offset = 0+60, name = "FlyingCreep"},
+                        { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP+60, name = "NormalCreep"},
 		},
 		towers = {
                         
