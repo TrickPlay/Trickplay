@@ -96,8 +96,17 @@ function Tower:new(args, prefix, square, player)
         
         -- Add a colored rectangle behind the tower
         if game.board.player2 then
-                object.color = Rectangle{w=SP,h=SP,x=object.x, y=object.y, opacity = 50, color=player.color}
-                screen:add(object.color)
+        
+                if player == game.board.player then
+                        
+                        object.color = AssetLoader:getImage( "TowerShadow1",{ x=object.x - 10, y=object.y - 10} ) --Rectangle{w=SP,h=SP,x=object.x, y=object.y, opacity = 50, color=player.color}
+                        screen:add(object.color)
+                else
+                        object.color = AssetLoader:getImage( "TowerShadow2",{ x=object.x - 10, y=object.y - 10} )
+                        screen:add(object.color)
+                
+                end
+        
         end
    
    setmetatable(object, self)
