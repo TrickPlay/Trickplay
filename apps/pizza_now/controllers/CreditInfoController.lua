@@ -265,38 +265,48 @@ CreditInfoController = Class(Controller, function(self, view, ...)
     end
 
     function self:move_selector(dir)
-       screen:grab_key_focus()
-       if(not self.parent_controller) then
-          self:set_parent_controller(view.parent_view:get_controller())
-       end
-       -- ymovement
-       if(0 ~= dir[2]) then
-          local new_selected = selected + dir[2]
-          if 1 <= new_selected and new_selected <= InfoSize then
-             selected = new_selected
-             sub_selection = 1
-             elseif(new_selected == InfoSize + 1) then
-             --change focus to footer
-             self.parent_controller:move_selector(dir)
-          end
-          --xmovement
-       elseif (0 ~= dir[1]) then
-          local new_selected = sub_selection + dir[1]
-          local subs = 0
-          assert(SubSelections[selected], "selected = "..selected)
-          for k,v in pairs(SubSelections[selected]) do
-             subs = subs + 1
-          end
-          if(1 <= new_selected and new_selected <= subs) then
-             sub_selection = new_selected
-             elseif(0 == new_selected) then
-             --change focus to order
-             self.parent_controller:move_selector(dir)
-          end
-       else
-          error("something eff'd up")
-       end
-       self:get_model():notify()
+        screen:grab_key_focus()
+        if(not self.parent_controller) then
+            self:set_parent_controller(view.parent_view:get_controller())
+        end
+        -- ymovement
+        if(0 ~= dir[2]) then
+            local new_selected = selected + dir[2]
+            if 1 <= new_selected and new_selected <= InfoSize then
+                selected = new_selected
+                sub_selection = 1
+                if(Info.CARD_TYPE ~= selected) then
+                    self:get_model():notify()
+                    self:run_callback()
+                    return
+                end
+            elseif(new_selected == InfoSize + 1) then
+                --change focus to footer
+                self.parent_controller:move_selector(dir)
+            end
+            --xmovement
+        elseif (0 ~= dir[1]) then
+            local new_selected = sub_selection + dir[1]
+            local subs = 0
+            assert(SubSelections[selected], "selected = "..selected)
+            for k,v in pairs(SubSelections[selected]) do
+                subs = subs + 1
+            end
+            if(1 <= new_selected and new_selected <= subs) then
+                sub_selection = new_selected
+                if(Info.CARD_TYPE ~= selected) then
+                    self:get_model():notify()
+                    self:run_callback()
+                    return
+                end
+            elseif(0 == new_selected) then
+                --change focus to order
+                self.parent_controller:move_selector(dir)
+            end
+        else
+            error("something eff'd up")
+        end
+        self:get_model():notify()
     end
 
     function self:run_callback()
