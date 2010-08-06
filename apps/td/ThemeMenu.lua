@@ -31,7 +31,7 @@ ThemeMenu:update_cursor_position()
 local single = MainMenu.container:find_child("single")
 
 ThemeMenu.container.x = MainMenu.container.x - MainMenu.container.w/2 + single.x + 40
-ThemeMenu.container.y = 100
+ThemeMenu.container.y = 80
 
 ThemeMenu.buttons.extra.r = function()
         
