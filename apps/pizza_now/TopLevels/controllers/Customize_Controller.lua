@@ -110,17 +110,25 @@ CustomizeController = Class(Controller,
 
          view.sub_group_items[selected][topping_index][2]:unparent()
          view.sub_group_items[selected][topping_index][3]:unparent()
-
+--[[
          view.sub_group_items[selected][topping_index][3] = Image {
              position = {-70*(3-1), 60*(topping_index-1)},
              src      = "assets/Placement/"..All_Options.Placement_r[place]..".png"
          }
-         view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
+--]]
+         view.sub_group_items[selected][topping_index][3] = Clone{source=view.images.place[place]}
+         view.sub_group_items[selected][topping_index][3].position = {-70*(3-1), 60*(topping_index-1)}
 
+         view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][3])
+--[[
          view.sub_group_items[selected][topping_index][2] = Image {
              position = {-70*(2-1), 60*(topping_index-1)},
              src      = "assets/CoverageX/"..All_Options.CoverageX_r[cov]..".png"
          }
+--]]
+         view.sub_group_items[selected][topping_index][2] = Clone{source=view.images.covx[cov]}
+         view.sub_group_items[selected][topping_index][2].position = {-70*(2-1), 60*(topping_index-1)}
+
          view.sub_group[selected]:add(view.sub_group_items[selected][topping_index][2])
          
          local found = false

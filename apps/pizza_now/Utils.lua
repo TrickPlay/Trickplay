@@ -99,6 +99,14 @@ function tostring( obj )
             "opacity="..obj.opacity..","..
             "text="..obj.text..","..
             "font="..obj.font.."}"
+      elseif obj.type == "Clone" then
+         return "Clone{"..
+            "x="..obj.x..","..
+            "y="..obj.y..","..
+            "w="..obj.w..","..
+            "h="..obj.h..","..
+            "opacity="..obj.opacity..","..
+            "}"
       else
          return tostring_old(obj)
       end
