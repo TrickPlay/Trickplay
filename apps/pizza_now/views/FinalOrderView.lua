@@ -344,8 +344,9 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
       removed_item.extra.cart_items = cart_items
       removed_item.extra.sel_item = sel_item
       removed_item.extra.top_of_order = order_grp.y
-      removed_item.extra.bottom_edge = ui_clipper.clip[2]+ui_clipper.clip[4]
+      removed_item.extra.ui_clipper = ui_clipper
       removed_item.extra.choice_name = choice_name
+      removed_item.extra.order_grp = order_grp
       removed_item:animate{
          duration=50,
          opacity=0,
@@ -356,6 +357,11 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
             local cart_items = ui.extra.cart_items
             local sel_item = ui.extra.sel_item
             local choice_name = ui.extra.choice_name
+            local order_grp = ui.extra.order_grp
+            local ui_clipper = ui.extra.ui_clipper
+            -- top and bottom edge y coordinates of clipping region
+            local top_edge = ui_clipper.clip[2]
+            local bottom_edge = ui_clipper.clip[2] + ui_clipper.clip[4]
 
             if #cart_items == 0 then
                down_arrow:animate{duration=50, opacity=0}
@@ -376,15 +382,26 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
                icon.focus:raise_to_top()
                icon.focus:animate{duration=50, opacity=255}
                icon.unfocus:animate{duration=50, opacity=0}
-               if ui.extra.top_of_order+cart_items[#cart_items].y+cart_items[#cart_items].h <= ui.extra.bottom_edge then
+               local bottom_of_order = ui.extra.top_of_order+cart_items[#cart_items].y+cart_items[#cart_items].h
+               -- if the bottom item is within the bottom edge of the screen hide down arrow
+               if bottom_of_order <= bottom_edge then
                   down_arrow:animate{duration=50, opacity=0}
+                  if order_grp.h < ui_clipper.clip[4] then
+                     order_grp:animate{duration=50, y=0}
+                     up_arrow.opacity=0
+                  else
+                     order_grp:animate{duration=50, y=bottom_edge-cart_items[#cart_items].y-cart_items[#cart_items].h}
+                  end
                end
                
+               local end_y = {}
                if sel_item <= #cart_items then
                   local y_trans = cart_items[sel_item].y-ui.y
                   for i=sel_item, #cart_items do
-                     cart_items[i]:animate{duration=50,y=cart_items[i].y-y_trans}
+                     end_y[i] = cart_items[i].y-y_trans
+                     cart_items[i]:animate{duration=50,y=end_y[i], mode="EASE_OUT_BOUNCE"}
                   end
+
                end
 
             end
