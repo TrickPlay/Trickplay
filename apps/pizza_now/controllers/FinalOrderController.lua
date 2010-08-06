@@ -25,6 +25,12 @@ FinalOrderController = Class(Controller, function(self, view, ...)
            function(self)
               table.remove(model.cart, selected_item)
               self:get_view():do_remove_animation(selected_item)
+              if #model.cart == 0 then
+                 self.parent_controller:move_selector(Directions.RIGHT)
+                 selected_item = nil
+              elseif selected_item > #model.cart then
+                 selected_item = #model.cart
+              end
            end
     }
 
@@ -63,6 +69,8 @@ FinalOrderController = Class(Controller, function(self, view, ...)
 
     function self:out_focus()
        previous_selected = {selected_choice, selected_item}
+       selected_choice = nil
+       selected_item = nil
     end
 
     function self:move_selector(dir)

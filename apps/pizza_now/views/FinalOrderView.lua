@@ -166,20 +166,60 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
    local down_arrow = Image{src="assets/DownScrollArrow.png", position={910, 700}, opacity=0}
    local order_grp = Group{position={0,15}}
    --more text
-   local taxText = Text{
+   local subtotal_text = Text{
+      position = {190, 750},
+        font = CUSTOMIZE_SUB_FONT,
+        color = Colors.BLACK,
+        text = "Subtotal"
+   }
+   local subtotal_cost = Text{
+      text="",
+      font=CUSTOMIZE_SUB_FONT,
+      color = Colors.BLACK,
+      width=RIGHT_LIMIT-801,
+      position={801,750},
+      wrap=true,
+      alignment="RIGHT"
+   }
+   local tax_text = Text{
       position = {190, 800},
         font = CUSTOMIZE_SUB_FONT,
         color = Colors.BLACK,
         text = "Tax, Processing, & Delivery",
    }
-   local totalCostText = Text{
+   local tax_cost = Text{
+      text="",
+      font=CUSTOMIZE_SUB_FONT,
+      color = Colors.BLACK,
+      width=RIGHT_LIMIT-801,
+      position={801,800},
+      wrap=true,
+      alignment="RIGHT"
+   }
+   local total_text = Text{
       position = {170,880},
       font = CUSTOMIZE_TAB_FONT,
       color = Colors.BLACK,
       text = "Total",
    }
+   local total_cost = Text{
+      text="",
+      font=CUSTOMIZE_TAB_FONT,
+      color = Colors.BLACK,
+      position={801,880},
+      wrap=true,
+      alignment="RIGHT",
+      width=RIGHT_LIMIT-801
+   }
+
    ui_clipper:add(order_grp)
-   view.ui:add(ui_clipper, taxText, totalCostText, up_arrow, down_arrow)
+   view.ui:add(
+      ui_clipper,
+      subtotal_text, subtotal_cost,
+      tax_text, tax_cost,
+      total_text, total_cost,
+      up_arrow, down_arrow
+   )
 
    local lut = {}
 
@@ -195,8 +235,8 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
    function view:update()
       local controller = self:get_controller()
       local comp = model:get_active_component()
+      local sel_choice, sel_item = controller:get_selected()
       if comp == Components.CHECKOUT and #icons > 0 then
-         local sel_choice, sel_item = controller:get_selected()
          local choice_name = lut[sel_choice]
          for i, choice_icons in ipairs(icons) do
             for j, tweak_icons in pairs(choice_icons) do
@@ -216,36 +256,34 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
          -- possibly kicking other shit off.
 
          -- first check if target item is off the top of the screen.
-         print("order_grp.y: " .. tostring(order_grp.y))
-         print("sel_item: " .. tostring(sel_item))
-         print("cart_items[sel_item].y: " .. tostring(cart_items[sel_item].y))
-         print("view.ui.clip[2]: " .. tostring(ui_clipper.clip[2]))
          -- new selected item is currently off the top of the screen
-         if order_grp.y+cart_items[sel_item].y < ui_clipper.clip[2] then
-            order_grp:animate{
-               duration=100,
-               y = ui_clipper.clip[2] - cart_items[sel_item].y,
-               mode = "EASE_OUT_BOUNCE"
-            }
-            down_arrow:animate{duration=50, opacity=255}
-            if sel_item == 1 then
-               up_arrow:animate{duration=50, opacity=0}
-            else
-               up_arrow:animate{duration=50, opacity=255}
-            end
-         elseif order_grp.y+cart_items[sel_item].y+cart_items[sel_item].h > ui_clipper.clip[2]+ui_clipper.clip[4] then
-            order_grp:animate{
-               duration=100,
-               y = ui_clipper.clip[2]+ui_clipper.clip[4] -
-                  (cart_items[sel_item].y+cart_items[sel_item].h),
-               mode = "EASE_OUT_BOUNCE"
-            }
-            up_arrow:animate{duration=50, opacity=255}
-            if sel_item == #cart_items then
-               down_arrow:animate{duration=50, opacity=0}
-            else
+         if sel_item then
+            if order_grp.y+cart_items[sel_item].y < ui_clipper.clip[2] then
+               order_grp:animate{
+                  duration=100,
+                  y = ui_clipper.clip[2] - cart_items[sel_item].y,
+                  mode = "EASE_OUT_BOUNCE"
+               }
                down_arrow:animate{duration=50, opacity=255}
-            end               
+               if sel_item == 1 then
+                  up_arrow:animate{duration=50, opacity=0}
+               else
+                  up_arrow:animate{duration=50, opacity=255}
+               end
+            elseif order_grp.y+cart_items[sel_item].y+cart_items[sel_item].h > ui_clipper.clip[2]+ui_clipper.clip[4] then
+               order_grp:animate{
+                  duration=100,
+                  y = ui_clipper.clip[2]+ui_clipper.clip[4] -
+                     (cart_items[sel_item].y+cart_items[sel_item].h),
+                  mode = "EASE_OUT_BOUNCE"
+               }
+               up_arrow:animate{duration=50, opacity=255}
+               if sel_item == #cart_items then
+                  down_arrow:animate{duration=50, opacity=0}
+               else
+                  down_arrow:animate{duration=50, opacity=255}
+               end               
+            end
          end
       end
    end
@@ -260,17 +298,79 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
       local current_y = 0
       local height
       
+      local subtotal = 0
       for i, pizza in ipairs(model.cart) do
+         subtotal = subtotal + pizza.Price
          item_grp, height, edit_icon, remove_icon = to_ui(pizza:as_dominos_pizza(), pizza.Price, current_y)
          table.insert(cart_items, item_grp)
          table.insert(icons, {edit=edit_icon, remove=remove_icon})
          current_y = current_y + height
       end
 
+      local tax = subtotal*.0925 + 2
+      local total = subtotal + tax
+
+      subtotal_cost.text = string.format("$%.2f", subtotal)
+      tax_cost.text = string.format("$%.2f", tax)
+      total_cost.text = string.format("$%.2f", total)
+
       order_grp:add(unpack(cart_items))
+      if order_grp.y+cart_items[#cart_items].y+cart_items[#cart_items].h > ui_clipper.clip[2]+ui_clipper.clip[4] then
+         down_arrow.opacity=255
+      end
    end
 
-   function view:do_remove_animation(selected_item)
-      error("view:do_remove_animation unimplemented")
+   function view:do_remove_animation()
+      local sel_choice, sel_item = self:get_controller():get_selected()
+      print("do_remove_animation called")
+      assert(type(sel_item) == "number", "sel_item not a number")
+      assert(1 <= sel_item and sel_item <= #cart_items, "sel_item index not in cart_items array")
+      local removed_item = table.remove(cart_items, sel_item)
+      local removed_icons = table.remove(icons, sel_item)
+      local choice_name = lut[sel_choice]
+      local icon = icons[sel_item][choice_name]
+      removed_item.extra.cart_items = cart_items
+      removed_item.extra.sel_item = sel_item
+      removed_item.extra.top_of_order = order_grp.y
+      removed_item.extra.bottom_edge = ui_clipper.clip[2]+ui_clipper.clip[4]
+      removed_item.extra.icon = icon
+      removed_item:animate{
+         duration=50,
+         opacity=0,
+         on_completed=
+         function(anim,ui)
+            if not ui then ui = anim end -- workaround for change in method signature from trickplay 0.0.6 to 0.0.7
+
+            local cart_items = ui.extra.cart_items
+            local sel_item = ui.extra.sel_item
+            local icon = ui.extra.icon
+
+            if #cart_items == 0 then
+               down_arrow:animate{duration=50, opacity=0}
+            else
+               icon.focus:raise_to_top()
+               icon.focus:animate{duration=50, opacity=255}
+               icon.unfocus:animate{duration=50, opacity=0}
+               if ui.extra.top_of_order+cart_items[#cart_items].y+cart_items[#cart_items].h <= ui.extra.bottom_edge then
+                  down_arrow:animate{duration=50, opacity=0}
+               end
+               
+               if sel_item <= #cart_items then
+                  local y_trans = cart_items[sel_item].y-ui.y
+                  for i=sel_item, #cart_items do
+                     cart_items[i]:animate{duration=50,y=cart_items[i].y-y_trans}
+                  end
+               end
+
+            end
+            ui:unparent()
+         end
+      }
+
+      if #cart_items > 0 then
+         icon.focus:raise_to_top()
+         icon.focus:animate{duration=50, opacity=255}
+         icon.unfocus:animate{duration=50, opacity=0}
+      end
    end
 end)

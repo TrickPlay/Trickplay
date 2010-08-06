@@ -21,9 +21,14 @@ CheckoutController = Class(Controller, function(self, view, ...)
     -- the default selected index
     local selected = CheckoutGroups.DETAILS
 
+    for group=CheckoutGroups.FIRST, CheckoutGroups.LAST do
+       view.items[group]:get_controller():set_parent_controller(self)
+    end
+
     --initialize the focus to the ORDER group
     assert(view.items[selected]:get_controller(), "view child with index "..selected.."is nil!")
     self.child = view.items[selected]:get_controller()
+    self.child:set_parent_controller(self)
 
     local CheckoutCallbacks = {
         [CheckoutGroups.ORDER] = function(self)
