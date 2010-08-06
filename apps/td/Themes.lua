@@ -42,6 +42,10 @@ for themeName, t in pairs(Themes) do
 
 end
 
+AssetLoader:preloadImage("MainMenuSmallButton","assets/MainMenuSmallButton.png")
+AssetLoader:preloadImage("MainMenuSmallFocus","assets/MainMenuSmallFocus.png")
+AssetLoader:preloadImage("MainMenuButton","assets/MainMenuButton.png")
+AssetLoader:preloadImage("MainMenuFocus","assets/MainMenuFocus.png")
 
 AssetLoader:preloadImage("RedArrow","assets/RedArrow.png")
 AssetLoader:preloadImage("MainMenu","assets/MainMenu.png")
@@ -60,8 +64,10 @@ AssetLoader:preloadImage("InfoBar2","assets/player2InfoBar.png")
 --AssetLoader:preloadImage("levelWindowLocked","assets/levelWindowLocked.png")
 --AssetLoader:preloadImage("levelWindowCompleted","assets/levelWindowCompleted.png")
 
+AssetLoader:preloadImage("levelWindowFocus","themes/robot/assets/levelselector/selectorFocus.png")
 AssetLoader:preloadImage("levelWindow","themes/robot/assets/levelselector/empty.png")
 AssetLoader:preloadImage("levelWindowLocked","themes/robot/assets/levelselector/locked.png")
+AssetLoader:preloadImage("levelWindowLock","themes/robot/assets/levelselector/lock.png")
 AssetLoader:preloadImage("levelWindowCompleted","themes/robot/assets/levelselector/check.png")
 
 
