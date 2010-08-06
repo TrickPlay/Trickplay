@@ -106,10 +106,12 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         local comp = model:get_active_component()
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeFooterView UI")
-            view.ui.opacity = 255
+            --view.ui.opacity = 255
             view.ui:raise_to_top()
             --if this child had the focus
             if p_controller.curr_comp == p_controller.ChildComponents.FOOT then
+                view.ui:animate{duration=CHANGE_VIEW_TIME,opacity = 255}
+
                 if controller.areyousure then
                     view.areyousure.opacity = 255
                     if controller:get_YNselected_index() == 1 then
@@ -146,6 +148,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                     view.items_selected[i].opacity   = 0
                     view.items_unselected[i].opacity = 255
                 end
+                view.ui:animate{duration=CHANGE_VIEW_TIME,opacity = BACKGROUND_FADE_OPACITY}
             end
         elseif comp ~= Components.TAB and comp ~= Components.CUSTOMIZE_ITEM then
             print("Hiding CustomizeFooterView UI")
