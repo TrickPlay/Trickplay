@@ -697,4 +697,4 @@ windmill_view:initialize()
         end
     end
 
-   end)
+end)
