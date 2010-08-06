@@ -25,7 +25,7 @@ ThemeMenu.container.opacity = 0
 ThemeMenu:create_key_functions()
 ThemeMenu:button_directions()
 ThemeMenu:create_buttons(10, "Sans 34px")
-ThemeMenu:apply_color_change("FFFFFF", "000000")
+--ThemeMenu:apply_color_change("FFFFFF", "000000")
 ThemeMenu:update_cursor_position()
 
 ThemeMenu.container.x = MainMenu.container.x - MainMenu.container.w/2 + 30

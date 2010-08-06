@@ -253,7 +253,7 @@ function Menu:create_buttons(margin, m_font, position)
 			self.text = Group{}
 			
 			if m_font and list[i][j].name and list[i][j].name ~= "null" then -- ignore if name == "null" 
-				list[i][j].extra.text = Text{font = m_font, color = "FFFFFF", text = list[i][j].name}
+				list[i][j].extra.text = Text{font = m_font, color = "000000", text = list[i][j].name}
 				
 				if position == "left" then
 					list[i][j].extra.text.anchor_point = {0, list[i][j].extra.text.h/2}
