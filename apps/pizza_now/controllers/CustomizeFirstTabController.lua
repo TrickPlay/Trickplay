@@ -68,7 +68,6 @@ end}
                         end
 
                     end
-                view.ui.opacity = 0
             else
                 view.parent.first_tab_groups[selected[1]][selected[2]][-2].color = Colors.BLACK
                 self.in_tab = true
@@ -110,6 +109,9 @@ end}
             if selected[2] == 1 and dir == Directions.LEFT then
                 print("Moving back to the tab bar")
                 view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
+            elseif new_selected[1] == 3 and new_selected[2] == 2 then
+                selected[1] = 2
+                selected[2] = 2
             elseif view.parent.first_tab_groups[new_selected[1]] ~= nil and
                    view.parent.first_tab_groups[new_selected[1]][new_selected[2]] ~= nil then
                 selected[1] = new_selected[1]

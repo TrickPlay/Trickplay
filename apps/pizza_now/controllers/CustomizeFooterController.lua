@@ -95,6 +95,7 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
                 model.current_item.pizzagroup:hide_all()
                 model:set_active_component(Components.CHECKOUT)
                 self:get_model():get_active_controller().view:refresh_cart()
+                view.ui.opacity = 0
                 model:notify()
             else
                 -- compromise so that there's not a full-on lua panic,
