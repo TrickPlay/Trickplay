@@ -51,7 +51,15 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     local MenuItemCallbacks = {
         [MenuItems.GO_BACK] = function(self)
             print("Backing up")
-            exit()
+            view.exitItem.group:animate{duration = 200, opacity = 0}
+            view.exitButtonPress:animate{
+                duration = 200, opacity = 255,
+                on_completed = function ()
+                    view.exitItem.group:animate{duration = 100, opacity = 255}
+                    view.exitButtonPress:animate{duration = 100, opacity = 0}
+                    exit()
+                end
+            }
         end,
         [MenuItems.STREET] = function(self)
             itemSelection(MenuItems.STREET, "street")
