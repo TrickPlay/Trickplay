@@ -357,7 +357,7 @@ function Board:createBoard()
 				
 				for i,v in pairs(towers) do
 				
-					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { } )
+					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { name = towers[i].cost } )
 					list[#list].extra.t = towers[i]
 					list[#list].extra.f = function()
 						if (player.gold - towers[i].cost >=0) then
@@ -373,20 +373,21 @@ function Board:createBoard()
 		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner.name == player.name) then
 			menuType = "Full"
 			
-			list[#list+1] = AssetLoader:getImage( "sellIcon", { } )
+			local tower = self.squareGrid[y][x].tower
+			
+			list[#list+1] = AssetLoader:getImage( "sellIcon", { name = math.ceil(tower.cost / 2) } )
 			list[#list].extra.f = function()
 				self:removeTower(player)
 				self:findPaths()
 				return true
 			end
 			
-			local tower = self.squareGrid[y][x].tower
 			if tower.level < tower.levels then 
 				
 				--print(player.gold)
 				--print(tower.table.upgrades[tower.level+1].cost)
 				
-				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { } )
+				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { name = tower.table.upgrades[tower.level+1].cost } )
 				list[#list].extra.f = function()
 					
 					--print(player.gold, tower.table.upgrades[tower.level+1].cost, player.gold - tower.table.upgrades[tower.level+1].cost)
