@@ -72,9 +72,15 @@ TabController = Class(Controller,
                 local new_selected = selected + dir[2]
                 if 1 <= new_selected and new_selected <= #view.menu_items[view.parent:get_controller():get_selected_index()] then
                     selected = new_selected
+                    if dir == Directions.UP then view:move_selector_up(selected)
+                    else                         view:move_selector_down(selected) end
+                --if you moved down, but couldn't then drop to the bottom bar
+                elseif dir == Directions.DOWN then
+                    view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.FOOT
+                    view.parent:get_controller().in_tab_group = false
+                    view:leave_sub_group()
                 end
-                if dir == Directions.UP then view:move_selector_up(selected)
-                else                         view:move_selector_down(selected) end
+
                 --MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected]()
                 self:get_model():notify()
             end
