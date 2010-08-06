@@ -93,7 +93,10 @@ WindMillController = Class(Controller, function(self, view, ...)
             CustomKeyTable[k](self)
         end
     end
-
+    
+    function self:set_y(y)
+        view.ui.y = y
+    end
     function self:get_selected_index()
         return selected
     end

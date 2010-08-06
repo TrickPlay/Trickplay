@@ -55,10 +55,11 @@ FoodSelectionController = Class(Controller, function(self, view, ...)
     end
 
     function self:move_selector(dir)
-        table.foreach(dir, print)
         local new_selected = selected + dir[2]
         if 1 <= new_selected and new_selected <= GroupSize then
+--            view.items[selected]:get_controller():out_focus()
             selected = new_selected
+  --          view.items[selected]:get_controller():on_focus()
         end
         self:get_model():notify()
     end

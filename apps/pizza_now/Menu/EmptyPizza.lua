@@ -295,8 +295,9 @@ EmptyPizza = Class(
             Placement = All_Options.Placement.None,
             ToppingGroup = nil,
             Selected = 
-               function(itself)
+               function(itself,y)
                   itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+                  itself:get_model():get_active_controller():set_y(y)
                   itself:get_model():notify()
                end
          }
@@ -319,8 +320,9 @@ EmptyPizza = Class(
             Placement = All_Options.Placement.None,
             ToppingGroup = nil,
             Selected = 
-               function(itself)
+               function(itself,y)
                   itself:get_model():set_active_component(Components.CUSTOMIZE_ITEM)
+                  itself:get_model():get_active_controller():set_y(y)
                   itself:get_model():notify()
                end
          }
@@ -338,7 +340,7 @@ EmptyPizza = Class(
       crust:show()
       crust.opacity=255
       
-      self.pizzagroup = Group{position = {960,480}}
+      self.pizzagroup = Group{position = {960,480},clip={0,0,960,480}}
 
 
       self.pizzagroup:add(crust)

@@ -37,7 +37,10 @@ TabController = Class(Controller,
                        "MenuItemCallbacks[view.parent:get_controller():get_selected_index()] is nil")
                  assert(MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected],
                        "MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected] is nil")
-                 MenuItemCallbacks[view.parent:get_controller():get_selected_index()][selected](self)
+                 local p_ind = view.parent:get_controller():get_selected_index()
+                 local y = view.parent.sub_group[p_ind].y+view.parent.sub_group_items[p_ind][selected][1].y
+                 print("y",y)
+                 MenuItemCallbacks[p_ind][selected](self,y-150)
              end
 --[[
             function(self)

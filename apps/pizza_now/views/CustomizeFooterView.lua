@@ -39,7 +39,18 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
     view.areyousure:add(view.yes_unsel)
     view.areyousure:add(view.no_sel)
     view.areyousure:add(view.no_unsel)
-
+    view.focusable_items = {
+        FocusableImage(30,30,
+         "assets/BackArrow.png",
+         "assets/BackArrowFocus.png"),
+        FocusableImage(250,30,
+         "assets/AddButton.png",
+         "assets/AddButtonFocus.png"),
+        FocusableImage(1700,30,
+         "assets/CartButton.png",
+         "assets/CartButtonFocus.png"),
+    }
+--[[
     view.items_selected = {
         Image{
             position={0, 20},
@@ -70,30 +81,36 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         }
 
     }
+--]]
     view.text = {
         Text{
-            position={100, 40},
-            font  = CUSTOMIZE_TAB_FONT,
+            position={0, 0},
+            font  = CUSTOMIZE_ENTRY_FONT,
             color = Colors.BLACK,
-            text = ""
+            text = "Go Back"
         },
         Text{
-            position={300, 40},
-            font  = CUSTOMIZE_TAB_FONT,
+            position={250, 0},
+            font  = CUSTOMIZE_ENTRY_FONT,
             color = Colors.BLACK,
             text = "Add to Order"
         },
         Text{
-            position={1250, 40},
-            font  = CUSTOMIZE_TAB_FONT,
+            position={1700, 0},
+            font  = CUSTOMIZE_ENTRY_FONT,
             color = Colors.BLACK,
-            text = "View Cart & Checkout"
+            text = "Checkout"
         }
 
     }
     view.ui:add(view.bar)
-    view.ui:add(unpack(view.items_selected))
-    view.ui:add(unpack(view.items_unselected))
+    --view.ui:add(unpack(view.items_selected))
+    --view.ui:add(unpack(view.items_unselected))
+    view.ui:add(view.focusable_items[1].group)
+    view.ui:add(view.focusable_items[2].group)
+    view.ui:add(view.focusable_items[3].group)
+
+
     view.ui:add(unpack(view.text))
     screen:add(view.ui)
     function view:initialize()
@@ -106,10 +123,12 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         local comp = model:get_active_component()
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeFooterView UI")
-            view.ui.opacity = 255
+            --view.ui.opacity = 255
             view.ui:raise_to_top()
             --if this child had the focus
             if p_controller.curr_comp == p_controller.ChildComponents.FOOT then
+                view.ui:animate{duration=CHANGE_VIEW_TIME,opacity = 255}
+
                 if controller.areyousure then
                     view.areyousure.opacity = 255
                     if controller:get_YNselected_index() == 1 then
@@ -125,27 +144,31 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                     end
                 else
                     view.areyousure.opacity = 0
-                    for i=1,#view.items_selected do
+                    for i=1,#view.focusable_items do
                         if i == controller:get_selected_index() then
                             print("\t",i,"opacity to 255")
                             --item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                            view.items_selected[i].opacity   = 255
-                            view.items_unselected[i].opacity = 0
+                            view.focusable_items[i]:on_focus()
+                            --view.items_selected[i].opacity   = 255
+                            --view.items_unselected[i].opacity = 0
                         else
                             print("\t",i,"opacity to 0")
                             --item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                            view.items_selected[i].opacity   = 0
-                            view.items_unselected[i].opacity = 255
+                            view.focusable_items[i]:out_focus()
+                            --view.items_selected[i].opacity   = 0
+                            --view.items_unselected[i].opacity = 255
                         end
                     end
                 end
             --if this child doesn't have the focus
             else
-                for i=1,#view.items_selected do
+                for i=1,#view.focusable_items do
                     --item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                    view.items_selected[i].opacity   = 0
-                    view.items_unselected[i].opacity = 255
+                    view.focusable_items[i]:out_focus()
+                    --view.items_selected[i].opacity   = 0
+                    --view.items_unselected[i].opacity = 255
                 end
+                view.ui:animate{duration=CHANGE_VIEW_TIME,opacity = BACKGROUND_FADE_OPACITY}
             end
         elseif comp ~= Components.TAB and comp ~= Components.CUSTOMIZE_ITEM then
             print("Hiding CustomizeFooterView UI")

@@ -56,7 +56,6 @@ FinalFooterController = Class(Controller, function(self, view, ...)
     end
 
     function self:set_parent_controller(parent_controller)
-        print("\n\n\nhere\n\n\n")
         self.parent_controller = parent_controller
     end
 
