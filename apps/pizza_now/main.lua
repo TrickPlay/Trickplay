@@ -20,8 +20,7 @@ dofile("MVC.lua")
 dofile("Views.lua")
 
 Components = {
-   COMPONENTS_FIRST = 1,
-   ADDRESS_INPUT = 1,
+   COMPONENTS_FIRST = 2,
    PROVIDER_SELECTION = 2,
    FOOD_SELECTION = 3,
    ITEM_SELECTION = 4,
@@ -38,8 +37,8 @@ model = Model()
 
 
 -- View/Controller initialization
-local address_input_view = AddressInputView(model)
-address_input_view:initialize()
+--local address_input_view = AddressInputView(model)
+--address_input_view:initialize()
 local provider_selection_view = ProviderSelectionView(model)
 provider_selection_view:initialize()
 
