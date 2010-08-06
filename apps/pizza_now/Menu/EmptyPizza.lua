@@ -201,7 +201,7 @@ EmptyPizza = Class(
             return lines
          end
       self.Price = 16.50
-      self.PriceString = function(self) return string.format("$%.2f", self.Price) end
+      self.PriceString = function() return string.format("$%.2f", self.Price) end
       self.Tabs = {}
       self.Tabs[1] = {
          Radio = true,
