@@ -16,7 +16,7 @@ screen:show()
 function app.on_loaded()
 	dofile ("Themes.lua")
 	
-	Popup:new{text = "Welcome to Robots vs Zombies!", draw = true, fadeSpeed = 500}:render()
+--	Popup:new{text = "Welcome to Robots vs Zombies!", draw = true, fadeSpeed = 500}:render()
 	 -- Everything is loaded
     
 	AssetLoader.on_preload_ready = function()

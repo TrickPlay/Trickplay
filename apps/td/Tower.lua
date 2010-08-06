@@ -177,7 +177,7 @@ function Tower:upgrade()
 		self.range = r.range
 		self.rangeCircle:clear_surface()
 		self.rangeCircle:begin_painting()
-		self.rangeCircle:set_source_color("00FF00")
+		self.rangeCircle:set_source_color(self.owner.color)
 		self.rangeCircle:arc(self.x+SP/2,self.y+SP/2,self.range,0,360)
 		self.rangeCircle:fill() -- or c:stroke()
 		self.rangeCircle:finish_painting()

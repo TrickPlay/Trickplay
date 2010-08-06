@@ -74,6 +74,7 @@ AssetLoader:preloadImage("levelWindowCompleted","themes/robot/assets/levelselect
 AssetLoader:preloadImage("select","assets/Selector.png")
 AssetLoader:preloadImage("select2","assets/Selector2.png")
 AssetLoader:preloadImage("death","themes/robot/assets/NormalCreepBlood.png")
+AssetLoader:preloadImage("flydeath","themes/robot/assets/FlyingCreepBlood.png")
 AssetLoader:preloadImage("normal","assets/normalRobot.png")
 AssetLoader:preloadImage("mediumRobot","assets/mediumRobot.png")
 AssetLoader:preloadImage("explosion","themes/robot/assets/explosion.png")

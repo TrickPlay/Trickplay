@@ -48,7 +48,7 @@ ThemeMenu.buttons.extra.r = function()
 	ThemeMenu.container.opacity = 0
 
 	LevelMenu.container.opacity = 255
-	LevelMenu.hl.opacity = 100
+	LevelMenu.hl.opacity = 255
 	LevelMenu:update_cursor_position()
 	LevelMenu.theme = t
 	
