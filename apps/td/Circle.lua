@@ -29,19 +29,12 @@ function createCircleMenu(offset, distance, params, menuType, player)
         local CircleMenu = Menu.create(c, list, hl)
         CircleMenu:create_key_functions()
         CircleMenu:button_directions()
-        CircleMenu:create_buttons(-20)	        
+        CircleMenu:create_buttons(-20, "Sans 20px")	        
         CircleMenu:update_cursor_position()
         
         CircleMenu.debug = true -- TURN THIS OFF LATER
         
-	--local CircleMenu = Menu.create(c, list)
-	--CircleMenu:create_key_functions()
-	--CircleMenu:button_directions()
-	--CircleMenu:create_circle(offset, distance)
-	--CircleMenu:circle_directions(offset, distance)
-        
         print("Created a button menu")
-
         
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
@@ -140,6 +133,14 @@ function createCircleMenu(offset, distance, params, menuType, player)
                 CircleMenu = nil
                 
 	end
+        
+        
+        -- text stuff
+        for i=1, #CircleMenu.list[1] do
+                local c = CircleMenu.list[1][i].extra.text
+                c.position = {c.x + 30, c.y - 30}
+                c.color = "000000"
+        end
 	
 	return CircleMenu
 
