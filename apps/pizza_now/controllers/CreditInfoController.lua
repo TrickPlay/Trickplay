@@ -2,6 +2,7 @@ CreditInfoController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.CHECKOUT)
 
     local controller = self
+    local model = view.get_model()
 
     local Info = {
         DRIVER_INSTRUCTIONS = 1,
