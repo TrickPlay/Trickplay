@@ -288,6 +288,24 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
          end
       end
    end
+
+   function view:update_totals()
+      local subtotal = 0
+      for i, pizza in ipairs(model.cart) do
+         subtotal = subtotal + pizza.Price
+      end
+      local tax = subtotal*.0925 + 2
+      local total = subtotal + tax
+      subtotal_cost.opacity = 0
+      subtotal_cost.text = string.format("$%.2f", subtotal)
+      subtotal_cost:animate{duration=50, opacity=255}
+      tax_cost.opacity = 0
+      tax_cost.text = string.format("$%.2f", tax)
+      tax_cost:animate{duration=50, opacity=255}
+      total_cost.opacity = 0
+      total_cost.text = string.format("$%.2f", total)
+      total_cost:animate{duration=50, opacity=255}
+   end
    
    function view:refresh_cart()
       order_grp:clear()
@@ -299,21 +317,14 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
       local current_y = 0
       local height
       
-      local subtotal = 0
       for i, pizza in ipairs(model.cart) do
-         subtotal = subtotal + pizza.Price
          item_grp, height, edit_icon, remove_icon = to_ui(pizza:as_dominos_pizza(), pizza.Price, current_y)
          table.insert(cart_items, item_grp)
          table.insert(icons, {edit=edit_icon, remove=remove_icon})
          current_y = current_y + height
       end
 
-      local tax = subtotal*.0925 + 2
-      local total = subtotal + tax
-
-      subtotal_cost.text = string.format("$%.2f", subtotal)
-      tax_cost.text = string.format("$%.2f", tax)
-      total_cost.text = string.format("$%.2f", total)
+      self:update_totals()
 
       order_grp:add(unpack(cart_items))
       if order_grp.y+cart_items[#cart_items].y+cart_items[#cart_items].h > ui_clipper.clip[2]+ui_clipper.clip[4] then
@@ -323,7 +334,6 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
 
    function view:do_remove_animation(sel_item)
       local sel_choice = self:get_controller():get_selected()
-      print("do_remove_animation called")
       assert(type(sel_item) == "number", "sel_item not a number")
       assert(sel_choice)
       assert(1 <= sel_item and sel_item <= #cart_items, "sel_item index not in cart_items array")
@@ -381,10 +391,6 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
          end
       }
 
-      if #cart_items > 0 then
-         icon.focus:raise_to_top()
-         icon.focus:animate{duration=50, opacity=255}
-         icon.unfocus:animate{duration=50, opacity=0}
-      end
+      self:update_totals()
    end
 end)
