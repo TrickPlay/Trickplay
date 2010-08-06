@@ -202,7 +202,7 @@ function createRedArrow()
                 Popup:new{
                         group = a,
                         time = 2,
-                        opacity = 150,
+                        opacity = 255,
                         on_fade_out = function()
                                 screen:remove(a)
                                 game.board.redArrow = nil
