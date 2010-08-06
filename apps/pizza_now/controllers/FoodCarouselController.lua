@@ -109,7 +109,7 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
        print("FoodCarouselController: move_selector called, selected is currently", selected)
        screen:grab_key_focus()
        local new_selected = selected + dir[1]
-       if 1 <= new_selected and new_selected <= MenuSize then
+       if 1 <= new_selected and new_selected <= MenuSize-1 then
           selected = new_selected
        end
        print("FoodCarouselController: exiting move_selector, selected is now", selected)
