@@ -111,6 +111,9 @@ FinalOrderController = Class(Controller, function(self, view, ...)
     end
 
     function self:refresh_cart()
+       if not selected_item then
+          previous_selected = {Choices.REMOVE, 1}
+       end
        view:refresh_cart()
     end
 end)
