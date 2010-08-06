@@ -162,8 +162,8 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
    
    view.ui = Group{name="finalOrder_ui", position={0,0}, opacity=255}
    local ui_clipper = Group{name="ui_clipper", position={0,15}, opacity=255, clip = {0,0, 960, 720}}
-   local up_arrow = Image{src="assets/UpScrollArrow.png", position={910, 10}}
-   local down_arrow = Image{src="assets/DownScrollArrow.png", position={910, 700}}
+   local up_arrow = Image{src="assets/UpScrollArrow.png", position={910, 10}, opacity=0}
+   local down_arrow = Image{src="assets/DownScrollArrow.png", position={910, 700}, opacity=0}
    local order_grp = Group{position={0,15}}
    --more text
    local taxText = Text{
@@ -252,6 +252,10 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
    
    function view:refresh_cart()
       order_grp:clear()
+      cart_items = {}
+      icons = {}
+      up_arrow.opacity=0
+      down_arrow.opacity=0
       local item_grp
       local current_y = 0
       local height
