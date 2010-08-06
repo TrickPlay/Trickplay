@@ -27,7 +27,7 @@ FoodFooterController = Class(Controller, function(self, view, ...)
         for i =  2,MenuSize-1 do 
             MenuItemCallbacks[i] = function(self)
                 print("editing cart item",MenuSize-i)
-                self:get_model():edit_selected(MenuSize-i)
+                self:get_model():edit_selected_cart_item(MenuSize-i)
                 self:get_model():notify()
             end
         end
