@@ -76,7 +76,7 @@ function app.on_loaded()
 				BoardMenu:update_cursor_position(hl2)
 				BoardMenu:controller_directions(hl2)
 				
-				local player = game.board:addPlayer{name = "Player 2", gold = LevelMenu.theme.wave.money/2, lives = 30, color = "008AFE"}
+				local player = game.board:addPlayer{name = "Player 2", gold = LevelMenu.theme.wave.money/2, lives = 30, color = {102,255,109}}
 				
 				hl2.extra.r = function() BoardMenu.buttons.extra.r{ x=hl2.extra.x, y=hl2.extra.y, player=player } end
 				ipod_keys(hl2)
