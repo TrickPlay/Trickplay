@@ -1,7 +1,8 @@
 local DEFAULT_FONT = CUSTOMIZE_ENTRY_FONT
 local DEFAULT_COLOR = Colors.BLACK
 
-FoodFooterView = Class(View, function(view, model, ...)
+FoodFooterView = Class(View, function(view, model,parent, ...)
+    view.parent = parent
     view._base.init(view, model)
      
     view.ui=Group{name="Food Footer UI", position={0,960}, opacity=255}
@@ -90,7 +91,7 @@ FoodFooterView = Class(View, function(view, model, ...)
                 controller:refresh()
             end
             for i,item in ipairs(view.items) do
-                if i == controller:get_selected_index() then
+                if i == controller:get_selected_index() and view.parent:get_controller():get_selected_index() == 2 then
                     if(item.on_focus) then
                         item:on_focus()
                     else

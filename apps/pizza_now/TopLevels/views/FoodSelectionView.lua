@@ -6,7 +6,7 @@ FoodSelectionView = Class(View, function(view, model, ...)
     -- foodHeaderView:initialize()
     local foodCarouselView = FoodCarouselView(model)
     foodCarouselView:initialize()
-    local foodFooterView = FoodFooterView(model)
+    local foodFooterView = FoodFooterView(model,view)
     foodFooterView:initialize()
 
     -- view.items = {foodHeaderView, foodCarouselView, foodFooterView}
