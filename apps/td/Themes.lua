@@ -42,9 +42,14 @@ for themeName, t in pairs(Themes) do
 
 end
 
+AssetLoader:preloadImage("MainMenuPressEnter","assets/MainMenuPressEnter.png")
+
+AssetLoader:preloadImage("MainMenuOverlay","assets/MainMenuOverlay.png")
 AssetLoader:preloadImage("MainMenuSmallButton","assets/MainMenuSmallButton.png")
 AssetLoader:preloadImage("MainMenuSmallFocus","assets/MainMenuSmallFocus.png")
-AssetLoader:preloadImage("MainMenuButton","assets/MainMenuButton.png")
+AssetLoader:preloadImage("MainMenuResume","assets/MainMenuResume.png")
+AssetLoader:preloadImage("MainMenuSingle","assets/MainMenuSingle.png")
+AssetLoader:preloadImage("MainMenuDouble","assets/MainMenuDouble.png")
 AssetLoader:preloadImage("MainMenuFocus","assets/MainMenuFocus.png")
 
 AssetLoader:preloadImage("RedArrow","assets/RedArrow.png")
