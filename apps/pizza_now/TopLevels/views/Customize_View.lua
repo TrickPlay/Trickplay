@@ -28,38 +28,39 @@ CustomizeView = Class(View, function(view, model, ...)
     view.images = {}
     view.preloaded_images=Group{name="preloaded",opacity=0}
     screen:add(view.preloaded_images)
+    view.words = {}
+    view.preloaded_text=Group{name="preloaded",opacity=0}
+    screen:add(view.preloaded_text)
+
     function view:pre_loader()
         view.images.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
-view.preloaded_images:add(view.images.bg)
+        view.preloaded_images:add(view.images.bg)
         view.images.vert_sep    = Image {
             width    = 20,
             height   = 960,
             tiled    = {false,true},
             src      = "assets/MenuLine.png"
         }
-view.preloaded_images:add(view.images.vert_sep)
+        view.preloaded_images:add(view.images.vert_sep)
         view.images.hor_sep = Image{
             scale    = {1,1.5},
             tiled    = {true,false},
             width    = 400,
             src      = "assets/MenuHorzLine.png"
         }
-view.preloaded_images:add(view.images.hor_sep)
+        view.preloaded_images:add(view.images.hor_sep)
         view.images.nutrition   = Image {
             position = {960, 0},
             src      = "assets/IngredientsBox.png"
         }
-view.preloaded_images:add(view.images.nutrition)
+        view.preloaded_images:add(view.images.nutrition)
         view.images.slice_lines = Image {
             position = {960, 480},
             src      = "assets/PizzaSliceLines_12.png"
         }
-view.preloaded_images:add(view.images.slice_lines)
---[[
+        view.preloaded_images:add(view.images.slice_lines)
+---[[
         view.images.selector = Image {
-            width     = 150,
-            height    = (960/#model.current_item.Tabs),
-            scale     = {false,true},
             src       = "assets/TabFocus_small.png"
         }
 --]]
@@ -67,7 +68,7 @@ view.preloaded_images:add(view.images.slice_lines)
             --scale    = {1,1.5},
             src      = "assets/MenuHorzLine.png"
         }
-view.preloaded_images:add(view.images.hor_line)
+        view.preloaded_images:add(view.images.hor_line)
 --[[
         view.images.vert_line = Image {
             width    = 20,
@@ -79,49 +80,49 @@ view.preloaded_images:add(view.images.hor_line)
         view.images.rad_on = Image {
             src      = "assets/RadioOn.png"
         }
-view.preloaded_images:add(view.images.rad_on)
+        view.preloaded_images:add(view.images.rad_on)
         view.images.rad_off = Image {
             src      = "assets/RadioOff.png"
         }
-view.preloaded_images:add(view.images.rad_off)
+        view.preloaded_images:add(view.images.rad_off)
         view.images.covx={}
         for i=1,#All_Options["CoverageX_r"] do
             view.images.covx[i] = Image{
                 src      = "assets/CoverageX/"..All_Options["CoverageX_r"][i]..".png"
             }
         end
-view.preloaded_images:add(unpack(view.images.covx))
+        view.preloaded_images:add(unpack(view.images.covx))
         view.images.place={}
         for i=1,#All_Options["Placement_r"] do
             view.images.place[i] = Image{
                  src      = "assets/Placement/"..All_Options["Placement_r"][i]..".png"
             }
         end
-view.preloaded_images:add(unpack(view.images.place))
+        view.preloaded_images:add(unpack(view.images.place))
         view.images.crust4 = Image{
             src      = "assets/CrustSelect4.png"
         }
-view.preloaded_images:add(view.images.crust4)
+        view.preloaded_images:add(view.images.crust4)
         view.images.crust3 = Image{
             src      = "assets/CrustSelect3.png"
         }
-view.preloaded_images:add(view.images.crust3)
+        view.preloaded_images:add(view.images.crust3)
         view.images.crustS = Image{
             src      = "assets/CrustSelectSize.png"
         }
-view.preloaded_images:add(view.images.crustS)
+        view.preloaded_images:add(view.images.crustS)
         view.images.up_arrow = Image{
             src      = "assets/UpScrollArrow.png"
         }
-view.preloaded_images:add(view.images.up_arrow)
+        view.preloaded_images:add(view.images.up_arrow)
         view.images.down_arrow = Image{
             src      = "assets/DownScrollArrow.png"
         }
-view.preloaded_images:add(view.images.down_arrow)
+        view.preloaded_images:add(view.images.down_arrow)
         view.images.pzzaLR = Image{
             src      = "assets/PizzaLR.png"
         }
-view.preloaded_images:add(view.images.pzzaLR)
+        view.preloaded_images:add(view.images.pzzaLR)
         view.images.size = {}
         view.images.sizefocus = {}
         for i=1,#All_Options["Size_r"] do
@@ -135,6 +136,9 @@ view.preloaded_images:add(view.images.pzzaLR)
         end
         view.preloaded_images:add(unpack(view.images.size))
         view.preloaded_images:add(unpack(view.images.sizefocus))
+----------------------------------------------------
+        --Text
+----------------------------------------------------
 
     end
     view:pre_loader()
@@ -241,21 +245,28 @@ view.preloaded_images:add(view.images.pzzaLR)
               position    = {1630, 70},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
-              text        = model.current_item:PriceString()
+              text        = model.current_item.Price
             }
 ---[[
         view.selector = Image {
                 position  = {150, 0},
                 width     = 150,
                 height    = (960/#model.current_item.Tabs),
-                scale     = {false,true},
+                tiled     = {false,true},
                 src       = "assets/TabFocus_small.png"
             }
 --]]
 --[[
+        print("\n\n",view.images.selector)
         view.selector = Clone{source=view.images.selector}
+        view.selector.width    = 150
+        view.selector.height   = (960/#model.current_item.Tabs)
+        view.selector.tile     = {false,true}
         view.selector.position = {150,0}
+        print("\n\n",view.selector)
 --]]
+        view.ui:add(view.selector)
+
         fffthis = view.selector
         view.ui.opacity = 255
 
@@ -704,7 +715,7 @@ view.preloaded_images:add(view.images.pzzaLR)
                                        All_Options.Placement_r[option.Placement]..".png"
                                 }
 --]]
-                                view.sub_group_items[tab_index][opt_index][3] = Clone{source=view.images.place[i]}
+                                view.sub_group_items[tab_index][opt_index][3] = Clone{source=view.images.place[option.Placement]}
                                 view.sub_group_items[tab_index][opt_index][3].position = {-70*(3-1), 60*(opt_index-1)}
 
                                 if option.Placement == All_Options.Placement.Entire or
@@ -724,7 +735,7 @@ view.preloaded_images:add(view.images.pzzaLR)
                                       All_Options.CoverageX_r[option.CoverageX]..".png"
                                 }
 -]]
-                                view.sub_group_items[tab_index][opt_index][2] = Clone{source=view.images.covx[i]}
+                                view.sub_group_items[tab_index][opt_index][2] = Clone{source=view.images.covx[option.CoverageX]}
                                 view.sub_group_items[tab_index][opt_index][2].position = {-70*(2-1), 60*(opt_index-1)}
 
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
@@ -746,6 +757,7 @@ view.preloaded_images:add(view.images.pzzaLR)
             end 
             view.ui:add(view.sub_group[tab_index])
         end
+
 --[[
             view.vert_lines[#view.menu_items+1] = Image {
                 position = {300, 120*(#view.menu_items+1-1)},
@@ -811,7 +823,6 @@ view.preloaded_images:add(view.images.pzzaLR)
         --view.ui:add(view.back_arrow_selected)
         --view.ui:add(view.add_to_order)
         --view.ui:add(view.hor_sep)
-        view.ui:add(view.selector)
         --view.ui:add(view.add_to_order_selector)
         view.ui:add(model.current_item.pizzagroup)
         model.current_item.pizzagroup:show_all()
@@ -891,8 +902,7 @@ windmill_view:initialize()
         --print("Active Component: "..comp)
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeView UI")
-            --view.ui.opacity = 255
-            view.ui:animate{duration = CHANGE_VIEW_TIME, position  = SHOW_POSITION}
+            view.ui.opacity = 255
                 --view.back_arrow_selected.opacity = 0
                 --view.add_to_order_selector.opacity = 0
                 for i,item in ipairs(view.menu_items) do
@@ -920,7 +930,7 @@ windmill_view:initialize()
                             view.selector.opacity = 255
                             view.vert_lines[i].opacity = 0
                             view.selector.y = 960*(i-1)/#model.current_item.Tabs
-                            view.selector:raise_to_top()
+                            --view.selector:raise_to_top()
                         else
                             view.vert_lines[i].opacity = 0
                             view.selector.opacity = 0
@@ -941,13 +951,8 @@ windmill_view:initialize()
         else
             print("Hiding CustomizeView UI")
             view.ui:complete_animation()
-            if(Components.FOOD_SELECTION ~= comp) then
-                view.ui.opacity = 0
-            else
-                view.ui.opacity = 255
-            end
-            view.ui:animate{duration = CHANGE_VIEW_TIME, position = HIDE_RIGHT}
+            view.ui.opacity = 0
         end
     end
 
-end)
+   end)
