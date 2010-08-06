@@ -26,7 +26,7 @@ ProvidersCarouselView = Class(View,
       local menu_items_sep = MENU_ITEMS_SEP
 
       --inited means that it's already been placed on screen
-      local ui = Group{name="providersCarousel_ui", position={0,0}, opacity=0, extra={inited=false}}
+      local ui = Group{name="providersCarousel_ui", position={0,0}, opacity=255, extra={inited=false}}
       ui:add(unpack(menu_items))
       view.ui = ui
       local center = {960, 480}
@@ -107,7 +107,7 @@ ProvidersCarouselView = Class(View,
                end
             end
          else
-            self.ui.opacity = 80
+            --self.ui.opacity = 80
          end
       end
 

@@ -1,6 +1,19 @@
 ProviderSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
+    view.HelpText = Text{
+         position = {20,30},
+         color    = Colors.WHITE,
+         font     = CUSTOMIZE_SUB_FONT,
+         text     = "Enter your address below,\n"..
+                    "then press up to select a\n"..
+                    "company from the providers\n"..
+                    "that service your area"
+    }
+
+
+
+
     -- local deliveryOptionsView = DeliveryOptionsView(model)
     -- deliveryOptionsView:initialize()
     local providersView = ProvidersCarouselView(model)
@@ -18,7 +31,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
     }
     --Delivery Address
     view.background_ui = Group{name="provider_background_ui", position={0,0}, opacity=255}
-    view.background_ui:add(back, orderBar)
+    view.background_ui:add(back, orderBar, view.HelpText)
     view.provider_ui=Group{name="provider_components_ui", position={0,0}, opacity=255}
 
     for i,v in ipairs(view.items) do
@@ -49,6 +62,7 @@ ProviderSelectionView = Class(View, function(view, model, ...)
                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                   self:get_controller().child = c_view:get_controller()
                else
+                  print(c_view.ui.opacity)
                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=BACKGROUND_FADE_OPACITY}
                end
             end

@@ -901,49 +901,51 @@ windmill_view:initialize()
         local comp = model:get_active_component()
         --print("Active Component: "..comp)
         if comp == Components.CUSTOMIZE then
-            print("Showing CustomizeView UI")
-            view.ui:animate{duration = 2*CHANGE_VIEW_TIME, opacity = 255,on_completed=
-            view.ui:animate{duration = CHANGE_VIEW_TIME, position = SHOW_POSITION}}
-            --view.back_arrow_selected.opacity = 0
-            --view.add_to_order_selector.opacity = 0
-                for i,item in ipairs(view.menu_items) do
-                    if i == controller:get_selected_index() then
-                        --print("\t",i,"opacity to 255")
-                        --item:animate{duration=100, opacity = 255}
-                        --item.opacity = 255
-                        if i == 1 then
-                            view.pzzaLR.opacity = 0
+            if controller.curr_comp == controller.ChildComponents.FOOT then
+                view.ui:animate{duration = CHANGE_VIEW_TIME, opacity = BACKGROUND_FADE_OPACITY}
+            else
+                print("Showing CustomizeView UI")
+                view.ui:animate{duration = 2*CHANGE_VIEW_TIME, opacity = 255,on_completed=
+                view.ui:animate{duration = CHANGE_VIEW_TIME, position = SHOW_POSITION}}
+                --view.back_arrow_selected.opacity = 0
+                --view.add_to_order_selector.opacity = 0
+                    for i,item in ipairs(view.menu_items) do
+                        if i == controller:get_selected_index() then
+                            --print("\t",i,"opacity to 255")
+                            --item:animate{duration=100, opacity = 255}
+                            --item.opacity = 255
+                            if i == 1 then
+                                view.pzzaLR.opacity = 0
+                            else
+                                view.pzzaLR.opacity = 255
+                            end
+                            view.sub_group[i]:animate{duration = 100, opacity = 255}
+                            if #view.sub_group_items[i] > 
+                                CUSTOMIZE_SCROLL_THRESHOLD then
+                                 view.up_arrow.opacity = 255
+                                view.down_arrow.opacity = 255
+                            else
+                                view.up_arrow.opacity = 0
+                                view.down_arrow.opacity = 0
+                            end
+                            if controller.curr_comp == view:get_controller().ChildComponents.TAB_BAR then
+                                --view.arrow.y = (i-1)*120
+                                view.selector.opacity = 255
+                                view.vert_lines[i].opacity = 0
+                                view.selector.y = 960*(i-1)/#model.current_item.Tabs
+                                --view.selector:raise_to_top()
+                            else
+                                view.vert_lines[i].opacity = 0
+                                view.selector.opacity = 0
+                            end
                         else
-                            view.pzzaLR.opacity = 255
+                            --print("\t",i,"opacity to 0")
+                            --item:animate{duration=100, opacity = 100}
+                            view.sub_group[i]:animate{duration = 100, opacity = 0}
+                            view.vert_lines[i].opacity = 255
                         end
-                        view.sub_group[i]:animate{duration = 100, opacity = 255}
-                        if #view.sub_group_items[i] > 
-                            CUSTOMIZE_SCROLL_THRESHOLD then
- 
-                            view.up_arrow.opacity = 255
-                            view.down_arrow.opacity = 255
-                        else
-                            view.up_arrow.opacity = 0
-                            view.down_arrow.opacity = 0
-                        end
-                        if controller.curr_comp == view:get_controller().ChildComponents.TAB_BAR then
-                            --view.arrow.y = (i-1)*120
-                            view.selector.opacity = 255
-                            view.vert_lines[i].opacity = 0
-                            view.selector.y = 960*(i-1)/#model.current_item.Tabs
-                            --view.selector:raise_to_top()
-                        else
-                            view.vert_lines[i].opacity = 0
-                            view.selector.opacity = 0
-                        end
-                    else
-                        --print("\t",i,"opacity to 0")
-                        --item:animate{duration=100, opacity = 100}
-                        view.sub_group[i]:animate{duration = 100, opacity = 0}
-                        view.vert_lines[i].opacity = 255
                     end
-                end
-            --end
+            end
         elseif comp == Components.TAB or comp == Components.CUSTOMIZE_ITEM or
                comp == Components.ACCORDIAN then
             print("Greying CustomizeView UI")
