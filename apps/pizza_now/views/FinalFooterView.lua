@@ -13,6 +13,12 @@ FinalFooterView = Class(View, function(view, model, parent_view, ...)
         tile = {true, false},
         width = 1920
     }
+    local backText = Text{
+        postion = {0, 0},
+        font = CUSTOMIZE_ENTRY_FONT,
+        color = Colors.BLACK,
+        text = "Go Back"
+    }
     local creditInstructionsText = Text{
         position = {170,60},
         font = CUSTOMIZE_TINY_FONT,
@@ -25,7 +31,7 @@ FinalFooterView = Class(View, function(view, model, parent_view, ...)
         color = Colors.BLACK,
         text = "By ordering, I implicitly agree to the Terms and Conditions of Domino's Pizza and Pizza Now."
     }
-    view.background_ui:add(orderBar, creditInstructionsText, termsText)
+    view.background_ui:add(orderBar, creditInstructionsText, termsText, backText)
     view.items = {
         {
             Image{
