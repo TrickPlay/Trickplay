@@ -14,6 +14,7 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
 
     -- the default selected index
     local selected = 1
+    local YNselected = 2
 
     local function itemSelection(item, name)
         local textObject = view.ui.children[item]
@@ -62,9 +63,14 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
                     self:get_model():notify()
         end,
         [MenuItems.CHECKOUT] = function(self)
+            self.areyousure = true
+                self:get_model():notify()
+
+--[[
                     model.current_item.pizzagroup:hide_all()
                     model:set_active_component(Components.CHECKOUT)
                     model:notify()
+--]]
         end
     }
 
@@ -74,10 +80,28 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self)
-            -- compromise so that there's not a full-on lua panic,
-            -- but the error message still displays on screen
-            local success, error_msg = pcall(MenuItemCallbacks[selected], self)
-            if not success then print(error_msg) end
+            if self.areyousure then
+                --save
+                if YNselected == 1 then
+                    model.current_item.pizzagroup:hide_all()
+                    if model.current_item_is_in_cart == false then
+                       print("adding new item")
+                       model.cart[#self:get_model().cart + 1] = view:get_model().current_item
+                    else
+                        print("Not adding,item is already in cart")
+                    end
+                end
+                self.areyousure = false
+                model.current_item.pizzagroup:hide_all()
+                model:set_active_component(Components.CHECKOUT)
+                self:get_model():get_active_controller().view:refresh_cart()
+                model:notify()
+            else
+                -- compromise so that there's not a full-on lua panic,
+                -- but the error message still displays on screen
+                local success, error_msg = pcall(MenuItemCallbacks[selected], self)
+                if not success then print(error_msg) end 
+            end
         end
     }
 
@@ -86,28 +110,35 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
             MenuKeyTable[k](self)
         end
     end
-
+    function self:get_YNselected_index()
+        return YNselected
+    end
     function self:get_selected_index()
         return selected
     end
-
+    self.areyousure = false
     function self:move_selector(dir)
-        if dir[1] ~= 0 then
-            --screen:grab_key_focus()
-            local new_selected = selected + dir[1]
-            if 1 <= new_selected and new_selected <= MenuSize then
-                selected = new_selected
+        if self.areyousure then
+            if dir[1] ~= 0 then
+                local new_YNselected = YNselected + dir[1]
+                if 1 <= new_YNselected and new_YNselected <= 2 then
+                    YNselected = new_YNselected
+                end
+                self:get_model():notify()
             end
-            self:get_model():notify()
-        elseif dir == Directions.UP then
-            --screen:grab_key_focus()
-            view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
-            self:get_model():notify()
+        else
+            if dir[1] ~= 0 then
+                --screen:grab_key_focus()
+                local new_selected = selected + dir[1]
+                if 1 <= new_selected and new_selected <= MenuSize then
+                    selected = new_selected
+                end
+                self:get_model():notify()
+            elseif dir == Directions.UP then
+                --screen:grab_key_focus()
+                view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
+                self:get_model():notify()
+            end
         end
-    end
-
-    function self:run_callback()
-            local success, error_msg = pcall(MenuItemCallbacks[selected], self)
-            if not success then print(error_msg) end
     end
 end)
