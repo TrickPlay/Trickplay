@@ -31,6 +31,7 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
     local MenuItemCallbacks = {
         [MenuItems.GO_BACK] = function(self)
             print("Backing up")
+            view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
             view.focusable_items[selected].group:animate{duration = 200, opacity = 0}
             view.pressed_items[selected]:animate{
                 duration = 200, opacity = 255,
@@ -45,6 +46,7 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
             }
         end,
         [MenuItems.ADD] = function(self)
+            view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
             view.focusable_items[selected].group:animate{duration = 200, opacity = 0}
             view.pressed_items[selected]:animate{
                 duration = 200, opacity = 255,
@@ -105,6 +107,7 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
         [keys.Return] = function(self)
             if self.areyousure then
                 --save
+                view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
                 if YNselected == 1 then
                     model.current_item.pizzagroup:hide_all()
                     if model.current_item_is_in_cart == false then

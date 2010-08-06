@@ -902,7 +902,8 @@ windmill_view:initialize()
         --print("Active Component: "..comp)
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeView UI")
-            view.ui:animate{duration = CHANGE_VIEW_TIME, position = SHOW_POSITION}
+            view.ui:animate{duration = 2*CHANGE_VIEW_TIME, opacity = 255,on_completed=
+            view.ui:animate{duration = CHANGE_VIEW_TIME, position = SHOW_POSITION}}
             --view.back_arrow_selected.opacity = 0
             --view.add_to_order_selector.opacity = 0
                 for i,item in ipairs(view.menu_items) do
