@@ -116,6 +116,19 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
                     else
                         print("Not adding,item is already in cart")
                     end
+                elseif model.current_item_is_in_cart then
+                        local index = 0
+                        for i = 1, #model.cart do
+                            if model.cart[i] == model.current_item then
+                                index = i
+                                print("found item in the cart at index",i)
+                            end
+                        end
+                        if index ~= 0 then
+                            print("removing index",index)
+                            table.remove(model.cart,index)
+                        end
+
                 end
                 self.areyousure = false
                 model.current_item.pizzagroup:hide_all()
