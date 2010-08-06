@@ -327,7 +327,8 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
       self:update_totals()
 
       order_grp:add(unpack(cart_items))
-      if order_grp.y+cart_items[#cart_items].y+cart_items[#cart_items].h > ui_clipper.clip[2]+ui_clipper.clip[4] then
+
+      if #cart_items > 0 and order_grp.y+cart_items[#cart_items].y+cart_items[#cart_items].h > ui_clipper.clip[2]+ui_clipper.clip[4] then
          down_arrow.opacity=255
       end
    end
