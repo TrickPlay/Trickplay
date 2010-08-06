@@ -139,6 +139,13 @@ Model = Class(function(model, ...)
         return model.creditInfo.card_type
     end
 
+    function model:edit_selected_cart_item(item_num)
+       self.current_item = self.cart[item_num]
+       self.current_item_is_in_cart = true
+       self:set_active_component(Components.CUSTOMIZE)
+       self:get_active_controller():init_shit()
+       self:get_controller(Components.TAB):init_shit()
+    end
 end)
 
 
