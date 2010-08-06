@@ -239,6 +239,7 @@ CustomizeController = Class(Controller,
                elseif dir == Directions.LEFT then
                   --self.on_back_arrow = true
                   self.curr_comp = self.ChildComponents.FOOT
+                  self.conches[self.curr_comp]:reset_selected_index()
                   self:get_model():notify()
                end
             --move up and down through the tabs
