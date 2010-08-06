@@ -33,29 +33,31 @@ end
 function Game:killGame(status)
 
 	paused = false
-
 	if status == 1 then
 		
 		local n = game.theme.themeName
 		
 		--Global
 		lastThemePlayed = n
-		
+		print (settings[n].currentLevel, currentLevel)
 		if settings[n].currentLevel == currentLevel then
-			
 			currentLevel = currentLevel + 1
 			settings[n] = { currentLevel = currentLevel }
-			createLevelMenu(currentLevel)
-			
-			LevelMenu.container.opacity = 255
-			LevelMenu.hl.opacity = 100
-			LevelMenu:update_cursor_position()
-			LevelMenu.theme = game.theme
+		
 		end
+		
+		createLevelMenu(settings[n].currentLevel)
+			
+		LevelMenu.container.opacity = 255
+		LevelMenu.hl.opacity = 100
+		LevelMenu:update_cursor_position()
+		LevelMenu.theme = game.theme
+
 	end
 	
 	bloodGroup:clear()
 	print ("kill me")
+	--debug()
 	screen:clear()
 	resumed = false
 	render_list = {}
@@ -91,6 +93,7 @@ function Game:killGame(status)
 
 	
 	screen:add(LevelMenu.container)
+	print("\n\n\n\n\n\n\n\n\n\n\n\nadded Level Menu")
 	screen:add(MainMenu.container)
 	screen:add(ThemeMenu.container)
 	
@@ -103,6 +106,8 @@ function Game:killGame(status)
 	keyboard_key_down = LevelMenu.buttons.on_key_down
 	
 	WAIT_TIME = FIRST_WAIT
+	
+	--debug()
 	
 	
 end
