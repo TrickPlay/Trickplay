@@ -68,10 +68,4 @@ if NETWORKING then
 end
 --model:start_app(Components.CHECKOUT)
 --model:get_active_controller():get_view():refresh_cart()
-table.insert(model.cart, EmptyPizza())
-table.insert(model.cart, EmptyPizza())
-table.insert(model.cart, EmptyPizza())
-table.insert(model.cart, EmptyPizza())
-table.insert(model.cart, EmptyPizza())
-table.insert(model.cart, EmptyPizza())
 model:start_app(Components.PROVIDER_SELECTION)
