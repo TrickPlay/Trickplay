@@ -9,18 +9,20 @@ dofile ("Bullet.lua")
 dofile ("TowerInfo.lua")
 dofile ("Popup.lua")
 
+mediaplayer:play_sound("backgroundMusic.wav")
+   
 screen:show()
 
 function app.on_loaded()
 	dofile ("Themes.lua")
 	
 	Popup:new{text = "Welcome to Robots vs Zombies!", draw = true, fadeSpeed = 500}:render()
-
-    -- Everything is loaded
+	 -- Everything is loaded
     AssetLoader.on_preload_ready = function()
         
     		TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
-			screen:add(TitleBackground)
+    		MainMenuImage = AssetLoader:getImage("MainMenu", {name = "MainMenu", x = 500, y = 100})
+			screen:add(TitleBackground, MainMenuImage)
 
         dofile ("Circle.lua")
         

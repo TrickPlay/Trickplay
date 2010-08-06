@@ -44,7 +44,7 @@ end
 
 
 AssetLoader:preloadImage("RedArrow","assets/RedArrow.png")
-
+AssetLoader:preloadImage("MainMenu","assets/MainMenu.png")
 AssetLoader:preloadImage("DescriptionRight","themes/robot/assets/DescriptionRight.png")
 
 AssetLoader:preloadImage("BuyFocus","themes/robot/assets/BuyFocus.png")
@@ -56,9 +56,14 @@ AssetLoader:preloadImage("smallWindow","assets/SmallWindow.png")
 AssetLoader:preloadImage("largeWindow","assets/LargeWindow.png")
 AssetLoader:preloadImage("InfoBar2","assets/player2InfoBar.png")
 
-AssetLoader:preloadImage("levelWindow","assets/levelWindow.png")
-AssetLoader:preloadImage("levelWindowLocked","assets/levelWindowLocked.png")
-AssetLoader:preloadImage("levelWindowCompleted","assets/levelWindowCompleted.png")
+--AssetLoader:preloadImage("levelWindow","assets/levelWindow.png")
+--AssetLoader:preloadImage("levelWindowLocked","assets/levelWindowLocked.png")
+--AssetLoader:preloadImage("levelWindowCompleted","assets/levelWindowCompleted.png")
+
+AssetLoader:preloadImage("levelWindow","themes/robot/assets/levelselector/empty.png")
+AssetLoader:preloadImage("levelWindowLocked","themes/robot/assets/levelselector/locked.png")
+AssetLoader:preloadImage("levelWindowCompleted","themes/robot/assets/levelselector/check.png")
+
 
 AssetLoader:preloadImage("select","assets/Selector.png")
 AssetLoader:preloadImage("select2","assets/Selector2.png")
