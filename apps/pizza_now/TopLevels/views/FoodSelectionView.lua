@@ -41,7 +41,7 @@ FoodSelectionView = Class(View, function(view, model, ...)
                     c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
                 end
             end
-        else
+        elseif comp ~= Components.CUSTOMIZE then
             print("Hiding FoodSelectionView UI")
             --self.provider_ui.opacity = 0
             self.provider_ui:complete_animation()

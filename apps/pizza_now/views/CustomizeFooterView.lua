@@ -50,38 +50,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
          "assets/CartButton.png",
          "assets/CartButtonFocus.png"),
     }
---[[
-    view.items_selected = {
-        Image{
-            position={0, 20},
-            src = "assets/BackArrowFocus.png"
-        },
-        Image{
-            position={200, 20},
-            src = "assets/AddButtonFocus.png"
-        },
-        Image{
-            position={1800, 20},
-            src = "assets/CartButtonFocus.png"
-        }
 
-    }
-    view.items_unselected = {
-        Image{
-            position={0, 20},
-            src = "assets/BackArrow.png"
-        },
-        Image{
-            position={200, 20},
-            src = "assets/AddButton.png"
-        },
-        Image{
-            position={1800, 20},
-            src = "assets/CartButton.png"
-        }
-
-    }
---]]
     view.text = {
         Text{
             position={0, 0},
@@ -103,12 +72,32 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         }
 
     }
+
+    view.pressed_items = {
+        Image{
+            position = {30, 30},
+            src = "assets/BackArrowPress.png",
+            opacity = 0
+        },
+        Image{
+            position = {250, 30},
+            src = "assets/AddButtonPress.png",
+            opacity = 0
+        },
+        Image{
+            position = {1700, 30},
+            src = "assets/CartButtonPress.png",
+            opacity = 0
+        }
+    }
+
     view.ui:add(view.bar)
-    --view.ui:add(unpack(view.items_selected))
-    --view.ui:add(unpack(view.items_unselected))
     view.ui:add(view.focusable_items[1].group)
     view.ui:add(view.focusable_items[2].group)
     view.ui:add(view.focusable_items[3].group)
+    for i,v in ipairs(view.pressed_items) do
+        view.ui:add(v)
+    end
 
 
     view.ui:add(unpack(view.text))
@@ -123,7 +112,6 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         local comp = model:get_active_component()
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeFooterView UI")
-            --view.ui.opacity = 255
             view.ui:raise_to_top()
             --if this child had the focus
             if p_controller.curr_comp == p_controller.ChildComponents.FOOT then
@@ -147,32 +135,24 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                     for i=1,#view.focusable_items do
                         if i == controller:get_selected_index() then
                             print("\t",i,"opacity to 255")
-                            --item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                             view.focusable_items[i]:on_focus()
-                            --view.items_selected[i].opacity   = 255
-                            --view.items_unselected[i].opacity = 0
                         else
                             print("\t",i,"opacity to 0")
-                            --item:animate{duration=CHANGE_VIEW_TIME, opacity=100}
                             view.focusable_items[i]:out_focus()
-                            --view.items_selected[i].opacity   = 0
-                            --view.items_unselected[i].opacity = 255
                         end
                     end
                 end
             --if this child doesn't have the focus
             else
                 for i=1,#view.focusable_items do
-                    --item:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                     view.focusable_items[i]:out_focus()
-                    --view.items_selected[i].opacity   = 0
-                    --view.items_unselected[i].opacity = 255
                 end
                 view.ui:animate{duration=CHANGE_VIEW_TIME,opacity = BACKGROUND_FADE_OPACITY}
             end
         elseif comp ~= Components.TAB and comp ~= Components.CUSTOMIZE_ITEM then
             print("Hiding CustomizeFooterView UI")
             view.ui:complete_animation()
+            view.areyousure.opacity = 0
             view.ui.opacity = 0
         end
     end
