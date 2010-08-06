@@ -9,6 +9,8 @@ CheckoutController = Class(Controller, function(self, view, ...)
         FOOTER = 3
     }
 
+    self.CheckoutGroups = CheckoutGroups
+
     local GroupSize = 0
     for k, v in pairs(CheckoutGroups) do
         GroupSize = GroupSize + 1
@@ -69,7 +71,7 @@ CheckoutController = Class(Controller, function(self, view, ...)
         screen:grab_key_focus()
         if(0 ~= dir[1]) then
             local new_selected = selected + dir[1]
-            if 2 <= new_selected and new_selected <= GroupSize-1 then
+            if 1 <= new_selected and new_selected <= GroupSize-1 then
                 view.items[selected]:get_controller():out_focus()
                 selected = new_selected
                 previousSelection = selected
@@ -78,6 +80,7 @@ CheckoutController = Class(Controller, function(self, view, ...)
         elseif(0 ~= dir[2]) then
             if(CheckoutGroups.ORDER == selected) or
               (CheckoutGroups.DETAILS == selected) then
+              print("Debugging move_selector in CheckoutController")
                 view.items[selected]:get_controller():out_focus()
                 selected = CheckoutGroups.FOOTER
                 view.items[selected]:get_controller():on_focus()

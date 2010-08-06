@@ -482,12 +482,13 @@ CustomizeView = Class(View, function(view, model, ...)
                                 end
  
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
-                                view.sub_group_items[tab_index][opt_index][2] = Image {
-                                     position = {-70*(2-1), 60*(opt_index-1)},
-                                     src      = "assets/CoverageX/"..
-                                      All_Options.CoverageX_r[option.CoverageX]..".png"
-                                }
-                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+                                   view.sub_group_items[tab_index][opt_index][2] = Image {
+                                      position = {-70*(2-1), 60*(opt_index-1)},
+                                      src      = "assets/CoverageX/"..
+                                         All_Options.CoverageX_r[option.CoverageX]..".png"
+                                   }
+                                   view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+
                             
                                 if opt_index > CUSTOMIZE_SCROLL_THRESHOLD then
                                     assert(option.Placement ~= nil,"shit "..option.Name)
