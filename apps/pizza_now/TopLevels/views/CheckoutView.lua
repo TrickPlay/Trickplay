@@ -19,14 +19,21 @@ CheckoutView = Class(View, function(view, model, ...)
     verticalDividerRight.position = {1770, 0}
     local verticalDividerCenter = Clone{source = verticalDividerLeft}
     verticalDividerCenter.position = {960, 0}
-    local horizontalDividerLeft = Image{
+    local horizontalDividerLeft1 = Image{
+        position = {150, 740},
+        height = 960-150,
+        tile = {false, true},
+        src = "assets/MenuLine.png",
+        z_rotation = {270,0,0}
+    }
+    local horizontalDividerLeft2 = Image{
         position = {150, 840},
         height = 960-150,
         tile = {false, true},
         src = "assets/MenuLine.png",
         z_rotation = {270,0,0}
     }
-    local horizontalDividerRight = Clone{source = horizontalDividerLeft}
+    local horizontalDividerRight = Clone{source = horizontalDividerLeft1}
     horizontalDividerRight.position = {960, 220}
     horizontalDividerRight.z_rotation = {270, 0, 0}
     local orderText = Text{
@@ -99,34 +106,14 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Instructions for driver:",
     }
-    --stuff describing the persons order
-    --placing the cart items in between the top of the screen and edit order
-    local currentCart = Text{
-        position = {160,0},
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLACK,
-        text = "Current Cart:",
-    }
-    --more text
-    local taxText = Text{
-        position = {190, 800},
-        font = CUSTOMIZE_SUB_FONT,
-        color = Colors.BLACK,
-        text = "Tax, Processing, & Delivery",
-    }
-    totalCostText = Text{
-        position = {170,880},
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLACK,
-        text = "Total",
-    }
+
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
-        verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
+        verticalDividerCenter, horizontalDividerLeft1, horizontalDividerLeft2, horizontalDividerRight,
         orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
         nameText, phoneText, emailText, extText, 
         --cardNumberText, expirationText, secretCodeText,
-        driverInstructionsText, taxText, totalCostText, currentCart
+        driverInstructionsText
     }
      
     --create the components
@@ -190,4 +177,8 @@ CheckoutView = Class(View, function(view, model, ...)
         end
     end
 
+    function view:refresh_cart()
+       assert(finalOrderView)
+       finalOrderView:refresh_cart()
+    end
 end)

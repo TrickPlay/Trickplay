@@ -159,7 +159,7 @@ CustomizeController = Class(Controller,
       function self:on_key_down(k)
          --print("Customize_controller on_key_down called with key", k)
          if self.curr_comp == self.ChildComponents.TAB_BAR then
-            MenuKeyTable[k](self)
+            if MenuKeyTable[k] then MenuKeyTable[k](self) end
          else
             print(self,self.curr_comp)
             assert(self.conches[self.curr_comp],"Controller  was not set")

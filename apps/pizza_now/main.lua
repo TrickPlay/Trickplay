@@ -66,7 +66,12 @@ end
 if NETWORKING then
    Navigator:init_session()
 end
---model:start_app(Components.ADDRESS_INPUT)
 --model:start_app(Components.CHECKOUT)
---model:start_app(Components.CUSTOMIZE_ITEM)
+--model:get_active_controller():get_view():refresh_cart()
+table.insert(model.cart, EmptyPizza())
+table.insert(model.cart, EmptyPizza())
+table.insert(model.cart, EmptyPizza())
+table.insert(model.cart, EmptyPizza())
+table.insert(model.cart, EmptyPizza())
+table.insert(model.cart, EmptyPizza())
 model:start_app(Components.PROVIDER_SELECTION)
