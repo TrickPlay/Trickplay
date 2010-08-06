@@ -25,11 +25,125 @@ CustomizeView = Class(View, function(view, model, ...)
     }
 
 
+    view.images = {}
+    view.preloaded_images=Group{name="preloaded",opacity=0}
+    screen:add(view.preloaded_images)
+    function view:pre_loader()
+        view.images.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
+view.preloaded_images:add(view.images.bg)
+        view.images.vert_sep    = Image {
+            width    = 20,
+            height   = 960,
+            tiled    = {false,true},
+            src      = "assets/MenuLine.png"
+        }
+view.preloaded_images:add(view.images.vert_sep)
+        view.images.hor_sep = Image{
+            scale    = {1,1.5},
+            tiled    = {true,false},
+            width    = 400,
+            src      = "assets/MenuHorzLine.png"
+        }
+view.preloaded_images:add(view.images.hor_sep)
+        view.images.nutrition   = Image {
+            position = {960, 0},
+            src      = "assets/IngredientsBox.png"
+        }
+view.preloaded_images:add(view.images.nutrition)
+        view.images.slice_lines = Image {
+            position = {960, 480},
+            src      = "assets/PizzaSliceLines_12.png"
+        }
+view.preloaded_images:add(view.images.slice_lines)
+--[[
+        view.images.selector = Image {
+            width     = 150,
+            height    = (960/#model.current_item.Tabs),
+            scale     = {false,true},
+            src       = "assets/TabFocus_small.png"
+        }
+--]]
+        view.images.hor_line = Image {
+            --scale    = {1,1.5},
+            src      = "assets/MenuHorzLine.png"
+        }
+view.preloaded_images:add(view.images.hor_line)
+--[[
+        view.images.vert_line = Image {
+            width    = 20,
+            height   = 960/#model.current_item.Tabs,
+            tiled    = {false,true},
+            src      = "assets/MenuLine.png"
+        }
+--]]
+        view.images.rad_on = Image {
+            src      = "assets/RadioOn.png"
+        }
+view.preloaded_images:add(view.images.rad_on)
+        view.images.rad_off = Image {
+            src      = "assets/RadioOff.png"
+        }
+view.preloaded_images:add(view.images.rad_off)
+        view.images.covx={}
+        for i=1,#All_Options["CoverageX_r"] do
+            view.images.covx[i] = Image{
+                src      = "assets/CoverageX/"..All_Options["CoverageX_r"][i]..".png"
+            }
+        end
+view.preloaded_images:add(unpack(view.images.covx))
+        view.images.place={}
+        for i=1,#All_Options["Placement_r"] do
+            view.images.place[i] = Image{
+                 src      = "assets/Placement/"..All_Options["Placement_r"][i]..".png"
+            }
+        end
+view.preloaded_images:add(unpack(view.images.place))
+        view.images.crust4 = Image{
+            src      = "assets/CrustSelect4.png"
+        }
+view.preloaded_images:add(view.images.crust4)
+        view.images.crust3 = Image{
+            src      = "assets/CrustSelect3.png"
+        }
+view.preloaded_images:add(view.images.crust3)
+        view.images.crustS = Image{
+            src      = "assets/CrustSelectSize.png"
+        }
+view.preloaded_images:add(view.images.crustS)
+        view.images.up_arrow = Image{
+            src      = "assets/UpScrollArrow.png"
+        }
+view.preloaded_images:add(view.images.up_arrow)
+        view.images.down_arrow = Image{
+            src      = "assets/DownScrollArrow.png"
+        }
+view.preloaded_images:add(view.images.down_arrow)
+        view.images.pzzaLR = Image{
+            src      = "assets/PizzaLR.png"
+        }
+view.preloaded_images:add(view.images.pzzaLR)
+        view.images.size = {}
+        view.images.sizefocus = {}
+        for i=1,#All_Options["Size_r"] do
+            view.images.size[i] = Image{
+                src      = "assets/Size"..All_Options["Size_r"][i]..".png"
+            }
+            view.images.sizefocus[i] = Image{
+                opacity  = 0,
+                src      = "assets/Size"..All_Options["Size_r"][i].."Focus.png"
+            }
+        end
+        view.preloaded_images:add(unpack(view.images.size))
+        view.preloaded_images:add(unpack(view.images.sizefocus))
+
+    end
+    view:pre_loader()
+
      
-    view.ui=Group{name="Customize ui", position=HIDE_RIGHT, opacity=255}
-    view.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
-    --view.bg2 = Clone{source=view.bg}
-    --view.bg2.position = {960,0}
+    view.ui=Group{name="Customize ui", position={0,0}, opacity=255}
+    --view.bg = Image{src = "assets/MenuBg.jpg", position={0,0}}
+    view.bg = Clone{source=view.images.bg}
+    view.bg.position = {0,0}
     view.ui:add(bg)
    -- view.ui:add(bg2)
         screen:add(view.ui)
@@ -95,6 +209,7 @@ CustomizeView = Class(View, function(view, model, ...)
             z_rotation = {90,0,0},
               text     = model.current_item.Name
            }
+--[[
         view.vert_sep    = Image {
                 position = {150, 0},
                 width    = 20,
@@ -102,15 +217,25 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
-
+--]]
+        view.vert_sep = Clone{source=view.images.vert_sep}
+        view.vert_sep.position = {150,0}
+--[[
         view.nutrition   = Image {
                 position = {960, 0},
                 src      = "assets/IngredientsBox.png"
             }
+--]]
+        view.nutrition = Clone{source=view.images.nutrition}
+        view.nutrition.position = {960,0}
+--[[
         view.slice_lines = Image {
                 position = {960, 480},
                 src      = "assets/PizzaSliceLines_12.png"
             }
+--]]
+        view.slice_lines = Clone{source=view.images.slice_lines}
+        view.slice_lines.position = {960,480}
 
         view.price = Text{
               position    = {1630, 70},
@@ -118,14 +243,20 @@ CustomizeView = Class(View, function(view, model, ...)
               color       = Colors.BLACK,
               text        = model.current_item:PriceString()
             }
-
+---[[
         view.selector = Image {
                 position  = {150, 0},
-                --height    = 960/#model.current_item.Tabs,
-                --scale     = {false,true},
-                src       = "assets/TabFocus.png"
+                width     = 150,
+                height    = (960/#model.current_item.Tabs),
+                scale     = {false,true},
+                src       = "assets/TabFocus_small.png"
             }
-
+--]]
+--[[
+        view.selector = Clone{source=view.images.selector}
+        view.selector.position = {150,0}
+--]]
+        fffthis = view.selector
         view.ui.opacity = 255
 
         view.accordian_group = {}
@@ -143,12 +274,21 @@ CustomizeView = Class(View, function(view, model, ...)
                 color    = Colors.BLACK,
                 text     = tab.Tab_Text
             }
+--[[
             view.hor_lines[tab_index] = Image {
                 position = {150, 960*(tab_index/#model.current_item.Tabs)},
                 --position = {150, 120*(tab_index-1)+120},
                 scale    = {1,1.5},
                 src      = "assets/MenuHorzLine.png"
             }
+--]]
+---[[
+            view.hor_lines[tab_index] = Clone{source=view.images.hor_line}
+            view.hor_lines[tab_index].position = {150, 960*(tab_index/#model.current_item.Tabs)}
+            view.hor_lines[tab_index].scale = {1,1.5}
+            --view.hor_lines[tab_index].opacity = 255
+--]]
+---[[
             view.vert_lines[tab_index] = Image {
                 position = {300, 960*(tab_index-1)/#model.current_item.Tabs},
                 width    = 20,
@@ -156,7 +296,11 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
-
+--]]
+--[[
+            view.vert_lines[tab_index] = Clone{source=view.images.vert_line}
+            view.vert_lines[tab_index].position = {}
+--]]
             view.sub_group_items[tab_index] = {}
             view.accordian_group[tab_index] = {}
             view.accordian_group_items[tab_index] = {}
@@ -179,6 +323,7 @@ CustomizeView = Class(View, function(view, model, ...)
                             color    = Colors.BLACK,
                             text     = "Cheese:"
                 })
+--[[
                 view.sub_group[tab_index]:add(Image{
                     position = {-40, -60},
                     scale    = {1,1.5},
@@ -186,6 +331,11 @@ CustomizeView = Class(View, function(view, model, ...)
                     width    = 400,
                     src      = "assets/MenuHorzLine.png"
                 })
+--]]
+                local temp = Clone{source=view.images.hor_sep}
+                temp.position = {-40,-60}
+                view.sub_group[tab_index]:add(temp)
+
                 --Cheese Placement
                 view.first_tab_groups[1][1] = {}
                 view.first_tab_groups[1][1][-2] = Text{
@@ -195,10 +345,15 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = "Placement:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-2])
+--[[
                 view.first_tab_groups[1][1][-1] = Image{
                             position = {-160, 0},
                             src      = "assets/CrustSelect4.png"
                 }
+--]]
+                view.first_tab_groups[1][1][-1] = Clone{source=view.images.crust4}
+                view.first_tab_groups[1][1][-1].position = {-160,0}
+
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][1][-1])
                 for i=1,#All_Options["Placement_r"] do
                     view.first_tab_groups[1][1][i] ={}
@@ -208,20 +363,32 @@ CustomizeView = Class(View, function(view, model, ...)
                             color    = Colors.BLACK,
                             text     = All_Options["Placement_r"][i]
                     }
+--[[
                     view.sub_group[tab_index]:add(Image{
                         position = {-60, 45*(i-1)-15},
                         src      = "assets/Placement/"..All_Options["Placement_r"][i]..".png"
                     })
+--]]
+                    print(i)
+                    temp=Clone{source=view.images.place[i]}
+                    temp.position = {-60, 45*(i-1)-15}
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][1][i][1])
+--[[
                     view.first_tab_groups[1][1][i][2] = Image {
                         position = {-120, 45*(i-1)-15},
                         src      = "assets/RadioOn.png"
                     }
+--]]
+                    view.first_tab_groups[1][1][i][2] = Clone{source=view.images.rad_on}
+                    view.first_tab_groups[1][1][i][2].position = {-120, 45*(i-1)-15}
+--[[
                     view.first_tab_groups[1][1][i][3] = Image {
                         position = {-120,45*(i-1)-15},
                         src      = "assets/RadioOff.png"
                     }
-
+--]]
+                    view.first_tab_groups[1][1][i][3] = Clone{source=view.images.rad_off}
+                    view.first_tab_groups[1][1][i][3].position = {-120,45*(i-1)-15}
                     if i == tab.Options[1].Placement then
                         view.first_tab_groups[1][1][i][2].opacity = 255
                         view.first_tab_groups[1][1][i][3].opacity = 0
@@ -241,18 +408,25 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = "Coverage:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-2])
+--[[
                 view.first_tab_groups[1][2][-1] = Image{
                             position = {200, 0},
                             src      = "assets/CrustSelect4.png"
                 }
+--]]
+                view.first_tab_groups[1][2][-1]=Clone{source=view.images.crust3}
+                view.first_tab_groups[1][2][-1].position={200,0}
                 view.sub_group[tab_index]:add(view.first_tab_groups[1][2][-1])
                 for i=1,#All_Options["CoverageX_r"]-1 do
                     view.first_tab_groups[1][2][i] ={} 
+--[[
                     view.sub_group[tab_index]:add(Image{
                         position = {300, 45*(i-1)-15},
                         src      = "assets/CoverageX/"..All_Options["CoverageX_r"][i+1]..".png"
                     })
-                   
+--]]
+                    temp = Clone{source=view.images.covx[i+1]}
+                    temp.position = {300, 45*(i-1)-15}
                     view.first_tab_groups[1][2][i][1] = Text{
                             position = {370, 45*(i-1)},
                             font     = CUSTOMIZE_SUB_FONT,
@@ -260,15 +434,22 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = All_Options["CoverageX_r"][i+1]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[1][2][i][1])
-
+--[[
                     view.first_tab_groups[1][2][i][2] = Image {
                         position = {240, 45*(i-1)-15},
                         src      = "assets/RadioOn.png"
                     }
+--]]
+                    view.first_tab_groups[1][2][i][2] = Clone{source=view.images.rad_on}
+                    view.first_tab_groups[1][2][i][2].position = {240, 45*(i-1)-15}
+--[[
                     view.first_tab_groups[1][2][i][3] = Image {
                         position = {240, 45*(i-1)-15},
                         src      = "assets/RadioOff.png"
                     }
+--]]
+                    view.first_tab_groups[1][2][i][3] = Clone{source=view.images.rad_off}
+                    view.first_tab_groups[1][2][i][3].position = {240, 45*(i-1)-15}
 
                     if i == tab.Options[1].CoverageX-1 then
                         view.first_tab_groups[1][2][i][2].opacity = 255
@@ -290,6 +471,7 @@ CustomizeView = Class(View, function(view, model, ...)
                             color    = Colors.BLACK,
                             text     = "Crust:"
                 })
+--[[
                 view.sub_group[tab_index]:add(Image{
                     position = {-40, 200},
                     scale    = {1,1.5},
@@ -297,6 +479,10 @@ CustomizeView = Class(View, function(view, model, ...)
                     width    = 400,
                     src      = "assets/MenuHorzLine.png"
                 })
+--]]
+                temp = Clone{source=view.images.hor_sep}
+                temp.position = {-40,200}
+                view.sub_group[tab_index]:add(temp)
                 --Crust Style
                 view.first_tab_groups[2][1] = {}
                 view.first_tab_groups[2][1][-2] = Text{
@@ -306,10 +492,14 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = "Styles:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[2][1][-2])
+--[[
                 view.first_tab_groups[2][1][-1] = Image{
                             position = {-160, 265},
                             src      = "assets/CrustSelect4.png"
                 }
+--]]
+                view.first_tab_groups[2][1][-1] = Clone{source=view.images.crust4}
+                view.first_tab_groups[2][1][-1].position={-160,265}
                 view.sub_group[tab_index]:add(view.first_tab_groups[2][1][-1])
                 for i=1,#All_Options["Crust_Style_r"] do
                     view.first_tab_groups[2][1][i] ={}
@@ -320,14 +510,22 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = All_Options["Crust_Style_r"][i]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][1][i][1])
+--[[
                     view.first_tab_groups[2][1][i][2] = Image {
                         position = {-120, 45*(i-1)+250},
                         src      = "assets/RadioOn.png"
                     }
+--]]
+                    view.first_tab_groups[2][1][i][2] = Clone{source=view.images.rad_on}
+                    view.first_tab_groups[2][1][i][2].position = {-120, 45*(i-1)+250}
+--[[
                     view.first_tab_groups[2][1][i][3] = Image {
                         position = {-120,45*(i-1)+250},
                         src      = "assets/RadioOff.png"
                     }
+--]]
+                    view.first_tab_groups[2][1][i][3] = Clone{source=view.images.rad_off}
+                    view.first_tab_groups[2][1][i][3].position = {-120, 45*(i-1)+250}
 
                     if i == tab.Options[3].Crust_Style then
                         view.first_tab_groups[2][1][i][2].opacity = 255
@@ -348,36 +546,55 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = "Available Size:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[2][2][-2])
+--[[
                 view.first_tab_groups[2][2][-1] = Image{
                             position = {200, 265},
                             src      = "assets/CrustSelectSize.png"
                 }
+--]]
+                view.first_tab_groups[2][2][-1] = Clone{source=view.images.crustS}
+                view.first_tab_groups[2][2][-1].position = {200, 265}
                 view.sub_group[tab_index]:add(view.first_tab_groups[2][2][-1])
                 local retarded = {0,80,180,300}
                 local half_retarded = {40-30,50-30,60-30,70-30}
                 for i=1,#All_Options["Size_r"] do
                     view.first_tab_groups[2][2][i] ={}
                     --print(80*(i-1)+20*((i-1)/2))
+--[[
                     view.first_tab_groups[2][2][i][1] = Image{
                             position = {300, retarded[i]+265 + 10*(i-1)},
                             src      = "assets/Size"..All_Options["Size_r"][i]..".png"
                     }
+--]]
+                    view.first_tab_groups[2][2][i][1] = Clone{source=view.images.size[i]}
+                    view.first_tab_groups[2][2][i][1].position = {300, retarded[i]+265 + 10*(i-1)}
+--[[
                     view.first_tab_groups[2][2][i][4] = Image{
                             position = {300, retarded[i]+265 + 10*(i-1)},
                             opacity  = 0,
                             src      = "assets/Size"..All_Options["Size_r"][i].."Focus.png"
                     }
+--]]
+                    view.first_tab_groups[2][2][i][4] = Clone{source=view.images.sizefocus[i]}
+                    view.first_tab_groups[2][2][i][4].position = {300, retarded[i]+265 + 10*(i-1)}
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][4])
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][1])
-
+--[[
                     view.first_tab_groups[2][2][i][2] = Image {
                         position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)},
                         src      = "assets/RadioOn.png"
                     }
+--]]
+                    view.first_tab_groups[2][2][i][2] = Clone{source=view.images.rad_on}
+                    view.first_tab_groups[2][2][i][2].position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)}
+--[[
                     view.first_tab_groups[2][2][i][3] = Image {
                         position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)},
                         src      = "assets/RadioOff.png"
                     }
+--]]
+                    view.first_tab_groups[2][2][i][3] = Clone{source=view.images.rad_off}
+                    view.first_tab_groups[2][2][i][3].position = {240, half_retarded[i]+retarded[i]+265+ 10*(i-1)}
 
                     if i == tab.Options[4].Size then
                         view.first_tab_groups[2][2][i][2].opacity = 255
@@ -404,10 +621,15 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = "Sauce:"
                 }
                 view.sub_group[tab_index]:add(view.first_tab_groups[3][1][-2])
+--[[
                 view.first_tab_groups[3][1][-1] = Image{
                             position = {-160, 540},
                             src      = "assets/CrustSelect4.png"
                 }
+--]]
+                view.first_tab_groups[3][1][-1] = Clone{source=view.images.crust4}
+                view.first_tab_groups[3][1][-1].position = {-160, 540}
+
                 view.sub_group[tab_index]:add(view.first_tab_groups[3][1][-1])
                 for i=1,#All_Options["Sauce_Type_r"] do
                     view.first_tab_groups[3][1][i] ={}
@@ -418,15 +640,23 @@ CustomizeView = Class(View, function(view, model, ...)
                             text     = All_Options["Sauce_Type_r"][i]
                     }
                     view.sub_group[tab_index]:add(view.first_tab_groups[3][1][i][1])
-
+--[[
                     view.first_tab_groups[3][1][i][2] = Image {
                         position = {-120,45*(i-1)+520},
                         src      = "assets/RadioOn.png"
                     }
+--]]
+                    view.first_tab_groups[3][1][i][2] = Clone{source=view.images.rad_on}
+                    view.first_tab_groups[3][1][i][2].position = {-120,45*(i-1)+520}
+--[[
                     view.first_tab_groups[3][1][i][3] = Image {
                         position = {-120,45*(i-1)+520},
                         src      = "assets/RadioOff.png"
                     }
+--]]
+                    view.first_tab_groups[3][1][i][3] = Clone{source=view.images.rad_off}
+                    view.first_tab_groups[3][1][i][3].position = {-120,45*(i-1)+520}
+
 
                     if i == tab.Options[2].Sauce_Type then
                         view.first_tab_groups[3][1][i][2].opacity = 255
@@ -467,11 +697,16 @@ CustomizeView = Class(View, function(view, model, ...)
                                                                                          70*(3-1))
                                 view.sub_group_items[tab_index][opt_index][4].opacity = 255
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][4].group)
+--[[
                                 view.sub_group_items[tab_index][opt_index][3] = Image {
                                       position = {-70*(3-1), 60*(opt_index-1)},
                                       src      = "assets/Placement/"..
                                        All_Options.Placement_r[option.Placement]..".png"
                                 }
+--]]
+                                view.sub_group_items[tab_index][opt_index][3] = Clone{source=view.images.place[i]}
+                                view.sub_group_items[tab_index][opt_index][3].position = {-70*(3-1), 60*(opt_index-1)}
+
                                 if option.Placement == All_Options.Placement.Entire or
                                    option.Placement == All_Options.Placement.Left then
                                     view.ingredientbox_left[#view.ingredientbox_left+1] = option.Name
@@ -482,13 +717,17 @@ CustomizeView = Class(View, function(view, model, ...)
                                 end
  
                                 view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][3])
-                                   view.sub_group_items[tab_index][opt_index][2] = Image {
-                                      position = {-70*(2-1), 60*(opt_index-1)},
-                                      src      = "assets/CoverageX/"..
-                                         All_Options.CoverageX_r[option.CoverageX]..".png"
-                                   }
-                                   view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
+--[[
+                                view.sub_group_items[tab_index][opt_index][2] = Image {
+                                     position = {-70*(2-1), 60*(opt_index-1)},
+                                     src      = "assets/CoverageX/"..
+                                      All_Options.CoverageX_r[option.CoverageX]..".png"
+                                }
+-]]
+                                view.sub_group_items[tab_index][opt_index][2] = Clone{source=view.images.covx[i]}
+                                view.sub_group_items[tab_index][opt_index][2].position = {-70*(2-1), 60*(opt_index-1)}
 
+                                view.sub_group[tab_index]:add(view.sub_group_items[tab_index][opt_index][2])
                             
                                 if opt_index > CUSTOMIZE_SCROLL_THRESHOLD then
                                     assert(option.Placement ~= nil,"shit "..option.Name)
@@ -524,20 +763,33 @@ CustomizeView = Class(View, function(view, model, ...)
             view.ui:raise(view.hor_lines[i])
         end
         view.ui:add(unpack(view.vert_lines))
+--[[
         view.up_arrow = Image{
             position = {850, 60*(1-1)- 25+view.sub_group[1].y},
                  src = "assets/UpScrollArrow.png"
             }
+--]]
+        view.up_arrow = Clone{source=view.images.up_arrow}
+        view.up_arrow.position = {850, 60*(1-1)- 25+view.sub_group[1].y}
         view.ui:add(view.up_arrow)
+--[[
         view.down_arrow = Image{
             position = {850,60*(CUSTOMIZE_SCROLL_THRESHOLD-0)+5+view.sub_group[1].y},
                  src = "assets/DownScrollArrow.png"
              }
+--]]
+        view.down_arrow = Clone{source=view.images.down_arrow}
+        view.down_arrow.position = {850,60*(CUSTOMIZE_SCROLL_THRESHOLD-0)+5+view.sub_group[1].y}
+
         view.ui:add(view.down_arrow)
+--[[
         view.pzzaLR = Image{
             position = {view.sub_group[1].x-70*(3-1)-20,0},
                  src = "assets/PizzaLR.png"
             }
+--]]
+        view.pzzaLR = Clone{source=view.images.pzzaLR}
+        view.pzzaLR.position = {view.sub_group[1].x-70*(3-1)-20,0}
         view.ui:add(view.pzzaLR)
  
         view.rebuild_ingredient_box()    
@@ -668,6 +920,7 @@ windmill_view:initialize()
                             view.selector.opacity = 255
                             view.vert_lines[i].opacity = 0
                             view.selector.y = 960*(i-1)/#model.current_item.Tabs
+                            view.selector:raise_to_top()
                         else
                             view.vert_lines[i].opacity = 0
                             view.selector.opacity = 0
