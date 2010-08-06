@@ -28,8 +28,10 @@ ThemeMenu:create_buttons(10, "Sans 34px")
 --ThemeMenu:apply_color_change("FFFFFF", "000000")
 ThemeMenu:update_cursor_position()
 
-ThemeMenu.container.x = MainMenu.container.x - MainMenu.container.w/2 + 30
-ThemeMenu.container.y = 200
+local single = MainMenu.container:find_child("single")
+
+ThemeMenu.container.x = MainMenu.container.x - MainMenu.container.w/2 + single.x + 40
+ThemeMenu.container.y = 100
 
 ThemeMenu.buttons.extra.r = function()
         

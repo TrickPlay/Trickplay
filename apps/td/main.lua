@@ -29,13 +29,18 @@ function app.on_loaded()
 		
 		local mainMenuList = {
 			{
-			AssetLoader:getImage("MainMenuButton",{ name="Single Player" }),
-			AssetLoader:getImage("MainMenuButton",{ name="Cooperative" }),
+			AssetLoader:getImage("MainMenuSingle",{ name="single" }),
+			AssetLoader:getImage("MainMenuDouble",{ name="double" }),
 			}
 		}
 		
-		--if settings.saved then mainMenuList[1][3] = AssetLoader:getImage("MainMenuButton",{ name="Resume Game" }) end		
-		mainMenuList[1][3] = AssetLoader:getImage("MainMenuButton",{ name="Resume Game" })
+		if settings.saved then
+			
+			mainMenuList[1][3] = mainMenuList[1][2]
+			mainMenuList[1][2] = mainMenuList[1][1]
+			mainMenuList[1][1] = AssetLoader:getImage("MainMenuResume",{ name="resume" })
+			
+		end
 		
 		
 		local mainMenuFocus = AssetLoader:getImage( "MainMenuFocus",{ name="Main Menu Focus" } ) --Rectangle{color="FF00CC", w=300, h=250}
@@ -46,21 +51,23 @@ function app.on_loaded()
 		MainMenu = Menu:new{container = g, list = mainMenuList, hl = mainMenuFocus}
 		--MainMenu:create_key_functions()
 		MainMenu:button_directions()
-		MainMenu:create_buttons(10, "Sans 34px")
+		MainMenu:create_buttons(10)
 		MainMenu:apply_color_change("FFFFFF", "000000")
 		--MainMenu.container.name = os.time()
 		--MainMenu.buttons:grab_key_focus()
 			
 		MainMenu:update_cursor_position()
-		MainMenu.hl.opacity = 50
+		MainMenu.hl.opacity = 255
 		MainMenu.hl.color = "FFFFFF"
 		
 		MainMenu.container.anchor_point = {MainMenu.container.w/2, MainMenu.container.h/2}
 		MainMenu.container.position = { screen.w/2, screen.h/2 + 150}
 		
 		MainMenu.buttons.extra.r = function()
+			
+			local select = MainMenu.list[1][MainMenu.x].name
 				
-			if MainMenu.x == 2 then
+			if select == "double" then
 				
 				createLevelMenu(1)
 				
@@ -92,7 +99,7 @@ function app.on_loaded()
 				screen:add(countdowntimer, phasetext, game.board.player.playertext, game.board.player.goldtext,livestext, leveltext)
 				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
 				
-			elseif MainMenu.x == 3 then
+			elseif select == "resume" then
 			
 				resumed = true
 				
@@ -122,9 +129,50 @@ function app.on_loaded()
 			
 		end
 		
+		-- Theme menu
+		dofile ("ThemeMenu.lua")
+		dofile ("Levels.lua")
+		
+		ThemeMenu.container.opacity = 255
+		
+		-- Complicated main menu crap
+		MainMenu.overlay = AssetLoader:getImage( "MainMenuOverlay",{ name="overlay", opacity = 0 } )
+		MainMenu.pressEnter = AssetLoader:getImage( "MainMenuPressEnter",{ name="pressEnter", opacity = 0 } )
+
+		MainMenu.container:add(MainMenu.overlay, MainMenu.pressEnter)
+		
+		local w = MainMenu.container.w
+		
+		local overlay = function()
+			
+			local name = MainMenu.list[1][MainMenu.x].name
+			MainMenu.container.w = w
+			
+			if name == "resume" or name == "double" then
+			
+				--ThemeMenu.container.x = MainMenu.container.x - MainMenu.container.w/2 + single.x + 40
+				--ThemeMenu.container.y = 200
+				
+				MainMenu.overlay.opacity = 255
+				MainMenu.overlay.x = MainMenu.list[1][MainMenu.x].x
+				ThemeMenu.hl.opacity = 0
+				MainMenu.pressEnter.opacity = 0
+			
+			else
+				MainMenu.pressEnter.opacity = 255
+				MainMenu.pressEnter.x = MainMenu.list[1][MainMenu.x].x
+				ThemeMenu.hl.opacity = 255
+				MainMenu.overlay.opacity = 0
+			
+			end
+			
+		end
+		
+		overlay()
+		
 		MainMenu.buttons.extra.up = function()
 		
-			if MainMenu.x == 1 then
+			if MainMenu.list[1][MainMenu.x].name == "single" then
 			
 				ThemeMenu.buttons.extra.up()
 				ThemeMenu:update_cursor_position()
@@ -135,7 +183,7 @@ function app.on_loaded()
 		
 		MainMenu.buttons.extra.down = function()
 		
-			if MainMenu.x == 1 then
+			if MainMenu.list[1][MainMenu.x].name == "single" then
 			
 				ThemeMenu.buttons.extra.down()
 				ThemeMenu:update_cursor_position()
@@ -144,13 +192,15 @@ function app.on_loaded()
 		
 		end
 		
+		MainMenu.buttons.extra.right = appendFunction(MainMenu.buttons.extra.right, overlay)
+		MainMenu.buttons.extra.left = appendFunction(MainMenu.buttons.extra.left, overlay)
+		
+		--MainMenu.buttons.extra.right = function() print(MainMenu.x, #MainMenu.list[1])  if MainMenu.x < #MainMenu.list[1] then MainMenu.buttons.extra.right() end end
 		
 		
 		
-		dofile ("ThemeMenu.lua")
-		dofile ("Levels.lua")
 		
-		ThemeMenu.container.opacity = 255
+		
 		
 		
 		
