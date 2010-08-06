@@ -131,7 +131,7 @@ CheckoutView = Class(View, function(view, model, ...)
     view.background_ui:add(unpack(background))
 
     --ui that actually moves
-    view.moving_ui=Group{name="checkoutMoving_ui", position={0,0}}
+    view.moving_ui=Group{name="checkoutMoving_ui", position=HIDE_TOP}
     view.moving_ui:add(view.background_ui, finalOrderView.ui, creditInfoView.ui)
     --redundant bottom bar ui group, does not move
     view.footer_ui=Group{name="checkoutFooter_ui", position={0,0}}
@@ -173,7 +173,7 @@ CheckoutView = Class(View, function(view, model, ...)
             self.ui:complete_animation()
             view.background_ui.opacity = 255
             self.footer_ui.opacity = 0
-            self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_POSITION}
+            self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_TOP}
         end
     end
 
