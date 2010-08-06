@@ -263,6 +263,7 @@ CheckoutView = Class(View, function(view, model, ...)
         else
             print("Hiding Checkout UI")
             self.ui:complete_animation()
+            view.background_ui.opacity = 255
             self.footer_ui.opacity = 0
             self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_POSITION}
         end
