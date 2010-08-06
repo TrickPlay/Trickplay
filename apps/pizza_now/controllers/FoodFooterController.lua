@@ -13,8 +13,16 @@ FoodFooterController = Class(Controller, function(self, view, ...)
             if provider_img then
                provider_img:unparent()
             end
-            self:get_model():set_active_component(Components.PROVIDER_SELECTION)
-            self:get_model():notify()
+            view.back.group:animate{duration = 200, opacity = 0}
+            view.back_pressed:animate{
+                duration = 200, opacity = 255,
+                on_completed = function()
+                    view.back.group:animate{duration = 100, opacity = 255}
+                    view.back_pressed:animate{duration = 100, opacity = 0}
+                    self:get_model():set_active_component(Components.PROVIDER_SELECTION)
+                    self:get_model():notify()
+                end
+            }
         end
         for i =  2,MenuSize-1 do 
             MenuItemCallbacks[i] = function(self)
@@ -30,9 +38,17 @@ FoodFooterController = Class(Controller, function(self, view, ...)
         end
         MenuItemCallbacks[MenuSize] = function(self)
             print("Checking OUT")
-            self:get_model():set_active_component(Components.CHECKOUT)
-            --self:get_model():get_active_controller().view:refresh_cart()
-            self:get_model():notify()
+            view.checkout.group:animate{duration = 200, opacity = 0}
+            view.checkout_pressed:animate{
+                duration = 200, opacity = 255,
+                on_completed = function()
+                    view.checkout.group:animate{duration = 100, opacity = 255}
+                    view.checkout_pressed:animate{duration = 100, opacity = 0}
+                    self:get_model():set_active_component(Components.CHECKOUT)
+                    self:get_model():get_active_controller().view:refresh_cart()
+                    self:get_model():notify()
+                end
+            }
         end
 
     end
@@ -85,6 +101,15 @@ FoodFooterController = Class(Controller, function(self, view, ...)
     end
     function self:reset_index()
         selected = 1
+    end
+
+    function self:on_focus()
+        selected = previous_selected
+    end
+
+    function self:out_focus()
+        previous_selected = selected
+        selected = 0
     end
 
     function self:move_selector(dir)

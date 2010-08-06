@@ -4,7 +4,7 @@ WindMillView = Class(View, function(view, model, ...)
 
     local amountSelection = false
      
-    view.ui=Group{name="windmill_ui", position={800,500}, opacity=255}
+    view.ui=Group{name="windmill_ui", position={700,500}, opacity=255}
 
     view.sideItems = {
         Image{

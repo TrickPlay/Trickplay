@@ -6,7 +6,7 @@ FoodSelectionView = Class(View, function(view, model, ...)
     -- foodHeaderView:initialize()
     local foodCarouselView = FoodCarouselView(model)
     foodCarouselView:initialize()
-    local foodFooterView = FoodFooterView(model)
+    local foodFooterView = FoodFooterView(model,view)
     foodFooterView:initialize()
 
     -- view.items = {foodHeaderView, foodCarouselView, foodFooterView}
@@ -26,11 +26,6 @@ FoodSelectionView = Class(View, function(view, model, ...)
         self:set_controller(FoodSelectionController(self))
     end
     
-    local prev_selection = {}
-    for i = 1, #view.items do
-        prev_selection[i] = 1
-    end
-
     function view:update()
         local controller = self:get_controller()
         local comp = model:get_active_component()
@@ -38,12 +33,11 @@ FoodSelectionView = Class(View, function(view, model, ...)
             print("Showing FoodSelectionView UI")
             self.provider_ui.opacity = 255
             for i,c_view in ipairs(view.items) do
-                 if i == controller:get_selected_index() then
-                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
-                   controller.child = c_view:get_controller()
+                if i == controller:get_selected_index() then
+                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
+                    controller.child = c_view:get_controller()
                 else
-                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
-                   prev_selection[i] = c_view:get_controller():get_selected_index()
+                    c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=100}
                 end
             end
         else

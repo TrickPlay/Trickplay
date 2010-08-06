@@ -14,6 +14,7 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
     end
 
     local selected = 1
+    local previous_selected = 1
     local MenuItemCallbacks = {
         [MenuItems.BUILD_PIZZA] =
            function(self)
@@ -96,7 +97,13 @@ FoodCarouselController = Class(Controller, function(self, view, ...)
 
     function self:get_selected_index()
         return selected
-    end		
+    end
+
+    function self:on_focus()
+    end
+
+    function self:out_focus()
+    end
 
     function self:move_selector(dir)
        print("FoodCarouselController: move_selector called, selected is currently", selected)

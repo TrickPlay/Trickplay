@@ -164,6 +164,7 @@ CheckoutView = Class(View, function(view, model, ...)
         local comp = self.model:get_active_component()
         if comp == Components.CHECKOUT then
             self.footer_ui.opacity = 255
+            self.ui:raise_to_top()
             self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=SHOW_POSITION}
             print("Showing Checkout UI")
             for i,c_view in ipairs(view.items) do
