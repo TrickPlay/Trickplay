@@ -1,6 +1,8 @@
 -- levels
 
 function createLevelMenu(l)
+
+			--debug()
         
         local list =	{
                                 {
@@ -112,5 +114,7 @@ function createLevelMenu(l)
                 screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup, leveltext, livestext)
         
         end
+        
+       -- debug()
         
 end

@@ -88,6 +88,15 @@ function Creep:render(seconds)
 	-- Current x and y values
 	local cx = self.creepGroup.x
 	local cy = self.creepGroup.y
+	
+	local leaked = function()
+			
+		local a = Group{x=0, y=0, opacity = 0}
+		a:add( AssetLoader:getImage( "bloodyhand", {z_rotation = {math.random(160)-80,screen.w/2, screen.h/2}, y = math.random(700)-350, x = math.random(700)-350} ) )
+		Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
+		
+	end
+
 	if self.flying then
 	
 		self.creepGroup.x = cx + MOVE
@@ -98,6 +107,7 @@ function Creep:render(seconds)
 			wave_counter = wave_counter + 1
 			self.dead = true
 			game.board.player.lives = game.board.player.lives - 1
+			leaked()
 			livestext.text = game.board.player.lives
 
 			--print (game.board.player.lives)
@@ -127,6 +137,7 @@ function Creep:render(seconds)
 		wave_counter = wave_counter + 1
 		self.dead = true
 		game.board.player.lives = game.board.player.lives - 1
+		leaked()
 		livestext.text = game.board.player.lives
 		--print (game.board.player.lives)
 		--self.creepGroup.x = wave_counter*-240
@@ -144,6 +155,7 @@ function Creep:render(seconds)
 				
 		local order = self.order
 		
+
 		-- Pick a direction [right]
 		if cx < order[2] then
 			-- If it's less, then calculate the new position
@@ -238,7 +250,6 @@ function Creep:render(seconds)
 	if (self.flying) then self.creepGroup.z = 2 end
 	self:animate()
 end
-
 function Creep:getHit(damage, intensity)
 	if (self.hit) then
 		self.hp = self.hp - damage*intensity
@@ -262,7 +273,7 @@ function Creep:bleed()
 	if (#bloodGroup.children < 400) then
 		bloodGroup:add(blood)
 	end
-	bloodGroup.opacity = 155
+	bloodGroup.opacity = 120
 end
 
 -- insert whatever happens on death here, you can use seconds or deathtimer
