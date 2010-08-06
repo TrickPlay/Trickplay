@@ -81,7 +81,7 @@ function app.on_loaded()
 			game.p2info:add(game.infobar2, game.name2, game.gold2)
 			screen:add(game.p2info)
 			
-			screen:add(countdowntimer, phasetext, playertext, goldtext,livestext, leveltext)
+			screen:add(countdowntimer, phasetext, game.board.player.playertext, game.board.player.goldtext,livestext, leveltext)
 			screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
 			
 			elseif MainMenu.y == 3 then
@@ -96,7 +96,7 @@ function app.on_loaded()
             game = Game:new{ theme = Themes.robot , gold = settings.gold}
             game:startGame()
                 
-            screen:add(countdowntimer, phasetext, playertext, goldtext,livestext, leveltext)
+            screen:add(countdowntimer, phasetext, game.board.player.playertext, game.board.player.goldtext,livestext, leveltext)
             screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
                 
             Popup:new{text = "Resuming round "..round}				

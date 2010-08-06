@@ -7,12 +7,16 @@ function Player:new(args)
 		gold = args.gold,
 		lives = args.lives,
 		color = args.color,
-		towerInfo = TowerInfo:new{}
+		towerInfo = TowerInfo:new{},
+		playertext = Text {font = "Sans 30px", text = "", x =200, y = 8, z=3, color = "000000"},
+		goldtext = Text {font = "Sans 30px", text = "", x =500, y = 8, z=3, color = "000000" }
+
 	}
 	if (resumed) then
 		object.gold = settings.gold
 		object.lives = settings.lives
 	end
+	
 	print (object.gold)
    setmetatable(object, self)
    self.__index = self

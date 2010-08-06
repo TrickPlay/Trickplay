@@ -2,8 +2,22 @@ local print = function() end
 
 function createCircleMenu(offset, distance, params, menuType, player)
 
+        if player.info then
+                player.info.fade = "out"
+        end
         
+        local desc = Group{z=3}
+        descImage = AssetLoader:getImage("DescriptionRight",{})
+        desc:add(descImage)
+        desc.anchor_point = {desc.w, desc.h}
+        desc.position = {screen.w, screen.h - 130}
+        player.description = Popup:new{group = desc, opacity = 200, fadeSpeed = 800, on_fade_in = function() end}
+        
+        desc:raise_to_top()
 
+        
+        
+        
         print("Should create a button menu")
 
 	local c = Group{}
@@ -33,9 +47,11 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.buttons.extra.down = nil
         
         CircleMenu.hl.opacity = 255
-	CircleMenu.container.opacity=230
+	--CircleMenu.container.opacity=230
         CircleMenu.container.z=5
         CircleMenu.owner = player
+        
+        local circlePopup = Popup:new{group = CircleMenu.container, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() CircleMenu.destroy() end}
         
         CircleMenu.list = list
         
@@ -45,6 +61,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
         
         CircleMenu.container.anchor_point = { CircleMenu.container.w, 0 }
         CircleMenu.container.x = 1920
+        CircleMenu.container.y = 1080 - 130
         
         
         print("Modified parameters")
@@ -79,7 +96,6 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         
                         -- Then destroy the menu and return to the board
                         last[menuType] = CircleMenu.x
-                        CircleMenu.destroy()
                         --BoardMenu.buttons:grab_key_focus()
                                         
                         if player == game.board.player then
@@ -91,6 +107,16 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         
                         player.position = nil
                         player.towerInfo.fade = "out"
+                        
+                        if player.info then
+                                player.info.fade = "in"
+                        end
+                        
+                        if player.description then
+                                player.description.fade = "out"
+                        end
+                        
+                        circlePopup.fade = "out"
                         
                 end
                 
