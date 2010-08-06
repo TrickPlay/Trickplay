@@ -680,6 +680,7 @@ windmill_view:initialize()
             view.selector.opacity = 0
         else
             print("Hiding CustomizeView UI")
+            view.ui:complete_animation()
             view.ui.opacity = 0
         end
     end
