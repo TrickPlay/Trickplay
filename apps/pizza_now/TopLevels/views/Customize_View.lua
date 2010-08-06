@@ -241,7 +241,7 @@ view.preloaded_images:add(view.images.pzzaLR)
               position    = {1630, 70},
               font        = CUSTOMIZE_TAB_FONT,
               color       = Colors.BLACK,
-              text        = model.current_item.Price
+              text        = model.current_item:PriceString()
             }
 ---[[
         view.selector = Image {
@@ -891,7 +891,8 @@ windmill_view:initialize()
         --print("Active Component: "..comp)
         if comp == Components.CUSTOMIZE then
             print("Showing CustomizeView UI")
-            view.ui.opacity = 255
+            --view.ui.opacity = 255
+            view.ui:animate{duration = CHANGE_VIEW_TIME, position  = SHOW_POSITION}
                 --view.back_arrow_selected.opacity = 0
                 --view.add_to_order_selector.opacity = 0
                 for i,item in ipairs(view.menu_items) do
@@ -940,8 +941,13 @@ windmill_view:initialize()
         else
             print("Hiding CustomizeView UI")
             view.ui:complete_animation()
-            view.ui.opacity = 0
+            if(Components.FOOD_SELECTION ~= comp) then
+                view.ui.opacity = 0
+            else
+                view.ui.opacity = 255
+            end
+            view.ui:animate{duration = CHANGE_VIEW_TIME, position = HIDE_RIGHT}
         end
     end
 
-   end)
+end)

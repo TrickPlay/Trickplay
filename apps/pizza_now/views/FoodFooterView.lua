@@ -62,7 +62,11 @@ FoodFooterView = Class(View, function(view, model,parent, ...)
         if comp == Components.FOOD_SELECTION then
             print("Showing FoodFooterView UI")
             if view.prev_cart_size ~= #model.cart then
-                print("\n\nUpdating Cart, size is now",#model.cart,"... adding "..model.cart[#model.cart].Name)
+               if model.cart[#model.cart] then
+                  print("\n\nUpdating Cart, size is now",#model.cart,"... adding "..model.cart[#model.cart].Name)
+               else
+                  print("Item #" .. tostring(#model.cart) .. " does not exist")
+               end
                 view.items = {}
                 local j = 1
                 view.items[j] = view.back
@@ -79,7 +83,7 @@ FoodFooterView = Class(View, function(view, model,parent, ...)
                        position={1700-250*i, 0},
                        font  = DEFAULT_FONT,
                        color = Colors.BLACK,
-                       text  = model.cart[i].Name.."\n"..model.cart[i].Price
+                       text  = model.cart[i].Name.."\n"..model.cart[i]:PriceString()
                     }
                     j=j+1
                 end

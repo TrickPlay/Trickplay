@@ -144,13 +144,13 @@ EmptyPizza = Class(
          function()
             local lines = {}
             --top line
-            lines.top = "- "..All_Options.Size_r[self.Tabs[1].Options[4].Size].." "
-               ..All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]
-               .." Pizza with:\t\t",self.Price,""
+            lines.top = "- "..All_Options.Size_r[self.Tabs[1].Options[4].Size].." "..
+               All_Options.Crust_Style_r[self.Tabs[1].Options[3].Crust_Style]..
+               " Pizza with:\t\t",self:PriceString(),""
             --pizza base info
-            lines.crust = "\t"..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "
-               ..All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "
-               ..All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce"
+            lines.crust = "\t"..All_Options.CoverageX_r[self.Tabs[1].Options[1].CoverageX].." Cheese, "..
+               All_Options.CoverageX_r[self.Tabs[1].Options[2].CoverageX].." "..
+               All_Options.Sauce_Type_r[self.Tabs[1].Options[2].Sauce_Type].." Sauce"
 
             --sides
             lines.entire = ""
@@ -200,7 +200,8 @@ EmptyPizza = Class(
             end
             return lines
          end
-      self.Price = "$16.50"
+      self.Price = 16.50
+      self.PriceString = function(self) return string.format("$%.2f", self.Price) end
       self.Tabs = {}
       self.Tabs[1] = {
          Radio = true,
@@ -468,17 +469,21 @@ EmptyPizza = Class(
          local new_right_topping_count = 0
          -- handle meats
          for i, topping_cust in ipairs(self.Tabs[2].Options) do
-            if topping_cust.CoverageX ~= All_Options.Coverage.None and
+            if topping_cust.CoverageX ~= All_Options.CoverageX.None and
                topping_cust.Placement ~= All_Options.Placement.None then
                topping = topping_lut[topping_cust.Name]
                coverage = coverage_lut[topping_cust.CoverageX]
                placement = placement_lut[topping_cust.Placement]
 
-               if placement == Placement.WHOLE or Placement.LEFT then
-                  new_left_topping_count = left_topping_count + tonumber(coverage)
+               assert(coverage, tostring(coverage) .. " and " .. tostring(topping_cust.CoverageX))
+               assert(placement)
+               print("coverage:", coverage)
+               print("placement:", placement)
+               if placement == Placement.WHOLE or placement == Placement.LEFT then
+                  new_left_topping_count = left_topping_count + tonumber(coverage.qty)
                end
-               if placement == Placement.WHOLE or Placement.RIGHT then
-                  new_right_topping_count = right_topping_count + tonumber(coverage)
+               if placement == Placement.WHOLE or placement == Placement.RIGHT then
+                  new_right_topping_count = right_topping_count + tonumber(coverage.qty)
                end
 
                if new_left_topping_count > TOPPING_LIMIT then
@@ -496,17 +501,17 @@ EmptyPizza = Class(
 
          -- handle unmeats
          for i, topping_cust in ipairs(self.Tabs[3].Options) do
-            if topping_cust.CoverageX ~= All_Options.Coverage.None and
+            if topping_cust.CoverageX ~= All_Options.CoverageX.None and
                topping_cust.Placement ~= All_Options.Placement.None then
                topping = topping_lut[topping_cust.Name]
                coverage = coverage_lut[topping_cust.CoverageX]
                placement = placement_lut[topping_cust.Placement]
 
-               if placement == Placement.WHOLE or Placement.LEFT then
-                  new_left_topping_count = left_topping_count + tonumber(coverage)
+               if placement == Placement.WHOLE or placement == Placement.LEFT then
+                  new_left_topping_count = left_topping_count + tonumber(coverage.qty)
                end
-               if placement == Placement.WHOLE or Placement.RIGHT then
-                  new_right_topping_count = right_topping_count + tonumber(coverage)
+               if placement == Placement.WHOLE or placement == Placement.RIGHT then
+                  new_right_topping_count = right_topping_count + tonumber(coverage.qty)
                end
 
                if new_left_topping_count > TOPPING_LIMIT then

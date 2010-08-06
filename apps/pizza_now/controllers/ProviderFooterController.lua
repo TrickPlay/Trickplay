@@ -106,6 +106,9 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
             selected = new_selected
         end
         self:get_model():notify()
+        if(selected ~= MenuItems.GO_BACK) then
+            self:run_callback()
+        end
     end
 
     function self:run_callback()

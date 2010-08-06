@@ -2,8 +2,6 @@ EDIT_ORDER_Y = 460
 
 CheckoutView = Class(View, function(view, model, ...)
     view._base.init(view,model)
-    view.cart_items = {}
-    view.icons = {}
     --first add the background shiz
     local back = Image{
         position = {0,0},
@@ -21,14 +19,21 @@ CheckoutView = Class(View, function(view, model, ...)
     verticalDividerRight.position = {1770, 0}
     local verticalDividerCenter = Clone{source = verticalDividerLeft}
     verticalDividerCenter.position = {960, 0}
-    local horizontalDividerLeft = Image{
+    local horizontalDividerLeft1 = Image{
+        position = {150, 740},
+        height = 960-150,
+        tile = {false, true},
+        src = "assets/MenuLine.png",
+        z_rotation = {270,0,0}
+    }
+    local horizontalDividerLeft2 = Image{
         position = {150, 840},
         height = 960-150,
         tile = {false, true},
         src = "assets/MenuLine.png",
         z_rotation = {270,0,0}
     }
-    local horizontalDividerRight = Clone{source = horizontalDividerLeft}
+    local horizontalDividerRight = Clone{source = horizontalDividerLeft1}
     horizontalDividerRight.position = {960, 220}
     horizontalDividerRight.z_rotation = {270, 0, 0}
     local orderText = Text{
@@ -101,34 +106,14 @@ CheckoutView = Class(View, function(view, model, ...)
         color = Colors.BLACK,
         text = "Instructions for driver:",
     }
-    --stuff describing the persons order
-    --placing the cart items in between the top of the screen and edit order
-    local currentCart = Text{
-        position = {160,0},
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLACK,
-        text = "Current Cart:",
-    }
-    --more text
-    local taxText = Text{
-        position = {190, 800},
-        font = CUSTOMIZE_SUB_FONT,
-        color = Colors.BLACK,
-        text = "Tax, Processing, & Delivery",
-    }
-    totalCostText = Text{
-        position = {170,880},
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLACK,
-        text = "Total",
-    }
+
     local background = {
         back, junkInDaTrunk, verticalDividerLeft, verticalDividerRight,
-        verticalDividerCenter, horizontalDividerLeft, horizontalDividerRight,
+        verticalDividerCenter, horizontalDividerLeft1, horizontalDividerLeft2, horizontalDividerRight,
         orderText, detailsText, passwordText, enterPaymentText, atSymbolText,
         nameText, phoneText, emailText, extText, 
         --cardNumberText, expirationText, secretCodeText,
-        driverInstructionsText, taxText, totalCostText, currentCart
+        driverInstructionsText
     }
      
     --create the components
@@ -144,8 +129,9 @@ CheckoutView = Class(View, function(view, model, ...)
     --background ui
     view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
     view.background_ui:add(unpack(background))
+
     --ui that actually moves
-    view.moving_ui=Group{name="checkoutMoving_ui", position={0,0}}
+    view.moving_ui=Group{name="checkoutMoving_ui", position=HIDE_TOP}
     view.moving_ui:add(view.background_ui, finalOrderView.ui, creditInfoView.ui)
     --redundant bottom bar ui group, does not move
     view.footer_ui=Group{name="checkoutFooter_ui", position={0,0}}
@@ -158,84 +144,6 @@ CheckoutView = Class(View, function(view, model, ...)
 
     function view:initialize()
         self:set_controller(CheckoutController(self))
-    end
-    function view:refresh_cart()
-        print("refreshing cart on checkout screen, cart has "
-               ..#model.cart.." item(s)")
-        --if nil ~= #view.cart_items then
-        for i=1,#view.cart_items do
-            view.cart_items[i]:unparent()
-        end
-        for i=1,#view.icons do
-            view.icons[i]:unparent()
-        end
-
-        --end
-        view.cart_items = {}
-        view.icons = {}
-        local next_y = 60
-        local cart_index = 1
-        local y_adjust = 100
-        while cart_index <= #model.cart and
-              next_y <= EDIT_ORDER_Y do
-            print("adding "..model.cart[cart_index].Name.." from cart to screen")
-            local lines = model.cart[cart_index].CheckOutDesc()
-            view.cart_items[#view.cart_items+1] = Text{
-                position = {200,next_y},
-                font = CUSTOMIZE_SUB_FONT_B,
-                color = Colors.BLACK,
-                text = lines.top
-            }
-            view.cart_items[#view.cart_items+1] = Text{
-                position = {200,next_y+50},
-                font = CUSTOMIZE_SUB_FONT,
-                color = Colors.BLACK,
-                text = lines.crust
-            }
-            if lines.entire ~= "" then
-                view.cart_items[#view.cart_items+1] = Text{
-                    position = {200,next_y+y_adjust},
-                    font = CUSTOMIZE_SUB_FONT,
-                    color = Colors.BLACK,
-                    text = lines.entire
-                }
-                view.icons[#view.icons+1] = Image{
-                    position = {250,next_y+y_adjust-10},
-                    src = "assets/Placement/Entire.png"
-                }
-                y_adjust = y_adjust+50
-            end
-            if lines.left ~= "" then
-                view.cart_items[#view.cart_items+1] = Text{
-                    position = {200,next_y+y_adjust},
-                    font = CUSTOMIZE_SUB_FONT,
-                    color = Colors.BLACK,
-                    text = lines.left
-                }
-                view.icons[#view.icons+1] = Image{
-                    position = {250,next_y+y_adjust-10},
-                    src = "assets/Placement/Left.png"
-                }
-                y_adjust = y_adjust+50
-            end
-            if lines.right ~= "" then
-                view.cart_items[#view.cart_items+1] = Text{
-                    position = {200,next_y+y_adjust},
-                    font = CUSTOMIZE_SUB_FONT,
-                    color = Colors.BLACK,
-                    text = lines.right
-                }
-                view.icons[#view.icons+1] = Image{
-                    position = {250,next_y+y_adjust-10},
-                    src = "assets/Placement/Right.png"
-                }
-                y_adjust = y_adjust+50
-            end
-            next_y = next_y +120 -- + model.cart[cart_index].Desc_height
-            cart_index = cart_index+1
-        end
-        view.moving_ui:add(unpack(view.cart_items))
-        view.moving_ui:add(unpack(view.icons))
     end
     
     function view:update()
@@ -254,7 +162,7 @@ CheckoutView = Class(View, function(view, model, ...)
                 else
                     c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=BACKGROUND_FADE_OPACITY}
                 end
-                if(controller:get_selected_index() < 3) then
+                if controller:get_selected_index() ~= controller.CheckoutGroups.FOOTER then
                     view.background_ui.opacity = 255
                 else
                     view.background_ui.opacity = BACKGROUND_FADE_OPACITY
@@ -263,9 +171,14 @@ CheckoutView = Class(View, function(view, model, ...)
         else
             print("Hiding Checkout UI")
             self.ui:complete_animation()
+            view.background_ui.opacity = 255
             self.footer_ui.opacity = 0
-            self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_POSITION}
+            self.moving_ui:animate{duration=CHANGE_VIEW_TIME, position=HIDE_TOP}
         end
     end
 
+    function view:refresh_cart()
+       assert(finalOrderView)
+       finalOrderView:get_controller():refresh_cart()
+    end
 end)
