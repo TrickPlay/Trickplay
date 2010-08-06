@@ -72,13 +72,14 @@ CheckoutController = Class(Controller, function(self, view, ...)
     function self:move_selector(dir)
         screen:grab_key_focus()
         local order_view_enabled = (#self:get_model().cart ~= 0)
+        print("order_view_enabled: " .. tostring(order_view_enabled))
         if(0 ~= dir[1]) then
             local new_selected = selected + dir[1]
             if CheckoutGroups.ORDER == new_selected and order_view_enabled or
                2 <= new_selected and new_selected <= GroupSize-1 then
                view.items[selected]:get_controller():out_focus()
-               previousSelection = selected
                selected = new_selected
+               previousSelection = selected
                view.items[selected]:get_controller():on_focus()
             end
         elseif(0 ~= dir[2]) then
