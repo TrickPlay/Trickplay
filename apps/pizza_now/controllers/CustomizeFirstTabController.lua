@@ -16,44 +16,7 @@ CustomizeFirstTabController = Class(Controller, function(self, view, ...)
     local selected = {1,1}
     local in_tab_selected = 1
     
---[[
 
-    local MenuItemCallbacks = {
-        [MenuItems.GO_BACK] = function(self)
-            print("Backing up")
-                    view.parent:get_controller().selected = 1
-                    model.current_item.pizzagroup:hide_all()
-                    model:set_active_component(Components.FOOD_SELECTION)
-                    model:notify()
-        end,
-        [MenuItems.ADD] = function(self)
-                    view.parent:get_controller().selected = 1
-                    model.current_item.pizzagroup:hide_all()
-                    if model.current_item_is_in_cart == false then
-                       print("adding new item")
-                       model.cart[#self:get_model().cart + 1] = view:get_model().current_item
-                    else
-                        print("Not adding,item is already in cart")
-                    end
-
-                    if NETWORKING then
-                       Navigator:add_pizza(model.current_item:as_dominos_pizza())
-                       local total, price = Navigator:get_total()
-                       print("\n\n\n\n\n\n\n\n\n\n" ..
-                             "Current Total: $" .. tostring(total) .. "\n" ..
-                             "Price of just-added pizza: $" .. tostring(price) .. "\n" ..
-                             "\n\n\n\n\n\n\n\n\n")
-                       if price then
-                          model.current_item.Price = "$" .. tostring(price)
-                       end
-                    end
-                    self:get_model():set_active_component(Components.FOOD_SELECTION)
-                    print("size of cart",#self:get_model().cart)
-                    print(self:get_model().cart[1].Name)
-                    self:get_model():notify()
-        end
-    }
---]]
 
     local tabs_mapping = {}
     function self:refresh_mapping()
@@ -105,6 +68,7 @@ end}
                         end
 
                     end
+                view.ui.opacity = 0
             else
                 view.parent.first_tab_groups[selected[1]][selected[2]][-2].color = Colors.BLACK
                 self.in_tab = true
