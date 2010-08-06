@@ -327,3 +327,9 @@ function Menu:circle_directions(offset, distance)
 	end
 
 end
+
+function appendFunction(first, second)
+
+        return function() first() second() end
+
+end

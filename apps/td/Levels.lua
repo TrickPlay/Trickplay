@@ -4,23 +4,23 @@ function createLevelMenu(l)
         
         local list =	{
                                 {
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 1}, }),
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 2}, x=-40}),
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 3}, x=-40})
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 1} }),
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 2} }),
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 3} })
                                 },
                                 {
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 4}, y=-40}),
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 5}, x=-40, y=-40}),
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 6}, x=-40, y=-40})
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 4}}),
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 5}}),
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 6}})
                                 },
                                 {
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 7}, y=-40}),
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 8}, x=-40, y=-40}),
-                                AssetLoader:getImage("levelWindow",{ extra = {level = 9}, x=-40, y=-40})
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 7}}),
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 8}}),
+                                AssetLoader:getImage("levelWindow",{ extra = {level = 9}})
                                 },
                                 {
                                 Group{name = "null"},
-                                AssetLoader:getImage("levelWindow", {extra = {level = 10}, x=-40, y=-40}),
+                                AssetLoader:getImage("levelWindow", {extra = {level = 10}}),
                                 Group{name = "null"}
                                 }
                         }
@@ -33,15 +33,46 @@ function createLevelMenu(l)
                         local b = list[i][j]
                 
                         if a < l then
-                                list[i][j] = AssetLoader:getImage("levelWindowCompleted",{extra={level=b.extra.level}, x = b.x, y = b.y})
+                                list[i][j] = Group{ extra={level=b.extra.level}, x = b.x, y = b.y}
+                                local window = AssetLoader:getImage("levelWindow",{})
+                                local text = Text{font = "Sans 90px", text = "Level "..b.extra.level, color = "000000"}
+                                text.anchor_point = {text.w/2, text.h/2}
+                                text.position = {window.w/2, window.h/2}
+                                
+                                list[i][j]:add( window, text )
+                                list[i][j]:add( AssetLoader:getImage("levelWindowCompleted",{}) )
                         elseif a == l then
-                                list[i][j] = AssetLoader:getImage("levelWindow",{extra={level=b.extra.level}, x = b.x, y = b.y})
+                                list[i][j] = Group{ extra={level=b.extra.level}, x = b.x, y = b.y}
+                                local window = AssetLoader:getImage("levelWindow",{})
+                                local text = Text{font = "Sans 90px", text = "Level "..b.extra.level, color = "000000"}
+                                text.anchor_point = {text.w/2, text.h/2}
+                                text.position = {window.w/2, window.h/2}
+                                
+                                list[i][j]:add( window, text )
+                                --list[i][j]:add( AssetLoader:getImage("levelWindowCompleted",{}) )
                         else
-                                list[i][j] = AssetLoader:getImage("levelWindowLocked",{extra={level=b.extra.level}, x = b.x, y = b.y})
+                                if b.extra.level then
+                                        list[i][j] = Group{ extra={level=b.extra.level}, x = b.x, y = b.y}
+                                        local window = AssetLoader:getImage("levelWindowLocked",{})
+                                        local text = Text{font = "Sans 90px", text = "Level "..b.extra.level, color = "000000"}
+                                        text.anchor_point = {text.w/2, text.h/2}
+                                        text.position = {window.w/2, window.h/2}
+                                        
+                                        list[i][j]:add( window, text )
+                                        list[i][j]:add( AssetLoader:getImage("levelWindowLock",{}) )
+                                end
                         end
+                        
+                        print(b.w)
                         
                         a = a + 1
                         if a > 9 then a = 10 end
+                end
+        end
+        
+        for i=1, #list do
+                for j=1, #list[i] do
+                        list[i][j].w = 550
                 end
         end
         
@@ -53,7 +84,7 @@ function createLevelMenu(l)
         screen:add(g)
         
         
-        local levelFocus = Rectangle{color="FF00CC", w=320, h=220}
+        local levelFocus = AssetLoader:getImage("levelWindowFocus",{})
         
         --LevelMenu = Menu.create(g, list, levelFocus)
         
@@ -63,19 +94,20 @@ function createLevelMenu(l)
         LevelMenu:create_key_functions()
         LevelMenu:button_directions()
         --debug()
-        LevelMenu:create_buttons(10, "Sans 62px")
+        LevelMenu:create_buttons(0)
         --debug()
-        LevelMenu:apply_color_change("FFFFFF", "000000")
+        --LevelMenu:apply_color_change("FFFFFF", "000000")
         
         
-        LevelMenu.container.x = 450
-        LevelMenu.container.y = 70
-        LevelMenu.container.scale = {.7, .7}
+        LevelMenu.container.x = 215
+        LevelMenu.container.y = 40
+        LevelMenu.container.scale = {.9, .9}
         
         LevelMenu.buttons.extra.space = function()
         
                 LevelMenu.container.opacity = 0
                 MainMenu.container.opacity = 255
+                ThemeMenu.container.opacity = 255
                 
                 ACTIVE_CONTAINER = MainMenu
                 keyboard_key_down = MainMenu.buttons.on_key_down
