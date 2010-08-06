@@ -2,6 +2,10 @@ if not GLOBALS_LOADED then
    dofile("Globals.lua")
 end
 
+if not Class then
+   dofile("Class.lua")
+end
+
 local size_crust_avlble = {
    [Crusts.HAND_TOSSED] = {
       [Sizes.SMALL] = true,
@@ -59,7 +63,42 @@ DominosPizza = Class(nil,
       end
 
       -- debug
-      checkRep()
+      -- checkRep()
+
+      function self:as_order()
+         local result = {
+            [Placement.WHOLE]={},
+            [Placement.LEFT]={},
+            [Placement.RIGHT]={}
+         }
+         local c_cust = self.cheese_customization
+         local s_cust = self.sauce_customization
+         local insert = table.insert
+
+         if c_cust.enabled then
+            insert(
+               result[c_cust.placement],
+               c_cust.coverage.prefix .. "Cheese"
+            )
+         end
+
+         if s_cust.enabled then
+            insert(
+               result[Placement.WHOLE],
+               s_cust.coverage.prefix .. s_cust.sauce.name
+            )
+         end
+
+         for topping, tweaks in pairs(self.toppings) do
+            insert(
+               result[tweaks.placement],
+               tweaks.coverage.prefix .. topping.name
+            )
+         end
+
+         local summary = self.size.prefix .. self.crust.prefix .. "Pizza"
+         return summary, result
+      end
    end)
 
 CHEESE_PIZZA = DominosPizza(
@@ -76,7 +115,7 @@ PEPPERONI_PIZZA = DominosPizza(
    DEFAULT_SAUCE_CUSTOMIZATION,
    {
       [Toppings.PEPPERONI] = {
-         coverage = Coverage.NORMAL,
+         coverage = Coverage.EXTRA,
          placement = Placement.WHOLE
       }
    }

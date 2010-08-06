@@ -31,12 +31,26 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
     local MenuItemCallbacks = {
         [MenuItems.GO_BACK] = function(self)
             print("Backing up")
+            view.focusable_items[selected].group:animate{duration = 200, opacity = 0}
+            view.pressed_items[selected]:animate{
+                duration = 200, opacity = 255,
+                on_completed = function()
+                    view.focusable_items[selected].group:animate{duration = 100, opacity = 255}
+                    view.pressed_items[selected]:animate{duration = 100, opacity = 0}
                     view.parent:get_controller().selected = 1
                     model.current_item.pizzagroup:hide_all()
                     model:set_active_component(Components.FOOD_SELECTION)
                     model:notify()
+                end
+            }
         end,
         [MenuItems.ADD] = function(self)
+            view.focusable_items[selected].group:animate{duration = 200, opacity = 0}
+            view.pressed_items[selected]:animate{
+                duration = 200, opacity = 255,
+                on_completed = function()
+                    view.focusable_items[selected].group:animate{duration = 100, opacity = 255}
+                    view.pressed_items[selected]:animate{duration = 100, opacity = 0}
                     view.parent:get_controller().selected = 1
                     model.current_item.pizzagroup:hide_all()
                     if model.current_item_is_in_cart == false then
@@ -61,16 +75,25 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
                     print("size of cart",#self:get_model().cart)
                     print(self:get_model().cart[1].Name)
                     self:get_model():notify()
+                end
+            }
         end,
         [MenuItems.CHECKOUT] = function(self)
-            self.areyousure = true
-                self:get_model():notify()
-
---[[
+            view.focusable_items[selected].group:animate{duration = 200, opacity = 0}
+            view.pressed_items[selected]:animate{
+                duration = 200, opacity = 255,
+                on_completed = function()
+                    view.focusable_items[selected].group:animate{duration = 100, opacity = 255}
+                    view.pressed_items[selected]:animate{duration = 100, opacity = 0}
+                    self.areyousure = true
+                    self:get_model():notify()
+                    --[[
                     model.current_item.pizzagroup:hide_all()
                     model:set_active_component(Components.CHECKOUT)
                     model:notify()
---]]
+                    --]]
+                end
+            }
         end
     }
 

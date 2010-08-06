@@ -3,51 +3,54 @@ FinalOrderController = Class(Controller, function(self, view, ...)
 
     local model = self.model
 
-    local Options = {
-        EDIT_ORDER = 1,
-        ADD_COUPON = 2
-    }
-    local OptionSize = 0
-    for k, v in pairs(Options) do
-        OptionSize = OptionSize + 1
-    end
-
     -- the default selected index
-    local selected = 0
-    local previous_selected = 1
+    local CartSize = #model.cart
+    local Choices = {
+       EDIT=1,
+       REMOVE=2,
+       LAST=2
+    }
+    self.Choices = Choices
+    local selected_choice = Choices.REMOVE
+    local selected_item = 1 -- default focus to first item in cart
+    local previous_selected = {selected_choice, selected_item}
 
-    local OptionCallbacks = {
-        [Options.EDIT_ORDER] = function(self)
-            print("edit order")
+    local ChoicesCallbacks = {
+        [Choices.EDIT] = function(self)
             model:set_active_component(Components.FOOD_SELECTION)
+            model:edit_selected_cart_item(selected_item)
             model:notify()
         end,
-        [Options.ADD_COUPON] = function(self)
-            print("adding coupon")
-        end
+        [Choices.REMOVE] =
+           function(self)
+              table.remove(model.cart, selected_item)
+              self:get_view():do_remove_animation(selected_item)
+           end
     }
 
     local OptionsInputKeyTable = {
         [keys.Up] = function(self) self:move_selector(Directions.UP) end,
         [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Return] =
         function(self)
             -- compromise so that there's not a full-on lua panic,
             -- but the error message still displays on screen
-            local success, error_msg = pcall(OptionCallbacks[selected], self)
+            local success, error_msg = pcall(ChoicesCallbacks[selected_choice], self)
             if not success then print(error_msg) end
         end
     }
 
     function self:on_key_down(k)
+       print("FinalOrderController received keypress: " .. tostring(k))
         if OptionsInputKeyTable[k] then
             OptionsInputKeyTable[k](self)
         end
     end
 
-    function self:get_selected_index()
-        return selected
+    function self:get_selected()
+        return selected_choice, selected_item
     end
 
     function self:set_parent_controller(parent_controller)
@@ -55,38 +58,51 @@ FinalOrderController = Class(Controller, function(self, view, ...)
     end
 
     function self:on_focus()
-        selected = previous_selected
+       selected_choice, selected_item = unpack(previous_selected)
     end
 
     function self:out_focus()
-        previous_selected = selected
-        selected = 0
+       previous_selected = {selected_choice, selected_item}
     end
 
     function self:move_selector(dir)
+       print("Move selector called in FinalOrderController")
         if(not self.parent_controller) then
             self:set_parent_controller(view.parent_view:get_controller())
         end
         if(0 ~= dir[2]) then
-            local new_selected = selected + dir[2]
-            if(1 <= new_selected and new_selected <= OptionSize) then
-                selected = new_selected
-            elseif(new_selected == OptionSize + 1) then
-                --change focus to footer
-                self.parent_controller:move_selector(dir)
-            end
-        elseif(0 ~= dir[1]) then
-            --change focus to credit info
-            self.parent_controller:move_selector(dir)
+           local new_selected_item = selected_item + dir[2]
+           print("current selected_item: " .. tostring(selected_item))
+           print("current cart size: " .. tostring(#model.cart))
+           if 1 <= new_selected_item and new_selected_item <= #model.cart then
+              selected_item = new_selected_item
+              print("changed item to " .. tostring(selected_item))
+           elseif new_selected_item == #model.cart + 1 then
+              --change focus to footer
+              self.parent_controller:move_selector(dir)
+           end
+        elseif 0 ~= dir[1] then
+           local new_choice = selected_choice + dir[1]
+           print("current choice: " .. tostring(selected_choice))
+           if 1 <= new_choice and new_choice <= Choices.LAST then
+              selected_choice = new_choice
+              print("changed choice to " .. tostring(selected_choice))
+           elseif new_choice == Choices.LAST+1 then
+              --change focus to credit info
+              self.parent_controller:move_selector(dir)
+           end
         else
-            error("something sucks")
+           error("something sucks")
         end
         self:get_model():notify()
     end
 
     function self:run_callback()
-        local success, error_msg = pcall(OptionCallbacks[selected], self)
-        if not success then print(error_msg) end
+       local success, error_msg = pcall(ChoicesCallbacks[selected_choice], self)
+       if not success then print(error_msg) end
     end
 
+    function self:refresh_cart()
+       view:refresh_cart()
+    end
 end)

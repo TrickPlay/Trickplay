@@ -4,10 +4,14 @@ CheckoutController = Class(Controller, function(self, view, ...)
     model = view:get_model()
 
     local CheckoutGroups = {
-        ORDER = 1,
-        DETAILS = 2,
-        FOOTER = 3
+       FIRST = 1,
+       ORDER = 1,
+       DETAILS = 2,
+       FOOTER = 3,
+       LAST = 3
     }
+
+    self.CheckoutGroups = CheckoutGroups
 
     local GroupSize = 0
     for k, v in pairs(CheckoutGroups) do
@@ -67,23 +71,31 @@ CheckoutController = Class(Controller, function(self, view, ...)
 
     function self:move_selector(dir)
         screen:grab_key_focus()
+        local order_view_enabled = (#self:get_model().cart ~= 0)
+        print("order_view_enabled: " .. tostring(order_view_enabled))
         if(0 ~= dir[1]) then
             local new_selected = selected + dir[1]
-            if 2 <= new_selected and new_selected <= GroupSize-1 then
-                view.items[selected]:get_controller():out_focus()
-                selected = new_selected
-                previousSelection = selected
-                view.items[selected]:get_controller():on_focus()
+            if CheckoutGroups.ORDER == new_selected and order_view_enabled or
+               2 <= new_selected and new_selected <= GroupSize-1 then
+               view.items[selected]:get_controller():out_focus()
+               selected = new_selected
+               previousSelection = selected
+               view.items[selected]:get_controller():on_focus()
             end
         elseif(0 ~= dir[2]) then
             if(CheckoutGroups.ORDER == selected) or
               (CheckoutGroups.DETAILS == selected) then
+              print("Debugging move_selector in CheckoutController")
                 view.items[selected]:get_controller():out_focus()
                 selected = CheckoutGroups.FOOTER
                 view.items[selected]:get_controller():on_focus()
-            else
+             else
                 view.items[selected]:get_controller():out_focus()
-                selected = previousSelection
+                if order_view_enabled then
+                   selected = previousSelection
+                else
+                   selected = CheckoutGroups.DETAILS
+                end
                 view.items[selected]:get_controller():on_focus()
             end
         end
