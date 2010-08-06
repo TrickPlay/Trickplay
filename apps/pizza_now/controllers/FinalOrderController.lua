@@ -99,7 +99,10 @@ FinalOrderController = Class(Controller, function(self, view, ...)
 
     function self:run_callback()
        local success, error_msg = pcall(ChoicesCallbacks[selected_choice], self)
-        if not success then print(error_msg) end
+       if not success then print(error_msg) end
     end
 
+    function self:refresh_cart()
+       view:refresh_cart()
+    end
 end)
