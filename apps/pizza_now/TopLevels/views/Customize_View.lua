@@ -121,6 +121,8 @@ CustomizeView = Class(View, function(view, model, ...)
 
         view.selector = Image {
                 position  = {150, 0},
+                --height    = 960/#model.current_item.Tabs,
+                --scale     = {false,true},
                 src       = "assets/TabFocus.png"
             }
 
@@ -136,20 +138,21 @@ CustomizeView = Class(View, function(view, model, ...)
     
             --build the customization menu
             view.menu_items[tab_index] = Text {
-                position = {155, 120*(tab_index-1)+30},
+                position = {155, 960*(tab_index-1)/#model.current_item.Tabs+30},
                 font     = CUSTOMIZE_SUB_FONT,
                 color    = Colors.BLACK,
                 text     = tab.Tab_Text
             }
             view.hor_lines[tab_index] = Image {
-                position = {150, 120*(tab_index-1)+120},
+                position = {150, 960*(tab_index/#model.current_item.Tabs)},
+                --position = {150, 120*(tab_index-1)+120},
                 scale    = {1,1.5},
                 src      = "assets/MenuHorzLine.png"
             }
             view.vert_lines[tab_index] = Image {
-                position = {300, 120*(tab_index-1)},
+                position = {300, 960*(tab_index-1)/#model.current_item.Tabs},
                 width    = 20,
-                height   = 120,
+                height   = 960/#model.current_item.Tabs,
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
@@ -387,7 +390,7 @@ CustomizeView = Class(View, function(view, model, ...)
                     view.sub_group[tab_index]:add(view.first_tab_groups[2][2][i][3])
                 end
 
-
+               
 
 
                 --Sauce is bottom left
@@ -503,6 +506,7 @@ CustomizeView = Class(View, function(view, model, ...)
             end 
             view.ui:add(view.sub_group[tab_index])
         end
+--[[
             view.vert_lines[#view.menu_items+1] = Image {
                 position = {300, 120*(#view.menu_items+1-1)},
                 width    = 20,
@@ -510,6 +514,7 @@ CustomizeView = Class(View, function(view, model, ...)
                 tiled    = {false,true},
                 src      = "assets/MenuLine.png"
             }
+--]]
         --view:get_controller():init_shit()
         view.ui:add(unpack(view.menu_items))
         --fthis = view.hor_lines[1]
@@ -660,7 +665,7 @@ windmill_view:initialize()
                             --view.arrow.y = (i-1)*120
                             view.selector.opacity = 255
                             view.vert_lines[i].opacity = 0
-                            view.selector.y = 120*(i-1)
+                            view.selector.y = 960*(i-1)/#model.current_item.Tabs
                         else
                             view.vert_lines[i].opacity = 0
                             view.selector.opacity = 0
