@@ -1,12 +1,12 @@
 local PEP_IMG_PATH = "assets/Topping_Pepperoni.png"
 
-local CRUST_HANDTOSSED = Image{src="assets/Crust_HandTossed.png"}
-local CRUST_THIN = Image{src="assets/Crust_HandTossed.png"}
-local SAUCE_ROBUST = Image{src="assets/Sauce_Robust.png"}
-local SAUCE_BBQ = Image{src="assets/Sauce_BBQ.png"}
-local SAUCE_WHITE = Image{src="assets/Sauce_White.png"}
-local SAUCE_MARINARA = Image{src="assets/Sauce_Marinara.png"}
-
+local CRUST_HANDTOSSED = Image{opacity = 0,src="assets/Crust_HandTossed.png"}
+local CRUST_THIN = Image{opacity = 0,src="assets/Crust_HandTossed.png"}
+local SAUCE_ROBUST = Image{opacity = 0,src="assets/Sauce_Robust.png"}
+local SAUCE_BBQ = Image{opacity = 0,src="assets/Sauce_BBQ.png"}
+local SAUCE_WHITE = Image{opacity = 0,src="assets/Sauce_White.png"}
+local SAUCE_MARINARA = Image{opacity = 0,src="assets/Sauce_Marinara.png"}
+screen:add(CRUST_HANDTOSSED,CRUST_THIN,SAUCE_ROBUST,SAUCE_BBQ,SAUCE_WHITE,SAUCE_MARINARA)
 if not Class then
    dofile("Class.lua")
 end
@@ -332,12 +332,12 @@ EmptyPizza = Class(
          position = {0, 0},
          src = "assets/Cheese_Normal.png"
       }
-      local sauce = SAUCE_ROBUST
-      sauce:unparent()
+      local sauce = Clone{source=SAUCE_ROBUST}
+      --sauce:unparent()
       sauce:show()
       sauce.opacity=255
-      local crust = CRUST_HANDTOSSED
-      crust:unparent()
+      local crust = Clone{source=CRUST_HANDTOSSED}
+      --crust:unparent()
       crust:show()
       crust.opacity=255
       
