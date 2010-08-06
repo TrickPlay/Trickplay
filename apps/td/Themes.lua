@@ -45,6 +45,8 @@ end
 
 AssetLoader:preloadImage("RedArrow","assets/RedArrow.png")
 
+AssetLoader:preloadImage("DescriptionRight","themes/robot/assets/DescriptionRight.png")
+
 AssetLoader:preloadImage("BuyFocus","themes/robot/assets/BuyFocus.png")
 
 AssetLoader:preloadImage("ProgressBar","assets/ProgressBar.png")
@@ -74,5 +76,8 @@ AssetLoader:preloadImage("upgradeIcon","assets/upgradeIcon.png")
 AssetLoader:preloadImage("obstacles","themes/robot/assets/obstacles.png")
 AssetLoader:preloadImage("shadow","themes/robot/assets/CreepShadow.png")	
 AssetLoader:preloadImage("sellIcon","assets/sell.png")
-AssetLoader:preloadImage("InfoBar","assets/InfoBar1.png")
+AssetLoader:preloadImage("PlayerRight","themes/robot/assets/PlayerRight.png")
+
+AssetLoader:preloadImage("NotEnoughMoney","themes/robot/assets/NotEnoughMoney.png")
+
 

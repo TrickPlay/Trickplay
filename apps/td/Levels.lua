@@ -95,14 +95,21 @@ function createLevelMenu(l)
                 savedRound = round
                 --LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
                 LevelMenu.theme.wave = dofile("themes/"..LevelMenu.theme.themeName.."/round"..round..".lua")
-        
+                
                 game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
                 game:startGame()
                 
-                screen:add(countdowntimer, phasetext, playertext, goldtext,livestext, leveltext)
-                screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+                local infobar = AssetLoader:getImage("PlayerRight",{})
+                local playerInfo = Group{opacity = 0, z=2.5}
+                playerInfo:add(infobar, game.board.player.playertext, game.board.player.goldtext)
+                playerInfo.anchor_point = {infobar.w, infobar.h}
+                playerInfo.position = {screen.w, screen.h - 25}
+                screen:add(playerInfo)
                 
+                game.board.player.info = Popup:new{group = playerInfo, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
                 Popup:new{text = "Round "..round}
+                
+                screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup, leveltext, livestext)
         
         end
         

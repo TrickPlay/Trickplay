@@ -32,7 +32,11 @@ function Popup:new(args)
                 draw = args.draw or nil,
         }
         
-        screen:add(object.group)
+        if not args.startOpaque then
+                object.group.opacity = 0
+        end
+        
+        if not object.group.parent then screen:add(object.group) end
       
         if game then table.insert(game.popups, object) end
 
@@ -43,6 +47,10 @@ function Popup:new(args)
         self.__index = self
         
         print("Created Popup")
+        
+        if not args.keepDown then
+                object.group:raise_to_top()
+        end
         
         return object
         
@@ -58,7 +66,7 @@ function Popup:render(seconds)
                         
                         --print("Animating popup")
                 
-                        self.group:animate{opacity = limit, duration = self.fadeSpeed, on_completed = function() pcall(self.on_fade_in_callback, self) end}  
+                        self.group:animate{opacity = limit, duration = self.fadeSpeed, on_completed = function() pcall(self.on_fade_in, self) end}  
                         self.fade = "out"
                         return
                 
@@ -74,7 +82,7 @@ function Popup:render(seconds)
                                         then self.fade = nil
                                 end
                                 
-                                pcall(self.on_fade_in_callback, self)
+                                pcall(self.on_fade_in, self)
                         end
                 end
         
@@ -83,7 +91,7 @@ function Popup:render(seconds)
                 --print("Fading out")
         
                 if self.draw then
-                        self.group:animate{opacity = 0, duration = self.fadeSpeed, on_completed = function() pcall(self.on_fade_out_callback, self) end}  
+                        self.group:animate{opacity = 0, duration = self.fadeSpeed, on_completed = function() pcall(self.on_fade_out, self) end}  
                         self.fade = nil
                         return
                         
@@ -94,7 +102,7 @@ function Popup:render(seconds)
                         else
                                 self.group.opacity = 0
                                 self.fade = nil
-                                pcall(self.on_fade_out_callback, self)
+                                pcall(self.on_fade_out, self)
                         end
                 end
         end
@@ -134,13 +142,13 @@ function Popup:checkStopwatch()
 
 end
 
-function Popup:on_fade_in_callback()
+function Popup:on_fade_in()
         
-        if self.on_fade_in then
+        --if self.on_fade_in then
                 
-                self.on_fade_in()
+        --        self.on_fade_in()
                 
-        else
+        --else
                 
                 if self.draw then
                         
@@ -154,22 +162,22 @@ function Popup:on_fade_in_callback()
                         
                 end
                 
-        end
+        --end
 
 end
 
-function Popup:on_fade_out_callback()
+function Popup:on_fade_out()
 
-        if self.on_fade_out then
+        --if self.on_fade_out then
                 
-                print("Called self.on_fade_out")
-                self.on_fade_out()
+        --        print("Called self.on_fade_out")
+        --        self.on_fade_out()
                 
-        end
+        --end
         
         print("Removing")
         
-        if self.group.parent then
+        if self.group.parent == screen then
                 screen:remove(self.group)
                 print("Removed popup from screen")
         end

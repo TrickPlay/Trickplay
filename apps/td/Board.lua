@@ -240,7 +240,7 @@ function Board:createBoard()
 	savedGold = self.player.gold
 	savedLives = self.player.lives
 	livestext.text = game.board.player.lives
-	infobar = AssetLoader:getImage("InfoBar",{x = 600, y = 1000, z = 2.5})
+	--infobar = AssetLoader:getImage("InfoBar",{x = 600, y = 1000, z = 2.5})
 	if (self.theme.obstacles[round].insert) then
 		for i =1, #self.theme.obstacles[round] do
 			self.obstacleImages[i] = Obstacle:new { x = GTP(self.theme.obstacles[round][i][2]), y = GTP(self.theme.obstacles[round][i][1]), frames = self.theme.obstacles[round].frames}
@@ -250,7 +250,7 @@ function Board:createBoard()
 	end
 	local b = Group{}
 
-	screen:add(self.backgroundImage, self.overlayImage, b, infobar, progressBar, waveProgress)
+	screen:add(self.backgroundImage, self.overlayImage, b, progressBar, waveProgress)
 
 	--screen:add(backgroundImage, overlayImage, b, infobar)
 
@@ -337,6 +337,15 @@ function Board:createBoard()
 			end
 			
 		end
+		
+		local notEnoughMoney = function()
+			
+			local a = Group{x=1440, y=795, opacity = 0}
+			a:add( AssetLoader:getImage( "NotEnoughMoney", { } ) )
+			Popup:new{group = a, fadeSpeed = 400, time=.8, opacity = 180}
+			
+		end
+		
 		if (self.squareGrid[y][x].square[3] == EMPTY) then
 			menuType = "Empty"
 			
@@ -356,9 +365,7 @@ function Board:createBoard()
 							self:findPaths()
 							return true
 						else
-							temp:add(tempImage)
-							Popup:new{text="You need "..towers[i].cost.. " gold for that!", fadeSpeed = 400, time=.5, opacity = 150}
-						
+							notEnoughMoney()
 						end
 					end
 				end
@@ -388,9 +395,7 @@ function Board:createBoard()
 							
 						return self:upgradeTower(player)
 					else
-						
-						Popup:new{text="Not enough gold!", fadeSpeed = 400, time=.5, opacity = 150}
-						
+						notEnoughMoney()
 					end
 					
 				end
@@ -415,8 +420,8 @@ function Board:createBoard()
 		
 	end
 	
-	playertext.text = self.player.name
-	goldtext.text = self.player.gold
+	self.player.playertext.text = self.player.name
+	self.player.goldtext.text = self.player.gold
 	BoardMenu.buttons.extra.p = function()
 	ipaused = not ipaused
 		if (ipaused) then
@@ -468,7 +473,7 @@ end
 function Board:updateGold(player)
 
 	if player == self.player then
-		goldtext.text = player.gold
+		player.goldtext.text = player.gold
 	else
 		game.gold2.text = player.gold
 	end
