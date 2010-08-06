@@ -13,6 +13,7 @@ function Player:new(args)
 		object.gold = settings.gold
 		object.lives = settings.lives
 	end
+	
 	print (object.gold)
    setmetatable(object, self)
    self.__index = self
