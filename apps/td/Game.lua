@@ -49,7 +49,7 @@ function Game:killGame(status)
 		createLevelMenu(settings[n].currentLevel)
 			
 		LevelMenu.container.opacity = 255
-		LevelMenu.hl.opacity = 100
+		LevelMenu.hl.opacity = 255
 		LevelMenu:update_cursor_position()
 		LevelMenu.theme = game.theme
 

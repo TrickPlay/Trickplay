@@ -100,7 +100,7 @@ Board.render = function (self, seconds)
 				v.deathtimer:start()
 				v.redBar.opacity = 0
 				v.greenBar.opacity = 0
-				if (not v.flying and game.board.theme.themeName ~= "pacman") then
+				if (game.board.theme.themeName ~= "pacman") then
 					v.creepImageGroup:remove(v.creepImage)
 					v.creepImageGroup:add(v.deathImage)
 				end				

@@ -3,7 +3,7 @@ app=
     id          = "com.trickplay.apps.robotsvszombies",
     release     = "1",
     version     = "1.0",
-    name        = "ESPN App",
-    author      = "Devin Abbott, Viraaj",
+    name        = "Robots vs. Zombies",
+    author      = "Devin Abbott, Viraaj Marathe",
     copyright   = "Trickplay Inc."
 }

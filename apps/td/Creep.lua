@@ -17,7 +17,12 @@ function Creep:new(args, x, y, name, buffs)
 	local timer = Stopwatch()
 	local deathtimer = Stopwatch()
 	local frames = args.frames
-	local deathImage = AssetLoader:getImage("death", {})
+	local deathImage
+	if (flying) then
+			deathImage = AssetLoader:getImage("flydeath", {})
+	else
+			deathImage = AssetLoader:getImage("death", {})
+	end
 	timer:start()
 	
 	-- Image/Group stuff
@@ -280,9 +285,10 @@ end
 function Creep:deathAnimation()
 --	self.creepGroup.opacity = 0
 	--print (self.face)
-	local frames = 11
-	local time = frames/20
-	if self.flying or game.board.theme.themeName == "pacman" then
+	local frames = 10
+	local flyframes = 9
+	local time = frames/15
+	if game.board.theme.themeName == "pacman" then
 		--self.creepGroup.z_rotation = {-180*self.deathtimer.elapsed_seconds, self.creepImage.w/(self.frames*2),self.creepImage.h/2}
 		local xscale = self.creepGroup.scale[1]
 		local yscale = self.creepGroup.scale[2]
@@ -292,6 +298,22 @@ function Creep:deathAnimation()
 			self.creepGroup:clear()
 			return true
 			
+		end
+	
+	elseif self.flying then
+		time = flyframes/15
+		for i=1, flyframes do
+			if self.deathtimer.elapsed_seconds < ( 1/flyframes ) * i * time and self.deathtimer.elapsed_seconds > ( 1/flyframes) * (i-1) * time then
+				self.deathImage.x = - self.deathImage.w/flyframes * (i-1)
+				self.deathImage.opacity = 255 - i*(255/flyframes)
+			end
+		end
+	
+		if self.deathtimer.elapsed_seconds > time then
+			self.deathtimer:start()
+			self.creepGroup.opacity = 0
+			self.creepGroup:clear()
+			return true
 		end
 		
 	else	
