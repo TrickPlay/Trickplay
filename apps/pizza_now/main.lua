@@ -57,14 +57,19 @@ local checkout_view = CheckoutView(model)
 checkout_view:initialize()
 
 function screen:on_key_down(k)
-    assert(model:get_active_controller())
-    model:get_active_controller():on_key_down(k)
+   if k == keys.r then
+      table.insert(model.cart, EmptyPizza())
+      model:get_active_controller():get_view():refresh_cart()
+      model:notify()
+   else
+      assert(model:get_active_controller())
+      model:get_active_controller():on_key_down(k)
+   end
 end
 
 
 if NETWORKING then
    Navigator:init_session()
 end
---model:start_app(Components.CHECKOUT)
---model:get_active_controller():get_view():refresh_cart()
+
 model:start_app(Components.PROVIDER_SELECTION)
