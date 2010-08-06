@@ -258,6 +258,7 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
          -- first check if target item is off the top of the screen.
          -- new selected item is currently off the top of the screen
          if sel_item then
+            assert(sel_item <= #cart_items)
             if order_grp.y+cart_items[sel_item].y < ui_clipper.clip[2] then
                order_grp:animate{
                   duration=100,
@@ -320,20 +321,20 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
       end
    end
 
-   function view:do_remove_animation()
-      local sel_choice, sel_item = self:get_controller():get_selected()
+   function view:do_remove_animation(sel_item)
+      local sel_choice = self:get_controller():get_selected()
       print("do_remove_animation called")
       assert(type(sel_item) == "number", "sel_item not a number")
+      assert(sel_choice)
       assert(1 <= sel_item and sel_item <= #cart_items, "sel_item index not in cart_items array")
       local removed_item = table.remove(cart_items, sel_item)
       local removed_icons = table.remove(icons, sel_item)
       local choice_name = lut[sel_choice]
-      local icon = icons[sel_item][choice_name]
       removed_item.extra.cart_items = cart_items
       removed_item.extra.sel_item = sel_item
       removed_item.extra.top_of_order = order_grp.y
       removed_item.extra.bottom_edge = ui_clipper.clip[2]+ui_clipper.clip[4]
-      removed_item.extra.icon = icon
+      removed_item.extra.choice_name = choice_name
       removed_item:animate{
          duration=50,
          opacity=0,
@@ -343,11 +344,24 @@ FinalOrderView = Class(View, function(view, model, parent_view, ...)
 
             local cart_items = ui.extra.cart_items
             local sel_item = ui.extra.sel_item
-            local icon = ui.extra.icon
+            local choice_name = ui.extra.choice_name
 
             if #cart_items == 0 then
                down_arrow:animate{duration=50, opacity=0}
             else
+               local new_focus_item = sel_item
+               if sel_item > #cart_items then
+                  new_focus_item = #cart_items
+               end
+               local icon = icons[new_focus_item][choice_name]
+               if not icon then
+                  for i,choices in ipairs(icons) do
+                     print(i)
+                     for k,v in pairs(choices) do
+                        print(k,v)
+                     end
+                  end
+               end
                icon.focus:raise_to_top()
                icon.focus:animate{duration=50, opacity=255}
                icon.unfocus:animate{duration=50, opacity=0}
