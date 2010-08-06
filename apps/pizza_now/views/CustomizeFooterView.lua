@@ -1,7 +1,6 @@
 CustomizeFooterView = Class(View, function(view, model,parent, ...)
     view._base.init(view, model)
     view.parent = parent
-     
     view.ui=Group{name="customize_footer_ui", position={0,960}, opacity=255}
     view.bar = Image{
                 position = {0,0},
@@ -38,6 +37,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
     view.areyousure:add(view.yes_sel)
     view.areyousure:add(view.yes_unsel)
     view.areyousure:add(view.no_sel)
+    fthis = view.ui 
     view.areyousure:add(view.no_unsel)
     view.focusable_items = {
         FocusableImage(30,30,
@@ -172,7 +172,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
             end
         elseif comp ~= Components.TAB and comp ~= Components.CUSTOMIZE_ITEM then
             print("Hiding CustomizeFooterView UI")
-            --view.ui:complete_animation()
+            view.ui:complete_animation()
             view.ui.opacity = 0
         end
     end
