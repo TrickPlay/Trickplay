@@ -33,7 +33,7 @@ Components = {
 }
 
 -- Model initialization
-model = Model()
+local model = Model()
 
 
 -- View/Controller initialization

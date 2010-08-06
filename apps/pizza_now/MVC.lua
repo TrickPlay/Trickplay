@@ -87,6 +87,32 @@ Model = Class(function(model, ...)
         self.active_component = comp
         screen:show()
         self:notify()
+        local firstAnimation = Group{position = {1920, 750}}
+        local text = Text{
+            position = {0,0},
+            font = CUSTOMIZE_TAB_FONT,
+            color = Colors.WHITE,
+            text = "Enter Your Delivery Address NOW!"
+        }
+        local image = Image{
+            position = {10, 70},
+            src = "assets/DownScrollArrow.png",
+            scale = {4,4}
+        }
+        firstAnimation:add(text, image)
+        screen:add(firstAnimation)
+        firstAnimation:animate{duration = 1000, x = 420,
+            on_completed = function()
+                local timer = Timer()
+                timer.interval = 3
+                function timer:on_timer()
+                    timer.on_timer = nil
+                    timer = nil
+                    firstAnimation:animate{duration = 300, x = -900}
+                end
+                timer:start()
+            end
+        }
     end
     
     function model:set_active_component(comp)
@@ -176,7 +202,7 @@ View = Class(Observer, function(view, model, ...)
     end
 
     function view:get_model()
-        return self.model
+        return view.model
     end
 
     function view:set_controller(cont)
