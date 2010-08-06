@@ -179,6 +179,6 @@ CheckoutView = Class(View, function(view, model, ...)
 
     function view:refresh_cart()
        assert(finalOrderView)
-       finalOrderView:refresh_cart()
+       finalOrderView:get_controller():refresh_cart()
     end
 end)
