@@ -1,15 +1,15 @@
 GLOBALS_LOADED = true
 Crusts = {
-   HAND_TOSSED = {name="handtossed", canon="HANDTOSS"},
-   DEEP_DISH = {name="deep dish", canon="DEEPDISH"},
-   CRUNCHY_THIN = {name="crunchy thin", canon="THIN"},
-   BROOKLYN_STYLE = {name="brooklyn style", canon="BK"}
+   HAND_TOSSED = {name="handtossed", canon="HANDTOSS", prefix="Hand Tossed "},
+   DEEP_DISH = {name="deep dish", canon="DEEPDISH", prefix="Deep Dish "},
+   CRUNCHY_THIN = {name="crunchy thin", canon="THIN", prefix="Thin "},
+   BROOKLYN_STYLE = {name="brooklyn style", canon="BK", prefix="Brooklyn "}
 }
 Sizes = {
-   SMALL = {name="small", diam=10},
-   MEDIUM = {name="medium", diam=12},
-   LARGE = {name="large", diam=14},
-   XLARGE = {name="x-large", diam=16}
+   SMALL = {name="small", diam=10, prefix='Small(10") '},
+   MEDIUM = {name="medium", diam=12, prefix='Medium(12") '},
+   LARGE = {name="large", diam=14, prefix='Large(14") '},
+   XLARGE = {name="x-large", diam=16, prefix='X-Large(16") '}
 }
 
 -- roughly a struct.
@@ -36,7 +36,7 @@ Toppings = {
    BACON = Topping("Bacon","K"),
    CHICKEN = Topping("Premium Chicken","Du"),
    SALAMI = Topping("Salami","Sa"),
-   PHILLY_STEAK = Topping("philly-steak","Pm"),
+   PHILLY_STEAK = Topping("Philly Steak","Pm"),
    -- UNMEATS
    GREEN_PEPPERS = Topping("Green Peppers","G"),
    BLACK_OLIVES = Topping("Black Olives","R"),
@@ -82,7 +82,7 @@ Placement = {
 }
 
 Coverage = {
-   NORMAL = "1",
-   EXTRA = "1.5",
-   LIGHT = ".5"
+   NORMAL = {prefix="", qty="1"},
+   EXTRA = {prefix="Extra ", qty="1.5"},
+   LIGHT = {prefix="Light ", qty=".5"}
 }

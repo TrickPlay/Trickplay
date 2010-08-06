@@ -140,7 +140,7 @@ Model = Class(function(model, ...)
     end
 
     function model:edit_selected_cart_item(item_num)
-       self.current_item = self:get_model().cart[item_num]
+       self.current_item = self.cart[item_num]
        self.current_item_is_in_cart = true
        self:set_active_component(Components.CUSTOMIZE)
        self:get_active_controller():init_shit()
