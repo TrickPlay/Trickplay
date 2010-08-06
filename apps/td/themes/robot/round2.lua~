@@ -1,12 +1,11 @@
 wave = {
 	
 	money = 10,
-	
 	-- Wave 1
 	{
 		{
 			{name = "SlowCreep"},
-			size = 5,
+			size = 1,
 			speed = 2,
 			buffs = {hp = 1},
 		},
@@ -17,7 +16,7 @@ wave = {
 	{
 		{
 			{name = "SlowCreep"},
-			size = 5,
+			size = 1,
 			speed = 1.5,
 			buffs = {hp = 1.25, speed = 1.25},
 		},
