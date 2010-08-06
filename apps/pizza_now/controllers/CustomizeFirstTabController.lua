@@ -95,6 +95,12 @@ end}
         return selected
     end
 
+    function self:reset_selected_index()
+        selected[1] = 1
+        selected[2] = 1
+    end
+
+
     self.in_tab = false
 
     function self:move_selector(dir)
@@ -108,14 +114,23 @@ end}
                                   selected[2] + dir[1]}
             if selected[2] == 1 and dir == Directions.LEFT then
                 print("Moving back to the tab bar")
+                self:reset_selected_index()
                 view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
             elseif new_selected[1] == 3 and new_selected[2] == 2 then
-                selected[1] = 2
-                selected[2] = 2
+                if dir == Directions.DOWN then
+                    self:reset_selected_index()
+                    view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.FOOT
+                else
+                    selected[1] = 2
+                    selected[2] = 2
+                end
             elseif view.parent.first_tab_groups[new_selected[1]] ~= nil and
                    view.parent.first_tab_groups[new_selected[1]][new_selected[2]] ~= nil then
                 selected[1] = new_selected[1]
                 selected[2] = new_selected[2]
+            elseif dir == Directions.DOWN then
+                self:reset_selected_index()
+                view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.FOOT
             end
             print("Moving to ",selected[1],selected[2])
         end

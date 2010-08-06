@@ -13,6 +13,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         position = {0,0},
         src      = "assets/SavePizza.png"
     }
+--[[
     view.yes_sel = Image{
         position = {50,100},
         src      = "assets/SavePizza_YesFocus.png"
@@ -29,16 +30,29 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         position = {190,100},
         src      = "assets/SavePizza_No.png"
     }
+--]]
+    view.yes_no={
+        FocusableImage(50,100,
+         "assets/SavePizza_Yes.png",
+         "assets/SavePizza_YesFocus.png"),
+        FocusableImage(190,100,
+         "assets/SavePizza_No.png",
+         "assets/SavePizza_NoFocus.png")
+    }
     view.areyousure = Group{name="Are You Sure",
                             position = {1500,-250},
                             opacity = 0}
     view.ui:add(view.areyousure)
     view.areyousure:add(view.save)
+--[[
     view.areyousure:add(view.yes_sel)
     view.areyousure:add(view.yes_unsel)
     view.areyousure:add(view.no_sel)
     fthis = view.ui 
     view.areyousure:add(view.no_unsel)
+--]]
+    view.areyousure:add(view.yes_no[1].group,
+                        view.yes_no[2].group)
     view.focusable_items = {
         FocusableImage(30,30,
          "assets/BackArrow.png",
@@ -120,15 +134,23 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
                 if controller.areyousure then
                     view.areyousure.opacity = 255
                     if controller:get_YNselected_index() == 1 then
+--[[
                         view.yes_sel.opacity   = 255
                         view.yes_unsel.opacity = 0
                         view.no_sel.opacity    = 0
                         view.no_unsel.opacity  = 255
+--]]
+                        view.yes_no[1]:on_focus()
+                        view.yes_no[2]:out_focus()
                     else
+--[[
                         view.yes_sel.opacity   = 0
                         view.yes_unsel.opacity = 255
                         view.no_sel.opacity    = 255
                         view.no_unsel.opacity  = 0
+--]]
+                        view.yes_no[1]:out_focus()
+                        view.yes_no[2]:on_focus()
                     end
                 else
                     view.areyousure.opacity = 0
