@@ -140,6 +140,9 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
     function self:get_YNselected_index()
         return YNselected
     end
+    function self:reset_selected_index()
+        selected = 1
+    end
     function self:get_selected_index()
         return selected
     end
