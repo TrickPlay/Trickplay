@@ -58,7 +58,7 @@ creepnum = 1
 wavePartCounter = 1
 creeppartnum = 1
 
-leveltext = Text {font = "Sans 20px", text = "Wave 1/30", x = 800, y = 1048, z = 3, color = "000000" }
+leveltext = Text {font = "Sans 20px", text = "Wave 1/30", x = 770, y = 1048, z = 3, color = "000000" }
 countdowntimer = Text { font = "Sans 30px", text = "", x = 900, y = 20, z=3, color = "000000", opacity=0}
 phasetext = Text { font = "Sans 30px", text = "Build Phase!", x =20, y = 1015, z=3, color = "000000", opacity=0}
 livestext = Text { font = "Sans 20px", text = "", x =1080, y =1048 , z=3, color = "000000", opacity = 255}

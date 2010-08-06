@@ -131,7 +131,7 @@ Board.render = function (self, seconds)
 			bloodGroup:clear()
 		end	
 	end
-	leveltext.text = "Wave  "..level.."/"..#self.theme.wave
+	leveltext.text = "Level "..round.."    Wave  "..level.."/"..#self.theme.wave
 	
 	if (wave_counter == CREEP_WAVE_LENGTH) then
 		for k,v in pairs(self.creepWave) do
