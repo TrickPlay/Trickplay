@@ -96,8 +96,19 @@ function app.on_loaded()
 				game.p2info:add(game.infobar2, game.name2, game.gold2)
 				screen:add(game.p2info)
 				
-				screen:add(countdowntimer, phasetext, game.board.player.playertext, game.board.player.goldtext,livestext, leveltext)
+				screen:add(livestext, leveltext)
 				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+				
+				-- Player 1 info bar-------------
+				local infobar = AssetLoader:getImage("PlayerRight",{})
+				local playerInfo = Group{opacity = 0, z=2.5}
+				playerInfo:add(infobar, game.board.player.playertext, game.board.player.goldtext)
+				playerInfo.anchor_point = {infobar.w, infobar.h}
+				playerInfo.position = {screen.w, screen.h - 25}
+				screen:add(playerInfo)
+				
+				game.board.player.info = Popup:new{group = playerInfo, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
+				----------------------------------
 				
 			elseif select == "resume" then
 			
@@ -112,8 +123,19 @@ function app.on_loaded()
 				game = Game:new{ theme = Themes.robot , gold = settings.gold}
 				game:startGame()
 				    
-				screen:add(countdowntimer, phasetext, game.board.player.playertext, game.board.player.goldtext,livestext, leveltext)
+				screen:add(livestext, leveltext)
 				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+				
+				-- Player 1 info bar-------------
+				local infobar = AssetLoader:getImage("PlayerRight",{})
+				local playerInfo = Group{opacity = 0, z=2.5}
+				playerInfo:add(infobar, game.board.player.playertext, game.board.player.goldtext)
+				playerInfo.anchor_point = {infobar.w, infobar.h}
+				playerInfo.position = {screen.w, screen.h - 25}
+				screen:add(playerInfo)
+				
+				game.board.player.info = Popup:new{group = playerInfo, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
+				----------------------------------
 				    
 				Popup:new{text = "Resuming round "..round}				
 				
