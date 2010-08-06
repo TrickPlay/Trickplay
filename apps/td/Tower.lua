@@ -47,7 +47,7 @@ function Tower:new(args, prefix, square, player)
 		timer = Stopwatch(),
         }
         
-   	local rangeCircle = Canvas{color="00FF00", x=0, y=0, width=1920, height=1080, z = 0, opacity = 0}
+   	local rangeCircle = Canvas{color=player.color, x=0, y=0, width=1920, height=1080, z = 0, opacity = 0}
         rangeCircle:begin_painting()
         rangeCircle:set_source_color(player.color)
         rangeCircle:arc(object.x+SP/2,object.y+SP/2,object.range,0,360)

@@ -42,7 +42,7 @@ function Board:new(args)
 	local object = {
 		w = w,
 		h = h,
-		player = Player:new { name = "Player 1", gold = args.gold, lives = 30, color = "00FF32" },
+		player = Player:new { name = "Player 1", gold = args.gold, lives = 30, color = {102,153,255} },
 		squareGrid = squareGrid,
 		squaresWithTowers = {},
 		obstacleImages = obstacleImages,
