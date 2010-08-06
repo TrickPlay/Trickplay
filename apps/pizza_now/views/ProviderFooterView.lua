@@ -13,23 +13,28 @@ ProviderFooterView = Class(View, function(view, model, ...)
      
     view.ui=Group{name="providerfooter_ui", position={0,0}, opacity=255}
 
-    local exitItem = FocusableImage(30, 980,
-        "assets/Exit.png",
-        "assets/ExitFocus.png")
+    view.exitButtonPress = Image{
+        position = {30, 980},
+        src = "assets/ExitButtonPress.png",
+        opacity = 0
+    }
+    view.exitItem = FocusableImage(30, 980,
+        "assets/ExitButton.png",
+        "assets/ExitButtonFocus.png")
     local streetBillingTextBox = TextBox(330, 990, 600)
     local apartmentBillingTextBox = TextBox(950, 990, 120)
     local cityBillingTextBox = TextBox(1090, 990, 370)
     local zipBillingTextBox = TextBox(1480, 990, 120)
 
     view.boxes = {
-        exitItem, streetBillingTextBox, apartmentBillingTextBox, cityBillingTextBox, 
-        zipBillingTextBox
+        view.exitItem, streetBillingTextBox, apartmentBillingTextBox,
+        cityBillingTextBox, zipBillingTextBox
     }
 
     view.items = {
         Text{
-            position={120, 970},
-            font  = CUSTOMIZE_TINY_FONT,
+            position={0, 960},
+            font  = CUSTOMIZE_ENTRY_FONT,
             color = DEFAULT_COLOR,
             text = "Exit"
         },
@@ -72,7 +77,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
         view.ui:add(v.group)
     end
     view.ui:add(unpack(view.items))
-    --screen:add(view.ui)
+    view.ui:add(view.exitButtonPress)
     function view:initialize()
         self:set_controller(ProviderFooterController(self))
     end
