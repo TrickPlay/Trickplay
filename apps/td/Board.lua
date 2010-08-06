@@ -57,13 +57,16 @@ end
 
 Board.render = function (self, seconds)
 	local s =self.timer.elapsed_seconds 
-	
 	CREEP_WAVE_LENGTH = self.theme.wave[level].size
-	
 	if seconds_elapsed.elapsed_seconds > WAIT_TIME - 3 and seconds_elapsed.elapsed_seconds < WAIT_TIME - 2 then createRedArrow() end
 	
 	if (seconds_elapsed.elapsed_seconds >= WAIT_TIME) then
 		WAIT_TIME = WAIT
+		waveProgress.x = waveProgress.x + seconds*((level)/#self.theme.wave * progressBar.w)/CREEP_WAVE_LENGTH
+		if (waveProgress.x >= 720 + (level)/#self.theme.wave * (progressBar.w-3*waveProgress.w)) then
+			waveProgress.x = 720 + (level)/#self.theme.wave * (progressBar.w-3*waveProgress.w)
+		end
+
 		local sp = self.theme.wave[level][wavePartCounter].speed or 1 
 		if (s > sp) then 
 			self.timer:start()
@@ -128,7 +131,7 @@ Board.render = function (self, seconds)
 			bloodGroup:clear()
 		end	
 	end
-	
+	leveltext.text = "Wave  "..level.."/"..#self.theme.wave
 	
 	if (wave_counter == CREEP_WAVE_LENGTH) then
 		for k,v in pairs(self.creepWave) do
@@ -231,6 +234,8 @@ function Board:createBoard()
 	
 	self.backgroundImage = AssetLoader:getImage( self.theme.themeName.."Background", { } ) --Image {src = self.theme.boardBackground }
 	self.overlayImage = AssetLoader:getImage( self.theme.themeName.."Overlay", {z = 2.5} )
+	progressBar = AssetLoader:getImage("ProgressBar", {x = 700, y = 990 })
+	waveProgress = AssetLoader:getImage("WaveProgress", {x = 720 , y = 998, scale = {1.8,1.8}})
 	savedLevel = level
 	savedGold = self.player.gold
 	savedLives = self.player.lives
@@ -245,7 +250,7 @@ function Board:createBoard()
 	end
 	local b = Group{}
 
-	screen:add(self.backgroundImage, self.overlayImage, b, infobar)
+	screen:add(self.backgroundImage, self.overlayImage, b, infobar, progressBar, waveProgress)
 
 	--screen:add(backgroundImage, overlayImage, b, infobar)
 
@@ -271,6 +276,7 @@ function Board:createBoard()
 		savedTowerPos = settings.towerPos
 		savedTowerUpgrades = settings.towerUpgrades
 		level = settings.level
+	
 		if (settings.towerType) then
 			for i=1, #settings.towerType do
 				 local selection = settings.towerType[i]
@@ -291,6 +297,7 @@ function Board:createBoard()
 			end
 		end
 	end
+	waveProgress.x = 720 + (level-1)/#self.theme.wave * (progressBar.w-waveProgress.w)
 		
 	BoardMenu.buttons.extra.r = function(args)
 	
@@ -349,7 +356,7 @@ function Board:createBoard()
 							self:findPaths()
 							return true
 						else
-						
+							temp:add(tempImage)
 							Popup:new{text="You need "..towers[i].cost.. " gold for that!", fadeSpeed = 400, time=.5, opacity = 150}
 						
 						end

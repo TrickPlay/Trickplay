@@ -99,7 +99,7 @@ function createLevelMenu(l)
                 game = Game:new{ theme = LevelMenu.theme , gold = LevelMenu.theme.wave.money}
                 game:startGame()
                 
-                screen:add(countdowntimer, phasetext, playertext, goldtext,livestext)
+                screen:add(countdowntimer, phasetext, playertext, goldtext,livestext, leveltext)
                 screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
                 
                 Popup:new{text = "Round "..round}

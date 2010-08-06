@@ -23,11 +23,11 @@ function Creep:new(args, x, y, name, buffs)
 	-- Image/Group stuff
 	local creepImage = AssetLoader:getImage(name, {})
 	--local creepImageGroup = Group{x = -SP/2, y=-SP, z=1, clip={0,0,SP*2,SP*2} }
-	local creepImageGroup = Group{z=1, clip={0,0,creepImage.w/frames,creepImage.h}, x = x_offset, y = y_offset }
+	local creepImageGroup = Group{z=1, clip={0,0,creepImage.w/frames,creepImage.h}, x = x_offset, y = y_offset+60 }
 	
 	creepImageGroup:add(creepImage)
-	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset-10}
-	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset-10}
+	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset+50, x = - 25}
+	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset+50, x = - 25}
 	local shadow = AssetLoader:getImage("shadow" ,{y = -y_offset-40, opacity = 0})
 	
 	local creepGroup = Group{opacity=255, x = x, y = y}

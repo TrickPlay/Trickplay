@@ -1,7 +1,6 @@
 wave = {
 	
 	money = 10,
-	
 	-- Wave 1
 	{
 		{
