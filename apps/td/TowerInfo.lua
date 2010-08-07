@@ -93,7 +93,7 @@ function TowerInfo:update(tower, player, isNew, x, y, range)
         end
 
 end
-
+--[[
 function TowerInfo:drawRangeCircle(x,y,range)
 		self.rangeCircle:clear_surface()
 		self.rangeCircle:begin_painting()
@@ -101,7 +101,7 @@ function TowerInfo:drawRangeCircle(x,y,range)
 		self.rangeCircle:arc(x+SP/2,y+SP/2,range,0,360)
 		self.rangeCircle:fill() -- or c:stroke()
 		self.rangeCircle:finish_painting()
-end
+end]]
 
 function TowerInfo:changeOpacity(seconds)
 

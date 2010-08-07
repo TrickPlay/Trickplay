@@ -86,18 +86,16 @@ function app.on_loaded()
 				hl2.extra.r = function() BoardMenu.buttons.extra.r{ x=hl2.extra.x, y=hl2.extra.y, player=player } end
 				ipod_keys(hl2)
 				
-				game.p2info = Group{}
-				game.infobar2 = AssetLoader:getImage("InfoBar2",{y = 1005, z = 2.5})
-				game.name2 = Text {font = "Sans 30px", text = player.name, x =320, y = 1015, z=3, color = "000000"}
-				game.gold2 = Text {font = "Sans 30px", text = player.gold, x =100, y = 1015, z=3, color = "000000" }
-				
+				-- Player 2 info bar -------------
+				game.p2info = Group{y = 995, z=2.5}
+				game.infobar2 = AssetLoader:getImage("PlayerLeft",{})
+				game.name2 = Text {font = "Sans 30px", text = player.name, x =300, y=10, color = "000000"}
+				game.gold2 = Text {font = "Sans 30px", text = player.gold, x =70, y=10, color = "000000"}
 				game.p2info:add(game.infobar2, game.name2, game.gold2)
-				screen:add(game.p2info)
 				
-				screen:add(livestext, leveltext)
-				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
+				game.board.player2.info = Popup:new{group = game.p2info, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
 				
-				-- Player 1 info bar-------------
+				-- Player 1 info bar -------------
 				local infobar = AssetLoader:getImage("PlayerRight",{})
 				local playerInfo = Group{opacity = 0, z=2.5}
 				playerInfo:add(infobar, game.board.player.playertext, game.board.player.goldtext)
@@ -107,6 +105,9 @@ function app.on_loaded()
 				
 				game.board.player.info = Popup:new{group = playerInfo, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
 				----------------------------------
+				
+				screen:add(livestext, leveltext)
+				screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup)
 				
 			elseif select == "resume" then
 			
