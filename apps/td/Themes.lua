@@ -97,7 +97,9 @@ AssetLoader:preloadImage("upgradeIcon","assets/upgradeIcon.png")
 AssetLoader:preloadImage("obstacles","themes/robot/assets/obstacles.png")
 AssetLoader:preloadImage("shadow","themes/robot/assets/CreepShadow.png")	
 AssetLoader:preloadImage("sellIcon","assets/sell.png")
+
 AssetLoader:preloadImage("PlayerRight","themes/robot/assets/PlayerRight.png")
+AssetLoader:preloadImage("PlayerLeft","themes/robot/assets/PlayerLeft.png")
 
 AssetLoader:preloadImage("NotEnoughMoney","themes/robot/assets/NotEnoughMoney.png")
 
