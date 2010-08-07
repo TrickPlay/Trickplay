@@ -89,7 +89,7 @@ function app.on_loaded()
 				ipod_keys(hl2)
 				
 				-- Player 2 info bar -------------
-				game.p2info = Group{y = 1004, z=2.5}
+				game.p2info = Group{y = 995, z=2.5}
 				game.infobar2 = AssetLoader:getImage("PlayerLeft",{})
 				game.name2 = Text {font = "Sans 30px", text = player.name, x =300, y=10, color = "000000"}
 				game.gold2 = Text {font = "Sans 30px", text = player.gold, x =70, y=10, color = "000000"}
