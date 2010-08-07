@@ -27,6 +27,7 @@ function Game:startGame()
 	gamestarted = true
 	self.board:init()
 	self.board:createBoard()
+
 end
 
 

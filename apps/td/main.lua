@@ -9,8 +9,6 @@ dofile ("Bullet.lua")
 dofile ("TowerInfo.lua")
 dofile ("Popup.lua")
 
-mediaplayer:play_sound("backgroundMusic.wav")
-   
 screen:show()
 
 function app.on_loaded()
@@ -20,7 +18,7 @@ function app.on_loaded()
 	 -- Everything is loaded
     
 	AssetLoader.on_preload_ready = function()
-        
+		mediaplayer:play_sound("backgroundMusic.wav")
 		TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
 		--MainMenuImage = AssetLoader:getImage("MainMenu", {name = "MainMenu", x = 500, y = 100})
 		screen:add(TitleBackground, MainMenuImage)
