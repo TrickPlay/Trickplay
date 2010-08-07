@@ -59,6 +59,8 @@ AssetLoader:preloadImage("MainMenuFocus","assets/MainMenuFocus.png")
 AssetLoader:preloadImage("RedArrow","assets/RedArrow.png")
 AssetLoader:preloadImage("MainMenu","assets/MainMenu.png")
 AssetLoader:preloadImage("DescriptionRight","themes/robot/assets/DescriptionRight.png")
+AssetLoader:preloadImage("DescriptionLeft","themes/robot/assets/DescriptionLeft.png")
+
 AssetLoader:preloadImage("bloodyhand","themes/robot/assets/bloodyhand.png")
 AssetLoader:preloadImage("BuyFocus","themes/robot/assets/BuyFocus.png")
 

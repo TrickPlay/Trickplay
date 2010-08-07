@@ -3,17 +3,32 @@ local print = function() end
 function createCircleMenu(offset, distance, params, menuType, player)
 
         if player.info then
-                player.info.fade = "out"
+                --player.info.fade = "out"
+                player.info.group.y = player.info.group.y - 90
         end
         
         local desc = Group{z=3}
-        descImage = AssetLoader:getImage("DescriptionRight",{})
-        desc:add(descImage)
-        desc.anchor_point = {desc.w, desc.h}
-        desc.position = {screen.w, screen.h - 130}
-        player.description = Popup:new{group = desc, opacity = 200, fadeSpeed = 800, on_fade_in = function() end}
         
+        --[[
+        if player == game.board.player then
+        
+                descImage = AssetLoader:getImage("DescriptionRight",{})
+                desc:add(descImage)
+                desc.anchor_point = {desc.w, desc.h}
+                desc.position = {screen.w, screen.h - 130}
+        
+        else
+        
+                descImage = AssetLoader:getImage("DescriptionLeft",{})
+                desc:add(descImage)
+                desc.anchor_point = {0, desc.h}
+                desc.position = {0, screen.h - 130}
+        
+        end
+        
+        player.description = Popup:new{group = desc, opacity = 200, fadeSpeed = 800, on_fade_in = function() end}
         desc:raise_to_top()
+        ]]
 
         
         
@@ -52,9 +67,18 @@ function createCircleMenu(offset, distance, params, menuType, player)
         
         --CircleMenu.container.scale = {.6,.6}
         
-        CircleMenu.container.anchor_point = { CircleMenu.container.w, 0 }
-        CircleMenu.container.x = 1920
-        CircleMenu.container.y = 1080 - 130
+        if player == game.board.player then 
+        
+                CircleMenu.container.anchor_point = { CircleMenu.container.w, 0 }
+                CircleMenu.container.x = 1920
+                CircleMenu.container.y = 1080 - 130
+                
+        else
+        
+                CircleMenu.container.x = 5
+                CircleMenu.container.y = 1080 - 130
+        
+        end
         
         
         print("Modified parameters")
@@ -63,7 +87,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	if not player.lastSelected then player.lastSelected = {} end
 	local last = player.lastSelected
 	
-	if (not last[menuType]) or (last[menuType] > CircleMenu.max_x[1]) then last[menuType] = 1 end
+	if (not last[menuType]) or (last[menuType] > CircleMenu.max_x[1]) then last[menuType] = CircleMenu.max_x[1]-1 end
 		
 	while last[menuType] > CircleMenu.x do
 		CircleMenu.buttons.extra.right()
@@ -102,7 +126,8 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         player.towerInfo.fade = "out"
                         
                         if player.info then
-                                player.info.fade = "in"
+                                --player.info.fade = "in"
+                                player.info.group.y = player.info.group.y + 90
                         end
                         
                         if player.description then
