@@ -265,9 +265,18 @@ function Board:createBoard()
 	BoardMenu:button_directions()
 	BoardMenu:create_buttons(0, "Sans 34px")
 	BoardMenu:apply_color_change("FFFFFF", "000000")
-	--BoardMenu.buttons:grab_key_focus()
+	
+	BoardMenu.x = 2
+	BoardMenu.y = 2
+	
 	BoardMenu:update_cursor_position()
 	BoardMenu.hl.opacity = 255
+	
+	local tmp = { BoardMenu.buttons.extra.right, BoardMenu.buttons.extra.left, BoardMenu.buttons.extra.up, BoardMenu.buttons.extra.down }
+	BoardMenu.buttons.extra.right = function() if BoardMenu.x < (BW - 1) then tmp[1]() end end
+	BoardMenu.buttons.extra.left = function() if BoardMenu.x > (2) then tmp[2]() end end
+	BoardMenu.buttons.extra.up = function() if BoardMenu.y > (2) then tmp[3]() end end
+	BoardMenu.buttons.extra.down = function() if BoardMenu.y < (BH - 1) then tmp[4]() end end
 	
 	BoardMenu.container.opacity=255
 	if (resumed) then

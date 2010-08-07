@@ -40,8 +40,10 @@ function Player:render(seconds)
 	end
 		
 	local current = game.board.squareGrid[ y ][ x ]
+	
+	if current.hasTower then current.tower.rangeCircle.opacity = 25 end
 
-	if not self.circle then --or not self.circle.list[1][self.circle.x].extra.t then
+	--[[if not self.circle then --or not self.circle.list[1][self.circle.x].extra.t then
 		
 		if current.hasTower then
 			current.tower.rangeCircle.opacity = 25
@@ -71,6 +73,6 @@ function Player:render(seconds)
 			
 		end
 		
-	end
+	end]]
 
 end
