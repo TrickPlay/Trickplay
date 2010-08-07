@@ -12,8 +12,8 @@ FinalOrderController = Class(Controller, function(self, view, ...)
     }
     self.Choices = Choices
     local selected_choice = Choices.REMOVE
-    local selected_item = 1 -- default focus to first item in cart
-    local previous_selected = {selected_choice, selected_item}
+    local selected_item = nil -- default focus to first item in cart
+    local previous_selected = {selected_choice, 1}
 
     local ChoicesCallbacks = {
         [Choices.EDIT] = function(self)
