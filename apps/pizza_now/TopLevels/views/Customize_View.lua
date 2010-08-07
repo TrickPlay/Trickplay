@@ -905,7 +905,7 @@ windmill_view:initialize()
                 view.ui:animate{duration = CHANGE_VIEW_TIME, opacity = BACKGROUND_FADE_OPACITY}
             else
                 print("Showing CustomizeView UI")
-                view.ui:animate{duration = 2*CHANGE_VIEW_TIME, opacity = 255,on_completed=
+                view.ui:animate{duration = 3*CHANGE_VIEW_TIME, opacity = 255,on_completed=
                 view.ui:animate{duration = CHANGE_VIEW_TIME, position = SHOW_POSITION}}
                 --view.back_arrow_selected.opacity = 0
                 --view.add_to_order_selector.opacity = 0

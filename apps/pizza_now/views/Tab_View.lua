@@ -80,6 +80,10 @@ TabView = Class(View, function(view, model,parent, ...)
              end
 
         end
+             if i == 1 then view.parent.up_arrow.opacity = BACKGROUND_FADE_OPACITY
+             else           view.parent.up_arrow.opacity = 255 
+             end
+
         print("\nto: bound",bound,"i",i,"s_g y pos",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y,
               "s_g_item y pos",view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y,"   addition",
                view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
@@ -125,6 +129,7 @@ TabView = Class(View, function(view, model,parent, ...)
 
 
 
+
     end
 
     function view:update()
@@ -139,12 +144,24 @@ TabView = Class(View, function(view, model,parent, ...)
                     if i == controller:get_selected_index() then
 
            view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
+            if i == 1 and #view.menu_items[view.parent:get_controller():get_selected_index()] > CUSTOMIZE_SCROLL_THRESHOLD then
+                           view.parent.up_arrow.opacity = BACKGROUND_FADE_OPACITY/2
+            else           view.parent.up_arrow.opacity = 255 
+            end
+             if i == #view.menu_items[view.parent:get_controller():get_selected_index()] and 
+                     #view.menu_items[view.parent:get_controller():get_selected_index()] > CUSTOMIZE_SCROLL_THRESHOLD then
+                                view.parent.down_arrow.opacity = BACKGROUND_FADE_OPACITY/2
+             else               view.parent.down_arrow.opacity = 255 
+             end
+
+
                     else
                         --item:animate{duration=100, opacity = 100}
            view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:out_focus()
                     end
                 end
             end
+
         elseif comp == Components.CUSTOMIZE_ITEM then
             print("Greying TabView UI")
             --view.ui.opacity = 100
