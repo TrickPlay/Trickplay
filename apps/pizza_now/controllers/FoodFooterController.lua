@@ -11,7 +11,15 @@ FoodFooterController = Class(Controller, function(self, view, ...)
             -- hack to get rid of the provider image at the top of this menu
             local provider_img = screen:find_child("provider_img_clone")
             if provider_img then
-               provider_img:unparent()
+               provider_img:animate{
+                  duration=150,
+                  opacity=0,
+                  on_completed=
+                  function(anim,ui)
+                     if not ui then ui = anim end
+                     ui:unparent()
+                  end
+               }
             end
             view.back.group:animate{duration = 200, opacity = 0}
             view.back_pressed:animate{

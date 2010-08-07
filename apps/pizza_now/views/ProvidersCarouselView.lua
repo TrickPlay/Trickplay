@@ -26,8 +26,10 @@ ProvidersCarouselView = Class(View,
       local menu_items_sep = MENU_ITEMS_SEP
 
       --inited means that it's already been placed on screen
-      local ui = Group{name="providersCarousel_ui", position={0,0}, opacity=255, extra={inited=false}}
-      ui:add(unpack(menu_items))
+      local ui = Group{name="providersCarousel_ui", position={0,0}, opacity=255}
+      local dock_ui = Group{name="dock_ui", position={0,0}, opacity=255, extra={inited=false}}
+      dock_ui:add(unpack(menu_items))
+      ui:add(dock_ui)
       view.ui = ui
       local center = {960, 480}
       local item_scale = {2,2}
@@ -44,6 +46,7 @@ ProvidersCarouselView = Class(View,
          local selected = controller:get_selected_index()
          -- if the doubled-in-height element is the new height of the menu, new_menu_h has the height to reflect that.
          if comp == Components.PROVIDER_SELECTION then
+            dock_ui.opacity=255
             local foc_item = menu_items[selected]
             local current_menu_h = menu_h
             if foc_item.h*item_scale[2] > current_menu_h then
@@ -87,18 +90,18 @@ ProvidersCarouselView = Class(View,
                y=center[2]-current_menu_h/2,
             }
 
-            if ui.extra.inited then
+            if dock_ui.extra.inited then
                grp_end_attrs.duration = animate_duration
-               ui:animate(grp_end_attrs)
+               dock_ui:animate(grp_end_attrs)
                for i, menu_item in ipairs(menu_items) do
                   assert(end_attrs[i], type(end_attrs[i]))
                   end_attrs[i].duration = animate_duration
                   menu_item:animate(end_attrs[i])
                end
             else
-               ui.extra.inited = true
+               dock_ui.extra.inited = true
                for k,v in pairs(grp_end_attrs) do
-                  ui[k] = v
+                  dock_ui[k] = v
                end
                for i, menu_item in ipairs(menu_items) do
                   for k,v in pairs(end_attrs[i]) do
@@ -107,7 +110,7 @@ ProvidersCarouselView = Class(View,
                end
             end
          else
-            --self.ui.opacity = 80
+            --self.dock_ui.opacity = 80
          end
       end
 
@@ -117,22 +120,22 @@ ProvidersCarouselView = Class(View,
          food_sel_controller:reset()
          local food_view = food_sel_controller:get_view()
          local food_ui = food_view.provider_ui
-         local provider_ui = screen:find_child("provider_ui")
+         local dock_ui = screen:find_child("dock_ui")
          local selected_item = menu_items[self:get_controller():get_selected_index()]
          local sel_clone = Clone{
             name="provider_img_clone",
             source=selected_item,
-            x=ui.x+selected_item.x,
-            y=ui.y+selected_item.y,
+            x=dock_ui.x+selected_item.x,
+            y=dock_ui.y+selected_item.y,
             scale=selected_item.scale
          }
          screen:add(sel_clone)
          selected_item.opacity=0
-         provider_ui.extra.food_ui = food_ui
+         dock_ui.extra.food_ui = food_ui
          food_ui.extra.model = self:get_model()
          food_ui.extra.clone = sel_clone
          food_ui.extra.orig_item = selected_item
-         provider_ui:animate{
+         dock_ui:animate{
             duration=100,
             opacity=0,
             on_completed=
