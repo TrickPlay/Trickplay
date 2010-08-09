@@ -95,6 +95,7 @@ Board.render = function (self, seconds)
 			if (v.hp ~= 0 and v.dead == false) then
 				v:render(seconds)
 			elseif (v.dead == false) then
+				if v.deathSound then mediaplayer:play_sound("themes/"..self.theme.themeName.."/sounds/"..v.deathSound) end
 				v.greenBar.width = 0
 				v.dead = true	
 				v.deathtimer:start()
