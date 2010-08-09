@@ -82,7 +82,9 @@ CreditInfoController = Class(Controller, function(self, view, ...)
         local defaultText = textObject.text
         textObject.editable = true
         textObject:grab_key_focus()
-        textObject.text = ""
+        if(not model.creditInfo[name]) then
+            textObject.text = ""
+        end
         function textObject:on_key_down(k)
             if(keys.Left == k or keys.Right == k) then
                 self.on_key_down = nil
@@ -119,7 +121,7 @@ CreditInfoController = Class(Controller, function(self, view, ...)
                 itemSelection(Info.NAME, NameSub.FIRST, "firstName")
             elseif(NameSub.LAST == sub_selection) then
                 --last name
-                itemSelection(Info.NAME, NameSub.LAST, "firstName")
+                itemSelection(Info.NAME, NameSub.LAST, "lastName")
             end
         end,
         [Info.PHONE] = function(self)
