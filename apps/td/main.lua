@@ -164,7 +164,7 @@ function app.on_loaded()
 					game.board.player.info = Popup:new{group = playerInfo, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
 					----------------------------------
 					    
-					Popup:new{text = "Resuming round "..round}				
+					Popup:new{text = "Resuming Level "..round}				
 					
 				else
 					

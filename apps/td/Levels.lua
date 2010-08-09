@@ -141,7 +141,7 @@ function createLevelMenu(l)
                 screen:add(playerInfo)
                 
                 game.board.player.info = Popup:new{group = playerInfo, fadeSpeed = 800, on_fade_in = function() end, on_fade_out = function() end}
-                Popup:new{text = "Round "..round}
+                Popup:new{text = "Level "..round}
                 
                 screen:add(bulletImage, healthbar, shootAnimation, healthbarblack, bloodGroup, obstaclesGroup, leveltext, livestext)
         
