@@ -45,6 +45,9 @@ function Tower:new(args, prefix, square, player)
 		fireImage = fireImage,
 		-- Stopwatch
 		timer = Stopwatch(),
+                
+                -- Bullet sound
+                sound = args.sound or nil,
         }
         
    	local rangeCircle = Canvas{color=player.color, x=0, y=0, width=1920, height=1080, z = 0, opacity = 0}
@@ -311,9 +314,18 @@ function Tower:animateFire(seconds, creep)
 		bullet.imageGroup.extra.parent = bullet
 		self.bgroup:add(bullet.imageGroup)
 		
-		--self.towerImageGroup.opacity = 2
+		if SOUND and game.bulletSounds < BULLET_SOUND_LIMIT then
+                        bullet.sound = true
+                        game.bulletSounds = game.bulletSounds + 1
+                        --print(game.bulletSounds)
+                        mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/"..self.sound)
+                end
 	
-	end
+	elseif SOUND and self.sound then
+        
+                mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/"..self.sound)
+        
+        end
 
 end
 

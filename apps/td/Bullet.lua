@@ -107,6 +107,7 @@ function Bullet:render(seconds)
 		
 		if pastx or pasty or self.imageGroup.x > 1920 or self.imageGroup.x < 0 or self.imageGroup.y > 1080 or self.imageGroup.y < 0 or self.creep.hp <= 0 then 
 			--print(dx, dy, self.imageGroup.x, self.imageGroup.y)
+			if self.sound then game.bulletSounds = game.bulletSounds - 1 end
 			self.creep.hit = true
 			self.creep:getHit(self.damage, 1)
 			self.imageGroup:remove(self.image)

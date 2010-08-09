@@ -50,6 +50,7 @@ function Board:new(args)
 		timer = Stopwatch(),
 		creepWave = {},
 	}
+	
 	setmetatable(object, self)
 	self.__index = self
 	return object
@@ -95,6 +96,7 @@ Board.render = function (self, seconds)
 			if (v.hp ~= 0 and v.dead == false) then
 				v:render(seconds)
 			elseif (v.dead == false) then
+				if SOUND and v.deathSound then mediaplayer:play_sound("themes/"..self.theme.themeName.."/sounds/"..v.deathSound) end
 				v.greenBar.width = 0
 				v.dead = true	
 				v.deathtimer:start()
@@ -265,8 +267,14 @@ function Board:createBoard()
 	BoardMenu = Menu.create(b, groups, hl)
 	BoardMenu:create_key_functions()
 	BoardMenu:button_directions()
-	BoardMenu:create_buttons(0, "Sans 34px")
-	BoardMenu:apply_color_change("FFFFFF", "000000")
+	BoardMenu:create_buttons(0)
+	
+	BoardMenu:addSound(nil, "themes/robot/sounds/BeepLow.wav")
+	
+	-- These will slow everything.. maybe take out?
+	--BoardMenu.ban = AssetLoader:getImage( "FocusBan", { } )
+	--BoardMenu:overlay()
+	--BoardMenu.updateOverlays()
 	
 	BoardMenu.x = 2
 	BoardMenu.y = 2
@@ -287,24 +295,24 @@ function Board:createBoard()
 		savedTowerPos = settings.towerPos
 		savedTowerUpgrades = settings.towerUpgrades
 		level = settings.level
-	
+		
 		if (settings.towerType) then
 			for i=1, #settings.towerType do
-				 local selection = settings.towerType[i]
-				 self.player.position = settings.towerPos[i]
-				 self.player.gold = self.player.gold + selection.cost
-				 self:buildTower(selection,self.player)
-				 if (settings.towerUpgrades[i] == 1) then
-				 	 self.player.gold = self.player.gold + selection.upgrades[1].cost
-					 self:upgradeTower(self.player)
-	 			 elseif (settings.towerUpgrades[i] == 2) then
-					 self.player.gold = self.player.gold + selection.upgrades[1].cost
-				 	 self.player.gold = self.player.gold + selection.upgrades[2].cost
-
-					 self:upgradeTower(self.player)
-					 self:upgradeTower(self.player)
-				 end
-
+				local selection = settings.towerType[i]
+				self.player.position = settings.towerPos[i]
+				self.player.gold = self.player.gold + selection.cost
+				self:buildTower(selection,self.player)
+				if (settings.towerUpgrades[i] == 1) then
+					self.player.gold = self.player.gold + selection.upgrades[1].cost
+					self:upgradeTower(self.player)
+				elseif (settings.towerUpgrades[i] == 2) then
+					self.player.gold = self.player.gold + selection.upgrades[1].cost
+					self.player.gold = self.player.gold + selection.upgrades[2].cost
+					
+					self:upgradeTower(self.player)
+					self:upgradeTower(self.player)
+				end
+				
 			end
 		end
 	end
@@ -351,7 +359,12 @@ function Board:createBoard()
 		
 		local notEnoughMoney = function()
 			
-			local a = Group{x=1440, y=795, opacity = 0}
+			local a
+			if player == self.player then
+				a = Group{x=1410, y=795, opacity = 0}
+			else
+				a = Group{x=50, y=795, opacity = 0}
+			end
 			a:add( AssetLoader:getImage( "NotEnoughMoney", { } ) )
 			Popup:new{group = a, fadeSpeed = 400, time=.8, opacity = 180}
 			
@@ -370,16 +383,34 @@ function Board:createBoard()
 				
 					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { name = towers[i].cost } )
 					list[#list].extra.t = towers[i]
+					list[#list].extra.p = true -- Means there is a cost number for focus purposes
 					list[#list].extra.f = function()
 						if (player.gold - towers[i].cost >=0) then
-							self:buildTower(towers[i], player)
-							self:findPaths()
-							return true
+							
+							local status, result = pcall ( self.checkForCreeps, self, { player.position[1], player.position[2] } )
+							
+							if result or not status then
+								
+								self:buildTower(towers[i], player)
+								self:findPaths()
+								return true
+								
+							else
+								
+								Popup:new{text = "You can't build on enemies!", fadeSpeed = 400, time=.8, opacity = 180}
+								
+							end
 						else
 							notEnoughMoney()
 						end
 					end
 				end
+			elseif SOUND then
+			
+				Popup:new{text = "You can't block the path!", fadeSpeed = 400, time=.8, opacity = 180}
+				mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+				
+			
 			end
 		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner.name == player.name) then
 			menuType = "Full"
@@ -387,6 +418,7 @@ function Board:createBoard()
 			local tower = self.squareGrid[y][x].tower
 			
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { name = math.ceil(tower.cost / 2) } )
+			list[#list].extra.p = true
 			list[#list].extra.f = function()
 				self:removeTower(player)
 				self:findPaths()
@@ -399,6 +431,7 @@ function Board:createBoard()
 				--print(tower.table.upgrades[tower.level+1].cost)
 				
 				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { name = tower.table.upgrades[tower.level+1].cost } )
+				list[#list].extra.p = true
 				list[#list].extra.f = function()
 					
 					--print(player.gold, tower.table.upgrades[tower.level+1].cost, player.gold - tower.table.upgrades[tower.level+1].cost)
@@ -435,7 +468,19 @@ function Board:createBoard()
 	self.player.playertext.text = self.player.name
 	self.player.goldtext.text = self.player.gold
 	BoardMenu.buttons.extra.p = function()
-	ipaused = not ipaused
+		paused = not paused
+		
+		if paused then	
+			game.board.timer:stop()
+			seconds_elapsed:stop()
+			PauseMenu:show()
+		else
+			game.board.timer:continue()
+			seconds_elapsed:continue()
+			PauseMenu:hide()
+		end
+		
+		--[[ipaused = not ipaused
 		if (ipaused) then
 --			screen:animate {duration = 500, y_rotation = 180}
 			screen:animate {duration = 500, scale = {0.1,0.1}}
@@ -443,12 +488,21 @@ function Board:createBoard()
 --			screen:animate {duration = 500, y_rotation = 0}
 			screen:animate {duration = 500, scale = {0.5,0.5}}
 
-		end
-	end	
+		end]]
+	end
+	
 	BoardMenu.buttons.extra.space = function()
 
 		--seconds_elapsed.elapsed_seconds = WAIT_TIME
 		bloodGroup:clear()
+	end
+	
+	BoardMenu.buttons.extra.s = function()
+	
+		SOUND = not SOUND
+		
+		if SOUND then mediaplayer:play() else mediaplayer:pause() end
+	
 	end
 	
 	
@@ -465,6 +519,18 @@ function Board:createBoard()
 
 end
 
+function Board:updateBan()
+
+	for i=1,BH do
+		for j=1, BW do
+		
+		if self.squareGrid[i][j].square[3] == FULL then BoardMenu.list[i][j].extra.overlay = self.ban
+		else BoardMenu.list[i][j].extra.overlay = nil end
+		
+		end
+	end
+
+end
 
 function Board:findPaths()
 
@@ -479,6 +545,29 @@ function Board:findPaths()
 			end
 		end
 	end
+
+end
+
+function Board:checkForCreeps(square)
+
+	for i, creep in pairs(self.creepWave) do
+		
+		if creep and not creep.flying and not creep.dead and creep.hp > 0 then
+			
+			--print(i,creep.path, creep.path[#creep.path])
+			
+			--print("CREEP:", creep.path[#creep.path][1], creep.path[#creep.path][2])
+			--print("TOWER:", square[1], square[2])
+			
+			if creep.path[#creep.path][1] == square[1] and creep.path[#creep.path][2] == square[2] then
+				--print("CAN'T BUILD HERE")
+				return
+			end
+		end
+	end
+	
+	--print("OK, GOOD")
+	return true
 
 end
 

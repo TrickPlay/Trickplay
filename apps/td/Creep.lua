@@ -31,8 +31,8 @@ function Creep:new(args, x, y, name, buffs)
 	local creepImageGroup = Group{z=1, clip={0,0,creepImage.w/frames,creepImage.h}, x = x_offset, y = y_offset }
 	
 	creepImageGroup:add(creepImage)
-	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset-10, x = - 25}
-	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset-10, x = - 25}
+	local greenBar = Clone {source = healthbar, color = "00FF00", y = y_offset-10, x = - 25, opacity=100}
+	local redBar = Clone {source = healthbarblack, color = "000000", width = SP, y = y_offset-10, x = - 25, opacity=70}
 	local shadow = AssetLoader:getImage("shadow" ,{y = -y_offset-40, opacity = 0})
 	
 	local creepGroup = Group{opacity=255, x = x, y = y}
@@ -71,7 +71,8 @@ function Creep:new(args, x, y, name, buffs)
 		bounty = bounty,
 		flying = flying,
 		creepGroup = creepGroup,
-		timer = timer
+		timer = timer,
+		deathSound = args.deathSound or nil,
    }
    
    if buffs then
@@ -95,10 +96,15 @@ function Creep:render(seconds)
 	local cy = self.creepGroup.y
 	
 	local leaked = function()
+		
+		if game.board.theme.themeName == "robot" then
+			local a = Group{x=0, y=0, opacity = 0}
+			a:add( AssetLoader:getImage( "bloodyhand", {z_rotation = {math.random(160)-80,screen.w/2, screen.h/2}, y = math.random(700)-350, x = math.random(700)-350} ) )
+			Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
 			
-		local a = Group{x=0, y=0, opacity = 0}
-		a:add( AssetLoader:getImage( "bloodyhand", {z_rotation = {math.random(160)-80,screen.w/2, screen.h/2}, y = math.random(700)-350, x = math.random(700)-350} ) )
-		Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
+			if SOUND then mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/ZombieGroan.wav") end
+			--mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/Thump.wav")
+		end
 		
 	end
 
