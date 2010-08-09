@@ -36,6 +36,11 @@ ProvidersCarouselView = Class(View,
       local side_item_scale = {1.1,1.1}
       local regular_scale = {1,1}
       local animate_duration = 50
+
+      function view:has_focus()
+         return self:get_controller():has_focus()
+      end
+
       function view:initialize()
          self:set_controller(ProvidersCarouselController(self))
       end
@@ -46,69 +51,69 @@ ProvidersCarouselView = Class(View,
          local selected = controller:get_selected_index()
          -- if the doubled-in-height element is the new height of the menu, new_menu_h has the height to reflect that.
          if comp == Components.PROVIDER_SELECTION then
-            dock_ui.opacity=255
-            local foc_item = menu_items[selected]
-            local current_menu_h = menu_h
-            if foc_item.h*item_scale[2] > current_menu_h then
-               current_menu_h = foc_item.h*item_scale[2]
-            end
+               dock_ui.opacity=255
+               local foc_item = menu_items[selected]
+               local current_menu_h = menu_h
+               if foc_item.h*item_scale[2] > current_menu_h then
+                  current_menu_h = foc_item.h*item_scale[2]
+               end
 
-            -- local current_menu_w =
-            --    menu_items_width + (#menu_items-1)*menu_items_sep+foc_item.w*(item_scale[1]-1)
-            -- store all the ultimate menu_item positions so we can run animations all at once at the end.
-            local end_attrs = {}
-            for i=1,#menu_items do
-               end_attrs[i] = {}
-            end
-            
-            -- first redefine cen_x, cen_y for within ui group
-            local cen_y = current_menu_h/2
-            local x_so_far = 0
-            local scale = {1,1}
-            for i,menu_item in ipairs(menu_items) do
-               -- calculate appropriate scale
-               if i==selected then
-                  scale=item_scale
-               elseif i==selected+1 or i==selected-1 then
-                  scale = side_item_scale
+               -- local current_menu_w =
+               --    menu_items_width + (#menu_items-1)*menu_items_sep+foc_item.w*(item_scale[1]-1)
+               -- store all the ultimate menu_item positions so we can run animations all at once at the end.
+               local end_attrs = {}
+               for i=1,#menu_items do
+                  end_attrs[i] = {}
+               end
+               
+               -- first redefine cen_x, cen_y for within ui group
+               local cen_y = current_menu_h/2
+               local x_so_far = 0
+               local scale = {1,1}
+               for i,menu_item in ipairs(menu_items) do
+                  -- calculate appropriate scale
+                  if i==selected and self:has_focus() then
+                     scale=item_scale
+                  elseif (i==selected+1 or i==selected-1) and self:has_focus() then
+                     scale = side_item_scale
+                  else
+                     scale = regular_scale
+                  end
+
+                  -- update animation params
+                  end_attrs[i].x = x_so_far
+                  end_attrs[i].scale=scale
+                  end_attrs[i].y = cen_y - menu_item.h*scale[2]/2
+
+                  -- update new x coordinate
+                  x_so_far = x_so_far + menu_item.w*scale[1]+menu_items_sep
+               end
+
+               local grp_end_attrs = {
+                  duration=100,
+                  x=center[1]-x_so_far/2,
+                  y=center[2]-current_menu_h/2,
+               }
+
+               if dock_ui.extra.inited then
+                  grp_end_attrs.duration = animate_duration
+                  dock_ui:animate(grp_end_attrs)
+                  for i, menu_item in ipairs(menu_items) do
+                     assert(end_attrs[i], type(end_attrs[i]))
+                     end_attrs[i].duration = animate_duration
+                     menu_item:animate(end_attrs[i])
+                  end
                else
-                  scale = regular_scale
-               end
-
-               -- update animation params
-               end_attrs[i].x = x_so_far
-               end_attrs[i].scale=scale
-               end_attrs[i].y = cen_y - menu_item.h*scale[2]/2
-
-               -- update new x coordinate
-               x_so_far = x_so_far + menu_item.w*scale[1]+menu_items_sep
-            end
-
-            local grp_end_attrs = {
-               duration=100,
-               x=center[1]-x_so_far/2,
-               y=center[2]-current_menu_h/2,
-            }
-
-            if dock_ui.extra.inited then
-               grp_end_attrs.duration = animate_duration
-               dock_ui:animate(grp_end_attrs)
-               for i, menu_item in ipairs(menu_items) do
-                  assert(end_attrs[i], type(end_attrs[i]))
-                  end_attrs[i].duration = animate_duration
-                  menu_item:animate(end_attrs[i])
-               end
-            else
-               dock_ui.extra.inited = true
-               for k,v in pairs(grp_end_attrs) do
-                  dock_ui[k] = v
-               end
-               for i, menu_item in ipairs(menu_items) do
-                  for k,v in pairs(end_attrs[i]) do
-                     menu_item[k] = v
+                  dock_ui.extra.inited = true
+                  for k,v in pairs(grp_end_attrs) do
+                     dock_ui[k] = v
+                  end
+                  for i, menu_item in ipairs(menu_items) do
+                     for k,v in pairs(end_attrs[i]) do
+                        menu_item[k] = v
+                     end
                   end
                end
-            end
          else
             --self.dock_ui.opacity = 80
          end

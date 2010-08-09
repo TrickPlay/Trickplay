@@ -66,6 +66,8 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
         end
     }
 
+    local focus = false
+
     function self:on_key_down(k)
         if CarouselKeyTable[k] then
            CarouselKeyTable[k](self)
@@ -86,11 +88,16 @@ ProvidersCarouselController = Class(Controller, function(self, view, ...)
     end
 
     function self:on_focus()
+       focus = true
     end
 
     function self:out_focus()
+       focus = false
     end
 
+    function self:has_focus()
+       return focus
+    end
     
     function self:run_callback()
         CarouselKeyTable[keys.Return](self)
