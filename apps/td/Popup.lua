@@ -3,6 +3,8 @@
 Popup = {}
 
 function Popup:new(args)
+
+        --if POPUP_LIMIT and game and #game.popups >= POPUP_LIMIT then return end 
      
         local wingroup
         local winbox
