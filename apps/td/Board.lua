@@ -161,6 +161,8 @@ Board.render = function (self, seconds)
 			
 			endGamePopup(1, "You win!")
 			
+			
+			
 		end
 		
 	end

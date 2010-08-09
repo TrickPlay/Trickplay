@@ -223,9 +223,13 @@ function endGamePopup(status, text)
         for k,v in pairs(game.popups) do
                 v.group.opacity = 0
         end
-
+			local a = Group{x=0, y=0, opacity = 0}
+			a:add( AssetLoader:getImage( "win", {y = 500, x = 750} ) )
+			Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
+		
         local a = Popup:new{
-                text = text,
+					 group = a,
+--                text = text,
                 time = 4,
                 fadeSpeed = 500,
                 draw = true,
