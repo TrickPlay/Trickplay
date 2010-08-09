@@ -28,26 +28,27 @@ Ranks = {
    EIGHT=Rank("Eight", 8),
    NINE=Rank("Nine", 9),
    TEN=Rank("Ten", 10),
-   JACK=Rank("Jack", 11)
-   QUEEN=Rank("Queen", 12)
-   KING=Rank("King", 13)
-   ACE=Rank("Ace", 14)
+   JACK=Rank("Jack", 11),
+   QUEEN=Rank("Queen", 12),
+   KING=Rank("King", 13),
+   ACE=Rank("Ace", 14),
 }
 
 function Card(rank, suit)
    return {
       rank=rank,
-      suit=suit
+      suit=suit,
+      name=rank.name .. " of " .. suit.name
    }
 end
 
 Cards = {}
-for _, suit in ipairs(Suits) do
-   for __, rank in ipairs(Ranks) do
+for _, suit in pairs(Suits) do
+   for __, rank in pairs(Ranks) do
       table.insert(Cards, Card(rank, suit))
    end
 end
-
+print("#Cards", #Cards)
 Deck = Class(nil, function(self, ...)
    local cards = {}
    for _, card in ipairs(Cards) do
@@ -63,10 +64,20 @@ Deck = Class(nil, function(self, ...)
    end
 
    function self:deal(n)
+      assert(n <= #cards)
       local hand = {}
+      local card
       for i=1,n do
-         table.insert(hand, table.remove(cards))
+         card = table.remove(cards)
+         table.insert(hand, card)
       end
       return hand
+   end
+
+   function self:reset()
+      cards = {}
+      for _, card in ipairs(Cards) do
+         table.insert(cards, card)
+      end
    end
 end)
