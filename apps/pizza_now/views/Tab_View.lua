@@ -107,7 +107,8 @@ TabView = Class(View, function(view, model,parent, ...)
 --[=[view.selector.y <= 60*(edge-1)]=] then --view.selector.y = view.parent.sub_group[view.parent:get_controller():get_selected_index()].y - view.ui.y + view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y-10--view.selector.y+60
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][4]:on_focus()
            --view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i-1][4]:out_focus()
-        elseif bound > CUSTOMIZE_SCROLL_THRESHOLD then
+        elseif bound > CUSTOMIZE_SCROLL_THRESHOLD and view.parent.sub_group[view.parent:get_controller():get_selected_index()].y +
+              view.parent.sub_group_items[view.parent:get_controller():get_selected_index()][i][1].y  > 770 then
              print("\n\n2",view.parent.sub_group[view.parent:get_controller():get_selected_index()].y)
              view.parent.sub_group[view.parent:get_controller():get_selected_index()].y = -60*(i-1-CUSTOMIZE_SCROLL_THRESHOLD)+40
 
