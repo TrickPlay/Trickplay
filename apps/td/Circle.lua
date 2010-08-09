@@ -40,12 +40,25 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	
 	local list = params
         
+        local focusBump = AssetLoader:getImage("BuyFocus",{})
+        local focusRound = AssetLoader:getImage("BuyFocusCircle",{})
+        
+        for i=1, #list[1] do
+                if list[1][i].extra.p then list[1][i].extra.overlay = focusBump
+                else list[1][i].extra.overlay = focusRound
+                end
+        end
+        
         local hl = AssetLoader:getImage("BuyFocus",{})
         local CircleMenu = Menu.create(c, list, hl)
         CircleMenu:create_key_functions()
         CircleMenu:button_directions()
         CircleMenu:create_buttons(-20, "Sans 20px")	        
         CircleMenu:update_cursor_position()
+        CircleMenu:overlay()
+	CircleMenu.updateOverlays()
+        
+        CircleMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
         
         CircleMenu.debug = true -- TURN THIS OFF LATER
         
@@ -54,7 +67,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
         
-        CircleMenu.hl.opacity = 255
+        CircleMenu.hl.opacity = 0
 	--CircleMenu.container.opacity=230
         CircleMenu.container.z=5
         CircleMenu.owner = player
@@ -102,13 +115,6 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.buttons.extra.r = function()
                 
 		-- Call the current button's function
-                
-                -- TODO Use the player to hold keypress function info
-                -- then have a table for keyboard like that table for ipod
-                -- That way I can do things like this on the player instead of having
-                -- A special case for both
-                ------------------------------------------
-               
                 if list[1][CircleMenu.x].extra.f() then
                         
                         -- Then destroy the menu and return to the board
@@ -136,6 +142,10 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         
                         circlePopup.fade = "out"
                         
+                elseif SOUND then
+                
+                        mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+                
                 end
                 
 	end
