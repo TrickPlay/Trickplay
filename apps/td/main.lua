@@ -26,7 +26,7 @@ function app.on_loaded()
 		--local track_url = "themes/robot/sounds/ThemeSong.wav"
 		if SOUND then
 		
-			local track_url = "backgroundMusic.wav"
+			local track_url = "ThemeLoop.wav"
 			mediaplayer:load(track_url)
 			mediaplayer.on_loaded = function (mediaplayer)
 				mediaplayer:play()
