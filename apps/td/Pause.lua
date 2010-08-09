@@ -68,7 +68,11 @@ end
 
 PauseMenu.buttons.extra.r = function()
 
-        PauseMenu.buttons.extra.p()
+        if PauseMenu.y == 1 then
+                PauseMenu.buttons.extra.p()
+        else
+                exit()
+        end
 
 end
 
