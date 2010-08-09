@@ -44,6 +44,7 @@ end
 
 AssetLoader:preloadImage("TowerShadow1","assets/TowerShadow1.png")
 AssetLoader:preloadImage("TowerShadow2","assets/TowerShadow2.png")
+AssetLoader:preloadImage("win","themes/robot/assets/win.png")
 
 
 AssetLoader:preloadImage("MainMenuPressEnter","assets/MainMenuPressEnter.png")
