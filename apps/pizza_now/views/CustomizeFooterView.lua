@@ -124,7 +124,7 @@ CustomizeFooterView = Class(View, function(view, model,parent, ...)
         local controller = view:get_controller()
         local p_controller = view.parent:get_controller()
         local comp = model:get_active_component()
-        if comp == Components.CUSTOMIZE then
+        if comp == Components.CUSTOMIZE or comp == Components.TAB then
             print("Showing CustomizeFooterView UI")
             view.ui:raise_to_top()
             --if this child had the focus

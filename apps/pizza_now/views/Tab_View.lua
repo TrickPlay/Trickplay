@@ -32,8 +32,9 @@ TabView = Class(View, function(view, model,parent, ...)
        model:set_active_component(Components.CUSTOMIZE)
        local sel = view.parent:get_controller():get_selected_index()
        view.parent.sub_group_items[sel][view:get_controller():get_selected_index()][4]:out_focus()
-       view:get_controller():reset_selected_index()
+       --view:get_controller():reset_selected_index()
        --view.selector.y = 0
+--[[
        view.parent.sub_group[sel].y = 100
        local sub_group_items = view.parent.sub_group_items
        for i=1,#sub_group_items[sel] do
@@ -50,6 +51,7 @@ TabView = Class(View, function(view, model,parent, ...)
              sub_group_items[sel][i][4].group.opacity = 0
           end
        end
+--]]
        self:get_model():notify()
     end
 
@@ -138,6 +140,7 @@ TabView = Class(View, function(view, model,parent, ...)
         if comp == Components.TAB then
             print("Showing TabView UI")
             view.ui.opacity = 255
+            view.parent.ui.opacity = 255
             --view.selector.opacity = 255
             for i,option in ipairs(view.menu_items[view.parent:get_controller():get_selected_index()]) do
                 for j,item in ipairs(option) do
