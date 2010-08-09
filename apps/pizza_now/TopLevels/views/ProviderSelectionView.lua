@@ -59,14 +59,16 @@ ProviderSelectionView = Class(View, function(view, model, ...)
             self.ui.opacity = 255
             for i,c_view in ipairs(view.items) do
                if i == selected then
+                  c_view:get_controller():on_focus()
                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=255}
                   self:get_controller().child = c_view:get_controller()
                else
+                  c_view:get_controller():out_focus()
                   print(c_view.ui.opacity)
                   c_view.ui:animate{duration=CHANGE_VIEW_TIME, opacity=BACKGROUND_FADE_OPACITY}
                end
             end
-        else
+         else
             print("Hiding ProviderSelectionView UI")
             self.ui.opacity = 0
         end
