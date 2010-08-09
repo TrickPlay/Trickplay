@@ -42,6 +42,12 @@ for themeName, t in pairs(Themes) do
 
 end
 
+AssetLoader:preloadImage("Resume","assets/Resume.png")
+AssetLoader:preloadImage("ResumeFocus","assets/ResumeFocus.png")
+AssetLoader:preloadImage("SaveAndQuit","assets/SaveAndQuit.png")
+AssetLoader:preloadImage("SaveAndQuitFocus","assets/SaveAndQuitFocus.png")
+
+
 AssetLoader:preloadImage("TowerShadow1","assets/TowerShadow1.png")
 AssetLoader:preloadImage("TowerShadow2","assets/TowerShadow2.png")
 
@@ -62,7 +68,9 @@ AssetLoader:preloadImage("DescriptionRight","themes/robot/assets/DescriptionRigh
 AssetLoader:preloadImage("DescriptionLeft","themes/robot/assets/DescriptionLeft.png")
 
 AssetLoader:preloadImage("bloodyhand","themes/robot/assets/bloodyhand.png")
+
 AssetLoader:preloadImage("BuyFocus","themes/robot/assets/BuyFocus.png")
+AssetLoader:preloadImage("BuyFocusCircle","themes/robot/assets/BuyFocusCircle.png")
 
 AssetLoader:preloadImage("ProgressBar","assets/ProgressBar.png")
 AssetLoader:preloadImage("WaveProgress", "themes/robot/assets/WaveProgress.png")

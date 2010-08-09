@@ -1,4 +1,4 @@
-local print = function() end
+--local print = function() end
 
 Popup = {}
 
@@ -87,8 +87,6 @@ function Popup:render(seconds)
                 end
         
         elseif self.fade == "out" then
-        
-                --print("Fading out")
         
                 if self.draw then
                         self.group:animate{opacity = 0, duration = self.fadeSpeed, on_completed = function() pcall(self.on_fade_out, self) end}  

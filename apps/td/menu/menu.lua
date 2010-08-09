@@ -107,6 +107,7 @@ function Menu:create_key_functions(container)
         self.actions[keys.space] = function() pcall ( container.extra.space ) if self.debug then print("Space") end pcall ( self.update_cursor_position, self ) end
         self.actions[keys.Return] = function() pcall ( container.extra.r ) if self.debug then print("Return/Enter") end pcall ( self.update_cursor_position, self ) end
         self.actions[keys.p] = function() pcall ( container.extra.p ) if self.debug then print("You pressed: p") end pcall ( self.update_cursor_position, self ) end
+        self.actions[keys.s] = function() pcall ( container.extra.s ) if self.debug then print("You pressed: s") end pcall ( self.update_cursor_position, self ) end
         
 end
 
@@ -207,6 +208,10 @@ end
 
 function Menu:overlay(args)
 
+        local print = function() end
+
+        print("\n\n\n\n")
+
         if not args then local args = {} end
 
         local list = self.list
@@ -226,18 +231,31 @@ function Menu:overlay(args)
                 end
         end
         
-        local change = function()
-                
+        print("Added overlays to container")
+        
+        local makeTransparent = function()
+        
                 local x, y = self:get_position()
-                
-                local l = list[x][y]
+                local l = list[y][x]
                 local o = l.extra.overlay
+                
+                if o then o.opacity = 0 end
+        
+        end
+        
+        local change = function()
+  
+                local x, y = self:get_position()
+                local l = list[y][x]
+                local o = l.extra.overlay
+                 
                 if not o then return end
                 
                 -- Adjust the current overlay's position and opacity
-                o.opacity = args.opacity or 255
+                o.opacity = 255
                 o.x = l.x
                 o.y = l.y
+                o:raise_to_top()
                 
                 -- For each button
                 for i=1,self.max_y do
@@ -251,16 +269,29 @@ function Menu:overlay(args)
                                 end
                         end
                 end
+                
+                print("fin")
         end
 
-        local old = {container.extra.up, container.extra.down, container.extra.left, container.extra.right}
-        local directions = {container.extra.up, container.extra.down, container.extra.left, container.extra.right}
+        print("Change is a function")
         
-        for i=1,#directions do
+        local container = self.buttons
         
-                directions[i] = appendFunction(change, old[i])
+        local temp = container.extra.right
+        container.extra.right = function() makeTransparent() temp() change() end
         
-        end
+        local temp = container.extra.left
+        container.extra.left = function() makeTransparent() temp() change() end
+        
+        local temp = container.extra.up
+        container.extra.up = function() makeTransparent() temp() change() end
+        
+        local temp = container.extra.down
+        container.extra.down = function() makeTransparent() temp() change() end
+        
+        self.updateOverlays = change
+
+        print("\n\n\n\n")
 
 end
 

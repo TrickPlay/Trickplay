@@ -29,6 +29,7 @@ CREEP_END = {4, BW}
 
 CREEP_WAVE_LENGTH = 30
 
+SOUND = true
 BULLET_SOUND_LIMIT = 5
 
 seconds_elapsed = Stopwatch()
