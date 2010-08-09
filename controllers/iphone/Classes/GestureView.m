@@ -25,8 +25,20 @@
 #define VERT_SWIPE_DRAG_MAX    10
 #define TAP_DISTANCE_MAX    4
 
+@interface GestureView(PrivateInterface)
+- (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
+- (void)ClearUIElements;
+@end
+
+@interface GestureView(AVAudioPlayerDelegates)
+- (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename;
+- (void)createAudioStreamer:(NSString *)audioURL;
+- (void)destroyAudioStreamer;
+@end
+
 @implementation GestureView
 
+@dynamic mSender;
 @synthesize mTouchedTime;
 @synthesize waitingView;
 @synthesize mStyleAlert;
@@ -86,6 +98,8 @@
 									target:self action:@selector(exitAppAction:)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
 
+	backgroundView.image = [UIImage imageNamed:@"background.png"];
+
 }
 
 - (void)exitAppAction:(id)sender
@@ -110,7 +124,7 @@
 	//}
 	mTryingToConnect = YES;
 	[listenSocket connectToHost:hostname onPort:port error:&error ];
-	NSTimer *atimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onTimeout) userInfo:nil repeats:NO];
+	[NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onTimeout) userInfo:nil repeats:NO];
 	[waitingView startAnimating];
 	//[self logInfo:FORMAT(@"Echo server started on port %hu", [listenSocket localPort])];
 
@@ -174,7 +188,7 @@
     else if (mAccelMode == 2) //high pass filter
 	{
 		//Method 2 for high pass filter
-		UIAccelerationValue				length,
+		UIAccelerationValue
 		 x,
 		 y,
 		 z;
@@ -248,7 +262,7 @@
     {
 		if (mTouchedTime > 0)
 		{
-			NSLog([NSString stringWithFormat:@"swipe speed horiz :%f ",[NSDate timeIntervalSinceReferenceDate]  - mTouchedTime]);
+			NSLog(@"swipe speed horiz :%f ",[NSDate timeIntervalSinceReferenceDate]  - mTouchedTime);
 			if (([NSDate timeIntervalSinceReferenceDate]  - mTouchedTime) < 0.05)
 			{
 				//numSwipes = 3;
@@ -285,7 +299,7 @@
 	{
 		if (mTouchedTime > 0)
 		{
-			NSLog([NSString stringWithFormat:@"swipe speed vertical:%f ",[NSDate timeIntervalSinceReferenceDate]  - mTouchedTime]);
+			NSLog(@"swipe speed vertical:%f ",[NSDate timeIntervalSinceReferenceDate]  - mTouchedTime);
 			if (([NSDate timeIntervalSinceReferenceDate]  - mTouchedTime) < 0.05)
 			{
 				//numSwipes = 3;
@@ -348,7 +362,7 @@
 		}
 		else
 		{
-			NSLog([NSString stringWithFormat:@"no swipe sent, start.x,.y:%f , %f  current.x,.y:%f , %f",startTouchPosition.x,startTouchPosition.y,currentTouchPosition.x,currentTouchPosition.y]);
+			NSLog(@"no swipe sent, start.x,.y:%f , %f  current.x,.y:%f , %f",startTouchPosition.x,startTouchPosition.y,currentTouchPosition.x,currentTouchPosition.y);
 		}
 		
 		
@@ -444,12 +458,12 @@
 		{
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			
-			if ([[components objectAtIndex:1] compare:@"L"] == 0)
+			if ([(NSString *)[components objectAtIndex:1] compare:@"L"] == 0)
 			{
 					mAccelMode = 1;
 					[[UIAccelerometer sharedAccelerometer] setUpdateInterval:[[components objectAtIndex:2] floatValue]];
 			}
-			else if ([[components objectAtIndex:1] compare:@"H"] == 0)
+			else if ([(NSString *)[components objectAtIndex:1] compare:@"H"] == 0)
 			{
 					mAccelMode = 2;
 					[[UIAccelerometer sharedAccelerometer] setUpdateInterval:[[components objectAtIndex:2] floatValue]];
@@ -499,7 +513,7 @@
 			if ([mResourceNameCollection count] > 0)
 			{
 				//Show the image
-				int index;
+				unsigned index;
 				NSDictionary *itemAtIndex;
 				for (index = 0;index < [mResourceNameCollection count];index++)
 				{
@@ -510,9 +524,9 @@
 						//NSData *data = [NSData dataWithContentsOfURL:url];
 						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
 						NSString *imageurl = [itemAtIndex objectForKey:@"link"];
-						if ([[itemAtIndex objectForKey:@"link"] hasPrefix:@"http:"] || [[itemAtIndex objectForKey:@"link"] hasPrefix:@"https:"])
+						if ([imageurl hasPrefix:@"http:"] || [imageurl hasPrefix:@"https:"])
 						{
-							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]]]] autorelease];
+							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageurl]]] autorelease];
 							backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
 						}
 						else {
@@ -527,15 +541,15 @@
 				}
 				
 				//Scale or tile it if necessary
-				if ([[components objectAtIndex:2] compare:@"C"] == 0)  //Center
+				if ([(NSString *)[components objectAtIndex:2] compare:@"C"] == 0)  //Center
 				{
 					
 				}
-				else if ([[components objectAtIndex:2] compare:@"S"] == 0)  //Stretch
+				else if ([(NSString *)[components objectAtIndex:2] compare:@"S"] == 0)  //Stretch
 				{
 					
 				}
-				else if ([[components objectAtIndex:2] compare:@"T"] == 0)  //Tile
+				else if ([(NSString *)[components objectAtIndex:2] compare:@"T"] == 0)  //Tile
 				{
 					
 				}
@@ -549,19 +563,20 @@
 			NSArray *components = [msg componentsSeparatedByString:@"\t"];
 			if ([mResourceNameCollection count] > 0)
 			{
-				int index;
+				unsigned index;
 				NSDictionary *itemAtIndex;
 				for (index = 0;index < [mResourceNameCollection count];index++)
 				{
 					itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
-					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
+                    NSString *soundname = [itemAtIndex objectForKey:@"name"];
+					if ([soundname compare:[components objectAtIndex:1]] == 0)
 					{
 						NSString *soundurl = [itemAtIndex objectForKey:@"link"];
-						[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];	
+						[self playSoundFile:soundname filename:soundurl];	
 					
 						//Loop parameter
 						NSString *loopvalue = [components objectAtIndex:2];
-						[mResourceNameCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[itemAtIndex objectForKey:@"name"], @"name",loopvalue, @"loop",[itemAtIndex objectForKey:@"link"],@"link", nil]];
+						[mResourceNameCollection replaceObjectAtIndex:index withObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:soundname, @"name",loopvalue, @"loop",soundurl,@"link", nil]];
 						
 						break;
 					}
@@ -584,7 +599,7 @@
 			NSString *windowtitle = [components objectAtIndex:1];
 			//multiple choice alertview
 			//<id>,<text> pairs
-			int theindex = 2;
+			unsigned theindex = 2;
 			if (mStyleAlert != nil)
 			{
 				[mStyleAlert release];
@@ -623,7 +638,7 @@
 			else {
 				mTextField.text = @"";
 			}
-			NSTimer *atimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onKeyboardDisplay) userInfo:nil repeats:NO];
+			[NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onKeyboardDisplay) userInfo:nil repeats:NO];
 			
 		}
 		
@@ -831,14 +846,14 @@
 	{
 		//[self destroyStreamer];
 		NSDictionary *itemAtIndex;
-		int index;
+		unsigned index;
 		for (index = 0;index < [mResourceNameCollection count];index++)
 		{
 			itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
-			if ([[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
+			if ([(NSString *)[itemAtIndex objectForKey:@"name"] compare:mSoundLoopName] == 0)
 			{
 				//Found it
-				if ([[itemAtIndex objectForKey:@"loop"] compare:@"0"] == 0) {
+				if ([(NSString *)[itemAtIndex objectForKey:@"loop"] compare:@"0"] == 0) {
 					//Play it again Sam, forever
 					[self playSoundFile:[itemAtIndex objectForKey:@"name"] filename:[itemAtIndex objectForKey:@"link"]];
 				}

@@ -3,9 +3,12 @@
 
 #ifdef TP_PROFILING
 
-#define PROFILER(name)  Profiler _profiler(name)
-#define PROFILER_DUMP   Profiler::dump()
-#define PROFILER_RESET  Profiler::reset()
+#define PROFILER(name)          Profiler _profiler(name)
+#define PROFILER_DUMP           Profiler::dump()
+#define PROFILER_OBJECTS        Profiler::dump_objects()
+#define PROFILER_RESET          Profiler::reset()
+#define PROFILER_CREATED(n,p)   Profiler::created(n,p)
+#define PROFILER_DESTROYED(n,p) Profiler::destroyed(n,p)
 
 #include "common.h"
 
@@ -31,6 +34,12 @@ public:
 
     static void reset();
 
+    static void created( const char * name, gpointer p );
+
+    static void destroyed( const char * name, gpointer p );
+
+    static void dump_objects();
+
 private:
 
     static GQueue * get_queue();
@@ -48,13 +57,28 @@ private:
     static bool compare( std::pair< String, Entry > a, std::pair< String, Entry > b );
 
     static EntryMap entries;
+
+    struct ObjectEntry
+    {
+        ObjectEntry() : created(0), destroyed(0) {}
+
+        guint   created;
+        guint   destroyed;
+    };
+
+    typedef std::map< String, ObjectEntry > ObjectMap;
+
+    static ObjectMap objects;
 };
 
 #else
 
-#define PROFILER(name)  while(0){}
-#define PROFILER_DUMP   g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
-#define PROFILER_RESET  while(0){}
+#define PROFILER(name)          while(0){}
+#define PROFILER_DUMP           g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
+#define PROFILER_OBJECTS        g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
+#define PROFILER_RESET          while(0){}
+#define PROFILER_CREATED(n,p)   while(0){}
+#define PROFILER_DESTROYED(n,p) while(0){}
 
 #endif // TP_PROFILING
 

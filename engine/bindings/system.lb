@@ -9,11 +9,10 @@
 global system [[TPContext*]]
 {
     system()
-        [[*self=App::get(L)->get_context();]];
+        [[
+        	self=lb_construct( TPContext , App::get(L)->get_context() );
+       	]];
 
-    ~system()
-        [[]];
-        
     # Function: acquire_numeric_keypad
     # Requests access to the numeric keypad. This can be used to allow the user
     # to enter numbers directly (as opposed to using an on-screen keyboard). You
