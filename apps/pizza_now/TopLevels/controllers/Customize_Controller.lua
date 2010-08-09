@@ -11,6 +11,8 @@ CustomizeController = Class(Controller,
           FIRST_TAB = 6
       }
       self.curr_comp = self.ChildComponents.TAB_BAR
+      self.prev_comp = self.ChildComponents.TAB_BAR
+
       self.conches = {}
       function self:set_children(children)
           print("All",#children,"set")
@@ -205,7 +207,7 @@ CustomizeController = Class(Controller,
             end
          --if you are already in the Tab sub group, pass the call down
          else--]]if(self.in_tab_group) then
-            --print("self.in_tab_group true")
+            print("\n\n\nself.in_tab_group true")
             assert(self.tab_controller,"tab controller is nil")
             self.tab_controller:move_selector(dir)
 --[[
@@ -238,6 +240,7 @@ CustomizeController = Class(Controller,
                   end
                elseif dir == Directions.LEFT then
                   --self.on_back_arrow = true
+                  self.prev_comp = self.ChildComponents.TAB_BAR
                   self.curr_comp = self.ChildComponents.FOOT
                   self.conches[self.curr_comp]:reset_selected_index()
                   self:get_model():notify()
@@ -252,6 +255,7 @@ CustomizeController = Class(Controller,
                   --print(selected)
                elseif new_selected > MenuSize then
                   print("add??")
+                  self.prev_comp = self.ChildComponents.TAB_BAR
                   self.curr_comp = self.ChildComponents.FOOT
                   --self:get_model():notify()
                end
