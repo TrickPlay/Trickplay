@@ -265,8 +265,14 @@ function Board:createBoard()
 	BoardMenu = Menu.create(b, groups, hl)
 	BoardMenu:create_key_functions()
 	BoardMenu:button_directions()
-	BoardMenu:create_buttons(0, "Sans 34px")
-	BoardMenu:apply_color_change("FFFFFF", "000000")
+	BoardMenu:create_buttons(0)
+	
+	BoardMenu:addSound(nil, "themes/robot/sounds/BeepLow.wav")
+	
+	-- These will slow everything.. maybe take out?
+	--BoardMenu.ban = AssetLoader:getImage( "FocusBan", { } )
+	--BoardMenu:overlay()
+	--BoardMenu.updateOverlays()
 	
 	BoardMenu.x = 2
 	BoardMenu.y = 2
@@ -351,7 +357,12 @@ function Board:createBoard()
 		
 		local notEnoughMoney = function()
 			
-			local a = Group{x=1440, y=795, opacity = 0}
+			local a
+			if player == self.player then
+				a = Group{x=1410, y=795, opacity = 0}
+			else
+				a = Group{x=50, y=795, opacity = 0}
+			end
 			a:add( AssetLoader:getImage( "NotEnoughMoney", { } ) )
 			Popup:new{group = a, fadeSpeed = 400, time=.8, opacity = 180}
 			
@@ -373,14 +384,29 @@ function Board:createBoard()
 					list[#list].extra.p = true -- Means there is a cost number for focus purposes
 					list[#list].extra.f = function()
 						if (player.gold - towers[i].cost >=0) then
-							self:buildTower(towers[i], player)
-							self:findPaths()
-							return true
+							
+							local status, result = pcall ( self.checkForCreeps, self, { player.position[1], player.position[2] } )
+							
+							if result or not status then
+								
+								self:buildTower(towers[i], player)
+								self:findPaths()
+								return true
+								
+							else
+								
+								Popup:new{text = "You can't build on enemies!", fadeSpeed = 400, time=.8, opacity = 180}
+								
+							end
 						else
 							notEnoughMoney()
 						end
 					end
 				end
+			elseif SOUND then
+			
+				mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+			
 			end
 		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner.name == player.name) then
 			menuType = "Full"
@@ -489,6 +515,18 @@ function Board:createBoard()
 
 end
 
+function Board:updateBan()
+
+	for i=1,BH do
+		for j=1, BW do
+		
+		if self.squareGrid[i][j].square[3] == FULL then BoardMenu.list[i][j].extra.overlay = self.ban
+		else BoardMenu.list[i][j].extra.overlay = nil end
+		
+		end
+	end
+
+end
 
 function Board:findPaths()
 
@@ -503,6 +541,29 @@ function Board:findPaths()
 			end
 		end
 	end
+
+end
+
+function Board:checkForCreeps(square)
+
+	for i, creep in pairs(self.creepWave) do
+		
+		if creep and not creep.flying and not creep.dead and creep.hp > 0 then
+			
+			--print(i,creep.path, creep.path[#creep.path])
+			
+			--print("CREEP:", creep.path[#creep.path][1], creep.path[#creep.path][2])
+			--print("TOWER:", square[1], square[2])
+			
+			if creep.path[#creep.path][1] == square[1] and creep.path[#creep.path][2] == square[2] then
+				--print("CAN'T BUILD HERE")
+				return
+			end
+		end
+	end
+	
+	--print("OK, GOOD")
+	return true
 
 end
 

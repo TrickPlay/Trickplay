@@ -94,6 +94,7 @@ function Menu:create_key_functions(container)
 	container.on_key_down = function(container, k)	
 		
                 pcall ( self.actions[k], container )
+                pcall ( self.playSound , k )
                 
 		return true -- Prevent bubble upward to screen
 	end
@@ -292,6 +293,27 @@ function Menu:overlay(args)
         self.updateOverlays = change
 
         print("\n\n\n\n")
+
+end
+
+function Menu:addSound(move, select)
+
+        if move then self.moveSound = move end
+        if select then self.selectSound = select end
+
+        self.playSound = function(k)
+        
+                if SOUND then
+                        if k == keys.Right then mediaplayer:play_sound(self.moveSound)
+                        elseif k == keys.Left then mediaplayer:play_sound(self.moveSound)
+                        elseif k == keys.Down then mediaplayer:play_sound(self.moveSound)
+                        elseif k == keys.Up then mediaplayer:play_sound(self.moveSound)
+                        elseif k == keys.Return then mediaplayer:play_sound(self.selectSound)
+                        elseif k == keys.Space then mediaplayer:play_sound(self.selectSound)
+                        end
+                end
+        
+        end
 
 end
 

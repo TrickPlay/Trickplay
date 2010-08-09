@@ -58,6 +58,8 @@ function createCircleMenu(offset, distance, params, menuType, player)
         CircleMenu:overlay()
 	CircleMenu.updateOverlays()
         
+        CircleMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
+        
         CircleMenu.debug = true -- TURN THIS OFF LATER
         
         print("Created a button menu")
@@ -113,13 +115,6 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.buttons.extra.r = function()
                 
 		-- Call the current button's function
-                
-                -- TODO Use the player to hold keypress function info
-                -- then have a table for keyboard like that table for ipod
-                -- That way I can do things like this on the player instead of having
-                -- A special case for both
-                ------------------------------------------
-               
                 if list[1][CircleMenu.x].extra.f() then
                         
                         -- Then destroy the menu and return to the board
@@ -147,6 +142,10 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         
                         circlePopup.fade = "out"
                         
+                elseif SOUND then
+                
+                        mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+                
                 end
                 
 	end
