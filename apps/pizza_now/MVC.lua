@@ -245,7 +245,7 @@ Controller = Class(Observer, function(controller, view, controller_id)
     end
 
     function controller:on_focus()
-        error("self:on_focus() not defined for controller")
+        error("self:on_focus() not defined for controller", 2)
     end
     
     function controller:out_focus()
