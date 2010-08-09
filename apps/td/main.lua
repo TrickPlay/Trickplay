@@ -24,15 +24,18 @@ function app.on_loaded()
 		--mediaplayer:play_sound("backgroundMusic.wav")
 		
 		--local track_url = "themes/robot/sounds/ThemeSong.wav"
+		if SOUND then
 		
-		local track_url = "backgroundMusic.wav"
-		mediaplayer:load(track_url)
-		mediaplayer.on_loaded = function (mediaplayer)
-			mediaplayer:play()
-		end
-		mediaplayer.on_end_of_stream = function (mediaplayer)
-			mediaplayer:seek(0) 
-			mediaplayer:play()
+			local track_url = "backgroundMusic.wav"
+			mediaplayer:load(track_url)
+			mediaplayer.on_loaded = function (mediaplayer)
+				mediaplayer:play()
+			end
+			mediaplayer.on_end_of_stream = function (mediaplayer)
+				mediaplayer:seek(0) 
+				mediaplayer:play()
+			end
+			
 		end
 
 		----
@@ -233,7 +236,7 @@ function app.on_loaded()
 		MainMenu.updateOverlays()
 		MainMenu.buttons.extra.left()
 		
-		
+		MainMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
 		
 		
 		--screen:add( AssetLoader:getImage("BuyFocus",{name="robot", x=200, y=200, z=20}) )

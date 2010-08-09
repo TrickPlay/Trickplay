@@ -47,6 +47,9 @@ AssetLoader:preloadImage("ResumeFocus","assets/ResumeFocus.png")
 AssetLoader:preloadImage("SaveAndQuit","assets/SaveAndQuit.png")
 AssetLoader:preloadImage("SaveAndQuitFocus","assets/SaveAndQuitFocus.png")
 
+AssetLoader:preloadImage("FocusBan","assets/FocusBan.png")
+
+
 
 AssetLoader:preloadImage("TowerShadow1","assets/TowerShadow1.png")
 AssetLoader:preloadImage("TowerShadow2","assets/TowerShadow2.png")

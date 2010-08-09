@@ -84,6 +84,8 @@ PauseMenu.buttons.extra.s = function()
 
 end
 
+PauseMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
+
 
 
 
