@@ -34,14 +34,8 @@ end
 function Menu:new(args)
 
         -- The only necessary thing is a list
-        if not args then
-                print("No empty menus!")
-                debug()
-                return
-        elseif not args.list then
-                print("Need buttons in a list")
-                debug()
-                return
+        if not args then print("No empty menus!") debug() return
+        elseif not args.list then print("Need buttons in a list") debug() return
         end
 
         -- Create the menu object
@@ -67,7 +61,7 @@ function Menu:new(args)
                 
         -- Make the x and y map of the button list
         local list = menu.list
-        if list[1][1] ~= nil then
+        if list[1][1] then
                 
                 menu.max_y = #list
                 menu.max_x = {}
@@ -86,13 +80,8 @@ function Menu:create_hl(hl)
 	if not hl then return end
 	self.hl = hl
 	self.hl.opacity=255
-	--self.hl.extra={ loc=1 }
 	self.hl.anchor_point = {self.hl.w/2, self.hl.h/2}
         self.container:add(self.hl)
-end
-
-function Menu:set_opacity(opacity)
-	self.container.opacity = opacity
 end
 
 -- Create commands for each button press
@@ -214,6 +203,69 @@ function Menu:stop_wiggle()
 	o:complete_animation()
 	o.extra.animate = function() end
 	o.x = o.extra.old[1] o.y = o.extra.old[2]
+end
+
+function Menu:overlay(args)
+
+        if not args then local args = {} end
+
+        local list = self.list
+        
+        for i=1,self.max_y do
+		for j=1,self.max_x[i] do
+                        
+                        local c = list[i][j]
+                        
+                        -- Add the overlays to screen if they are not part of a group
+                        if c.extra.overlay then
+                                if not c.extra.overlay.parent then
+                                        self.container:add(c.extra.overlay)
+                                end
+                        end
+                        
+                end
+        end
+        
+        local change = function()
+                
+                local x, y = self:get_position()
+                
+                local l = list[x][y]
+                local o = l.extra.overlay
+                if not o then return end
+                
+                -- Adjust the current overlay's position and opacity
+                o.opacity = args.opacity or 255
+                o.x = l.x
+                o.y = l.y
+                
+                -- For each button
+                for i=1,self.max_y do
+                        for j=1,self.max_x[i] do
+                                
+                                local c = list[i][j].extra.overlay
+                                
+                                -- If the overlay is not the current one, then hide it
+                                if c and c ~= o then
+                                        c.opacity = 0
+                                end
+                        end
+                end
+        end
+
+        local old = {container.extra.up, container.extra.down, container.extra.left, container.extra.right}
+        local directions = {container.extra.up, container.extra.down, container.extra.left, container.extra.right}
+        
+        for i=1,#directions do
+        
+                directions[i] = appendFunction(change, old[i])
+        
+        end
+
+end
+
+function Menu:get_position()
+        return self.x, self.y
 end
 
 function Menu:create_buttons(margin, m_font, position)

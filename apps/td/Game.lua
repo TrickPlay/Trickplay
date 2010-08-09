@@ -17,6 +17,7 @@ function Game:new(args)
 		board = board,
 		theme = theme,
 		popups = {},
+		bulletSounds = 0,
    }
    setmetatable(object, self)
    self.__index = self

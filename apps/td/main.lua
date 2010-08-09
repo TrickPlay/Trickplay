@@ -14,15 +14,30 @@ screen:show()
 function app.on_loaded()
 	dofile ("Themes.lua")
 	
---	Popup:new{text = "Welcome to Robots vs Zombies!", draw = true, fadeSpeed = 500}:render()
-	 -- Everything is loaded
-    
+	Popup:new{text = "Welcome to Robots vs Zombies!", draw = true, fadeSpeed = 500}:render()
+	-- Everything is loaded
+	
 	AssetLoader.on_preload_ready = function()
-		mediaplayer:play_sound("backgroundMusic.wav")
+		
+		--mediaplayer:play_sound("backgroundMusic.wav")
+		
+		--local track_url = "themes/robot/sounds/ThemeSong.wav"
+		local track_url = "backgroundMusic.wav"
+		mediaplayer:load(track_url)
+		mediaplayer.on_loaded = function (mediaplayer)
+			mediaplayer:play()
+		end
+		mediaplayer.on_end_of_stream = function (mediaplayer)
+			mediaplayer:seek(0) 
+			mediaplayer:play()
+		end
+
+		----
+		
 		TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
 		--MainMenuImage = AssetLoader:getImage("MainMenu", {name = "MainMenu", x = 500, y = 100})
 		screen:add(TitleBackground, MainMenuImage)
-	
+		
 		dofile ("Circle.lua")
 		
 		local mainMenuList = {

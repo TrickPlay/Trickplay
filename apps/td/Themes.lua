@@ -66,7 +66,9 @@ AssetLoader:preloadImage("BuyFocus","themes/robot/assets/BuyFocus.png")
 
 AssetLoader:preloadImage("ProgressBar","assets/ProgressBar.png")
 AssetLoader:preloadImage("WaveProgress", "themes/robot/assets/WaveProgress.png")
-AssetLoader:preloadImage("TitleBackground","themes/robot/background.png")
+
+AssetLoader:preloadImage("TitleBackground","themes/robot/assets/TitleBackground.png")
+
 AssetLoader:preloadImage("smallWindow","assets/SmallWindow.png")
 AssetLoader:preloadImage("largeWindow","assets/LargeWindow.png")
 AssetLoader:preloadImage("InfoBar2","assets/player2InfoBar.png")
