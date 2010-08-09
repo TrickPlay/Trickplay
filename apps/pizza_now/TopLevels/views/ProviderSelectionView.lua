@@ -5,10 +5,11 @@ ProviderSelectionView = Class(View, function(view, model, ...)
          position = {20,30},
          color    = Colors.WHITE,
          font     = CUSTOMIZE_SUB_FONT,
-         text     = "Enter your address below,\n"..
-                    "then press up to select a\n"..
-                    "company from the providers\n"..
-                    "that service your area"
+         text     = ""
+         -- "Enter your address below,\n"..
+         --            "then press up to select a\n"..
+         --            "company from the providers\n"..
+         --            "that service your area"
     }
 
 

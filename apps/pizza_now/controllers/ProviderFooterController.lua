@@ -20,6 +20,7 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     -- the default selected index
     local selected = 2
     local previous_selected = 2
+    local focus = false
 
     local function itemSelection(item, name)
         local textObject = view.items[item]
@@ -101,12 +102,18 @@ ProviderFooterController = Class(Controller, function(self, view, ...)
     end
 
     function self:on_focus()
-        selected = previous_selected
+       focus = true
+--        selected = previous_selected
     end
 
     function self:out_focus()
-        previous_selected = selected
-        selected = 0
+       focus = false
+        -- previous_selected = selected
+        -- selected = 0
+    end
+
+    function self:has_focus()
+       return focus
     end
 
     function self:move_selector(dir)
