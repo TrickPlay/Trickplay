@@ -14,12 +14,12 @@ ProviderSelectionController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = ProviderGroups.FOOTER
+    local selected = ProviderGroups.PROVIDERS
 
     --initialize the focus to the carousel
     assert(view.items[selected], "view child with index " .. selected .. " is nil!")
     self.child = view.items[selected]:get_controller()
-
+    self.child:on_focus()
     local ProviderCallbacks = {
         -- [ProviderGroups.DELIVERY_OPTIONS] = function(self)
         --     print("delivery options")

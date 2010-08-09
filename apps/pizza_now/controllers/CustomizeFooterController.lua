@@ -179,7 +179,11 @@ CustomizeFooterController = Class(Controller, function(self, view, ...)
                 self:get_model():notify()
             elseif dir == Directions.UP then
                 --screen:grab_key_focus()
+                if view.parent:get_controller().prev_comp == view.parent:get_controller().ChildComponents.TAB_ITEMS then     
+                    model:set_active_component(Components.TAB)
+                end
                 view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.TAB_BAR
+                
                 self:get_model():notify()
             end
         end

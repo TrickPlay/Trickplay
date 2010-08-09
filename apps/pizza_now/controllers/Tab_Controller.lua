@@ -3,7 +3,7 @@ TabController = Class(Controller,
         self._base.init(self, view, Components.TAB)
 
         -- the default selected index
-        local selected = 1
+        local selected = {}
         local i = 1
 
         local MenuItemCallbacks = {}
@@ -19,6 +19,7 @@ TabController = Class(Controller,
                         i = i + 1
                     end
                 end
+                selected[tab_index] = 1
             end
         end
 
@@ -56,28 +57,30 @@ TabController = Class(Controller,
         end
 
         function self:get_selected_index()
-            return selected
+            return selected[view.parent:get_controller():get_selected_index()]
         end
         function self:reset_selected_index()
-            selected = 1
+            selected[view.parent:get_controller():get_selected_index()] = 1
         end
 
         function self:move_selector(dir)
+            local tab_ind = view.parent:get_controller():get_selected_index()
             --move out of the Tab sub group
             if dir == Directions.LEFT then
                 view.parent:get_controller().in_tab_group = false
                 view:leave_sub_group()
             --move up and down through the options
             elseif dir[2] ~= 0 then
-                local new_selected = selected + dir[2]
-                if 1 <= new_selected and new_selected <= #view.menu_items[view.parent:get_controller():get_selected_index()] then
-                    selected = new_selected
-                    if dir == Directions.UP then view:move_selector_up(selected)
-                    else                         view:move_selector_down(selected) end
+                local new_selected = selected[tab_ind] + dir[2]
+                if 1 <= new_selected and new_selected <= #view.menu_items[tab_ind] then
+                    selected[tab_ind] = new_selected
+                    if dir == Directions.UP then view:move_selector_up(selected[tab_ind])
+                    else                         view:move_selector_down(selected[tab_ind]) end
                 --if you moved down, but couldn't then drop to the bottom bar
                 elseif dir == Directions.DOWN then
+                    view.parent:get_controller().prev_comp = view.parent:get_controller().ChildComponents.TAB_ITEMS
                     view.parent:get_controller().curr_comp = view.parent:get_controller().ChildComponents.FOOT
-                    view.parent:get_controller().in_tab_group = false
+                    --view.parent:get_controller().in_tab_group = false
                     view:leave_sub_group()
                 end
 

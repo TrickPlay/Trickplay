@@ -42,7 +42,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             position={340, 1000},
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
-            text="Enter Street",
+            text="411 Acacia Ave",
             wants_enter = false,
             max_length = 26
         },
@@ -51,7 +51,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
-            text="Apt.",
+            text="",
             max_length = 5
         },
         Text{
@@ -59,7 +59,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
-            text="City",
+            text="Palo Alto",
             max_length = 15
         },
         Text{
@@ -67,7 +67,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             font=DEFAULT_FONT,
             color=DEFAULT_COLOR,
             wants_enter = false,
-            text="ZIP",
+            text="94306",
             max_length = 5
         },
     }
@@ -89,7 +89,7 @@ ProviderFooterView = Class(View, function(view, model, ...)
             print("Showing ProviderFooterView UI")
             view.ui:raise_to_top()
             for i,box in ipairs(view.boxes) do
-                if i == controller:get_selected_index() then
+               if i == controller:get_selected_index() and self:get_controller():has_focus() then
                     print("\t",i,"opacity to 255")
                     box.on_focus()
                 else
