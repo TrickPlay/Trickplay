@@ -4,22 +4,23 @@ set( LB_GENERATOR       ${ENGINE_SRC}/lb/bin/lb.py )
 
 set( 3RD_PARTY_SOURCE_FILES )
 
+set( ENGINE_LIBRARY_NAMES )
+
+set( ENGINE_SOURCE_FILES )
+
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
 #------------------------------------------------------------------------------
 # Include directories
 #------------------------------------------------------------------------------
 
-TP_FIND_INCLUDE( expat.h 				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( curl/curl.h 				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( glib-2.0 glib.h 			ENGINE_INCLUDE_DIRS )
-TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( cairo cairo.h				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( pango-1.0 pango/pango.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( avahi-core core.h			ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( expat.h 								ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( curl/curl.h 							ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( glib-2.0 glib.h 						ENGINE_INCLUDE_DIRS )
+TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h				ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( cairo cairo.h							ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( pango-1.0 pango/pango.h				ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( fontconfig fontconfig.h                ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
@@ -29,7 +30,43 @@ TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
 #TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
+
+
+#------------------------------------------------------------------------------
+# Avahi for MDNS
+
+if (TP_CONTROLLER_DISCOVERY_MDNS)
+	
+	TP_FIND_INCLUDE( avahi-core core.h						ENGINE_INCLUDE_DIRS )
+	TP_FIND_INCLUDE( avahi-glib glib-watch.h				ENGINE_INCLUDE_DIRS )
+	TP_FIND_INCLUDE( avahi-common watch.h					ENGINE_INCLUDE_DIRS )
+	
+	list( APPEND ENGINE_LIBRARY_NAMES	avahi-core avahi-common avahi-glib )
+	
+	add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
+
+    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+	
+endif (TP_CONTROLLER_DISCOVERY_MDNS)
+
+#------------------------------------------------------------------------------
+# UPnP
+
+if ( TP_CONTROLLER_DISCOVERY_UPNP )
+
+	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
+	
+	list( APPEND ENGINE_LIBRARY_NAMES upnp )
+	
+	add_definitions( -DTP_CONTROLLER_DISCOVERY_UPNP=1 )
+	
+	list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_upnp.cpp )
+
+endif ( TP_CONTROLLER_DISCOVERY_UPNP )
+
+#------------------------------------------------------------------------------
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -46,7 +83,9 @@ include_directories(
 # Libraries
 #------------------------------------------------------------------------------
 
-set(
+list( 
+	APPEND
+    
     ENGINE_LIBRARY_NAMES
     
     #--------------
@@ -80,12 +119,6 @@ set(
     tokyocabinet
     
     #--------------
-    # avahi
-    #--------------
-        
-    avahi-core avahi-common avahi-glib
-    
-    #--------------
     # sqlite
     #--------------
     
@@ -110,6 +143,11 @@ set(
     
     json-glib-1.0    
         
+	#--------------
+	# uuid
+	#--------------
+
+	ossp-uuid	        
 )
 
 #------------------------------------------------------------------------------
@@ -168,6 +206,7 @@ endif (TP_CLUTTER_BACKEND_EGL)
 if (TP_PRODUCTION)
 
 	add_definitions( -DTP_PRODUCTION=1 )
+	add_definitions( -DG_DISABLE_ASSERT=1 )
 	
 endif (TP_PRODUCTION)
 
@@ -195,28 +234,32 @@ set(
 
     LB_FILES
     
+    ${BINDINGS_SRC}/globals.lb
+
     ${BINDINGS_SRC}/timer.lb
+    
     ${BINDINGS_SRC}/url_request.lb
     ${BINDINGS_SRC}/local_hash.lb
-    ${BINDINGS_SRC}/globals.lb
     ${BINDINGS_SRC}/app.lb
     ${BINDINGS_SRC}/system.lb
     ${BINDINGS_SRC}/settings.lb
     ${BINDINGS_SRC}/profile.lb
     ${BINDINGS_SRC}/xml.lb
+    ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
-    ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/json.lb
+
+	${BINDINGS_SRC}/audiosampler.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
     ${BINDINGS_SRC}/clutter_screen.lb
-    ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_rectangle.lb
+    ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_clone.lb
     ${BINDINGS_SRC}/clutter_group.lb
     ${BINDINGS_SRC}/clutter_image.lb
@@ -286,7 +329,7 @@ set( LUA_SOURCE_FILES
     ${LUA_ROOT}/src/ltablib.c
     ${LUA_ROOT}/src/lstrlib.c
     ${LUA_ROOT}/src/loadlib.c
-#    ${LUA_ROOT}/src/liolib.c
+    ${LUA_ROOT}/src/liolib.c
 #    ${LUA_ROOT}/src/linit.c
 )
 
@@ -298,15 +341,12 @@ set_source_files_properties(
         LANGUAGE CXX
 )
 
-
 #------------------------------------------------------------------------------
 
-add_library(
-    
-    tpcore
-    
-    STATIC
-    
+list( APPEND 
+
+	ENGINE_SOURCE_FILES
+
     ${ENGINE_SRC}/source/notify.cpp
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/app.cpp    
@@ -315,13 +355,12 @@ add_library(
     ${ENGINE_SRC}/source/console.cpp
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
-    ${ENGINE_SRC}/source/mdns.cpp
     ${ENGINE_SRC}/source/keys.cpp
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp    
-    ${ENGINE_SRC}/source/signal_collector.cpp    
     ${ENGINE_SRC}/source/clutter_util.cpp    
+
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
     ${ENGINE_SRC}/source/profiler.cpp
@@ -339,6 +378,20 @@ add_library(
 
     ${ENGINE_SRC}/lb/src/lb.cpp
 
+    ${ENGINE_SRC}/source/user_data.cpp
+    ${ENGINE_SRC}/source/util.cpp
+)
+
+#------------------------------------------------------------------------------
+
+add_library(
+    
+    tpcore
+    
+    STATIC
+
+	${ENGINE_SOURCE_FILES}    
+    
     ${GENERATED_FILES}
     
     ${LUA_SOURCE_FILES}

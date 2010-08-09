@@ -200,7 +200,7 @@ global settings [[Settings*]] table
 {
     settings()
         [[
-            *self=new Settings(L);
+            self=lb_construct( Settings , new Settings(L) );
         ]];
         
     ~settings()

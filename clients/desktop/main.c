@@ -38,9 +38,9 @@ int main( int argc, char * argv[ ] )
 
     TPContext * context = tp_context_new();
 
-    if ( argc > 1 )
+    if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
     {
-        tp_context_set( context, "app.path", argv[ 1 ] );
+        tp_context_set( context, "app_path", argv[ argc - 1  ] );
     }
 
 #if CUSTOM_IMAGE_DECODER

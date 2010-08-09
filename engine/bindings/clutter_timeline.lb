@@ -4,7 +4,6 @@ module clutter_timeline;
 #include "clutter/clutter.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -27,13 +26,15 @@ class Timeline [[ClutterTimeline*]]
 {
     Timeline(table props = 0)
 	[[
-	    *self=clutter_timeline_new(1000);
-    	    ClutterUtil::set_props_from_table(L,props);
+		self=clutter_timeline_new(1000);
+		g_object_ref(self);
+		self=lb_construct_gobject(ClutterTimeline,self);
+    	ClutterUtil::set_props_from_table(L,props);
+    	g_object_unref(self);
 	]];
 	
     ~Timeline()
 	[[
-	    g_object_unref(G_OBJECT(self));
 	]];
 	
 	/*
@@ -339,9 +340,12 @@ class Timeline [[ClutterTimeline*]]
 		
     callback on_new_frame
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_new_frame,"on_new_frame",
-		self,"new-frame",G_CALLBACK(Timeline_on_new_frame),L);
+	    UserData::get(L)->connect_signal_if(
+			on_new_frame,
+			"on_new_frame",
+			"new-frame",
+			G_CALLBACK(Timeline_on_new_frame),
+			L);
 	]];
 	
 	/*
@@ -356,9 +360,12 @@ class Timeline [[ClutterTimeline*]]
 	
     callback on_started
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_started,"on_started",
-		self,"started",G_CALLBACK(Timeline_on_started),L);	    
+	    UserData::get(L)->connect_signal_if(
+			on_started,
+			"on_started",
+			"started",
+			G_CALLBACK(Timeline_on_started),
+			L);	    
 	]];
     
     /*
@@ -373,9 +380,12 @@ class Timeline [[ClutterTimeline*]]
     
     callback on_completed
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_completed,"on_completed",
-		self,"completed",G_CALLBACK(Timeline_on_completed),L);	    	    
+	    UserData::get(L)->connect_signal_if(
+			on_completed,
+			"on_completed",
+			"completed",
+			G_CALLBACK(Timeline_on_completed),
+			L);	    	    
 	]];
 	
 	/*
@@ -390,9 +400,12 @@ class Timeline [[ClutterTimeline*]]
 	
     callback on_paused
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_paused,"on_paused",
-		self,"paused",G_CALLBACK(Timeline_on_paused),L);	    	    
+	    UserData::get(L)->connect_signal_if(
+			on_paused,
+			"on_paused",
+			"paused",
+			G_CALLBACK(Timeline_on_paused),
+			L);	    	    
 	]];
 	
 	/*
@@ -411,9 +424,12 @@ class Timeline [[ClutterTimeline*]]
 	
     callback on_marker_reached
 	[[
-	    SignalCollector::get(L)->connect_if(
-		on_marker_reached,"on_marker_reached",
-		self,"marker-reached",G_CALLBACK(Timeline_on_marker_reached),L);	    	    	    
+	    UserData::get(L)->connect_signal_if(
+			on_marker_reached,
+			"on_marker_reached",
+			"marker-reached",
+			G_CALLBACK(Timeline_on_marker_reached),
+			L);	    	    	    
 	]];
 }
 
@@ -422,29 +438,29 @@ void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L)
 {
     lua_pushinteger(L,msecs);
     lua_pushnumber(L,clutter_timeline_get_progress(timeline));
-    invoke_Timeline_on_new_frame(L,timeline,2,0);
+    UserData::invoke_callback(G_OBJECT(timeline),"on_new_frame",2,0,L);
 }
 
 void Timeline_on_started(ClutterTimeline*timeline,lua_State*L)
 {
-    invoke_Timeline_on_started(L,timeline,0,0);    
+    UserData::invoke_callback(G_OBJECT(timeline),"on_started",0,0,L);
 }
 
 void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L)
 {
-    invoke_Timeline_on_completed(L,timeline,0,0);    
+    UserData::invoke_callback(G_OBJECT(timeline),"on_completed",0,0,L);
 }
 
 void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L)
 {
-    invoke_Timeline_on_paused(L,timeline,0,0);    
+    UserData::invoke_callback(G_OBJECT(timeline),"on_paused",0,0,L);
 }
 
 void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L)
 {
     lua_pushstring(L,marker_name);
     lua_pushinteger(L,msecs);
-    invoke_Timeline_on_marker_reached(L,timeline,2,0);
+    UserData::invoke_callback(G_OBJECT(timeline),"on_marker_reached",2,0,L);
 }
 
 ]]

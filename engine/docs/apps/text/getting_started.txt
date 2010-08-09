@@ -118,14 +118,13 @@ you details about the configuration of TrickPlay.
 Topic: Configuring TrickPlay
 
 You can change what TrickPlay knows. This can be done in several ways, but the
-easiest is to create a text file called "trickplay.cfg" in a directory where you
-run the TrickPlay executable. This file contains any number of
-keys and values, where the value is separated from the key by an equal sign.
-Any line that starts with a # is ignored, so you can add comments. For example, try this:
+easiest is to create a text file called ".trickplay" in a directory where you
+run the TrickPlay executable or your home directory. This is a Lua file that 
+has access to all command line options passed to trickplay. For example, try this:
 
 (code)
-system.language=es
-system.country=AR
+system_language="es"
+system_country="AR"
 (end)
 
 This tells TrickPlay that it should run in Spanish and the country is Argentina.

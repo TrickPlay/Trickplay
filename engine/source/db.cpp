@@ -7,7 +7,7 @@
 
 namespace SQLite
 {
-    DebugLog db_debug( true );
+    Debug_ON db_debug;
 
     Error::Error()
         :
