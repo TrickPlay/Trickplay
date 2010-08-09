@@ -314,14 +314,14 @@ function Tower:animateFire(seconds, creep)
 		bullet.imageGroup.extra.parent = bullet
 		self.bgroup:add(bullet.imageGroup)
 		
-		if game.bulletSounds < BULLET_SOUND_LIMIT then
+		if SOUND and game.bulletSounds < BULLET_SOUND_LIMIT then
                         bullet.sound = true
                         game.bulletSounds = game.bulletSounds + 1
-                        print(game.bulletSounds)
+                        --print(game.bulletSounds)
                         mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/"..self.sound)
                 end
 	
-	elseif self.sound then
+	elseif SOUND and self.sound then
         
                 mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/"..self.sound)
         

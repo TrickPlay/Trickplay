@@ -9,6 +9,8 @@ dofile ("Bullet.lua")
 dofile ("TowerInfo.lua")
 dofile ("Popup.lua")
 
+
+
 screen:show()
 
 function app.on_loaded()
@@ -22,6 +24,7 @@ function app.on_loaded()
 		--mediaplayer:play_sound("backgroundMusic.wav")
 		
 		--local track_url = "themes/robot/sounds/ThemeSong.wav"
+		
 		local track_url = "backgroundMusic.wav"
 		mediaplayer:load(track_url)
 		mediaplayer.on_loaded = function (mediaplayer)
@@ -36,22 +39,27 @@ function app.on_loaded()
 		
 		TitleBackground = AssetLoader:getImage("TitleBackground",{name="TitleBackground"} )
 		--MainMenuImage = AssetLoader:getImage("MainMenu", {name = "MainMenu", x = 500, y = 100})
-		screen:add(TitleBackground, MainMenuImage)
+		screen:add(TitleBackground)
 		
 		dofile ("Circle.lua")
 		
+		local o = AssetLoader:getImage( "MainMenuOverlay",{ name="overlay" } )
+		local e = AssetLoader:getImage( "MainMenuPressEnter",{ name="pressEnter" } )
+		
 		local mainMenuList = {
 			{
-			AssetLoader:getImage("MainMenuSingle",{ name="single" }),
-			AssetLoader:getImage("MainMenuDouble",{ name="double" }),
+			AssetLoader:getImage("MainMenuSingle",{ name="single", extra={overlay = e} }),
+			AssetLoader:getImage("MainMenuDouble",{ name="double", extra={overlay = o} }),
 			}
 		}
+		
+		--mainMenuList[1][2].extra.overlay = o
 		
 		if settings.saved then
 			
 			mainMenuList[1][3] = mainMenuList[1][2]
 			mainMenuList[1][2] = mainMenuList[1][1]
-			mainMenuList[1][1] = AssetLoader:getImage("MainMenuResume",{ name="resume" })
+			mainMenuList[1][1] = AssetLoader:getImage("MainMenuResume",{ name="resume", extra={overlay = o} })
 			
 		end
 		
@@ -168,83 +176,65 @@ function app.on_loaded()
 		-- Theme menu
 		dofile ("ThemeMenu.lua")
 		dofile ("Levels.lua")
+		dofile ("Pause.lua")
 		
 		ThemeMenu.container.opacity = 255
 		
-		-- Complicated main menu crap
-		MainMenu.overlay = AssetLoader:getImage( "MainMenuOverlay",{ name="overlay", opacity = 0 } )
-		MainMenu.pressEnter = AssetLoader:getImage( "MainMenuPressEnter",{ name="pressEnter", opacity = 0 } )
-
-		MainMenu.container:add(MainMenu.overlay, MainMenu.pressEnter)
-		
-		local w = MainMenu.container.w
-		
-		local overlay = function()
-			
-			local name = MainMenu.list[1][MainMenu.x].name
-			MainMenu.container.w = w
-			
-			if name == "resume" or name == "double" then
-			
-				--ThemeMenu.container.x = MainMenu.container.x - MainMenu.container.w/2 + single.x + 40
-				--ThemeMenu.container.y = 200
-				
-				MainMenu.overlay.opacity = 255
-				MainMenu.overlay.x = MainMenu.list[1][MainMenu.x].x
-				ThemeMenu.hl.opacity = 0
-				MainMenu.pressEnter.opacity = 0
-			
-			else
-				MainMenu.pressEnter.opacity = 255
-				MainMenu.pressEnter.x = MainMenu.list[1][MainMenu.x].x
-				ThemeMenu.hl.opacity = 255
-				MainMenu.overlay.opacity = 0
-			
-			end
-			
-		end
-		
-		overlay()
-		
 		MainMenu.buttons.extra.up = function()
-		
-			if MainMenu.list[1][MainMenu.x].name == "single" then
 			
+			if MainMenu.list[1][MainMenu.x].name == "single" then
+				
 				ThemeMenu.buttons.extra.up()
 				ThemeMenu:update_cursor_position()
-			
+				
 			end
-		
+			
 		end
 		
 		MainMenu.buttons.extra.down = function()
-		
-			if MainMenu.list[1][MainMenu.x].name == "single" then
 			
+			if MainMenu.list[1][MainMenu.x].name == "single" then
+				
 				ThemeMenu.buttons.extra.down()
 				ThemeMenu:update_cursor_position()
+				
+			end
 			
+		end
+		
+		local focusTheme = function()
+		
+			if MainMenu.list[1][MainMenu.x].name == "single" then
+				ThemeMenu.hl.opacity = 255
+			else
+				ThemeMenu.hl.opacity = 0
 			end
 		
 		end
 		
-		MainMenu.buttons.extra.right = appendFunction(MainMenu.buttons.extra.right, overlay)
-		MainMenu.buttons.extra.left = appendFunction(MainMenu.buttons.extra.left, overlay)
+		local temp = MainMenu.buttons.extra.right
+		MainMenu.buttons.extra.right = function()
+			temp()
+			focusTheme()
+		end
 		
-		--MainMenu.buttons.extra.right = function() print(MainMenu.x, #MainMenu.list[1])  if MainMenu.x < #MainMenu.list[1] then MainMenu.buttons.extra.right() end end
-		
-		
-		
-		
-		
-		
-		
-		
+		local temp = MainMenu.buttons.extra.left
+		MainMenu.buttons.extra.left = function()
+			temp()
+			focusTheme()
+		end
 		
 		ACTIVE_CONTAINER = MainMenu
 		keyboard_key_down = MainMenu.buttons.on_key_down
 	    
 		AssetLoader.on_preload_ready = nil
+		
+		MainMenu:overlay()
+		MainMenu.updateOverlays()
+		MainMenu.buttons.extra.left()
+		
+		
+		
 		
 		--screen:add( AssetLoader:getImage("BuyFocus",{name="robot", x=200, y=200, z=20}) )
 		--screen:add(AssetLoader:getImage("InfoBar",{x = 500, y = 500}))

@@ -40,12 +40,23 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	
 	local list = params
         
+        local focusBump = AssetLoader:getImage("BuyFocus",{})
+        local focusRound = AssetLoader:getImage("BuyFocusCircle",{})
+        
+        for i=1, #list[1] do
+                if list[1][i].extra.p then list[1][i].extra.overlay = focusBump
+                else list[1][i].extra.overlay = focusRound
+                end
+        end
+        
         local hl = AssetLoader:getImage("BuyFocus",{})
         local CircleMenu = Menu.create(c, list, hl)
         CircleMenu:create_key_functions()
         CircleMenu:button_directions()
         CircleMenu:create_buttons(-20, "Sans 20px")	        
         CircleMenu:update_cursor_position()
+        CircleMenu:overlay()
+	CircleMenu.updateOverlays()
         
         CircleMenu.debug = true -- TURN THIS OFF LATER
         
@@ -54,7 +65,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
 	CircleMenu.buttons.extra.up = nil
 	CircleMenu.buttons.extra.down = nil
         
-        CircleMenu.hl.opacity = 255
+        CircleMenu.hl.opacity = 0
 	--CircleMenu.container.opacity=230
         CircleMenu.container.z=5
         CircleMenu.owner = player

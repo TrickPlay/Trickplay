@@ -50,6 +50,7 @@ function Board:new(args)
 		timer = Stopwatch(),
 		creepWave = {},
 	}
+	
 	setmetatable(object, self)
 	self.__index = self
 	return object
@@ -95,7 +96,7 @@ Board.render = function (self, seconds)
 			if (v.hp ~= 0 and v.dead == false) then
 				v:render(seconds)
 			elseif (v.dead == false) then
-				if v.deathSound then mediaplayer:play_sound("themes/"..self.theme.themeName.."/sounds/"..v.deathSound) end
+				if SOUND and v.deathSound then mediaplayer:play_sound("themes/"..self.theme.themeName.."/sounds/"..v.deathSound) end
 				v.greenBar.width = 0
 				v.dead = true	
 				v.deathtimer:start()
@@ -286,24 +287,24 @@ function Board:createBoard()
 		savedTowerPos = settings.towerPos
 		savedTowerUpgrades = settings.towerUpgrades
 		level = settings.level
-	
+		
 		if (settings.towerType) then
 			for i=1, #settings.towerType do
-				 local selection = settings.towerType[i]
-				 self.player.position = settings.towerPos[i]
-				 self.player.gold = self.player.gold + selection.cost
-				 self:buildTower(selection,self.player)
-				 if (settings.towerUpgrades[i] == 1) then
-				 	 self.player.gold = self.player.gold + selection.upgrades[1].cost
-					 self:upgradeTower(self.player)
-	 			 elseif (settings.towerUpgrades[i] == 2) then
-					 self.player.gold = self.player.gold + selection.upgrades[1].cost
-				 	 self.player.gold = self.player.gold + selection.upgrades[2].cost
-
-					 self:upgradeTower(self.player)
-					 self:upgradeTower(self.player)
-				 end
-
+				local selection = settings.towerType[i]
+				self.player.position = settings.towerPos[i]
+				self.player.gold = self.player.gold + selection.cost
+				self:buildTower(selection,self.player)
+				if (settings.towerUpgrades[i] == 1) then
+					self.player.gold = self.player.gold + selection.upgrades[1].cost
+					self:upgradeTower(self.player)
+				elseif (settings.towerUpgrades[i] == 2) then
+					self.player.gold = self.player.gold + selection.upgrades[1].cost
+					self.player.gold = self.player.gold + selection.upgrades[2].cost
+					
+					self:upgradeTower(self.player)
+					self:upgradeTower(self.player)
+				end
+				
 			end
 		end
 	end
@@ -369,6 +370,7 @@ function Board:createBoard()
 				
 					list[#list+1] = AssetLoader:getImage( self.theme.themeName..towers[i].name.."Icon", { name = towers[i].cost } )
 					list[#list].extra.t = towers[i]
+					list[#list].extra.p = true -- Means there is a cost number for focus purposes
 					list[#list].extra.f = function()
 						if (player.gold - towers[i].cost >=0) then
 							self:buildTower(towers[i], player)
@@ -386,6 +388,7 @@ function Board:createBoard()
 			local tower = self.squareGrid[y][x].tower
 			
 			list[#list+1] = AssetLoader:getImage( "sellIcon", { name = math.ceil(tower.cost / 2) } )
+			list[#list].extra.p = true
 			list[#list].extra.f = function()
 				self:removeTower(player)
 				self:findPaths()
@@ -398,6 +401,7 @@ function Board:createBoard()
 				--print(tower.table.upgrades[tower.level+1].cost)
 				
 				list[#list+1] = AssetLoader:getImage( "upgradeIcon", { name = tower.table.upgrades[tower.level+1].cost } )
+				list[#list].extra.p = true
 				list[#list].extra.f = function()
 					
 					--print(player.gold, tower.table.upgrades[tower.level+1].cost, player.gold - tower.table.upgrades[tower.level+1].cost)
@@ -434,7 +438,19 @@ function Board:createBoard()
 	self.player.playertext.text = self.player.name
 	self.player.goldtext.text = self.player.gold
 	BoardMenu.buttons.extra.p = function()
-	ipaused = not ipaused
+		paused = not paused
+		
+		if paused then	
+			game.board.timer:stop()
+			seconds_elapsed:stop()
+			PauseMenu:show()
+		else
+			game.board.timer:continue()
+			seconds_elapsed:continue()
+			PauseMenu:hide()
+		end
+		
+		--[[ipaused = not ipaused
 		if (ipaused) then
 --			screen:animate {duration = 500, y_rotation = 180}
 			screen:animate {duration = 500, scale = {0.1,0.1}}
@@ -442,12 +458,21 @@ function Board:createBoard()
 --			screen:animate {duration = 500, y_rotation = 0}
 			screen:animate {duration = 500, scale = {0.5,0.5}}
 
-		end
-	end	
+		end]]
+	end
+	
 	BoardMenu.buttons.extra.space = function()
 
 		--seconds_elapsed.elapsed_seconds = WAIT_TIME
 		bloodGroup:clear()
+	end
+	
+	BoardMenu.buttons.extra.s = function()
+	
+		SOUND = not SOUND
+		
+		if SOUND then mediaplayer:play() else mediaplayer:pause() end
+	
 	end
 	
 	
