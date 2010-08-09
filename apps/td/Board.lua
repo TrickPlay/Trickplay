@@ -405,7 +405,9 @@ function Board:createBoard()
 				end
 			elseif SOUND then
 			
+				Popup:new{text = "You can't block the path!", fadeSpeed = 400, time=.8, opacity = 180}
 				mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+				
 			
 			end
 		elseif (self.squareGrid[y][x].square[3] == FULL and self.squareGrid[y][x].hasTower == true and self.squareGrid[y][x].tower.owner.name == player.name) then
