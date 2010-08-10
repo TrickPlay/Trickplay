@@ -5,6 +5,7 @@ dofile("MVC.lua")
 dofile("Views.lua")
 
 Components = {
+    PLAYER_SELECTION = 1
 }
 
 -- Model initialization
@@ -12,8 +13,6 @@ local model = Model()
 
 
 -- View/Controller initialization
---local address_input_view = AddressInputView(model)
---address_input_view:initialize()
 local player_selection_view = PlayerSelectionView(model)
 player_selection_view:initialize()
 
