@@ -1,6 +1,7 @@
 PlayerSelectionController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.PLAYER_SELECTION)
 
+    local controller = self
     model = view:get_model()
 
     local PlayerGroups = {
@@ -39,7 +40,7 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
     }
 
     local PlayerSelectionKeyTable = {
-        [keys.Up] = function(self) self.child:on_key_down(keys.Up) end,
+        [keys.Up] = function(self) self:move_selector(Directions.UP) end,
         [keys.Down] = function(self) self.child:on_key_down(keys.Down) end,
         [keys.Left] = function(self) self.child:on_key_down(keys.Left) end,
         [keys.Right] = function(self) self.child:on_key_down(keys.Right) end,
@@ -69,6 +70,7 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
         model.players[playerCounter] = Player(args)
         
         playerCounter = playerCounter + 1
+        self:get_model():notify()
     end
 
     function self:on_key_down(k)
@@ -84,9 +86,9 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
     function self:move_selector(dir)
         screen:grab_key_focus()
         if(0 ~= dir[1]) then
-            local new_selected = selected + dir[1]
+            local new_selected = subselection + dir[1]
             if 1 >= new_selected and SubSize <= new_selected then
-                selected = new_selected
+                subselection = new_selected
             end
         elseif(0 ~= dir[2]) then
             local new_selected = selected + dir[2]
