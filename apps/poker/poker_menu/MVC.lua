@@ -5,6 +5,16 @@ Model = Class(function(model, ...)
     model.controllers = {}
     model.active_component = nil
 
+    --a table of all the current players
+    model.players = {
+        [1] = false,
+        [2] = false,
+        [3] = false,
+        [4] = false,
+        [5] = false,
+        [6] = false
+    }
+
     -- class methods
     function model:attach(observer, controller_id)
         self.registry[observer] = true
