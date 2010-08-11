@@ -17,6 +17,7 @@ local hand2 = {
 }
 
 assert(ONE_PAIR.comparator(hand1, hand2) == 1)
+assert(compare_hands(hand1, hand2) == 1)
 
 hand1 = {
    Card("ACE","SPADES"),
@@ -117,7 +118,7 @@ hand2 = {
    Card("FOUR","HEARTS")
 }
 assert(FLUSH.comparator(hand1,hand2) == -1)
-
+assert(not STRAIGHT_FLUSH.present_in(hand2))
 
 
 hand1 = {
@@ -152,5 +153,10 @@ hand3 = {
 assert(STRAIGHT.present_in(hand1))
 assert(STRAIGHT.present_in(hand2))
 assert(STRAIGHT.present_in(hand3))
-assert(STRAIGHT.comparator(hand1,hand3) == -1)
+assert(STRAIGHT_FLUSH.present_in(hand1))
+assert(STRAIGHT_FLUSH.present_in(hand2))
+assert(STRAIGHT_FLUSH.present_in(hand3))
+assert(STRAIGHT.comparator(hand1,hand2) == 1)
+assert(STRAIGHT_FLUSH.comparator(hand1,hand2) == -1)
+assert(compare_hands(hand1,hand2)==-1)
 print("All tests passed!")
