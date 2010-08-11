@@ -24,6 +24,9 @@ Directions = {
    UP = {0,-1}
 }
 
+HUMAN = 1
+CPU = 2
+
 Colors={
    SLATE_GRAY                   ="708090",
    WHITE                        ="FFFFFF",
@@ -127,6 +130,8 @@ Characters={
    [keys.period] = '.',
    [keys.minus] = '-',
 }
+
+PLAYER_NAME_FONT = "KacstArt 40px"
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"
 CUSTOMIZE_TINIER_FONT = "KacstArt 20px"

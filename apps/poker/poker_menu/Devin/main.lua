@@ -4,19 +4,24 @@ dofile("Globals.lua")
 dofile("MVC.lua")
 dofile("Views.lua")
 dofile("Chip.lua")
+dofile("Player.lua")
 
 Components = {
     PLAYER_SELECTION = 1,
     PLAYER_BETTING = 2
 }
 
+Components.COMPONENTS_LAST = 2
+Components.COMPONENTS_FIRST = 1
+
+
 -- Model initialization
 local model = Model()
 
 
 -- View/Controller initialization
-local player_selection_view = PlayerSelectionView(model)
-player_selection_view:initialize()
+BettingView(model):initialize()
+PlayerSelectionView(model):initialize()
 
 function screen:on_key_down(k)
     assert(model:get_active_controller())
