@@ -311,11 +311,12 @@ function screen.on_key_down(screen,keyval)
 
 				zoom_image = Group { position = {0,0} }
 				local zoom_image_url
-				if screen.size[2] > 540 then
+				--if screen.size[2] > 540 then
 					zoom_image_url = Flickr.get_original_url(the_photo)
-				else
+			--	else
 					zoom_image_url = Flickr.get_medium_url(the_photo)
-				end
+			--	end
+				print (zoom_image_url)
 				local zoom_thumb_img = Clone { source = the_photo.thumbWallImage.children[2] }
 				local zoom_image_txt_grp = Group { position = { 0, 0 } }
 				local zoom_image_txt_rect = Rectangle { color = trickplay_red , opacity = 255*0.7, size = { 200, 24 }, position = { 0, 0} }
