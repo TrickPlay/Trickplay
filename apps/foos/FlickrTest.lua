@@ -1,3 +1,11 @@
+--[[
+
+--PhotoBucket
+API key is: 149830333
+API private key is: 35cbcef171010144952df0fc117a5d9f
+
+]]
+
 Timer{ interval = 2 , on_timer = function() collectgarbage() end }
 
 dofile("Flickr.lua")
@@ -38,17 +46,20 @@ function populate_next_page( completion )
 			
 			callback = function(self)
 				photo_urls[pagenum] = Flickr.get_medium_url(photo_index[pagenum])				
-				print (photo_urls[pagenum])
 
 				if (photo_urls[pagenum]) then
 					drawImage(photo_urls[pagenum])
 				end
 				pagenum = pagenum + 1
---				populate_next_page({})]]
+				if (pagenum < 50) then
+					populate_next_page({})
+				else
+					dofile("Load.lua")
+				end
 			end
 		})
 end
-
+populate_next_page({})
 function drawImage(url)
 		local the_photo = photo_index[pagenum]
 		local image = Image{
@@ -63,7 +74,6 @@ end
 -- Fetch the first set of images
 -- We pass a callback which itself will load more images once first page is loaded
 -- ...with its own callback to load page 3 as well.  So we basically load the first 3 pages, one at a time at startup.
-populate_next_page({})
 
 screen:show_all()
 
@@ -74,10 +84,10 @@ Flickr.license_info(flickr_api_key, licenses)
 local zoom_image
 local wall_zoom_back_z = -300
 local image_zoom_back_z = -200
-
+--[[
 function screen.on_key_down(screen,keyval)
 	if (keyval == keys.Return) then
 		screen:clear()
 		populate_next_page({})
 	end
-end
+end]]
