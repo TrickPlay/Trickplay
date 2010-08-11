@@ -1,3 +1,7 @@
+if not Class then
+   dofile("Class.lua")
+end
+
 function Suit(name)
    return {
       name=name
@@ -35,6 +39,14 @@ Ranks = {
 }
 
 function Card(rank, suit)
+   if type(rank) == "string" then
+      rank = Ranks[rank]
+      assert(rank)
+   end
+   if type(suit) == "string" then
+      suit = Suits[suit]
+      assert(suit)
+   end
    return {
       rank=rank,
       suit=suit,
@@ -48,7 +60,7 @@ for _, suit in pairs(Suits) do
       table.insert(Cards, Card(rank, suit))
    end
 end
-print("#Cards", #Cards)
+
 Deck = Class(nil, function(self, ...)
    local cards = {}
    for _, card in ipairs(Cards) do

@@ -59,4 +59,26 @@ hand2 = {
    Card("FOUR","SPADES"),
    Card("SEVEN","CLUBS")
 }
+assert(not FULL_HOUSE.present_in(hand1))
+assert(not FULL_HOUSE.present_in(hand2))
 assert(THREE_OF_A_KIND.comparator(hand1, hand2) == 1)
+
+hand1 = {
+   Card("FIVE","SPADES"),
+   Card("FIVE","DIAMONDS"),
+   Card("FIVE","HEARTS"),
+   Card("SIX","HEARTS"),
+   Card("SIX","CLUBS"),
+}
+   
+hand2 = {
+   Card("JACK","SPADES"),
+   Card("JACK","DIAMONDS"),
+   Card("JACK","HEARTS"),
+   Card("FOUR","HEARTS"),
+   Card("FOUR","SPADES")
+}
+
+assert(FULL_HOUSE.present_in(hand1))
+assert(FULL_HOUSE.present_in(hand2))
+assert(FULL_HOUSE.comparator(hand1, hand2) == 1)
