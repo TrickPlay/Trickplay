@@ -5,48 +5,7 @@ Model = Class(function(model, ...)
     model.controllers = {}
     model.active_component = nil
 
-    --pizza data
-    model.delivery = nil
-    model.arrival_time = 12
-    
-    model.current_item = nil
-    model.current_item_is_in_cart = false
-
-    model.cart = {}
-    
-    --address info
-    model.address = {
-        street = false,
-        apartment = false,
-        city = false,
-        zip = false
-    }
-
-    model.creditInfo = {
-        driverInstructions = false,
-        password = false,
-        firstName = false,
-        lastName = false,
-        phone_areaCode = false,
-        phone_first = false,
-        phone_last = false,
-        phone_ext = false,
-        email_alias = false,
-        email_at = false,
-        cardNumber_first = false,
-        cardNumber_second = false,
-        cardNumber_third = false,
-        cardNumber_forth = false,
-        card_expiration_month = false,
-        card_expiration_year = false,
-        card_code = false,
-        street = false,
-        apartment = false,
-        city = false,
-        zip = false,
-        card_type = false,
-        card_number = false,
-    }
+    model.pic_text = {0,0}
 
     -- class methods
     function model:attach(observer, controller_id)
@@ -132,46 +91,6 @@ Model = Class(function(model, ...)
         end
     end
 
-    function model:set_delivery()
-        if(self.delivery) then
-            self.delivery = not self.delivery
-        else
-            self.delivery = true
-        end
-    end
-
-    function model:set_arrival_time()
-        self.arrival_time = self.arrival_time + .5
-        if(self.arrival_time >= 24) then
-            self.arrival_time = 0
-        end
-    end
-
-    function model:set_address(args)
-        for k,v in pairs(args) do
-            model.address[k] = v
-            assert(model.address[k])
-        end
-    end
-
-    function model:set_creditInfo(args)
-        for k,v in pairs(args) do
-            model.creditInfo[k] = v
-            assert(model.creditInfo[k])
-        end
-    end
-    
-    function model:selected_card()
-        return model.creditInfo.card_type
-    end
-
-    function model:edit_selected_cart_item(item_num)
-       self.current_item = self.cart[item_num]
-       self.current_item_is_in_cart = true
-       self:set_active_component(Components.CUSTOMIZE)
-       self:get_active_controller():init_shit()
-       self:get_controller(Components.TAB):init_shit()
-    end
 end)
 
 
