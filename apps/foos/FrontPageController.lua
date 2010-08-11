@@ -36,6 +36,10 @@ FrontPageController = Class(Controller, function(self, view, view_grid, ...)
         selected = {1,1}
     end
 
+    function self:set_selected_index(r,c)
+        selected = {r,c}
+    end
+
     function self:get_selected_index()
         return selected
     end
