@@ -40,22 +40,29 @@ Ranks = {
    ACE=Rank("Ace", 14, "A"),
 }
 
-function Card(rank, suit)
+Card = Class(nil, 
+function(self, rank, suit)
    if type(rank) == "string" then
-      rank = Ranks[rank]
-      assert(rank)
+      self.rank = Ranks[rank]
+   else
+      self.rank = rank
    end
+   assert(self.rank)
+
    if type(suit) == "string" then
-      suit = Suits[suit]
-      assert(suit)
+      self.suit = Suits[suit]
+   else
+      self.suit = suit
    end
-   return {
-      rank=rank,
-      suit=suit,
-      name=rank.name .. " of " .. suit.name,
-      abbv=rank.abbv .. suit.abbv
-   }
-end
+   assert(self.suit)
+
+   self.name = self.rank.name .. " of " .. self.suit.name
+   self.abbv = self.rank.abbv .. self.suit.abbv
+
+   function self:equals(card)
+      return self.rank == card.rank and self.suit == card.suit
+   end
+end)
 
 Cards = {}
 for _, suit in pairs(Suits) do
