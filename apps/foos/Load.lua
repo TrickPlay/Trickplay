@@ -221,6 +221,20 @@ function RandomGrid()
             grid[r2+i][c2+j] = {r2,c2}
         end
     end
+
+    for i = 1,NUM_ROWS do 
+        str = ""
+        for j = 1,NUM_COLS do
+            assert(grid,"0")
+            assert(grid[i],"1")
+            assert(grid[i][j],"2")
+            assert(grid[i][j][1],"3")
+            str = str.."{"..grid[i][j][1]..","..grid[i][j][2].."} "
+            --print("{"..g[i][j][1]..","..g[i][j][2].."} ")
+        end
+        print(str)
+    end
+
     return grid
 end
 --[[

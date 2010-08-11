@@ -12,10 +12,15 @@ FrontPageView = Class(View, function(view, model, ...)
     function view:refresh()
 print("refreshin")
         view.ui:clear()
+        view.menu_items = {}
         grid, view.menu_items = GenerateGrid(view.ui)
         assert(view.menu_items,"no menu items")
         assert(grid,"no grid :(")
         view:get_controller():refresh_grid(grid)
+        sel = view:get_controller():get_selected_index()
+        view:get_controller():set_selected_index(grid[sel[1]][sel[2]][1],
+                                                 grid[sel[1]][sel[2]][2])
+        model:notify()
         --view:get_controller():reset_selected_index()
     end
 
