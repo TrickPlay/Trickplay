@@ -22,8 +22,42 @@ FrontPageController = Class(Controller, function(self, view, view_grid, ...)
         [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
-        [keys['r']]      = function(self) view.refresh() end,
-        [keys.Return] = function(self) view.refresh() end    }
+        [keys.r]     = function(self) view.refresh() end,
+        [keys.h]     = function(self)
+            self:get_model():set_active_component(Components.HELP_MENU)
+            self:get_model():notify()
+ end,
+
+        [keys.m]     = function(self)
+            self:get_model():set_active_component(Components.MAIN_MENU)
+            self:get_model():notify() 
+        end,
+
+        [keys.Return] = function(self) 
+            --text goes on left side if too close to the right
+            if selected[2] > NUM_COLS/2+1 then
+                self:get_model().pic_text = {
+                         (selected[2]-1)*screen.width/NUM_COLS - 250,
+                         (selected[1]-1)*screen.height/NUM_ROWS
+                }
+                print("text left",self:get_model().pic_text[1],self:get_model().pic_text[2])
+
+            --defaults the the right otherwise
+            else
+                self:get_model().pic_text = {
+                         (selected[2]-1)*screen.width/NUM_COLS +
+                         view.menu_items[selected[1]][selected[2]].width*
+                         view.menu_items[selected[1]][selected[2]].scale[1]+20,
+                         (selected[1]-1)*screen.height/NUM_ROWS
+                }
+                print("text right",self:get_model().pic_text[1],self:get_model().pic_text[2])
+
+            end
+            --self:get_model().selected_picture = {selected[1],selected[2]}
+            self:get_model():set_active_component(Components.ITEM_SELECTED)
+            self:get_model():notify()
+        end
+    }
 
 
     function self:on_key_down(k)
@@ -49,27 +83,40 @@ FrontPageController = Class(Controller, function(self, view, view_grid, ...)
     function self:move_selector(dir)
         local next_spot = {selected[1],selected[2]}
 
-        --move to the next image (i.e. if the one you are on is 
-        --not a 1x1 or the one you are moving to is not a 1x1)
-        while grid[next_spot[1]]               ~= nil and
-              grid[next_spot[1]][next_spot[2]] ~= nil and
 
-              grid[next_spot[1]][next_spot[2]][1] == 
-              grid[selected[1]][selected[2]][1]       and
+        --Pressing up when you are on the top row of images
+        --brings the upper menu
+        if next_spot[1] + dir[2] == 0 then
+            self:get_model():set_active_component(Components.MAIN_MENU)       
 
-              grid[next_spot[1]][next_spot[2]][2] == 
-              grid[selected[1]][selected[2]][2]       do
 
-            next_spot = {next_spot[1] + dir[2],
-                         next_spot[2] + dir[1]}
+        --Regular movement/navigation within the picture grid
+        else
+            --move to the next image (i.e. if the one you are on is 
+            --not a 1x1 or the one you are moving to is not a 1x1)
+            while grid[next_spot[1]]               ~= nil and
+                  grid[next_spot[1]][next_spot[2]] ~= nil and
+
+                  grid[next_spot[1]][next_spot[2]][1] == 
+                  grid[selected[1]][selected[2]][1]       and
+
+                  grid[next_spot[1]][next_spot[2]][2] == 
+                  grid[selected[1]][selected[2]][2]       do
+
+
+                next_spot = {next_spot[1] + dir[2],
+                             next_spot[2] + dir[1]}
+            end
+
+            --if you didn't reach an edge then, move to it
+            if grid[next_spot[1]]               ~= nil and
+               grid[next_spot[1]][next_spot[2]] ~= nil then
+                selected[1] = grid[next_spot[1]][next_spot[2]][1]
+                selected[2] = grid[next_spot[1]][next_spot[2]][2]
+            end
+
         end
 
-        --if you didn't reach an edge then, move to it
-        if grid[next_spot[1]]               ~= nil and
-           grid[next_spot[1]][next_spot[2]] ~= nil then
-            selected[1] = grid[next_spot[1]][next_spot[2]][1]
-            selected[2] = grid[next_spot[1]][next_spot[2]][2]
-        end
         self:get_model():notify()
 
     end
