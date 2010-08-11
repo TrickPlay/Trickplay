@@ -1,3 +1,5 @@
+dofile ("FlickrTest.lua")
+
 NUM_OF_3X3 = 1
 NUM_OF_2X2 = 2
 
@@ -55,7 +57,7 @@ function Place_Pictures(grid,pic_group)
             --a big image (i.e 2x2 or 3x3)
             if grid[i][j][1] == i and
                grid[i][j][2] == j then
-
+                --populate_next_page({})
                 pictures[i][j] = Image{
                     position = {screen.width  * (j-1) / NUM_COLS,
                                 screen.height * (i-1) / NUM_ROWS},
