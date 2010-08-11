@@ -1,0 +1,39 @@
+if model.bet.CURRENT_BET > self.chips.TEN * 10 + self.chips.HUNDRED * 100 then
+                
+                self.chipstack[ #self.chipstack + 1 ] = Clone{source=self.chip, y = - 1.5 * ( #self.chipstack ) * 10, opacity=255}
+                self.chipgroup:add( self.chipstack[ #self.chipstack] )
+                self.chips.TEN = self.chips.TEN + 1
+                
+                if self.chips.TEN >= 10 then
+                    for i=#self.chipstack-9, #self.chipstack do
+                        self.chipgroup:remove(self.chipstack[i])
+                        self.chipstack[i] = nil
+                    end
+                    self.chips.TEN = 0
+                    
+                    self.chipstack[ #self.chipstack + 1 ] = Clone{source=self.chip100, y = - 1.5 * ( #self.chipstack ) * 10, opacity=255}
+                    self.chipgroup:add( self.chipstack[ #self.chipstack ] )
+                    self.chips.HUNDRED = self.chips.HUNDRED + 1
+                end
+                
+                print("Chips:", #self.chipstack) 
+
+            elseif model.bet.CURRENT_BET < self.chips.TEN * 10 + self.chips.HUNDRED * 100 then
+                self.chipgroup:remove( self.chipstack[ #self.chipstack ] )
+                self.chipstack[ #self.chipstack ] = nil 
+            end
+            
+            
+            view.chip = Image{src = "pokerchip.png", opacity = 0}
+    view.chip100 = Image{src = "pokerchipdark.png", opacity = 0}
+    --screen:add(view.chip100,view.chip)
+    
+    view.chips = {
+        TEN = 0,
+        HUNDRED = 0,
+        THOUSAND = 0,
+    }
+    view.chipstack = {
+    }
+    view.chipgroup = Group{x=screen.w/2, y=screen.h/2}
+    screen:add(view.chipgroup)
