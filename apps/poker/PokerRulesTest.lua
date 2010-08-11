@@ -82,3 +82,75 @@ hand2 = {
 assert(FULL_HOUSE.present_in(hand1))
 assert(FULL_HOUSE.present_in(hand2))
 assert(FULL_HOUSE.comparator(hand1, hand2) == 1)
+
+hand1 = {
+   Card("JACK","SPADES"),
+   Card("TEN","SPADES"),
+   Card("EIGHT","SPADES"),
+   Card("SEVEN","SPADES"),
+   Card("FIVE","SPADES"),
+   Card("FOUR","SPADES")
+}
+
+hand2 = {
+   Card("JACK","HEARTS"),
+   Card("TEN","HEARTS"),
+   Card("EIGHT","HEARTS"),
+   Card("SEVEN","HEARTS"),
+   Card("FIVE","HEARTS")
+}
+
+assert(FLUSH.comparator(hand1,hand2) == 0)
+hand2 = {
+   Card("JACK","HEARTS"),
+   Card("TEN","HEARTS"),
+   Card("EIGHT","HEARTS"),
+   Card("SEVEN","HEARTS"),
+   Card("SIX","HEARTS")
+}
+assert(FLUSH.comparator(hand1,hand2) == 1)
+hand2 = {
+   Card("JACK","HEARTS"),
+   Card("TEN","HEARTS"),
+   Card("EIGHT","HEARTS"),
+   Card("SEVEN","HEARTS"),
+   Card("FOUR","HEARTS")
+}
+assert(FLUSH.comparator(hand1,hand2) == -1)
+
+
+
+hand1 = {
+   Card("FIVE","SPADES"),
+   Card("SIX","SPADES"),
+   Card("SEVEN","SPADES"),
+   Card("EIGHT","SPADES"),
+   Card("NINE","SPADES"),
+   Card("TEN","SPADES"),
+   Card("JACK","SPADES"),
+}
+
+hand2 = {
+   Card("FIVE","SPADES"),
+   Card("SIX","SPADES"),
+   Card("SEVEN","SPADES"),
+   Card("EIGHT","SPADES"),
+   Card("NINE","SPADES"),
+   Card("TEN","SPADES"),
+   Card("JACK","HEARTS"),
+   Card("QUEEN","HEARTS")
+}
+
+hand3 = {
+   Card("ACE","SPADES"),
+   Card("TWO","SPADES"),
+   Card("THREE","SPADES"),
+   Card("FOUR","SPADES"),
+   Card("FIVE","SPADES"),
+}
+
+assert(STRAIGHT.present_in(hand1))
+assert(STRAIGHT.present_in(hand2))
+assert(STRAIGHT.present_in(hand3))
+assert(STRAIGHT.comparator(hand1,hand3) == -1)
+print("All tests passed!")

@@ -48,6 +48,95 @@ function n_of_a_kind_compare(hand1,hand2,N)
    end
 end
 
+function get_best_flush(hand)
+   local sorted_hand = sort_hand(hand)
+   local buckets = {
+      [Suits.CLUBS] = {},
+      [Suits.DIAMONDS] = {},
+      [Suits.HEARTS] = {},
+      [Suits.SPADES] = {}
+   }
+   for _,card in ipairs(sorted_hand) do
+      table.insert(buckets[card.suit], card)
+   end
+
+   local flush_found = false
+   local flush_suits = {}
+   for suit,cards in pairs(buckets) do
+      if #cards >= 5 then
+         flush_suits[suit] = true
+         flush_found = true
+         for i = #cards-5,1,-1 do
+            table.remove(cards,i)
+         end
+      else
+         buckets[suit] = nil
+      end
+   end
+
+   assert(flush_found)
+
+   local top_suits = {}
+   for i = 5,1,-1 do
+      local top_rank_num = Ranks.TWO.num
+      for suit,_ in pairs(flush_suits) do
+         local cards = buckets[suit]
+         if cards[i].rank.num > top_rank_num then
+            top_rank_num = cards[i].rank.num
+            top_suits = {[suit]=true}
+         elseif cards[i].rank.num == top_rank_num then
+            top_suits[suit] = true
+         end
+      end
+      flush_suits = top_suits
+   end
+
+   local counter = 0
+   local cards = {}
+   for suit, _ in pairs(flush_suits) do
+      counter = counter+1
+      cards = buckets[suit]
+   end
+   return cards
+end
+
+-- returns cards in descending order
+function get_best_straight(hand)
+   local sorted_hand = sort_hand(hand)
+   local last_rank_num
+   local aces = {}
+   local straight_so_far = {}
+   for i=#sorted_hand, 1, -1 do
+      if sorted_hand[i].rank == Ranks.ACE then
+         table.insert(aces, sorted_hand[i])
+      end
+      if #straight_so_far == 0 then
+         -- start a new straight
+         table.insert(straight_so_far, sorted_hand[i])
+      elseif sorted_hand[i].rank.num == last_rank_num then
+         -- skip the current card, same rank as last card
+      elseif sorted_hand[i].rank.num == last_rank_num-1 then
+         -- insert new card into straight, as it fits
+         table.insert(straight_so_far, sorted_hand[i])
+      else -- start a new straight template
+         straight_so_far = {sorted_hand[i]}
+      end
+
+      last_rank_num = sorted_hand[i].rank.num
+      if #straight_so_far >= 5 then
+         return straight_so_far
+      end
+   end
+   if #aces > 0 and last_rank_num == Ranks.TWO.num then
+      table.insert(straight_so_far, aces[1])
+   end
+   if #straight_so_far >= 5 then
+      return straight_so_far
+   else
+      return {}
+   end
+end
+
 STRAIGHT_FLUSH = {
    name="Straight Flush",
    present_in=
@@ -139,45 +228,26 @@ FLUSH = {
          end
          for suit,cards in pairs(buckets) do
             if #cards >= 5 then
-               
+               return true
             end
          end
       end,
    comparator=
       function(hand1,hand2)
-         local sorted_hand = sort_hand(hand)
-         local buckets = {
-            [Suits.CLUBS] = {},
-            [Suits.DIAMONDS] = {},
-            [Suits.HEARTS] = {},
-            [Suits.SPADES] = {}
-         }
-         for _,card in ipairs(sorted_hand) do
-            table.insert(buckets[card.suit], card)
-         end
-         local flush_suits = {}
-         for suit,cards in pairs(buckets) do
-            if #cards >= 5 then
-               table.insert(flush_suits,suit)
-               for i = #cards-5,1,-1 do
-                  table.remove(cards,i)
-               end
-            else
-               buckets[suit] = nil
+         local cards1 = get_best_flush(hand1)
+         assert(#cards1 == 5)
+         local cards2 = get_best_flush(hand2)
+         assert(#cards2 == 5)
+
+
+         for i = 5, 1, -1 do
+            if cards1[i].rank.num > cards2[i].rank.num then
+               return -1
+            elseif cards1[i].rank.num < cards2[i].rank.num then
+               return 1
             end
          end
-
-         local top_cards = {}
-         for i = 5,1,-1 do
-            for _,suit in ipairs(flush_suits) do
-               local cards = buckets[suit]
-               table.insert(top_cards,cards[i].rank.num)
-            end
-            
-            local max = 0
-         end
-
-
+         return 0
       end
 }
 
@@ -185,9 +255,24 @@ STRAIGHT = {
    name="Straight",
    present_in=
       function(hand)
+         local straight = get_best_straight(hand)
+         return #straight ~= 0
       end,
    comparator=
       function(hand1,hand2)
+         -- get_best_straight returns cards in descending order
+         local straight1 = get_best_straight(hand1)
+         assert(#straight1 ~= 0)
+         local straight2 = get_best_straight(hand2)
+         assert(#straight2 ~= 0)
+
+         if straight1[1].rank.num > straight2[1].rank.num then
+            return -1
+         elseif straight1[1].rank.num < straight2[1].rank.num then
+            return 1
+         else
+            return 0
+         end
       end
 }
 
