@@ -137,28 +137,65 @@ function get_best_straight(hand)
    end
 end
 
+function get_best_straight_flush(hand)
+   local sorted_hand = sort_hand(hand)
+   local buckets = {
+      [Suits.CLUBS] = {},
+      [Suits.DIAMONDS] = {},
+      [Suits.HEARTS] = {},
+      [Suits.SPADES] = {}
+   }
+   for i=#sorted_hand, 1, -1 do
+      local card = sorted_hand[i]
+      table.insert(buckets[card.suit], card)
+   end
+
+   local straight_flushes = {}
+   for suit, cards in pairs(buckets) do
+      local straight = get_best_straight(cards)
+      if #straight == 5 then
+         straight_flushes[suit] = straight
+      end
+   end
+
+   local top_rank_num = Ranks.TWO.num
+   local top_suits = {}
+   local straight_flush = {}
+   for suit,straight in pairs(straight_flushes) do
+      if straight[1].rank.num > top_rank_num then
+         top_rank_num = straight[1].rank.num
+         top_suits = {[suit]=true}
+      elseif straight[1].rank.num == top_rank_num then
+         top_suits[suit] = true
+      end
+   end
+   for suit,_ in pairs(top_suits) do
+      straight_flush = straight_flushes[suit]
+   end
+   return straight_flush
+end
+
 STRAIGHT_FLUSH = {
    name="Straight Flush",
    present_in=
       function (hand)
-         local hand_copy = {}
-         for _,card in ipairs(hand) do
-            table.insert(hand_copy,card)
-         end
-         table.sort(
-            hand_copy,
-            function(a,b)
-               return a.rank.num < b.rank.num
-            end
-         )
-         
-         -- incomplete
+         return #get_best_straight_flush(hand) == 5
       end,
    comparator=
       function(hand1, hand2)
-         return true
-         -- both hand1 and hand2 must have this poker hand
-         --incomplete
+         -- get_best_straight returns cards in descending order
+         local straight_flush1 = get_best_straight_flush(hand1)
+         assert(#straight_flush1 ~= 0)
+         local straight_flush2 = get_best_straight_flush(hand2)
+         assert(#straight_flush2 ~= 0)
+
+         if straight_flush1[1].rank.num > straight_flush2[1].rank.num then
+            return -1
+         elseif straight_flush1[1].rank.num < straight_flush2[1].rank.num then
+            return 1
+         else
+            return 0
+         end
       end
 }
 
@@ -429,3 +466,19 @@ PokerHands = {
    ONE_PAIR,
    HIGH_CARD
 }
+
+function compare_hands(hand1, hand2)
+   local pin1, pin2
+   for _,poker_hand in ipairs(PokerHands) do
+      pin1 = poker_hand.present_in(hand1)
+      pin2 = poker_hand.present_in(hand2)
+      if pin1 and pin2 then
+         return poker_hand.comparator(hand1,hand2)
+      elseif pin1 then
+         return -1
+      elseif pin2 then
+         return 1
+      end
+   end
+   return 0
+end
