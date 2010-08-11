@@ -4,7 +4,7 @@ Chip = Class(function(self, value, image, ...)
         self.value = value
         self.image = image
         
-        self.image.x = 600
+        --self.image.x = 600
        
 end)
 
@@ -34,6 +34,38 @@ chipStack = Class(function(self, ...)
         self.lookup = {10, 100, 1000, 10000, 100000, 1000000}
         self.group = Group{}
         
+        function self:setChips(value)
+                local biggest = self.lookup[#self.lookup]
+                local sum = 0
+                
+                if value > self:count() then
+                        -- While there are more chips to add
+                        while value > self:count() do
+                        
+                                -- Get the biggest possible chip
+                                while biggest > value do
+                                        biggest = biggest/10
+                                end
+                                
+                                self:pushChip( Chip(biggest, Image{src = "pokerchip"..biggest..".png"}) )
+                                
+                                value = value - biggest
+                        end
+                elseif value < self:count() then
+                        while value < self:count() do
+                        
+                                -- Get the biggest possible chip
+                                while self:count() - biggest < value do
+                                        biggest = biggest/10
+                                end
+                                
+                                self:removeChip(nil, 0)
+                                
+                                value = value + biggest
+                        end
+                end
+        end
+        
         -- Push a chip onto the stack
         function self:pushChip(chip)
                 --print("Pushing chip!")
@@ -45,34 +77,43 @@ chipStack = Class(function(self, ...)
         end
         
         -- Pop a chip from the stack
-        function self:popChip()
+        function self:popChip(newStack)
+                local c
                 local size = #self.chips
+                
                 self.group:remove(self.chips[size].image)
                 self.types[self.chips[size].value] = self.types[self.chips[size].value] - 1
+                
+                c = self.chips[size]
+                
+                --[[if newStack then
+                        c.image.position = {
+                                c.image.position[1] + ( newStack.group.position[1] - self.group.position[1] ),
+                                c.image.position[2] + ( newStack.group.position[2] - self.group.position[2] ),
+                        }
+                        newStack:pushChip(c)
+                        print(c.image.position[1], c.image.position[2])
+                end]]
+                
                 self.chips[size] = nil
+                
+                return c
         end
         
-        function self:removeChip(chip)
+        function self:removeChip(chip, specificChip)
                 
                 local size = self:getSize()
+                local found = false
+                local start = 1
                 
-                for i=1, size do
+                if specificChip then
+                        self.group:remove(self.chips[specificChip])
+                        self.chips[specificChip] = nil
+                        found = true
+                end
                 
-                        -- For later..
-                        --[[if found then
-                                self.chips[i-1] = self.chips[i]
-                        end
-                
-                        if not found and type(chip) == "table" and chip == self.chips[i] then
-                                self.group:remove(chip.image)
-                                self.chips[i] = nil
-                                found = true
-                        elseif not found and type(chip) == "number" and chip == self.chips[i].value then
-                                self.group:remove(self.chips[i].image)
-                                self.chips[i] = nil
-                                found = true
-                        end]]
-                
+                for i=start, size do
+
                         if not found and chip == self.chips[i] then
                                 self.group:remove(chip.image)
                                 self.chips[i] = nil
@@ -114,9 +155,9 @@ chipStack = Class(function(self, ...)
                                 addx = addx + dx
                         end
                 
-                        --self.chips[i].image.position = {addx, add}
+                        self.chips[i].image.position = {addx, add}
                         
-                        self.chips[i].image:animate{duration=100, x=addx, y=add}
+                        --self.chips[i].image:animate{duration=1000, x=addx, y=add}
                         
                         add = add - dy
                         
@@ -183,12 +224,12 @@ chipStack = Class(function(self, ...)
         end
         
         function self:merge(other)
-        
+                
                 for i=1, other:getSize() do
                         self:pushChip(other.chips[#other.chips])
                         other:popChip()
                 end
-        
+                
         end
 
 end)
@@ -253,3 +294,20 @@ s:merge(c)
 s:sortChips()
 s:arrangeChips(15, 150)
 ]]
+
+
+                        -- For later.. in removing a chip with a value
+                        --[[if found then
+                                self.chips[i-1] = self.chips[i]
+                        end
+                
+                        if not found and type(chip) == "table" and chip == self.chips[i] then
+                                self.group:remove(chip.image)
+                                self.chips[i] = nil
+                                found = true
+                        elseif not found and type(chip) == "number" and chip == self.chips[i].value then
+                                self.group:remove(self.chips[i].image)
+                                self.chips[i] = nil
+                                found = true
+                        end]]
+                

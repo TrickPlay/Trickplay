@@ -15,10 +15,20 @@ Model = Class(function(model, ...)
         [6] = false
     }
     
+    model.default_player_locations = {
+        [1] = {1920*(1/4), 1080*(1/3)},
+        [2] = {1920*(1/2), 1080*(1/3)},
+        [3] = {1920*(3/4), 1080*(1/3)},
+        [4] = {1920*(1/4), 1080*(2/3)},
+        [5] = {1920*(1/2), 1080*(2/3)},
+        [6] = {1920*(3/4), 1080*(2/3)},
+    }
+    
     model.bet = {
         SMALL_BLIND = 10,
         BIG_BLIND = 20,
-        CURRENT_BET = 10,
+        DEFAULT_BET = 20,
+        CURRENT_POT = 0,
     }
 
     -- class methods
