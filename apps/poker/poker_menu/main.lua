@@ -16,4 +16,10 @@ local model = Model()
 local player_selection_view = PlayerSelectionView(model)
 player_selection_view:initialize()
 
-model:start_app(Components.PROVIDER_SELECTION)
+function screen:on_key_down(k)
+    assert(model:get_active_controller())
+    print("current comp: "..model:get_active_component())
+    model:get_active_controller():on_key_down(k)
+end
+
+model:start_app(Components.PLAYER_SELECTION)
