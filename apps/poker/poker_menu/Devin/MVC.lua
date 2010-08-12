@@ -24,6 +24,8 @@ Model = Class(function(model, ...)
         [6] = {1920*(3/4), 1080*(2/3)},
     }
     
+    model.currentPlayer = nil
+    
     model.bet = {
         SMALL_BLIND = 10,
         BIG_BLIND = 20,

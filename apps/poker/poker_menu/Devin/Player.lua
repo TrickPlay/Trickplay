@@ -4,8 +4,8 @@ Player = Class(function(player, ...)
         player.number = 0
         player.row = 0
         player.col = 0
-        player.bet = 0 --model.bet.DEFAULT_BET
-        player.money = 250
+        player.bet = model.bet.DEFAULT_BET
+        player.money = 800
         player.position = {0, 0}
     
         for k,v in pairs(args) do
@@ -14,18 +14,11 @@ Player = Class(function(player, ...)
         
         function player:makeChips()
                 
-                player.chips = chipStack()
+                player.chips = chipCollection()
                 player.chips.group.position = {player.position[1], player.position[2] - 170}
+                player.chips:set(player.money)
+                player.chips:arrange(55, 5)
                 screen:add(player.chips.group)
-                
-                --[[while player.chips:count() <= player.money do
-                        player.chips:pushChip( Chip(10, Image{src = "pokerchip10.png"}) )
-                        player.chips:convertUp()
-                end]]
-                
-                player.chips:setChips(player.money)
-                
-                player.chips:arrangeChips(15, 150)
                 
         end
         
