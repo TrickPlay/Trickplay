@@ -269,7 +269,7 @@ function Board:createBoard()
 	BoardMenu:button_directions()
 	BoardMenu:create_buttons(0)
 	
-	BoardMenu:addSound(nil, "themes/robot/sounds/BeepLow.wav")
+	BoardMenu:addSound(nil, "themes/robot/sounds/BeepLow.mp3")
 	
 	-- These will slow everything.. maybe take out?
 	--BoardMenu.ban = AssetLoader:getImage( "FocusBan", { } )
@@ -408,7 +408,7 @@ function Board:createBoard()
 			elseif SOUND then
 			
 				Popup:new{text = "You can't block the path!", fadeSpeed = 400, time=.8, opacity = 180}
-				mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+				mediaplayer:play_sound("themes/robot/sounds/Error.mp3")
 				
 			
 			end

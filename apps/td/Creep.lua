@@ -102,8 +102,8 @@ function Creep:render(seconds)
 			a:add( AssetLoader:getImage( "bloodyhand", {z_rotation = {math.random(160)-80,screen.w/2, screen.h/2}, y = math.random(700)-350, x = math.random(700)-350} ) )
 			Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
 			
-			if SOUND then mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/ZombieGroan.wav") end
-			--mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/Thump.wav")
+			if SOUND then mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/ZombieGroan.mp3") end
+			--mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/Thump.mp3")
 		end
 		
 	end

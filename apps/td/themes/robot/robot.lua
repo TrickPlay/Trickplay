@@ -7,12 +7,12 @@ local robot = {
                 {id = 3, im = "Snowball", speed = 800},
         },
         creeps = {
-                { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP+60, name = "NormalCreep", deathSound = "ZombieCrunch.wav"},
-                { hp = 300, speed = 30, bounty = 1, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP+60, name = "MediumCreep", deathSound = "ZombieCrunch.wav"},
-                { hp = 1000, speed = 25, bounty = 2, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP+60, name = "HardCreep", deathSound = "ZombieCrunch.wav"},
-                { hp = 20000, speed = 20, bounty = 20, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep", deathSound = "ZombieCrunch.wav"},
-                { hp = 80, speed = 35, bounty = 1, flying = true, frames = 4,  x_offset = -SP, y_offset = 0+60, name = "FlyingCreep", deathSound = "ZombieCrunch.wav"},
-                { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP+60, name = "NormalCreep", deathSound = "ZombieCrunch.wav"},
+                { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP+60, name = "NormalCreep", deathSound = "ZombieCrunch.mp3"},
+                { hp = 300, speed = 30, bounty = 1, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP+60, name = "MediumCreep", deathSound = "ZombieCrunch.mp3"},
+                { hp = 1000, speed = 25, bounty = 2, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP+60, name = "HardCreep", deathSound = "ZombieCrunch.mp3"},
+                { hp = 20000, speed = 20, bounty = 20, flying = false, frames = 7,  x_offset = -SP/2, y_offset = -SP, name = "BossCreep", deathSound = "ZombieCrunch.mp3"},
+                { hp = 80, speed = 35, bounty = 1, flying = true, frames = 4,  x_offset = -SP, y_offset = 0+60, name = "FlyingCreep", deathSound = "ZombieCrunch.mp3"},
+                { hp = 100, speed = 20, bounty = 1, flying = false, frames = 7, x_offset = -SP/2, y_offset = -SP+60, name = "NormalCreep", deathSound = "ZombieCrunch.mp3"},
         },
         towers = {
                 
@@ -33,7 +33,7 @@ local robot = {
                                 {damage = 40, range = 350, cooldown = 0.5, cost = 4, slow = false},
                                 {damage = 90, range = 400, cooldown = 0.5, cost = 10, slow = false}
                         },
-                        sound = "Gun.wav"
+                        sound = "Gun.mp3"
                 },
                 
                 slowTower = {
@@ -56,7 +56,7 @@ local robot = {
                                 {damage = 10, range = 450, cooldown = 1, cost = 10, slowammount = 55},
                                 {damage = 10, range = 450, cooldown = 1, cost = 50, slowammount = 40, splash = true}
                         },
-                        sound = "SnowBullet.wav"
+                        sound = "SnowBullet.mp3"
                 },
                 
                 nukeTower =	{
@@ -78,7 +78,7 @@ local robot = {
                                 {damage = 320, range = 250, cooldown = 1.8, cost = 35, splash = true},
                                 {damage = 480, range = 300, cooldown = 1.6, cost = 45, splash = true}
                         },
-                        sound = "Explosion.wav"
+                        sound = "Explosion.mp3"
                 },
                 
                 laserTower = {
@@ -100,7 +100,7 @@ local robot = {
                                 {damage = 200, range = 550, cooldown = 0.20, cost = 70, slow = false},
                                 {damage = 450, range = 700, cooldown = 0.15, cost = 250, slow = false},
                         },
-                        sound = "Laser.wav"							
+                        sound = "Laser.mp3"							
                 },
                 
                 --wall = { damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, frames = 1, slow = false, name = "Wall",	}

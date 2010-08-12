@@ -147,6 +147,6 @@ function createLevelMenu(l)
         
         end
         
-        LevelMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
+        LevelMenu:addSound("themes/robot/sounds/BeepHigh.mp3", "themes/robot/sounds/BeepLow.mp3")
         
 end
