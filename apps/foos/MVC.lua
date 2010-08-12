@@ -7,6 +7,15 @@ Model = Class(function(model, ...)
 
     model.pic_text = {0,0}
 
+    model.num_sources = 16
+    model.front_page_index = 1
+
+    model.vis_pics   = {}
+    model.left_edge  = {}
+    model.right_edge = {}
+    model.right_next_index = 0
+    model.left_next_index = 0
+
     -- class methods
     function model:attach(observer, controller_id)
         self.registry[observer] = true
