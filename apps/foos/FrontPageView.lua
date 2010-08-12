@@ -10,6 +10,12 @@ FrontPageView = Class(View, function(view, model, ...)
 
     screen:add(view.ui)
 
+view.selector = Image{
+   src = "assets/polaroid_overlay.png",
+   opacity = 0
+}
+fthis = view.selector
+view.ui:add(view.selector)
     function view:initialize()
         self:set_controller(FrontPageController(self))
     end
@@ -199,6 +205,10 @@ FrontPageView = Class(View, function(view, model, ...)
                         (NUM_VIS_COLS + 1) +
                         .9*screen.width  / (NUM_VIS_COLS + 1)*.5--15
 
+                     view.selector:animate{
+                         duration = CHANGE_VIEW_TIME,
+                         opacity = 0,
+                     }
 
             model.vis_pics[prev[1]][prev[2]]:animate{
                  duration = CHANGE_VIEW_TIME,
@@ -225,6 +235,15 @@ FrontPageView = Class(View, function(view, model, ...)
                             1.1*(screen.height/NUM_ROWS) / 
                             model.vis_pics[sel[1]][sel[2]].base_size[2]
                         }
+                     }
+                     view.selector:raise_to_top()
+                     view.selector.position={new_c-37,new_r-10}
+                     view.selector:animate{
+                         duration = CHANGE_VIEW_TIME,
+                         scale = {1.05,1.1
+                        },
+
+                         opacity = 255
                      }
                  end
             }
