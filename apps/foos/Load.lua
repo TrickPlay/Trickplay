@@ -10,6 +10,10 @@ PADDING_MIDDLE = 0
 
 PIC_DIR = "assets/thumbnails/"
 
+function Setup_Album_Covers()
+    
+end
+
 function Init_Pics(ui)
 
     for i = 1,NUM_ROWS do 
@@ -39,7 +43,7 @@ function Init_Pics(ui)
     end
 
     for i = 1,NUM_ROWS do 
-       local index = i + NUM_ROWS*NUM_VIS_COLS
+        local index = i + NUM_ROWS*NUM_VIS_COLS
 
         model.left_edge[i]  = nil
         model.right_edge[i] = Image{
