@@ -544,8 +544,18 @@ public:
                     closure->cookie_jar->set_cookie( header.c_str() );
                 }
 
-                closure->response.headers.insert(
-                    std::make_pair( header.substr( 0, sep ), header.substr( sep + 2, header.length() ) ) );
+                gchar ** parts = g_strsplit( header.c_str() , ":" , 2 );
+
+                if ( g_strv_length( parts ) != 2 )
+                {
+                    g_warning( "BAD HEADER LINE '%s'", header.c_str() );
+                }
+                else
+                {
+                    closure->response.headers.insert( std::make_pair( String( parts[ 0 ] ) , String( g_strstrip( parts[ 1 ] ) ) ) );
+                }
+
+                g_strfreev( parts );
             }
         }
 

@@ -137,6 +137,13 @@ struct UserData
     }
 
     //.........................................................................
+
+    inline const char * get_type() const
+    {
+        return type;
+    }
+
+    //.........................................................................
     // Gets the user data from the Lua stack given the index.
 
     inline static UserData * get( lua_State * L , int index = 1 )
