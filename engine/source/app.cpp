@@ -57,6 +57,10 @@ extern int luaopen_json( lua_State * L );
 
 extern int luaopen_socket( lua_State * L );
 
+#ifdef TP_UPNP_CLIENT
+extern int luaopen_upnp( lua_State * L );
+#endif
+
 extern int luaopen_restricted( lua_State * L );
 extern int luaopen_apps( lua_State * L );
 
@@ -710,6 +714,10 @@ int App::run( const StringSet & allowed_names )
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
+
+#ifdef TP_UPNP_CLIENT
+    luaopen_upnp( L );
+#endif
 
     luaopen_apps( L );
     luaopen_restricted( L );

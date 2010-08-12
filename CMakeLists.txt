@@ -18,6 +18,7 @@ endif(CMAKE_TOOLCHAIN_FILE)
 
 set( TP_CONTROLLER_DISCOVERY_MDNS 1 )
 set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
+set( TP_UPNP_CLIENT 1 )
 
 #------------------------------------------------------------------------------
 
