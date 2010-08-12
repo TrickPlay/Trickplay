@@ -9,6 +9,12 @@ dofile("PokerRules.lua")
 dofile("PokerRulesTest.lua")
 dofile("CountOutsTest.lua")
 dofile("Popup.lua")
+
+local img = Image{
+   src="assets/pokerTable.png"
+}
+
+screen:add(img)
 local deck = Deck()
 deck:shuffle()
 local hand1 = deck:deal(5)
