@@ -1,5 +1,38 @@
+dofile("Class.lua") -- Must be declared before any class definitions.
+dofile("Globals.lua")
+--dofile("Utils.lua")
+dofile("MVC.lua")
+dofile("Views.lua")
+dofile("Chip.lua")
+dofile("Player.lua")
+dofile("Popup.lua")
+
+Components = {
+    PLAYER_SELECTION = 1,
+    PLAYER_BETTING = 2
+}
+
+Components.COMPONENTS_LAST = 2
+Components.COMPONENTS_FIRST = 1
 
 
+-- Model initialization
+local model = Model()
+
+
+-- View/Controller initialization
+BettingView(model):initialize()
+PlayerSelectionView(model):initialize()
+
+function screen:on_key_down(k)
+    assert(model:get_active_controller())
+    print("current comp: "..model:get_active_component())
+    model:get_active_controller():on_key_down(k)
+end
+
+model:start_app(Components.PLAYER_SELECTION)
+
+--[[
 math.randomseed(os.time())
 dofile("Class.lua")
 dofile("Cards.lua")
@@ -84,16 +117,19 @@ function screen:on_key_down(k)
          if not child.text then
             child.anchor_point = {child.w/2, child.h/2}
             flipCard(child)
-            --[[child.y_rotation = {child.y_rotation[1]+20, 0, 0}
+            ---
+            child.y_rotation = {child.y_rotation[1]+20, 0, 0}
             if child.y_rotation[1]%360 >= 90 and child.y_rotation[1]%360 <= 270 then 
                child:find_child("back"):raise_to_top()
             else
                child:find_child("front"):raise_to_top()
-            end]]
+            end
+            --]
          end
       end )
    end
 end
+--]]
 
 local p = Popup:new{draw = true, text="You're Playing Poker Dogs"}
 p:render()
