@@ -16,6 +16,69 @@ Suits = {
    SPADES=Suit("Spades")
 }
 
+-- Returns the string of a card's image
+function getCardImageName(card)
+   local suits = {
+      ["Clubs"] = "CLUB",
+      ["Diamonds"] = "DIAMOND",
+      ["Hearts"] = "HEART",
+      ["Spades"] = "SPADE",
+   }
+   return suits[card.suit.name]..card.rank.num
+end
+
+-- Get a group with the image of a card's front/back
+function getCardGroup(card, args)
+   local cardImage = Image{ src="assets/cards/"..getCardImageName(card)..".png", name="front" }
+   local cardBack = Image{ src="assets/Card_Reverse.png", name="back" }
+   local cardGroup = Group{ children={cardBack,cardImage}, name="card",extra={face = true} }
+
+   if args and type(args) == "table" then for k, v in pairs(args) do
+      cardGroup[k] = v
+   end end
+
+   return cardGroup
+end
+
+-- Flip a card, return true if the front is showing
+function flipCard(cardGroup)
+   
+   if not cardGroup.extra.rotation then cardGroup.extra.rotation = 180
+   else cardGroup.extra.rotation = cardGroup.extra.rotation + 180
+   end
+   
+   cardGroup.extra.face = not cardGroup.extra.face
+   
+   local front = cardGroup:find_child("front")
+   local back = cardGroup:find_child("back")
+   assert(front)
+   assert(back)
+   
+   cardGroup:complete_animation()
+   cardGroup:animate{
+      y_rotation = cardGroup.extra.rotation - 90,
+      duration = 200,
+      on_completed = function()
+         
+         if cardGroup.extra.face then
+            print("Showing face:", cardGroup.extra.face)
+            front.opacity = 255
+            back.opacity = 0
+         else
+            print("Showing back:", cardGroup.extra.face)
+            front.opacity = 0
+            back.opacity = 255
+         end
+         
+         cardGroup:animate{
+            y_rotation = cardGroup.extra.rotation,
+            duration = 200,
+            }
+      end
+   }
+
+end
+
 function Rank(name, num, abbv)
    return {
       name=name,
