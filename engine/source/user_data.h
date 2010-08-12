@@ -247,7 +247,7 @@ struct UserData
 
 private:
 
-    friend class Handle;
+    friend struct Handle;
 
     //.........................................................................
 

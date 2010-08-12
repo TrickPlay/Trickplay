@@ -700,7 +700,7 @@ int lb_set_extra(lua_State * L)
 {
     if (!lua_isnil(L,2))
     {
-        lb_checktable(L,2);
+        (void)lb_checktable(L,2);
     }
 
     LSG;
@@ -758,7 +758,7 @@ void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter
 
     int t = lua_gettop( L );
 
-    lb_checktable(L,t);
+    (void)lb_checktable(L,t);
 
     lb_strong_deref(L,visited);
     lua_pushvalue(L,t);
@@ -825,7 +825,7 @@ void lb_dump_table( lua_State * L )
 {
     LSG;
 
-    lb_checktable(L,1);
+    (void)lb_checktable(L,1);
 
     int filter = 0;
 
