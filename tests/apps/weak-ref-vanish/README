@@ -1,0 +1,17 @@
+
+This app does a bunch of animations - when you press a key. It shows that 
+sometimes a weak ref to one of our user datas can be removed from the weak
+ref table before the user data is finalized (which is something that Lua
+does).
+
+http://lua-users.org/lists/lua-l/2010-08/msg00144.html
+
+This was causing an assertion when a user data in this state got a toggle
+ref notify and tried to go from weak to strong. When dereferencing the 
+weak ref, it got a nil.
+
+Fixed in:
+9dc718c9bf30bfca5b310d376996dbaabab3aac3
+Thu 12 Aug 2010 03:49:56 PM PDT
+
+
