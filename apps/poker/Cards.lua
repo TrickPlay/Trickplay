@@ -1,6 +1,11 @@
+if not Class then
+   dofile("Class.lua")
+end
+
 function Suit(name)
    return {
-      name=name
+      name=name,
+      abbv=string.sub(name, 1, 1)
    }
 end
 
@@ -11,36 +16,53 @@ Suits = {
    SPADES=Suit("Spades")
 }
 
-function Rank(name, num)
+function Rank(name, num, abbv)
    return {
       name=name,
-      num=num
+      num=num,
+      abbv=abbv
    }
 end
 
 Ranks = {
-   TWO=Rank("Two", 2),
-   THREE=Rank("Three", 3),
-   FOUR=Rank("Four", 4),
-   FIVE=Rank("Five", 5),
-   SIX=Rank("Six", 6),
-   SEVEN=Rank("Seven", 7),
-   EIGHT=Rank("Eight", 8),
-   NINE=Rank("Nine", 9),
-   TEN=Rank("Ten", 10),
-   JACK=Rank("Jack", 11),
-   QUEEN=Rank("Queen", 12),
-   KING=Rank("King", 13),
-   ACE=Rank("Ace", 14),
+   TWO=Rank("Two", 2, "2"),
+   THREE=Rank("Three", 3, "3"),
+   FOUR=Rank("Four", 4, "4"),
+   FIVE=Rank("Five", 5, "5"),
+   SIX=Rank("Six", 6, "6"),
+   SEVEN=Rank("Seven", 7, "7"),
+   EIGHT=Rank("Eight", 8, "8"),
+   NINE=Rank("Nine", 9, "9"),
+   TEN=Rank("Ten", 10, "T"),
+   JACK=Rank("Jack", 11, "J"),
+   QUEEN=Rank("Queen", 12, "Q"),
+   KING=Rank("King", 13, "K"),
+   ACE=Rank("Ace", 14, "A"),
 }
 
-function Card(rank, suit)
-   return {
-      rank=rank,
-      suit=suit,
-      name=rank.name .. " of " .. suit.name
-   }
-end
+Card = Class(nil, 
+function(self, rank, suit)
+   if type(rank) == "string" then
+      self.rank = Ranks[rank]
+   else
+      self.rank = rank
+   end
+   assert(self.rank)
+
+   if type(suit) == "string" then
+      self.suit = Suits[suit]
+   else
+      self.suit = suit
+   end
+   assert(self.suit)
+
+   self.name = self.rank.name .. " of " .. self.suit.name
+   self.abbv = self.rank.abbv .. self.suit.abbv
+
+   function self:equals(card)
+      return self.rank == card.rank and self.suit == card.suit
+   end
+end)
 
 Cards = {}
 for _, suit in pairs(Suits) do
@@ -48,7 +70,7 @@ for _, suit in pairs(Suits) do
       table.insert(Cards, Card(rank, suit))
    end
 end
-print("#Cards", #Cards)
+
 Deck = Class(nil, function(self, ...)
    local cards = {}
    for _, card in ipairs(Cards) do

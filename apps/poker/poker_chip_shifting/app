@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.poker_menu",
+    release     = "1",
+    version     = "1.0",
+    name        = "poker_menu",
+    author      = "Rex Fenley",
+    copyright   = "© Trickplay Inc."
+}
+
