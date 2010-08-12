@@ -105,6 +105,13 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 
 //.........................................................................
 
+int lb_get_extra(lua_State * L);
+
+int lb_set_extra(lua_State * L);
+
+//.........................................................................
+
+void lb_dump_table( lua_State * L );
 
 #endif // _TRICKPLAY_LB_H
 

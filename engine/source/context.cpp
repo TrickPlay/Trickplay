@@ -368,6 +368,19 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         Images::dump_cache();
     }
+    else if ( !strcmp( command , "gc" ) )
+    {
+        if ( context->current_app )
+        {
+            if ( lua_State * L = context->current_app->get_lua_state() )
+            {
+                int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+                lua_gc( L , LUA_GCCOLLECT , 0 );
+                int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+                g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+            }
+        }
+    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
