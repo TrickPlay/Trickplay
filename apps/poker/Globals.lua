@@ -24,5 +24,7 @@ Colors={
    FOCUS_RED                    ="602020"
 }
 
+PLAYER_NAME_FONT = "KacstArt 40px"
+
 DEFAULT_FONT = "DejaVu Serif 40px"
 DEFAULT_COLOR = Colors.WHITE
