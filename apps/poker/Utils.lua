@@ -65,7 +65,7 @@ function count_outs(hand)
    local out_table = {}
    for _, poker_hand in ipairs(PokerHands) do
       if poker_hand.present_in(h) then
-         print(poker_hand.name .. " in hand!")
+         -- print(poker_hand.name .. " in hand!")
       else
          table.insert(targets, poker_hand)
          out_table[poker_hand] = 0
