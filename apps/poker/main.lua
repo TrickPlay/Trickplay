@@ -1,7 +1,12 @@
+
+
 math.randomseed(os.time())
 dofile("Class.lua")
 dofile("Cards.lua")
 dofile("Globals.lua")
+dofile("Utils.lua")
+dofile("PokerRules.lua")
+dofile("PokerRulesTest.lua")
 local deck = Deck()
 deck:shuffle()
 local hand1 = deck:deal(5)
@@ -49,5 +54,14 @@ function screen:on_key_down(k)
       hand1=deck:deal(5)
       hand2=deck:deal(5)
       display_cards()
+      print("One pair present in hand1:",ONE_PAIR.present_in(hand1))
+      print("One pair present in hand2:",ONE_PAIR.present_in(hand2))
+      if res == 1 then
+         print("hand 2 wins")
+      elseif res == -1 then
+         print("hand 1 wins")
+      else
+         print("tie.")
+      end
    end
 end
