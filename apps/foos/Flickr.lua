@@ -16,7 +16,6 @@ Flickr = {
 			end
 			return result
 		end
-	
 		local data = json:parse( URLRequest( Flickr.license_info_url.."&api_key="..api_key):perform().body )
 		for i, license in ipairs( data.licenses.license ) do
 		licenses[license.id] =	{
