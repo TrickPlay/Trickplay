@@ -58,7 +58,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
         CircleMenu:overlay()
 	CircleMenu.updateOverlays()
         
-        CircleMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
+        CircleMenu:addSound("themes/robot/sounds/BeepHigh.mp3", "themes/robot/sounds/BeepLow.mp3")
         
         CircleMenu.debug = true -- TURN THIS OFF LATER
         
@@ -144,7 +144,7 @@ function createCircleMenu(offset, distance, params, menuType, player)
                         
                 elseif SOUND then
                 
-                        mediaplayer:play_sound("themes/robot/sounds/Error.wav")
+                        mediaplayer:play_sound("themes/robot/sounds/Error.mp3")
                 
                 end
                 

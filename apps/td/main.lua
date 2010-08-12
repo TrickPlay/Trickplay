@@ -21,12 +21,12 @@ function app.on_loaded()
 	
 	AssetLoader.on_preload_ready = function()
 		
-		--mediaplayer:play_sound("backgroundMusic.wav")
+		--mediaplayer:play_sound("backgroundMusic.mp3")
 		
-		--local track_url = "themes/robot/sounds/ThemeSong.wav"
+		--local track_url = "themes/robot/sounds/ThemeSong.mp3"
 		if SOUND then
 		
-			local track_url = "ThemeLoop.wav"
+			local track_url = "ThemeLoop.mp3"
 			mediaplayer:load(track_url)
 			mediaplayer.on_loaded = function (mediaplayer)
 				mediaplayer:play()
@@ -242,7 +242,7 @@ function app.on_loaded()
 			MainMenu.updateOverlays()
 			MainMenu.buttons.extra.left()
 			
-			MainMenu:addSound("themes/robot/sounds/BeepHigh.wav", "themes/robot/sounds/BeepLow.wav")
+			MainMenu:addSound("themes/robot/sounds/BeepHigh.mp3", "themes/robot/sounds/BeepLow.mp3")
 		
 		end
 		
