@@ -27,10 +27,10 @@ Model = Class(function(model, ...)
     model.currentPlayer = nil
     
     model.bet = {
-        SMALL_BLIND = 10,
-        BIG_BLIND = 20,
-        DEFAULT_BET = 20,
-        CURRENT_POT = 0,
+        SMALL_BLIND = 1,
+        BIG_BLIND = 2,
+        DEFAULT_BET = 2,
+        --CURRENT_POT = 0,
     }
 
     -- class methods
