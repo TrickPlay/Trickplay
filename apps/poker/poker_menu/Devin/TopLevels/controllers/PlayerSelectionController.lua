@@ -51,6 +51,7 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
         }
         model.players[playerCounter] = Player(args)
         model.players[playerCounter]:makeChips()
+        model.currentPlayer = playerCounter
         --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
         
         playerCounter = playerCounter + 1

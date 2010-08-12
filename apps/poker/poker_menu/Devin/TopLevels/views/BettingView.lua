@@ -47,8 +47,8 @@ BettingView = Class(View, function(view, model, ...)
         self:set_controller(BettingController(self))
     end
     
-    view.stack = chipStack()
-    view.stack.group.position = {1800,500}
+    view.stack = chipCollection()
+    view.stack.group.position = {1700,500}
     screen:add(view.stack.group)
     
     function view:update()
@@ -70,19 +70,27 @@ BettingView = Class(View, function(view, model, ...)
             end
             
             local t = view.text[3]
-            t.text = "Bet:"..model.players[1].bet
+            t.text = "Bet:"..model.players[ model.currentPlayer ].bet
             t.anchor_point = {t.w/2, t.h/2}
             
-            local player = model.players[1]
+            local player = model.players[ model.currentPlayer ]
             local playerStack = player.chips
             local stack = view.stack
             
-            -- Add chips to the bet
-            stack:setChips(player.bet)
-            --playerStack:setChips(player.money)
+            local function sum()
+                local s = 0
+                for i=1,model.currentPlayer do
+                    s = s + model.players[i].bet
+                end
+                return s
+            end
             
-            stack:arrangeChips(15)
-            playerStack:arrangeChips(15,150)
+            -- Add chips to the bet
+            stack:set( sum() )
+            playerStack:set(player.money)
+            
+            stack:arrange(55, 5)
+            playerStack:arrange(55,5)
             
         else
             print("Hiding Betting UI")
