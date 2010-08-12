@@ -20,6 +20,13 @@ set( TP_CONTROLLER_DISCOVERY_MDNS 1 )
 set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 set( TP_UPNP_CLIENT 1 )
 
+# Turn off UPnP on the mac for now.
+
+if ( CMAKE_HOST_APPLE )
+	unset( TP_CONTROLLER_DISCOVERY_UPNP )
+	unset( TP_UPNP_CLIENT )
+endif( CMAKE_HOST_APPLE )
+
 #------------------------------------------------------------------------------
 
 include(util.cmake)
