@@ -5,6 +5,7 @@ dofile("MVC.lua")
 dofile("Views.lua")
 dofile("Chip.lua")
 dofile("Player.lua")
+dofile("Popup.lua")
 
 Components = {
     PLAYER_SELECTION = 1,
@@ -110,12 +111,14 @@ function screen:on_key_down(k)
          if not child.text then
             child.anchor_point = {child.w/2, child.h/2}
             flipCard(child)
-            --[[child.y_rotation = {child.y_rotation[1]+20, 0, 0}
+            ---
+            child.y_rotation = {child.y_rotation[1]+20, 0, 0}
             if child.y_rotation[1]%360 >= 90 and child.y_rotation[1]%360 <= 270 then 
                child:find_child("back"):raise_to_top()
             else
                child:find_child("front"):raise_to_top()
-            end]]
+            end
+            --]
          end
       end )
    end
@@ -123,3 +126,4 @@ end
 --]]
 
 local p = Popup:new{draw = true, text="You're Playing Poker Dogs"}
+p:render()
