@@ -37,7 +37,7 @@ for themeName, t in pairs(Themes) do
 		
 	end
 	
-	AssetLoader:preloadImage(themeName.."Background", "themes/"..themeName.."/assets/Background.png")
+	AssetLoader:preloadImage(themeName.."Background", "themes/"..themeName.."/assets/Background.jpg")
 	AssetLoader:preloadImage(themeName.."Overlay", "themes/"..themeName.."/assets/Overlay.png")
 
 end
@@ -79,7 +79,7 @@ AssetLoader:preloadImage("BuyFocusCircle","themes/robot/assets/BuyFocusCircle.pn
 AssetLoader:preloadImage("ProgressBar","assets/ProgressBar.png")
 AssetLoader:preloadImage("WaveProgress", "themes/robot/assets/WaveProgress.png")
 
-AssetLoader:preloadImage("TitleBackground","themes/robot/assets/TitleBackground.png")
+AssetLoader:preloadImage("TitleBackground","themes/robot/assets/TitleBackground.jpg")
 
 AssetLoader:preloadImage("smallWindow","assets/SmallWindow.png")
 AssetLoader:preloadImage("largeWindow","assets/LargeWindow.png")

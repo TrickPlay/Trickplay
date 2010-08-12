@@ -106,7 +106,7 @@ local robot = {
                 --wall = { damage = 0, range = 0, cooldown = 1000, cost = 5, slowammount = 0, frames = 1, slow = false, name = "Wall",	}
                 
         },
-        boardBackground = "assets/robotBackground.png",
+        boardBackground = "assets/robotBackground.jpg",
         obstacles = dofile("themes/robot/obstacles.lua"),
         wave = nil,
         
