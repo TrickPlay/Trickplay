@@ -29,7 +29,7 @@ void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
     lua_pushnumber( L, color->alpha );
     lua_rawseti( L, -2, 4 );
 
-    LSG_END( 1 );
+    (void)LSG_END( 1 );
 }
 
 //.............................................................................
