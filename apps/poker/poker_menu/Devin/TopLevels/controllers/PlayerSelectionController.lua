@@ -6,12 +6,13 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
 
     local PlayerGroups = {
         TOP = 1,
-        BOTTOM = 2,
+        BOTTOM = 2
     }
     local SubGroups = {
         LEFT = 1,
-        MIDDLE = 2,
-        RIGHT = 3
+        LEFT_MIDDLE = 2,
+        RIGHT_MIDDLE = 3,
+        RIGHT = 4
     }
 
     local GroupSize = 0
@@ -25,15 +26,21 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
 
     -- the default selected index
     local selected = PlayerGroups.BOTTOM
-    local subselection = SubGroups.MIDDLE
+    local subselection = SubGroups.LEFT_MIDDLE
+    assert(selected)
+    assert(subselection)
     --the number of the current player selecting a seat
     local playerCounter = 1
 
     local PlayerCallbacks = {
-        --[[[PlayerGroups.TOP] = function(self)
-        end,
-        [PlayerGroups.BOTTOM] = function(self)
-        end]]
+        [PlayerGroups.TOP] = {},
+        [PlayerGroups.BOTTOM] = {
+            [SubGroups.LEFT_MIDDLE] = function()
+            end,
+            [SubGroups.RIGHT_MIDDLE] = function()
+                exit()
+            end
+        }
     }
 
     local function setPlayerSeat()
@@ -65,9 +72,16 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] =
         function(self)
-            setPlayerSeat()
-            self:get_model():set_active_component(Components.PLAYER_BETTING)
-            self:get_model():notify()
+            local success, error_msg = 
+                pcall(PlayerCallbacks[selected][subselection], self)
+            if not success then
+                print(error_msg)
+                setPlayerSeat()
+                if(playerCounter > 6) then
+                    self:get_model():set_active_component(Components.PLAYER_BETTING)
+                    self:get_model():notify()
+                end
+            end
         end
     }
 
