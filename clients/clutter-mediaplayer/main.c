@@ -1,5 +1,6 @@
 
 #include "clutter-gst/clutter-gst.h"
+#include "gst/video/video.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -271,6 +272,11 @@ static void loading_messages(GstBus * bus,GstMessage * message,TPMediaPlayer * m
             ud->load_signal=0;
             
             break;
+        }
+        default:
+        {
+        	// Some unhandled case
+        	g_warning("Unhandled message type: %d",message->type);
         }
     }
 }
