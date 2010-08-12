@@ -1,4 +1,4 @@
-dofile ("FlickrTest.lua")
+--dofile ("FlickrTest.lua")
 
 NUM_OF_3X3 = 1
 NUM_OF_2X2 = 2
