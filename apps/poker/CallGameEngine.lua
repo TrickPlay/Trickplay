@@ -5,6 +5,7 @@ local engine = GameEngine()
       function()
          engine:initialize_hand()
          engine:hole_deal()
+         engine:hole_set_action()
          engine:hole_betting_til_block()
       end,
    [HOLE_BETTING] =
@@ -12,6 +13,7 @@ local engine = GameEngine()
          engine:hole_betting_til_block(bet)
          if engine.round == Rounds.FLOP then
             engine:flop_deal()
+            engine:flop_set_action()
             engine:flop_betting_til_block()
          end
       end,
@@ -20,6 +22,7 @@ local engine = GameEngine()
          engine:flop_betting_til_block(bet)
          if engine.round == Rounds.TURN then
             engine:turn_deal()
+            engine:turn_set_action()
             engine:turn_betting_til_block()
          end
       end,
@@ -28,6 +31,7 @@ local engine = GameEngine()
          engine:turn_betting_til_block(bet)
          if engine.round == Rounds.RIVER then
             engine:river_deal()
+            engine:river_set_action()
             engine:river_betting_til_block()
          end
       end,
