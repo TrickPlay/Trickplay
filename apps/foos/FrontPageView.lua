@@ -159,7 +159,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
                              }
                          else
-                             model.albums[prev[1]][prev[2]]:complete_animation()
+                             model.placeholders[prev[1]][prev[2]]:complete_animation()
                              model.albums[sel[1]][sel[2]]:complete_animation()
                              model.albums[sel[1]][sel[2]]:raise_to_top()
                              model.albums[sel[1]][sel[2]]:animate{
