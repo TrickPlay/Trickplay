@@ -95,7 +95,7 @@ function upnp_service_search( device_type , service_type , callback , timeout )
         if not ( search_completed and requests_left == 0 ) then return end
         
         -- This is a table that maps an action id (an invocation of an action)
-        -- to its corresponding service object or callback
+        -- to its corresponding service object and callback
         
         local action_map = {}
 
@@ -121,7 +121,7 @@ function upnp_service_search( device_type , service_type , callback , timeout )
                     
                 if id > 0 then
                 
-                    action_map[ id ] = callback or service
+                    action_map[ id ] = { service , callback }
                 
                 end
                 
@@ -325,31 +325,26 @@ function upnp_service_search( device_type , service_type , callback , timeout )
         end
 
         -------------------------------------------------------------------
-        -- When an action completes, we look for its service in the action_map
-        -- table. If it is there, we call its on_action_completed function.
-        -- If instead of a service, the action map points to a function,
-        -- we just call the function.
+        -- When an action completes, we look for an entry in the action_map
+        -- table for this action id. The table will have the 'service' that
+        -- called the action as its first element and *may* have a callback
+        -- as its second element. If the callback is nil, we use
+        -- service.on_action_completed.
         -------------------------------------------------------------------
         
         function client.on_action_completed( client , id , error_code , xml )
         
             print( "ACTION" , id , "COMPLETED WITH ERROR CODE" , error_code )
             
-            local service = action_map[ id ]
+            local service , callback = unpack( action_map[ id ] )
+
+            action_map[ id ] = nil
             
-            if service then
+            callback = callback or service.on_action_completed
             
-                if type( service ) == "function" then
-                
-                    pcall( service , id , error_code , xml )
-                    
-                else
-                
-                    pcall( service.on_action_completed , service , id , error_code , xml )
-                    
-                end
-                
-                action_map[ id ] = nil
+            if service and callback then
+            
+                pcall( callback , service , id , error_code , xml )
             
             end
         
