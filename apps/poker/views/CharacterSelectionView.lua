@@ -1,11 +1,11 @@
-PlayerSelectionView = Class(View, function(view, model, ...)
+CharacterSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     --first add the background shiz
 
     local background = {
     }
 
-    local choosePlayersText = Text{
+    local chooseCharacterText = Text{
         font = CUSTOMIZE_TAB_FONT,
         color = Colors.BLUE,
         position = {3000, 500},
@@ -18,11 +18,11 @@ PlayerSelectionView = Class(View, function(view, model, ...)
         timer:stop()
         timer.on_timer = nil
         timer = nil
-        choosePlayersText:animate{
+        chooseCharacterText:animate{
             duration = CHANGE_VIEW_TIME, x = -3000,
             on_completed = function()
-                choosePlayersText:unparent()
-                choosePlayersText = nil
+                chooseCharacterText:unparent()
+                chooseCharacterText = nil
             end
         }
     end
@@ -55,25 +55,25 @@ PlayerSelectionView = Class(View, function(view, model, ...)
     view.ui=Group{name="checkout_ui", position={0,0}}
     view.ui:add(unpack(view.items[1]))
     view.ui:add(unpack(view.items[2]))
-    view.ui:add(choosePlayersText)
+    view.ui:add(chooseCharacterText)
 
     screen:add(view.ui)
 
     function view:initialize()
-        self:set_controller(PlayerSelectionController(self))
+        self:set_controller(CharacterSelectionController(self))
     end
     
-    local choosePlayersFlag = true
+    local chooseCharacterFlag = true
     function view:update()
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
-        if comp == Components.PLAYER_SELECTION then
+        if comp == Components.CHARACTER_SELECTION then
             self.ui.opacity = 255
             self.ui:raise_to_top()
-            print("Showing Player Selection UI")
-            if(choosePlayersFlag) then
-                choosePlayersFlag = nil
-                choosePlayersText:animate{
+            print("Showing Character Selection UI")
+            if(chooseCharacterFlag) then
+                chooseCharacterFlag = nil
+                chooseCharacterText:animate{
                     duration = CHANGE_VIEW_TIME, x = 800,
                     on_completed = function()
                         timer:start()
@@ -91,7 +91,7 @@ PlayerSelectionView = Class(View, function(view, model, ...)
                 end
             end
         else
-            print("Hiding Player Selection UI")
+            print("Hiding Character Selection UI")
             self.ui:complete_animation()
             self.ui.opacity = 0
         end

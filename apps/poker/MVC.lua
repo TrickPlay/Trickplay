@@ -14,16 +14,18 @@ Model = Class(function(model, ...)
         [5] = false,
         [6] = false
     }
-    
+
+    SCREEN_WIDTH = screen.w
+    SCREEN_HEIGHT = screen.h
     model.default_player_locations = {
-        [1] = {1920*(1/5), 1080*(1/3)},
-        [2] = {1920*(2/5), 1080*(1/3)},
-        [3] = {1920*(3/5), 1080*(1/3)},
-        [4] = {1920*(4/5), 1080*(1/3)},
-        [5] = {1920*(1/5), 1080*(2/3)},
-        [6] = {1920*(2/5), 1080*(2/3)},
-        [7] = {1920*(3/5), 1080*(2/3)},
-        [8] = {1920*(4/5), 1080*(2/3)},
+        [1] = {SCREEN_WIDTH*(1/5), SCREEN_HEIGHT*(1/3)},
+        [2] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(1/3)},
+        [3] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(1/3)},
+        [4] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(1/3)},
+        [5] = {SCREEN_WIDTH*(1/5), SCREEN_HEIGHT*(2/3)},
+        [6] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
+        [7] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
+        [8] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(2/3)},
     }
     
     model.currentPlayer = nil

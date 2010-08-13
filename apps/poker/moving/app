@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.examples.hello-world",
+    release     = "1",
+    version     = "1.0",
+    name        = "Hello World",
+    author      = "Darren Yin",
+    copyright   = "Trickplay Inc."
+}
