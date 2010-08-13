@@ -23,9 +23,9 @@ Model = Class(function(model, ...)
         [3] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(1/3)},
         [4] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(1/3)},
         [5] = {SCREEN_WIDTH*(1/5), SCREEN_HEIGHT*(2/3)},
-        [6] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
-        [7] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
-        [8] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(2/3)},
+        ["START"] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
+        ["EXIT"] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
+        [6] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(2/3)},
     }
     
     model.currentPlayer = nil

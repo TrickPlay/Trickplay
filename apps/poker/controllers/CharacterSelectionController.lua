@@ -47,6 +47,15 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             end
         }
     }
+    
+    local function getPosition()
+    
+        local num = (selected-1)*SubSize + subselection
+        
+        if num == 8 then num = 6 end
+    
+        return num
+    end
 
     local function setCharacterSeat()
         --instantiate the player
@@ -54,15 +63,18 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         if(playerCounter == 1) then
             user = HUMAN
         end
+        
+        local position = getPosition()
         args = {
             user = user,
             row = selected,
             col = subselection,
             number = playerCounter,
-            position = model.default_player_locations[ (selected-1)*3 + subselection ]
+            position = model.default_player_locations[ position ]
         }
-        model.players[playerCounter] = Player(args)
-        model.players[playerCounter]:makeChips()
+        model.players[ playerCounter ] = Player(args)
+        model.players[ playerCounter ]:createMoneyChips()
+        model.players[ playerCounter ]:createBetChips()
         model.currentPlayer = playerCounter
         --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
         
@@ -110,6 +122,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             local new_selected = subselection + dir[1]
             if 1 <= new_selected and SubSize >= new_selected then
                 subselection = new_selected
+                
             end
         elseif(0 ~= dir[2]) then
             local new_selected = selected + dir[2]
@@ -117,6 +130,8 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 selected = new_selected
             end
         end
+        print(SubSize, GroupSize)
+        print(subselection, selected)
         self:get_model():notify()
     end
 

@@ -16,9 +16,9 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         },
         {
             Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[5] },
-            Text{font=CUSTOMIZE_TAB_FONT, color=Colors.RED, position=model.default_player_locations[6], text="START"},
-            Text{font=CUSTOMIZE_TAB_FONT, color=Colors.RED, position=model.default_player_locations[7], text="EXIT"},
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[8] },
+            Text{font=CUSTOMIZE_TAB_FONT, color=Colors.RED, position=model.default_player_locations.START, text="START"},
+            Text{font=CUSTOMIZE_TAB_FONT, color=Colors.RED, position=model.default_player_locations.EXIT, text="EXIT"},
+            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[6] },
         }
     }
 

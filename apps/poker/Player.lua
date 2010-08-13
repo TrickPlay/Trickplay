@@ -5,7 +5,7 @@ Player = Class(function(player, ...)
    player.row = 0
    player.col = 0
    player.bet = model.bet.DEFAULT_BET
-   player.money = 800
+   player.money = 800 - player.bet
    player.position = {0, 0}
    player.table_position = nil
    
@@ -13,13 +13,23 @@ Player = Class(function(player, ...)
       player[k] = v
    end
    
-   function player:makeChips()
+   function player:createMoneyChips()
       
-      player.chips = chipCollection()
-      player.chips.group.position = {player.position[1], player.position[2] - 170}
-      player.chips:set(player.money)
-      player.chips:arrange(55, 5)
-      screen:add(player.chips.group)
+      player.moneyChips = chipCollection()
+      player.moneyChips.group.position = {player.position[1], player.position[2] - 170}
+      player.moneyChips:set(player.money)
+      player.moneyChips:arrange(55, 5)
+      screen:add(player.moneyChips.group)
+      
+   end
+   
+   function player:createBetChips()
+      
+      player.betChips = chipCollection()
+      player.betChips.group.position = {player.position[1], player.position[2] - 300}
+      player.betChips:set(player.bet)
+      player.betChips:arrange(55, 5)
+      screen:add(player.betChips.group)
       
    end
    
