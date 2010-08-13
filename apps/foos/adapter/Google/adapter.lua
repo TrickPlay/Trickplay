@@ -1,8 +1,5 @@
 --local source = {}
 
-showGoogleImage("stuff", START_INDEX)
-
-
 local adapter = {
 	name = "GoogleImages",
 	logoUrl = "adapter/Google/logo.jpg",
