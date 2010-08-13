@@ -89,8 +89,10 @@ function(ctrl, game_ctrl, ...)
       pot = 0
 
       -- initialize small blind, big blind bets
-      player_bets[players[sb_p]] = small_blind
-      player_bets[players[bb_p]] = big_blind
+      player_bets[players[sb_p]] = sb_qty
+      players[sb_p].money = players[sb_p].money - sb_qty
+      player_bets[players[bb_p]] = bb_qty
+      players[bb_p].money = players[bb_p].money - bb_qty
 
       -- initialize cards for each player
       deck:reset()
