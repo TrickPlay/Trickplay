@@ -93,6 +93,7 @@ function(ctrl, game_ctrl, ...)
       player_bets[players[bb_p]] = big_blind
 
       -- initialize cards for each player
+      deck:reset()
       deck:shuffle()
       hole_cards = {}
       for _,player in ipairs(players) do
@@ -113,22 +114,10 @@ function(ctrl, game_ctrl, ...)
 
    -- Table of ui deal animations
    local deal_LUT = {
-      [Rounds.HOLE]=
-         function(pres)
-            pres:deal_hole()
-         end,
-      [Rounds.FLOP]=
-         function(pres)
-            pres:deal_flop()
-         end,
-      [Rounds.TURN]=
-         function(pres)
-            pres:deal_turn()
-         end,
-      [Rounds.RIVER]=
-         function(pres)
-            pres:deal_river()
-         end
+      [Rounds.HOLE]=function(pres) pres:deal_hole() end,
+      [Rounds.FLOP]=function(pres) pres:deal_flop() end,
+      [Rounds.TURN]=function(pres) pres:deal_turn() end,
+      [Rounds.RIVER]=function(pres) pres:deal_river() end
    }
    function ctrl.deal(ctrl, round)
       deal_LUT[round](pres)
