@@ -1,4 +1,5 @@
 --dofile ("FlickrTest.lua")
+dofile("Slideshow.lua")
 NUM_ROWS   = 2
 NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
