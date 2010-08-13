@@ -14,6 +14,8 @@ Model = Class(function(model, ...)
         [5] = false,
         [6] = false
     }
+    --used so no two players can have the same position on the table
+    model.positions = {}
 
     SCREEN_WIDTH = screen.w
     SCREEN_HEIGHT = screen.h
