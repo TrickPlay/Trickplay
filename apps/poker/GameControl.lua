@@ -11,17 +11,15 @@ function(ctrl, model, ...)
    local pres = GamePresentation(ctrl)
    local hand_ctrl = HandControl(ctrl)
 
-   local mvc_on_key_down = function() end
-   local old_on_key_down = function() end
    local in_hand = false
-
 
    local game_pipeline = {}
    local orig_game_pipeline = {
       function(ctrl)
          ctrl:start_hand()
          enable_event_listener(Events.TIMER, 1)
-         return true
+         local continue = true
+         return continue
       end,
       function(ctrl)
          screen:add(
@@ -75,10 +73,13 @@ function(ctrl, model, ...)
    function ctrl.initialize_game(ctrl, args)
       state:initialize(args)
       pres:display_ui()
+
+      -- reset pipeline
       game_pipeline = {}
       for _, stage in ipairs(orig_game_pipeline) do
          table.insert(game_pipeline,stage)
       end
+
       disable_event_listeners()
       enable_event_listener(Events.TIMER, 1)
    end

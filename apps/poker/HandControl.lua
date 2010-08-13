@@ -58,6 +58,18 @@ function(ctrl, game_ctrl, ...)
    local bb_p
    local deck
 
+   function ctrl:get_community_cards() return community_cards end
+   function ctrl:get_hole_cards() return hole_cards end
+   function ctrl:get_player_bets() return player_bets end
+   function ctrl:get_pot() return pot end
+   function ctrl:get_action() return action end
+   function ctrl:get_players() return players end
+   function ctrl:get_sb_qty() return sb_qty end
+   function ctrl:get_bb_qty() return bb_qty end
+   function ctrl:get_sb_p() return sb_p end
+   function ctrl:get_bb_p() return bb_p end
+   function ctrl:get_deck() return deck end
+
    -- public functions
    function ctrl.initialize(ctrl)
       players = game_ctrl:get_players()
@@ -99,20 +111,21 @@ function(ctrl, game_ctrl, ...)
    -- Table of ui deal animations
    local deal_LUT = {
       [Rounds.HOLE]=
-         function(ctrl)
+         function(pres)
+            
          end,
       [Rounds.FLOP]=
-         function(ctrl)
+         function(pres)
          end,
       [Rounds.TURN]=
-         function(ctrl)
+         function(pres)
          end,
       [Rounds.RIVER]=
-         function(ctrl)
+         function(pres)
          end
    }
    function ctrl.deal(ctrl, round)
-      deal_LUT[round](ctrl)
+      deal_LUT[round](pres)
       return true
    end
 
