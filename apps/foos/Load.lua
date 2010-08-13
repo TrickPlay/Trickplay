@@ -59,6 +59,7 @@ function Load_Image(site,index)
         },
         -- toss the filler image and scale it once loaded
         on_loaded = function()
+            if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
             print("loading pic at",i,j,index)
             model.placeholders[i][j]:unparent()
             model.placeholders[i][j] = nil
@@ -72,6 +73,7 @@ function Load_Image(site,index)
             }
             model.album_group:add(model.albums[i][j])
             model.albums[i][j]:lower_to_bottom()
+            end
         end
     }
 end
