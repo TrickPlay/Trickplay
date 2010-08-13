@@ -10,10 +10,10 @@ function startAdapter(selection)
 end
 
 function loadCovers()
-	search = "scene"
+	search = "space"
 	for i =1, 16 do
 		local request = URLRequest {
-		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=xxlarge",
+		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=medium",
 		on_complete = function (request, response)
 			local data = json:parse(response.body)
          site = data.responseData.results[1].unescapedUrl
