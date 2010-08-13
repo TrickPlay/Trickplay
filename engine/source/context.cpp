@@ -1227,11 +1227,6 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
-    if ( log_level & G_LOG_LEVEL_WARNING && g_str_has_prefix( log_domain , "Cogl") )
-    {
-        return;
-    }
-
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message
