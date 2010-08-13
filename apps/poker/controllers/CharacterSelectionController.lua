@@ -75,7 +75,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         end
         
         args = {
-            isHuman = isHuman
+            isHuman = isHuman,
             row = selected,
             col = subselection,
             number = playerCounter,
