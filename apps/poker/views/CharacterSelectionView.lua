@@ -5,28 +5,6 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     local background = {
     }
 
-    local chooseCharacterText = Text{
-        font = CUSTOMIZE_TAB_FONT,
-        color = Colors.BLUE,
-        position = {3000, 500},
-        text = "Choose Character's"        
-    }
-
-    local timer = Timer()
-    timer.interval = 2
-    timer.on_timer = function(timer)
-        timer:stop()
-        timer.on_timer = nil
-        timer = nil
-        chooseCharacterText:animate{
-            duration = CHANGE_VIEW_TIME, x = -3000,
-            on_completed = function()
-                chooseCharacterText:unparent()
-                chooseCharacterText = nil
-            end
-        }
-    end
-         
     --create the components
 
     view.items = {
@@ -63,7 +41,6 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         self:set_controller(CharacterSelectionController(self))
     end
     
-    local chooseCharacterFlag = true
     function view:update()
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
@@ -71,15 +48,6 @@ CharacterSelectionView = Class(View, function(view, model, ...)
             self.ui.opacity = 255
             self.ui:raise_to_top()
             print("Showing Character Selection UI")
-            if(chooseCharacterFlag) then
-                chooseCharacterFlag = nil
-                chooseCharacterText:animate{
-                    duration = CHANGE_VIEW_TIME, x = 800,
-                    on_completed = function()
-                        timer:start()
-                    end
-                }
-            end
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 

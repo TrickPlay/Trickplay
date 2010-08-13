@@ -36,6 +36,11 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         [CharacterSelectionGroups.TOP] = {},
         [CharacterSelectionGroups.BOTTOM] = {
             [SubGroups.LEFT_MIDDLE] = function()
+                if(playerCounter > 2) then
+                    self:get_model():set_active_component(Components.PLAYER_BETTING)
+                    self:get_model():notify()
+                end
+
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
                 exit()
