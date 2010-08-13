@@ -11,7 +11,6 @@ FrontPageController = Class(Controller, function(self, view, ...)
 
     -- the default selected index
     local selected = {1,1}
-    local prev_index = {1,1}
 
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
@@ -43,17 +42,10 @@ FrontPageController = Class(Controller, function(self, view, ...)
         return selected[1],selected[2]
     end
 
-    function self:get_prev_index()
-        return prev_index[1],prev_index[2]
-    end
-    function self:set_prev_index(r,c)
-        prev_index = {r,c}
-    end
 
 
 
     function self:move_selector(dir)
-        prev_index = {selected[1],selected[2]}
         local next_spot = {selected[1]+dir[2],selected[2]+dir[1]}
         if next_spot[1] > 0 and next_spot[1] <= NUM_ROWS and
            next_spot[2] > 0 and next_spot[2] <= NUM_VIS_COLS then

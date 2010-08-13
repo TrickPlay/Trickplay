@@ -75,4 +75,19 @@ function Load_Image(site,index)
     }
 end
 
+function Scale_To_Fit(img,base_size,target_size)
+    local scale_x = target_size[1] / base_size[1]
+    local scale_y = target_size[2] / base_size[2]
 
+    if scale_x > scale_y then
+        img.scale = {scale_y,scale_y}
+        img.anchor_point = {base_size[1]*(1-scale_y)/2,0}
+        img.clip  = {0,0,base_size[1]*scale_y,
+                         base_size[2]*scale_y}
+    else
+        img.scale = {scale_x,scale_x}
+        img.anchor_point = {0,base_size[2]*(1-scale_x)/2}
+        img.clip  = {0,0,base_size[1]*scale_x,
+                         base_size[2]*scale_x} 
+    end
+end
