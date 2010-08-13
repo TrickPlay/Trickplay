@@ -7,6 +7,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
     view.selector = Image
     {
+        name = "frontpageselector",
         src = "assets/polaroid_overlay.png",
         opacity = 0
     }
@@ -78,6 +79,11 @@ FrontPageView = Class(View, function(view, model, ...)
                 prev[2]  = prev[2] + model.front_page_index - 1
 --]]
         if comp == Components.FRONT_PAGE  then
+
+if model.album_group:find_child("frontpageselector") == nil then
+    model.album_group:add(view.selector)
+
+end
             print("\n\nShowing FrontPageView UI\n")
 --[[
             model.album_group:raise_to_top()
