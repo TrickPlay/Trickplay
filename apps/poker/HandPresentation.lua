@@ -136,4 +136,16 @@ function(pres, ctrl)
          player.betChips:set(0)
       end
    end
+
+   function pres.show_winners(pres, winners)
+      -- winners is an array of the winning players
+   end
+
+   function pres.fold_player(pres, active_player)
+      update_players()
+   end
+
+   function pres.bet_player(pres, active_player)
+      update_players()
+   end
 end)

@@ -30,6 +30,13 @@ Player = Class(function(player, args, ...)
       screen:add(player.betChips.group)
       
    end
+
+   function player:get_move(hole, call_bet, min_raise, current_bet, pot)
+      local fold = false
+      local bet = call_bet
+      
+      return fold, 10
+   end
    
    player.status = PlayerStatusView(model, nil, player)
    player.status:initialize()

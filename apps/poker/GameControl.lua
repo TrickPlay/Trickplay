@@ -33,7 +33,7 @@ function(ctrl, model, ...)
          pres:finish_hand()
          return continue
       end
-      -- stage where we 
+      -- stage where we
       -- function(ctrl)
       --    enable_event_listener(Events.TIMER, 1)
       --    return true
@@ -66,7 +66,6 @@ function(ctrl, model, ...)
       state:initialize(args)
       pres:display_ui()
 
-      -- reset pipeline
       reset_pipeline()
       disable_event_listeners()
       enable_event_listener(Events.TIMER, 1)
