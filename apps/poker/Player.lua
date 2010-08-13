@@ -1,7 +1,5 @@
 Player = Class(function(player, args, ...)
    player.isHuman = false
--- what is this?
-   player.user = false
    player.number = 0
    player.bet = model.bet.DEFAULT_BET
    player.money = 800
