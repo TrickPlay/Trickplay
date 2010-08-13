@@ -2,9 +2,9 @@ dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("MVC.lua")
 dofile("FrontPageView.lua")
 dofile("FrontPageController.lua")
---[[
-dofile("MainMenuView.lua")
-dofile("MainMenuController.lua")
+---[[
+dofile("SlideshowView.lua")
+dofile("SlideshowController.lua")
 --]]
 --[[
 dofile("HelpMenuView.lua")
@@ -21,10 +21,8 @@ dofile("Load.lua")
 Components = {
    COMPONENTS_FIRST = 1,
    FRONT_PAGE       = 1,
-   MAIN_MENU        = 2,
-   ITEM_SELECTED    = 3,
-   HELP_MENU        = 4,
-   COMPONENTS_LAST  = 4
+   SLIDE_SHOW       = 2,
+   COMPONENTS_LAST  = 2
 }
 model = Model()
 
@@ -32,9 +30,9 @@ Setup_Album_Covers()
 
 local front_page_view = FrontPageView(model)
 front_page_view:initialize()
---[[
-local main_menu_view = MainMenuView(model)
-main_menu_view:initialize()
+---[[
+local slide_show_view = SlideshowView(model)
+slide_show_view:initialize()
 --]]
 --[[
 local help_menu_view = HelpMenuView(model)

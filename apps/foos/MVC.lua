@@ -10,20 +10,17 @@ Model = Class(function(model, ...)
     model.num_sources = NUM_SLIDESHOW_IMAGES
     model.front_page_index = 1
 
-    model.vis_pics   = {}
-    model.left_edge  = {}
-    model.right_edge = {}
-    model.right_next_index = 0
-    model.left_next_index = 0
+    --FRONT_PAGE
     model.albums = {}
     model.placeholders = {}
-    model.album_base_sizes = {}
-    model.albums_loaded = false
     model.album_group = Group{name="Album Group"}
-model.default = Image{
+    model.default = Image{
                 src = "assets/img_placeholder_questionmark_loading.jpg",
                 opacity = 0
-            }
+    }
+
+    --SLIDE_SHOW
+    model.curr_slideshow = {}
 
 
     -- class methods
