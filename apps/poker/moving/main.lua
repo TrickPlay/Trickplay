@@ -10,6 +10,7 @@ players = {
    ComputerPlayer(),
    ComputerPlayer(),
    ComputerPlayer(),
+   HumanPlayer(),
    ComputerPlayer()
 }
 texts = {
