@@ -1244,7 +1244,6 @@ interface actor [[ClutterActor*]]
     bool complete_animation()
 	[[
 	    ClutterAnimation * animation=clutter_actor_get_animation(self);
-	    g_debug("ANIMATION=%p",animation);
 	    if (animation)
 	    {
 		clutter_animation_completed(animation);
