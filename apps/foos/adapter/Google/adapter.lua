@@ -19,5 +19,5 @@ function showGoogleImage(search,index)
 	}
 	request:send()
 end
-showGoogleImage("stuff", START_INDEX)
+showGoogleImage("xkcd", START_INDEX)
 
