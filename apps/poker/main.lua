@@ -19,9 +19,11 @@ function()
 
 
    Components = {
+      COMPONENTS_FIRST = 1,
       CHARACTER_SELECTION = 1,
       PLAYER_BETTING = 2,
-      GAME = 3
+      GAME = 3,
+      COMPONENTS_LAST = 3
    }
 
    -- Model initialization
@@ -59,27 +61,8 @@ function()
       end
    end
    game = GameControl(model)
-   local players = {}
-   table.insert(players,
-                Player{
-                   isHuman=true,
-                   table_position=1
-                })
-   for i=2,6 do
-      table.insert(
-         players,
-         Player{
-            isHuman=true,
-            table_position=i
-         })
-   end
-   game:initialize_game{
-      sb=1,
-      bb=2,
-      endowment=800,
-      players=players
-   }
-   old_on_key_down = nil
-   model:start_app(Components.GAME)
+   
+--   model:start_app(Components.GAME)
+   model:start_app(Components.CHARACTER_SELECTION)
    AssetLoader.on_preload_ready = nil
 end

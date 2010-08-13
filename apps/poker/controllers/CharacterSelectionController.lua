@@ -32,15 +32,24 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     --the number of the current player selecting a seat
     local playerCounter = 1
 
+    local function start_a_game()
+        model:set_active_component(Components.GAME)
+        game:initialize_game{
+            sb=1,
+            bb=2,
+            endowment=800,
+            players=model.players
+        }
+        old_on_key_down = nil
+    end
+
     local CharacterSelectionCallbacks = {
         [CharacterSelectionGroups.TOP] = {},
         [CharacterSelectionGroups.BOTTOM] = {
             [SubGroups.LEFT_MIDDLE] = function()
                 if(playerCounter > 2) then
-                    self:get_model():set_active_component(Components.PLAYER_BETTING)
-                    self:get_model():notify()
+                    start_a_game()
                 end
-
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
                 exit()
@@ -98,8 +107,11 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 print(error_msg)
                 setCharacterSeat()
                 if(playerCounter > 6) then
+                    --[[
                     self:get_model():set_active_component(Components.PLAYER_BETTING)
                     self:get_model():notify()
+                    --]]
+                    start_a_game()
                 end
             end
         end
