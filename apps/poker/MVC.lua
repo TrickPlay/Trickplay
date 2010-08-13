@@ -6,14 +6,7 @@ Model = Class(function(model, ...)
     model.active_component = nil
 
     --a table of all the current players
-    model.players = {
-        [1] = false,
-        [2] = false,
-        [3] = false,
-        [4] = false,
-        [5] = false,
-        [6] = false
-    }
+    model.players = { }
     --used so no two players can have the same position on the table
     model.positions = {}
 

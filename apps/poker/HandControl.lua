@@ -81,6 +81,9 @@ function(ctrl, game_ctrl, ...)
       bb_p = game_ctrl:get_bb_p()
       deck = game_ctrl:get_deck()
 
+      -- person after the big blind goes first, initially
+      action = (bb_p % #players) + 1
+
       -- initialize bet in front of each player
       player_bets = {}
       for _,player in ipairs(players) do
