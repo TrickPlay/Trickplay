@@ -29,10 +29,17 @@ BettingController = Class(Controller, function(self, view, ...)
     local playerCounter = 1
 
     local PlayerCallbacks = {
-        --[[[PlayerGroups.TOP] = function(self)
+        [SubGroups.LEFT] = function(self)
+        --[[
+            local current_bet = model.players[ model.currentPlayer ].bet
+            model.players[ model.currentPlayer ].bet = 0
+            model.players[ model.currentPlayer ].money = model.players[ model.currentPlayer ].money - current_bet
+        --]]
         end,
-        [PlayerGroups.BOTTOM] = function(self)
-        end]]
+        [SubGroups.MIDDLE] = function(self)
+        end,
+        [SubGroups.RIGHT] = function(self)
+        end
     }
 
     local PlayerSelectionKeyTable = {
