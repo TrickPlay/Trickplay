@@ -1,10 +1,10 @@
-PlayerSelectionController = Class(Controller, function(self, view, ...)
-    self._base.init(self, view, Components.PLAYER_SELECTION)
+CharacterSelectionController = Class(Controller, function(self, view, ...)
+    self._base.init(self, view, Components.CHARACTER_SELECTION)
 
     local controller = self
     model = view:get_model()
 
-    local PlayerGroups = {
+    local CharacterSelectionGroups = {
         TOP = 1,
         BOTTOM = 2
     }
@@ -16,7 +16,7 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
     }
 
     local GroupSize = 0
-    for k, v in pairs(PlayerGroups) do
+    for k, v in pairs(CharacterSelectionGroups) do
         GroupSize = GroupSize + 1
     end
     local SubSize = 0
@@ -25,16 +25,16 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = PlayerGroups.BOTTOM
+    local selected = CharacterSelectionGroups.BOTTOM
     local subselection = SubGroups.LEFT_MIDDLE
     assert(selected)
     assert(subselection)
     --the number of the current player selecting a seat
     local playerCounter = 1
 
-    local PlayerCallbacks = {
-        [PlayerGroups.TOP] = {},
-        [PlayerGroups.BOTTOM] = {
+    local CharacterSelectionCallbacks = {
+        [CharacterSelectionGroups.TOP] = {},
+        [CharacterSelectionGroups.BOTTOM] = {
             [SubGroups.LEFT_MIDDLE] = function()
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
@@ -43,7 +43,7 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
         }
     }
 
-    local function setPlayerSeat()
+    local function setCharacterSeat()
         --instantiate the player
         local user = false
         if(playerCounter == 1) then
@@ -65,7 +65,7 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
         self:get_model():notify()
     end
 
-    local PlayerSelectionKeyTable = {
+    local CharacterSelectionKeyTable = {
         [keys.Up] = function(self) self:move_selector(Directions.UP) end,
         [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
@@ -73,10 +73,10 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
         [keys.Return] =
         function(self)
             local success, error_msg = 
-                pcall(PlayerCallbacks[selected][subselection], self)
+                pcall(CharacterSelectionCallbacks[selected][subselection], self)
             if not success then
                 print(error_msg)
-                setPlayerSeat()
+                setCharacterSeat()
                 if(playerCounter > 6) then
                     self:get_model():set_active_component(Components.PLAYER_BETTING)
                     self:get_model():notify()
@@ -86,8 +86,8 @@ PlayerSelectionController = Class(Controller, function(self, view, ...)
     }
 
     function self:on_key_down(k)
-        if PlayerSelectionKeyTable[k] then
-            PlayerSelectionKeyTable[k](self)
+        if CharacterSelectionKeyTable[k] then
+            CharacterSelectionKeyTable[k](self)
         end
     end
 

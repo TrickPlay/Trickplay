@@ -8,7 +8,7 @@ dofile("Player.lua")
 dofile("Popup.lua")
 
 Components = {
-    PLAYER_SELECTION = 1,
+    CHARACTER_SELECTION = 1,
     PLAYER_BETTING = 2
 }
 
@@ -22,7 +22,7 @@ local model = Model()
 
 -- View/Controller initialization
 BettingView(model):initialize()
-PlayerSelectionView(model):initialize()
+CharacterSelectionView(model):initialize()
 
 function screen:on_key_down(k)
     assert(model:get_active_controller())
@@ -30,7 +30,7 @@ function screen:on_key_down(k)
     model:get_active_controller():on_key_down(k)
 end
 
-model:start_app(Components.PLAYER_SELECTION)
+model:start_app(Components.CHARACTER_SELECTION)
 
 --[[
 math.randomseed(os.time())
