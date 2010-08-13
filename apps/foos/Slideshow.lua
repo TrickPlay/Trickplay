@@ -34,8 +34,10 @@ function Slideshow:begin()
 	timer:start()
 end
 function Slideshow:stop()
-        self.images[current_pic]:complete_animation()
-        timer:stop()
+		  if (self.images[current_pic] ~= nil) then
+	        self.images[current_pic]:complete_animation()
+   	     timer:stop()
+   	  end
 end
 -- will send and image across the screen
 function Slideshow:sendImage(site)
@@ -57,6 +59,11 @@ function Slideshow:sendImage(site)
         else
                 print("idk")
         end
+        	if (self.images[current_pic-3] ~= nil) then
+				self.images[current_pic-3].opacity = 0
+				table.remove(self.images,current_pic-3)
+			end
+
 end
 
 function timer.on_timer(timer)
