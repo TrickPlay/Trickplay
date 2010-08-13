@@ -42,7 +42,7 @@ BettingController = Class(Controller, function(self, view, ...)
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self)
         
-            self:get_model():set_active_component(Components.PLAYER_SELECTION)
+            self:get_model():set_active_component(Components.CHARACTER_SELECTION)
             self:get_model():notify()
         
         end,
