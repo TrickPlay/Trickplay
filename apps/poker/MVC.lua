@@ -32,6 +32,7 @@ Model = Class(function(model, ...)
         [6] = {1400, 850},
         POT = {930, 797}
     }
+    mdbl = model.default_bet_locations
     
     --[[
         model.default_bet_locations = {
