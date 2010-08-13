@@ -25,16 +25,15 @@ function(pres, ctrl)
    end
    
    local function all_cards_up()
-      --[[
+      
       for _,card in pairs(allCards) do
          print(card)
-         if card.group.extra.face == "back" then
-            print("Flipped!")
+         if not card.group.extra.face then
             flipCard(card.group)
-            print("Ok!")
          end
       end
-      --]]
+      
+      --[[
       for player, hole in pairs( ctrl:get_hole_cards() ) do
          local card1, card2 = unpack(hole)
          if not card1.group.extra.face then
@@ -43,6 +42,7 @@ function(pres, ctrl)
             flipCard(card2.group)
          end
       end
+      --]]
       
       --debug()
    end
@@ -53,11 +53,14 @@ function(pres, ctrl)
    end
 
    function pres.deal_hole(pres)
+      
       update_players()
       -- just make them all appear in front of the appropriate players
       local hole_cards = ctrl:get_hole_cards()
       y=100
       for player,hole in pairs(hole_cards) do
+         player.betChips.group:animate{position = model.potchips.group.position, duration=500, mode="EASE_OUT_QUAD", on_completed = function() model.potchips:set(3) model.potchips:arrange(55, 5) end}
+      
          local card1, card2 = unpack(hole)
          assert(model.default_bet_locations)
          assert(model.default_bet_locations[player.table_position]) 
