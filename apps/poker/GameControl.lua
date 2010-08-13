@@ -80,7 +80,7 @@ function(ctrl, model, ...)
       disable_event_listeners()
 
       
-      if #game_pipeline == 0 then
+      if #game_pipeline == 0 and #players>1 then
          reset_pipeline()
       end
       local action = game_pipeline[1]
