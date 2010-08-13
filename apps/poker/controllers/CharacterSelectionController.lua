@@ -71,7 +71,8 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             row = selected,
             col = subselection,
             number = playerCounter,
-            position = model.default_player_locations[ position ]
+            position = model.default_player_locations[ position ],
+            chipPosition = model.default_bet_locations[ position ],
         }
         model.players[ playerCounter ] = Player(args)
         --model.players[ playerCounter ]:createMoneyChips()

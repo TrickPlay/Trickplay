@@ -13,20 +13,22 @@ Player = Class(function(player, ...)
       player[k] = v
    end
    
+   --[[
    function player:createMoneyChips()
       
       player.moneyChips = chipCollection()
-      player.moneyChips.group.position = {player.position[1], player.position[2] - 170}
+      player.moneyChips.group.position = {player.chipPosition[1], player.chipPosition[2]}
       player.moneyChips:set(player.money)
       player.moneyChips:arrange(55, 5)
       screen:add(player.moneyChips.group)
       
    end
+   --]]
    
    function player:createBetChips()
       
       player.betChips = chipCollection()
-      player.betChips.group.position = {player.position[1], player.position[2] - 300}
+      player.betChips.group.position = {player.chipPosition[1], player.chipPosition[2]}
       player.betChips:set(player.bet)
       player.betChips:arrange(55, 5)
       screen:add(player.betChips.group)

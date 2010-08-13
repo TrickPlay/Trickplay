@@ -160,10 +160,22 @@ chipCollection = Class(function(self, ...)
                 local x = 0
                 for i=1, self:size() do
                         local y = 0
-                        self.stacks[i].group.x = x
-                        x = x + dx
+                        --self.stacks[i].group.x = x
+                        --x = x + dx
+                        self.stacks[i].group.position = self:getChipPosition( self.stacks[i].chipValue )
+                        print(self.stacks[i].group.position[1], self.stacks[i].group.position[2])
                         self.stacks[i]:arrange(dy)
                 end
+        end
+        
+        function self:getChipPosition(value)
+                local t = {
+                        [1] = {0, 0},
+                        [5] = {55, 0},
+                        [10] = {25, -40},
+                        [100] = {80, -40}
+                }
+                return t[value]
         end
         
         function self:convertUp()
