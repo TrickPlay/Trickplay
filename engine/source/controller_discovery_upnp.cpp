@@ -71,7 +71,7 @@ static void prepare_device_xml( TPContext * context , const String & name )
             uuid.c_str() );
 }
 
-static const char * controller_spcd_xml =
+static const char * controller_scpd_xml =
 
     "<?xml version=\"1.0\"?>"
     "<scpd>"
@@ -103,24 +103,22 @@ static const char * controller_spcd_xml =
 
 //=============================================================================
 
-static int upnp_virtual_get_info( const char *filename , UpnpFileInfo * info )
+static int upnp_virtual_get_info( const char *filename , File_Info * info )
 {
     if ( ! strcmp( filename , "/device.xml" ) )
     {
-        UpnpFileInfo_set_FileLength( info , strlen( device_xml ) );
-        UpnpFileInfo_set_ContentType( info , "text/xml" );
-        UpnpFileInfo_set_IsDirectory( info , 0 );
-        UpnpFileInfo_set_IsReadable( info , 1 );
-
+        info->file_length = strlen( device_xml );
+        info->content_type = ixmlCloneDOMString( "text/xml" );
+        info->is_directory = 0;
+        info->is_readable = 1;
         return 0;
     }
     else if ( ! strcmp( filename , "/controller-scpd.xml" ) )
     {
-        UpnpFileInfo_set_FileLength( info , strlen( controller_spcd_xml ) );
-        UpnpFileInfo_set_ContentType( info , "text/xml" );
-        UpnpFileInfo_set_IsDirectory( info , 0 );
-        UpnpFileInfo_set_IsReadable( info , 1 );
-
+        info->file_length = strlen( controller_scpd_xml );
+        info->content_type = ixmlCloneDOMString( "text/xml" );
+        info->is_directory = 0;
+        info->is_readable = 1;
         return 0;
     }
 
@@ -139,7 +137,7 @@ static UpnpWebFileHandle upnp_virtual_open( const char * filename, enum UpnpOpen
         }
         else if ( ! strcmp( filename , "/controller-scpd.xml" ) )
         {
-            result = ( UpnpWebFileHandle ) new std::istringstream( controller_spcd_xml );
+            result = ( UpnpWebFileHandle ) new std::istringstream( controller_scpd_xml );
         }
     }
 
@@ -220,13 +218,17 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
         }
     }
 
-    UpnpVirtualDir_set_GetInfoCallback( upnp_virtual_get_info );
-    UpnpVirtualDir_set_OpenCallback( upnp_virtual_open );
-    UpnpVirtualDir_set_ReadCallback( upnp_virtual_read );
-    UpnpVirtualDir_set_WriteCallback( upnp_virtual_write );
-    UpnpVirtualDir_set_SeekCallback( upnp_virtual_seek );
-    UpnpVirtualDir_set_CloseCallback( upnp_virtual_close );
+    UpnpVirtualDirCallbacks callbacks;
 
+
+    callbacks.get_info = upnp_virtual_get_info;
+    callbacks.open = upnp_virtual_open;
+    callbacks.read = upnp_virtual_read;
+    callbacks.write = upnp_virtual_write;
+    callbacks.seek = upnp_virtual_seek;
+    callbacks.close = upnp_virtual_close;
+
+    UpnpSetVirtualDirCallbacks( & callbacks );
 
     if ( UPNP_E_SUCCESS != UpnpAddVirtualDir( "/" ) )
     {
@@ -296,9 +298,9 @@ int ControllerDiscoveryUPnP::upnp_device_callback( Upnp_EventType type , void * 
     {
         case UPNP_CONTROL_ACTION_REQUEST:
             {
-                UpnpActionRequest * r = ( UpnpActionRequest * ) event;
+                Upnp_Action_Request * r = ( Upnp_Action_Request * ) event;
 
-                if ( ! strcmp( "getport" , UpnpString_get_String( UpnpActionRequest_get_ActionName( r ) ) ) )
+                if ( ! strcmp( "getport" , r->ActionName ) )
                 {
                     std::stringstream port;
 
@@ -311,9 +313,9 @@ int ControllerDiscoveryUPnP::upnp_device_callback( Upnp_EventType type , void * 
                             "port",
                             port.str().c_str() );
 
-                    UpnpActionRequest_set_ActionResult( r , response );
+                    r->ActionResult = response;
 
-                    UpnpActionRequest_set_ErrCode( r , UPNP_E_SUCCESS );
+                    r->ErrCode = UPNP_E_SUCCESS;
                 }
             }
             break;
