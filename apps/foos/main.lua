@@ -8,6 +8,7 @@ dofile("MainMenuController.lua")
 dofile("HelpMenuView.lua")
 dofile("HelpMenuController.lua")
 --]]
+dofile("adapter/Adapter.lua")
 dofile("ItemSelectedView.lua")
 dofile("ItemSelectedController.lua")
 dofile("Load.lua")
@@ -22,6 +23,7 @@ Components = {
 }
 model = Model()
 
+Setup_Album_Covers()
 
 local front_page_view = FrontPageView(model)
 front_page_view:initialize()
