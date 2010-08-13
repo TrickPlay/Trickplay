@@ -21,7 +21,7 @@ Model = Class(function(model, ...)
     model.albums_loaded = false
     model.album_group = Group{name="Album Group"}
 model.default = Image{
-                src = "assets/thumbnail/Album1.jpg",
+                src = "assets/img_placeholder_questionmark_loading.jpg",
                 opacity = 0
             }
 
