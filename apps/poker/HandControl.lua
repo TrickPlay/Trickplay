@@ -269,8 +269,8 @@ function(ctrl, game_ctrl, ...)
       for _, card in ipairs(in_hands[best]) do
          print(card.name)
       end
-      pres:show_winners(winners)
-      enable_event_listener(Events.TIMER, .5)
+      pres:showdown(winners)
+      enable_event_listener(Events.TIMER, 3)
       return true
    end
 

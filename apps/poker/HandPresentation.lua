@@ -59,11 +59,9 @@ function(pres, ctrl)
       local hole_cards = ctrl:get_hole_cards()
       y=100
       for player,hole in pairs(hole_cards) do
-         player.betChips.group:animate{position = model.potchips.group.position, duration=500, mode="EASE_OUT_QUAD", on_completed = function() model.potchips:set(3) model.potchips:arrange(55, 5) end}
+--         player.betChips.group:animate{position = model.potchips.group.position, duration=500, mode="EASE_OUT_QUAD", on_completed = function() model.potchips:set(3) model.potchips:arrange(55, 5) end}
       
          local card1, card2 = unpack(hole)
-         assert(model.default_bet_locations)
-         assert(model.default_bet_locations[player.table_position]) 
          card1.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]}
          card2.group.position = {model.default_bet_locations[player.table_position][1] + 100, model.default_bet_locations[player.table_position][2]}
          screen:add(card1.group, card2.group)
@@ -119,7 +117,6 @@ function(pres, ctrl)
       flipCard(cards[i].group)
       table.insert(allCards, cards[i])
       
-      all_cards_up()
    end
 
    function pres.clear_ui(pres)
@@ -137,7 +134,8 @@ function(pres, ctrl)
       end
    end
 
-   function pres.show_winners(pres, winners)
+   function pres.showdown(pres, winners)
+      all_cards_up()
       -- winners is an array of the winning players
    end
 
