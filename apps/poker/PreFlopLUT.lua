@@ -36,39 +36,39 @@ end
 --]]
 --build AA-QQ
 for i = Ranks.QUEEN.num,Ranks.ACE.num do
-    baseMovesTable[i][i][SUITED] = moves.RAISE
-    baseMovesTable[i][i][UNSUITED] = moves.RAISE
+    baseMovesTable[i][i][SUITED] = Moves.RAISE
+    baseMovesTable[i][i][UNSUITED] = Moves.RAISE
 end
 --JJ-22
 for i = Ranks.TWO.num, Ranks.JACK.num do
-    baseMovesTable[i][i][SUITED] = moves.CALL
-    baseMovesTable[i][i][UNSUITED] = moves.CALL
+    baseMovesTable[i][i][SUITED] = Moves.CALL
+    baseMovesTable[i][i][UNSUITED] = Moves.CALL
 end
 --AKs, AK, AQs, AQ
 for i = Ranks.QUEEN.num,Ranks.KING.num do
-    baseMovesTable[Ranks.ACE.num][i][SUITED] = moves.RAISE
-    baseMovesTable[Ranks.ACE.num][i][UNSUITED] = moves.RAISE
+    baseMovesTable[Ranks.ACE.num][i][SUITED] = Moves.RAISE
+    baseMovesTable[Ranks.ACE.num][i][UNSUITED] = Moves.RAISE
 end
 --AJs
-baseMovesTable[Ranks.ACE.num][Ranks.JACK.num][SUITED] = moves.RAISE
+baseMovesTable[Ranks.ACE.num][Ranks.JACK.num][SUITED] = Moves.RAISE
 --ATs
-baseMovesTable[Ranks.ACE.num][Ranks.TEN.num][SUITED] = moves.CALL
+baseMovesTable[Ranks.ACE.num][Ranks.TEN.num][SUITED] = Moves.CALL
 --AJ
-baseMovesTable[Ranks.ACE.num][Ranks.JACK.num][UNSUITED] = moves.CALL
+baseMovesTable[Ranks.ACE.num][Ranks.JACK.num][UNSUITED] = Moves.CALL
 --A9s-A7s
 for i = Ranks.SEVEN.num,Ranks.NINE.num do
-    baseMovesTable[Ranks.ACE.num][i][SUITED] = moves.CALL
+    baseMovesTable[Ranks.ACE.num][i][SUITED] = Moves.CALL
 end
 --KQs
-baseMovesTable[Ranks.KING.num][Ranks.QUEEN.num][SUITED] = moves.CALL
+baseMovesTable[Ranks.KING.num][Ranks.QUEEN.num][SUITED] = Moves.CALL
 --KJs
-baseMovesTable[Ranks.KING.num][Ranks.JACK.num][SUITED] = moves.CALL
+baseMovesTable[Ranks.KING.num][Ranks.JACK.num][SUITED] = Moves.CALL
 --QJs
-baseMoveTable[Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = moves.CALL
+baseMovesTable[Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = Moves.CALL
 
 --Set up some basic pre-flop moves based on Early UR into all different
 --Sections of the LUT, use deep copies
-local movesTable = {}
+movesTable = {}
 for i = Position.EARLY,Position.BIG_BLIND do
     movesTable[i] = {}
     for j = RaiseFactor.UR, RaiseFactor.RR do
@@ -77,8 +77,8 @@ for i = Position.EARLY,Position.BIG_BLIND do
             movesTable[i][j][k] = {}
             for l = Ranks.TWO.num,Ranks.ACE.num do
                 movesTable[i][j][k][l] = {}
-                movesTable[i][j][k][l][SUITED] = baseMoveTable[i][j][k][l][SUITED]
-                movesTable[i][j][k][l][UNSUITED] = baseMoveTable[i][j][k][l][UNSUITED]
+                movesTable[i][j][k][l][SUITED] = baseMovesTable[k][l][SUITED]
+                movesTable[i][j][k][l][UNSUITED] = baseMovesTable[k][l][UNSUITED]
             end
         end
     end
@@ -89,23 +89,23 @@ end
 --]]
 --66-22
 for i = Ranks.TWO.num,Ranks.SIX.num do
-    movesTable[Position.EARLY][RaiseFactor.R][i][i][SUITED] = moves.FOLD
-    movesTable[Position.EARLY][RaiseFactor.R][i][i][UNSUITED] = moves.FOLD
+    movesTable[Position.EARLY][RaiseFactor.R][i][i][SUITED] = Moves.FOLD
+    movesTable[Position.EARLY][RaiseFactor.R][i][i][UNSUITED] = Moves.FOLD
 end
 --AJs
-movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][Ranks.JACK.num][SUITED] = moves.CALL
+movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][Ranks.JACK.num][SUITED] = Moves.CALL
 --ATs
-movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][Ranks.TEN.num][SUITED] = moves.FOLD
+movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][Ranks.TEN.num][SUITED] = Moves.FOLD
 --AJ
-movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][Ranks.JACK.num][UNSUITED] = moves.FOLD
+movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][Ranks.JACK.num][UNSUITED] = Moves.FOLD
 --A9s-A7s
 for i = Ranks.SEVEN.num,Ranks.NINE.num do
-    movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][i][SUITED] = moves.FOLD
+    movesTable[Position.EARLY][RaiseFactor.R][Ranks.ACE.num][i][SUITED] = Moves.FOLD
 end
 --KJs
-movesTable[Position.EARLY][RaiseFactor.R][Ranks.KING.num][Ranks.JACK.num][SUITED] = moves.FOLD
+movesTable[Position.EARLY][RaiseFactor.R][Ranks.KING.num][Ranks.JACK.num][SUITED] = Moves.FOLD
 --QJs
-movesTable[Position.EARLY][RaiseFactor.R][Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = moves.FOLD
+movesTable[Position.EARLY][RaiseFactor.R][Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = Moves.FOLD
 
 --[[
     Early RR
@@ -118,10 +118,10 @@ for i = Ranks.TWO.num,Ranks.ACE.num do
     end
 end
 --AQs,AQ
-movesTable[Position.EARLY][RaiseFactor.RR][Ranks.ACE.num][Ranks.QUEEN.num][SUITED] = moves.CALL
-movesTable[Position.EARLY][RaiseFactor.RR][Ranks.ACE.num][Ranks.QUEEN.num][UNSUITED] = moves.CALL
+movesTable[Position.EARLY][RaiseFactor.RR][Ranks.ACE.num][Ranks.QUEEN.num][SUITED] = Moves.CALL
+movesTable[Position.EARLY][RaiseFactor.RR][Ranks.ACE.num][Ranks.QUEEN.num][UNSUITED] = Moves.CALL
 --KQs
-movesTable[Position.EARLY][RaiseFactor.RR][Ranks.KING.num][Ranks.QUEEN.num][SUITED] = moves.FOLD
+movesTable[Position.EARLY][RaiseFactor.RR][Ranks.KING.num][Ranks.QUEEN.num][SUITED] = Moves.FOLD
 
 --[[
     copy Early to Early2
@@ -138,25 +138,25 @@ movesTable[Position.MIDDLE][RaiseFactor.RR] = movesTable[Position.EARLY][RaiseFa
     Middle UR
 --]]
 --AT
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.ACE.num][Ranks.QUEEN.num][UNSUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.ACE.num][Ranks.QUEEN.num][UNSUITED] = Moves.CALL
 --Axs
 for i = Ranks.TWO.num,Ranks.ACE.num do
-    movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.ACE.num][i][SUITED] = moves.CALL
+    movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.ACE.num][i][SUITED] = Moves.CALL
 end
 --KQ
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.KING.num][Ranks.QUEEN.num][UNSUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.KING.num][Ranks.QUEEN.num][UNSUITED] = Moves.CALL
 --KTs
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.KING.num][Ranks.TEN.num][SUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.KING.num][Ranks.TEN.num][SUITED] = Moves.CALL
 --QTs
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.QUEEN.num][Ranks.TEN.num][SUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.QUEEN.num][Ranks.TEN.num][SUITED] = Moves.CALL
 --JTs
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.JACK.num][Ranks.TEN.num][SUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.JACK.num][Ranks.TEN.num][SUITED] = Moves.CALL
 --J9s
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.JACK.num][Ranks.NINE.num][SUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.JACK.num][Ranks.NINE.num][SUITED] = Moves.CALL
 --T9s
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.TEN.num][Ranks.NINE.num][SUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.TEN.num][Ranks.NINE.num][SUITED] = Moves.CALL
 --98s
-movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.NINE.num][Ranks.EIGHT.num][SUITED] = moves.CALL
+movesTable[Position.MIDDLE][RaiseFactor.UR][Ranks.NINE.num][Ranks.EIGHT.num][SUITED] = Moves.CALL
 
 --[[
     Late UR
@@ -169,31 +169,31 @@ for i = Ranks.TWO.num,Ranks.ACE.num do
     end
 end
 --JJ
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.JACK.num][Ranks.JACK.num][SUITED] = moves.RAISE
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.JACK.num][Ranks.JACK.num][UNSUITED] = moves.RAISE
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.JACK.num][Ranks.JACK.num][SUITED] = Moves.RAISE
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.JACK.num][Ranks.JACK.num][UNSUITED] = Moves.RAISE
 --TT
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.TEN.num][Ranks.TEN.num][SUITED] = moves.RAISE
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.TEN.num][Ranks.TEN.num][UNSUITED] = moves.RAISE
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.TEN.num][Ranks.TEN.num][SUITED] = Moves.RAISE
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.TEN.num][Ranks.TEN.num][UNSUITED] = Moves.RAISE
 --KQ-KT suited and unsuited
 for i = Ranks.TEN.num,Ranks.QUEEN.num do
-    movesTable[Position.LATE][RaiseFactor.UR][Ranks.KING.num][i][SUITED] = moves.CALL
-    movesTable[Position.LATE][RaiseFactor.UR][Ranks.KING.num][i][UNSUITED] = moves.CALL
+    movesTable[Position.LATE][RaiseFactor.UR][Ranks.KING.num][i][SUITED] = Moves.CALL
+    movesTable[Position.LATE][RaiseFactor.UR][Ranks.KING.num][i][UNSUITED] = Moves.CALL
 end
 --all other Kxs
 for i = Ranks.TWO.num,Ranks.NINE.num do
-    movesTable[Position.LATE][RaiseFactor.UR][Ranks.KING.num][i][SUITED] = moves.CALL
+    movesTable[Position.LATE][RaiseFactor.UR][Ranks.KING.num][i][SUITED] = Moves.CALL
 end
 --QJ-QT suited and unsuited
 for i = Ranks.TEN.num,Ranks.JACK.num do
-    movesTable[Position.LATE][RaiseFactor.UR][Ranks.QUEEN.num][i][SUITED] = moves.CALL
-    movesTable[Position.LATE][RaiseFactor.UR][Ranks.QUEEN.num][i][UNSUITED] = moves.CALL
+    movesTable[Position.LATE][RaiseFactor.UR][Ranks.QUEEN.num][i][SUITED] = Moves.CALL
+    movesTable[Position.LATE][RaiseFactor.UR][Ranks.QUEEN.num][i][UNSUITED] = Moves.CALL
 end
 --Q9s
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.QUEEN.num][Ranks.NINE.num][SUITED] = moves.CALL
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.QUEEN.num][Ranks.NINE.num][SUITED] = Moves.CALL
 --JTs
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.JACK.num][Ranks.TEN.num][SUITED] = moves.CALL
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.JACK.num][Ranks.TEN.num][SUITED] = Moves.CALL
 --T8s
-movesTable[Position.LATE][RaiseFactor.UR][Ranks.TEN.num][Ranks.EIGHT.num][SUITED] = moves.CALL
+movesTable[Position.LATE][RaiseFactor.UR][Ranks.TEN.num][Ranks.EIGHT.num][SUITED] = Moves.CALL
 
 --[[
     Late R
@@ -206,9 +206,9 @@ for i = Ranks.TWO.num,Ranks.ACE.num do
     end
 end
 --AJs
-movesTable[Position.LATE][RaiseFactor.R][Ranks.ACE.num][Ranks.JACK.num][SUITED] = moves.RAISE
+movesTable[Position.LATE][RaiseFactor.R][Ranks.ACE.num][Ranks.JACK.num][SUITED] = Moves.RAISE
 --QJs
-movesTable[Position.LATE][RaiseFactor.R][Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = moves.CALL
+movesTable[Position.LATE][RaiseFactor.R][Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = Moves.CALL
 
 --[[
     Late RR
@@ -221,10 +221,10 @@ for i = Ranks.TWO.num,Ranks.ACE.num do
     end
 end
 --TT
-movesTable[Position.LATE][RaiseFactor.RR][Ranks.TEN.num][Ranks.TEN.num][SUITED] = moves.CALL
-movesTable[Position.LATE][RaiseFactor.RR][Ranks.TEN.num][Ranks.TEN.num][UNSUITED] = moves.CALL
+movesTable[Position.LATE][RaiseFactor.RR][Ranks.TEN.num][Ranks.TEN.num][SUITED] = Moves.CALL
+movesTable[Position.LATE][RaiseFactor.RR][Ranks.TEN.num][Ranks.TEN.num][UNSUITED] = Moves.CALL
 --KQs
-movesTable[Position.LATE][RaiseFactor.RR][Ranks.KING.num][Ranks.QUEEN.num][SUITED] = moves.CALL
+movesTable[Position.LATE][RaiseFactor.RR][Ranks.KING.num][Ranks.QUEEN.num][SUITED] = Moves.CALL
 
 --[[
     Small Blind UR
@@ -239,38 +239,38 @@ end
 --some redundancy here, but saves from explicit insertion
 --Ax and Axs
 for i = Ranks.TWO.num,Ranks.ACE.num do
-    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.ACE.num][i][SUITED] = moves.CALL
-    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.ACE.num][i][UNSUITED] = moves.CALL
+    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.ACE.num][i][SUITED] = Moves.CALL
+    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.ACE.num][i][UNSUITED] = Moves.CALL
 end
 --Qxs
 for i = Ranks.TWO.num,Ranks.ACE.num do
-    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.QUEEN.num][i][SUITED] = moves.CALL
+    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.QUEEN.num][i][SUITED] = Moves.CALL
 end
 --J8s
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.JACK.num][Ranks.EIGHT.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.JACK.num][Ranks.EIGHT.num][SUITED] = Moves.CALL
 --J7s
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.JACK.num][Ranks.SEVEN.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.JACK.num][Ranks.SEVEN.num][SUITED] = Moves.CALL
 --T7s
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.TEN.num][Ranks.SEVEN.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.TEN.num][Ranks.SEVEN.num][SUITED] = Moves.CALL
 --98
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.NINE.num][Ranks.EIGHT.num][UNSUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.NINE.num][Ranks.EIGHT.num][UNSUITED] = Moves.CALL
 --97s
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.NINE.num][Ranks.SEVEN.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.NINE.num][Ranks.SEVEN.num][SUITED] = Moves.CALL
 --87s, 87
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.EIGHT.num][Ranks.SEVEN.num][SUITED] = moves.CALL
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.EIGHT.num][Ranks.SEVEN.num][UNSUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.EIGHT.num][Ranks.SEVEN.num][SUITED] = Moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.EIGHT.num][Ranks.SEVEN.num][UNSUITED] = Moves.CALL
 --76s, 76, 75s, 75
 for i = Ranks.FIVE.num, Ranks.SIX.num do
-    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SEVEN.num][i][SUITED] = moves.CALL
-    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SEVEN.num][i][UNSUITED] = moves.CALL
+    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SEVEN.num][i][SUITED] = Moves.CALL
+    movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SEVEN.num][i][UNSUITED] = Moves.CALL
 end
 --65s, 65
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SIX.num][Ranks.FIVE.num][SUITED] = moves.CALL
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SIX.num][Ranks.FIVE.num][UNSUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SIX.num][Ranks.FIVE.num][SUITED] = Moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SIX.num][Ranks.FIVE.num][UNSUITED] = Moves.CALL
 --64s
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SIX.num][Ranks.FOUR.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.SIX.num][Ranks.FOUR.num][SUITED] = Moves.CALL
 --54s
-movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.FIVE.num][Ranks.FOUR.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.UR][Ranks.FIVE.num][Ranks.FOUR.num][SUITED] = Moves.CALL
 
 --[[
     Small Blind R
@@ -283,14 +283,14 @@ for i = Ranks.TWO.num,Ranks.ACE.num do
     end
 end
 --66-22
-for i = Ranks.TWO.num,RANKS.SIX.num do
-    movesTable[Position.SMALL_BLIND][RaiseFactor.R][i][i][SUITED] = moves.CALL
-    movesTable[Position.SMALL_BLIND][RaiseFactor.R][i][i][UNSUITED] = moves.CALL
+for i = Ranks.TWO.num,Ranks.SIX.num do
+    movesTable[Position.SMALL_BLIND][RaiseFactor.R][i][i][SUITED] = Moves.CALL
+    movesTable[Position.SMALL_BLIND][RaiseFactor.R][i][i][UNSUITED] = Moves.CALL
 end
 --ATs
-movesTable[Position.SMALL_BLIND][RaiseFactor.R][Ranks.ACE.num][Ranks.TEN.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.R][Ranks.ACE.num][Ranks.TEN.num][SUITED] = Moves.CALL
 --KJs
-movesTable[Position.SMALL_BLIND][RaiseFactor.R][Ranks.KING.num][Ranks.JACK.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.R][Ranks.KING.num][Ranks.JACK.num][SUITED] = Moves.CALL
 
 --[[
     Small Blind RR
@@ -303,7 +303,7 @@ for i = Ranks.TWO.num,Ranks.ACE.num do
     end
 end
 --ATs
-movesTable[Position.SMALL_BLIND][RaiseFactor.RR][Ranks.ACE.num][Ranks.TEN.num][SUITED] = moves.CALL
+movesTable[Position.SMALL_BLIND][RaiseFactor.RR][Ranks.ACE.num][Ranks.TEN.num][SUITED] = Moves.CALL
 
 --[[
     Big Blind UR
@@ -318,8 +318,8 @@ end
 --call/check on all low hands as well (up to KAs so less redundancy in assignment)
 for i = Ranks.TWO.num,Ranks.KING.num do
     for j = Ranks.TWO.num,Ranks.ACE.num do
-        movesTable[Position.BIG_BLIND][RaiseFacotr.UR][i][j][SUITED] = moves.CALL
-        movesTable[Position.BIG_BLIND][RaiseFacotr.UR][i][j][UNSUITED] = moves.CALL
+        movesTable[Position.BIG_BLIND][RaiseFactor.UR][i][j][SUITED] = Moves.CALL
+        movesTable[Position.BIG_BLIND][RaiseFactor.UR][i][j][UNSUITED] = Moves.CALL
     end
 end
 
@@ -336,14 +336,14 @@ end
 
 --Qxs
 for i = Ranks.TWO.num,Ranks.JACK.num do
-    movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.QUEEN.num][i][SUITED] = moves.CALL
+    movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.QUEEN.num][i][SUITED] = Moves.CALL
 end
 --J8s
-movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.JACK.num][Ranks.EIGHT.num][SUITED] = moves.CALL
+movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.JACK.num][Ranks.EIGHT.num][SUITED] = Moves.CALL
 --J7s
-movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.JACK.num][Ranks.SEVEN.num][SUITED] = moves.CALL
+movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.JACK.num][Ranks.SEVEN.num][SUITED] = Moves.CALL
 --98
-movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.NINE.num][Ranks.EIGHT.num][UNSUITED] = moves.CALL
+movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.NINE.num][Ranks.EIGHT.num][UNSUITED] = Moves.CALL
 
 --[[
     Big Blind RR
