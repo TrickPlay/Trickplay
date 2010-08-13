@@ -16,20 +16,44 @@ function(pres, ctrl)
    
    local allCards = {}
    
-   function pres.display_hand(pres)
-      local player_bets = ctrl:get_player_bets()
-      for player, bet in pairs(player_bets) do
-         player.betChips = chipCollection()
-         player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
+   local function update_players()
+      for player, bet in pairs( ctrl:get_player_bets() ) do
          player.betChips:set(bet)
          player.betChips:arrange(55, 5)
-         screen:add(player.betChips.group)
-         player.betChips.group:raise_to_top()
+         player.status:update()
       end
-      --assert(nil)
+   end
+   
+   local function all_cards_up()
+      --[[
+      for _,card in pairs(allCards) do
+         print(card)
+         if card.group.extra.face == "back" then
+            print("Flipped!")
+            flipCard(card.group)
+            print("Ok!")
+         end
+      end
+      --]]
+      for player, hole in pairs( ctrl:get_hole_cards() ) do
+         local card1, card2 = unpack(hole)
+         if not card1.group.extra.face then
+            print(card1.group.extra.face, card2.group.extra.face)
+            flipCard(card1.group)
+            flipCard(card2.group)
+         end
+      end
+      
+      --debug()
+   end
+   
+   function pres.display_hand(pres)
+      -- Update player bets and money
+      update_players()
    end
 
    function pres.deal_hole(pres)
+      update_players()
       -- just make them all appear in front of the appropriate players
       local hole_cards = ctrl:get_hole_cards()
       y=100
@@ -41,8 +65,10 @@ function(pres, ctrl)
          card2.group.position = {model.default_bet_locations[player.table_position][1] + 100, model.default_bet_locations[player.table_position][2]}
          screen:add(card1.group, card2.group)
          y = y + 200
-         flipCard(card1.group)
-         flipCard(card2.group)
+         if player.isHuman then
+            flipCard(card1.group)
+            flipCard(card2.group)
+         end
          table.insert(allCards, card1)
          table.insert(allCards, card2)
       end
@@ -50,18 +76,8 @@ function(pres, ctrl)
       screen:add(text)
    end
    function pres.deal_flop(pres)
-   
-      --[[
-      local text_str = "Dealing flop cards"
-      local text = Text{
-         font="Sans 40px",
-         color="FFFFFF",
-         text=text_str,
-         position={120,120}
-      }
-      screen:add(text)
-      --]]
-      
+      update_players()
+
       local cards = ctrl:get_community_cards()
       local x = 750
       local y = 650
@@ -76,6 +92,8 @@ function(pres, ctrl)
    end
    
    function pres.deal_turn(pres)
+      update_players()
+      
       local cards = ctrl:get_community_cards()
       local x = 1050
       local y = 650
@@ -87,6 +105,8 @@ function(pres, ctrl)
    end
    
    function pres.deal_river(pres)
+      update_players()   
+      
       local cards = ctrl:get_community_cards()
       local x = 1150
       local y = 650
@@ -95,6 +115,8 @@ function(pres, ctrl)
       screen:add(cards[i].group)
       flipCard(cards[i].group)
       table.insert(allCards, cards[i])
+      
+      all_cards_up()
    end
 
    function pres.clear_ui(pres)
@@ -109,8 +131,6 @@ function(pres, ctrl)
       local player_bets = ctrl:get_player_bets()
       for player, bet in pairs(player_bets) do
          player.betChips:set(0)
-         screen:remove(player.betChips.group)
-         player.betChips = nil
       end
    end
 end)

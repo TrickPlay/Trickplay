@@ -31,6 +31,8 @@ Player = Class(function(player, args, ...)
       
    end
    
-   player.status = PlayerStatusView(model, nil, player):initialize()
+   player.status = PlayerStatusView(model, nil, player)
+   player.status:initialize()
+   assert(player.status)
 
 end)
