@@ -1,4 +1,5 @@
 --dofile ("FlickrTest.lua")
+dofile("Slideshow.lua")
 NUM_ROWS   = 2
 NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
@@ -10,8 +11,8 @@ PIC_DIR = "assets/thumbnails/"
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
     screen:add(model.default)
-
-    startAdapter(2) --TODO fix this one source shit
+	 loadCovers()
+   -- startAdapter(1) --TODO fix this one source shit
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
     --fill the thing with clones of the default-loading image

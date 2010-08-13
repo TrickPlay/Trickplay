@@ -1,29 +1,31 @@
-adaptersTable = { "Yahoo", "Google" }
+adaptersTable = { "Google", "Google", "Google", "Google", "Google", "Google" }
 picsTable = {}
+adapters = {}
 
-
-START_INDEX = 1
+	START_INDEX = 1
 NUM_SLIDESHOW_IMAGES =16 
 
 function startAdapter(selection)
-print("\n\n\n\n\n shit")
 	dofile("adapter/"..adaptersTable[selection].."/adapter.lua")
 end
 
-function getPictureUrl()
-        if type(picsTable[1]) == "string" then 
-    		return picsTable
-        else
-            return {}
-        end
-end
-
-function getUrls(source)
-	-- this function would call something in the Slideshow App
-	picsTable = source
-	for k,v in pairs(source) do
-		print(k,v) 
+function loadCovers()
+	search = "space"
+	for i =1, 16 do
+		local request = URLRequest {
+		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=medium",
+		on_complete = function (request, response)
+			local data = json:parse(response.body)
+         site = data.responseData.results[1].unescapedUrl
+         Load_Image(site,i)
+		end
+		}
+		request:send()
 	end
 end
 
---startAdapter(2)
+function slideShow()
+	
+	screen:clear()
+end
+
