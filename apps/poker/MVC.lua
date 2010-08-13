@@ -18,14 +18,14 @@ Model = Class(function(model, ...)
     SCREEN_WIDTH = screen.w
     SCREEN_HEIGHT = screen.h
     model.default_player_locations = {
-        [1] = {SCREEN_WIDTH*(1/5), SCREEN_HEIGHT*(1/3)},
-        [2] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(1/3)},
-        [3] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(1/3)},
-        [4] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(1/3)},
-        [5] = {SCREEN_WIDTH*(1/5), SCREEN_HEIGHT*(2/3)},
+        [1] = {160, 260},
+        [2] = {620, 90},
+        [3] = {SCREEN_WIDTH-620, 90},
+        [4] = {SCREEN_WIDTH-160, 260},
+        [5] = {230, 890},
         ["START"] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
         ["EXIT"] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
-        [6] = {SCREEN_WIDTH*(4/5), SCREEN_HEIGHT*(2/3)},
+        [6] = {SCREEN_WIDTH-230, 890},
     }
     
     model.currentPlayer = nil

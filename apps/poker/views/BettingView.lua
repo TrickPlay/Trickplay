@@ -36,10 +36,11 @@ BettingView = Class(View, function(view, model, ...)
     view.moving_ui=Group{name="checkoutMoving_ui", position=HIDE_TOP}
 --    view.moving_ui:add()
     --all ui junk for this view
-    view.ui=Group{name="checkout_ui", position={0,0}}
+    view.ui=Group{name="checkout_ui", position={screen.w/2,screen.h/2+300}}
     for _,v in ipairs(view.items) do
         view.ui:add(unpack(v))
     end
+    view.ui.anchor_point = {view.ui.w/2, view.ui.h/2}
 
     screen:add(view.ui)
 
