@@ -68,8 +68,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
 
     local function setCharacterSeat()
         --instantiate the player
-        local position = getPosition()
-        if(model.positions[position]) then return end
+        if(model.positions[getPosition()]) then return end
         local user = false
         if(playerCounter == 1) then
             user = HUMAN
@@ -80,13 +79,14 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             row = selected,
             col = subselection,
             number = playerCounter,
-            position = model.default_player_locations[ position ],
-            chipPosition = model.default_bet_locations[ position ],
+            table_position = getPosition(),
+            position = model.default_player_locations[ getPosition() ],
+            chipPosition = model.default_bet_locations[ getPosition() ],
         }
         model.players[ playerCounter ] = Player(args)
         --model.players[ playerCounter ]:createMoneyChips()
         model.players[ playerCounter ]:createBetChips()
-        model.positions[position] = true
+        model.positions[getPosition()] = true
         model.currentPlayer = playerCounter
         --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
         
@@ -105,14 +105,14 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 pcall(CharacterSelectionCallbacks[selected][subselection], self)
             if not success then
                 print(error_msg)
-                setCharacterSeat()
-                if(playerCounter > 6) then
-                    --[[
-                    self:get_model():set_active_component(Components.PLAYER_BETTING)
-                    self:get_model():notify()
-                    --]]
+                if(playerCounter >= 6) then
+                    setCharacterSeat()
                     start_a_game()
+                elseif(selected == CharacterSelectionGroups.BOTTOM) and
+                      (subselection == SubGroups.LEFT_MIDDLE) then
+                    return
                 end
+                setCharacterSeat()
             end
         end
     }
