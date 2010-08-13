@@ -2,12 +2,9 @@ Player = Class(function(player, isHuman, ...)
    player.isHuman = isHuman
    player.user = false
    player.number = 0
-   player.row = 0
-   player.col = 0
    player.bet = model.bet.DEFAULT_BET
    player.money = 800
    player.position = false
-   player.table_position = nil
    -- for k,v in pairs(args) do
    --    player[k] = v
    -- end
