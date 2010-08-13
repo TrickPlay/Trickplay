@@ -174,10 +174,11 @@ FrontPageView = Class(View, function(view, model, ...)
 
                              }
                          end
+                         view.selector:complete_animation()
                          view.selector:raise_to_top()
                          view.selector.position={new_c-37,new_r-10}
                          view.selector:animate{
-                             duration = CHANGE_VIEW_TIME,
+                             duration = 2*CHANGE_VIEW_TIME,
                              scale = {1.05,1.1},
                              opacity = 255
                          }
@@ -228,6 +229,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
                              }
                          end
+                         view.selector:complete_animation()
                          view.selector:raise_to_top()
                          view.selector.position={new_c-37,new_r-10}
                          view.selector:animate{
