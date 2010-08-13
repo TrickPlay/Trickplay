@@ -263,12 +263,12 @@ show_focus = function()
                                         
                                         i = i + 1
                                         
-                                        if i == index then
-                                            break
-                                        end
-                                        
                                         if i > #list then
                                             i = 1
+                                        end
+
+                                        if i == index then
+                                            break
                                         end
                                     
                                     end
