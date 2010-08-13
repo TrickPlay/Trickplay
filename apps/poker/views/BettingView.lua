@@ -74,7 +74,8 @@ BettingView = Class(View, function(view, model, ...)
             t.anchor_point = {t.w/2, t.h/2}
             
             local player = model.players[ model.currentPlayer ]
-            local playerStack = player.chips
+            local playerMoney = player.moneyChips
+            local playerBet = player.betChips
             local stack = view.stack
             
             local function sum()
@@ -87,10 +88,12 @@ BettingView = Class(View, function(view, model, ...)
             
             -- Add chips to the bet
             stack:set( sum() )
-            playerStack:set(player.money)
+            playerMoney:set(player.money)
+            playerBet:set(player.bet)
             
             stack:arrange(55, 5)
-            playerStack:arrange(55,5)
+            playerMoney:arrange(55,5)
+            playerBet:arrange(55,5)
             
         else
             print("Hiding Betting UI")
