@@ -18,6 +18,8 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self) 
+            model.album_group:clear()
+            model.albums = {}
             self:get_model():set_active_component(Components.SLIDE_SHOW)
             model.curr_slideshow = Slideshow:new { num_pics = 20  }
 				--screen:clear()
