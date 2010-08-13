@@ -73,4 +73,7 @@ function(pres, ctrl)
       }
       screen:add(text)
    end
+
+   function pres.clear_ui(pres)
+   end
 end)

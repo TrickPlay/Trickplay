@@ -1,13 +1,15 @@
-Player = Class(function(player, isHuman, ...)
-   player.isHuman = isHuman
-   player.user = false
-   player.number = 0
+Player = Class(function(player, args, ...)
+   player.isHuman = false
+-- what is this?
+--   player.user = false
+--   player.number = 0
    player.bet = model.bet.DEFAULT_BET
    player.money = 800
    player.position = false
-   -- for k,v in pairs(args) do
-   --    player[k] = v
-   -- end
+   player.table_position = nil
+   for k,v in pairs(args) do
+      player[k] = v
+   end
    
    --[[
    function player:createMoneyChips()

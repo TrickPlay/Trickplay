@@ -48,6 +48,9 @@ GameState = Class(nil,function(state, ctrl)
       bb_qty = args.bb or error("Assign big blind!", 2)
       endowment = args.endowment or error("No initial endowment", 2)
       players = args.players or error("No players!", 2)
+      for _,player in ipairs(players) do
+         player.money = endowment
+      end
       dealer = math.random(#players)
       print("Dealer randomly selected to be " .. tostring(dealer))
       sb_p, bb_p = calc_blind_pos()
