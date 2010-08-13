@@ -1,12 +1,11 @@
 Player = Class(function(player, args, ...)
    player.isHuman = false
 -- what is this?
---   player.user = false
---   player.number = 0
+   player.user = false
+   player.number = 0
    player.bet = model.bet.DEFAULT_BET
    player.money = 800
    player.position = false
-   player.table_position = nil
    for k,v in pairs(args) do
       player[k] = v
    end
@@ -33,6 +32,6 @@ Player = Class(function(player, args, ...)
       
    end
    
---   player.status = PlayerStatusView(model, nil, player):initialize()
+   player.status = PlayerStatusView(model, nil, player):initialize()
 
 end)
