@@ -20,7 +20,7 @@ function(pres, ctrl)
       local player_bets = ctrl:get_player_bets()
       for player, bet in pairs(player_bets) do
          player.betChips = chipCollection()
-         player.betChips.group.position = {model.default_bet_locations[player.position][1], model.default_bet_locations[player.position][2]-100}
+         player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
          player.betChips:set(bet)
          player.betChips:arrange(55, 5)
          screen:add(player.betChips.group)
@@ -98,10 +98,19 @@ function(pres, ctrl)
    end
 
    function pres.clear_ui(pres)
+      -- clear cards
       for key,card in pairs(allCards) do
          screen:remove(card.group)
          resetCardGroup(card.group)
          allCards[key] = nil
+      end
+      
+      -- reset bets
+      local player_bets = ctrl:get_player_bets()
+      for player, bet in pairs(player_bets) do
+         player.betChips:set(0)
+         screen:remove(player.betChips.group)
+         player.betChips = nil
       end
    end
 end)

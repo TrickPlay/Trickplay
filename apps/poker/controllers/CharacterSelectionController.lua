@@ -85,7 +85,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         }
         model.players[ playerCounter ] = Player(args)
         --model.players[ playerCounter ]:createMoneyChips()
-        model.players[ playerCounter ]:createBetChips()
+        --model.players[ playerCounter ]:createBetChips()
         model.positions[getPosition()] = true
         model.currentPlayer = playerCounter
         --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
