@@ -28,16 +28,36 @@ function getCardImageName(card)
 end
 
 -- Get a group with the image of a card's front/back
-function getCardGroup(card, args)
+function getCardGroup(card, args, face)
    local cardImage = Image{ src="assets/cards/"..getCardImageName(card)..".png", name="front" }
    local cardBack = Image{ src="assets/Card_Reverse.png", name="back" }
-   local cardGroup = Group{ children={cardBack,cardImage}, name="card",extra={face = true} }
+   local cardGroup = Group{ children={cardBack,cardImage}, name="card",extra={face = true}, anchor_point = {cardImage.w/2, cardImage.h/2} }
 
    if args and type(args) == "table" then for k, v in pairs(args) do
       cardGroup[k] = v
    end end
+   
+   if face=="back" then
+      cardGroup.extra.face = false
+      cardImage.opacity = 0
+      cardGroup.extra.rotation = 180
+      cardGroup.y_rotation = { cardGroup.extra.rotation, 0, 0 }
+   end
 
    return cardGroup
+end
+
+function resetCardGroup(cardGroup)
+
+   local front = cardGroup:find_child("front")
+   local back = cardGroup:find_child("back")
+
+   cardGroup.extra.face = false
+   front.opacity = 0
+   back.opacity = 255
+   cardGroup.extra.rotation = 180
+   cardGroup.y_rotation = { cardGroup.extra.rotation, 0, 0 }
+
 end
 
 -- Flip a card, return true if the front is showing
@@ -121,6 +141,8 @@ function(self, rank, suit)
 
    self.name = self.rank.name .. " of " .. self.suit.name
    self.abbv = self.rank.abbv .. self.suit.abbv
+
+   self.group = getCardGroup(self, nil, "back")
 
    function self:equals(card)
       return self.rank == card.rank and self.suit == card.suit

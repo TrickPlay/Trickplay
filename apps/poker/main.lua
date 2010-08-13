@@ -61,15 +61,7 @@ function()
       end
    end
    game = GameControl(model)
-   --[[
-   game:initialize_game{
-      sb=1,
-      bb=2,
-      endowment=800,
-      players=players
-   }
-   old_on_key_down = nil
-   --]]
+   
 --   model:start_app(Components.GAME)
    model:start_app(Components.CHARACTER_SELECTION)
    AssetLoader.on_preload_ready = nil
