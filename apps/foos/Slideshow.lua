@@ -7,7 +7,7 @@ function Slideshow:new(args)
 	local num_pics = args.num_pics
 	local urls = {}
 	local images = {}
-	local object = {
+	local object = { 
 		num_pics = num_pics,
 		images = images
 	}
@@ -33,7 +33,9 @@ function Slideshow:begin()
 	print ("begin")
 	timer:start()
 end
-
+function Slideshow:stop()
+        timer:stop()
+end
 -- will send and image across the screen
 function Slideshow:sendImage(site)
 	print(site)
@@ -48,14 +50,19 @@ function Slideshow:sendImage(site)
 			current_pic = current_pic+1
 		end
 	}
-	screen:add(self.images[temp])
+        if self.ui ~= nil then
+                print("adding to view.ui",self.ui)
+		self.ui:add(self.images[temp])
+        else
+                print("idk")
+        end
 end
 
 function timer.on_timer(timer)
 	print("tick"..current_pic)
 	search = "space"
 
-	slideshow:loadUrls("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge")
+	model.curr_slideshow:loadUrls("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge")
 end
 
 

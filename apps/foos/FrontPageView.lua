@@ -85,7 +85,7 @@ FrontPageView = Class(View, function(view, model, ...)
             left_edge:raise_to_top()
 --]]
             view.ui:raise_to_top()
-            model.album_group.opacity = 255            
+            view.ui.opacity = 255            
 
             print("new index is",sel[1],sel[2],"shift",model.front_page_index)
             print("previous index is",prev_i[1],prev_i[2])
@@ -232,10 +232,10 @@ FrontPageView = Class(View, function(view, model, ...)
                 } 
             end
 
-        elseif comp == Components.ITEM_SELECTED  then
         else
             print("Hiding FrontPageView UI")
             model.album_group:complete_animation()
+            view.ui.opacity = 0
         end
     end
 
