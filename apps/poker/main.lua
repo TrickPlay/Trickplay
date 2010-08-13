@@ -125,5 +125,12 @@ function screen:on_key_down(k)
 end
 --]]
 
-local p = Popup:new{draw = true, text="You're Playing Poker Dogs"}
-p:render()
+app.on_loaded = function()
+   
+   local t = Text {font = "Sans 100px", text = "You're Playing Poker Dogs", color = "0055FF", position = {screen.w/2, screen.h/2} }
+   t.anchor_point = {t.w/2, t.h/2}
+   
+   local p = Popup:new{group = t, animate_out={y=800, opacity=0} }
+
+end
+
