@@ -10,6 +10,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self) 
+            Setup_Album_Covers()
             model.curr_slideshow:stop()
             view.ui:clear()
             model.curr_slideshow = {}
