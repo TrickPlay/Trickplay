@@ -89,11 +89,11 @@ BettingView = Class(View, function(view, model, ...)
             
             -- Add chips to the bet
             stack:set( sum() )
-            playerMoney:set(player.money)
+            --playerMoney:set(player.money)
             playerBet:set(player.bet)
             
             stack:arrange(55, 5)
-            playerMoney:arrange(55,5)
+            --playerMoney:arrange(55,5)
             playerBet:arrange(55,5)
             
         else
@@ -104,30 +104,3 @@ BettingView = Class(View, function(view, model, ...)
     end
 
 end)
-
---[[
-            if player.bet > stack:count() then
-                while player.bet > stack:count() do
-                    playerStack:convertDown(10)    
-                    
-                    local c = playerStack:popChip( playerStack )
-                    --print("Chip position", c.image.position[1], c.image.position[2])
-                    stack:pushChip( c )
-                    stack:convertUp()
-                    
-                    playerStack:arrangeChips(15, 150)
-                    stack:arrangeChips(15)
-                end
-            -- Give chips back to the player
-            elseif player.bet < stack:count() then
-                while player.bet < stack:count() do
-                    stack:convertDown(10)
-                    local c = stack:popChip( true )
-                    stack:arrangeChips(15)
-                    
-                    playerStack:pushChip( c )
-                    playerStack:convertUp()
-                    playerStack:arrangeChips(15, 150)
-                end
-            end
-]]
