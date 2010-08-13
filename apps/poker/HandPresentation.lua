@@ -13,37 +13,33 @@
 HandPresentation = Class(nil,
 function(pres, ctrl)
    local ctrl = ctrl
+   
+   local allCards = {}
+   
    function pres.display_hand(pres)
    end
 
    function pres.deal_hole(pres)
       -- just make them all appear in front of the appropriate players
       local hole_cards = ctrl:get_hole_cards()
-
-      -- tell me if you want this to be more like
-      -- for i, hole in ipairs(hole_cards)
-      y=0
+      y=100
       for player,hole in pairs(hole_cards) do
          local card1, card2 = unpack(hole)
-         local text1 = Text{
-            font="Sans 40px",
-            color="FFFFFF",
-            text=card1.abbv,
-            position={50,y}
-         }
-         local text2 = Text{
-            font="Sans 40px",
-            color="FFFFFF",
-            text=card2.abbv,
-            position={50,y+50}
-         }
-         screen:add(text1, text2)
-         y = y + 150
+         card1.group.position = {model.default_bet_locations[player.position][1], model.default_bet_locations[player.position][2]}
+         card2.group.position = {model.default_bet_locations[player.position][1] + 100, model.default_bet_locations[player.position][2]}
+         screen:add(card1.group, card2.group)
+         y = y + 200
+         flipCard(card1.group)
+         flipCard(card2.group)
+         table.insert(allCards, card1)
+         table.insert(allCards, card2)
       end
       local text_str = "Dealing hole cards"
       screen:add(text)
    end
    function pres.deal_flop(pres)
+   
+      --[[
       local text_str = "Dealing flop cards"
       local text = Text{
          font="Sans 40px",
@@ -52,28 +48,48 @@ function(pres, ctrl)
          position={120,120}
       }
       screen:add(text)
+      --]]
+      
+      local cards = ctrl:get_community_cards()
+      local x = 750
+      local y = 650
+      for i=1, 3 do
+         cards[i].group.position = {x, y}
+         screen:add(cards[i].group)
+         x = x + 100
+         flipCard(cards[i].group)
+         table.insert(allCards, cards[i])
+      end
+      
    end
+   
    function pres.deal_turn(pres)
-      local text_str = "Dealing turn card"
-      local text = Text{
-         font="Sans 40px",
-         color="FFFFFF",
-         text=text_str,
-         position={200,200}
-      }
-      screen:add(text)
+      local cards = ctrl:get_community_cards()
+      local x = 1050
+      local y = 650
+      local i = 4
+      cards[i].group.position = {x, y}
+      screen:add(cards[i].group)
+      flipCard(cards[i].group)
+      table.insert(allCards, cards[i])
    end
+   
    function pres.deal_river(pres)
-      local text_str = "Dealing river card"
-      local text = Text{
-         font="Sans 40px",
-         color="FFFFFF",
-         text=text_str,
-         position={300,300}
-      }
-      screen:add(text)
+      local cards = ctrl:get_community_cards()
+      local x = 1150
+      local y = 650
+      local i = 5
+      cards[i].group.position = {x, y}
+      screen:add(cards[i].group)
+      flipCard(cards[i].group)
+      table.insert(allCards, cards[i])
    end
 
    function pres.clear_ui(pres)
+      for key,card in pairs(allCards) do
+         screen:remove(card.group)
+         resetCardGroup(card.group)
+         allCards[key] = nil
+      end
    end
 end)
