@@ -1,26 +1,26 @@
-adaptersTable = { "Yahoo", "Google" }
+adaptersTable = { "Google", "Google", "Google", "Google", "Google", "Google" }
 picsTable = {}
+adapters = {}
 
-
-START_INDEX = 1
-NUM_SLIDESHOW_IMAGES = 10
+	START_INDEX = 1
+NUM_SLIDESHOW_IMAGES =16 
 
 function startAdapter(selection)
-	dofile(adaptersTable[selection].."/adapter.lua")
+	dofile("adapter/"..adaptersTable[selection].."/adapter.lua")
 end
 
-function getPictureUrl()
-	
-	for k,v in pairs(picsTable) do
-		print(k,v) 
+function loadCovers()
+	search = "scene"
+	for i =1, 16 do
+		local request = URLRequest {
+		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=xxlarge",
+		on_complete = function (request, response)
+			local data = json:parse(response.body)
+         site = data.responseData.results[1].unescapedUrl
+         Load_Image(site,i)
+		end
+		}
+		request:send()
 	end
-	return picsTable
 end
 
-function setUrls(source)
-	-- this function would call something in the Slideshow App
-	picsTable = source
-end
-
-startAdapter(2)
-getPictureUrl()
