@@ -31,6 +31,17 @@ Model = Class(function(model, ...)
     }
     
     model.default_bet_locations = {
+        [1] = {200, 600},
+        [2] = {550, 350},
+        [3] = {1400, 350},
+        [4] = {1720, 600},
+        [5] = {550, 850},
+        [6] = {1400, 850},
+        POT = {930, 797}
+    }
+    
+    --[[
+        model.default_bet_locations = {
         [1] = {190, 567},
         [2] = {519, 351},
         [3] = {1352, 350},
@@ -39,6 +50,7 @@ Model = Class(function(model, ...)
         [6] = {1344, 920},
         POT = {930, 797}
     }
+    --]]
     
     model.currentPlayer = nil
     

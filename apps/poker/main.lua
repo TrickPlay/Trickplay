@@ -63,14 +63,14 @@ function()
    table.insert(players,
                 Player{
                    isHuman=true,
-                   table_position=1
+                   position=1
                 })
    for i=2,6 do
       table.insert(
          players,
          Player{
             isHuman=true,
-            table_position=i
+            position=i
          })
    end
    game:initialize_game{
