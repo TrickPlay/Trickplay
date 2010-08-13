@@ -48,6 +48,7 @@ function Load_Image(site,index)
     local j = math.ceil(index/NUM_ROWS)
 
     print("getting a pic for ",i,j,index)
+    if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
     model.albums[i][j] = Image
     {
         async    = true,
@@ -79,6 +80,7 @@ function Load_Image(site,index)
             end
         end
     }
+    end
 end
 
 function Scale_To_Fit(img,base_size,target_size)

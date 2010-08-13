@@ -12,11 +12,7 @@ SlideshowView = Class(View, function(view, model, ...)
         self:set_controller(SlideshowController(self))
     end
 
-    
-    function view:start_timer()
-	print ("begin")
-	timer:start()
-    end
+
 
            
     function view:update()
