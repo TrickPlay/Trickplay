@@ -48,7 +48,7 @@ function Load_Image(site,index)
     local j = math.ceil(index/NUM_ROWS)
 
     print("getting a pic for ",i,j,index)
-    if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
+    if model.albums[i] ~= nil then
     model.albums[i][j] = Image
     {
         async    = true,
