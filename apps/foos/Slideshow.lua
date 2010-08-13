@@ -34,6 +34,7 @@ function Slideshow:begin()
 	timer:start()
 end
 function Slideshow:stop()
+        self.images[current_pic]:complete_animation()
         timer:stop()
 end
 -- will send and image across the screen
