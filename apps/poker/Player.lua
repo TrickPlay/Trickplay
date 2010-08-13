@@ -6,6 +6,7 @@ Player = Class(function(player, args, ...)
    player.bet = model.bet.DEFAULT_BET
    player.money = 800
    player.position = false
+   player.table_position = nil
    for k,v in pairs(args) do
       player[k] = v
    end
