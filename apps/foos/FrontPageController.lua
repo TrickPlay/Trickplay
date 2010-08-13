@@ -19,8 +19,12 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self) 
-            self:get_model():set_active_component(Components.ITEM_SELECTED)
-            self:get_model():notify()
+--            self:get_model():set_active_component(Components.ITEM_SELECTED)
+ --           self:get_model():notify()
+            slideshow = Slideshow:new { num_pics = 20 }
+				screen:clear()
+				slideshow:begin()
+
         end
     }
 
