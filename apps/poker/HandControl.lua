@@ -54,6 +54,7 @@ function(ctrl, game_ctrl, ...)
    local players
    local sb_qty
    local bb_qty
+   local dealer
    local sb_p
    local bb_p
    local deck
@@ -75,6 +76,7 @@ function(ctrl, game_ctrl, ...)
       players = game_ctrl:get_players()
       sb_qty = game_ctrl:get_sb_qty()
       bb_qty = game_ctrl:get_bb_qty()
+      dealer = game_ctrl:get_dealer()
       sb_p = game_ctrl:get_sb_p()
       bb_p = game_ctrl:get_bb_p()
       deck = game_ctrl:get_deck()
@@ -91,6 +93,7 @@ function(ctrl, game_ctrl, ...)
       player_bets[players[bb_p]] = big_blind
 
       -- initialize cards for each player
+      deck:shuffle()
       hole_cards = {}
       for _,player in ipairs(players) do
          hole_cards[player] = deck:deal(2)
@@ -129,6 +132,7 @@ function(ctrl, game_ctrl, ...)
    }
    function ctrl.deal(ctrl, round)
       deal_LUT[round](pres)
+      enable_event_listener(Events.TIMER, .5)
       return true
    end
 
@@ -152,10 +156,12 @@ function(ctrl, game_ctrl, ...)
    }
    function ctrl.bet(ctrl, round)
       bet_LUT[round](pres)
+      enable_event_listener(Events.TIMER, .1)
       return true
    end
 
    function ctrl.showdown(ctrl)
+      enable_event_listener(Events.TIMER, .5)
       return true
    end
 
@@ -172,5 +178,10 @@ function(ctrl, game_ctrl, ...)
       else
          return true
       end
+   end
+
+   function ctrl.cleanup(ctrl)
+      pres:clear_ui()
+      return true
    end
 end)
