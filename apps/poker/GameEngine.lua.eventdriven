@@ -103,28 +103,77 @@ function(self, players, ...)
       community_cards = deck:deal(5)
    end
 
+   executeMove(move)
 
    function self:hole_deal()
       -- animation junk goes here.
    end
 
-   function self:re_enter()
-   end
-   
-   function self:bet_helper()
-      bet_helper()
+   function self:hole_set_action()
+      action = (bb_p%#players)+1
    end
 
-   function self:hole_betting()
+   function self:hole_betting_til_block()
+      -- assigns the action to the player under the gun
+      player = players[action]
+
+      if not player.isHuman then
+         local move = player:get_move()
+         executeMove(move)
+      else
+         coroutines.create
+      end
+
+
+      -- while all players haven't had a turn yet and not all player
+      -- bets are equal
+   end
+
+   function self:flop_deal()
+      -- animation junk goes here.
+   end
+
+   function self:flop_set_action()
+      action = sb_p
+   end
+
+   function self:flop_betting_til_block()
       -- assigns the action to the player under the gun
       action = (bb_p%#players)+1
 
-      if player.isHuman() then
-         bet_helper()
-      end
-      bet_helper()
       -- while all players haven't had a turn yet and not all player
       -- bets are equal
-      self:hole_betting()
+   end
+
+   function self:turn_deal()
+      -- animation junk goes here.
+   end
+
+   function self:turn_set_action()
+      action = sb_p
+   end
+
+   function self:turn_betting_til_block()
+      -- assigns the action to the player under the gun
+      action = (bb_p%#players)+1
+
+      -- while all players haven't had a turn yet and not all player
+      -- bets are equal
+   end
+
+   function self:river_deal()
+      -- animation junk goes here.
+   end
+
+   function self:river_set_action()
+      action = sb_p
+   end
+
+   function self:river_betting_til_block()
+      -- assigns the action to the player under the gun
+      action = (bb_p%#players)+1
+
+      -- while all players haven't had a river yet and not all player
+      -- bets are equal
    end
 end
