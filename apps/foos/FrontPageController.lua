@@ -40,11 +40,11 @@ FrontPageController = Class(Controller, function(self, view, ...)
     end
 
     function self:get_selected_index()
-        return selected
+        return selected[1],selected[2]
     end
 
     function self:get_prev_index()
-        return prev_index
+        return prev_index[1],prev_index[2]
     end
     function self:set_prev_index(r,c)
         prev_index = {r,c}
@@ -55,15 +55,19 @@ FrontPageController = Class(Controller, function(self, view, ...)
     function self:move_selector(dir)
         prev_index = {selected[1],selected[2]}
         local next_spot = {selected[1]+dir[2],selected[2]+dir[1]}
-        if model.vis_pics[next_spot[1]]               ~= nil and
-           model.vis_pics[next_spot[1]][next_spot[2]] ~= nil then
+        if next_spot[1] > 0 and next_spot[1] <= NUM_ROWS and
+           next_spot[2] > 0 and next_spot[2] <= NUM_VIS_COLS then
 
             selected[1] = next_spot[1]
             selected[2] = next_spot[2]
+--[[
         elseif dir == Directions.RIGHT then
             view:move_right()
         elseif dir == Directions.LEFT  then
             view:move_left()
+--]]
+        elseif dir == Directions.RIGHT or dir == Directions.LEFT then
+            view:shift_group(dir[1])
         end
 
         self:get_model():notify()

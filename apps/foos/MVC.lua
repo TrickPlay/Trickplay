@@ -7,7 +7,7 @@ Model = Class(function(model, ...)
 
     model.pic_text = {0,0}
 
-    model.num_sources = 16
+    model.num_sources = NUM_SLIDESHOW_IMAGES
     model.front_page_index = 1
 
     model.vis_pics   = {}
@@ -15,6 +15,16 @@ Model = Class(function(model, ...)
     model.right_edge = {}
     model.right_next_index = 0
     model.left_next_index = 0
+    model.albums = {}
+    model.placeholders = {}
+    model.album_base_sizes = {}
+    model.albums_loaded = false
+    model.album_group = Group{name="Album Group"}
+model.default = Image{
+                src = "assets/thumbnail/Album1.jpg",
+                opacity = 0
+            }
+
 
     -- class methods
     function model:attach(observer, controller_id)
