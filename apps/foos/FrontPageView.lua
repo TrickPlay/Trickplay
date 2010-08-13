@@ -130,7 +130,8 @@ FrontPageView = Class(View, function(view, model, ...)
                      on_completed = function()
                          prev_i = {sel[1],sel[2]}
                          --model.placeholders[prev_i[1]][prev_i[2]]:complete_animation()
-                         if model.albums[sel[1]][sel[2]] == nil then
+                         if model.albums[sel[1]] == nil or 
+                            model.albums[sel[1]][sel[2]] == nil then
                              print("completed, moving to placeholder")
                              model.placeholders[sel[1]][sel[2]]:complete_animation()
                              model.placeholders[sel[1]][sel[2]]:raise_to_top()

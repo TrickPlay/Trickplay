@@ -61,8 +61,11 @@ function Load_Image(site,index)
         on_loaded = function()
             if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
             print("loading pic at",i,j,index)
+            if model.placeholders[i] ~= nil and 
+               model.placeholders[i][j] ~= nil then
             model.placeholders[i][j]:unparent()
             model.placeholders[i][j] = nil
+            end
 
             model.albums[i][j].scale = 
             {
