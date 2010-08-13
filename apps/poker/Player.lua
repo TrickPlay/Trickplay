@@ -1,5 +1,5 @@
-Player = Class(function(player, ...)
-
+Player = Class(function(player, isHuman, ...)
+   player.isHuman = isHuman
    player.user = false
    player.number = 0
    player.row = 0
@@ -8,10 +8,9 @@ Player = Class(function(player, ...)
    player.money = 800 - player.bet
    player.position = false
    player.table_position = nil
-   
-   for k,v in pairs(args) do
-      player[k] = v
-   end
+   -- for k,v in pairs(args) do
+   --    player[k] = v
+   -- end
    
    function player:createMoneyChips()
       
@@ -33,6 +32,6 @@ Player = Class(function(player, ...)
       
    end
    
-   player.status = PlayerStatusView(model, nil, player):initialize()
+--   player.status = PlayerStatusView(model, nil, player):initialize()
 
 end)
