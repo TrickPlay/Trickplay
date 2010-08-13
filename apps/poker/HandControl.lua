@@ -112,16 +112,19 @@ function(ctrl, game_ctrl, ...)
    local deal_LUT = {
       [Rounds.HOLE]=
          function(pres)
-            
+            pres:deal_hole()
          end,
       [Rounds.FLOP]=
          function(pres)
+            pres:deal_flop()
          end,
       [Rounds.TURN]=
          function(pres)
+            pres:deal_turn()
          end,
       [Rounds.RIVER]=
          function(pres)
+            pres:deal_river()
          end
    }
    function ctrl.deal(ctrl, round)
@@ -129,20 +132,45 @@ function(ctrl, game_ctrl, ...)
       return true
    end
 
+   local bet_LUT = {
+      [Rounds.HOLE]=
+         function(pres)
+--            pres:deal_hole()
+         end,
+      [Rounds.FLOP]=
+         function(pres)
+--            pres:deal_flop()
+         end,
+      [Rounds.TURN]=
+         function(pres)
+--            pres:deal_turn()
+         end,
+      [Rounds.RIVER]=
+         function(pres)
+--            pres:deal_river()
+         end
+   }
    function ctrl.bet(ctrl, round)
-      
+      bet_LUT[round](pres)
+      return true
    end
 
    function ctrl.showdown(ctrl)
+      return true
    end
 
-   function ctrl.on_event(ctrl, event, extra)
+   function ctrl.on_event(ctrl)
+      print(#hand_pipeline, "entries left in hand_pipeline")
       if #hand_pipeline > 0 then
          local next_action = hand_pipeline[1]
          local result = next_action(ctrl)
          if result then table.remove(hand_pipeline, 1) end
+      end
+
+      if #hand_pipeline > 0 then
+         return false
       else
-         game_ctrl:cleanup_hand()
+         return true
       end
    end
 end)

@@ -16,22 +16,15 @@ function(ctrl, model, ...)
    local game_pipeline = {}
    local orig_game_pipeline = {
       function(ctrl)
-         ctrl:start_hand()
+         hand_ctrl:initialize()
          enable_event_listener(Events.TIMER, 1)
          local continue = true
          return continue
       end,
       function(ctrl)
-         screen:add(
-            Text{
-               text="Pipeline stage 2 triggered",
-               font="Sans 40px",
-               color="FFFFFF",
-               y=0
-            }
-         )
+         local continue = hand_ctrl:on_event()
          enable_event_listener(Events.TIMER, 1)
-         return true
+         return continue
       end,
       function(ctrl)
          screen:add(
