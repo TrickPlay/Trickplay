@@ -5,7 +5,7 @@ Player = Class(function(player, ...)
    player.row = 0
    player.col = 0
    player.bet = model.bet.DEFAULT_BET
-   player.money = 800 - player.bet
+   player.money = 800
    player.position = {0, 0}
    player.table_position = nil
    

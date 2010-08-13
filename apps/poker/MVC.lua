@@ -28,6 +28,16 @@ Model = Class(function(model, ...)
         [6] = {SCREEN_WIDTH-230, 890},
     }
     
+    model.default_bet_locations = {
+        [1] = {190, 567},
+        [2] = {519, 351},
+        [3] = {1352, 350},
+        [4] = {1718, 581},
+        [5] = {550, 955},
+        [6] = {1344, 920},
+        POT = {930, 797}
+    }
+    
     model.currentPlayer = nil
     
     model.bet = {
