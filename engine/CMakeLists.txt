@@ -59,6 +59,9 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
 	
 	list( APPEND ENGINE_LIBRARY_NAMES upnp )
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		list( APPEND ENGINE_LIBRARY_NAMES ixml )
+	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	
 	
 	if ( TP_CONTROLLER_DISCOVERY_UPNP )
@@ -157,12 +160,22 @@ list(
     
     json-glib-1.0    
         
-	#--------------
-	# uuid
-	#--------------
-
-	ossp-uuid	        
 )
+
+#--------------
+# uuid
+#--------------
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	list(
+		APPEND ENGINE_LIBRARY_NAMES
+		uuid
+	)
+else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+	list(
+		APPEND ENGINE_LIBRARY_NAMES
+		ossp-uuid
+	)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 #------------------------------------------------------------------------------
 # Use the right clutter libraries based on the backend used
@@ -177,11 +190,19 @@ if (TP_CLUTTER_BACKEND_EGL)
 
 else (TP_CLUTTER_BACKEND_EGL)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list(
+	APPEND ENGINE_LIBRARY_NAMES
+
+	clutter-osx-1.0
+    )
+else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(
         APPEND ENGINE_LIBRARY_NAMES
         
         clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes
     )
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 endif (TP_CLUTTER_BACKEND_EGL)
 
