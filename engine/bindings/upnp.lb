@@ -138,7 +138,7 @@ private:
 	{
 	public:
 	
-		static void post( UserData::Handle * udata , UpnpActionComplete * action )
+		static void post( UserData::Handle * udata , Upnp_Action_Complete * action )
 		{
 			g_assert( udata );
 			g_assert( action );
@@ -155,12 +155,12 @@ private:
 		ActionResult()
 		{}
 		
-		ActionResult( UserData::Handle * _udata , UpnpActionComplete * action )
+		ActionResult( UserData::Handle * _udata , Upnp_Action_Complete * action )
 		:
 			udata( _udata ),
-			error_code( UpnpActionComplete_get_ErrCode( action ) )
+			error_code( action->ErrCode )
 		{
-			if ( IXML_Document * doc = UpnpActionComplete_get_ActionResult( action ) )
+			if ( IXML_Document * doc = action->ActionResult )
 			{
 				if ( DOMString ds = ixmlDocumenttoString( doc ) )
 				{
@@ -225,7 +225,7 @@ private:
 	{
 	public:
 	
-		static void post( UserData::Handle * udata , UpnpDiscovery * discovery )
+		static void post( UserData::Handle * udata , Upnp_Discovery * discovery )
 		{
 			g_assert( udata );
 			g_assert( discovery );
@@ -248,15 +248,15 @@ private:
 		{
 		}
 	
-		SearchResult( UserData::Handle * _udata , UpnpDiscovery * discovery )
+		SearchResult( UserData::Handle * _udata , Upnp_Discovery * discovery )
 		:
 			udata( _udata ),
-			error_code( UpnpDiscovery_get_ErrCode( discovery ) ),
-			device_id( UpnpString_get_String( UpnpDiscovery_get_DeviceID( discovery ) ) ),
-			device_type( UpnpString_get_String( UpnpDiscovery_get_DeviceType( discovery ) ) ),
-			service_type( UpnpString_get_String( UpnpDiscovery_get_ServiceType( discovery ) ) ),
-			service_version( UpnpString_get_String( UpnpDiscovery_get_ServiceVer( discovery ) ) ),
-			location( UpnpString_get_String( UpnpDiscovery_get_Location( discovery ) ) )
+			error_code( discovery->ErrCode ),
+			device_id( discovery->DeviceId ),
+			device_type( discovery->DeviceType ),
+			service_type( discovery->ServiceType ),
+			service_version( discovery->ServiceVer ),
+			location( discovery->Location )
 		{
 		}
 	
@@ -334,7 +334,7 @@ private:
 		switch( type )
 		{
 			case UPNP_CONTROL_ACTION_COMPLETE:
-				ActionResult::post( ( UserData::Handle * ) user , ( UpnpActionComplete * ) event );
+				ActionResult::post( ( UserData::Handle * ) user , ( Upnp_Action_Complete * ) event );
 				break;
 				
 			default:
@@ -350,15 +350,18 @@ private:
 		{
         	case UPNP_DISCOVERY_SEARCH_RESULT:
 	        	{
+	        		ulog( "SEARCH RESULT" );
 	        		// This gathers the results of the search into a search result structure
 	        		// and puts that in the main thread - to callback
 	        		
-	        		SearchResult::post( ( UserData::Handle * ) user , ( UpnpDiscovery * ) event );
+	        		SearchResult::post( ( UserData::Handle * ) user , ( Upnp_Discovery * ) event );
 	        	}
 	        	break;
         	
         	case UPNP_DISCOVERY_SEARCH_TIMEOUT:
 	        	{
+	        		ulog( "SEARCH FINISHED" );
+	        		
 	        		// This will issue a completed callback and then destroy the user data handle
 	        			        		
 	        		SearchResult::finished( ( UserData::Handle * ) user );	        	
