@@ -27,6 +27,7 @@ function(ctrl, model, ...)
          return continue
       end,
       function(ctrl)
+         state:move_blinds()
          local continue = hand_ctrl:cleanup()
          enable_event_listener(Events.TIMER, 1)
          pres:finish_hand()
@@ -79,7 +80,6 @@ function(ctrl, model, ...)
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
-      
       if #game_pipeline == 0 and #ctrl:get_players()>1 then
          reset_pipeline()
       end

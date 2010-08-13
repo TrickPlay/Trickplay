@@ -42,6 +42,11 @@ GameState = Class(nil,function(state, ctrl)
    function state.get_bb_p(state) return bb_p end
    function state.get_deck(state) return deck end
 
+   function state:move_blinds()
+      dealer = (dealer % #players) + 1
+      sb_p, bb_p = calc_blind_pos()
+   end
+
    -- public functions
    function state.initialize(state, args)
       sb_qty = args.sb or error("Assign small blind!", 2)

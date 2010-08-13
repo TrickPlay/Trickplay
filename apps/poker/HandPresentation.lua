@@ -25,7 +25,7 @@ function(pres, ctrl)
       y=100
       for player,hole in pairs(hole_cards) do
          local card1, card2 = unpack(hole)
-        assert(model.default_bet_locations)
+         assert(model.default_bet_locations)
          assert(model.default_bet_locations[player.table_position]) 
          card1.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]}
          card2.group.position = {model.default_bet_locations[player.table_position][1] + 100, model.default_bet_locations[player.table_position][2]}
