@@ -19,5 +19,5 @@ function showGoogleImage(search,index)
 	}
 	request:send()
 end
-showGoogleImage("asian", START_INDEX)
+showGoogleImage("stuff", START_INDEX)
 
