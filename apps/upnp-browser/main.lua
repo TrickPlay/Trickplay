@@ -92,8 +92,6 @@ local function browse_finished( server , id , error_code , xml )
         
         if didl then
             
-            print( didl )
-            
             didl = XMLTree( didl )
             
             -- Make sure the root is <DIDL-Lite> and that there are children
@@ -120,7 +118,7 @@ local function browse_finished( server , id , error_code , xml )
                             
                             end
                             
-                            print( "FOUND" , title )
+                            --print( "FOUND" , title )
                         
                             add_item( title ,
                                 {
@@ -263,12 +261,12 @@ show_focus = function()
                                         
                                         i = i + 1
                                         
-                                        if i == index then
-                                            break
-                                        end
-                                        
                                         if i > #list then
                                             i = 1
+                                        end
+
+                                        if i == index then
+                                            break
                                         end
                                     
                                     end
