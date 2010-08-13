@@ -14,9 +14,9 @@ function(pres, ctrl)
    function pres.display_ui(pres)
       -- put sb, bb, dealer markers down, plus player chip stacks
       if not screen:find_child("dealerchip") then
-         local dealerchip = Image{src = "assets/Chip_D.png", position = mdbl[ ctrl.get_dealer(ctrl) ], name="dealerchip"}
-         local bbchip = Image{src = "assets/Chip_BB.png", position = mdbl[ ctrl.get_bb_p(ctrl) ], name="bbchip"}
-         local sbchip = Image{src = "assets/Chip_SB.png", position = mdbl[ ctrl.get_sb_p(ctrl) ], name="sbchip"}
+         local dealerchip = Image{src = "assets/Chip_D.png", position = mdbl[ model.players[ ctrl:get_dealer() ].table_position ], name="dealerchip"}
+         local bbchip = Image{src = "assets/Chip_BB.png", position = mdbl[ model.players[ ctrl:get_bb_p() ].table_position ], name="bbchip"}
+         local sbchip = Image{src = "assets/Chip_SB.png", position = mdbl[ model.players[ ctrl:get_sb_p() ].table_position ], name="sbchip"}
          screen:add(dealerchip, bbchip, sbchip)
       end
       
