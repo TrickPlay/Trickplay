@@ -10,8 +10,8 @@ PIC_DIR = "assets/thumbnails/"
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
     screen:add(model.default)
-	 loadCovers()
-    --startAdapter(1) --TODO fix this one source shit
+	-- loadCovers()
+    startAdapter(1) --TODO fix this one source shit
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
     --fill the thing with clones of the default-loading image
