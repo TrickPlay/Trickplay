@@ -24,3 +24,8 @@ function loadCovers()
 	end
 end
 
+function slideShow()
+	
+	screen:clear()
+end
+
