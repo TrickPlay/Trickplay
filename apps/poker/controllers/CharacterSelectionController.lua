@@ -69,13 +69,13 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     local function setCharacterSeat()
         --instantiate the player
         if(model.positions[getPosition()]) then return end
-        local user = false
+        local isHuman = false
         if(playerCounter == 1) then
-            user = HUMAN
+            isHuman = true
         end
         
         args = {
-            user = user,
+            isHuman = isHuman
             row = selected,
             col = subselection,
             number = playerCounter,
