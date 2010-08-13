@@ -1,4 +1,5 @@
 
+TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h    TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( clutter-1.0 clutter-gst/clutter-gst.h  TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gstreamer-0.10 gst/gst.h               TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( glib-2.0 glib.h 			TPCMP_INCLUDE_DIRS )
