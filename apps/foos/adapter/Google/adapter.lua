@@ -1,23 +1,48 @@
 --local source = {}
 
-function showGoogleImage(search,index)
-	local request = URLRequest {
-		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..index.."&imgsz=medium",
-		on_complete = function (request, response)
-			
-			local data = json:parse(response.body)
-                        site = data.responseData.results[1].unescapedUrl
-			picsTable[index] = site
-                        Load_Image(site,index)
-			if (index+1 < START_INDEX + NUM_SLIDESHOW_IMAGES) then
-				showGoogleImage(search,index+1)
-			else
-				getUrls(picsTable)
-			end
-
-		end
+local adapter = {
+	name = "GoogleImages",
+	logoUrl = "adapter/Google/logo.jpg",
+	{
+		name = "public",
+		caption = adapter:getCaption(),
+		required_inputs = {
+			query = adapter:getQuery(),
+		},
+		albums = adapter:getAlbums(),
+		photos = adapter:getPhotos(album, start, num_images)
 	}
-	request:send()
-end
-showGoogleImage("xkcd", START_INDEX)
+}
 
+function adapter:getQuery()
+	return "National+Geographic"
+end
+
+function adapter:getCaption()
+	-- some caption of the album
+	return "hello"
+end
+
+function adapter:getAlbums()
+	return {}
+end
+
+function adapter:getPhotos(album,start,num_images)
+	sites = {}
+	search = self:getQuery()
+	for i = start, start + num_images do
+		local request = URLRequest {
+		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=xxlarge",
+		on_complete = function (request, response)
+			local data = json:parse(response.body)
+			table.insert(sites,data.responseData.results[1].unescapedUrl)
+			Load_Image(site,i)
+		end
+		}
+		request:send()
+	end
+	return sites
+end
+
+
+return adapter
