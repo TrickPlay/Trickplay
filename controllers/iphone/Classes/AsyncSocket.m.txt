@@ -28,8 +28,6 @@
 #define READALL_CHUNKSIZE	256         // Incremental increase in buffer size
 #define WRITE_CHUNKSIZE    (1024 * 4)   // Limit on size of each write pass
 
-#define TCP_NODELAY 1
-
 NSString *const AsyncSocketException = @"AsyncSocketException";
 NSString *const AsyncSocketErrorDomain = @"AsyncSocketErrorDomain";
 
@@ -1556,7 +1554,7 @@ Failed:
 	}
 
 	// Setup write stream callbacks
-
+	
 	CFOptionFlags writeStreamEvents = kCFStreamEventCanAcceptBytes |
 	                                  kCFStreamEventErrorOccurred  |
 	                                  kCFStreamEventEndEncountered |
@@ -1575,7 +1573,6 @@ Failed:
 		if (errPtr) *errPtr = err;
 		return NO;
 	}
-
 	
 	// Add read and write streams to run loop
 	
@@ -1668,7 +1665,6 @@ Failed:
 
 - (BOOL)setSocketFromStreamsAndReturnError:(NSError **)errPtr
 {
-	
 	// Get the CFSocketNativeHandle from theReadStream
 	CFSocketNativeHandle native;
 	CFDataRef nativeProp = CFReadStreamCopyProperty(theReadStream, kCFStreamPropertySocketNativeHandle);
@@ -1689,9 +1685,6 @@ Failed:
 		if (errPtr) *errPtr = [self getSocketError];
 		return NO;
 	}
-	
-	int yes = 1;
-	setsockopt(CFSocketGetNative(theSocket), IPPROTO_TCP, TCP_NODELAY, (void *)&yes, sizeof(yes));
 	
 	// Determine whether the connection was IPv4 or IPv6.
 	// We may already know if this was an accepted socket,
@@ -3519,7 +3512,6 @@ Failed:
 		
 		// Write.
 		CFIndex bytesWritten = CFWriteStreamWrite(theWriteStream, writestart, bytesToWrite);
-        NSLog(@"Just wrote %d bytes", bytesWritten);
 		
 		// Unset the "can accept bytes" flag
 		theFlags &= ~kSocketCanAcceptBytes;
