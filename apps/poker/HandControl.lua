@@ -14,6 +14,7 @@ function(ctrl, game_ctrl, ...)
    --local state = HandState(ctrl)
    local pres = HandPresentation(ctrl)
    local game_ctrl = game_ctrl or error("no game_ctrl",2)
+--   local bet_ctrl = BettingControl(ctrl)
 
    local hand_pipeline = {}
    local orig_hand_pipeline = {
@@ -58,6 +59,10 @@ function(ctrl, game_ctrl, ...)
    local sb_p
    local bb_p
    local deck
+   local in_players
+   local done
+   local call_bet
+   local min_raise
 
    function ctrl:get_community_cards() return community_cards end
    function ctrl:get_hole_cards() return hole_cards end
@@ -71,6 +76,23 @@ function(ctrl, game_ctrl, ...)
    function ctrl:get_bb_p() return bb_p end
    function ctrl:get_deck() return deck end
 
+   -- private functions
+   local function give_winner_pot_and_bone_out()
+      assert(#in_players == 1)
+      local winner = in_players[1]
+      for _,player in ipairs(players) do
+         assert(done[player])
+         if player ~= winner then
+            assert(player_bets[player] == 0)
+         end
+      end
+      winner.money = winner.money + player_bets[winner] + pot
+      player_bets[winner] = 0
+      pot = 0
+      hand_pipeline = {}
+      enable_event_listener(Events.TIMER, 1)
+   end
+
    -- public functions
    function ctrl.initialize(ctrl)
       players = game_ctrl:get_players()
@@ -80,6 +102,13 @@ function(ctrl, game_ctrl, ...)
       sb_p = game_ctrl:get_sb_p()
       bb_p = game_ctrl:get_bb_p()
       deck = game_ctrl:get_deck()
+
+      in_players = {}
+      done = {}
+      for i, player in ipairs(players) do
+         in_players[i] = player
+         done[player] = false
+      end
 
       -- person after the big blind goes first, initially
       action = (bb_p % #players) + 1
@@ -96,6 +125,9 @@ function(ctrl, game_ctrl, ...)
       players[sb_p].money = players[sb_p].money - sb_qty
       player_bets[players[bb_p]] = bb_qty
       players[bb_p].money = players[bb_p].money - bb_qty
+
+      call_bet = bb_qty
+      min_raise = bb_qty
 
       -- initialize cards for each player
       deck:reset()
@@ -130,31 +162,114 @@ function(ctrl, game_ctrl, ...)
       return true
    end
 
-   local bet_LUT = {
-      [Rounds.HOLE]=
-         function(pres)
---            pres:deal_hole()
-         end,
-      [Rounds.FLOP]=
-         function(pres)
---            pres:deal_flop()
-         end,
-      [Rounds.TURN]=
-         function(pres)
---            pres:deal_turn()
-         end,
-      [Rounds.RIVER]=
-         function(pres)
---            pres:deal_river()
-         end
-   }
    function ctrl.bet(ctrl, round)
-      bet_LUT[round](pres)
-      enable_event_listener(Events.TIMER, .1)
-      return true
+      print(action)
+      local active_player = in_players[action]
+      local fold, bet
+      if false and active_player.isHuman then
+
+      else
+         -- get computer move
+         -- current cards, bet to call, min raise, current wager, pot size
+         fold, bet = active_player:get_move(hole_cards[active_player], call_bet, min_raise, player_bets[active_player], pot)
+         if fold then
+            -- current wager goes into pot
+            pot = pot + player_bets[active_player]
+            player_bets[active_player] = 0
+            table.remove(in_players, action)
+            action = ((action - 1) % #in_players) + 1
+            pres:fold_player(active_player)
+         else
+            local delta = bet-player_bets[active_player]
+            assert(0 <= delta and delta <= active_player.money)
+            player_bets[active_player] = bet
+            active_player.money = active_player.money - delta
+            pres:bet_player(active_player)
+         end
+         done[active_player] = true
+      end
+
+      local continue = true
+
+      assert(#in_players > 0)
+      if #in_players == 1 then
+         give_winner_pot_and_bone_out()
+         return true
+      end
+
+      for i, player in ipairs(in_players) do
+         if not done[player] then
+            continue = false
+         end
+      end
+
+      if continue then
+         -- set the pot
+         for i,player in ipairs(in_players) do
+            pot = pot + player_bets[player]
+            player_bets[player] = 0
+            done[player] = false
+         end
+
+         -- reset the new action
+         local tmp_action = (dealer % #players) + 1
+         local safety_counter = 0
+         while done[players[tmp_action]] == true do
+            assert(safety_counter <= #players)
+            tmp_action = (tmp_action % #players) + 1
+            safety_counter = safety_counter+1
+         end
+         action = tmp_action
+      else
+         local tmp_action = (action % #players) + 1
+         local safety_counter = 0
+         while done[players[tmp_action]] == true do
+            assert(safety_counter <= #players)
+            tmp_action = (tmp_action % #players) + 1
+            safety_counter = safety_counter+1
+         end
+         action = tmp_action
+      end
+      enable_event_listener(Events.TIMER, 1)
+      return continue
    end
 
    function ctrl.showdown(ctrl)
+      assert(#in_players > 1)
+      local in_hands = {}
+      for _, player in ipairs(in_players) do
+         local hand = {}
+         for _, card in ipairs(hole_cards[player]) do
+            table.insert(hand, card)
+         end
+         for _, card in ipairs(community_cards) do
+            table.insert(hand, card)
+         end
+         in_hands[player] = hand
+      end
+
+
+      local best = in_players[1]
+      local winners = {in_players[1]}
+      local result
+      for i=2,#in_players do
+         result = compare_hands(in_hands[best], in_hands[in_players[i]])
+         if result == 0 then
+            table.insert(winners, in_players[i])
+         elseif result == 1 then
+            best = in_players[i]
+            winners = {in_players[i]}
+         end
+      end
+
+      best.money = best.money + pot
+      pot = 0
+
+      print("player won with")
+      for _, card in ipairs(in_hands[best]) do
+         print(card.name)
+      end
+      pres:show_winners(winners)
       enable_event_listener(Events.TIMER, .5)
       return true
    end

@@ -16,6 +16,7 @@ function()
    dofile("Popup.lua")
    dofile("TimerWrapper.lua")
    dofile("GameControl.lua")
+   dofile("PokerRules.lua")
 
 
    Components = {
