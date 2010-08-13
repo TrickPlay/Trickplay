@@ -3,14 +3,19 @@ picsTable = {}
 
 
 START_INDEX = 1
-NUM_SLIDESHOW_IMAGES = 10
+NUM_SLIDESHOW_IMAGES =16 
 
 function startAdapter(selection)
-	dofile(adaptersTable[selection].."/adapter.lua")
+print("\n\n\n\n\n shit")
+	dofile("adapter/"..adaptersTable[selection].."/adapter.lua")
 end
 
 function getPictureUrl()
-	return picsTable
+        if type(picsTable[1]) == "string" then 
+    		return picsTable
+        else
+            return {}
+        end
 end
 
 function getUrls(source)
@@ -21,4 +26,4 @@ function getUrls(source)
 	end
 end
 
-startAdapter(2)
+--startAdapter(2)
