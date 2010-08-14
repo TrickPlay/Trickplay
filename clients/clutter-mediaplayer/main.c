@@ -277,8 +277,8 @@ static void loading_messages(GstBus * bus,GstMessage * message,TPMediaPlayer * m
         }
         default:
         {
-        	// Some unhandled case
-        	g_warning("Unhandled message type: %d",message->type);
+        	// Default handler to make clang shut up
+			break;
         }
     }
 }
