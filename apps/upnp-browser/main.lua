@@ -66,7 +66,7 @@ end
 
 local show_focus
 
-local function browse_finished( server , id , error_code , xml )
+local function browse_finished( server , id , result )
     
     print( "FINISHED BROWSE" , id )
     
@@ -82,13 +82,13 @@ local function browse_finished( server , id , error_code , xml )
     
     local empty = true
     
-    if error_code == 0 then
+    if result.error == 0 then
     
         -- The xml here is a BrowseResponse that contains an element for
         -- each return value. The one we want is called 'Result' which has
         -- DIDL-Lite
         
-        local didl = XMLTree( xml ):find( "BrowseResponse/Result.text" )
+        local didl = XMLTree( result.xml ):find( "BrowseResponse/Result.text" )
         
         if didl then
             
