@@ -27,12 +27,14 @@ dofile( "xml.lua" )
                 
                     The callback should have this prototype:
                     
-                        callback( service , action_id , error_code , xml )
+                        callback( service , action_id , result )
                         
                             service - The service object for the action
                             action_id - The action id
-                            error_code - The error code of the action (0 means success)
-                            xml - The xml (as a string) for the result of the action.
+                            result - A table that has the following fields:
+                                error - Integer error code
+                                xml - String XML result of the action
+                                
                             
                     If a callback is not provided, the service's "on_action_completed"
                     will be called with the same parameters.
@@ -332,7 +334,7 @@ function upnp_service_search( device_type , service_type , callback , timeout )
         -- service.on_action_completed.
         -------------------------------------------------------------------
         
-        function client.on_action_completed( client , id , error_code , xml )
+        function client.on_action_completed( client , id , result )
         
             print( "ACTION" , id , "COMPLETED WITH ERROR CODE" , error_code )
             
@@ -344,7 +346,7 @@ function upnp_service_search( device_type , service_type , callback , timeout )
             
             if service and callback then
             
-                pcall( callback , service , id , error_code , xml )
+                pcall( callback , service , id , result )
             
             end
         
@@ -360,9 +362,15 @@ function upnp_service_search( device_type , service_type , callback , timeout )
     -- When we get a search result
     ---------------------------------------------------------------------------
 
-    function client.on_search_result( client , search_id , location )
+    function client.on_search_result( client , search_id , info )
+    
+        if info.error ~= 0 then        
+            return
+        end
     
         -- Location is the URL to the device description XML doc
+        
+        local location = info.location
         
         -- If we already have it, bail        
         

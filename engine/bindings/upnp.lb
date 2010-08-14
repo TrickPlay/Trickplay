@@ -198,10 +198,17 @@ private:
 			g_assert( ud );
 			
 			lua_pushnumber( L , action->id );
-			lua_pushnumber( L , error_code );
-			lua_pushstring( L , xml.c_str() );
 			
-			ud->invoke_callback( "on_action_completed" , 3 , 0 );
+			lua_newtable(L);
+			int t=lua_gettop(L);
+			
+			lua_pushinteger(L,error_code);
+			lua_setfield(L,t,"error");
+			
+			lua_pushstring(L,xml.c_str());
+			lua_setfield(L,t,"xml");
+			
+			ud->invoke_callback( "on_action_completed" , 2 , 0 );
 		}
 		
 		static gboolean process( gpointer self )
@@ -295,8 +302,28 @@ private:
 			g_assert( ud );
 			
 			lua_pushnumber( L , search->id );
-			lua_pushstring( L , location.c_str() );
 			
+			lua_newtable(L);
+			int t = lua_gettop(L);
+			
+			lua_pushinteger(L,error_code);
+			lua_setfield(L,t,"error");
+			
+			lua_pushstring(L,device_id.c_str());
+			lua_setfield(L,t,"device_id");
+			
+			lua_pushstring(L,device_type.c_str());
+			lua_setfield(L,t,"device_type");
+			
+			lua_pushstring(L,service_type.c_str());
+			lua_setfield(L,t,"service_type");
+			
+			lua_pushstring(L,service_version.c_str());
+			lua_setfield(L,t,"service_version");
+			
+			lua_pushstring(L,location.c_str());
+			lua_setfield(L,t,"location");
+						
 			ud->invoke_callback( "on_search_result" , 2 , 0 );
 		}
 		
