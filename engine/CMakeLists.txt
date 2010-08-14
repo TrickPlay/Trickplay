@@ -51,37 +51,6 @@ if (TP_CONTROLLER_DISCOVERY_MDNS)
 	
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
-#------------------------------------------------------------------------------
-# UPnP
-
-if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
-
-	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
-	
-	list( APPEND ENGINE_LIBRARY_NAMES upnp )
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		list( APPEND ENGINE_LIBRARY_NAMES ixml )
-	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	
-	
-	if ( TP_CONTROLLER_DISCOVERY_UPNP )
-		
-		add_definitions( -DTP_CONTROLLER_DISCOVERY_UPNP=1 )
-		
-		list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_upnp.cpp )
-	
-	endif ( TP_CONTROLLER_DISCOVERY_UPNP )
-	
-	if ( TP_UPNP_CLIENT )
-	
-		add_definitions( -DTP_UPNP_CLIENT=1 )
-		
-		list( APPEND LB_FILES ${BINDINGS_SRC}/upnp.lb )
-	
-	endif( TP_UPNP_CLIENT )
-	
-endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
-
 
 #------------------------------------------------------------------------------
 
@@ -176,6 +145,39 @@ else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
 		ossp-uuid
 	)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+#------------------------------------------------------------------------------
+# UPnP - must come after uuid cos it export some uuid symbols badly
+
+if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
+
+	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
+	
+	list( APPEND ENGINE_LIBRARY_NAMES upnp )
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		list( APPEND ENGINE_LIBRARY_NAMES ixml )
+	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	
+	
+	if ( TP_CONTROLLER_DISCOVERY_UPNP )
+		
+		add_definitions( -DTP_CONTROLLER_DISCOVERY_UPNP=1 )
+		
+		list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_upnp.cpp )
+	
+	endif ( TP_CONTROLLER_DISCOVERY_UPNP )
+	
+	if ( TP_UPNP_CLIENT )
+	
+		add_definitions( -DTP_UPNP_CLIENT=1 )
+		
+		list( APPEND LB_FILES ${BINDINGS_SRC}/upnp.lb )
+	
+	endif( TP_UPNP_CLIENT )
+	
+endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
+
+
 
 #------------------------------------------------------------------------------
 # Use the right clutter libraries based on the backend used
