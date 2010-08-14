@@ -196,7 +196,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(
 	APPEND ENGINE_LIBRARY_NAMES
 
-	clutter-osx-1.0
+	clutter-glx-1.0
     )
 else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(
