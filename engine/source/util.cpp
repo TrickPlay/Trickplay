@@ -8,27 +8,30 @@
 
 static String make_uuid( unsigned int mode )
 {
+    String result;
+
     uuid_t * u = 0;
 
-    uuid_create( & u );
-    uuid_make( u , mode );
-
-    char buffer[ UUID_LEN_STR + 1 ];
-
-    size_t len = UUID_LEN_STR + 1;
-
-    void * up = & buffer[0];
-
-    uuid_rc_t r = uuid_export( u , UUID_FMT_STR , & up , & len );
-
-    uuid_destroy( u );
-
-    if ( r == UUID_RC_OK )
+    if ( UUID_RC_OK == uuid_create( & u ) )
     {
-        return String( buffer );
+        if ( UUID_RC_OK == uuid_make( u , mode ) )
+        {
+            char buffer[ UUID_LEN_STR + 1 ];
+
+            size_t len = UUID_LEN_STR + 1;
+
+            void * up = & buffer[0];
+
+            if ( UUID_RC_OK == uuid_export( u , UUID_FMT_STR , & up , & len ) )
+            {
+                result = buffer;
+            }
+        }
+
+        uuid_destroy( u );
     }
 
-    return String();
+    return result;
 }
 
 String Util::make_v1_uuid()
