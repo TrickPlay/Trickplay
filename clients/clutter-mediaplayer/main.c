@@ -1,4 +1,6 @@
 
+#define G_LOG_DOMAIN "tp-cmp"
+
 #include "clutter-gst/clutter-gst.h"
 #include "gst/video/video.h"
 
