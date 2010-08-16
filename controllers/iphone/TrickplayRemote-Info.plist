@@ -41,7 +41,7 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>UIrequiresPersisitentWiFi</key>
+	<key>UIRequiresPersistentWiFi</key>
 	<true/>
 	<key>UTExportedTypeDeclarations</key>
 	<array/>
