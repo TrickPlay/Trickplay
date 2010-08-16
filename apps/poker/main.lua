@@ -44,20 +44,29 @@ function()
       TIMER = 2,
       BET_PLACED = 3,
    }
+   local old_on_key_down
    -- private (helper) functions
    function disable_event_listeners()
-      old_on_key_down, screen.on_key_down = screen.on_key_down, function() end
+      if screen.on_key_down then
+         old_on_key_down, screen.on_key_down = screen.on_key_down, nil
+      end
       t:disable()
    end
 
    function enable_event_listener(event, interval)
       if event == Events.KEYBOARD then
-         screen.on_key_down, old_on_key_down = old_on_key_down, function() end
+         print("keyboard enabled")
+         if old_on_key_down then
+            screen.on_key_down, old_on_key_down = old_on_key_down, nil
+         end
       elseif event == Events.TIMER then
          t:enable{
             on_timer=function()
-                        game:on_event(Events.TIMER)
-                     end,
+               game:on_event{
+                  type=Events.TIMER,
+                  interval=interval
+               }
+            end,
             interval=interval
          }
       end

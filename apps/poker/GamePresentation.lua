@@ -14,8 +14,16 @@ function(pres, ctrl)
    function pres.display_ui(pres)
       -- put sb, bb, dealer markers down, plus player chip stacks
       if not model.dealerchip then
-         model.dealerchip = Image{src = "assets/Chip_D.png", position = mdbl[ model.players[ ctrl:get_dealer() ].table_position ], name="dealerchip"}
-         model.bbchip = Image{src = "assets/Chip_BB.png", position = mdbl[ model.players[ ctrl:get_bb_p() ].table_position ], name="bbchip"}
+         model.dealerchip = Image{
+            src = "assets/Chip_D.png",
+            position = mdbl[ model.players[ ctrl:get_dealer() ].table_position ],
+            name="dealerchip"
+         }
+         model.bbchip = Image{
+            src = "assets/Chip_BB.png",
+            position = mdbl[ model.players[ ctrl:get_bb_p() ].table_position ],
+            name="bbchip"
+         }
          model.sbchip = Image{src = "assets/Chip_SB.png", position = mdbl[ model.players[ ctrl:get_sb_p() ].table_position ], name="sbchip"}
          screen:add(model.dealerchip, model.bbchip, model.sbchip)
       end
