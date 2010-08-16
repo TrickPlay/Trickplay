@@ -36,10 +36,14 @@ Player = Class(function(player, args, ...)
    -- @param call_bet the bet you need to make in order to call
    -- @param min_raise the minimum raise, so values of bet between
    -- call_bet+1 and call_bet+min_raise-1 are invalid
+   -- @param position  early, middle, late, whatever
+   -- @param current_bet the size of the bet currently in front of the
+   -- player for the betting round
    -- @param pot current size of pot
    -- @returns fold boolean  true if player should fold
    -- @returns bet number  quantity of bet, if fold then bet should be 0
-   function player:get_move(hole, call_bet, min_raise, current_bet, pot)
+   function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot)
+      -- TODO: pass in real position, right now position is placeholder data cause it's unclear how to calculate position.
       local fold = false
       local bet = call_bet
       

@@ -165,6 +165,10 @@ function(ctrl, game_ctrl, ...)
 
    -- Handle betting stage of a hand.
    -- preconditions: active player 
+   --
+   -- postconditions: action var indexes current active player. also,
+   -- proper event listener set up. if current active player is a
+   -- human, then event listener waits for on_event call from 
    function ctrl.bet(ctrl, round)
       print(action)
       local active_player = in_players[action]
@@ -174,7 +178,7 @@ function(ctrl, game_ctrl, ...)
       else
          -- get computer move
          -- current cards, bet to call, min raise, current wager, pot size
-         fold, bet = active_player:get_move(hole_cards[active_player], call_bet, min_raise, player_bets[active_player], pot)
+         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, call_bet, min_raise, player_bets[active_player], pot)
          if fold then
             -- current wager goes into pot
             pot = pot + player_bets[active_player]
