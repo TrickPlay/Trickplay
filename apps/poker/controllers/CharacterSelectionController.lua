@@ -68,7 +68,8 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
 
     local function setCharacterSeat()
         --instantiate the player
-        if(model.positions[getPosition()]) then return end
+       local pos = getPosition()
+        if(model.positions[pos]) then return end
         local isHuman = false
         if(playerCounter == 1) then
             isHuman = true
@@ -79,14 +80,23 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             row = selected,
             col = subselection,
             number = playerCounter,
-            table_position = getPosition(),
+            table_position = pos,
             position = model.default_player_locations[ getPosition() ],
             chipPosition = model.default_bet_locations[ getPosition() ],
         }
-        model.players[ playerCounter ] = Player(args)
+
+        -- insertion point
+        local i = 1
+        while i <= #model.players do
+           if pos < model.players[i].table_position then
+              break
+           end
+           i = i+1
+        end
+        table.insert(model.players, i, Player(args))
         --model.players[ playerCounter ]:createMoneyChips()
         --model.players[ playerCounter ]:createBetChips()
-        model.positions[getPosition()] = true
+        model.positions[pos] = true
         model.currentPlayer = playerCounter
         --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
         
