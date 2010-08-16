@@ -174,7 +174,7 @@ FrontPageView = Class(View, function(view, model, ...)
                     view.selector.position={new_c-37,new_r-10}
                     view.selector:animate{
                         duration = 2*CHANGE_VIEW_TIME,
-                        scale = {1.05,1.1},
+                        --scale = {1.05,1.1},
                         opacity = 255
                     }
 
@@ -183,24 +183,10 @@ FrontPageView = Class(View, function(view, model, ...)
                     if r == 4 and model.swapping_cover == false then
                         model.swapping_cover = true
                         r = math.random(1,10)
-                        local formula = (model.front_page_index + (prev_i[2]-1))*2+
-                                                               (prev_i[1]-1)
-                        local next_url = getNextUrl(
-                          searches[formula],r)
-                        print("formula",formula,"url",next_url)
-
-                        model.swap_pic = Image{
-                            src=next_url,
-                            opacity = 0,
-                            --async = true,
-                            on_loaded = function()
-                                model.swap_pic.scale = {
-                                    PIC_W / model.swap_pic.base_size[1],
-                                    PIC_H / model.swap_pic.base_size[2]
-                                }
-                                Flip_Pic(prev_i[1],prev_i[2],model.swap_pic)
-                            end
-                        }
+                        local formula = (
+                                        (prev_i[2]-1))*2 + (prev_i[1])
+                        print("formula?",prev_i[1],prev_i[2],formula)
+                        loadCovers(formula, searches[formula], r)
                     end
                     prev_i = {sel[1],sel[2]}
 
