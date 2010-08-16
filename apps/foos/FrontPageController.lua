@@ -2,7 +2,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.FRONT_PAGE)
 
     -- the default selected index
-    local selected = {1,1}
+    local selected = {1,2}
 
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
@@ -13,7 +13,11 @@ FrontPageController = Class(Controller, function(self, view, ...)
             model.album_group:clear()
             model.albums = {}
             self:get_model():set_active_component(Components.SLIDE_SHOW)
-            model.curr_slideshow = Slideshow:new { num_pics = 20, index = (model.front_page_index + (selected[2]-1))*2+(selected[1]-1)-1}
+            model.curr_slideshow = Slideshow:new{ 
+                num_pics = 20, 
+                index    = (model.front_page_index + (selected[2]-1))*2+
+                                                     (selected[1]-1)-1
+            }
 				--screen:clear()
 	    model.curr_slideshow:begin()
             self:get_model():notify()
@@ -57,9 +61,14 @@ FrontPageController = Class(Controller, function(self, view, ...)
             view:move_left()
 --]]
         elseif dir == Directions.RIGHT or dir == Directions.LEFT then
-            view:shift_group(dir[1])
-        end
+            local next_index = model.front_page_index + dir[1]
+            local upper_bound = math.ceil(model.num_sources / NUM_ROWS) -
+                                     (NUM_VIS_COLS-1)
 
+            if next_index > 0 and next_index <= upper_bound then
+                model.front_page_index = next_index
+            end
+        end
         self:get_model():notify()
 
     end

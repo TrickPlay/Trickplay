@@ -46,42 +46,47 @@ FrontPageView = Class(View, function(view, model, ...)
     local prev_scale = {1,1}
  
     function view:shift_group(dir)
-
+--[[
         local next_spot = model.front_page_index + dir
         local upper_bound = math.ceil(model.num_sources / NUM_ROWS) -
                                      (NUM_VIS_COLS-1)
         if next_spot > 0 and next_spot <= upper_bound then
-        model.front_page_index = next_spot
+            model.front_page_index = next_spot
+        end
+--]]
         model.album_group:complete_animation()
 
-            model.album_group:animate
-            {
-                 duration = 2*CHANGE_VIEW_TIME,
-                 mode     = EASE_IN_QUAD,
-                 x = model.album_group.x - dir*(screen.width/(NUM_VIS_COLS+1))
-            }
+        model.album_group:animate
+        {
+             duration = 2*CHANGE_VIEW_TIME,
+             mode     = EASE_IN_QUAD,
+             x        = -1*(model.front_page_index-1) * PIC_W + .5*PIC_W
+             --x = model.album_group.x - dir*(screen.width/(NUM_VIS_COLS+1))
+        }
 
         --TODO include loader threshold here
-        end
+        
     end
 
-    local prev_i = {1,1} 
+    local prev_i = {1,5} 
            
     function view:update()
         local controller = view:get_controller()
         local comp       = model:get_active_component()
-        local sel        = {}
+        local  sel       = {}
         sel[1],sel[2]    = controller:get_selected_index()
                sel[2]    = sel[2] + model.front_page_index  - 1
         if comp == Components.FRONT_PAGE  then
 
+            view:shift_group()
             if model.album_group:find_child("frontpageselector") == nil 
                                                                    then
                 controller:reset_selected_index()
-                sel = {1,1}
+                sel    = {1,1}
                 prev_i = {1,1}
                 model.front_page_index = 1
                 model.album_group:add(view.selector)
+
             end
             print("\n\nShowing FrontPageView UI\n")
 
@@ -140,6 +145,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
             if model.albums[sel[1]] == nil or 
                model.albums[sel[1]][sel[2]] == nil then
+               print("going to placeholder",sel[1],sel[2])
                 current = model.placeholders[sel[1]][sel[2]]
                 curr_bs =  {
                    model.def_bs[1],model.def_bs[2]
@@ -153,15 +159,18 @@ FrontPageView = Class(View, function(view, model, ...)
             end
             print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
 
-            previous:complete_animation()
+assert(previous ~= nil,"wth")
+                previous:complete_animation()
             previous:animate{
                 duration = CHANGE_VIEW_TIME,
                 scale    = { PIC_W / prev_bs[1], PIC_H / prev_bs[2] },
                 position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)},
                 on_completed = function()
 
-
-                    current:complete_animation()
+                    print("completed to placeholder:",sel[1],sel[2])
+                    --if current:complete_animation ~= nil then
+                        current:complete_animation()
+                    --end
                     current:raise_to_top()
                     current:animate{
                         duration = CHANGE_VIEW_TIME,
@@ -171,10 +180,10 @@ FrontPageView = Class(View, function(view, model, ...)
 
                     view.selector:complete_animation()
                     view.selector:raise_to_top()
-                    view.selector.position={new_c-37,new_r-10}
+                    view.selector.position={new_c-30,new_r-0}
                     view.selector:animate{
                         duration = 2*CHANGE_VIEW_TIME,
-                        --scale = {1.05,1.1},
+                        scale = {1.05,1.15},
                         opacity = 255
                     }
 

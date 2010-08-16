@@ -137,44 +137,4 @@ function Scale_To_Fit(img,base_size,target_size)
     end
 end
 
-function Change_Cover(i,j, new_pic)
 
-    local old_pic
-    local prev_bs
-
-    if model.albums[i] == nil or 
-       model.albums[i][j] == nil then
-
-        old_pic = model.placeholders[i][j]
-    else
-        old_pic = model.albums[i][j]
-    end
-
-    --old_pic.y_rotation = {   0,  old_pic.w / 2, 0 }
-    --new_pic.y_rotation = { -90,  new_pic.w / 2, 0 }
-    new_pic.position   = {       PIC_W * (j-1), PIC_H * (i-1) }
-new_pic.opacity = 255
-
-    model.album_group:add(new_pic)
-    old_pic:lower_to_bottom()
-
-    new_pic:lower_to_bottom()
-
-    old_pic:animate{
-         duration=4*CHANGE_VIEW_TIME,
-         --y_rotation = 90,
-         y = old_pic.y + PIC_H,
-         opacity = 0,
-
-         on_completed = function()
-             print("flip called back",old_pic,new_pic)
-             if old_pic ~= nil then
-                 old_pic:unparent() 
-                 old_pic = nil
-             end
-             model.albums[i][j] = new_pic
-             new_pic:lower_to_bottom()
-             model.swapping_cover = false
-         end
-    }
-end
