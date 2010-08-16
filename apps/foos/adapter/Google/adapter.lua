@@ -30,18 +30,15 @@ end
 function adapter:getPhotos(album,start,num_images)
 	sites = {}
 	search = self:getQuery()
-	for i = start, start + num_images do
-		local request = URLRequest {
-		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=xxlarge",
-		on_complete = function (request, response)
-			local data = json:parse(response.body)
-			table.insert(sites,data.responseData.results[1].unescapedUrl)
-			Load_Image(site,i)
-		end
-		}
-		request:send()
+	local request = URLRequest {
+	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=xxlarge",
+	on_complete = function (request, response)
+		local data = json:parse(response.body)
+		table.insert(sites,data.responseData.results[1].unescapedUrl)
+		Load_Image(site,i)
 	end
-	return sites
+	}
+	request:send()
 end
 
 
