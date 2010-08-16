@@ -22,7 +22,7 @@ function loadCovers(i,search, start_index)
 end
 
 function getNextUrl(search, index)
-	return "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..(index).."&imgsz=medium"
+	
 end
 
 function slideShow()
