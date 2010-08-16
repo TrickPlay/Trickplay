@@ -183,8 +183,7 @@ FrontPageView = Class(View, function(view, model, ...)
                     if r == 4 and model.swapping_cover == false then
                         model.swapping_cover = true
                         r = math.random(1,10)
-                        local formula = (
-                                        (prev_i[2]-1))*2 + (prev_i[1])
+                        local formula = (prev_i[2]-1)*2 + (prev_i[1])
                         print("formula?",prev_i[1],prev_i[2],formula)
                         loadCovers(formula, searches[formula], r)
                     end
