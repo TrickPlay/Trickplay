@@ -1,17 +1,8 @@
---dofile("HandState.lua")
+dofile("HandState.lua")
 dofile("HandPresentation.lua")
 
-local Rounds = {
-   HOLE=1,
-   FLOP=2,
-   TURN=3,
-   RIVER=4,
-   DONE=5
-}
-HandControl = Class(nil,
-function(ctrl, game_ctrl, ...)
-
-   --local state = HandState(ctrl)
+HandControl = Class(nil,function(ctrl, game_ctrl, ...)
+   local state = HandState(ctrl)
    local pres = HandPresentation(ctrl)
    local game_ctrl = game_ctrl or error("no game_ctrl",2)
 --   local bet_ctrl = BettingControl(ctrl)
@@ -95,14 +86,23 @@ function(ctrl, game_ctrl, ...)
 
    -- public functions
    function ctrl.initialize(ctrl)
-      players = game_ctrl:get_players()
-      sb_qty = game_ctrl:get_sb_qty()
-      bb_qty = game_ctrl:get_bb_qty()
-      dealer = game_ctrl:get_dealer()
-      sb_p = game_ctrl:get_sb_p()
-      bb_p = game_ctrl:get_bb_p()
-      deck = game_ctrl:get_deck()
+      state:initialize{
+         players = game_ctrl:get_players(),
+         sb_qty = game_ctrl:get_sb_qty(),
+         bb_qty = game_ctrl:get_bb_qty(),
+         dealer = game_ctrl:get_dealer(),
+         sb_p = game_ctrl:get_sb_p(),
+         bb_p = game_ctrl:get_bb_p(),
+         deck = game_ctrl:get_deck()
+      }
 
+         players = game_ctrl:get_players()
+         sb_qty = game_ctrl:get_sb_qty()
+         bb_qty = game_ctrl:get_bb_qty()
+         dealer = game_ctrl:get_dealer()
+         sb_p = game_ctrl:get_sb_p()
+         bb_p = game_ctrl:get_bb_p()
+         deck = game_ctrl:get_deck()
       in_players = {}
       done = {}
       for i, player in ipairs(players) do
@@ -178,7 +178,7 @@ function(ctrl, game_ctrl, ...)
       else
          -- get computer move
          -- current cards, bet to call, min raise, current wager, pot size
-         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, call_bet, min_raise, player_bets[active_player], pot)
+         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
          if fold then
             -- current wager goes into pot
             pot = pot + player_bets[active_player]
