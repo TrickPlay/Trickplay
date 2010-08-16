@@ -41,7 +41,8 @@ function()
    end
    Events = {
       KEYBOARD = 1,
-      TIMER = 2
+      TIMER = 2,
+      BET_PLACED = 3,
    }
    -- private (helper) functions
    function disable_event_listeners()

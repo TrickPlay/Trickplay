@@ -162,12 +162,15 @@ function(ctrl, game_ctrl, ...)
       return true
    end
 
+
+   -- Handle betting stage of a hand.
+   -- preconditions: active player 
    function ctrl.bet(ctrl, round)
       print(action)
       local active_player = in_players[action]
       local fold, bet
       if false and active_player.isHuman then
-
+         
       else
          -- get computer move
          -- current cards, bet to call, min raise, current wager, pot size
