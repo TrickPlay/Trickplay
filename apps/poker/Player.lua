@@ -32,6 +32,11 @@ Player = Class(function(player, args, ...)
    end
 
    ---
+   -- @param hole an array of two hole cards
+   -- @param call_bet the bet you need to make in order to call
+   -- @param min_raise the minimum raise, so values of bet between
+   -- call_bet+1 and call_bet+min_raise-1 are invalid
+   -- @param pot current size of pot
    -- @returns fold boolean  true if player should fold
    -- @returns bet number  quantity of bet, if fold then bet should be 0
    function player:get_move(hole, call_bet, min_raise, current_bet, pot)
