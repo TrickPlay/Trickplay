@@ -1,11 +1,21 @@
 --dofile ("FlickrTest.lua")
+dofile("Slideshow.lua")
+NUM_ROWS   = 2
+NUM_VIS_COLS   = 3
+PADDING_BORDER = 0
+PADDING_MIDDLE = 0
+
+searches = {"space", "dinosaur", "picasa", "flickr", "google","yahoo", "family", "stuff", "funny", "cool", "music", "pandora", "facebook", "twitter", "digg", "scene"}
+PIC_DIR = "assets/thumbnails/"
 
 
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
     assert(model.default,"default is not init yet")
     screen:add(model.default)
-	 loadCovers()
+	for i =1, 16 do
+		 loadCovers(i,searches[i], 1)
+	end
    -- startAdapter(1) --TODO fix this one source shit
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
