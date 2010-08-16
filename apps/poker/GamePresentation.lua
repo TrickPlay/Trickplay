@@ -29,6 +29,10 @@ function(pres, ctrl)
          model.potchips.group:raise_to_top()
       end
       
+      if not model.deck then
+         model.deck = ctrl:get_deck()
+      end
+      
    end
 
    function pres.finish_hand(pres)

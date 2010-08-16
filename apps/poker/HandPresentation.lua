@@ -90,8 +90,6 @@ function(pres, ctrl)
    end
 
    function pres:deal_hole()
-      --animate_chips_to_center()
-      --add_chips()
       update_players()
       
       -- just make them all appear in front of the appropriate players
