@@ -2,6 +2,8 @@ Slideshow = {}
 local timer = Timer()
 timer.interval = 4
 current_pic = 1
+temp_pic = 0
+local started = true
 
 function Slideshow:new(args)
 	local num_pics = args.num_pics
@@ -9,7 +11,7 @@ function Slideshow:new(args)
 	local images = {}
 	local object = { 
 		num_pics = num_pics,
-		images = images
+		images = images,
 	}
    setmetatable(object, self)
    self.__index = self
@@ -31,12 +33,17 @@ end
 -- will control when to load a URL
 function Slideshow:begin()
 	print ("begin")
+	started = true
 	timer:start()
 end
 function Slideshow:stop()
+   	timer:stop()
+  	     started = false
+
 		  if (self.images[current_pic] ~= nil) then
+   	     
 	        self.images[current_pic]:complete_animation()
-   	     timer:stop()
+   	     self.images = {}
    	  end
 end
 -- will send and image across the screen
@@ -51,26 +58,27 @@ function Slideshow:sendImage(site)
 		z = 0,
 		on_completed = function()
 			current_pic = current_pic+1
-		end
-	}
-        if self.ui ~= nil then
-                print("adding to view.ui",self.ui)
-		self.ui:add(self.images[temp])
-        else
-                print("idk")
-        end
-        	if (self.images[current_pic-3] ~= nil) then
+			if (self.images[current_pic-3] ~= nil) then
+				print (current_pic-3)
 				self.images[current_pic-3].opacity = 0
 				table.remove(self.images,current_pic-3)
 			end
+		end
+	}
+	if self.ui ~= nil then
+		print("adding to view.ui",self.ui)
+		self.ui:add(self.images[temp])
+	end
 
 end
 
 function timer.on_timer(timer)
 	print("tick"..current_pic)
 	search = "space"
-
-	model.curr_slideshow:loadUrls("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge")
+	if (current_pic ~= temp_pic and started) then
+		model.curr_slideshow:loadUrls("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge")
+		temp_pic = current_pic
+	end
 end
 
 
