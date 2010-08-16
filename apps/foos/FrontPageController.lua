@@ -21,7 +21,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
             model.album_group:clear()
             model.albums = {}
             self:get_model():set_active_component(Components.SLIDE_SHOW)
-            model.curr_slideshow = Slideshow:new { num_pics = 20  }
+            model.curr_slideshow = Slideshow:new { num_pics = 20, index = (model.front_page_index + (selected[2]-1))*2+(selected[1]-1)}
 				--screen:clear()
 	    model.curr_slideshow:begin()
             self:get_model():notify()
