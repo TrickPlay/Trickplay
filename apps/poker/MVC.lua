@@ -13,14 +13,14 @@ Model = Class(function(model, ...)
     SCREEN_WIDTH = screen.w
     SCREEN_HEIGHT = screen.h
     model.default_player_locations = {
-        [1] = {160, 260},
-        [2] = {620, 90},
-        [3] = {SCREEN_WIDTH-620, 90},
-        [4] = {SCREEN_WIDTH-160, 260},
-        [5] = {230, 890},
+        [1] = {0, 572},
+        [2] = {0, 99},
+        [3] = {310, 20},
+        [4] = {1281, 20},
+        [5] = {1590, 99},
         ["START"] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
         ["EXIT"] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
-        [6] = {SCREEN_WIDTH-230, 890},
+        [6] = {1590, 572},
     }
     
     model.default_bet_locations = {

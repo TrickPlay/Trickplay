@@ -128,7 +128,7 @@ function(pres, ctrl)
          for k,card in pairs(hole) do
             screen:add(card.group)
             -- Animate and flip the card if the player is human
-            card.group:animate{x = pos[1] + x, y = pos[2], mode=MODE, duration=TIME, z_rotation=0, on_completed = function() if player.isHuman then flipCard(card.group) end end }
+            card.group:animate{x = pos[1] + x, y = pos[2], mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
             x = x + 100
             
             table.insert(allCards, card)
@@ -145,7 +145,7 @@ function(pres, ctrl)
 
       local cards = ctrl:get_community_cards()
       for i=1, 3 do
-         cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation = 0, on_completed = function() flipCard(cards[i].group) end }
+         cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
          screen:add(cards[i].group)
          table.insert(allCards, cards[i])
       end
@@ -159,7 +159,7 @@ function(pres, ctrl)
       
       local cards = ctrl:get_community_cards()
       local i = 4
-      cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation = 0, on_completed = function() flipCard(cards[i].group) end }
+      cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
       screen:add(cards[i].group)
       table.insert(allCards, cards[i])
    end
