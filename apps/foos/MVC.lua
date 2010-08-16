@@ -7,14 +7,36 @@ Model = Class(function(model, ...)
 
     model.pic_text = {0,0}
 
-    model.num_sources = 16
+    model.num_sources = NUM_SLIDESHOW_IMAGES
     model.front_page_index = 1
+    model.swapping_cover = false
+    model.swap_pic = nil
 
-    model.vis_pics   = {}
-    model.left_edge  = {}
-    model.right_edge = {}
-    model.right_next_index = 0
-    model.left_next_index = 0
+    --FRONT_PAGE
+    model.albums = {}
+    model.placeholders = {}
+    model.album_group = Group{name="Album Group"}
+    model.prac_pic = Image{
+                src = "assets/thumbnails/Album3.jpg",
+                opacity = 0
+    }
+    screen:add(model.prac_pic)
+--[[
+ model.prac_pic.scale = {
+                                    PIC_W / model.prac_pic.base_size[1],
+                                    PIC_H / model.prac_pic.base_size[2]
+                                }
+--]]
+
+    model.default = Image{
+                src = "assets/img_placeholder_questionmark_loading.jpg",
+                opacity = 0
+    }
+    model.def_bs = {model.default.base_size[1],model.default.base_size[2]}
+
+    --SLIDE_SHOW
+    model.curr_slideshow = {}
+
 
     -- class methods
     function model:attach(observer, controller_id)

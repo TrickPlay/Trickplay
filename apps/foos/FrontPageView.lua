@@ -1,285 +1,203 @@
 CHANGE_VIEW_TIME = 100
+math.randomseed(os.time())
 
 FrontPageView = Class(View, function(view, model, ...)
-
     view._base.init(view, model)
 
-    view.ui=Group{name="Front_Page_ui"}
-
-    Init_Pics(view.ui)
-
+    view.ui = Group{name="front page ui"}
     screen:add(view.ui)
 
-view.selector = Image{
-   src = "assets/polaroid_overlay.png",
-   opacity = 0
-}
-fthis = view.selector
-view.ui:add(view.selector)
+    view.selector = Image
+    {
+        name = "frontpageselector",
+        src = "assets/polaroid_overlay.png",
+        opacity = 0
+    }
+
+    model.album_group:add(view.selector)
+    view.ui:add(model.album_group)
+
+    grad = Image
+    {
+        src = "assets/gradient_mask.png",
+        opacity = 0
+    }
+    screen:add(grad)
+
+    local right_edge = Clone{source = grad}
+    right_edge.scale = {1,1080}
+    right_edge.opacity = 255
+    right_edge.x = 1550
+    view.ui:add(right_edge)
+
+    local left_edge = Clone{source = grad}
+    left_edge.scale = {1,1080}
+    left_edge.opacity = 255
+    left_edge.z_rotation = {180,0,0}
+    left_edge.y = 1080
+    left_edge.x = 1920-1550
+    view.ui:add(left_edge)
+
+
     function view:initialize()
         self:set_controller(FrontPageController(self))
     end
 
     local prev_scale = {1,1}
  
-    function view:move_right()
-        if model.right_edge[1] ~= nil then
-            local prev = view:get_controller():get_prev_index()
-            view:get_controller():set_prev_index(prev[1],prev[2]-1)
-            --shift left side of visible pics to the left edge
-            for i = 1,NUM_ROWS do
-                if model.left_edge[i] ~= nil then
+    function view:shift_group(dir)
 
-                    model.left_edge[i]:unparent()
-                end
-                model.left_edge[i] = model.vis_pics[i][1]
-                model.left_edge[i].position=
-                {
-                    0  -
-                    screen.width  / (NUM_VIS_COLS + 1)*.5,
-                    screen.height * (i-1) / NUM_ROWS
-                }
-            end
+        local next_spot = model.front_page_index + dir
+        local upper_bound = math.ceil(model.num_sources / NUM_ROWS) -
+                                     (NUM_VIS_COLS-1)
+        if next_spot > 0 and next_spot <= upper_bound then
+        model.front_page_index = next_spot
+        model.album_group:complete_animation()
 
-            --shift the visible pics
-            for i = 1,NUM_ROWS do 
-                for j = 2,NUM_VIS_COLS do
-                    model.vis_pics[i][j-1] = model.vis_pics[i][j]
-                    model.vis_pics[i][j-1].position = 
-                    {
-                        screen.width  * (j-2) / (NUM_VIS_COLS + 1) +
-                        screen.width  / (NUM_VIS_COLS + 1)*.5,
-                        screen.height * (i-1) / NUM_ROWS
-                    }
-                end
-            end
+            model.album_group:animate
+            {
+                 duration = 2*CHANGE_VIEW_TIME,
+                 mode     = EASE_IN_QUAD,
+                 x = model.album_group.x - dir*(screen.width/(NUM_VIS_COLS+1))
+            }
 
-            --shift the right edge to the right side of the visible pics
-            for i = 1,NUM_ROWS do
-                model.vis_pics[i][NUM_VIS_COLS] = model.right_edge[i]
-                model.vis_pics[i][NUM_VIS_COLS].position=                  
-                    {
-                        screen.width *(NUM_VIS_COLS-1)/(NUM_VIS_COLS + 1)+
-                        screen.width  / (NUM_VIS_COLS + 1)*.5,
-                        screen.height * (i-1) / NUM_ROWS
-                    }
-                model.right_edge[i] = nil
-            end
-
-            local next_index = model.front_page_index + 1
-            
-            --add in pics to the right edge
-            print("front index is now:",next_index,
-                  "  checking as:",(model.front_page_index + 3)*2 - 1)
-            if (next_index + 3)*2 - 1 < model.num_sources then
-                model.front_page_index = next_index
-                for i = 1, NUM_ROWS do
-                    local index = (model.front_page_index + 2)*2 + i
-                    model.right_edge[i] = Image{
-
-                        position = 
-                        {
-                            screen.width  -
-                            screen.width  / (NUM_VIS_COLS + 1)*.5,
-                            screen.height * (i-1) / NUM_ROWS
-                        },
-
-                        src = PIC_DIR.."Album"..index..".jpg"
-                    }
-                    model.right_edge[i].scale = 
-                    {
-                        (screen.width/(NUM_VIS_COLS+1))  / 
-                         model.right_edge[i].base_size[1],
-                        (screen.height/NUM_ROWS) / 
-                         model.right_edge[i].base_size[2]
-                    }
-                    view.ui:add(model.right_edge[i])
-                end
-            end
+        --TODO include loader threshold here
         end
     end
 
-    function view:move_left()
-        if model.left_edge[1] ~= nil then
-            local prev = view:get_controller():get_prev_index()
-            view:get_controller():set_prev_index(prev[1],prev[2]+1)
-
-            --shift right side of visible pics to the right edge
-            for i = 1,NUM_ROWS do
-                if model.right_edge[i] ~= nil then
-
-                    model.right_edge[i]:unparent()
-                end
-                model.right_edge[i] = model.vis_pics[i][NUM_VIS_COLS]
-                model.right_edge[i].position=
-                {
-                    screen.width  -
-                    screen.width  / (NUM_VIS_COLS + 1)*.5,
-                    screen.height * (i-1) / NUM_ROWS
-                }
-            end
-
-            --shift the visible pics
-            for i = 1,NUM_ROWS do 
-                for j = NUM_VIS_COLS-1,1,-1 do
-                    model.vis_pics[i][j+1] = model.vis_pics[i][j]
-                    model.vis_pics[i][j+1].position = 
-                    {
-                        screen.width  * (j-0) / (NUM_VIS_COLS + 1) +
-                        screen.width  / (NUM_VIS_COLS + 1)*.5,
-                        screen.height * (i-1) / NUM_ROWS
-                    }
-                end
-            end
-
-            --shift the left edge to the left side of the visible pics
-            for i = 1,NUM_ROWS do
-                model.vis_pics[i][1] = model.left_edge[i]
-                model.vis_pics[i][1].position=                  
-                    {
-
-                        screen.width  / (NUM_VIS_COLS + 1)*.5,
-                        screen.height * (i-1) / NUM_ROWS
-                    }
-                model.left_edge[i] = nil
-            end
-
-            local next_index = model.front_page_index - 1
-            
-            --add in pics to the right edge
-            print("front index is now:",next_index)
-            if next_index > 1 then
-                model.front_page_index = next_index
-                for i = 1, NUM_ROWS do
-                    local index = model.front_page_index*2+ i-4
---(model.front_page_index + 2)*2
-                    print("grabbing pic",index)
-                    model.left_edge[i] = Image{
-                       position = 
-                       {
-                            0  -
-                            screen.width  / (NUM_VIS_COLS + 1)*.5,
-                            screen.height * (i-1) / NUM_ROWS
-                        },
-
-                        src = PIC_DIR.."Album"..index..".jpg"
-                    }
-                    model.left_edge[i].scale = 
-                    {
-                        (screen.width/(NUM_VIS_COLS+1))  / 
-                         model.left_edge[i].base_size[1],
-                        (screen.height/NUM_ROWS) / 
-                         model.left_edge[i].base_size[2]
-                    }
-                    view.ui:add(model.left_edge[i])
-                end
-            end
-        end
-    end
+    local prev_i = {1,1} 
            
     function view:update()
-        local controller =       view:get_controller()
-        local comp       =      model:get_active_component()
-        local sel        = controller:get_selected_index()
-        local prev       = controller:get_prev_index()
-
+        local controller = view:get_controller()
+        local comp       = model:get_active_component()
+        local sel        = {}
+        sel[1],sel[2]    = controller:get_selected_index()
+               sel[2]    = sel[2] + model.front_page_index  - 1
         if comp == Components.FRONT_PAGE  then
+
+            if model.album_group:find_child("frontpageselector") == nil 
+                                                                   then
+                controller:reset_selected_index()
+                sel = {1,1}
+                prev_i = {1,1}
+                model.front_page_index = 1
+                model.album_group:add(view.selector)
+            end
             print("\n\nShowing FrontPageView UI\n")
 
             view.ui:raise_to_top()
             view.ui.opacity = 255            
-            --view.ui:animate{duration=CHANGE_VIEW_TIME,opacity = 255}
 
-            print("new index is",sel[1],sel[2])
-            print("previous index is",prev[1],prev[2])
+            print("new index is",sel[1],sel[2],"shift",
+                                   model.front_page_index)
+            print("previous index is",prev_i[1],prev_i[2])
 
-            local new_r
+
+            local prev_index = model.front_page_index*2 + (prev_i[1]-1)
+            local sel_index  = model.front_page_index*2 + (sel[1]-1)
+
+
+            local new_r = PIC_H * (sel[1]-1)
             if sel[1] == 1 then
                 new_r = 0
             elseif sel[1] == NUM_ROWS then
-                new_r = .9*screen.height * (sel[1]-1) / NUM_ROWS
+                  new_r = new_r * .9
+--                new_r = .9*screen.height * (sel[1]-1) / NUM_ROWS
             else
-                new_r = .95*screen.height * (sel[1]-1) / NUM_ROWS
+                  new_r = new_r * .95
+--                new_r = .95*screen.height * (sel[1]-1) / NUM_ROWS
             end
+            local new_c = PIC_W * (sel[2]-1)
+--[[
             local new_c = screen.width  * (sel[2]-1) / 
-                        (NUM_VIS_COLS + 1) +
-                        .9*screen.width  / (NUM_VIS_COLS + 1)*.5--15
-
-                     view.selector:animate{
-                         duration = CHANGE_VIEW_TIME,
-                         opacity = 0,
-                     }
-
-            model.vis_pics[prev[1]][prev[2]]:animate{
+                             (NUM_VIS_COLS + 1)
+--]]
+            view.selector:animate{
                  duration = CHANGE_VIEW_TIME,
-                 scale  = {
-                     (screen.width/(NUM_VIS_COLS+1))  / 
-                      model.vis_pics[prev[1]][prev[2]].base_size[1],
-                     (screen.height/NUM_ROWS) / 
-                      model.vis_pics[prev[1]][prev[2]].base_size[2]
-                 },
-                 position = {
-                     screen.width  * (prev[2]-1) / (NUM_VIS_COLS + 1) +
-                     screen.width  / (NUM_VIS_COLS + 1)*.5,
-                     screen.height * (prev[1]-1) / NUM_ROWS
-                 },
-
-                 on_completed = function()
-                     model.vis_pics[sel[1]][sel[2]]:raise_to_top()
-                     model.vis_pics[sel[1]][sel[2]]:animate{
-                        duration = CHANGE_VIEW_TIME,
-                        position = {new_c,new_r},
-                        scale  = {
-                            1.1*(screen.width/(NUM_VIS_COLS+1))  / 
-                            model.vis_pics[sel[1]][sel[2]].base_size[1],
-                            1.1*(screen.height/NUM_ROWS) / 
-                            model.vis_pics[sel[1]][sel[2]].base_size[2]
-                        }
-                     }
-                     view.selector:raise_to_top()
-                     view.selector.position={new_c-37,new_r-10}
-                     view.selector:animate{
-                         duration = CHANGE_VIEW_TIME,
-                         scale = {1.05,1.1
-                        },
-
-                         opacity = 255
-                     }
-                 end
+                 opacity  = 0
             }
 
 
-           
+            local previous
+            local current
+            local prev_bs
+            local curr_bs
 
---[[
-            for i = 1,NUM_ROWS do
-                for j = 1,NUM_VIS_COLS do
-                    if sel[1] == i and sel[2] == j then 
-                        print("Moving to",i,j)
-                        model.vis_pics[i][j]:animate{
-                            duration = CHANGE_VIEW_TIME,
-                            opacity  = 255,
-                            z        = 5
-                        }
-                    elseif model.vis_pics[i][j] ~= nil then
-                        model.vis_pics[i][j]:animate{
-                            duration = CHANGE_VIEW_TIME,
-                            opacity  = 150,
-                            z        = 0
-                        }
-                    end
-                end
+            if model.albums[prev_i[1]] == nil or 
+               model.albums[prev_i[1]][prev_i[2]] == nil then
+
+                previous = model.placeholders[prev_i[1]][prev_i[2]]
+                prev_bs = {
+                    model.def_bs[1],model.def_bs[2]
+                }
+            else
+                previous = model.albums[prev_i[1]][prev_i[2]]
+                prev_bs = {
+                    model.albums[prev_i[1]][prev_i[2]].base_size[1],
+                    model.albums[prev_i[1]][prev_i[2]].base_size[2]
+                }
             end
---]]
-        elseif comp == Components.ITEM_SELECTED  then
+
+            if model.albums[sel[1]] == nil or 
+               model.albums[sel[1]][sel[2]] == nil then
+                current = model.placeholders[sel[1]][sel[2]]
+                curr_bs =  {
+                   model.def_bs[1],model.def_bs[2]
+                }
+            else
+                current = model.albums[sel[1]][sel[2]]
+                curr_bs = {
+                    model.albums[sel[1]][sel[2]].base_size[1],
+                    model.albums[sel[1]][sel[2]].base_size[2]
+                }
+            end
+            print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
+
+            previous:complete_animation()
+            previous:animate{
+                duration = CHANGE_VIEW_TIME,
+                scale    = { PIC_W / prev_bs[1], PIC_H / prev_bs[2] },
+                position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)},
+                on_completed = function()
+
+
+                    current:complete_animation()
+                    current:raise_to_top()
+                    current:animate{
+                        duration = CHANGE_VIEW_TIME,
+                        position = {new_c,new_r},
+                        scale  = {SEL_W / curr_bs[1],SEL_H /curr_bs[2]}
+                    }
+
+                    view.selector:complete_animation()
+                    view.selector:raise_to_top()
+                    view.selector.position={new_c-37,new_r-10}
+                    view.selector:animate{
+                        duration = 2*CHANGE_VIEW_TIME,
+                        --scale = {1.05,1.1},
+                        opacity = 255
+                    }
+
+                    local r = math.random(1,4)
+                    print(r,model.swapping_cover)
+                    if r == 4 and model.swapping_cover == false then
+                        model.swapping_cover = true
+                        r = math.random(1,10)
+                        local formula = (
+                                        (prev_i[2]-1))*2 + (prev_i[1])
+                        print("formula?",prev_i[1],prev_i[2],formula)
+                        loadCovers(formula, searches[formula], r)
+                    end
+                    prev_i = {sel[1],sel[2]}
+
+                end
+            }
+
+
         else
             print("Hiding FrontPageView UI")
-            view.ui:complete_animation()
-                        model.vis_pics[sel[1]][sel[2]]:animate{
-                            duration = CHANGE_VIEW_TIME,
-                            opacity  = 150,
-                            z        = 0
-                        }
+            model.album_group:complete_animation()
+            view.ui.opacity = 0
         end
     end
 
