@@ -14,6 +14,18 @@ Model = Class(function(model, ...)
     model.albums = {}
     model.placeholders = {}
     model.album_group = Group{name="Album Group"}
+    model.prac_pic = Image{
+                src = "assets/thumbnails/Album3.jpg",
+                opacity = 0
+    }
+    screen:add(model.prac_pic)
+--[[
+ model.prac_pic.scale = {
+                                    PIC_W / model.prac_pic.base_size[1],
+                                    PIC_H / model.prac_pic.base_size[2]
+                                }
+--]]
+
     model.default = Image{
                 src = "assets/img_placeholder_questionmark_loading.jpg",
                 opacity = 0

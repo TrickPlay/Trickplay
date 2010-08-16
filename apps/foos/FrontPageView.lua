@@ -1,4 +1,5 @@
 CHANGE_VIEW_TIME = 100
+math.randomseed(os.time())
 
 FrontPageView = Class(View, function(view, model, ...)
     view._base.init(view, model)
@@ -124,6 +125,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
             if model.albums[prev_i[1]] == nil or 
                model.albums[prev_i[1]][prev_i[2]] == nil then
+
                 previous = model.placeholders[prev_i[1]][prev_i[2]]
                 prev_bs = {
                     model.def_bs[1],model.def_bs[2]
@@ -157,7 +159,8 @@ FrontPageView = Class(View, function(view, model, ...)
                 scale    = { PIC_W / prev_bs[1], PIC_H / prev_bs[2] },
                 position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)},
                 on_completed = function()
-                    prev_i = {sel[1],sel[2]}
+
+
                     current:complete_animation()
                     current:raise_to_top()
                     current:animate{
@@ -165,6 +168,7 @@ FrontPageView = Class(View, function(view, model, ...)
                         position = {new_c,new_r},
                         scale  = {SEL_W / curr_bs[1],SEL_H /curr_bs[2]}
                     }
+
                     view.selector:complete_animation()
                     view.selector:raise_to_top()
                     view.selector.position={new_c-37,new_r-10}
@@ -173,6 +177,29 @@ FrontPageView = Class(View, function(view, model, ...)
                         scale = {1.05,1.1},
                         opacity = 255
                     }
+
+                    local r = math.random(1,4)
+                    print(r)
+                    if r == 4 then
+                        local next_pic = Image{
+                            src="assets/thumbnails/Album3.jpg",
+                            opacity = 0,
+                            on_loaded = function()
+
+                            end
+                        }
+---[=[
+                                next_pic.scale = {
+                                    PIC_W / next_pic.base_size[1],
+                                    PIC_H / next_pic.base_size[2]
+                                }
+--]=]
+                            --next_pic.y_rotation = { -90,  PIC_W , 0 }
+
+
+                        Flip_Pic(prev_i[1],prev_i[2],next_pic)
+                    end
+                    prev_i = {sel[1],sel[2]}
 
                 end
             }
