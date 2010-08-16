@@ -1,13 +1,6 @@
---dofile("HandState.lua")
+dofile("HandState.lua")
 dofile("HandPresentation.lua")
 
-Rounds = {
-   HOLE=1,
-   FLOP=2,
-   TURN=3,
-   RIVER=4,
-   DONE=5
-}
 HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    local state = HandState(ctrl)
    local pres = HandPresentation(ctrl)
@@ -93,14 +86,23 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
 
    -- public functions
    function ctrl.initialize(ctrl)
-      players = game_ctrl:get_players()
-      sb_qty = game_ctrl:get_sb_qty()
-      bb_qty = game_ctrl:get_bb_qty()
-      dealer = game_ctrl:get_dealer()
-      sb_p = game_ctrl:get_sb_p()
-      bb_p = game_ctrl:get_bb_p()
-      deck = game_ctrl:get_deck()
+      state:initialize{
+         players = game_ctrl:get_players(),
+         sb_qty = game_ctrl:get_sb_qty(),
+         bb_qty = game_ctrl:get_bb_qty(),
+         dealer = game_ctrl:get_dealer(),
+         sb_p = game_ctrl:get_sb_p(),
+         bb_p = game_ctrl:get_bb_p(),
+         deck = game_ctrl:get_deck()
+      }
 
+         players = game_ctrl:get_players()
+         sb_qty = game_ctrl:get_sb_qty()
+         bb_qty = game_ctrl:get_bb_qty()
+         dealer = game_ctrl:get_dealer()
+         sb_p = game_ctrl:get_sb_p()
+         bb_p = game_ctrl:get_bb_p()
+         deck = game_ctrl:get_deck()
       in_players = {}
       done = {}
       for i, player in ipairs(players) do
