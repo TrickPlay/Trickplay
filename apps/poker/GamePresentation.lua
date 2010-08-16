@@ -39,6 +39,12 @@ function(pres, ctrl)
       
       if not model.deck then
          model.deck = ctrl:get_deck()
+         for i=#model.deck.cards, #model.deck.cards-7, -1 do
+            local g = model.deck.cards[i].group
+            g.position = MCL.DECK
+            g.z_rotation={math.random(-5, 5), 0, 0}
+            screen:add(g)
+         end
       end
       
    end
@@ -50,6 +56,15 @@ function(pres, ctrl)
       model.bbchip:animate{ position = mdbl[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
       model.sbchip:animate{ position = mdbl[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
       model.potchips:set(0)
+      
+      -- Reset deck
+      for i=#model.deck.cards, #model.deck.cards-7, -1 do
+         local g = model.deck.cards[i].group
+         g.position = MCL.DECK
+         g.z_rotation={math.random(-5, 5), 0, 0}
+         screen:add(g)
+      end
+      
    
  -- sb, bb, dealer data in ctrl are correct, u just gotta make the view reflect that
  -- move sb, bb, dealer chips to new locations

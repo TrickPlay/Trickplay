@@ -9,6 +9,9 @@
 -- ctrl:get_sb_p()
 -- ctrl:get_bb_p()
 -- ctrl:get_deck()
+local TIME = 300
+local MODE = "EASE_OUT_QUAD"
+
 
 HandPresentation = Class(nil,
 function(pres, ctrl)
@@ -93,32 +96,45 @@ function(pres, ctrl)
    end
    
    function pres:display_hand()
+      -- Initialize chips
       remove_chips()
    	add_chips()
       update_players()
+      
+      -- Put community cards on the deck
+      local cards = ctrl:get_community_cards()
+      for i=5,1,-1 do
+         cards[i].group.position = MCL.DECK
+         cards[i].group:raise_to_top()
+      end
+      
+      -- Put hole cards on the deck
+      for player,hole in pairs( ctrl:get_hole_cards() ) do
+         for _,card in pairs(hole) do
+            card.group.position = MCL.DECK
+            card.group:raise_to_top()
+         end
+      end
    end
 
    function pres:deal_hole()
       update_players()
       
-      -- just make them all appear in front of the appropriate players
-      local hole_cards = ctrl:get_hole_cards()
-      y=100
-      for player,hole in pairs(hole_cards) do
+      for player,hole in pairs( ctrl:get_hole_cards() ) do
          
-         local card1, card2 = unpack(hole)
-         card1.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]}
-         card2.group.position = {model.default_bet_locations[player.table_position][1] + 100, model.default_bet_locations[player.table_position][2]}
-         screen:add(card1.group, card2.group)
-         y = y + 200
-         if player.isHuman then
-            flipCard(card1.group)
-            flipCard(card2.group)
+         local x = 0
+         local pos = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]}
+         
+         for k,card in pairs(hole) do
+            screen:add(card.group)
+            -- Animate and flip the card if the player is human
+            card.group:animate{x = pos[1] + x, y = pos[2], mode=MODE, duration=TIME, z_rotation=0, on_completed = function() if player.isHuman then flipCard(card.group) end end }
+            x = x + 100
+            
+            table.insert(allCards, card)
          end
-         table.insert(allCards, card1)
-         table.insert(allCards, card2)
       end
-      local text_str = "Dealing hole cards"
+      
       screen:add(text)
    end
    
@@ -128,13 +144,9 @@ function(pres, ctrl)
       update_players()
 
       local cards = ctrl:get_community_cards()
-      local x = 750
-      local y = 650
       for i=1, 3 do
-         cards[i].group.position = {x, y}
+         cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation = 0, on_completed = function() flipCard(cards[i].group) end }
          screen:add(cards[i].group)
-         x = x + 100
-         flipCard(cards[i].group)
          table.insert(allCards, cards[i])
       end
       
@@ -146,12 +158,9 @@ function(pres, ctrl)
       update_players()
       
       local cards = ctrl:get_community_cards()
-      local x = 1050
-      local y = 650
       local i = 4
-      cards[i].group.position = {x, y}
+      cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation = 0, on_completed = function() flipCard(cards[i].group) end }
       screen:add(cards[i].group)
-      flipCard(cards[i].group)
       table.insert(allCards, cards[i])
    end
    
@@ -161,12 +170,9 @@ function(pres, ctrl)
       update_players()   
       
       local cards = ctrl:get_community_cards()
-      local x = 1150
-      local y = 650
       local i = 5
-      cards[i].group.position = {x, y}
+      cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation = 0, on_completed = function() flipCard(cards[i].group) end }
       screen:add(cards[i].group)
-      flipCard(cards[i].group)
       table.insert(allCards, cards[i])
       
    end

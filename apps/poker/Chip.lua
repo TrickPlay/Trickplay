@@ -1,4 +1,4 @@
-local function print() end
+--local function print() end
 
 -- GLOBALS
 CHIP_W = 55
@@ -77,8 +77,10 @@ chipCollection = Class(function(self, ...)
         
         function self:set(value)
                 if self:value() == value then
+                        print("Nothing to change")
                         return true
                 elseif self:value() < value then
+                        print("Attempting to add chips")
                         -- First, sort the stacks
                         self:sort()
                         local biggest = 1
@@ -87,7 +89,7 @@ chipCollection = Class(function(self, ...)
                         -- While there are more chips to add...
                         while v <= value do
                                 
-                                print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
+                                --print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
                                 
                                 -- Find the biggest chip we can add
                                 while self.stacks[biggest].chipValue + v > value do
@@ -103,6 +105,7 @@ chipCollection = Class(function(self, ...)
                         end
                            
                 else
+                        print("Attempting to subtract chips")
                         for i, stack in ipairs(self.stacks) do
                                 while stack.size > 0 do
                                         stack:removeChip()
@@ -152,7 +155,7 @@ chipCollection = Class(function(self, ...)
                         --self.stacks[i].group.x = x
                         --x = x + dx
                         self.stacks[i].group.position = self:getChipPosition( self.stacks[i].chipValue )
-                        print(self.stacks[i].group.position[1], self.stacks[i].group.position[2])
+                        --print(self.stacks[i].group.position[1], self.stacks[i].group.position[2])
                         self.stacks[i]:arrange(dy)
                 end
         end
@@ -168,6 +171,7 @@ chipCollection = Class(function(self, ...)
         end
         
         function self:convertUp()
+                
                 biggest = #self.stacks
                 while biggest > 1 do
                         while self.stacks[biggest].size >= 10 do

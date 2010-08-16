@@ -30,9 +30,21 @@ Model = Class(function(model, ...)
         [4] = {1720, 600},
         [5] = {550, 850},
         [6] = {1400, 850},
-        POT = {930, 797}
+        POT = {925, 680}
     }
     mdbl = model.default_bet_locations
+    
+    model.card_locations = {
+        [1] = {726, 510},
+        [2] = {843, 510},
+        [3] = {966, 510},
+        [4] = {1084, 510},
+        [5] = {1205, 510},
+        DECK = {785, 650},
+        BURN = {1145, 650}
+    }
+    MCL = model.card_locations
+    
     
     --[[
         model.default_bet_locations = {

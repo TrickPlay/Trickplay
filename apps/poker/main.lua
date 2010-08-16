@@ -1,7 +1,27 @@
 dofile ("Assets.lua")
 
+-- Asset loading ---------------------------------------------------------------
 AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
+AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleNone.png")
+
+
+local ui_colors = {"Red", "Green", "Gray"}
+local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold"}
+
+for _,color in pairs(ui_colors) do
+   for _,button in pairs(ui_buttons) do
+      AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
+   end
+end
+
+local player_text = {"BubbleLeft", "BubbleRight"}
+for i=1, 2 do
+   for _, text in ipairs(player_text) do
+      AssetLoader:preloadImage(text..i,"assets/UI/"..text..i..".png")
+   end
+end
+--------------------------------------------------------------------------------
 
 AssetLoader.on_preload_ready =
 function()
