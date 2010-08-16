@@ -16,15 +16,19 @@ function(pres, ctrl)
       if not model.dealerchip then
          model.dealerchip = Image{
             src = "assets/Chip_D.png",
-            position = mdbl[ model.players[ ctrl:get_dealer() ].table_position ],
+            position = MSCL[ model.players[ ctrl:get_dealer() ].table_position ],
             name="dealerchip"
          }
          model.bbchip = Image{
             src = "assets/Chip_BB.png",
-            position = mdbl[ model.players[ ctrl:get_bb_p() ].table_position ],
+            position = MSCL[ model.players[ ctrl:get_bb_p() ].table_position ],
             name="bbchip"
          }
-         model.sbchip = Image{src = "assets/Chip_SB.png", position = mdbl[ model.players[ ctrl:get_sb_p() ].table_position ], name="sbchip"}
+         model.sbchip = Image{
+            src = "assets/Chip_SB.png",
+            position = MSCL[ model.players[ ctrl:get_sb_p() ].table_position ],
+            name="sbchip"
+         }
          screen:add(model.dealerchip, model.bbchip, model.sbchip)
       end
       
@@ -52,9 +56,9 @@ function(pres, ctrl)
    function pres.finish_hand(pres)
 
       -- Animate chips
-      model.dealerchip:animate{ position = mdbl[ ctrl.get_dealer(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-      model.bbchip:animate{ position = mdbl[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-      model.sbchip:animate{ position = mdbl[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.dealerchip:animate{ position = MSCL[ ctrl.get_dealer(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.bbchip:animate{ position = MSCL[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.sbchip:animate{ position = MSCL[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
       model.potchips:set(0)
       
       -- Reset deck
