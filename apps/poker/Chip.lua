@@ -1,3 +1,10 @@
+local function print() end
+
+-- GLOBALS
+CHIP_W = 55
+CHIP_H = 5
+
+
 -- A chip
 Chip = Class(function(self, value, image, ...)
 
@@ -59,7 +66,6 @@ chipCollection = Class(function(self, ...)
         function self:size() return #self.stacks end -- Returns the number of stacks in the collection
 
         self.group = Group{}
-        --screen:add(self.group)
         
         self.stacks = {}
         
@@ -86,7 +92,9 @@ chipCollection = Class(function(self, ...)
                                 -- Find the biggest chip we can add
                                 while self.stacks[biggest].chipValue + v > value do
                                         biggest = biggest + 1
-                                        if biggest > #self.stacks then return end
+                                        if biggest > #self.stacks then 
+                                        	return self:arrange(CHIP_W, CHIP_H)
+                                        end
                                 end
                                 
                                 self.stacks[biggest]:addChip()
@@ -102,29 +110,10 @@ chipCollection = Class(function(self, ...)
                         end
                         
                         self:set(value)
-                        --[[
-                        -- First, sort the stacks
-                        self:sort()
-                        local biggest = 1
-                        local v = self:value()
-                        
-                        -- While there are more chips to add...
-                        while v >= value do
-                                
-                                print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
-                                
-                                -- Find the biggest chip we can add
-                                while v - self.stacks[biggest].chipValue < value do
-                                        biggest = biggest + 1
-                                        if biggest > #self.stacks then return end
-                                end
-                                
-                                self.stacks[biggest]:removeChip()
-                                v = v - self.stacks[biggest].chipValue
-                                
-                        end
-                        ]]
+
                 end
+                
+                self:arrange(CHIP_W, CHIP_H)
         end
         
         function self:sort()
@@ -237,3 +226,28 @@ col:set(247)
 col:convertUp()
 col:arrange(55, 5)
 col.group.scale={3, 3}]]
+
+
+--[[
+-- First, sort the stacks
+-- FOR SMARTER REMOVE
+self:sort()
+local biggest = 1
+local v = self:value()
+
+-- While there are more chips to add...
+while v >= value do
+        
+        print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
+        
+        -- Find the biggest chip we can add
+        while v - self.stacks[biggest].chipValue < value do
+                biggest = biggest + 1
+                if biggest > #self.stacks then return end
+        end
+        
+        self.stacks[biggest]:removeChip()
+        v = v - self.stacks[biggest].chipValue
+        
+end
+                        ]]

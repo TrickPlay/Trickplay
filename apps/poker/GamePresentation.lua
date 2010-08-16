@@ -19,16 +19,8 @@ function(pres, ctrl)
          model.sbchip = Image{src = "assets/Chip_SB.png", position = mdbl[ model.players[ ctrl:get_sb_p() ].table_position ], name="sbchip"}
          screen:add(model.dealerchip, model.bbchip, model.sbchip)
       end
-
-      for key, player in pairs(ctrl.get_players(ctrl)) do
-         if not player.betChips then
-            player.betChips = chipCollection()
-            player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
-            screen:add(player.betChips.group)
-            player.betChips.group:raise_to_top()
-         end
-      end
       
+      -- add the pot chips
       if not model.potchips then
          model.potchips = chipCollection()
          model.potchips.group.position = model.default_bet_locations.POT
@@ -52,10 +44,6 @@ function(pres, ctrl)
    model.bbchip:animate{ position = mdbl[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
    model.sbchip:animate{ position = mdbl[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
    model.potchips:set(0)
-   
-   for key, player in pairs(ctrl.get_players(ctrl)) do
-      player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
-   end
    
  -- sb, bb, dealer data in ctrl are correct, u just gotta make the view reflect that
  -- move sb, bb, dealer chips to new locations

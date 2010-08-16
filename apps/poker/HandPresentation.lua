@@ -19,42 +19,52 @@ function(pres, ctrl)
    local function update_players()
       for player, bet in pairs( ctrl:get_player_bets() ) do
          player.betChips:set(bet)
-         player.betChips:arrange(55, 5)
          player.status:update()
       end
    end
    
-   local function all_cards_up()
+   local function remove_chips()
+      for key, player in pairs( ctrl:get_players() ) do
+         if player.betChips then
+            screen:remove(player.betChips.group)
+            player.betChips = nil
+         end
+      end
+   end
+   
+   local function add_chips()
       
+      remove_chips()
+      
+      for key, player in pairs( ctrl:get_players() ) do
+         if not player.betChips then
+            player.betChips = chipCollection()
+            player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
+            screen:add(player.betChips.group)
+            player.betChips.group:raise_to_top()
+         end
+      end
+   end
+   
+   -- Flip all cards up at the end of the hand
+   local function all_cards_up()
       for _,card in pairs(allCards) do
          print(card)
          if not card.group.extra.face then
             flipCard(card.group)
          end
       end
-      
-      --[[
-      for player, hole in pairs( ctrl:get_hole_cards() ) do
-         local card1, card2 = unpack(hole)
-         if not card1.group.extra.face then
-            print(card1.group.extra.face, card2.group.extra.face)
-            flipCard(card1.group)
-            flipCard(card2.group)
-         end
-      end
-      --]]
-      
-      --debug()
    end
    
-   function pres.display_hand(pres)
-      -- Update player bets and money
+   function pres:display_hand()
+   	add_chips()
       update_players()
    end
 
-   function pres.deal_hole(pres)
-      
+   function pres:deal_hole()
+      add_chips()
       update_players()
+      
       -- just make them all appear in front of the appropriate players
       local hole_cards = ctrl:get_hole_cards()
       y=100
@@ -76,7 +86,9 @@ function(pres, ctrl)
       local text_str = "Dealing hole cards"
       screen:add(text)
    end
+   
    function pres.deal_flop(pres)
+      add_chips()
       update_players()
 
       local cards = ctrl:get_community_cards()
@@ -93,6 +105,7 @@ function(pres, ctrl)
    end
    
    function pres.deal_turn(pres)
+      add_chips()
       update_players()
       
       local cards = ctrl:get_community_cards()
@@ -106,6 +119,7 @@ function(pres, ctrl)
    end
    
    function pres.deal_river(pres)
+      add_chips()
       update_players()   
       
       local cards = ctrl:get_community_cards()
@@ -128,10 +142,7 @@ function(pres, ctrl)
       end
       
       -- reset bets
-      local player_bets = ctrl:get_player_bets()
-      for player, bet in pairs(player_bets) do
-         player.betChips:set(0)
-      end
+      remove_chips()
    end
 
    function pres.showdown(pres, winners)
