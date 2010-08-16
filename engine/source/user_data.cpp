@@ -412,6 +412,8 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
     self->push_proxy();
 
+    g_assert( !lua_isnil(L,-1));
+
     lua_rawget( L , -2 );
 
     if ( lua_isnil( L , -1  ) )
@@ -472,6 +474,14 @@ int UserData::get_callback( const char * name )
     // We do have a callbacks table, fetch the functions table
 
     push_proxy();
+
+    if (lua_isnil(L,-1))
+    {
+        lua_remove(L,-2);
+        LSG_CHECK(1);
+        return 1;
+    }
+
     lua_rawget( L , -2 );
 
     lua_remove( L , -2 );
@@ -536,18 +546,12 @@ void UserData::push_proxy()
     if ( strong_ref != LUA_NOREF )
     {
         lb_strong_deref( L , strong_ref );
+        g_assert( ! lua_isnil( L , -1 ) );
     }
     else
     {
         lb_weak_deref( L , weak_ref );
     }
-
-    // This assert could be triggered when the weak ref is taken from us
-    // without our knowledge, which is not an error condition. I'm leaving
-    // it in for now so we can more easily find a case where it happens
-    // and I can take a look at it.
-
-    g_assert( ! lua_isnil( L , -1 ) );
 }
 
 //.............................................................................
@@ -574,6 +578,8 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
     // nargs : callback
 
     push_proxy();
+
+    g_assert(!lua_isnil(L,-1));
 
     // nargs : callback : proxy
 
