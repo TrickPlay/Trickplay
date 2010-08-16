@@ -179,25 +179,28 @@ FrontPageView = Class(View, function(view, model, ...)
                     }
 
                     local r = math.random(1,4)
-                    print(r)
-                    if r == 4 then
-                        local next_pic = Image{
-                            src="assets/thumbnails/Album3.jpg",
-                            opacity = 0,
-                            on_loaded = function()
+                    print(r,model.swapping_cover)
+                    if r == 4 and model.swapping_cover == false then
+                        model.swapping_cover = true
+                        r = math.random(1,10)
+                        local formula = (model.front_page_index + (prev_i[2]-1))*2+
+                                                               (prev_i[1]-1)
+                        local next_url = getNextUrl(
+                          searches[formula],r)
+                        print("formula",formula,"url",next_url)
 
+                        model.swap_pic = Image{
+                            src=next_url,
+                            opacity = 0,
+                            --async = true,
+                            on_loaded = function()
+                                model.swap_pic.scale = {
+                                    PIC_W / model.swap_pic.base_size[1],
+                                    PIC_H / model.swap_pic.base_size[2]
+                                }
+                                Flip_Pic(prev_i[1],prev_i[2],model.swap_pic)
                             end
                         }
----[=[
-                                next_pic.scale = {
-                                    PIC_W / next_pic.base_size[1],
-                                    PIC_H / next_pic.base_size[2]
-                                }
---]=]
-                            --next_pic.y_rotation = { -90,  PIC_W , 0 }
-
-
-                        Flip_Pic(prev_i[1],prev_i[2],next_pic)
                     end
                     prev_i = {sel[1],sel[2]}
 

@@ -133,10 +133,14 @@ new_pic.opacity = 255
          opacity = 0,
 
          on_completed = function()
-             old_pic:unparent() 
-             old_pic = nil
+             print("flip called back",old_pic,new_pic)
+             if old_pic ~= nil then
+                 old_pic:unparent() 
+                 old_pic = nil
+             end
              model.albums[i][j] = new_pic
              new_pic:lower_to_bottom()
+             model.swapping_cover = false
          end
     }
 end
