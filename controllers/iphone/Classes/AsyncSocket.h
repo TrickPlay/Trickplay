@@ -160,6 +160,7 @@ typedef enum AsyncSocketError AsyncSocketError;
 	
 	CFReadStreamRef theReadStream;
 	CFWriteStreamRef theWriteStream;
+    int theNativeWriteSocket;
 
 	CFRunLoopSourceRef theSource4;     // For theSocket4
 	CFRunLoopSourceRef theSource6;     // For theSocket6
