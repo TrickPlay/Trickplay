@@ -6,21 +6,21 @@ PlayerStatusView = Class(View, function(self, model, args, player,...)
         -- Show player info
         self.player = player
         self.show = true
-        self.background = Rectangle{w=250, h=80, color=Colors.TURQUOISE}
-        self.group = Group{ children={self.background}, opacity=0, position = player.position }
+        self.background = AssetLoader:getImage("BubbleHeaderGray",{y = -30})
+        self.text_bubble = AssetLoader:getImage("BubbleNone",{})
+        self.group = Group{ children={self.background, self.text_bubble}, opacity=0, position = player.position }
         
         -- Player text
-        self.name = Text{ font = PLAYER_NAME_FONT, color = Colors.BLACK, text = "Player "..player.number }
-        self.money = Text{ font = PLAYER_NAME_FONT, color = Colors.BLACK, text = "Money " }
+        self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.SLATE_GRAY, text = "Player "..player.number}
+        self.title.position = {self.title.w/2 + 50, self.title.h/2 - 5}
+        self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = "Sup dawg"}
+        self.action.position = {165, 50}
         
         -- Align player attributes
-        local spacing = 36
-        local dy = 0
-        self.attributes = { self.name, self.money }
+        self.attributes = { self.title, self.action }
         
         for i,v in ipairs(self.attributes) do
-                v.y = dy
-                dy = dy + spacing
+                v.anchor_point = {v.w/2, v.h/2}
                 self.group:add(v)
         end
 
@@ -38,7 +38,7 @@ PlayerStatusView = Class(View, function(self, model, args, player,...)
     
         function self:update()
                 if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
-                self.money.text = "Money: "..self.player.money
+                self.title.text = "Player "..player.number.."   Money: $"..self.player.money
         end
 
 end)
