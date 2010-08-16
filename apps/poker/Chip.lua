@@ -174,7 +174,16 @@ chipCollection = Class(function(self, ...)
                                 for i=1,10 do
                                         self.stacks[biggest]:removeChip()
                                 end
-                                self.stacks[biggest-1]:addChip()
+                                
+                                -- biggest is 5 and biggest-1 is 10
+                                -- need to remove 10 and add 5
+                                
+                                -- amt = ( 5 / 10 ) * 10 = 5
+                                local amt = ( self.stacks[biggest].chipValue / self.stacks[biggest-1].chipValue ) * 10
+                                
+                                for i=1,amt do
+                                        self.stacks[biggest-1]:addChip()
+                                end
                         end
                         biggest = biggest - 1
                 end

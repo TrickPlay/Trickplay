@@ -58,12 +58,28 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     }
     
     local function getPosition()
-    
+        ---[[ Old way of getting position
         local num = (selected-1)*SubSize + subselection
         
         if num == 8 then num = 6 end
     
         return num
+        --]]
+        
+        --[[ New, possibly correct way, but so far it doesn't work
+        local num
+        
+        if selected == 2 and subselection == 1 then
+            num = 1
+        elseif selected == 1 then
+            num = 1 + subselection
+        elseif selected == 2 and subselection == 4 then
+            num = 6
+        end
+        
+        return num
+        --]]
+        
     end
 
     local function setCharacterSeat()
@@ -94,11 +110,8 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
            i = i+1
         end
         table.insert(model.players, i, Player(args))
-        --model.players[ playerCounter ]:createMoneyChips()
-        --model.players[ playerCounter ]:createBetChips()
         model.positions[pos] = true
         model.currentPlayer = playerCounter
-        --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
         
         playerCounter = playerCounter + 1
         self:get_model():notify()

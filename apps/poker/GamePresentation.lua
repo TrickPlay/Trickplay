@@ -32,18 +32,12 @@ function(pres, ctrl)
    end
 
    function pres.finish_hand(pres)
-   -- Just move
-   --[[
-   screen:find_child("dealerchip").position = mdbl[ ctrl.get_dealer(ctrl) ]
-   screen:find_child("bbchip").position = mdbl[ ctrl.get_bb_p(ctrl) ]
-   screen:find_child("sbchip").position = mdbl[ ctrl.get_sb_p(ctrl) ]
-   --]]
-   
-   -- Animate chips
-   model.dealerchip:animate{ position = mdbl[ ctrl.get_dealer(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-   model.bbchip:animate{ position = mdbl[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-   model.sbchip:animate{ position = mdbl[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-   model.potchips:set(0)
+
+      -- Animate chips
+      model.dealerchip:animate{ position = mdbl[ ctrl.get_dealer(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.bbchip:animate{ position = mdbl[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.sbchip:animate{ position = mdbl[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.potchips:set(0)
    
  -- sb, bb, dealer data in ctrl are correct, u just gotta make the view reflect that
  -- move sb, bb, dealer chips to new locations
