@@ -31,6 +31,9 @@ Player = Class(function(player, args, ...)
       
    end
 
+   ---
+   -- @returns fold boolean  true if player should fold
+   -- @returns bet number  quantity of bet, if fold then bet should be 0
    function player:get_move(hole, call_bet, min_raise, current_bet, pot)
       local fold = false
       local bet = call_bet

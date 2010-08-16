@@ -102,29 +102,4 @@ function(self, players, ...)
       end
       community_cards = deck:deal(5)
    end
-
-
-   function self:hole_deal()
-      -- animation junk goes here.
-   end
-
-   function self:re_enter()
-   end
-   
-   function self:bet_helper()
-      bet_helper()
-   end
-
-   function self:hole_betting()
-      -- assigns the action to the player under the gun
-      action = (bb_p%#players)+1
-
-      if player.isHuman() then
-         bet_helper()
-      end
-      bet_helper()
-      -- while all players haven't had a turn yet and not all player
-      -- bets are equal
-      self:hole_betting()
-   end
 end
