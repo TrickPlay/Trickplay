@@ -18,9 +18,9 @@ Model = Class(function(model, ...)
         [3] = {310, 20},
         [4] = {1281, 20},
         [5] = {1590, 99},
-        ["START"] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
-        ["EXIT"] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
         [6] = {1590, 572},
+        START = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
+        EXIT = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
     }
     
     model.default_bet_locations = {
@@ -45,18 +45,15 @@ Model = Class(function(model, ...)
     }
     MCL = model.card_locations
     
-    
-    --[[
-        model.default_bet_locations = {
-        [1] = {190, 567},
-        [2] = {519, 351},
-        [3] = {1352, 350},
-        [4] = {1718, 581},
-        [5] = {550, 955},
-        [6] = {1344, 920},
-        POT = {930, 797}
+    model.status_chip_locations = {
+        [1] = {500, 820},
+        [2] = {320, 520},
+        [3] = {700, 310},
+        [4] = {1185, 310},
+        [5] = {1550, 520},
+        [6] = {1290, 820},
     }
-    --]]
+    MSCL = model.status_chip_locations
     
     model.currentPlayer = nil
     

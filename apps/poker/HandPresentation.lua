@@ -52,7 +52,8 @@ function(pres, ctrl)
    local function add_chips()
       for _, player in pairs( ctrl:get_players() ) do
          player.betChips = chipCollection()
-         player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
+         player.betChips.group.position = { MSCL[player.table_position][1] + 55, MSCL[player.table_position][2] }
+         --player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
          screen:add(player.betChips.group)
          player.betChips.group:raise_to_top()
       end
