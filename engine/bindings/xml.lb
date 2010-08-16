@@ -9,11 +9,10 @@ class Parser
 {
 public:
     
-    Parser()
+    Parser(bool expand_namespaces)
     {
-        parser=XML_ParserCreate(NULL);
-        XML_SetElementHandler(parser,start_element_handler,end_element_handler);
-        XML_SetCharacterDataHandler(parser,character_data_handler);
+        parser=expand_namespaces ? XML_ParserCreateNS(NULL,':') : XML_ParserCreate(NULL);
+        reset();
     }
     
     ~Parser()
@@ -32,12 +31,25 @@ public:
         return encoding.c_str();
     }
     
+    void reset()
+    {
+        XML_ParserReset(parser,encoding.empty() ? NULL : encoding.c_str());
+        XML_SetElementHandler(parser,start_element_handler,end_element_handler);
+        XML_SetCharacterDataHandler(parser,character_data_handler);
+        XML_SetNamespaceDeclHandler(parser,start_namespace_handler,end_namespace_handler);
+        char_data.clear();
+    }
+    
     bool parse(UserData * ud,const char * xml,size_t xml_len,bool finished)
     {
     	UserData::Handle * handle = UserData::Handle::make(ud,this);
         XML_SetUserData(parser,handle);
         bool result = XML_Parse(parser,xml,xml_len,finished);
         UserData::Handle::destroy( handle );
+        if (finished)
+        {
+        	reset();
+        }
         return result;
     }
     
@@ -48,6 +60,10 @@ protected:
     static void start_element_handler(void *userData,const XML_Char *name,const XML_Char **atts);
     static void end_element_handler(void *userData,const XML_Char *name);
     static void character_data_handler(void *userData,const XML_Char *s,int len);
+    
+	static void start_namespace_handler(void *userData,const XML_Char *prefix,const XML_Char *uri);
+	static void end_namespace_handler(void *userData,const XML_Char *prefix);
+    
     
 private:
     
@@ -73,10 +89,19 @@ class XMLParser [[Parser*]]
     # > parser=XMLParser("UTF-8")
     # >
     # > parser=XMLParser{ encoding="UTF-8" , on_start_element=some_function }
+    #
+    # If you want to enable processing of namespaces, you should pass 'true' for
+    # the second argument, like this:
+    #
+    # > parser=XMLParser( nil , true )
+    #
+    # When you do so, the <on_start_namespace> and <on_end_namespace> callbacks
+    # will be enabled. In <on_start_element> and <on_end_element>, the tag of
+    # each element will include the full URI of its namespace.
     
-    XMLParser(string encoding=NULL)
+    XMLParser(string encoding=NULL,bool expand_namespaces=false)
         [[
-            self=lb_construct(Parser,new Parser);
+            self=lb_construct(Parser,new Parser(expand_namespaces));
             
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {
@@ -166,6 +191,27 @@ class XMLParser [[Parser*]]
     # data - The character data
     
     callback on_character_data;
+    
+    # Event: on_start_namespace
+    # This function gets called when a new namespace is detected in the document.
+    # It only happens when the parser is created with expand_namespaces set to true.
+    #
+    # Arguments:
+    # parser - The XMLParser
+    # prefix - The string prefix of the namespace
+    # uri - The URI of the namespace
+    
+    callback on_start_namespace;
+    
+    # Event: on_end_namespace
+    # This function gets called when a namespace goes out of scope.
+    # It only happens when the parser is created with expand_namespaces set to true.
+    #
+    # Arguments:
+    # parser - The XMLParser
+    # prefix - The string prefix of the namespace
+
+    callback on_end_namespace;
 }
 
 [[
@@ -222,6 +268,33 @@ void Parser::character_data_handler(void *userData,const XML_Char *s,int len)
     Parser * self=( Parser * ) handle->get_user();
     
     self->char_data.append(s,len);    
+}
+
+void Parser::start_namespace_handler(void *userData,const XML_Char *prefix,const XML_Char *uri)
+{
+	UserData::Handle * handle = UserData::Handle::get( userData );
+	
+    Parser * self=( Parser * ) handle->get_user();
+    
+    lua_State * L = handle->get_lua_state();
+
+    lua_pushstring(L,prefix?prefix:"");
+    lua_pushstring(L,uri);
+    
+    invoke_XMLParser_on_start_namespace(L,self,2,0);	
+}
+
+void Parser::end_namespace_handler(void *userData,const XML_Char *prefix)
+{
+	UserData::Handle * handle = UserData::Handle::get( userData );
+	
+    Parser * self=( Parser * ) handle->get_user();
+    
+    lua_State * L = handle->get_lua_state();
+
+    lua_pushstring(L,prefix?prefix:"");
+    
+    invoke_XMLParser_on_end_namespace(L,self,1,0);	
 }
 
 ]]
