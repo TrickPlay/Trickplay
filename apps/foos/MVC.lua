@@ -18,6 +18,7 @@ Model = Class(function(model, ...)
                 src = "assets/img_placeholder_questionmark_loading.jpg",
                 opacity = 0
     }
+    model.def_bs = {model.default.base_size[1],model.default.base_size[2]}
 
     --SLIDE_SHOW
     model.curr_slideshow = {}
