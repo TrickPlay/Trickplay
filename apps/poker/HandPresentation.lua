@@ -16,6 +16,7 @@ function(pres, ctrl)
    
    local allCards = {}
    
+   -- Update bets and status boxes for all players
    local function update_players()
       for player, bet in pairs( ctrl:get_player_bets() ) do
          player.betChips:set(bet)
@@ -23,26 +24,25 @@ function(pres, ctrl)
       end
    end
    
-   local function remove_chips()
-      for key, player in pairs( ctrl:get_players() ) do
+   -- Remove player chips
+   local function remove_chips(chips)
+      for _, player in pairs( ctrl:get_players() ) do
          if player.betChips then
-            screen:remove(player.betChips.group)
+            if player.betChips.parent then
+               screen:remove(player.betChips.group)
+            end
             player.betChips = nil
          end
       end
    end
    
+   -- Add player chips
    local function add_chips()
-      
-      remove_chips()
-      
-      for key, player in pairs( ctrl:get_players() ) do
-         if not player.betChips then
-            player.betChips = chipCollection()
-            player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
-            screen:add(player.betChips.group)
-            player.betChips.group:raise_to_top()
-         end
+      for _, player in pairs( ctrl:get_players() ) do
+         player.betChips = chipCollection()
+         player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
+         screen:add(player.betChips.group)
+         player.betChips.group:raise_to_top()
       end
    end
    
@@ -56,21 +56,49 @@ function(pres, ctrl)
       end
    end
    
+   local function animate_chips_to_center(player)
+      if player then
+         player.betChips.group:animate{
+            position = model.potchips.group.position,
+            duration=500,
+            mode="EASE_OUT_QUAD",
+            on_completed = function()
+               model.potchips:set( model.potchips:value() + c:value() )
+               screen:remove(c.group)
+            end
+         }
+      else
+         for _, player in pairs( ctrl:get_players() ) do
+            local c = player.betChips
+            player.betChips.group:animate{
+               position = model.potchips.group.position,
+               duration=500,
+               mode="EASE_OUT_QUAD",
+               on_completed = function()
+                  model.potchips:set( model.potchips:value() + c:value() )
+                  screen:remove(c.group)
+               end
+            }
+         end
+      end
+   end
+   
    function pres:display_hand()
+      remove_chips()
    	add_chips()
       update_players()
    end
 
    function pres:deal_hole()
-      add_chips()
+      --animate_chips_to_center()
+      --add_chips()
       update_players()
       
       -- just make them all appear in front of the appropriate players
       local hole_cards = ctrl:get_hole_cards()
       y=100
       for player,hole in pairs(hole_cards) do
---         player.betChips.group:animate{position = model.potchips.group.position, duration=500, mode="EASE_OUT_QUAD", on_completed = function() model.potchips:set(3) model.potchips:arrange(55, 5) end}
-      
+         
          local card1, card2 = unpack(hole)
          card1.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]}
          card2.group.position = {model.default_bet_locations[player.table_position][1] + 100, model.default_bet_locations[player.table_position][2]}
@@ -87,7 +115,8 @@ function(pres, ctrl)
       screen:add(text)
    end
    
-   function pres.deal_flop(pres)
+   function pres:deal_flop()
+      animate_chips_to_center()
       add_chips()
       update_players()
 
@@ -104,7 +133,8 @@ function(pres, ctrl)
       
    end
    
-   function pres.deal_turn(pres)
+   function pres:deal_turn()
+      animate_chips_to_center()
       add_chips()
       update_players()
       
@@ -118,7 +148,8 @@ function(pres, ctrl)
       table.insert(allCards, cards[i])
    end
    
-   function pres.deal_river(pres)
+   function pres:deal_river()
+      animate_chips_to_center()
       add_chips()
       update_players()   
       
@@ -133,7 +164,7 @@ function(pres, ctrl)
       
    end
 
-   function pres.clear_ui(pres)
+   function pres:clear_ui()
       -- clear cards
       for key,card in pairs(allCards) do
          screen:remove(card.group)
@@ -145,16 +176,18 @@ function(pres, ctrl)
       remove_chips()
    end
 
-   function pres.showdown(pres, winners)
+   function pres:showdown(winners)
+      animate_chips_to_center()
       all_cards_up()
       -- winners is an array of the winning players
    end
 
-   function pres.fold_player(pres, active_player)
+   function pres:fold_player(active_player)
+      animate_chips_to_center(active_player)
       update_players()
    end
 
-   function pres.bet_player(pres, active_player)
+   function pres:bet_player(active_player)
       update_players()
    end
 end)
