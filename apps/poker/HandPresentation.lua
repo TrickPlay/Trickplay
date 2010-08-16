@@ -16,6 +16,15 @@ function(pres, ctrl)
    
    local allCards = {}
    
+   local poker_hand_text = Text{
+      font="Sans 40px",
+      color="FFFFFF",
+      text="",
+      position={100, 100},
+      opacity = 255
+   }
+   screen:add(poker_hand_text)
+
    -- Update bets and status boxes for all players
    local function update_players()
       for player, bet in pairs( ctrl:get_player_bets() ) do
@@ -162,7 +171,11 @@ function(pres, ctrl)
       
    end
 
-   function pres:clear_ui()
+   function pres.clear_ui(pres)
+      poker_hand_text:animate{
+         duration=200,
+         opacity=0
+      }
       -- clear cards
       for key,card in pairs(allCards) do
          screen:remove(card.group)
@@ -174,9 +187,15 @@ function(pres, ctrl)
       remove_chips()
    end
 
-   function pres:showdown(winners)
+   function pres.showdown(pres, winners, poker_hand)
       animate_chips_to_center()
       all_cards_up()
+      print(poker_hand.name .. " passed to pres:showdown()")
+      poker_hand_text.text = poker_hand.name
+      poker_hand_text:animate{
+         duration=300,
+         opacity=255,
+      }
       -- winners is an array of the winning players
    end
 
