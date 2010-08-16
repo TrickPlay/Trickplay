@@ -53,36 +53,70 @@ end
 --Called by the adapter's on_complete function
 function Load_Image(site,index)
 
-    local i = index%NUM_ROWS + 1
+    local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
 
     print("getting a pic for ",i,j,index)
-    if model.albums[i] ~= nil then
-    model.albums[i][j] = Image
-    {
-        async    = true,
-        src      = site,
-        position = { PIC_W * (j-1), PIC_H * (i-1) },
-        -- toss the filler image and scale it once loaded
-        on_loaded = function()
-            if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
-            print("loading pic at",i,j,index)
-            if model.placeholders[i] ~= nil and 
-               model.placeholders[i][j] ~= nil then
-            model.placeholders[i][j]:unparent()
-            model.placeholders[i][j] = nil
-            end
+    if model.albums[i] ~= nil and  model.albums[i][j] == nil then
+        model.albums[i][j] = Image
+        {
+            async    = true,
+            src      = site,
+            position = { PIC_W * (j-1), PIC_H * (i-1) },
+            -- toss the filler image and scale it once loaded
+            on_loaded = function()
+                if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
+                    print("loading pic at",i,j,index)
+                    if model.placeholders[i] ~= nil and 
+                       model.placeholders[i][j] ~= nil then
 
-            model.albums[i][j].scale = 
-            {
-                 PIC_W / model.albums[i][j].base_size[1],
-                 PIC_H / model.albums[i][j].base_size[2]
-            }
-            model.album_group:add(model.albums[i][j])
-            model.albums[i][j]:lower_to_bottom()
+                        model.placeholders[i][j]:unparent()
+                        model.placeholders[i][j] = nil
+                    end
+
+                    model.albums[i][j].scale = 
+                    {
+                        PIC_W / model.albums[i][j].base_size[1],
+                        PIC_H / model.albums[i][j].base_size[2]
+                    }
+                    model.album_group:add(model.albums[i][j])
+                    model.albums[i][j]:lower_to_bottom()
+                end
             end
-        end
-    }
+        }
+    elseif model.albums[i][j] ~= nil then
+
+        model.swap_pic = Image{
+            async    = true,
+            src      = site,
+            position = { PIC_W * (j-1), PIC_H * (i-1) },
+            -- toss the filler image and scale it once loaded
+            on_loaded = function()
+                model.swap_pic.scale = {
+                    PIC_W / model.swap_pic.base_size[1],
+                    PIC_H / model.swap_pic.base_size[2]
+                }
+                model.album_group:add(model.swap_pic)
+                model.albums[i][j]:lower_to_bottom()
+                model.swap_pic:lower_to_bottom()
+                model.albums[i][j]:animate{
+                    duration = 4*CHANGE_VIEW_TIME,
+                    y        = model.albums[i][j].y + PIC_H,
+                    opacity  = 0,
+                    on_completed = function()
+                        print("changeCover called back",
+                              model.albums[i][j],model.swap_pic)
+                        if model.albums[i][j] ~= nil then
+                            model.albums[i][j]:unparent() 
+                            model.albums[i][j] = nil
+                        end
+                        model.albums[i][j] = model.swap_pic
+                        model.swap_pic:lower_to_bottom()
+                        model.swapping_cover = false
+                    end
+                } 
+            end
+        }
     end
 end
 
@@ -103,7 +137,7 @@ function Scale_To_Fit(img,base_size,target_size)
     end
 end
 
-function Flip_Pic(i,j, new_pic)
+function Change_Cover(i,j, new_pic)
 
     local old_pic
     local prev_bs
