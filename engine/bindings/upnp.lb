@@ -47,13 +47,11 @@ public:
 	struct Search
 	{
 		int 				id;
-		Client *			client;
 	};
 	
 	struct Action
 	{
 		int 				id;
-		Client *			client;
 	};
 	
 	int search( lua_State * L , const char * target , int timeout )
@@ -61,7 +59,6 @@ public:
 		Search * search = g_new( Search , 1 );
 				
 		search->id = next_search_id;
-		search->client = this;
 
 		UserData::Handle * udata = UserData::Handle::make( L , 1 , search , g_free );		
 		
@@ -109,7 +106,6 @@ public:
 		Action * a = g_new( Action , 1 );
 				
 		a->id = next_action_id;
-		a->client = this;
 
 		UserData::Handle * udata = UserData::Handle::make( L , 1 , a , g_free );		
 		
@@ -142,6 +138,10 @@ private:
 		{
 			g_assert( udata );
 			g_assert( action );
+			
+			Action * a = ( Action * ) udata->get_user();
+			
+			ulog( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
 			
     		g_idle_add_full( 
     			G_PRIORITY_DEFAULT_IDLE , 
