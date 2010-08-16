@@ -183,14 +183,14 @@ HandState = Class(nil, function(state, ctrl, ...)
 
       for i=2,#in_players do
          result, tmp_poker_hand = compare_hands(in_hands[best], in_hands[in_players[i]])
+         if not poker_hand then
+            poker_hand = tmp_poker_hand
+         end
          if result == 0 then
             table.insert(winners, in_players[i])
          elseif result == 1 then
             best = in_players[i]
             winners = {in_players[i]}
-            poker_hand = tmp_poker_hand
-         end
-         if #in_players == 2 then
             poker_hand = tmp_poker_hand
          end
       end
