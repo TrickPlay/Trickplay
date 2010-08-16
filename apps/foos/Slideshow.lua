@@ -4,11 +4,14 @@ timer.interval = 4
 current_pic = 1
 temp_pic = 0
 local started = true
-
+local search = "space"
 function Slideshow:new(args)
 	local num_pics = args.num_pics
 	local urls = {}
 	local images = {}
+	search = searches[args.index]
+	print ("INDEX: "..args.index)
+	print ("SEARCHING: "..search)
 	local object = { 
 		num_pics = num_pics,
 		images = images,
@@ -74,7 +77,6 @@ end
 
 function timer.on_timer(timer)
 	print("tick"..current_pic)
-	search = "space"
 	if (current_pic ~= temp_pic and started) then
 		model.curr_slideshow:loadUrls("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge")
 		temp_pic = current_pic
