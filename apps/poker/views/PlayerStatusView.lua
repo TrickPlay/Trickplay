@@ -6,7 +6,17 @@ PlayerStatusView = Class(View, function(self, model, args, player,...)
         -- Show player info
         self.player = player
         self.show = true
-        self.background = AssetLoader:getImage("BubbleHeaderGray",{y = -30})
+        
+        local color
+        if player.isHuman then
+                color = "Green"
+        else
+                color = "Gray"
+        end
+        
+        self.background = AssetLoader:getImage("BubbleHeader"..color,{y = -30})
+
+        
         self.text_bubble = AssetLoader:getImage("BubbleNone",{})
         self.group = Group{ children={self.background, self.text_bubble}, opacity=0, position = player.position }
         
