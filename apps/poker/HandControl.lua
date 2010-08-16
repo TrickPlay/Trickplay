@@ -1,7 +1,7 @@
 --dofile("HandState.lua")
 dofile("HandPresentation.lua")
 
-local Rounds = {
+Rounds = {
    HOLE=1,
    FLOP=2,
    TURN=3,
