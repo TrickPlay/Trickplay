@@ -36,3 +36,10 @@ CUSTOMIZE_NAME_FONT = "KacstArt 144px"
 
 DEFAULT_FONT = "DejaVu Serif 40px"
 DEFAULT_COLOR = Colors.WHITE
+
+Rounds = {
+   HOLE=1,
+   FLOP=2,
+   TURN=3,
+   RIVER=4,
+}
