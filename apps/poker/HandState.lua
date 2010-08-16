@@ -92,4 +92,118 @@ HandState = Class(nil, function(state, ctrl, ...)
       player_bets[winner] = 0
       pot = 0
    end
+
+   function state.bet(state, round)
+      local active_player = in_players[action]
+      local fold, bet
+      if false and active_player.isHuman then
+         
+      else
+         -- get computer move
+         -- current cards, bet to call, min raise, current wager, pot size
+         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
+         if fold then
+            -- current wager goes into pot
+            pot = pot + player_bets[active_player]
+            player_bets[active_player] = 0
+            table.remove(in_players, action)
+            action = ((action - 1) % #in_players) + 1
+            ctrl:fold_player(active_player)
+         else
+            local delta = bet-player_bets[active_player]
+            assert(0 <= delta and delta <= active_player.money)
+            player_bets[active_player] = bet
+            active_player.money = active_player.money - delta
+            ctrl:bet_player(active_player)
+         end
+         done[active_player] = true
+      end
+
+      local continue = true
+
+      assert(#in_players > 0)
+      if #in_players == 1 then
+         give_winner_pot_and_bone_out()
+         return true
+      end
+
+      for i, player in ipairs(in_players) do
+         if not done[player] then
+            continue = false
+         end
+      end
+
+      if continue then
+         -- set the pot
+         for i,player in ipairs(in_players) do
+            pot = pot + player_bets[player]
+            player_bets[player] = 0
+            done[player] = false
+         end
+
+         -- reset the new action
+         local tmp_action = (dealer % #players) + 1
+         local safety_counter = 0
+         while done[players[tmp_action]] == true do
+            assert(safety_counter <= #players)
+            tmp_action = (tmp_action % #players) + 1
+            safety_counter = safety_counter+1
+         end
+         action = tmp_action
+      else
+         local tmp_action = (action % #players) + 1
+         local safety_counter = 0
+         while done[players[tmp_action]] == true do
+            assert(safety_counter <= #players)
+            tmp_action = (tmp_action % #players) + 1
+            safety_counter = safety_counter+1
+         end
+         action = tmp_action
+      end
+      return continue
+   end
+
+   function state.showdown(state)
+      assert(#in_players > 1)
+      local in_hands = {}
+      for _, player in ipairs(in_players) do
+         local hand = {}
+         for _, card in ipairs(hole_cards[player]) do
+            table.insert(hand, card)
+         end
+         for _, card in ipairs(community_cards) do
+            table.insert(hand, card)
+         end
+         in_hands[player] = hand
+      end
+
+      local best = in_players[1]
+      local winners = {in_players[1]}
+      local result, tmp_poker_hand, poker_hand
+
+      for i=2,#in_players do
+         result, tmp_poker_hand = compare_hands(in_hands[best], in_hands[in_players[i]])
+         if result == 0 then
+            table.insert(winners, in_players[i])
+         elseif result == 1 then
+            best = in_players[i]
+            winners = {in_players[i]}
+            poker_hand = tmp_poker_hand
+         end
+         if #in_players == 2 then
+            poker_hand = tmp_poker_hand
+         end
+      end
+
+      best.money = best.money + pot
+      pot = 0
+
+      print("player won with")
+      for _, card in ipairs(in_hands[best]) do
+         print(card.name)
+      end
+      print("won with " .. poker_hand.name .. " in state.showdown()")
+      return winners, poker_hand
+   end
+
 end)

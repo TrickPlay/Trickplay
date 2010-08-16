@@ -22,8 +22,8 @@ function(ctrl, model, ...)
          return continue
       end,
       -- stage where we play through a hand
-      function(ctrl)
-         local continue = hand_ctrl:on_event()
+      function(ctrl, event)
+         local continue = hand_ctrl:on_event(event)
          return continue
       end,
       function(ctrl)
@@ -75,7 +75,14 @@ function(ctrl, model, ...)
       hand_ctrl:initialize()
    end
    
-   function ctrl.on_event(ctrl, event, extra)
+   function ctrl.on_key_down(ctrl, key)
+      ctrl:on_event{
+         type=Events.KEYBOARD,
+         key=key,
+      }
+   end
+
+   function ctrl.on_event(ctrl, event)
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
@@ -83,7 +90,7 @@ function(ctrl, model, ...)
          reset_pipeline()
       end
       local action = game_pipeline[1]
-      local result = action(ctrl)
+      local result = action(ctrl, event)
       if result then table.remove(game_pipeline, 1) end
 
       -- if #game_pipeline > 0 then

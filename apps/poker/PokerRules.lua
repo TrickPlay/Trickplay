@@ -473,12 +473,12 @@ function compare_hands(hand1, hand2)
       pin1 = poker_hand.present_in(hand1)
       pin2 = poker_hand.present_in(hand2)
       if pin1 and pin2 then
-         return poker_hand.comparator(hand1,hand2)
+         return poker_hand.comparator(hand1,hand2), poker_hand
       elseif pin1 then
-         return -1
+         return -1, poker_hand
       elseif pin2 then
-         return 1
+         return 1, poker_hand
       end
    end
-   return 0
+   return 0, poker_hand
 end
