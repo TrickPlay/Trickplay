@@ -1,3 +1,24 @@
+Directions = {
+   RIGHT = { 1, 0},
+   LEFT  = {-1, 0},
+   DOWN  = { 0, 1},
+   UP    = { 0,-1}
+}
+NUM_ROWS   = 2
+NUM_VIS_COLS   = 3
+PADDING_BORDER = 0
+PADDING_MIDDLE = 0
+
+PIC_DIR = "assets/thumbnails/"
+
+PIC_W = (screen.width/(NUM_VIS_COLS+1)) 
+PIC_H = (screen.height/NUM_ROWS)
+SEL_W = 1.1*PIC_W
+SEL_H = 1.1*PIC_H
+
+
+
+
 dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("MVC.lua")
 dofile("FrontPageView.lua")
@@ -16,6 +37,8 @@ dofile("adapter/Adapter.lua")
 dofile("ItemSelectedView.lua")
 dofile("ItemSelectedController.lua")
 --]]
+dofile("Slideshow.lua")
+
 dofile("Load.lua")
 
 Components = {

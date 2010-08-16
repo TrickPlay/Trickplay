@@ -1,15 +1,9 @@
 --dofile ("FlickrTest.lua")
-dofile("Slideshow.lua")
-NUM_ROWS   = 2
-NUM_VIS_COLS   = 3
-PADDING_BORDER = 0
-PADDING_MIDDLE = 0
-
-PIC_DIR = "assets/thumbnails/"
 
 
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
+    assert(model.default,"default is not init yet")
     screen:add(model.default)
 	 loadCovers()
    -- startAdapter(1) --TODO fix this one source shit
@@ -24,15 +18,20 @@ function Setup_Album_Covers()
             model.placeholders[i][j] = Clone{ source = model.default }
             model.placeholders[i][j].position = 
             {
+                PIC_W * (j-1), PIC_H * (i-1)
+--[[
                 screen.width  * (j-1) / (NUM_VIS_COLS + 1),
                 screen.height * (i-1) / NUM_ROWS
+--]]
             }
             model.placeholders[i][j].scale = 
             {
-                (screen.width/(NUM_VIS_COLS+1))  / 
-                 model.default.base_size[1],
-                (screen.height/NUM_ROWS) / 
-                 model.default.base_size[2]
+                 PIC_W / 
+--                 (screen.width/(NUM_VIS_COLS+1))  / 
+                  model.default.base_size[1],
+                  PIC_H / 
+--                 (screen.height/NUM_ROWS) / 
+                  model.default.base_size[2]
             }
             model.placeholders.opacity = 255
 
@@ -55,8 +54,11 @@ function Load_Image(site,index)
         src      = site,
         position = 
         {
+            PIC_W * (j-1), PIC_H * (i-1)
+--[[
             screen.width  * (j-1) / (NUM_VIS_COLS + 1),
             screen.height * (i-1) / NUM_ROWS
+--]]
         },
         -- toss the filler image and scale it once loaded
         on_loaded = function()
@@ -70,9 +72,11 @@ function Load_Image(site,index)
 
             model.albums[i][j].scale = 
             {
-                 (screen.width/(NUM_VIS_COLS+1))  / 
+                 PIC_W / 
+--                 (screen.width/(NUM_VIS_COLS+1))  / 
                   model.albums[i][j].base_size[1],
-                 (screen.height/NUM_ROWS) / 
+                  PIC_H / 
+--                 (screen.height/NUM_ROWS) / 
                   model.albums[i][j].base_size[2]
             }
             model.album_group:add(model.albums[i][j])
