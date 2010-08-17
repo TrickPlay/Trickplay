@@ -9,19 +9,36 @@ CharacterSelectionView = Class(View, function(view, model, ...)
 
     view.items = {
         {
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[1] },
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[2] },
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[3] },
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[4] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[2] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[3] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[4] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[5] },
         },
         {
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[5] },
-            Text{font=CUSTOMIZE_TAB_FONT, color=Colors.RED, position=model.default_player_locations.START, text="START"},
-            Text{font=CUSTOMIZE_TAB_FONT, color=Colors.RED, position=model.default_player_locations.EXIT, text="EXIT"},
-            Rectangle{color={255,255,255}, width=100, height=100, position = model.default_player_locations[6] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1] },
+            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.START, extra = { text="START" } },
+            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.EXIT, extra = { text="EXIT" } },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6] },
         }
     }
-
+    
+    view.text = {}
+    
+    for i, table in ipairs(view.items) do
+        for k,v in ipairs(table) do
+            if v.extra.text then
+                local text = Text{ font = "Sans 38px", color = "FFFFFF", text = v.extra.text }
+                view.text[k] = text
+                text.anchor_point = {text.w/2, text.h/2}
+                text.position = {v.position[1] + v.w/2, v.position[2] + v.h/2}
+                local g = Group{children={v, text}}
+                view.items[i][k] = g
+            end
+        end
+    end
+    
+    
+    
     --background ui
     view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
     view.background_ui:add(unpack(background))

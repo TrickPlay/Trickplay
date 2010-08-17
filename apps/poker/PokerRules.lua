@@ -473,14 +473,14 @@ function compare_hands(hand1, hand2)
       pin1 = poker_hand.present_in(hand1)
       pin2 = poker_hand.present_in(hand2)
       if pin1 and pin2 then
-         return poker_hand.comparator(hand1,hand2)
+         return poker_hand.comparator(hand1,hand2), poker_hand
       elseif pin1 then
-         return -1
+         return -1, poker_hand
       elseif pin2 then
-         return 1
+         return 1, poker_hand
       end
    end
-   return 0
+   return 0, poker_hand
 end
 
 function get_best(hand)
@@ -490,23 +490,4 @@ function get_best(hand)
       end
    end
    error("fail.")
-end
-
-function get_best_five(hand)
-   local best_hand = hand
-   local compared_to = {}
-   local i = 1
-   local j = 1
-   while(i+5 <= #hand) do
-      compared_to[i] = hand[i]
-      if(i-j >= 4) then
-         if(compare_hands(best_hand, compared_to) > 0) then
-            best_hand = compared_to
-         end
-         i = j
-         j = j + 1
-      end
-      i = i + 1
-   end
-   return best_hand
 end
