@@ -43,3 +43,27 @@ Rounds = {
    TURN=3,
    RIVER=4,
 }
+
+Position = {
+    EARLY = 1,
+    EARLY2 = 2,     --Same as Early but redundancy for 6 players
+    MIDDLE = 3,
+    LATE = 4,
+    SMALL_BLIND = 5,
+    BIG_BLIND = 6
+}
+RaiseFactor = {
+    UR = 1,     --Un-Raised Big-Blind
+    R = 2,      --Raised Big-Blind
+    RR = 3      --Re-Raised Big-Blind
+}
+Moves = {
+    CALL = 1,
+    RAISE = 2,
+    FOLD = 3
+}
+SUITED = 1
+UNSUITED = 2
+
+HIGH_OUTS_RANGE = .66
+LOW_OUTS_RANGE = .33
