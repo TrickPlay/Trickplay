@@ -11,6 +11,8 @@
 #import "AsyncSocket.h"
 #import <sys/socket.h>
 #import <netinet/in.h>
+#import <netinet/tcp.h>
+#import <fcntl.h>
 #import <arpa/inet.h>
 #import <netdb.h>
 
@@ -554,6 +556,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 		theRunLoop = NULL;
 		theReadStream = NULL;
 		theWriteStream = NULL;
+        theNativeWriteSocket = 0;
 		
 		theConnectTimer = nil;
 		
@@ -1666,6 +1669,7 @@ Failed:
 
 - (BOOL)setSocketFromStreamsAndReturnError:(NSError **)errPtr
 {
+	
 	// Get the CFSocketNativeHandle from theReadStream
 	CFSocketNativeHandle native;
 	CFDataRef nativeProp = CFReadStreamCopyProperty(theReadStream, kCFStreamPropertySocketNativeHandle);
@@ -1686,6 +1690,9 @@ Failed:
 		if (errPtr) *errPtr = [self getSocketError];
 		return NO;
 	}
+	
+	int yes = 1;
+	setsockopt(CFSocketGetNative(theSocket), IPPROTO_TCP, TCP_NODELAY, (void *)&yes, sizeof(yes));
 	
 	// Determine whether the connection was IPv4 or IPv6.
 	// We may already know if this was an accepted socket,
@@ -3496,7 +3503,41 @@ Failed:
 	{
 		return;
 	}
-	
+
+	if(theNativeWriteSocket == 0)
+    {
+        // Get the CFSocketNativeHandle from theWriteStream
+        CFSocketNativeHandle native;
+        CFDataRef nativeProp = CFWriteStreamCopyProperty(theWriteStream, kCFStreamPropertySocketNativeHandle);
+        if(nativeProp == NULL)
+        {
+            NSLog(@"Failed to get native socket from write stream");
+            return;
+        }
+        
+        CFIndex len = MIN(CFDataGetLength(nativeProp), sizeof(native));
+        
+        CFDataGetBytes(nativeProp, CFRangeMake(0, len), (UInt8 *)&native);
+        CFRelease(nativeProp);
+        
+        CFSocketRef theSocket = CFSocketCreateWithNative(kCFAllocatorDefault, native, 0, NULL, NULL);
+        if(theSocket == NULL)
+        {
+            NSLog(@"Failed to get socket from write stream reference");
+            return;
+        }
+        
+        theNativeWriteSocket = CFSocketGetNative(theSocket);
+
+        int yes = 1;
+        int no = 0;
+        int bufsiz = 4;
+        setsockopt(theNativeWriteSocket, IPPROTO_TCP, TCP_NODELAY, (void *)&yes, sizeof(yes));
+        setsockopt(theNativeWriteSocket, SOL_SOCKET, SO_SNDBUF, (void *)&bufsiz, sizeof(bufsiz));
+        setsockopt(theNativeWriteSocket, SOL_SOCKET, SO_DEBUG, (void *)&yes, sizeof(yes));
+        setsockopt(theNativeWriteSocket, IPPROTO_TCP, TCP_NOPUSH, (void *)&no, sizeof(no));
+    }
+    
 	// Note: This method is not called if theCurrentWrite is an AsyncSpecialPacket (startTLS packet)
 	
 	CFIndex totalBytesWritten = 0;
@@ -3511,26 +3552,28 @@ Failed:
 		CFIndex bytesToWrite = (bytesRemaining < WRITE_CHUNKSIZE) ? bytesRemaining : WRITE_CHUNKSIZE;
 		UInt8 *writestart = (UInt8 *)([theCurrentWrite->buffer bytes] + theCurrentWrite->bytesDone);
 		
-		// Write.
-		CFIndex bytesWritten = CFWriteStreamWrite(theWriteStream, writestart, bytesToWrite);
+		// Write to native socket
+        CFIndex bytesWritten = send(theNativeWriteSocket, writestart, bytesToWrite, 0);        
         NSLog(@"Just wrote %d bytes", bytesWritten);
-		
+
 		// Unset the "can accept bytes" flag
 		theFlags &= ~kSocketCanAcceptBytes;
 		
 		// Check results
-		if (bytesWritten < 0)
+		if (bytesWritten < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 		{
+            NSLog(@"Socket write failed: %s",strerror(errno));
 			error = YES;
 		}
 		else
 		{
+            if(bytesWritten < 0) bytesWritten = 0;
 			// Update total amount read for the current write
 			theCurrentWrite->bytesDone += bytesWritten;
 			
 			// Update total amount written in this method invocation
 			totalBytesWritten += bytesWritten;
-			
+
 			// Is packet done?
 			done = ([theCurrentWrite->buffer length] == theCurrentWrite->bytesDone);
 		}

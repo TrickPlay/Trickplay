@@ -384,7 +384,7 @@ class Image [[ClutterActor*]] actor
 		    lua_rawseti(L,-2,2);
 		]]
 		[[
-		    lb_checktable(L,2);
+		    (void)lb_checktable(L,2);
 		    lua_rawgeti(L,2,1);
 		    lua_rawgeti(L,2,2);
 		    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));

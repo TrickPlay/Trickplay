@@ -1137,6 +1137,8 @@ def emit( stuff , f ):
                     if not prop["read_only"]:
                         setters.append( prop )
                             
+                f.write( '    {"extra",lb_get_extra}, // AUTO\n' )
+                
                 f.write(
                     "    {NULL,NULL}\n"
                     "  };\n"
@@ -1144,28 +1146,30 @@ def emit( stuff , f ):
                     "  lua_rawset(L,-3);\n"
                 )
     
-                if len( setters ) > 0:
-                    
-                    f.write(
-                        '  lua_pushstring(L,"__setters__");\n'
-                        "  lua_newtable(L);\n"
-                        "  const luaL_Reg setters[]=\n"
-                        "  {\n"
-                    )
+                # Setters
                                     
-                    for prop in setters:
-                        f.write(
-                            '    {"%s",set_%s_%s},\n'
-                            %
-                            ( prop["name"] , bind_name , prop["name"] )
-                        )
+                f.write(
+                    '  lua_pushstring(L,"__setters__");\n'
+                    "  lua_newtable(L);\n"
+                    "  const luaL_Reg setters[]=\n"
+                    "  {\n"
+                )
                                 
+                for prop in setters:
                     f.write(
-                        "    {NULL,NULL}\n"
-                        "  };\n"
-                        "  luaL_register(L,NULL,setters);\n"
-                        "  lua_rawset(L,-3);\n"
+                        '    {"%s",set_%s_%s},\n'
+                        %
+                        ( prop["name"] , bind_name , prop["name"] )
                     )
+                    
+                f.write( '    {"extra",lb_set_extra}, // AUTO\n' )
+                            
+                f.write(
+                    "    {NULL,NULL}\n"
+                    "  };\n"
+                    "  luaL_register(L,NULL,setters);\n"
+                    "  lua_rawset(L,-3);\n"
+                )
                     
             if bind[ "inherits" ] is not None:
                 
