@@ -10,11 +10,11 @@ FrontPageView = Class(View, function(view, model, ...)
     view.selector = Image
     {
         name = "frontpageselector",
-        src = "assets/polaroid_overlay.png",
-        opacity = 0
+        src = "assets/blackwhiteframe_overlay.png",
+        opacity = 255
     }
 
-    model.album_group:add(view.selector)
+    --model.album_group:add(view.selector)
     view.ui:add(model.album_group)
 
     grad = Image
@@ -54,13 +54,32 @@ FrontPageView = Class(View, function(view, model, ...)
             model.front_page_index = next_spot
         end
 --]]
+        left_edge:complete_animation()
+        right_edge:complete_animation()
+        local new_x
+        if model.front_page_index == 1 then
+            new_x = 0
+            left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 0}
+            right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
+        elseif model.front_page_index == math.ceil(model.num_sources / 
+                     NUM_ROWS) - (NUM_VIS_COLS-1)               then
+            new_x = -1*(model.front_page_index-1) * PIC_W + 
+                       (screen.width - NUM_VIS_COLS*PIC_W)
+            left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
+            right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
+        else
+            new_x = -1*(model.front_page_index-1) * PIC_W + 
+                       (screen.width - NUM_VIS_COLS*PIC_W)/2
+            left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
+            right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
+        end
         model.album_group:complete_animation()
 
         model.album_group:animate
         {
              duration = 2*CHANGE_VIEW_TIME,
-             mode     = EASE_IN_QUAD,
-             x        = -1*(model.front_page_index-1) * PIC_W + .5*PIC_W
+             mode     = EASE_OUT_QUAD,
+             x        = new_x
              --x = model.album_group.x - dir*(screen.width/(NUM_VIS_COLS+1))
         }
 
@@ -68,7 +87,7 @@ FrontPageView = Class(View, function(view, model, ...)
         
     end
 
-    local prev_i = {1,5} 
+    local prev_i = {1,1} 
            
     function view:update()
         local controller = view:get_controller()
@@ -79,15 +98,6 @@ FrontPageView = Class(View, function(view, model, ...)
         if comp == Components.FRONT_PAGE  then
 
             view:shift_group()
-            if model.album_group:find_child("frontpageselector") == nil 
-                                                                   then
-                controller:reset_selected_index()
-                sel    = {1,1}
-                prev_i = {1,1}
-                model.front_page_index = 1
-                model.album_group:add(view.selector)
-
-            end
             print("\n\nShowing FrontPageView UI\n")
 
             view.ui:raise_to_top()
@@ -103,6 +113,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
 
             local new_r = PIC_H * (sel[1]-1)
+--[[
             if sel[1] == 1 then
                 new_r = 0
             elseif sel[1] == NUM_ROWS then
@@ -112,22 +123,42 @@ FrontPageView = Class(View, function(view, model, ...)
                   new_r = new_r * .95
 --                new_r = .95*screen.height * (sel[1]-1) / NUM_ROWS
             end
+--]]
             local new_c = PIC_W * (sel[2]-1)
+
 --[[
             local new_c = screen.width  * (sel[2]-1) / 
                              (NUM_VIS_COLS + 1)
 --]]
+                    view.selector:raise_to_top()
+view.selector:complete_animation()
             view.selector:animate{
-                 duration = CHANGE_VIEW_TIME,
-                 opacity  = 0
+                 duration = 2*CHANGE_VIEW_TIME,
+                 mode = EASE_OUT_BOUNCE,
+                 position = {new_c-55,new_r-55}
+                 --opacity  = 0
             }
 
+            if model.album_group:find_child("frontpageselector") == nil 
+                                                                   then
+print("adding selector")
+                view.selector.opacity = 0
+                model.album_group:add(view.selector)
+                view.selector:complete_animation()
+                view.selector:animate{
+                     duration = 15*CHANGE_VIEW_TIME,
+                     --position = {new_c-55,new_r-55}
+                     opacity  = 255
+                }
 
-            local previous
-            local current
-            local prev_bs
-            local curr_bs
 
+            end
+
+       --     local previous
+         --   local current
+     --       local prev_bs
+         --   local curr_bs
+--[=[
             if model.albums[prev_i[1]] == nil or 
                model.albums[prev_i[1]][prev_i[2]] == nil then
 
@@ -142,21 +173,28 @@ FrontPageView = Class(View, function(view, model, ...)
                     model.albums[prev_i[1]][prev_i[2]].base_size[2]
                 }
             end
-
+--]=]
+--[=[
             if model.albums[sel[1]] == nil or 
                model.albums[sel[1]][sel[2]] == nil then
                print("going to placeholder",sel[1],sel[2])
                 current = model.placeholders[sel[1]][sel[2]]
+--]=]
+--[=[
                 curr_bs =  {
                    model.def_bs[1],model.def_bs[2]
                 }
-            else
-                current = model.albums[sel[1]][sel[2]]
+--]=]
+     --       else
+     --           current = model.albums[sel[1]][sel[2]]
+--[=[
                 curr_bs = {
                     model.albums[sel[1]][sel[2]].base_size[1],
                     model.albums[sel[1]][sel[2]].base_size[2]
                 }
-            end
+--]=]
+     --       end
+--[[
             print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
 
 assert(previous ~= nil,"wth")
@@ -171,35 +209,46 @@ assert(previous ~= nil,"wth")
                     --if current:complete_animation ~= nil then
                         current:complete_animation()
                     --end
-                    current:raise_to_top()
+--]]
+--[[
+                    view.selector:complete_animation()
+                    view.selector.position={new_c-55,new_r-55}
+                    view.selector:animate{
+                        duration = 2*CHANGE_VIEW_TIME,
+                        --scale = {1.05,1.15},
+                        opacity = 255
+                    }
+                    --current:raise_to_top()
+
+                    view.selector:raise_to_top()
+--]]
+--[[
                     current:animate{
                         duration = CHANGE_VIEW_TIME,
                         position = {new_c,new_r},
                         scale  = {SEL_W / curr_bs[1],SEL_H /curr_bs[2]}
                     }
 
-                    view.selector:complete_animation()
-                    view.selector:raise_to_top()
-                    view.selector.position={new_c-30,new_r-0}
-                    view.selector:animate{
-                        duration = 2*CHANGE_VIEW_TIME,
-                        scale = {1.05,1.15},
-                        opacity = 255
-                    }
 
-                    local r = math.random(1,4)
-                    print(r,model.swapping_cover)
-                    if r == 4 and model.swapping_cover == false then
-                        model.swapping_cover = true
-                        r = math.random(1,10)
-                        local formula = (prev_i[2]-1)*2 + (prev_i[1])
-                        print("formula?",prev_i[1],prev_i[2],formula)
-                        loadCovers(formula, searches[formula], r)
-                    end
-                    prev_i = {sel[1],sel[2]}
 
                 end
             }
+--]]
+            local rand = math.random(1,3)
+            --print(rand,model.swapping_cover)
+            if rand == 3 and model.swapping_cover == false then
+                model.swapping_cover = true
+                local rand_i = {
+                    math.random(1,NUM_ROWS),
+                    math.random(1,NUM_VIS_COLS) + 
+                         model.front_page_index  - 1
+                }
+                local search_i = math.random(1,10)
+                local formula = (rand_i[2]-1)*2 + (rand_i[1])
+                --print("formula?",rand_i[1],rand_i[2],formula)
+                loadCovers(formula, searches[formula], search_i)
+            end
+            prev_i = {sel[1],sel[2]}
 
 
         else

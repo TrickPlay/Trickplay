@@ -2,13 +2,18 @@ FrontPageController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.FRONT_PAGE)
 
     -- the default selected index
-    local selected = {1,2}
+    local selected = {1,1}
 
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
         [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.a]     = function(self)
+            self:get_model():set_active_component(Components.SOURCE_MANAGER)
+            self:get_model():notify()
+
+        end,
         [keys.Return] = function(self) 
             model.album_group:clear()
             model.albums = {}

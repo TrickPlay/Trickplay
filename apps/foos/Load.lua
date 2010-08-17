@@ -84,7 +84,7 @@ function Load_Image(site,index)
                 end
             end
         }
-    elseif model.albums[i][j] ~= nil then
+    elseif model.albums[i] ~= nil and model.albums[i][j] ~= nil then
 
         model.swap_pic = Image{
             async    = true,
