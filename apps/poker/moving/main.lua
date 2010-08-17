@@ -27,7 +27,7 @@ local num = state:get_state()
 state_ui = Text{text=tostring(num), color="FFFFFF", font="Sans 40px", position={960,960}}
 local control = Control()
 function screen:on_key_down(k)
-   control:on_event("keyboard")
+   control:on_event(KbdEvent{key=k})
 end
 for _,text in ipairs(texts) do
    screen:add(text)

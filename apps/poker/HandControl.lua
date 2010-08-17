@@ -10,13 +10,13 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    local hand_pipeline = {}
    local orig_hand_pipeline = {
       function(ctrl) return ctrl:deal(Rounds.HOLE) end,
-      function(ctrl, event) return ctrl:bet(Rounds.HOLE) end,
+      function(ctrl, event) return ctrl:bet(Rounds.HOLE, event) end,
       function(ctrl) return ctrl:deal(Rounds.FLOP) end,
-      function(ctrl, event) return ctrl:bet(Rounds.FLOP) end,
+      function(ctrl, event) return ctrl:bet(Rounds.FLOP, event) end,
       function(ctrl) return ctrl:deal(Rounds.TURN) end,
-      function(ctrl, event) return ctrl:bet(Rounds.TURN) end,
+      function(ctrl, event) return ctrl:bet(Rounds.TURN, event) end,
       function(ctrl) return ctrl:deal(Rounds.RIVER) end,
-      function(ctrl, event) return ctrl:bet(Rounds.RIVER) end,
+      function(ctrl, event) return ctrl:bet(Rounds.RIVER, event) end,
       function(ctrl) return ctrl:showdown() end
    }
 
@@ -33,12 +33,12 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_deck() return state:get_deck() end
 
    -- private functions
-   local function give_winner_pot_and_bone_out()
+   function ctrl:give_winner_pot_and_bone_out()
       state:give_winner_pot()
 
       
       hand_pipeline = {}
-      enable_event_listener(Events.TIMER, 1)
+      enable_event_listener(KbdEvent())
    end
 
    local function initialize_pipeline()
@@ -63,7 +63,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       initialize_pipeline()
       pres:display_hand()
 
-      enable_event_listener(Events.TIMER, .5)
+      enable_event_listener(TimerEvent{interval=.5})
    end
 
 
@@ -76,7 +76,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    }
    function ctrl.deal(ctrl, round)
       deal_LUT[round](pres)
-      enable_event_listener(Events.TIMER, .5)
+      enable_event_listener(TimerEvent{interval=.5})
       return true
    end
 
@@ -87,9 +87,39 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    -- postconditions: action var indexes current active player. also,
    -- proper event listener set up. if current active player is a
    -- human, then event listener waits for on_event call from 
-   function ctrl.bet(ctrl, round)
-      local continue = state:bet(round)
-      enable_event_listener(Events.TIMER, .5)
+
+   print("defined and set waiting_for_bet to false")
+   local waiting_for_bet = false
+   function ctrl.bet(ctrl, round, event)
+      print("entering ctrl:bet, and waiting_for_bet is", waiting_for_bet)
+      local continue = false
+      if waiting_for_bet and event:is_a(BetEvent) then
+         print("setting waiting_for_bet to false")
+         waiting_for_bet = false
+         continue = state:execute_bet(event.bet)
+         print("setting up timerevent in ctrl.bet, where waiting_for_bet is", waiting_for_bet)
+         game_ctrl:on_event(Event{})
+      elseif not waiting_for_bet then
+         print("generating a bet, and setting waiting_for_bet to true")
+         waiting_for_bet = true
+         local active_player = state:get_active_player()
+         if active_player.isHuman then
+            model.currentPlayer = active_player
+            model.in_players = state:get_in_players()
+            model:set_active_component(Components.PLAYER_BETTING)
+            model:get_active_controller():set_callback(function(bet) game_ctrl:on_event(BetEvent{bet=bet}) end)
+            enable_event_listener(KbdEvent())
+         else
+            local bet = active_player:get_move(state)
+            enable_event_listener(
+               TimerEvent{
+                  interval=1,
+                  cb=function()
+                        game_ctrl:on_event(BetEvent{bet=bet})
+                  end})
+         end
+      end
+      if continue then waiting_for_bet = false end
       return continue
    end
 
@@ -104,7 +134,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl.showdown(ctrl)
       local winners, poker_hand = state:showdown()
       pres:showdown(winners, poker_hand)
-      enable_event_listener(Events.KEYBOARD)
+      enable_event_listener(KbdEvent())
       return true
    end
 
@@ -113,7 +143,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       if #hand_pipeline > 0 then
          local next_action = hand_pipeline[1]
          local result = next_action(ctrl, event)
-         if result then table.remove(hand_pipeline, 1) end
+         if result then 
+            print("removing action from hand_pipeline")
+            table.remove(hand_pipeline, 1)
+         end
       end
 
       if #hand_pipeline > 0 then
@@ -126,5 +159,9 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl.cleanup(ctrl)
       pres:clear_ui()
       return true
+   end
+
+   function ctrl:set_betting_listener(callback, player)
+      game_ctrl:set_bet_listener(callback, player)
    end
 end)
