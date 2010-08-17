@@ -32,6 +32,15 @@ Player = Class(function(player, args, ...)
       
    end
 
+   --[[
+      @return The Player's current position. Early, Middle, Late,...
+      view Position table in Globals.lua for options
+   --]]
+   function player:get_position(state)
+      -- TODO: actually calculate position
+      return Position.BIG_BLIND
+   end
+
    ---
    -- @param hole an array of two hole cards
    -- @param community_cards
@@ -47,23 +56,28 @@ Player = Class(function(player, args, ...)
    -- @returns bet number  quantity of bet, if fold then bet should be 0
    --function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot, round)
    function player:get_move(state)
-      -- TODO: pass in real position, right now position is placeholder data cause it's unclear how to calculate position.
-      assert(hole)
-      if(not position) then
-          position = Position.EARLY
-      end
+      
+      local hole = state:get_hole_cards()[self]
+      local position = self:get_position(state)
       local fold = false
-<<<<<<< HEAD:apps/poker/Player.lua
-      local bet = call_bet
+      local call_bet = state:get_call_bet()
+      local min_raise = state:get_min_raise()
+      local round = Rounds.HOLE
+      local raisedFactor = RaiseFactor.UR
+      local community_cards = state:get_community_cards()
+      -- move the ai will make
       local ai_move = Moves.FOLD
-      local amount_to_raise = RaiseFactor.UR
+      local amount_to_raise = RaiseFactor.RR
 
       --combine the community cards and hole
-      local all_cards = hole
+      assert(hole[1])
+      assert(hole[2])
+      local all_cards = {}
+      all_cards[1], all_cards[2] = hole[1], hole[2]
       for i,v in ipairs(community_cards) do
           table.insert(all_cards, v)
       end
-      local best_hand = get_best(hole)
+      local best_hand = get_best(all_cards)
       
       -- get outs for enemy cards winning
       local outs = 0
@@ -93,24 +107,21 @@ Player = Class(function(player, args, ...)
 
       local function curvature(a_move)
          if(a_move == Moves.CALL) then
-            local random_num = math.random(3)
-            if(3 == random_num) then
+            if(3 == math.random(3)) then
                a_move = Moves.RAISE
             end
          elseif(ai_move == Moves.RAISE) then
-            local random_num = math.random(3)
-            if(3 == random_num) then
+            if(3 == math.random(3)) then
                a_move = Moves.CALL
             end
          end            
-         return a_move, math.random(2,3)
+         return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
       end
 
       local playsTable = {
          [Rounds.HOLE] = function(a_move)
             -- TODO: get a calculation or param that determines whether
             --       the bets have been unraised, raised, or re-raised
-            local raisedFactor = RaiseFactor.UR
             local hand = sort_hand(hole)
             local suit = UNSUITED
             if(hand[1].suit.name == hand[2].suit.name) then
@@ -119,8 +130,7 @@ Player = Class(function(player, args, ...)
 
             a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
             --introduce a random element
-            local random = math.random(4)
-            if(random == 4) then
+            if(math.random(4) == 4) then
                a_move = math.random(Moves.CALL, Moves.FOLD)
             end
             return a_move
@@ -225,16 +235,28 @@ Player = Class(function(player, args, ...)
       ai_move, amount_to_raise = playsTable[round](ai_move)
       
       if(Moves.CALL == ai_move) then
+         print("\nCALL, call_bet = "..call_bet.."\n")
          return false, call_bet
       elseif(Moves.FOLD == ai_move) then
+         print("\nFOLD\n")
          return true, 0
       elseif(Moves.RAISE == ai_move) then
          if(amount_to_raise == RaiseFactor.R) then
-            return false, math.random(call_bet, call_bet*2)
+            local a_bet = math.random(call_bet+min_raise, call_bet*2)
+            if(a_bet > player.money) then
+               a_bet = player.money
+            end
+            print("\nRAISE, raised by "..a_bet.."\n")
+            return false, a_bet
          elseif(amount_to_raise == RaiseFactor.RR) then
-            return false, math.random(call_bet*1.5, call_bet*2.5)
+            local a_bet = math.random(call_bet*1.5+min_raise, call_bet*2.5)
+            if(a_bet > player.money) then
+               a_bet = player.money
+            end
+            print("\nRAISE, raised by "..a_bet.."\n")
+            return false, a_bet
          else
-            error("failed raising the stakes")
+            error("failed raising the steaks")
          end
       else
          error("someth'n wrong with the moves")
