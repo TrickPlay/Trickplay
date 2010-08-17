@@ -61,7 +61,7 @@ Player = Class(function(player, args, ...)
       -- else
       --    return true, 0
       -- end
-      return 10
+      return false, state:get_call_bet()
    end
    
    player.status = PlayerStatusView(model, nil, player)
