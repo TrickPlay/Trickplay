@@ -46,9 +46,12 @@ PlayerStatusView = Class(View, function(self, model, args, player,...)
                 if self.show then self.group.opacity = 240 end
         end
     
-        function self:update()
+        function self:update(text)
                 if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
                 self.title.text = "Player "..player.number.."   Money: $"..self.player.money
+                
+                if text then self.action.text = text end
+                self.action.anchor_point = {self.action.w/2, self.action.h/2}
         end
 
 end)

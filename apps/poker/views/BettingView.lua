@@ -99,7 +99,7 @@ BettingView = Class(View, function(view, model, ...)
         else
             print("Hiding Betting UI")
             self.ui:complete_animation()
-            self.ui.opacity = 255
+            self.ui.opacity = 0
         end
     end
 

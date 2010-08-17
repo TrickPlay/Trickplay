@@ -49,6 +49,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             [SubGroups.LEFT_MIDDLE] = function()
                 if(playerCounter > 2) then
                     start_a_game()
+                    
                 end
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
@@ -58,7 +59,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     }
     
     local function getPosition()
-        ---[[ Old way of getting position
+        --[[ Old way of getting position
         local num = (selected-1)*SubSize + subselection
         
         if num == 8 then num = 6 end
@@ -66,7 +67,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         return num
         --]]
         
-        --[[ New, possibly correct way, but so far it doesn't work
+        ---[[ better?
         local num
         
         if selected == 2 and subselection == 1 then

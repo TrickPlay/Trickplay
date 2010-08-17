@@ -23,7 +23,7 @@ function(pres, ctrl)
       font="Sans 40px",
       color="FFFFFF",
       text="",
-      position={100, 100},
+      position={100, 200},
       opacity = 255
    }
    screen:add(poker_hand_text)
@@ -123,14 +123,15 @@ function(pres, ctrl)
       
       for player,hole in pairs( ctrl:get_hole_cards() ) do
          
-         local x = 0
-         local pos = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]}
+         local offset = 0
+         local pos = {MPCL[player.table_position][1], MPCL[player.table_position][2]}
          
          for k,card in pairs(hole) do
             screen:add(card.group)
             -- Animate and flip the card if the player is human
-            card.group:animate{x = pos[1] + x, y = pos[2], mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
-            x = x + 100
+            card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
+            card.group:raise_to_top()
+            offset = offset + 30
             
             table.insert(allCards, card)
          end
@@ -198,12 +199,26 @@ function(pres, ctrl)
       animate_chips_to_center()
       all_cards_up()
       print(poker_hand.name .. " passed to pres:showdown()")
+      --[[
       poker_hand_text.text = poker_hand.name
       poker_hand_text:animate{
          duration=300,
          opacity=255,
       }
+      ]]--
+      
       -- winners is an array of the winning players
+      --[[
+      local p_num = winners[1].table_position
+      local wintext = "Player "..p_num.. " wins!"
+      local t = Text{ font="Sans 50px", color="00FF55", text=wintext, position=MDPL[p_num] }
+      
+      Popup:new{group = t}
+      --]]
+      
+      winners[1].status:update( poker_hand.name )
+      --winners[1].status:update( "I win!" )
+      
    end
 
    function pres:fold_player(active_player)
@@ -212,6 +227,14 @@ function(pres, ctrl)
    end
 
    function pres:bet_player(active_player)
-      update_players()
+      --update_players()
+      
+      for player, bet in pairs( ctrl:get_player_bets() ) do
+         if player == active_player then
+            player.betChips:set(bet)
+            player.status:update( "Bet "..bet )
+         end
+      end
+
    end
 end)
