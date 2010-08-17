@@ -46,6 +46,10 @@ Player = Class(function(player, args, ...)
    -- @returns bet number  quantity of bet, if fold then bet should be 0
    function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot, round)
       -- TODO: pass in real position, right now position is placeholder data cause it's unclear how to calculate position.
+      assert(hole)
+      if(not position) then
+          position = Position.EARLY
+      end
       local fold = false
       local bet = call_bet
       local ai_move = Moves.FOLD
@@ -56,7 +60,7 @@ Player = Class(function(player, args, ...)
       for i,v in ipairs(community_cards) do
           table.insert(all_cards, v)
       end
-      local best_hand = get_best(hand)
+      local best_hand = get_best(hole)
       
       -- get outs for enemy cards winning
       local outs = 0
@@ -84,8 +88,23 @@ Player = Class(function(player, args, ...)
          return some_outs, some_total_outs
       end
 
+      local function curvature(a_move)
+         if(a_move == Moves.CALL) then
+            local random_num = math.random(3)
+            if(3 == random_num) then
+               a_move = Moves.RAISE
+            end
+         elseif(ai_move == Moves.RAISE) then
+            local random_num = math.random(3)
+            if(3 == random_num) then
+               a_move = Moves.CALL
+            end
+         end            
+         return a_move, math.random(2,3)
+      end
+
       local playsTable = {
-         [Rounds.HOLE] = function()
+         [Rounds.HOLE] = function(a_move)
             -- TODO: get a calculation or param that determines whether
             --       the bets have been unraised, raised, or re-raised
             local raisedFactor = RaiseFactor.UR
@@ -95,7 +114,7 @@ Player = Class(function(player, args, ...)
                suit = SUITED
             end
 
-            local a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
+            a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
             --introduce a random element
             local random = math.random(4)
             if(random == 4) then
@@ -103,7 +122,7 @@ Player = Class(function(player, args, ...)
             end
             return a_move
          end,
-         [Rounds.FLOP] = function()
+         [Rounds.FLOP] = function(a_move)
             --First, check to see that the best hand is not the
             --river
             for place,poker_hand in ipairs(PokerHands) do
@@ -182,9 +201,9 @@ Player = Class(function(player, args, ...)
                   return Moves.FOLD
                elseif(losing_odds <= HIGH_OUTS_RANGE and
                losing_odds >= LOW_OUTS_RANGE) then
-                  return Moves.Raise, RaiseFactor.R
+                  return Moves.RAISE, RaiseFactor.R
                elseif(outs/total_outs < LOW_OUTS_RANGE) then
-                  return Moves.Raise, RaiseFactor.RR
+                  return Moves.RAISE, RaiseFactor.RR
                else
                    error("problem ai betting")
                end
@@ -192,21 +211,21 @@ Player = Class(function(player, args, ...)
                error("problem ai betting")
             end
          end,
-         [Rounds.TURN] = function()
-            return ai_move
+         [Rounds.TURN] = function(a_move)
+            return curvature(a_move)
          end,
-         [Rounds.RIVER] = function()
-            return ai_move
+         [Rounds.RIVER] = function(a_move)
+            return curvature(a_move)
          end
       }
 
-      ai_move, amount_to_raise = playsTable[round]()
+      ai_move, amount_to_raise = playsTable[round](ai_move)
       
-      if(Moves.CALL == move) then
+      if(Moves.CALL == ai_move) then
          return false, call_bet
-      elseif(Moves.FOLD == move) then
+      elseif(Moves.FOLD == ai_move) then
          return true, 0
-      elseif(Moves.Raise == move) then
+      elseif(Moves.RAISE == ai_move) then
          if(amount_to_raise == RaiseFactor.R) then
             return false, math.random(call_bet, call_bet*2)
          elseif(amount_to_raise == RaiseFactor.RR) then
