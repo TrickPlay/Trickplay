@@ -53,6 +53,7 @@ Player = Class(function(player, args, ...)
           position = Position.EARLY
       end
       local fold = false
+<<<<<<< HEAD:apps/poker/Player.lua
       local bet = call_bet
       local ai_move = Moves.FOLD
       local amount_to_raise = RaiseFactor.UR

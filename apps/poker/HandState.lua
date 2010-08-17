@@ -35,6 +35,8 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_sb_p() return sb_p end
    function state:get_bb_p() return bb_p end
    function state:get_deck() return deck end
+   function state:get_call_bet() return call_bet end
+   function state:get_min_raise() return min_raise end
 
    function state.initialize(state, args)
       players = args.players
@@ -79,7 +81,6 @@ HandState = Class(nil, function(state, ctrl, ...)
          hole_cards[player] = deck:deal(2)
       end
       community_cards = deck:deal(5)
-
    end
 
    function state.give_winner_pot(state)
@@ -100,10 +101,13 @@ HandState = Class(nil, function(state, ctrl, ...)
       ctrl:set_bet_listener(callback, player)
    end
 
-
-   function state:execute_bet(bet)
+   -- if bet is less than call_bet then assume folding
+   function state:execute_bet(fold, bet)
+      if type(fold) ~= "boolean" or type(bet) ~= "number" then
+         error("execute_bet called with parameters of incorrect type", 2)
+      end
       local active_player = in_players[action]
-      if bet == 0 then
+      if fold then
          -- current wager goes into pot
          pot = pot + player_bets[active_player]
          player_bets[active_player] = 0
@@ -112,9 +116,24 @@ HandState = Class(nil, function(state, ctrl, ...)
          ctrl:fold_player(active_player)
       else
          local delta = bet-player_bets[active_player]
-         assert(0 <= delta and delta <= active_player.money)
          player_bets[active_player] = bet
-         active_player.money = active_player.money - delta
+
+         -- bet is a call
+         if bet <= call_bet then
+            
+         else
+            if bet-call_bet > min_raise then
+               min_raise = bet-call_bet
+            end
+            call_bet = bet
+            for i,player in ipairs(in_players) do
+               if i ~= action and player.money > 0 then
+                  done[player] = false
+               end
+            end
+         end
+--         assert(0 <= delta and delta <= active_player.money) logic is kind of in bettingview/controller
+         --active_player.money = active_player.money - delta
          ctrl:bet_player(active_player)
       end
       done[active_player] = true
@@ -143,6 +162,8 @@ HandState = Class(nil, function(state, ctrl, ...)
             player_bets[player] = 0
             done[player] = false
          end
+         call_bet = 0
+         min_raise = bb_qty
 
          -- reset the new action
          local tmp_action = (dealer % #in_players) + 1
