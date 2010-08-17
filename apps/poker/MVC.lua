@@ -13,15 +13,16 @@ Model = Class(function(model, ...)
     SCREEN_WIDTH = screen.w
     SCREEN_HEIGHT = screen.h
     model.default_player_locations = {
-        [1] = {160, 260},
-        [2] = {620, 90},
-        [3] = {SCREEN_WIDTH-620, 90},
-        [4] = {SCREEN_WIDTH-160, 260},
-        [5] = {230, 890},
-        ["START"] = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
-        ["EXIT"] = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
-        [6] = {SCREEN_WIDTH-230, 890},
+        [1] = {0, 572},
+        [2] = {0, 99},
+        [3] = {310, 20},
+        [4] = {1281, 20},
+        [5] = {1590, 99},
+        [6] = {1590, 572},
+        START = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
+        EXIT = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
     }
+    MDPL = model.default_player_locations
     
     model.default_bet_locations = {
         [1] = {200, 600},
@@ -30,21 +31,44 @@ Model = Class(function(model, ...)
         [4] = {1720, 600},
         [5] = {550, 850},
         [6] = {1400, 850},
-        POT = {930, 797}
+        POT = {925, 680}
     }
     mdbl = model.default_bet_locations
     
-    --[[
-        model.default_bet_locations = {
-        [1] = {190, 567},
-        [2] = {519, 351},
-        [3] = {1352, 350},
-        [4] = {1718, 581},
-        [5] = {550, 955},
-        [6] = {1344, 920},
-        POT = {930, 797}
+    model.card_locations = {
+        [1] = {726, 510},
+        [2] = {843, 510},
+        [3] = {966, 510},
+        [4] = {1084, 510},
+        [5] = {1205, 510},
+        DECK = {785, 650},
+        BURN = {1145, 650}
     }
-    --]]
+    MCL = model.card_locations
+    
+    model.player_card_locations = {
+        [1] = {347, 759},
+        [2] = {70, 381},
+        [3] = {454, 159},
+        [4] = {1414, 189},
+        [5] = {1726, 409},
+        [6] = {1452, 760}
+    }
+    MPCL = model.player_card_locations
+    for i=1, #MPCL do
+        MPCL[i][1] = MPCL[i][1] + 45
+        MPCL[i][2] = MPCL[i][2] + 60
+    end
+    
+    model.status_chip_locations = {
+        [1] = {500, 820},
+        [2] = {320, 520},
+        [3] = {700, 310},
+        [4] = {1185, 310},
+        [5] = {1550, 520},
+        [6] = {1290, 820},
+    }
+    MSCL = model.status_chip_locations
     
     model.currentPlayer = nil
     

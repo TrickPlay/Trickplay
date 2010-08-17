@@ -187,4 +187,6 @@ Deck = Class(nil, function(self, ...)
          table.insert(cards, card)
       end
    end
+   
+   self.cards = cards
 end)

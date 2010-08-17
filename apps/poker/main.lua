@@ -1,7 +1,27 @@
 dofile ("Assets.lua")
 
+-- Asset loading ---------------------------------------------------------------
 AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
+AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleNone.png")
+
+
+local ui_colors = {"Red", "Green", "Gray"}
+local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"}
+
+for _,color in pairs(ui_colors) do
+   for _,button in pairs(ui_buttons) do
+      AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
+   end
+end
+
+local player_text = {"BubbleLeft", "BubbleRight"}
+for i=1, 2 do
+   for _, text in ipairs(player_text) do
+      AssetLoader:preloadImage(text..i,"assets/UI/"..text..i..".png")
+   end
+end
+--------------------------------------------------------------------------------
 
 AssetLoader.on_preload_ready =
 function()
@@ -45,20 +65,29 @@ function()
       TIMER = 2,
       BET_PLACED = 3,
    }
+   local old_on_key_down
    -- private (helper) functions
    function disable_event_listeners()
-      old_on_key_down, screen.on_key_down = screen.on_key_down, function() end
+      if screen.on_key_down then
+         old_on_key_down, screen.on_key_down = screen.on_key_down, nil
+      end
       t:disable()
    end
 
    function enable_event_listener(event, interval)
       if event == Events.KEYBOARD then
-         screen.on_key_down, old_on_key_down = old_on_key_down, function() end
+         print("keyboard enabled")
+         if old_on_key_down then
+            screen.on_key_down, old_on_key_down = old_on_key_down, nil
+         end
       elseif event == Events.TIMER then
          t:enable{
             on_timer=function()
-                        game:on_event(Events.TIMER)
-                     end,
+               game:on_event{
+                  type=Events.TIMER,
+                  interval=interval
+               }
+            end,
             interval=interval
          }
       end
