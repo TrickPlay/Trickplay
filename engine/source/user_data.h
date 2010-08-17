@@ -137,6 +137,13 @@ struct UserData
     }
 
     //.........................................................................
+
+    inline const char * get_type() const
+    {
+        return type;
+    }
+
+    //.........................................................................
     // Gets the user data from the Lua stack given the index.
 
     inline static UserData * get( lua_State * L , int index = 1 )
@@ -173,7 +180,8 @@ struct UserData
     }
 #endif
     //.........................................................................
-    // Pushes the Lua proxy onto the stack - whether it is weak or strong
+    // Pushes the Lua proxy onto the stack - whether it is weak or strong. If
+    // it is weak and is about to be finalized, this can push a nil.
 
     void push_proxy();
 
@@ -240,7 +248,7 @@ struct UserData
 
 private:
 
-    friend class Handle;
+    friend struct Handle;
 
     //.........................................................................
 
@@ -318,24 +326,17 @@ private:
     bool            initialized;
 
     //.........................................................................
-    // A reference to the Lua object. We flip this between a strong
-    // reference and a weak reference. The only time it can go away
-    // is when the Lua state goes away - in that case this object will
-    // be uninstalled and deleted.
+    // A reference to the Lua object. We keep a weak reference all the time
+    // and a strong one only when the toggle ref is not the last.
 
-    int             proxy_ref;
+    int             weak_ref;
 
-    //.........................................................................
-    // Whether the reference above is weak or strong, so we can toggle it
-
-    enum RefType { STRONG , WEAK };
-
-    RefType         proxy_ref_type;
+    int             strong_ref;
 
     //.........................................................................
     // Callbacks are kept in a table we reference.
 
-    int callbacks_ref;
+    int             callbacks_ref;
 
     //.........................................................................
     // A map to signals we have connected to the master. Each entry has our own
@@ -345,7 +346,7 @@ private:
 
     typedef std::map< String , gulong > SignalMap;
 
-    SignalMap * signals;
+    SignalMap *     signals;
 };
 
 

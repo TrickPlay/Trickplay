@@ -507,6 +507,18 @@ globals
 #else
 			lua_pushvalue( L , LUA_REGISTRYINDEX );
 #endif			
-		]];		
-}
+		]];
+		
+	string uuid()
+		[[
+			String uuid( Util::make_v4_uuid() );
+			
+			result = uuid.c_str();
+		]];
+		
 
+	dumptable( table t , function filter = 0 )
+		[[
+			lb_dump_table(L);
+		]];						
+}

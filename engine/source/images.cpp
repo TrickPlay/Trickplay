@@ -370,7 +370,7 @@ Images::Images( const Images & )
 
 //-----------------------------------------------------------------------------
 
-Images::Images * Images::get( bool destroy )
+Images * Images::get( bool destroy )
 {
     static Images * self = NULL;
 

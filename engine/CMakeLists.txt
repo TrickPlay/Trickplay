@@ -1,8 +1,12 @@
 
 set( ENGINE_SRC		${PROJECT_SOURCE_DIR}/engine )
-set( LB_GENERATOR       ${ENGINE_SRC}/lb/bin/lb.py )
+set( LB_GENERATOR   ${ENGINE_SRC}/lb/bin/lb.py )
+set( BINDINGS_SRC	${ENGINE_SRC}/bindings )
 
 set( 3RD_PARTY_SOURCE_FILES )
+set( ENGINE_LIBRARY_NAMES )
+set( ENGINE_SOURCE_FILES )
+set( LB_FILES )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
@@ -10,16 +14,13 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 # Include directories
 #------------------------------------------------------------------------------
 
-TP_FIND_INCLUDE( expat.h 				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( curl/curl.h 				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( glib-2.0 glib.h 			ENGINE_INCLUDE_DIRS )
-TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( cairo cairo.h				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( pango-1.0 pango/pango.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( avahi-core core.h			ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( avahi-glib glib-watch.h		ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( avahi-common watch.h			ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( expat.h 								ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( curl/curl.h 							ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( glib-2.0 glib.h 						ENGINE_INCLUDE_DIRS )
+TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h				ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( cairo cairo.h							ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( pango-1.0 pango/pango.h				ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 			ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( fontconfig fontconfig.h                ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
@@ -29,7 +30,29 @@ TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
 #TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
+
+
+#------------------------------------------------------------------------------
+# Avahi for MDNS
+
+if (TP_CONTROLLER_DISCOVERY_MDNS)
+	
+	TP_FIND_INCLUDE( avahi-core core.h						ENGINE_INCLUDE_DIRS )
+	TP_FIND_INCLUDE( avahi-glib glib-watch.h				ENGINE_INCLUDE_DIRS )
+	TP_FIND_INCLUDE( avahi-common watch.h					ENGINE_INCLUDE_DIRS )
+	
+	list( APPEND ENGINE_LIBRARY_NAMES	avahi-core avahi-common avahi-glib )
+	
+	add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
+
+    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+	
+endif (TP_CONTROLLER_DISCOVERY_MDNS)
+
+
+#------------------------------------------------------------------------------
 
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
@@ -46,7 +69,9 @@ include_directories(
 # Libraries
 #------------------------------------------------------------------------------
 
-set(
+list( 
+	APPEND
+    
     ENGINE_LIBRARY_NAMES
     
     #--------------
@@ -74,18 +99,6 @@ set(
     ssl crypto cares curl
 
     #--------------
-    # tokyo
-    #--------------
-    
-    tokyocabinet
-    
-    #--------------
-    # avahi
-    #--------------
-        
-    avahi-core avahi-common avahi-glib
-    
-    #--------------
     # sqlite
     #--------------
     
@@ -112,6 +125,54 @@ set(
         
 )
 
+#--------------
+# uuid
+#--------------
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	list(
+		APPEND ENGINE_LIBRARY_NAMES
+		uuid
+	)
+else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+	list(
+		APPEND ENGINE_LIBRARY_NAMES
+		ossp-uuid
+	)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+#------------------------------------------------------------------------------
+# UPnP - must come after uuid cos it export some uuid symbols badly
+
+if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
+
+	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
+	
+	list( APPEND ENGINE_LIBRARY_NAMES upnp )
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		list( APPEND ENGINE_LIBRARY_NAMES ixml )
+	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	
+	
+	if ( TP_CONTROLLER_DISCOVERY_UPNP )
+		
+		add_definitions( -DTP_CONTROLLER_DISCOVERY_UPNP=1 )
+		
+		list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_upnp.cpp )
+	
+	endif ( TP_CONTROLLER_DISCOVERY_UPNP )
+	
+	if ( TP_UPNP_CLIENT )
+	
+		add_definitions( -DTP_UPNP_CLIENT=1 )
+		
+		list( APPEND LB_FILES ${BINDINGS_SRC}/upnp.lb )
+	
+	endif( TP_UPNP_CLIENT )
+	
+endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
+
+
+
 #------------------------------------------------------------------------------
 # Use the right clutter libraries based on the backend used
 
@@ -125,11 +186,19 @@ if (TP_CLUTTER_BACKEND_EGL)
 
 else (TP_CLUTTER_BACKEND_EGL)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list(
+	APPEND ENGINE_LIBRARY_NAMES
+
+	clutter-glx-1.0
+    )
+else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(
         APPEND ENGINE_LIBRARY_NAMES
         
         clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes
     )
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 endif (TP_CLUTTER_BACKEND_EGL)
 
@@ -190,18 +259,14 @@ endif( TP_PROFILING )
 # Files generated by LB
 #------------------------------------------------------------------------------
 
-set( BINDINGS_SRC ${ENGINE_SRC}/bindings )
 
-set(
-
-    LB_FILES
+list( APPEND LB_FILES
     
     ${BINDINGS_SRC}/globals.lb
 
     ${BINDINGS_SRC}/timer.lb
     
     ${BINDINGS_SRC}/url_request.lb
-    ${BINDINGS_SRC}/local_hash.lb
     ${BINDINGS_SRC}/app.lb
     ${BINDINGS_SRC}/system.lb
     ${BINDINGS_SRC}/settings.lb
@@ -303,15 +368,12 @@ set_source_files_properties(
         LANGUAGE CXX
 )
 
-
 #------------------------------------------------------------------------------
 
-add_library(
-    
-    tpcore
-    
-    STATIC
-    
+list( APPEND 
+
+	ENGINE_SOURCE_FILES
+
     ${ENGINE_SRC}/source/notify.cpp
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/app.cpp    
@@ -320,12 +382,12 @@ add_library(
     ${ENGINE_SRC}/source/console.cpp
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
-    ${ENGINE_SRC}/source/mdns.cpp
     ${ENGINE_SRC}/source/keys.cpp
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp    
     ${ENGINE_SRC}/source/clutter_util.cpp    
+
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
     ${ENGINE_SRC}/source/profiler.cpp
@@ -344,6 +406,18 @@ add_library(
     ${ENGINE_SRC}/lb/src/lb.cpp
 
     ${ENGINE_SRC}/source/user_data.cpp
+    ${ENGINE_SRC}/source/util.cpp
+)
+
+#------------------------------------------------------------------------------
+
+add_library(
+    
+    tpcore
+    
+    STATIC
+
+	${ENGINE_SOURCE_FILES}    
     
     ${GENERATED_FILES}
     

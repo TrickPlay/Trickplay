@@ -1,13 +1,12 @@
-
 #include <avahi-common/error.h>
 #include <avahi-common/timeval.h>
 #include <avahi-common/alternative.h>
 #include <avahi-glib/glib-malloc.h>
 
-#include "mdns.h"
+#include "controller_discovery_mdns.h"
 #include "util.h"
 
-MDNS::MDNS( const String & n, int p )
+ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const String & n, int p )
     :
     poll( NULL ),
     server( NULL ),
@@ -36,7 +35,7 @@ MDNS::MDNS( const String & n, int p )
     }
 }
 
-MDNS::~MDNS()
+ControllerDiscoveryMDNS::~ControllerDiscoveryMDNS()
 {
     if ( group )
     {
@@ -51,19 +50,19 @@ MDNS::~MDNS()
     avahi_glib_poll_free( poll );
 }
 
-bool MDNS::is_ready() const
+bool ControllerDiscoveryMDNS::is_ready() const
 {
     return ready;
 }
 
-void MDNS::rename()
+void ControllerDiscoveryMDNS::rename()
 {
     char * new_name = avahi_alternative_service_name( name.c_str() );
     name = new_name;
     avahi_free( new_name );
 }
 
-void MDNS::create_service( AvahiServer * server )
+void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
 {
     if ( !group )
     {
@@ -115,9 +114,9 @@ void MDNS::create_service( AvahiServer * server )
     }
 }
 
-void MDNS::avahi_server_callback( AvahiServer * server, AvahiServerState state, void * userdata )
+void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, AvahiServerState state, void * userdata )
 {
-    MDNS * self = ( MDNS * )userdata;
+    ControllerDiscoveryMDNS * self = ( ControllerDiscoveryMDNS * )userdata;
 
     switch ( state )
     {
@@ -161,9 +160,9 @@ void MDNS::avahi_server_callback( AvahiServer * server, AvahiServerState state, 
     }
 }
 
-void MDNS::avahi_entry_group_callback( AvahiServer * server, AvahiSEntryGroup * g, AvahiEntryGroupState state, void * userdata )
+void ControllerDiscoveryMDNS::avahi_entry_group_callback( AvahiServer * server, AvahiSEntryGroup * g, AvahiEntryGroupState state, void * userdata )
 {
-    MDNS * self = ( MDNS * )userdata;
+    ControllerDiscoveryMDNS * self = ( ControllerDiscoveryMDNS * )userdata;
 
     switch ( state )
     {
