@@ -99,12 +99,6 @@ list(
     ssl crypto cares curl
 
     #--------------
-    # tokyo
-    #--------------
-    
-    tokyocabinet
-    
-    #--------------
     # sqlite
     #--------------
     
@@ -273,7 +267,6 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/timer.lb
     
     ${BINDINGS_SRC}/url_request.lb
-    ${BINDINGS_SRC}/local_hash.lb
     ${BINDINGS_SRC}/app.lb
     ${BINDINGS_SRC}/system.lb
     ${BINDINGS_SRC}/settings.lb

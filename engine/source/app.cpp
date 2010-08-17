@@ -42,7 +42,6 @@ extern int luaopen_clutter_interval( lua_State * L );
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
 extern int luaopen_url_request( lua_State * L );
-extern int luaopen_storage( lua_State * L );
 extern int luaopen_globals( lua_State * L );
 extern int luaopen_app( lua_State * L );
 extern int luaopen_system( lua_State * L );
@@ -702,7 +701,6 @@ int App::run( const StringSet & allowed_names )
     luaopen_idle( L );
     luaopen_timer( L );
     luaopen_xml( L );
-    luaopen_storage( L );
     luaopen_app( L );
     luaopen_system( L );
     luaopen_settings( L );
