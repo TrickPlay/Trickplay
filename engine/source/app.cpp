@@ -67,6 +67,10 @@ extern int luaopen_apps( lua_State * L );
 
 extern void luaopen_keys( lua_State * L );
 
+// The address to use as a key for the app itself
+
+static char TP_APP_KEY = 0;
+
 //=============================================================================
 
 //=============================================================================
@@ -619,7 +623,7 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 
     // Put a pointer to us in Lua so bindings can get to it
 
-    lua_pushstring( L, "tp_app" );
+    lua_pushlightuserdata( L, &TP_APP_KEY );
     lua_pushlightuserdata( L, this );
     lua_rawset( L, LUA_REGISTRYINDEX );
 }
@@ -925,7 +929,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
 App * App::get( lua_State * L )
 {
     g_assert( L );
-    lua_pushstring( L, "tp_app" );
+    lua_pushlightuserdata( L, &TP_APP_KEY );
     lua_rawget( L, LUA_REGISTRYINDEX );
     App * result = ( App * )lua_touserdata( L, -1 );
     lua_pop( L, 1 );
