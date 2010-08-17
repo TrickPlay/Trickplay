@@ -7,6 +7,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    local game_ctrl = game_ctrl or error("no game_ctrl",2)
 --   local bet_ctrl = BettingControl(ctrl)
 
+   local round = Rounds.HOLE
    local hand_pipeline = {}
    local orig_hand_pipeline = {
       function(ctrl) return ctrl:deal(Rounds.HOLE) end,
@@ -31,6 +32,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_sb_p() return state:get_sb_p() end
    function ctrl:get_bb_p() return state:get_bb_p() end
    function ctrl:get_deck() return state:get_deck() end
+   function ctrl:get_round() return round end
 
    -- private functions
    function ctrl:give_winner_pot_and_bone_out()
@@ -74,7 +76,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       [Rounds.TURN]=function(pres) pres:deal_turn() end,
       [Rounds.RIVER]=function(pres) pres:deal_river() end
    }
-   function ctrl.deal(ctrl, round)
+   function ctrl.deal(ctrl, rd)
+      round = rd
       deal_LUT[round](pres)
       enable_event_listener(TimerEvent{interval=.5})
       return true
@@ -90,7 +93,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
 
    print("defined and set waiting_for_bet to false")
    local waiting_for_bet = false
-   function ctrl.bet(ctrl, round, event)
+   function ctrl.bet(ctrl, rd, event)
+      round = rd
       print("entering ctrl:bet, and waiting_for_bet is", waiting_for_bet)
       local continue = false
       if waiting_for_bet and event:is_a(BetEvent) then
@@ -99,7 +103,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
          print("type(event.fold):",type(event.fold))
          print("type(event.bet):", type(event.bet))
          continue = state:execute_bet(event.fold, event.bet)
-         print("setting up timerevent in ctrl.bet, where waiting_for_bet is", waiting_for_bet)
+         print("setting up event in ctrl.bet, where waiting_for_bet is", waiting_for_bet)
          game_ctrl:on_event(Event{})
       elseif not waiting_for_bet then
          print("generating a bet, and setting waiting_for_bet to true")
@@ -152,8 +156,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       print(#hand_pipeline, "entries left in hand_pipeline")
       if #hand_pipeline > 0 then
          local next_action = hand_pipeline[1]
-         local result = next_action(ctrl, event)
-         if result then 
+         local continue = next_action(ctrl, event)
+         if continue then 
             print("removing action from hand_pipeline")
             table.remove(hand_pipeline, 1)
          end
