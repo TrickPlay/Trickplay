@@ -96,7 +96,9 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       if waiting_for_bet and event:is_a(BetEvent) then
          print("setting waiting_for_bet to false")
          waiting_for_bet = false
-         continue = state:execute_bet(event.bet)
+         print("type(event.fold):",type(event.fold))
+         print("type(event.bet):", type(event.bet))
+         continue = state:execute_bet(event.fold, event.bet)
          print("setting up timerevent in ctrl.bet, where waiting_for_bet is", waiting_for_bet)
          game_ctrl:on_event(Event{})
       elseif not waiting_for_bet then
@@ -105,17 +107,25 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
          local active_player = state:get_active_player()
          if active_player.isHuman then
             model.currentPlayer = active_player
+            model.orig_bet = state:get_player_bets()[active_player]
+            model.call_bet = state:get_call_bet()
+            model.min_raise = state:get_min_raise()
             model.in_players = state:get_in_players()
+            print("original_bet", model.orig_bet, "call_bet", model.call_bet, "min_raise", model.min_raise)
             model:set_active_component(Components.PLAYER_BETTING)
-            model:get_active_controller():set_callback(function(bet) game_ctrl:on_event(BetEvent{bet=bet}) end)
+            model:get_active_controller():set_callback(
+               function(fold, bet) 
+                  game_ctrl:on_event(BetEvent{fold=fold, bet=bet})
+               end)
             enable_event_listener(KbdEvent())
+            model:notify()
          else
-            local bet = active_player:get_move(state)
+            local fold, bet = active_player:get_move(state)
             enable_event_listener(
                TimerEvent{
                   interval=1,
                   cb=function()
-                        game_ctrl:on_event(BetEvent{bet=bet})
+                        game_ctrl:on_event(BetEvent{fold=fold, bet=bet})
                   end})
          end
       end
