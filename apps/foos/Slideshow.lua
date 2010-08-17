@@ -5,6 +5,8 @@ current_pic = 1
 temp_pic = 0
 local started = true
 local search = "space"
+local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
+screen:add(overlay_image)
 function Slideshow:new(args)
 	local num_pics = args.num_pics
 	local urls = {}
@@ -51,13 +53,32 @@ function Slideshow:stop()
 end
 -- will send and image across the screen
 function Slideshow:sendImage(site)
-	print(site)
 	local temp = current_pic
 	self.images[current_pic] = Image { src = site, z = 1000}
+	local rotation_num = math.random(30) - 15 
+	local rotation = {rotation_num, self.images[current_pic].w, self.images[current_pic].h}
+	
+	self.images[current_pic].z_rotation = rotation
 	self.images[current_pic].x = screen.w/2 - self.images[current_pic].w/2
 	self.images[current_pic].y = screen.h/2 - self.images[current_pic].h/2 
+	
+	local overlay = Clone { source = overlay_image, z = 1000}
+	rotation = {rotation_num, overlay.w, overlay.h}
+	overlay.x = screen.w/2 - self.images[current_pic].w/2
+	overlay.y = screen.h/2 - self.images[current_pic].h/2 
+	overlay.scale = {self.images[current_pic].w/screen.w, self.images[current_pic].h/screen.h}
+	overlay.z_rotation = rotation
+	overlay:animate {
+		duration = 2000,
+		z = 1,
+		on_completed = function()
+			if (self.images[current_pic-3] ~= nil) then
+				overlay.opacity = 0
+			end
+		end
+	}
 	self.images[current_pic]:animate {
-		duration = 3000,
+		duration = 2000,
 		z = 0,
 		on_completed = function()
 			current_pic = current_pic+1
@@ -70,7 +91,7 @@ function Slideshow:sendImage(site)
 	}
 	if self.ui ~= nil then
 		print("adding to view.ui",self.ui)
-		self.ui:add(self.images[temp])
+		self.ui:add(self.images[temp], overlay)
 	end
 
 end
