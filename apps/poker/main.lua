@@ -7,7 +7,7 @@ AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleNone.png")
 
 
 local ui_colors = {"Red", "Green", "Gray"}
-local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold"}
+local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"}
 
 for _,color in pairs(ui_colors) do
    for _,button in pairs(ui_buttons) do

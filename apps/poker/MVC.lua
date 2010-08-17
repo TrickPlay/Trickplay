@@ -22,6 +22,7 @@ Model = Class(function(model, ...)
         START = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)},
         EXIT = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)},
     }
+    MDPL = model.default_player_locations
     
     model.default_bet_locations = {
         [1] = {200, 600},
@@ -44,6 +45,20 @@ Model = Class(function(model, ...)
         BURN = {1145, 650}
     }
     MCL = model.card_locations
+    
+    model.player_card_locations = {
+        [1] = {347, 759},
+        [2] = {70, 381},
+        [3] = {454, 159},
+        [4] = {1414, 189},
+        [5] = {1726, 409},
+        [6] = {1452, 760}
+    }
+    MPCL = model.player_card_locations
+    for i=1, #MPCL do
+        MPCL[i][1] = MPCL[i][1] + 45
+        MPCL[i][2] = MPCL[i][2] + 60
+    end
     
     model.status_chip_locations = {
         [1] = {500, 820},
