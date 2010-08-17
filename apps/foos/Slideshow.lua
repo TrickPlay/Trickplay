@@ -49,6 +49,8 @@ function Slideshow:begin()
 	current_pic = 1
 	temp_pic = 0
 	timer:start()
+	local logo = Image { src = adapters[self.index][1].logoUrl, x = 200, y = 200 }
+	screen:add(logo)
 end
 function Slideshow:stop()
    	timer:stop()
