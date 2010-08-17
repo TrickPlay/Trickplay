@@ -17,7 +17,7 @@ function(ctrl, model, ...)
    local orig_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
-         enable_event_listener(Events.TIMER, 1)
+         enable_event_listener(TimerEvent{interval=1})
          local continue = true
          return continue
       end,
@@ -29,19 +29,10 @@ function(ctrl, model, ...)
       function(ctrl)
          state:move_blinds()
          local continue = hand_ctrl:cleanup()
-         enable_event_listener(Events.TIMER, 1)
+         enable_event_listener(TimerEvent{interval=1})
          pres:finish_hand()
          return continue
       end
-      -- stage where we
-      -- function(ctrl)
-      --    enable_event_listener(Events.TIMER, 1)
-      --    return true
-      -- end,
-      -- function(ctrl)
-      --    enable_event_listener(Events.TIMER, 1)
-      --    return true
-      -- end,
    }
 
    -- getters/setters
@@ -63,12 +54,13 @@ function(ctrl, model, ...)
 
    -- public functions
    function ctrl.initialize_game(ctrl, args)
+
       state:initialize(args)
       pres:display_ui()
 
       reset_pipeline()
       disable_event_listeners()
-      enable_event_listener(Events.TIMER, 1)
+      enable_event_listener(TimerEvent{interval=1})
    end
 
    function ctrl.start_hand(ctrl)
@@ -76,13 +68,18 @@ function(ctrl, model, ...)
    end
    
    function ctrl.on_key_down(ctrl, key)
-      ctrl:on_event{
-         type=Events.KEYBOARD,
-         key=key,
-      }
+      ctrl:on_event(KbdEvent{key=key})
    end
 
    function ctrl.on_event(ctrl, event)
+      assert(event:is_a(Event))
+      if event:is_a(BetEvent) then
+         print("BetEvent triggered")
+      elseif event:is_a(TimerEvent) then
+         print("TimerEvent triggered")
+      elseif event:is_a(KbdEvent) then
+         print("KbdEvent triggered")
+      end
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
@@ -100,5 +97,16 @@ function(ctrl, model, ...)
       -- else
       --    enable_event_listener(Events.KEYBOARD)
       -- end
+   end
+
+   function ctrl:set_bet_listener(callback, player)
+      if player.isHuman then
+         model.currentPlayer = player
+         model:set_active_component(Components.PLAYER_BETTING)
+         model:get_active_controller():set_callback(callback)
+         enable_event_listener(KbdEvent())
+      else
+         
+      end
    end
 end)

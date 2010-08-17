@@ -5,6 +5,7 @@ Player = Class(function(player, args, ...)
    player.money = 800
    player.position = false
    player.table_position = nil
+   player.chipPosition = nil
    for k,v in pairs(args) do
       player[k] = v
    end
@@ -44,12 +45,23 @@ Player = Class(function(player, args, ...)
    -- @param round
    -- @returns fold boolean  true if player should fold
    -- @returns bet number  quantity of bet, if fold then bet should be 0
-   function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot, round)
+   --function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot, round)
+   function player:get_move(state)
       -- TODO: pass in real position, right now position is placeholder data cause it's unclear how to calculate position.
       local fold = false
-      local bet = call_bet
-      
-      return fold, 10
+      -- local bet = call_bet
+      -- local r = math.random(10)
+      -- -- if r == 1 then
+      -- --    return true, 0
+      -- -- else
+      -- --    return fold, 10
+      -- -- end
+      -- if true or hole[1].rank == hole[2].rank or hole[1].rank.num>11 or hole[2].rank.num > 11 then
+      --    return false, 10
+      -- else
+      --    return true, 0
+      -- end
+      return 10
    end
    
    player.status = PlayerStatusView(model, nil, player)

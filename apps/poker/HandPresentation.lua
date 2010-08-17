@@ -71,6 +71,7 @@ function(pres, ctrl)
    
    local function animate_chips_to_center(player)
       if player then
+         local c = player.betChips
          player.betChips.group:animate{
             position = model.potchips.group.position,
             duration=500,
