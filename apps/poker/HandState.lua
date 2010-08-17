@@ -101,6 +101,7 @@ HandState = Class(nil, function(state, ctrl, ...)
       else
          -- get computer move
          -- current cards, bet to call, min raise, current wager, pot size
+         assert(hole_cards[active_player])
          fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
          if fold then
             -- current wager goes into pot

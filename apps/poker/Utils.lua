@@ -1,6 +1,7 @@
 
 
 function sort_hand(hand)
+   if not hand then error("hand is nil!", 2) end
    local hand_copy = {}
    for _,card in ipairs(hand) do
       table.insert(hand_copy,card)
