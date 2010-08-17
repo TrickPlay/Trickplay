@@ -86,3 +86,13 @@ function count_outs(hand)
    end
    return out_table
 end
+
+--prints the mofok'n hand
+function hand_print(hand)
+   assert(hand)
+   print("This hand contains:\n")
+   for _,card in ipairs(hand) do
+      print(card.name)
+   end
+   print("\n")
+end
