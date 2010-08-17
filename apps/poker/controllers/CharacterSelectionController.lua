@@ -6,7 +6,8 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
 
     local CharacterSelectionGroups = {
         TOP = 1,
-        BOTTOM = 2
+        MIDDLE = 2,
+        BOTTOM = 3,
     }
     local SubGroups = {
         LEFT = 1,
@@ -25,7 +26,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = CharacterSelectionGroups.BOTTOM
+    local selected = CharacterSelectionGroups.MIDDLE
     local subselection = SubGroups.LEFT_MIDDLE
     assert(selected)
     assert(subselection)
@@ -45,7 +46,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
 
     local CharacterSelectionCallbacks = {
         [CharacterSelectionGroups.TOP] = {},
-        [CharacterSelectionGroups.BOTTOM] = {
+        [CharacterSelectionGroups.MIDDLE] = {
             [SubGroups.LEFT_MIDDLE] = function()
                 if(playerCounter > 2) then
                     start_a_game()
@@ -53,8 +54,18 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 end
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
-                exit()
+                print("starting tutorial")
+                if not TUTORIAL then
+                    TUTORIAL = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{opacity=0}), animate_in = {opacity=255, duration=500}, on_fade_in = function() end }
+                else
+                    TUTORIAL.fade = "out"
+                    TUTORIAL.on_fade_out = function() screen:remove(TUTORIAL.group) TUTORIAL = nil end
+                    TUTORIAL:render()
+                end
             end
+        },
+        [CharacterSelectionGroups.BOTTOM] = {
+            [1] = function() exit() end
         }
     }
     
@@ -132,7 +143,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 if(playerCounter >= 6) then
                     setCharacterSeat()
                     start_a_game()
-                elseif(selected == CharacterSelectionGroups.BOTTOM) and
+                elseif(selected == CharacterSelectionGroups.MIDDLE) and
                       (subselection == SubGroups.LEFT_MIDDLE) then
                     return
                 end
@@ -161,12 +172,22 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             local new_selected = subselection + dir[1]
             if 1 <= new_selected and SubSize >= new_selected then
                 subselection = new_selected
-                
+            end
+            -- You can only move to exit on the bottom row
+            if selected == 3 then
+                subselection = 1
             end
         elseif(0 ~= dir[2]) then
             local new_selected = selected + dir[2]
             if 1 <= new_selected and GroupSize >= new_selected then
+                -- If you move off the bottom, go to #2
+                if selected == 3 then
+                    subselection = 2
+                end
                 selected = new_selected
+            end
+            if selected == 3 then
+                subselection = 1
             end
         end
         print(SubSize, GroupSize)
