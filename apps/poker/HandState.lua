@@ -37,6 +37,8 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_deck() return deck end
    function state:get_call_bet() return call_bet end
    function state:get_min_raise() return min_raise end
+   function state:get_round() return ctrl:get_round() end
+   function state:player_done() return done[in_players[action]] end
 
    function state.initialize(state, args)
       players = args.players
@@ -46,6 +48,7 @@ HandState = Class(nil, function(state, ctrl, ...)
       sb_p = args.sb_p
       bb_p = args.bb_p
       deck = args.deck
+      round = Rounds.HOLE
 
       in_players = {}
       done = {}
@@ -107,7 +110,9 @@ HandState = Class(nil, function(state, ctrl, ...)
          error("execute_bet called with parameters of incorrect type", 2)
       end
       local active_player = in_players[action]
+      print("active_player.number", active_player.number)
       if fold then
+         print("player folded")
          -- current wager goes into pot
          pot = pot + player_bets[active_player]
          player_bets[active_player] = 0
@@ -120,8 +125,9 @@ HandState = Class(nil, function(state, ctrl, ...)
 
          -- bet is a call
          if bet <= call_bet then
-            
+            print("player called")
          else
+            print("player raised")
             if bet-call_bet > min_raise then
                min_raise = bet-call_bet
             end

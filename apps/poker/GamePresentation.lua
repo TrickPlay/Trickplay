@@ -56,9 +56,9 @@ function(pres, ctrl)
    function pres.finish_hand(pres)
 
       -- Animate chips
-      model.dealerchip:animate{ position = MSCL[ ctrl.get_dealer(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-      model.bbchip:animate{ position = MSCL[ ctrl.get_bb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
-      model.sbchip:animate{ position = MSCL[ ctrl.get_sb_p(ctrl) ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.dealerchip:animate{ position = MSCL[ model.players[ctrl:get_dealer()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.bbchip:animate{ position = MSCL[ model.players[ctrl:get_bb_p()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
+      model.sbchip:animate{ position = MSCL[ model.players[ctrl:get_sb_p()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
       model.potchips:set(0)
       
       -- Reset deck
