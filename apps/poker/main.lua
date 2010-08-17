@@ -38,7 +38,7 @@ function()
    dofile("GameControl.lua")
    dofile("PokerRules.lua")
    dofile("PreFlopLUT.lua")
-
+   dofile("Events.lua")
 
    Components = {
       COMPONENTS_FIRST = 1,
@@ -63,60 +63,54 @@ function()
    Events = {
       KEYBOARD = 1,
       TIMER = 2,
-      BET_PLACED = 3,
+      BET_READY = 3,
+      BET_READY_AND_TIMER = 4,
    }
    local old_on_key_down
+   local event_listener_en = true
    -- private (helper) functions
    function disable_event_listeners()
       if screen.on_key_down then
          old_on_key_down, screen.on_key_down = screen.on_key_down, nil
       end
       t:disable()
+      event_listener_en = false
    end
 
-   function enable_event_listener(event, interval)
-      if event == Events.KEYBOARD then
+   function enable_event_listener(event)
+      assert(event:is_a(Event))
+      if event:is_a(KbdEvent) then
          print("keyboard enabled")
          if old_on_key_down then
             screen.on_key_down, old_on_key_down = old_on_key_down, nil
          end
-      elseif event == Events.TIMER then
+      elseif event:is_a(TimerEvent) then
+         local cb = event.cb or
+            function()
+               game:on_event(event)
+            end
          t:enable{
-            on_timer=function()
-               game:on_event{
-                  type=Events.TIMER,
-                  interval=interval
-               }
-            end,
-            interval=interval
+            on_timer=cb,
+            interval=event.interval
          }
+      elseif event:is_a(BetEvent) then
+         
       end
+      event_listener_en = true
    end
+
+   function event_listener_enabled()
+      return event_listener_en
+   end
+
    game = GameControl(model)
-   
---   model:start_app(Components.GAME)
    model:start_app(Components.CHARACTER_SELECTION)
---   local players = {}
---   table.insert(players,
---                Player{
---                   isHuman=true,
---                   table_position=1
---                })
---   for i=2,3 do
---      table.insert(
---         players,
---         Player{
---            isHuman=true,
---            table_position=i
---         })
---   end
---   game:initialize_game{
---      sb=1,
---      bb=2,
---      endowment=800,
---      players=players
---   }
---   old_on_key_down = nil
---   model:start_app(Components.GAME)
+   -- local p = Player{position={100,100}, chipPosition={200,200}}
+   -- p:createBetChips()
+   -- model.players = {p}
+   -- model.currentPlayer = 1
+
+--   model:start_app(Components.PLAYER_BETTING)
+
    AssetLoader.on_preload_ready = nil
 end

@@ -13,6 +13,7 @@ HandState = Class(nil, function(state, ctrl, ...)
    local sb_p
    local bb_p
    local deck
+   local in_players
 
    -- array of players who are still in the game.
    local in_players
@@ -27,6 +28,8 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_pot() return pot end
    function state:get_action() return action end
    function state:get_players() return players end
+   function state:get_in_players() return in_players end
+   function state:get_active_player() return in_players[action] end
    function state:get_sb_qty() return sb_qty end
    function state:get_bb_qty() return bb_qty end
    function state:get_sb_p() return sb_p end
@@ -93,38 +96,35 @@ HandState = Class(nil, function(state, ctrl, ...)
       pot = 0
    end
 
-   function state.bet(state, round)
+   local function set_bet_listener(callback, player)
+      ctrl:set_bet_listener(callback, player)
+   end
+
+
+   function state:execute_bet(bet)
       local active_player = in_players[action]
-      local fold, bet
-      if false and active_player.isHuman then
-         
+      if bet == 0 then
+         -- current wager goes into pot
+         pot = pot + player_bets[active_player]
+         player_bets[active_player] = 0
+         table.remove(in_players, action)
+         action = ((action - 1) % #in_players) + 1
+         ctrl:fold_player(active_player)
       else
-         -- get computer move
-         -- current cards, bet to call, min raise, current wager, pot size
-         assert(hole_cards[active_player])
-         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
-         if fold then
-            -- current wager goes into pot
-            pot = pot + player_bets[active_player]
-            player_bets[active_player] = 0
-            table.remove(in_players, action)
-            action = ((action - 1) % #in_players) + 1
-            ctrl:fold_player(active_player)
-         else
-            local delta = bet-player_bets[active_player]
-            assert(0 <= delta and delta <= active_player.money)
-            player_bets[active_player] = bet
-            active_player.money = active_player.money - delta
-            ctrl:bet_player(active_player)
-         end
-         done[active_player] = true
+         local delta = bet-player_bets[active_player]
+         assert(0 <= delta and delta <= active_player.money)
+         player_bets[active_player] = bet
+         active_player.money = active_player.money - delta
+         ctrl:bet_player(active_player)
       end
+      done[active_player] = true
 
       local continue = true
 
       assert(#in_players > 0)
       if #in_players == 1 then
-         give_winner_pot_and_bone_out()
+         done[in_players[1]] = true
+         ctrl:give_winner_pot_and_bone_out()
          return true
       end
 
@@ -135,6 +135,8 @@ HandState = Class(nil, function(state, ctrl, ...)
       end
 
       if continue then
+         print("betting round finished, should go to the next one")
+
          -- set the pot
          for i,player in ipairs(in_players) do
             pot = pot + player_bets[player]
@@ -143,25 +145,77 @@ HandState = Class(nil, function(state, ctrl, ...)
          end
 
          -- reset the new action
-         local tmp_action = (dealer % #players) + 1
+         local tmp_action = (dealer % #in_players) + 1
          local safety_counter = 0
-         while done[players[tmp_action]] == true do
-            assert(safety_counter <= #players)
-            tmp_action = (tmp_action % #players) + 1
+         while done[in_players[tmp_action]] == true do
+            assert(safety_counter <= #in_players)
+            tmp_action = (tmp_action % #in_players) + 1
             safety_counter = safety_counter+1
          end
          action = tmp_action
       else
-         local tmp_action = (action % #players) + 1
+         local tmp_action = (action % #in_players) + 1
          local safety_counter = 0
-         while done[players[tmp_action]] == true do
-            assert(safety_counter <= #players)
-            tmp_action = (tmp_action % #players) + 1
+         while done[in_players[tmp_action]] == true do
+            assert(safety_counter <= #in_players)
+            tmp_action = (tmp_action % #in_players) + 1
             safety_counter = safety_counter+1
          end
          action = tmp_action
       end
+      assert(action <= #in_players)
       return continue
+   end
+
+   function state.wait_for_bet(state, round)
+      local continue = true
+
+      -- this code shouldn't be here, it's just safety code.
+      assert(#in_players > 0)
+      if #in_players == 1 then
+         done[in_players[1]] = true
+         ctrl:give_winner_pot_and_bone_out()
+         return true
+      end
+
+      for i, player in ipairs(in_players) do
+         if not done[player] then
+            continue = false
+         end
+      end
+      if continue then return true end
+
+      local active_player = in_players[action]
+      if active_player.isHuman then
+         model.currentPlayer = active_player
+         model.in_players = in_players
+         model:set_active_component(Components.PLAYER_BETTING)
+         model:get_active_controller():set_callback(function(fold, bet) execute_bet(fold, bet) end)
+         enable_event_listener(KbdEvent())
+      else
+         local fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
+         enable_event_listener(
+            TimerEvent{
+               interval=.5,
+               cb=function()
+                     execute_bet(fold, bet)
+                     enable_event_listener(TimerEvent{interval=.1})
+                  end})
+      end
+   end
+
+   function state.bet(state, round)
+      local active_player = in_players[action]
+      assert(active_player)
+      local fold, bet
+      if false and active_player.isHuman then
+         
+      else
+         -- get computer move
+         -- current cards, bet to call, min raise, current wager, pot size
+         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
+      end
+
    end
 
    function state.showdown(state)
@@ -192,6 +246,9 @@ HandState = Class(nil, function(state, ctrl, ...)
          elseif result == 1 then
             best = in_players[i]
             winners = {in_players[i]}
+            poker_hand = tmp_poker_hand
+         end
+         if #in_players == 2 then
             poker_hand = tmp_poker_hand
          end
       end

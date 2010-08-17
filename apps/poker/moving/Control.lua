@@ -39,7 +39,7 @@ function(control,...)
             interval=1,
             on_timer=
                function()
-                  control:on_event("timer")
+                  control:on_event(TimerEvent{interval=1})
                end
          }
       end

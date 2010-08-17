@@ -71,18 +71,18 @@ BettingView = Class(View, function(view, model, ...)
             end
             
             local t = view.text[3]
-            t.text = "Bet:"..model.players[ model.currentPlayer ].bet
             t.anchor_point = {t.w/2, t.h/2}
             
-            local player = model.players[ model.currentPlayer ]
+            local player = model.currentPlayer
+            t.text = "Bet:"..player.bet
             local playerMoney = player.moneyChips
             local playerBet = player.betChips
             local stack = view.stack
             
             local function sum()
                 local s = 0
-                for i=1,model.currentPlayer do
-                    s = s + model.players[i].bet
+                for i=1,#model.in_players do
+                    s = s + model.in_players[i].bet
                 end
                 return s
             end
