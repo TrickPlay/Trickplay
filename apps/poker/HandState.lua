@@ -38,6 +38,7 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_call_bet() return call_bet end
    function state:get_min_raise() return min_raise end
    function state:get_round() return ctrl:get_round() end
+   function state:player_done() return done[in_players[action]] end
 
    function state.initialize(state, args)
       players = args.players
