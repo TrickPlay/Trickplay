@@ -78,6 +78,9 @@ Player = Class(function(player, args, ...)
           table.insert(all_cards, v)
       end
       local best_hand = get_best(all_cards)
+
+      hand_print(hole)
+      hand_print(community_cards)
       
       -- get outs for enemy cards winning
       local outs = 0
@@ -133,7 +136,7 @@ Player = Class(function(player, args, ...)
             if(math.random(4) == 4) then
                a_move = math.random(Moves.CALL, Moves.FOLD)
             end
-            return a_move
+            return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
          end,
          [Rounds.FLOP] = function(a_move)
             --First, check to see that the best hand is not the
