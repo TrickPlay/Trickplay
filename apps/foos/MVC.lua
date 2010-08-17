@@ -8,7 +8,7 @@ Model = Class(function(model, ...)
     model.pic_text = {0,0}
 
     model.num_sources = NUM_SLIDESHOW_IMAGES
-    model.front_page_index = 1
+    model.front_page_index = math.ceil(math.ceil(model.num_sources /NUM_ROWS)/2)
     model.swapping_cover = false
     model.swap_pic = nil
 
