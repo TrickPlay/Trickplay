@@ -9,8 +9,9 @@ local started = true
 local search = "space"
 local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
 local background = Image {src = "assets/background.jpg" }
+local background2 = Image {src = "assets/background2.png" }
 
-screen:add(overlay_image,background)
+screen:add(overlay_image,background,background2)
 function Slideshow:new(args)
 	local num_pics = args.num_pics
 	local urls = {}
@@ -34,7 +35,8 @@ function Slideshow:loadUrls(url)
 		url = url,
 		on_complete = function (request, response)
 			local data = json:parse(response.body)
-			print(adapters[self.index][1].caption(data))
+		
+			print (adapters[self.index][1].logoUrl)
 		   site = adapters[self.index][1].site(data)
 			self:sendImage(site)
 		end
@@ -49,8 +51,8 @@ function Slideshow:begin()
 	current_pic = 1
 	temp_pic = 0
 	timer:start()
-	local logo = Image { src = adapters[self.index][1].logoUrl, x = 200, y = 200 }
-	screen:add(logo)
+--	local logo = Image { src = adapters[self.index].logoUrl, x = 200, y = 200, z= 3}
+--	screen:add(logo)
 end
 function Slideshow:stop()
    	timer:stop()
