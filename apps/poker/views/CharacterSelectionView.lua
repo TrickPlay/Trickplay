@@ -17,8 +17,11 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         {
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1] },
             Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.START, extra = { text="START" } },
-            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.EXIT, extra = { text="EXIT" } },
+            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.TUTORIAL, extra = { text="TUTORIAL" } },
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6] },
+        },
+        {
+            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.EXIT, extra = { text="EXIT" } },
         }
     }
     
@@ -33,6 +36,9 @@ CharacterSelectionView = Class(View, function(view, model, ...)
                 text.position = {v.position[1] + v.w/2, v.position[2] + v.h/2}
                 local g = Group{children={v, text}}
                 view.items[i][k] = g
+                g.anchor_point = {v.w/2, v.h/2}
+            else
+                v.anchor_point = {v.w/2, v.h/2}
             end
         end
     end
@@ -50,6 +56,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     view.ui=Group{name="checkout_ui", position={0,0}}
     view.ui:add(unpack(view.items[1]))
     view.ui:add(unpack(view.items[2]))
+    view.ui:add(unpack(view.items[3]))
     view.ui:add(chooseCharacterText)
 
     screen:add(view.ui)

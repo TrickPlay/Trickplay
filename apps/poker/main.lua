@@ -4,6 +4,7 @@ dofile ("Assets.lua")
 AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleNone.png")
+AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 
 
 local ui_colors = {"Red", "Green", "Gray"}
