@@ -13,14 +13,16 @@ PIC_DIR = "assets/thumbnails/"
 
 PIC_H = (screen.height/NUM_ROWS)
 PIC_W = PIC_H--(screen.width/(NUM_VIS_COLS+1)) 
-SEL_W = PIC_W--*1.1
-SEL_H = PIC_H--*1.1
+SEL_W = PIC_W*1.1
+SEL_H = PIC_H*1.1
 
 
 
 
 dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("MVC.lua")
+dofile("TextBox.lua")
+dofile("FocusableImage.lua")
 dofile("FrontPageView.lua")
 dofile("FrontPageController.lua")
 ---[[
