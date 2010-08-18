@@ -1,7 +1,21 @@
 ASSERTIONS_ENABLED = true
 
 local old_assert = assert
-assert = function(...) if ASSERTIONS_ENABLED then old_assert(...) end end
+assert =
+function(...)
+   if ASSERTIONS_ENABLED then
+      old_assert(...)
+   else
+      local cond, msg = ...
+      if cond then
+         if msg then
+            print(msg)
+         else
+            print("assertion failed...")
+         end
+      end
+   end
+end
 
 Directions = {
    RIGHT = {1,0},
