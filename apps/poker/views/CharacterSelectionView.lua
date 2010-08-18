@@ -6,6 +6,9 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     }
 
     --create the components
+    local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "assets/UI/ButtonStartGreen.png", "assets/UI/ButtonStartRed.png")
+    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
+    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
 
     view.items = {
         {
@@ -16,34 +19,23 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         },
         {
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1] },
-            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.START, extra = { text="START" } },
-            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.TUTORIAL, extra = { text="TUTORIAL" } },
+            start_button,
+            Text(), -- placeholder, makes logic simpler
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6] },
         },
         {
-            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.EXIT, extra = { text="EXIT" } },
+            Text(), exit_button, help_button, Text()
         }
     }
     
-    view.text = {}
-    
-    for i, table in ipairs(view.items) do
-        for k,v in ipairs(table) do
-            if v.extra.text then
-                local text = Text{ font = "Sans 38px", color = "FFFFFF", text = v.extra.text }
-                view.text[k] = text
-                text.anchor_point = {text.w/2, text.h/2}
-                text.position = {v.position[1] + v.w/2, v.position[2] + v.h/2}
-                local g = Group{children={v, text}}
-                view.items[i][k] = g
-                g.anchor_point = {v.w/2, v.h/2}
-            else
-                v.anchor_point = {v.w/2, v.h/2}
-            end
-        end
-    end
-    
-    
+    view.text = {
+        Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.START[1] + 30, y = MDPL.START[2] + 20, text = "Start"},
+        Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.EXIT[1] + 40, y = MDPL.EXIT[2] + 20, text = "Exit"},
+        Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.HELP[1] + 35, y = MDPL.HELP[2] + 20, text = "Help"},
+    }
     
     --background ui
     view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
@@ -55,9 +47,17 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     --all ui junk for this view
     view.ui=Group{name="checkout_ui", position={0,0}}
     view.ui:add(unpack(view.items[1]))
-    view.ui:add(unpack(view.items[2]))
-    view.ui:add(unpack(view.items[3]))
-    view.ui:add(chooseCharacterText)
+    for _,v in ipairs(view.items[2]) do
+        if(v.group) then
+            view.ui:add(v.group)
+        else
+            view.ui:add(v)
+        end
+    end
+    for _,v in ipairs(view.items[3]) do
+        view.ui:add(v.group)
+    end
+    view.ui:add(unpack(view.text))
 
     screen:add(view.ui)
 
@@ -76,9 +76,17 @@ CharacterSelectionView = Class(View, function(view, model, ...)
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
-                        item.opacity = 255
+                        if(item.on_focus) then
+                            item:on_focus()
+                        else
+                            item.opacity = 255
+                        end
                     else
-                        item.opacity = 100
+                        if(item.out_focus) then
+                            item:out_focus()
+                        else
+                            item.opacity = 100
+                        end
                     end
                 end
             end

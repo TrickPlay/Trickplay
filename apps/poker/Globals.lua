@@ -1,3 +1,22 @@
+ASSERTIONS_ENABLED = true
+
+local old_assert = assert
+assert =
+function(...)
+   if ASSERTIONS_ENABLED then
+      old_assert(...)
+   else
+      local cond, msg = ...
+      if cond then
+         if msg then
+            print(msg)
+         else
+            print("assertion failed...")
+         end
+      end
+   end
+end
+
 Directions = {
    RIGHT = {1,0},
    LEFT = {-1,0},
@@ -76,3 +95,5 @@ Difficulty = {
     MEDIUM = 2,
     EASY = 3
 }
+
+CHANGE_VIEW_TIME = 400

@@ -7,7 +7,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     local CharacterSelectionGroups = {
         TOP = 1,
         MIDDLE = 2,
-        BOTTOM = 3,
+        BOTTOM = 3
     }
     local SubGroups = {
         LEFT = 1,
@@ -31,7 +31,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     assert(selected)
     assert(subselection)
     --the number of the current player selecting a seat
-    local playerCounter = 1
+    local playerCounter = 0
 
     local function start_a_game()
         model:set_active_component(Components.GAME)
@@ -48,10 +48,14 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         [CharacterSelectionGroups.TOP] = {},
         [CharacterSelectionGroups.MIDDLE] = {
             [SubGroups.LEFT_MIDDLE] = function()
-                if(playerCounter > 2) then
+                if(playerCounter >= 2) then
                     start_a_game()
-                    
                 end
+            end
+        },
+        [CharacterSelectionGroups.BOTTOM] = {
+            [SubGroups.LEFT_MIDDLE] = function()
+                exit()
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
                 print("starting tutorial")
@@ -70,15 +74,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     }
     
     local function getPosition()
-        --[[ Old way of getting position
-        local num = (selected-1)*SubSize + subselection
-        
-        if num == 8 then num = 6 end
-    
-        return num
-        --]]
-        
-        ---[[ better?
+
         local num
         
         if selected == 2 and subselection == 1 then
@@ -87,16 +83,18 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             num = 1 + subselection
         elseif selected == 2 and subselection == 4 then
             num = 6
+        else
+            error("error selecting position")
         end
         
         return num
-        --]]
         
     end
 
     local function setCharacterSeat()
+
         --instantiate the player
-       local pos = getPosition()
+        local pos = getPosition()
         if(model.positions[pos]) then return end
         local isHuman = false
         if(playerCounter == 1) then
@@ -105,8 +103,6 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         
         args = {
             isHuman = isHuman,
-            row = selected,
-            col = subselection,
             number = playerCounter,
             table_position = pos,
             position = model.default_player_locations[ getPosition() ],
@@ -127,6 +123,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         
         playerCounter = playerCounter + 1
         self:get_model():notify()
+
     end
 
     local CharacterSelectionKeyTable = {
@@ -136,18 +133,13 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] =
         function(self)
-            local success, error_msg = 
-                pcall(CharacterSelectionCallbacks[selected][subselection], self)
-            if not success then
-                print(error_msg)
-                if(playerCounter >= 6) then
-                    setCharacterSeat()
-                    start_a_game()
-                elseif(selected == CharacterSelectionGroups.MIDDLE) and
-                      (subselection == SubGroups.LEFT_MIDDLE) then
-                    return
-                end
+            if(CharacterSelectionCallbacks[selected][subselection]) then
+                CharacterSelectionCallbacks[selected][subselection]()
+            else
                 setCharacterSeat()
+                if(playerCounter >= 6) then
+                    start_a_game()
+                end
             end
         end
     }
@@ -166,6 +158,21 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         return subselection
     end
 
+    local function check_for_valid(dir)
+        if(CharacterSelectionGroups.MIDDLE == selected) and
+          (SubGroups.RIGHT_MIDDLE == subselection) then
+            if(0 ~= dir[1]) then subselection = subselection + dir[1]
+            elseif(0 ~= dir[2]) then subselection = SubGroups.LEFT_MIDDLE
+            end
+        elseif(CharacterSelectionGroups.BOTTOM == selected) then
+            if(SubGroups.LEFT == subselection) then
+                subselection = SubGroups.LEFT_MIDDLE
+            elseif(SubGroups.RIGHT == subselection) then
+                subselection = SubGroups.RIGHT_MIDDLE
+            end
+        end
+    end
+
     function self:move_selector(dir)
         screen:grab_key_focus()
         if(0 ~= dir[1]) then
@@ -173,23 +180,13 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             if 1 <= new_selected and SubSize >= new_selected then
                 subselection = new_selected
             end
-            -- You can only move to exit on the bottom row
-            if selected == 3 then
-                subselection = 1
-            end
         elseif(0 ~= dir[2]) then
             local new_selected = selected + dir[2]
             if 1 <= new_selected and GroupSize >= new_selected then
-                -- If you move off the bottom, go to #2
-                if selected == 3 then
-                    subselection = 2
-                end
                 selected = new_selected
             end
-            if selected == 3 then
-                subselection = 1
-            end
         end
+        check_for_valid(dir)
         print(SubSize, GroupSize)
         print(subselection, selected)
         self:get_model():notify()
