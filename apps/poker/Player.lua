@@ -295,22 +295,24 @@ Player = Class(function(player, args, ...)
       if(Moves.CALL == ai_move) then
          print("\nCALL, call_bet = "..call_bet.."\n")
          return false, call_bet
-      elseif(Moves.FOLD == ai_move) then
+      elseif Moves.FOLD == ai_move then
          print("\nFOLD\n")
          return true, 0
-      elseif(Moves.RAISE == ai_move) then
+      elseif Moves.RAISE == ai_move then
+         assert(call_bet >= 0)
+         assert(min_raise > 0)
          local a_bet = call_bet+min_raise
-         if(amount_to_raise == RaiseFactor.R) then
+         if amount_to_raise == RaiseFactor.R then
             --websites say raising the bet times 2 is a good standard?
-            if(a_bet < call_bet*2) then
+            if a_bet < call_bet*2 then
                a_bet = math.random(a_bet, call_bet*2)
             end
-            if(a_bet > player.money) then
+            if a_bet > player.money then
                a_bet = player.money
             end
             print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
-         elseif(amount_to_raise == RaiseFactor.RR) then
+         elseif amount_to_raise == RaiseFactor.RR then
             if(call_bet*2+min_raise < call_bet*3) then
                a_bet = math.random(call_bet*2+min_raise, call_bet*3)
             end

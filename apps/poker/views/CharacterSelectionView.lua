@@ -16,8 +16,8 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         },
         {
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1] },
-            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.START, extra = { text="START" } },
-            Rectangle{width=200, height=120, color=Colors.RED, position=MDPL.EXIT, extra = { text="EXIT" } },
+            Rectangle{name="startbox", width=200, height=120, color=Colors.RED, position=MDPL.START, extra = { text="START" } },
+            Rectangle{name="exitbox", width=200, height=120, color=Colors.RED, position=MDPL.EXIT, extra = { text="EXIT" } },
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6] },
         }
     }

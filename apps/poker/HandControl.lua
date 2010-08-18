@@ -108,6 +108,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
          if active_player.isHuman then
             model.currentPlayer = active_player
             model.orig_bet = state:get_player_bets()[active_player]
+            model.orig_money = model.orig_bet + active_player.money
             model.call_bet = state:get_call_bet()
             model.min_raise = state:get_min_raise()
             model.in_players = state:get_in_players()
