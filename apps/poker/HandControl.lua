@@ -42,6 +42,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
 --      enable_event_listener(TimerEvent{interval=2})
    end
 
+   function ctrl:clear_pipeline()
+      hand_pipeline = {}
+   end
+
    local function initialize_pipeline()
       hand_pipeline = {}
       for _,stage in ipairs(orig_hand_pipeline) do
@@ -148,8 +152,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       pres:fold_player(active_player)
    end
 
-   function ctrl:bet_player(active_player)
-      pres:bet_player(active_player)
+   function ctrl:call_player(active_player)
+      pres:call_player(active_player)
+   end
+   function ctrl:raise_player(active_player)
+      pres:raise_player(active_player)
    end
 
    function ctrl.showdown(ctrl)
