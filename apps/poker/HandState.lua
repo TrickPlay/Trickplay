@@ -151,6 +151,13 @@ HandState = Class(nil, function(state, ctrl, ...)
          local delta = bet-player_bets[active_player]
          assert(0 <= delta, "player tried to decrease his bet from " .. player_bets[active_player] .. " to " .. bet)
          player_bets[active_player] = bet
+         local total_money = 0
+         for _,player in ipairs(players) do
+            total_money = total_money + player.money + player_bets[player]
+         end
+         total_money = total_money + pot
+         print("TOTAL MONEY SHOULD BE " .. #players * 800 .. ", IS " .. total_money)
+         print("player money:",active_player.money,"bet",bet,"pot",pot)
 
          print("call_bet",call_bet,"min_raise",min_raise)
          -- bet is a call
