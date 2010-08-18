@@ -165,7 +165,7 @@ chipCollection = Class(function(self, ...)
                         [1] = {0, 0},
                         [5] = {55, 0},
                         [10] = {25, -40},
-                        [100] = {80, -40}
+                        [100] = {-30, -40}
                 }
                 return t[value]
         end
