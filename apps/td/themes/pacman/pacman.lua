@@ -47,7 +47,7 @@ local pacman = {
                                 }]]
         },
         obstacles = dofile("themes/pacman/obstacles.lua"),
-        boardBackground = "themes/pacman/assets/bg.jpg",
+        boardBackground = "themes/pacman/assets/bg.png",
 
         wave = dofile("themes/pacman/round1.lua"),
         
