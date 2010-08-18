@@ -14,7 +14,8 @@ end
 
 
 function loadCovers(i,search, start_index)
-	print (adapters[i].logoUrl)
+	adapters[i]:loadCovers(i,search,start_index)
+--[[	print (adapters[i].logoUrl)
 	local request = URLRequest {
 	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=medium",
 	on_complete = function (request, response)
@@ -23,7 +24,7 @@ function loadCovers(i,search, start_index)
       Load_Image(site,i)
 	end
 	}
-	request:send()
+	request:send()]]
 end
 
 function getNextUrl(search, index)

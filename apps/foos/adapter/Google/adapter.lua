@@ -5,7 +5,7 @@ local adapter = {
 	logoUrl = "adapter/Google/logo.jpg",
 	{
 		name = "public",
-		caption = function(data) return "Url: "..data.responseData.results[1].visibleUrl.." Info: "..data.responseData.results[1].titleNoFormatting end,
+		caption = function(data) return "Url: "..data.responseData.results[1].visibleUrl.."\nInfo: "..data.responseData.results[1].titleNoFormatting end,
 		required_inputs = {
 			query = "space",
 		},
@@ -29,5 +29,17 @@ function adapter:getPhotos(album,start,num_images)
 
 end
 
+function adapter:loadCovers(i,search, start_index)
+	print (adapters[i].logoUrl)
+	local request = URLRequest {
+	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=medium",
+	on_complete = function (request, response)
+		local data = json:parse(response.body)
+		site = data.responseData.results[1].unescapedUrl
+      Load_Image(site,i)
+	end
+	}
+	request:send()
+end
 
 return adapter

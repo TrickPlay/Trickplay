@@ -10,8 +10,9 @@ local search = "space"
 local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
 local background = Image {src = "assets/background.jpg" }
 local background2 = Image {src = "assets/background2.png" }
+local caption = Text {font = "Sans 25px", text = "", x = 1530, y = 400}
+screen:add(overlay_image,background,background2,caption)
 
-screen:add(overlay_image,background,background2)
 function Slideshow:new(args)
 	local num_pics = args.num_pics
 	local urls = {}
@@ -35,9 +36,9 @@ function Slideshow:loadUrls(url)
 		url = url,
 		on_complete = function (request, response)
 			local data = json:parse(response.body)
-		
-			print (adapters[self.index][1].logoUrl)
+	
 		   site = adapters[self.index][1].site(data)
+	   	caption.text = adapters[self.index][1].caption(data)
 			self:sendImage(site)
 		end
 	}
@@ -79,9 +80,9 @@ function Slideshow:sendImage(site)
 	self.images[current_pic]:add(image,overlay)
 	self.ui:add(self.images[temp])
 	self.images[current_pic]:animate {
-		duration = 500,
+		duration = 2000,
 		z = 0,
-		z_rotation = 740-math.random(20)-10,
+		--z_rotation = 740-math.random(20)-10,
 		on_completed = function()
 			if (self.images[temp] ~= nil) then
 				self.images[temp]:animate {
@@ -102,7 +103,6 @@ end
 function timer.on_timer(timer)
 	print("tick"..current_pic)
 	if (current_pic ~= temp_pic and started) then
-		--print(adapters[1].logoUrl)
 		model.curr_slideshow:loadUrls(adapters[1][1].photos(search,current_pic))
 		temp_pic = current_pic
 	end
