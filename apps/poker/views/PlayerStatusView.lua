@@ -53,5 +53,15 @@ PlayerStatusView = Class(View, function(self, model, args, player,...)
                 if text then self.action.text = text end
                 self.action.anchor_point = {self.action.w/2, self.action.h/2}
         end
+        
+        function self:hide()
+                self.group.opacity = 0
+                self.show = false
+        end
+        
+        function self:display()
+                self.group.opacity = 240
+                self.show = true
+        end
 
 end)
