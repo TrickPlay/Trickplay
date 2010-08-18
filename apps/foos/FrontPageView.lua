@@ -148,12 +148,16 @@ FrontPageView = Class(View, function(view, model, ...)
                              (NUM_VIS_COLS + 1)
 --]]
 
-
-            local previous
-            local current
-            local prev_bs
-            local curr_bs
 ---[=[
+            local previous =  model.fp_slots[prev_i[1]][prev_i[2]]
+            local current  =  model.fp_slots[sel[1]][sel[2]]
+--[=[
+            local prev_bs  = {model.fp_slots[prev_i[1]][prev_i[2]].base_size[1],
+                              model.fp_slots[prev_i[1]][prev_i[2]].base_size[2]}
+            local curr_bs  = {model.fp_slots[sel[1]][sel[2]].base_size[1],
+                              model.fp_slots[sel[1]][sel[2]].base_size[2]}
+--]=]
+--[=[
             if model.albums[prev_i[1]] == nil or 
                model.albums[prev_i[1]][prev_i[2]] == nil then
 
@@ -169,34 +173,33 @@ FrontPageView = Class(View, function(view, model, ...)
                 }
             end
 --]=]
----[=[
+--[=[
             if model.albums[sel[1]] == nil or 
                model.albums[sel[1]][sel[2]] == nil then
                print("going to placeholder",sel[1],sel[2])
                 current = model.placeholders[sel[1]][sel[2]]
---]=]
----[=[
                 curr_bs =  {
                    model.def_bs[1],model.def_bs[2]
                 }
---]=]
             else
                 current = model.albums[sel[1]][sel[2]]
----[=[
                 curr_bs = {
                     model.albums[sel[1]][sel[2]].base_size[1],
                     model.albums[sel[1]][sel[2]].base_size[2]
                 }
---]=]
             end
----[[
-            print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
+--]=]
 
-assert(previous ~= nil,"wth")
-                previous:complete_animation()
+---[[
+            --print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
+
+            assert(previous ~= nil,"wth")
+            previous:complete_animation()
+            view.backdrop.opacity = 0
             previous:animate{
                 duration = CHANGE_VIEW_TIME,
-                scale    = { PIC_W / prev_bs[1], PIC_H / prev_bs[2] },
+                scale = {1,1},
+                --scale    = { PIC_W / prev_bs[1], PIC_H / prev_bs[2] },
                 position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)},
                 on_completed = function()
                     prev_i = {sel[1],sel[2]}
@@ -204,7 +207,8 @@ assert(previous ~= nil,"wth")
                     --if current:complete_animation ~= nil then
                         current:complete_animation()
                     view.backdrop.position={new_c-22,new_r-17}
-                    view.backdrop.scale = {1.02,1.02}
+                    view.backdrop.scale = {1.015,1.015}
+                    view.backdrop.opacity = 255
                     view.backdrop:raise_to_top()
                     current:raise_to_top()
 
@@ -226,7 +230,15 @@ assert(previous ~= nil,"wth")
                     current:animate{
                         duration = CHANGE_VIEW_TIME,
                         position = {new_c,new_r},
-                        scale  = {SEL_W / curr_bs[1],SEL_H /curr_bs[2]}
+                        scale    = {1.1,1.1},
+                        --scale  = {SEL_W / curr_bs[1],SEL_H /curr_bs[2]},
+                        on_completed = function()
+                            view.backdrop.position={new_c-22,new_r-17}
+                            view.backdrop.scale = {1.015,1.015}
+                            view.backdrop.opacity = 255
+                            view.backdrop:raise_to_top()
+                            current:raise_to_top()
+                        end
                     }
 
 
@@ -338,10 +350,13 @@ function view.timer.on_timer(timer)
                     math.random(1,NUM_VIS_COLS) + 
                          model.front_page_index  - 1
                 }
-                local search_i = math.random(1,10)
-                local formula = (rand_i[2]-1)*2 + (rand_i[1])
-                --print("formula?",rand_i[1],rand_i[2],formula)
-                loadCovers(formula, searches[formula], search_i)
+                if rand_i[1] ~= model.fp_index[1] and
+                   rand_i[2] ~= model.fp_index[2] then
+                    local search_i = math.random(1,10)
+                    local formula = (rand_i[2]-1)*2 + (rand_i[1])
+                    --print("formula?",rand_i[1],rand_i[2],formula)
+                    loadCovers(formula, searches[formula], search_i)
+                end
             end
 
 end

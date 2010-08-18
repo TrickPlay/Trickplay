@@ -17,11 +17,13 @@ Model = Class(function(model, ...)
     model.albums = {}
     model.placeholders = {}
     model.album_group = Group{name="Album Group"}
-    model.prac_pic = Image{
-                src = "assets/thumbnails/Album3.jpg",
-                opacity = 0
+    model.fp_backing = Rectangle{
+                color = "602020",
+                width = PIC_W,
+                height = PIC_H
     }
-    screen:add(model.prac_pic)
+    screen:add(model.fp_backing)
+    model.fp_slots = {}
 
     model.fp_index = {1,1}
 --[[
