@@ -238,4 +238,10 @@ function(pres, ctrl)
       end
 
    end
+
+   function pres:start_turn(active_player)
+   end
+
+   function pres:finish_turn(active_player)
+   end
 end)
