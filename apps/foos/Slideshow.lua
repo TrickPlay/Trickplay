@@ -19,13 +19,15 @@ function Slideshow:new(args)
 	local urls = {}
 	local images = {}
 	local index = args.index
+	local style = dofile("slideshows/Photo/slideshow.lua")
 	search = searches[args.index]
 	print ("INDEX: "..args.index)
 	print ("SEARCHING: "..search)
 	local object = { 
 		num_pics = num_pics,
 		images = images,
-		index = index
+		index = index,
+		style = style
 	}
    setmetatable(object, self)
    self.__index = self
@@ -56,7 +58,6 @@ function Slideshow:begin()
 	self.ui:add(overlay_image,background,background2,caption)
 	local queryText = Text { text = adapters[self.index][1].required_inputs.query, font = "Sans 30px", x = 150, y = 300}
 	self.ui:add(queryText)
-
 	local logo = Image { src = adapters[self.index].logoUrl, x = 100, y = 170, z= 1, scale = adapters[self.index].logoscale}
 	self.ui:add(logo)
 end
@@ -73,7 +74,8 @@ function Slideshow:stop()
 end
 -- will send and image across the screen
 function Slideshow:sendImage(site)
-	
+	print (self.style:sendImage(site))
+
 	local temp = current_pic
 	self.images[current_pic] = Group {z = 500}
 	local image = Image { src = site }
