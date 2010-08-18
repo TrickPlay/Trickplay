@@ -34,7 +34,7 @@ Player = Class(function(player, args, ...)
    end
 
    function player:get_position(state)
-      -- TODO: actually calculate position
+      
       local num_of_players = 0
       for _,__ in ipairs(state:get_players()) do
          num_of_players = num_of_players + 1
@@ -104,7 +104,7 @@ Player = Class(function(player, args, ...)
       local ai_move = last_move
       local amount_to_raise = RaiseFactor.RR
       print("player calculates call bet is " .. call_bet .. " and min_raise is " .. min_raise)
-      --combine the community cards and hole
+      -- combine the community cards and hole
       assert(hole[1])
       assert(hole[2])
       local all_cards = {}
@@ -182,9 +182,16 @@ Player = Class(function(player, args, ...)
             for place,poker_hand in ipairs(PokerHands) do
                if(poker_hand.present_in(community_cards)) and
                 (place <= best_hand) then
-                     print("place = "..place)
-                     print("best_hand = "..best_hand)
-                  return Moves.FOLD, RaiseFactor.UR
+                  print("place = "..place)
+                  print("best_hand = "..best_hand)
+                  --if player's hand is a high pair or higher its still
+                  --worth playing even though a pair is in the river:
+                  if(best_hand == PokerHands.ONE_PAIR) and
+                   (hole[1].rank.num > 9) then
+                     return Moves.CALL, RaiseFactor.UR
+                  else
+                     return Moves.FOLD, RaiseFactor.UR
+                  end
                end
             end
             print("best_hand = "..best_hand)
