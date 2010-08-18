@@ -1,3 +1,8 @@
+ASSERTIONS_ENABLED = true
+
+local old_assert = assert
+assert = function(...) if ASSERTIONS_ENABLED then old_assert(...) end end
+
 Directions = {
    RIGHT = {1,0},
    LEFT = {-1,0},
