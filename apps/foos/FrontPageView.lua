@@ -22,6 +22,12 @@ FrontPageView = Class(View, function(view, model, ...)
         src = "assets/overlay_infobar.png",
         opacity = 0
     }
+    view.backdrop = Image
+    {
+        name = "pic_info",
+        src = "assets/backdrop.png",
+        opacity = 0
+    }
 
 
     --model.album_group:add(view.selector)
