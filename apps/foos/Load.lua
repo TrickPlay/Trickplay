@@ -5,7 +5,7 @@ NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
 
-searches = {"space", "dinosaur", "puppy", "cat", "interesting","robots", "family", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
+searches = {"space", "picasa", "puppy", "cat", "interesting","robots", "family", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
 PIC_DIR = "assets/thumbnails/"
 
 
@@ -23,18 +23,14 @@ function Setup_Album_Covers()
     for i = 1,NUM_ROWS do 
         model.placeholders[i] = {}
         model.albums[i] = {}
+        model.fp_slots[i] = {}
         for j = 1,math.ceil(model.num_sources/NUM_ROWS) do
 
             model.placeholders[i][j] = Clone{ source = model.default, opacity =150}
             model.placeholders[i][j].position = 
-            {
-                PIC_W * (j-1) + PIC_W/4, PIC_H * (i-1)+PIC_H/4
---[[
-                screen.width  * (j-1) / (NUM_VIS_COLS + 1),
-                screen.height * (i-1) / NUM_ROWS
---]]
-            }
-				model.placeholders[i][j].z_rotation = {0, model.default.w/2, model.default.h/2}
+                                 { PIC_W/4,PIC_H/4 }
+            model.placeholders[i][j].z_rotation = 
+                                        { 0, model.default.w/2, model.default.h/2 }
 --[[            model.placeholders[i][j].scale = 
             {
                  PIC_W / 
@@ -45,7 +41,16 @@ function Setup_Album_Covers()
                   model.default.base_size[2]
             }]]
             model.placeholders.opacity = 255
-            model.album_group:add(model.placeholders[i][j])
+            model.fp_slots[i][j] = Group
+            {
+                name     = "Slot "..i.." "..j, 
+                position = { PIC_W * (j-1), PIC_H * (i-1) },
+                opacity  = 255
+            }
+            model.fp_slots[i][j]:add(Clone{ source = model.fp_backing, opacity = 255 })
+            model.fp_slots[i][j]:add(model.placeholders[i][j])
+
+            model.album_group:add(model.fp_slots[i][j])
         end
     end
     
@@ -63,7 +68,7 @@ function Load_Image(site,index)
         {
             async    = true,
             src      = site,
-            position = { PIC_W * (j-1), PIC_H * (i-1) },
+            --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function()
                 if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
@@ -78,8 +83,8 @@ function Load_Image(site,index)
                     if model.fp_index[1] == i and model.fp_index[2] == j then
                         model.albums[i][j].scale = 
                         {
-                            SEL_W / model.albums[i][j].base_size[1],
-                            SEL_H / model.albums[i][j].base_size[2]
+                            PIC_W / model.albums[i][j].base_size[1],
+                            PIC_H / model.albums[i][j].base_size[2]
                         }
                         model.albums[i][j]:raise_to_top()
                     else
@@ -89,9 +94,9 @@ function Load_Image(site,index)
                             PIC_H / model.albums[i][j].base_size[2]
                         }
                     end
-                    model.album_group:add(model.albums[i][j])
-                    model.albums[i][j]:lower_to_bottom()
-                    --model:notify()
+                    model.fp_slots[i][j]:add(model.albums[i][j])
+                --    model.album_group:add(model.albums[i][j])
+                --    model.albums[i][j]:lower_to_bottom()
                 end
             end
         }
@@ -100,7 +105,7 @@ function Load_Image(site,index)
         model.swap_pic = Image{
             async    = true,
             src      = site,
-            position = { PIC_W * (j-1), PIC_H * (i-1) },
+            --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function()
                 if (model.swap_pic == nil or model.albums[i] == nil or model.albums[i][j] == nil) then 
@@ -109,8 +114,8 @@ function Load_Image(site,index)
                 else
                     if model.fp_index[1] == i and model.fp_index[2] == j then
                         model.swap_pic.scale = {
-                            SEL_W / model.swap_pic.base_size[1],
-                            SEL_H / model.swap_pic.base_size[2]
+                            PIC_W / model.swap_pic.base_size[1],
+                            PIC_H / model.swap_pic.base_size[2]
                         }
                     else
                         model.swap_pic.scale = {
@@ -118,8 +123,9 @@ function Load_Image(site,index)
                             PIC_H / model.swap_pic.base_size[2]
                         }
                     end
-                    model.album_group:add(model.swap_pic)
-                    model.albums[i][j]:lower_to_bottom()
+                    model.fp_slots[i][j]:add(model.swap_pic)
+                    --model.album_group:add(model.swap_pic)
+                    --model.albums[i][j]:lower_to_bottom()
                     model.swap_pic:lower_to_bottom()
                     model.albums[i][j]:animate{
                         duration     = 4*CHANGE_VIEW_TIME,
