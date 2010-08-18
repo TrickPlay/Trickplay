@@ -49,7 +49,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         [CharacterSelectionGroups.TOP] = {},
         [CharacterSelectionGroups.MIDDLE] = {
             [SubGroups.LEFT_MIDDLE] = function()
-                if(playerCounter > 2) then
+                if(playerCounter >= 2) then
                     start_a_game()
                 end
             end
