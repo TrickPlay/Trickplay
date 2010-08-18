@@ -107,7 +107,9 @@ function Load_Image(site,index)
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function()
-                if (model.swap_pic == nil or model.albums[i] == nil or model.albums[i][j] == nil) then 
+                if model.swap_pic == nil or model.albums[i] == nil or 
+                                       model.albums[i][j] == nil or 
+                                    model.swap_pic.loaded == false then 
                     print("\n\nFailed to load")
                     model.swap_pic = nil 
                     model.swapping_cover = false
