@@ -226,9 +226,9 @@ function(pres, ctrl)
       
       Popup:new{group = t}
       
-      
+      ]]--
       winners[1].status:update( poker_hand.name )
-     ]]--
+     
       --winners[1].status:update( "I win!" )
       
    end

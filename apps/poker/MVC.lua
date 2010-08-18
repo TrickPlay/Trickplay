@@ -19,9 +19,9 @@ Model = Class(function(model, ...)
         [4] = {1281, 20},
         [5] = {1590, 99},
         [6] = {1590, 572},
-        START = {SCREEN_WIDTH*(2/5), SCREEN_HEIGHT*(2/3)+100},
-        EXIT = {SCREEN_WIDTH*(1/2), SCREEN_HEIGHT*(2/3)+250},
-        TUTORIAL = {SCREEN_WIDTH*(3/5), SCREEN_HEIGHT*(2/3)+100},
+        START = {720, 780},
+        EXIT = {750, 870},
+        HELP = {900, 870}
     }
     MDPL = model.default_player_locations
     
