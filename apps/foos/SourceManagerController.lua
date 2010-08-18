@@ -3,18 +3,17 @@ SourceManagerController = Class(Controller, function(self, view, ...)
 
     -- the default selected index
     local src_selected = 1
-    local acc_selected = 1
+    local acc_selected = {1,1}
 
     local controller = self
 
     local TextObj = function(obj)
                 local text_obj = obj
-                local default_text = text_obj.text
+                --local default_text = text_obj.text
                 text_obj.editable = true
                 text_obj:grab_key_focus()
                 function text_obj:on_key_down(k)
                     if keys.Return == k then
-print("TextObj recorded a RETURN press")
                         self.on_key_down = nil
                         screen:grab_key_focus()
                         --controller:on_key_down(k)
@@ -30,7 +29,7 @@ print("TextObj recorded a RETURN press")
                         --code to save the text goes here     
                     end
 --]]
-                    self.text = default_text               
+                    --self.text = default_text               
                 end
 
     end
@@ -40,11 +39,11 @@ print("TextObj recorded a RETURN press")
         ["QUERY"] = 
         {
             --Text Box
-            function()
+            {function()
                 TextObj( view.accordian_text["QUERY"][1] )
-            end,
+            end},
             --save
-            function() 
+            {function() 
                 view.accordian = false
                 view:leave_accordian()
             end,
@@ -52,22 +51,22 @@ print("TextObj recorded a RETURN press")
             function() 
                 view.accordian = false
                 view:leave_accordian()
-            end
+            end}
         },
         ["LOGIN"] = 
         {
-            function()
-                TextObj( view.accordian_text["LOGIN"][1] ) end,
-            function()
-                TextObj( view.accordian_text["LOGIN"][2] ) end,
-            function()
+            {function()
+                TextObj( view.accordian_text["LOGIN"][1] ) end},
+            {function()
+                TextObj( view.accordian_text["LOGIN"][2] ) end},
+            {function()
                 view.accordian = false
                 view:leave_accordian()
             end,
             function()
                 view.accordian = false
                 view:leave_accordian()
-            end
+            end}
         }
     }
 
@@ -83,7 +82,7 @@ print("TextObj recorded a RETURN press")
                 view.accordian = true
                 view.enter_accordian()
             else
-                MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected]()
+                MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
             end
             self:get_model():notify()
             
@@ -92,7 +91,6 @@ print("TextObj recorded a RETURN press")
 
 
     function self:on_key_down(k)
-        print("sdl;fjsd;afj;skdafj;skajd\n\n\n")
         if MenuKeyTable[k] then
             MenuKeyTable[k](self)
         end
@@ -113,29 +111,37 @@ print("TextObj recorded a RETURN press")
 
 
     function self:reset_acc_selected_index()
-        acc_selected = 1
+        acc_selected = {1,1}
     end
 
-    function self:set_acc_selected_index(i)
-        acc_selected = i
+    function self:set_acc_selected_index(r,c)
+        acc_selected = {r,c}
     end
 
     function self:get_acc_selected_index()
-        return acc_selected
+        return acc_selected[1],acc_selected[2]
     end
 
 
 
     function self:move_selector(dir)
-        local next_spot 
         if view.accordian == true then
-            next_spot= acc_selected+dir[1]
+            local next_spot= {acc_selected[1]+dir[2],
+                              acc_selected[2]+dir[1]}
+--[[
             if next_spot > 0 and next_spot <= 
               #view.accordian_items[  model.source_list[src_selected][2]  ] then
-                acc_selected = next_spot
+--]]
+            if view.accordian_items[  model.source_list[src_selected][2]  ][next_spot[1] ] ~= nil and view.accordian_items[  model.source_list[src_selected][2]  ][next_spot[1] ][ next_spot[2] ] ~= nil then
+                acc_selected = {next_spot[1],next_spot[2]}
             end
+            if next_spot[1] == #view.accordian_items[  model.source_list[src_selected][2]  ] - 1 and
+               next_spot[2] == 2 then
+               acc_selected = {#view.accordian_items[  model.source_list[src_selected][2]  ] - 1, 1}
+            end
+
         else
-            next_spot= src_selected+dir[2]
+            local next_spot= src_selected+dir[2]
             if next_spot > 0 and 
                next_spot <= #view.menu_items then
                 src_selected = next_spot
