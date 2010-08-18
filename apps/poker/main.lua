@@ -38,6 +38,7 @@ function()
    dofile("TimerWrapper.lua")
    dofile("GameControl.lua")
    dofile("PokerRules.lua")
+   dofile("PreFlopLUT.lua")
    dofile("Events.lua")
 
    Components = {
@@ -80,11 +81,12 @@ function()
    function enable_event_listener(event)
       assert(event:is_a(Event))
       if event:is_a(KbdEvent) then
-         print("keyboard enabled")
+         print("enable_event_listener(KbdEvent())")
          if old_on_key_down then
             screen.on_key_down, old_on_key_down = old_on_key_down, nil
          end
       elseif event:is_a(TimerEvent) then
+         print("enable_event_listener(TimerEvent{interval=" .. event.interval .. "})")
          local cb = event.cb or
             function()
                game:on_event(event)
@@ -93,8 +95,6 @@ function()
             on_timer=cb,
             interval=event.interval
          }
-      elseif event:is_a(BetEvent) then
-         
       end
       event_listener_en = true
    end

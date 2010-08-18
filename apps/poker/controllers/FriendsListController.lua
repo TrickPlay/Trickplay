@@ -1,4 +1,4 @@
-CharacterSelectionController = Class(Controller, function(self, view, ...)
+FriendsListController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.CHARACTER_SELECTION)
 
     local controller = self
@@ -43,28 +43,6 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         }
     }
 
-    local function setCharacterSeat()
-        --instantiate the player
-        local user = false
-        if(playerCounter == 1) then
-            user = HUMAN
-        end
-        args = {
-            user = user,
-            row = selected,
-            col = subselection,
-            number = playerCounter,
-            position = model.default_player_locations[ (selected-1)*3 + subselection ]
-        }
-        model.players[playerCounter] = Player(args)
-        model.players[playerCounter]:makeChips()
-        model.currentPlayer = playerCounter
-        --model.players[playerCounter].status = PlayerStatusView(model, nil, model.players[playerCounter]):initialize()
-        
-        playerCounter = playerCounter + 1
-        self:get_model():notify()
-    end
-
     local CharacterSelectionKeyTable = {
         [keys.Up] = function(self) self:move_selector(Directions.UP) end,
         [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
@@ -76,11 +54,6 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 pcall(CharacterSelectionCallbacks[selected][subselection], self)
             if not success then
                 print(error_msg)
-                setCharacterSeat()
-                if(playerCounter > 6) then
-                    self:get_model():set_active_component(Components.PLAYER_BETTING)
-                    self:get_model():notify()
-                end
             end
         end
     }
