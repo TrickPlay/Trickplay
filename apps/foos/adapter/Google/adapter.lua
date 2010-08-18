@@ -1,7 +1,7 @@
 --local source = {}
 
 local adapter = {
-	name = "GoogleImagesSearch",
+	name = "Google Images Search",
 	logoUrl = "adapter/Google/logo.png",
 	logoscale = {0.3,0.3},
 	{

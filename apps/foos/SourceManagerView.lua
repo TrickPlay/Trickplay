@@ -7,7 +7,8 @@ SourceManagerView = Class(View, function(view, model, ...)
     screen:add(view.clones)
 
     
-
+	local background = Image {src = "assets/background.jpg", x = -200 }	
+	 view.ui:add(background)
     local  add_sel = Image{src = "assets/source\ manager/Add_Sel.png"}
     local  add_un  = Image{src = "assets/source\ manager/Add_UnSel.png"}
     local hide_sel = Image{src = "assets/source\ manager/Hide_Sel.png"}
