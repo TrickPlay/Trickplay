@@ -5,7 +5,6 @@ NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
 
-searches = {"space", "dinosaur", "puppy", "cat", "interesting","robots", "family", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
 PIC_DIR = "assets/thumbnails/"
 
 
