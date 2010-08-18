@@ -24,9 +24,9 @@ FrontPageController = Class(Controller, function(self, view, ...)
                                                      (selected[1]-1)-1
             }
 				--screen:clear()
-	    model.curr_slideshow:begin()
-            self:get_model():notify()
-
+		      self:get_model():notify()
+		      model.curr_slideshow:begin()
+        
         end
     }
 

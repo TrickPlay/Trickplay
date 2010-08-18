@@ -1,8 +1,9 @@
 --local source = {}
 
 local adapter = {
-	name = "GoogleImages",
-	logoUrl = "adapter/Google/logo.jpg",
+	name = "GoogleImagesSearch",
+	logoUrl = "adapter/Google/logo.png",
+	logoscale = {0.3,0.3},
 	{
 		name = "public",
 		caption = function(data) return "Url: "..data.responseData.results[1].visibleUrl.."\nInfo: "..data.responseData.results[1].titleNoFormatting end,
@@ -35,6 +36,7 @@ function adapter:loadCovers(i,search, start_index)
 	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=medium",
 	on_complete = function (request, response)
 		local data = json:parse(response.body)
+		
 		site = data.responseData.results[1].unescapedUrl
       Load_Image(site,i)
 	end
