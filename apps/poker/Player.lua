@@ -33,10 +33,6 @@ Player = Class(function(player, args, ...)
       
    end
 
-   --[[
-      @return The Player's current position. Early, Middle, Late,...
-      view Position table in Globals.lua for options
-   --]]
    function player:get_position(state)
       -- TODO: actually calculate position
       local num_of_players = 0
@@ -107,7 +103,7 @@ Player = Class(function(player, args, ...)
       -- move the ai will make
       local ai_move = last_move
       local amount_to_raise = RaiseFactor.RR
-
+      print("player calculates call bet is " .. call_bet .. " and min_raise is " .. min_raise)
       --combine the community cards and hole
       assert(hole[1])
       assert(hole[2])
@@ -312,7 +308,7 @@ Player = Class(function(player, args, ...)
             if(a_bet > player.money) then
                a_bet = player.money
             end
-            print("\nRAISE, raised by "..a_bet.."\n")
+            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
          elseif(amount_to_raise == RaiseFactor.RR) then
             if(call_bet*2+min_raise < call_bet*3) then
@@ -321,7 +317,7 @@ Player = Class(function(player, args, ...)
             if(a_bet > player.money) then
                a_bet = player.money
             end
-            print("\nRAISE, raised by "..a_bet.."\n")
+            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
          else
             error("failed raising the steaks")
