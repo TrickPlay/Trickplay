@@ -12,7 +12,7 @@ PIC_DIR = "assets/thumbnails/"
 function Setup_Album_Covers()
     assert(model.default,"default is not init yet")
     screen:add(model.default)
-	for i =1, 16 do
+	for i =1, #adapters do
 		 loadCovers(i,searches[i], 1)
 	end
    -- startAdapter(1) --TODO fix this one source shit
