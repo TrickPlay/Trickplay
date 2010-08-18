@@ -69,3 +69,10 @@ UNSUITED = 2
 
 HIGH_OUTS_RANGE = .66
 LOW_OUTS_RANGE = .33
+
+--adjusts standard deviation in decision making
+Difficulty = {
+    HARD = 1,
+    MEDIUM = 2,
+    EASY = 3
+}

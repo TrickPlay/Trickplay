@@ -6,6 +6,7 @@ Player = Class(function(player, args, ...)
    player.position = false
    player.table_position = nil
    player.chipPosition = nil
+   player.difficulty = Difficulty.HARD
    for k,v in pairs(args) do
       player[k] = v
    end
@@ -38,7 +39,7 @@ Player = Class(function(player, args, ...)
    --]]
    function player:get_position(state)
       -- TODO: actually calculate position
-      return Position.BIG_BLIND
+      return Position.SMALL_BLIND
    end
 
    ---
@@ -62,7 +63,7 @@ Player = Class(function(player, args, ...)
       local fold = false
       local call_bet = state:get_call_bet()
       local min_raise = state:get_min_raise()
-      local round = Rounds.HOLE
+      local round = Rounds.FLOP
       local raisedFactor = RaiseFactor.UR
       local community_cards = state:get_community_cards()
       -- move the ai will make
@@ -77,7 +78,8 @@ Player = Class(function(player, args, ...)
       for i,v in ipairs(community_cards) do
           table.insert(all_cards, v)
       end
-      local best_hand = get_best(all_cards)
+      local _, best_hand = get_best(all_cards)
+
 
       hand_print(hole)
       hand_print(community_cards)
@@ -90,7 +92,7 @@ Player = Class(function(player, args, ...)
       -- @return some_total_outs Total outs for all hands of the enemies
       local function get_outs(i, j, k, l)
          local some_outs = 0
-         local some_total_outs
+         local some_total_outs = 0
          local a_hand = {}
          a_hand[1] = community_cards[i]
          a_hand[2] = community_cards[j]
@@ -98,23 +100,25 @@ Player = Class(function(player, args, ...)
          if(l) then
             a_hand[4] = community_cards[l]
          end
-         out_table = count_outs(a_hand)
+         local out_table = count_outs(a_hand)
          for place,poker_hand in ipairs(PokerHands) do
-            if(place <= best_hand) then
-               some_outs = some_outs + out_table[poker_hand]
+            if(out_table[poker_hand]) then
+               if(place <= best_hand) then
+                  some_outs = some_outs + out_table[poker_hand]
+               end
+               some_total_outs = some_total_outs + out_table[poker_hand]
             end
-            some_total_outs = some_total_outs + out_table[poker_hand]
          end
          return some_outs, some_total_outs
       end
 
       local function curvature(a_move)
          if(a_move == Moves.CALL) then
-            if(3 == math.random(3)) then
+            if(4 <= math.random(3) + self.difficulty) then
                a_move = Moves.RAISE
             end
          elseif(ai_move == Moves.RAISE) then
-            if(3 == math.random(3)) then
+            if(4 <= math.random(3) + self.difficulty) then
                a_move = Moves.CALL
             end
          end            
@@ -133,7 +137,7 @@ Player = Class(function(player, args, ...)
 
             a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
             --introduce a random element
-            if(math.random(4) == 4) then
+            if(5 == math.random(4) + self.difficulty) then
                a_move = math.random(Moves.CALL, Moves.FOLD)
             end
             return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
@@ -143,10 +147,13 @@ Player = Class(function(player, args, ...)
             --river
             for place,poker_hand in ipairs(PokerHands) do
                if(poker_hand.present_in(community_cards)) and
-                (place >= best_hand) then
+                (place <= best_hand) then
+                     print("place = "..place)
+                     print("best_hand = "..best_hand)
                   return Moves.FOLD
                end
             end
+            print("best_hand = "..best_hand)
 
             -- TODO: Un-Fugly this code
             --get the outs in 3 card combos of the river and compare
@@ -160,24 +167,29 @@ Player = Class(function(player, args, ...)
                total_outs = total_outs + some_total_outs
                k = k + 1
             end
+            k = k - 1
             while(j <= #community_cards - 1) do
                local some_outs, some_total_outs = get_outs(i,j,k)
                outs = outs + some_outs
                total_outs = total_outs + some_total_outs
                j = j + 1
             end
+            j = j - 1
             while(i <= #community_cards - 2) do
                local some_outs, some_total_outs = get_outs(i,j,k)
                outs = outs + some_outs
                total_outs = total_outs + some_total_outs
                i = i + 1
             end
-
+            print("outs = "..outs)
+            print("total_outs = "..total_outs)
             local losing_odds = outs/total_outs
-            if(losing_odds > HIGH_OUTS_RANGE) then
+            print("\nlosing_odds1 = "..losing_odds.."\n")
+            local stddev = (math.random(self.difficulty)-1) * .2
+            if(losing_odds > HIGH_OUTS_RANGE + stddev) then
                return Moves.FOLD
-            elseif(losing_odds <= HIGH_OUTS_RANGE and
-            losing_odds >= LOW_OUTS_RANGE) then
+            elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
+            (losing_odds >= LOW_OUTS_RANGE) then
                return Moves.CALL
             elseif(outs/total_outs < LOW_OUTS_RANGE) then
                outs = 0
@@ -194,29 +206,37 @@ Player = Class(function(player, args, ...)
                   total_outs = total_outs + some_total_outs
                   l = l + 1
                end
+               l = l - 1
                while(k <= #community_cards - 1) do
                   local some_outs, some_total_outs = get_outs(i,j,k,l)
                   outs = outs + some_outs
                   total_outs = total_outs + some_total_outs
                   k = k + 1
                end
+               k = k - 1
                while(j <= #community_cards - 2) do
                   local some_outs, some_total_outs = get_outs(i,j,k,l)
                   outs = outs + some_outs
                   total_outs = total_outs + some_total_outs
                   j = j + 1
                end
+               j = j - 1
                while(i <= #community_cards - 3) do
                   local some_outs, some_total_outs = get_outs(i,j,k,l)
                   outs = outs + some_outs
                   total_outs = total_outs + some_total_outs
                   i = i + 1
                end
-               local losing_odds = outs/total_outs
-               if(losing_odds > HIGH_OUTS_RANGE) then
+
+               print("outs = "..outs)
+               print("total_outs = "..total_outs)
+               losing_odds = outs/total_outs
+               print("\nlosing_odds2 = "..losing_odds.."\n")
+               stddev = (math.random(self.difficulty)-1) * .1
+               if(losing_odds > HIGH_OUTS_RANGE + stddev) then
                   return Moves.FOLD
-               elseif(losing_odds <= HIGH_OUTS_RANGE and
-               losing_odds >= LOW_OUTS_RANGE) then
+               elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
+               (losing_odds >= LOW_OUTS_RANGE) then
                   return Moves.RAISE, RaiseFactor.R
                elseif(outs/total_outs < LOW_OUTS_RANGE) then
                   return Moves.RAISE, RaiseFactor.RR
@@ -244,15 +264,21 @@ Player = Class(function(player, args, ...)
          print("\nFOLD\n")
          return true, 0
       elseif(Moves.RAISE == ai_move) then
+         local a_bet = call_bet+min_raise
          if(amount_to_raise == RaiseFactor.R) then
-            local a_bet = math.random(call_bet+min_raise, call_bet*2)
+            --websites say raising the bet times 2 is a good standard?
+            if(a_bet < call_bet*2) then
+               a_bet = math.random(a_bet, call_bet*2)
+            end
             if(a_bet > player.money) then
                a_bet = player.money
             end
             print("\nRAISE, raised by "..a_bet.."\n")
             return false, a_bet
          elseif(amount_to_raise == RaiseFactor.RR) then
-            local a_bet = math.random(call_bet*1.5+min_raise, call_bet*2.5)
+            if(call_bet*2+min_raise < call_bet*3) then
+               a_bet = math.random(call_bet*2+min_raise, call_bet*3)
+            end
             if(a_bet > player.money) then
                a_bet = player.money
             end

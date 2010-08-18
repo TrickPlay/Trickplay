@@ -487,9 +487,9 @@ end
 
 function get_best(hand)
    if not hand then error("get_best passed a nil hand", 2) end
-   for _, poker_hand in ipairs(PokerHands) do
+   for position, poker_hand in ipairs(PokerHands) do
       if poker_hand.present_in(hand) then
-         return poker_hand
+         return poker_hand, position
       end
    end
    error("fail.")
