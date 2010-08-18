@@ -457,18 +457,6 @@ HIGH_CARD = {
       end
 }
 
-PokerHands = {
-   STRAIGHT_FLUSH,
-   FOUR_OF_A_KIND,
-   FULL_HOUSE,
-   FLUSH,
-   STRAIGHT,
-   THREE_OF_A_KIND,
-   TWO_PAIR,
-   ONE_PAIR,
-   HIGH_CARD
-}
-
 function compare_hands(hand1, hand2)
    local pin1, pin2
    for _,poker_hand in ipairs(PokerHands) do
@@ -494,3 +482,15 @@ function get_best(hand)
    end
    error("fail.")
 end
+
+PokerHands = {
+   STRAIGHT_FLUSH,
+   FOUR_OF_A_KIND,
+   FULL_HOUSE,
+   FLUSH,
+   STRAIGHT,
+   THREE_OF_A_KIND,
+   TWO_PAIR,
+   ONE_PAIR,
+   HIGH_CARD
+}
