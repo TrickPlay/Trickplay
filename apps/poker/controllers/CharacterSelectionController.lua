@@ -31,7 +31,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     assert(selected)
     assert(subselection)
     --the number of the current player selecting a seat
-    local playerCounter = 1
+    local playerCounter = 0
 
     local function start_a_game()
         model:set_active_component(Components.GAME)
