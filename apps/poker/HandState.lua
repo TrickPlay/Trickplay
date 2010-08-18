@@ -17,8 +17,12 @@ HandState = Class(nil, function(state, ctrl, ...)
 
    -- array of players who are still in the game.
    local in_players
-   -- player => done table. if done[player] then 
+   -- index of active player in players table.. it should be the case that players[players_action] == in_players[action]
+   local players_action
+   -- player => done table. if done[player] then player is in the hand, but doesn't need to bet anymore
    local done
+   -- player => removed table.
+   local removed
    local call_bet
    local min_raise
 
@@ -52,15 +56,18 @@ HandState = Class(nil, function(state, ctrl, ...)
       round = Rounds.HOLE
 
       in_players = {}
+      
       done = {}
+      removed = {}
       for i, player in ipairs(players) do
          in_players[i] = player
          done[player] = false
+         removed[player] = false
       end
 
       -- person after the big blind goes first, initially
       action = (bb_p % #players) + 1
-
+      players_action = action
       -- initialize bet in front of each player
       player_bets = {}
       for _,player in ipairs(players) do
@@ -119,17 +126,43 @@ HandState = Class(nil, function(state, ctrl, ...)
          pot = pot + player_bets[active_player]
          player_bets[active_player] = 0
          table.remove(in_players, action)
+         
+         removed[active_player] = true
          action = ((action - 1) % #in_players) + 1
+         local next_players_action = (players_action % #players) + 1
+         while removed[players[next_players_action]] do
+            next_players_action = (next_players_action % #players) + 1
+         end
+         players_action = next_players_action
          ctrl:fold_player(active_player)
       else
+         local max_bet = 0
+         local cand
+         for _,player in ipairs(in_players) do
+            cand = player_bets[player] + player.money
+            if cand > max_bet then max_bet = cand end
+         end
+         assert(bet <= max_bet)
+
+         print("bet went from",player_bets[active_player],"to",bet)
          local delta = bet-player_bets[active_player]
+         assert(0 <= delta)
          player_bets[active_player] = bet
 
+         print("call_bet",call_bet,"min_raise",min_raise)
          -- bet is a call
-         if bet <= call_bet then
+         if bet < call_bet then
+            print("player should have pushed all in")
+            assert(
+               active_player.money == 0,
+               "if bet is less than the minimum bet to call, and player didn't fold, then player should be all in\n" ..
+                  "but he had " .. active_player.money .. " leftover when he bet " .. bet .. " and the call bet was " .. call_bet
+            )
+         elseif bet == call_bet then
             print("player called")
          else
             print("player raised")
+            assert(bet >= call_bet+min_raise or active_player.money == 0)
             if bet-call_bet > min_raise then
                min_raise = bet-call_bet
             end
