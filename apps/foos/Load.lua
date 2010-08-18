@@ -48,6 +48,7 @@ function Setup_Album_Covers()
             model.album_group:add(model.placeholders[i][j])
         end
     end
+    
 end
 
 --Called by the adapter's on_complete function
@@ -74,13 +75,23 @@ function Load_Image(site,index)
                         model.placeholders[i][j] = nil
                     end
 
-                    model.albums[i][j].scale = 
-                    {
-                        PIC_W / model.albums[i][j].base_size[1],
-                        PIC_H / model.albums[i][j].base_size[2]
-                    }
+                    if model.fp_index[1] == i and model.fp_index[2] == j then
+                        model.albums[i][j].scale = 
+                        {
+                            SEL_W / model.albums[i][j].base_size[1],
+                            SEL_H / model.albums[i][j].base_size[2]
+                        }
+                        model.albums[i][j]:raise_to_top()
+                    else
+                        model.albums[i][j].scale = 
+                        {
+                            PIC_W / model.albums[i][j].base_size[1],
+                            PIC_H / model.albums[i][j].base_size[2]
+                        }
+                    end
                     model.album_group:add(model.albums[i][j])
                     model.albums[i][j]:lower_to_bottom()
+                    --model:notify()
                 end
             end
         }
@@ -92,39 +103,44 @@ function Load_Image(site,index)
             position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function()
-            	 if (model.swap_pic == nil or model.albums[i] == nil or model.albums[i][j] == nil) then 
-            	     model.swap_pic = nil 
-					     model.swapping_cover = false
-            	 else
-		             model.swap_pic.scale = {
-		                 PIC_W / model.swap_pic.base_size[1],
-		                 PIC_H / model.swap_pic.base_size[2]
-		             }
-		             model.album_group:add(model.swap_pic)
-		             model.albums[i][j]:lower_to_bottom()
-		             model.swap_pic:lower_to_bottom()
-		             model.albums[i][j]:animate{
-		                 duration = 4*CHANGE_VIEW_TIME,
-		                 y        = model.albums[i][j].y + PIC_H,
-		                 opacity  = 0,
-		                 on_completed = function()
-									 if (model.albums[i] == nil or model.albums[i][j] == nil) then model.swap_pic = nil 
-									 else
-
-				                  print("changeCover called back",
-				                        model.albums[i][j],model.swap_pic)
-				                  if model.albums[i][j] ~= nil then
-				                      model.albums[i][j]:unparent() 
-				                      model.albums[i][j] = nil
-				                  end
-				                  model.albums[i][j] = model.swap_pic
-				                  model.swap_pic:lower_to_bottom()
-				                end
-				                model.swapping_cover = false
-		                 end
-		             }
-		           end
-		            
+                if (model.swap_pic == nil or model.albums[i] == nil or model.albums[i][j] == nil) then 
+                    model.swap_pic = nil 
+                    model.swapping_cover = false
+                else
+                    if model.fp_index[1] == i and model.fp_index[2] == j then
+                        model.swap_pic.scale = {
+                            SEL_W / model.swap_pic.base_size[1],
+                            SEL_H / model.swap_pic.base_size[2]
+                        }
+                    else
+                        model.swap_pic.scale = {
+                            PIC_W / model.swap_pic.base_size[1],
+                            PIC_H / model.swap_pic.base_size[2]
+                        }
+                    end
+                    model.album_group:add(model.swap_pic)
+                    model.albums[i][j]:lower_to_bottom()
+                    model.swap_pic:lower_to_bottom()
+                    model.albums[i][j]:animate{
+                        duration     = 4*CHANGE_VIEW_TIME,
+                        y            = model.albums[i][j].y + PIC_H,
+                        opacity      = 0,
+                        on_completed = function()
+                            if (model.albums[i] == nil or model.albums[i][j] == nil) then 
+                                model.swap_pic = nil 
+                            else
+                                print("changeCover called back",model.albums[i][j],model.swap_pic)
+                                if model.albums[i][j] ~= nil then
+                                    model.albums[i][j]:unparent() 
+                                    model.albums[i][j] = nil
+                                end
+                                model.albums[i][j] = model.swap_pic
+                                model.swap_pic:lower_to_bottom()
+                            end
+                            model.swapping_cover = false
+                        end
+                    }
+                end            
             end
         }
     end
