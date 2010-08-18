@@ -90,7 +90,7 @@ end
 --prints the mofok'n hand
 function hand_print(hand)
    assert(hand)
-   print("This hand contains:\n")
+   print("\nThis hand contains:\n")
    for _,card in ipairs(hand) do
       print(card.name)
    end
