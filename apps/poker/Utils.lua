@@ -1,6 +1,7 @@
 
 
 function sort_hand(hand)
+   if not hand then error("hand is nil!", 2) end
    local hand_copy = {}
    for _,card in ipairs(hand) do
       table.insert(hand_copy,card)
@@ -84,4 +85,14 @@ function count_outs(hand)
       end
    end
    return out_table
+end
+
+--prints the mofok'n hand
+function hand_print(hand)
+   assert(hand)
+   print("This hand contains:\n")
+   for _,card in ipairs(hand) do
+      print(card.name)
+   end
+   print("\n")
 end
