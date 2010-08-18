@@ -63,6 +63,7 @@ end
 function Slideshow:stop()
    	timer:stop()
   	     started = false
+		collectgarbage()
 
 		  if (self.images[current_pic] ~= nil) then
    	     
@@ -110,7 +111,6 @@ end
 
 function timer.on_timer(timer)
 	print("tick"..current_pic)
-	collectgarbage()
 	if (current_pic ~= temp_pic and started) then
 		model.curr_slideshow:loadUrls(adapters[model.curr_slideshow.index][1].photos(search,current_pic))
 		temp_pic = current_pic
