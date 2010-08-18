@@ -29,7 +29,7 @@ Model = Class(function(model, ...)
 --]]
 
     model.default = Image{
-                src = "assets/img_placeholder_questionmark_loading.jpg",
+                src = "assets/loading.png",
                 opacity = 0
     }
     model.def_bs = {model.default.base_size[1],model.default.base_size[2]}

@@ -1,43 +1,21 @@
---[[source = {}
-
-function showYahooImage(search,x,y,index)
-	local request = URLRequest {
-		url = "http://search.yahooapis.com/ImageSearchService/V1/imageSearch?appid=YahooDemo&query="..search.."&results=1&output=json",
-		
-		on_complete = function (request, response)
-			local data = json:parse(response.body)
-			local image = Image {
-				src = data.ResultSet.Result[index].ClickUrl,
-				x = x,
-				y = y
-			}
-			screen:add(image)
-		end
-	}
-	request:send()
-end
-
-return source
-
-]]
-
 local adapter = {
-	name = "GoogleImages",
-	logoUrl = "adapter/Google/logo.jpg",
+	name = "YahooImageSearch",
+	logoUrl = "adapter/Yahoo/logo.png",
+	logoscale = {1,1},
 	{
 		name = "public",
-		caption = adapter:getCaption(),
+		caption = function(data) return "" end,
 		required_inputs = {
-			query = adapter:getQuery(),
+			query = "space",
 		},
-		albums = adapter:getAlbums(),
-		photos = adapter:getPhotos(album, start, num_images)
+		albums = function() end,
+		photos = function(search,current_pic) return "http://search.yahooapis.com/ImageSearchService/V1/imageSearch?appid=YahooDemo&query="..search.."&results=1&start="..current_pic.."&output=json" end,
+		site = function(data) 
+		--	return data.responseData.results[1].unescapedUrl
+			return data.ResultSet.Result[1].ClickUrl 
+		end
 	}
 }
-
-function adapter:getQuery()
-	return "National+Geographic"
-end
 
 function adapter:getCaption()
 	-- some caption of the album
@@ -49,21 +27,21 @@ function adapter:getAlbums()
 end
 
 function adapter:getPhotos(album,start,num_images)
-	sites = {}
-	search = self:getQuery()
-	for i = start, start + num_images do
-		local request = URLRequest {
-		url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..i.."&imgsz=xxlarge",
-		on_complete = function (request, response)
-			local data = json:parse(response.body)
-			table.insert(sites,data.responseData.results[1].unescapedUrl)
-		end
-		}
-		request:send()
-	end
-	return sites
+
 end
 
+function adapter:loadCovers(i,search, start_index)
+	local request = URLRequest {
+	url = "http://search.yahooapis.com/ImageSearchService/V1/imageSearch?appid=YahooDemo&query="..search.."&results=1&start="..start_index.."&output=json",
+	on_complete = function (request, response)
+		local data = json:parse(response.body)
+		for k,v in pairs(data) do print(k,v) end
+
+		site = data.ResultSet.Result[1].ClickUrl
+      Load_Image(site,i)
+	end
+	}
+	request:send()
+end
 
 return adapter
-
