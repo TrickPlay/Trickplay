@@ -20,7 +20,8 @@ Model = Class(function(model, ...)
     model.fp_backing = Rectangle{
                 color = "602020",
                 width = PIC_W,
-                height = PIC_H
+                height = PIC_H,
+                opacity = 0
     }
     screen:add(model.fp_backing)
     model.fp_slots = {}

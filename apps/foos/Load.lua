@@ -43,7 +43,7 @@ function Setup_Album_Covers()
             model.fp_slots[i][j] = Group
             {
                 name     = "Slot "..i.." "..j, 
-                position = { PIC_W * (j-1), PIC_H * (i-1) },
+                position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
                 opacity  = 255
             }
             model.fp_slots[i][j]:add(Clone{ source = model.fp_backing, opacity = 255 })
@@ -107,12 +107,14 @@ function Load_Image(site,index)
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function()
-                if (model.swap_pic == nil or model.albums[i] == nil or model.albums[i][j] == nil) then 
-                    print("\n\nFailed to load")
+                if model.swap_pic == nil or model.albums[i] == nil or 
+                                       model.albums[i][j] == nil or 
+                                    model.swap_pic.loaded == false then 
+                    --print("\n\nFailed to load")
                     model.swap_pic = nil 
                     model.swapping_cover = false
                 else
-                    print("swap pic loaded")
+                    --print("swap pic loaded")
                     if model.fp_index[1] == i and model.fp_index[2] == j then
                         model.swap_pic.scale = {
                             PIC_W / model.swap_pic.base_size[1],
@@ -133,12 +135,12 @@ function Load_Image(site,index)
                         y            = model.albums[i][j].y + PIC_H,
                         opacity      = 0,
                         on_completed = function()
-                            print("swap animation completed")
+                            --print("swap animation completed")
                             if model.albums[i] == nil or 
                                model.albums[i][j] == nil then 
                                 model.swap_pic = nil 
                             else
-                                print("changeCover called back",model.albums[i][j],model.swap_pic)
+                                --print("changeCover called back",model.albums[i][j],model.swap_pic)
                                 if model.albums[i][j] ~= nil then
                                     model.albums[i][j]:unparent() 
                                     model.albums[i][j] = nil
