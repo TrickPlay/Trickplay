@@ -35,6 +35,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
 
     local function start_a_game()
         model:set_active_component(Components.GAME)
+        model:notify()
         game:initialize_game{
             sb=1,
             bb=2,

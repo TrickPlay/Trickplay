@@ -227,7 +227,18 @@ function(pres, ctrl)
       update_players()
    end
 
-   function pres:bet_player(active_player)
+   function pres:call_player(active_player)
+      --update_players()
+      
+      for player, bet in pairs( ctrl:get_player_bets() ) do
+         if player == active_player then
+            player.betChips:set(bet)
+            player.status:update( "Bet "..bet )
+         end
+      end
+
+   end
+   function pres:raise_player(active_player)
       --update_players()
       
       for player, bet in pairs( ctrl:get_player_bets() ) do
