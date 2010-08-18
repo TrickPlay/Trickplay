@@ -148,7 +148,13 @@ BettingController = Class(Controller, function(self, view, ...)
        if not updated and model:get_active_component() == Components.PLAYER_BETTING then
           subselection = SubGroups.CALL
           updated = true
-          model.currentPlayer.bet = model.orig_bet
+          local call_bet = model.call_bet
+          local player = model.currentPlayer
+          if call_bet <= player.bet+player.money then -- TODO gogogo.
+             player.bet, player.money = call_bet, player.money+player.bet-call_bet
+          else
+             player.bet, player.money = player.bet+player.money, 0
+          end
        end
        view:update()
     end

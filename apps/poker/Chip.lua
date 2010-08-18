@@ -77,10 +77,10 @@ chipCollection = Class(function(self, ...)
         
         function self:set(value)
                 if self:value() == value then
-                        print("Nothing to change")
+--                        print("Nothing to change")
                         return true
                 elseif self:value() < value then
-                        print("Attempting to add chips")
+--                        print("Attempting to add chips")
                         -- First, sort the stacks
                         self:sort()
                         local biggest = 1
@@ -105,7 +105,7 @@ chipCollection = Class(function(self, ...)
                         end
                            
                 else
-                        print("Attempting to subtract chips")
+--                        print("Attempting to subtract chips")
                         for i, stack in ipairs(self.stacks) do
                                 while stack.size > 0 do
                                         stack:removeChip()
