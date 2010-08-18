@@ -108,9 +108,11 @@ function Load_Image(site,index)
             -- toss the filler image and scale it once loaded
             on_loaded = function()
                 if (model.swap_pic == nil or model.albums[i] == nil or model.albums[i][j] == nil) then 
+                    print("\n\nFailed to load")
                     model.swap_pic = nil 
                     model.swapping_cover = false
                 else
+                    print("swap pic loaded")
                     if model.fp_index[1] == i and model.fp_index[2] == j then
                         model.swap_pic.scale = {
                             PIC_W / model.swap_pic.base_size[1],
@@ -124,14 +126,16 @@ function Load_Image(site,index)
                     end
                     model.fp_slots[i][j]:add(model.swap_pic)
                     --model.album_group:add(model.swap_pic)
-                    --model.albums[i][j]:lower_to_bottom()
-                    model.swap_pic:lower_to_bottom()
+                    model.albums[i][j]:raise_to_top()
+--                    model.swap_pic:lower_to_bottom()
                     model.albums[i][j]:animate{
                         duration     = 4*CHANGE_VIEW_TIME,
                         y            = model.albums[i][j].y + PIC_H,
                         opacity      = 0,
                         on_completed = function()
-                            if (model.albums[i] == nil or model.albums[i][j] == nil) then 
+                            print("swap animation completed")
+                            if model.albums[i] == nil or 
+                               model.albums[i][j] == nil then 
                                 model.swap_pic = nil 
                             else
                                 print("changeCover called back",model.albums[i][j],model.swap_pic)
@@ -140,7 +144,7 @@ function Load_Image(site,index)
                                     model.albums[i][j] = nil
                                 end
                                 model.albums[i][j] = model.swap_pic
-                                model.swap_pic:lower_to_bottom()
+                                --model.swap_pic:lower_to_bottom()
                             end
                             model.swapping_cover = false
                         end
@@ -148,6 +152,8 @@ function Load_Image(site,index)
                 end            
             end
         }
+    else
+        model.swapping_cover = false
     end
 end
 

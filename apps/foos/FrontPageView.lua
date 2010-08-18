@@ -206,10 +206,12 @@ FrontPageView = Class(View, function(view, model, ...)
                     print("completed to placeholder:",sel[1],sel[2])
                     --if current:complete_animation ~= nil then
                         current:complete_animation()
+--[[
                     view.backdrop.position={new_c-22,new_r-17}
                     view.backdrop.scale = {1.015,1.015}
                     view.backdrop.opacity = 255
                     view.backdrop:raise_to_top()
+
                     current:raise_to_top()
 
                     --end
@@ -314,25 +316,6 @@ print("adding selector")
                 
 
             end
---[[
-
-            local rand = math.random(1,3)
-            --print(rand,model.swapping_cover)
-            if rand == 3 and model.swapping_cover == false then
-                model.swapping_cover = true
-                local rand_i = {
-                    math.random(1,NUM_ROWS),
-                    math.random(1,NUM_VIS_COLS) + 
-                         model.front_page_index  - 1
-                }
-                local search_i = math.random(1,10)
-                local formula = (rand_i[2]-1)*2 + (rand_i[1])
-                --print("formula?",rand_i[1],rand_i[2],formula)
-                loadCovers(formula, searches[formula], search_i)
-            end
-            prev_i = {sel[1],sel[2]}
---]]
-
         else
             print("Hiding FrontPageView UI")
             model.album_group:complete_animation()
@@ -341,21 +324,26 @@ print("adding selector")
     end
 
 function view.timer.on_timer(timer)
-	print("random insert")
+	print("random insert, locked = ",model.swapping_cover)
             --print(rand,model.swapping_cover)
             if model.swapping_cover == false then
-                model.swapping_cover = true
                 local rand_i = {
                     math.random(1,NUM_ROWS),
                     math.random(1,NUM_VIS_COLS) + 
                          model.front_page_index  - 1
                 }
-                if rand_i[1] ~= model.fp_index[1] and
+                print("trying at",rand_i[1],rand_i[2],"when at",model.fp_index[1],model.fp_index[2])
+                if rand_i[1] ~= model.fp_index[1] or
                    rand_i[2] ~= model.fp_index[2] then
+print("calling")
+                    model.swapping_cover = true
+
                     local search_i = math.random(1,10)
                     local formula = (rand_i[2]-1)*2 + (rand_i[1])
                     --print("formula?",rand_i[1],rand_i[2],formula)
                     loadCovers(formula, searches[formula], search_i)
+                else
+                print("not calling")
                 end
             end
 
