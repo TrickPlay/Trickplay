@@ -31,6 +31,7 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_player_bets() return player_bets end
    function state:get_pot() return pot end
    function state:get_action() return action end
+   function state:get_dealer() return dealer end
    function state:get_players() return players end
    function state:get_in_players() return in_players end
    function state:get_active_player() return in_players[action] end

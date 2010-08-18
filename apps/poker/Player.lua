@@ -35,7 +35,42 @@ Player = Class(function(player, args, ...)
 
    function player:get_position(state)
       -- TODO: actually calculate position
-      return Position.SMALL_BLIND
+      local num_of_players = 0
+      for _,__ in ipairs(state:get_players()) do
+         num_of_players = num_of_players + 1
+      end
+
+      local active_player = state:get_active_player()
+      local action_player = 0
+      for i,v in ipairs(state:get_players()) do
+         if(active_player == v) then
+            action_player = i
+         end
+      end
+      assert(action_player > 0)
+      assert(action_player <= num_of_players)
+
+      --eliminate obvious cases
+      if(action_player == state:get_sb_p()) then
+         return Position.SMALL_BLIND
+      elseif(action_player == state:get_bb_p()) then
+         return Position.BIG_BLIND
+      elseif(action_player == state:get_dealer()) then
+         return Position.LATE
+      else
+      --other cases
+         local position = action_player - state:get_bb_p()
+         if(position < 0) then
+            position = position + num_of_players
+         end
+         --edge case
+         if(num_of_players == 5) then
+            position = position + 1
+         end
+         assert(position < Position.LATE)
+         return position
+      end
+      error("error calculation position")
    end
 
    ---
@@ -52,18 +87,22 @@ Player = Class(function(player, args, ...)
    -- @returns fold boolean  true if player should fold
    -- @returns bet number  quantity of bet, if fold then bet should be 0
    --function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot, round)
+   local last_move = Moves.FOLD
    function player:get_move(state)
       
+      -- stuff that the player usually plays off of
       local hole = state:get_hole_cards()[self]
       local position = self:get_position(state)
       local fold = false
       local call_bet = state:get_call_bet()
       local min_raise = state:get_min_raise()
-      local round = Rounds.FLOP
+      local round = state:get_round()
+      print("\nRound: "..round.."\n")
       local raisedFactor = RaiseFactor.UR
       local community_cards = state:get_community_cards()
+
       -- move the ai will make
-      local ai_move = Moves.FOLD
+      local ai_move = last_move
       local amount_to_raise = RaiseFactor.RR
       print("player calculates call bet is " .. call_bet .. " and min_raise is " .. min_raise)
       --combine the community cards and hole
@@ -117,7 +156,8 @@ Player = Class(function(player, args, ...)
             if(4 <= math.random(3) + self.difficulty) then
                a_move = Moves.CALL
             end
-         end            
+         end
+         print("\na_move: "..a_move.."\n")
          return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
       end
 
@@ -133,7 +173,7 @@ Player = Class(function(player, args, ...)
 
             a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
             --introduce a random element
-            if(5 == math.random(4) + self.difficulty) then
+            if(5 <= math.random(4) + self.difficulty) then
                a_move = math.random(Moves.CALL, Moves.FOLD)
             end
             return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
@@ -146,7 +186,7 @@ Player = Class(function(player, args, ...)
                 (place <= best_hand) then
                      print("place = "..place)
                      print("best_hand = "..best_hand)
-                  return Moves.FOLD
+                  return Moves.FOLD, RaiseFactor.UR
                end
             end
             print("best_hand = "..best_hand)
@@ -183,10 +223,10 @@ Player = Class(function(player, args, ...)
             print("\nlosing_odds1 = "..losing_odds.."\n")
             local stddev = (math.random(self.difficulty)-1) * .2
             if(losing_odds > HIGH_OUTS_RANGE + stddev) then
-               return Moves.FOLD
+               return Moves.FOLD, RaiseFactor.UR
             elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
             (losing_odds >= LOW_OUTS_RANGE) then
-               return Moves.CALL
+               return Moves.CALL, RaiseFactor.UR
             elseif(outs/total_outs < LOW_OUTS_RANGE) then
                outs = 0
                total_outs = 0
@@ -230,7 +270,7 @@ Player = Class(function(player, args, ...)
                print("\nlosing_odds2 = "..losing_odds.."\n")
                stddev = (math.random(self.difficulty)-1) * .1
                if(losing_odds > HIGH_OUTS_RANGE + stddev) then
-                  return Moves.FOLD
+                  return Moves.FOLD, RaiseFactor.UR
                elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
                (losing_odds >= LOW_OUTS_RANGE) then
                   return Moves.RAISE, RaiseFactor.R
@@ -252,6 +292,7 @@ Player = Class(function(player, args, ...)
       }
 
       ai_move, amount_to_raise = playsTable[round](ai_move)
+      last_move = ai_move
       
       if(Moves.CALL == ai_move) then
          print("\nCALL, call_bet = "..call_bet.."\n")
