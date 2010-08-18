@@ -268,7 +268,7 @@ Player = Class(function(player, args, ...)
                print("\nlosing_odds2 = "..losing_odds.."\n")
                stddev = (math.random(self.difficulty)-1) * .1
                if(losing_odds > HIGH_OUTS_RANGE + stddev) then
-                  return Moves.FOLD, RaiseFactor.UR
+                  return Moves.CALL, RaiseFactor.UR
                elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
                (losing_odds >= LOW_OUTS_RANGE) then
                   return Moves.RAISE, RaiseFactor.R

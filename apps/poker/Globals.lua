@@ -76,3 +76,5 @@ Difficulty = {
     MEDIUM = 2,
     EASY = 3
 }
+
+CHANGE_VIEW_TIME = 400
