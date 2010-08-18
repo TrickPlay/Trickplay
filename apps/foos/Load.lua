@@ -5,7 +5,7 @@ NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
 
-searches = {"space", "dinosaur", "picasa", "flickr", "google","yahoo", "family", "stuff", "funny", "cool", "music", "pandora", "facebook", "twitter", "digg", "scene"}
+searches = {"space", "dinosaur", "puppy", "cat", "interesting","robots", "family", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
 PIC_DIR = "assets/thumbnails/"
 
 
@@ -25,16 +25,17 @@ function Setup_Album_Covers()
         model.albums[i] = {}
         for j = 1,math.ceil(model.num_sources/NUM_ROWS) do
 
-            model.placeholders[i][j] = Clone{ source = model.default }
+            model.placeholders[i][j] = Clone{ source = model.default, opacity =150}
             model.placeholders[i][j].position = 
             {
-                PIC_W * (j-1), PIC_H * (i-1)
+                PIC_W * (j-1) + PIC_W/4, PIC_H * (i-1)+PIC_H/4
 --[[
                 screen.width  * (j-1) / (NUM_VIS_COLS + 1),
                 screen.height * (i-1) / NUM_ROWS
 --]]
             }
-            model.placeholders[i][j].scale = 
+				model.placeholders[i][j].z_rotation = {0, model.default.w/2, model.default.h/2}
+--[[            model.placeholders[i][j].scale = 
             {
                  PIC_W / 
 --                 (screen.width/(NUM_VIS_COLS+1))  / 
@@ -42,9 +43,8 @@ function Setup_Album_Covers()
                   PIC_H / 
 --                 (screen.height/NUM_ROWS) / 
                   model.default.base_size[2]
-            }
+            }]]
             model.placeholders.opacity = 255
-
             model.album_group:add(model.placeholders[i][j])
         end
     end
