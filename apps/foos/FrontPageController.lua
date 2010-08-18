@@ -11,6 +11,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.a]     = function(self)
             self:get_model():set_active_component(Components.SOURCE_MANAGER)
+            view.timer:stop()
             self:get_model():notify()
 
         end,
@@ -24,9 +25,10 @@ FrontPageController = Class(Controller, function(self, view, ...)
                                                      (selected[1]-1)-1
             }
 				--screen:clear()
-	    model.curr_slideshow:begin()
+            view.timer:stop()
             self:get_model():notify()
 
+	    model.curr_slideshow:begin()
         end
     }
 

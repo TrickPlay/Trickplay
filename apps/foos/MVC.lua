@@ -1,3 +1,4 @@
+CHANGE_TIME_VIEW = 100
  -- constructor, called with Model(...)
 Model = Class(function(model, ...)
     -- (private) class fields
@@ -21,6 +22,8 @@ Model = Class(function(model, ...)
                 opacity = 0
     }
     screen:add(model.prac_pic)
+
+    model.fp_index = {1,1}
 --[[
  model.prac_pic.scale = {
                                     PIC_W / model.prac_pic.base_size[1],
@@ -39,9 +42,9 @@ Model = Class(function(model, ...)
 
 
     --Source Manager
-    model.source_list = {  {"Google",   QUERY}, {"Picasa",     BOTH},
-                           {"Facebook", LOGIN}, {"Yahoo!",    QUERY},
-                           {"Flickr",   QUERY}, {"PhotoBuket", BOTH}
+    model.source_list = {  {"Google",   "QUERY"}, {"Picasa",     "LOGIN"},
+                           {"Facebook", "LOGIN"}, {"Yahoo!",     "QUERY"},
+                           {"Flickr",   "QUERY"}, {"PhotoBuket", "QUERY"}
                         }
 
     -- class methods
