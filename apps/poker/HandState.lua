@@ -32,6 +32,7 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_active_player() return in_players[action] end
    function state:get_sb_qty() return sb_qty end
    function state:get_bb_qty() return bb_qty end
+   function state:get_dealer() return dealer end
    function state:get_sb_p() return sb_p end
    function state:get_bb_p() return bb_p end
    function state:get_deck() return deck end
