@@ -40,13 +40,16 @@ Model = Class(function(model, ...)
     --SLIDE_SHOW
     model.curr_slideshow = {}
 
-
+	model.source_list= {}
     --Source Manager
-    model.source_list = {  {"Google",   "QUERY"}, {"Picasa",     "LOGIN"},
-                           {"Facebook", "LOGIN"}, {"Yahoo!",     "QUERY"},
+    for i=1, #adapterTypes do
+	    model.source_list[i] = {adapterTypesTable[i].name,   adapterTypesTable[i][1].required_inputs.format}
+	 end
+--[[    model.source_list = {  {adapters[1].name,   adapters[1][1].required_inputs.format}, {"Picasa",     "LOGIN"},
+                           {"Facebook", "LOGIN"}, {adapters[2].name,   adapters[2][1].required_inputs.format},
                            {"Flickr",   "QUERY"}, {"PhotoBuket", "QUERY"}
                         }
-
+]]
     -- class methods
     function model:attach(observer, controller_id)
         self.registry[observer] = true
