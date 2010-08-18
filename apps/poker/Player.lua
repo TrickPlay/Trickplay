@@ -86,7 +86,6 @@ Player = Class(function(player, args, ...)
    -- @param round
    -- @returns fold boolean  true if player should fold
    -- @returns bet number  quantity of bet, if fold then bet should be 0
-   --function player:get_move(hole, community_cards, position, call_bet, min_raise, current_bet, pot, round)
    local last_move = Moves.FOLD
    function player:get_move(state)
       
@@ -157,7 +156,6 @@ Player = Class(function(player, args, ...)
                a_move = Moves.CALL
             end
          end
-         print("\na_move: "..a_move.."\n")
          return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
       end
 
