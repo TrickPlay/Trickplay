@@ -98,10 +98,12 @@ BettingController = Class(Controller, function(self, view, ...)
 
     function self:move_selector(dir)
         screen:grab_key_focus()
+        local orig_money = model.orig_money
         local orig_bet = model.orig_bet
         local call_bet = model.call_bet
         local min_raise = model.min_raise
         local player = model.currentPlayer
+        assert(player.money + player.bet == orig_money)
         -- Change button
         if(0 ~= dir[1]) then
             local new_selected = subselection + dir[1]
@@ -116,9 +118,12 @@ BettingController = Class(Controller, function(self, view, ...)
             if 1 <= new_selected and SubSize >= new_selected then
                subselection = new_selected
                if subselection == SubGroups.FOLD then
+                  local old_money = player.money
                   player.bet, player.money = orig_bet, player.money+player.bet-orig_bet
+                  print("subgroups.fold: player.money was $" .. old_money .. ", now $" .. player.money)
                elseif subselection == SubGroups.CALL then
                   if call_bet <= player.bet+player.money then -- TODO gogogo.
+                     local old_money = player.money
                      player.bet, player.money = call_bet, player.money+player.bet-call_bet
                   else
                      player.bet, player.money = player.bet+player.money, 0
@@ -150,6 +155,7 @@ BettingController = Class(Controller, function(self, view, ...)
           updated = true
           local call_bet = model.call_bet
           local player = model.currentPlayer
+          player.bet = model.orig_bet
           if call_bet <= player.bet+player.money then -- TODO gogogo.
              player.bet, player.money = call_bet, player.money+player.bet-call_bet
           else
