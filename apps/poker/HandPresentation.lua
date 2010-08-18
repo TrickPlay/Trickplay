@@ -254,6 +254,12 @@ function(pres, ctrl)
    end
 
    function pres:start_turn(active_player)
+      active_player.status:update( "My turn, foo!" )
+      local pos = active_player.table_position
+      local params = DOG_ANIMATIONS[ pos ]
+      if params and params.name then
+         a = Animation(params.dog, params.frames, params.position)
+      end
    end
 
    function pres:finish_turn(active_player)

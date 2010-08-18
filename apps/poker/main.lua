@@ -6,27 +6,48 @@ AssetLoader:preloadImage("Table","assets/table.png")
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleNone.png")
 AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 
-
+-- Buttons
 local ui_colors = {"Red", "Green", "Gray"}
 local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"}
-
 for _,color in pairs(ui_colors) do
    for _,button in pairs(ui_buttons) do
       AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
    end
 end
 
+-- Player text bubbles
 local player_text = {"BubbleLeft", "BubbleRight"}
 for i=1, 2 do
    for _, text in ipairs(player_text) do
       AssetLoader:preloadImage(text..i,"assets/UI/"..text..i..".png")
    end
 end
+
+-- Dog animations
+DOG_ANIMATIONS = {
+   [1] = {},
+   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0} },
+   [3] = {dog = 3, name = "animation_gunfired", frames = 10, position = {340, 5} },
+   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
+   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1750, 10} },
+}
+
+for i, t in ipairs(DOG_ANIMATIONS) do
+   if t.frames then  
+      for j=1, t.frames do
+         AssetLoader:preloadImage("dog"..i.."frame"..j,"assets/dogs/"..t.name.."/"..j..".png")
+         print("assets/dogs/animation_smoke/"..j..".png")
+      end
+   end
+end
+
 --------------------------------------------------------------------------------
 
 AssetLoader.on_preload_ready =
 function()
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
+   --DOG = AssetLoader:getImage("dog4frame5",{})
+   screen:add( DOG )
    dofile("Class.lua") -- Must be declared before any class definitions.
    dofile("Globals.lua")
    --dofile("Utils.lua")
@@ -40,6 +61,7 @@ function()
    dofile("PokerRules.lua")
    dofile("PreFlopLUT.lua")
    dofile("Events.lua")
+   dofile("Animate.lua")
 
    Components = {
       COMPONENTS_FIRST = 1,
