@@ -12,15 +12,19 @@ SourceManagerView = Class(View, function(view, model, ...)
     local  add_un  = Image{src = "assets/source\ manager/Add_UnSel.png"}
     local hide_sel = Image{src = "assets/source\ manager/Hide_Sel.png"}
     local hide_un  = Image{src = "assets/source\ manager/Hide_UnSel.png"}
-	 local ok_sel = Image { src = "assets/source\ manager/ok_focus.png"}
-	 local ok_un = Image { src = "assets/source\ manager/ok_nofocus.png"}
-	 local cancel_sel = Image { src = "assets/source\ manager/cancel_focus.png"} 
-	 local cancel_un = Image { src = "assets/source\ manager/cancel_nofocus.png"}
+    local ok_sel = Image { src = "assets/source\ manager/ok_focus.png"}
+    local ok_un = Image { src = "assets/source\ manager/ok_nofocus.png"}
+    local cancel_sel = Image { src = "assets/source\ manager/cancel_focus.png"}
+    local cancel_un = Image { src = "assets/source\ manager/cancel_nofocus.png"}
+    local txtbx_sel = Image{src="assets/source\ manager/typeinbox_focus.png"}
+    local txtbx_un = Image{src="assets/source\ manager/typeinbox_nofocus.png"}
 	 view.clones:add(ok_sel, ok_un, cancel_sel, cancel_un)
-    view.clones:add(  add_sel )
-    view.clones:add(  add_un  )
-    view.clones:add( hide_sel )
-    view.clones:add( hide_un  )
+    view.clones:add(   add_sel )
+    view.clones:add(   add_un  )
+    view.clones:add(  hide_sel )
+    view.clones:add(  hide_un  )
+    view.clones:add( txtbx_sel )
+    view.clones:add( txtbx_un  )
 
     view.menu_buttons = {}
     view.menu_items   = {}
@@ -50,15 +54,15 @@ SourceManagerView = Class(View, function(view, model, ...)
     {
         ["QUERY"] = 
         {
-             TextBox(0,0,300),
-             FocusableImage(400, 0, ok_un, ok_sel),
+             FocusableImage(  0, 0,  txtbx_un,  txtbx_sel),
+             FocusableImage(400, 0,     ok_un,     ok_sel),
              FocusableImage(800, 0, cancel_un, cancel_sel)
         },
         ["LOGIN"] = 
         {
-             TextBox(  0,0,300),
-             TextBox(400,0,300),
-             FocusableImage( 800, 0, ok_un, ok_sel),
+             FocusableImage(  0, 0,   txtbx_un,  txtbx_sel),
+             FocusableImage( 400, 0,  txtbx_un,  txtbx_sel),
+             FocusableImage( 800, 0,     ok_un,     ok_sel),
              FocusableImage(1200, 0, cancel_un, cancel_sel)
         }
     }
