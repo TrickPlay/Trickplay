@@ -98,12 +98,13 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       local continue = false
       if ctrl.waiting_for_bet and event:is_a(BetEvent) then
          ctrl.waiting_for_bet = false
+         pres:finish_turn(state:get_active_player())
          continue = state:execute_bet(event.fold, event.bet)
          enable_event_listener(TimerEvent{interval=.5})
       elseif not ctrl.waiting_for_bet then
-         print("player is done:", state:player_done())
          ctrl.waiting_for_bet = true
          local active_player = state:get_active_player()
+         pres:start_turn(active_player)
          if active_player.isHuman then
             model.currentPlayer = active_player
             model.orig_bet = state:get_player_bets()[active_player]
@@ -125,7 +126,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
          else
             local fold, bet = active_player:get_move(state)
             local orig_bet = state:get_player_bets()[state:get_active_player()]
-            active_player.money = active_player.money + orig_bet - bet
+            print("computer move, activeplayer money was $" .. active_player.money)
+            if not fold then
+               active_player.money = active_player.money + orig_bet - bet
+            end
+            print("computer move, activeplayer money now $" .. active_player.money)
             enable_event_listener(
                TimerEvent{
                   interval=1,
