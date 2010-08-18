@@ -74,18 +74,18 @@ FrontPageView = Class(View, function(view, model, ...)
         right_edge:complete_animation()
         local new_x
         if model.front_page_index == 1 then
-            new_x = 0
+            new_x = 10
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 0}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
         elseif model.front_page_index == math.ceil(model.num_sources / 
                      NUM_ROWS) - (NUM_VIS_COLS-1)               then
             new_x = -1*(model.front_page_index-1) * PIC_W + 
-                       (screen.width - NUM_VIS_COLS*PIC_W)
+                       (screen.width - NUM_VIS_COLS*PIC_W) - 10
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
         else
             new_x = -1*(model.front_page_index-1) * PIC_W + 
-                       (screen.width - NUM_VIS_COLS*PIC_W)/2
+                       (screen.width - NUM_VIS_COLS*PIC_W)/2 
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
         end
@@ -130,7 +130,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
 
             local new_r = PIC_H * (sel[1]-1)
----[[
+--[[
             if sel[1] == 1 then
                 new_r = 0
             elseif sel[1] == NUM_ROWS then
@@ -141,7 +141,7 @@ FrontPageView = Class(View, function(view, model, ...)
 --                new_r = .95*screen.height * (sel[1]-1) / NUM_ROWS
             end
 --]]
-            local new_c = PIC_W * (sel[2]-1) - .05*PIC_W 
+            local new_c = PIC_W * (sel[2]-1) - .025*PIC_W 
 
 --[[
             local new_c = screen.width  * (sel[2]-1) / 
@@ -200,22 +200,11 @@ FrontPageView = Class(View, function(view, model, ...)
                 duration = CHANGE_VIEW_TIME,
                 scale = {1,1},
                 --scale    = { PIC_W / prev_bs[1], PIC_H / prev_bs[2] },
-                position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)},
+                position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)+10},
                 on_completed = function()
                     prev_i = {sel[1],sel[2]}
                     print("completed to placeholder:",sel[1],sel[2])
-                    --if current:complete_animation ~= nil then
-                        current:complete_animation()
---[[
-                    view.backdrop.position={new_c-22,new_r-17}
-                    view.backdrop.scale = {1.015,1.015}
-                    view.backdrop.opacity = 255
-                    view.backdrop:raise_to_top()
-
-                    current:raise_to_top()
-
-                    --end
---]]
+                    current:complete_animation()
 --[[
                     view.selector:complete_animation()
                     view.selector.position={new_c-55,new_r-55}
@@ -232,11 +221,11 @@ FrontPageView = Class(View, function(view, model, ...)
                     current:animate{
                         duration = CHANGE_VIEW_TIME,
                         position = {new_c,new_r},
-                        scale    = {1.1,1.1},
+                        scale    = {1.05,1.05},
                         --scale  = {SEL_W / curr_bs[1],SEL_H /curr_bs[2]},
                         on_completed = function()
                             view.backdrop.position={new_c-22,new_r-17}
-                            view.backdrop.scale = {1.015,1.015}
+                            view.backdrop.scale = {.945,.945}
                             view.backdrop.opacity = 255
                             view.backdrop:raise_to_top()
                             current:raise_to_top()
@@ -324,7 +313,7 @@ print("adding selector")
     end
 
 function view.timer.on_timer(timer)
-	print("random insert, locked = ",model.swapping_cover)
+	--print("random insert, locked = ",model.swapping_cover)
             --print(rand,model.swapping_cover)
             if model.swapping_cover == false then
                 local rand_i = {
@@ -332,10 +321,11 @@ function view.timer.on_timer(timer)
                     math.random(1,NUM_VIS_COLS) + 
                          model.front_page_index  - 1
                 }
-                print("trying at",rand_i[1],rand_i[2],"when at",model.fp_index[1],model.fp_index[2])
+                --print("trying at",rand_i[1],rand_i[2],"when at",model.fp_index[1],
+                --                                                model.fp_index[2])
                 if rand_i[1] ~= model.fp_index[1] or
                    rand_i[2] ~= model.fp_index[2] then
-print("calling")
+                    --print("calling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
@@ -343,7 +333,7 @@ print("calling")
                     --print("formula?",rand_i[1],rand_i[2],formula)
                     loadCovers(formula, searches[formula], search_i)
                 else
-                print("not calling")
+                --print("not calling")
                 end
             end
 
