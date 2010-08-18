@@ -50,7 +50,7 @@ BettingView = Class(View, function(view, model, ...)
     
     view.stack = chipCollection()
     view.stack.group.position = {1700,500}
-    screen:add(view.stack.group)
+--    screen:add(view.stack.group)
     
     function view:update()
         local controller = self:get_controller()

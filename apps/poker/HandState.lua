@@ -106,6 +106,7 @@ HandState = Class(nil, function(state, ctrl, ...)
 
    -- if bet is less than call_bet then assume folding
    function state:execute_bet(fold, bet)
+      print("HandState:execute_bet(" .. tostring(fold) .. ", " .. tostring(bet) .. ")")
       if type(fold) ~= "boolean" or type(bet) ~= "number" then
          error("execute_bet called with parameters of incorrect type", 2)
       end
@@ -217,7 +218,14 @@ HandState = Class(nil, function(state, ctrl, ...)
          model.currentPlayer = active_player
          model.in_players = in_players
          model:set_active_component(Components.PLAYER_BETTING)
-         model:get_active_controller():set_callback(function(fold, bet) execute_bet(fold, bet) end)
+         model:get_active_controller():set_callback(
+            function(fold, bet)
+               enable_event_listener(
+                  TimerEvent{
+                     interval=.1,
+                     cb=function() execute_bet(fold, bet) end
+                  })
+            end)
          enable_event_listener(KbdEvent())
       else
          local fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)

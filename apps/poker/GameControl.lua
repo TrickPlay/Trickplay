@@ -74,11 +74,13 @@ function(ctrl, model, ...)
    function ctrl.on_event(ctrl, event)
       assert(event:is_a(Event))
       if event:is_a(BetEvent) then
-         print("BetEvent triggered")
+         print("GameControl:on_event(BetEvent)")
       elseif event:is_a(TimerEvent) then
-         print("TimerEvent triggered")
+         print("GameControl:on_event(TimerEvent)")
       elseif event:is_a(KbdEvent) then
-         print("KbdEvent triggered")
+         print("GameControl:on_event(KbdEvent)")
+      else
+         print("GameControl:on_event(Event)")
       end
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
