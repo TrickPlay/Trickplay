@@ -26,7 +26,7 @@ FrontPageView = Class(View, function(view, model, ...)
     {
         name = "pic_info",
         src = "assets/backdrop.png",
-        opacity = 0
+        opacity = 255
     }
 
 
@@ -203,7 +203,11 @@ assert(previous ~= nil,"wth")
                     print("completed to placeholder:",sel[1],sel[2])
                     --if current:complete_animation ~= nil then
                         current:complete_animation()
+                    view.backdrop.position={new_c-22,new_r-17}
+                    view.backdrop.scale = {1.02,1.02}
+                    view.backdrop:raise_to_top()
                     current:raise_to_top()
+
                     --end
 --]]
 --[[
@@ -284,6 +288,8 @@ print("adding selector")
                 view.selector.opacity = 0
                 model.album_group:add(view.selector)
                 model.album_group:add(view.sel_info)
+                model.album_group:add(view.backdrop)
+
 --[[
                 view.selector:complete_animation()
                 view.selector:animate{
