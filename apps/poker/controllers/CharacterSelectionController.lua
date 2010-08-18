@@ -26,7 +26,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
     end
 
     -- the default selected index
-    local selected = CharacterSelectionGroups.BOTTOM
+    local selected = CharacterSelectionGroups.MIDDLE
     local subselection = SubGroups.LEFT_MIDDLE
     assert(selected)
     assert(subselection)
@@ -59,8 +59,18 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                 exit()
             end,
             [SubGroups.RIGHT_MIDDLE] = function()
-                exit()
+                print("starting tutorial")
+                if not TUTORIAL then
+                    TUTORIAL = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{opacity=0}), animate_in = {opacity=255, duration=500}, on_fade_in = function() end }
+                else
+                    TUTORIAL.fade = "out"
+                    TUTORIAL.on_fade_out = function() screen:remove(TUTORIAL.group) TUTORIAL = nil end
+                    TUTORIAL:render()
+                end
             end
+        },
+        [CharacterSelectionGroups.BOTTOM] = {
+            [1] = function() exit() end
         }
     }
     
