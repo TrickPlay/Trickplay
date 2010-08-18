@@ -1,4 +1,18 @@
-Position = {
+--[[
+    this is what should be called for result
+
+    i.e. preFlopLUT[Position.EARLY][RaiseFactor.UR][Ranks.ACE.num][Ranks.ACE.num][SUITED]
+    @return value in Moves table (Moves.CALL)
+
+    Cards must be listed in order, hence ...[Ranks.JACK.num][Ranks.ACE.num]...
+    does not guarentee a valid result!!
+--]]
+preFlopLUT = nil
+
+--[[
+    values below are also in Globals.lua
+--]]
+local Position = {
     EARLY = 1,
     EARLY2 = 2,     --Same as Early but redundancy for 6 players
     MIDDLE = 3,
@@ -6,18 +20,18 @@ Position = {
     SMALL_BLIND = 5,
     BIG_BLIND = 6
 }
-RaiseFactor = {
+local RaiseFactor = {
     UR = 1,     --Un-Raised Big-Blind
     R = 2,      --Raised Big-Blind
     RR = 3      --Re-Raised Big-Blind
 }
-Moves = {
+local Moves = {
     CALL = 1,
     RAISE = 2,
     FOLD = 3
 }
-SUITED = 1
-UNSUITED = 2
+local SUITED = 1
+local UNSUITED = 2
 
 --contains pre-flop moves for Early UR condition, used as basis
 local baseMovesTable = {}
@@ -68,7 +82,7 @@ baseMovesTable[Ranks.QUEEN.num][Ranks.JACK.num][SUITED] = Moves.CALL
 
 --Set up some basic pre-flop moves based on Early UR into all different
 --Sections of the LUT, use deep copies
-movesTable = {}
+local movesTable = {}
 for i = Position.EARLY,Position.BIG_BLIND do
     movesTable[i] = {}
     for j = RaiseFactor.UR, RaiseFactor.RR do
@@ -351,3 +365,4 @@ movesTable[Position.BIG_BLIND][RaiseFactor.R][Ranks.NINE.num][Ranks.EIGHT.num][U
 --Same as Small Blind RR, shallow copy since this wont change
 movesTable[Position.BIG_BLIND][RaiseFactor.RR] = movesTable[Position.SMALL_BLIND][RaiseFactor.RR]
 
+preFlopLUT = movesTable

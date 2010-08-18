@@ -7,6 +7,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    local game_ctrl = game_ctrl or error("no game_ctrl",2)
 --   local bet_ctrl = BettingControl(ctrl)
 
+   local round = Rounds.HOLE
    local hand_pipeline = {}
    local orig_hand_pipeline = {
       function(ctrl) return ctrl:deal(Rounds.HOLE) end,
@@ -31,14 +32,14 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_sb_p() return state:get_sb_p() end
    function ctrl:get_bb_p() return state:get_bb_p() end
    function ctrl:get_deck() return state:get_deck() end
+   function ctrl:get_round() return round end
 
    -- private functions
    function ctrl:give_winner_pot_and_bone_out()
+      print("HandControl:give_winner_pot_and_bone_out()")
       state:give_winner_pot()
-
-      
       hand_pipeline = {}
-      enable_event_listener(KbdEvent())
+--      enable_event_listener(TimerEvent{interval=2})
    end
 
    local function initialize_pipeline()
@@ -74,7 +75,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       [Rounds.TURN]=function(pres) pres:deal_turn() end,
       [Rounds.RIVER]=function(pres) pres:deal_river() end
    }
-   function ctrl.deal(ctrl, round)
+   function ctrl.deal(ctrl, rd)
+      round = rd
       deal_LUT[round](pres)
       enable_event_listener(TimerEvent{interval=.5})
       return true
@@ -89,37 +91,50 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    -- human, then event listener waits for on_event call from 
 
    print("defined and set waiting_for_bet to false")
-   local waiting_for_bet = false
-   function ctrl.bet(ctrl, round, event)
-      print("entering ctrl:bet, and waiting_for_bet is", waiting_for_bet)
+   ctrl.waiting_for_bet = false
+   function ctrl.bet(ctrl, rd, event)
+      print("HandControl:bet(" .. tostring(rd) .. ", event")
+      round = rd
       local continue = false
-      if waiting_for_bet and event:is_a(BetEvent) then
-         print("setting waiting_for_bet to false")
-         waiting_for_bet = false
-         continue = state:execute_bet(event.bet)
-         print("setting up timerevent in ctrl.bet, where waiting_for_bet is", waiting_for_bet)
-         game_ctrl:on_event(Event{})
-      elseif not waiting_for_bet then
-         print("generating a bet, and setting waiting_for_bet to true")
-         waiting_for_bet = true
+      if ctrl.waiting_for_bet and event:is_a(BetEvent) then
+         ctrl.waiting_for_bet = false
+         continue = state:execute_bet(event.fold, event.bet)
+         enable_event_listener(TimerEvent{interval=.5})
+      elseif not ctrl.waiting_for_bet then
+         print("player is done:", state:player_done())
+         ctrl.waiting_for_bet = true
          local active_player = state:get_active_player()
          if active_player.isHuman then
             model.currentPlayer = active_player
+            model.orig_bet = state:get_player_bets()[active_player]
+            model.call_bet = state:get_call_bet()
+            model.min_raise = state:get_min_raise()
             model.in_players = state:get_in_players()
             model:set_active_component(Components.PLAYER_BETTING)
-            model:get_active_controller():set_callback(function(bet) game_ctrl:on_event(BetEvent{bet=bet}) end)
+            model:get_active_controller():set_callback(
+               function(fold, bet) 
+                  enable_event_listener(
+                     TimerEvent{
+                        interval=.01,
+                        cb=function()
+                           game_ctrl:on_event(BetEvent{fold=fold, bet=bet})
+                        end})
+               end)
             enable_event_listener(KbdEvent())
+            model:notify()
          else
-            local bet = active_player:get_move(state)
+            local fold, bet = active_player:get_move(state)
+            local orig_bet = state:get_player_bets()[state:get_active_player()]
+            active_player.money = active_player.money + orig_bet - bet
             enable_event_listener(
                TimerEvent{
                   interval=1,
                   cb=function()
-                        game_ctrl:on_event(BetEvent{bet=bet})
-                  end})
+                        game_ctrl:on_event(BetEvent{fold=fold, bet=bet})
+                     end})
          end
       end
-      if continue then waiting_for_bet = false end
+      if continue then ctrl.waiting_for_bet = false end
       return continue
    end
 
@@ -142,8 +157,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       print(#hand_pipeline, "entries left in hand_pipeline")
       if #hand_pipeline > 0 then
          local next_action = hand_pipeline[1]
-         local result = next_action(ctrl, event)
-         if result then 
+         local continue = next_action(ctrl, event)
+         if continue then 
             print("removing action from hand_pipeline")
             table.remove(hand_pipeline, 1)
          end

@@ -138,6 +138,7 @@ function get_best_straight(hand)
 end
 
 function get_best_straight_flush(hand)
+   if not hand then error("hand is nil!", 2) end
    local sorted_hand = sort_hand(hand)
    local buckets = {
       [Suits.CLUBS] = {},
@@ -179,6 +180,7 @@ STRAIGHT_FLUSH = {
    name="Straight Flush",
    present_in=
       function (hand)
+         if not hand then error("hand is nil, in STRAIGHT_FLUSH.present_in()", 2) end
          return #get_best_straight_flush(hand) == 5
       end,
    comparator=
@@ -481,4 +483,14 @@ function compare_hands(hand1, hand2)
       end
    end
    return 0, poker_hand
+end
+
+function get_best(hand)
+   if not hand then error("get_best passed a nil hand", 2) end
+   for position, poker_hand in ipairs(PokerHands) do
+      if poker_hand.present_in(hand) then
+         return poker_hand, position
+      end
+   end
+   error("fail.")
 end

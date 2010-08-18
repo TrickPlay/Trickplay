@@ -17,8 +17,12 @@ HandState = Class(nil, function(state, ctrl, ...)
 
    -- array of players who are still in the game.
    local in_players
-   -- player => done table. if done[player] then 
+   -- index of active player in players table.. it should be the case that players[players_action] == in_players[action]
+   local players_action
+   -- player => done table. if done[player] then player is in the hand, but doesn't need to bet anymore
    local done
+   -- player => removed table.
+   local removed
    local call_bet
    local min_raise
 
@@ -32,9 +36,14 @@ HandState = Class(nil, function(state, ctrl, ...)
    function state:get_active_player() return in_players[action] end
    function state:get_sb_qty() return sb_qty end
    function state:get_bb_qty() return bb_qty end
+   function state:get_dealer() return dealer end
    function state:get_sb_p() return sb_p end
    function state:get_bb_p() return bb_p end
    function state:get_deck() return deck end
+   function state:get_call_bet() return call_bet end
+   function state:get_min_raise() return min_raise end
+   function state:get_round() return ctrl:get_round() end
+   function state:player_done() return done[in_players[action]] end
 
    function state.initialize(state, args)
       players = args.players
@@ -44,17 +53,21 @@ HandState = Class(nil, function(state, ctrl, ...)
       sb_p = args.sb_p
       bb_p = args.bb_p
       deck = args.deck
+      round = Rounds.HOLE
 
       in_players = {}
+      
       done = {}
+      removed = {}
       for i, player in ipairs(players) do
          in_players[i] = player
          done[player] = false
+         removed[player] = false
       end
 
       -- person after the big blind goes first, initially
       action = (bb_p % #players) + 1
-
+      players_action = action
       -- initialize bet in front of each player
       player_bets = {}
       for _,player in ipairs(players) do
@@ -79,7 +92,6 @@ HandState = Class(nil, function(state, ctrl, ...)
          hole_cards[player] = deck:deal(2)
       end
       community_cards = deck:deal(5)
-
    end
 
    function state.give_winner_pot(state)
@@ -100,21 +112,69 @@ HandState = Class(nil, function(state, ctrl, ...)
       ctrl:set_bet_listener(callback, player)
    end
 
-
-   function state:execute_bet(bet)
+   -- if bet is less than call_bet then assume folding
+   function state:execute_bet(fold, bet)
+      print("HandState:execute_bet(" .. tostring(fold) .. ", " .. tostring(bet) .. ")")
+      if type(fold) ~= "boolean" or type(bet) ~= "number" then
+         error("execute_bet called with parameters of incorrect type", 2)
+      end
       local active_player = in_players[action]
-      if bet == 0 then
+      print("active_player.number", active_player.number)
+      if fold then
+         print("player folded")
          -- current wager goes into pot
          pot = pot + player_bets[active_player]
          player_bets[active_player] = 0
          table.remove(in_players, action)
+         
+         removed[active_player] = true
          action = ((action - 1) % #in_players) + 1
+         local next_players_action = (players_action % #players) + 1
+         while removed[players[next_players_action]] do
+            next_players_action = (next_players_action % #players) + 1
+         end
+         players_action = next_players_action
          ctrl:fold_player(active_player)
       else
+         local max_bet = 0
+         local cand
+         for _,player in ipairs(in_players) do
+            cand = player_bets[player] + player.money
+            if cand > max_bet then max_bet = cand end
+         end
+         assert(bet <= max_bet)
+
+         print("bet went from",player_bets[active_player],"to",bet)
          local delta = bet-player_bets[active_player]
-         assert(0 <= delta and delta <= active_player.money)
+         assert(0 <= delta)
          player_bets[active_player] = bet
-         active_player.money = active_player.money - delta
+
+         print("call_bet",call_bet,"min_raise",min_raise)
+         -- bet is a call
+         if bet < call_bet then
+            print("player should have pushed all in")
+            assert(
+               active_player.money == 0,
+               "if bet is less than the minimum bet to call, and player didn't fold, then player should be all in\n" ..
+                  "but he had " .. active_player.money .. " leftover when he bet " .. bet .. " and the call bet was " .. call_bet
+            )
+         elseif bet == call_bet then
+            print("player called")
+         else
+            print("player raised")
+            assert(bet >= call_bet+min_raise or active_player.money == 0)
+            if bet-call_bet > min_raise then
+               min_raise = bet-call_bet
+            end
+            call_bet = bet
+            for i,player in ipairs(in_players) do
+               if i ~= action and player.money > 0 then
+                  done[player] = false
+               end
+            end
+         end
+--         assert(0 <= delta and delta <= active_player.money) logic is kind of in bettingview/controller
+         --active_player.money = active_player.money - delta
          ctrl:bet_player(active_player)
       end
       done[active_player] = true
@@ -143,6 +203,8 @@ HandState = Class(nil, function(state, ctrl, ...)
             player_bets[player] = 0
             done[player] = false
          end
+         call_bet = 0
+         min_raise = bb_qty
 
          -- reset the new action
          local tmp_action = (dealer % #in_players) + 1
@@ -190,7 +252,14 @@ HandState = Class(nil, function(state, ctrl, ...)
          model.currentPlayer = active_player
          model.in_players = in_players
          model:set_active_component(Components.PLAYER_BETTING)
-         model:get_active_controller():set_callback(function(fold, bet) execute_bet(fold, bet) end)
+         model:get_active_controller():set_callback(
+            function(fold, bet)
+               enable_event_listener(
+                  TimerEvent{
+                     interval=.1,
+                     cb=function() execute_bet(fold, bet) end
+                  })
+            end)
          enable_event_listener(KbdEvent())
       else
          local fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)

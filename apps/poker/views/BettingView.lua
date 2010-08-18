@@ -10,7 +10,7 @@ BettingView = Class(View, function(view, model, ...)
     view.items = {
         {
             Rectangle{color={255,0,0}, width=200, height=100, position={100, 100}, extra={text = "Fold"}},
-            Rectangle{color={0,0,255}, width=200, height=100, position={350, 100}, extra={text = "Call"}},
+            Rectangle{color={0,0,255}, width=200, height=100, position={350, 100}, extra={text = "Check/Call"}},
             Rectangle{color={0,255,0}, width=200, height=100, position={600, 100}, extra={text = "Bet: "..model.bet.DEFAULT_BET}},
         },
     }
@@ -50,7 +50,7 @@ BettingView = Class(View, function(view, model, ...)
     
     view.stack = chipCollection()
     view.stack.group.position = {1700,500}
-    screen:add(view.stack.group)
+--    screen:add(view.stack.group)
     
     function view:update()
         local controller = self:get_controller()

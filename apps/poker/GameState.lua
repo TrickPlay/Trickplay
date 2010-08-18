@@ -30,6 +30,7 @@ GameState = Class(nil,function(state, ctrl)
          bb = (sb % #players) + 1
       end
 
+      print("new sb position:", sb, "new bb position:", bb)
       return sb, bb
    end
 
