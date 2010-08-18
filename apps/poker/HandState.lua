@@ -80,6 +80,8 @@ HandState = Class(nil, function(state, ctrl, ...)
       players[sb_p].money = players[sb_p].money - sb_qty
       player_bets[players[bb_p]] = bb_qty
       players[bb_p].money = players[bb_p].money - bb_qty
+      print("the small blind player has $" .. players[sb_p].money)
+      print("the big blind player has $" .. players[bb_p].money)
 
       call_bet = bb_qty
       min_raise = bb_qty
@@ -121,7 +123,7 @@ HandState = Class(nil, function(state, ctrl, ...)
       local active_player = in_players[action]
       print("active_player.number", active_player.number)
       if fold then
-         print("player folded")
+         print("\n\n\nplayer folded, " .. player_bets[active_player] .. " goes into the pot, player is left with $" .. active_player.money)
          -- current wager goes into pot
          pot = pot + player_bets[active_player]
          player_bets[active_player] = 0
@@ -142,11 +144,11 @@ HandState = Class(nil, function(state, ctrl, ...)
             cand = player_bets[player] + player.money
             if cand > max_bet then max_bet = cand end
          end
-         assert(bet <= max_bet)
+         assert(bet <= max_bet, "bet was too large: bet was " .. bet .. " but max_bet was " .. max_bet)
 
          print("bet went from",player_bets[active_player],"to",bet)
          local delta = bet-player_bets[active_player]
-         assert(0 <= delta)
+         assert(0 <= delta, "player tried to decrease his bet from " .. player_bets[active_player] .. " to " .. bet)
          player_bets[active_player] = bet
 
          print("call_bet",call_bet,"min_raise",min_raise)
