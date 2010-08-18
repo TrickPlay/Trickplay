@@ -29,6 +29,15 @@ local function build_ui( show_it )
     local BUTTON_FONT_COLOR         = "FFFFFFFF"
      
     -------------------------------------------------------------------------------
+    -- Section index constants
+    -------------------------------------------------------------------------------
+    
+    local SECTION_APPS      = 1
+    local SECTION_SHOWCASE  = 2
+    local SECTION_SHOP      = 3
+    local SECTION_SETTINGS  = 4
+    
+    -------------------------------------------------------------------------------
     -- All the initial assets
     -------------------------------------------------------------------------------
     
@@ -89,7 +98,7 @@ local function build_ui( show_it )
     local BUTTON_TEXT_Y_OFFSET      = 22
     local FIRST_BUTTON_X            = 13                    -- x coordinate of first button
     local FIRST_BUTTON_Y            = 9                     -- y coordinate of first button
-    local BUTTON_X_OFFSET           = ui.apps_button.w + 7  -- distance between left side of buttons
+    local BUTTON_X_OFFSET           = ui.apps_button.w + 5  -- distance between left side of buttons
     local DROPDOWN_POINT_Y_OFFSET   = -4                     -- how far to raise or lower the drop downs
     
     -------------------------------------------------------------------------------
@@ -126,24 +135,31 @@ local function build_ui( show_it )
     
     ui.sections =
     {
+        [SECTION_APPS] =
         {
             button = ui.apps_button,
-            dropdown = ui.apps_dropdown,
+            dropdown_bg = ui.apps_dropdown,
             text = ui.apps_text
         },
+        
+        [SECTION_SHOWCASE]=
         {
             button = ui.showcase_button,
-            dropdown = ui.showcase_dropdown,
+            dropdown_bg = ui.showcase_dropdown,
             text = ui.showcase_text
         },
+        
+        [SECTION_SHOP]=
         {
             button = ui.shop_button,
-            dropdown = ui.shop_dropdown,
+            dropdown_bg = ui.shop_dropdown,
             text = ui.shop_text
         },
+        
+        [SECTION_SETTINGS]=
         {
             button = ui.settings_button,
-            dropdown = ui.settings_dropdown,
+            dropdown_bg = ui.settings_dropdown,
             text = ui.settings_text
         }
     }
@@ -165,14 +181,21 @@ local function build_ui( show_it )
             section.button.y + BUTTON_TEXT_Y_OFFSET
         }
         
-        section.dropdown.anchor_point = { section.dropdown.w / 2 , 0 }
-        
-        section.dropdown.position =
+        section.dropdown = Group
         {
-            section.button.x + section.button.w / 2,
-            ui.bar.h + DROPDOWN_POINT_Y_OFFSET
+            size = section.dropdown_bg.size,
+            anchor_point = { section.dropdown_bg.w / 2 , 0 },
+            position = 
+            {
+                section.button.x + section.button.w / 2,
+                ui.bar.h + DROPDOWN_POINT_Y_OFFSET
+            },
+            children =
+            {
+                section.dropdown_bg
+            }
         }
-        
+                
         ui.bar:add( section.button , section.text )
         
         section.button:lower( ui.button_focus )
@@ -192,16 +215,16 @@ local function build_ui( show_it )
                         
     ui.strings = strings    -- Store the string table
 
-    ui.focus = 1            -- The section # that has focus
+    ui.focus = SECTION_APPS     -- The section # that has focus
     
     ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
     
     ui.color_keys =             -- Which section # to focus with the given key
     {
-        [ keys.YELLOW ] = 1,
-        [ keys.GREEN  ] = 2,
-        [ keys.RED    ] = 3,
-        [ keys.BLUE   ] = 4
+        [ keys.YELLOW ] = SECTION_APPS,
+        [ keys.GREEN  ] = SECTION_SHOWCASE,
+        [ keys.RED    ] = SECTION_SHOP,
+        [ keys.BLUE   ] = SECTION_SETTINGS
     }
 
     -------------------------------------------------------------------------------
@@ -286,29 +309,29 @@ local function build_ui( show_it )
     -- Handlers
     -------------------------------------------------------------------------------
         
+    local key_map =
+    {
+        [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
+        [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
+        
+        [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ key ] ) end,
+        [ keys.GREEN    ] = function() move_focus( ui.color_keys[ key ] ) end,
+        [ keys.RED      ] = function() move_focus( ui.color_keys[ key ] ) end,
+        [ keys.BLUE     ] = function() move_focus( ui.color_keys[ key ] ) end,
+        
+        -- For keyboards
+        
+        [ keys.F5       ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
+        [ keys.F6       ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
+        [ keys.F7       ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
+        [ keys.F8       ] = function() move_focus( ui.color_keys[ keys.BLUE ] ) end,
+        
+        -- TODO : Pressing OK on a button may do something else
+        
+        [ keys.Return   ] = function() animate_in_dropdown() end,
+    }
+    
     function ui.bar.on_key_down( _ , key )
-            
-        local key_map =
-        {
-            [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
-            [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
-            
-            [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ key ] ) end,
-            [ keys.GREEN    ] = function() move_focus( ui.color_keys[ key ] ) end,
-            [ keys.RED      ] = function() move_focus( ui.color_keys[ key ] ) end,
-            [ keys.BLUE     ] = function() move_focus( ui.color_keys[ key ] ) end,
-            
-            -- For keyboards
-            
-            [ keys.F5       ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
-            [ keys.F6       ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
-            [ keys.F7       ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
-            [ keys.F8       ] = function() move_focus( ui.color_keys[ keys.BLUE ] ) end,
-            
-            -- TODO : Pressing OK on a button may do something else
-            
-            [ keys.Return   ] = function() animate_in_dropdown() end,
-        }
         
         if not pcall( key_map[ key ] ) then
         
@@ -424,6 +447,94 @@ local function build_ui( show_it )
         ui:hide()
     
     end
+
+
+    ----------------------------------------------------------------------------
+    -- Load the apps and the most used apps
+    ----------------------------------------------------------------------------
+    
+    local top_apps = settings.top_apps or {}
+    
+    ui.all_apps = apps:get_for_current_profile()
+    
+    ui.top_apps = {}
+    
+    -- Look for each top app in all_apps and, if it is there, add it to
+    -- ui.top_apps until we have 3.
+    
+    -- This ensures that the ids we have saved previously in top apps still
+    -- exist.
+    
+    for _ , app_id in ipairs( top_apps ) do
+    
+        local app = ui.all_apps[ app_id ]
+        
+        if app then
+        
+            app.is_top = true
+    
+            table.insert( ui.top_apps , app_id )
+            
+            if # ui.top_apps == 3 then
+                break
+            end
+        end
+    
+    end
+
+    -- If ui.top_apps has less than 3, then add some from all_apps.
+    --
+    -- In a cold start, top apps will be empty - this fills it. 
+    
+    if # ui.top_apps < 3 then
+    
+        for app_id , app in pairs( ui.all_apps ) do
+        
+            if not app.is_top then
+            
+                app.is_top = true
+                
+                table.insert( ui.top_apps , app_id )
+                
+                if # ui.top_apps == 3 then
+                    break
+                end
+            end
+        end
+    end
+    
+    -- Now, get the icons for the top apps
+    
+    for _ , app_id in ipairs( ui.top_apps ) do
+    
+        local image = Image()
+        
+        -- If we cannot load the app icon, we use the generic one
+        
+        if not image:load_app_icon( app_id , "launcher-icon.png" ) then
+        
+            if not ui.generic_app_icon then
+            
+                ui.generic_app_icon = Image{ src = "assets/generic-app-icon.png" , opacity = 0 }
+                
+                screen:add( ui.generic_app_icon )
+                
+            end
+            
+            image = Clone{ source = ui.generic_app_icon , opacity = 255 }
+        
+        end
+        
+        -- Now we have either the icon or a clone of the generic icon
+        
+        local group = ui.sections[ SECTION_APPS ].dropdown
+        
+        
+    
+    end
+
+    
+    ----------------------------------------------------------------------------
     
     return ui
     
@@ -443,7 +554,7 @@ function main()
     
 end
 
-main()
+dolater( main )
 
 
 
