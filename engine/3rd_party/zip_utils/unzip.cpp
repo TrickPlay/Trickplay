@@ -1,7 +1,6 @@
 #ifdef ZIP_STD
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
 #include <time.h>
 #include <cstdlib>
 #ifdef _MSC_VER
