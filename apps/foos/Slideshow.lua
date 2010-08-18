@@ -9,18 +9,22 @@ local started = true
 local search = "space"
 local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
 local background = Image {src = "assets/background.jpg" }
+local background2 = Image {src = "assets/background2.png" }
+local caption = Text {font = "Sans 25px", text = "", x = 1530, y = 400}
+screen:add(overlay_image,background,background2,caption)
 
-screen:add(overlay_image,background)
 function Slideshow:new(args)
 	local num_pics = args.num_pics
 	local urls = {}
 	local images = {}
+	local index = args.index
 	search = searches[args.index]
 	print ("INDEX: "..args.index)
 	print ("SEARCHING: "..search)
 	local object = { 
 		num_pics = num_pics,
 		images = images,
+		index = index
 	}
    setmetatable(object, self)
    self.__index = self
@@ -32,7 +36,9 @@ function Slideshow:loadUrls(url)
 		url = url,
 		on_complete = function (request, response)
 			local data = json:parse(response.body)
-		   site = data.responseData.results[1].unescapedUrl
+	
+		   site = adapters[self.index][1].site(data)
+	   	caption.text = adapters[self.index][1].caption(data)
 			self:sendImage(site)
 		end
 	}
@@ -43,7 +49,11 @@ end
 function Slideshow:begin()
 	print ("begin")
 	started = true
+	current_pic = 1
+	temp_pic = 0
 	timer:start()
+--	local logo = Image { src = adapters[self.index].logoUrl, x = 200, y = 200, z= 3}
+--	screen:add(logo)
 end
 function Slideshow:stop()
    	timer:stop()
@@ -57,47 +67,9 @@ function Slideshow:stop()
 end
 -- will send and image across the screen
 function Slideshow:sendImage(site)
-	--[[local temp = current_pic
-	self.images[current_pic] = Image { src = site, z = 1000}
-	local image = self.images[current_pic]
 	
-	local rotation_num = math.random(30) - 15 
-	local rotation = {rotation_num, image.w/2, image.h/2}
-	
-	self.images[current_pic].z_rotation = rotation
-	self.images[current_pic].x = screen.w/2 - self.images[current_pic].w/2
-	self.images[current_pic].y = screen.h/2 - self.images[current_pic].h/2 
-	
-	local overlay = Clone { source = overlay_image, z = 1000}
-	overlay.scale = {self.images[current_pic].w/(overlay.w-60), self.images[current_pic].h/(overlay.h-60)}
-	rotation = {rotation_num, overlay.w/2, overlay.h/2}
-
-	overlay.z_rotation = rotation
-
-	overlay.x = screen.w/2 - self.images[current_pic].w/2 - 20
-	overlay.y = screen.h/2 - self.images[current_pic].h/2 - 20
-	overlay:animate {
-		duration = 2000,
-		z = 0,
-	}
-	self.images[current_pic]:animate {
-		duration = 2000,
-		z = 0,
-		on_completed = function()
-			current_pic = current_pic+1
-			if (self.images[current_pic-3] ~= nil) then
-				print (current_pic-3)
-				self.images[current_pic-3].opacity = 0
-				table.remove(self.images,current_pic-3)
-			end
-		end
-	}
-	if self.ui ~= nil then
-		print("adding to view.ui",self.ui)
-		self.ui:add(self.images[temp], overlay)
-	end]]
 	local temp = current_pic
-	self.images[current_pic] = Group {z = 1000}
+	self.images[current_pic] = Group {z = 500}
 	local image = Image { src = site }
 	local overlay = Clone { source = overlay_image, scale = {image.w/(screen.w-100), image.h/(screen.h-100) }, x = (-image.w)/40, y = (-image.h)/20}
 	self.images[current_pic].scale = {SLIDESHOW_HEIGHT/image.h, SLIDESHOW_HEIGHT/image.h}
@@ -110,15 +82,18 @@ function Slideshow:sendImage(site)
 	self.images[current_pic]:animate {
 		duration = 2000,
 		z = 0,
+		--z_rotation = 740-math.random(20)-10,
 		on_completed = function()
-			self.images[temp]:animate {
-				duration = 20000,
-				opacity = 240,
-				on_completed = function()
-					self.ui:remove(self.images[temp])
-					self.images[temp] = {}
-				end
-			}
+			if (self.images[temp] ~= nil) then
+				self.images[temp]:animate {
+					duration = 20000,
+					opacity = 240,
+					on_completed = function()
+						self.ui:remove(self.images[temp])
+						self.images[temp] = {}
+					end
+				}
+			end
 			current_pic = current_pic + 1
 			
 		end
@@ -128,7 +103,7 @@ end
 function timer.on_timer(timer)
 	print("tick"..current_pic)
 	if (current_pic ~= temp_pic and started) then
-		model.curr_slideshow:loadUrls("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge")
+		model.curr_slideshow:loadUrls(adapters[1][1].photos(search,current_pic))
 		temp_pic = current_pic
 	end
 end
