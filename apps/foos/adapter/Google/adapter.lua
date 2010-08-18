@@ -8,6 +8,7 @@ local adapter = {
 		name = "public",
 		caption = function(data) return "Url: "..data.responseData.results[1].visibleUrl.."\nInfo: "..data.responseData.results[1].titleNoFormatting end,
 		required_inputs = {
+			format = "QUERY",
 			query = "space",
 		},
 		albums = function() end,

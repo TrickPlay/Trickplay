@@ -20,6 +20,8 @@ SEL_H = PIC_H*1.1
 
 
 dofile("Class.lua") -- Must be declared before any class definitions.
+dofile("adapter/Adapter.lua")
+
 dofile("MVC.lua")
 dofile("TextBox.lua")
 dofile("FocusableImage.lua")
@@ -34,7 +36,6 @@ dofile("HelpMenuView.lua")
 dofile("HelpMenuController.lua")
 --]]
 
-dofile("adapter/Adapter.lua")
 ---[[
 dofile("SourceManagerView.lua")
 dofile("SourceManagerController.lua")
