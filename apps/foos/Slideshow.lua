@@ -20,7 +20,7 @@ function Slideshow:new(args)
 	local images = {}
 	local index = args.index
 	local style = dofile("slideshows/Photo/slideshow.lua")
-	search = searches[args.index]
+	search = adapters[args.index][1].required_inputs.query
 	print ("INDEX: "..args.index)
 	print ("SEARCHING: "..search)
 	local object = { 

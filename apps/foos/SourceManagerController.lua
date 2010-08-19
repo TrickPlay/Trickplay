@@ -25,11 +25,12 @@ print("TextObj recorded a RETURN press")
                     print("\n\n on key focus out")
                     self.editable = false
                     self.on_key_focus_out = nil
---[[
+
                     if self.text ~= ""  then
-                        --code to save the text goes here     
+								adapters[1][1].required_inputs.query = self.text
+								searches[1] = self.text
                     end
---]]
+
                     self.text = default_text               
                 end
 
@@ -84,6 +85,7 @@ print("TextObj recorded a RETURN press")
                 view.enter_accordian()
             else
                 MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected]()
+					
             end
             self:get_model():notify()
             

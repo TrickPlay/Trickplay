@@ -1,6 +1,6 @@
 adapterTypes = {"Google","Yahoo","Google","Yahoo","Google","Yahoo","Google","Yahoo"}
 adaptersTable = { "Google", "Yahoo", "Yahoo", "Google", "Google", "Google", "Google", "Google", "Google", "Google", "Google", "Yahoo", "Google", "Google", "Google", "Google"}
-searches = {"space", "dinosaur", "puppy", "cat", "interesting","robots", "family", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
+searches = settings.searches or {"space", "dinosaur", "puppy", "cat", "interesting","robots", "family", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
 
 picsTable = {}
 adapters = {}
