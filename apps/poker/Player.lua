@@ -86,9 +86,9 @@ Player = Class(function(player, args, ...)
       local random_seed = 3^(-(a_bet/player.money))+.1+stddev --use a power function for scaling
 
       local coef_of_chance = 13-best_hand+player.difficulty
-      local num = math.random(math.floor(random_seed*coef_of_chance))
+      print("coef_of_chance: "..coef_of_chance)
       print("random_seed: "..random_seed)
-      print("position+player.difficulty: "..coef_of_chance)
+      local num = math.random(math.floor(random_seed*coef_of_chance))
       print("num: "..num.."\n")
       if(num == 1) then
          print("\nFOLD\n")
