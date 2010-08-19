@@ -288,4 +288,9 @@ function(pres, ctrl)
    function pres:remove_player(removed_player)
       removed_player.status:hide()
    end
+
+   -- called when everyone else folds, making one player the winner by
+   -- default
+   function pres:win_from_bets(only_player)
+   end
 end)

@@ -46,7 +46,8 @@ player:get\_move(state).
 
 \section*{Todo}
 \begin{itemize}
-\item Remove a player when he loses all his money.
+\item Fix the bug where chips sometimes remain on the table.
+\item Clean up the source files of all the extra cruft that doesn't actually run.
 \end{itemize}
 
 \section*{Done}
@@ -65,5 +66,9 @@ player:get\_move(state).
   the initial action in certain betting rounds is wrong.
 \item \CheckedBox Sanitize betting input so that it fails hard when the user tries
   to make an illegal bet.
+\item \CheckedBox Remove a player when he loses all his money.
+\item \CheckedBox Abstracted out initial endowment to a global variable
+\item \CheckedBox Fixed a bug in Player where computer player doesn't
+  actually go all in when he wishes to.
 \end{itemize}
 \end{document}
