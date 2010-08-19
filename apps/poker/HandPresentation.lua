@@ -284,4 +284,8 @@ function(pres, ctrl)
    function pres:finish_turn(active_player)
       active_player.glow.opacity = 0
    end
+
+   function pres:remove_player(removed_player)
+      removed_player.status:hide()
+   end
 end)
