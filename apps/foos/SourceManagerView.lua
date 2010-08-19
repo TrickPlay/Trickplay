@@ -55,16 +55,16 @@ SourceManagerView = Class(View, function(view, model, ...)
     {
         ["QUERY"] = 
         {
-             FocusableImage(  0, 0,  txtbx_un,  txtbx_sel),
-             FocusableImage(400, 0,     ok_un,     ok_sel),
-             FocusableImage(800, 0, cancel_un, cancel_sel)
+             {FocusableImage( 200,  0,  txtbx_un,  txtbx_sel)},
+             {FocusableImage( 150, 60,     ok_un,     ok_sel),
+              FocusableImage( 350, 60, cancel_un, cancel_sel)}
         },
         ["LOGIN"] = 
         {
-             FocusableImage(  0, 0,   txtbx_un,  txtbx_sel),
-             FocusableImage( 400, 0,  txtbx_un,  txtbx_sel),
-             FocusableImage( 800, 0,     ok_un,     ok_sel),
-             FocusableImage(1200, 0, cancel_un, cancel_sel)
+             {FocusableImage( 200, 0,   txtbx_un,  txtbx_sel)},
+             {FocusableImage( 200, 60,  txtbx_un,  txtbx_sel)},
+             {FocusableImage( 150, 120,     ok_un,     ok_sel),
+              FocusableImage( 350, 120, cancel_un, cancel_sel)}
         }
     }
     view.accordian_text = 
@@ -72,28 +72,28 @@ SourceManagerView = Class(View, function(view, model, ...)
         ["QUERY"] = 
         {
             Text{
-                position={15,0},
+                position={225,30},
                 font="KacstArt 30px",
-                color="FFFFFF",
+                color="000000",
                 wants_enter = false,
-                text="keyword"
+                text=""
             }
         },
         ["LOGIN"] = 
         {
             Text{
-                position={15,0},
+                position={225,30},
                 font="KacstArt 30px",
-                color="FFFFFF",
+                color="000000",
                 wants_enter = false,
-                text="username"
+                text=""
             },
             Text{
-                position={415,0},
+                position={225,100},
                 font="KacstArt 30px",
-                color="FFFFFF",
+                color="000000",
                 wants_enter = false,
-                text="password"
+                text=""
             }
         }
     }
@@ -107,14 +107,14 @@ SourceManagerView = Class(View, function(view, model, ...)
      --   "BOTH"  =  Group{name="Both Accordians"}
     }
 
-    view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][1].group)
-    view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][2].group)
-    view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][3].group)
+    view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][1][1].group)
+    view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][2][1].group)
+    view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][2][2].group)
     view.accordian_groups["QUERY"]:add(unpack( view.accordian_text["QUERY"]))
-    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][1].group)
-    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][2].group)
-    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][3].group)
-    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][4].group)
+    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][1][1].group)
+    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][2][1].group)
+    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][3][1].group)
+    view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][3][2].group)
     view.accordian_groups["LOGIN"]:add(unpack( view.accordian_text["LOGIN"]))
 
     
@@ -138,7 +138,7 @@ SourceManagerView = Class(View, function(view, model, ...)
         
         assert(view.accordian_groups[  model.source_list[src_sel][2]  ],"shit happened")
         view.accordian_groups[  model.source_list[src_sel][2]  ].y = 
-                           view.menu_items[src_sel].y + 120
+                           view.menu_items[src_sel].y +80
         --view.acc_split.y = view.menu_items[src_sel].y
 
         for i = src_sel+1,#model.source_list do
@@ -200,7 +200,8 @@ SourceManagerView = Class(View, function(view, model, ...)
         local controller = view:get_controller()
         local comp       = model:get_active_component()
         local src_sel    = controller:get_src_selected_index()
-        local acc_sel    = controller:get_acc_selected_index()
+        local acc_sel    = {}
+        acc_sel[1], acc_sel[2] =  controller:get_acc_selected_index()
 
         if comp == Components.SOURCE_MANAGER  then
             if view.accordian == false then
@@ -224,10 +225,12 @@ SourceManagerView = Class(View, function(view, model, ...)
             else
                 local acc = view.accordian_items[  model.source_list[src_sel][2]  ]
                 for i = 1, #acc do
-                    if i == acc_sel then
-                        acc[i]:on_focus()
-                    else
-                        acc[i]:out_focus()
+                    for j = 1, #acc[i] do
+                        if i == acc_sel[1] and j == acc_sel[2] then
+                            acc[i][j]:on_focus()
+                        else
+                            acc[i][j]:out_focus()
+                        end  
                     end
                 end
             end

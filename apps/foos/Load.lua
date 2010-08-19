@@ -78,7 +78,10 @@ function Load_Image(site,index)
                         model.placeholders[i][j]:unparent()
                         model.placeholders[i][j] = nil
                     end
-
+                    Scale_To_Fit(model.albums[i][j],
+                                 model.albums[i][j].base_size,
+                                 {PIC_W,PIC_H})
+--[[
                     if model.fp_index[1] == i and model.fp_index[2] == j then
                         model.albums[i][j].scale = 
                         {
@@ -93,6 +96,7 @@ function Load_Image(site,index)
                             PIC_H / model.albums[i][j].base_size[2]
                         }
                     end
+--]]
                     model.fp_slots[i][j]:add(model.albums[i][j])
                 --    model.album_group:add(model.albums[i][j])
                 --    model.albums[i][j]:lower_to_bottom()
@@ -163,17 +167,37 @@ function Scale_To_Fit(img,base_size,target_size)
     local scale_x = target_size[1] / base_size[1]
     local scale_y = target_size[2] / base_size[2]
 
-    if scale_x > scale_y then
+--TODO: this might only apply when scaling down
+    print( scale_x, scale_y )
+
+
+    if (scale_y > scale_x and scale_x < 1) or
+       (scale_y < scale_x) then--[[(scale_x < scale_y and scale_y < 1) or
+                       (scale_x > scale_y) then]]
+print("chose y")
         img.scale = {scale_y,scale_y}
-        img.anchor_point = {base_size[1]*(1-scale_y)/2,0}
-        img.clip  = {0,0,base_size[1]*scale_y,
-                         base_size[2]*scale_y}
+---[[
+        --img.anchor_point = {base_size[1]*(1-scale_y)/2,0}
+        img.clip  = { (img.w-target_size[1])/2,      0,
+                      (img.w-target_size[1])/2+target_size[1],target_size[2]}
+                         --base_size[1]*scale_y,
+                        -- base_size[2]*scale_y}
+        --img.anchor_point = { -1*(img.w-target_size[1])/2,      0}
+--]]
     else
+print("chose x")
         img.scale = {scale_x,scale_x}
-        img.anchor_point = {0,base_size[2]*(1-scale_x)/2}
-        img.clip  = {0,0,base_size[1]*scale_x,
-                         base_size[2]*scale_x} 
+---[[
+        --img.anchor_point = {0,base_size[2]*(1-scale_x)/2}
+        img.clip  = {       0,(img.h-target_size[2])/2,
+               target_size[1],(img.h-target_size[2])/2+target_size[1]}
+
+--base_size[1]*scale_x,                        --base_size[2]*scale_x} 
+--]]
+          --img.anchor_point = {  0,-1*(img.h-target_size[2])/2        }
+
     end
+
 end
 
 
