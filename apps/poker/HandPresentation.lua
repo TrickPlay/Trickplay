@@ -13,8 +13,7 @@ local TIME = 300
 local MODE = "EASE_OUT_QUAD"
 
 
-HandPresentation = Class(nil,
-function(pres, ctrl)
+HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
    
    local allCards = {}

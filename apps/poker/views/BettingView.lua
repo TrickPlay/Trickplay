@@ -58,7 +58,7 @@ BettingView = Class(View, function(view, model, ...)
         if comp == Components.PLAYER_BETTING then
             self.ui.opacity = 255
             self.ui:raise_to_top()
-            print("Showing Betting UI")
+--            print("Showing Betting UI")
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
@@ -97,7 +97,7 @@ BettingView = Class(View, function(view, model, ...)
             playerBet:arrange(55,5)
             
         else
-            print("Hiding Betting UI")
+--            print("Hiding Betting UI")
             self.ui:complete_animation()
             self.ui.opacity = 0
         end

@@ -251,7 +251,7 @@ local v = self:value()
 -- While there are more chips to add...
 while v >= value do
         
-        print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
+--        print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
         
         -- Find the biggest chip we can add
         while v - self.stacks[biggest].chipValue < value do

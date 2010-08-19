@@ -89,10 +89,12 @@ end
 
 --prints the mofok'n hand
 function hand_print(hand)
+   local str_builder = {}
+   table.insert(str_builder, "\n\nThis hand contains:")
    assert(hand)
-   print("\nThis hand contains:\n")
    for _,card in ipairs(hand) do
-      print(card.name)
+      table.insert(str_builder, "                     "..card.abbv)
    end
-   print("\n")
+   table.insert(str_builder,"")
+   print(table.concat(str_builder,"\n"))
 end
