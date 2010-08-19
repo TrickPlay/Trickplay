@@ -35,6 +35,7 @@ Model = Class(function(model, ...)
         POT = {925, 680}
     }
     mdbl = model.default_bet_locations
+    MDBL = model.default_bet_locations
     
     model.card_locations = {
         [1] = {726, 510},

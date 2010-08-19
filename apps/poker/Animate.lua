@@ -15,7 +15,7 @@ Animation = Class( function(self, dog, frames, position, ...)
         self.timer.on_timer = function()
                 -- If there are no frames left, remove the animation
                 if self.frameCounter > frames then
-                        screen:remove(self.group)
+                        DOG_ANIMATION_LAYER:remove(self.group)
                         self.timer:stop()
                         self.timer = nil
                 -- Tick through each frame
@@ -32,7 +32,7 @@ Animation = Class( function(self, dog, frames, position, ...)
                 end
         end
         
-        screen:add(self.group)
+        DOG_ANIMATION_LAYER:add(self.group)
         self.group:raise_to_top()
         
         self.timer.on_timer()
