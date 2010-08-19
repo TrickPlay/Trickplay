@@ -16,19 +16,20 @@ FrontPageController = Class(Controller, function(self, view, ...)
 
         end,
         [keys.Return] = function(self) 
-            model.album_group:clear()
-            model.albums = {}
-            self:get_model():set_active_component(Components.SLIDE_SHOW)
-            model.curr_slideshow = Slideshow:new{ 
-                num_pics = 20, 
-                index    = #adapters+1 - ((model.front_page_index + (selected[2]-1))*2+
-                                                     (selected[1]-1)-1)
-            }
-				--screen:clear()
-            view.timer:stop()
-            self:get_model():notify()
-
-	    model.curr_slideshow:begin()
+            local formula = (model.front_page_index + (selected[2]-1))*2+
+                                                     (selected[1]-1)-1
+            if adapters[formula] ~= nil then
+                model.album_group:clear()
+                model.albums = {}
+                self:get_model():set_active_component(Components.SLIDE_SHOW)
+                model.curr_slideshow = Slideshow:new{ 
+                    num_pics = 20, 
+                    index    = #adapters+1 - formula
+                }
+                view.timer:stop()
+                self:get_model():notify()
+	        model.curr_slideshow:begin()
+            end
         end
     }
 
