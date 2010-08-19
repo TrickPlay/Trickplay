@@ -24,16 +24,18 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     print("\n\n on key focus out")
                     self.editable = false
                     self.on_key_focus_out = nil
+                    acc_selected[1] = acc_selected[1] + 1
 
                     if self.text ~= ""  then
-								table.insert(adapters, dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua"))
-								adaptersTable[#adapters] = adapterTypes[src_selected]
-								adapters[#adapters][1].required_inputs.query = self.text
-								searches[#adapters] = self.text
-								model.album_group:clear()
-            				model.albums = {}
-								Setup_Album_Covers()
-						 end
+			table.insert(adapters, dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua"))
+			adaptersTable[#adapters] = adapterTypes[src_selected]
+			adapters[#adapters][1].required_inputs.query = self.text
+			searches[#adapters] = self.text
+			model.album_group:clear()
+            		model.albums = {}
+			Setup_Album_Covers()
+		 end
+                 model:notify()
                     --self.text = default_text               
                 end
 

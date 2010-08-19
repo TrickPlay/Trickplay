@@ -8,7 +8,7 @@ Model = Class(function(model, ...)
 
     model.pic_text = {0,0}
 
-    model.num_sources = NUM_SLIDESHOW_IMAGES
+    --model.num_sources = NUM_SLIDESHOW_IMAGES
     model.front_page_index = 1--math.ceil(math.ceil(model.num_sources /NUM_ROWS)/2)
     model.swapping_cover = false
     model.swap_pic = nil
@@ -27,6 +27,7 @@ Model = Class(function(model, ...)
     model.fp_slots = {}
 
     model.fp_index = {1,1}
+    model.fp_1D_index = 1
 --[[
  model.prac_pic.scale = {
                                     PIC_W / model.prac_pic.base_size[1],
