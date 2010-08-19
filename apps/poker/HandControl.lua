@@ -35,17 +35,6 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_round() return round end
 
    -- private functions
-   function ctrl:give_winner_pot_and_bone_out()
-      print("HandControl:give_winner_pot_and_bone_out()")
-      state:give_winner_pot()
-      hand_pipeline = {}
---      enable_event_listener(TimerEvent{interval=2})
-   end
-
-   function ctrl:clear_pipeline()
-      hand_pipeline = {}
-   end
-
    local function initialize_pipeline()
       hand_pipeline = {}
       for _,stage in ipairs(orig_hand_pipeline) do
@@ -54,6 +43,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    end
 
    -- public functions
+   function ctrl:clear_pipeline()
+      hand_pipeline = {}
+   end
+
    function ctrl.initialize(ctrl)
       state:initialize{
          players = game_ctrl:get_players(),
@@ -97,7 +90,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    print("defined and set waiting_for_bet to false")
    ctrl.waiting_for_bet = false
    function ctrl.bet(ctrl, rd, event)
-      print("HandControl:bet(" .. tostring(rd) .. ", event")
+--      print("HandControl:bet(" .. tostring(rd) .. ", event")
       round = rd
       local continue = false
       if ctrl.waiting_for_bet and event:is_a(BetEvent) then

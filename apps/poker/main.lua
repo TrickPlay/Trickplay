@@ -123,12 +123,12 @@ function()
    function enable_event_listener(event)
       assert(event:is_a(Event))
       if event:is_a(KbdEvent) then
-         print("enable_event_listener(KbdEvent())")
+--         print("enable_event_listener(KbdEvent())")
          if old_on_key_down then
             screen.on_key_down, old_on_key_down = old_on_key_down, nil
          end
       elseif event:is_a(TimerEvent) then
-         print("enable_event_listener(TimerEvent{interval=" .. event.interval .. "})")
+--         print("enable_event_listener(TimerEvent{interval=" .. event.interval .. "})")
          local cb = event.cb or
             function()
                game:on_event(event)

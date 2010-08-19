@@ -1,5 +1,4 @@
-CharacterSelectionController = Class(Controller,
-function(self, view, ...)
+CharacterSelectionController = Class(Controller,function(self, view, ...)
    self._base.init(self, view, Components.CHARACTER_SELECTION)
 
    local controller = self
