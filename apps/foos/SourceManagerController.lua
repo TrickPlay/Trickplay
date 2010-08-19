@@ -26,8 +26,10 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     self.on_key_focus_out = nil
 
                     if self.text ~= ""  then
+								adapters[1] = dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua")
 								adapters[1][1].required_inputs.query = self.text
 								searches[1] = self.text
+								adapters[1]:loadCovers(1,self.text,1)
                     end
                     --self.text = default_text               
                 end
