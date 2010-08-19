@@ -27,6 +27,7 @@ Model = Class(function(model, ...)
     model.fp_slots = {}
 
     model.fp_index = {1,1}
+    model.fp_1D_index = 1
 --[[
  model.prac_pic.scale = {
                                     PIC_W / model.prac_pic.base_size[1],

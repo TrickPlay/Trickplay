@@ -125,6 +125,7 @@ FrontPageView = Class(View, function(view, model, ...)
         sel[1],sel[2]    = controller:get_selected_index()
                sel[2]    = sel[2] + model.front_page_index  - 1
         model.fp_index = {sel[1],sel[2]}
+        model.fp_1D_index = (sel[2]-1)*NUM_ROWS + (sel[1])
         if comp == Components.FRONT_PAGE  then
 
             view:shift_group()
@@ -262,8 +263,7 @@ FrontPageView = Class(View, function(view, model, ...)
                                                        model.fp_index[1]              == sel[1] then
                                                         view.album_title:raise_to_top()
                                                         view.album_title.text = 
-                                                              adapters[(sel[2]-1)*2 + 
-                                                              (sel[1])][1].required_inputs.query
+                                                              adapters[model.fp_1D_index][1].required_inputs.query
                                                         view.album_title.position = {PIC_W*(sel[2]-1)+300,
                                                                               PIC_H*(sel[1]-1)+1.05*PIC_H-50}
                                                         view.album_title:animate{
@@ -273,8 +273,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
                                                         view.album_logo:raise_to_top()
                                                         view.album_logo.size = {200,50}
-                                                        view.album_logo.src = adapters[(sel[2]-1)*2 + 
-                                                              (sel[1])].logoUrl
+                                                        view.album_logo.src = adapters[model.fp_1D_index].logoUrl
                                                         view.album_logo.position = {PIC_W*(sel[2]-1),
                                                                               PIC_H*(sel[1]-1)+1.05*PIC_H-50}
                                                         view.album_logo:animate{
@@ -333,7 +332,7 @@ function view.timer.on_timer(timer)
                 }
                 --print("trying at",rand_i[1],rand_i[2],"when at",model.fp_index[1],
                 --                                                model.fp_index[2])
-                local formula = (rand_i[2]-1)*2 + (rand_i[1])
+                local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
 
                 if (rand_i[1] ~= model.fp_index[1] or
                    rand_i[2] ~= model.fp_index[2]) and adapters[formula]~=nil then
