@@ -42,6 +42,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
 --      enable_event_listener(TimerEvent{interval=2})
    end
 
+   function ctrl:clear_pipeline()
+      hand_pipeline = {}
+   end
+
    local function initialize_pipeline()
       hand_pipeline = {}
       for _,stage in ipairs(orig_hand_pipeline) do
@@ -129,6 +133,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
             local orig_bet = state:get_player_bets()[state:get_active_player()]
             print("computer move, activeplayer money was $" .. active_player.money)
             if not fold then
+               assert(orig_bet <= bet and bet <= active_player.money + orig_bet) -- TODO
                active_player.money = active_player.money + orig_bet - bet
             end
             print("computer move, activeplayer money now $" .. active_player.money)
@@ -148,8 +153,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       pres:fold_player(active_player)
    end
 
-   function ctrl:bet_player(active_player)
-      pres:bet_player(active_player)
+   function ctrl:call_player(active_player)
+      pres:call_player(active_player)
+   end
+   function ctrl:raise_player(active_player)
+      pres:raise_player(active_player)
    end
 
    function ctrl.showdown(ctrl)
