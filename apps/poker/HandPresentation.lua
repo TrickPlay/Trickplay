@@ -16,11 +16,17 @@ local MODE = "EASE_OUT_QUAD"
 --print = function() end
 local print = function() end --realPrint
 
-
-HandPresentation = Class(nil,
-function(pres, ctrl)
+HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
    local allCards = {}
+   
+   local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "Ammount", position = MDBL.POT}
+   on_text_changed = function()
+      potText.anchor_point = {potText.w/2, potText.h/2}
+   end
+   potText.y = potText.y + 60
+   --potText.x = potText.x + 20
+   screen:add(potText)
 
    -------------------------LOCAL FUNCTIONS--------------------------
 
@@ -58,23 +64,11 @@ function(pres, ctrl)
    
    -- Remove a player's hole cards
    local function remove_player_cards(player)
-      ---[[
       local hole_cards = ctrl:get_hole_cards()
       local hole = hole_cards[player]
       for k,card in pairs(hole) do
          screen:remove(card.group)
-         --[[
-         local t
-         for i,v in ipairs(allCards) do
-            if card == v then
-               t = i
-               break
-            end
-         end
-         table.remove(allCards, i)
-         --]]
       end
-      --]]
    end
    
    -- Animate all chips to center and add them to the pot
@@ -87,6 +81,7 @@ function(pres, ctrl)
                mode="EASE_OUT_QUAD",
                on_completed = function()
                   model.potchips:set( model.potchips:value() + player.betChips:value() )
+                  potText.text = model.potchips:value()
                   remove_player_chips(player)
                end
             }
@@ -103,14 +98,12 @@ function(pres, ctrl)
       local cards = ctrl:get_community_cards()
       for i=5,1,-1 do
          cards[i].group.position = MCL.DECK
-         -----cards[i].group:raise_to_top()
       end
       
       -- Put hole cards on the deck
       for player,hole in pairs( ctrl:get_hole_cards() ) do
          for _,card in pairs(hole) do
             card.group.position = MCL.DECK
-            -----card.group:raise_to_top()
             table.insert(allCards, card)
          end
          
@@ -254,4 +247,5 @@ function(pres, ctrl)
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
    end
+   
 end)

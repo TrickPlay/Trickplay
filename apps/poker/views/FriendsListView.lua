@@ -31,7 +31,7 @@ FriendsListView = Class(View, function(view, model, ...)
         if comp == Components.CHARACTER_SELECTION then
             self.ui.opacity = 255
             self.ui:raise_to_top()
-            print("Showing Character Selection UI")
+--            print("Showing Character Selection UI")
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
@@ -43,7 +43,7 @@ FriendsListView = Class(View, function(view, model, ...)
                 end
             end
         else
-            print("Hiding Character Selection UI")
+--            print("Hiding Character Selection UI")
             self.ui:complete_animation()
             self.ui.opacity = 0
         end
