@@ -1,5 +1,5 @@
 local adapter = {
-	name = "YahooImageSearch",
+	name = "Yahoo Image Search",
 	logoUrl = "adapter/Yahoo/logo.png",
 	logoscale = {1,1},
 	{

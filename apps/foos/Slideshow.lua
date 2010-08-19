@@ -1,7 +1,7 @@
 --print = function() end
 
 Slideshow = {}
-SLIDESHOW_WIDTH = 1000
+SLIDESHOW_WIDTH = 1200
 SLIDESHOW_HEIGHT = 800
 local timer = Timer()
 timer.interval = 4
@@ -19,7 +19,8 @@ function Slideshow:new(args)
 	local urls = {}
 	local images = {}
 	local index = args.index
-	search = searches[args.index]
+	local style = dofile("slideshows/Photo/slideshow.lua")
+	search = adapters[args.index][1].required_inputs.query
 	print ("INDEX: "..args.index)
 	print ("SEARCHING: "..search)
 	local object = { 
@@ -56,7 +57,6 @@ function Slideshow:begin()
 	self.ui:add(overlay_image,background,background2,caption)
 	local queryText = Text { text = adapters[self.index][1].required_inputs.query, font = "Sans 30px", x = 150, y = 300}
 	self.ui:add(queryText)
-
 	local logo = Image { src = adapters[self.index].logoUrl, x = 100, y = 170, z= 1, scale = adapters[self.index].logoscale}
 	self.ui:add(logo)
 end
@@ -80,16 +80,22 @@ function Slideshow:sendImage(site)
 	local overlay = Clone { source = overlay_image, scale = {image.w/(screen.w-100), image.h/(screen.h-100) }, x = (-image.w)/40, y = (-image.h)/20}
 	self.images[current_pic].scale = {SLIDESHOW_HEIGHT/image.h, SLIDESHOW_HEIGHT/image.h}
 	local i_width = image.w * SLIDESHOW_HEIGHT/image.h
+	local i_height = SLIDESHOW_HEIGHT
+	print ("original: "..image.w.." WIDTH:"..i_width)
+	if (image.w/image.h > 1.5) then
+		self.images[current_pic].scale = {SLIDESHOW_WIDTH/image.w, SLIDESHOW_WIDTH/image.w}
+		i_height = i_height * SLIDESHOW_WIDTH/i_width
+	end
 	self.images[current_pic].x = (math.random(2)-1)*1920
 	self.images[current_pic].y = (math.random(2)-1)*1080
-	self.images[current_pic].z_rotation = {math.floor(math.random(20)-10), i_width/2, SLIDESHOW_HEIGHT/2}
+	self.images[current_pic].z_rotation = {math.floor(math.random(20)-10), i_width/2, i_height/2}
 	self.images[current_pic]:add(image,overlay)
 	self.ui:add(self.images[temp])
 	self.images[current_pic]:animate {
 		duration = 1000,
 		mode = EASE_IN_EXPO,
 		x = screen.w/2 - i_width/2,
-		y = screen.h/2 - SLIDESHOW_HEIGHT/2,
+		y = screen.h/2 - i_height/2,
 		z = 0,
 		--z_rotation = 740-math.random(20)-10,
 		on_completed = function()

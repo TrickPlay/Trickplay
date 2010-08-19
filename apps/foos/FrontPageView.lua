@@ -332,15 +332,16 @@ function view.timer.on_timer(timer)
                 }
                 --print("trying at",rand_i[1],rand_i[2],"when at",model.fp_index[1],
                 --                                                model.fp_index[2])
-                if rand_i[1] ~= model.fp_index[1] or
-                   rand_i[2] ~= model.fp_index[2] then
+                local formula = (rand_i[2]-1)*2 + (rand_i[1])
+
+                if (rand_i[1] ~= model.fp_index[1] or
+                   rand_i[2] ~= model.fp_index[2]) and adapters[formula]~=nil then
                     --print("calling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
-                    local formula = (rand_i[2]-1)*2 + (rand_i[1])
                     --print("formula?",rand_i[1],rand_i[2],formula)
-                    loadCovers(formula, searches[formula], search_i)
+                    loadCovers(formula, searches[#adapters+1-formula], search_i)
                 else
                 --print("not calling")
                 end
