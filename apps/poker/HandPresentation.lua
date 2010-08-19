@@ -36,6 +36,12 @@ function(pres, ctrl)
       end
    end
    
+   local function clear_speech()
+      for player, bet in pairs( ctrl:get_player_bets() ) do
+         player.status:update( "" )
+      end
+   end
+   
    -- Remove player chips
    local function remove_chips(chips)
       for _, player in pairs( ctrl:get_players() ) do
@@ -112,6 +118,10 @@ function(pres, ctrl)
       
       -- Put hole cards on the deck
       for player,hole in pairs( ctrl:get_hole_cards() ) do
+         
+         player.status:display()
+         player.status:update( "I'm In" )   
+         
          for _,card in pairs(hole) do
             card.group.position = MCL.DECK
             card.group:raise_to_top()
@@ -181,6 +191,7 @@ function(pres, ctrl)
    end
 
    function pres.clear_ui(pres)
+      print("CLEARED")
       poker_hand_text:animate{
          duration=200,
          opacity=0
@@ -194,6 +205,7 @@ function(pres, ctrl)
       
       -- reset bets
       remove_chips()
+      print("CLEARED")
    end
 
    function pres.showdown(pres, winners, poker_hand)
@@ -209,25 +221,40 @@ function(pres, ctrl)
       ]]--
       
       -- winners is an array of the winning players
-      --[[
-      local p_num = winners[1].table_position
+      
+     --[[ local p_num = winners[1].table_position
       local wintext = "Player "..p_num.. " wins!"
       local t = Text{ font="Sans 50px", color="00FF55", text=wintext, position=MDPL[p_num] }
       
       Popup:new{group = t}
-      --]]
       
+      ]]--
       winners[1].status:update( poker_hand.name )
+     
       --winners[1].status:update( "I win!" )
       
    end
 
    function pres:fold_player(active_player)
+     
       animate_chips_to_center(active_player)
       update_players()
+      active_player.status:update( "Fold" )
+      active_player.status:hide()
    end
 
-   function pres:bet_player(active_player)
+   function pres:call_player(active_player)
+      --update_players()
+      
+      for player, bet in pairs( ctrl:get_player_bets() ) do
+         if player == active_player then
+            player.betChips:set(bet)
+            player.status:update( "Bet "..bet )
+         end
+      end
+
+   end
+   function pres:raise_player(active_player)
       --update_players()
       
       for player, bet in pairs( ctrl:get_player_bets() ) do
@@ -240,8 +267,21 @@ function(pres, ctrl)
    end
 
    function pres:start_turn(active_player)
+      active_player.status:update( "My turn, foo!" )
+      local pos = active_player.table_position
+      local params = DOG_ANIMATIONS[ pos ]
+      if params and params.name then
+         a = Animation(params.dog, params.frames, params.position)
+      end
+      
+      if not active_player.glow then
+         active_player.glow = DOG_GLOW[ params.dog ]
+      end
+      
+      active_player.glow.opacity = 255
    end
 
    function pres:finish_turn(active_player)
+      active_player.glow.opacity = 0
    end
 end)
