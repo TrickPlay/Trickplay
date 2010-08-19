@@ -180,7 +180,8 @@ struct UserData
     }
 #endif
     //.........................................................................
-    // Pushes the Lua proxy onto the stack - whether it is weak or strong
+    // Pushes the Lua proxy onto the stack - whether it is weak or strong. If
+    // it is weak and is about to be finalized, this can push a nil.
 
     void push_proxy();
 
@@ -247,7 +248,7 @@ struct UserData
 
 private:
 
-    friend class Handle;
+    friend struct Handle;
 
     //.........................................................................
 

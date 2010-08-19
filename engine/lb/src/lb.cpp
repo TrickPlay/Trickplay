@@ -8,6 +8,69 @@
 
 void lb_get_extras_table( lua_State * L , bool create );
 
+void lb_get_weak_refs_table( lua_State * L , bool create );
+void lb_get_weak_refs_free_list( lua_State * L );
+
+//.........................................................................
+
+#if 0
+
+int dump_wr( lua_State * L )
+{
+    LSG;
+
+    lua_getglobal(L,"dumptable");
+    lua_pushvalue(L,-1);
+    lb_get_weak_refs_table(L,false);
+    lua_call(L,1,0);
+    lb_get_weak_refs_free_list(L);
+    lua_call(L,1,0);
+
+    return LSG_END(0);
+}
+
+#endif
+
+//.............................................................................
+// The weak refs table has been split into two tables. One holds the weak refs
+// and the other a free list. The gist of this is that we only re-use an index
+// when it has been explicitly removed by lb_weak_unref. If an index was removed
+// by the garbage collector, it will remain un-used (and nil) until the thing
+// it points to is finalized. This guarantees that a weak ref you hold will either
+// point to the thing you expect or nil; it won't point to something else that
+// magically took the same index.
+//.............................................................................
+// Returns the free list table. It is always created and initialized if it
+// doesn't already exist. The index 0 points to the next available index. So,
+// the table always starts out with 0 = 1.
+
+void lb_get_weak_refs_free_list( lua_State * L )
+{
+    static char TP_WEAK_REFS_FREE_LIST_TABLE = 0;
+
+    LSG;
+
+    lua_pushlightuserdata(L,&TP_WEAK_REFS_FREE_LIST_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+
+        lua_createtable(L,100,0);
+        lua_pushinteger(L,1);
+        lua_rawseti(L,-2,0);
+
+        lua_pushlightuserdata(L,&TP_WEAK_REFS_FREE_LIST_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    LSG_CHECK(1);
+}
+
+//.............................................................................
+
 void lb_get_weak_refs_table( lua_State * L , bool create )
 {
     static char TP_WEAK_REFS_TABLE = 0; // We only use the address
@@ -19,8 +82,12 @@ void lb_get_weak_refs_table( lua_State * L , bool create )
 
     if (lua_isnil(L,-1) && create)
     {
+#if 0
+        lua_pushcfunction(L,dump_wr);
+        lua_setglobal(L,"wr");
+#endif
         lua_pop(L,1);
-        lua_createtable(L,50,0);
+        lua_createtable(L,100,0);
 
         lua_newtable(L);
         lua_pushstring(L,"__mode");
@@ -49,6 +116,39 @@ int lb_weak_ref( lua_State * L )
 
     LSG;
 
+    // First, we have to get an index for the new ref from the
+    // free list.
+
+    lb_get_weak_refs_free_list( L );
+
+    int t=lua_gettop(L);
+
+    lua_rawgeti(L,t,0);
+
+    g_assert(!lua_isnil(L,-1));
+
+    int ref = lua_tointeger(L,-1);
+
+    lua_pop(L,1);
+    lua_rawgeti(L,t,ref);
+
+    if (!lua_isnil(L,-1))
+    {
+        lua_rawseti(L,t,0);
+    }
+    else
+    {
+        lua_pop(L,1);
+        lua_pushinteger(L,ref+1);
+        lua_rawseti(L,t,0);
+    }
+
+    lua_pop(L,1);
+
+    LSG_CHECK(0);
+
+    // Now that we have index, we can use it in the weak refs table
+
     lb_get_weak_refs_table( L , true );
 
     // At this point, we should have the thing to ref
@@ -60,9 +160,9 @@ int lb_weak_ref( lua_State * L )
 
     lua_insert( L , -2 );
 
-    // Pops the thing and returns the ref
+    // Pops the thing and sticks it in the table
 
-    int ref = luaL_ref( L , -2 );
+    lua_rawseti(L,-2,ref);
 
     // Pop the table
 
@@ -88,13 +188,26 @@ void lb_weak_unref( lua_State * L , int ref )
 
     LSG;
 
-    lb_get_weak_refs_table( L , false );
+    // Add this index to the free list
+
+    lb_get_weak_refs_free_list(L);
 
     g_assert( ! lua_isnil( L , -1 ) );
 
-    luaL_unref( L , -1 , ref );
+    lua_rawgeti(L,-1,0);    // Get the value at 0
+    lua_rawseti(L,-2,ref);  // Set the value at ref to the value at 0
+    lua_pushinteger(L,ref); // Set the value at 0 to ref
+    lua_rawseti(L,-2,0);
 
     lua_pop( L , 1 );
+
+    // Now clear it in the weak refs table
+
+    lb_get_weak_refs_table( L , false );
+
+    lua_pushnil(L);
+    lua_rawseti(L,-2,ref);
+    lua_pop(L,1);
 
     LSG_CHECK(0);
 }
@@ -700,7 +813,7 @@ int lb_set_extra(lua_State * L)
 {
     if (!lua_isnil(L,2))
     {
-        lb_checktable(L,2);
+        (void)lb_checktable(L,2);
     }
 
     LSG;
@@ -752,13 +865,14 @@ std::string lb_value_desc( lua_State * L , int index )
     return result;
 }
 
+
 void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter )
 {
     LSG;
 
     int t = lua_gettop( L );
 
-    lb_checktable(L,t);
+    (void)lb_checktable(L,t);
 
     lb_strong_deref(L,visited);
     lua_pushvalue(L,t);
@@ -825,7 +939,7 @@ void lb_dump_table( lua_State * L )
 {
     LSG;
 
-    lb_checktable(L,1);
+    (void)lb_checktable(L,1);
 
     int filter = 0;
 

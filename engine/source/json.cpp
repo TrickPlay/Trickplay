@@ -125,7 +125,7 @@ void JSON::to_lua( lua_State * L, JsonNode * node )
         }
     }
 
-    LSG_END(1);
+    (void)LSG_END(1);
 }
 
 //-----------------------------------------------------------------------------
@@ -283,7 +283,7 @@ bool JSON::parse( lua_State * L, const gchar * json_string )
         lua_pushnil( L );
     }
 
-    LSG_END(1);
+    (void)LSG_END(1);
 
     return result;
 }
