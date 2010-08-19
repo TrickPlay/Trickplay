@@ -1,7 +1,29 @@
 
+#ifdef TP_HAS_READLINE
+#include "readline/readline.h"
+#include "readline/history.h"
+#endif
+
 #include "console.h"
 #include "util.h"
 #include "context.h"
+
+
+#ifdef TP_HAS_READLINE
+
+static Console * readline_console = 0;
+
+void Console::readline_handler( char * line )
+{
+    if ( line && strlen( line ) && readline_console )
+    {
+        readline_console->process_line( line );
+
+        add_history( line );
+    }
+}
+
+#endif
 
 Console::Console( TPContext * ctx, bool read_stdin, int port )
     :
@@ -24,6 +46,16 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
                 stdin_buffer = g_string_new( NULL );
 
                 g_io_add_watch( channel, G_IO_IN, channel_watch, this );
+
+#ifdef TP_HAS_READLINE
+
+                using_history();
+
+                rl_catch_signals = 0;
+
+                rl_callback_handler_install( "" , readline_handler );
+
+#endif
             }
         }
     }
@@ -54,7 +86,6 @@ Console::~Console()
 {
     if ( channel )
     {
-        g_io_channel_shutdown( channel, FALSE, NULL );
         g_io_channel_unref( channel );
     }
 
@@ -64,6 +95,13 @@ Console::~Console()
     }
 
     context->remove_output_handler( output_handler, this );
+
+#ifdef TP_HAS_READLINE
+
+    rl_callback_handler_remove();
+
+#endif
+
 }
 
 void Console::add_command_handler( CommandHandler handler, void * data )
@@ -162,7 +200,19 @@ void Console::process_line( gchar * line )
 
 gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gpointer data )
 {
+#ifdef TP_HAS_READLINE
+
+    readline_console = ( Console * ) data;
+
+    rl_callback_read_char();
+
+    readline_console = 0;
+
+    return TRUE;
+
+#else
     return ( ( Console * )data )->read_data();
+#endif
 }
 
 void Console::connection_accepted( gpointer connection, const char * remote_address )

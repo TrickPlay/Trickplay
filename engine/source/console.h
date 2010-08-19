@@ -25,6 +25,12 @@ protected:
 
     static gboolean channel_watch( GIOChannel * source, GIOCondition condition, gpointer data );
 
+#ifdef TP_HAS_READLINE
+
+    static void readline_handler( char * line );
+
+#endif
+
 private:
 
     Console() {}
