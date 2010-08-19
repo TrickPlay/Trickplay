@@ -155,8 +155,49 @@ for _, suit in pairs(Suits) do
       table.insert(Cards, Card(rank, suit))
    end
 end
+RiggedCards = {
+   Card("ACE","HEARTS"),
+   Card("TWO","HEARTS"),
+   Card("THREE","HEARTS"),
+   Card("FOUR","HEARTS"),
+   Card("FIVE","HEARTS"),
+   Card("SIX","HEARTS"),
+   Card("SEVEN","HEARTS"),
+   Card("EIGHT","HEARTS"),
+   Card("NINE","HEARTS"),
+   Card("TEN","HEARTS"),
+   Card("JACK","HEARTS"),
+   Card("QUEEN","HEARTS"),
+   Card("KING","HEARTS"),
+   Card("ACE","DIAMONDS"),
+-- Community Cards
+   Card("ACE","SPADES"),
+   Card("KING","SPADES"),
+   Card("QUEEN","SPADES"),
+   Card("JACK","SPADES"),
+   Card("TEN","SPADES"),
+-- hole 6
+   Card("TWO","DIAMONDS"),
+   Card("THREE","DIAMONDS"),
+-- hole 5
+   Card("FOUR","DIAMONDS"),
+   Card("FIVE","DIAMONDS"),
+-- hole 4
+   Card("SIX","DIAMONDS"),
+   Card("SEVEN","DIAMONDS"),
+-- hole 3
+   Card("EIGHT","DIAMONDS"),
+   Card("NINE","DIAMONDS"),
+-- hole 2
+   Card("TEN","DIAMONDS"),
+   Card("JACK","DIAMONDS"),
+-- hole 1
+   Card("QUEEN","DIAMONDS"),
+   Card("KING","DIAMONDS")
+}
 
-Deck = Class(nil, function(self, ...)
+Deck = Class(nil,
+function(self, ...)
    local cards = {}
    for _, card in ipairs(Cards) do
       table.insert(cards, card)

@@ -133,6 +133,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
             local orig_bet = state:get_player_bets()[state:get_active_player()]
             print("computer move, activeplayer money was $" .. active_player.money)
             if not fold then
+               assert(orig_bet <= bet and bet <= active_player.money + orig_bet) -- TODO
                active_player.money = active_player.money + orig_bet - bet
             end
             print("computer move, activeplayer money now $" .. active_player.money)
