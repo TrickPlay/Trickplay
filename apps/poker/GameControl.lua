@@ -85,9 +85,18 @@ function(ctrl, model, ...)
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
-      if #game_pipeline == 0 and #ctrl:get_players()>1 then
+      if #ctrl:get_players() == 1 then
+         pres:return_to_main_menu()
+         enable_event_listener(KbdEvent())
+         model:set_active_component(Components.CHARACTER_SELECTION)
+         model:notify()
+         return
+      end
+
+      if #game_pipeline == 0 then
          reset_pipeline()
       end
+
       local action = game_pipeline[1]
       local result = action(ctrl, event)
       if result then table.remove(game_pipeline, 1) end
