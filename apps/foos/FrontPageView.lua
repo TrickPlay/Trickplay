@@ -192,6 +192,10 @@ FrontPageView = Class(View, function(view, model, ...)
 
 ---[[
             --print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
+            view.sel_info:complete_animation()
+            view.sel_info.opacity = 0
+            view.sel_info.scale   = {1,1}
+            view.sel_info.position = {PIC_W*(sel[2]-1),PIC_H*sel[1]}
 
             assert(previous ~= nil,"wth")
             previous:complete_animation()
@@ -229,6 +233,34 @@ FrontPageView = Class(View, function(view, model, ...)
                             view.backdrop.opacity = 255
                             view.backdrop:raise_to_top()
                             current:raise_to_top()
+--[[
+                            if model.albums[sel[1] ]         ~= nil    and 
+                               model.albums[sel[1] ][sel[2] ] ~= nil    and
+                               (view.sel_info.x/PIC_W) + 1  == sel[2] and
+                               (view.sel_info.y/PIC_H)      == sel[1] then
+--]]
+                                --view.sel_info.position = {new_c,new_r+PIC_H}
+                                view.sel_info:raise_to_top()
+
+                                view.sel_info:animate{
+                                    duration = 10*CHANGE_VIEW_TIME,
+                                    opacity  = 255,
+                                    on_completed = function()
+                                        if model.albums[sel[1]]         ~= nil    and 
+                                           model.albums[sel[1]][sel[2]] ~= nil    and
+                                           (view.sel_info.x/PIC_W) + 1  == sel[2] and
+                                           (view.sel_info.y/PIC_H)      == sel[1] then
+
+
+                                            view.sel_info:animate{
+                                                duration = 2*CHANGE_VIEW_TIME,
+                                                y        = view.sel_info.y - 100,
+                                                scale    = {1,100}
+                                            }
+                                        end
+                                    end
+                                }
+                            --end
                         end
                     }
 
