@@ -49,12 +49,13 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         [CharacterSelectionGroups.TOP] = {},
         [CharacterSelectionGroups.MIDDLE] = {
             [SubGroups.LEFT_MIDDLE] = function()
-                if(playerCounter >= 2) then
+                if playerCounter >= 2 then
                     start_a_game()
                 end
             end
         },
         [CharacterSelectionGroups.BOTTOM] = {
+           [SubGroups.LEFT] = function() exit() end,
             [SubGroups.LEFT_MIDDLE] = function()
                 exit()
             end,
@@ -68,9 +69,6 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
                     TUTORIAL:render()
                 end
             end
-        },
-        [CharacterSelectionGroups.BOTTOM] = {
-            [1] = function() exit() end
         }
     }
     
@@ -122,10 +120,9 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         table.insert(model.players, i, Player(args))
         model.positions[pos] = true
         model.currentPlayer = playerCounter
-        
+
         playerCounter = playerCounter + 1
         self:get_model():notify()
-
     end
 
     local CharacterSelectionKeyTable = {
@@ -189,8 +186,8 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             end
         end
         check_for_valid(dir)
-        print(SubSize, GroupSize)
-        print(subselection, selected)
+        print("SubSize:",SubSize,"GroupSize:",GroupSize)
+        print("subselection:",subselection,"selected:",selected)
         self:get_model():notify()
     end
 
