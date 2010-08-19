@@ -263,7 +263,7 @@ FrontPageView = Class(View, function(view, model, ...)
                                                        model.fp_index[1]              == sel[1] then
                                                         view.album_title:raise_to_top()
                                                         view.album_title.text = 
-                                                              adapters[model.fp_1D_index][1].required_inputs.query
+                                                              adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query
                                                         view.album_title.position = {PIC_W*(sel[2]-1)+300,
                                                                               PIC_H*(sel[1]-1)+1.05*PIC_H-50}
                                                         view.album_title:animate{
@@ -273,7 +273,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
                                                         view.album_logo:raise_to_top()
                                                         view.album_logo.size = {200,50}
-                                                        view.album_logo.src = adapters[model.fp_1D_index].logoUrl
+                                                        view.album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
                                                         view.album_logo.position = {PIC_W*(sel[2]-1),
                                                                               PIC_H*(sel[1]-1)+1.05*PIC_H-50}
                                                         view.album_logo:animate{
