@@ -34,6 +34,10 @@ the pipeline, or not. Currently, every stage of the pipeline either
 starts a timer event, or turns the keyboard listener on, but other
 events may be added as necessary as well.
 
+The GameControl has GamePresentation and GameState slaves which it
+directs, while it also calls the lower-level HandControl which has its
+own presentation and state slaves. These are hooked up with the 
+
 Each betting round is composed of player turns, and for each turn,
 there's a bet setup and a bet execution. The bet setup sets up a
 listener for the event that a bet is ready (either through the
@@ -44,10 +48,10 @@ interface utilizes the BettingController (and its corresponding
 BettingView gives it visibility). The computer move comes from
 player:get\_move(state).
 
+Every time the 
 \section*{Todo}
 \begin{itemize}
 \item Fix the bug where chips sometimes remain on the table.
-\item Clean up the source files of all the extra cruft that doesn't actually run.
 \end{itemize}
 
 \section*{Done}
@@ -70,5 +74,6 @@ player:get\_move(state).
 \item \CheckedBox Abstracted out initial endowment to a global variable
 \item \CheckedBox Fixed a bug in Player where computer player doesn't
   actually go all in when he wishes to.
+\item \CheckedBox Clean up the source files of all the extra cruft that doesn't actually run.
 \end{itemize}
 \end{document}

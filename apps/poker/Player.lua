@@ -90,7 +90,9 @@ Player = Class(function(player, args, ...)
       local coef_of_chance = 13-best_hand+player.difficulty
       print("coef_of_chance: "..coef_of_chance)
       print("random_seed: "..random_seed)
-      local num = math.random(math.floor(random_seed*coef_of_chance))
+      local m = math.floor(random_seed*coef_of_chance)
+      assert(m >= 1, "math.floor(random_seed*coef_of_chance) was too small: " .. m)
+      local num = math.random(m)
       print("num: "..num.."\n")
       if(num == 1) then
          print("\nFOLD\n")
@@ -382,5 +384,10 @@ Player = Class(function(player, args, ...)
    player.status = PlayerStatusView(model, nil, player)
    player.status:initialize()
    assert(player.status)
+   
+   function player:get_move(state)
+      local call_bet = state:get_call_bet()
+      return false, call_bet
+   end
 
 end)
