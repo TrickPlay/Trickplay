@@ -73,6 +73,68 @@ Player = Class(function(player, args, ...)
       error("error calculation position")
    end
 
+   local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand)
+
+      assert(call_bet >= 0)
+      assert(min_raise > 0)
+      assert(stddev)
+      assert(ai_move)
+      assert(amount_to_raise)
+      assert(best_hand)
+      -- first figure out if the bet is too high for the player
+      local a_bet = call_bet+min_raise
+      local random_seed = 3^(-(a_bet/player.money))+.1+stddev --use a power function for scaling
+
+      local coef_of_chance = 13-best_hand+player.difficulty
+      local num = math.random(math.floor(random_seed*coef_of_chance))
+      print("random_seed: "..random_seed)
+      print("position+player.difficulty: "..coef_of_chance)
+      print("num: "..num.."\n")
+      if(num == 1) then
+         print("\nFOLD\n")
+         return true, 0
+      -- if the bet wont destroy the player's account then he's good to raise
+      elseif(Moves.CALL == ai_move) then
+         print("\nCALL, call_bet = "..call_bet.."\n")
+         -- only call if really financially feasible
+         if(call_bet < (.3+stddev)*player.money) then
+            return false, call_bet
+         else
+            print("\nFOLD\n")
+            return true, 0
+         end
+      elseif Moves.RAISE == ai_move then
+         assert(call_bet >= 0)
+         assert(min_raise > 0)
+         local a_bet = call_bet+min_raise
+         if amount_to_raise == RaiseFactor.R then
+            --websites say raising the bet times 2 is a good standard?
+            if a_bet < call_bet*2 then
+               a_bet = math.random(a_bet, call_bet*2)
+            end
+            if a_bet > player.money then
+               a_bet = player.money
+            end
+            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
+            return false, a_bet
+         elseif amount_to_raise == RaiseFactor.RR then
+            if(call_bet*2+min_raise < call_bet*3) then
+               a_bet = math.random(call_bet*2+min_raise, call_bet*3)
+            end
+            if(a_bet > player.money) then
+               a_bet = player.money
+            end
+            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
+            return false, a_bet
+         else
+            error("failed raising the steaks")
+         end
+      else
+         error("someth'n wrong with the moves")
+      end
+
+   end
+
    ---
    -- @param hole an array of two hole cards
    -- @param community_cards
@@ -114,6 +176,8 @@ Player = Class(function(player, args, ...)
       end
       local _, best_hand = get_best(all_cards)
 
+      -- arbitrary random factor
+      local stddev = (math.random(self.difficulty)-1) * .2
 
       hand_print(hole)
       hand_print(community_cards)
@@ -226,9 +290,15 @@ Player = Class(function(player, args, ...)
             print("total_outs = "..total_outs)
             local losing_odds = outs/total_outs
             print("\nlosing_odds1 = "..losing_odds.."\n")
-            local stddev = (math.random(self.difficulty)-1) * .2
             if(losing_odds > HIGH_OUTS_RANGE + stddev) then
-               return Moves.FOLD, RaiseFactor.UR
+               -- if player's hand is a high pair or higher its still
+               -- worth playing even though a pair is in the river:
+               if(best_hand == PokerHands.ONE_PAIR) and
+                (hole[1].rank.num > 9) then
+                  return Moves.CALL, RaiseFactor.UR
+               else
+                  return Moves.FOLD, RaiseFactor.UR
+               end
             elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
             (losing_odds >= LOW_OUTS_RANGE) then
                return Moves.CALL, RaiseFactor.UR
@@ -273,7 +343,6 @@ Player = Class(function(player, args, ...)
                print("total_outs = "..total_outs)
                losing_odds = outs/total_outs
                print("\nlosing_odds2 = "..losing_odds.."\n")
-               stddev = (math.random(self.difficulty)-1) * .1
                if(losing_odds > HIGH_OUTS_RANGE + stddev) then
                   return Moves.CALL, RaiseFactor.UR
                elseif(losing_odds <= HIGH_OUTS_RANGE + stddev) and
@@ -299,41 +368,13 @@ Player = Class(function(player, args, ...)
       ai_move, amount_to_raise = playsTable[round](ai_move)
       last_move = ai_move
       
-      if(Moves.CALL == ai_move) then
-         print("\nCALL, call_bet = "..call_bet.."\n")
-         return false, call_bet
-      elseif Moves.FOLD == ai_move then
+      if Moves.FOLD == ai_move then
          print("\nFOLD\n")
          return true, 0
-      elseif Moves.RAISE == ai_move then
-         assert(call_bet >= 0)
-         assert(min_raise > 0)
-         local a_bet = call_bet+min_raise
-         if amount_to_raise == RaiseFactor.R then
-            --websites say raising the bet times 2 is a good standard?
-            if a_bet < call_bet*2 then
-               a_bet = math.random(a_bet, call_bet*2)
-            end
-            if a_bet > player.money then
-               a_bet = player.money
-            end
-            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
-            return false, a_bet
-         elseif amount_to_raise == RaiseFactor.RR then
-            if(call_bet*2+min_raise < call_bet*3) then
-               a_bet = math.random(call_bet*2+min_raise, call_bet*3)
-            end
-            if(a_bet > player.money) then
-               a_bet = player.money
-            end
-            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
-            return false, a_bet
-         else
-            error("failed raising the steaks")
-         end
       else
-         error("someth'n wrong with the moves")
+         return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand)
       end
+
    end
    
    player.status = PlayerStatusView(model, nil, player)
