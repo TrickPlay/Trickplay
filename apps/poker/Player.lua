@@ -11,6 +11,8 @@ Player = Class(function(player, args, ...)
       player[k] = v
    end
    
+   player.glow = DOG_GLOW[ player.table_position ]
+   
    --[[
    function player:createMoneyChips()
       
@@ -382,5 +384,10 @@ Player = Class(function(player, args, ...)
    player.status = PlayerStatusView(model, nil, player)
    player.status:initialize()
    assert(player.status)
+   
+   function player:get_move(state)
+      local call_bet = state:get_call_bet()
+      return false, call_bet
+   end
 
 end)
