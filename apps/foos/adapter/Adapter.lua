@@ -1,15 +1,9 @@
 adapterTypes = {"Google","Yahoo","Google","Yahoo","Google","Yahoo","Google","Yahoo"}
 adaptersTable = settings.adaptersTable or { "Google", "Yahoo", "Yahoo", "Google", "Google", "Google", "Google"}
-searches = settings.searches or {"space", "dinosaurs", "dog", "cat", "jessica%20alba","national%20geographic", "animals", "stuff", "funny", "cool", "music", "meganfox", "starwars", "twitter", "digg", "scene"}
+searches = settings.searches or {"space", "dinosaurs", "dog", "cat", "jessica%20alba","national%20geographic", "mila%20kunis"}
 
-picsTable = {}
 adapters = {}
 adapterTypesTable = {}
-
-
-
-START_INDEX = 1
-NUM_SLIDESHOW_IMAGES =16 
 
 for i =1, #adaptersTable do
 	adapters[i] = dofile("adapter/"..adaptersTable[i].."/adapter.lua")
@@ -30,5 +24,15 @@ end
 function slideShow()
 	
 	screen:clear()
+end
+
+function deleteAdapter(index)
+	index = #adapters+1 - index
+	table.remove(adapters,index)
+	table.remove(searches,index)
+	table.remove(adaptersTable,index)
+	model.album_group:clear()
+	model.albums = {}
+	Setup_Album_Covers()
 end
 
