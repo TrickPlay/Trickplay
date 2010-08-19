@@ -95,8 +95,9 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       local continue = false
       if ctrl.waiting_for_bet and event:is_a(BetEvent) then
          ctrl.waiting_for_bet = false
-         pres:finish_turn(state:get_active_player())
+         local active_player = state:get_active_player()
          continue = state:execute_bet(event.fold, event.bet)
+         pres:finish_turn(active_player)
          enable_event_listener(TimerEvent{interval=.5})
       elseif not ctrl.waiting_for_bet then
          ctrl.waiting_for_bet = true

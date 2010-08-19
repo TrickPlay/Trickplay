@@ -8,7 +8,10 @@ AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 
 -- Buttons
 local ui_colors = {"Red", "Green", "Gray"}
-local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"}
+local ui_buttons = {
+   "BubbleHeader", "ButtonArrowDown", "ButtonArrowUp",
+   "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"
+}
 for _,color in pairs(ui_colors) do
    for _,button in pairs(ui_buttons) do
       AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
