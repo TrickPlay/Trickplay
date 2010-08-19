@@ -74,7 +74,8 @@ public:
 		{
 			if (dirty)
 			{
-				if ( SQLite::Backup( SQLite::DB( file_name.c_str() ) , *db ).ok() )
+				SQLite::DB destination( file_name.c_str() );
+				if ( SQLite::Backup( destination , *db ).ok() )
 				{
 					g_debug( "FLUSHED SETTINGS DATABASE" );
 				}
