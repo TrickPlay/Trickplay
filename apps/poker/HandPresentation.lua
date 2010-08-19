@@ -113,7 +113,7 @@ function(pres, ctrl)
       local cards = ctrl:get_community_cards()
       for i=5,1,-1 do
          cards[i].group.position = MCL.DECK
-         cards[i].group:raise_to_top()
+         -------cards[i].group:raise_to_top()
       end
       
       -- Put hole cards on the deck
@@ -141,7 +141,7 @@ function(pres, ctrl)
             screen:add(card.group)
             -- Animate and flip the card if the player is human
             card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
-            card.group:raise_to_top()
+            -------card.group:raise_to_top()
             offset = offset + 30
             
             table.insert(allCards, card)
@@ -192,10 +192,7 @@ function(pres, ctrl)
 
    function pres.clear_ui(pres)
       print("CLEARED")
-      poker_hand_text:animate{
-         duration=200,
-         opacity=0
-      }
+
       -- clear cards
       for key,card in pairs(allCards) do
          screen:remove(card.group)
@@ -292,5 +289,6 @@ function(pres, ctrl)
    -- called when everyone else folds, making one player the winner by
    -- default
    function pres:win_from_bets(only_player)
+      pres:clear_ui()
    end
 end)
