@@ -49,6 +49,9 @@ HandState = Class(nil,function(state, ctrl, ...)
       end
       return in_players
    end
+   function state:get_orig_bet()
+      return player_bets[state:get_active_player()]
+   end
    function state:get_active_player() return players[action] end
    function state:get_sb_qty() return sb_qty end
    function state:get_bb_qty() return bb_qty end
@@ -310,6 +313,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       out[removed_player] = nil
       done[removed_player] = nil
       player_bets[removed_player] = nil
+      ctrl:remove_player(removed_player)
    end
 
    function state.showdown(state)

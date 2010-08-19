@@ -37,9 +37,9 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
         model:set_active_component(Components.GAME)
         model:notify()
         game:initialize_game{
-            sb=1,
-            bb=2,
-            endowment=800,
+            sb=SMALL_BLIND,
+            bb=BIG_BLIND,
+            endowment=INITIAL_ENDOWMENT,
             players=model.players
         }
         old_on_key_down = nil
@@ -108,6 +108,7 @@ CharacterSelectionController = Class(Controller, function(self, view, ...)
             table_position = pos,
             position = model.default_player_locations[ getPosition() ],
             chipPosition = model.default_bet_locations[ getPosition() ],
+            endowment = INITIAL_ENDOWMENT
         }
 
         -- insertion point
