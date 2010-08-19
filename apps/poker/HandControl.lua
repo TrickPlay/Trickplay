@@ -197,11 +197,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       return true
    end
 
-   function ctrl:set_betting_listener(callback, player)
-      game_ctrl:set_bet_listener(callback, player)
-   end
-
    function ctrl:remove_player(removed_player)
       pres:remove_player(removed_player)
+   end
+
+   function ctrl:win_from_bets(only_player)
+      pres:win_from_bets(only_player)
    end
 end)

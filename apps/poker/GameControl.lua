@@ -102,6 +102,7 @@ function(ctrl, model, ...)
    end
 
    function ctrl:set_bet_listener(callback, player)
+      error("GameControl:set_bet_listener called")
       if player.isHuman then
          model.currentPlayer = player
          model:set_active_component(Components.PLAYER_BETTING)

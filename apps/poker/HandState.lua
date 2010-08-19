@@ -119,23 +119,6 @@ HandState = Class(nil,function(state, ctrl, ...)
       community_cards = deck:deal(5)
    end
 
-   function state.give_winner_pot(state)
-      local winner = in_players[1]
-      for _,player in ipairs(players) do
-         assert(done[player])
-         if player ~= winner then
-            assert(player_bets[player] == 0)
-         end
-      end
-      winner.money = winner.money + player_bets[winner] + pot
-      player_bets[winner] = 0
-      pot = 0
-   end
-
-   local function set_bet_listener(callback, player)
-      ctrl:set_bet_listener(callback, player)
-   end
-
    local function set_out(player)
       if not out[player] then
          num_inplayers = num_inplayers - 1
@@ -215,6 +198,7 @@ HandState = Class(nil,function(state, ctrl, ...)
          local only_player = get_only_player()
          only_player.money, player_bets[only_player], pot = only_player.money+player_bets[only_player]+pot,0,0
          ctrl:clear_pipeline()
+         ctrl:win_from_bets(only_player)
          return continue
       end
 
@@ -247,64 +231,6 @@ HandState = Class(nil,function(state, ctrl, ...)
          action = tmp_action
       end
       return continue
-   end
-
-   -- if bet is less than call_bet then assume folding
-   function state.wait_for_bet(state, round)
-      local continue = true
-
-      -- this code shouldn't be here, it's just safety code.
-      if #in_players == 1 then
-         done[in_players[1]] = true
-         ctrl:give_winner_pot_and_bone_out()
-         return true
-      end
-
-      for i, player in ipairs(in_players) do
-         if not done[player] then
-            continue = false
-         end
-      end
-      if continue then return true end
-
-      local active_player = in_players[action]
-      if active_player.isHuman then
-         model.currentPlayer = active_player
-         model.in_players = in_players
-         model:set_active_component(Components.PLAYER_BETTING)
-         model:get_active_controller():set_callback(
-            function(fold, bet)
-               enable_event_listener(
-                  TimerEvent{
-                     interval=.1,
-                     cb=function() execute_bet(fold, bet) end
-                  })
-            end)
-         enable_event_listener(KbdEvent())
-      else
-         local fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
-         enable_event_listener(
-            TimerEvent{
-               interval=.5,
-               cb=function()
-                     execute_bet(fold, bet)
-                     enable_event_listener(TimerEvent{interval=.1})
-                  end})
-      end
-   end
-
-   function state.bet(state, round)
-      local active_player = in_players[action]
-      assert(active_player)
-      local fold, bet
-      if false and active_player.isHuman then
-         
-      else
-         -- get computer move
-         -- current cards, bet to call, min raise, current wager, pot size
-         fold, bet = active_player:get_move(hole_cards[active_player], community_cards, position, call_bet, min_raise, player_bets[active_player], pot, round)
-      end
-
    end
 
    local function remove_player(i)
