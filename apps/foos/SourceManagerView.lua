@@ -19,6 +19,9 @@ SourceManagerView = Class(View, function(view, model, ...)
     local cancel_un = Image { src = "assets/source\ manager/cancel_nofocus.png"}
     local txtbx_sel = Image{src="assets/source\ manager/typeinbox_focus.png"}
     local txtbx_un = Image{src="assets/source\ manager/typeinbox_nofocus.png"}
+    
+    local queryText = Text {font = "Sans 30px" , text = "Search for: "}
+    
 	 view.clones:add(ok_sel, ok_un, cancel_sel, cancel_un)
     view.clones:add(   add_sel )
     view.clones:add(   add_un  )
