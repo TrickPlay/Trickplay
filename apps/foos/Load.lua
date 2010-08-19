@@ -13,9 +13,8 @@ function Setup_Album_Covers()
     assert(model.default,"default is not init yet")
     screen:add(model.default)
 	for i =1, #adapters do
-		 loadCovers(i,searches[i], 1)
+		 loadCovers(i,searches[#adapters+1-i], 1)
 	end
-   -- startAdapter(1) --TODO fix this one source shit
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
     --fill the thing with clones of the default-loading image
@@ -57,7 +56,6 @@ end
 
 --Called by the adapter's on_complete function
 function Load_Image(site,index)
-
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
 
