@@ -91,7 +91,7 @@ FrontPageView = Class(View, function(view, model, ...)
             new_x = 10
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 0}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
-        elseif model.front_page_index == math.ceil(model.num_sources / 
+        elseif model.front_page_index == math.ceil(#adapters / 
                      NUM_ROWS) - (NUM_VIS_COLS-1)               then
             new_x = -1*(model.front_page_index-1) * PIC_W + 
                        (screen.width - NUM_VIS_COLS*PIC_W) - 10
@@ -233,7 +233,8 @@ FrontPageView = Class(View, function(view, model, ...)
                             view.backdrop.opacity = 255
                             view.backdrop:raise_to_top()
                             current:raise_to_top()
-                            if 
+                            if model.albums[sel[1] ]          ~= nil    and
+                               model.albums[sel[1] ][sel[2] ] ~= nil    and
                                model.fp_index[2]              == sel[2] and
                                model.fp_index[1]              == sel[1] then
                                 view.sel_info:raise_to_top()
