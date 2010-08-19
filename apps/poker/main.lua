@@ -25,11 +25,12 @@ end
 
 -- Dog animations
 DOG_ANIMATIONS = {
-   [1] = {},
+   [1] = {dog = 1},
    [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0} },
-   [3] = {dog = 3, name = "animation_gunfired", frames = 10, position = {340, 5} },
+   [3] = {dog = 3, name = "animation_slideglass", frames = 10, position = {340, 5} },
    [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
    [5] = {dog = 5, name = "animation_music", frames = 7, position = {1750, 10} },
+   [6] = {dog = 6},
 }
 
 for i, t in ipairs(DOG_ANIMATIONS) do
@@ -41,13 +42,31 @@ for i, t in ipairs(DOG_ANIMATIONS) do
    end
 end
 
+-- Dog glows
+DOG_GLOW = {
+   [1] = {90, 537},
+   [2] = {0, 143},
+   [3] = {487, 0},
+   [4] = {1154, 13},
+   [5] = {1624, 135},
+   [6] = {1466, 567},
+}
+for i=1, 6 do
+   AssetLoader:preloadImage("dog"..i.."glow","assets/dogs/glow/"..i..".png")
+end
+
 --------------------------------------------------------------------------------
 
 AssetLoader.on_preload_ready =
 function()
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
-   --DOG = AssetLoader:getImage("dog4frame5",{})
-   screen:add( DOG )
+   for i=1, 6 do
+      DOG_GLOW[i] = AssetLoader:getImage("dog"..i.."glow",{position = DOG_GLOW[i], opacity=0} )
+      screen:add(DOG_GLOW[i])
+   end
+   
+   --DOG = AssetLoader:getImage("dog1glow",{})
+   --screen:add( DOG )
    dofile("Class.lua") -- Must be declared before any class definitions.
    dofile("Globals.lua")
    --dofile("Utils.lua")
