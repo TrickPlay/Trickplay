@@ -191,6 +191,7 @@ function(pres, ctrl)
    end
 
    function pres.clear_ui(pres)
+      print("CLEARED")
       poker_hand_text:animate{
          duration=200,
          opacity=0
@@ -204,6 +205,7 @@ function(pres, ctrl)
       
       -- reset bets
       remove_chips()
+      print("CLEARED")
    end
 
    function pres.showdown(pres, winners, poker_hand)
@@ -271,8 +273,15 @@ function(pres, ctrl)
       if params and params.name then
          a = Animation(params.dog, params.frames, params.position)
       end
+      
+      if not active_player.glow then
+         active_player.glow = DOG_GLOW[ params.dog ]
+      end
+      
+      active_player.glow.opacity = 255
    end
 
    function pres:finish_turn(active_player)
+      active_player.glow.opacity = 0
    end
 end)

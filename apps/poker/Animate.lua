@@ -33,6 +33,7 @@ Animation = Class( function(self, dog, frames, position, ...)
         end
         
         screen:add(self.group)
+        self.group:raise_to_top()
         
         self.timer.on_timer()
         self.timer:start()
