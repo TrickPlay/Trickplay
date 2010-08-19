@@ -22,7 +22,7 @@ function Setup_Album_Covers()
         model.placeholders[i] = {}
         model.albums[i] = {}
         model.fp_slots[i] = {}
-        for j = 1,math.ceil(model.num_sources/NUM_ROWS) do
+        for j = 1,math.ceil(#adapters/NUM_ROWS) do
 
             model.placeholders[i][j] = Clone{ source = model.default, opacity =150}
             model.placeholders[i][j].position = 
