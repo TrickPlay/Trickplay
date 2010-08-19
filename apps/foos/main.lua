@@ -69,6 +69,11 @@ source_manager_view:initialize()
 local item_selected_view = ItemSelectedView(model)
 item_selected_view:initialize()
 --]]
+
+function app:on_closing()
+	settings.searches = searches
+end
+
 function screen:on_key_down(k)
     assert(model:get_active_controller())
     model:get_active_controller():on_key_down(k)
