@@ -2,7 +2,7 @@ Player = Class(function(player, args, ...)
    player.isHuman = false
    player.number = 0
    player.bet = model.bet.DEFAULT_BET
-   player.money = 800
+   player.money = INITIAL_ENDOWMENT
    player.position = false
    player.table_position = nil
    player.chipPosition = nil
@@ -73,7 +73,7 @@ Player = Class(function(player, args, ...)
       error("error calculation position")
    end
 
-   local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand)
+   local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet)
 
       assert(call_bet >= 0)
       assert(min_raise > 0)
@@ -112,8 +112,8 @@ Player = Class(function(player, args, ...)
             if a_bet < call_bet*2 then
                a_bet = math.random(a_bet, call_bet*2)
             end
-            if a_bet > player.money then
-               a_bet = player.money
+            if a_bet > player.money+orig_bet then
+               a_bet = player.money+orig_bet
             end
             print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
@@ -121,8 +121,8 @@ Player = Class(function(player, args, ...)
             if(call_bet*2+min_raise < call_bet*3) then
                a_bet = math.random(call_bet*2+min_raise, call_bet*3)
             end
-            if(a_bet > player.money) then
-               a_bet = player.money
+            if a_bet > player.money+orig_bet then
+               a_bet = player.money+orig_bet
             end
             print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
@@ -160,7 +160,7 @@ Player = Class(function(player, args, ...)
       print("\nRound: "..round.."\n")
       local raisedFactor = RaiseFactor.UR
       local community_cards = state:get_community_cards()
-
+      local orig_bet = state:get_orig_bet()
       -- move the ai will make
       local ai_move = last_move
       local amount_to_raise = RaiseFactor.RR
@@ -372,7 +372,7 @@ Player = Class(function(player, args, ...)
          print("\nFOLD\n")
          return true, 0
       else
-         return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand)
+         return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet)
       end
 
    end
