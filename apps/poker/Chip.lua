@@ -212,6 +212,14 @@ chipCollection = Class(function(self, ...)
                 
         end
         
+        -- Set to 0 and remove from parent
+        function self:remove()
+                self:set(0)
+                if self.group.parent then
+                        self.group.parent:remove(self.group)
+                end
+        end
+        
         function self:initialize()
                 self:add( chipStack(1) )
                 self:add( chipStack(5) )
