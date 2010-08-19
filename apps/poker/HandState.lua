@@ -90,12 +90,18 @@ HandState = Class(nil,function(state, ctrl, ...)
       pot = 0
 
       -- initialize small blind, big blind bets
-      player_bets[players[sb_p]] = sb_qty
-      players[sb_p].money = players[sb_p].money - sb_qty
-      player_bets[players[bb_p]] = bb_qty
-      players[bb_p].money = players[bb_p].money - bb_qty
-      print("the small blind player has $" .. players[sb_p].money)
-      print("the big blind player has $" .. players[bb_p].money)
+      local sb_player = players[sb_p]
+      if sb_player.money < sb_qty then
+         sb_player.money, player_bets[sb_player] = 0, sb_player.money
+      else
+         sb_player.money, player_bets[sb_player] = sb_player.money-sb_qty, sb_qty
+      end
+      local bb_player = players[bb_p]
+      if bb_player.money < bb_qty then
+         bb_player.money, player_bets[bb_player] = 0, bb_player.money
+      else
+         bb_player.money, player_bets[bb_player] = bb_player.money-bb_qty, bb_qty
+      end
 
       call_bet = bb_qty
       min_raise = bb_qty
@@ -165,6 +171,11 @@ HandState = Class(nil,function(state, ctrl, ...)
          pot, player_bets[active_player] = pot+player_bets[active_player], 0
          done[active_player] = true
          ctrl:fold_player(active_player)
+         -- if he's out of money, then that's dumb.
+         if active_player.money == 0 then
+            table.remove(players, action)
+            action = action - 1
+         end
       elseif bet == call_bet or (bet < call_bet and active_player.money == 0) then
          -- player calls
          player_bets[active_player] = bet
@@ -293,6 +304,14 @@ HandState = Class(nil,function(state, ctrl, ...)
 
    end
 
+   local function remove_player(i)
+      local removed_player = players[i]
+      table.remove(players,i)
+      out[removed_player] = nil
+      done[removed_player] = nil
+      player_bets[removed_player] = nil
+   end
+
    function state.showdown(state)
       local in_players = state:get_in_players()
       assert(#in_players > 1)
@@ -329,14 +348,20 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
       end
 
-      best.money = best.money + pot
+      print("splitting $" .. pot .. " pot " .. #winners .. " ways")
+      for _,winner in ipairs(winners) do
+         winner.money = winner.money + pot/#winners
+      end
       pot = 0
 
-      print("player won with")
-      for _, card in ipairs(in_hands[best]) do
-         print(card.name)
+      local i = 1
+      while i <= #players do
+         if players[i].money == 0 then
+            remove_player(i)
+         else
+            i=i+1
+         end
       end
-      print("won with " .. poker_hand.name .. " in state.showdown()")
       return winners, poker_hand
    end
 

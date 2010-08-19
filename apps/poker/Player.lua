@@ -88,7 +88,6 @@ Player = Class(function(player, args, ...)
    -- @returns bet number  quantity of bet, if fold then bet should be 0
    local last_move = Moves.FOLD
    function player:get_move(state)
-      
       -- stuff that the player usually plays off of
       local hole = state:get_hole_cards()[self]
       local position = self:get_position(state)
@@ -103,6 +102,7 @@ Player = Class(function(player, args, ...)
       -- move the ai will make
       local ai_move = last_move
       local amount_to_raise = RaiseFactor.RR
+
       print("player calculates call bet is " .. call_bet .. " and min_raise is " .. min_raise)
       -- combine the community cards and hole
       assert(hole[1])
