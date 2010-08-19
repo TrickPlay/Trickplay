@@ -171,12 +171,11 @@ function Scale_To_Fit(img,base_size,target_size)
     print( scale_x, scale_y )
 
 
-    if (scale_y > scale_x and scale_x < 1) or
-       (scale_y < scale_x) then--[[(scale_x < scale_y and scale_y < 1) or
+    if scale_y > scale_x  then--[[(scale_x < scale_y and scale_y < 1) or
                        (scale_x > scale_y) then]]
 print("chose y")
         img.scale = {scale_y,scale_y}
----[[
+--[[
         --img.anchor_point = {base_size[1]*(1-scale_y)/2,0}
         img.clip  = { (img.w-target_size[1])/2,      0,
                       (img.w-target_size[1])/2+target_size[1],target_size[2]}
@@ -187,7 +186,7 @@ print("chose y")
     else
 print("chose x")
         img.scale = {scale_x,scale_x}
----[[
+--[[
         --img.anchor_point = {0,base_size[2]*(1-scale_x)/2}
         img.clip  = {       0,(img.h-target_size[2])/2,
                target_size[1],(img.h-target_size[2])/2+target_size[1]}
