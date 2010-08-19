@@ -1,27 +1,18 @@
+SMALL_BLIND = 1
+BIG_BLIND = 2
+INITIAL_ENDOWMENT = 200
+
 ASSERTIONS_ENABLED = true
 
--- local old_assert = assert
--- assert =
--- function(...)
---    local cond, msg = ...
---    if ASSERTIONS_ENABLED then
---       if cond then
---          if msg then
---             error(msg, 2)
---          else
---             error("assertion failed...", 2)
---          end
---       end
---    else
---       if cond then
---          if msg then
---             print(msg)
---          else
---             print("assertion failed...")
---          end
---       end
---    end
--- end
+if ASSERTIONS_ENABLED then
+   local old_assert = assert
+   function assert(...)
+      if cond then
+         if msg then print(msg)
+         else print("assertion failed...") end
+      end
+   end
+end
 
 Directions = {
    RIGHT = {1,0},

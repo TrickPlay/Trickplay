@@ -2,7 +2,7 @@ Player = Class(function(player, args, ...)
    player.isHuman = false
    player.number = 0
    player.bet = model.bet.DEFAULT_BET
-   player.money = 800
+   player.money = INITIAL_ENDOWMENT
    player.position = false
    player.table_position = nil
    player.chipPosition = nil
@@ -98,7 +98,7 @@ Player = Class(function(player, args, ...)
       print("\nRound: "..round.."\n")
       local raisedFactor = RaiseFactor.UR
       local community_cards = state:get_community_cards()
-
+      local orig_bet = state:get_orig_bet()
       -- move the ai will make
       local ai_move = last_move
       local amount_to_raise = RaiseFactor.RR
@@ -113,7 +113,6 @@ Player = Class(function(player, args, ...)
           table.insert(all_cards, v)
       end
       local _, best_hand = get_best(all_cards)
-
 
       hand_print(hole)
       hand_print(community_cards)
@@ -312,19 +311,29 @@ Player = Class(function(player, args, ...)
          if amount_to_raise == RaiseFactor.R then
             --websites say raising the bet times 2 is a good standard?
             if a_bet < call_bet*2 then
+               local old_a_bet = a_bet
                a_bet = math.random(a_bet, call_bet*2)
+               if a_bet < call_bet then
+                  print("lower_bound:",old_a_bet,"upper_bound:",call_bet*2)
+                  error("a_bet:",a_bet,"call_bet:",call_bet)
+               end
             end
-            if a_bet > player.money then
-               a_bet = player.money
+            if a_bet > player.money+orig_bet then
+               a_bet = player.money+orig_bet
             end
             print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
          elseif amount_to_raise == RaiseFactor.RR then
             if(call_bet*2+min_raise < call_bet*3) then
+               local old_a_bet = a_bet
                a_bet = math.random(call_bet*2+min_raise, call_bet*3)
+               if a_bet < call_bet then
+                  print("lower_bound:",call_bet*2+min_raise,"upper_bound:",call_bet*3)
+                  error("a_bet:",a_bet,"call_bet:",call_bet)
+               end
             end
-            if(a_bet > player.money) then
-               a_bet = player.money
+            if a_bet > player.money+orig_bet then
+               a_bet = player.money+orig_bet
             end
             print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
