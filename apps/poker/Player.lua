@@ -11,6 +11,8 @@ Player = Class(function(player, args, ...)
       player[k] = v
    end
    
+   player.glow = DOG_GLOW[ player.table_position ]
+   
    --[[
    function player:createMoneyChips()
       

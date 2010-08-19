@@ -12,125 +12,116 @@
 local TIME = 300
 local MODE = "EASE_OUT_QUAD"
 
+--realPrint = print
+--print = function() end
+local print = function() end --realPrint
+
 
 HandPresentation = Class(nil,
 function(pres, ctrl)
    local ctrl = ctrl
-   
    local allCards = {}
-   
-   local poker_hand_text = Text{
-      font="Sans 40px",
-      color="FFFFFF",
-      text="",
-      position={100, 200},
-      opacity = 255
-   }
-   screen:add(poker_hand_text)
 
-   -- Update bets and status boxes for all players
-   local function update_players()
-      for player, bet in pairs( ctrl:get_player_bets() ) do
-         player.betChips:set(bet)
-         player.status:update()
-      end
-   end
-   
-   local function clear_speech()
-      for player, bet in pairs( ctrl:get_player_bets() ) do
-         player.status:update( "" )
-      end
-   end
-   
+   -------------------------LOCAL FUNCTIONS--------------------------
+
    -- Remove player chips
-   local function remove_chips(chips)
-      for _, player in pairs( ctrl:get_players() ) do
-         if player.betChips then
-            if player.betChips.parent then
-               screen:remove(player.betChips.group)
-            end
-            player.betChips = nil
-         end
+   local function remove_player_chips(player)
+      if player.betChips then
+         player.betChips:remove()
+         player.betChips = nil
+      end
+   end
+   
+   -- Remove chips for all players
+   local function remove_all_chips()
+      for player, bet in pairs( ctrl:get_player_bets() ) do
+         remove_player_chips(player)
       end
    end
    
    -- Add player chips
-   local function add_chips()
-      for _, player in pairs( ctrl:get_players() ) do
-         player.betChips = chipCollection()
-         player.betChips.group.position = { MSCL[player.table_position][1] + 55, MSCL[player.table_position][2] }
-         --player.betChips.group.position = {model.default_bet_locations[player.table_position][1], model.default_bet_locations[player.table_position][2]-150}
-         screen:add(player.betChips.group)
-         player.betChips.group:raise_to_top()
-      end
+   local function add_player_chips(player)
+      player.betChips = chipCollection()
+      player.betChips.group.position = { MSCL[player.table_position][1] + 55, MSCL[player.table_position][2] }
+      screen:add(player.betChips.group)
+      player.betChips.group:raise_to_top()
    end
    
    -- Flip all cards up at the end of the hand
    local function all_cards_up()
       for _,card in pairs(allCards) do
-         print(card)
          if not card.group.extra.face then
             flipCard(card.group)
          end
       end
    end
    
-   local function animate_chips_to_center(player)
-      if player then
-         local c = player.betChips
-         player.betChips.group:animate{
-            position = model.potchips.group.position,
-            duration=500,
-            mode="EASE_OUT_QUAD",
-            on_completed = function()
-               model.potchips:set( model.potchips:value() + c:value() )
-               screen:remove(c.group)
+   -- Remove a player's hole cards
+   local function remove_player_cards(player)
+      ---[[
+      local hole_cards = ctrl:get_hole_cards()
+      local hole = hole_cards[player]
+      for k,card in pairs(hole) do
+         screen:remove(card.group)
+         --[[
+         local t
+         for i,v in ipairs(allCards) do
+            if card == v then
+               t = i
+               break
             end
-         }
-      else
-         for _, player in pairs( ctrl:get_players() ) do
-            local c = player.betChips
+         end
+         table.remove(allCards, i)
+         --]]
+      end
+      --]]
+   end
+   
+   -- Animate all chips to center and add them to the pot
+   local function animate_chips_to_center()
+      for _, player in pairs( ctrl:get_players() ) do
+         if player.betChips then
             player.betChips.group:animate{
                position = model.potchips.group.position,
                duration=500,
                mode="EASE_OUT_QUAD",
                on_completed = function()
-                  model.potchips:set( model.potchips:value() + c:value() )
-                  screen:remove(c.group)
+                  model.potchips:set( model.potchips:value() + player.betChips:value() )
+                  remove_player_chips(player)
                end
             }
          end
       end
    end
    
+   ------------------------- GAME FLOW --------------------------
+   
+   -- Initialize stuff
    function pres:display_hand()
-      -- Initialize chips
-      remove_chips()
-   	add_chips()
-      update_players()
       
       -- Put community cards on the deck
       local cards = ctrl:get_community_cards()
       for i=5,1,-1 do
          cards[i].group.position = MCL.DECK
-         -------cards[i].group:raise_to_top()
+         -----cards[i].group:raise_to_top()
       end
       
       -- Put hole cards on the deck
       for player,hole in pairs( ctrl:get_hole_cards() ) do
-         
-         player.status:display()
-         player.status:update( "I'm In" )   
-         
          for _,card in pairs(hole) do
             card.group.position = MCL.DECK
-            card.group:raise_to_top()
+            -----card.group:raise_to_top()
+            table.insert(allCards, card)
          end
+         
+         player.status:display()
+         player.status:update( "I'm In" )  
       end
+      
    end
 
+   -- Deal hole cards
    function pres:deal_hole()
-      update_players()
       
       for player,hole in pairs( ctrl:get_hole_cards() ) do
          
@@ -141,154 +132,126 @@ function(pres, ctrl)
             screen:add(card.group)
             -- Animate and flip the card if the player is human
             card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
-            -------card.group:raise_to_top()
+            card.group:raise_to_top()
             offset = offset + 30
-            
-            table.insert(allCards, card)
          end
       end
       
-      screen:add(text)
    end
    
-   function pres:deal_flop()
-      animate_chips_to_center()
-      add_chips()
-      update_players()
-
+   -- Deal community cards
+   local function deal_cards(start, finish)
       local cards = ctrl:get_community_cards()
-      for i=1, 3 do
+      for i=start,(finish or start) do
          cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
          screen:add(cards[i].group)
+         print("NOW DEALING CARD", i)
          table.insert(allCards, cards[i])
       end
-      
    end
    
+   -- Animate chips and deal flop
+   function pres:deal_flop()
+      animate_chips_to_center()
+      deal_cards(1, 3)
+      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
+   end
+   
+   -- Animate chips and deal turn
    function pres:deal_turn()
       animate_chips_to_center()
-      add_chips()
-      update_players()
-      
-      local cards = ctrl:get_community_cards()
-      local i = 4
-      cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
-      screen:add(cards[i].group)
-      table.insert(allCards, cards[i])
+      deal_cards(4)
+      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
    end
    
+   -- Animate chips and deal river
    function pres:deal_river()
       animate_chips_to_center()
-      add_chips()
-      update_players()   
-      
-      local cards = ctrl:get_community_cards()
-      local i = 5
-      cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation = 0, on_completed = function() flipCard(cards[i].group) end }
-      screen:add(cards[i].group)
-      table.insert(allCards, cards[i])
-      
+      deal_cards(5)
+      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
    end
-
-   function pres.clear_ui(pres)
-      print("CLEARED")
-
-      -- clear cards
-      for key,card in pairs(allCards) do
-         screen:remove(card.group)
-         resetCardGroup(card.group)
-         allCards[key] = nil
-      end
-      
-      -- reset bets
-      remove_chips()
-      print("CLEARED")
-   end
-
+   
+   -- End of the game
    function pres.showdown(pres, winners, poker_hand)
       animate_chips_to_center()
       all_cards_up()
       print(poker_hand.name .. " passed to pres:showdown()")
-      --[[
-      poker_hand_text.text = poker_hand.name
-      poker_hand_text:animate{
-         duration=300,
-         opacity=255,
-      }
-      ]]--
       
-      -- winners is an array of the winning players
-      
-     --[[ local p_num = winners[1].table_position
-      local wintext = "Player "..p_num.. " wins!"
-      local t = Text{ font="Sans 50px", color="00FF55", text=wintext, position=MDPL[p_num] }
-      
-      Popup:new{group = t}
-      
-      ]]--
       winners[1].status:update( poker_hand.name )
-     
-      --winners[1].status:update( "I win!" )
-      
    end
 
-   function pres:fold_player(active_player)
-     
-      animate_chips_to_center(active_player)
-      update_players()
-      active_player.status:update( "Fold" )
-      active_player.status:hide()
-   end
-
-   function pres:call_player(active_player)
-      --update_players()
-      
-      for player, bet in pairs( ctrl:get_player_bets() ) do
-         if player == active_player then
-            player.betChips:set(bet)
-            player.status:update( "Bet "..bet )
-         end
+   -- Clear everything
+   function pres.clear_ui(pres)
+   
+      -- clear cards
+      for i,card in ipairs(allCards) do
+         print("Removing card", i)
+         resetCardGroup(card.group)
+         print(card.group.parent, screen, card.group.parent==screen)
+         if card.group.parent == screen then screen:remove(card.group) end
+         
       end
-
-   end
-   function pres:raise_player(active_player)
-      --update_players()
+            
+      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS. THEY WILL NOW BE REMOVED")
+      allCards = {}
       
-      for player, bet in pairs( ctrl:get_player_bets() ) do
-         if player == active_player then
-            player.betChips:set(bet)
-            player.status:update( "Bet "..bet )
-         end
-      end
-
+      -- reset bets
+      remove_all_chips()
    end
-
-   function pres:start_turn(active_player)
-      active_player.status:update( "My turn, foo!" )
-      local pos = active_player.table_position
+   
+   -------------------------PLAYER TURNS--------------------------
+   
+   -- START
+   -- This is the players turn, deal with dog animations and chips
+   function pres:start_turn(player)
+   
+      if not player.betChips then add_player_chips(player) end
+      assert(player.betChips)
+   
+      player.status:update( "My turn, foo!" )
+      local pos = player.table_position
       local params = DOG_ANIMATIONS[ pos ]
       if params and params.name then
          a = Animation(params.dog, params.frames, params.position)
       end
       
-      if not active_player.glow then
-         active_player.glow = DOG_GLOW[ params.dog ]
-      end
+      player.glow.opacity = 255
       
-      active_player.glow.opacity = 255
    end
 
-   function pres:finish_turn(active_player)
-      active_player.glow.opacity = 0
+   -- FOLD
+   function pres:fold_player(player)
+      remove_player_chips(player)
+      remove_player_cards(player)
+      player.status:hide()
+      player.glow.opacity = 50
    end
 
+   -- CALL
+   function pres:call_player(player)
+      local bet = ctrl:get_player_bets()[player]
+      player.betChips:set(bet)
+      player.status:update( "Call "..bet )
+   end
+   
+   -- RAISE
+   function pres:raise_player(player)
+      local bet = ctrl:get_player_bets()[player]
+      player.betChips:set(bet)
+      player.status:update( "Raise to "..bet )
+   end
+
+   -- FINISH TURN
+   function pres:finish_turn(player)
+      player.glow.opacity = 0
+   end
+
+   -- SOMEONE LEFT A SEAT
    function pres:remove_player(removed_player)
-      removed_player.status:hide()
+      pres:fold_player(removed_player)
    end
 
-   -- called when everyone else folds, making one player the winner by
-   -- default
+   -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
-      pres:clear_ui()
    end
 end)

@@ -68,7 +68,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       initialize_pipeline()
       pres:display_hand()
 
-      enable_event_listener(TimerEvent{interval=.5})
+      enable_event_listener(TimerEvent{interval=1})
    end
 
 
@@ -82,7 +82,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl.deal(ctrl, rd)
       round = rd
       deal_LUT[round](pres)
-      enable_event_listener(TimerEvent{interval=.5})
+      enable_event_listener(TimerEvent{interval=1})
       return true
    end
 
@@ -102,9 +102,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       local continue = false
       if ctrl.waiting_for_bet and event:is_a(BetEvent) then
          ctrl.waiting_for_bet = false
-         pres:finish_turn(state:get_active_player())
+         local active_player = state:get_active_player()
          continue = state:execute_bet(event.fold, event.bet)
-         enable_event_listener(TimerEvent{interval=.5})
+         pres:finish_turn(active_player)
+         enable_event_listener(TimerEvent{interval=1})
       elseif not ctrl.waiting_for_bet then
          ctrl.waiting_for_bet = true
          local active_player = state:get_active_player()
