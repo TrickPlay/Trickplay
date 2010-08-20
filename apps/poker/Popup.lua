@@ -47,7 +47,7 @@ function Popup:new(args)
         }
         
 	-- Various parameters
-        if not object.group.parent then screen:add(object.group) end
+        -- if not object.group.parent then screen:add(object.group) end
         if not args.keepDown then object.group:raise_to_top() end
 	
 	-- Callbacks
