@@ -302,7 +302,13 @@ def parse( source ):
                     
                     sys.exit( "Invalid parameters for " + name )
                 
-                output[ -1 ][ "functions" ].append( dict( name = name , type = type , parameters = parameters , code = code ) )
+                if type == "callback":
+                
+                    output[ -1 ][ "properties" ].append( dict( type = type , name = name , read_only = False , get_code = code , set_code = None ) )
+
+                else:                
+                
+                    output[ -1 ][ "functions" ].append( dict( name = name , type = type , parameters = parameters , code = code ) )
                 
             elif ( len( tokens ) == 5) and ( tokens[0] == "const" ):
                 
