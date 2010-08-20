@@ -55,7 +55,7 @@ function Slideshow:begin()
 	temp_pic = 0
 	timer:start()
 	self.ui:add(overlay_image,background,background2,caption)
-	local queryText = Text { text = adapters[self.index][1].required_inputs.query, font = "Sans 30px", x = 150, y = 300}
+	local queryText = Text { text = string.gsub(adapters[self.index][1].required_inputs.query,"%%20"," "), font = "Sans 30px", x = 75, y = 300}
 	self.ui:add(queryText)
 	local logo = Image { src = adapters[self.index].logoUrl, x = 100, y = 170, z= 1, scale = adapters[self.index].logoscale}
 	self.ui:add(logo)
