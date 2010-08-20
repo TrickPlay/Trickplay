@@ -11,14 +11,14 @@ TutorialView = Class(View, function(self, model, ...)
     self.tutorialGroup = tutorialGroup
     screen:add(tutorialGroup)
 
-    tutorial[1] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
-    tutorial[2] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
+    tutorial[1] = Popup:new{ group=AssetLoader:getImage("Tutorial1",{}), noRender = true, }
+    tutorial[2] = Popup:new{ group=AssetLoader:getImage("Tutorial2",{}), noRender = true, }
     tutorial[3] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
-    tutorial[4] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
-    tutorial[5] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
+    tutorial[4] = Popup:new{ group=AssetLoader:getImage("Tutorial2",{}), noRender = true, }
+    tutorial[5] = Popup:new{ group=AssetLoader:getImage("Tutorial1",{}), noRender = true, }
     tutorial[6] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
-    tutorial[7] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
-    tutorial[8] = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{}), noRender = true, }
+    tutorial[7] = Popup:new{ group=AssetLoader:getImage("Tutorial1",{}), noRender = true, }
+    tutorial[8] = Popup:new{ group=AssetLoader:getImage("Tutorial2",{}), noRender = true, }
     
     for i, slide in ipairs(tutorial) do
         self.tutorialGroup:add(slide.group)
