@@ -47,7 +47,15 @@ FrontPageView = Class(View, function(view, model, ...)
         font     = "Sans 32px",
         position = {300, 0}
     }
-    view.bottom_bar:add(sel_info, album_logo, album_title)
+    local controls = Text
+    {
+        name     = "controls",
+        text     = "A - Add a source  D - Delete source\nEnter - view slideshow",
+        color    = "FFFFFF",
+        font     = "Sans 24px",
+        position = {30, 50}
+    }
+    view.bottom_bar:add(sel_info, album_logo, album_title,controls)
     --model.album_group:add(view.selector)
     view.ui:add(model.album_group)
 
@@ -59,17 +67,17 @@ FrontPageView = Class(View, function(view, model, ...)
     screen:add(grad)
 
     local right_edge = Clone{source = grad}
-    right_edge.scale = {1,1080}
+    right_edge.scale = {.5,1080}
     right_edge.opacity = 255
-    right_edge.x = 1550
+    right_edge.x = 1750
     view.ui:add(right_edge)
 
     local left_edge = Clone{source = grad}
-    left_edge.scale = {1,1080}
+    left_edge.scale = {.5,1080}
     left_edge.opacity = 255
     left_edge.z_rotation = {180,0,0}
     left_edge.y = 1080
-    left_edge.x = 1920-1550
+    left_edge.x = 1920-1750
     view.ui:add(left_edge)
 
 
@@ -219,12 +227,15 @@ print("adding bottom bar")
             end
 --]=]
             --print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
+            view.bottom_bar.opacity = 0
+
             view.bottom_bar:complete_animation()
+           -- view.bottom_bar.opacity = 0
+
             view.bottom_bar:unparent()
 
             model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
 
-            view.bottom_bar.opacity = 0
             view.bottom_bar.position = {0,PIC_H}
 
             assert(previous ~= nil,"wth")
@@ -266,17 +277,36 @@ print("adding bottom bar")
                                 view.bottom_bar.position = {-10, PIC_H}
 
                                 view.bottom_bar:animate{
-                                    duration = 10*CHANGE_VIEW_TIME,
-                                    opacity  = 1,
+                                    duration = 4*CHANGE_VIEW_TIME,
+                                    y        = PIC_H,
                                     on_completed = function()
                                         if model.fp_slots[sel[1] ][sel[2] ]:find_child("bottom_bar") ~= nil then
                                             view.bottom_bar.opacity = 255
-                                            album_title.text = string.gsub((adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query),"%%20"," ")
+                                            album_title.text = string.gsub((adapters[#adapters - 
+                                                 model.fp_1D_index + 1][1].required_inputs.query),
+                                                                                      "%%20"," ")
                                             album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
                                             view.bottom_bar:animate{
-                                                duration = CHANGE_VIEW_TIME,
-                                                y        = PIC_H- 60,
+                                                duration = 2*CHANGE_VIEW_TIME,
+                                                y        = PIC_H- 50,
+                                                on_completed = function()
+                                                    if model.fp_slots[sel[1] ][sel[2] ]:find_child(
+                                                                          "bottom_bar") ~= nil then
+                                                        view.bottom_bar:animate{
+                                                            duration = 20*CHANGE_VIEW_TIME,
+                                                            y        = PIC_H- 50,
+                                                            on_completed = function()
+                                                                 if model.fp_slots[sel[1] ][sel[2] ]:find_child("bottom_bar") ~= nil then
+                                                                        view.bottom_bar:animate{
+                                                                        duration = CHANGE_VIEW_TIME,
+                                                                        y        = PIC_H- 120
+                                                                    }
+                                                                end
+                                                            end
+                                                        }
+                                                    end
+                                                end
                                                 --scale    = {1.051,60},
 --[[
                                                 on_completed = function()
