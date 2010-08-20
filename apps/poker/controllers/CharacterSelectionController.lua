@@ -56,13 +56,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          [SubGroups.MIDDLE] = function() exit() return end,
          [SubGroups.RIGHT_MIDDLE] = function()
             print("starting tutorial")
-            if not TUTORIAL then
-               TUTORIAL = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{opacity=0}), animate_in = {opacity=255, duration=500}, on_fade_in = function() end }
-            else
-               TUTORIAL.fade = "out"
-               TUTORIAL.on_fade_out = function() screen:remove(TUTORIAL.group) TUTORIAL = nil end
-               TUTORIAL:render()
-            end
+            model:set_active_component(Components.TUTORIAL)
+            self:get_model():notify()
          end
       },
    }
