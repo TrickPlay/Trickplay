@@ -27,9 +27,9 @@ function Setup_Album_Covers()
         model.albums[i] = {}
         model.fp_slots[i] = {}
         for j = 1,math.ceil(#adapters/NUM_ROWS) do
+				local pic_index = ((((j-1)*NUM_ROWS+i)-1)%8+1)
             if ((j-1)*NUM_ROWS+i)<=#adapters then
-
-            model.placeholders[i][j] = Clone{ source = model.default[(i*j)%8], opacity =255}
+            model.placeholders[i][j] = Clone{ source = model.default[pic_index], opacity =255}
             model.placeholders.opacity = 255
             model.fp_slots[i][j] = Group
             {
@@ -62,8 +62,8 @@ function Load_Image(site,index)
             src      = site,
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
-            on_loaded = function()
-                if model.albums[i] ~= nil and model.albums[i][j] ~= nil then
+            on_loaded = function(image,failed)
+                if model.albums[i] ~= nil and model.albums[i][j] ~= nil and not failed then
                     print("loading pic at",i,j,index)
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
@@ -89,7 +89,8 @@ function Load_Image(site,index)
             src      = site,
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
-            on_loaded = function()
+            on_loaded = function(image,failed)
+            	if not failed then
                 if model.swap_pic == nil or model.albums[i] == nil or 
                                        model.albums[i][j] == nil or 
                                     model.swap_pic.loaded == false then 
@@ -141,6 +142,7 @@ function Load_Image(site,index)
                         end
                     }
                 end            
+                end
             end
         }
     else

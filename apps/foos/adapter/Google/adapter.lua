@@ -13,7 +13,7 @@ local adapter = {
 		},
 		albums = function() end,
 		photos = function(search,current_pic) return "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge" end,
-		site = function(data) return data.responseData.results[1].unescapedUrl end
+		site = function(data) return data.responseData.results[1].unescapedUrl or "" end
 		
 	}
 }
@@ -38,7 +38,7 @@ function adapter:loadCovers(i,search, start_index)
 	on_complete = function (request, response)
 		local data = json:parse(response.body)
 		
-		site = data.responseData.results[1].unescapedUrl
+		site = data.responseData.results[1].unescapedUrl or ""
       Load_Image(site,i)
 	end
 	}
