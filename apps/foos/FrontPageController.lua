@@ -64,7 +64,9 @@ FrontPageController = Class(Controller, function(self, view, ...)
     function self:move_selector(dir)
         local next_spot = {selected[1]+dir[2],selected[2]+dir[1]}
         if next_spot[1] > 0 and next_spot[1] <= NUM_ROWS and
-           next_spot[2] > 0 and next_spot[2] <= NUM_VIS_COLS then
+           next_spot[2] > 0 and next_spot[2] <= NUM_VIS_COLS and 
+           model.albums[next_spot[1]] ~= nil                 and
+           model.albums[next_spot[1]][next_spot[2]] ~= nil   then
 
             selected[1] = next_spot[1]
             selected[2] = next_spot[2]

@@ -2,7 +2,7 @@ SourceManagerView = Class(View, function(view, model, ...)
     view._base.init(view, model)
 
     view.clones = Group{name="source manager clone sources",opacity = 0}
-    view.ui     = Group{name="source manager ui", position = {-960+200,0}}
+    view.ui     = Group{name="source manager ui", position = {200,0}}
     screen:add(view.ui)
     screen:add(view.clones)
 
@@ -246,7 +246,7 @@ SourceManagerView = Class(View, function(view, model, ...)
             --model.album_group:complete_animation()
             view.ui:complete_animation()
             view.ui:animate{duration = 100,
-                            x        = -960+200}
+                            x        = 200}
             view.ui.opacity = 0
         end
     end
