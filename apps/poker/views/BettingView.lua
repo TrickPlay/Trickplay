@@ -3,54 +3,63 @@ BettingView = Class(View, function(view, model, ...)
     --first add the background shiz
 
     local background = {
+        Image{position = {MDPL.FOLD[1]-35, MDPL.FOLD[2]-20}, src = "assets/UI/ButtonsShadow.png"}
     }
      
     --create the components
+    local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2], "assets/UI/ButtonCallGreen.png", "assets/UI/ButtonCallRed.png")
+    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "assets/UI/ButtonFoldGreen.png", "assets/UI/ButtonFoldRed.png")
+    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2], "assets/UI/ButtonBetGreen.png", "assets/UI/ButtonBetRed.png")
+
+    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
+    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
 
     view.items = {
         {
-            Rectangle{color={255,0,0}, width=200, height=100, position={100, 100}, extra={text = "Fold"}},
-            Rectangle{color={0,0,255}, width=200, height=100, position={350, 100}, extra={text = "Check/Call"}},
-            Rectangle{color={0,255,0}, width=200, height=100, position={600, 100}, extra={text = "Bet: "..model.bet.DEFAULT_BET}},
+            fold_button, call_button, bet_button
         },
+        {
+            exit_button, help_button
+        }
     }
     
-    view.text = {}
-    
-    for i, table in ipairs(view.items) do
-        for k,v in ipairs(table) do
-            local text = Text{ font = "Sans 38px", color = "FFFFFF", text = v.extra.text }
-            view.text[k] = text
-            text.anchor_point = {text.w/2, text.h/2}
-            text.position = {v.position[1] + v.w/2, v.position[2] + v.h/2}
-            local g = Group{children={v, text}}
-            view.items[i][k] = g
-        end
-    end
+    ---create text for the components
+    local fold_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.FOLD[1] + 17, y = MDPL.FOLD[2] + 30, text = "Fold"}
+    local call_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.CALL[1] + 30, y = MDPL.CALL[2] + 30, text = "Call"}
+    local bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.BET[1] + 30, y = MDPL.BET[2] + 30, text = "Bet"}
 
+    local exit_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.EXIT[1] + 40, y = MDPL.EXIT[2] + 20, text = "Exit"}
+    local help_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.HELP[1] + 35, y = MDPL.HELP[2] + 20, text = "Help"}
+
+    view.text = {
+        fold_text, call_text, bet_text, exit_text, help_text
+    }
+    
     --background ui
-    view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
+    view.background_ui = Group{name = "bettingBackground_ui", position = {0, 0}}
     view.background_ui:add(unpack(background))
 
-    --ui that actually moves
-    view.moving_ui=Group{name="checkoutMoving_ui", position=HIDE_TOP}
---    view.moving_ui:add()
     --all ui junk for this view
-    view.ui=Group{name="checkout_ui", position={screen.w/2,screen.h/2+300}}
-    for _,v in ipairs(view.items) do
-        view.ui:add(unpack(v))
+    view.ui=Group{name="betting_ui", position={0,0}}
+    view.ui:add(view.background_ui)
+    for _,v in ipairs(view.items[1]) do
+        view.ui:add(v.group)
     end
-    view.ui.anchor_point = {view.ui.w/2, view.ui.h/2}
+    for _,v in ipairs(view.items[2]) do
+        view.ui:add(v.group)
+    end
+    view.ui:add(unpack(view.text))
 
     screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(BettingController(self))
     end
-    
-    view.stack = chipCollection()
-    view.stack.group.position = {1700,500}
---    screen:add(view.stack.group)
     
     function view:update()
         local controller = self:get_controller()
@@ -63,39 +72,29 @@ BettingView = Class(View, function(view, model, ...)
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
-                        item.opacity = 255
+                        item:on_focus()
                     else
-                        item.opacity = 100
+                        item:out_focus()
                     end
                 end
             end
             
-            local t = view.text[3]
-            t.anchor_point = {t.w/2, t.h/2}
-            
             local player = model.currentPlayer
-            t.text = "Bet:"..player.bet
-            local playerMoney = player.moneyChips
-            local playerBet = player.betChips
-            local stack = view.stack
-            
-            local function sum()
-                local s = 0
-                for i=1,#model.in_players do
-                    s = s + model.in_players[i].bet
-                end
-                return s
+            bet_text.text = "Bet:     "..player.bet
+
+            if(model.call_bet == 0) then
+                call_text.text = "Check"
+                call_text.x = MDPL.CALL[1] + 10
+            else
+                call_text.text = "Call"
+                call_text.x = MDPL.CALL[1] + 30
             end
             
+            local playerBet = player.betChips
+            
             -- Add chips to the bet
-            stack:set( sum() )
-            --playerMoney:set(player.money)
             playerBet:set(player.bet)
-            
-            stack:arrange(55, 5)
-            --playerMoney:arrange(55,5)
-            playerBet:arrange(55,5)
-            
+
         else
 --            print("Hiding Betting UI")
             self.ui:complete_animation()

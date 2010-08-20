@@ -6,14 +6,14 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    local CharacterSelectionGroups = {
       TOP = 1,
-      MIDDLE = 2,
-      BOTTOM = 3
+      BOTTOM = 2,
    }
    local SubGroups = {
       LEFT = 1,
       LEFT_MIDDLE = 2,
-      RIGHT_MIDDLE = 3,
-      RIGHT = 4
+      MIDDLE = 3,
+      RIGHT_MIDDLE = 4,
+      RIGHT = 5
    }
 
    local GroupSize = 0
@@ -26,7 +26,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    end
 
    -- the default selected index
-   local selected = CharacterSelectionGroups.MIDDLE
+   local selected = CharacterSelectionGroups.BOTTOM
    local subselection = SubGroups.LEFT_MIDDLE
    assert(selected)
    assert(subselection)
@@ -47,16 +47,13 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    local CharacterSelectionCallbacks = {
       [CharacterSelectionGroups.TOP] = {},
-      [CharacterSelectionGroups.MIDDLE] = {
+      [CharacterSelectionGroups.BOTTOM] = {
          [SubGroups.LEFT_MIDDLE] = function()
             if playerCounter >= 2 then
                start_a_game()
             end
-         end
-      },
-      [CharacterSelectionGroups.BOTTOM] = {
-         [SubGroups.LEFT] = function() exit() end,
-         [SubGroups.LEFT_MIDDLE] = function() exit() end,
+         end,
+         [SubGroups.MIDDLE] = function() exit() return end,
          [SubGroups.RIGHT_MIDDLE] = function()
             print("starting tutorial")
             if not TUTORIAL then
@@ -67,7 +64,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
                TUTORIAL:render()
             end
          end
-      }
+      },
    }
    
    local function getPosition()
@@ -78,7 +75,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          num = 1
       elseif selected == 1 then
          num = 1 + subselection
-      elseif selected == 2 and subselection == 4 then
+      elseif selected == 2 and subselection == 5 then
          num = 6
       else
          error("error selecting position")
@@ -156,16 +153,12 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    end
 
    local function check_for_valid(dir)
-      if (CharacterSelectionGroups.MIDDLE == selected) and
-         (SubGroups.RIGHT_MIDDLE == subselection) then
-         if 0 ~= dir[1] then subselection = subselection + dir[1]
-         elseif 0 ~= dir[2] then subselection = SubGroups.LEFT_MIDDLE
-         end
+      if (CharacterSelectionGroups.TOP == selected) and
+         (SubGroups.RIGHT == subselection) then
+             subselection = SubGroups.RIGHT_MIDDLE 
       elseif CharacterSelectionGroups.BOTTOM == selected then
-         if SubGroups.LEFT == subselection then
-            subselection = SubGroups.LEFT_MIDDLE
-         elseif SubGroups.RIGHT == subselection then
-            subselection = SubGroups.RIGHT_MIDDLE
+         if(0 ~= dir[2] and subselection >= SubGroups.MIDDLE) then
+             subselection = subselection + 1
          end
       end
    end
