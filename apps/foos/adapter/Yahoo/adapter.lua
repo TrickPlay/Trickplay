@@ -38,7 +38,7 @@ function adapter:loadCovers(i,search, start_index)
 		local data = json:parse(response.body)
 		for k,v in pairs(data) do print(k,v) end
 
-		site = data.ResultSet.Result[1].ClickUrl
+		site = data.ResultSet.Result[1].ClickUrl or ""
       Load_Image(site,i)
 	end
 	}

@@ -271,7 +271,7 @@ print("adding bottom bar")
                                     on_completed = function()
                                         if model.fp_slots[sel[1] ][sel[2] ]:find_child("bottom_bar") ~= nil then
                                             view.bottom_bar.opacity = 255
-                                            album_title.text = adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query
+                                            album_title.text = string.gsub((adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query),"%%20"," ")
                                             album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
                                             view.bottom_bar:animate{
