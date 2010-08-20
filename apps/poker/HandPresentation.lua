@@ -93,7 +93,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Initialize stuff
    function pres:display_hand()
-      
+      mediaplayer:play_sound(SHUFFLE_WAV)
       -- Put community cards on the deck
       local cards = ctrl:get_community_cards()
       for i=5,1,-1 do
@@ -115,7 +115,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- Deal hole cards
    function pres:deal_hole()
-      
+      mediaplayer:play_sound(DEAL_WAV)
       for player,hole in pairs( ctrl:get_hole_cards() ) do
          
          local offset = 0
@@ -134,6 +134,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Deal community cards
    local function deal_cards(start, finish)
+      mediaplayer:play_sound(DEAL_WAV)
       local cards = ctrl:get_community_cards()
       for i=start,(finish or start) do
          cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
@@ -145,6 +146,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate chips and deal flop
    function pres:deal_flop()
+      mediaplayer:play_sound(DEAL_WAV)
       animate_chips_to_center()
       deal_cards(1, 3)
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
@@ -152,6 +154,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate chips and deal turn
    function pres:deal_turn()
+      mediaplayer:play_sound(DEAL_WAV)
       animate_chips_to_center()
       deal_cards(4)
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
@@ -159,6 +162,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate chips and deal river
    function pres:deal_river()
+      mediaplayer:play_sound(DEAL_WAV)
       animate_chips_to_center()
       deal_cards(5)
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
@@ -166,6 +170,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- End of the game
    function pres.showdown(pres, winners, poker_hand)
+      mediaplayer:play_sound(SHOWDOWN_WAV)
       animate_chips_to_center()
       all_cards_up()
       print(poker_hand.name .. " passed to pres:showdown()")
@@ -214,14 +219,23 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- FOLD
    function pres:fold_player(player)
+      mediaplayer:play_sound(FOLD_WAV)
       remove_player_chips(player)
       remove_player_cards(player)
       player.status:hide()
       player.glow.opacity = 50
    end
 
+   -- CHECK
+   function pres:check_player(player)
+      mediaplayer:play_sound(CHECK_WAV)
+      local bet = ctrl:get_player_bets()[player]
+      player.betChips:set(bet)
+      player.status:update( "Call "..bet )
+   end
    -- CALL
    function pres:call_player(player)
+      mediaplayer:play_sound(CALL_WAV)
       local bet = ctrl:get_player_bets()[player]
       player.betChips:set(bet)
       player.status:update( "Call "..bet )
@@ -229,6 +243,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- RAISE
    function pres:raise_player(player)
+      mediaplayer:play_sound(RAISE_WAV)
       local bet = ctrl:get_player_bets()[player]
       player.betChips:set(bet)
       player.status:update( "Raise to "..bet )
