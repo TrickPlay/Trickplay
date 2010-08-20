@@ -16,7 +16,6 @@ function Setup_Album_Covers()
 
 
     assert(model.default,"default is not init yet")
-    screen:add(model.default)
 	for i =1, #adapters do
 		 loadCovers(i,searches[#adapters+1-i], 1)
 	end
@@ -30,11 +29,7 @@ function Setup_Album_Covers()
         for j = 1,math.ceil(#adapters/NUM_ROWS) do
             if ((j-1)*NUM_ROWS+i)<=#adapters then
 
-            model.placeholders[i][j] = Clone{ source = model.default, opacity =150}
-            model.placeholders[i][j].position = 
-                                 { PIC_W/4,PIC_H/4 }
-            model.placeholders[i][j].z_rotation = 
-                                        { 0, model.default.w/2, model.default.h/2 }
+            model.placeholders[i][j] = Clone{ source = model.default[(i*j)%8], opacity =255}
             model.placeholders.opacity = 255
             model.fp_slots[i][j] = Group
             {
@@ -50,13 +45,14 @@ function Setup_Album_Covers()
             end
         end
     end
-    
 end
 
 --Called by the adapter's on_complete function
 function Load_Image(site,index)
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
+    
+    print ("SITE: "..site)
 
     print("getting a pic for ",i,j,index)
     if model.albums[i] ~= nil and  model.albums[i][j] == nil then

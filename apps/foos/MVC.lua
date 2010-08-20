@@ -35,12 +35,18 @@ Model = Class(function(model, ...)
                                     PIC_H / model.prac_pic.base_size[2]
                                 }
 --]]
+	model.default = {}
+	for i=1,8 do 
+		 model.default[i] = Image{
+		             src = "assets/backs/color_0"..i..".jpg",
+		             opacity = 0
+		 }
+	    model.def_bs = {model.default[i].base_size[1],model.default[i].base_size[2]}
 
-    model.default = Image{
-                src = "assets/loading.png",
-                opacity = 0
-    }
-    model.def_bs = {model.default.base_size[1],model.default.base_size[2]}
+		 screen:add(model.default[i])
+
+	end
+
 
     --SLIDE_SHOW
     model.curr_slideshow = {}
