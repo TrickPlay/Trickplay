@@ -34,6 +34,10 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    local playerCounter = 0
 
    local function start_a_game()
+      --make sure last dog selected does not continue to glow
+      for _,v in ipairs(DOG_GLOW) do
+         v.opacity = 0
+      end
       model:set_active_component(Components.GAME)
       model:notify()
       game:initialize_game{
