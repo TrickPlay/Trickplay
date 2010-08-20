@@ -170,7 +170,7 @@ class XMLParser [[Parser*]]
     # tag - The name of the new element
     # attributes - A table containing all the attributes of the new element
     
-    callback on_start_element;
+    callback on_start_element( XMLParser parser , string tag , table attributes);
     
     # Event: on_end_element
     # This function gets called every time an element is closed.
@@ -179,7 +179,7 @@ class XMLParser [[Parser*]]
     # parser - The XMLParser
     # tag - The name of the element
     
-    callback on_end_element;
+    callback on_end_element( XMLParser parser , string tag );
     
     # Event: on_character_data
     # This function gets called when there is character data for an element.
@@ -190,7 +190,7 @@ class XMLParser [[Parser*]]
     # parser - The XMLParser
     # data - The character data
     
-    callback on_character_data;
+    callback on_character_data( XMLParser parser , string data );
     
     # Event: on_start_namespace
     # This function gets called when a new namespace is detected in the document.
@@ -201,7 +201,7 @@ class XMLParser [[Parser*]]
     # prefix - The string prefix of the namespace
     # uri - The URI of the namespace
     
-    callback on_start_namespace;
+    callback on_start_namespace( XMLParser parser , string prefix , string uri );
     
     # Event: on_end_namespace
     # This function gets called when a namespace goes out of scope.
@@ -211,7 +211,7 @@ class XMLParser [[Parser*]]
     # parser - The XMLParser
     # prefix - The string prefix of the namespace
 
-    callback on_end_namespace;
+    callback on_end_namespace( XMLParser parser , string prefix );
 }
 
 [[
