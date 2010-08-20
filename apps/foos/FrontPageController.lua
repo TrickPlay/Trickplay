@@ -3,7 +3,6 @@ FrontPageController = Class(Controller, function(self, view, ...)
 
     -- the default selected index
     local selected = {1,1}
-
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
         [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
@@ -15,6 +14,13 @@ FrontPageController = Class(Controller, function(self, view, ...)
             self:get_model():notify()
 
         end,
+        [keys.d]     = function(self)
+            local formula = (model.front_page_index + (selected[2]-1))*2+(selected[1]-1)-1
+				deleteAdapter(formula)
+				model.front_page_index = 1
+				selected = {1,1}
+        end,
+
         [keys.Return] = function(self) 
             local formula = (model.front_page_index + (selected[2]-1))*2+
                                                      (selected[1]-1)-1
@@ -28,7 +34,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
                 }
                 view.timer:stop()
                 self:get_model():notify()
-	        model.curr_slideshow:begin()
+			       model.curr_slideshow:begin()
             end
         end
     }

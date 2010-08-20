@@ -29,15 +29,6 @@ function Setup_Album_Covers()
                                  { PIC_W/4,PIC_H/4 }
             model.placeholders[i][j].z_rotation = 
                                         { 0, model.default.w/2, model.default.h/2 }
---[[            model.placeholders[i][j].scale = 
-            {
-                 PIC_W / 
---                 (screen.width/(NUM_VIS_COLS+1))  / 
-                  model.default.base_size[1],
-                  PIC_H / 
---                 (screen.height/NUM_ROWS) / 
-                  model.default.base_size[2]
-            }]]
             model.placeholders.opacity = 255
             model.fp_slots[i][j] = Group
             {
