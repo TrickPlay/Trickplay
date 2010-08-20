@@ -63,11 +63,11 @@ FrontPageController = Class(Controller, function(self, view, ...)
 
     function self:move_selector(dir)
         local next_spot = {selected[1]+dir[2],selected[2]+dir[1]}
-        if next_spot[1] > 0 and next_spot[1] <= NUM_ROWS and
+        if next_spot[1] > 0 and next_spot[1] <= NUM_ROWS     and
            next_spot[2] > 0 and next_spot[2] <= NUM_VIS_COLS and 
-           model.albums[next_spot[1]] ~= nil                 and
-           model.albums[next_spot[1]][next_spot[2]] ~= nil   then
-
+           model.fp_slots[next_spot[1]] ~= nil                 and
+           model.fp_slots[next_spot[1]][next_spot[2]+model.front_page_index-1] ~= nil   then
+print(model.fp_slots[next_spot[1]][next_spot[2]+model.front_page_index-1].name)
             selected[1] = next_spot[1]
             selected[2] = next_spot[2]
             self:get_model():notify()
@@ -77,7 +77,9 @@ FrontPageController = Class(Controller, function(self, view, ...)
             local upper_bound = math.ceil(#adapters / NUM_ROWS) -
                                      (NUM_VIS_COLS-1)
 
-            if next_index > 0 and next_index <= upper_bound then
+            if next_index > 0 and next_index <= upper_bound and
+           model.fp_slots[next_spot[1]] ~= nil                 and
+           model.fp_slots[next_spot[1]][next_spot[2]+model.front_page_index-1] ~= nil   then
                 model.front_page_index = next_index
                 self:get_model():notify()
 
