@@ -29,6 +29,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     acc_selected[1] = acc_selected[1] + 1
 
                     query_text = self.text
+                    model:notify()
 		 
                 end
 
@@ -47,12 +48,12 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                 if query_text ~= "" then
 			table.insert(adapters, dofile("adapter/"..
                                  adapterTypes[src_selected].."/adapter.lua"))
-			adaptersTable[#adapters] = adapterTypes[src_selected]
-			local search = string.gsub(query_text," ","%%20")
-			adapters[#adapters][1].required_inputs.query = search
-			searches[#adapters] = search
-			model.album_group:clear()
-    		        model.albums = {}
+                    adaptersTable[#adapters] = adapterTypes[src_selected]
+                    local search = string.gsub(query_text," ","%%20")
+                    adapters[#adapters][1].required_inputs.query = search
+                    searches[#adapters] = search
+                    model.album_group:clear()
+                    model.albums = {}
                     Setup_Album_Covers()
                     model:notify()
 
