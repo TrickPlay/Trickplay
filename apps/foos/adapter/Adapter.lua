@@ -27,6 +27,7 @@ function slideShow()
 end
 
 function deleteAdapter(index)
+
 	index = #adapters+1 - index
 	table.remove(adapters,index)
 	table.remove(searches,index)
