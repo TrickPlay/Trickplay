@@ -244,7 +244,7 @@ Player = Class(function(player, args, ...)
             print("\nposition = "..position.."\nraisedFactor = "..raisedFactor.."\nhand[1].rank.num = "..hand[1].rank.num.."\nhand[2].rank.num = "..hand[2].rank.num.."\n")
             --introduce a random element
             if(5 <= math.random(4) + self.difficulty) then
-               a_move = math.random(Moves.CALL, Moves.FOLD)
+               a_move = math.random(Moves.CALL, Moves.RAISE)
                print("\nrandomize move\n")
             end
             return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
