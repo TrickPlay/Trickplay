@@ -18,10 +18,11 @@ Model = Class(function(model, ...)
     model.placeholders = {}
     model.album_group = Group{name="Album Group"}
     model.fp_backing = Rectangle{
-                color = "602020",
-                width = PIC_W,
-                height = PIC_H,
-                opacity = 0
+                color    = "000000",
+                width    = PIC_W - 4,
+                height   = PIC_H - 4,
+                position = { 2 , 2 },
+                opacity  = 0
     }
     screen:add(model.fp_backing)
     model.fp_slots = {}

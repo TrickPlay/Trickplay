@@ -62,6 +62,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
 
             selected[1] = next_spot[1]
             selected[2] = next_spot[2]
+            self:get_model():notify()
 
         elseif dir == Directions.RIGHT or dir == Directions.LEFT then
             local next_index = model.front_page_index + dir[1]
@@ -70,9 +71,10 @@ FrontPageController = Class(Controller, function(self, view, ...)
 
             if next_index > 0 and next_index <= upper_bound then
                 model.front_page_index = next_index
+                self:get_model():notify()
+
             end
         end
-        self:get_model():notify()
 
     end
 end)

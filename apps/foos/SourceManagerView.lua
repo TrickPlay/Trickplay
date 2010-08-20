@@ -2,7 +2,7 @@ SourceManagerView = Class(View, function(view, model, ...)
     view._base.init(view, model)
 
     view.clones = Group{name="source manager clone sources",opacity = 0}
-    view.ui     = Group{name="source manager ui", position = {200,0}}
+    view.ui     = Group{name="source manager ui", position = {-960+200,0}}
     screen:add(view.ui)
     screen:add(view.clones)
 
@@ -204,12 +204,16 @@ SourceManagerView = Class(View, function(view, model, ...)
         acc_sel[1], acc_sel[2] =  controller:get_acc_selected_index()
 
         if comp == Components.SOURCE_MANAGER  then
+                view.ui:raise_to_top()
+                view.ui.opacity = 255 
+            view.ui:complete_animation()
+            view.ui:animate{duration = 100,
+                            x        = 200}
             if view.accordian == false then
             
                 print("\n\nShowing SourceManagerView UI - Source Providers\n")
 
-                view.ui:raise_to_top()
-                view.ui.opacity = 255            
+           
 
                 for i = 1, #view.menu_items do
                     view.menu_buttons[i][1]:complete_animation()
@@ -237,6 +241,9 @@ SourceManagerView = Class(View, function(view, model, ...)
         else
             print("Hiding FrontPageView UI")
             --model.album_group:complete_animation()
+            view.ui:complete_animation()
+            view.ui:animate{duration = 100,
+                            x        = -960+200}
             view.ui.opacity = 0
         end
     end
