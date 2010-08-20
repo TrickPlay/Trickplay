@@ -36,7 +36,7 @@ FrontPageView = Class(View, function(view, model, ...)
         name = "pic_logo",
         src  = "",
         position = {20,0},
-        size = {200, 50}
+--        size = {200, 50}
     }
                                                                               
     local album_title = Text
