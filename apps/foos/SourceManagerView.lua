@@ -2,13 +2,15 @@ SourceManagerView = Class(View, function(view, model, ...)
     view._base.init(view, model)
 
     view.clones = Group{name="source manager clone sources",opacity = 0}
-    view.ui     = Group{name="source manager ui", position = {200,0}}
+    view.ui     = Group{name="source manager ui", position = {screen.width,0}}
     screen:add(view.ui)
     screen:add(view.clones)
 
     
+--[[
 	local background = Image {src = "assets/background.jpg", x = -200 }	
 	 view.ui:add(background)
+--]]
     local  add_sel = Image{src = "assets/source\ manager/Add_Sel.png"}
     local  add_un  = Image{src = "assets/source\ manager/Add_UnSel.png"}
     local hide_sel = Image{src = "assets/source\ manager/Hide_Sel.png"}
@@ -104,9 +106,9 @@ SourceManagerView = Class(View, function(view, model, ...)
     view.accordian_groups = 
     {
         ["QUERY"] =  Group{name="Query Accordian",opacity = 0,
-                            position = {view.ui.x+50,0}},
+                            position = {100,0}},
         ["LOGIN"] =  Group{name="Login Accordian",opacity = 0,
-                            position = {view.ui.x+50,0}},
+                            position = {100,0}},
      --   "BOTH"  =  Group{name="Both Accordians"}
     }
 
@@ -131,15 +133,15 @@ SourceManagerView = Class(View, function(view, model, ...)
 
     view.accordian = false
 
-    view.acc_split = Group{name="lower half of the accordian"
-                            }
+    view.acc_split = Group{ name="lower half of the accordian" }
     view.ui:add(view.acc_split)
 
     function view:enter_accordian()
         local src_sel    = view:get_controller():get_src_selected_index()
         print("Entering a",model.source_list[src_sel][2],"accordian")
         
-        assert(view.accordian_groups[  model.source_list[src_sel][2]  ],"shit happened")
+        assert(view.accordian_groups[  model.source_list[src_sel][2]  ],
+                                                          "shit happened")
         view.accordian_groups[  model.source_list[src_sel][2]  ].y = 
                            view.menu_items[src_sel].y +80
         --view.acc_split.y = view.menu_items[src_sel].y
@@ -155,11 +157,13 @@ SourceManagerView = Class(View, function(view, model, ...)
             view.acc_split:add(view.menu_buttons[i][2])
             
         end
+
         view.acc_split:animate
         {
             duration = CHANGE_TIME_VIEW, 
                    y = view.acc_split.y + 180,
             on_completed = function()
+                view.accordian_groups[  model.source_list[src_sel][2]  ]:raise_to_top()
                 view.accordian_groups[  model.source_list[src_sel][2]  ]:animate
                 {
                     duration = CHANGE_VIEW_TIME,
@@ -210,8 +214,8 @@ SourceManagerView = Class(View, function(view, model, ...)
                 view.ui:raise_to_top()
                 view.ui.opacity = 255 
             view.ui:complete_animation()
-            view.ui:animate{duration = 100,
-                            x        = 200}
+            view.ui:animate{duration = 300,
+                            x        = screen.width/2}
             if view.accordian == false then
             
                 print("\n\nShowing SourceManagerView UI - Source Providers\n")
@@ -242,12 +246,12 @@ SourceManagerView = Class(View, function(view, model, ...)
                 end
             end
         else
-            print("Hiding FrontPageView UI")
+            print("Hiding SourceManagerView UI")
             --model.album_group:complete_animation()
             view.ui:complete_animation()
-            view.ui:animate{duration = 100,
-                            x        = 200}
-            view.ui.opacity = 0
+            view.ui:animate{duration = 300,
+                            x        = screen.width}
+            --view.ui.opacity = 0
         end
     end
 

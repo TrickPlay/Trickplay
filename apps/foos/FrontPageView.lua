@@ -135,7 +135,7 @@ FrontPageView = Class(View, function(view, model, ...)
             view:shift_group()
             print("\n\nShowing FrontPageView UI\n")
 
-            view.ui:raise_to_top()
+            --view.ui:raise_to_top()
             view.ui.opacity = 255            
 
             print("new index is",sel[1],sel[2],"shift",
@@ -314,7 +314,7 @@ print("adding bottom bar")
                 end
             }
 
-        elseif comp == Components.SOURCE_PAGE then
+        elseif comp == Components.SOURCE_MANAGER then
             print("Dimming FrontPageView UI")
             model.album_group:complete_animation()
             view.ui:animate{duration = 100,opacity = 150}
