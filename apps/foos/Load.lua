@@ -10,6 +10,11 @@ PIC_DIR = "assets/thumbnails/"
 
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
+    model.albums = {}
+    model.fp_slots = {}
+    model.placeholders = {}
+
+
     assert(model.default,"default is not init yet")
     screen:add(model.default)
 	for i =1, #adapters do
@@ -23,6 +28,7 @@ function Setup_Album_Covers()
         model.albums[i] = {}
         model.fp_slots[i] = {}
         for j = 1,math.ceil(#adapters/NUM_ROWS) do
+            if ((j-1)*NUM_ROWS+i)<=#adapters then
 
             model.placeholders[i][j] = Clone{ source = model.default, opacity =150}
             model.placeholders[i][j].position = 
@@ -41,6 +47,7 @@ function Setup_Album_Covers()
             model.fp_slots[i][j]:add(model.placeholders[i][j])
 
             model.album_group:add(model.fp_slots[i][j])
+            end
         end
     end
     
