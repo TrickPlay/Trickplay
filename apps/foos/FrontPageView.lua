@@ -16,34 +16,38 @@ FrontPageView = Class(View, function(view, model, ...)
         src = "assets/blackwhiteframe_overlay.png",
         opacity = 0--255
     }
-    view.sel_info = Image
-    {
-        name = "pic_info",
-        src = "assets/overlay_infobar.png",
-        opacity = 0
-    }
     view.backdrop = Image
     {
-        name = "pic_info",
+        name = "backdrop",
         src = "assets/backdrop.png",
         opacity = 255
     }
 
-    view.album_logo = Image
+    view.bottom_bar = Group{name="bottom_bar"}
+    local sel_info = Image
     {
-        name = "pic_info",
-        src = "",
-        opacity = 0
+        name     = "pic_info",
+        src      = "assets/bottom_bar.png",
+        scale    = {1.1,1},
+        position = {-10,0},
     }
-
-    view.album_title = Text
+    local album_logo = Image
     {
+        name = "pic_logo",
+        src  = "",
+        position = {20,0},
+        size = {200, 50}
+    }
+                                                                              
+    local album_title = Text
+    {
+        name     = "pic_text",
         text     = "",
-        opacity  = 0,
         color    = "FFFFFF",
-        font     = "Sans 32px"
+        font     = "Sans 32px",
+        position = {300, 0}
     }
-
+    view.bottom_bar:add(sel_info, album_logo, album_title)
     --model.album_group:add(view.selector)
     view.ui:add(model.album_group)
 
@@ -187,6 +191,17 @@ FrontPageView = Class(View, function(view, model, ...)
                 }
             end
 --]=]
+            if model.album_group:find_child("bottom_bar") == nil 
+                                                                   then
+print("adding bottom bar")
+                model.album_group:add(view.backdrop)
+                model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
+                view.timer:start()
+
+            end
+
+
+
 --[=[
             if model.albums[sel[1]] == nil or 
                model.albums[sel[1]][sel[2]] == nil then
@@ -204,14 +219,13 @@ FrontPageView = Class(View, function(view, model, ...)
             end
 --]=]
             --print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
-            view.sel_info:complete_animation()
-            view.sel_info.opacity = 0
-            view.sel_info.scale   = {1.05,1}
-            view.sel_info.position = {PIC_W*(sel[2]-1)-20,PIC_H*(sel[1]-1)+1.05*PIC_H}
+            view.bottom_bar:complete_animation()
+            view.bottom_bar:unparent()
 
-            view.album_title.opacity = 0
-            view.album_logo.opacity = 0
+            model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
 
+            view.bottom_bar.opacity = 0
+            view.bottom_bar.position = {0,PIC_H}
 
             assert(previous ~= nil,"wth")
             previous:complete_animation()
@@ -221,6 +235,11 @@ FrontPageView = Class(View, function(view, model, ...)
                 scale = {1,1},
                 position = { PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)+10},
                 on_completed = function()
+                    if model.albums[sel[1] ]          ~= nil    and
+                       model.albums[sel[1] ][sel[2] ] ~= nil    and
+                       model.fp_index[2]              == sel[2] and
+                       model.fp_index[1]              == sel[1] then
+
                     prev_i = {sel[1],sel[2]}
                     print("completed to placeholder:",sel[1],sel[2])
                     current:complete_animation()
@@ -229,91 +248,77 @@ FrontPageView = Class(View, function(view, model, ...)
                         position = {new_c,new_r},
                         scale    = {1.05,1.05},
                         on_completed = function()
-                            view.backdrop.position={new_c-22,new_r-17}
-                            view.backdrop.scale = {.945,.945}
-                            view.backdrop.opacity = 255
-                            view.backdrop:raise_to_top()
-                            current:raise_to_top()
                             if model.albums[sel[1] ]          ~= nil    and
                                model.albums[sel[1] ][sel[2] ] ~= nil    and
                                model.fp_index[2]              == sel[2] and
                                model.fp_index[1]              == sel[1] then
-                                view.sel_info:raise_to_top()
+
+                                view.backdrop.position={new_c-22,new_r-17}
+                                view.backdrop.scale = {.945,.945}
+                                view.backdrop.opacity = 255
+                                view.backdrop:raise_to_top()
+                                current:raise_to_top()
+
+                                view.bottom_bar:raise_to_top()
                                 --idk why this needs to be here but it fixes issues of the
                                 --animation fucking up while you're moving around
-                                view.sel_info.scale   = {1.05,1}
-                                view.sel_info.position = {PIC_W*(sel[2]-1)-20,
-                                                          PIC_H*(sel[1]-1)+1.05*PIC_H}
+                                view.bottom_bar.scale   = {1.1,1}
+                                view.bottom_bar.position = {-10, PIC_H}
 
-                                view.sel_info:animate{
+                                view.bottom_bar:animate{
                                     duration = 10*CHANGE_VIEW_TIME,
-                                    opacity  = 255,
+                                    opacity  = 1,
                                     on_completed = function()
-                                        if 
-                                           model.fp_index[2]              == sel[2] and
-                                           model.fp_index[1]              == sel[1] then
+                                        if model.fp_slots[sel[1] ][sel[2] ]:find_child("bottom_bar") ~= nil then
+                                            view.bottom_bar.opacity = 255
+                                            album_title.text = adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query
+                                            album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
-                                            view.sel_info:animate{
+                                            view.bottom_bar:animate{
                                                 duration = CHANGE_VIEW_TIME,
-                                                y        = PIC_H*(sel[1]-1)+1.05*PIC_H - 60,
-                                                scale    = {1.051,60},
+                                                y        = PIC_H- 60,
+                                                --scale    = {1.051,60},
+--[[
                                                 on_completed = function()
-                                                    if
-                                                       model.fp_index[2]              == sel[2] and
-                                                       model.fp_index[1]              == sel[1] then
+                                                    if model.fp_slots[sel[1] ][sel[2] ]:find_child("pic_logo") ~= nil and
+                                                       model.fp_slots[sel[1] ][sel[2] ]:find_child("pic_text") ~= nil then
                                                         view.album_title:raise_to_top()
                                                         view.album_title.text = 
                                                               adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query
-                                                        view.album_title.position = {PIC_W*(sel[2]-1)+300,
-                                                                              PIC_H*(sel[1]-1)+1.05*PIC_H-50}
+                                                        view.album_title.position = {300,
+                                                                              PIC_H-50}
                                                         view.album_title:animate{
-                                                            duration = CHANGE_VIEW_TIME, 
+                                                            duration = .5*CHANGE_VIEW_TIME, 
                                                             opacity  = 255
                                                         }
 
                                                         view.album_logo:raise_to_top()
                                                         view.album_logo.size = {200,50}
-                                                        view.album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
-                                                        view.album_logo.position = {PIC_W*(sel[2]-1),
-                                                                              PIC_H*(sel[1]-1)+1.05*PIC_H-50}
+                                                        view.album_logo.position = {0,
+                                                                              PIC_H-50}
                                                         view.album_logo:animate{
-                                                            duration = CHANGE_VIEW_TIME, 
+                                                            duration = .5*CHANGE_VIEW_TIME, 
                                                             opacity  = 255
                                                         }
                                                     end
-                                                end
+                                                end--]]
                                             }
                                         end
                                     end
                                 }
                             end
                         end
+                    
                     }
+                    end
                 end
             }
 
-            if model.album_group:find_child("frontpageselector") == nil 
-                                                                   then
-print("adding selector")
-                view.selector.opacity = 0
-                model.album_group:add(view.selector)
-                model.album_group:add(view.sel_info)
-                model.album_group:add(view.backdrop)
-                model.album_group:add(view.album_title)
-                model.album_group:add(view.album_logo)
+        elseif comp == Components.SOURCE_PAGE then
+            print("Dimming FrontPageView UI")
+            model.album_group:complete_animation()
+            view.ui:animate{duration = 100,opacity = 150}
 
---[[
-                view.selector:complete_animation()
-                view.selector:animate{
-                     duration = 15*CHANGE_VIEW_TIME,
-                     --position = {new_c-55,new_r-55}
-                     opacity  = 255
-                }
---]]
-                view.timer:start()
-                
-
-            end
         else
             print("Hiding FrontPageView UI")
             model.album_group:complete_animation()
@@ -322,8 +327,7 @@ print("adding selector")
     end
 
 function view.timer.on_timer(timer)
-	--print("random insert, locked = ",model.swapping_cover)
-            --print(rand,model.swapping_cover)
+	print("random insert, locked = ",model.swapping_cover)
             if model.swapping_cover == false then
                 local rand_i = {
                     math.random(1,NUM_ROWS),
@@ -336,14 +340,14 @@ function view.timer.on_timer(timer)
 
                 if (rand_i[1] ~= model.fp_index[1] or
                    rand_i[2] ~= model.fp_index[2]) and adapters[formula]~=nil then
-                    --print("calling")
+                    print("calling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
                     loadCovers(formula, searches[#adapters+1-formula], search_i)
                 else
-                --print("not calling")
+                    print("not calling")
                 end
             end
 

@@ -43,9 +43,10 @@ function Setup_Album_Covers()
             {
                 name     = "Slot "..i.." "..j, 
                 position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
+                clip     = { 0, 0,  PIC_W, PIC_H },
                 opacity  = 255
             }
-            model.fp_slots[i][j]:add(Clone{ source = model.fp_backing, opacity = 255 })
+            --model.fp_slots[i][j]:add(Clone{ source = model.fp_backing, opacity = 255 })
             model.fp_slots[i][j]:add(model.placeholders[i][j])
 
             model.album_group:add(model.fp_slots[i][j])
@@ -79,25 +80,11 @@ function Load_Image(site,index)
                     Scale_To_Fit(model.albums[i][j],
                                  model.albums[i][j].base_size,
                                  {PIC_W,PIC_H})
---[[
-                    if model.fp_index[1] == i and model.fp_index[2] == j then
-                        model.albums[i][j].scale = 
-                        {
-                            PIC_W / model.albums[i][j].base_size[1],
-                            PIC_H / model.albums[i][j].base_size[2]
-                        }
-                        model.albums[i][j]:raise_to_top()
-                    else
-                        model.albums[i][j].scale = 
-                        {
-                            PIC_W / model.albums[i][j].base_size[1],
-                            PIC_H / model.albums[i][j].base_size[2]
-                        }
-                    end
---]]
                     model.fp_slots[i][j]:add(model.albums[i][j])
-                --    model.album_group:add(model.albums[i][j])
-                --    model.albums[i][j]:lower_to_bottom()
+
+                    if model.fp_index[1] == i and model.fp_index[2] == j then
+                        model:notify()
+                    end
                 end
             end
         }
