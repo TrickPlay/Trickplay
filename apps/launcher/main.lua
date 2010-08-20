@@ -25,7 +25,7 @@ local function build_ui( show_it )
     -- Style constants
     -------------------------------------------------------------------------------
     
-    local BUTTON_FONT               = "DejaVu Sans 28px"
+    local BUTTON_FONT               = "DejaVu Sans 32px"
     local BUTTON_FONT_COLOR         = "FFFFFFFF"
      
     -------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ local function build_ui( show_it )
         
         button_focus        = Image { src = "assets/button-focus.png" },
     
-        apps_button         = Image { src = "assets/button-myapps-blank.png" },
+        apps_button         = Image { src = "assets/button-red.png" },
         
         apps_text           = Text  {
                                         font = BUTTON_FONT ,
@@ -57,9 +57,9 @@ local function build_ui( show_it )
                                         text = strings[ "My Apps" ]
                                     },
                                     
-        apps_dropdown       = Image { src = "assets/dropdown-myapps.png" },
+        apps_dropdown       = Image { src = "assets/dropdown-red.png" },
         
-        shop_button         = Image { src = "assets/button-appshop-blank.png" },
+        shop_button         = Image { src = "assets/button-yellow.png" },
         
         shop_text           = Text  {
                                         font = BUTTON_FONT ,
@@ -67,27 +67,27 @@ local function build_ui( show_it )
                                         text = strings[ "App Shop" ]
                                     },
                                     
-        shop_dropdown       = Image { src = "assets/dropdown-appshop.png" },
+        shop_dropdown       = Image { src = "assets/dropdown-yellow.png" },
         
-        settings_button     = Image { src = "assets/button-settings-blank.png" },
+        settings_button     = Image { src = "assets/button-blue.png" },
         
         settings_text       = Text  {
                                         font = BUTTON_FONT ,
                                         color = BUTTON_FONT_COLOR ,
-                                        text = strings[ "Settings" ]                                        
+                                        text = strings[ "More" ]                                        
                                     },
                                     
-        settings_dropdown   = Image { src = "assets/dropdown-settings.png" },
+        settings_dropdown   = Image { src = "assets/dropdown-blue.png" },
     
-        showcase_button     = Image { src = "assets/button-showcase-blank.png" },
+        showcase_button     = Image { src = "assets/button-green.png" },
         
         showcase_text       = Text  {
                                         font = BUTTON_FONT ,
                                         color = BUTTON_FONT_COLOR ,
-                                        text = strings[ "Heineken Showcase" ]
+                                        text = strings[ "Showcase" ]
                                     },
                                     
-        showcase_dropdown   = Image { src = "assets/dropdown-showcase.png" }
+        showcase_dropdown   = Image { src = "assets/dropdown-green.png" }
     }
     
     -------------------------------------------------------------------------------
@@ -221,9 +221,9 @@ local function build_ui( show_it )
     
     ui.color_keys =             -- Which section # to focus with the given key
     {
-        [ keys.YELLOW ] = SECTION_APPS,
+        [ keys.RED    ] = SECTION_APPS,
         [ keys.GREEN  ] = SECTION_SHOWCASE,
-        [ keys.RED    ] = SECTION_SHOP,
+        [ keys.YELLOW ] = SECTION_SHOP,
         [ keys.BLUE   ] = SECTION_SETTINGS
     }
 
@@ -314,16 +314,16 @@ local function build_ui( show_it )
         [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
         [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
         
-        [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ key ] ) end,
-        [ keys.GREEN    ] = function() move_focus( ui.color_keys[ key ] ) end,
         [ keys.RED      ] = function() move_focus( ui.color_keys[ key ] ) end,
+        [ keys.GREEN    ] = function() move_focus( ui.color_keys[ key ] ) end,
+        [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ key ] ) end,
         [ keys.BLUE     ] = function() move_focus( ui.color_keys[ key ] ) end,
         
         -- For keyboards
         
-        [ keys.F5       ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
+        [ keys.F5       ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
         [ keys.F6       ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
-        [ keys.F7       ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
+        [ keys.F7       ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
         [ keys.F8       ] = function() move_focus( ui.color_keys[ keys.BLUE ] ) end,
         
         -- TODO : Pressing OK on a button may do something else
