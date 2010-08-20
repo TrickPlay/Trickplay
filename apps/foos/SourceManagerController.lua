@@ -29,15 +29,15 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     if self.text ~= ""  then
 			table.insert(adapters, dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua"))
 			adaptersTable[#adapters] = adapterTypes[src_selected]
-			adapters[#adapters][1].required_inputs.query = self.text
-			searches[#adapters] = self.text
+			local search = string.gsub(self.text," ","%%20")
+			adapters[#adapters][1].required_inputs.query = search
+			searches[#adapters] = search
 			model.album_group:clear()
-            		model.albums = {}
+    		model.albums = {}
 			Setup_Album_Covers()
 		 end
-                 model:notify()
-                    --self.text = default_text               
-                end
+       model:notify()
+       end
 
     end
 
