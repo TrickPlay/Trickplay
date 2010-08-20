@@ -95,7 +95,8 @@ function()
       CHARACTER_SELECTION = 1,
       PLAYER_BETTING = 2,
       GAME = 3,
-      COMPONENTS_LAST = 3
+      TUTORIAL = 4,
+      COMPONENTS_LAST = 4
    }
 
    -- Model initialization
@@ -104,6 +105,7 @@ function()
    -- View/Controller initialization
    BettingView(model):initialize()
    CharacterSelectionView(model):initialize()
+   TutorialView(model):initialize()
 
    function screen:on_key_down(k)
       assert(model:get_active_controller())

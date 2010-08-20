@@ -56,31 +56,33 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          [SubGroups.MIDDLE] = function() exit() return end,
          [SubGroups.RIGHT_MIDDLE] = function()
             print("starting tutorial")
-            if not TUTORIAL then
-               TUTORIAL = Popup:new{ group=AssetLoader:getImage("TutorialGameplay",{opacity=0}), animate_in = {opacity=255, duration=500}, on_fade_in = function() end }
-            else
-               TUTORIAL.fade = "out"
-               TUTORIAL.on_fade_out = function() screen:remove(TUTORIAL.group) TUTORIAL = nil end
-               TUTORIAL:render()
-            end
+            model:set_active_component(Components.TUTORIAL)
+            self:get_model():notify()
          end
       },
    }
-   
-   local function getPosition()
 
-      local num
+   function self:getPosition(i, j)
       
-      if selected == 2 and subselection == 1 then
-         num = 1
-      elseif selected == 1 then
-         num = 1 + subselection
-      elseif selected == 2 and subselection == 5 then
-         num = 6
-      else
-         error("error selecting position")
+      local sel = selected
+      local subsel = subselection
+      if i and j then
+          sel = i
+          subsel = j
       end
       
+      local num
+      
+      if sel == 2 and subsel == 1 then
+         num = 1
+      elseif sel == 1 then
+         num = 1 + subsel
+      elseif sel == 2 and subsel == 5 then
+         num = 6
+      else
+         error("error selecting position", 2)
+      end
+
       return num
       
    end
@@ -88,7 +90,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    local function setCharacterSeat()
 
       --instantiate the player
-      local pos = getPosition()
+      local pos = self:getPosition()
       if(model.positions[pos]) then return end
       local isHuman = false
       if(playerCounter == 1) then
@@ -99,8 +101,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          isHuman = isHuman,
          number = playerCounter,
          table_position = pos,
-         position = model.default_player_locations[ getPosition() ],
-         chipPosition = model.default_bet_locations[ getPosition() ],
+         position = model.default_player_locations[ self:getPosition() ],
+         chipPosition = model.default_bet_locations[ self:getPosition() ],
          endowment = INITIAL_ENDOWMENT
       }
 
