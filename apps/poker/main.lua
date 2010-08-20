@@ -8,7 +8,10 @@ AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 
 -- Buttons
 local ui_colors = {"Red", "Green", "Gray"}
-local ui_buttons = {"BubbleHeader", "ButtonArrayDown", "ButtonArrowUp", "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"}
+local ui_buttons = {
+   "BubbleHeader", "ButtonArrowDown", "ButtonArrowUp",
+   "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"
+}
 for _,color in pairs(ui_colors) do
    for _,button in pairs(ui_buttons) do
       AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
@@ -27,7 +30,7 @@ end
 DOG_ANIMATIONS = {
    [1] = {dog = 1},
    [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0} },
-   [3] = {dog = 3, name = "animation_slideglass", frames = 10, position = {340, 5} },
+   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {340, 5} },
    [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
    [5] = {dog = 5, name = "animation_music", frames = 7, position = {1750, 10} },
    [6] = {dog = 6},
@@ -55,14 +58,18 @@ for i=1, 6 do
    AssetLoader:preloadImage("dog"..i.."glow","assets/dogs/glow/"..i..".png")
 end
 
+DOG_GLOW_LAYER = Group{}
+DOG_ANIMATION_LAYER = Group{}
+
 --------------------------------------------------------------------------------
 
 AssetLoader.on_preload_ready =
 function()
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
+   screen:add(DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
    for i=1, 6 do
       DOG_GLOW[i] = AssetLoader:getImage("dog"..i.."glow",{position = DOG_GLOW[i], opacity=0} )
-      screen:add(DOG_GLOW[i])
+      DOG_GLOW_LAYER:add(DOG_GLOW[i])
    end
    
    --DOG = AssetLoader:getImage("dog1glow",{})

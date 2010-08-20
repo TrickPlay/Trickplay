@@ -66,9 +66,25 @@ function(pres, ctrl)
          local g = model.deck.cards[i].group
          g.position = MCL.DECK
          g.z_rotation={math.random(-5, 5), 0, 0}
-         screen:add(g)
+         if g.parent ~= screen then screen:add(g) end
       end
       
+      --[[
+      for i,card in ipairs(model.deck.cards) do
+         print("resetting card", i)
+         local g = card.group
+         
+         if type(g.parent) == "userdata" then screen:remove(g) end
+         
+         resetCardGroup(g)
+         
+         g.position = MCL.DECK
+         g.z_rotation={math.random(-5, 5), 0, 0}
+         
+         if not g.parent then screen:add(g) end
+         
+      end
+      ]]--
    
  -- sb, bb, dealer data in ctrl are correct, u just gotta make the view reflect that
  -- move sb, bb, dealer chips to new locations
