@@ -385,9 +385,9 @@ Player = Class(function(player, args, ...)
    player.status:initialize()
    assert(player.status)
    
-   function player:get_move(state)
-      local call_bet = state:get_call_bet()
-      return false, call_bet
-   end
+   --function player:get_move(state)
+   --   local call_bet = state:get_call_bet()
+   --   return false, call_bet
+   --end
 
 end)

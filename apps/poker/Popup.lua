@@ -5,14 +5,14 @@ Popup = {}
 -- Default black bar with white text
 local function defaultMessage(args)
 
-   if not args.text then args.text = "A popup" end
+	if not args.text then args.text = "A popup" end
 
-   local background = Rectangle{w=screen.w, h=200, color="000000"}
-   local text = Text {font = "Sans 100px", text = args.text, color = "FFFFFF", position = {screen.w/2, 100} }
-   text.anchor_point = {text.w/2, text.h/2}
-   local group = Group{z=5, opacity = 50, y = screen.h/2 - 100, children={ background, text }}
-   
-   return group
+	local background = Rectangle{w=screen.w, h=200, color="000000"}
+	local text = Text {font = "Sans 100px", text = args.text, color = "FFFFFF", position = {screen.w/2, 100} }
+	text.anchor_point = {text.w/2, text.h/2}
+	local group = Group{z=5, opacity = 50, y = screen.h/2 - 100, children={ background, text }}
+	
+	return group
 
 end
 
@@ -29,112 +29,112 @@ end
 
 function Popup:new(args)
 
-   assert(args, "Popup created with no arguments!")
-   
-   local animate_in = args.animate_in or {opacity = 220}
-   local animate_out = args.animate_out or {opacity = 0}
-   
-   local object = {
-      fade = args.fade or "in",
-      group = args.group or defaultMessage(args),
-      
-      -- Time on screen
-      time = args.time or 3,
-      
-      -- Animation tables
-      animate_in = animate_in,
-      animate_out = animate_out
-   }
-   
-   -- Various parameters
-   if not object.group.parent then screen:add(object.group) end
-   if not args.keepDown then object.group:raise_to_top() end
-   
-   -- Callbacks
-   if args.on_fade_in then object.on_fade_in = args.on_fade_in end
-   if args.on_fade_out then object.on_fade_out = args.on_fade_out end
+	assert(args, "Popup created with no arguments!")
+     
+	local animate_in = args.animate_in or {opacity = 220}
+	local animate_out = args.animate_out or {opacity = 0}
+     
+        local object = {
+                fade = args.fade or "in",
+                group = args.group or defaultMessage(args),
+		
+		-- Time on screen
+                time = args.time or 3,
+		
+		-- Animation tables
+		animate_in = animate_in,
+		animate_out = animate_out
+        }
+        
+	-- Various parameters
+        -- if not object.group.parent then screen:add(object.group) end
+        if not args.keepDown then object.group:raise_to_top() end
+	
+	-- Callbacks
+	if args.on_fade_in then object.on_fade_in = args.on_fade_in end
+        if args.on_fade_out then object.on_fade_out = args.on_fade_out end
 
-   setmetatable(object, self)
-   self.__index = self
-   
-   if not args.noRender then object:render() end
-   
-   print("Created Popup")
-   
-   return object
-   
+        setmetatable(object, self)
+        self.__index = self
+	
+	if not args.noRender then object:render() end
+        
+        print("Created Popup")
+        
+        return object
+        
 end
 
 function Popup:render()
 
-   if self.fade == "in" then
-      
-      print("Animating in")
-      
-      -- On completed function
-      self.animate_in.on_completed = function() pcall(self.on_fade_in, self) end
-      if not self.animate_in.duration then self.animate_in.duration = 200 end
-      
-      self.group:animate( self.animate_in )  
-      self.fade = "out"
-      return
-      
-   elseif self.fade == "out" then
-      
-      print("Animating out")
-      
-      -- On completed function
-      self.animate_out.on_completed = function() pcall(self.on_fade_out, self) end
-      if not self.animate_out.duration then self.animate_out.duration = 200 end
-      
-      self.group:animate( self.animate_out )  
-      self.fade = nil
-      return
-      
-   end
-   
+        if self.fade == "in" then
+	
+		print("Animating in")
+                
+		-- On completed function
+		self.animate_in.on_completed = function() pcall(self.on_fade_in, self) end
+		if not self.animate_in.duration then self.animate_in.duration = 200 end
+		
+		self.group:animate( self.animate_in )  
+		self.fade = "out"
+		return
+		
+        elseif self.fade == "out" then
+		
+		print("Animating out")
+		
+		-- On completed function
+		self.animate_out.on_completed = function() pcall(self.on_fade_out, self) end
+		if not self.animate_out.duration then self.animate_out.duration = 200 end
+		
+		self.group:animate( self.animate_out )  
+		self.fade = nil
+		return
+		
+        end
+        
 end
 
 function Popup:setTimer()
 
-   self.timer = Timer()
-   self.timer.interval = self.time
-   
-   self.timer.on_timer = function()
-                            
-      print("Time's up!")
-                            
-      self:render()
-      self.timer:stop()
-      self.timer.on_timer = nil
-      self.timer = nil
-                            
-   end
-   
-   self.timer:start()
+        self.timer = Timer()
+        self.timer.interval = self.time
+        
+        self.timer.on_timer = function()
+		
+        	print("Time's up!")
+		
+                self:render()
+       		self.timer:stop()
+                self.timer.on_timer = nil
+                self.timer = nil
+                
+        end
+        
+        self.timer:start()
 
 end
 
 function Popup:on_fade_in()
 
-   print("on_fade_in called")
-   
-   self:setTimer()
-   
+	print("on_fade_in called")
+                
+	self:setTimer()
+                    
 end
 
 function Popup:on_fade_out()
 
-   print("on_fade_out called")
-   
-   if self.group.parent then
-      
-      self.group.parent:remove(self.group)
-      
-      print("Removed popup from parent container")
-   end
-   
-   self = nil
+	print("on_fade_out called")
+        
+        if self.group.parent then
+        
+                self.group.parent:remove(self.group)
+                
+                print("Removed popup from parent container")
+        end
+	
+	self = nil
 
 end
 
