@@ -316,6 +316,8 @@ print("adding bottom bar")
 
         elseif comp == Components.SOURCE_MANAGER then
             print("Dimming FrontPageView UI")
+            view:shift_group()
+
             model.album_group:complete_animation()
             view.ui:animate{duration = 100,opacity = 150}
 

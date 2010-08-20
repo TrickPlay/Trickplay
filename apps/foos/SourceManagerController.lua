@@ -5,6 +5,8 @@ SourceManagerController = Class(Controller, function(self, view, ...)
     local src_selected = 1
     local acc_selected = {1,1}
 
+    local query_text = ""
+    local login_text = {"",""}
     local controller = self
 
     local TextObj = function(obj)
@@ -26,18 +28,9 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     self.on_key_focus_out = nil
                     acc_selected[1] = acc_selected[1] + 1
 
-                    if self.text ~= ""  then
-			table.insert(adapters, dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua"))
-			adaptersTable[#adapters] = adapterTypes[src_selected]
-			local search = string.gsub(self.text," ","%%20")
-			adapters[#adapters][1].required_inputs.query = search
-			searches[#adapters] = search
-			model.album_group:clear()
-    		model.albums = {}
-			Setup_Album_Covers()
-		 end
-       model:notify()
-       end
+                    query_text = self.text
+		 
+                end
 
     end
 
@@ -51,11 +44,25 @@ SourceManagerController = Class(Controller, function(self, view, ...)
             end},
             --save
             {function() 
+                if query_text ~= "" then
+			table.insert(adapters, dofile("adapter/"..
+                                 adapterTypes[src_selected].."/adapter.lua"))
+			adaptersTable[#adapters] = adapterTypes[src_selected]
+			local search = string.gsub(query_text," ","%%20")
+			adapters[#adapters][1].required_inputs.query = search
+			searches[#adapters] = search
+			model.album_group:clear()
+    		        model.albums = {}
+                    Setup_Album_Covers()
+                    model:notify()
+
+                end
                 view.accordian = false
                 view:leave_accordian()
             end,
             --cancel
             function() 
+                query_text = ""
                 view.accordian = false
                 view:leave_accordian()
             end}
