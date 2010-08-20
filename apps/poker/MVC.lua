@@ -19,9 +19,17 @@ Model = Class(function(model, ...)
         [4] = {1281, 20},
         [5] = {1590, 99},
         [6] = {1331, 950},
-        START = {720, 780},
+        START = {730, 880},
+        EXIT_MENU = {890, 880},
+        HELP_MENU = {1050, 880},
+
+        FOLD = {740, 780},
         EXIT = {750, 870},
-        HELP = {900, 870}
+        HELP = {910, 870},
+        CALL = {870, 780},
+        BET = {1020, 780},
+        UP = {1090, 770},
+        DOWN = {1090, 850}
     }
     MDPL = model.default_player_locations
     
