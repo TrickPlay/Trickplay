@@ -7,6 +7,10 @@ SourceManagerView = Class(View, function(view, model, ...)
     screen:add(view.clones)
 
     
+
+    local resume_button = Image{src="assets/source\ manager/resume_button.png",
+                                position =  {0,screen.height/3}}
+    view.ui:add(resume_button)
 --[[
 	local background = Image {src = "assets/background.jpg", x = -200 }	
 	 view.ui:add(background)
@@ -42,14 +46,14 @@ SourceManagerView = Class(View, function(view, model, ...)
             font     = "KacstArt 42px",
             color    = "FFFFFF",
             opacity  = 255,
-            position = {400,120*i}
+            position = {500,120*i}
         }
 
         view.menu_buttons[i]    = {}
-        view.menu_buttons[i][1] = Clone{ source = add_un  }
-        view.menu_buttons[i][2] = Clone{ source = add_sel }
-        view.menu_buttons[i][1].position = {100, 120*i-20}
-        view.menu_buttons[i][2].position = {100, 120*i-20}
+        view.menu_buttons[i][1] = Clone{ source = add_sel  }
+        view.menu_buttons[i][2] = Clone{ source = add_un }
+        view.menu_buttons[i][1].position = {200, 120*i-20}
+        view.menu_buttons[i][2].position = {200, 120*i-20}
 
         view.ui:add(unpack(view.menu_buttons[i]))
     end
@@ -106,16 +110,20 @@ SourceManagerView = Class(View, function(view, model, ...)
     view.accordian_groups = 
     {
         ["QUERY"] =  Group{name="Query Accordian",opacity = 0,
-                            position = {100,0}},
+                            position = {200,0}},
         ["LOGIN"] =  Group{name="Login Accordian",opacity = 0,
-                            position = {100,0}},
+                            position = {200,0}},
      --   "BOTH"  =  Group{name="Both Accordians"}
     }
 
+    view.accordian_groups["QUERY"]:add(Text{text="Enter Query:", 
+         position = {0,30},font ="KacstArt 30px",color = "FFFFFF" })
     view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][1][1].group)
     view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][2][1].group)
     view.accordian_groups["QUERY"]:add(view.accordian_items["QUERY"][2][2].group)
     view.accordian_groups["QUERY"]:add(unpack( view.accordian_text["QUERY"]))
+    view.accordian_groups["LOGIN"]:add(Text{text="Username:\nPassword:", 
+         position = {0,30},font ="KacstArt 30px",color = "FFFFFF" })
     view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][1][1].group)
     view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][2][1].group)
     view.accordian_groups["LOGIN"]:add(view.accordian_items["LOGIN"][3][1].group)

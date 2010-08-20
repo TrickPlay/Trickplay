@@ -11,7 +11,7 @@ PADDING_MIDDLE = 0
 
 PIC_DIR = "assets/thumbnails/"
 
-PIC_H = (screen.height/NUM_ROWS)*.98
+PIC_H = (screen.height/NUM_ROWS) - 10
 PIC_W = PIC_H--(screen.width/(NUM_VIS_COLS+1)) 
 SEL_W = PIC_W*1.1
 SEL_H = PIC_H*1.1
