@@ -99,7 +99,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       
       args = {
          isHuman = isHuman,
-         number = playerCounter,
+         number = playerCounter + 1,
          table_position = pos,
          position = model.default_player_locations[ self:getPosition() ],
          chipPosition = model.default_bet_locations[ self:getPosition() ],
