@@ -50,6 +50,8 @@ end
 function Load_Image(site,index)
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
+    
+    print ("SITE: "..site)
 
     print("getting a pic for ",i,j,index)
     if model.albums[i] ~= nil and  model.albums[i][j] == nil then
