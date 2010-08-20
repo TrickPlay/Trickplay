@@ -1,7 +1,7 @@
 Animation = Class( function(self, dog, frames, position, ...)
 
         self.timer = Timer()
-        self.timer.interval = .1
+        self.timer.interval = .1075
         self.frameCounter = 0
         
         self.group = Group{position = position}
