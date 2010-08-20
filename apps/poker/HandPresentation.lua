@@ -111,6 +111,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
          player.status:update( "I'm In" )  
       end
       
+      -- Initialize SB and BB player chip collections
+      local sb_player = model.players[ ctrl:get_sb_p() ]
+      local bb_player = model.players[ ctrl:get_bb_p() ]
+      add_player_chips( sb_player )
+      add_player_chips( bb_player )
+      sb_player.betChips:set( ctrl:get_sb_qty() )
+      bb_player.betChips:set( ctrl:get_bb_qty() )
+      
    end
 
    -- Deal hole cards
