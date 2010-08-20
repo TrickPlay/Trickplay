@@ -17,7 +17,8 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.d]     = function(self)
             local formula = (model.front_page_index + (selected[2]-1))*2+(selected[1]-1)-1
 				deleteAdapter(formula)
-
+				model.front_page_index = 1
+				selected = {1,1}
         end,
 
         [keys.Return] = function(self) 
