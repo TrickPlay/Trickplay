@@ -9,7 +9,7 @@ current_pic = 1
 temp_pic = 0
 local started = true
 local search = "space"
-local caption = Text {font = "Sans 25px", text = "", x = 1530, y = 400}
+local caption = Text {font = "Sans 15px", text = "", x = 1530, y = 400}
 local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
 local background = Image {src = "assets/background.jpg" }
 local background2 = Image {src = "assets/background2.png" }
@@ -55,9 +55,9 @@ function Slideshow:begin()
 	temp_pic = 0
 	timer:start()
 	self.ui:add(overlay_image,background,background2,caption)
-	local queryText = Text { text = string.gsub(adapters[self.index][1].required_inputs.query,"%%20"," "), font = "Sans 30px", x = 75, y = 300}
+	local queryText = Text { text = string.gsub(adapters[self.index][1].required_inputs.query,"%%20"," "), font = "Sans 30px", x = 105, y = 300}
 	self.ui:add(queryText)
-	local logo = Image { src = adapters[self.index].logoUrl, x = 100, y = 170, z= 1, scale = adapters[self.index].logoscale}
+	local logo = Image { src = adapters[self.index].logoUrl, x = 20, y = 130, z= 1, size = {300,225}}
 	self.ui:add(logo)
 end
 function Slideshow:stop()
