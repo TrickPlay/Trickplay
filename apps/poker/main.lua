@@ -18,6 +18,11 @@ for _,color in pairs(ui_colors) do
    end
 end
 
+-- Tutorial slides
+for i=1, 2 do
+   AssetLoader:preloadImage("Tutorial"..i,"assets/tut"..i..".png")
+end
+
 -- Player text bubbles
 local player_text = {"BubbleLeft", "BubbleRight"}
 for i=1, 2 do
