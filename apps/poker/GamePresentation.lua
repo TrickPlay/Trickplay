@@ -89,4 +89,7 @@ function(pres, ctrl)
  -- sb, bb, dealer data in ctrl are correct, u just gotta make the view reflect that
  -- move sb, bb, dealer chips to new locations
    end
+
+   function pres:return_to_main_menu()
+   end
 end)

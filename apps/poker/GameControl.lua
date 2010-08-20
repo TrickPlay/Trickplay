@@ -35,6 +35,26 @@ function(ctrl, model, ...)
       end
    }
 
+   local help_game_pipeline = {
+      function(ctrl)
+         hand_ctrl:initialize()
+         enable_event_listener(TimerEvent{interval=1})
+         local continue = true
+         return continue
+      end,
+      -- stage where we play through a hand
+      function(ctrl, event)
+         local continue = hand_ctrl:on_event(event)
+         return continue
+      end,
+      function(ctrl)
+         state:move_blinds()
+         local continue = hand_ctrl:cleanup()
+         enable_event_listener(TimerEvent{interval=1})
+         pres:finish_hand()
+         return continue
+      end
+   }
    -- getters/setters
    function ctrl.get_players(ctrl) return state:get_players() end
    function ctrl.get_sb_qty(ctrl) return state:get_sb_qty() end
@@ -85,9 +105,18 @@ function(ctrl, model, ...)
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
-      if #game_pipeline == 0 and #ctrl:get_players()>1 then
+      if #ctrl:get_players() == 1 then
+         pres:return_to_main_menu()
+         enable_event_listener(KbdEvent())
+         model:set_active_component(Components.CHARACTER_SELECTION)
+         model:notify()
+         return
+      end
+
+      if #game_pipeline == 0 then
          reset_pipeline()
       end
+
       local action = game_pipeline[1]
       local result = action(ctrl, event)
       if result then table.remove(game_pipeline, 1) end

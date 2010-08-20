@@ -154,9 +154,13 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       pres:fold_player(active_player)
    end
 
+   function ctrl:check_player(active_player)
+      pres:check_player(active_player)
+   end
    function ctrl:call_player(active_player)
       pres:call_player(active_player)
    end
+
    function ctrl:raise_player(active_player)
       pres:raise_player(active_player)
    end
