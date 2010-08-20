@@ -166,7 +166,11 @@ HandState = Class(nil,function(state, ctrl, ...)
          -- player calls
          player_bets[active_player] = bet
          done[active_player] = true
-         ctrl:call_player(active_player)
+         if bet == 0 then
+            ctrl:check_player(active_player)
+         else
+            ctrl:call_player(active_player)
+         end
       elseif bet >= call_bet+min_raise or (call_bet < bet and bet < call_bet+min_raise and active_player.money==0) then
          -- player raises, forces everyone to act
          player_bets[active_player] = bet

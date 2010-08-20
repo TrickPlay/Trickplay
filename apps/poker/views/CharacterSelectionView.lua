@@ -16,15 +16,15 @@ CharacterSelectionView = Class(View, function(view, model, ...)
 
     view.items = {
         {
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[2] },
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[3] },
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[4] },
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[5] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[2], opacity = 0},
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[3], opacity = 0},
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[4], opacity = 0},
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[5], opacity = 0},
         },
         {
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1], opacity = 0},
             start_button, exit_button, help_button,
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6] },
+            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6], opacity = 0},
         },
     }
     
@@ -65,22 +65,22 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         local comp = self.model:get_active_component()
         if comp == Components.CHARACTER_SELECTION then
             self.ui.opacity = 255
-            self.ui:raise_to_top()
+--            self.ui:raise_to_top()
 --            print("Showing Character Selection UI")
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
-                        if(item.on_focus) then
+                        if(type(item) == "table" and item:is_a(FocusableImage)) then
                             item:on_focus()
                         else
-                            item.opacity = 255
+                            DOG_GLOW[controller:getPosition(i,j)].opacity = 255
                         end
                     else
-                        if(item.out_focus) then
+                        if(type(item) == "table" and item:is_a(FocusableImage)) then
                             item:out_focus()
                         else
-                            item.opacity = 100
+                            DOG_GLOW[controller:getPosition(i,j)].opacity = 0
                         end
                     end
                 end
