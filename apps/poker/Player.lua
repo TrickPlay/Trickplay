@@ -231,16 +231,21 @@ Player = Class(function(player, args, ...)
          [Rounds.HOLE] = function(a_move)
             -- TODO: get a calculation or param that determines whether
             --       the bets have been unraised, raised, or re-raised
-            local hand = sort_hand(hole)
+            local hand = hole
+            if(hand[1].rank.num < hand[2].rank.num) then
+                hand[1], hand[2] = hand[2], hand[1]
+            end
             local suit = UNSUITED
             if(hand[1].suit.name == hand[2].suit.name) then
                suit = SUITED
             end
 
             a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
+            print("\nposition = "..position.."\nraisedFactor = "..raisedFactor.."\nhand[1].rank.num = "..hand[1].rank.num.."\nhand[2].rank.num = "..hand[2].rank.num.."\n")
             --introduce a random element
             if(5 <= math.random(4) + self.difficulty) then
                a_move = math.random(Moves.CALL, Moves.FOLD)
+               print("\nrandomize move\n")
             end
             return a_move, math.random(RaiseFactor.R, RaiseFactor.RR)
          end,
