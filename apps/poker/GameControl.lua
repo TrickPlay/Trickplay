@@ -35,6 +35,26 @@ function(ctrl, model, ...)
       end
    }
 
+   local help_game_pipeline = {
+      function(ctrl)
+         hand_ctrl:initialize()
+         enable_event_listener(TimerEvent{interval=1})
+         local continue = true
+         return continue
+      end,
+      -- stage where we play through a hand
+      function(ctrl, event)
+         local continue = hand_ctrl:on_event(event)
+         return continue
+      end,
+      function(ctrl)
+         state:move_blinds()
+         local continue = hand_ctrl:cleanup()
+         enable_event_listener(TimerEvent{interval=1})
+         pres:finish_hand()
+         return continue
+      end
+   }
    -- getters/setters
    function ctrl.get_players(ctrl) return state:get_players() end
    function ctrl.get_sb_qty(ctrl) return state:get_sb_qty() end

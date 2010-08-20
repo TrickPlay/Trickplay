@@ -2,6 +2,8 @@ SMALL_BLIND = 1
 BIG_BLIND = 2
 INITIAL_ENDOWMENT = 200
 
+HELP_ENABLED = true
+
 ASSERTIONS_ENABLED = true
 
 if ASSERTIONS_ENABLED then
@@ -94,3 +96,14 @@ Difficulty = {
 }
 
 CHANGE_VIEW_TIME = 400
+
+-- SOUNDS
+
+DEAL_WAV = "assets/sounds/sound84.wav"
+SHOWDOWN_WAV = "assets/sounds/Dog Bark 3.wav"
+SHUFFLE_WAV = "assets/sounds/Shuffle 1.wav"
+FOLD_WAV = "assets/sounds/Dog bust out 4.wav"
+CHECK_WAV = "assets/sounds/check.wav"
+CALL_WAV = "assets/sounds/Chips.wav"
+RAISE_WAV = "assets/sounds/Chips.wav"
+BUSTOUT_WAV = "assets/sounds/Bust out sound.wav"
