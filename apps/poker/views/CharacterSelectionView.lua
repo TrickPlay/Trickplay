@@ -3,12 +3,16 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     --first add the background shiz
 
     local background = {
+        Image{
+            position = {MDPL.START[1]+5, MDPL.START[2]+10},
+            src = "assets/UI/shadow_beginning.png"
+        },
     }
 
     --create the components
     local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "assets/UI/ButtonStartGreen.png", "assets/UI/ButtonStartRed.png")
-    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
-    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
+    local exit_button = FocusableImage(MDPL.EXIT_MENU[1], MDPL.EXIT_MENU[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
+    local help_button = FocusableImage(MDPL.HELP_MENU[1], MDPL.HELP_MENU[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
 
     view.items = {
         {
@@ -19,33 +23,27 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         },
         {
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1] },
-            start_button,
-            Text(), -- placeholder, makes logic simpler
+            start_button, exit_button, help_button,
             Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6] },
         },
-        {
-            Text(), exit_button, help_button, Text()
-        }
     }
     
     view.text = {
         Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
             x = MDPL.START[1] + 30, y = MDPL.START[2] + 20, text = "Start"},
         Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.EXIT[1] + 40, y = MDPL.EXIT[2] + 20, text = "Exit"},
+            x = MDPL.EXIT_MENU[1] + 40, y = MDPL.EXIT_MENU[2] + 20, text = "Exit"},
         Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.HELP[1] + 35, y = MDPL.HELP[2] + 20, text = "Help"},
+            x = MDPL.HELP_MENU[1] + 35, y = MDPL.HELP_MENU[2] + 20, text = "Help"},
     }
     
     --background ui
-    view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
+    view.background_ui = Group{name = "start_menu_background_ui", position = {0, 0}}
     view.background_ui:add(unpack(background))
 
-    --ui that actually moves
-    view.moving_ui=Group{name="checkoutMoving_ui", position=HIDE_TOP}
---    view.moving_ui:add()
     --all ui junk for this view
-    view.ui=Group{name="checkout_ui", position={0,0}}
+    view.ui=Group{name="start_menu_ui", position={0,0}}
+    view.ui:add(view.background_ui)
     view.ui:add(unpack(view.items[1]))
     for _,v in ipairs(view.items[2]) do
         if(v.group) then
@@ -53,9 +51,6 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         else
             view.ui:add(v)
         end
-    end
-    for _,v in ipairs(view.items[3]) do
-        view.ui:add(v.group)
     end
     view.ui:add(unpack(view.text))
 
