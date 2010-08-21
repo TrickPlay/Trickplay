@@ -44,14 +44,6 @@ dofile("Slideshow.lua")
 
 dofile("Load.lua")
 
-mediaplayer.on_loaded = function () mediaplayer:play() end
-mediaplayer.on_end_of_stream = function ()
-						mediaplayer:seek(0)
-						mediaplayer:play()
-					end
-mediaplayer:load('music.mp3')
-
-
 Components = {
    COMPONENTS_FIRST = 1,
    FRONT_PAGE       = 1,
