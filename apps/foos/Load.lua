@@ -17,7 +17,7 @@ function Setup_Album_Covers()
 
     assert(model.default,"default is not init yet")
 	for i =1, #adapters do
-		 loadCovers(i,searches[#adapters+1-i], 1)
+		 loadCovers(i,searches[#adapters+1-i], math.random(20))
 	end
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
@@ -55,7 +55,10 @@ function Load_Image(site,index)
     print ("SITE: "..site)
 
     print("getting a pic for ",i,j,index)
-    if model.albums[i] ~= nil and  model.albums[i][j] == nil then
+		
+	 if (site == "") then
+	 		loadCovers(index, searches[#adapters+1-index], math.random(16))
+    elseif model.albums[i] ~= nil and  model.albums[i][j] == nil then
         model.albums[i][j] = Image
         {
             async    = true,
@@ -63,7 +66,11 @@ function Load_Image(site,index)
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
-                if model.albums[i] ~= nil and model.albums[i][j] ~= nil and not failed then
+            	 if (failed) then					 	 
+            	 		loadCovers(index, searches[#adapters+1-index], 2)
+            	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
+           	 
+                elseif model.albums[i] ~= nil and model.albums[i][j] ~= nil and not failed then
                     print("loading pic at",i,j,index)
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
