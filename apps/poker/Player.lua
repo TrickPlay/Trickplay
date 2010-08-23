@@ -114,6 +114,7 @@ Player = Class(function(player, args, ...)
          if(a_bet < bb_qty*3+min_raise) then
             -- calculate ammount to raise
             if amount_to_raise == RaiseFactor.R then
+               assert(a_bet < bb_qty * 3, "a_bet = " .. tostring(a_bet) .. ", bb_qty*3 = " ..tostring(bb_qty*3))
                a_bet = math.random(a_bet, bb_qty * 3)
             elseif amount_to_raise == RaiseFactor.RR then
                a_bet = math.random(bb_qty*3+min_raise, bb_qty*5+min_raise)
