@@ -75,7 +75,7 @@ Player = Class(function(player, args, ...)
       error("error calculation position")
    end
 
-   local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet)
+   local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet, bb_qty)
 
       assert(call_bet >= 0)
       assert(min_raise > 0)
@@ -113,8 +113,8 @@ Player = Class(function(player, args, ...)
          local a_bet = call_bet+min_raise
          if amount_to_raise == RaiseFactor.R then
             --websites say raising the bet times 2 is a good standard?
-            if a_bet < call_bet*2 then
-               a_bet = math.random(a_bet, call_bet*2)
+            if a_bet < bb_qty * 3 then
+               a_bet = math.random(a_bet, bb_qty * 3)
             end
             if a_bet > player.money+orig_bet then
                a_bet = player.money+orig_bet
@@ -122,8 +122,8 @@ Player = Class(function(player, args, ...)
             print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
             return false, a_bet
          elseif amount_to_raise == RaiseFactor.RR then
-            if(call_bet*2+min_raise < call_bet*3) then
-               a_bet = math.random(call_bet*2+min_raise, call_bet*3)
+            if bb_qty*3+min_raise < bb_qty*5+min_raise then
+               a_bet = math.random(bb_qty*3+min_raise, bb_qty*5+min_raise)
             end
             if a_bet > player.money+orig_bet then
                a_bet = player.money+orig_bet
@@ -160,6 +160,7 @@ Player = Class(function(player, args, ...)
       local fold = false
       local call_bet = state:get_call_bet()
       local min_raise = state:get_min_raise()
+      local bb_qty = state:get_bb_qty()
       local round = state:get_round()
       print("\nRound: "..round.."\n")
       local raisedFactor = RaiseFactor.UR
@@ -241,7 +242,7 @@ Player = Class(function(player, args, ...)
             end
 
             a_move = preFlopLUT[position][raisedFactor][hand[1].rank.num][hand[2].rank.num][suit]
-            print("\nposition = "..position.."\nraisedFactor = "..raisedFactor.."\nhand[1].rank.num = "..hand[1].rank.num.."\nhand[2].rank.num = "..hand[2].rank.num.."\n")
+            --print("\nposition = "..position.."\nraisedFactor = "..raisedFactor.."\nhand[1].rank.num = "..hand[1].rank.num.."\nhand[2].rank.num = "..hand[2].rank.num.."\n")
             --introduce a random element
             if(5 <= math.random(4) + self.difficulty) then
                a_move = math.random(Moves.CALL, Moves.RAISE)
@@ -378,10 +379,14 @@ Player = Class(function(player, args, ...)
       last_move = ai_move
       
       if Moves.FOLD == ai_move then
+         if(call_bet <= 0) then
+             print("\nCHECK\n")
+             return false, 0
+         end
          print("\nFOLD\n")
          return true, 0
       else
-         return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet)
+         return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet, bb_qty)
       end
 
    end

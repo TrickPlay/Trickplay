@@ -27,7 +27,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    -- the default selected index
    local selected = CharacterSelectionGroups.BOTTOM
-   local subselection = SubGroups.LEFT_MIDDLE
+   local subselection = SubGroups.LEFT
    assert(selected)
    assert(subselection)
    --the number of the current player selecting a seat
@@ -97,7 +97,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       local pos = self:getPosition()
       if(model.positions[pos]) then return end
       local isHuman = false
-      if(playerCounter == 1) then
+      if(playerCounter == 0) then
          isHuman = true
       end
       
@@ -161,10 +161,17 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    local function check_for_valid(dir)
       if (CharacterSelectionGroups.TOP == selected) and
          (SubGroups.RIGHT == subselection) then
-             subselection = SubGroups.RIGHT_MIDDLE 
+            subselection = SubGroups.RIGHT_MIDDLE 
       elseif CharacterSelectionGroups.BOTTOM == selected then
-         if(0 ~= dir[2] and subselection >= SubGroups.MIDDLE) then
-             subselection = subselection + 1
+         if(0 ~= dir[2]) then
+            if(subselection >= SubGroups.MIDDLE) then
+               subselection = subselection + 1
+            elseif(subselection == SubGroups.LEFT_MIDDLE and playerCounter < 2) then
+               subselection = 1
+            end
+         elseif (0 ~= dir[1]) and (playerCounter < 2) and
+            (subselection == SubGroups.LEFT_MIDDLE) then
+               subselection = subselection + dir[1]
          end
       end
    end
