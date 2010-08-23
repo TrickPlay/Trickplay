@@ -176,6 +176,8 @@ HandState = Class(nil,function(state, ctrl, ...)
          player_bets[active_player] = bet
          if bet == 0 then
             ctrl:check_player(active_player)
+         elseif active_player.money == 0 then
+            ctrl:all_in_player(active_player)
          else
             ctrl:call_player(active_player)
          end
@@ -194,7 +196,11 @@ HandState = Class(nil,function(state, ctrl, ...)
             min_raise = overbid
          end
          call_bet = bet
-         ctrl:raise_player(active_player)
+         if active_player.money == 0 then
+            ctrl:all_in_player(active_player)
+         else
+            ctrl:raise_player(active_player)
+         end
       else
          error(
             "problem. this should never display. let's see what happened:" .. '\n' ..
