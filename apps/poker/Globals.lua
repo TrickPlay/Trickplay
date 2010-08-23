@@ -42,7 +42,7 @@ Colors={
    FOCUS_RED                    ="602020"
 }
 
-PLAYER_NAME_FONT = "KacstArt 20px"
+PLAYER_NAME_FONT = "KacstArt 22px"
 PLAYER_ACTION_FONT = "KacstArt 40px"
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"

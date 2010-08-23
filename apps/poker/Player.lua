@@ -13,18 +13,6 @@ Player = Class(function(player, args, ...)
    
    player.glow = DOG_GLOW[ player.table_position ]
    
-   --[[
-   function player:createMoneyChips()
-      
-      player.moneyChips = chipCollection()
-      player.moneyChips.group.position = {player.chipPosition[1], player.chipPosition[2]}
-      player.moneyChips:set(player.money)
-      player.moneyChips:arrange(55, 5)
-      screen:add(player.moneyChips.group)
-      
-   end
-   --]]
-   
    function player:createBetChips()
       
       player.betChips = chipCollection()

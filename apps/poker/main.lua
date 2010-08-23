@@ -3,13 +3,13 @@ dofile ("Assets.lua")
 -- Asset loading ---------------------------------------------------------------
 AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
-AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleNone.png")
+AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
 AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 
 -- Buttons
 local ui_colors = {"Red", "Green", "Gray"}
 local ui_buttons = {
-   "BubbleHeader", "ButtonArrowDown", "ButtonArrowUp",
+   "Bubble", "BubbleHeader", "ButtonArrowDown", "ButtonArrowUp",
    "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"
 }
 for _,color in pairs(ui_colors) do
@@ -29,6 +29,13 @@ for i=1, 2 do
    for _, text in ipairs(player_text) do
       AssetLoader:preloadImage(text..i,"assets/UI/"..text..i..".png")
    end
+end
+
+DOGS = {}
+
+-- Dog images
+for i=1,6 do
+   AssetLoader:preloadImage("dog"..i,"assets/dogs/dogs/"..i..".png")
 end
 
 -- Dog animations
@@ -63,6 +70,7 @@ for i=1, 6 do
    AssetLoader:preloadImage("dog"..i.."glow","assets/dogs/glow/"..i..".png")
 end
 
+DOG_LAYER = Group{}
 DOG_GLOW_LAYER = Group{}
 DOG_ANIMATION_LAYER = Group{}
 
@@ -71,8 +79,10 @@ DOG_ANIMATION_LAYER = Group{}
 AssetLoader.on_preload_ready =
 function()
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
-   screen:add(DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
+   screen:add(DOG_LAYER, DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
    for i=1, 6 do
+      DOGS[i] = AssetLoader:getImage("dog"..i,{opacity = 0})
+      DOG_LAYER:add(DOGS[i])
       DOG_GLOW[i] = AssetLoader:getImage("dog"..i.."glow",{position = DOG_GLOW[i], opacity=0} )
       DOG_GLOW_LAYER:add(DOG_GLOW[i])
    end
