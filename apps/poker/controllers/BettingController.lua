@@ -14,8 +14,8 @@ BettingController = Class(Controller, function(self, view, ...)
         RAISE = 3
     }
     local SubGroups2 = {
-        EXIT = 1,
-        HELP = 2
+        HELP = 1,
+        EXIT = 2
     }
 
     local GroupSize = 0
@@ -168,6 +168,7 @@ BettingController = Class(Controller, function(self, view, ...)
           if(subselection == SubGroups.RAISE) then
               local new_money = model.currentPlayer.money + ( dir[2] * model.bet.BIG_BLIND )
               local new_bet = model.currentPlayer.bet + ( - dir[2] * model.bet.BIG_BLIND )
+              view:change_bet_animation(dir)
               if new_bet >= minRaiseBet and new_money >= 0 then
                   model.currentPlayer.bet = new_bet
                   model.currentPlayer.money = new_money
