@@ -12,18 +12,18 @@ Player = Class(function(player, args, ...)
    end
    
    player.glow = DOG_GLOW[ player.table_position ]
+   player.dog = DOGS[ player.table_position ]
+   --player.dog.position = player.position
+   player.dog.opacity = 255
    
-   --[[
-   function player:createMoneyChips()
-      
-      player.moneyChips = chipCollection()
-      player.moneyChips.group.position = {player.chipPosition[1], player.chipPosition[2]}
-      player.moneyChips:set(player.money)
-      player.moneyChips:arrange(55, 5)
-      screen:add(player.moneyChips.group)
-      
+   function player:dim()
+        player.dog:animate{opacity = 50, duration = 300}
+        player.glow:animate{opacity = 50, duration = 300}
    end
-   --]]
+   
+   function player:show()
+        player.dog:animate{opacity = 255, duration = 300}
+   end
    
    function player:createBetChips()
       
@@ -385,7 +385,8 @@ Player = Class(function(player, args, ...)
    end
    
    player.status = PlayerStatusView(model, nil, player)
-   player.status:initialize()
+   --player.status:initialize()
+   player.status:display()
    assert(player.status)
    
    --function player:get_move(state)

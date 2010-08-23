@@ -21,7 +21,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local allCards = {}
    
    local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = MDBL.POT}
-   on_text_changed = function()
+   function potText.on_text_changed()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
    potText.y = potText.y + 60
@@ -67,7 +67,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local hole_cards = ctrl:get_hole_cards()
       local hole = hole_cards[player]
       for k,card in pairs(hole) do
-         screen:remove(card.group)
+         card.group:animate{
+            opacity = 0,
+            duration=300,
+            on_completed = function()
+               screen:remove(card.group)
+               card.group.opacity = 255
+            end
+         }
       end
    end
    
@@ -87,6 +94,15 @@ HandPresentation = Class(nil,function(pres, ctrl)
             }
          end
       end
+   end
+   
+   -- Give the pot to a player after he wins
+   local function animate_pot_to_player(player)
+      model.potchips.group:animate{
+         position = { MSCL[player.table_position][1] + 55, MSCL[player.table_position][2] },
+         duration = 500,
+         mode="EASE_OUT_QUAD",
+      }
    end
    
    ------------------------- GAME FLOW --------------------------
@@ -111,7 +127,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
          
          player.status:display()
-         player.status:update( "I'm In" )  
+         player.status:update( GET_IMIN_STRING() )
+         player:show()
+
       end
       
       -- Initialize SB and BB player chip collections
@@ -174,8 +192,19 @@ HandPresentation = Class(nil,function(pres, ctrl)
       animate_chips_to_center()
       all_cards_up()
       print(poker_hand.name .. " passed to pres:showdown()")
-      
-      winners[1].status:update( poker_hand.name )
+
+      local won = {}
+      for _,winner in ipairs(winners) do
+         winner.status:update( GET_WINHAND_STRING() )
+         won[winner] = true
+      end
+
+      for _,player in ipairs(ctrl:get_players()) do
+         if not won[player] then
+            player.status:hide()
+         end
+      end
+      animate_pot_to_player(winners[1])
    end
 
    -- Clear everything
@@ -189,7 +218,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
          resetCardGroup(card.group)
          print(card.group.parent, screen, card.group.parent==screen)
          if card.group.parent == screen then screen:remove(card.group) end
-         
       end
             
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS. THEY WILL NOW BE REMOVED")
@@ -227,7 +255,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
 --         remove_player_chips(player)
          remove_player_cards(player)
 --         player.status:hide()
-         player.glow.opacity = 50
+         player.status:dim()
+         player:dim()
       end
 
       mediaplayer:play_sound(FOLD_WAV)
@@ -258,6 +287,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
       player.status:update( "Raise to "..bet )
    end
 
+   -- ALL IN
+   function pres:all_in_player(player)
+      mediaplayer:play_sound(RAISE_WAV)
+      local bet = ctrl:get_player_bets()[player]
+      player.betChips:set(bet)
+      player.status:update( GET_ALLIN_STRING() )
+   end
+
    -- FINISH TURN
    function pres:finish_turn(player)
       player.glow.opacity = 0
@@ -270,6 +307,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
+      only_player.status:update( "weaksauce." )
    end
 
    -- Betting round over, HandState has been set for next betting round

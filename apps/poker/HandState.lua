@@ -24,6 +24,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    local call_bet
    local min_raise
    local num_inplayers
+   local all_in
 
    function state:get_community_cards() return community_cards end
    function state:get_hole_cards() return hole_cards end
@@ -77,11 +78,14 @@ HandState = Class(nil,function(state, ctrl, ...)
 
       done = {}
       out = {}
+      all_in = {}
       for i, player in ipairs(players) do
          done[player] = false
          out[player] = false
+         all_in[player] = false
       end
       num_inplayers = #players
+      ctrl:set_bets_done(false)
 
       -- person after the big blind goes first, initially
       action = (bb_p % #players) + 1
@@ -150,13 +154,17 @@ HandState = Class(nil,function(state, ctrl, ...)
    -- raise). Assumes the active player's money (player.moneY) reflects
    -- his current holdings.
    function state:execute_bet(fold, bet)
+      print("state:execute_bet(" .. tostring(fold) .. ", " .. tostring(bet) .. ")")
       local active_player = players[action]
       local old_player_bet = player_bets[active_player]
+      done[active_player] = true
+      if active_player.money == 0 then
+         all_in[active_player] = true
+      end
       if fold then
          -- if the player folds, then he's out of the hand, and whatever bet he had goes into the pot
          set_out(active_player)
          pot, player_bets[active_player] = pot+player_bets[active_player], 0
-         done[active_player] = true
          ctrl:fold_player(active_player)
          -- if he's out of money, then that's dumb.
          if active_player.money == 0 then
@@ -166,18 +174,18 @@ HandState = Class(nil,function(state, ctrl, ...)
       elseif bet == call_bet or (bet < call_bet and active_player.money == 0) then
          -- player calls
          player_bets[active_player] = bet
-         done[active_player] = true
          if bet == 0 then
             ctrl:check_player(active_player)
+         elseif active_player.money == 0 then
+            ctrl:all_in_player(active_player)
          else
             ctrl:call_player(active_player)
          end
       elseif bet >= call_bet+min_raise or (call_bet < bet and bet < call_bet+min_raise and active_player.money==0) then
          -- player raises, forces everyone to act
          player_bets[active_player] = bet
-         done[active_player] = true
          for _, player in ipairs(players) do
-            if player ~= active_player and not out[player] and player.money > 0 then
+            if player ~= active_player and not out[player] and not all_in[player] and player.money > 0 then
                done[player] = false
             end
          end
@@ -188,7 +196,11 @@ HandState = Class(nil,function(state, ctrl, ...)
             min_raise = overbid
          end
          call_bet = bet
-         ctrl:raise_player(active_player)
+         if active_player.money == 0 then
+            ctrl:all_in_player(active_player)
+         else
+            ctrl:raise_player(active_player)
+         end
       else
          error(
             "problem. this should never display. let's see what happened:" .. '\n' ..
@@ -209,7 +221,7 @@ HandState = Class(nil,function(state, ctrl, ...)
 
       -- if there are still in players who need to bet, then stay in betting round
       for i, player in ipairs(players) do
-         if not out[player] and not done[player] then
+         if not out[player] and not done[player] and not all_in[player] then
             continue = false
          end
       end
@@ -225,15 +237,50 @@ HandState = Class(nil,function(state, ctrl, ...)
          min_raise = bb_qty
 
          local tmp_action = (dealer % #players) + 1
-         while out[players[tmp_action]] or done[players[tmp_action]] do
+         local safety_counter = 1
+         local num_all_in = 0
+         print("before true loop")
+         local num_in_players = #self:get_in_players()
+         while out[players[tmp_action]] or done[players[tmp_action]] or all_in[players[tmp_action]] do
             tmp_action = (tmp_action % #players) + 1
+            if all_in[players[tmp_action]] then
+               print("player "..tmp_action.." is all in")
+               num_all_in = num_all_in+1
+            end
+            if num_all_in == num_in_players then
+               ctrl:set_bets_done(true)
+               break
+            end
+            safety_counter = safety_counter + 1
+            if safety_counter > #players then
+               error("infinite loop detected in continue true")
+               break
+            end
          end
+         print("after true loop")
          action = tmp_action
          ctrl:betting_round_over()
       else
          local tmp_action = (action % #players) + 1
-         while out[players[tmp_action]] or done[players[tmp_action]] do
+         local safety_counter = 1
+         local num_all_in = 0
+         print("before false loop")
+         local num_in_players = #self:get_in_players()
+         while out[players[tmp_action]] or done[players[tmp_action]] or all_in[players[tmp_action]] do
             tmp_action = (tmp_action % #players) + 1
+            if all_in[players[tmp_action]] then
+               print("player "..tmp_action.." is all in")
+               num_all_in = num_all_in+1
+            end
+            if num_all_in == num_in_players then
+               ctrl:set_bets_done(true)
+               break
+            end
+            safety_counter = safety_counter + 1
+            if safety_counter > #players then
+               error("infinite loop detected in continue false")
+               break
+            end
          end
          action = tmp_action
       end

@@ -11,6 +11,30 @@
 GamePresentation = Class(nil,
 function(pres, ctrl)
    local ctrl = ctrl
+   
+   -- LOCAL FUNCTIONS
+   local function create_pot_chips()
+      if not model.potchips then
+         model.potchips = chipCollection()
+         model.potchips.group.position = model.default_bet_locations.POT
+         screen:add(model.potchips.group)
+         model.potchips:set(0)
+         model.potchips.group:raise_to_top()
+      else
+         local pot = model.potchips
+         pot.group:animate{
+            opacity=0,
+            duration=300,
+            on_completed = function() screen:remove(pot) end
+         }
+         model.potchips:set(0)
+         model.potchips = nil
+         
+         create_pot_chips()
+      end
+   end
+   
+   -- GAME FLOW
    function pres.display_ui(pres)
       -- put sb, bb, dealer markers down, plus player chip stacks
       if not model.dealerchip then
@@ -33,13 +57,7 @@ function(pres, ctrl)
       end
       
       -- add the pot chips
-      if not model.potchips then
-         model.potchips = chipCollection()
-         model.potchips.group.position = model.default_bet_locations.POT
-         screen:add(model.potchips.group)
-         model.potchips:set(0)
-         model.potchips.group:raise_to_top()
-      end
+      create_pot_chips()
       
       if not model.deck then
          model.deck = ctrl:get_deck()
@@ -59,7 +77,12 @@ function(pres, ctrl)
       model.dealerchip:animate{ position = MSCL[ model.players[ctrl:get_dealer()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
       model.bbchip:animate{ position = MSCL[ model.players[ctrl:get_bb_p()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
       model.sbchip:animate{ position = MSCL[ model.players[ctrl:get_sb_p()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
-      model.potchips:set(0)
+      
+      create_pot_chips()
+      
+      for _, card in ipairs(model.deck.cards) do
+         card.group.opacity = 255
+      end
       
       -- Reset deck
       for i=#model.deck.cards, #model.deck.cards-7, -1 do
@@ -69,25 +92,6 @@ function(pres, ctrl)
          if g.parent ~= screen then screen:add(g) end
       end
       
-      --[[
-      for i,card in ipairs(model.deck.cards) do
-         print("resetting card", i)
-         local g = card.group
-         
-         if type(g.parent) == "userdata" then screen:remove(g) end
-         
-         resetCardGroup(g)
-         
-         g.position = MCL.DECK
-         g.z_rotation={math.random(-5, 5), 0, 0}
-         
-         if not g.parent then screen:add(g) end
-         
-      end
-      ]]--
-   
- -- sb, bb, dealer data in ctrl are correct, u just gotta make the view reflect that
- -- move sb, bb, dealer chips to new locations
    end
 
    function pres:return_to_main_menu()
