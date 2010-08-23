@@ -190,7 +190,7 @@ HandState = Class(nil,function(state, ctrl, ...)
          call_bet = bet
          ctrl:raise_player(active_player)
       else
-         print(
+         error(
             "problem. this should never display. let's see what happened:" .. '\n' ..
                "call_bet: " .. call_bet .. ", min_raise: " .. min_raise ..'\n' ..
                "old bet: " .. old_player_bet .. ", new bet: " .. bet .. '\n' ..
