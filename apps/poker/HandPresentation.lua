@@ -216,7 +216,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       if not player.betChips then add_player_chips(player) end
       assert(player.betChips)
    
-      player.status:update( "My turn, foo!" )
+      player.status:update( "My turn!" )
       local pos = player.table_position
       local params = DOG_ANIMATIONS[ pos ]
       if params and params.name then
@@ -229,17 +229,16 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- FOLD
    function pres:fold_player(player)
+      local foldtimer = Timer{interval=.2}
+      function foldtimer.on_timer(t)
+         t:stop()
+         remove_player_chips(player)
+         remove_player_cards(player)
+         player.status:hide()
+         player.glow.opacity = 50
+      end
+
       mediaplayer:play_sound(FOLD_WAV)
-      local foldtimer = Timer{
-         interval=.2,
-         on_timer=function(t)
-            t:stop()
-            remove_player_chips(player)
-            remove_player_cards(player)
-            player.status:hide()
-            player.glow.opacity = 50
-         end
-      }
       player.status:update("Fold")
       foldtimer:start()
    end
