@@ -91,7 +91,7 @@ Player = Class(function(player, args, ...)
       print("coef_of_chance: "..coef_of_chance)
       print("random_seed: "..random_seed)
       local m = math.floor(random_seed*coef_of_chance)
-      assert(m >= 1, "math.floor(random_seed*coef_of_chance) was too small: " .. m)
+      if(m < 1) then m = 1 end
       local num = math.random(m)
       print("num: "..num.."\n")
       if(num == 1) then
@@ -111,28 +111,20 @@ Player = Class(function(player, args, ...)
          assert(call_bet >= 0)
          assert(min_raise > 0)
          local a_bet = call_bet+min_raise
-         if amount_to_raise == RaiseFactor.R then
-            --websites say raising the bet times 2 is a good standard?
-            if a_bet < bb_qty * 3 then
+         if(a_bet < bb_qty*3+min_raise) then
+            -- calculate ammount to raise
+            if amount_to_raise == RaiseFactor.R then
                a_bet = math.random(a_bet, bb_qty * 3)
-            end
-            if a_bet > player.money+orig_bet then
-               a_bet = player.money+orig_bet
-            end
-            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
-            return false, a_bet
-         elseif amount_to_raise == RaiseFactor.RR then
-            if bb_qty*3+min_raise < bb_qty*5+min_raise then
+            elseif amount_to_raise == RaiseFactor.RR then
                a_bet = math.random(bb_qty*3+min_raise, bb_qty*5+min_raise)
             end
-            if a_bet > player.money+orig_bet then
-               a_bet = player.money+orig_bet
-            end
-            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
-            return false, a_bet
-         else
-            error("failed raising the steaks")
          end
+         -- check for all in
+         if a_bet > player.money+orig_bet then
+            a_bet = player.money+orig_bet
+         end
+         print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
+         return false, a_bet
       else
          error("someth'n wrong with the moves")
       end

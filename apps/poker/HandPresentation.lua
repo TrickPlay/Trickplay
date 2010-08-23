@@ -21,7 +21,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local allCards = {}
    
    local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = MDBL.POT}
-   on_text_changed = function()
+   function potText.on_text_changed()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
    potText.y = potText.y + 60
@@ -164,17 +164,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
       elseif round == Rounds.FLOP then
          -- Animate chips and deal flop
-         animate_chips_to_center()
          deal_cards(1, 3)
          print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
       elseif round == Rounds.TURN then
          -- Animate chips and deal turn
-         animate_chips_to_center()
          deal_cards(4)
          print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
       elseif round == Rounds.RIVER then
          -- Animate chips and deal river
-         animate_chips_to_center()
          deal_cards(5)
          print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
       end
@@ -202,7 +199,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
          resetCardGroup(card.group)
          print(card.group.parent, screen, card.group.parent==screen)
          if card.group.parent == screen then screen:remove(card.group) end
-         
       end
             
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS. THEY WILL NOW BE REMOVED")
@@ -221,7 +217,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       if not player.betChips then add_player_chips(player) end
       assert(player.betChips)
    
-      player.status:update( "My turn!" )
+      player.status:update( GET_MYTURN_STRING() )
       local pos = player.table_position
       local params = DOG_ANIMATIONS[ pos ]
       if params and params.name then
@@ -237,7 +233,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local foldtimer = Timer{interval=.2}
       function foldtimer.on_timer(t)
          t:stop()
-         remove_player_chips(player)
+--         remove_player_chips(player)
          remove_player_cards(player)
 --         player.status:hide()
          player.glow.opacity = 50
@@ -291,5 +287,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
       for _,player in ipairs(ctrl:get_players()) do
          if out[player] then player.status:hide() end
       end
+      animate_chips_to_center()
    end
 end)
