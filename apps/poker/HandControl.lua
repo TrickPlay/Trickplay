@@ -21,6 +21,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       function(ctrl) return ctrl:showdown() end
    }
 
+   -- true if everyone's all in
+   local bets_done = false
+   function ctrl:set_bets_done(boo)
+      bets_done = boo
+   end
    function ctrl:get_community_cards() return state:get_community_cards() end
    function ctrl:get_hole_cards() return state:get_hole_cards() end
    function ctrl:get_player_bets() return state:get_player_bets() end
@@ -84,7 +89,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    print("defined and set waiting_for_bet to false")
    ctrl.waiting_for_bet = false
    function ctrl.bet(ctrl, rd, event)
---      print("HandControl:bet(" .. tostring(rd) .. ", event")
+      if bets_done then
+         enable_event_listener(TimerEvent{interval=.3})
+         return true
+      end
+      print("HandControl:bet(" .. tostring(rd) .. ", event")
       round = rd
       local continue = false
       if ctrl.waiting_for_bet and event:is_a(BetEvent) then
