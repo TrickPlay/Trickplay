@@ -67,7 +67,13 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local hole_cards = ctrl:get_hole_cards()
       local hole = hole_cards[player]
       for k,card in pairs(hole) do
-         screen:remove(card.group)
+         card.group:animate{
+            opacity = 0,
+            duration=300,
+            on_completed = function()
+               screen:remove(card.group)
+            end
+         }
       end
    end
    
@@ -120,7 +126,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
          
          player.status:display()
-         player.status:update( "I'm In" )  
+         player.status:update( "I'm In" )
+         player:show()
+
       end
       
       -- Initialize SB and BB player chip collections
@@ -236,7 +244,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
 --         remove_player_chips(player)
          remove_player_cards(player)
 --         player.status:hide()
-         player.glow.opacity = 50
+         player.status:dim()
+         player:dim()
       end
 
       mediaplayer:play_sound(FOLD_WAV)
