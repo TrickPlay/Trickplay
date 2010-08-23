@@ -20,7 +20,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
    local allCards = {}
    
-   local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "Ammount", position = MDBL.POT}
+   local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = MDBL.POT}
    on_text_changed = function()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
@@ -94,6 +94,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- Initialize stuff
    function pres:display_hand()
       mediaplayer:play_sound(SHUFFLE_WAV)
+      
+      potText.text = ""
+      
       -- Put community cards on the deck
       local cards = ctrl:get_community_cards()
       for i=5,1,-1 do
@@ -110,6 +113,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
          player.status:display()
          player.status:update( "I'm In" )  
       end
+      
+      -- Initialize SB and BB player chip collections
+      local sb_player = model.players[ ctrl:get_sb_p() ]
+      local bb_player = model.players[ ctrl:get_bb_p() ]
+      add_player_chips( sb_player )
+      add_player_chips( bb_player )
+      sb_player.betChips:set( ctrl:get_sb_qty() )
+      bb_player.betChips:set( ctrl:get_bb_qty() )
       
    end
 
@@ -146,7 +157,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate chips and deal flop
    function pres:deal_flop()
-      mediaplayer:play_sound(DEAL_WAV)
       animate_chips_to_center()
       deal_cards(1, 3)
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
@@ -154,7 +164,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate chips and deal turn
    function pres:deal_turn()
-      mediaplayer:play_sound(DEAL_WAV)
       animate_chips_to_center()
       deal_cards(4)
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
@@ -162,7 +171,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate chips and deal river
    function pres:deal_river()
-      mediaplayer:play_sound(DEAL_WAV)
       animate_chips_to_center()
       deal_cards(5)
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
@@ -180,7 +188,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- Clear everything
    function pres.clear_ui(pres)
-   
+      
+      potText.text = ""
+      
       -- clear cards
       for i,card in ipairs(allCards) do
          print("Removing card", i)
