@@ -91,7 +91,7 @@ Player = Class(function(player, args, ...)
       print("coef_of_chance: "..coef_of_chance)
       print("random_seed: "..random_seed)
       local m = math.floor(random_seed*coef_of_chance)
-      assert(m >= 1, "math.floor(random_seed*coef_of_chance) was too small: " .. m)
+      if(m < 1) then m = 1 end
       local num = math.random(m)
       print("num: "..num.."\n")
       if(num == 1) then
