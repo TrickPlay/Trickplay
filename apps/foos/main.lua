@@ -73,6 +73,7 @@ item_selected_view:initialize()
 function app:on_closing()
 	settings.searches = searches
 	settings.adaptersTable = adaptersTable
+	settings.user_ids = user_ids
 end
 
 function screen:on_key_down(k)
