@@ -36,6 +36,7 @@ BettingController = Class(Controller, function(self, view, ...)
     local subselection = SubGroups.CALL
     --the number of the current player selecting a seat
     local playerCounter = 1
+    local minRaiseBet = 4
 
     local betCallback = function() end
     local updated = false -- updated is true when the player bet has
@@ -150,6 +151,7 @@ BettingController = Class(Controller, function(self, view, ...)
                    if call_bet < player.bet + player.money and player.bet + player.money < bet then
                       bet = player.bet+player.money
                    end
+                   minRaiseBet = bet
                    player.bet, player.money = bet, player.bet+player.money-bet
                 end
              end
@@ -166,7 +168,7 @@ BettingController = Class(Controller, function(self, view, ...)
           if(subselection == SubGroups.RAISE) then
               local new_money = model.currentPlayer.money + ( dir[2] * model.bet.BIG_BLIND )
               local new_bet = model.currentPlayer.bet + ( - dir[2] * model.bet.BIG_BLIND )
-              if new_bet > 0 and new_money >= 0 then
+              if new_bet >= minRaiseBet and new_money >= 0 then
                   model.currentPlayer.bet = new_bet
                   model.currentPlayer.money = new_money
                   print("Current bet:", model.currentPlayer.bet, "Current money:", model.currentPlayer.money)
