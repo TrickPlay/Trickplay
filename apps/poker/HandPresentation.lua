@@ -72,6 +72,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
             duration=300,
             on_completed = function()
                screen:remove(card.group)
+               card.group.opacity = 255
             end
          }
       end
