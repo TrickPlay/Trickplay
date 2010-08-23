@@ -122,11 +122,9 @@ Player = Class(function(player, args, ...)
             if a_bet > player.money+orig_bet then
                a_bet = player.money+orig_bet
             end
-            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
-            return false, a_bet
-         else
-            error("failed raising the steaks")
          end
+         print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
+         return false, a_bet
       else
          error("someth'n wrong with the moves")
       end
