@@ -83,9 +83,10 @@ function Load_Image(site,index)
                                  {PIC_W,PIC_H})
                     model.fp_slots[i][j]:add(model.albums[i][j])
 
-                    if model.fp_index[1] == i and model.fp_index[2] == j then
-                        model:notify()
-                    end
+                    --if model.fp_index[1] == i and model.fp_index[2] == j then
+                        --model:notify()
+                        model.albums[i][j]:lower_to_bottom()
+                    --end
                 end
             end
         }
@@ -94,7 +95,6 @@ function Load_Image(site,index)
         model.swap_pic = Image{
             async    = true,
             src      = site,
-            --position = { PIC_W * (j-1), PIC_H * (i-1) },
             -- toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
             	if not failed then
@@ -105,45 +105,26 @@ function Load_Image(site,index)
                     model.swap_pic = nil 
                     model.swapping_cover = false
                 else
-                    --print("swap pic loaded")
---[[
-                    if model.fp_index[1] == i and model.fp_index[2] == j then
-                        model.swap_pic.scale = {
-                            PIC_W / model.swap_pic.base_size[1],
-                            PIC_H / model.swap_pic.base_size[2]
-                        }
-                    else
-                        model.swap_pic.scale = {
-                            PIC_W / model.swap_pic.base_size[1],
-                            PIC_H / model.swap_pic.base_size[2]
-                        }
-                    end
---]]
                     Scale_To_Fit(model.swap_pic,
                                  model.swap_pic.base_size,
                                  {PIC_W,PIC_H})
 
                     model.fp_slots[i][j]:add(model.swap_pic)
-                    --model.album_group:add(model.swap_pic)
                     model.albums[i][j]:raise_to_top()
---                    model.swap_pic:lower_to_bottom()
                     model.albums[i][j]:animate{
                         duration     = 4*CHANGE_VIEW_TIME,
                         y            = model.albums[i][j].y + PIC_H,
                         opacity      = 0,
                         on_completed = function()
-                            --print("swap animation completed")
                             if model.albums[i] == nil or 
                                model.albums[i][j] == nil then 
                                 model.swap_pic = nil 
                             else
-                                --print("changeCover called back",model.albums[i][j],model.swap_pic)
                                 if model.albums[i][j] ~= nil then
                                     model.albums[i][j]:unparent() 
                                     model.albums[i][j] = nil
                                 end
                                 model.albums[i][j] = model.swap_pic
-                                --model.swap_pic:lower_to_bottom()
                             end
                             model.swapping_cover = false
                         end
