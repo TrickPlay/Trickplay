@@ -22,20 +22,19 @@ local function build_ui( show_it )
     setmetatable( strings , { __index = missing_localized_string } )
 
     -------------------------------------------------------------------------------
-    -- Style constants
-    -------------------------------------------------------------------------------
-    
-    local BUTTON_FONT               = "DejaVu Sans 32px"
-    local BUTTON_FONT_COLOR         = "FFFFFFFF"
-     
-    -------------------------------------------------------------------------------
-    -- Section index constants
+    -- Section index constants. These also determine their order.
     -------------------------------------------------------------------------------
     
     local SECTION_APPS      = 1
     local SECTION_SHOWCASE  = 2
     local SECTION_SHOP      = 3
     local SECTION_SETTINGS  = 4
+
+    -------------------------------------------------------------------------------
+    -- Style constants
+    -------------------------------------------------------------------------------
+    
+    local BUTTON_TEXT_STYLE = { font = "DejaVu Sans 32px" , color = "FFFFFFFF" }
     
     -------------------------------------------------------------------------------
     -- All the initial assets
@@ -48,46 +47,45 @@ local function build_ui( show_it )
         bar_background      = Image { src = "assets/menu-background-"..OEM..".png" },
         
         button_focus        = Image { src = "assets/button-focus.png" },
-    
-        apps_button         = Image { src = "assets/button-red.png" },
         
-        apps_text           = Text  {
-                                        font = BUTTON_FONT ,
-                                        color = BUTTON_FONT_COLOR ,
-                                        text = strings[ "My Apps" ]
-                                    },
-                                    
-        apps_dropdown       = Image { src = "assets/dropdown-red.png" },
-        
-        shop_button         = Image { src = "assets/button-yellow.png" },
-        
-        shop_text           = Text  {
-                                        font = BUTTON_FONT ,
-                                        color = BUTTON_FONT_COLOR ,
-                                        text = strings[ "App Shop" ]
-                                    },
-                                    
-        shop_dropdown       = Image { src = "assets/dropdown-yellow.png" },
-        
-        settings_button     = Image { src = "assets/button-blue.png" },
-        
-        settings_text       = Text  {
-                                        font = BUTTON_FONT ,
-                                        color = BUTTON_FONT_COLOR ,
-                                        text = strings[ "More" ]                                        
-                                    },
-                                    
-        settings_dropdown   = Image { src = "assets/dropdown-blue.png" },
-    
-        showcase_button     = Image { src = "assets/button-green.png" },
-        
-        showcase_text       = Text  {
-                                        font = BUTTON_FONT ,
-                                        color = BUTTON_FONT_COLOR ,
-                                        text = strings[ "Showcase" ]
-                                    },
-                                    
-        showcase_dropdown   = Image { src = "assets/dropdown-green.png" }
+        sections =
+        {
+            [SECTION_APPS] =
+            {
+                button  = Image { src = "assets/button-red.png" },
+                text    = Text  { text = strings[ "My Apps" ] }:set( BUTTON_TEXT_STYLE ),
+                color   = { 120 ,  21 ,  21 , 230 }, -- RED
+                height  = 900,
+                init    = dofile( "section-apps.lua" )
+            },
+            
+            [SECTION_SHOWCASE] =
+            {
+                button  = Image { src = "assets/button-green.png" },
+                text    = Text  { text = strings[ "Showcase" ] }:set( BUTTON_TEXT_STYLE ),
+                color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
+                height  = 620,
+                init    = dofile( "section-showcase.lua" )
+            },
+            
+            [SECTION_SHOP] =
+            {
+                button  = Image { src = "assets/button-yellow.png" },
+                text    = Text  { text = strings[ "App Shop" ] }:set( BUTTON_TEXT_STYLE ),
+                color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
+                height  = 620,
+                init    = dofile( "section-shop.lua" )
+            },
+            
+            [SECTION_SETTINGS] =
+            {
+                button  = Image { src = "assets/button-blue.png" },
+                text    = Text  { text = strings[ "More" ] }:set( BUTTON_TEXT_STYLE ),
+                color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
+                height  = 320,
+                init    = dofile( "section-settings.lua" )
+            }
+        }
     }
     
     -------------------------------------------------------------------------------
@@ -98,11 +96,17 @@ local function build_ui( show_it )
     local BUTTON_TEXT_Y_OFFSET      = 22
     local FIRST_BUTTON_X            = 13                    -- x coordinate of first button
     local FIRST_BUTTON_Y            = 9                     -- y coordinate of first button
-    local BUTTON_X_OFFSET           = ui.apps_button.w + 5  -- distance between left side of buttons
-    local DROPDOWN_POINT_Y_OFFSET   = -4                     -- how far to raise or lower the drop downs
+    local BUTTON_X_OFFSET           = 5                     -- distance between left side of buttons
+    local DROPDOWN_POINT_Y_OFFSET   = -6                    -- how far to raise or lower the drop downs
     
     -------------------------------------------------------------------------------
-    -- Now, create structure an position everything
+    -- The function that makes drop downs - it returns a Canvas.
+    -------------------------------------------------------------------------------
+    
+    local make_dropdown = dofile( "dropdown.lua" )
+    
+    -------------------------------------------------------------------------------
+    -- Now, create structure and position everything
     -------------------------------------------------------------------------------
     
     ----------------------------------------------------------------------------
@@ -131,47 +135,22 @@ local function build_ui( show_it )
     screen:add( ui.bar )    
     
     ----------------------------------------------------------------------------
-    -- Put the buttons, dropdowns and text into an array, in order of appearance
     
-    ui.sections =
-    {
-        [SECTION_APPS] =
-        {
-            button = ui.apps_button,
-            dropdown_bg = ui.apps_dropdown,
-            text = ui.apps_text
-        },
+    local i = 0
+    
+    for _ , section in ipairs( ui.sections ) do
+    
+        section.ui = ui
         
-        [SECTION_SHOWCASE]=
-        {
-            button = ui.showcase_button,
-            dropdown_bg = ui.showcase_dropdown,
-            text = ui.showcase_text
-        },
+        -- Create the dropdown background
+    
+        section.dropdown_bg = make_dropdown( { section.button.w , section.height } , section.color )
+    
+        -- Position the button and text for this section
         
-        [SECTION_SHOP]=
-        {
-            button = ui.shop_button,
-            dropdown_bg = ui.shop_dropdown,
-            text = ui.shop_text
-        },
-        
-        [SECTION_SETTINGS]=
-        {
-            button = ui.settings_button,
-            dropdown_bg = ui.settings_dropdown,
-            text = ui.settings_text
-        }
-    }
-    
-    ----------------------------------------------------------------------------
-    -- Now, add and position everything
-    
-    for i , section in ipairs( ui.sections ) do
-    
         section.button.position =
         {
-            FIRST_BUTTON_X + ( BUTTON_X_OFFSET * ( i - 1 ) ),
+            FIRST_BUTTON_X + ( ( BUTTON_X_OFFSET + section.button.w ) * i  ),
             FIRST_BUTTON_Y
         }
     
@@ -180,6 +159,8 @@ local function build_ui( show_it )
             section.button.x + BUTTON_TEXT_X_OFFSET ,
             section.button.y + BUTTON_TEXT_Y_OFFSET
         }
+        
+        -- Create the dropdown group
         
         section.dropdown = Group
         {
@@ -195,14 +176,22 @@ local function build_ui( show_it )
                 section.dropdown_bg
             }
         }
-                
+        
+        -- Add the text and button
+        
         ui.bar:add( section.button , section.text )
+        
+        -- Make sure its Z is correct with respect to the focus image
         
         section.button:lower( ui.button_focus )
         
         section.text:raise( ui.button_focus )
         
+        -- Add the section dropdown to the screen
+        
         screen:add( section.dropdown )
+        
+        i = i + 1
         
     end
 
@@ -213,9 +202,9 @@ local function build_ui( show_it )
     local DROPDOWN_TIMEOUT = 200    -- How many milliseconds one has to stay
                                     -- on a button for the dropdown to show up
                         
-    ui.strings = strings    -- Store the string table
+    ui.strings = strings            -- Store the string table
 
-    ui.focus = SECTION_APPS     -- The section # that has focus
+    ui.focus = SECTION_APPS         -- The section # that has focus
     
     ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
     
@@ -263,6 +252,20 @@ local function build_ui( show_it )
         local section = ui.sections[ ui.focus ]
         
         if section.dropdown.is_visible then return end
+        
+        -- If the section has not been initialized, do it now
+        
+        if section.init then
+        
+            section:init()
+            
+            section.init = nil
+        
+        end
+        
+        -- Call its on_show method
+        
+        pcall( section.on_show , section )
         
         section.dropdown.opacity = 0
         
@@ -314,10 +317,10 @@ local function build_ui( show_it )
         [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
         [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
         
-        [ keys.RED      ] = function() move_focus( ui.color_keys[ key ] ) end,
-        [ keys.GREEN    ] = function() move_focus( ui.color_keys[ key ] ) end,
-        [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ key ] ) end,
-        [ keys.BLUE     ] = function() move_focus( ui.color_keys[ key ] ) end,
+        [ keys.RED      ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
+        [ keys.GREEN    ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
+        [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
+        [ keys.BLUE     ] = function() move_focus( ui.color_keys[ keys.BLUE ] ) end,
         
         -- For keyboards
         
@@ -448,92 +451,6 @@ local function build_ui( show_it )
     
     end
 
-
-    ----------------------------------------------------------------------------
-    -- Load the apps and the most used apps
-    ----------------------------------------------------------------------------
-    
-    local top_apps = settings.top_apps or {}
-    
-    ui.all_apps = apps:get_for_current_profile()
-    
-    ui.top_apps = {}
-    
-    -- Look for each top app in all_apps and, if it is there, add it to
-    -- ui.top_apps until we have 3.
-    
-    -- This ensures that the ids we have saved previously in top apps still
-    -- exist.
-    
-    for _ , app_id in ipairs( top_apps ) do
-    
-        local app = ui.all_apps[ app_id ]
-        
-        if app then
-        
-            app.is_top = true
-    
-            table.insert( ui.top_apps , app_id )
-            
-            if # ui.top_apps == 3 then
-                break
-            end
-        end
-    
-    end
-
-    -- If ui.top_apps has less than 3, then add some from all_apps.
-    --
-    -- In a cold start, top apps will be empty - this fills it. 
-    
-    if # ui.top_apps < 3 then
-    
-        for app_id , app in pairs( ui.all_apps ) do
-        
-            if not app.is_top then
-            
-                app.is_top = true
-                
-                table.insert( ui.top_apps , app_id )
-                
-                if # ui.top_apps == 3 then
-                    break
-                end
-            end
-        end
-    end
-    
-    -- Now, get the icons for the top apps
-    
-    for _ , app_id in ipairs( ui.top_apps ) do
-    
-        local image = Image()
-        
-        -- If we cannot load the app icon, we use the generic one
-        
-        if not image:load_app_icon( app_id , "launcher-icon.png" ) then
-        
-            if not ui.generic_app_icon then
-            
-                ui.generic_app_icon = Image{ src = "assets/generic-app-icon.png" , opacity = 0 }
-                
-                screen:add( ui.generic_app_icon )
-                
-            end
-            
-            image = Clone{ source = ui.generic_app_icon , opacity = 255 }
-        
-        end
-        
-        -- Now we have either the icon or a clone of the generic icon
-        
-        local group = ui.sections[ SECTION_APPS ].dropdown
-        
-        
-    
-    end
-
-    
     ----------------------------------------------------------------------------
     
     return ui
@@ -548,13 +465,15 @@ function main()
 
     screen:show()
 
-    local ui = build_ui()
+    --local
+    
+    ui = build_ui( true)
        
     ui:animate_in()
     
 end
 
-dolater( main )
+main()
 
 
 
