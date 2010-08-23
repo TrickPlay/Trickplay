@@ -89,6 +89,15 @@ HandPresentation = Class(nil,function(pres, ctrl)
       end
    end
    
+   -- Give the pot to a player after he wins
+   local function animate_pot_to_player(player)
+      model.potchips.group:animate{
+         position = { MSCL[player.table_position][1] + 55, MSCL[player.table_position][2] },
+         duration = 500,
+         mode="EASE_OUT_QUAD",
+      }
+   end
+   
    ------------------------- GAME FLOW --------------------------
    
    -- Initialize stuff
@@ -179,6 +188,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       print(poker_hand.name .. " passed to pres:showdown()")
       
       winners[1].status:update( poker_hand.name )
+      animate_pot_to_player(winners[1])
    end
 
    -- Clear everything
