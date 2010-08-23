@@ -202,7 +202,7 @@ STRAIGHT_FLUSH = {
 }
 
 FOUR_OF_A_KIND = {
-   name="Four of a Kind",
+   name="4 of a Kind",
    present_in=
       function(hand)
          return has_n_of_a_kind(hand, 4)
@@ -316,7 +316,7 @@ STRAIGHT = {
 }
 
 THREE_OF_A_KIND = {
-   name="Three of a Kind",
+   name="3 of a Kind",
    present_in=
       function(hand)
          return has_n_of_a_kind(hand, 3)
