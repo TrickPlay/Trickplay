@@ -114,7 +114,7 @@ Player = Class(function(player, args, ...)
          if(a_bet < bb_qty*3+min_raise) then
             -- calculate ammount to raise
             if amount_to_raise == RaiseFactor.R then
-               a_bet = math.random(a_bet, bb_qty * 3)
+               a_bet = math.random(a_bet, bb_qty*3+min_raise)
             elseif amount_to_raise == RaiseFactor.RR then
                a_bet = math.random(bb_qty*3+min_raise, bb_qty*5+min_raise)
             end
@@ -207,6 +207,7 @@ Player = Class(function(player, args, ...)
          return some_outs, some_total_outs
       end
 
+      -- helps to curve the AI's betting strategy
       local function curvature(a_move)
          if(a_move == Moves.CALL) then
             if(4 <= math.random(3) + self.difficulty) then

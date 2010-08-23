@@ -13,8 +13,12 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       LEFT_MIDDLE = 2,
       MIDDLE = 3,
       RIGHT_MIDDLE = 4,
-      RIGHT = 5
+      RIGHT = 5,
    }
+
+   local HELP = SubGroups.LEFT_MIDDLE
+   local START = SubGroups.MIDDLE
+   local EXIT = SubGroups.RIGHT_MIDDLE
 
    local GroupSize = 0
    for k, v in pairs(CharacterSelectionGroups) do
@@ -32,6 +36,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    assert(subselection)
    --the number of the current player selecting a seat
    local playerCounter = 0
+   controller.playerCounter = playerCounter
 
    local function start_a_game()
       --make sure last dog selected does not continue to glow
@@ -52,13 +57,13 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    local CharacterSelectionCallbacks = {
       [CharacterSelectionGroups.TOP] = {},
       [CharacterSelectionGroups.BOTTOM] = {
-         [SubGroups.LEFT_MIDDLE] = function()
+         [START] = function()
             if playerCounter >= 2 then
                start_a_game()
             end
          end,
-         [SubGroups.MIDDLE] = function() exit() return end,
-         [SubGroups.RIGHT_MIDDLE] = function()
+         [EXIT] = function() exit() return end,
+         [HELP] = function()
             print("starting tutorial")
             model:set_active_component(Components.TUTORIAL)
             self:get_model():notify()
@@ -123,6 +128,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       model.currentPlayer = playerCounter
 
       playerCounter = playerCounter + 1
+      if(playerCounter >= 2) then
+         view.items[2][3].group.opacity = 255
+      end
       self:get_model():notify()
    end
 
@@ -166,11 +174,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          if(0 ~= dir[2]) then
             if(subselection >= SubGroups.MIDDLE) then
                subselection = subselection + 1
-            elseif(subselection == SubGroups.LEFT_MIDDLE and playerCounter < 2) then
-               subselection = 1
             end
          elseif (0 ~= dir[1]) and (playerCounter < 2) and
-            (subselection == SubGroups.LEFT_MIDDLE) then
+            (subselection == SubGroups.MIDDLE) then
                subselection = subselection + dir[1]
          end
       end
@@ -182,14 +188,15 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          local new_selected = subselection + dir[1]
          if 1 <= new_selected and SubSize >= new_selected then
             subselection = new_selected
+            check_for_valid(dir)
          end
-         elseif(0 ~= dir[2]) then
+      elseif(0 ~= dir[2]) then
          local new_selected = selected + dir[2]
          if 1 <= new_selected and GroupSize >= new_selected then
             selected = new_selected
+            check_for_valid(dir)
          end
       end
-      check_for_valid(dir)
       self:get_model():notify()
    end
 

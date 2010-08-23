@@ -3,34 +3,56 @@ BettingView = Class(View, function(view, model, ...)
     --first add the background shiz
 
     local background = {
-        Image{position = {MDPL.FOLD[1]-35, MDPL.FOLD[2]-20}, src = "assets/UI/ButtonsShadow.png"}
+        Image{
+            position = {MDPL.FOLD[1], MDPL.FOLD[2]},
+            src = "assets/UI/new/buttons_on_table.png"
+        }
     }
      
     --create the components
-    local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2], "assets/UI/ButtonCallGreen.png", "assets/UI/ButtonCallRed.png")
-    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "assets/UI/ButtonFoldGreen.png", "assets/UI/ButtonFoldRed.png")
-    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2], "assets/UI/ButtonBetGreen.png", "assets/UI/ButtonBetRed.png")
+    local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2], "assets/UI/new/fold_default", "assets/UI/new/fold_focused.png")
+    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "assets/UI/new/call_default", "assets/UI/new/call_focused.png")
+    local check_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "assets/UI/new/check_default.png", "assets/UI/new/check_focused.png")
+    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2], "assets/UI/new/bet_default", "assets/UI/new/bet_focused.png")
 
-    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
-    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "assets/UI/ButtonExitGreen.png", "assets/UI/ButtonExitRed.png")
+    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "assets/UI/new/exit_default.png", "assets/UI/new/exit_focused.png")
+    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "assets/UI/new/help_default.png", "assets/UI/new/help_focused.png")
+
+    check_button.group.opacity = 0
+
+    -- up down arrows
+    local arrows = {
+        Image{
+            position  = {MDPL.UP[1], MDPL.UP[2]},
+            src = "assets/UI/new/betarrow_up.png",
+            opacity = 0
+        },
+        Image{
+            position  = {MDPL.DOWN[1], MDPL.DOWN[2]},
+            src = "assets/UI/new/betarrow_down.png",
+            opacity = 0
+        }
+    }
 
     view.items = {
         {
             fold_button, call_button, bet_button
         },
         {
-            exit_button, help_button
+            help_button, exit_button
         }
     }
     
-    ---create text for the components
+    -- create text for the components
+    --[[
     local fold_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
             x = MDPL.FOLD[1] + 17, y = MDPL.FOLD[2] + 30, text = "Fold"}
     local call_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
             x = MDPL.CALL[1] + 30, y = MDPL.CALL[2] + 30, text = "Call"}
-    local bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.BET[1] + 30, y = MDPL.BET[2] + 30, text = "Bet"}
-
+    --]]
+    bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+            x = MDPL.BET[1] + 130, y = MDPL.BET[2] + 35, text = "$"}
+    --[[
     local exit_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
             x = MDPL.EXIT[1] + 40, y = MDPL.EXIT[2] + 20, text = "Exit"}
     local help_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
@@ -39,6 +61,7 @@ BettingView = Class(View, function(view, model, ...)
     view.text = {
         fold_text, call_text, bet_text, exit_text, help_text
     }
+    --]]
     
     --background ui
     view.background_ui = Group{name = "bettingBackground_ui", position = {0, 0}}
@@ -53,12 +76,29 @@ BettingView = Class(View, function(view, model, ...)
     for _,v in ipairs(view.items[2]) do
         view.ui:add(v.group)
     end
-    view.ui:add(unpack(view.text))
+    view.ui:add(check_button.group)
+    view.ui:add(bet_text)
+    view.ui:add(unpack(arrows))
 
     screen:add(view.ui)
 
     function view:initialize()
         self:set_controller(BettingController(self))
+    end
+
+    function view:change_bet_animation(dir)
+        assert(0 ~= dir[2])
+        if(1 ~= dir[2]) then
+            arrows[1]:complete_animation()
+            arrows[1].opacity = 255
+            arrows[1]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
+        elseif(-1 ~= dir[2]) then
+            arrows[2]:complete_animation()
+            arrows[2].opacity = 255
+            arrows[2]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
+        else
+            error("wtf mate?")
+        end
     end
     
     function view:update()
@@ -72,22 +112,28 @@ BettingView = Class(View, function(view, model, ...)
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
+                        if(item == call_button) then
+                            check_button:on_focus()
+                        end
                         item:on_focus()
                     else
+                        if(item == call_button) then
+                            check_button:out_focus()
+                        end
                         item:out_focus()
                     end
                 end
             end
             
             local player = model.currentPlayer
-            bet_text.text = "Bet:     "..player.bet
-
+            bet_text.text = "$"..player.bet
+--TODO: fix this
             if(model.call_bet == 0) then
-                call_text.text = "Check"
-                call_text.x = MDPL.CALL[1] + 10
+                check_button.group.opacity = 255
+                call_button.group.opacity = 0
             else
-                call_text.text = "Call"
-                call_text.x = MDPL.CALL[1] + 30
+                check_button.group.opacity = 0
+                call_button.group.opacity = 255
             end
             
             local playerBet = player.betChips
