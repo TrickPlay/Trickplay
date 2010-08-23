@@ -9,7 +9,7 @@ SourceManagerView = Class(View, function(view, model, ...)
     
 
     local resume_button = Image{src="assets/source\ manager/resume_button.png",
-                                position =  {0,screen.height/3}, opacity = 0}
+                                position =  {0,screen.height/3}}
     view.ui:add(resume_button)
 --[[
 	local background = Image {src = "assets/background.jpg", x = -200 }	
@@ -224,11 +224,6 @@ SourceManagerView = Class(View, function(view, model, ...)
             view.ui:complete_animation()
             view.ui:animate{duration = 300,
                             x        = screen.width/2}
-            resume_button:animate{duration = 2000, opacity = 0,
-                on_completed = function()
-                    resume_button:animate{duration=100,opacity = 255}
-                end
-            }
             if view.accordian == false then
             
                 print("\n\nShowing SourceManagerView UI - Source Providers\n")
@@ -264,7 +259,6 @@ SourceManagerView = Class(View, function(view, model, ...)
             view.ui:animate{duration = 300,
                             x        = screen.width}
             --view.ui.opacity = 0
-            resume_button:animate{duration = 100,opacity = 0}
         end
     end
 
