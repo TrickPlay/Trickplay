@@ -241,7 +241,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       mediaplayer:play_sound(CHECK_WAV)
       local bet = ctrl:get_player_bets()[player]
       player.betChips:set(bet)
-      player.status:update( "Call "..bet )
+      player.status:update( "Check" )
    end
    -- CALL
    function pres:call_player(player)
