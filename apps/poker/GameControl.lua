@@ -13,6 +13,8 @@ function(ctrl, model, ...)
    local model = model
    local in_hand = false
 
+   local hands = 0
+
    local game_pipeline = {}
    local orig_game_pipeline = {
       function(ctrl)
@@ -31,7 +33,14 @@ function(ctrl, model, ...)
          local continue = hand_ctrl:cleanup()
          enable_event_listener(TimerEvent{interval=1})
          pres:finish_hand()
+         hands = hands + 1
          return continue
+      end,
+      function(ctrl)
+         if hands % 10 == 0 then
+            state:increase_blinds()
+         end
+         enable_event_listener(TimerEvent{interval=.1})
       end
    }
 
