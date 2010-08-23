@@ -10,6 +10,14 @@ FrontPageView = Class(View, function(view, model, ...)
     view.ui = Group{name="front page ui"}
     screen:add(view.ui)
 
+    local big_black_box = Rectangle
+    {
+        width = 1920,
+        height = 1080,
+        color = "000000",
+        opacity = 0
+    }
+    view.ui:add(big_black_box)
     view.selector = Image
     {
         name = "frontpageselector",
@@ -47,6 +55,9 @@ FrontPageView = Class(View, function(view, model, ...)
         font     = "Sans 32px",
         position = {300, 0}
     }
+    local prev_i = {1,1} 
+                                       
+--[[
     local controls = Text
     {
         name     = "controls",
@@ -55,6 +66,7 @@ FrontPageView = Class(View, function(view, model, ...)
         font     = "Sans 24px",
         position = {30, 50}
     }
+--]]
     view.bottom_bar:add(sel_info, album_logo, album_title,controls)
     --model.album_group:add(view.selector)
     view.ui:add(model.album_group)
@@ -79,6 +91,78 @@ FrontPageView = Class(View, function(view, model, ...)
     left_edge.y = 1080
     left_edge.x = 1920-1750
     view.ui:add(left_edge)
+
+    local sel_timeline = Timeline
+    {
+        name      = "Selection animation",
+        loop      =  false,
+        duration  =  3000,
+        direction = "FORWARD",
+    }
+
+    view.previous   = nil
+    view.current    = nil
+    view.prev_pos   = {}
+    view.prev_scale = {1,1}
+
+    function sel_timeline.on_new_frame(t,msecs)
+        local  sel       = {}
+        sel[1],sel[2]    = view:get_controller():get_selected_index()
+               sel[2]    = sel[2] + model.front_page_index  - 1
+
+        -- shrink the previous
+        if msecs <= 200  then
+            local progress    =  msecs/200
+
+            --cannot assume that image will have made it to its full expanded size
+            local pos_delta   = {view.prev_pos[1] - view.prev_target_pos[1],
+                                 view.prev_pos[2] - view.prev_target_pos[2]}
+            local scale_delta = {view.prev_scale[1] - 1, view.prev_scale[2] - 1}
+
+            view.previous.x     =  view.prev_pos[1]   - progress*pos_delta[1]
+            view.previous.y     =  view.prev_pos[2]   - progress*pos_delta[2]
+            view.previous.scale = {view.prev_scale[1] - progress*scale_delta[1],
+                                   view.prev_scale[2] - progress*scale_delta[2]}
+            print("\t",view.previous.x,view.previous.y,"\t",view.previous.scale[1],view.previous.scale[2],"\t", progress)
+        -- grow the next one
+        elseif msecs > 200 and msecs <= 400 then
+             
+            --in case on_new_frame didn't get called on the 100th msec
+            view.previous.position = {view.prev_target_pos[1],view.prev_target_pos[2]}
+            view.previous.scale    = {1,1}
+            prev_i={sel[1],sel[2]}
+
+            local progress = (msecs - 200)/200
+
+            view.current.x = PIC_W * (sel[2]-1) -  (.025*PIC_W)*progress
+            view.current.y = PIC_H * (sel[1]-1) +  10 - progress*10
+            view.current.scale = {1 + progress*.05, 1 + progress * .05}
+
+            view.backdrop.scale = {.845 + .1*progress,.845 + .1*progress}
+            view.backdrop.opacity = 255--*progress
+            view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
+                         PIC_H * (sel[1]-1)-17*progress}
+
+        elseif msecs > 400  and msecs <= 800 then
+            --in case on_new_frame didn't get called on the 200th msec
+            view.current.position = {PIC_W * (sel[2]-1) -  (.025*PIC_W),
+                                     PIC_H * (sel[1]-1)}
+            view.current.scale    = {1.05,1.05}
+
+            view.backdrop.scale = {.945,.945}
+
+        -- bring the bar up a little bit
+        elseif msecs > 800  and msecs <= 900 then
+            local progress = (msecs - 800)/100
+            view.bottom_bar.opacity = 255
+            view.bottom_bar.y = PIC_H - progress*50
+        -- bring the bar up a little more
+        elseif msecs > 2900 and msecs <= 3000 then
+            local progress = (msecs - 2900)/100
+
+            view.bottom_bar.y = PIC_H - progress*120
+        end
+    end
 
 
     function view:initialize()
@@ -129,7 +213,6 @@ FrontPageView = Class(View, function(view, model, ...)
         
     end
 
-    local prev_i = {1,1} 
     function view:update()
         local controller = view:get_controller()
         local comp       = model:get_active_component()
@@ -145,14 +228,15 @@ FrontPageView = Class(View, function(view, model, ...)
 
             --view.ui:raise_to_top()
             view.ui.opacity = 255            
+            big_black_box.opacity = 0
 
             print("new index is",sel[1],sel[2],"shift",
                                    model.front_page_index)
             print("previous index is",prev_i[1],prev_i[2])
 
 
-            local prev_index = model.front_page_index*2 + (prev_i[1]-1)
-            local sel_index  = model.front_page_index*2 + (sel[1]-1)
+           -- local prev_index = model.front_page_index*2 + (prev_i[1]-1)
+           -- local sel_index  = model.front_page_index*2 + (sel[1]-1)
 
 
             local new_r = PIC_H * (sel[1]-1)
@@ -175,8 +259,16 @@ FrontPageView = Class(View, function(view, model, ...)
 --]]
 
 ---[=[
-            local previous =  model.fp_slots[prev_i[1]][prev_i[2]]
-            local current  =  model.fp_slots[sel[1]][sel[2]]
+            sel_timeline:stop()
+            view.previous   =  model.fp_slots[prev_i[1]][prev_i[2]]
+            view.prev_pos   = {view.previous.position[1],
+                               view.previous.position[2]}
+            view.prev_scale = {view.previous.scale[1],
+                               view.previous.scale[2]}
+            view.prev_target_pos = {PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)+10}
+            print(view.prev_pos[1],view.prev_pos[2],"  ",view.prev_target_pos[1],view.prev_target_pos[2],"  ",view.previous.x,view.previous.y)
+
+            view.current    =  model.fp_slots[sel[1]][sel[2]]
 --[=[
             local prev_bs  = {model.fp_slots[prev_i[1]][prev_i[2]].base_size[1],
                               model.fp_slots[prev_i[1]][prev_i[2]].base_size[2]}
@@ -209,6 +301,7 @@ print("adding bottom bar")
             end
 
 
+            
 
 --[=[
             if model.albums[sel[1]] == nil or 
@@ -226,18 +319,29 @@ print("adding bottom bar")
                 }
             end
 --]=]
+
             --print(prev_bs[1],prev_bs[2],curr_bs[1],curr_bs[2])
             view.bottom_bar.opacity = 0
 
-            view.bottom_bar:complete_animation()
+            --view.bottom_bar:complete_animation()
            -- view.bottom_bar.opacity = 0
 
             view.bottom_bar:unparent()
-
             model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
+            view.bottom_bar.position = {-10,PIC_H}
+            view.bottom_bar.scale   = {1.1,1}
 
-            view.bottom_bar.position = {0,PIC_H}
+            album_title.text = adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query
+            album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
+            view.backdrop.position={new_c-22,new_r-17}
+            view.backdrop.scale = {.945,.945}
+            view.backdrop.opacity = 0
+            view.backdrop:raise_to_top()
+            view.current:raise_to_top()
+
+            sel_timeline:start()
+--[==[
             assert(previous ~= nil,"wth")
             previous:complete_animation()
             view.backdrop.opacity = 0
@@ -343,17 +447,19 @@ print("adding bottom bar")
                     end
                 end
             }
-
+--]==]
         elseif comp == Components.SOURCE_MANAGER then
             print("Dimming FrontPageView UI")
             view:shift_group()
 
             model.album_group:complete_animation()
-            view.ui:animate{duration = 100,opacity = 150}
+            big_black_box:raise_to_top()
+            big_black_box:animate{duration = 100,opacity = 50}
 
         else
             print("Hiding FrontPageView UI")
             model.album_group:complete_animation()
+            big_black_box.opacity = 0
             view.ui.opacity = 0
         end
     end
