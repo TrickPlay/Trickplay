@@ -43,8 +43,8 @@ FrontPageView = Class(View, function(view, model, ...)
     {
         name = "pic_logo",
         src  = "",
-        position = {20,0},
-        size = {200, 50}
+        position = {40,-75},
+        size = {300, 225}
     }
                                                                               
     local album_title = Text
@@ -53,20 +53,16 @@ FrontPageView = Class(View, function(view, model, ...)
         text     = "",
         color    = "FFFFFF",
         font     = "Sans 32px",
-        position = {300, 0}
+        position = {320, 10}
     }
     local prev_i = {1,1} 
-                                       
---[[
-    local controls = Text
+    local controls = Image
     {
+        src = "assets/buttons.png",
         name     = "controls",
-        text     = "A - Add a source  D - Delete source\nEnter - view slideshow",
-        color    = "FFFFFF",
-        font     = "Sans 24px",
-        position = {30, 50}
+        position = {-10, 25}
     }
---]]
+
     view.bottom_bar:add(sel_info, album_logo, album_title,controls)
     --model.album_group:add(view.selector)
     view.ui:add(model.album_group)
@@ -327,6 +323,7 @@ print("adding bottom bar")
            -- view.bottom_bar.opacity = 0
 
             view.bottom_bar:unparent()
+
             model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
             view.bottom_bar.position = {-10,PIC_H}
             view.bottom_bar.scale   = {1.1,1}

@@ -227,8 +227,7 @@ SourceManagerView = Class(View, function(view, model, ...)
             if view.accordian == false then
             
                 print("\n\nShowing SourceManagerView UI - Source Providers\n")
-
-           
+          
 
                 for i = 1, #view.menu_items do
                     view.menu_buttons[i][1]:complete_animation()
