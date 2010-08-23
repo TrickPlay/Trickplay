@@ -18,8 +18,8 @@ local adapter = {
 		end,
 		site = function(data) 
 			local num_photos = #data.photos.photo
-			current_pic = (current_pic-1)%num_photos + 1
-			return "http://farm"..data.photos.photo[current_pic].farm..".static.flickr.com/"..data.photos.photo[current_pic].server.."/"..data.photos.photo[current_pic].id.."_"..data.photos.photo[current_pic].secret..".jpg" 
+			local start_index = (current_pic-1)%num_photos + 1
+			return "http://farm"..data.photos.photo[start_index].farm..".static.flickr.com/"..data.photos.photo[start_index].server.."/"..data.photos.photo[start_index].id.."_"..data.photos.photo[start_index].secret..".jpg"
 		end
 		
 	}
