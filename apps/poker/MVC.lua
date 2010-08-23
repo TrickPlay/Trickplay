@@ -80,6 +80,25 @@ Model = Class(function(model, ...)
     }
     MSCL = model.status_chip_locations
     
+    model.player_bubble_locations = {
+        [1] = {20, 760},
+        [2] = {20, 90},
+        [3] = {320, 20},
+        [4] = {1330, 20},
+        [5] = {1630, 90},
+        [6] = {1630, 760},
+    }
+    MPBL = model.player_bubble_locations
+    
+    --Player bubbles pos clockwise from bottom-left:
+    ---20,760
+    --20,90
+    --320, 20
+    --1330,20
+    --1630, 90
+    --1930,760
+    --second bubble is y+60
+    
     model.currentPlayer = nil
     
     model.bet = {
