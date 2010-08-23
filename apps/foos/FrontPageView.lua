@@ -172,16 +172,10 @@ FrontPageView = Class(View, function(view, model, ...)
     local prev_scale = {1,1}
  
     function view:shift_group(dir)
---[[
-        local next_spot = model.front_page_index + dir
-        local upper_bound = math.ceil(model.num_sources / NUM_ROWS) -
-                                     (NUM_VIS_COLS-1)
-        if next_spot > 0 and next_spot <= upper_bound then
-            model.front_page_index = next_spot
-        end
---]]
+
         left_edge:complete_animation()
         right_edge:complete_animation()
+
         local new_x
         if model.front_page_index == 1 then
             new_x = 10
@@ -257,7 +251,6 @@ FrontPageView = Class(View, function(view, model, ...)
 
 
 
-            --if sel[1] ~= prev_i[1] and sel[2] ~= prev_i[2] then
             view.bottom_bar.opacity = 0
             view.bottom_bar:unparent()
 
@@ -270,14 +263,12 @@ FrontPageView = Class(View, function(view, model, ...)
                                                                                       "%%20"," ")
             album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
-            --view.backdrop.position={new_c-22,new_r-17}
-            --view.backdrop.scale = {.945,.945}
+
             view.backdrop.opacity = 0
             view.backdrop:raise_to_top()
             view.current:raise_to_top()
 
             sel_timeline:start()
-            --end
         elseif comp == Components.SOURCE_MANAGER then
             print("Dimming FrontPageView UI")
             view:shift_group()
@@ -302,8 +293,7 @@ function view.timer.on_timer(timer)
                     math.random(1,NUM_VIS_COLS) + 
                          model.front_page_index  - 1
                 }
-                --print("trying at",rand_i[1],rand_i[2],"when at",model.fp_index[1],
-                --                                                model.fp_index[2])
+
                 local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
 
                 if (rand_i[1] ~= model.fp_index[1] or
