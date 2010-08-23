@@ -108,3 +108,8 @@ CHECK_WAV = "assets/sounds/check.wav"
 CALL_WAV = "assets/sounds/Chips.wav"
 RAISE_WAV = "assets/sounds/Chips.wav"
 BUSTOUT_WAV = "assets/sounds/Bust out sound.wav"
+
+local MYTURN_STRINGS = {"My turn!", "I'm up", "On me", "Hmmm", "Woof woof", "Me me me"}
+function GET_MYTURN_STRING()
+   return MYTURN_STRINGS[math.random(#MYTURN_STRINGS)]
+end
