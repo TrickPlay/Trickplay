@@ -118,10 +118,10 @@ Player = Class(function(player, args, ...)
             elseif amount_to_raise == RaiseFactor.RR then
                a_bet = math.random(bb_qty*3+min_raise, bb_qty*5+min_raise)
             end
-            -- check for all in
-            if a_bet > player.money+orig_bet then
-               a_bet = player.money+orig_bet
-            end
+         end
+         -- check for all in
+         if a_bet > player.money+orig_bet then
+            a_bet = player.money+orig_bet
          end
          print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
          return false, a_bet
