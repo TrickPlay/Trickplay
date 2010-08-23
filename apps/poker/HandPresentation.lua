@@ -21,7 +21,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local allCards = {}
    
    local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = MDBL.POT}
-   on_text_changed = function()
+   function potText.on_text_changed()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
    potText.y = potText.y + 60
@@ -189,7 +189,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
          resetCardGroup(card.group)
          print(card.group.parent, screen, card.group.parent==screen)
          if card.group.parent == screen then screen:remove(card.group) end
-         
       end
             
       print("ALLCARDS NOW CONTAINS", #allCards, "CARDS. THEY WILL NOW BE REMOVED")
