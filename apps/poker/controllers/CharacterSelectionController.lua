@@ -97,7 +97,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       local pos = self:getPosition()
       if(model.positions[pos]) then return end
       local isHuman = false
-      if(playerCounter == 1) then
+      if(playerCounter == 0) then
          isHuman = true
       end
       
