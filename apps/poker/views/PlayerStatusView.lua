@@ -50,11 +50,11 @@ function(self, model, args, player,...)
    end
    
    function self:initialize()
-      if self.show then self.group.opacity = 240 end
+      --if self.show then self.group.opacity = 240 end
    end
    
    function self:update(text)
-      if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
+      --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
       self.title.text = "Player "..player.number.."   Money: $"..self.player.money
       
       if text then self.action.text = text end
@@ -64,16 +64,17 @@ function(self, model, args, player,...)
    
    function self:dim()
       self.group.opacity = 100
+      --self.show = 2
    end
    
    function self:hide()
       self.group:animate{opacity = 0, duration=300}
-      self.show = false
+      --self.show = 0
    end
    
    function self:display()
       self.group:animate{opacity = 240, duration=300}
-      self.show = true
+      --self.show = 1
    end
    
 end)
