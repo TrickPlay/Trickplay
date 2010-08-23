@@ -63,6 +63,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state:get_min_raise() return min_raise end
    function state:get_round() return ctrl:get_round() end
    function state:player_done() return done[players[action]] end
+   function state:get_out_table() return out end
 
    function state.initialize(state, args)
       players = args.players
@@ -214,6 +215,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       end
 
       if continue then
+         -- otherwise, betting round done, so...
          -- consolidate bets into the pot
          for i,player in ipairs(players) do
             pot, player_bets[player] = pot+player_bets[player], 0
@@ -227,6 +229,7 @@ HandState = Class(nil,function(state, ctrl, ...)
             tmp_action = (tmp_action % #players) + 1
          end
          action = tmp_action
+         ctrl:betting_round_over()
       else
          local tmp_action = (action % #players) + 1
          while out[players[tmp_action]] or done[players[tmp_action]] do

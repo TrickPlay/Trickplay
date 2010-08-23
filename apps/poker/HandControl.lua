@@ -33,6 +33,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_bb_p() return state:get_bb_p() end
    function ctrl:get_deck() return state:get_deck() end
    function ctrl:get_round() return round end
+   function ctrl:get_out_table() return state:get_out_table() end
 
    -- private functions
    local function initialize_pipeline()
@@ -65,16 +66,9 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    end
 
 
-   -- Table of ui deal animations
-   local deal_LUT = {
-      [Rounds.HOLE]=function(pres) pres:deal_hole() end,
-      [Rounds.FLOP]=function(pres) pres:deal_flop() end,
-      [Rounds.TURN]=function(pres) pres:deal_turn() end,
-      [Rounds.RIVER]=function(pres) pres:deal_river() end
-   }
    function ctrl.deal(ctrl, rd)
       round = rd
-      deal_LUT[round](pres)
+      pres:deal(round)
       enable_event_listener(TimerEvent{interval=1})
       return true
    end
@@ -201,5 +195,9 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
 
    function ctrl:win_from_bets(only_player)
       pres:win_from_bets(only_player)
+   end
+
+   function ctrl:betting_round_over()
+      pres:betting_round_over()
    end
 end)
