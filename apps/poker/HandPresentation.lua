@@ -124,25 +124,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
       
    end
 
-   -- Deal hole cards
-   function pres:deal_hole()
-      mediaplayer:play_sound(DEAL_WAV)
-      for player,hole in pairs( ctrl:get_hole_cards() ) do
-         
-         local offset = 0
-         local pos = {MPCL[player.table_position][1], MPCL[player.table_position][2]}
-         
-         for k,card in pairs(hole) do
-            screen:add(card.group)
-            -- Animate and flip the card if the player is human
-            card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
-            card.group:raise_to_top()
-            offset = offset + 30
-         end
-      end
-      
-   end
-   
    -- Deal community cards
    local function deal_cards(start, finish)
       mediaplayer:play_sound(DEAL_WAV)
@@ -154,26 +135,40 @@ HandPresentation = Class(nil,function(pres, ctrl)
          table.insert(allCards, cards[i])
       end
    end
-   
-   -- Animate chips and deal flop
-   function pres:deal_flop()
-      animate_chips_to_center()
-      deal_cards(1, 3)
-      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
-   end
-   
-   -- Animate chips and deal turn
-   function pres:deal_turn()
-      animate_chips_to_center()
-      deal_cards(4)
-      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
-   end
-   
-   -- Animate chips and deal river
-   function pres:deal_river()
-      animate_chips_to_center()
-      deal_cards(5)
-      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
+
+   function pres:deal(round)
+      if round == Rounds.HOLE then
+         -- Deal hole cards
+         mediaplayer:play_sound(DEAL_WAV)
+         for player,hole in pairs( ctrl:get_hole_cards() ) do
+            
+            local offset = 0
+            local pos = {MPCL[player.table_position][1], MPCL[player.table_position][2]}
+            
+            for k,card in pairs(hole) do
+               screen:add(card.group)
+               -- Animate and flip the card if the player is human
+               card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
+               card.group:raise_to_top()
+               offset = offset + 30
+            end
+         end
+      elseif round == Rounds.FLOP then
+         -- Animate chips and deal flop
+         animate_chips_to_center()
+         deal_cards(1, 3)
+         print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
+      elseif round == Rounds.TURN then
+         -- Animate chips and deal turn
+         animate_chips_to_center()
+         deal_cards(4)
+         print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
+      elseif round == Rounds.RIVER then
+         -- Animate chips and deal river
+         animate_chips_to_center()
+         deal_cards(5)
+         print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
+      end
    end
    
    -- End of the game
@@ -234,7 +229,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
          t:stop()
          remove_player_chips(player)
          remove_player_cards(player)
-         player.status:hide()
+--         player.status:hide()
          player.glow.opacity = 50
       end
 
@@ -279,5 +274,12 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
    end
-   
+
+   -- Betting round over, HandState has been set for next betting round
+   function pres:betting_round_over()
+      local out = ctrl:get_out_table()
+      for _,player in ipairs(ctrl:get_players()) do
+         if out[player] then player.status:hide() end
+      end
+   end
 end)
