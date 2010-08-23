@@ -230,10 +230,18 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- FOLD
    function pres:fold_player(player)
       mediaplayer:play_sound(FOLD_WAV)
-      remove_player_chips(player)
-      remove_player_cards(player)
-      player.status:hide()
-      player.glow.opacity = 50
+      local foldtimer = Timer{
+         interval=.2,
+         on_timer=function(t)
+            t:stop()
+            remove_player_chips(player)
+            remove_player_cards(player)
+            player.status:hide()
+            player.glow.opacity = 50
+         end
+      }
+      player.status:update("Fold")
+      foldtimer:start()
    end
 
    -- CHECK
