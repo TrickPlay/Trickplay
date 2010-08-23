@@ -126,7 +126,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
          
          player.status:display()
-         player.status:update( "I'm In" )
+         player.status:update( GET_IMIN_STRING() )
          player:show()
 
       end
@@ -191,8 +191,18 @@ HandPresentation = Class(nil,function(pres, ctrl)
       animate_chips_to_center()
       all_cards_up()
       print(poker_hand.name .. " passed to pres:showdown()")
-      
-      winners[1].status:update( poker_hand.name )
+
+      local won = {}
+      for _,winner in ipairs(winners) do
+         winner.status:update( GET_WINHAND_STRING() )
+         won[winner] = true
+      end
+
+      for _,player in ipairs(ctrl:get_players()) do
+         if not won[player] then
+            player.status:hide()
+         end
+      end
       animate_pot_to_player(winners[1])
    end
 
@@ -296,6 +306,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
+      only_player.status:update( "weaksauce." )
    end
 
    -- Betting round over, HandState has been set for next betting round
