@@ -40,6 +40,9 @@ function adapter:loadCovers(i,search, start_index)
 		
 		site = data.responseData.results[1].unescapedUrl or ""
       Load_Image(site,i)
+--		print(i)
+--		debug()
+
 	end
 	}
 	request:send()
