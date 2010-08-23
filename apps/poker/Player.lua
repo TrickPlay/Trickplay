@@ -111,20 +111,14 @@ Player = Class(function(player, args, ...)
          assert(call_bet >= 0)
          assert(min_raise > 0)
          local a_bet = call_bet+min_raise
-         if amount_to_raise == RaiseFactor.R then
-            --websites say raising the bet times 2 is a good standard?
-            if a_bet < bb_qty * 3 then
+         if(a_bet < bb_qty*3+min_raise) then
+            -- calculate ammount to raise
+            if amount_to_raise == RaiseFactor.R then
                a_bet = math.random(a_bet, bb_qty * 3)
-            end
-            if a_bet > player.money+orig_bet then
-               a_bet = player.money+orig_bet
-            end
-            print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
-            return false, a_bet
-         elseif amount_to_raise == RaiseFactor.RR then
-            if bb_qty*3+min_raise < bb_qty*5+min_raise then
+            elseif amount_to_raise == RaiseFactor.RR then
                a_bet = math.random(bb_qty*3+min_raise, bb_qty*5+min_raise)
             end
+            -- check for all in
             if a_bet > player.money+orig_bet then
                a_bet = player.money+orig_bet
             end
