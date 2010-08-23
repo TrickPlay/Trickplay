@@ -257,6 +257,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
       player.status:update( "Raise to "..bet )
    end
 
+   -- ALL IN
+   function pres:all_in_player(player)
+      mediaplayer:play_sound(RAISE_WAV)
+      local bet = ctrl:get_player_bets()[player]
+      player.betChips:set(bet)
+      player.status:update( GET_ALLIN_STRING() )
+   end
+
    -- FINISH TURN
    function pres:finish_turn(player)
       player.glow.opacity = 0

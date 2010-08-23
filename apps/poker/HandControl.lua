@@ -168,6 +168,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       pres:raise_player(active_player)
    end
 
+   function ctrl:all_in_player(active_player)
+      pres:all_in_player(active_player)
+   end
+
    function ctrl.showdown(ctrl)
       local winners, poker_hand = state:showdown()
       pres:showdown(winners, poker_hand)
