@@ -17,7 +17,7 @@ function Setup_Album_Covers()
 
     assert(model.default,"default is not init yet")
 	for i =1, #adapters do
-		 loadCovers(i,searches[#adapters+1-i], math.random(20))
+		 loadCovers(i,searches[#adapters+1-i], math.random(5))
 	end
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
@@ -67,7 +67,7 @@ function Load_Image(site,index)
             -- toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
             	 if (failed) then					 	 
-            	 		loadCovers(index, searches[#adapters+1-index], 2)
+            	 		loadCovers(index, searches[#adapters+1-index], 1)
             	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
            	 
                 elseif model.albums[i] ~= nil and model.albums[i][j] ~= nil and not failed then

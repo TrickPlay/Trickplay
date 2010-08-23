@@ -1,6 +1,6 @@
 adapterTypes = {"Google","Yahoo","Flickr","Yahoo","Google","Yahoo","Google","Yahoo"}
-adaptersTable = settings.adaptersTable or { "Google", "Yahoo", "Yahoo", "Google", "Google", "Google", "Google"}
-searches = settings.searches or {"space", "dinosaurs", "dog", "cat", "jessica%20alba","national%20geographic", "mila%20kunis"}
+adaptersTable = settings.adaptersTable or { "Google", "Yahoo", "Yahoo", "Google", "Google", "Yahoo", "Flickr"}
+searches = settings.searches or {"space", "dinosaurs", "dog", "cat", "jessica%20alba","national%20geographic", ""}
 
 adapters = {}
 adapterTypesTable = {}
@@ -17,12 +17,11 @@ end
 
 function loadCovers(i,search, start_index)
 	if (adapters[i] ~= nil) then
-		adapters[i]:loadCovers(i,search,start_index)
+		adapters[#adapters+1-i]:loadCovers(i,search,start_index)
 	end
 end
 
 function slideShow()
-	
 	screen:clear()
 end
 
