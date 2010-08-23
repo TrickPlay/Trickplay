@@ -79,7 +79,10 @@ function(pres, ctrl)
       model.sbchip:animate{ position = MSCL[ model.players[ctrl:get_sb_p()].table_position ], duration = 400, mode="EASE_OUT_QUAD" }
       
       create_pot_chips()
-      --model.potchips:set(0)
+      
+      for _, card in ipairs(model.deck.cards) do
+         card.group.opacity = 255
+      end
       
       -- Reset deck
       for i=#model.deck.cards, #model.deck.cards-7, -1 do
