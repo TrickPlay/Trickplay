@@ -42,7 +42,7 @@ Colors={
    FOCUS_RED                    ="602020"
 }
 
-PLAYER_NAME_FONT = "KacstArt 20px"
+PLAYER_NAME_FONT = "KacstArt 22px"
 PLAYER_ACTION_FONT = "KacstArt 40px"
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"
@@ -112,4 +112,19 @@ BUSTOUT_WAV = "assets/sounds/Bust out sound.wav"
 local MYTURN_STRINGS = {"My turn!", "I'm up", "On me", "Hmmm", "Woof woof", "Me me me"}
 function GET_MYTURN_STRING()
    return MYTURN_STRINGS[math.random(#MYTURN_STRINGS)]
+end
+
+local ALLIN_STRINGS = {"All in","I'm Shoving","Showtime","Just chips, baby!","Splash!","Feeling good"}
+function GET_ALLIN_STRING()
+   return ALLIN_STRINGS[math.random(#ALLIN_STRINGS)]
+end
+
+local WINHAND_STRINGS = {"I got this","Rake 'em in","Collecting!","My hand","All me","Ooh Yeah","You like that?"}
+function GET_WINHAND_STRING()
+   return WINHAND_STRINGS[math.random(#WINHAND_STRINGS)]
+end
+
+local IMIN_STRINGS = {"I'm in","Let's Go","Want somma dis?","Hit me","Keep dealing","Let's play"}
+function GET_IMIN_STRING()
+   return IMIN_STRINGS[math.random(#IMIN_STRINGS)]
 end

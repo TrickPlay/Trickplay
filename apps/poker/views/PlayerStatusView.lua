@@ -15,17 +15,23 @@ function(self, model, args, player,...)
       color = "Gray"
    end
    
-   self.background = AssetLoader:getImage("BubbleHeader"..color,{y = -30})
-
+   self.top = AssetLoader:getImage("Bubble"..color,{})
+   self.bottom = AssetLoader:getImage("BubbleNone",{y = 60})
    
-   self.text_bubble = AssetLoader:getImage("BubbleNone",{})
-   self.group = Group{ children={self.background, self.text_bubble}, opacity=0, position = player.position }
+   self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.table_position] }
    
    -- Player text
-   self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.SLATE_GRAY, text = "Player "..player.number}
-   self.title.position = {self.title.w/2 + 50, self.title.h/2 - 5}
+   self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.WHITE, text = "Player "..player.number}
+   self.title.on_text_changed = function()
+      self.title.anchor_point = { self.title.w/2, self.title.h/2 }
+      self.title.position = { self.top.w/2, self.top.h/2 }
+   end
+
    self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = "Sup dawg"}
-   self.action.position = {165, 50}
+   self.action.on_text_changed = function()
+      self.action.anchor_point = { self.action.w/2, self.action.h/2 }
+      self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
+   end
    
    -- Align player attributes
    self.attributes = { self.title, self.action }
@@ -44,23 +50,31 @@ function(self, model, args, player,...)
    end
    
    function self:initialize()
-      if self.show then self.group.opacity = 240 end
+      --if self.show then self.group.opacity = 240 end
    end
    
    function self:update(text)
-      if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
+      --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
       self.title.text = "Player "..player.number.."   Money: $"..self.player.money
       
       if text then self.action.text = text end
       self.action.anchor_point = {self.action.w/2, self.action.h/2}
+      self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
    end
-        function self:hide()
-                self.group.opacity = 0
-                self.show = false
-        end
-        
-        function self:display()
-                self.group.opacity = 240
-                self.show = true
-        end
+   
+   function self:dim()
+      self.group.opacity = 100
+      --self.show = 2
+   end
+   
+   function self:hide()
+      self.group:animate{opacity = 0, duration=300}
+      --self.show = 0
+   end
+   
+   function self:display()
+      self.group:animate{opacity = 240, duration=300}
+      --self.show = 1
+   end
+   
 end)

@@ -81,12 +81,19 @@ CharacterSelectionView = Class(View, function(view, model, ...)
                             item:on_focus()
                         else
                             DOG_GLOW[controller:getPosition(i,j)].opacity = 255
+                            DOGS[controller:getPosition(i,j)].opacity = 255
                         end
                     else
                         if(type(item) == "table" and item:is_a(FocusableImage)) then
                             item:out_focus()
                         else
-                            DOG_GLOW[controller:getPosition(i,j)].opacity = 0
+                            DOG_GLOW[controller:getPosition(i,j)].opacity = 120
+                             
+                            DOGS[controller:getPosition(i,j)].opacity = 0
+                            
+                            for _,player in ipairs(model.players) do
+                                player.dog.opacity = 255
+                            end
                         end
                     end
                 end
