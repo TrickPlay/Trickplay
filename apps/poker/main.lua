@@ -81,9 +81,9 @@ function()
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
    screen:add(DOG_LAYER, DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
    for i=1, 6 do
-      DOGS[i] = AssetLoader:getImage("dog"..i,{opacity = 0})
+      DOGS[i] = AssetLoader:getImage("dog"..i,{position = DOG_GLOW[i], opacity = 0, name = "Dog "..i})
       DOG_LAYER:add(DOGS[i])
-      DOG_GLOW[i] = AssetLoader:getImage("dog"..i.."glow",{position = DOG_GLOW[i], opacity=0} )
+      DOG_GLOW[i] = AssetLoader:getImage("dog"..i.."glow",{position = DOG_GLOW[i], opacity=255, name = "Dog "..i.. "glow"} )
       DOG_GLOW_LAYER:add(DOG_GLOW[i])
    end
    

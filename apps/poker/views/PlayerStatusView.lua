@@ -18,7 +18,7 @@ function(self, model, args, player,...)
    self.top = AssetLoader:getImage("Bubble"..color,{})
    self.bottom = AssetLoader:getImage("BubbleNone",{y = 60})
    
-   self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.number] }
+   self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.table_position] }
    
    -- Player text
    self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.WHITE, text = "Player "..player.number}
@@ -62,13 +62,18 @@ function(self, model, args, player,...)
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
    end
    
+   function self:dim()
+      self.group.opacity = 100
+   end
+   
    function self:hide()
-           self.group.opacity = 0
-           self.show = false
+      self.group:animate{opacity = 0, duration=300}
+      self.show = false
    end
    
    function self:display()
-           self.group.opacity = 240
-           self.show = true
+      self.group:animate{opacity = 240, duration=300}
+      self.show = true
    end
+   
 end)
