@@ -20,6 +20,36 @@ function(self, model, args, player,...)
    
    self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.table_position] }
    
+   -- Blinking red focus
+   self.focus = AssetLoader:getImage("BubbleRed",{opacity = 0})
+   self.group:add(self.focus)
+   self.popup = Popup:new{
+      group = self.focus,
+      noRender = true,
+      animate_in = {duration=500, opacity=255},
+      animate_out = {duration=500, opacity=0},
+      on_fade_in = function()
+         self.popup.fade = "out"
+         self.popup:render()
+      end,
+      on_fade_out = function()
+         if not self.popup.stop then
+            self.popup.fade = "in"
+            self.popup:render()
+         end
+      end,
+   }
+   
+   function self:startFocus()
+      self.popup.stop = nil
+      self.popup.fade = "in"
+      self.popup:render()
+   end
+   
+   function self:stopFocus()
+      self.popup.stop = true
+   end
+   
    -- Player text
    self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.WHITE, text = "Player "..player.number}
    self.title.on_text_changed = function()

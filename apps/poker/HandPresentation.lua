@@ -246,6 +246,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
       
       player.glow.opacity = 255
       
+      player.status:startFocus()
+      
    end
 
    -- FOLD
@@ -299,6 +301,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- FINISH TURN
    function pres:finish_turn(player)
       player.glow.opacity = 0
+      player.status:stopFocus()
    end
 
    -- SOMEONE LEFT A SEAT
