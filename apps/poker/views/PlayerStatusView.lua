@@ -21,22 +21,25 @@ function(self, model, args, player,...)
    self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.table_position] }
    
    -- Blinking red focus
-   self.focus = AssetLoader:getImage("BubbleRed",{opacity = 0})
+   self.focus = Group{ children = { AssetLoader:getImage("BubbleRed",{}) }, opacity = 0 }
    self.group:add(self.focus)
    self.popup = Popup:new{
       group = self.focus,
       noRender = true,
-      animate_in = {duration=500, opacity=255},
-      animate_out = {duration=500, opacity=0},
-      loop = true,
+      animate_in = {duration=10, opacity=255},
+      animate_out = {duration=10, opacity=0},
+      on_fade_in = function() end,
+      on_fade_out = function() end,
    }
    
    function self:startFocus()
-      self.popup:start_loop()
+      self.popup.fade = "in"
+      self.popup:render()
    end
    
    function self:stopFocus()
-      self.popup:pause_loop()
+      self.popup.fade = "out"
+      self.popup:render()
    end
    
    -- Player text
