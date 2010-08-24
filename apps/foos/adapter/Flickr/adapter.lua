@@ -2,7 +2,7 @@
 num_photos = 1
 
 local adapter = {
-	name = "Flickr User Albums",
+	name = "Flickr User Photostream",
 	logoUrl = "adapter/Flickr/logo.png",
 	logoscale = {0.1,0.1},
 	{
@@ -15,11 +15,11 @@ local adapter = {
 		},
 		albums = function() end,
 		photos = function(search,current_pic, i)
-      	return "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=1a1b2c811464d2d3423bb9200bbb4680&user_id="..user_ids[i].."&nojsoncallback=1"
+      	return "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..user_ids[i].."&nojsoncallback=1"
 		end,
-		site = function(data) 
+		site = function(data,i) 
 			num_photos = #data.photos.photo
-			local start_index = (current_pic-1)%num_photos + 1
+			local start_index = (i-1)%num_photos + 1
 			return "http://farm"..data.photos.photo[start_index].farm..".static.flickr.com/"..data.photos.photo[start_index].server.."/"..data.photos.photo[start_index].id.."_"..data.photos.photo[start_index].secret..".jpg"
 		end
 		
@@ -44,7 +44,7 @@ function adapter:loadCovers(i,search, start_index)
 
 	if (user_ids[#adapters+1-i]) then
 	local request = URLRequest {
-		url = "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=1a1b2c811464d2d3423bb9200bbb4680&user_id="..user_ids[#adapters+1-i].."&nojsoncallback=1",
+		url = "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..user_ids[#adapters+1-i].."&nojsoncallback=1",
 		on_complete = function (request, response)
 			local data = json:parse(response.body)
 			for k,v in pairs(data.photos.photo[1]) do print(k,v) end
@@ -58,9 +58,11 @@ end
 
 function adapter:getUserID(username)
 	local request = URLRequest {		
-		url = "http://www.flickr.com/services/rest/?method=flickr.people.findByUsername&username="..username.."&format=json&api_key=1a1b2c811464d2d3423bb9200bbb4680&nojsoncallback=1",
+		url = "http://www.flickr.com/services/rest/?method=flickr.people.findByUsername&username="..username.."&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&nojsoncallback=1",
 		on_complete = function(request,response)
 			local data = json:parse(response.body)
+--			print (json:stringify(data))
+--			debug()
 			if (data.user) then
 				self[1].required_inputs.user_id = data.user.nsid
 				user_ids[#adapters] = data.user.nsid
