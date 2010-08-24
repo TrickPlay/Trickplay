@@ -124,7 +124,7 @@ function GET_WINHAND_STRING()
    return WINHAND_STRINGS[math.random(#WINHAND_STRINGS)]
 end
 
-local IMIN_STRINGS = {"I'm in","Let's Go","Want somma dis?","Hit me","Keep dealing","Let's play"}
+local IMIN_STRINGS = {"I'm in","Let's Go","Hit me","Keep dealing","Let's play"}
 function GET_IMIN_STRING()
    return IMIN_STRINGS[math.random(#IMIN_STRINGS)]
 end
