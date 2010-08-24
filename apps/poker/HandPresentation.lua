@@ -19,16 +19,43 @@ local print = function() end --realPrint
 HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
    local allCards = {}
+   local burnCards = {}
    
-   local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = MDBL.POT}
+   local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = {MDBL.POT[1] + 20, MDBL.POT[2] + 60}}
    function potText.on_text_changed()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
-   potText.y = potText.y + 60
-   --potText.x = potText.x + 20
+
    screen:add(potText)
 
    -------------------------LOCAL FUNCTIONS--------------------------
+   
+   -- Create a burn card
+   local function create_burn_card()
+      
+      local burn = Card( Ranks.TWO, Suits.HEARTS )
+      table.insert( burnCards, burn )
+      burn.group.position = MCL.DECK
+      screen:add( burn.group )
+      burn.group:animate{
+         position = {1145 + math.random(-1, 1), 647 + math.random(-1, 1)},
+         mode=MODE,
+         duration=TIME,
+         z_rotation = math.random(-5, 5),
+      }
+      
+   end
+   
+   -- Remove burn cards
+   local function remove_burn_cards()
+      
+      for _, card in pairs(burnCards) do
+         screen:remove(card.group)
+      end
+      
+      burnCards = {}
+      
+   end
 
    -- Remove player chips
    local function remove_player_chips(player)
@@ -66,15 +93,17 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local function remove_player_cards(player)
       local hole_cards = ctrl:get_hole_cards()
       local hole = hole_cards[player]
-      for k,card in pairs(hole) do
-         card.group:animate{
-            opacity = 0,
-            duration=300,
-            on_completed = function()
-               screen:remove(card.group)
-               card.group.opacity = 255
-            end
-         }
+      if hole then
+         for k,card in pairs(hole) do
+            card.group:animate{
+               opacity = 0,
+               duration=300,
+               on_completed = function()
+                  screen:remove(card.group)
+                  card.group.opacity = 255
+               end
+            }
+         end
       end
    end
    
@@ -157,6 +186,10 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    function pres:deal(round)
       
+      if round ~= Rounds.HOLE then
+         create_burn_card()
+      end
+      
       if round == Rounds.HOLE then
          -- Deal hole cards
          mediaplayer:play_sound(DEAL_WAV)
@@ -176,15 +209,12 @@ HandPresentation = Class(nil,function(pres, ctrl)
       elseif round == Rounds.FLOP then
          -- Animate chips and deal flop
          deal_cards(1, 3)
-         print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
       elseif round == Rounds.TURN then
          -- Animate chips and deal turn
          deal_cards(4)
-         print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
       elseif round == Rounds.RIVER then
          -- Animate chips and deal river
          deal_cards(5)
-         print("ALLCARDS NOW CONTAINS", #allCards, "CARDS")
       end
    end
    
@@ -216,14 +246,15 @@ HandPresentation = Class(nil,function(pres, ctrl)
       
       -- clear cards
       for i,card in ipairs(allCards) do
-         print("Removing card", i)
          resetCardGroup(card.group)
          print(card.group.parent, screen, card.group.parent==screen)
          if card.group.parent == screen then screen:remove(card.group) end
       end
-            
-      print("ALLCARDS NOW CONTAINS", #allCards, "CARDS. THEY WILL NOW BE REMOVED")
+      
       allCards = {}
+      
+      -- remove burn cards
+      remove_burn_cards()
       
       -- reset bets
       remove_all_chips()
@@ -307,7 +338,17 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- SOMEONE LEFT A SEAT
    function pres:remove_player(removed_player)
-      pres:fold_player(removed_player)
+      local foldtimer = Timer{interval=.2}
+      function foldtimer.on_timer(t)
+         t:stop()
+         remove_player_cards(removed_player)
+         
+         removed_player.status:hide()
+         removed_player:hide()
+      end
+
+      mediaplayer:play_sound(FOLD_WAV)
+      foldtimer:start()
    end
 
    -- EVERYONE ELSE FOLDED

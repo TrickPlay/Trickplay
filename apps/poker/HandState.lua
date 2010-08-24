@@ -30,6 +30,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state:get_hole_cards() return hole_cards end
    function state:get_player_bets() return player_bets end
    function state:get_pot() return pot end
+   function state:get_active_player_bet() return player_bets(players[action]) end
    function state:get_action()
       local in_players = state:get_in_players()
       local active_player = state:get_active_player()
@@ -65,6 +66,18 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state:get_round() return ctrl:get_round() end
    function state:player_done() return done[players[action]] end
    function state:get_out_table() return out end
+   function state:get_max_bet()
+      local top1 = 0
+      local top2 = 0
+      for _,player in ipairs(players) do
+         if not out[player] then
+            local holdings = player.money + player_bets[player]
+            if holdings > top1 then top1, top2 = holdings, top1
+            elseif holdings > top2 then top2 = holdings end
+         end
+      end
+      return top2
+   end
 
    function state.initialize(state, args)
       players = args.players
@@ -147,6 +160,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       end
       return only_player
    end
+
 
    ---
    -- Makes the active player take his turn. If fold is true, then player

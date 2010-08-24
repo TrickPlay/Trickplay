@@ -112,6 +112,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
             model.orig_money = model.orig_bet + active_player.money
             model.call_bet = state:get_call_bet()
             model.min_raise = state:get_min_raise()
+            model.max_bet = state:get_max_bet()
             model.in_players = state:get_in_players()
             model:set_active_component(Components.PLAYER_BETTING)
             model:get_active_controller():set_callback(
