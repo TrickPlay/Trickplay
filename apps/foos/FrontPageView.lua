@@ -156,6 +156,8 @@ FrontPageView = Class(View, function(view, model, ...)
             local progress = (msecs - 800)/100
             view.bottom_bar.opacity = 255
             view.bottom_bar.y = PIC_H - progress*70
+        elseif msecs > 900 and msecs <= 2900 then
+            view.bottom_bar.y = PIC_H - 70
         -- bring the bar up a little more
         elseif msecs > 2900 and msecs <= 3000 then
             local progress = (msecs - 2900)/100
@@ -164,7 +166,9 @@ FrontPageView = Class(View, function(view, model, ...)
         end
     end
 
-
+    function sel_timeline.on_completed()
+        view.bottom_bar.y = PIC_H - 140
+    end
     function view:initialize()
         self:set_controller(FrontPageController(self))
     end
@@ -244,8 +248,11 @@ FrontPageView = Class(View, function(view, model, ...)
                                view.previous.position[2]}
             view.prev_scale = {view.previous.scale[1],
                                view.previous.scale[2]}
-            view.prev_target_pos = {PIC_W * (prev_i[2]-1),PIC_H * (prev_i[1]-1)+10}
-            print(view.prev_pos[1],view.prev_pos[2],"  ",view.prev_target_pos[1],view.prev_target_pos[2],"  ",view.previous.x,view.previous.y)
+            view.prev_target_pos = {PIC_W * (prev_i[2]-1),
+                                    PIC_H * (prev_i[1]-1)+10}
+            print(view.prev_pos[1],        view.prev_pos[2],"  ",
+                  view.prev_target_pos[1], view.prev_target_pos[2],"  ",
+                  view.previous.x,         view.previous.y)
 
             view.current    =  model.fp_slots[sel[1]][sel[2]]
 
@@ -309,6 +316,113 @@ function view.timer.on_timer(timer)
                 end
             end
 
+end
+
+function view:Delete_Cover(index)
+    local del_timeline = Timeline
+    {
+        name      = "Deletion animation",
+        loop      =  false,
+        duration  =  200,
+        direction = "FORWARD",
+    }
+
+
+    function del_timeline.on_new_frame(t,msecs)
+        print("on neww frame")
+        local progress = msecs/t.duration
+
+        model.albums[(index-1)%NUM_ROWS +1]
+                    [math.ceil(index/NUM_ROWS)].opacity = (1-progress)*255
+        for ind = index, #adapters do
+            local targ_i = (ind-1)%NUM_ROWS +1
+            local targ_j = math.ceil(ind/NUM_ROWS)
+
+            local curr_i = (ind+1-1)%NUM_ROWS +1
+            local curr_j = math.ceil((ind+1)/NUM_ROWS)
+
+            if model.fp_slots[curr_i]        ~= nil and
+               model.fp_slots[curr_i][curr_j] ~= nil then
+                --model.fp_slots[new_i][new_j]:raise_to_top()
+                model.fp_slots[curr_i][curr_j].position =
+                {
+                    PIC_W*(curr_j-1) + progress * ((PIC_W*(targ_j-1)) -
+                                                   (PIC_W*(curr_j-1))),
+                    PIC_H*(curr_i-1)+10 + progress * ((PIC_H*(targ_i-1)) -
+                                                      (PIC_H*(curr_i-1)))
+                }
+            end
+        end
+        if model.front_page_index == math.ceil(#adapters / 
+                              NUM_ROWS) - (NUM_VIS_COLS-1) and
+           model.front_page_index ~= 1 and ((#adapters-1)%NUM_ROWS) == 0 then
+
+            --stupid edge case
+            if model.front_page_index == 2 then
+                model.album_group.x = (1-progress)*(-1*
+                             (model.front_page_index-1) * PIC_W + 
+                             (screen.width - NUM_VIS_COLS*PIC_W)) 
+                              - 10 + progress*10
+            else
+                model.album_group.x = -1*(model.front_page_index-1) * PIC_W + 
+                       (screen.width - NUM_VIS_COLS*PIC_W) - 10 + progress*PIC_W
+            end
+        end
+    end
+    function del_timeline.on_completed()
+        model.fp_slots[(index-1)%NUM_ROWS +1]
+                      [math.ceil(index/NUM_ROWS)] = nil
+        model.albums[(index-1)%NUM_ROWS +1]
+                    [math.ceil(index/NUM_ROWS)]:unparent()
+        model.albums[(index-1)%NUM_ROWS +1]
+                    [math.ceil(index/NUM_ROWS)] = nil
+
+        for ind = index, #adapters do
+            local targ_i = (ind-1)%NUM_ROWS +1
+            local targ_j = math.ceil(ind/NUM_ROWS)
+
+            local curr_i = (ind+1-1)%NUM_ROWS +1
+            local curr_j = math.ceil((ind+1)/NUM_ROWS)
+
+            if  model.fp_slots[curr_i]        ~= nil and
+                model.fp_slots[curr_i][curr_j] ~= nil then
+
+                --model.fp_slots[new_i][new_j]:raise_to_top()
+                model.fp_slots[curr_i][curr_j].position =
+                {
+                    PIC_W*(targ_j-1) ,
+                    PIC_H*(targ_i-1) + 10
+                }
+                model.fp_slots[targ_i][targ_j] =
+                     model.fp_slots[curr_i][curr_j]
+                model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
+---[[
+            else
+                model.fp_slots[targ_i][targ_j] = nil
+                 model.albums[targ_i][targ_j] = nil
+--]]
+            end
+        end
+        if model.front_page_index == math.ceil(#adapters / 
+                              NUM_ROWS) - (NUM_VIS_COLS-1) and
+                              model.front_page_index ~= 1  and 
+                            ((#adapters-1)%NUM_ROWS) == 0  then
+            model.front_page_index = model.front_page_index - 1
+        end
+        print("\n\n",index,#adapters)
+        if index  == #adapters then
+            local i = ((index-1)-1)%NUM_ROWS +1
+            local j = math.ceil((index-1)/NUM_ROWS)
+            print("setting to",i,j - 
+                                    ( model.front_page_index  - 1 ))
+            view:get_controller():set_selected_index(i,j - 
+                                    ( model.front_page_index  - 1 ))
+            prev_i = {i,j -( model.front_page_index  - 1 )}
+        end
+        deleteAdapter(index)
+        model:notify()
+    end
+    del_timeline:start()
 end
 
 end)
