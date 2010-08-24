@@ -94,6 +94,11 @@ function(pres, ctrl)
       
    end
 
+   -- called when either human player no longer detected, or one player left.
    function pres:return_to_main_menu()
+   end
+
+   -- called when sb_qty and bb_qty updated
+   function pres:update_blinds()
    end
 end)

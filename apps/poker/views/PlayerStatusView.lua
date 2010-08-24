@@ -27,7 +27,7 @@ function(self, model, args, player,...)
       self.title.position = { self.top.w/2, self.top.h/2 }
    end
 
-   self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = "Sup dawg"}
+   self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = GET_IMIN_STRING()}
    self.action.on_text_changed = function()
       self.action.anchor_point = { self.action.w/2, self.action.h/2 }
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
@@ -57,9 +57,18 @@ function(self, model, args, player,...)
       --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
       self.title.text = "Player "..player.number.."   Money: $"..self.player.money
       
-      if text then self.action.text = text end
+      if text then
+         self.action.text = text 
+         self.bottom:animate{opacity=255,duration=300}
+         self.action:animate{opacity=255,duration=300}
+      end
       self.action.anchor_point = {self.action.w/2, self.action.h/2}
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
+   end
+
+   function self:hide_bottom()
+      self.bottom:animate{opacity=0,duration=300}
+      self.action:animate{opacity=0,duration=300}
    end
    
    function self:dim()
