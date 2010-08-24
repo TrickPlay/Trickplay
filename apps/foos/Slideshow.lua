@@ -15,7 +15,7 @@ local caption = Text {font = "Sans 15px", text = "", x = 1530, y = 400}
 local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
 local background = Image {src = "assets/background.jpg" }
 local background2 = Image {src = "assets/background2.png" }
-
+local fullscreen = false
 local off_screen_list = {}
 local  on_screen_list = {}
 
@@ -257,26 +257,30 @@ function Slideshow:next_picture()
         print("\tcomp_anim")
         pic.opacity = 255
         print("\tanimate")
-        pic:animate 
-        {
-            duration = 200,
-            mode     = EASE_IN_EXPO,
-            x        = screen.w/4,--2 - i_width/2,
-            y        = screen.h/6,--2 - i_height/2,
-            z        = 0,
-            --garbage collection
-            on_completed = function()
-                print("on_completed")
-                if #on_screen_list > 5 then
-                    self.ui:remove(on_screen_list[#on_screen_list])
-                    on_screen_list[#on_screen_list] = nil
-                end
-            end
-        }
+        if (not fullscreen) then
+		     pic:animate 
+		     {
+		         duration = 200,
+		         mode     = EASE_IN_EXPO,
+		         x        = screen.w/4,--2 - i_width/2,
+		         y        = screen.h/6,--2 - i_height/2,
+		         z        = 0,
+		         --garbage collection
+		         on_completed = function()
+		             print("on_completed")
+		             if #on_screen_list > 5 then
+		                 self.ui:remove(on_screen_list[#on_screen_list])
+		                 on_screen_list[#on_screen_list] = nil
+		             end
+		         end
+		     }
+		  else
     else
         --tell the user no
     end
 end
 
 function Slideshow:toggle_fullscreen()
+	fullscreen = not fullscreen
+
 end
