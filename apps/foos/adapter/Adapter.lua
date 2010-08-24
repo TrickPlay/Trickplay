@@ -2,6 +2,7 @@ adapterTypes = {"Google","Yahoo","Flickr","Yahoo","Google","Yahoo","Google","Yah
 adaptersTable = settings.adaptersTable or { "Google", "Yahoo", "Yahoo", "Google", "Google", "Yahoo", "Google"}
 searches = settings.searches or {"space", "dinosaurs", "dog", "cat", "jessica%20alba","national%20geographic", "NFL"}
 user_ids = settings.user_ids or {}
+dontswap = false
 
 adapters = {}
 adapterTypesTable = {}
