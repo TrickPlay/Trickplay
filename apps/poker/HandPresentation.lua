@@ -156,6 +156,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    end
 
    function pres:deal(round)
+      
       if round == Rounds.HOLE then
          -- Deal hole cards
          mediaplayer:play_sound(DEAL_WAV)
@@ -318,7 +319,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres:betting_round_over()
       local out = ctrl:get_out_table()
       for _,player in ipairs(ctrl:get_players()) do
-         if out[player] then player.status:hide() end
+         if out[player] then player.status:hide()
+         else player.status:hide_bottom() end
       end
       animate_chips_to_center()
    end
