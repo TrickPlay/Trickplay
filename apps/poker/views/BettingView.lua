@@ -138,4 +138,29 @@ BettingView = Class(View, function(view, model, ...)
         end
     end
 
+    function view:show_all_in_notification()
+       local text = Text{
+          text="Can't bet anymore, you're already pushing everyone all in",
+          font="Sans 40px",
+          color="FFFFFF",
+          position={500,500},
+          opacity=0
+       }
+       screen:add(text)
+       text:animate{
+          duration=200,
+          opacity=255,
+          on_completed=function(anim, ui)
+             if not ui then ui = anim end
+             ui:animate{
+                duration=200,
+                opacity=0,
+                on_completed=function(anim,ui)
+                   if not ui then ui=anim end
+                   ui:unparent()
+                end
+             }
+          end
+       }
+    end
 end)
