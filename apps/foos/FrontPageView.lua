@@ -134,8 +134,8 @@ FrontPageView = Class(View, function(view, model, ...)
 
             view.current.x = PIC_W * (sel[2]-1) -  (.025*PIC_W)*progress
             view.current.y = PIC_H * (sel[1]-1) +  10 - progress*15
-            view.current.scale = {1 + progress*.05, 1 + progress * .05}
-
+	         view.current.scale = {1 + progress*.05, 1 + progress * .05}
+				
             view.backdrop.scale = {.845 + .1*progress,.845 + .1*progress}
             view.backdrop.opacity = 255--*progress
             view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
