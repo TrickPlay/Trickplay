@@ -40,7 +40,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    local function start_a_game()
     -- add table text
-    screen:add( AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}}) )
+    local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
+    screen:add( table_text )
+    table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
    
       --make sure last dog selected does not continue to glow
       for _,v in ipairs(DOG_GLOW) do

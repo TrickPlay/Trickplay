@@ -55,7 +55,7 @@ DOG_ANIMATIONS = {
    [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {340, 5} },
    [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
    [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186} },
-   [6] = {dog = 6},
+   [6] = {dog = 6, name = "animation_jacket", frames = 10, position = {1404, 572} },
 }
 
 for i, t in ipairs(DOG_ANIMATIONS) do
