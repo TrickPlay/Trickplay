@@ -88,10 +88,11 @@ function Slideshow:begin()
                                 caption, queryText, logo )
     --grab 5 pictures
     self:preload(5)
+    current_pic = current_pic + 5
 end
 
 function Slideshow:preload(num_pics)
-    for i = current_pic,current_pic + num_pics do
+    for i = current_pic, current_pic + (num_pics-1) do
         model.curr_slideshow:loadUrls(
             adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
             off_screen_list  
@@ -213,8 +214,6 @@ function Slideshow:toggle_timer()
 end
 
 function Slideshow:previous_picture()
-    --if still_loading then
-    --elseif current_pic - 1 > 0 then
     if #on_screen_list > 0 then
         print("prev\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
 
@@ -236,16 +235,13 @@ function Slideshow:previous_picture()
         {
             duration = 200,
             mode     = EASE_IN_EXPO,
-            --z = 500,
-            --opacity = 0,
-        x = (math.random(2)-1)*1920,
-        y = (math.random(2)-1)*1080,
+            x        = (math.random(2)-1)*1920,
+            y        = (math.random(2)-1)*1080,
             --garbage collection
             on_completed = function()
                 z = 500
                 self.ui:remove(pic)
                 if #off_screen_list > 6 then
-                    self.ui:remove(off_screen_list[#off_screen_list])
                     off_screen_list[#off_screen_list] = nil
                 end
             end
@@ -258,10 +254,7 @@ function Slideshow:previous_picture()
 end
 
 function Slideshow:next_picture()
-    --if still_loading then
-    --else
-       -- still_loading = true
-
+    if #off_screen_list > 0 then
         print("next\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
         current_pic = current_pic +1
 
@@ -295,9 +288,9 @@ function Slideshow:next_picture()
                 end
             end
         }
-        
-
-    --end
+    else
+        --tell the user no
+    end
 end
 
 function Slideshow:toggle_fullscreen()
