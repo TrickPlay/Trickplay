@@ -4,7 +4,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
     -- the default selected index
     local src_selected = 1
     local acc_selected = {1,1}
-
+	 local in_box = false
     local query_text = ""
     local login_text = {"",""}
     local controller = self
@@ -14,11 +14,13 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                 --local default_text = text_obj.text
                 text_obj.editable = true
                 text_obj:grab_key_focus()
+                in_box = true
                 function text_obj:on_key_down(k)
                     if keys.Return == k then
                         self.on_key_down = nil
                         screen:grab_key_focus()
                         --controller:on_key_down(k)
+                        in_box = false
                         return true
                     end
                 end
@@ -97,25 +99,25 @@ SourceManagerController = Class(Controller, function(self, view, ...)
 
 
     local MenuKeyTable = {
-        [keys.Up]     = function(self) self:move_selector(Directions.UP   ) end,
-        [keys.Down]   = function(self) self:move_selector(Directions.DOWN ) end,
-        [keys.Left]   = function(self) self:move_selector(Directions.LEFT ) end,
-        [keys.Right]  = function(self) self:move_selector(Directions.RIGHT) end,
-        [keys.Return] = function(self) 
-            if view.accordian == false then
-                --enter the accordian
-                view.accordian = true
-                view.enter_accordian()
-            end
-            MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
-            self:get_model():notify()
-            
-        end
+    	     [keys.Up]     = function(self) self:move_selector(Directions.UP   ) end,
+		     [keys.Down]   = function(self) self:move_selector(Directions.DOWN ) end,
+		     [keys.Left]   = function(self) self:move_selector(Directions.LEFT ) end,
+		     [keys.Right]  = function(self) self:move_selector(Directions.RIGHT) end,
+		     [keys.Return] = function(self) 
+		         if view.accordian == false then
+		             --enter the accordian
+		             view.accordian = true
+		             view.enter_accordian()
+		         end
+		         MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
+		         self:get_model():notify()
+		         
+		     end
     }
 
 
     function self:on_key_down(k)
-        if MenuKeyTable[k] then
+        if MenuKeyTable[k]  and not in_box then
             MenuKeyTable[k](self)
         end
     end
