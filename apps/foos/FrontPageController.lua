@@ -11,14 +11,15 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.a]     = function(self)
             self:get_model():set_active_component(Components.SOURCE_MANAGER)
             --view.timer:stop()
-            self:get_model():notify()
+                                self:get_model():notify()
 
         end,
         [keys.d]     = function(self)
             local formula = (model.front_page_index + (selected[2]-1))*2+(selected[1]-1)-1
-				deleteAdapter(formula)
-				model.front_page_index = 1
-				selected = {1,1}
+				view:Delete_Cover(formula)
+				--model.front_page_index = 1
+				--selected = {1,1}
+
         end,
 
         [keys.Return] = function(self) 

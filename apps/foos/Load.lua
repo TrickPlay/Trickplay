@@ -98,38 +98,40 @@ function Load_Image(site,index)
             -- toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
             	if not failed then
-                if model.swap_pic == nil or model.albums[i] == nil or 
-                                       model.albums[i][j] == nil or 
-                                    model.swap_pic.loaded == false then 
-                    --print("\n\nFailed to load")
-                    model.swap_pic = nil 
-                    model.swapping_cover = false
-                else
-                    Scale_To_Fit(model.swap_pic,
-                                 model.swap_pic.base_size,
-                                 {PIC_W,PIC_H})
+                    if model.swap_pic == nil or model.albums[i] == nil or 
+                                           model.albums[i][j] == nil or 
+                                        model.swap_pic.loaded == false then 
+                        model.swap_pic = nil 
+                        model.swapping_cover = false
+                    else
+                        Scale_To_Fit(model.swap_pic,
+                                     model.swap_pic.base_size,
+                                     {PIC_W,PIC_H})
 
-                    model.fp_slots[i][j]:add(model.swap_pic)
-                    model.albums[i][j]:raise_to_top()
-                    model.albums[i][j]:animate{
-                        duration     = 4*CHANGE_VIEW_TIME,
-                        y            = model.albums[i][j].y + PIC_H,
-                        opacity      = 0,
-                        on_completed = function()
-                            if model.albums[i] == nil or 
-                               model.albums[i][j] == nil then 
-                                model.swap_pic = nil 
-                            else
-                                if model.albums[i][j] ~= nil then
-                                    model.albums[i][j]:unparent() 
-                                    model.albums[i][j] = nil
+                        model.fp_slots[i][j]:add(model.swap_pic)
+                        model.albums[i][j]:raise_to_top()
+                        model.albums[i][j]:animate{
+                            duration     = 4*CHANGE_VIEW_TIME,
+                            y            = model.albums[i][j].y + PIC_H,
+                            opacity      = 0,
+                            on_completed = function()
+                                if  model.albums[i]    == nil or 
+                                    model.albums[i][j] == nil then 
+
+                                    model.swap_pic     =  nil 
+                                else
+                                    if  model.albums[i][j] ~= nil then
+                                        model.albums[i][j]:unparent() 
+                                        model.albums[i][j] = nil
+                                    end
+                                    model.albums[i][j] = model.swap_pic
                                 end
-                                model.albums[i][j] = model.swap_pic
+                                model.swapping_cover = false
                             end
-                            model.swapping_cover = false
-                        end
-                    }
-                end            
+                        }
+                    end            
+                else
+                    model.swapping_cover = false
                 end
             end
         }
