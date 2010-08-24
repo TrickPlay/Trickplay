@@ -6,7 +6,7 @@ HELP_ENABLED = true
 
 ASSERTIONS_ENABLED = true
 
-if ASSERTIONS_ENABLED then
+if not ASSERTIONS_ENABLED then
    local old_assert = assert
    function assert(...)
       if cond then
