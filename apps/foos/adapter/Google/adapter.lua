@@ -34,7 +34,7 @@ end
 function adapter:loadCovers(i,search, start_index)
 	print (adapters[i].logoUrl)
 	local request = URLRequest {
-	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=medium",
+	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=xxlarge",
 	on_complete = function (request, response)
 		local data = json:parse(response.body)
 		

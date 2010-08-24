@@ -93,7 +93,7 @@ end
 function Slideshow:preload(num_pics)
     for i = current_pic,current_pic + num_pics do
         model.curr_slideshow:loadUrls(
-            adapters[model.curr_slideshow.index][1].photos(search,i),
+            adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
             off_screen_list  
         )
     end
