@@ -105,11 +105,10 @@ FrontPageView = Class(View, function(view, model, ...)
         local  sel       = {}
         sel[1],sel[2]    = view:get_controller():get_selected_index()
                sel[2]    = sel[2] + model.front_page_index  - 1
-
         -- shrink the previous
         if msecs <= 200  then
             local progress    =  msecs/200
-
+			  dontswap = true		
             --cannot assume that image will have made it to its full expanded size
             local pos_delta   = {view.prev_pos[1] - view.prev_target_pos[1],
                                  view.prev_pos[2] - view.prev_target_pos[2]}
@@ -124,7 +123,7 @@ FrontPageView = Class(View, function(view, model, ...)
             }
         -- grow the next one
         elseif msecs > 200 and msecs <= 400 then
-             
+ 
             --in case on_new_frame didn't get called on the 200th msec
             view.previous.position = {view.prev_target_pos[1],view.prev_target_pos[2]}
             view.previous.scale    = {1,1}
@@ -140,6 +139,7 @@ FrontPageView = Class(View, function(view, model, ...)
             view.backdrop.opacity = 255--*progress
             view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
                          PIC_H * (sel[1]-1)-22*progress}
+           dontswap = false
 
         elseif msecs > 400  and msecs <= 800 then
             --in case on_new_frame didn't get called on the 400th msec
@@ -310,7 +310,9 @@ function view.timer.on_timer(timer)
 
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
+                    if (not dontswap) then
                     loadCovers(formula, searches[#adapters+1-formula], search_i)
+                    end
                 else
                     print("not calling")
                 end
@@ -326,14 +328,11 @@ function view:Delete_Cover(index)
         duration  =  200,
         direction = "FORWARD",
     }
-
-
-    function del_timeline.on_new_frame(t,msecs)
-        print("on neww frame")
+	 function del_timeline.on_new_frame(t,msecs)
         local progress = msecs/t.duration
+	    dontswap = true
 
-        model.albums[(index-1)%NUM_ROWS +1]
-                    [math.ceil(index/NUM_ROWS)].opacity = (1-progress)*255
+        model.albums[(index-1)%NUM_ROWS +1][math.ceil(index/NUM_ROWS)].opacity = (1-progress)*255
         for ind = index, #adapters do
             local targ_i = (ind-1)%NUM_ROWS +1
             local targ_j = math.ceil(ind/NUM_ROWS)
@@ -396,11 +395,9 @@ function view:Delete_Cover(index)
                 model.fp_slots[targ_i][targ_j] =
                      model.fp_slots[curr_i][curr_j]
                 model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
----[[
             else
                 model.fp_slots[targ_i][targ_j] = nil
                  model.albums[targ_i][targ_j] = nil
---]]
             end
         end
         if model.front_page_index == math.ceil(#adapters / 
@@ -421,6 +418,7 @@ function view:Delete_Cover(index)
         end
         deleteAdapter(index)
         model:notify()
+        dontswap = false
     end
     del_timeline:start()
 end
