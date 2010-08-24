@@ -85,9 +85,13 @@ Player = Class(function(player, args, ...)
       if(call_bet == 0) then
          print("\nCHECK\n")
          return false, 0
-      elseif(call_bet/(pot+call_bet) < .15) then
+      -- check for cases of good pot odds or the person has already invested a ton
+      -- and should just stay in then
+      elseif(call_bet/(pot+call_bet) < .15 or orig_bet > call_bet-orig_bet or orig_bet > player.money) then
          print("\nCALL\n")
-         if call_bet > player.money+orig_bet then
+         -- if the call bet is larger than all the player's money or if the call bet
+         -- leaves the player with less than 5% of his money then go all-in
+         if call_bet > player.money+orig_bet or player.money+orig_bet-call_bet < .05*player.money+orig_bet then
             call_bet = player.money+orig_bet
          end
          return false, call_bet
@@ -100,6 +104,7 @@ Player = Class(function(player, args, ...)
    -- calculate and returns a bet
    local function calculate_bet(state, stddev, ai_move, amount_to_raise, best_hand)
 
+         print("player.bet = "..player.bet)
       local pot = state:get_pot()
       local call_bet = state:get_call_bet()
       local min_raise = state:get_min_raise()
@@ -129,7 +134,6 @@ Player = Class(function(player, args, ...)
       elseif(Moves.CALL == ai_move or number_of_bets >= 5) then
          print("\nCALL, call_bet = "..call_bet.."\n")
          -- only call if really financially feasible or already betted a ton
-         -- or good pot odds
          if(call_bet < (.3+stddev)*player.money or number_of_bets >= 5) then
             return false, call_bet
          else
@@ -292,7 +296,7 @@ Player = Class(function(player, args, ...)
                   --if player's hand is a high pair or higher its still
                   --worth playing even though a pair is in the river:
                   if(best_hand == PokerHands.ONE_PAIR) and
-                   (hole[1].rank.num > 9) then
+                   (hole[1].rank.num > 9 and hole[1].rank.num == hole[2].rank.num) then
                      return Moves.CALL, RaiseFactor.UR
                   else
                      return Moves.FOLD, RaiseFactor.UR

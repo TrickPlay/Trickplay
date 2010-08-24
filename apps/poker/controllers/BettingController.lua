@@ -170,11 +170,11 @@ BettingController = Class(Controller, function(self, view, ...)
               local new_bet = model.currentPlayer.bet + ( - dir[2] * model.bet.BIG_BLIND )
               local max_bet = model.max_bet
               view:change_bet_animation(dir)
-              if new_bet > max_bet then
+              if new_money < 0 then
+                 new_bet, new_money = new_bet+new_money, 0
+              elseif new_bet > max_bet then
                  new_bet, new_money = max_bet, new_bet + new_money - max_bet
                  view:show_all_in_notification()
-              elseif new_money < 0 then
-                 new_bet, new_money = new_bet+new_money, 0
               elseif new_bet < minRaiseBet then
                  new_bet, new_money = minRaiseBet, new_bet+new_money-minRaiseBet
               end

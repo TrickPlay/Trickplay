@@ -261,7 +261,7 @@ HandState = Class(nil,function(state, ctrl, ...)
                print("player "..tmp_action.." is all in")
                num_all_in = num_all_in+1
             end
-            if num_all_in == num_in_players then
+            if num_all_in == num_in_players-1 then
                ctrl:set_bets_done(true)
                break
             end
