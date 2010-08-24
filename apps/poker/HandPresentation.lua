@@ -273,7 +273,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local pos = player.table_position
       local params = DOG_ANIMATIONS[ pos ]
       if params and params.name then
-         a = Animation(params.dog, params.frames, params.position)
+         a = Animation(params.dog, params.frames, params.position, params.speed)
       end
       
       player.glow.opacity = 255

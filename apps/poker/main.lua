@@ -50,12 +50,12 @@ end
 
 -- Dog animations
 DOG_ANIMATIONS = {
-   [1] = {dog = 1, name = "animation_bling", frames = 6, position = {90, 538} },
-   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0} },
-   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {340, 5} },
-   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
-   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186} },
-   [6] = {dog = 6, name = "animation_jacket", frames = 10, position = {1404, 572} },
+   [1] = {dog = 1, name = "animation_bling", frames = 6, position = {90, 538}, speed = .1 },
+   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0}, speed = .1 },
+   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {340, 5}, speed = .1 },
+   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22}, speed = .14 },
+   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186}, speed = .16 },
+   [6] = {dog = 6, name = "animation_jacket", frames = 10, position = {1404, 572}, speed = .1 },
 }
 
 for i, t in ipairs(DOG_ANIMATIONS) do
