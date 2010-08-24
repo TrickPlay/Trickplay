@@ -1,4 +1,4 @@
---print = function() end
+print = function() end
 
 Slideshow = {}
 SLIDESHOW_WIDTH = 1200
@@ -9,6 +9,7 @@ local still_loading = false
 timer.interval = 4
 current_pic = 1
 temp_pic = 0
+pic_num = 1
 local started = true
 local search = "space"
 local caption = Text {font = "Sans 15px", text = "", x = 1530, y = 400}
@@ -18,6 +19,7 @@ local background2 = Image {src = "assets/background2.png" }
 local fullscreen = false
 local off_screen_list = {}
 local  on_screen_list = {}
+local logo = Image{opacity = 0}
 
 function Slideshow:new(args)
 	local num_pics = args.num_pics
@@ -38,14 +40,14 @@ function Slideshow:new(args)
     return object
 end
 
-function Slideshow:loadUrls(url,img_table)
+function Slideshow:loadUrls(url,img_table, i)
     local request = URLRequest 
     {
         url = url,
         on_complete = function (request, response)
 
             local data   = json:parse(response.body)
-            site         = adapters[self.index][1].site(data)
+            site         = adapters[self.index][1].site(data, i)
             caption.text = adapters[self.index][1].caption(data)
 
             self:LoadImage(site,img_table)
@@ -58,6 +60,7 @@ end
 function Slideshow:begin()
 
     print ("Begin Slide Show")
+    self.ui:clear()
 
     --init values
     started        = true
@@ -76,12 +79,11 @@ function Slideshow:begin()
         x    = 105, 
         y    = 300
     }
-    local logo = Image 
+    logo = Image 
     { 
         src = adapters[self.index].logoUrl,
         x = 20,
         y = 130,
-        z = 1,
         size = {300,225}
     }
     self.ui:add( overlay_image, background, background2,
@@ -95,7 +97,7 @@ function Slideshow:preload(num_pics)
     for i = current_pic, current_pic + (num_pics-1) do
         model.curr_slideshow:loadUrls(
             adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
-            off_screen_list  
+            off_screen_list, i  
         )
     end
 end
@@ -146,23 +148,35 @@ function Slideshow:LoadImage(site,img_table)
                     y = (-img.h)/20
                 }
 
-                img_table[index].scale = {SLIDESHOW_HEIGHT/image.h, SLIDESHOW_HEIGHT/image.h}
+                if (not fullscreen) then
+		             img_table[index].scale = {SLIDESHOW_HEIGHT/image.h, SLIDESHOW_HEIGHT/image.h}
 
-                local i_width = img.w * SLIDESHOW_HEIGHT/image.h
-                local i_height = SLIDESHOW_HEIGHT
-                print ("original: "..image.w.." WIDTH:"..i_width)
-                if (img.w/img.h > 1.5) then
-                    img_table[index].scale = 
-                    {
-                        SLIDESHOW_WIDTH/image.w,
-                        SLIDESHOW_WIDTH/image.w
-                    }
-                    i_height = i_height * SLIDESHOW_WIDTH/i_width
-                end
-                img_table[index].x = (math.random(2)-1)*1920
-                img_table[index].y = (math.random(2)-1)*1080
-                img_table[index].z_rotation = {math.floor(math.random(20)-10), i_width/2, i_height/2}
+		             local i_width = img.w * SLIDESHOW_HEIGHT/image.h
+		             local i_height = SLIDESHOW_HEIGHT
+		             print ("original: "..image.w.." WIDTH:"..i_width)
+		             if (img.w/img.h > 1.5) then
+		                 img_table[index].scale = 
+		                 {
+		                     SLIDESHOW_WIDTH/image.w,
+		                     SLIDESHOW_WIDTH/image.w
+		                 }
+		                 i_height = i_height * SLIDESHOW_WIDTH/i_width
+		             end
+		             img_table[index].x = (math.random(2)-1)*1920
+		             img_table[index].y = (math.random(2)-1)*1080
+		             img_table[index].z_rotation = {math.floor(math.random(20)-10), i_width/2, i_height/2}
+		          else
+					  img_table[index].opacity = 0
+					  overlay.opacity = 0
+					  img_table[index].z_rotation = {0,image.w/2,image.h/2}
+					  img_table[index].anchor_point = {image.w/2,image.h/2}
+					  img_table[index].z = 0
+					  img_table[index].x = screen.w/2
+					  img_table[index].y = screen.h/2
+ 	 	    	 		img_table[index].scale = {1080/image.h,1080/image.h}
+		          end
                 img_table[index]:add(image,overlay)
+
             end
             img.on_loaded = nil
         end
@@ -205,25 +219,28 @@ function Slideshow:previous_picture()
         pic:complete_animation()
  
         --animate it off the screen
-        pic:animate 
-        {
-            duration = 200,
-            mode     = EASE_IN_EXPO,
-            x        = (math.random(2)-1)*1920,
-            y        = (math.random(2)-1)*1080,
-            --garbage collection
-            on_completed = function()
-                z = 500
-                self.ui:remove(pic)
----[[
-                if #off_screen_list > 6 then
-                    print("removing from off_screen list")
-                    off_screen_list[#off_screen_list] = nil
-                end
---]]
-            end
-        }
-        
+        if (not fullscreen) then
+		     pic:animate 
+		     {
+		         duration = 200,
+		         mode     = EASE_IN_EXPO,
+		         x        = (math.random(2)-1)*1920,
+		         y        = (math.random(2)-1)*1080,
+		         --garbage collection
+		         on_completed = function()
+		             z = 500
+		             self.ui:remove(pic)
+	---[[
+		             if #off_screen_list > 6 then
+		                 print("removing from off_screen list")
+		                 off_screen_list[#off_screen_list] = nil
+		             end
+	--]]
+		         end
+		     }
+		  else
+				-- code to go back in full screen
+        end
     else
         -- tell the user NO
     end
@@ -275,7 +292,25 @@ function Slideshow:next_picture()
 		         end
 		     }
 		  else
-		  		
+			  pic.opacity = 0
+			  
+			  pic:animate {
+			  		duration = 1000,
+			  		mode = EASE_IN_EXPO,
+			  		opacity = 255,
+			  		on_completed = function()
+		             print("on_completed")
+		             if #on_screen_list > 1 then
+		                 self.ui:remove(on_screen_list[#on_screen_list])
+		                 on_screen_list[#on_screen_list] = nil
+		             end
+		         end
+			  }
+			  on_screen_list[#on_screen_list]:animate {
+			  	duration = 1000,
+			  	opacity = 0,
+		  		mode = EASE_IN_EXPO,
+			  }
 		  end
     else
         --tell the user no
@@ -284,5 +319,19 @@ end
 
 function Slideshow:toggle_fullscreen()
 	fullscreen = not fullscreen
+	self.ui:remove(on_screen_list[#on_screen_list])
+	self:stop()
+	self:begin()
 
+
+	if (fullscreen) then
+		background.opacity = 0
+		background2.opacity = 0
+		logo.opacity = 0
+	else
+		background.opacity = 255
+		background2.opacity = 255
+		logo.opacity = 255
+	end
+	--this will reset it we should do something better
 end
