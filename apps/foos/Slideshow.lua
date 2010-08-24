@@ -1,4 +1,4 @@
-print = function() end
+--print = function() end
 
 Slideshow = {}
 SLIDESHOW_WIDTH = 1200

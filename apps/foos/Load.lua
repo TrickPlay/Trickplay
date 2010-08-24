@@ -33,7 +33,7 @@ function Setup_Album_Covers()
             model.placeholders.opacity = 255
             model.fp_slots[i][j] = Group
             {
-                name     = "Slot "..i.." "..j, 
+                --name     = "Slot "..i.." "..j, 
                 position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
                 clip     = { 0, 0,  PIC_W, PIC_H },
                 opacity  = 255

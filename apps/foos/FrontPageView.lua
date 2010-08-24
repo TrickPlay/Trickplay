@@ -427,3 +427,142 @@ end
 
 end)
 
+function Add_Cover()
+    local add_timeline = Timeline
+    {
+        name      = "Adding animation",
+        loop      =  false,
+        duration  =  200,
+        direction = "FORWARD",
+    }
+
+
+    function add_timeline.on_new_frame(t,msecs)
+        print("on neww frame")
+        local progress = msecs/t.duration
+--[[
+        model.albums[(index-1)%NUM_ROWS +1]
+                    [math.ceil(index/NUM_ROWS)].opacity = (1-progress)*255
+--]]
+        for ind = 1, #adapters do
+            local targ_i = (ind+1-1)%NUM_ROWS +1
+            local targ_j = math.ceil((ind+1)/NUM_ROWS)
+
+            local curr_i = (ind-1)%NUM_ROWS +1
+            local curr_j = math.ceil((ind)/NUM_ROWS)
+
+            if model.fp_slots[curr_i]        ~= nil and
+               model.fp_slots[curr_i][curr_j] ~= nil then
+                --model.fp_slots[new_i][new_j]:raise_to_top()
+                model.fp_slots[curr_i][curr_j].position =
+                {
+                    PIC_W*(curr_j-1) + progress * ((PIC_W*(targ_j-1)) -
+                                                   (PIC_W*(curr_j-1))),
+                    PIC_H*(curr_i-1)+10 + progress * ((PIC_H*(targ_i-1)) -
+                                                      (PIC_H*(curr_i-1)))
+                }
+            end
+        end
+--[[
+        if model.front_page_index == math.ceil(#adapters / 
+                              NUM_ROWS) - (NUM_VIS_COLS-1) and
+           model.front_page_index ~= 1 and ((#adapters-1)%NUM_ROWS) == 0 then
+
+            --stupid edge case
+            if model.front_page_index == 2 then
+                model.album_group.x = (1-progress)*(-1*
+                             (model.front_page_index-1) * PIC_W + 
+                             (screen.width - NUM_VIS_COLS*PIC_W)) 
+                              - 10 + progress*10
+            else
+                model.album_group.x = -1*(model.front_page_index-1) * PIC_W + 
+                       (screen.width - NUM_VIS_COLS*PIC_W) - 10 + progress*PIC_W
+            end
+        end
+--]]
+    end
+    function add_timeline.on_completed()
+--[[
+        model.fp_slots[(index-1)%NUM_ROWS +1]
+                      [math.ceil(index/NUM_ROWS)] = nil
+        model.albums[(index-1)%NUM_ROWS +1]
+                    [math.ceil(index/NUM_ROWS)]:unparent()
+        model.albums[(index-1)%NUM_ROWS +1]
+                    [math.ceil(index/NUM_ROWS)] = nil
+--]]
+        for ind = #adapters,1,-1 do
+            local targ_i = (ind+1-1)%NUM_ROWS +1
+            local targ_j = math.ceil((ind+1)/NUM_ROWS)
+
+            local curr_i = (ind-1)%NUM_ROWS +1
+            local curr_j = math.ceil((ind)/NUM_ROWS)
+
+            if  model.fp_slots[curr_i]        ~= nil and
+                model.fp_slots[curr_i][curr_j] ~= nil then
+
+                --model.fp_slots[new_i][new_j]:raise_to_top()
+                model.fp_slots[curr_i][curr_j].position =
+                {
+                    PIC_W*(targ_j-1) ,
+                    PIC_H*(targ_i-1) + 10
+                }
+                --an edge case if there's only one picture
+                if model.fp_slots[targ_i] == nil then
+                    model.fp_slots[targ_i] = {}
+                end
+                if model.albums[targ_i] == nil then
+                    model.albums[targ_i] = {}
+                end
+
+                model.fp_slots[targ_i][targ_j] =
+                     model.fp_slots[curr_i][curr_j]
+                model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
+                model.fp_slots[curr_i][curr_j] = nil
+                model.albums[curr_i][curr_j]   = nil
+--[[
+            else
+                model.fp_slots[targ_i][targ_j] = nil
+                 model.albums[targ_i][targ_j] = nil
+--]]
+            end
+        end
+        model.fp_slots[1][1] = Group
+        {
+            --name     = "Slot "..i.." "..j, 
+            position = { 0, 10 },
+            clip     = { 0, 0,  PIC_W, PIC_H },
+            opacity  = 255
+        }
+        model.placeholders[1][1] = Clone
+        {
+            source = model.default[1],
+            opacity =255
+        }
+        model.fp_slots[1][1]:add(model.placeholders[1][1])
+        model.album_group:add(model.fp_slots[1][1])
+        loadCovers(1,searches[#adapters], math.random(5)) 
+
+--[[
+        if model.front_page_index == math.ceil(#adapters / 
+                              NUM_ROWS) - (NUM_VIS_COLS-1) and
+                              model.front_page_index ~= 1  and 
+                            ((#adapters-1)%NUM_ROWS) == 0  then
+            model.front_page_index = model.front_page_index - 1
+        end
+        print("\n\n",index,#adapters)
+        if index  == #adapters then
+            local i = ((index-1)-1)%NUM_ROWS +1
+            local j = math.ceil((index-1)/NUM_ROWS)
+            print("setting to",i,j - 
+                                    ( model.front_page_index  - 1 ))
+            view:get_controller():set_selected_index(i,j - 
+                                    ( model.front_page_index  - 1 ))
+            prev_i = {i,j -( model.front_page_index  - 1 )}
+        end
+--]]
+        --deleteAdapter(index)
+        model:notify()
+    end
+    add_timeline:start()
+end
+
