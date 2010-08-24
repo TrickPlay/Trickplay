@@ -9,7 +9,7 @@ AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 -- Buttons
 local ui_colors = {"Red", "Green", "Gray"}
 local ui_buttons = {
-   "Bubble", "BubbleHeader", "ButtonArrowDown", "ButtonArrowUp",
+   "Bubble", "ButtonArrowDown", "ButtonArrowUp",
    "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"
 }
 for _,color in pairs(ui_colors) do
@@ -23,11 +23,19 @@ for i=1, 2 do
    AssetLoader:preloadImage("Tutorial"..i,"assets/tut"..i..".png")
 end
 
--- Player text bubbles
-local player_text = {"BubbleLeft", "BubbleRight"}
-for i=1, 2 do
-   for _, text in ipairs(player_text) do
-      AssetLoader:preloadImage(text..i,"assets/UI/"..text..i..".png")
+-- Load new UI elements
+AssetLoader:preloadImage("ButtonsOnTable","assets/UI/new/buttons_on_table.png")
+AssetLoader:preloadImage("BetArrowUp","assets/UI/new/betarrow_up.png")
+AssetLoader:preloadImage("BetArrowDown","assets/UI/new/betarrow_down.png")
+
+local button_types = { "focused", "default" }
+local button_names = { "fold", "call", "bet", "check", "exit", "help", "start" }
+
+for i, type in pairs(button_types) do
+   for k, name in pairs(button_names) do
+      if i==1 or k>3 then
+         AssetLoader:preloadImage(name.."_"..type,"assets/UI/new/"..name.."_"..type..".png")
+      end
    end
 end
 
@@ -90,6 +98,8 @@ DOG_ANIMATION_LAYER = Group{}
 
 AssetLoader.on_preload_ready =
 function()
+   --a = AssetLoader:getImage("fold_focused",{})
+   --screen:add( a )
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
    screen:add(DOG_LAYER, DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
    for i=1, 6 do
