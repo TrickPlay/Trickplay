@@ -3,6 +3,8 @@ dofile ("Assets.lua")
 -- Asset loading ---------------------------------------------------------------
 AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
+AssetLoader:preloadImage("TableText","assets/UI/new/table_text.png")
+
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
 AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 
@@ -101,6 +103,7 @@ function()
    --a = AssetLoader:getImage("fold_focused",{})
    --screen:add( a )
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
+
    screen:add(DOG_LAYER, DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
    for i=1, 6 do
       DOGS[i] = AssetLoader:getImage("dog"..i,{position = DOG_GLOW[i], opacity = 0, name = "Dog "..i})

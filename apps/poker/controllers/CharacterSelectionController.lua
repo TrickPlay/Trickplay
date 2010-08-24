@@ -39,6 +39,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    controller.playerCounter = playerCounter
 
    local function start_a_game()
+    -- add table text
+    screen:add( AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}}) )
+   
       --make sure last dog selected does not continue to glow
       for _,v in ipairs(DOG_GLOW) do
          v.opacity = 0
