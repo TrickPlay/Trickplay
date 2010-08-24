@@ -80,13 +80,16 @@ Player = Class(function(player, args, ...)
       error("error calculation position")
    end
 
-   local function do_fold(call_bet, pot)
+   local function do_fold(call_bet, pot, orig_bet)
       assert(call_bet >=0)
       if(call_bet == 0) then
          print("\nCHECK\n")
          return false, 0
-      elseif(call_bet/(pot+call_bet) < .3) then
+      elseif(call_bet/(pot+call_bet) < .15) then
          print("\nCALL\n")
+         if call_bet > player.money+orig_bet then
+            call_bet = player.money+orig_bet
+         end
          return false, call_bet
       end
       print("\nFOLD\n")
@@ -95,7 +98,13 @@ Player = Class(function(player, args, ...)
    
    local number_of_bets = 0
    -- calculate and returns a bet
-   local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet, bb_qty, pot)
+   local function calculate_bet(state, stddev, ai_move, amount_to_raise, best_hand)
+
+      local pot = state:get_pot()
+      local call_bet = state:get_call_bet()
+      local min_raise = state:get_min_raise()
+      local bb_qty = state:get_bb_qty()
+      local orig_bet = state:get_orig_bet()
 
       assert(call_bet >= 0)
       assert(min_raise > 0)
@@ -115,7 +124,7 @@ Player = Class(function(player, args, ...)
       local num = math.random(m)
       print("num: "..num.."\n")
       if(num == 1) then
-         return do_fold(call_bet, pot)
+         return do_fold(call_bet, pot, orig_bet)
       -- if the bet wont destroy the player's account then he's good to raise
       elseif(Moves.CALL == ai_move or number_of_bets >= 5) then
          print("\nCALL, call_bet = "..call_bet.."\n")
@@ -124,7 +133,7 @@ Player = Class(function(player, args, ...)
          if(call_bet < (.3+stddev)*player.money or number_of_bets >= 5) then
             return false, call_bet
          else
-            return do_fold(call_bet, pot)
+            return do_fold(call_bet, pot, orig_bet)
          end
       elseif Moves.RAISE == ai_move then
          assert(call_bet >= 0)
@@ -401,9 +410,9 @@ Player = Class(function(player, args, ...)
       last_move = ai_move
       
       if Moves.FOLD == ai_move then
-         return do_fold(call_bet, pot)
+         return do_fold(call_bet, pot, orig_bet)
       else
-         return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet, bb_qty, pot)
+         return calculate_bet(state, stddev, ai_move, amount_to_raise, best_hand)
       end
 
    end
