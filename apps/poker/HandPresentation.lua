@@ -127,7 +127,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
          
          player.status:display()
-         player.status:update( GET_IMIN_STRING() )
+--         player.status:update( "" )
+         player.status:hide_bottom()
          player:show()
 
       end
@@ -155,6 +156,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    end
 
    function pres:deal(round)
+      
       if round == Rounds.HOLE then
          -- Deal hole cards
          mediaplayer:play_sound(DEAL_WAV)
@@ -195,7 +197,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
       local won = {}
       for _,winner in ipairs(winners) do
-         winner.status:update( GET_WINHAND_STRING() )
+         winner.status:update( poker_hand.name )
          won[winner] = true
       end
 
@@ -244,6 +246,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
       end
       
       player.glow.opacity = 255
+      
+      player.status:startFocus()
       
    end
 
@@ -298,6 +302,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- FINISH TURN
    function pres:finish_turn(player)
       player.glow.opacity = 0
+      player.status:stopFocus()
    end
 
    -- SOMEONE LEFT A SEAT
@@ -308,13 +313,16 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
       only_player.status:update( "weaksauce." )
+      only_player.betChips:set(0)
+      animate_pot_to_player( only_player )
    end
 
    -- Betting round over, HandState has been set for next betting round
    function pres:betting_round_over()
       local out = ctrl:get_out_table()
       for _,player in ipairs(ctrl:get_players()) do
-         if out[player] then player.status:hide() end
+         if out[player] then player.status:hide()
+         else player.status:hide_bottom() end
       end
       animate_chips_to_center()
    end

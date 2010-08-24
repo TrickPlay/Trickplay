@@ -39,6 +39,7 @@ function(ctrl, model, ...)
       function(ctrl)
          if hands % 10 == 0 then
             state:increase_blinds()
+            pres:update_blinds()
          end
          enable_event_listener(TimerEvent{interval=.1})
          return true
@@ -115,7 +116,13 @@ function(ctrl, model, ...)
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
-      if #ctrl:get_players() == 1 then
+      local players = ctrl:get_players()
+      local still_playing = false
+      for _,player in ipairs(players) do
+         if player.isHuman then still_playing = true end
+      end
+
+      if #players == 1 or not still_playing then
          pres:return_to_main_menu()
          enable_event_listener(KbdEvent())
          model:set_active_component(Components.CHARACTER_SELECTION)
