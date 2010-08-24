@@ -127,7 +127,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
          
          player.status:display()
-         player.status:update( GET_IMIN_STRING() )
+--         player.status:update( "" )
+         player.status:hide_bottom()
          player:show()
 
       end
@@ -195,7 +196,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
       local won = {}
       for _,winner in ipairs(winners) do
-         winner.status:update( GET_WINHAND_STRING() )
+         winner.status:update( poker_hand.name )
          won[winner] = true
       end
 
