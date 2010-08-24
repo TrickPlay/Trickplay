@@ -59,6 +59,22 @@ function Popup:new(args)
 	
 	if not args.noRender then object:render() end
         
+	if args.loop then
+		
+		object.on_fade_in = function()
+			object.fade = "out"
+			object:render()
+		end
+		
+		object.on_fade_out = function()
+			if not object.stop then
+			   object.fade = "in"
+			   object:render()
+			end
+		end
+		
+	end
+	
         print("Created Popup")
         
         return object
@@ -118,9 +134,9 @@ end
 function Popup:on_fade_in()
 
 	print("on_fade_in called")
-                
+	
 	self:setTimer()
-                    
+
 end
 
 function Popup:on_fade_out()
@@ -138,7 +154,19 @@ function Popup:on_fade_out()
 
 end
 
+function Popup:start_loop()
 
+	self.stop = nil
+	self.fade = "in"
+	self:render()
+	
+end
+
+function Popup:pause_loop()
+
+	self.stop = true
+	
+end
 
 
 

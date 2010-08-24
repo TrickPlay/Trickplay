@@ -20,6 +20,25 @@ function(self, model, args, player,...)
    
    self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.table_position] }
    
+   -- Blinking red focus
+   self.focus = AssetLoader:getImage("BubbleRed",{opacity = 0})
+   self.group:add(self.focus)
+   self.popup = Popup:new{
+      group = self.focus,
+      noRender = true,
+      animate_in = {duration=500, opacity=255},
+      animate_out = {duration=500, opacity=0},
+      loop = true,
+   }
+   
+   function self:startFocus()
+      self.popup:start_loop()
+   end
+   
+   function self:stopFocus()
+      self.popup:pause_loop()
+   end
+   
    -- Player text
    self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.WHITE, text = "Player "..player.number}
    self.title.on_text_changed = function()
@@ -27,7 +46,7 @@ function(self, model, args, player,...)
       self.title.position = { self.top.w/2, self.top.h/2 }
    end
 
-   self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = "Sup dawg"}
+   self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = GET_IMIN_STRING()}
    self.action.on_text_changed = function()
       self.action.anchor_point = { self.action.w/2, self.action.h/2 }
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
@@ -55,11 +74,20 @@ function(self, model, args, player,...)
    
    function self:update(text)
       --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
-      self.title.text = "Player "..player.number.."   Money: $"..self.player.money
+      self.title.text = "Player "..player.number.."  $"..self.player.money
       
-      if text then self.action.text = text end
+      if text then
+         self.action.text = text 
+         self.bottom:animate{opacity=255,duration=300}
+         self.action:animate{opacity=255,duration=300}
+      end
       self.action.anchor_point = {self.action.w/2, self.action.h/2}
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
+   end
+
+   function self:hide_bottom()
+      self.bottom:animate{opacity=0,duration=300}
+      self.action:animate{opacity=0,duration=300}
    end
    
    function self:dim()
