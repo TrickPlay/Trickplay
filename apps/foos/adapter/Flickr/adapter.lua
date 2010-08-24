@@ -2,7 +2,7 @@
 num_photos = 1
 
 local adapter = {
-	name = "Flickr User Albums",
+	name = "Flickr User Photostream",
 	logoUrl = "adapter/Flickr/logo.png",
 	logoscale = {0.1,0.1},
 	{
@@ -17,9 +17,9 @@ local adapter = {
 		photos = function(search,current_pic, i)
       	return "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..user_ids[i].."&nojsoncallback=1"
 		end,
-		site = function(data) 
+		site = function(data,i) 
 			num_photos = #data.photos.photo
-			local start_index = (current_pic-1)%num_photos + 1
+			local start_index = (i-1)%num_photos + 1
 			return "http://farm"..data.photos.photo[start_index].farm..".static.flickr.com/"..data.photos.photo[start_index].server.."/"..data.photos.photo[start_index].id.."_"..data.photos.photo[start_index].secret..".jpg"
 		end
 		

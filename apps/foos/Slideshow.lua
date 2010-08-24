@@ -9,6 +9,7 @@ local still_loading = false
 timer.interval = 4
 current_pic = 1
 temp_pic = 0
+pic_num = 1
 local started = true
 local search = "space"
 local caption = Text {font = "Sans 15px", text = "", x = 1530, y = 400}
@@ -39,14 +40,14 @@ function Slideshow:new(args)
     return object
 end
 
-function Slideshow:loadUrls(url,img_table)
+function Slideshow:loadUrls(url,img_table, i)
     local request = URLRequest 
     {
         url = url,
         on_complete = function (request, response)
 
             local data   = json:parse(response.body)
-            site         = adapters[self.index][1].site(data)
+            site         = adapters[self.index][1].site(data, i)
             caption.text = adapters[self.index][1].caption(data)
 
             self:LoadImage(site,img_table)
@@ -96,7 +97,7 @@ function Slideshow:preload(num_pics)
     for i = current_pic, current_pic + (num_pics-1) do
         model.curr_slideshow:loadUrls(
             adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
-            off_screen_list  
+            off_screen_list, i  
         )
     end
 end
