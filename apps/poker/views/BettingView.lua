@@ -81,6 +81,7 @@ BettingView = Class(View, function(view, model, ...)
     view.ui:add(unpack(arrows))
 
     screen:add(view.ui)
+    fold_button.group:raise_to_top()    --compensates for clipping with check_button
 
     function view:initialize()
         self:set_controller(BettingController(self))
@@ -127,7 +128,7 @@ BettingView = Class(View, function(view, model, ...)
             
             local player = model.currentPlayer
             bet_text.text = "$"..player.bet
---TODO: fix this
+
             if(model.call_bet == 0) then
                 check_button.group.opacity = 255
                 call_button.group.opacity = 0
