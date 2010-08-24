@@ -67,4 +67,8 @@ GameState = Class(nil,function(state, ctrl)
       print("Deck initialized and shuffled")
    end
 
+   function state.increase_blinds(state)
+      sb_qty = sb_qty * 2
+      bb_qty = bb_qty * 2
+   end
 end)
