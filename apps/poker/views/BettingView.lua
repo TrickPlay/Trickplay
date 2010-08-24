@@ -3,35 +3,24 @@ BettingView = Class(View, function(view, model, ...)
     --first add the background shiz
 
     local background = {
-        Image{
-            position = {MDPL.FOLD[1], MDPL.FOLD[2]},
-            src = "assets/UI/new/buttons_on_table.png"
-        }
+        AssetLoader:getImage( "ButtonsOnTable", { position = MDPL.FOLD } )
     }
      
     --create the components
-    local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2], "assets/UI/new/fold_default", "assets/UI/new/fold_focused.png")
-    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "assets/UI/new/call_default", "assets/UI/new/call_focused.png")
-    local check_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "assets/UI/new/check_default.png", "assets/UI/new/check_focused.png")
-    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2], "assets/UI/new/bet_default", "assets/UI/new/bet_focused.png")
+    local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2], nil, "fold_focused")
+    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], nil, "call_focused")
+    local check_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2], "check_default", "check_focused")
+    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2], nil, "bet_focused")
 
-    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "assets/UI/new/exit_default.png", "assets/UI/new/exit_focused.png")
-    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "assets/UI/new/help_default.png", "assets/UI/new/help_focused.png")
+    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2], "exit_default", "exit_focused")
+    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2], "help_default", "help_focused")
 
     check_button.group.opacity = 0
 
     -- up down arrows
     local arrows = {
-        Image{
-            position  = {MDPL.UP[1], MDPL.UP[2]},
-            src = "assets/UI/new/betarrow_up.png",
-            opacity = 0
-        },
-        Image{
-            position  = {MDPL.DOWN[1], MDPL.DOWN[2]},
-            src = "assets/UI/new/betarrow_down.png",
-            opacity = 0
-        }
+        AssetLoader:getImage( "BetArrowUp", { position = MDPL.UP, opacity = 0 } ),
+        AssetLoader:getImage( "BetArrowDown", { position = MDPL.DOWN, opacity = 0 } )
     }
 
     view.items = {
