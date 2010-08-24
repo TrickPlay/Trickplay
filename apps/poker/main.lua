@@ -40,11 +40,11 @@ end
 
 -- Dog animations
 DOG_ANIMATIONS = {
-   [1] = {dog = 1},
+   [1] = {dog = 1, name = "animation_bling", frames = 6, position = {90, 538} },
    [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0} },
    [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {340, 5} },
    [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
-   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1750, 10} },
+   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186} },
    [6] = {dog = 6},
 }
 
