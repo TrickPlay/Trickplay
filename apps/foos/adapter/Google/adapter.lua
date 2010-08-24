@@ -6,14 +6,26 @@ local adapter = {
 	logoscale = {0.3,0.3},
 	{
 		name = "public",
-		caption = function(data) return "Url: "..data.responseData.results[1].visibleUrl.."\nInfo: "..data.responseData.results[1].titleNoFormatting end,
+		caption = function(data)
+			if (type(data.responseData) == "table") then
+				return "Url: "..data.responseData.results[1].visibleUrl.."\nInfo: "..data.responseData.results[1].titleNoFormatting 
+			else
+				return ""
+			end
+		end,
 		required_inputs = {
 			format = "QUERY",
 			query = "space",
 		},
 		albums = function() end,
 		photos = function(search,current_pic) return "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..current_pic.."&imgsz=xxlarge" end,
-		site = function(data) return data.responseData.results[1].unescapedUrl or "" end
+		site = function(data) 
+			if (type(data.responseData) == "table") then
+				return data.responseData.results[1].unescapedUrl
+			else
+				return "" 
+			end
+		end
 		
 	}
 }
@@ -37,12 +49,10 @@ function adapter:loadCovers(i,search, start_index)
 	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=xxlarge",
 	on_complete = function (request, response)
 		local data = json:parse(response.body)
-		
-		site = data.responseData.results[1].unescapedUrl or ""
-      Load_Image(site,i)
---		print(i)
---		debug()
-
+		if (type(data.responseData) == "table") then
+			site = data.responseData.results[1].unescapedUrl or ""
+		   Load_Image(site,i)
+		end
 	end
 	}
 	request:send()
