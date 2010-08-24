@@ -313,6 +313,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
       only_player.status:update( "weaksauce." )
+      only_player.betChips:set(0)
+      animate_pot_to_player( only_player )
    end
 
    -- Betting round over, HandState has been set for next betting round

@@ -28,26 +28,15 @@ function(self, model, args, player,...)
       noRender = true,
       animate_in = {duration=500, opacity=255},
       animate_out = {duration=500, opacity=0},
-      on_fade_in = function()
-         self.popup.fade = "out"
-         self.popup:render()
-      end,
-      on_fade_out = function()
-         if not self.popup.stop then
-            self.popup.fade = "in"
-            self.popup:render()
-         end
-      end,
+      loop = true,
    }
    
    function self:startFocus()
-      self.popup.stop = nil
-      self.popup.fade = "in"
-      self.popup:render()
+      self.popup:start_loop()
    end
    
    function self:stopFocus()
-      self.popup.stop = true
+      self.popup:pause_loop()
    end
    
    -- Player text
@@ -85,7 +74,7 @@ function(self, model, args, player,...)
    
    function self:update(text)
       --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
-      self.title.text = "Player "..player.number.."   Money: $"..self.player.money
+      self.title.text = "Player "..player.number.."  $"..self.player.money
       
       if text then
          self.action.text = text 
