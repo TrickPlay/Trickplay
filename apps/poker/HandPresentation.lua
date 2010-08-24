@@ -201,7 +201,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
             for k,card in pairs(hole) do
                screen:add(card.group)
                -- Animate and flip the card if the player is human
-               card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, on_completed = function() if player.isHuman then flipCard(card.group) end end }
+               card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, z_rotation=0, on_completed = function() if player.isHuman then flipCard(card.group) end end }
                card.group:raise_to_top()
                offset = offset + 30
             end
