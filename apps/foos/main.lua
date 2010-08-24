@@ -11,16 +11,20 @@ PADDING_MIDDLE = 0
 
 PIC_DIR = "assets/thumbnails/"
 
-PIC_W = (screen.width/(NUM_VIS_COLS+1)) 
-PIC_H = (screen.height/NUM_ROWS)
-SEL_W = 1.1*PIC_W
-SEL_H = 1.1*PIC_H
+PIC_H = (screen.height/NUM_ROWS) - 10
+PIC_W = PIC_H--(screen.width/(NUM_VIS_COLS+1)) 
+SEL_W = PIC_W*1.1
+SEL_H = PIC_H*1.1
 
 
 
 
 dofile("Class.lua") -- Must be declared before any class definitions.
+dofile("adapter/Adapter.lua")
+
 dofile("MVC.lua")
+dofile("TextBox.lua")
+dofile("FocusableImage.lua")
 dofile("FrontPageView.lua")
 dofile("FrontPageController.lua")
 ---[[
@@ -32,10 +36,9 @@ dofile("HelpMenuView.lua")
 dofile("HelpMenuController.lua")
 --]]
 
-dofile("adapter/Adapter.lua")
---[[
-dofile("ItemSelectedView.lua")
-dofile("ItemSelectedController.lua")
+---[[
+dofile("SourceManagerView.lua")
+dofile("SourceManagerController.lua")
 --]]
 dofile("Slideshow.lua")
 
@@ -45,7 +48,8 @@ Components = {
    COMPONENTS_FIRST = 1,
    FRONT_PAGE       = 1,
    SLIDE_SHOW       = 2,
-   COMPONENTS_LAST  = 2
+   SOURCE_MANAGER   = 3,
+   COMPONENTS_LAST  = 3
 }
 model = Model()
 
@@ -57,14 +61,21 @@ front_page_view:initialize()
 local slide_show_view = SlideshowView(model)
 slide_show_view:initialize()
 --]]
---[[
-local help_menu_view = HelpMenuView(model)
-help_menu_view:initialize()
+---[[
+local source_manager_view = SourceManagerView(model)
+source_manager_view:initialize()
 --]]
 --[[
 local item_selected_view = ItemSelectedView(model)
 item_selected_view:initialize()
 --]]
+
+function app:on_closing()
+	settings.searches = searches
+	settings.adaptersTable = adaptersTable
+	settings.user_ids = user_ids
+end
+
 function screen:on_key_down(k)
     assert(model:get_active_controller())
     model:get_active_controller():on_key_down(k)
