@@ -109,6 +109,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                 MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
             else
                 MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
+                
             end
             self:get_model():notify()
             
