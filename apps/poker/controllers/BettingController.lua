@@ -169,12 +169,17 @@ BettingController = Class(Controller, function(self, view, ...)
               local new_money = model.currentPlayer.money + ( dir[2] * model.bet.BIG_BLIND )
               local new_bet = model.currentPlayer.bet + ( - dir[2] * model.bet.BIG_BLIND )
               view:change_bet_animation(dir)
-              if new_bet >= minRaiseBet and new_money >= 0 then
-                  model.currentPlayer.bet = new_bet
-                  model.currentPlayer.money = new_money
-                  print("Current bet:", model.currentPlayer.bet, "Current money:", model.currentPlayer.money)
+              if new_money < 0 then
+                 new_bet, new_money = new_bet+new_money, 0
+              elseif new_bet < minRaiseBet then
+                 new_bet, new_money = minRaiseBet, new_bet+new_money-minRaiseBet
               end
-          else
+              if new_bet >= minRaiseBet and new_money >= 0 then
+                 model.currentPlayer.bet = new_bet
+                 model.currentPlayer.money = new_money
+                 print("Current bet:", model.currentPlayer.bet, "Current money:", model.currentPlayer.money)
+              end
+           else
              local new_selected = selected + dir[2]
              if(1 <= new_selected and GroupSize >= new_selected) then
                  selected = new_selected

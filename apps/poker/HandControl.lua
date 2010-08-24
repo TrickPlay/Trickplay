@@ -141,6 +141,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
                   "bet ($".. bet ..") should max out at player's bank plus original bet ($"..active_player.money+orig_bet..")."
                )
                active_player.money = active_player.money + orig_bet - bet
+               assert(active_player.money >= 0, "WTF? money went negative.")
             end
             print("computer move, activeplayer money now $" .. active_player.money)
             enable_event_listener(
