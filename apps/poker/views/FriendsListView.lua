@@ -12,9 +12,6 @@ FriendsListView = Class(View, function(view, model, ...)
     view.background_ui = Group{name = "checkoutBackground_ui", position = {0, 0}}
     view.background_ui:add(unpack(background))
 
-    --ui that actually moves
-    view.moving_ui=Group{name="checkoutMoving_ui", position=HIDE_TOP}
---    view.moving_ui:add()
     --all ui junk for this view
     view.ui=Group{name="checkout_ui", position={0,0}}
     view.ui:add()
@@ -22,7 +19,7 @@ FriendsListView = Class(View, function(view, model, ...)
     screen:add(view.ui)
 
     function view:initialize()
-        self:set_controller(CharacterSelectionController(self))
+        self:set_controller(FriendsListController(self))
     end
     
     function view:update()
