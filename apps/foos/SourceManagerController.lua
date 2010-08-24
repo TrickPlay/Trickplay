@@ -106,10 +106,8 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                 --enter the accordian
                 view.accordian = true
                 view.enter_accordian()
-                MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
-            else
-                MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
             end
+            MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
             self:get_model():notify()
             
         end
@@ -158,7 +156,8 @@ SourceManagerController = Class(Controller, function(self, view, ...)
             if next_spot > 0 and next_spot <= 
               #view.accordian_items[  model.source_list[src_selected][2]  ] then
 --]]
-            if view.accordian_items[  model.source_list[src_selected][2]  ][next_spot[1] ] ~= nil and view.accordian_items[  model.source_list[src_selected][2]  ][next_spot[1] ][ next_spot[2] ] ~= nil then
+            if view.accordian_items[  model.source_list[src_selected][2]  ][next_spot[1] ] ~= nil 
+            and view.accordian_items[  model.source_list[src_selected][2]  ][next_spot[1] ][ next_spot[2] ] ~= nil then
                 acc_selected = {next_spot[1],next_spot[2]}
             end
             if next_spot[1] == #view.accordian_items[  model.source_list[src_selected][2]  ] - 1 and
