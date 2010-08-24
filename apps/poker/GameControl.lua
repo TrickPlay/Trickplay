@@ -41,6 +41,7 @@ function(ctrl, model, ...)
             state:increase_blinds()
          end
          enable_event_listener(TimerEvent{interval=.1})
+         return true
       end
    }
 
