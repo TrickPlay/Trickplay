@@ -29,6 +29,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     acc_selected[1] = acc_selected[1] + 1
 
                     query_text = self.text
+                    login_text[1] = self.text
                     model:notify()
 		 
                 end
@@ -75,6 +76,15 @@ SourceManagerController = Class(Controller, function(self, view, ...)
             {function()
                 TextObj( view.accordian_text["LOGIN"][2] ) end},
             {function()
+            	 if login_text[1] ~= "" then
+  						table.insert(adapters, dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua"))
+                    adaptersTable[#adapters] = adapterTypes[src_selected]
+                    local search = string.gsub(query_text," ","%%20")
+                    adapters[#adapters]:getUserID(search)
+                    adapters[#adapters][1].required_inputs.query = search                    
+                    searches[#adapters] = search
+                    
+                end
                 view.accordian = false
                 view:leave_accordian()
             end,
