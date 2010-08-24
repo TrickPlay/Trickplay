@@ -21,6 +21,11 @@ Player = Class(function(player, args, ...)
         player.glow:animate{opacity = 50, duration = 300}
    end
    
+   function player:hide()
+        player.dog:animate{opacity = 0, duration = 300}
+        player.glow:animate{opacity = 0, duration = 300}
+   end
+   
    function player:show()
         player.dog:animate{opacity = 255, duration = 300}
    end

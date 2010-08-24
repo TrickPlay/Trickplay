@@ -14,9 +14,9 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     }
 
     --create the components
-    local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "assets/UI/new/start_default.png", "assets/UI/new/start_focused.png")
-    local exit_button = FocusableImage(MDPL.EXIT_MENU[1], MDPL.EXIT_MENU[2], "assets/UI/new/exit_default.png", "assets/UI/new/exit_focused.png")
-    local help_button = FocusableImage(MDPL.HELP_MENU[1], MDPL.HELP_MENU[2], "assets/UI/new/help_default.png", "assets/UI/new/help_focused.png")
+    local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "start_default", "start_focused")
+    local exit_button = FocusableImage(MDPL.EXIT_MENU[1], MDPL.EXIT_MENU[2], "exit_default", "exit_focused")
+    local help_button = FocusableImage(MDPL.HELP_MENU[1], MDPL.HELP_MENU[2], "help_default", "help_focused")
 
     start_button.group.opacity = 0
 
