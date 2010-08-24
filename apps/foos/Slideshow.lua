@@ -105,10 +105,15 @@ function Slideshow:stop()
     timer_running = false
     started       = false
 
-    if (self.images[current_pic] ~= nil) then
-        self.images[current_pic]:complete_animation()
-        self.images = {}
+    if off_screen_list[1] ~= nil then
+        off_screen_list[1]:complete_animation()
     end
+    if on_screen_list[1] ~= nil then
+        on_screen_list[1]:complete_animation()
+    end
+
+    on_screen_list  = {}
+    off_screen_list = {}
     collectgarbage()
 end
 -- will send and image across the screen
@@ -127,71 +132,41 @@ function Slideshow:LoadImage(site,img_table)
                 self:preload(1)
             else
 
-        local index = #img_table + 1
-        img_table[index] = Group {z = 500}
-        local overlay = Clone 
-        { 
-            source = overlay_image, 
-            scale  = 
-            {
-                image.w/(screen.w-100),
-                image.h/(screen.h-100)
-            }, 
-            x = (-image.w)/40,
-            y = (-image.h)/20
-        }
-
-        img_table[index].scale = {SLIDESHOW_HEIGHT/image.h, SLIDESHOW_HEIGHT/image.h}
-
-        local i_width = image.w * SLIDESHOW_HEIGHT/image.h
-        local i_height = SLIDESHOW_HEIGHT
-        print ("original: "..image.w.." WIDTH:"..i_width)
-        if (image.w/image.h > 1.5) then
-            img_table[index].scale = 
-            {
-                SLIDESHOW_WIDTH/image.w,
-                SLIDESHOW_WIDTH/image.w
-            }
-            i_height = i_height * SLIDESHOW_WIDTH/i_width
-        end
-        img_table[index].x = (math.random(2)-1)*1920
-        img_table[index].y = (math.random(2)-1)*1080
-        img_table[index].z_rotation = {math.floor(math.random(20)-10), i_width/2, i_height/2}
-        img_table[index]:add(image,overlay)
-            end
-        end
-    }
-
-        --self.ui:add(self.images[temp])
---[[
-        img_table[index]:animate 
-        {
-            duration = 1000,
-            mode     = EASE_IN_EXPO,
-            x        = screen.w/2 - i_width/2,
-            y        = screen.h/2 - i_height/2,
-            z        = 0,
-            --z_rotation = 740-math.random(20)-10,
-            on_completed = function()
-                if (img_table[index] ~= nil) then
-                    img_table[index]:animate 
+                local index = #img_table + 1
+                img_table[index] = Group {z = 500}
+                local overlay = Clone 
+                { 
+                    source = overlay_image, 
+                    scale  = 
                     {
-                        duration     = 20000,
-                        opacity      = 254,
-                        on_completed = function()
-                            self.ui:remove(self.images[temp])
-                            self.images[temp] = {}
-                        end
+                        img.w/(screen.w-100),
+                        img.h/(screen.h-100)
+                    }, 
+                    x = (-img.w)/40,
+                    y = (-img.h)/20
+                }
+
+                img_table[index].scale = {SLIDESHOW_HEIGHT/image.h, SLIDESHOW_HEIGHT/image.h}
+
+                local i_width = img.w * SLIDESHOW_HEIGHT/image.h
+                local i_height = SLIDESHOW_HEIGHT
+                print ("original: "..image.w.." WIDTH:"..i_width)
+                if (img.w/img.h > 1.5) then
+                    img_table[index].scale = 
+                    {
+                        SLIDESHOW_WIDTH/image.w,
+                        SLIDESHOW_WIDTH/image.w
                     }
+                    i_height = i_height * SLIDESHOW_WIDTH/i_width
                 end
-                still_loading = false
-                --current_pic = current_pic + 1		
+                img_table[index].x = (math.random(2)-1)*1920
+                img_table[index].y = (math.random(2)-1)*1080
+                img_table[index].z_rotation = {math.floor(math.random(20)-10), i_width/2, i_height/2}
+                img_table[index]:add(image,overlay)
             end
-        }
---]]
-    --else
-    --end
-	
+            img.on_loaded = nil
+        end
+    }	
 end
 
 function timer.on_timer(timer)
@@ -217,7 +192,6 @@ function Slideshow:previous_picture()
     if #on_screen_list > 0 then
         print("prev\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
 
-        --still_loading = true
         current_pic   = current_pic -1
 
         --grab an image off of the off screen table
@@ -241,9 +215,12 @@ function Slideshow:previous_picture()
             on_completed = function()
                 z = 500
                 self.ui:remove(pic)
+---[[
                 if #off_screen_list > 6 then
+                    print("removing from off_screen list")
                     off_screen_list[#off_screen_list] = nil
                 end
+--]]
             end
         }
         
@@ -254,26 +231,33 @@ function Slideshow:previous_picture()
 end
 
 function Slideshow:next_picture()
+    print("Slideshow:next_picture()")
     if #off_screen_list > 0 then
-        print("next\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
+        print("\tnext\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
         current_pic = current_pic +1
 
         --grab an image off of the off screen table
         assert(  off_screen_list ~= nil, "off screen list is nil"   )
         assert( #off_screen_list > 0,    "off screen list is empty" )
-        table.insert( on_screen_list,  1, table.remove( off_screen_list,1 ))
-        print("next\tafter \ton screen",#on_screen_list,"off_screen",#off_screen_list)
+        local pic = table.remove( off_screen_list,1 )
+        table.insert( on_screen_list,  1, pic )
+        print("\tnext\tafter \ton screen",#on_screen_list,"off_screen",#off_screen_list)
  
         --load up another in the preload list
         if #off_screen_list < 5 then
             self:preload(1)
+            print("\tpreloaded")
+        else
+            print("\tnot preloading")
         end
-
         --animate it to the screen
-        self.ui:add(on_screen_list[1])
-        on_screen_list[1]:complete_animation()
-        on_screen_list[1].opacity = 255
-        on_screen_list[1]:animate 
+        self.ui:add(pic)
+        print("\tadded")
+        pic:complete_animation()
+        print("\tcomp_anim")
+        pic.opacity = 255
+        print("\tanimate")
+        pic:animate 
         {
             duration = 200,
             mode     = EASE_IN_EXPO,
@@ -282,6 +266,7 @@ function Slideshow:next_picture()
             z        = 0,
             --garbage collection
             on_completed = function()
+                print("on_completed")
                 if #on_screen_list > 5 then
                     self.ui:remove(on_screen_list[#on_screen_list])
                     on_screen_list[#on_screen_list] = nil
