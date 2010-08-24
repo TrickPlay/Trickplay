@@ -30,6 +30,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state:get_hole_cards() return hole_cards end
    function state:get_player_bets() return player_bets end
    function state:get_pot() return pot end
+   function state:get_active_player_bet() return player_bets(players[action]) end
    function state:get_action()
       local in_players = state:get_in_players()
       local active_player = state:get_active_player()
@@ -146,6 +147,12 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
       end
       return only_player
+   end
+
+   local function get_second_richest_holdings()
+      for _,player in ipairs(players) do
+         
+      end
    end
 
    ---
