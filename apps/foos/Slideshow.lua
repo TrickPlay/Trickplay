@@ -275,6 +275,8 @@ function Slideshow:next_picture()
 		         end
 		     }
 		  else
+		  		
+		  end
     else
         --tell the user no
     end
