@@ -1,3 +1,4 @@
+CHANGE_TIME_VIEW = 100
  -- constructor, called with Model(...)
 Model = Class(function(model, ...)
     -- (private) class fields
@@ -7,8 +8,8 @@ Model = Class(function(model, ...)
 
     model.pic_text = {0,0}
 
-    model.num_sources = NUM_SLIDESHOW_IMAGES
-    model.front_page_index = 1
+    --model.num_sources = NUM_SLIDESHOW_IMAGES
+    model.front_page_index = 1--math.ceil(math.ceil(model.num_sources /NUM_ROWS)/2)
     model.swapping_cover = false
     model.swap_pic = nil
 
@@ -16,28 +17,50 @@ Model = Class(function(model, ...)
     model.albums = {}
     model.placeholders = {}
     model.album_group = Group{name="Album Group"}
-    model.prac_pic = Image{
-                src = "assets/thumbnails/Album3.jpg",
-                opacity = 0
+    model.fp_backing = Rectangle{
+                color    = "000000",
+                width    = PIC_W - 4,
+                height   = PIC_H - 4,
+                position = { 2 , 2 },
+                opacity  = 0
     }
-    screen:add(model.prac_pic)
+    screen:add(model.fp_backing)
+    model.fp_slots = {}
+
+    model.fp_index = {1,1}
+    model.fp_1D_index = 1
 --[[
  model.prac_pic.scale = {
                                     PIC_W / model.prac_pic.base_size[1],
                                     PIC_H / model.prac_pic.base_size[2]
                                 }
 --]]
+	model.default = {}
+	for i=1,8 do 
+		 model.default[i] = Image{
+		             src = "assets/backs/color_0"..i..".jpg",
+		             opacity = 0
+		 }
+	    model.def_bs = {model.default[i].base_size[1],model.default[i].base_size[2]}
 
-    model.default = Image{
-                src = "assets/img_placeholder_questionmark_loading.jpg",
-                opacity = 0
-    }
-    model.def_bs = {model.default.base_size[1],model.default.base_size[2]}
+		 screen:add(model.default[i])
+
+	end
+
 
     --SLIDE_SHOW
     model.curr_slideshow = {}
 
-
+	model.source_list= {}
+    --Source Manager
+    for i=1, #adapterTypes do
+	    model.source_list[i] = {adapterTypesTable[i].name,   adapterTypesTable[i][1].required_inputs.format}
+	 end
+--[[    model.source_list = {  {adapters[1].name,   adapters[1][1].required_inputs.format}, {"Picasa",     "LOGIN"},
+                           {"Facebook", "LOGIN"}, {adapters[2].name,   adapters[2][1].required_inputs.format},
+                           {"Flickr",   "QUERY"}, {"PhotoBuket", "QUERY"}
+                        }
+]]
     -- class methods
     function model:attach(observer, controller_id)
         self.registry[observer] = true
