@@ -2,13 +2,13 @@ SlideshowController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.SLIDE_SHOW)
 
     -- the default selected index
-    local selected = 1
+    -- local selected = 1	the Slideshow object has its own indexing variable
 
     local MenuKeyTable = {
-        [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
-        [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
-        [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
-        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Up]    = function(self) model.curr_slideshow:toggle_timer() end,
+        [keys.Down]  = function(self) model.curr_slideshow:toggle_fullscreen() end,
+        [keys.Left]  = function(self) model.curr_slideshow:previous_picture() end,
+        [keys.Right] = function(self) model.curr_slideshow:next_picture() end,
         [keys.Return] = function(self) 
             Setup_Album_Covers()
             model.curr_slideshow:stop()
