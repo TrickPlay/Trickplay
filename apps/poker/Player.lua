@@ -75,6 +75,18 @@ Player = Class(function(player, args, ...)
       error("error calculation position")
    end
 
+   local function do_fold(call_bet)
+      assert(call_bet >=0)
+      if(call_bet == 0) then
+         print("\nCHECK\n")
+         return false, 0
+      end
+      print("\nFOLD\n")
+      return true, 0
+   end
+   
+   local number_of_bets = 0
+   -- calculate and returns a bet
    local function calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet, bb_qty)
 
       assert(call_bet >= 0)
@@ -95,17 +107,15 @@ Player = Class(function(player, args, ...)
       local num = math.random(m)
       print("num: "..num.."\n")
       if(num == 1) then
-         print("\nFOLD\n")
-         return true, 0
+         return do_fold(call_bet)
       -- if the bet wont destroy the player's account then he's good to raise
-      elseif(Moves.CALL == ai_move) then
+      elseif(Moves.CALL == ai_move or number_of_bets >= 5) then
          print("\nCALL, call_bet = "..call_bet.."\n")
-         -- only call if really financially feasible
-         if(call_bet < (.3+stddev)*player.money) then
+         -- only call if really financially feasible or already betted a ton
+         if(call_bet < (.3+stddev)*player.money or number_of_bets >= 5) then
             return false, call_bet
          else
-            print("\nFOLD\n")
-            return true, 0
+            return do_fold(call_bet)
          end
       elseif Moves.RAISE == ai_move then
          assert(call_bet >= 0)
@@ -124,6 +134,7 @@ Player = Class(function(player, args, ...)
             a_bet = player.money+orig_bet
          end
          print("\nRAISE, raised to "..a_bet.." while call_bet is "..call_bet.."\n")
+         number_of_bets = number_of_bets + 1
          return false, a_bet
       else
          error("someth'n wrong with the moves")
@@ -145,6 +156,7 @@ Player = Class(function(player, args, ...)
    -- @returns fold boolean  true if player should fold
    -- @returns bet number  quantity of bet, if fold then bet should be 0
    local last_move = Moves.FOLD
+   local last_round = 0
    function player:get_move(state)
       -- stuff that the player usually plays off of
       local hole = state:get_hole_cards()[self]
@@ -153,8 +165,15 @@ Player = Class(function(player, args, ...)
       local call_bet = state:get_call_bet()
       local min_raise = state:get_min_raise()
       local bb_qty = state:get_bb_qty()
+
       local round = state:get_round()
+      -- logic determines number of bets the player has applied in the current round
+      if(last_round ~= round) then
+          last_round = round
+          number_of_bets = 0
+      end
       print("\nRound: "..round.."\n")
+
       local raisedFactor = RaiseFactor.UR
       local community_cards = state:get_community_cards()
       local orig_bet = state:get_orig_bet()
@@ -372,18 +391,13 @@ Player = Class(function(player, args, ...)
       last_move = ai_move
       
       if Moves.FOLD == ai_move then
-         if(call_bet <= 0) then
-             print("\nCHECK\n")
-             return false, 0
-         end
-         print("\nFOLD\n")
-         return true, 0
+         return do_fold(call_bet)
       else
          return calculate_bet(call_bet, min_raise, stddev, ai_move, amount_to_raise, best_hand, orig_bet, bb_qty)
       end
 
    end
-   
+
    player.status = PlayerStatusView(model, nil, player)
    --player.status:initialize()
    player.status:display()
