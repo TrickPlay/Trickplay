@@ -60,6 +60,7 @@ end
 function Load_Image(site,index)
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
+    local slot  = model.fp_slots[i][j]
 
     print("getting a pic for ",i,j,index)
     --[[
@@ -74,9 +75,9 @@ function Load_Image(site,index)
 		
     if (site == "") then
         loadCovers(index, searches[#adapters+1-index], math.random(16))
-    elseif model.albums[i]      ~= nil and  
-           model.albums[i][j]   == nil and 
-           model.fp_slots[i][j] ~= nil then
+    elseif model.albums[i]    ~= nil and  
+           model.albums[i][j] == nil and 
+           slot               ~= nil then
         model.albums[i][j] = Image
         {
             async    = true,
@@ -88,7 +89,9 @@ function Load_Image(site,index)
             	 		loadCovers(index, searches[#adapters+1-index], 1)
             	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
            	 
-                elseif model.albums[i] ~= nil and model.albums[i][j] ~= nil and not failed then
+                elseif model.albums[i] ~= nil    and 
+                       model.albums[i][j] ~= nil and 
+                       not failed                then
                     print("loading pic at",i,j,index,model.placeholders[i][j])
 
                     if model.placeholders[i] ~= nil and 
@@ -100,7 +103,7 @@ function Load_Image(site,index)
                     Scale_To_Fit(model.albums[i][j],
                                  model.albums[i][j].base_size,
                                  {PIC_W,PIC_H})
-                    model.fp_slots[i][j]:add(model.albums[i][j])
+                    slot:add(model.albums[i][j])
 
                     --if model.fp_index[1] == i and model.fp_index[2] == j then
                         --model:notify()
