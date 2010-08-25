@@ -125,7 +125,7 @@ function Load_Image(site,index)
             -- toss the filler image and scale it once loaded
             on_loaded = function(img,failed)
                 --assert(img == model.swap_pic)
-            	if not failed then
+            	if not failed and not dontswap then
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
 
@@ -173,6 +173,7 @@ function Load_Image(site,index)
                 else
                     model.swapping_cover = false
                     dontswap = true
+                    loadCovers(index, searches[#adapters+1-index], math.random(16))
                 end
             end
         }
