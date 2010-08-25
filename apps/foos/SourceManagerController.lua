@@ -55,11 +55,15 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     local search = string.gsub(query_text," ","%%20")
                     adapters[#adapters][1].required_inputs.query = search
                     searches[#adapters] = search
+                    Add_Cover()
+
+
+--[[
                     model.album_group:clear()
                     model.albums = {}
                     Setup_Album_Covers()
                     model:notify()
-
+--]]
                 end
                 view.accordian = false
                 view:leave_accordian()
