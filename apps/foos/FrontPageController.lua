@@ -35,6 +35,12 @@ FrontPageController = Class(Controller, function(self, view, ...)
                 }
                 view.timer:stop()
                 self:get_model():notify()
+                fullscreen = false
+					background.opacity = 255
+					background2.opacity = 255
+					logo.opacity = 255
+					controls.opacity = 255
+
 			       model.curr_slideshow:begin()
             end
         end
