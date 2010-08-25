@@ -205,4 +205,12 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       self:get_model():notify()
    end
 
+   function self:reset()
+      playerCounter = 0
+      self.playerCounter = 0
+      model.players = {}
+      for i=1,6 do
+         model.positions[i] = false
+      end
+   end
 end)
