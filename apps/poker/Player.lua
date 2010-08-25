@@ -6,7 +6,7 @@ Player = Class(function(player, args, ...)
    player.position = false
    player.table_position = nil
    player.chipPosition = nil
-   player.difficulty = Difficulty.EASY
+   player.difficulty = math.random(Difficulty.HARD,Difficulty.EASY)
    for k,v in pairs(args) do
       player[k] = v
    end
