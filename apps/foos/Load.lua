@@ -141,7 +141,7 @@ function Load_Image(site,index)
                         Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
 
                         slot:add(img)
-                        print(model.albums[i][j])
+                        --print(model.albums[i][j])
                         model.albums[i][j]:raise_to_top()
                         model.albums[i][j]:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
@@ -151,7 +151,7 @@ function Load_Image(site,index)
                                 --print(model.swap_pic,model.albums[i][j])
                                 if  model.albums[i]    == nil or 
                                     model.albums[i][j] == nil then 
-                                    image     =  nil 
+                                    model.swap_pic     =  nil 
                                 else
                                     if  model.albums[i][j] ~= nil then
                                         model.albums[i][j]:unparent() 
@@ -160,7 +160,7 @@ function Load_Image(site,index)
 
                                     end
                                     --swap_pic is already a child of the slot
-                                    model.albums[i][j] = image
+                                    model.albums[i][j] = img-- model.swap_pic--image
                                     model.swap_pic = nil
 
                                 end
