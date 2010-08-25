@@ -2,7 +2,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     --first add the background shiz
 
-    local background = {
+    background = {
         Image{
             position = {MDPL.START[1]+5, MDPL.START[2]+10},
             src = "assets/UI/shadow_beginning.png"
@@ -10,7 +10,20 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         Image{
             position = {MDPL.START[1], MDPL.START[2]},
             src = "assets/UI/new/start_unclickable.png"
-        }
+        },
+        Text{
+            position = {400,470},
+            text = "Choose Your Character!",
+            font = "KacstArt 100px",
+            color = Colors.YELLOW
+        },
+        Text{
+            position = {400,470},
+            text = "Select Your Oponents!",
+            font = "KacstArt 100px",
+            color = Colors.YELLOW,
+            opacity = 0
+        },
     }
 
     --create the components
@@ -73,6 +86,13 @@ CharacterSelectionView = Class(View, function(view, model, ...)
             self.ui.opacity = 255
 --            self.ui:raise_to_top()
 --            print("Showing Character Selection UI")
+            if(controller.playerCounter == 0) then
+                background[3].opacity = 255
+                background[4].opacity = 0
+            else
+                background[3].opacity = 0
+                background[4].opacity = 255
+            end
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
