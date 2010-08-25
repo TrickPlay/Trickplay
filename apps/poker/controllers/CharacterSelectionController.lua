@@ -35,8 +35,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    assert(selected)
    assert(subselection)
    --the number of the current player selecting a seat
-   local playerCounter = 0
-   controller.playerCounter = playerCounter
+   self.playerCounter = 0
 
    local function start_a_game()
     -- add table text
@@ -63,7 +62,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       [CharacterSelectionGroups.TOP] = {},
       [CharacterSelectionGroups.BOTTOM] = {
          [START] = function()
-            if playerCounter >= 2 then
+            if self.playerCounter >= 2 then
                start_a_game()
             end
          end,
@@ -107,13 +106,13 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       local pos = self:getPosition()
       if(model.positions[pos]) then return end
       local isHuman = false
-      if(playerCounter == 0) then
+      if(self.playerCounter == 0) then
          isHuman = true
       end
       
       args = {
          isHuman = isHuman,
-         number = playerCounter + 1,
+         number = self.playerCounter + 1,
          table_position = pos,
          position = model.default_player_locations[ self:getPosition() ],
          chipPosition = model.default_bet_locations[ self:getPosition() ],
@@ -130,10 +129,10 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       end
       table.insert(model.players, i, Player(args))
       model.positions[pos] = true
-      model.currentPlayer = playerCounter
+      model.currentPlayer = self.playerCounter
 
-      playerCounter = playerCounter + 1
-      if(playerCounter >= 2) then
+      self.playerCounter = self.playerCounter + 1
+      if(self.playerCounter >= 2) then
          view.items[2][3].group.opacity = 255
       end
       self:get_model():notify()
@@ -150,7 +149,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
                CharacterSelectionCallbacks[selected][subselection]()
             else
                setCharacterSeat()
-               if(playerCounter >= 6) then
+               if(self.playerCounter >= 6) then
                   start_a_game()
                end
             end
@@ -180,7 +179,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             if(subselection >= SubGroups.MIDDLE) then
                subselection = subselection + 1
             end
-         elseif (0 ~= dir[1]) and (playerCounter < 2) and
+         elseif (0 ~= dir[1]) and (self.playerCounter < 2) and
             (subselection == SubGroups.MIDDLE) then
                subselection = subselection + dir[1]
          end
@@ -206,7 +205,6 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    end
 
    function self:reset()
-      playerCounter = 0
       self.playerCounter = 0
       model.players = {}
       for i=1,6 do
