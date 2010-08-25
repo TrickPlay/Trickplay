@@ -305,8 +305,8 @@ function view.timer.on_timer(timer)
 					
                 if (rand_i[1] ~= model.fp_index[1] or
                     rand_i[2] ~= model.fp_index[2]) and 
-                   adapters[formula]~=nil then
-                   if (not dontswap) then
+                    adapters[formula]~=nil then
+                    if (not dontswap) then
                    	
                     print("calling")
                     model.swapping_cover = true
@@ -314,6 +314,8 @@ function view.timer.on_timer(timer)
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
                      loadCovers(formula, searches[#adapters+1-formula], search_i)
+                    else
+                        model.swapping_cover = false
                     end
                 else
                     print("not calling")
