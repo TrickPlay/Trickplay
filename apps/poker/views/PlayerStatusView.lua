@@ -26,20 +26,23 @@ function(self, model, args, player,...)
    self.popup = Popup:new{
       group = self.focus,
       noRender = true,
-      animate_in = {duration=10, opacity=255},
-      animate_out = {duration=10, opacity=0},
-      on_fade_in = function() end,
-      on_fade_out = function() end,
+      animate_in = {duration=500, opacity=255},
+      animate_out = {duration=500, opacity=0},
+      loop = true,
+      --on_fade_in = function() end,
+      --on_fade_out = function() end,
    }
    
    function self:startFocus()
-      self.popup.fade = "in"
-      self.popup:render()
+      self.popup:start_loop()
+      --self.popup.fade = "in"
+      --self.popup:render()
    end
    
    function self:stopFocus()
-      self.popup.fade = "out"
-      self.popup:render()
+      self.popup:pause_loop()
+      --self.popup.fade = "out"
+      --self.popup:render()
    end
    
    -- Player text

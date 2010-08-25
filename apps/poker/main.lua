@@ -3,6 +3,8 @@ dofile ("Assets.lua")
 -- Asset loading ---------------------------------------------------------------
 AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
+AssetLoader:preloadImage("TableText","assets/UI/new/table_text.png")
+
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
 AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
 AssetLoader:preloadImage("pot_glow_img", "assets/UI/new/pot_glow.png")
@@ -49,12 +51,12 @@ end
 
 -- Dog animations
 DOG_ANIMATIONS = {
-   [1] = {dog = 1, name = "animation_bling", frames = 6, position = {90, 538} },
-   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0} },
-   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {340, 5} },
-   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22} },
-   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186} },
-   [6] = {dog = 6},
+   [1] = {dog = 1, name = "animation_bling", frames = 11, position = {90, 538}, speed = .06 },
+   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0}, speed = .1 },
+   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {341, 9}, speed = .1 },
+   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22}, speed = .14 },
+   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186}, speed = .16 },
+   [6] = {dog = 6, name = "animation_jacket", frames = 10, position = {1404, 572}, speed = .1 },
 }
 
 for i, t in ipairs(DOG_ANIMATIONS) do
@@ -102,6 +104,7 @@ function()
    --a = AssetLoader:getImage("fold_focused",{})
    --screen:add( a )
    screen:add( AssetLoader:getImage("Table",{name="TableBackground"}) )
+
    screen:add(DOG_LAYER, DOG_GLOW_LAYER, DOG_ANIMATION_LAYER)
    for i=1, 6 do
       DOGS[i] = AssetLoader:getImage("dog"..i,{position = DOG_GLOW[i], opacity = 0, name = "Dog "..i})

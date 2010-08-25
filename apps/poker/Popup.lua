@@ -143,12 +143,7 @@ function Popup:on_fade_out()
 
 	print("on_fade_out called")
         
-        if self.group.parent then
-        
-                self.group.parent:remove(self.group)
-                
-                print("Removed popup from parent container")
-        end
+        self.group:unparent()
 	
 	self = nil
 

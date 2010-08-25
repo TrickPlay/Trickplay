@@ -126,6 +126,7 @@ function(ctrl, model, ...)
          pres:return_to_main_menu()
          enable_event_listener(KbdEvent())
          model:set_active_component(Components.CHARACTER_SELECTION)
+         model:get_active_controller():reset()
          model:notify()
          return
       end
