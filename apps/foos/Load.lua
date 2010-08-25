@@ -117,7 +117,6 @@ function Load_Image(site,index)
                             on_completed = function()
                                 if  model.albums[i]    == nil or 
                                     model.albums[i][j] == nil then 
-
                                     model.swap_pic     =  nil 
                                 else
                                     if  model.albums[i][j] ~= nil then
