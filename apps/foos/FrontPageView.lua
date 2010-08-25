@@ -483,6 +483,8 @@ end
 end)
 
 function Add_Cover()
+    model.swapping_cover = false
+
     local add_timeline = Timeline
     {
         name      = "Adding animation",
