@@ -320,6 +320,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres:check_player(player)
       mediaplayer:play_sound(CHECK_WAV)
       local bet = ctrl:get_player_bets()[player]
+      if not player.betChips then add_player_chips(player) end
       player.betChips:set(bet)
       player.status:update( "Check" )
    end
@@ -327,6 +328,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres:call_player(player)
       mediaplayer:play_sound(CALL_WAV)
       local bet = ctrl:get_player_bets()[player]
+      if not player.betChips then add_player_chips(player) end
       player.betChips:set(bet)
       player.status:update( "Call "..bet )
    end
@@ -335,6 +337,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres:raise_player(player)
       mediaplayer:play_sound(RAISE_WAV)
       local bet = ctrl:get_player_bets()[player]
+      if not player.betChips then add_player_chips(player) end
       player.betChips:set(bet)
       player.status:update( "Raise to "..bet )
    end
@@ -343,6 +346,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres:all_in_player(player)
       mediaplayer:play_sound(RAISE_WAV)
       local bet = ctrl:get_player_bets()[player]
+      if not player.betChips then add_player_chips(player) end
       player.betChips:set(bet)
       player.status:update( GET_ALLIN_STRING() )
    end
