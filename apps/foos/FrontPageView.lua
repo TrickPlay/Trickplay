@@ -442,7 +442,7 @@ function view:Delete_Cover(index)
                                     ( model.front_page_index  - 1 ))
             prev_i = {i,j -( model.front_page_index  - 1 )}
         end
-
+--[[
         for ind=index,#adapters do
             local i = (ind-1)%NUM_ROWS +1
             local j = math.ceil(ind/NUM_ROWS)
@@ -460,6 +460,7 @@ function view:Delete_Cover(index)
                 loadCovers(ind,searches[#adapters], math.random(5))
             end
         end
+--]]
 
 
         deleteAdapter(index)
