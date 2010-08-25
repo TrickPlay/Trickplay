@@ -314,8 +314,6 @@ function view.timer.on_timer(timer)
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
                      loadCovers(formula, searches[#adapters+1-formula], search_i)
-                    else
-                        model.swapping_cover = false
                     end
                 else
                     print("not calling")
