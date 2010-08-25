@@ -324,6 +324,7 @@ function view.timer.on_timer(timer)
 end
 
 function view:Delete_Cover(index)
+    model.swapping_cover = false
     print("Delete_Cover( "..index.." )")
     if #adapters ~= 1 then
     local keys = view:get_controller().on_key_down 
