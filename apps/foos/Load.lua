@@ -4,12 +4,16 @@ NUM_ROWS   = 2
 NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
+loadGroup = {}
 
 PIC_DIR = "assets/thumbnails/"
 
 
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
+	 
+	 
+	 
     model.albums = {}
     model.fp_slots = {}
     model.placeholders = {}
@@ -125,7 +129,7 @@ function Load_Image(site,index)
             -- toss the filler image and scale it once loaded
             on_loaded = function(img,failed)
                 --assert(img == model.swap_pic)
-            	if not failed and not dontswap then
+            	if not failed and model.swapping_cover then
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
 
@@ -150,7 +154,8 @@ function Load_Image(site,index)
                             on_completed = function(image)
                                 --print(model.swap_pic,model.albums[i][j])
                                 if  model.albums[i]    == nil or 
-                                    model.albums[i][j] == nil then 
+                                    model.albums[i][j] == nil or
+                                    model.swapping_cover == false then 
                                     model.swap_pic     =  nil 
                                 else
                                     if  model.albums[i][j] ~= nil then

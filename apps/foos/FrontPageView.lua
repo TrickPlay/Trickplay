@@ -323,6 +323,7 @@ function view.timer.on_timer(timer)
 end
 
 function view:Delete_Cover(index)
+    model.swapping_cover = false
     print("Delete_Cover( "..index.." )")
     if #adapters ~= 1 then
     local keys = view:get_controller().on_key_down 
@@ -438,11 +439,14 @@ function view:Delete_Cover(index)
         end
         --print("\n\n",index,#adapters)
         if index  == #adapters then
-            print("setting to",i,j - 
+            local ii = (index-1-1)%NUM_ROWS +1
+            local jj = math.ceil((index-1)/NUM_ROWS)
+
+            print("setting to",ii,jj - 
                                     ( model.front_page_index  - 1 ))
-            view:get_controller():set_selected_index(i,j - 
+            view:get_controller():set_selected_index(ii,jj - 
                                     ( model.front_page_index  - 1 ))
-            prev_i = {i,j -( model.front_page_index  - 1 )}
+            prev_i = {ii,jj -( model.front_page_index  - 1 )}
         end
 --[[
         for ind=index,#adapters do
