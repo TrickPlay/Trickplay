@@ -25,6 +25,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    local min_raise
    local num_inplayers
    local all_in
+   local orig_money
 
    function state:get_community_cards() return community_cards end
    function state:get_hole_cards() return hole_cards end
@@ -89,13 +90,13 @@ HandState = Class(nil,function(state, ctrl, ...)
       deck = args.deck
       round = Rounds.HOLE
 
-      done = {}
-      out = {}
-      all_in = {}
+      done, out, all_in, orig_money, running_money = {}, {}, {}, {}, {}
       for i, player in ipairs(players) do
          done[player] = false
          out[player] = false
          all_in[player] = false
+         orig_money[player] = player.money
+         running_money[player] = 0
       end
       num_inplayers = #players
       ctrl:set_bets_done(false)
@@ -224,6 +225,7 @@ HandState = Class(nil,function(state, ctrl, ...)
          )
       end
 
+      running_money[active_player] = running_money[active_player] + player_bets[active_player]
       local continue = true
       if get_num_inplayers() == 1 then
          local only_player = get_only_player()
@@ -261,7 +263,7 @@ HandState = Class(nil,function(state, ctrl, ...)
                print("player "..tmp_action.." is all in")
                num_all_in = num_all_in+1
             end
-            if num_all_in == num_in_players then
+            if num_all_in == num_in_players-1 then
                ctrl:set_bets_done(true)
                break
             end

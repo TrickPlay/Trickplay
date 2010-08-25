@@ -114,7 +114,7 @@ function GET_MYTURN_STRING()
    return MYTURN_STRINGS[math.random(#MYTURN_STRINGS)]
 end
 
-local ALLIN_STRINGS = {"All in","I'm Shoving","Showtime","Just chips, baby!","Splash!","Feeling good"}
+local ALLIN_STRINGS = {"All in","I'm Shoving","Showtime","Splash!","Feeling good"}
 function GET_ALLIN_STRING()
    return ALLIN_STRINGS[math.random(#ALLIN_STRINGS)]
 end

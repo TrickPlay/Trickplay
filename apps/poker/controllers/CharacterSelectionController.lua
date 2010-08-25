@@ -39,6 +39,11 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    controller.playerCounter = playerCounter
 
    local function start_a_game()
+    -- add table text
+    local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
+    screen:add( table_text )
+    table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
+   
       --make sure last dog selected does not continue to glow
       for _,v in ipairs(DOG_GLOW) do
          v.opacity = 0
@@ -200,4 +205,12 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       self:get_model():notify()
    end
 
+   function self:reset()
+      playerCounter = 0
+      self.playerCounter = 0
+      model.players = {}
+      for i=1,6 do
+         model.positions[i] = false
+      end
+   end
 end)
