@@ -21,7 +21,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local allCards = {}
    local burnCards = {}
    
-   local potText = Text{ font = PLAYER_ACTION_FONT, color = "BFB800", text = "", position = {MDBL.POT[1] + 20, MDBL.POT[2] + 60}}
+   potText = Text{ font = PLAYER_ACTION_FONT, color = Colors.WHITE, text = "", position = {MDBL.POT[1] + 40, MDBL.POT[2] + 60}}
    function potText.on_text_changed()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
@@ -118,6 +118,21 @@ HandPresentation = Class(nil,function(pres, ctrl)
                on_completed = function()
                   model.potchips:set( model.potchips:value() + player.betChips:value() )
                   potText.text = model.potchips:value()
+
+                  -- flash the glow under the pot value text
+                  local function show_glow(x)
+                     if(x >= 5) then return end
+                     x = x + 1
+                     if(x%2 > 0) then
+                        pot_glow_img:animate{duration=300, opacity=255,
+                           on_completed = function() show_glow(x) end}
+                     else
+                        pot_glow_img:animate{duration=300, opacity=0,
+                           on_completed = function() show_glow(x) end}
+                     end
+                  end
+                  show_glow(0)
+
                   remove_player_chips(player)
                end
             }
@@ -141,6 +156,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       mediaplayer:play_sound(SHUFFLE_WAV)
       
       potText.text = ""
+      pot_glow_img.opacity = 0
       
       -- Put community cards on the deck
       local cards = ctrl:get_community_cards()
@@ -243,6 +259,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres.clear_ui(pres)
       
       potText.text = ""
+      pot_glow_img.opacity = 0
       
       -- clear cards
       for i,card in ipairs(allCards) do

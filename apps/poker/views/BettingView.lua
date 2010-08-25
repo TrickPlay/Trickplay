@@ -39,7 +39,7 @@ BettingView = Class(View, function(view, model, ...)
     local call_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
             x = MDPL.CALL[1] + 30, y = MDPL.CALL[2] + 30, text = "Call"}
     --]]
-    bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
+    bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.YELLOW,
             x = MDPL.BET[1] + 130, y = MDPL.BET[2] + 35, text = "$"}
     --[[
     local exit_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,

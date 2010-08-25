@@ -5,6 +5,7 @@ AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.png")
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
 AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
+AssetLoader:preloadImage("pot_glow_img", "assets/UI/new/pot_glow.png")
 
 -- Buttons
 local ui_colors = {"Red", "Green", "Gray"}
@@ -108,6 +109,8 @@ function()
       DOG_GLOW[i] = AssetLoader:getImage("dog"..i.."glow",{position = DOG_GLOW[i], opacity=255, name = "Dog "..i.. "glow"} )
       DOG_GLOW_LAYER:add(DOG_GLOW[i])
    end
+   pot_glow_img=AssetLoader:getImage("pot_glow_img",{opacity=0,position={839,627}})
+   screen:add(pot_glow_img)
    
    --DOG = AssetLoader:getImage("dog1glow",{})
    --screen:add( DOG )

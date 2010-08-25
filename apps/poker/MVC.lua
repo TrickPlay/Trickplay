@@ -40,7 +40,7 @@ Model = Class(function(model, ...)
         [4] = {1720, 600},
         [5] = {550, 850},
         [6] = {1400, 850},
-        POT = {925, 680}
+        POT = {925, 650}
     }
     mdbl = model.default_bet_locations
     MDBL = model.default_bet_locations
