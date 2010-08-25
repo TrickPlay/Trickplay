@@ -39,7 +39,9 @@ function adapter:loadCovers(i,search, start_index)
 		for k,v in pairs(data) do print(k,v) end
 		if (data.ResultSet) then
 			site = data.ResultSet.Result[1].ClickUrl or ""
-   	   Load_Image(site,i)
+         if (not dontswap) then
+	   	   Load_Image(site,i)
+	   	end
    	end
 	end
 	}

@@ -108,7 +108,6 @@ FrontPageView = Class(View, function(view, model, ...)
         -- shrink the previous
         if msecs <= 200  then
             local progress    =  msecs/200
-			  dontswap = true		
             --cannot assume that image will have made it to its full expanded size
             local pos_delta   = {view.prev_pos[1] - view.prev_target_pos[1],
                                  view.prev_pos[2] - view.prev_target_pos[2]}
@@ -139,8 +138,6 @@ FrontPageView = Class(View, function(view, model, ...)
             view.backdrop.opacity = 255--*progress
             view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
                          PIC_H * (sel[1]-1)-22*progress}
-           dontswap = false
-
         elseif msecs > 400  and msecs <= 800 then
             --in case on_new_frame didn't get called on the 400th msec
             view.current.position = {PIC_W * (sel[2]-1) -  (.025*PIC_W),
@@ -156,6 +153,7 @@ FrontPageView = Class(View, function(view, model, ...)
             local progress = (msecs - 800)/100
             view.bottom_bar.opacity = 255
             view.bottom_bar.y = PIC_H - progress*70
+            dontswap = false
         elseif msecs > 900 and msecs <= 2900 then
             view.bottom_bar.y = PIC_H - 70
         -- bring the bar up a little more
@@ -305,13 +303,14 @@ function view.timer.on_timer(timer)
 
                 if (rand_i[1] ~= model.fp_index[1] or
                    rand_i[2] ~= model.fp_index[2]) and adapters[formula]~=nil then
+                   if (not dontswap) then
+                   	
                     print("calling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
-                    if (not dontswap) then
-                    loadCovers(formula, searches[#adapters+1-formula], search_i)
+                     loadCovers(formula, searches[#adapters+1-formula], search_i)
                     end
                 else
                     print("not calling")
@@ -418,7 +417,6 @@ function view:Delete_Cover(index)
         end
         deleteAdapter(index)
         model:notify()
-        dontswap = false
     end
     del_timeline:start()
 end
