@@ -153,7 +153,6 @@ FrontPageView = Class(View, function(view, model, ...)
             local progress = (msecs - 800)/100
             view.bottom_bar.opacity = 255
             view.bottom_bar.y = PIC_H - progress*70
-            dontswap = false
         elseif msecs > 900 and msecs <= 2900 then
             view.bottom_bar.y = PIC_H - 70
         -- bring the bar up a little more
@@ -300,7 +299,7 @@ function view.timer.on_timer(timer)
                 }
 
                 local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
-
+					
                 if (rand_i[1] ~= model.fp_index[1] or
                    rand_i[2] ~= model.fp_index[2]) and adapters[formula]~=nil then
                    if (not dontswap) then
@@ -464,8 +463,10 @@ function view:Delete_Cover(index)
 
         deleteAdapter(index)
         model:notify()
-        dontswap = false
         view:get_controller().on_key_down = keys
+         dontswap = false
+
+
     end
     del_timeline:start()
     end

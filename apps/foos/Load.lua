@@ -78,6 +78,7 @@ function Load_Image(site,index)
     elseif model.albums[i]    ~= nil and  
            model.albums[i][j] == nil and 
            slot               ~= nil then
+        temp = model.albums[i][j]
         model.albums[i][j] = Image
         {
             async    = true,
@@ -86,7 +87,7 @@ function Load_Image(site,index)
             --toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
             	 if (failed) then					 	 
-            	 		loadCovers(index, searches[#adapters+1-index], 1)
+            	 		loadCovers(index, searches[#adapters+1-index], math.random(16))
             	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
            	 
                 elseif model.albums[i] ~= nil    and 
@@ -126,10 +127,9 @@ function Load_Image(site,index)
                         model.placeholders[i][j]:unparent()
                         model.placeholders[i][j] = nil
                     end
-
                     if model.swap_pic == nil or model.albums[i] == nil or 
                                            model.albums[i][j] == nil or 
-                                        model.swap_pic.loaded == false then 
+                                        model.swap_pic.loaded == false or dontswap then 
                         model.swap_pic = nil 
                         model.swapping_cover = false
                     else
@@ -160,6 +160,7 @@ function Load_Image(site,index)
                     end            
                 else
                     model.swapping_cover = false
+                    dontswap = true
                 end
             end
         }
