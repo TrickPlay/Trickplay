@@ -108,6 +108,7 @@ FrontPageView = Class(View, function(view, model, ...)
         -- shrink the previous
         if msecs <= 200  then
             local progress    =  msecs/200
+			  dontswap = true		
             --cannot assume that image will have made it to its full expanded size
             local pos_delta   = {view.prev_pos[1] - view.prev_target_pos[1],
                                  view.prev_pos[2] - view.prev_target_pos[2]}
@@ -138,6 +139,8 @@ FrontPageView = Class(View, function(view, model, ...)
             view.backdrop.opacity = 255--*progress
             view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
                          PIC_H * (sel[1]-1)-22*progress}
+           dontswap = false
+
         elseif msecs > 400  and msecs <= 800 then
             --in case on_new_frame didn't get called on the 400th msec
             view.current.position = {PIC_W * (sel[2]-1) -  (.025*PIC_W),
@@ -301,7 +304,8 @@ function view.timer.on_timer(timer)
                 local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
 					
                 if (rand_i[1] ~= model.fp_index[1] or
-                   rand_i[2] ~= model.fp_index[2]) and adapters[formula]~=nil then
+                    rand_i[2] ~= model.fp_index[2]) and 
+                   adapters[formula]~=nil then
                    if (not dontswap) then
                    	
                     print("calling")
