@@ -321,6 +321,10 @@ function view.timer.on_timer(timer)
 end
 
 function view:Delete_Cover(index)
+    print("Delete_Cover("..index..")")
+    if #adapters ~= 1 then
+    local keys = view:get_controller().on_key_down 
+    view:get_controller().on_key_down = function() end
     local del_timeline = Timeline
     {
         name      = "Deletion animation",
@@ -328,11 +332,25 @@ function view:Delete_Cover(index)
         duration  =  200,
         direction = "FORWARD",
     }
-	 function del_timeline.on_new_frame(t,msecs)
+    function del_timeline.on_started()
+        print("started")
+    end
+    function del_timeline.on_new_frame(t,msecs)
+        print("on new frame")
         local progress = msecs/t.duration
 	    dontswap = true
 
-        model.albums[(index-1)%NUM_ROWS +1][math.ceil(index/NUM_ROWS)].opacity = (1-progress)*255
+        if model.albums[(index-1)%NUM_ROWS +1]
+                       [math.ceil(index/NUM_ROWS)] ~= nil then 
+            model.albums[(index-1)%NUM_ROWS +1]
+                        [math.ceil(index/NUM_ROWS)].opacity = 
+                                                (1-progress)*255
+        elseif model.placeholders[(index-1)%NUM_ROWS +1]
+                                 [math.ceil(index/NUM_ROWS)] ~= nil then
+            model.placeholders[(index-1)%NUM_ROWS +1]
+                              [math.ceil(index/NUM_ROWS)].opacity = 
+                                                 (1-progress)*255
+        end
         for ind = index, #adapters do
             local targ_i = (ind-1)%NUM_ROWS +1
             local targ_j = math.ceil(ind/NUM_ROWS)
@@ -369,12 +387,21 @@ function view:Delete_Cover(index)
         end
     end
     function del_timeline.on_completed()
-        model.fp_slots[(index-1)%NUM_ROWS +1]
-                      [math.ceil(index/NUM_ROWS)] = nil
-        model.albums[(index-1)%NUM_ROWS +1]
-                    [math.ceil(index/NUM_ROWS)]:unparent()
-        model.albums[(index-1)%NUM_ROWS +1]
-                    [math.ceil(index/NUM_ROWS)] = nil
+        local i = (index-1)%NUM_ROWS +1
+        local j = math.ceil(index/NUM_ROWS)
+        --print("DEL on completed",index,",",i,j,",",model.albums[i][j],model.placeholders[i][j])
+
+        if  model.albums[i] ~= nil and model.albums[i][j] ~= nil then
+            model.albums[i][j]:unparent()
+            model.albums[i][j] = nil
+        elseif  model.placeholders[i]~= nil and 
+                model.placeholders[i][j] ~= nil and 
+                model.placeholders[i][j] ~= 0   then
+            model.placeholders[i][j].opacity = 0
+            model.placeholders[i][j]:unparent()
+            model.placeholders[i][j] = nil
+        end
+        model.fp_slots[i][j] = nil
 
         for ind = index, #adapters do
             local targ_i = (ind-1)%NUM_ROWS +1
@@ -394,10 +421,11 @@ function view:Delete_Cover(index)
                 }
                 model.fp_slots[targ_i][targ_j] =
                      model.fp_slots[curr_i][curr_j]
+                
                 model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
             else
                 model.fp_slots[targ_i][targ_j] = nil
-                 model.albums[targ_i][targ_j] = nil
+                model.albums[targ_i][targ_j] = nil
             end
         end
         if model.front_page_index == math.ceil(#adapters / 
@@ -406,21 +434,41 @@ function view:Delete_Cover(index)
                             ((#adapters-1)%NUM_ROWS) == 0  then
             model.front_page_index = model.front_page_index - 1
         end
-        print("\n\n",index,#adapters)
+        --print("\n\n",index,#adapters)
         if index  == #adapters then
-            local i = ((index-1)-1)%NUM_ROWS +1
-            local j = math.ceil((index-1)/NUM_ROWS)
             print("setting to",i,j - 
                                     ( model.front_page_index  - 1 ))
             view:get_controller():set_selected_index(i,j - 
                                     ( model.front_page_index  - 1 ))
             prev_i = {i,j -( model.front_page_index  - 1 )}
         end
+
+        for ind=index,#adapters do
+            local i = (ind-1)%NUM_ROWS +1
+            local j = math.ceil(ind/NUM_ROWS)
+            if model.albums[a]           ~= nil  and
+               model.albums[i][j]        ~= nil  and
+               model.albums[i][j].loaded ~= true then
+                model.albums[i][j] = nil
+                model.placeholders[i][j] = Clone
+                {
+                    source = model.default[math.random(1,8)],
+                    opacity =255
+                }
+                model.fp_slots[i][j]:add(model.placeholders[i][j])
+                model.album_group:add(model.fp_slots[i][j])
+                loadCovers(ind,searches[#adapters], math.random(5))
+            end
+        end
+
+
         deleteAdapter(index)
         model:notify()
         dontswap = false
+        view:get_controller().on_key_down = keys
     end
     del_timeline:start()
+    end
 end
 
 end)
@@ -515,8 +563,10 @@ function Add_Cover()
                 model.fp_slots[targ_i][targ_j] =
                      model.fp_slots[curr_i][curr_j]
                 model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
-                model.fp_slots[curr_i][curr_j] = nil
-                model.albums[curr_i][curr_j]   = nil
+                model.placeholders[targ_i][targ_j] = model.placeholders[curr_i][curr_j]
+                model.fp_slots[curr_i][curr_j]     = nil
+                model.albums[curr_i][curr_j]       = nil
+                model.placeholders[curr_i][curr_i] = nil
 --[[
             else
                 model.fp_slots[targ_i][targ_j] = nil
@@ -524,6 +574,7 @@ function Add_Cover()
 --]]
             end
         end
+        model.albums[1][1]   = nil
         model.fp_slots[1][1] = Group
         {
             --name     = "Slot "..i.." "..j, 
@@ -533,7 +584,7 @@ function Add_Cover()
         }
         model.placeholders[1][1] = Clone
         {
-            source = model.default[1],
+            source = model.default[math.random(1,8)],
             opacity =255
         }
         model.fp_slots[1][1]:add(model.placeholders[1][1])

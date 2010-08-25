@@ -27,51 +27,70 @@ function Setup_Album_Covers()
         model.albums[i] = {}
         model.fp_slots[i] = {}
         for j = 1,math.ceil(#adapters/NUM_ROWS) do
-				local pic_index = ((((j-1)*NUM_ROWS+i)-1)%8+1)
+            local pic_index = ((((j-1)*NUM_ROWS+i)-1)%8+1)
             if ((j-1)*NUM_ROWS+i)<=#adapters then
-            model.placeholders[i][j] = Clone{ source = model.default[pic_index], opacity =255}
-            model.placeholders.opacity = 255
-            model.fp_slots[i][j] = Group
-            {
-                --name     = "Slot "..i.." "..j, 
-                position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
-                clip     = { 0, 0,  PIC_W, PIC_H },
-                opacity  = 255
-            }
-            --model.fp_slots[i][j]:add(Clone{ source = model.fp_backing, opacity = 255 })
-            model.fp_slots[i][j]:add(model.placeholders[i][j])
+                model.placeholders[i][j] = Clone
+                {
+                    source  = model.default[pic_index],
+                    opacity = 255
+                }
+                model.placeholders[i][j].opacity = 255
+                model.fp_slots[i][j] = Group
+                {
+                    position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
+                    clip     = { 0, 0,  PIC_W, PIC_H },
+                    opacity  = 255
+                }
+                model.fp_slots[i][j]:add(model.placeholders[i][j])
 
-            model.album_group:add(model.fp_slots[i][j])
+                model.album_group:add(model.fp_slots[i][j])
             end
         end
     end
+--[[
+    for ii=1,NUM_ROWS do
+	for jj=1,math.ceil(#adapters/NUM_ROWS) do
+	    assert(type(model.placeholders[ii][jj]) ~= "number")
+        end
+    end
+--]]
 end
 
 --Called by the adapter's on_complete function
 function Load_Image(site,index)
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
-    
-    print ("SITE: "..site)
 
     print("getting a pic for ",i,j,index)
+    --[[
+    for ii=1,i do
+	for jj=1,j do
+	    assert(type(model.placeholders[ii][jj]) ~= "number","for"..ii.." "..jj)
+        end
+    end
+--]]
+    print ("SITE: "..site)
+
 		
-	 if (site == "") then
-	 		loadCovers(index, searches[#adapters+1-index], math.random(16))
-    elseif model.albums[i] ~= nil and  model.albums[i][j] == nil then
+    if (site == "") then
+        loadCovers(index, searches[#adapters+1-index], math.random(16))
+    elseif model.albums[i]      ~= nil and  
+           model.albums[i][j]   == nil and 
+           model.fp_slots[i][j] ~= nil then
         model.albums[i][j] = Image
         {
             async    = true,
             src      = site,
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
-            -- toss the filler image and scale it once loaded
+            --toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
             	 if (failed) then					 	 
             	 		loadCovers(index, searches[#adapters+1-index], 1)
             	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
            	 
                 elseif model.albums[i] ~= nil and model.albums[i][j] ~= nil and not failed then
-                    print("loading pic at",i,j,index)
+                    print("loading pic at",i,j,index,model.placeholders[i][j])
+
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
 
@@ -98,6 +117,13 @@ function Load_Image(site,index)
             -- toss the filler image and scale it once loaded
             on_loaded = function(image,failed)
             	if not failed then
+                    if model.placeholders[i] ~= nil and 
+                       model.placeholders[i][j] ~= nil then
+
+                        model.placeholders[i][j]:unparent()
+                        model.placeholders[i][j] = nil
+                    end
+
                     if model.swap_pic == nil or model.albums[i] == nil or 
                                            model.albums[i][j] == nil or 
                                         model.swap_pic.loaded == false then 
@@ -148,8 +174,7 @@ function Scale_To_Fit(img,base_size,target_size)
     print( scale_x, scale_y )
 
 
-    if scale_y > scale_x  then--[[(scale_x < scale_y and scale_y < 1) or
-                       (scale_x > scale_y) then]]
+    if scale_y > scale_x  then
 print("chose y")
         img.size = {scale_y*base_size[1],scale_y*base_size[2]}
 
