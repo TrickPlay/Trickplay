@@ -151,9 +151,13 @@ function()
    TutorialView(model):initialize()
 
    function screen:on_key_down(k)
-      assert(model:get_active_controller())
-      print("current comp: "..model:get_active_component())
-      model:get_active_controller():on_key_down(k)
+      if k == keys.s then
+         t:complete()
+      elseif not t.enabled then
+         assert(model:get_active_controller())
+         print("current comp: "..model:get_active_component())
+         model:get_active_controller():on_key_down(k)
+      end
    end
    Events = {
       KEYBOARD = 1,
@@ -165,9 +169,9 @@ function()
    local event_listener_en = true
    -- private (helper) functions
    function disable_event_listeners()
-      if screen.on_key_down then
-         old_on_key_down, screen.on_key_down = screen.on_key_down, nil
-      end
+      -- if screen.on_key_down then
+      --    old_on_key_down, screen.on_key_down = screen.on_key_down, nil
+      -- end
       t:disable()
       event_listener_en = false
    end
