@@ -124,7 +124,7 @@ function Load_Image(site,index)
             src      = site,
             -- toss the filler image and scale it once loaded
             on_loaded = function(img,failed)
-                assert(img == model.swap_pic)
+                --assert(img == model.swap_pic)
             	if not failed then
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
@@ -132,27 +132,26 @@ function Load_Image(site,index)
                         model.placeholders[i][j]:unparent()
                         model.placeholders[i][j] = nil
                     end
-                    if model.swap_pic == nil or model.albums[i] == nil or 
-                                           model.albums[i][j] == nil or 
-                                        model.swap_pic.loaded == false or dontswap then 
-                        model.swap_pic = nil 
+                    if img == nil or model.albums[i]    == nil or 
+                                     model.albums[i][j] == nil or 
+                                     img.loaded         == false then 
+                        img = nil 
                         model.swapping_cover = false
                     else
-                        Scale_To_Fit(model.swap_pic,
-                                     model.swap_pic.base_size,
-                                     {PIC_W,PIC_H})
+                        Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
 
-                        slot:add(model.swap_pic)
+                        slot:add(img)
+                        print(model.albums[i][j])
                         model.albums[i][j]:raise_to_top()
                         model.albums[i][j]:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
                             y            = img.y + PIC_H,
                             opacity      = 0,
                             on_completed = function(image)
-                                print(model.swap_pic,model.albums[i][j])
+                                --print(model.swap_pic,model.albums[i][j])
                                 if  model.albums[i]    == nil or 
                                     model.albums[i][j] == nil then 
-                                    model.swap_pic     =  nil 
+                                    image     =  nil 
                                 else
                                     if  model.albums[i][j] ~= nil then
                                         model.albums[i][j]:unparent() 
@@ -161,7 +160,7 @@ function Load_Image(site,index)
 
                                     end
                                     --swap_pic is already a child of the slot
-                                    model.albums[i][j] = model.swap_pic
+                                    model.albums[i][j] = image
                                     model.swap_pic = nil
 
                                 end
