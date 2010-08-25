@@ -90,13 +90,12 @@ HandState = Class(nil,function(state, ctrl, ...)
       deck = args.deck
       round = Rounds.HOLE
 
-      done, out, all_in, orig_money, running_money = {}, {}, {}, {}, {}
+      done, out, all_in, orig_money = {}, {}, {}, {}
       for i, player in ipairs(players) do
          done[player] = false
          out[player] = false
          all_in[player] = false
          orig_money[player] = player.money
-         running_money[player] = 0
       end
       num_inplayers = #players
       ctrl:set_bets_done(false)
@@ -123,6 +122,11 @@ HandState = Class(nil,function(state, ctrl, ...)
          bb_player.money, player_bets[bb_player] = 0, bb_player.money
       else
          bb_player.money, player_bets[bb_player] = bb_player.money-bb_qty, bb_qty
+      end
+
+      running_money = {}
+      for _, player in ipairs(players) do
+         running_money[player] = player_bets[player]
       end
 
       call_bet = bb_qty
@@ -176,6 +180,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       if active_player.money == 0 then
          all_in[active_player] = true
       end
+      local delta = 0
       if fold then
          -- if the player folds, then he's out of the hand, and whatever bet he had goes into the pot
          set_out(active_player)
@@ -188,6 +193,7 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
       elseif bet == call_bet or (bet < call_bet and active_player.money == 0) then
          -- player calls
+         delta = bet - player_bets[active_player]
          player_bets[active_player] = bet
          if bet == 0 then
             ctrl:check_player(active_player)
@@ -198,6 +204,7 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
       elseif bet >= call_bet+min_raise or (call_bet < bet and bet < call_bet+min_raise and active_player.money==0) then
          -- player raises, forces everyone to act
+         delta = bet - player_bets[active_player]
          player_bets[active_player] = bet
          for _, player in ipairs(players) do
             if player ~= active_player and not out[player] and not all_in[player] and player.money > 0 then
@@ -225,14 +232,14 @@ HandState = Class(nil,function(state, ctrl, ...)
          )
       end
 
-      running_money[active_player] = running_money[active_player] + player_bets[active_player]
+      running_money[active_player] = running_money[active_player] + delta
       local continue = true
       if get_num_inplayers() == 1 then
          local only_player = get_only_player()
          only_player.money, player_bets[only_player], pot = only_player.money+player_bets[only_player]+pot,0,0
          ctrl:clear_pipeline()
          ctrl:win_from_bets(only_player)
-         return continue
+         return continue 
       end
 
       -- if there are still in players who need to bet, then stay in betting round
@@ -347,6 +354,12 @@ HandState = Class(nil,function(state, ctrl, ...)
             poker_hand = tmp_poker_hand
          end
       end
+
+      local test_pot = 0
+      for _,player in ipairs(players) do
+         test_pot = test_pot + running_money[player]
+      end
+      assert(test_pot == pot, "sum of runningmoney was " .. test_pot .. " but should be " .. pot)
 
       print("splitting $" .. pot .. " pot " .. #winners .. " ways")
       for _,winner in ipairs(winners) do
