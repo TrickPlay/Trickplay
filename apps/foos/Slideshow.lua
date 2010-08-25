@@ -16,6 +16,15 @@ local caption = Text {font = "Sans 15px", text = "", x = 1530, y = 400}
 local overlay_image = Image { src = "assets/overlay.png", opacity = 0 }
 local background = Image {src = "assets/background.jpg" }
 local background2 = Image {src = "assets/background2.png" }
+local up = Image {src = "assets/slideshow/NavPause.png", y = -80, x = 30 }
+local down = Image {src = "assets/slideshow/NavFull.png", y = 80, x = 30 }
+local left = Image {src = "assets/slideshow/NavPrev.png", x = -80 }
+local right = Image {src = "assets/slideshow/NavNext.png", x = 140 }
+local back = Image {src = "assets/slideshow/NavBack.png" }
+
+local controls = Group{x = 100, y = 900, z =1}
+controls:add(up,down,left,right,back)
+
 local fullscreen = false
 local off_screen_list = {}
 local  on_screen_list = {}
@@ -87,7 +96,7 @@ function Slideshow:begin()
         size = {300,225}
     }
     self.ui:add( overlay_image, background, background2,
-                                caption, queryText, logo )
+                                caption, queryText, logo, controls )
     --grab 5 pictures
     self:preload(5)
     current_pic = current_pic + 5
@@ -196,9 +205,12 @@ function Slideshow:toggle_timer()
     if timer_running then
         timer:stop()
         timer_running = false
+        up.src = "assets/slideshow/NavPlay.png"
+
     else
         timer:start()
         timer_running = true
+        up.src = "assets/slideshow/NavPause.png"
     end
 end
 
@@ -328,10 +340,12 @@ function Slideshow:toggle_fullscreen()
 		background.opacity = 0
 		background2.opacity = 0
 		logo.opacity = 0
+		controls.opacity = 100
 	else
 		background.opacity = 255
 		background2.opacity = 255
 		logo.opacity = 255
+		controls.opacity = 255
 	end
 	--this will reset it we should do something better
 end
