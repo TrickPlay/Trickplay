@@ -323,7 +323,7 @@ function view.timer.on_timer(timer)
 end
 
 function view:Delete_Cover(index)
-    print("Delete_Cover("..index..")")
+    print("Delete_Cover( "..index.." )")
     if #adapters ~= 1 then
     local keys = view:get_controller().on_key_down 
     view:get_controller().on_key_down = function() end
