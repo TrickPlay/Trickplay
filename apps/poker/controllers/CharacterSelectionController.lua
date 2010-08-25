@@ -48,13 +48,14 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          v.opacity = 0
       end
       model:set_active_component(Components.GAME)
-      model:notify()
       game:initialize_game{
          sb=SMALL_BLIND,
          bb=BIG_BLIND,
          endowment=INITIAL_ENDOWMENT,
+         randomness=RANDOMNESS,
          players=model.players
       }
+      model:notify()
       old_on_key_down = nil
    end
 

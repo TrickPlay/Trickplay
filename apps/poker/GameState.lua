@@ -16,6 +16,7 @@ GameState = Class(nil,function(state, ctrl)
    local sb_p = nil
    local bb_p = nil
    local deck = nil
+   local randomness = nil
 
    -- private functions
    local function calc_blind_pos()
@@ -54,9 +55,11 @@ GameState = Class(nil,function(state, ctrl)
       bb_qty = args.bb or error("Assign big blind!", 2)
       endowment = args.endowment or error("No initial endowment", 2)
       players = args.players or error("No players!", 2)
+      randomness = args.randomness or 0
       for _,player in ipairs(players) do
-         player.money = endowment
+         player.money = endowment + math.random(-randomness, randomness)
       end
+
       dealer = math.random(#players)
       print("Dealer randomly selected to be " .. tostring(dealer))
       sb_p, bb_p = calc_blind_pos()
