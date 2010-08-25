@@ -51,7 +51,9 @@ function adapter:loadCovers(i,search, start_index)
 		local data = json:parse(response.body)
 		if (type(data.responseData) == "table") then
 			site = data.responseData.results[1].unescapedUrl or ""
-		   Load_Image(site,i)
+         if (not dontswap) then
+			   Load_Image(site,i)
+			end
 		end
 	end
 	}

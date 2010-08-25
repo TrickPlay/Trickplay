@@ -156,6 +156,7 @@ FrontPageView = Class(View, function(view, model, ...)
             local progress = (msecs - 800)/100
             view.bottom_bar.opacity = 255
             view.bottom_bar.y = PIC_H - progress*70
+            dontswap = false
         elseif msecs > 900 and msecs <= 2900 then
             view.bottom_bar.y = PIC_H - 70
         -- bring the bar up a little more
@@ -306,15 +307,14 @@ function view.timer.on_timer(timer)
                 if (rand_i[1] ~= model.fp_index[1] or
                     rand_i[2] ~= model.fp_index[2]) and 
                    adapters[formula]~=nil then
+                   if (not dontswap) then
+                   	
                     print("calling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
-                    if (not dontswap) then
-                    loadCovers(formula, searches[#adapters+1-formula], search_i)
-                    else
-                        model.swapping_cover = false
+                     loadCovers(formula, searches[#adapters+1-formula], search_i)
                     end
                 else
                     print("not calling")
