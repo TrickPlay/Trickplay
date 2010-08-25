@@ -315,8 +315,6 @@ function view.timer.on_timer(timer)
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
                      loadCovers(formula, searches[#adapters+1-formula], search_i)
-                    else
-                        model.swapping_cover = false
                     end
                 else
                     print("not calling")
@@ -326,7 +324,7 @@ function view.timer.on_timer(timer)
 end
 
 function view:Delete_Cover(index)
-    print("Delete_Cover("..index..")")
+    print("Delete_Cover( "..index.." )")
     if #adapters ~= 1 then
     local keys = view:get_controller().on_key_down 
     view:get_controller().on_key_down = function() end
