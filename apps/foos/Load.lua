@@ -61,6 +61,10 @@ function Load_Image(site,index)
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
     local slot  = model.fp_slots[i][j]
+    local album = nil
+    if model.albums[i] ~= nil then
+        album = model.albums[i][j]
+    end
 
     print("getting a pic for ",i,j,index)
     --[[
@@ -85,13 +89,13 @@ function Load_Image(site,index)
             src      = site,
             --position = { PIC_W * (j-1), PIC_H * (i-1) },
             --toss the filler image and scale it once loaded
-            on_loaded = function(image,failed)
+            on_loaded = function(img,failed)
             	 if (failed) then					 	 
             	 		loadCovers(index, searches[#adapters+1-index], math.random(16))
             	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
            	 
-                elseif model.albums[i] ~= nil    and 
-                       model.albums[i][j] ~= nil and 
+                elseif --[[model.albums[i] ~= nil    and 
+                       model.albums[i][j] ~= nil and --]]
                        not failed                then
                     print("loading pic at",i,j,index,model.placeholders[i][j])
 
@@ -101,14 +105,14 @@ function Load_Image(site,index)
                         model.placeholders[i][j]:unparent()
                         model.placeholders[i][j] = nil
                     end
-                    Scale_To_Fit(model.albums[i][j],
-                                 model.albums[i][j].base_size,
+                    Scale_To_Fit(img,
+                                 img.base_size,
                                  {PIC_W,PIC_H})
-                    slot:add(model.albums[i][j])
+                    slot:add(img)
 
                     --if model.fp_index[1] == i and model.fp_index[2] == j then
                         --model:notify()
-                        model.albums[i][j]:lower_to_bottom()
+                        img:lower_to_bottom()
                     --end
                 end
             end
@@ -119,7 +123,7 @@ function Load_Image(site,index)
             async    = true,
             src      = site,
             -- toss the filler image and scale it once loaded
-            on_loaded = function(image,failed)
+            on_loaded = function(img,failed)
             	if not failed then
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
@@ -137,11 +141,11 @@ function Load_Image(site,index)
                                      model.swap_pic.base_size,
                                      {PIC_W,PIC_H})
 
-                        model.fp_slots[i][j]:add(model.swap_pic)
-                        model.albums[i][j]:raise_to_top()
-                        model.albums[i][j]:animate{
+                        slot:add(model.swap_pic)
+                        img:raise_to_top()
+                        img:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
-                            y            = model.albums[i][j].y + PIC_H,
+                            y            = img.y + PIC_H,
                             opacity      = 0,
                             on_completed = function()
                                 if  model.albums[i]    == nil or 
@@ -173,24 +177,18 @@ function Scale_To_Fit(img,base_size,target_size)
     local scale_x = target_size[1] / base_size[1]
     local scale_y = target_size[2] / base_size[2]
 
---TODO: this might only apply when scaling down
-    print( scale_x, scale_y )
-
-
     if scale_y > scale_x  then
-print("chose y")
-        img.size = {scale_y*base_size[1],scale_y*base_size[2]}
+        img.size  = {scale_y*base_size[1],scale_y*base_size[2]}
 
         img.clip  = { (img.w-target_size[1])/2, 0,
-                      target_size[1],target_size[2]}
-        img.anchor_point = { (img.w-target_size[1])/2,      0}
+                       target_size[1],target_size[2]}
+        img.anchor_point = { (img.w-target_size[1])/2, 0 }
     else
-print("chose x")
-        img.size = {scale_x*base_size[1],scale_x*base_size[2]}
+        img.size  = {scale_x*base_size[1],scale_x*base_size[2]}
 
         img.clip  = { 0,(img.h-target_size[2])/2,
-               target_size[1], target_size[1]}
-          img.anchor_point = {  0,(img.h-target_size[2])/2        }
+                      target_size[1], target_size[1]}
+        img.anchor_point = {  0, (img.h-target_size[2])/2 }
 
     end
 
