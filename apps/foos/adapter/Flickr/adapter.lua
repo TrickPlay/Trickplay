@@ -49,7 +49,9 @@ function adapter:loadCovers(i,search, start_index)
 			local data = json:parse(response.body)
 			for k,v in pairs(data.photos.photo[1]) do print(k,v) end
 			test = "http://farm"..data.photos.photo[start_index].farm..".static.flickr.com/"..data.photos.photo[start_index].server.."/"..data.photos.photo[start_index].id.."_"..data.photos.photo[start_index].secret..".jpg"
-		   Load_Image(test,i)
+         if (not dontswap) then
+			   Load_Image(test,i)
+			end
 		end
 		}
 		request:send()
