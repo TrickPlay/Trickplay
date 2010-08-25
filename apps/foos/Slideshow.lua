@@ -22,7 +22,7 @@ local left = Image {src = "assets/slideshow/NavPrev.png", x = -80 }
 local right = Image {src = "assets/slideshow/NavNext.png", x = 140 }
 local back = Image {src = "assets/slideshow/NavBack.png" }
 
-local controls = Group{x = 200, y = 800}
+local controls = Group{x = 100, y = 900, z =1}
 controls:add(up,down,left,right,back)
 
 local fullscreen = false
@@ -340,10 +340,12 @@ function Slideshow:toggle_fullscreen()
 		background.opacity = 0
 		background2.opacity = 0
 		logo.opacity = 0
+		controls.opacity = 100
 	else
 		background.opacity = 255
 		background2.opacity = 255
 		logo.opacity = 255
+		controls.opacity = 255
 	end
 	--this will reset it we should do something better
 end
