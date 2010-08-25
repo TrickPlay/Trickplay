@@ -2,7 +2,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
     --first add the background shiz
 
-    background = {
+    local background = {
         Image{
             position = {MDPL.START[1]+5, MDPL.START[2]+10},
             src = "assets/UI/shadow_beginning.png"
