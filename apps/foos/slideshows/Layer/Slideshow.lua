@@ -145,8 +145,6 @@ end
 -- will send and image across the screen
 function Slideshow:LoadImage(site,img_table)
 --	print("load")
-	animate_image_in(site)
-
         --the 2 items in the Group
     local image 
     image = Image 
@@ -170,6 +168,7 @@ function Slideshow:LoadImage(site,img_table)
                         img.w/(screen.w-100),
                         img.h/(screen.h-100)
                     }, 
+                    opacity = 0,
                     x = (-img.w)/40,
                     y = (-img.h)/20
                 }
@@ -279,8 +278,10 @@ end
 
 function Slideshow:next_picture()
 
+
     print("Slideshow:next_picture()")
     if #off_screen_list > 0 then
+
         print("\tnext\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
         current_pic = current_pic +1
 
@@ -305,6 +306,9 @@ function Slideshow:next_picture()
         print("\tcomp_anim")
         pic.opacity = 255
         print("\tanimate")
+        if (site ~=nil and site ~= "") then
+	  		  animate_image_in(site)
+		  end
         if (not fullscreen) then
 		     pic:animate 
 		     {
