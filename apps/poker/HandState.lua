@@ -80,6 +80,27 @@ HandState = Class(nil,function(state, ctrl, ...)
       return top2
    end
 
+   function state:get_bets_done()
+      local num_all_in = 0
+      local num_in_players = #state:get_in_players()
+      print("num_in_players:",num_in_players)
+      local all_in_bet = 0
+      for _,player in ipairs(state:get_in_players()) do
+         if player_bets[player] > all_in_bet then all_in_bet = player_bets[player] end
+         if all_in[player] then
+            num_all_in = num_all_in+1
+         else
+            not_all_in_player = player
+         end
+      end
+      if num_all_in == num_in_players-1 and player_bets[not_all_in_player] == all_in_bet or 
+         num_all_in == num_in_players then
+         return true
+      end
+
+      return false
+   end
+
    function state.initialize(state, args)
       players = args.players
       sb_qty = args.sb_qty
@@ -359,11 +380,13 @@ HandState = Class(nil,function(state, ctrl, ...)
       for _,player in ipairs(players) do
          test_pot = test_pot + running_money[player]
       end
-      assert(test_pot == pot, "sum of runningmoney was " .. test_pot .. " but should be " .. pot)
+      if test_pot ~= pot then
+         print("sum of runningmoney was " .. test_pot .. " but should be " .. pot)
+      end
 
       print("splitting $" .. pot .. " pot " .. #winners .. " ways")
       for _,winner in ipairs(winners) do
-         winner.money = winner.money + pot/#winners
+         winner.money = winner.money + math.floor(pot/#winners)
       end
       pot = 0
 

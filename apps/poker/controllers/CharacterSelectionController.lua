@@ -195,17 +195,22 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    function self:move_selector(dir)
       screen:grab_key_focus()
-      if(0 ~= dir[1]) then
+      if 0 ~= dir[1] then
          local new_selected = subselection + dir[1]
          if 1 <= new_selected and SubSize >= new_selected then
             subselection = new_selected
             check_for_valid(dir)
          end
-      elseif(0 ~= dir[2]) then
-         local new_selected = selected + dir[2]
-         if 1 <= new_selected and GroupSize >= new_selected then
-            selected = new_selected
-            check_for_valid(dir)
+      elseif 0 ~= dir[2] then
+         if dir[2] == -1 and selected == CharacterSelectionGroups.BOTTOM and subselection == SubGroups.RIGHT_MIDDLE then
+            selected = CharacterSelectionGroups.TOP
+            subselection = SubGroups.MIDDLE
+         else
+            local new_selected = selected + dir[2]
+            if 1 <= new_selected and GroupSize >= new_selected then
+               selected = new_selected
+               check_for_valid(dir)
+            end
          end
       end
       self:get_model():notify()
