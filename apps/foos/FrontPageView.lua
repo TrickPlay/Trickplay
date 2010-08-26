@@ -348,7 +348,8 @@ function view:Delete_Cover(index)
             model.albums[(index-1)%NUM_ROWS +1]
                         [math.ceil(index/NUM_ROWS)].opacity = 
                                                 (1-progress)*255
-        elseif model.placeholders[(index-1)%NUM_ROWS +1]
+        end
+        if model.placeholders[(index-1)%NUM_ROWS +1]
                                  [math.ceil(index/NUM_ROWS)] ~= nil then
             model.placeholders[(index-1)%NUM_ROWS +1]
                               [math.ceil(index/NUM_ROWS)].opacity = 
@@ -397,7 +398,8 @@ function view:Delete_Cover(index)
         if  model.albums[i] ~= nil and model.albums[i][j] ~= nil then
             model.albums[i][j]:unparent()
             model.albums[i][j] = nil
-        elseif  model.placeholders[i]~= nil and 
+        end
+        if  model.placeholders[i]~= nil and 
                 model.placeholders[i][j] ~= nil and 
                 model.placeholders[i][j] ~= 0   then
             model.placeholders[i][j].opacity = 0
