@@ -28,6 +28,7 @@ function(ctrl, model, ...)
          local continue = hand_ctrl:on_event(event)
          return continue
       end,
+      -- clean hand
       function(ctrl)
          state:move_blinds()
          local continue = hand_ctrl:cleanup()
@@ -36,6 +37,7 @@ function(ctrl, model, ...)
          hands = hands + 1
          return continue
       end,
+      -- increase blinds
       function(ctrl)
          if hands % 10 == 0 then
             state:increase_blinds()
@@ -46,6 +48,7 @@ function(ctrl, model, ...)
       end
    }
 
+    --[[
    local help_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
@@ -66,6 +69,8 @@ function(ctrl, model, ...)
          return continue
       end
    }
+   --]]
+
    -- getters/setters
    function ctrl.get_players(ctrl) return state:get_players() end
    function ctrl.get_sb_qty(ctrl) return state:get_sb_qty() end

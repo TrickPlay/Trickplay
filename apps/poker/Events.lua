@@ -26,3 +26,10 @@ BetEvent = Class(Event,function(event,args,...)
       event.cb = args.cb
    end
 end)
+
+NetEvent = Class(Event,
+function(even,args,...)
+   if args then
+      assert(type(args) == "table", "Event constructor uses named parameters. e.g. pass in a table.")
+   end
+end)

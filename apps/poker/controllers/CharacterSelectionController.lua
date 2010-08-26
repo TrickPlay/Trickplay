@@ -38,10 +38,10 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
    self.playerCounter = 0
 
    local function start_a_game()
-    -- add table text
-    local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
-    screen:add( table_text )
-    table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
+      -- add table text
+      local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
+      screen:add( table_text )
+      table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
    
       --make sure last dog selected does not continue to glow
       for _,v in ipairs(DOG_GLOW) do
@@ -93,6 +93,12 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          num = 1 + subsel
       elseif sel == 2 and subsel == 5 then
          num = 6
+      elseif sel == 2 and subsel == 2 then
+         return "HELP_MENU"
+      elseif sel == 2 and subsel == 3 then
+         return "START"
+      elseif sel == 2 and subsel == 4 then
+         return "EXIT_MENU"
       else
          error("error selecting position", 2)
       end
@@ -134,7 +140,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
       self.playerCounter = self.playerCounter + 1
       if(self.playerCounter >= 2) then
-         view.items[2][3].group.opacity = 255
+         view.items[2][3].opacity = 255
       end
       self:get_model():notify()
    end

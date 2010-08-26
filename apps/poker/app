@@ -1,10 +1,10 @@
 app=
 {
-    id          = "com.trickplay.1945",
+    id          = "com.trickplay.holdem",
     release     = "1",
     version     = "1.0",
-    name        = "1945",
-    author      = "Pablo Pissanetzky",
+    name        = "Texas Hold'em",
+    author      = "Darren, Devin, and Rex",
     copyright   = "© Trickplay Inc."
 }
 

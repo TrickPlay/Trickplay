@@ -90,6 +90,25 @@ BettingView = Class(View, function(view, model, ...)
             error("wtf mate?")
         end
     end
+  
+    --@return true for call, false for check
+    local function call_or_check()
+        local players = model.players
+        local player = model.currentPlayer
+        local bb_p = model.bb_p
+        local bb_qty = model.bb_qty
+        local bb_player = players[bb_p]
+        if model.call_bet == 0 or
+            (model.call_bet <= bb_qty and player == bb_player) then
+            check_button.group.opacity = 255
+            call_button.group.opacity = 0
+            view.items[1][2] = check_button
+        else
+            check_button.group.opacity = 0
+            call_button.group.opacity = 255
+            view.items[1][2] = call_button
+        end
+    end
     
     function view:update()
         local controller = self:get_controller()
@@ -98,18 +117,14 @@ BettingView = Class(View, function(view, model, ...)
             self.ui.opacity = 255
             self.ui:raise_to_top()
 --            print("Showing Betting UI")
+            -- figures out whether "call" or "check" should be displayed
+            call_or_check()
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
-                        if(item == call_button) then
-                            check_button:on_focus()
-                        end
                         item:on_focus()
                     else
-                        if(item == call_button) then
-                            check_button:out_focus()
-                        end
                         item:out_focus()
                     end
                 end
@@ -118,14 +133,6 @@ BettingView = Class(View, function(view, model, ...)
             local player = model.currentPlayer
             bet_text.text = "$"..player.bet
 
-            if(model.call_bet == 0) then
-                check_button.group.opacity = 255
-                call_button.group.opacity = 0
-            else
-                check_button.group.opacity = 0
-                call_button.group.opacity = 255
-            end
-            
             local playerBet = player.betChips
             
             -- Add chips to the bet
