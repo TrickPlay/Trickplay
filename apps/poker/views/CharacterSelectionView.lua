@@ -2,20 +2,33 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
     -- text instructing the player to select a character
+    
+    choose_char_text = AssetLoader:getImage("ChooseDog",{})
+    select_ai_text = AssetLoader:getImage("ChooseAI",{})
+    
+    choose_char_text.position = {1920/2-choose_char_text.width/2, 1080/2-choose_char_text.height/2 + 50}
+    select_ai_text.position = {1920/2-select_ai_text.width/2, 1080/2-select_ai_text.height/2 + 100}
+    
+    --[[
     choose_char_text = Text{
         text = "Choose Your Character!",
         font = "KacstArt 70px",
         color = Colors.YELLOW,
         opacity = 0
     }
+    ]]--
+    
+    --[[
     select_ai_text = Text{
         text = "Select Your Opponents!",
         font = "KacstArt 70px",
         color = Colors.YELLOW,
         opacity = 0
     }
-    choose_char_text.position = {1920/2-choose_char_text.width/2, 1080/2-choose_char_text.height/2}
-    select_ai_text.position = {1920/2-select_ai_text.width/2, 1080/2-select_ai_text.height/2}
+    ]]--
+    
+    --choose_char_text.position = {1920/2-choose_char_text.width/2, 1080/2-choose_char_text.height/2}
+    --select_ai_text.position = {1920/2-select_ai_text.width/2, 1080/2-select_ai_text.height/2}
     local background = {
         choose_char_text,
         select_ai_text
