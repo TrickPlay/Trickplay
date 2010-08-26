@@ -1,6 +1,7 @@
 local adapter = {
 	name = "Yahoo Image Search",
 	logoUrl = "adapter/Yahoo/logo.png",
+	hasImages = true,
 	logoscale = {1,1},
 	{
 		name = "public",
@@ -38,10 +39,12 @@ function adapter:loadCovers(i,search, start_index)
 		local data = json:parse(response.body)
 		for k,v in pairs(data) do print(k,v) end
 		if (data.ResultSet) then
-			site = data.ResultSet.Result[1].ClickUrl or ""
-         if (not dontswap) then
-	   	   Load_Image(site,i)
-	   	end
+			if (data.ResultSet.Result[1]) then
+				site = data.ResultSet.Result[1].ClickUrl or ""
+		      if (not dontswap) then
+				   Load_Image(site,i)
+				end
+			end
    	end
 	end
 	}
