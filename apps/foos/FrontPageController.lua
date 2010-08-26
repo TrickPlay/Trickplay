@@ -35,6 +35,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.Return] = function(self) 
             local formula = (model.front_page_index + (selected[2]-1))*2+
                                                      (selected[1]-1)-1
+				
             if adapters[formula] ~= nil then
 	             dofile("slideshows/"..slideshow_styles[style].."/Slideshow.lua")
 

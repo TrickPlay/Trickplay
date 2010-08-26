@@ -89,7 +89,6 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     adapters[#adapters]:getUserID(search)
                     adapters[#adapters][1].required_inputs.query = search                    
                     searches[#adapters] = search
-                    
                 end
                 view.accordian = false
                 view:leave_accordian()

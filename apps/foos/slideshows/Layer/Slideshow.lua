@@ -119,10 +119,12 @@ end
 
 function Slideshow:preload(num_pics)
     for i = current_pic, current_pic + (num_pics-1) do
+        if (adapters[model.curr_slideshow.index]) then
         model.curr_slideshow:loadUrls(
             adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
             off_screen_list, i  
         )
+        end
     end
 end
 
@@ -559,7 +561,7 @@ orginal_image.on_loaded = function()
 				scale = {2,2},
 			}
 			image_pieces[counter]:animate{
-				duration=200,
+				duration=500,
 				position = oldposition,
 				opacity = 255,
 				z = 0,

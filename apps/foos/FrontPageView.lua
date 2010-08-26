@@ -274,10 +274,14 @@ FrontPageView = Class(View, function(view, model, ...)
             model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
             view.bottom_bar.position = {-10,PIC_H}
             view.bottom_bar.scale   = {1.1,1}
-
-            album_title.text = string.gsub((adapters[#adapters - 
-                 model.fp_1D_index+1][1].required_inputs.query),"%%20"," ")
-            album_logo.src = adapters[#adapters - model.fp_1D_index+1].logoUrl
+--				print (#adapters - model.fp_1D_index + 1,adapters[#adapters - model.fp_1D_index + 1].hasImages)
+--				debug()
+				if (adapters[#adapters - model.fp_1D_index + 1].hasImages) then
+	         album_title.text = string.gsub((adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query),"%%20"," ")
+	         else
+	         	album_title.text = "NO IMAGES"
+	         end
+            album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
 
             view.backdrop.opacity = 0

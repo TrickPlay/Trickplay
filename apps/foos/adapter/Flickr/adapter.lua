@@ -5,6 +5,7 @@ local adapter = {
 	name = "Flickr Photostream",
 	logoUrl = "adapter/Flickr/logo.png",
 	logoscale = {0.1,0.1},
+	hasImages = true,
 	{
 		name = "public",
 		caption = function(data) return "" end,
@@ -69,10 +70,11 @@ function adapter:getUserID(username)
 				self[1].required_inputs.user_id = data.user.nsid
 				user_ids[#adapters] = data.user.nsid
 	--			self[1].required_inputs.query = data.user.nsid
-		      model.album_group:clear()
+            Add_Cover()
+--[[		      model.album_group:clear()
 		      model.albums = {}
 		      Setup_Album_Covers()
-		      model:notify()
+		      model:notify()]]
 		   end
 		end
 	}
