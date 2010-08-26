@@ -116,8 +116,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
                duration=500,
                mode="EASE_OUT_QUAD",
                on_completed = function()
+                  local to_show_glow = player.betChips:value() > 0
                   model.potchips:set( model.potchips:value() + player.betChips:value() )
-                  local to_not_show_glow = potText.text == model.potchips:value()
                   potText.text = model.potchips:value()
 
                   -- flash the glow under the pot value text
@@ -132,7 +132,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
                            on_completed = function() show_glow(x) end}
                      end
                   end
-                  if not to_not_show_glow then show_glow(0) end
+                  if to_show_glow then show_glow(0) end
 
                   remove_player_chips(player)
                end
