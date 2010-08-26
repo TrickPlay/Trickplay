@@ -27,9 +27,11 @@ function Setup_Album_Covers()
 
     --fill the thing with clones of the default-loading image
     for i = 1,NUM_ROWS do 
+
         model.placeholders[i] = {}
-        model.albums[i] = {}
-        model.fp_slots[i] = {}
+        model.albums[i]       = {}
+        model.fp_slots[i]     = {}
+
         for j = 1,math.ceil(#adapters/NUM_ROWS) do
             local pic_index = ((((j-1)*NUM_ROWS+i)-1)%8+1)
             if ((j-1)*NUM_ROWS+i)<=#adapters then
@@ -51,138 +53,61 @@ function Setup_Album_Covers()
             end
         end
     end
---[[
-    for ii=1,NUM_ROWS do
-	for jj=1,math.ceil(#adapters/NUM_ROWS) do
-	    assert(type(model.placeholders[ii][jj]) ~= "number")
-        end
-    end
---]]
 end
 
 --Called by the adapter's on_complete function
 function Load_Image(site,index)
+    print("Load_Image(",site,",",index,")")
+    -- 2D version of the index
     local i = (index-1)%NUM_ROWS +1
     local j = math.ceil(index/NUM_ROWS)
+    --keep a local version for the callbacks
     local slot  = model.fp_slots[i][j]
-    local album = nil
-    if model.albums[i] ~= nil then
-        album = model.albums[i][j]
+    local prev_cover = nil
+    if model.albums[i][j] ~= nil then
+        prev_cover         = model.albums[i][j]
+        model.albums[i][j] = nil
     end
 
-    print("getting a pic for ",i,j,index)
-    --[[
-    for ii=1,i do
-	for jj=1,j do
-	    assert(type(model.placeholders[ii][jj]) ~= "number","for"..ii.." "..jj)
-        end
-    end
---]]
-    print ("SITE: "..site)
-
-		
+    --if url returned is empty, do it again
     if (site == "") then
         loadCovers(index, searches[#adapters+1-index], math.random(16))
-    elseif model.albums[i]    ~= nil and  
-           model.albums[i][j] == nil and 
-           slot               ~= nil then
-        temp = model.albums[i][j]
-        model.albums[i][j] = Image
-        {
-            async    = true,
-            src      = site,
-            --position = { PIC_W * (j-1), PIC_H * (i-1) },
-            --toss the filler image and scale it once loaded
-            on_loaded = function(img,failed)
-            	 if (failed) then					 	 
-            	 		loadCovers(index, searches[#adapters+1-index], math.random(16))
-            	 		print ("FAILED MOFUCKA\n\n\n\n\n\n\n\n\n")
-           	 
-                elseif --[[model.albums[i] ~= nil    and 
-                       model.albums[i][j] ~= nil and --]]
-                       not failed                then
-                    print("loading pic at",i,j,index,model.placeholders[i][j])
---[[
-                    if model.placeholders[i] ~= nil and 
-                       model.placeholders[i][j] ~= nil then
+    --if the album is empty, then it is the initial load
+    elseif model.albums[i] ~= nil and slot ~= nil then
 
-                        model.placeholders[i][j]:unparent()
-                        model.placeholders[i][j] = nil
-                    end
---]]
-                    Scale_To_Fit(img,
-                                 img.base_size,
-                                 {PIC_W,PIC_H})
-                    slot:add(img)
-
-                    --if model.fp_index[1] == i and model.fp_index[2] == j then
-                        --model:notify()
-                        --img:lower_to_bottom()
-                    --end
-                end
-            end
-        }
-    elseif model.albums[i] ~= nil and model.albums[i][j] ~= nil then
-
-        model.swap_pic = Image{
-            async    = true,
-            src      = site,
+        model.albums[i][j] = Image{
+            async = true,
+            src   = site,
             -- toss the filler image and scale it once loaded
             on_loaded = function(img,failed)
-                --assert(img == model.swap_pic)
-            	if not failed and model.swapping_cover then
---[[
-                    if model.placeholders[i] ~= nil and 
-                       model.placeholders[i][j] ~= nil then
-
-                        model.placeholders[i][j]:unparent()
-                        model.placeholders[i][j] = nil
-                    end
---]]
-                    if img == nil or model.albums[i]    == nil or 
-                                     model.albums[i][j] == nil or 
-                                     img.loaded         == false then 
-                        img = nil 
-                        model.swapping_cover = false
-                    else
-                        Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
-
-                        slot:add(img)
-                        --print(model.albums[i][j])
-                        model.albums[i][j]:raise_to_top()
-                        model.albums[i][j]:animate{
+                --if everything went right
+                if not failed and img ~= nil then
+                    print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")",model.albums[i][j])
+                        
+                    --add the next album cover
+                    Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
+                    slot:add(img)
+                    --put the old one on top and animate it down
+                    --only animate if there is a picture already there
+                    if prev_cover ~= nil then
+                        print("\tan old cover exists, animating it out")
+                        prev_cover:raise_to_top()
+                        prev_cover:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
                             y            = img.y + PIC_H,
                             opacity      = 0,
                             on_completed = function(image)
-                                --print(model.swap_pic,model.albums[i][j])
-                                if  model.albums[i]    == nil or 
-                                    model.albums[i][j] == nil or
-                                    model.swapping_cover == false then 
-                                    model.swap_pic     =  nil 
-                                else
-                                    if  model.albums[i][j] ~= nil then
-                                        model.albums[i][j]:unparent() 
-
-                                        model.albums[i][j] = nil
-
-                                    end
-                                    --swap_pic is already a child of the slot
-                                    model.albums[i][j] = img-- model.swap_pic--image
-                                    model.swap_pic = nil
-
-                                end
-
-                                model.swapping_cover = false
-
+                                --toss the old cover after the animation
+                                prev_cover:unparent()
+                                prev_cover = nil
                             end
                         }
-                    end            
+                    end
+                --if it failed to load 
                 else
-                    model.swapping_cover = false
-                    dontswap = true
                     loadCovers(index, searches[#adapters+1-index], math.random(16))
                 end
+                model.swapping_cover = false
             end
         }
     else
@@ -195,14 +120,12 @@ function Scale_To_Fit(img,base_size,target_size)
     local scale_y = target_size[2] / base_size[2]
 
     if scale_y > scale_x  then
-        img.size  = {scale_y*base_size[1],scale_y*base_size[2]}
-
+        img.size  = {scale_y*base_size[1], scale_y*base_size[2]}
         img.clip  = { (img.w-target_size[1])/2, 0,
                        target_size[1],target_size[2]}
         img.anchor_point = { (img.w-target_size[1])/2, 0 }
     else
         img.size  = {scale_x*base_size[1],scale_x*base_size[2]}
-
         img.clip  = { 0,(img.h-target_size[2])/2,
                       target_size[1], target_size[1]}
         img.anchor_point = {  0, (img.h-target_size[2])/2 }
@@ -210,5 +133,3 @@ function Scale_To_Fit(img,base_size,target_size)
     end
 
 end
-
-
