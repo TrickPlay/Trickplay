@@ -113,6 +113,7 @@ function(pres, ctrl)
       info_grp:unparent()
       screen:find_child("TableText"):unparent()
       
+      --[[
       local text
       if human_won then
          text = Text{
@@ -134,6 +135,23 @@ function(pres, ctrl)
       text.anchor_point = {text.w/2, text.h/2}
       screen:add(text)
       Popup:new{group = text, time = 3}
+      --]]
+      
+      local r = Rectangle{ w=1920, h=1080, opacity = 0, color = "000000"}
+      screen:add(r)
+      
+      local m
+      if human_won then
+         m = AssetLoader:getImage("Win",{})
+      else
+         m = AssetLoader:getImage("Lose",{})
+      end
+      m.anchor_point = {m.w/2, m.h/2}
+      m.position = {screen.w/2, screen.h/2}
+      screen:add(m)
+      
+      Popup:new{group = r, time = 3}
+      Popup:new{group = m, time = 3}
 
    end
 
