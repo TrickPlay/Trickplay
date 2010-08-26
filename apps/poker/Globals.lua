@@ -1,8 +1,8 @@
 SMALL_BLIND = 1
 BIG_BLIND = 2
-INITIAL_ENDOWMENT = 200
+INITIAL_ENDOWMENT = 2
 -- randomly subtracts or adds up to this amount to endowments
-RANDOMNESS = 10
+RANDOMNESS = 0
 
 HELP_ENABLED = true
 

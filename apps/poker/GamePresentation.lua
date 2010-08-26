@@ -96,6 +96,17 @@ function(pres, ctrl)
 
    -- called when either human player no longer detected, or one player left.
    function pres:return_to_main_menu()
+      for _,player in ipairs(model.players) do
+         if player.status then player.status:hide() end
+         if player.betChips then player.betChips:remove() end
+      end
+
+      for _,card in ipairs(model.deck.cards) do
+         card.group:unparent()
+      end
+      model.dealerchip:unparent()
+      model.bbchip:unparent()
+      model.sbchip:unparent()
    end
 
    -- called when sb_qty and bb_qty updated
