@@ -107,6 +107,8 @@ function(pres, ctrl)
       model.dealerchip:unparent()
       model.bbchip:unparent()
       model.sbchip:unparent()
+      model.potchips.group:unparent()
+      screen:find_child("TableText"):unparent()
    end
 
    -- called when sb_qty and bb_qty updated
