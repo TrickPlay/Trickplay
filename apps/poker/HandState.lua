@@ -265,7 +265,6 @@ HandState = Class(nil,function(state, ctrl, ...)
          print("before true loop")
          local num_in_players = #self:get_in_players()
          while out[players[tmp_action]] or done[players[tmp_action]] or all_in[players[tmp_action]] do
-            tmp_action = (tmp_action % #players) + 1
             if all_in[players[tmp_action]] then
                print("player "..tmp_action.." is all in")
                num_all_in = num_all_in+1
@@ -279,6 +278,7 @@ HandState = Class(nil,function(state, ctrl, ...)
                error("infinite loop detected in continue true")
                break
             end
+            tmp_action = (tmp_action % #players) + 1
          end
          print("after true loop")
          action = tmp_action
@@ -290,7 +290,6 @@ HandState = Class(nil,function(state, ctrl, ...)
          print("before false loop")
          local num_in_players = #self:get_in_players()
          while out[players[tmp_action]] or done[players[tmp_action]] or all_in[players[tmp_action]] do
-            tmp_action = (tmp_action % #players) + 1
             if all_in[players[tmp_action]] then
                print("player "..tmp_action.." is all in")
                num_all_in = num_all_in+1
@@ -304,6 +303,7 @@ HandState = Class(nil,function(state, ctrl, ...)
                error("infinite loop detected in continue false")
                break
             end
+            tmp_action = (tmp_action % #players) + 1
          end
          action = tmp_action
       end
