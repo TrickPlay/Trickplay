@@ -32,7 +32,6 @@ for _,color in pairs(ui_colors) do
 end
 
 -- Load new UI elements
-AssetLoader:preloadImage("ButtonsOnTable","assets/UI/new/buttons_on_table.png")
 AssetLoader:preloadImage("BetArrowUp","assets/UI/new/betarrow_up.png")
 AssetLoader:preloadImage("BetArrowDown","assets/UI/new/betarrow_down.png")
 

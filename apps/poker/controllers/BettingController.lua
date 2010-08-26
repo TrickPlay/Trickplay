@@ -77,6 +77,8 @@ BettingController = Class(Controller, function(self, view, ...)
                return
            end
            if(PlayerGroups.BOTTOM == selected and SubGroups2.HELP == subselection) then
+               model:set_active_component(Components.TUTORIAL)
+               self:get_model():notify()
                return
            end
 
