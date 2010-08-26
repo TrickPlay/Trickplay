@@ -19,6 +19,7 @@ function(ctrl, model, ...)
    local orig_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
+         pres:update_blinds()
          enable_event_listener(TimerEvent{interval=1})
          local continue = true
          return continue
@@ -39,9 +40,8 @@ function(ctrl, model, ...)
       end,
       -- increase blinds
       function(ctrl)
-         if hands % 10 == 0 then
+         if hands % 4 == 0 then
             state:increase_blinds()
-            pres:update_blinds()
          end
          enable_event_listener(TimerEvent{interval=.1})
          return true
