@@ -112,6 +112,29 @@ function(pres, ctrl)
       info_grp.opacity=0
       info_grp:unparent()
       screen:find_child("TableText"):unparent()
+      
+      local text
+      if human_won then
+         text = Text{
+            text="You win!",
+            font="Sans 60px",
+            color="FFFFFF",
+            position={screen.w/2,400},
+            opacity=0
+         }
+      else
+         text = Text{
+            text="You lose!",
+            font="Sans 60px",
+            color="FFFFFF",
+            position={screen.w/2,400},
+            opacity=0
+         }
+      end
+      text.anchor_point = {text.w/2, text.h/2}
+      screen:add(text)
+      Popup:new{group = text, time = 3}
+
    end
 
    -- called when sb_qty and bb_qty updated
