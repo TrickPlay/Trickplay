@@ -35,7 +35,7 @@ function Setup_Album_Covers()
             if ((j-1)*NUM_ROWS+i)<=#adapters then
                 model.placeholders[i][j] = Clone
                 {
-                    source  = model.default[pic_index],
+                    source  = model.default[math.random(1,8)],
                     opacity = 255
                 }
                 model.placeholders[i][j].opacity = 255
@@ -102,13 +102,14 @@ function Load_Image(site,index)
                        model.albums[i][j] ~= nil and --]]
                        not failed                then
                     print("loading pic at",i,j,index,model.placeholders[i][j])
-
+--[[
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
 
                         model.placeholders[i][j]:unparent()
                         model.placeholders[i][j] = nil
                     end
+--]]
                     Scale_To_Fit(img,
                                  img.base_size,
                                  {PIC_W,PIC_H})
@@ -116,7 +117,7 @@ function Load_Image(site,index)
 
                     --if model.fp_index[1] == i and model.fp_index[2] == j then
                         --model:notify()
-                        img:lower_to_bottom()
+                        --img:lower_to_bottom()
                     --end
                 end
             end
@@ -130,12 +131,14 @@ function Load_Image(site,index)
             on_loaded = function(img,failed)
                 --assert(img == model.swap_pic)
             	if not failed and model.swapping_cover then
+--[[
                     if model.placeholders[i] ~= nil and 
                        model.placeholders[i][j] ~= nil then
 
                         model.placeholders[i][j]:unparent()
                         model.placeholders[i][j] = nil
                     end
+--]]
                     if img == nil or model.albums[i]    == nil or 
                                      model.albums[i][j] == nil or 
                                      img.loaded         == false then 
