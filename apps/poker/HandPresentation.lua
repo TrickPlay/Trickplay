@@ -117,11 +117,12 @@ HandPresentation = Class(nil,function(pres, ctrl)
                mode="EASE_OUT_QUAD",
                on_completed = function()
                   model.potchips:set( model.potchips:value() + player.betChips:value() )
+                  local to_not_show_glow = potText.text == model.potchips:value()
                   potText.text = model.potchips:value()
 
                   -- flash the glow under the pot value text
                   local function show_glow(x)
-                     if(x >= 5) then return end
+                     if(x >= 6) then return end
                      x = x + 1
                      if(x%2 > 0) then
                         pot_glow_img:animate{duration=300, opacity=255,
@@ -131,7 +132,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
                            on_completed = function() show_glow(x) end}
                      end
                   end
-                  show_glow(0)
+                  if not to_not_show_glow then show_glow(0) end
 
                   remove_player_chips(player)
                end
