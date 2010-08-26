@@ -295,8 +295,8 @@ FrontPageView = Class(View, function(view, model, ...)
         end
     end
 
-function view.timer.on_timer(timer)
-	print("random insert, locked = ",model.swapping_cover)
+function view.timer:on_timer()
+	print("random_insert(), locked = ",model.swapping_cover)
             if model.swapping_cover == false then
                 local rand_i = {
                     math.random(1,NUM_ROWS),
@@ -311,7 +311,7 @@ function view.timer.on_timer(timer)
                     adapters[formula]~=nil then
                     if (not dontswap) then
                    	
-                    print("calling")
+                    print("\tcalling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
