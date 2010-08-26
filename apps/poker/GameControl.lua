@@ -19,6 +19,7 @@ function(ctrl, model, ...)
    local orig_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
+         pres:update_blinds()
          enable_event_listener(TimerEvent{interval=1})
          local continue = true
          return continue
@@ -39,9 +40,8 @@ function(ctrl, model, ...)
       end,
       -- increase blinds
       function(ctrl)
-         if hands % 10 == 0 then
+         if hands % 4 == 0 then
             state:increase_blinds()
-            pres:update_blinds()
          end
          enable_event_listener(TimerEvent{interval=.1})
          return true
@@ -128,6 +128,7 @@ function(ctrl, model, ...)
       end
 
       if #players == 1 or not still_playing then
+         hand_ctrl:cleanup()
          pres:return_to_main_menu()
          enable_event_listener(KbdEvent())
          model:set_active_component(Components.CHARACTER_SELECTION)
@@ -139,6 +140,7 @@ function(ctrl, model, ...)
       if #game_pipeline == 0 then
          reset_pipeline()
       end
+
 
       local action = game_pipeline[1]
       local result = action(ctrl, event)
