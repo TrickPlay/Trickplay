@@ -1,4 +1,5 @@
 --print = function() end
+dofile("Slideshow2.lua")
 
 Slideshow = {}
 SLIDESHOW_WIDTH = 1200
@@ -21,6 +22,12 @@ local down = Image {src = "assets/slideshow/NavFull.png", y = 80, x = 30 }
 local left = Image {src = "assets/slideshow/NavPrev.png", x = -80 }
 local right = Image {src = "assets/slideshow/NavNext.png", x = 140 }
 local back = Image {src = "assets/slideshow/NavBack.png" }
+
+local images_album = {
+	"http://upload.wikimedia.org/wikipedia/commons/1/1b/Nice-night-view-with-blurred-cars_1200x900.jpg",
+	"http://upload.wikimedia.org/wikipedia/commons/9/94/Beautiful_Buns_in_beautiful_string-bikinis.jpg",
+	"http://www.crazythemes.com/images/Asian-Girl-Model.jpg"
+}
 
 controls = Group{x = 100, y = 900, z =1}
 controls:add(up,down,left,right,back)
@@ -68,6 +75,16 @@ end
 -- will control when to load a URL
 function Slideshow:begin()
 
+--[[	timer=Timer()
+	timer.interval=10
+	local counter=1
+	function timer.on_timer(timer)
+		if counter <= #images_album then
+			animate_image_in( images_album[counter] )
+		end
+		counter = counter + 1
+	end
+	timer:start()]]
     print ("Begin Slide Show")
     self.ui:clear()
 
@@ -97,7 +114,7 @@ function Slideshow:begin()
     self.ui:add( overlay_image, background, background2,
                                 caption, queryText, logo, controls )
     --grab 5 pictures
-    self:preload(5)
+    self:preload(1)
     current_pic = current_pic + 5
 end
 
@@ -128,7 +145,8 @@ function Slideshow:stop()
 end
 -- will send and image across the screen
 function Slideshow:LoadImage(site,img_table)
-
+--	print("load")
+	animate_image_in(site)
 
         --the 2 items in the Group
     local image 
@@ -136,6 +154,7 @@ function Slideshow:LoadImage(site,img_table)
     { 
         src   = site, 
         async = true, 
+        opacity = 0,
         on_loaded = function(img,failed)
 
             if failed then
@@ -198,6 +217,7 @@ function timer.on_timer(timer)
                 timer.interval = 4
 		model.curr_slideshow:next_picture()
 	end
+
 end
 
 function Slideshow:toggle_timer()
@@ -259,6 +279,7 @@ function Slideshow:previous_picture()
 end
 
 function Slideshow:next_picture()
+
     print("Slideshow:next_picture()")
     if #off_screen_list > 0 then
         print("\tnext\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
@@ -293,6 +314,7 @@ function Slideshow:next_picture()
 		         x        = screen.w/4,--2 - i_width/2,
 		         y        = screen.h/6,--2 - i_height/2,
 		         z        = 0,
+		         opacity = 0,
 		         --garbage collection
 		         on_completed = function()
 		             print("on_completed")
