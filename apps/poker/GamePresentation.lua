@@ -96,7 +96,7 @@ function(pres, ctrl)
    end
 
    -- called when either human player no longer detected, or one player left.
-   function pres:return_to_main_menu()
+   function pres:return_to_main_menu(human_won)
       for _,player in ipairs(model.players) do
          if player.status then player.status:hide() end
          if player.betChips then player.betChips:remove() end
