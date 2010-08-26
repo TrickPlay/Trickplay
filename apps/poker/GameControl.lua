@@ -129,7 +129,7 @@ function(ctrl, model, ...)
 
       if #players == 1 or not still_playing then
          hand_ctrl:cleanup()
-         pres:return_to_main_menu()
+         pres:return_to_main_menu(still_playing)
          enable_event_listener(KbdEvent())
          model:set_active_component(Components.CHARACTER_SELECTION)
          model:get_active_controller():reset()
