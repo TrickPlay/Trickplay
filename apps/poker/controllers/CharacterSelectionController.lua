@@ -216,5 +216,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       for i=1,6 do
          model.positions[i] = false
       end
+
+      view:reset()
    end
 end)
