@@ -96,7 +96,7 @@ function(pres, ctrl)
    end
 
    -- called when either human player no longer detected, or one player left.
-   function pres:return_to_main_menu()
+   function pres:return_to_main_menu(human_won)
       for _,player in ipairs(model.players) do
          if player.status then player.status:hide() end
          if player.betChips then player.betChips:remove() end
@@ -112,14 +112,55 @@ function(pres, ctrl)
       info_grp.opacity=0
       info_grp:unparent()
       screen:find_child("TableText"):unparent()
+      
+      --[[
+      local text
+      if human_won then
+         text = Text{
+            text="You win!",
+            font="Sans 60px",
+            color="FFFFFF",
+            position={screen.w/2,400},
+            opacity=0
+         }
+      else
+         text = Text{
+            text="You lose!",
+            font="Sans 60px",
+            color="FFFFFF",
+            position={screen.w/2,400},
+            opacity=0
+         }
+      end
+      text.anchor_point = {text.w/2, text.h/2}
+      screen:add(text)
+      Popup:new{group = text, time = 3}
+      --]]
+      
+      local r = Rectangle{ w=1920, h=1080, opacity = 0, color = "000000"}
+      screen:add(r)
+      
+      local m
+      if human_won then
+         m = AssetLoader:getImage("Win",{})
+      else
+         m = AssetLoader:getImage("Lose",{})
+      end
+      m.anchor_point = {m.w/2, m.h/2}
+      m.position = {screen.w/2, screen.h/2}
+      screen:add(m)
+      
+      Popup:new{group = r, time = 3}
+      Popup:new{group = m, time = 3}
+
    end
 
    -- called when sb_qty and bb_qty updated
    function pres:update_blinds()
       if not info_grp or info_grp.opacity==0 then
-         info_bb = Clone{source=model.bbchip}
+         info_bb = Image{src=model.bbchip.src}
          info_bb_t = Text{position={50,5}, text=tostring(ctrl:get_bb_qty()), color="FFFFFF", font=PLAYER_NAME_FONT}
-         info_sb = Clone{source=model.sbchip,y=30}
+         info_sb = Image{src=model.sbchip.src,y=30}
          info_sb_t = Text{position={50,35}, text=tostring(ctrl:get_sb_qty()), color="FFFFFF", font=PLAYER_NAME_FONT}
          info_grp = Group{children={info_bb,info_sb,info_bb_t,info_sb_t},position={0,1000}}
          screen:add(info_grp)

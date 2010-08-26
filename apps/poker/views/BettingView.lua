@@ -134,9 +134,11 @@ BettingView = Class(View, function(view, model, ...)
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
                         -- set the positions of the focus-highlights correctly
+                        
+                        print(item, item.extra.text, button_focus)
                         button_focus.position={
-                            MDPL[item.text][1]-13,
-                            MDPL[item.text][2]-11
+                            MDPL[item.extra.text][1]-13,
+                            MDPL[item.extra.text][2]-11
                         }
                         -- show only required focus
                         if(item.extra.text == "BET") then

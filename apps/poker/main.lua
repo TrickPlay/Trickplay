@@ -11,6 +11,10 @@ AssetLoader:preloadImage("ChooseDog","assets/ChooseYourDog.png")
 AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
 
 
+AssetLoader:preloadImage("Win","assets/outcome/winner.png")
+AssetLoader:preloadImage("Lose","assets/outcome/loser.png")
+
+
 
 -- Tutorial Slides
 for i=1, 4 do
