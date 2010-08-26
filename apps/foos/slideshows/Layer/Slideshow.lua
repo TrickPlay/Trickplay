@@ -414,8 +414,9 @@ function animate_image_in(source)
 		async = true,
 		opacity = 0,	
 	}
-
-model.curr_slideshow.ui:add(orginal_image)
+if model.curr_slideshow ~= nil then
+    model.curr_slideshow.ui:add(orginal_image)
+end
 screen:show()
 orginal_image.on_loaded = function()
 	print_r("org_img size:" .. orginal_image.transformed_size[1] .. "x" .. orginal_image.transformed_size[2])		
@@ -554,7 +555,7 @@ orginal_image.on_loaded = function()
 				scale = {2,2},
 			}
 			image_pieces[counter]:animate{
-				duration=500,
+				duration=200,
 				position = oldposition,
 				opacity = 255,
 				z = 0,
