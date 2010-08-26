@@ -94,6 +94,7 @@ BettingView = Class(View, function(view, model, ...)
     --@return true for call, false for check
     local function call_or_check()
         local players = model.players
+        local player = model.currentPlayer
         local bb_p = model.bb_p
         local bb_qty = model.bb_qty
         local bb_player = players[bb_p]
