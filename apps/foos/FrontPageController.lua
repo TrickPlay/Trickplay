@@ -38,8 +38,8 @@ FrontPageController = Class(Controller, function(self, view, ...)
             if adapters[formula] ~= nil then
 	             dofile("slideshows/"..slideshow_styles[style].."/Slideshow.lua")
 
-                model.album_group:clear()
-                model.albums = {}
+              --  model.album_group:clear()
+               -- model.albums = {}
                 self:get_model():set_active_component(Components.SLIDE_SHOW)
                 model.curr_slideshow = Slideshow:new{ 
                     num_pics = 20, 

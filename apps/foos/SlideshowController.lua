@@ -10,7 +10,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
         [keys.Left]  = function(self) model.curr_slideshow:previous_picture() end,
         [keys.Right] = function(self) model.curr_slideshow:next_picture() end,
         [keys.Return] = function(self) 
-            Setup_Album_Covers()
+--            Setup_Album_Covers()
             model.curr_slideshow:stop()
             view.ui:clear()
             model.curr_slideshow = {}

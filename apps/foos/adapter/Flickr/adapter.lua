@@ -2,7 +2,7 @@
 num_photos = 1
 
 local adapter = {
-	name = "Flickr User Photostream",
+	name = "Flickr Photostream",
 	logoUrl = "adapter/Flickr/logo.png",
 	logoscale = {0.1,0.1},
 	{
