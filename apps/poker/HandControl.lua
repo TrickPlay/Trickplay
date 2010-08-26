@@ -89,6 +89,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    print("defined and set waiting_for_bet to false")
    ctrl.waiting_for_bet = false
    function ctrl.bet(ctrl, rd, event)
+      bets_done = state:get_bets_done()
       if bets_done then
          enable_event_listener(TimerEvent{interval=.3})
          return true
