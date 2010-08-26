@@ -11,6 +11,7 @@
 GamePresentation = Class(nil,
 function(pres, ctrl)
    local ctrl = ctrl
+   local info_bb, info_bb_t, info_sb, info_sb_t, info_grp
    
    -- LOCAL FUNCTIONS
    local function create_pot_chips()
@@ -107,9 +108,24 @@ function(pres, ctrl)
       model.dealerchip:unparent()
       model.bbchip:unparent()
       model.sbchip:unparent()
+      model.potchips.group:unparent()
+      info_grp.opacity=0
+      info_grp:unparent()
+      screen:find_child("TableText"):unparent()
    end
 
    -- called when sb_qty and bb_qty updated
    function pres:update_blinds()
+      if not info_grp or info_grp.opacity==0 then
+         info_bb = Clone{source=model.bbchip}
+         info_bb_t = Text{position={50,5}, text=tostring(ctrl:get_bb_qty()), color="FFFFFF", font=PLAYER_NAME_FONT}
+         info_sb = Clone{source=model.sbchip,y=30}
+         info_sb_t = Text{position={50,35}, text=tostring(ctrl:get_sb_qty()), color="FFFFFF", font=PLAYER_NAME_FONT}
+         info_grp = Group{children={info_bb,info_sb,info_bb_t,info_sb_t},position={0,1000}}
+         screen:add(info_grp)
+      else
+         info_bb_t.text = ctrl:get_bb_qty()
+         info_sb_t.text = ctrl:get_sb_qty()
+      end
    end
 end)
