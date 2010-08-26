@@ -266,9 +266,8 @@ FrontPageView = Class(View, function(view, model, ...)
             view.bottom_bar.scale   = {1.1,1}
 
             album_title.text = string.gsub((adapters[#adapters - 
-                                                 model.fp_1D_index + 1][1].required_inputs.query),
-                                                                                      "%%20"," ")
-            album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
+                 model.fp_1D_index+1][1].required_inputs.query),"%%20"," ")
+            album_logo.src = adapters[#adapters - model.fp_1D_index+1].logoUrl
 
 
             view.backdrop.opacity = 0
@@ -292,8 +291,8 @@ FrontPageView = Class(View, function(view, model, ...)
         end
     end
 
-function view.timer.on_timer(timer)
-	print("random insert, locked = ",model.swapping_cover)
+function view.timer:on_timer()
+	print("random_insert(), locked = ",model.swapping_cover)
             if model.swapping_cover == false then
                 local rand_i = {
                     math.random(1,NUM_ROWS),
@@ -308,7 +307,7 @@ function view.timer.on_timer(timer)
                     adapters[formula]~=nil then
                     if (not dontswap) then
                    	
-                    print("calling")
+                    print("\tcalling")
                     model.swapping_cover = true
 
                     local search_i = math.random(1,10)
