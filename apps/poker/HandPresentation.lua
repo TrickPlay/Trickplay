@@ -254,6 +254,17 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
       end
       animate_pot_to_player(winners[1])
+      local text = Text{
+         text="Hit any key to continue!",
+         font="Sans 36px",
+         color="FFFFFF",
+         position={screen.w/2,400},
+         opacity=0
+      }
+      text.anchor_point = {text.w/2, text.h/2}
+      screen:add(text)
+      Popup:new{group = text, time = 1.5}
+
    end
 
    -- Clear everything
@@ -360,7 +371,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- SOMEONE LEFT A SEAT
    function pres:remove_player(removed_player)
-      local foldtimer = Timer{interval=.2}
+      local foldtimer = Timer{interval=1}
       function foldtimer.on_timer(t)
          t:stop()
          remove_player_cards(removed_player)
