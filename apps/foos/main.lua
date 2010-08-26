@@ -1,3 +1,5 @@
+slideshow_styles = {"Photo","Layer"}
+style = 1
 Directions = {
    RIGHT = { 1, 0},
    LEFT  = {-1, 0},
@@ -40,8 +42,6 @@ dofile("HelpMenuController.lua")
 dofile("SourceManagerView.lua")
 dofile("SourceManagerController.lua")
 --]]
-dofile("Slideshow.lua")
-
 dofile("Load.lua")
 
 Components = {
