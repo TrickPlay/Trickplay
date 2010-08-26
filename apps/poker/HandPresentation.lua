@@ -184,9 +184,10 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local bb_player = model.players[ ctrl:get_bb_p() ]
       add_player_chips( sb_player )
       add_player_chips( bb_player )
-      sb_player.betChips:set( ctrl:get_sb_qty() )
-      bb_player.betChips:set( ctrl:get_bb_qty() )
-      
+      local player_bets = ctrl:get_player_bets()
+      sb_player.betChips:set( player_bets[sb_player] )
+      bb_player.betChips:set( player_bets[bb_player] )
+      model:notify()
    end
 
    -- Deal community cards
