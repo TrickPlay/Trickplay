@@ -6,18 +6,18 @@ BettingView = Class(View, function(view, model, ...)
      
     --create the components
     local fold_button = Image{position={MDPL.FOLD[1], MDPL.FOLD[2]}, src="assets/DevinUI/fold_6.png"}
-    fold_button.text = "FOLD"
+    fold_button.extra.text = "FOLD"
     local call_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/DevinUI/call.png"}
-    call_button.text = "CALL"
+    call_button.extra.text = "CALL"
     local check_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/DevinUI/check.png"}
-    check_button.text = "CALL"
+    check_button.extra.text = "CALL"
     local bet_button = Image{position={MDPL.BET[1], MDPL.BET[2]}, src="assets/DevinUI/bet.png"}
-    bet_button.text = "BET"
+    bet_button.extra.text = "BET"
 
     local exit_button = Image{position={MDPL.EXIT[1], MDPL.EXIT[2]}, src="assets/DevinUI/exit.png"}
-    exit_button.text = "EXIT"
+    exit_button.extra.text = "EXIT"
     local help_button = Image{position={MDPL.HELP[1], MDPL.HELP[2]}, src="assets/DevinUI/help.png"}
-    help_button.text = "HELP"
+    help_button.extra.text = "HELP"
 
     check_button.opacity = 0
 
@@ -134,12 +134,14 @@ BettingView = Class(View, function(view, model, ...)
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
                         -- set the positions of the focus-highlights correctly
+                        
+                        print(item, item.extra.text, button_focus)
                         button_focus.position={
-                            MDPL[item.text][1]-13,
-                            MDPL[item.text][2]-11
+                            MDPL[item.extra.text][1]-13,
+                            MDPL[item.extra.text][2]-11
                         }
                         -- show only required focus
-                        if(item.text == "BET") then
+                        if(item.extra.text == "BET") then
                             bet_focus.opacity = 255
                             button_focus.opacity = 0
                         else
