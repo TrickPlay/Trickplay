@@ -98,16 +98,23 @@ function Slideshow:begin()
     self.ui:add( overlay_image, background, background2,
                                 caption, queryText, logo, controls )
     --grab 5 pictures
-    self:preload(5)
+    self:preload(5,off_screen_list)
     current_pic = current_pic + 5
 end
 
-function Slideshow:preload(num_pics)
-    for i = current_pic, current_pic + (num_pics-1) do
-        model.curr_slideshow:loadUrls(
-            adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
-            off_screen_list, i  
-        )
+function Slideshow:preload(num_pics,img_table)
+    local start_ind = current_pic
+    if img_table == on_screen_list then
+        start_ind = start_ind - (#off_screen_list + #on_screen_list+1)
+    end
+    if start_ind >= 1 then
+        for i = start_ind, start_ind + (num_pics-1) do
+            print("\n\npreload with",i,"\n")
+            model.curr_slideshow:loadUrls(
+                adapters[model.curr_slideshow.index][1].photos(search,i,model.curr_slideshow.index),
+                img_table, i  
+            )
+        end
     end
 end
 
@@ -140,7 +147,12 @@ function Slideshow:LoadImage(site,img_table)
         on_loaded = function(img,failed)
 
             if failed then
-                self:preload(1)
+                if img_table == on_screen_table then
+                    current_pic = current_pic -1
+                else
+                    current_pic = current_pic +1
+                end
+                self:preload(1,img_table)
             else
 
                 local index = #img_table + 1
@@ -185,6 +197,20 @@ function Slideshow:LoadImage(site,img_table)
  	 	    	 		img_table[index].scale = {1080/image.h,1080/image.h}
 		          end
                 img_table[index]:add(image,overlay)
+                if img_table[1].parent ~= nil then
+                    if (not fullscreen) then
+                        self.ui:add(img_table[index])
+                        img_table[index]:lower_to_bottom()
+                        img_table[index].x        = screen.w/4
+                        img_table[index].y        = screen.h/6
+                        img_table[index].z        = 0
+                        background:lower_to_bottom()
+                    else
+					  img_table[index].x = screen.w/2
+					  img_table[index].y = screen.h/2
+
+                    end
+                end
 
             end
             img.on_loaded = nil
@@ -215,7 +241,7 @@ function Slideshow:toggle_timer()
 end
 
 function Slideshow:previous_picture()
-    if #on_screen_list > 0 then
+    if #on_screen_list > 1 then
         print("prev\tbefore \ton screen",#on_screen_list,"off_screen",#off_screen_list)
 
         current_pic   = current_pic -1
@@ -227,12 +253,19 @@ function Slideshow:previous_picture()
         local pic = table.remove(on_screen_list, 1 )
         table.insert(off_screen_list, 1 ,pic)
         print("prev\tafter \ton screen",#on_screen_list,"off_screen",#off_screen_list)
+        --load up another in the preload list
+        if #on_screen_list < 6 and current_pic > #on_screen_list  then
+            self:preload(1,on_screen_list)
+            print("\tpreloaded")
+        else
+            print("\tnot preloading")
+        end
 
         pic:complete_animation()
  
         --animate it off the screen
         if (not fullscreen) then
-		     pic:animate 
+            pic:animate 
 		     {
 		         duration = 200,
 		         mode     = EASE_IN_EXPO,
@@ -242,15 +275,36 @@ function Slideshow:previous_picture()
 		         on_completed = function()
 		             z = 500
 		             self.ui:remove(pic)
-	---[[
 		             if #off_screen_list > 6 then
 		                 print("removing from off_screen list")
 		                 off_screen_list[#off_screen_list] = nil
 		             end
-	--]]
 		         end
 		     }
-		  else
+        else
+            pic:animate 
+		     {
+		         duration = 200,
+		         mode     = EASE_IN_EXPO,
+		         opacity  = 0,
+		         --garbage collection
+		         on_completed = function()
+		             z = 500
+		             self.ui:remove(pic)
+		             if #off_screen_list > 6 then
+		                 print("removing from off_screen list")
+		                 off_screen_list[#off_screen_list] = nil
+		             end
+		         end
+		     }
+             self.ui:add(on_screen_list[1])
+             on_screen_list[1]:animate {
+			  	duration = 1000,
+			  	opacity = 255,
+		  		mode = EASE_IN_EXPO,
+			  }
+
+
 				-- code to go back in full screen
         end
     else
@@ -274,7 +328,7 @@ function Slideshow:next_picture()
  
         --load up another in the preload list
         if #off_screen_list < 5 then
-            self:preload(1)
+            self:preload(1,off_screen_list)
             print("\tpreloaded")
         else
             print("\tnot preloading")
@@ -312,17 +366,19 @@ function Slideshow:next_picture()
 			  		opacity = 255,
 			  		on_completed = function()
 		             print("on_completed")
-		             if #on_screen_list > 1 then
+		             if #on_screen_list > 5 then
 		                 self.ui:remove(on_screen_list[#on_screen_list])
 		                 on_screen_list[#on_screen_list] = nil
 		             end
 		         end
 			  }
-			  on_screen_list[#on_screen_list]:animate {
-			  	duration = 1000,
-			  	opacity = 0,
-		  		mode = EASE_IN_EXPO,
-			  }
+                          if on_screen_list[2] ~= nil  then
+			      on_screen_list[2]:animate {
+			  	  duration = 1000,
+			  	  opacity = 0,
+		  		  mode = EASE_IN_EXPO,
+                              }
+                          end
 		  end
     else
         --tell the user no
