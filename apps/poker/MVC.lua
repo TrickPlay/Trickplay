@@ -23,13 +23,13 @@ Model = Class(function(model, ...)
         EXIT_MENU = {1088, 743},
         HELP_MENU = {635, 744},
 
-        FOLD = {660, 762},
-        EXIT = {1320, 982},
-        HELP = {396, 982},
-        CALL = {814, 762},
-        BET = {969, 762},
-        UP = {1100, 766},
-        DOWN = {1100, 848}
+        FOLD = {655, 766},
+        EXIT = {886, 826},
+        HELP = {734,826},
+        CALL = {810,766},
+        BET = {971,748},
+        UP = {1094,754},
+        DOWN = {1094, 835}
     }
     MDPL = model.default_player_locations
     
