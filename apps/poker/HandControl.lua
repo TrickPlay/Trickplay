@@ -114,6 +114,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
             model.min_raise = state:get_min_raise()
             model.max_bet = state:get_max_bet()
             model.in_players = state:get_in_players()
+            model.bb_p = state:get_bb_p()
+            model.bb_qty = state:get_bb_qty()
             model:set_active_component(Components.PLAYER_BETTING)
             model:get_active_controller():set_callback(
                function(fold, bet) 

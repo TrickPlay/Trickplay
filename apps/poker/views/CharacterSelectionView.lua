@@ -1,51 +1,65 @@
 CharacterSelectionView = Class(View, function(view, model, ...)
     view._base.init(view,model)
-    --first add the background shiz
 
+    -- text instructing the player to select a character
+    choose_char_text = Text{
+        text = "Choose Your Character!",
+        font = "KacstArt 70px",
+        color = Colors.YELLOW,
+        opacity = 0
+    }
+    select_ai_text = Text{
+        text = "Select Your Opponents!",
+        font = "KacstArt 70px",
+        color = Colors.YELLOW,
+        opacity = 0
+    }
+    choose_char_text.position = {1920/2-choose_char_text.width/2, 1080/2-choose_char_text.height/2}
+    select_ai_text.position = {1920/2-select_ai_text.width/2, 1080/2-select_ai_text.height/2}
     local background = {
-        Image{
-            position = {MDPL.START[1]+5, MDPL.START[2]+10},
-            src = "assets/UI/shadow_beginning.png"
-        },
-        Image{
-            position = {MDPL.START[1], MDPL.START[2]},
-            src = "assets/UI/new/start_unclickable.png"
-        },
-        Text{
-            position = {400,470},
-            text = "Choose Your Character!",
-            font = "KacstArt 100px",
-            color = Colors.YELLOW
-        },
-        Text{
-            position = {400,470},
-            text = "Select Your Oponents!",
-            font = "KacstArt 100px",
-            color = Colors.YELLOW,
-            opacity = 0
-        },
+        choose_char_text,
+        select_ai_text
     }
 
-    --create the components
-    local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "start_default", "start_focused")
-    local exit_button = FocusableImage(MDPL.EXIT_MENU[1], MDPL.EXIT_MENU[2], "exit_default", "exit_focused")
-    local help_button = FocusableImage(MDPL.HELP_MENU[1], MDPL.HELP_MENU[2], "help_default", "help_focused")
+    -- background/static stuff
+    local button_seat_chosen = Image{position={-1000,-100}, src="assets/DevinUI/ButtonSeatChosen.png"}
 
-    start_button.group.opacity = 0
+    screen:add(button_seat_chosen)
+
+    local seats_chosen = {
+        Clone{source=button_seat_chosen},
+        Clone{source=button_seat_chosen},
+        Clone{source=button_seat_chosen},
+        Clone{source=button_seat_chosen},
+        Clone{source=button_seat_chosen},
+        Clone{source=button_seat_chosen}
+    }
+    for i,v in ipairs(seats_chosen) do
+        v.position = MDPL[i]
+    end
+
+    --create the components
+    local start_button = Image{position=MDPL.START, src="assets/DevinUI/ButtonStart.png", opacity = 0}
+    local exit_button = Image{position=MDPL.EXIT_MENU, src="assets/DevinUI/ButtonExit.png"}
+    local help_button = Image{position=MDPL.HELP_MENU, src="assets/DevinUI/ButtonHelp.png"}
 
     view.items = {
         {
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[2], opacity = 0},
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[3], opacity = 0},
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[4], opacity = 0},
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[5], opacity = 0},
+            Image{position=MDPL[2], src="assets/DevinUI/ButtonSeat.png"},
+            Image{position=MDPL[3], src="assets/DevinUI/ButtonSeat.png"},
+            Image{position=MDPL[4], src="assets/DevinUI/ButtonSeat.png"},
+            Image{position=MDPL[5], src="assets/DevinUI/ButtonSeat.png"}
         },
         {
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[1], opacity = 0},
+            Image{position=MDPL[1], src="assets/DevinUI/ButtonSeat.png"},
             help_button, start_button, exit_button,
-            Rectangle{color="FFFFFF", width=100, height=100, position = MDPL[6], opacity = 0},
-        },
+            Image{position=MDPL[6], src="assets/DevinUI/ButtonSeat.png"}
+        }
     }
+
+    -- focuses
+    local button_focus = Image{position={MDPL[1][1]-15, MDPL[1][2]-15}, src="assets/DevinUI/ButtonFocusBig.png", opacity=0}
+    local seat_focus = Image{position={MDPL[1][1]-10,MDPL[1][2]-10}, src="assets/DevinUI/ButtonFocusSmall.png"}
    --[[ 
     view.text = {
         Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
@@ -63,6 +77,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     --all ui junk for this view
     view.ui=Group{name="start_menu_ui", position={0,0}}
     view.ui:add(view.background_ui)
+    view.ui:add(unpack(seats_chosen))
     view.ui:add(unpack(view.items[1]))
     for _,v in ipairs(view.items[2]) do
         if(v.group) then
@@ -72,6 +87,8 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         end
     end
 --    view.ui:add(unpack(view.text))
+    view.ui:add(button_focus)
+    view.ui:add(seat_focus)
 
     screen:add(view.ui)
 
@@ -87,33 +104,47 @@ CharacterSelectionView = Class(View, function(view, model, ...)
 --            self.ui:raise_to_top()
 --            print("Showing Character Selection UI")
             if(controller.playerCounter == 0) then
-                background[3].opacity = 255
-                background[4].opacity = 0
+                choose_char_text:animate{duration=CHANGE_VIEW_TIME+100, opacity=255}
+                select_ai_text.opacity = 0
             else
-                background[3].opacity = 0
-                background[4].opacity = 255
+                choose_char_text.opacity = 0
+                select_ai_text:animate{duration=CHANGE_VIEW_TIME+100, opacity=255}
             end
             for i,t in ipairs(view.items) do
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
-                        if(type(item) == "table" and item:is_a(FocusableImage)) then
-                            item:on_focus()
-                        else
+                        -- set the positions of the focus highlights correctly
+                        button_focus.position = {
+                            MDPL[controller:getPosition(i,j)][1]-15,
+                            MDPL[controller:getPosition(i,j)][2]-15
+                        }
+                        seat_focus.position = {
+                            MDPL[controller:getPosition(i,j)][1]-10,
+                            MDPL[controller:getPosition(i,j)][2]-10
+                        }
+                        -- hide buttons for selecting seats already selected
+                        if(model.positions[controller:getPosition(i,j)]) then
+                            item.opacity = 0
+                        end
+                        -- show focuses specific to certain buttons
+                        if(type(controller:getPosition(i,j)) == "number") then
+                            seat_focus.opacity = 255
+                            button_focus.opacity = 0
                             DOG_GLOW[controller:getPosition(i,j)].opacity = 255
                             DOGS[controller:getPosition(i,j)].opacity = 255
+                        else
+                            seat_focus.opacity = 0
+                            button_focus.opacity = 255
                         end
                     else
-                        if(type(item) == "table" and item:is_a(FocusableImage)) then
-                            item:out_focus()
-                        else
+                        if(type(controller:getPosition(i,j)) == "number") then
                             DOG_GLOW[controller:getPosition(i,j)].opacity = 120
-                             
                             DOGS[controller:getPosition(i,j)].opacity = 0
+                        end
                             
-                            for _,player in ipairs(model.players) do
-                                player.dog.opacity = 255
-                            end
+                        for _,player in ipairs(model.players) do
+                            player.dog.opacity = 255
                         end
                     end
                 end
