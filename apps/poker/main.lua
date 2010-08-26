@@ -6,7 +6,17 @@ AssetLoader:preloadImage("Table","assets/table.png")
 AssetLoader:preloadImage("TableText","assets/UI/new/table_text.png")
 
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
-AssetLoader:preloadImage("TutorialGameplay","assets/TutorialGameplay.png")
+
+AssetLoader:preloadImage("ChooseDog","assets/ChooseYourDog.png")
+AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
+
+
+
+-- Tutorial Slides
+for i=1, 4 do
+   AssetLoader:preloadImage("Tutorial"..i,"assets/Tutorial/"..i..".png")
+end
+
 AssetLoader:preloadImage("pot_glow_img", "assets/UI/new/pot_glow.png")
 
 -- Buttons
@@ -19,11 +29,6 @@ for _,color in pairs(ui_colors) do
    for _,button in pairs(ui_buttons) do
       AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
    end
-end
-
--- Tutorial slides
-for i=1, 2 do
-   AssetLoader:preloadImage("Tutorial"..i,"assets/tut"..i..".png")
 end
 
 -- Load new UI elements
