@@ -21,11 +21,23 @@ FrontPageController = Class(Controller, function(self, view, ...)
 				--selected = {1,1}
 
         end,
-
+		  [keys.s] = function(self)
+		  	  if (style == #slideshow_styles ) then
+		  	  		style = 1
+		  	  	else
+		  	  		style = style + 1
+		  	  	end
+		  	  	print (slideshow_styles[style])
+		  	  
+		  	  
+		  end,
+		 
         [keys.Return] = function(self) 
             local formula = (model.front_page_index + (selected[2]-1))*2+
                                                      (selected[1]-1)-1
             if adapters[formula] ~= nil then
+	             dofile("slideshows/"..slideshow_styles[style].."/Slideshow.lua")
+
                 model.album_group:clear()
                 model.albums = {}
                 self:get_model():set_active_component(Components.SLIDE_SHOW)
