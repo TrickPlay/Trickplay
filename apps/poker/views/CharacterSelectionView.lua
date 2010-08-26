@@ -116,10 +116,14 @@ CharacterSelectionView = Class(View, function(view, model, ...)
             self.ui.opacity = 255
 --            self.ui:raise_to_top()
 --            print("Showing Character Selection UI")
+            -- displays instruction text
             if(controller.playerCounter == 0) then
-                choose_char_text:animate{duration=CHANGE_VIEW_TIME+100, opacity=255}
+                if(not choose_char_text.opacity == 255) then
+                    choose_char_text:animate{duration=CHANGE_VIEW_TIME+100, opacity=255}
+                end
                 select_ai_text.opacity = 0
             else
+                choose_char_text:complete_animation()
                 choose_char_text.opacity = 0
                 select_ai_text:animate{duration=CHANGE_VIEW_TIME+100, opacity=255}
             end
@@ -127,7 +131,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
                 for j,item in ipairs(t) do
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
-                        -- set the positions of the focus highlights correctly
+                        -- set the positions of the focus-highlights correctly
                         button_focus.position = {
                             MDPL[controller:getPosition(i,j)][1]-15,
                             MDPL[controller:getPosition(i,j)][2]-15
