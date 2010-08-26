@@ -213,6 +213,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    function self:reset()
       self.playerCounter = 0
+      selected = 2
+      subselection = 1
       model.players = {}
       for i=1,6 do
          model.positions[i] = false
