@@ -45,7 +45,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
                     num_pics = 20, 
                     index    = #adapters+1 - formula
                 }
-                view.timer:stop()
+                --view.timer:stop()
                 self:get_model():notify()
                 fullscreen = false
 					background.opacity = 255

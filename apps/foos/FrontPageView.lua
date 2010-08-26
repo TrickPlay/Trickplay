@@ -4,33 +4,39 @@ math.randomseed(os.time())
 FrontPageView = Class(View, function(view, model, ...)
     view._base.init(view, model)
 
+    --timer that pings an random cover to change
     view.timer = Timer()
     view.timer.interval = 3
 
     view.ui = Group{name="front page ui"}
     screen:add(view.ui)
 
+    --black box used to gray-out the the covers
     local big_black_box = Rectangle
     {
-        width = 1920,
-        height = 1080,
-        color = "000000",
+        width   = 1920,
+        height  = 1080,
+        color   = "000000",
         opacity = 0
     }
     view.ui:add(big_black_box)
+--[[
     view.selector = Image
     {
         name = "frontpageselector",
         src = "assets/blackwhiteframe_overlay.png",
         opacity = 0--255
     }
+--]]
     view.backdrop = Image
     {
         name = "backdrop",
         src = "assets/backdrop.png",
         opacity = 255
     }
+--]]
 
+    --the bottom bar that appears over the selected album cover
     view.bottom_bar = Group{name="bottom_bar"}
     local sel_info = Image
     {
@@ -55,25 +61,22 @@ FrontPageView = Class(View, function(view, model, ...)
         font     = "Sans 32px",
         position = {240, 10}
     }
-    local prev_i = {1,1} 
     local controls = Image
     {
         src = "assets/buttons.png",
         name     = "controls",
         position = {-10, 45}
     }
-
     view.bottom_bar:add(sel_info, album_logo, album_title,controls)
-    --model.album_group:add(view.selector)
-    view.ui:add(model.album_group)
 
-    grad = Image
+
+    --gradients for the half-visible albums
+    local grad = Image
     {
         src = "assets/gradient_mask.png",
         opacity = 0
     }
     screen:add(grad)
-
     local right_edge = Clone{source = grad}
     right_edge.scale = {.5,1080}
     right_edge.opacity = 255
@@ -88,6 +91,17 @@ FrontPageView = Class(View, function(view, model, ...)
     left_edge.x = 1920-1750
     view.ui:add(left_edge)
 
+    --add the album covers to the ui
+    view.ui:add(model.album_group)
+
+    --state info for the selection animation
+    local prev_i = {1,1}
+    view.previous   = nil
+    view.current    = nil
+    view.prev_pos   = {}
+    view.prev_scale = {1,1}
+
+    --the selection timeline
     local sel_timeline = Timeline
     {
         name      = "Selection animation",
@@ -95,16 +109,10 @@ FrontPageView = Class(View, function(view, model, ...)
         duration  =  3000,
         direction = "FORWARD",
     }
-
-    view.previous   = nil
-    view.current    = nil
-    view.prev_pos   = {}
-    view.prev_scale = {1,1}
-
     function sel_timeline.on_new_frame(t,msecs)
-        local  sel       = {}
-        sel[1],sel[2]    = view:get_controller():get_selected_index()
-               sel[2]    = sel[2] + model.front_page_index  - 1
+        local sel     = {}
+        sel[1],sel[2] = view:get_controller():get_selected_index()
+        sel[2]        = sel[2] + model.front_page_index  - 1
         -- shrink the previous
         if msecs <= 200  then
             local progress    =  msecs/200
@@ -169,6 +177,8 @@ FrontPageView = Class(View, function(view, model, ...)
     function sel_timeline.on_completed()
         view.bottom_bar.y = PIC_H - 140
     end
+
+
     function view:initialize()
         self:set_controller(FrontPageController(self))
     end
@@ -204,7 +214,6 @@ FrontPageView = Class(View, function(view, model, ...)
              duration = 2*CHANGE_VIEW_TIME,
              mode     = EASE_OUT_QUAD,
              x        = new_x
-             --x = model.album_group.x - dir*(screen.width/(NUM_VIS_COLS+1))
         }
 
         --TODO include loader threshold here
@@ -212,15 +221,16 @@ FrontPageView = Class(View, function(view, model, ...)
     end
 
     function view:update()
-        local controller = view:get_controller()
-        local comp       = model:get_active_component()
-        local  sel       = {}
-        sel[1],sel[2]    = controller:get_selected_index()
-               sel[2]    = sel[2] + model.front_page_index  - 1
-        model.fp_index = {sel[1],sel[2]}
-        model.fp_1D_index = (sel[2]-1)*NUM_ROWS + (sel[1])
+        local controller  = view:get_controller()
+        local comp        = model:get_active_component()
+        local  sel        = {}
+        sel[1],sel[2]     = controller:get_selected_index()
+               sel[2]     = sel[2] + model.front_page_index  - 1
+        model.fp_index    = { sel[1], sel[2] }
+        model.fp_1D_index = ( sel[2]-1 ) * NUM_ROWS + ( sel[1] )
         if comp == Components.FRONT_PAGE  then
 
+            --an if that is entered every time the view switches back
             if model.album_group:find_child("bottom_bar") == nil then
                 print("adding bottom bar")
                 model.album_group:add(view.backdrop)
