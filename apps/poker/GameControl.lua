@@ -127,18 +127,19 @@ function(ctrl, model, ...)
          if player.isHuman then still_playing = true end
       end
 
-      if #players == 1 or not still_playing then
-         pres:return_to_main_menu()
-         enable_event_listener(KbdEvent())
-         model:set_active_component(Components.CHARACTER_SELECTION)
-         model:get_active_controller():reset()
-         model:notify()
-         return
+      if #game_pipeline == 0 then
+         if #players == 1 or not still_playing then
+            pres:return_to_main_menu()
+            enable_event_listener(KbdEvent())
+            model:set_active_component(Components.CHARACTER_SELECTION)
+            model:get_active_controller():reset()
+            model:notify()
+            return
+         else
+            reset_pipeline()
+         end
       end
 
-      if #game_pipeline == 0 then
-         reset_pipeline()
-      end
 
       local action = game_pipeline[1]
       local result = action(ctrl, event)
