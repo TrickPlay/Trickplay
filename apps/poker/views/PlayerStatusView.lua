@@ -46,11 +46,12 @@ function(self, model, args, player,...)
    end
    
    -- Player text
-   self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.WHITE, text = "Player "..player.number}
+   self.title = Text{ font = PLAYER_NAME_FONT, color = Colors.WHITE, text = ""}
    self.title.on_text_changed = function()
       self.title.anchor_point = { self.title.w/2, self.title.h/2 }
       self.title.position = { self.top.w/2, self.top.h/2 }
    end
+   self.title.text = "Player "..player.number
 
    self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = GET_IMIN_STRING()}
    self.action.on_text_changed = function()
