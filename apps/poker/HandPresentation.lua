@@ -1,14 +1,3 @@
--- ctrl:get_community_cards()
--- ctrl:get_hole_cards()
--- ctrl:get_player_bets()
--- ctrl:get_pot()
--- ctrl:get_action()
--- ctrl:get_players()
--- ctrl:get_sb_qty()
--- ctrl:get_bb_qty()
--- ctrl:get_sb_p()
--- ctrl:get_bb_p()
--- ctrl:get_deck()
 local TIME = 300
 local MODE = "EASE_OUT_QUAD"
 

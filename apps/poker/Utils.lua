@@ -98,3 +98,19 @@ function hand_print(hand)
    table.insert(str_builder,"")
    print(table.concat(str_builder,"\n"))
 end
+
+function contains(tbl, elt)
+   assert(type(tbl) == "table")
+   for _,tbl_elt in ipairs(tbl) do
+      if tbl_elt == elt then return true end
+   end
+   return false
+end
+
+function find(tbl, elt)
+   assert(type(tbl) == "table")
+   for _,tbl_elt in ipairs(tbl) do
+      if tbl_elt == elt then return _ end
+   end
+   return -1
+end

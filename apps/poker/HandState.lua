@@ -3,7 +3,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    local community_cards
    local hole_cards
    local player_bets
-   local pot
+   local pots
    local action
 
    local players
@@ -30,7 +30,14 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state:get_community_cards() return community_cards end
    function state:get_hole_cards() return hole_cards end
    function state:get_player_bets() return player_bets end
-   function state:get_pot() return pot end
+   function state:get_pot()
+      local pot_total = 0
+      for _,pot in ipairs(pots) do
+         pot_total = pot_total + pot
+      end
+      return pot_total
+   end
+   function state:get_pots() return pots end
    function state:get_active_player_bet() return player_bets(players[action]) end
    function state:get_action()
       local in_players = state:get_in_players()
@@ -43,6 +50,14 @@ HandState = Class(nil,function(state, ctrl, ...)
    end
    function state:get_dealer() return dealer end
    function state:get_players() return players end
+   function state:get_sorted_players()
+      local sorted_players = {}
+      for _,player in ipairs(players) do
+         table.insert(sorted_players, player)
+      end
+      table.sort(sorted_players, function(pa,pb) return pa < pb end)
+      return sorted_players
+   end
    function state:get_in_players()
       local in_players = {}
       for _,player in ipairs(players) do
@@ -108,7 +123,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       for _,player in ipairs(players) do
          player_bets[player] = 0
       end
-      pot = 0
+      pots = {0}
 
       -- initialize small blind, big blind bets
       local sb_player = players[sb_p]
@@ -166,6 +181,39 @@ HandState = Class(nil,function(state, ctrl, ...)
       return only_player
    end
 
+   local function get_deltas()
+      local sorted_players = {}
+      for _,player in ipairs(players) do
+         table.insert(sorted_players, player)
+      end
+      table.sort(sorted_players, function(pa,pb) return pa < pb end)
+      local deltas = {}
+      table.insert(deltas, sorted_players[1].money)
+      for i=2,#sorted_players do
+         table.insert(deltas, sorted_players[i].money-sorted_players[i-1])
+      end
+      return deltas
+   end
+
+   local function add_player_bet_to_pot(player)
+      local sorted_players = state:get_sorted_players()
+      local deltas = get_deltas()
+      local bet = player_bets[player]
+      local i = 1
+      while bet > 0 do
+         if i > #deltas then error("tried to fold player, but player bet was too large for reasonable pot") end
+         if bet < deltas[i] then pots[i], bet = pots[i] + bet, 0
+         else pots[i], bet = pots[i]+deltas[i], bet-deltas[i] end
+         i = i+1
+      end
+      player_bets[player] = 0
+   end
+
+   local function add_bets_to_pot()
+      for i,player in ipairs(players) do
+         add_player_bet_to_pot(player)
+      end
+   end
 
    ---
    -- Makes the active player take his turn. If fold is true, then player
@@ -184,7 +232,8 @@ HandState = Class(nil,function(state, ctrl, ...)
       if fold then
          -- if the player folds, then he's out of the hand, and whatever bet he had goes into the pot
          set_out(active_player)
-         pot, player_bets[active_player] = pot+player_bets[active_player], 0
+         add_player_bet_to_pot(active_player)
+--         pot, player_bets[active_player] = pot+player_bets[active_player], 0
          ctrl:fold_player(active_player)
          -- if he's out of money, then that's dumb.
          if active_player.money == 0 then
@@ -252,10 +301,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       if continue then
          -- otherwise, betting round done, so...
          -- consolidate bets into the pot
-         for i,player in ipairs(players) do
-            pot, player_bets[player] = pot+player_bets[player], 0
-            done[player] = false
-         end
+         add_bets_to_pots()
          call_bet = 0
          min_raise = bb_qty
 
