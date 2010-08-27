@@ -25,23 +25,13 @@ dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("adapter/Adapter.lua")
 
 dofile("MVC.lua")
-dofile("TextBox.lua")
 dofile("FocusableImage.lua")
-dofile("FrontPageView.lua")
-dofile("FrontPageController.lua")
----[[
-dofile("SlideshowView.lua")
-dofile("SlideshowController.lua")
---]]
---[[
-dofile("HelpMenuView.lua")
-dofile("HelpMenuController.lua")
---]]
-
----[[
-dofile("SourceManagerView.lua")
-dofile("SourceManagerController.lua")
---]]
+dofile("views/FrontPageView.lua")
+dofile("controllers/FrontPageController.lua")
+dofile("views/SlideshowView.lua")
+dofile("controllers/SlideshowController.lua")
+dofile("views/SourceManagerView.lua")
+dofile("controllers/SourceManagerController.lua")
 dofile("Load.lua")
 
 Components = {
@@ -57,18 +47,12 @@ Setup_Album_Covers()
 
 local front_page_view = FrontPageView(model)
 front_page_view:initialize()
----[[
+
 local slide_show_view = SlideshowView(model)
 slide_show_view:initialize()
---]]
----[[
+
 local source_manager_view = SourceManagerView(model)
 source_manager_view:initialize()
---]]
---[[
-local item_selected_view = ItemSelectedView(model)
-item_selected_view:initialize()
---]]
 
 function app:on_closing()
 	settings.searches = searches
