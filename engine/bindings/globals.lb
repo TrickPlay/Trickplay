@@ -125,6 +125,12 @@ globals
                 return luaL_error(L,"Invalid path '%s'",file_name);
             }
             
+            if (!g_str_has_suffix(path,".lua"))
+            {
+            	path = g_strdup_printf( "%s.lua",path);
+            	free_later( path );
+            }
+            
             int n = lua_gettop(L);
             if (luaL_loadfile(L,path) != 0)
                 lua_error(L);
@@ -146,6 +152,12 @@ globals
                 return 2;
             }
             
+            if (!g_str_has_suffix(path,".lua"))
+            {
+            	path = g_strdup_printf( "%s.lua",path);
+            	free_later( path );
+            }
+
             if (luaL_loadfile(L,path)==0)
             {
                 return 1;
