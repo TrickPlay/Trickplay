@@ -21,7 +21,6 @@ if (UNIX AND NOT APPLE)
 			"libavahi-core6 (>= 0.6.25)"
 			"libavahi-glib1(>= 0.6.25)"
 			"libclutter-1.0-0 (>= 1.0.6)"
-			"libtokyocabinet8"
 			"libexpat1"
 			"libsqlite3-0 (>= 3.6.0)"
 			"libclutter-gst-0.10-0"
