@@ -13,6 +13,13 @@ function( section )
     
     section.all_apps = apps:get_for_current_profile()
     
+    section.icon_overlay_w_label = Image { src = "assets/icon-overlay-white-text-label.png" }
+        
+    section.icon_overlay_b_label = Image { src = "assets/icon-overlay-black-text-label.png" }
+    
+    screen:add( section.icon_overlay_w_label:set{ opacity = 0 } , section.icon_overlay_b_label:set{ opacity = 0 } )
+    
+    
     ---------------------------------------------------------------------------
 
     local function is_top_app( app_id )
@@ -114,10 +121,11 @@ function( section )
     }
 
     local MENU_ITEM_HEIGHT  = 40
-    local TOP_PADDING       = 46
-    local ITEM_PADDING      = 26
+    local TOP_PADDING       = 40
+    local MENU_ITEM_PADDING = 24
+    local APP_ITEM_PADDING  = 16
     local BOT_PADDING       = 0
-    local HORIZ_PADDING     = 20
+    local HORIZ_PADDING     = 16
     
     local group = section.dropdown
         
@@ -125,10 +133,13 @@ function( section )
     -- The 'all apps' menu item
     ---------------------------------------------------------------------------
     
+    local ring = Canvas()
+    
+    
     local all_apps_text = Text
     {
         text = section.ui.strings[ "View All My Apps" ],
-        position = { 0 , TOP_PADDING + ITEM_PADDING }
+        position = { 0 , TOP_PADDING + MENU_ITEM_PADDING }
     }
     
     all_apps_text:set( MENU_ITEM_TEXT_STYLE[ UNSELECTED ] )
@@ -144,7 +155,7 @@ function( section )
     local category_text = Text
     {
         text = section.ui.strings[ "Recently Used" ],
-        position = { 0 , all_apps_text.y + all_apps_text.h + ITEM_PADDING }
+        position = { 0 , all_apps_text.y + all_apps_text.h + MENU_ITEM_PADDING }
     }
     
     category_text:set( MENU_ITEM_TEXT_STYLE[ UNSELECTED ] )
@@ -159,7 +170,7 @@ function( section )
     
     validate_top_apps()
     
-    local y = category_text.y + category_text.h + ITEM_PADDING
+    local y = category_text.y + category_text.h + MENU_ITEM_PADDING
     
     local x = HORIZ_PADDING
     
@@ -167,27 +178,28 @@ function( section )
     
     local w = group.w - ( HORIZ_PADDING * 2 )
 
-    local h = ( h_left / TOP_APP_COUNT ) - ITEM_PADDING
+    local h = ( h_left / TOP_APP_COUNT ) - APP_ITEM_PADDING
     
-    local FRAME_PADDING     = 8
-    local CAPTION_HEIGHT    = 32
+    local FRAME_PADDING     = 6
+    local CAPTION_HEIGHT    = 36
+    local CAPTION_X_PADDING = 2
+    local CAPTION_Y_PADDING = -4
     
     local icon_w = w - ( FRAME_PADDING * 2 )
-    local icon_h = h - ( ( FRAME_PADDING * 1 ) + CAPTION_HEIGHT )
+    local icon_h = h - ( ( FRAME_PADDING * 2 ) + CAPTION_HEIGHT )
     
     for i = 1 , TOP_APP_COUNT do
         
         local app_id = section.top_apps[ i ]
     
-        local box = Rectangle
+        local box = Clone
         {
-            color = "FFFFFF" ,
+            source = section.icon_overlay_w_label,
             size = { w , h },
-            position = { x , y + ( ( h + ITEM_PADDING ) * ( i - 1 ) ) }
+            opacity = 255,
+            position = { x , y + ( ( h + APP_ITEM_PADDING ) * ( i - 1 ) ) }
         }
         
-        group:add( box )
-    
         local icon = section.app_icons[ app_id ]
         
         icon:set
@@ -198,11 +210,12 @@ function( section )
         }
         
         group:add( icon )
-        
+        group:add( box )
+    
         local caption = Text
         {
-            x = box.x + FRAME_PADDING,
-            y = box.y + box.h - CAPTION_HEIGHT,
+            x = box.x + FRAME_PADDING + CAPTION_X_PADDING,
+            y = box.y + box.h - CAPTION_HEIGHT + CAPTION_Y_PADDING,
             text = section.all_apps[ app_id ].name,
             ellipsize = "END",
             w = icon_w
