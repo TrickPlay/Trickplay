@@ -44,10 +44,16 @@ local function build_ui( show_it )
     {
         bar                 = Group {},
         
-        bar_background      = Image { src = "assets/menu-background-"..OEM..".png" },
+        bar_background      = Image { src = "assets/menu-background.png" },
         
         button_focus        = Image { src = "assets/button-focus.png" },
         
+        search_button       = Image { src = "assets/button-search.png" },
+        
+        search_focus        = Image { src = "assets/button-search-focus.png" },
+        
+        logo                = Image { src = "assets/logo.png" },
+                
         sections =
         {
             [SECTION_APPS] =
@@ -55,7 +61,7 @@ local function build_ui( show_it )
                 button  = Image { src = "assets/button-red.png" },
                 text    = Text  { text = strings[ "My Apps" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 120 ,  21 ,  21 , 230 }, -- RED
-                height  = 900,
+                height  = 870,
                 init    = dofile( "section-apps.lua" )
             },
             
@@ -96,8 +102,10 @@ local function build_ui( show_it )
     local BUTTON_TEXT_Y_OFFSET      = 22
     local FIRST_BUTTON_X            = 13                    -- x coordinate of first button
     local FIRST_BUTTON_Y            = 9                     -- y coordinate of first button
-    local BUTTON_X_OFFSET           = 5                     -- distance between left side of buttons
-    local DROPDOWN_POINT_Y_OFFSET   = -6                    -- how far to raise or lower the drop downs
+    local BUTTON_X_OFFSET           = 7                     -- distance between left side of buttons
+    local SEARCH_BUTTON_X_OFFSET    = 5
+    local DROPDOWN_POINT_Y_OFFSET   = -2                    -- how far to raise or lower the drop downs
+    local DROPDOWN_WIDTH_OFFSET     = -16                   -- The width of the dropdown in relation to its button
     
     -------------------------------------------------------------------------------
     -- The function that makes drop downs - it returns a Canvas.
@@ -138,21 +146,25 @@ local function build_ui( show_it )
     
     local i = 0
     
+    local left = FIRST_BUTTON_X
+    
     for _ , section in ipairs( ui.sections ) do
     
         section.ui = ui
         
         -- Create the dropdown background
     
-        section.dropdown_bg = make_dropdown( { section.button.w , section.height } , section.color )
+        section.dropdown_bg = make_dropdown( { section.button.w + DROPDOWN_WIDTH_OFFSET , section.height } , section.color )
     
         -- Position the button and text for this section
         
         section.button.position =
         {
-            FIRST_BUTTON_X + ( ( BUTTON_X_OFFSET + section.button.w ) * i  ),
+            left,
             FIRST_BUTTON_Y
         }
+        
+        left = left + BUTTON_X_OFFSET + section.button.w
     
         section.text.position =
         {
@@ -194,6 +206,19 @@ local function build_ui( show_it )
         i = i + 1
         
     end
+
+    -------------------------------------------------------------------------------
+    -- Add the search button and the logo
+    -------------------------------------------------------------------------------
+    
+    ui.search_button.position = { left + SEARCH_BUTTON_X_OFFSET , FIRST_BUTTON_Y }
+    
+    ui.bar:add( ui.search_button )
+    
+    
+    ui.logo.position = { screen.w - ( ui.logo.w + FIRST_BUTTON_X ) , FIRST_BUTTON_Y }
+    
+    ui.bar:add( ui.logo )
 
     -------------------------------------------------------------------------------
     -- UI state information
