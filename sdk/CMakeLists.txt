@@ -32,7 +32,7 @@ if (UNIX AND NOT APPLE)
 			"libgif4"
 			"libossp-uuid15"
 			"libupnp3 (>= 1.6)"
-			"libreadline"
+			"libreadline6"
 		)
 		
 		set( FIRST 1 )
