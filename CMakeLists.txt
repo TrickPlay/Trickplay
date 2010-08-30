@@ -14,6 +14,14 @@ else(CMAKE_TOOLCHAIN_FILE)
 endif(CMAKE_TOOLCHAIN_FILE)
 
 #------------------------------------------------------------------------------
+# For now, enable both
+
+set( TP_CONTROLLER_DISCOVERY_MDNS 1 )
+set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
+
+set( TP_UPNP_CLIENT 1 )
+
+#------------------------------------------------------------------------------
 
 include(util.cmake)
 

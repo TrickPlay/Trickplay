@@ -1,275 +1,274 @@
 
+#include <cstring>
+#include <string>
+
 #include "lb.h"
-#include "glib.h"
-#include "string.h"
 
-// Assuming user data is at -1
+//.........................................................................
 
-int lb_get_callback(lua_State*L,void*self,const char*name,int metatable_on_top)
+void lb_get_extras_table( lua_State * L , bool create );
+
+void lb_get_weak_refs_table( lua_State * L , bool create );
+void lb_get_weak_refs_free_list( lua_State * L );
+
+//.........................................................................
+
+#if 0
+
+int dump_wr( lua_State * L )
 {
     LSG;
-    
-    if(metatable_on_top)
-    {
-        // the metatable is at 1
-        lua_pushstring(L,"__callbacks__");
-        lua_rawget(L,-2);
-        if (lua_isnil(L,-1))
-            return LSG_END(1);
-    }
-    else
-    {
-        if(!luaL_getmetafield(L,-1,"__callbacks__"))
-        {
-            lua_pushnil(L);
-            return LSG_END(1);
-        }
-    }
 
-    // udata ... callbacks table
-    
-    lua_pushlightuserdata(L,self);
-    lua_rawget(L,-2);
-    lua_remove(L,-2);
-    
-    if(lua_isnil(L,-1))
-        return LSG_END(1);
-    
-    lua_pushstring(L,name);
-    lua_rawget(L,-2);
-    lua_remove(L,-2);
-    
+    lua_getglobal(L,"dumptable");
+    lua_pushvalue(L,-1);
+    lb_get_weak_refs_table(L,false);
+    lua_call(L,1,0);
+    lb_get_weak_refs_free_list(L);
+    lua_call(L,1,0);
+
+    return LSG_END(0);
+}
+
+#endif
+
+//.............................................................................
+// The weak refs table has been split into two tables. One holds the weak refs
+// and the other a free list. The gist of this is that we only re-use an index
+// when it has been explicitly removed by lb_weak_unref. If an index was removed
+// by the garbage collector, it will remain un-used (and nil) until the thing
+// it points to is finalized. This guarantees that a weak ref you hold will either
+// point to the thing you expect or nil; it won't point to something else that
+// magically took the same index.
+//.............................................................................
+// Returns the free list table. It is always created and initialized if it
+// doesn't already exist. The index 0 points to the next available index. So,
+// the table always starts out with 0 = 1.
+
+void lb_get_weak_refs_free_list( lua_State * L )
+{
+    static char TP_WEAK_REFS_FREE_LIST_TABLE = 0;
+
+    LSG;
+
+    lua_pushlightuserdata(L,&TP_WEAK_REFS_FREE_LIST_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
     if (lua_isnil(L,-1))
-        return LSG_END(1);
-    
-    if (metatable_on_top)
     {
-        lua_rawgeti(L,-1,2);  // push the callback
-        lua_rawgeti(L,-2,1);  // push the user data
-        lua_remove(L,-3);
-        return LSG_END(2);
+        lua_pop(L,1);
+
+        lua_createtable(L,100,0);
+        lua_pushinteger(L,1);
+        lua_rawseti(L,-2,0);
+
+        lua_pushlightuserdata(L,&TP_WEAK_REFS_FREE_LIST_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
     }
 
-    // the second entry in this table is the callback
-    lua_rawgeti(L,-1,2);    
-    lua_remove(L,-2);
-    return LSG_END(1);
+    LSG_CHECK(1);
 }
 
-// Assumes the user data is at -2 and the callback at -1
+//.............................................................................
 
-int lb_set_callback(lua_State*L,void*self,const char*name)
+void lb_get_weak_refs_table( lua_State * L , bool create )
 {
+    static char TP_WEAK_REFS_TABLE = 0; // We only use the address
+
     LSG;
-    
-    int udata = lua_gettop(L)-1;
-    int cb    = lua_gettop(L);
-    
-    int isnil = lua_isnil(L,cb);
-    
-    if (!isnil)
-        luaL_checktype(L,cb,LUA_TFUNCTION);
-        
-    if(!lua_getmetatable(L,udata))
-        luaL_error(L,"Missing metatable");
-        
-    lua_pushstring(L,"__callbacks__");
-    lua_rawget(L,-2);
-    
-    if(lua_isnil(L,-1))
+
+    lua_pushlightuserdata(L,&TP_WEAK_REFS_TABLE);
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1) && create)
     {
+#if 0
+        lua_pushcfunction(L,dump_wr);
+        lua_setglobal(L,"wr");
+#endif
         lua_pop(L,1);
+        lua_createtable(L,100,0);
+
         lua_newtable(L);
-        lua_pushstring(L,"__callbacks__");
+        lua_pushstring(L,"__mode");
+        lua_pushstring(L,"v");
+        lua_rawset(L,-3);
+
+        lua_setmetatable(L,-2);
+
+        lua_pushlightuserdata(L,&TP_WEAK_REFS_TABLE);
         lua_pushvalue(L,-2);
-        lua_rawset(L,-4);
+        lua_rawset(L,LUA_REGISTRYINDEX);
     }
-    
-    // metatable : __callbacks__ table
-    
-    lua_pushlightuserdata(L,self);
-    lua_rawget(L,-2);
-    
-    if(lua_isnil(L,-1))
+
+    LSG_CHECK(1);
+}
+
+
+
+//.........................................................................
+// Like luaL_ref - takes the item at the top of the stack and adds
+// a weak ref to it. It pops the item and returns the ref.
+
+int lb_weak_ref( lua_State * L )
+{
+    g_assert( L );
+
+    LSG;
+
+    // First, we have to get an index for the new ref from the
+    // free list.
+
+    lb_get_weak_refs_free_list( L );
+
+    int t=lua_gettop(L);
+
+    lua_rawgeti(L,t,0);
+
+    g_assert(!lua_isnil(L,-1));
+
+    int ref = lua_tointeger(L,-1);
+
+    lua_pop(L,1);
+    lua_rawgeti(L,t,ref);
+
+    if (!lua_isnil(L,-1))
     {
-        lua_pop(L,1);
-        lua_newtable(L);
-        lua_pushlightuserdata(L,self);
-        lua_pushvalue(L,-2);
-        lua_rawset(L,-4);
-    }
-    
-    // metatable : __callbacks__ table : instance table
-    
-    lua_pushstring(L,name);
-    
-    if (isnil)
-    {
-        lua_pushnil(L);
+        lua_rawseti(L,t,0);
     }
     else
     {
-        lua_newtable(L);
-        lua_pushvalue(L,udata); // push the user data
-        lua_rawseti(L,-2,1);
-        lua_pushvalue(L,cb); // push the function
-        lua_rawseti(L,-2,2);
-    }
-    
-    lua_rawset(L,-3);
-    
-    // If we just removed a callback - we need to see if the
-    // instance table is now empty, so we can get rid of
-    // it. Otherwise, it will hang around forever.
-
-    int leftovers = 3;
-
-    if (isnil)
-    {
-        lua_pushnil(L);
-        if (lua_next(L,-2))
-        {
-            leftovers += 2;
-        }
-        else
-        {
-            // it is empty, pop it
-            lua_pop(L,1);
-
-            // Now clear its entry from __callbacks__
-            lua_pushlightuserdata(L,self);
-            lua_pushnil(L);
-            lua_rawset(L,-3);
-
-            leftovers -= 1;
-        }
+        lua_pop(L,1);
+        lua_pushinteger(L,ref+1);
+        lua_rawseti(L,t,0);
     }
 
-    lua_pop(L,leftovers);
+    lua_pop(L,1);
 
-    LSG_END(0);
-    
-    return isnil;
+    LSG_CHECK(0);
+
+    // Now that we have index, we can use it in the weak refs table
+
+    lb_get_weak_refs_table( L , true );
+
+    // At this point, we should have the thing to ref
+    // at -2 and the weak refs table at -1
+
+    LSG_CHECK(1);
+
+    // Exchange the two items - weak refs table at -2 and thing at -1
+
+    lua_insert( L , -2 );
+
+    // Pops the thing and sticks it in the table
+
+    lua_rawseti(L,-2,ref);
+
+    // Pop the table
+
+    lua_pop( L , 1 );
+
+    LSG_CHECK(-1);
+
+    return ref;
 }
 
-void lb_clear_callbacks(lua_State*L,void*self,const char*metatable)
+//.........................................................................
+// Like luaL_unref - takes the ref and removes it from the weak refs table.
+// If the ref is not valid, it does nothing.
+
+void lb_weak_unref( lua_State * L , int ref )
 {
+    g_assert( L );
+
+    if ( ref == LUA_NOREF || ref == LUA_REFNIL )
+    {
+        return;
+    }
+
     LSG;
-    
-    luaL_getmetatable(L,metatable);
-    if(lua_isnil(L,-1))
-    {
-        lua_pop(L,1);
-        LSG_END(0);
-        return;
-    }
-    
-    lua_pushstring(L,"__callbacks__" );
-    lua_rawget(L,-2);
-    
-    if(lua_isnil(L,-1))
-    {
-        lua_pop(L,2);
-        LSG_END(0);
-        return;
-    }
-    
-    lua_pushlightuserdata(L,self);
+
+    // Add this index to the free list
+
+    lb_get_weak_refs_free_list(L);
+
+    g_assert( ! lua_isnil( L , -1 ) );
+
+    lua_rawgeti(L,-1,0);    // Get the value at 0
+    lua_rawseti(L,-2,ref);  // Set the value at ref to the value at 0
+    lua_pushinteger(L,ref); // Set the value at 0 to ref
+    lua_rawseti(L,-2,0);
+
+    lua_pop( L , 1 );
+
+    // Now clear it in the weak refs table
+
+    lb_get_weak_refs_table( L , false );
+
     lua_pushnil(L);
-    lua_rawset(L,-3);
-    lua_pop(L,2);
-    
-    LSG_END(0);
+    lua_rawseti(L,-2,ref);
+    lua_pop(L,1);
+
+    LSG_CHECK(0);
 }
 
-// This one does it for a user data at index
+//.........................................................................
+// Pushes the value pointed to by the weak ref. If the ref is not valid, it
+// will push a nil.
 
-void lb_clear_callbacks(lua_State*L,int index)
+void lb_weak_deref( lua_State * L , int ref )
 {
+    g_assert( L );
+
     LSG;
 
-    if (0 != lua_getmetatable(L,index))
+    if ( ref == LUA_NOREF || ref == LUA_REFNIL )
     {
-        lua_pushstring(L,"__callbacks__" );
-        lua_rawget(L,-2);
+        lua_pushnil( L );
+    }
+    else
+    {
+        lb_get_weak_refs_table( L , false );
 
-        if(!lua_isnil(L,-1))
-        {
-            void ** o = (void**)lua_touserdata(L,index);
-            if (o)
-            {
-                lua_pushlightuserdata(L,*o);
-                lua_pushnil(L);
-                lua_rawset(L,-3);
-            }
-        }
-        lua_pop(L,2);
+        g_assert( ! lua_isnil( L , -1 ) );
+
+        // Get the value by index from the weak refs table
+
+        lua_rawgeti( L , -1 , ref );
+
+        // Get rid of the table
+
+        lua_remove( L , -2 );
     }
 
-    LSG_END(0);
+    LSG_CHECK(1);
 }
 
+//.........................................................................
+// Pushes the value pointed to by the strong ref. If the ref is not valid, it
+// will push a nil.
 
-// Assumes that nargs are already at the top of the stack. Returns 0 if the callback is not there
-// or 1 otherwise. Upon return, it pops nargs from the stack and pushes nresults (like lua_call).
-
-int lb_invoke_callback(lua_State*L,void*self,const char*metatable,const char*name,int nargs,int nresults)
+void lb_strong_deref( lua_State * L , int ref )
 {
+    g_assert( L );
+
     LSG;
-    
-    luaL_getmetatable(L,metatable);
-    if (lua_isnil(L,-1))
+
+    if ( ref == LUA_NOREF || ref == LUA_REFNIL )
     {
-        lua_pop(L,nargs+1);
-        LSG_END(-nargs);
-        return 0;
+        lua_pushnil( L );
+    }
+    else
+    {
+        // Get the value by index from the registry
+
+        lua_rawgeti( L , LUA_REGISTRYINDEX , ref );
     }
 
-    if (lb_get_callback(L,self,name,1)==1)
-    {
-        lua_pop(L,nargs+2);
-        LSG_END(-nargs);
-        return 0;
-    }
-
-    // Get rid of the metatable
-    lua_remove(L,-3);
-
-    // Move the user data before the args
-    lua_insert(L,lua_gettop(L)-(nargs+1));
-    // Move the callback before the args
-    lua_insert(L,lua_gettop(L)-(nargs+1));
-    
-    lua_call(L,nargs+1,nresults);
-    
-    LSG_END(nresults-nargs);
-    
-    return 1;
+    LSG_CHECK(1);
 }
 
-// Assuming udata is at index
-
-int lb_callback_attached(lua_State*L,void*self,const char*name,int index)
-{
-    LSG;
-    
-    int extra = 0;
-    
-    if(index!=-1&&index!=lua_gettop(L))
-    {
-        lua_pushvalue(L,index);
-        extra = 1;
-    }
-    
-    lb_get_callback(L,self,name,0);
-    int result = !lua_isnil(L,-1);
-    lua_pop(L,1+extra);
-    
-    LSG_END(0);
-    
-    return result;
-}
-
+//.........................................................................
 
 int lb_index(lua_State*L)
 {
@@ -296,6 +295,25 @@ int lb_index(lua_State*L)
         lua_pushvalue(L,1);         // push the user data
         lua_call(L,1,1);            // call the value as a function
     }
+    else
+    {
+        lua_pop(L,1);                               // pop nil
+        lb_get_extras_table( L , false );
+
+        if (!lua_isnil(L,-1))
+        {
+            lua_pushvalue(L,1);                     // Get the table for this usedata
+            lua_rawget(L,-2);
+            lua_remove(L,-2);                       // Drop the extra table
+
+            if (!lua_isnil(L,-1))
+            {
+                lua_pushvalue(L,2);                 // Push the key
+                lua_gettable(L,-2);                 // Get the value for the key
+                lua_remove(L,-2);                   // Drop the table - leaving the value
+            }
+        }
+    }
     return LSG_END(1);
 }
 
@@ -308,12 +326,26 @@ int lb_newindex(lua_State*L)
     lua_pushstring(L,"__setters__");// push "_setters_"
     lua_rawget(L,-2);               // get the setters table from the mt
     lua_replace(L,-2);              // get rid of the metatable
+
+    if (lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+        return LSG_END(0);
+    }
+
     lua_pushvalue(L,2);             // push the original key
     lua_rawget(L,-2);               // get the setter function for this key
     lua_replace(L,-2);              // get rid of the setters table
     if(lua_isnil(L,-1))
     {
-        lua_pop(L,1);               // if the setter function is not found, do nothing
+        lua_pop(L,1);               // if the setter function is not found, look in the extra table
+
+        lb_get_extra(L);            // pushes the extra table, creating it if needed
+        lua_pushvalue(L,2);         // push the key
+        lua_pushvalue(L,3);         // push the value
+        lua_settable(L,-3);         // set it - using metamethods
+        lua_pop(L,1);               // pop the table
+
         return LSG_END(0);
     }
     lua_pushvalue(L,1);             // push the original user data
@@ -454,53 +486,8 @@ void lb_set_props_from_table(lua_State*L)
     LSG_END(0);
 }
 
-// This maps the underlying user data pointers to instances of user
-// datas in Lua. It keeps a table with weak user datas as the values
 
-void lb_store_weak_ref(lua_State*L,int udata,void*self)
-{
-    LSG;
-    
-    // Get the metatable for the user data
-    
-    if(!lua_getmetatable(L,udata))
-        return;
-    
-    // Get the instances table
-    
-    lua_pushstring(L,"__instances__");
-    lua_rawget(L,-2);
-    
-    if(lua_isnil(L,-1))
-    {
-        lua_pop(L,1);
-        // If it doesn't exist yet, we need to create it
-        
-        lua_newtable(L);
-        
-        // Create a metatable for it and set the mode
-        lua_newtable(L);
-        lua_pushstring(L,"__mode");
-        lua_pushstring(L,"v");
-        lua_rawset(L,-3);
-        
-        // Set its metatable
-        lua_setmetatable(L,-2);
-        
-        // Set it as __instances__ on the metatable
-        
-        lua_pushstring(L,"__instances__");
-        lua_pushvalue(L,-2);
-        lua_rawset(L,-4);
-    }
-    
-    lua_pushlightuserdata(L,self);
-    lua_pushvalue(L,udata);
-    lua_rawset(L,-3);
-    lua_pop(L,2);
-    
-    LSG_END(0);    
-}
+#if 0
 
 // Given a user data pointer, this looks to see if there is
 // and existing instance in the __instances__ table of the
@@ -561,6 +548,8 @@ int lb_wrap(lua_State*L,void*self,const char*metatable)
     return 1;
 }
 
+#endif
+
 const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
 {
     if (lua_isstring(L,narg))
@@ -571,7 +560,27 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
     return def;
 }
 
-static const char * TP_ALLOWED_TABLE = "TP_ALLOWED";
+void lb_get_allowed_table( lua_State * L , bool create )
+{
+    static char TP_ALLOWED_TABLE = 0; // We only use the address
+
+    LSG;
+
+    lua_pushlightuserdata( L , & TP_ALLOWED_TABLE );
+    lua_rawget( L , LUA_REGISTRYINDEX );
+
+    if (lua_isnil( L , -1 ) && create )
+    {
+        lua_pop(L,1);
+        lua_newtable(L);
+        lua_pushlightuserdata(L,&TP_ALLOWED_TABLE);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    LSG_CHECK(1);
+}
+
 
 int lb_is_allowed(lua_State*L,const char*name)
 {
@@ -579,8 +588,8 @@ int lb_is_allowed(lua_State*L,const char*name)
 
     LSG;
 
-    lua_pushstring(L,TP_ALLOWED_TABLE);
-    lua_rawget(L,LUA_REGISTRYINDEX);
+    lb_get_allowed_table( L , false );
+
     if (lua_type(L,-1)==LUA_TTABLE)
     {
         lua_pushstring(L,name);
@@ -599,17 +608,7 @@ void lb_allow(lua_State*L,const char*name)
 {
     LSG;
 
-    lua_pushstring(L,TP_ALLOWED_TABLE);
-    lua_rawget(L,LUA_REGISTRYINDEX);
-
-    if (lua_isnil(L,-1))
-    {
-        lua_pop(L,1);
-        lua_newtable(L);
-        lua_pushstring(L,TP_ALLOWED_TABLE);
-        lua_pushvalue(L,-2);
-        lua_rawset(L,LUA_REGISTRYINDEX);
-    }
+    lb_get_allowed_table( L , true );
 
     lua_pushstring(L,name);
     lua_pushboolean(L,1);
@@ -618,4 +617,351 @@ void lb_allow(lua_State*L,const char*name)
     lua_pop(L,1);
 
     LSG_END(0);
+}
+
+//.........................................................................
+
+static int lb_lazy_globals_index( lua_State * L )
+{
+    LSG;
+
+    if ( lua_type( L , 2 ) == LUA_TSTRING )
+    {
+        // Duplicate the key we were called with and get its loader from
+        // our first upvalue (the table of mappings from name to loader).
+
+        lua_pushvalue( L , 2 );
+        lua_rawget( L , lua_upvalueindex( 1 ) );
+
+        if ( ! lua_isnil( L , -1 ) )
+        {
+            g_debug( "LAZY LOADING '%s'" , lua_tostring( L , 2 ) );
+
+            lua_call( L , 0 , 0 );
+
+            // That function should have installed the named global into
+            // the globals table.
+
+            // We can now get rid of the function from the mapping table.
+
+            lua_pushvalue( L , 2 );
+            lua_pushnil( L );
+            lua_rawset( L , lua_upvalueindex( 1 ) );
+
+            // The function should have installed the global, so we fetch it.
+
+            lua_pushvalue( L , 2 );
+            lua_rawget( L , 1 );
+
+            if ( lua_isnil( L , -1 ) )
+            {
+                g_warning( "LAZY LOADER FOR '%s' DID NOT WORK - GLOBAL IS NOT THERE"  , lua_tostring( L , 2 ) );
+            }
+        }
+
+        return LSG_END(1);
+    }
+
+    return LSG_END(0);
+}
+
+
+void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader )
+{
+    LSG;
+
+    lua_pushvalue( L , LUA_GLOBALSINDEX );
+
+    // There is no metatable on the globals table, so we create it and plug in
+    // our own index function.
+
+    if ( 0 == lua_getmetatable( L , -1 ) )
+    {
+        g_debug( "INSTALLING LAZY LOADER" );
+//        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
+
+        // Create the metatable
+
+        lua_newtable( L );
+        lua_pushstring( L , "__index" );
+
+        // Create a new table mapping name to loader which will be stored as
+        // an upvalue for the index function
+
+        lua_newtable( L );
+        lua_pushstring( L , name );
+        lua_pushcfunction( L , loader );
+        lua_rawset( L , -3 );
+
+        // Push the index function with its upvalue
+
+        lua_pushcclosure( L , lb_lazy_globals_index , 1 );
+
+        // Set it as _index on the metatable
+
+        lua_rawset( L , -3 );
+
+        // Set the metatable on the global table
+
+        lua_setmetatable( L , -2 );
+
+        // Pop the global table
+
+        lua_pop( L , 1 );
+    }
+    else
+    {
+//        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
+
+        // Get the lazy load function from the global metatable
+
+        lua_pushstring( L , "__index" );
+        lua_rawget( L , -2 );
+
+        // Get its mapping table from the upvalue
+
+        lua_getupvalue( L , -1 , 1 );
+
+        g_assert( lua_type( L , -1 ) == LUA_TTABLE );
+
+        // Set the new name and loader function
+
+        lua_pushstring( L , name );
+        lua_pushcfunction( L , loader );
+        lua_rawset( L , -3 );
+
+        // Pop the globals table, its metatable, the index function and its upvalue table
+
+        lua_pop( L , 4 );
+    }
+
+    LSG_CHECK(0);
+}
+
+//.........................................................................
+// The extras table is in the registry and uses the user data as a weak
+// key to point to the user supplied extra table. We create this table
+// if it doesn't already exist.
+//
+// REGISTRY
+// --------
+// TP_EXTRA_TABLE = { <user data> (weak) = <user supplied table> }
+
+void lb_get_extras_table( lua_State * L , bool create )
+{
+    static char TP_EXTRA_TABLE=0; // We only use the address of this
+
+    LSG;
+
+    lua_pushlightuserdata(L,&TP_EXTRA_TABLE);   // get the extra table
+    lua_rawget(L,LUA_REGISTRYINDEX);
+
+    if (lua_isnil(L,-1) && create)
+    {
+        lua_pop(L,1);
+        lua_newtable(L);
+
+        lua_newtable(L);
+        lua_pushstring(L,"__mode");
+        lua_pushstring(L,"k");
+        lua_rawset(L,-3);
+
+        lua_setmetatable(L,-2);
+
+        lua_pushlightuserdata(L,&TP_EXTRA_TABLE);   // get the extra table
+        lua_pushvalue(L,-2);
+        lua_rawset(L,LUA_REGISTRYINDEX);
+    }
+
+    LSG_CHECK(1);
+}
+
+
+int lb_get_extra(lua_State * L)
+{
+    LSG;
+
+    lb_get_extras_table( L , true );
+
+    // table is on top
+
+    lua_pushvalue(L,1);
+    lua_rawget(L,-2);
+
+    if(lua_isnil(L,-1))
+    {
+        lua_pop(L,1);
+
+        lua_newtable(L);
+        lua_pushvalue(L,1);
+        lua_pushvalue(L,-2);
+        lua_rawset(L,-4);
+    }
+
+    lua_remove(L,-2);
+
+    g_assert(lua_type(L,-1)==LUA_TTABLE);
+
+    return LSG_END(1);
+}
+
+//-----------------------------------------------------------------------------
+// This one expects the user data at 1 and the table (or nil) at 2 - it sets the new
+// table as the extra table for this user data.
+
+int lb_set_extra(lua_State * L)
+{
+    if (!lua_isnil(L,2))
+    {
+        (void)lb_checktable(L,2);
+    }
+
+    LSG;
+
+    lb_get_extras_table( L , true );
+
+    lua_pushvalue(L,1);
+    lua_pushvalue(L,2);
+    lua_rawset(L,-3);
+
+    lua_pop(L,1);
+
+    return LSG_END(0);
+}
+
+//-----------------------------------------------------------------------------
+// Table dumping functions
+
+std::string lb_value_desc( lua_State * L , int index )
+{
+    LSG;
+
+    lua_getglobal(L,"tostring");
+    lua_pushvalue(L,index);
+    lua_call(L,1,1);
+    std::string result = lua_tostring(L,-1);
+    lua_pop(L,1);
+
+    bool add_type = false;
+
+    switch(lua_type(L,index))
+    {
+        case LUA_TSTRING:
+            result = "\"" + result + "\"";
+            break;
+
+        case LUA_TUSERDATA:
+            result = result + " (" + UserData::get(L,index)->get_type() + ")";
+            break;
+    }
+
+    if ( add_type )
+    {
+        result = result + " (" + lua_typename(L,lua_type(L,index)) + ")";
+    }
+
+    LSG_CHECK(0);
+
+    return result;
+}
+
+
+void lb_dump_table_recurse( lua_State * L , int visited , int depth , int filter )
+{
+    LSG;
+
+    int t = lua_gettop( L );
+
+    (void)lb_checktable(L,t);
+
+    lb_strong_deref(L,visited);
+    lua_pushvalue(L,t);
+    lua_pushboolean(L,true);
+    lua_rawset(L,-3);
+    lua_pop(L,1);
+
+    std::string indent( 2 * depth , ' ' );
+
+    g_message("%s{",indent.c_str());
+
+    lua_pushnil(L);
+
+    while(lua_next(L,t))
+    {
+        if (filter)
+        {
+            lua_pushvalue(L,filter);
+            lua_pushvalue(L,-3);
+            lua_pushvalue(L,-3);
+            lua_pushinteger(L,depth+1);
+            lua_call(L,3,1);
+            bool skip=!lua_toboolean(L,-1);
+            lua_pop(L,1);
+
+            if (skip)
+            {
+                lua_pop(L,1);
+                continue;
+            }
+        }
+
+        std::string k = lb_value_desc(L,lua_gettop(L)-1);
+        std::string v = lb_value_desc(L,lua_gettop(L));
+
+        g_message( "%s  %s = %s",indent.c_str(),k.c_str(),v.c_str());
+
+        if (lua_type(L,-1)==LUA_TTABLE)
+        {
+            lb_strong_deref(L,visited);
+            lua_pushvalue(L,-2);
+            lua_rawget(L,-2);
+            if (lua_toboolean(L,-1))
+            {
+                g_message("%s  { *CYCLE* }",indent.c_str() );
+                lua_pop(L,2); // the boolean and the visited table
+            }
+            else
+            {
+                lua_pop(L,2); // the nil and the visited table
+                lb_dump_table_recurse(L,visited,depth+1,filter);
+            }
+        }
+
+        lua_pop(L,1); // the value
+    }
+
+    g_message("%s}",indent.c_str());
+
+    LSG_END(0);
+}
+
+void lb_dump_table( lua_State * L )
+{
+    LSG;
+
+    (void)lb_checktable(L,1);
+
+    int filter = 0;
+
+    if (lua_gettop(L)>1&&lua_type(L,2)==LUA_TFUNCTION)
+    {
+        filter = 2;
+    }
+
+    lua_getglobal(L,"tostring");
+    lua_pushvalue(L,1);
+    lua_call(L,1,1);
+    g_message("%s",lua_tostring(L,-1));
+    lua_pop(L,1);
+
+    lua_newtable(L);
+    int visited = lb_strong_ref(L);
+
+    lua_pushvalue(L,1);
+    lb_dump_table_recurse(L,visited,0,filter);
+    lua_pop(L,1);
+
+    lb_strong_unref(L,visited);
+
+    LSG_CHECK(0);
 }

@@ -37,9 +37,7 @@ function ImageQueue( url_list )
         
         if # self.images > 0 then
         
-            result = self.images[ 1 ]
-            
-            table.remove( self.images , 1 )
+            result = table.remove( self.images , 1 )
         
         end
         
@@ -51,8 +49,13 @@ function ImageQueue( url_list )
         
                 if self.next_url > # self.url_list then
                 
-                    break
+                    self.next_url = 1 
                     
+                    if self.next_url > # self.url_list then
+                    
+                        break
+                    
+                    end
                 end
             
                 -- Create the image
@@ -105,14 +108,10 @@ MOTION_PER_SECOND   = 16
 SLIDE_SECONDS       = 5
 OVERZOOM            = 1.05
 
-old_image_time = 0
-
 paused = false
 
 function idle.on_idle( idle , seconds )
 
-	if(math.random(1000) == 5) then print(image_time.elapsed_seconds - old_image_time, seconds) end
-	old_image_time=image_time.elapsed_seconds
 
 	if paused then return end
 

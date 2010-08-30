@@ -54,7 +54,7 @@ global idle [[idle*]]
 {
     idle()
 	[[
-	    *self=new idle(L);    
+	    self=lb_construct( idle , new idle(L) );    
 	]];
 	
     ~idle()
@@ -66,11 +66,11 @@ global idle [[idle*]]
 	[[
 	    if (on_idle)
 	    {
-		self->set();
+			self->set();
 	    }
 	    else
 	    {
-		self->clear();
+			self->clear();
 	    }
 	]];
 }

@@ -4,7 +4,6 @@ module clutter_alpha;
 #include "clutter/clutter.h"
 
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -31,15 +30,17 @@ class Alpha [[ClutterAlpha*]]
 {
     Alpha(table props = 0)
 	[[
-	    *self=clutter_alpha_new();
-	    g_object_ref_sink(G_OBJECT(*self));
-    	    ClutterUtil::set_props_from_table(L,props);
+	    self=clutter_alpha_new();
+	    g_object_ref_sink(self);
+	    g_object_ref(self);
+	    self=lb_construct_gobject( ClutterAlpha , self );
+    	ClutterUtil::set_props_from_table(L,props);
+    	g_object_unref(self);
 	]];
 
     
     ~Alpha()
 	[[
-	    g_object_unref(G_OBJECT(self));
 	]];
 	
 	/*
@@ -51,19 +52,33 @@ class Alpha [[ClutterAlpha*]]
     Timeline timeline
 		[[
 		    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
-		    if(wrap_Timeline(L,timeline))
-			g_object_ref(G_OBJECT(timeline));
+		    if ( ! timeline )
+		    {
+		    	lua_pushnil( L );
+		    }
+		    else if ( UserData * ud = UserData::get( G_OBJECT( timeline ) ) )
+		    {
+		    	ud->push_proxy();
+		    }
+		    else
+		    {
+		    	lua_pushnil( L );
+		    }
 		]]
 		[[
 		    luaL_checkudata(L,-1,"TIMELINE_METATABLE");
-		    void * udata=lua_touserdata(L,-1);
-		    if (udata)
+		    
+		    UserData * ud = UserData::get( L , -1 );
+		    
+		    if ( ud )
 		    {
-			GObject * timeline=*((GObject**)udata);
-			
-			if (timeline && CLUTTER_IS_TIMELINE(timeline))
-			    clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
-		    }
+		    	GObject * timeline = ud->get_master();
+		    	
+		    	if ( timeline && CLUTTER_IS_TIMELINE( timeline ) )
+		    	{
+			    	clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
+		    	}
+		    }		    
 		]];
 		
 	/*
@@ -191,12 +206,12 @@ gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp)
     
     if (!L)
     {
-	return 0;
+		return 0;
     }
     
     lua_pushnumber(L,clutter_timeline_get_progress(clutter_alpha_get_timeline(self)));
     
-    invoke_Alpha_on_alpha(L,self,1,1);
+    UserData::invoke_callback( G_OBJECT( self ) , "on_alpha" , 1 , 1 , L );
     
     gdouble result(lua_tonumber(L,-1));
     lua_pop(L,1);
