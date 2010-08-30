@@ -5,6 +5,14 @@
 #include "clutter_util.h"
 #include "lb.h"
 
+
+//.............................................................................
+
+ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
+{
+    return CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
+}
+
 //.............................................................................
 
 void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
@@ -21,7 +29,7 @@ void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
     lua_pushnumber( L, color->alpha );
     lua_rawseti( L, -2, 4 );
 
-    LSG_END( 1 );
+    (void)LSG_END( 1 );
 }
 
 //.............................................................................
@@ -120,19 +128,19 @@ gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
 
 ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 {
-    void * udata = lua_touserdata( L, n );
-
-    if ( !udata )
+    if ( lua_type( L , n ) != LUA_TUSERDATA )
     {
         return NULL;
     }
 
-    GObject * obj = *( ( GObject ** )udata );
+    UserData * ud = UserData::get( L , n );
 
-    if ( !obj )
+    if ( ! ud )
     {
         return NULL;
     }
+
+    GObject * obj = ud->get_master();
 
     return CLUTTER_IS_ACTOR( obj ) ? CLUTTER_ACTOR( obj ) : NULL;
 }
@@ -184,19 +192,17 @@ const char * ClutterUtil::get_actor_metatable( ClutterActor * actor )
 
 void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
 {
-    const char * metatable = get_actor_metatable( actor );
-
-    if ( !metatable )
+    if ( ! actor )
     {
         lua_pushnil( L );
-        return;
     }
-
-    int is_new = lb_wrap( L, actor, metatable );
-
-    if ( is_new )
+    else if ( UserData * ud = UserData::get( G_OBJECT( actor ) ) )
     {
-        g_object_ref( G_OBJECT( actor ) );
+        ud->push_proxy();
+    }
+    else
+    {
+        lua_pushnil( L );
     }
 }
 
@@ -273,55 +279,3 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
 }
 
 //-----------------------------------------------------------------------------
-
-ClutterUtil::Extra::Extra( lua_State * L )
-    :
-    lsp( App::get( L )->ref_lua_state_proxy() )
-{
-    lua_newtable( L );
-    lua_pushvalue( L, -1 );
-    table_ref = luaL_ref( L, LUA_REGISTRYINDEX );
-}
-
-// Takes a ref on a table that is already on the stack
-// and leaves it on the stack
-
-ClutterUtil::Extra::Extra( lua_State * L, int t )
-    :
-    lsp( App::get( L )->ref_lua_state_proxy() )
-{
-    lua_pushvalue( L, t );
-    table_ref = luaL_ref( L, LUA_REGISTRYINDEX );
-}
-
-// Releases the ref
-// This may happen after the lua state is closed, because extra is bolted
-// on to a GObject...so we protect against that by using a lua state
-// proxy and checking that it is still good.
-
-ClutterUtil::Extra::~Extra()
-{
-    if ( lsp->is_valid() )
-    {
-        luaL_unref( lsp->get_lua_state(), LUA_REGISTRYINDEX, table_ref );
-    }
-
-    lsp->unref();
-}
-
-// Pushes the referenced table onto the stack
-
-void ClutterUtil::Extra::push_table()
-{
-    lua_rawgeti( lsp->get_lua_state(), LUA_REGISTRYINDEX, table_ref );
-}
-
-// GDestroyNotify for it
-
-void ClutterUtil::Extra::destroy( gpointer a )
-{
-    if ( a )
-    {
-        delete ( Extra * )a;
-    }
-}
