@@ -3,7 +3,7 @@
 -- the first time.
 
 return
-function( section )
+function( section , ui )
 
     local TOP_APP_COUNT = 3
     
@@ -19,6 +19,16 @@ function( section )
     
     screen:add( section.icon_overlay_w_label:set{ opacity = 0 } , section.icon_overlay_b_label:set{ opacity = 0 } )
     
+    section.text_focus = Clone{ source = ui.button_focus , opacity = 0 }
+    
+    section.app_focus = Image{ src = "assets/app-icon-focus.png" , opacity = 0 }
+    section.app_focus.anchor_point = section.app_focus.center
+    
+    section.dropdown:add( section.text_focus , section.app_focus )
+    
+    section.focus_functions = {}
+    
+    section.unfocus_functions = {}
     
     ---------------------------------------------------------------------------
 
@@ -120,24 +130,38 @@ function( section )
         [UNSELECTED] = { font = "DejaVu Sans 24px" , color = "000000FF" },
     }
 
-    local MENU_ITEM_HEIGHT  = 40
-    local TOP_PADDING       = 40
-    local MENU_ITEM_PADDING = 24
-    local APP_ITEM_PADDING  = 16
-    local BOT_PADDING       = 0
-    local HORIZ_PADDING     = 16
+    local MENU_ITEM_HEIGHT  = 44    -- The height of each text menu item
+    local TOP_PADDING       = 40    -- The vertical distance from the point of the dropdown to the first text menu item
+    local MENU_ITEM_PADDING = 40    -- Vertical space between text menu items
+    local APP_ITEM_PADDING  = 18    -- Vertical space between app items
+    local BOT_PADDING       = 10     -- Vertical padding at the bottom of the dropdown
+    local HORIZ_PADDING     = 22    -- Horizontal space from left of dropdown
     
     local group = section.dropdown
         
     ---------------------------------------------------------------------------
-    -- The 'all apps' menu item
+    -- The 'all apps' menu item and its ring
     ---------------------------------------------------------------------------
     
-    local ring = Canvas()
+    local RING_WIDTH    = group.w - ( HORIZ_PADDING * 2 ) - 10
+    local RING_HEIGHT   = MENU_ITEM_HEIGHT + 14
+    local RING_BORDER_W = 2
+    local RING_COLOR    = "FFFFFF"
+    local RING_INSET    = 3
+    local RING_RADIUS   = 12
     
+    local ring = Canvas{ name = "all-apps-ring" , size = { RING_WIDTH , RING_HEIGHT } }
+    
+    ring:begin_painting()
+    ring:set_line_width( RING_BORDER_W )
+    ring:set_source_color( RING_COLOR )
+    ring:round_rectangle( RING_INSET , RING_INSET , RING_WIDTH - ( RING_INSET * 2 ) , RING_HEIGHT - ( RING_INSET * 2 ) , RING_RADIUS )
+    ring:stroke()
+    ring:finish_painting()
     
     local all_apps_text = Text
     {
+        name = "all-apps",
         text = section.ui.strings[ "View All My Apps" ],
         position = { 0 , TOP_PADDING + MENU_ITEM_PADDING }
     }
@@ -146,11 +170,57 @@ function( section )
     
     all_apps_text.x = group.w / 2 - all_apps_text.w / 2
     
-    group:add( all_apps_text )
+
+    ring.anchor_point = ring.center
+    ring.position = all_apps_text.center
+       
+    group:add( ring , all_apps_text )
     
     ---------------------------------------------------------------------------
-    -- The 'category' menu item
+    -- Put the text focus ring in place
     ---------------------------------------------------------------------------
+    
+    section.text_focus:set
+    {
+        name = "text-focus",
+        size = { RING_WIDTH + 7 , RING_HEIGHT + 7 }
+    }
+
+    section.text_focus.anchor_point = section.text_focus.center
+    
+    -- This function will put the focus on the all apps text box
+
+    section.focus_functions[ 1 ] =
+    
+        function()
+    
+            section.app_focus.opacity = 0
+
+            section.text_focus.opacity = 255
+            section.text_focus.position = { ring.x - 1 , ring.y }    
+            section.text_focus:lower( all_apps_text )
+            section.text_focus.w = RING_WIDTH + 7
+        
+        end
+        
+    
+    ---------------------------------------------------------------------------
+    -- The 'category' menu item and its arrows
+    ---------------------------------------------------------------------------
+    
+    local ARROW_WIDTH   = MENU_ITEM_HEIGHT / 4 
+    local ARROW_HEIGHT  = MENU_ITEM_HEIGHT / 2
+    local ARROW_COLOR   = "FFFFFF"
+    
+    local arrow = Canvas{ name = "left-arrow" , size = { ARROW_WIDTH , ARROW_HEIGHT } }
+    
+    arrow:begin_painting()
+    arrow:move_to( 0 , arrow.h / 2 )
+    arrow:line_to( arrow.w , 0 )
+    arrow:line_to( arrow.w , arrow.h )
+    arrow:set_source_color( ARROW_COLOR )
+    arrow:fill()
+    arrow:finish_painting()
     
     local category_text = Text
     {
@@ -162,7 +232,50 @@ function( section )
     
     category_text.x = group.w / 2 - category_text.w / 2
     
-    group:add( category_text )
+    arrow.anchor_point = arrow.center
+    
+    arrow.position = { HORIZ_PADDING + arrow.w * 2  , category_text.center[ 2 ] }
+    
+    local r_arrow = Clone{ name = "right-arrow" , source = arrow }
+    
+    r_arrow.anchor_point = r_arrow.center
+    
+    r_arrow:set
+    {
+        z_rotation = { 180 , 0 , 0 },
+        position = { group.w - ( HORIZ_PADDING + arrow.w * 2 ) , category_text.center[ 2 ] }
+    }
+    
+    arrow.opacity = 50
+    r_arrow.opacity = 50
+    
+    group:add( arrow , r_arrow , category_text )
+    
+    -- Function to focus the category item        
+        
+    section.focus_functions[ 2 ] =
+    
+        function()
+        
+            section.app_focus.opacity = 0
+    
+            section.text_focus.opacity = 255
+            section.text_focus.position = { ring.x - 1 + 34, ring.y + MENU_ITEM_HEIGHT + MENU_ITEM_PADDING - 12 }    
+            section.text_focus:lower( arrow )
+            section.text_focus.w = RING_WIDTH - 60
+            arrow.opacity = 255
+            r_arrow.opacity = 255
+            
+        end
+
+    section.unfocus_functions[ 2 ] =
+    
+        function()
+        
+            arrow.opacity = 50
+            r_arrow.opacity = 50
+            
+        end
         
     ---------------------------------------------------------------------------
     -- The top apps
@@ -170,7 +283,7 @@ function( section )
     
     validate_top_apps()
     
-    local y = category_text.y + category_text.h + MENU_ITEM_PADDING
+    local y = category_text.y + category_text.h + MENU_ITEM_PADDING - 10
     
     local x = HORIZ_PADDING
     
@@ -183,11 +296,12 @@ function( section )
     local FRAME_PADDING     = 6
     local CAPTION_HEIGHT    = 36
     local CAPTION_X_PADDING = 2
-    local CAPTION_Y_PADDING = -4
+    local CAPTION_Y_PADDING = 0
     
     local icon_w = w - ( FRAME_PADDING * 2 )
-    local icon_h = h - ( ( FRAME_PADDING * 2 ) + CAPTION_HEIGHT )
+    local icon_h = h - ( ( FRAME_PADDING * 2 ) + CAPTION_HEIGHT ) + 4
     
+        
     for i = 1 , TOP_APP_COUNT do
         
         local app_id = section.top_apps[ i ]
@@ -200,6 +314,14 @@ function( section )
             position = { x , y + ( ( h + APP_ITEM_PADDING ) * ( i - 1 ) ) }
         }
         
+        local black_box = Clone
+        {
+            source = section.icon_overlay_b_label,
+            size = { w , h },
+            opacity = 0,
+            position = { x , y + ( ( h + APP_ITEM_PADDING ) * ( i - 1 ) ) }        
+        }
+        
         local icon = section.app_icons[ app_id ]
         
         icon:set
@@ -209,8 +331,7 @@ function( section )
             size = { icon_w , icon_h }
         }
         
-        group:add( icon )
-        group:add( box )
+        group:add( icon , black_box , box )
     
         local caption = Text
         {
@@ -224,16 +345,116 @@ function( section )
         caption:set( APP_LABEL_TEXT_STYLE[ UNSELECTED ] )
         
         group:add( caption )
+        
+        section.focus_functions[ i + 2 ] =
+        
+            function()
+            
+                section.text_focus.opacity = 0
+                
+                section.app_focus.opacity = 255
+                section.app_focus.position = { box.center[ 1 ] , box.center[ 2 ] - 3 }
+                section.app_focus:lower( icon )
+                
+                box.opacity = 0
+                black_box.opacity = 255
+                
+                caption:set( APP_LABEL_TEXT_STYLE[ SELECTED ] )
+            
+            end
+            
+        section.unfocus_functions[ i + 2 ] =
+        
+            function()
+            
+                box.opacity = 255
+                black_box.opacity = 0
+                
+                caption:set( APP_LABEL_TEXT_STYLE[ UNSELECTED ] )
+            
+            end
     
     end
 
+    section.app_focus:raise_to_top()
 
     ---------------------------------------------------------------------------
+    -- This function returns focus to the menu bar
+    ---------------------------------------------------------------------------
+    
+    section.focus_functions[ 0 ] =
+    
+        function()
+        
+            section.app_focus.opacity = 0
+            section.text_focus.opacity = 0
+            
+            ui:on_exit_section()
+            
+        end
+    
+
+    ---------------------------------------------------------------------------
+    -- Called each time the drop down is about to be shown
     ---------------------------------------------------------------------------
 
     function section.on_show( section )
     
-   
+        section.app_focus.opacity = 0
+        section.text_focus.opacity = 0
+    end
+    
+    ---------------------------------------------------------------------------
+    
+    local function move_focus( delta )
+    
+        local unfocus = section.unfocus_functions[ section.focus ]
+        
+        local focus = section.focus_functions[ section.focus + delta ]
+        
+        if not focus then
+            return
+        end
+        
+        if unfocus then
+            unfocus()
+        end
+        
+        section.focus = section.focus + delta
+    
+        focus()
+        
+    end
+    
+    
+    local key_map =
+    {
+        [ keys.Up   ] = function() move_focus( -1 ) end,
+        [ keys.Down ] = function() move_focus( 1  ) end
+    }
+
+    ---------------------------------------------------------------------------
+    -- Called when the section is entered, by pressing down from the
+    -- main menu bar
+    ---------------------------------------------------------------------------
+    
+    function section.on_enter( section )
+    
+        section.focus = 1
+        
+        pcall( section.focus_functions[ 1 ] )
+        
+        section.dropdown:grab_key_focus()
+        
+        section.dropdown.on_key_down =
+        
+            function( section , key )
+                local f = key_map[ key ]
+                if f then
+                    f()
+                end
+            end
+    
     end
     
 end
