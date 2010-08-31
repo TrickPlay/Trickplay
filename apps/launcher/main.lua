@@ -282,7 +282,7 @@ local function build_ui( show_it )
         
         if section.init then
         
-            section:init()
+            section:init( ui )
             
             section.init = nil
         
@@ -332,6 +332,20 @@ local function build_ui( show_it )
         reset_dropdown_timer()    
     end
 
+    -------------------------------------------------------------------------------
+    
+    local function enter_section()
+    
+        local section = ui.sections[ ui.focus ]
+        
+        if not section then return end
+        
+        ui.button_focus.opacity = 0
+        
+        section:on_enter()
+    
+    end
+
 
     -------------------------------------------------------------------------------
     -- Handlers
@@ -357,6 +371,8 @@ local function build_ui( show_it )
         -- TODO : Pressing OK on a button may do something else
         
         [ keys.Return   ] = function() animate_in_dropdown() end,
+        
+        [ keys.Down     ] = function() enter_section() end,
     }
     
     function ui.bar.on_key_down( _ , key )
@@ -465,6 +481,18 @@ local function build_ui( show_it )
             opacity = 255
         }
         
+    end
+    
+    ----------------------------------------------------------------------------
+    -- Called by a section when it wants to lose focus
+    -- (When you press UP at the top selection of a dropdown)
+    ----------------------------------------------------------------------------    
+    
+    function ui:on_exit_section()
+    
+        self.bar:grab_key_focus()
+        self.button_focus.opacity = 255
+    
     end
     
     ----------------------------------------------------------------------------
