@@ -211,11 +211,6 @@ function()
 
    game = GameControl(model)
    model:start_app(Components.CHARACTER_SELECTION)
-   -- local p = Player{position={100,100}, chipPosition={200,200}}
-   -- p:createBetChips()
-   -- model.players = {p}
-   -- model.currentPlayer = 1
-
 --   model:start_app(Components.PLAYER_BETTING)
 
    AssetLoader.on_preload_ready = nil
