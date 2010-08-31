@@ -80,6 +80,9 @@ HandState = Class(nil,function(state, ctrl, ...)
       return top2
    end
 
+   --[[
+      @return true if all players have finished betting, false otherwise
+   --]]
    function state:get_bets_done()
       local num_all_in = 0
       local num_in_players = #state:get_in_players()
@@ -101,6 +104,10 @@ HandState = Class(nil,function(state, ctrl, ...)
       return false
    end
 
+   --[[
+      Initializes the hand. Includes moving BB and SB and setting up each
+      players Hole.
+   --]]
    function state.initialize(state, args)
       players = args.players
       sb_qty = args.sb_qty
@@ -191,7 +198,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    ---
    -- Makes the active player take his turn. If fold is true, then player
    -- folded, otherwise, player bet changes to bet (may be a call or a
-   -- raise). Assumes the active player's money (player.moneY) reflects
+   -- raise). Assumes the active player's money (player.money) reflects
    -- his current holdings.
    function state:execute_bet(fold, bet)
       print("state:execute_bet(" .. tostring(fold) .. ", " .. tostring(bet) .. ")")

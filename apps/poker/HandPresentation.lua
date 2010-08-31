@@ -387,8 +387,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
+      assert(only_player)
       only_player.status:update( "weaksauce." )
-      only_player.betChips:set(0)
+      if only_player.betChips then only_player.betChips:set(0) end
       animate_pot_to_player( only_player )
    end
 

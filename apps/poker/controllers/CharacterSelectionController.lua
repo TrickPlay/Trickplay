@@ -116,10 +116,11 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       if(self.playerCounter == 0) then
          isHuman = true
       end
+      self.playerCounter = self.playerCounter + 1
       
       args = {
          isHuman = isHuman,
-         number = self.playerCounter + 1,
+         number = self.playerCounter,
          table_position = pos,
          position = model.default_player_locations[ self:getPosition() ],
          chipPosition = model.default_bet_locations[ self:getPosition() ],
@@ -134,11 +135,11 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          end
          i = i+1
       end
+      print("\n\n\n\ni = "..i.."\n\n\n\n")
       table.insert(model.players, i, Player(args))
       model.positions[pos] = true
       model.currentPlayer = self.playerCounter
 
-      self.playerCounter = self.playerCounter + 1
       if(self.playerCounter >= 2) then
          view.items[2][3].opacity = 255
       end
