@@ -1,40 +1,60 @@
 SourceManagerController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.SOURCE_MANAGER)
 
-    -- the default selected index
+    --indexing for source selection
     local src_selected = 1
+    function self:reset_src_selected_index()
+        src_selected = 1
+    end
+    function self:set_src_selected_index(i)
+        src_selected = i
+    end
+    function self:get_src_selected_index()
+        return src_selected
+    end
+
+    --indexing for selection within a source's accordian menu
     local acc_selected = {1,1}
-	 local in_box = false
+    function self:reset_acc_selected_index()
+        acc_selected = {1,1}
+    end
+    function self:set_acc_selected_index(r,c)
+        acc_selected = {r,c}
+    end
+    function self:get_acc_selected_index()
+        return acc_selected[1],acc_selected[2]
+    end
+
+    local in_box = false
     local query_text = ""
     local login_text = {"",""}
     local controller = self
 
     local TextObj = function(obj)
-                local text_obj = obj
-                --local default_text = text_obj.text
-                text_obj.editable = true
-                text_obj:grab_key_focus()
-                in_box = true
-                function text_obj:on_key_down(k)
-                    if keys.Return == k then
-                        self.on_key_down = nil
-                        screen:grab_key_focus()
-                        --controller:on_key_down(k)
-                        in_box = false
-                        return true
-                    end
-                end
-                function text_obj:on_key_focus_out()
-                    print("\n\n on key focus out")
-                    self.editable = false
-                    self.on_key_focus_out = nil
-                    acc_selected[1] = acc_selected[1] + 1
+       local text_obj = obj
+       --local default_text = text_obj.text
+       text_obj.editable = true
+       text_obj:grab_key_focus()
+       in_box = true
+       function text_obj:on_key_down(k)
+           if keys.Return == k then
+               self.on_key_down = nil
+               screen:grab_key_focus()
+               --controller:on_key_down(k)
+               in_box = false
+               return true
+           end
+       end
+       function text_obj:on_key_focus_out()
+           print("\n\n on key focus out")
+           self.editable = false
+           self.on_key_focus_out = nil
+           acc_selected[1] = acc_selected[1] + 1
 
-                    query_text = self.text
-                    login_text[1] = self.text
-                    model:notify()
-		 
-                end
+           query_text = self.text
+           login_text[1] = self.text
+           model:notify()
+       end
 
     end
 
@@ -122,38 +142,15 @@ SourceManagerController = Class(Controller, function(self, view, ...)
     function self:on_key_down(k)
         if MenuKeyTable[k]  and not in_box then
             MenuKeyTable[k](self)
+        else
+            screen.on_key_down = model.keep_keys            
         end
     end
 
-    function self:reset_src_selected_index()
-        src_selected = 1
-    end
-
-    function self:set_src_selected_index(i)
-        src_selected = i
-    end
-
-    function self:get_src_selected_index()
-        return src_selected
-    end
-
-
-
-    function self:reset_acc_selected_index()
-        acc_selected = {1,1}
-    end
-
-    function self:set_acc_selected_index(r,c)
-        acc_selected = {r,c}
-    end
-
-    function self:get_acc_selected_index()
-        return acc_selected[1],acc_selected[2]
-    end
-
-
 
     function self:move_selector(dir)
+        screen.on_key_down = model.keep_keys            
+
         if view.accordian == true then
             local next_spot= {acc_selected[1]+dir[2],
                               acc_selected[2]+dir[1]}

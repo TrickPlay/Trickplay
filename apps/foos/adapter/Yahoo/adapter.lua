@@ -14,7 +14,12 @@ local adapter = {
 		photos = function(search,current_pic) return "http://search.yahooapis.com/ImageSearchService/V1/imageSearch?appid=YahooDemo&query="..search.."&results=1&start="..current_pic.."&output=json" end,
 		site = function(data) 
 		--	return data.responseData.results[1].unescapedUrl
-			return data.ResultSet.Result[1].ClickUrl or ""
+                        if data.ResultSet == nil or data.ResultSet.Result ==
+                           nil or data.ResultSet.Result[1] == nil or
+                           data.ResultSet.Result[1].ClickUrl == nil then
+                            return ""
+                        end
+			return data.ResultSet.Result[1].ClickUrl
 		end
 	}
 }
@@ -41,9 +46,9 @@ function adapter:loadCovers(i,search, start_index)
 		if (data.ResultSet) then
 			if (data.ResultSet.Result[1]) then
 				site = data.ResultSet.Result[1].ClickUrl or ""
-		      if (not dontswap) then
+		      --if (not dontswap) then
 				   Load_Image(site,i)
-				end
+			--	end
 			end
    	end
 	end

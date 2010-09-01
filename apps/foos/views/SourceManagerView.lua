@@ -15,20 +15,21 @@ SourceManagerView = Class(View, function(view, model, ...)
 	local background = Image {src = "assets/background.jpg", x = -200 }	
 	 view.ui:add(background)
 --]]
-    local  add_sel = Image{src = "assets/source\ manager/Add_Sel.png"}
-    local  add_un  = Image{src = "assets/source\ manager/Add_UnSel.png"}
-    local hide_sel = Image{src = "assets/source\ manager/Hide_Sel.png"}
-    local hide_un  = Image{src = "assets/source\ manager/Hide_UnSel.png"}
-    local ok_sel = Image { src = "assets/source\ manager/ok_focus.png"}
-    local ok_un = Image { src = "assets/source\ manager/ok_nofocus.png"}
-    local cancel_sel = Image { src = "assets/source\ manager/cancel_focus.png"}
-    local cancel_un = Image { src = "assets/source\ manager/cancel_nofocus.png"}
-    local txtbx_sel = Image{src="assets/source\ manager/typeinbox_focus.png"}
-    local txtbx_un = Image{src="assets/source\ manager/typeinbox_nofocus.png"}
+    local add_sel    = Image{ src = "assets/source\ manager/Add_Sel.png"}
+    local add_un      = Image{ src = "assets/source\ manager/Add_UnSel.png"}
+    local ok_sel     = Image{ src = "assets/source\ manager/ok_focus.png"}
+    local ok_un      = Image{ src = "assets/source\ manager/ok_nofocus.png"}
+    local cancel_sel = Image{ src = "assets/source\ manager/cancel_focus.png"}
+    local cancel_un  = Image{ src = "assets/source\ manager/cancel_nofocus.png"}
+    local txtbx_sel  = Image{ src = "assets/source\ manager/typeinbox_focus.png"}
+    local txtbx_un   = Image{ src = "assets/source\ manager/typeinbox_nofocus.png"}
     
     local queryText = Text {font = "Sans 30px" , text = "Search for: "}
     
-	 view.clones:add(ok_sel, ok_un, cancel_sel, cancel_un)
+    view.clones:add(    ok_sel )
+    view.clones:add(    ok_un  )
+    view.clones:add(cancel_sel )
+    view.clones:add(cancel_un  )
     view.clones:add(   add_sel )
     view.clones:add(   add_un  )
     view.clones:add(  hide_sel )
@@ -174,8 +175,11 @@ SourceManagerView = Class(View, function(view, model, ...)
                 view.accordian_groups[  model.source_list[src_sel][2]  ]:raise_to_top()
                 view.accordian_groups[  model.source_list[src_sel][2]  ]:animate
                 {
-                    duration = CHANGE_VIEW_TIME,
-                    opacity  = 255
+                    duration     = CHANGE_VIEW_TIME,
+                    opacity      = 255,
+                    on_completed = function()
+                        screen.on_key_down = model.keep_keys      
+                    end
                 }
             end
         }
@@ -191,8 +195,11 @@ SourceManagerView = Class(View, function(view, model, ...)
             on_completed = function()
                 view.acc_split:animate
                 {
-                    duration = CHANGE_TIME_VIEW, 
-                           y = view.acc_split.y - 180
+                    duration     = CHANGE_TIME_VIEW, 
+                    y            = view.acc_split.y - 180,
+                    on_completed = function()
+                        reset_keys()  
+                    end
                 }
             end
         }
@@ -222,8 +229,16 @@ SourceManagerView = Class(View, function(view, model, ...)
                 view.ui:raise_to_top()
                 view.ui.opacity = 255 
             view.ui:complete_animation()
-            view.ui:animate{duration = 300,
-                            x        = screen.width/2}
+            if view.ui.x ~= screen.width/2 then
+                view.ui:animate
+                {
+                    duration      = 300,
+                    x             = screen.width/2,
+                    on_completed = function()
+                        screen.on_key_down = model.keep_keys
+                    end
+                }
+            end
             if view.accordian == false then
             
                 print("\n\nShowing SourceManagerView UI - Source Providers\n")

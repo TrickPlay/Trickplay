@@ -5,7 +5,8 @@ Model = Class(function(model, ...)
     model.registry = {}
     model.controllers = {}
     model.active_component = nil
-
+    model.loading_dot      = Image{src="assets/LoadingCircle.png",size = {30,30},opacity = 0}
+    screen:add(model.loading_dot)
     model.pic_text = {0,0}
 
     --model.num_sources = NUM_SLIDESHOW_IMAGES

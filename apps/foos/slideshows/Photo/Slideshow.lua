@@ -32,17 +32,17 @@ local  on_screen_list = {}
 logo = Image{opacity = 0}
 
 function Slideshow:new(args)
-	local num_pics = args.num_pics
-	local urls     = {}
-	local images   = {}
+--	local num_pics = args.num_pics
+--	local urls     = {}
+--	local images   = {}
 	local index    = args.index
-	local style    = dofile("slideshows/Photo/slideshow.lua")
+--	local style    = dofile("slideshows/Photo/Slideshow.lua")
 	search         = adapters[args.index][1].required_inputs.query
 	print ("INDEX: "..args.index)
 	print ("SEARCHING: "..search)
 	local object = { 
-		num_pics = num_pics,
-		images   = images,
+--		num_pics = num_pics,
+--		images   = images,
 		index    = index
 	}
     setmetatable(object, self)
