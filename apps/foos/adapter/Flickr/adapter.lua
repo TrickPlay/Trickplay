@@ -16,7 +16,7 @@ local adapter = {
 		},
 		albums = function() end,
 		photos = function(search,current_pic, i)
-      	return "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..user_ids[i].."&nojsoncallback=1"
+		return "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..user_ids[i].."&nojsoncallback=1"
 		end,
 		site = function(data,i) 
 			num_photos = #data.photos.photo
@@ -50,9 +50,9 @@ function adapter:loadCovers(i,search, start_index)
 			local data = json:parse(response.body)
 			for k,v in pairs(data.photos.photo[1]) do print(k,v) end
 			test = "http://farm"..data.photos.photo[start_index].farm..".static.flickr.com/"..data.photos.photo[start_index].server.."/"..data.photos.photo[start_index].id.."_"..data.photos.photo[start_index].secret..".jpg"
-         if (not dontswap) then
+         --if (not dontswap) then
 			   Load_Image(test,i)
-			end
+			--end
 		end
 		}
 		request:send()
@@ -71,10 +71,10 @@ function adapter:getUserID(username)
 				user_ids[#adapters] = data.user.nsid
 	--			self[1].required_inputs.query = data.user.nsid
             Add_Cover()
---[[		      model.album_group:clear()
-		      model.albums = {}
-		      Setup_Album_Covers()
-		      model:notify()]]
+--[[			  model.album_group:clear()
+			  model.albums = {}
+			  Setup_Album_Covers()
+			  model:notify()]]
 		   end
 		end
 	}

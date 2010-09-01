@@ -7,22 +7,74 @@ PADDING_MIDDLE = 0
 loadGroup = {}
 
 PIC_DIR = "assets/thumbnails/"
+function loading(group)
 
+    group:add(Rectangle
+    {
+        name   = "backing",
+        color  = "FFFFFF",
+        width  = PIC_W,
+        height = PIC_H 
+    })
+    local loading_dots = 
+    {
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
+        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}}
+    }
 
+    for i=1,#loading_dots do
+        local r   = 100
+        local rad = (2*math.pi)/(#loading_dots) * i
+
+        loading_dots[i].x = math.floor( r * math.cos(rad) )
+        loading_dots[i].y = math.floor( r * math.sin(rad) )
+
+        group:add(loading_dots[i])
+        --print(loading_dots[i].x ,loading_dots[i].y, deg)
+    end
+
+    local load_timeline = Timeline
+    {
+            name      = "Selection animation",
+            loop      =  true,
+            duration  =  150 * (#loading_dots),
+            direction = "FORWARD", 
+    }
+    function load_timeline.on_new_frame(t,msecs)
+        --print("on_frame",msecs)
+        local increment = math.ceil(255/(#loading_dots))
+        local start_i = math.ceil(msecs/150)
+        for i = 1,#loading_dots do
+            local curr_i = (start_i + (i-1))%(#loading_dots) +1
+
+            loading_dots[curr_i].opacity = increment*i--(255*msecs/2400 + increment*i) %
+                                                --       255
+
+            --print("\t",curr_i,loading_dots[curr_i].opacity)
+        end
+    end
+    load_timeline:start()
+end
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
-	 
-	 
-	 
-    model.albums = {}
-    model.fp_slots = {}
+    model.albums       = {}
+    model.fp_slots     = {}
     model.placeholders = {}
 
-
     assert(model.default,"default is not init yet")
-	for i =1, #adapters do
-		 loadCovers(i,searches[#adapters+1-i], math.random(5))
-	end
+    for i =1, #adapters do
+        loadCovers(i,searches[#adapters+1-i], math.random(5))
+    end
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
     --fill the thing with clones of the default-loading image
@@ -83,15 +135,18 @@ function Load_Image(site,index)
                 --if everything went right
                 if not failed and img ~= nil then
                     print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")",model.albums[i][j])
-                        
+                    
                     --add the next album cover
                     Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
                     slot:add(img)
+model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
                     --put the old one on top and animate it down
                     --only animate if there is a picture already there
                     if prev_cover ~= nil then
                         print("\tan old cover exists, animating it out")
                         prev_cover:raise_to_top()
+model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
+                        
                         prev_cover:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
                             y            = img.y + PIC_H,
@@ -105,7 +160,8 @@ function Load_Image(site,index)
                     end
                 --if it failed to load 
                 else
-                    loadCovers(index, searches[#adapters+1-index], math.random(16))
+                    loadCovers(index, searches[#adapters+1-index],
+                                                  math.random(16))
                 end
                 model.swapping_cover = false
             end

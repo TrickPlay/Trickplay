@@ -118,7 +118,7 @@ FrontPageView = Class(View, function(view, model, ...)
             local progress    =  msecs/200
 			  dontswap = true		
             --cannot assume that image will have made it to its full expanded size
-            local pos_delta   = {view.prev_pos[1] - view.prev_target_pos[1],
+            local   pos_delta = {view.prev_pos[1] - view.prev_target_pos[1],
                                  view.prev_pos[2] - view.prev_target_pos[2]}
             local scale_delta = {view.prev_scale[1] - 1, view.prev_scale[2] - 1}
 
@@ -133,9 +133,13 @@ FrontPageView = Class(View, function(view, model, ...)
         elseif msecs > 200 and msecs <= 400 then
  
             --in case on_new_frame didn't get called on the 200th msec
-            view.previous.position = {view.prev_target_pos[1],view.prev_target_pos[2]}
-            view.previous.scale    = {1,1}
-            prev_i={sel[1],sel[2]}
+            view.previous.position = 
+            {
+                view.prev_target_pos[1],
+                view.prev_target_pos[2]
+            }
+            view.previous.scale = { 1 , 1 }
+            prev_i = { sel[1] , sel[2] }
 
             local progress = (msecs - 200)/200
 
@@ -147,8 +151,8 @@ FrontPageView = Class(View, function(view, model, ...)
             view.backdrop.opacity = 255--*progress
             view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
                          PIC_H * (sel[1]-1)-22*progress}
-           dontswap = false
-
+           --dontswap = false
+            --screen.on_key_down = model.keep_keys
         elseif msecs > 400  and msecs <= 800 then
             --in case on_new_frame didn't get called on the 400th msec
             view.current.position = {PIC_W * (sel[2]-1) -  (.025*PIC_W),
@@ -156,8 +160,10 @@ FrontPageView = Class(View, function(view, model, ...)
             view.current.scale    = {1.05,1.05}
 
             view.backdrop.scale = {.945,.945}
-            view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22,
-                         PIC_H * (sel[1]-1)-22}
+            view.backdrop.position = {
+                PIC_W * (sel[2]-1) - 22 - (.025*PIC_W),
+                PIC_H * (sel[1]-1) - 22
+            }
 
         -- bring the bar up a little bit
         elseif msecs > 800  and msecs <= 900 then
@@ -166,10 +172,10 @@ FrontPageView = Class(View, function(view, model, ...)
             view.bottom_bar.y = PIC_H - progress*70
         elseif msecs > 900 and msecs <= 2900 then
             view.bottom_bar.y = PIC_H - 70
+
         -- bring the bar up a little more
         elseif msecs > 2900 and msecs <= 3000 then
             local progress = (msecs - 2900)/100
-
             view.bottom_bar.y = PIC_H - progress*140
         end
     end
@@ -211,9 +217,12 @@ FrontPageView = Class(View, function(view, model, ...)
 
         model.album_group:animate
         {
-             duration = 2*CHANGE_VIEW_TIME,
-             mode     = EASE_OUT_QUAD,
-             x        = new_x
+            duration = 2*CHANGE_VIEW_TIME,
+            mode     = EASE_OUT_QUAD,
+            x        = new_x,
+            on_completed = function()
+                reset_keys()
+            end
         }
 
         --TODO include loader threshold here
@@ -316,10 +325,10 @@ function view.timer:on_timer()
 
                 local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
 					
-                if (rand_i[1] ~= model.fp_index[1] or
-                    rand_i[2] ~= model.fp_index[2]) and 
+                if --[[(rand_i[1] ~= model.fp_index[1] or
+                    rand_i[2] ~= model.fp_index[2]) and --]]
                     adapters[formula]~=nil then
-                    if (not dontswap) then
+                    --if (not dontswap) then
                    	
                     print("\tcalling")
                     model.swapping_cover = true
@@ -327,7 +336,7 @@ function view.timer:on_timer()
                     local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
                      loadCovers(formula, searches[#adapters+1-formula], search_i)
-                    end
+                    --end
                 else
                     print("not calling")
                 end
@@ -338,9 +347,9 @@ end
 function view:Delete_Cover(index)
     model.swapping_cover = false
     print("Delete_Cover( "..index.." )")
-    if #adapters ~= 1 then
-    local keys = view:get_controller().on_key_down 
-    view:get_controller().on_key_down = function() end
+    --if #adapters ~= 1 then
+    --local keys = view:get_controller().on_key_down 
+    --view:get_controller().on_key_down = function() end
     local del_timeline = Timeline
     {
         name      = "Deletion animation",
@@ -349,12 +358,12 @@ function view:Delete_Cover(index)
         direction = "FORWARD",
     }
     function del_timeline.on_started()
-        print("started")
+        print("del on started")
     end
     function del_timeline.on_new_frame(t,msecs)
-        print("on new frame")
+        print("del on new frame")
         local progress = msecs/t.duration
-	    dontswap = true
+	    --dontswap = true
 
         if model.albums[(index-1)%NUM_ROWS +1]
                        [math.ceil(index/NUM_ROWS)] ~= nil then 
@@ -404,17 +413,20 @@ function view:Delete_Cover(index)
         end
     end
     function del_timeline.on_completed()
+        print("del on completed")
         local i = (index-1)%NUM_ROWS +1
         local j = math.ceil(index/NUM_ROWS)
         --print("DEL on completed",index,",",i,j,",",model.albums[i][j],model.placeholders[i][j])
 
-        if  model.albums[i] ~= nil and model.albums[i][j] ~= nil then
+        if  model.albums[i]    ~= nil and 
+            model.albums[i][j] ~= nil then
+
             model.albums[i][j]:unparent()
             model.albums[i][j] = nil
         end
-        if  model.placeholders[i]~= nil and 
-                model.placeholders[i][j] ~= nil and 
-                model.placeholders[i][j] ~= 0   then
+        if  model.placeholders[i]    ~= nil and 
+            model.placeholders[i][j] ~= nil then
+
             model.placeholders[i][j].opacity = 0
             model.placeholders[i][j]:unparent()
             model.placeholders[i][j] = nil
@@ -453,7 +465,7 @@ function view:Delete_Cover(index)
             model.front_page_index = model.front_page_index - 1
         end
         --print("\n\n",index,#adapters)
-        if index  == #adapters then
+        if index  == #adapters and index ~= 1 then
             local ii = (index-1-1)%NUM_ROWS +1
             local jj = math.ceil((index-1)/NUM_ROWS)
 
@@ -485,14 +497,21 @@ function view:Delete_Cover(index)
 
 
         deleteAdapter(index)
+        -- ... fuckin race conditions
+        --print("hacked")
+        --local hack = model.keep_keys
+       -- model.keep_keys = function() end
         model:notify()
-        view:get_controller().on_key_down = keys
-         dontswap = false
+        --model.keep_keys = hack
+        --print("unhacked")
+        --view:get_controller().on_key_down = keys
+        -- dontswap = false
+        --reset_keys()            
 
 
     end
     del_timeline:start()
-    end
+    --end
 end
 
 end)
@@ -637,6 +656,8 @@ function Add_Cover()
 --]]
         --deleteAdapter(index)
         model:notify()
+        --dont need to give keys back here, they are given 
+        --back in the leave accordian animation
     end
     add_timeline:start()
 end
