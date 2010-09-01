@@ -26,9 +26,17 @@ function( section , ui )
     
     section.dropdown:add( section.text_focus , section.app_focus )
     
+    -- A table of functions to call when an item gains focus
+    
     section.focus_functions = {}
     
+    -- A table of functions to call when an item loses focus
+    
     section.unfocus_functions = {}
+    
+    -- A table of functions to call when an item is activated (press Enter)
+    
+    section.activate_functions = {}
     
     ---------------------------------------------------------------------------
 
@@ -376,6 +384,14 @@ function( section , ui )
                 caption:set( APP_LABEL_TEXT_STYLE[ UNSELECTED ] )
             
             end
+            
+        section.activate_functions[ i + 2 ] =
+        
+            function()
+            
+                apps:launch( app_id )
+            
+            end
     
     end
 
@@ -429,11 +445,22 @@ function( section , ui )
         
     end
     
+    local function activate_focused()
+    
+        local activate = section.activate_functions[ section.focus ]
+        
+        if activate then
+            activate()
+        end
+    
+    end
+    
     
     local key_map =
     {
-        [ keys.Up   ] = function() move_focus( -1 ) end,
-        [ keys.Down ] = function() move_focus( 1  ) end
+        [ keys.Up     ] = function() move_focus( -1 ) end,
+        [ keys.Down   ] = function() move_focus( 1  ) end,
+        [ keys.Return ] = function() activate_focused() end,
     }
 
     ---------------------------------------------------------------------------
@@ -445,7 +472,7 @@ function( section , ui )
     
         section.focus = 1
         
-        pcall( section.focus_functions[ 1 ] )
+        section.focus_functions[ 1 ]()
         
         section.dropdown:grab_key_focus()
         
