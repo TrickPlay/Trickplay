@@ -3,7 +3,7 @@
 return function ( size , color )
 
     local BORDER_WIDTH=6
-    local POINT_HEIGHT=38
+    local POINT_HEIGHT=34
     local POINT_WIDTH=60
     local BORDER_COLOR="FFFFFF5C"
     local CORNER_RADIUS=22
