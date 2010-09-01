@@ -103,7 +103,7 @@ function( section , ui )
                 
                 if not icon:load_app_icon( app_id , "launcher-icon.png" ) then
                     if not section.generic_app_icon then
-                        section.generic_app_icon = Image{ src = "assets/generic-app-icon.png" , opacity = 0 }
+                        section.generic_app_icon = Image{ src = "assets/generic-app-icon.jpg" , opacity = 0 }
                         screen:add( section.generic_app_icon )
                     end                    
                     icon = Clone{ source = section.generic_app_icon , opacity = 255 }                
