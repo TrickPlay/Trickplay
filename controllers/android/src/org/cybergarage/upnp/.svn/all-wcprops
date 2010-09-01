@@ -1,0 +1,119 @@
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svnroot/cgupnpjava/!svn/ver/138/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp
+END
+Device.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/cgupnpjava/!svn/ver/138/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/Device.java
+END
+Service.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/cgupnpjava/!svn/ver/138/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/Service.java
+END
+AllowedValueRange.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/AllowedValueRange.java
+END
+ServiceStateTable.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ServiceStateTable.java
+END
+ActionList.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ActionList.java
+END
+Action.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/cgupnpjava/!svn/ver/65/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/Action.java
+END
+ArgumentList.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/cgupnpjava/!svn/ver/65/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ArgumentList.java
+END
+AllowedValueList.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/AllowedValueList.java
+END
+Argument.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/Argument.java
+END
+UPnP.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/cgupnpjava/!svn/ver/123/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/UPnP.java
+END
+IconList.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/IconList.java
+END
+AllowedValue.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/AllowedValue.java
+END
+UPnPStatus.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/cgupnpjava/!svn/ver/59/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/UPnPStatus.java
+END
+StateVariable.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/StateVariable.java
+END
+RootDescription.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/RootDescription.java
+END
+Icon.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/cgupnpjava/!svn/ver/136/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/Icon.java
+END
+ControlPoint.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/cgupnpjava/!svn/ver/66/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ControlPoint.java
+END
+DeviceList.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/DeviceList.java
+END
+ServiceList.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ServiceList.java
+END
