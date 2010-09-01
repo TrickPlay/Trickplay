@@ -120,8 +120,8 @@ function( section , ui )
     
     local MENU_ITEM_TEXT_STYLE =
     {
-        [SELECTED]   = { font = "DejaVu Sans 28px", color = "FFFFFFFF" },
-        [UNSELECTED] = { font = "DejaVu Sans 28px", color = "FFFFFFFF" },
+        [SELECTED]   = { font = "DejaVu Sans 26px", color = "FFFFFFFF" },
+        [UNSELECTED] = { font = "DejaVu Sans 26px", color = "FFFFFFFF" },
     }
     
     local APP_LABEL_TEXT_STYLE =
@@ -130,12 +130,12 @@ function( section , ui )
         [UNSELECTED] = { font = "DejaVu Sans 24px" , color = "000000FF" },
     }
 
-    local MENU_ITEM_HEIGHT  = 44    -- The height of each text menu item
-    local TOP_PADDING       = 40    -- The vertical distance from the point of the dropdown to the first text menu item
-    local MENU_ITEM_PADDING = 40    -- Vertical space between text menu items
-    local APP_ITEM_PADDING  = 18    -- Vertical space between app items
-    local BOT_PADDING       = 10     -- Vertical padding at the bottom of the dropdown
-    local HORIZ_PADDING     = 22    -- Horizontal space from left of dropdown
+    local MENU_ITEM_HEIGHT  = 36    -- The height of each text menu item
+    local TOP_PADDING       = 26    -- The vertical distance from the point of the dropdown to the first text menu item
+    local MENU_ITEM_PADDING = 32    -- Vertical space between text menu items
+    local APP_ITEM_PADDING  = 28    -- Vertical space between app items
+    local BOT_PADDING       = 0     -- Vertical padding at the bottom of the dropdown
+    local HORIZ_PADDING     = 26    -- Horizontal space from left of dropdown
     
     local group = section.dropdown
         
@@ -248,6 +248,7 @@ function( section , ui )
     
     arrow.opacity = 50
     r_arrow.opacity = 50
+    category_text.opacity = 50
     
     group:add( arrow , r_arrow , category_text )
     
@@ -260,11 +261,12 @@ function( section , ui )
             section.app_focus.opacity = 0
     
             section.text_focus.opacity = 255
-            section.text_focus.position = { ring.x - 1 + 34, ring.y + MENU_ITEM_HEIGHT + MENU_ITEM_PADDING - 12 }    
+            section.text_focus.position = { ring.x - 1 + 34, ring.y + MENU_ITEM_HEIGHT + MENU_ITEM_PADDING - 6 }    
             section.text_focus:lower( arrow )
             section.text_focus.w = RING_WIDTH - 60
             arrow.opacity = 255
             r_arrow.opacity = 255
+            category_text.opacity = 255
             
         end
 
@@ -274,6 +276,7 @@ function( section , ui )
         
             arrow.opacity = 50
             r_arrow.opacity = 50
+            category_text.opacity = 50
             
         end
         
@@ -283,7 +286,7 @@ function( section , ui )
     
     validate_top_apps()
     
-    local y = category_text.y + category_text.h + MENU_ITEM_PADDING - 10
+    local y = category_text.y + category_text.h + MENU_ITEM_PADDING 
     
     local x = HORIZ_PADDING
     
