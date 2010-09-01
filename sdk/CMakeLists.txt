@@ -29,7 +29,7 @@ if (UNIX AND NOT APPLE)
 			"libjpeg62"
 			"libtiffxx0c2"
 			"libgif4"
-			"libossp-uuid15"
+			"libossp-uuid15 | libossp-uuid16"
 			"libupnp3 (>= 1.6)"
 			"libreadline6"
 		)
