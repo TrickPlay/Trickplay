@@ -3,6 +3,7 @@ Format: 1.4
 
 Title: TrickPlay
 SubTitle: Application Developer's Guide and Reference
+Footer: v__REPLACE_ME_VERSION_TAG__
 
 # You can add a footer to your documentation like this:
 # Footer: [text]
