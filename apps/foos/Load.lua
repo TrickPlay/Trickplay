@@ -64,78 +64,86 @@ function loading(group)
         end
     end
     load_timeline:start()
+    return load_timeline
 end
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
-    model.albums       = {}
+    --model.albums       = {}
     model.fp_slots     = {}
-    model.placeholders = {}
 
-    assert(model.default,"default is not init yet")
-    for i =1, #adapters do
-        loadCovers(i,searches[#adapters+1-i], math.random(5))
-    end
+   -- model.placeholders = {}
+
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
     --fill the thing with clones of the default-loading image
     for i = 1,NUM_ROWS do 
 
-        model.placeholders[i] = {}
-        model.albums[i]       = {}
+        --model.placeholders[i] = {}
+        --model.albums[i]       = {}
         model.fp_slots[i]     = {}
 
         for j = 1,math.ceil(#adapters/NUM_ROWS) do
             local pic_index = ((((j-1)*NUM_ROWS+i)-1)%8+1)
             if ((j-1)*NUM_ROWS+i)<=#adapters then
-                model.placeholders[i][j] = Clone
-                {
-                    source  = model.default[math.random(1,8)],
-                    opacity = 255
-                }
-                model.placeholders[i][j].opacity = 255
                 model.fp_slots[i][j] = Group
                 {
                     position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
                     clip     = { 0, 0,  PIC_W, PIC_H },
                     opacity  = 255
                 }
-                model.fp_slots[i][j]:add(model.placeholders[i][j])
+                model.fp_slots[i][j]:add(Clone
+                {
+                    name    = "placeholder",
+                    source  = model.default[math.random(1,8)],
+                    opacity = 255
+                })
 
                 model.album_group:add(model.fp_slots[i][j])
             end
         end
     end
+
+    for i =1, #adapters do
+        local ii = (i-1)%NUM_ROWS +1
+        local jj = math.ceil(i/NUM_ROWS)
+
+        adapters[#adapters+1-i]:loadCovers(model.fp_slots[ii][jj],
+                                           searches[#adapters+1-i],
+                                           math.random(5))
+    end
 end
 
 --Called by the adapter's on_complete function
-function Load_Image(site,index)
-    print("Load_Image(",site,",",index,")")
+function Load_Image(src,site,search,slot)
+    print("Load_Image(",site,",",search,")")
     -- 2D version of the index
-    local i = (index-1)%NUM_ROWS +1
-    local j = math.ceil(index/NUM_ROWS)
+    --local i = (index-1)%NUM_ROWS +1
+    --local j = math.ceil(index/NUM_ROWS)
     --keep a local version for the callbacks
-    local slot  = model.fp_slots[i][j]
-    local prev_cover = nil
+    --local slot  = model.fp_slots[i][j]
+    --local prev_cover = nil
+--[[
     if model.albums[i][j] ~= nil then
         prev_cover         = model.albums[i][j]
         model.albums[i][j] = nil
     end
-
+--]]
     --if url returned is empty, do it again
     if (site == "") then
-        loadCovers(index, searches[#adapters+1-index], math.random(16))
+        src:loadCovers(slot,search, math.random(16))
     --if the album is empty, then it is the initial load
-    elseif model.albums[i] ~= nil and slot ~= nil then
+    elseif slot ~= nil then
 
-        model.albums[i][j] = Image{
+        local pic = Image{
+            name  = "cover",
             async = true,
             src   = site,
             -- toss the filler image and scale it once loaded
             on_loaded = function(img,failed)
                 --if everything went right
                 if not failed and img ~= nil then
-                    print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")",model.albums[i][j])
-                    
+                    --print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")")
+                    local prev_cover = slot:find_child("cover")        
                     --add the next album cover
                     Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
                     slot:add(img)
@@ -145,13 +153,15 @@ model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
                     if prev_cover ~= nil then
                         print("\tan old cover exists, animating it out")
                         prev_cover:raise_to_top()
+print("1")
 model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
-                        
+          print("2")              
                         prev_cover:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
                             y            = img.y + PIC_H,
                             opacity      = 0,
                             on_completed = function(image)
+print("3")
                                 --toss the old cover after the animation
                                 prev_cover:unparent()
                                 prev_cover = nil
@@ -160,8 +170,7 @@ model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
                     end
                 --if it failed to load 
                 else
-                    loadCovers(index, searches[#adapters+1-index],
-                                                  math.random(16))
+                    src:loadCovers(slot,search,math.random(16))
                 end
                 model.swapping_cover = false
             end

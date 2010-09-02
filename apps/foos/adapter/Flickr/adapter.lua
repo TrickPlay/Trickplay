@@ -40,7 +40,7 @@ function adapter:getPhotos(album,start,num_images)
 
 end
 
-function adapter:loadCovers(i,search, start_index)
+function adapter:loadCovers(slot,search, start_index)
 	start_index = (start_index-1)%(num_photos) + 1
 
 	if (user_ids[#adapters+1-i]) then
@@ -51,7 +51,7 @@ function adapter:loadCovers(i,search, start_index)
 			for k,v in pairs(data.photos.photo[1]) do print(k,v) end
 			test = "http://farm"..data.photos.photo[start_index].farm..".static.flickr.com/"..data.photos.photo[start_index].server.."/"..data.photos.photo[start_index].id.."_"..data.photos.photo[start_index].secret..".jpg"
          --if (not dontswap) then
-			   Load_Image(test,i)
+			   Load_Image(adapter,site,search,slot)
 			--end
 		end
 		}

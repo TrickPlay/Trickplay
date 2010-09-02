@@ -44,19 +44,18 @@ function adapter:getPhotos(album,start,num_images)
 
 end
 
-function adapter:loadCovers(i,search, start_index)
-	print (adapters[i].logoUrl)
+function adapter:loadCovers(slot,search, start_index)
 	local request = URLRequest {
 	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=xxlarge",
 	on_complete = function (request, response)
 		local data = json:parse(response.body)
 		if (type(data.responseData) == "table" and data.responseData.results[1] ~= nil) then
-			site = data.responseData.results[1].unescapedUrl or ""
+			local site = data.responseData.results[1].unescapedUrl or ""
          --if (not dontswap) then
-			   Load_Image(site,i)
+			   Load_Image(adapter,site,search,slot)
 			--end
 		else
-			Load_Image("assets/none.png",i)
+			Load_Image(adapter,"assets/none.png",search,slot)
 			print(i)
 			self.hasImages = false
 		end

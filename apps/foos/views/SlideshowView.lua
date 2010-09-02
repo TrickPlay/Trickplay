@@ -327,7 +327,7 @@ SlideshowView = Class(View, function(view, model, ...)
         }
 --]]
         local clone = Group{}
-        loading(clone)
+        local timeline  = loading(clone)
         off_screen_prep[styles[style_i] ](clone,group)
 
         local index = view:get_controller():get_photo_index() +
@@ -359,21 +359,31 @@ SlideshowView = Class(View, function(view, model, ...)
                     src       = site, 
                     async     = true, 
                     on_loaded = function(img,failed)
-                        print("picture loaded")
                         --if it failed to load from the internet, then
                         --throw up the placeholder
                         if failed then
---[[                use the X here and display a loading asset before
-                            local backup = Image {
-                                name = "slide",
-                                src  = "assets/none.png"
-                            }
-                            view.on_screen_list[rel_i] = Group {z = 500}
-                            prep_pic[styles[style_i] ](backup,
-                                     view.on_screen_list[rel_i])
---]]
+                            print("picture loading failed")
+                            --loaded the placeholder for failed pics
+                            local placeholder = Group{}
+                            placeholder:add(Rectangle
+                            {
+                                name   = "backing",
+                                color  = "000000",
+                                width  = PIC_W,
+                                height = PIC_H 
+                            })
+
+                            placeholder:add(Clone
+                            {
+                                name   = "slide",
+                                source = backup,
+                                x      = 100,
+                                y      = 100
+                            })
+                            on_screen_prep[styles[style_i]](placeholder,group)
                         else
                             --view.on_screen_list[rel_i] = Group {z = 500}
+                            timeline:stop()
                             group:clear()
                             on_screen_prep[styles[style_i] ](img,group)
                         end
@@ -402,7 +412,7 @@ SlideshowView = Class(View, function(view, model, ...)
         }
 --]]
         local clone = Group{}
-        loading(clone)
+        local timeline = loading(clone)
         on_screen_prep[styles[style_i] ](clone,group)
         local index = view:get_controller():get_photo_index() -
                                           #view.on_screen_list +1
@@ -437,8 +447,26 @@ SlideshowView = Class(View, function(view, model, ...)
                     on_loaded = function(img,failed)
                         if failed then
                             --loaded the placeholder for failed pics
+                            local placeholder = Group{}
+                            placeholder:add(Rectangle
+                            {
+                                name   = "backing",
+                                color  = "000000",
+                                width  = PIC_W,
+                                height = PIC_H 
+                            })
+
+                            placeholder:add(Clone
+                            {
+                                name   = "slide",
+                                source = backup,
+                                x      = 50,
+                                y      = 50
+                            })
+                            on_screen_prep[styles[style_i]](placeholder,group)
                         else
                             --view.on_screen_list[rel_i] = Group {z = 500}
+                            timeline:stop()
                             group:clear()
                             on_screen_prep[styles[style_i]](img,group)
                             --if its the desk/slideshow, then need to

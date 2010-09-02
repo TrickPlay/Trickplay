@@ -166,19 +166,21 @@ SourceManagerView = Class(View, function(view, model, ...)
             view.acc_split:add(view.menu_buttons[i][2])
             
         end
-
+        view.acc_split:complete_animation()
         view.acc_split:animate
         {
-            duration = CHANGE_TIME_VIEW, 
-                   y = view.acc_split.y + 180,
+            duration     = 100, 
+            y            = view.menu_items[1].y + 50,
             on_completed = function()
                 view.accordian_groups[  model.source_list[src_sel][2]  ]:raise_to_top()
+                view.accordian_groups[  model.source_list[src_sel][2]  ]:complete_animation()
                 view.accordian_groups[  model.source_list[src_sel][2]  ]:animate
                 {
-                    duration     = CHANGE_VIEW_TIME,
+                    duration     = 100,
                     opacity      = 255,
                     on_completed = function()
-                        screen.on_key_down = model.keep_keys      
+                        view.acc_split.y = view.menu_items[1].y + 50
+                        reset_keys()      
                     end
                 }
             end
@@ -187,17 +189,23 @@ SourceManagerView = Class(View, function(view, model, ...)
 
 
     function view:leave_accordian()
+        --duration of this animation should match the duraction of the 
+        --add cover timeline to ensure that reset keys occurs after it
+        --finished
         local src_sel    = view:get_controller():get_src_selected_index()
+        view.accordian_groups[  model.source_list[src_sel][2]  ]:complete_animation()
         view.accordian_groups[  model.source_list[src_sel][2]  ]:animate
         {
-            duration = CHANGE_VIEW_TIME,
+            duration = 100,
             opacity  = 0,
             on_completed = function()
+                view.acc_split:complete_animation()
                 view.acc_split:animate
                 {
-                    duration     = CHANGE_TIME_VIEW, 
-                    y            = view.acc_split.y - 180,
+                    duration     = 100, 
+                    y            = view.menu_items[1].y +0,
                     on_completed = function()
+                        view.accordian_groups[  model.source_list[src_sel][2]  ].opacity = 0
                         reset_keys()  
                     end
                 }
@@ -226,8 +234,9 @@ SourceManagerView = Class(View, function(view, model, ...)
         acc_sel[1], acc_sel[2] =  controller:get_acc_selected_index()
 
         if comp == Components.SOURCE_MANAGER  then
-                view.ui:raise_to_top()
-                view.ui.opacity = 255 
+            
+            view.ui:raise_to_top()
+            view.ui.opacity = 255 
             view.ui:complete_animation()
             if view.ui.x ~= screen.width/2 then
                 view.ui:animate
@@ -235,9 +244,13 @@ SourceManagerView = Class(View, function(view, model, ...)
                     duration      = 300,
                     x             = screen.width/2,
                     on_completed = function()
-                        screen.on_key_down = model.keep_keys
+                        reset_keys()
                     end
                 }
+--[[
+            else
+                print("please print this\n\n\n\n")
+--]]
             end
             if view.accordian == false then
             
@@ -248,14 +261,20 @@ SourceManagerView = Class(View, function(view, model, ...)
                     view.menu_buttons[i][1]:complete_animation()
                     view.menu_buttons[i][2]:complete_animation()
                     if i == src_sel then
-                        view.menu_buttons[i][1]:animate{ duration = 100, opacity =   0}
-                        view.menu_buttons[i][2]:animate{ duration = 100, opacity = 255}
+                        view.menu_buttons[i][1]:animate{ duration = 100 ,
+                                                         opacity  =   0 }
+                        view.menu_buttons[i][2]:animate{ duration = 100 ,
+                                                         opacity  = 255 }
                     else
-                        view.menu_buttons[i][1]:animate{ duration = 100, opacity = 255}
-                        view.menu_buttons[i][2]:animate{ duration = 100, opacity =   0}
+                        view.menu_buttons[i][1]:animate{ duration = 100 ,
+                                                         opacity  = 255 }
+                        view.menu_buttons[i][2]:animate{ duration = 100 ,
+                                                         opacity  =   0 }
                     end
                 end
             else
+                print("\n\nShowing SourceManagerView UI - Accordian\n")
+
                 local acc = view.accordian_items[  model.source_list[src_sel][2]  ]
                 for i = 1, #acc do
                     for j = 1, #acc[i] do
@@ -266,12 +285,14 @@ SourceManagerView = Class(View, function(view, model, ...)
                         end  
                     end
                 end
+
             end
+
         else
             print("Hiding SourceManagerView UI")
             --model.album_group:complete_animation()
             view.ui:complete_animation()
-            view.ui:animate{duration = 300,
+            view.ui:animate{duration =          300,
                             x        = screen.width}
             --view.ui.opacity = 0
         end

@@ -21,9 +21,10 @@ for i =1, #adapterTypes do
 end
 
 
-function loadCovers(i,search, start_index)
+function loadCovers(child,slot,search, start_index)
+        error("badddddddd user.... bad")
 	if (adapters[i] ~= nil) then
-		adapters[#adapters+1-i]:loadCovers(i,search,start_index)
+		adapters[#adapters+1-i]:loadCovers(i,slot,search, start_index)
 	end
 end
 
