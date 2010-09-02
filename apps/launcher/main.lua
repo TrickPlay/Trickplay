@@ -35,61 +35,71 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
     
     local BUTTON_TEXT_STYLE = { font = "DejaVu Sans 32px" , color = "FFFFFFFF" }
+
+    -------------------------------------------------------------------------------
+    -- The asset cache
+    -------------------------------------------------------------------------------
     
+    local assets = dofile( "assets-cache" )
+        
     -------------------------------------------------------------------------------
     -- All the initial assets
     -------------------------------------------------------------------------------
     
     local ui =
     {
+        assets              = assets,
+        
+        factory             = dofile( "ui-factory" ),
+        
         bar                 = Group {},
         
-        bar_background      = Image { src = "assets/menu-background.png" },
+        bar_background      = assets( "assets/menu-background.png" ),
         
-        button_focus        = Image { src = "assets/button-focus.png" },
+        button_focus        = assets( "assets/button-focus.png" ),
         
-        search_button       = Image { src = "assets/button-search.png" },
+        search_button       = assets( "assets/button-search.png" ),
         
-        search_focus        = Image { src = "assets/button-search-focus.png" },
+        search_focus        = assets( "assets/button-search-focus.png" ),
         
-        logo                = Image { src = "assets/logo.png" },
+        logo                = assets( "assets/logo.png" ),
                 
         sections =
         {
             [SECTION_APPS] =
             {
-                button  = Image { src = "assets/button-red.png" },
+                button  = assets( "assets/button-red.png" ),
                 text    = Text  { text = strings[ "My Apps" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 120 ,  21 ,  21 , 230 }, -- RED
-                height  = 870,
-                init    = dofile( "section-apps.lua" )
+                height  = 900,
+                init    = dofile( "section-apps" )
             },
             
             [SECTION_SHOWCASE] =
             {
-                button  = Image { src = "assets/button-green.png" },
+                button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "Showcase" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
                 height  = 620,
-                init    = dofile( "section-showcase.lua" )
+                init    = dofile( "section-showcase" )
             },
             
             [SECTION_SHOP] =
             {
-                button  = Image { src = "assets/button-yellow.png" },
+                button  = assets( "assets/button-yellow.png" ),
                 text    = Text  { text = strings[ "App Shop" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
                 height  = 620,
-                init    = dofile( "section-shop.lua" )
+                init    = dofile( "section-shop" )
             },
             
             [SECTION_SETTINGS] =
             {
-                button  = Image { src = "assets/button-blue.png" },
+                button  = assets( "assets/button-blue.png" ),
                 text    = Text  { text = strings[ "More" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
                 height  = 320,
-                init    = dofile( "section-settings.lua" )
+                init    = dofile( "section-settings" )
             }
         }
     }
@@ -105,13 +115,7 @@ local function build_ui( show_it )
     local BUTTON_X_OFFSET           = 7                     -- distance between left side of buttons
     local SEARCH_BUTTON_X_OFFSET    = 5
     local DROPDOWN_POINT_Y_OFFSET   = -2                    -- how far to raise or lower the drop downs
-    local DROPDOWN_WIDTH_OFFSET     = -16                   -- The width of the dropdown in relation to its button
-    
-    -------------------------------------------------------------------------------
-    -- The function that makes drop downs - it returns a Canvas.
-    -------------------------------------------------------------------------------
-    
-    local make_dropdown = dofile( "dropdown.lua" )
+    local DROPDOWN_WIDTH_OFFSET     = -8                   -- The width of the dropdown in relation to its button
     
     -------------------------------------------------------------------------------
     -- Now, create structure and position everything
@@ -154,7 +158,7 @@ local function build_ui( show_it )
         
         -- Create the dropdown background
     
-        section.dropdown_bg = make_dropdown( { section.button.w + DROPDOWN_WIDTH_OFFSET , section.height } , section.color )
+        section.dropdown_bg = ui.factory.make_dropdown( { section.button.w + DROPDOWN_WIDTH_OFFSET , section.height } , section.color )
     
         -- Position the button and text for this section
         
@@ -282,7 +286,7 @@ local function build_ui( show_it )
         
         if section.init then
         
-            section:init( ui )
+            section:init( )
             
             section.init = nil
         
@@ -339,10 +343,12 @@ local function build_ui( show_it )
         local section = ui.sections[ ui.focus ]
         
         if not section then return end
+                
+        if section:on_enter() then
         
-        ui.button_focus.opacity = 0
-        
-        section:on_enter()
+            ui.button_focus.opacity = 0
+            
+        end
     
     end
 
