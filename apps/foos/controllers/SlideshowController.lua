@@ -102,8 +102,7 @@ end
                end
                view.off_screen_list[#view.off_screen_list]=nil
            end
-           if view:get_controller():get_photo_index() -
-                                #view.on_screen_list+1 >1 then
+           if photo_index - #view.on_screen_list+1 >1 then
                view:preload_back()
            end
         end 

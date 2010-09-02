@@ -37,7 +37,7 @@ function adapter:getPhotos(album,start,num_images)
 
 end
 
-function adapter:loadCovers(i,search, start_index)
+function adapter:loadCovers(slot,search, start_index)
 	local request = URLRequest {
 	url = "http://search.yahooapis.com/ImageSearchService/V1/imageSearch?appid=YahooDemo&query="..search.."&results=1&start="..start_index.."&output=json",
 	on_complete = function (request, response)
@@ -47,7 +47,7 @@ function adapter:loadCovers(i,search, start_index)
 			if (data.ResultSet.Result[1]) then
 				site = data.ResultSet.Result[1].ClickUrl or ""
 		      --if (not dontswap) then
-				   Load_Image(site,i)
+				   Load_Image(adapter,site,search,slot)
 			--	end
 			end
    	end

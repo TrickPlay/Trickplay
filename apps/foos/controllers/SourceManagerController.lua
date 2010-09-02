@@ -70,7 +70,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
             {function() 
                 if query_text ~= "" then
 			table.insert(adapters, dofile("adapter/"..
-                                 adapterTypes[src_selected].."/adapter.lua"))
+                                adapterTypes[src_selected].."/adapter.lua"))
                     adaptersTable[#adapters] = adapterTypes[src_selected]
                     local search = string.gsub(query_text," ","%%20")
                     adapters[#adapters][1].required_inputs.query = search
@@ -84,6 +84,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     Setup_Album_Covers()
                     model:notify()
 --]]
+                    query_text = ""
                 end
                 view.accordian = false
                 view:leave_accordian()
@@ -103,12 +104,16 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                 TextObj( view.accordian_text["LOGIN"][2] ) end},
             {function()
             	 if login_text[1] ~= "" then
-  						table.insert(adapters, dofile("adapter/"..adapterTypes[src_selected].."/adapter.lua"))
+                    table.insert(adapters, dofile("adapter/"..
+                                 adapterTypes[src_selected]..
+                                 "/adapter.lua"))
+
                     adaptersTable[#adapters] = adapterTypes[src_selected]
                     local search = string.gsub(query_text," ","%%20")
                     adapters[#adapters]:getUserID(search)
                     adapters[#adapters][1].required_inputs.query = search                    
                     searches[#adapters] = search
+                    login_text[1] = ""
                 end
                 view.accordian = false
                 view:leave_accordian()
@@ -122,20 +127,20 @@ SourceManagerController = Class(Controller, function(self, view, ...)
 
 
     local MenuKeyTable = {
-    	     [keys.Up]     = function(self) self:move_selector(Directions.UP   ) end,
-		     [keys.Down]   = function(self) self:move_selector(Directions.DOWN ) end,
-		     [keys.Left]   = function(self) self:move_selector(Directions.LEFT ) end,
-		     [keys.Right]  = function(self) self:move_selector(Directions.RIGHT) end,
-		     [keys.Return] = function(self) 
-		         if view.accordian == false then
-		             --enter the accordian
-		             view.accordian = true
-		             view.enter_accordian()
-		         end
-		         MenuItemCallBacks[model.source_list[src_selected][2]][acc_selected[1]][acc_selected[2]]()
-		         self:get_model():notify()
-		         
-		     end
+        [keys.Up]     = function(self) self:move_selector(Directions.UP   ) end,
+        [keys.Down]   = function(self) self:move_selector(Directions.DOWN ) end,
+        [keys.Left]   = function(self) self:move_selector(Directions.LEFT ) end,
+        [keys.Right]  = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Return] = function(self) 
+            if view.accordian == false then
+                --enter the accordian
+                view.accordian = true
+                view.enter_accordian()
+            end
+            MenuItemCallBacks[model.source_list[src_selected][2]][
+                             acc_selected[1] ][acc_selected[2] ]()
+            self:get_model():notify()
+       end
     }
 
 
@@ -143,13 +148,13 @@ SourceManagerController = Class(Controller, function(self, view, ...)
         if MenuKeyTable[k]  and not in_box then
             MenuKeyTable[k](self)
         else
-            screen.on_key_down = model.keep_keys            
+            reset_keys()           
         end
     end
 
 
     function self:move_selector(dir)
-        screen.on_key_down = model.keep_keys            
+        reset_keys()            
 
         if view.accordian == true then
             local next_spot= {acc_selected[1]+dir[2],

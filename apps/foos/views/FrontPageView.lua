@@ -327,15 +327,17 @@ function view.timer:on_timer()
 					
                 if --[[(rand_i[1] ~= model.fp_index[1] or
                     rand_i[2] ~= model.fp_index[2]) and --]]
-                    adapters[formula]~=nil then
+                    adapters[model.fp_1D_index]~=nil then
                     --if (not dontswap) then
                    	
                     print("\tcalling")
                     model.swapping_cover = true
 
-                    local search_i = math.random(1,10)
                     --print("formula?",rand_i[1],rand_i[2],formula)
-                     loadCovers(formula, searches[#adapters+1-formula], search_i)
+                     adapters[#adapters+1-formula]:loadCovers(
+                                model.fp_slots[rand_i[1] ][rand_i[2] ], 
+                                searches[#adapters+1-formula], 
+                                math.random(1,10))
                     --end
                 else
                     print("not calling")
@@ -364,7 +366,7 @@ function view:Delete_Cover(index)
         print("del on new frame")
         local progress = msecs/t.duration
 	    --dontswap = true
-
+--[[
         if model.albums[(index-1)%NUM_ROWS +1]
                        [math.ceil(index/NUM_ROWS)] ~= nil then 
             model.albums[(index-1)%NUM_ROWS +1]
@@ -377,6 +379,19 @@ function view:Delete_Cover(index)
                               [math.ceil(index/NUM_ROWS)].opacity = 
                                                  (1-progress)*255
         end
+--]]
+        local cover = model.fp_slots[(index-1)%NUM_ROWS +1]
+                       [math.ceil(index/NUM_ROWS)]:find_child("cover")
+        
+        local placeholder = model.fp_slots[(index-1)%NUM_ROWS +1]
+                       [math.ceil(index/NUM_ROWS)]:find_child("placeholder")
+        if cover ~= nil then 
+            cover.opacity = (1-progress)*255
+        end
+        if placeholder ~= nil then
+           placeholder.opacity = (1-progress)*255
+        end
+
         for ind = index, #adapters do
             local targ_i = (ind-1)%NUM_ROWS +1
             local targ_j = math.ceil(ind/NUM_ROWS)
@@ -418,18 +433,11 @@ function view:Delete_Cover(index)
         local j = math.ceil(index/NUM_ROWS)
         --print("DEL on completed",index,",",i,j,",",model.albums[i][j],model.placeholders[i][j])
 
-        if  model.albums[i]    ~= nil and 
-            model.albums[i][j] ~= nil then
-
-            model.albums[i][j]:unparent()
-            model.albums[i][j] = nil
+        if  model.fp_slots[i][j]:find_child("cover") ~= nil then
+            model.fp_slots[i][j]:remove("cover")
         end
-        if  model.placeholders[i]    ~= nil and 
-            model.placeholders[i][j] ~= nil then
-
-            model.placeholders[i][j].opacity = 0
-            model.placeholders[i][j]:unparent()
-            model.placeholders[i][j] = nil
+        if  model.fp_slots[i][j]:find_child("placeholder") ~= nil then
+            model.fp_slots[i][j]:remove("placeholder")
         end
         model.fp_slots[i][j] = nil
 
@@ -452,10 +460,10 @@ function view:Delete_Cover(index)
                 model.fp_slots[targ_i][targ_j] =
                      model.fp_slots[curr_i][curr_j]
                 
-                model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
+                --model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
             else
                 model.fp_slots[targ_i][targ_j] = nil
-                model.albums[targ_i][targ_j] = nil
+                --model.albums[targ_i][targ_j] = nil
             end
         end
         if model.front_page_index == math.ceil(#adapters / 
@@ -601,17 +609,17 @@ function Add_Cover()
                 if model.fp_slots[targ_i] == nil then
                     model.fp_slots[targ_i] = {}
                 end
+--[[
                 if model.albums[targ_i] == nil then
                     model.albums[targ_i] = {}
                 end
-
-                model.fp_slots[targ_i][targ_j] =
-                     model.fp_slots[curr_i][curr_j]
-                model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
-                model.placeholders[targ_i][targ_j] = model.placeholders[curr_i][curr_j]
+--]]
+                model.fp_slots[targ_i][targ_j] = model.fp_slots[curr_i][curr_j]
+                --model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
+                --model.placeholders[targ_i][targ_j] = model.placeholders[curr_i][curr_j]
                 model.fp_slots[curr_i][curr_j]     = nil
-                model.albums[curr_i][curr_j]       = nil
-                model.placeholders[curr_i][curr_i] = nil
+                --model.albums[curr_i][curr_j]       = nil
+                --model.placeholders[curr_i][curr_i] = nil
 --[[
             else
                 model.fp_slots[targ_i][targ_j] = nil
@@ -619,7 +627,7 @@ function Add_Cover()
 --]]
             end
         end
-        model.albums[1][1]   = nil
+        --model.albums[1][1]   = nil
         model.fp_slots[1][1] = Group
         {
             --name     = "Slot "..i.." "..j, 
@@ -627,14 +635,17 @@ function Add_Cover()
             clip     = { 0, 0,  PIC_W, PIC_H },
             opacity  = 255
         }
-        model.placeholders[1][1] = Clone
+        model.fp_slots[1][1]:add(Clone
         {
+            name   = "placeholder",
             source = model.default[math.random(1,8)],
             opacity =255
-        }
-        model.fp_slots[1][1]:add(model.placeholders[1][1])
+        })
+        --model.fp_slots[1][1]:add(model.placeholders[1][1])
         model.album_group:add(model.fp_slots[1][1])
-        loadCovers(1,searches[#adapters], math.random(5)) 
+        adapters[#adapters+1-model.fp_1D_index]:loadCovers(model.fp_slots[1][1],
+                                               searches[#adapters], 
+                                               math.random(5)) 
 
 --[[
         if model.front_page_index == math.ceil(#adapters / 

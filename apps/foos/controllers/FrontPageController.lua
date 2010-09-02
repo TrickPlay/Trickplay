@@ -36,7 +36,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
                 style = style + 1
             end
             print (slideshow_styles[style])
-            screen.on_key_down = model.keep_keys            
+            reset_keys()            
         end,
         [keys.Return] = function(self) 
 				
