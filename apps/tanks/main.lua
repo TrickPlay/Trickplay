@@ -12,7 +12,6 @@ function screen:on_key_down(key)
 	elseif key ~= keys.Return then return
 	end
 
-	print("Refine: ",terrain_refine)
 	make_terrain(terrain_refine)
 	draw_terrain()
 end

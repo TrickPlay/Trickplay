@@ -1,5 +1,5 @@
 
-local roughness = 0.7
+local roughness = 0.5
 local initial_random_range = screen.h/3.5
 local random_range
 
@@ -12,8 +12,8 @@ screen:show()
 local function display_line_segments(segments)
 	terrain_canvas:begin_painting()
 	terrain_canvas:set_source_color("00ff00")
-	terrain_canvas:clear_surface()
 	terrain_canvas:set_line_width(10)
+	terrain_canvas:clear_surface()
 	terrain_canvas:move_to(segments[1].start.x, segments[1].start.y)
 	terrain_canvas:curve_to(
 								segments[1].start.x, segments[1].start.y,
