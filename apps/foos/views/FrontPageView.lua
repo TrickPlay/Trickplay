@@ -106,7 +106,8 @@ FrontPageView = Class(View, function(view, model, ...)
     {
         name      = "Selection animation",
         loop      =  false,
-        duration  =  3000,
+        --duration  =  3000,
+        duration  = 900,
         direction = "FORWARD",
     }
     function sel_timeline.on_new_frame(t,msecs)
@@ -153,6 +154,7 @@ FrontPageView = Class(View, function(view, model, ...)
                          PIC_H * (sel[1]-1)-22*progress}
            --dontswap = false
             --screen.on_key_down = model.keep_keys
+
         elseif msecs > 400  and msecs <= 800 then
             --in case on_new_frame didn't get called on the 400th msec
             view.current.position = {PIC_W * (sel[2]-1) -  (.025*PIC_W),
@@ -170,6 +172,7 @@ FrontPageView = Class(View, function(view, model, ...)
             local progress = (msecs - 800)/100
             view.bottom_bar.opacity = 255
             view.bottom_bar.y = PIC_H - progress*70
+--[[
         elseif msecs > 900 and msecs <= 2900 then
             view.bottom_bar.y = PIC_H - 70
 
@@ -177,11 +180,13 @@ FrontPageView = Class(View, function(view, model, ...)
         elseif msecs > 2900 and msecs <= 3000 then
             local progress = (msecs - 2900)/100
             view.bottom_bar.y = PIC_H - progress*140
+--]]
         end
     end
 
     function sel_timeline.on_completed()
-        view.bottom_bar.y = PIC_H - 140
+        --view.bottom_bar.y = PIC_H - 140
+        view.bottom_bar.y = PIC_H - 70
     end
 
 

@@ -17,8 +17,23 @@ SlideshowView = Class(View, function(view, model, ...)
         opacity = 0 
     }
 
-    local background  = Image {src = "assets/background.jpg" }
+    local background  = Image {src = "assets/background.jpg"  }
     local background2 = Image {src = "assets/background2.png" }
+
+    --NAV MENU
+    local nav_group = Group    { position = {1500, 300}, opacity = 0 }
+    local nav_back  = Rectangle{ w = 300,  h = 400,  color = "FFFFFF"}
+    nav_group:add(nav_back)
+    view.nav_items =
+    {
+        Text{text = "Close Menu",              y =  20, font="Sans 36px"},
+        Text{text = "Back to Albums",          y =  80, font="Sans 36px"},
+        Text{text = "Hide this Album",         y = 140, font="Sans 36px"},
+        Text{text = "Play Slideshow",          y = 200, font="Sans 36px"},
+        Text{text = "Change Slide Show Style", y = 260, font="Sans 36px"},
+    }
+    nav_group:add(unpack(view.nav_items))
+    view.ui:add(nav_group)
 
     --NAV UI
     local back     = Image{src="assets/slideshow/NavBack.png" }
@@ -109,7 +124,12 @@ SlideshowView = Class(View, function(view, model, ...)
                 group.z = 0
                 group.x = screen.w/2
                 group.y = screen.h/2
-                group.scale = {1080/img.h,1080/img.h}
+                if screen.w/img.w > screen.h/img.h then
+                    group.scale = {screen.h/img.h,screen.h/img.h}
+                else
+                    group.scale = {screen.w/img.w,screen.w/img.w}
+                end
+
                 group:add(img)
         end,
         ["LAYERED"]    = function(img,group)
@@ -164,7 +184,11 @@ SlideshowView = Class(View, function(view, model, ...)
                 group.z = 0
                 group.x = screen.w/2
                 group.y = screen.h/2
-                group.scale = {1080/img.h,1080/img.h}
+                if screen.w/img.w > screen.h/img.h then
+                    group.scale = {screen.h/img.h,screen.h/img.h}
+                else
+                    group.scale = {screen.w/img.w,screen.w/img.w}
+                end
                 group:add(img)
         end,
         ["LAYERED"]    = function(img,group)
@@ -205,7 +229,7 @@ SlideshowView = Class(View, function(view, model, ...)
             background.opacity  = 0
             background2.opacity = 0
             view.logo.opacity   = 0
-            controls.opacity    = 100
+            controls.opacity    = 0
 
             for i = 1,#view.on_screen_list do
                 local pic = view.on_screen_list[i]:find_child("slide")
@@ -216,7 +240,7 @@ SlideshowView = Class(View, function(view, model, ...)
                 elseif backing ~= nil then
                     off_screen_prep["FULLSCREEN"](backing,view.on_screen_list[i])
                 else
-                    error("should not have got here")
+                   -- error("should not have got here")
                 end
             end
             if view.on_screen_list[1] ~= nil then
@@ -232,7 +256,7 @@ SlideshowView = Class(View, function(view, model, ...)
                     view.off_screen_list[i]:clear()
                     off_screen_prep["FULLSCREEN"](backing,view.off_screen_list[i])
                 else
-                    error("should not have got here")
+                   -- error("should not have got here")
 
                 end
             end
@@ -379,48 +403,73 @@ SlideshowView = Class(View, function(view, model, ...)
                                                                    index)
                 caption.text = adapters[#adapters - model.fp_1D_index + 1][1].caption(data)
                 print("getting image",site)
+                if site ~= "" then    
+                    local image = Image{
+                        name      = "slide",
+                        src       = site, 
+                        async     = true, 
+                        on_loaded = function(img,failed)
+                            --if it failed to load from the internet, then
+                            --throw up the placeholder
+                            local style_i2 = view:get_controller():get_style_index()
+                            if failed then
+                                print("picture loading failed")
+                                --loaded the placeholder for failed pics
+                                local placeholder = Group{}
+                                placeholder:add(Rectangle
+                                {
+                                    name   = "backing",
+                                    color  = "000000",
+                                    width  = PIC_W,
+                                    height = PIC_H 
+                                })
 
-                local image = Image{
-                    name      = "slide",
-                    src       = site, 
-                    async     = true, 
-                    on_loaded = function(img,failed)
-                        --if it failed to load from the internet, then
-                        --throw up the placeholder
-local style_i2 = view:get_controller():get_style_index()
-                        if failed then
-                            print("picture loading failed")
-                            --loaded the placeholder for failed pics
-                            local placeholder = Group{}
-                            placeholder:add(Rectangle
-                            {
-                                name   = "backing",
-                                color  = "000000",
-                                width  = PIC_W,
-                                height = PIC_H 
-                            })
+                                placeholder:add(Clone
+                                {
+                                    name   = "slide",
+                                    source = backup,
+                                    x      = 100,
+                                    y      = 100
+                                })
+                                on_screen_prep[view.styles[style_i2]](placeholder,group)
+                            else
+                                --view.on_screen_list[rel_i] = Group {z = 500}
+                                timeline:stop()
+                                group:clear()
+                                on_screen_prep[view.styles[style_i2] ](img,group)
 
-                            placeholder:add(Clone
-                            {
-                                name   = "slide",
-                                source = backup,
-                                x      = 100,
-                                y      = 100
-                            })
-                            on_screen_prep[view.styles[style_i2]](placeholder,group)
-                        else
-                            --view.on_screen_list[rel_i] = Group {z = 500}
-                            timeline:stop()
-                            group:clear()
-                            on_screen_prep[view.styles[style_i2] ](img,group)
+                            end
                             if group == view.on_screen_list[1] then
                                 group.opacity = 255
                             end
+                            img.on_loaded = nil
                         end
-                        img.on_loaded = nil
-                    end
-                } 
+                    } 
+                else
+                    print("url loading failed")
+                    local style_i2 = view:get_controller():get_style_index()
+                    --loaded the placeholder for failed pics
+                    local placeholder = Group{}
+                    placeholder:add(Rectangle
+                    {
+                        name   = "backing",
+                        color  = "000000",
+                        width  = PIC_W,
+                        height = PIC_H 
+                    })
 
+                    placeholder:add(Clone
+                    {
+                        name   = "slide",
+                        source = backup,
+                        x      = 100,
+                        y      = 100
+                    })
+                    on_screen_prep[view.styles[style_i2]](placeholder,group)
+                    if group == view.on_screen_list[1] then
+                        group.opacity = 255
+                    end
+                end
             end
         }
         request:send()
@@ -457,8 +506,7 @@ local style_i2 = view:get_controller():get_style_index()
             on_complete = function (request, response)
 
                 local data   = json:parse(response.body)
-                local site   = adapters[#adapters - model.fp_1D_index + 1][1].site(data,
-                                                                   index)
+                local site   = adapters[#adapters - model.fp_1D_index + 1][1].site(data,index)
                 caption.text = adapters[#adapters - model.fp_1D_index + 1][1].caption(data)
 
 
@@ -471,41 +519,69 @@ local style_i2 = view:get_controller():get_style_index()
                 
                 --self:LoadImage(site,view.on_screen_list,updated_index)
                 print("getting image",site)
-                local image = Image{
-                    name      = "slide",
-                    src       = site, 
-                    async     = true, 
-                    on_loaded = function(img,failed)
-                        if failed then
-                            --loaded the placeholder for failed pics
-                            local placeholder = Group{}
-                            placeholder:add(Rectangle
-                            {
-                                name   = "backing",
-                                color  = "000000",
-                                width  = PIC_W,
-                                height = PIC_H 
-                            })
+                if site ~= "" then
+                    local image = Image{
+                        name      = "slide",
+                        src       = site, 
+                        async     = true, 
+                        on_loaded = function(img,failed)
+                            if failed then
+                                --loaded the placeholder for failed pics
+                                local placeholder = Group{}
+                                placeholder:add(Rectangle
+                                {
+                                    name   = "backing",
+                                    color  = "000000",
+                                    width  = PIC_W,
+                                    height = PIC_H 
+                                })
 
-                            placeholder:add(Clone
-                            {
-                                name   = "slide",
-                                source = backup,
-                                x      = 50,
-                                y      = 50
-                            })
-                            on_screen_prep[view.styles[style_i]](placeholder,group)
-                        else
-                            --view.on_screen_list[rel_i] = Group {z = 500}
-                            timeline:stop()
-                            group:clear()
-                            on_screen_prep[view.styles[style_i]](img,group)
-                            --if its the desk/slideshow, then need to
-                            --put it at the bottom of the stack
+                                placeholder:add(Clone
+                                {
+                                    name   = "slide",
+                                    source = backup,
+                                    x      = 50,
+                                    y      = 50
+                                })
+                                on_screen_prep[view.styles[style_i]](placeholder,group)
+                            else
+                                --view.on_screen_list[rel_i] = Group {z = 500}
+                                timeline:stop()
+                                group:clear()
+                                on_screen_prep[view.styles[style_i]](img,group)
+                                --if its the desk/slideshow, then need to
+                                --put it at the bottom of the stack
+                            end
+                            if group == view.on_screen_list[1] then
+                                group.opacity = 255
+                            end
                         end
-                        img.on_loaded = nil
+                    } 
+                else
+                    print("url loading failed")
+                    local style_i2 = view:get_controller():get_style_index()
+                    --loaded the placeholder for failed pics
+                    local placeholder = Group{}
+                    placeholder:add(Rectangle
+                    {
+                        name   = "backing",
+                        color  = "000000",
+                        width  = PIC_W,
+                        height = PIC_H 
+                    })
+
+                    placeholder:add(Clone
+                    {
+                        name   = "slide",
+                        source = backup,
+                        x      = 100,
+                        y      = 100
+                    })
+                    on_screen_prep[view.styles[style_i2]](placeholder,group)
+                    if group == view.on_screen_list[1] then
+                        group.opacity = 255
                     end
-                } 
+                end
             end
         }
         request:send()
@@ -527,9 +603,30 @@ local style_i2 = view:get_controller():get_style_index()
     function view.timer.on_timer(timer)
         local photo_i = view:get_controller():get_photo_index()+1
 	print("tick "..photo_i)
-        view:get_controller():on_key_down(keys.Left)
+        view:get_controller():on_key_down(keys.Right)
     end
 
+    function view:nav_on_focus()
+        nav_group:raise_to_top()
+        nav_group:animate
+        { 
+            duration = 200,
+            opacity  = 255,
+            on_completed = function()
+                reset_keys()
+            end
+        }
+    end
+    function view:nav_out_focus()
+        nav_group:animate
+        { 
+            duration = 200,
+            opacity  = 0,
+            on_completed = function()
+                reset_keys()
+            end
+        }
+    end
     view.prev_i = 0
 
     function view:update()
@@ -537,6 +634,7 @@ local style_i2 = view:get_controller():get_style_index()
         local comp       = model:get_active_component()
         local photo_i    = controller:get_photo_index()
         local style_i    = controller:get_style_index()
+        local menu_i     = controller:get_menu_index()
         if comp == Components.SLIDE_SHOW  then
             print("\n\nShowing SlideshowView UI\tquery index:",
                   model.fp_1D_index,"photo index:",photo_i,"on screen:",
@@ -544,7 +642,13 @@ local style_i2 = view:get_controller():get_style_index()
                   "\n")
             view.ui:raise_to_top()
             view.ui.opacity = 255
-
+            for i = 1 , #view.nav_items do
+                if menu_i == i then
+                    view.nav_items[i].color = "602020"
+                else
+                    view.nav_items[i].color = "000000"                    
+                end
+            end
             --if moving backwards
             if photo_i - view.prev_i < 0 then
                 if #view.on_screen_list > 1 then
@@ -577,6 +681,7 @@ local style_i2 = view:get_controller():get_style_index()
                 end
             else
                 print("diff is 0?\tphoto_i:",photo_i,"prev_i",view.prev_i)
+                reset_keys()
             end
             view.prev_i = photo_i
         else
