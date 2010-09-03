@@ -23,13 +23,13 @@ local function display_line_segments(segments)
 	local i
 	for i = 2,#segments-1 do
 		terrain_canvas:curve_to(
-									(segments[i-1].start.x+2*segments[i].fin.x)/3, 2*segments[i].start.y-(segments[i-1].start.y+2*segments[i].fin.y)/3,
+									2*segments[i].start.x-(2*segments[i-1].start.x+segments[i].fin.x)/3, 2*segments[i].start.y-(2*segments[i-1].start.y+segments[i].fin.y)/3,
 									(2*segments[i].start.x+segments[i+1].fin.x)/3, (2*segments[i].start.y+segments[i+1].fin.y)/3,
 									segments[i].fin.x, segments[i].fin.y
 		)
 	end
 	terrain_canvas:curve_to(
-								(segments[#segments-1].start.x+2*segments[#segments].fin.x)/3, 2*segments[#segments].start.y-(segments[#segments-1].start.y+2*segments[#segments].fin.y)/3,
+								2*segments[#segments].start.x-(2*segments[#segments-1].start.x+segments[#segments].fin.x)/3, 2*segments[#segments].start.y-(2*segments[#segments-1].start.y+segments[#segments].fin.y)/3,
 								segments[#segments].fin.x, segments[#segments].fin.y,
 								segments[#segments].fin.x, segments[#segments].fin.y
 							)
