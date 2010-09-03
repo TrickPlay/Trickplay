@@ -15,10 +15,24 @@ local function display_line_segments(segments)
 	terrain_canvas:clear_surface()
 	terrain_canvas:set_line_width(10)
 	terrain_canvas:move_to(segments[1].start.x, segments[1].start.y)
+	terrain_canvas:curve_to(
+								segments[1].start.x, segments[1].start.y,
+								(2*segments[1].start.x+segments[2].fin.x)/3, (2*segments[1].start.y+segments[2].fin.y)/3,
+								segments[1].fin.x, segments[1].fin.y
+							)
 	local i
-	for i = 1,#segments do
-		terrain_canvas:line_to(segments[i].fin.x,   segments[i].fin.y)
+	for i = 2,#segments-1 do
+		terrain_canvas:curve_to(
+									(segments[i-1].start.x+2*segments[i].fin.x)/3, 2*segments[i].start.y-(segments[i-1].start.y+2*segments[i].fin.y)/3,
+									(2*segments[i].start.x+segments[i+1].fin.x)/3, (2*segments[i].start.y+segments[i+1].fin.y)/3,
+									segments[i].fin.x, segments[i].fin.y
+		)
 	end
+	terrain_canvas:curve_to(
+								(segments[#segments-1].start.x+2*segments[#segments].fin.x)/3, 2*segments[#segments].start.y-(segments[#segments-1].start.y+2*segments[#segments].fin.y)/3,
+								segments[#segments].fin.x, segments[#segments].fin.y,
+								segments[#segments].fin.x, segments[#segments].fin.y
+							)
 	terrain_canvas:stroke()
 	terrain_canvas:finish_painting()
 end
