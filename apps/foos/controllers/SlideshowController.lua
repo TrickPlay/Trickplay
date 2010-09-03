@@ -11,37 +11,44 @@ SlideshowController = Class(Controller, function(self, view, ...)
     function self:reset_style_index() style_index = 1     end
     function self:set_style_index(i)  style_index = i     end
     function self:get_style_index()   return style_index  end
-function self:Prep_Slideshow()
-    view.queryText.text = string.gsub(
-                adapters[model.fp_1D_index][1].required_inputs.query,"%%20"," ")
-    view.logo = Image 
-    { 
-        src  = adapters[model.fp_1D_index].logoUrl,
-        x    = 20,
-        y    = 130,
-        size = {300,225}
-    }
-    view.ui:add(view.logo)
-view.set_ui[ view.styles[style_index] ]()
 
-    for i = 1,5 do
-        view:preload_front()
+    local menu_index = 1
+    function self:reset_menu_index()  menu_index = 1      end
+    function self:set_menu_index(i)   menu_index = i      end
+    function self:get_menu_index()    return menu_index   end
+    local menu_is_visible = false
+
+    function self:Prep_Slideshow()
+        view.queryText.text = string.gsub(
+            adapters[model.fp_1D_index][1].required_inputs.query,"%%20"," ")
+        view.logo = Image 
+        { 
+            src  = adapters[model.fp_1D_index].logoUrl,
+            x    = 20,
+            y    = 130,
+            size = {300,225}
+        }
+        view.ui:add(view.logo)
+        view.set_ui[ view.styles[style_index] ]()
+
+        menu_index = 1
+        menu_is_visible = false
+
+        for i = 1,5 do
+            view:preload_front()
+        end
     end
-end
 
-    local MenuKeyTable = {
-        [keys.Up]    = function(self) view:toggle_timer() end,
-        [keys.Down]  = function(self) 
-            style_index = style_index%(#view.styles) +1
-            print(style_index)
-            view.set_ui[ view.styles[style_index] ]()
-            reset_keys()            
+
+    local NavCallbacks =
+    {
+        --CLOSE THE NAV MENU
+        function()
+            menu_is_visible = false
+            view:nav_out_focus()
         end,
-        [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
-        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
-        [keys.Return] = function(self) 
---            Setup_Album_Covers()
-            --model.curr_slideshow:stop()
+        --GO BACK TO THE FRONT PAGE
+        function()
             if view.timer_is_running then
                 view.timer:stop()
                 view.timer_it_running = false
@@ -65,14 +72,46 @@ end
  
             photo_index = 1
             view.prev_i = 0
---[[
-            view.ui:clear()
-            view.ui:add( backup, overlay_image, background, background2, caption,
-                         view.queryText, controls )
 
---]]
+            menu_is_visible = false
+            view:nav_out_focus()
+
             self:get_model():set_active_component(Components.FRONT_PAGE)
             self:get_model():notify()
+
+        end,
+        --DELETE THIS ALBUM & GO BACK TO THE FRONT PAGE
+        function()
+        end,
+        --TOGGLE THE SLIDESHOW & CLOSE THE NAV MENU
+        function()
+            view:toggle_timer()
+            menu_is_visible = false
+            view:nav_out_focus()
+        end,
+        --SWITCH SLIDE SHOW STYLE
+        function()
+            style_index = style_index%(#view.styles) +1
+            print(style_index)
+            view.set_ui[ view.styles[style_index] ]()
+            reset_keys()  
+        end,
+
+    }
+
+    local MenuKeyTable = {
+        [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
+        [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
+        [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
+        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Return] = function(self) 
+            if menu_is_visible then
+                NavCallbacks[menu_index]()
+            else
+                menu_is_visible = true
+                view:nav_on_focus()
+            end
+            
         end
     }
 
@@ -87,6 +126,12 @@ end
         photo_index = photo_index + dir[1]
         if photo_index <= 0 then
            photo_index = 1
+        end
+        if menu_is_visible then
+            menu_index = menu_index + dir[2]
+            if menu_index < 1 or menu_index > #view.nav_items then
+                menu_index = menu_index - dir[2]
+            end
         end
         --moving foward through the photos
         if dir == Directions.RIGHT then
