@@ -79,10 +79,19 @@ global idle [[idle*]]
 gboolean idle::on_idle(gpointer data)
 {
     idle * self=(idle*)data;
-    
+
     if (self->lsp->is_valid())
     {
-        lua_pushnumber(self->lsp->get_lua_state(),g_timer_elapsed( self->timer, NULL ));
+		double elapsed = g_timer_elapsed(self->timer,NULL);
+		     	
+		// If it is less than one ms, we bail
+		
+		if ( elapsed < 0.001 )
+		{
+			return TRUE;
+		}
+    
+        lua_pushnumber(self->lsp->get_lua_state(),elapsed);
         g_timer_start(self->timer);
         lb_invoke_callback(self->lsp->get_lua_state(),self,IDLE_METATABLE,"on_idle",1,0);
     }
