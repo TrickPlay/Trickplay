@@ -382,7 +382,7 @@ local function build_ui( show_it )
     }
     
     function ui.bar.on_key_down( _ , key )
-        
+    
         if not pcall( key_map[ key ] ) then
         
             print( keys[ key ] )
