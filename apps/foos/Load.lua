@@ -12,7 +12,7 @@ function loading(group)
     group:add(Rectangle
     {
         name   = "backing",
-        color  = "FFFFFF",
+        color  = "000000",
         width  = PIC_W,
         height = PIC_H 
     })

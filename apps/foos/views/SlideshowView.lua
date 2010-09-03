@@ -10,7 +10,7 @@ SlideshowView = Class(View, function(view, model, ...)
         src     = "assets/none.png",
         opacity = 0
     }
-    screen:add(backup)
+    --screen:add(backup)
     local overlay_image = Image
     { 
         src     = "assets/overlay.png", 
@@ -48,7 +48,7 @@ SlideshowView = Class(View, function(view, model, ...)
     }
 
 
-    view.ui:add( overlay_image, background, background2, caption,
+    view.ui:add( backup, overlay_image, background, background2, caption,
                  view.queryText, controls )
     view.timer            = Timer()
     view.timer.interval   = 4
@@ -58,149 +58,7 @@ SlideshowView = Class(View, function(view, model, ...)
     view.on_screen_list  = {}
     view.off_screen_list = {}
 
-    local styles = {"REGULAR","FULLSCREEN","LAYERED"}
-    local set_ui =  
-    {
-        ["REGULAR"]    = function()
-            background.opacity = 255
-            background2.opacity = 255
-            logo.opacity = 255
-            controls.opacity = 255
-
-            for i = 1,#view.on_screen_list do
-                local pic = view.on_screen_list[i]:find_child("slide")
-                pic:unparent()
-                assert(pic ~= nil,"couldn't find the picture in the"..
-                       " on_screen_list at index",i,"when converting"..
-                       " the slideshow to regular mode")
-                off_screen_prep["REGULAR"](pic,view.on_screen_list[i])
-            end
-            for i = 1,#view.off_screen_list do
-                local pic = view.off_screen_list[i]:find_child("slide")
-                pic:unparent()
-                assert(pic ~= nil,"couldn't find the picture in the"..
-                       " off_screen_list at index",i,"when converting"..
-                       " the slideshow to regular mode")
-                off_screen_prep["REGULAR"](pic,view.off_screen_list[i])
-            end
-        end,
-
-        ["FULLSCREEN"] = function()
-            background.opacity = 0
-            background2.opacity = 0
-            logo.opacity = 0
-            controls.opacity = 100
-
-            for i = 1,#view.on_screen_list do
-                local pic = view.on_screen_list[i]:find_child("slide")
-                pic:unparent()
-                assert(pic ~= nil,"couldn't find the picture in the"..
-                       " on_screen_list at index",i,"when converting"..
-                       " the slideshow to fullscreen mode")
-                off_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
-            end
-            for i = 1,#view.off_screen_list do
-                local pic = view.off_screen_list[i]:find_child("slide")
-                pic:unparent()
-                assert(pic ~= nil,"couldn't find the picture in the"..
-                       " off_screen_list at index",i,"when converting"..
-                       " the slideshow to fullscreen mode")
-                off_screen_prep["FULLSCREEN"](pic,view.off_screen_list[i])
-            end
-
-        end,
-        ["LAYERED"]    = function()
-        end
-    }
-
-    local forward_animation =
-    {
-        ["REGULAR"]    = function(pic)
-            pic:animate 
-            {
-                duration = 400,
-                mode     = EASE_IN_EXPO,
-                x        = screen.w/4,
-                y        = screen.h/6,
-                z        = 0
-            }
-        end,
-        ["FULLSCREEN"] = function(pic)
-            pic.opacity = 0
-			  
-            pic:animate 
-            {
-                duration = 700,
-                mode     = EASE_IN_EXPO,
-                opacity  = 255
-            }
-            if view.on_screen_list[2] ~= nil  then
-                view.on_screen_list[2]:animate
-                {
-                    duration = 1000,
-                    opacity  = 0,
-                    mode     = EASE_IN_EXPO,
-                }
-            end
-        end,
-        ["LAYERED"]    = function()
-        end
-    }
-
-    local backward_animation =
-    {
-        ["REGULAR"]    = function(pic)
-            pic:animate 
-            {
-                duration = 400,
-                mode     = EASE_IN_EXPO,
-                x        = math.random(0,1)*1920,
-                y        = math.random(0,1)*1080,
-                z        = 500,
-                --garbage collection
-                on_completed = function()
-                    --z = 500
-                    view.ui:remove(pic)
---[[handled in a different function
-
-                    if #off_screen_list > 6 then
-                        print("removing from off_screen list")
-                        off_screen_list[#off_screen_list] = nil
-                    end
---]]
-                 end
-            }
-        end,
-        ["FULLSCREEN"] = function()
-            pic:animate 
-            {
-                duration = 200,
-                mode     = EASE_IN_EXPO,
-                opacity  = 0,
-                --garbage collection
-                on_completed = function()
-                    z = 500
-                    view.ui:remove(pic)
---[[ handled in a different function
-
-                    if #off_screen_list > 6 then
-                        print("removing from off_screen list")
-                        off_screen_list[#off_screen_list] = nil
-                    end
---]]
-                end
-            }
-            self.ui:add(view.on_screen_list[1])
-            view.on_screen_list[1]:animate 
-            {
-                duration = 1000,
-                opacity = 255,
-                mode = EASE_IN_EXPO,
-            }
-        end,
-        ["LAYERED"]    = function()
-        end
-    }
+    view.styles = {"REGULAR","FULLSCREEN",}--"LAYERED"}
     local off_screen_prep = 
     {
         ["REGULAR"]    = function(img,group)
@@ -216,6 +74,8 @@ SlideshowView = Class(View, function(view, model, ...)
                     x = (-img.w)/40,
                     y = (-img.h)/20
                 }
+                group.anchor_point = {0,0}
+
                 group.scale = 
                 {
                     SLIDESHOW_HEIGHT/img.h,
@@ -270,6 +130,7 @@ SlideshowView = Class(View, function(view, model, ...)
                     x = (-img.w)/40,
                     y = (-img.h)/20
                 }
+                group.anchor_point = {0,0}
                 group.scale = 
                 {
                     SLIDESHOW_HEIGHT/img.h,
@@ -310,6 +171,177 @@ SlideshowView = Class(View, function(view, model, ...)
         end
     }
 
+    view.set_ui =  
+    {
+        ["REGULAR"]    = function()
+            background.opacity  = 255
+            background2.opacity = 255
+            view.logo.opacity   = 255
+            controls.opacity    = 255
+
+            for i = 1,#view.on_screen_list do
+                local pic = view.on_screen_list[i]:find_child("slide")
+                if pic ~= nil then
+                    view.on_screen_list[i]:clear()
+                    on_screen_prep["REGULAR"](pic,view.on_screen_list[i])
+                    view.on_screen_list[i].opacity = 255
+                    view.ui:add(view.on_screen_list[i])
+
+                    view.on_screen_list[i]:lower_to_bottom()
+                    background2:lower_to_bottom()
+                    background:lower_to_bottom()
+                end
+            end
+            for i = 1,#view.off_screen_list do
+                local pic = view.off_screen_list[i]:find_child("slide")
+                if pic ~= nil then
+                    view.off_screen_list[i]:clear()
+                    off_screen_prep["REGULAR"](pic,view.off_screen_list[i])
+                end
+            end
+        end,
+
+        ["FULLSCREEN"] = function()
+            background.opacity  = 0
+            background2.opacity = 0
+            view.logo.opacity   = 0
+            controls.opacity    = 100
+
+            for i = 1,#view.on_screen_list do
+                local pic = view.on_screen_list[i]:find_child("slide")
+                local backing =view.on_screen_list[i]:find_child("loading")
+                view.on_screen_list[i]:clear()
+                if pic ~= nil then
+                    off_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
+                elseif backing ~= nil then
+                    off_screen_prep["FULLSCREEN"](backing,view.on_screen_list[i])
+                else
+                    error("should not have got here")
+                end
+            end
+            if view.on_screen_list[1] ~= nil then
+                view.on_screen_list[1].opacity = 255
+            end
+            for i = 1,#view.off_screen_list do
+                local pic = view.off_screen_list[i]:find_child("slide")
+                local backing =view.off_screen_list[i]:find_child("loading")
+                view.off_screen_list[i]:clear()
+                if pic ~= nil then
+                    off_screen_prep["FULLSCREEN"](pic,view.off_screen_list[i])
+                elseif backing ~= nil then
+                    view.off_screen_list[i]:clear()
+                    off_screen_prep["FULLSCREEN"](backing,view.off_screen_list[i])
+                else
+                    error("should not have got here")
+
+                end
+            end
+
+        end,
+        ["LAYERED"]    = function()
+        end
+    }
+
+    local forward_animation =
+    {
+        ["REGULAR"]    = function(pic)
+            pic:animate 
+            {
+                duration = 400,
+                mode     = EASE_IN_EXPO,
+                x        = screen.w/4,
+                y        = screen.h/6,
+                z        = 0,
+                on_completed = function()
+                    reset_keys()            
+                end
+            }
+        end,
+        ["FULLSCREEN"] = function(pic)
+            pic.opacity = 0
+			  
+            pic:animate 
+            {
+                duration = 200,
+                mode     = EASE_IN_EXPO,
+                opacity  = 255
+            }
+            if view.on_screen_list[2] ~= nil  then
+                view.on_screen_list[2]:animate
+                {
+                    duration = 300,
+                    opacity  = 0,
+                    mode     = EASE_IN_EXPO,
+                    on_completed = function()
+                        reset_keys()            
+                    end
+                }
+            end
+        end,
+        ["LAYERED"]    = function()
+        end
+    }
+
+    local backward_animation =
+    {
+        ["REGULAR"]    = function(pic)
+            pic:animate 
+            {
+                duration = 400,
+                mode     = EASE_IN_EXPO,
+                x        = math.random(0,1)*1920,
+                y        = math.random(0,1)*1080,
+                z        = 500,
+                --garbage collection
+                on_completed = function()
+                    --z = 500
+                    view.ui:remove(pic)
+                    reset_keys()            
+
+--[[handled in a different function
+
+                    if #off_screen_list > 6 then
+                        print("removing from off_screen list")
+                        off_screen_list[#off_screen_list] = nil
+                    end
+--]]
+                 end
+            }
+        end,
+        ["FULLSCREEN"] = function(pic)
+            pic:animate 
+            {
+                duration = 200,
+                mode     = EASE_IN_EXPO,
+                opacity  = 0,
+                --garbage collection
+                on_completed = function()
+                    z = 500
+                    view.ui:remove(pic)
+--[[ handled in a different function
+
+                    if #off_screen_list > 6 then
+                        print("removing from off_screen list")
+                        off_screen_list[#off_screen_list] = nil
+                    end
+--]]
+                end
+            }
+            view.ui:add(view.on_screen_list[1])
+            view.on_screen_list[1]:animate 
+            {
+                duration = 300,
+                opacity = 255,
+                mode = EASE_IN_EXPO,
+                on_completed = function()
+                    reset_keys()            
+                end
+            }
+        end,
+        ["LAYERED"]    = function()
+        end
+    }
+
     function view:initialize()
         self:set_controller(SlideshowController(self))
     end
@@ -326,9 +358,9 @@ SlideshowView = Class(View, function(view, model, ...)
             source = backup,
         }
 --]]
-        local clone = Group{}
+        local clone = Group{name="loading"}
         local timeline  = loading(clone)
-        off_screen_prep[styles[style_i] ](clone,group)
+        off_screen_prep[view.styles[style_i] ](clone,group)
 
         local index = view:get_controller():get_photo_index() +
                                           #view.off_screen_list
@@ -346,14 +378,8 @@ SlideshowView = Class(View, function(view, model, ...)
                 local site   = adapters[#adapters - model.fp_1D_index + 1][1].site(data,
                                                                    index)
                 caption.text = adapters[#adapters - model.fp_1D_index + 1][1].caption(data)
+                print("getting image",site)
 
-                local photo_i = view:get_controller():get_photo_index()
-
-                --recalculate the relative index
-                --in case the user moved while it was loading
-                local rel_i = index - 
-                             view:get_controller():get_photo_index()
-                
                 local image = Image{
                     name      = "slide",
                     src       = site, 
@@ -361,6 +387,7 @@ SlideshowView = Class(View, function(view, model, ...)
                     on_loaded = function(img,failed)
                         --if it failed to load from the internet, then
                         --throw up the placeholder
+local style_i2 = view:get_controller():get_style_index()
                         if failed then
                             print("picture loading failed")
                             --loaded the placeholder for failed pics
@@ -380,12 +407,15 @@ SlideshowView = Class(View, function(view, model, ...)
                                 x      = 100,
                                 y      = 100
                             })
-                            on_screen_prep[styles[style_i]](placeholder,group)
+                            on_screen_prep[view.styles[style_i2]](placeholder,group)
                         else
                             --view.on_screen_list[rel_i] = Group {z = 500}
                             timeline:stop()
                             group:clear()
-                            on_screen_prep[styles[style_i] ](img,group)
+                            on_screen_prep[view.styles[style_i2] ](img,group)
+                            if group == view.on_screen_list[1] then
+                                group.opacity = 255
+                            end
                         end
                         img.on_loaded = nil
                     end
@@ -411,9 +441,9 @@ SlideshowView = Class(View, function(view, model, ...)
             source = backup,
         }
 --]]
-        local clone = Group{}
+        local clone = Group{name="loading"}
         local timeline = loading(clone)
-        on_screen_prep[styles[style_i] ](clone,group)
+        on_screen_prep[view.styles[style_i] ](clone,group)
         local index = view:get_controller():get_photo_index() -
                                           #view.on_screen_list +1
         print("preload back",index)
@@ -440,6 +470,7 @@ SlideshowView = Class(View, function(view, model, ...)
                 local rel_i = -1*( index + 1 - photo_i )
                 
                 --self:LoadImage(site,view.on_screen_list,updated_index)
+                print("getting image",site)
                 local image = Image{
                     name      = "slide",
                     src       = site, 
@@ -463,12 +494,12 @@ SlideshowView = Class(View, function(view, model, ...)
                                 x      = 50,
                                 y      = 50
                             })
-                            on_screen_prep[styles[style_i]](placeholder,group)
+                            on_screen_prep[view.styles[style_i]](placeholder,group)
                         else
                             --view.on_screen_list[rel_i] = Group {z = 500}
                             timeline:stop()
                             group:clear()
-                            on_screen_prep[styles[style_i]](img,group)
+                            on_screen_prep[view.styles[style_i]](img,group)
                             --if its the desk/slideshow, then need to
                             --put it at the bottom of the stack
                         end
@@ -479,7 +510,6 @@ SlideshowView = Class(View, function(view, model, ...)
         }
         request:send()
     end
-
     function view:toggle_timer()    
         if view.timer_is_running then
             view.timer:stop()
@@ -492,15 +522,12 @@ SlideshowView = Class(View, function(view, model, ...)
             up_play.opacity  = 0
             up_pause.opacity = 255
         end
-
+        reset_keys()            
     end  
     function view.timer.on_timer(timer)
-	print("tick "..current_pic)
-	--if still_loading then
-        if #view.off_screen_list > 0 then
-                timer.interval = 4
-		view:next_picture()
-	end
+        local photo_i = view:get_controller():get_photo_index()+1
+	print("tick "..photo_i)
+        view:get_controller():on_key_down(keys.Left)
     end
 
     view.prev_i = 0
@@ -527,7 +554,7 @@ SlideshowView = Class(View, function(view, model, ...)
                     table.insert(view.off_screen_list, 1 ,pic)
                     pic:complete_animation()
                 
-                    backward_animation[styles[style_i]](pic)
+                    backward_animation[view.styles[style_i]](pic)
                 else
                     print("on screen is 0")
                 end
@@ -544,7 +571,7 @@ SlideshowView = Class(View, function(view, model, ...)
                    pic:complete_animation()
                    pic.opacity = 255
 
-                   forward_animation[styles[style_i]](pic)
+                   forward_animation[view.styles[style_i]](pic)
                 else
                     print("off screen is 0")
                 end

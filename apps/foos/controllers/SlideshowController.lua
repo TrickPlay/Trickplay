@@ -7,12 +7,11 @@ SlideshowController = Class(Controller, function(self, view, ...)
     function self:set_photo_index(i)  photo_index = i     end
     function self:get_photo_index()   return photo_index  end
 
-    local style_index = 1
+    local style_index = 2
     function self:reset_style_index() style_index = 1     end
     function self:set_style_index(i)  style_index = i     end
     function self:get_style_index()   return style_index  end
 function self:Prep_Slideshow()
-
     view.queryText.text = string.gsub(
                 adapters[model.fp_1D_index][1].required_inputs.query,"%%20"," ")
     view.logo = Image 
@@ -23,6 +22,8 @@ function self:Prep_Slideshow()
         size = {300,225}
     }
     view.ui:add(view.logo)
+view.set_ui[ view.styles[style_index] ]()
+
     for i = 1,5 do
         view:preload_front()
     end
@@ -30,7 +31,12 @@ end
 
     local MenuKeyTable = {
         [keys.Up]    = function(self) view:toggle_timer() end,
-        [keys.Down]  = function(self) view:toggle_fullscreen() end,
+        [keys.Down]  = function(self) 
+            style_index = style_index%(#view.styles) +1
+            print(style_index)
+            view.set_ui[ view.styles[style_index] ]()
+            reset_keys()            
+        end,
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] = function(self) 
@@ -48,16 +54,23 @@ end
             end
             collectgarbage()
 
-            view.on_screen_list  = {}
+            for i = 1,#view.on_screen_list do
+                view.on_screen_list[i]:unparent()
+            end
+            for i = 1,#view.off_screen_list do
+                view.off_screen_list[i]:unparent()
+            end
+            view.on_screen_list = {}
             view.off_screen_list = {}
  
             photo_index = 1
             view.prev_i = 0
+--[[
             view.ui:clear()
-            view.ui:add( overlay_image, background, background2, caption,
+            view.ui:add( backup, overlay_image, background, background2, caption,
                          view.queryText, controls )
 
-
+--]]
             self:get_model():set_active_component(Components.FRONT_PAGE)
             self:get_model():notify()
         end
@@ -65,7 +78,6 @@ end
 
 
     function self:on_key_down(k)
-            reset_keys()            
         if MenuKeyTable[k] then
             MenuKeyTable[k](self)
         end
