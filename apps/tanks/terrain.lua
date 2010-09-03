@@ -1,15 +1,26 @@
 
-local roughness = 0.3
-local random_range = screen.h/4
+local roughness = 0.7
+local initial_random_range = screen.h/3.5
+local random_range
 
-local line_segments = {
-}
+local line_segments = {}
 
-local terrain_group = Group {}
-screen:add(terrain_group)
+local terrain_canvas = Canvas { size = { screen.w, screen.h } }
+screen:add(terrain_canvas)
+screen:show()
 
-local function display_line_segment(segments)
-	
+local function display_line_segments(segments)
+	terrain_canvas:begin_painting()
+	terrain_canvas:set_source_color("00ff00")
+	terrain_canvas:clear_surface()
+	terrain_canvas:set_line_width(10)
+	terrain_canvas:move_to(segments[1].start.x, segments[1].start.y)
+	local i
+	for i = 1,#segments do
+		terrain_canvas:line_to(segments[i].fin.x,   segments[i].fin.y)
+	end
+	terrain_canvas:stroke()
+	terrain_canvas:finish_painting()
 end
 
 local function split_line_segment_into(orig_segment, new_segments)
@@ -33,13 +44,20 @@ local function split_line_segment_into(orig_segment, new_segments)
 								} )
 end
 
-function draw_terrain(n)
+function draw_terrain()
+	display_line_segments(line_segments)
+end
+
+function make_terrain(n)
 
 	-- Start with one line-segment which goes from half-way up screen on left to half-way up on right
-	table.insert(line_segments, { start = { x=0, y=screen.h/2 }, fin = { x=screen.w, y=screen.h/2 } })
+	line_segments = {
+						{ start = { x=0, y=screen.h/2 }, fin = { x=screen.w, y=screen.h/2 } }
+					}
 
 	-- Now repeat n times
 	local i
+	random_range = initial_random_range
 	for i = 1,n do
 		local new_segments = {}
 
@@ -48,8 +66,7 @@ function draw_terrain(n)
 			split_line_segment_into(segment, new_segments)
 		end
 
-		dumptable(new_segments)
-
 		line_segments = new_segments
+		random_range = random_range / math.exp(roughness)
 	end
 end
