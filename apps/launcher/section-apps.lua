@@ -1,4 +1,57 @@
 
+
+local function AppList( all , settings_key )
+    
+    local result = {}
+
+    local saved = settings[ settings_key ] or {}
+    
+    local to_add = {}
+    
+    for app_id , _ in pairs( all ) do
+        to_add[ app_id ] = true
+    end
+    
+    for _ , app_id in ipairs( saved ) do
+        if to_add[ app_id ] then
+            table.insert( result , app_id )
+            to_add[ app_id ] = nil
+        end
+    end
+    
+    for app_id , _ in pairs( to_add ) do
+        table.insert( result , app_id )
+    end
+    
+    local mt = {}
+    
+    mt.__index = mt
+    
+    mt.all = all
+    
+    function mt:save()
+        settings[ settings_key ] = result
+    end
+    
+    function mt:make_first( app_id )
+        local index = nil
+        for i , j in ipairs( self ) do
+            if j == app_id then
+                index = i
+                break
+            end
+        end
+        if index and index > 1 then
+            table.remove( self , index )
+            table.insert( self , 1 , app_id )
+            self:save()
+        end
+    end
+
+    return setmetatable( result , mt )
+end
+
+
 -- This gets called once - when the section is about to be shown for
 -- the first time.
 
@@ -15,278 +68,29 @@ function( section )
 
     local TOP_APP_COUNT = 3
     
-    section.top_apps = settings.top_apps or {}
-    
-    section.all_apps = apps:get_for_current_profile()
+    local profile_apps = apps:get_for_current_profile()
     
     -- Take myself out
     
-    section.all_apps[ app.id ] = nil
-        
-    section.items = {}
-    
-    ---------------------------------------------------------------------------
+    profile_apps[ app.id ] = nil
 
-    local function is_top_app( app_id )
-        for _ , top in ipairs( section.top_apps ) do
-            if app_id == top then
-                return true
-            end
-        end
-        return false
-    end
+    -- The list of focusable items in the dropdown        
+        
+    local section_items = {}
     
+    local recently_used_apps = AppList( profile_apps , "recently_used" )
+        
     ---------------------------------------------------------------------------
-    -- Make sure that there are TOP_APP_COUNT apps in section.top_apps, that
-    -- they are all valid and that they all have icons.
+    -- We're switching to a list of apps in full screen
     ---------------------------------------------------------------------------
     
-    local function validate_top_apps()
+    local function show_all_apps( app_list )
     
-        -- Load the apps and the most used apps
-    
-        local top_apps = section.top_apps
-    
-        section.top_apps = {}
-    
-        -- Look for each top app in all_apps and, if it is there, add it to
-        -- section.top_apps until we have TOP_APP_COUNT.
+        local fs_apps = dofile( "fs-apps" )( ui , app_list )
         
-        -- This ensures that the ids we have saved previously in top apps still
-        -- exist.
-        
-        for _ , app_id in ipairs( top_apps ) do
-            if section.all_apps[ app_id ] then
-                table.insert( section.top_apps , app_id )
-                if # section.top_apps == TOP_APP_COUNT then
-                    break
-                end
-            end
-        end
-
-        -- If ui.top_apps has less than TOP_APP_COUNT, then add some from all_apps.
-        -- In a cold start, top apps will be empty - this fills it. 
-        
-        if # section.top_apps < TOP_APP_COUNT then
-            for app_id , app in pairs( section.all_apps ) do
-                if not is_top_app( app_id ) then
-                    table.insert( section.top_apps , app_id )
-                    if # section.top_apps == TOP_APP_COUNT then
-                        break
-                    end
-                end
-            end
-        end
+        ui:on_section_full_screen( fs_apps )
     
     end
-
-    ---------------------------------------------------------------------------
-    -- Switch to 'full screen' view of all apps
-    ---------------------------------------------------------------------------
-
-    local function show_all_apps()
-    
-        local app_list = {}
-        
-        -- Add the top apps
-        
-        for _ , app_id in ipairs( section.top_apps ) do        
-            table.insert( app_list , section.all_apps[ app_id ] )        
-        end
-        
-        -- Add the other apps
-        
-        for app_id , app in pairs( section.all_apps ) do        
-            if not is_top_app( app_id ) then
-                table.insert( app_list , app )
-            end
-        end
-        
-        -- Create a group to hold all the tiles
-        
-        local group = Group
-        {
-            size = { screen.w , screen.h - ui.bar.h } ,
-            position = { 0 , ui.bar.h + 1 },
-            clip = { 0 , 0 , screen.w , screen.h - ui.bar.h }
-        }
-        
-        screen:add( group )
-        
-        group:raise_to_top()
-        
-        -- Prevent keys from going to the menu
-        
-        group:grab_key_focus()
-               
-        -- Figure out the spacing of tiles
-        
-        -- We use the width and height of a tile that is in the dropdown
-        
-        local TILE_W = section.items[ 3 ].w
-        local TILE_H = section.items[ 3 ].h
-        
-        local LEFT_MARGIN   = 7
-        
-        local V_SPACE = ( group.h - ( TILE_H * 4 ) ) / 5
-        
-        local tile_x = LEFT_MARGIN
-        local tile_y = V_SPACE
-        
-        local col = 1
-        local row = 1
-        
-        -- Now, create new tiles
-        
-        local tiles = {}
-        
-        for i , app in ipairs( app_list ) do
-        
-            -- Create the tile
-        
-            local tile = factory.make_app_tile( assets , app.name , app.id )
-            
-            group:add( tile )
-            
-            tile.position = { tile_x , tile_y }
-            
-            tile.y_rotation = { 90 , tile.w / 2 , 0 }
-            
-            tile.opacity = 0
-            
-            tile.extra.col = col
-            tile.extra.row = row
-                    
-            -- Calculate the position of the next tile
-
-            row = row + 1
-            
-            if row > 4 then
-            
-                tile_x = tile_x + TILE_W + V_SPACE
-                tile_y = V_SPACE
-                row = 1
-                col = col + 1
-            
-            else
-            
-                tile_y = tile_y + TILE_H + V_SPACE
-            
-            end
-        
-            table.insert( tiles , tile )            
-        end
-        
-        -- Now, we start an idle handler to get rid of the drop down and
-        -- rotate the tiles in
-        
-        local DURATION = 100
-        
-        local start = Stopwatch()
-        
-        function idle.on_idle( )
-        
-            local progress = math.min( start.elapsed / DURATION , 1 )
-            
-            section.dropdown.opacity = 255 - 255 * progress
-            
-            section.dropdown.y_rotation = { -90 * progress , section.dropdown.w / 2 , 0 }
-            
-            -- Once the dropdown is gone, we can bring in the tiles
-            
-            if progress == 1 then
-            
-                -- Reset the stopwatch
-                
-                start:start()
-                
-                -- This is how long each diagonal is going to wait to start
-                -- its rotation
-                
-                local DELAY = 100
-                
-                -- How many ms each one will take to rotate in. Note that the total
-                -- time depends on the number of diagonals. In a 4x4 grid, for
-                -- example, the last one will wait 6 * DELAY and will finish
-                -- DURATION ms after that. 
-                
-                local DURATION = 150
-
-                -- Locals for the idle function below
-                
-                local done
-                local delay
-                local progress
-                local yr
-                local op
-                
-                function idle.on_idle( idle )
-                    
-                    done = true
-                
-                    for i , tile in ipairs( tiles ) do
-                    
-                        delay = DELAY * ( tile.extra.col + tile.extra.row - 2 )
-                        
-                        if start.elapsed > delay then
-                        
-                            progress = math.min( ( start.elapsed - delay ) / DURATION , 1 )
-                        
-                            -- See if it still needs to be rotated
-                            
-                            yr = tile.y_rotation[ 1 ]
-                            
-                            if yr > 0 then
-                                yr = 90 - 90 * progress
-                                tile.y_rotation = { yr , tile.w / 2 , 0 }
-                                done = false
-                            end
-                            
-                            -- See if it still needs its opacity increased
-                        
-                            op = tile.opacity
-                            
-                            if op < 255 then
-                                op = 255 * progress
-                                tile.opacity = op
-                                done = false                                
-                            end
-                            
-                        else
-                        
-                            -- This tile is not ready to start, so we need to keep going
-                            
-                            done = false
-                            
-                        end    
-                    
-                    end
-                    
-                    -- All tiles are done with their animations
-                    
-                    if done then
-                    
-                        print( "DONE AT" , start.elapsed )
-                        
-                        -- Focus the first tile
-                        
-                        tiles[1]:on_focus_in()
-
-                        -- Get rid of the idle handler
-                        
-                        idle.on_idle = nil
-                        
-
-                    end
-                
-                end
-            
-            end
-        
-        end
-    
-    end
-
 
     ---------------------------------------------------------------------------
     -- Build the initial UI for the section
@@ -307,31 +111,38 @@ function( section )
         
         local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
-        table.insert( section.items , all_apps )
+        table.insert( section_items , all_apps )
         
-        table.insert( section.items , categories )
+        table.insert( section_items , categories )
         
         items_height = items_height + all_apps.h + categories.h
         
         all_apps.extra.on_activate =
         
             function()
-                show_all_apps()
+                -- TODO: we may have several app lists, we have to choose the
+                -- one that the cetegory selector is pointing to.
+                
+                show_all_apps( recently_used_apps )
             end
         
         ---------------------------------------------------------------------------
         -- The top apps
         ---------------------------------------------------------------------------
         
-        validate_top_apps()
-                
         for i = 1 , TOP_APP_COUNT do    
             
-            local app_id = section.top_apps[ i ]
+            local app_id = recently_used_apps[ i ]
             
-            local tile = factory.make_app_tile( assets , section.all_apps[ app_id ].name , app_id )
+            local name = recently_used_apps.all[ app_id ].name
             
-            table.insert( section.items , tile )
+            if not app_id then
+                break
+            end
+            
+            local tile = factory.make_app_tile( assets , name , app_id )
+            
+            table.insert( section_items , tile )
             
             items_height = items_height + tile.h
             
@@ -339,19 +150,20 @@ function( section )
             
                 function( )
                     if apps:launch( app_id ) then
-                       table.remove( section.top_apps , i )
-                       table.insert( section.top_apps , 1 , app_id )
-                       settings.top_apps = section.top_apps
+                        recently_used_apps:make_first( app_id )
                     end
                 end
             
         end
         
-        local margin = ( space - items_height ) / ( # section.items - 1 )
+        -- This spaces all items equally.
+        -- TODO: If there are less than 3 app tiles, it will be wrong.
+        
+        local margin = ( space - items_height ) / ( # section_items - 1 )
         
         local y = TOP_PADDING
         
-        for _ , item in ipairs( section.items ) do
+        for _ , item in ipairs( section_items ) do
         
             item.x = ( group.w - item.w ) / 2
             item.y = y
@@ -375,9 +187,9 @@ function( section )
     
     local function move_focus( delta )
     
-        local unfocus = section.items[ section.focus ]
+        local unfocus = section_items[ section.focus ]
         
-        local focus = section.items[ section.focus + delta ]
+        local focus = section_items[ section.focus + delta ]
         
         if not focus then
             if section.focus + delta == 0 then
@@ -401,7 +213,7 @@ function( section )
     
     local function activate_focused()
     
-        local focused = section.items[ section.focus ]
+        local focused = section_items[ section.focus ]
         
         if focused and focused.on_activate then
             focused:on_activate()
