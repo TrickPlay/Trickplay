@@ -251,16 +251,27 @@ local function build_ui( show_it )
 
     local function reset_dropdown_timer()
     
-        ui.dropdown_timer:stop()
-        ui.dropdown_timer:start()
+        if ui.dropdown_timer then
+        
+            ui.dropdown_timer:stop()
+            ui.dropdown_timer:start()
+            
+        end
     
     end
 
-    local function animate_out_dropdown( )
+    local function animate_out_dropdown( callback )
         
         local ANIMATION_DURATION = 200
         
         local section = ui.sections[ ui.focus ]
+        
+        if not section.dropdown then
+            if callback then
+                callback( section )
+            end
+            return
+        end
         
         if not section.dropdown.is_visible then return end
         
@@ -269,7 +280,13 @@ local function build_ui( show_it )
             duration = ANIMATION_DURATION,
             opacity = 0,
             y_rotation = -90,
-            on_completed = function() section.dropdown:hide() end
+            on_completed =
+                function()
+                    section.dropdown:hide()
+                    if callback then
+                        callback( section )
+                    end
+                end
         }
     
     end
@@ -343,6 +360,11 @@ local function build_ui( show_it )
         local section = ui.sections[ ui.focus ]
         
         if not section then return end
+
+        if section.init then
+            section:init()
+            section.init = nil
+        end
                 
         if section:on_enter() then
         
@@ -376,18 +398,18 @@ local function build_ui( show_it )
         
         -- TODO : Pressing OK on a button may do something else
         
-        [ keys.Return   ] = function() animate_in_dropdown() end,
+--        [ keys.Return   ] = function() animate_in_dropdown() end,
         
         [ keys.Down     ] = function() enter_section() end,
     }
     
     function ui.bar.on_key_down( _ , key )
     
-        if not pcall( key_map[ key ] ) then
+        local f = key_map[ key ]
         
-            print( keys[ key ] )
-        
-        end
+        if f then
+            f()
+        end    
     
     end
     
@@ -498,6 +520,67 @@ local function build_ui( show_it )
     
         self.bar:grab_key_focus()
         self.button_focus.opacity = 255
+    
+    end
+
+    ----------------------------------------------------------------------------
+    -- Called by a section when it goes full screen. This spells the end of
+    -- dropdowns.
+    ----------------------------------------------------------------------------
+    
+    function ui:on_section_full_screen( new_section )
+    
+        -- Give the key focus to the screen so we are not interrupted
+        
+        screen:grab_key_focus()
+        
+        -- Kill the dropdown timer
+        
+        ui.dropdown_timer = nil            
+        
+        -- Function to show the new section
+        
+        local function show_new_section( old_section )
+        
+            if old_section then
+            
+                if old_section.dropdown then
+                
+                    old_section.dropdown:unparent()
+                    
+                    old_section.dropdown = nil
+                
+                end
+                
+                -- TODO: don't like this - I should move the buttons somewhere else
+                
+                new_section.button = old_section.button
+            
+            end
+            
+            -- Attach the new section
+            
+            ui.sections[ ui.focus ] = new_section
+            
+            -- Tell it to show itself
+            
+            new_section:on_show()
+        
+        end
+        
+        -- Now, animate the dropdown out
+        
+        local section = ui.sections[ ui.focus ]
+        
+        if section and section.dropdown then
+        
+            animate_out_dropdown( show_new_section )
+           
+        else
+            
+            show_new_section()
+            
+        end
     
     end
     
