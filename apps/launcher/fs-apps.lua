@@ -20,6 +20,9 @@ function( ui , app_list )
     local function build_ui()
     
         if group then
+            group:raise_to_top()
+            group:grab_key_focus()
+            group.opacity = 255
             return
         end
         
@@ -332,7 +335,23 @@ function( ui , app_list )
         return true
     
     end
+    
+    function section.on_default_action( section )
+    
+        ui:on_section_full_screen( section )
+        
+        return true
+    
+    end
 
+    function section.on_hide( section )
+        
+        if group then
+            group.opacity = 0
+        end
+        
+    end
+    
     ---------------------------------------------------------------------------
 
     return section
