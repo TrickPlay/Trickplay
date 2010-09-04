@@ -410,7 +410,10 @@ local function build_ui( show_it )
             end
             
             if section:on_default_action() then
+                
                 ui.button_focus.opacity = 0
+                
+                ui.fs_focus = ui.focus
             end
         
         end
@@ -598,19 +601,29 @@ local function build_ui( show_it )
                 end
             end
             
-        
-            if old_section then
-            
-                -- TODO: don't like this - I should move the buttons somewhere else
-                
-                new_section.button = old_section.button
-            
-            end
-            
+                    
+            -- TODO: don't like this - I should move the buttons somewhere else
+            new_section.button = ui.sections[ ui.focus ].button
+
             -- Attach the new section
             
             ui.sections[ ui.focus ] = new_section
+        
+            -- Hide the old one
             
+            if ui.fs_focus then
+            
+                local prev_fs_focus = ui.sections[ ui.fs_focus ]
+                
+                if prev_fs_focus and prev_fs_focus.on_hide then
+                
+                    prev_fs_focus:on_hide()
+                    
+                end
+            
+            end
+        
+        
             -- Make it the full screen focus
             
             ui.fs_focus = ui.focus
