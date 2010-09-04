@@ -52,6 +52,8 @@ local function build_ui( show_it )
         
         factory             = dofile( "ui-factory" ),
         
+        fs_focus            = nil,
+        
         bar                 = Group {},
         
         bar_background      = assets( "assets/menu-background.png" ),
@@ -356,8 +358,8 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
     
     local function enter_section()
-    
-        local section = ui.sections[ ui.focus ]
+
+        local section = ui.sections[ ui.fs_focus or ui.focus ]
         
         if not section then return end
 
@@ -374,6 +376,46 @@ local function build_ui( show_it )
     
     end
 
+    -------------------------------------------------------------------------------
+    -- Invoke the default action for the current section    
+    -------------------------------------------------------------------------------
+    
+    local function do_default_for_section()
+    
+        if ui.fs_focus and ( ui.focus == ui.fs_focus ) then
+            
+            -- If they hit enter on the section that is currently full screen,
+            -- we just act like they hit 'down' and enter the section
+            
+            enter_section()
+        
+        else
+        
+            -- Otherwise, we are going to ask the currently focused section
+            -- to take itself into full screen mode
+            
+            local section = ui.sections[ ui.focus ]
+            
+            if not section then
+                return
+            end
+            
+            if section.init then
+                section:init()
+                section.init = nil
+            end
+            
+            if not section.on_default_action then
+                return
+            end
+            
+            if section:on_default_action() then
+                ui.button_focus.opacity = 0
+            end
+        
+        end
+    
+    end
 
     -------------------------------------------------------------------------------
     -- Handlers
@@ -398,7 +440,7 @@ local function build_ui( show_it )
         
         -- TODO : Pressing OK on a button may do something else
         
---        [ keys.Return   ] = function() animate_in_dropdown() end,
+        [ keys.Return   ] = function() do_default_for_section() end,
         
         [ keys.Down     ] = function() enter_section() end,
     }
@@ -424,6 +466,11 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
     -- Define ui functions
     -------------------------------------------------------------------------------
+    
+    function ui:get_client_rect( )
+        return { x = 0 , y = ui.bar.h , w = screen.w , h = screen.h - ui.bar.h }
+    end
+    
     
     ----------------------------------------------------------------------------
     -- Utility to iterate over all sections
@@ -542,16 +589,18 @@ local function build_ui( show_it )
         
         local function show_new_section( old_section )
         
+            -- Get rid of all the dropdowns
+        
+            for _ , section in ipairs( ui.sections ) do
+                if section.dropdown then
+                    section.dropdown:unparent()
+                    section.dropdown = nil
+                end
+            end
+            
+        
             if old_section then
             
-                if old_section.dropdown then
-                
-                    old_section.dropdown:unparent()
-                    
-                    old_section.dropdown = nil
-                
-                end
-                
                 -- TODO: don't like this - I should move the buttons somewhere else
                 
                 new_section.button = old_section.button
@@ -561,6 +610,10 @@ local function build_ui( show_it )
             -- Attach the new section
             
             ui.sections[ ui.focus ] = new_section
+            
+            -- Make it the full screen focus
+            
+            ui.fs_focus = ui.focus
             
             -- Tell it to show itself
             

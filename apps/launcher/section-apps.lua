@@ -1,57 +1,4 @@
 
-
-local function AppList( all , settings_key )
-    
-    local result = {}
-
-    local saved = settings[ settings_key ] or {}
-    
-    local to_add = {}
-    
-    for app_id , _ in pairs( all ) do
-        to_add[ app_id ] = true
-    end
-    
-    for _ , app_id in ipairs( saved ) do
-        if to_add[ app_id ] then
-            table.insert( result , app_id )
-            to_add[ app_id ] = nil
-        end
-    end
-    
-    for app_id , _ in pairs( to_add ) do
-        table.insert( result , app_id )
-    end
-    
-    local mt = {}
-    
-    mt.__index = mt
-    
-    mt.all = all
-    
-    function mt:save()
-        settings[ settings_key ] = result
-    end
-    
-    function mt:make_first( app_id )
-        local index = nil
-        for i , j in ipairs( self ) do
-            if j == app_id then
-                index = i
-                break
-            end
-        end
-        if index and index > 1 then
-            table.remove( self , index )
-            table.insert( self , 1 , app_id )
-            self:save()
-        end
-    end
-
-    return setmetatable( result , mt )
-end
-
-
 -- This gets called once - when the section is about to be shown for
 -- the first time.
 
@@ -78,7 +25,7 @@ function( section )
         
     local section_items = {}
     
-    local recently_used_apps = AppList( profile_apps , "recently_used" )
+    local recently_used_apps = dofile( "app-list" )( profile_apps , "recently_used" )
         
     ---------------------------------------------------------------------------
     -- We're switching to a list of apps in full screen
@@ -252,6 +199,18 @@ function( section )
             end
     
         return true
+    end
+
+    ---------------------------------------------------------------------------
+    -- Called when the user presses enter on this section's menu button
+    ---------------------------------------------------------------------------
+    
+    function section.on_default_action( section )
+    
+        show_all_apps( recently_used_apps )
+        
+        return true
+    
     end
     
     
