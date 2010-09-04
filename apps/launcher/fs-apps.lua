@@ -23,11 +23,13 @@ function( ui , app_list )
             return
         end
         
+        local client_rect = ui:get_client_rect()
+        
         group = Group
         {
-            size = { screen.w , screen.h - ui.bar.h } ,
-            position = { 0 , ui.bar.h + 1 },
-            clip = { 0 , 0 , screen.w , screen.h - ui.bar.h }
+            size = { client_rect.w , client_rect.h } ,
+            position = { client_rect.x , client_rect.y },
+            clip = { 0 , 0 , client_rect.w , client_rect.h }
         }
         
         screen:add( group )
