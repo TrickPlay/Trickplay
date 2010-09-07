@@ -931,6 +931,49 @@ interface actor [[ClutterActor*]]
     move_anchor_point( double x , double y )
 	[[clutter_actor_move_anchor_point(self,x,y);]];
 	
+	/*
+	Function: transform_point
+	
+	Transforms a point in this element's coordinate space into the coordinate space of 
+	one of its ancestors.
+	
+	Arguments:
+	
+	ancestor - An ancestor of this element.
+	x , y , z - The coordinates of the point.
+	
+	
+	Returns:
+	
+	A table with 3 elements corresponding to the coordinates of the transformed point.
+	*/
+	
+	table transform_point( UIElement ancestor, double x , double y , double z = 0 )
+		[[
+			lua_newtable(L);
+			
+			ClutterActor * a=ClutterUtil::user_data_to_actor(L,ancestor);
+			
+			if (a)
+			{
+				ClutterVertex point_in;
+				point_in.x = x;
+				point_in.y = y;
+				point_in.z = z;
+				
+				ClutterVertex point_out;
+				
+				clutter_actor_apply_relative_transform_to_point( self , a , & point_in , & point_out );
+				
+				lua_pushnumber( L , point_out.x );
+				lua_rawseti( L , -2 , 1 );
+				lua_pushnumber( L , point_out.y );
+				lua_rawseti( L , -2 , 2 );
+				lua_pushnumber( L , point_out.z );
+				lua_rawseti( L , -2 , 3 );
+			}						
+		]];  
+	
     /*
 	Function: grab_key_focus
 	
