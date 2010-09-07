@@ -274,8 +274,8 @@ FrontPageView = Class(View, function(view, model, ...)
                                view.previous.scale[2]}
             view.prev_target_pos = {PIC_W * (prev_i[2]-1),
                                     PIC_H * (prev_i[1]-1)+10}
-            print(view.prev_pos[1],        view.prev_pos[2],"  ",
-                  view.prev_target_pos[1], view.prev_target_pos[2],"  ",
+            print(view.prev_pos[1],        view.prev_pos[2]        ,"   ",
+                  view.prev_target_pos[1], view.prev_target_pos[2] ,"   ",
                   view.previous.x,         view.previous.y)
 
             view.current    =  model.fp_slots[sel[1]][sel[2]]

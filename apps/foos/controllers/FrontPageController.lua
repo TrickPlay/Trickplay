@@ -16,10 +16,6 @@ FrontPageController = Class(Controller, function(self, view, ...)
             self:get_model():notify()
         end,
         [keys.d]     = function(self)
---[[
-            local formula = (model.front_page_index + (selected[2]-1))*2+
-                                                      (selected[1]-1) -1
---]]
             print("num left",#adapters)
             if #adapters > 1 then
                 print("entered")
@@ -30,7 +26,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
             end
         end,
         [keys.s] = function(self)
-            if (style == #slideshow_styles ) then
+            if style == #slideshow_styles then
                 style = 1
             else
                 style = style + 1
@@ -39,28 +35,16 @@ FrontPageController = Class(Controller, function(self, view, ...)
             reset_keys()            
         end,
         [keys.Return] = function(self) 
-				
+            	
             if adapters[model.fp_1D_index] ~= nil then
-                --dofile("slideshows/"..slideshow_styles[style]..
-                --                               "/Slideshow.lua")
                 view.timer:stop()
                 model:set_active_component(
                                 Components.SLIDE_SHOW)
-                --model.curr_slideshow = Slideshow:new
-                --{ 
-                --    num_pics = 20, 
-                --    index    = #adapters+1 - model.fp_1D_index
-                --}
+
                 model:get_controller(Components.SLIDE_SHOW):Prep_Slideshow()
-                reset_keys()
                 self:get_model():notify()
-                --fullscreen = false
-                --background.opacity = 255
-                --background2.opacity = 255
-                --logo.opacity = 255
-                --controls.opacity = 255
-                --model.curr_slideshow:begin()
             end
+            reset_keys()
         end
     }
 
@@ -69,7 +53,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
         if MenuKeyTable[k] then
             MenuKeyTable[k](self)
         else
-            screen.on_key_down = model.keep_keys            
+            reset_keys()            
         end
     end
 
@@ -110,10 +94,10 @@ FrontPageController = Class(Controller, function(self, view, ...)
                 model.front_page_index = next_index
                 self:get_model():notify()
             else
-                screen.on_key_down = model.keep_keys
+                reset_keys()
             end
         else
-            screen.on_key_down = model.keep_keys
+            reset_keys()
         end
 
     end
