@@ -21,30 +21,34 @@ SlideshowView = Class(View, function(view, model, ...)
     local background2 = Image {src = "assets/background2.png" }
 
     --NAV MENU
-    local nav_group = Group    { position = {1500, 300}, opacity = 0 }
-    local nav_back  = Rectangle{ w = 300,  h = 400,  color = "FFFFFF"}
-    nav_group:add(nav_back)
+    view.nav_group = Group    { position = {1500, 300}, opacity = 0 }
+    local nav_back  = Rectangle{ w = 300,  h = 480,  color = "FFFFFF"}
+    view.nav_group:add(nav_back)
     view.nav_items =
     {
-        Text{text = "Close Menu",              y =  20, font="Sans 36px"},
-        Text{text = "Back to Albums",          y =  80, font="Sans 36px"},
-        Text{text = "Hide this Album",         y = 140, font="Sans 36px"},
-        Text{text = "Play Slideshow",          y = 200, font="Sans 36px"},
-        Text{text = "Change Slide Show Style", y = 260, font="Sans 36px"},
+        Text{text = "Close Menu",              y = 160, font="Sans 36px"},
+        Text{text = "Back to Albums",          y = 220, font="Sans 36px"},
+        Text{text = "Hide this Album",         y = 280, font="Sans 36px"},
+        Text{text = "Play Slideshow",          y = 340, font="Sans 36px"},
+        Text{text = "Change Slide Show Style", y = 400, font="Sans 36px"},
     }
-    nav_group:add(unpack(view.nav_items))
-    view.ui:add(nav_group)
-
-    --NAV UI
-    local back     = Image{src="assets/slideshow/NavBack.png" }
-    local left     = Image{src="assets/slideshow/NavPrev.png", x=-80}
-    local right    = Image{src="assets/slideshow/NavNext.png", x=140}
-    local down     = Image{src="assets/slideshow/NavFull.png", x= 30,y= 80}
-    local up_play  = Image{src="assets/slideshow/NavPlay.png", x= 30,y=-80}
-    local up_pause = Image{src="assets/slideshow/NavPause.png",x= 30,y=-80,
-                                                              opacity =  0}
-    local controls = Group{x = 100, y = 900, z =1}
-    controls:add(up_pause,up_play,down,left,right,back)
+    view.nav_group:add(unpack(view.nav_items))
+    view.logo = Image
+    {
+        name = "slideshow cover",
+        src  = "",
+        position = {-40,-75},
+        size = {300, 225}
+    }
+    view.queryText = Text 
+    { 
+        text = "",
+        font = "Sans 30px",
+        x    = 105, 
+        y    = 80
+    }
+    view.nav_group:add(view.queryText, view.logo)
+    view.ui:add(view.nav_group)
 
     local caption = Text 
     {
@@ -53,18 +57,10 @@ SlideshowView = Class(View, function(view, model, ...)
         x    = 1530,
         y    = 400
     }
-    view.logo = nil
-    view.queryText = Text 
-    { 
-        text = "",
-        font = "Sans 30px",
-        x    = 105, 
-        y    = 300
-    }
 
 
-    view.ui:add( backup, overlay_image, background, background2, caption,
-                 view.queryText, controls )
+
+    view.ui:add( backup, overlay_image, background, background2, caption )
     view.timer            = Timer()
     view.timer.interval   = 4
     view.timer_is_running = false
@@ -73,7 +69,7 @@ SlideshowView = Class(View, function(view, model, ...)
     view.on_screen_list  = {}
     view.off_screen_list = {}
 
-    view.styles = {"REGULAR","FULLSCREEN",}--"LAYERED"}
+    view.styles = {"REGULAR","FULLSCREEN"}--"LAYERED"}
     local off_screen_prep = 
     {
         ["REGULAR"]    = function(img,group)
@@ -200,8 +196,7 @@ SlideshowView = Class(View, function(view, model, ...)
         ["REGULAR"]    = function()
             background.opacity  = 255
             background2.opacity = 255
-            view.logo.opacity   = 255
-            controls.opacity    = 255
+            --view.logo.opacity   = 255
 
             for i = 1,#view.on_screen_list do
                 local pic = view.on_screen_list[i]:find_child("slide")
@@ -228,8 +223,7 @@ SlideshowView = Class(View, function(view, model, ...)
         ["FULLSCREEN"] = function()
             background.opacity  = 0
             background2.opacity = 0
-            view.logo.opacity   = 0
-            controls.opacity    = 0
+            --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
                 local pic = view.on_screen_list[i]:find_child("slide")
@@ -388,7 +382,7 @@ SlideshowView = Class(View, function(view, model, ...)
 
         local index = view:get_controller():get_photo_index() +
                                           #view.off_screen_list
-        print("preload front",index)
+        print("preload front",index,adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,model.fp_1D_index)
         local request = URLRequest
         {
             url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
@@ -494,7 +488,7 @@ SlideshowView = Class(View, function(view, model, ...)
         local timeline = loading(clone)
         on_screen_prep[view.styles[style_i] ](clone,group)
         local index = view:get_controller():get_photo_index() -
-                                          #view.on_screen_list +1
+                                          4
         print("preload back",index)
         local request = URLRequest
         {
@@ -607,8 +601,8 @@ SlideshowView = Class(View, function(view, model, ...)
     end
 
     function view:nav_on_focus()
-        nav_group:raise_to_top()
-        nav_group:animate
+        view.nav_group:raise_to_top()
+        view.nav_group:animate
         { 
             duration = 200,
             opacity  = 255,
@@ -618,7 +612,7 @@ SlideshowView = Class(View, function(view, model, ...)
         }
     end
     function view:nav_out_focus()
-        nav_group:animate
+        view.nav_group:animate
         { 
             duration = 200,
             opacity  = 0,

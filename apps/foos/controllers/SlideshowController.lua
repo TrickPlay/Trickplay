@@ -20,15 +20,9 @@ SlideshowController = Class(Controller, function(self, view, ...)
 
     function self:Prep_Slideshow()
         view.queryText.text = string.gsub(
-            adapters[model.fp_1D_index][1].required_inputs.query,"%%20"," ")
-        view.logo = Image 
-        { 
-            src  = adapters[model.fp_1D_index].logoUrl,
-            x    = 20,
-            y    = 130,
-            size = {300,225}
-        }
-        view.ui:add(view.logo)
+            adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,"%%20"," ")
+        view.logo.src  = adapters[#adapters - model.fp_1D_index + 1].logoUrl
+        view.nav_group:add(view.logo)
         view.set_ui[ view.styles[style_index] ]()
 
         menu_index = 1
@@ -133,9 +127,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
                 menu_index = menu_index - dir[2]
             end
         end
-        --moving foward through the photos
-        if dir == Directions.RIGHT then
-           view:preload_front()
+
            if #view.on_screen_list > 5 then
                print("removing from on_screen list")
                
@@ -147,9 +139,6 @@ SlideshowController = Class(Controller, function(self, view, ...)
 
                view.on_screen_list[#view.on_screen_list]=nil
            end
-        --moving back
-        elseif dir == Directions.LEFT then
-           --toss the end of the off_screen_list
            if #view.off_screen_list > 5 then
                print("removing from off_screen list")
                if view.off_screen_list[#view.off_screen_list] ~= nil and
@@ -159,7 +148,15 @@ SlideshowController = Class(Controller, function(self, view, ...)
                end
                view.off_screen_list[#view.off_screen_list]=nil
            end
-           if photo_index - #view.on_screen_list+1 >1 then
+
+
+        --moving foward through the photos
+        if dir == Directions.RIGHT then
+           view:preload_front()
+        --moving back
+        elseif dir == Directions.LEFT then
+           --toss the end of the off_screen_list
+           if photo_index >= 5  then
                view:preload_back()
            end
         end 
