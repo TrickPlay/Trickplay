@@ -141,8 +141,9 @@ end
 ]]--
 
 local marker = Rectangle { size = { grass_width, grass_width }, color = "ff0000", anchor_point = { grass_width/2, grass_width/2 } }
+local marker2 = Rectangle { size = { 3, screen.h }, color = "0000ff", anchor_point = { 2, 0 } }
 function trace_terrain()
-    screen:add(marker)
+    screen:add(marker, marker2)
     marker.position = { 0, screen.h/2 }
     local t = Timeline {
         duration = 3000,
@@ -155,9 +156,11 @@ function trace_terrain()
                 y = (1-t)^3*p[0].y + 3*(1-t)^2*t*p[1].y + 3*(1-t)*t^2*p[2].y + t^3*p[3].y
             }
             marker.position = { point.x, point.y-grass_width }
+            marker2.x = screen.w*progress
         end,
         on_completed = function()
             marker:unparent()
+            marker2:unparent()
         end
     }
     t:start()
