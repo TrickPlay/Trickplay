@@ -3,6 +3,8 @@ local roughness = 0.5
 local initial_random_range = screen.h/3.5
 local random_range
 
+local grass_width = 20
+
 local line_segments = {}
 
 local terrain_canvas = Canvas { size = { screen.w, screen.h } }
@@ -57,9 +59,8 @@ end
 
 local function display_line_segments(segments)
 	terrain_canvas:begin_painting()
-	terrain_canvas:set_source_color("008000")
 	terrain_canvas:clear_surface()
-	terrain_canvas:move_to(0, terrain_canvas.height)
+	terrain_canvas:move_to(-grass_width, terrain_canvas.height+grass_width)
 	terrain_canvas:line_to(segments[1].start.x, segments[1].start.y)
 	for i = 1,#segments do
         local p0 = {
@@ -97,8 +98,20 @@ local function display_line_segments(segments)
 									p3.x, p3.y
 		)
 	end
-	terrain_canvas:line_to(terrain_canvas.width, terrain_canvas.height)
-	terrain_canvas:fill()
+	terrain_canvas:line_to(terrain_canvas.width+grass_width, terrain_canvas.height+grass_width)
+	terrain_canvas:set_source_color("608000")
+	terrain_canvas:fill(true)
+	terrain_canvas:set_source_color("40a000")
+	terrain_canvas:set_line_width(grass_width)
+	terrain_canvas:stroke()
+--[[
+    terrain_canvas:move_to(segments[1].start.x,segments[1].start.y)
+    for i = 1,#segments do
+        terrain_canvas:line_to(segments[i].fin.x, segments[i].fin.y)
+    end
+    terrain_canvas:set_source_color("800000")
+    terrain_canvas:stroke()
+]]--
 	terrain_canvas:finish_painting()
 end
 
@@ -131,11 +144,10 @@ function make_terrain(n)
 
 	-- Start with one line-segment which goes from half-way up screen on left to half-way up on right
 	line_segments = {
-						{ start = { x=0, y=screen.h/2 }, fin = { x=screen.w, y=screen.h/2 } }
+						{ start = { x=-grass_width, y=screen.h/2 }, fin = { x=screen.w+grass_width, y=screen.h/2 } }
 					}
 
 	-- Now repeat n times
-	local i
 	random_range = initial_random_range
 	for i = 1,n do
 		local new_segments = {}
