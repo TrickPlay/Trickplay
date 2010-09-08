@@ -154,7 +154,7 @@ function trace_terrain()
                 x = (1-t)^3*p[0].x + 3*(1-t)^2*t*p[1].x + 3*(1-t)*t^2*p[2].x + t^3*p[3].x,
                 y = (1-t)^3*p[0].y + 3*(1-t)^2*t*p[1].y + 3*(1-t)*t^2*p[2].y + t^3*p[3].y
             }
-            marker.position = { point.x, point.y }
+            marker.position = { point.x, point.y-grass_width }
         end,
         on_completed = function()
             marker:unparent()
