@@ -1,12 +1,12 @@
 
-local roughness = 0.5
-local initial_random_range = screen.h/3.5
-local random_range
+local ROUGHNESS = 0.5
+local INITIAL_RANDOM_RANGE = screen.h/3.5
 
-local grass_width = 20
+local GRASS_WIDTH = 20
 
-local line_segments = {}
 
+
+local line_segments = {} -- list of the endpoints of each terrain segment
 local terrain_canvas = Canvas { size = { screen.w, screen.h } }
 screen:add(terrain_canvas)
 screen:show()
@@ -57,29 +57,55 @@ local function control_points(segments, i)
     return p
 end
 
-local function display_line_segments(segments)
+local function split_line_segment(orig_segment, break_point, offset)
+    return {
+                {
+                    start = orig_segment.start,
+                    fin   = {
+                                x = break_point.x + offset.x,
+                                y = break_point.y + offset.y
+                            }
+                },
+                {
+                    start = {
+                                x = break_point.x + offset.x,
+                                y = break_point.y + offset.y
+                            },
+                    fin = orig_segment.fin
+                }
+    }
+end
+
+local function midpoint(segment)
+    return {
+                x = (segment.start.x+segment.fin.x)/2,
+                y = (segment.start.y+segment.fin.y)/2
+           }
+end
+
+function draw_terrain()
 	terrain_canvas:begin_painting()
 	terrain_canvas:clear_surface()
-	terrain_canvas:move_to(-grass_width, terrain_canvas.height+grass_width)
-	terrain_canvas:line_to(segments[1].start.x, segments[1].start.y)
-	for i = 1,#segments do
-	    local p = control_points(segments,i)
+	terrain_canvas:move_to(-GRASS_WIDTH, terrain_canvas.height+GRASS_WIDTH)
+	terrain_canvas:line_to(line_segments[1].start.x, line_segments[1].start.y)
+	for i = 1,#line_segments do
+	    local p = control_points(line_segments,i)
         terrain_canvas:curve_to(
 									p[1].x, p[1].y,
 									p[2].x, p[2].y,
 									p[3].x, p[3].y
 		)
 	end
-	terrain_canvas:line_to(terrain_canvas.width+grass_width, terrain_canvas.height+grass_width)
+	terrain_canvas:line_to(terrain_canvas.width+GRASS_WIDTH, terrain_canvas.height+GRASS_WIDTH)
 	terrain_canvas:set_source_color("608000")
 	terrain_canvas:fill(true)
 	terrain_canvas:set_source_color("40a000")
-	terrain_canvas:set_line_width(grass_width)
+	terrain_canvas:set_line_width(GRASS_WIDTH)
 	terrain_canvas:stroke()
 --[[
-    terrain_canvas:move_to(segments[1].start.x,segments[1].start.y)
-    for i = 1,#segments do
-        terrain_canvas:line_to(segments[i].fin.x, segments[i].fin.y)
+    terrain_canvas:move_to(line_segments[1].start.x,line_segments[1].start.y)
+    for i = 1,#line_segments do
+        terrain_canvas:line_to(line_segments[i].fin.x, line_segments[i].fin.y)
     end
     terrain_canvas:set_source_color("800000")
     terrain_canvas:stroke()
@@ -87,51 +113,78 @@ local function display_line_segments(segments)
 	terrain_canvas:finish_painting()
 end
 
-local function split_line_segment_into(orig_segment, new_segments)
-	-- Find midpoint of existing segment
-	local midpoint = {
-						x = (orig_segment.fin.x + orig_segment.start.x) / 2,
-						y = (orig_segment.fin.y + orig_segment.start.y) / 2
-					}
-
-	-- Now fudge the y component by some random amount
-	midpoint.y = midpoint.y + math.random(-random_range, random_range)
-
-	-- Now create 2 new points with this new midpoint as their end/start
-	table.insert(new_segments, {
-									start = orig_segment.start,
-									fin = midpoint
-								} )
-	table.insert(new_segments, {
-									start = midpoint,
-									fin = orig_segment.fin
-								} )
-end
-
-function draw_terrain()
-	display_line_segments(line_segments)
-end
-
 function make_terrain(n)
 
 	-- Start with one line-segment which goes from half-way up screen on left to half-way up on right
 	line_segments = {
-						{ start = { x=-grass_width, y=screen.h/2 }, fin = { x=screen.w+grass_width, y=screen.h/2 } }
+						{
+						    start = { x=-GRASS_WIDTH, y=screen.h/2 },
+                            fin = { x=screen.w+GRASS_WIDTH, y=screen.h/2 }
+                        }
 					}
 
 	-- Now repeat n times
-	random_range = initial_random_range
+	local random_range = INITIAL_RANDOM_RANGE
+	local random_split = { x=0, y=0 }
 	for i = 1,n do
-		local new_segments = {}
-
-		local segment
-		for _,segment in pairs(line_segments) do
-			split_line_segment_into(segment, new_segments)
+        -- iterate downwards since splitting points will make list grow longer
+		for i=#line_segments,1,-1 do
+		    local seg = table.remove(line_segments,i)
+		    random_split.y = math.random(-random_range, random_range)
+            local broken = split_line_segment(
+                                                seg,
+                                                midpoint(seg),
+                                                random_split
+                                            )
+            table.insert( line_segments, i, broken[2] )
+            table.insert( line_segments, i, broken[1] )
 		end
 
-		line_segments = new_segments
-		random_range = random_range / math.exp(roughness)
+		random_range = random_range * ROUGHNESS
 	end
+end
+
+
+local function segment_from_t(t)
+    return math.min(math.floor(t*#line_segments)+1,#line_segments)
+end
+
+local function t_within_t(t)
+    return (t*#line_segments+1)-segment_from_t(t)
+end
+
+local function point_on_curve(t)
+    local seg = segment_from_t(t)
+    local t = t_within_t(t)
+    local p = control_points(line_segments, seg)
+    return {
+        x = (1-t)^3*p[0].x + 3*(1-t)^2*t*p[1].x + 3*(1-t)*t^2*p[2].x + t^3*p[3].x,
+        y = (1-t)^3*p[0].y + 3*(1-t)^2*t*p[1].y + 3*(1-t)*t^2*p[2].y + t^3*p[3].y
+    }
+end
+--[[
+    This function will cause the terrain to "break" at the given point (given by a "t" parameter relative to the whole screen).  The segment at that point will be broken in half, with the break point being lowered by bang_size; the curve will then be re-calculated and redrawn
+]]--
+function explode_terrain_at(t, bang_size)
+    print("Breaking at ",t)
+    local seg = segment_from_t(t)
+    local breakpoint = point_on_curve(t)
+
+    local the_seg = table.remove(line_segments,seg)
+    print("Breaking: ",serialize(the_seg))
+    local broken = split_line_segment(
+                                        the_seg,
+                                        breakpoint,
+                                        { x = 0, y = -bang_size }
+                                  )
+
+    print("Result of break: ",serialize(broken))
+
+    table.insert(line_segments, seg, broken[2])
+    table.insert(line_segments, seg, broken[1])
+    
+    print("Line segments are now:")
+    dumptable(line_segments)
 end
 
 
@@ -140,7 +193,7 @@ end
     B(t) = (1-t)³.P0 + 3(1-t)².t.P1 + 3(1-t).t².P2 + t³.P3, t∈[0,1]
 ]]--
 
-local marker = Rectangle { size = { grass_width, grass_width }, color = "ff0000", anchor_point = { grass_width/2, grass_width/2 } }
+local marker = Rectangle { size = { GRASS_WIDTH, GRASS_WIDTH }, color = "ff0000", anchor_point = { GRASS_WIDTH/2, GRASS_WIDTH/2 } }
 local marker2 = Rectangle { size = { 3, screen.h }, color = "0000ff", anchor_point = { 2, 0 } }
 function trace_terrain()
     screen:add(marker, marker2)
@@ -148,14 +201,8 @@ function trace_terrain()
     local t = Timeline {
         duration = 3000,
         on_new_frame = function(t, msec, progress)
-            local seg = math.min(math.floor(progress*#line_segments)+1,#line_segments)
-            local t = (progress*#line_segments+1)-seg
-            local p = control_points(line_segments, seg)
-            local point = {
-                x = (1-t)^3*p[0].x + 3*(1-t)^2*t*p[1].x + 3*(1-t)*t^2*p[2].x + t^3*p[3].x,
-                y = (1-t)^3*p[0].y + 3*(1-t)^2*t*p[1].y + 3*(1-t)*t^2*p[2].y + t^3*p[3].y
-            }
-            marker.position = { point.x, point.y-grass_width }
+            local point = point_on_curve(progress)
+            marker.position = { point.x, point.y-GRASS_WIDTH }
             marker2.x = screen.w*progress
         end,
         on_completed = function()
