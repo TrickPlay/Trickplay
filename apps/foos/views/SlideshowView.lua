@@ -280,19 +280,19 @@ SlideshowView = Class(View, function(view, model, ...)
 			  
             pic:animate 
             {
-                duration = 200,
+                duration = 300,
                 mode     = EASE_IN_EXPO,
-                opacity  = 255
+                opacity  = 255,
+                on_completed = function()
+                    reset_keys()
+                end
             }
             if view.on_screen_list[2] ~= nil  then
                 view.on_screen_list[2]:animate
                 {
-                    duration = 300,
+                    duration = 200,
                     opacity  = 0,
-                    mode     = EASE_IN_EXPO,
-                    on_completed = function()
-                        reset_keys()            
-                    end
+                    mode     = EASE_IN_EXPO
                 }
             end
         end,
@@ -380,9 +380,9 @@ SlideshowView = Class(View, function(view, model, ...)
         local timeline  = loading(clone)
         off_screen_prep[view.styles[style_i] ](clone,group)
 
-        local index = view:get_controller():get_photo_index() +
+        local index = view:get_controller():get_photo_index() - 1 +
                                           #view.off_screen_list
-        print("preload front",index,adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,model.fp_1D_index)
+        print("preload front",index,adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query)
         local request = URLRequest
         {
             url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
@@ -403,6 +403,8 @@ SlideshowView = Class(View, function(view, model, ...)
                         src       = site, 
                         async     = true, 
                         on_loaded = function(img,failed)
+                            img.on_loaded = nil
+
                             --if it failed to load from the internet, then
                             --throw up the placeholder
                             local style_i2 = view:get_controller():get_style_index()
@@ -436,7 +438,6 @@ SlideshowView = Class(View, function(view, model, ...)
                             if group == view.on_screen_list[1] then
                                 group.opacity = 255
                             end
-                            img.on_loaded = nil
                         end
                     } 
                 else
@@ -487,8 +488,8 @@ SlideshowView = Class(View, function(view, model, ...)
         local clone = Group{name="loading"}
         local timeline = loading(clone)
         on_screen_prep[view.styles[style_i] ](clone,group)
-        local index = view:get_controller():get_photo_index() -
-                                          4
+        local index = view:get_controller():get_photo_index()  -
+                                                  #view.on_screen_list + 2
         print("preload back",index)
         local request = URLRequest
         {
@@ -519,6 +520,8 @@ SlideshowView = Class(View, function(view, model, ...)
                         src       = site, 
                         async     = true, 
                         on_loaded = function(img,failed)
+                            img.on_loaded = nil
+
                             if failed then
                                 --loaded the placeholder for failed pics
                                 local placeholder = Group{}
@@ -584,13 +587,9 @@ SlideshowView = Class(View, function(view, model, ...)
         if view.timer_is_running then
             view.timer:stop()
             view.timer_is_running = false
-            up_play.opacity  = 255
-            up_pause.opacity = 0
         else
             view.timer:start()
             view.timer_is_running = true
-            up_play.opacity  = 0
-            up_pause.opacity = 255
         end
         reset_keys()            
     end  
@@ -621,7 +620,7 @@ SlideshowView = Class(View, function(view, model, ...)
             end
         }
     end
-    view.prev_i = 0
+    view.prev_i = -1
 
     function view:update()
         local controller = view:get_controller()
@@ -630,10 +629,7 @@ SlideshowView = Class(View, function(view, model, ...)
         local style_i    = controller:get_style_index()
         local menu_i     = controller:get_menu_index()
         if comp == Components.SLIDE_SHOW  then
-            print("\n\nShowing SlideshowView UI\tquery index:",
-                  model.fp_1D_index,"photo index:",photo_i,"on screen:",
-                  #view.on_screen_list,"off_screen:",#view.off_screen_list,
-                  "\n")
+            print("\n\nShowing SlideshowView UI")
             view.ui:raise_to_top()
             view.ui.opacity = 255
             for i = 1 , #view.nav_items do
@@ -650,6 +646,17 @@ SlideshowView = Class(View, function(view, model, ...)
                     --grab the pic underneath the current one
                     local pic = table.remove(view.on_screen_list, 1 )
                     table.insert(view.off_screen_list, 1 ,pic)
+                    if #view.off_screen_list > 5 then
+                        print("removing from off_screen list")
+                        if view.off_screen_list[#view.off_screen_list] ~= 
+                           nil and
+                           view.off_screen_list[#view.off_screen_list
+                           ].parent ~= nil then
+                            view.off_screen_list[#view.off_screen_list]:unparent()
+                        end
+                        view.off_screen_list[#view.off_screen_list]=nil
+                    end
+
                     pic:complete_animation()
                 
                     backward_animation[view.styles[style_i]](pic)
@@ -663,6 +670,17 @@ SlideshowView = Class(View, function(view, model, ...)
                    --grab the picture
                    local pic = table.remove( view.off_screen_list,1 )
                    table.insert( view.on_screen_list,  1, pic )
+                   if #view.on_screen_list > 5 then
+                       print("removing from on_screen list")
+            
+                       if view.on_screen_list[#view.on_screen_list] ~= nil and
+                          view.on_screen_list[#view.on_screen_list].parent ~= nil
+                                                                            then
+                           view.on_screen_list[#view.on_screen_list]:unparent()
+                       end
+
+                       view.on_screen_list[#view.on_screen_list]=nil
+                   end
 
                    --add it to the screen and end its previous animation
                    self.ui:add(pic)
@@ -678,6 +696,10 @@ SlideshowView = Class(View, function(view, model, ...)
                 reset_keys()
             end
             view.prev_i = photo_i
+            print("\n\nresultant state is\t\tquery index:",
+                  model.fp_1D_index,"photo index:",photo_i,"on screen:",
+                  #view.on_screen_list,"off_screen:",#view.off_screen_list,
+                  "\n")
         else
             print("Hiding SlideshowView UI")
             view.ui:complete_animation()
