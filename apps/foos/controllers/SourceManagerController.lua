@@ -113,6 +113,8 @@ SourceManagerController = Class(Controller, function(self, view, ...)
                     adapters[#adapters]:getUserID(search)
                     adapters[#adapters][1].required_inputs.query = search                    
                     searches[#adapters] = search
+                    Add_Cover()
+
                     login_text[1] = ""
                 end
                 view.accordian = false

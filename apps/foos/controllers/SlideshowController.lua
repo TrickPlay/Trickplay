@@ -2,7 +2,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.SLIDE_SHOW)
 
     -- the default selected indices
-    local photo_index = 1
+    local photo_index = 0
     function self:reset_photo_index() photo_index = 1     end
     function self:set_photo_index(i)  photo_index = i     end
     function self:get_photo_index()   return photo_index  end
@@ -19,6 +19,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
     local menu_is_visible = false
 
     function self:Prep_Slideshow()
+        photo_index = 0
         view.queryText.text = string.gsub(
             adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,"%%20"," ")
         view.logo.src  = adapters[#adapters - model.fp_1D_index + 1].logoUrl
@@ -61,11 +62,11 @@ SlideshowController = Class(Controller, function(self, view, ...)
             for i = 1,#view.off_screen_list do
                 view.off_screen_list[i]:unparent()
             end
-            view.on_screen_list = {}
+            view.on_screen_list  = {}
             view.off_screen_list = {}
  
-            photo_index = 1
-            view.prev_i = 0
+            photo_index =  0
+            view.prev_i = -1
 
             menu_is_visible = false
             view:nav_out_focus()
@@ -117,9 +118,13 @@ SlideshowController = Class(Controller, function(self, view, ...)
     end
 
     function self:move_selector(dir)
+        print("\n\nKey press when\t\t query index:",
+               model.fp_1D_index,"photo index:",photo_index,"on screen:",
+               #view.on_screen_list,"off_screen:",#view.off_screen_list,
+              "\n")
         photo_index = photo_index + dir[1]
-        if photo_index <= 0 then
-           photo_index = 1
+        if photo_index < 0 then
+           photo_index = 0
         end
         if menu_is_visible then
             menu_index = menu_index + dir[2]
@@ -127,38 +132,38 @@ SlideshowController = Class(Controller, function(self, view, ...)
                 menu_index = menu_index - dir[2]
             end
         end
+--[[
+        if #view.on_screen_list > 5 then
+            print("removing from on_screen list")
+            
+            if view.on_screen_list[#view.on_screen_list] ~= nil and
+               view.on_screen_list[#view.on_screen_list].parent ~= nil
+                                                                 then
+                view.on_screen_list[#view.on_screen_list]:unparent()
+            end
 
-           if #view.on_screen_list > 5 then
-               print("removing from on_screen list")
-               
-               if view.on_screen_list[#view.on_screen_list] ~= nil and
-                  view.on_screen_list[#view.on_screen_list].parent ~= nil
-                                                                    then
-                   view.on_screen_list[#view.on_screen_list]:unparent()
-               end
-
-               view.on_screen_list[#view.on_screen_list]=nil
-           end
-           if #view.off_screen_list > 5 then
-               print("removing from off_screen list")
-               if view.off_screen_list[#view.off_screen_list] ~= nil and
-                  view.off_screen_list[#view.off_screen_list].parent ~= nil
-                                                                    then
-                   view.off_screen_list[#view.off_screen_list]:unparent()
-               end
-               view.off_screen_list[#view.off_screen_list]=nil
-           end
-
+            view.on_screen_list[#view.on_screen_list]=nil
+        end
+        if #view.off_screen_list > 5 then
+            print("removing from off_screen list")
+            if view.off_screen_list[#view.off_screen_list] ~= nil and
+               view.off_screen_list[#view.off_screen_list].parent ~= nil
+                                                                 then
+                view.off_screen_list[#view.off_screen_list]:unparent()
+            end
+            view.off_screen_list[#view.off_screen_list]=nil
+        end
+--]]
 
         --moving foward through the photos
         if dir == Directions.RIGHT then
-           view:preload_front()
+            view:preload_front()
         --moving back
         elseif dir == Directions.LEFT then
-           --toss the end of the off_screen_list
-           if photo_index >= 5  then
-               view:preload_back()
-           end
+            --toss the end of the off_screen_list
+            if photo_index >= 4  then
+                view:preload_back()
+            end
         end 
         self:get_model():notify()
     end

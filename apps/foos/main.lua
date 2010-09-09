@@ -75,6 +75,7 @@ end
 
 --stores the function pointer
 model.keep_keys = screen.on_key_down
+
 function reset_keys()
     print("reseting keys",model.keep_keys)
     screen.on_key_down = model.keep_keys
