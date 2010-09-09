@@ -111,6 +111,25 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     return result;
 }
 
+gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    
+    lua_pushnumber(L,event->x);
+    lua_pushnumber(L,event->y);
+    
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_motion" , 2 , 1 , L ))
+    {
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
+    }
+
+    return result;
+}
+
 gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
 {
     int result = FALSE;
@@ -1413,6 +1432,16 @@ interface actor [[ClutterActor*]]
 			"on_button_up",
 			"button-release-event",
 			G_CALLBACK(actor_on_button_up),
+			L);	    
+	]];
+	
+	callback on_motion
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_motion,
+			"on_motion",
+			"motion-event",
+			G_CALLBACK(actor_on_motion),
 			L);	    
 	]];
 
