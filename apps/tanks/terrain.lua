@@ -84,24 +84,24 @@ local function midpoint(segment)
 end
 
 function draw_terrain()
-	terrain_canvas:begin_painting()
-	terrain_canvas:clear_surface()
-	terrain_canvas:move_to(-GRASS_WIDTH, terrain_canvas.height+GRASS_WIDTH)
-	terrain_canvas:line_to(line_segments[1].start.x, line_segments[1].start.y)
-	for i = 1,#line_segments do
-	    local p = control_points(line_segments,i)
+    terrain_canvas:begin_painting()
+    terrain_canvas:clear_surface()
+    terrain_canvas:move_to(-GRASS_WIDTH, terrain_canvas.height+GRASS_WIDTH)
+    terrain_canvas:line_to(line_segments[1].start.x, line_segments[1].start.y)
+    for i = 1,#line_segments do
+        local p = control_points(line_segments,i)
         terrain_canvas:curve_to(
-									p[1].x, p[1].y,
-									p[2].x, p[2].y,
-									p[3].x, p[3].y
-		)
-	end
-	terrain_canvas:line_to(terrain_canvas.width+GRASS_WIDTH, terrain_canvas.height+GRASS_WIDTH)
-	terrain_canvas:set_source_color("608000")
-	terrain_canvas:fill(true)
-	terrain_canvas:set_source_color("40a000")
-	terrain_canvas:set_line_width(GRASS_WIDTH)
-	terrain_canvas:stroke()
+                                    p[1].x, p[1].y,
+                                    p[2].x, p[2].y,
+                                    p[3].x, p[3].y
+        )
+    end
+    terrain_canvas:line_to(terrain_canvas.width+GRASS_WIDTH, terrain_canvas.height+GRASS_WIDTH)
+    terrain_canvas:set_source_color("608000")
+    terrain_canvas:fill(true)
+    terrain_canvas:set_source_color("40a000")
+    terrain_canvas:set_line_width(GRASS_WIDTH)
+    terrain_canvas:stroke()
 --[[
     terrain_canvas:move_to(line_segments[1].start.x,line_segments[1].start.y)
     for i = 1,#line_segments do
@@ -110,27 +110,27 @@ function draw_terrain()
     terrain_canvas:set_source_color("800000")
     terrain_canvas:stroke()
 ]]--
-	terrain_canvas:finish_painting()
+    terrain_canvas:finish_painting()
 end
 
 function make_terrain(n)
 
-	-- Start with one line-segment which goes from half-way up screen on left to half-way up on right
-	line_segments = {
-						{
-						    start = { x=-GRASS_WIDTH, y=screen.h/2 },
+    -- Start with one line-segment which goes from half-way up screen on left to half-way up on right
+    line_segments = {
+                        {
+                            start = { x=-GRASS_WIDTH, y=screen.h/2 },
                             fin = { x=screen.w+GRASS_WIDTH, y=screen.h/2 }
                         }
-					}
+                    }
 
-	-- Now repeat n times
-	local random_range = INITIAL_RANDOM_RANGE
-	local random_split = { x=0, y=0 }
-	for i = 1,n do
+    -- Now repeat n times
+    local random_range = INITIAL_RANDOM_RANGE
+    local random_split = { x=0, y=0 }
+    for i = 1,n do
         -- iterate downwards since splitting points will make list grow longer
-		for i=#line_segments,1,-1 do
-		    local seg = table.remove(line_segments,i)
-		    random_split.y = math.random(-random_range, random_range)
+        for i=#line_segments,1,-1 do
+            local seg = table.remove(line_segments,i)
+            random_split.y = math.random(-random_range, random_range)
             local broken = split_line_segment(
                                                 seg,
                                                 midpoint(seg),
@@ -138,10 +138,10 @@ function make_terrain(n)
                                             )
             table.insert( line_segments, i, broken[2] )
             table.insert( line_segments, i, broken[1] )
-		end
+        end
 
-		random_range = random_range * ROUGHNESS
-	end
+        random_range = random_range * ROUGHNESS
+    end
 end
 
 
