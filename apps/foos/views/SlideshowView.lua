@@ -86,7 +86,6 @@ SlideshowView = Class(View, function(view, model, ...)
                     y = (-img.h)/20
                 }
                 group.anchor_point = {0,0}
-
                 group.scale = 
                 {
                     SLIDESHOW_HEIGHT/img.h,
@@ -129,6 +128,117 @@ SlideshowView = Class(View, function(view, model, ...)
                 group:add(img)
         end,
         ["LAYERED"]    = function(img,group)
+                --if you change these numbers, change their counterparts
+                --in on_screen_prep
+                local number_of_tiles =13
+                local tile_width  = orginal_image.w/3
+                local tile_height = orginal_image.h/3
+                local turn_margin = 50
+                local margin_left = (screen.w - orginal_image.w)*0.5
+                local margin_top = (screen.h - orginal_image.h)*0.5
+
+                img.position = {margin_left, margin_top}
+--[[
+                local drop_point = {
+                    {(tile_width*0.60) , (tile_height*0.61)},
+                    {(tile_width*1.50) , (tile_height*0.61)},
+                    {(tile_width*2.50) , (tile_height*0.61)},
+                    {(tile_width*0.60) , (tile_height*1.51)},
+                    {(tile_width*2.52) , (tile_height*2.52)},
+                    {(tile_width*2.52) , (tile_height*1.51)},
+                    {(tile_width*0.60) , (tile_height*2.52)},
+                    {(tile_width*1.51) , (tile_height*2.52)},
+		
+                    {(tile_width*1) , (tile_height*1)},
+                    {(tile_width*1) , (tile_height*2)},
+                    {(tile_width*2) , (tile_height*1)},
+                    {(tile_width*2) , (tile_height*2)},
+		
+                    {(tile_width*1.51) , (tile_height*1.51)},		
+                }
+--]]
+                --local image_pieces = {}
+                for i = 1,number_of_tiles do
+                    local rotation = math.random(-20,20)
+                    local image_offset_left = drop_point[i][1]+math.random(-30,30)
+                    local image_offset_top  = drop_point[i][2]+math.random(-30,30)
+                    local this_group = Group
+                    {
+                        name = "Clone "..i,
+                        clip = 
+                        {
+                            0,
+                            0,
+                            tile_width,
+                            tile_height
+                        },
+                        anchor_point = 
+                        {
+                            (tile_width*0.5),
+                            (tile_height*0.5)
+                        },
+                        position = 
+                        {
+                            margin_left + image_offset_left,
+                            margin_top + image_offset_top
+                        },
+                        z_rotation = {rotation,0,0},
+                        opacity    = 0,
+			
+                    }
+                    local bounding_box = Rectangle{
+                        anchor_point = {
+                            (tile_width*0.5),
+                            (tile_height*0.5)
+                        },
+                        position = {
+                            (tile_width*0.5),
+                            (tile_height*0.5)
+                        },
+                        size = {
+                            tile_width,
+                            tile_height
+                        },
+                        border_color= { 255, 255 , 255 },
+                        color = { 255, 0 , 0, 0 },
+                        border_width=6,
+                        opacity = 255
+                    }
+
+                    local this_image = Clone{
+                        source = img,
+                        opacity = 255,
+                        size = {
+                            tile_width*4,
+                            tile_height*4
+                        },
+                        anchor_point = {
+                            image_offset_left,
+                            image_offset_top
+                        },
+			
+                        position = {
+                            (tile_width*0.5),
+                            (tile_height*0.5)
+                        },
+			
+                        z_rotation = {
+                            counter_rotation(rotation)
+                        },			
+                    }
+		
+                    this_group:add(this_image,bounding_box)
+                    if (model.curr_slideshow.ui) then
+                        model.curr_slideshow.ui:add(this_group)
+                    end
+                    --image_pieces[i] = this_group
+                    group:add(this_group)
+--[[
+                    print_r("this_image size:" .. 
+                                   this_group.transformed_size[1] .. 
+                            "x" .. this_group.transformed_size[2])
+--]]
+                end
         end
     }
     local on_screen_prep =
@@ -188,6 +298,7 @@ SlideshowView = Class(View, function(view, model, ...)
                 group:add(img)
         end,
         ["LAYERED"]    = function(img,group)
+               view.off_screen_prep["LAYERED"](img,group)
         end
     }
 
@@ -297,6 +408,37 @@ SlideshowView = Class(View, function(view, model, ...)
             end
         end,
         ["LAYERED"]    = function()
+--[[base code
+	timer=Timer()
+	timer.interval=0.5
+	local counter=1
+	function timer.on_timer(timer)
+		if counter <= #image_pieces then
+			local oldposition 	= image_pieces[counter].position
+			local random_rotation = math.random(-30,30)
+			image_pieces[counter]:set{
+				position = {
+					screen.w/2,
+					screen.h/2
+				},
+				--z_rotation = {random_rotation},
+				scale = {2,2},
+			}
+			image_pieces[counter]:animate{
+				duration=500,
+				position = oldposition,
+				opacity = 255,
+				z = 0,
+				scale = {1,1},
+				--z_rotation = {counter_rotation(random_rotation)},
+			}
+		elseif counter > #image_pieces then
+		
+		end
+		counter = counter + 1
+	end
+	timer:start()
+--]]
         end
     }
 
@@ -382,20 +524,23 @@ SlideshowView = Class(View, function(view, model, ...)
 
         local index = view:get_controller():get_photo_index() - 1 +
                                           #view.off_screen_list
-        print("preload front",index,adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query)
+        print("preload front",index,adapters[#adapters -
+                model.fp_1D_index + 1][1].required_inputs.query)
         local request = URLRequest
         {
             url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
-                      adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,
+                      adapters[#adapters - model.fp_1D_index + 
+                                   1][1].required_inputs.query,
                       index,
                       model.fp_1D_index
                   ),
             on_complete = function (request, response)
 
                 local data   = json:parse(response.body)
-                local site   = adapters[#adapters - model.fp_1D_index + 1][1].site(data,
-                                                                   index)
-                caption.text = adapters[#adapters - model.fp_1D_index + 1][1].caption(data)
+                local site   = adapters[#adapters - model.fp_1D_index + 
+                                                  1][1].site(data, index)
+                caption.text = adapters[#adapters - model.fp_1D_index + 
+                                                      1][1].caption(data)
                 print("getting image",site)
                 if site ~= "" then    
                     local image = Image{

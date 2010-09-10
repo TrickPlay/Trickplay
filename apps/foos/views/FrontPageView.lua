@@ -330,20 +330,18 @@ function view.timer:on_timer()
 
                 local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
 					
-                if --[[(rand_i[1] ~= model.fp_index[1] or
-                    rand_i[2] ~= model.fp_index[2]) and --]]
-                    adapters[model.fp_1D_index]~=nil then
-                    --if (not dontswap) then
+                if adapters[#adapters+1-formula]~=nil then
                    	
                     print("\tcalling")
                     model.swapping_cover = true
 
                     --print("formula?",rand_i[1],rand_i[2],formula)
                      adapters[#adapters+1-formula]:loadCovers(
+
                                 model.fp_slots[rand_i[1] ][rand_i[2] ], 
                                 searches[#adapters+1-formula], 
-                                math.random(1,10))
-                    --end
+                                math.random(1,10)
+                     )
                 else
                     print("not calling")
                 end
@@ -586,14 +584,7 @@ function Add_Cover()
 --]]
     end
     function add_timeline.on_completed()
---[[
-        model.fp_slots[(index-1)%NUM_ROWS +1]
-                      [math.ceil(index/NUM_ROWS)] = nil
-        model.albums[(index-1)%NUM_ROWS +1]
-                    [math.ceil(index/NUM_ROWS)]:unparent()
-        model.albums[(index-1)%NUM_ROWS +1]
-                    [math.ceil(index/NUM_ROWS)] = nil
---]]
+
         for ind = #adapters,1,-1 do
             local targ_i = (ind+1-1)%NUM_ROWS +1
             local targ_j = math.ceil((ind+1)/NUM_ROWS)
@@ -604,7 +595,6 @@ function Add_Cover()
             if  model.fp_slots[curr_i]        ~= nil and
                 model.fp_slots[curr_i][curr_j] ~= nil then
 
-                --model.fp_slots[new_i][new_j]:raise_to_top()
                 model.fp_slots[curr_i][curr_j].position =
                 {
                     PIC_W*(targ_j-1) ,
@@ -614,28 +604,12 @@ function Add_Cover()
                 if model.fp_slots[targ_i] == nil then
                     model.fp_slots[targ_i] = {}
                 end
---[[
-                if model.albums[targ_i] == nil then
-                    model.albums[targ_i] = {}
-                end
---]]
                 model.fp_slots[targ_i][targ_j] = model.fp_slots[curr_i][curr_j]
-                --model.albums[targ_i][targ_j] = model.albums[curr_i][curr_j]
-                --model.placeholders[targ_i][targ_j] = model.placeholders[curr_i][curr_j]
                 model.fp_slots[curr_i][curr_j]     = nil
-                --model.albums[curr_i][curr_j]       = nil
-                --model.placeholders[curr_i][curr_i] = nil
---[[
-            else
-                model.fp_slots[targ_i][targ_j] = nil
-                 model.albums[targ_i][targ_j] = nil
---]]
             end
         end
-        --model.albums[1][1]   = nil
         model.fp_slots[1][1] = Group
         {
-            --name     = "Slot "..i.." "..j, 
             position = { 0, 10 },
             clip     = { 0, 0,  PIC_W, PIC_H },
             opacity  = 255
@@ -646,31 +620,11 @@ function Add_Cover()
             source = model.default[math.random(1,8)],
             opacity =255
         })
-        --model.fp_slots[1][1]:add(model.placeholders[1][1])
         model.album_group:add(model.fp_slots[1][1])
         adapters[#adapters+1-model.fp_1D_index]:loadCovers(model.fp_slots[1][1],
                                                searches[#adapters], 
                                                math.random(5)) 
 
---[[
-        if model.front_page_index == math.ceil(#adapters / 
-                              NUM_ROWS) - (NUM_VIS_COLS-1) and
-                              model.front_page_index ~= 1  and 
-                            ((#adapters-1)%NUM_ROWS) == 0  then
-            model.front_page_index = model.front_page_index - 1
-        end
-        print("\n\n",index,#adapters)
-        if index  == #adapters then
-            local i = ((index-1)-1)%NUM_ROWS +1
-            local j = math.ceil((index-1)/NUM_ROWS)
-            print("setting to",i,j - 
-                                    ( model.front_page_index  - 1 ))
-            view:get_controller():set_selected_index(i,j - 
-                                    ( model.front_page_index  - 1 ))
-            prev_i = {i,j -( model.front_page_index  - 1 )}
-        end
---]]
-        --deleteAdapter(index)
         model:notify()
         --dont need to give keys back here, they are given 
         --back in the leave accordian animation
