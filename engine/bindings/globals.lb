@@ -561,6 +561,26 @@ globals
     		
     		result = r;
     	]];
+    	
+    string base64_encode( lstring s )
+    	[[
+    		gchar * encoded = g_base64_encode( ( const guchar * ) s , s_len ); 
+    		FreeLater free_later( encoded );
+    		
+    		result = encoded; 
+    	]];
+    	
+    lstring base64_decode( string s )
+    	[[
+    		gsize length;
+    		
+    		guchar * decoded = g_base64_decode( ( const gchar * ) s , & length );
+    		
+    		FreeLater free_later( decoded );
+    		
+    		result = ( const char * ) decoded;
+    		result_len = length;
+    	]];
         
 	lstring uint32_to_be( int n )
 		[[
