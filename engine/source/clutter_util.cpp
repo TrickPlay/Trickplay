@@ -278,4 +278,20 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
 #endif
 }
 
+void ClutterUtil::stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y )
+{
+    ClutterContainer *stage = (ClutterContainer*)clutter_stage_get_default();
+
+    ClutterActor *screen = clutter_container_find_child_by_name(stage, "screen");
+
+    g_assert(screen);
+
+    gdouble scale_x, scale_y;
+    clutter_actor_get_scale(screen, &scale_x, &scale_y);
+
+    *x = *x/scale_x;
+    *y = *y/scale_y;
+}
+
+
 //-----------------------------------------------------------------------------

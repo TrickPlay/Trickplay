@@ -52,6 +52,9 @@ namespace ClutterUtil
     void inject_key_down( guint key_code, gunichar unicode );
 
     void inject_key_up( guint key_code, gunichar unicode );
+
+    // Convert stage coordinates into screen coordinates -- adjusts x,y in place
+    void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );
 };
 
 
