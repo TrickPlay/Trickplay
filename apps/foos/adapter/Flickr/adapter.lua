@@ -86,7 +86,8 @@ function adapter:getUserID(username)
 --[[			  model.album_group:clear()
 			  model.albums = {}
 			  Setup_Album_Covers()
-			  model:notify()]]
+			  model:notify()
+--]]
                    else
                        --print("failed")
 		   end

@@ -45,8 +45,11 @@ function adapter:getPhotos(album,start,num_images)
 end
 
 function adapter:loadCovers(slot,search, start_index)
+
 	local request = URLRequest {
-	url = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="..search.."&rsz=1&start="..start_index.."&imgsz=xxlarge",
+	url = "http://ajax.googleapis.com/ajax/services/search/images?"..
+              "v=1.0&q="..search.."&rsz=1&start="..start_index..
+              "&imgsz=xxlarge",
 	on_complete = function (request, response)
 		local data = json:parse(response.body)
 		if (type(data.responseData) == "table" and data.responseData.results[1] ~= nil) then

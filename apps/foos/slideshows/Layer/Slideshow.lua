@@ -467,9 +467,7 @@ orginal_image.on_loaded = function()
 		local image_offset_left = drop_point[i][1]+math.random(-30,30)
 		local image_offset_top  = drop_point[i][2]+math.random(-30,30)
 		local this_group = Group{
-		--[[ ]]
 
-			--[[]]
 			clip = {
 				0,
 				0,
@@ -535,14 +533,14 @@ orginal_image.on_loaded = function()
 			},			
 		}
 		
-	this_group:add(this_image,bounding_box)
-	if (model.curr_slideshow.ui) then
-		model.curr_slideshow.ui:add(this_group)
-	end
-	table.insert(image_pieces,i,this_group)
-	--showCenter(this_group)
-	--showCenter(this_image)
-	print_r("this_image size:" .. this_group.transformed_size[1] .. "x" .. this_group.transformed_size[2])
+		this_group:add(this_image,bounding_box)
+		if (model.curr_slideshow.ui) then
+			model.curr_slideshow.ui:add(this_group)
+		end
+		table.insert(image_pieces,i,this_group)
+		--showCenter(this_group)
+		--showCenter(this_image)
+		print_r("this_image size:" .. this_group.transformed_size[1] .. "x" .. this_group.transformed_size[2])
 	end
 	
 	timer=Timer()

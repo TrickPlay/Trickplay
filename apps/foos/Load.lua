@@ -116,18 +116,6 @@ end
 --Called by the adapter's on_complete function
 function Load_Image(src,site,search,slot)
     print("Load_Image(",site,",",search,")")
-    -- 2D version of the index
-    --local i = (index-1)%NUM_ROWS +1
-    --local j = math.ceil(index/NUM_ROWS)
-    --keep a local version for the callbacks
-    --local slot  = model.fp_slots[i][j]
-    --local prev_cover = nil
---[[
-    if model.albums[i][j] ~= nil then
-        prev_cover         = model.albums[i][j]
-        model.albums[i][j] = nil
-    end
---]]
     --if url returned is empty, do it again
     if (site == "") then
         src:loadCovers(slot,search, math.random(16))
@@ -147,7 +135,7 @@ function Load_Image(src,site,search,slot)
                     --add the next album cover
                     Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
                     slot:add(img)
-model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
+                    model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
                     --put the old one on top and animate it down
                     --only animate if there is a picture already there
                     if prev_cover ~= nil then

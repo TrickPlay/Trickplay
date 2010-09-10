@@ -69,8 +69,8 @@ SourceManagerController = Class(Controller, function(self, view, ...)
             --save
             {function() 
                 if query_text ~= "" then
-			table.insert(adapters, dofile("adapter/"..
-                                adapterTypes[src_selected].."/adapter.lua"))
+                    table.insert(adapters, dofile("adapter/"..
+                                 adapterTypes[src_selected].."/adapter.lua"))
                     adaptersTable[#adapters] = adapterTypes[src_selected]
                     local search = string.gsub(query_text," ","%%20")
                     adapters[#adapters][1].required_inputs.query = search
@@ -103,6 +103,7 @@ SourceManagerController = Class(Controller, function(self, view, ...)
             {function()
                 TextObj( view.accordian_text["LOGIN"][2] ) end},
             {function()
+print("LOGIN OK")
             	 if login_text[1] ~= "" then
                     table.insert(adapters, dofile("adapter/"..
                                  adapterTypes[src_selected]..
