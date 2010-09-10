@@ -99,10 +99,117 @@ void pb( void * s , int l )
 	g_debug( "%s" , o.c_str() );
 }
 #endif
+
+
+String hash( GChecksumType type , const void * data , gsize length , bool binary )
+{
+	String result;
+	
+	GChecksum * cs = g_checksum_new( type );
+	g_checksum_update( cs , ( const guchar * ) data , length );
+
+	if ( binary ) 
+	{
+		gsize digest_length=g_checksum_type_get_length( type );
+		guint8 digest[ digest_length  ];
+		g_checksum_get_digest( cs , digest , & digest_length );
+		result = String( ( const char * ) digest , digest_length ); 
+	}
+	else
+	{
+		result = g_checksum_get_string( cs );
+	}
+	
+	g_checksum_free( cs );
+	
+	return result;
+} 
+
+String hmac( GChecksumType type , const void * key , gsize key_len , const void * message , gsize message_len , bool binary )
+{
+	static guint BLOCK_SIZE = 64; // This could be incorrect if new checksum types are used
+	
+	guint HASH_SIZE = g_checksum_type_get_length( type );
+	
+	guint8 key_buffer[ BLOCK_SIZE ];
+	
+	memset( key_buffer , 0 , BLOCK_SIZE );
+	 
+	if ( key_len > BLOCK_SIZE )
+	{
+		GChecksum * cs = g_checksum_new( type );
+		g_checksum_update( cs , (const guchar *) key , key_len );
+		gsize size = BLOCK_SIZE;
+		g_checksum_get_digest( cs , key_buffer , & size );
+		g_assert( size == HASH_SIZE );
+		g_checksum_free( cs ); 	
+	}
+	else
+	{
+		g_memmove( key_buffer , key , key_len );	
+	}
+	
+	guint8 o_pad[ BLOCK_SIZE ];
+	guint8 i_pad[ BLOCK_SIZE ];
+	
+	for( guint i = 0; i < BLOCK_SIZE; ++i )
+	{
+		o_pad[ i ] = key_buffer[ i ] ^ 0x5c;
+		i_pad[ i ] = key_buffer[ i ] ^ 0x36;
+	}
+	
+	guint8 message_hash[ HASH_SIZE ];
+	
+	{
+		GChecksum * cs = g_checksum_new( type );
+		g_checksum_update( cs , ( const guchar * ) i_pad , BLOCK_SIZE );
+		g_checksum_update( cs , ( const guchar * ) message , message_len );
+		gsize size = HASH_SIZE;
+		g_checksum_get_digest( cs , message_hash , & size );
+		g_assert( size == HASH_SIZE );
+		g_checksum_free( cs );
+	} 	
+	
+	String result;
+	
+	{
+		GChecksum * cs = g_checksum_new( type );
+		g_checksum_update( cs , ( const guchar * ) o_pad , BLOCK_SIZE );
+		g_checksum_update( cs , ( const guchar * ) message_hash , HASH_SIZE );
+		
+		if ( binary )
+		{
+			guint8 digest[ HASH_SIZE ];
+			gsize size = HASH_SIZE;
+			g_checksum_get_digest( cs , digest , & size );
+			g_assert( size == HASH_SIZE );
+			result = String( ( const char * ) digest , HASH_SIZE );
+		}
+		else
+		{
+			result = g_checksum_get_string( cs );
+		}
+		g_checksum_free( cs );
+	}
+
+	return result;	
+}
+
+
 ]]
+
+/*
+	File: global functions
+*/
 
 globals
 {
+	/*
+		Function: print
+		
+		Prints all the arguments to the console.
+	*/
+	
     print()
         [[
             std::string result;
@@ -126,6 +233,20 @@ globals
             }
             g_message("%s",result.c_str());                
         ]];
+    
+    /*
+    	Function: dofile
+    	
+    	Opens the named file and executes it as a Lua chunk.
+    	
+    	Arguments:
+    	
+    		file_name - The name of the file (in your app bundle).
+    		
+    	Returns:
+    	
+    		values - All values returned by the chunk.
+    */
     
     multi dofile(string file_name)
         [[
@@ -152,6 +273,22 @@ globals
             return lua_gettop(L) - n;            
         ]];
         
+    /*
+    	Function: loadfile
+    	
+    	Loads the file as a Lua chunk and returns its contents as a function. If there
+    	is an error, returns nil and an error message.
+    	
+    	Arguments: 
+    	
+    		file_name - The name of the file (in your app bundle).
+    		
+    	Returns:
+    	
+    		a function - That can be called to execute the chunk.
+    		nil , error message - If there is something wrong.
+    */
+    
     multi loadfile(string file_name)
         [[
             bool is_uri=false;
@@ -184,6 +321,22 @@ globals
             }            
         ]];
         
+    /*
+    	Function: readfile
+    	
+    	Loads the contents of the given file and returns them as a string. If
+    	there are any problems, it returns nil.
+    	
+    	Arguments:
+    	
+    		file_name - The name of the file to read (in your app bundle).
+    		
+    	Returns:
+    	
+    		string - The contents of the file or
+    		nil - If something went wrong.
+    */
+    
 	lstring readfile(string file_name )
 		[[
 			result = NULL;
@@ -211,11 +364,24 @@ globals
             }                        
 		]];       
         
+    /*
+    	Function: exit
+    	
+    	Exits/closes the app. This does not happen immediately, so exit does return control to
+    	you. Your app will exit the next time through TrickPlay's event loop.
+    */
+    
     exit()
         [[
             App::get(L)->get_context()->close_app();        
         ]];
         
+    /*    
+    	Function: launch_action
+    	
+    	TODO
+    */
+    
     multi launch_action( string app_id = NULL, string action = NULL, string uri = NULL, string type = NULL , table parameters = 0 )
     	[[
     		String serialized_parameters;
@@ -279,7 +445,26 @@ globals
 			return 2;
     		
     	]];
-        
+      
+    /*
+    	Function: choose
+    	
+    	Receives 3 parameters. If the first one is true, it returns the second one, 
+    	otherwise, it returns the third one.
+    	
+    	Arguments:
+    	
+    		expression - An expression. Remember that in Lua, only false and nil evaluate to false.
+    		a - The value to return if the expression is true.
+    		b - The value to return if the expression is false.
+    		
+    	Returns:
+    	
+    		a - If the expression is true.
+    		b - If the expression is false.
+    		nil - If you pass less than 3 arguments. 
+    */
+      
     multi choose()
         [[
             if (lua_gettop(L)<3)
@@ -293,6 +478,22 @@ globals
             return 1;
         ]];
 
+	/*
+		Function: serialize
+		
+		Converts some Lua values to a string.  
+		
+		TODO cycles
+		
+		Arguments:
+		
+			value - A number, string, boolean or table.
+			
+		Returns:
+		
+			string - A string representation of the value.
+	*/
+	
     string serialize()
         [[
             String buffer;
@@ -426,142 +627,132 @@ globals
             result=buffer.empty()?NULL:buffer.c_str();
         ]];
 
-    string md5( lstring s )
+	/*
+		Function: md5
+		
+		Returns the MD5 hash of the string passed in.
+		
+		Arguments:
+		
+			string - A string to hash.
+			binary - If true, the result is a binary string, otherwise, it is hex.
+			
+		Returns:
+		
+			string - The MD5 hash of the string. 
+	*/
+	
+    lstring md5( lstring s , bool binary = false )
         [[
-            result = g_compute_checksum_for_string( G_CHECKSUM_MD5, s, s_len );
-            FreeLater free_later( ( char * )result );
+        	String h( hash( G_CHECKSUM_MD5 , s , s_len , binary ) );
+        	result = h.data();
+        	result_len = h.length();
         ]];
         
-    string sha1( lstring s )
+	/*
+		Function: sha1
+		
+		Returns the SHA-1 hash of the string passed in.
+		
+		Arguments:
+		
+			string - A string to hash.
+			binary - If true, the result is a binary string, otherwise, it is hex.
+			
+		Returns:
+		
+			string - The SHA-1 hash of the string. 
+	*/
+	
+    lstring sha1( lstring s , bool binary = false )
         [[
-            result = g_compute_checksum_for_string( G_CHECKSUM_SHA1, s, s_len );
-            FreeLater free_later( ( char * )result );
+        	String h( hash( G_CHECKSUM_SHA1 , s , s_len , binary ) );
+        	result = h.data();
+        	result_len = h.length();
         ]];
 
-    string sha256( lstring s )
+	/*
+		Function: sha256
+		
+		Returns the SHA-256 hash of the string passed in.
+		
+		Arguments:
+		
+			string - A string to hash.
+			binary - If true, the result is a binary string, otherwise, it is hex.
+			
+		Returns:
+		
+			string - The SHA-256 hash of the string. 
+	*/
+	
+    lstring sha256( lstring s , bool binary = false )
         [[
-            result = g_compute_checksum_for_string( G_CHECKSUM_SHA256, s, s_len );
-            FreeLater free_later( ( char * )result );
+        	String h( hash( G_CHECKSUM_SHA256 , s , s_len , binary ) );
+        	result = h.data();
+        	result_len = h.length();
         ]];
         
-    string hmac_sha1( lstring key , lstring message )
+	/*
+		Function: hmac_sha1
+		
+		Returns the HMAC/SHA-1 hash of the key and message.
+		
+		Arguments:
+		
+			key - The key.
+			message - The message.
+			binary - If true, the result is a binary string, otherwise, it is hex.
+			
+		Returns:
+		
+			string - The HMAC/SHA-1 hash. 
+	*/
+	
+    lstring hmac_sha1( lstring key , lstring message , bool binary = false)
     	[[
-    		static guint BLOCK_SIZE = 64;
-    		static guint HASH_SIZE  = 20;
-    		
-    		guint8 key_buffer[ BLOCK_SIZE ];
-    		
-    		memset( key_buffer , 0 , BLOCK_SIZE );
-    		 
-    		if ( key_len > BLOCK_SIZE )
-    		{
-    			GChecksum * cs = g_checksum_new( G_CHECKSUM_SHA1 );
-    			g_checksum_update( cs , (const guchar *) key , key_len );
-    			gsize size = BLOCK_SIZE;
-    			g_checksum_get_digest( cs , key_buffer , &size );
-    			g_assert( size == HASH_SIZE );
-    			g_checksum_free( cs ); 	
-    		}
-    		else
-    		{
-    			g_memmove( key_buffer , key , key_len );	
-    		}
-    		
-    		guint8 o_pad[ BLOCK_SIZE ];
-    		guint8 i_pad[ BLOCK_SIZE ];
-    		
-    		for( guint i = 0; i < BLOCK_SIZE; ++i )
-    		{
-    			o_pad[ i ] = key_buffer[ i ] ^ 0x5c;
-    			i_pad[ i ] = key_buffer[ i ] ^ 0x36;
-    		}
-    		
-    		guint8 message_hash[ HASH_SIZE ];
-    		
-    		{
-				GChecksum * cs = g_checksum_new( G_CHECKSUM_SHA1 );
-				g_checksum_update( cs , ( const guchar * ) i_pad , BLOCK_SIZE );
-				g_checksum_update( cs , ( const guchar * ) message , message_len );
-				gsize size = BLOCK_SIZE;
-				g_checksum_get_digest( cs , message_hash , & size );
-				g_assert( size == HASH_SIZE );
-				g_checksum_free( cs );
-			} 	
-    		
-			gchar * r = 0;
-    		
-    		{
-				GChecksum * cs = g_checksum_new( G_CHECKSUM_SHA1 );
-				g_checksum_update( cs , ( const guchar * ) o_pad , BLOCK_SIZE );
-				g_checksum_update( cs , ( const guchar * ) message_hash , HASH_SIZE );
-				r = g_strdup( g_checksum_get_string( cs ) );
-				g_checksum_free( cs );
-    		}
-    		
-    		FreeLater free_later( r );
-    		
-    		result = r;
+    		String h( hmac( G_CHECKSUM_SHA1 , key , key_len , message , message_len , binary ) );
+    		result = h.data();
+    		result_len = h.length();
     	]];
         
-    string hmac_sha256( lstring key , lstring message )
+	/*
+		Function: hmac_sha256
+		
+		Returns the HMAC/SHA-256 hash of the key and message.
+		
+		Arguments:
+		
+			key - The key.
+			message - The message.
+			binary - If true, the result is a binary string, otherwise, it is hex.
+			
+		Returns:
+		
+			string - The HMAC/SHA-256 hash. 
+	*/
+
+    lstring hmac_sha256( lstring key , lstring message , bool binary = false )
     	[[
-    		static guint BLOCK_SIZE = 64;
-    		static guint HASH_SIZE  = 32;
-    		
-    		guint8 key_buffer[ BLOCK_SIZE ];
-    		
-    		memset( key_buffer , 0 , BLOCK_SIZE );
-    		 
-    		if ( key_len > BLOCK_SIZE )
-    		{
-    			GChecksum * cs = g_checksum_new( G_CHECKSUM_SHA256 );
-    			g_checksum_update( cs , (const guchar *) key , key_len );
-    			gsize size = BLOCK_SIZE;
-    			g_checksum_get_digest( cs , key_buffer , &size );
-    			g_assert( size == HASH_SIZE );
-    			g_checksum_free( cs ); 	
-    		}
-    		else
-    		{
-    			g_memmove( key_buffer , key , key_len );	
-    		}
-    		
-    		guint8 o_pad[ BLOCK_SIZE ];
-    		guint8 i_pad[ BLOCK_SIZE ];
-    		
-    		for( guint i = 0; i < BLOCK_SIZE; ++i )
-    		{
-    			o_pad[ i ] = key_buffer[ i ] ^ 0x5c;
-    			i_pad[ i ] = key_buffer[ i ] ^ 0x36;
-    		}
-    		
-    		guint8 message_hash[ HASH_SIZE ];
-    		
-    		{
-				GChecksum * cs = g_checksum_new( G_CHECKSUM_SHA256 );
-				g_checksum_update( cs , ( const guchar * ) i_pad , BLOCK_SIZE );
-				g_checksum_update( cs , ( const guchar * ) message , message_len );
-				gsize size = BLOCK_SIZE;
-				g_checksum_get_digest( cs , message_hash , & size );
-				g_assert( size == HASH_SIZE );
-				g_checksum_free( cs );
-			} 	
-    		
-			gchar * r = 0;
-    		
-    		{
-				GChecksum * cs = g_checksum_new( G_CHECKSUM_SHA256 );
-				g_checksum_update( cs , ( const guchar * ) o_pad , BLOCK_SIZE );
-				g_checksum_update( cs , ( const guchar * ) message_hash , HASH_SIZE );
-				r = g_strdup( g_checksum_get_string( cs ) );
-				g_checksum_free( cs );
-    		}
-    		
-    		FreeLater free_later( r );
-    		
-    		result = r;
+    		String h( hmac( G_CHECKSUM_SHA256 , key , key_len , message , message_len , binary ) );
+    		result = h.data();
+    		result_len = h.length();
     	]];
     	
+    /*
+    	Function: base64_encode
+    	
+    	Encodes a string to base 64.
+    	
+    	Arguments:
+    	
+    		s - The string to encode.
+    		
+    	Returns:
+    		
+    		string - The encoded result.
+    */
+    
     string base64_encode( lstring s )
     	[[
     		gchar * encoded = g_base64_encode( ( const guchar * ) s , s_len ); 
@@ -570,6 +761,20 @@ globals
     		result = encoded; 
     	]];
     	
+    /*
+    	Function: base64_decode
+    	
+    	Decodes a base 64 string.
+    	
+    	Arguments:
+    	
+    		s - The string to decode.
+    		
+    	Returns:
+    		
+    		string - The decoded result.
+    */
+
     lstring base64_decode( string s )
     	[[
     		gsize length;
@@ -639,6 +844,18 @@ globals
 			UserData::clear_callbacks( L , o );
 		]];		       
 		
+	/*
+		Function: dolater
+		
+		Posts a function and arguments for execution during the next pass of the event loop. Note
+		that there is no way to receive any values returned by the function. 
+		
+		Arguments:
+		
+			f - The function to execute.
+			others - Any number of arguments to pass to the function. 
+	*/
+	
 	dolater( function f , ... )
 		[[
 			int nargs = lua_gettop(L)-f;
@@ -673,6 +890,17 @@ globals
 #endif			
 		]];
 		
+	/*
+		Function: uuid
+		
+		Generates a random (v4) UUID.
+		
+		Returns:
+		
+			uuid - A new UUID.
+			
+	*/ 
+	
 	string uuid()
 		[[
 			String uuid( Util::make_v4_uuid() );
@@ -680,7 +908,20 @@ globals
 			result = uuid.c_str();
 		]];
 		
-
+	/*
+		Function: dumptable
+		
+		Prints a table to the console; for debugging purposes. It handles 
+		cyclic references.
+		
+		Arguments:
+		
+			t - The table to print.
+			filter - A function that receives the table, the current key and the
+				recursion depth. If the function returns false, the key is not printed.
+			 
+	*/
+	
 	dumptable( table t , function filter = 0 )
 		[[
 			lb_dump_table(L);
