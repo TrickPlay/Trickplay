@@ -32,6 +32,7 @@ if (UNIX AND NOT APPLE)
 			"libossp-uuid15 | libossp-uuid16"
 			"libupnp3 (>= 1.6)"
 			"libreadline6"
+			"liburiparser1"
 		)
 		
 		set( FIRST 1 )
