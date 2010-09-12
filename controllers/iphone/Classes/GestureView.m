@@ -24,6 +24,8 @@
 #define HORIZ_SWIPE_DRAG_MIN  25  //Was 20
 #define VERT_SWIPE_DRAG_MAX    10
 #define TAP_DISTANCE_MAX    4
+#define SOCKET_MODE_IPHONE4 1
+#define SOCKET_MODE_LEGACY 2
 
 @interface GestureView(PrivateInterface)
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
@@ -64,6 +66,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	self.view.tag = 2;
+	
+	mSocketMode = SOCKET_MODE_IPHONE4;
+	
 	accelerationY = 0;
 	accelerationX = 0;
 	accelerationZ = 0;
@@ -117,16 +122,53 @@
 	
 	NSError *error = nil;
 	self.title = thetitle;
-	//if(![listenSocket acceptOnPort:port error:&error])
-	//{
-		//[self logError:FORMAT(@"Error starting server: %@", error)];
-	//	return;
-	//}
+	
 	mTryingToConnect = YES;
-	[listenSocket connectToHost:hostname onPort:port error:&error ];
-	[NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onTimeout) userInfo:nil repeats:NO];
-	[waitingView startAnimating];
-	//[self logInfo:FORMAT(@"Echo server started on port %hu", [listenSocket localPort])];
+	if (mSocketMode == SOCKET_MODE_LEGACY)
+	{
+		[listenSocket connectToHost:hostname onPort:port error:&error ];
+		//[self logInfo:FORMAT(@"Echo server started on port %hu", [listenSocket localPort])];
+		[NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onTimeout) userInfo:nil repeats:NO];
+		[waitingView startAnimating];
+	}
+	else {
+		[NSStream getStreamsToHostNamed:hostname 
+								   port:port 
+							inputStream:&iStream
+						   outputStream:&oStream];            
+		[iStream retain];
+		[oStream retain];
+		
+		[iStream setDelegate:self];
+		[oStream setDelegate:self];
+		
+		[iStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
+						   forMode:NSDefaultRunLoopMode];
+		[oStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
+						   forMode:NSDefaultRunLoopMode];
+		
+		[connectedSockets addObject:oStream];
+		
+		[oStream open];
+		[iStream open];   
+		
+		CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
+		NSInteger theheight = mainframe.size.height;
+		theheight = theheight - 45;  //subtract the height of navbar
+		NSInteger thewidth = mainframe.size.width;
+		
+		NSString *welcomeData = [NSString stringWithFormat:@"ID\t2\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n",[UIDevice currentDevice].name,thewidth,theheight,thewidth,theheight ];
+		[self sendDataToSocket:welcomeData];
+		
+		[waitingView stopAnimating];
+		
+		//The connect process using this method does not have an "onConnect" method that I am aware of
+		//So just assume the connection was made successfully
+		
+	}
+
+	
+	
 
 }
 
@@ -136,9 +178,18 @@
 		
   	   if ([connectedSockets count] == 0)
 	   {
-		   [listenSocket disconnect];
+		   if (mSocketMode == SOCKET_MODE_LEGACY)
+		   {
+			   [listenSocket disconnect];
+			   [connectedSockets removeObject:listenSocket];
+		   }else {
+			   [iStream close];
+			   [oStream close];
+			   [connectedSockets removeObjectAtIndex:0];
+		   }
+
 		   mAccelMode = 0;
-		   [connectedSockets removeObject:listenSocket];
+		   
 		   [self.navigationController popViewControllerAnimated:YES];    
 		   [waitingView stopAnimating];
 	   }
@@ -149,6 +200,24 @@
 	@finally {
 	}	
 }
+
+- (void)sendDataToSocket:(NSString *)sentData
+{
+    if (mSocketMode == SOCKET_MODE_LEGACY)
+	{
+		[listenSocket writeData:[sentData dataUsingEncoding:NSUTF8StringEncoding] withTimeout:-1 tag:0];
+	}
+	else {
+		//const uint8_t *str = (uint8_t *) [sentData cStringUsingEncoding:NSASCIIStringEncoding];
+		const uint8_t *str = (uint8_t *) [sentData UTF8String];
+		[oStream write:str maxLength:strlen((char*)str)]; 
+		//[self writeToServer:str];
+		
+	}
+
+}
+
+
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -177,8 +246,8 @@
 		accelerationX = acceleration.x * kFilteringFactor + accelerationX * (1.0 - kFilteringFactor);
 		accelerationY = acceleration.y * kFilteringFactor + accelerationY * (1.0 - kFilteringFactor);
 		accelerationZ = acceleration.z * kFilteringFactor + accelerationZ * (1.0 - kFilteringFactor);
-		NSData *sentData = [[NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", accelerationX,accelerationY,accelerationZ] dataUsingEncoding:NSUTF8StringEncoding];
-		[listenSocket writeData:sentData withTimeout:-1 tag:0];
+		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", accelerationX,accelerationY,accelerationZ];
+		[self sendDataToSocket:sentData];
 		
 		
 	}
@@ -201,8 +270,8 @@
 		 x = acceleration.x - myAcceleration[0];
 		 y = acceleration.y - myAcceleration[0];
 		 z = acceleration.z - myAcceleration[0];
-		NSData *sentData = [[NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", myAcceleration[0],myAcceleration[1],myAcceleration[2]] dataUsingEncoding:NSUTF8StringEncoding];
-		[listenSocket writeData:sentData withTimeout:-1 tag:0];
+		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", myAcceleration[0],myAcceleration[1],myAcceleration[2]];
+		[self sendDataToSocket:sentData];
 		
 		 //Compute the intensity of the current acceleration 
 		 //length = sqrt(x * x + y * y + z * z);
@@ -231,8 +300,8 @@
 	//Send the TOUCHDOWN event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TD\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,mTouchedTime] dataUsingEncoding:NSUTF8StringEncoding];
-		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
+		NSString *sentTouchData = [NSString stringWithFormat:@"TD\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,mTouchedTime];
+		[self sendDataToSocket:sentTouchData];
 	}
 }
 
@@ -245,8 +314,8 @@
 	//Send the TOUCHMOVE event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TM\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]] dataUsingEncoding:NSUTF8StringEncoding];
-		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
+		NSString *sentTouchData = [NSString stringWithFormat:@"TM\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
+		[self sendDataToSocket:sentTouchData];
 	}
 	
 	
@@ -339,8 +408,8 @@
 	//Send the TOUCHUP event if enabled
 	if (([connectedSockets count] > 0) && mTouchEventsAllowed)
 	{
-		NSData *sentTouchData = [[NSString stringWithFormat:@"TU\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]] dataUsingEncoding:NSUTF8StringEncoding];
-		[listenSocket writeData:sentTouchData withTimeout:-1 tag:0];
+		NSString *sentTouchData = [NSString stringWithFormat:@"TU\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
+		[self sendDataToSocket:sentTouchData];
 	}
 	
 	if (!mSwipeSent)
@@ -356,8 +425,8 @@
 			//Send click event if click events are enabled
 			if (([connectedSockets count] > 0) && mClickEventsAllowed)
 			{
-				NSData *sentClickData = [[NSString stringWithFormat:@"CK\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]] dataUsingEncoding:NSUTF8StringEncoding];
-				[listenSocket writeData:sentClickData withTimeout:-1 tag:0];
+				NSString *sentClickData = [NSString stringWithFormat:@"CK\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
+				[self sendDataToSocket:sentClickData];
 			}
 		}
 		else
@@ -390,10 +459,10 @@
 	if ([connectedSockets count] > 0)
 	{
 	    int index;	
-		NSData *sentData = [[NSString stringWithFormat:@"KP\t%@\n", thekey] dataUsingEncoding:NSUTF8StringEncoding];
+		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
 
 		for (index = 1; index <= thecount; index++) {
-			[listenSocket writeData:sentData withTimeout:-1 tag:0];
+			[self sendDataToSocket:sentData];
 		}
 		
 		mKeySent = YES;
@@ -443,6 +512,38 @@
 {
 	[sock readDataToData:[AsyncSocket LFData] withTimeout:-1 tag:0];
 }
+
+//Socket read occured
+- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode {
+    
+    switch(eventCode) {
+        case NSStreamEventHasBytesAvailable:
+        {
+            if (data == nil) {
+                data = [[NSMutableData alloc] init];
+            }
+            uint8_t buf[1024];
+            unsigned int len = 0;
+            len = [(NSInputStream *)stream read:buf maxLength:1024];
+            if(len) {    
+                [data appendBytes:(const void *)buf length:len];
+                int bytesRead;
+                bytesRead += len;
+            } else {
+                NSLog(@"No data.");
+            }
+            
+            NSString *str = [[NSString alloc] initWithData:data 
+												  encoding:NSUTF8StringEncoding];
+            NSLog(str);
+		    [self onSocket:nil didReadData:[str dataUsingEncoding:NSUTF8StringEncoding] withTag:0];
+            [str release];
+            [data release];        
+            data = nil;
+        } break;
+    }
+}
+
 
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
@@ -660,8 +761,8 @@
 	// Even if we were unable to write the incoming data to the log,
 	// we're still going to echo it back to the client.
 	//[sock writeData:data withTimeout:-1 tag:1];
-	NSData *echoData = [@"ECHO\n" dataUsingEncoding:NSUTF8StringEncoding];
-	[listenSocket writeData:echoData withTimeout:-1 tag:0];
+	NSString *echoData = @"ECHO\n";
+	[self sendDataToSocket:echoData];
 }
 
 - (void)ClearUIElements
@@ -689,45 +790,12 @@
 {
 	//AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     NSLog(@"Dismiss the alertview");
-    switch (buttonIndex)
-    {
-		//UI<tab><id>\n
-        case 0: 
-		{
-		    NSData *sentData = [[NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:0]] dataUsingEncoding:NSUTF8StringEncoding];
-			[listenSocket writeData:sentData withTimeout:-1 tag:0];
-		    break;
-		}
-		case 1: 
-		{
-		    NSData *sentData = [[NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:1]] dataUsingEncoding:NSUTF8StringEncoding];
-			[listenSocket writeData:sentData withTimeout:-1 tag:0];
-		    break;
-		}	
-		case 2: 
-		{
-		    NSData *sentData = [[NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:2]] dataUsingEncoding:NSUTF8StringEncoding];
-			[listenSocket writeData:sentData withTimeout:-1 tag:0];
-		    break;
-		}
-		case 3: 
-		{
-		    NSData *sentData = [[NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:3]] dataUsingEncoding:NSUTF8StringEncoding];
-			[listenSocket writeData:sentData withTimeout:-1 tag:0];
-		    break;
-		}
-		case 4: 
-		{
-		    NSData *sentData = [[NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:4]] dataUsingEncoding:NSUTF8StringEncoding];
-			[listenSocket writeData:sentData withTimeout:-1 tag:0];
-		    break;
-		}
-		 	
-			
-    }
-			
-			
-	
+	if (buttonIndex < 5)
+	{
+		NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
+		[self sendDataToSocket:sentData];
+	}
+    
 	
 }
 
@@ -735,8 +803,8 @@
 {
 	NSLog(@"textbox hidden");
 	///Send the text to the socket  UI<TAB><The New Text>\n
-	NSData *sentData = [[NSString stringWithFormat:@"UI\t%@\n", mTextField.text] dataUsingEncoding:NSUTF8StringEncoding];
-	[listenSocket writeData:sentData withTimeout:-1 tag:0];
+	NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", mTextField.text];
+	[self sendDataToSocket:sentData];
 }
 
 // this helps dismiss the keyboard when the "Done" button is clicked
@@ -914,8 +982,19 @@
 
 - (void)dealloc {
 	[self destroyAudioStreamer];
-	[listenSocket disconnect];
-	[listenSocket release];
+	if (mSocketMode == SOCKET_MODE_LEGACY)
+	{
+	    [listenSocket disconnect];
+	    [listenSocket release];
+	}
+	else {
+		[iStream release];
+		[oStream release];
+		
+		if (iStream) CFRelease(iStream);
+		if (oStream) CFRelease(oStream);
+	}
+
 	[connectedSockets release];
 	[mStyleAlert release];
 	[backgroundView release];
