@@ -31,7 +31,7 @@ TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
-#TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -132,7 +132,9 @@ list(
     # Make sure this one comes before the clutter libraries, otherwise
     # we will get json symbols from them - and those are outdated
     
-    json-glib-1.0           
+    json-glib-1.0
+    
+    uriparser           
 )
 
 #--------------
@@ -298,6 +300,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_interval.lb
     
     ${BINDINGS_SRC}/socket.lb
+    
+    ${BINDINGS_SRC}/uri.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
