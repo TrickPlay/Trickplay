@@ -18,6 +18,7 @@ end
 
 for i =1, #adapterTypes do
 	adapterTypesTable[i] = dofile("adapter/"..adapterTypes[i].."/adapter.lua")
+        print(adapterTypesTable[i] )
 end
 
 
@@ -33,14 +34,6 @@ function slideShow()
 end
 
 function deleteAdapter(index)
-	
-	
---[[
-	model.album_group:clear()
-	model.albums = {}
-	Setup_Album_Covers()
---]]
-
     index = #adapters+1 - index
     table.remove(adapters,index)
     table.remove(searches,index)
