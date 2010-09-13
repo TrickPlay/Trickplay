@@ -321,6 +321,78 @@ globals
             }            
         ]];
         
+	lstring readdir(string dir_name)
+		[[	
+		result = NULL;
+		result_len = 0;
+                bool is_uri=false;
+		guint flags = 0;
+		gchar *list = NULL;
+		gchar *filename = NULL;
+		gchar *tmpbuf = NULL;
+		GDir *dir = NULL;
+
+                dir = g_dir_open(dir_name, 0, NULL);
+		if(dir) 
+		{
+                	filename = (gchar *)g_dir_read_name(dir);
+			while (filename != NULL) { 
+				if (!list)
+					list = g_strdup_printf("\n%s/%s\n",dir_name,filename);
+				else {
+					tmpbuf = g_strconcat(list,dir_name,"/",filename,"\n",NULL);
+					g_free(list);
+					list = tmpbuf;
+				}
+				filename = (gchar *)g_dir_read_name(dir);
+			}
+		}
+                result = list;
+            	result_len = strlen(list);
+		g_dir_close(dir);
+		]];
+
+
+	writefile(string file_name, string contents)
+                [[
+                bool is_uri=false;
+                char * path=App::get(L)->normalize_path(file_name,&is_uri);
+                gchar * old_contents = NULL;
+                gsize old_length = 0;
+                FreeLater free_later(path);
+                if ( path && ! is_uri )
+                {
+                        gsize length = strlen(contents);
+                        if ( g_file_get_contents( path, & old_contents, & old_length, NULL ) )
+                        {
+                                length += old_length;
+				if (old_length != 0) {
+                	        	gchar new_contents[length];
+                                	g_strlcpy(new_contents, old_contents, old_length+1);
+                                	g_strlcat(new_contents, contents, length+1);
+                                	g_file_set_contents(path, new_contents, length, NULL);
+				} else 
+                                	g_file_set_contents(path, contents, length, NULL);
+                        }else {
+                                g_file_set_contents(path, contents, length, NULL);
+                                length += old_length;
+                        }
+                }
+                ]];
+
+/*
+		[[
+		bool is_uri=false;
+            	char * path=App::get(L)->normalize_path(file_name,&is_uri);
+            	FreeLater free_later(path);
+            	if ( path && ! is_uri )
+            	{
+                	gsize length = strlen(contents);
+                	g_file_set_contents(path, contents, length, NULL);
+                }
+		]];
+*/
+
     /*
     	Function: readfile
     	
