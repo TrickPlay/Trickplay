@@ -338,7 +338,9 @@ SlideshowView = Class(View, function(view, model, ...)
                off_screen_prep["LAYERED"](img,group)
                group.opacity = 255
                group.z = 0
-               group:raise_to_top()
+               group:lower_to_bottom()
+               background2:lower_to_bottom()
+               background:lower_to_bottom()
         end
     }
 
