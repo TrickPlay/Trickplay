@@ -69,7 +69,7 @@ SlideshowView = Class(View, function(view, model, ...)
     view.on_screen_list  = {}
     view.off_screen_list = {}
 
-    view.styles = {"REGULAR","FULLSCREEN"}--"LAYERED"}
+    view.styles = {"REGULAR","FULLSCREEN","LAYERED"}
     local off_screen_prep = 
     {
         ["REGULAR"]    = function(img,group)
@@ -128,35 +128,72 @@ SlideshowView = Class(View, function(view, model, ...)
                 group:add(img)
         end,
         ["LAYERED"]    = function(img,group)
+                group.anchor_point = {0,0}
+                group.position     = {0,0}
+                group.z            = 0
+                group.scale        = {1,1}
+                --group:raise_to_top()
+
+                function counter_rotation(rotation) 
+                    if rotation>0 then return 0 -         (rotation)
+                    else               return 0 + math.abs(rotation) end
+                end
                 --if you change these numbers, change their counterparts
                 --in on_screen_prep
-                local number_of_tiles =13
-                local tile_width  = orginal_image.w/3
-                local tile_height = orginal_image.h/3
-                local turn_margin = 50
-                local margin_left = (screen.w - orginal_image.w)*0.5
-                local margin_top = (screen.h - orginal_image.h)*0.5
+                if img.size[1]/img.size[2] > screen.w/screen.h then
+                    img.size = {screen.w - 200, 
+                               (screen.w - 200)/img.w*img.h}
+                else
+                    img.size = {(screen.h - 100)/img.h*img.w, 
+                                 screen.h - 100}
+                end
 
-                img.position = {margin_left, margin_top}
+                local number_of_tiles =13
+                local tile_width  = img.w/3--+100
+                local tile_height = img.h/3--+100
+                local turn_margin = 50
+                local margin_left = (screen.w - img.w)*0.5
+                local margin_top  = (screen.h - img.h)*0.5
+
+                img.opacity  =  0-- 255
 --[[
-                local drop_point = {
-                    {(tile_width*0.60) , (tile_height*0.61)},
-                    {(tile_width*1.50) , (tile_height*0.61)},
-                    {(tile_width*2.50) , (tile_height*0.61)},
-                    {(tile_width*0.60) , (tile_height*1.51)},
-                    {(tile_width*2.52) , (tile_height*2.52)},
-                    {(tile_width*2.52) , (tile_height*1.51)},
-                    {(tile_width*0.60) , (tile_height*2.52)},
-                    {(tile_width*1.51) , (tile_height*2.52)},
+                group.scale = 
+                {
+                    SLIDESHOW_HEIGHT/img.h,
+                    SLIDESHOW_HEIGHT/img.h
+                }
+--]]
+                group:add(img)
+                group.position = {margin_left,margin_top}
+
+                --group.anchor_point = {group.w/2,group.h/2}
+                --group.position = {screen.w/5,screen.h/4}--screen.w/2,screen.h/2}
+
+                --13 drop_points
+                local pre_drop_points = {
+                    {(tile_width*0.50) , (tile_height*0.50)},
+                    {(tile_width*1.50) , (tile_height*0.50)},
+                    {(tile_width*2.50) , (tile_height*0.50)},
+                    {(tile_width*0.50) , (tile_height*1.5)},
+                    {(tile_width*2.50) , (tile_height*2.5)},
+                    {(tile_width*2.50) , (tile_height*1.5)},
+                    {(tile_width*0.50) , (tile_height*2.5)},
+                    {(tile_width*1.51) , (tile_height*2.5)},
 		
-                    {(tile_width*1) , (tile_height*1)},
-                    {(tile_width*1) , (tile_height*2)},
-                    {(tile_width*2) , (tile_height*1)},
-                    {(tile_width*2) , (tile_height*2)},
+                    {(tile_width*1)    ,    (tile_height*1)},
+                    {(tile_width*1)    ,    (tile_height*2)},
+                    {(tile_width*2)    ,    (tile_height*1)},
+                    {(tile_width*2)    ,    (tile_height*2)},
 		
                     {(tile_width*1.51) , (tile_height*1.51)},		
                 }
---]]
+                local drop_point = {}
+                while #pre_drop_points > 0 do
+                    local pos = math.random(1,#pre_drop_points)
+                    local ele = table.remove(pre_drop_points, pos)
+                    drop_point[#drop_point + 1] = ele
+                end
+                
                 --local image_pieces = {}
                 for i = 1,number_of_tiles do
                     local rotation = math.random(-20,20)
@@ -174,13 +211,13 @@ SlideshowView = Class(View, function(view, model, ...)
                         },
                         anchor_point = 
                         {
-                            (tile_width*0.5),
-                            (tile_height*0.5)
+                            tile_width/2,
+                            tile_height/2
                         },
                         position = 
                         {
-                            margin_left + image_offset_left,
-                            margin_top + image_offset_top
+                            image_offset_left, --  tile_width/2,
+                            image_offset_top  -- tile_height/2
                         },
                         z_rotation = {rotation,0,0},
                         opacity    = 0,
@@ -199,8 +236,8 @@ SlideshowView = Class(View, function(view, model, ...)
                             tile_width,
                             tile_height
                         },
-                        border_color= { 255, 255 , 255 },
-                        color = { 255, 0 , 0, 0 },
+                        border_color = { 255, 255, 255 },
+                        color        = { 255,  0, 0, 0 },
                         border_width=6,
                         opacity = 255
                     }
@@ -209,8 +246,8 @@ SlideshowView = Class(View, function(view, model, ...)
                         source = img,
                         opacity = 255,
                         size = {
-                            tile_width*4,
-                            tile_height*4
+                            tile_width*3,
+                            tile_height*3
                         },
                         anchor_point = {
                             image_offset_left,
@@ -218,8 +255,8 @@ SlideshowView = Class(View, function(view, model, ...)
                         },
 			
                         position = {
-                            (tile_width*0.5),
-                            (tile_height*0.5)
+                            (tile_width  * 0.5),
+                            (tile_height * 0.5)
                         },
 			
                         z_rotation = {
@@ -298,7 +335,10 @@ SlideshowView = Class(View, function(view, model, ...)
                 group:add(img)
         end,
         ["LAYERED"]    = function(img,group)
-               view.off_screen_prep["LAYERED"](img,group)
+               off_screen_prep["LAYERED"](img,group)
+               group.opacity = 255
+               group.z = 0
+               group:raise_to_top()
         end
     }
 
@@ -312,6 +352,7 @@ SlideshowView = Class(View, function(view, model, ...)
             for i = 1,#view.on_screen_list do
                 local pic = view.on_screen_list[i]:find_child("slide")
                 if pic ~= nil then
+                    pic.opacity = 255
                     view.on_screen_list[i]:clear()
                     on_screen_prep["REGULAR"](pic,view.on_screen_list[i])
                     view.on_screen_list[i].opacity = 255
@@ -320,6 +361,8 @@ SlideshowView = Class(View, function(view, model, ...)
                     view.on_screen_list[i]:lower_to_bottom()
                     background2:lower_to_bottom()
                     background:lower_to_bottom()
+                else
+                    error("shit")
                 end
             end
             for i = 1,#view.off_screen_list do
@@ -368,6 +411,41 @@ SlideshowView = Class(View, function(view, model, ...)
 
         end,
         ["LAYERED"]    = function()
+            background.opacity  = 255
+            background2.opacity = 255
+            --view.logo.opacity   = 0
+
+            for i = 1,#view.on_screen_list do
+                local pic     = view.on_screen_list[i]:find_child("slide")
+                local backing = view.on_screen_list[i]:find_child("loading")
+                view.on_screen_list[i]:clear()
+                if pic ~= nil then
+                    on_screen_prep["LAYERED"](pic,view.on_screen_list[i])
+                elseif backing ~= nil then
+                    on_screen_prep["LAYERED"](backing,view.on_screen_list[i])
+                else
+                   -- error("should not have got here")
+                end
+            end
+            if view.on_screen_list[1] ~= nil then
+                view.on_screen_list[1].opacity = 255
+            end
+            for i = 1,#view.off_screen_list do
+                local pic     = view.off_screen_list[i]:find_child("slide")
+                local backing = view.off_screen_list[i]:find_child("loading")
+                view.off_screen_list[i]:clear()
+                if pic ~= nil then
+                    off_screen_prep["LAYERED"](pic,view.off_screen_list[i])
+                elseif backing ~= nil then
+                    view.off_screen_list[i]:clear()
+                    off_screen_prep["LAYERED"](backing,view.off_screen_list[i])
+                else
+                    error("should not have got here")
+
+                end
+            end
+
+
         end
     }
 
@@ -407,38 +485,60 @@ SlideshowView = Class(View, function(view, model, ...)
                 }
             end
         end,
-        ["LAYERED"]    = function()
---[[base code
-	timer=Timer()
-	timer.interval=0.5
-	local counter=1
-	function timer.on_timer(timer)
-		if counter <= #image_pieces then
-			local oldposition 	= image_pieces[counter].position
-			local random_rotation = math.random(-30,30)
-			image_pieces[counter]:set{
-				position = {
-					screen.w/2,
-					screen.h/2
-				},
-				--z_rotation = {random_rotation},
-				scale = {2,2},
-			}
-			image_pieces[counter]:animate{
-				duration=500,
-				position = oldposition,
-				opacity = 255,
-				z = 0,
-				scale = {1,1},
-				--z_rotation = {counter_rotation(random_rotation)},
-			}
-		elseif counter > #image_pieces then
-		
-		end
-		counter = counter + 1
-	end
-	timer:start()
---]]
+        ["LAYERED"]    = function(pic)
+
+                local layered_timeline = Timeline
+                {
+                    name      = "Layered Timeline",
+                    duration  = 13*300,
+                    loop      = false,
+                    direction = "FORWARD"
+                }
+                local drop_points = {}
+                pic.z = 0
+                function layered_timeline.on_started()
+                    pic.opacity = 255
+                    pic:raise_to_top()
+                    for i = 1, 13 do
+                        local child = pic:find_child("Clone "..i)
+                        drop_points[i]    = {}
+                        drop_points[i][1] = child.x
+                        drop_points[i][2] = child.y
+                        print(drop_points[i][1], drop_points[i][2])
+                        child.position = {pic.w/2,-pic.h/2}
+                        child.z        = 500
+                        child.opacity  = 255
+                    end
+                end
+                function layered_timeline.on_new_frame(t,msecs)
+                    local index    =  math.ceil(msecs/300)
+                    local progress = (msecs - 300*(index-1))/300
+                    for i = 1,index-1 do
+                        local child    = pic:find_child("Clone "..i)
+                        child.position = {drop_points[i][1],
+                                          drop_points[i][2]}
+                        child.scale    = { 1 , 1 }
+                        child.z        = 0
+                    end
+                    local child = pic:find_child("Clone "..index)
+                    print(index)--drop_points[i][1])
+                    child.x = pic.w/2 + progress*(
+                                 drop_points[index][1] - pic.w/2)
+                    child.y = pic.h/2 + progress*(
+                                 drop_points[index][2] - pic.h/2)
+                    child.scale = {2-progress,2-progress}
+                    child.z = (1-progress)*300                    
+                end
+                function layered_timeline.on_completed()
+                    for i = 1, 13 do
+                        local child    = pic:find_child("Clone "..i)
+                        child.position = {drop_points[i][1],
+                                          drop_points[i][2]}
+                        child.z        = 0
+                    end
+                    reset_keys()
+                end
+                layered_timeline:start()
         end
     }
 
@@ -779,7 +879,7 @@ SlideshowView = Class(View, function(view, model, ...)
             view.ui.opacity = 255
             for i = 1 , #view.nav_items do
                 if menu_i == i then
-                    view.nav_items[i].color = "602020"
+                    view.nav_items[i].color = "FF0000"
                 else
                     view.nav_items[i].color = "000000"                    
                 end
