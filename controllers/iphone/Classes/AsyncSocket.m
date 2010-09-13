@@ -3504,7 +3504,7 @@ Failed:
 		return;
 	}
 
-	if(theNativeWriteSocket == 0)
+	/*if(theNativeWriteSocket == 0)
     {
         // Get the CFSocketNativeHandle from theWriteStream
         CFSocketNativeHandle native;
@@ -3536,7 +3536,7 @@ Failed:
         setsockopt(theNativeWriteSocket, SOL_SOCKET, SO_SNDBUF, (void *)&bufsiz, sizeof(bufsiz));
         setsockopt(theNativeWriteSocket, SOL_SOCKET, SO_DEBUG, (void *)&yes, sizeof(yes));
         setsockopt(theNativeWriteSocket, IPPROTO_TCP, TCP_NOPUSH, (void *)&no, sizeof(no));
-    }
+	}  */
     
 	// Note: This method is not called if theCurrentWrite is an AsyncSpecialPacket (startTLS packet)
 	
@@ -3552,22 +3552,27 @@ Failed:
 		CFIndex bytesToWrite = (bytesRemaining < WRITE_CHUNKSIZE) ? bytesRemaining : WRITE_CHUNKSIZE;
 		UInt8 *writestart = (UInt8 *)([theCurrentWrite->buffer bytes] + theCurrentWrite->bytesDone);
 		
+		//Write
+		CFIndex bytesWritten = CFWriteStreamWrite(theWriteStream, writestart, bytesToWrite);
+		
 		// Write to native socket
-        CFIndex bytesWritten = send(theNativeWriteSocket, writestart, bytesToWrite, 0);        
+        //CFIndex bytesWritten = send(theNativeWriteSocket, writestart, bytesToWrite, 0);        
         NSLog(@"Just wrote %d bytes", bytesWritten);
 
 		// Unset the "can accept bytes" flag
 		theFlags &= ~kSocketCanAcceptBytes;
 		
 		// Check results
-		if (bytesWritten < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+		if (bytesWritten < 0)
+		//if (bytesWritten < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 		{
-            NSLog(@"Socket write failed: %s",strerror(errno));
+            //NSLog(@"Socket write failed: %s",strerror(errno));
+			NSLog(@"Socket write failed");
 			error = YES;
 		}
 		else
 		{
-            if(bytesWritten < 0) bytesWritten = 0;
+            //if(bytesWritten < 0) bytesWritten = 0;
 			// Update total amount read for the current write
 			theCurrentWrite->bytesDone += bytesWritten;
 			
