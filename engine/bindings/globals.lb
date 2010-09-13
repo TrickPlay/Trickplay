@@ -522,7 +522,7 @@ globals
     	Function: choose
     	
     	Receives 3 parameters. If the first one is true, it returns the second one, 
-    	otherwise, it returns the third one.
+    	otherwise, it returns the third one.  Equivalent to ((expression)?(a):(b)) in C.
     	
     	Arguments:
     	
