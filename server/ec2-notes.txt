@@ -1,0 +1,21 @@
+#ssh
+ssh -i TP_dev.pem root@ec2-184-72-169-182.compute-1.amazonaws.com
+
+#create user
+useradd trickplay
+su - trickplay
+
+#jetty
+wget http://dist.codehaus.org/jetty/jetty-6.1.25/jetty-6.1.25.zip
+unzip jetty-6.1.25.zip
+
+#grails
+grails dev war
+scp -i TP_dev.pem root@ec2-184-72-169-182.compute-1.amazonaws.com:~/
+
+mv trickplay-0.1.war /home/trickplay/jetty-6.1.25/webapps/
+chown trickplay:trickplay /home/trickplay/jetty-6.1.25/webapps/trickplay-0.1.war
+
+#mysql
+
+
