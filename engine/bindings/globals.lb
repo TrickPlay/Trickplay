@@ -321,77 +321,98 @@ globals
             }            
         ]];
         
-	lstring readdir(string dir_name)
-		[[	
-		result = NULL;
-		result_len = 0;
-                bool is_uri=false;
-		guint flags = 0;
-		gchar *list = NULL;
-		gchar *filename = NULL;
-		gchar *tmpbuf = NULL;
-		GDir *dir = NULL;
+ /*
+        Function: readdir
 
-                dir = g_dir_open(dir_name, 0, NULL);
-		if(dir) 
+        List file names of the given directory name and returns them as a table. If
+        there are any problems, it returns nil.
+
+        Arguments:
+
+                dir_name - The name of the directory to look up.
+
+        Returns:
+                table - The file names or 
+                nil - If something went wrong.
+
+    */
+
+     table readdir(string dir_name)
+        [[	
+	    gchar *filename = NULL;
+	    GDir *dir = NULL;
+
+            dir = g_dir_open(dir_name, 0, NULL);
+
+	    if(dir) 
+	    {
+		filename = (gchar *)g_dir_read_name(dir);
+		lua_newtable( L );
+		int t = lua_gettop( L );
+		int i = 1; 
+		while(filename != NULL)
 		{
-                	filename = (gchar *)g_dir_read_name(dir);
-			while (filename != NULL) { 
-				if (!list)
-					list = g_strdup_printf("\n%s/%s\n",dir_name,filename);
-				else {
-					tmpbuf = g_strconcat(list,dir_name,"/",filename,"\n",NULL);
-					g_free(list);
-					list = tmpbuf;
-				}
-				filename = (gchar *)g_dir_read_name(dir);
-			}
+			lua_pushstring( L , filename );
+   			lua_rawseti( L , t , i++ );  
+			filename = (gchar *)g_dir_read_name(dir);
 		}
-                result = list;
-            	result_len = strlen(list);
-		g_dir_close(dir);
-		]];
+	    	g_dir_close(dir);
+	    }
+	    else 
+	    {
+		luaL_error( L, "Invalid directory name '%s'", dir_name);
+   		lua_pushnil( L );
+	    }
+         ]];
 
 
-	writefile(string file_name, string contents)
-                [[
-                bool is_uri=false;
-                char * path=App::get(L)->normalize_path(file_name,&is_uri);
-                gchar * old_contents = NULL;
-                gsize old_length = 0;
-                FreeLater free_later(path);
-                if ( path && ! is_uri )
-                {
-                        gsize length = strlen(contents);
-                        if ( g_file_get_contents( path, & old_contents, & old_length, NULL ) )
-                        {
-                                length += old_length;
-				if (old_length != 0) {
-                	        	gchar new_contents[length];
-                                	g_strlcpy(new_contents, old_contents, old_length+1);
-                                	g_strlcat(new_contents, contents, length+1);
-                                	g_file_set_contents(path, new_contents, length, NULL);
-				} else 
-                                	g_file_set_contents(path, contents, length, NULL);
-                        }else {
-                                g_file_set_contents(path, contents, length, NULL);
-                                length += old_length;
-                        }
-                }
-                ]];
+    /*
+        Function: writefile
 
-/*
-		[[
-		bool is_uri=false;
-            	char * path=App::get(L)->normalize_path(file_name,&is_uri);
-            	FreeLater free_later(path);
-            	if ( path && ! is_uri )
-            	{
-                	gsize length = strlen(contents);
-                	g_file_set_contents(path, contents, length, NULL);
-                }
-		]];
-*/
+        List file names of the given directory name and returns them as a table. 
+
+        Arguments:
+
+                file_name - The name of the file to write
+	        contents - The contents to write  
+
+    */
+
+     writefile(string file_name, string contents)
+         [[
+	     bool is_uri=false;
+             char * path=App::get(L)->normalize_path(file_name,&is_uri);
+             gchar * old_contents = NULL;
+             gsize old_length = 0;
+
+             FreeLater free_later(path);
+
+             if ( path && ! is_uri )
+             {
+             	 gsize length = strlen(contents);
+                 if ( g_file_get_contents( path, & old_contents, & old_length, NULL ) )
+                 {
+                      length += old_length;
+		      if (old_length != 0) 
+		      {
+                           gchar new_contents[length];
+                           g_strlcpy(new_contents, old_contents, old_length+1);
+                           g_strlcat(new_contents, contents, length+1);
+                           g_file_set_contents(path, new_contents, length, NULL);
+		      } 
+		      else 
+		      {
+                           g_file_set_contents(path, contents, length, NULL);
+		      }
+                 } 
+		 else 
+		 {
+                 	   g_file_set_contents(path, contents, length, NULL);
+                           length += old_length;
+                 }
+             }
+          ]];
+
 
     /*
     	Function: readfile
@@ -522,7 +543,7 @@ globals
     	Function: choose
     	
     	Receives 3 parameters. If the first one is true, it returns the second one, 
-    	otherwise, it returns the third one.  Equivalent to ((expression)?(a):(b)) in C.
+    	otherwise, it returns the third one.
     	
     	Arguments:
     	
