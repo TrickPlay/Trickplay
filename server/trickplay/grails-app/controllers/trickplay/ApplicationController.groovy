@@ -97,7 +97,6 @@ class ApplicationController extends WsController {
             }
         }
         try {
-            int rez = 0;
             def list = Application.list(max:params.max, offset:params.offset, sort:params.sort, order:params.order);
             def apps = [];
             for(a in list) {
@@ -122,7 +121,13 @@ class ApplicationController extends WsController {
                                      email:a.supportEmail,
                                      license:a.license,
                                      price:a.price,
-                                     vendor:a.developer.vendor.name)
+                                     vendor:a.developer.vendor.name,
+                                     medias: array {
+                                         for(s in a.medias) {
+                                             media (url:s.imgUrl, imageType:s.imgType, mimeType:s.mimeType)
+                                         }
+                                     },
+                                     )
                     }
                 }
             }
