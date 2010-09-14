@@ -341,6 +341,10 @@ SlideshowView = Class(View, function(view, model, ...)
                group:lower_to_bottom()
                background2:lower_to_bottom()
                background:lower_to_bottom()
+               for i = 1, 13 do
+                   local child = group:find_child("Clone "..i)
+                   child.opacity = 255
+               end
         end
     }
 
@@ -382,15 +386,19 @@ SlideshowView = Class(View, function(view, model, ...)
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
-                local pic = view.on_screen_list[i]:find_child("slide")
-                local backing =view.on_screen_list[i]:find_child("loading")
-                view.on_screen_list[i]:clear()
-                if pic ~= nil then
-                    off_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
-                elseif backing ~= nil then
-                    off_screen_prep["FULLSCREEN"](backing,view.on_screen_list[i])
+                if i == 1 then
+                    on_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
                 else
-                   -- error("should not have got here")
+                    local pic = view.on_screen_list[i]:find_child("slide")
+                    local backing =view.on_screen_list[i]:find_child("loading")
+                    view.on_screen_list[i]:clear()
+                    if pic ~= nil then
+                        off_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
+                    elseif backing ~= nil then
+                        off_screen_prep["FULLSCREEN"](backing,view.on_screen_list[i])
+                    else
+                       -- error("should not have got here")
+                    end
                 end
             end
             if view.on_screen_list[1] ~= nil then
@@ -491,7 +499,7 @@ SlideshowView = Class(View, function(view, model, ...)
 
                 local layered_timeline = Timeline
                 {
-                    name      = "Layered Timeline",
+                    name      = "Backward Layered Timeline",
                     duration  = 13*300,
                     loop      = false,
                     direction = "FORWARD"
@@ -523,19 +531,20 @@ SlideshowView = Class(View, function(view, model, ...)
                         child.z        = 0
                     end
                     local child = pic:find_child("Clone "..index)
-                    print(index)--drop_points[i][1])
+                    --print(index)--drop_points[i][1])
                     child.x = pic.w/2 + progress*(
                                  drop_points[index][1] - pic.w/2)
                     child.y = pic.h/2 + progress*(
                                  drop_points[index][2] - pic.h/2)
                     child.scale = {2-progress,2-progress}
-                    child.z = (1-progress)*300                    
+                    child.z     = (1-progress)*500                    
                 end
                 function layered_timeline.on_completed()
                     for i = 1, 13 do
                         local child    = pic:find_child("Clone "..i)
                         child.position = {drop_points[i][1],
                                           drop_points[i][2]}
+                        child.scale    = {1,1}
                         child.z        = 0
                     end
                     reset_keys()
@@ -600,7 +609,61 @@ SlideshowView = Class(View, function(view, model, ...)
                 end
             }
         end,
-        ["LAYERED"]    = function()
+        ["LAYERED"]    = function(pic)
+                local layered_timeline = Timeline
+                {
+                    name      = "Forward Layered Timeline",
+                    duration  = 13*300,
+                    loop      = false,
+                    direction = "FORWARD"
+                }
+                local drop_points = {}
+                pic.z = 0
+                function layered_timeline.on_started()
+                    for i = 1, 13 do
+                        local child = pic:find_child("Clone "..i)
+                        drop_points[i]    = {}
+                        drop_points[i][1] = child.x
+                        drop_points[i][2] = child.y
+                        print(drop_points[i][1], drop_points[i][2])
+--[[
+                        child.position = {pic.w/2,-pic.h/2}
+                        child.z        = 500
+                        child.opacity  = 255
+--]]
+                    end
+                end
+                function layered_timeline.on_new_frame(t,msecs)
+                    local index    =  math.ceil(msecs/300)
+                    local progress = (msecs - 300*(index-1))/300
+                    for i = 1,index-1 do
+                        local child    = pic:find_child("Clone "..i)
+                        child.position = {pic.w/2,-pic.h/2}
+                        child.scale    = { 2 , 2 }
+                        child.z        = 500
+                    end
+                    local child = pic:find_child("Clone "..index)
+                    --print(index)--drop_points[i][1])
+                    child.x = drop_points[index][1] + progress*(pic.w/2 - 
+                                 drop_points[index][1])
+                    child.y = drop_points[index][2] + progress*(pic.h/2 - 
+                                 drop_points[index][2])
+                    child.scale = {1+progress,1+progress}
+                    child.z     = progress*500                    
+                end
+                function layered_timeline.on_completed()
+                    pic.opacity = 0
+                    for i = 1, 13 do
+print(i)
+                        local child    = pic:find_child("Clone "..i)
+                        child.position = {drop_points[i][1],
+                                          drop_points[i][2]}
+                        child.scale    = { 2 , 2 }
+                        child.z        = 500
+                    end
+                    reset_keys()
+                end
+                layered_timeline:start()
         end
     }
 

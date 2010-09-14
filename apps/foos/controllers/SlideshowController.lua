@@ -114,6 +114,8 @@ SlideshowController = Class(Controller, function(self, view, ...)
     function self:on_key_down(k)
         if MenuKeyTable[k] then
             MenuKeyTable[k](self)
+        else
+            rest_keys()
         end
     end
 
