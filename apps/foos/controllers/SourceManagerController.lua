@@ -113,7 +113,7 @@ print("LOGIN OK")
                     local search = string.gsub(query_text," ","%%20")
                     adapters[#adapters]:getUserID(search)
                     adapters[#adapters][1].required_inputs.query = search                    
-                    --searches[#adapters] = search
+                    searches[#adapters] = search
                     Add_Cover()
 
                     login_text[1] = ""
