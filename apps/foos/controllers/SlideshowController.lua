@@ -115,7 +115,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
         if MenuKeyTable[k] then
             MenuKeyTable[k](self)
         else
-            rest_keys()
+            reset_keys()
         end
     end
 

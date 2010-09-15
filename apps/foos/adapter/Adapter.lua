@@ -1,4 +1,4 @@
-adapterTypes  = {"Google","Yahoo","Flickr", "Photobucket"}
+adapterTypes  = {"Google","Yahoo","Flickr", "Photobucket","Picasa"}
 adaptersTable = settings.adaptersTable or 
                 { "Google", "Yahoo", "Yahoo", "Google", "Google", 
                   "Yahoo", "Google"}
