@@ -360,7 +360,6 @@ globals
 	    }
 	    else 
 	    {
-		luaL_error( L, "Invalid directory name '%s'", dir_name);
    		lua_pushnil( L );
 	    }
          ]];
