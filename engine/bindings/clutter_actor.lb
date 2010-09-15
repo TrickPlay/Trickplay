@@ -1070,6 +1070,13 @@ interface actor [[ClutterActor*]]
 	    guint duration=lua_tonumber(L,-1);
 	    lua_pop(L,1);
 	    
+	    if ( duration <= 0 )
+	    {
+	    	lua_pushnil( L );
+	    	luaL_error( L , "Call to animate has invalid or missing duration" );
+	    	return 1; 
+	    }
+	    
 	    lua_getfield(L,props,"mode");
 	    gulong mode=ClutterUtil::to_clutter_animation_mode(lua_tostring(L,-1));
 	    lua_pop(L,1);
@@ -1230,6 +1237,15 @@ interface actor [[ClutterActor*]]
 		}
 		
 		lua_pop(L,1);
+	    }
+	    
+	    if ( values->n_values == 0 )
+	    {
+		    g_value_array_free(values);
+		    g_ptr_array_free(names,TRUE);
+		    lua_pushnil( L );
+		    luaL_error( L , "Call to animate has no properties" );
+		    return 1;
 	    }
 	    
 	    ClutterAnimation * a=clutter_actor_animatev(self,mode,duration,
