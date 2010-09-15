@@ -21,7 +21,6 @@ function( ui , app_list )
     
         if group then
             group:raise_to_top()
-            group:grab_key_focus()
             group.opacity = 255
             return
         end
@@ -38,11 +37,7 @@ function( ui , app_list )
         screen:add( group )
         
         group:raise_to_top()
-        
-        -- Prevent keys from going to the menu while we are animating
-        
-        group:grab_key_focus()
-                       
+                              
         -- These variables will hold the spacing for tiles
         
         local LEFT_MARGIN   = 7
@@ -298,18 +293,7 @@ function( ui , app_list )
         -- When animations are done and we are ready to proceed
         
         local function show()
-        
-            focus_tile( focused_tile or tiles[1] )
             
-            group.on_key_down =
-                
-                function( group , key )
-                    local f = key_map[ key ]
-                    if f then
-                        f()
-                    end
-                end
-        
         end
         
         -- Build the UI if we have not done so already
@@ -331,6 +315,15 @@ function( ui , app_list )
         focus_tile( focused_tile or tiles[1] )
         
         group:grab_key_focus()
+
+        group.on_key_down =
+            
+            function( group , key )
+                local f = key_map[ key ]
+                if f then
+                    f()
+                end
+            end
         
         return true
     
@@ -348,6 +341,7 @@ function( ui , app_list )
         
         if group then
             group.opacity = 0
+            group.on_key_down = nil
         end
         
     end

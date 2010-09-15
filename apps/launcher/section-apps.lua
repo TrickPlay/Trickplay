@@ -33,6 +33,8 @@ function( section )
     
     local function show_all_apps( app_list )
     
+        ui:on_exit_section( section )
+    
         local fs_apps = dofile( "fs-apps" )( ui , app_list )
         
         ui:on_section_full_screen( fs_apps )
