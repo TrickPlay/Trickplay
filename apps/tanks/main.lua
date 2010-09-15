@@ -1,6 +1,5 @@
 dofile("terrain.lua")
 
-
 local TERRAIN_REFINE = 2
 local EXPLOSION_SIZE = 20
 
