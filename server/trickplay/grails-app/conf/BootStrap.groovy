@@ -5,6 +5,9 @@ class BootStrap {
     def passwordEncoder;
 
      def init = { servletContext ->
+
+        def save = { it.save(); if (it.hasErrors()) { println it.errors } }
+
              //
          def role1 = new Role(authority:"ROLE_USER",
                               description:"User");
@@ -64,13 +67,13 @@ class BootStrap {
          def cat3 = new Category(name:"Animation");
          def cat4 = new Category(name:"Photos");
          def cat5 = new Category(name:"Sports");
-         def cat6 = new Category(name:"Featured");
+         def cat_featured = new Category(name:"Featured");
          cat1.save();
          cat2.save();
          cat3.save();
          cat4.save();
          cat5.save();
-         cat6.save();
+         cat_featured.save();
 
          def vend1 = new Vendor(name:"Trickplay",
                                 dateCreated:new Date(),
@@ -100,22 +103,40 @@ class BootStrap {
          if (dev2.hasErrors()){
              println dev2.errors
          }
+             
+        // True Blood Comics
+        
 
-         def icon1 = new Media(imgType:"icon", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/049/Purple/54/7d/7b/mzl.btnqdaaq.175x175-75.jpg"));
-         icon1.save();
-          if (icon1.hasErrors()){
-             println icon1.errors
-         }
-        def app1 = new Application(name:"Doodle Jump",
-                                    description:"A clone of iPhone's wildly popular game.",
-                                    supportEmail:"support@limasky.com",
+        def tb_icon = new Media(
+                                imgType:"icon",
+                                mimeType:"image/jpeg",
+                                mediaUrl:new URL("http://store.trickplay.com/v1/com.trickplay.fake.trueblood/icon.jpg"));
+
+        def tb_featured_icon = new Media(
+                                imgType:"featuredIcon",
+                                mimeType:"image/png",
+                                mediaUrl:new URL("http://store.trickplay.com/v1/com.trickplay.fake.trueblood/featured.png"));
+        
+        def tb_background = new Media(
+                                imgType:"background",
+                                mimeType:"image/jpeg",
+                                mediaUrl:new URL("http://store.trickplay.com/v1/com.trickplay.fake.trueblood/background.jpg"));
+        
+        
+        save( tb_icon )
+        save( tb_featured_icon )
+        save( tb_background )
+        
+        def app1 = new Application(name:"True Blood Comics",
+                                    description:"View full screen art with new stories never seen before! Blood and sex mix on a hot rainy night at Merlotte's, when Sookie and her friends are trapped by a vengeful spirit who feeds on shame. Bon Temps, Louisiana has never been stranger, or more twisted, in a new story co-plotted by TRUE BLOOD series creator Alan Ball, with a script from David Tischman and Mariah Huehner, and lush art by David Messina.",
+                                    supportEmail:"support@trickplay.com",
                                     license:"free for all",
-                                    websiteUrl:new URL("http://www.limasky.com/"),
-                                    icon:icon1,
+                                    websiteUrl:new URL("http://hbo.com/"),
+                                    icon:tb_icon,
                                     price:1.99,
                                     approved:true,
                                     developer:dev1,
-                                    categories:[cat1,cat3,cat6],
+                                    categories:[cat1,cat3,cat_featured],
                                     versions:[new Version(versionNumber:1,
                                                           freeUpdate:true,
                                                           current:true,
@@ -124,25 +145,40 @@ class BootStrap {
                                                                                 releaseNumber:1,
                                                                                 approved:true,
                                                                                 current:true,
-                                                                                medias:[new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/041/Purple/5b/c4/38/mzl.wysngtfo.320x480-75.jpg")), new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/024/Purple/45/18/98/mzl.zepxrncb.320x480-75.jpg"))],
-)])]);
-         app1.save();
-         if (app1.hasErrors()){
-             println app1.errors
-         }
+                                                                                medias:[tb_featured_icon,tb_background])])]);
+         save( app1 )
 
-         def icon2 = new Media(imgType:"icon", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/058/Purple/27/fb/29/mzl.mcpzyiba.175x175-75.jpg"));
-         icon2.save();
-         def app2 = new Application(name:"Flickr",
-                                    description:"Awesome 3D way to view your Flickr photos.",
-                                    supportEmail:"support@flickr.com",
-                                    license:"Yahoo Public License",
-                                    websiteUrl:new URL("http://www.flickr.com/"),
-                                    icon:icon2,
+         
+         def hulu_icon = new Media(
+                                imgType:"icon",
+                                mimeType:"image/jpeg",
+                                mediaUrl:new URL("http://store.trickplay.com/v1/com.trickplay.fake.hulu/icon.jpg"));
+
+         def hulu_featured_icon = new Media(
+                                imgType:"featuredIcon",
+                                mimeType:"image/png",
+                                mediaUrl:new URL("http://store.trickplay.com/v1/com.trickplay.fake.hulu/featured.png"));
+         
+         def hulu_background = new Media(
+                                imgType:"background",
+                                mimeType:"image/jpeg",
+                                mediaUrl:new URL("http://store.trickplay.com/v1/com.trickplay.fake.hulu/background.jpg"));
+         
+         
+         save( hulu_icon );
+         save( hulu_featured_icon );
+         save( hulu_background );
+         
+         def app2 = new Application(name:"Hulu Plus",
+                                    description:"Choose from more than 2,600 current primetime TV hits such as The Simpsons, 30 Rock, Lost, Glee and The Office the morning after they air; classics like Buffy the Vampire Slayer, The A-Team, Airwolf and Married...with Children; movies like Last of the Mohicans and Basic Instinct; documentaries like Super Size Me, and other popular TV shows and movies.",
+                                    supportEmail:"support@hulu.com",
+                                    license:"None",
+                                    websiteUrl:new URL("http://www.hulu.com/"),
+                                    icon:hulu_icon,
                                     price:0.00,
                                     approved:true,
                                     developer:dev2,
-                                    categories:[cat4],
+                                    categories:[cat4,cat_featured],
                                     versions:[new Version(versionNumber:1,
                                                           freeUpdate:true,
                                                           current:true,
@@ -151,66 +187,54 @@ class BootStrap {
                                                                                 releaseNumber:1,
                                                                                 approved:true,
                                                                                 current:true,
-                                                                                medias:[new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/022/Purple/95/fd/bf/mzl.aalsvuwr.320x480-75.jpg")), new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/051/Purple/2e/8d/c7/mzl.xphvwcdf.320x480-75.jpg"))],
-)])]);
-         app2.save();
-         if (app2.hasErrors()){
-             println app2.errors
-         }
+                                                                                medias:[hulu_featured_icon,hulu_background])])]);
+         save( app2 );
 
-         def icon3 = new Media(imgType:"icon", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/002/Purple/38/fc/0e/mzl.pstnvzug.175x175-75.jpg"));
-         icon3.save();
-         def app3 = new Application(name:"Yahoo Fantasy Football",
-                                    description:"Yahoo! Fantasy Football, the Web’s #1 fantasy football game.",
-                                    supportEmail:"support@yahoo.com",
-                                    license:"Yahoo Public License",
-                                    websiteUrl:new URL("http://www.yahoo.com/"),
-                                    icon:icon3,
-                                    price:7.99,
-                                    approved:true,
-                                    developer:dev2,
-                                    categories:[cat5],
-                                    versions:[new Version(versionNumber:1,
-                                                          freeUpdate:true,
-                                                          current:true,
-                                                          releases:[new Release(notes:"Launch",
-                                                                                requirements:"",
-                                                                                releaseNumber:1,
-                                                                                approved:true,
-                                                                                current:true,
-                                                                                medias:[new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/021/Purple/e8/e9/e5/mzl.lsyyzuvw.320x480-75.jpg")), new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/027/Purple/36/98/0d/mzl.fschpcbs.320x480-75.jpg"))],
-)])]);
-         app3.save();
-         if (app3.hasErrors()){
-             println app3.errors
-         }
+         
+        def make_app = { name , icon_url ->
+            
+            def icon = new Media( imgType:"icon", mimeType:"image/jpeg", mediaUrl:new URL(icon_url));
+            
+            save( icon );
 
-         def icon4 = new Media(imgType:"icon", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/005/Purple/da/db/b3/mzl.sonzhhny.175x175-75.jpg"));
-         icon4.save();
-         def app4 = new Application(name:"Pandora Radio",
-                                    description:"Pandora Radio is your own FREE personalized radio now available to stream music on your TV. Just start with the name of one of your favorite artists, songs or classical composers and Pandora will create a station that plays their music and more music like it.",
-                                    supportEmail:"support@pandora.com",
-                                    license:"Pandora EULA",
-                                    websiteUrl:new URL("http://www.pandora.com/"),
-                                    icon:icon4,
-                                    price:0.00,
-                                    approved:true,
-                                    developer:dev1,
-                                    categories:[cat2,cat6],
-                                    versions:[new Version(versionNumber:1,
-                                                          freeUpdate:true,
-                                                          current:true,
-                                                          releases:[new Release(notes:"Launch",
-                                                                                requirements:"",
-                                                                                releaseNumber:1,
-                                                                                approved:true,
-                                                                                current:true,
-                                                                                medias:[new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/036/Purple/95/6e/d8/mzl.beqctpjq.320x480-75.jpg")), new Media(imgType:"screenshot", mimeType:"image/jpeg", mediaUrl:new URL("http://a1.phobos.apple.com/us/r1000/051/Purple/db/41/92/mzl.pjrvhdfy.320x480-75.jpg"))],
-)])]);
-         app4.save();
-         if (app4.hasErrors()){
-             println app4.errors
-         }
+            def app = new Application(name:name,
+                                       description:"Lorem ipsum.",
+                                       supportEmail:"support@trickplay.com",
+                                       license:"GPL",
+                                       websiteUrl:new URL("http://www.trickplay.com/"),
+                                       icon:icon,
+                                       price:0.99,
+                                       approved:true,
+                                       developer:dev2,
+                                       categories:[cat1],
+                                       versions:[new Version(versionNumber:1,
+                                                             freeUpdate:true,
+                                                             current:true,
+                                                             releases:[new Release(notes:"Launch",
+                                                                                   requirements:"",
+                                                                                   releaseNumber:1,
+                                                                                   approved:true,
+                                                                                   current:true,
+                                                                                   medias:[])])]);
+            save( app );
+        }
+        
+        make_app( "Cow Tipper" , "http://store.trickplay.com/v1/com.trickplay.fake.cowtipper/icon.jpg" );
+        make_app( "NBA" , "http://store.trickplay.com/v1/com.trickplay.fake.nba/icon.jpg" );
+        make_app( "HBO" , "http://store.trickplay.com/v1/com.trickplay.fake.hbo/icon.jpg" );
+        make_app( "Candyland" , "http://store.trickplay.com/v1/com.trickplay.fake.candyland/icon.jpg" );
+        make_app( "Poker Dawgs" , "http://store.trickplay.com/v1/com.trickplay.fake.pokerdawgs/icon.jpg" );
+        make_app( "Plants vs. Zombies" , "http://store.trickplay.com/v1/com.trickplay.fake.pvz/icon.jpg" );
+        make_app( "1945" , "http://store.trickplay.com/v1/com.trickplay.fake.1945/icon.jpg" );
+        make_app( "8 Ball Billiards HD" , "http://store.trickplay.com/v1/com.trickplay.fake.billiards/icon.jpg" );
+        make_app( "Solitaire" , "http://store.trickplay.com/v1/com.trickplay.fake.solitaire/icon.jpg" );
+        make_app( "NFL" , "http://store.trickplay.com/v1/com.trickplay.fake.nfl/icon.jpg" );
+        make_app( "American Idol" , "http://store.trickplay.com/v1/com.trickplay.fake.idol/icon.jpg" );
+        make_app( "The Game of Life" , "http://store.trickplay.com/v1/com.trickplay.fake.life/icon.jpg" );
+        make_app( "Spirals" , "http://store.trickplay.com/v1/com.trickplay.fake.spirals/icon.jpg" );
+        make_app( "Aquaria" , "http://store.trickplay.com/v1/com.trickplay.fake.aquaria/icon.jpg" );
+        make_app( "Carlsberg" , "http://store.trickplay.com/v1/com.trickplay.fake.carlsberg/icon.jpg" );
+         
      }
 
      def destroy = {
