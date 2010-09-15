@@ -45,22 +45,17 @@ function adapter:getPhotos(album,start,num_images)
 
 end
 
-function adapter:loadCovers(slot,search, start_index)
-print("waaaaaaaat\n\n\n\n\n\n\n")
+function adapter:loadCovers(slot,search, start_index,formula)
 	start_index = (start_index-1)%(num_photos) + 1
-	if search ~= nil then
---[[
-	if (user_ids[#adapters+1-model.fp_1D_index]) then
 for i = 1,#adapters do
 print(i,user_ids[i])
 end
---]]
+
+	if (user_ids[formula]) then
 	local request = URLRequest {
-		url = "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..search.."&nojsoncallback=1",
+		url = "http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&user_id="..user_ids[formula].."&nojsoncallback=1",
 		on_complete = function (request, response)
-print("\n\n\n\nFUUUUUUUKKKKK")
 			local data = json:parse(response.body)
---[[
 			for k,v in pairs(data.photos.photo[1]) do print(k,v) end
 			test = "http://farm"..data.photos.photo[start_index].farm..
                                ".static.flickr.com/"..
@@ -70,16 +65,6 @@ print("\n\n\n\nFUUUUUUUKKKKK")
          --if (not dontswap) then
 			   Load_Image(adapter,site,search,slot)
 			--end
---]]
-			num_photos = #data.photos.photo
-			--local start_index = (i-1)%num_photos + 1
-			return "http://farm"..data.photos.photo[start_index].farm..
-                               ".static.flickr.com/"
-                               ..data.photos.photo[start_index].server..
-                               "/"..data.photos.photo[start_index].id..
-                               "_"..data.photos.photo[start_index].secret..
-                               ".jpg"
-
 		end
 		}
 		request:send()
@@ -87,7 +72,7 @@ print("\n\n\n\nFUUUUUUUKKKKK")
 end
 
 function adapter:getUserID(username)
-	local index = #adapters
+local index = #adapters
 	local request = URLRequest {		
 		url = "http://www.flickr.com/services/rest/?method=flickr.people.findByUsername&username="..username.."&format=json&api_key=e68b53548e8e6a71565a1385dc99429f&nojsoncallback=1",
 		on_complete = function(request,response)
@@ -96,7 +81,10 @@ function adapter:getUserID(username)
 --			debug()
 			if (data.user) then
 				self[1].required_inputs.user_id = data.user.nsid
-				searches[index] = data.user.nsid
+				user_ids[index] = data.user.nsid
+        local ii = (index-1)%NUM_ROWS +1
+        local jj = math.ceil(index/NUM_ROWS)
+adapter:loadCovers(model.fp_slots[ii][jj],searches[index], 1,index)
 --print("\n\n\n\n\n\n\n\nadapters",user_ids[#adapters])
 	--			self[1].required_inputs.query = data.user.nsid
 --[[			  model.album_group:clear()

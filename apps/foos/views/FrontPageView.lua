@@ -340,7 +340,8 @@ function view.timer:on_timer()
 
                                 model.fp_slots[rand_i[1] ][rand_i[2] ], 
                                 searches[#adapters+1-formula], 
-                                math.random(1,10)
+                                math.random(1,10),
+				#adapters+1-formula
                      )
                 else
                     print("not calling")
@@ -622,8 +623,8 @@ function Add_Cover()
         })
         model.album_group:add(model.fp_slots[1][1])
         adapters[#adapters]:loadCovers(model.fp_slots[1][1],
-user_ids[#adapters]                       , 
-                                               math.random(5)) 
+searches[#adapters]                       , 
+                                               math.random(5),#adapters) 
 
         model:notify()
         --dont need to give keys back here, they are given 
