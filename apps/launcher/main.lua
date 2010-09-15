@@ -387,7 +387,7 @@ local function build_ui( show_it )
             -- If they hit enter on the section that is currently full screen,
             -- we just act like they hit 'down' and enter the section
             
-            enter_section()
+            --enter_section()
         
         else
         
@@ -411,9 +411,9 @@ local function build_ui( show_it )
             
             if section:on_default_action() then
                 
-                ui.button_focus.opacity = 0
+                --ui.button_focus.opacity = 0
                 
-                ui.fs_focus = ui.focus
+                --ui.fs_focus = ui.focus
             end
         
         end
@@ -582,7 +582,7 @@ local function build_ui( show_it )
     
         -- Give the key focus to the screen so we are not interrupted
         
-        screen:grab_key_focus()
+        --screen:grab_key_focus()
         
         -- Kill the dropdown timer
         
