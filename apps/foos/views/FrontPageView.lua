@@ -621,8 +621,8 @@ function Add_Cover()
             opacity =255
         })
         model.album_group:add(model.fp_slots[1][1])
-        adapters[#adapters+1-model.fp_1D_index]:loadCovers(model.fp_slots[1][1],
-                                               searches[#adapters], 
+        adapters[#adapters]:loadCovers(model.fp_slots[1][1],
+user_ids[#adapters]                       , 
                                                math.random(5)) 
 
         model:notify()
