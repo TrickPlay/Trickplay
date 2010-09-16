@@ -4,6 +4,10 @@ NUM_ROWS   = 2
 NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
+
+sources = {}
+terms = {"Bokeh","Sunset","City","Scenic","Clouds","Mountain","Autumn","Grass"}
+
 loadGroup = {}
 
 PIC_DIR = "assets/thumbnails/"
@@ -82,9 +86,8 @@ function Setup_Album_Covers()
         --model.albums[i]       = {}
         model.fp_slots[i]     = {}
 
-        for j = 1,math.ceil(#adapters/NUM_ROWS) do
-            local pic_index = ((((j-1)*NUM_ROWS+i)-1)%8+1)
-            if ((j-1)*NUM_ROWS+i)<=#adapters then
+        for j = 1,math.ceil(#terms/NUM_ROWS) do
+            if ((j-1)*NUM_ROWS+i)<= #terms then--#adapters then
                 model.fp_slots[i][j] = Group
                 {
                     position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
@@ -103,16 +106,76 @@ function Setup_Album_Covers()
         end
     end
 
-    for i =1, #adapters do
+    for i =1, #terms do
         local ii = (i-1)%NUM_ROWS +1
         local jj = math.ceil(i/NUM_ROWS)
 
+        sources[i] = Flickr_Interesting(model.fp_slots[ii][jj],terms[i])
+        sources[i]:get_interesting_photos()
+--[[
         adapters[#adapters+1-i]:loadCovers(model.fp_slots[ii][jj],
                                            searches[#adapters+1-i],
                                            math.random(5))
+--]]
     end
 end
 
+function LoadImg(url,slot)
+    print("Load_Image(",url,")")
+    --if url returned is empty, do it again
+    if (url == "") then
+        error("\n\n\nNEED ASSET TO LOAD FOR A BLANK IMG URL\n\n")
+        --src:loadCovers(slot,search, math.random(16))
+    --if the album is empty, then it is the initial load
+    elseif slot ~= nil then
+
+        local pic = Image{
+            name  = "cover",
+            async = true,
+            src   = url,
+            -- toss the filler image and scale it once loaded
+            on_loaded = function(img,failed)
+                --if everything went right
+                if not failed and img ~= nil then
+                    --print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")")
+                    local prev_cover = slot:find_child("cover")        
+                    --add the next album cover
+                    Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
+                    slot:add(img)
+                    model:get_controller(Components.FRONT_PAGE): 
+                                              raise_bottom_bar()
+                    --put the old one on top and animate it down
+                    --only animate if there is a picture already there
+                    if prev_cover ~= nil then
+                        print("\tan old cover exists, animating it out")
+                        prev_cover:raise_to_top()
+                        model:get_controller(Components.FRONT_PAGE):
+                                                  raise_bottom_bar()
+                        prev_cover:animate{
+                            duration     = 4*CHANGE_VIEW_TIME,
+                            y            = img.y + PIC_H,
+                            opacity      = 0,
+                            on_completed = function(image)
+                                --toss the old cover after the animation
+                                prev_cover:unparent()
+                                prev_cover = nil
+                            end
+                        }
+                    end
+                --if it failed to load 
+                else
+                    error("\n\n\nNEED ASSETS TO LOAD WHEN IMG FAILED TO LOAD\n\n")
+                    --src:loadCovers(slot,search,math.random(16))
+                end
+                model.swapping_cover = false
+            end
+        }
+    else
+        model.swapping_cover = false
+    end
+
+end
+--[[
 --Called by the adapter's on_complete function
 function Load_Image(src,site,search,slot)
     print("Load_Image(",site,",",search,")")
@@ -167,7 +230,7 @@ print("3")
         model.swapping_cover = false
     end
 end
-
+--]]
 function Scale_To_Fit(img,base_size,target_size)
     local scale_x = target_size[1] / base_size[1]
     local scale_y = target_size[2] / base_size[2]
