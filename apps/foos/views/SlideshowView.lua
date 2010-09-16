@@ -69,7 +69,7 @@ SlideshowView = Class(View, function(view, model, ...)
     view.on_screen_list  = {}
     view.off_screen_list = {}
 
-    view.styles = {"REGULAR","FULLSCREEN","LAYERED"}
+    view.styles = {"REGULAR","LAYERED"}--,"FULLSCREEN",}
     local off_screen_prep = 
     {
         ["REGULAR"]    = function(img,group)
@@ -110,7 +110,20 @@ SlideshowView = Class(View, function(view, model, ...)
                     i_width/2, 
                     i_height/2
                 }
+
                 group:add(img,overlay)
+                local backing = Rectangle
+                {
+                        size = {
+                            img.size[1],
+                            img.size[2]
+                        },
+                        color        = { 0,  0, 0, 255 },
+                        opacity = 255
+                }
+				group:add(backing)
+				backing:lower_to_bottom()
+
         end,
         ["FULLSCREEN"] = function(img,group)
                 group.opacity = 0
@@ -241,6 +254,23 @@ SlideshowView = Class(View, function(view, model, ...)
                         border_width=6,
                         opacity = 255
                     }
+                    local backing = Rectangle
+                    {
+                        anchor_point = {
+                            (tile_width*0.5),
+                            (tile_height*0.5)
+                        },
+                        position = {
+                            (tile_width*0.5),
+                            (tile_height*0.5)
+                        },
+                        size = {
+                            tile_width,
+                            tile_height
+                        },
+                        color        = { 0,  0, 0, 255 },
+                        opacity = 255
+                    }
 
                     local this_image = Clone{
                         source = img,
@@ -264,7 +294,7 @@ SlideshowView = Class(View, function(view, model, ...)
                         },			
                     }
 		
-                    this_group:add(this_image,bounding_box)
+                    this_group:add(backing,this_image,bounding_box)
                     if (model.curr_slideshow.ui) then
                         model.curr_slideshow.ui:add(this_group)
                     end
@@ -319,6 +349,18 @@ SlideshowView = Class(View, function(view, model, ...)
                     i_height/2
                 }
                 group:add(img,overlay)
+                local backing = Rectangle
+                {
+                        size = {
+                            img.size[1],
+                            img.size[2]
+                        },
+                        color        = { 0,  0, 0, 255 },
+                        opacity = 255
+                }
+				group:add(backing)
+				backing:lower_to_bottom()
+
         end,
         ["FULLSCREEN"] = function(img,group)
                 group.opacity = 0
@@ -374,6 +416,7 @@ SlideshowView = Class(View, function(view, model, ...)
             for i = 1,#view.off_screen_list do
                 local pic = view.off_screen_list[i]:find_child("slide")
                 if pic ~= nil then
+                    pic.opacity = 255
                     view.off_screen_list[i]:clear()
                     off_screen_prep["REGULAR"](pic,view.off_screen_list[i])
                 end
@@ -689,8 +732,57 @@ print(i)
 
         local index = view:get_controller():get_photo_index() - 1 +
                                           #view.off_screen_list
+--[[
         print("preload front",index,adapters[#adapters -
                 model.fp_1D_index + 1][1].required_inputs.query)
+--]]
+        --local callback = function(url)
+            local image = Image{
+                name      = "slide",
+                src       = sources[model.fp_1D_index]:get_photos_at(
+								index,false),
+                async     = true, 
+                on_loaded = function(img,failed)
+                    img.on_loaded = nil
+
+                    --if it failed to load from the internet, then
+                    --throw up the placeholder
+                    local style_i2 = view:get_controller():get_style_index()
+                    if failed then
+                        print("picture loading failed")
+                        --loaded the placeholder for failed pics
+                        local placeholder = Group{}
+                        placeholder:add(Rectangle
+                        {
+                            name   = "backing",
+                            color  = "000000",
+                            width  = PIC_W,
+                            height = PIC_H 
+                        })
+
+                        placeholder:add(Clone
+                        {
+                            name   = "slide",
+                            source = backup,
+                            x      = 100,
+                            y      = 100
+                        })
+                        on_screen_prep[view.styles[style_i2] ](placeholder,group)
+                    else
+                        --view.on_screen_list[rel_i] = Group {z = 500}
+                        timeline:stop()
+                        group:clear()
+                        on_screen_prep[view.styles[style_i2] ](img,group)
+
+                    end
+                    if group == view.on_screen_list[1] then
+                        group.opacity = 255
+                    end
+                end
+            }
+        --end
+        --sources[model.fp_1D_index]:get_interesting_photos(index,false,callback)
+--[[
         local request = URLRequest
         {
             url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
@@ -737,7 +829,7 @@ print(i)
                                     x      = 100,
                                     y      = 100
                                 })
-                                on_screen_prep[view.styles[style_i2]](placeholder,group)
+                                on_screen_prep[view.styles[style_i2] ](placeholder,group)
                             else
                                 --view.on_screen_list[rel_i] = Group {z = 500}
                                 timeline:stop()
@@ -770,7 +862,7 @@ print(i)
                         x      = 100,
                         y      = 100
                     })
-                    on_screen_prep[view.styles[style_i2]](placeholder,group)
+                    on_screen_prep[view.styles[style_i2] ](placeholder,group)
                     if group == view.on_screen_list[1] then
                         group.opacity = 255
                     end
@@ -778,6 +870,7 @@ print(i)
             end
         }
         request:send()
+--]]
     end
     function view:preload_back()
         view.on_screen_list[#view.on_screen_list+1] = Group {z = 0}
@@ -801,6 +894,52 @@ print(i)
         local index = view:get_controller():get_photo_index()  -
                                                   #view.on_screen_list + 2
         print("preload back",index)
+        --local callback = function(url)
+            local image = Image{
+                name      = "slide",
+				src       = sources[model.fp_1D_index]:get_photos_at(
+								index,false),
+                async     = true, 
+                on_loaded = function(img,failed)
+                    img.on_loaded = nil
+
+                    if failed then
+                        --loaded the placeholder for failed pics
+                        local placeholder = Group{}
+                        placeholder:add(Rectangle
+                        {
+                            name   = "backing",
+                            color  = "000000",
+                            width  = PIC_W,
+                            height = PIC_H 
+                        })
+
+                        placeholder:add(Clone
+                        {
+                            name   = "slide",
+                            source = backup,
+                            x      = 50,
+                            y      = 50
+                        })
+                        on_screen_prep[view.styles[style_i] ](placeholder,group)
+                    else
+                        --view.on_screen_list[rel_i] = Group {z = 500}
+                        timeline:stop()
+                        group:clear()
+                        on_screen_prep[view.styles[style_i] ](img,group)
+                        --if its the desk/slideshow, then need to
+                        --put it at the bottom of the stack
+                    end
+                    if group == view.on_screen_list[1] then
+                        group.opacity = 255
+                    end
+                end
+            }
+--        end
+
+        --sources[model.fp_1D_index]:get_interesting_photos(index,false,callback)
+
+--[[
         local request = URLRequest
         {
             url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
@@ -850,12 +989,12 @@ print(i)
                                     x      = 50,
                                     y      = 50
                                 })
-                                on_screen_prep[view.styles[style_i]](placeholder,group)
+                                on_screen_prep[view.styles[style_i] ](placeholder,group)
                             else
                                 --view.on_screen_list[rel_i] = Group {z = 500}
                                 timeline:stop()
                                 group:clear()
-                                on_screen_prep[view.styles[style_i]](img,group)
+                                on_screen_prep[view.styles[style_i] ](img,group)
                                 --if its the desk/slideshow, then need to
                                 --put it at the bottom of the stack
                             end
@@ -884,7 +1023,7 @@ print(i)
                         x      = 100,
                         y      = 100
                     })
-                    on_screen_prep[view.styles[style_i2]](placeholder,group)
+                    on_screen_prep[view.styles[style_i2] ](placeholder,group)
                     if group == view.on_screen_list[1] then
                         group.opacity = 255
                     end
@@ -892,6 +1031,7 @@ print(i)
             end
         }
         request:send()
+--]]
     end
     function view:toggle_timer()    
         if view.timer_is_running then

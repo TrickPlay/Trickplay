@@ -206,7 +206,7 @@ FrontPageView = Class(View, function(view, model, ...)
             new_x = 10
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 0}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
-        elseif model.front_page_index == math.ceil(#adapters / 
+        elseif model.front_page_index == math.ceil(#sources / 
                      NUM_ROWS) - (NUM_VIS_COLS-1)               then
             new_x = -1*(model.front_page_index-1) * PIC_W + 
                        (screen.width - NUM_VIS_COLS*PIC_W) - 10
@@ -290,13 +290,15 @@ FrontPageView = Class(View, function(view, model, ...)
             view.bottom_bar.scale   = {1.1,1}
 --				print (#adapters - model.fp_1D_index + 1,adapters[#adapters - model.fp_1D_index + 1].hasImages)
 --				debug()
+--[[
 				if (adapters[#adapters - model.fp_1D_index + 1].hasImages) then
 	         album_title.text = string.gsub((adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query),"%%20"," ")
 	         else
 	         	album_title.text = "NO IMAGES"
 	         end
-            album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 
+            album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
+--]]
 
             view.backdrop.opacity = 0
             view.backdrop:raise_to_top()
@@ -329,13 +331,14 @@ function view.timer:on_timer()
                 }
 
                 local formula = (rand_i[2]-1)*NUM_ROWS + (rand_i[1])
-					
-                if adapters[#adapters+1-formula]~=nil then
+		if sources[formula] ~= nil then			
+                --if adapters[#adapters+1-formula]~=nil then
                    	
                     print("\tcalling")
                     model.swapping_cover = true
 
                     --print("formula?",rand_i[1],rand_i[2],formula)
+--[[
                      adapters[#adapters+1-formula]:loadCovers(
 
                                 model.fp_slots[rand_i[1] ][rand_i[2] ], 
@@ -343,13 +346,15 @@ function view.timer:on_timer()
                                 math.random(1,10),
 				#adapters+1-formula
                      )
+--]]
+                    LoadImg(sources[formula]:get_photos_at(math.random(10),true),model.fp_slots[rand_i[1] ][rand_i[2] ])
                 else
                     print("not calling")
                 end
             end
 
 end
-
+--[=[
 function view:Delete_Cover(index)
     model.swapping_cover = false
     print("Delete_Cover( "..index.." )")
@@ -525,9 +530,9 @@ function view:Delete_Cover(index)
     del_timeline:start()
     --end
 end
-
+--]=]
 end)
-
+--[=[
 function Add_Cover()
     model.swapping_cover = false
 
@@ -632,4 +637,4 @@ searches[#adapters]                       ,
     end
     add_timeline:start()
 end
-
+--]=]

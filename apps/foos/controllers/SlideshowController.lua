@@ -7,7 +7,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
     function self:set_photo_index(i)  photo_index = i     end
     function self:get_photo_index()   return photo_index  end
 
-    local style_index = 2
+    local style_index = 1
     function self:reset_style_index() style_index = 1     end
     function self:set_style_index(i)  style_index = i     end
     function self:get_style_index()   return style_index  end
@@ -20,9 +20,11 @@ SlideshowController = Class(Controller, function(self, view, ...)
 
     function self:Prep_Slideshow()
         photo_index = 0
+--[[
         view.queryText.text = string.gsub(
             adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,"%%20"," ")
         view.logo.src  = adapters[#adapters - model.fp_1D_index + 1].logoUrl
+--]]
         view.nav_group:add(view.logo)
         view.set_ui[ view.styles[style_index] ]()
 

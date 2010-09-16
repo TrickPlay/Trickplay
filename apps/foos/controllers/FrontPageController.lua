@@ -11,6 +11,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
         [keys.Down]  = function(self) self:move_selector(Directions.DOWN)  end,
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT)  end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+--[[
         [keys.a]     = function(self)
             self:get_model():set_active_component(Components.SOURCE_MANAGER)
             self:get_model():notify()
@@ -34,9 +35,11 @@ FrontPageController = Class(Controller, function(self, view, ...)
             print (slideshow_styles[style])
             reset_keys()            
         end,
+--]]
         [keys.Return] = function(self) 
-            	
-            if adapters[model.fp_1D_index] ~= nil then
+            
+            if sources[model.fp_1D_index] ~= nil then	
+            --if adapters[model.fp_1D_index] ~= nil then
                 view.timer:stop()
                 model:set_active_component(
                                 Components.SLIDE_SHOW)
@@ -83,8 +86,10 @@ FrontPageController = Class(Controller, function(self, view, ...)
         --if trying to rotate the screen-carousel
         elseif dir == Directions.RIGHT or dir == Directions.LEFT then
             local next_index = model.front_page_index + dir[1]
-            local upper_bound = math.ceil(#adapters / NUM_ROWS) -
+            local upper_bound = math.ceil(#sources / NUM_ROWS) -
                                      (NUM_VIS_COLS-1)
+--            local upper_bound = math.ceil(#adapters / NUM_ROWS) -
+--                                     (NUM_VIS_COLS-1)
 
             --if the rotation is valid
             if next_index > 0 and next_index <= upper_bound and

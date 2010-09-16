@@ -54,12 +54,14 @@ Model = Class(function(model, ...)
 
 	model.source_list= {}
     --Source Manager
+--[[
     for i=1, #adapterTypes do
             print(adapterTypesTable[i])
             print(adapterTypesTable[i][1].required_inputs.format)
 	    model.source_list[i] = {adapterTypesTable[i].name,   
                 adapterTypesTable[i][1].required_inputs.format}
 	 end
+--]]
 --[[    model.source_list = {  {adapters[1].name,   adapters[1][1].required_inputs.format}, {"Picasa",     "LOGIN"},
                            {"Facebook", "LOGIN"}, {adapters[2].name,   adapters[2][1].required_inputs.format},
                            {"Flickr",   "QUERY"}, {"PhotoBuket", "QUERY"}

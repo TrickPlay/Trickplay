@@ -22,7 +22,7 @@ SEL_H = PIC_H*1.1
 
 
 dofile("Class.lua") -- Must be declared before any class definitions.
-dofile("adapter/Adapter.lua")
+dofile("adapters.lua")--/Adapter.lua")
 
 dofile("MVC.lua")
 dofile("FocusableImage.lua")
@@ -32,10 +32,10 @@ dofile("controllers/FrontPageController.lua")
 
 dofile("views/SlideshowView.lua")
 dofile("controllers/SlideshowController.lua")
-
+--[[
 dofile("views/SourceManagerView.lua")
 dofile("controllers/SourceManagerController.lua")
-
+--]]
 dofile("Load.lua")
 
 Components = {
@@ -54,10 +54,10 @@ front_page_view:initialize()
 
 local slide_show_view = SlideshowView(model)
 slide_show_view:initialize()
-
+--[[
 local source_manager_view = SourceManagerView(model)
 source_manager_view:initialize()
-
+--]]
 --cache all of the current searches
 function app:on_closing()
 	settings.searches = searches
