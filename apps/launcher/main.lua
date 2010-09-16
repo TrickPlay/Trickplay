@@ -684,3 +684,19 @@ end
 main()
 
 
+--[[
+screen:add( Rectangle{ color = "0000FF" , size = screen.size } )
+
+local assets = dofile( "assets-cache" )
+
+local f = dofile( "ui-factory" )
+
+--t = f.make_featured_app_tile( assets , "True Blood Comics" , "http://store.trickplay.com/v1/com.trickplay.fake.trueblood/featured.png" )
+
+t = f.make_shop_floor_tile( assets , "http://store.trickplay.com/v1/com.trickplay.fake.trueblood/icon.jpg" )
+
+screen:add( t:set{ position = { 200 , 200 } } )
+
+
+screen:show()
+]]

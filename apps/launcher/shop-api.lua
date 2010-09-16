@@ -2,7 +2,7 @@
 local api = { private = { } }
 
 --local base_url = "http://ec2-184-72-169-182.compute-1.amazonaws.com:8080/trickplay-0.1/"
-local base_url = "http://localhost:8080/trickplay/"
+local base_url = "http://quinnipiac.local:8080/trickplay/"
 
 local function assert_table( v ) assert( type( v ) == "table" ) end
 local function assert_string( v ) assert( type( v ) == "string" ) end
