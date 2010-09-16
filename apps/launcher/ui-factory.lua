@@ -330,6 +330,134 @@ function factory.make_app_tile( assets , caption , app_id )
 end
 
 -------------------------------------------------------------------------------
+-- Makes a featured app tile
+-------------------------------------------------------------------------------
+
+function factory.make_featured_app_tile( assets , caption , icon_url )
+
+    local STYLE                 = { font = "DejaVu Sans 34px" , color = "FFFFFF" }
+    local FRAME_X_OFFSET        = 15
+    local FRAME_Y_OFFSET        = 23
+    local FRAME_X_PADDING       = 7
+    local FRAME_Y_PADDING       = 12
+    local LABEL_COLOR           = "000000CC"
+    local LABEL_HEIGHT          = 67
+    local LABEL_BORDER_WIDTH    = 2
+    local LABEL_BORDER_COLOR    = "CCCCCCAA"
+    local TEXT_TOP_OFFSET       = 10
+    local TEXT_LEFT_OFFSET      = 30
+    local LABEL_BOTTOM_OFFSET   = -( LABEL_HEIGHT - 2 ) 
+    
+    local text = Text{ text = caption }:set( STYLE )
+
+    local frame = assets( "assets/featured-app-overlay-frame.png" )
+    
+    local focus = assets( "assets/featured-app-focus.png" )
+    
+    local label = Rectangle
+    {
+        color = LABEL_COLOR ,
+        size = { frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT },
+        border_width = LABEL_BORDER_WIDTH,
+        border_color = LABEL_BORDER_COLOR
+    }
+    
+    local icon = Image
+    {
+        src = icon_url ,
+        async = true,
+    }
+    
+    local group = Group
+    {
+        children =
+        {
+            focus:set{ opacity = 0 },
+            
+            icon:set
+            {
+                x = FRAME_X_OFFSET + FRAME_X_PADDING,
+                y = FRAME_Y_OFFSET
+            },
+            
+            label:set
+            {
+                x = FRAME_X_OFFSET + FRAME_X_PADDING,
+                y = FRAME_Y_OFFSET + frame.h + LABEL_BOTTOM_OFFSET - FRAME_Y_PADDING
+            },
+            
+            frame:set
+            {
+                position = { FRAME_X_OFFSET , FRAME_Y_OFFSET }
+            },
+            
+            text:set
+            {
+                position = { frame.x + TEXT_LEFT_OFFSET , label.y + TEXT_TOP_OFFSET }
+            }
+        }
+    }
+
+    function group.extra.on_focus_in()
+        focus.opacity = 255
+    end
+    
+    function group.extra.on_focus_out()
+        focus.opacity = 0
+    end
+    
+    return group
+    
+end
+
+-------------------------------------------------------------------------------
+-- Makes a tile for the floor of the main app shop screen
+-------------------------------------------------------------------------------
+
+function factory.make_shop_floor_tile( assets , icon_url )
+
+    local FRAME_X_PADDING = 4
+    local FRAME_Y_PADDING = 0
+    local FRAME_BOTTOM    = 2
+    local FRAME_BORDER_W  = 10
+    local ICON_WIDTH      = 480
+    local ICON_HEIGHT     = 270
+
+    local frame = assets( "assets/icon-overlay-white-no-label.png" )
+    
+    local icon = Image{ src = icon_url , async = true , size = { ICON_WIDTH , ICON_HEIGHT } }
+    
+    local scale = ( frame.w - ( FRAME_X_PADDING * 2 ) - ( FRAME_BORDER_W * 2 ) ) / 480
+    
+    local group = Group
+    {
+        size = frame.size ,
+        
+        children =
+        {
+            icon:set
+            {
+                anchor_point = { ICON_WIDTH / 2 , ICON_HEIGHT / 2 },
+                x = frame.center[ 1 ],
+                y = frame.center[ 2 ] - FRAME_BOTTOM,
+                scale = { scale , scale }
+            },
+            
+            frame
+        }
+    }
+
+    function group.extra.on_focus_in()
+    end
+    
+    function group.extra.on_focus_out()
+    end
+    
+    return group
+
+end
+
+
 
 return factory
 
