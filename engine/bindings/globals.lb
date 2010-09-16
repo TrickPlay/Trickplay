@@ -376,10 +376,10 @@ globals
 	        contents - The contents to write  
 	        overwrite - The boolean values which determine whether 
 			    the contents will be overwritten into the file 
-			    default is false 
+			    default is true 
     */
 
-     writefile(string file_name, string contents, bool overwrite=false)
+     writefile(string file_name, string contents, bool overwrite=true)
          [[
 	     bool is_uri=false;
              char * path=App::get(L)->normalize_path(file_name,&is_uri);
