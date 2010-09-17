@@ -17,23 +17,25 @@ function loading(group)
     {
         name   = "backing",
         color  = "000000",
-        width  = PIC_W,
-        height = PIC_H 
+        width  = screen.h,
+        height = screen.h 
     })
     local loading_dots = 
     {
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}},
-        Clone{source = model.loading_dot, anchor_point= {PIC_W/-2,PIC_H/-2}}
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
+        Clone{source = model.loading_dot, anchor_point= {screen.h/-2,screen.h/-2}},
     }
 
     for i=1,#loading_dots do
