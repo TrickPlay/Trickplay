@@ -79,15 +79,41 @@ Flickr_User = Class(nil,function(adapter, slot_ref, info, ...)
 	end
 end)
 --]]
+	local api_key = "e68b53548e8e6a71565a1385dc99429f"
+
+local licenses = {}
+	    local license_info_url = 
+			"http://api.flickr.com/services/rest/?"..
+			"method=flickr.photos.licenses.getInfo"..
+			"&format=json&nojsoncallback=1"
+		local extract_short_license = function(url)
+			local result
+			_, _, result = string.find(url, "http:\/\/creativecommons.org\/licenses\/([%a%-]+)\/")
+			if(nil == result) then
+				result = "free"
+			end
+			return result
+		end
+	
+		local data = json:parse( URLRequest( license_info_url.."&api_key="..api_key):perform().body )
+		for i, license in ipairs( data.licenses.license ) do
+		licenses[license.id] =	
+		{
+			name  = license.name,
+			url   = license.url,
+			short = extract_short_license(license.url),
+		}
+		end
 
 Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
-	local api_key = "e68b53548e8e6a71565a1385dc99429f"
 	local slot = slot_ref
 	local search = string.gsub(search_term,"%%20"," ")
-    local interesting_photos = nil
+    local page_num = 1
+	adapter.photo_list = {}
 
 
-	function adapter:get_interesting_photos()--i,thumb,callback)
+	function adapter:get_interesting_photos(i)--i,thumb,callback)
+print("requesting")
 		local base_url = 
 				"http://api.flickr.com/services/rest/?"..
 				"method=flickr.photos.search"..
@@ -98,21 +124,32 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 				"&media=photos"..
 				"&extras=license%2Cowner_name%2Curl_t%2Curl_m%2Curl_o"..
 				"&format=json&nojsoncallback=1"
+		local page = page_num
+		if i ~= nil then
+			page = i
+		end
 		local request  = URLRequest
 		{
-			url = base_url.."&per_page=200&page=1&api_key="..api_key..
-					"&tag="..search,
+			url = base_url.."&per_page=50&page="..page..
+					"&api_key="..api_key..
+					"&text="..search,
 			on_complete =
 			function( request , response )
-
-				interesting_photos = json:parse( response.body )
+print("response!")
+				local data = json:parse( response.body )
 ---[[
-				if(0 == #(interesting_photos.photos.photo)) then
+				if(0 == #(data.photos.photo)) and page_num <= 5 then
+					page_num = page_num+1
 					-- Bug in flickr API sometimes returns no results: RESEND
 					print("FLICKR BUG!!  RESEND: ",request.url)
 					request:send()
 					return
 				end
+
+				for i , photo in ipairs( data.photos.photo ) do
+					adapter.photo_list[(page-1)*50 +i]= photo
+				end
+
 				LoadImg(adapter:get_photos_at(math.random(5),true),slot)
 --]]
 --[[
@@ -130,14 +167,46 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 
 	end
 	function adapter:get_photos_at(i,thumb)
-i=i+1
-print(i)
-		if interesting_photos == nil then
+		i=i+1
+	--	print(i)
+--[[
+		if i < (page_num-1)*50 then
+			return nil
+		end
+--]]
+		if  adapter.photo_list[i] == nil then
+			self:get_interesting_photos(math.ceil(i/50))
+
 			return ""
-		elseif thumb then
-			return interesting_photos.photos.photo[i].url_m
+        end
+		if i > #adapter.photo_list -30 then
+			page_num = page_num + 1
+			self:get_interesting_photos()
+		end
+		if thumb then
+			return adapter.photo_list[i].url_m, Text
+				{
+					position = { 10, 0 },
+					text = "\""..adapter.photo_list[i].title..
+						"\" ©"..adapter.photo_list[i].ownername..
+						" ("..licenses[adapter.photo_list[i].
+							license].short..")",
+					color = { 255, 255, 255 },
+					font = "Graublau Web,DejaVu Sans,Sans 18px",
+					wrap = false,
+				}
 		else
-			return interesting_photos.photos.photo[i].url_m
+			return adapter.photo_list[i].url_m, Text
+				{
+					position = { 10, 0 },
+					text = "\""..adapter.photo_list[i].title..
+						"\" ©"..adapter.photo_list[i].ownername..
+						" ("..licenses[adapter.photo_list[i].
+							license].short..")",
+					color = { 255, 255, 255 },
+					font = "Graublau Web,DejaVu Sans,Sans 18px",
+					wrap = false,
+				}
 		end
 	end
 end)

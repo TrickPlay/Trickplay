@@ -77,9 +77,11 @@ SlideshowController = Class(Controller, function(self, view, ...)
             self:get_model():notify()
 
         end,
+--[[
         --DELETE THIS ALBUM & GO BACK TO THE FRONT PAGE
         function()
         end,
+--]]
         --TOGGLE THE SLIDESHOW & CLOSE THE NAV MENU
         function()
             view:toggle_timer()
@@ -92,6 +94,9 @@ SlideshowController = Class(Controller, function(self, view, ...)
             print(style_index)
             view.set_ui[ view.styles[style_index] ]()
             reset_keys()  
+            menu_is_visible = false
+            view:nav_out_focus()
+
         end,
 
     }

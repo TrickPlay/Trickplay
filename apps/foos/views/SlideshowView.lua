@@ -22,15 +22,15 @@ SlideshowView = Class(View, function(view, model, ...)
 
     --NAV MENU
     view.nav_group = Group    { position = {1500, 300}, opacity = 0 }
-    local nav_back  = Rectangle{ w = 300,  h = 480,  color = "FFFFFF"}
+    local nav_back  = Rectangle{ w = 300,  h = 400,  color = "FFFFFF"}
     view.nav_group:add(nav_back)
     view.nav_items =
     {
         Text{text = "Close Menu",              y = 160, font="Sans 36px"},
         Text{text = "Back to Albums",          y = 220, font="Sans 36px"},
-        Text{text = "Hide this Album",         y = 280, font="Sans 36px"},
-        Text{text = "Play Slideshow",          y = 340, font="Sans 36px"},
-        Text{text = "Change Slide Show Style", y = 400, font="Sans 36px"},
+        --Text{text = "Hide this Album",         y = 280, font="Sans 36px"},
+        Text{text = "Play Slideshow",          y = 280, font="Sans 36px"},
+        Text{text = "Change Slide Show Style", y = 340, font="Sans 36px"},
     }
     view.nav_group:add(unpack(view.nav_items))
     view.logo = Image
@@ -69,10 +69,53 @@ SlideshowView = Class(View, function(view, model, ...)
     view.on_screen_list  = {}
     view.off_screen_list = {}
 
-    view.styles = {"REGULAR","LAYERED"}--,"FULLSCREEN",}
+    view.styles = {"REGULAR","LAYERED","MOSAIC"}--,"FULLSCREEN",}
     local off_screen_prep = 
     {
         ["REGULAR"]    = function(img,group)
+			group:add( Rectangle{
+						name = "backing",
+                        size = {
+                            img.w,
+                            img.h
+                        },
+                        color        = { 0,  0, 0, 255 },
+                        opacity = 255
+                })
+			group:add(img)
+			group:add( Rectangle{
+						name = "overlay",
+                        size = {
+                            group.size[1] + 12,
+                            group.size[2] + 12 -- 12 = border_width * 2
+                        },
+                        color        = { 0,  0, 0, 0 },
+                        border_color = { 255, 255, 255,255 },
+
+						position = {-6,-6},
+                        border_width=6,
+                        opacity = 255
+                })
+
+--			print("off1",group.w,group.h)
+			if group.w/group.h > screen.w/screen.h then
+				group.scale = {(screen.w*.9)/group.w,(screen.w*.9)/group.w}
+			else
+				group.scale = {(screen.h*.9)/group.h,(screen.h*.9)/group.h}
+			end
+--			print("off2",group.w,group.h,group.size[1],group.size[2])
+			group.z_rotation   = { math.random(-10,10), 
+									group.size[1]/2,
+									group.size[2]/2}
+
+			group.anchor_point = {	group.size[1]/2,
+									group.size[2]/2}
+
+			group.position = {	screen.w/2+math.random(-5,5),
+								screen.h/2+math.random(-5,5)}
+
+
+--[[
                 local overlay = Clone 
                 {
                     name   = "overlay",
@@ -123,7 +166,7 @@ SlideshowView = Class(View, function(view, model, ...)
                 }
 				group:add(backing)
 				backing:lower_to_bottom()
-
+--]]
         end,
         ["FULLSCREEN"] = function(img,group)
                 group.opacity = 0
@@ -306,11 +349,187 @@ SlideshowView = Class(View, function(view, model, ...)
                             "x" .. this_group.transformed_size[2])
 --]]
                 end
-        end
+        end,
+		["MOSAIC"]    = function(img,group)
+				img.scale = {1,1}
+				group.scale = {1,1}
+				group.size = {0,0}
+				group.opacity = 0
+group:clear()
+group.z = 0
+img.z = 0
+				if img.w/img.h > screen.w/screen.h then
+					img.size = {screen.w,img.h*(screen.w)/img.w}
+				else
+					img.size = {(screen.h)/img.h*img.w,screen.h}
+				end
+				img.opacity = 0
+                img.anchor_point = {img.size[1]/2,img.size[2]/2}
+                img.position = {screen.w/2,screen.h/2}
+				group:add(img)
+				local num_rows    = 5
+				local num_cols    = 10
+				local tile_width  = 181
+				local tile_height = 206
+
+				local vert_gutter   = 12
+				local horz_gutter   = 12
+				local vert_left_gap = 1
+				local horz_top_gap  = 1
+
+				for i = 1,num_rows do
+					for j = 1, num_cols do
+--[[
+	                    local this_group = Group
+    	                {
+        	                name = "Clone "..i,
+            	            clip = 
+                	        {
+                    	        0,
+                        	    0,
+                            	tile_width,
+	                            tile_height
+    	                    },
+	                        position = 
+    	                    {
+        	                    (j-1)*(tile_width+vert_gutter)+vert_left_gap,
+            	                (i-1)*(tile_height+horz_gutter)+horz_top_gap
+                	        },
+                        	opacity    = 0,
+	                    }
+--]]
+						local xx = (j-1)*(tile_width+vert_gutter)+
+							vert_left_gap -- (img.x - img.anchor_point[1])
+						local yy = (i-1)*(tile_height+horz_gutter)+
+							horz_top_gap -- (img.y - img.anchor_point[2])
+						local clone = Clone{
+                            name   = "clone "..i..","..j,
+                            source = img,
+                            opacity = 255,
+                            clip = 
+                            {
+                                xx-(img.x - img.anchor_point[1]),
+            	                yy-(img.y - img.anchor_point[2]),
+                                tile_width,
+                                tile_height
+                            },
+							position = 
+							{
+							--	(j-1)*(tile_width+vert_gutter)+
+							--vert_left_gap,
+							--	(i-1)*(tile_height+horz_gutter)+
+							--horz_top_gap
+								(img.x - img.anchor_point[1]),
+								(img.y - img.anchor_point[2])
+							}
+                        }
+						local flash = Rectangle
+						{
+							color = "FFFFFF0F",
+							size  = {	tile_width,
+                            		    tile_height},
+							position = { 								(j-1)*(tile_width+vert_gutter)+
+							vert_left_gap,
+								(i-1)*(tile_height+horz_gutter)+
+							horz_top_gap
+}
+						}
+group:add(clone,flash)
+					end
+				end
+		end
     }
     local on_screen_prep =
     {
         ["REGULAR"]    = function(img,group)
+			off_screen_prep["REGULAR"](img,group)
+--[[
+			group:add( Rectangle{
+						name = "backing",
+                        size = {
+                            img.w,
+                            img.h
+                        },
+                        color        = { 0,  0, 0, 255 },
+                        opacity = 255
+                })
+			group:add(img)
+			group:add( Rectangle{
+						name = "overlay",
+                        size = {
+                            group.size[1] + 12,
+                            group.size[2] + 12 -- 12 = border_width * 2
+                        },
+                        color        = { 255,  0, 0, 0 },
+                        border_color = { 255, 255, 255,255 },
+
+						position = {-6,-6},
+                        border_width=6,
+                        opacity = 255
+                })
+
+--			print("off1",group.w,group.h)
+			if group.w/group.h > screen.w/screen.h then
+				group.scale = {(screen.w*.9)/group.w,(screen.w*.9)/group.w}
+			else
+				group.scale = {(screen.h*.9)/group.h,(screen.h*.9)/group.h}
+			end
+--			print("off2",group.w,group.h,group.size[1],group.size[2])
+			group.z_rotation   = { math.random(-10,10), 
+									group.size[1]/2,
+									group.size[2]/2}
+
+			group.anchor_point = {	group.size[1]/2,
+									group.size[2]/2}
+
+			group.position = {	screen.w/2+math.random(-5,5),
+								screen.h/2+math.random(-5,5)}
+
+--]]
+--[[
+				local rotation = math.random(-10,10)
+				--target position is {screen.w - 100, screen.h - 100}
+				--match the dim which has a greater dist to cover
+print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
+				if img.w/img.h > screen.w/screen.h then
+					img.scale = {(screen.w*.9)/img.w,(screen.w*.9)/img.w}
+				else
+					img.scale = {(screen.h*.9)/img.h,(screen.h*.9)/img.h}
+				end
+				img.anchor_point = {img.size[1]*img.scale[1]/2, img.size[2]*img.scale[2]/2}
+				img.position = {img.size[1]*img.scale[1]/2, img.size[2]*img.scale[2]/2}
+print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
+                local bounding_box = Rectangle{
+						name = "overlay",
+                        size = {
+                            screen.w*.9 + 12,
+                            screen.h*.9 + 12 -- 12 = border_width * 2
+                        },
+						anchor_point = {(screen.w*.9 + 12)/2,(screen.h*.9 + 12)/2},
+                        border_color = { 255, 255, 255 },
+                        color        = { 255,  0, 0, 0 },
+						position = {screen.w/2,screen.h/2},
+                        border_width=6,
+                        opacity = 255
+                }
+				group.size = {screen.w*.9,screen.h*.9}
+				--group.z_rotation = {rotation,group.w/2,group.h/2}
+				group.anchor_point = {group.w/2,group.h/2}
+                group.position = {screen.w/2,screen.h/2}
+                local backing = Rectangle
+                {
+						--position = {screen.w/2,screen.h/2},
+						anchor_point = {img.size[1]/2,img.size[2]/2},
+                        size = {
+                            img.size[1],
+                            img.size[2]
+                        },
+                        color        = { 0,  0, 0, 255 },
+                        opacity = 255
+                }
+				group:add(backing,img,bounding_box)
+--]]
+--[[
                 local overlay = Clone 
                 {
                     name   = "overlay",
@@ -360,7 +579,7 @@ SlideshowView = Class(View, function(view, model, ...)
                 }
 				group:add(backing)
 				backing:lower_to_bottom()
-
+--]]
         end,
         ["FULLSCREEN"] = function(img,group)
                 group.opacity = 0
@@ -387,6 +606,9 @@ SlideshowView = Class(View, function(view, model, ...)
                    local child = group:find_child("Clone "..i)
                    child.opacity = 255
                end
+        end,
+		["MOSAIC"]    = function(img,group)
+            off_screen_prep["MOSAIC"](img,group)
         end
     }
 
@@ -429,12 +651,13 @@ SlideshowView = Class(View, function(view, model, ...)
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
-                if i == 1 then
-                    on_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
-                else
                     local pic = view.on_screen_list[i]:find_child("slide")
                     local backing =view.on_screen_list[i]:find_child("loading")
                     view.on_screen_list[i]:clear()
+                if i == 1 then
+                    on_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
+                else
+
                     if pic ~= nil then
                         off_screen_prep["FULLSCREEN"](pic,view.on_screen_list[i])
                     elseif backing ~= nil then
@@ -490,7 +713,6 @@ SlideshowView = Class(View, function(view, model, ...)
                 if pic ~= nil then
                     off_screen_prep["LAYERED"](pic,view.off_screen_list[i])
                 elseif backing ~= nil then
-                    view.off_screen_list[i]:clear()
                     off_screen_prep["LAYERED"](backing,view.off_screen_list[i])
                 else
                     error("should not have got here")
@@ -499,18 +721,87 @@ SlideshowView = Class(View, function(view, model, ...)
             end
 
 
-        end
-    }
+        end,
+        ["MOSAIC"] = function()
+            background.opacity  = 0
+            background2.opacity = 0
+            --view.logo.opacity   = 0
 
+            for i = 1,#view.on_screen_list do
+                local pic = view.on_screen_list[i]:find_child("slide")
+                local backing =view.on_screen_list[i]:find_child("loading")
+                view.on_screen_list[i]:clear()
+
+                view.on_screen_list[i].z_rotation = {0,0,0}
+                view.on_screen_list[i].scale = {1,1}
+                view.on_screen_list[i].position = {0,0}
+                view.on_screen_list[i].z = 0				
+				
+
+                pic.z_rotation = {0,0,0}
+                pic.scale = {1,1}
+                pic.position = {0,0}
+				pic.z = 0
+
+                if i == 1 then
+                    on_screen_prep["MOSAIC"](pic,view.on_screen_list[i])
+                else
+                    if pic ~= nil then
+                        off_screen_prep["MOSAIC"](pic,view.on_screen_list[i])
+                    elseif backing ~= nil then
+                        off_screen_prep["MOSAIC"](backing,view.on_screen_list[i])
+                    else
+                       -- error("should not have got here")
+                    end
+                end
+            end
+            if view.on_screen_list[1] ~= nil then
+                view.on_screen_list[1].opacity = 255
+            end
+            for i = 1,#view.off_screen_list do
+                local pic = view.off_screen_list[i]:find_child("slide")
+                local backing =view.off_screen_list[i]:find_child("loading")
+                view.off_screen_list[i]:clear()
+
+                view.off_screen_list[i].z_rotation = {0,0,0}
+                view.off_screen_list[i].scale = {1,1}
+                view.off_screen_list[i].position = {0,0}
+                view.off_screen_list[i].z = 0				
+
+                pic.z_rotation = {0,0,0}
+                pic.scale = {1,1}
+                pic.position = {0,0}
+				pic.z = 0
+
+                if pic ~= nil then
+                    off_screen_prep["MOSAIC"](pic,view.off_screen_list[i])
+                elseif backing ~= nil then
+                    view.off_screen_list[i]:clear()
+                    off_screen_prep["MOSAIC"](backing,view.off_screen_list[i])
+                else
+                   -- error("should not have got here")
+
+                end
+            end
+        end
+
+
+    }
+    local layered_timeline = nil
     local forward_animation =
     {
         ["REGULAR"]    = function(pic)
+            local end_pos = {pic.position[1],
+                             pic.position[2]}
+            pic.x = math.random(0,1)*1920
+            pic.y = math.random(0,1)*1080
+            pic.z = 400
             pic:animate 
             {
                 duration = 400,
-                mode     = EASE_IN_EXPO,
-                x        = screen.w/4,
-                y        = screen.h/6,
+                --mode     = EASE_IN_EXPO,
+                x        = end_pos[1],
+                y        = end_pos[2],
                 z        = 0,
                 on_completed = function()
                     reset_keys()            
@@ -539,8 +830,10 @@ SlideshowView = Class(View, function(view, model, ...)
             end
         end,
         ["LAYERED"]    = function(pic)
-
-                local layered_timeline = Timeline
+                if layered_timeline ~= nil then
+                    layered_timeline:on_completed()--advance_to_marker("end")
+                end
+                layered_timeline = Timeline
                 {
                     name      = "Backward Layered Timeline",
                     duration  = 13*300,
@@ -563,6 +856,7 @@ SlideshowView = Class(View, function(view, model, ...)
                         child.opacity  = 255
                     end
                 end
+                layered_timeline:add_marker("end",layered_timeline.duration)
                 function layered_timeline.on_new_frame(t,msecs)
                     local index    =  math.ceil(msecs/300)
                     local progress = (msecs - 300*(index-1))/300
@@ -580,7 +874,10 @@ SlideshowView = Class(View, function(view, model, ...)
                     child.y = pic.h/2 + progress*(
                                  drop_points[index][2] - pic.h/2)
                     child.scale = {2-progress,2-progress}
-                    child.z     = (1-progress)*500                    
+                    child.z     = (1-progress)*500             
+                    if msecs > 200 then
+                        reset_keys()
+                    end       
                 end
                 function layered_timeline.on_completed()
                     for i = 1, 13 do
@@ -590,25 +887,53 @@ SlideshowView = Class(View, function(view, model, ...)
                         child.scale    = {1,1}
                         child.z        = 0
                     end
-                    reset_keys()
+					layered_timeline:pause()
+
+                    layered_timeline = nil
+                    --reset_keys()
                 end
                 layered_timeline:start()
+        end,
+        ["MOSAIC"] = function(pic)
+            pic.opacity = 0
+			  
+            pic:animate 
+            {
+                duration = 300,
+                mode     = EASE_IN_EXPO,
+                opacity  = 255,
+                on_completed = function()
+                    reset_keys()
+                end
+            }
+            if view.on_screen_list[2] ~= nil  then
+                view.on_screen_list[2]:animate
+                {
+                    duration = 200,
+                    opacity  = 0,
+                    mode     = EASE_IN_EXPO
+                }
+            end
         end
+
     }
 
     local backward_animation =
     {
         ["REGULAR"]    = function(pic)
+            local end_pos = {pic.position[1],
+                             pic.position[2]}
             pic:animate 
             {
                 duration = 400,
-                mode     = EASE_IN_EXPO,
+                --mode     = EASE_IN_EXPO,
                 x        = math.random(0,1)*1920,
                 y        = math.random(0,1)*1080,
                 z        = 500,
                 --garbage collection
                 on_completed = function()
-                    --z = 500
+                    pic.x = end_pos[1]
+                    pic.y = end_pos[2]
                     view.ui:remove(pic)
                     reset_keys()            
 
@@ -653,15 +978,22 @@ SlideshowView = Class(View, function(view, model, ...)
             }
         end,
         ["LAYERED"]    = function(pic)
-                local layered_timeline = Timeline
+                reset_keys()
+                if layered_timeline ~= nil then
+                    layered_timeline:on_completed()--advance_to_marker("end")
+                end
+                layered_timeline = Timeline
                 {
                     name      = "Forward Layered Timeline",
                     duration  = 13*300,
                     loop      = false,
                     direction = "FORWARD"
                 }
+
                 local drop_points = {}
                 pic.z = 0
+                layered_timeline:add_marker("end",layered_timeline.duration)
+
                 function layered_timeline.on_started()
                     for i = 1, 13 do
                         local child = pic:find_child("Clone "..i)
@@ -704,10 +1036,43 @@ print(i)
                         child.scale    = { 2 , 2 }
                         child.z        = 500
                     end
-                    reset_keys()
+					layered_timeline:pause()
+                    layered_timeline = nil
+                    --reset_keys()
                 end
                 layered_timeline:start()
+        end,
+        ["MOSAIC"] = function(pic)
+            pic:animate 
+            {
+                duration = 200,
+                mode     = EASE_IN_EXPO,
+                opacity  = 0,
+                --garbage collection
+                on_completed = function()
+                    z = 500
+                    view.ui:remove(pic)
+--[[ handled in a different function
+
+                    if #off_screen_list > 6 then
+                        print("removing from off_screen list")
+                        off_screen_list[#off_screen_list] = nil
+                    end
+--]]
+                end
+            }
+            view.ui:add(view.on_screen_list[1])
+            view.on_screen_list[1]:animate 
+            {
+                duration = 300,
+                opacity = 255,
+                mode = EASE_IN_EXPO,
+                on_completed = function()
+                    reset_keys()            
+                end
+            }
         end
+
     }
 
     function view:initialize()
@@ -737,10 +1102,37 @@ print(i)
                 model.fp_1D_index + 1][1].required_inputs.query)
 --]]
         --local callback = function(url)
+        local attempt = 1
+        local function load_pic(timeline,group,attempt)
+            attempt = attempt + 1
+	        local photo_i    = view:get_controller():get_photo_index()
+
+			local pic     
+			local license 
+			pic, license = sources[model.fp_1D_index]:get_photos_at(
+								index,false)
+			if pic == nil or attempt == 5 or index < photo_i - 5 then
+				
+				return
+			end
+            if pic == "" then
+                if group ~= nil then
+                    local timeout = Timer{ interval = 4 }
+
+                    function timeout:on_timer()
+			    --	print("trying again",index, pic)
+
+                        timeout:stop()
+                        load_pic(timeline,group,attempt)
+                    end
+
+                    timeout:start()
+                end
+                return
+            end
             local image = Image{
                 name      = "slide",
-                src       = sources[model.fp_1D_index]:get_photos_at(
-								index,false),
+                src       = pic,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
@@ -773,13 +1165,15 @@ print(i)
                         timeline:stop()
                         group:clear()
                         on_screen_prep[view.styles[style_i2] ](img,group)
-
+                        group:add(license)
                     end
                     if group == view.on_screen_list[1] then
                         group.opacity = 255
                     end
                 end
             }
+        end
+        load_pic(timeline,group,attempt)
         --end
         --sources[model.fp_1D_index]:get_interesting_photos(index,false,callback)
 --[[
@@ -894,11 +1288,28 @@ print(i)
         local index = view:get_controller():get_photo_index()  -
                                                   #view.on_screen_list + 2
         print("preload back",index)
+        local function load_pic(timeline,group)
+
         --local callback = function(url)
+			local pic     
+			local license 
+			pic, license = sources[model.fp_1D_index]:get_photos_at(
+								index,false)
+            if pic == "" then
+                local timeout = Timer{ interval = 4 }
+
+                function timeout:on_timer()
+                    timeout:stop()
+                    load_pic(timeline,group)
+                end
+
+                timeout:start()
+                return
+            end
+
             local image = Image{
                 name      = "slide",
-				src       = sources[model.fp_1D_index]:get_photos_at(
-								index,false),
+				src       = pic,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
@@ -929,13 +1340,16 @@ print(i)
                         on_screen_prep[view.styles[style_i] ](img,group)
                         --if its the desk/slideshow, then need to
                         --put it at the bottom of the stack
+                        group:add(license)
                     end
                     if group == view.on_screen_list[1] then
                         group.opacity = 255
                     end
                 end
             }
---        end
+        end
+        load_pic(timeline,group)
+
 
         --sources[model.fp_1D_index]:get_interesting_photos(index,false,callback)
 

@@ -124,7 +124,7 @@ function LoadImg(url,slot)
     print("Load_Image(",url,")")
     --if url returned is empty, do it again
     if (url == "") then
-        error("\n\n\nNEED ASSET TO LOAD FOR A BLANK IMG URL\n\n")
+        --error("\n\n\nNEED ASSET TO LOAD FOR A BLANK IMG URL\n\n")
         --src:loadCovers(slot,search, math.random(16))
     --if the album is empty, then it is the initial load
     elseif slot ~= nil then
@@ -138,6 +138,21 @@ function LoadImg(url,slot)
                 --if everything went right
                 if not failed and img ~= nil then
                     --print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")")
+                    local placeholder = slot:find_child("placeholder")
+                    if placeholder ~= nil then
+                        placeholder:unparent()
+			local r = Rectangle
+                        {
+                            size = {
+                                PIC_W,
+                                PIC_H
+                            },
+                            color        = { 0,  0, 0, 255 },
+                            opacity = 255
+                        }
+                        slot:add(r)
+                        r:lower_to_bottom()
+                    end
                     local prev_cover = slot:find_child("cover")        
                     --add the next album cover
                     Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
