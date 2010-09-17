@@ -128,6 +128,7 @@ class BootStrap {
         save( tb_background )
         
         def app1 = new Application(name:"True Blood Comics",
+                                   appId:"com.hbo.TrueBlood",
                                     description:"View full screen art with new stories never seen before! Blood and sex mix on a hot rainy night at Merlotte's, when Sookie and her friends are trapped by a vengeful spirit who feeds on shame. Bon Temps, Louisiana has never been stranger, or more twisted, in a new story co-plotted by TRUE BLOOD series creator Alan Ball, with a script from David Tischman and Mariah Huehner, and lush art by David Messina.",
                                     supportEmail:"support@trickplay.com",
                                     license:"free for all",
@@ -170,6 +171,7 @@ class BootStrap {
          save( hulu_background );
          
          def app2 = new Application(name:"Hulu Plus",
+                                   appId:"com.hulu.HuluPlus",
                                     description:"Choose from more than 2,600 current primetime TV hits such as The Simpsons, 30 Rock, Lost, Glee and The Office the morning after they air; classics like Buffy the Vampire Slayer, The A-Team, Airwolf and Married...with Children; movies like Last of the Mohicans and Basic Instinct; documentaries like Super Size Me, and other popular TV shows and movies.",
                                     supportEmail:"support@hulu.com",
                                     license:"None",
@@ -191,13 +193,14 @@ class BootStrap {
          save( app2 );
 
          
-        def make_app = { name , icon_url ->
+        def make_app = { name , tp_id , icon_url ->
             
             def icon = new Media( imgType:"icon", mimeType:"image/jpeg", mediaUrl:new URL(icon_url));
             
             save( icon );
 
             def app = new Application(name:name,
+                                      appId:tp_id,
                                        description:"Lorem ipsum.",
                                        supportEmail:"support@trickplay.com",
                                        license:"GPL",
@@ -219,21 +222,21 @@ class BootStrap {
             save( app );
         }
         
-        make_app( "Cow Tipper" , "http://store.trickplay.com/v1/com.trickplay.fake.cowtipper/icon.jpg" );
-        make_app( "NBA" , "http://store.trickplay.com/v1/com.trickplay.fake.nba/icon.jpg" );
-        make_app( "HBO" , "http://store.trickplay.com/v1/com.trickplay.fake.hbo/icon.jpg" );
-        make_app( "Candyland" , "http://store.trickplay.com/v1/com.trickplay.fake.candyland/icon.jpg" );
-        make_app( "Poker Dawgs" , "http://store.trickplay.com/v1/com.trickplay.fake.pokerdawgs/icon.jpg" );
-        make_app( "Plants vs. Zombies" , "http://store.trickplay.com/v1/com.trickplay.fake.pvz/icon.jpg" );
-        make_app( "1945" , "http://store.trickplay.com/v1/com.trickplay.fake.1945/icon.jpg" );
-        make_app( "8 Ball Billiards HD" , "http://store.trickplay.com/v1/com.trickplay.fake.billiards/icon.jpg" );
-        make_app( "Solitaire" , "http://store.trickplay.com/v1/com.trickplay.fake.solitaire/icon.jpg" );
-        make_app( "NFL" , "http://store.trickplay.com/v1/com.trickplay.fake.nfl/icon.jpg" );
-        make_app( "American Idol" , "http://store.trickplay.com/v1/com.trickplay.fake.idol/icon.jpg" );
-        make_app( "The Game of Life" , "http://store.trickplay.com/v1/com.trickplay.fake.life/icon.jpg" );
-        make_app( "Spirals" , "http://store.trickplay.com/v1/com.trickplay.fake.spirals/icon.jpg" );
-        make_app( "Aquaria" , "http://store.trickplay.com/v1/com.trickplay.fake.aquaria/icon.jpg" );
-        make_app( "Carlsberg" , "http://store.trickplay.com/v1/com.trickplay.fake.carlsberg/icon.jpg" );
+        make_app( "Cow Tipper" , "com.trickplay.Cow",  "http://store.trickplay.com/v1/com.trickplay.fake.cowtipper/icon.jpg" );
+        make_app( "NBA" , "com.trickplay.NBA",  "http://store.trickplay.com/v1/com.trickplay.fake.nba/icon.jpg" );
+        make_app( "HBO" , "com.trickplay.HBO",  "http://store.trickplay.com/v1/com.trickplay.fake.hbo/icon.jpg" );
+        make_app( "Candyland" , "com.trickplay.Candyland",  "http://store.trickplay.com/v1/com.trickplay.fake.candyland/icon.jpg" );
+        make_app( "Poker Dawgs" , "com.trickplay.Poker",  "http://store.trickplay.com/v1/com.trickplay.fake.pokerdawgs/icon.jpg" );
+        make_app( "Plants vs. Zombies" , "com.trickplay.PlantsVZombies",  "http://store.trickplay.com/v1/com.trickplay.fake.pvz/icon.jpg" );
+        make_app( "1945" , "com.trickplay.1945",  "http://store.trickplay.com/v1/com.trickplay.fake.1945/icon.jpg" );
+        make_app( "8 Ball Billiards HD" , "com.trickplay.Billiards",  "http://store.trickplay.com/v1/com.trickplay.fake.billiards/icon.jpg" );
+        make_app( "Solitaire" , "com.trickplay.Solitaire",  "http://store.trickplay.com/v1/com.trickplay.fake.solitaire/icon.jpg" );
+        make_app( "NFL" , "com.trickplay.",  "http://store.trickplay.com/v1/com.trickplay.fake.nfl/icon.jpg" );
+        make_app( "American Idol" , "com.trickplay.AmericanIdol",  "http://store.trickplay.com/v1/com.trickplay.fake.idol/icon.jpg" );
+        make_app( "The Game of Life" , "com.trickplay.Life",  "http://store.trickplay.com/v1/com.trickplay.fake.life/icon.jpg" );
+        make_app( "Spirals" , "com.trickplay.Spirals",  "http://store.trickplay.com/v1/com.trickplay.fake.spirals/icon.jpg" );
+        make_app( "Aquaria" , "com.trickplay.Aquaria",  "http://store.trickplay.com/v1/com.trickplay.fake.aquaria/icon.jpg" );
+        make_app( "Carlsberg" , "com.trickplay.Carlsberg",  "http://store.trickplay.com/v1/com.trickplay.fake.carlsberg/icon.jpg" );
          
      }
 

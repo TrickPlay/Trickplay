@@ -4,6 +4,7 @@ class Application {
 
     static constraints = {
         name(blank:false, maxSize:255, unique:true);
+        appId(blank:false, maxSize:255, unique:true);
         description(blank:false, maxSize:4096);
         rating(nullable:true, inList:["4+", "9+", "12+", "17+", "No Rating"]);
         icon();
@@ -15,7 +16,7 @@ class Application {
         approved();
     };
 
-    String name, description, supportEmail, license;
+    String name, appId, description, supportEmail, license;
     String rating = "No Rating";
     Developer developer; //test
     URL websiteUrl;
