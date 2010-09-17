@@ -127,14 +127,31 @@ function( ui )
         fetch_initial_data()
                
     end
-    
+
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
     
-    local featured_items = {}
+    local function price_to_string( price )
     
-    local app_items = {}
+        local np = tonumber( price )
+        
+        if np < 0.01 then
+            return ui.strings[ "Free" ]
+        end
+        
+        -- TODO : currency
+        
+        if np < 1 then
+            return string.format( "%d¢" , np * 100 )
+        end
+        
+        return string.format( "$%2.2f" , price )
     
+    end
+    
+    ---------------------------------------------------------------------------
+    ---------------------------------------------------------------------------
+            
     function section.data_arrived( section , featured_apps , all_apps )
     
         group:clear()
@@ -147,7 +164,40 @@ function( ui )
             return
         end
         
+        -----------------------------------------------------------------------
         -- The initial data is here, we can build the UI
+        
+        section.main =
+        {
+            focused = nil,          -- Points to either featured or apps
+            
+            featured =
+            {
+                items = {},
+                
+                focused = nil,      -- The index of the focused item in items
+            },
+            
+            apps =
+            {
+                items = {},
+                
+                focused = nil,      -- The index of the current center item in items
+                
+                name_text = nil,    -- The text for the focused item's name
+                
+                price_text = nil,   -- The text for the focused item's price
+                
+                focus_ring = nil,   -- The focus ring around the center item
+                
+                n_visible = 7,      -- The number of app tiles that are visible
+            }
+        }
+        
+        local featured_items = section.main.featured.items
+    
+        local app_items = section.main.apps.items
+        
         
         -----------------------------------------------------------------------
         -- First the two featured boxes
@@ -186,7 +236,7 @@ function( ui )
                 featured_x = featured_x + item.w + FEATURED_SPACE
                 
                 group:add( item )
-            
+                            
             end
         
         end
@@ -204,7 +254,8 @@ function( ui )
         -- TODO: We should not create tiles for ALL of them right here...there
         -- could be thousands. Need to add paging mechanism
         
-        local REFLECTION_OPACITY = 0.1 * 255
+        local REFLECTION_OPACITY    = 0.1 * 255
+        local REFLECTION_Y_OFFSET   = -10 
         
         for _ , shop_app in ipairs( all_apps.applications ) do
 
@@ -224,7 +275,7 @@ function( ui )
             {
                 source = tile,
                 x = 0,
-                y = tile.h - 16 ,
+                y = tile.h + REFLECTION_Y_OFFSET ,
                 x_rotation = { 180 , tile.h / 2 , 0 },
                 opacity = REFLECTION_OPACITY
             }
@@ -237,6 +288,10 @@ function( ui )
             tile_group.anchor_point = tile.center 
             
             tile_group.extra.shop_app = shop_app
+            
+            tile_group.extra.on_focus_in = tile.extra.on_focus_in
+            tile_group.extra.on_focus_out = tile.extra.on_focus_out
+            tile_group.extra.set_focus_opacity = tile.extra.set_focus_opacity
             
             
             table.insert( app_items , tile_group )
@@ -255,6 +310,24 @@ function( ui )
         local SIDE_TILE_ANGLE   = 20
         local SIDE_TILE_X_PAD   = 130
         
+        -- This is a function that gives us the position of a tile relative to
+        -- the center tile. We use it to place the tiles and also when
+        -- animating them. It also returns whether the tile would be on screen
+        -- at that distance.
+        
+        function section.main.apps.get_tile_position( center_distance )
+            local x
+            local y
+            local onscreen = math.abs( center_distance ) <= 3
+            
+            if center_distance == 0 then
+                return { group.w / 2 , CENTER_TILE_Y } , onscreen , 0 , CENTER_TILE_SCALE
+            elseif center_distance < 0 then
+                return { ( group.w / 2 ) - ( SIDE_TILE_X_PAD + ( math.abs( center_distance ) * SIDE_TILE_X_SPACE ) ) , SIDE_TILE_Y } , onscreen , SIDE_TILE_ANGLE , SIDE_TILE_SCALE
+            else
+                return { ( group.w / 2 ) + ( SIDE_TILE_X_PAD + ( math.abs( center_distance ) * SIDE_TILE_X_SPACE ) ) , SIDE_TILE_Y } , onscreen , -SIDE_TILE_ANGLE , SIDE_TILE_SCALE
+            end                    
+        end
         
         if # app_items > 0 then
         
@@ -267,23 +340,27 @@ function( ui )
             {
                 anchor_point = focus.center,
                 x = group.w / 2,
-                y = CENTER_TILE_Y - 3
+                y = CENTER_TILE_Y - 3,
+                opacity = 0
             }
             
             group:add( focus )
+                        
+            section.main.apps.focus_ring = focus
 
             -------------------------------------------------------------------                    
             -- Next, put down the center tile
             
             local center = math.ceil( ( # app_items / 2 ) )
+            
+            section.main.apps.focused = center
 
             local tile = app_items[ center ]
-            
+                        
             tile:set
             {
                 scale = { CENTER_TILE_SCALE , CENTER_TILE_SCALE },
-                x = group.w / 2,
-                y = CENTER_TILE_Y
+                position = section.main.apps.get_tile_position( 0 )
             }
             
             group:add( tile )
@@ -291,7 +368,7 @@ function( ui )
             -------------------------------------------------------------------
             -- The text for the focused app's name and price
             
-            local APP_NAME_TEXT_STYLE   = { font = "DejaVu Sans bold 34px" , color = "FFFFFF" }            
+            local APP_NAME_TEXT_STYLE   = { font = "DejaVu Sans bold 30px" , color = "FFFFFF" }            
             local APP_PRICE_TEXT_STYLE  = { font = "DejaVu Sans 24px" , color = "FFFFFF" }
             local APP_NAME_Y_OFFSET     = 60
             local APP_PRICE_Y_OFFSET    = 26  
@@ -309,28 +386,23 @@ function( ui )
             
             group:add( focused_name )
             
-            local focused_price = Text( APP_PRICE_TEXT_STYLE )
+            local focused_price = Text(  APP_PRICE_TEXT_STYLE )
+
+            focused_price.text = price_to_string( sa.price )
                         
-            local price = tonumber( sa.price )
-            
-            if price == 0 then
-                price = ui.strings[ "Free" ]
-            else
-                -- TODO: Use the right currency
-                price = "$ "..sa.price
-            end
-            
-            focused_price.text = price
-            
             focused_price:set
             {
                 anchor_point = focused_price.center,
                 x = group.w / 2,
-                y = group.h - APP_PRICE_Y_OFFSET            
+                y = group.h - APP_PRICE_Y_OFFSET
             }
-            
-            
+                        
             group:add( focused_price )
+            
+            section.main.apps.name_text = focused_name
+            section.main.apps.price_text = focused_price
+            
+            
             
             -------------------------------------------------------------------                    
             -- Now, extend from the center outwards until we run out
@@ -353,8 +425,7 @@ function( ui )
                     tile:set
                     {
                         scale = { SIDE_TILE_SCALE , SIDE_TILE_SCALE },
-                        x = ( group.w / 2 ) - ( SIDE_TILE_X_PAD + ( ( center - left ) * SIDE_TILE_X_SPACE ) ),
-                        y = SIDE_TILE_Y,
+                        position = section.main.apps.get_tile_position( left - center ),
                         y_rotation = { SIDE_TILE_ANGLE , 0 , 0 }
                     }
                                         
@@ -373,8 +444,7 @@ function( ui )
                     tile:set
                     {
                         scale = { SIDE_TILE_SCALE , SIDE_TILE_SCALE },
-                        x = ( group.w / 2 ) + ( SIDE_TILE_X_PAD + ( ( right - center ) * SIDE_TILE_X_SPACE ) ),
-                        y = SIDE_TILE_Y,
+                        position = section.main.apps.get_tile_position( right - center ),
                         y_rotation = { - SIDE_TILE_ANGLE , 0 , 0 }
                     }
                     
@@ -388,16 +458,249 @@ function( ui )
                 right = right + 1
             end
             
+            focus:raise_to_top()
+            
+            focus:lower( section.main.apps.items[ section.main.apps.focused ] )
+            
         end
         
 
         -----------------------------------------------------------------------
     
     end
+
+    ---------------------------------------------------------------------------
+    -- Focus
+    ---------------------------------------------------------------------------
+    
+    -- Move the focus among featured tiles left and right
+    
+    local function move_featured_focus( d )
+        
+        local f = section.main.featured
+        
+        local new_focus = f.focused + d
+        
+        local item = f.items[ new_focus ]
+        
+        if item then
+            f.items[ f.focused ]:on_focus_out()
+            item:on_focus_in()
+            f.focused = new_focus
+        end
+        -- TODO: will scroll when we have more than two
+    end
+    
+    -- Move the focus among app tiles left and right
+    
+    local function move_apps_focus( d )
+    
+        local a = section.main.apps
+    
+        local old_center = a.focused
+        
+        local new_center = old_center + d
+        
+        if new_center > # a.items or new_center < 1 then
+            return
+        end
+        
+        local to_animate = {}
+        
+        for i , item in ipairs( a.items ) do
+        
+            local old_pos , old_onscreen , old_angle , old_scale = a.get_tile_position( i - old_center )
+            
+            local new_pos , new_onscreen , new_angle , new_scale = a.get_tile_position( i - new_center )
+            
+            -- Only animate tiles that are on screen now or will be onscreen
+            
+            if old_onscreen or new_onscreen then
+            
+                local t = { item = item }
+                
+                t.x = Interval( old_pos[ 1 ] , new_pos[ 1 ] )
+                t.y = Interval( old_pos[ 2 ] , new_pos[ 2 ] )
+                
+                if old_angle ~= new_angle then
+                    t.angle = Interval( old_angle , new_angle )
+                end
+                
+                if old_scale ~= new_scale then
+                    t.scale = Interval( old_scale , new_scale )
+                end
+                
+                table.insert( to_animate , t )
+            
+                if i == new_center then
+                    t.new_center = true
+                    item:raise_to_top()
+                elseif i == old_center then
+                    t.old_center = true
+                    item:raise_to_top()
+                end
+                
+            end
+        
+        end
+        
+        -- Disable key down while animating
+        
+        local on_key_down = group.on_key_down
+        
+        group.on_key_down = nil
+
+        -----------------------------------------------------------------------
+        -- Prepare the text and adjust its position
+        
+        a.name_text.opacity = 0
+        a.name_text.text = a.items[ new_center ].extra.shop_app.name
+        local ap = a.name_text.anchor_point
+        a.name_text.anchor_point = { a.name_text.w / 2 , ap[ 2 ] }
+        a.name_text:raise_to_top()
+        
+
+        a.price_text.opacity = 0
+        a.price_text.text = price_to_string( a.items[ new_center ].extra.shop_app.price )
+        local ap = a.price_text.anchor_point
+        a.price_text.anchor_point = { a.price_text.w / 2 , ap[ 2 ] }
+        a.price_text:raise_to_top()
+        
+        -----------------------------------------------------------------------
+        -- Create the timeline and start it
+        
+        local timeline = Timeline{ duration = 150 }
+        
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            for _ , t in ipairs( to_animate ) do
+                t.item.x = t.x:get_value( progress )
+                t.item.y = t.y:get_value( progress )
+                if t.angle then
+                    t.item.y_rotation = { t.angle:get_value( progress ) , 0 , 0 }
+                end
+                if t.scale then
+                    local s = t.scale:get_value( progress )
+                    t.item.scale = { s , s }
+                end
+                if t.old_center then
+                    t.item:set_focus_opacity( 255 * ( 1 - progress ) )
+                elseif t.new_center then
+                    t.item:set_focus_opacity( 255 * progress )
+                end
+            end
+            a.name_text.opacity = 255 * progress
+            a.price_text.opacity = 255 * progress
+        end
+        
+        function timeline.on_completed( timeline )
+            a.focused = new_center
+            group.on_key_down = on_key_down
+        end
+        
+        timeline:start()
+    
+    end
+    
+    
+    local function move_focus_left()
+        local m = section.main        
+        if not m then
+            return
+        end
+        if m.focused == m.featured then
+            move_featured_focus( -1 )
+        elseif m.focused == m.apps then
+            move_apps_focus( -1 )        
+        end
+    end
+
+    local function move_focus_right()
+        local m = section.main        
+        if not m then
+            return
+        end
+        if m.focused == m.featured then
+            move_featured_focus( 1 )
+        elseif m.focused == m.apps then
+            move_apps_focus( 1 )        
+        end
+    end
+
+    local function move_focus_up()
+        local m = section.main        
+        if not m then
+            return
+        end
+        
+        -- If we are on featured, we exit the section (give focus back to the menu)
+        
+        if m.focused == m.featured then
+        
+            m.featured.items[ m.featured.focused ]:on_focus_out()
+            m.focused = nil
+            ui:on_exit_section( section )
+        
+        -- If we are on apps and there are no featured, we do the same thing.
+        -- Otherwise, we focus from apps to featured.
+        
+        elseif m.focused == m.apps then
+        
+            if # m.featured.items == 0 then
+            
+                m.apps.focus_ring.opacity = 0
+                m.apps.items[ m.focused ]:on_focus_out()
+                m.focused = nil
+                ui:on_exit_section( section )
+                
+            else
+            
+                m.apps.focus_ring.opacity = 0
+                m.apps.items[ m.apps.focused ]:on_focus_out()
+                m.focused = m.featured
+                m.featured.items[ m.featured.focused ]:on_focus_in()
+            
+            end
+        
+        end
+    end
+
+    local function move_focus_down()
+        
+        local m = section.main        
+        if not m then
+            return
+        end
+        
+        -- We can only go down if the focus is on the featured items
+        
+        if m.focused == m.featured then
+        
+            if m.apps.focused then
+            
+                m.featured.items[ m.featured.focused ]:on_focus_out()
+                
+                m.apps.focus_ring.opacity = 255
+                
+                m.apps.items[ m.apps.focused ]:on_focus_in()
+                
+                m.focused = m.apps
+            
+            end
+        
+        end
+    end
     
     ---------------------------------------------------------------------------
     -- Handlers for the main menu events
     ---------------------------------------------------------------------------
+    
+    local key_map =
+    {
+        [ keys.Left     ] = move_focus_left,
+        [ keys.Right    ] = move_focus_right,
+        [ keys.Up       ] = move_focus_up,
+        [ keys.Down     ] = move_focus_down,
+    }
     
     function section.on_show( section )
     
@@ -405,12 +708,9 @@ function( ui )
         
         function group.on_key_down( group , key )
             
-            print( "SHOP FS" , "KEY" , key )
-            
-            if key == keys.Up then
-            
-                ui:on_exit_section()  
-            
+            local handler = key_map[ key ]
+            if handler then
+                handler()
             end
         
         end
@@ -419,8 +719,42 @@ function( ui )
     
     function section.on_enter( section )
     
-        --group:grab_key_focus()
+        -- If the screen has not been built, we cannot enter
         
+        if not section.main then
+            return false
+        end
+        
+        if # section.main.featured.items > 0 then
+        
+            section.main.focused = section.main.featured
+            
+            if not section.main.featured.focused then
+            
+                section.main.featured.focused = 1
+                
+            end
+            
+            section.main.featured.items[ section.main.featured.focused ]:on_focus_in()
+            
+            group:grab_key_focus()
+            
+            return true
+        
+        end
+        
+        if # section.main.apps.items > 0 then
+        
+            section.main.focused = section.main.apps
+            
+            section.main.focus_ring.opacity = 255
+            
+            group:grab_key_focus()
+            
+            return true
+        
+        end
+    
         return false
         
     end

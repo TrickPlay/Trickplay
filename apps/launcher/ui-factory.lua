@@ -425,6 +425,8 @@ function factory.make_shop_floor_tile( assets , icon_url )
 
     local frame = assets( "assets/icon-overlay-white-no-label.png" )
     
+    local focus = assets( "assets/icon-overlay-black-no-label.png" )
+    
     local icon = Image{ src = icon_url , async = true , size = { ICON_WIDTH , ICON_HEIGHT } }
     
     local scale = ( frame.w - ( FRAME_X_PADDING * 2 ) - ( FRAME_BORDER_W * 2 ) ) / 480
@@ -443,14 +445,25 @@ function factory.make_shop_floor_tile( assets , icon_url )
                 scale = { scale , scale }
             },
             
-            frame
+            frame ,
+            
+            focus:set{ opacity = 0 }
         }
     }
 
     function group.extra.on_focus_in()
+        focus.opacity = 255
+        frame.opacity = 0 
     end
     
     function group.extra.on_focus_out()
+        focus.opacity = 0
+        frame.opacity = 255 
+    end
+    
+    function group.extra.set_focus_opacity( group , opacity )
+        focus.opacity = opacity
+        frame.opacity = 255 - opacity
     end
     
     return group
