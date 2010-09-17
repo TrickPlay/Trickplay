@@ -355,9 +355,9 @@ SlideshowView = Class(View, function(view, model, ...)
 				group.scale = {1,1}
 				group.size = {0,0}
 				group.opacity = 0
-group:clear()
-group.z = 0
-img.z = 0
+				group:clear()
+				group.z = 0
+				img.z = 0
 				if img.w/img.h > screen.w/screen.h then
 					img.size = {screen.w,img.h*(screen.w)/img.w}
 				else
@@ -425,6 +425,7 @@ img.z = 0
                         }
 						local flash = Rectangle
 						{
+							name  = "flash "..i..","..j,
 							color = "FFFFFF0F",
 							size  = {	tile_width,
                             		    tile_height},
@@ -738,15 +739,21 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
                 view.on_screen_list[i].z = 0				
 				
 
+
+                if i == 1 and pic ~= nil then
                 pic.z_rotation = {0,0,0}
                 pic.scale = {1,1}
                 pic.position = {0,0}
 				pic.z = 0
 
-                if i == 1 then
                     on_screen_prep["MOSAIC"](pic,view.on_screen_list[i])
                 else
                     if pic ~= nil then
+                pic.z_rotation = {0,0,0}
+                pic.scale = {1,1}
+                pic.position = {0,0}
+				pic.z = 0
+
                         off_screen_prep["MOSAIC"](pic,view.on_screen_list[i])
                     elseif backing ~= nil then
                         off_screen_prep["MOSAIC"](backing,view.on_screen_list[i])
@@ -768,12 +775,13 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
                 view.off_screen_list[i].position = {0,0}
                 view.off_screen_list[i].z = 0				
 
+                if pic ~= nil then
+
                 pic.z_rotation = {0,0,0}
                 pic.scale = {1,1}
                 pic.position = {0,0}
 				pic.z = 0
 
-                if pic ~= nil then
                     off_screen_prep["MOSAIC"](pic,view.off_screen_list[i])
                 elseif backing ~= nil then
                     view.off_screen_list[i]:clear()
@@ -895,8 +903,245 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
                 layered_timeline:start()
         end,
         ["MOSAIC"] = function(pic)
-            pic.opacity = 0
-			  
+            pic.opacity = 255
+--[[
+			for i = 1,5 do
+				for j = 1,10 do
+					local 
+				end
+			end 
+--]]
+local mosaic_timeline = Timeline
+{
+	duration = 200*(5+10),
+	loop     = false,
+	forward  = "FORWARD"
+}
+local old = view.on_screen_list[2]
+function mosaic_timeline.on_started()
+
+			for i = 1,5 do
+				for j = 1,10 do
+					local child = pic:find_child("clone "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {-180,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+					child.opacity = 0
+
+					child = pic:find_child("flash "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {-180,child.w/2,0}
+					child.opacity = 0
+
+				end
+			end 
+		if old ~= nil then
+			for i = 1,5 do
+				for j = 1,10 do
+					local child = old:find_child("clone "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {0,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+					child.opacity = 255
+
+
+					child = pic:find_child("flash "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {-180,child.w/2,0}
+					child.opacity = 15
+
+				end
+			end 
+		end
+
+end
+function mosaic_timeline.on_new_frame(t,msecs)
+				local stage_i = math.ceil(msecs / 200) --stages 1-15
+				
+				local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
+print(stage_i,p)
+				for i = 1,5 do
+					for j = 1,10 do
+						if (i+j-1)  == stage_i then
+							local child = pic:find_child("clone "..i..","..j)
+							assert(child,"... what?")
+							child.y_rotation = {-180 + 90*(p),child.clip[1]+child.clip[3]/2,0}
+							if (-180 + 90*(p)) > -135 and (-180 + 90*(p)) < -45 then
+								child.opacity = 255 * ((-180 + 90*(p)) - 45)/90
+							elseif (-180 + 90*(p)) > -45 then
+								child.opacity = 255
+							end
+							child = pic:find_child("flash "..i..","..j)
+							assert(child,"... what?")
+							child.y_rotation = {-180 + 90*(p),child.w/2,0}
+							if (-180 + 90*(p)) > -135 and (-180 + 90*(p)) < -45 then
+								child.opacity = 15 * ((-180 + 90*(p)) - 45)/90
+							elseif (-180 + 90*(p)) > -45 then
+								child.opacity = 15
+							end
+							if old ~= nil then
+								child = old:find_child("clone "..i..","..j)
+								assert(child,"... what?")
+								child.y_rotation = {90*(p),child.clip[1]+child.clip[3]/2,0}
+								if (90 * (p)) < 135 and (90 * (p)) > 45 then
+									child.opacity = 255 * (1-((90 * (p)) - 45)/90)
+								elseif (90 * (p)) > 135 then
+									child.opacity = 0
+								end
+
+								child = old:find_child("flash "..i..","..j)
+								assert(child,"... what?")
+								child.y_rotation = {90*(p),child.w/2,0}
+								if (90 * (p)) < 135 and (90 * (p)) > 45 then
+									child.opacity = 15 * (1-((90 * (p)) - 45)/90)
+								elseif (90 * (p)) > 135 then
+									child.opacity = 0
+								end
+
+							end
+						elseif (i+j-1)  == stage_i - 1 then
+							local child = pic:find_child("clone "..i..","..j)
+							assert(child,"... what?")
+							child.y_rotation = {-90*(1-p),child.clip[1]+child.clip[3]/2,0}
+							if (-90 * (1-p)) > -135 and (-90 * (1-p)) < -45 then
+								child.opacity = 255 * ((-90 * (1-p)) - 45)/90
+							elseif (-90 * (1-p)) > -45 then
+								child.opacity = 255
+							end
+							child = pic:find_child("flash "..i..","..j)
+							assert(child,"... what?")
+							if (-90 * (1-p)) > -135 and (-90 * (1-p)) < -45 then
+								child.opacity = 15 * ((-90 * (1-p)) - 45)/90
+							elseif (-90 * (1-p)) > -45 then
+								child.opacity = 15
+							end
+							if old ~= nil then
+								child = old:find_child("clone "..i..","..j)
+								assert(child,"... what?")
+								child.y_rotation = {90+90*(p),child.clip[1]+child.clip[3]/2,0}
+								if (90 +90* (p)) < 135 and (90 +90* (p)) > 45 then
+									child.opacity = 255 * (1-((90+90 * (p)) - 45)/90)
+								elseif (90+90 * (p)) > 135 then
+									child.opacity = 0
+								end
+
+								child = old:find_child("flash "..i..","..j)
+								assert(child,"... what?")
+								child.y_rotation = {90+90*(p),child.w/2,0}
+								if (90 +90* (p)) < 135 and (90 +90* (p)) > 45 then
+									child.opacity = 15 * (1-((90+90 * (p)) - 45)/90)
+								elseif (90+90 * (p)) > 135 then
+									child.opacity = 0
+								end
+
+							end
+
+						elseif (i+j-1) < stage_i - 1 then
+							local child = pic:find_child("clone "..i..","..j)
+							assert(child,"... what?")
+							child.y_rotation = {0,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+							child.opacity = 255
+
+							child = pic:find_child("flash "..i..","..j)
+							assert(child,"... what?")
+							child.y_rotation = {0,child.w/2,0}
+							child.opacity = 15
+							if old ~= nil then
+
+								local child = old:find_child("clone "..i..","..j)
+								assert(child,"... what?")
+								child.y_rotation = {180,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+								child.opacity = 0
+	
+								child = old:find_child("flash "..i..","..j)
+								assert(child,"... what?")
+								child.y_rotation = {180,child.w/2,0}
+								child.opacity = 0
+							end
+						end
+					end
+				end
+
+--[[
+			local p = msecs / t.duration
+			for i = 1,5 do
+				for j = 1,10 do
+					local child = pic:find_child("clone "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {-180*(1-p),child.clip[1]+child.clip[3]/2,0}
+					if (-180 * (1-p)) > -135 and (-180 * (1-p)) < -45 then
+						child.opacity = 255 * ((-180 * (1-p)) - 45)/90
+					elseif (-180 * (1-p)) > -45 then
+						child.opacity = 255
+					end
+					child = pic:find_child("flash "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {-180*(1-p),child.w/2,0}
+					if (-180 * (1-p)) > -90 then
+						child.opacity = 15
+					end
+
+				end
+			end 
+		if old ~= nil then
+			for i = 1,5 do
+				for j = 1,10 do
+					local child = old:find_child("clone "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {180*(p),child.clip[1]+child.clip[3]/2,0}
+					if (180 * (p)) < 135 and (180 * (p)) > 45 then
+						child.opacity = 255 * (1-((180 * (p)) - 45)/90)
+					elseif (180 * (p)) > 135 then
+						child.opacity = 0
+					end
+
+					child = old:find_child("flash "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {180*(p),child.w/2,0}
+					if (180 * (p)) > 90 then
+						child.opacity = 0
+					end
+
+				end
+			end 
+		end
+--]]
+end
+function mosaic_timeline.on_completed()
+			for i = 1,5 do
+				for j = 1,10 do
+					local child = pic:find_child("clone "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {0,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+					child.opacity = 255
+
+	 				child = pic:find_child("flash "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {0,child.w/2,0}
+					child.opacity = 15
+
+
+				end
+			end 
+		if old ~= nil then
+			for i = 1,5 do
+				for j = 1,10 do
+					local child = old:find_child("clone "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {180,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+					child.opacity = 0
+
+					child = old:find_child("flash "..i..","..j)
+					assert(child,"... what?")
+					child.y_rotation = {180,child.w/2,0}
+					child.opacity = 0
+				end
+			end 
+		end
+old.opacity = 0
+end
+reset_keys()
+
+mosaic_timeline:start()
+--[[
             pic:animate 
             {
                 duration = 300,
@@ -914,7 +1159,9 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
                     mode     = EASE_IN_EXPO
                 }
             end
+--]]
         end
+
 
     }
 
