@@ -369,13 +369,13 @@ SlideshowView = Class(View, function(view, model, ...)
 				group:add(img)
 				local num_rows    = 5
 				local num_cols    = 10
-				local tile_width  = 181
-				local tile_height = 206
+				local tile_width  = 188--185--181
+				local tile_height = 214--210--206
 
-				local vert_gutter   = 12
-				local horz_gutter   = 12
-				local vert_left_gap = 1
-				local horz_top_gap  = 1
+				local vert_gutter   = 4--8--12
+				local horz_gutter   = 3--8--12
+				local vert_left_gap = -1 --2-- -1 --1
+				local horz_top_gap  = -1 --1
 
 				for i = 1,num_rows do
 					for j = 1, num_cols do
@@ -429,10 +429,9 @@ SlideshowView = Class(View, function(view, model, ...)
 							color = "FFFFFF0F",
 							size  = {	tile_width,
                             		    tile_height},
-							position = { 								(j-1)*(tile_width+vert_gutter)+
-							vert_left_gap,
-								(i-1)*(tile_height+horz_gutter)+
-							horz_top_gap
+							position = { 	
+								(j-1)*(tile_width+vert_gutter)+ vert_left_gap,
+								(i-1)*(tile_height+horz_gutter)+horz_top_gap
 }
 						}
 group:add(clone,flash)
@@ -1007,6 +1006,8 @@ print(stage_i,p)
 								child.opacity = 255
 							end
 							child = pic:find_child("flash "..i..","..j)
+							child.y_rotation = {-90*(1-p),child.w/2,0}
+
 							assert(child,"... what?")
 							if (-90 * (1-p)) > -135 and (-90 * (1-p)) < -45 then
 								child.opacity = 15 * ((-90 * (1-p)) - 45)/90
@@ -1117,7 +1118,7 @@ function mosaic_timeline.on_completed()
 					assert(child,"... what?")
 					child.y_rotation = {0,child.w/2,0}
 					child.opacity = 15
-
+child:raise_to_top()
 
 				end
 			end 
@@ -1135,8 +1136,9 @@ function mosaic_timeline.on_completed()
 					child.opacity = 0
 				end
 			end 
-		end
 old.opacity = 0
+
+		end
 end
 reset_keys()
 
