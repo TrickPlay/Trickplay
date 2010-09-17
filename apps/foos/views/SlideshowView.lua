@@ -369,13 +369,13 @@ SlideshowView = Class(View, function(view, model, ...)
 				group:add(img)
 				local num_rows    = 5
 				local num_cols    = 10
-				local tile_width  = 188--185--181
-				local tile_height = 214--210--206
+				local tile_width  = 192--188--185--181
+				local tile_height = 216 --214--210--206
 
-				local vert_gutter   = 4--8--12
-				local horz_gutter   = 3--8--12
-				local vert_left_gap = -1 --2-- -1 --1
-				local horz_top_gap  = -1 --1
+				local vert_gutter   = 0--4--8--12
+				local horz_gutter   = 0--3--8--12
+				local vert_left_gap = 0-- -1 --2-- -1 --1
+				local horz_top_gap  = 0-- -1 --1
 
 				for i = 1,num_rows do
 					for j = 1, num_cols do
