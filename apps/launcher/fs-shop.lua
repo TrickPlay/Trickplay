@@ -1,4 +1,19 @@
 
+-- Global
+
+function FunctionTimeline( t )
+    local functions = t.functions
+    assert( type( functions ) == "table" )
+    t.functions = nil
+    local timeline = Timeline( t )
+    function timeline.on_new_frame( timeline , elapsed , progress )
+        for _ , f in ipairs( functions ) do f( progress ) end
+    end
+    return timeline
+end
+
+
+
 return
 function( ui )
 
@@ -15,6 +30,11 @@ function( ui )
     -- The shop API
     
     local api = dofile( "shop-api" )
+    
+    -- The details screen object
+    
+    local details = dofile( "fs-shop-app" )( ui , api )
+    
     
     local function fetch_initial_data()
     
@@ -130,27 +150,6 @@ function( ui )
 
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    
-    local function price_to_string( price )
-    
-        local np = tonumber( price )
-        
-        if np < 0.01 then
-            return ui.strings[ "Free" ]
-        end
-        
-        -- TODO : currency
-        
-        if np < 1 then
-            return string.format( "%d¢" , np * 100 )
-        end
-        
-        return string.format( "$%2.2f" , price )
-    
-    end
-    
-    ---------------------------------------------------------------------------
-    ---------------------------------------------------------------------------
             
     function section.data_arrived( section , featured_apps , all_apps )
     
@@ -190,7 +189,8 @@ function( ui )
                 
                 focus_ring = nil,   -- The focus ring around the center item
                 
-                n_visible = 7,      -- The number of app tiles that are visible
+                floor = nil,        -- A group holding all the 'floor' items
+                
             }
         }
         
@@ -244,9 +244,21 @@ function( ui )
         -----------------------------------------------------------------------
         -- The floor
         
-        local floor = assets( "assets/app-shop-floor.png" )
+        local floor_background = assets( "assets/app-shop-floor.png" )
         
-        group:add( floor:set{ x = 0 , y = group.h - floor.h } )
+        local floor = Group
+        {
+            size = floor_background.size,
+            position = { 0 , group.h - floor_background.h },
+            children =
+            {
+                floor_background:set{ position = { 0 , 0 } }
+            }
+        }
+        
+        group:add( floor )
+        
+        section.main.apps.floor = floor
         
         -----------------------------------------------------------------------
         -- Now the app tiles at the floor
@@ -301,7 +313,7 @@ function( ui )
         -----------------------------------------------------------------------
         -- Position the tiles
         
-        local CENTER_TILE_Y     = floor.y + floor.h / 2 + 30        
+        local CENTER_TILE_Y     = ( floor.h / 2  ) + 30        
         local CENTER_TILE_SCALE = 0.87
         
         local SIDE_TILE_SCALE   = 0.70
@@ -321,11 +333,11 @@ function( ui )
             local onscreen = math.abs( center_distance ) <= 3
             
             if center_distance == 0 then
-                return { group.w / 2 , CENTER_TILE_Y } , onscreen , 0 , CENTER_TILE_SCALE
+                return { floor.w / 2 , CENTER_TILE_Y } , onscreen , 0 , CENTER_TILE_SCALE
             elseif center_distance < 0 then
-                return { ( group.w / 2 ) - ( SIDE_TILE_X_PAD + ( math.abs( center_distance ) * SIDE_TILE_X_SPACE ) ) , SIDE_TILE_Y } , onscreen , SIDE_TILE_ANGLE , SIDE_TILE_SCALE
+                return { ( floor.w / 2 ) - ( SIDE_TILE_X_PAD + ( math.abs( center_distance ) * SIDE_TILE_X_SPACE ) ) , SIDE_TILE_Y } , onscreen , SIDE_TILE_ANGLE , SIDE_TILE_SCALE
             else
-                return { ( group.w / 2 ) + ( SIDE_TILE_X_PAD + ( math.abs( center_distance ) * SIDE_TILE_X_SPACE ) ) , SIDE_TILE_Y } , onscreen , -SIDE_TILE_ANGLE , SIDE_TILE_SCALE
+                return { ( floor.w / 2 ) + ( SIDE_TILE_X_PAD + ( math.abs( center_distance ) * SIDE_TILE_X_SPACE ) ) , SIDE_TILE_Y } , onscreen , -SIDE_TILE_ANGLE , SIDE_TILE_SCALE
             end                    
         end
         
@@ -339,12 +351,12 @@ function( ui )
             focus:set
             {
                 anchor_point = focus.center,
-                x = group.w / 2,
+                x = floor.w / 2,
                 y = CENTER_TILE_Y - 3,
                 opacity = 0
             }
             
-            group:add( focus )
+            floor:add( focus )
                         
             section.main.apps.focus_ring = focus
 
@@ -363,8 +375,8 @@ function( ui )
                 position = section.main.apps.get_tile_position( 0 )
             }
             
-            group:add( tile )
-
+            floor:add( tile )
+            
             -------------------------------------------------------------------
             -- The text for the focused app's name and price
             
@@ -380,24 +392,24 @@ function( ui )
             focused_name:set
             {
                 anchor_point = focused_name.center,
-                x = group.w / 2,
-                y = group.h - APP_NAME_Y_OFFSET
+                x = floor.w / 2,
+                y = floor.h - APP_NAME_Y_OFFSET
             }
             
-            group:add( focused_name )
+            floor:add( focused_name )
             
             local focused_price = Text(  APP_PRICE_TEXT_STYLE )
 
-            focused_price.text = price_to_string( sa.price )
+            focused_price.text = api:price_to_string( sa.price ) or ui.strings[ "Free" ]
                         
             focused_price:set
             {
                 anchor_point = focused_price.center,
-                x = group.w / 2,
-                y = group.h - APP_PRICE_Y_OFFSET
+                x = floor.w / 2,
+                y = floor.h - APP_PRICE_Y_OFFSET
             }
                         
-            group:add( focused_price )
+            floor:add( focused_price )
             
             section.main.apps.name_text = focused_name
             section.main.apps.price_text = focused_price
@@ -429,9 +441,9 @@ function( ui )
                         y_rotation = { SIDE_TILE_ANGLE , 0 , 0 }
                     }
                                         
-                    group:add( tile )
+                    floor:add( tile )
                     
-                    tile:raise( floor )
+                    tile:raise( floor_background )
                 
                 end
                 
@@ -448,9 +460,9 @@ function( ui )
                         y_rotation = { - SIDE_TILE_ANGLE , 0 , 0 }
                     }
                     
-                    group:add( tile )
+                    floor:add( tile )
                     
-                    tile:raise( floor )
+                    tile:raise( floor_background )
                 
                 end
             
@@ -561,7 +573,7 @@ function( ui )
         
 
         a.price_text.opacity = 0
-        a.price_text.text = price_to_string( a.items[ new_center ].extra.shop_app.price )
+        a.price_text.text = api:price_to_string( a.items[ new_center ].extra.shop_app.price ) or ui.strings[ "Free" ]
         local ap = a.price_text.anchor_point
         a.price_text.anchor_point = { a.price_text.w / 2 , ap[ 2 ] }
         a.price_text:raise_to_top()
@@ -690,6 +702,127 @@ function( ui )
         end
     end
     
+    local function show_app_details()
+    
+        local ANIMATE_OUT_DURATION = 150
+
+        local m = section.main        
+        if not m then
+            return
+        end
+        
+        local shop_app
+        
+        -- First, turn off the focus rings
+        
+        if m.focused == m.featured then
+            shop_app = m.featured.items[ m.featured.focused ].extra.shop_app
+            m.featured.items[ m.featured.focused ]:on_focus_out()
+        elseif m.focused == m.apps then
+            shop_app = m.apps.items[ m.apps.focused ].extra.shop_app
+            m.apps.items[ m.apps.focused ]:on_focus_out()
+            m.apps.focus_ring.opacity = 0
+        end
+        
+        assert( shop_app )
+        
+        -- Now, prepare a list of things to animate out of the screen
+        
+        -- Here, we are just adding functions to the to_animate table, which
+        -- makes the timeline's on_new_frame much simpler - it has no ifs
+        
+        local to_animate = {}
+        
+        for _ , item in ipairs( m.featured.items ) do
+        
+            item.extra.original_position = item.position
+            
+            if item.x < group.w / 2 then
+                local interval = Interval( item.x , - item.w )
+                table.insert( to_animate , function( progress ) item.x = interval:get_value( progress ) end )
+            else
+                local interval = Interval( item.x , group.w )
+                table.insert( to_animate , function( progress ) item.x = interval:get_value( progress ) end )
+            end
+            
+        end
+        
+        do
+            local floor = m.apps.floor            
+            floor.extra.original_position = floor.position
+            
+            local interval = Interval( floor.y , group.h )
+            table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
+        end
+        
+        -- Shut off key handler
+        
+        local on_key_down = group.on_key_down
+        
+        group.on_key_down = nil
+
+        -- Forward declaration
+        
+        local back_from_details
+        
+        -- Timeline
+        
+        local timeline = FunctionTimeline{ duration = ANIMATE_OUT_DURATION , functions = to_animate }
+        
+        function timeline.on_completed( timeline )
+            details:show_app( shop_app , back_from_details )
+        end
+        
+        timeline:start()
+        
+        -- This is the callback that the details screen calls when it is
+        -- finished.
+        
+        back_from_details = function()
+        
+            -- Need to put everything back in place
+                        
+            local to_animate = {}
+        
+            for _ , item in ipairs( m.featured.items ) do
+            
+                local x = item.extra.original_position[ 1 ]
+                
+                local interval = Interval( item.x , x )
+                table.insert( to_animate , function( progress ) item.x = interval:get_value( progress ) end )
+                
+            end
+            
+            do
+                local floor = m.apps.floor
+                local y = floor.extra.original_position[ 2 ]
+                
+                local interval = Interval( floor.y , y )
+                table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
+            end
+            
+            local timeline = FunctionTimeline{ duration = ANIMATE_OUT_DURATION , functions = to_animate }
+            
+            function timeline.on_completed( )
+                
+                if m.focused == m.featured then
+                    m.featured.items[ m.featured.focused ]:on_focus_in()
+                elseif m.focused == m.apps then
+                    m.apps.items[ m.apps.focused ]:on_focus_in()
+                    m.apps.focus_ring.opacity = 255
+                end
+                
+                group.on_key_down = on_key_down
+                group:grab_key_focus()
+                
+            end
+            
+            timeline:start()
+        
+        end
+        
+    end
+    
     ---------------------------------------------------------------------------
     -- Handlers for the main menu events
     ---------------------------------------------------------------------------
@@ -700,6 +833,7 @@ function( ui )
         [ keys.Right    ] = move_focus_right,
         [ keys.Up       ] = move_focus_up,
         [ keys.Down     ] = move_focus_down,
+        [ keys.Return   ] = show_app_details,
     }
     
     function section.on_show( section )

@@ -30,6 +30,32 @@ function api:search( params , callback )
     
 end
 
+function api:price_to_string( price )
+
+    assert( price )
+
+    price = tonumber( price )
+    
+    -- We return nil when it is free
+    
+    if price < 0.01 then
+        return nil
+    end
+    
+    -- TODO : currency
+    
+    -- Cents
+    
+    if price < 1 then
+        return string.format( "%d¢" , price * 100 )
+    end
+    
+    -- Dollars
+    
+    return string.format( "$%2.2f" , price )
+
+end
+
 -------------------------------------------------------------------------------
 -- Private
 -------------------------------------------------------------------------------
