@@ -83,11 +83,11 @@ function( section )
             
             local app_id = recently_used_apps[ i ]
             
-            local name = recently_used_apps.all[ app_id ].name
-            
             if not app_id then
                 break
             end
+            
+            local name = recently_used_apps.all[ app_id ].name
             
             local tile = factory.make_app_tile( assets , name , app_id )
             
