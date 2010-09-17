@@ -97,7 +97,6 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
                         border_width=6,
                         opacity = 255
                 })
-
 --			print("off1",group.w,group.h)
 			if group.w/group.h > screen.w/screen.h then
 				group.scale = {(screen.w*.9)/group.w,(screen.w*.9)/group.w}
@@ -359,10 +358,19 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
 				group:clear()
 				group.z = 0
 				img.z = 0
-				if img.w/img.h > screen.w/screen.h then
-					img.size = {screen.w,img.h*(screen.w)/img.w}
+				if img.children ~= nil  then
+                if screen.w/img.w > screen.h/img.h then
+                    img.scale = {screen.h/img.h,screen.h/img.h}
+                else
+                    img.scale = {screen.w/img.w,screen.w/img.w}
+                end
+
 				else
-					img.size = {(screen.h)/img.h*img.w,screen.h}
+					if img.w/img.h > screen.w/screen.h then
+						img.size = {screen.w,img.h*(screen.w)/img.w}
+					else
+						img.size = {(screen.h)/img.h*img.w,screen.h}
+					end
 				end
 				img.opacity = 0
                 img.anchor_point = {img.size[1]/2,img.size[2]/2}
@@ -406,25 +414,6 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
 
 				for i = 1,num_rows do
 					for j = 1, num_cols do
---[[
-	                    local this_group = Group
-    	                {
-        	                name = "Clone "..i,
-            	            clip = 
-                	        {
-                    	        0,
-                        	    0,
-                            	tile_width,
-	                            tile_height
-    	                    },
-	                        position = 
-    	                    {
-        	                    (j-1)*(tile_width+vert_gutter)+vert_left_gap,
-            	                (i-1)*(tile_height+horz_gutter)+horz_top_gap
-                	        },
-                        	opacity    = 0,
-	                    }
---]]
 						local xx = (j-1)*(tile_width+vert_gutter)+
 							vert_left_gap -- (img.x - img.anchor_point[1])
 						local yy = (i-1)*(tile_height+horz_gutter)+
@@ -442,10 +431,6 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
                             },
 							position = 
 							{
-							--	(j-1)*(tile_width+vert_gutter)+
-							--vert_left_gap,
-							--	(i-1)*(tile_height+horz_gutter)+
-							--horz_top_gap
 								(img.x - img.anchor_point[1]),
 								(img.y - img.anchor_point[2])
 							}
@@ -651,9 +636,19 @@ mosaic_background.opacity = 0
 
             for i = 1,#view.on_screen_list do
                 local pic = view.on_screen_list[i]:find_child("slide")
+
                 if pic ~= nil then
                     pic.opacity = 255
+                pic.z_rotation = {0,0,0}
+                pic.scale = {1,1}
+                pic.position = {0,0}
+				pic.z = 0
+pic.anchor_point = {0,0}
+				pic.size = {pic.base_size[1], pic.base_size[2]}
+
                     view.on_screen_list[i]:clear()
+                view.on_screen_list[i] = Group {z = 500}
+
                     on_screen_prep["REGULAR"](pic,view.on_screen_list[i])
                     view.on_screen_list[i].opacity = 255
                     view.ui:add(view.on_screen_list[i])
@@ -669,7 +664,16 @@ mosaic_background.opacity = 0
                 local pic = view.off_screen_list[i]:find_child("slide")
                 if pic ~= nil then
                     pic.opacity = 255
+                pic.z_rotation = {0,0,0}
+                pic.scale = {1,1}
+                pic.position = {0,0}
+				pic.z = 0
+pic.anchor_point = {0,0}
+				pic.size = {pic.base_size[1], pic.base_size[2]}
+
                     view.off_screen_list[i]:clear()
+				view.off_screen_list[i] = Group {z = 0}
+
                     off_screen_prep["REGULAR"](pic,view.off_screen_list[i])
                 end
             end
@@ -759,6 +763,9 @@ mosaic_background.opacity = 0
             background2.opacity = 0
 mosaic_background.opacity = 255
 mosaic_background:lower_to_bottom()
+if layered_timeline ~= nil then
+                    layered_timeline:on_completed()--advance_to_marker("end")
+end
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -839,7 +846,7 @@ mosaic_background:lower_to_bottom()
             pic.z = 400
             pic:animate 
             {
-                duration = 400,
+                duration = 500,
                 --mode     = EASE_IN_EXPO,
                 x        = end_pos[1],
                 y        = end_pos[2],
@@ -909,16 +916,20 @@ mosaic_background:lower_to_bottom()
                         child.z        = 0
                     end
                     local child = pic:find_child("Clone "..index)
-                    --print(index)--drop_points[i][1])
-                    child.x = pic.w/2 + progress*(
-                                 drop_points[index][1] - pic.w/2)
-                    child.y = pic.h/2 + progress*(
-                                 drop_points[index][2] - pic.h/2)
-                    child.scale = {2-progress,2-progress}
-                    child.z     = (1-progress)*500             
-                    if msecs > 200 then
+					--if child ~= nil then
+                    	--print(index)--drop_points[i][1])
+                	    child.x = pic.w/2 + progress*(
+            	                     drop_points[index][1] - pic.w/2)
+        	            child.y = pic.h/2 + progress*(
+    	                             drop_points[index][2] - pic.h/2)
+	                    child.scale = {2-progress,2-progress}
+                    	child.z     = (1-progress)*500             
+					--end
+--[[
+                    if msecs > 500 then
                         reset_keys()
                     end       
+--]]
                 end
                 function layered_timeline.on_completed()
                     for i = 1, 13 do
@@ -931,7 +942,8 @@ mosaic_background:lower_to_bottom()
 					layered_timeline:pause()
 
                     layered_timeline = nil
-                    --reset_keys()
+                    reset_keys()
+
                 end
                 layered_timeline:start()
         end,
@@ -1118,6 +1130,8 @@ child:raise_to_top()
 --]]
 				end
 			end 
+reset_keys()
+
 		if old ~= nil then
 			for i = 1,5 do
 				for j = 1,10 do
@@ -1137,7 +1151,6 @@ old.opacity = 0
 
 		end
 end
-reset_keys()
 
 mosaic_timeline:start()
 --[[
@@ -1171,7 +1184,7 @@ mosaic_timeline:start()
                              pic.position[2]}
             pic:animate 
             {
-                duration = 400,
+                duration = 500,
                 --mode     = EASE_IN_EXPO,
                 x        = math.random(0,1)*1920,
                 y        = math.random(0,1)*1080,
@@ -1224,7 +1237,6 @@ mosaic_timeline:start()
             }
         end,
         ["LAYERED"]    = function(pic)
-                reset_keys()
                 if layered_timeline ~= nil then
                     layered_timeline:on_completed()--advance_to_marker("end")
                 end
@@ -1270,7 +1282,10 @@ mosaic_timeline:start()
                     child.y = drop_points[index][2] + progress*(pic.h/2 - 
                                  drop_points[index][2])
                     child.scale = {1+progress,1+progress}
-                    child.z     = progress*500                    
+                    child.z     = progress*500            
+					if msecs > 500 then
+                    	reset_keys()
+					end        
                 end
                 function layered_timeline.on_completed()
                     pic.opacity = 0
@@ -1284,7 +1299,6 @@ print(i)
                     end
 					layered_timeline:pause()
                     layered_timeline = nil
-                    --reset_keys()
                 end
                 layered_timeline:start()
         end,
@@ -1475,6 +1489,8 @@ child:raise_to_top()
 --]]
 				end
 			end 
+reset_keys()
+
 		if old ~= nil then
 			for i = 1,5 do
 				for j = 1,10 do
@@ -1494,7 +1510,6 @@ old.opacity = 0
 
 		end
 end
-reset_keys()
 
 mosaic_timeline:start()
 --[[

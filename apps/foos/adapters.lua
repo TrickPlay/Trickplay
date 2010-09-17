@@ -110,7 +110,7 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 	local search = string.gsub(search_term,"%%20"," ")
     local page_num = 1
 	adapter.photo_list = {}
-
+local outbound_requests = {}
 
 	function adapter:get_interesting_photos(i)--i,thumb,callback)
 print("requesting")
@@ -128,6 +128,14 @@ print("requesting")
 		if i ~= nil then
 			page = i
 		end
+		local already_requested = false
+		for i = 1, #outbound_requests do
+			if outbound_requests[i] == page then
+				already_requested = true
+			end
+		end
+		if already_requested then return end
+		outbound_requests[#outbound_requests + 1] = page
 		local request  = URLRequest
 		{
 			url = base_url.."&per_page=50&page="..page..
@@ -135,10 +143,30 @@ print("requesting")
 					"&text="..search,
 			on_complete =
 			function( request , response )
+				for i = 1, #outbound_requests do
+					if outbound_requests[i] == page then
+						table.remove(outbound_requests,i)
+						break
+					end
+				end
+
+				if response == nil or response.body == nil then
+					if page_num <= 5 then
+						page_num = page_num+1
+						-- Bug in flickr API sometimes returns no results: RESEND
+						print("FLICKR BUG!!  RESEND: ",request.url)
+						request:send()
+
+					end
+					return
+
+				end
 print("response!")
 				local data = json:parse( response.body )
+--dumptable(data)
 ---[[
-				if(0 == #(data.photos.photo)) and page_num <= 5 then
+				if((0 == #(data.photos.photo)) and page_num <= 5 ) or
+					data.photos == nil then
 					page_num = page_num+1
 					-- Bug in flickr API sometimes returns no results: RESEND
 					print("FLICKR BUG!!  RESEND: ",request.url)
@@ -179,7 +207,7 @@ print("response!")
 
 			return ""
         end
-		if i > #adapter.photo_list -30 then
+		if i == #adapter.photo_list -30 then
 			page_num = page_num + 1
 			self:get_interesting_photos()
 		end
