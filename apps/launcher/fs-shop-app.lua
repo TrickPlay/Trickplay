@@ -9,8 +9,6 @@ function( ui , api )
     
     local section = {}
    
-    local ui = nil
-    
     local function build_ui()
     
         local APP_TITLE_STYLE   = { font = "DejaVu Sans 48px" , color = "000000FF" }
@@ -31,12 +29,18 @@ function( ui , api )
         
         local ANIMATE_OUT_DURATION      = 200
         
-        local SCRIM_HIDDEN_Y    = screen.h * 1.25
+        local SCRIM_HIDDEN_Y            = screen.h * 1.25
         
+        local TILE_SCALE                = 0.90
+        local TILE_X                    = 250
+        local TILE_Y                    = 32
         
-    
+        local GET_BUTTON_X              = 250 --center
+        local GET_BUTTON_Y              = 260
+        
+
         local group = Group{ position = { 0 , 0 } , size = screen.size , opacity = 0 }
-                
+            
 
         local scrim_background = assets( "assets/app-screen-scrim.png" )
                 
@@ -45,7 +49,9 @@ function( ui , api )
         local app_title = Text( APP_TITLE_STYLE )
         
         local app_desc = Text( APP_DESC_STYLE )
-        
+                
+        local get_button = factory.make_text_menu_item( assets , "Get it" )
+                
         local scrim = Group
         {
             position = { 0 , SCRIM_Y } ,
@@ -72,17 +78,27 @@ function( ui , api )
                     size = { APP_DESC_W , APP_DESC_H },
                     clip = { 0 , 0 , APP_DESC_W , APP_DESC_H },
                     ellipsize = "END"
+                },
+                
+                get_button:set
+                {
+                    anchor_point = get_button.center,
+                    position = { GET_BUTTON_X , GET_BUTTON_Y }
                 }
             }
         }
         
         group:add( scrim )
         
-        local ui = { readonly = { group = function() return group end } }
-        
         local background = nil
         
-        function ui:populate( shop_app )
+        local tile = nil
+        
+        local old_idle = nil
+
+        local me = { readonly = { group = function() return group end } }
+        
+        function me:populate( shop_app )
         
             -- Remove and let go of an old background if it is there
             
@@ -119,6 +135,27 @@ function( ui , api )
                 end
                 
             end
+            
+            -- Remove old tile if there
+            
+            if tile then            
+                tile:unparent()
+                tile = nil
+            end
+            
+            -- Add new tile
+            
+            tile = factory.make_shop_floor_tile( assets , shop_app.icon )
+            
+            tile:set
+            {
+                position = { TILE_X , TILE_Y },
+                scale = { TILE_SCALE , TILE_SCALE }
+            }
+            
+            scrim:add( tile )
+            
+            tile:raise( scrim_background )
         
             -- Now, populate the text
             
@@ -126,9 +163,11 @@ function( ui , api )
             
             app_desc.text = shop_app.description or ""
             
+            get_button:set_caption( ui.strings[ "Get it now" ]..": "..( api:price_to_string( shop_app.price ) or ui.strings[ "Free" ] ) )
+            
         end
         
-        function ui:animate_in( callback )
+        function me:animate_in( callback )
         
             if not group.parent then
                 screen:add( group )
@@ -147,14 +186,61 @@ function( ui , api )
             local timeline = FunctionTimeline{ duration = ANIMATE_IN_DURATION , functions = to_animate }
             
             function timeline.on_completed( timeline )
-                callback()
+                
+                -- Focus the button
+                
+                get_button:on_focus_in()
+                
+                -- Set up an on_idle to rotate the icon tile after some delay
+                
+                local delay = 1.5
+                                
+                old_idle = idle.on_idle
+                
+                local tile_rotate_d         = -1
+                local TILE_ROTATE_ANGLE     = 20
+                local TILE_ROTATE_SPEED     = TILE_ROTATE_ANGLE / 3
+                
+                function idle.on_idle( idle , seconds )
+                
+                    if delay then
+                        delay = delay - seconds
+                        if delay <= 0 then
+                            delay = nil
+                        end
+                        return
+                    end
+                
+                
+                    local a = ( tile.y_rotation[ 1 ] ) + tile_rotate_d * ( TILE_ROTATE_SPEED * seconds )
+                    
+                    if a >= TILE_ROTATE_ANGLE then
+                        a = TILE_ROTATE_ANGLE
+                        tile_rotate_d = - tile_rotate_d
+                    elseif a <= -TILE_ROTATE_ANGLE then
+                        a = -TILE_ROTATE_ANGLE
+                        tile_rotate_d = - tile_rotate_d
+                    end
+                    
+                    tile.y_rotation = { a , 0 , 0 }
+                    
+                end
+
+                -- Invoke the callback
+                
+                callback()               
+                
             end
             
             timeline:start()
 
         end
         
-        function ui:animate_out( callback )
+        function me:animate_out( callback )
+        
+            idle.on_idle = old_idle
+            
+            old_idle = nil
         
             local to_animate = {}
             
@@ -178,6 +264,11 @@ function( ui , api )
                     background:unparent()
                     background = nil
                 end
+                if tile then
+                    tile:unparent()
+                    tile = nil
+                end
+                
                 group.opacity = 0
             
                 callback()
@@ -187,28 +278,32 @@ function( ui , api )
         
         end
         
-        return Encapsulate( ui )
+        return Encapsulate( me )
         
     end
     
+    local me 
+    
     function section:show_app( shop_app , back_callback )
     
-        if not ui then
-            ui = build_ui()
+        if not me then
+            me = build_ui()
         end
         
-        local group = ui.group
+        local group = me.group
         
         local function finished_in()
             group:grab_key_focus()
             function group.on_key_down( group , key )
-                group.on_key_down = nil
-                ui:animate_out( back_callback )
+                if key == keys.Return then
+                    group.on_key_down = nil
+                    me:animate_out( back_callback )
+                end
             end
         end
         
-        ui:populate( shop_app )
-        ui:animate_in( finished_in )
+        me:populate( shop_app )
+        me:animate_in( finished_in )
     
     end
     

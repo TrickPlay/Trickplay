@@ -160,6 +160,11 @@ function factory.make_text_menu_item( assets , caption )
         focus.opacity = 0
     end
     
+    function group.extra.set_caption( _ , caption )
+        text.text = caption
+        text:set{ position = { ( WIDTH - text.w ) / 2 , ( HEIGHT - text.h ) / 2 } }
+    end
+    
     return group
 
 end
@@ -431,7 +436,7 @@ function factory.make_shop_floor_tile( assets , icon_url )
     
     local scale = ( frame.w - ( FRAME_X_PADDING * 2 ) - ( FRAME_BORDER_W * 2 ) ) / 480
     
-    local group = Group
+    local inner = Group
     {
         size = frame.size ,
         
@@ -448,6 +453,31 @@ function factory.make_shop_floor_tile( assets , icon_url )
             frame ,
             
             focus:set{ opacity = 0 }
+        }
+    }
+    
+    local group = Group
+    {
+        anchor_point = frame.center,
+        
+        children =
+        {
+            Clone
+            {
+                source = inner,
+                x_rotation = { 180 , frame.h , 0 },
+                opacity = 0.1 * 255,
+                position = { 0 , -6 }
+            },
+--[[            
+            Rectangle
+            {
+                size = inner.size,
+                position = { 0 , inner.h - 6  },
+                color = "000000DD"
+            },
+]]
+            inner,            
         }
     }
 
