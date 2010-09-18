@@ -17,6 +17,7 @@ class ApplicationController extends WsController {
                 render(contentType:'application/json') {
                     stat = "ok"
                     application (name:a.name,
+                                 tp_id:a.appId,
                                  description:a.description,
                                  icon:a.icon.imgUrl,
                                  url:a.websiteUrl,
@@ -114,6 +115,7 @@ class ApplicationController extends WsController {
                 applications = array {
                     for(a in apps) {
                         application (id:a.id,
+                                     tp_id:a.appId,
                                      name:a.name,
                                      description:a.description,
                                      icon:a.icon.imgUrl,
