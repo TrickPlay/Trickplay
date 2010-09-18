@@ -265,10 +265,7 @@ function( ui )
         
         -- TODO: We should not create tiles for ALL of them right here...there
         -- could be thousands. Need to add paging mechanism
-        
-        local REFLECTION_OPACITY    = 0.1 * 255
-        local REFLECTION_Y_OFFSET   = -10 
-        
+                
         for _ , shop_app in ipairs( all_apps.applications ) do
 
             local medias = {}
@@ -279,34 +276,12 @@ function( ui )
             
             shop_app.medias = medias
             
-            local tile_group = Group() 
             
             local tile = factory.make_shop_floor_tile( assets , shop_app.icon )
+
+            tile.extra.shop_app = shop_app
             
-            local reflection = Clone
-            {
-                source = tile,
-                x = 0,
-                y = tile.h + REFLECTION_Y_OFFSET ,
-                x_rotation = { 180 , tile.h / 2 , 0 },
-                opacity = REFLECTION_OPACITY
-            }
-            
-            tile_group:add( reflection , tile )
-            
-            -- The anchor point is in the center of the tile, not the reflection,
-            -- or the whole group.
-            
-            tile_group.anchor_point = tile.center 
-            
-            tile_group.extra.shop_app = shop_app
-            
-            tile_group.extra.on_focus_in = tile.extra.on_focus_in
-            tile_group.extra.on_focus_out = tile.extra.on_focus_out
-            tile_group.extra.set_focus_opacity = tile.extra.set_focus_opacity
-            
-            
-            table.insert( app_items , tile_group )
+            table.insert( app_items , tile )
         
         end
         
@@ -802,6 +777,10 @@ function( ui )
             end
             
             local timeline = FunctionTimeline{ duration = ANIMATE_OUT_DURATION , functions = to_animate }
+
+            -- When the animation is done, we put the focus rings back in,
+            -- grab key focus and restore our key handler. We're back in
+            -- business.
             
             function timeline.on_completed( )
                 
