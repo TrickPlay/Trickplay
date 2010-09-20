@@ -18,7 +18,6 @@ SlideshowView = Class(View, function(view, model, ...)
     }
 
     local background  = Image {src = "assets/background.jpg"  }
-    local background2 = Image {src = "assets/background2.png" }
 local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size = {screen.w,screen.h},opacity=255}
 
     --NAV MENU
@@ -59,9 +58,12 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
         y    = 400
     }
 
+local postit = Image
+{src = "assets/note-menu.png",position = {-300,400}}
 
-
-    view.ui:add( backup, overlay_image, background, background2, caption, mosaic_background )
+local license_box = Group{name="license box",position={1000,1040}}
+license_box:add(Rectangle{color="000000",w=920,h=80},opacity=150)
+    view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
     view.timer            = Timer()
     view.timer.interval   = 4
     view.timer_is_running = false
@@ -69,6 +71,8 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
 
     view.on_screen_list  = {}
     view.off_screen_list = {}
+    view.license_on  = {}
+	view.license_off = {}
 
     view.styles = {"REGULAR","LAYERED","MOSAIC"}--,"FULLSCREEN",}
     local off_screen_prep = 
@@ -91,7 +95,7 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
                             group.size[2] + 12 -- 12 = border_width * 2
                         },
                         color        = { 0,  0, 0, 0 },
-                        border_color = { 255, 255, 255,255 },
+                        border_color = { 220, 220, 220,255 },
 
 						position = {-6,-6},
                         border_width=6,
@@ -99,7 +103,7 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
                 })
 --			print("off1",group.w,group.h)
 			if group.w/group.h > screen.w/screen.h then
-				group.scale = {(screen.w*.9)/group.w,(screen.w*.9)/group.w}
+				group.scale = {((screen.w-400)*.9)/group.w,((screen.w-400)*.9)/group.w}
 			else
 				group.scale = {(screen.h*.9)/group.h,(screen.h*.9)/group.h}
 			end
@@ -111,7 +115,7 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
 			group.anchor_point = {	group.size[1]/2,
 									group.size[2]/2}
 
-			group.position = {	screen.w/2+math.random(-5,5),
+			group.position = {	(screen.w-400)/2+math.random(-5,5)+400,
 								screen.h/2+math.random(-5,5)}
 
 
@@ -614,7 +618,6 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
                group.opacity = 255
                group.z = 0
                group:lower_to_bottom()
-               background2:lower_to_bottom()
                background:lower_to_bottom()
                for i = 1, 13 do
                    local child = group:find_child("Clone "..i)
@@ -630,7 +633,6 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
     {
         ["REGULAR"]    = function()
             background.opacity  = 255
-            background2.opacity = 255
 mosaic_background.opacity = 0
             --view.logo.opacity   = 255
 
@@ -654,7 +656,6 @@ pic.anchor_point = {0,0}
                     view.ui:add(view.on_screen_list[i])
 
                     view.on_screen_list[i]:lower_to_bottom()
-                    background2:lower_to_bottom()
                     background:lower_to_bottom()
                 else
                     error("shit")
@@ -681,7 +682,6 @@ pic.anchor_point = {0,0}
 
         ["FULLSCREEN"] = function()
             background.opacity  = 0
-            background2.opacity = 0
 mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
@@ -723,7 +723,6 @@ mosaic_background.opacity = 0
         end,
         ["LAYERED"]    = function()
             background.opacity  = 255
-            background2.opacity = 255
 mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
@@ -760,12 +759,13 @@ mosaic_background.opacity = 0
         end,
         ["MOSAIC"] = function()
             background.opacity  = 0
-            background2.opacity = 0
-mosaic_background.opacity = 255
-mosaic_background:lower_to_bottom()
-if layered_timeline ~= nil then
-                    layered_timeline:on_completed()--advance_to_marker("end")
-end
+			mosaic_background.opacity = 255
+			mosaic_background:lower_to_bottom()
+			if layered_timeline ~= nil then
+				layered_timeline:stop()
+                layered_timeline:on_completed()
+				layered_timeline = nil
+			end
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -839,11 +839,15 @@ end
     local forward_animation =
     {
         ["REGULAR"]    = function(pic)
+
             local end_pos = {pic.position[1],
                              pic.position[2]}
+
             pic.x = math.random(0,1)*1920
             pic.y = math.random(0,1)*1080
+
             pic.z = 400
+
             pic:animate 
             {
                 duration = 500,
@@ -852,9 +856,12 @@ end
                 y        = end_pos[2],
                 z        = 0,
                 on_completed = function()
+						license_box:raise_to_top()
+
                     reset_keys()            
                 end
             }
+
         end,
         ["FULLSCREEN"] = function(pic)
             pic.opacity = 0
@@ -866,6 +873,8 @@ end
                 opacity  = 255,
                 on_completed = function()
                     reset_keys()
+						license_box:raise_to_top()
+
                 end
             }
             if view.on_screen_list[2] ~= nil  then
@@ -879,7 +888,9 @@ end
         end,
         ["LAYERED"]    = function(pic)
                 if layered_timeline ~= nil then
-                    layered_timeline:on_completed()--advance_to_marker("end")
+					layered_timeline:stop()
+                    layered_timeline:on_completed()
+					layered_timeline = nil
                 end
                 layered_timeline = Timeline
                 {
@@ -904,7 +915,6 @@ end
                         child.opacity  = 255
                     end
                 end
-                layered_timeline:add_marker("end",layered_timeline.duration)
                 function layered_timeline.on_new_frame(t,msecs)
                     local index    =  math.ceil(msecs/300)
                     local progress = (msecs - 300*(index-1))/300
@@ -939,10 +949,9 @@ end
                         child.scale    = {1,1}
                         child.z        = 0
                     end
-					layered_timeline:pause()
 
-                    layered_timeline = nil
                     reset_keys()
+						license_box:raise_to_top()
 
                 end
                 layered_timeline:start()
@@ -1128,6 +1137,8 @@ function mosaic_timeline.on_completed()
 					child.opacity = 15
 child:raise_to_top()
 --]]
+						license_box:raise_to_top()
+
 				end
 			end 
 reset_keys()
@@ -1203,6 +1214,8 @@ mosaic_timeline:start()
                         off_screen_list[#off_screen_list] = nil
                     end
 --]]
+						license_box:raise_to_top()
+
                  end
             }
         end,
@@ -1223,6 +1236,8 @@ mosaic_timeline:start()
                         off_screen_list[#off_screen_list] = nil
                     end
 --]]
+						license_box:raise_to_top()
+
                 end
             }
             view.ui:add(view.on_screen_list[1])
@@ -1238,7 +1253,9 @@ mosaic_timeline:start()
         end,
         ["LAYERED"]    = function(pic)
                 if layered_timeline ~= nil then
-                    layered_timeline:on_completed()--advance_to_marker("end")
+					layered_timeline:stop()
+                    layered_timeline:on_completed()
+					layered_timeline = nil
                 end
                 layered_timeline = Timeline
                 {
@@ -1250,7 +1267,6 @@ mosaic_timeline:start()
 
                 local drop_points = {}
                 pic.z = 0
-                layered_timeline:add_marker("end",layered_timeline.duration)
 
                 function layered_timeline.on_started()
                     for i = 1, 13 do
@@ -1297,8 +1313,8 @@ print(i)
                         child.scale    = { 2 , 2 }
                         child.z        = 500
                     end
-					layered_timeline:pause()
-                    layered_timeline = nil
+						license_box:raise_to_top()
+
                 end
                 layered_timeline:start()
         end,
@@ -1509,6 +1525,8 @@ reset_keys()
 old.opacity = 0
 
 		end
+						license_box:raise_to_top()
+
 end
 
 mosaic_timeline:start()
@@ -1541,7 +1559,15 @@ mosaic_timeline:start()
 
     function view:preload_front()
         view.off_screen_list[#view.off_screen_list+1] = Group {z = 500}
+        view.license_off[#view.license_off+1] = Text
+		{
+			text = "",
+			font = "Sans 18px",
+			color = "FFFFFF",
+		}
+
         local group = view.off_screen_list[#view.off_screen_list]
+		local license = view.license_off[#view.license_off]
 
         local style_i = view:get_controller():get_style_index()
 --[[
@@ -1568,8 +1594,7 @@ mosaic_timeline:start()
 	        local photo_i    = view:get_controller():get_photo_index()
 
 			local pic     
-			local license 
-			pic, license = sources[model.fp_1D_index]:get_photos_at(
+			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
 			if pic == nil or attempt == 5 or index < photo_i - 5 then
 				
@@ -1625,7 +1650,6 @@ mosaic_timeline:start()
                         timeline:stop()
                         group:clear()
                         on_screen_prep[view.styles[style_i2] ](img,group)
-                        group:add(license)
                     end
                     if group == view.on_screen_list[1] then
                         group.opacity = 255
@@ -1728,10 +1752,17 @@ mosaic_timeline:start()
     end
     function view:preload_back()
         view.on_screen_list[#view.on_screen_list+1] = Group {z = 0}
+        view.license_on[#view.license_on+1] = Text
+		{
+			text = "",
+			font = "Sans 18px",
+			color = "FFFFFF",
+		}
+
         local group = view.on_screen_list[#view.on_screen_list]
+		local license = view.license_on[#view.license_on]
         view.ui:add(group)
         group:lower_to_bottom()
-        background2:lower_to_bottom()
         background:lower_to_bottom()
 
         local style_i = view:get_controller():get_style_index()
@@ -1752,8 +1783,7 @@ mosaic_timeline:start()
 
         --local callback = function(url)
 			local pic     
-			local license 
-			pic, license = sources[model.fp_1D_index]:get_photos_at(
+			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
             if pic == "" then
                 local timeout = Timer{ interval = 4 }
@@ -1800,7 +1830,6 @@ mosaic_timeline:start()
                         on_screen_prep[view.styles[style_i] ](img,group)
                         --if its the desk/slideshow, then need to
                         --put it at the bottom of the stack
-                        group:add(license)
                     end
                     if group == view.on_screen_list[1] then
                         group.opacity = 255
@@ -1970,6 +1999,16 @@ mosaic_timeline:start()
                     --grab the pic underneath the current one
                     local pic = table.remove(view.on_screen_list, 1 )
                     table.insert(view.off_screen_list, 1 ,pic)
+                    local license = table.remove(view.license_on, 1 )
+                    table.insert(view.license_off, 1 ,license)
+					if license ~= nil then
+						license:unparent()
+					end
+					if view.license_on[1] ~= nil then
+						license_box:add(view.license_on[1])
+						license_box:raise_to_top()
+					end
+
                     if #view.off_screen_list > 5 then
                         print("removing from off_screen list")
                         if view.off_screen_list[#view.off_screen_list] ~= 
@@ -1992,8 +2031,19 @@ mosaic_timeline:start()
                 if #view.off_screen_list > 0 then
                    print("moving forward")
                    --grab the picture
+
                    local pic = table.remove( view.off_screen_list,1 )
                    table.insert( view.on_screen_list,  1, pic )
+                   local license = table.remove( view.license_off,1 )
+                   table.insert( view.license_on,  1, license )
+					if view.license_on[2] ~= nil then
+						view.license_on[2]:unparent()
+					end
+					if license ~= nil then
+						license_box:add(license)
+						license_box:raise_to_top()
+
+					end
                    if #view.on_screen_list > 5 then
                        print("removing from on_screen list")
             
@@ -2005,6 +2055,9 @@ mosaic_timeline:start()
 
                        view.on_screen_list[#view.on_screen_list]=nil
                    end
+					if #view.license_on >5 then
+						view.license_on[#view.license_on] = nil
+					end
 
                    --add it to the screen and end its previous animation
                    self.ui:add(pic)
@@ -2012,6 +2065,7 @@ mosaic_timeline:start()
                    pic.opacity = 255
 
                    forward_animation[view.styles[style_i]](pic)
+
                 else
                     print("off screen is 0")
                 end
