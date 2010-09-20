@@ -74,18 +74,13 @@ function loading(group)
 end
 --calls adapters/sources, loads default images
 function Setup_Album_Covers()
-    --model.albums       = {}
     model.fp_slots     = {}
-
-   -- model.placeholders = {}
 
     model.album_group.x = screen.width  / (NUM_VIS_COLS + 1)*.5
 
     --fill the thing with clones of the default-loading image
     for i = 1,NUM_ROWS do 
 
-        --model.placeholders[i] = {}
-        --model.albums[i]       = {}
         model.fp_slots[i]     = {}
 
         for j = 1,math.ceil(#terms/NUM_ROWS) do

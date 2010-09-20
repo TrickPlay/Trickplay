@@ -212,29 +212,18 @@ print("response!")
 			self:get_interesting_photos()
 		end
 		if thumb then
-			return adapter.photo_list[i].url_m, Text
-				{
-					position = { 10, 0 },
-					text = "\""..adapter.photo_list[i].title..
-						"\" ©"..adapter.photo_list[i].ownername..
+			return adapter.photo_list[i].url_m,  
+						"\""..adapter.photo_list[i].title..
+						"\" ©\n"..adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
-							license].short..")",
-					color = { 255, 255, 255 },
-					font = "Graublau Web,DejaVu Sans,Sans 18px",
-					wrap = false,
-				}
+							license].short..")"
 		else
-			return adapter.photo_list[i].url_m, Text
-				{
-					position = { 10, 0 },
-					text = "\""..adapter.photo_list[i].title..
-						"\" ©"..adapter.photo_list[i].ownername..
+
+			return adapter.photo_list[i].url_m, 
+						"\""..adapter.photo_list[i].title..
+						"\" ©\n"..adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
-							license].short..")",
-					color = { 255, 255, 255 },
-					font = "Graublau Web,DejaVu Sans,Sans 18px",
-					wrap = false,
-				}
+							license].short..")"
 		end
 	end
 end)

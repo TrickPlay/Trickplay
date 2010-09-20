@@ -101,6 +101,91 @@ FrontPageView = Class(View, function(view, model, ...)
     view.prev_pos   = {}
     view.prev_scale = {1,1}
 
+	local selector = Image {src = "assets/poloroid.png" }
+	view.ui:add(selector)
+	function view:move_selector(moving)
+	    local sel_timeline = Timeline
+		{
+        	name      = "Selection animation",
+	        loop      =  false,
+			--duration  =  3000,
+        	duration  = 200,
+	        direction = "FORWARD",
+    	}
+        local controller  = view:get_controller()
+        local  sel        = {}
+        sel[1],sel[2]     = controller:get_selected_index()
+local curr_old_x = view.current.x
+local curr_targ_x = view.current.x
+local prev_old_x = view.previous.x
+local prev_targ_x =PIC_W * (prev_i[2]-1) 
+		local old_x    = selector.x
+		local old_y    = selector.y
+print(model.album_group.x, view.current.x)
+---[[
+		if     sel[2] + model.front_page_index -1 == 1 then
+			curr_targ_x = 20
+		elseif sel[2] == NUM_VIS_COLS and 
+				model.front_page_index == math.ceil(#sources / 
+                     NUM_ROWS) - (NUM_VIS_COLS-1) then
+			curr_targ_x = curr_targ_x - 30
+
+		end
+--]]
+		local target_y = view.current.y
+		if     sel[1] == 1        then target_y = 0
+		elseif sel[1] == NUM_ROWS then target_y = view.current.y -110
+		end
+
+
+		local prev_old_y  = view.previous.y
+		local prev_targ_y = PIC_H * (prev_i[1]-1)+10 
+
+		local curr_old_y = view.current.y
+		local curr_targ_y = view.current.y
+		if     sel[1] == 1        then curr_targ_y = 30
+		elseif sel[1] == NUM_ROWS then curr_targ_y = view.current.y -75
+		end
+
+	    function sel_timeline.on_new_frame(t,msecs)
+			local p = msecs/t.duration
+		local target_x = model.album_group.x + view.current.x - 30
+
+			--move the selector
+			selector.x = old_x + (target_x - old_x)*p
+			selector.y = old_y + (target_y - old_y)*p
+
+			--move old slot back to its position
+			view.previous.y = prev_old_y + (prev_targ_y - prev_old_y)*p
+			view.previous.x = prev_old_x + (prev_targ_x - prev_old_x)*p
+
+			--move the next slot up (if on the bottom row) 
+			-- or down (if on the top row)
+			view.current.y = curr_old_y + (curr_targ_y - curr_old_y)*p
+			view.current.x = curr_old_x + (curr_targ_x - curr_old_x)*p
+	         view.current.scale = {1 + p*.05, 1 + p * .05}
+	         view.previous.scale = {1 + (1-p)*.05, 1 + (1-p) * .05}
+
+		end
+	    function sel_timeline.on_completed()
+		local target_x = model.album_group.x + view.current.x - 30
+	         view.current.scale = {1.05, 1.05}
+	         view.previous.scale = {1, 1 }
+
+			view.current.y = curr_targ_y
+			view.current.x = curr_targ_x
+			view.previous.y = prev_targ_y
+			view.previous.x = prev_targ_x
+			selector.x = target_x
+			selector.y = target_y
+			prev_i[1] = sel[1]
+			prev_i[2] = sel[2] + model.front_page_index-1
+reset_keys()
+		end
+		sel_timeline:start()
+	end
+--[=[
+
     --the selection timeline
     local sel_timeline = Timeline
     {
@@ -166,7 +251,6 @@ FrontPageView = Class(View, function(view, model, ...)
                 PIC_W * (sel[2]-1) - 22 - (.025*PIC_W),
                 PIC_H * (sel[1]-1) - 22
             }
-
         -- bring the bar up a little bit
         elseif msecs > 800  and msecs <= 900 then
             local progress = (msecs - 800)/100
@@ -188,6 +272,7 @@ FrontPageView = Class(View, function(view, model, ...)
         --view.bottom_bar.y = PIC_H - 140
         view.bottom_bar.y = PIC_H - 70
     end
+--]=]
 
 
     function view:initialize()
@@ -226,7 +311,7 @@ FrontPageView = Class(View, function(view, model, ...)
             mode     = EASE_OUT_QUAD,
             x        = new_x,
             on_completed = function()
-                reset_keys()
+            --    reset_keys()
             end
         }
 
@@ -266,7 +351,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
 
 
-            sel_timeline:stop()
+            --sel_timeline:stop()
             view.previous   =  model.fp_slots[prev_i[1]][prev_i[2]]
             view.prev_pos   = {view.previous.position[1],
                                view.previous.position[2]}
@@ -304,7 +389,7 @@ FrontPageView = Class(View, function(view, model, ...)
             view.backdrop:raise_to_top()
             view.current:raise_to_top()
 
-            sel_timeline:start()
+            --sel_timeline:start()
         elseif comp == Components.SOURCE_MANAGER then
             print("Dimming FrontPageView UI")
             view:shift_group()
