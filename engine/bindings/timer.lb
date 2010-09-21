@@ -15,6 +15,12 @@ module timer;
     
     If you change the interval to <= 0, remove the callback, call stop
     or return false from the callback, the timer will stop ticking.
+
+    NOTE: This is a "best effort" timer, which will try and call you back every interval.  However,
+    the resolution of the timer may vary from platform to platform, and no guarantee is made about the
+    precision of the timing of callbacks, particularly for short intervals.  You may wish to use an animation
+    or a Timeline for more precise control under some circumstances, or if you want something to happen with
+    relatively low latency, you might want to use an on_idle() handler.
 */
 
 class timer
@@ -26,8 +32,8 @@ public:
     static gboolean timer_fired( gpointer data );
     void start(UserData * ud);
     void stop();
-    void set_interval(UserData * ud,lua_Number new_interval);
-    lua_Number get_interval() const;
+    void set_interval(UserData * ud,unsigned int new_interval);
+    unsigned int get_interval() const;
     void cancel();
 
 private:
@@ -75,7 +81,7 @@ class Timer [[timer*]]
     # > timer=Timer{ interval=5000 , on_timer=some_function }
     
     
-    Timer( double interval = 0 , function on_timer = 0 )
+    Timer( int interval = 0 , function on_timer = 0 )
         [[
             self = lb_construct( timer , new timer );
 
@@ -112,7 +118,7 @@ class Timer [[timer*]]
     # Property: interval
     # The interval, in milliseconds, after which the timer fires. 
         
-    double interval
+    int interval
         [[interval=self->get_interval();]]
         [[self->set_interval(UserData::get(L),interval);]];
         
@@ -188,7 +194,7 @@ void timer::stop()
     source=NULL;
 }
 
-void timer::set_interval(UserData * ud,lua_Number new_interval)
+void timer::set_interval(UserData * ud,unsigned int new_interval)
 {
     if (new_interval==interval)
 		return;
@@ -202,7 +208,7 @@ void timer::set_interval(UserData * ud,lua_Number new_interval)
     }
 }
 
-lua_Number timer::get_interval() const
+unsigned int timer::get_interval() const
 {
     return interval;
 }
