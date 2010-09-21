@@ -100,7 +100,7 @@ function Creep:render(seconds)
 		if game.board.theme.themeName == "robot" then
 			local a = Group{x=0, y=0, opacity = 0}
 			a:add( AssetLoader:getImage( "bloodyhand", {z_rotation = {math.random(160)-80,screen.w/2, screen.h/2}, y = math.random(700)-350, x = math.random(700)-350} ) )
-			Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
+			Popup:new{group = a, fadeSpeed = 400, time=2000, opacity = 255}
 			
 			if SOUND then mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/ZombieGroan.mp3") end
 			--mediaplayer:play_sound("themes/"..game.board.theme.themeName.."/sounds/Thump.mp3")
