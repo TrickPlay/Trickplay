@@ -26,6 +26,7 @@ function( ui , api )
         local BACKGROUND_FADE_DURATION  = 500
         
         local ANIMATE_IN_DURATION       = 200
+        local ANIMATE_IN_MODE           = "EASE_IN_QUAD"
         
         local ANIMATE_OUT_DURATION      = 200
         
@@ -183,7 +184,7 @@ function( ui , api )
             local interval = Interval( SCRIM_HIDDEN_Y , SCRIM_Y )
             table.insert( to_animate , function( progress ) scrim.y = interval:get_value( progress ) end )
             
-            local timeline = FunctionTimeline{ duration = ANIMATE_IN_DURATION , functions = to_animate }
+            local timeline = FunctionTimeline{ mode = ANIMATE_IN_MODE , duration = ANIMATE_IN_DURATION , functions = to_animate }
             
             function timeline.on_completed( timeline )
                 
