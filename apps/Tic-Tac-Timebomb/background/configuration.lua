@@ -42,8 +42,8 @@ random_scale = SCALE_RANDOM[math.random(1,6)]
 -----------------------------------------------
 
 -- Sets Rectangle width and height
-square_width = 45
-square_height = 45
+square_width = 15
+square_height = 15
 
 
 -----------------------------------------------
@@ -67,10 +67,10 @@ shape_z_rotation = 1440
 -----------------
 
 -- Sets the Starting scale
-start_scale = 1
+start_scale = 2
 
 -- End scale ( use random_scale for random scaling)
-end_scale = 1
+end_scale = 2
 
 
 -------------------
