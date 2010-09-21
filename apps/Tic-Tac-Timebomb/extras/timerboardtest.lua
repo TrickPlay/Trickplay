@@ -1,0 +1,10 @@
+-- ShowBoardTimer("X") testTimer = Timer()
+--  testTimer.interval=1 interval = 0
+-- function testTimer.on_timer(testTimer) 
+-- 	TickBoardTimer() 
+-- 	if interval == 10 then 
+-- 		ClearBoardTimer()
+-- 	end
+-- 	interval = interval + 1
+-- end
+-- testTimer:start() NewPlayField()
