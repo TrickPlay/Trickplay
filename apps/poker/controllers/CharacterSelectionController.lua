@@ -39,7 +39,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    local function start_a_game()
       -- add table text
-      local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
+      --local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
+      local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {674, 445}, opacity = 0})
+      ttt = table_text
       screen:add( table_text )
       table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
    
@@ -135,7 +137,6 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          end
          i = i+1
       end
-      print("\n\n\n\ni = "..i.."\n\n\n\n")
       table.insert(model.players, i, Player(args))
       model.positions[pos] = true
       model.currentPlayer = self.playerCounter
