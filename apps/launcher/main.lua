@@ -29,6 +29,7 @@ local function build_ui( show_it )
     local SECTION_SHOWCASE  = 2
     local SECTION_SHOP      = 3
     local SECTION_SETTINGS  = 4
+    local SECTION_SEARCH    = 5 -- special
 
     -------------------------------------------------------------------------------
     -- Style constants
@@ -103,6 +104,7 @@ local function build_ui( show_it )
                 height  = 320,
                 init    = dofile( "section-settings" )
             }
+            
         }
     }
     
@@ -219,7 +221,10 @@ local function build_ui( show_it )
     
     ui.search_button.position = { left + SEARCH_BUTTON_X_OFFSET , FIRST_BUTTON_Y }
     
-    ui.bar:add( ui.search_button )
+    ui.search_focus.position = ui.search_button.position
+    ui.search_focus.opacity = 0
+
+    ui.bar:add( ui.search_button , ui.search_focus )
     
     
     ui.logo.position = { screen.w - ( ui.logo.w + FIRST_BUTTON_X ) , FIRST_BUTTON_Y }
@@ -268,6 +273,10 @@ local function build_ui( show_it )
         
         local section = ui.sections[ ui.focus ]
         
+        if not section then
+            return
+        end
+        
         if not section.dropdown then
             if callback then
                 callback( section )
@@ -298,6 +307,10 @@ local function build_ui( show_it )
         local ANIMATION_DURATION = 150
         
         local section = ui.sections[ ui.focus ]
+        
+        if not section then
+            return
+        end
         
         if section.dropdown.is_visible then return end
         
@@ -334,25 +347,49 @@ local function build_ui( show_it )
 
         -- Bad focus. Your focus needs more focus.
         
-        if not new_focus then return end
+        if not new_focus then
+            return
+        end
         
         -- Same focus. Laser focus.
         
-        if new_focus == ui.focus then return end
+        if new_focus == ui.focus then
+            return
+        end
         
         local section = ui.sections[ new_focus ]
         
         -- Focus out of range. Blurred.
         
-        if not section then return end -- The new section is out of range
+        if not section and new_focus ~= SECTION_SEARCH then
+            return -- The new section is out of range
+        end 
         
         animate_out_dropdown()
         
+        if ui.focus == SECTION_SEARCH then
+        
+            ui.search_focus.opacity = 0
+            
+            ui.button_focus.opacity = 255
+            
+        end            
+        
         ui.focus = new_focus
         
-        ui.button_focus.position = section.button.position
+        if ui.focus == SECTION_SEARCH then
         
-        reset_dropdown_timer()    
+            ui.search_focus.opacity = 255
+            
+            ui.button_focus.opacity = 0
+            
+        else
+        
+            ui.button_focus.position = section.button.position
+            
+            reset_dropdown_timer()    
+        end
+        
     end
 
     -------------------------------------------------------------------------------
@@ -370,7 +407,11 @@ local function build_ui( show_it )
                 
         if section:on_enter() then
         
-            ui.button_focus.opacity = 0
+            if ui.focus == SECTION_SEARCH then
+                ui.search_focus.opacity = 0
+            else
+                ui.button_focus.opacity = 0
+            end
             
         end
     
@@ -569,7 +610,16 @@ local function build_ui( show_it )
     function ui:on_exit_section()
     
         self.bar:grab_key_focus()
-        self.button_focus.opacity = 255
+        
+        if ui.focus == SECTION_SEARCH then
+        
+            self.search_focus.opacity = 255
+            
+        else
+        
+            self.button_focus.opacity = 255
+            
+        end
     
     end
 
