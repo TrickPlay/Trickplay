@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/cgupnpjava/!svn/ver/131/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp
+END
+SSDPPacket.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPPacket.java
+END
+SSDPSearchSocketList.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svnroot/cgupnpjava/!svn/ver/67/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPSearchSocketList.java
+END
+SSDPNotifySocketList.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svnroot/cgupnpjava/!svn/ver/67/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPNotifySocketList.java
+END
+SSDPSearchSocket.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/cgupnpjava/!svn/ver/91/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPSearchSocket.java
+END
+SSDPSearchRequest.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPSearchRequest.java
+END
+SSDP.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/cgupnpjava/!svn/ver/68/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDP.java
+END
+SSDPNotifySocket.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/cgupnpjava/!svn/ver/91/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPNotifySocket.java
+END
+SSDPNotifyRequest.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPNotifyRequest.java
+END
+HTTPUSocket.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/cgupnpjava/!svn/ver/131/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/HTTPUSocket.java
+END
+SSDPSearchResponse.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPSearchResponse.java
+END
+SSDPRequest.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPRequest.java
+END
+SSDPSearchResponseSocketList.java
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/svnroot/cgupnpjava/!svn/ver/59/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPSearchResponseSocketList.java
+END
+SSDPSearchResponseSocket.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svnroot/cgupnpjava/!svn/ver/131/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPSearchResponseSocket.java
+END
+SSDPResponse.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/SSDPResponse.java
+END
+HTTPMUSocket.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnroot/cgupnpjava/!svn/ver/118/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/ssdp/HTTPMUSocket.java
+END

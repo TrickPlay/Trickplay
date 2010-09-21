@@ -43,6 +43,13 @@
 	AVAudioPlayer  *mAudioPlayer;
 	NSString *mSoundLoopName;
 	AudioStreamer *streamer;
+		
+											   
+	//iPhone4 socket
+	NSInteger mSocketMode;
+	NSMutableData *data;
+	NSInputStream *iStream;
+    NSOutputStream *oStream;
 }
 
 @property NSTimeInterval mTouchedTime;

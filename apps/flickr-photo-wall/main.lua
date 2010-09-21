@@ -1,4 +1,4 @@
-Timer{ interval = 2 , on_timer = function() collectgarbage() end }
+Timer{ interval = 2000 , on_timer = function() collectgarbage() end }
 
 dofile("Flickr.lua")
 
