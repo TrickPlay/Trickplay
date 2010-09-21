@@ -83,7 +83,7 @@ local function build_ui( show_it )
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "Showcase" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 620,
+                height  = 340,
                 init    = dofile( "section-showcase" )
             },
             
