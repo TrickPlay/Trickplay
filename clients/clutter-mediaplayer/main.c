@@ -1,5 +1,8 @@
 
+#define G_LOG_DOMAIN "tp-cmp"
+
 #include "clutter-gst/clutter-gst.h"
+#include "gst/video/video.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -271,6 +274,11 @@ static void loading_messages(GstBus * bus,GstMessage * message,TPMediaPlayer * m
             ud->load_signal=0;
             
             break;
+        }
+        default:
+        {
+        	// Default handler to make clang shut up
+			break;
         }
     }
 }
