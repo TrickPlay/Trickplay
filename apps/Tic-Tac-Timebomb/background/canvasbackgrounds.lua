@@ -104,6 +104,34 @@ local function make_roll_clones()
 
 end
 
+local function make_roll_clones_big()
+
+	update_config()
+	rollclone = Clone
+			   {
+					 source = shape,
+					 name = "imaclone2",
+				}
+	
+	screen:add(rollclone)
+	
+	rollclone.opacity = shape_start_opacity
+	rollclone.position = {shape_start_x,shape_start_y}
+	rollclone.scale = {5,5}
+	rollclone.anchor_point = {square_width/2,square_height/2}
+	print("Animating: rollclone, from: ",shape)
+    	
+	rollclone:animate({ 
+	duration = 200000, 
+    scale = {5, 5}, 
+	opacity = shape_start_opacity, 
+	mode = animation_mode, 
+	position = { shape_end_x,shape_end_y },  
+	on_completed = function(_,a) print("unparent:",a,a.name) a:unparent()  end,
+	z_rotation = shape_z_rotation,
+	})
+
+end
   
   
 ------------------------------------------------------------
@@ -115,6 +143,7 @@ function random_shapes()
 	for i = 1,number_of_shapes do
 		print("Cloning..")
 		make_roll_clones()
+		make_roll_clones_big()
 --		make_grow_clones()
 		print("Cloned!")
 	end
