@@ -500,6 +500,60 @@ function factory.make_shop_floor_tile( assets , icon_url )
 
 end
 
+-------------------------------------------------------------------------------
+-- Makes a star
+-------------------------------------------------------------------------------
+
+function factory.make_star( size , percent_filled , empty_color , full_color )
+
+    local function star_path( canvas , center , radius )
+        local x = 0
+        local y = -radius
+        canvas:save()
+        canvas:translate( unpack( center ) )
+        canvas:move_to( x , y )
+        for i = 1 , 5 do
+            canvas:rotate( 72 * 3 )
+            canvas:line_to( x , y )
+        end
+        canvas:restore()
+    end
+
+    local c = Canvas{ size = { size , size } }
+    
+    local r = size / 2
+    
+    c:begin_painting()
+    
+    if percent_filled == 0 then
+        star_path( c , { r , r } , r )
+        c:set_source_color( empty_color )
+        c:fill()
+    elseif percent_filled == 1 then
+        star_path( c , { r , r } , r )
+        c:set_source_color( full_color )
+        c:fill()
+    else
+        star_path( c , { r , r } , r )
+        c:set_source_color( empty_color )
+        c:fill()
+        c.op = "ATOP"
+        c:rectangle( 0 , 0 , size * percent_filled , size )
+        c:set_source_color( full_color )
+        c:fill()
+    end
+    
+    c:finish_painting()
+    
+    function c.extra.on_focus_in()
+    end
+    
+    function c.extra.on_focus_out()
+    end
+    
+    return c
+
+end
 
 
 return factory
