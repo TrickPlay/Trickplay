@@ -11,6 +11,10 @@ AssetLoader:preloadImage("ChooseDog","assets/ChooseYourDog.png")
 AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
 
 
+AssetLoader:preloadImage("Win","assets/outcome/winner.png")
+AssetLoader:preloadImage("Lose","assets/outcome/loser.png")
+
+
 
 -- Tutorial Slides
 for i=1, 4 do
@@ -32,7 +36,6 @@ for _,color in pairs(ui_colors) do
 end
 
 -- Load new UI elements
-AssetLoader:preloadImage("ButtonsOnTable","assets/UI/new/buttons_on_table.png")
 AssetLoader:preloadImage("BetArrowUp","assets/UI/new/betarrow_up.png")
 AssetLoader:preloadImage("BetArrowDown","assets/UI/new/betarrow_down.png")
 
@@ -56,12 +59,12 @@ end
 
 -- Dog animations
 DOG_ANIMATIONS = {
-   [1] = {dog = 1, name = "animation_bling", frames = 11, position = {90, 538}, speed = .06 },
-   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0}, speed = .1 },
-   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {341, 9}, speed = .1 },
-   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22}, speed = .14 },
-   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186}, speed = .16 },
-   [6] = {dog = 6, name = "animation_jacket", frames = 10, position = {1404, 572}, speed = .1 },
+   [1] = {dog = 1, name = "animation_bling", frames = 11, position = {90, 538}, speed = 60 },
+   [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0}, speed = 100 },
+   [3] = {dog = 3, name = "animation_slideglass", frames = 5, position = {341, 9}, speed = 100 },
+   [4] = {dog = 4, name = "animation_cards", frames = 5, position = {1144, 22}, speed = 140 },
+   [5] = {dog = 5, name = "animation_music", frames = 7, position = {1607, 186}, speed = 160 },
+   [6] = {dog = 6, name = "animation_jacket", frames = 10, position = {1404, 572}, speed = 100 },
 }
 
 for i, t in ipairs(DOG_ANIMATIONS) do
@@ -208,11 +211,6 @@ function()
 
    game = GameControl(model)
    model:start_app(Components.CHARACTER_SELECTION)
-   -- local p = Player{position={100,100}, chipPosition={200,200}}
-   -- p:createBetChips()
-   -- model.players = {p}
-   -- model.currentPlayer = 1
-
 --   model:start_app(Components.PLAYER_BETTING)
 
    AssetLoader.on_preload_ready = nil

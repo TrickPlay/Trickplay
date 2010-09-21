@@ -173,9 +173,10 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local bb_player = model.players[ ctrl:get_bb_p() ]
       add_player_chips( sb_player )
       add_player_chips( bb_player )
-      sb_player.betChips:set( ctrl:get_sb_qty() )
-      bb_player.betChips:set( ctrl:get_bb_qty() )
-      
+      local player_bets = ctrl:get_player_bets()
+      sb_player.betChips:set( player_bets[sb_player] )
+      bb_player.betChips:set( player_bets[bb_player] )
+      model:notify()
    end
 
    -- Deal community cards
@@ -243,6 +244,17 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
       end
       animate_pot_to_player(winners[1])
+      local text = Text{
+         text="Hit any key to continue!",
+         font="Sans 36px",
+         color="FFFFFF",
+         position={screen.w/2,400},
+         opacity=0
+      }
+      text.anchor_point = {text.w/2, text.h/2}
+      screen:add(text)
+      Popup:new{group = text, time = 1.5}
+
    end
 
    -- Clear everything
@@ -291,7 +303,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- FOLD
    function pres:fold_player(player)
-      local foldtimer = Timer{interval=.2}
+      local foldtimer = Timer{interval=200}
       function foldtimer.on_timer(t)
          t:stop()
 --         remove_player_chips(player)
@@ -349,7 +361,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- SOMEONE LEFT A SEAT
    function pres:remove_player(removed_player)
-      local foldtimer = Timer{interval=.2}
+      local foldtimer = Timer{interval=1000}
       function foldtimer.on_timer(t)
          t:stop()
          remove_player_cards(removed_player)
@@ -364,8 +376,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
+      assert(only_player)
       only_player.status:update( "weaksauce." )
-      only_player.betChips:set(0)
+      if only_player.betChips then only_player.betChips:set(0) end
       animate_pot_to_player( only_player )
    end
 

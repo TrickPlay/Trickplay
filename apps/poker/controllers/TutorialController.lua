@@ -6,10 +6,16 @@ TutorialController = Class(Controller, function(self, view, ...)
     
     local keyTable = {
         [keys.Up] = function(self) end,
-        [keys.Down] = function(self) model:set_active_component(Components.CHARACTER_SELECTION) self:get_model():notify() end,
+        [keys.Down] = function(self) 
+            model:set_active_component(model.previous_component)
+            self:get_model():notify()
+        end,
         [keys.Left] = function(self) self:move(Directions.LEFT) end,
         [keys.Right] = function(self) self:move(Directions.RIGHT) end,
-        [keys.Return] = function(self) model:set_active_component(Components.CHARACTER_SELECTION) self:get_model():notify() end,
+        [keys.Return] = function(self)
+            model:set_active_component(model.previous_component)
+            self:get_model():notify()
+        end,
     }
     
     function self:on_key_down(k)

@@ -116,10 +116,11 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       if(self.playerCounter == 0) then
          isHuman = true
       end
+      self.playerCounter = self.playerCounter + 1
       
       args = {
          isHuman = isHuman,
-         number = self.playerCounter + 1,
+         number = self.playerCounter,
          table_position = pos,
          position = model.default_player_locations[ self:getPosition() ],
          chipPosition = model.default_bet_locations[ self:getPosition() ],
@@ -134,11 +135,11 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          end
          i = i+1
       end
+      print("\n\n\n\ni = "..i.."\n\n\n\n")
       table.insert(model.players, i, Player(args))
       model.positions[pos] = true
       model.currentPlayer = self.playerCounter
 
-      self.playerCounter = self.playerCounter + 1
       if(self.playerCounter >= 2) then
          view.items[2][3].opacity = 255
       end
@@ -195,17 +196,22 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    function self:move_selector(dir)
       screen:grab_key_focus()
-      if(0 ~= dir[1]) then
+      if 0 ~= dir[1] then
          local new_selected = subselection + dir[1]
          if 1 <= new_selected and SubSize >= new_selected then
             subselection = new_selected
             check_for_valid(dir)
          end
-      elseif(0 ~= dir[2]) then
-         local new_selected = selected + dir[2]
-         if 1 <= new_selected and GroupSize >= new_selected then
-            selected = new_selected
-            check_for_valid(dir)
+      elseif 0 ~= dir[2] then
+         if dir[2] == -1 and selected == CharacterSelectionGroups.BOTTOM and subselection == SubGroups.RIGHT_MIDDLE then
+            selected = CharacterSelectionGroups.TOP
+            subselection = SubGroups.MIDDLE
+         else
+            local new_selected = selected + dir[2]
+            if 1 <= new_selected and GroupSize >= new_selected then
+               selected = new_selected
+               check_for_valid(dir)
+            end
          end
       end
       self:get_model():notify()
@@ -213,9 +219,13 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
    function self:reset()
       self.playerCounter = 0
+      selected = 2
+      subselection = 1
       model.players = {}
       for i=1,6 do
          model.positions[i] = false
       end
+
+      view:reset()
    end
 end)

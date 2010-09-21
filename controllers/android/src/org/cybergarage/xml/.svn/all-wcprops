@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/cgupnpjava/!svn/ver/152/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml
+END
+AttributeList.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/AttributeList.java
+END
+XML.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/XML.java
+END
+NodeList.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/cgupnpjava/!svn/ver/63/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/NodeList.java
+END
+Attribute.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/Attribute.java
+END
+Node.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/cgupnpjava/!svn/ver/94/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/Node.java
+END
+ParserException.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/ParserException.java
+END
+Parser.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/cgupnpjava/!svn/ver/142/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/Parser.java
+END

@@ -19,7 +19,8 @@ function(ctrl, model, ...)
    local orig_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
-         enable_event_listener(TimerEvent{interval=1})
+         pres:update_blinds()
+         enable_event_listener(TimerEvent{interval=1000})
          local continue = true
          return continue
       end,
@@ -32,18 +33,17 @@ function(ctrl, model, ...)
       function(ctrl)
          state:move_blinds()
          local continue = hand_ctrl:cleanup()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          pres:finish_hand()
          hands = hands + 1
          return continue
       end,
       -- increase blinds
       function(ctrl)
-         if hands % 10 == 0 then
+         if hands % 4 == 0 then
             state:increase_blinds()
-            pres:update_blinds()
          end
-         enable_event_listener(TimerEvent{interval=.1})
+         enable_event_listener(TimerEvent{interval=100})
          return true
       end
    }
@@ -52,7 +52,7 @@ function(ctrl, model, ...)
    local help_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          local continue = true
          return continue
       end,
@@ -64,7 +64,7 @@ function(ctrl, model, ...)
       function(ctrl)
          state:move_blinds()
          local continue = hand_ctrl:cleanup()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          pres:finish_hand()
          return continue
       end
@@ -96,7 +96,7 @@ function(ctrl, model, ...)
 
       reset_pipeline()
       disable_event_listeners()
-      enable_event_listener(TimerEvent{interval=1})
+      enable_event_listener(TimerEvent{interval=1000})
    end
 
    function ctrl.start_hand(ctrl)
@@ -128,7 +128,8 @@ function(ctrl, model, ...)
       end
 
       if #players == 1 or not still_playing then
-         pres:return_to_main_menu()
+         hand_ctrl:cleanup()
+         pres:return_to_main_menu(still_playing)
          enable_event_listener(KbdEvent())
          model:set_active_component(Components.CHARACTER_SELECTION)
          model:get_active_controller():reset()
@@ -139,6 +140,7 @@ function(ctrl, model, ...)
       if #game_pipeline == 0 then
          reset_pipeline()
       end
+
 
       local action = game_pipeline[1]
       local result = action(ctrl, event)
@@ -151,17 +153,5 @@ function(ctrl, model, ...)
       -- else
       --    enable_event_listener(Events.KEYBOARD)
       -- end
-   end
-
-   function ctrl:set_bet_listener(callback, player)
-      error("GameControl:set_bet_listener called")
-      if player.isHuman then
-         model.currentPlayer = player
-         model:set_active_component(Components.PLAYER_BETTING)
-         model:get_active_controller():set_callback(callback)
-         enable_event_listener(KbdEvent())
-      else
-         
-      end
    end
 end)

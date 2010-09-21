@@ -3,32 +3,12 @@ CharacterSelectionView = Class(View, function(view, model, ...)
 
     -- text instructing the player to select a character
     
-    choose_char_text = AssetLoader:getImage("ChooseDog",{})
-    select_ai_text = AssetLoader:getImage("ChooseAI",{})
+    local choose_char_text = AssetLoader:getImage("ChooseDog",{})
+    local select_ai_text = AssetLoader:getImage("ChooseAI",{})
     
     choose_char_text.position = {1920/2-choose_char_text.width/2, 1080/2-choose_char_text.height/2 + 50}
     select_ai_text.position = {1920/2-select_ai_text.width/2, 1080/2-select_ai_text.height/2 + 100}
     
-    --[[
-    choose_char_text = Text{
-        text = "Choose Your Character!",
-        font = "KacstArt 70px",
-        color = Colors.YELLOW,
-        opacity = 0
-    }
-    ]]--
-    
-    --[[
-    select_ai_text = Text{
-        text = "Select Your Opponents!",
-        font = "KacstArt 70px",
-        color = Colors.YELLOW,
-        opacity = 0
-    }
-    ]]--
-    
-    --choose_char_text.position = {1920/2-choose_char_text.width/2, 1080/2-choose_char_text.height/2}
-    --select_ai_text.position = {1920/2-select_ai_text.width/2, 1080/2-select_ai_text.height/2}
     local background = {
         choose_char_text,
         select_ai_text
@@ -107,6 +87,20 @@ CharacterSelectionView = Class(View, function(view, model, ...)
 
     function view:initialize()
         self:set_controller(CharacterSelectionController(self))
+    end
+
+    function view:reset()
+        -- show the instructions text
+        background[1].opacity = 255
+
+        -- show all the buttons for the dog-seats
+        for i,v in ipairs(view.items) do
+            for j,item in ipairs(v) do
+                item.opacity = 255
+            end
+        end
+        -- hide the start button
+        start_button.opacity = 0
     end
     
     function view:update()
