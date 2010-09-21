@@ -101,7 +101,7 @@ local function build_ui( show_it )
                 button  = assets( "assets/button-blue.png" ),
                 text    = Text  { text = strings[ "More" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
-                height  = 320,
+                height  = 380,
                 init    = dofile( "section-settings" )
             }
             
