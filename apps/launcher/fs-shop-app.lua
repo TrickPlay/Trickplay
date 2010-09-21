@@ -193,9 +193,11 @@ function( ui , api )
                 
                 -- Set up an on_idle to rotate the icon tile after some delay
                 
-                local delay = 1.5
-                                
                 old_idle = idle.on_idle
+
+                local delay = 1.0
+                local angle = 0
+                local rotation = { 0 , 0 , 0 }
                 
                 local tile_rotate_d         = -1
                 local TILE_ROTATE_ANGLE     = 20
@@ -212,17 +214,19 @@ function( ui , api )
                     end
                 
                 
-                    local a = ( tile.y_rotation[ 1 ] ) + tile_rotate_d * ( TILE_ROTATE_SPEED * seconds )
+                    angle = angle + tile_rotate_d * ( TILE_ROTATE_SPEED * seconds )
                     
-                    if a >= TILE_ROTATE_ANGLE then
-                        a = TILE_ROTATE_ANGLE
+                    if angle >= TILE_ROTATE_ANGLE then
+                        angle = TILE_ROTATE_ANGLE
                         tile_rotate_d = - tile_rotate_d
-                    elseif a <= -TILE_ROTATE_ANGLE then
-                        a = -TILE_ROTATE_ANGLE
+                    elseif angle <= -TILE_ROTATE_ANGLE then
+                        angle = -TILE_ROTATE_ANGLE
                         tile_rotate_d = - tile_rotate_d
                     end
                     
-                    tile.y_rotation = { a , 0 , 0 }
+                    rotation[ 1 ] = angle
+                    
+                    tile.y_rotation = rotation
                     
                 end
 
