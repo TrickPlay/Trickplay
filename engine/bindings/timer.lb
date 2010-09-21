@@ -15,6 +15,12 @@ module timer;
     
     If you change the interval to <= 0, remove the callback, call stop
     or return false from the callback, the timer will stop ticking.
+
+    NOTE: This is a "best effort" timer, which will try and call you back every interval.  However,
+    the resolution of the timer may vary from platform to platform, and no guarantee is made about the
+    precision of the timing of callbacks, particularly for short intervals.  You may wish to use an animation
+    or a Timeline for more precise control under some circumstances, or if you want something to happen with
+    relatively low latency, you might want to use an on_idle() handler.
 */
 
 class timer
@@ -26,8 +32,8 @@ public:
     static gboolean timer_fired( gpointer data );
     void start(UserData * ud);
     void stop();
-    void set_interval(UserData * ud,lua_Number new_interval);
-    lua_Number get_interval() const;
+    void set_interval(UserData * ud,unsigned int new_interval);
+    unsigned int get_interval() const;
     void cancel();
 
 private:
@@ -52,32 +58,30 @@ class Timer [[timer*]]
     # when the timer is created, it will start right away.
     #
     # Arguments:
-    # interval - In seconds, how long until the timer fires. Note that this is
-    # a double, so you can specify fractions of seconds: for example, 0.5 is half
-    # a second.
+    # interval - In milliseconds, how long until the timer fires.
     # on_timer - A function that will be called when the timer fires.
     #
     # Examples:
     # This one creates a timer that won't start right away (until we call <start>)
     # > timer=Timer()
-    # > timer.interval=5
+    # > timer.interval=5000
     # > function timer.on_timer(timer)
     # >   print("TICK")
     # > end
     # > timer:start()
     #
     # This one won't start either, because there is no callback
-    # > timer=Timer(5)
+    # > timer=Timer(5000)
     #
     # This one will start right away and will call 'some_function' in about 5
     # seconds
-    # > timer=Timer(5,some_function)
+    # > timer=Timer(5000,some_function)
     #
     # You can also do it like this
-    # > timer=Timer{ interval=5 , on_timer=some_function }
+    # > timer=Timer{ interval=5000 , on_timer=some_function }
     
     
-    Timer( double interval = 0 , function on_timer = 0 )
+    Timer( int interval = 0 , function on_timer = 0 )
         [[
             self = lb_construct( timer , new timer );
 
@@ -112,9 +116,9 @@ class Timer [[timer*]]
         ]];
 	
     # Property: interval
-    # The interval, in seconds, after which the timer fires. 
+    # The interval, in milliseconds, after which the timer fires. 
         
-    double interval
+    int interval
         [[interval=self->get_interval();]]
         [[self->set_interval(UserData::get(L),interval);]];
         
@@ -170,12 +174,12 @@ void timer::start( UserData * ud )
 {
     if (source)
 		return;
-    
+
     if (interval<=0)
 		return;
-    
-    source = g_timeout_source_new( interval * 1000 );
-	    
+
+    source = g_timeout_source_new( interval );
+
     g_source_set_callback( source , timer_fired , UserData::Handle::make( ud , this ) , UserData::Handle::destroy );
     g_source_attach( source , g_main_context_default()  );
 }
@@ -190,7 +194,7 @@ void timer::stop()
     source=NULL;
 }
 
-void timer::set_interval(UserData * ud,lua_Number new_interval)
+void timer::set_interval(UserData * ud,unsigned int new_interval)
 {
     if (new_interval==interval)
 		return;
@@ -204,7 +208,7 @@ void timer::set_interval(UserData * ud,lua_Number new_interval)
     }
 }
 
-lua_Number timer::get_interval() const
+unsigned int timer::get_interval() const
 {
     return interval;
 }
