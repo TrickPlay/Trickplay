@@ -376,7 +376,7 @@ function game.ask_next_question()
     end
 
     game.time=0
-    game.timer=Timer(1)
+    game.timer=Timer(1000)
     function game.timer.on_timer(timer)
         game.time=game.time+1
         ui.timer.text=tostring(game.MAX_TIME-game.time)

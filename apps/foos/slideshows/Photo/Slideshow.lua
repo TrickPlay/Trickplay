@@ -7,7 +7,7 @@ SLIDESHOW_HEIGHT = 800
 local timer = Timer()
 local timer_running = false
 local still_loading = false
-timer.interval = 4
+timer.interval = 4000
 current_pic = 1
 temp_pic = 0
 pic_num = 1
@@ -77,7 +77,7 @@ function Slideshow:begin()
     current_pic    = 1
     temp_pic       = 0
     timer_running  = true
-    timer.interval = 1
+    timer.interval = 1000
     timer:start()
 
     --view
@@ -222,7 +222,7 @@ function timer.on_timer(timer)
 	print("tick "..current_pic)
 	--if still_loading then
         if #off_screen_list > 0 then
-                timer.interval = 4
+                timer.interval = 4000
 		model.curr_slideshow:next_picture()
 	end
 end
