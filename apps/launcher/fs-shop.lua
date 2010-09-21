@@ -2,12 +2,28 @@
 -- Global
 
 function FunctionTimeline( t )
+    
     local functions = t.functions
     assert( type( functions ) == "table" )
     t.functions = nil
+    local count = # functions
+    
+    local mode = t.mode
+    if mode then
+        t.mode = nil
+    end
+    
     local timeline = Timeline( t )
-    function timeline.on_new_frame( timeline , elapsed , progress )
-        for _ , f in ipairs( functions ) do f( progress ) end
+    
+    if mode then
+        local alpha = Alpha{ timeline = timeline , mode = mode }
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            for i = 1 , count do functions[i]( alpha.alpha ) end
+        end
+    else
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            for i = 1 , count do functions[i]( progress ) end
+        end
     end
     return timeline
 end
@@ -680,6 +696,7 @@ function( ui )
     local function show_app_details()
     
         local ANIMATE_OUT_DURATION = 150
+        local ANIMATE_OUT_MODE     = nil
 
         local m = section.main        
         if not m then
@@ -742,7 +759,7 @@ function( ui )
         
         -- Timeline
         
-        local timeline = FunctionTimeline{ duration = ANIMATE_OUT_DURATION , functions = to_animate }
+        local timeline = FunctionTimeline{ mode = ANIMATE_OUT_MODE , duration = ANIMATE_OUT_DURATION , functions = to_animate }
         
         function timeline.on_completed( timeline )
             details:show_app( shop_app , back_from_details )
