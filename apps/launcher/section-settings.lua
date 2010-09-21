@@ -155,9 +155,7 @@ function( section )
     
     function section.on_default_action( section )
     
-        show_all_apps( recently_used_apps )
-        
-        return true
+        return false
     
     end
     
