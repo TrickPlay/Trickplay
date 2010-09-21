@@ -83,7 +83,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
             selected[2] = next_spot[2]
             self:get_model():notify()
 
-			view:move_selector(false)
+			--view:move_selector(false)
 
         --if trying to rotate the screen-carousel
         elseif dir == Directions.RIGHT or dir == Directions.LEFT then
@@ -101,7 +101,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
                 model.front_page_index = next_index
                 self:get_model():notify()
 
-				view:move_selector(true)
+				--view:move_selector(true)
             else
                 reset_keys()
             end

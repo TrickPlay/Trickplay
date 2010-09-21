@@ -168,9 +168,9 @@ print(model.album_group.x, view.current.x)
 
 		end
 	    function sel_timeline.on_completed()
-		local target_x = model.album_group.x + view.current.x - 30
-	         view.current.scale = {1.05, 1.05}
-	         view.previous.scale = {1, 1 }
+			local target_x = model.album_group.x + view.current.x - 30
+	        view.current.scale = {1.05, 1.05}
+	        view.previous.scale = {1, 1 }
 
 			view.current.y = curr_targ_y
 			view.current.x = curr_targ_x
@@ -181,6 +181,7 @@ print(model.album_group.x, view.current.x)
 			prev_i[1] = sel[1]
 			prev_i[2] = sel[2] + model.front_page_index-1
 reset_keys()
+print("done",sel[1],sel[2])
 		end
 		sel_timeline:start()
 	end
@@ -332,10 +333,9 @@ reset_keys()
             --an if that is entered every time the view switches back
             if model.album_group:find_child("bottom_bar") == nil then
                 print("adding bottom bar")
-                model.album_group:add(view.backdrop)
-                model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
+                --model.album_group:add(view.backdrop)
+                --model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
                 view.timer:start()
-
             end
 
             view:shift_group()
@@ -367,12 +367,12 @@ reset_keys()
 
 
 
-            view.bottom_bar.opacity = 0
-            view.bottom_bar:unparent()
+            --view.bottom_bar.opacity = 0
+            --view.bottom_bar:unparent()
 
-            model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
-            view.bottom_bar.position = {-10,PIC_H}
-            view.bottom_bar.scale   = {1.1,1}
+            --model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
+            --view.bottom_bar.position = {-10,PIC_H}
+            --view.bottom_bar.scale   = {1.1,1}
 --				print (#adapters - model.fp_1D_index + 1,adapters[#adapters - model.fp_1D_index + 1].hasImages)
 --				debug()
 --[[
@@ -385,10 +385,10 @@ reset_keys()
             album_logo.src = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 --]]
 
-            view.backdrop.opacity = 0
-            view.backdrop:raise_to_top()
+            --view.backdrop.opacity = 0
+            --view.backdrop:raise_to_top()
             view.current:raise_to_top()
-
+view.move_selector()
             --sel_timeline:start()
         elseif comp == Components.SOURCE_MANAGER then
             print("Dimming FrontPageView UI")
