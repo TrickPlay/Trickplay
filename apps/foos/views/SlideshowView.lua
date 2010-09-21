@@ -65,21 +65,28 @@ local postit_bg = Image
 local postit_text =
 {
 	Image{src="assets/note-menu-text0.png",y=80,x=35,opacity=255},
-	Image{src="assets/note-menu-text1.png",opacity=0},
-	Image{src="assets/note-menu-text2.png",opacity=0},
-	Image{src="assets/note-menu-text3.png",opacity=0}
+	Image{src="assets/note-menu-text1.png",y=80,x=35,opacity=0},
+	Image{src="assets/note-menu-text2.png",y=80,x=35,opacity=0},
+	Image{src="assets/note-menu-text3.png",y=80,x=35,opacity=0}
 }
 --style one ,x=55,y=160
 --style one ,x=70,y=195
 --done ,x=95,y=260
+	local arrow_pos =
+		{
+			{55,160},
+			{70,195},
+			{95,260}
+		}
+
 local postit_arrow   = Image{src="assets/note-menu-arrow.png",x=95,y=260}--,x=postit.x,y=postit.y}
 local postit_options = Image{src="assets/note-menu-options.png",x=250,y=250}--,x=postit.x,y=postit.y}
 
 postit:add(postit_bg, postit_arrow, postit_options)
 postit:add(unpack(postit_text))
 
-local license_box = Group{name="license box",position={1000,1040}}
-license_box:add(Rectangle{color="000000",w=920,h=80,opacity=150})
+local license_box = Group{name="license box",position={0,1040}}
+license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
     view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
 
     view.timer            = Timer()
@@ -219,18 +226,18 @@ license_box:add(Rectangle{color="000000",w=920,h=80,opacity=150})
                 --if you change these numbers, change their counterparts
                 --in on_screen_prep
                 if img.size[1]/img.size[2] > screen.w/screen.h then
-                    img.size = {screen.w - 200, 
-                               (screen.w - 200)/img.w*img.h}
+                    img.size = {screen.w - 400, 
+                               (screen.w - 400)/img.w*img.h}
                 else
-                    img.size = {(screen.h - 100)/img.h*img.w, 
-                                 screen.h - 100}
+                    img.size = {(screen.h *.9)/img.h*img.w, 
+                                 screen.h *.9}
                 end
 
                 local number_of_tiles =13
                 local tile_width  = img.w/3--+100
                 local tile_height = img.h/3--+100
                 local turn_margin = 50
-                local margin_left = (screen.w - img.w)*0.5
+                local margin_left = (screen.w-400)/2 - (img.w)*0.5+400
                 local margin_top  = (screen.h - img.h)*0.5
 
                 img.opacity  =  0-- 255
@@ -1614,6 +1621,7 @@ mosaic_timeline:start()
 			local pic     
 			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
+			license.x = screen.w - license.w
 			if pic == nil or attempt == 5 or index < photo_i - 5 then
 				
 				return
@@ -1803,6 +1811,8 @@ mosaic_timeline:start()
 			local pic     
 			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
+			license.x = screen.w - license.w
+
             if pic == "" then
                 local timeout = Timer{ interval = 4000 }
 
@@ -1970,7 +1980,7 @@ mosaic_timeline:start()
         view:get_controller():on_key_down(keys.Right)
     end
 
-    function view:nav_on_focus()
+    function view:nav_on_focus(style_i)
 --[[
         view.nav_group:raise_to_top()
         view.nav_group:animate
@@ -1984,12 +1994,36 @@ mosaic_timeline:start()
 --]]
 		local t = Timeline
 		{
+			duration  = 200,
+			loop      = false,
+			direction = "FORWARD"
+		}
+		postit_arrow.position = {arrow_pos[1][1],arrow_pos[1][2]}
+		local old_x  = -250
+		local targ_x =   10
+		function t.on_new_frame(t,msecs,p)
+			postit_text[1].opacity = 255*(1-p)
+			postit_text[style_i+1].opacity = 255*p
+			postit.x = old_x + p * (targ_x - old_x)
+		end
+		function t.on_completed()
+			postit.x = targ_x
+			reset_keys()
+		end
+		t:start()
+    end
+	function view:nav_move(i)
+--[[
+		local t = Timeline
+		{
 			duration = 200,
 			loop = false,
 			direction = "FORWARD"
 		}
 		local old_x  = -250
+		local old_y  =
 		local targ_x = 10
+		local targ_y
 		function t.on_new_frame(t,msecs)
 			postit.x = old_x + msecs/t.duration * (targ_x - old_x)
 		end
@@ -1998,8 +2032,65 @@ mosaic_timeline:start()
 			reset_keys()
 		end
 		t:start()
-    end
-    function view:nav_out_focus()
+--]]
+		postit_arrow:animate
+		{
+			duration = 200,
+			x = arrow_pos[i][1],
+			y = arrow_pos[i][2]
+		}
+	end
+	function view:pick(curr,old)
+		local t = Timeline
+		{
+			duration = 400,
+			loop = false,
+			direction = "FORWARD"
+		}
+print(curr,old)
+		function t.on_new_frame(t,msecs,p)
+			postit_text[curr+1].opacity = 255*(p)
+			postit_text[old+1].opacity = 255*(1-p)
+
+		end
+		function t.on_completed()
+			postit_text[curr+1].opacity = 255
+			postit_text[old+1].opacity = 0
+
+			reset_keys()
+		end
+		t:start()
+
+	end
+    function view:nav_out_focus(style_i)
+		local t = Timeline
+		{
+			duration = 400,
+			loop = false,
+			direction = "FORWARD"
+		}
+		local old_x  = 10
+		local targ_x = -250
+		function t.on_new_frame(t,msecs)
+			if msecs <= 100 then
+				local p = msecs/100
+				postit_text[4].opacity = 255*(p)
+				postit_text[style_i + 1].opacity = 255*(1-p)
+			else
+				local p = (msecs-100)/(t.duration-100)
+				postit_text[1].opacity = 255*(p)
+				postit_text[4].opacity = 255*(1-p)
+				postit.x = old_x + p * (targ_x - old_x)
+
+			end
+		end
+		function t.on_completed()
+			postit.x = targ_x
+			reset_keys()
+		end
+		t:start()
+
+--[[
         view.nav_group:animate
         { 
             duration = 200,
@@ -2008,6 +2099,7 @@ mosaic_timeline:start()
                 reset_keys()
             end
         }
+--]]
     end
     view.prev_i = -1
 

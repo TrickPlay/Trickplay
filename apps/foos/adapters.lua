@@ -214,14 +214,14 @@ print("response!")
 		if thumb then
 			return adapter.photo_list[i].url_m,  
 						"\""..adapter.photo_list[i].title..
-						"\" ©\n"..adapter.photo_list[i].ownername..
+						"\" ©"..adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		else
 
 			return adapter.photo_list[i].url_m, 
 						"\""..adapter.photo_list[i].title..
-						"\" ©\n"..adapter.photo_list[i].ownername..
+						"\" ©"..adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		end

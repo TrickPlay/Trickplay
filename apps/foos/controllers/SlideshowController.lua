@@ -36,7 +36,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
         end
     end
 
-
+--[=[
     local NavCallbacks =
     {
         --CLOSE THE NAV MENU
@@ -83,11 +83,13 @@ SlideshowController = Class(Controller, function(self, view, ...)
         end,
 --]]
         --TOGGLE THE SLIDESHOW & CLOSE THE NAV MENU
+
         function()
             view:toggle_timer()
             menu_is_visible = false
             view:nav_out_focus()
         end,
+
         --SWITCH SLIDE SHOW STYLE
         function()
             style_index = style_index%(#view.styles) +1
@@ -100,18 +102,77 @@ SlideshowController = Class(Controller, function(self, view, ...)
         end,
 
     }
+--]=]
+
+    local NavCallbacks =
+    {
+        --CLOSE THE NAV MENU
+        function()
+            view.set_ui[ view.styles[1] ]()
+            view:pick(1,style_index)
+            style_index = 1
+            
+        end,
+        function()
+            view.set_ui[ view.styles[2] ]()
+            view:pick(2,style_index)
+            style_index = 2
+
+        end,
+        function()
+            menu_index = 1
+            view:toggle_timer()
+            menu_is_visible = false
+            view:nav_out_focus(style_index)
+        end
+    }
 
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP) end,
         [keys.Down]  = function(self) self:move_selector(Directions.DOWN) end,
         [keys.Left]  = function(self) self:move_selector(Directions.LEFT) end,
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+	[keys.BackSpace] = function(self)
+            if view.timer_is_running then
+                view.timer:stop()
+                view.timer_it_running = false
+            end
+            if view.off_screen_list[1] ~= nil then
+                view.off_screen_list[1]:complete_animation()
+            end
+            if view.on_screen_list[1] ~= nil then
+                view.on_screen_list[1]:complete_animation()
+            end
+            collectgarbage()
+
+            for i = 1,#view.on_screen_list do
+                view.on_screen_list[i]:unparent()
+            end
+            for i = 1,#view.off_screen_list do
+                view.off_screen_list[i]:unparent()
+            end
+            view.on_screen_list  = {}
+            view.off_screen_list = {}
+ 
+            photo_index =  0
+            view.prev_i = -1
+            if menu_is_visible then
+        	    menu_is_visible = false
+	            view:nav_out_focus(style_index)
+            end
+
+            self:get_model():set_active_component(Components.FRONT_PAGE)
+            self:get_model():notify()
+
+reset_keys()
+
+	end,
         [keys.Return] = function(self) 
             if menu_is_visible then
-                NavCallbacks[menu_index]()
+                NavCallbacks[menu_index](style_index)
             else
                 menu_is_visible = true
-                view:nav_on_focus()
+                view:nav_on_focus(style_index)
             end
             
         end
@@ -137,9 +198,16 @@ SlideshowController = Class(Controller, function(self, view, ...)
         end
         if menu_is_visible then
             menu_index = menu_index + dir[2]
+            if menu_index < 1 or menu_index > #NavCallbacks then
+                menu_index = menu_index - dir[2]
+            end
+            view:nav_move(menu_index)
+--[[
+            menu_index = menu_index + dir[2]
             if menu_index < 1 or menu_index > #view.nav_items then
                 menu_index = menu_index - dir[2]
             end
+--]]
         end
 --[[
         if #view.on_screen_list > 5 then
