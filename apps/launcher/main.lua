@@ -237,7 +237,7 @@ local function build_ui( show_it )
 
     ui.focus = SECTION_APPS         -- The section # that has focus
     
-    ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
+    ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT )
     
     ui.color_keys =             -- Which section # to focus with the given key
     {
