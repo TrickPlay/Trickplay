@@ -57,13 +57,31 @@ local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size 
         x    = 1530,
         y    = 400
     }
+--off screen -300,400
+--on screen 10,400
+local postit = Group{name="post-it",position = {-250,400}}
+local postit_bg = Image
+{src = "assets/note-menu.png"}
+local postit_text =
+{
+	Image{src="assets/note-menu-text0.png",y=80,x=35,opacity=255},
+	Image{src="assets/note-menu-text1.png",opacity=0},
+	Image{src="assets/note-menu-text2.png",opacity=0},
+	Image{src="assets/note-menu-text3.png",opacity=0}
+}
+--style one ,x=55,y=160
+--style one ,x=70,y=195
+--done ,x=95,y=260
+local postit_arrow   = Image{src="assets/note-menu-arrow.png",x=95,y=260}--,x=postit.x,y=postit.y}
+local postit_options = Image{src="assets/note-menu-options.png",x=250,y=250}--,x=postit.x,y=postit.y}
 
-local postit = Image
-{src = "assets/note-menu.png",position = {-300,400}}
+postit:add(postit_bg, postit_arrow, postit_options)
+postit:add(unpack(postit_text))
 
 local license_box = Group{name="license box",position={1000,1040}}
-license_box:add(Rectangle{color="000000",w=920,h=80},opacity=150)
+license_box:add(Rectangle{color="000000",w=920,h=80,opacity=150})
     view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
+
     view.timer            = Timer()
     view.timer.interval   = 4
     view.timer_is_running = false
@@ -74,7 +92,7 @@ license_box:add(Rectangle{color="000000",w=920,h=80},opacity=150)
     view.license_on  = {}
 	view.license_off = {}
 
-    view.styles = {"REGULAR","LAYERED","MOSAIC"}--,"FULLSCREEN",}
+    view.styles = {"REGULAR","LAYERED"}--,"MOSAIC"}--,"FULLSCREEN",}
     local off_screen_prep = 
     {
         ["REGULAR"]    = function(img,group)
@@ -1953,6 +1971,7 @@ mosaic_timeline:start()
     end
 
     function view:nav_on_focus()
+--[[
         view.nav_group:raise_to_top()
         view.nav_group:animate
         { 
@@ -1962,6 +1981,23 @@ mosaic_timeline:start()
                 reset_keys()
             end
         }
+--]]
+		local t = Timeline
+		{
+			duration = 200,
+			loop = false,
+			direction = "FORWARD"
+		}
+		local old_x  = -250
+		local targ_x = 10
+		function t.on_new_frame(t,msecs)
+			postit.x = old_x + msecs/t.duration * (targ_x - old_x)
+		end
+		function t.on_completed()
+			postit.x = targ_x
+			reset_keys()
+		end
+		t:start()
     end
     function view:nav_out_focus()
         view.nav_group:animate
