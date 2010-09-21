@@ -9,6 +9,16 @@
 #include "util.h"
 
 //-----------------------------------------------------------------------------
+
+#ifdef TP_CONTROLLER_DISCOVERY_MDNS
+#include "controller_discovery_mdns.h"
+#endif
+
+#ifdef TP_CONTROLLER_DISCOVERY_UPNP
+#include "controller_discovery_upnp.h"
+#endif
+
+//-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
 #define DISCONNECT_TIMEOUT_SEC  120
@@ -17,7 +27,8 @@
 
 ControllerServer::ControllerServer( TPContext * ctx, const String & name, int port )
     :
-    mdns( NULL ),
+    discovery_mdns( NULL ),
+    discovery_upnp( NULL ),
     server( NULL ),
     context( ctx )
 {
@@ -37,7 +48,18 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
         g_info( "CONTROLLER SERVER LISTENER READY ON PORT %d", server->get_port() );
 
-        mdns.reset( new MDNS( name, server->get_port() ) );
+#ifdef TP_CONTROLLER_DISCOVERY_MDNS
+
+        discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+
+#endif
+
+#ifdef TP_CONTROLLER_DISCOVERY_UPNP
+
+        discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
+
+#endif
+
     }
 }
 
@@ -51,12 +73,17 @@ ControllerServer::~ControllerServer()
 
 bool ControllerServer::is_ready() const
 {
-    if ( !mdns.get() )
+    if ( discovery_mdns.get() )
     {
-        return false;
+        return discovery_mdns->is_ready();
     }
 
-    return mdns->is_ready();
+    if ( discovery_upnp.get() )
+    {
+        return discovery_upnp->is_ready();
+    }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------

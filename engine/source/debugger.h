@@ -15,6 +15,8 @@ public:
 
     void install();
 
+    void uninstall();
+
     void break_next_line();
 
 private:

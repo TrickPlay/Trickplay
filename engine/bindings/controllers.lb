@@ -34,8 +34,8 @@ public:
     // Delegate functions
     
     virtual void disconnected();
-    virtual void key_down(unsigned int key_code,unsigned long int unicode);
-    virtual void key_up(unsigned int key_code,unsigned long int unicode);
+    virtual bool key_down(unsigned int key_code,unsigned long int unicode);
+    virtual bool key_up(unsigned int key_code,unsigned long int unicode);
     virtual void accelerometer(double x,double y,double z);
     virtual void click(int x,int y);
     virtual void touch_down(int x,int y);
@@ -70,16 +70,16 @@ public:
     
     void push_connected();
     
-    void proxy_destroyed(ControllerDelegate * proxy);
+    void proxy_disconnected(ControllerDelegate * proxy);
     
 private:
 
     lua_State *         L;
     ControllerList *    list;
     
-    typedef std::set<ControllerDelegate*> ProxySet;
+    typedef std::map< ControllerDelegate* , UserData::Handle * > ProxyMap;
     
-    ProxySet            proxies;
+    ProxyMap            proxies;
 };
     
 
@@ -103,7 +103,7 @@ global controllers [[ControllerListDelegate*]]
 {
     controllers()
         [[
-            *self=new ControllerListDelegate(L);            
+            self=lb_construct( ControllerListDelegate , new ControllerListDelegate(L) );            
         ]];
         
     ~controllers()
@@ -152,7 +152,7 @@ interface controller [[ControllerDelegate*]]
 {
     controller()
         [[
-            *self=(ControllerDelegate*)lua_touserdata(L,-2);
+            self=lb_construct( ControllerDelegate , lua_touserdata(L,-2) );
         ]];
         
     ~controller()
@@ -741,6 +741,10 @@ interface controller [[ControllerDelegate*]]
     		key code - The numeric code of the key.
     		
     		unicode - The unicode value of the key or 0.
+    		
+    	Returns:
+    	
+    		false - If you don't want the event to be propagated.
     */
     
     callback on_key_down;
@@ -757,6 +761,10 @@ interface controller [[ControllerDelegate*]]
     		key code - The numeric code of the key.
     		
     		unicode - The unicode value of the key or 0.
+
+    	Returns:
+    	
+    		false - If you don't want the event to be propagated.
     */
 
     callback on_key_up;
@@ -869,9 +877,7 @@ ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,C
 ControllerDelegate::~ControllerDelegate()
 {
     controller->remove_delegate(this);
-    controller->unref();
-    
-    list->proxy_destroyed(this);
+    controller->unref();    
 }
 
 //.........................................................................
@@ -880,21 +886,49 @@ ControllerDelegate::~ControllerDelegate()
 void ControllerDelegate::disconnected()
 {   
     invoke_controller_on_disconnected(L,this,0,0);
-    detach_controller(L,this);
+    
+    list->proxy_disconnected(this);    
 }
 
-void ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
-    invoke_controller_on_key_down(L,this,2,0);
+
+    bool result = true;
+
+    if ( invoke_controller_on_key_down(L,this,2,1) )
+    {
+	    if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+	    {
+	    	result = false;
+	    } 
+	    
+	    lua_pop( L , 1 );
+	}    
+    
+    return result;
 }
 
-void ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
-    invoke_controller_on_key_up(L,this,2,0);
+
+    bool result = true;
+
+    if ( invoke_controller_on_key_up(L,this,2,1) )
+    {
+    
+    	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+    	{
+    		result = false;
+    	} 
+    
+    	lua_pop( L , 1 );
+    }
+    
+    return result;
 }
 
 void ControllerDelegate::accelerometer(double x,double y,double z)
@@ -960,6 +994,11 @@ ControllerListDelegate::ControllerListDelegate(lua_State * l)
 ControllerListDelegate::~ControllerListDelegate()
 {
     list->remove_delegate(this);
+    
+    for ( ProxyMap::iterator it = proxies.begin(); it != proxies.end(); ++it )
+    {
+    	UserData::Handle::destroy( it->second );
+    }
 }
 
 //.........................................................................
@@ -969,22 +1008,32 @@ void ControllerListDelegate::connected(Controller * controller)
 {
     ControllerDelegate * d=new ControllerDelegate(L,controller,this);
     
-    proxies.insert(d);
-    
     lua_pushlightuserdata(L,d);
     
     new_controller(L);
     
     lua_remove(L,-2);
+
+	// When a controller is connected, we create a handle to it - to keep the
+	// Lua object around as long as it remains connected.
+	
+	proxies[ d ] = UserData::Handle::make( L , -1 );
     
     invoke_controllers_on_controller_connected(L,this,1,0);
 }
 
 //.........................................................................
 
-void ControllerListDelegate::proxy_destroyed(ControllerDelegate * proxy)
+void ControllerListDelegate::proxy_disconnected(ControllerDelegate * proxy)
 {
-    proxies.erase(proxy);
+	ProxyMap::iterator it = proxies.find( proxy );
+	
+	if ( it != proxies.end() )
+	{
+		UserData::Handle::destroy( it->second );
+		
+		proxies.erase( it );		
+	}
 }
 
 //.........................................................................
@@ -1000,19 +1049,24 @@ void ControllerListDelegate::push_connected()
     
     ControllerList::ControllerSet found;
     
-    for(ProxySet::iterator it=proxies.begin();it!=proxies.end();++it)
+    for(ProxyMap::iterator it=proxies.begin();it!=proxies.end();++it)
     {
-        if (!(*it)->get_controller()->is_connected())
+        if (! it->first->get_controller()->is_connected())
             continue;
         
-        int is_new=wrap_controller(L,(*it));
-        g_assert(!is_new);
+        UserData * ud = it->second->get_user_data();
+        g_assert( ud );
+        ud->push_proxy();
+        
         lua_rawseti(L,-2,i++);
         
-        found.insert((*it)->get_controller());
+        found.insert(it->first->get_controller());
     }
     
     // These may not exist as Lua objects but they are definitely connected
+    
+    // This should not happen any more - since we hold on to the Lua objects as 
+    // soon as they connect.
     
     ControllerList::ControllerSet controllers(list->get_controllers());
         
@@ -1026,13 +1080,13 @@ void ControllerListDelegate::push_connected()
         
         ControllerDelegate * d=new ControllerDelegate(L,*it,this);
         
-        proxies.insert(d);
-        
         lua_pushlightuserdata(L,d);
         
         new_controller(L);
         
         lua_remove(L,-2);
+        
+        proxies[ d ] = UserData::Handle::make( L , -1 );
         
         lua_rawseti(L,-2,i++);
     }

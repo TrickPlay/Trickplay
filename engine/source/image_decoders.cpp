@@ -218,6 +218,7 @@ namespace ImageDecoders
                             {
                                 png_set_palette_to_rgb( png_ptr );
                                 depth = 3;
+                                bit_depth = 8;
                             }
 
                             if ( color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8 )
@@ -432,9 +433,42 @@ namespace ImageDecoders
         {
             jpeg_read_header( cinfo, TRUE );
 
+            switch (cinfo->jpeg_color_space)
+            {
+                case JCS_UNKNOWN:
+                    break;
+
+                case JCS_GRAYSCALE:
+                    cinfo->out_color_space     = JCS_RGB;
+                    break;
+
+                case JCS_RGB:
+                    cinfo->out_color_space     = JCS_RGB;
+                    break;
+
+                case JCS_YCbCr:
+                    cinfo->out_color_space     = JCS_RGB;
+                    break;
+
+                case JCS_CMYK:
+                case JCS_YCCK:
+                    cinfo->out_color_space     = JCS_CMYK;
+                    break;
+
+                default:
+                    g_warning( "JPEG HAS INVALID OUTPUT COLOR SPACE" );
+                    return TP_IMAGE_DECODE_FAILED;
+            }
+
+
             jpeg_start_decompress( cinfo );
 
-            g_assert( cinfo->output_components == 3 || cinfo->output_components == 1 );
+            if ( ! ( cinfo->output_components == 3 || cinfo->output_components == 1 || cinfo->output_components == 4 ) )
+            {
+                g_warning( "JPEG HAS INVALID # OF COMPONENTS (%d)" , cinfo->output_components );
+
+                return TP_IMAGE_DECODE_FAILED;
+            }
 
             JSAMPARRAY buffer = (*cinfo->mem->alloc_sarray)( ( j_common_ptr ) cinfo, JPOOL_IMAGE, cinfo->output_width * cinfo->output_components, 1 );
 
@@ -454,31 +488,47 @@ namespace ImageDecoders
             {
                 guchar * p = pixels;
 
+                unsigned int index;
+
                 while( cinfo->output_scanline < cinfo->output_height )
                 {
                     jpeg_read_scanlines( cinfo, buffer, 1 );
 
-                    if ( cinfo->output_components == 3 )
-                    {
-                        unsigned int index = 0;
+                    index = 0;
 
-                        for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 3 )
-                        {
-                            *(p++) = (*buffer)[ index ];
-                            *(p++) = (*buffer)[ index + 1 ];
-                            *(p++) = (*buffer)[ index + 2 ];
-                        }
-                    }
-                    else if ( cinfo->output_components == 1 )
+                    switch ( cinfo->output_components )
                     {
-                        unsigned int index = 0;
+                        case 1:
 
-                        for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 1 )
-                        {
-                            *(p++) = (*buffer)[ index ];
-                            *(p++) = (*buffer)[ index ];
-                            *(p++) = (*buffer)[ index ];
-                        }
+                            for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 1 )
+                            {
+                                *(p++) = (*buffer)[ index ];
+                                *(p++) = (*buffer)[ index ];
+                                *(p++) = (*buffer)[ index ];
+                            }
+                            break;
+
+                        case 3:
+
+                            for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 3 )
+                            {
+                                *(p++) = (*buffer)[ index ];
+                                *(p++) = (*buffer)[ index + 1 ];
+                                *(p++) = (*buffer)[ index + 2 ];
+                            }
+                            break;
+
+                        case 4:
+
+                            for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 4 )
+                            {
+                                int k = (*buffer)[index + 3];
+
+                                *(p++) = k * (*buffer)[ index ] / 255;
+                                *(p++) = k * (*buffer)[ index + 1 ] / 255;
+                                *(p++) = k * (*buffer)[ index + 2 ] / 255;
+                            }
+                            break;
                     }
                 }
 

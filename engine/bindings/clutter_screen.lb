@@ -5,7 +5,6 @@ module clutter_screen;
 
 #include "context.h"
 #include "util.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 ]]
 
@@ -28,16 +27,18 @@ global screen [[ClutterActor*]] actor , container
 {
     screen()
 	[[
-	    *self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid());
+		// Screen is a global and we don't want its reference toggling all the
+		// time, so we take an extra one and hold on to it.
+		
+		self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid() );		
+	    self=lb_construct_gobject( ClutterActor , g_object_ref( self ) );
 	    
-	    g_object_ref(G_OBJECT(*self));
-	    
-	    ClutterUtil::initialize_actor(L,*self,SCREEN_METATABLE);	    	    	    
+	    ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
 	]];
     
     ~screen()
 	[[
-	    g_object_unref(G_OBJECT(self));
+		g_object_unref( self );
 	]];
 
     #..........................................................................
@@ -163,11 +164,11 @@ global screen [[ClutterActor*]] actor , container
             to_clutter_color(L,2,&color);
             clutter_stage_set_color(CLUTTER_STAGE(self),&color);            
         ]];
-	
+*/	
     table perspective
 	[[
 	    ClutterPerspective p;
-	    clutter_stage_get_perspective(CLUTTER_STAGE(self),&p);
+	    clutter_stage_get_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
 	    lua_newtable(L);
 	    lua_pushnumber(L,p.fovy);
 	    lua_rawseti(L,-2,1);
@@ -180,15 +181,15 @@ global screen [[ClutterActor*]] actor , container
 	]]
 	[[
 	    luaL_checktype(L,2,LUA_TTABLE);
-            lua_rawgeti(L,2,1);
-            lua_rawgeti(L,2,2);
-            lua_rawgeti(L,2,3);
-            lua_rawgeti(L,2,4);
+        lua_rawgeti(L,2,1);
+        lua_rawgeti(L,2,2);
+        lua_rawgeti(L,2,3);
+        lua_rawgeti(L,2,4);
 	    ClutterPerspective p = {lua_tonumber(L,-4),lua_tonumber(L,-3),
 		lua_tonumber(L,-2),lua_tonumber(L,-1)};
-            clutter_stage_set_perspective(CLUTTER_STAGE(self),&p);
-            lua_pop(L,4);
+        clutter_stage_set_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
+        lua_pop(L,4);
 	]];	
- */	
+	
 }
 
