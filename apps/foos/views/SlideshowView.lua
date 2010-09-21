@@ -65,7 +65,7 @@ local license_box = Group{name="license box",position={1000,1040}}
 license_box:add(Rectangle{color="000000",w=920,h=80},opacity=150)
     view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
     view.timer            = Timer()
-    view.timer.interval   = 4
+    view.timer.interval   = 4000
     view.timer_is_running = false
      
 
@@ -1602,7 +1602,7 @@ mosaic_timeline:start()
 			end
             if pic == "" then
                 if group ~= nil then
-                    local timeout = Timer{ interval = 4 }
+                    local timeout = Timer{ interval = 4000 }
 
                     function timeout:on_timer()
 			    --	print("trying again",index, pic)
@@ -1786,7 +1786,7 @@ mosaic_timeline:start()
 			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
             if pic == "" then
-                local timeout = Timer{ interval = 4 }
+                local timeout = Timer{ interval = 4000 }
 
                 function timeout:on_timer()
                     timeout:stop()
