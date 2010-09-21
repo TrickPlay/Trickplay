@@ -10,9 +10,9 @@
 #include "image_decoders.h"
 
 //=============================================================================
-// Set to false to stop image debug log
+// Set to OFF to stop image debug log
 
-DebugLog images_debug( false );
+Debug_OFF images_debug;
 
 //=============================================================================
 // Wraps around an external decoder
@@ -370,7 +370,7 @@ Images::Images( const Images & )
 
 //-----------------------------------------------------------------------------
 
-Images::Images * Images::get( bool destroy )
+Images * Images::get( bool destroy )
 {
     static Images * self = NULL;
 

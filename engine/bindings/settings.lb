@@ -1,12 +1,7 @@
 [[
-extern "C"
-{
-    #include "tcutil.h"
-    #include "tchdb.h"
-}
-
 #include "app.h"
 #include "util.h"
+#include "db.h"
 
 class Settings
 {
@@ -15,7 +10,8 @@ public:
     Settings(lua_State*l)
     :
         L(l),
-		db(NULL)
+        db(NULL),
+        dirty(false)
     {
 		App::get(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
     }
@@ -31,46 +27,79 @@ public:
 		{
 	    	return;
 	    }
-	
-        db = tchdbnew();
-        
-        if (!db)
-        {
-            g_error("FAILED TO CREATE SETTINGS DATABASE");
-        }
-        
-        if(!tchdbtune(db,256,-1,-1,0))
-        {
-            g_warning("FAILED TO TUNE SETTINGS DATABASE : %s", tchdberrmsg(tchdbecode(db)));
-        }
-	
+
+		bool create = true;
+
+	    SQLite::DB mdb( ":memory:" );
+
+		FreeLater free_later;
+			    
 		App * app=App::get(L);
 	
-		gchar * name=g_strdup_printf("settings-%d.tch",app->get_profile_id());
-		FreeLater free_later(name);
+		gchar * name=g_strdup_printf("settings-%d.db",app->get_profile_id());
+		free_later(name);
         
-        gchar * file_name=g_build_filename(app->get_data_path().c_str(),name,NULL);
-        free_later(file_name);
+        gchar * fn=g_build_filename(app->get_data_path().c_str(),name,NULL);
+        free_later(fn);
         
-		if(!tchdbopen(db,file_name,HDBOWRITER|HDBOREADER|HDBOCREAT))
+        file_name = fn;
+        
+        if ( g_file_test( fn , G_FILE_TEST_EXISTS ) )
         {
-            g_error("FAILED TO OPEN SETTINGS DATABASE : %s", tchdberrmsg(tchdbecode(db)));
-        }
+		    SQLite::DB ddb( fn , SQLITE_OPEN_READONLY );
+		    
+		    if ( SQLite::Backup( mdb , ddb ).ok() )
+		    {
+		    	g_debug( "RESTORED SETTINGS DATABASE" );
+				create  = false;
+				dirty = false;
+		    }    
+		}	    
+
+	    if ( create )
+	    {
+	    	g_debug( "CREATING SETTINGS DATABASE" );
+	    	
+	    	mdb.exec( "CREATE TABLE settings ( key TEXT PRIMARY KEY NOT NULL , value TEXT )" );
+	    	
+	    	dirty = false;
+	    }
+
+		db = new SQLite::DB( mdb ); 	    
     }
     
     void close()
     {
 		if (db)
 		{
-		    tchdbclose(db);
-		    tchdbdel(db);
-		    db=NULL;
+			if (dirty)
+			{
+				SQLite::DB destination( file_name.c_str() );
+				if ( SQLite::Backup( destination , *db ).ok() )
+				{
+					g_debug( "FLUSHED SETTINGS DATABASE" );
+				}
+				else
+				{
+					g_warning( "FAILED TO FLUSH SETTINGS DATABASE %s" , file_name.c_str() );
+				}
+				dirty = false;
+			}
+			
+			delete db;
+			db = NULL;
+			file_name.clear(); 
 		}	
     }
     
     void set()
     {
 		open();
+		
+		if ( !db )
+		{
+			return;
+		}
 	
         size_t key_len;
         
@@ -86,10 +115,10 @@ public:
         
         if (lua_isnil(L,3))
         {
-            if (!tchdbout(db,key,key_len))
-            {
-                g_warning("FAILED TO DELETE SETTING '%s' : %s",key,tchdberrmsg(tchdbecode(db)));
-            }
+        	SQLite::Statement d( *db , "delete from settings where key = ?1" );
+        	d.bind( 1 , String( key , key_len ) );
+        	d.step();
+        	dirty = true;        	
         }
         else
         {
@@ -103,20 +132,32 @@ public:
     
             const char * value=lua_tolstring(L,-1,&value_len);
             
-            if(!tchdbput(db,key,key_len,value,value_len))
+            SQLite::Statement insert(*db,"INSERT OR REPLACE INTO settings (key,value) VALUES (?1,?2);");
+            
+            insert.bind( 1 , String( key , key_len ) );
+            insert.bind( 2 , String( value , value_len ) );
+            
+            if ( !insert.step_done() )
             {
-                g_warning("FAILED TO STORE SETTING '%s' = '%s' : %s",key,value,tchdberrmsg(tchdbecode(db)));
+                g_warning("FAILED TO STORE SETTING '%s' = '%s' : %s",key,value,insert.get_msg().c_str());
             }
-		    
+            
 		    lua_pop(L,1);
 		    
 		    LSG_END(0);
+		    
+		    dirty = true;
         }
     }
     
     bool get()
     {
 		open();
+		
+		if (!db)
+		{
+			return false;
+		}
 	
         size_t key_len;
         
@@ -128,17 +169,17 @@ public:
             return false;
         }
         
-        int value_len;
-        void * value =tchdbget(db,key,key_len,&value_len);
+        SQLite::Statement select( *db , "SELECT value FROM settings WHERE key = ?1" );
+        select.bind( 1 , String( key , key_len ) );
         
-        if (!value)
+        if ( ! select.step_row() )
         {
-            return false;
+        	return false;
         }
         
-		String statement="return "+String((const char *)value,value_len);
-		
-		free(value);
+        String value( select.get_string( 0 ) );
+        
+		String statement="return "+value;
 		
 		if (luaL_dostring(L,statement.c_str())!=0)
 		{
@@ -165,8 +206,10 @@ private:
 		((Settings*)self)->close();
     }
     
-    lua_State * L;
-    TCHDB *     db;
+    lua_State * 	L;
+    SQLite::DB * 	db;
+    String			file_name;
+    bool			dirty;
 };
 
 ]]
@@ -200,7 +243,7 @@ global settings [[Settings*]] table
 {
     settings()
         [[
-            *self=new Settings(L);
+            self=lb_construct( Settings , new Settings(L) );
         ]];
         
     ~settings()

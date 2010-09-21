@@ -1,5 +1,8 @@
 
+#define G_LOG_DOMAIN "tp-cmp"
+
 #include "clutter-gst/clutter-gst.h"
+#include "gst/video/video.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -271,6 +274,11 @@ static void loading_messages(GstBus * bus,GstMessage * message,TPMediaPlayer * m
             ud->load_signal=0;
             
             break;
+        }
+        default:
+        {
+        	// Default handler to make clang shut up
+			break;
         }
     }
 }
@@ -625,8 +633,10 @@ int main(int argc,char * argv[])
     
     TPContext * context = tp_context_new();
     
-    if (argc>1)
-        tp_context_set(context,"app.path",argv[1]);
+    if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
+    {
+        tp_context_set( context, "app_path", argv[ argc - 1  ] );
+    }
     
     tp_context_set_media_player_constructor(context,mp_constructor);
     

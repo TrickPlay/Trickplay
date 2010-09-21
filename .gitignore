@@ -4,8 +4,11 @@
 *.o
 *.a
 trickplay.cfg
+.trickplay
 .DS_Store
 trickplay-runtime.tbz
 sdk/ports/PortIndex*
 engine/source/stash/*
-
+*~
+*.swp
+engine/docs/apps/nd/Data
