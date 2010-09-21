@@ -52,29 +52,27 @@ class Timer [[timer*]]
     # when the timer is created, it will start right away.
     #
     # Arguments:
-    # interval - In seconds, how long until the timer fires. Note that this is
-    # a double, so you can specify fractions of seconds: for example, 0.5 is half
-    # a second.
+    # interval - In milliseconds, how long until the timer fires.
     # on_timer - A function that will be called when the timer fires.
     #
     # Examples:
     # This one creates a timer that won't start right away (until we call <start>)
     # > timer=Timer()
-    # > timer.interval=5
+    # > timer.interval=5000
     # > function timer.on_timer(timer)
     # >   print("TICK")
     # > end
     # > timer:start()
     #
     # This one won't start either, because there is no callback
-    # > timer=Timer(5)
+    # > timer=Timer(5000)
     #
     # This one will start right away and will call 'some_function' in about 5
     # seconds
-    # > timer=Timer(5,some_function)
+    # > timer=Timer(5000,some_function)
     #
     # You can also do it like this
-    # > timer=Timer{ interval=5 , on_timer=some_function }
+    # > timer=Timer{ interval=5000 , on_timer=some_function }
     
     
     Timer( double interval = 0 , function on_timer = 0 )
@@ -112,7 +110,7 @@ class Timer [[timer*]]
         ]];
 	
     # Property: interval
-    # The interval, in seconds, after which the timer fires. 
+    # The interval, in milliseconds, after which the timer fires. 
         
     double interval
         [[interval=self->get_interval();]]
@@ -170,12 +168,12 @@ void timer::start( UserData * ud )
 {
     if (source)
 		return;
-    
+
     if (interval<=0)
 		return;
-    
-    source = g_timeout_source_new( interval * 1000 );
-	    
+
+    source = g_timeout_source_new( interval );
+
     g_source_set_callback( source , timer_fired , UserData::Handle::make( ud , this ) , UserData::Handle::destroy );
     g_source_attach( source , g_main_context_default()  );
 }
