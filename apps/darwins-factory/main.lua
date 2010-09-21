@@ -8,7 +8,7 @@ BarneyConstants = {
                "Water", "Laser", "Surge", "Health", "Acid", "Null"},
     numberOfHearts = 5,
     numberOfEffects = 12,
-    clockLength = 1,
+    clockLength = 1000,
     intervals = 5
 }
 

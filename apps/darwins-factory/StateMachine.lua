@@ -315,7 +315,7 @@ function StateMachine()
             print("\n\n\nplayers: "..board.numberOfPlayers.."\n\n\n")
             printScores()
             screen.on_key_down = nil
-            local timer = Timer{interval = 5,
+            local timer = Timer{interval = 5000,
             on_timer = function(timer)
             timer:stop()
             --states.current = states.reset
