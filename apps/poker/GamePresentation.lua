@@ -150,8 +150,8 @@ function(pres, ctrl)
       m.position = {screen.w/2, screen.h/2}
       screen:add(m)
       
-      Popup:new{group = r, time = 3}
-      Popup:new{group = m, time = 3}
+      Popup:new{group = r, time = 5}
+      Popup:new{group = m, time = 5}
 
    end
 

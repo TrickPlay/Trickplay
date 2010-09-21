@@ -2,8 +2,8 @@ dofile ("Assets.lua")
 
 -- Asset loading ---------------------------------------------------------------
 AssetLoader:construct()
-AssetLoader:preloadImage("Table","assets/table.png")
-AssetLoader:preloadImage("TableText","assets/UI/new/table_text.png")
+AssetLoader:preloadImage("Table","assets/table.jpg")
+AssetLoader:preloadImage("TableText","assets/UI/new/table-marks.png")
 
 AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
 
@@ -11,8 +11,8 @@ AssetLoader:preloadImage("ChooseDog","assets/ChooseYourDog.png")
 AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
 
 
-AssetLoader:preloadImage("Win","assets/outcome/winner.png")
-AssetLoader:preloadImage("Lose","assets/outcome/loser.png")
+AssetLoader:preloadImage("Win","assets/outcome_new/winner.png")
+AssetLoader:preloadImage("Lose","assets/outcome_new/loser.png")
 
 
 
@@ -54,10 +54,11 @@ DOGS = {}
 
 -- Dog images
 for i=1,6 do
-   AssetLoader:preloadImage("dog"..i,"assets/dogs/dogs/"..i..".png")
+   AssetLoader:preloadImage("dog"..i,"assets/new_dogs/dog-"..i..".png")
 end
 
 -- Dog animations
+--[[
 DOG_ANIMATIONS = {
    [1] = {dog = 1, name = "animation_bling", frames = 11, position = {90, 538}, speed = .06 },
    [2] = {dog = 2, name = "animation_smoke", frames = 7, position = {170,0}, speed = .1 },
@@ -75,8 +76,18 @@ for i, t in ipairs(DOG_ANIMATIONS) do
       end
    end
 end
+--]]
 
 -- Dog glows
+DOG_GLOW = {
+    [1] = {97, 740},
+    [2] = {69, 74},
+    [3] = {488, 8},
+    [4] = {1191, 27},
+    [5] = {1528, 116},
+    [6] = {1356, 568}
+}
+--[[
 DOG_GLOW = {
    [1] = {90, 538},
    [2] = {0, 144},
@@ -85,25 +96,15 @@ DOG_GLOW = {
    [5] = {1626, 136},
    [6] = {1468, 568},
 }
-
---[[
-DOG_GLOW = {
-   [1] = {90, 537},
-   [2] = {0, 143},
-   [3] = {487, 0},
-   [4] = {1154, 13},
-   [5] = {1624, 135},
-   [6] = {1466, 567},
-}
 --]]
 
 for i=1, 6 do
-   AssetLoader:preloadImage("dog"..i.."glow","assets/dogs/glow/"..i..".png")
+   AssetLoader:preloadImage("dog"..i.."glow","assets/new_dogs/dog-"..i.."-focus.png")
 end
 
 DOG_LAYER = Group{}
 DOG_GLOW_LAYER = Group{}
-DOG_ANIMATION_LAYER = Group{}
+--DOG_ANIMATION_LAYER = Group{}
 
 --------------------------------------------------------------------------------
 
@@ -147,7 +148,8 @@ function()
       PLAYER_BETTING = 2,
       GAME = 3,
       TUTORIAL = 4,
-      COMPONENTS_LAST = 4
+      SPLASH = 5,
+      COMPONENTS_LAST = 5
    }
 
    -- Model initialization
@@ -157,6 +159,7 @@ function()
    BettingView(model):initialize()
    CharacterSelectionView(model):initialize()
    TutorialView(model):initialize()
+   SplashView(model):initialize()
 
    function screen:on_key_down(k)
       if k == keys.s then
@@ -210,7 +213,7 @@ function()
    end
 
    game = GameControl(model)
-   model:start_app(Components.CHARACTER_SELECTION)
+   model:start_app(Components.SPLASH)
 --   model:start_app(Components.PLAYER_BETTING)
 
    AssetLoader.on_preload_ready = nil

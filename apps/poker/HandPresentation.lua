@@ -301,9 +301,11 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
       player.status:update( GET_MYTURN_STRING() )
       local pos = player.table_position
-      local params = DOG_ANIMATIONS[ pos ]
-      if params and params.name then
-         a = Animation(params.dog, params.frames, params.position, params.speed)
+      if DOG_ANIMATIONS then
+          local params = DOG_ANIMATIONS[ pos ]
+          if params and params.name then
+             a = Animation(params.dog, params.frames, params.position, params.speed)
+          end
       end
       
       player.glow.opacity = 255

@@ -35,18 +35,20 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     local start_button = Image{position=MDPL.START, src="assets/DevinUI/ButtonStart.png", opacity = 0}
     local exit_button = Image{position=MDPL.EXIT_MENU, src="assets/DevinUI/ButtonExit.png"}
     local help_button = Image{position=MDPL.HELP_MENU, src="assets/DevinUI/ButtonHelp.png"}
+    local button_seat = Image{src = "assets/new_buttons/player-button.png",opacity=0}
+    screen:add(button_seat)
 
     view.items = {
         {
-            Image{position=MDPL[2], src="assets/DevinUI/ButtonSeat.png"},
-            Image{position=MDPL[3], src="assets/DevinUI/ButtonSeat.png"},
-            Image{position=MDPL[4], src="assets/DevinUI/ButtonSeat.png"},
-            Image{position=MDPL[5], src="assets/DevinUI/ButtonSeat.png"}
+            Clone{position=MDPL[2], source=button_seat},
+            Clone{position=MDPL[3], source=button_seat},
+            Clone{position=MDPL[4], source=button_seat},
+            Clone{position=MDPL[5], source=button_seat}
         },
         {
-            Image{position=MDPL[1], src="assets/DevinUI/ButtonSeat.png"},
+            Clone{position=MDPL[1], source=button_seat},
             help_button, start_button, exit_button,
-            Image{position=MDPL[6], src="assets/DevinUI/ButtonSeat.png"}
+            Clone{position=MDPL[6], source=button_seat}
         }
     }
 

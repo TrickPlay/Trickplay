@@ -8,3 +8,6 @@ dofile("views/CharacterSelectionView.lua")
 dofile("controllers/CharacterSelectionController.lua")
 
 dofile("views/PlayerStatusView.lua")
+
+dofile("views/SplashView.lua")
+dofile("controllers/SplashController.lua")
