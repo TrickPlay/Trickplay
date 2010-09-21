@@ -165,7 +165,7 @@ pepporonigroup = topping_dropping(topping, Sides.RIGHT, Amount.EXTRA, pepporonig
 screen:show()
 ---[[
 timer = Timer()
-timer.interval = 3
+timer.interval = 3000
 function timer.on_timer(timer)
     side = math.random(4)
     amount = math.random(4)

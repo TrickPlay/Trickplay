@@ -104,7 +104,7 @@ Model = Class(function(model, ...)
         -- firstAnimation:animate{duration = 1000, x = 420,
         --     on_completed = function()
         --         local timer = Timer()
-        --         timer.interval = 2
+        --         timer.interval = 2000
         --         function timer:on_timer()
         --             timer.on_timer = nil
         --             timer = nil
