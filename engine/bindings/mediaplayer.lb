@@ -81,24 +81,23 @@ interface video_texture [[ClutterActor *]] actor
 {
     video_texture()
         [[
-            // We don't need to ref it because we do that when we wrap it
+            self = lb_construct_gobject( ClutterActor , G_OBJECT( lua_touserdata( L , -1 ) ) ); 
         ]];
         
     ~video_texture()
         [[
-            g_object_unref(G_OBJECT(self));
         ]];
         
     readonly udata parent
-	[[
-	    lua_pushnil(L);
-	]];
+		[[
+		    lua_pushnil(L);
+		]];
 	
     unparent()
-	[[
-	    // Cannot let the app developer remove his screen from the stage,
-	    // because he would not have a way to put it back
-	]];        
+		[[
+		    // Cannot let the app developer remove his screen from the stage,
+		    // because he would not have a way to put it back
+		]];        
 }
 
 
@@ -112,7 +111,7 @@ global mediaplayer [[MP*]]
 {
     mediaplayer()
         [[
-            *self=new MP(L);    
+            self=lb_construct( MP , new MP(L) );    
         ]];
         
     ~mediaplayer()
@@ -329,12 +328,18 @@ global mediaplayer [[MP*]]
                 }
                 else
                 {
-                    int is_new=lb_wrap(L,CLUTTER_ACTOR(t),VIDEO_TEXTURE_METATABLE);
-                    
-                    if (is_new)
-                    {
-                        g_object_ref(G_OBJECT(t));
-                    }
+                	UserData * ud = UserData::get( G_OBJECT( t ) );
+                	
+                	if ( ud )
+                	{
+                		ud->push_proxy();
+                	}
+                	else
+                	{
+                		lua_pushlightuserdata( L , t );
+                		new_video_texture( L );
+                		lua_remove( L , -2 );
+                	}
                 }
             }
         ]];
@@ -662,6 +667,8 @@ global mediaplayer [[MP*]]
     
     udata new()
         [[
+                lua_pushnil(L);
+#if 0
             MP * mp=new MP(L,false);
             
             if (!mp->get_player())
@@ -673,6 +680,8 @@ global mediaplayer [[MP*]]
             {
                 lb_wrap(L,mp,MEDIAPLAYER_METATABLE);
             }
+#endif
+            
         ]];
     
     /*

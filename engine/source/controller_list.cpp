@@ -349,11 +349,19 @@ void Controller::key_down( unsigned int key_code, unsigned long int unicode )
 
     key_code = map_key_code( key_code );
 
-    ClutterUtil::inject_key_down( key_code, unicode );
+    bool inject = true;
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->key_down( key_code, unicode );
+        if ( ! ( *it )->key_down( key_code, unicode ) )
+        {
+            inject = false;
+        }
+    }
+
+    if ( inject )
+    {
+        ClutterUtil::inject_key_down( key_code, unicode );
     }
 }
 
@@ -368,11 +376,19 @@ void Controller::key_up( unsigned int key_code, unsigned long int unicode )
 
     key_code = map_key_code( key_code );
 
-    ClutterUtil::inject_key_up( key_code, unicode );
+    bool inject = true;
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->key_up( key_code, unicode );
+        if ( ! ( *it )->key_up( key_code, unicode ) )
+        {
+            inject = false;
+        }
+    }
+
+    if ( inject )
+    {
+        ClutterUtil::inject_key_up( key_code, unicode );
     }
 }
 

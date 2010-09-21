@@ -58,8 +58,8 @@ public:
     {
     public:
         virtual void disconnected() = 0;
-        virtual void key_down( unsigned int key_code, unsigned long int unicode ) = 0;
-        virtual void key_up( unsigned int key_code, unsigned long int unicode ) = 0;
+        virtual bool key_down( unsigned int key_code, unsigned long int unicode ) = 0;
+        virtual bool key_up( unsigned int key_code, unsigned long int unicode ) = 0;
         virtual void accelerometer( double x, double y, double z ) = 0;
         virtual void click( int x, int y ) = 0;
         virtual void touch_down( int x, int y ) = 0;

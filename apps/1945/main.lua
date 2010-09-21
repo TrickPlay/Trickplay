@@ -1089,7 +1089,7 @@ function idle.on_idle( idle , seconds )
         for _ , item in ipairs( render_list ) do
        
             pcall( item.render , item , seconds ) 
-       
+
         end
         
         process_collisions( )
