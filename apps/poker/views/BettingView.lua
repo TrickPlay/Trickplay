@@ -178,7 +178,7 @@ BettingView = Class(View, function(view, model, ...)
         }
         text.anchor_point = {text.w/2, text.h/2}
         screen:add(text)
-        Popup:new{group = text, time = 1}
+        Popup:new{group = text, time = 1000}
        
        --[[
        screen:add(text)
