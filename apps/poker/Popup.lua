@@ -39,7 +39,7 @@ function Popup:new(args)
                 group = args.group or defaultMessage(args),
 		
 		-- Time on screen
-                time = args.time or 3,
+                time = args.time or 3000,
 		
 		-- Animation tables
 		animate_in = animate_in,

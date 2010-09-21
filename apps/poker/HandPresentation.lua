@@ -314,7 +314,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- FOLD
    function pres:fold_player(player)
-      local foldtimer = Timer{interval=.2}
+      local foldtimer = Timer{interval=200}
       function foldtimer.on_timer(t)
          t:stop()
 --         remove_player_chips(player)
@@ -372,7 +372,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- SOMEONE LEFT A SEAT
    function pres:remove_player(removed_player)
-      local foldtimer = Timer{interval=1}
+      local foldtimer = Timer{interval=1000}
       function foldtimer.on_timer(t)
          t:stop()
          remove_player_cards(removed_player)
