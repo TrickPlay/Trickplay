@@ -72,9 +72,12 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
 gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
 {
     int result = FALSE;
-    
-    lua_pushnumber(L,event->x);
-    lua_pushnumber(L,event->y);
+
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
     
@@ -93,9 +96,11 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
 gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
 {
     int result = FALSE;
-    
-    lua_pushnumber(L,event->x);
-    lua_pushnumber(L,event->y);
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
     
@@ -111,12 +116,35 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     return result;
 }
 
+gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_motion" , 2 , 1 , L ))
+    {
+		if (lua_toboolean(L,-1))
+		{
+	    	result = TRUE;
+	    }
+		lua_pop(L,1);
+    }
+
+    return result;
+}
+
 gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
 {
     int result = FALSE;
-    
-    lua_pushnumber(L,event->x);
-    lua_pushnumber(L,event->y);
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
     lua_pushinteger(L,event->direction);
     
     if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_scroll" , 3 , 1 , L ))
@@ -931,6 +959,49 @@ interface actor [[ClutterActor*]]
     move_anchor_point( double x , double y )
 	[[clutter_actor_move_anchor_point(self,x,y);]];
 	
+	/*
+	Function: transform_point
+	
+	Transforms a point in this element's coordinate space into the coordinate space of 
+	one of its ancestors.
+	
+	Arguments:
+	
+	ancestor - An ancestor of this element.
+	x , y , z - The coordinates of the point.
+	
+	
+	Returns:
+	
+	A table with 3 elements corresponding to the coordinates of the transformed point.
+	*/
+	
+	table transform_point( UIElement ancestor, double x , double y , double z = 0 )
+		[[
+			lua_newtable(L);
+			
+			ClutterActor * a=ClutterUtil::user_data_to_actor(L,ancestor);
+			
+			if (a)
+			{
+				ClutterVertex point_in;
+				point_in.x = x;
+				point_in.y = y;
+				point_in.z = z;
+				
+				ClutterVertex point_out;
+				
+				clutter_actor_apply_relative_transform_to_point( self , a , & point_in , & point_out );
+				
+				lua_pushnumber( L , point_out.x );
+				lua_rawseti( L , -2 , 1 );
+				lua_pushnumber( L , point_out.y );
+				lua_rawseti( L , -2 , 2 );
+				lua_pushnumber( L , point_out.z );
+				lua_rawseti( L , -2 , 3 );
+			}						
+		]];  
+	
     /*
 	Function: grab_key_focus
 	
@@ -998,6 +1069,13 @@ interface actor [[ClutterActor*]]
 	    lua_getfield(L,props,"duration");
 	    guint duration=lua_tonumber(L,-1);
 	    lua_pop(L,1);
+	    
+	    if ( duration <= 0 )
+	    {
+	    	lua_pushnil( L );
+	    	luaL_error( L , "Call to animate has invalid or missing duration" );
+	    	return 1; 
+	    }
 	    
 	    lua_getfield(L,props,"mode");
 	    gulong mode=ClutterUtil::to_clutter_animation_mode(lua_tostring(L,-1));
@@ -1159,6 +1237,15 @@ interface actor [[ClutterActor*]]
 		}
 		
 		lua_pop(L,1);
+	    }
+	    
+	    if ( values->n_values == 0 )
+	    {
+		    g_value_array_free(values);
+		    g_ptr_array_free(names,TRUE);
+		    lua_pushnil( L );
+		    luaL_error( L , "Call to animate has no properties" );
+		    return 1;
 	    }
 	    
 	    ClutterAnimation * a=clutter_actor_animatev(self,mode,duration,
@@ -1370,6 +1457,16 @@ interface actor [[ClutterActor*]]
 			"on_button_up",
 			"button-release-event",
 			G_CALLBACK(actor_on_button_up),
+			L);	    
+	]];
+	
+	callback on_motion
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_motion,
+			"on_motion",
+			"motion-event",
+			G_CALLBACK(actor_on_motion),
 			L);	    
 	]];
 
