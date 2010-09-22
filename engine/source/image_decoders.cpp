@@ -218,6 +218,7 @@ namespace ImageDecoders
                             {
                                 png_set_palette_to_rgb( png_ptr );
                                 depth = 3;
+                                bit_depth = 8;
                             }
 
                             if ( color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8 )
