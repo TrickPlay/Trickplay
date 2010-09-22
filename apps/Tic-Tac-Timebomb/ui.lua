@@ -22,25 +22,6 @@ function ui.factory(name,defaults,override)
 end
 
 
-local helpButton = Image{
-				src = "/assets/TimerOnRed.png",
-				opacity = 255,
-				y = 980,
-				x = 1810,
-				anchor_point = {0,0},
-				z = 5,
-				scale = {.7,1.3},
-				}	
-local helpText = Text{
-				text = "Help",
-				opacity = 255,
-				color = "ffffff",
-				font = "Sans 40px",
-				x = 1715,
-				y = 1000,
-				z = 5,
-				anchor_point = {0,0},
-				}
 local restartButton = Image{
 				src = "/assets/TimerOnBlue.png",
 				opacity = 255,
@@ -56,7 +37,7 @@ local restartText = Text{
 				color = "ffffff",
 				font = "Sans 40px",
 				x = 1715,
-				y = 930,
+				y = 970,
 				z = 5,
 				anchor_point = {0,0},
 				}
