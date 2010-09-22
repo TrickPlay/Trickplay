@@ -2,7 +2,6 @@
 #include "openssl/opensslv.h"
 #include "zlib.h"
 #include "curl/curl.h"
-#include "tcutil.h"
 #include "expat.h"
 #include "fontconfig.h"
 #include "cairo/cairo-version.h"
@@ -45,7 +44,6 @@ void dump_versions()
     g_info( "\topenssl      %s", OPENSSL_VERSION_TEXT );
     g_info( "\tzlib         %s", ZLIB_VERSION );
     g_info( "\tcurl         %s (%s)", LIBCURL_VERSION, curl_version_info( CURLVERSION_NOW )->version );
-    g_info( "\ttokyocabinet %s", tcversion );
     g_info( "\texpat        (%s)", XML_ExpatVersion() );
     g_info( "\tgif          %s", clean_version( GIF_LIB_VERSION, free_later ) );
     g_info( "\ttiff         (%s)", clean_version( TIFFGetVersion(), free_later ) );
