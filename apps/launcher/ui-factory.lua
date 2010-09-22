@@ -213,8 +213,8 @@ function factory.make_text_side_selector( assets , caption )
         size = { WIDTH , HEIGHT },
         children =
         {
-            l_arrow:set{ position = { PADDING_X + ARROW_WIDTH / 2 , HEIGHT / 2 } },
-            r_arrow:set{ position = { WIDTH - PADDING_X - ARROW_WIDTH / 2 , HEIGHT / 2 } },
+            l_arrow:set{ position = { PADDING_X + ARROW_WIDTH / 2 , HEIGHT / 2 } , opacity = 128 },
+            r_arrow:set{ position = { WIDTH - PADDING_X - ARROW_WIDTH / 2 , HEIGHT / 2 } , opacity = 128 },
             focus:set
             {
                 position =
@@ -235,10 +235,14 @@ function factory.make_text_side_selector( assets , caption )
     
     function group.extra.on_focus_in()
         focus.opacity = 255
+        l_arrow.opacity = 255
+        r_arrow.opacity = 255
     end
     
     function group.extra.on_focus_out()
         focus.opacity = 0
+        l_arrow.opacity = 128
+        r_arrow.opacity = 128
     end
     
     return group
@@ -333,6 +337,88 @@ function factory.make_app_tile( assets , caption , app_id )
     return group
 
 end
+
+-------------------------------------------------------------------------------
+-- Makes a store app tile with a polaroid-style frame
+-------------------------------------------------------------------------------
+    
+function factory.make_store_tile( assets , caption , url )
+
+    local STYLE         = { font = "DejaVu Sans 24px" , color = "000000FF" }
+    local PADDING_X     = 17 -- The focus ring has this much padding around it
+    local PADDING_Y     = 17.5
+    local FRAME_SHADOW  = 1
+    local WIDTH         = 300 + ( PADDING_X * 2 )
+    local HEIGHT        = 200 + ( PADDING_Y * 2 )
+    local ICON_PADDING  = 6
+    local ICON_WIDTH    = 300 - ICON_PADDING * 2
+    local ICON_REAL_W   = 480 -- From the store
+    local CAPTION_X     = PADDING_X + ICON_PADDING + FRAME_SHADOW + 1
+    local CAPTION_Y     = HEIGHT - PADDING_Y - 37
+    local CAPTION_WIDTH = 300 - ( FRAME_SHADOW * 2 ) - ( ICON_PADDING * 2 )
+        
+    local text = Text{ text = caption }:set( STYLE )
+    
+    local focus = assets( "assets/app-icon-focus.png" )
+    
+    local white_frame = assets( "assets/icon-overlay-white-text-label.png" )
+
+    local black_frame = assets( "assets/icon-overlay-black-text-label.png" )
+    
+    local icon = Image{ src = url , async = true }
+    
+    local scale = ICON_WIDTH / ICON_REAL_W
+    
+    icon.scale = { scale , scale }
+    
+    local group = Group
+    {
+        size = { WIDTH , HEIGHT },
+        children =
+        {
+            focus:set{ position = { 0 , 0 }, size = { WIDTH , HEIGHT }, opacity = 0 },
+            icon:set
+            {
+                position = { PADDING_X + ICON_PADDING + FRAME_SHADOW , PADDING_Y + ICON_PADDING + FRAME_SHADOW } 
+            },
+            black_frame:set
+            {
+                position = { PADDING_X + FRAME_SHADOW , PADDING_Y + FRAME_SHADOW } ,
+                size = { WIDTH - PADDING_X * 2 , HEIGHT - PADDING_Y * 2 },
+                opacity = 0
+            },
+            white_frame:set
+            {
+                position = { PADDING_X + FRAME_SHADOW , PADDING_Y + FRAME_SHADOW } ,
+                size = { WIDTH - PADDING_X * 2 , HEIGHT - PADDING_Y * 2 }
+            },
+            text:set
+            {
+                position = { CAPTION_X , CAPTION_Y },
+                width = CAPTION_WIDTH,
+                ellipsize = "END"
+            }
+        }
+    }
+    
+    function group.extra.on_focus_in()
+        focus.opacity = 255
+        black_frame.opacity = 255
+        white_frame.opacity = 0
+        text.color = "FFFFFFFF"
+    end
+    
+    function group.extra.on_focus_out()
+        focus.opacity = 0
+        black_frame.opacity = 0
+        white_frame.opacity = 255
+        text.color = "000000FF"
+    end
+    
+    return group
+
+end
+
 
 -------------------------------------------------------------------------------
 -- Makes a featured app tile

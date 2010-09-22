@@ -74,7 +74,7 @@ local function build_ui( show_it )
                 button  = assets( "assets/button-red.png" ),
                 text    = Text  { text = strings[ "My Apps" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 120 ,  21 ,  21 , 230 }, -- RED
-                height  = 900,
+                height  = 900 - 60 - 30  ,
                 init    = dofile( "section-apps" )
             },
             
@@ -83,7 +83,7 @@ local function build_ui( show_it )
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "Showcase" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 340,
+                height  = 340 - 90,
                 init    = dofile( "section-showcase" )
             },
             
@@ -92,7 +92,7 @@ local function build_ui( show_it )
                 button  = assets( "assets/button-yellow.png" ),
                 text    = Text  { text = strings[ "App Shop" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
-                height  = 620,
+                height  = 900 - 60 - 30 ,
                 init    = dofile( "section-shop" )
             },
             
@@ -117,7 +117,7 @@ local function build_ui( show_it )
     local FIRST_BUTTON_X            = 13                    -- x coordinate of first button
     local FIRST_BUTTON_Y            = 9                     -- y coordinate of first button
     local BUTTON_X_OFFSET           = 7                     -- distance between left side of buttons
-    local SEARCH_BUTTON_X_OFFSET    = 5
+    local SEARCH_BUTTON_X_OFFSET    = 4
     local DROPDOWN_POINT_Y_OFFSET   = -2                    -- how far to raise or lower the drop downs
     local DROPDOWN_WIDTH_OFFSET     = -8                   -- The width of the dropdown in relation to its button
     
