@@ -1,0 +1,16 @@
+package trickplay;
+
+class ContentFileController {
+
+    def index = {
+        log.debug "Uploaded content file with id=${params.ufileId}"
+        [files: ContentFile.list(), params:params]
+    }
+    
+    def delete = {
+        def ufile = ContentFile.get(params.id)
+        ufile.delete()
+        redirect action:index
+    }
+
+}

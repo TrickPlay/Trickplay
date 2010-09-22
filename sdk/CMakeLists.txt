@@ -21,7 +21,6 @@ if (UNIX AND NOT APPLE)
 			"libavahi-core6 (>= 0.6.25)"
 			"libavahi-glib1(>= 0.6.25)"
 			"libclutter-1.0-0 (>= 1.0.6)"
-			"libtokyocabinet8"
 			"libexpat1"
 			"libsqlite3-0 (>= 3.6.0)"
 			"libclutter-gst-0.10-0"
@@ -30,8 +29,10 @@ if (UNIX AND NOT APPLE)
 			"libjpeg62"
 			"libtiffxx0c2"
 			"libgif4"
-			"libossp-uuid15"
+			"libossp-uuid15 | libossp-uuid16"
 			"libupnp3 (>= 1.6)"
+			"libreadline6"
+			"liburiparser1"
 		)
 		
 		set( FIRST 1 )
