@@ -6,7 +6,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
     --timer that pings an random cover to change
     view.timer = Timer()
-    view.timer.interval = 3000
+    view.timer.interval = 3--000
 
     view.ui = Group{name="front page ui"}
     screen:add(view.ui)
@@ -101,8 +101,15 @@ FrontPageView = Class(View, function(view, model, ...)
     view.prev_pos   = {}
     view.prev_scale = {1,1}
 
-	local selector = Image {src = "assets/poloroid.png" }
-	view.ui:add(selector)
+	fp_selector = Group{name="selector"}
+	local selectorImg = Image {name="img",src = "assets/poloroid.png" }
+	local selector_title = Text{name="title",font = "DejaVu Sans ExtraLight 18px",
+			y = 585,color = "000000",text = "",ellisize="END",x=30,clip={0,0,540,50}}
+	local selector_auth = Text{name="auth",font = "DejaVu Sans ExtraLight 18px",
+			y = 610,color = "000000",text = "",ellisize="END",x=30,clip={0,0,540,50}}
+
+	fp_selector:add(selectorImg,selector_title,selector_auth)
+	view.ui:add(fp_selector)
 	function view:move_selector(moving)
 	    local sel_timeline = Timeline
 		{
@@ -112,19 +119,21 @@ FrontPageView = Class(View, function(view, model, ...)
         	duration  = 200,
 	        direction = "FORWARD",
     	}
-        local controller  = view:get_controller()
+		local license
         local  sel        = {}
-        sel[1],sel[2]     = controller:get_selected_index()
-local curr_old_x = view.current.x
-local curr_targ_x = view.current.x
-local prev_old_x = view.previous.x
-local prev_targ_x =PIC_W * (prev_i[2]-1) 
-		local old_x    = selector.x
-		local old_y    = selector.y
-print(model.album_group.x, view.current.x)
+        sel[1],sel[2]     = view:get_controller():get_selected_index()
+
+		local curr_old_x  = view.current.x
+		local curr_targ_x = view.current.x
+		local prev_old_x  = view.previous.x
+		local prev_targ_x = PIC_W * (prev_i[2]-1) 
+
+		local old_x    = fp_selector.x
+		local old_y    = fp_selector.y
+		print(model.album_group.x, view.current.x)
 ---[[
 		if     sel[2] + model.front_page_index -1 == 1 then
-			curr_targ_x = 20
+			curr_targ_x = 35
 		elseif sel[2] == NUM_VIS_COLS and 
 				model.front_page_index == math.ceil(#sources / 
                      NUM_ROWS) - (NUM_VIS_COLS-1) then
@@ -137,23 +146,34 @@ print(model.album_group.x, view.current.x)
 		elseif sel[1] == NUM_ROWS then target_y = view.current.y -110
 		end
 
-
+		selector_title.text = view.current.extra.lic_tit
+		selector_auth.text = view.current.extra.lic_auth
+		if 540 > selector_title.w then
+			selector_title.x = selectorImg.w-selector_title.w-50
+		else
+			selector_title.x = 30
+		end
+		if 540 > selector_auth.w then
+			selector_auth.x = selectorImg.w-selector_auth.w-50
+		else
+			selector_auth.x=30
+		end
 		local prev_old_y  = view.previous.y
 		local prev_targ_y = PIC_H * (prev_i[1]-1)+10 
 
 		local curr_old_y = view.current.y
 		local curr_targ_y = view.current.y
-		if     sel[1] == 1        then curr_targ_y = 30
+		if     sel[1] == 1        then curr_targ_y = 40
 		elseif sel[1] == NUM_ROWS then curr_targ_y = view.current.y -75
 		end
 
 	    function sel_timeline.on_new_frame(t,msecs)
 			local p = msecs/t.duration
-		local target_x = model.album_group.x + view.current.x - 30
+			local target_x = model.album_group.x + view.current.x - 35
 
 			--move the selector
-			selector.x = old_x + (target_x - old_x)*p
-			selector.y = old_y + (target_y - old_y)*p
+			fp_selector.x = old_x + (target_x - old_x)*p
+			fp_selector.y = old_y + (target_y - old_y)*p
 
 			--move old slot back to its position
 			view.previous.y = prev_old_y + (prev_targ_y - prev_old_y)*p
@@ -163,25 +183,27 @@ print(model.album_group.x, view.current.x)
 			-- or down (if on the top row)
 			view.current.y = curr_old_y + (curr_targ_y - curr_old_y)*p
 			view.current.x = curr_old_x + (curr_targ_x - curr_old_x)*p
-	         view.current.scale = {1 + p*.05, 1 + p * .05}
-	         view.previous.scale = {1 + (1-p)*.05, 1 + (1-p) * .05}
+	         --view.current.scale = {1 + p*.05, 1 + p * .05}
+	         --view.previous.scale = {1 + (1-p)*.05, 1 + (1-p) * .05}
 
 		end
 	    function sel_timeline.on_completed()
-			local target_x = model.album_group.x + view.current.x - 30
-	        view.current.scale = {1.05, 1.05}
-	        view.previous.scale = {1, 1 }
+			local target_x = model.album_group.x + view.current.x - 35
+print(model.album_group.x, view.current.x)
+	        --view.previous.scale = {1, 1 }
+
+	        --view.current.scale = {1.05, 1.05}
+			view.previous.y = prev_targ_y
+			view.previous.x = prev_targ_x
 
 			view.current.y = curr_targ_y
 			view.current.x = curr_targ_x
-			view.previous.y = prev_targ_y
-			view.previous.x = prev_targ_x
-			selector.x = target_x
-			selector.y = target_y
+			fp_selector.x = target_x
+			fp_selector.y = target_y
 			prev_i[1] = sel[1]
 			prev_i[2] = sel[2] + model.front_page_index-1
 reset_keys()
-print("done",sel[1],sel[2])
+--print("done",selector.x,selector.y,sel[1],sel[2])
 		end
 		sel_timeline:start()
 	end
@@ -281,7 +303,6 @@ print("done",sel[1],sel[2])
     end
 
     local prev_scale = {1,1}
- 
     function view:shift_group(dir)
 
         left_edge:complete_animation()
@@ -289,13 +310,13 @@ print("done",sel[1],sel[2])
 
         local new_x
         if model.front_page_index == 1 then
-            new_x = 10
+            new_x = 0--10
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 0}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
         elseif model.front_page_index == math.ceil(#sources / 
                      NUM_ROWS) - (NUM_VIS_COLS-1)               then
             new_x = -1*(model.front_page_index-1) * PIC_W + 
-                       (screen.width - NUM_VIS_COLS*PIC_W) - 10
+                       (screen.width - NUM_VIS_COLS*PIC_W)-- - 10
             left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
             right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
         else
@@ -319,6 +340,7 @@ print("done",sel[1],sel[2])
         --TODO include loader threshold here
         
     end
+ local fucking_stupid = true
 
     function view:update()
         local controller  = view:get_controller()
@@ -337,8 +359,13 @@ print("done",sel[1],sel[2])
                 --model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
                 view.timer:start()
             end
-
+--stupid edge case for the very beginning
+if fucking_stupid then
+	fucking_stupid = false 
+	model.album_group.x=0--10
+else
             view:shift_group()
+end
             print("\n\nShowing FrontPageView UI\n")
 
             --view.ui:raise_to_top()
@@ -432,7 +459,9 @@ function view.timer:on_timer()
 				#adapters+1-formula
                      )
 --]]
-                    LoadImg(sources[formula]:get_photos_at(math.random(10),true),model.fp_slots[rand_i[1] ][rand_i[2] ])
+local foto,lic_tit, lic_auth
+				foto,lic_tit, lic_auth = sources[formula]:get_photos_at(math.random(1,10),true)
+                    LoadImg(foto,model.fp_slots[rand_i[1] ][rand_i[2] ],lic_tit,lic_auth)
                 else
                     print("not calling")
                 end

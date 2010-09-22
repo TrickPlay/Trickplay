@@ -167,6 +167,10 @@ SlideshowController = Class(Controller, function(self, view, ...)
 reset_keys()
 
 	end,
+		[keys.p] = function(self)
+            view:toggle_timer()
+			reset_keys()			
+		end,
         [keys.Return] = function(self) 
             if menu_is_visible then
                 NavCallbacks[menu_index](style_index)

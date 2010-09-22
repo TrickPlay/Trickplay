@@ -5,6 +5,8 @@ NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
 
+local failed_to_load = Image{src = "assets/placeholder.jpg",opacity=0}
+screen:add(failed_to_load)
 sources = {}
 terms = {"Bokeh","Sunset","City","Scenic","Clouds","Mountain","Autumn","Grass"}
 
@@ -87,7 +89,7 @@ function Setup_Album_Covers()
             if ((j-1)*NUM_ROWS+i)<= #terms then--#adapters then
                 model.fp_slots[i][j] = Group
                 {
-                    position = { PIC_W * (j-1), PIC_H * (i-1)+10 },
+                    position = { PIC_W * (j-1), PIC_H * (i-1) },
                     clip     = { 0, 0,  PIC_W, PIC_H },
                     opacity  = 255
                 }
@@ -97,7 +99,8 @@ function Setup_Album_Covers()
                     source  = model.default[math.random(1,8)],
                     opacity = 255
                 })
-
+				model.fp_slots[i][j].extra.lic_tit = "Acquiring license"
+				model.fp_slots[i][j].extra.lic_auth = " "
                 model.album_group:add(model.fp_slots[i][j])
             end
         end
@@ -117,7 +120,7 @@ function Setup_Album_Covers()
     end
 end
 
-function LoadImg(url,slot)
+function LoadImg(url,slot,lic_tit,lic_auth)
     print("Load_Image(",url,")")
     --if url returned is empty, do it again
     if (url == "") then
@@ -138,18 +141,37 @@ function LoadImg(url,slot)
                     local placeholder = slot:find_child("placeholder")
                     if placeholder ~= nil then
                         placeholder:unparent()
-			local r = Rectangle
+						local r = Rectangle
                         {
                             size = {
                                 PIC_W,
                                 PIC_H
                             },
-                            color        = { 0,  0, 0, 255 },
-                            opacity = 255
+                            color="000000",
                         }
                         slot:add(r)
                         r:lower_to_bottom()
                     end
+					slot.extra.lic_tit  = lic_tit
+					slot.extra.lic_auth = lic_auth
+					if slot == model.fp_slots[model.fp_index[1] ][model.fp_index[2] ] then
+						sel_tit  = fp_selector:find_child("title")
+						sel_auth = fp_selector:find_child("auth")
+						sel_img  = fp_selector:find_child("img")
+						sel_tit.text = lic_tit
+						sel_auth.text = lic_auth
+
+						if PIC_W > sel_tit.w then
+							sel_tit.x = sel_img.w-sel_tit.w-50
+						else
+							sel_tit.x = 30
+						end
+						if PIC_W > sel_auth.w then
+							sel_auth.x = sel_img.w-sel_auth.w-50
+						else
+							sel_auth.x=30
+						end
+					end
                     local prev_cover = slot:find_child("cover")        
                     --add the next album cover
                     Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
@@ -176,8 +198,50 @@ function LoadImg(url,slot)
                     end
                 --if it failed to load 
                 else
-                    error("\n\n\nNEED ASSETS TO LOAD WHEN IMG FAILED TO LOAD\n\n")
-                    --src:loadCovers(slot,search,math.random(16))
+                    --error("\n\n\nNEED ASSETS TO LOAD WHEN IMG FAILED TO LOAD\n\n")
+                    --print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")")
+                    local placeholder = slot:find_child("placeholder")
+                    if placeholder ~= nil then
+                        placeholder:unparent()
+						local r = Rectangle
+                        {
+                            size = {
+                                PIC_W,
+                                PIC_H
+                            },
+                            color="000000",
+                        }
+                        slot:add(r)
+                        r:lower_to_bottom()
+                    end
+					slot.extra.lic_tit  = "Could not load the image"
+					slot.extra.lic_auth = "URL does not exist"
+					
+                    local prev_cover = slot:find_child("cover") 
+					img = Clone{source=failed_to_load}
+                    --add the next album cover
+                    slot:add(img)
+                    model:get_controller(Components.FRONT_PAGE): 
+                                              raise_bottom_bar()
+                    --put the old one on top and animate it down
+                    --only animate if there is a picture already there
+                    if prev_cover ~= nil then
+                        print("\tan old cover exists, animating it out")
+                        prev_cover:raise_to_top()
+                        model:get_controller(Components.FRONT_PAGE):
+                                                  raise_bottom_bar()
+                        prev_cover:animate{
+                            duration     = 4*CHANGE_VIEW_TIME,
+                            y            = img.y + PIC_H,
+                            opacity      = 0,
+                            on_completed = function(image)
+                                --toss the old cover after the animation
+                                prev_cover:unparent()
+                                prev_cover = nil
+                            end
+                        }
+                    end
+
                 end
                 model.swapping_cover = false
             end
