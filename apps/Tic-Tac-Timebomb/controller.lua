@@ -14,19 +14,26 @@ local ControlConstants = {
 }
 
 
-local splashImage = Image{
-				src = "/assets/splash.png",
+local splashImg = Image
+{
+				src = "/assets/SplashScreen.jpg",
 				opacity = 255,
 				y = 0,
-				z = 6,
-				anchor_point = {0,1080}
-				}	
-				
-screen:add(splashImage)
+}	
+local startbutton = Image
+{
+	src = "assets/start-button.png",
+x=800,y=650,
+					
+}
+local splash = Group{name="splash",anchor_point = {0,1080},z=6
+}
+splash:add(splashImg,startbutton)
+screen:add(splash)
 
 function GameControl:show_splash()
 	
-		splashImage:animate({ duration = 700, y = 1080, mode = "EASE_IN_OUT_SINE" })
+		splash:animate({ duration = 700, y = 1080, mode = "EASE_IN_OUT_SINE" })
 		local child = screen:find_child("end session text")
         if child ~= nil then child:unparent() end
 
@@ -34,9 +41,38 @@ end
 
 
 function GameControl:hide_splash()
-
-		splashImage:animate({ duration = 500, y = 2160, mode = "EASE_IN_OUT_SINE" })
-
+	local t = Timeline
+	{
+		duration = 1000,
+		direction = "FORWARD",
+		loop = false
+	}
+	local button_old_x = startbutton.x
+	local button_old_y = startbutton.y
+	local button_new_x = startbutton.x+30
+	local button_new_y = startbutton.y+20
+	function t.on_new_frame(t,msecs)
+		if msecs <= 150 then
+			local p = (msecs)/(150)
+			startbutton.x = button_old_x + (button_new_x - button_old_x)*p
+			startbutton.y = button_old_y + (button_new_y - button_old_y)*p
+		elseif msecs <= 300 then
+			local p = (msecs-150)/(150)
+			startbutton.x = button_new_x + (button_old_x - button_new_x)*p
+			startbutton.y = button_new_y + (button_old_y - button_new_y)*p
+		elseif msecs <= 500 then
+		else
+			local p = (msecs-500)/(t.duration-500)
+			splash.y = 1080*(1-p)
+			
+		end
+	end
+	function t.on_completed()
+		splash.y = 0
+		startbutton.x = button_old_x
+		startbutton.y = button_old_y
+	end
+t:start()
 end
 
 function GameControl:start_session()
@@ -129,24 +165,40 @@ function GameControl:place_player_at_index(player, index)
                     src="assets/PieceLg".. player_icon.."C.png",
                     scale={2,2},
                 }
-                local winnertext = Text
+                local winnertext = Image
                 {   name="end of session text",
-                	text ="Wins!",
-                	font = "Sans 160px",
-                	color = "ffffff",
+                	src ="assets/wins.png",
+					opacity = 0
                 }	
                 winner.position = {screen.w/2,-screen.h/2}
                 winner.anchor_point={winner.w/2,winner.h/2}    
                 
-                winnertext.position = {screen.w/2,-screen.h/2}
+                winnertext.position = {screen.w/2,screen.h/2}
                 winnertext.anchor_point={winnertext.w/2,winner.h/2}
                 
-                screen:add(winnertext, winner)
+                screen:add(winner,winnertext)
                 
-                winner:animate{duration=700,y=screen.h/2, mode = "EASE_IN_OUT_SINE"}
-                winnertext:animate{duration=700,y=screen.h/2 + 240, mode = "EASE_IN_OUT_SINE"}
-                
-				ClearPlayField()
+                --winner:animate{duration=700,y=screen.h/2, mode = "EASE_IN_OUT_SINE"}
+                --winnertext:animate{duration=700,y=screen.h/2 + 240, mode = "EASE_IN_OUT_SINE"}
+				local t = Timeline
+				{
+					duration  = 2000,
+					direction = "FORWARD",
+					loop      = false
+				}
+				function t.on_new_frame(t,msecs)
+					if msecs <= 200 then
+						local p = msecs/200
+						winner.y = -screen.h/2 + screen.h*p
+					elseif msecs > 1700 then
+						local p = (msecs-1700)/(t.duration-1700)
+						winnertext.opacity = 255*p
+					end
+				end
+				function t.on_completed()
+				end
+                t:start()
+				--ClearPlayField()
 				return ControlConstants.state.clear
             else
                 print("2")
@@ -224,8 +276,8 @@ function GameControl.make_random_move_delegate(free_space_mask, placement_callba
 
         callback_player = player
         -- place timer board
-
-        StatusText:pressToDrop()
+print("wft",ControlConstants.player_icon[player])
+        StatusText:pressToDrop(ControlConstants.player_icon[player])
 
         TimerBoardShow(ControlConstants.player_icon[player])
         print("Player Icon: " .. ControlConstants.player_icon[player])
@@ -373,7 +425,7 @@ function GameControl:make_state_machine()
     	end,
 --]]
         [ControlConstants.state.clear] = function() 
-            local child = screen:find_child("help text")
+            local child = screen:find_child("end of session text")
             if child ~= nil then child:unparent() end
             -- stop moving piece if already running
         	self.move_delegate.stop()

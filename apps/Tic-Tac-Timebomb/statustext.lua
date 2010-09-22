@@ -57,12 +57,15 @@ function StatusText:pressToMove(player_icon)
 	
 end
 
-function StatusText:pressToDrop()
+function StatusText:pressToDrop(player_icon)
 
 	self:clear()
-		self:add(PlayIconImage)
 
-	  local image_defaults = {x=5,y=-6}
+	local image_defaults = {x=5,y=-6}
+print("player_icon",player_icon)
+    	local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
+                                             or ui:createPieceHalfXC(image_defaults)
+		self:add(PlayIconImage)
 
 	-- adding text "press"
 	local textPress = StatusText:Text()
