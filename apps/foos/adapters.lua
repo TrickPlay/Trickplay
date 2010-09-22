@@ -177,8 +177,10 @@ print("response!")
 				for i , photo in ipairs( data.photos.photo ) do
 					adapter.photo_list[(page-1)*50 +i]= photo
 				end
-
-				LoadImg(adapter:get_photos_at(math.random(5),true),slot)
+				local i = math.random(5)
+				local foto,lic_tit, lic_auth
+				foto,lic_tit, lic_auth = adapter:get_photos_at(i,true)
+				LoadImg(foto,slot,lic_tit, lic_auth)
 --]]
 --[[
 				local src = nil
@@ -214,14 +216,14 @@ print("response!")
 		if thumb then
 			return adapter.photo_list[i].url_m,  
 						"\""..adapter.photo_list[i].title..
-						"\" ©"..adapter.photo_list[i].ownername..
+						"\" ©",adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		else
 
 			return adapter.photo_list[i].url_m, 
 						"\""..adapter.photo_list[i].title..
-						"\" ©"..adapter.photo_list[i].ownername..
+						"\" ©",adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		end

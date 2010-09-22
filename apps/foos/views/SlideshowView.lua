@@ -85,12 +85,12 @@ local postit_options = Image{src="assets/note-menu-options.png",x=250,y=250}--,x
 postit:add(postit_bg, postit_arrow, postit_options)
 postit:add(unpack(postit_text))
 
-local license_box = Group{name="license box",position={0,1040}}
+local license_box = Group{name="license box",position={0,1055}}
 license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
     view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
 
     view.timer            = Timer()
-    view.timer.interval   = 4000
+    view.timer.interval   = 4--000
     view.timer_is_running = false
      
 
@@ -1618,9 +1618,10 @@ mosaic_timeline:start()
             attempt = attempt + 1
 	        local photo_i    = view:get_controller():get_photo_index()
 
-			local pic     
-			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
+			local pic, title, auth 
+			pic, title, auth = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
+			license.text = title.." "..auth
 			license.x = screen.w - license.w
 			if pic == nil or attempt == 5 or index < photo_i - 5 then
 				
@@ -1808,9 +1809,10 @@ mosaic_timeline:start()
         local function load_pic(timeline,group)
 
         --local callback = function(url)
-			local pic     
-			pic, license.text = sources[model.fp_1D_index]:get_photos_at(
+			local pic, title, auth 
+			pic, title, auth = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
+			license.text = title.." "..auth
 			license.x = screen.w - license.w
 
             if pic == "" then
@@ -1966,9 +1968,11 @@ mosaic_timeline:start()
     end
     function view:toggle_timer()    
         if view.timer_is_running then
+print("toggle off")
             view.timer:stop()
             view.timer_is_running = false
         else
+print("toggle on")
             view.timer:start()
             view.timer_is_running = true
         end
@@ -2041,26 +2045,28 @@ mosaic_timeline:start()
 		}
 	end
 	function view:pick(curr,old)
-		local t = Timeline
-		{
-			duration = 400,
-			loop = false,
-			direction = "FORWARD"
-		}
-print(curr,old)
-		function t.on_new_frame(t,msecs,p)
-			postit_text[curr+1].opacity = 255*(p)
-			postit_text[old+1].opacity = 255*(1-p)
+		if old ~= curr then
+			local t = Timeline
+			{
+				duration = 400,
+				loop = false,
+				direction = "FORWARD"
+			}
+			function t.on_new_frame(t,msecs,p)
+				postit_text[curr+1].opacity = 255*(p)
+				postit_text[old+1].opacity = 255*(1-p)
 
-		end
-		function t.on_completed()
-			postit_text[curr+1].opacity = 255
-			postit_text[old+1].opacity = 0
+			end
+			function t.on_completed()
+				postit_text[curr+1].opacity = 255
+				postit_text[old+1].opacity = 0
 
+				reset_keys()
+			end
+			t:start()
+		else
 			reset_keys()
 		end
-		t:start()
-
 	end
     function view:nav_out_focus(style_i)
 		local t = Timeline
