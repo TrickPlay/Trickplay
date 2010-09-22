@@ -1,15 +1,17 @@
 
 local api = { private = { } }
 
---local base_url = "http://ec2-184-72-169-182.compute-1.amazonaws.com:8080/trickplay-0.1/"
-
---local base_url = "http://quinnipiac.local:8080/trickplay/"
-
 -------------------------------------------------------------------------------
 -- If the base url is an empty string, we try to read the results from
 -- json files included in the app in the directory "fake-server"
 
 local base_url = ""
+
+-------------------------------------------------------------------------------
+
+--local base_url = "http://ec2-184-72-169-182.compute-1.amazonaws.com:8080/trickplay-0.1/"
+
+--local base_url = "http://quinnipiac.local:8080/trickplay/"
 
 -------------------------------------------------------------------------------
 

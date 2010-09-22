@@ -56,16 +56,19 @@ function( section )
         local items_height = 0
     
     
-        local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
+--        local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
         
         local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
-        table.insert( section_items , all_apps )
+--        table.insert( section_items , all_apps )
         
         table.insert( section_items , categories )
         
-        items_height = items_height + all_apps.h + categories.h
+--        items_height = items_height + all_apps.h + categories.h
+  
+        items_height = items_height + categories.h
         
+--[[        
         all_apps.extra.on_activate =
         
             function()
@@ -74,7 +77,7 @@ function( section )
                 
                 show_all_apps( recently_used_apps )
             end
-        
+]]        
         ---------------------------------------------------------------------------
         -- The top apps
         ---------------------------------------------------------------------------

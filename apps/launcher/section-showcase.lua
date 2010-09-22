@@ -31,9 +31,9 @@ function( section )
         local space = group.h - ( TOP_PADDING + BOTTOM_PADDING )
         local items_height = 0
         
-        local item1 = factory.make_text_menu_item( assets , ui.strings[ "Honor the Code" ] )
+--        local item1 = factory.make_text_menu_item( assets , ui.strings[ "Honor the Code" ] )
         
-        table.insert( section_items , item1  )
+--        table.insert( section_items , item1  )
 
         local image = assets( "assets/showcase-mountain-dew.png" )
             
@@ -43,12 +43,12 @@ function( section )
         for i = 1 , # section_items do
             items_height = items_height + section_items[ i ].h
         end
-        
+--[[        
         item1.extra.on_activate =
         
             function()
             end
-        
+]]        
         -- This spaces all items equally.
         -- TODO: If there are less than 3 app tiles, it will be wrong.
         
@@ -133,6 +133,8 @@ function( section )
     
     function section.on_enter( section )
     
+        return false
+--[[    
         section.focus = 0
         
         move_focus( 1 )
@@ -149,6 +151,7 @@ function( section )
             end
     
         return true
+]]        
     end
 
     ---------------------------------------------------------------------------
