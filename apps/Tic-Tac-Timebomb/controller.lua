@@ -9,7 +9,7 @@ local ControlConstants = {
     rev_magic_3 =  { [2]=1, [7]=2, [6]=3, [9]=4, [5]=5, [1]=6, [4]=7, [3]=8, [8]=9 },
     player_icon = { "X", "O"},
     play = {invalid = 1, win = 2, no = 3, tie = 4},
-    speeds = {600, 400, 300, 300},
+    speeds = {0.6, 0.4, 0.3, 0.3},
     win_rounds = 6
 }
 
@@ -162,7 +162,8 @@ function GameControl:place_player_at_index(player, index)
                 local winner = Image
                 {
                     name="end session text",
-                    src="assets/PieceHg".. player_icon.."C.png",
+                    src="assets/PieceLg".. player_icon.."C.png",
+                    scale={2,2},
                 }
                 local winnertext = Image
                 {   name="end of session text",
@@ -173,7 +174,7 @@ function GameControl:place_player_at_index(player, index)
                 winner.anchor_point={winner.w/2,winner.h/2}    
                 
                 winnertext.position = {screen.w/2,screen.h/2}
-                winnertext.anchor_point={winnertext.w/2,winnertext.h/2}
+                winnertext.anchor_point={winnertext.w/2,winner.h/2}
                 
                 screen:add(winner,winnertext)
                 
@@ -181,18 +182,16 @@ function GameControl:place_player_at_index(player, index)
                 --winnertext:animate{duration=700,y=screen.h/2 + 240, mode = "EASE_IN_OUT_SINE"}
 				local t = Timeline
 				{
-					duration  = 1700,
+					duration  = 2000,
 					direction = "FORWARD",
 					loop      = false
 				}
 				function t.on_new_frame(t,msecs)
 					if msecs <= 200 then
 						local p = msecs/200
-						winner.y = -screen.h/2 + screen.h/2*p
-					elseif msecs <=1400 then
-						winner.y = screen.h/2
-					elseif msecs > 1400 then
-						local p = (msecs-1400)/(t.duration-1400)
+						winner.y = -screen.h/2 + screen.h*p
+					elseif msecs > 1700 then
+						local p = (msecs-1700)/(t.duration-1700)
 						winnertext.opacity = 255*p
 					end
 				end
