@@ -26,6 +26,7 @@ struct idle
     {
         clear();
         source=clutter_threads_add_idle(on_idle,this);
+        g_timer_start(timer);
         //source=clutter_threads_add_frame_source(60,on_idle,this);
     }
 
@@ -36,6 +37,7 @@ struct idle
             g_source_remove(source);
             source=0;
         }
+        g_timer_stop(timer);
     }
 
     static gboolean on_idle(gpointer data);
@@ -47,7 +49,13 @@ struct idle
 ]]
 
 /*
-    Global: idle 
+    Global: idle
+    
+    Idle lets you set a function that will be called as often as possible, leaving
+    time for rendering. It can be used to implement a game loop or animations.
+    
+    Note that idle may be rate limited (to 60 invocations per second, for example), 
+    and can slow down when TrickPlay receives events. 
 */
 
 global idle [[idle*]]
@@ -62,7 +70,34 @@ global idle [[idle*]]
 	    delete self;
 	]];
 	
-    callback on_idle
+	/*
+		Event: on_idle
+		
+		When this is set to a function, it will be called as often as possible, until
+		you set it back to nil.
+		
+		This example, will set a function that sums up the elapsed seconds and stops
+		after it reaches six.
+		
+		(code)
+		local total = 0
+		function idle.on_idle( idle , seconds )
+		  total = total + seconds 
+		  if total >= 6 then
+		  	idle.on_idle = nil
+		  end 
+		end
+		(end)
+		
+		Arguments:
+		
+			idle - The idle.
+			
+			elapsed_seconds - The fractional seconds elapsed since the function was called
+							  the last time.
+	*/
+	
+    callback on_idle( idle idle , double elapsed_seconds )
 	[[
 	    if (on_idle)
 	    {

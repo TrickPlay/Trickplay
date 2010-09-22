@@ -1,0 +1,16 @@
+package trickplay;
+
+class ApplicationFileController {
+
+    def index = {
+        log.debug "Uploaded application file with id=${params.ufileId}"
+        [files: ApplicationFile.list(), params:params]
+    }
+    
+    def delete = {
+        def ufile = ApplicationFile.get(params.id)
+        ufile.delete()
+        redirect action:index
+    }
+
+}
