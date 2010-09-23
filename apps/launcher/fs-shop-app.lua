@@ -8,6 +8,17 @@ function( ui , api )
     local Encapsulate = dofile( "Encapsulate" )
     
     local section = {}
+    
+    local get_button
+    
+    local keepers = {}
+    
+    local function hold( thing )
+        keepers[ thing ] = true
+    end
+    local function letgo( thing )
+        keepers[ thing ] = nil
+    end
    
     local function build_ui()
     
@@ -26,7 +37,7 @@ function( ui , api )
         local BACKGROUND_FADE_DURATION  = 500
         
         local ANIMATE_IN_DURATION       = 200
-        local ANIMATE_IN_MODE           = "EASE_IN_QUAD"
+        local ANIMATE_IN_MODE           = nil -- "EASE_IN_QUAD"
         
         local ANIMATE_OUT_DURATION      = 200
         
@@ -40,7 +51,7 @@ function( ui , api )
         local GET_BUTTON_Y              = 260
         
 
-        local group = Group{ position = { 0 , 0 } , size = screen.size , opacity = 0 }
+        local group = Group{ position = { 0 , 0 } , size = screen.size , opacity = 0 , name = "app-shop-details" }
             
 
         local scrim_background = assets( "assets/app-screen-scrim.png" )
@@ -51,7 +62,7 @@ function( ui , api )
         
         local app_desc = Text( APP_DESC_STYLE )
                 
-        local get_button = factory.make_text_menu_item( assets , "Get it" )
+        get_button = factory.make_text_menu_item( assets , "Get it" )
                 
         local scrim = Group
         {
@@ -95,8 +106,6 @@ function( ui , api )
         
         local tile = nil
         
-        local old_idle = nil
-
         local me = { readonly = { group = function() return group end } }
         
         function me:populate( shop_app )
@@ -104,7 +113,7 @@ function( ui , api )
             -- Remove and let go of an old background if it is there
             
             if background then
-                backgroun:unparent()
+                background:unparent()
                 background = nil
             end
             
@@ -187,11 +196,7 @@ function( ui , api )
             local timeline = FunctionTimeline{ mode = ANIMATE_IN_MODE , duration = ANIMATE_IN_DURATION , functions = to_animate }
             
             function timeline.on_completed( timeline )
-                
-                -- Focus the button
-                
-                get_button:on_focus_in()
-                
+                                
                 -- Set up an on_idle to rotate the icon tile after some delay
                 
                 old_idle = idle.on_idle
@@ -203,7 +208,7 @@ function( ui , api )
                 local tile_rotate_d         = -1
                 local TILE_ROTATE_ANGLE     = 20
                 local TILE_ROTATE_SPEED     = TILE_ROTATE_ANGLE / 3
-                
+
                 function idle.on_idle( idle , seconds )
                 
                     if delay then
@@ -243,9 +248,7 @@ function( ui , api )
         
         function me:animate_out( callback )
         
-            idle.on_idle = old_idle
-            
-            old_idle = nil
+            idle.on_idle = nil
         
             local to_animate = {}
             
@@ -265,6 +268,7 @@ function( ui , api )
             local timeline = FunctionTimeline{ duration = ANIMATE_OUT_DURATION , functions = to_animate }
             
             function timeline.on_completed( timeline )
+                
                 if background then
                     background:unparent()
                     background = nil
@@ -275,11 +279,28 @@ function( ui , api )
                 end
                 
                 group.opacity = 0
-            
-                callback()
+                
+                letgo( timeline )
+
+                if callback then
+                    callback()
+                end
+                
             end
+
             
             timeline:start()
+            
+            -- In one special case, this timeline gets garbage collected right
+            -- after we leave this function. This is an engine issue that I've
+            -- noted - bug # 192.
+            --
+            -- To reproduce it, run this, go to the store drop down, click on
+            -- an item to bring up the app details page, then go to the 'Apps'
+            -- menu item and bring up the list of apps - the app details
+            -- screen does not get animated out properly.
+            
+            hold( timeline )            
         
         end
         
@@ -289,29 +310,49 @@ function( ui , api )
     
     local me 
     
+    local go_back
+    
     function section:show_app( shop_app , back_callback )
+    
+        go_back = back_callback
     
         if not me then
             me = build_ui()
         end
         
-        local group = me.group
-        
         local function finished_in()
-            group:grab_key_focus()
-            function group.on_key_down( group , key )
-                if key == keys.Return then
-                    group.on_key_down = nil
-                    me:animate_out( back_callback )
-                end
-            end
         end
+        
+        get_button:on_focus_out()
         
         me:populate( shop_app )
         me:animate_in( finished_in )
     
     end
     
+    function section:on_enter()
+        get_button:on_focus_in()
+
+        local group = me.group
+        
+        group:grab_key_focus()
+        function group.on_key_down( group , key )
+            if key == keys.Return then
+                group.on_key_down = nil
+                me:animate_out( go_back )
+            end
+        end
+    end
+    
+    function section:on_hide()
+        get_button:on_focus_out()
+        me:animate_out( )
+    end
+    
+    function section:go_back()
+        get_button:on_focus_out()
+        me:animate_out( go_back )
+    end
     
     return Encapsulate( section )
     
