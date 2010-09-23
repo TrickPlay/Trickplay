@@ -92,7 +92,7 @@ shape_end_y = shape_start_y
 -------------------
 
 -- Sets initial opacity of shapes
-shape_start_opacity = math.random(10,20)
+shape_start_opacity = math.random(15,20)
 
 -- Sets the final opacity 
 shape_end_opacity = 0
