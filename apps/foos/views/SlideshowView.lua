@@ -945,10 +945,12 @@ mosaic_background.opacity = 0
                     local progress = (msecs - 300*(index-1))/300
                     for i = 1,index-1 do
                         local child    = pic:find_child("Clone "..i)
+			if child ~= nil then
                         child.position = {drop_points[i][1],
                                           drop_points[i][2]}
                         child.scale    = { 1 , 1 }
                         child.z        = 0
+			end
                     end
                     local child = pic:find_child("Clone "..index)
 					--if child ~= nil then
