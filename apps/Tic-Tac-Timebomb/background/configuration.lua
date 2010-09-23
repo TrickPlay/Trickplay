@@ -67,10 +67,10 @@ shape_z_rotation = 1440
 -----------------
 
 -- Sets the Starting scale
-start_scale = 2
+start_scale = 0
 
 -- End scale ( use random_scale for random scaling)
-end_scale = 2
+end_scale = random_scale
 
 
 -------------------
@@ -92,11 +92,10 @@ shape_end_y = shape_start_y
 -------------------
 
 -- Sets initial opacity of shapes
-shape_start_opacity = math.random(50,75)
+shape_start_opacity = math.random(10,20)
 
 -- Sets the final opacity 
-shape_end_opacity = shape_start_opacity
-
+shape_end_opacity = 0
 
 -----------------
 -- Shape Quantity
@@ -108,7 +107,7 @@ timer_interval = 3
 
 -- Dicates number of shapes per cycle. cycle length is timer_interval
 
-number_of_shapes = 1
+number_of_shapes = math.random(3,5)
 
 ------------------
 -- color/fill/stroke
@@ -135,7 +134,7 @@ stroke_bool = false
 animation_mode = "EASE_OUT_SINE"
 
 --- Animation Duration
-animation_duration = 80000
+animation_duration = 20000
 
 ------------------------------------------------------------
 

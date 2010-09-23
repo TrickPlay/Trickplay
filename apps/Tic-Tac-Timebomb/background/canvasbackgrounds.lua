@@ -14,7 +14,7 @@ local background = Image{
 				opacity = 255,
 				y = 0,
 				x = 0,
-				z = -50,
+				z = -3,
 				}
 screen:add(background)
 
@@ -54,7 +54,7 @@ local function make_grow_clones()
 			   {                    
 					 source = shape,   
 					 name = "imaclone",
-					 z = -9,
+					 z = -2,
 				}
 	screen:add(growclone)
 	
@@ -84,7 +84,7 @@ local function make_roll_clones()
 			   {
 					 source = shape,
 					 name = "imaclone2",
-					 z = -9,
+					 z = -2,
 				}
 	
 	screen:add(rollclone)
@@ -114,7 +114,7 @@ local function make_roll_clones_big()
 			   {
 					 source = shape,
 					 name = "imaclone2",
-					 z = -9,
+					 z = -2,
 				}
 	
 	screen:add(rollclone)
