@@ -106,7 +106,9 @@ function( section )
             tile.extra.on_activate =
             
                 function( )
-                    -- TODO: What happens when you hit this tile
+                    ui:on_exit_section( section )
+                    local shop = dofile( "fs-shop")( ui , a , section.featured_apps , section.all_apps )
+                    ui:on_section_full_screen( shop )
                 end
         
         end
@@ -217,6 +219,10 @@ function( section )
         if featured_apps == nil or all_apps == nil then
             build_error_ui()
         else
+            
+            section.featured_apps = featured_apps
+            section.all_apps = all_apps
+            
             local shop_apps = {}
             
             -- Add up to 3 from featured_apps
@@ -254,6 +260,19 @@ function( section )
                 end
             
             end
+            
+            for i = 1 , # shop_apps do
+            
+                local medias = {}
+                
+                for _ , media in ipairs( shop_apps[ i ].medias or {} ) do
+                    medias[ media.imageType ] = media.url
+                end
+            
+                shop_apps[ i ].medias = medias
+            
+            end
+            
             
             build_ui( shop_apps )
         end

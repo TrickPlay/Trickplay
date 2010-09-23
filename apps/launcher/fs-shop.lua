@@ -28,10 +28,16 @@ function FunctionTimeline( t )
     return timeline
 end
 
+-------------------------------------------------------------------------------
+-- logging
+
+local print = function() end
+
+-------------------------------------------------------------------------------
 
 
 return
-function( ui )
+function( ui , details_shop_app , featured_apps , all_apps )
 
     local section   = {}
     
@@ -51,8 +57,29 @@ function( ui )
     
     local details = dofile( "fs-shop-app" )( ui , api )
     
+    local in_details = false
+    
+    local showing = false
+    
+    local STATE_LOADING     = 1
+    local STATE_ERROR       = 2
+    local STATE_MAIN_IN     = 3
+    local STATE_MAIN_OUT    = 4
+    local STATE_DETAILS     = 5
+    
+    local state = STATE_LOADING
+        
     
     local function fetch_initial_data()
+    
+        -- If these results were passed to us when we were created, we just
+        -- use them as they are and don't send out requests.
+        
+        if featured_apps and all_apps then
+            print( "USING EXISTING APP LISTS" )
+            section:data_arrived( featured_apps , all_apps )
+            return
+        end
     
         -- The result of getting a list of featured apps from the API
         
@@ -136,17 +163,23 @@ function( ui )
     -- This builds the initial 'loading UI' until the data comes back
     
     local function build_ui()
+    
+        print( "BUILDING UI" )
         
         if group then
             group:raise_to_top()
             group.opacity = 255
+            print( "UI ALREADY BUILT - MADE VISIBLE" )
             return
         end
+        
+        print( "BUILDING NEW UI" )
         
         local client_rect = ui:get_client_rect()
         
         group = Group
         {
+            name = "app-shop-main",
             size = { client_rect.w , client_rect.h } ,
             position = { client_rect.x , client_rect.y },
             clip = { 0 , 0 , client_rect.w , client_rect.h },
@@ -176,6 +209,7 @@ function( ui )
 
         if not featured_apps or not all_apps then
             group:add( Text{ font = "60px" , text = "Error!" , color = "FFFFFF" } )
+            state = STATE_ERROR
             return
         end
         
@@ -227,15 +261,19 @@ function( ui )
         
         for _ , shop_app in ipairs( featured_apps.applications ) do
         
-            local medias = {}
+            if # shop_app.medias > 0 then
+        
+                local medias = {}
+                
+                for _ , media in ipairs( shop_app.medias or {} ) do
+                    medias[ media.imageType ] = media.url
+                end
+                
+                shop_app.medias = medias
             
-            for _ , media in ipairs( shop_app.medias or {} ) do
-                medias[ media.imageType ] = media.url
             end
             
-            shop_app.medias = medias
-            
-            local featured_icon_url = medias[ "featuredIcon" ]
+            local featured_icon_url = shop_app.medias[ "featuredIcon" ]
             
             if featured_icon_url and # featured_items < 2 then
                 
@@ -284,14 +322,17 @@ function( ui )
                 
         for _ , shop_app in ipairs( all_apps.applications ) do
 
-            local medias = {}
+            if # shop_app.medias then
             
-            for _ , media in ipairs( shop_app.medias or {} ) do
-                medias[ media.imageType ] = media.url
+                local medias = {}
+                
+                for _ , media in ipairs( shop_app.medias or {} ) do
+                    medias[ media.imageType ] = media.url
+                end
+                
+                shop_app.medias = medias
+            
             end
-            
-            shop_app.medias = medias
-            
             
             local tile = factory.make_shop_floor_tile( assets , shop_app.icon )
 
@@ -467,9 +508,17 @@ function( ui )
             
         end
         
-
         -----------------------------------------------------------------------
-    
+        
+        
+        section:animate_out( nil , true )
+        
+        state = STATE_MAIN_OUT
+        
+        if showing then
+            state = STATE_MAIN_IN
+            section:animate_in()
+        end 
     end
 
     ---------------------------------------------------------------------------
@@ -693,41 +742,42 @@ function( ui )
         end
     end
     
-    local function show_app_details()
-    
+    function section:animate_out( callback , skip_animation )
+
         local ANIMATE_OUT_DURATION = 150
         local ANIMATE_OUT_MODE     = nil
-
+        
+        local function finished()
+            group.opacity = 0
+            if callback then
+                callback()
+            end
+        end
+        
         local m = section.main        
         if not m then
+            finished()
             return
         end
         
-        local shop_app
-        
-        -- First, turn off the focus rings
+        -- Turn off the focus rings
         
         if m.focused == m.featured then
-            shop_app = m.featured.items[ m.featured.focused ].extra.shop_app
             m.featured.items[ m.featured.focused ]:on_focus_out()
         elseif m.focused == m.apps then
-            shop_app = m.apps.items[ m.apps.focused ].extra.shop_app
             m.apps.items[ m.apps.focused ]:on_focus_out()
             m.apps.focus_ring.opacity = 0
         end
-        
-        assert( shop_app )
-        
+
         -- Now, prepare a list of things to animate out of the screen
-        
-        -- Here, we are just adding functions to the to_animate table, which
-        -- makes the timeline's on_new_frame much simpler - it has no ifs
-        
+                
         local to_animate = {}
         
         for _ , item in ipairs( m.featured.items ) do
         
-            item.extra.original_position = item.position
+            if not item.extra.original_position then
+                item.extra.original_position = item.position
+            end
             
             if item.x < group.w / 2 then
                 local interval = Interval( item.x , - item.w )
@@ -740,82 +790,160 @@ function( ui )
         end
         
         do
-            local floor = m.apps.floor            
-            floor.extra.original_position = floor.position
+            local floor = m.apps.floor
+            
+            if not floor.extra.original_position then
+                floor.extra.original_position = floor.position
+            end
             
             local interval = Interval( floor.y , group.h )
             table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
         end
         
-        -- Shut off key handler
+        if skip_animation then
         
-        local on_key_down = group.on_key_down
+            -- Call all the functions with a progress of 1 - which will set
+            -- everything to its final position.
+            
+            for i = 1 , # to_animate do
+                to_animate[ i ]( 1 )
+            end
+            
+            finished()
+            
+        else
         
-        group.on_key_down = nil
+            -- Timeline
+            
+            local timeline = FunctionTimeline
+            {
+                mode = ANIMATE_OUT_MODE ,
+                duration = ANIMATE_OUT_DURATION ,
+                functions = to_animate,
+                on_completed = finished
+            }
+            
+            timeline:start()
+            
+        end
+        
+    end
+    
+    function section:animate_in( callback )
+    
+        local ANIMATE_IN_DURATION = 150
+        local ANIMATE_IN_MODE     = nil
+        
+        local function finished()
+            if callback then
+                callback()
+            end
+        end
+        
+        group.opacity = 255
+        
+        local m = section.main        
+        if not m then
+            finished()
+            return
+        end
+        
+        -- Need to put everything back in place
+                    
+        local to_animate = {}
+    
+        for _ , item in ipairs( m.featured.items ) do
+            local x = item.extra.original_position[ 1 ]
+            local interval = Interval( item.x , x )
+            table.insert( to_animate , function( progress ) item.x = interval:get_value( progress ) end )
+        end
+        
+        do
+            local floor = m.apps.floor
+            local y = floor.extra.original_position[ 2 ]
+            local interval = Interval( floor.y , y )
+            table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
+        end
+        
+        local timeline = FunctionTimeline
+        {
+            duration = ANIMATE_IN_DURATION ,
+            mode = ANIMATE_IN_MODE,
+            functions = to_animate,
+            on_completed = finished
+        }
 
-        -- Forward declaration
+                
+        timeline:start()
+    end
+    
+    local function back_from_details()
+    
+        local function finished()
+            group:grab_key_focus()
+            local m = section.main        
+            if m.focused == m.featured then
+                m.featured.items[ m.featured.focused ]:on_focus_in()
+            elseif m.focused == m.apps then
+                m.apps.items[ m.apps.focused ]:on_focus_in()
+                m.apps.focus_ring.opacity = 255
+            else
+                section:on_enter()
+            end
+        end
         
-        local back_from_details
+        state = STATE_MAIN_IN
         
-        -- Timeline
+        section:animate_in( finished )
+    
+    end
+    
+    local function back_from_straight_details()
+    
+        -- This happens when we went straight to a details screen from the
+        -- shop dropdown. We are coming back with no UI.
         
-        local timeline = FunctionTimeline{ mode = ANIMATE_OUT_MODE , duration = ANIMATE_OUT_DURATION , functions = to_animate }
+        state = STATE_LOADING
+        section:on_show()
+        section:on_enter()
         
-        function timeline.on_completed( timeline )
+    end
+    
+    local function show_focused_app_details()
+        if state ~= STATE_MAIN_IN then
+            return
+        end
+        
+        local m = section.main        
+        if not m then
+            return
+        end
+        
+        -- Find the selected app
+        
+        local shop_app
+        
+        if m.focused == m.featured then
+            shop_app = m.featured.items[ m.featured.focused ].extra.shop_app
+        elseif m.focused == m.apps then
+            shop_app = m.apps.items[ m.apps.focused ].extra.shop_app
+        end
+        
+        if not shop_app then
+            return
+        end
+        
+        -- Give the focus back to the main menu
+        
+        ui:on_exit_section( section )
+        
+        local function show_details()
             details:show_app( shop_app , back_from_details )
         end
         
-        timeline:start()
+        section:animate_out( show_details )
         
-        -- This is the callback that the details screen calls when it is
-        -- finished.
-        
-        back_from_details = function()
-        
-            -- Need to put everything back in place
-                        
-            local to_animate = {}
-        
-            for _ , item in ipairs( m.featured.items ) do
-            
-                local x = item.extra.original_position[ 1 ]
-                
-                local interval = Interval( item.x , x )
-                table.insert( to_animate , function( progress ) item.x = interval:get_value( progress ) end )
-                
-            end
-            
-            do
-                local floor = m.apps.floor
-                local y = floor.extra.original_position[ 2 ]
-                
-                local interval = Interval( floor.y , y )
-                table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
-            end
-            
-            local timeline = FunctionTimeline{ duration = ANIMATE_OUT_DURATION , functions = to_animate }
-
-            -- When the animation is done, we put the focus rings back in,
-            -- grab key focus and restore our key handler. We're back in
-            -- business.
-            
-            function timeline.on_completed( )
-                
-                if m.focused == m.featured then
-                    m.featured.items[ m.featured.focused ]:on_focus_in()
-                elseif m.focused == m.apps then
-                    m.apps.items[ m.apps.focused ]:on_focus_in()
-                    m.apps.focus_ring.opacity = 255
-                end
-                
-                group.on_key_down = on_key_down
-                group:grab_key_focus()
-                
-            end
-            
-            timeline:start()
-        
-        end
+        state = STATE_DETAILS
         
     end
     
@@ -829,12 +957,47 @@ function( ui )
         [ keys.Right    ] = move_focus_right,
         [ keys.Up       ] = move_focus_up,
         [ keys.Down     ] = move_focus_down,
-        [ keys.Return   ] = show_app_details,
+        [ keys.Return   ] = show_focused_app_details,
     }
     
-    function section.on_show( section )
+    function section:on_show( )
     
-        build_ui()
+        print( "ON SHOW" , state )
+    
+        showing = true
+    
+        if state == STATE_LOADING or state == STATE_ERROR then
+        
+            -- Here, we are going straight to the details screen without
+            -- building our own UI.
+            
+            if details_shop_app then
+            
+                details:show_app( details_shop_app , back_from_straight_details )
+                
+                details_shop_app = nil
+                
+                state = STATE_DETAILS
+                
+                return
+            
+            else
+        
+                build_ui()
+                
+            end
+            
+        elseif state == STATE_MAIN_IN then
+        
+            self:animate_out( nil , true )
+            self:animate_in()
+        
+        elseif state == STATE_MAIN_OUT then
+        
+            self:animate_in()
+            state = STATE_MAIN_IN
+            
+        end
         
         function group.on_key_down( group , key )
             
@@ -844,47 +1007,61 @@ function( ui )
             end
         
         end
-            
+        
     end
     
     function section.on_enter( section )
     
         -- If the screen has not been built, we cannot enter
         
-        if not section.main then
+        if state == STATE_LOADING or state == STATE_ERROR then
+            
             return false
-        end
-        
-        if # section.main.featured.items > 0 then
-        
-            section.main.focused = section.main.featured
             
-            if not section.main.featured.focused then
+        elseif state == STATE_MAIN_IN then
+        
+            if # section.main.featured.items > 0 then
             
-                section.main.featured.focused = 1
+                section.main.focused = section.main.featured
                 
+                if not section.main.featured.focused then
+                
+                    section.main.featured.focused = 1
+                    
+                end
+                
+                section.main.featured.items[ section.main.featured.focused ]:on_focus_in()
+                
+                group:grab_key_focus()
+                
+                return true
+            
             end
             
-            section.main.featured.items[ section.main.featured.focused ]:on_focus_in()
+            if # section.main.apps.items > 0 then
             
-            group:grab_key_focus()
+                section.main.focused = section.main.apps
+                
+                section.main.focus_ring.opacity = 255
+                
+                group:grab_key_focus()
+                
+                return true
+            
+            end
+        
+        elseif state == STATE_MAIN_OUT then
+        
+            assert( false )
+        
+        elseif state == STATE_DETAILS then
+        
+            details:on_enter()
             
             return true
         
         end
-        
-        if # section.main.apps.items > 0 then
-        
-            section.main.focused = section.main.apps
-            
-            section.main.focus_ring.opacity = 255
-            
-            group:grab_key_focus()
-            
-            return true
-        
-        end
-    
+                
         return false
         
     end
@@ -898,9 +1075,39 @@ function( ui )
     end
 
     function section.on_hide( section )
+    
+        print( "ON HIDE" , state )
+    
+        showing = false
         
-        if group then
+        if state == STATE_LOADING or state == STATE_ERROR then
+            
             group.opacity = 0
+            
+        elseif state == STATE_MAIN_IN then
+        
+            section:animate_out()
+        
+            state = STATE_MAIN_OUT
+            
+        elseif state == STATE_MAIN_OUT then
+        
+            -- do nothing
+            
+        elseif state == STATE_DETAILS then
+        
+            details:on_hide()
+            
+            if group then
+            
+                state = STATE_MAIN_OUT
+                
+            else
+                
+                state = STATE_LOADING
+                
+            end
+        
         end
         
     end
