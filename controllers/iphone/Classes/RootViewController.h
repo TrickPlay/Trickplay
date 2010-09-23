@@ -8,7 +8,7 @@
 
 #import "GestureView.h"
 
-@interface RootViewController : UITableViewController  {
+@interface RootViewController : UITableViewController <UINavigationControllerDelegate>  {
 	NSNetServiceBrowser* netServiceBrowser;
 	NSNetService* currentResolve;
 	NSMutableArray* services;

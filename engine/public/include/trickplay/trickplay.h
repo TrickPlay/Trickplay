@@ -34,7 +34,7 @@ extern "C" {
 
 #define TP_MAJOR_VERSION    0
 #define TP_MINOR_VERSION    0
-#define TP_PATCH_VERSION    6
+#define TP_PATCH_VERSION    10
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -106,6 +106,10 @@ typedef struct TPContext TPContext;
                             as "1.3" or "2.0.1".
                             Defaults to "0.0.0".
                             
+    TP_SYSTEM_SN -          System serial number. This should be the serial number of the
+                            system and should never change.
+                            Defaults to "SN".
+
     TP_DATA_PATH -          Data path. This must be a path where TrickPlay can create
                             files and directories. TrickPlay will create a sub-directory
                             called "trickplay" and keep all of its data there.
@@ -191,6 +195,7 @@ typedef struct TPContext TPContext;
 #define TP_SYSTEM_COUNTRY               "system_country"
 #define TP_SYSTEM_NAME                  "system_name"
 #define TP_SYSTEM_VERSION               "system_version"
+#define TP_SYSTEM_SN                    "system_sn"
 #define TP_DATA_PATH                    "data_path"
 #define TP_SCREEN_WIDTH                 "screen_width"
 #define TP_SCREEN_HEIGHT                "screen_height"

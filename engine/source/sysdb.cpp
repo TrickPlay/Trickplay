@@ -342,6 +342,17 @@ bool SystemDatabase::insert_initial_data()
         }
     }
 
+    // UUID
+
+    String uuid = get_string( TP_DB_UUID );
+
+    if ( uuid.empty() )
+    {
+        uuid = Util::make_v1_uuid();
+
+        set( TP_DB_UUID , uuid );
+    }
+
     return true;
 }
 

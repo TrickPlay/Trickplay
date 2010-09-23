@@ -67,7 +67,7 @@ protected:
 
 };
 
-int wrap_audio_sample(lua_State*, void*);
+int new_audiosample( lua_State * );
 
 ]]
 
@@ -81,6 +81,7 @@ global audiosampler [[void*]]
 	audiosampler()
 	[[
 		g_info("RAND_MAX is 2^%.0f",log2(RAND_MAX));
+		lb_construct_empty();
 	]];
 
 	# Function: get_sample
@@ -98,7 +99,9 @@ global audiosampler [[void*]]
 			sample->the_array[i] = rnd % trunc;
 		}
 
-		wrap_audio_sample(L, sample);
+		lua_pushlightuserdata( L , sample );
+		new_audiosample( L );
+		lua_remove( L , -2 );
 	]];
 }
 
@@ -112,6 +115,7 @@ interface audiosample [[AudioSample*]]
 {
 	audiosample()
 		[[
+			self=lb_construct( AudioSample , lua_touserdata( L , -2 ) );
 		]];
 
     ~audiosample()
@@ -157,7 +161,9 @@ interface audiosample [[AudioSample*]]
 			delete [] cpx;
 			kiss_fft_free(st);
 
-			lb_wrap(L, fft, AUDIOSAMPLE_METATABLE);
+			lua_pushlightuserdata( L , fft );
+			new_audiosample( L );
+			lua_remove( L , -2 );
 		]];
 
 	string __tostring()
@@ -166,12 +172,3 @@ interface audiosample [[AudioSample*]]
 			result = s.c_str();
 		]];
 }
-
-[[
-
-int wrap_audio_sample(lua_State*L, void*sample)
-{
-	return lb_wrap(L, sample, AUDIOSAMPLE_METATABLE);
-}
-
-]]
