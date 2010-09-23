@@ -14,6 +14,7 @@ local background = Image{
 				opacity = 255,
 				y = 0,
 				x = 0,
+				z = -50,
 				}
 screen:add(background)
 
@@ -22,8 +23,8 @@ screen:add(background)
 ------------------------------------------------------------
 
 local function make_shapes()
-make_squares()
---make_circles()
+--make_squares()
+make_circles()
 end
 
 ------------------------------------------------------------
@@ -53,6 +54,7 @@ local function make_grow_clones()
 			   {                    
 					 source = shape,   
 					 name = "imaclone",
+					 z = -9,
 				}
 	screen:add(growclone)
 	
@@ -82,6 +84,7 @@ local function make_roll_clones()
 			   {
 					 source = shape,
 					 name = "imaclone2",
+					 z = -9,
 				}
 	
 	screen:add(rollclone)
@@ -93,8 +96,8 @@ local function make_roll_clones()
 	print("Animating: rollclone, from: ",shape)
     	
 	rollclone:animate({ 
-	duration = animation_duration, 
-	scale = {end_scale, end_scale}, 
+	duration = 4000, 
+	scale = {start_scale, start_scale}, 
 	opacity = shape_end_opacity, 
 	mode = animation_mode, 
 	position = { shape_end_x,shape_end_y },  
@@ -111,6 +114,7 @@ local function make_roll_clones_big()
 			   {
 					 source = shape,
 					 name = "imaclone2",
+					 z = -9,
 				}
 	
 	screen:add(rollclone)
@@ -122,7 +126,7 @@ local function make_roll_clones_big()
 	print("Animating: rollclone, from: ",shape)
     	
 	rollclone:animate({ 
-	duration = 200000, 
+	duration = 20000, 
     scale = {5, 5}, 
 	opacity = shape_start_opacity, 
 	mode = animation_mode, 
@@ -142,9 +146,9 @@ end
 function random_shapes()
 	for i = 1,number_of_shapes do
 		print("Cloning..")
-		make_roll_clones()
-		make_roll_clones_big()
---		make_grow_clones()
+--		make_roll_clones()
+--		make_roll_clones_big()
+		make_grow_clones()
 		print("Cloned!")
 	end
 end

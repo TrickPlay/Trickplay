@@ -32,7 +32,6 @@ splash:add(splashImg,startbutton)
 screen:add(splash)
 
 function GameControl:show_splash()
-	
 		splash:animate({ duration = 700, y = 1080, mode = "EASE_IN_OUT_SINE" })
 		local child = screen:find_child("end session text")
         if child ~= nil then child:unparent() end
@@ -73,6 +72,8 @@ function GameControl:hide_splash()
 		startbutton.y = button_old_y
 	end
 t:start()
+
+
 end
 
 function GameControl:start_session()

@@ -22,45 +22,8 @@ function ui.factory(name,defaults,override)
 end
 
 
-local helpButton = Image{
-				src = "/assets/TimerOnRed.png",
-				opacity = 255,
-				y = 980,
-				x = 1810,
-				anchor_point = {0,0},
-				z = 5,
-				scale = {.7,1.3},
-				}	
-local helpText = Text{
-				text = "Help",
-				opacity = 255,
-				color = "ffffff",
-				font = "Sans 40px",
-				x = 1715,
-				y = 1000,
-				z = 5,
-				anchor_point = {0,0},
-				}
-local restartButton = Image{
-				src = "/assets/TimerOnBlue.png",
-				opacity = 255,
-				y = 910,
-				x = 1810,
-				anchor_point = {0,0},
-				z = 5,
-				scale = {.7,1.3},
-				}	
-local restartText = Text{
-				text = "Restart",
-				opacity = 255,
-				color = "ffffff",
-				font = "Sans 40px",
-				x = 1715,
-				y = 930,
-				z = 5,
-				anchor_point = {0,0},
-				}
-screen:add(helpText, helpButton, restartText, restartButton)
+
+
 function ui:createFieldLg(override)
 	local defaults = {}
 	defaults.src = "assets/FieldLg.png"
@@ -213,3 +176,32 @@ function ui:createTextShadow(textObject)
 	return shadow
 end
 
+local restartButton = Image{
+				src = "/assets/TimerOnBlue.png",
+				opacity = 200,
+				y = 988,
+				x = 1810,
+				scale = {.7,1.3},
+				anchor_point = {0,0},
+				z = 5,
+				}	
+local restartButton2 = Image{
+				src = "/assets/TimerOffBlue.png",
+				opacity = 150,
+				y = 988,
+				x = 1810,
+				scale = {.7,1.3},
+				anchor_point = {0,0},
+				z = 4,
+				}	
+local restartText = Text{
+				text = "Restart",
+				opacity = 255,
+				color = "ffffff",
+				font = "Sans 40px",
+				x = 1715,
+				y = 1010,
+				z = 5,
+				anchor_point = {0,0},
+				}
+screen:add(restartText, restartButton, restartButton2)
