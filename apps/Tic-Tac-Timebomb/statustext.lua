@@ -7,7 +7,7 @@ StatusText.container.w = 720
 StatusText.container.h = 120
 StatusText.defaults = {}
 StatusText.defaults.z = 5
-StatusText.defaults.font = "DejaVu Sans 70px"
+StatusText.defaults.font = "DejaVu Sans 50px"
 StatusText.defaults.color = "FFFFFF"
 StatusText.defaults.x = 5
 StatusText.defaults.y = 20
@@ -31,7 +31,7 @@ end
 function StatusText:pressToMove(player_icon)
 	-- adding Icon
 	self:clear(pressToDrop)
-    local image_defaults = {x=5,y=-6}
+    local image_defaults = {x=5,y=-8}
     local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
                                              or ui:createPieceHalfXC(image_defaults)
 	self:add(PlayIconImage)
@@ -50,7 +50,7 @@ function StatusText:pressToMove(player_icon)
 --	
 	-- adding text "to move"
 	local textToMove = StatusText:Text()
-	textToMove:set{text="Press enter to move",x=145}
+	textToMove:set{text="Press enter to move",x=150}
 	self:add(textToMove)
 	ui:createTextShadow(textToMove)
 	PlayField:add(self:getContainer())
@@ -61,7 +61,7 @@ function StatusText:pressToDrop(player_icon)
 
 	self:clear()
 
-	local image_defaults = {x=5,y=-6}
+	local image_defaults = {x=5,y=-8}
 print("player_icon",player_icon)
     	local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
                                              or ui:createPieceHalfXC(image_defaults)
@@ -69,7 +69,7 @@ print("player_icon",player_icon)
 
 	-- adding text "press"
 	local textPress = StatusText:Text()
-	textPress:set{text="Press enter to drop",x=145}
+	textPress:set{text="Press enter to drop",x=150}
 	self:add(textPress)
 	ui:createTextShadow(textPress)
 	
