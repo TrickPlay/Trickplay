@@ -326,7 +326,9 @@ local function build_ui( show_it )
         
         -- Call its on_show method
         
-        pcall( section.on_show , section )
+        if section.on_show then
+            section:on_show()
+        end
         
         section.dropdown.opacity = 0
         
@@ -666,9 +668,7 @@ local function build_ui( show_it )
                 local prev_fs_focus = ui.sections[ ui.fs_focus ]
                 
                 if prev_fs_focus and prev_fs_focus.on_hide then
-                
                     prev_fs_focus:on_hide()
-                    
                 end
             
             end
