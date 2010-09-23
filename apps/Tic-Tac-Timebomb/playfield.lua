@@ -40,7 +40,7 @@ function SavePlayField (board,winspots,number_of_wins,gamenumber)
 	boardText.position = {53,195}
 	-- boardText.anchor_point = {boardText.w/2,boardText.h/2}
 	boardText.color="FFFFFF"
-	boardText.font = "Sans 32px"
+	boardText.font = "DejaVu Sans 32px"
 	MiniBoard:add(boardText)
 	ui:createTextShadow(boardText)
 	for index, value in ipairs(board) do
