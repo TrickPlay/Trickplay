@@ -103,11 +103,11 @@ shape_end_opacity = 0
 
 -- Sets interval between creation of shapes
 
-timer_interval = 3
+timer_interval = 9
 
 -- Dicates number of shapes per cycle. cycle length is timer_interval
 
-number_of_shapes = math.random(3,5)
+number_of_shapes = math.random(4,6)
 
 ------------------
 -- color/fill/stroke
@@ -134,7 +134,7 @@ stroke_bool = false
 animation_mode = "EASE_OUT_SINE"
 
 --- Animation Duration
-animation_duration = 20000
+animation_duration = 35000
 
 ------------------------------------------------------------
 
