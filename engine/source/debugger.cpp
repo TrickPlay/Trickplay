@@ -18,7 +18,7 @@ Debugger::Debugger( App * _app )
 
 Debugger::~Debugger()
 {
-    lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
+    uninstall();
 
     app->get_context()->remove_console_command_handler( "debug", command_handler, this );
 }
@@ -26,6 +26,14 @@ Debugger::~Debugger()
 void Debugger::command_handler( const char * command, const char * parameters, void * me )
 {
     ( ( Debugger * ) me )->handle_command( parameters );
+}
+
+void Debugger::uninstall()
+{
+    if ( installed )
+    {
+        lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
+    }
 }
 
 void Debugger::install()

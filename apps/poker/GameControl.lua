@@ -20,7 +20,7 @@ function(ctrl, model, ...)
       function(ctrl)
          hand_ctrl:initialize()
          pres:update_blinds()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          local continue = true
          return continue
       end,
@@ -33,7 +33,7 @@ function(ctrl, model, ...)
       function(ctrl)
          state:move_blinds()
          local continue = hand_ctrl:cleanup()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          pres:finish_hand()
          hands = hands + 1
          return continue
@@ -43,7 +43,7 @@ function(ctrl, model, ...)
          if hands % 4 == 0 then
             state:increase_blinds()
          end
-         enable_event_listener(TimerEvent{interval=.1})
+         enable_event_listener(TimerEvent{interval=100})
          return true
       end
    }
@@ -52,7 +52,7 @@ function(ctrl, model, ...)
    local help_game_pipeline = {
       function(ctrl)
          hand_ctrl:initialize()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          local continue = true
          return continue
       end,
@@ -64,7 +64,7 @@ function(ctrl, model, ...)
       function(ctrl)
          state:move_blinds()
          local continue = hand_ctrl:cleanup()
-         enable_event_listener(TimerEvent{interval=1})
+         enable_event_listener(TimerEvent{interval=1000})
          pres:finish_hand()
          return continue
       end
@@ -96,7 +96,7 @@ function(ctrl, model, ...)
 
       reset_pipeline()
       disable_event_listeners()
-      enable_event_listener(TimerEvent{interval=1})
+      enable_event_listener(TimerEvent{interval=1000})
    end
 
    function ctrl.start_hand(ctrl)
