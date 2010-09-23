@@ -50,6 +50,15 @@ function( ui , api )
         local GET_BUTTON_X              = 250 --center
         local GET_BUTTON_Y              = 260
         
+        local STAR_SIZE                 = 40
+        local STAR_FULL_COLOR           = "BBBBBB"
+        local STAR_EMPTY_COLOR          = "333333"
+        local STAR_PADDING              = 10
+        local STAR_GROUP_X              = 1560
+        local STAR_GROUP_Y              = 16
+        
+        local REVIEW_TEXT_STYLE         = { font = "DejaVu Sans 30px", color = STAR_FULL_COLOR } 
+        
 
         local group = Group{ position = { 0 , 0 } , size = screen.size , opacity = 0 , name = "app-shop-details" }
             
@@ -63,6 +72,14 @@ function( ui , api )
         local app_desc = Text( APP_DESC_STYLE )
                 
         get_button = factory.make_text_menu_item( assets , "Get it" )
+        
+        local full_star = factory.make_star( STAR_SIZE , 1 , STAR_EMPTY_COLOR , STAR_FULL_COLOR )
+        local empty_star = factory.make_star( STAR_SIZE , 0 , STAR_EMPTY_COLOR , STAR_FULL_COLOR )
+        local half_star = factory.make_star( STAR_SIZE , 0.5 , STAR_EMPTY_COLOR , STAR_FULL_COLOR )
+        
+        local star_group = Group{ size = { STAR_SIZE * 5 + STAR_PADDING * 4 , STAR_SIZE } }
+        
+        local review_text = Text( REVIEW_TEXT_STYLE )
                 
         local scrim = Group
         {
@@ -75,6 +92,51 @@ function( ui , api )
                     position = { 0 , 0 }
                 },
                 
+                ---------------------------------------------------------------
+                -- TODO : stars and review count are hard-coded
+                
+                star_group:set
+                {
+                    position = { STAR_GROUP_X , STAR_GROUP_Y },
+                    
+                    children =
+                    {
+                        full_star ,
+                        
+                        Clone
+                        {
+                            source = full_star,
+                            x = STAR_SIZE + STAR_PADDING
+                        },
+                            
+                        Clone
+                        {
+                            source = full_star,
+                            x = STAR_SIZE * 2 + STAR_PADDING * 2
+                        },
+                        
+                        half_star:set
+                        {
+                            x = STAR_SIZE * 3 + STAR_PADDING * 3
+                        },
+
+                        empty_star:set
+                        {
+                            x = STAR_SIZE * 4 + STAR_PADDING * 4
+                        },
+                    }
+                },
+                
+                -- Text showing number of star ratings
+                
+                review_text:set
+                {
+                    x = STAR_GROUP_X + STAR_SIZE * 5 + STAR_PADDING * 6,
+                    y = STAR_GROUP_Y + 2,
+                },
+                
+                ---------------------------------------------------------------
+
                 app_title:set
                 {
                     position = { APP_TITLE_X , APP_TITLE_Y },
@@ -107,6 +169,8 @@ function( ui , api )
         local tile = nil
         
         local me = { readonly = { group = function() return group end } }
+        
+        local review_cache = {} -- For keeping fake review numbers
         
         function me:populate( shop_app )
         
@@ -174,6 +238,17 @@ function( ui , api )
             app_desc.text = shop_app.description or ""
             
             get_button:set_caption( ui.strings[ "Get it now" ]..": "..( api:price_to_string( shop_app.price ) or ui.strings[ "Free" ] ) )
+
+            -- TODO: Fake review count
+            
+            local reviews = review_cache[ shop_app.id ]
+            
+            if not reviews then
+                reviews = math.random( 30 , 200 )
+                review_cache[ shop_app.id ] = reviews
+            end
+            
+            review_text.text = "["..tostring( reviews ).."]"
             
         end
         
