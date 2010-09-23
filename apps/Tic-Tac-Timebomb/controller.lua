@@ -380,7 +380,7 @@ function GameControl:make_state_machine()
     	  	print("Control: HELP STATE")
     	    local child = screen:find_child("help text")
             if child == nil then 
-    	  		screen:add(Text{text="help text",color="ffffff",position={960,1580},font="Sans 50px",name="help text"})
+    	  		screen:add(Text{text="help text",color="ffffff",position={960,1580},font="DejaVu Sans 50px",name="help text"})
 
     	  	end
     	  	return ControlConstants.state.clear
