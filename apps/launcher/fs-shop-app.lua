@@ -340,6 +340,9 @@ function( ui , api )
             if key == keys.Return then
                 group.on_key_down = nil
                 me:animate_out( go_back )
+            elseif key == keys.Up then
+                get_button:on_focus_out()
+                ui:on_exit_section()
             end
         end
     end
