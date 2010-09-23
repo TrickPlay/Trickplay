@@ -163,7 +163,7 @@ function GameControl:place_player_at_index(player, index)
                 local winner = Image
                 {
                     name="end session text",
-                    src="assets/PieceLg".. player_icon.."C.png",
+                    src="assets/PieceHg".. player_icon.."C.png",
                     scale={2,2},
                 }
                 local winnertext = Image
