@@ -42,6 +42,12 @@ SplashView = Class(View, function(view, model, ...)
                 glow.opacity = 0
             end
         else
+            if splash_timer then
+                splash_timer:stop()
+                splash_timer.on_timer = nil
+                splash_timer = nil
+            end
+
             self.ui:complete_animation()
             self.ui.opacity = 0
         end
