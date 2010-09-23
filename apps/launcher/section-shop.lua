@@ -344,8 +344,9 @@ function( section )
         return true
     end
 
-
-    build_loading_ui()
+    if group then
+        build_loading_ui()
     
-    fetch_initial_data()
+        fetch_initial_data()
+    end
 end

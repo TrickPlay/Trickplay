@@ -25,6 +25,10 @@ function( section )
     
         local group = section.dropdown
         
+        if not group then
+            return 
+        end
+        
         local TOP_PADDING = 60
         local BOTTOM_PADDING = 40
         
