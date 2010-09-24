@@ -36,9 +36,10 @@ for _,color in pairs(ui_colors) do
 end
 
 -- Load new UI elements
-AssetLoader:preloadImage("BetArrowUp","assets/UI/new/betarrow_up.png")
-AssetLoader:preloadImage("BetArrowDown","assets/UI/new/betarrow_down.png")
+AssetLoader:preloadImage("BetArrowUp","assets/new_buttons/ButtonBet+.png")
+AssetLoader:preloadImage("BetArrowDown","assets/new_buttons/ButtonBet-.png")
 
+--[[
 local button_types = { "focused", "default" }
 local button_names = { "fold", "call", "bet", "check", "exit", "help", "start" }
 
@@ -49,6 +50,7 @@ for i, type in pairs(button_types) do
       end
    end
 end
+--]]
 
 DOGS = {}
 

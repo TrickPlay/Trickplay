@@ -24,8 +24,9 @@ Model = Class(function(model, ...)
         HELP_MENU = {635, 744},
 
         FOLD = {655, 766},
-        EXIT = {886, 826},
-        HELP = {734,826},
+        NEW_DEAL = {650, 826},
+        EXIT = {900, 826},
+        HELP = {774,826},
         CALL = {810,766},
         BET = {971,748},
         UP = {1094,754},
