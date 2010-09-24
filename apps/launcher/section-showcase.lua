@@ -164,6 +164,12 @@ function( section )
     
     function section.on_default_action( section )
     
+        ui:on_exit_section( section )
+    
+        local showcase = dofile( "fs-showcase" )( ui )
+        
+        ui:on_section_full_screen( showcase )
+
         return false
     
     end

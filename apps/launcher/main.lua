@@ -702,6 +702,13 @@ local function build_ui( show_it )
         end
     
     end
+
+    ----------------------------------------------------------------------------
+    
+    function ui:lower( element )
+        element:lower( ui.bar )
+    end
+    
     
     ----------------------------------------------------------------------------
     -- Hide everything unless show_it is true (only for debugging)
