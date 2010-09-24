@@ -89,7 +89,7 @@ function Popup:render()
                 
 		-- On completed function
 		self.animate_in.on_completed = function() pcall(self.on_fade_in, self) end
-		if not self.animate_in.duration then self.animate_in.duration = 200 end
+		if not self.animate_in.duration then self.animate_in.duration = 300 end
 		
 		self.group:animate( self.animate_in )  
 		self.fade = "out"
@@ -101,7 +101,7 @@ function Popup:render()
 		
 		-- On completed function
 		self.animate_out.on_completed = function() pcall(self.on_fade_out, self) end
-		if not self.animate_out.duration then self.animate_out.duration = 200 end
+		if not self.animate_out.duration then self.animate_out.duration = 300 end
 		
 		self.group:animate( self.animate_out )  
 		self.fade = nil
