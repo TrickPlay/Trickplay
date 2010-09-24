@@ -86,34 +86,54 @@ class ApplicationController extends WsController {
     }
 
     def search = {
-        if(!params.max) params.max = 10;
-        if(!params.offset) params.offset = 0;
+        if(!params.max) params.max = "10";
+        if(!params.offset) params.offset = "0";
         if(!params.sort) params.sort = "name";
         if(!params.order) params.order = "desc";
-        def categories = []
-        if (params.category) {
-            String[] cs = params.category.split(",");
-            for(String c:cs) {
-                categories.add(c);
-            }
-        }
         try {
-            def list = Application.list(max:params.max, offset:params.offset, sort:params.sort, order:params.order);
+            // TODO: make this a query, rather than iterating through all apps
+            def list = Application.list(sort:params.sort, order:params.order);
             def apps = [];
             for(a in list) {
-                if ( ( (params.keyword && filterKeyword(a, params.keyword)) || !params.keyword) &&
-                         ( (params.category && filterCategory(a, params.category)) || !params.category) ) {
-                    apps.add(a);
+                if (params.keyword) {
+                    if (params.category) {
+                        if (filterKeyword(a, params.keyword) && filterCategory(a, params.category)) apps.add(a);
+                    } else {
+                        if (filterKeyword(a, params.keyword)) apps.add(a);
+                    }
+                } else {
+                    if (params.category) {
+                        if(filterCategory(a, params.category)) apps.add(a);
+                    } else {
+                        apps.add(a);
+                    }
                 }
             }
+
+            def apps2 = [];
+            def off = 0;
+            def added = 0;
+            int offs = Integer.parseInt(params.offset);
+            int maxs = Integer.parseInt(params.max);
+            for (a in apps) {
+                if (offs > off || added >= maxs) {
+                    //no add
+                } else {
+                    apps2.add(a);
+                    added++;
+                }
+                off++;
+            }
+
             render(contentType:'application/json') {
                 stat = "ok";
-                results = apps.size()
-                page = params.offset
+                results = apps2.size()
+                total = apps.size()
+                offset = offs
                 sort = params.sort
                 order = params.order
                 applications = array {
-                    for(a in apps) {
+                    for(a in apps2) {
                         application (id:a.id,
                                      tp_id:a.appId,
                                      name:a.name,
@@ -144,7 +164,11 @@ class ApplicationController extends WsController {
         String[] kws = keywordList.split(",");
         boolean hasKeyword = false;
         for(String kw:kws) {
-            if (a.name.contains(kw) || a.description.contains(kw)) hasKeyword = true;
+            if (a.name.toLowerCase().contains(kw.toLowerCase()) || a.description.toLowerCase().contains(kw.toLowerCase())) {
+                hasKeyword = true;
+            } else {
+                return false;
+            }
         }
         return hasKeyword;
     }
@@ -152,13 +176,18 @@ class ApplicationController extends WsController {
     def filterCategory(Application a, String categoryList)
     {
         String[] cs = categoryList.split(",");
-        boolean hasCategory = false;
-        for(Category cat:a.categories) {
-            for(String c:cs) {
-                if (cat.name.toLowerCase().equals(c.toLowerCase())) hasCategory = true;
+        for(String c:cs) {
+            boolean hasCategory = false;
+            for(Category cat:a.categories) {
+                if (cat.name.toLowerCase().equals(c.toLowerCase())) {
+                    hasCategory = true;
+                }
+            }
+            if (!hasCategory) {
+                return false;
             }
         }
-        return hasCategory;
+        return true;
     }
 
     def purchase = {
