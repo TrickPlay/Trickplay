@@ -96,7 +96,7 @@ end
 function PlayFieldMovePiece(piece,col,row)
 	if piece.extra.is_moving then
 		local newposition = calcPosition(PlayField.w/3, piece.w, col, row)
-		piece:animate{duration=60,position=newposition}
+		piece:animate{duration=160,position=newposition}
 		piece:show()
 		piece.opacity = 128
 	end
