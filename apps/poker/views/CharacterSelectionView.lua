@@ -53,6 +53,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
 
     --create the components
     local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "start_button", "start_button_on")
+    view.start_button = start_button
     start_button.group.opacity = 0
     local exit_button = FocusableImage(MDPL.EXIT_MENU[1], MDPL.EXIT_MENU[2],
         "exit_button", "exit_button_on")
