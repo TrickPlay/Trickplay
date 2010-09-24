@@ -6,7 +6,7 @@ FrontPageView = Class(View, function(view, model, ...)
 
     --timer that pings an random cover to change
     view.timer = Timer()
-    view.timer.interval = 3--000
+    view.timer.interval = 3000
 
     view.ui = Group{name="front page ui"}
     screen:add(view.ui)
