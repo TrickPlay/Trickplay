@@ -10,21 +10,21 @@ function info_text()
 	return	string.format("Lives: \t\t\tCurrent Score: %010d\tHigh Score: %010d",point_counter,high_score)
 end
 local my_plane_sz = 65*2
-local score = Text{text = info_text(),font="Sans Bold 36px",color="FFFFFF",x=30,y=15,z=1}
+local score = Text{text = info_text(),font="Highway Gothic Wide Bold 36px",color="FFFFFF",x=30,y=15,z=1}
 local topbar = Rectangle{color="0000007F",w=1920,h=80,z=1}
 local game_is_running = false
 local splash = Group{z=10}
 local end_game  = Group{z=10,opacity = 0}
 end_game:add(
-	Text{ text = "GAMEOVER",font = "Sans Bold 70px", color = "FFFFFF",position={400,450}}--,
-	--Text{ text = "Press any key to play again",font = "Sans 36px", color = "FFFFFF",position={400,650}}
+	Text{ text = "GAMEOVER",font = "Highway Gothic Wide Bold 70px", color = "FFFFFF",position={400,450}}--,
+	--Text{ text = "Press any key to play again",font = "Highway Gothic Wide 36px", color = "FFFFFF",position={400,650}}
 )
 splash:add(
 
 	--shadows
 	Text{
 		text = "1945!",
-		font = "Sans Bold 70px",
+		font = "Highway Gothic Wide Bold 70px",
 		color = "000000",
 		opacity = 150,
 		x = 505,
@@ -32,7 +32,7 @@ splash:add(
 	},
 	Text{
 		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
-		font = "Sans 32px",
+		font = "Highway Gothic Wide 32px",
 		color = "000000",
 		opacity = 150,
 		x = 905,
@@ -40,7 +40,7 @@ splash:add(
 	},
 	Text{
 		text = "Press Enter to begin!",
-		font = "Sans 32px",
+		font = "Highway Gothic Wide 32px",
 		color = "000000",
 		opacity = 150,
 		x = 505,
@@ -49,21 +49,21 @@ splash:add(
 
 	Text{
 		text = "1945!",
-		font = "Sans Bold 70px",
+		font = "Highway Gothic Wide Bold 70px",
 		color = "FFFFFF",
 		x = 500,
 		y = 400
 	},
 	Text{
 		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
-		font = "Sans 32px",
+		font = "Highway Gothic Wide 32px",
 		color = "FFFFFF",
 		x = 900,
 		y = 500,
 	},
 	Text{
 		text = "Press Enter to begin!",
-		font = "Sans 32px",
+		font = "Highway Gothic Wide 32px",
 		color = "FFFFFF",
 		x = 500,
 		y = 700,
@@ -109,8 +109,8 @@ assets =
     island1         = Image{ src = "assets/island1.png" },
     island2         = Image{ src = "assets/island2.png" },
     island3         = Image{ src = "assets/island3.png" },
-    score           = Text{ font = "Sans 24px" , text = "+10" , color = "FFFF00" },
-    g_over          = Text{ font = "Sans 24px" , text = "GAMEOVER" , color = "FFFFFF" },
+    score           = Text{ font = "Highway Gothic Wide 24px" , text = "+10" , color = "FFFF00" },
+    g_over          = Text{ font = "Highway Gothic Wide 24px" , text = "GAMEOVER" , color = "FFFFFF" },
 }
 
 for _ , v in pairs( assets ) do
