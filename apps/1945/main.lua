@@ -3,25 +3,35 @@ dofile( "controller.lua" )
 
 
 -- Alex's code
+local life = Image{src = "assets/myplane_small.png"}
+local lives =
+{
+	Clone{source="life",x=40,z=10},
+	Clone{source="life",x=60,z=10},
+	Clone{source="life",x=80,z=10},
+}
 local number_of_lives = 3
-local high_score = 0
+local high_score = settings.high_score or 0
 local point_counter = 0
 function info_text()
-	return	"Lives: "..number_of_lives..
-		"\t\t\tCurrent Score: "..point_counter..
-		"\tHigh Score: "..high_score
+	return	string.format("Lives: %d \t\t\tCurrent Score: %010d\tHigh Score: %010d",number_of_lives,point_counter,high_score)
 end
 local my_plane_sz = 65*2
 local score = Text{text = info_text(),font="Sans Bold 36px",color="FFFFFF",x=30,y=20,z=1}
 local topbar = Rectangle{color="0000007F",w=1920,h=100,z=1}
-local game_started = false
+local game_is_running = false
 local splash = Group{z=10}
+local end_game  = Group{z=10,opacity = 0}
+end_game:add(
+	Text{ text = "GAMEOVER",font = "Sans Bold 70px", color = "FFFFFF",position={400,450}}--,
+	--Text{ text = "Press any key to play again",font = "Sans 36px", color = "FFFFFF",position={400,650}}
+)
 splash:add(
 
 	--shadows
 	Text{
 		text = "1945!",
-		font = "Sans 70px",
+		font = "Sans Bold 70px",
 		color = "000000",
 		opacity = 150,
 		x = 505,
@@ -46,7 +56,7 @@ splash:add(
 
 	Text{
 		text = "1945!",
-		font = "Sans 70px",
+		font = "Sans Bold 70px",
 		color = "FFFFFF",
 		x = 500,
 		y = 400
@@ -67,8 +77,8 @@ splash:add(
 	}
 
 )
-screen:add(topbar,score,splash)
-
+screen:add(topbar,score,end_game,splash)
+screen:add(unpack(lives))
 -------------------------------------------------------------------------------
 
 function clamp( v , min , max )
@@ -97,6 +107,7 @@ assets =
     island2         = Image{ src = "assets/island2.png" },
     island3         = Image{ src = "assets/island3.png" },
     score           = Text{ font = "Sans 24px" , text = "+10" , color = "FFFF00" },
+    g_over          = Text{ font = "Sans 24px" , text = "GAMEOVER" , color = "FFFFFF" },
 }
 
 for _ , v in pairs( assets ) do
@@ -535,7 +546,7 @@ my_plane =
             
             -- when dead
             
-            else
+            elseif game_is_running then
 --           TODO: decrement life counter
                 -- Figure the total time we have been dead
 --[[
@@ -706,8 +717,126 @@ my_plane =
     collision =
     
         function( self , other )
-number_of_lives = number_of_lives - 1
+
+
+
+--more Alex code
+if number_of_lives == 0 then
+	game_is_running = false
+	--end_game.y = -100
+	--end_game.opacity = 255
+--	end_game.scale = {.5,.5}
+	remove_from_render_list( my_plane )
+	add_to_render_list(
+                
+                            {
+                                speed = 80,
+                                
+                                text = Clone{ source = assets.g_over },
+                                
+                                setup =
+                                
+                                    function( self )
+                                    
+                                        self.text.position = { screen.w/2,screen.h/2}--location[ 1 ] + 30 , location[ 2 ] }
+                                        
+                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
+                                        
+                                        self.text.opacity = 255;
+                                    
+                                        screen:add( self.text )
+                                        
+                                    end,
+                                    
+                                render =
+                                
+                                    function( self , seconds )
+                                    
+                                        local o = self.text.opacity - self.speed * seconds
+                                        
+                                        local scale = self.text.scale
+                                        
+                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        
+                                        if o <= 0 then
+                                        
+                                            remove_from_render_list( self )
+                                            
+                                            screen:remove( self.text )
+                                        
+                                        else
+                                        
+                                            self.text.opacity = o
+                                            
+                                            self.text.scale = scale
+                                        
+                                        end
+                                    
+                                    end,
+                            })
+	add_to_render_list(
+                
+                            {
+                                elapsed = 0,
+                                
+                                --text = Clone{ source = assets.g_over },
+                                
+                                setup =
+                                
+                                    function( self )
+					self.save_keys = screen.on_key_down
+					screen.on_key_down = nil
+
+                                    end,
+                                    
+                                render =
+                                
+                                    function( self , seconds )
+                                   	self.elapsed = self.elapsed + seconds
+					if self.elapsed > 4 then
+						remove_from_render_list( self )
+						screen.on_key_down = self.save_keys
+					elseif self.elapsed >3 then
+						splash.opacity = 255
+					end
+                                    end,
+                            })
+
+--[[
+	local t = Timeline{
+		duration = 3000,
+		direction= "FORWARD",
+		loop = false
+	}
+	local save_keys = screen.on_key_down
+	screen.on_key_down = nil
+	function t.on_new_frame(t,msecs,p) 
+		if msecs <= 500 then
+			end_game.y = -100 + (500 + 100)*msecs/500
+		elseif msecs <= 2000 then
+			end_game.opacity = 255*(1-(msecs-500)/1500)
+			--end_game.scale   = {.5+4*msecs/2000,.5+4*msecs/2000}
+		else--if msecs > 2500 then
+			end_game.opacity = 0
+			splash.opacity = 255*(msecs-2000)/1000
+print(splash.opacity)
+		end
+	end
+	function t.on_completed()
+print("FIINIISH")
+		splash.opacity = 255
+		screen.on_key_down = save_keys
+	end
+	t:start()
+--]]
+else
+	number_of_lives = number_of_lives - 1
+	
+end
 score.text = info_text()
+--------
+
+
 
             self.dead = true
             
@@ -1031,6 +1160,9 @@ enemies =
                     
 --TODO increment the point counter
 point_counter = point_counter+10
+if point_counter > high_score then
+	high_score = point_counter
+end
 score.text = info_text()
                         screen:remove( self.group )
                         
@@ -1183,10 +1315,14 @@ end
 
 function screen.on_key_down( screen , key )
 
-    if not game_started then
+    if not game_is_running then
         start_game()
 	splash.opacity = 0
-	game_started = true
+	game_is_running = true
+	end_game.opacity = 0
+	number_of_lives = 3
+	point_counter = 0
+	score.text = info_text()
     elseif key == keys.space then
         
         paused = not paused
@@ -1202,4 +1338,7 @@ function screen.on_key_down( screen , key )
 end
 
 -------------------------------------------------------------------------------
+function app:on_closing()
+	settings.high_score = high_score
+end
 math.randomseed( os.time() )
