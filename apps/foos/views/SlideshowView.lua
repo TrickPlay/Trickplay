@@ -90,7 +90,7 @@ license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
     view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
 
     view.timer            = Timer()
-    view.timer.interval   = 4--000
+    view.timer.interval   = 4000
     view.timer_is_running = false
      
 
