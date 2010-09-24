@@ -14,8 +14,9 @@ BettingController = Class(Controller, function(self, view, ...)
         RAISE = 3
     }
     local SubGroups2 = {
-        HELP = 1,
-        EXIT = 2
+        NEW_DEAL = 1,
+        HELP = 2,
+        EXIT = 3
     }
 
     local GroupSize = 0

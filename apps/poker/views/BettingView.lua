@@ -5,9 +5,10 @@ BettingView = Class(View, function(view, model, ...)
     }
      
     --create the components
-    local fold_button = Image{position={MDPL.FOLD[1], MDPL.FOLD[2]}, src="assets/DevinUI/fold_6.png"}
+    --[[
+    local fold_button = Image{position={MDPL.FOLD[1], MDPL.FOLD[2]}, src="assets/new_buttons/ButtonFold.png"}
     fold_button.extra.text = "FOLD"
-    local call_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/DevinUI/call.png"}
+    local call_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/new_button/ButtonCall.png"}
     call_button.extra.text = "CALL"
     local check_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/DevinUI/check.png"}
     check_button.extra.text = "CALL"
@@ -18,6 +19,30 @@ BettingView = Class(View, function(view, model, ...)
     exit_button.extra.text = "EXIT"
     local help_button = Image{position={MDPL.HELP[1], MDPL.HELP[2]}, src="assets/DevinUI/help.png"}
     help_button.extra.text = "HELP"
+    --]]
+
+    local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2],
+        "assets/new_buttons/ButtonFold.png", "assets/new_buttons/ButtonFold-on.png")
+    fold_button.extra.text = "FOLD"
+    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2],
+        "assets/new_buttons/ButtonCall.png", "assets/new_buttons/ButtonCall-on.png")
+    call_button.extra.text = "CALL"
+    local check_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2],
+        "assets/new_buttons/ButtonCheck.png", "asset/new_buttons/ButtonCheck-on.png")
+    check_button.extra.text = "CALL"
+    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2],
+        "assets/new_buttons/ButtonBet.png", "assets/new_buttons/ButtonBet-on.png")
+    bet_button.extra.text = "BET"
+
+    local new_deal_button = FocusableImage(MDPL.NEW_DEAL[1], MDPL.NEW_DEAL[2],
+        "assets/new_buttons/ButtonNewDeal.png", "assets/new_buttons/ButtonNewDeal-on.png")
+    local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2],
+        "assets/new_buttons/ButtonExit.png", "assets/new_buttons/ButtonExit-on.png")
+    exit_button.extra.text = "EXIT"
+    local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2],
+        "assets/new_buttons/ButtonHelp.png", "assets/new_buttons/ButtonHelp-on.png")
+    help_button.extra.text = "HELP"
+
 
     check_button.opacity = 0
 
@@ -27,19 +52,22 @@ BettingView = Class(View, function(view, model, ...)
         AssetLoader:getImage( "BetArrowDown", { position = MDPL.DOWN, opacity = 0 } )
     }
 
+---[[
     view.items = {
         {
             fold_button, call_button, bet_button
         },
         {
-            help_button, exit_button
+            new_deal_button, help_button, exit_button
         }
     }
-
+    the_items = view.items
+    --]]
+--[[
     -- add the focus
     local button_focus = Image{position=MDPL.CALL, src="assets/DevinUI/focus_small.png"}
     local bet_focus = Image{position={MDPL.BET[1]-10,MDPL.BET[2]+5}, src="assets/DevinUI/focus_big.png", opacity=0}
-    
+    --]]
     -- create text for the components
     --[[
     local fold_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
@@ -134,8 +162,12 @@ BettingView = Class(View, function(view, model, ...)
                     if(i == controller:get_selected_index()) and 
                       (j == controller:get_subselection_index()) then
                         -- set the positions of the focus-highlights correctly
-                        
-                        print(item, item.extra.text, button_focus)
+                        item:on_focus_inst()
+                        if item.extra.text == CALL then
+                            check_button.group.opacity = 255
+                            check_button:on_focus_inst()
+                        end
+                       --[[ 
                         button_focus.position={
                             MDPL[item.extra.text][1]-13,
                             MDPL[item.extra.text][2]-11
@@ -148,7 +180,13 @@ BettingView = Class(View, function(view, model, ...)
                             button_focus.opacity = 255
                             bet_focus.opacity = 0
                         end
+                        --]]
                     else
+                        item:out_focus_inst()
+                        if item.extra.text == CALL then
+                            check_button.group.opacity = 255
+                            check_button:out_focus_inst()
+                        end
                     end
                 end
             end
