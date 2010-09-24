@@ -38,7 +38,7 @@ function( section )
     
         local item1 = factory.make_text_menu_item( assets , ui.strings[ "My Account" ] )
         local item2 = factory.make_text_menu_item( assets , ui.strings[ "Profiles" ] )
-        local item3 = factory.make_text_menu_item( assets , ui.strings[ "Tools" ] )
+        local item3 = factory.make_text_menu_item( assets , ui.strings[ "Plug and Play" ] )
         local item4 = factory.make_text_menu_item( assets , ui.strings[ "Settings" ] )
         
         table.insert( section_items , item1  )
@@ -53,6 +53,12 @@ function( section )
         item1.extra.on_activate =
         
             function()
+            end
+            
+        item3.extra.on_activate =
+        
+            function()
+                apps:launch( "com.trickplay.oobe" )
             end
         
         -- This spaces all items equally.
