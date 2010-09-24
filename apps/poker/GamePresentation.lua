@@ -134,7 +134,7 @@ function(pres, ctrl)
       end
       text.anchor_point = {text.w/2, text.h/2}
       screen:add(text)
-      Popup:new{group = text, time = 3}
+      Popup:new{group = text, time = 3000}
       --]]
       
       if not reset then 
@@ -150,8 +150,8 @@ function(pres, ctrl)
          m.position = {screen.w/2, screen.h/2}
          screen:add(m)
       
-         Popup:new{group = r, time = 5}
-         Popup:new{group = m, time = 5}
+         Popup:new{group = r, time = 5000}
+         Popup:new{group = m, time = 5000}
       end
 
    end
