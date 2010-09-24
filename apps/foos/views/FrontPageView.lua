@@ -104,9 +104,9 @@ FrontPageView = Class(View, function(view, model, ...)
 	fp_selector = Group{name="selector"}
 	local selectorImg = Image {name="img",src = "assets/poloroid.png" }
 	local selector_title = Text{name="title",font = "DejaVu Sans ExtraLight 18px",
-			y = 585,color = "000000",text = "",ellisize="END",x=30,clip={0,0,540,50}}
+			y = 585,color = "000000",text = "",ellipsize="END",x=30,clip={0,0,540,50}}
 	local selector_auth = Text{name="auth",font = "DejaVu Sans ExtraLight 18px",
-			y = 610,color = "000000",text = "",ellisize="END",x=30,clip={0,0,540,50}}
+			y = 610,color = "000000",text = "",ellipsize="END",x=30,clip={0,0,540,50}}
 
 	fp_selector:add(selectorImg,selector_title,selector_auth)
 	view.ui:add(fp_selector)
@@ -116,7 +116,7 @@ FrontPageView = Class(View, function(view, model, ...)
         	name      = "Selection animation",
 	        loop      =  false,
 			--duration  =  3000,
-        	duration  = 200,
+        	duration  = 300,
 	        direction = "FORWARD",
     	}
 		local license
@@ -459,8 +459,12 @@ function view.timer:on_timer()
 				#adapters+1-formula
                      )
 --]]
+local rand_photo = math.random(1,50)
 local foto,lic_tit, lic_auth
-				foto,lic_tit, lic_auth = sources[formula]:get_photos_at(math.random(1,10),true)
+				foto,lic_tit, lic_auth = sources[formula]:get_photos_at(rand_photo,true)
+				if lic_tit == model.fp_slots[rand_i[1] ][rand_i[2] ].extra.lic_tit then
+					foto,lic_tit, lic_auth = sources[formula]:get_photos_at(rand_photo+1,true)
+	end
                     LoadImg(foto,model.fp_slots[rand_i[1] ][rand_i[2] ],lic_tit,lic_auth)
                 else
                     print("not calling")
