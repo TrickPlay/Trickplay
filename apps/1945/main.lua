@@ -3,22 +3,15 @@ dofile( "controller.lua" )
 
 
 -- Alex's code
-local life = Image{src = "assets/myplane_small.png"}
-local lives =
-{
-	Clone{source="life",x=40,z=10},
-	Clone{source="life",x=60,z=10},
-	Clone{source="life",x=80,z=10},
-}
 local number_of_lives = 3
 local high_score = settings.high_score or 0
 local point_counter = 0
 function info_text()
-	return	string.format("Lives: %d \t\t\tCurrent Score: %010d\tHigh Score: %010d",number_of_lives,point_counter,high_score)
+	return	string.format("Lives: \t\t\tCurrent Score: %010d\tHigh Score: %010d",point_counter,high_score)
 end
 local my_plane_sz = 65*2
-local score = Text{text = info_text(),font="Sans Bold 36px",color="FFFFFF",x=30,y=20,z=1}
-local topbar = Rectangle{color="0000007F",w=1920,h=100,z=1}
+local score = Text{text = info_text(),font="Sans Bold 36px",color="FFFFFF",x=30,y=15,z=1}
+local topbar = Rectangle{color="0000007F",w=1920,h=80,z=1}
 local game_is_running = false
 local splash = Group{z=10}
 local end_game  = Group{z=10,opacity = 0}
@@ -38,7 +31,7 @@ splash:add(
 		y = 405
 	},
 	Text{
-		text = "Enter - Shoots\nArrows - Moves\nSpace - Pauses",
+		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
 		font = "Sans 32px",
 		color = "000000",
 		opacity = 150,
@@ -62,7 +55,7 @@ splash:add(
 		y = 400
 	},
 	Text{
-		text = "Enter - Shoots\nArrows - Moves\nSpace - Pauses",
+		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
 		font = "Sans 32px",
 		color = "FFFFFF",
 		x = 900,
@@ -77,6 +70,16 @@ splash:add(
 	}
 
 )
+
+local life = Image{src = "assets/life.png",opacity=0,z=10}
+screen:add(life)
+local lives =
+{
+	Clone{name="life1",source=life,x=200,y=15,z=10},
+	Clone{name="life2",source=life,x=260,y=15,z=10},
+	Clone{name="life3",source=life,x=320,y=15,z=10},
+}
+
 screen:add(topbar,score,end_game,splash)
 screen:add(unpack(lives))
 -------------------------------------------------------------------------------
@@ -464,7 +467,40 @@ my_plane =
     
             -- Move
             
-            if not self.dead then
+            if game_is_running then--not self.dead then
+if self.dead then
+                -- Figure the total time we have been dead
+                self.dead_time = self.dead_time + seconds
+                
+                -- If it is the maximum time, we go back to being alive
+                
+                if self.dead_time >= self.max_dead_time then
+                    self.dead = false
+                    
+                    self.dead_time = 0
+                    
+                    self.group:show()
+                    
+                -- Otherwise, we blink
+                    
+                elseif self.dead_time > self.dead_blink_delay then
+                
+                    local blink_on = math.floor( self.dead_time / ( 1 / self.dead_blinks ) ) % 2 == 0
+                    
+                    if blink_on then
+                    
+                        self.group:show()
+                        
+                    else
+                        
+                        self.group:hide()
+                        
+                    end
+                
+                end
+
+end
+
             
                 local start_point = self.group.center
                 
@@ -540,26 +576,19 @@ my_plane =
                     
                     self.group.y = y
                 end
-    
+    if not self.dead then
                 add_to_collision_list( self , start_point , self.group.center , { self.group.w - 10 , self.group.h - 30 } , TYPE_ENEMY_PLANE )
-
+end
             
             -- when dead
-            
+            --[[
             elseif game_is_running then
---           TODO: decrement life counter
                 -- Figure the total time we have been dead
---[[
-                if number_of_lives <= 0 then
-		exit()
-		end 
---]]
                 self.dead_time = self.dead_time + seconds
                 
                 -- If it is the maximum time, we go back to being alive
                 
                 if self.dead_time >= self.max_dead_time then
---number_of_lives = number_of_lives - 1
                     self.dead = false
                     
                     self.dead_time = 0
@@ -583,9 +612,8 @@ my_plane =
                     end
                 
                 end
-            
+            --]]
             end
-            
         end,
         
     -- Adds a bullet to the render list
@@ -830,6 +858,7 @@ print("FIINIISH")
 	t:start()
 --]]
 else
+	lives[number_of_lives].opacity=0
 	number_of_lives = number_of_lives - 1
 	
 end
@@ -910,13 +939,13 @@ score.text = info_text()
     on_key =
     
         function( self , key )
-        
-            if self.dead then
+        --[[
+            if number_of_lives == 0 then--self.dead then
             
                 return
                 
             end
-               
+            --]]   
             if key == keys.Right then
             
                 self.h_speed = clamp( self.h_speed + self.speed_bump , -self.max_h_speed , self.max_h_speed )
@@ -1280,9 +1309,10 @@ score.text = info_text()
 function start_game()
 add_to_render_list( my_plane )
 end
+add_to_render_list( water )
+
 add_to_render_list( enemies )
 
-add_to_render_list( water )
 
 paused = false
 
@@ -1323,6 +1353,9 @@ function screen.on_key_down( screen , key )
 	number_of_lives = 3
 	point_counter = 0
 	score.text = info_text()
+	lives[1].opacity=255
+	lives[3].opacity=255
+	lives[2].opacity=255
     elseif key == keys.space then
         
         paused = not paused
