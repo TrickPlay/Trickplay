@@ -103,7 +103,7 @@ shape_end_opacity = 0
 
 -- Sets interval between creation of shapes
 
-timer_interval = 9
+timer_interval = 9000
 
 -- Dicates number of shapes per cycle. cycle length is timer_interval
 
