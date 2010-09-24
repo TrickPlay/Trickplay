@@ -23,7 +23,7 @@ SplashView = Class(View, function(view, model, ...)
         if comp == Components.SPLASH then
             if not splash_timer then
                 splash_timer = Timer()
-                splash_timer.interval = 7
+                splash_timer.interval = 7000
                 splash_timer.on_timer = function()
                     splash_timer:stop()
                     splash_timer.on_timer = nil

@@ -122,7 +122,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
                function(fold, bet) 
                   enable_event_listener(
                      TimerEvent{
-                        interval=10,
+                        interval=100,
                         cb=function()
                            game_ctrl:on_event(BetEvent{fold=fold, bet=bet})
                         end})

@@ -23,7 +23,14 @@ end
 
 AssetLoader:preloadImage("pot_glow_img", "assets/UI/new/pot_glow.png")
 
+-- Bubbles
+AssetLoader:preloadImage("BubbleRed", "assets/balloons/Bubble-active.png")
+AssetLoader:preloadImage("BubbleGreen", "assets/balloons/Bubble-green.png")
+AssetLoader:preloadImage("BubbleGray", "assets/balloons/Bubble-message.png")
+AssetLoader:preloadImage("BubbleBlack", "assets/balloons/Bubble-nonactive.png")
+
 -- Buttons
+--[[
 local ui_colors = {"Red", "Green", "Gray"}
 local ui_buttons = {
    "Bubble", "ButtonArrowDown", "ButtonArrowUp",
@@ -34,6 +41,23 @@ for _,color in pairs(ui_colors) do
       AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
    end
 end
+--]]
+AssetLoader:preloadImage("help_button", "assets/new_buttons/ButtonHelp.png")
+AssetLoader:preloadImage("help_button_on", "assets/new_buttons/ButtonHelp-on.png")
+AssetLoader:preloadImage("exit_button", "assets/new_buttons/ButtonExit.png")
+AssetLoader:preloadImage("exit_button_on", "assets/new_buttons/ButtonExit-on.png")
+AssetLoader:preloadImage("start_button", "assets/new_buttons/ButtonStart.png")
+AssetLoader:preloadImage("start_button_on", "assets/new_buttons/ButtonStart-on.png")
+AssetLoader:preloadImage("new_deal_button", "assets/new_buttons/ButtonNewDeal.png")
+AssetLoader:preloadImage("new_deal_button_on", "assets/new_buttons/ButtonNewDeal-on.png")
+AssetLoader:preloadImage("call_button", "assets/new_buttons/ButtonCall.png")
+AssetLoader:preloadImage("call_button_on", "assets/new_buttons/ButtonCall-on.png")
+AssetLoader:preloadImage("check_button", "assets/new_buttons/ButtonCheck.png")
+AssetLoader:preloadImage("check_button_on", "assets/new_buttons/ButtonCheck-on.png")
+AssetLoader:preloadImage("fold_button", "assets/new_buttons/ButtonFold.png")
+AssetLoader:preloadImage("fold_button_on", "assets/new_buttons/ButtonFold-on.png")
+AssetLoader:preloadImage("bet_button", "assets/new_buttons/ButtonBet.png")
+AssetLoader:preloadImage("bet_button_on", "assets/new_buttons/ButtonBet-on.png")
 
 -- Load new UI elements
 AssetLoader:preloadImage("BetArrowUp","assets/new_buttons/ButtonBet+.png")

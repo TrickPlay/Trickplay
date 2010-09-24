@@ -3,7 +3,7 @@ app=
     id          = "com.trickplay.holdem",
     release     = "1",
     version     = "1.0",
-    name        = "Texas Hold'em",
+    name        = "Poker Dawgz",
     author      = "Darren, Devin, and Rex",
     copyright   = "© Trickplay Inc."
 }

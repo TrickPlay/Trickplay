@@ -24,13 +24,13 @@ Model = Class(function(model, ...)
         HELP_MENU = {635, 744},
 
         FOLD = {655, 766},
-        NEW_DEAL = {650, 826},
-        EXIT = {900, 826},
-        HELP = {774,826},
+        NEW_DEAL = {700, 911},
+        EXIT = {1065, 911},
+        HELP = {908,911},
         CALL = {810,766},
-        BET = {971,748},
-        UP = {1094,754},
-        DOWN = {1094, 835}
+        BET = {971,743},
+        UP = {994,744},
+        DOWN = {994, 840}
     }
     MDPL = model.default_player_locations
     
@@ -82,12 +82,12 @@ Model = Class(function(model, ...)
     MSCL = model.status_chip_locations
     
     model.player_bubble_locations = {
-        [1] = {20, 760},
-        [2] = {20, 90},
-        [3] = {320, 20},
-        [4] = {1330, 20},
-        [5] = {1630, 90},
-        [6] = {1630, 760},
+        [1] = {20, 640},
+        [2] = {20, 20},
+        [3] = {300, 20},
+        [4] = {1350, 20},
+        [5] = {1630, 20},
+        [6] = {1630, 900},
     }
     MPBL = model.player_bubble_locations
     

@@ -12,7 +12,7 @@ TimerWrapper = Class(nil,function(self,...)
             timer:stop()
             args.on_timer()
          end
-         timer.interval = args.interval or 1
+         timer.interval = args.interval or 1000
       end
 
       timer:start()

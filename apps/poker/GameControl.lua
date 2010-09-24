@@ -99,6 +99,17 @@ function(ctrl, model, ...)
       enable_event_listener(TimerEvent{interval=1000})
    end
 
+   function ctrl:reset()
+
+         hand_ctrl:cleanup()
+         pres:return_to_main_menu(still_playing, true)
+         enable_event_listener(KbdEvent())
+         model:set_active_component(Components.CHARACTER_SELECTION)
+         model:get_active_controller():reset()
+         model:notify()
+
+   end
+
    function ctrl.start_hand(ctrl)
       hand_ctrl:initialize()
    end

@@ -12,13 +12,15 @@ function(self, model, args, player,...)
    if player.isHuman then
       color = "Green"
    else
-      color = "Gray"
+      color = "Black"
    end
    
    self.top = AssetLoader:getImage("Bubble"..color,{})
-   self.bottom = AssetLoader:getImage("BubbleNone",{y = 60})
+   self.bottom = AssetLoader:getImage("BubbleGray",{})
+   self.bottom_group = Group{y=60}
+   self.bottom_group:add(self.bottom)
    
-   self.group = Group{ children={self.top, self.bottom}, opacity=0, position = MPBL[player.table_position] }
+   self.group = Group{ children={self.bottom_group, self.top}, opacity=0, position = MPBL[player.table_position] }
    
    -- Blinking red focus
    self.focus = Group{ children = { AssetLoader:getImage("BubbleRed",{}) }, opacity = 0 }
@@ -61,10 +63,11 @@ function(self, model, args, player,...)
    
    -- Align player attributes
    self.attributes = { self.title, self.action }
+   self.group:add(self.title)
+   self.bottom_group:add(self.action)
    
    for i,v in ipairs(self.attributes) do
       v.anchor_point = {v.w/2, v.h/2}
-      self.group:add(v)
    end
 
    print(#self.group.children)
@@ -85,16 +88,14 @@ function(self, model, args, player,...)
       
       if text then
          self.action.text = text 
-         self.bottom:animate{opacity=255,duration=300}
-         self.action:animate{opacity=255,duration=300}
+         self.bottom_group:animate{opacity=255,duration=300, y = 60}
       end
       self.action.anchor_point = {self.action.w/2, self.action.h/2}
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
    end
 
    function self:hide_bottom()
-      self.bottom:animate{opacity=0,duration=300}
-      self.action:animate{opacity=0,duration=300}
+      self.bottom_group:animate{opacity=0,duration=300, y = 0}
    end
    
    function self:dim()
