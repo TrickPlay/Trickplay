@@ -9,7 +9,7 @@ local ControlConstants = {
     rev_magic_3 =  { [2]=1, [7]=2, [6]=3, [9]=4, [5]=5, [1]=6, [4]=7, [3]=8, [8]=9 },
     player_icon = { "X", "O"},
     play = {invalid = 1, win = 2, no = 3, tie = 4},
-    speeds = {0.6, 0.4, 0.3, 0.3},
+    speeds = {600, 400, 300, 300},
     win_rounds = 6
 }
 
@@ -164,7 +164,7 @@ function GameControl:place_player_at_index(player, index)
                 {
                     name="end session text",
                     src="assets/PieceHg".. player_icon.."C.png",
-                    scale={1.5,1.5},
+                    scale={1.4,1.4},
                 }
                 local winnertext = Image
                 {   name="end of session text",
@@ -174,7 +174,7 @@ function GameControl:place_player_at_index(player, index)
                 winner.position = {screen.w/2,-screen.h/2}
                 winner.anchor_point={winner.w/2,winner.h/2}    
                 
-                winnertext.position = {screen.w/2,700}
+                winnertext.position = {screen.w/2,695}
                 winnertext.anchor_point={winnertext.w/2,winner.h/2}
                 
                 screen:add(winner,winnertext)
