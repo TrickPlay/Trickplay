@@ -264,7 +264,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       }
       text.anchor_point = {text.w/2, text.h/2}
       screen:add(text)
-      Popup:new{group = text, time = 1.5}
+      Popup:new{group = text, time = 1500}
 
    end
 
@@ -316,7 +316,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    -- FOLD
    function pres:fold_player(player)
-      local foldtimer = Timer{interval=.2}
+      local foldtimer = Timer{interval=200}
       function foldtimer.on_timer(t)
          t:stop()
 --         remove_player_chips(player)

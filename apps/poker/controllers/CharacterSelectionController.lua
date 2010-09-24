@@ -44,6 +44,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       ttt = table_text
       screen:add( table_text )
       table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
+      view.start_button.opacity = 0
    
       --make sure last dog selected does not continue to glow
       for _,v in ipairs(DOG_GLOW) do
