@@ -96,7 +96,7 @@ function(pres, ctrl)
    end
 
    -- called when either human player no longer detected, or one player left.
-   function pres:return_to_main_menu(human_won)
+   function pres:return_to_main_menu(human_won, reset)
       for _,player in ipairs(model.players) do
          if player.status then player.status:hide() end
          if player.betChips then player.betChips:remove() end
@@ -137,21 +137,22 @@ function(pres, ctrl)
       Popup:new{group = text, time = 3}
       --]]
       
-      local r = Rectangle{ w=1920, h=1080, opacity = 0, color = "000000"}
-      screen:add(r)
+      if not reset then 
+         local r = Rectangle{ w=1920, h=1080, opacity = 0, color = "000000"}
+         screen:add(r)
+         local m
+         if human_won then
+            m = AssetLoader:getImage("Win",{})
+         else
+            m = AssetLoader:getImage("Lose",{})
+         end
+         m.anchor_point = {m.w/2, m.h/2}
+         m.position = {screen.w/2, screen.h/2}
+         screen:add(m)
       
-      local m
-      if human_won then
-         m = AssetLoader:getImage("Win",{})
-      else
-         m = AssetLoader:getImage("Lose",{})
+         Popup:new{group = r, time = 5}
+         Popup:new{group = m, time = 5}
       end
-      m.anchor_point = {m.w/2, m.h/2}
-      m.position = {screen.w/2, screen.h/2}
-      screen:add(m)
-      
-      Popup:new{group = r, time = 5}
-      Popup:new{group = m, time = 5}
 
    end
 

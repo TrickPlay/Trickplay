@@ -22,25 +22,25 @@ BettingView = Class(View, function(view, model, ...)
     --]]
 
     local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2],
-        "assets/new_buttons/ButtonFold.png", "assets/new_buttons/ButtonFold-on.png")
+        "fold_button", "fold_button_on")
     fold_button.extra.text = "FOLD"
-    local call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2],
-        "assets/new_buttons/ButtonCall.png", "assets/new_buttons/ButtonCall-on.png")
+    call_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2],
+        "call_button", "call_button_on")
     call_button.extra.text = "CALL"
-    local check_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2],
-        "assets/new_buttons/ButtonCheck.png", "asset/new_buttons/ButtonCheck-on.png")
+    check_button = FocusableImage(MDPL.CALL[1], MDPL.CALL[2],
+        "check_button", "check_button_on")
     check_button.extra.text = "CALL"
-    local bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2],
-        "assets/new_buttons/ButtonBet.png", "assets/new_buttons/ButtonBet-on.png")
+    bet_button = FocusableImage(MDPL.BET[1], MDPL.BET[2],
+        "bet_button", "bet_button_on")
     bet_button.extra.text = "BET"
 
     local new_deal_button = FocusableImage(MDPL.NEW_DEAL[1], MDPL.NEW_DEAL[2],
-        "assets/new_buttons/ButtonNewDeal.png", "assets/new_buttons/ButtonNewDeal-on.png")
+        "new_deal_button", "new_deal_button_on")
     local exit_button = FocusableImage(MDPL.EXIT[1], MDPL.EXIT[2],
-        "assets/new_buttons/ButtonExit.png", "assets/new_buttons/ButtonExit-on.png")
+        "exit_button", "exit_button_on")
     exit_button.extra.text = "EXIT"
     local help_button = FocusableImage(MDPL.HELP[1], MDPL.HELP[2],
-        "assets/new_buttons/ButtonHelp.png", "assets/new_buttons/ButtonHelp-on.png")
+        "help_button", "help_button_on")
     help_button.extra.text = "HELP"
 
 
@@ -61,7 +61,6 @@ BettingView = Class(View, function(view, model, ...)
             new_deal_button, help_button, exit_button
         }
     }
-    the_items = view.items
     --]]
 --[[
     -- add the focus
@@ -76,7 +75,7 @@ BettingView = Class(View, function(view, model, ...)
             x = MDPL.CALL[1] + 30, y = MDPL.CALL[2] + 30, text = "Call"}
     --]]
     local bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.YELLOW,
-            x = MDPL.BET[1] + 130, y = MDPL.BET[2] + 35, text = "$"}
+            x = MDPL.BET[1] + 130, y = MDPL.BET[2] + 45, text = "$"}
     --[[
     local exit_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
             x = MDPL.EXIT[1] + 40, y = MDPL.EXIT[2] + 20, text = "Exit"}
@@ -96,12 +95,12 @@ BettingView = Class(View, function(view, model, ...)
     view.ui=Group{name="betting_ui", position={0,0}}
     view.ui:add(view.background_ui)
     for _,v in ipairs(view.items[1]) do
-        view.ui:add(v)
+        if v.group then view.ui:add(v.group) else view.ui:add(v) end
     end
     for _,v in ipairs(view.items[2]) do
-        view.ui:add(v)
+        if v.group then view.ui:add(v.group) else view.ui:add(v) end
     end
-    view.ui:add(check_button)
+    view.ui:add(check_button.group)
     view.ui:add(bet_text)
     view.ui:add(unpack(arrows))
 
@@ -117,11 +116,9 @@ BettingView = Class(View, function(view, model, ...)
     function view:change_bet_animation(dir)
         assert(0 ~= dir[2])
         if(1 ~= dir[2]) then
-            arrows[1]:complete_animation()
             arrows[1].opacity = 255
             arrows[1]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
         elseif(-1 ~= dir[2]) then
-            arrows[2]:complete_animation()
             arrows[2].opacity = 255
             arrows[2]:animate{duration=CHANGE_VIEW_TIME, opacity=0}
         else
@@ -138,12 +135,12 @@ BettingView = Class(View, function(view, model, ...)
         local bb_player = players[bb_p]
         if model.call_bet == 0 or
             (model.call_bet <= bb_qty and player == bb_player) then
-            check_button.opacity = 255
-            call_button.opacity = 0
+            check_button.group.opacity = 255
+            call_button.group.opacity = 0
             view.items[1][2] = check_button
         else
-            check_button.opacity = 0
-            call_button.opacity = 255
+            check_button.group.opacity = 0
+            call_button.group.opacity = 255
             view.items[1][2] = call_button
         end
     end
@@ -163,10 +160,6 @@ BettingView = Class(View, function(view, model, ...)
                       (j == controller:get_subselection_index()) then
                         -- set the positions of the focus-highlights correctly
                         item:on_focus_inst()
-                        if item.extra.text == CALL then
-                            check_button.group.opacity = 255
-                            check_button:on_focus_inst()
-                        end
                        --[[ 
                         button_focus.position={
                             MDPL[item.extra.text][1]-13,
@@ -183,10 +176,6 @@ BettingView = Class(View, function(view, model, ...)
                         --]]
                     else
                         item:out_focus_inst()
-                        if item.extra.text == CALL then
-                            check_button.group.opacity = 255
-                            check_button:out_focus_inst()
-                        end
                     end
                 end
             end

@@ -82,6 +82,11 @@ BettingController = Class(Controller, function(self, view, ...)
                self:get_model():notify()
                return
            end
+           if(PlayerGroups.BOTTOM == selected
+            and SubGroups2.NEW_DEAL == subselection) then
+              game:reset()
+              return
+           end
 
            local bet = model.currentPlayer.bet
            -- weird logic to make it see a fold
@@ -168,7 +173,7 @@ BettingController = Class(Controller, function(self, view, ...)
           end
        -- Change bet
        elseif(0 ~= dir[2]) then
-          if(subselection == SubGroups.RAISE) then
+          if(selected == PlayerGroups.TOP and subselection == SubGroups.RAISE) then
               local new_money = model.currentPlayer.money + ( dir[2] * model.bet.BIG_BLIND )
               local new_bet = model.currentPlayer.bet + ( - dir[2] * model.bet.BIG_BLIND )
               local max_bet = model.max_bet

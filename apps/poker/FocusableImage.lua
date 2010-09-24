@@ -25,22 +25,22 @@ FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, ...)
     
     function focusimg:on_focus()
         focusimg.focus:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
-        if image_src then focusimg.image:animate{duration = CHANGE_VIEW_TIME, opacity = 0} end
+        if focusimg.image then focusimg.image:animate{duration = CHANGE_VIEW_TIME, opacity = 0} end
     end
 
     function focusimg:out_focus()
         focusimg.focus:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
-        if image_src then focusimg.image:animate{duration = CHANGE_VIEW_TIME, opacity = 255} end
+        if focusimg.image then focusimg.image:animate{duration = CHANGE_VIEW_TIME, opacity = 255} end
     end
 
     function focusimg:on_focus_inst()
-        if focus_src then focusimg.focus.opacity = 255 end
-        if image_src then focusimg.image.opacity = 0 end
+        if focusimg.focus then focusimg.focus.opacity = 255 end
+        if focusimg.image then focusimg.image.opacity = 0 end
     end
 
     function focusimg:out_focus_inst()
-        if focus_src then focusimg.focus.opacity = 0 end
-        if image_src then focusimg.image.opacity = 255 end
+        if focusimg.focus then focusimg.focus.opacity = 0 end
+        if focusimg.image then focusimg.image.opacity = 255 end
     end
 
 end)

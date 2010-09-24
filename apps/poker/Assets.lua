@@ -18,9 +18,12 @@ end
 
 function AssetLoader:getImage(name,defaults)
    if self.assets[name] == nil then
+       return nil
+       --[[
       self.assets[name] = Image(defaults)
       self.assets[name]:hide()
       screen:add(self.assets[name])
+    --]]
    elseif self.assets[name].parent == nil then
       self.assets[name]:hide()
       screen:add(self.assets[name])
