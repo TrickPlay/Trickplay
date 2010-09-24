@@ -256,7 +256,7 @@ function( ui , api )
                 screen:add( group )
             end
             
-            group:lower_to_bottom()
+            ui:lower( group )
             
             group.opacity = 255
             
