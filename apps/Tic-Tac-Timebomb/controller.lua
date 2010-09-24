@@ -164,17 +164,17 @@ function GameControl:place_player_at_index(player, index)
                 {
                     name="end session text",
                     src="assets/PieceHg".. player_icon.."C.png",
-                    scale={2,2},
+                    scale={1.5,1.5},
                 }
                 local winnertext = Image
                 {   name="end of session text",
                 	src ="assets/wins.png",
-					opacity = 0
+					opacity = 0,
                 }	
                 winner.position = {screen.w/2,-screen.h/2}
                 winner.anchor_point={winner.w/2,winner.h/2}    
                 
-                winnertext.position = {screen.w/2,screen.h/2}
+                winnertext.position = {screen.w/2,700}
                 winnertext.anchor_point={winnertext.w/2,winner.h/2}
                 
                 screen:add(winner,winnertext)
