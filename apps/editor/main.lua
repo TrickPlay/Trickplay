@@ -174,7 +174,7 @@ local function build_ui( show_it )
         section.text.position =
         {
             section.button.x + BUTTON_TEXT_X_OFFSET ,
-            section.button.y + BUTTON_TEXT_Y_OFFSET - 5 --hjk added -5
+            section.button.y + BUTTON_TEXT_Y_OFFSET - 5 
         }
         
         -- Create the dropdown group
@@ -505,7 +505,7 @@ local function build_ui( show_it )
         if f then
             f()
         end    
-	return true --add hjk
+	return true
     end
     
     function ui.dropdown_timer.on_timer( )
@@ -528,9 +528,7 @@ local function build_ui( show_it )
           print("button_down() results : ",x,y,button,num_clicks)
 
           mouse_state = BUTTON_DOWN
-          if(mouse_mode == S_RECTANGLE) then print("M_STATE RECT") Editor().rectangle(x, y) end
-          if(mouse_mode == S_SELECT) then print("M_STATE SELCT " ) end
-	
+          if(mouse_mode == S_RECTANGLE) then Editor().rectangle(x, y) end
 	
      end
 

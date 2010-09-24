@@ -24,23 +24,9 @@ function( section )
     
         
     ---------------------------------------------------------------------------
-    -- We're switching to a list of apps in full screen
-    ---------------------------------------------------------------------------
-    
-    local function show_all_apps( app_list )
-    
-        ui:on_exit_section( section )
-    
-        local fs_apps = dofile( "fs-apps" )( ui , app_list )
-        
-        ui:on_section_full_screen( fs_apps )
-    
-    end
-
-    ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
-
+--[[
      local dropdown_map =
      {
      	["UNDO                   [Z]"]   = function() Editor().undo() mouse_mode = S_SELECT end,
@@ -51,7 +37,7 @@ function( section )
      	["CLONE OBJECT    [C]"]   = function() end,
      	["GROUP OBJECT   [G]"]   = function() end
      }
-
+]]
     local function build_dropdown_ui()
     
         local group = section.dropdown
@@ -83,6 +69,18 @@ function( section )
         table.insert( section_items , f_group )
         
 	for _,item in ipairs( section_items ) do
+	     item.reactive = true
+             function item:on_button_down(x,y,button,num_clicks)
+        	if item.on_activate then
+	    		item:on_focus_out()
+            		animate_out_dropdown()
+            		item:on_activate()
+            		screen.grab_key_focus(screen)
+			
+        	end
+		return true 
+	     end
+--[[
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
                 --dropmenu_item.reactive = true
@@ -93,13 +91,9 @@ function( section )
             		--screen.grab_key_focus(screen)
                 end
              end
-         -- on_focus_out()
-         -- animate_out_dropdown()
+]]
        end
 
-        -- table.insert( section_items , categories )
-        
-        --items_height = items_height + f_new.h + categories.h
         items_height = items_height + f_undo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_clone.h + f_group.h
         
         f_rect.extra.on_activate =
@@ -109,12 +103,12 @@ function( section )
         
         f_text.extra.on_activate =
             function()
-		mouse_mode = S_TEXT
+		mouse_mode = S_SELECT
 		Editor().text()
             end
         f_image.extra.on_activate =
             function()
-		mouse_mode = S_TEXT
+		mouse_mode = S_SELECT
 		Editor().image()
             end
         f_video.extra.on_activate =
@@ -232,7 +226,6 @@ function( section )
     
     function section.on_default_action( section )
     
-        -- show_all_apps( recently_used_apps )
         
         return true
     

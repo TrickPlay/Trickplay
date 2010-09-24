@@ -17,67 +17,62 @@ S_GROUP           = 4
 -- Variables
 ---------------------
 dragging          = nil
-mouse_mode      = S_SELECT
-mouse_state     = BUTTON_UP
+mouse_mode        = S_SELECT
+mouse_state       = BUTTON_UP
 
 ---------------------
--- Local Variables
+-- Local 
 ---------------------
-local rect_init_x       = 0
-local rect_init_y       = 0
-local file_name         = ""
-local contents          = ""
-local item_num          = 0
-local input_purpose     = ""
-local current_filename  = ""
-local input_t
-g = Group()
+local g = Group()
+local contents    = ""
+local item_num    = 0
 
 -----------
 -- Utils 
 -----------
 
 function abs(a)
-     if(a>0) then
-          return a
-     else
-          return -a
-     end
+    if(a>0) then
+        return a
+    else
+        return -a
+    end
 end
-
 
 function itemTostring(v)
     local itm_str = ""
-    local indentation       = "\n\t\t  "
+    local indent       = "\n\t\t"
+    local b_indent       = "\n\t"
 
     if(v.type == "Rectangle") then 
-    itm_str = itm_str..v.name.." = "..v.type.."{name=\""..v.name.."\","..indentation..
-              "border_color={"..table.concat(v.border_color,",").."},"..indentation..
-              "border_width="..v.border_width..",color={"..table.concat(v.color,",").."},"..
-              indentation.."size={"..table.concat(v.border_color,",").."},"..indentation..
-              "border_width="..v.border_width..","..indentation.."color={"..table.concat(v.color,",").."},"
-              ..indentation.."size = {"..table.concat(v.size,",").."},"..indentation..
-              "position = {"..v.x..","..v.y.."}}\n\n"
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "border_color={"..table.concat(v.border_color,",").."},"..indent..
+         "border_width="..v.border_width..",color={"..table.concat(v.color,",").."},"..indent..
+	 "size={"..table.concat(v.border_color,",").."},"..indent..
+         "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
+	 "size = {"..table.concat(v.size,",").."},"..indent..
+         "position = {"..v.x..","..v.y.."}"..b_indent.."}\n\n"
     elseif (v.type == "Image") then 
-    itm_str = itm_str..v.name.." = "..v.type.."{name=\""..v.name.."\","..indentation..
-              "src=\""..v.src.."\","..indentation..
-              "base_size={"..table.concat(v.base_size,",").."},"..indentation..
-              "position = {"..v.x..","..v.y.."}}\n\n"
-              --"tile="..v.tile..","..indentation..
-              --"async="..v.async..","..indentation.."loaded="..v.loaded.."}\n\n"
+    	 itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+	 "name=\""..v.name.."\","..indent..
+         "src=\""..v.src.."\","..indent..
+         "base_size={"..table.concat(v.base_size,",").."},"..indent..
+         "position = {"..v.x..","..v.y.."},"..indent.. 
+         "async="..tostring(v.async)..","..indent..
+	 "loaded="..tostring(v.loaded)..b_indent.."}\n\n"
     elseif (v.type == "Text") then 
-    local function bTos (b) if(b == true) then s = "true" else s = "false" end end 
-
-    itm_str = itm_str..v.name.." = "..v.type.."{name=\""..v.name.."\","..indentation..
-	      "text=\""..v.text.."\","..indentation..
-	      "font=\""..v.font.."\","..indentation..
-              "color={"..table.concat(v.color,",").."},"..indentation..
-              "size={"..table.concat(v.size,",").."},"..indentation..
-              "position = {"..v.x..","..v.y.."},"..indentation..
-              "editable="..tostring(v.editable)..","..indentation..
-              "reactive="..tostring(v.reactive)..","..indentation..
-              "wants_enter="..tostring(v.wants_enter)..","..indentation..
-	      "wrap="..tostring(v.wrap).."}\n\n"
+    	 itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+	 "text=\""..v.text.."\","..indent..
+	 "font=\""..v.font.."\","..indent..
+         "color={"..table.concat(v.color,",").."},"..indent..
+         "size={"..table.concat(v.size,",").."},"..indent..
+         "position = {"..v.x..","..v.y.."},"..indent..
+         "editable="..tostring(v.editable)..","..indent..
+         "reactive="..tostring(v.reactive)..","..indent..
+         "wants_enter="..tostring(v.wants_enter)..","..indent..
+	 "wrap="..tostring(v.wrap)..b_indent.."}\n\n"
     end 
     return itm_str
 end
@@ -99,24 +94,28 @@ end
 -- Screen Command Line Inputs 
 --------------------------------
 
+local current_filename  = ""
+local input_t
+
 function printScreen(txt, name)
      if (name == nil) then 
 	name = "printScreen"
      end 
      screen:add(Text{name= name, text = txt, font= "DejaVu Sans 40px",
      color = "FFFFFF", position ={100, 950}, editable = false ,
-     reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=false})
+     reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=true, wrap_mode="CHAR"})
 end
 
 function inputScreen_savefile()
      local file_not_exists = true
-     local dir = readdir("./test")
+     local dir = readdir("./editor")
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                current_filename = input_t.text
                cleanText()
                cleanText("input")
-               printScreen("The file named "..current_filename.." already exists. \nDo you want to replace it? [Y|N] \n")
+               printScreen("The file named "..current_filename..
+	       " already exists. \nDo you want to replace it? [Y|N] \n")
                inputScreen("yn")
                file_not_exists = false
           end
@@ -134,7 +133,7 @@ end
 function inputScreen_openfile()
 
      local file_not_exists = true
-     local dir = readdir("./test")
+     local dir = readdir("./editor")
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                current_filename = input_t.text
@@ -149,17 +148,16 @@ function inputScreen_openfile()
           inputScreen("reopenfile")
           return 0
      end
-
      current_filename = input_t.text
-     temp_f = loadfile(input_t.text)
-     temp_f(g)
+     local f = loadfile(input_t.text)
+     f(g)
      item_num = table.getn(g.children)
      for i, v in pairs(g.children) do
           v.reactive = true;
           function v:on_button_down(x,y,button,num_clicks)
                print ("rect button down ")
-               if(button == 2) then
-                    -- editor.inspector(v) 
+               if(button == 2 or num_clicks >= 2) then
+                    editor.inspector(v) 
                     return true;
                end
                dragging = {v, x - v.x, y - v.y }
@@ -171,6 +169,7 @@ function inputScreen_openfile()
                return true;
           end
      end --for
+
      screen:add(g)
      cleanText()
      cleanText("input")
@@ -189,6 +188,8 @@ function inputScreen_yn()
           cleanText("input")
      end
 end
+
+local input_purpose     = ""
 
 function inputScreen(a)
      input_purpose = a
@@ -222,11 +223,24 @@ function inputScreen(a)
      		   cleanText()
      		   cleanText("input")
 		   item_num = item_num + 1
+              elseif (input_purpose == "inspector") then inspector_commit(v, input_t.text) 
               end --elseif
           end --if
      end --input_t:on_key_down(key)
 
 end --inputScreen()
+--[[
+function inspector_commit(v, cmd)
+
+cmd = name="rect99", size={100,100}, color = "FFFFFF" 
+local  = 
+       local i, j, attr 
+       i, j =  string.find(cmd, "=")
+       
+       attr = string.sub(cmd, i,j)	
+        
+end 
+]]
 
 function cleanText(text_name)
      if(text_name == nil) then text_name = "printScreen" end
@@ -242,6 +256,9 @@ end
 -- Editor Functions
 --------------------------------
 
+local rect_init_x = 0
+local rect_init_y = 0
+
 function Editor()
     local editor = {}
 
@@ -256,67 +273,49 @@ function Editor()
         item_num = 0
         current_filename = ""
         screen.grab_key_focus(screen)
-    end  --editor.close()
+     end  --editor.close()
 
-    function editor.open()
+     function editor.open()
         editor.close()
         printScreen("File Name : ")
         inputScreen("openfile")
-    end -- editor.open()
+     end -- editor.open()
 
-    function editor.inspector(v)
-        local inspector = loadInspector(v)
-        screen:add(Text{name="inspector",text = inspector,font="DejaVu Sans 30px" ,
-        color = "FFFFFF" , position = { 100 , 100 } , editable = false ,
-        reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=true})
-    end -- editor.inspector()
+     function editor.inspector(v)
+--[[
+	local itm_str = itemTostring(v)
+	printScreen(item_str) 
+        printScreen("::> ")
+	inputScreen("inspector")
+]]
+     end -- editor.inspector()
 
- function editor.view_codes()
-        if (current_filename ~= "") then
-                local codes = readfile(current_filename)
-                editor.close()
-                screen:add(Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-                color = "FFFFFF" , position = { 100 , 100 } , editable = false ,
-                reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=true})
-        else
-	     local codes = "local g = ... \n\n"
-             local obj_names = getObjnames()
+     function editor.view_codes()
+          local codes = "local g = ... \n\n"
+          local obj_names = getObjnames()
 	
-             local n = table.getn(g.children)
-	     print("item number")
-	     print (n)
-	     print("item number")
-	     print (n)
-	     print("item number")
-	     print (n)
-	     print("item number")
-	     print (n)
-	     print("item number")
-	     print (n)
-	     print("item number")
-	     print (n)
-	     print("item number")
-	     print (n)
-             for i, v in pairs(g.children) do
-             	 codes= codes..itemTostring(v)
-                 if (i == n) then
-                      codes = codes.."g:add("..obj_names..")"
-		 end 
-             end
-	     editor.close()
-             screen:add(Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-             color = "FFFFFF" , position = { 100 , 100 } , editable = false ,
-             reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=true})
-        end
-        screen.grab_key_focus(screen) --hjk
-    end -- editor.view_codes()
+          local n = table.getn(g.children)
+          for i, v in pairs(g.children) do
+               codes= codes..itemTostring(v)
+               if (i == n) then
+                    codes = codes.."g:add("..obj_names..")"
+	       end 
+           end
+	   screen:remove(g)
+           screen:add(Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
+           color = "FFFFFF" , position = { 100 , 100 } , editable = false ,
+           reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=true, wrap_mode="CHAR"})
+           screen.grab_key_focus(screen) --hjk
 
-    function editor.save()
+     end -- editor.view_codes()
+
+     function editor.save()
+
+        cleanText("codes")
         printScreen("File Name : ")
         contents = "local g = ... \n\n"
         local obj_names = getObjnames()
         local n = table.getn(g.children)
-	print ("object num : ") print(n)
    
         for i, v in pairs(g.children) do
              contents= contents..itemTostring(v)
@@ -324,15 +323,13 @@ function Editor()
                   contents = contents.."g:add("..obj_names..")"
              end
         end
-
-print("KKKKKKKKKKKKKKKKKKKKK")
-	print(contents)
-print("KKKKKKKKKKKKKKKKKKKKK")
         inputScreen("savefile")
-    end  --editor.save()
 
-    function editor.rectangle(x, y)
+     end  
+
+     function editor.rectangle(x, y)
 	
+        cleanText("codes")
 	local DEFAULT_COLOR     = "FFFFFFC0"
         rect_init_x = x -- origin x
         rect_init_y = y -- origin y
@@ -352,23 +349,24 @@ print("KKKKKKKKKKKKKKKKKKKKK")
         g:add(ui.rect)
         screen:add(g)
 
-     function ui.rect:on_button_down(x,y,button,num_clicks)
-                print ("rect button down ")
-                if(button == 2) then
-                        -- editor.inspector(v) 
-                        return true;
-                end
-                dragging = {ui.rect, x - ui.rect.x, y - ui.rect.y }
-                return true;
+        function ui.rect:on_button_down(x,y,button,num_clicks)
+             print ("rect button down ")
+             if(button == 2 or num_clicks >= 2) then
+                  editor.inspector(v) 
+                  return true;
+             end
+             dragging = {ui.rect, x - ui.rect.x, y - ui.rect.y }
+             return true;
         end
         function ui.rect:on_button_up(x,y,button,num_clicks)
-                print ("rect button up ")
-                dragging = nil
-                return true;
+            print ("rect button up ")
+            dragging = nil
+            return true;
         end
-    end -- editor.rectangle
 
-    function editor.rectangle_done(x,y)
+     end -- editor.rectangle
+
+     function editor.rectangle_done(x,y)
         ui.rect.size = { abs(x-rect_init_x), abs(y-rect_init_y) }
         if(x-rect_init_x < 0) then
            ui.rect.x = x
@@ -377,9 +375,10 @@ print("KKKKKKKKKKKKKKKKKKKKK")
             ui.rect.y = y
         end
         item_num = item_num + 1
-    end -- editor.rectangle_done        
+        screen.grab_key_focus(screen)
+     end 
 
-    function editor.rectangle_move(x,y)
+     function editor.rectangle_move(x,y)
         ui.rect.size = { abs(x-rect_init_x), abs(y-rect_init_y) }
         if(x- rect_init_x < 0) then
             ui.rect.x = x
@@ -387,23 +386,20 @@ print("KKKKKKKKKKKKKKKKKKKKK")
         if(y- rect_init_y < 0) then
             ui.rect.y = y
         end
-    end -- editor.rectangle_move()
+     end
 
-    function editor.undo()
-    end
+     function editor.undo()
+     end
 	
-    function editor.text()
+     function editor.text()
 	local DEFAULT_COLOR     = "FFFFFFC0"
-	local x = 100 
-	local y = 100 
-        rect_init_x = x -- origin x
-        rect_init_y = y -- origin y
 
+        cleanText("codes")
         ui.text = Text{
         name="text"..tostring(item_num),
 	text = "", font= "DejaVu Sans 40px",
-     	color = "FFFFFF", position ={x,y}, editable = true ,
-     	reactive = true, wants_enter = true, size = {150, 150},wrap=true} 
+     	color = "FFFFFF", position ={100, 100}, editable = true ,
+     	reactive = true, wants_enter = true, size = {150, 150},wrap=true, wrap_mode="CHAR"} 
         g:add(ui.text)
         screen:add(g)
         ui.text.grab_key_focus(ui.text)
@@ -419,11 +415,13 @@ print("KKKKKKKKKKKKKKKKKKKKK")
     end
 	
     function editor.image()
+        cleanText("codes")
         printScreen("File Name : ")
         inputScreen("open_imagefile")
     end
 	
     function editor.video()
+        cleanText("codes")
         printScreen("File Name : ")
         inputScreen("open_mediafile")
 	mediaplayer.on_loaded = function( self ) self:play() end
