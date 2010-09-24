@@ -1,33 +1,6 @@
 
 -- Global
 
-function FunctionTimeline( t )
-    
-    local functions = t.functions
-    assert( type( functions ) == "table" )
-    t.functions = nil
-    local count = # functions
-    
-    local mode = t.mode
-    if mode then
-        t.mode = nil
-    end
-    
-    local timeline = Timeline( t )
-    
-    if mode then
-        local alpha = Alpha{ timeline = timeline , mode = mode }
-        function timeline.on_new_frame( timeline , elapsed , progress )
-            for i = 1 , count do functions[i]( alpha.alpha ) end
-        end
-    else
-        function timeline.on_new_frame( timeline , elapsed , progress )
-            for i = 1 , count do functions[i]( progress ) end
-        end
-    end
-    return timeline
-end
-
 -------------------------------------------------------------------------------
 -- logging
 
