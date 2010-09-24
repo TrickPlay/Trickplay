@@ -6,12 +6,64 @@ dofile( "controller.lua" )
 local number_of_lives = 3
 local high_score = settings.high_score or 0
 local point_counter = 0
-function info_text()
-	return	string.format("Lives: \t\t\tCurrent Score: %010d\tHigh Score: %010d",point_counter,high_score)
-end
 local my_plane_sz = 65*2
-local score = Text{text = info_text(),font="Highway Gothic Wide Bold 36px",color="FFFFFF",x=30,y=15,z=1}
-local topbar = Rectangle{color="0000007F",w=1920,h=80,z=1}
+local topbar = Group{z=1}
+topbar:add( 
+	Rectangle{
+		name = "BG",
+		color="0000007F",
+		w=1920,
+		h=80
+	},
+	Text{
+		name = "LIVES",
+		text = "Lives:",
+		font="Highway Gothic Wide Bold 36px",
+		color="FFFFFF",
+		x=30,
+		y=10
+	},
+	Text{
+		name = "SCORE",
+		text = "Current Score:",
+		font="Highway Gothic Wide Bold 36px",
+		color="FFFFFF",
+		y = 10
+	},
+	Text{
+		name = "HIGHSCORE",
+		text = "High Score:",
+		font="Highway Gothic Wide Bold 36px",
+		color="FFFFFF",
+		y = 10
+	}
+
+)
+local score_txt = Text{
+		text = "",
+		font="Highway Gothic Wide Bold 36px",
+		color="FFFFFF",
+		x = screen.w/2 +20,
+		y = 10
+}
+local h_score_txt = Text{
+		text = "",
+		font="Highway Gothic Wide Bold 36px",
+		color="FFFFFF",
+		y = 10
+}
+function redo_score_text()
+	score_txt.text   = string.format("%06d",point_counter)
+	h_score_txt.text = string.format("%06d",high_score) 
+end
+
+redo_score_text()
+h_score_txt.x = screen.w-h_score_txt.w-20
+
+topbar:add(score_txt,h_score_txt)
+topbar:find_child("SCORE").x = screen.w/2 - topbar:find_child("SCORE").w - 20
+topbar:find_child("HIGHSCORE").x = h_score_txt.x - topbar:find_child("HIGHSCORE").w - 20
+
 local game_is_running = false
 local splash = Group{z=10}
 local end_game  = Group{z=10,opacity = 0}
@@ -24,7 +76,7 @@ splash:add(
 	--shadows
 	Text{
 		text = "1945!",
-		font = "Highway Gothic Wide Bold 70px",
+		font = "Highway Gothic Wide Bold 80px",
 		color = "000000",
 		opacity = 150,
 		x = 505,
@@ -49,7 +101,7 @@ splash:add(
 
 	Text{
 		text = "1945!",
-		font = "Highway Gothic Wide Bold 70px",
+		font = "Highway Gothic Wide Bold 80px",
 		color = "FFFFFF",
 		x = 500,
 		y = 400
@@ -58,8 +110,8 @@ splash:add(
 		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
 		font = "Highway Gothic Wide 32px",
 		color = "FFFFFF",
-		x = 900,
-		y = 500,
+		x = 940,
+		y = 450,
 	},
 	Text{
 		text = "Press Enter to begin!",
@@ -862,7 +914,7 @@ else
 	number_of_lives = number_of_lives - 1
 	
 end
-score.text = info_text()
+redo_score_text()
 --------
 
 
@@ -1192,7 +1244,7 @@ point_counter = point_counter+10
 if point_counter > high_score then
 	high_score = point_counter
 end
-score.text = info_text()
+redo_score_text()
                         screen:remove( self.group )
                         
                         remove_from_render_list( self )
@@ -1325,7 +1377,6 @@ screen:show()
 -- Game loop, renders everything in the render list
 
 function idle.on_idle( idle , seconds )
-    --score.text = info_text()
     if not paused then
     
         for _ , item in ipairs( render_list ) do
@@ -1352,7 +1403,7 @@ function screen.on_key_down( screen , key )
 	end_game.opacity = 0
 	number_of_lives = 3
 	point_counter = 0
-	score.text = info_text()
+	redo_score_text()
 	lives[1].opacity=255
 	lives[3].opacity=255
 	lives[2].opacity=255
