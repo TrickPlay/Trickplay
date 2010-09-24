@@ -5,8 +5,6 @@ function( ui , api )
     local assets    = ui.assets
     local factory   = ui.factory
     
-    local Encapsulate = dofile( "Encapsulate" )
-    
     local section = {}
     
     local get_button

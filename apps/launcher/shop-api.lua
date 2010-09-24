@@ -156,4 +156,4 @@ end
 
 -------------------------------------------------------------------------------
 
-return dofile( "Encapsulate" )( api )
+return Encapsulate( api )
