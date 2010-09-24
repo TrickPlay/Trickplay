@@ -709,6 +709,17 @@ local function build_ui( show_it )
         element:lower( ui.bar )
     end
     
+    ----------------------------------------------------------------------------
+    
+    function screen.on_key_down( screen , key )
+        if key == keys.BackSpace or key == keys.EXIT then
+            if type( reload == "function" ) then
+                screen.opacity = 0
+                reload()
+            end
+        end
+    end
+    
     
     ----------------------------------------------------------------------------
     -- Hide everything unless show_it is true (only for debugging)
@@ -742,6 +753,7 @@ function main()
 end
 
 main()
+
 
 --[[
 local assets = dofile( "assets-cache" )
