@@ -22,20 +22,6 @@ function( section )
     
         
     ---------------------------------------------------------------------------
-    -- We're switching to a list of apps in full screen
-    ---------------------------------------------------------------------------
-    
-    local function show_all_apps( app_list )
-    
-        ui:on_exit_section( section )
-    
-        local fs_apps = dofile( "fs-apps" )( ui , app_list )
-        
-        ui:on_section_full_screen( fs_apps )
-    
-    end
-
-    ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
 

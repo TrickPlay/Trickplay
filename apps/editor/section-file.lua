@@ -28,20 +28,6 @@ function( section )
     local section_items = {}
     
     ---------------------------------------------------------------------------
-    -- We're switching to a list of apps in full screen
-    ---------------------------------------------------------------------------
-    
-    local function show_all_apps( app_list )
-    
-        ui:on_exit_section( section )
-    
-        local fs_apps = dofile( "fs-apps" )( ui , app_list )
-        
-        ui:on_section_full_screen( fs_apps )
-    
-    end
-
-    ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
 
@@ -80,6 +66,14 @@ local dropdown_map =
         table.insert( section_items , f_quit )
         
         for _,item in ipairs( section_items ) do
+             function item:on_button_down(x,y,button,num_clicks)
+        	  if (item.on_activate) then
+	    		item:on_focus_out()
+	    		animate_out_dropdown()
+            		item:on_activate()
+        	  end
+	     end 
+--[[ 
 	     if item:find_child("caption") then
 		local dropmenu_item = item:find_child("caption") 
 		--dropmenu_item.reactive = true
@@ -89,7 +83,7 @@ local dropdown_map =
         		return true
 		end 
 	     end 
-         -- on_focus_out()
+]]
        end
 
         -- table.insert( section_items , categories )
@@ -238,7 +232,6 @@ local dropdown_map =
     function section.on_default_action( section )
     
         -- hjk : menu 에서 리턴 눌렸을 때 그 항목 중 디폴트 처리 할 기능
-        -- show_all_apps( recently_used_apps )
         
         return true
     

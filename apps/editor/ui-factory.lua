@@ -26,18 +26,21 @@ function factory.make_dropdown( size , color )
                     ( c.w / 2 ) + ( POINT_WIDTH / 2 ) + POINT_CORNER_RADIUS , POINT_HEIGHT - H_BORDER_WIDTH )
                     
         c:line_to( c.w - H_BORDER_WIDTH - CORNER_RADIUS , POINT_HEIGHT - H_BORDER_WIDTH )
-        
+--------------------------------------------------------------------------------------------------
+       --[[ 
+]]
         c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
                     c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
                     c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
                     
         c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-        
         c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
                     c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
                     c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
         
         c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+ --[[       
+    ]]
         
         c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
                     H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
@@ -150,7 +153,6 @@ function factory.make_text_menu_item( assets , caption )
         {
             ring:set{ position = { 0 , 0 } },
             focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
-            -- hjk text:set{ position = { ( WIDTH - text.w ) / 2 , ( HEIGHT - text.h ) / 2 } }
             text:set{ position = { 30 , 15 } }
         }
     }
