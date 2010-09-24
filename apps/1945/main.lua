@@ -1309,9 +1309,10 @@ score.text = info_text()
 function start_game()
 add_to_render_list( my_plane )
 end
+add_to_render_list( water )
+
 add_to_render_list( enemies )
 
-add_to_render_list( water )
 
 paused = false
 
