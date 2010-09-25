@@ -60,6 +60,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- Remove player chips
    local function remove_player_chips(player)
       if player.betChips then
+         player.betChips:set(0)
+         player.betChips.group:unparent()
          player.betChips:remove()
          player.betChips = nil
       end

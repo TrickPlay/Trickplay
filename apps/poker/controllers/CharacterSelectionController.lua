@@ -44,9 +44,19 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       ttt = table_text
       screen:add( table_text )
       table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
-      view.start_button.opacity = 0
+      
+      -- reset the CharacterSelectionView for the next game
+      for i,t in ipairs(view.items) do
+          for j,item in ipairs(t) do
+              if item.group then item.group.opacity = 255 else item.opacity = 255 end
+              if view.seats_chosen[i][j].group then
+                  view.seats_chosen[i][j].group.opacity = 0
+              end
+          end
+      end
+      view.start_button.group.opacity = 0
    
-      --make sure last dog selected does not continue to glow
+      -- make sure last dog selected does not continue to glow
       for _,v in ipairs(DOG_GLOW) do
          v.opacity = 0
       end

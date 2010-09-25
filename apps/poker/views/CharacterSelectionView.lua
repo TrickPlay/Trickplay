@@ -50,6 +50,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     seats_chosen[2][5].group.x = MDPL[6][1]
     seats_chosen[2][5].group.y = MDPL[6][2]
     seats_chosen[2][5].group.opacity = 0
+    view.seats_chosen = seats_chosen
 
     --create the components
     local start_button = FocusableImage(MDPL.START[1], MDPL.START[2], "start_button", "start_button_on")
