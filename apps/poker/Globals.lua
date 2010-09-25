@@ -44,8 +44,8 @@ Colors={
    FOCUS_RED                    ="602020"
 }
 
-PLAYER_NAME_FONT = "KacstArt 28px"
-PLAYER_ACTION_FONT = "KacstArt 40px"
+PLAYER_NAME_FONT = "DejaVu Serif Condensed 28px"
+PLAYER_ACTION_FONT = "DejaVu Serif Condensed 34px"
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"
 CUSTOMIZE_TINIER_FONT = "KacstArt 20px"

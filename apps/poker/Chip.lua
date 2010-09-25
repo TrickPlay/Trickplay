@@ -216,7 +216,7 @@ chipCollection = Class(function(self, ...)
     function self:remove()
         self:set(0)
         if self.group.parent then
-            self.group.parent:remove(self.group)
+            self.group:unparent()
         end
     end
 

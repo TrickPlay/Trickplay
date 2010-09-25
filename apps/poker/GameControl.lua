@@ -101,12 +101,16 @@ function(ctrl, model, ...)
 
    function ctrl:reset()
 
-         hand_ctrl:cleanup()
-         pres:return_to_main_menu(still_playing, true)
-         enable_event_listener(KbdEvent())
-         model:set_active_component(Components.CHARACTER_SELECTION)
-         model:get_active_controller():reset()
-         model:notify()
+      for _,player in ipairs(model.players) do
+          assert(player.betChips)
+         if player.betChips then player.betChips:set(0) print("\nhere\n")end
+      end 
+      hand_ctrl:cleanup()
+      pres:return_to_main_menu(still_playing, true)
+      enable_event_listener(KbdEvent())
+      model:set_active_component(Components.CHARACTER_SELECTION)
+      model:get_active_controller():reset()
+      model:notify()
 
    end
 
