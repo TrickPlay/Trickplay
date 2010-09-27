@@ -9,7 +9,7 @@ local ControlConstants = {
     rev_magic_3 =  { [2]=1, [7]=2, [6]=3, [9]=4, [5]=5, [1]=6, [4]=7, [3]=8, [8]=9 },
     player_icon = { "X", "O"},
     play = {invalid = 1, win = 2, no = 3, tie = 4},
-    speeds = {600, 400, 300, 300},
+    speeds = {500, 400, 300, 300},
     win_rounds = 6
 }
 
@@ -183,16 +183,19 @@ function GameControl:place_player_at_index(player, index)
                 --winnertext:animate{duration=700,y=screen.h/2 + 240, mode = "EASE_IN_OUT_SINE"}
 				local t = Timeline
 				{
-					duration  = 2000,
+					duration  = 1300,
 					direction = "FORWARD",
 					loop      = false
 				}
 				function t.on_new_frame(t,msecs)
 					if msecs <= 200 then
-						local p = msecs/200
+						PlayField.opacity = msecs/200*(255*.7-255) + 255
+					elseif msecs <= 400 then
+						local p = (msecs-200)/200
 						winner.y = -screen.h/2 + screen.h*p
-					elseif msecs > 1700 then
-						local p = (msecs-1700)/(t.duration-1700)
+						
+					elseif msecs > 1000 then
+						local p = (msecs-1000)/(t.duration-1000)
 						winnertext.opacity = 255*p
 					end
 				end
@@ -475,7 +478,7 @@ function GameControl.make_control()
     screen.on_key_down = function(screen, keyval)
         local key_actions = {
 
-            [keys.space] = function()
+            [keys.Return] = function()
                 -- update view
                 StatusText:EnterButtonPressed()
                 self.state.next()
