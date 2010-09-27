@@ -36,7 +36,6 @@ BettingController = Class(Controller, function(self, view, ...)
     local selected = PlayerGroups.TOP
     local subselection = SubGroups.CALL
     --the number of the current player selecting a seat
-    local playerCounter = 1
     local minRaiseBet = 4
 
     local betCallback = function() end
@@ -107,6 +106,15 @@ BettingController = Class(Controller, function(self, view, ...)
        betCallback = cb
     end
 
+    function self:reset()
+       selected = PlayerGroups.TOP
+       subselection = SubGroups.CALL
+       minRaiseBet = 4
+
+       betCallback = function() end
+       updated = false
+    end
+
     function self:on_key_down(k)
        print("bettingcontroller on_key_down")
         if PlayerSelectionKeyTable[k] then
@@ -129,6 +137,9 @@ BettingController = Class(Controller, function(self, view, ...)
        local call_bet = model.call_bet
        local min_raise = model.min_raise
        local player = model.currentPlayer
+       print("player.money", player.money)
+       print("player.bet", player.bet)
+       print("orig_money", orig_money)
        assert(player.money + player.bet == orig_money)
        -- Change button
        if(0 ~= dir[1]) then
@@ -194,7 +205,21 @@ BettingController = Class(Controller, function(self, view, ...)
            else
              local new_selected = selected + dir[2]
              if(1 <= new_selected and GroupSize >= new_selected) then
-                 selected = new_selected
+                if (selected == PlayerGroups.BOTTOM
+                and subselection == SubGroups2.EXIT) then
+                   local text = Text{
+                       text = "Can only move to Help from Exit!",
+                       font = "Sans 36px",
+                       color = "FFFFFF",
+                       position = {screen.w/2, 400},
+                       opacity = 0
+                   }
+                   text.anchor_point = {text.w/2, text.h/2}
+                   screen:add(text)
+                   Popup:new{group = text, time = 1000}
+                else
+                   selected = new_selected
+                end
              end
           end
        end

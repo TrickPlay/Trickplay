@@ -28,8 +28,8 @@ function(self, model, args, player,...)
    self.popup = Popup:new{
       group = self.focus,
       noRender = true,
-      animate_in = {duration=500, opacity=255},
-      animate_out = {duration=500, opacity=0},
+      animate_in = {duration=800, opacity=255},
+      animate_out = {duration=800, opacity=0},
       loop = true,
       --on_fade_in = function() end,
       --on_fade_out = function() end,

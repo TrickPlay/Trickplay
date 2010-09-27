@@ -1,14 +1,3 @@
--- ctrl:get_community_cards()
--- ctrl:get_hole_cards()
--- ctrl:get_player_bets()
--- ctrl:get_pot()
--- ctrl:get_action()
--- ctrl:get_players()
--- ctrl:get_sb_qty()
--- ctrl:get_bb_qty()
--- ctrl:get_sb_p()
--- ctrl:get_bb_p()
--- ctrl:get_deck()
 local TIME = 300
 local MODE = "EASE_OUT_QUAD"
 
@@ -120,7 +109,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
                on_completed = function()
                   local to_show_glow = player.betChips:value() > 0
                   model.potchips:set( model.potchips:value() + player.betChips:value() )
-                  potText.text = model.potchips:value()
+                  potText.text = "$"..model.potchips:value()
 
                   -- flash the glow under the pot value text
                   local function show_glow(x)

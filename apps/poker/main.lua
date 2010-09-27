@@ -187,15 +187,6 @@ function()
    TutorialView(model):initialize()
    SplashView(model):initialize()
 
-   function screen:on_key_down(k)
-      if k == keys.s then
-         t:complete()
-      elseif not t.enabled then
-         assert(model:get_active_controller())
-         print("current comp: "..model:get_active_component())
-         model:get_active_controller():on_key_down(k)
-      end
-   end
    Events = {
       KEYBOARD = 1,
       TIMER = 2,
@@ -204,6 +195,17 @@ function()
    }
    local old_on_key_down
    local event_listener_en = true
+
+   function screen:on_key_down(k)
+--      if k == keys.s then
+--         t:complete()
+--      elseif not t.enabled then
+      if not t.enabled and event_listener_en then
+         assert(model:get_active_controller())
+         print("current comp: "..model:get_active_component())
+         model:get_active_controller():on_key_down(k)
+      end
+   end
    -- private (helper) functions
    function disable_event_listeners()
       -- if screen.on_key_down then
@@ -216,12 +218,12 @@ function()
    function enable_event_listener(event)
       assert(event:is_a(Event))
       if event:is_a(KbdEvent) then
---         print("enable_event_listener(KbdEvent())")
+         print("enable_event_listener(KbdEvent())")
          if old_on_key_down then
             screen.on_key_down, old_on_key_down = old_on_key_down, nil
          end
       elseif event:is_a(TimerEvent) then
---         print("enable_event_listener(TimerEvent{interval=" .. event.interval .. "})")
+         print("enable_event_listener(TimerEvent{interval=" .. event.interval .. "})")
          local cb = event.cb or
             function()
                game:on_event(event)

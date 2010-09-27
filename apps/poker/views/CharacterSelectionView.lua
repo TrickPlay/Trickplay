@@ -42,13 +42,19 @@ CharacterSelectionView = Class(View, function(view, model, ...)
     for i,v in ipairs(seats_chosen[1]) do
         v.group.x = MDPL[i+1][1]
         v.group.y = MDPL[i+1][2]
+        v.image.x = 10
+        v.image.y = 10
         v.group.opacity = 0
     end
     seats_chosen[2][1].group.x = MDPL[1][1]
     seats_chosen[2][1].group.y = MDPL[1][2]
+    seats_chosen[2][1].image.x = 10
+    seats_chosen[2][1].image.y = 10
     seats_chosen[2][1].group.opacity = 0
     seats_chosen[2][5].group.x = MDPL[6][1]
     seats_chosen[2][5].group.y = MDPL[6][2]
+    seats_chosen[2][5].image.x = 10
+    seats_chosen[2][5].image.y = 10
     seats_chosen[2][5].group.opacity = 0
     view.seats_chosen = seats_chosen
 

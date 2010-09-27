@@ -48,6 +48,11 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       end
    end
 
+   function ctrl:reset()
+      bets_done = false
+      ctrl.waiting_for_bet = false
+   end
+
    -- public functions
    function ctrl:clear_pipeline()
       hand_pipeline = {}
@@ -63,6 +68,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
          bb_p = game_ctrl:get_bb_p(),
          deck = game_ctrl:get_deck()
       }
+
+      print("Hand initializing")
 
       initialize_pipeline()
       pres:display_hand()
@@ -94,7 +101,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
          enable_event_listener(TimerEvent{interval=300})
          return true
       end
-      print("HandControl:bet(" .. tostring(rd) .. ", event")
+      print("HandControl:bet(" .. tostring(rd) .. ", event)")
       round = rd
       local continue = false
       if ctrl.waiting_for_bet and event:is_a(BetEvent) then

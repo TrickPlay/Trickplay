@@ -94,6 +94,7 @@ function(ctrl, model, ...)
       state:initialize(args)
       pres:display_ui()
 
+      print("Game initializing")
       reset_pipeline()
       disable_event_listeners()
       enable_event_listener(TimerEvent{interval=1000})
@@ -101,13 +102,11 @@ function(ctrl, model, ...)
 
    function ctrl:reset()
 
-      for _,player in ipairs(model.players) do
-          assert(player.betChips)
-         if player.betChips then player.betChips:set(0) print("\nhere\n")end
-      end 
       hand_ctrl:cleanup()
+      hand_ctrl:reset()
       pres:return_to_main_menu(still_playing, true)
       enable_event_listener(KbdEvent())
+      model:get_controller(Components.PLAYER_BETTING):reset()
       model:set_active_component(Components.CHARACTER_SELECTION)
       model:get_active_controller():reset()
       model:notify()
@@ -145,10 +144,23 @@ function(ctrl, model, ...)
       if #players == 1 or not still_playing then
          hand_ctrl:cleanup()
          pres:return_to_main_menu(still_playing)
-         enable_event_listener(KbdEvent())
-         model:set_active_component(Components.CHARACTER_SELECTION)
-         model:get_active_controller():reset()
-         model:notify()
+
+         disable_event_listeners()
+         disable_events_timer = Timer()
+         disable_events_timer.interval = 6000
+         function disable_events_timer:on_timer()
+            disable_events_timer:stop()
+            disable_events_timer.on_timer = nil
+            disable_events_timer = nil
+            
+            enable_event_listener(KbdEvent())
+
+            model:set_active_component(Components.CHARACTER_SELECTION)
+            model:get_active_controller():reset()
+            model:notify()
+         end
+         disable_events_timer:start()
+
          return
       end
 

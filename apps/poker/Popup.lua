@@ -30,37 +30,36 @@ end
 function Popup:new(args)
 
 	assert(args, "Popup created with no arguments!")
-     
+
 	local animate_in = args.animate_in or {opacity = 220}
 	local animate_out = args.animate_out or {opacity = 0}
      
-        local object = {
-                fade = args.fade or "in",
-                group = args.group or defaultMessage(args),
-		
-		-- Time on screen
-                time = args.time or 3000,
-		
-		-- Animation tables
-		animate_in = animate_in,
-		animate_out = animate_out
-        }
+    local object = {
+        fade = args.fade or "in",
+        group = args.group or defaultMessage(args),
+	
+	    -- Time on screen
+        time = args.time or 3000,
+	
+    	-- Animation tables
+	    animate_in = animate_in,
+    	animate_out = animate_out
+    }
         
 	-- Various parameters
-        -- if not object.group.parent then screen:add(object.group) end
-        if not args.keepDown then object.group:raise_to_top() end
+    -- if not object.group.parent then screen:add(object.group) end
+    if not args.keepDown then object.group:raise_to_top() end
 	
 	-- Callbacks
 	if args.on_fade_in then object.on_fade_in = args.on_fade_in end
-        if args.on_fade_out then object.on_fade_out = args.on_fade_out end
+    if args.on_fade_out then object.on_fade_out = args.on_fade_out end
 
-        setmetatable(object, self)
-        self.__index = self
+    setmetatable(object, self)
+    self.__index = self
 	
 	if not args.noRender then object:render() end
         
 	if args.loop then
-		
 		object.on_fade_in = function()
 			object.fade = "out"
 			object:render()
@@ -72,62 +71,65 @@ function Popup:new(args)
 			   object:render()
 			end
 		end
-		
 	end
 	
-        print("Created Popup")
+    print("Created Popup")
         
-        return object
+    return object
         
 end
 
 function Popup:render()
 
-        if self.fade == "in" then
+    if self.fade == "in" then
 	
-		print("Animating in")
-                
-		-- On completed function
-		self.animate_in.on_completed = function() pcall(self.on_fade_in, self) end
-		if not self.animate_in.duration then self.animate_in.duration = 300 end
-		
-		self.group:animate( self.animate_in )  
-		self.fade = "out"
-		return
-		
-        elseif self.fade == "out" then
-		
-		print("Animating out")
-		
-		-- On completed function
-		self.animate_out.on_completed = function() pcall(self.on_fade_out, self) end
-		if not self.animate_out.duration then self.animate_out.duration = 300 end
-		
-		self.group:animate( self.animate_out )  
-		self.fade = nil
-		return
-		
-        end
-        
+	print("Animating in")
+            
+	-- On completed function
+	self.animate_in.on_completed = function()
+        pcall(self.on_fade_in, self)
+    end
+	if not self.animate_in.duration then self.animate_in.duration = 300 end
+	
+	self.group:animate( self.animate_in )  
+	self.fade = "out"
+	return
+	
+    elseif self.fade == "out" then
+	
+	print("Animating out")
+	
+	-- On completed function
+	self.animate_out.on_completed = function()
+        pcall(self.on_fade_out, self)
+    end
+	if not self.animate_out.duration then self.animate_out.duration = 300 end
+	
+	self.group:animate( self.animate_out )  
+	self.fade = nil
+	return
+	
+    end
+    
 end
 
 function Popup:setTimer()
 
-        self.timer = Timer()
-        self.timer.interval = self.time
-        
-        self.timer.on_timer = function()
-		
-        	print("Time's up!")
-		
-                self:render()
-       		self.timer:stop()
-                self.timer.on_timer = nil
-                self.timer = nil
-                
-        end
-        
-        self.timer:start()
+    self.timer = Timer()
+    self.timer.interval = self.time
+    
+    self.timer.on_timer = function()
+	
+    	print("Time's up!")
+	
+        self:render()
+    	self.timer:stop()
+        self.timer.on_timer = nil
+        self.timer = nil
+            
+    end
+    
+    self.timer:start()
 
 end
 
@@ -143,7 +145,7 @@ function Popup:on_fade_out()
 
 	print("on_fade_out called")
         
-        self.group:unparent()
+    self.group:unparent()
 	
 	self = nil
 
@@ -162,6 +164,3 @@ function Popup:pause_loop()
 	self.stop = true
 	
 end
-
-
-
