@@ -75,12 +75,12 @@ splash:add(
 
 	--shadows
 	Text{
-		text = "1945!",
-		font = "Highway Gothic Wide Bold 80px",
+		text = "1945",
+		font = "Highway Gothic Wide Bold 120px",
 		color = "000000",
 		opacity = 150,
-		x = 505,
-		y = 405
+		x = 825,
+		y = 305
 	},
 	Text{
 		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
@@ -88,7 +88,7 @@ splash:add(
 		color = "000000",
 		opacity = 150,
 		x = 905,
-		y = 505,
+		y = 455,
 	},
 	Text{
 		text = "Press Enter to begin!",
@@ -100,17 +100,17 @@ splash:add(
 	},
 
 	Text{
-		text = "1945!",
-		font = "Highway Gothic Wide Bold 80px",
+		text = "1945",
+		font = "Highway Gothic Wide Bold 120px",
 		color = "FFFFFF",
-		x = 500,
-		y = 400
+		x = 820,
+		y = 300
 	},
 	Text{
 		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
 		font = "Highway Gothic Wide 32px",
 		color = "FFFFFF",
-		x = 940,
+		x = 900,
 		y = 450,
 	},
 	Text{
@@ -130,6 +130,8 @@ local lives =
 	Clone{name="life1",source=life,x=200,y=15,z=10},
 	Clone{name="life2",source=life,x=260,y=15,z=10},
 	Clone{name="life3",source=life,x=320,y=15,z=10},
+	Clone{name="life4",source=life,x=380,y=15,z=10,opacity=0},
+	Clone{name="life5",source=life,x=440,y=15,z=10,opacity=0},
 }
 
 screen:add(topbar,score,end_game,splash)
@@ -163,6 +165,7 @@ assets =
     island3         = Image{ src = "assets/island3.png" },
     score           = Text{ font = "Highway Gothic Wide 24px" , text = "+10" , color = "FFFF00" },
     g_over          = Text{ font = "Highway Gothic Wide 24px" , text = "GAMEOVER" , color = "FFFFFF" },
+    up_life          = Text{ font = "Highway Gothic Wide 24px" , text = "+1 Life"  , color = "FFFFFF" },
 }
 
 for _ , v in pairs( assets ) do
@@ -179,9 +182,9 @@ ENEMY_PLANE_MIN_SPEED       = 105
 
 ENEMY_PLANE_MAX_SPEED       = 150
 
-ENEMY_FREQUENCY             = 0.8
+ENEMY_FREQUENCY             = 1--0.8
 
-ENEMY_SHOOTER_PERCENTAGE    = 20
+ENEMY_SHOOTER_PERCENTAGE    = 20--deprecated
 
 -------------------------------------------------------------------------------
 
@@ -747,7 +750,20 @@ end
                                 setup =
                                 
                                     function( self )
-                                    
+                               
+if point_counter < 999990 then     
+	point_counter = point_counter+10
+	if point_counter > high_score then
+		high_score = point_counter
+	end
+	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
+		number_of_lives = number_of_lives + 1
+		lives[number_of_lives].opacity =255
+		self.text = Clone{source=assets.up_life}
+	end
+	redo_score_text()
+end
+
                                         self.text.position = { location[ 1 ] + 30 , location[ 2 ] }
                                         
                                         self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
@@ -761,7 +777,7 @@ end
                                 render =
                                 
                                     function( self , seconds )
-                                    
+                                   -- print("aaaa")
                                         local o = self.text.opacity - self.speed * seconds
                                         
                                         local scale = self.text.scale
@@ -810,7 +826,7 @@ if number_of_lives == 0 then
 	add_to_render_list(
                 
                             {
-                                speed = 80,
+                                speed = 20,
                                 
                                 text = Clone{ source = assets.g_over },
                                 
@@ -873,10 +889,10 @@ if number_of_lives == 0 then
                                 
                                     function( self , seconds )
                                    	self.elapsed = self.elapsed + seconds
-					if self.elapsed > 4 then
+					if self.elapsed > 5 then
 						remove_from_render_list( self )
 						screen.on_key_down = self.save_keys
-					elseif self.elapsed >3 then
+					elseif self.elapsed >4 then
 						splash.opacity = 255
 					end
                                     end,
@@ -1062,9 +1078,9 @@ enemies =
                 
                 shoots = false,
                 
-                shoot_time = 0.5 + math.random(), -- seconds
+                shoot_time = 4,--0.5 + math.random(), -- seconds
                 
-                last_shot_time = 0,
+                last_shot_time = 2,
                 
                 setup =
                 
@@ -1107,7 +1123,7 @@ enemies =
                             
                         screen:add( self.group )
                         
-                        self.shoots = math.random( 100 ) < ENEMY_SHOOTER_PERCENTAGE
+                        self.shoots = true-- math.random( 100 ) < ENEMY_SHOOTER_PERCENTAGE
                     
                     end,
                     
@@ -1156,13 +1172,13 @@ enemies =
                         
                         -- Shoot
                         
-                        if self.shoots then
-                        
-                            self.last_shot_time = self.last_shot_time + seconds
+                        --if self.shoots then
+                        local r = math.random()*2
+                            self.last_shot_time = self.last_shot_time + seconds + r
+                            --print(self.last_shot_time,self.shoot_time)
+                            if self.last_shot_time >= self.shoot_time and math.random(1,20) == 8 then
                             
-                            if self.last_shot_time >= self.shoot_time then
-                            
-                                self.last_shot_time = self.last_shot_time - self.shoot_time
+                                self.last_shot_time = self.last_shot_time - self.shoot_time - r
                                 
                                 local enemy = self
                                 
@@ -1229,9 +1245,11 @@ enemies =
                                     
                                 add_to_render_list( bullet )
                                 
+			else
+				self.last_shot_time = self.last_shot_time - r
                             end
                         
-                        end
+                        --end
                     
                     end,
                     
@@ -1239,12 +1257,17 @@ enemies =
                 
                     function( self , other )
                     
---TODO increment the point counter
+--[[
 point_counter = point_counter+10
 if point_counter > high_score then
 	high_score = point_counter
 end
+if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
+	number_of_lives = number_of_lives + 1
+	lives[number_of_lives].opacity =255
+end
 redo_score_text()
+--]]
                         screen:remove( self.group )
                         
                         remove_from_render_list( self )
