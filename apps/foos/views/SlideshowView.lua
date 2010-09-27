@@ -85,7 +85,7 @@ local postit_options = Image{src="assets/note-menu-options.png",x=250,y=250}--,x
 postit:add(postit_bg, postit_arrow, postit_options)
 postit:add(unpack(postit_text))
 
-local license_box = Group{name="license box",position={0,1055}}
+local license_box = Group{name="license box",position={0,1040}}
 license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
     view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
 
@@ -248,6 +248,7 @@ license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
                     SLIDESHOW_HEIGHT/img.h
                 }
 --]]
+img.name="slide"
                 group:add(img)
                 group.position = {margin_left,margin_top}
 
@@ -916,7 +917,8 @@ mosaic_background.opacity = 0
 					layered_timeline:stop()
                     layered_timeline:on_completed()
 					layered_timeline = nil
-                end
+					reset_keys()
+                end--lse
                 layered_timeline = Timeline
                 {
                     name      = "Backward Layered Timeline",
@@ -962,7 +964,7 @@ mosaic_background.opacity = 0
 	                    child.scale = {2-progress,2-progress}
                     	child.z     = (1-progress)*500             
 					--end
---[[
+---[[
                     if msecs > 500 then
                         reset_keys()
                     end       
@@ -971,17 +973,21 @@ mosaic_background.opacity = 0
                 function layered_timeline.on_completed()
                     for i = 1, 13 do
                         local child    = pic:find_child("Clone "..i)
-                        child.position = {drop_points[i][1],
-                                          drop_points[i][2]}
-                        child.scale    = {1,1}
-                        child.z        = 0
+						if child ~= nil then
+            	            child.position = {drop_points[i][1],
+        	                                  drop_points[i][2]}
+    	                    child.scale    = {1,1}
+	                        child.z        = 0
+						end
                     end
 
                     reset_keys()
-						license_box:raise_to_top()
+					license_box:raise_to_top()
+					layered_timeline = nil
 
                 end
                 layered_timeline:start()
+				--end
         end,
         ["MOSAIC"] = function(pic)
             pic.opacity = 255
@@ -1283,7 +1289,8 @@ mosaic_timeline:start()
 					layered_timeline:stop()
                     layered_timeline:on_completed()
 					layered_timeline = nil
-                end
+					rest_keys()
+                end--lse
                 layered_timeline = Timeline
                 {
                     name      = "Forward Layered Timeline",
@@ -1335,15 +1342,18 @@ mosaic_timeline:start()
                     for i = 1, 13 do
 print(i)
                         local child    = pic:find_child("Clone "..i)
-                        child.position = {drop_points[i][1],
-                                          drop_points[i][2]}
-                        child.scale    = { 2 , 2 }
-                        child.z        = 500
+						if child ~= nil then
+            	            child.position = {drop_points[i][1],
+        	                                  drop_points[i][2]}
+    	                    child.scale    = { 2 , 2 }
+	                        child.z        = 500
+						end
                     end
-						license_box:raise_to_top()
-
+					license_box:raise_to_top()
+					layered_timeline = nil
                 end
                 layered_timeline:start()
+				--end
         end,
         ["MOSAIC"] = function(pic)
             pic.opacity = 255

@@ -143,7 +143,7 @@ FrontPageView = Class(View, function(view, model, ...)
 --]]
 		local target_y = view.current.y
 		if     sel[1] == 1        then target_y = 0
-		elseif sel[1] == NUM_ROWS then target_y = view.current.y -110
+		elseif sel[1] == NUM_ROWS then target_y = PIC_H -110
 		end
 
 		selector_title.text = view.current.extra.lic_tit
@@ -164,7 +164,7 @@ FrontPageView = Class(View, function(view, model, ...)
 		local curr_old_y = view.current.y
 		local curr_targ_y = view.current.y
 		if     sel[1] == 1        then curr_targ_y = 40
-		elseif sel[1] == NUM_ROWS then curr_targ_y = view.current.y -75
+		elseif sel[1] == NUM_ROWS then curr_targ_y = PIC_H -75
 		end
 
 	    function sel_timeline.on_new_frame(t,msecs)
