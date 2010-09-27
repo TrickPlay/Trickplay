@@ -207,7 +207,7 @@ print("response!")
 		if  adapter.photo_list[i] == nil then
 			self:get_interesting_photos(math.ceil(i/50))
 
-			return ""
+			return "","",""
         end
 		if i == #adapter.photo_list -30 then
 			page_num = page_num + 1
@@ -215,15 +215,23 @@ print("response!")
 		end
 		if thumb then
 			return adapter.photo_list[i].url_m,  
-						"\""..adapter.photo_list[i].title..
-						"\" ©",adapter.photo_list[i].ownername..
+						"\""..adapter.photo_list[i].title.."\" ©",
+						adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		else
+dumptable(adapter.photo_list[i])
+local lg_img
+if adapter.photo_list[i].height_o ~= nil and adapter.photo_list[i].width_o ~= nil and adapter.photo_list[i].height_o <=1024 and adapter.photo_list[i].width_o <= 1024 then
+lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_o.%2" , 1 )
+else
+lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_b.%2" , 1 )
 
-			return adapter.photo_list[i].url_m, 
-						"\""..adapter.photo_list[i].title..
-						"\" ©",adapter.photo_list[i].ownername..
+end
+
+			return lg_img, 
+						"\""..adapter.photo_list[i].title.."\" ©",
+						adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		end

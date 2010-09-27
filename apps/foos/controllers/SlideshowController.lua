@@ -121,7 +121,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
         end,
         function()
             menu_index = 1
-            view:toggle_timer()
+            --view:toggle_timer()
             menu_is_visible = false
             view:nav_out_focus(style_index)
         end
