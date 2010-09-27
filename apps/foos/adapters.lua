@@ -220,15 +220,19 @@ print("response!")
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
 		else
-dumptable(adapter.photo_list[i])
-local lg_img
-if adapter.photo_list[i].height_o ~= nil and adapter.photo_list[i].width_o ~= nil and adapter.photo_list[i].height_o <=1024 and adapter.photo_list[i].width_o <= 1024 then
-lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_o.%2" , 1 )
-else
+
+--dumptable(adapter.photo_list[i])
+local lg_img = adapter.photo_list[i].url_m
+--[[
+if adapter.photo_list[i].height_o == nil or adapter.photo_list[i].width_o == nil then 
+lg_img = adapter.photo_list[i].url_m
+elseif tonumber(adapter.photo_list[i].height_o)  > 1024 or tonumber(adapter.photo_list[i].width_o) > 1024 then
 lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_b.%2" , 1 )
+else
+lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_o.%2" , 1 )
 
 end
-
+--]]
 			return lg_img, 
 						"\""..adapter.photo_list[i].title.."\" ©",
 						adapter.photo_list[i].ownername..
