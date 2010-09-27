@@ -77,10 +77,10 @@ chipCollection = Class(function(self, ...)
 
     function self:set(value)
         if self:value() == value then
-            --               print("Nothing to change")
+            -- Nothing to change
             return true
         elseif self:value() < value then
-            --                        print("Attempting to add chips")
+            -- Attempting to add chips
             -- First, sort the stacks
             self:sort()
             local biggest = 1
@@ -231,7 +231,8 @@ chipCollection = Class(function(self, ...)
 
 end)
 
---[[col = chipCollection()
+--[[
+col = chipCollection()
 
 local stack1 = chipStack(1)
 local stack5 = chipStack(5)

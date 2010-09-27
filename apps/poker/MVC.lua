@@ -145,6 +145,7 @@ Model = Class(function(model, ...)
     end
 
     function model:start_app(comp)
+        enable_event_listener(KbdEvent())
         self.active_component = comp
         screen:show()
         self:notify()
