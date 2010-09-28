@@ -1,4 +1,5 @@
 dofile("Class.lua")
+dofile("Globals.lua")
 dofile("Events.lua")
 dofile("RCP.lua")
 dofile("Utils.lua")
