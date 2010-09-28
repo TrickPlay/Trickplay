@@ -15,27 +15,29 @@ topbar:add(
 		w=1920,
 		h=80
 	},
+    --[[
 	Text{
 		name = "LIVES",
 		text = "Lives:",
 		font="Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		x=30,
-		y=10
+		y=20
 	},
+    --]]
 	Text{
 		name = "SCORE",
 		text = "Current Score:",
 		font="Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
-		y = 10
+		y = 20
 	},
 	Text{
 		name = "HIGHSCORE",
 		text = "High Score:",
 		font="Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
-		y = 10
+		y = 20
 	}
 
 )
@@ -44,13 +46,13 @@ local score_txt = Text{
 		font="Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		x = screen.w/2 +20,
-		y = 10
+		y = 20
 }
 local h_score_txt = Text{
 		text = "",
 		font="Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
-		y = 10
+		y = 20
 }
 function redo_score_text()
 	score_txt.text   = string.format("%06d",point_counter)
@@ -72,7 +74,7 @@ end_game:add(
 	--Text{ text = "Press any key to play again",font = "Highway Gothic Wide 36px", color = "FFFFFF",position={400,650}}
 )
 splash:add(
-
+--[[
 	--shadows
 	Text{
 		text = "1945",
@@ -120,18 +122,29 @@ splash:add(
 		x = 500,
 		y = 700,
 	}
-
+--]]
+    Image{ name = "logo",src = "assets/splash/AirCombatLogo.png", position = {screen.w/2,screen.h/2-80}},
+    Image{ name = "instr", src = "assets/splash/InstructionBar.png", position = {50,screen.h - 120}},
+    Image{ name = "start",src = "assets/splash/StartButton.png", position = {screen.w/2,screen.h/2+240}}
 )
+local logo = splash:find_child("logo")
+logo.anchor_point = {logo.w/2,logo.h/2}
+--[[
+local instr = splash:find_child("instr")
+instr.anchor_point = {instr.w/2,instr.h/2}
+--]]
+local startt = splash:find_child("start")
+startt.anchor_point = {startt.w/2,startt.h/2}
 
 local life = Image{src = "assets/life.png",opacity=0,z=10}
 screen:add(life)
 local lives =
 {
-	Clone{name="life1",source=life,x=200,y=15,z=10},
-	Clone{name="life2",source=life,x=260,y=15,z=10},
-	Clone{name="life3",source=life,x=320,y=15,z=10},
-	Clone{name="life4",source=life,x=380,y=15,z=10,opacity=0},
-	Clone{name="life5",source=life,x=440,y=15,z=10,opacity=0},
+	Clone{name="life1",source=life,x=20,y=15,z=10},
+	Clone{name="life2",source=life,x=80,y=15,z=10},
+	Clone{name="life3",source=life,x=140,y=15,z=10},
+	Clone{name="life4",source=life,x=200,y=15,z=10,opacity=0},
+	Clone{name="life5",source=life,x=260,y=15,z=10,opacity=0},
 }
 
 screen:add(topbar,score,end_game,splash)
