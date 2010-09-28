@@ -123,7 +123,7 @@ private:
     // Server delegate methods
 
     virtual void connection_accepted( gpointer connection, const char * remote_address );
-    virtual void connection_data_received( gpointer connection, const char * data );
+    virtual void connection_data_received( gpointer connection, const char * data , gsize size );
     virtual void connection_closed( gpointer connection );
 
     //..........................................................................
