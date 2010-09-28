@@ -14,8 +14,14 @@ function(pres, ctrl)
     background.anchor_point = {current_background.w/2, current_background.h/2}
     background.position = {1920/2, 1080/2}
 
-    local focus = nil
+    local tiles = {
+        "assets/tiles/TileWoodLg.png",
+        "assets/tiles/TilePlasticLg.png"
+    }
 
+    local focus = nil
+    
+    ui = Group()
     ui:add(background)
 
     screen:add(ui)
@@ -43,18 +49,6 @@ function(pres, ctrl)
     function pres:display_ui()
 
         -- show focus
-        focus_pick_tile = Image{
-        }
-        focus_pick_card.anchor_point = {focus_pick_card.width/2, focus_pick_card.height/2}
-        focus_drop_tile = Image{
-        }
-        focus_drop_card.anchor_point = {focus_drop_card.width/2, focus_drop_card.height/2}
-        focus_not_valid = Image{
-        }
-        focus_not_valid.anchor_point = {focus_not_valid.width/2, focus_not_valid.height/2}
-        focus = Group()
-        focus:add(focus_pick_card, focus_drop_card, focus_not_valid)
-        ui:add(focus)
         screen:show()
     end
 
