@@ -62,8 +62,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       end
       model:set_active_component(Components.GAME)
       game:initialize_game{
-         sb=50,--SMALL_BLIND,
-         bb=100,--BIG_BLIND,
+         sb=SMALL_BLIND,
+         bb=BIG_BLIND,
          endowment=INITIAL_ENDOWMENT,
          randomness=RANDOMNESS,
          players=model.players
