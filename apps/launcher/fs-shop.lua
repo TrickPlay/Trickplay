@@ -4,7 +4,7 @@
 -------------------------------------------------------------------------------
 -- logging
 
-local print = function() end
+--local print = function() end
 
 -------------------------------------------------------------------------------
 
@@ -29,8 +29,6 @@ function( ui , details_shop_app , featured_apps , all_apps )
     -- The details screen object
     
     local details = dofile( "fs-shop-app" )( ui , api )
-    
-    local in_details = false
     
     local showing = false
     
@@ -133,6 +131,8 @@ function( ui , details_shop_app , featured_apps , all_apps )
     
     local group = nil
     
+    local background = nil
+    
     -- This builds the initial 'loading UI' until the data comes back
     
     local function build_ui()
@@ -184,6 +184,16 @@ function( ui , details_shop_app , featured_apps , all_apps )
             group:add( Text{ font = "60px" , text = "Error!" , color = "FFFFFF" } )
             state = STATE_ERROR
             return
+        end
+        
+        local had_background = background ~= nil
+        
+        if not had_background then
+        
+            background = assets( "assets/app-shop-bkgd-temp.jpg" )
+        
+            screen:add( background )
+            
         end
         
         -----------------------------------------------------------------------
@@ -484,13 +494,13 @@ function( ui , details_shop_app , featured_apps , all_apps )
         -----------------------------------------------------------------------
         
         
-        section:animate_out( nil , true )
+        section:animate_out( nil , true , had_background )
         
         state = STATE_MAIN_OUT
         
         if showing then
             state = STATE_MAIN_IN
-            section:animate_in()
+            section:animate_in( nil , had_background )
         end 
     end
 
@@ -715,10 +725,11 @@ function( ui , details_shop_app , featured_apps , all_apps )
         end
     end
     
-    function section:animate_out( callback , skip_animation )
+    function section:animate_out( callback , skip_animation , leave_background )
 
         local ANIMATE_OUT_DURATION = 150
         local ANIMATE_OUT_MODE     = nil
+        
         
         local function finished()
             group.opacity = 0
@@ -773,6 +784,10 @@ function( ui , details_shop_app , featured_apps , all_apps )
             table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
         end
         
+        if background and not leave_background then
+            table.insert( to_animate , function( progress ) background.opacity = 255 * ( 1 - progress ) end )
+        end
+        
         if skip_animation then
         
             -- Call all the functions with a progress of 1 - which will set
@@ -802,7 +817,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         
     end
     
-    function section:animate_in( callback )
+    function section:animate_in( callback , leave_background )
     
         local ANIMATE_IN_DURATION = 150
         local ANIMATE_IN_MODE     = nil
@@ -838,6 +853,11 @@ function( ui , details_shop_app , featured_apps , all_apps )
             table.insert( to_animate , function( progress ) floor.y = interval:get_value( progress ) end )
         end
         
+        if background and not leave_background then
+            ui:lower( background )
+            table.insert( to_animate , function( progress ) background.opacity = 255 * progress end )
+        end
+        
         local timeline = FunctionTimeline
         {
             duration = ANIMATE_IN_DURATION ,
@@ -867,7 +887,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         
         state = STATE_MAIN_IN
         
-        section:animate_in( finished )
+        section:animate_in( finished , true )
     
     end
     
@@ -914,7 +934,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
             details:show_app( shop_app , back_from_details )
         end
         
-        section:animate_out( show_details )
+        section:animate_out( show_details , false , true )
         
         state = STATE_DETAILS
         
@@ -945,6 +965,16 @@ function( ui , details_shop_app , featured_apps , all_apps )
             -- building our own UI.
             
             if details_shop_app then
+            
+                background = assets( "assets/app-shop-bkgd-temp.jpg" )
+        
+                screen:add( background:set{ opacity = 0 } )
+                
+                ui:lower( background )
+                
+                background:animate{ duration = 100 , opacity = 255 }
+                
+            
             
                 details:show_app( details_shop_app , back_from_straight_details )
                 
@@ -1081,6 +1111,12 @@ function( ui , details_shop_app , featured_apps , all_apps )
                 
             end
         
+        end
+   
+        print ( "HIDING BACKGROUND" , background )
+        
+        if background then
+            background.opacity = 0
         end
         
     end
