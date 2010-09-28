@@ -44,7 +44,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
                 model:set_active_component(
                                 Components.SLIDE_SHOW)
 
-                model:get_controller(Components.SLIDE_SHOW):Prep_Slideshow()
+                model:get_controller(Components.SLIDE_SHOW):Prep_Slideshow(model.fp_slots[model.fp_index[1]][model.fp_index[2]].extra.index)
                 self:get_model():notify()
             end
             reset_keys()

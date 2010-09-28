@@ -79,41 +79,61 @@ Flickr_User = Class(nil,function(adapter, slot_ref, info, ...)
 	end
 end)
 --]]
-	local api_key = "e68b53548e8e6a71565a1385dc99429f"
+local api_key = "e68b53548e8e6a71565a1385dc99429f"
 
+--Grabs the creative commons licensing information
+local licenses_acquired = false
 local licenses = {}
-	    local license_info_url = 
-			"http://api.flickr.com/services/rest/?"..
-			"method=flickr.photos.licenses.getInfo"..
-			"&format=json&nojsoncallback=1"
-		local extract_short_license = function(url)
-			local result
-			_, _, result = string.find(url, "http:\/\/creativecommons.org\/licenses\/([%a%-]+)\/")
-			if(nil == result) then
-				result = "free"
-			end
-			return result
-		end
-	
-		local data = json:parse( URLRequest( license_info_url.."&api_key="..api_key):perform().body )
+local license_info_url = 
+	"http://api.flickr.com/services/rest/?"..
+	"method=flickr.photos.licenses.getInfo"..
+	"&format=json&nojsoncallback=1"
+
+local extract_short_license = function(url)
+	local result
+	_, _, result = string.find(url, "http:\/\/creativecommons.org\/"..
+									"licenses\/([%a%-]+)\/")
+	if(nil == result) then
+		result = "free"
+	end
+	return result
+end
+
+--Request to CreativeCommmons.org
+local req = URLRequest{
+	url = license_info_url.."&api_key="..api_key,
+	on_complete = function(request,response)
+		local data = json:parse( response.body )
 		for i, license in ipairs( data.licenses.license ) do
-		licenses[license.id] =	
-		{
-			name  = license.name,
-			url   = license.url,
-			short = extract_short_license(license.url),
-		}
+			licenses[license.id] =	
+			{
+				name  = license.name,
+				url   = license.url,
+				short = extract_short_license(license.url),
+			}
 		end
+		licenses_acquired = true
+	end
+}
+req:send()
+
 
 Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
+	--slot on the front page
 	local slot = slot_ref
+	--save the URLEncoded search term
 	local search = string.gsub(search_term,"%%20"," ")
+	--keeps track of current search page (50 results per page)
     local page_num = 1
+	--saved img urls from the search queries
 	adapter.photo_list = {}
-local outbound_requests = {}
+	--an attempt to prevent the user from flooding Flickr with requests
+	local outbound_requests = {}
+	 
 
-	function adapter:get_interesting_photos(i)--i,thumb,callback)
-print("requesting")
+	--gets the list of URLs from a search query
+	function adapter:get_interesting_photos(i)
+		local num_retrys = 0
 		local base_url = 
 				"http://api.flickr.com/services/rest/?"..
 				"method=flickr.photos.search"..
@@ -124,10 +144,12 @@ print("requesting")
 				"&media=photos"..
 				"&extras=license%2Cowner_name%2Curl_t%2Curl_m%2Curl_o"..
 				"&format=json&nojsoncallback=1"
+		--if a parameter indicates the page requested
 		local page = page_num
 		if i ~= nil then
 			page = i
 		end
+		--checks if a request for this page has already been sent
 		local already_requested = false
 		for i = 1, #outbound_requests do
 			if outbound_requests[i] == page then
@@ -135,6 +157,8 @@ print("requesting")
 			end
 		end
 		if already_requested then return end
+print("requesting",page)
+
 		outbound_requests[#outbound_requests + 1] = page
 		local request  = URLRequest
 		{
@@ -143,67 +167,68 @@ print("requesting")
 					"&text="..search,
 			on_complete =
 			function( request , response )
+print("response",num_retrys)
+				--remove the request from the outbound list
 				for i = 1, #outbound_requests do
 					if outbound_requests[i] == page then
 						table.remove(outbound_requests,i)
 						break
 					end
 				end
-
+				--response is bad, try again
 				if response == nil or response.body == nil then
-					if page_num <= 5 then
-						page_num = page_num+1
-						-- Bug in flickr API sometimes returns no results: RESEND
-						print("FLICKR BUG!!  RESEND: ",request.url)
-						request:send()
-
+					if num_retrys <= 3 then
+						num_retrys = num_retrys+1
+						local tmp = Timer{}
+						tmp.interval = 1000
+						function tmp.on_timer()
+							tmp:stop()
+							tmp = nil
+							print("FLICKR BUG!!  RESEND: ",request.url)
+							request:send()
+						end
+						tmp:start()
 					end
 					return
-
 				end
-print("response!")
 				local data = json:parse( response.body )
---dumptable(data)
----[[
+				--if response is empty
 				if((0 == #(data.photos.photo)) and page_num <= 5 ) or
 					data.photos == nil then
-					page_num = page_num+1
-					-- Bug in flickr API sometimes returns no results: RESEND
-					print("FLICKR BUG!!  RESEND: ",request.url)
-					request:send()
+						if num_retrys <= 3 then
+							num_retrys = num_retrys+1
+						local tmp = Timer{}
+						tmp.interval = 1000
+
+						function tmp.on_timer()
+							tmp:stop()
+							tmp = nil
+							print("FLICKR BUG!!  RESEND: ",request.url)
+							request:send()
+						end
+						tmp:start()
+					end
 					return
 				end
-
+print("here")
+				--Otherwise, grab the URLs
 				for i , photo in ipairs( data.photos.photo ) do
 					adapter.photo_list[(page-1)*50 +i]= photo
 				end
+
+				--load picture in the front page
 				local i = math.random(5)
 				local foto,lic_tit, lic_auth
 				foto,lic_tit, lic_auth = adapter:get_photos_at(i,true)
-				LoadImg(foto,slot,lic_tit, lic_auth)
---]]
---[[
-				local src = nil
-				if thumb then
-					src=data.photos.photo[i].url_m
-				else
-					src=data.photos.photo[i].url_o
-				end
-				callback(src,slot)
---]]
+				LoadImg(foto,slot,lic_tit, lic_auth, i)
 			end
 		}
 		request:send()
 
 	end
 	function adapter:get_photos_at(i,thumb)
+		local lic_tit, lic_auth
 		i=i+1
-	--	print(i)
---[[
-		if i < (page_num-1)*50 then
-			return nil
-		end
---]]
 		if  adapter.photo_list[i] == nil then
 			self:get_interesting_photos(math.ceil(i/50))
 
@@ -213,12 +238,18 @@ print("response!")
 			page_num = page_num + 1
 			self:get_interesting_photos()
 		end
-		if thumb then
-			return adapter.photo_list[i].url_m,  
-						"\""..adapter.photo_list[i].title.."\" ©",
-						adapter.photo_list[i].ownername..
+		if licenses_acquired then
+			lic_tit  = "\""..adapter.photo_list[i].title.."\" ©"
+			lic_auth = 	adapter.photo_list[i].ownername..
 						" ("..licenses[adapter.photo_list[i].
 							license].short..")"
+		else
+			lic_tit = "Acquiring Licenses..."
+			lic_auth = ""
+		end
+
+		if thumb then
+			return adapter.photo_list[i].url_m,  lic_tit, lic_auth
 		else
 
 --dumptable(adapter.photo_list[i])
@@ -233,11 +264,7 @@ lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_o.%2
 
 end
 --]]
-			return lg_img, 
-						"\""..adapter.photo_list[i].title.."\" ©",
-						adapter.photo_list[i].ownername..
-						" ("..licenses[adapter.photo_list[i].
-							license].short..")"
+			return lg_img, lic_tit, lic_auth
 		end
 	end
 end)

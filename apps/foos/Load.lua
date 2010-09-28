@@ -5,7 +5,7 @@ NUM_VIS_COLS   = 3
 PADDING_BORDER = 0
 PADDING_MIDDLE = 0
 
-local failed_to_load = Image{src = "assets/placeholder.jpg",opacity=0}
+failed_to_load = Image{src = "assets/placeholder.jpg",opacity=0}
 screen:add(failed_to_load)
 sources = {}
 terms = {"Bokeh","Sunset","City","Scenic","Clouds","Mountain","Autumn","Grass"}
@@ -99,8 +99,9 @@ function Setup_Album_Covers()
                     source  = model.default[math.random(1,8)],
                     opacity = 255
                 })
-				model.fp_slots[i][j].extra.lic_tit = "Acquiring license"
+				model.fp_slots[i][j].extra.lic_tit = "Waiting for Picture"
 				model.fp_slots[i][j].extra.lic_auth = " "
+				model.fp_slots[i][j].extra.index = 0
                 model.album_group:add(model.fp_slots[i][j])
             end
         end
@@ -120,7 +121,7 @@ function Setup_Album_Covers()
     end
 end
 
-function LoadImg(url,slot,lic_tit,lic_auth)
+function LoadImg(url,slot,lic_tit,lic_auth, index)
     print("Load_Image(",url,")")
     --if url returned is empty, do it again
     if (url == "") then
@@ -154,6 +155,7 @@ function LoadImg(url,slot,lic_tit,lic_auth)
                     end
 					slot.extra.lic_tit  = lic_tit
 					slot.extra.lic_auth = lic_auth
+					slot.extra.index = index
 					if slot == model.fp_slots[model.fp_index[1] ][model.fp_index[2] ] then
 						sel_tit  = fp_selector:find_child("title")
 						sel_auth = fp_selector:find_child("auth")
@@ -161,16 +163,7 @@ function LoadImg(url,slot,lic_tit,lic_auth)
 						sel_tit.text = lic_tit
 						sel_auth.text = lic_auth
 
-						if PIC_W > sel_tit.w then
-							sel_tit.x = sel_img.w-sel_tit.w-50
-						else
-							sel_tit.x = 30
-						end
-						if PIC_W > sel_auth.w then
-							sel_auth.x = sel_img.w-sel_auth.w-50
-						else
-							sel_auth.x=30
-						end
+	
 					end
                     local prev_cover = slot:find_child("cover")        
                     --add the next album cover
@@ -251,62 +244,7 @@ function LoadImg(url,slot,lic_tit,lic_auth)
     end
 
 end
---[[
---Called by the adapter's on_complete function
-function Load_Image(src,site,search,slot)
-    print("Load_Image(",site,",",search,")")
-    --if url returned is empty, do it again
-    if (site == "") then
-        src:loadCovers(slot,search, math.random(16))
-    --if the album is empty, then it is the initial load
-    elseif slot ~= nil then
 
-        local pic = Image{
-            name  = "cover",
-            async = true,
-            src   = site,
-            -- toss the filler image and scale it once loaded
-            on_loaded = function(img,failed)
-                --if everything went right
-                if not failed and img ~= nil then
-                    --print("\tloading pic at",index,"\t a.k.a ("..i..", "..j..")")
-                    local prev_cover = slot:find_child("cover")        
-                    --add the next album cover
-                    Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
-                    slot:add(img)
-                    model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
-                    --put the old one on top and animate it down
-                    --only animate if there is a picture already there
-                    if prev_cover ~= nil then
-                        print("\tan old cover exists, animating it out")
-                        prev_cover:raise_to_top()
-print("1")
-model:get_controller(Components.FRONT_PAGE):raise_bottom_bar()
-          print("2")              
-                        prev_cover:animate{
-                            duration     = 4*CHANGE_VIEW_TIME,
-                            y            = img.y + PIC_H,
-                            opacity      = 0,
-                            on_completed = function(image)
-print("3")
-                                --toss the old cover after the animation
-                                prev_cover:unparent()
-                                prev_cover = nil
-                            end
-                        }
-                    end
-                --if it failed to load 
-                else
-                    src:loadCovers(slot,search,math.random(16))
-                end
-                model.swapping_cover = false
-            end
-        }
-    else
-        model.swapping_cover = false
-    end
-end
---]]
 function Scale_To_Fit(img,base_size,target_size)
     local scale_x = target_size[1] / base_size[1]
     local scale_y = target_size[2] / base_size[2]

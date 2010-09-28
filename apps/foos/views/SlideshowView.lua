@@ -5,89 +5,66 @@ SlideshowView = Class(View, function(view, model, ...)
     view._base.init(view, model)
     view.ui = Group{name="slideshow ui"}
     screen:add(view.ui)
-    local backup = Image {
-        name    = "slide",
-        src     = "assets/none.png",
-        opacity = 0
-    }
-    --screen:add(backup)
     local overlay_image = Image
     { 
         src     = "assets/overlay.png", 
         opacity = 0 
     }
+    local layered_timeline = nil
 
     local background  = Image {src = "assets/background.jpg"  }
-local mosaic_background = Image {src = "assets/tiled-slideshow-bkgd.jpg" , size = {screen.w,screen.h},opacity=255}
+	local mosaic_background = Image 
+	{
+		src = "assets/tiled-slideshow-bkgd.jpg" ,
+		size = {screen.w,screen.h},opacity=255
+	}
 
-    --NAV MENU
-    view.nav_group = Group    { position = {1500, 300}, opacity = 0 }
-    local nav_back  = Rectangle{ w = 300,  h = 400,  color = "FFFFFF"}
-    view.nav_group:add(nav_back)
-    view.nav_items =
-    {
-        Text{text = "Close Menu",              y = 160, font="Sans 36px"},
-        Text{text = "Back to Albums",          y = 220, font="Sans 36px"},
-        --Text{text = "Hide this Album",         y = 280, font="Sans 36px"},
-        Text{text = "Play Slideshow",          y = 280, font="Sans 36px"},
-        Text{text = "Change Slide Show Style", y = 340, font="Sans 36px"},
-    }
-    view.nav_group:add(unpack(view.nav_items))
-    view.logo = Image
-    {
-        name = "slideshow cover",
-        src  = "",
-        position = {-40,-75},
-        size = {300, 225}
-    }
-    view.queryText = Text 
-    { 
-        text = "",
-        font = "Sans 30px",
-        x    = 105, 
-        y    = 80
-    }
-    view.nav_group:add(view.queryText, view.logo)
-    view.ui:add(view.nav_group)
-
-    local caption = Text 
-    {
-        font = "Sans 15px",
-        text = "",
-        x    = 1530,
-        y    = 400
-    }
---off screen -300,400
---on screen 10,400
-local postit = Group{name="post-it",position = {-250,400}}
-local postit_bg = Image
-{src = "assets/note-menu.png"}
-local postit_text =
-{
-	Image{src="assets/note-menu-text0.png",y=80,x=35,opacity=255},
-	Image{src="assets/note-menu-text1.png",y=80,x=35,opacity=0},
-	Image{src="assets/note-menu-text2.png",y=80,x=35,opacity=0},
-	Image{src="assets/note-menu-text3.png",y=80,x=35,opacity=0}
-}
---style one ,x=55,y=160
---style one ,x=70,y=195
---done ,x=95,y=260
+	-- POST-IT Menu --
+	local postit = Group{name="post-it",position = {-250,400}}
+	local postit_bg = Image{src = "assets/note-menu.png"}
+	local postit_text =
+	{
+		Image{src="assets/note-menu-text0.png",y=80,x=35,opacity=255},
+		Image{src="assets/note-menu-text1.png",y=80,x=35,opacity=0},
+		Image{src="assets/note-menu-text2.png",y=80,x=35,opacity=0},
+		Image{src="assets/note-menu-text3.png",y=80,x=35,opacity=0}
+	}
 	local arrow_pos =
-		{
-			{55,160},
-			{70,195},
-			{95,260}
-		}
+	{
+		{55,160},
+		{70,195},
+		{95,260}
+	}
 
-local postit_arrow   = Image{src="assets/note-menu-arrow.png",x=95,y=260}--,x=postit.x,y=postit.y}
-local postit_options = Image{src="assets/note-menu-options.png",x=250,y=250}--,x=postit.x,y=postit.y}
+	local postit_arrow   = Image
+	{
+		src="assets/note-menu-arrow.png",
+		x=95,
+		y=260
+	}
+	local postit_options = Image
+	{
+		src="assets/note-menu-options.png",
+		x=250,
+		y=250
+	}
 
-postit:add(postit_bg, postit_arrow, postit_options)
-postit:add(unpack(postit_text))
+	postit:add(postit_bg, postit_arrow, postit_options)
+	postit:add(unpack(postit_text))
 
-local license_box = Group{name="license box",position={0,1040}}
-license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
-    view.ui:add( backup, overlay_image, background, postit, caption, mosaic_background,license_box )
+	-- License Info At the Bottom --
+	local license_box = Group{name="license box",position={0,1040}}
+	license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
+
+local pause = Image{src = "assets/pause.png",x=screen.w/2,y=screen.h/2,opacity = 0}
+pause.anchor_point = {pause.w/2,pause.h/2}
+local play = Image{src = "assets/play.png",x=screen.w/2,y=screen.h/2,opacity = 0}
+play.anchor_point = {play.w/2,play.h/2}
+
+    view.ui:add(
+		overlay_image, background, postit, caption, mosaic_background,
+		license_box, pause,play
+	)
 
     view.timer            = Timer()
     view.timer.interval   = 4000
@@ -128,7 +105,11 @@ license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
                 })
 --			print("off1",group.w,group.h)
 			if group.w/group.h > screen.w/screen.h then
-				group.scale = {((screen.w-400)*.9)/group.w,((screen.w-400)*.9)/group.w}
+				group.scale = 
+				{
+					((screen.w-400)*.9)/group.w,
+					((screen.w-400)*.9)/group.w
+				}
 			else
 				group.scale = {(screen.h*.9)/group.h,(screen.h*.9)/group.h}
 			end
@@ -144,58 +125,6 @@ license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
 								screen.h/2+math.random(-5,5)}
 
 
---[[
-                local overlay = Clone 
-                {
-                    name   = "overlay",
-                    source = overlay_image, 
-                    scale  = 
-                    {
-                        img.w/(screen.w-100),
-                        img.h/(screen.h-100)
-                    }, 
-                    x = (-img.w)/40,
-                    y = (-img.h)/20
-                }
-                group.anchor_point = {0,0}
-                group.scale = 
-                {
-                    SLIDESHOW_HEIGHT/img.h,
-                    SLIDESHOW_HEIGHT/img.h
-                }
-                local i_width = img.w * SLIDESHOW_HEIGHT/img.h
-                local i_height = SLIDESHOW_HEIGHT
-                print ("original: "..img.w.." WIDTH:"..i_width)
-                if (img.w/img.h > 1.5) then
-                    group.scale = 
-                    {
-                        SLIDESHOW_WIDTH/img.w,
-                        SLIDESHOW_WIDTH/img.w
-                    }
-                    i_height = i_height * SLIDESHOW_WIDTH/i_width
-                end
-                group.x = math.random(0,1)*1920
-                group.y = math.random(0,1)*1080
-                group.z_rotation = 
-                {
-                    math.random(-10,10), 
-                    i_width/2, 
-                    i_height/2
-                }
-
-                group:add(img,overlay)
-                local backing = Rectangle
-                {
-                        size = {
-                            img.size[1],
-                            img.size[2]
-                        },
-                        color        = { 0,  0, 0, 255 },
-                        opacity = 255
-                }
-				group:add(backing)
-				backing:lower_to_bottom()
---]]
         end,
         ["FULLSCREEN"] = function(img,group)
                 group.opacity = 0
@@ -241,19 +170,9 @@ license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
                 local margin_top  = (screen.h - img.h)*0.5
 
                 img.opacity  =  0-- 255
---[[
-                group.scale = 
-                {
-                    SLIDESHOW_HEIGHT/img.h,
-                    SLIDESHOW_HEIGHT/img.h
-                }
---]]
-img.name="slide"
+				img.name="slide"
                 group:add(img)
                 group.position = {margin_left,margin_top}
-
-                --group.anchor_point = {group.w/2,group.h/2}
-                --group.position = {screen.w/5,screen.h/4}--screen.w/2,screen.h/2}
 
                 --13 drop_points
                 local pre_drop_points = {
@@ -280,11 +199,12 @@ img.name="slide"
                     drop_point[#drop_point + 1] = ele
                 end
                 
-                --local image_pieces = {}
                 for i = 1,number_of_tiles do
                     local rotation = math.random(-20,20)
-                    local image_offset_left = drop_point[i][1]+math.random(-30,30)
-                    local image_offset_top  = drop_point[i][2]+math.random(-30,30)
+                    local image_offset_left = drop_point[i][1]+
+						math.random(-30,30)
+                    local image_offset_top  = drop_point[i][2]+
+						math.random(-30,30)
                     local this_group = Group
                     {
                         name = "Clone "..i,
@@ -368,16 +288,7 @@ img.name="slide"
                     }
 		
                     this_group:add(backing,this_image,bounding_box)
-                    if (model.curr_slideshow.ui) then
-                        model.curr_slideshow.ui:add(this_group)
-                    end
-                    --image_pieces[i] = this_group
                     group:add(this_group)
---[[
-                    print_r("this_image size:" .. 
-                                   this_group.transformed_size[1] .. 
-                            "x" .. this_group.transformed_size[2])
---]]
                 end
         end,
 		["MOSAIC"]    = function(img,group)
@@ -465,7 +376,7 @@ img.name="slide"
 								(img.y - img.anchor_point[2])
 							}
                         }
---[[
+--[[ DIDNT REALY WORK PROPERLY
 						local flash = Rectangle
 						{
 							name  = "flash "..i..","..j,
@@ -478,7 +389,7 @@ img.name="slide"
 							}
 						}
 --]]
-group:add(clone)--,flash)
+						group:add(clone)--,flash)
 					end
 				end
 		end
@@ -487,143 +398,6 @@ group:add(clone)--,flash)
     {
         ["REGULAR"]    = function(img,group)
 			off_screen_prep["REGULAR"](img,group)
---[[
-			group:add( Rectangle{
-						name = "backing",
-                        size = {
-                            img.w,
-                            img.h
-                        },
-                        color        = { 0,  0, 0, 255 },
-                        opacity = 255
-                })
-			group:add(img)
-			group:add( Rectangle{
-						name = "overlay",
-                        size = {
-                            group.size[1] + 12,
-                            group.size[2] + 12 -- 12 = border_width * 2
-                        },
-                        color        = { 255,  0, 0, 0 },
-                        border_color = { 255, 255, 255,255 },
-
-						position = {-6,-6},
-                        border_width=6,
-                        opacity = 255
-                })
-
---			print("off1",group.w,group.h)
-			if group.w/group.h > screen.w/screen.h then
-				group.scale = {(screen.w*.9)/group.w,(screen.w*.9)/group.w}
-			else
-				group.scale = {(screen.h*.9)/group.h,(screen.h*.9)/group.h}
-			end
---			print("off2",group.w,group.h,group.size[1],group.size[2])
-			group.z_rotation   = { math.random(-10,10), 
-									group.size[1]/2,
-									group.size[2]/2}
-
-			group.anchor_point = {	group.size[1]/2,
-									group.size[2]/2}
-
-			group.position = {	screen.w/2+math.random(-5,5),
-								screen.h/2+math.random(-5,5)}
-
---]]
---[[
-				local rotation = math.random(-10,10)
-				--target position is {screen.w - 100, screen.h - 100}
-				--match the dim which has a greater dist to cover
-print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
-				if img.w/img.h > screen.w/screen.h then
-					img.scale = {(screen.w*.9)/img.w,(screen.w*.9)/img.w}
-				else
-					img.scale = {(screen.h*.9)/img.h,(screen.h*.9)/img.h}
-				end
-				img.anchor_point = {img.size[1]*img.scale[1]/2, img.size[2]*img.scale[2]/2}
-				img.position = {img.size[1]*img.scale[1]/2, img.size[2]*img.scale[2]/2}
-print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
-                local bounding_box = Rectangle{
-						name = "overlay",
-                        size = {
-                            screen.w*.9 + 12,
-                            screen.h*.9 + 12 -- 12 = border_width * 2
-                        },
-						anchor_point = {(screen.w*.9 + 12)/2,(screen.h*.9 + 12)/2},
-                        border_color = { 255, 255, 255 },
-                        color        = { 255,  0, 0, 0 },
-						position = {screen.w/2,screen.h/2},
-                        border_width=6,
-                        opacity = 255
-                }
-				group.size = {screen.w*.9,screen.h*.9}
-				--group.z_rotation = {rotation,group.w/2,group.h/2}
-				group.anchor_point = {group.w/2,group.h/2}
-                group.position = {screen.w/2,screen.h/2}
-                local backing = Rectangle
-                {
-						--position = {screen.w/2,screen.h/2},
-						anchor_point = {img.size[1]/2,img.size[2]/2},
-                        size = {
-                            img.size[1],
-                            img.size[2]
-                        },
-                        color        = { 0,  0, 0, 255 },
-                        opacity = 255
-                }
-				group:add(backing,img,bounding_box)
---]]
---[[
-                local overlay = Clone 
-                {
-                    name   = "overlay",
-                    source = overlay_image, 
-                    scale  = 
-                    {
-                        img.w/(screen.w-100),
-                        img.h/(screen.h-100)
-                    }, 
-                    x = (-img.w)/40,
-                    y = (-img.h)/20
-                }
-                group.anchor_point = {0,0}
-                group.scale = 
-                {
-                    SLIDESHOW_HEIGHT/img.h,
-                    SLIDESHOW_HEIGHT/img.h
-                }
-                local i_width = img.w * SLIDESHOW_HEIGHT/img.h
-                local i_height = SLIDESHOW_HEIGHT
-                print ("original: "..img.w.." WIDTH:"..i_width)
-                if (img.w/img.h > 1.5) then
-                    group.scale = 
-                    {
-                        SLIDESHOW_WIDTH/img.w,
-                        SLIDESHOW_WIDTH/img.w
-                    }
-                    i_height = i_height * SLIDESHOW_WIDTH/i_width
-                end
-                group.x = screen.w/4
-                group.y = screen.h/6
-                group.z_rotation = 
-                {
-                    math.random(-10,10), 
-                    i_width/2, 
-                    i_height/2
-                }
-                group:add(img,overlay)
-                local backing = Rectangle
-                {
-                        size = {
-                            img.size[1],
-                            img.size[2]
-                        },
-                        color        = { 0,  0, 0, 255 },
-                        opacity = 255
-                }
-				group:add(backing)
-				backing:lower_to_bottom()
---]]
         end,
         ["FULLSCREEN"] = function(img,group)
                 group.opacity = 0
@@ -641,13 +415,9 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
         end,
         ["LAYERED"]    = function(img,group)
                off_screen_prep["LAYERED"](img,group)
-               group.opacity = 255
-               group.z = 0
-               group:lower_to_bottom()
-               background:lower_to_bottom()
+
                for i = 1, 13 do
-                   local child = group:find_child("Clone "..i)
-                   child.opacity = 255
+                   group:find_child("Clone "..i).opacity = 255
                end
         end,
 		["MOSAIC"]    = function(img,group)
@@ -658,31 +428,41 @@ print(img.size[1]*img.scale[1],img.size[2]*img.scale[2])
     view.set_ui =  
     {
         ["REGULAR"]    = function()
+				if layered_timeline ~= nil then
+					reset_keys()
+					return false
+--[[
+					layered_timeline:stop()
+                    layered_timeline:on_completed()
+					layered_timeline = nil
+					reset_keys()
+--]]
+                end
             background.opacity  = 255
-mosaic_background.opacity = 0
+			mosaic_background.opacity = 0
             --view.logo.opacity   = 255
 
-            for i = 1,#view.on_screen_list do
+            for i = #view.on_screen_list,1,-1 do
                 local pic = view.on_screen_list[i]:find_child("slide")
-
                 if pic ~= nil then
-                    pic.opacity = 255
-                pic.z_rotation = {0,0,0}
-                pic.scale = {1,1}
-                pic.position = {0,0}
-				pic.z = 0
-pic.anchor_point = {0,0}
-				pic.size = {pic.base_size[1], pic.base_size[2]}
+					pic.opacity      =  255
+					pic.z_rotation   = {0,0,0}
+					pic.scale        = {1,1}
+					pic.position     = {0,0}
+					pic.z            =  0
+					pic.anchor_point = {0,0}
+					if pic.base_size ~= nil then
+						pic.size = {pic.base_size[1], pic.base_size[2]}
+					end
+					view.on_screen_list[i]:clear()
+					view.on_screen_list[i] = Group {z = 500}
 
-                    view.on_screen_list[i]:clear()
-                view.on_screen_list[i] = Group {z = 500}
+					on_screen_prep["REGULAR"](pic,view.on_screen_list[i])
+					view.on_screen_list[i].opacity = 255
+					view.ui:add(view.on_screen_list[i])
 
-                    on_screen_prep["REGULAR"](pic,view.on_screen_list[i])
-                    view.on_screen_list[i].opacity = 255
-                    view.ui:add(view.on_screen_list[i])
-
-                    view.on_screen_list[i]:lower_to_bottom()
-                    background:lower_to_bottom()
+					--view.on_screen_list[i]:lower_to_bottom()
+					--background:lower_to_bottom()
                 else
                     error("shit")
                 end
@@ -690,25 +470,29 @@ pic.anchor_point = {0,0}
             for i = 1,#view.off_screen_list do
                 local pic = view.off_screen_list[i]:find_child("slide")
                 if pic ~= nil then
-                    pic.opacity = 255
-                pic.z_rotation = {0,0,0}
-                pic.scale = {1,1}
-                pic.position = {0,0}
-				pic.z = 0
-pic.anchor_point = {0,0}
-				pic.size = {pic.base_size[1], pic.base_size[2]}
+                    pic.opacity      =  255
+					pic.z_rotation   = {0,0,0}
+					pic.scale        = {1,1}
+					pic.position     = {0,0}
+					pic.z            =  0
+					pic.anchor_point = {0,0}
+
+					if pic.base_size ~= nil then
+						pic.size = {pic.base_size[1], pic.base_size[2]}
+					end
 
                     view.off_screen_list[i]:clear()
-				view.off_screen_list[i] = Group {z = 0}
+					view.off_screen_list[i] = Group {z = 0}
 
                     off_screen_prep["REGULAR"](pic,view.off_screen_list[i])
                 end
             end
+			return true
         end,
 
         ["FULLSCREEN"] = function()
             background.opacity  = 0
-mosaic_background.opacity = 0
+			mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -748,8 +532,13 @@ mosaic_background.opacity = 0
 
         end,
         ["LAYERED"]    = function()
+if layered_timeline ~= nil then
+					reset_keys()
+
+					return false
+end
             background.opacity  = 255
-mosaic_background.opacity = 0
+			mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -781,7 +570,7 @@ mosaic_background.opacity = 0
                 end
             end
 
-
+			return true
         end,
         ["MOSAIC"] = function()
             background.opacity  = 0
@@ -861,7 +650,6 @@ mosaic_background.opacity = 0
 
 
     }
-    local layered_timeline = nil
     local forward_animation =
     {
         ["REGULAR"]    = function(pic)
@@ -917,58 +705,63 @@ mosaic_background.opacity = 0
 					layered_timeline:stop()
                     layered_timeline:on_completed()
 					layered_timeline = nil
-					reset_keys()
+					--reset_keys()
                 end--lse
                 layered_timeline = Timeline
                 {
                     name      = "Backward Layered Timeline",
-                    duration  = 13*300,
+                    duration  = 13*200,
                     loop      = false,
                     direction = "FORWARD"
                 }
+				local tmp = Timer{}
+				tmp.interval = 500
+				function tmp.on_timer()
+					reset_keys()
+					tmp:stop()
+					tmp = nil
+				end
+				tmp:start()
                 local drop_points = {}
+				pic.opacity = 255
                 pic.z = 0
                 function layered_timeline.on_started()
                     pic.opacity = 255
                     pic:raise_to_top()
                     for i = 1, 13 do
                         local child = pic:find_child("Clone "..i)
-                        drop_points[i]    = {}
-                        drop_points[i][1] = child.x
-                        drop_points[i][2] = child.y
-                        print(drop_points[i][1], drop_points[i][2])
-                        child.position = {pic.w/2,-pic.h/2}
-                        child.z        = 500
-                        child.opacity  = 255
+						if child ~= nil then
+     	                   drop_points[i]    = {}
+        	                drop_points[i][1] = child.x
+            	            drop_points[i][2] = child.y
+	                        child.position = {pic.w/2,-pic.h/2}
+    	                    child.z        = 500
+        	                child.opacity  = 255
+						end
                     end
                 end
                 function layered_timeline.on_new_frame(t,msecs)
-                    local index    =  math.ceil(msecs/300)
-                    local progress = (msecs - 300*(index-1))/300
+                    local index    =  math.ceil(msecs/200)
+                    local progress = (msecs - 200*(index-1))/200
                     for i = 1,index-1 do
                         local child    = pic:find_child("Clone "..i)
-			if child ~= nil then
-                        child.position = {drop_points[i][1],
-                                          drop_points[i][2]}
-                        child.scale    = { 1 , 1 }
-                        child.z        = 0
-			end
+						if child ~= nil then
+        	                child.position = {drop_points[i][1],
+            	                              drop_points[i][2]}
+                	        child.scale    = { 1 , 1 }
+                    	    child.z        = 0
+						end
                     end
                     local child = pic:find_child("Clone "..index)
-					--if child ~= nil then
-                    	--print(index)--drop_points[i][1])
+					if child ~= nil then
                 	    child.x = pic.w/2 + progress*(
             	                     drop_points[index][1] - pic.w/2)
         	            child.y = pic.h/2 + progress*(
     	                             drop_points[index][2] - pic.h/2)
 	                    child.scale = {2-progress,2-progress}
                     	child.z     = (1-progress)*500             
-					--end
----[[
-                    if msecs > 500 then
-                        reset_keys()
-                    end       
---]]
+					end
+      
                 end
                 function layered_timeline.on_completed()
                     for i = 1, 13 do
@@ -981,7 +774,6 @@ mosaic_background.opacity = 0
 						end
                     end
 
-                    reset_keys()
 					license_box:raise_to_top()
 					layered_timeline = nil
 
@@ -1011,7 +803,7 @@ function mosaic_timeline.on_started()
 				for j = 1,10 do
 					local child = pic:find_child("clone "..i..","..j)
 					assert(child,"... what?")
-					child.y_rotation = {-180,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+					child.y_rotation = {-180,child.clip[1]+child.clip[3]/2,0}
 					child.opacity = 0
 --[[
 					child = pic:find_child("flash "..i..","..j)
@@ -1026,7 +818,7 @@ function mosaic_timeline.on_started()
 				for j = 1,10 do
 					local child = old:find_child("clone "..i..","..j)
 					assert(child,"... what?")
-					child.y_rotation = {0,--[[child.x+]]child.clip[1]+child.clip[3]/2,0}
+					child.y_rotation = {0,child.clip[1]+child.clip[3]/2,0}
 					child.opacity = 255
 
 --[[
@@ -1197,25 +989,6 @@ old.opacity = 0
 end
 
 mosaic_timeline:start()
---[[
-            pic:animate 
-            {
-                duration = 300,
-                mode     = EASE_IN_EXPO,
-                opacity  = 255,
-                on_completed = function()
-                    reset_keys()
-                end
-            }
-            if view.on_screen_list[2] ~= nil  then
-                view.on_screen_list[2]:animate
-                {
-                    duration = 200,
-                    opacity  = 0,
-                    mode     = EASE_IN_EXPO
-                }
-            end
---]]
         end
 
 
@@ -1289,26 +1062,33 @@ mosaic_timeline:start()
 					layered_timeline:stop()
                     layered_timeline:on_completed()
 					layered_timeline = nil
-					rest_keys()
+					--reset_keys()
                 end--lse
                 layered_timeline = Timeline
                 {
-                    name      = "Forward Layered Timeline",
-                    duration  = 13*300,
+                    name      = "Backward Layered Timeline",
+                    duration  = 13*200,
                     loop      = false,
                     direction = "FORWARD"
                 }
-
+				local tmp = Timer{}
+				tmp.interval = 500
+				function tmp.on_timer()
+					reset_keys()
+					tmp:stop()
+					tmp = nil
+				end
+				tmp:start()
                 local drop_points = {}
                 pic.z = 0
-
                 function layered_timeline.on_started()
                     for i = 1, 13 do
                         local child = pic:find_child("Clone "..i)
-                        drop_points[i]    = {}
-                        drop_points[i][1] = child.x
-                        drop_points[i][2] = child.y
-                        print(drop_points[i][1], drop_points[i][2])
+						if child ~= nil then
+        	                drop_points[i]    = {}
+    	                    drop_points[i][1] = child.x
+	                        drop_points[i][2] = child.y
+						end
 --[[
                         child.position = {pic.w/2,-pic.h/2}
                         child.z        = 500
@@ -1317,30 +1097,30 @@ mosaic_timeline:start()
                     end
                 end
                 function layered_timeline.on_new_frame(t,msecs)
-                    local index    =  math.ceil(msecs/300)
-                    local progress = (msecs - 300*(index-1))/300
+                    local index    =  math.ceil(msecs/200)
+                    local progress = (msecs - 200*(index-1))/200
                     for i = 1,index-1 do
                         local child    = pic:find_child("Clone "..i)
-                        child.position = {pic.w/2,-pic.h/2}
-                        child.scale    = { 2 , 2 }
-                        child.z        = 500
+						if child ~= nil then
+        	                child.position = {pic.w/2,-pic.h/2}
+    	                    child.scale    = { 2 , 2 }
+	                        child.z        = 500
+						end
                     end
                     local child = pic:find_child("Clone "..index)
-                    --print(index)--drop_points[i][1])
-                    child.x = drop_points[index][1] + progress*(pic.w/2 - 
-                                 drop_points[index][1])
-                    child.y = drop_points[index][2] + progress*(pic.h/2 - 
-                                 drop_points[index][2])
-                    child.scale = {1+progress,1+progress}
-                    child.z     = progress*500            
-					if msecs > 500 then
-                    	reset_keys()
-					end        
+					if child ~= nil then
+                    	child.x = drop_points[index][1] + progress*(
+								pic.w/2 - drop_points[index][1])
+            	        child.y = drop_points[index][2] + progress*(
+								pic.h/2 - drop_points[index][2])
+    	                child.scale = {1+progress,1+progress}
+	                    child.z     = progress*500            
+					end
+       
                 end
                 function layered_timeline.on_completed()
                     pic.opacity = 0
                     for i = 1, 13 do
-print(i)
                         local child    = pic:find_child("Clone "..i)
 						if child ~= nil then
             	            child.position = {drop_points[i][1],
@@ -1607,24 +1387,13 @@ mosaic_timeline:start()
 		local license = view.license_off[#view.license_off]
 
         local style_i = view:get_controller():get_style_index()
---[[
-        local clone = Clone
-        {
-            name   = "slide",
-            source = backup,
-        }
---]]
+
         local clone = Group{name="loading"}
         local timeline  = loading(clone)
         off_screen_prep[view.styles[style_i] ](clone,group)
 
-        local index = view:get_controller():get_photo_index() - 1 +
+        local index = view:get_controller():get_photo_index()  +
                                           #view.off_screen_list
---[[
-        print("preload front",index,adapters[#adapters -
-                model.fp_1D_index + 1][1].required_inputs.query)
---]]
-        --local callback = function(url)
         local attempt = 1
         local function load_pic(timeline,group,attempt)
             attempt = attempt + 1
@@ -1679,9 +1448,9 @@ mosaic_timeline:start()
                         placeholder:add(Clone
                         {
                             name   = "slide",
-                            source = backup,
-                            x      = 100,
-                            y      = 100
+                            source = failed_to_load,
+--                            x      = 100,
+ --                           y      = 100
                         })
                         on_screen_prep[view.styles[style_i2] ](placeholder,group)
                     else
@@ -1805,22 +1574,14 @@ mosaic_timeline:start()
         background:lower_to_bottom()
 
         local style_i = view:get_controller():get_style_index()
---[[
-        local clone = Clone
-        {
-            name   = "slide",
-            source = backup,
-        }
---]]
         local clone = Group{name="loading"}
         local timeline = loading(clone)
         on_screen_prep[view.styles[style_i] ](clone,group)
         local index = view:get_controller():get_photo_index()  -
-                                                  #view.on_screen_list + 2
+                                                  #view.on_screen_list +1-- + 2
         print("preload back",index)
         local function load_pic(timeline,group)
 
-        --local callback = function(url)
 			local pic, title, auth 
 			pic, title, auth = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
@@ -1860,16 +1621,31 @@ mosaic_timeline:start()
                         placeholder:add(Clone
                         {
                             name   = "slide",
-                            source = backup,
-                            x      = 50,
-                            y      = 50
+                            source = failed_to_load,
+                           -- x      = 50,
+                           -- y      = 50
                         })
                         on_screen_prep[view.styles[style_i] ](placeholder,group)
                     else
+						print("got it")
                         --view.on_screen_list[rel_i] = Group {z = 500}
                         timeline:stop()
                         group:clear()
                         on_screen_prep[view.styles[style_i] ](img,group)
+
+						--handles edge case, where the image loads after 
+						--the picture was browsed past and thrown in the 
+						--off screen list
+						if view.styles[style_i] == "LAYERED" then
+							for i = 1, #view.off_screen_list do
+								if group == view.off_screen_list[i] then
+									for i = 1, 13 do
+					                   group:find_child("Clone "..i).opacity = 0
+						            end
+									break
+								end
+							end
+						end
                         --if its the desk/slideshow, then need to
                         --put it at the bottom of the stack
                     end
@@ -1880,113 +1656,25 @@ mosaic_timeline:start()
             }
         end
         load_pic(timeline,group)
-
-
-        --sources[model.fp_1D_index]:get_interesting_photos(index,false,callback)
-
---[[
-        local request = URLRequest
-        {
-            url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
-                  adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,
-                           index,
-                           model.fp_1D_index
-                  ),
-            on_complete = function (request, response)
-
-                local data   = json:parse(response.body)
-                local site   = adapters[#adapters - model.fp_1D_index + 1][1].site(data,index)
-                caption.text = adapters[#adapters - model.fp_1D_index + 1][1].caption(data)
-
-
-                local photo_i = view:get_controller():get_photo_index()
-                local style_i = view:get_controller():get_style_index()
-
-                --recalculate the relative index
-                --in case the user moved while it was loading
-                local rel_i = -1*( index + 1 - photo_i )
-                
-                --self:LoadImage(site,view.on_screen_list,updated_index)
-                print("getting image",site)
-                if site ~= "" then
-                    local image = Image{
-                        name      = "slide",
-                        src       = site, 
-                        async     = true, 
-                        on_loaded = function(img,failed)
-                            img.on_loaded = nil
-
-                            if failed then
-                                --loaded the placeholder for failed pics
-                                local placeholder = Group{}
-                                placeholder:add(Rectangle
-                                {
-                                    name   = "backing",
-                                    color  = "000000",
-                                    width  = PIC_W,
-                                    height = PIC_H 
-                                })
-
-                                placeholder:add(Clone
-                                {
-                                    name   = "slide",
-                                    source = backup,
-                                    x      = 50,
-                                    y      = 50
-                                })
-                                on_screen_prep[view.styles[style_i] ](placeholder,group)
-                            else
-                                --view.on_screen_list[rel_i] = Group {z = 500}
-                                timeline:stop()
-                                group:clear()
-                                on_screen_prep[view.styles[style_i] ](img,group)
-                                --if its the desk/slideshow, then need to
-                                --put it at the bottom of the stack
-                            end
-                            if group == view.on_screen_list[1] then
-                                group.opacity = 255
-                            end
-                        end
-                    } 
-                else
-                    print("url loading failed")
-                    local style_i2 = view:get_controller():get_style_index()
-                    --loaded the placeholder for failed pics
-                    local placeholder = Group{}
-                    placeholder:add(Rectangle
-                    {
-                        name   = "backing",
-                        color  = "000000",
-                        width  = PIC_W,
-                        height = PIC_H 
-                    })
-
-                    placeholder:add(Clone
-                    {
-                        name   = "slide",
-                        source = backup,
-                        x      = 100,
-                        y      = 100
-                    })
-                    on_screen_prep[view.styles[style_i2] ](placeholder,group)
-                    if group == view.on_screen_list[1] then
-                        group.opacity = 255
-                    end
-                end
-            end
-        }
-        request:send()
---]]
     end
+
     function view:toggle_timer()    
         if view.timer_is_running then
 print("toggle off")
             view.timer:stop()
             view.timer_is_running = false
+			pause:raise_to_top()
+			pause.opacity=255
+			pause.scale = {.1,.1}
+			pause:animate{duration=1000,scale={2,2},opacity = 0}
         else
 print("toggle on")
             view.timer:start()
             view.timer_is_running = true
+			play:raise_to_top()
+			play.opacity=255
+			play.scale = {.1,.1}
+			play:animate{duration=1000,scale={2,2},opacity = 0}
         end
         reset_keys()            
     end  
@@ -2108,16 +1796,7 @@ print("toggle on")
 		end
 		t:start()
 
---[[
-        view.nav_group:animate
-        { 
-            duration = 200,
-            opacity  = 0,
-            on_completed = function()
-                reset_keys()
-            end
-        }
---]]
+
     end
     view.prev_i = -1
 
@@ -2131,13 +1810,7 @@ print("toggle on")
             print("\n\nShowing SlideshowView UI")
             view.ui:raise_to_top()
             view.ui.opacity = 255
-            for i = 1 , #view.nav_items do
-                if menu_i == i then
-                    view.nav_items[i].color = "FF0000"
-                else
-                    view.nav_items[i].color = "000000"                    
-                end
-            end
+
             --if moving backwards
             if photo_i - view.prev_i < 0 then
                 if #view.on_screen_list > 1 then
@@ -2168,20 +1841,21 @@ print("toggle on")
 
                     pic:complete_animation()
                 
-                    backward_animation[view.styles[style_i]](pic)
+                    backward_animation[ view.styles[style_i] ](pic)
                 else
                     print("on screen is 0")
+					reset_keys()
                 end
             --if moving forwards
             elseif photo_i - view.prev_i > 0 then
                 if #view.off_screen_list > 0 then
-                   print("moving forward")
-                   --grab the picture
+					print("moving forward")
+					--grab the picture
 
-                   local pic = table.remove( view.off_screen_list,1 )
-                   table.insert( view.on_screen_list,  1, pic )
-                   local license = table.remove( view.license_off,1 )
-                   table.insert( view.license_on,  1, license )
+					local pic = table.remove( view.off_screen_list,1 )
+					table.insert( view.on_screen_list,  1, pic )
+					local license = table.remove( view.license_off,1 )
+					table.insert( view.license_on,  1, license )
 					if view.license_on[2] ~= nil then
 						view.license_on[2]:unparent()
 					end
@@ -2190,7 +1864,7 @@ print("toggle on")
 						license_box:raise_to_top()
 
 					end
-                   if #view.on_screen_list > 5 then
+					if #view.on_screen_list > 5 then
                        print("removing from on_screen list")
             
                        if view.on_screen_list[#view.on_screen_list] ~= nil and
@@ -2210,10 +1884,11 @@ print("toggle on")
                    pic:complete_animation()
                    pic.opacity = 255
 
-                   forward_animation[view.styles[style_i]](pic)
+                   forward_animation[ view.styles[style_i] ](pic)
 
                 else
                     print("off screen is 0")
+					reset_keys()
                 end
             else
                 print("diff is 0?\tphoto_i:",photo_i,"prev_i",view.prev_i)
