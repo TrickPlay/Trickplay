@@ -104,9 +104,9 @@ FrontPageView = Class(View, function(view, model, ...)
 	fp_selector = Group{name="selector"}
 	local selectorImg = Image {name="img",src = "assets/poloroid.png" }
 	local selector_title = Text{name="title",font = "DejaVu Sans ExtraLight 18px",
-			y = 585,color = "000000",text = "",ellipsize="END",x=30,clip={0,0,540,50}}
+			y = 585,color = "000000",text = "",x=30,ellipsize="END",alignment="RIGHT",w=PIC_W,clip={0,0,540,50}}
 	local selector_auth = Text{name="auth",font = "DejaVu Sans ExtraLight 18px",
-			y = 610,color = "000000",text = "",ellipsize="END",x=30,clip={0,0,540,50}}
+			y = 610,color = "000000",text = "",alignment="RIGHT",w=PIC_W,x=30,clip={0,0,540,50},ellipsize="END"}
 
 	fp_selector:add(selectorImg,selector_title,selector_auth)
 	view.ui:add(fp_selector)
@@ -159,7 +159,7 @@ FrontPageView = Class(View, function(view, model, ...)
 			selector_auth.x=30
 		end
 		local prev_old_y  = view.previous.y
-		local prev_targ_y = PIC_H * (prev_i[1]-1)+10 
+		local prev_targ_y = PIC_H * (prev_i[1]-1)
 
 		local curr_old_y = view.current.y
 		local curr_targ_y = view.current.y
@@ -465,7 +465,7 @@ local foto,lic_tit, lic_auth
 				if lic_tit == model.fp_slots[rand_i[1] ][rand_i[2] ].extra.lic_tit then
 					foto,lic_tit, lic_auth = sources[formula]:get_photos_at(rand_photo+1,true)
 	end
-                    LoadImg(foto,model.fp_slots[rand_i[1] ][rand_i[2] ],lic_tit,lic_auth)
+                    LoadImg(foto,model.fp_slots[rand_i[1] ][rand_i[2] ],lic_tit,lic_auth,rand_photo)
                 else
                     print("not calling")
                 end

@@ -137,7 +137,8 @@ Model = Class(function(model, ...)
     function model:set_active_component(comp)
        if type(comp) ~= "number" then
           error("Component " .. tostring(comp) .. " is not a number", 2)
-       elseif comp < Components.COMPONENTS_FIRST or Components.COMPONENTS_LAST < comp then
+       elseif comp < Components.COMPONENTS_FIRST or 
+              Components.COMPONENTS_LAST < comp then
           error("Component " .. comp .. " does not exist", 2)
        end
        self.previous_component = self.active_component

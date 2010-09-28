@@ -1,5 +1,3 @@
-slideshow_styles = {"Photo","Layer"}
-style = 1
 Directions = {
    RIGHT = { 1, 0},
    LEFT  = {-1, 0},
@@ -8,16 +6,9 @@ Directions = {
 }
 NUM_ROWS       = 2
 NUM_VIS_COLS   = 3
-PADDING_BORDER = 0
-PADDING_MIDDLE = 0
 
-PIC_DIR = "assets/thumbnails/"
-
-PIC_H = (screen.height/NUM_ROWS)-- - 10
-PIC_W = PIC_H--(screen.width/(NUM_VIS_COLS+1)) 
-SEL_W = PIC_W*1.1
-SEL_H = PIC_H*1.1
-
+PIC_H = (screen.height/NUM_ROWS)
+PIC_W = PIC_H
 
 
 

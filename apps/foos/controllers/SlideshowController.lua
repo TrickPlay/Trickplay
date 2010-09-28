@@ -18,14 +18,15 @@ SlideshowController = Class(Controller, function(self, view, ...)
     function self:get_menu_index()    return menu_index   end
     local menu_is_visible = false
 
-    function self:Prep_Slideshow()
-        photo_index = 0
+    function self:Prep_Slideshow(i)
+        photo_index = i
+view.prev_i = i
 --[[
         view.queryText.text = string.gsub(
             adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,"%%20"," ")
         view.logo.src  = adapters[#adapters - model.fp_1D_index + 1].logoUrl
 --]]
-        view.nav_group:add(view.logo)
+        --view.nav_group:add(view.logo)
         view.set_ui[ view.styles[style_index] ]()
 
         menu_index = 1
@@ -34,6 +35,13 @@ SlideshowController = Class(Controller, function(self, view, ...)
         for i = 1,5 do
             view:preload_front()
         end
+		local upper = i
+		if i > 4 then
+			upper = 4
+		end
+		for i = 1, upper do
+			view:preload_back()
+		end
     end
 
 --[=[
@@ -108,16 +116,16 @@ SlideshowController = Class(Controller, function(self, view, ...)
     {
         --CLOSE THE NAV MENU
         function()
-            view.set_ui[ view.styles[1] ]()
-            view:pick(1,style_index)
-            style_index = 1
-            
+            if view.set_ui[ view.styles[1] ]() then
+    	        view:pick(1,style_index)
+	            style_index = 1
+            end
         end,
         function()
-            view.set_ui[ view.styles[2] ]()
-            view:pick(2,style_index)
-            style_index = 2
-
+            if view.set_ui[ view.styles[2] ]() then
+    	        view:pick(2,style_index)
+	            style_index = 2
+			end
         end,
         function()
             menu_index = 1
