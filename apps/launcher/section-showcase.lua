@@ -39,7 +39,7 @@ function( section )
         
 --        table.insert( section_items , item1  )
 
-        local image = assets( "assets/showcase-mountain-dew.png" )
+        local image = assets( "showcase/dropdown.png" )
             
         table.insert( section_items , image )
         
