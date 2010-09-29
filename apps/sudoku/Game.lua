@@ -1,4 +1,11 @@
-math.randomseed(os.time())
+local TILE_WIDTH  = 100
+local TILE_GUTTER = 10
+local SET_GUTTER  = 20
+local TOP_GAP     = (TILE_WIDTH*9 + TILE_GUTTER*6 + SET_GUTTER*2)/2
+assert(TOP_GAP >= SET_GUTTER, "flawed #defines for the board..." )
+
+
+
 function BoardGen(number_of_givens)
     assert(number_of_givens <= 60, "in BoardGen, number_of_givens is too large")
     assert(number_of_givens >= 25, "in BoardGen, number_of_givens is too small")
@@ -123,7 +130,70 @@ function BoardGen(number_of_givens)
     return base
 end
 
+function DevelopBoard(group,givens)
+	local t
+	---------------------------------
+	for r = 1,9 do     for c = 1,9 do
+	---------------------------------
+		
+
+		if givens[r][c] ~= 0 then
+			t = Text
+			{
+				name = "Given "..r.." "..c,
+				text = givens[r][c],
+				font = "Sans 36px",
+			}
+			t.anchor_point={t.w/2,t.h/2}
+			t.x = (c-1)*TILE_WIDTH + 
+				math.floor(c/3)*SET_GUTTER +
+				(c%3)*TILE_GUTTER
+			t.y = (r-1)*TILE_WIDTH + 
+				math.floor(r/3)*SET_GUTTER +
+				(r%3)*TILE_GUTTER
+			group:add(t)
+		else
+			
+		end
+
+	---------------------------------
+	end	           end
+	---------------------------------
+
+end
+
+Game = Class(function(g,number_of_givens, ...)
+	local givens = BoardGen(number_of_givens)
+	local guesses = 
+	{
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}},
+		{{},{},{},{},{},{},{},{},{}}
+	}
+	g.board = Group{}
+	DevelopBoard(g.board,givens)
+	function g:add_guess(r,c,guess)
+		if givens[r][c] ~= 0 then
+			table.insert(guesses[r][c],guess)
+			return true
+		else
+			return false
+		end
+	end
+end)
+
+
+--[[
+will print a board
 local t = BoardGen(25)
 for i = 1, #t do
     print(t[i][1],t[i][2],t[i][3],t[i][4],t[i][5],t[i][6],t[i][7],t[i][8],t[i][9])
 end
+
+--]]
