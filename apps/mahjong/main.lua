@@ -22,9 +22,15 @@ GridPositions = {}
 for i = 1,15 do
     GridPositions[i] = {}
     for j = 1,8 do
-        GridPositions[i][j] = {94*i, 118*j}
+        GridPositions[i][j] = {}
+        for k = 1,4 do
+            GridPositions[i][j][k] = {94*(i-1) - (k-1)*16, 118*(j-1) - (k-1)*20}
+        end
     end
 end
+GridPositions.TOP = Utils.deepcopy(GridPositions[7][4][4])
+GridPositions.TOP[1] = GridPositions.TOP[1] + 40
+GridPositions.TOP[2] = GridPositions.TOP[2] + 40
 
 -- Animation loop initialization
 gameloop = GameLoop()

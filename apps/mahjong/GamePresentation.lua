@@ -20,9 +20,11 @@ function(pres, ctrl)
     }
 
     local focus = nil
+
+    local grid_group = Group{position = {440, 60}}
     
     ui = Group()
-    ui:add(background)
+    ui:add(background, grid_group)
 
     screen:add(ui)
 
@@ -48,12 +50,34 @@ function(pres, ctrl)
 
     function pres:display_ui()
         local grid = ctrl:get_grid()
-        for i = 2,13 do
-            for j = 1,8 do
-                grid[i][j].group.position = Utils.deepcopy(GridPositions[i][j])
-                screen:add(grid[i][j].group)
+        -- left edge
+        grid[1][4][1].group.position = Utils.deepcopy(GridPositions[1][4][1])
+        grid[1][4][1].group.y = grid[1][4][1].group.y + 40
+        grid_group:add(grid[1][4][1].group)
+        -- everything in the middle
+        for k = 1,4 do
+            for i = 2,13 do
+                for j = 1,8 do
+                    if grid[i][j][k] then
+                        grid[i][j][k].group.position =
+                            Utils.deepcopy(GridPositions[i][j][k])
+                        grid_group:add(grid[i][j][k].group)
+                    end
+                end
             end
         end
+        -- right edge
+        grid[14][4][1].group.position = Utils.deepcopy(GridPositions[14][4][1])
+        grid[14][4][1].group.y = grid[14][4][1].group.y + 40
+        grid[15][4][1].group.position = Utils.deepcopy(GridPositions[15][4][1])
+        grid[15][4][1].group.y = grid[15][4][1].group.y + 40
+        -- top
+        grid[7][4][5].group.position = Utils.deepcopy(GridPositions.TOP)
+        grid_group:add(
+            grid[14][4][1].group,
+            grid[15][4][1].group,
+            grid[7][4][5].group
+        )
 
         screen:show()
     end

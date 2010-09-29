@@ -16,7 +16,7 @@ function Utils.deepcopy(t)
     local res = {}
     for k,v in pairs(t) do
         if type(v) == 'table' then
-            v = deepcopy(v)
+            v = Utils.deepcopy(v)
         end
         res[k] = v
     end
