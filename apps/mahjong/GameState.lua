@@ -84,6 +84,12 @@ GameState = Class(nil,function(state, ctrl)
             end
         end
 
+        for i = 2,13 do
+            for j = 1,8 do
+                grid[i][j] = Tile()
+            end
+        end
+
     end
 
 

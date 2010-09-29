@@ -47,8 +47,14 @@ function(pres, ctrl)
 
 
     function pres:display_ui()
+        local grid = ctrl:get_grid()
+        for i = 2,13 do
+            for j = 1,8 do
+                grid[i][j].group.position = Utils.deepcopy(GridPositions[i][j])
+                screen:add(grid[i][j].group)
+            end
+        end
 
-        -- show focus
         screen:show()
     end
 
@@ -58,12 +64,6 @@ function(pres, ctrl)
 
     function pres:update(event)
         if not event:is_a(NotifyEvent) then return end
-
-        if not ctrl:is_active_component() and focus then
-            focus.opacity = 0
-        elseif focus then
-            focus.opacity = 255
-        end
     end
 
     function pres:move_focus()
