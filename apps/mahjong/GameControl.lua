@@ -49,8 +49,8 @@ function(ctrl, router, ...)
     function ctrl:initialize_game(args)
 
         state:initialize(args)
-        pres:display_ui()
         state:build_mahjong()
+        pres:display_ui()
 --        state:build_test()
         grid = state:get_grid()
 
@@ -61,8 +61,6 @@ function(ctrl, router, ...)
         router:notify()
 
         ctrl:set_selector({x = 1, y = 1})
-        set_score(0)
-        set_moves(0)
         prev_selector = nil
         state:reset()
         pres:reset()

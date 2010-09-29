@@ -22,7 +22,7 @@ GridPositions = {}
 for i = 1,15 do
     GridPositions[i] = {}
     for j = 1,8 do
-        GridPositions[i][j] = {30*i, 50*j}
+        GridPositions[i][j] = {94*i, 118*j}
     end
 end
 
