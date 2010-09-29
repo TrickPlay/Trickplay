@@ -56,6 +56,7 @@ extern int luaopen_json( lua_State * L );
 extern int luaopen_socket( lua_State * L );
 
 extern int luaopen_uri( lua_State * L );
+extern int luaopen_physics_module( lua_State * L );
 
 #ifdef TP_UPNP_CLIENT
 extern int luaopen_upnp( lua_State * L );
@@ -718,6 +719,7 @@ int App::run( const StringSet & allowed_names )
     luaopen_socket( L );
     luaopen_url_request( L );
     luaopen_uri( L );
+    luaopen_physics_module( L );
 
 #ifdef TP_UPNP_CLIENT
     luaopen_upnp( L );
