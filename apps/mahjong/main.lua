@@ -19,12 +19,12 @@ dofile("EventHandling.lua")
 
 
 GridPositions = {}
-for i = 1,15 do
+for i = 1,30 do
     GridPositions[i] = {}
-    for j = 1,8 do
+    for j = 1,16 do
         GridPositions[i][j] = {}
-        for k = 1,4 do
-            GridPositions[i][j][k] = {94*(i-1) - (k-1)*16, 118*(j-1) - (k-1)*20}
+        for k = 1,5 do
+            GridPositions[i][j][k] = {47*(i-1) - (k-1)*16, 59*(j-1) - (k-1)*20}
         end
     end
 end

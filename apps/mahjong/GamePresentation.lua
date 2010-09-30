@@ -19,7 +19,9 @@ function(pres, ctrl)
         "assets/tiles/TilePlasticLg.png"
     }
 
-    local focus = nil
+    local focus = Rectangle{width = 110, height = 140,
+        position = GridPositions[2][1][1]
+    }
 
     local grid_group = Group{position = {440, 60}}
     
@@ -50,14 +52,16 @@ function(pres, ctrl)
 
     function pres:display_ui()
         local grid = ctrl:get_grid()
-        -- left edge
+        -- left edgei
+        --[[
         grid[1][4][1].group.position = Utils.deepcopy(GridPositions[1][4][1])
         grid[1][4][1].group.y = grid[1][4][1].group.y + 50
         grid_group:add(grid[1][4][1].group)
+        --]]
         -- everything in the middle
-        for k = 1,4 do
-            for i = 2,13 do
-                for j = 1,8 do
+        for k = 1,5 do
+            for i = 1,30 do
+                for j = 1,16 do
                     if grid[i][j][k] then
                         grid[i][j][k].group.position =
                             Utils.deepcopy(GridPositions[i][j][k])
@@ -66,6 +70,7 @@ function(pres, ctrl)
                 end
             end
         end
+        --[[
         -- right edge
         grid[14][4][1].group.position = Utils.deepcopy(GridPositions[14][4][1])
         grid[14][4][1].group.y = grid[14][4][1].group.y + 50
@@ -78,6 +83,7 @@ function(pres, ctrl)
             grid[15][4][1].group,
             grid[7][4][5].group
         )
+        --]]
 
         -- change the tile depth mask layer opacity based on the height of the tile
         for k = 1, GRID_DEPTH do
@@ -90,6 +96,8 @@ function(pres, ctrl)
                 end
             end
         end
+
+        grid_group:add(focus)
 
         screen:show()
     end

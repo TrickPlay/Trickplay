@@ -11,7 +11,7 @@ function(ctrl, router, ...)
 
     local grid = state:get_grid()
     -- the position of the focus
-    local selector = {x = 1, y = 1}
+    local selector = {x = 2, y = 1, z = 1}
     local prev_selector = nil
 
     -- getters/setters
@@ -112,6 +112,13 @@ function(ctrl, router, ...)
     end
 
     function ctrl:move_selector(dir)
+        local x = selector.x
+        local y = selector.y
+        local z = 1
+
+        if 0 ~= dir[1] then
+        elseif 0 ~= dir[2] then
+        end
     end
 
 end)
