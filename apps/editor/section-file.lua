@@ -5,8 +5,6 @@
 return
 function( section )
 
---    dofile("editor.lua")
-
     local ui = section.ui
 
     local assets = ui.assets
@@ -65,7 +63,7 @@ local dropdown_map =
         table.insert( section_items , f_view )
         table.insert( section_items , f_quit )
         
-        for _,item in ipairs( section_items ) do
+        for _,item in pairs( section_items ) do
              function item:on_button_down(x,y,button,num_clicks)
         	  if (item.on_activate) then
 	    		item:on_focus_out()

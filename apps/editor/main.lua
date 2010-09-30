@@ -2,9 +2,9 @@ dofile("editor.lua")
 -------------------------------------------------------------------------------
 -- Build the UI
 -------------------------------------------------------------------------------
-
 local function build_ui( show_it )
 
+--[[
     -------------------------------------------------------------------------------
     -- Localized string table
     -------------------------------------------------------------------------------
@@ -104,6 +104,7 @@ local function build_ui( show_it )
         }
     }
     
+]]
     -------------------------------------------------------------------------------
     -- Position constants
     -------------------------------------------------------------------------------
@@ -169,7 +170,7 @@ local function build_ui( show_it )
             FIRST_BUTTON_Y
         }
         
-        left = left + BUTTON_X_OFFSET + section.button.w
+        left = left + BUTTON_X_OFFSET + section.button.w 
     
         section.text.position =
         {
@@ -430,6 +431,8 @@ local function build_ui( show_it )
     -- Handlers
     -------------------------------------------------------------------------------
         
+    
+
     local key_map =
     {
 
@@ -440,6 +443,24 @@ local function build_ui( show_it )
         [ keys.s	] = function() animate_out_dropdown() Editor().save() mouse_mode = S_SELECT end,
         [ keys.t	] = function() animate_out_dropdown() Editor().text() mouse_mode = S_SELECT end,
         [ keys.i	] = function() animate_out_dropdown() Editor().image() mouse_mode = S_SELECT end,
+        [ keys.p	] = function() animate_out_dropdown()--[[ if (current_inspector ~= nil) then 
+								   screen:remove(inspector)
+                						   current_inspector = nil
+                						   editor.n_selected(v)
+                						   screen.grab_key_focus(screen)
+							      else 
+								   editor.inspector(v)
+							      end 
+								]]
+							      end,
+        [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
+								   menu_hide = false 
+        							   ui.bar:show()
+								   ui.button_focus:show()
+        							   ui:animate_in() 
+							      else 
+								   menu_hide = true 
+							      end end,
         [ keys.q	] = function() exit() end,
         [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
         [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
@@ -542,15 +563,15 @@ local function build_ui( show_it )
 
       function screen:on_motion(x,y)
           print("on_motion() results : ",x,y)
---[[
-    if( y > ui.bar_background.h ) then
-		ui:hide()
-    else 
-	ui.button_focus:show()
-        ui.bar:show()
-        ui:animate_in()
-    end 
-]]
+	  if (menu_hide == true ) then
+    	  if( y > ui.bar_background.h) then 
+		     ui:hide()
+    	  else 
+		ui.button_focus:show()
+        	ui.bar:show()
+        	ui:animate_in()
+    	  end 
+	  end
           if dragging then
                local actor , dx , dy = unpack( dragging )
                actor.position = { x - dx , y - dy  }
@@ -693,6 +714,7 @@ end
 
 function main()
 
+    screen:add(BG_IMAGE)
     screen:show()
     screen.reactive=true
     ui = build_ui(true)
