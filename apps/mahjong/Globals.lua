@@ -12,6 +12,10 @@ if not ASSERTIONS_ENABLED then
    end
 end
 
+GRID_HEIGHT = 8     -- y value range
+GRID_WIDTH = 15     -- x value range
+GRID_DEPTH = 5      -- z value range
+
 Directions = {
    RIGHT = {1,0},
    LEFT = {-1,0},
@@ -38,9 +42,6 @@ Colors={
    FOCUS_RED                    ="602020"
 }
 
-PLAYER_NAME_FONT = "KacstArt 28px"
-PLAYER_ACTION_FONT = "KacstArt 40px"
-
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"
 CUSTOMIZE_TINIER_FONT = "KacstArt 20px"
 CUSTOMIZE_TAB_FONT  = "KacstArt 48px"
@@ -56,9 +57,6 @@ MENU_FONT_BOLD_BIG = "DejaVu Sans Bold 38px"
 
 DEFAULT_FONT = "DejaVu Serif 40px"
 DEFAULT_COLOR = Colors.WHITE
-
-SUITED = 1
-UNSUITED = 2
 
 DIALOG_DISPLAY_TIME = 1000
 CHANGE_VIEW_TIME = 500

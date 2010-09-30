@@ -52,7 +52,7 @@ function(pres, ctrl)
         local grid = ctrl:get_grid()
         -- left edge
         grid[1][4][1].group.position = Utils.deepcopy(GridPositions[1][4][1])
-        grid[1][4][1].group.y = grid[1][4][1].group.y + 40
+        grid[1][4][1].group.y = grid[1][4][1].group.y + 50
         grid_group:add(grid[1][4][1].group)
         -- everything in the middle
         for k = 1,4 do
@@ -68,9 +68,9 @@ function(pres, ctrl)
         end
         -- right edge
         grid[14][4][1].group.position = Utils.deepcopy(GridPositions[14][4][1])
-        grid[14][4][1].group.y = grid[14][4][1].group.y + 40
+        grid[14][4][1].group.y = grid[14][4][1].group.y + 50
         grid[15][4][1].group.position = Utils.deepcopy(GridPositions[15][4][1])
-        grid[15][4][1].group.y = grid[15][4][1].group.y + 40
+        grid[15][4][1].group.y = grid[15][4][1].group.y + 50
         -- top
         grid[7][4][5].group.position = Utils.deepcopy(GridPositions.TOP)
         grid_group:add(
@@ -78,6 +78,18 @@ function(pres, ctrl)
             grid[15][4][1].group,
             grid[7][4][5].group
         )
+
+        -- change the tile depth mask layer opacity based on the height of the tile
+        for k = 1, GRID_DEPTH do
+            for i = 1,GRID_WIDTH do
+                for j = 1, GRID_HEIGHT do
+                    if grid[i][j][k] then
+                        grid[i][j][k].depth.opacity = 180-180*((k-1)/4)
+                        print(grid[i][j][k].depth.opacity)
+                    end
+                end
+            end
+        end
 
         screen:show()
     end

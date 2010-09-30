@@ -64,6 +64,9 @@ for i = 1,4 do
     i = i + 1
 end
 
+local tile_depth = Image{src = "assets/tiles/TileDepthLg.png", opacity = 0}
+screen:add(tile_depth)
+
 Tile = Class(function(tile, suit, number, ...)
     assert(type(suit) == "number")
     assert(type(number) == "number")
@@ -74,11 +77,13 @@ Tile = Class(function(tile, suit, number, ...)
     tile.image = Clone{source = tiles[2]}
     if not glyphs[suit][number].parent then screen:add(glyphs[suit][number]) end
     tile.glyph = Clone{source = glyphs[suit][number]}
+    tile.depth = Clone{source = tile_depth}
+
     tile.number = number
     tile.suit = suit
 
     tile.group = Group()
-    tile.group:add(tile.image, tile.glyph)
+    tile.group:add(tile.image, tile.glyph, tile.depth)
     
 end)
 
