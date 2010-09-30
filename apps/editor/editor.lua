@@ -12,32 +12,163 @@ S_SELECT          = 0
 S_RECTANGLE       = 1
 S_MENU            = 3
 S_GROUP           = 4
+DEFAULT_COLOR     = "FFFFFFC0"
+
+-- Section index constants. These also determine their order.
+
+SECTION_FILE      = 1
+SECTION_EDIT      = 2
+SECTION_ARRANGE   = 3
+SECTION_HELP      = 4
+    
+-- Style constants
+
+BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
+    
+-- Background image 
+BG_IMAGE = Image {src = "baduk.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
 
 ---------------------
 -- Variables
 ---------------------
 dragging          = nil
+menu_hide 	  = false
+popup_hide 	  = false
 mouse_mode        = S_SELECT
 mouse_state       = BUTTON_UP
+current_inspector = nil
 
----------------------
--- Local 
----------------------
 local g = Group()
 local contents    = ""
 local item_num    = 0
 
+-- localized string table
+
+strings = dofile( "localized:strings.lua" ) or {}
+function missing_localized_string( t , s )
+	rawset(t,s,s) 
+	return s
+end
+
+setmetatable( strings , { __index = missing_localized_string } )
+
+
+-- The asset cache
+assets = dofile( "assets-cache" )
+
+ui =
+    {
+        assets              = assets,
+        factory             = dofile( "ui-factory" ),
+        fs_focus            = nil,
+        bar                 = Group {},
+        bar_background      = assets( "assets/menu-background.png" ),
+        button_focus        = assets( "assets/button-focus.png" ),
+        search_button       = assets( "assets/button-search.png" ),
+        search_focus        = assets( "assets/button-search-focus.png" ),
+        logo                = assets( "assets/logo.png" ),
+
+        sections =
+        {
+            [SECTION_FILE] =
+            {
+                button  = assets( "assets/button-red.png" ),
+                text    = Text  { text = strings[ "  FILE " ] }:set( BUTTON_TEXT_STYLE ),
+                color   = { 120 ,  21 ,  21 , 230 }, -- RED
+                height  = 370,
+                init    = dofile( "section-file" )
+            },
+
+            [SECTION_EDIT] =
+            {
+                button  = assets( "assets/button-green.png" ),
+                text    = Text  { text = strings[ "  EDIT  " ] }:set( BUTTON_TEXT_STYLE ),
+                color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
+                height  = 500,
+                init    = dofile( "section-edit" )
+            },
+
+            [SECTION_ARRANGE] =
+            {
+                button  = assets( "assets/button-yellow.png" ),
+                text    = Text  { text = strings[ "  ARRANGE" ] }:set( BUTTON_TEXT_STYLE ),
+                color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
+                height  = 300,
+                init    = dofile( "section-arrange" )
+            },
+  	   [SECTION_HELP] =
+            {
+                button  = assets( "assets/button-blue.png" ),
+                text    = Text  { text = strings[ "  HELP" ] }:set( BUTTON_TEXT_STYLE ),
+                color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
+                height  = 200,
+                init    = dofile( "section-help" )
+            }
+        }
+    }
+
+local factory = ui.factory
 -----------
 -- Utils 
 -----------
 
-function abs(a)
-    if(a>0) then
-        return a
-    else
-        return -a
-    end
-end
+function abs(a) if(a>0) then return a else return -a end end
+function make_attr_t(v)        
+
+local attr_t =  
+      {
+	     {"title", "INSPECTOR : "..string.upper(v.type)},
+     	     {"caption", "OBJECT NAME"},
+ 	     {"name", v.name},
+	     {"line",""},
+	     {"x", v.x},
+	     {"y", v.y},
+	     {"z", v.z},
+	     {"w", v.w},
+	     {"h", v.h},
+	     {"line",""}
+      }
+      if (v.type == "Text") then 
+	table.insert(attr_t, {"color", v.color})
+	table.insert(attr_t, {"font ", v.font})
+	table.insert(attr_t, {"line",""})
+	table.insert(attr_t, {"caption", "TEXT"})
+	table.insert(attr_t, {"text", v.text})
+	table.insert(attr_t, {"line",""})
+	table.insert(attr_t, {"editable", v.editable})
+	table.insert(attr_t, {"wants_enter", v.wants_enter})
+	table.insert(attr_t, {"line",""})
+	table.insert(attr_t, {"wrap", v.wrap})
+	table.insert(attr_t, {"wrap_mode", v.wrap_mode})
+	table.insert(attr_t, {"line",""})
+      elseif (v.type  == "Rectangle") then
+	--table.insert(attr_t, {"caption", "FILL COLOR"})
+	table.insert(attr_t, {"fill_color  ", v.color})
+	--table.insert(attr_t, {"caption", "BORDER COLOR"})
+        table.insert(attr_t, {"border_color", v.border_color})
+        table.insert(attr_t, {"border_width", v.border_width})
+	table.insert(attr_t, {"line",""})
+      elseif (v.type  == "Image") then
+	table.insert(attr_t, {"caption", "SOURCE LOCATION"})
+	table.insert(attr_t, {"src", v.src})
+	table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"base_size", v.base_size})
+        table.insert(attr_t, {"async    ", v.async})
+        table.insert(attr_t, {"loaded   ", v.loaded})
+	table.insert(attr_t, {"line",""})
+      end 
+      table.insert(attr_t, {"opacity", v.opacity})
+      table.insert(attr_t, {"line",""})
+      --table.insert(attr_t, {"rotation", v.rotation})
+      --table.insert(attr_t, {"line",""})
+      --table.insert(attr_t, {"anchor_point", v.anchor_point})
+      --table.insert(attr_t, {"line",""})
+      table.insert(attr_t, {"button", "VIEW CODE"})
+      table.insert(attr_t, {"button", "APPLY"})
+      table.insert(attr_t, {"button", "CANCEL"})
+
+      return attr_t
+end 
 
 function itemTostring(v)
     local itm_str = ""
@@ -62,6 +193,10 @@ function itemTostring(v)
          "async="..tostring(v.async)..","..indent..
 	 "loaded="..tostring(v.loaded)..b_indent.."}\n\n"
     elseif (v.type == "Text") then 
+    	 if (v.extra.name == "MediaPlayer") then 
+	 	itm_str = "mediaplayer:load(\""..v.extra.source.."\")\n"..
+		   "mediaplayer.on_loaded = function( self ) self:play() end"
+	 else 
     	 itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
 	 "text=\""..v.text.."\","..indent..
@@ -73,7 +208,8 @@ function itemTostring(v)
          "reactive="..tostring(v.reactive)..","..indent..
          "wants_enter="..tostring(v.wants_enter)..","..indent..
 	 "wrap="..tostring(v.wrap)..b_indent.."}\n\n"
-    end 
+ 	 end 
+    end
     return itm_str
 end
 
@@ -89,6 +225,26 @@ function getObjnames()
     end
     return obj_names
 end
+
+function create_on_button_down_f(v) 
+	function v:on_button_down(x,y,button,num_clicks)
+               print (v.type, " button down ")
+               if(button == 2 or num_clicks >= 2) then
+                    if(v.type ~= "Group") then 
+                         Editor().inspector(v)
+		    end 
+                    return true;
+               end
+               dragging = {v, x - v.x, y - v.y }
+               return true;
+          end
+          function v:on_button_up(x,y,button,num_clicks)
+               print ("rect button up ")
+               dragging = nil
+               return true;
+          end
+end 
+
 
 --------------------------------
 -- Screen Command Line Inputs 
@@ -154,20 +310,7 @@ function inputScreen_openfile()
      item_num = table.getn(g.children)
      for i, v in pairs(g.children) do
           v.reactive = true;
-          function v:on_button_down(x,y,button,num_clicks)
-               print ("rect button down ")
-               if(button == 2 or num_clicks >= 2) then
-                    editor.inspector(v) 
-                    return true;
-               end
-               dragging = {v, x - v.x, y - v.y }
-               return true;
-          end
-          function v:on_button_up(x,y,button,num_clicks)
-               print ("rect button up ")
-               dragging = nil
-               return true;
-          end
+	  create_on_button_down_f(v)
      end --for
 
      screen:add(g)
@@ -188,6 +331,29 @@ function inputScreen_yn()
           cleanText("input")
      end
 end
+
+function inputScreen_openvideo()
+     print(input_t.text)
+     mediaplayer:load(input_t.text)
+     --mediaplayer:set_viewport_geometry(100, 100, 500, 500)
+     mp_t = Text{name = "mediaplayer", extra = {name = "MediaPlayer", source = input_t.text}}
+     g:add(mp_t)
+     cleanText()
+     cleanText("input")
+
+end 
+
+function inputScreen_openimage()
+     ui.image= Image { name="img"..tostring(item_num),
+     src = input_t.text, opacity = 255 , position = {200,200}}
+     ui.image.reactive = true;
+     create_on_button_down_f(ui.image)
+     g:add(ui.image)
+     screen:add(g)
+     cleanText()
+     cleanText("input")
+     item_num = item_num + 1
+end 
 
 local input_purpose     = ""
 
@@ -212,23 +378,13 @@ function inputScreen(a)
               elseif (input_purpose == "yn") then inputScreen_yn()
               elseif (input_purpose == "openfile") then inputScreen_openfile()
               elseif (input_purpose == "reopenfile") then cleanText("err_msg") inputScreen_openfile()
-              elseif (input_purpose == "open_mediafile") then  
-		   mediaplayer:load(input_t.text) 
-	           cleanText()
-		   cleanText("input")
-              elseif (input_purpose == "open_imagefile") then  
-		   ui.image= Image { name="img"..tostring(item_num),
-		   src = input_t.text, opacity = 255 , position = {200,200}} g:add(ui.image)
-        	   screen:add(g)
-     		   cleanText()
-     		   cleanText("input")
-		   item_num = item_num + 1
+              elseif (input_purpose == "open_mediafile") then inputScreen_openvideo() 
+              elseif (input_purpose == "open_imagefile") then  inputScreen_openimage()
               elseif (input_purpose == "inspector") then inspector_commit(v, input_t.text) 
-              end --elseif
-          end --if
-     end --input_t:on_key_down(key)
-
-end --inputScreen()
+              end 
+          end 
+     end 
+end 
 --[[
 function inspector_commit(v, cmd)
 
@@ -236,7 +392,6 @@ cmd = name="rect99", size={100,100}, color = "FFFFFF"
 local  = 
        local i, j, attr 
        i, j =  string.find(cmd, "=")
-       
        attr = string.sub(cmd, i,j)	
         
 end 
@@ -273,22 +428,158 @@ function Editor()
         item_num = 0
         current_filename = ""
         screen.grab_key_focus(screen)
-     end  --editor.close()
+     end 
+
+     function editor.selected(obj)
+        for i, v in pairs(g.children) do
+             if g:find_child(v.name) then
+		  if (obj.name ~= v.name) then 
+                       g:find_child(v.name):set{opacity = 100}
+		  end 
+             end
+        end
+     end  
+
+     function editor.n_selected(obj)
+        for i, v in pairs(g.children) do
+             if g:find_child(v.name) then
+                  g:find_child(v.name):set{opacity = 255}
+             end
+        end
+     end  
 
      function editor.open()
         editor.close()
         printScreen("File Name : ")
         inputScreen("openfile")
-     end -- editor.open()
+     end 
 
-     function editor.inspector(v)
---[[
-	local itm_str = itemTostring(v)
-	printScreen(item_str) 
-        printScreen("::> ")
-	inputScreen("inspector")
-]]
-     end -- editor.inspector()
+     function editor.inspector(v) -- build_inspector_ui()
+
+	local WIDTH = 450 
+	local INSPECTOR_OFFSET = 30 
+        local TOP_PADDING = 12
+        local BOTTOM_PADDING = 12
+
+        local items_height = 0
+	local space = 0
+	local used = 0
+
+	if(current_inspector ~= nil) then 
+		return 
+        end 
+
+        editor.selected(v)
+
+	local attr_t = make_attr_t(v)
+	local inspector_items = {}
+	local inspector_bg = factory.make_popup_bg(v.type)
+	local inspector_xbox = factory.make_xbox()
+
+	local inspector = Group {
+	     position ={ v.x + v.w + INSPECTOR_OFFSET , v.y },
+	     anchor_point = {0,0},--{ inspector_bg.w / 2 , 0 },
+             children =
+             {
+               inspector_bg, 
+	       inspector_xbox:set{position = {465, 40}}
+             }
+	}
+
+
+	if(inspector.y - INSPECTOR_OFFSET  <= ui.bar_background.h) then
+                inspector.y = ui.bar_background.h + INSPECTOR_OFFSET
+        elseif (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h ) then
+                inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
+        end 
+        if (inspector.x + inspector.w + INSPECTOR_OFFSET >= screen.w ) then
+                inspector.x = v.x - inspector.w - INSPECTOR_OFFSET
+        end 
+	local attr_i, attr_n, attr_v
+	local i = 0
+	for i=1,35 do 
+             if (attr_t[i] == nil) then
+		  break
+	     end 
+	     attr_n = attr_t[i][1] 
+	     attr_i = attr_t[i][2] 
+
+	     if(type(attr_i) == table ) then
+	          attr_v = table.concat(attr_i,",")
+             else
+                  attr_v = tostring(attr_i)
+             end 
+
+	     print("attr_n",attr_n)
+	     print("attr_v",attr_v)
+
+	    local item = factory.make_text_popup_item(assets, attr_n, attr_v) 
+	    if(attr_n ~= "title" and attr_n ~= "line" and attr_n ~=  "caption") then 
+	    	table.insert(inspector_items, item)
+
+	         function item:on_button_down(x,y,button,num_clicks)
+                 if (item.on_activate) then
+                     item:on_activate()
+                 end
+                 end
+
+	         item.extra.on_activate = function ()  end 
+	    end 
+
+            items_height = items_height + item.h 
+
+	    if(item.w <= space) then 
+                 items_height = items_height - item.h 
+            	 item.x = used + 30
+	    else 
+                 item.x = ( inspector_bg.w - WIDTH ) / 2
+		 space = 0
+		 used = 0
+            end 
+		
+	    if(attr_n == "name" or attr_n == "text" or attr_n == "src") then 
+                 item.y = items_height - 15
+            elseif (attr_n == "line") then  
+                 item.y = items_height + 35
+	    else 
+                 item.y = items_height
+	    end
+
+	    if(space == 0) then 
+	         space = WIDTH - item.w 
+            else 
+		 space = space - item.w
+	    end
+	    used = used + item.w 
+
+	    inspector:add(item)
+        end 
+
+	screen:add(inspector)
+
+        if inspector:find_child("name") and 
+             inspector:find_child("name"):find_child("name") then
+             inspector:find_child("name"):find_child("name"):grab_key_focus()
+             inspector:find_child("name"):remove(inspector:find_child("name"):find_child("ring"))
+             inspector:find_child("name"):add(inspector:find_child("name").extra.focus)
+             inspector:find_child("name"):find_child("name"):set{cursor_visible = true, cursor_size = 3}
+        end
+
+	current_inspector = inspector
+
+        inspector.reactive = true;
+	create_on_button_down_f(inspector)
+
+        inspector_xbox.reactive = true;
+	function inspector_xbox:on_button_down(x,y,button,num_clicks)
+		screen:remove(inspector)
+		current_inspector = nil
+		editor.n_selected(v)
+                screen.grab_key_focus(screen) 
+		return true
+        end 
+
+     end
 
      function editor.view_codes()
           local codes = "local g = ... \n\n"
@@ -327,10 +618,10 @@ function Editor()
 
      end  
 
+
      function editor.rectangle(x, y)
 	
         cleanText("codes")
-	local DEFAULT_COLOR     = "FFFFFFC0"
         rect_init_x = x -- origin x
         rect_init_y = y -- origin y
         if (ui.rect ~= nil and "rect"..tostring(item_num) == ui.rect.name) then
@@ -349,20 +640,7 @@ function Editor()
         g:add(ui.rect)
         screen:add(g)
 
-        function ui.rect:on_button_down(x,y,button,num_clicks)
-             print ("rect button down ")
-             if(button == 2 or num_clicks >= 2) then
-                  editor.inspector(v) 
-                  return true;
-             end
-             dragging = {ui.rect, x - ui.rect.x, y - ui.rect.y }
-             return true;
-        end
-        function ui.rect:on_button_up(x,y,button,num_clicks)
-            print ("rect button up ")
-            dragging = nil
-            return true;
-        end
+        create_on_button_down_f(ui.rect) 
 
      end -- editor.rectangle
 
@@ -392,13 +670,12 @@ function Editor()
      end
 	
      function editor.text()
-	local DEFAULT_COLOR     = "FFFFFFC0"
 
         cleanText("codes")
         ui.text = Text{
         name="text"..tostring(item_num),
 	text = "", font= "DejaVu Sans 40px",
-     	color = "FFFFFF", position ={100, 100}, editable = true ,
+     	color = DEFAULT_COLOR, position ={100, 100}, editable = true ,
      	reactive = true, wants_enter = true, size = {150, 150},wrap=true, wrap_mode="CHAR"} 
         g:add(ui.text)
         screen:add(g)
@@ -412,6 +689,9 @@ function Editor()
 		return true
 	     end 
 	end 
+	ui.text.reactrective = true;
+	create_on_button_down_f(ui.text)
+
     end
 	
     function editor.image()
@@ -421,11 +701,12 @@ function Editor()
     end
 	
     function editor.video()
+        mediaplayer.on_loaded = function( self ) screen:remove(BG_IMAGE) self:play() end 
+	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
+
         cleanText("codes")
         printScreen("File Name : ")
         inputScreen("open_mediafile")
-	mediaplayer.on_loaded = function( self ) self:play() end
-	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
     end
 	
     function editor.clone()
