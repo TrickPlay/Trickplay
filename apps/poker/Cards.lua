@@ -27,10 +27,13 @@ function getCardImageName(card)
    return suits[card.suit.name]..card.rank.num
 end
 
+
+local card_back_image = Image{src = "assets/Card_Reverse.png", opacity = 0}
+screen:add(card_back_image)
 -- Get a group with the image of a card's front/back
 function getCardGroup(card, args, face)
    local cardImage = Image{ src="assets/cards/"..getCardImageName(card)..".png", name="front" }
-   local cardBack = Image{ src="assets/Card_Reverse.png", name="back" }
+   local cardBack = Clone{source = card_back_image, name="back" }
    local cardGroup = Group{ children={cardBack,cardImage}, name="card",extra={face = true}, anchor_point = {cardImage.w/2, cardImage.h/2} }
 
    if args and type(args) == "table" then for k, v in pairs(args) do
@@ -155,46 +158,48 @@ for _, suit in pairs(Suits) do
       table.insert(Cards, Card(rank, suit))
    end
 end
-RiggedCards = {
-   Card("ACE","HEARTS"),
-   Card("TWO","HEARTS"),
-   Card("THREE","HEARTS"),
-   Card("FOUR","HEARTS"),
-   Card("FIVE","HEARTS"),
-   Card("SIX","HEARTS"),
-   Card("SEVEN","HEARTS"),
-   Card("EIGHT","HEARTS"),
-   Card("NINE","HEARTS"),
-   Card("TEN","HEARTS"),
-   Card("JACK","HEARTS"),
-   Card("QUEEN","HEARTS"),
-   Card("KING","HEARTS"),
-   Card("ACE","DIAMONDS"),
--- Community Cards
-   Card("ACE","SPADES"),
-   Card("KING","SPADES"),
-   Card("QUEEN","SPADES"),
-   Card("JACK","SPADES"),
-   Card("TEN","SPADES"),
--- hole 6
-   Card("TWO","DIAMONDS"),
-   Card("THREE","DIAMONDS"),
--- hole 5
-   Card("FOUR","DIAMONDS"),
-   Card("FIVE","DIAMONDS"),
--- hole 4
-   Card("SIX","DIAMONDS"),
-   Card("SEVEN","DIAMONDS"),
--- hole 3
-   Card("EIGHT","DIAMONDS"),
-   Card("NINE","DIAMONDS"),
--- hole 2
-   Card("TEN","DIAMONDS"),
-   Card("JACK","DIAMONDS"),
--- hole 1
-   Card("QUEEN","DIAMONDS"),
-   Card("KING","DIAMONDS")
-}
+function get_rigged_cards()
+   return {
+      Card("ACE","HEARTS"),
+      Card("TWO","HEARTS"),
+      Card("THREE","HEARTS"),
+      Card("FOUR","HEARTS"),
+      Card("FIVE","HEARTS"),
+      Card("SIX","HEARTS"),
+      Card("SEVEN","HEARTS"),
+      Card("EIGHT","HEARTS"),
+      Card("NINE","HEARTS"),
+      Card("TEN","HEARTS"),
+      Card("JACK","HEARTS"),
+      Card("QUEEN","HEARTS"),
+      Card("KING","HEARTS"),
+      Card("ACE","DIAMONDS"),
+      -- Community Cards
+      Card("ACE","SPADES"),
+      Card("KING","SPADES"),
+      Card("QUEEN","SPADES"),
+      Card("JACK","SPADES"),
+      Card("TEN","SPADES"),
+      -- hole 6
+      Card("TWO","DIAMONDS"),
+      Card("THREE","DIAMONDS"),
+      -- hole 5
+      Card("FOUR","DIAMONDS"),
+      Card("FIVE","DIAMONDS"),
+      -- hole 4
+      Card("SIX","DIAMONDS"),
+      Card("SEVEN","DIAMONDS"),
+      -- hole 3
+      Card("EIGHT","DIAMONDS"),
+      Card("NINE","DIAMONDS"),
+      -- hole 2
+      Card("TEN","DIAMONDS"),
+      Card("JACK","DIAMONDS"),
+      -- hole 1
+      Card("QUEEN","DIAMONDS"),
+      Card("KING","DIAMONDS")
+   }
+end
 
 Deck = Class(nil,
 function(self, ...)
