@@ -32,11 +32,13 @@ file(STRINGS engine/public/include/trickplay/trickplay.h TP_MAJOR_VERSION REGEX 
 file(STRINGS engine/public/include/trickplay/trickplay.h TP_MINOR_VERSION REGEX "^#define.*TP_MINOR_VERSION.*")
 file(STRINGS engine/public/include/trickplay/trickplay.h TP_PATCH_VERSION REGEX "^#define.*TP_PATCH_VERSION.*")
 
-string(REGEX REPLACE "^#define.*TP_MAJOR_VERSION.*([0-9]+).*" "\\1" TP_MAJOR_VERSION "${TP_MAJOR_VERSION}")
-string(REGEX REPLACE "^#define.*TP_MINOR_VERSION.*([0-9]+).*" "\\1" TP_MINOR_VERSION "${TP_MINOR_VERSION}")
-string(REGEX REPLACE "^#define.*TP_PATCH_VERSION.*([0-9]+).*" "\\1" TP_PATCH_VERSION "${TP_PATCH_VERSION}")
+string(REGEX REPLACE "^#define.*TP_MAJOR_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_MAJOR_VERSION "${TP_MAJOR_VERSION}")
+string(REGEX REPLACE "^#define.*TP_MINOR_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_MINOR_VERSION "${TP_MINOR_VERSION}")
+string(REGEX REPLACE "^#define.*TP_PATCH_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_PATCH_VERSION "${TP_PATCH_VERSION}")
 
 set(TP_VERSION "${TP_MAJOR_VERSION}.${TP_MINOR_VERSION}.${TP_PATCH_VERSION}")
+
+message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION}" )
 
 #------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build
