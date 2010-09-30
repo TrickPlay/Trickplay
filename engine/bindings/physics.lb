@@ -113,6 +113,27 @@ interface Body [[ Body * ]]
 			delete self;
 		]];
 		
+	readonly UIElement source
+		[[
+			ClutterUtil::wrap_concrete_actor( L , self->actor );
+		]];
+		
+	bool awake
+		[[
+			awake = self->body->IsAwake();
+		]]
+		[[
+			self->body->SetAwake( awake );
+		]];
+		
+	bool active
+		[[
+			active = self->body->IsActive();
+		]]
+		[[
+			self->body->SetActive( active );
+		]];
+
 	readonly table position
 		[[
 			const b2Vec2 pos( self->body->GetPosition() );
@@ -323,7 +344,21 @@ global physics [[ Physx * ]]
 				fixture_def.density = lua_tonumber( L , -1 );
 			}
 			lua_pop( L , 1 );
+			
+			lua_getfield( L , properties , "awake" );
+			if ( ! lua_isnil( L , -1 ) )
+			{
+				body_def.awake = lua_toboolean( L , -1 );
+			}
+			lua_pop( L , 1 );
 				
+			lua_getfield( L , properties , "active" );
+			if ( ! lua_isnil( L , -1 ) )
+			{
+				body_def.active = lua_toboolean( L , -1 );
+			}
+			lua_pop( L , 1 );
+
 			//.................................................................
 			// Create the body
 			
