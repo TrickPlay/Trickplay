@@ -82,6 +82,8 @@ Tile = Class(function(tile, suit, number, ...)
     tile.number = number
     tile.suit = suit
 
+    tile.null = false
+
     tile.group = Group()
     tile.group:add(tile.image, tile.glyph, tile.depth)
     
@@ -104,8 +106,6 @@ Tiles = Class(function(self, ...)
     for i,v in ipairs(tiles) do
         original_order[i] = v
     end
-
-    self.null = false
 
     function self:get_tiles() return tiles end
 

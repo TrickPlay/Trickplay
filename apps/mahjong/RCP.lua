@@ -187,7 +187,7 @@ Controller = Class(Observer, function(ctrl, router, id)
             end,
         [keys.Return] =
             function()
-                ctrl:run_callback()
+                if ctrl.return_pressed then ctrl:return_pressed() end
             end
     }
 
