@@ -76,41 +76,40 @@ local function build_castle()
     screen:add( plank )
     physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
 
-    plank = make_plank( 10 )
-    plank.position = { LEFT + 10 , floor - wood.h * 1.5 - wood.w / 2 - 40 }
+    plank = make_plank( 30 )
+    plank.position = { LEFT + 20 , floor - wood.h * 1.5 - wood.w / 2 - 10 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
     
-    plank = make_plank( -10 )
-    plank.position = { LEFT + 190 , floor - wood.h * 1.5 - wood.w / 2 - 40 }
+    plank = make_plank( -30 )
+    plank.position = { LEFT + 180 , floor - wood.h * 1.5 - wood.w / 2 - 10 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
 
---[[
+
     plank = make_plank( 90 )
-    plank.position = { LEFT + 100 , floor - wood.h * 4 }
+    plank.position = { LEFT + 100 , floor - wood.h * 2.1 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
-]]
-    
---[[    
+    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+
     
     plank = make_plank()
-    plank:set{ position = { LEFT  , floor - wood.h * 4  } }
+    plank:set{ position = { LEFT  , floor - wood.h * 2.65  } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
     
     
     plank = make_plank()
-    plank:set{ position = { LEFT + 200 , floor - wood.h * 4  } }
+    plank:set{ position = { LEFT + 200 , floor - wood.h * 2.65  } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
-    
+    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+
+
     plank = make_plank( 90 )
-    plank.position = { LEFT + 100 , floor - wood.h * 5 }
+    plank.position = { LEFT + 100 , floor - wood.h * 3.2 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
-]]    
+    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+
 end
 
 -------------------------------------------------------------------------------
@@ -157,67 +156,74 @@ local spf = 1 / 60
 local n
 local ret = keys.Return
 
-function idle.on_idle( )
+function screen.on_key_down( screen , key )
+
+    if key == ret then
     
-    if sw.elapsed_seconds < spf then return end
-    
-    physics:step()    
-    sw:start()
-    
-    -- Once the crate has settled down, we can start
-    
-    if not crate.awake then
-    
-        crate.source.color = "FFFFFF"
-        
-        idle.on_idle = nil
-        
-        -- Close the top edge so stuff doesn't fly off the screen
-        
-        top_edge.active = true
-        
-        -- Attach key handler
-        
-        function screen.on_key_down( screen , key )
-        
-            if key == ret then
+        screen.on_key_down = nil
+
+        function idle.on_idle( )
             
-                local old_key_down = screen.on_key_down
+            if sw.elapsed_seconds < spf then return end
             
-                screen.on_key_down = nil
-                
-                crate.source.color = "FF0000"
+            physics:step()    
+            sw:start()
             
-                -- Give the crate a push
+            -- Once the crate has settled down, we can start
+            
+            if not crate.awake then
+            
+                crate.source.color = "FFFFFF"
                 
-                local p = crate.position
-                                
-                crate:apply_linear_impulse( 300 , 400 , p[1] , p[2] )
+                idle.on_idle = nil
                 
-                crate:apply_torque( 9000 )
+                -- Close the top edge so stuff doesn't fly off the screen
                 
-                -- Now, spin until the crate settles down again
+                top_edge.active = true
                 
-                function idle.on_idle()
+                -- Attach key handler
                 
-                    if sw.elapsed_seconds < spf then return end
-                    physics:step()
-                    sw:start()
+                function screen.on_key_down( screen , key )
                 
-                    -- When the crate is done, we change its color, and re-attach
-                    -- the key handler, so you can give it another push
+                    if key == ret then
                     
-                    if not crate.awake then
-                        crate.source.color = "FFFFFF"
-                        screen.on_key_down = old_key_down
+                        local old_key_down = screen.on_key_down
+                    
+                        screen.on_key_down = nil
+                        
+                        crate.source.color = "FF0000"
+                    
+                        -- Give the crate a push
+                        
+                        local p = crate.position
+                                        
+                        crate:apply_linear_impulse( 300 , 400 , p[1] , p[2] )
+                        
+                        crate:apply_torque( 9000 )
+                        
+                        -- Now, spin until the crate settles down again
+                        
+                        function idle.on_idle()
+                        
+                            if sw.elapsed_seconds < spf then return end
+                            physics:step()
+                            sw:start()
+                        
+                            -- When the crate is done, we change its color, and re-attach
+                            -- the key handler, so you can give it another push
+                            
+                            if not crate.awake then
+                                crate.source.color = "FFFFFF"
+                                screen.on_key_down = old_key_down
+                            end
+                            
+                        end
+                    
                     end
                     
                 end
-            
+                
             end
-            
         end
-        
     end
-
 end
