@@ -366,7 +366,7 @@ function Board:createBoard()
 				a = Group{x=50, y=795, opacity = 0}
 			end
 			a:add( AssetLoader:getImage( "NotEnoughMoney", { } ) )
-			Popup:new{group = a, fadeSpeed = 400, time=.8, opacity = 180}
+			Popup:new{group = a, fadeSpeed = 400, time=800, opacity = 180}
 			
 		end
 		
@@ -397,7 +397,7 @@ function Board:createBoard()
 								
 							else
 								
-								Popup:new{text = "You can't build on enemies!", fadeSpeed = 400, time=.8, opacity = 180}
+								Popup:new{text = "You can't build on enemies!", fadeSpeed = 400, time=800, opacity = 180}
 								
 							end
 						else
@@ -407,7 +407,7 @@ function Board:createBoard()
 				end
 			elseif SOUND then
 			
-				Popup:new{text = "You can't block the path!", fadeSpeed = 400, time=.8, opacity = 180}
+				Popup:new{text = "You can't block the path!", fadeSpeed = 400, time=800, opacity = 180}
 				mediaplayer:play_sound("themes/robot/sounds/Error.mp3")
 				
 			

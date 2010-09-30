@@ -470,6 +470,11 @@ globals
             App::get(L)->get_context()->close_app();        
         ]];
         
+    reload()
+    	[[
+    		App::get(L)->get_context()->reload_app();
+    	]];
+        
     /*    
     	Function: launch_action
     	

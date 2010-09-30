@@ -8,6 +8,8 @@
 #include "event_group.h"
 #include "debugger.h"
 
+#define APP_METADATA_FILENAME   "app"
+
 //-----------------------------------------------------------------------------
 // Forward declarations
 
