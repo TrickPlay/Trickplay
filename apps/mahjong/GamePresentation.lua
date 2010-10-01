@@ -111,6 +111,11 @@ function(pres, ctrl)
     end
 
     function pres:move_focus()
+        local selector = ctrl:get_selector()
+
+        local position = GridPositions[selector.x][selector.y][selector.z]
+        focus.x = position[1]
+        focus.y = position[2]
     end
 
     function pres:choose_focus()

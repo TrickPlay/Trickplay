@@ -51,6 +51,8 @@ function(ctrl, router, ...)
         state:initialize(args)
         state:build_mahjong()
         pres:display_ui()
+        state:set_tile_quadrants()
+        state:find_selectable_tiles()
 --        state:build_test()
         grid = state:get_grid()
 
@@ -63,8 +65,9 @@ function(ctrl, router, ...)
         ctrl:set_selector({x = 1, y = 1})
         prev_selector = nil
         state:reset()
-        pres:reset()
         state:build_mahjong()
+        pres:reset()
+        state:set_tile_quadrants()
         grid = state:get_grid()
     end
 
@@ -112,12 +115,42 @@ function(ctrl, router, ...)
     end
 
     function ctrl:move_selector(dir)
+        local selection_grid = state:get_selection_grid()
         local x = selector.x
         local y = selector.y
-        local z = 1
+        local z = selector.z
+        local new_tile = nil
 
-        if 0 ~= dir[1] then
-        elseif 0 ~= dir[2] then
+        local dist = nil
+        --arbitrarily high value
+        local closest_dist = 10000
+        for _,tile in pairs(selection_grid) do
+            dumptable(tile.position)
+            -- check against comparing tiles in the wrong direction
+            if -1 == dir[1] and tile.position[1] >= x then
+                -- dont compare
+            elseif 1 == dir[1] and tile.position[1] <= x then
+                -- dont compare
+            elseif -1 == dir[2] and tile.position[2] >= y then
+                -- dont compare
+            elseif 1 == dir[2] and tile.position[2] <= y then
+                -- dont compare
+            else
+                -- Euclidean distance measure
+                    -- check against comparing against current position
+                dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2)
+                if dist < closest_dist and dist ~= 0 then
+                    closest_dist = dist
+                    new_tile = tile
+                end
+            end
+        end
+
+        if new_tile then
+            selector.x = new_tile.position[1]
+            selector.y = new_tile.position[2]
+            selector.z = new_tile.position[3]
+            pres:move_focus()
         end
     end
 

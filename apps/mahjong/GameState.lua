@@ -29,6 +29,8 @@ GameState = Class(nil,function(state, ctrl)
     --]]
     -- the game grid
     local grid = nil
+    -- a grid containing available positions to move to
+    local selection_grid = nil
     -- all the tile objects stored in a table
     local tiles = nil
     -- the class for all the tiles with functions
@@ -44,6 +46,7 @@ GameState = Class(nil,function(state, ctrl)
 
     -- getters/setters
     function state:get_grid() return grid end
+    function state:get_selection_grid() return selection_grid end
     function state:get_tiles() return tiles end
     function state:get_tiles_class() return tiles_class end
     function state:is_new_game() return new_game end
@@ -168,9 +171,71 @@ GameState = Class(nil,function(state, ctrl)
 
     end
 
+    --[[
+        The grid is set into quadrants, i.e., a tile at [1][1][1] will cover
+        [1][2][1], [2][1][1], and [2][2][1] as well since each section represents
+        one-quarter of a tile. This data structure allows for more complex tile
+        placings.
+    --]]
+    function state:set_tile_quadrants()
+        for i = 1,GRID_WIDTH do
+            for j = 1,GRID_HEIGHT do
+                for k = 1,GRID_DEPTH do
+                    if grid[i][j][k] and not grid[i][j][k].set then
+                        grid[i][j][k].position = {i,j,k}
+                        grid[i+1][j][k] = grid[i][j][k]
+                        grid[i][j+1][k] = grid[i][j][k]
+                        grid[i+1][j+1][k] = grid[i][j][k]
+                        grid[i][j][k].set = true
+                    end
+                end
+            end
+        end
+    end
+
 
 --------------------- Functions ------------------
 
+
+    function state:find_selectable_tiles()
+        selection_grid = {}
+        local x = nil
+        local y = nil
+        local z = nil
+        for i = 1,GRID_WIDTH do
+            for j = 1,GRID_HEIGHT do
+                for k = 1,GRID_DEPTH do
+                    if grid[i][j][k] and not selection_grid[grid[i][j][k]] then
+                        -- normalize to the upper left hand quadrant of the tile
+                        x = grid[i][j][k].position[1]
+                        y = grid[i][j][k].position[2]
+                        z = grid[i][j][k].position[3]
+                        if not (
+                        -- 2 right
+                        (grid[x+2] and (grid[x+2][y][z]
+                        -- 2 right 1 down
+                        or (grid[x+2][y+1] and grid[x+2][y+1][z])))
+                        -- 1 left
+                        and (grid[x-1] and (grid[x-1][y][z]
+                        -- 1 left 1 down
+                        or (grid[x-1][y+1] and grid[x-1][y+1][z])))
+                        )
+
+                        -- 1 higher (z)
+                        and (not grid[x][y][z+1])
+                        -- 1 right 1 higher
+                        and (not grid[x+1] or not grid[x+1][y][z+1])
+                        -- 1 down 1 higher
+                        and (not grid[x][y+1] or not grid[x][y+1][z+1])
+                        -- 1 right 1 down 1 higher
+                        and (not grid[x+1][y+1][z+1]) then
+                            selection_grid[grid[x][y][z]] = grid[x][y][z]
+                        end
+                    end
+                end
+            end
+        end
+    end
 
     function state:undo()
     end
@@ -183,6 +248,7 @@ GameState = Class(nil,function(state, ctrl)
 
         local x = selector.x
         local y = selector.y
+        local z = selector.z
 
         if state:is_roaming() then
         else

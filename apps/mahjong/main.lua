@@ -14,7 +14,7 @@ Events = {
 dofile("DoFiles.lua")
 
 -- Router initialization
-local router = Router()
+router = Router()
 dofile("EventHandling.lua")
 
 
