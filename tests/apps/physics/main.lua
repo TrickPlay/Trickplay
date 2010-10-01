@@ -1,2 +1,2 @@
 
-dofile( "revolute_joint" )
+dofile( "tests" )
