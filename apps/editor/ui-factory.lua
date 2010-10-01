@@ -490,7 +490,7 @@ function factory.make_xbox()
     return c
 end 
 
-function factory.make_text_popup_item(assets, item_n, item_v) 
+function factory.make_text_popup_item(assets, item_n, item_v, n_item_n) 
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
     local TEXT_SIZE     = 26
     local PADDING_X     = 7
@@ -552,7 +552,7 @@ function factory.make_text_popup_item(assets, item_n, item_v)
     end 
 
     local group = Group {}
-    local text, text_input, ring, line, button
+    local text, input_text, ring, focus, line, button
 
     if(item_n == "title" or item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
@@ -564,25 +564,55 @@ function factory.make_text_popup_item(assets, item_n, item_v)
 	group:add(line)
         group.size = {WIDTH, LINE_WIDTH + PADDING_Y}
     elseif (item_n == "button") then 
-	if(item_v == "VIEW CODES") then 
+	group.name = item_v
+	group.reactive = true
+
+	if(item_v == "view code") then 
 	     button = make_ring(WIDTH, HEIGHT + PADDING_Y)
 	else 
 	     button = make_ring(WIDTH/2 - 3, HEIGHT + PADDING_Y)
 	end 
+	button.name = "button"
         button.position  = {0, 0}
     	group:add(button)
+
+	local focus = assets( "assets/button-focus.png" )
+        focus.name = "focus"
+        focus:set{ position = { 0 , 0 } , size = { group.w , group.h } , opacity = 0 }
+        group:add(focus)
+
     	text = Text {text = string.upper(item_v)}:set(STYLE)
         text.position  = {(button.w - text.w)/2, (button.h - text.h)/2}
     	group:add(text)
+
+    	next_text = Text {name = "next_attr", text = n_item_n}
+    	group:add(next_text)
+
+
+        function group.extra.on_focus_in()
+	     button.opacity = 0 
+             focus.opacity = 255
+        end
+
+        function group.extra.on_focus_out()
+             focus.opacity = 0
+	     button.opacity = 255 
+        end
+
     else 
+	group.name = item_n
+	group.reactive = true
+
         local space = WIDTH - PADDING_X  
 
         if(item_n == "name" or item_n == "text" or item_n == "src") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	else 
-    	     text = Text {text = string.upper(item_n)}:set(STYLE)
+    	     text = Text {name = "attr", text = string.upper(item_n)}:set(STYLE)
              text.position  = {WIDTH - space , 0}
     	     group:add(text)
+
+
 	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
 	     space = space - string.len(item_n) * 20
              if (item_n =="font " or item_n == "color") then 
@@ -594,12 +624,23 @@ function factory.make_text_popup_item(assets, item_n, item_v)
 	     end
         end 
 
+    	next_text = Text {name = "next_attr", text = n_item_n}
+    	group:add(next_text)
+
         ring = make_ring(input_box_width, HEIGHT + 5) 
 	ring.name = "ring"
 	ring.position = {WIDTH - space , 0}
+        ring.opacity = 255
         group:add(ring)
 
+        focus = make_focus_ring(input_box_width, HEIGHT + 5)
+        focus.name = "focus"
+        focus.position = {WIDTH - space , 0}
+        focus.opacity = 0
+	group:add(focus)
+
 	space = space - PADDING_B
+
 	-- get rid of "table : " form item_v
         local j, k, l 
         print(item_v)
@@ -610,29 +651,21 @@ function factory.make_text_popup_item(assets, item_n, item_v)
              item_v = string.sub(item_v,k+1,l)
 	end 
 
-    	text_input = Text {name = item_n, text =item_v, editable=true,
+    	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
 
-	if(item_n == "name") then 
-	      group.name = "name" 
-	      group.reactive = true
-	      group.extra.focus = make_focus_ring(input_box_width, HEIGHT + 5)
-	      group.extra.focus:set{name = "ring", position = {WIDTH - space - PADDING_B , 0}}
-        end 
-
-        text_input.position  = {WIDTH - space , PADDING_Y}
-    	group:add(text_input)
+        input_text.position  = {WIDTH - space , PADDING_Y}
+    	group:add(input_text)
 	
-        local focus = assets( "assets/button-focus.png" )
-        focus:set{ position = { 0 , 0 } , size = { group.w , group.h } , opacity = 0 }
-	group:add(focus)
 
         function group.extra.on_focus_in()
+             ring.opacity = 0
              focus.opacity = 255
         end
 
         function group.extra.on_focus_out()
              focus.opacity = 0
+             ring.opacity = 255
         end 
     end
     return group
