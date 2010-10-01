@@ -82,7 +82,12 @@ Tile = Class(function(tile, suit, number, ...)
     tile.number = number
     tile.suit = suit
 
+    -- determines if the tile is eliminated from the current game
     tile.null = false
+    -- determines if the tile is set in the current game
+    tile.set = false
+    -- the position of the tile in the game grid
+    tile.position = nil
 
     tile.group = Group()
     tile.group:add(tile.image, tile.glyph, tile.depth)
