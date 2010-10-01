@@ -29,8 +29,10 @@ GameState = Class(nil,function(state, ctrl)
     --]]
     -- the game grid
     local grid = nil
-    -- a grid containing available positions to move to
+    -- a grid containing available tiles to select
     local selection_grid = nil
+    -- a grid containing the tiles at the top
+    local top_grid = nil
     -- all the tile objects stored in a table
     local tiles = nil
     -- the class for all the tiles with functions
@@ -47,6 +49,7 @@ GameState = Class(nil,function(state, ctrl)
     -- getters/setters
     function state:get_grid() return grid end
     function state:get_selection_grid() return selection_grid end
+    function state:get_top_grid() return top_grid end
     function state:get_tiles() return tiles end
     function state:get_tiles_class() return tiles_class end
     function state:is_new_game() return new_game end
@@ -196,6 +199,31 @@ GameState = Class(nil,function(state, ctrl)
 
 --------------------- Functions ------------------
 
+
+    function state:find_top_tiles()
+        top_grid = {}
+        local x = nil
+        local y = nil
+        local z = nil
+        local new_z = nil
+        for i = 1,GRID_WIDTH do
+            for j = 1,GRID_HEIGHT do
+                for k = 1,GRID_DEPTH do
+                    if grid[i][j][k] and not top_grid[grid[i][j][k]] then
+                        x = i
+                        y = j
+                        z = k
+                        new_z = z + 1
+                        while new_z <= GRID_DEPTH do
+                            if grid[i][j][new_z] then z = new_z end
+                            new_z = new_z + 1
+                        end
+                        top_grid[grid[x][y][z]] = grid[x][y][z]
+                    end
+                end
+            end
+        end
+    end
 
     function state:find_selectable_tiles()
         selection_grid = {}
