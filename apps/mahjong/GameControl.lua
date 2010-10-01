@@ -9,7 +9,7 @@ function(ctrl, router, ...)
     local state = GameState(ctrl)
     local pres = GamePresentation(ctrl)
 
-    local grid = state:get_grid()
+    local grid = nil
     -- the position of the focus
     local selector = {x = 2, y = 1, z = 1}
     local prev_selector = nil
@@ -53,6 +53,7 @@ function(ctrl, router, ...)
         pres:display_ui()
         state:set_tile_quadrants()
         state:find_selectable_tiles()
+        state:find_top_tiles()
 --        state:build_test()
         grid = state:get_grid()
 
@@ -116,35 +117,63 @@ function(ctrl, router, ...)
 
     function ctrl:move_selector(dir)
         local selection_grid = state:get_selection_grid()
+        local top_grid = state:get_top_grid()
+
         local x = selector.x
         local y = selector.y
         local z = selector.z
+        local old_tile = grid[x][y][z]
+        local z = 1
         local new_tile = nil
 
-        local dist = nil
-        --arbitrarily high value
-        local closest_dist = 10000
-        for _,tile in pairs(selection_grid) do
-            dumptable(tile.position)
-            -- check against comparing tiles in the wrong direction
-            if -1 == dir[1] and tile.position[1] >= x then
-                -- dont compare
-            elseif 1 == dir[1] and tile.position[1] <= x then
-                -- dont compare
-            elseif -1 == dir[2] and tile.position[2] >= y then
-                -- dont compare
-            elseif 1 == dir[2] and tile.position[2] <= y then
-                -- dont compare
-            else
-                -- Euclidean distance measure
-                    -- check against comparing against current position
-                dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2)
-                if dist < closest_dist and dist ~= 0 then
-                    closest_dist = dist
-                    new_tile = tile
-                end
+        if 0 ~= dir[1] and grid[x+dir[1]] and grid[x+dir[1]][y][z] then
+            x = x + dir[1]
+            if grid[x-dir[1]][y][z] == grid[x][y][z]
+            and grid[x+dir[1]] and grid[x+dir[1]][y][z] then
+                x = x + dir[1]
+            end
+        elseif 0 ~= dir[2] and grid[x][y+dir[2]] and grid[x][y+dir[2]][z] then
+            y = y + dir[2]
+            if grid[x][y-dir[2]][z] == grid[x][y][z]
+            and grid[x][y+dir[2]] and grid[x][y+dir[2]][z] then
+                y = y + dir[2]
             end
         end
+        while grid[x][y][z+1] do z = z + 1 end
+
+        if old_tile ~= grid[x][y][z] then new_tile = grid[x][y][z] end
+
+        ---[[
+        if not new_tile then
+            local dist = nil
+            --arbitrarily high value
+            local closest_dist = 10000
+            print("selector")
+            dumptable(selector)
+            for _,tile in pairs(top_grid) do--selection_grid) do
+                -- check against comparing tiles in the wrong direction
+                if -1 == dir[1] and tile.position[1] >= x then
+                    -- dont compare
+                elseif 1 == dir[1] and tile.position[1] <= x then
+                    -- dont compare
+                elseif -1 == dir[2] and tile.position[2] >= y then
+                    -- dont compare
+                elseif 1 == dir[2] and tile.position[2] <= y then
+                    -- dont compare
+                else
+                    -- Euclidean distance measure
+                        -- check against comparing against current position
+                    dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2)
+                    if dist < closest_dist and dist ~= 0 then
+                        closest_dist = dist
+                        new_tile = tile
+                    end
+                    dumptable(tile.position)
+                end
+            end
+            print("new_tile")
+        end
+        --]]
 
         if new_tile then
             selector.x = new_tile.position[1]
