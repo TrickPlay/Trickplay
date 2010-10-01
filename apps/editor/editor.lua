@@ -114,58 +114,61 @@ local factory = ui.factory
 
 function abs(a) if(a>0) then return a else return -a end end
 function make_attr_t(v)        
-
+function toboolean(s) if (s == "true") then return true else return false end end 
 local attr_t =  
       {
 	     {"title", "INSPECTOR : "..string.upper(v.type)},
      	     {"caption", "OBJECT NAME"},
- 	     {"name", v.name},
+ 	     {"name", v.name,"x"},
 	     {"line",""},
-	     {"x", v.x},
-	     {"y", v.y},
-	     {"z", v.z},
-	     {"w", v.w},
+	     {"x", v.x, "y"},
+	     {"y", v.y, "z"},
+	     {"z", v.z, "w"},
+	     {"w", v.w, "h"},
 	     {"h", v.h},
 	     {"line",""}
       }
       if (v.type == "Text") then 
-	table.insert(attr_t, {"color", v.color})
-	table.insert(attr_t, {"font ", v.font})
+        table.insert(attr_t[9], "color")
+	table.insert(attr_t, {"color", v.color,"font "})
+	table.insert(attr_t, {"font ", v.font,"text"})
 	table.insert(attr_t, {"line",""})
 	table.insert(attr_t, {"caption", "TEXT"})
-	table.insert(attr_t, {"text", v.text})
+	table.insert(attr_t, {"text", v.text,"editable"})
 	table.insert(attr_t, {"line",""})
-	table.insert(attr_t, {"editable", v.editable})
-	table.insert(attr_t, {"wants_enter", v.wants_enter})
+	table.insert(attr_t, {"editable", v.editable,"wants_enter"})
+	table.insert(attr_t, {"wants_enter", v.wants_enter,"wrap"})
 	table.insert(attr_t, {"line",""})
-	table.insert(attr_t, {"wrap", v.wrap})
-	table.insert(attr_t, {"wrap_mode", v.wrap_mode})
+	table.insert(attr_t, {"wrap", v.wrap, "wrap_mode"})
+	table.insert(attr_t, {"wrap_mode", v.wrap_mode,"opacity"})
 	table.insert(attr_t, {"line",""})
       elseif (v.type  == "Rectangle") then
+        table.insert(attr_t[9], "fill_color  ")
 	--table.insert(attr_t, {"caption", "FILL COLOR"})
-	table.insert(attr_t, {"fill_color  ", v.color})
+	table.insert(attr_t, {"fill_color  ", v.color,"border_color"})
 	--table.insert(attr_t, {"caption", "BORDER COLOR"})
-        table.insert(attr_t, {"border_color", v.border_color})
-        table.insert(attr_t, {"border_width", v.border_width})
+        table.insert(attr_t, {"border_color", v.border_color, "border_width"})
+        table.insert(attr_t, {"border_width", v.border_width, "opacity"})
 	table.insert(attr_t, {"line",""})
       elseif (v.type  == "Image") then
+        table.insert(attr_t[9], "src")
 	table.insert(attr_t, {"caption", "SOURCE LOCATION"})
-	table.insert(attr_t, {"src", v.src})
+	table.insert(attr_t, {"src", v.src,"base_size"})
 	table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"base_size", v.base_size})
-        table.insert(attr_t, {"async    ", v.async})
-        table.insert(attr_t, {"loaded   ", v.loaded})
+        table.insert(attr_t, {"base_size", v.base_size,"async    "})
+        table.insert(attr_t, {"async    ", v.async, "loaded   "})
+        table.insert(attr_t, {"loaded   ", v.loaded,"opacity"})
 	table.insert(attr_t, {"line",""})
       end 
-      table.insert(attr_t, {"opacity", v.opacity})
+      table.insert(attr_t, {"opacity", v.opacity, "view code"})
       table.insert(attr_t, {"line",""})
       --table.insert(attr_t, {"rotation", v.rotation})
       --table.insert(attr_t, {"line",""})
       --table.insert(attr_t, {"anchor_point", v.anchor_point})
       --table.insert(attr_t, {"line",""})
-      table.insert(attr_t, {"button", "VIEW CODE"})
-      table.insert(attr_t, {"button", "APPLY"})
-      table.insert(attr_t, {"button", "CANCEL"})
+      table.insert(attr_t, {"button", "view code", "apply"})
+      table.insert(attr_t, {"button", "apply", "cancel"})
+      table.insert(attr_t, {"button", "cancel"})
 
       return attr_t
 end 
@@ -179,11 +182,9 @@ function itemTostring(v)
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "border_color={"..table.concat(v.border_color,",").."},"..indent..
-         "border_width="..v.border_width..",color={"..table.concat(v.color,",").."},"..indent..
-	 "size={"..table.concat(v.border_color,",").."},"..indent..
          "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
 	 "size = {"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y.."}"..b_indent.."}\n\n"
+         "position = {"..v.x..","..v.y.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Image") then 
     	 itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
 	 "name=\""..v.name.."\","..indent..
@@ -191,7 +192,7 @@ function itemTostring(v)
          "base_size={"..table.concat(v.base_size,",").."},"..indent..
          "position = {"..v.x..","..v.y.."},"..indent.. 
          "async="..tostring(v.async)..","..indent..
-	 "loaded="..tostring(v.loaded)..b_indent.."}\n\n"
+	 "loaded="..tostring(v.loaded)..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Text") then 
     	 if (v.extra.name == "MediaPlayer") then 
 	 	itm_str = "mediaplayer:load(\""..v.extra.source.."\")\n"..
@@ -207,7 +208,7 @@ function itemTostring(v)
          "editable="..tostring(v.editable)..","..indent..
          "reactive="..tostring(v.reactive)..","..indent..
          "wants_enter="..tostring(v.wants_enter)..","..indent..
-	 "wrap="..tostring(v.wrap)..b_indent.."}\n\n"
+	 "wrap="..tostring(v.wrap)..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
  	 end 
     end
     return itm_str
@@ -414,6 +415,7 @@ end
 local rect_init_x = 0
 local rect_init_y = 0
 
+
 function Editor()
     local editor = {}
 
@@ -434,7 +436,8 @@ function Editor()
         for i, v in pairs(g.children) do
              if g:find_child(v.name) then
 		  if (obj.name ~= v.name) then 
-                       g:find_child(v.name):set{opacity = 100}
+		       g:find_child(v.name).extra.org_opacity = g:find_child(v.name).opacity
+                       g:find_child(v.name):set{opacity = 50}
 		  end 
              end
         end
@@ -443,7 +446,7 @@ function Editor()
      function editor.n_selected(obj)
         for i, v in pairs(g.children) do
              if g:find_child(v.name) then
-                  g:find_child(v.name):set{opacity = 255}
+		  g:find_child(v.name):set{opacity = g:find_child(v.name).extra.org_opacity} 
              end
         end
      end  
@@ -486,7 +489,6 @@ function Editor()
              }
 	}
 
-
 	if(inspector.y - INSPECTOR_OFFSET  <= ui.bar_background.h) then
                 inspector.y = ui.bar_background.h + INSPECTOR_OFFSET
         elseif (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h ) then
@@ -495,6 +497,7 @@ function Editor()
         if (inspector.x + inspector.w + INSPECTOR_OFFSET >= screen.w ) then
                 inspector.x = v.x - inspector.w - INSPECTOR_OFFSET
         end 
+
 	local attr_i, attr_n, attr_v
 	local i = 0
 	for i=1,35 do 
@@ -503,6 +506,7 @@ function Editor()
 	     end 
 	     attr_n = attr_t[i][1] 
 	     attr_i = attr_t[i][2] 
+	     n_attr_n = attr_t[i][3] 
 
 	     if(type(attr_i) == table ) then
 	          attr_v = table.concat(attr_i,",")
@@ -510,11 +514,10 @@ function Editor()
                   attr_v = tostring(attr_i)
              end 
 
-	     print("attr_n",attr_n)
-	     print("attr_v",attr_v)
-
-	    local item = factory.make_text_popup_item(assets, attr_n, attr_v) 
-	    if(attr_n ~= "title" and attr_n ~= "line" and attr_n ~=  "caption") then 
+	     if(n_attr_n == nil) then n_attr_n = "" end 
+	     
+	     local item = factory.make_text_popup_item(assets, attr_n, attr_v, n_attr_n) 
+	     if(attr_n ~= "title" and attr_n ~= "line" and attr_n ~=  "caption") then 
 	    	table.insert(inspector_items, item)
 
 	         function item:on_button_down(x,y,button,num_clicks)
@@ -524,7 +527,7 @@ function Editor()
                  end
 
 	         item.extra.on_activate = function ()  end 
-	    end 
+	     end 
 
             items_height = items_height + item.h 
 
@@ -556,17 +559,90 @@ function Editor()
         end 
 
 	screen:add(inspector)
-
-        if inspector:find_child("name") and 
-             inspector:find_child("name"):find_child("name") then
-             inspector:find_child("name"):find_child("name"):grab_key_focus()
-             inspector:find_child("name"):remove(inspector:find_child("name"):find_child("ring"))
-             inspector:find_child("name"):add(inspector:find_child("name").extra.focus)
-             inspector:find_child("name"):find_child("name"):set{cursor_visible = true, cursor_size = 3}
+  
+       function apply_to_object (v, inspector)
+            v.name = inspector:find_child("name"):find_child("input_text").text
+            v.x = tonumber(inspector:find_child("x"):find_child("input_text").text)
+            v.y = tonumber(inspector:find_child("y"):find_child("input_text").text)
+            v.z = tonumber(inspector:find_child("z"):find_child("input_text").text)
+            v.w = tonumber(inspector:find_child("w"):find_child("input_text").text)
+            v.h = tonumber(inspector:find_child("h"):find_child("input_text").text)
+            v.opacity = tonumber(inspector:find_child("opacity"):find_child("input_text").text)
+            if(v.type == "Rectangle") then
+                  v.color = inspector:find_child("fill_color  "):find_child("input_text").text
+                  v.border_color = inspector:find_child("border_color"):find_child("input_text").text
+                  v.border_width = tonumber(inspector:find_child("border_width"):find_child("input_text").text)
+            elseif (v.type == "Text") then
+                  v.color = inspector:find_child("color"):find_child("input_text").text
+                  v.font = inspector:find_child("font "):find_child("input_text").text
+                  v.text = inspector:find_child("text"):find_child("input_text").text
+                  v.editable = toboolean(inspector:find_child("editable"):find_child("input_text").text)
+                  v.wants_enter = toboolean(inspector:find_child("wants_enter"):find_child("input_text").text)
+                  v.wrap = toboolean(inspector:find_child("wrap"):find_child("input_text").text)
+                  v.wrap_mode = inspector:find_child("wrap_mode"):find_child("input_text").text
+             elseif (v.type == "Image") then
+                  v.src = inspector:find_child("src"):find_child("input_text").text
+                  v.base_size = inspector:find_child("base_size"):find_child("input_text").text
+                  v.async = toboolean(inspector:find_child("async    "):find_child("input_text").text)
+                  v.loaded = toboolean(inspector:find_child("loaded   "):find_child("input_text").text)
+             end 
         end
 
-	current_inspector = inspector
+	function grab_focus(attr) 
+        if inspector:find_child(attr) and  
+             inspector:find_child(attr):find_child("input_text") then
+             inspector:find_child(attr):find_child("input_text"):grab_key_focus()
+             inspector:find_child(attr):find_child("input_text"):set{cursor_visible = true, cursor_size = 3}
+             inspector:find_child(attr).extra.on_focus_in()
 
+	     input_txt = inspector:find_child(attr):find_child("input_text")
+	     function input_txt:on_key_down(key)
+	          if key == keys.Return or
+                     key == keys.Tab or 
+                     key == keys.Right then
+                     inspector:find_child(attr).extra.on_focus_out()
+                     inspector:find_child(attr):find_child("input_text"):set{cursor_visible = false}
+                     grab_focus(inspector:find_child(attr):find_child("next_attr").text)
+                  end
+   	     end 
+        elseif inspector:find_child(attr):find_child("button") then
+ 	      inspector:find_child(attr):find_child("button"):grab_key_focus()
+              inspector:find_child(attr).extra.on_focus_in()
+              button = inspector:find_child(attr):find_child("button")
+              function button:on_key_down(key)
+                   if key == keys.Return then
+                      if (attr == "view code") then 
+		          screen:remove(inspector)
+		          current_inspector = nil
+		          editor.n_selected(v)
+                          screen.grab_key_focus(screen) 
+			  --apply_to_object (v, inspector) 
+		          editor.view_code()
+	                  return true
+		      elseif (attr == "apply") then 
+			  apply_to_object (v, inspector) 
+		          screen:remove(inspector)
+		          current_inspector = nil
+		          editor.n_selected(v)
+                          screen.grab_key_focus(screen) 
+		      elseif (attr == "cancel") then 
+		          screen:remove(inspector)
+		          current_inspector = nil
+		          editor.n_selected(v)
+                          screen.grab_key_focus(screen) 
+	                  return true
+		      end 
+ 		   elseif key == keys.Tab or key == keys.Right then 
+                      inspector:find_child(attr).extra.on_focus_out()
+                      grab_focus(inspector:find_child(attr):find_child("next_attr").text)
+                   end
+              end
+
+        end
+	end 
+
+	grab_focus("name") 
+	current_inspector = inspector
         inspector.reactive = true;
 	create_on_button_down_f(inspector)
 
@@ -581,7 +657,7 @@ function Editor()
 
      end
 
-     function editor.view_codes()
+     function editor.view_code()
           local codes = "local g = ... \n\n"
           local obj_names = getObjnames()
 	
@@ -598,7 +674,7 @@ function Editor()
            reactive = false, wants_enter = false, w = screen.w - 500 , h = screen.h ,wrap=true, wrap_mode="CHAR"})
            screen.grab_key_focus(screen) --hjk
 
-     end -- editor.view_codes()
+     end 
 
      function editor.save()
 

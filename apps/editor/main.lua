@@ -437,7 +437,7 @@ local function build_ui( show_it )
     {
 
 	[ keys.r	] = function() animate_out_dropdown() mouse_mode = S_RECTANGLE end,
-        [ keys.v	] = function() animate_out_dropdown() Editor().view_codes() mouse_mode = S_SELECT end,
+        [ keys.v	] = function() animate_out_dropdown() Editor().view_code() mouse_mode = S_SELECT end,
         [ keys.n	] = function() animate_out_dropdown() Editor().close() mouse_mode = S_SELECT end,
         [ keys.o	] = function() animate_out_dropdown() Editor().open() mouse_mode = S_SELECT end,
         [ keys.s	] = function() animate_out_dropdown() Editor().save() mouse_mode = S_SELECT end,

@@ -4,14 +4,15 @@ text0 = Text
 	{
 		name="text0",
 		text="sjdfhksfj",
-		font="DejaVu Sans 40px",
-		color={255,255,255,255},
+		font="DejaVu Sans 50px",
+		color={0,41,0,255},
 		size={150,150},
-		position = {1598,262},
+		position = {788,872},
 		editable=true,
 		reactive=true,
 		wants_enter=true,
-		wrap=true
+		wrap=true,
+		opacity = 255
 	}
 
 img1 = Image
@@ -21,19 +22,19 @@ img1 = Image
 		base_size={174,71},
 		position = {102,956},
 		async=false,
-		loaded=true
+		loaded=true,
+		opacity = 255
 	}
 
-rect2 = Rectangle
+rect999 = Rectangle
 	{
-		name="rect2",
-		border_color={0,0,0,255},
-		border_width=1,color={255,255,255,192},
-		size={0,0,0,255},
+		name="rect999",
+		border_color={255,255,255,255},
 		border_width=1,
-		color={255,255,255,192},
-		size = {80,78},
-		position = {1304,590}
+		color={0,53,194,73},
+		size = {200,200},
+		position = {1098,300},
+		opacity = 255
 	}
 
 text3 = Text
@@ -41,23 +42,25 @@ text3 = Text
 		name="text3",
 		text="sdfasdfsdfi",
 		font="DejaVu Sans 40px",
-		color={255,255,255,192},
+		color={240,240,240,255},
 		size={150,150},
 		position = {100,100},
 		editable=true,
 		reactive=true,
 		wants_enter=true,
-		wrap=true
+		wrap=true,
+		opacity = 255
 	}
 
-img4 = Image
+img999 = Image
 	{
-		name="img4",
+		name="img999",
 		src="logo.png",
 		base_size={174,71},
-		position = {714,562},
+		position = {708,562},
 		async=false,
-		loaded=true
+		loaded=true,
+		opacity = 255
 	}
 
 img5 = Image
@@ -67,7 +70,8 @@ img5 = Image
 		base_size={174,71},
 		position = {1352,770},
 		async=false,
-		loaded=true
+		loaded=true,
+		opacity = 255
 	}
 
-g:add(text0,img1,rect2,text3,img4,img5)
+g:add(text0,img1,rect999,text3,img999,img5)
