@@ -7,6 +7,46 @@ module physics_module;
 
 #include "clutter_util.h"
 
+void populate_fixture_from_table( lua_State * L , int properties , b2FixtureDef & fixture_def )
+{
+    lua_getfield( L , properties , "friction" );
+    if ( ! lua_isnil( L , -1 ) )
+    {
+        fixture_def.friction = lua_tonumber( L , -1 );
+    }
+    lua_pop( L , 1 );
+
+    lua_getfield( L , properties , "restitution" );
+    if ( ! lua_isnil( L , -1 ) )
+    {
+        fixture_def.restitution = lua_tonumber( L , -1 );
+    }
+    lua_pop( L , 1 );
+
+    lua_getfield( L , properties , "bounce" );
+    if ( ! lua_isnil( L , -1 ) )
+    {
+        fixture_def.restitution = lua_tonumber( L , -1 );
+    }
+    lua_pop( L , 1 );
+
+    lua_getfield( L , properties , "density" );
+    if ( ! lua_isnil( L , -1 ) )
+    {
+        fixture_def.density = lua_tonumber( L , -1 );
+    }
+    lua_pop( L , 1 );
+
+    lua_getfield( L , properties , "sensor" );
+    if ( ! lua_isnil( L , -1 ) )
+    {
+        fixture_def.isSensor = lua_toboolean( L , -1 );
+    }
+    lua_pop( L , 1 );
+
+    // TODO : filter
+}
+
 class Physx
 {
 public:
@@ -80,18 +120,24 @@ public:
 	:
 		physx( _p ),
 		body( _b ),
-		actor( _a )
+		actor( _a ),
+		next_fixture_handle( 2 )
 	{
 		g_assert( physx );
 		g_assert( body );
-		g_assert( actor );
-		
-		g_object_ref( G_OBJECT( actor ) );
+
+		if ( actor )
+		{
+		    g_object_ref( G_OBJECT( actor ) );
+		}
 	}
 	
 	~Body()
 	{
-		g_object_unref( G_OBJECT( actor ) );
+        if ( actor )
+        {
+            g_object_unref( G_OBJECT( actor ) );
+        }
 	}
 	
 	static Body * get( lua_State * L , int n )
@@ -102,9 +148,23 @@ public:
 	Physx  * 		physx;
 	b2Body * 		body;
 	ClutterActor * 	actor;
+	int             next_fixture_handle;
 };
 
 ]]
+
+interface Shape [[ b2Shape * ]]
+{
+    Shape()
+        [[
+            self = lb_construct( b2Shape , lua_touserdata( L , -2 ) );
+        ]];
+
+    ~Shape()
+        [[
+            delete self;
+        ]];
+}
 
 interface Body [[ Body * ]]
 {
@@ -278,6 +338,102 @@ interface Body [[ Body * ]]
             lua_pushvalue( L , 1 );
         ]];
 
+    #-------------------------------------------------------------------------
+    # Fixtures
+
+    readonly table fixtures
+        [[
+            lua_newtable( L );
+            int t = lua_gettop( L );
+            int i = 1;
+
+            for( b2Fixture * f = self->body->GetFixtureList(); f ; f = f->GetNext() , ++i )
+            {
+                lua_newtable( L );
+
+                lua_pushinteger( L , GPOINTER_TO_INT( f->GetUserData() ) );
+                lua_setfield( L , -2 , "handle" );
+
+                switch( f->GetType() )
+                {
+                    case b2Shape::e_circle:
+                        lua_pushstring( L , "circle" );
+                        break;
+
+                    case b2Shape::e_polygon:
+                        lua_pushstring( L , "polygon" );
+                        break;
+
+                    default:
+                        lua_pushnil( L );
+                }
+
+                lua_setfield( L , -2 , "type" );
+
+                lua_pushboolean( L , f->IsSensor() );
+                lua_setfield( L , -2 , "sensor" );
+
+                lua_pushnumber( L , f->GetDensity() );
+                lua_setfield( L , -2 , "density" );
+
+                lua_pushnumber( L , f->GetFriction() );
+                lua_setfield( L , -2 , "friction" );
+
+                lua_pushnumber( L , f->GetRestitution() );
+                lua_setfield( L , -2 , "bounce" );
+
+                lua_rawseti( L , t , i );
+            }
+        ]];
+
+    bool remove_fixture( int fixture_handle )
+        [[
+            result = false;
+
+            for( b2Fixture * f = self->body->GetFixtureList(); f ; f = f->GetNext() )
+            {
+                if ( GPOINTER_TO_INT( f->GetUserData() ) == fixture_handle )
+                {
+                    result = true;
+                    f->GetBody()->DestroyFixture( f );
+                    break;
+                }
+            }
+        ]];
+
+    int add_fixture( table properties )
+        [[
+            result = 0;
+
+            lua_getfield( L , properties , "shape" );
+            if ( lua_type( L , -1 ) != LUA_TUSERDATA )
+            {
+                lua_pop( L , 1 );
+                return luaL_error( L , "Missing shape" );
+            }
+
+            b2Shape * shape = ( b2Shape * ) UserData::get_client( L , lua_gettop( L ) );
+
+            if ( ! shape )
+            {
+                lua_pop( L , 1 );
+                return luaL_error( L , "Invalid shape" );
+            }
+
+            lua_pop( L , 1 );
+
+            b2FixtureDef fixture_def;
+
+            populate_fixture_from_table( L , properties , fixture_def );
+
+            fixture_def.shape = shape;
+
+            result = self->next_fixture_handle++;
+
+            fixture_def.userData = GINT_TO_POINTER( result );
+
+            self->body->CreateFixture( & fixture_def );
+        ]];
 }
 
 
@@ -343,14 +499,19 @@ global physics [[ Physx * ]]
 		
 	Body Body( table properties )
 		[[
+            ClutterActor * actor = NULL;
+
 			lua_getfield( L , properties , "source" );
 			
-			ClutterActor * actor = ClutterUtil::user_data_to_actor( L , lua_gettop( L ) ); 
-
-			if ( ! actor )
+			if ( ! lua_isnil( L , -1 ) )
 			{
-				lua_pop( L , 1 );
-				return luaL_error( L , "Invalid or missing body source" );
+			    actor = ClutterUtil::user_data_to_actor( L , lua_gettop( L ) );
+
+                if ( ! actor )
+                {
+                    lua_pop( L , 1 );
+                    return luaL_error( L , "Invalid or missing body source" );
+                }
 			}
 			
 			lua_pop( L , 1 );
@@ -362,23 +523,73 @@ global physics [[ Physx * ]]
 			// the actor has. If the actor is inside a container, this will
 			// be wrong. We also cheat and modify the actor's anchor point...naughty.
 			
-			gfloat width;
-			gfloat height;
-			
-			clutter_actor_get_size( actor , & width , & height );
-			
-			clutter_actor_move_anchor_point( actor , width / 2 , height / 2 );
+			gfloat width = 0;
+			gfloat height = 0;
 
-			gfloat x;
-			gfloat y;
+			// Get the size from the actor
+
+			if ( actor )
+			{
+			    clutter_actor_get_size( actor , & width , & height );
+
+			    clutter_actor_move_anchor_point( actor , width / 2 , height / 2 );
+			}
 			
-			clutter_actor_get_position( actor , & x , & y );
+			// See if there is another size
 			
-			gfloat rotation;
-			gfloat rx;
-			gfloat ry;
+            lua_getfield( L , properties , "size" );
+            if ( lua_type( L , -1 ) == LUA_TTABLE )
+            {
+                lua_rawgeti( L , -1 , 1 );
+                lua_rawgeti( L , -2 , 2 );
+
+                width = lua_tonumber( L , -2 );
+                height = lua_tonumber( L , -1 );
+
+                lua_pop( L , 2 );
+            }
+            lua_pop( L , 1 );
+
+            // Get the position
+
+			gfloat x = 0;
+			gfloat y = 0;
 			
-			rotation = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , & rx , & ry , NULL );		
+			if ( actor )
+			{
+			    clutter_actor_get_position( actor , & x , & y );
+			}
+
+			lua_getfield( L , properties , "position" );
+			if ( lua_type( L , -1 ) == LUA_TTABLE )
+			{
+                lua_rawgeti( L , -1 , 1 );
+                lua_rawgeti( L , -2 , 2 );
+
+                x = lua_tonumber( L , -2 );
+                y = lua_tonumber( L , -1 );
+
+                lua_pop( L , 2 );
+			}
+			lua_pop( L , 1 );
+			
+			// Rotation
+
+			gfloat rotation = 0 ;
+			gfloat rx = 0;
+			gfloat ry = 0;
+			
+			if ( actor )
+			{
+			    rotation = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , & rx , & ry , NULL );
+			}
+
+			lua_getfield( L , properties , "rotation" );
+			if ( ! lua_isnil( L , -1 ) )
+			{
+			    rotation = lua_tonumber( L , -1 );
+			}
+			lua_pop( L , 1 );
 			
 			//.................................................................
 			// Create the body definition
@@ -393,6 +604,11 @@ global physics [[ Physx * ]]
 			b2FixtureDef fixture_def;
 			
 			//.................................................................
+			// Read fixture properties
+
+			populate_fixture_from_table( L , properties , fixture_def );
+
+			//.................................................................
 			// Read the rest of the properties
 			
 			lua_getfield( L , properties , "dynamic" );
@@ -401,34 +617,6 @@ global physics [[ Physx * ]]
 				body_def.type = b2_dynamicBody;
 			}
 			lua_pop( L , 1 );	
-			
-			lua_getfield( L , properties , "friction" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-				fixture_def.friction = lua_tonumber( L , -1 );
-			}
-			lua_pop( L , 1 );
-			
-			lua_getfield( L , properties , "restitution" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-				fixture_def.restitution = lua_tonumber( L , -1 );
-			}
-			lua_pop( L , 1 );
-			
-			lua_getfield( L , properties , "bounce" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-				fixture_def.restitution = lua_tonumber( L , -1 );
-			}
-			lua_pop( L , 1 );
-
-			lua_getfield( L , properties , "density" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-				fixture_def.density = lua_tonumber( L , -1 );
-			}
-			lua_pop( L , 1 );
 			
 			lua_getfield( L , properties , "awake" );
 			if ( ! lua_isnil( L , -1 ) )
@@ -451,23 +639,37 @@ global physics [[ Physx * ]]
 			
 			g_assert( body );
 			
-			//.................................................................
-			// Create a rectangular default shape for the body
-			
-			b2PolygonShape shape;
-#if 0			
-			shape.SetAsBox( ( width * 0.5 ) / self->ppm , ( height * 0.5 ) / self->ppm , 
-				b2Vec2( rx / self->ppm , ry / self->ppm ) , 
-				rotation * ( G_PI / 180.0 ) );
-#else
-			shape.SetAsBox( ( width * 0.5 ) / self->ppm , ( height * 0.5 ) / self->ppm ) ;
-#endif			
+            //.................................................................
+			// See if the definition included a shape
 
+			fixture_def.shape = NULL;
+
+			lua_getfield( L , properties , "shape" );
+			if ( ! lua_isnil( L , -1 ) )
+			{
+			    fixture_def.shape = ( b2Shape * ) UserData::get_client( L , lua_gettop( L ) );
+			}
+			lua_pop( L , 1 );
+
+			//.................................................................
+			// If not, create a rectangular default shape for the body
+
+            b2PolygonShape polygon;
+
+            if ( ! fixture_def.shape )
+			{
+                polygon.SetAsBox( ( width * 0.5 ) / self->ppm , ( height * 0.5 ) / self->ppm ) ;
+
+                fixture_def.shape = & polygon;
+			}
+			
 			//.................................................................
 			// Create the default fixture
 			
-			fixture_def.shape = & shape;
-			
+			// This is the 'handle' for the fixture - we always start with 1
+
+			fixture_def.userData = GINT_TO_POINTER( 1 );
+
 			body->CreateFixture( & fixture_def ); 
 
 			//.................................................................
@@ -477,8 +679,10 @@ global physics [[ Physx * ]]
 			// TODO: There may be a problem destroying a body during the step function,
 			// which could happen if an actor is collected. 
 	
-			g_object_set_data_full( G_OBJECT( actor ) , "tp-physics-body" , body , ( GDestroyNotify ) destroy_actor_body );
-
+			if ( actor )
+			{
+			    g_object_set_data_full( G_OBJECT( actor ) , "tp-physics-body" , body , ( GDestroyNotify ) destroy_actor_body );
+			}
 			//.................................................................
 			// Create an instance of a Body for Lua
 						
@@ -598,5 +802,101 @@ global physics [[ Physx * ]]
             }
 
             self->world.CreateJoint( & j );
+        ]];
+
+    #..........................................................................
+    # Shape factory methods
+
+	Shape Box( table size , table center = 0 , double rotation = 0 )
+        [[
+            b2PolygonShape * shape = new b2PolygonShape();
+
+            if ( ! center )
+            {
+                lua_rawgeti( L , size , 1 );
+                lua_rawgeti( L , size , 2 );
+
+                shape->SetAsBox( ( lua_tonumber( L , -2 ) * 0.5 ) / self->ppm ,
+                    ( lua_tonumber( L , -1 ) * 0.5 ) / self->ppm );
+
+                lua_pop( L , 2 );
+            }
+            else
+            {
+                lua_rawgeti( L , size , 1 );
+                lua_rawgeti( L , size , 2 );
+
+                lua_rawgeti( L , center , 1 );
+                lua_rawgeti( L , center , 2 );
+
+                shape->SetAsBox( ( lua_tonumber( L , -4 ) * 0.5 ) / self->ppm,
+                        ( lua_tonumber( L , -3 ) * 0.5 ) / self->ppm,
+                        b2Vec2( lua_tonumber( L , -2 ) / self->ppm ,
+                                lua_tonumber( L , -1 ) / self->ppm ),
+                        rotation * ( G_PI / 180.0 ) );
+
+                lua_pop( L , 4 );
+            }
+
+            lua_pushlightuserdata( L , shape );
+
+            new_Shape( L );
+
+            lua_remove( L , -2 );
+        ]];
+
+	Shape Edge( table point_a , table point_b )
+        [[
+            b2PolygonShape * shape = new b2PolygonShape();
+
+            lua_rawgeti( L , point_a , 1 );
+            lua_rawgeti( L , point_a , 2 );
+            lua_rawgeti( L , point_b , 1 );
+            lua_rawgeti( L , point_b , 2 );
+
+            shape->SetAsEdge( b2Vec2( lua_tonumber( L , -4 ) / self->ppm ,
+                    lua_tonumber( L , -3 ) / self->ppm ),
+                    b2Vec2( lua_tonumber( L , -2 ) / self->ppm ,
+                            lua_tonumber( L , -1 ) / self->ppm ) );
+
+            lua_pop( L , 4 );
+
+            lua_pushlightuserdata( L , shape );
+
+            new_Shape( L );
+
+            lua_remove( L , -2 );
+        ]];
+/*
+	Shape Polygon( table points )
+        [[
+            // TODO : formed from a table of vertices
+        ]];
+*/
+
+	Shape Circle( double radius , table center = 0 )
+        [[
+            b2CircleShape * shape = new b2CircleShape();
+
+            shape->m_radius = radius / self->ppm;
+
+            shape->m_p.SetZero();
+
+            if ( center )
+            {
+                lua_rawgeti( L , center , 1 );
+                lua_rawgeti( L , center , 2 );
+
+                shape->m_p.Set( lua_tonumber( L , -2 ) / self->ppm ,
+                        lua_tonumber( L , -1 ) / self->ppm );
+
+                lua_pop( L , 2 );
+            }
+
+            lua_pushlightuserdata( L , shape );
+
+            new_Shape( L );
+
+            lua_remove( L , -2 );
         ]];
 }
