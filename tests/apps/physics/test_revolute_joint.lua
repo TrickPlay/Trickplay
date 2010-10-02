@@ -82,14 +82,8 @@ end
 screen:show()
 
 
-local s = Stopwatch()
-local f = 1 / 60;
-
-function idle.on_idle()
-    if s.elapsed_seconds >= f then
-        physics:step()
-        s:start()
-    end    
+function idle.on_idle( idle , seconds )
+    physics:step( seconds )
 end
 
 function screen.on_key_down( screen , key )

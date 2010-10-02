@@ -117,16 +117,8 @@ if false then
 
 else
 
-    local s = Stopwatch()
-    local f = 1 / 60;
-    local n
-    
-    function idle.on_idle()
-        if s.elapsed_seconds >= f then
-            n = physics:step()
-            --print( n )
-            s:start()
-        end
+    function idle.on_idle( idle , seconds )
+        physics:step( seconds )
     end
     
     local up = keys.Up
