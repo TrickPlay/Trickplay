@@ -44,10 +44,70 @@ void populate_fixture_from_table( lua_State * L , int properties , b2FixtureDef 
     }
     lua_pop( L , 1 );
 
-    // TODO : filter
+    lua_getfield( L , properties , "filter" );
+    if ( lua_istable( L , -1 ) )
+    {
+        int f = lua_gettop( L );
+
+        lua_getfield( L , f , "group" );
+        if ( ! lua_isnil( L , -1 ) )
+        {
+            fixture_def.filter.groupIndex = lua_tointeger( L , -1 );
+        }
+        lua_pop( L , 1 );
+
+        lua_getfield( L , f , "category" );
+        if ( lua_isnumber( L , -1 ) )
+        {
+            fixture_def.filter.categoryBits = 1 << lua_tointeger( L , -1 );
+        }
+        else if ( lua_istable( L , -1 ) )
+        {
+            fixture_def.filter.categoryBits = 0;
+
+            int t = lua_gettop( L );
+
+            lua_pushnil( L );
+
+            while( lua_next( L , t ) )
+            {
+                if ( lua_isnumber( L , -1 ) )
+                {
+                    fixture_def.filter.categoryBits |= 1 << lua_tointeger( L , -1 );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
+
+        lua_getfield( L , f , "mask" );
+        if ( lua_isnumber( L , -1 ) )
+        {
+            fixture_def.filter.maskBits = 1 << lua_tointeger( L , -1 );
+        }
+        else if ( lua_istable( L , -1 ) )
+        {
+            fixture_def.filter.maskBits = 0;
+
+            int t = lua_gettop( L );
+
+            lua_pushnil( L );
+
+            while( lua_next( L , t ) )
+            {
+                if ( lua_isnumber( L , -1 ) )
+                {
+                    fixture_def.filter.maskBits |= 1 << lua_tointeger( L , -1 );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
+    }
+    lua_pop( L , 1 );
 }
 
-class Physx
+class Physx : private b2ContactListener
 {
 public:
 
@@ -56,7 +116,7 @@ public:
 		world( b2Vec2( 0.0f , 10.0f ) , true ), 
 		ppm( 64.0f ) // 64 pixels per meter - at 1920 that is 30 meters
 	{
-    	
+//	    world.SetContactListener( this );
 	}
 	
 	~Physx()
@@ -72,6 +132,57 @@ public:
 	
 	b2World  	world;
 	float32		ppm;
+
+private:
+
+    // b2ContactListener methods
+
+    virtual void BeginContact( b2Contact * contact )
+    {
+        g_debug( "BEGIN CONTACT" );
+
+        b2WorldManifold wm;
+
+        contact->GetWorldManifold( & wm );
+
+        for ( int32 i = 0; i < 3; ++i )
+        {
+            g_debug( "    POINT %d : %f , %f" , i , wm.points[ i ].x , wm.points[ i ].y );
+        }
+
+        /*
+        const b2Manifold * m = contact->GetManifold();
+
+        if ( ! m )
+        {
+            g_debug( "  NO MANIFOLD" );
+        }
+        else
+        {
+            g_debug( "  POINTS = %d" , m->pointCount );
+
+            for ( int32 i = 0; i < m->pointCount; ++i )
+            {
+                g_debug( "    POINT %d : %f , %f" , i , m->points[ i ].localPoint.x , m->points[ i ].localPoint.y );
+            }
+        }
+        */
+    }
+
+    virtual void EndContact( b2Contact * contact )
+    {
+        g_debug( "END CONTACT" );
+    }
+
+    virtual void PreSolve( b2Contact * contact , const b2Manifold * oldManifold )
+    {
+
+    }
+
+    virtual void PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
+    {
+
+    }
 };
 
 #if 0
@@ -449,10 +560,8 @@ global physics [[ Physx * ]]
 			delete self;
 		]];
 		
-	int step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
+	bool step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
 		[[
-			int n = 0;
-			
 			self->world.Step( time_step , velocity_iterations , position_iterations );
 			
 			for( b2Body * body = self->world.GetBodyList(); body; body = body->GetNext() )
@@ -461,8 +570,6 @@ global physics [[ Physx * ]]
 				{
 					continue;
 				}
-				
-				++n;
 				
 				ClutterActor * actor = CLUTTER_ACTOR( body->GetUserData() );
 				
@@ -476,7 +583,7 @@ global physics [[ Physx * ]]
 				}
 			}
 			
-			result = n;
+			result = self->world.GetContactList() != 0;
 		]]; 
 		
 	table gravity
@@ -899,4 +1006,5 @@ global physics [[ Physx * ]]
 
             lua_remove( L , -2 );
         ]];
+
 }
