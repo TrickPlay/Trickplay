@@ -1,10 +1,20 @@
 local TILE_WIDTH  = 100
-local TILE_GUTTER = 12
-local SET_GUTTER  = 10
-local TOP_GAP     = 30--(screen.h - (TILE_WIDTH*9 + TILE_GUTTER*8 + SET_GUTTER*2))/2
+local TILE_GUTTER = 10
+local SET_GUTTER  = 20
+local TOP_GAP     = 30
 assert(TOP_GAP >= SET_GUTTER, "flawed #defines for the board..." )
 
+function sel_pos(r,c)
+	return
+			(c-1)*TILE_WIDTH + 
+				math.floor((c-1)/3)*SET_GUTTER +
+				(c-1)*TILE_GUTTER-1 + 500
+			,
+			(r-1)*TILE_WIDTH + 
+				math.floor((r-1)/3)*SET_GUTTER +
+				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
 
+end
 
 function BoardGen(number_of_givens)
     assert(number_of_givens <= 80, "in BoardGen, number_of_givens is too large")
@@ -36,7 +46,7 @@ function BoardGen(number_of_givens)
             if first ~= second then
                 --the ol' switcheroo
                 for k = 1,9 do
-                    temp[k] = base[k][first+3*i]
+                    temp[k] = base[k][first + 3*i]
                 end
                 for k = 1,9 do
                     base[k][first+3*i] = base[k][second + 3*i]
@@ -130,13 +140,15 @@ function BoardGen(number_of_givens)
     return base
 end
 
-function DevelopBoard(group,givens)
+function DevelopBoard(group,givens,guesses)
+	local text
 	local t
 	local guess_g
 	---------------------------------
 	for r = 1,9 do     for c = 1,9 do
 	---------------------------------
 		
+--[[
 		t = Rectangle {name = "Tile "..r.." "..c,color = "202020",w = TILE_WIDTH,h = TILE_WIDTH, anchor_point = {TILE_WIDTH/2,TILE_WIDTH/2},opacity=0}
 			t.x = (c-1)*TILE_WIDTH + 
 				math.floor((c-1)/3)*SET_GUTTER +
@@ -146,6 +158,7 @@ function DevelopBoard(group,givens)
 				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
 
 		group:add(t)
+--]]
 		if givens[r][c] ~= 0 then
 			t = Text
 			{
@@ -179,28 +192,70 @@ function DevelopBoard(group,givens)
 				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
 			group:add(t)
 		else
+			text = ""
+			if guesses[r][c].pen ~= 0 then
+				text = guesses[r][c].pen
+			end
 			guess_g = Group{name = "Guess "..r.." "..c,opacity=0}
 			group:add(guess_g)
+			t = Text
+			{
+				name = "Pen_s "..r.." "..c,
+				text = text,
+				font = "DejaVu Bold 82px",
+				color = "000000",
+				opacity = 255,		
+			}
+			t.anchor_point={t.w/2,t.h/2}
+			t.x = (c-1)*TILE_WIDTH + 
+				math.floor((c-1)/3)*SET_GUTTER +
+				(c-1)*TILE_GUTTER-1
+			t.y = (r-1)*TILE_WIDTH + 
+				math.floor((r-1)/3)*SET_GUTTER +
+				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
+			group:add(t)
+
+			t = Text
+			{
+				name = "Pen "..r.." "..c,
+				text = text,
+				font = "DejaVu Bold 80px",
+				color = "fefa00",
+				opacity = 255,
+
+			}
+			t.anchor_point={t.w/2,t.h/2}
+			t.x = (c-1)*TILE_WIDTH + 
+				math.floor((c-1)/3)*SET_GUTTER +
+				(c-1)*TILE_GUTTER
+			t.y = (r-1)*TILE_WIDTH + 
+				math.floor((r-1)/3)*SET_GUTTER +
+				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
+			group:add(t)
 
 			for g = 1,9 do
 				t = Text
 				{
 					name    = "Guess "..r.." "..c.." "..g,
 					text    = g,
-					font    = "DejaVu ExtraLight 55px",
-					color   = "FFFFFF",
+					font    = "Eraser 57px",
+					color   = "fefa00",
 					opacity = 0,
 					--z=1
 				}
 				t.scale = {1/2,1/2}
 				t.anchor_point={t.w/2,t.h/2}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER+ ((g-1)%3-1)*TILE_WIDTH/3
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+ (math.floor((g-1)/3)-1)*
-				TILE_WIDTH/3+TOP_GAP+TILE_WIDTH/2
+				t.x = (c-1)*TILE_WIDTH + 
+					math.floor((c-1)/3)*SET_GUTTER +
+					(c-1)*TILE_GUTTER+ ((g-1)%3-1)*TILE_WIDTH/3
+				t.y = (r-1)*TILE_WIDTH + 
+					math.floor((r-1)/3)*SET_GUTTER +
+					(r-1)*TILE_GUTTER+ (math.floor((g-1)/3)-1)*
+					TILE_WIDTH/3+TOP_GAP+TILE_WIDTH/2
+
+				if guesses[r][c][g] and guesses[r][c].pen == 0 then 
+					t.opacity=255
+				end
 
 				group:add(t)
 				t = Text
@@ -213,13 +268,13 @@ function DevelopBoard(group,givens)
 				}
 				t.scale = {1/2,1/2}
 				t.anchor_point={t.w/2,t.h/2}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER+ ((g-1)%3-1)*TILE_WIDTH/3
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+ (math.floor((g-1)/3)-1)*
-				TILE_WIDTH/3+TOP_GAP+TILE_WIDTH/2
+				t.x = (c-1)*TILE_WIDTH + 
+					math.floor((c-1)/3)*SET_GUTTER +
+					(c-1)*TILE_GUTTER+ ((g-1)%3-1)*TILE_WIDTH/3
+				t.y = (r-1)*TILE_WIDTH + 
+					math.floor((r-1)/3)*SET_GUTTER +
+					(r-1)*TILE_GUTTER+ (math.floor((g-1)/3)-1)*
+					TILE_WIDTH/3+TOP_GAP+TILE_WIDTH/2
 
 				guess_g:add(t)
 
@@ -246,25 +301,29 @@ sel_menu:add(
 sel_menu:add(unpack(m_items))
 sel_menu.anchor_point={TILE_WIDTH/2,TILE_WIDTH/2}
 --]]
-Game = Class(function(g,number_of_givens, ...)
+Game = Class(function(g,the_givens, the_guesses, ...)
 	local error_checking = false
 
 	local error_list = {}
 	local undo_list = {}
 	local redo_list = {}
-	local givens = BoardGen(number_of_givens)
-	local guesses = 
-	{
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}},
-		{{},{},{},{},{},{},{},{},{}}
-	}
+	local givens = the_givens--BoardGen(number_of_givens)
+	local guesses = {}
+	if the_guesses then
+		guesses = the_guesses
+	else
+		guesses = 
+		{
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}},
+			{{},{},{},{},{},{},{},{},{}}
+		}
 
 	for r = 1,9 do     for c = 1,9 do
 
@@ -272,14 +331,213 @@ Game = Class(function(g,number_of_givens, ...)
 			guesses[r][c][i] = false
 		end 
 		guesses[r][c].sz = 0
+		guesses[r][c].pen = 0
 
-    end                end
-
+	end                end
+	end
 	g.board = Group{}
 	screen:add(g.board)
-	DevelopBoard(g.board,givens)
+	DevelopBoard(g.board,givens, guesses)
 	--g.board.anchor_point = {g.board.w/2,g.board.h/2}
 	g.board.position = {500,0}--{screen.w/2+40,screen.h/2}
+	function g:save()
+		settings.givens  = givens
+		settings.guesses = guesses
+	end
+	function g:get_guesses(r,c)
+		return guesses[r][c]
+	end
+	function g:get_givens(r,c)
+		return givens[r][c]
+	end
+	function g:add_to_err_list(r,c,guess)
+		if error_checking then
+			--check the row
+			for rr = 1,9 do
+				if givens[rr][c] == guess then
+					table.insert(error_list,
+						{{r,c,guess},{rr,c}})
+				elseif guesses[rr][c][guess] and 
+					rr ~= r then
+					table.insert(error_list,
+						{{r,c,guess},{rr,c,guess}})
+				end
+			end
+			--check the column
+			for cc = 1,9 do
+				if givens[r][cc] == guess then
+					table.insert(error_list,
+						{{r,c,guess},{r,cc}})
+				elseif guesses[r][cc][guess] and 
+					cc ~= c then
+					table.insert(error_list,
+						{{r,c,guess},{r,cc,guess}})
+				end
+			end
+			--check the set
+			for rr = math.floor((r-1)/3)*3+1, math.ceil(r/3)*3 do
+				for cc = math.floor((c-1)/3)*3+1, 
+				         math.ceil(c/3)*3 do
+					if givens[rr][cc] == guess then
+						table.insert(error_list,
+							{{r,c,guess},{rr,cc}})
+					elseif guesses[rr][cc][guess] and 
+						(cc ~= c or rr ~= r) then
+						table.insert(error_list,
+							{{r,c,guess},{rr,cc,guess}})
+					end
+				end
+			end
+			--update the error_list
+			for i,e in ipairs(error_list) do
+				if #e[1] == 2 then
+					g.board:find_child("Given "..e[1][1].." "
+						..e[1][2]).color = "FF0000"
+				elseif #e[1] == 3 then
+					if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+						g.board:find_child("Pen "..e[1][1].." "
+							..e[1][2]).color = "FF0000"
+					end
+					g.board:find_child("Guess "..e[1][1].." "
+						..e[1][2].." "..e[1][3]).color = "FF0000"
+				else
+					error("this should never happen,"..
+						" i did something wrong")
+				end
+				if #e[2] == 2 then
+
+					if givens[e[2][1]][e[2][2]] == 0 then
+						print(e[1][1],e[1][2],"   ",e[2][1],e[2][2])
+
+						debug()
+					end
+					g.board:find_child("Given "..e[2][1].." "
+						..e[2][2]).color = "FF0000"
+				elseif #e[2] == 3 then
+					if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+						g.board:find_child("Pen "..e[2][1].." "
+							..e[2][2]).color = "FF0000"
+					end
+					g.board:find_child("Guess "..e[2][1].." "
+						..e[2][2].." "..e[2][3]).color = "FF0000"
+				else	
+					error("this should never happen,"..
+						" i did something wrong")
+				end
+			end
+		end
+
+	end
+	function g:rem_from_err_list(r,c,val)
+		if error_checking then
+			--have to search backwards in order to update the
+			--table at the same time
+			local e
+			for i =#error_list,1,-1 do
+				e = error_list[i]
+				if (e[1][1] == r and e[1][2] == c 
+				                 and e[1][3] == guess) or
+				   (e[2][1] == r and e[2][2] == c 
+				                 and e[2][3] == guess) then
+
+					if #e[1] == 2 then
+						g.board:find_child("Given "..e[1][1].." "
+							..e[1][2]).color = "FFFFFF"
+					elseif #e[1] == 3 then
+						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+							g.board:find_child("Pen "..e[1][1].." "
+								..e[1][2]).color = "fefa00"
+						end
+						g.board:find_child("Guess "..e[1][1].." "
+							..e[1][2].." "..e[1][3]).color = "fefa00"
+					else
+						error("this should never happen,"..
+							" i did something wrong")
+					end
+					if #e[2] == 2 then
+						g.board:find_child("Given "..e[2][1].." "
+							..e[2][2]).color = "FFFFFF"
+					elseif #e[2] == 3 then
+						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+							g.board:find_child("Pen "..e[2][1].." "
+								..e[2][2]).color = "fefa00"
+						end
+						g.board:find_child("Guess "..e[2][1].." "
+							..e[2][2].." "..e[2][3]).color = "fefa00"
+					else
+						error("this should never happen,"..
+							" i did something wrong")
+					end
+
+					table.remove(error_list,i)
+				end
+			end
+			for i =#error_list,1,-1 do
+				e = error_list[i]
+
+					if #e[1] == 2 then
+						g.board:find_child("Given "..e[1][1].." "
+							..e[1][2]).color = "FF0000"
+					elseif #e[1] == 3 then
+						g.board:find_child("Guess "..e[1][1].." "
+							..e[1][2].." "..e[1][3]).color = "FF0000"
+					else
+						error("this should never happen,"..
+							" i did something wrong")
+					end
+					if #e[2] == 2 then
+						g.board:find_child("Given "..e[2][1].." "
+							..e[2][2]).color = "FF0000"
+					elseif #e[2] == 3 then
+						g.board:find_child("Guess "..e[2][1].." "
+							..e[2][2].." "..e[2][3]).color = "FF0000"
+					else
+						error("this should never happen,"..
+							" i did something wrong")
+					end
+			end	
+		end	
+
+	end
+	function g:pen(r,c,p)
+		g:clear_tile(r,c)
+		if guesses[r][c].pen == p then
+			guesses[r][c].pen = 0
+			g.board:find_child("Pen "..r.." "..c).text=""
+			g.board:find_child("Pen_s "..r.." "..c).text=""
+			g:rem_from_err_list(r,c,p)
+			return
+		end
+--[[
+		for i = 1,9 do
+			guesses[r][c][i] = false
+		end
+--]]
+		guesses[r][c].pen = p
+		guesses[r][c][p] = true
+		local pen = g.board:find_child("Pen "..r.." "..c)
+		pen.text=p
+		pen.anchor_point={pen.w/2,pen.h/2}
+		pen.x = (c-1)*TILE_WIDTH + 
+				math.floor((c-1)/3)*SET_GUTTER +
+				(c-1)*TILE_GUTTER
+		pen.y = (r-1)*TILE_WIDTH + 
+				math.floor((r-1)/3)*SET_GUTTER +
+				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
+
+		local pen_s = g.board:find_child("Pen_s "..r.." "..c)
+		pen_s.text=p
+		pen_s.text=p
+		pen_s.anchor_point={pen.w/2,pen.h/2}
+		pen_s.x = (c-1)*TILE_WIDTH + 
+				math.floor((c-1)/3)*SET_GUTTER +
+				(c-1)*TILE_GUTTER-1
+		pen_s.y = (r-1)*TILE_WIDTH + 
+				math.floor((r-1)/3)*SET_GUTTER +
+				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
+		g:add_to_err_list(r,c,p)
+
+	end
 	function g:toggle_guess(r,c,guess,status)
 		if type(guess) == "table" then
 			for i = 1,#guess do
@@ -288,7 +546,31 @@ Game = Class(function(g,number_of_givens, ...)
 			return
 		end
 		if givens[r][c] == 0 then
-			if guesses[r][c][guess] then
+			if guesses[r][c].pen ~= 0 then
+				if guesses[r][c].pen ~= guess then	
+					g.board:find_child("Guess "..r.." "..c..
+						" "..guesses[r][c].pen).opacity = 255
+
+					guesses[r][c][guess] = true
+					g.board:find_child("Guess "..r.." "..c..
+						" "..guess).opacity = 255
+					if status ~= "REDO" and status ~= "UNDO" then
+						table.insert(undo_list,{r,c,guess})
+						if #undo_list > 100 then
+							table.remove(undo_list,1)
+						end
+					elseif status ~= "REDO" and status ~= "UNDO" then
+						redo_list = {}
+					end
+					g:add_to_err_list(r,c,guess)
+				else
+					g:rem_from_err_list(r,c,guess)
+				end	
+				guesses[r][c].pen = 0
+				g.board:find_child("Pen "..r.." "..c).text=""
+				g.board:find_child("Pen_s "..r.." "..c).text=""
+			
+			elseif guesses[r][c][guess] then
 				guesses[r][c].sz = guesses[r][c].sz - 1
 				guesses[r][c][guess] = false
 				g.board:find_child("Guess "..r.." "..c..
@@ -301,69 +583,10 @@ Game = Class(function(g,number_of_givens, ...)
 				elseif status ~= "REDO" and status ~= "UNDO" then
 					redo_list = {}
 				end
-				if error_checking then
-				--have to search backwards in order to update the
-				--table at the same time
-				local e
-				for i =#error_list,1,-1 do
-					e = error_list[i]
-					if (e[1][1] == r and e[1][2] == c 
-					                 and e[1][3] == guess) or
-					   (e[2][1] == r and e[2][2] == c 
-					                 and e[2][3] == guess) then
-						--table.remove(error_list,i)
-
-						if #e[1] == 2 then
-							g.board:find_child("Given "..e[1][1].." "
-								..e[1][2]).color = "FFFFFF"
-						elseif #e[1] == 3 then
-							g.board:find_child("Guess "..e[1][1].." "
-								..e[1][2].." "..e[1][3]).color = "FFFFFF"
-						else
-							error("this should never happen,"..
-								" i did something wrong")
-						end
-						if #e[2] == 2 then
-							g.board:find_child("Given "..e[2][1].." "
-								..e[2][2]).color = "FFFFFF"
-						elseif #e[2] == 3 then
-							g.board:find_child("Guess "..e[2][1].." "
-								..e[2][2].." "..e[2][3]).color = "FFFFFF"
-						else
-							error("this should never happen,"..
-								" i did something wrong")
-						end
-
-						table.remove(error_list,i)
-					end
-				end
-				for i =#error_list,1,-1 do
-					e = error_list[i]
-
-						if #e[1] == 2 then
-							g.board:find_child("Given "..e[1][1].." "
-								..e[1][2]).color = "FFFFFF"
-						elseif #e[1] == 3 then
-							g.board:find_child("Guess "..e[1][1].." "
-								..e[1][2].." "..e[1][3]).color = "FFFFFF"
-						else
-							error("this should never happen,"..
-								" i did something wrong")
-						end
-						if #e[2] == 2 then
-							g.board:find_child("Given "..e[2][1].." "
-								..e[2][2]).color = "FF0000"
-						elseif #e[2] == 3 then
-							g.board:find_child("Guess "..e[2][1].." "
-								..e[2][2].." "..e[2][3]).color = "FF0000"
-						else
-							error("this should never happen,"..
-								" i did something wrong")
-						end
-				end	
-				end			
+				g:rem_from_err_list(r,c,guess)
+	
 			else
-				guesses[r][c].sz = guesses[r][c].sz + 1
+				--guesses[r][c].sz = guesses[r][c].sz + 1
 				guesses[r][c][guess] = true
 				g.board:find_child("Guess "..r.." "..c..
 					" "..guess).opacity = 255
@@ -375,64 +598,7 @@ Game = Class(function(g,number_of_givens, ...)
 				elseif status ~= "REDO" and status ~= "UNDO" then
 					redo_list = {}
 				end
-				--Error Check
-				if error_checking then
-				for rr = 1,9 do
-					if givens[rr][c] == guess then
-						table.insert(error_list,
-							{{r,c,guess},{rr,c}})
-					elseif guesses[rr][c][guess] and 
-						rr ~= r then
-						table.insert(error_list,
-							{{r,c,guess},{rr,c,guess}})
-					end
-				end
-				for cc = 1,9 do
-					if givens[r][cc] == guess then
-						table.insert(error_list,
-							{{r,c,guess},{r,cc}})
-					elseif guesses[r][cc][guess] and 
-						cc ~= c then
-						table.insert(error_list,
-							{{r,c,guess},{r,cc,guess}})
-					end
-				end
-				for rr = math.floor((r-1)/3)*3+1, math.ceil(r/3)*3 do
-					for cc = math.floor((c-1)/3)*3+1, math.ceil(c/3)*3 do
-						if givens[rr][cc] == guess then
-							table.insert(error_list,
-								{{r,c,guess},{rr,cc}})
-						elseif guesses[rr][cc][guess] and 
-							(cc ~= c or rr ~= r) then
-							table.insert(error_list,
-								{{r,c,guess},{rr,cc,guess}})
-						end
-					end
-				end
-				for i,e in ipairs(error_list) do
-					if #e[1] == 2 then
-						g.board:find_child("Given "..e[1][1].." "
-							..e[1][2]).color = "FF0000"
-					elseif #e[1] == 3 then
-						g.board:find_child("Guess "..e[1][1].." "
-							..e[1][2].." "..e[1][3]).color = "FF0000"
-					else
-						error("this should never happen,"..
-							" i did something wrong")
-					end
-
-					if #e[2] == 2 then
-						g.board:find_child("Given "..e[2][1].." "
-							..e[2][2]).color = "FF0000"
-					elseif #e[2] == 3 then
-						g.board:find_child("Guess "..e[2][1].." "
-							..e[2][2].." "..e[2][3]).color = "FF0000"
-					else
-						error("this should never happen,"..
-							" i did something wrong")
-					end
-				end
-				end
+				g:add_to_err_list(r,c,guess)
 			end
 			return true
 		else
@@ -450,8 +616,12 @@ Game = Class(function(g,number_of_givens, ...)
 						g.board:find_child("Given "..e[1][1].." "
 							..e[1][2]).color = "FFFFFF"
 					elseif #e[1] == 3 then
+						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+							g.board:find_child("Pen "..e[1][1].." "
+								..e[1][2]).color = "fefa00"
+						end
 						g.board:find_child("Guess "..e[1][1].." "
-							..e[1][2].." "..e[1][3]).color = "FFFFFF"
+							..e[1][2].." "..e[1][3]).color = "fefa00"
 					else
 						error("this should never happen,"..
 							" i did something wrong")
@@ -460,8 +630,12 @@ Game = Class(function(g,number_of_givens, ...)
 						g.board:find_child("Given "..e[2][1].." "
 							..e[2][2]).color = "FFFFFF"
 					elseif #e[2] == 3 then
+						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+							g.board:find_child("Pen "..e[2][1].." "
+								..e[2][2]).color = "fefa00"
+						end
 						g.board:find_child("Guess "..e[2][1].." "
-							..e[2][2].." "..e[2][3]).color = "FFFFFF"
+							..e[2][2].." "..e[2][3]).color = "fefa00"
 					else
 						error("this should never happen,"..
 							" i did something wrong")
@@ -558,8 +732,13 @@ Game = Class(function(g,number_of_givens, ...)
 				g.board:find_child("Given "..e[1][1].." "
 					..e[1][2]).color = "FF0000"
 			elseif #e[1] == 3 then
-				g.board:find_child("Guess "..e[1][1].." "
-					..e[1][2].." "..e[1][3]).color = "FF0000"
+				if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+					g.board:find_child("Pen "..e[1][1].." "
+						..e[1][2]).color = "FF0000"
+				else
+					g.board:find_child("Guess "..e[1][1].." "
+						..e[1][2].." "..e[1][3]).color = "FF0000"
+				end
 			else
 				error("this should never happen,"..
 					" i did something wrong")
@@ -574,8 +753,14 @@ Game = Class(function(g,number_of_givens, ...)
 				g.board:find_child("Given "..e[2][1].." "
 					..e[2][2]).color = "FF0000"
 			elseif #e[2] == 3 then
+				if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+					g.board:find_child("Pen "..e[2][1].." "
+						..e[2][2]).color = "FF0000"
+				else
+
 				g.board:find_child("Guess "..e[2][1].." "
 					..e[2][2].." "..e[2][3]).color = "FF0000"
+				end
 			else
 				error("this should never happen,"..
 					" i did something wrong")
@@ -724,14 +909,20 @@ Game = Class(function(g,number_of_givens, ...)
 		local params = {}
 		for i = 1,9 do
 			if guesses[r][c][i] then
+				g:rem_from_err_list(r,c,i)
 				guesses[r][c][i] = false
 				local guess = g.board:find_child("Guess "..
 						r.." "..c.." "..i)
-				guess.color = "FFFFFF"
+--				guess.color = "FFFFFF"
 				guess.opacity = 0
 				table.insert(params,i)
 			end
 		end
+		guesses[r][c].pen = 0
+		g.board:find_child("Pen "..r.." "..c).text=""
+		g.board:find_child("Pen_s "..r.." "..c).text=""
+
+
 		table.insert(undo_list,{r,c,params})
 	end
 --[[
