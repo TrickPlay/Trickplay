@@ -8,9 +8,7 @@ function( section )
 --    dofile("editor.lua")
 
     local ui = section.ui
-
     local assets = ui.assets
-    
     local factory = ui.factory
 
     ---------------------------------------------------------------------------
@@ -29,9 +27,9 @@ function( section )
 --[[
      local dropdown_map =
      {
-     	["UNDO                   [Z]"]   = function() Editor().undo() mouse_mode = S_SELECT end,
-     	["TEXT                    [T]"]   = function() Editor().text() mouse_mode = S_SELECT end,
-     	["IMAGE                   [I]"]   = function() Editor().image() mouse_mode = S_SELECT end,
+     	["UNDO                   [Z]"]   = function() editor.undo() mouse_mode = S_SELECT end,
+     	["TEXT                    [T]"]   = function() editor.text() mouse_mode = S_SELECT end,
+     	["IMAGE                   [I]"]   = function() editor.image() mouse_mode = S_SELECT end,
      	["RECTANGLE         [R]"]   = function() mouse_mode = S_RECTANGLE end,
      	["VIDEO               "]   = function() mouse_mode = S_SELECT end,
      	["CLONE OBJECT    [C]"]   = function() end,
@@ -104,16 +102,16 @@ function( section )
         f_text.extra.on_activate =
             function()
 		mouse_mode = S_SELECT
-		Editor().text()
+		editor.text()
             end
         f_image.extra.on_activate =
             function()
 		mouse_mode = S_SELECT
-		Editor().image()
+		editor.image()
             end
         f_video.extra.on_activate =
             function()
-		Editor().video()
+		editor.video()
 		mouse_mode = S_SELECT
             end
         

@@ -608,6 +608,9 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
         if(item_n == "name" or item_n == "text" or item_n == "src") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	else 
+	     if(item_n == "cx" or item_n == "cy" or item_n == "cw" or item_n == "ch") then 
+                 item_n = string.sub(item_n,2,2)
+	     end 
     	     text = Text {name = "attr", text = string.upper(item_n)}:set(STYLE)
              text.position  = {WIDTH - space , 0}
     	     group:add(text)

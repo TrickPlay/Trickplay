@@ -6,9 +6,7 @@ return
 function( section )
 
     local ui = section.ui
-
     local assets = ui.assets
-    
     local factory = ui.factory
 
     ---------------------------------------------------------------------------
@@ -31,11 +29,11 @@ function( section )
 
 local dropdown_map =
 {
-     ["NEW                [N] "]   = function() Editor().close() mouse_mode = S_SELECT end,
-     ["OPEN               [O] "]   = function() Editor().open() mouse_mode = S_SELECT end,
-     ["SAVE               [S] "]   = function() Editor().save() mouse_mode = S_SELECT end,
+     ["NEW                [N] "]   = function() editor.close() mouse_mode = S_SELECT end,
+     ["OPEN               [O] "]   = function() editor.open() mouse_mode = S_SELECT end,
+     ["SAVE               [S] "]   = function() editor.save() mouse_mode = S_SELECT end,
      ["QUIT               [Q] "]   = function() exit() end,
-     ["VIEW CODES   [V]"]          = function() Editor().view_codes() mouse_mode = S_SELECT end
+     ["VIEW CODES   [V]"]          = function() editor.view_codes() mouse_mode = S_SELECT end
 }
 
     local function build_dropdown_ui()
@@ -91,25 +89,25 @@ local dropdown_map =
         
         f_new.extra.on_activate =
             function()
-	    	Editor().close() 
+	    	editor.close() 
 		mouse_mode = S_SELECT
             end
         
         f_open.extra.on_activate =
             function()
-		Editor().open()
+		editor.open()
 		mouse_mode = S_SELECT
             end
         
         f_save.extra.on_activate =
             function()
-		Editor().save()
+		editor.save()
 		mouse_mode = S_SELECT
             end
         
         f_view.extra.on_activate =
             function()
-		Editor().view_codes()
+		editor.view_codes()
 		mouse_mode = S_SELECT
             end
         
