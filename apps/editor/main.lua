@@ -1,110 +1,11 @@
+dofile("header.lua")
 dofile("editor.lua")
+--dofile("util.lua")
+
 -------------------------------------------------------------------------------
 -- Build the UI
 -------------------------------------------------------------------------------
 local function build_ui( show_it )
-
---[[
-    -------------------------------------------------------------------------------
-    -- Localized string table
-    -------------------------------------------------------------------------------
-    
-    local strings = dofile( "localized:strings.lua" ) or {}
-    -- Set an __index function to warn and return the original string
-    local function missing_localized_string( t , s )
-       -- print( "\t*** MISSING LOCALIZED STRING '"..s.."'" )
-        rawset(t,s,s) -- only warn once per string
-        return s
-    end
-    
-    setmetatable( strings , { __index = missing_localized_string } )
-
-    -------------------------------------------------------------------------------
-    -- Section index constants. These also determine their order.
-    -------------------------------------------------------------------------------
-    
-    local SECTION_FILE      = 1
-    local SECTION_EDIT      = 2
-    local SECTION_ARRANGE   = 3
-    local SECTION_HELP      = 4
-
-    -------------------------------------------------------------------------------
-    -- Style constants
-    -------------------------------------------------------------------------------
-    
-    local BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
-
-    -------------------------------------------------------------------------------
-    -- The asset cache
-    -------------------------------------------------------------------------------
-    
-    local assets = dofile( "assets-cache" )
-        
-    -------------------------------------------------------------------------------
-    -- All the initial assets
-    -------------------------------------------------------------------------------
-    
-    ui =
-    {
-        assets              = assets,
-        
-        factory             = dofile( "ui-factory" ),
-        
-        fs_focus            = nil,
-        
-        bar                 = Group {},
-        
-        bar_background      = assets( "assets/menu-background.png" ),
-        
-        button_focus        = assets( "assets/button-focus.png" ),
-        
-        search_button       = assets( "assets/button-search.png" ),
-        
-        search_focus        = assets( "assets/button-search-focus.png" ),
-        
-        logo                = assets( "assets/logo.png" ),
-                
-        sections =
-        {
-            [SECTION_FILE] =
-            {
-                button  = assets( "assets/button-red.png" ),
-                text    = Text  { text = strings[ "  FILE " ] }:set( BUTTON_TEXT_STYLE ),
-                color   = { 120 ,  21 ,  21 , 230 }, -- RED
-                height  = 370,
-                init    = dofile( "section-file" )
-            },
-            
-            [SECTION_EDIT] =
-            {
-                button  = assets( "assets/button-green.png" ),
-                text    = Text  { text = strings[ "  EDIT  " ] }:set( BUTTON_TEXT_STYLE ),
-                color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 500,
-                init    = dofile( "section-edit" )
-            },
-            
-            [SECTION_ARRANGE] =
-            {
-                button  = assets( "assets/button-yellow.png" ),
-                text    = Text  { text = strings[ "  ARRANGE" ] }:set( BUTTON_TEXT_STYLE ),
-                color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
-                height  = 300,
-                init    = dofile( "section-arrange" )
-            },
-            
-            [SECTION_HELP] =
-            {
-                button  = assets( "assets/button-blue.png" ),
-                text    = Text  { text = strings[ "  HELP" ] }:set( BUTTON_TEXT_STYLE ),
-                color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
-                height  = 200,
-                init    = dofile( "section-help" )
-            }
-        }
-    }
-    
-]]
     -------------------------------------------------------------------------------
     -- Position constants
     -------------------------------------------------------------------------------
@@ -117,12 +18,9 @@ local function build_ui( show_it )
     local DROPDOWN_POINT_Y_OFFSET   = -2                    -- how far to raise or lower the drop downs
     local DROPDOWN_WIDTH_OFFSET     = -8                   -- The width of the dropdown in relation to its button
     
-    -------------------------------------------------------------------------------
-    -- Now, create structure and position everything
-    -------------------------------------------------------------------------------
-    
     ----------------------------------------------------------------------------
     -- The group that holds the bar background and the buttons
+    ----------------------------------------------------------------------------
     
     ui.bar:set
     {
@@ -150,7 +48,6 @@ local function build_ui( show_it )
     ----------------------------------------------------------------------------
     
     local i = 0
-    
     local left = FIRST_BUTTON_X
     
     for _ , section in ipairs( ui.sections ) do
@@ -159,11 +56,9 @@ local function build_ui( show_it )
         section.button.h = section.button.h - 15
 
         -- Create the dropdown background
-    
         section.dropdown_bg = ui.factory.make_dropdown( { section.button.w + DROPDOWN_WIDTH_OFFSET , section.height } , section.color )
     
         -- Position the button and text for this section
-        
         section.button.position =
         {
             left,
@@ -202,13 +97,11 @@ local function build_ui( show_it )
         -- Make sure its Z is correct with respect to the focus image
         
         section.button:lower( ui.button_focus )
-        
         section.text:raise( ui.button_focus )
         
         -- Add the section dropdown to the screen
         
         screen:add( section.dropdown )
-        
         i = i + 1
 
     end
@@ -218,15 +111,9 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
     
     ui.search_button.position = { left + SEARCH_BUTTON_X_OFFSET , FIRST_BUTTON_Y }
-
     ui.search_button.size = { ui.search_button.w -15 , ui.search_button.h - 15 }
-
-
     ui.bar:add( ui.search_button )
-    
-    
     ui.logo.position = { screen.w - ( ui.logo.w + FIRST_BUTTON_X ) , FIRST_BUTTON_Y }
-    
     ui.bar:add( ui.logo )
 
     -------------------------------------------------------------------------------
@@ -237,11 +124,8 @@ local function build_ui( show_it )
                                     -- on a button for the dropdown to show up
                         
     ui.strings = strings            -- Store the string table
-
     ui.focus = SECTION_FILE         -- The section # that has focus
-    
     ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
-    
     ui.color_keys =             -- Which section # to focus with the given key
     {
         [ keys.RED    ] = SECTION_FILE,
@@ -257,7 +141,6 @@ local function build_ui( show_it )
     local function reset_dropdown_timer()
     
         if ui.dropdown_timer then
-        
             ui.dropdown_timer:stop()
             ui.dropdown_timer:start()
             
@@ -268,7 +151,6 @@ local function build_ui( show_it )
     function animate_out_dropdown( callback )
 
         local ANIMATION_DURATION = 200
-        
         local section = ui.sections[ ui.focus ]
         
         if not section.dropdown then
@@ -303,7 +185,6 @@ local function build_ui( show_it )
 	end 
         
         local ANIMATION_DURATION = 150
-        
         local section = ui.sections[ ui.focus ]
         
         if section.dropdown.is_visible then return end
@@ -311,23 +192,16 @@ local function build_ui( show_it )
         -- If the section has not been initialized, do it now
         
         if section.init then
-        
             section:init( )
-            
             section.init = nil
-        
         end
         
         -- Call its on_show method
         
         pcall( section.on_show , section )
-        
         section.dropdown.opacity = 0
-        
         section.dropdown:show()
-        
         section.dropdown.y_rotation = { 90 , 0 , 0 }
-        
         section.dropdown:animate
         {
             duration = ANIMATION_DURATION,
@@ -340,25 +214,15 @@ local function build_ui( show_it )
     local function move_focus( new_focus )
 
         -- Bad focus. Your focus needs more focus.
-        
         if not new_focus then return end
-        
         -- Same focus. Laser focus.
-        
         if new_focus == ui.focus then return end
-        
         local section = ui.sections[ new_focus ]
-        
         -- Focus out of range. Blurred.
-        
         if not section then return end -- The new section is out of range
-        
         animate_out_dropdown()
-        
         ui.focus = new_focus
-        
         ui.button_focus.position = section.button.position
-        
         reset_dropdown_timer()    
     end
 
@@ -376,9 +240,7 @@ local function build_ui( show_it )
         end
                 
         if section:on_enter() then
-        
             ui.button_focus.opacity = 0
-            
         end
     
     end
@@ -419,7 +281,6 @@ local function build_ui( show_it )
             if section:on_default_action() then
                 
                 --ui.button_focus.opacity = 0
-                
                 --ui.fs_focus = ui.focus
             end
         
@@ -430,29 +291,21 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
     -- Handlers
     -------------------------------------------------------------------------------
-        
-    
 
     local key_map =
     {
 
 	[ keys.r	] = function() animate_out_dropdown() mouse_mode = S_RECTANGLE end,
-        [ keys.v	] = function() animate_out_dropdown() Editor().view_code() mouse_mode = S_SELECT end,
-        [ keys.n	] = function() animate_out_dropdown() Editor().close() mouse_mode = S_SELECT end,
-        [ keys.o	] = function() animate_out_dropdown() Editor().open() mouse_mode = S_SELECT end,
-        [ keys.s	] = function() animate_out_dropdown() Editor().save() mouse_mode = S_SELECT end,
-        [ keys.t	] = function() animate_out_dropdown() Editor().text() mouse_mode = S_SELECT end,
-        [ keys.i	] = function() animate_out_dropdown() Editor().image() mouse_mode = S_SELECT end,
-        [ keys.p	] = function() animate_out_dropdown()--[[ if (current_inspector ~= nil) then 
-								   screen:remove(inspector)
-                						   current_inspector = nil
-                						   editor.n_selected(v)
-                						   screen.grab_key_focus(screen)
-							      else 
-								   editor.inspector(v)
-							      end 
-								]]
-							      end,
+        [ keys.v	] = function() animate_out_dropdown() editor.view_code() mouse_mode = S_SELECT end,
+        [ keys.n	] = function() animate_out_dropdown() editor.close() mouse_mode = S_SELECT end,
+        [ keys.o	] = function() animate_out_dropdown() editor.open() mouse_mode = S_SELECT end,
+        [ keys.s	] = function() animate_out_dropdown() editor.save() mouse_mode = S_SELECT end,
+        [ keys.t	] = function() animate_out_dropdown() editor.text() mouse_mode = S_SELECT end,
+        [ keys.i	] = function() animate_out_dropdown() editor.image() mouse_mode = S_SELECT end,
+        [ keys.u	] = function() animate_out_dropdown() editor.undo() mouse_mode = S_SELECT end,
+        [ keys.e	] = function() animate_out_dropdown() editor.redo() mouse_mode = S_SELECT end,
+        [ keys.x	] = function() animate_out_dropdown() editor.debug() mouse_mode = S_SELECT end,
+        [ keys.p	] = function() animate_out_dropdown() end,
         [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
 								   menu_hide = false 
         							   ui.bar:show()
@@ -549,14 +402,14 @@ local function build_ui( show_it )
           print("button_down() results : ",x,y,button,num_clicks)
 
           mouse_state = BUTTON_DOWN
-          if(mouse_mode == S_RECTANGLE) then Editor().rectangle(x, y) end
+          if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
 	
      end
 
      function screen:on_button_up(x,y,button,clicks_count)
           print("button_up() results : ",x,y,button,click_count)
           if (mouse_state == BUTTON_DOWN) then
-              if (mouse_mode == S_RECTANGLE) then Editor().rectangle_done(x, y) mouse_mode = S_SELECT end
+              if (mouse_mode == S_RECTANGLE) then editor.rectangle_done(x, y) mouse_mode = S_SELECT end
               mouse_state = BUTTON_UP
           end
       end
@@ -572,12 +425,15 @@ local function build_ui( show_it )
         	ui:animate_in()
     	  end 
 	  end
+--[[
+    comment out 1004 
           if dragging then
                local actor , dx , dy = unpack( dragging )
                actor.position = { x - dx , y - dy  }
           end
+]]
           if(mouse_state == BUTTON_DOWN) then
-               if (mouse_mode == S_RECTANGLE) then Editor().rectangle_move(x, y) end
+               if (mouse_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
           end
       end
 
@@ -605,9 +461,7 @@ local function build_ui( show_it )
     function ui:hide()
     
         self.button_focus:hide()
-
         self.bar:hide()
-        
         self:foreach_section( function( section ) section.dropdown:hide() end )
             
     end
@@ -620,9 +474,7 @@ local function build_ui( show_it )
         -- Make sure everthing that needs to be hidden is hidden
         
         self:hide()
-        
         self.bar:show()
-        
         self.button_focus:show()
         
         -- Constants
@@ -645,15 +497,11 @@ local function build_ui( show_it )
         local function animation_completed()
         
             -- The bar gets key focus after we animate
-            
             self.bar:grab_key_focus()
-            
             self.dropdown_timer:start()
             
             if callback then
-            
                 callback( self )
-                
             end
             
         end
