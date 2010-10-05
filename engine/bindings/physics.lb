@@ -126,24 +126,17 @@ public:
 	Physx()
 	:
 		world( b2Vec2( 0.0f , 10.0f ) , true ), 
-		ppm( 64.0f ) // 64 pixels per meter - at 1920 that is 30 meters
+		ppm( 64.0f ), // 64 pixels per meter - at 1920 that is 30 meters
+		next_fixture_handle( 1 )
 	{
 //	    world.SetContactListener( this );
 	}
 	
-	~Physx()
-	{
-		for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
-		{
-			if ( void * ud = body->GetUserData() )
-			{
-				g_object_set_data( G_OBJECT( ud ) , "tp-physics-body" , NULL );
-			}
-		}
-	}
+	~Physx();
 	
-	b2World  	world;
-	float32		ppm;
+	b2World    world;
+	float32    ppm;
+	int        next_fixture_handle;
 
 private:
 
@@ -226,11 +219,6 @@ bool get_actor_screen_point( ClutterActor * actor , const ClutterVertex * actor_
 
 #endif
 
-void destroy_actor_body( b2Body * body )
-{
-	body->GetWorld()->DestroyBody( body );
-}
-
 ]]
 
 [[
@@ -239,12 +227,30 @@ class Body
 {
 public:
 
+    struct Info
+    {
+        Info( ClutterActor * _a , Body * _b )
+        :
+            actor( _a ),
+            tp_body( _b )
+        {
+            g_debug( "CREATED BODY INFO %p : %p , %p" , this , actor , tp_body );
+        }
+
+        ~Info()
+        {
+            g_debug( "DESTROYED BODY INFO %p : %p , %p" , this , actor , tp_body );
+        }
+
+        ClutterActor *  actor;
+        Body *          tp_body;
+    };
+
 	Body( Physx * _p , b2Body * _b , ClutterActor * _a )
 	:
 		physx( _p ),
 		body( _b ),
-		actor( _a ),
-		next_fixture_handle( 2 )
+		actor( _a )
 	{
 		g_assert( physx );
 		g_assert( body );
@@ -253,6 +259,8 @@ public:
 		{
 		    g_object_ref( G_OBJECT( actor ) );
 		}
+
+		body->SetUserData( new Info( actor , this ) );
 	}
 	
 	~Body()
@@ -261,6 +269,12 @@ public:
         {
             g_object_unref( G_OBJECT( actor ) );
         }
+
+        Info * info = ( Info * ) body->GetUserData();
+
+        info->tp_body = NULL;
+
+        g_debug( "CLEARED BODY INFO %p : %p , %p" , info , info->actor , info->tp_body );
 	}
 	
 	static Body * get( lua_State * L , int n )
@@ -271,8 +285,39 @@ public:
 	Physx  * 		physx;
 	b2Body * 		body;
 	ClutterActor * 	actor;
-	int             next_fixture_handle;
 };
+
+void destroy_actor_body( b2Body * body )
+{
+    Body::Info * info = ( Body::Info * ) body->GetUserData();
+
+    delete info;
+
+    body->SetUserData( 0 );
+
+    body->GetWorld()->DestroyBody( body );
+}
+
+
+Physx::~Physx()
+{
+    for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
+    {
+        if ( Body::Info * info = ( Body::Info * ) body->GetUserData() )
+        {
+            if ( info->actor )
+            {
+                g_object_set_data( G_OBJECT( info->actor ) , "tp-physics-body" , NULL );
+            }
+            else
+            {
+                delete info;
+
+                body->SetUserData( 0 );
+            }
+        }
+    }
+}
 
 ]]
 
@@ -610,7 +655,7 @@ interface Body [[ Body * ]]
 
             fixture_def.shape = shape;
 
-            result = self->next_fixture_handle++;
+            result = self->physx->next_fixture_handle++;
 
             fixture_def.userData = GINT_TO_POINTER( result );
 
@@ -642,11 +687,11 @@ global physics [[ Physx * ]]
 					continue;
 				}
 				
-				ClutterActor * actor = CLUTTER_ACTOR( body->GetUserData() );
+				Body::Info * info = ( Body::Info * ) body->GetUserData();
 				
-				if ( actor )
+				if ( info && info->actor )
 				{
-				    synchronize_actor( actor , body , self->ppm );
+				    synchronize_actor( info->actor , body , self->ppm );
 				}
 			}
 			
@@ -769,9 +814,7 @@ global physics [[ Physx * ]]
 			// Create the body definition
 			
 			b2BodyDef body_def;
-			
-			body_def.userData = actor;
-			
+
 			body_def.position.Set( x / self->ppm , y / self->ppm );
 			body_def.angle = rotation * ( G_PI / 180.0 ); 
 			
@@ -840,9 +883,9 @@ global physics [[ Physx * ]]
 			//.................................................................
 			// Create the default fixture
 			
-			// This is the 'handle' for the fixture - we always start with 1
+			// This is the 'handle' for the fixture
 
-			fixture_def.userData = GINT_TO_POINTER( 1 );
+			fixture_def.userData = GINT_TO_POINTER( self->next_fixture_handle++ );
 
 			body->CreateFixture( & fixture_def ); 
 
