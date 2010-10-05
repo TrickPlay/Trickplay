@@ -14,8 +14,6 @@ function(gameloop, ...)
             return
         end
         
-        disable_event_listeners() 
-        
         local progress
         local element
         for i,props in ipairs(elements) do

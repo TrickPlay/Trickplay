@@ -3,11 +3,30 @@
     delegation.
 --]]
 local event_listener_en = true
+local key_handler = {}
+local key_hints = {}
 function screen:on_key_down(k)
     if k == keys.g then dumptable(_G) end
+    if key_handler[k] then
+        key_hints[k] = not key_hints[k]
+        key_handler[k]()
+    end
     if event_listener_en then
         router:delegate(KbdEvent({key = k}), {router:get_active_component()})
     end
+end
+
+function add_to_key_handler(key, func)
+    if not key then error("must have a key for key_handler", 2) end
+    if not func then error("must have a function for key_handler", 2 ) end
+    if type(func) ~= "function" then error("func must be a function", 2) end
+
+    key_handler[key] = func
+    key_hints[key] = false
+end
+
+function is_key_hint_on(key)
+    return key_hints[key]
 end
 
 function disable_event_listeners()

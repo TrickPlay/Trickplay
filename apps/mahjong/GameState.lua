@@ -31,12 +31,23 @@ GameState = Class(nil,function(state, ctrl)
     local grid = nil
     -- a grid containing available tiles to select
     local selection_grid = nil
+    -- a table that contains the matching tiles, pairs(matching_tiles) reveals
+    -- all tiles which have a match not necessarilly in any order, the key is also
+    -- the value
+    local matching_tiles = nil
     -- a grid containing the tiles at the top
     local top_grid = nil
+    -- a table where a tile tile is a key to the same tile, holds top tiles
+    local top_tiles = nil
     -- all the tile objects stored in a table
     local tiles = nil
+    -- a table which contains matching tiles organized by indexing into the suit
+    -- and number, i.e. matches[tile.suit][tile.number]
+    local matches = nil
     -- the class for all the tiles with functions
     local tiles_class = nil
+    -- current selected tile to be compared with another tile for elimination
+    local selected_tile = nil
     -- true if the game has not started yet
     local new_game = true
     -- true if the game was won and the auto-complete dialog already showed
@@ -49,9 +60,13 @@ GameState = Class(nil,function(state, ctrl)
     -- getters/setters
     function state:get_grid() return grid end
     function state:get_selection_grid() return selection_grid end
+    function state:get_matching_tiles() return matching_tiles end
     function state:get_top_grid() return top_grid end
+    function state:get_top_tiles() return top_tiles end
     function state:get_tiles() return tiles end
+    function state:get_matches() return matches end
     function state:get_tiles_class() return tiles_class end
+    function state:get_selected_tile() return selected_tile end
     function state:is_new_game() return new_game end
     function state:must_restart() return must_restart end
     function state:game_won() return game_won end
@@ -62,10 +77,10 @@ GameState = Class(nil,function(state, ctrl)
     end
     --[[
         If true the player can move anywhere.
-        If false the palyer has a collection of cards and can only move those
-        cards to specific CardStack Objects.
+        If false the player has a tile selected and must move to another tile
+        which matches the selected one.
     --]]
-    function state:is_roaming() return roaming end
+    function state:is_roaming() return selected_tile == nil end
 
 
 ----------------- Initialization -------------
@@ -75,6 +90,12 @@ GameState = Class(nil,function(state, ctrl)
         print("state initializing")
         new_game = true
         game_won = false
+        
+        -- Get all the tiles in the game
+        tiles_class = Tiles()
+        tiles_class:shuffle()
+        tiles = tiles_class:get_tiles()
+        matches = tiles_class:get_matches()
     end
 
     function state:reset()
@@ -83,14 +104,12 @@ GameState = Class(nil,function(state, ctrl)
         must_restart = false
         game_timer.start = 0
         game_timer.current = 0
+
+        tiles_class:shuffle()
+        tiles_class:reset()
     end
 
     function state:build_mahjong()
-        -- Get all the tiles in the game
-        tiles_class = Tiles()
-        tiles_class:shuffle()
-        tiles = tiles_class:get_tiles()
-
         -- Sets up the game grid the player moves across
         local index = 1
         grid = {}
@@ -167,7 +186,6 @@ GameState = Class(nil,function(state, ctrl)
                 index = index + 1
             end
         end
-        print("final index", index)
         -- Top Piece
         grid[14][8][5] = tiles[index]
         index = index + 1
@@ -202,27 +220,58 @@ GameState = Class(nil,function(state, ctrl)
 
     function state:find_top_tiles()
         top_grid = {}
+        top_tiles = {}
         local x = nil
         local y = nil
         local z = nil
         local new_z = nil
         for i = 1,GRID_WIDTH do
+            top_grid[i] = {}
             for j = 1,GRID_HEIGHT do
+                top_grid[i][j] = {}
                 for k = 1,GRID_DEPTH do
-                    if grid[i][j][k] and not top_grid[grid[i][j][k]] then
-                        x = i
-                        y = j
-                        z = k
-                        new_z = z + 1
-                        while new_z <= GRID_DEPTH do
-                            if grid[i][j][new_z] then z = new_z end
-                            new_z = new_z + 1
+                    if grid[i][j][k] then
+                        top_grid[i][j][k] = grid[i][j][k]
+                        if not top_grid[grid[i][j][k]] then
+                            x = i
+                            y = j
+                            z = k
+                            new_z = z + 1
+                            while new_z <= GRID_DEPTH do
+                                if grid[i][j][new_z] then z = new_z end
+                                new_z = new_z + 1
+                            end
+                            top_tiles[grid[x][y][z]] = grid[x][y][z]
                         end
-                        top_grid[grid[x][y][z]] = grid[x][y][z]
                     end
                 end
             end
         end
+
+        add_to_key_handler(keys.t, function()
+        --[[
+            for i = 1,GRID_WIDTH do
+                for j = 1,GRID_HEIGHT do
+                    for k = 1,GRID_DEPTH do
+                        if top_grid[i][j][k] then
+                            if top_grid[i][j][k].focus.red.opacity == 255 then
+                                top_grid[i][j][k].focus.red.opacity = 0
+                            else
+                                top_grid[i][j][k].focus.red.opacity = 255
+                            end
+                        end
+                    end
+                end
+            end
+        --]]
+            for k,v in pairs(top_tiles) do
+                if is_key_hint_on(keys.t) then
+                    v.focus.red.opacity = 255
+                else
+                    v.focus.red.opacity = 0
+                end
+            end
+        end)
     end
 
     function state:find_selectable_tiles()
@@ -265,6 +314,37 @@ GameState = Class(nil,function(state, ctrl)
         end
     end
 
+    function state:find_matching_tiles()
+        matching_tiles = {}
+        for _,tile in pairs(selection_grid) do
+            if tile.suit == Suits.FLOWER or tile.suit == Suits.SEASON then
+                for _,matching_number in ipairs(matches[tile.suit]) do
+                    for _,match in ipairs(matching_number) do
+                        if match ~= tile and selection_grid[match] then
+                            matching_tiles[tile] = tile
+                            matching_tiles[match] = match
+                        end
+                    end
+                end
+            else
+                for _,match in ipairs(matches[tile.suit][tile.number]) do
+                    if match ~= tile and selection_grid[match] then
+                        matching_tiles[tile] = tile
+                        matching_tiles[match] = match
+                    end
+                end
+            end
+        end
+    end
+
+    function state:show_matching_tiles()
+        for _,tile in pairs(matching_tiles) do
+            if tile.focus.green.opacity == 0 then tile.focus.green.opacity = 255
+            else tile.focus.green.opacity = 0
+            end
+        end
+    end
+
     function state:undo()
     end
 
@@ -278,11 +358,40 @@ GameState = Class(nil,function(state, ctrl)
         local y = selector.y
         local z = selector.z
 
-        if state:is_roaming() then
-        else
-        end
+        local tile = grid[x][y][z]
 
-        return state:is_roaming()
+        if not selected_tile then
+            -- if its a selectable piece
+            if selection_grid[tile] then
+                -- select the piece
+                selected_tile = tile
+                tile.focus.green.opacity = 255
+            end
+        else
+            if selection_grid[tile] and selected_tile:is_a_match(tile) then
+                self:remove_tile(tile)
+                self:remove_tile(selected_tile)
+                selected_tile = nil
+
+                self:find_selectable_tiles()
+                self:find_top_tiles()
+                self:find_matching_tiles()
+            elseif tile == selected_tile then
+                selected_tile.focus.green.opacity = 0
+                selected_tile = nil
+            end
+        end
+    end
+
+    function state:remove_tile(tile)
+        tile.null = true
+        local position = tile.position
+        tile.group:unparent()
+
+        grid[position[1]][position[2]][position[3]] = nil
+        grid[position[1]+1][position[2]][position[3]] = nil
+        grid[position[1]][position[2]+1][position[3]] = nil
+        grid[position[1]+1][position[2]+1][position[3]] = nil
     end
 
     function state:check_for_win()

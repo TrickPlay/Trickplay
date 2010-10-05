@@ -11,8 +11,8 @@ function(ctrl, router, ...)
 
     local grid = nil
     -- the position of the focus
-    local selector = {x = 2, y = 1, z = 1}
-    local prev_selector = nil
+    local selector = {x = 3, y = 1, z = 1}
+    local prev_selector = {x = 3, y = 1, z = 1}
 
     -- getters/setters
     function ctrl:get_router() return router end
@@ -51,11 +51,18 @@ function(ctrl, router, ...)
         state:initialize(args)
         state:build_mahjong()
         pres:display_ui()
+        screen:show()
+
         state:set_tile_quadrants()
         state:find_selectable_tiles()
+        state:find_matching_tiles()
         state:find_top_tiles()
 --        state:build_test()
         grid = state:get_grid()
+        pres:move_focus()
+
+        add_to_key_handler(keys.h, state.show_matching_tiles)
+        add_to_key_handler(keys.r, ctrl.reset_game)
 
     end
 
@@ -63,13 +70,21 @@ function(ctrl, router, ...)
         router:set_active_component(Components.GAME)
         router:notify()
 
-        ctrl:set_selector({x = 1, y = 1})
-        prev_selector = nil
         state:reset()
         state:build_mahjong()
+        pres:display_ui()
         pres:reset()
         state:set_tile_quadrants()
+
+        state:find_selectable_tiles()
+        state:find_matching_tiles()
+        state:find_top_tiles()
+--        state:build_test()
         grid = state:get_grid()
+
+        selector = {x = 1, y = 1, z = 1}
+        ctrl:reset_selector()
+        pres:move_focus()
     end
 
 
@@ -85,25 +100,30 @@ function(ctrl, router, ...)
 
     function ctrl:return_pressed()
         local was_roaming = state:is_roaming()
-        local still_roaming = state:click(selector)
+        state:click(selector)
+        local still_roaming = state:is_roaming()
         -- short circuit, checks to see if state changed from roaming to
         -- not roaming during click, thus game must know where it picked
         -- up a card from in order to put it back to its previous spot
         if was_roaming == not still_roaming then
             if was_roaming then
-                prev_selector = {}
-                prev_selector.x = selector.x
-                prev_selector.y = selector.y
+            elseif grid[selector.x][selector.y][selector.z] then
             else
-                increase_moves() --this is global in "MenuView.lua"/should change
-
-                prev_selector = nil
-
-                if state:get_stock():is_empty() and state:get_waste():is_empty() then
-                    state:check_for_win()
-                end
+                --increase_moves() --this is global in "MenuView.lua"/should change
+                self:reset_selector()
             end
         end
+
+        local counter = 0
+        local matching_tiles = state:get_matching_tiles()
+        for _,_ in pairs(matching_tiles) do
+            counter = counter + 1
+        end
+        if counter <= 0 then
+            print("game over")
+            self:reset_game()
+        end
+        print("pieces left =",counter)
     end
 
     function ctrl:back_pressed()
@@ -118,6 +138,7 @@ function(ctrl, router, ...)
     function ctrl:move_selector(dir)
         local selection_grid = state:get_selection_grid()
         local top_grid = state:get_top_grid()
+        local top_tiles = state:get_top_tiles()
 
         local x = selector.x
         local y = selector.y
@@ -126,32 +147,45 @@ function(ctrl, router, ...)
         local z = 1
         local new_tile = nil
 
-        if 0 ~= dir[1] and grid[x+dir[1]] and grid[x+dir[1]][y][z] then
+        if 0 ~= dir[1] and top_grid[x+dir[1]] and top_grid[x+dir[1]][y][z] then
             x = x + dir[1]
-            if grid[x-dir[1]][y][z] == grid[x][y][z]
-            and grid[x+dir[1]] and grid[x+dir[1]][y][z] then
+            --print("x1",x)
+            if top_grid[x-dir[1]][y][z] == top_grid[x][y][z]
+            and top_grid[x+dir[1]] and top_grid[x+dir[1]][y][z] then
                 x = x + dir[1]
+            --print("x2",x)
             end
-        elseif 0 ~= dir[2] and grid[x][y+dir[2]] and grid[x][y+dir[2]][z] then
+        elseif 0 ~= dir[2] and top_grid[x][y+dir[2]] and top_grid[x][y+dir[2]][z] then
             y = y + dir[2]
-            if grid[x][y-dir[2]][z] == grid[x][y][z]
-            and grid[x][y+dir[2]] and grid[x][y+dir[2]][z] then
+            if top_grid[x][y-dir[2]][z] == top_grid[x][y][z]
+            and top_grid[x][y+dir[2]] and top_grid[x][y+dir[2]][z] then
                 y = y + dir[2]
             end
         end
-        while grid[x][y][z+1] do z = z + 1 end
+        while top_grid[x][y][z+1] do z = z + 1 end
 
-        if old_tile ~= grid[x][y][z] then new_tile = grid[x][y][z] end
+        if old_tile ~= top_grid[x][y][z] then new_tile = top_grid[x][y][z] end
 
         ---[[
+        -- if a tile could not be moved to directly move to the closest neighbor
         if not new_tile then
+            x = selector.x
+            y = selector.y
             local dist = nil
             --arbitrarily high value
             local closest_dist = 10000
-            print("selector")
-            dumptable(selector)
-            for _,tile in pairs(top_grid) do--selection_grid) do
+            --print("selector")
+            --dumptable(selector)
+            for _,tile in pairs(top_tiles) do
+                --dumptable(tile)
                 -- check against comparing tiles in the wrong direction
+                --[[
+                if tile.position[1] == 15 and tile.position[2] == 7 then
+                    dumptable(tile.position)
+                    print("x = ", x)
+                    print("y = ", y)
+                end
+                --]]
                 if -1 == dir[1] and tile.position[1] >= x then
                     -- dont compare
                 elseif 1 == dir[1] and tile.position[1] <= x then
@@ -168,14 +202,43 @@ function(ctrl, router, ...)
                         closest_dist = dist
                         new_tile = tile
                     end
-                    dumptable(tile.position)
+                --    print("new_tile")
+              --      dumptable(tile.position)
                 end
             end
-            print("new_tile")
         end
         --]]
 
         if new_tile then
+            prev_selector = Utils.deepcopy(selector)
+            selector.x = new_tile.position[1]
+            selector.y = new_tile.position[2]
+            selector.z = new_tile.position[3]
+            pres:move_focus()
+        end
+    end
+
+    function ctrl:reset_selector()
+        local top_tiles = state:get_top_tiles()
+
+        local x = selector.x
+        local y = selector.y
+        local new_tile = nil
+
+        local dist = nil
+        --arbitrarily high value
+        local closest_dist = 10000
+        for _,tile in pairs(top_tiles) do
+            -- Euclidean distance measure
+                -- check against comparing against current position
+            dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2)
+            if dist < closest_dist and dist ~= 0 then
+                closest_dist = dist
+                new_tile = tile
+            end
+        end
+        if new_tile then
+            prev_selector = nil
             selector.x = new_tile.position[1]
             selector.y = new_tile.position[2]
             selector.z = new_tile.position[3]
