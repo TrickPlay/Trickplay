@@ -1,6 +1,7 @@
 local tiles = {
     Image{src = "assets/tiles/TileWoodLg.png", opacity = 0},
-    Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0}
+    Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0},
+    Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0}
 }
 for i,image in ipairs(tiles) do screen:add(image) end
 
@@ -65,7 +66,26 @@ for i = 1,4 do
 end
 
 local tile_depth = Image{src = "assets/tiles/TileDepthLg.png", opacity = 0}
-screen:add(tile_depth)
+local tile_highlight_yellow = Image{
+        src="assets/tiles/TileHighlightYellowLg.png",
+        opacity = 0
+}
+local tile_highlight_red = Image{
+        src="assets/tiles/TileHighlightRedLg.png",
+        opacity = 0
+}
+local tile_highlight_green = Image{
+        src="assets/tiles/TileHighlightGreenLg.png",
+        opacity = 0
+}
+local sparkle = Image{
+    src="assets/tiles/Sparkle.png",
+    opacity = 0
+}
+screen:add(
+    tile_depth, tile_highlight_yellow, tile_highlight_green, tile_highlight_red,
+    sparkle
+)
 
 Tile = Class(function(tile, suit, number, ...)
     assert(type(suit) == "number")
@@ -74,10 +94,17 @@ Tile = Class(function(tile, suit, number, ...)
         error("glyph["..suit.."]["..number.."] is not registered", 2)
     end
     
-    tile.image = Clone{source = tiles[2]}
+    tile.image = Clone{source = tiles[3]}
     if not glyphs[suit][number].parent then screen:add(glyphs[suit][number]) end
     tile.glyph = Clone{source = glyphs[suit][number]}
+    tile.focus = {
+        green = Clone{source = tile_highlight_green, x = -21, y = -27, opacity = 0},
+        red = Clone{source = tile_highlight_red, x = -21, y = -27, opacity = 0},
+        yellow = Clone{source = tile_highlight_yellow, x = -21, y = -27, opacity = 0}
+    }
     tile.depth = Clone{source = tile_depth}
+    tile.sparkle = Clone{source = sparkle, opacity = 0}
+    tile.sparkle.clip = {0, 0, tile.sparkle.width/5, tile.sparkle.height}
 
     tile.number = number
     tile.suit = suit
@@ -90,18 +117,52 @@ Tile = Class(function(tile, suit, number, ...)
     tile.position = nil
 
     tile.group = Group()
-    tile.group:add(tile.image, tile.glyph, tile.depth)
+    tile.group:add(
+        tile.image, tile.depth, tile.focus.green, tile.focus.yellow,
+        tile.focus.red, tile.glyph, tile.sparkle
+    )
+
+    function tile:is_a_match(match)
+        if tile == match then return false end
+
+        if tile.suit == Suits.FLOWER or tile.suit == Suits.SEASON then
+            if match.suit == tile.suit then return true end
+        else
+            if match.suit == tile.suit and match.number == tile.number then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    function tile:reset()
+        tile:focus_reset()
+        tile.null = false
+        tile.set = false
+        tile.position = nil
+    end
+
+    function tile:focus_reset()
+        self.focus.red.opacity = 0
+        self.focus.yellow.opacity = 0
+        self.focus.green.opacity = 0
+    end
     
 end)
 
 Tiles = Class(function(self, ...)
 
     local tiles = {}
+    local matches = {}
     local index = 1
     for suit = Suits.FIRST, Suits.LAST do
         for number,glyph_type in ipairs(glyphs[suit]) do
             for multiple = 1,Multiplier[suit] do
                 tiles[index] = Tile(suit, number)
+                if not matches[suit] then matches[suit] = {} end
+                if not matches[suit][number] then matches[suit][number] = {} end
+                table.insert(matches[suit][number], tiles[index])
                 index = index + 1
             end
         end
@@ -113,6 +174,7 @@ Tiles = Class(function(self, ...)
     end
 
     function self:get_tiles() return tiles end
+    function self:get_matches() return matches end
 
     function self:shuffle()
         for i,tile in ipairs(tiles) do
@@ -124,6 +186,12 @@ Tiles = Class(function(self, ...)
     function self:organize()
         for i,v in ipairs(original_order) do
             tiles[i] = v
+        end
+    end
+
+    function self:reset()
+        for i,v in ipairs(tiles) do
+            v:reset()
         end
     end
 

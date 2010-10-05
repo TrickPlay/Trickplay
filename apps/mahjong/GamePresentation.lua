@@ -16,7 +16,8 @@ function(pres, ctrl)
 
     local tiles = {
         "assets/tiles/TileWoodLg.png",
-        "assets/tiles/TilePlasticLg.png"
+        "assets/tiles/TilePlasticLg.png",
+        "assets/tiles/TileMarbleLg.png"
     }
 
     local focus = Rectangle{width = 110, height = 140,
@@ -52,7 +53,7 @@ function(pres, ctrl)
 
     function pres:display_ui()
         local grid = ctrl:get_grid()
-        -- left edgei
+        -- left edge
         --[[
         grid[1][4][1].group.position = Utils.deepcopy(GridPositions[1][4][1])
         grid[1][4][1].group.y = grid[1][4][1].group.y + 50
@@ -65,6 +66,9 @@ function(pres, ctrl)
                     if grid[i][j][k] then
                         grid[i][j][k].group.position =
                             Utils.deepcopy(GridPositions[i][j][k])
+                        if grid[i][j][k].group.parent then
+                            grid[i][j][k].group:unparent()
+                        end
                         grid_group:add(grid[i][j][k].group)
                     end
                 end
@@ -90,20 +94,28 @@ function(pres, ctrl)
             for i = 1,GRID_WIDTH do
                 for j = 1, GRID_HEIGHT do
                     if grid[i][j][k] then
-                        grid[i][j][k].depth.opacity = 180-180*((k-1)/4)
-                        print(grid[i][j][k].depth.opacity)
+                        grid[i][j][k].depth.opacity = 255-255*((k-1)/4)
                     end
                 end
             end
         end
 
-        grid_group:add(focus)
+--        grid_group:add(focus)
 
-        screen:show()
     end
 
     function pres:reset()
         print("pres:reset() not yet implemented")
+        local grid = ctrl:get_grid()
+        for i = 1,GRID_WIDTH do
+            for j = 1,GRID_HEIGHT do
+                for k = 1,GRID_DEPTH do
+                    if grid[i][j][k] then
+                        grid[i][j][k]:focus_reset()
+                    end
+                end
+            end
+        end
     end
 
     function pres:update(event)
@@ -112,6 +124,13 @@ function(pres, ctrl)
 
     function pres:move_focus()
         local selector = ctrl:get_selector()
+        local prev_selector = ctrl:get_prev_selector()
+
+        local grid = ctrl:get_grid()
+        if prev_selector then
+            grid[prev_selector.x][prev_selector.y][prev_selector.z].focus.yellow.opacity = 0
+        end
+        grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 255
 
         local position = GridPositions[selector.x][selector.y][selector.z]
         focus.x = position[1]
