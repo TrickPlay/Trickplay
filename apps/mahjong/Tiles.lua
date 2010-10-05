@@ -94,7 +94,7 @@ Tile = Class(function(tile, suit, number, ...)
         error("glyph["..suit.."]["..number.."] is not registered", 2)
     end
     
-    tile.image = Clone{source = tiles[3]}
+    tile.image = Clone{source = tiles[1]}
     if not glyphs[suit][number].parent then screen:add(glyphs[suit][number]) end
     tile.glyph = Clone{source = glyphs[suit][number]}
     tile.focus = {
