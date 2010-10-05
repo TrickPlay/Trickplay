@@ -93,9 +93,9 @@ void MyAudioSessionInterruptionListener(void *inClientData, UInt32 inInterruptio
 void audioCallback( void *inUserData, AudioQueueRef inQueue, AudioQueueBufferRef inBuffer ) {
 	
 	NSLog(@"audio callback");
-	int numBuffersToEnqueueLater;
-	AudioQueueBufferRef audioQueueBuffer[kNumAQBufs];
-    printf( "callback for buffer %d from run loop %d\n", inBuffer, CFRunLoopGetCurrent() );
+//	int numBuffersToEnqueueLater;
+//	AudioQueueBufferRef audioQueueBuffer[kNumAQBufs];
+    printf( "callback for buffer %p from run loop %p\n", inBuffer, CFRunLoopGetCurrent() );
     
     // fill it up
     inBuffer->mAudioDataByteSize = inBuffer->mAudioDataBytesCapacity;
@@ -109,8 +109,8 @@ void audioCallback( void *inUserData, AudioQueueRef inQueue, AudioQueueBufferRef
     if( err ) {
         printf( "Error on AudioQueueEnqueueBuffer: %4s\n", (char*)&err );
         
-        audioQueueBuffer[ numBuffersToEnqueueLater ] = inBuffer;
-        numBuffersToEnqueueLater++;
+//        audioQueueBuffer[ numBuffersToEnqueueLater ] = inBuffer;
+//        numBuffersToEnqueueLater++;
 	}
 }
 

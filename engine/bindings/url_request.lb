@@ -14,7 +14,7 @@ interface URLResponse [[Network::Response*]]
 {
     URLResponse()
         [[
-            *self=(Network::Response*)lua_touserdata(L,-2);
+            self=lb_construct(Network::Response,lua_touserdata(L,-2));
         ]];
         
     ~URLResponse()
@@ -89,22 +89,7 @@ interface URLResponse [[Network::Response*]]
 }
 
 [[
-struct RequestInfo
-{
-    RequestInfo(Network::Request*r,lua_State*l) : self(r),L(l)
-    {
-    }
-    
-    ~RequestInfo()
-    {
-    }
-    
-    Network::Request * self;
-    lua_State * L;
-};
-
 void URLRequest_response_callback(const Network::Response&response,gpointer info);
-void URLRequest_response_destroy(gpointer info);
 ]]
 
 # Class: URLRequest
@@ -128,7 +113,7 @@ class URLRequest [[Network::Request*]]
     
     URLRequest(string url=NULL)
         [[
-            *self=new Network::Request(App::get(L)->get_user_agent());
+            self=lb_construct( Network::Request , new Network::Request(App::get(L)->get_user_agent()) );
             
             if (lua_gettop(L)==2 && lua_istable(L,-2))
             {
@@ -136,11 +121,10 @@ class URLRequest [[Network::Request*]]
                 lb_set_props_from_table(L);
                 lua_pop(L,1);
             }
-	    else
-	    {
-		if (url)
-		    (*self)->url=url;		    
-	    }
+		    else if (url)
+		    {
+			    self->url=url;		    
+		    }
         ]];
     
     ~URLRequest()
@@ -250,11 +234,11 @@ class URLRequest [[Network::Request*]]
     
     udata perform()
         [[
-	    App * app=App::get(L);
+	    	App * app=App::get(L);
 
             Network::Response response=app->get_network()->perform_request(
-		*self,
-		app->get_cookie_jar());
+				*self,
+				app->get_cookie_jar());
 
             lua_pushlightuserdata(L,new Network::Response(response));
             new_URLResponse(L);
@@ -268,14 +252,14 @@ class URLRequest [[Network::Request*]]
     
     send()
         [[
-	    App * app=App::get(L);
+	    	App * app=App::get(L);
 
             app->get_network()->perform_request_async(
-		*self,
-		app->get_cookie_jar(),
-		URLRequest_response_callback,
-		new RequestInfo(self,L),
-		URLRequest_response_destroy);
+				*self,
+				app->get_cookie_jar(),
+				URLRequest_response_callback,
+				UserData::Handle::make(L,1,self),
+				UserData::Handle::destroy);
         ]];
         
     # Event: on_complete
@@ -304,19 +288,20 @@ class URLRequest [[Network::Request*]]
 }
 
 [[
-void URLRequest_response_callback(const Network::Response&response,gpointer info)
+void URLRequest_response_callback(const Network::Response&response,gpointer _handle)
 {
-    RequestInfo * ri=(RequestInfo*)info;
-    lua_pushlightuserdata(ri->L,new Network::Response(response));
-    new_URLResponse(ri->L);
-    lua_remove(ri->L,-2);
+	UserData::Handle * handle = UserData::Handle::get( _handle );
+	
+	lua_State * L = handle->get_lua_state();
+	
+	if ( L )
+	{
+    	lua_pushlightuserdata(L,new Network::Response(response));
+    	new_URLResponse(L);
+    	lua_remove(L,-2);
     
-    invoke_URLRequest_on_complete(ri->L,ri->self,1,0);    
-}
-
-void URLRequest_response_destroy(gpointer info)
-{
-    delete (RequestInfo*)info;    
+    	invoke_URLRequest_on_complete(L,(Network::Request*)handle->get_user(),1,0);
+    }    
 }
 
 ]]
