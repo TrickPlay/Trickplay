@@ -107,6 +107,18 @@ void populate_fixture_from_table( lua_State * L , int properties , b2FixtureDef 
     lua_pop( L , 1 );
 }
 
+void synchronize_actor( ClutterActor * actor , b2Body* body , double ppm )
+{
+    if ( actor )
+    {
+        const b2Vec2 & pos( body->GetPosition() );
+
+        clutter_actor_set_position( actor , pos.x * ppm , pos.y * ppm );
+
+        clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , body->GetAngle () / ( G_PI / 180.0 ) , 0 , 0 , 0 );
+    }
+}
+
 class Physx : private b2ContactListener
 {
 public:
@@ -310,23 +322,82 @@ interface Body [[ Body * ]]
 			self->body->SetActive( active );
 		]];
 
-	readonly table position
+	table position
 		[[
-			const b2Vec2 pos( self->body->GetPosition() );
+			const b2Vec2 & pos( self->body->GetPosition() );
 			
 			lua_newtable( L );
 			lua_pushnumber( L , pos.x * self->physx->ppm );
 			lua_rawseti( L , -2 , 1 );
 			lua_pushnumber( L , pos.y * self->physx->ppm );
 			lua_rawseti( L , -2 , 2 );
-		]];
-		
-	readonly double angle
+		]]
 		[[
-			angle = self->body->GetAngle() / ( G_PI / 180.0 );
+		    lua_rawgeti( L , 2 , 1 );
+            lua_rawgeti( L , 2 , 2 );
+
+            b2Vec2 pos( lua_tonumber( L , -2 ) / self->physx->ppm , lua_tonumber( L , -1 ) / self->physx->ppm );
+
+            lua_pop( L , 2 );
+
+            self->body->SetTransform( pos , self->body->GetAngle() );
+
+            synchronize_actor( self->actor , self->body , self->physx->ppm );
 		]];
 
-	readonly table world_center
+	double x
+        [[
+            const b2Vec2 & pos( self->body->GetPosition() );
+
+            x = pos.x * self->physx->ppm;
+        ]]
+        [[
+            b2Vec2 pos( self->body->GetPosition() );
+
+            pos.x = x / self->physx->ppm;
+
+            self->body->SetTransform( pos , self->body->GetAngle() );
+
+            synchronize_actor( self->actor , self->body , self->physx->ppm );
+        ]];
+		
+    double y
+        [[
+            const b2Vec2 & pos( self->body->GetPosition() );
+
+            y = pos.y * self->physx->ppm;
+        ]]
+        [[
+            b2Vec2 pos( self->body->GetPosition() );
+
+            pos.y = y / self->physx->ppm;
+
+            self->body->SetTransform( pos , self->body->GetAngle() );
+
+            synchronize_actor( self->actor , self->body , self->physx->ppm );
+        ]];
+
+	double angle
+		[[
+			angle = self->body->GetAngle() / ( G_PI / 180.0 );
+		]]
+		[[
+		    self->body->SetTransform( self->body->GetPosition() , angle * ( G_PI / 180 ) );
+
+            synchronize_actor( self->actor , self->body , self->physx->ppm );
+		]];
+
+    double rotation
+        [[
+            rotation = self->body->GetAngle() / ( G_PI / 180.0 );
+        ]]
+        [[
+            self->body->SetTransform( self->body->GetPosition() , rotation * ( G_PI / 180 ) );
+
+            synchronize_actor( self->actor , self->body , self->physx->ppm );
+        ]];
+
+    readonly table world_center
         [[
             const b2Vec2 pos( self->body->GetWorldCenter() );
             lua_newtable( L );
@@ -575,11 +646,7 @@ global physics [[ Physx * ]]
 				
 				if ( actor )
 				{
-					const b2Vec2 & pos( body->GetPosition() );
-					
-					clutter_actor_set_position( actor , pos.x * self->ppm , pos.y * self->ppm );
-					
-					clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , body->GetAngle () / ( G_PI / 180.0 ) , 0 , 0 , 0 );
+				    synchronize_actor( actor , body , self->ppm );
 				}
 			}
 			
