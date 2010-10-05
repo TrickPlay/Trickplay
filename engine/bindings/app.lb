@@ -15,14 +15,10 @@ global app [[App*]]
 {
     app()
         [[
-            *self=App::get(L);
-
-            (*self)->add_notification_handler(TP_NOTIFICATION_APP_LOADED,app_loaded_handler,L);
-            (*self)->add_notification_handler(TP_NOTIFICATION_APP_CLOSING,app_closing_handler,L);
-        ]];
-
-    ~app()
-        [[
+            self=lb_construct( App , App::get(L) );
+	
+            self->add_notification_handler(TP_NOTIFICATION_APP_LOADED,app_loaded_handler,L);
+            self->add_notification_handler(TP_NOTIFICATION_APP_CLOSING,app_closing_handler,L);
         ]];
     
     # Property: id

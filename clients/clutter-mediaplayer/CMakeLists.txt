@@ -1,4 +1,5 @@
 
+TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h    TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( clutter-1.0 clutter-gst/clutter-gst.h  TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gstreamer-0.10 gst/gst.h               TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( glib-2.0 glib.h 			TPCMP_INCLUDE_DIRS )
@@ -30,7 +31,6 @@ TP_FIND_LIBRARY( json-glib-1.0      TPCMP_LIBRARIES )
 
 TP_FIND_LIBRARY( clutter-glx-1.0    TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( clutter-gst-0.10   TPCMP_LIBRARIES )
-TP_FIND_LIBRARY( clutter-gst-1.0   TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstreamer-0.10     TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstvideo-0.10      TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstbase-0.10       TPCMP_LIBRARIES )

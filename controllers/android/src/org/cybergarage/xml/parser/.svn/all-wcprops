@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/cgupnpjava/!svn/ver/152/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/parser
+END
+JaxpParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/cgupnpjava/!svn/ver/95/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/parser/JaxpParser.java
+END
+XercesParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/parser/XercesParser.java
+END
+XmlPullParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svnroot/cgupnpjava/!svn/ver/152/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/parser/XmlPullParser.java
+END
+kXML2Parser.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/xml/parser/kXML2Parser.java
+END
