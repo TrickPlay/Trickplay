@@ -39,7 +39,9 @@ end
 function editor.n_selected(obj)
         for i, v in pairs(g.children) do
              if g:find_child(v.name) then
-		  g:find_child(v.name):set{opacity = g:find_child(v.name).extra.org_opacity} 
+		  if (obj.name ~= v.name) then 
+		       g:find_child(v.name):set{opacity = g:find_child(v.name).extra.org_opacity} 
+		  end
              end
         end
 end  
@@ -73,7 +75,8 @@ function editor.inspector(v)
 	local inspector_xbox = factory.make_xbox()
 
 	local inspector = Group {
-	     position ={ v.x + v.w + INSPECTOR_OFFSET , v.y },
+	     --position ={ v.x + v.w + INSPECTOR_OFFSET , v.y },
+	     position ={0, 0},
 	     anchor_point = {0,0},--{ inspector_bg.w / 2 , 0 },
              children =
              {
@@ -82,37 +85,80 @@ function editor.inspector(v)
              }
 	}
 
-	if(inspector.y - INSPECTOR_OFFSET  <= ui.bar_background.h) then
-                inspector.y = ui.bar_background.h + INSPECTOR_OFFSET
-        elseif (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h ) then
-                inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
-        end 
-        if (inspector.x + inspector.w + INSPECTOR_OFFSET >= screen.w ) then
-                inspector.x = v.x - inspector.w - INSPECTOR_OFFSET
-        end 
+	local function inspector_position() 
+	     local x_space, y_space
+ 
+	     if (v.x > screen.w - v.x - v.w) then 
+	          x_space = v.x 
+        	  if (inspector.w + INSPECTOR_OFFSET < x_space) then 
+			inspector.x = x_space - inspector.w - INSPECTOR_OFFSET
+		  else 
+			inspector.x = (v.x + v.w - inspector.w)/2
+        	  end 
+	     else 
+		  x_space = screen.w - v.x - v.w
+        	  if (inspector.w + INSPECTOR_OFFSET < x_space) then 
+			inspector.x = v.x + v.w + INSPECTOR_OFFSET
+		  else 
+			inspector.x = (v.x + v.w - inspector.w)/2
+        	  end 
+	    end  
 
-	local attr_i, attr_n, attr_v
+	    if (v.y > screen.h - v.y - v.h) then 
+		y_space = v.y 
+        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+			inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
+			if(inspector.y <= ui.bar_background.h + INSPECTOR_OFFSET) then
+			     inspector.y = ui.bar_background.h + INSPECTOR_OFFSET	
+			end	
+		else 
+                	inspector.y = (v.y + v.h - inspector.h) /2
+			if(inspector.y <= ui.bar_background.h + INSPECTOR_OFFSET) then
+			     inspector.y = ui.bar_background.h + INSPECTOR_OFFSET	
+			end	
+        	end 
+	    else 
+		y_space = screen.h - v.y - v.h
+        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+			inspector.y = v.y + v.h + INSPECTOR_OFFSET
+		else 
+			inspector.y = (v.y + v.h - inspector.h)/2
+			if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
+				inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
+			elseif (inspector.y <= ui.bar_background.h + INSPECTOR_OFFSET) then
+			     inspector.y = ui.bar_background.h + INSPECTOR_OFFSET	
+			end
+        	end 
+	    end 
+	end 
+
+	inspector_position() 
+
+	local attr_n, attr_v
 	local i = 0
 	for i=1,35 do 
              if (attr_t[i] == nil) then
 		  break
 	     end 
 	     attr_n = attr_t[i][1] 
-	     attr_i = attr_t[i][2] 
+	     attr_v = attr_t[i][2] 
 	     n_attr_n = attr_t[i][3] 
 
+--[[
 	     if(type(attr_i) == table ) then
 	          attr_v = table.concat(attr_i,",")
              else
                   attr_v = tostring(attr_i)
              end 
+]]
+             attr_v = tostring(attr_v)
 
 	     if(n_attr_n == nil) then n_attr_n = "" end 
 	     
-	     local item = factory.make_text_popup_item(assets, attr_n, attr_v, n_attr_n) 
+	     local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, n_attr_n) 
+--[[
 	     if(attr_n ~= "title" and attr_n ~= "line" and attr_n ~=  "caption") then 
 	    	table.insert(inspector_items, item)
-
 	         function item:on_button_down(x,y,button,num_clicks)
                  if (item.on_activate) then
                      item:on_activate()
@@ -121,6 +167,7 @@ function editor.inspector(v)
 
 	         item.extra.on_activate = function ()  end 
 	     end 
+]]
 
             items_height = items_height + item.h 
 
@@ -133,13 +180,37 @@ function editor.inspector(v)
 		 used = 0
             end 
 		
-	    if(attr_n == "name" or attr_n == "text" or attr_n == "src") then 
+---[[
+	    if(attr_n == "name" or attr_n == "text" or attr_n == "src" 
+	       or attr_n == "r" or attr_n == "g" or attr_n == "b" or attr_n == "font "
+	       or attr_n == "rect_r" or attr_n == "rect_g" or attr_n == "rect_b" 
+	       or attr_n == "bord_r" or attr_n == "bord_g" or attr_n == "bord_b" 
+	       or attr_n == "font ") then 
                  item.y = items_height - 15
+
             elseif (attr_n == "line") then  
+                 item.y = items_height + 35
+
+	    --elseif (attr_n == "caption") then  
+                 -- item.y = items_height - 35
+	    else 
+                 item.y = items_height
+	    end
+--]]
+
+--[[
+	    print("KKKK") 
+	    print(attr_n)
+	    print("s", space)
+	    print("u", used)
+	    print("x", item.x)
+	    print("y", item.y)
+            if (attr_n == "line") then  
                  item.y = items_height + 35
 	    else 
                  item.y = items_height
 	    end
+]]
 
 	    if(space == 0) then 
 	         space = WIDTH - item.w 
@@ -147,67 +218,13 @@ function editor.inspector(v)
 		 space = space - item.w
 	    end
 	    used = used + item.w 
-
+	
 	    inspector:add(item)
         end 
 
 	screen:add(inspector)
-	local org_obj, new_obj
-
-	function grab_focus(attr) 
-        if inspector:find_child(attr) and  
-             inspector:find_child(attr):find_child("input_text") then
-             inspector:find_child(attr):find_child("input_text"):grab_key_focus()
-             inspector:find_child(attr):find_child("input_text"):set{cursor_visible = true, cursor_size = 3}
-             inspector:find_child(attr).extra.on_focus_in()
-
-	     input_txt = inspector:find_child(attr):find_child("input_text")
-	     function input_txt:on_key_down(key)
-	          if key == keys.Return or
-                     key == keys.Tab or 
-                     key == keys.Right then
-                     inspector:find_child(attr).extra.on_focus_out()
-                     inspector:find_child(attr):find_child("input_text"):set{cursor_visible = false}
-                     grab_focus(inspector:find_child(attr):find_child("next_attr").text)
-                  end
-   	     end 
-        elseif inspector:find_child(attr):find_child("button") then
- 	      inspector:find_child(attr):find_child("button"):grab_key_focus()
-              inspector:find_child(attr).extra.on_focus_in()
-              button = inspector:find_child(attr):find_child("button")
-              function button:on_key_down(key)
-                   if key == keys.Return then
-                      if (attr == "view code") then 
-		          screen:remove(inspector)
-		          current_inspector = nil
-		          editor.n_selected(v)
-                          screen.grab_key_focus(screen) 
-			  -- org_obj, new_obj = inspector_apply (v, inspector) 
-		          editor.view_code()
-	                  return true
-		      elseif (attr == "apply") then 
-			  org_obj, new_obj = inspector_apply (v, inspector) 
-		          screen:remove(inspector)
-		          current_inspector = nil
-		          editor.n_selected(v)
-                          screen.grab_key_focus(screen) 
-		      elseif (attr == "cancel") then 
-		          screen:remove(inspector)
-		          current_inspector = nil
-		          editor.n_selected(v)
-                          screen.grab_key_focus(screen) 
-	                  return true
-		      end 
- 		   elseif key == keys.Tab or key == keys.Right then 
-                      inspector:find_child(attr).extra.on_focus_out()
-                      grab_focus(inspector:find_child(attr):find_child("next_attr").text)
-                   end
-              end
-
-        end
-	end 
-
-	grab_focus("name") 
+	inspector:find_child("name").extra.on_focus_in()
+	
 	current_inspector = inspector
         inspector.reactive = true;
 	create_on_button_down_f(inspector)
@@ -315,11 +332,11 @@ end
 function editor.undo()
 	  if( undo_list == nil) then return true end 
           local undo_item= table.remove(undo_list)
+	  if(undo_item == nill) then return true end
 	  if undo_item[2] == CHG then 
                local the_obj = g:find_child(undo_item[1])
  	       the_obj:set{opacity = undo_item[3].opacity} 
  	       the_obj:set{w = undo_item[3].w, h =undo_item[3].h } 
- 	       --the_obj:set{color = undo_item[3].color}
 	       redo_item = {undo_item[3].name, CHG, undo_item[3], undo_item[4]}
 	       table.insert(redo_list, redo_item)
 	  elseif undo_item[2] == ADD then 
@@ -345,6 +362,7 @@ function editor.redo()
           
 	  if( redo_list == nil) then return true end 
           local redo_item= table.remove(redo_list)
+	  if(redo_item == nill) then return true end
  	  
           if redo_item[2] == CHG then 
               local the_obj = g:find_child(redo_item[1])
@@ -353,11 +371,11 @@ function editor.redo()
                undo_item = {redo_item[4].name, CHG, redo_item[3], redo_item[4]}
                table.insert(undo_list, undo_item)
           elseif redo_item[2] == ADD then 
-               editor.add(g:find_child(redo_item[1]))
-              -- table.insert(undo_list, redo_item)
+               editor.add(redo_item[3])
+               table.insert(undo_list, redo_item)
           elseif undo_item[2] == DEL then 
-               editor.delete(g:find_child(redo_item[1]))
-              -- table.insert(undo_list, redo_item)
+               editor.delete(redo_item[3])
+               table.insert(undo_list, redo_item)
           end 
 end
 
@@ -365,13 +383,13 @@ function editor.add(obj)
 	g:add(obj)
         --screen:add(g:find_child(obj.name))
         screen:add(obj)
-        table.insert(undo_list, {obj.name, ADD, obj})
+        --table.insert(undo_list, {obj.name, ADD, obj})
 end
 
 function editor.delete(obj)
         --screen:remove(g:find_child(obj.name))
         screen:remove(obj)
-        table.insert(undo_list, {obj.name, DEL, obj})
+        --table.insert(undo_list, {obj.name, DEL, obj})
 	g:remove(obj)
 end
 
@@ -405,6 +423,7 @@ function editor.text()
 
      	function ui.text:on_key_down(key)
              if key == keys.Return then
+		ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
 		item_num = item_num + 1
 		return true

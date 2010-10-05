@@ -1,157 +1,8 @@
-
---local g = Group()
---local contents    = ""
---local item_num    = 0
-
 -----------
 -- Utils 
 -----------
 
 function abs(a) if(a>0) then return a else return -a end end
-function make_attr_t(v)
-function toboolean(s) if (s == "true") then return true else return false end end
-local attr_t =
-      {
-             {"title", "INSPECTOR : "..string.upper(v.type)},
-             {"caption", "OBJECT NAME"},
-             {"name", v.name,"x"},
-             {"line",""},
-             {"x", v.x, "y"},
-             {"y", v.y, "z"},
-             {"z", v.z, "w"},
-             {"w", v.w, "h"},
-             {"h", v.h},
-             {"line",""}
-      }
-      if (v.type == "Text") then
-        table.insert(attr_t[9], "color")
-        table.insert(attr_t, {"color", v.color,"font "})
-        table.insert(attr_t, {"font ", v.font,"text"})
-        table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"caption", "TEXT"})
-        table.insert(attr_t, {"text", v.text,"editable"})
-        table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"editable", v.editable,"wants_enter"})
-        table.insert(attr_t, {"wants_enter", v.wants_enter,"wrap"})
-        table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"wrap", v.wrap, "wrap_mode"})
-        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"opacity"})
-        table.insert(attr_t, {"line",""})
-      elseif (v.type  == "Rectangle") then
-        table.insert(attr_t[9], "fill_color  ")
-        --table.insert(attr_t, {"caption", "FILL COLOR"})
-        table.insert(attr_t, {"fill_color  ", v.color,"border_color"})
-        --table.insert(attr_t, {"caption", "BORDER COLOR"})
-        table.insert(attr_t, {"border_color", v.border_color, "border_width"})
-        table.insert(attr_t, {"border_width", v.border_width, "opacity"})
-        table.insert(attr_t, {"line",""})
-      elseif (v.type  == "Image") then
-        table.insert(attr_t[9], "src")
-        table.insert(attr_t, {"caption", "SOURCE LOCATION"})
-        table.insert(attr_t, {"src", v.src,"cx"})
-        table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"caption", "CLIP   "})
-        local clip_t = v.clip
-        if clip_t == nil then
-             clip_t = {0,0 ,v.w, v.h}
-        end
-        table.insert(attr_t, {"cx", clip_t[1], "cy"})
-        table.insert(attr_t, {"cy", clip_t[2], "cw"})
-        table.insert(attr_t, {"cw", clip_t[3], "ch"})
-        table.insert(attr_t, {"ch", clip_t[4], "opacity"})
-        table.insert(attr_t, {"line",""})
---[[
-        table.insert(attr_t, {"caption", "X ROTATION  "})
-        local x_rotation_t = v.x_rotation 
-        if x_rotation_t == nil then 
-             x_rotation_t = {"-","-","-"} 
-        end
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "rxy"})
-        table.insert(attr_t, {"rxy", x_rotation_t[2], "rxz"})
-        table.insert(attr_t, {"rxz", x_rotation_t[3], "opacity"})
-        table.insert(attr_t, {"line",""})
-
-        table.insert(attr_t, {"caption", "Y ROTATION  "})
-        local y_rotation_t = v.y_rotation 
-        if y_rotation_t == nil then 
-             y_rotation_t = {"-","-","-"} 
-        end
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "ryz"})
-        table.insert(attr_t, {"ryx", y_rotation_t[2], "ryz"})
-        table.insert(attr_t, {"ryz", y_rotation_t[3], "z_angle"})
-        table.insert(attr_t, {"line",""})
-
-        table.insert(attr_t, {"caption", "Z ROTATION  "})
-        local z_rotation_t = v.z_rotation 
-        if z_rotation_t == nil then 
-             z_rotation_t = {"-","-","-"} 
-        end
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "rzx"})
-        table.insert(attr_t, {"rzx", z_rotation_t[2], "rzy"})
-        table.insert(attr_t, {"rzy", z_rotation_t[3], "opacity"})
- table.insert(attr_t, {"line",""})
-]]
-      end
-      table.insert(attr_t, {"opacity", v.opacity, "view code"})
-      table.insert(attr_t, {"line",""})
-      --table.insert(attr_t, {"rotation", v.rotation})
-      --table.insert(attr_t, {"line",""})
-      --table.insert(attr_t, {"anchor_point", v.anchor_point})
-      --table.insert(attr_t, {"line",""})
-      table.insert(attr_t, {"button", "view code", "apply"})
-      table.insert(attr_t, {"button", "apply", "cancel"})
-      table.insert(attr_t, {"button", "cancel"})
-
-      return attr_t
-end
-
-function itemTostring(v)
-    local itm_str = ""
-    local indent       = "\n\t\t"
-    local b_indent       = "\n\t"
-    local clip_t = v.clip
-    if(clip_t == nil) then
-             clip_t = {0,0 ,v.w, v.h}
-    end
-    if(v.type == "Rectangle") then
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "border_color={"..table.concat(v.border_color,",").."},"..indent..
-         "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
-         "size = {"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Image") then
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "src=\""..v.src.."\","..indent..
-        -- "base_size={"..table.concat(v.base_size,",").."},"..indent..
-        -- "async="..tostring(v.async)..","..indent..
-        -- "loaded="..tostring(v.loaded)..","..indent..
-         "position = {"..v.x..","..v.y.."},"..indent..
-         "clip = {"..clip_t[1]..","..clip_t[2]..","..clip_t[3]..","..
-                  clip_t[4].."},"..indent..
-         "opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Text") then
-         if (v.extra.name == "MediaPlayer") then
-                itm_str = "mediaplayer:load(\""..v.extra.source.."\")\n"..
-                   "mediaplayer.on_loaded = function( self ) self:play() end"
-         else
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "text=\""..v.text.."\","..indent..
-         "font=\""..v.font.."\","..indent..
-         "color={"..table.concat(v.color,",").."},"..indent..
-         "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y.."},"..indent..
-         "editable="..tostring(v.editable)..","..indent..
-         "reactive="..tostring(v.reactive)..","..indent..
-         "wants_enter="..tostring(v.wants_enter)..","..indent..
-         "wrap="..tostring(v.wrap)..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
-         end
-    end
-    return itm_str
-end
-
 function getObjnames()
     local obj_names = ""
     local n = table.getn(g.children)
@@ -167,8 +18,8 @@ end
 
 function create_on_button_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
-               print (v.type, " button down ")
-               if(button == 2 or num_clicks >= 2) then
+               print (v.type, button, " button down ")
+               if(button == 3 or num_clicks >= 2) then
                     if(v.type ~= "Group") then
                          editor.inspector(v)
                     end
@@ -338,6 +189,208 @@ function cleanText(text_name)
         input_t.text = ""
         input_purpose = ""
      end
+end
+
+
+function make_attr_t(v)
+function toboolean(s) if (s == "true") then return true else return false end end
+local attr_t =
+      {
+             {"title", "INSPECTOR : "..string.upper(v.type)},
+             {"caption", "OBJECT NAME"},
+             {"name", v.name,"x"},
+             {"line",""},
+             {"x", v.x, "y"},
+             {"y", v.y, "z"},
+             {"z", v.z, "w"},
+             {"w", v.w, "h"},
+             {"h", v.h},
+             {"line",""}
+      }
+      if (v.type == "Text") then
+        table.insert(attr_t[9], "r")
+
+        table.insert(attr_t, {"caption", "COLOR "})
+        local color_t = v.color 
+        if color_t == nil then 
+             color_t = {0,0,0}
+        end
+        table.insert(attr_t, {"r", color_t[1], "g"})
+        table.insert(attr_t, {"g", color_t[2], "b"})
+        table.insert(attr_t, {"b", color_t[3], "font "})
+        --table.insert(attr_t, {"line",""})
+        --table.insert(attr_t, {"color", v.color,"font "})
+        table.insert(attr_t, {"font ", v.font,"text"})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"caption", "TEXT"})
+        table.insert(attr_t, {"text", v.text,"editable"})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"editable", v.editable,"wants_enter"})
+        table.insert(attr_t, {"wants_enter", v.wants_enter,"wrap"})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"wrap", v.wrap, "wrap_mode"})
+        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"opacity"})
+        table.insert(attr_t, {"line",""})
+      elseif (v.type  == "Rectangle") then
+        table.insert(attr_t[9], "rect_r")
+        color_t = v.color 
+        if color_t == nil then 
+             color_t = {0,0,0}
+        end
+        table.insert(attr_t, {"caption", "FILL COLOR"})
+        table.insert(attr_t, {"rect_r", color_t[1], "rect_g"})
+        table.insert(attr_t, {"rect_g", color_t[2], "rect_b"})
+        table.insert(attr_t, {"rect_b", color_t[3], "bord_r"})
+        --table.insert(attr_t, {"fill_color  ", v.color,"border_color"})
+        color_t = v.border_color 
+        if color_t == nil then 
+             color_t = {0,0,0}
+        end
+        table.insert(attr_t, {"caption", "BORDER COLOR"})
+        table.insert(attr_t, {"bord_r", color_t[1], "bord_g"})
+        table.insert(attr_t, {"bord_g", color_t[2], "bord_b"})
+        table.insert(attr_t, {"bord_b", color_t[3], "bwidth"})
+        --table.insert(attr_t, {"border_color", v.border_color, "border_width"})
+        table.insert(attr_t, {"bwidth", v.border_width, "x_ang"})
+        table.insert(attr_t, {"line",""})
+	table.insert(attr_t, {"caption", "ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        local y_rotation_t = v.x_rotation 
+        local z_rotation_t = v.x_rotation 
+        if x_rotation_t == nil then 
+             x_rotation_t = {0,0,0} 
+        elseif y_rotation_t == nil then 
+             y_rotation_t = {0,0,0} 
+        elseif z_rotation_t == nil then 
+             z_rotation_t = {0,0,0} 
+        end
+        table.insert(attr_t, {"x_ang", x_rotation_t[1], "y_ang"})
+        table.insert(attr_t, {"y_ang", y_rotation_t[1], "z_ang"})
+        table.insert(attr_t, {"z_ang", z_rotation_t[1], "opacity"})
+
+      elseif (v.type  == "Image") then
+        table.insert(attr_t[9], "src")
+        table.insert(attr_t, {"caption", "SOURCE LOCATION"})
+        table.insert(attr_t, {"src", v.src,"cx"})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"caption", "CLIP   "})
+        local clip_t = v.clip
+        if clip_t == nil then
+             clip_t = {0,0 ,v.w, v.h}
+        end
+        table.insert(attr_t, {"cx", clip_t[1], "cy"})
+        table.insert(attr_t, {"cy", clip_t[2], "cw"})
+        table.insert(attr_t, {"cw", clip_t[3], "ch"})
+        table.insert(attr_t, {"ch", clip_t[4], "x_angle"})
+        --table.insert(attr_t, {"ch", clip_t[4], "opacity"})
+        table.insert(attr_t, {"line",""})
+ 	table.insert(attr_t, {"caption", "ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        local y_rotation_t = v.x_rotation 
+        local z_rotation_t = v.x_rotation 
+        if x_rotation_t == nil then 
+             x_rotation_t = {0,0,0} 
+        elseif y_rotation_t == nil then 
+             y_rotation_t = {0,0,0} 
+        elseif z_rotation_t == nil then 
+             z_rotation_t = {0,0,0} 
+        end
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "y_angle"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "z_angle"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "opacity"})
+	
+--[[
+        table.insert(attr_t, {"caption", "X ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        if x_rotation_t == nil then 
+             x_rotation_t = {"-","-","-"} 
+        end
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "rxy"})
+        table.insert(attr_t, {"rxy", x_rotation_t[2], "rxz"})
+        table.insert(attr_t, {"rxz", x_rotation_t[3], "opacity"})
+        table.insert(attr_t, {"line",""})
+
+        table.insert(attr_t, {"caption", "Y ROTATION  "})
+        local y_rotation_t = v.y_rotation 
+        if y_rotation_t == nil then 
+             y_rotation_t = {"-","-","-"} 
+        end
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "ryz"})
+        table.insert(attr_t, {"ryx", y_rotation_t[2], "ryz"})
+        table.insert(attr_t, {"ryz", y_rotation_t[3], "z_angle"})
+        table.insert(attr_t, {"line",""})
+
+        table.insert(attr_t, {"caption", "Z ROTATION  "})
+        local z_rotation_t = v.z_rotation 
+        if z_rotation_t == nil then 
+             z_rotation_t = {"-","-","-"} 
+        end
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "rzx"})
+        table.insert(attr_t, {"rzx", z_rotation_t[2], "rzy"})
+        table.insert(attr_t, {"rzy", z_rotation_t[3], "opacity"})
+ table.insert(attr_t, {"line",""})
+]]
+      end
+      table.insert(attr_t, {"line",""})
+      table.insert(attr_t, {"opacity", v.opacity, "view code"})
+      table.insert(attr_t, {"line",""})
+      --table.insert(attr_t, {"rotation", v.rotation})
+      --table.insert(attr_t, {"line",""})
+      --table.insert(attr_t, {"anchor_point", v.anchor_point})
+      --table.insert(attr_t, {"line",""})
+      table.insert(attr_t, {"button", "view code", "apply"})
+      table.insert(attr_t, {"button", "apply", "cancel"})
+      table.insert(attr_t, {"button", "cancel"})
+
+      return attr_t
+end
+
+function itemTostring(v)
+    local itm_str = ""
+    local indent       = "\n\t\t"
+    local b_indent       = "\n\t"
+    local clip_t = v.clip
+    if(clip_t == nil) then
+             clip_t = {0,0 ,v.w, v.h}
+    end
+    if(v.type == "Rectangle") then
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "border_color={"..table.concat(v.border_color,",").."},"..indent..
+         "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
+         "size = {"..table.concat(v.size,",").."},"..indent..
+         "position = {"..v.x..","..v.y.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Image") then
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "src=\""..v.src.."\","..indent..
+        -- "base_size={"..table.concat(v.base_size,",").."},"..indent..
+        -- "async="..tostring(v.async)..","..indent..
+        -- "loaded="..tostring(v.loaded)..","..indent..
+         "position = {"..v.x..","..v.y.."},"..indent..
+         "clip = {"..clip_t[1]..","..clip_t[2]..","..clip_t[3]..","..
+                  clip_t[4].."},"..indent..
+         "opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Text") then
+         if (v.extra.name == "MediaPlayer") then
+                itm_str = "mediaplayer:load(\""..v.extra.source.."\")\n"..
+                   "mediaplayer.on_loaded = function( self ) self:play() end"
+         else
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "text=\""..v.text.."\","..indent..
+         "font=\""..v.font.."\","..indent..
+         "color={"..table.concat(v.color,",").."},"..indent..
+         "size={"..table.concat(v.size,",").."},"..indent..
+         "position = {"..v.x..","..v.y.."},"..indent..
+         "editable="..tostring(v.editable)..","..indent..
+         "reactive="..tostring(v.reactive)..","..indent..
+         "wants_enter="..tostring(v.wants_enter)..","..indent..
+         "wrap="..tostring(v.wrap)..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
+         end
+    end
+    return itm_str
 end
 
 

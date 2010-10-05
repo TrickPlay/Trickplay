@@ -1,50 +1,48 @@
 local g = ... 
 
-text0 = Text
+img0 = Image
 	{
-		name="text0",
-		text="sjdfhksfj",
-		font="DejaVu Sans 50px",
-		color={0,41,0,255},
+		name="img0",
+		src="logo.png",
+		position = {1474,214},
+		clip = {0,0,174,71},
+		opacity = 255
+	}
+
+rect1 = Rectangle
+	{
+		name="rect1",
+		border_color={0,0,0,255},
+		border_width=1,
+		color={255,255,255,192},
+		size = {1564,24},
+		position = {156,308},
+		opacity = 100
+	}
+
+text2 = Text
+	{
+		name="text2",
+		text="Title",
+		font="DejaVu Sans 40px",
+		color={255,255,255,192},
 		size={150,150},
-		position = {788,872},
+		position = {150,236},
 		editable=true,
 		reactive=true,
 		wants_enter=true,
 		wrap=true,
-		opacity = 255
-	}
-
-img1 = Image
-	{
-		name="img1",
-		src="assets/logo.png",
-		base_size={174,71},
-		position = {102,956},
-		async=false,
-		loaded=true,
-		opacity = 255
-	}
-
-rect999 = Rectangle
-	{
-		name="rect999",
-		border_color={255,255,255,255},
-		border_width=1,
-		color={0,53,194,73},
-		size = {200,200},
-		position = {1098,300},
-		opacity = 255
+		opacity = 90
 	}
 
 text3 = Text
 	{
 		name="text3",
-		text="sdfasdfsdfi",
+		text="aaabbbcccddd",
 		font="DejaVu Sans 40px",
-		color={240,240,240,255},
+		color={0,100,0,255},
 		size={150,150},
-		position = {100,100},
+		position = {764,362},
 		editable=true,
 		reactive=true,
 		wants_enter=true,
@@ -52,26 +50,24 @@ text3 = Text
 		opacity = 255
 	}
 
-img999 = Image
+rect4 = Rectangle
 	{
-		name="img999",
-		src="logo.png",
-		base_size={174,71},
-		position = {708,562},
-		async=false,
-		loaded=true,
-		opacity = 255
+		name="rect4",
+		border_color={0,17,114,57},
+		border_width=1,
+		color={0,17,114,88},
+		size = {834,444},
+		position = {796,540},
+		opacity = 111
 	}
 
 img5 = Image
 	{
 		name="img5",
-		src="logo.png",
-		base_size={174,71},
-		position = {1352,770},
-		async=false,
-		loaded=true,
-		opacity = 255
+		src="assets/generic-app-icon.jpg",
+		position = {160,354},
+		clip = {0,0,480,270},
+		opacity = 100
 	}
 
-g:add(text0,img1,rect999,text3,img999,img5)
+g:add(img0,rect1,text2,text3,rect4,img5)
