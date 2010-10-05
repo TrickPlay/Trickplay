@@ -1,6 +1,5 @@
 dofile("header.lua")
 dofile("editor.lua")
---dofile("util.lua")
 
 -------------------------------------------------------------------------------
 -- Build the UI
@@ -331,7 +330,7 @@ local function build_ui( show_it )
         [ keys.Return   ] = function() local s= ui.sections[ui.focus]
         		    ui.button_focus.position = s.button.position
         		    ui.button_focus.opacity = 255
-	 		   -- do_default_for_section() 
+	 		    do_default_for_section() 
 			    animate_in_dropdown() end,
         
         [ keys.Down     ] = function() enter_section() end, 
@@ -358,6 +357,8 @@ local function build_ui( show_it )
 	     section.button.reactive = true
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
+		  button_map[section.button.name]()
+--[[
 		  if(menu_button_second_down == false) then
                        if(button_map[section.button.name]) then
 			    button_map[section.button.name]()
@@ -367,6 +368,7 @@ local function build_ui( show_it )
 		       animate_out_dropdown()
 		       menu_button_second_down = false
 		  end 
+]]
                   return true
 	     end
 	 end
@@ -425,13 +427,10 @@ local function build_ui( show_it )
         	ui:animate_in()
     	  end 
 	  end
---[[
-    comment out 1004 
           if dragging then
                local actor , dx , dy = unpack( dragging )
                actor.position = { x - dx , y - dy  }
           end
-]]
           if(mouse_state == BUTTON_DOWN) then
                if (mouse_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
           end

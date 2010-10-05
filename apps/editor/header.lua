@@ -38,6 +38,7 @@ BG_IMAGE = Image {src = "baduk.png", tile = {true, true}, position = {0,0}, size
 ---------------------
 dragging          = nil
 current_inspector = nil
+current_focus 	  = nil
 menu_hide         = false
 popup_hide        = false
 mouse_mode        = S_SELECT

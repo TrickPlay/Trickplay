@@ -246,7 +246,7 @@ end
     
 function factory.make_app_tile( assets , caption , app_id )
 
-    local STYLE         = { font = "DejaVu Sans 24px" , color = "000000FF" }
+    local STYLE         = { font = "DejaVu Sans 24px" , color = "FFFFFF" }
     local PADDING_X     = 17 -- The focus ring has this much padding around it
     local PADDING_Y     = 17.5
     local FRAME_SHADOW  = 1
@@ -337,13 +337,13 @@ function factory.make_popup_bg(o_type)
 
    -- Set canvas size and color according to o_type 
     if(o_type == "Text") then 
-         size = {500, 830}
+         size = {500, 870}
     	 color = "472446" -- bora
     elseif(o_type == "Image") then
-         size = {500, 680}
+         size = {500, 770}
     	 color = "5a252b" -- ppat
     elseif(o_type == "Rectangle") then
-         size = {500, 600}
+         size = {500, 755}
     	 color = "2c420c" -- ssuk
     elseif(o_type == "Video") then
          size = {500, 500}
@@ -353,7 +353,7 @@ function factory.make_popup_bg(o_type)
     local BORDER_WIDTH= 3 
     local POINT_HEIGHT=34
     local POINT_WIDTH=60
-    local BORDER_COLOR="FFFFFF5C"
+    local BORDER_COLOR="FFFFFF"
     local CORNER_RADIUS=22
     local POINT_CORNER_RADIUS=2
     local H_BORDER_WIDTH = BORDER_WIDTH / 2
@@ -490,7 +490,7 @@ function factory.make_xbox()
     return c
 end 
 
-function factory.make_text_popup_item(assets, item_n, item_v, n_item_n) 
+function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_item_n) 
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
     local TEXT_SIZE     = 26
     local PADDING_X     = 7
@@ -500,7 +500,7 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
     local HEIGHT        = TEXT_SIZE  + ( PADDING_Y * 2 )
     local BORDER_WIDTH  = 1
     local BORDER_COLOR  = "FFFFFF"
-    local LINE_COLOR    = "FFFFFF5C"
+    local LINE_COLOR    = "FFFFFF"
     local BORDER_RADIUS = 12
     local LINE_WIDTH    = 1
 
@@ -574,6 +574,64 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
 	end 
 	button.name = "button"
         button.position  = {0, 0}
+        button.reactive = true
+
+	function button:on_key_down(key)
+             if key == keys.Return then
+                  if (item_v == "view code") then 
+		      screen:remove(inspector)
+		      current_inspector = nil
+		      editor.n_selected(v)
+                      screen.grab_key_focus(screen) 
+		      -- org_obj, new_obj = inspector_apply (v, inspector) 
+		      editor.view_code()
+	              return true
+		  elseif (item_v == "apply") then 
+		      org_obj, new_obj = inspector_apply (v, inspector) 
+		      screen:remove(inspector)
+		      current_inspector = nil
+		      editor.n_selected(v)
+                      screen.grab_key_focus(screen) 
+	              return true
+		  elseif (item_v == "cancel") then 
+		      screen:remove(inspector)
+		      current_inspector = nil
+		      editor.n_selected(v)
+                      screen.grab_key_focus(screen) 
+	              return true
+		  end 
+ 	     elseif key == keys.Tab or key == keys.Right then 
+                  group.extra.on_focus_out()
+		  inspector:find_child(n_item_n).extra.on_focus_in()	
+             end
+        end
+
+	function button:on_button_down ()
+ 	     current_focus.extra.on_focus_out()
+	     current_focus = group
+	     group.extra.on_focus_in()
+	     if (item_v == "view code") then 
+		      screen:remove(inspector)
+		      current_inspector = nil
+		      editor.n_selected(v)
+                      screen.grab_key_focus(screen) 
+		      -- org_obj, new_obj = inspector_apply (v, inspector) 
+		      editor.view_code()
+	     elseif (item_v == "apply") then 
+		      org_obj, new_obj = inspector_apply (v, inspector) 
+		      screen:remove(inspector)
+		      current_inspector = nil
+		      editor.n_selected(v)
+                      screen.grab_key_focus(screen) 
+	     elseif (item_v == "cancel") then 
+		      screen:remove(inspector)
+		      current_inspector = nil
+		      editor.n_selected(v)
+                      screen.grab_key_focus(screen) 
+	     end 
+
+             return true;
+	end 
     	group:add(button)
 
 	local focus = assets( "assets/button-focus.png" )
@@ -585,11 +643,13 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
         text.position  = {(button.w - text.w)/2, (button.h - text.h)/2}
     	group:add(text)
 
-    	next_text = Text {name = "next_attr", text = n_item_n}
+    	next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
     	group:add(next_text)
 
 
         function group.extra.on_focus_in()
+             current_focus = group
+	     button:grab_key_focus()
 	     button.opacity = 0 
              focus.opacity = 255
         end
@@ -610,6 +670,16 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
 	else 
 	     if(item_n == "cx" or item_n == "cy" or item_n == "cw" or item_n == "ch") then 
                  item_n = string.sub(item_n,2,2)
+	     elseif item_n == "rect_r" or item_n == "bord_r" or
+		    item_n == "rect_g" or item_n == "bord_g" or
+		    item_n == "rect_b" or item_n == "bord_b" then 
+                 item_n = string.sub(item_n,6,6)
+	     elseif item_n =="bwidth" then
+	         item_n = "border width"
+	     elseif item_n =="x_angle" or item_n =="x_ang" or
+	     item_n =="y_angle" or item_n =="y_ang" or
+	     item_n =="z_angle" or item_n =="z_ang" then 
+	         item_n = string.sub(item_n,1,1)
 	     end 
     	     text = Text {name = "attr", text = string.upper(item_n)}:set(STYLE)
              text.position  = {WIDTH - space , 0}
@@ -622,12 +692,14 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
 	     elseif (item_n == "base_size") then 
 	          input_box_width = WIDTH - 200 - ( PADDING_X * 2) 
-             elseif(item_n == "fill_color  " or item_n == "border_color" or item_n == "border_width") then 
+             elseif(item_n == "fill_color  " or item_n == "border_color" or item_n == "bwidth") then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
 	     end
         end 
+	print ("input_box_width", input_box_width)
+        print("space", space)
 
-    	next_text = Text {name = "next_attr", text = n_item_n}
+    	next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
     	group:add(next_text)
 
         ring = make_ring(input_box_width, HEIGHT + 5) 
@@ -645,6 +717,7 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
 	space = space - PADDING_B
 
 	-- get rid of "table : " form item_v
+--[[
         local j, k, l 
         print(item_v)
 	l = string.len(item_v)
@@ -654,23 +727,61 @@ function factory.make_text_popup_item(assets, item_n, item_v, n_item_n)
              item_v = string.sub(item_v,k+1,l)
 	end 
 
+
+	if(type(item_v) == table) then -- color 
+	
+	local r,g,b 
+	r= item_v[1] 
+	g= item_v[2] 
+	b= item_v[3] 
+	
+	end	
+]]
+
     	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
 
         input_text.position  = {WIDTH - space , PADDING_Y}
-    	group:add(input_text)
+
+	function input_text:on_button_down(x,y,button,num_clicks)
+ 	       current_focus.extra.on_focus_out()
+	       current_focus = group
+	       group.extra.on_focus_in()
+               return true;
+        end
+
+  	function input_text:on_key_down(key)
+	       if key == keys.Return or
+                  key == keys.Tab or 
+                  key == keys.Right then
+	       	     group.extra.on_focus_out()
+		     inspector:find_child(n_item_n).extra.on_focus_in()	
+               end
+   	end 
+
 	
+    	group:add(input_text)
 
         function group.extra.on_focus_in()
+	     current_focus = group
              ring.opacity = 0
+             input_text.cursor_visible = true
              focus.opacity = 255
+	     input_text:grab_key_focus()
         end
 
         function group.extra.on_focus_out()
              focus.opacity = 0
+             input_text.cursor_visible = false
              ring.opacity = 255
         end 
     end
+    print ("group width", group.w)
+--[[
+    if(next_text) then
+         group.w = group.w - next_text.w
+    end
+]]
     return group
 end
  
