@@ -6,7 +6,6 @@ module clutter_image;
 #include "network.h"
 #include "util.h"
 #include "images.h"
-#include "signal_collector.h"
 #include "clutter_util.h"
 #include "context.h"
 #include "sysdb.h"
@@ -275,11 +274,10 @@ class Image [[ClutterActor*]] actor
 {
     Image(table props = 0 )
         [[
-            *self = clutter_texture_new();
-	    	g_object_ref_sink( G_OBJECT( *self ) );
-	    	ClutterUtil::initialize_actor( L, *self, IMAGE_METATABLE );
-	    	
-	    	ImageExtra * extra = ImageExtra::get( *self );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
+	    	ClutterUtil::initialize_actor( L, self, IMAGE_METATABLE );
+
+	    	ImageExtra * extra = ImageExtra::get( self );
 	    	 
 	    	extra->constructing = TRUE;
 	    	
@@ -287,12 +285,13 @@ class Image [[ClutterActor*]] actor
 
 	    	extra->constructing = FALSE;
 	    	
-			load_image( L, CLUTTER_TEXTURE( * self ) );	    	
+			load_image( L, CLUTTER_TEXTURE( self ) );
+			
+			g_object_unref( self );	    	
         ]];
 	
     ~Image()
 		[[
-		    g_object_unref( G_OBJECT( self ) );
 		]];
     
     /*
@@ -385,7 +384,7 @@ class Image [[ClutterActor*]] actor
 		    lua_rawseti(L,-2,2);
 		]]
 		[[
-		    lb_checktable(L,2);
+		    (void)lb_checktable(L,2);
 		    lua_rawgeti(L,2,1);
 		    lua_rawgeti(L,2,2);
 		    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));
@@ -486,10 +485,9 @@ class Image [[ClutterActor*]] actor
 	
     callback on_loaded
 		[[
-		    SignalCollector::get(L)->connect_if(
+		    UserData::get(L)->connect_signal_if(
 				on_loaded,
 				"on_loaded",
-				self,
 				"load-finished",
 				G_CALLBACK(Image_on_loaded),
 				L);
@@ -509,10 +507,9 @@ class Image [[ClutterActor*]] actor
 	
     callback on_size_changed
 		[[
-		    SignalCollector::get(L)->connect_if(
+		    UserData::get(L)->connect_signal_if(
 				on_size_changed,
 				"on_size_changed",
-				self,
 				"size-change",
 				G_CALLBACK(Image_on_size_changed),
 				L);	    
@@ -525,7 +522,7 @@ void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L)
 	if ( ImageExtra::get( self )->async )
 	{
     	lua_pushboolean(L,error?1:0);
-    	invoke_Image_on_loaded(L,CLUTTER_ACTOR(self),1,0);
+    	UserData::invoke_callback(G_OBJECT(self),"on_loaded",1,0,L);
     }
 }
 
@@ -533,7 +530,7 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 {
     lua_pushinteger(L,width);
     lua_pushinteger(L,height);
-    invoke_Image_on_size_changed(L,CLUTTER_ACTOR(self),2,0);
+  	UserData::invoke_callback(G_OBJECT(self),"on_size_changed",2,0,L);
 }
 ]]
 

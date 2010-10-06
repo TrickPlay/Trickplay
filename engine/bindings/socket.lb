@@ -39,7 +39,7 @@ class Socket [[ SocketDelegate * ]]
 {
 	Socket()
 		[[
-			*self = new SocketDelegate( L );
+			self = lb_construct( SocketDelegate , new SocketDelegate( L ) );
 		]];
 		
 	~Socket()

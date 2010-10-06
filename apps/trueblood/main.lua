@@ -93,7 +93,7 @@ for _,child in pairs(assets.credits.children[3].children) do
 end
 
 local timer = Timer {
-						interval = 2,
+						interval = 2000,
 						on_timer = function ()
 							local new_credits = credits:get_page(true)
 							assets.credits:remove(assets.credits.children[1])

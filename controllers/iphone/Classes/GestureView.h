@@ -12,7 +12,10 @@
 
 @class AudioStreamer;
 
-@interface GestureView : UIViewController <UITextFieldDelegate, AVAudioPlayerDelegate> {
+@interface GestureView : UIViewController <UITextFieldDelegate,
+                                           AVAudioPlayerDelegate,
+                                           UIAccelerometerDelegate,
+                                           UIActionSheetDelegate> {
     UIAccelerationValue accelerationY;
 	UIAccelerationValue accelerationX;
 	UIAccelerationValue accelerationZ;
@@ -40,6 +43,13 @@
 	AVAudioPlayer  *mAudioPlayer;
 	NSString *mSoundLoopName;
 	AudioStreamer *streamer;
+		
+											   
+	//iPhone4 socket
+	NSInteger mSocketMode;
+	NSMutableData *data;
+	NSInputStream *iStream;
+    NSOutputStream *oStream;
 }
 
 @property NSTimeInterval mTouchedTime;
