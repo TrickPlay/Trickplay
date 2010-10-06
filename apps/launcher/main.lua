@@ -551,10 +551,10 @@ local swap_tile = function(image, delay)
 	end }
 end
 
-Timer { interval = 15, on_timer = function(timer)
-	swap_tile(OEMLabel.children[1], .5)
-	swap_tile(OEMLabel.children[2], 1)
-	swap_tile(OEMLabel.children[3], 1.5)
+Timer { interval = 15000, on_timer = function(timer)
+	swap_tile(OEMLabel.children[1], 500)
+	swap_tile(OEMLabel.children[2], 1000)
+	swap_tile(OEMLabel.children[3], 1500)
 end }
 
 screen:add(getLabel)

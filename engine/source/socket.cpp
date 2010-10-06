@@ -1,5 +1,8 @@
 
 #include "socket.h"
+#include "util.h"
+
+Debug_OFF slog;
 
 #define INPUT_BUFFER_SIZE   1024
 #define INPUT_BUFFER_KEY    "tp-input-buffer"
@@ -230,7 +233,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
 
     gssize bytes_written = g_output_stream_write_finish( self->output, res, & error );
 
-    g_debug( "WROTE %" G_GSSIZE_FORMAT " BYTES", bytes_written );
+    slog( "WROTE %" G_GSSIZE_FORMAT " BYTES", bytes_written );
 
     if ( error || bytes_written <= 0 )
     {
@@ -254,7 +257,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
     {
         GByteArray * write_buffer = ( GByteArray * ) g_object_get_data( G_OBJECT( self->output ), OUTPUT_BUFFER_KEY );
 
-        g_debug( "BYTES LEFT IN BUFFER %" G_GSSIZE_FORMAT , write_buffer->len - bytes_written );
+        slog( "BYTES LEFT IN BUFFER %" G_GSSIZE_FORMAT , write_buffer->len - bytes_written );
 
         if ( bytes_written < gssize( write_buffer->len ) )
         {
