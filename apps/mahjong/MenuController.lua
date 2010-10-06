@@ -5,7 +5,7 @@ MenuController = Class(Controller,function(self, view, ...)
     router = view:get_router()
 
     -- determines whether or not to hide the options menu
-    local hide_options = true
+    local hide_options = false
 
     -- Create the tables used as nodes in the menu graph
     local Blue_Card = {}

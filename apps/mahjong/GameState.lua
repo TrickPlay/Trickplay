@@ -49,6 +49,9 @@ GameState = Class(nil,function(state, ctrl)
     local tiles_class = nil
     -- current selected tile to be compared with another tile for elimination
     local selected_tile = nil
+    -- a table containing the two tiles that were last removed from the board
+    -- tiles can be restored by pressing undo
+    local last_tiles = nil
     -- true if the game has not started yet
     local new_game = true
     -- true if the game was won and the auto-complete dialog already showed
@@ -168,6 +171,22 @@ GameState = Class(nil,function(state, ctrl)
         grid[5][4][2] = tiles[2]
         grid[8][10][1] = tiles[3]
         grid[5][4][1] = tiles[4]
+    end
+
+    function state:build_two_tile_test()
+        local index = 1
+        grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        grid[10][10][1] = tiles[math.random(3,20)]
+        grid[10][10][2] = tiles[math.random(3,20)]
+        grid[1][1][1] = tiles[1]
+        grid[8][5][1] = tiles[2]
     end
 
     --[[
@@ -326,6 +345,19 @@ GameState = Class(nil,function(state, ctrl)
     end
 
     function state:undo()
+        if not last_tiles then return end
+
+        local position_1 = last_tiles[1].position
+        local position_2 = last_tiles[2].position
+
+        grid[position_1[1]][position_1[2]][position_1[3]] = last_tiles[1]
+        grid[position_2[1]][position_2[2]][position_2[3]] = last_tiles[2]
+
+        last_tiles[1]:reset()
+        last_tiles[2]:reset()
+
+        last_tiles = nil
+
     end
 
     function state:check_remaining_moves(hint)
@@ -349,13 +381,47 @@ GameState = Class(nil,function(state, ctrl)
             end
         else
             if selection_grid[tile] and selected_tile:is_a_match(tile) then
-                self:remove_tile(tile)
-                self:remove_tile(selected_tile)
-                selected_tile = nil
+                local counter = 0
+                intervals ={
+                    ["x"] = Interval(selected_tile.group.position[1],
+                                     selected_tile.group.position[1] - 100),
+                    ["y"] = Interval(selected_tile.group.position[2],
+                                     selected_tile.group.position[2] - 100),
+                }
+                gameloop:add(selected_tile.group, 3000, nil, intervals,
+                    function()
+                        selected_tile.group.z = selected_tile.group.z + 1
+                        counter = counter + 1
+                    end)
+                intervals ={
+                    ["x"] = Interval(tile.group.position[1],
+                                     tile.group.position[1] - 100),
+                    ["y"] = Interval(tile.group.position[2],
+                                     tile.group.position[2] - 100),
+                }
+                gameloop:add(tile.group, 3000, nil, intervals,
+                    function()
+                        tile.group.z = tile.group.z + 1
+                        counter = counter + 1
+                    end)
+                local timer = Timer()
+                timer.interval = 500
+                function timer:on_timer()
+                    if counter == 2 then
+                        timer:stop()
+                        timer.on_timer = nil
+                        
+                        last_tiles = {tile, selected_tile}
+                        state:remove_tile(tile)
+                        state:remove_tile(selected_tile)
+                        selected_tile = nil
 
-                self:find_selectable_tiles()
-                self:find_top_tiles()
-                self:find_matching_tiles()
+                        state:find_selectable_tiles()
+                        state:find_top_tiles()
+                        state:find_matching_tiles()
+                    end
+                end
+                timer:start()
             elseif tile == selected_tile then
                 selected_tile.focus.green.opacity = 0
                 selected_tile = nil
@@ -372,10 +438,13 @@ GameState = Class(nil,function(state, ctrl)
         grid[position[1]+1][position[2]][position[3]] = nil
         grid[position[1]][position[2]+1][position[3]] = nil
         grid[position[1]+1][position[2]+1][position[3]] = nil
+
+        tile.set = false
         positions[tile] = nil
     end
 
     function state:check_for_win()
+        selected_tile = nil
         self:find_top_tiles()
         if #top_tiles == 0 then
             game:reset_game()
