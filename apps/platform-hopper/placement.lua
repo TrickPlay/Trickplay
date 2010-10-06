@@ -51,4 +51,15 @@ function place_new_platform( container, platform_prototype, jump_height )
 								position = { candidate_position.x, candidate_position.y },
 							}
 	container:add(platform)
+	physics:Body{ source = platform,
+	                dynamic = false,
+	                bounce = 0,
+	                density = 1,
+	                friction = 1,
+	                fixed_rotation = true,
+	                awake = false,
+	                active = true,
+                    sleeping_allowed = true,
+
+	            }
 end

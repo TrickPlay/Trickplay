@@ -11,11 +11,12 @@ local Settings = {
 					SCORE_GAME_POS			= { screen.w/20, screen.h/20, 5 },
 					SCORE_DEAD_BG			= "BE2F2F80",
 
-					JUMP_TIME				=	500,
-					JUMP_HEIGHT				=	screen.h/4,
+					JUMP_IMPULSE			=	150,
 
 					NUM_PLATFORMS			=	25,
 				}
+
+physics.gravity = { 0, 100 }
 
 mediaplayer.on_loaded = function( self ) self:play() end
 mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
@@ -30,14 +31,13 @@ local green_platform = Image {
 screen:add(green_platform)
 
 player =	{
-					-- Horizontal momentum is measured in pixels per second
-					horizontal_momentum = 0,
-
 					live = false,
 
 					jumper = Image {
 						src = Settings.JUMPER_IMAGE,
 					},
+					
+					physics = nil,
 
 					score = 0,
 					connected_controllers = { _ = {}},
@@ -82,169 +82,6 @@ screen:add(player.jumper)
 ]]--
 dofile('controller.lua')
 
---[[
-	Bouncing up launches us to go up to a maximum jump height off where we started
-	over a period of time, on a quadratic curve, just like real gravity!
-]]--
-local bounce_up_timeline = Timeline { duration = Settings.JUMP_TIME }
-local bounce_up_alpha = Alpha { timeline = bounce_up_timeline, mode = "EASE_OUT_QUAD" }
-local bounce_up_interval = Interval ( 0, 0 ) -- The actual interval will be set when we start bouncing up based on location at that time
-local spin = false
---[[
-	We need to move according to gravity in the y-direction, but also respond to the player's momentum to move in the x-direction.
-	This horizontal momentum will be controlled by the controller
-]]--
-function bounce_up_timeline.on_new_frame( t , msecs )
-	-- The quadratic alpha simulates gravity quite nicely
-
-	if player.jumper.y < screen.h/2 then
-		-- We moved up!  Score!
-		player.set_score(player.score +
-						math.floor(player.jumper_delta + (player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha ))*10)/10)
-
-		-- If the player is at or above the half-way point on the screen on the way up, scroll all the platforms, and not the player!
-		platforms:foreach_child(
-									function (child)
-										child.y = child.y - player.jumper_delta + (player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha ))
-									end
-								)
-		-- This delta tracks how far the player should have moved, so we can deal with that offset on the next frame
-		player.jumper_delta = player.jumper.y - bounce_up_interval:get_value( bounce_up_alpha.alpha )
-	else
-		-- Otherwise, just move him up
-		player.jumper.y = bounce_up_interval:get_value( bounce_up_alpha.alpha )
-	end
-	
-
-	-- x movement is determined by momentum over time
-	player.jumper.x = player.jumper.x + t.delta * player.horizontal_momentum/1000
-	-- If you hit the edge of the screen, wrap around to the far side.
-	if(player.jumper.x > screen.w) then
-		player.jumper.x = (5-player.jumper.w)
-	elseif player.jumper.x < (5-player.jumper.w) then
-		player.jumper.x = screen.w
-	end
-
-	if spin then
-		player.jumper.z_rotation = { -bounce_up_alpha.alpha * 360, player.jumper.w/2, -player.jumper.w/2 }
-	end
-end
-
---[[
-	Once we complete out bounce up, we're going to start falling.
-]]--
-function bounce_up_timeline.on_completed( )
-	fall_down()
-end
-
-function bounce_up()
-	-- About 1/5 of the time, jumper will do a little summersault on the way up
-	if math.random() < 0.2 then
-		spin = true
-	else
-		spin = false
-	end
-
-	-- Set up the starting and ending y-position for the player on this upward bounce, re-using the existing Interval object
-	bounce_up_interval.from, bounce_up_interval.to = player.jumper.y, player.jumper.y - Settings.JUMP_HEIGHT
-	player.jumper_delta = 0
-
-	bounce_up_timeline:rewind()
-	bounce_up_timeline:start()
-end
-
---[[
-  Falling is aimed at the bottom of the screen, over a time period that depends on the height of the
-  player at the start.  If we hit a platform on the way down, then we stop the fall.  If we hit the
-  bottom of the screen, it's death.
-]]--
-local fall_timeline = Timeline { }
-local fall_alpha = Alpha { timeline = fall_timeline, mode = "EASE_IN_QUAD" }
-local fall_interval = Interval ( 0, 0 )
---[[
-	We need to move according to gravity in the y-direction, but also respond to the player's momentum to move in the x-direction.
-	This horizontal momentum will be controlled by the controller
-]]--
-function fall_timeline.on_new_frame( t , msecs )
-	-- The quadratic alpha simulates gravity quite nicely
-	local old_player_y = player.jumper.y
-	player.jumper.y = fall_interval:get_value( fall_alpha.alpha )
-
-	-- x movement is determined by momentum over time
-	local old_player_x = player.jumper.x
-	local theoretical_new_x = player.jumper.x + t.delta * player.horizontal_momentum/1000
-	player.jumper.x = theoretical_new_x
-
-	-- If you hit the edge of the screen, wrap around to the far side.
-	if(player.jumper.x > screen.w) then
-		player.jumper.x = (5-player.jumper.w)
-	elseif player.jumper.x < (5-player.jumper.w) then
-		player.jumper.x = screen.w
-	end
-
-	-- Check for each platform on the board if the line segment we just travelled intersects any platform
-	local hit = false
-	platforms:foreach_child(
-								function (child)
-									-- If the platform is below the bottom of the screen then no hit
-									if child.y > screen.h then return end
-									-- If we're not in the right y-ballpark then no hit
-									if math.abs(child.y - player.jumper.y) > 15 then return end
-									-- If the left side of the player is to the right of the right of the platform, then no hit
-									if player.jumper.x > ( child.x + child.w ) then return end
-									-- If the right side of the player is to the left of the left of the platform, then no hit
-									if (player.jumper.x + player.jumper.w) < child.x then return end
-									-- Otherwise we have a hit!
-									hit = true
-								end
-							)
-
-	if hit then
-		-- We hit a platform, so stop falling, and start bouncing
-		t:stop()
-		bounce_up()
-	end
-	
-	-- If we didn't hit a platform, just keep falling on the timeline
-end
-
---[[
-	If the falling loop completes, it's because we're dead.
-]]--
-function fall_timeline.on_completed( t )
-	t:stop()
-	print('AIYEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!')
-	player.connected_controllers:death_splat()
-
-	player.jumper:animate({
-							duration = 100,
-							mode = "EASE_OUT_BACK",
-							scale = { 3, 3 },
-							opacity = 0,
-							on_completed = function () screen:add(start_text) end,
-						})
-	score:animate({
-					duration = 500,
-					mode = 'EASE_OUT_SINE',
-					x = (screen.w-score_bg.w)/2,
-					y = screen.h/2 - 80,
- 					scale = { 1.5, 1.5 },
-				})
-	score_bg.color = Settings.SCORE_DEAD_BG
-	player.live = false
-end
-
-
-function fall_down()
-	fall_timeline.duration = Settings.JUMP_TIME
-	fall_interval.from, fall_interval.to = player.jumper.y, screen.h
-
-	fall_timeline:rewind()
-	fall_timeline:start()
-
-	platform_cleanup()
-
-end
 
 
 function platform_cleanup()
@@ -263,6 +100,62 @@ function platform_cleanup()
 	end
 end
 
+local sw = Stopwatch()
+local spf = 1 / 60
+
+local function idle_bouncer()
+
+    if sw.elapsed_seconds < spf then return end
+
+    physics:step()
+    sw:start()
+
+    local lin_velocity = player.physics.linear_velocity
+
+    if(lin_velocity[2] == 0) then 
+        player.physics:apply_linear_impulse( 0 , -Settings.JUMP_IMPULSE , player.jumper.x , player.jumper.y )
+    end
+    if ( player.jumper.x < 0 ) then
+        print("Wrapping negative")
+        player.jumper.x = screen.w
+        -- Now restart the physics to get it in the correct position; this is a hack
+        player.physics = physics:Body{
+                                source = player.jumper,
+                                dynamic = true,
+                                density = 1,
+                                friction = 0.1,
+                                bounce = 0,
+                                active = true,
+                                awake = true,
+                            }
+        player.physics.fixed_rotation = true
+        player.linear_velocity = lin_velocity,
+
+        dumptable(player.jumper.position)
+        dumptable(player.physics.position)
+    elseif ( player.jumper.x > screen.w ) then
+        print("Wrapping positive")
+        player.jumper.x = 0
+        -- Now restart the physics to get it in the correct position; this is a hack
+        player.physics = physics:Body{
+                                source = player.jumper,
+                                dynamic = true,
+                                density = 1,
+                                friction = 0.1,
+                                bounce = 0,
+                                active = true,
+                                awake = true,
+                            }
+        player.physics.fixed_rotation = true
+        player.linear_velocity = lin_velocity,
+
+
+        dumptable(player.jumper.position)
+        dumptable(player.physics.position)
+    end
+
+end
+
 function player.reset()
 
 	start_text:unparent()
@@ -277,6 +170,16 @@ function player.reset()
 	local start_platform = Clone { source = green_platform }
 	start_platform.position = { screen.w/2, 5 * screen.h / 6 }
 	platforms:add(start_platform)
+	physics:Body{
+	                source = start_platform,
+	                dynamic = false,
+	                active = true,
+	                bounce = 0.0,
+	                friction = 1.0,
+	                density = 1.0,
+	                awake = false,
+	                sleeping_allowed = true,
+                }
 
 	player.connected_controllers:game_on()
 
@@ -287,18 +190,28 @@ function player.reset()
 
 	player.jumper.scale = { 1, 1, player.jumper.w/2, 0 }
 	player.jumper.position =	{
-									start_platform.x + (start_platform.w - player.jumper.w)/2,
-									start_platform.y
+									start_platform.x + (start_platform.w - player.jumper.w)/2 - 40,
+									start_platform.y - 200
 								}
+    player.physics = physics:Body{
+                                    source = player.jumper,
+                                    dynamic = true,
+                                    density = 1,
+                                    friction = 0.1,
+                                    bounce = 0,
+                                    active = true,
+                                    awake = true,
+                	                fixed_rotation = true,
+                        }
+    player.physics.fixed_rotation = true
 	player.jumper.opacity = 255
 
 
 	-- Initially place platforms randomly on screen
 	for i = 1,Settings.NUM_PLATFORMS do
-		place_new_platform(platforms, green_platform, Settings.JUMP_HEIGHT)
+		place_new_platform(platforms, green_platform, 100)
 	end
 
+    idle.on_idle = idle_bouncer
 
-	bounce_up()
 end
-

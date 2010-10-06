@@ -2,24 +2,12 @@
 	The controller's accelerometer will control only the on-screen X momentum of the player.
 ]]--
 
-local SAMPLE_PERIOD		= 0.02
-local MOMENTUM_DAMPING	= 3
-local MAX_MOMENTUM		= 1000
+local IMPULSE_SCALING = 100
+local SAMPLE_PERIOD = 0.02
 
 local function momentum_adjust(x)
 			-- Use 1/10 of the original momentum when adjusting to a new momentum
-			player.horizontal_momentum =	(
-												MOMENTUM_DAMPING*player.horizontal_momentum
-												+ (MAX_MOMENTUM * x)
-											) / ( 1 + MOMENTUM_DAMPING )
-
-			if(player.horizontal_momentum > MAX_MOMENTUM) then
-				player.horizontal_momentum = MAX_MOMENTUM
-			end
-
-			if(player.horizontal_momentum < -MAX_MOMENTUM) then
-				player.horizontal_momentum = -MAX_MOMENTUM
-			end
+			player.physics:apply_linear_impulse( IMPULSE_SCALING * x, 0, player.jumper.x, player.jumper.y )
 end
 
 function controllers.on_controller_connected(controllers,controller)
@@ -85,8 +73,13 @@ local key_handlers =	{
 				[keys.Right] =
 							function ()
 								momentum_adjust(1)
+							end,
+				[keys.space] =
+							function ()
+								player.live = true
+								player:reset()
 							end
-				}
+}
 
 function screen.on_key_down(screen,keyval)
 	if key_handlers[keyval] then
