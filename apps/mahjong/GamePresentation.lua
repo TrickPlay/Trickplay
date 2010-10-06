@@ -21,7 +21,7 @@ function(pres, ctrl)
     }
 
     local focus = Rectangle{width = 110, height = 140,
-        position = GridPositions[2][1][1]
+        position = Utils.deepcopy(GridPositions[2][1][1])
     }
 
     local grid_group = Group{position = {440, 60}}
@@ -60,16 +60,20 @@ function(pres, ctrl)
         grid_group:add(grid[1][4][1].group)
         --]]
         -- everything in the middle
-        for k = 1,5 do
-            for i = 1,30 do
-                for j = 1,16 do
+        local tile = nil
+        local pos = nil
+        for k = 1,GRID_DEPTH do
+            for i = 1,GRID_WIDTH do
+                for j = 1,GRID_HEIGHT do
                     if grid[i][j][k] then
-                        grid[i][j][k].group.position =
-                            Utils.deepcopy(GridPositions[i][j][k])
-                        if grid[i][j][k].group.parent then
-                            grid[i][j][k].group:unparent()
+                        tile = grid[i][j][k]
+                        pos = tile.position
+                        tile.group.position =
+                            Utils.deepcopy(GridPositions[pos[1]][pos[2]][pos[3]])
+                        if tile.group.parent then --necessary for z position
+                            tile.group:unparent()
                         end
-                        grid_group:add(grid[i][j][k].group)
+                        grid_group:add(tile.group)
                     end
                 end
             end
@@ -105,7 +109,6 @@ function(pres, ctrl)
     end
 
     function pres:reset()
-        print("pres:reset() not yet implemented")
         local grid = ctrl:get_grid()
         for i = 1,GRID_WIDTH do
             for j = 1,GRID_HEIGHT do
@@ -132,7 +135,7 @@ function(pres, ctrl)
         end
         grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 255
 
-        local position = GridPositions[selector.x][selector.y][selector.z]
+        local position = Utils.deepcopy(GridPositions[selector.x][selector.y][selector.z])
         focus.x = position[1]
         focus.y = position[2]
     end

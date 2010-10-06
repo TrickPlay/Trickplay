@@ -49,20 +49,19 @@ function(ctrl, router, ...)
     function ctrl:initialize_game(args)
 
         state:initialize(args)
-        state:build_mahjong()
+        state:build_layout(Layouts.TURTLE)
+--        state:build_test()
+        state:set_tile_tables()
+        grid = state:get_grid()
+
         pres:display_ui()
         screen:show()
 
-        state:set_tile_quadrants()
-        state:find_selectable_tiles()
-        state:find_matching_tiles()
-        state:find_top_tiles()
---        state:build_test()
-        grid = state:get_grid()
-        pres:move_focus()
+        ctrl:reset_selector()
 
         add_to_key_handler(keys.h, state.show_matching_tiles)
         add_to_key_handler(keys.r, ctrl.reset_game)
+        add_to_key_handler(keys.s, ctrl.shuffle_game)
 
     end
 
@@ -71,16 +70,26 @@ function(ctrl, router, ...)
         router:notify()
 
         state:reset()
-        state:build_mahjong()
+        state:build_layout(Layouts.TURTLE)
+--        state:build_test()
+        state:set_tile_tables()
+        grid = state:get_grid()
+
         pres:display_ui()
         pres:reset()
-        state:set_tile_quadrants()
 
-        state:find_selectable_tiles()
-        state:find_matching_tiles()
-        state:find_top_tiles()
---        state:build_test()
+        selector = {x = 1, y = 1, z = 1}
+        ctrl:reset_selector()
+        pres:move_focus()
+    end
+
+    function ctrl:shuffle_game()
+        state:shuffle()
+        state:set_tile_tables()
         grid = state:get_grid()
+
+        pres:display_ui()
+        pres:reset()
 
         selector = {x = 1, y = 1, z = 1}
         ctrl:reset_selector()
@@ -121,7 +130,7 @@ function(ctrl, router, ...)
         end
         if counter <= 0 then
             print("game over")
-            self:reset_game()
+            state:check_for_win()
         end
         print("pieces left =",counter)
     end
@@ -176,7 +185,7 @@ function(ctrl, router, ...)
             local closest_dist = 10000
             --print("selector")
             --dumptable(selector)
-            for _,tile in pairs(top_tiles) do
+            for _,tile in ipairs(top_tiles) do
                 --dumptable(tile)
                 -- check against comparing tiles in the wrong direction
                 --[[
@@ -228,7 +237,7 @@ function(ctrl, router, ...)
         local dist = nil
         --arbitrarily high value
         local closest_dist = 10000
-        for _,tile in pairs(top_tiles) do
+        for _,tile in ipairs(top_tiles) do
             -- Euclidean distance measure
                 -- check against comparing against current position
             dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2)

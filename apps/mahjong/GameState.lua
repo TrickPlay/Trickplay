@@ -2,7 +2,6 @@ GameState = Class(nil,function(state, ctrl)
     math.randomseed(os.time())
     local ctrl = ctrl
     
-
     game_timer = {
         start = 0,
         current = 0,
@@ -44,6 +43,8 @@ GameState = Class(nil,function(state, ctrl)
     -- a table which contains matching tiles organized by indexing into the suit
     -- and number, i.e. matches[tile.suit][tile.number]
     local matches = nil
+    -- a table containing the positions of all available tiles
+    local positions = nil
     -- the class for all the tiles with functions
     local tiles_class = nil
     -- current selected tile to be compared with another tile for elimination
@@ -56,6 +57,8 @@ GameState = Class(nil,function(state, ctrl)
     local must_restart = false
     -- true if the player is in roaming mode
     local roaming = false
+    -- the Layout determines layout of mahjong game
+    local layout = nil
 
     -- getters/setters
     function state:get_grid() return grid end
@@ -109,7 +112,48 @@ GameState = Class(nil,function(state, ctrl)
         tiles_class:reset()
     end
 
-    function state:build_mahjong()
+    function state:shuffle()
+        local switch = nil
+        local temp = {}
+        
+        tiles_class:reset()
+
+        for tile,position in pairs(positions) do
+            table.insert(temp, position)
+        end
+
+        for i,position in ipairs(temp) do
+            rand_pos = temp[math.random(#temp)]
+            rand_tile = grid[rand_pos[1]][rand_pos[2]][rand_pos[3]]
+            tile = grid[position[1]][position[2]][position[3]]
+            assert(tile:is_a(Tile))
+            assert(rand_tile:is_a(Tile))
+            
+            tile.position, rand_tile.position = rand_pos, position
+            grid[rand_pos[1]][rand_pos[2]][rand_pos[3]],
+            grid[position[1]][position[2]][position[3]]
+                =
+            grid[position[1]][position[2]][position[3]],
+            grid[rand_pos[1]][rand_pos[2]][rand_pos[3]]
+
+        end
+    end
+
+    function state:set_tile_tables()
+        state:set_tile_quadrants()
+        state:find_selectable_tiles()
+        state:find_matching_tiles()
+        state:find_top_tiles()
+    end
+
+    function state:build_layout(number)
+        assert(number)
+        assert(type(number) == "number")
+        layout = Layout(number, tiles)
+        grid = layout:get_grid()
+    end
+
+    function state:build_test()
         -- Sets up the game grid the player moves across
         local index = 1
         grid = {}
@@ -120,76 +164,10 @@ GameState = Class(nil,function(state, ctrl)
             end
         end
 
-        -- Bottom layer
-        for i = 7,22,2 do
-            for j = 1,15,2 do
-                grid[i][j][1] = tiles[index]
-                index = index + 1
-            end
-        end
-        grid[3][1][1] = tiles[index]
-        index = index + 1
-        grid[5][1][1] = tiles[index]
-        index = index + 1
-        grid[23][1][1] = tiles[index]
-        index = index + 1
-        grid[25][1][1] = tiles[index]
-        index = index + 1
-        grid[3][15][1] = tiles[index]
-        index = index + 1
-        grid[5][15][1] = tiles[index]
-        index = index + 1
-        grid[23][15][1] = tiles[index]
-        index = index + 1
-        grid[25][15][1] = tiles[index]
-        index = index + 1
-        for j = 5,11,2 do
-            grid[5][j][1] = tiles[index]
-            index = index + 1
-            grid[23][j][1] = tiles[index]
-            index = index + 1
-        end
-        for j = 7,9,2 do
-            grid[3][j][1] = tiles[index]
-            index = index + 1
-            grid[25][j][1] = tiles[index]
-            index = index + 1
-        end
-        -- left outer edge  (redundancy so moving to the left from [2][4][1] and
-        -- [2][5][1] is equilvalent)
-        grid[1][8][1] = tiles[index]
-        index = index + 1
-        -- right outer edge
-        grid[27][8][1] = tiles[index]
-        index = index + 1
-        grid[29][8][1] = tiles[index]
-        index = index + 1
-
-        -- Second from bottom layer
-        for i = 9,19,2 do
-            for j = 3,13,2 do
-                grid[i][j][2] = tiles[index]
-                index = index + 1
-            end
-        end
-        -- Third
-        for i = 11,17,2 do
-            for j = 5,11,2 do
-                grid[i][j][3] = tiles[index]
-                index = index + 1
-            end
-        end
-        -- Fourth
-        for i = 13,15,2 do
-            for j = 7,9,2 do
-                grid[i][j][4] = tiles[index]
-                index = index + 1
-            end
-        end
-        -- Top Piece
-        grid[14][8][5] = tiles[index]
-        index = index + 1
-
+        grid[1][1][1] = tiles[1]
+        grid[5][4][2] = tiles[2]
+        grid[8][10][1] = tiles[3]
+        grid[5][4][1] = tiles[4]
     end
 
     --[[
@@ -199,11 +177,13 @@ GameState = Class(nil,function(state, ctrl)
         placings.
     --]]
     function state:set_tile_quadrants()
+        positions = {}
         for i = 1,GRID_WIDTH do
             for j = 1,GRID_HEIGHT do
                 for k = 1,GRID_DEPTH do
                     if grid[i][j][k] and not grid[i][j][k].set then
                         grid[i][j][k].position = {i,j,k}
+                        positions[grid[i][j][k]] = {i,j,k}
                         grid[i+1][j][k] = grid[i][j][k]
                         grid[i][j+1][k] = grid[i][j][k]
                         grid[i+1][j+1][k] = grid[i][j][k]
@@ -241,7 +221,7 @@ GameState = Class(nil,function(state, ctrl)
                                 if grid[i][j][new_z] then z = new_z end
                                 new_z = new_z + 1
                             end
-                            top_tiles[grid[x][y][z]] = grid[x][y][z]
+                            table.insert(top_tiles, grid[x][y][z])
                         end
                     end
                 end
@@ -264,7 +244,7 @@ GameState = Class(nil,function(state, ctrl)
                 end
             end
         --]]
-            for k,v in pairs(top_tiles) do
+            for k,v in ipairs(top_tiles) do
                 if is_key_hint_on(keys.t) then
                     v.focus.red.opacity = 255
                 else
@@ -339,7 +319,7 @@ GameState = Class(nil,function(state, ctrl)
 
     function state:show_matching_tiles()
         for _,tile in pairs(matching_tiles) do
-            if tile.focus.green.opacity == 0 then tile.focus.green.opacity = 255
+            if tile.focus.green.opacity == 0 then tile:set_green()
             else tile.focus.green.opacity = 0
             end
         end
@@ -365,7 +345,7 @@ GameState = Class(nil,function(state, ctrl)
             if selection_grid[tile] then
                 -- select the piece
                 selected_tile = tile
-                tile.focus.green.opacity = 255
+                tile:set_green()
             end
         else
             if selection_grid[tile] and selected_tile:is_a_match(tile) then
@@ -392,9 +372,16 @@ GameState = Class(nil,function(state, ctrl)
         grid[position[1]+1][position[2]][position[3]] = nil
         grid[position[1]][position[2]+1][position[3]] = nil
         grid[position[1]+1][position[2]+1][position[3]] = nil
+        positions[tile] = nil
     end
 
     function state:check_for_win()
+        self:find_top_tiles()
+        if #top_tiles == 0 then
+            game:reset_game()
+        else
+            game:shuffle_game()
+        end
     end
 
 end)
