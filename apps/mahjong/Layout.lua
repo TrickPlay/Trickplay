@@ -1,6 +1,7 @@
 Layouts = {
     TURTLE = 1,
-    CLUB = 2
+    CLUB = 2,
+    ARENA = 3
 }
 Layouts.LAST = -1
 for _,__ in pairs(Layouts) do
@@ -102,7 +103,7 @@ local layout_functions = {
         end
 
         -- Center
-        for i = 11,15,2 do
+        for i = 13,17,2 do
             for j = 1,11,2 do
                 for k = 1,2 do
                     grid[i][j][k] = tiles[index]
@@ -113,34 +114,33 @@ local layout_functions = {
         -- top left/right side of the top leaf
         for j = 3,5,2 do
             for k = 1,2 do
-                grid[9][j][k] = tiles[index]
+                grid[11][j][k] = tiles[index]
                 index = index + 1
-                grid[17][j][k] = tiles[index]
+                grid[19][j][k] = tiles[index]
                 index = index + 1
             end
         end
         -- Bottom center stuff
         for k = 1,2 do
-            grid[11][13][k] = tiles[index]
+            grid[13][13][k] = tiles[index]
             index = index + 1
-            grid[15][13][k] = tiles[index]
+            grid[17][13][k] = tiles[index]
             index = index + 1
         end
         -- Very Bottom stuff
-        for i = 11,15,2 do
+        for i = 13,17,2 do
             for k = 1,2 do
-                print(index)
                 grid[i][15][k] = tiles[index]
                 index = index + 1
             end
         end
         for k = 1,2 do
-            grid[13][13][k] = tiles[index]
+            grid[15][13][k] = tiles[index]
             index = index + 1
         end
         -- Left/Right leaves
         -- center part of the left/right leafs
-        for i = 3,7,2 do
+        for i = 5,9,2 do
             for j = 7,13,2 do
                 for k = 1,2 do
                     grid[i][j][k] = tiles[index]
@@ -153,24 +153,24 @@ local layout_functions = {
         -- most left/right tiles
         for j = 9,11,2 do
             for k = 1,2 do
-                grid[1][j][k] = tiles[index]
+                grid[3][j][k] = tiles[index]
                 index = index + 1
-                grid[17][j][k] = tiles[index]
+                grid[19][j][k] = tiles[index]
                 index = index + 1
             end
         end
         -- right/left side tiles on the left/right leaf
         for j = 9,11,2 do
             for k = 1,2 do
-                grid[9][j][k] = tiles[index]
+                grid[11][j][k] = tiles[index]
                 index = index + 1
-                grid[25][j][k] = tiles[index]
+                grid[27][j][k] = tiles[index]
                 index = index + 1
             end
         end
         -- Top Layers
         -- left/center/right
-        for i = 4,6,2 do
+        for i = 6,8,2 do
             for j = 9,11,2 do
                 for k = 3,4 do
                     -- left
@@ -188,7 +188,75 @@ local layout_functions = {
 
 
         return grid
+    end,
+
+    [Layouts.ARENA] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+        
+        -- Top left/right triangle
+        for i = 1,9,2 do
+            for j = 1,7,2 do
+                for k = 1,(12-i-j)/2 do
+                    if k < 1 then break end
+                    -- left
+                    grid[i+2][j+1][k] = tiles[index]
+                    index = index + 1
+                    -- right
+                    grid[28-i][j+1][k] = tiles[index]
+                    index = index + 1
+                end
+            end
+        end
+        -- Bottom left/right triangle
+        for i = 1,9,2 do
+            for j = 1,5,2 do
+                for k = 1,(12-i-j)/2 do
+                    if k < 1 then break end
+                    -- left
+                    grid[i+2][15-j][k] = tiles[index]
+                    index = index + 1
+                    -- right
+                    grid[28-i][15-j][k] = tiles[index]
+                    index = index + 1
+                end
+            end
+        end
+
+        --Center strip
+        for j = 3,11,2 do
+            grid[15][j+1][1] = tiles[index]
+            index = index + 1
+        end
+        grid[15][4][2] = tiles[index]
+        index = index + 1
+        grid[15][8][2] = tiles[index]
+        index = index + 1
+        grid[15][12][2] = tiles[index]
+        index = index + 1
+
+        grid[13][4][1] = tiles[index]
+        index = index + 1
+        grid[13][8][1] = tiles[index]
+        index = index + 1
+        grid[13][12][1] = tiles[index]
+        index = index + 1
+        grid[17][4][1] = tiles[index]
+        index = index + 1
+        grid[17][8][1] = tiles[index]
+        index = index + 1
+        grid[17][12][1] = tiles[index]
+        index = index + 1
+
+        return grid
     end
+
 }
 
 Layout = Class(function(layout, number, tiles, ...)

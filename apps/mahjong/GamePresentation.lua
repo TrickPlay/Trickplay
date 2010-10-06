@@ -7,12 +7,13 @@ function(pres, ctrl)
 
 
     local backgrounds = {
+        "assets/Mahjong_bg1.jpg"
     }
-    local current_background = Image{src=backgrounds[2], name="background"}
+    local current_background = Image{src=backgrounds[1], name="background"}
     local background = Group()
     background:add(current_background)
-    background.anchor_point = {current_background.w/2, current_background.h/2}
-    background.position = {1920/2, 1080/2}
+    --background.anchor_point = {current_background.w/2, current_background.h/2}
+    --background.position = {1920/2, 1080/2}
 
     local tiles = {
         "assets/tiles/TileWoodLg.png",
@@ -24,7 +25,7 @@ function(pres, ctrl)
         position = Utils.deepcopy(GridPositions[2][1][1])
     }
 
-    local grid_group = Group{position = {440, 60}}
+    local grid_group = Group{position = {460, 60}}
     
     ui = Group()
     ui:add(background, grid_group)

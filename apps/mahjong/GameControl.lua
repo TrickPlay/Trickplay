@@ -51,7 +51,9 @@ function(ctrl, router, ...)
         state:initialize(args)
         --state:build_layout(Layouts.TURTLE)
         state:build_layout(Layouts.CLUB)
---        state:build_test()
+        --state:build_layout(Layouts.ARENA)
+        --state:build_test()
+        --state:build_two_tile_test()
         state:set_tile_tables()
         grid = state:get_grid()
 
@@ -63,17 +65,21 @@ function(ctrl, router, ...)
         add_to_key_handler(keys.h, state.show_matching_tiles)
         add_to_key_handler(keys.r, ctrl.reset_game)
         add_to_key_handler(keys.s, ctrl.shuffle_game)
+        add_to_key_handler(keys.u, ctrl.undo_move)
 
     end
 
     function ctrl:reset_game()
+        print("game resetting")
         router:set_active_component(Components.GAME)
         router:notify()
 
         state:reset()
         --state:build_layout(Layouts.TURTLE)
-        state:build_layout(Layouts.CLUB)
---        state:build_test()
+        --state:build_layout(Layouts.CLUB)
+        state:build_layout(Layouts.ARENA)
+        --state:build_test()
+        --state:build_two_tile_test()
         state:set_tile_tables()
         grid = state:get_grid()
 
@@ -86,6 +92,7 @@ function(ctrl, router, ...)
     end
 
     function ctrl:shuffle_game()
+        print("game re-shuffling")
         state:shuffle()
         state:set_tile_tables()
         grid = state:get_grid()
@@ -94,6 +101,18 @@ function(ctrl, router, ...)
         pres:reset()
 
         selector = {x = 1, y = 1, z = 1}
+        ctrl:reset_selector()
+        pres:move_focus()
+    end
+
+    function ctrl:undo_move()
+        state:undo()
+        state:set_tile_tables()
+        grid = state:get_grid()
+
+        pres:display_ui()
+        pres:reset()
+
         ctrl:reset_selector()
         pres:move_focus()
     end
@@ -114,11 +133,13 @@ function(ctrl, router, ...)
         state:click(selector)
         local still_roaming = state:is_roaming()
         -- short circuit, checks to see if state changed from roaming to
-        -- not roaming during click, thus game must know where it picked
-        -- up a card from in order to put it back to its previous spot
+        -- not roaming during click, thus game must know whether it picked
+        -- up a tile
         if was_roaming == not still_roaming then
             if was_roaming then
+            -- if no tile was deleted
             elseif grid[selector.x][selector.y][selector.z] then
+                -- do nothing (for now)
             else
                 --increase_moves() --this is global in "MenuView.lua"/should change
                 self:reset_selector()
@@ -127,7 +148,7 @@ function(ctrl, router, ...)
 
         local counter = 0
         local matching_tiles = state:get_matching_tiles()
-        for _,_ in pairs(matching_tiles) do
+        for _,__ in pairs(matching_tiles) do
             counter = counter + 1
         end
         if counter <= 0 then
@@ -182,6 +203,7 @@ function(ctrl, router, ...)
         if not new_tile then
             x = selector.x
             y = selector.y
+            z = selector.z
             local dist = nil
             --arbitrarily high value
             local closest_dist = 10000
@@ -208,7 +230,8 @@ function(ctrl, router, ...)
                 else
                     -- Euclidean distance measure
                         -- check against comparing against current position
-                    dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2)
+                    dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2
+                        + (tile.position[3]-z)^2)
                     if dist < closest_dist and dist ~= 0 then
                         closest_dist = dist
                         new_tile = tile

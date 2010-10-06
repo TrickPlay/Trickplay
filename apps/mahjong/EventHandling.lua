@@ -30,7 +30,7 @@ function is_key_hint_on(key)
 end
 
 function disable_event_listeners()
-    t:disable()
+    --t:disable()
     event_listner_en = false
 end
 

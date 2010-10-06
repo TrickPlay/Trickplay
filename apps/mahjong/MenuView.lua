@@ -4,10 +4,17 @@ MenuView = Class(View, function(view, model, ...)
 ------------ Load Assets ------------
 
     local menu_bars = {
+        Image{src = "assets/menus/menu.jpg"}
+    }
+    local menu_drop_shadow = Image{
+        src="assets/menus/menu-drop-shadow.png",
+        x = 395
     }
 
     --
     view.items = {}
+
+    local focusable_items = {}
 
     -- score related stuff
     local time_text = game_timer.text
@@ -28,9 +35,10 @@ MenuView = Class(View, function(view, model, ...)
 
     -- menu ui
     local menu_open_x = 0
-    local menu_closed_x = -265
-    local menu_hiden_x = -385
-    view.menu_ui = Group{name = "menu_ui", position = {0, menu_closed_x}}
+    local menu_closed_x = 0---265
+    local menu_hiden_x = -408
+    view.menu_ui = Group{name = "menu_ui", position = {menu_open_x,0}}
+    view.menu_ui:add(menu_drop_shadow)
     view.menu_ui:add(unpack(menu_bars))
     view.menu_ui:add(unpack(view.items))
 
@@ -143,16 +151,16 @@ MenuView = Class(View, function(view, model, ...)
         local selected_object = controller:get_selection().object
 
         if controller:is_options_hidden() then
-            options_text.text = "Show Options"
+            --options_text.text = "Show Options"
         else
-            options_text.text = "Hide Options"
+            --options_text.text = "Hide Options"
         end
 
         -- hide focus if not the active component
         if controller:is_active_component() then
-            if selected_object.on_focus then selected_object:on_focus() end
+            --if selected_object.on_focus then selected_object:on_focus() end
         else
-            if selected_object.off_focus then selected_object:off_focus() end
+            --if selected_object.off_focus then selected_object:off_focus() end
         end
 
         if comp ~= Components.MENU then
