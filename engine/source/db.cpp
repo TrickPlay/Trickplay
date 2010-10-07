@@ -436,7 +436,14 @@ namespace SQLite
 
     String Statement::get_string( int col )
     {
-        return !ok() || is_null( col ) ? String() : String( ( const char * )sqlite3_column_text( s, col ) );
+        if ( !ok() || is_null( col ) )
+        {
+            return String();
+        }
+
+        const char * value = ( const char * ) sqlite3_column_text( s, col );
+
+        return ! value ? String() : String( value , sqlite3_column_bytes( s , col ) );
     }
 
     bool Statement::is_null( int col )
