@@ -5,93 +5,243 @@ dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("Game.lua")
 
 dofile("FocusableImage.lua")
+local num_givens = 50
 --local bg = Image{src="assets/background.jpg"}
-local blank_button_on   = Image{src="assets/blank_on.png",  opacity=0}
-local blank_button_off  = Image{src="assets/blank_off.png", opacity=0}
-local green_button_on   = Image{src="assets/green_on.png",  opacity=0}
-local green_button_off  = Image{src="assets/green_off.png", opacity=0}
-local red_button_on     = Image{src="assets/red_on.png",    opacity=0}
-local red_button_off    = Image{src="assets/red_off.png",   opacity=0}
-local blue_button_on    = Image{src="assets/blue_on.png",   opacity=0}
-local blue_button_off   = Image{src="assets/blue_off.png",  opacity=0}
-local yellow_button_on  = Image{src="assets/yellow_on.png", opacity=0}
-local yellow_button_off = Image{src="assets/yellow_off.png",opacity=0}
-local blue = Image{src = "assets/3x3grid-blue.png",opacity=0}
-local red  = Image{src =  "assets/3x3grid-red.png",opacity=0}
-print("0")
+local blank_button_on   = Image{src="assets/blank_on.png",      opacity=0}
+local blank_button_off  = Image{src="assets/blank_off.png",     opacity=0}
+local green_button_on   = Image{src="assets/green_on.png",      opacity=0}
+local green_button_off  = Image{src="assets/green_off.png",     opacity=0}
+local red_button_on     = Image{src="assets/red_on.png",        opacity=0}
+local red_button_off    = Image{src="assets/red_off.png",       opacity=0}
+local blue_button_on    = Image{src="assets/blue_on.png",       opacity=0}
+local blue_button_off   = Image{src="assets/blue_off.png",      opacity=0}
+local yellow_button_on  = Image{src="assets/yellow_on.png",     opacity=0}
+local yellow_button_off = Image{src="assets/yellow_off.png",    opacity=0}
+local blue              = Image{src ="assets/3x3grid-blue.png", opacity=0}
+local red               = Image{src ="assets/3x3grid-red.png",  opacity=0}
+sparkle_base            = Image{src ="assets/Sparkle.png",      opacity=0}
+--sparkle = Group{name="\n\n\njhsdfsdfjklsdfjkl;d",z=3}
+
 screen:add(
 	 blank_button_on,  blank_button_off, green_button_on, green_button_off,
 	   red_button_on,    red_button_off,  blue_button_on,  blue_button_off,
-	yellow_button_on, yellow_button_off,             red,             blue
+	yellow_button_on, yellow_button_off,             red,             blue,
+	         sparkle_base
+
 )
-print("-1")
+
+--sparkle:add(sparkle_base)
+--sparkle.clip = {0,0,sparkle_base.w/5,sparkle_base.h}
+--sparkle.anchor_point = {sparkle_base.w/(5*2),sparkle_base.h/2}
+function start_sparkle(x,y, num_sparkles)
+	local timeline = Timeline
+	{
+		duration = 2000,
+		loop = false,
+		direction = "FORWARD"
+	}
+	local sparkles = {}
+	local sparkles_strip = {}
+
+	--each sparkle gets predefined params (with variance)
+	local x_start = {}
+	local y_start = {}
+	local x_peak  = {}
+	local y_peak  = {}
+	local x_end   = {}
+	local y_end   = {}
+
+	local scale  = {}
+	local rot_start   = {}
+	local rot_speed   = {}
+	local stage_start = {}
+	local stage_speed = {}
+	local o_peak      = {}
+	local o_t_end     = {}
+	local t_peak      = {}
+
+	function timeline.on_started()
+		for i = 1, num_sparkles do
+			sparkles[i] = Group{opacity=0}
+			sparkles_strip[i] = Clone{source = sparkle_base}
+			sparkles[i].clip = {0,0,sparkles_strip[i].w/5,sparkles_strip[i].h}
+			sparkles[i]:add(sparkles_strip[i])
+
+			local x_dir = math.random(85,115)/100
+			x_start[i] = math.random(-2,2)+x
+			y_start[i] = math.random(-2,2)+y
+			x_peak[i]  = x_start[i]*x_dir
+			y_peak[i]  = y_start[i]-80+math.random(-10,10)
+			x_end[i]   = x_peak[i]*x_dir
+			y_end[i]   = y_peak[i]+90+math.random(-10,10)
+
+			--scale[i] = math.random(8,9)/10
+			--sparkles[i].scale={scale[i],scale[i]}
+
+			rot_start[i]   = math.random(   0, 359) --initial rotation
+			rot_speed[i]   = math.random( 500, 700) --num of milliseconds for a rotation
+			stage_start[i] = math.random(   1,   5) --initial start stage
+			stage_speed[i] = math.random(  50, 100) --num of milliseconds between switches
+			
+			o_peak[i] = math.random(170,255)
+			o_t_end[i] = math.random(0,300) -- when, during the final 200 milliseconds,
+											-- the opacity goes to 0
+			t_peak[i] = 500 + math.random(-100,100)
+			screen:add(sparkles[i])
+			sparkles[i]:raise_to_top()
+		end
+	end
+	
+	function timeline.on_new_frame(t,msecs,p)
+		--local sparkle_stage = math.ceil(p*5)
+		--sparkle_base.x = -1*(stage-1)*sparkle_base.w/5
+		--sparkle.z_rotation = {360*p,sparkle_base.w/(5*2),sparkle_base.h/2}
+
+		local prog
+		local stage
+		for i = 1,num_sparkles do
+			stage = math.floor(msecs/stage_speed[i] + stage_start[i])%5+1
+
+			if msecs < 250 then
+				sparkles[i].opacity = msecs/100 * o_peak[i]
+			end
+			if msecs < t_peak[i] then
+				prog = msecs/t_peak[i]
+				sparkles[i].x = prog*(x_peak[i]-x_start[i]) + x_start[i]
+				sparkles[i].y = prog*(y_peak[i]-y_start[i]) + y_start[i]
+				sparkles_strip[i].x =  -1*(stage-1)*sparkles_strip[i].w/5
+				--sparkles[i].z_rotation = {rot_start[i]+360*(msecs%rot_speed[i]),0,0}
+				
+			elseif msecs < (t.duration - o_t_end[i]) then
+				prog = (msecs-t_peak[i])/(t.duration- o_t_end[i]-t_peak[i])
+				sparkles[i].x = prog*(x_end[i]-x_peak[i]) + x_peak[i]
+				sparkles[i].y = prog*(y_end[i]-y_peak[i]) + y_peak[i]
+				sparkles[i].opacity = (1-prog)*o_peak[i]
+				sparkles_strip[i].x =  -1*(stage-1)*sparkles_strip[i].w/5
+
+			end
+		end
+	end
+	function timeline.on_completed()
+		for i=1,num_sparkles do
+			sparkles[i]:clear()
+			sparkles[i]:unparent()
+			sparkles[i] = nil
+		end
+	end
+	timeline:start()
+end
+local help = Group{z=3,opacity=0}
+screen:add(help)
+help:add(
+	Rectangle{
+		color="000000",
+		w=1000,
+		h=800,
+	--	x=screen.w/2,
+	--	y=screen.h/2,
+		opacity=220
+	},
+	Text{
+		text = "The Rules of Sudoku:\n\n"..
+			"- All the numbers in any row must be unique\n"..
+			"- All the numbers in any column must be unique\n"..
+			"- All the numbers in any designate 3x3 must be unique\n\n"..
+			"The numbers 1-9 will be placed exactly once in each of\n"..
+			"those categories.\n\n"..
+			"Gameplay:\n\n"..
+			" ARROWS  - Move the cursor around to select tiles\n"..
+			" NUMBERS - Allow you to make a guess on a tile\n"..
+			" ENTER   - Opens the pencil menu to guess multiple"..
+				" numbers\n\n"..
+			"Good Luck!\nPress any button to go back",
+		font = "DejaVu 45px",
+		color = "FFFFFF",
+		x = 50, y = 50
+	}
+)
+help.anchor_point = {   help.w/2,   help.h/2 }
+help.position     = { screen.w/2, screen.h/2 }
+
 local side_font = "Dejavu Bold 60px"
 right_menu = Group{z=1}
 local right_list = {
 	FocusableImage({0,0},"Cheat", 
 		red_button_off,red_button_on,function() end),
 
-	FocusableImage({0,blank_button_off.h+7},"Undo Move", 
+	FocusableImage({0,blank_button_off.h+8},"Undo Move", 
 		green_button_off,green_button_on,
 		function() 
-			game:undo(ind.r,ind.c) 
+			game:undo() 
 		end),
 
-	FocusableImage({0,2*(blank_button_off.h+7)},"Show Errors", 
+	FocusableImage({0,2*(blank_button_off.h+8)},"Show Errors", 
 		yellow_button_off,yellow_button_on, 
 		function() 
 			game:error_check() 
 		end),
 
-	FocusableImage({0,3*(blank_button_off.h+7)},"Restart Puzzle", 
+	FocusableImage({0,3*(blank_button_off.h+8)},"Restart Puzzle", 
 		blue_button_off, blue_button_on, 
 		function() 
 			game:restart() 
 		end)
 }
-print("1")
 right_menu:add( right_list[1].group,right_list[2].group,right_list[3].group,right_list[4].group )
-print("2")
 right_menu.anchor_point = {right_menu.w/2,0}
-right_menu.y_rotation ={-25,right_menu.w/2,0}
-right_menu.position = {screen.w - right_menu.w/2+120,red.h   + 90}
+--right_menu.y_rotation ={-25,right_menu.w/2,0}
+right_menu.position = {screen.w - right_menu.w/2+80,red.h   + 90}
 local left_menu = Group{z=1}
 local left_list = {
 	FocusableImage({0,0},"New Puzzle", 
+		blank_button_off,blank_button_on,
+		function() 
+---[[
+			game.board:clear()
+			game = Game(BoardGen(num_givens))
+			ind = {r=1,c=1}
+--]]
+			flip_board()
+
+--[[
+			splash.opacity = 255
+			focus = "SPLASH"
+			left_list[left_index].color = "FFFFFF"
+			left_index = 1
+--]]
+		end),
+
+	FocusableImage({0,blank_button_off.h+8},"Help", 
 		blank_button_off,blank_button_on,
 		function() 
 			help.opacity = 255
 			help:raise_to_top()
 			focus = "HELP"
 		end),
-
-	FocusableImage({0,blank_button_off.h+10},"Help", 
+	FocusableImage({0,2*(blank_button_off.h+8)},"Settings", 
 		blank_button_off,blank_button_on,
 		function() 
-			splash.opacity = 255
-			focus = "SPLASH"
-			left_list[left_index].color = "FFFFFF"
-			left_index = 1
+
 		end),
 
-	FocusableImage({0,2*(blank_button_off.h+10)},"Save Exit", 
+
+	FocusableImage({0,3*(blank_button_off.h+8)},"Save & Exit", 
 		blank_button_off,blank_button_on,
 		function() 
 			game:save()
 			exit()
 		end)
 }
-print("23")
-left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group )
+left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group,left_list[4].group )
 left_menu.anchor_point = {left_menu.w/2,0}
-left_menu.position = {left_menu.w/2+180,red.h   + 90}
+left_menu.position = {left_menu.w/2+260,red.h   + 90}
 
 
 local left_index = 1
 local right_index = 1
 
 
-
+local red_is_on = true
 local red_board = Group{}
 local red_blox = 
 {
@@ -111,26 +261,28 @@ local red_blox =
 		Clone{source=red, x= red.w*2 + 30*2, y= red.h*2 + 30*2}
 	}
 }
-local blue_board = Group{opacity=0}
+local blue_board = Group{}
 local blue_blox = 
 {
 	{
-		Clone{source=blue},
-		Clone{source=blue, x= blue.w   + 30},
-		Clone{source=blue, x= blue.w*2 + 30*2}
+		Clone{source=blue,opacity = 0},
+		Clone{source=blue,opacity = 0, x= blue.w   + 30},
+		Clone{source=blue,opacity = 0, x= blue.w*2 + 30*2}
 	},
 	{
-		Clone{source=blue,                     y= blue.h   + 30},
-		Clone{source=blue, x= blue.w   + 30,   y= blue.h   + 30},
-		Clone{source=blue, x= blue.w*2 + 30*2, y= blue.h   + 30}
+		Clone{source=blue,opacity = 0,                     y= blue.h   + 30},
+		Clone{source=blue,opacity = 0, x= blue.w   + 30,   y= blue.h   + 30},
+		Clone{source=blue,opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30}
 	},
 	{
-		Clone{source=blue,                     y= blue.h*2 + 30*2},
-		Clone{source=blue, x= blue.w   + 30,   y= blue.h*2 + 30*2},
-		Clone{source=blue, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
+		Clone{source=blue,opacity = 0,                     y= blue.h*2 + 30*2},
+		Clone{source=blue,opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2},
+		Clone{source=blue,opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
 	}
 }
-screen:add(Image{src="assets/background.jpg"},red_board,blue_board)
+local bg_red  = Image{src="assets/bg_red.jpg"}
+local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
+screen:add(bg_red,bg_blue,red_board,blue_board, Image{src="assets/logo.png",x=40,y=40})
 for i=1,3 do
 	blue_board:add( unpack(blue_blox[i]) )
 	red_board:add(  unpack( red_blox[i]) )
@@ -139,6 +291,98 @@ red_board.anchor_point  = {  red_board.w/2,  red_board.h/2 }
 red_board.position      = {     screen.w/2,     screen.h/2 }
 blue_board.anchor_point = { blue_board.w/2, blue_board.h/2 }
 blue_board.position     = {     screen.w/2,     screen.h/2 }
+
+function flip_board()
+	local timeline = Timeline
+	{
+		duration  =  200*(3+3),
+		loop      =  false,
+		direction = "FORWARD"
+	}
+	local old_board, new_board, old_bg, new_bg
+	
+	function timeline.on_started()
+		if red_is_on then
+			old_board =  red_blox
+			new_board = blue_blox
+			old_bg    =    bg_red
+			new_bg    =   bg_blue
+		else
+			old_board = blue_blox
+			new_board =  red_blox
+			old_bg    =   bg_blue
+			new_bg    =    bg_red
+		end
+		for r = 1,3 do for c = 1,3 do
+			new_board[r][c].y_rotation = {-180,new_board[r][c].w/2,0}
+		end            end
+
+	end
+	function timeline.on_new_frame(t,msecs,prog)
+		old_bg.opacity = 255 * (1-prog)
+		new_bg.opacity = 255 *    prog
+		local stage_i = math.ceil(msecs / 200) --stages 1-15
+				
+		local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
+		local degrees_old, degrees_new
+		for r = 1,3 do   for c = 1,3 do
+
+			--flipping stage 1
+			-- the old board tiles rotate from    0 - 90
+			-- the new board tiles rotate from -180 - 90
+			if (r+c-1)  == stage_i then
+				degrees_old = 90*(p)
+			--flipping stage 2
+			-- the old board tiles rotate from  90 - 180
+			-- the new board tiles rotate from -90 - 0
+			elseif (r+c-1)  == stage_i - 1 then
+				degrees_old = 90+90*(p)
+			--already flipped
+			-- the old board tiles are at 180
+			-- the new board tiles are at   0
+			elseif (r+c-1) < stage_i - 1 then
+				degrees_old = 180
+			--havent flipped
+			-- the old board tiles are at    0
+			-- the new board tiles are at -180
+			else
+				degrees_old = -180
+			end					
+			degrees_new = degrees_old - 180
+
+			old_board[r][c].y_rotation = { degrees_old, old_board[r][c].w/2, 0 }
+			new_board[r][c].y_rotation = { degrees_new, new_board[r][c].w/2, 0 }
+
+			if degrees_old <  135 and degrees_old >  45 then
+				old_board[r][c].opacity = 255 * (1- (degrees_old - 45)/90)
+			elseif degrees_old > 135 then
+				old_board[r][c].opacity = 0
+			end
+			if degrees_new > -135 and degrees_new < -45 then
+				new_board[r][c].opacity = 255* (degrees_new - 45)/90
+			elseif degrees_new > -45 then
+				new_board[r][c].opacity = 255
+			end
+
+		end		end
+
+	end
+	function timeline.on_completed()
+		for r = 1,3 do   for c = 1,3 do
+
+			old_board[r][c].y_rotation = { 180, old_board[r][c].w/2, 0 }
+			new_board[r][c].y_rotation = {   0, new_board[r][c].w/2, 0 }
+			old_board[r][c].opacity =   0
+			new_board[r][c].opacity = 255
+
+		end              end
+
+		if red_is_on then red_is_on = false else red_is_on = true end
+		old_bg.opacity =   0
+		new_bg.opacity = 255
+	end
+	timeline:start()
+end
 
 local num_font = "DejaVu Bold Condensed 30px"
 local pencil_menu = Group{y=40,opacity=0,z=1}
@@ -157,10 +401,10 @@ pencil_menu:add(
 	Text{name="9",text="9",font=num_font,color="FFFFFF",x=p_x(9),y=25},
 	Image{name="clear_on",  src="assets/button_on.png",y=70,x=100},
 	Image{name="clear_off", src="assets/button_off.png",y=70,x=100},
-	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=70,x=112},
+	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=77,x=115},
 	Image{name="done_on",   src="assets/button_on.png",y=70,x=210},
 	Image{name="done_off",  src="assets/button_off.png",y=70,x=210},
-	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=70,x=222}
+	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=77,x=225}
 )
 --[[
 local clock_sec = 50
@@ -214,40 +458,51 @@ screen:add(
 	pencil_menu
 )
 
-local help = Group{z=3,opacity=0}
-screen:add(help)
-help:add(
+
+
+
+local splash     = Group{z=2}
+local splash_list = 
+{
+	FocusableImage({screen.w/2+800,screen.h/2+700},"Continue Game", 
+		blank_button_off,blank_button_on,
+		function() 
+			splash.opacity = 0			
+
+			focus = "GAME_BOARD"
+			selector.opacity = 255
+
+		end),
+	FocusableImage({screen.w/2+1800,screen.h/2+700},"New Medium Game", 
+		blank_button_off,blank_button_on,
+		function() 
+			splash.opacity = 0			
+			if settings.givens and settings.guesses then
+				game.board:clear()
+			end
+			game = Game(BoardGen(num_givens))
+			ind = {r=1,c=1}
+			focus = "GAME_BOARD"
+			selector.opacity = 255
+
+		end)
+
+	
+}
+splash:add(
 	Rectangle{
 		color="000000",
 		w=1000,
-		h=800,
-	--	x=screen.w/2,
-	--	y=screen.h/2,
-		opacity=220
+		h=500,
+		x=screen.w/2,
+		y=screen.h/2,
+		opacity=180
 	},
-	Text{
-		text = "The Rules of Sudoku:\n\n"..
-			"- All the numbers in any row must be unique\n"..
-			"- All the numbers in any column must be unique\n"..
-			"- All the numbers in any designate 3x3 must be unique\n\n"..
-			"The numbers 1-9 will be placed exactly once in each of\n"..
-			"those categories.\n\n"..
-			"Gameplay:\n\n"..
-			" ARROWS  - Move the cursor around to select tiles\n"..
-			" NUMBERS - Allow you to make a guess on a tile\n"..
-			" ENTER   - Opens the pencil menu to guess multiple"..
-				" numbers\n\n"..
-			"Good Luck!\nPress any button to go back",
-		font = "DejaVu 45px",
-		color = "FFFFFF",
-		x = 50, y = 50
-	}
+	Image{src="assets/logo.png",x = screen.w/2,y = screen.h/2-100},
+	splash_list[1].group,
+	splash_list[2].group
 )
-help.anchor_point = {   help.w/2,   help.h/2 }
-help.position     = { screen.w/2, screen.h/2 }
-
-local num_givens = 50
-local splash     = Group{z=2}
+--[[
 splash:add(
 	Rectangle{
 		color="000000",
@@ -324,9 +579,15 @@ splash:add(
 		y     = screen.h/2+180
 	}
 )
+--]]
 splash:foreach_child( function(child)
-	child.anchor_point = {child.w/2,child.h/2}
+	if child.group ~= nil then
+		child.group.anchor_point = {child.w/2,child.h/2}
+	else
+		child.anchor_point = {child.w/2,child.h/2}
+	end
 end)
+
 screen:add(splash)
 Directions = {
    RIGHT = { 1, 0},
@@ -335,7 +596,7 @@ Directions = {
    UP    = { 0,-1}
 }
 local pencil_menu_index = 2
-local focus = "SPLASH"
+focus = "SPLASH"
 local game_on = false
 game = nil
 local ind = {r=1,c=1}
@@ -558,22 +819,31 @@ function game_on_key_down(k)
 end
 local splash_hor_index = 2
 if settings.givens and settings.guesses then
+
 	game = Game(settings.givens,settings.guesses)
 	screen:add(game.board)
 	splash_hor_index = 1
+	splash_list[1]:on_focus()
+--[[
 	splash:find_child("cont").color    = "FF0000"
 	splash:find_child("new").color   = "FFFFFF"
-
+--]]
 else
 	game = nil
+	splash_list[2]:out_focus()
+--[[
 	splash:find_child("cont").color    = "FFFFFF"
 	splash:find_child("new").color   = "FF0000"
-
+--]]
 end
+local game_num = {55,45,30}
+local game_opts = {"Easy","Medium","Hard"}
+local curr_opt = 2
 function splash_on_key_down(k)
 	local key = 
 	{
 		[ keys.Return ] = function()
+--[[
 			splash.opacity = 0			
 
 			if splash_hor_index == 2 then
@@ -589,34 +859,66 @@ function splash_on_key_down(k)
 			selector.opacity = 255
 			--clock:start()
 			--game:on_focus(1,1)
+--]]
+			splash_list[splash_hor_index]:press_enter()
 		end,
 		[keys.Down] = function()
-			if num_givens > 25 and splash_hor_index == 2 then
-				num_givens = num_givens - 1
+			if num_givens > 25 and splash_hor_index == 2 and curr_opt < 3 then
+				--num_givens = num_givens - 1
+				curr_opt = curr_opt + 1
+				num_givens = game_num[curr_opt]
+
+--[[
 				splash:find_child("givens").text = num_givens
 				splash:find_child("givens_s").text = num_givens
+--]]
+				local t = splash_list[2].group:find_child("text")
+				t.text = "New "..game_opts[curr_opt].." Game"
+				t.anchor_point = {t.w/2,t.h/2}
+				t = splash_list[2].group:find_child("text_s")
+				t.text = "New "..game_opts[curr_opt].." Game"
+				t.anchor_point = {t.w/2,t.h/2}
+				
 			end
 		end,
 		[keys.Up] = function()
-			if num_givens < 60 and splash_hor_index == 2 then
-				num_givens = num_givens + 1
+			if num_givens < 60 and splash_hor_index == 2 and curr_opt > 1 then
+				--num_givens = num_givens + 1
+				curr_opt = curr_opt - 1
+				num_givens = game_num[curr_opt]
+--[[
 				splash:find_child("givens").text = num_givens
 				splash:find_child("givens_s").text = num_givens
+--]]
+				local t = splash_list[2].group:find_child("text")
+				t.text = "New "..game_opts[curr_opt].." Game"
+				t.anchor_point = {t.w/2,t.h/2}
+				t = splash_list[2].group:find_child("text_s")
+				t.text = "New "..game_opts[curr_opt].." Game"
+				t.anchor_point = {t.w/2,t.h/2}
+
 			end
 
 		end,
 		[keys.Right] = function()
 			splash_hor_index = 2
+			splash_list[2]:on_focus()
+			splash_list[1]:out_focus()
+--[[
 			splash:find_child("new").color    = "FF0000"
 			splash:find_child("cont").color   = "FFFFFF"
-
+--]]
 		end,
 		[keys.Left] = function()
 
 			if settings.givens and settings.guesses then
 				splash_hor_index = 1
+			splash_list[1]:on_focus()
+			splash_list[2]:out_focus()
+--[[
 				splash:find_child("new").color    = "FFFFFF"
 				splash:find_child("cont").color   = "FF0000"
+--]]
 			end
 		end,
 
@@ -687,6 +989,7 @@ function right_menu_on_key_down(k)
 	if key[k] then key[k]() end
 end
 function screen:on_key_down(k)
+print(focus)
 	local sub_on_key_down = 
 	{
 		["SPLASH"] = function(key_press)
@@ -706,6 +1009,10 @@ function screen:on_key_down(k)
 			focus = "GAME_LEFT"
 		end,	
 	}
+	if k == keys.s then
+		start_sparkle(200,200,12)
+		return
+	end
 	if sub_on_key_down[focus] then
 		sub_on_key_down[focus](k)
 	else

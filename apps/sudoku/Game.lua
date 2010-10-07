@@ -307,7 +307,6 @@ sel_menu:add(unpack(m_items))
 sel_menu.anchor_point={TILE_WIDTH/2,TILE_WIDTH/2}
 --]]
 Game = Class(function(g,the_givens, the_guesses, ...)
-print("SHIIIIIIT")
 	local error_checking = false
 	local empty_spaces = 81
 
@@ -936,7 +935,7 @@ end
 			end
 		end
 	end
-	function g:undo(r,c)
+	function g:undo()
 		if #undo_list > 0 then
 			params = table.remove(undo_list)
 			table.insert(redo_list,{params[1],params[2],params[3],params[4]})
