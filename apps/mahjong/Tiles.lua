@@ -116,11 +116,14 @@ Tile = Class(function(tile, suit, number, ...)
     -- the position of the tile in the game grid
     tile.position = nil
 
-    tile.group = Group()
+    tile.group = Group{clip = {0,0,tile.image.width,tile.image.height}}
     tile.group:add(
         tile.image, tile.depth, tile.focus.green, tile.focus.yellow,
         tile.focus.red, tile.glyph, tile.sparkle
     )
+
+    TILE_HEIGHT = tile.image.height
+    TILE_WIDTH = tile.image.width
 
     function tile:is_a_match(match)
         if tile == match then return false end
