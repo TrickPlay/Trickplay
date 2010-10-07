@@ -23,12 +23,12 @@ screen:add(splash, start_button_focus)
 screen:show()
 
 local timer = Timer()
-timer.interval = 6000
+timer.interval = 7000
 timer.on_timer = function(timer)
     timer:stop()
     timer.on_timer = nil
 
-    start_button_focus:animate{duration = 2000, opacity = 255,
+    start_button_focus:animate{duration = 1000, opacity = 255,
     on_completed = function()
 
         -- Router initialization
@@ -42,7 +42,7 @@ timer.on_timer = function(timer)
             for j = 1,GRID_HEIGHT do
                 GridPositions[i][j] = {}
                 for k = 1,GRID_DEPTH do
-                    GridPositions[i][j][k] = {47*(i-1) - (k-1)*16, 59*(j-1) - (k-1)*20}
+                    GridPositions[i][j][k] = {47*(i-1) - (k-1)*16, 59*(j-1) - (k-1)*21}
                 end
             end
         end
@@ -55,8 +55,8 @@ timer.on_timer = function(timer)
 
         -- View/Controller initialization
         game = GameControl(router, Components.GAME)
-        local menu = MenuView(router)
-        menu:initialize()
+        game_menu = MenuView(router)
+        game_menu:initialize()
 
         splash:unparent()
 

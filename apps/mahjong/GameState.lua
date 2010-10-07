@@ -377,53 +377,33 @@ GameState = Class(nil,function(state, ctrl)
             if selection_grid[tile] then
                 -- select the piece
                 selected_tile = tile
+                game_menu:add_tile_image(
+                    Clone{source = tile.image},
+                    Clone{source = tile.glyph})
                 tile:set_green()
             end
         else
             if selection_grid[tile] and selected_tile:is_a_match(tile) then
                 local counter = 0
-                intervals ={
-                    ["x"] = Interval(selected_tile.group.position[1],
-                                     selected_tile.group.position[1] - 100),
-                    ["y"] = Interval(selected_tile.group.position[2],
-                                     selected_tile.group.position[2] - 100),
-                }
-                gameloop:add(selected_tile.group, 3000, nil, intervals,
-                    function()
-                        selected_tile.group.z = selected_tile.group.z + 1
-                        counter = counter + 1
-                    end)
-                intervals ={
-                    ["x"] = Interval(tile.group.position[1],
-                                     tile.group.position[1] - 100),
-                    ["y"] = Interval(tile.group.position[2],
-                                     tile.group.position[2] - 100),
-                }
-                gameloop:add(tile.group, 3000, nil, intervals,
-                    function()
-                        tile.group.z = tile.group.z + 1
-                        counter = counter + 1
-                    end)
-                local timer = Timer()
-                timer.interval = 500
-                function timer:on_timer()
-                    if counter == 2 then
-                        timer:stop()
-                        timer.on_timer = nil
-                        
-                        last_tiles = {tile, selected_tile}
-                        state:remove_tile(tile)
-                        state:remove_tile(selected_tile)
-                        selected_tile = nil
+                local temp = selected_tile
+                
+                game_menu:add_tile_image(
+                    Clone{source = tile.image},
+                    Clone{source = tile.glyph})
 
-                        state:find_selectable_tiles()
-                        state:find_top_tiles()
-                        state:find_matching_tiles()
-                    end
-                end
-                timer:start()
+                ctrl:get_presentation():tile_bump(tile.group, temp.group)
+
+                last_tiles = {tile, selected_tile}
+                state:remove_tile(tile)
+                state:remove_tile(selected_tile)
+                selected_tile = nil
+
+                state:find_selectable_tiles()
+                state:find_top_tiles()
+                state:find_matching_tiles()
             elseif tile == selected_tile then
                 selected_tile.focus.green.opacity = 0
+                game_menu:remove_tile_images()
                 selected_tile = nil
             end
         end
@@ -432,7 +412,7 @@ GameState = Class(nil,function(state, ctrl)
     function state:remove_tile(tile)
         tile.null = true
         local position = tile.position
-        tile.group:unparent()
+        --tile.group:unparent()
 
         grid[position[1]][position[2]][position[3]] = nil
         grid[position[1]+1][position[2]][position[3]] = nil
