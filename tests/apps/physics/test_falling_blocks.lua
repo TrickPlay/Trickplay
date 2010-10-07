@@ -117,9 +117,7 @@ if false then
 
 else
 
-    function idle.on_idle( idle , seconds )
-        physics:step( seconds )
-    end
+    physics:start()
     
     local up = keys.Up
     local down = keys.Down
