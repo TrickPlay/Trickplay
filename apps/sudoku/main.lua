@@ -1,22 +1,95 @@
 math.randomseed(os.time())
+
+dofile("Class.lua") -- Must be declared before any class definitions.
+
+dofile("Game.lua")
+
+dofile("FocusableImage.lua")
 --local bg = Image{src="assets/background.jpg"}
-local blank_button_on   = Image{src="assets/blank_on",  opacity=0}
-local blank_button_off  = Image{src="assets/blank_off", opacity=0}
-local green_button_on   = Image{src="assets/green_on",  opacity=0}
-local green_button_off  = Image{src="assets/green_off", opacity=0}
-local red_button_on     = Image{src="assets/red_on",    opacity=0}
-local red_button_off    = Image{src="assets/red_off",   opacity=0}
-local blue_button_on    = Image{src="assets/blue_on",   opacity=0}
-local blue_button_off   = Image{src="assets/blue_off",  opacity=0}
-local yellow_button_on  = Image{src="assets/yellow_on", opacity=0}
-local yellow_button_off = Image{src="assets/yellow_off",opacity=0}
+local blank_button_on   = Image{src="assets/blank_on.png",  opacity=0}
+local blank_button_off  = Image{src="assets/blank_off.png", opacity=0}
+local green_button_on   = Image{src="assets/green_on.png",  opacity=0}
+local green_button_off  = Image{src="assets/green_off.png", opacity=0}
+local red_button_on     = Image{src="assets/red_on.png",    opacity=0}
+local red_button_off    = Image{src="assets/red_off.png",   opacity=0}
+local blue_button_on    = Image{src="assets/blue_on.png",   opacity=0}
+local blue_button_off   = Image{src="assets/blue_off.png",  opacity=0}
+local yellow_button_on  = Image{src="assets/yellow_on.png", opacity=0}
+local yellow_button_off = Image{src="assets/yellow_off.png",opacity=0}
 local blue = Image{src = "assets/3x3grid-blue.png",opacity=0}
 local red  = Image{src =  "assets/3x3grid-red.png",opacity=0}
+print("0")
 screen:add(
 	 blank_button_on,  blank_button_off, green_button_on, green_button_off,
 	   red_button_on,    red_button_off,  blue_button_on,  blue_button_off,
-	yellow_button_on, yellow_button_off, red,blue
+	yellow_button_on, yellow_button_off,             red,             blue
 )
+print("-1")
+local side_font = "Dejavu Bold 60px"
+right_menu = Group{z=1}
+local right_list = {
+	FocusableImage({0,0},"Cheat", 
+		red_button_off,red_button_on,function() end),
+
+	FocusableImage({0,blank_button_off.h+7},"Undo Move", 
+		green_button_off,green_button_on,
+		function() 
+			game:undo(ind.r,ind.c) 
+		end),
+
+	FocusableImage({0,2*(blank_button_off.h+7)},"Show Errors", 
+		yellow_button_off,yellow_button_on, 
+		function() 
+			game:error_check() 
+		end),
+
+	FocusableImage({0,3*(blank_button_off.h+7)},"Restart Puzzle", 
+		blue_button_off, blue_button_on, 
+		function() 
+			game:restart() 
+		end)
+}
+print("1")
+right_menu:add( right_list[1].group,right_list[2].group,right_list[3].group,right_list[4].group )
+print("2")
+right_menu.anchor_point = {right_menu.w/2,0}
+right_menu.y_rotation ={-25,right_menu.w/2,0}
+right_menu.position = {screen.w - right_menu.w/2+120,red.h   + 90}
+local left_menu = Group{z=1}
+local left_list = {
+	FocusableImage({0,0},"New Puzzle", 
+		blank_button_off,blank_button_on,
+		function() 
+			help.opacity = 255
+			help:raise_to_top()
+			focus = "HELP"
+		end),
+
+	FocusableImage({0,blank_button_off.h+10},"Help", 
+		blank_button_off,blank_button_on,
+		function() 
+			splash.opacity = 255
+			focus = "SPLASH"
+			left_list[left_index].color = "FFFFFF"
+			left_index = 1
+		end),
+
+	FocusableImage({0,2*(blank_button_off.h+10)},"Save Exit", 
+		blank_button_off,blank_button_on,
+		function() 
+			game:save()
+			exit()
+		end)
+}
+print("23")
+left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group )
+left_menu.anchor_point = {left_menu.w/2,0}
+left_menu.position = {left_menu.w/2+180,red.h   + 90}
+
+
+local left_index = 1
+local right_index = 1
+
 
 
 local red_board = Group{}
@@ -89,27 +162,6 @@ pencil_menu:add(
 	Image{name="done_off",  src="assets/button_off.png",y=70,x=210},
 	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=70,x=222}
 )
-local side_font = "Dejavu Bold 60px"
-local right_menu = Group{z=1}
-local right_list = {
-	Text{text="Undo",          font=side_font,color="FFFFFF",x=1500,y=400},
-	Text{text="Mark Errors",   font=side_font,color="FFFFFF",x=1500,y=500},
-	Text{text="Restart Puzzle",font=side_font,color="FFFFFF",x=1500,y=600},
-}
-right_menu:add( unpack(right_list) )
-screen:add(right_menu)
-local left_menu = Group{z=1}
-local left_list = {
---	Text{text="Pause",      font=side_font,color="FFFFFF",x=100,y=300},
-	Text{text="Help",       font=side_font,color="FFFFFF",x=100,y=400},
-	Text{text="New Puzzle", font=side_font,color="FFFFFF",x=100,y=500},
-	Text{text="Save & Exit",font=side_font,color="FFFFFF",x=100,y=600},
-}
-right_menu:add( unpack(left_list) )
-screen:add(left_menu)
-
-local left_index = 1
-local right_index = 1
 --[[
 local clock_sec = 50
 local clock_min = 59
@@ -282,10 +334,6 @@ Directions = {
    DOWN  = { 0, 1},
    UP    = { 0,-1}
 }
-
-dofile("Class.lua") -- Must be declared before any class definitions.
-
-dofile("Game.lua")
 local pencil_menu_index = 2
 local focus = "SPLASH"
 local game_on = false
@@ -349,7 +397,7 @@ function game_on_key_down(k)
 					selector.x,selector.y = sel_pos(ind.r,ind.c)
 				else
 					focus = "GAME_RIGHT"
-					right_list[right_index].color = "FF0000"
+					right_list[right_index]:on_focus()
 					selector.opacity = 0
 				end
 			end
@@ -372,7 +420,7 @@ function game_on_key_down(k)
 					selector.x,selector.y = sel_pos(ind.r,ind.c)
 				else
 					focus = "GAME_LEFT"
-					left_list[left_index].color = "FF0000"
+					left_list[left_index]:on_focus()
 					selector.opacity = 0
 				end
 			end
@@ -575,113 +623,65 @@ function splash_on_key_down(k)
 	}
 	if key[k] then key[k]() end	
 end
-local left_nav_callbacks = 
-{
---[[
-	--Play/Pause
-	function()
-		if left_list[1].text == "Pause" then
-			left_list[1].text = "Play"
-			clock:stop()
-		else
-			left_list[1].text = "Pause"
-			clock:start()
-		end
-	end,
---]]
-	--Help
-	function()
-		help.opacity = 255
-		help:raise_to_top()
-		focus = "HELP"
-	end,
-	--New Puzzle
-	function()
-		splash.opacity = 255
-		focus = "SPLASH"
-		left_list[left_index].color = "FFFFFF"
-		left_index = 1
-	end,
-	--Save & Exit
-	function()
-		game:save()
-		exit()
-	end,
-}
 function left_menu_on_key_down(k)
 	local key = 
 	{
 		[keys.Up] = function()
 			if left_index > 1 then
-				left_list[left_index].color = "FFFFFF"
+				left_list[left_index]:out_focus()
 				left_index = left_index - 1
-				left_list[left_index].color = "FF0000"
+				left_list[left_index]:on_focus()
 			end
 		end,
 		[keys.Down] = function()
-			if left_index < #left_nav_callbacks then
-				left_list[left_index].color = "FFFFFF"
+			if left_index < #left_list then
+				left_list[left_index]:out_focus()
 				left_index = left_index + 1
-				left_list[left_index].color = "FF0000"
+				left_list[left_index]:on_focus()
 			end
 		end,
 		[keys.Right] = function()
-			left_list[left_index].color = "FFFFFF"
+			left_list[left_index]:out_focus()
 			left_index = 1
 			focus = "GAME_BOARD"
 			selector.opacity = 255
 
 		end,
 		[keys.Return] = function()
-			left_nav_callbacks[left_index]()
+			left_list[left_index]:press_enter()
 		end,
 	}
 	if key[k] then key[k]() end
 end
-local right_nav_callbacks = 
-{
-	--Undo
-	function()
-		game:undo(ind.r,ind.c)
-	end,
-	--Mark Errors
-	function()
-		game:error_check()
-	end,
-	--Restart Puzzle
-	function()
-		game:restart()
-	end,
-}
 
 function right_menu_on_key_down(k)
 	local key = 
 	{
 		[keys.Up] = function()
 			if right_index > 1 then
-				right_list[right_index].color = "FFFFFF"
+				right_list[right_index]:out_focus()
 				right_index = right_index - 1
-				right_list[right_index].color = "FF0000"
+				right_list[right_index]:on_focus()
 
 			end
 		end,
 		[keys.Down] = function()
-			if right_index < #right_nav_callbacks then
-				right_list[right_index].color = "FFFFFF"
+			if right_index < #right_list then
+				right_list[right_index]:out_focus()
 				right_index = right_index + 1
-				right_list[right_index].color = "FF0000"
+				right_list[right_index]:on_focus()
 
 			end
 		end,
 		[keys.Left] = function()
-			right_list[right_index].color = "FFFFFF"
+			right_list[right_index]:out_focus()
 			right_index = 1
 			focus = "GAME_BOARD"
 			selector.opacity = 255
 
 		end,
 		[keys.Return] = function()
-			right_nav_callbacks[right_index]()
+			right_list[right_index]:press_enter()
 		end,
 	}
 	if key[k] then key[k]() end
@@ -727,6 +727,8 @@ end
 function app:on_closing()
 	game:save()
 end
+screen:add(right_menu,left_menu)
+
 selector.x,selector.y = sel_pos(1,1)
 --game:on_focus(1,1)
 screen:show()
