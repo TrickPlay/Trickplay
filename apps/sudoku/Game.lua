@@ -4,6 +4,7 @@ local SET_GUTTER  = 20
 local TOP_GAP     = 30
 assert(TOP_GAP >= SET_GUTTER, "flawed #defines for the board..." )
 
+
 function sel_pos(r,c)
 	return
 			(c-1)*TILE_WIDTH + 
