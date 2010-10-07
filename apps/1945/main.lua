@@ -14,6 +14,12 @@ end
 
 -------------------------------------------------------------------------------
 
+local screen_h = screen.h
+local screen_w = screen.w
+
+
+-------------------------------------------------------------------------------
+
 assets =
 {
     water           = Image{ src = "assets/water.png" },
@@ -182,20 +188,22 @@ water =
     time = 0,
     
     island_time = 0.5, -- seconds
-    
+        
     setup =
     
         function( self )
                 
             local tile = assets.water
             
-            tile:set{ w = screen.w , tile = { true , false } }
+            tile:set{ w = screen_w , tile = { true , false } }
                         
-            for i = 1 , math.ceil( screen.h / tile.h ) + 3 do
+            for i = 1 , math.ceil( screen_h / tile.h ) + 3 do
                    
                 table.insert( self.strips , Clone{ source = tile } )
                 
             end
+            
+            self.strip_h = tile.h
             
             local top = - ( tile.h * 2 )
             
@@ -221,21 +229,28 @@ water =
             
             local dy = self.speed * seconds
             
-            local maxy = screen.h
+            local maxy = screen_h
             
-            self.top_y = self.top_y + dy    
+            self.top_y = self.top_y + dy
+            
+            local sh = self.strip_h
+            local y
+            
+            
             
             for _ , strip in ipairs( self.strips ) do
             
-                strip.y = strip.y + dy
+                y = strip.y + dy
+                            
+                if y > maxy then
                 
-                if strip.y > maxy then
-                
-                    strip.y = self.top_y - strip.h + 1   
+                    y = self.top_y - sh + 1   
                     
-                    self.top_y = strip.y
+                    self.top_y = y
                 
                 end
+                
+                strip.y = y
             
             end
             
@@ -260,7 +275,7 @@ water =
                             
                                 function( self )
                                 
-                                    self.image.position = { math.random( 0 , screen.w ) , - self.image.h }
+                                    self.image.position = { math.random( 0 , screen_w ) , - self.image.h }
                                     
                                     if math.random( 100 ) > 50 then
                                     
@@ -286,7 +301,7 @@ water =
                                 
                                     local y = self.image.y + self.speed * seconds
                                     
-                                    if y > screen.h then
+                                    if y > screen_h then
                                     
                                         remove_from_render_list( self )
                                         
@@ -358,7 +373,7 @@ my_plane =
             
             screen:add( self.group )
             
-            self.group.position = { screen.w / 2 - 65 / 2 , screen.h - 65 }
+            self.group.position = { screen_w / 2 - 65 / 2 , screen_h - 65 }
             
         end,
         
@@ -393,9 +408,9 @@ my_plane =
                 
                     local x = self.group.x + ( self.h_speed * seconds )
                     
-                    if x > screen.w - 65 then
+                    if x > screen_w - 65 then
                     
-                        x = screen.w - 65
+                        x = screen_w - 65
                         
                         self.h_speed = 0
                     
@@ -430,9 +445,9 @@ my_plane =
     
                     local y = self.group.y + ( self.v_speed * seconds )
                     
-                    if y > screen.h - 65 then
+                    if y > screen_h - 65 then
                     
-                        y = screen.h - 65
+                        y = screen_h - 65
                         
                         self.v_speed = 0
                     
@@ -517,7 +532,7 @@ my_plane =
                 type = TYPE_MY_BULLET,
                 
                 speed = -400,
-                
+                                
                 image =
                     
                     Clone
@@ -534,6 +549,10 @@ my_plane =
                     
                         screen:add( self.image )
                         
+                        self.image_h = self.image.h
+                        
+                        self.image_w = self.image.w
+                        
                     end,
                     
                 render =
@@ -542,7 +561,7 @@ my_plane =
                     
                         local y = self.image.y + self.speed * seconds
                         
-                        if y < -self.image.h then
+                        if y < -self.image_h then
                             
                             remove_from_render_list( self )
                             
@@ -554,7 +573,7 @@ my_plane =
                                 self ,
                                 { self.image.x , self.image.y },
                                 { self.image.x , y },
-                                { self.image.w , self.image.h },
+                                { self.image_w , self.image_h },
                                 TYPE_ENEMY_PLANE )
                         
                             self.image.y = y
@@ -645,7 +664,7 @@ my_plane =
             
             local location = self.group.center
             
-            self.group.position = { screen.w / 2 - self.group.w / 2 , screen.h - self.group.h }
+            self.group.position = { screen_w / 2 - self.group.w / 2 , screen_h - self.group.h }
 
             -- Spawn an explosion
             
@@ -795,6 +814,9 @@ enemies =
                             self.image = Clone{ source = image , opacity = 255 }
                         end
                         
+                        self.image_w = self.image.w
+                        self.image_h = self.image.h
+                        
                         if speed then
                         
                             self.speed = speed
@@ -809,7 +831,7 @@ enemies =
                         
                         if not position then
                         
-                            position = { math.random( 0 , screen.w - self.image.w ) , - self.image.h }
+                            position = { math.random( 0 , screen_w - self.image.w ) , - self.image.h }
                         
                         end
                     
@@ -824,6 +846,9 @@ enemies =
                         screen:add( self.group )
                         
                         self.shoots = math.random( 100 ) < ENEMY_SHOOTER_PERCENTAGE
+                        
+                        self.group_w = self.group.w
+                        self.group_h = self.group.h
                     
                     end,
                     
@@ -833,9 +858,9 @@ enemies =
                     
                         -- Flip
                         
-                        local x = self.image.x - self.image.w / 3
+                        local x = self.image.x - self.image_w / 3
                         
-                        if x == - self.image.w then
+                        if x == - self.image_w then
                         
                             x = 0
                             
@@ -847,7 +872,7 @@ enemies =
                         
                         local y = self.group.y + self.speed * seconds
                         
-                        if y > screen.h then
+                        if y > screen_h then
                         
                             screen:remove( self.group )
                             
@@ -860,9 +885,9 @@ enemies =
                             add_to_collision_list(
                                 
                                 self,
-                                { self.group.x + self.group.w / 2 , self.group.y + self.group.h / 2 },
-                                { self.group.x + self.group.w / 2 , y + self.group.h / 2 },
-                                { self.group.w , self.group.h },
+                                { self.group.x + self.group_w / 2 , self.group.y + self.group_h / 2 },
+                                { self.group.x + self.group_w / 2 , y + self.group_h / 2 },
+                                { self.group_w , self.group_h },
                                 TYPE_MY_BULLET
                             )
                         
@@ -910,7 +935,7 @@ enemies =
                                             
                                                 local y = self.image.y + self.speed * seconds
                                                 
-                                                if y > screen.h then
+                                                if y > screen_h then
                                                 
                                                     remove_from_render_list( self )
                                                     
@@ -1043,11 +1068,13 @@ enemies =
                     
                     local w = image.w / 3
                     
-                    local left = math.random( 0 , screen.w - ( count * w ) )
+                    local h = image.h
                     
-                    add_to_render_list( self:new_enemy( image , speed , { left , - image.h * 2 } ) )
-                    add_to_render_list( self:new_enemy( image , speed , { left + w , - image.h } ) )
-                    add_to_render_list( self:new_enemy( image , speed , { left + w * 2 , - image.h * 2 } ) )
+                    local left = math.random( 0 , screen_w - ( count * w ) )
+                    
+                    add_to_render_list( self:new_enemy( image , speed , { left , - h * 2 } ) )
+                    add_to_render_list( self:new_enemy( image , speed , { left + w , - h } ) )
+                    add_to_render_list( self:new_enemy( image , speed , { left + w * 2 , - h * 2 } ) )
                     
                     self.count = self.count + count
                 
@@ -1082,6 +1109,8 @@ paused = false
 -------------------------------------------------------------------------------
 -- Game loop, renders everything in the render list
 
+local it = 0
+
 function idle.on_idle( idle , seconds )
    
     if not paused then
@@ -1093,7 +1122,13 @@ function idle.on_idle( idle , seconds )
         end
         
         process_collisions( )
+--[[        
+        it = it + 1
         
+        if it == 600 then
+            idle.on_idle = nil
+        end
+]]        
     end
     
 end
