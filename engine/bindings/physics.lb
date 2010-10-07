@@ -7,6 +7,8 @@ module physics_module;
 
 #include "clutter_util.h"
 
+static Debug_ON plog;
+
 void populate_fixture_from_table( lua_State * L , int properties , b2FixtureDef & fixture_def )
 {
     lua_getfield( L , properties , "friction" );
@@ -123,61 +125,77 @@ class Physx : private b2ContactListener
 {
 public:
 
-	Physx()
+	Physx( lua_State * _L )
 	:
+	    L( _L ),
 		world( b2Vec2( 0.0f , 10.0f ) , true ), 
 		ppm( 64.0f ), // 64 pixels per meter - at 1920 that is 30 meters
-		next_fixture_handle( 1 )
+		next_handle( 1 ),
+		velocity_it( 6 ),
+		position_it( 2 ),
+		source( 0 ),
+		timer( g_timer_new())
 	{
-//	    world.SetContactListener( this );
+	    world.SetContactListener( this );
+
 	}
 	
 	~Physx();
 	
-	b2World    world;
-	float32    ppm;
-	int        next_fixture_handle;
+	void start( int velocity_iterations , int position_iterations )
+	{
+	    if ( ! source )
+	    {
+	        source = clutter_threads_add_idle( on_idle , this );
+	        //source = clutter_threads_add_frame_source( 60 , on_idle , this );
+	        g_timer_start( timer );
+
+	        velocity_it = velocity_iterations;
+	        position_it = position_iterations;
+	    }
+	}
+
+	void stop()
+	{
+	    if ( source )
+	    {
+	        g_source_remove( source );
+	        source = 0;
+	    }
+	}
+
+	bool step( double time_step , int velocity_iterations , int position_iterations );
+
+	lua_State *    L;
+	b2World        world;
+	float32        ppm;
+	int            next_handle;
+	int            velocity_it;
+	int            position_it;
+	guint          source;
+	GTimer *       timer;
+	ClutterActor * screen;
 
 private:
 
+	static gboolean on_idle( gpointer data )
+	{
+	    Physx * self = ( Physx * ) data;
+
+	    double seconds = g_timer_elapsed( self->timer , NULL );
+
+	    g_timer_start( self->timer );
+
+	    self->step( seconds , self->velocity_it , self->position_it );
+
+	    return TRUE;
+	}
+
     // b2ContactListener methods
 
-    virtual void BeginContact( b2Contact * contact )
-    {
-        g_debug( "BEGIN CONTACT" );
+    virtual void BeginContact( b2Contact * contact );
 
-        b2WorldManifold wm;
-
-        contact->GetWorldManifold( & wm );
-
-        for ( int32 i = 0; i < 3; ++i )
-        {
-            g_debug( "    POINT %d : %f , %f" , i , wm.points[ i ].x , wm.points[ i ].y );
-        }
-
-        /*
-        const b2Manifold * m = contact->GetManifold();
-
-        if ( ! m )
-        {
-            g_debug( "  NO MANIFOLD" );
-        }
-        else
-        {
-            g_debug( "  POINTS = %d" , m->pointCount );
-
-            for ( int32 i = 0; i < m->pointCount; ++i )
-            {
-                g_debug( "    POINT %d : %f , %f" , i , m->points[ i ].localPoint.x , m->points[ i ].localPoint.y );
-            }
-        }
-        */
-    }
-
-    virtual void EndContact( b2Contact * contact )
-    {
-        g_debug( "END CONTACT" );
-    }
+    virtual void EndContact( b2Contact * contact );
 
     virtual void PreSolve( b2Contact * contact , const b2Manifold * oldManifold )
     {
@@ -232,18 +250,20 @@ public:
         Info( ClutterActor * _a , Body * _b )
         :
             actor( _a ),
-            tp_body( _b )
+            tp_body( _b ),
+            body_handle( _b->handle )
         {
-            g_debug( "CREATED BODY INFO %p : %p , %p" , this , actor , tp_body );
+            plog( "CREATED BODY INFO %d: %p : %p , %p" , body_handle , this , actor , tp_body );
         }
 
         ~Info()
         {
-            g_debug( "DESTROYED BODY INFO %p : %p , %p" , this , actor , tp_body );
+            plog( "DESTROYED BODY INFO %d: %p : %p , %p" , body_handle , this , actor , tp_body );
         }
 
         ClutterActor *  actor;
         Body *          tp_body;
+        int             body_handle;
     };
 
 	Body( Physx * _p , b2Body * _b , ClutterActor * _a )
@@ -254,6 +274,8 @@ public:
 	{
 		g_assert( physx );
 		g_assert( body );
+
+		handle = physx->next_handle++;
 
 		if ( actor )
 		{
@@ -274,7 +296,7 @@ public:
 
         info->tp_body = NULL;
 
-        g_debug( "CLEARED BODY INFO %p : %p , %p" , info , info->actor , info->tp_body );
+        plog( "CLEARED BODY INFO %p : %p , %p" , info , info->actor , info->tp_body );
 	}
 	
 	static Body * get( lua_State * L , int n )
@@ -285,6 +307,7 @@ public:
 	Physx  * 		physx;
 	b2Body * 		body;
 	ClutterActor * 	actor;
+	int             handle;
 };
 
 void destroy_actor_body( b2Body * body )
@@ -301,6 +324,12 @@ void destroy_actor_body( b2Body * body )
 
 Physx::~Physx()
 {
+    stop();
+
+    g_timer_destroy( timer );
+
+    world.SetContactListener( 0 );
+
     for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
     {
         if ( Body::Info * info = ( Body::Info * ) body->GetUserData() )
@@ -317,6 +346,71 @@ Physx::~Physx()
             }
         }
     }
+}
+
+bool Physx::step( double time_step , int velocity_iterations , int position_iterations )
+{
+    world.Step( time_step , velocity_iterations , position_iterations );
+
+    for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
+    {
+        if ( ! body->IsAwake() || ! body->IsActive() )
+        {
+            continue;
+        }
+
+        Body::Info * info = ( Body::Info * ) body->GetUserData();
+
+        if ( info && info->actor )
+        {
+            synchronize_actor( info->actor , body , ppm );
+        }
+    }
+
+    return world.GetContactList() != 0;
+}
+
+
+void Physx::BeginContact( b2Contact * contact )
+{
+    b2WorldManifold wm;
+
+    contact->GetWorldManifold( & wm );
+
+    b2Fixture * fa = contact->GetFixtureA();
+    b2Fixture * fb = contact->GetFixtureB();
+
+    int fixture_a_handle = fa ? GPOINTER_TO_INT( fa->GetUserData() ) : 0;
+    int fixture_b_handle = fb ? GPOINTER_TO_INT( fb->GetUserData() ) : 0;
+
+    b2Body * ba = fa ? fa->GetBody() : 0;
+    b2Body * bb = fb ? fb->GetBody() : 0;
+
+    Body::Info * ia = ba ? ( Body::Info * ) ba->GetUserData() : 0;
+    Body::Info * ib = bb ? ( Body::Info * ) bb->GetUserData() : 0;
+
+    int body_a_handle = ia ? ia->body_handle : 0;
+    int body_b_handle = ib ? ib->body_handle : 0;
+
+    lua_newtable( L );
+    lua_pushnumber( L , wm.points[ 0 ].x * ppm );
+    lua_rawseti( L , -2 , 1 );
+    lua_pushnumber( L , wm.points[ 0 ].y * ppm );
+    lua_rawseti( L , -2 , 2 );
+
+    lua_pushinteger( L , body_a_handle );
+
+    lua_pushinteger( L , fixture_a_handle );
+
+    lua_pushinteger( L , body_b_handle );
+
+    lua_pushinteger( L , fixture_b_handle );
+
+    UserData::invoke_callback( this , "on_begin_contact" , 5 , 0 , L );
+}
+
+void Physx::EndContact( b2Contact * contact )
+{
 }
 
 ]]
@@ -345,6 +439,11 @@ interface Body [[ Body * ]]
 		[[
 			delete self;
 		]];
+
+	readonly int handle
+        [[
+            handle = self->handle;
+        ]];
 		
 	readonly UIElement source
 		[[
@@ -655,7 +754,7 @@ interface Body [[ Body * ]]
 
             fixture_def.shape = shape;
 
-            result = self->physx->next_fixture_handle++;
+            result = self->physx->next_handle++;
 
             fixture_def.userData = GINT_TO_POINTER( result );
 
@@ -668,34 +767,27 @@ global physics [[ Physx * ]]
 {
 	physics()
 		[[
-			self = lb_construct( Physx , new Physx() );
+			self = lb_construct( Physx , new Physx( L ) );
 		]];
 		
 	~physics()
 		[[
 			delete self;
 		]];
+
+	start( int velocity_iterations = 6, int position_iterations = 2 )
+        [[
+            self->start( velocity_iterations , position_iterations );
+        ]];
+
+	stop()
+        [[
+            self->stop();
+        ]];
 		
 	bool step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
 		[[
-			self->world.Step( time_step , velocity_iterations , position_iterations );
-			
-			for( b2Body * body = self->world.GetBodyList(); body; body = body->GetNext() )
-			{
-				if ( ! body->IsAwake() || ! body->IsActive() )
-				{
-					continue;
-				}
-				
-				Body::Info * info = ( Body::Info * ) body->GetUserData();
-				
-				if ( info && info->actor )
-				{
-				    synchronize_actor( info->actor , body , self->ppm );
-				}
-			}
-			
-			result = self->world.GetContactList() != 0;
+            result = self->step( time_step , velocity_iterations , position_iterations );
 		]]; 
 		
 	table gravity
@@ -885,7 +977,7 @@ global physics [[ Physx * ]]
 			
 			// This is the 'handle' for the fixture
 
-			fixture_def.userData = GINT_TO_POINTER( self->next_fixture_handle++ );
+			fixture_def.userData = GINT_TO_POINTER( self->next_handle++ );
 
 			body->CreateFixture( & fixture_def ); 
 
@@ -1117,4 +1209,7 @@ global physics [[ Physx * ]]
             lua_remove( L , -2 );
         ]];
 
+	callback on_begin_contact( table point , int body_a_handle , int fixture_a_handle , int body_b_handle , int fixture_b_handle );
+
+    callback on_end_contact( table point , int body_a_handle , int fixture_a_handle , int body_b_handle , int fixture_b_handle );
 }
