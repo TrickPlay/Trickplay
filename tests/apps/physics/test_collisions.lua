@@ -11,6 +11,8 @@ physics:Body{ size = { screen.w , 2 } , position = { screen.w / 2 , screen.h + 1
 
 -------------------------------------------------------------------------------
 
+local ball_colors = {}
+
 local function make_ball( color , filter )
 
     local BALL_SIZE  = math.random( 50 , 100 )
@@ -45,11 +47,15 @@ local function make_ball( color , filter )
         filter = filter
     }
     
-    -- Give the ball an initial velocity
+    -- Give the ball an initial velocity and some damping
+    
+    ball.linear_damping = 0.01
     
     ball.linear_velocity = { math.random( 5 , 10 ) , math.random( 5 , 10 ) }
     
     screen:add( ball.source )
+    
+    ball_colors[ ball.handle ] = color
     
     return ball
 end
@@ -107,7 +113,23 @@ local caption = Text
 
 screen:add( caption )
 
-physics:Body{ source = caption , dynamic = true , density = 10 , friction = 0 , bounce = 1 }
+caption = physics:Body{ source = caption , dynamic = true , density = 10 , friction = 0 , bounce = 1 }
+
+function physics.on_begin_contact( physics , point , body_a , fixture_a , body_b , fixture_b )
+
+    local other
+    
+    if body_a == caption.handle then
+        other = body_b
+    elseif body_b == caption.handle then
+        other = body_a
+    end
+    
+    if other then
+        caption.source.color = ball_colors[ other ] or "FFFFFF"
+    end
+
+end
 
 -------------------------------------------------------------------------------
 -- No gravity
@@ -118,19 +140,24 @@ physics.gravity = { 0 , 0 }
 
 screen:show()
 
-local collision_count = 1
+if false then
 
-local sw = Stopwatch()
+    local ret = keys.Return
 
-local function collisions()
-    --print( "COLLISION" , collision_count )
-    collision_count = collision_count + 1
+    function screen.on_key_down( screen , key )
+        if key == ret then
+            physics:step()
+        end
+    end
 
-    -- Every second, we check for balls that may be stuck against the wall
-    -- and give them a nudge
+else
+
+    physics:start()
     
-    if sw.elapsed >= 1000 then
-        
+    local timer = Timer( 1000 )
+    
+    function timer.on_timer()
+
         local vx , vy
         local ball
         for i = 1 , # balls do
@@ -142,31 +169,10 @@ local function collisions()
                 ball:apply_force( ball.position[ 1 ] , ball.position[ 2 ] , math.random( 2 , 6 ) , math.random( 2 , 6 ) )
             end
         end
-    
-        sw:start()
         
     end
-end
-
-if false then
-
-    local ret = keys.Return
-
-    function screen.on_key_down( screen , key )
-        if key == ret then
-            if physics:step() then
-                collisions()
-            end
-        end
-    end
-
-else
-
-    function idle.on_idle( idle , seconds )
-        if physics:step( seconds ) then
-            collisions()
-        end
-    end
+    
+    timer:start()
     
 end
 

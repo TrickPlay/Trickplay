@@ -81,10 +81,7 @@ end
 
 screen:show()
 
-
-function idle.on_idle( idle , seconds )
-    physics:step( seconds )
-end
+physics:start()
 
 function screen.on_key_down( screen , key )
 
