@@ -5,371 +5,10 @@ module physics_module;
 #include "Box2D/Box2D.h"
 #include "clutter/clutter.h"
 
+#include "physics.h"
 #include "clutter_util.h"
 
-static Debug_ON plog;
-
-void populate_fixture_from_table( lua_State * L , int properties , b2FixtureDef & fixture_def )
-{
-    lua_getfield( L , properties , "friction" );
-    if ( ! lua_isnil( L , -1 ) )
-    {
-        fixture_def.friction = lua_tonumber( L , -1 );
-    }
-    lua_pop( L , 1 );
-
-    lua_getfield( L , properties , "restitution" );
-    if ( ! lua_isnil( L , -1 ) )
-    {
-        fixture_def.restitution = lua_tonumber( L , -1 );
-    }
-    lua_pop( L , 1 );
-
-    lua_getfield( L , properties , "bounce" );
-    if ( ! lua_isnil( L , -1 ) )
-    {
-        fixture_def.restitution = lua_tonumber( L , -1 );
-    }
-    lua_pop( L , 1 );
-
-    lua_getfield( L , properties , "density" );
-    if ( ! lua_isnil( L , -1 ) )
-    {
-        fixture_def.density = lua_tonumber( L , -1 );
-    }
-    lua_pop( L , 1 );
-
-    lua_getfield( L , properties , "sensor" );
-    if ( ! lua_isnil( L , -1 ) )
-    {
-        fixture_def.isSensor = lua_toboolean( L , -1 );
-    }
-    lua_pop( L , 1 );
-
-    lua_getfield( L , properties , "filter" );
-    if ( lua_istable( L , -1 ) )
-    {
-        int f = lua_gettop( L );
-
-        lua_getfield( L , f , "group" );
-        if ( ! lua_isnil( L , -1 ) )
-        {
-            fixture_def.filter.groupIndex = lua_tointeger( L , -1 );
-        }
-        lua_pop( L , 1 );
-
-        lua_getfield( L , f , "category" );
-        if ( lua_isnumber( L , -1 ) )
-        {
-            fixture_def.filter.categoryBits = 1 << lua_tointeger( L , -1 );
-        }
-        else if ( lua_istable( L , -1 ) )
-        {
-            fixture_def.filter.categoryBits = 0;
-
-            int t = lua_gettop( L );
-
-            lua_pushnil( L );
-
-            while( lua_next( L , t ) )
-            {
-                if ( lua_isnumber( L , -1 ) )
-                {
-                    fixture_def.filter.categoryBits |= 1 << lua_tointeger( L , -1 );
-                }
-                lua_pop( L , 1 );
-            }
-        }
-        lua_pop( L , 1 );
-
-        lua_getfield( L , f , "mask" );
-        if ( lua_isnumber( L , -1 ) )
-        {
-            fixture_def.filter.maskBits = 1 << lua_tointeger( L , -1 );
-        }
-        else if ( lua_istable( L , -1 ) )
-        {
-            fixture_def.filter.maskBits = 0;
-
-            int t = lua_gettop( L );
-
-            lua_pushnil( L );
-
-            while( lua_next( L , t ) )
-            {
-                if ( lua_isnumber( L , -1 ) )
-                {
-                    fixture_def.filter.maskBits |= 1 << lua_tointeger( L , -1 );
-                }
-                lua_pop( L , 1 );
-            }
-        }
-        lua_pop( L , 1 );
-    }
-    lua_pop( L , 1 );
-}
-
-void synchronize_actor( ClutterActor * actor , b2Body* body , double ppm )
-{
-    if ( actor )
-    {
-        const b2Vec2 & pos( body->GetPosition() );
-
-        clutter_actor_set_position( actor , pos.x * ppm , pos.y * ppm );
-
-        clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , body->GetAngle () / ( G_PI / 180.0 ) , 0 , 0 , 0 );
-    }
-}
-
-class Physx : private b2ContactListener
-{
-public:
-
-	Physx( lua_State * _L )
-	:
-	    L( _L ),
-		world( b2Vec2( 0.0f , 10.0f ) , true ), 
-		ppm( 64.0f ), // 64 pixels per meter - at 1920 that is 30 meters
-		next_handle( 1 ),
-		velocity_it( 6 ),
-		position_it( 2 ),
-		source( 0 ),
-		timer( g_timer_new())
-	{
-	    world.SetContactListener( this );
-
-	}
-	
-	~Physx();
-	
-	void start( int velocity_iterations , int position_iterations )
-	{
-	    if ( ! source )
-	    {
-	        source = clutter_threads_add_idle( on_idle , this );
-	        //source = clutter_threads_add_frame_source( 60 , on_idle , this );
-	        g_timer_start( timer );
-
-	        velocity_it = velocity_iterations;
-	        position_it = position_iterations;
-	    }
-	}
-
-	void stop()
-	{
-	    if ( source )
-	    {
-	        g_source_remove( source );
-	        source = 0;
-	    }
-	}
-
-	bool step( double time_step , int velocity_iterations , int position_iterations );
-
-	lua_State *    L;
-	b2World        world;
-	float32        ppm;
-	int            next_handle;
-	int            velocity_it;
-	int            position_it;
-	guint          source;
-	GTimer *       timer;
-	ClutterActor * screen;
-
-private:
-
-	static gboolean on_idle( gpointer data )
-	{
-	    Physx * self = ( Physx * ) data;
-
-	    double seconds = g_timer_elapsed( self->timer , NULL );
-
-	    g_timer_start( self->timer );
-
-	    self->step( seconds , self->velocity_it , self->position_it );
-
-	    return TRUE;
-	}
-
-    // b2ContactListener methods
-
-    virtual void BeginContact( b2Contact * contact );
-
-    virtual void EndContact( b2Contact * contact );
-
-    virtual void PreSolve( b2Contact * contact , const b2Manifold * oldManifold )
-    {
-
-    }
-
-    virtual void PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
-    {
-
-    }
-};
-
 #if 0
-
-bool get_actor_screen_point( ClutterActor * actor , const ClutterVertex * actor_point , ClutterVertex * screen_point )
-{
-	ClutterActor * stage = clutter_stage_get_default();
-	
-	ClutterActor * screen = NULL;
-	
-	for( ClutterActor * parent = clutter_actor_get_parent( actor ); parent; parent = clutter_actor_get_parent( parent ) )
-	{
-		if ( clutter_actor_get_parent( parent ) == stage )
-		{
-			screen = parent;
-			break;
-		}
-	} 
-	
-	if ( ! screen )
-	{
-		return false;
-	}
-	
-	clutter_actor_apply_relative_transform_to_point( actor , screen , actor_point , screen_point );
-	
-	return true;
-} 
-
-#endif
-
-]]
-
-[[
-
-class Body
-{
-public:
-
-    struct Info
-    {
-        Info( ClutterActor * _a , Body * _b )
-        :
-            actor( _a ),
-            tp_body( _b ),
-            body_handle( _b->handle )
-        {
-            plog( "CREATED BODY INFO %d: %p : %p , %p" , body_handle , this , actor , tp_body );
-        }
-
-        ~Info()
-        {
-            plog( "DESTROYED BODY INFO %d: %p : %p , %p" , body_handle , this , actor , tp_body );
-        }
-
-        ClutterActor *  actor;
-        Body *          tp_body;
-        int             body_handle;
-    };
-
-	Body( Physx * _p , b2Body * _b , ClutterActor * _a )
-	:
-		physx( _p ),
-		body( _b ),
-		actor( _a )
-	{
-		g_assert( physx );
-		g_assert( body );
-
-		handle = physx->next_handle++;
-
-		if ( actor )
-		{
-		    g_object_ref( G_OBJECT( actor ) );
-		}
-
-		body->SetUserData( new Info( actor , this ) );
-	}
-	
-	~Body()
-	{
-        if ( actor )
-        {
-            g_object_unref( G_OBJECT( actor ) );
-        }
-
-        Info * info = ( Info * ) body->GetUserData();
-
-        info->tp_body = NULL;
-
-        plog( "CLEARED BODY INFO %p : %p , %p" , info , info->actor , info->tp_body );
-	}
-	
-	static Body * get( lua_State * L , int n )
-    {
-	    return ( Body * ) UserData::get_client( L , n );
-    }
-
-	Physx  * 		physx;
-	b2Body * 		body;
-	ClutterActor * 	actor;
-	int             handle;
-};
-
-void destroy_actor_body( b2Body * body )
-{
-    Body::Info * info = ( Body::Info * ) body->GetUserData();
-
-    delete info;
-
-    body->SetUserData( 0 );
-
-    body->GetWorld()->DestroyBody( body );
-}
-
-
-Physx::~Physx()
-{
-    stop();
-
-    g_timer_destroy( timer );
-
-    world.SetContactListener( 0 );
-
-    for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
-    {
-        if ( Body::Info * info = ( Body::Info * ) body->GetUserData() )
-        {
-            if ( info->actor )
-            {
-                g_object_set_data( G_OBJECT( info->actor ) , "tp-physics-body" , NULL );
-            }
-            else
-            {
-                delete info;
-
-                body->SetUserData( 0 );
-            }
-        }
-    }
-}
-
-bool Physx::step( double time_step , int velocity_iterations , int position_iterations )
-{
-    world.Step( time_step , velocity_iterations , position_iterations );
-
-    for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
-    {
-        if ( ! body->IsAwake() || ! body->IsActive() )
-        {
-            continue;
-        }
-
-        Body::Info * info = ( Body::Info * ) body->GetUserData();
-
-        if ( info && info->actor )
-        {
-            synchronize_actor( info->actor , body , ppm );
-        }
-    }
-
-    return world.GetContactList() != 0;
-}
-
 
 void Physx::BeginContact( b2Contact * contact )
 {
@@ -409,11 +48,11 @@ void Physx::BeginContact( b2Contact * contact )
     UserData::invoke_callback( this , "on_begin_contact" , 5 , 0 , L );
 }
 
-void Physx::EndContact( b2Contact * contact )
-{
-}
+#endif
 
 ]]
+
+/*===========================================================================*/
 
 interface Shape [[ b2Shape * ]]
 {
@@ -428,11 +67,13 @@ interface Shape [[ b2Shape * ]]
         ]];
 }
 
-interface Body [[ Body * ]]
+/*===========================================================================*/
+
+interface Body [[ Physics::Body * ]]
 {
 	Body()
 		[[
-			self = lb_construct( Body , lua_touserdata( L , -2 ) );
+			self = lb_construct( Physics::Body , lua_touserdata( L , -2 ) );
 		]];
 		
 	~Body()
@@ -447,124 +88,150 @@ interface Body [[ Body * ]]
 		
 	readonly UIElement source
 		[[
+            self->check( L );
 			ClutterUtil::wrap_concrete_actor( L , self->actor );
 		]];
+
+	string type
+	    [[
+	        self->check( L );
+            switch( self->body->GetType() )
+            {
+                case b2_staticBody:
+                    type = "static";
+                    break;
+
+                case b2_kinematicBody:
+                    type = "kinematic";
+                    break;
+
+                case b2_dynamicBody:
+                    type = "dynamic";
+                    break;
+
+                default:
+                    type = 0;
+                    break;
+            }
+	    ]]
+	    [[
+            self->check( L );
+
+            if ( ! type )
+            {
+                luaL_error( L , "Invalid body type" );
+            }
+            else
+            {
+                if ( ! strcmp( type , "static" ) )
+                {
+                    self->body->SetType( b2_staticBody );
+                }
+                else if ( ! strcmp( type , "kinematic" ) )
+                {
+                    self->body->SetType( b2_kinematicBody );
+                }
+                else if ( ! strcmp( type , "dynamic" ) )
+                {
+                    self->body->SetType( b2_dynamicBody );
+                }
+                else
+                {
+                    luaL_error( L , "Invalid body type '%s'" , type );
+                }
+            }
+	    ]];
 		
 	bool awake
 		[[
+            self->check( L );
 			awake = self->body->IsAwake();
 		]]
 		[[
+            self->check( L );
 			self->body->SetAwake( awake );
 		]];
 		
 	bool active
 		[[
+            self->check( L );
 			active = self->body->IsActive();
 		]]
 		[[
+            self->check( L );
 			self->body->SetActive( active );
 		]];
 
-	table position
+	readonly table position
 		[[
-			const b2Vec2 & pos( self->body->GetPosition() );
+            self->check( L );
+
+            const b2Vec2 & pos( self->body->GetPosition() );
 			
 			lua_newtable( L );
-			lua_pushnumber( L , pos.x * self->physx->ppm );
+			lua_pushnumber( L , self->world->world_to_screen( pos.x ) );
 			lua_rawseti( L , -2 , 1 );
-			lua_pushnumber( L , pos.y * self->physx->ppm );
+			lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
 			lua_rawseti( L , -2 , 2 );
-		]]
-		[[
-		    lua_rawgeti( L , 2 , 1 );
-            lua_rawgeti( L , 2 , 2 );
-
-            b2Vec2 pos( lua_tonumber( L , -2 ) / self->physx->ppm , lua_tonumber( L , -1 ) / self->physx->ppm );
-
-            lua_pop( L , 2 );
-
-            self->body->SetTransform( pos , self->body->GetAngle() );
-
-            synchronize_actor( self->actor , self->body , self->physx->ppm );
 		]];
 
-	double x
+	readonly double x
         [[
+            self->check( L );
+
             const b2Vec2 & pos( self->body->GetPosition() );
 
-            x = pos.x * self->physx->ppm;
-        ]]
-        [[
-            b2Vec2 pos( self->body->GetPosition() );
-
-            pos.x = x / self->physx->ppm;
-
-            self->body->SetTransform( pos , self->body->GetAngle() );
-
-            synchronize_actor( self->actor , self->body , self->physx->ppm );
+            x = self->world->world_to_screen( pos.x );
         ]];
-		
-    double y
+
+    readonly double y
         [[
+            self->check( L );
+
             const b2Vec2 & pos( self->body->GetPosition() );
 
-            y = pos.y * self->physx->ppm;
-        ]]
-        [[
-            b2Vec2 pos( self->body->GetPosition() );
-
-            pos.y = y / self->physx->ppm;
-
-            self->body->SetTransform( pos , self->body->GetAngle() );
-
-            synchronize_actor( self->actor , self->body , self->physx->ppm );
+            y = self->world->world_to_screen( pos.y );
         ]];
 
-	double angle
+	readonly double angle
 		[[
-			angle = self->body->GetAngle() / ( G_PI / 180.0 );
-		]]
-		[[
-		    self->body->SetTransform( self->body->GetPosition() , angle * ( G_PI / 180 ) );
-
-            synchronize_actor( self->actor , self->body , self->physx->ppm );
+            self->check( L );
+			angle = Physics::World::radians_to_degrees( self->body->GetAngle() );
 		]];
 
-    double rotation
+    readonly double rotation
         [[
-            rotation = self->body->GetAngle() / ( G_PI / 180.0 );
-        ]]
-        [[
-            self->body->SetTransform( self->body->GetPosition() , rotation * ( G_PI / 180 ) );
-
-            synchronize_actor( self->actor , self->body , self->physx->ppm );
+            self->check( L );
+            rotation = Physics::World::radians_to_degrees( self->body->GetAngle() );
         ]];
 
     readonly table world_center
         [[
+            self->check( L );
             const b2Vec2 pos( self->body->GetWorldCenter() );
             lua_newtable( L );
-            lua_pushnumber( L , pos.x * self->physx->ppm );
+            lua_pushnumber( L , self->world->world_to_screen( pos.x ) );
             lua_rawseti( L , -2 , 1 );
-            lua_pushnumber( L , pos.y * self->physx->ppm );
+            lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
             lua_rawseti( L , -2 , 2 );
         ]];
 
 	readonly table local_center
         [[
+            self->check( L );
             const b2Vec2 pos( self->body->GetLocalCenter() );
             lua_newtable( L );
-            lua_pushnumber( L , pos.x * self->physx->ppm );
+            lua_pushnumber( L , self->world->world_to_screen( pos.x ) );
             lua_rawseti( L , -2 , 1 );
-            lua_pushnumber( L , pos.y * self->physx->ppm );
+            lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
             lua_rawseti( L , -2 , 2 );
         ]];
-
 		
 	table linear_velocity
 		[[
-			b2Vec2 lv( self->body->GetLinearVelocity() );
+            self->check( L );
+
+            b2Vec2 lv( self->body->GetLinearVelocity() );
 			
 			lua_newtable( L );
 			lua_pushnumber( L , lv.x );
@@ -573,6 +240,8 @@ interface Body [[ Body * ]]
 			lua_rawseti( L , -2 , 2 );	
 		]]
 		[[
+            self->check( L );
+
 			lua_rawgeti( L , 2 , 1 );
 			lua_rawgeti( L , 2 , 2 );
 			
@@ -582,14 +251,20 @@ interface Body [[ Body * ]]
 		
 	double angular_velocity
 		[[
-			angular_velocity = self->body->GetAngularVelocity() / ( G_PI / 180.0 );
+            self->check( L );
+
+			angular_velocity = Physics::World::radians_to_degrees( self->body->GetAngularVelocity() );
 		]]
 		[[
-			self->body->SetAngularVelocity( angular_velocity * ( G_PI / 180.0 ) );
+            self->check( L );
+
+			self->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
 		]];
 
 	readonly double mass
         [[
+            self->check( L );
+
             mass = self->body->GetMass();
         ]];
 
@@ -597,69 +272,124 @@ interface Body [[ Body * ]]
 		
 	double linear_damping
         [[
+            self->check( L );
+
             linear_damping = self->body->GetLinearDamping();
         ]]
         [[
+            self->check( L );
+
             self->body->SetLinearDamping( linear_damping );
         ]];
 
 	double angular_damping
         [[
+            self->check( L );
+
             angular_damping = self->body->GetAngularDamping();
         ]]
         [[
+            self->check( L );
+
             self->body->SetAngularDamping( angular_damping );
         ]];
 
 	bool bullet
         [[
+            self->check( L );
+
             bullet = self->body->IsBullet();
         ]]
         [[
+            self->check( L );
+
             self->body->SetBullet( bullet );
         ]];
 
 	bool sleeping_allowed
         [[
+            self->check( L );
+
             sleeping_allowed = self->body->IsSleepingAllowed();
         ]]
         [[
+            self->check( L );
+
             self->body->SetSleepingAllowed( sleeping_allowed );
         ]];
 
 	bool fixed_rotation
         [[
+            self->check( L );
+
             fixed_rotation = self->body->IsFixedRotation();
         ]]
         [[
+            self->check( L );
+
             self->body->SetFixedRotation( fixed_rotation );
         ]];
 
+	synchronize( )
+        [[
+            self->check( L );
 
-	apply_force( double force_x , double force_y , double x , double y )
+            self->synchronize_body();
+        ]];
+
+	apply_force( table force , table point )
 		[[
-			self->body->ApplyForce( b2Vec2( force_x , force_y ) , 
-				b2Vec2( x / self->physx->ppm , y / self->physx->ppm ) );   
+            self->check( L );
+
+            lua_rawgeti( L , force , 1 );
+            lua_rawgeti( L , force , 2 );
+
+            lua_rawgeti( L , point , 1 );
+            lua_rawgeti( L , point , 2 );
+
+			self->body->ApplyForce(
+			    b2Vec2( lua_tonumber( L , -4 ) , lua_tonumber( L , -3 ) ) ,
+				b2Vec2( self->world->screen_to_world( lua_tonumber( L , -2 ) ),
+				        self->world->screen_to_world( lua_tonumber( L , -1 ) ) ) );
+
+			lua_pop( L , 4 );
 		]];
 		
 	apply_torque( double torque )
 		[[
-			self->body->ApplyTorque( torque );
+            self->check( L );
+
+            self->body->ApplyTorque( torque );
 		]];
 		
-	apply_linear_impulse( double impulse_x , double impulse_y , double x , double y )
+	apply_linear_impulse( table force , table point )
 		[[
-			self->body->ApplyLinearImpulse( b2Vec2( impulse_x , impulse_y ) , 
-				b2Vec2( x / self->physx->ppm , y / self->physx->ppm ) );   
+            self->check( L );
+
+            lua_rawgeti( L , force , 1 );
+            lua_rawgeti( L , force , 2 );
+
+            lua_rawgeti( L , point , 1 );
+            lua_rawgeti( L , point , 2 );
+
+            self->body->ApplyLinearImpulse(
+                    b2Vec2( lua_tonumber( L , -4 ) , lua_tonumber( L , -3 ) ) ,
+                    b2Vec2( self->world->screen_to_world( lua_tonumber( L , -2 ) ),
+                          self->world->screen_to_world( lua_tonumber( L , -1 ) ) ) );
+
+            lua_pop( L , 4 );
 		]];
 	
 	apply_angular_impulse( double impulse )
         [[
+            self->check( L );
+
             self->body->ApplyAngularImpulse( impulse );
         ]];
 
     Body set( table props )
         [[
+            self->check( L );
             ClutterUtil::set_props_from_table( L , props );
             lua_pushvalue( L , 1 );
         ]];
@@ -669,6 +399,8 @@ interface Body [[ Body * ]]
 
     readonly table fixtures
         [[
+            self->check( L );
+
             lua_newtable( L );
             int t = lua_gettop( L );
             int i = 1;
@@ -714,6 +446,8 @@ interface Body [[ Body * ]]
 
     bool remove_fixture( int fixture_handle )
         [[
+            self->check( L );
+
             result = false;
 
             for( b2Fixture * f = self->body->GetFixtureList(); f ; f = f->GetNext() )
@@ -727,53 +461,65 @@ interface Body [[ Body * ]]
             }
         ]];
 
+    remove_all_fixtures()
+        [[
+            self->check( L );
+
+            for( b2Fixture * f = self->body->GetFixtureList(); f ; )
+            {
+                b2Fixture * next = f->GetNext();
+
+                f->GetBody()->DestroyFixture( f );
+
+                f = next;
+            }
+
+        ]];
+
     int add_fixture( table properties )
         [[
+            self->check( L );
+
             result = 0;
 
-            lua_getfield( L , properties , "shape" );
-            if ( lua_type( L , -1 ) != LUA_TUSERDATA )
+            b2FixtureDef fd = self->world->create_fixture_def( properties );
+
+            if ( ! fd.shape )
             {
-                lua_pop( L , 1 );
                 return luaL_error( L , "Missing shape" );
             }
 
-            b2Shape * shape = ( b2Shape * ) UserData::get_client( L , lua_gettop( L ) );
+            result = self->world->get_next_handle();
 
-            if ( ! shape )
-            {
-                lua_pop( L , 1 );
-                return luaL_error( L , "Invalid shape" );
-            }
+            fd.userData = GINT_TO_POINTER( result );
 
-            lua_pop( L , 1 );
-
-            b2FixtureDef fixture_def;
-
-            populate_fixture_from_table( L , properties , fixture_def );
-
-            fixture_def.shape = shape;
-
-            result = self->physx->next_handle++;
-
-            fixture_def.userData = GINT_TO_POINTER( result );
-
-            self->body->CreateFixture( & fixture_def );
+            self->body->CreateFixture( & fd );
         ]];
 }
 
+/*===========================================================================*/
 
-global physics [[ Physx * ]]
+global physics [[ Physics::World * ]]
 {
 	physics()
 		[[
-			self = lb_construct( Physx , new Physx( L ) );
+            ClutterActor * screen = clutter_get_actor_by_gid( App::get( L )->get_screen_gid() );
+
+			self = lb_construct( Physics::World , new Physics::World( L , screen , 64 ) );
 		]];
 		
 	~physics()
 		[[
 			delete self;
 		]];
+
+	double pixels_per_meter
+        [[
+            pixels_per_meter = self->ppm;
+        ]]
+        [[
+            self->ppm = pixels_per_meter;
+        ]];
 
 	start( int velocity_iterations = 6, int position_iterations = 2 )
         [[
@@ -785,14 +531,14 @@ global physics [[ Physx * ]]
             self->stop();
         ]];
 		
-	bool step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
+	step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
 		[[
-            result = self->step( time_step , velocity_iterations , position_iterations );
+            self->step( time_step , velocity_iterations , position_iterations );
 		]]; 
 		
 	table gravity
 		[[
-			b2Vec2 g( self->world.GetGravity() );
+			b2Vec2 g( self->get_world()->GetGravity() );
 			lua_newtable( L );
 			lua_pushnumber( L , g.x );
 			lua_rawseti( L , -2 , 1 );
@@ -804,203 +550,24 @@ global physics [[ Physx * ]]
             lua_rawgeti( L , 2 , 1 );
             lua_rawgeti( L , 2 , 2 );
             b2Vec2 g( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
-            self->world.SetGravity( g );
+            self->get_world()->SetGravity( g );
             lua_pop( L , 2 );
 		]];
 		
 	Body Body( table properties )
 		[[
-            ClutterActor * actor = NULL;
+            int n = self->create_body( properties , new_Body );
 
-			lua_getfield( L , properties , "source" );
-			
-			if ( ! lua_isnil( L , -1 ) )
-			{
-			    actor = ClutterUtil::user_data_to_actor( L , lua_gettop( L ) );
-
-                if ( ! actor )
-                {
-                    lua_pop( L , 1 );
-                    return luaL_error( L , "Invalid or missing body source" );
-                }
-			}
-			
-			lua_pop( L , 1 );
-			
-			//.................................................................
-			// Get position and size of the actor
-			
-			// TODO: We do not do any transformations here - we just use whatever
-			// the actor has. If the actor is inside a container, this will
-			// be wrong. We also cheat and modify the actor's anchor point...naughty.
-			
-			gfloat width = 0;
-			gfloat height = 0;
-
-			// Get the size from the actor
-
-			if ( actor )
-			{
-			    clutter_actor_get_size( actor , & width , & height );
-
-			    clutter_actor_move_anchor_point( actor , width / 2 , height / 2 );
-			}
-			
-			// See if there is another size
-			
-            lua_getfield( L , properties , "size" );
-            if ( lua_type( L , -1 ) == LUA_TTABLE )
+            if ( ! n )
             {
-                lua_rawgeti( L , -1 , 1 );
-                lua_rawgeti( L , -2 , 2 );
-
-                width = lua_tonumber( L , -2 );
-                height = lua_tonumber( L , -1 );
-
-                lua_pop( L , 2 );
+                lua_pushnil( L );
             }
-            lua_pop( L , 1 );
-
-            // Get the position
-
-			gfloat x = 0;
-			gfloat y = 0;
-			
-			if ( actor )
-			{
-			    clutter_actor_get_position( actor , & x , & y );
-			}
-
-			lua_getfield( L , properties , "position" );
-			if ( lua_type( L , -1 ) == LUA_TTABLE )
-			{
-                lua_rawgeti( L , -1 , 1 );
-                lua_rawgeti( L , -2 , 2 );
-
-                x = lua_tonumber( L , -2 );
-                y = lua_tonumber( L , -1 );
-
-                lua_pop( L , 2 );
-			}
-			lua_pop( L , 1 );
-			
-			// Rotation
-
-			gfloat rotation = 0 ;
-			gfloat rx = 0;
-			gfloat ry = 0;
-			
-			if ( actor )
-			{
-			    rotation = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , & rx , & ry , NULL );
-			}
-
-			lua_getfield( L , properties , "rotation" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-			    rotation = lua_tonumber( L , -1 );
-			}
-			lua_pop( L , 1 );
-			
-			//.................................................................
-			// Create the body definition
-			
-			b2BodyDef body_def;
-
-			body_def.position.Set( x / self->ppm , y / self->ppm );
-			body_def.angle = rotation * ( G_PI / 180.0 ); 
-			
-			b2FixtureDef fixture_def;
-			
-			//.................................................................
-			// Read fixture properties
-
-			populate_fixture_from_table( L , properties , fixture_def );
-
-			//.................................................................
-			// Read the rest of the properties
-			
-			lua_getfield( L , properties , "dynamic" );
-			if ( lua_toboolean( L , -1 ) )
-			{
-				body_def.type = b2_dynamicBody;
-			}
-			lua_pop( L , 1 );	
-			
-			lua_getfield( L , properties , "awake" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-				body_def.awake = lua_toboolean( L , -1 );
-			}
-			lua_pop( L , 1 );
-				
-			lua_getfield( L , properties , "active" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-				body_def.active = lua_toboolean( L , -1 );
-			}
-			lua_pop( L , 1 );
-
-			//.................................................................
-			// Create the body
-			
-			b2Body * body = self->world.CreateBody( & body_def );
-			
-			g_assert( body );
-			
-            //.................................................................
-			// See if the definition included a shape
-
-			fixture_def.shape = NULL;
-
-			lua_getfield( L , properties , "shape" );
-			if ( ! lua_isnil( L , -1 ) )
-			{
-			    fixture_def.shape = ( b2Shape * ) UserData::get_client( L , lua_gettop( L ) );
-			}
-			lua_pop( L , 1 );
-
-			//.................................................................
-			// If not, create a rectangular default shape for the body
-
-            b2PolygonShape polygon;
-
-            if ( ! fixture_def.shape )
-			{
-                polygon.SetAsBox( ( width * 0.5 ) / self->ppm , ( height * 0.5 ) / self->ppm ) ;
-
-                fixture_def.shape = & polygon;
-			}
-			
-			//.................................................................
-			// Create the default fixture
-			
-			// This is the 'handle' for the fixture
-
-			fixture_def.userData = GINT_TO_POINTER( self->next_handle++ );
-
-			body->CreateFixture( & fixture_def ); 
-
-			//.................................................................
-			// Attach the body to the actor with a destroy notify that will remove the
-			// body from the world and destroy it when the actor is destroyed.
-			
-			// TODO: There may be a problem destroying a body during the step function,
-			// which could happen if an actor is collected. 
-	
-			if ( actor )
-			{
-			    g_object_set_data_full( G_OBJECT( actor ) , "tp-physics-body" , body , ( GDestroyNotify ) destroy_actor_body );
-			}
-			//.................................................................
-			// Create an instance of a Body for Lua
-						
-			lua_pushlightuserdata( L , new Body( self , body , actor ) );
-			 			
-			new_Body(L);
-    		lua_remove(L,-2);
+            else
+            {
+                ClutterUtil::set_props_from_table( L , properties );
+            }
 		]];
-
+/*
 	DistanceJoint( Body body_a , table anchor_a , Body body_b , table anchor_b , table properties = 0 )
 	    [[
 	        b2DistanceJointDef d;
@@ -1112,7 +679,7 @@ global physics [[ Physx * ]]
 
             self->world.CreateJoint( & j );
         ]];
-
+*/
     #..........................................................................
     # Shape factory methods
 
@@ -1125,8 +692,8 @@ global physics [[ Physx * ]]
                 lua_rawgeti( L , size , 1 );
                 lua_rawgeti( L , size , 2 );
 
-                shape->SetAsBox( ( lua_tonumber( L , -2 ) * 0.5 ) / self->ppm ,
-                    ( lua_tonumber( L , -1 ) * 0.5 ) / self->ppm );
+                shape->SetAsBox( self->screen_to_world( lua_tonumber( L , -2 ) * 0.5 ) ,
+                    self->screen_to_world( lua_tonumber( L , -1 ) * 0.5 ) );
 
                 lua_pop( L , 2 );
             }
@@ -1138,11 +705,11 @@ global physics [[ Physx * ]]
                 lua_rawgeti( L , center , 1 );
                 lua_rawgeti( L , center , 2 );
 
-                shape->SetAsBox( ( lua_tonumber( L , -4 ) * 0.5 ) / self->ppm,
-                        ( lua_tonumber( L , -3 ) * 0.5 ) / self->ppm,
-                        b2Vec2( lua_tonumber( L , -2 ) / self->ppm ,
-                                lua_tonumber( L , -1 ) / self->ppm ),
-                        rotation * ( G_PI / 180.0 ) );
+                shape->SetAsBox( self->screen_to_world( lua_tonumber( L , -4 ) * 0.5 ) ,
+                        self->screen_to_world( lua_tonumber( L , -3 ) * 0.5 ),
+                        b2Vec2( self->screen_to_world( lua_tonumber( L , -2 ) ),
+                                self->screen_to_world( lua_tonumber( L , -1 ) ) ),
+                        Physics::World::degrees_to_radians( rotation ) );
 
                 lua_pop( L , 4 );
             }
@@ -1163,10 +730,10 @@ global physics [[ Physx * ]]
             lua_rawgeti( L , point_b , 1 );
             lua_rawgeti( L , point_b , 2 );
 
-            shape->SetAsEdge( b2Vec2( lua_tonumber( L , -4 ) / self->ppm ,
-                    lua_tonumber( L , -3 ) / self->ppm ),
-                    b2Vec2( lua_tonumber( L , -2 ) / self->ppm ,
-                            lua_tonumber( L , -1 ) / self->ppm ) );
+            shape->SetAsEdge( b2Vec2( self->screen_to_world( lua_tonumber( L , -4 ) ) ,
+                    self->screen_to_world( lua_tonumber( L , -3 ) ) ),
+                    b2Vec2( self->screen_to_world( lua_tonumber( L , -2 ) ) ,
+                            self->screen_to_world( lua_tonumber( L , -1 ) ) ) );
 
             lua_pop( L , 4 );
 
@@ -1176,18 +743,49 @@ global physics [[ Physx * ]]
 
             lua_remove( L , -2 );
         ]];
-/*
+
+
 	Shape Polygon( table points )
         [[
-            // TODO : formed from a table of vertices
+            std::vector< b2Vec2 > p;
+
+            lua_pushnil( L );
+
+            while( lua_next( L , points ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    lua_rawgeti( L , -1 , 1 );
+                    lua_rawgeti( L , -2 , 2 );
+
+                    p.push_back(
+                            b2Vec2( self->screen_to_world( lua_tonumber( L , -2 ) ) ,
+                                    self->screen_to_world( lua_tonumber( L , -1 ) ) ) );
+
+                    lua_pop( L , 2 );
+                }
+                lua_pop( L , 1 );
+            }
+
+            if ( p.empty() )
+            {
+                return luaL_error( L , "Invalid polygon points" );
+            }
+
+            b2PolygonShape * shape = new b2PolygonShape();
+
+            shape->Set( & p[ 0 ] , p.size() );
+
+            lua_pushlightuserdata( L , shape );
+            new_Shape( L );
+            lua_remove( L , -2 );
         ]];
-*/
 
 	Shape Circle( double radius , table center = 0 )
         [[
             b2CircleShape * shape = new b2CircleShape();
 
-            shape->m_radius = radius / self->ppm;
+            shape->m_radius = self->screen_to_world( radius );
 
             shape->m_p.SetZero();
 
@@ -1196,8 +794,8 @@ global physics [[ Physx * ]]
                 lua_rawgeti( L , center , 1 );
                 lua_rawgeti( L , center , 2 );
 
-                shape->m_p.Set( lua_tonumber( L , -2 ) / self->ppm ,
-                        lua_tonumber( L , -1 ) / self->ppm );
+                shape->m_p.Set( self->screen_to_world( lua_tonumber( L , -2 ) ) ,
+                        self->screen_to_world( lua_tonumber( L , -1 ) ) );
 
                 lua_pop( L , 2 );
             }
@@ -1209,7 +807,11 @@ global physics [[ Physx * ]]
             lua_remove( L , -2 );
         ]];
 
+    #..........................................................................
+
+
 	callback on_begin_contact( table point , int body_a_handle , int fixture_a_handle , int body_b_handle , int fixture_b_handle );
 
     callback on_end_contact( table point , int body_a_handle , int fixture_a_handle , int body_b_handle , int fixture_b_handle );
+
 }
