@@ -10,7 +10,6 @@
 #include "profiler.h"
 
 //-----------------------------------------------------------------------------
-#define APP_METADATA_FILENAME   "app"
 #define APP_TABLE_NAME          "app"
 #define APP_FIELD_ID            "id"
 #define APP_FIELD_NAME          "name"
