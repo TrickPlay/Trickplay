@@ -1,3 +1,4 @@
+dofile("nums.lua")
 local TILE_WIDTH  = 100
 local TILE_GUTTER = 10
 local SET_GUTTER  = 20
@@ -141,151 +142,144 @@ function BoardGen(number_of_givens)
     return base
 end
 
-function DevelopBoard(group,givens,guesses)
+function DevelopBoard(grid_of_groups,givens,guesses,blox)
+--	local grid_of_groups = {}
 	local empty_spaces = 81
 	local text
 	local t
 	local guess_g
 	---------------------------------
-	for r = 1,9 do     for c = 1,9 do
+	for r = 1,9 do  
+			grid_of_groups[r] = {}   
+					for c = 1,9 do
 	---------------------------------
-		
---[[
-		t = Rectangle {name = "Tile "..r.." "..c,color = "202020",w = TILE_WIDTH,h = TILE_WIDTH, anchor_point = {TILE_WIDTH/2,TILE_WIDTH/2},opacity=0}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
 
-		group:add(t)
+		grid_of_groups[r][c] = Group
+		{
+			name = r.." "..c
+		}
+		blox[math.floor((r-1)/3)+1][math.floor((c-1)/3)+1]:add(
+			grid_of_groups[r][c])
+--local backing = Rectangle{color="707070",opacity=0,w=100,h=100}
+		grid_of_groups[r][c]:add(backing)
+		grid_of_groups[r][c].x = ((c-1)%3)*(TILE_WIDTH+TILE_GUTTER)
+				+ TILE_WIDTH/2
+		grid_of_groups[r][c].y = ((r-1)%3)*(TILE_WIDTH+TILE_GUTTER)
+				+ TILE_WIDTH/2+15
+--[[
+		grid_of_groups[r][c].x = screen.w/2+ (c-5)*(TILE_WIDTH+TILE_GUTTER)
+if c<=3 then
+grid_of_groups[r][c].x=grid_of_groups[r][c].x - SET_GUTTER
+elseif c>=7 then
+grid_of_groups[r][c].x=grid_of_groups[r][c].x + SET_GUTTER
+
+end --+ math.floor((r-5)
+--(c-1)*TILE_WIDTH + math.floor((c-1)/3)*
+--		                         SET_GUTTER + (c-1)*TILE_GUTTER+500
+		grid_of_groups[r][c].y = screen.h/2+(r-5)*(TILE_WIDTH+TILE_GUTTER)+15
+if r<=3 then
+grid_of_groups[r][c].y=grid_of_groups[r][c].y - SET_GUTTER
+elseif r>=7 then
+grid_of_groups[r][c].y=grid_of_groups[r][c].y + SET_GUTTER
+
+end 
 --]]
+
 		if givens[r][c] ~= 0 then
 			empty_spaces = empty_spaces - 1
-			t = Text
-			{
-				name = "Given_s "..r.." "..c,
-				text = givens[r][c],
-				font = "DejaVu Bold 82px",
-					color = "000000"
-			}
-			t.anchor_point={t.w/2,t.h/2}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER-1
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
-			group:add(t)
-
-			t = Text
-			{
+			t = Clone{
 				name = "Given "..r.." "..c,
-				text = givens[r][c],
-				font = "DejaVu Bold 80px",
-					color = "FFFFFF"
+				source = given_nums[ givens[r][c] ],
+				opacity=0
 			}
 			t.anchor_point={t.w/2,t.h/2}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
-			group:add(t)
+				t.x = TILE_WIDTH/2
+				t.y = TILE_WIDTH/2
+
+			grid_of_groups[r][c]:add(t)
+t.opacity=255
 		else
-			text = ""
-			if guesses[r][c].pen ~= 0 then
-				text = guesses[r][c].pen
-			end
 			if guesses[r][c].num > 0 then
 				empty_spaces = empty_spaces - 1				
 			end
-			guess_g = Group{name = "Guess "..r.." "..c,opacity=0}
-			group:add(guess_g)
-			t = Text
-			{
-				name = "Pen_s "..r.." "..c,
-				text = text,
-				font = "DejaVu Bold 82px",
-				color = "000000",
-				opacity = 255,		
-			}
-			t.anchor_point={t.w/2,t.h/2}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER-1
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
-			group:add(t)
-
-			t = Text
-			{
-				name = "Pen "..r.." "..c,
-				text = text,
-				font = "DejaVu Bold 80px",
-				color = "fefa00",
-				opacity = 255,
-
-			}
-			t.anchor_point={t.w/2,t.h/2}
-			t.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER
-			t.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
-			group:add(t)
-
 			for g = 1,9 do
-				t = Text
-				{
-					name    = "Guess "..r.." "..c.." "..g,
-					text    = g,
-					font    = "Eraser 57px",
-					color   = "fefa00",
-					opacity = 0,
-					--z=1
+				t= Clone{
+					name   = "Pen "..g,
+					source = pen_nums[g],
+					opacity = 0
 				}
-				t.scale = {1/2,1/2}
 				t.anchor_point={t.w/2,t.h/2}
-				t.x = (c-1)*TILE_WIDTH + 
-					math.floor((c-1)/3)*SET_GUTTER +
-					(c-1)*TILE_GUTTER+ ((g-1)%3-1)*TILE_WIDTH/3
-				t.y = (r-1)*TILE_WIDTH + 
-					math.floor((r-1)/3)*SET_GUTTER +
-					(r-1)*TILE_GUTTER+ (math.floor((g-1)/3)-1)*
-					TILE_WIDTH/3+TOP_GAP+TILE_WIDTH/2
+				t.x = TILE_WIDTH/2
+				t.y = TILE_WIDTH/2
 
-				if guesses[r][c][g] and guesses[r][c].pen == 0 then 
+				grid_of_groups[r][c]:add(t)
+				if guesses[r][c].pen == g then
 					t.opacity=255
 				end
 
-				group:add(t)
-				t = Text
-				{
-					text    = g,
-					font    = "DejaVu ExtraLight 55px",
-					color   = "707070",
-					opacity = 150
-					
+				t= Clone{
+					name   = "WR_Pen "..g,
+					source = wr_pen_nums[g],
+					opacity = 0
 				}
+				t.anchor_point={t.w/2,t.h/2}
+				t.x = TILE_WIDTH/2
+				t.y = TILE_WIDTH/2
+
+
+				grid_of_groups[r][c]:add(t)
+
+				t = Clone{
+					name   = "Guess "..g,
+					source = pencil_nums[g],
+					opacity = 0
+				}
+
 				t.scale = {1/2,1/2}
 				t.anchor_point={t.w/2,t.h/2}
-				t.x = (c-1)*TILE_WIDTH + 
-					math.floor((c-1)/3)*SET_GUTTER +
-					(c-1)*TILE_GUTTER+ ((g-1)%3-1)*TILE_WIDTH/3
-				t.y = (r-1)*TILE_WIDTH + 
-					math.floor((r-1)/3)*SET_GUTTER +
-					(r-1)*TILE_GUTTER+ (math.floor((g-1)/3)-1)*
-					TILE_WIDTH/3+TOP_GAP+TILE_WIDTH/2
+				t.x = ((g-1)%3+1)*TILE_WIDTH/4+15
+				t.y = (math.floor((g-1)/3)+1)*TILE_WIDTH/4+15
 
-				guess_g:add(t)
+				grid_of_groups[r][c]:add(t)
+				
+				if guesses[r][c][g] and guesses[r][c].pen == 0 then 
+					t.opacity=255
+				end
+				t = Clone{
+					name   = "WR_Guess "..g,
+					source = wr_pencil_nums[g],
+					opacity = 0
+				}
 
+				t.scale = {1/2,1/2}
+				t.anchor_point={t.w/2,t.h/2}
+				t.x = ((g-1)%3+1)*TILE_WIDTH/4+15
+				t.y = (math.floor((g-1)/3)+1)*TILE_WIDTH/4+15
+
+
+				grid_of_groups[r][c]:add(t)
 			end
 		end
+--[[
+grid_of_groups[r][c]:foreach_child( function(child)
+		child.anchor_point = {child.w/2,child.h/2}
+end)
+--]]
+--backing.w = grid_of_groups[r][c].w
+--backing.h = grid_of_groups[r][c].h
+--print(backing.w,backing.h)
+--backing.anchor_point = {backing.w/2,backing.h/2}
+--backing.x = backing.w/2
+--backing.y = backing.h/2
+		grid_of_groups[r][c].anchor_point = 
+		{
+			grid_of_groups[r][c].w/2,
+			grid_of_groups[r][c].h/2
+		}
+		
+--(r-1)*TILE_WIDTH + math.floor((r-1)/3)*
+--		                         SET_GUTTER +(r-1)*TILE_GUTTER+TOP_GAP+
+--		                         TILE_WIDTH/2
 
 	---------------------------------
 	end	           end
@@ -307,10 +301,10 @@ sel_menu:add(
 sel_menu:add(unpack(m_items))
 sel_menu.anchor_point={TILE_WIDTH/2,TILE_WIDTH/2}
 --]]
-Game = Class(function(g,the_givens, the_guesses, ...)
+Game = Class(function(g,the_givens, the_guesses,blox, ...)
 	local error_checking = false
 	local empty_spaces = 81
-
+	local the_blox = blox
 	local error_list = {}
 	local undo_list = {}
 	local redo_list = {}
@@ -342,12 +336,13 @@ Game = Class(function(g,the_givens, the_guesses, ...)
 
 		end                end
 	end
-	g.board = Group{}
-	screen:add(g.board)
-	empty_spaces = DevelopBoard(g.board,givens, guesses)
+	--g.board = Group{}
+	g.grid_of_groups = {}
+	--screen:add(g.board)
+	empty_spaces = DevelopBoard(g.grid_of_groups,givens, guesses,blox)
 print(empty_spaces)
 	--g.board.anchor_point = {g.board.w/2,g.board.h/2}
-	g.board.position = {500,0}--{screen.w/2+40,screen.h/2}
+	--g.board.position = {500,0}--{screen.w/2+40,screen.h/2}
 	function g:save()
 		settings.givens  = givens
 		settings.guesses = guesses
@@ -379,14 +374,16 @@ print(empty_spaces)
 			end 
 			guesses[r][c].num = 0
 			guesses[r][c].pen = 0
-
+			g.grid_of_groups[r][c]:clear()
 		end                end
-		g.board:clear()
-		g.board = Group{}
-		screen:add(g.board)
-		empty_spaces = DevelopBoard(g.board,givens, guesses)
+		g.grid_of_groups = {}
+		--g.board:clear()
+		--g.board = Group{}
+		
+		--screen:add(g.board)
+		empty_spaces = DevelopBoard(g.grid_of_groups,givens, guesses,the_blox)
 		print(empty_spaces)
-g.board.position = {500,0}
+--g.board.position = {500,0}
 	end
 	function g:check_guess(r,c,v,t)
 		--r = row
@@ -460,11 +457,16 @@ g.board.position = {500,0}
 --]]
 				elseif #e[1] == 3 then
 					if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-						g.board:find_child("Pen "..e[1][1].." "
-							..e[1][2]).color = "FF0000"
+						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 0
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 255
+						else
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 0
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 255
+						end
 					end
-					g.board:find_child("Guess "..e[1][1].." "
-						..e[1][2].." "..e[1][3]).color = "FF0000"
+					--g.board:find_child("Guess "..e[1][1].." "
+					--	..e[1][2].." "..e[1][3]).color = "FF0000"
 				else
 					error("this should never happen,"..
 						" i did something wrong")
@@ -477,11 +479,14 @@ g.board.position = {500,0}
 --]]
 				elseif #e[2] == 3 then
 					if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-						g.board:find_child("Pen "..e[2][1].." "
-							..e[2][2]).color = "FF0000"
+						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 0
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 255
+						else                             
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 0
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess"..e[2][3]).opacity = 255
+						end
 					end
-					g.board:find_child("Guess "..e[2][1].." "
-						..e[2][2].." "..e[2][3]).color = "FF0000"
 				else	
 					error("this should never happen,"..
 						" i did something wrong")
@@ -502,63 +507,63 @@ g.board.position = {500,0}
 				                 and e[1][3] == guess) or
 				   (e[2][1] == r and e[2][2] == c 
 				                 and e[2][3] == guess) then
-					--print("rm")
-					if #e[1] == 2 then
-						g.board:find_child("Given "..e[1][1].." "
-							..e[1][2]).color = "FFFFFF"
-					elseif #e[1] == 3 then
-						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-							g.board:find_child("Pen "..e[1][1].." "
-								..e[1][2]).color = "fefa00"
+					if error_checking then
+						if #e[1] == 2 then
+						elseif #e[1] == 3 then
+							if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 255
+								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 0
+							else
+								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 255
+								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 0
+							end
+						else
+							error("this should never happen,"..
+								" i did something wrong")
 						end
-						g.board:find_child("Guess "..e[1][1].." "
-							..e[1][2].." "..e[1][3]).color = "fefa00"
-					else
-						error("this should never happen,"..
-							" i did something wrong")
-					end
-					if #e[2] == 2 then
-						g.board:find_child("Given "..e[2][1].." "
-							..e[2][2]).color = "FFFFFF"
-					elseif #e[2] == 3 then
-						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-							g.board:find_child("Pen "..e[2][1].." "
-								..e[2][2]).color = "fefa00"
+						if #e[2] == 2 then
+						elseif #e[2] == 3 then
+							if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 255
+								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 0
+							else                             
+								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 255
+								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 0
+							end
+						else
+							error("this should never happen,"..
+								" i did something wrong")
 						end
-						g.board:find_child("Guess "..e[2][1].." "
-							..e[2][2].." "..e[2][3]).color = "fefa00"
-					else
-						error("this should never happen,"..
-							" i did something wrong")
 					end
-
 					table.remove(error_list,i)
 				end
 			end
 		if error_checking then
 			for i =#error_list,1,-1 do
 				e = error_list[i]
-
 					if #e[1] == 2 then
---[[
-						g.board:find_child("Given "..e[1][1].." "
-							..e[1][2]).color = "FF0000"
---]]
 					elseif #e[1] == 3 then
-						g.board:find_child("Guess "..e[1][1].." "
-							..e[1][2].." "..e[1][3]).color = "FF0000"
+						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 0
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 255
+						else
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 0
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 255
+						end
 					else
 						error("this should never happen,"..
 							" i did something wrong")
 					end
 					if #e[2] == 2 then
---[[
-						g.board:find_child("Given "..e[2][1].." "
-							..e[2][2]).color = "FF0000"
---]]
 					elseif #e[2] == 3 then
-						g.board:find_child("Guess "..e[2][1].." "
-							..e[2][2].." "..e[2][3]).color = "FF0000"
+						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 0
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 255
+						else                             
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 0
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 255
+						end
+
 					else
 						error("this should never happen,"..
 							" i did something wrong")
@@ -571,17 +576,6 @@ g.board.position = {500,0}
 
 
 	function g:pen(r,c,p,status)
-print("pen",r,c,p)
---[[
-					if status ~= "REDO" and status ~= "UNDO" then
-						table.insert(undo_list,{g.,r,c,p})
-						if #undo_list > 100 then
-							table.remove(undo_list,1)
-						end
-					elseif status ~= "REDO" and status ~= "UNDO" then
-						redo_list = {}
-					end
---]]
 		if givens[r][c] ~= 0 then return end
 
 		--if another pen number was there
@@ -595,17 +589,22 @@ print("pen",r,c,p)
 			elseif status ~= "REDO" then
 				redo_list = {}
 			end
+			guesses[r][c][guesses[r][c].pen] = false
+
 print("here")
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
 			--if toggling out a penned number
 			if guesses[r][c].pen == p then
 				print("removing pen")
 				empty_spaces = empty_spaces + 1
-				guesses[r][c][p] = false
+				g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+
 				guesses[r][c].pen = 0
 				guesses[r][c].num = 0
+--[[
 				g.board:find_child("Pen "..r.." "..c).text=""
 				g.board:find_child("Pen_s "..r.." "..c).text=""
+--]]
 				return
 			end
 		--if pencil numbers were there
@@ -616,8 +615,7 @@ print("here")
 					table.insert(params,i)
 					g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
-					g.board:find_child("Guess "..
-						r.." "..c.." "..i).opacity = 0
+					g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
 				end
 			end
 			if status ~= "UNDO" then
@@ -651,9 +649,18 @@ print("here")
 		end
 --]]
 		guesses[r][c].num = 1
-		
+		if guesses[r][c].pen ~= 0 then
+			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+		end
+
 		guesses[r][c].pen = p
 		guesses[r][c][p] = true
+local ggroup = 	g.grid_of_groups[r][c]
+local cchild = ggroup:find_child("Pen "..p)
+cchild.opacity = 255
+
+--[[
 		local pen = g.board:find_child("Pen "..r.." "..c)
 		pen.text=p
 		pen.anchor_point={pen.w/2,pen.h/2}
@@ -673,11 +680,12 @@ print("here")
 		pen_s.y = (r-1)*TILE_WIDTH + 
 				math.floor((r-1)/3)*SET_GUTTER +
 				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
+--]]
 		g:add_to_err_list(r,c,p)
 		if empty_spaces == 0 and #error_list == 0 then
 			player_won()
 		end
-print(empty_spaces)
+		print(empty_spaces)
 	end
 
 
@@ -707,14 +715,15 @@ print(empty_spaces)
 			end
 
 			guesses[r][c][guesses[r][c].pen] = false
-			guesses[r][c].pen = 0
-			g.board:find_child("Pen "..r.." "..c).text=""
-			g.board:find_child("Pen_s "..r.." "..c).text=""
+			g:rem_from_err_list(r,c,guesses[r][c].pen)
 
+			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 255
+
+
+			guesses[r][c].pen = 0
 			--add the penciled guess
 			guesses[r][c][guess] = true
-			g.board:find_child("Guess "..r.." "..c..
-				" "..guess).opacity = 255
 			g:add_to_err_list(r,c,guess)
 			if empty_spaces == 0 and #error_list == 0 then
 				player_won()
@@ -730,8 +739,9 @@ print(empty_spaces)
 
 --			guesses[r][c].sz = guesses[r][c].sz - 1
 			guesses[r][c][guess] = false
-			g.board:find_child("Guess "..r.." "..c..
-				" "..guess).opacity = 0
+			g:rem_from_err_list(r,c,guess)
+			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 0
+
 			if status ~= "REDO" and status ~= "UNDO" then
 				table.insert(undo_list,{g.toggle_guess,r,c,guess})
 				if #undo_list > 100 then
@@ -740,7 +750,6 @@ print(empty_spaces)
 			elseif status ~= "REDO" and status ~= "UNDO" then
 				redo_list = {}
 			end
-			g:rem_from_err_list(r,c,guess)
 
 		--if toggling it on
 		else
@@ -752,8 +761,8 @@ print(empty_spaces)
 
 			--guesses[r][c].sz = guesses[r][c].sz + 1
 			guesses[r][c][guess] = true
-			g.board:find_child("Guess "..r.." "..c..
-				" "..guess).opacity = 255
+			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 255
+
 			if status ~= "REDO" and status ~= "UNDO" then
 				table.insert(undo_list,{g.toggle_guess,r,c,guess})
 				if #undo_list > 100 then
@@ -767,7 +776,7 @@ print(empty_spaces)
 				player_won()
 			end
 		end
-print(empty_spaces)
+	print(empty_spaces)
 end
 	function g:error_check()
 		if error_checking then
@@ -777,29 +786,29 @@ end
 						--table.remove(error_list,i)
 
 					if #e[1] == 2 then
-						g.board:find_child("Given "..e[1][1].." "
-							..e[1][2]).color = "FFFFFF"
 					elseif #e[1] == 3 then
 						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-							g.board:find_child("Pen "..e[1][1].." "
-								..e[1][2]).color = "fefa00"
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 255
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 0
+						else
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 255
+							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 0
 						end
-						g.board:find_child("Guess "..e[1][1].." "
-							..e[1][2].." "..e[1][3]).color = "fefa00"
+
 					else
 						error("this should never happen,"..
 							" i did something wrong")
 					end
 					if #e[2] == 2 then
-						g.board:find_child("Given "..e[2][1].." "
-							..e[2][2]).color = "FFFFFF"
 					elseif #e[2] == 3 then
 						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-							g.board:find_child("Pen "..e[2][1].." "
-								..e[2][2]).color = "fefa00"
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 255
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 0
+						else
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 255
+							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 0
 						end
-						g.board:find_child("Guess "..e[2][1].." "
-							..e[2][2].." "..e[2][3]).color = "fefa00"
+
 					else
 						error("this should never happen,"..
 							" i did something wrong")
@@ -900,35 +909,24 @@ end
 --]]
 			elseif #e[1] == 3 then
 				if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-					g.board:find_child("Pen "..e[1][1].." "
-						..e[1][2]).color = "FF0000"
+					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 0
+					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 255
 				else
-					g.board:find_child("Guess "..e[1][1].." "
-						..e[1][2].." "..e[1][3]).color = "FF0000"
+					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 0
+					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 255
 				end
 			else
 				error("this should never happen,"..
 					" i did something wrong")
 			end
 			if #e[2] == 2 then
-
-				if givens[e[2][1]][e[2][2]] == 0 then
-					print(e[1][1],e[1][2],"   ",e[2][1],e[2][2])
-
-					debug()
-				end
---[[
-				g.board:find_child("Given "..e[2][1].." "
-					..e[2][2]).color = "FF0000"
---]]
 			elseif #e[2] == 3 then
 				if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-					g.board:find_child("Pen "..e[2][1].." "
-						..e[2][2]).color = "FF0000"
+					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 0
+					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 255
 				else
-
-				g.board:find_child("Guess "..e[2][1].." "
-					..e[2][2].." "..e[2][3]).color = "FF0000"
+					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 0
+					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 255
 				end
 			else
 				error("this should never happen,"..
@@ -1025,12 +1023,11 @@ print("undooo",params[2],params[3],params[4])
 		empty_spaces = empty_spaces + 1
 		if guesses[r][c].pen ~= 0 then
 			table.insert(undo_list,{g.pen,r,c,guesses[r][c].pen})
+			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
 
 			guesses[r][c].pen = 0
 			guesses[r][c].num = 0
-			g.board:find_child("Pen "..r.." "..c).text=""
-			g.board:find_child("Pen_s "..r.." "..c).text=""
-
 		else
 
 		local params = {}
@@ -1038,23 +1035,17 @@ print("undooo",params[2],params[3],params[4])
 				if guesses[r][c][i] then
 					g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
-					local guess = g.board:find_child("Guess "..
-							r.." "..c.." "..i)
-					guess.opacity = 0
+					g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
+					--guess.opacity = 0
 					table.insert(params,i)
 				end
 			end
-			guesses[r][c].pen = 0
 			guesses[r][c].num = 0
-			g.board:find_child("Pen "..r.." "..c).text=""
-			g.board:find_child("Pen_s "..r.." "..c).text=""
-
 
 			table.insert(undo_list,{g.set_pencil,r,c,params})
 		end
 	end
 	function g:set_pencil(r,c,nums)
-print("hi??")
 		if guesses[r][c].num == 0 then
 			empty_spaces = empty_spaces - 1
 		end
@@ -1063,21 +1054,25 @@ print("hi??")
 			if guesses[r][c][i] then
 				g:rem_from_err_list(r,c,i)
 				guesses[r][c][i] = false
-				g.board:find_child("Guess "..
-					r.." "..c.." "..i).opacity = 0
+				g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
 --				guess.color = "FFFFFF"
 --				guess.opacity = 0
 			end
 		end
 		for i = 1,#nums do
 			guesses[r][c][nums[i]] = true
-			g.board:find_child("Guess "..
-				r.." "..c.." "..nums[i]).opacity = 255
+			g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 255
+			g:add_to_err_list(r,c,i)
 		end
-		guesses[r][c].pen = 0
+		if guesses[r][c].pen ~= 0 then
+			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+
+			guesses[r][c].pen = 0
+		end
 		guesses[r][c].num = #nums
-		g.board:find_child("Pen "..r.." "..c).text=""
-		g.board:find_child("Pen_s "..r.." "..c).text=""
+	--	g.board:find_child("Pen "..r.." "..c).text=""
+	--	g.board:find_child("Pen_s "..r.." "..c).text=""
 
 	end
 --[[
