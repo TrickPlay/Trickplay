@@ -495,6 +495,172 @@ interface Body [[ Physics::Body * ]]
 
             self->body->CreateFixture( & fd );
         ]];
+
+    #..........................................................................
+    # Joints
+
+    bool remove_joint( int joint_handle )
+        [[
+            self->check( L );
+
+            gpointer h = GINT_TO_POINTER( joint_handle );
+
+            result = false;
+
+            for( b2JointEdge * e = self->body->GetJointList(); e; e = e->next )
+            {
+                if ( e->joint && e->joint->GetUserData() == h )
+                {
+                    result = true;
+
+                    self->world->get_world()->DestroyJoint( e->joint );
+
+                    break;
+                }
+            }
+        ]];
+
+    int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
+        [[
+            self->check( L );
+
+            Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
+
+            if ( ! other )
+            {
+                return luaL_error( L , "Invalid body" );
+            }
+
+            other->check( L );
+
+            b2Body * ba = self->body;
+            b2Body * bb = other->body;
+
+            lua_rawgeti( L , anchor , 1 );
+            lua_rawgeti( L , anchor , 2 );
+
+            float32 ax = self->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 ay = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+
+            lua_pop( L , 2 );
+
+            lua_rawgeti( L , other_anchor , 1 );
+            lua_rawgeti( L , other_anchor , 2 );
+
+            float32 bx = self->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 by = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+
+            lua_pop( L , 2 );
+
+            b2DistanceJointDef d;
+
+            d.Initialize( ba , bb , b2Vec2( ax , ay ) , b2Vec2( bx , by ) );
+
+            if ( properties )
+            {
+                lua_getfield( L , properties , "frequency" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    d.frequencyHz = lua_tonumber( L , -1 );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "damping_ratio" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    d.dampingRatio = lua_tonumber( L , -1 );
+                }
+                lua_pop( L , 1 );
+            }
+
+            result = self->world->get_next_handle();
+
+            b2Joint * joint = self->world->get_world()->CreateJoint( & d );
+
+            joint->SetUserData( GINT_TO_POINTER( result ) );
+
+        ]];
+
+    int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
+        [[
+            self->check( L );
+
+            Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
+
+            if ( ! other )
+            {
+                return luaL_error( L , "Invalid body" );
+            }
+
+            other->check( L );
+
+            b2Body * ba = self->body;
+            b2Body * bb = other->body;
+
+            lua_rawgeti( L , anchor , 1 );
+            lua_rawgeti( L , anchor , 2 );
+
+            float32 x = self->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 y = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+
+            lua_pop( L , 2 );
+
+            b2RevoluteJointDef j;
+
+            j.Initialize( ba , bb , b2Vec2( x , y ) );
+
+            if ( properties )
+            {
+                lua_getfield( L , properties , "enable_limit" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    j.enableLimit = lua_toboolean( L , -1 );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "lower_angle" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    j.lowerAngle = Physics::World::degrees_to_radians( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "upper_angle" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    j.upperAngle = Physics::World::degrees_to_radians( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "enable_motor" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    j.enableMotor = lua_toboolean( L , -1 );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "motor_speed" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    j.motorSpeed = Physics::World::degrees_to_radians( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "max_motor_torque" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    j.maxMotorTorque = lua_tonumber( L , -1 );
+                }
+                lua_pop( L , 1 );
+
+            }
+
+            result = self->world->get_next_handle();
+
+            b2Joint * joint = self->world->get_world()->CreateJoint( & j );
+
+            joint->SetUserData( GINT_TO_POINTER( result ) );
+        ]];
 }
 
 /*===========================================================================*/
@@ -567,119 +733,7 @@ global physics [[ Physics::World * ]]
                 ClutterUtil::set_props_from_table( L , properties );
             }
 		]];
-/*
-	DistanceJoint( Body body_a , table anchor_a , Body body_b , table anchor_b , table properties = 0 )
-	    [[
-	        b2DistanceJointDef d;
 
-            b2Body * ba = Body::get( L , body_a )->body;
-            b2Body * bb = Body::get( L , body_b )->body;
-
-            lua_rawgeti( L , anchor_a , 1 );
-            lua_rawgeti( L , anchor_a , 2 );
-
-            float32 ax = lua_tonumber( L , -2 ) / self->ppm;
-            float32 ay = lua_tonumber( L , -1 ) / self->ppm;
-
-            lua_pop( L , 2 );
-
-            lua_rawgeti( L , anchor_b , 1 );
-            lua_rawgeti( L , anchor_b , 2 );
-
-            float32 bx = lua_tonumber( L , -2 ) / self->ppm;
-            float32 by = lua_tonumber( L , -1 ) / self->ppm;
-
-            lua_pop( L , 2 );
-
-            d.Initialize( ba , bb , b2Vec2( ax , ay ) , b2Vec2( bx , by ) );
-
-            if ( properties )
-            {
-                lua_getfield( L , properties , "frequency" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    d.frequencyHz = lua_tonumber( L , -1 );
-                }
-                lua_pop( L , 1 );
-
-                lua_getfield( L , properties , "damping_ratio" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    d.dampingRatio = lua_tonumber( L , -1 );
-                }
-                lua_pop( L , 1 );
-            }
-
-            self->world.CreateJoint( & d );
-
-	    ]];
-
-	RevoluteJoint( Body body_a , Body body_b , table anchor , table properties = 0 )
-        [[
-            b2Body * ba = Body::get( L , body_a )->body;
-            b2Body * bb = Body::get( L , body_b )->body;
-
-            lua_rawgeti( L , anchor , 1 );
-            lua_rawgeti( L , anchor , 2 );
-
-            float32 x = lua_tonumber( L , -2 ) / self->ppm;
-            float32 y = lua_tonumber( L , -1 ) / self->ppm;
-
-            lua_pop( L , 2 );
-
-            b2RevoluteJointDef j;
-
-            j.Initialize( ba , bb , b2Vec2( x , y ) );
-
-            if ( properties )
-            {
-                lua_getfield( L , properties , "enable_limit" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    j.enableLimit = lua_toboolean( L , -1 );
-                }
-                lua_pop( L , 1 );
-
-                lua_getfield( L , properties , "lower_angle" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    j.lowerAngle = lua_tonumber( L , -1 ) * ( G_PI / 180.0 );
-                }
-                lua_pop( L , 1 );
-
-                lua_getfield( L , properties , "upper_angle" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    j.upperAngle = lua_tonumber( L , -1 ) * ( G_PI / 180.0 );
-                }
-                lua_pop( L , 1 );
-
-                lua_getfield( L , properties , "enable_motor" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    j.enableMotor = lua_toboolean( L , -1 );
-                }
-                lua_pop( L , 1 );
-
-                lua_getfield( L , properties , "motor_speed" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    j.motorSpeed = lua_tonumber( L , -1 ) * ( G_PI / 180.0 );
-                }
-                lua_pop( L , 1 );
-
-                lua_getfield( L , properties , "max_motor_torque" );
-                if ( ! lua_isnil( L , -1 ) )
-                {
-                    j.maxMotorTorque = lua_tonumber( L , -1 );
-                }
-                lua_pop( L , 1 );
-
-            }
-
-            self->world.CreateJoint( & j );
-        ]];
-*/
     #..........................................................................
     # Shape factory methods
 

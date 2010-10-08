@@ -12,7 +12,7 @@ local top = Rectangle
 
 screen:add( top )
 
-local top_body = physics:Body{ source = top }
+local top_body = physics:Body{ source = top , type = "static" }
 
 -------------------------------------------------------------------------------
 -- Ropes
@@ -49,15 +49,13 @@ for i = 1 , ROPE_COUNT do
     
     -- Create the bodies
 
-    local rope_body = physics:Body{ source = rope , dynamic = true , friction = 0 , density = 0.1 , awake = false }
+    local rope_body = physics:Body{ source = rope , friction = 0 , density = 0.1 , awake = false }
 
-    local crate_body = physics:Body{ source = crate , dynamic = true , friction = 0.1 , density = 0.8 , bounce = 0.9 , awake = false }
-    
-    crate_body.fixed_rotation = true
+    local crate_body = physics:Body{ source = crate , friction = 0.1 , density = 0.8 , bounce = 0.9 , awake = false , fixed_rotation = true }
     
     -- Join the rope to the top
     
-    physics:RevoluteJoint( top_body , rope_body , { rope.x , rope.y - rope.h / 2 } ,
+    top_body:RevoluteJoint( rope_body , { rope.x , rope.y - rope.h / 2 } ,
         {
             enable_limit = true ,
             lower_angle = -90,
@@ -67,12 +65,13 @@ for i = 1 , ROPE_COUNT do
     
     -- Joing the rope to the crate
     
-    physics:RevoluteJoint( rope_body , crate_body , { rope.x , rope.y + rope.h  / 2 } )
+    rope_body:RevoluteJoint( crate_body , { rope.x , rope.y + rope.h  / 2 } )
     
     -- Now, create a distance join between the crate and the top
     
-    physics:DistanceJoint( top_body , { rope.x , rope.y - rope.h / 2 } , crate_body , { rope.x , rope.y + rope.h  / 2 } ) 
+    top_body:DistanceJoint( { rope.x , rope.y - rope.h / 2 } , crate_body , { rope.x , rope.y + rope.h  / 2 } ) 
     
+
     -- Store the crate body
     
     table.insert( crates , crate_body )
@@ -88,10 +87,8 @@ function screen.on_key_down( screen , key )
     if key == keys.Return then
     
         local crate = crates[ 1 ]
-
-        local x , y = unpack( crate.position )
         
-        crate:apply_linear_impulse( -50 , 0 , x , y )
+        crate:apply_linear_impulse( { -50 , 0 } , crate.position )
         
     end
 

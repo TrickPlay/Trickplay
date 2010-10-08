@@ -15,7 +15,6 @@ globe = physics:Body
     
     shape = physics:Circle( globe_image.w / 2 * globe_image.scale[ 1 ] ),
     
-    dynamic = true,
     density = 1.0,
     bounce = 0.8,
     friction = 0.1
@@ -38,7 +37,8 @@ local ground = physics:Body
         z_rotation = { 10 , 0 , 0  }
     },
     
-    friction = 0.9
+    friction = 0.9,
+    type = "static"
 }
 
 
@@ -48,8 +48,27 @@ screen:add( globe.source , ground.source )
 -- Add invisible bumpers on the left and right of the screen
 -- Note that these do not have actors attached to them.
 
-physics:Body{ size = { 2 , screen.h } , position = { -1 , screen.h / 2 } }
-physics:Body{ size = { 2 , screen.h } , position = { screen.w + 1 , screen.h / 2 } }
+local left_bumper = physics:Body
+{
+    type = "static" ,
+    source = Group
+    {
+        size = { 2 , screen.h },
+        position = { -2 , 0 }
+    }
+}
+        
+local right_bumper = physics:Body
+{
+    type = "static",
+    source = Group
+    {
+        size = { 2 , screen.h },
+        position = { screen.w , 0 }
+    }
+}
+
+screen:add( right_bumper.source , left_bumper.source )
 
 -------------------------------------------------------------------------------
 
@@ -67,8 +86,6 @@ if false then
 
 else
 
-    function idle.on_idle( idle , seconds )
-        physics:step( seconds )
-    end
+    physics:start()
     
 end

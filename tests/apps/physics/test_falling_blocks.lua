@@ -29,7 +29,6 @@ for i = 1 , 30 do
             density = 1.0 ,
             friction = 0.5 ,
             bounce = 0.5,
-            dynamic = true
         }
         
     if not body then
@@ -55,8 +54,7 @@ g = Rectangle
 screen:add( g )
 
 
-
-ground = physics:Body{ source = g , friction = 0.2 }
+ground = physics:Body{ source = g , friction = 0.2 , type = "static" }
 
 g = Rectangle
 {
@@ -69,22 +67,22 @@ g = Rectangle
 
 screen:add( g )
 
-slide = physics:Body{ source = g , friction = 0.8 }
+slide = physics:Body{ source = g , friction = 0.8 , type = "static" }
 
 -------------------------------------------------------------------------------
 -- Add invisible bumpers on the left, right and bottom of the screen
 
 g = Group{ size = { 2 , screen.h } , position = { -2 , 0 } }
 screen:add( g )
-physics:Body{ source = g }
+physics:Body{ source = g , type = "static" }
 
 g = Group{ size = { 2 , screen.h } , position = { screen.w , 0 } }
 screen:add( g )
-physics:Body{ source = g }
+physics:Body{ source = g , type = "static" }
 
 g = Group{ size = { screen.w , 2 } , position = { 0 , screen.h } }
 screen:add( g )
-physics:Body{ source = g }
+physics:Body{ source = g , type = "static" }
 
 -------------------------------------------------------------------------------
 
@@ -129,13 +127,13 @@ else
         local p = body.position
         local vx , vy = unpack( body.linear_velocity )
         if key == up and vy > -2 then
-            body:apply_linear_impulse( 0 , -8 , p[ 1 ] , p[ 2 ] )
+            body:apply_linear_impulse( { 0 , -8 } , p )
         elseif key == down then
-            body:apply_force( 0 , 600 , p[ 1 ] , p[ 2 ] )
+            body:apply_force( { 0 , 600 } , p )
         elseif key == left then
-            body:apply_force( -600 , 0 , p[ 1 ] , p[ 2 ] )
+            body:apply_force( { -600 , 0 } , p )
         elseif key == right then
-            body:apply_force( 600 , 0 , p[ 1 ] , p[ 2 ] )
+            body:apply_force( { 600 , 0 } , p )
         elseif key == space then
             body:apply_torque( -100 )
         end
