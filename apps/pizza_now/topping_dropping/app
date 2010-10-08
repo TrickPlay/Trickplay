@@ -1,9 +1,0 @@
-app=
-{
-    id          = "com.trickplay.pizza_now",
-    release     = "1",
-    version     = "0.1a",
-    name        = "Pizza Now",
-    author      = "Trickplay, Jr.",
-    copyright   = "© Trickplay Inc."
-}
