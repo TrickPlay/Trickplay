@@ -31,8 +31,7 @@ TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
-#TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
-
+TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -51,6 +50,18 @@ if (TP_CONTROLLER_DISCOVERY_MDNS)
 	
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
+
+#------------------------------------------------------------------------------
+
+if (NOT TP_CLUTTER_BACKEND_EGL)
+
+	TP_FIND_INCLUDE( readline/readline.h ENGINE_INCLUDE_DIRS )
+	
+	list( APPEND ENGINE_LIBRARY_NAMES readline )
+	
+	add_definitions( -DTP_HAS_READLINE=1 ) 	
+
+endif (NOT TP_CLUTTER_BACKEND_EGL)
 
 #------------------------------------------------------------------------------
 
@@ -99,12 +110,6 @@ list(
     ssl crypto cares curl
 
     #--------------
-    # tokyo
-    #--------------
-    
-    tokyocabinet
-    
-    #--------------
     # sqlite
     #--------------
     
@@ -127,8 +132,9 @@ list(
     # Make sure this one comes before the clutter libraries, otherwise
     # we will get json symbols from them - and those are outdated
     
-    json-glib-1.0    
-        
+    json-glib-1.0
+    
+    uriparser           
 )
 
 #--------------
@@ -184,27 +190,19 @@ endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 
 if (TP_CLUTTER_BACKEND_EGL)
 
-    list(
-        APPEND ENGINE_LIBRARY_NAMES
-        
-        clutter-eglnative-1.0
-    )
+    list( APPEND ENGINE_LIBRARY_NAMES clutter-eglnative-1.0 )
 
 else (TP_CLUTTER_BACKEND_EGL)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    list(
-	APPEND ENGINE_LIBRARY_NAMES
-
-	clutter-glx-1.0
-    )
-else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    list(
-        APPEND ENGINE_LIBRARY_NAMES
-        
-        clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes
-    )
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	
+	    list( APPEND ENGINE_LIBRARY_NAMES clutter-glx-1.0 )
+	    
+	else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	
+	    list( APPEND ENGINE_LIBRARY_NAMES clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes )
+	    
+	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 endif (TP_CLUTTER_BACKEND_EGL)
 
@@ -273,7 +271,6 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/timer.lb
     
     ${BINDINGS_SRC}/url_request.lb
-    ${BINDINGS_SRC}/local_hash.lb
     ${BINDINGS_SRC}/app.lb
     ${BINDINGS_SRC}/system.lb
     ${BINDINGS_SRC}/settings.lb
@@ -303,6 +300,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_interval.lb
     
     ${BINDINGS_SRC}/socket.lb
+    
+    ${BINDINGS_SRC}/uri.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
