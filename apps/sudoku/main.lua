@@ -29,6 +29,69 @@ screen:add(
 	         sparkle_base
 
 )
+local red_is_on = true
+local red_board = Group{}
+local red_blox = 
+{
+	{
+		Group{},
+		Group{x= red.w   + 30},
+		Group{x= red.w*2 + 30*2}
+	},
+	{
+		Group{                   y= red.h   + 30},
+		Group{x= red.w   + 30,   y= red.h   + 30},
+		Group{x= red.w*2 + 30*2, y= red.h   + 30}
+	},
+	{
+		Group{                   y= red.h*2 + 30*2},
+		Group{x= red.w   + 30,   y= red.h*2 + 30*2},
+		Group{x= red.w*2 + 30*2, y= red.h*2 + 30*2}
+	}
+}
+for i = 1,#red_blox do    for j=1,#red_blox[i] do
+
+		red_blox[i][j]:add(Clone{source=red})
+
+end                        end
+
+local blue_board = Group{}
+local blue_blox = 
+{
+	{
+		Group{opacity = 0},
+		Group{opacity = 0, x= blue.w   + 30},
+		Group{opacity = 0, x= blue.w*2 + 30*2}
+	},
+	{
+		Group{opacity = 0,                     y= blue.h   + 30},
+		Group{opacity = 0, x= blue.w   + 30,   y= blue.h   + 30},
+		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30}
+	},
+	{
+		Group{opacity = 0,                     y= blue.h*2 + 30*2},
+		Group{opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2},
+		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
+	}
+}
+for i = 1,#blue_blox do    for j=1,#blue_blox[i] do
+
+		blue_blox[i][j]:add(Clone{source=blue})
+
+end                        end
+
+local bg_red  = Image{src="assets/bg_red.jpg"}
+local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
+screen:add(bg_red,bg_blue,red_board,blue_board, Image{src="assets/logo.png",x=40,y=40})
+for i=1,3 do
+	blue_board:add( unpack(blue_blox[i]) )
+	red_board:add(  unpack( red_blox[i]) )
+end
+red_board.anchor_point  = {  red_board.w/2,  red_board.h/2 }
+red_board.position      = {     screen.w/2,     screen.h/2 }
+blue_board.anchor_point = { blue_board.w/2, blue_board.h/2 }
+blue_board.position     = {     screen.w/2,     screen.h/2 }
+
 
 --sparkle:add(sparkle_base)
 --sparkle.clip = {0,0,sparkle_base.w/5,sparkle_base.h}
@@ -250,7 +313,7 @@ right_menu.anchor_point = {right_menu.w/2,0}
 right_menu.position = {screen.w - right_menu.w/2+80,red.h   + 90}
 local left_menu = Group{z=1}
 local left_list = {
-	FocusableImage({0,0},"New Puzzle", 
+	FocusableImage({blank_button_off.w/2,blank_button_off.h/2},"New Puzzle", 
 		blank_button_off,blank_button_on,
 		function() 
 ---[[
@@ -259,7 +322,12 @@ local left_list = {
 			--game = Game(BoardGen(num_givens))
 			--ind = {r=1,c=1}
 --]]
-			flip_board()
+			if red_is_on then
+				game = Game(BoardGen(num_givens),nil,blue_blox)
+			else
+				game = Game(BoardGen(num_givens),nil,red_blox)
+			end
+			dolater(flip_board)
 
 --[[
 			splash.opacity = 255
@@ -269,21 +337,21 @@ local left_list = {
 --]]
 		end),
 
-	FocusableImage({0,blank_button_off.h+8},"Help", 
+	FocusableImage({blank_button_off.w/2,blank_button_off.h/2+blank_button_off.h+8},"Help", 
 		blank_button_off,blank_button_on,
 		function() 
 			help.opacity = 255
 			help:raise_to_top()
 			focus = "HELP"
 		end),
-	FocusableImage({0,2*(blank_button_off.h+8)},"Settings", 
+	FocusableImage({blank_button_off.w/2,blank_button_off.h/2+2*(blank_button_off.h+8)},"Settings", 
 		blank_button_off,blank_button_on,
 		function() 
 
 		end),
 
 
-	FocusableImage({0,3*(blank_button_off.h+8)},"Save & Exit", 
+	FocusableImage({blank_button_off.w/2,blank_button_off.h/2+3*(blank_button_off.h+8)},"Save & Exit", 
 		blank_button_off,blank_button_on,
 		function() 
 			game:save()
@@ -291,76 +359,13 @@ local left_list = {
 		end)
 }
 left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group,left_list[4].group )
-left_menu.anchor_point = {left_menu.w/2,0}
-left_menu.position = {left_menu.w/2+260,red.h   + 90}
+left_menu.anchor_point = {left_menu.w/2,left_menu.h/2}
+left_menu.position = {(screen.w/2 - red.w*3/2)/2,screen.h/2+18}
 
 
 local left_index = 1
 local right_index = 1
 
-
-local red_is_on = true
-local red_board = Group{}
-local red_blox = 
-{
-	{
-		Group{},
-		Group{x= red.w   + 30},
-		Group{x= red.w*2 + 30*2}
-	},
-	{
-		Group{                   y= red.h   + 30},
-		Group{x= red.w   + 30,   y= red.h   + 30},
-		Group{x= red.w*2 + 30*2, y= red.h   + 30}
-	},
-	{
-		Group{                   y= red.h*2 + 30*2},
-		Group{x= red.w   + 30,   y= red.h*2 + 30*2},
-		Group{x= red.w*2 + 30*2, y= red.h*2 + 30*2}
-	}
-}
-for i = 1,#red_blox do    for j=1,#red_blox[i] do
-
-		red_blox[i][j]:add(Clone{source=red})
-
-end                        end
-
-local blue_board = Group{}
-local blue_blox = 
-{
-	{
-		Group{opacity = 0},
-		Group{opacity = 0, x= blue.w   + 30},
-		Group{opacity = 0, x= blue.w*2 + 30*2}
-	},
-	{
-		Group{opacity = 0,                     y= blue.h   + 30},
-		Group{opacity = 0, x= blue.w   + 30,   y= blue.h   + 30},
-		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30}
-	},
-	{
-		Group{opacity = 0,                     y= blue.h*2 + 30*2},
-		Group{opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2},
-		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
-	}
-}
-for i = 1,#blue_blox do    for j=1,#blue_blox[i] do
-
-		blue_blox[i][j]:add(Clone{source=blue})
-
-end                        end
-
-local bg_red  = Image{src="assets/bg_red.jpg"}
-local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
-screen:add(bg_red,bg_blue,red_board,blue_board, Image{src="assets/logo.png",x=40,y=40})
-for i=1,3 do
-	blue_board:add( unpack(blue_blox[i]) )
-	red_board:add(  unpack( red_blox[i]) )
-end
-red_board.anchor_point  = {  red_board.w/2,  red_board.h/2 }
-red_board.position      = {     screen.w/2,     screen.h/2 }
-blue_board.anchor_point = { blue_board.w/2, blue_board.h/2 }
-blue_board.position     = {     screen.w/2,     screen.h/2 }
 
 function flip_board()
 	local timeline = Timeline
@@ -454,9 +459,24 @@ end
 
 		end              end
 
-		if red_is_on then red_is_on = false else red_is_on = true end
+		if red_is_on then 
+			for r = 1,3 do   for c = 1,3 do
+				red_blox[r][c]:clear()
+				red_blox[r][c]:add(Clone{source=red})
+			end              end
+			
+			red_is_on = false 
+		else 
+			for r = 1,3 do   for c = 1,3 do
+				blue_blox[r][c]:clear()
+				blue_blox[r][c]:add(Clone{source=blue})
+			end              end
+
+			red_is_on = true 
+		end
 		old_bg.opacity =   0
 		new_bg.opacity = 255
+		
 	end
 	timeline:start()
 end
@@ -554,15 +574,7 @@ local splash_list =
 		blank_button_off,blank_button_on,
 		function() 
 			splash.opacity = 0			
-			if settings.givens and settings.guesses then
-				for r = 1,9 do     for c = 1,9 do
-					--game.grid_of_groups[r][c]:clear()
-					--game.grid_of_groups[r][c]:unparent()
-					--game.grid_of_groups[r][c] = nil
 
-				end                end
-
-			end
 			if red_is_on then
 				game = Game(BoardGen(num_givens),nil,blue_blox)
 			else
@@ -572,7 +584,7 @@ local splash_list =
 			ind = {r=1,c=1}
 			focus = "GAME_BOARD"
 			selector.opacity = 255
-			flip_board()
+			dolater(flip_board)
 		end)
 
 	
