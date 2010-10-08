@@ -349,7 +349,7 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
 
                 if ( server->delegate )
                 {
-                    server->delegate->connection_data_received( connection, s );
+                    server->delegate->connection_data_received( connection, s , bytes_read );
                 }
 
                 s = e + 1;
@@ -364,7 +364,7 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
         }
         else if ( server->delegate )
         {
-            server->delegate->connection_data_received( connection, buffer );
+            server->delegate->connection_data_received( connection, buffer , bytes_read );
         }
 
         // Read again
