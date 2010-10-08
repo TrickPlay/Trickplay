@@ -28,7 +28,7 @@ function Popup:new(args)
                 group = args.group or wingroup,
                 background = winbox or nil,
                 text = wintext or nil,
-                time = args.time or 3,
+                time = args.time or 3000,
                 fadeSpeed = args.fadeSpeed or 200,
                 opacity = args.opacity or 220,
                 draw = args.draw or nil,
@@ -201,7 +201,7 @@ function createRedArrow()
                 
                 Popup:new{
                         group = a,
-                        time = 2,
+                        time = 2000,
                         opacity = 255,
                         on_fade_out = function()
                                 screen:remove(a)
@@ -225,12 +225,12 @@ function endGamePopup(status, text)
         end
 			local a = Group{x=0, y=0, opacity = 0}
 			a:add( AssetLoader:getImage( "win", {y = 500, x = 750} ) )
-			Popup:new{group = a, fadeSpeed = 400, time=2.0, opacity = 255}
+			Popup:new{group = a, fadeSpeed = 400, time=2000, opacity = 255}
 		
         local a = Popup:new{
 					 group = a,
 --                text = text,
-                time = 4,
+                time = 4000,
                 fadeSpeed = 500,
                 draw = true,
                 on_fade_out = function()

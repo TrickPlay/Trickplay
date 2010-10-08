@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control
+END
+ControlResponse.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/ControlResponse.java
+END
+Control.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/Control.java
+END
+ActionListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/ActionListener.java
+END
+QueryResponse.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/QueryResponse.java
+END
+RenewSubscriber.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/RenewSubscriber.java
+END
+ActionRequest.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/ActionRequest.java
+END
+ControlRequest.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/ControlRequest.java
+END
+QueryListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/QueryListener.java
+END
+ActionResponse.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/ActionResponse.java
+END
+QueryRequest.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svnroot/cgupnpjava/!svn/ver/56/trunk/cyberlink/upnp-stack/src/main/java/org/cybergarage/upnp/control/QueryRequest.java
+END

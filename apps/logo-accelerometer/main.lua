@@ -9,7 +9,7 @@ mediaplayer:load('background.mp4')
 plane = Image{ src="plane.png" , position = { screen.w + 10 , 0 } }
 screen:add(plane)
 
-plane_timer=Timer( 8 )
+plane_timer=Timer( 8000 )
 
 function plane_timer.on_timer()
     plane.position={screen.w+10,math.random(0,screen.h-plane.h)}

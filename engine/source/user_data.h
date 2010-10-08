@@ -171,14 +171,14 @@ struct UserData
     }
 
     //.........................................................................
-#if 0
+
     inline static UserData * get_from_client( gpointer client )
     {
         gpointer master = g_hash_table_lookup( get_client_map() , client );
 
         return master ? UserData::get( G_OBJECT( master ) ) : 0;
     }
-#endif
+
     //.........................................................................
     // Pushes the Lua proxy onto the stack - whether it is weak or strong. If
     // it is weak and is about to be finalized, this can push a nil.
