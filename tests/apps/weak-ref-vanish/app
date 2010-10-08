@@ -1,9 +1,0 @@
-app=
-{
-    id          = "com.trickplay.tests.weak-ref-vanish",
-    release     = "1",
-    version     = "1.0",
-    name        = "Weak ref vanish",
-    author      = "Darren Yin",
-    copyright   = "Trickplay Inc."
-}
