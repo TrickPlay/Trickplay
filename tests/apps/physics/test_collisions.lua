@@ -4,10 +4,12 @@ math.randomseed( os.time() )
 -------------------------------------------------------------------------------
 -- Add invisible walls
 
-physics:Body{ size = { 2 , screen.h } , position = { -1 , screen.h / 2 } }
-physics:Body{ size = { 2 , screen.h } , position = { screen.w + 1 , screen.h / 2 } }
-physics:Body{ size = { screen.w , 2 } , position = { screen.w / 2 , -1 } }
-physics:Body{ size = { screen.w , 2 } , position = { screen.w / 2 , screen.h + 1 } }
+local lb = physics:Body{ type = "static" , source = Group{ size = { 2 , screen.h } , position = { -2 , 0 } } }
+local rb = physics:Body{ type = "static" , source = Group{ size = { 2 , screen.h } , position = { screen.w , 0 } } }
+local tb = physics:Body{ type = "static" , source = Group{ size = { screen.w , 2 } , position = { 0 , -2 } } }
+local bb = physics:Body{ type = "static" , source = Group{ size = { screen.w , 2 } , position = { 0 , screen.h } } }
+
+screen:add( lb.source , rb.source , tb.source , bb.source )
 
 -------------------------------------------------------------------------------
 
@@ -40,18 +42,17 @@ local function make_ball( color , filter )
             }
         },
         shape = physics:Circle( BALL_SIZE / 2 ),
-        dynamic = true,
         density = 1,
         friction = 0,
         bounce = 1,
-        filter = filter
+        filter = filter,
+
+        -- Give the ball an initial velocity and some damping
+    
+        linear_damping = 0.01,    
+        linear_velocity = { math.random( 5 , 10 ) , math.random( 5 , 10 ) },
     }
     
-    -- Give the ball an initial velocity and some damping
-    
-    ball.linear_damping = 0.01
-    
-    ball.linear_velocity = { math.random( 5 , 10 ) , math.random( 5 , 10 ) }
     
     screen:add( ball.source )
     
@@ -113,16 +114,20 @@ local caption = Text
 
 screen:add( caption )
 
-caption = physics:Body{ source = caption , dynamic = true , density = 10 , friction = 0 , bounce = 1 }
+caption = physics:Body{ source = caption , density = 10 , friction = 0 , bounce = 1 }
 
-function physics.on_begin_contact( physics , point , body_a , fixture_a , body_b , fixture_b )
+function physics.on_begin_contact( physics , contact )
+
+    if not contact.has_body[ caption.handle ] then
+        return
+    end
 
     local other
     
-    if body_a == caption.handle then
-        other = body_b
-    elseif body_b == caption.handle then
-        other = body_a
+    if contact.bodies[ 1 ] == caption.handle then
+        other = contact.bodies[ 2 ]
+    elseif contact.bodies[ 2 ] == caption.handle then
+        other = contact.bodies[ 1 ]
     end
     
     if other then
@@ -166,7 +171,8 @@ else
             vx = math.abs( vx )
             vy = math.abs( vy )
             if ( vx == 0 or vy == 0 ) then
-                ball:apply_force( ball.position[ 1 ] , ball.position[ 2 ] , math.random( 2 , 6 ) , math.random( 2 , 6 ) )
+                print( "DEAD BALL!" )
+                ball:apply_linear_impulse( { math.random( 2 , 6 ) , math.random( 2 , 6 ) } , ball.position )
             end
         end
         

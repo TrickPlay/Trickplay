@@ -14,6 +14,10 @@ static Debug_ON plog;
 
 World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
 :
+    begin_contact_attached( false ),
+    end_contact_attached( false ),
+    pre_solve_attached( false ),
+    post_solve_attached( false ),
     ppm( _pixels_per_meter ),
     L( _L ),
     world( b2Vec2( 0.0f , 10.0f ) , true ),
@@ -386,34 +390,178 @@ b2FixtureDef World::create_fixture_def( int properties )
     return fd;
 }
 
+//.............................................................................
+
+void World::push_contact( b2Contact * contact )
+{
+    g_assert( contact );
+
+    b2WorldManifold wm;
+
+    contact->GetWorldManifold( & wm );
+
+    b2Fixture * fa = contact->GetFixtureA();
+    b2Fixture * fb = contact->GetFixtureB();
+
+    int fixture_a_handle = fa ? GPOINTER_TO_INT( fa->GetUserData() ) : 0;
+    int fixture_b_handle = fb ? GPOINTER_TO_INT( fb->GetUserData() ) : 0;
+
+    b2Body * ba = fa ? fa->GetBody() : 0;
+    b2Body * bb = fb ? fb->GetBody() : 0;
+
+    Body * ia = ba ? Body::get_from_body( ba ) : 0;
+    Body * ib = bb ? Body::get_from_body( bb ) : 0;
+
+    int body_a_handle = ia ? ia->handle : 0;
+    int body_b_handle = ib ? ib->handle : 0;
+
+    lua_newtable( L );
+    int t = lua_gettop( L );
+
+    lua_createtable( L , 2 , 0 );
+    lua_pushnumber( L , world_to_screen( wm.points[ 0 ].x ) );
+    lua_rawseti( L , -2  , 1 );
+    lua_pushnumber( L , world_to_screen( wm.points[ 0 ].y ) );
+    lua_rawseti( L , -2  , 2 );
+    lua_setfield( L , t , "point" );
+
+    lua_createtable( L , 2 , 0 );
+    lua_pushinteger( L , fixture_a_handle );
+    lua_rawseti( L , -2 , 1 );
+    lua_pushinteger( L , fixture_b_handle );
+    lua_rawseti( L , -2 , 2 );
+    lua_setfield( L , t , "fixtures" );
+
+    lua_createtable( L , 2 , 0 );
+    lua_pushboolean( L , true );
+    lua_rawseti( L , -2 , fixture_a_handle );
+    lua_pushboolean( L , true );
+    lua_rawseti( L , -2 , fixture_b_handle );
+    lua_setfield( L , t , "has_fixture" );
+
+    lua_createtable( L , 2 , 0 );
+    lua_pushinteger( L , body_a_handle );
+    lua_rawseti( L , -2 , 1 );
+    lua_pushinteger( L , body_b_handle );
+    lua_rawseti( L , -2 , 2 );
+    lua_setfield( L , t , "bodies" );
+
+    lua_createtable( L , 2 , 0 );
+    lua_pushboolean( L , true );
+    lua_rawseti( L , -2 , body_a_handle );
+    lua_pushboolean( L , true );
+    lua_rawseti( L , -2 , body_b_handle );
+    lua_setfield( L , t , "has_body" );
+
+    lua_pushboolean( L , contact->IsTouching() );
+    lua_setfield( L , t , "touching" );
+}
+
+void World::push_contact_list( b2Contact * contact )
+{
+    if ( ! contact )
+    {
+        lua_pushnil( L );
+        return;
+    }
+
+    lua_newtable( L );
+
+    int i = 1;
+
+    for( b2Contact * c = contact; c ; c = c->GetNext() , ++i )
+    {
+        push_contact( c );
+        lua_rawseti( L , -2 , i );
+    }
+}
+
+void World::push_contact_list( b2ContactEdge * contact_edge )
+{
+    if ( ! contact_edge )
+    {
+        lua_pushnil( L );
+        return;
+    }
+
+    lua_newtable( L );
+
+    int i = 1;
+
+    for ( b2ContactEdge * e = contact_edge; e ; e = e->next , ++i )
+    {
+        push_contact( e->contact );
+        lua_rawseti( L , -2 , i );
+    }
+}
 
 //=============================================================================
 // ContactListener callbacks
 
 void World::BeginContact( b2Contact * contact )
 {
-    // TODO:
+    if ( ! begin_contact_attached )
+    {
+        return;
+    }
+
+    push_contact( contact );
+
+    UserData::invoke_callback( this , "on_begin_contact" , 1 , 0 , L );
 }
 
 //.............................................................................
 
 void World::EndContact( b2Contact * contact )
 {
-    // TODO:
+    if ( ! end_contact_attached )
+    {
+        return;
+    }
+
+    push_contact( contact );
+
+    UserData::invoke_callback( this , "on_end_contact" , 1 , 0 , L );
 }
 
 //.............................................................................
 
 void World::PreSolve( b2Contact * contact , const b2Manifold * oldManifold )
 {
-    // TODO:
+    if ( ! pre_solve_attached )
+    {
+        return;
+    }
+
+    push_contact( contact );
+
+    int called = UserData::invoke_callback( this , "on_pre_solve_contact" , 1 , 1 , L );
+
+    if ( called )
+    {
+        if ( lua_isboolean( L , -1 ) && lua_toboolean( L , -1 ) )
+        {
+            contact->SetEnabled( false );
+        }
+
+        lua_pop( L , 1 );
+    }
 }
 
 //.............................................................................
 
 void World::PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
 {
-    // TODO:
+    // TODO : should we pass the impulse too?
+
+    if ( ! post_solve_attached )
+    {
+        return;
+    }
+
+    push_contact( contact );
+
+    UserData::invoke_callback( this , "on_post_solve_contact" , 1 , 0 , L );
 }
 
 //.............................................................................
