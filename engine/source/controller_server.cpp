@@ -369,7 +369,7 @@ void ControllerServer::connection_closed( gpointer connection )
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::connection_data_received( gpointer connection, const char * line )
+void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read )
 {
     ConnectionMap::iterator it = connections.find( connection );
 
