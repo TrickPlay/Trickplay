@@ -330,6 +330,13 @@ interface Body [[ Physics::Body * ]]
             self->body->SetFixedRotation( fixed_rotation );
         ]];
 
+	readonly table contacts
+        [[
+            self->check( L );
+
+            self->world->push_contact_list( self->body->GetContactList() );
+        ]];
+
 	synchronize( )
         [[
             self->check( L );
@@ -687,7 +694,35 @@ global physics [[ Physics::World * ]]
             self->ppm = pixels_per_meter;
         ]];
 
-	start( int velocity_iterations = 6, int position_iterations = 2 )
+    table gravity
+        [[
+            b2Vec2 g( self->get_world()->GetGravity() );
+            lua_newtable( L );
+            lua_pushnumber( L , g.x );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , g.y );
+            lua_rawseti( L , -2 , 2 );
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti( L , 2 , 1 );
+            lua_rawgeti( L , 2 , 2 );
+            b2Vec2 g( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
+            self->get_world()->SetGravity( g );
+            lua_pop( L , 2 );
+        ]];
+
+    readonly table contacts
+        [[
+            self->push_contact_list( self->get_world()->GetContactList() );
+        ]];
+
+    readonly bool running
+        [[
+            running = self->running();
+        ]];
+
+    start( int velocity_iterations = 6, int position_iterations = 2 )
         [[
             self->start( velocity_iterations , position_iterations );
         ]];
@@ -700,24 +735,6 @@ global physics [[ Physics::World * ]]
 	step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
 		[[
             self->step( time_step , velocity_iterations , position_iterations );
-		]]; 
-		
-	table gravity
-		[[
-			b2Vec2 g( self->get_world()->GetGravity() );
-			lua_newtable( L );
-			lua_pushnumber( L , g.x );
-			lua_rawseti( L , -2 , 1 );
-			lua_pushnumber( L , g.y );
-			lua_rawseti( L , -2 , 2 );
-		]]
-		[[
-            luaL_checktype(L,2,LUA_TTABLE);
-            lua_rawgeti( L , 2 , 1 );
-            lua_rawgeti( L , 2 , 2 );
-            b2Vec2 g( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
-            self->get_world()->SetGravity( g );
-            lua_pop( L , 2 );
 		]];
 		
 	Body Body( table properties )
@@ -864,8 +881,26 @@ global physics [[ Physics::World * ]]
     #..........................................................................
 
 
-	callback on_begin_contact( table point , int body_a_handle , int fixture_a_handle , int body_b_handle , int fixture_b_handle );
+	callback on_begin_contact( table contact )
+        [[
+            self->begin_contact_attached = on_begin_contact != 0;
+        ]];
 
-    callback on_end_contact( table point , int body_a_handle , int fixture_a_handle , int body_b_handle , int fixture_b_handle );
+    callback on_end_contact( table contact )
+        [[
+            self->end_contact_attached = on_end_contact != 0;
+        ]];
+
+
+    callback on_pre_solve_contact( table contact )
+        [[
+            self->pre_solve_attached = on_pre_solve_contact != 0;
+        ]];
+
+
+    callback on_post_solve_contact( table contact )
+        [[
+            self->post_solve_attached = on_post_solve_contact != 0;
+        ]];
 
 }

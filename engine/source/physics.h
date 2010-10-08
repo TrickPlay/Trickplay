@@ -50,6 +50,11 @@ namespace Physics
 
         void step( float32 time_step , int velocity_iterations , int position_iterations );
 
+        inline bool running() const
+        {
+            return idle_source != 0;
+        }
+
         //.........................................................................
 
         inline static float32 degrees_to_radians( float32 degrees )
@@ -80,6 +85,22 @@ namespace Physics
         //.........................................................................
 
         b2FixtureDef create_fixture_def( int properties );
+
+        //.........................................................................
+
+        void push_contact( b2Contact * contact );
+
+        void push_contact_list( b2Contact * contact );
+
+        void push_contact_list( b2ContactEdge * contact_edge );
+
+        bool begin_contact_attached;
+
+        bool end_contact_attached;
+
+        bool pre_solve_attached;
+
+        bool post_solve_attached;
 
         //.........................................................................
 

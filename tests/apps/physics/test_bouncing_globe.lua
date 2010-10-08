@@ -72,6 +72,14 @@ screen:add( right_bumper.source , left_bumper.source )
 
 -------------------------------------------------------------------------------
 
+local collision = Rectangle{ color = "FF0000" , size = { 10 , 10 } , anchor_point = { 5 , 5 } }
+
+screen:add( collision )
+
+collision:hide()
+
+-------------------------------------------------------------------------------
+
 screen:show()
 
 if false then
@@ -85,6 +93,23 @@ if false then
     end
 
 else
+
+    function screen.on_key_down( screen , key )
+        if key == keys.space then
+            if physics.running then
+                physics:stop()
+            else
+                physics:start()
+            end
+        end
+    end
+    
+    function physics:on_begin_contact( contact )
+        --dumptable( contact )
+        collision.position = contact.point
+        collision:show()
+        --dumptable( globe.linear_velocity )
+    end
 
     physics:start()
     
