@@ -12,9 +12,12 @@ if not ASSERTIONS_ENABLED then
    end
 end
 
-GRID_HEIGHT = 8     -- y value range
-GRID_WIDTH = 15     -- x value range
+GRID_HEIGHT = 19     -- y value range
+GRID_WIDTH = 30     -- x value range
 GRID_DEPTH = 5      -- z value range
+
+MAX_X = 15
+MAX_Y = 8
 
 Directions = {
    RIGHT = {1,0},
