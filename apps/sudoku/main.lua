@@ -57,76 +57,133 @@ function start_sparkle(x,y, num_sparkles)
 	local stage_start = {}
 	local stage_speed = {}
 	local o_peak      = {}
-	local o_t_end     = {}
+	local t_start     = {}
 	local t_peak      = {}
+	local t_end       = {}
 
-	function timeline.on_started()
-		for i = 1, num_sparkles do
-			sparkles[i] = Group{opacity=0}
-			sparkles_strip[i] = Clone{source = sparkle_base}
-			sparkles[i].clip = {0,0,sparkles_strip[i].w/5,sparkles_strip[i].h}
-			sparkles[i]:add(sparkles_strip[i])
-
-			local x_dir = math.random(85,115)/100
-			x_start[i] = math.random(-2,2)+x
-			y_start[i] = math.random(-2,2)+y
-			x_peak[i]  = x_start[i]*x_dir
-			y_peak[i]  = y_start[i]-80+math.random(-10,10)
-			x_end[i]   = x_peak[i]*x_dir
-			y_end[i]   = y_peak[i]+90+math.random(-10,10)
-
-			--scale[i] = math.random(8,9)/10
-			--sparkles[i].scale={scale[i],scale[i]}
-
-			rot_start[i]   = math.random(   0, 359) --initial rotation
-			rot_speed[i]   = math.random( 500, 700) --num of milliseconds for a rotation
-			stage_start[i] = math.random(   1,   5) --initial start stage
-			stage_speed[i] = math.random(  50, 100) --num of milliseconds between switches
-			
-			o_peak[i] = math.random(170,255)
-			o_t_end[i] = math.random(0,300) -- when, during the final 200 milliseconds,
-											-- the opacity goes to 0
-			t_peak[i] = 500 + math.random(-100,100)
-			screen:add(sparkles[i])
-			sparkles[i]:raise_to_top()
-		end
-	end
+	--function timeline.on_started()
+		for r = 1,4 do
+			sparkles[r] = {}
+			sparkles_strip[r] = {}
 	
-	function timeline.on_new_frame(t,msecs,p)
-		--local sparkle_stage = math.ceil(p*5)
-		--sparkle_base.x = -1*(stage-1)*sparkle_base.w/5
-		--sparkle.z_rotation = {360*p,sparkle_base.w/(5*2),sparkle_base.h/2}
+			x_start[r] = {}
+			y_start[r] = {}
+			x_peak[r]  = {}
+			y_peak[r]  = {}
+			x_end[r]   = {}
+			y_end[r]   = {}
+	
+			scale[r]  = {}
+			rot_start[r]   = {}
+			rot_speed[r]   = {}
+			stage_start[r] = {}
+			stage_speed[r] = {}
+			o_peak[r]      = {}
+			t_start[r]     = {}
+			t_peak[r]      = {}
+			t_end[r]       = {}
 
-		local prog
-		local stage
-		for i = 1,num_sparkles do
-			stage = math.floor(msecs/stage_speed[i] + stage_start[i])%5+1
+			for c = 1,4 do
+				sparkles[r][c] = {}
+				sparkles_strip[r][c] = {}
+	        
+				x_start[r][c] = {}
+				y_start[r][c] = {}
+				x_peak[r][c]  = {}
+				y_peak[r][c]  = {}
+				x_end[r][c]   = {}
+				y_end[r][c]   = {}
+	        
+				scale[r][c]  = {}
+				rot_start[r][c]   = {}
+				rot_speed[r][c]   = {}
+				stage_start[r][c] = {}
+				stage_speed[r][c] = {}
+				o_peak[r][c]      = {}
+				t_start[r][c]     = {}
+				t_peak[r][c]      = {}
+				t_end[r][c]       = {}
 
-			if msecs < 250 then
-				sparkles[i].opacity = msecs/100 * o_peak[i]
+				for i = 1, num_sparkles do
+					sparkles[r][c][i] = Group{opacity=0}
+					sparkles_strip[r][c][i] = Clone{source = sparkle_base}
+					sparkles[r][c][i].clip = {0,0,sparkles_strip[r][c][i].w/5,sparkles_strip[r][c][i].h}
+					sparkles[r][c][i]:add(sparkles_strip[r][c][i])
+                
+					local x_dir = math.random(85,115)/100
+					x_start[r][c][i] = math.random(-2,2)+x[c]
+					sparkles[r][c][i].x = x_start[r][c][i]
+					y_start[r][c][i] = math.random(-2,2)+y[r]
+					sparkles[r][c][i].y = y_start[r][c][i]
+					x_peak[r][c][i]  = x_start[r][c][i]*x_dir
+					y_peak[r][c][i]  = y_start[r][c][i]-80+math.random(-10,10)
+					x_end[r][c][i]   = x_peak[r][c][i]*x_dir
+					y_end[r][c][i]   = y_peak[r][c][i]+90+math.random(-10,10)
+                
+					--scale[i] = math.random(8,9)/10
+					--sparkles[i].scale={scale[i],scale[i]}
+                
+					rot_start[r][c][i]   = math.random(   0, 359) --initial rotation
+					rot_speed[r][c][i]   = math.random( 500, 700) --num of milliseconds for a rotation
+					stage_start[r][c][i] = math.random(   1,   5) --initial start stage
+					stage_speed[r][c][i] = math.random(  50, 100) --num of milliseconds between switches
+					
+					o_peak[r][c][i]  = math.random(170,255)
+					t_start[r][c][i] = math.random(0,300)
+					t_peak[r][c][i]  = 400 + math.random(-100,100)
+					t_end[r][c][i]   = math.random(0,300) -- when, during the final 200 milliseconds,
+													-- the opacity goes to 0
+					screen:add(sparkles[r][c][i])
+					sparkles[r][c][i]:raise_to_top()
+				end
 			end
-			if msecs < t_peak[i] then
-				prog = msecs/t_peak[i]
-				sparkles[i].x = prog*(x_peak[i]-x_start[i]) + x_start[i]
-				sparkles[i].y = prog*(y_peak[i]-y_start[i]) + y_start[i]
-				sparkles_strip[i].x =  -1*(stage-1)*sparkles_strip[i].w/5
-				--sparkles[i].z_rotation = {rot_start[i]+360*(msecs%rot_speed[i]),0,0}
-				
-			elseif msecs < (t.duration - o_t_end[i]) then
-				prog = (msecs-t_peak[i])/(t.duration- o_t_end[i]-t_peak[i])
-				sparkles[i].x = prog*(x_end[i]-x_peak[i]) + x_peak[i]
-				sparkles[i].y = prog*(y_end[i]-y_peak[i]) + y_peak[i]
-				sparkles[i].opacity = (1-prog)*o_peak[i]
-				sparkles_strip[i].x =  -1*(stage-1)*sparkles_strip[i].w/5
-
+		end
+	--end
+	
+		function timeline.on_new_frame(t,msecs,p)
+			--local sparkle_stage = math.ceil(p*5)
+			--sparkle_base.x = -1*(stage-1)*sparkle_base.w/5
+			--sparkle.z_rotation = {360*p,sparkle_base.w/(5*2),sparkle_base.h/2}
+			local prog
+			local stage
+			for r = 1,4 do
+			for c = 1,4 do
+	    	for i = 1,num_sparkles do
+				stage = math.floor(msecs/stage_speed[r][c][i] + stage_start[r][c][i])%5+1
+--[[	
+	    		if msecs < 250 and msecs > t_start[i] then
+					sparkles[i].opacity = msecs/250 * o_peak[i]
+				end
+--]]	
+				if msecs < t_peak[r][c][i] and msecs > t_start[r][c][i] then
+					prog = (msecs-t_start[r][c][i])/(t_peak[r][c][i]-t_start[r][c][i])
+					sparkles[r][c][i].opacity = prog * o_peak[r][c][i]
+					sparkles[r][c][i].x = prog*(x_peak[r][c][i]-x_start[r][c][i]) + x_start[r][c][i]
+					sparkles[r][c][i].y = prog*(y_peak[r][c][i]-y_start[r][c][i]) + y_start[r][c][i]
+					sparkles_strip[r][c][i].x =  -1*(stage-1)*sparkles_strip[r][c][i].w/5
+					--sparkles[i].z_rotation = {rot_start[i]+360*(msecs%rot_speed[i]),0,0}
+					
+				elseif msecs < (t.duration - t_end[r][c][i])and msecs > t_start[r][c][i] then
+					prog = (msecs-t_peak[r][c][i])/(t.duration- t_end[r][c][i]-t_peak[r][c][i])
+					sparkles[r][c][i].x = prog*(x_end[r][c][i]-x_peak[r][c][i]) + x_peak[r][c][i]
+					sparkles[r][c][i].y = prog*(y_end[r][c][i]-y_peak[r][c][i]) + y_peak[r][c][i]
+					sparkles[r][c][i].opacity = (1-prog)*o_peak[r][c][i]
+					sparkles_strip[r][c][i].x =  -1*(stage-1)*sparkles_strip[r][c][i].w/5
+					end
+				end
 			end
 		end
 	end
 	function timeline.on_completed()
+		for r = 1,4 do
+		for c = 1,4 do
+
 		for i=1,num_sparkles do
-			sparkles[i]:clear()
-			sparkles[i]:unparent()
-			sparkles[i] = nil
+			sparkles[r][c][i]:clear()
+			sparkles[r][c][i]:unparent()
+			sparkles[r][c][i] = nil
+end
+end
 		end
 	end
 	timeline:start()
@@ -197,9 +254,10 @@ local left_list = {
 		blank_button_off,blank_button_on,
 		function() 
 ---[[
-			game.board:clear()
-			game = Game(BoardGen(num_givens))
-			ind = {r=1,c=1}
+			--game.board:clear()
+			
+			--game = Game(BoardGen(num_givens))
+			--ind = {r=1,c=1}
 --]]
 			flip_board()
 
@@ -246,40 +304,52 @@ local red_board = Group{}
 local red_blox = 
 {
 	{
-		Clone{source=red},
-		Clone{source=red, x= red.w   + 30},
-		Clone{source=red, x= red.w*2 + 30*2}
+		Group{},
+		Group{x= red.w   + 30},
+		Group{x= red.w*2 + 30*2}
 	},
 	{
-		Clone{source=red,                    y= red.h   + 30},
-		Clone{source=red, x= red.w   + 30,   y= red.h   + 30},
-		Clone{source=red, x= red.w*2 + 30*2, y= red.h   + 30}
+		Group{                   y= red.h   + 30},
+		Group{x= red.w   + 30,   y= red.h   + 30},
+		Group{x= red.w*2 + 30*2, y= red.h   + 30}
 	},
 	{
-		Clone{source=red,                    y= red.h*2 + 30*2},
-		Clone{source=red, x= red.w   + 30,   y= red.h*2 + 30*2},
-		Clone{source=red, x= red.w*2 + 30*2, y= red.h*2 + 30*2}
+		Group{                   y= red.h*2 + 30*2},
+		Group{x= red.w   + 30,   y= red.h*2 + 30*2},
+		Group{x= red.w*2 + 30*2, y= red.h*2 + 30*2}
 	}
 }
+for i = 1,#red_blox do    for j=1,#red_blox[i] do
+
+		red_blox[i][j]:add(Clone{source=red})
+
+end                        end
+
 local blue_board = Group{}
 local blue_blox = 
 {
 	{
-		Clone{source=blue,opacity = 0},
-		Clone{source=blue,opacity = 0, x= blue.w   + 30},
-		Clone{source=blue,opacity = 0, x= blue.w*2 + 30*2}
+		Group{opacity = 0},
+		Group{opacity = 0, x= blue.w   + 30},
+		Group{opacity = 0, x= blue.w*2 + 30*2}
 	},
 	{
-		Clone{source=blue,opacity = 0,                     y= blue.h   + 30},
-		Clone{source=blue,opacity = 0, x= blue.w   + 30,   y= blue.h   + 30},
-		Clone{source=blue,opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30}
+		Group{opacity = 0,                     y= blue.h   + 30},
+		Group{opacity = 0, x= blue.w   + 30,   y= blue.h   + 30},
+		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30}
 	},
 	{
-		Clone{source=blue,opacity = 0,                     y= blue.h*2 + 30*2},
-		Clone{source=blue,opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2},
-		Clone{source=blue,opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
+		Group{opacity = 0,                     y= blue.h*2 + 30*2},
+		Group{opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2},
+		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
 	}
 }
+for i = 1,#blue_blox do    for j=1,#blue_blox[i] do
+
+		blue_blox[i][j]:add(Clone{source=blue})
+
+end                        end
+
 local bg_red  = Image{src="assets/bg_red.jpg"}
 local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
 screen:add(bg_red,bg_blue,red_board,blue_board, Image{src="assets/logo.png",x=40,y=40})
@@ -299,9 +369,10 @@ function flip_board()
 		loop      =  false,
 		direction = "FORWARD"
 	}
+	local stopwatch = Stopwatch()
 	local old_board, new_board, old_bg, new_bg
 	
-	function timeline.on_started()
+	--function timeline.on_started()
 		if red_is_on then
 			old_board =  red_blox
 			new_board = blue_blox
@@ -317,8 +388,12 @@ function flip_board()
 			new_board[r][c].y_rotation = {-180,new_board[r][c].w/2,0}
 		end            end
 
-	end
+	--end
 	function timeline.on_new_frame(t,msecs,prog)
+if stopwatch then
+	print(stopwatch.elapsed)
+	stopwatch = nil
+end
 		old_bg.opacity = 255 * (1-prog)
 		new_bg.opacity = 255 *    prog
 		local stage_i = math.ceil(msecs / 200) --stages 1-15
@@ -346,12 +421,14 @@ function flip_board()
 			-- the old board tiles are at    0
 			-- the new board tiles are at -180
 			else
-				degrees_old = -180
+				degrees_old = 0
 			end					
 			degrees_new = degrees_old - 180
 
-			old_board[r][c].y_rotation = { degrees_old, old_board[r][c].w/2, 0 }
-			new_board[r][c].y_rotation = { degrees_new, new_board[r][c].w/2, 0 }
+			old_board[r][c].y_rotation = { degrees_old, 
+				old_board[r][c].w/2, 0 }
+			new_board[r][c].y_rotation = { degrees_new, 
+				new_board[r][c].w/2, 0 }
 
 			if degrees_old <  135 and degrees_old >  45 then
 				old_board[r][c].opacity = 255 * (1- (degrees_old - 45)/90)
@@ -386,7 +463,7 @@ end
 
 local num_font = "DejaVu Bold Condensed 30px"
 local pencil_menu = Group{y=40,opacity=0,z=1}
-function p_x(i) return 20*i+80 end
+function p_x(i) return 24*i+80 end
 pencil_menu:add(
 	Image{name="bg_up",src="assets/pencil-menu-up.png"},
 	Image{name="bg_dn",src="assets/pencil-menu-down.png",y=15},
@@ -399,12 +476,12 @@ pencil_menu:add(
 	Text{name="7",text="7",font=num_font,color="FFFFFF",x=p_x(7),y=25},
 	Text{name="8",text="8",font=num_font,color="FFFFFF",x=p_x(8),y=25},
 	Text{name="9",text="9",font=num_font,color="FFFFFF",x=p_x(9),y=25},
-	Image{name="clear_on",  src="assets/button_on.png",y=70,x=100},
-	Image{name="clear_off", src="assets/button_off.png",y=70,x=100},
-	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=77,x=115},
-	Image{name="done_on",   src="assets/button_on.png",y=70,x=210},
-	Image{name="done_off",  src="assets/button_off.png",y=70,x=210},
-	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=77,x=225}
+	Image{name="clear_on",  src="assets/button_on.png",y=60,x=100},
+	Image{name="clear_off", src="assets/button_off.png",y=60,x=100},
+	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=67,x=115},
+	Image{name="done_on",   src="assets/button_on.png",y=60,x=210},
+	Image{name="done_off",  src="assets/button_off.png",y=60,x=210},
+	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=67,x=225}
 )
 --[[
 local clock_sec = 50
@@ -464,7 +541,7 @@ screen:add(
 local splash     = Group{z=2}
 local splash_list = 
 {
-	FocusableImage({screen.w/2+800,screen.h/2+700},"Continue Game", 
+	FocusableImage({screen.w/2+800,screen.h/2+800},"Continue Game", 
 		blank_button_off,blank_button_on,
 		function() 
 			splash.opacity = 0			
@@ -473,32 +550,35 @@ local splash_list =
 			selector.opacity = 255
 
 		end),
-	FocusableImage({screen.w/2+1800,screen.h/2+700},"New Medium Game", 
+	FocusableImage({screen.w/2+1800,screen.h/2+800},"New Medium Game", 
 		blank_button_off,blank_button_on,
 		function() 
 			splash.opacity = 0			
 			if settings.givens and settings.guesses then
-				game.board:clear()
+				for r = 1,9 do     for c = 1,9 do
+					--game.grid_of_groups[r][c]:clear()
+					--game.grid_of_groups[r][c]:unparent()
+					--game.grid_of_groups[r][c] = nil
+
+				end                end
+
 			end
-			game = Game(BoardGen(num_givens))
+			if red_is_on then
+				game = Game(BoardGen(num_givens),nil,blue_blox)
+			else
+				game = Game(BoardGen(num_givens),nil,red_blox)
+			end
+			collectgarbage("collect")
 			ind = {r=1,c=1}
 			focus = "GAME_BOARD"
 			selector.opacity = 255
-
+			flip_board()
 		end)
 
 	
 }
 splash:add(
-	Rectangle{
-		color="000000",
-		w=1000,
-		h=500,
-		x=screen.w/2,
-		y=screen.h/2,
-		opacity=180
-	},
-	Image{src="assets/logo.png",x = screen.w/2,y = screen.h/2-100},
+	Image{src="assets/splash-menu.png",x = screen.w/2,y = screen.h/2-100},
 	splash_list[1].group,
 	splash_list[2].group
 )
@@ -712,7 +792,7 @@ function game_on_key_down(k)
 				if ind.r > 9/2 then
 					pencil_menu:find_child("bg_up").opacity=0
 					pencil_menu:find_child("bg_dn").opacity=255
-					pencil_menu.x = selector.x - 115
+					pencil_menu.x = selector.x - 160
 					pencil_menu.y = selector.y - selector.h/2 - 
 					                pencil_menu.h +20
 
@@ -726,7 +806,7 @@ function game_on_key_down(k)
 				else
 					pencil_menu:find_child("bg_up").opacity=255
 					pencil_menu:find_child("bg_dn").opacity=0
-					pencil_menu.x = selector.x - 115
+					pencil_menu.x = selector.x - 160
 					pencil_menu.y = selector.y + selector.h/2-20
 
 					pencil_menu:find_child("clear_on").opacity = 0
@@ -820,7 +900,11 @@ end
 local splash_hor_index = 2
 if settings.givens and settings.guesses then
 
-	game = Game(settings.givens,settings.guesses)
+	if red_is_on then
+		game = Game(settings.givens,settings.guesses,red_blox)
+	else
+		game = Game(settings.givens,settings.guesses,blue_blox)
+	end
 	screen:add(game.board)
 	splash_hor_index = 1
 	splash_list[1]:on_focus()
@@ -989,7 +1073,6 @@ function right_menu_on_key_down(k)
 	if key[k] then key[k]() end
 end
 function screen:on_key_down(k)
-print(focus)
 	local sub_on_key_down = 
 	{
 		["SPLASH"] = function(key_press)
@@ -1010,7 +1093,8 @@ print(focus)
 		end,	
 	}
 	if k == keys.s then
-		start_sparkle(200,200,12)
+		start_sparkle({200,300,400,500,600,700,800,900,1000},
+{200,300,400,500,600,700,800,900,1000},12)
 		return
 	end
 	if sub_on_key_down[focus] then
