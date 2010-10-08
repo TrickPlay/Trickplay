@@ -222,7 +222,7 @@ void Console::connection_accepted( gpointer connection, const char * remote_addr
     g_debug( "ACCEPTED CONSOLE CONNECTION FROM %s", remote_address );
 }
 
-void Console::connection_data_received( gpointer connection, const char * data )
+void Console::connection_data_received( gpointer connection, const char * data , gsize )
 {
     gchar * line = g_strdup( data );
     process_line( line );
