@@ -205,7 +205,7 @@ int World::create_body( int properties , lua_CFunction constructor )
 
     if ( ! fd.shape )
     {
-        box.SetAsBox( screen_to_world( height / 2.0f ) , screen_to_world( width / 2.0f ) );
+        box.SetAsBox( screen_to_world( width / 2.0f ) , screen_to_world( height / 2.0f ) );
 
         fd.shape = & box;
     }
