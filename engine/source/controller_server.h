@@ -5,7 +5,6 @@
 #include "trickplay/controller.h"
 
 #include "common.h"
-#include "mdns.h"
 #include "server.h"
 #include "context.h"
 
@@ -23,6 +22,30 @@ public:
     // Returns true if our listener is up and the mDNS service was established
 
     bool is_ready() const;
+
+    //..........................................................................
+
+    class Discovery
+    {
+    public:
+
+        virtual ~Discovery()
+        {}
+
+        virtual bool is_ready() const = 0;
+
+    protected:
+
+        Discovery()
+        {}
+
+    private:
+
+
+        Discovery( const Discovery & )
+        {}
+    };
+
 
 private:
 
@@ -86,9 +109,11 @@ private:
     };
 
     //..........................................................................
-    // The mDNS instance
+    // The discovery mechanisms
 
-    std::auto_ptr<MDNS> mdns;
+    std::auto_ptr<Discovery> discovery_mdns;
+
+    std::auto_ptr<Discovery> discovery_upnp;
 
     //..........................................................................
     // The socket server
@@ -98,7 +123,7 @@ private:
     // Server delegate methods
 
     virtual void connection_accepted( gpointer connection, const char * remote_address );
-    virtual void connection_data_received( gpointer connection, const char * data );
+    virtual void connection_data_received( gpointer connection, const char * data , gsize size );
     virtual void connection_closed( gpointer connection );
 
     //..........................................................................

@@ -1,0 +1,262 @@
+
+[[
+#include "uriparser/Uri.h"
+
+#include "util.h"	
+
+static void push_text_range( lua_State * L , const UriTextRangeA & range )
+{
+	if ( range.first && range.afterLast )
+	{
+		lua_pushlstring( L , range.first , range.afterLast - range.first );
+	}
+	else
+	{
+		lua_pushnil( L );
+	}
+}
+
+]]
+
+/*
+	Global: uri
+	
+	Provides some basic URI functions.
+*/
+
+global uri [[void*]]
+{
+	/*
+		Function: parse
+		
+		Parses a URI and returns a table containing its components. If there is a problem
+		parsing the URI, it may return nil.
+		
+		Arguments:
+		
+			uri_string - The URI to parse.
+		
+		Returns:
+		
+			table - A table of components. Any, none or all of the following components may be present:
+					scheme, user, host, port, query, fragment, absolute and path. Path is a table of strings
+					for each segment of the path. For example, if the path is "wiki/index.php" the path table
+					will be { "wiki" , "index.php" }.
+					
+			nil - If there was a problem parsing the URI.
+					
+		Example:
+		
+		(code)		
+		
+		dumptable( uri:parse( "http://foo:bar@trickplay.com:80/hello/goodbye.php?a=1%3D&2=a+b") )
+		
+		-- Results in:
+		
+		{
+			"host" = "trickplay.com"
+		    "port" = "80"
+		    "user" = "foo:bar"
+		    "scheme" = "http"
+		    "path" = 
+		    {
+		    	1 = "hello"
+		     	2 = "goodbye.php"
+		    }
+		    "absolute" = false
+		    "query" = "a=1%3D&2=a+b"
+ 		}	
+ 		
+ 		(end)	
+ 
+	*/
+	
+	table parse( string uri_string )
+		[[
+			UriParserStateA state;
+			UriUriA uri;
+			
+			state.uri = & uri;
+			
+			if ( uriParseUriA( & state , uri_string ) == URI_SUCCESS )
+			{
+				lua_newtable( L );
+				
+				int t = lua_gettop(L);
+				
+				lua_pushstring( L , "scheme" );
+				push_text_range( L , uri.scheme );
+				lua_rawset( L , t );
+				
+				lua_pushstring( L , "user" );
+				push_text_range( L , uri.userInfo );
+				lua_rawset( L , t );
+				
+				lua_pushstring( L , "host" );
+				push_text_range( L , uri.hostText );
+				lua_rawset( L , t );
+				
+				lua_pushstring( L , "port" );
+				push_text_range( L , uri.portText );
+				lua_rawset( L , t );
+				
+				lua_pushstring( L , "query" );
+				push_text_range( L , uri.query );
+				lua_rawset( L , t );
+				
+				lua_pushstring( L , "fragment" );
+				push_text_range( L , uri.fragment );
+				lua_rawset( L , t );
+				
+				lua_pushstring( L , "absolute" );
+				lua_pushboolean( L , uri.absolutePath );
+				lua_rawset( L , t );
+				
+				if ( uri.pathHead )
+				{
+					int i = 1;
+					
+					lua_pushstring( L , "path" );
+					lua_newtable( L );
+					
+					for( UriPathSegmentA * segment = uri.pathHead; segment; segment = segment->next , ++i )
+					{
+						push_text_range( L , segment->text );
+						lua_rawseti( L , -2 , i );
+					}
+					lua_rawset( L , t );
+				}
+			}
+			else
+			{
+				lua_pushnil( L );
+			}	
+			
+			uriFreeUriMembersA( & uri );
+		]];
+		
+	/*
+		Function: parse_query
+		
+		Parses a URI query string and returns all the keys and values in order.
+		
+		Arguments:
+		
+			query_string - The query string to parse.
+			plus_to_space - Whether to convert + to space.
+			
+		Returns:
+		
+			table - The resulting table is a list of tables. Each one of these 
+					tables will contain the key as the first element and, if there
+					is a corresponding value, the value as the second element. For example,
+					the query string "a=1&b&c=3" will return the table { { "a" ,"1" } , 
+					{ "b" } , { "c" , "3" } }.
+					
+			nil - If there is a problem.
+	*/
+	
+	table parse_query( lstring query_string , bool plus_to_space = true )
+		[[
+			UriQueryListA * q = 0;
+			
+			if ( uriDissectQueryMallocExA( & q , 0 , query_string , query_string + query_string_len , plus_to_space ? URI_TRUE : URI_FALSE , URI_BR_DONT_TOUCH ) == URI_SUCCESS )
+			{
+				lua_newtable( L );
+				int t = lua_gettop( L );
+				int i = 1;
+				
+				for( UriQueryListA * n = q; n ; n = n->next , ++i )
+				{
+					lua_newtable( L );
+					lua_pushstring( L , n->key );
+					lua_rawseti( L , -2 , 1 );
+					
+					if ( n->value )
+					{
+						lua_pushstring( L , n->value );
+						lua_rawseti( L , -2 , 2 );
+					}
+					lua_rawseti( L , t , i );
+				}
+				
+				uriFreeQueryListA( q );
+			}
+			else
+			{
+				lua_pushnil( L );
+			}
+		]];		
+		
+	/*
+		Function: escape
+		
+		Escapes a string.
+		
+		Arguments:
+		
+			s - The string to escape.
+			space_to_plus - Whether to convert spaces to +. If not, they will become %20.
+			
+		Returns:
+		
+			string - The escaped string.
+	*/
+	
+	lstring escape( lstring s , bool space_to_plus = false )
+		[[
+			gchar * out = g_new( gchar , s_len * 3 );
+			
+			FreeLater free_later( out );
+			
+			char * end = uriEscapeA( s , out , space_to_plus ? URI_TRUE : URI_FALSE , URI_BR_DONT_TOUCH );
+			
+			if ( end ) 
+			{
+				result = out;
+				result_len = end - out;
+			}
+			else
+			{
+				result = 0;
+				result_len = 0;
+			}
+		]]; 
+		
+	/*
+		Function: unescape
+		
+		Un-escapes a string.
+		
+		Arguments: 
+		
+			s - The string to un-escape.
+			plus_to_space - Whether to convert + to space.
+			
+		Returns:
+		
+			string - The unescaped string.
+	*/
+	
+	lstring unescape( lstring s , bool plus_to_space = true )
+		[[
+			gchar * out = g_new( gchar , s_len );
+			
+			memmove( out , s , s_len );
+			
+			FreeLater free_later( out );
+			
+			const char * end = uriUnescapeInPlaceExA( out , plus_to_space ? URI_TRUE : URI_FALSE , URI_BR_DONT_TOUCH );
+			
+			if ( end )
+			{
+				result = out;
+				result_len = end - out;
+			}
+			else
+			{
+				result = 0;
+				result_len = 0;
+			}
+		]];
+}

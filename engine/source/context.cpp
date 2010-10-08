@@ -368,6 +368,19 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         Images::dump_cache();
     }
+    else if ( !strcmp( command , "gc" ) )
+    {
+        if ( context->current_app )
+        {
+            if ( lua_State * L = context->current_app->get_lua_state() )
+            {
+                int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+                lua_gc( L , LUA_GCCOLLECT , 0 );
+                int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+                g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+            }
+        }
+    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
@@ -1214,11 +1227,6 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
-    if ( log_level & G_LOG_LEVEL_WARNING && g_str_has_prefix( log_domain , "Cogl") )
-    {
-        return;
-    }
-
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message
@@ -1465,6 +1473,7 @@ void TPContext::load_external_configuration()
         TP_SYSTEM_COUNTRY,
         TP_SYSTEM_NAME,
         TP_SYSTEM_VERSION,
+        TP_SYSTEM_SN,
         TP_DATA_PATH,
         TP_SCREEN_WIDTH,
         TP_SCREEN_HEIGHT,
@@ -1597,6 +1606,14 @@ void TPContext::validate_configuration()
     {
         set( TP_SYSTEM_VERSION, TP_SYSTEM_VERSION_DEFAULT );
         g_warning( "DEFAULT:%s=%s", TP_SYSTEM_VERSION, TP_SYSTEM_VERSION_DEFAULT );
+    }
+
+    // SYSTEM SN
+
+    if ( !get( TP_SYSTEM_SN ) )
+    {
+        set( TP_SYSTEM_SN, TP_SYSTEM_SN_DEFAULT );
+        g_warning( "DEFAULT:%s=%s", TP_SYSTEM_SN, TP_SYSTEM_SN_DEFAULT );
     }
 
     // DATA PATH

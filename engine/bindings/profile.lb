@@ -14,15 +14,11 @@ global profile [[App*]]
 {
     profile()
         [[
-            *self=App::get(L);
-            (*self)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGING,profile_changing_handler,L);
-            (*self)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,L);            
+            self=lb_construct( App , App::get(L) );
+            self->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGING,profile_changing_handler,L);
+            self->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,L);            
         ]];
         
-    ~profile()
-        [[
-        ]];
-
     # Property: id
     # The ID of the current profile
     
