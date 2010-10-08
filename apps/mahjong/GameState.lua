@@ -62,6 +62,8 @@ GameState = Class(nil,function(state, ctrl)
     local roaming = false
     -- the Layout determines layout of mahjong game
     local layout = nil
+    -- the number of the layout among layouts
+    local layout_number = nil
 
     -- getters/setters
     function state:get_grid() return grid end
@@ -99,7 +101,6 @@ GameState = Class(nil,function(state, ctrl)
         
         -- Get all the tiles in the game
         tiles_class = Tiles()
-        tiles_class:shuffle()
         tiles = tiles_class:get_tiles()
         matches = tiles_class:get_matches()
     end
@@ -111,8 +112,17 @@ GameState = Class(nil,function(state, ctrl)
         game_timer.start = 0
         game_timer.current = 0
 
-        tiles_class:shuffle()
+        tiles_class:shuffle(layout_number)
         tiles_class:reset()
+        game_menu:remove_tile_images()
+    end
+
+    function state:build_layout(number)
+        assert(number)
+        assert(type(number) == "number")
+        layout_number = number
+        layout = Layout(layout_number, tiles_class)
+        grid = layout:get_grid()
     end
 
     function state:shuffle()
@@ -140,6 +150,7 @@ GameState = Class(nil,function(state, ctrl)
             grid[rand_pos[1]][rand_pos[2]][rand_pos[3]]
 
         end
+        game_menu:remove_tile_images()
     end
 
     function state:set_tile_tables()
@@ -147,13 +158,6 @@ GameState = Class(nil,function(state, ctrl)
         state:find_selectable_tiles()
         state:find_matching_tiles()
         state:find_top_tiles()
-    end
-
-    function state:build_layout(number)
-        assert(number)
-        assert(type(number) == "number")
-        layout = Layout(number, tiles)
-        grid = layout:get_grid()
     end
 
     function state:build_test()
@@ -386,6 +390,13 @@ GameState = Class(nil,function(state, ctrl)
             if selection_grid[tile] and selected_tile:is_a_match(tile) then
                 local counter = 0
                 local temp = selected_tile
+
+                tile:set_green()
+                local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
+                local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}
+
+                gameloop:add(tile.focus.green, 600, nil, interval_1)
+                gameloop:add(temp.focus.green, 600, nil, interval_2)
                 
                 game_menu:add_tile_image(
                     Clone{source = tile.image},
@@ -405,6 +416,12 @@ GameState = Class(nil,function(state, ctrl)
                 selected_tile.focus.green.opacity = 0
                 game_menu:remove_tile_images()
                 selected_tile = nil
+            else
+                tile.focus.yellow.opacity = 50
+                tile.focus.red.opacity = 255
+                local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
+                gameloop:add(tile.focus.red, 200, nil, interval, 
+                    function() tile.focus.yellow.opacity = 255 end)
             end
         end
     end

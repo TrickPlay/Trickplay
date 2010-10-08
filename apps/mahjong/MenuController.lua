@@ -8,173 +8,50 @@ MenuController = Class(Controller,function(self, view, ...)
     local hide_options = false
 
     -- Create the tables used as nodes in the menu graph
-    local Blue_Card = {}
-    local Red_Card = {}
-    local Black_Card = {}
-    local Forest_Card = {}
-    local Brown_Table = {}
-    local Green_Table = {}
-    local Black_Table = {}
-    local Auto_Hide = {}
-    local Deal_3_Cards = {}
-    local Auto_Finish = {}
-    local Hide_Options = {}
-    local Deal_New_Hand = {}
-    local Next_Move = {}
-    local Undo_Move = {}
-
-
+    local New_Game = {}
+    local Undo = {}
+    local Shuffle = {}
+    local Hint = {}
+    local Help = {}
+    local Show_Options = {}
 
     -- create the graph
-    Blue_Card[Directions.DOWN] = Undo_Move
-    Blue_Card[Directions.RIGHT] = Red_Card
-    Blue_Card.object = view:get_object("blue_card")
-    Blue_Card.callback =
-        function ()
-            view:change_card_back(1)
-        end
-
-    Red_Card[Directions.DOWN] = Undo_Move
-    Red_Card[Directions.RIGHT] = Forest_Card
-    Red_Card[Directions.LEFT] = Blue_Card
-    Red_Card.object = view:get_object("red_card")
-    Red_Card.callback =
-        function ()
-            view:change_card_back(2)
-        end
-
-    Forest_Card[Directions.DOWN] = Next_Move
-    Forest_Card[Directions.RIGHT] = Black_Card
-    Forest_Card[Directions.LEFT] = Red_Card
-    Forest_Card.object = view:get_object("forest_card")
-    Forest_Card.callback =
-        function ()
-            view:change_card_back(3)
-        end
-
-    Black_Card[Directions.DOWN] = Next_Move
-    Black_Card[Directions.RIGHT] = Brown_Table
-    Black_Card[Directions.LEFT] = Forest_Card
-    Black_Card.object = view:get_object("black_card")
-    Black_Card.callback =
-        function ()
-            view:change_card_back(4)
-        end
-
-    Brown_Table[Directions.DOWN] = Deal_New_Hand
-    Brown_Table[Directions.RIGHT] = Green_Table
-    Brown_Table[Directions.LEFT] = Black_Card
-    Brown_Table.object = view:get_object("brown_table")
-    Brown_Table.callback =
+    New_Game[Directions.DOWN] = Undo
+    New_Game.object = view:get_object("new_game")
+    New_Game.callback = 
         function()
-           change_background(1)
-           change_theme(1) 
         end
 
-    Green_Table[Directions.DOWN] = Deal_New_Hand
-    Green_Table[Directions.RIGHT] = Black_Table
-    Green_Table[Directions.LEFT] = Brown_Table
-    Green_Table.object = view:get_object("green_table")
-    Green_Table.callback =
+    Undo[Directions.UP] = New_Game
+    Undo[Directions.DOWN] = Shuffle
+    Undo.object = view:get_object("undo")
+    Undo.callback = 
         function()
-           change_background(2)
-           change_theme(2) 
         end
 
-
-    Black_Table[Directions.DOWN] = Deal_New_Hand
-    Black_Table[Directions.RIGHT] = Auto_Hide
-    Black_Table[Directions.LEFT] = Green_Table
-    Black_Table.object = view:get_object("black_table")
-    Black_Table.callback =
+    Shuffle[Directions.UP] = Undo
+    Shuffle[Directions.DOWN] = Hint
+    Shuffle.object = view:get_object("shuffle")
+    Shuffle.callback = 
         function()
-           change_background(3)
-           change_theme(3) 
         end
 
-    
-    Auto_Hide[Directions.DOWN] = Deal_3_Cards
-    Auto_Hide[Directions.LEFT] = Black_Table
-    Auto_Hide.object = view:get_object("auto_hide")
-    Auto_Hide.callback =
+    Help[Directions.UP] = Hint
+    Help[Directions.DOWN] = Show_Options
+    Help.object = view:get_object("help")
+    Help.callback = 
         function()
-            view:change_auto_hide()
         end
 
-    Deal_3_Cards[Directions.DOWN] = Auto_Finish
-    Deal_3_Cards[Directions.UP] = Auto_Hide
-    Deal_3_Cards[Directions.LEFT] = Black_Table
-    Deal_3_Cards.object = view:get_object("deal_3")
-    Deal_3_Cards.callback =
+    Show_Options[Directions.UP] = Help
+    Show_Options.object = view:get_object("show_options")
+    Show_Options.callback =
         function()
-            if game:get_state():is_new_game() then
-                view:change_deal_3()
-                game:get_state():change_deal_3()
-            end
         end
 
-    Auto_Finish[Directions.DOWN] = Hide_Options
-    Auto_Finish[Directions.UP] = Deal_3_Cards
-    Auto_Finish[Directions.LEFT] = Black_Table
-    Auto_Finish.object = view:get_object("auto_finish")
-    Auto_Finish.callback =
-        function()
-            game:get_state():change_auto_finish()
-            view:change_auto_finish()
-        end
-
-    Hide_Options[Directions.UP] = Auto_Finish
-    Hide_Options[Directions.LEFT] = Deal_New_Hand
-    Hide_Options.object = view:get_object("hide_options")
-    Hide_Options.callback =
-        function()
-            hide_options = not hide_options
-            -- if the component changed then more than one notify
-            -- maybe sent, which is redundant and unnecessary
-            if router:get_active_component() == Components.MENU then
-                view:update(NotifyEvent())
-            end
-        end
-    
-    Deal_New_Hand[Directions.UP] = Brown_Table
-    Deal_New_Hand[Directions.RIGHT] = Hide_Options
-    Deal_New_Hand[Directions.LEFT] = Next_Move
-    Deal_New_Hand.object = view:get_object("deal_hand")
-    Deal_New_Hand.callback =
-        function()
-            router:delegate(ResetEvent(), Components.GAME)
-        end
-    
-    Next_Move[Directions.UP] = Black_Card
-    Next_Move[Directions.RIGHT] = Deal_New_Hand
-    Next_Move[Directions.LEFT] = Undo_Move
-    Next_Move.object = view:get_object("next_move")
-    Next_Move.callback =
-        function()
-            game:hint()
-            -- move focus back to the game so player may use hint
-            controller:move_selector(Directions.DOWN)
-        end
-    
-    Undo_Move[Directions.UP] = Blue_Card
-    Undo_Move[Directions.RIGHT] = Next_Move
-    Undo_Move.object = view:get_object("undo_move")
-    Undo_Move.callback = 
-        function()
-            if (not game:get_undo_orig_selector())
-              or (not game:get_undo_latest_selector()) then
-                DialogDisplay("Nothing to Undo", CHANGE_VIEW_TIME*2)
-                return
-            end
-
-            game:undo()
-            -- move focus back to the game so player may use hint
-            controller:move_selector(Directions.DOWN)
-        end
-    
     -- the default selected index
-    local selection = Undo_Move
-    local prev_selection = Next_Move
+    local selection = New_Game
+    local prev_selection = Undo
    
     -- getters
     function self:is_active_component()

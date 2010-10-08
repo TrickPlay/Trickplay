@@ -183,9 +183,15 @@ Tiles = Class(function(self, ...)
     function self:get_tiles() return tiles end
     function self:get_matches() return matches end
 
-    function self:shuffle()
-        for i,tile in ipairs(tiles) do
-            local index = math.random(#tiles)
+    function self:shuffle(number)
+        if not number then number = 144 end
+        assert(number <= #tiles)
+
+        local index = nil
+        local tile = nil
+        for i = 1,number do
+            tile = tiles[i]
+            index = math.random(number)
             tiles[i], tiles[index] = tiles[index], tiles[i]
         end
     end

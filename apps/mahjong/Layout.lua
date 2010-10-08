@@ -1,12 +1,16 @@
 Layouts = {
     TURTLE = 1,
     CLUB = 2,
-    ARENA = 3
+    ARENA = 3,
+    BULL = 4,
+    CUBE = 5
 }
 Layouts.LAST = -1
 for _,__ in pairs(Layouts) do
     Layouts.LAST = Layouts.LAST + 1
 end
+
+NUMBER_OF_TILES = {144, 144, 144, 80, 64}
 
 local layout_functions = {
     [Layouts.TURTLE] = function(tiles)
@@ -255,21 +259,60 @@ local layout_functions = {
         index = index + 1
 
         return grid
-    end
+    end,
 
+    [Layouts.BULL] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        
+
+        return grid
+    end,
+
+    [Layouts.CUBE] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        for i = 11,17,2 do
+            for j = 5,11,2 do
+                for k = 1,4 do
+                    grid[i][j][k] = tiles[index]
+                    index = index + 1
+                end
+            end
+        end
+
+        return grid
+    end
 }
 
-Layout = Class(function(layout, number, tiles, ...)
+Layout = Class(function(layout, number, tiles_class, ...)
 
     assert(number)
-    assert(tiles)
-    if type(tiles) ~= "table" then error("tiles must be a table of tiles", 2) end
+    assert(tiles_class)
+    if not tiles_class.is_a or not tiles_class:is_a(Tiles) then
+        error("tiles must be a table of tiles", 2)
+    end
     if type(number) ~= "number" then error("number must be a number", 2) end
     if number < 1 or number > Layouts.LAST then
         error("number must be between 1 and "..Layouts.LAST.." inclusive", 2)
     end
 
-    local grid = layout_functions[number](tiles)
+    tiles_class:shuffle(NUMBER_OF_TILES[number])
+    local grid = layout_functions[number](tiles_class:get_tiles())
 
     function layout:get_grid() return grid end
 
@@ -280,7 +323,7 @@ Layout = Class(function(layout, number, tiles, ...)
             error("number must be between 1 and "..Layouts.LAST.." inclusive", 2)
         end
 
-        grid = layout_functions[number](tiles)
+        grid = layout_functions[number](tiles_class:get_tiles())
     end
 
 end)
