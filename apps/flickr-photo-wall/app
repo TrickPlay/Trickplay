@@ -1,0 +1,15 @@
+app=
+{
+    id          = "com.trickplay.flickr-photo-wall",
+    release     = "1",
+    version     = "1.0",
+    name        = "Flickr Wall",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc.",
+    
+    actions =
+    {
+        LAUNCH = {}
+    }
+}
+
