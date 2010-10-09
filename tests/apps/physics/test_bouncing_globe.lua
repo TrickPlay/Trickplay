@@ -104,8 +104,8 @@ else
         end
     end
     
-    function physics:on_begin_contact( contact )
-        --dumptable( contact )
+    function globe:on_begin_contact( contact )
+        dumptable( contact )
         collision.position = contact.point
         collision:show()
         --dumptable( globe.linear_velocity )

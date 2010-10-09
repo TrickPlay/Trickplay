@@ -116,19 +116,9 @@ screen:add( caption )
 
 caption = physics:Body{ source = caption , density = 10 , friction = 0 , bounce = 1 }
 
-function physics.on_begin_contact( physics , contact )
+function caption.on_begin_contact( caption , contact )
 
-    if not contact.has_body[ caption.handle ] then
-        return
-    end
-
-    local other
-    
-    if contact.bodies[ 1 ] == caption.handle then
-        other = contact.bodies[ 2 ]
-    elseif contact.bodies[ 2 ] == caption.handle then
-        other = contact.bodies[ 1 ]
-    end
+    local other = contact.other_body[ caption.handle ]
     
     if other then
         caption.source.color = ball_colors[ other ] or "FFFFFF"
