@@ -4,7 +4,7 @@ MenuView = Class(View, function(view, model, ...)
 ------------ Load Assets ------------
 
     local menu_bars = {
-        Image{src = "assets/menus/menu+btns.jpg"}
+        Image{src = "assets/menus/menu.jpg"}
     }
     local menu_options = Image{src = "assets/menus/options-menu.png", x = 0}
     menu_options.y = 1070 - menu_options.height
@@ -14,9 +14,35 @@ MenuView = Class(View, function(view, model, ...)
     }
 
     --
-    view.items = {}
+    view.items = {
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "New Game"),
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "Undo Last Move"),
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "Shuffle Tiles"),
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "Show a Hint"),
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "Help"),
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "Show Options"),
+        FocusableImage(40, 392, "assets/menus/button-large-off.png",
+            "assets/menus/button-large-on.png", "Exit"),
+    }
+    for i = 1,7 do
+        view.items[i].group.y = 392+(i-1)*(view.items[1].image.height+10)
+    end
 
-    local focusable_items = {}
+    local focusable_items = {
+        new_game = view.items[1],
+        undo = view.items[2],
+        shuffle = view.items[3],
+        hint = view.items[4],
+        help = view.items[5],
+        show_options = view.items[6],
+        exit = view.items[7]
+    }
 
     -- score related stuff
     local time_text = game_timer.text
@@ -36,14 +62,17 @@ MenuView = Class(View, function(view, model, ...)
     moves_text.extra.moves = 0
 
     -- menu ui
-    local menu_open_x = 395
+    local menu_open_x = 385
     local menu_closed_x = 0
---    local menu_hiden_x = -408
     view.tile_group = Group{name = "selected_tile", position = {140, 220}}
     view.menu_ui = Group{name = "menu_ui"}
     view.menu_ui:add(menu_options, menu_drop_shadow)
     view.menu_ui:add(unpack(menu_bars))
-    view.menu_ui:add(unpack(view.items))
+    for i,item in ipairs(view.items) do
+        if item.group then view.menu_ui:add(item.group)
+        else view.menu_ui:add(item)
+        end
+    end
     view.menu_ui:add(view.tile_group)
 
     -- all ui junk for this view
@@ -52,20 +81,6 @@ MenuView = Class(View, function(view, model, ...)
 
     screen:add(view.ui)
 
-    add_to_key_handler(keys.o, function()
-        local intervals = nil
-        if menu_options.x == menu_open_x then
-            intervals ={
-                ["x"] = Interval(menu_options.x, menu_closed_x)
-            }
-        else
-            intervals ={
-                ["x"] = Interval(menu_options.x, menu_open_x)
-            }
-        end
-
-        gameloop:add(menu_options, 400, nil, intervals)
-    end)
 
 --------- Variables ----------------------
 
@@ -137,6 +152,21 @@ MenuView = Class(View, function(view, model, ...)
 ---------- Extra Animations ------------------------
 
 
+    add_to_key_handler(keys.o, function()
+        local intervals = nil
+        if menu_options.x == menu_open_x then
+            intervals ={
+                ["x"] = Interval(menu_options.x, menu_closed_x)
+            }
+        else
+            intervals ={
+                ["x"] = Interval(menu_options.x, menu_open_x)
+            }
+        end
+
+        gameloop:add(menu_options, 400, nil, intervals)
+    end)
+
     function view:add_tile_image(tile_image, tile_glyph)
         assert(tile_image)
         assert(tile_glyph)
@@ -163,8 +193,8 @@ MenuView = Class(View, function(view, model, ...)
             ["x"] = Interval(right_tile.x, right_tile.x - 8)
         }
 
-        gameloop:add(left_tile, 400, nil, left_interval)
-        gameloop:add(right_tile, 400, nil, right_interval)
+        gameloop:add(left_tile, 500, nil, left_interval)
+        gameloop:add(right_tile, 500, nil, right_interval)
     end
 
     function view:remove_tile_images()
@@ -194,14 +224,8 @@ MenuView = Class(View, function(view, model, ...)
         if selected_object.on_focus then selected_object:on_focus() end
     end
 
-    function view:hide_menu_completely()
-        if view.menu_ui.y == menu_hiden_y then return end
-
-        local intervals = {["y"] = Interval(view.menu_ui.y, menu_hiden_y)}
-        gameloop:add(view.menu_ui, CHANGE_VIEW_TIME, nil, intervals)
-    end
-
     function view:update(event)
+        assert(event)
         if not event:is_a(NotifyEvent) then return end
 
         local controller = self:get_controller()
@@ -209,31 +233,30 @@ MenuView = Class(View, function(view, model, ...)
         local selected_object = controller:get_selection().object
 
         if controller:is_options_hidden() then
-            --options_text.text = "Show Options"
+            focusable_items.show_options.text.text = "Show Options"
         else
-            --options_text.text = "Hide Options"
+            focusable_items.show_options.text.text = "Hide Options"
         end
 
         -- hide focus if not the active component
         if controller:is_active_component() then
-            --if selected_object.on_focus then selected_object:on_focus() end
+            if selected_object.on_focus then selected_object:on_focus() end
         else
-            --if selected_object.off_focus then selected_object:off_focus() end
+            if selected_object.off_focus then selected_object:off_focus() end
         end
---[[
+---[[
         if comp ~= Components.MENU then
-            if view.auto_hide_menu then view:hide_menu_completely()
-            elseif view.menu_ui.y ~= menu_closed_y then
-                local intervals = {["x"] = Interval(view.menu_ui.x, menu_closed_x)}
-                gameloop:add(view.menu_ui, CHANGE_VIEW_TIME, nil, intervals)
+            if menu_options.y ~= menu_closed_y then
+                local intervals = {["x"] = Interval(menu_options.x, menu_closed_x)}
+                gameloop:add(menu_options, CHANGE_VIEW_TIME, nil, intervals)
             end
         else
-            if controller:is_options_hidden() and view.menu_ui.x ~= menu_closed_x then
-                local intervals = {["x"] = Interval(view.menu_ui.x, menu_closed_x)}
-                gameloop:add(view.menu_ui, CHANGE_VIEW_TIME, nil, intervals)
-            elseif not controller:is_options_hidden() and view.menu_ui.x ~= menu_open_x then
-                local intervals = {["x"] = Interval(view.menu_ui.x, menu_open_x)}
-                gameloop:add(view.menu_ui, CHANGE_VIEW_TIME, nil, intervals)
+            if controller:is_options_hidden() and menu_options.x ~= menu_closed_x then
+                local intervals = {["x"] = Interval(menu_options.x, menu_closed_x)}
+                gameloop:add(menu_options, CHANGE_VIEW_TIME, nil, intervals)
+            elseif not controller:is_options_hidden() and menu_options.x ~= menu_open_x then
+                local intervals = {["x"] = Interval(menu_options.x, menu_open_x)}
+                gameloop:add(menu_options, CHANGE_VIEW_TIME, nil, intervals)
             end
         end
         --]]

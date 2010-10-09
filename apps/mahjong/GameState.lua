@@ -111,6 +111,7 @@ GameState = Class(nil,function(state, ctrl)
         must_restart = false
         game_timer.start = 0
         game_timer.current = 0
+        last_tiles = nil
 
         tiles_class:shuffle(layout_number)
         tiles_class:reset()
@@ -128,6 +129,8 @@ GameState = Class(nil,function(state, ctrl)
     function state:shuffle()
         local switch = nil
         local temp = {}
+        last_tiles = nil
+
         
         tiles_class:reset()
 
@@ -252,21 +255,6 @@ GameState = Class(nil,function(state, ctrl)
         end
 
         add_to_key_handler(keys.t, function()
-        --[[
-            for i = 1,GRID_WIDTH do
-                for j = 1,GRID_HEIGHT do
-                    for k = 1,GRID_DEPTH do
-                        if top_grid[i][j][k] then
-                            if top_grid[i][j][k].focus.red.opacity == 255 then
-                                top_grid[i][j][k].focus.red.opacity = 0
-                            else
-                                top_grid[i][j][k].focus.red.opacity = 255
-                            end
-                        end
-                    end
-                end
-            end
-        --]]
             for k,v in ipairs(top_tiles) do
                 if is_key_hint_on(keys.t) then
                     v.focus.red.opacity = 255
@@ -349,7 +337,7 @@ GameState = Class(nil,function(state, ctrl)
     end
 
     function state:undo()
-        if not last_tiles then return end
+        if not last_tiles then return false end
 
         local position_1 = last_tiles[1].position
         local position_2 = last_tiles[2].position
@@ -361,6 +349,7 @@ GameState = Class(nil,function(state, ctrl)
         last_tiles[2]:reset()
 
         last_tiles = nil
+        return true
 
     end
 
@@ -392,6 +381,7 @@ GameState = Class(nil,function(state, ctrl)
                 local temp = selected_tile
 
                 tile:set_green()
+                tile.focus.yellow.opacity = 0
                 local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
                 local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}
 
