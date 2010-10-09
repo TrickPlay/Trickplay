@@ -8,17 +8,14 @@
 namespace Physics
 {
 
-static Debug_ON plog;
+static Debug_OFF plog;
 
 //.............................................................................
 
 World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
 :
-    begin_contact_attached( false ),
-    end_contact_attached( false ),
-    pre_solve_attached( false ),
-    post_solve_attached( false ),
     ppm( _pixels_per_meter ),
+    global_callbacks( 0 ),
     L( _L ),
     world( b2Vec2( 0.0f , 10.0f ) , true ),
     next_handle( 1 ),
@@ -46,10 +43,10 @@ World::~World()
 
     g_timer_destroy( timer );
 
-    // Tell all the body wrappers that their b2Body is going away
-
     for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
     {
+        // Tell the body wrapper that its body is gone
+
         Body::body_destroyed( body );
     }
 
@@ -433,11 +430,11 @@ void World::push_contact( b2Contact * contact )
     lua_setfield( L , t , "fixtures" );
 
     lua_createtable( L , 2 , 0 );
-    lua_pushboolean( L , true );
+    lua_pushinteger( L , fixture_b_handle );
     lua_rawseti( L , -2 , fixture_a_handle );
-    lua_pushboolean( L , true );
+    lua_pushinteger( L , fixture_a_handle );
     lua_rawseti( L , -2 , fixture_b_handle );
-    lua_setfield( L , t , "has_fixture" );
+    lua_setfield( L , t , "other_fixture" );
 
     lua_createtable( L , 2 , 0 );
     lua_pushinteger( L , body_a_handle );
@@ -447,15 +444,20 @@ void World::push_contact( b2Contact * contact )
     lua_setfield( L , t , "bodies" );
 
     lua_createtable( L , 2 , 0 );
-    lua_pushboolean( L , true );
+    lua_pushinteger( L , body_b_handle );
     lua_rawseti( L , -2 , body_a_handle );
-    lua_pushboolean( L , true );
+    lua_pushinteger( L , body_a_handle );
     lua_rawseti( L , -2 , body_b_handle );
-    lua_setfield( L , t , "has_body" );
+    lua_setfield( L , t , "other_body" );
 
     lua_pushboolean( L , contact->IsTouching() );
     lua_setfield( L , t , "touching" );
+
+    lua_pushboolean( L , contact->IsEnabled() );
+    lua_setfield( L , t , "enabled" );
 }
+
+//.............................................................................
 
 void World::push_contact_list( b2Contact * contact )
 {
@@ -476,6 +478,8 @@ void World::push_contact_list( b2Contact * contact )
     }
 }
 
+//.............................................................................
+
 void World::push_contact_list( b2ContactEdge * contact_edge )
 {
     if ( ! contact_edge )
@@ -495,57 +499,228 @@ void World::push_contact_list( b2ContactEdge * contact_edge )
     }
 }
 
+//.............................................................................
+// Sets or clears a bit in 'global_callbacks' corresponding to the callback
+// passed in. This lets us know quickly whether that global callback is
+// wanted by the Lua proxy for the world.
+
+void World::attach_global_callback( ContactCallback callback , bool attach )
+{
+    if ( ! attach )
+    {
+        global_callbacks &= ! guint8( callback );
+    }
+    else
+    {
+        global_callbacks |= guint8( callback );
+    }
+}
+
+//.............................................................................
+// Given a body, a callback type and whether to attach or detach the callback,
+// we update our body callback map.
+
+void World::attach_body_callback( Body * body , ContactCallback callback , bool attach )
+{
+    g_assert( body );
+
+    if ( ! body->body )
+    {
+        return;
+    }
+
+    // See if we already have an entry for this b2Body in the map
+
+    BodyCallbackMap::iterator it = body_callbacks.find( body->body );
+
+    // Not found
+
+    if ( it == body_callbacks.end() )
+    {
+        if ( ! attach )
+        {
+            // We are being asked to detach a callback that is not there
+
+            return;
+        }
+        else
+        {
+            // Otherwise, this is the only callback for this body so far,
+            // so we insert a new b2Body/mask pair into the map.
+
+            body_callbacks.insert( std::make_pair( body->body , guint8( callback ) ) );
+        }
+    }
+    else
+    {
+        if ( ! attach )
+        {
+            // Clear the bit for this callback
+
+            it->second &= ! guint8( callback );
+
+            // If it has no other callbacks attached, we can remove it from
+            // the map completely.
+
+            if ( it->second == 0 )
+            {
+                body_callbacks.erase( it );
+            }
+        }
+        else
+        {
+            // Set the bit for this callback
+
+            it->second |= guint8( callback );
+        }
+    }
+}
+
+//.............................................................................
+// Removes the entry for this b2Body from the callbacks map
+
+void World::detach_body_callbacks( b2Body * body )
+{
+    if ( body )
+    {
+        BodyCallbackMap::iterator it = body_callbacks.find( body );
+
+        if ( it != body_callbacks.end() )
+        {
+            body_callbacks.erase( it );
+        }
+    }
+}
+
+//.............................................................................
+// If this b2Body is all good and wants this type of callback, we add its
+// Body * to the list.
+
+void World::add_contact_callback_body( b2Body * body , ContactCallback callback , BodyList & list )
+{
+    if ( ! body )
+    {
+        return;
+    }
+
+    // Look for the b2Body in our map
+
+    BodyCallbackMap::iterator it( body_callbacks.find( body ) );
+
+    // If it is there
+
+    if ( it != body_callbacks.end() )
+    {
+        // See if it wants this callback
+
+        if ( it->second & callback )
+        {
+            // If so and its Body is valid, add it to the list
+
+            if ( Body * b = Body::get_from_body( body ) )
+            {
+                list.push_back( b );
+            }
+        }
+    }
+}
+
+//.............................................................................
+// Creates a list of Body * for the two bodies in the contact, as long as they
+// want the callback and they are in good shape.
+
+World::BodyList World::get_contact_callback_bodies( b2Contact * contact , ContactCallback callback )
+{
+    std::list<Physics::Body*> result;
+
+    add_contact_callback_body( contact->GetFixtureA()->GetBody() , callback , result );
+
+    add_contact_callback_body( contact->GetFixtureB()->GetBody() , callback , result );
+
+    return result;
+}
+
+//.............................................................................
+// Given a contact, callback and callback name, invokes all the right callbacks.
+
+void World::invoke_contact_callback( b2Contact * contact , ContactCallback callback , const char * name )
+{
+    // Get a list of bodies that want this callback. The list will
+    // have either 0, 1 or 2.
+
+    BodyList bodies( get_contact_callback_bodies( contact , callback ) );
+
+    // If the list of bodies is empty and no one wants the global
+    // callback, we bail right here
+
+    if ( ( ! ( global_callbacks & callback ) ) && bodies.empty() )
+    {
+        return;
+    }
+
+    // We push the contact once and then push its value for each call
+
+    push_contact( contact );
+
+    int c = lua_gettop( L );
+
+    // Body callbacks
+
+    if ( ! bodies.empty() )
+    {
+        for( BodyList::const_iterator it = bodies.begin(); it != bodies.end(); ++it )
+        {
+            lua_pushvalue( L , c );
+
+            UserData::invoke_callback( *it , name , 1 , 0 , L );
+
+            if ( callback == PRE_SOLVE_CONTACT )
+            {
+                lua_getfield( L , c , "enabled" );
+                contact->SetEnabled( lua_toboolean( L , -1 ) );
+                lua_pop( L , 1 );
+            }
+        }
+    }
+
+    // Now the global world callback
+
+    if ( global_callbacks & callback )
+    {
+        lua_pushvalue( L , c );
+        UserData::invoke_callback( this , name , 1 , 0 , L );
+
+        if ( callback == PRE_SOLVE_CONTACT )
+        {
+            lua_getfield( L , c , "enabled" );
+            contact->SetEnabled( lua_toboolean( L , -1 ) );
+            lua_pop( L , 1 );
+        }
+    }
+
+    lua_pop( L , 1 );
+}
+
 //=============================================================================
 // ContactListener callbacks
 
 void World::BeginContact( b2Contact * contact )
 {
-    if ( ! begin_contact_attached )
-    {
-        return;
-    }
-
-    push_contact( contact );
-
-    UserData::invoke_callback( this , "on_begin_contact" , 1 , 0 , L );
+    invoke_contact_callback( contact , BEGIN_CONTACT , "on_begin_contact" );
 }
 
 //.............................................................................
 
 void World::EndContact( b2Contact * contact )
 {
-    if ( ! end_contact_attached )
-    {
-        return;
-    }
-
-    push_contact( contact );
-
-    UserData::invoke_callback( this , "on_end_contact" , 1 , 0 , L );
+    invoke_contact_callback( contact , END_CONTACT , "on_end_contact" );
 }
 
 //.............................................................................
 
 void World::PreSolve( b2Contact * contact , const b2Manifold * oldManifold )
 {
-    if ( ! pre_solve_attached )
-    {
-        return;
-    }
-
-    push_contact( contact );
-
-    int called = UserData::invoke_callback( this , "on_pre_solve_contact" , 1 , 1 , L );
-
-    if ( called )
-    {
-        if ( lua_isboolean( L , -1 ) && lua_toboolean( L , -1 ) )
-        {
-            contact->SetEnabled( false );
-        }
-
-        lua_pop( L , 1 );
-    }
+    invoke_contact_callback( contact , PRE_SOLVE_CONTACT , "on_pre_solve_contact" );
 }
 
 //.............................................................................
@@ -554,14 +729,7 @@ void World::PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
 {
     // TODO : should we pass the impulse too?
 
-    if ( ! post_solve_attached )
-    {
-        return;
-    }
-
-    push_contact( contact );
-
-    UserData::invoke_callback( this , "on_post_solve_contact" , 1 , 0 , L );
+    invoke_contact_callback( contact , POST_SOLVE_CONTACT , "on_post_solve_contact" );
 }
 
 //.............................................................................
@@ -660,15 +828,18 @@ void Body::body_destroyed( b2Body * body )
 // The actor is being destroyed - that means that the b2Body will be destroyed
 // as well. This structure loses its body and actor members.
 
-
 void Body::destroy_actor_body( Body * self )
 {
     plog( "CLEARING ACTOR BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
 
-    // Nullify the body's user data
-
     if ( self->body )
     {
+        // Remove any callbacks for this body
+
+        self->world->detach_body_callbacks( self->body );
+
+        // Nullify the body's user data
+
         self->body->SetUserData( 0 );
 
         self->body->SetActive( false );
@@ -798,5 +969,6 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
 }
 
 //.............................................................................
+
 
 }; // Physics

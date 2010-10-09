@@ -7,49 +7,6 @@ module physics_module;
 
 #include "physics.h"
 #include "clutter_util.h"
-
-#if 0
-
-void Physx::BeginContact( b2Contact * contact )
-{
-    b2WorldManifold wm;
-
-    contact->GetWorldManifold( & wm );
-
-    b2Fixture * fa = contact->GetFixtureA();
-    b2Fixture * fb = contact->GetFixtureB();
-
-    int fixture_a_handle = fa ? GPOINTER_TO_INT( fa->GetUserData() ) : 0;
-    int fixture_b_handle = fb ? GPOINTER_TO_INT( fb->GetUserData() ) : 0;
-
-    b2Body * ba = fa ? fa->GetBody() : 0;
-    b2Body * bb = fb ? fb->GetBody() : 0;
-
-    Body::Info * ia = ba ? ( Body::Info * ) ba->GetUserData() : 0;
-    Body::Info * ib = bb ? ( Body::Info * ) bb->GetUserData() : 0;
-
-    int body_a_handle = ia ? ia->body_handle : 0;
-    int body_b_handle = ib ? ib->body_handle : 0;
-
-    lua_newtable( L );
-    lua_pushnumber( L , wm.points[ 0 ].x * ppm );
-    lua_rawseti( L , -2 , 1 );
-    lua_pushnumber( L , wm.points[ 0 ].y * ppm );
-    lua_rawseti( L , -2 , 2 );
-
-    lua_pushinteger( L , body_a_handle );
-
-    lua_pushinteger( L , fixture_a_handle );
-
-    lua_pushinteger( L , body_b_handle );
-
-    lua_pushinteger( L , fixture_b_handle );
-
-    UserData::invoke_callback( this , "on_begin_contact" , 5 , 0 , L );
-}
-
-#endif
-
 ]]
 
 /*===========================================================================*/
@@ -668,6 +625,27 @@ interface Body [[ Physics::Body * ]]
 
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
+
+    callback on_begin_contact( table contact )
+        [[
+            self->world->attach_body_callback( self , Physics::BEGIN_CONTACT , on_begin_contact );
+        ]];
+
+    callback on_end_contact( table contact )
+        [[
+            self->world->attach_body_callback( self , Physics::END_CONTACT , on_end_contact );
+        ]];
+
+
+    callback on_pre_solve_contact( table contact )
+        [[
+            self->world->attach_body_callback( self , Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
+        ]];
+
+    callback on_post_solve_contact( table contact )
+        [[
+            self->world->attach_body_callback( self , Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
+        ]];
 }
 
 /*===========================================================================*/
@@ -883,24 +861,21 @@ global physics [[ Physics::World * ]]
 
 	callback on_begin_contact( table contact )
         [[
-            self->begin_contact_attached = on_begin_contact != 0;
+            self->attach_global_callback( Physics::BEGIN_CONTACT , on_begin_contact );
         ]];
 
     callback on_end_contact( table contact )
         [[
-            self->end_contact_attached = on_end_contact != 0;
+            self->attach_global_callback( Physics::END_CONTACT , on_end_contact );
         ]];
-
 
     callback on_pre_solve_contact( table contact )
         [[
-            self->pre_solve_attached = on_pre_solve_contact != 0;
+            self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
         ]];
-
 
     callback on_post_solve_contact( table contact )
         [[
-            self->post_solve_attached = on_post_solve_contact != 0;
+            self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
-
 }

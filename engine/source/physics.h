@@ -11,6 +11,14 @@ namespace Physics
 {
     class Body;
 
+    enum ContactCallback
+    {
+        BEGIN_CONTACT = 0x01,
+        END_CONTACT = 0x02,
+        PRE_SOLVE_CONTACT = 0x04,
+        POST_SOLVE_CONTACT = 0x08
+    };
+
     //=========================================================================
 
     class World : private b2ContactListener
@@ -94,13 +102,12 @@ namespace Physics
 
         void push_contact_list( b2ContactEdge * contact_edge );
 
-        bool begin_contact_attached;
+        void attach_global_callback( ContactCallback callback , bool attach );
 
-        bool end_contact_attached;
 
-        bool pre_solve_attached;
+        void attach_body_callback( Body * body , ContactCallback callback , bool attach );
 
-        bool post_solve_attached;
+        void detach_body_callbacks( b2Body * body );
 
         //.........................................................................
 
@@ -122,6 +129,22 @@ namespace Physics
         //.........................................................................
 
         static gboolean on_idle( gpointer me );
+
+        //.........................................................................
+
+        guint8          global_callbacks;
+
+        typedef std::map< b2Body * , guint8 > BodyCallbackMap;
+
+        BodyCallbackMap body_callbacks;
+
+        typedef std::list< Body * > BodyList;
+
+        void add_contact_callback_body( b2Body * body , ContactCallback callback , BodyList & list );
+
+        BodyList get_contact_callback_bodies( b2Contact * contact , ContactCallback callback );
+
+        void invoke_contact_callback( b2Contact * contact , ContactCallback callback , const char * name );
 
         //.........................................................................
 
