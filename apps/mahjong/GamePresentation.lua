@@ -118,6 +118,17 @@ function(pres, ctrl)
 
     function pres:update(event)
         if not event:is_a(NotifyEvent) then return end
+        
+        local grid = ctrl:get_grid()
+        if not grid then return end
+
+        local selector = ctrl:get_selector()
+        local comp = router:get_active_component()
+        if comp ~= Components.GAME then
+            grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 0
+        else
+            grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 255
+        end
     end
 
     function pres:move_focus()
@@ -181,49 +192,74 @@ function(pres, ctrl)
             y = (left_y + right_tile.y)*.5
         }
 
-        local left_intervals = nil
-        local right_intervals = nil
+        local left_intervals_t = nil
+        local left_durations = nil
+        local right_intervals_t = nil
+        local right_durations = nil
         
-        if x_bump then 
-            left_intervals = {
-                ["x"] = Interval(left_tile.x, median.x-1-TILE_WIDTH+16),
-                ["y"] = Interval(left_tile.y, median.y),
-            }
+        if x_bump then
+            left_x = median.x-1-TILE_WIDTH+16
+            left_y = median.y
         else
-            left_intervals = {
-                ["x"] = Interval(left_tile.x, median.x-TILE_WIDTH+16),
-                ["y"] = Interval(left_tile.y, median.y-1),
-            }
+            left_x = median.x-1-TILE_WIDTH+16
+            left_y = median.y
         end
-        right_intervals = {
-            ["x"] = Interval(right_tile.x, median.x),
-            ["y"] = Interval(right_tile.y, median.y)
+        
+        local left_intervals_t = {
+            {
+                ["x"] = Interval(left_tile.x, left_x),
+                ["y"] = Interval(left_tile.y, left_y),
+            },
+            {
+                ["z"] = Interval(left_tile.z, left_tile.z + 20)
+            }
         }
+        local left_durations = {300, 200}
+        local from = {x = left_x, y = left_y}
+        local to = {x = left_x-200, y = left_y}
+        print("left_x", left_x)
+        table.insert(left_intervals_t, {
+            ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
+            ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true)
+        })
+        table.insert(left_durations, 700)
 
-        right_tile:raise_to_top()
+        table.insert(left_intervals_t, {["y"]=Interval(left_y,1200)})
+        table.insert(left_durations, 400)
 
-        gameloop:add(left_tile, 500, nil, left_intervals,
-        function()
-            left_intervals = {
-                ["y"] = Interval(left_tile.y, 1200),
+        right_tile.z = right_tile.z + 1
+
+        local right_intervals_t = {
+            {
+                ["x"] = Interval(right_tile.x, median.x),
+                ["y"] = Interval(right_tile.y, median.y),
+            },
+            {
+                ["z"] = Interval(right_tile.z, right_tile.z + 20)
             }
-            gameloop:add(left_tile, 400, nil, left_intervals,
-            function()
-                game_menu:remove_tile_images()
-                left_tile:unparent()
-            end)
-        end)
-        gameloop:add(right_tile, 500, nil, right_intervals,
-        function()
-            right_intervals = {
-                ["y"] = Interval(right_tile.y, 1200)
-            }
-            gameloop:add(right_tile, 400, nil, right_intervals,
+        }
+        local right_durations = {300, 200}
+        local from = {x = median.x, y = median.y}
+        local to = {x = median.x+200, y = median.y}
+        table.insert(right_intervals_t, {
+            ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
+            ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true)
+        })
+        table.insert(right_durations, 700)
+
+        table.insert(right_intervals_t, {["y"]=Interval(median.y,1200)})
+        table.insert(right_durations, 400)
+        gameloop:add_list(right_tile, right_durations, right_intervals_t,
             function()
                 game_menu:remove_tile_images()
                 right_tile:unparent()
             end)
-        end)
+
+        gameloop:add_list(left_tile, left_durations, left_intervals_t,
+            function()
+                game_menu:remove_tile_images()
+                left_tile:unparent()
+            end)
 
         game_menu:tile_bump()
     end

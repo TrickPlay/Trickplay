@@ -5,7 +5,7 @@ MenuController = Class(Controller,function(self, view, ...)
     router = view:get_router()
 
     -- determines whether or not to hide the options menu
-    local hide_options = false
+    local hide_options = true
 
     -- Create the tables used as nodes in the menu graph
     local New_Game = {}
@@ -14,12 +14,14 @@ MenuController = Class(Controller,function(self, view, ...)
     local Hint = {}
     local Help = {}
     local Show_Options = {}
+    local Exit = {}
 
     -- create the graph
     New_Game[Directions.DOWN] = Undo
     New_Game.object = view:get_object("new_game")
     New_Game.callback = 
         function()
+            game:reset_game()
         end
 
     Undo[Directions.UP] = New_Game
@@ -27,6 +29,7 @@ MenuController = Class(Controller,function(self, view, ...)
     Undo.object = view:get_object("undo")
     Undo.callback = 
         function()
+            game:undo_move()
         end
 
     Shuffle[Directions.UP] = Undo
@@ -34,6 +37,15 @@ MenuController = Class(Controller,function(self, view, ...)
     Shuffle.object = view:get_object("shuffle")
     Shuffle.callback = 
         function()
+            game:shuffle_game()
+        end
+
+    Hint[Directions.UP] = Shuffle
+    Hint[Directions.DOWN] = Help
+    Hint.object = view:get_object("hint")
+    Hint.callback =
+        function()
+            game:get_state():show_matching_tiles()
         end
 
     Help[Directions.UP] = Hint
@@ -44,10 +56,17 @@ MenuController = Class(Controller,function(self, view, ...)
         end
 
     Show_Options[Directions.UP] = Help
+    Show_Options[Directions.DOWN] = Exit
     Show_Options.object = view:get_object("show_options")
     Show_Options.callback =
         function()
+            hide_options = not hide_options
+            view:update(NotifyEvent())
         end
+
+    Exit[Directions.UP] = Show_Options
+    Exit.object = view:get_object("exit")
+    Exit.callback = function() exit() end
 
     -- the default selected index
     local selection = New_Game
@@ -75,31 +94,24 @@ MenuController = Class(Controller,function(self, view, ...)
     end
 
     function self:move_selector(dir)
-        -- if options are hidden and at the bottom level options can't move up!
-        if (selection == Undo_Move or  selection == Next_Move
-          or  selection == Deal_New_Hand or  selection == Hide_Options)
-          and hide_options and dir == Directions.UP
-          then
-            return
-        end
-
         -- move to the next node
         if selection[dir] then
             prev_selection = selection
             selection = selection[dir]
             view:move_focus()
         -- if moving down and nothing below then move down
-        elseif 1 == dir[2] and (not game:get_state():must_restart()) then
+        elseif 1 == dir[1] and (not game:get_state():must_restart()) then
             -- if options are not hidden then hide them first
             router:set_active_component(Components.GAME)
             if not self:is_options_hidden() then
-                Hide_Options:callback(false)
+                hide_options = true
+                Show_Options:callback()
             end
             router:notify()
         end
     end
 
-    function self:run_callback()
+    function self:return_pressed()
         if not selection.callback then
             error("callback not defined for this element: "..tostring(selection))
         end

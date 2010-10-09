@@ -15,10 +15,7 @@ function(gameloop, ...)
         end
         
         local progress
-        local element
         for i,props in ipairs(elements) do
-            progress = nil
-            element = props.element
             if props.wait then
                 if not (type(props.wait) == "number") then
                     error("wait needs a number", 3)
@@ -35,14 +32,14 @@ function(gameloop, ...)
             progress = Utils.clamp(0, (sw.elapsed-props.start)/props.duration, 1)
 
             for var,interval in pairs(props.vals) do
-                if type(interval) == "table" then
+                if type(interval) == "table" and not interval.is_a then
                     local temp_table = {}
                     for j,v in ipairs(interval) do
                         temp_table[j] = v:get_value(progress) 
                     end
-                    element[var] = temp_table
+                    props.element[var] = temp_table
                 else
-                    element[var] = interval:get_value(progress)
+                    props.element[var] = interval:get_value(progress)
                 end
             end
             if progress >= 1 then
@@ -78,6 +75,35 @@ function(gameloop, ...)
         disable_event_listeners()
         idle.on_idle = my_idle
     end
+
+    function gameloop:add_list(element, durations, intervals, callback)
+
+        if not element then error("no element", 2) end
+        if not durations then error("no durations table", 2) end
+        if not intervals then error("no intervals table", 2) end
+        if not type(durations) == "table" then
+            error("durations needs to be a table", 2)
+        end
+        if not type(intervals) == "table" then
+            error("intervals needs to be a table", 2)
+        end
+        if #intervals ~= #durations then
+            error("#intervals ~= #durations, should be a duration per interval", 2)
+        end
+
+        local current = callback
+        for i = #intervals,1,-1 do
+            local temp = current
+            current = function()
+                gameloop:add(element, durations[i], nil, intervals[i], temp)
+            end
+        end
+
+        current()
+
+    end
+
+    -- The game timer
     local t = Timer
     {
         interval = 1500,

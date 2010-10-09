@@ -1,9 +1,16 @@
-FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, text, extra, ...)
+FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, text, ...)
     if not x then return end
     assert(x)
     assert(y)
 --    assert(image_src)
 --    assert(focus_src)
+
+    if type(image_src) == "string" then
+        image_src = Image{src = image_src}
+    end
+    if type(focus_src) == "string" then
+        focus_src = Image{src = focus_src}
+    end
     
     focusimg.image = image_src
     focusimg.focus = focus_src
@@ -18,6 +25,9 @@ FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, text, extr
     focusimg.group:add(focusimg.image)
     focusimg.group:add(focusimg.focus)
     if text then
+        if type(text) == "string" then
+            text = Text{text = text, font = DEFAULT_FONT, color = DEFAULT_COLOR}
+        end
         focusimg.text = text
         focusimg.group:add(text)
         text.anchor_point = {text.width/2, text.height/2}
@@ -31,22 +41,24 @@ FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, text, extr
     
     function focusimg:on_focus()
         if focusimg.focus then
-            focusimg.focus:animate{duration = CHANGE_FOCUS_TIME, opacity = 255}
+            interval = {opacity = Interval(focusimg.focus.opacity, 255)}
+            gameloop:add(focusimg.focus, CHANGE_FOCUS_TIME, nil, interval)
         end
         if focusimg.image then
-            focusimg.image:animate{duration = CHANGE_FOCUS_TIME, opacity = 100}
+            interval = {opacity = Interval(focusimg.image.opacity, 100)}
+            gameloop:add(focusimg.image, CHANGE_FOCUS_TIME, nil, interval)
         end
-        if text then text.color = Colors.BLACK end
     end
 
     function focusimg:off_focus()
         if focusimg.focus then
-            focusimg.focus:animate{duration = CHANGE_FOCUS_TIME, opacity = 0}
+            interval = {opacity = Interval(focusimg.focus.opacity, 0)}
+            gameloop:add(focusimg.focus, CHANGE_FOCUS_TIME, nil, interval)
         end
         if focusimg.image then
-            focusimg.image:animate{duration = CHANGE_FOCUS_TIME, opacity = 255}
+            interval = {opacity = Interval(focusimg.image.opacity, 255)}
+            gameloop:add(focusimg.image, CHANGE_FOCUS_TIME, nil, interval)
         end
-        if text then text.color = Colors.WHITE end
     end
 
 end)
