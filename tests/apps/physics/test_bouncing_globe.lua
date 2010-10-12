@@ -89,6 +89,7 @@ if false then
     function screen.on_key_down( screen , key )
         if key == ret then
             physics:step()
+            physics:draw_debug()
         end
     end
 
