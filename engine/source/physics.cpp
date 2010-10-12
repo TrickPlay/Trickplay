@@ -90,6 +90,19 @@ void World::stop()
 
 void World::step( float32 time_step , int _velocity_iterations , int _position_iterations )
 {
+    // Bodies that we could not destroy during a callback are taken care of here.
+    // We only destroy a few at a time.
+
+    if ( ! to_destroy.empty() )
+    {
+        for( int i = 0; ! to_destroy.empty() && i < 5; ++i )
+        {
+            world.DestroyBody( to_destroy.front() );
+
+            to_destroy.pop_front();
+        }
+    }
+
     world.Step( time_step , _velocity_iterations , _position_iterations );
 
     for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
@@ -701,6 +714,15 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
     lua_pop( L , 1 );
 }
 
+//.............................................................................
+
+void World::destroy_body_later( b2Body * body )
+{
+    g_assert( body );
+
+    to_destroy.push_back( body );
+}
+
 //=============================================================================
 // ContactListener callbacks
 
@@ -773,7 +795,7 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
 
     // Attach a signal handler to be notified when the actor's mapped property changes
 
-    mapped_handler = g_signal_connect_after( G_OBJECT( actor ) , "notify::mapped" , ( GCallback ) actor_mapped_notify , this );
+    g_signal_connect_after( G_OBJECT( actor ) , "notify::mapped" , ( GCallback ) actor_mapped_notify , this );
 
 
     plog( "CREATED BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
@@ -844,18 +866,24 @@ void Body::destroy_actor_body( Body * self )
 
         self->body->SetActive( false );
 
-        // TODO: b2Bodies cannot be destroyed during callbacks. So, if an actor is
+        // b2Bodies cannot be destroyed during callbacks. So, if an actor is
         // collected during a collision callback, for example, the call to destroy the
-        // associated b2Body will fail.
+        // associated b2Body will fail. To get around this, we tell the
+        // world to destroy the body later.
 
-        self->body->GetWorld()->DestroyBody( self->body );
+        if ( self->body->GetWorld()->IsLocked() )
+        {
+            self->world->destroy_body_later( self->body );
+        }
+        else
+        {
+            self->body->GetWorld()->DestroyBody( self->body );
+        }
 
         self->body = 0;
     }
 
     g_assert( self->actor );
-
-    g_signal_handler_disconnect( self->actor , self->mapped_handler );
 
     self->actor = 0;
 
