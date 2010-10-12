@@ -95,7 +95,8 @@ end                        end
 
 local bg_red  = Image{src="assets/bg_red.jpg"}
 local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
-screen:add(bg_red,bg_blue,red_board,blue_board, Image{src="assets/logo.png",x=40,y=40})
+local top_left_logo =  Image{src="assets/logo.png",x=40,y=40,opacity=0}
+screen:add(bg_red,bg_blue,red_board,blue_board, top_left_logo)
 for i=1,3 do
 	blue_board:add( unpack(blue_blox[i]) )
 	red_board:add(  unpack( red_blox[i]) )
@@ -317,7 +318,14 @@ local right_list = {
 	FocusableImage({0,3*(blank_button_off.h+8)},"Restart Puzzle", 
 		blue_button_off, blue_button_on, 
 		function() 
-			game:restart() 
+			if red_is_on then
+				game = Game(game:get_all_givens(),nil,blue_blox)
+			else
+				game = Game(game:get_all_givens(),nil,red_blox)
+			end
+			dolater(flip_board)
+
+			--game:restart() 
 		end)
 }
 right_menu:add( right_list[1].group,right_list[2].group,right_list[3].group,right_list[4].group )
@@ -326,7 +334,8 @@ right_menu:add( right_list[1].group,right_list[2].group,right_list[3].group,righ
 --right_menu.y_rotation ={-25,right_menu.w/2,0}
 --right_menu.position = {screen.w - right_menu.w/2+80,red.h   + 90}
 right_menu.position = {screen.w/2+3/2*red.w+30+(screen.w/2-3/2*red.w - blank_button_off.w-30)/2,screen.h/2-red.h/2-10}
-
+right_menu.y_rotation = {-135,blank_button_off.w,0}
+right_menu.opacity=0
 local left_menu = Group{z=1}
 local left_list = {
 	FocusableImage({0,0},"New Puzzle", 
@@ -377,7 +386,8 @@ local left_list = {
 left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group,left_list[4].group )
 --left_menu.anchor_point = {left_menu.w/2,left_menu.h/2}
 left_menu.position = {(screen.w/2-3/2*red.w - blank_button_off.w-30)/2,screen.h/2-red.h/2-10}
-
+left_menu.y_rotation={135,0,0}
+left_menu.opacity=0
 
 local left_index = 1
 local right_index = 1
@@ -582,13 +592,13 @@ local splash_list1 =
 	FocusableImage({screen.w/2-blank_button_off.w - 20,screen.h/2+110},"Continue Game", 
 		blank_button_off,blank_button_on,
 		function() 
-			splash.opacity = 0			
+			--splash.opacity = 0			
 
 			focus = "GAME_BOARD"
 			selector.opacity = 255
-
+			dolater(splash_to_game)
 		end),
-	FocusableImage({screen.w/2+ 20,screen.h/2+110},"New Medium Game", 
+	FocusableImage({screen.w/2+ 20,screen.h/2+110},"New Game", 
 		blank_button_off,blank_button_on,
 		function() 
 			focus = "SPLASH_DIFF"
@@ -606,6 +616,7 @@ local curr_opt = 1
 
 local splash_diff = VertButtonCarousel(
 	"Difficulty",game_opts,{screen.w/2-blank_button_on.w/2,screen.h/2+50},blanks,arrows)
+splash_diff:on_focus()
 splash_items2:add(splash_diff.group)
 local splash_bg = Image{src="assets/splash-menu.png",x = screen.w/2,y = screen.h/2}
 splash_bg.anchor_point={splash_bg.w/2,splash_bg.h/2}
@@ -621,6 +632,36 @@ Directions = {
    DOWN  = { 0, 1},
    UP    = { 0,-1}
 }
+
+function splash_to_game(next_func)
+	local deg = 135
+	local timeline = Timeline
+	{
+		duration = 500
+	}
+	function timeline.on_new_frame(t,msecs,p)
+		left_menu.y_rotation = {deg*(1-p),0,0}
+		right_menu.y_rotation = {-deg*(1-p),blank_button_off.w,0}
+		left_menu.opacity = 255*p
+		right_menu.opacity = 255*p
+		top_left_logo.opacity = 255*p
+		splash.opacity = 255*(1-p)
+	end
+	function timeline:on_completed()
+		left_menu.y_rotation = {0,0,0}
+		right_menu.y_rotation = {0,blank_button_off.w,0}
+		left_menu.opacity = 255
+		right_menu.opacity = 255
+		top_left_logo.opacity = 255
+		splash.opacity = 0
+		if next_func then
+			dolater(next_func)
+		end
+	end
+	timeline:start()
+end
+
+
 local pencil_menu_index = 2
 focus = "SPLASH"
 local game_on = false
@@ -855,15 +896,15 @@ if settings.givens and settings.guesses then
 	splash_hor_index = 1
 	splash_list1[1]:on_focus()
 --[[
-	splash:find_child("cont").color    = "FF0000"
-	splash:find_child("new").color   = "FFFFFF"
+	splash:find_child("cont").color = "FF0000"
+	splash:find_child("new").color  = "FFFFFF"
 --]]
 else
 	game = nil
 	splash_list1[2]:on_focus()
 --[[
-	splash:find_child("cont").color    = "FFFFFF"
-	splash:find_child("new").color   = "FF0000"
+	splash:find_child("cont").color = "FFFFFF"
+	splash:find_child("new").color  = "FF0000"
 --]]
 end
 function splash_diff_on_key_down(k)
@@ -881,7 +922,7 @@ function splash_diff_on_key_down(k)
 			splash_diff:press_down()
 		end,
 		[ keys.Return ] = function()
-			splash.opacity = 0			
+			--splash.opacity = 0			
 			splash_items1.opacity=255
 			splash_items2.opacity=0
 
@@ -894,7 +935,8 @@ function splash_diff_on_key_down(k)
 			ind = {r=1,c=1}
 			focus = "GAME_BOARD"
 			selector.opacity = 255
-			dolater(flip_board)
+			--dolater(flip_board)
+			dolater(splash_to_game,flip_board)
 		end
 	}
 	if key[k] then key[k]() end	
@@ -922,44 +964,6 @@ function splash_on_key_down(k)
 			--game:on_focus(1,1)
 --]]
 			splash_list1[splash_hor_index]:press_enter()
-		end,
-		[keys.Down] = function()
-			if num_givens > 25 and splash_hor_index == 2 and curr_opt < 3 then
-				--num_givens = num_givens - 1
-				curr_opt = curr_opt + 1
-				num_givens = game_num[curr_opt]
-
---[[
-				splash:find_child("givens").text = num_givens
-				splash:find_child("givens_s").text = num_givens
---]]
-				local t = splash_list1[2].group:find_child("text")
-				t.text = "New "..game_opts[curr_opt].." Game"
-				t.anchor_point = {t.w/2,t.h/2}
-				t = splash_list1[2].group:find_child("text_s")
-				t.text = "New "..game_opts[curr_opt].." Game"
-				t.anchor_point = {t.w/2,t.h/2}
-				
-			end
-		end,
-		[keys.Up] = function()
-			if num_givens < 60 and splash_hor_index == 2 and curr_opt > 1 then
-				--num_givens = num_givens + 1
-				curr_opt = curr_opt - 1
-				num_givens = game_num[curr_opt]
---[[
-				splash:find_child("givens").text = num_givens
-				splash:find_child("givens_s").text = num_givens
---]]
-				local t = splash_list1[2].group:find_child("text")
-				t.text = "New "..game_opts[curr_opt].." Game"
-				t.anchor_point = {t.w/2,t.h/2}
-				t = splash_list1[2].group:find_child("text_s")
-				t.text = "New "..game_opts[curr_opt].." Game"
-				t.anchor_point = {t.w/2,t.h/2}
-
-			end
-
 		end,
 		[keys.Right] = function()
 			splash_hor_index = 2
