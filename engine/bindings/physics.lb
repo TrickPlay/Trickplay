@@ -119,7 +119,7 @@ interface Body [[ Physics::Body * ]]
 			self->body->SetActive( active );
 		]];
 
-	readonly table position
+	table position
 		[[
             self->check( L );
 
@@ -130,36 +130,91 @@ interface Body [[ Physics::Body * ]]
 			lua_rawseti( L , -2 , 1 );
 			lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
 			lua_rawseti( L , -2 , 2 );
+		]]
+		[[
+		    self->check( L );
+
+            lua_rawgeti( L , 2 , 1 );
+            lua_rawgeti( L , 2 , 2 );
+
+            const b2Vec2 pos( self->world->screen_to_world( lua_tonumber( L , -2 ) ) ,
+                    self->world->screen_to_world( lua_tonumber( L , -1 ) ) );
+
+            lua_pop( L , 2 );
+
+            self->body->SetTransform( pos , self->body->GetAngle() );
+
+            self->synchronize_actor();
 		]];
 
-	readonly double x
+	double x
         [[
             self->check( L );
 
             const b2Vec2 & pos( self->body->GetPosition() );
 
             x = self->world->world_to_screen( pos.x );
+        ]]
+        [[
+            self->check( L );
+
+            b2Vec2 pos( self->body->GetTransform().position );
+
+            pos.x = self->world->screen_to_world( x );
+
+            self->body->SetTransform( pos , self->body->GetAngle() );
+
+            self->synchronize_actor();
         ]];
 
-    readonly double y
+    double y
         [[
             self->check( L );
 
             const b2Vec2 & pos( self->body->GetPosition() );
 
             y = self->world->world_to_screen( pos.y );
+        ]]
+        [[
+            self->check( L );
+
+            b2Vec2 pos( self->body->GetTransform().position );
+
+            pos.y = self->world->screen_to_world( y );
+
+            self->body->SetTransform( pos , self->body->GetAngle() );
+
+            self->synchronize_actor();
         ]];
 
-	readonly double angle
+	double angle
 		[[
             self->check( L );
 			angle = Physics::World::radians_to_degrees( self->body->GetAngle() );
+		]]
+		[[
+		    self->check( L );
+
+            b2Vec2 pos( self->body->GetTransform().position );
+
+            self->body->SetTransform( pos , Physics::World::degrees_to_radians( angle ) );
+
+            self->synchronize_actor();
 		]];
 
-    readonly double rotation
+    double rotation
         [[
             self->check( L );
             rotation = Physics::World::radians_to_degrees( self->body->GetAngle() );
+        ]]
+        [[
+            self->check( L );
+
+            b2Vec2 pos( self->body->GetTransform().position );
+
+            self->body->SetTransform( pos , Physics::World::degrees_to_radians( rotation ) );
+
+            self->synchronize_actor();
         ]];
 
     readonly table world_center
