@@ -165,7 +165,7 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 		grid_of_groups[r][c].x = ((c-1)%3)*(TILE_WIDTH+TILE_GUTTER)
 				+ TILE_WIDTH/2
 		grid_of_groups[r][c].y = ((r-1)%3)*(TILE_WIDTH+TILE_GUTTER)
-				+ TILE_WIDTH/2+15
+				+ TILE_WIDTH/2
 --[[
 		grid_of_groups[r][c].x = screen.w/2+ (c-5)*(TILE_WIDTH+TILE_GUTTER)
 if c<=3 then
@@ -193,8 +193,8 @@ end
 				opacity=0
 			}
 			t.anchor_point={t.w/2,t.h/2}
-				t.x = TILE_WIDTH/2
-				t.y = TILE_WIDTH/2
+	--			t.x = TILE_WIDTH/2
+	--			t.y = TILE_WIDTH/2
 
 			grid_of_groups[r][c]:add(t)
 t.opacity=255
@@ -209,8 +209,8 @@ t.opacity=255
 					opacity = 0
 				}
 				t.anchor_point={t.w/2,t.h/2}
-				t.x = TILE_WIDTH/2
-				t.y = TILE_WIDTH/2
+		--		t.x = TILE_WIDTH/2
+		--		t.y = TILE_WIDTH/2
 
 				grid_of_groups[r][c]:add(t)
 				if guesses[r][c].pen == g then
@@ -223,8 +223,8 @@ t.opacity=255
 					opacity = 0
 				}
 				t.anchor_point={t.w/2,t.h/2}
-				t.x = TILE_WIDTH/2
-				t.y = TILE_WIDTH/2
+		--		t.x = TILE_WIDTH/2
+		--		t.y = TILE_WIDTH/2
 
 
 				grid_of_groups[r][c]:add(t)
@@ -237,8 +237,8 @@ t.opacity=255
 
 				t.scale = {1/2,1/2}
 				t.anchor_point={t.w/2,t.h/2}
-				t.x = ((g-1)%3+1)*TILE_WIDTH/4+15
-				t.y = (math.floor((g-1)/3)+1)*TILE_WIDTH/4+15
+				t.x = ((g-1)%3-1)*(TILE_WIDTH/4+5)
+				t.y = (math.floor((g-1)/3)-1)*(TILE_WIDTH/4+5)
 
 				grid_of_groups[r][c]:add(t)
 				
@@ -253,8 +253,8 @@ t.opacity=255
 
 				t.scale = {1/2,1/2}
 				t.anchor_point={t.w/2,t.h/2}
-				t.x = ((g-1)%3+1)*TILE_WIDTH/4+15
-				t.y = (math.floor((g-1)/3)+1)*TILE_WIDTH/4+15
+				t.x = ((g-1)%3-1)*(TILE_WIDTH/4+5)
+				t.y = (math.floor((g-1)/3)-1)*(TILE_WIDTH/4+5)
 
 
 				grid_of_groups[r][c]:add(t)
@@ -271,11 +271,11 @@ end)
 --backing.anchor_point = {backing.w/2,backing.h/2}
 --backing.x = backing.w/2
 --backing.y = backing.h/2
-		grid_of_groups[r][c].anchor_point = 
-		{
-			grid_of_groups[r][c].w/2,
-			grid_of_groups[r][c].h/2
-		}
+	--	grid_of_groups[r][c].anchor_point = 
+	--	{
+	--		grid_of_groups[r][c].w/2,
+	--		grid_of_groups[r][c].h/2
+	--	}
 		
 --(r-1)*TILE_WIDTH + math.floor((r-1)/3)*
 --		                         SET_GUTTER +(r-1)*TILE_GUTTER+TOP_GAP+
