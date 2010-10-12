@@ -61,4 +61,22 @@ FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, text, ...)
         end
     end
 
+    function focusimg:on_focus_inst()
+        if focusimg.focus then
+            focusimg.focus.opacity = 255
+        end
+        if focusimg.image then
+            focusimg.image.opacity = 0
+        end
+    end
+
+    function focusimg:off_focus_inst()
+        if focusimg.focus then
+            focusimg.focus.opacity = 0
+        end
+        if focusimg.image then
+            focusimg.image.opacity = 255
+        end
+    end
+
 end)

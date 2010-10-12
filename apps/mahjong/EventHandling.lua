@@ -31,7 +31,7 @@ end
 
 function disable_event_listeners()
     --t:disable()
-    event_listner_en = false
+    event_listener_en = false
 end
 
 function enable_event_listeners()

@@ -206,6 +206,7 @@ MenuView = Class(View, function(view, model, ...)
         gameloop:add(right_tile, 500, nil, right_interval,
             function()
                 gameloop:add(right_tile, 400, nil, {["opacity"]=Interval(255,0)})
+                enable_event_listeners()
             end)
     end
 
@@ -232,8 +233,8 @@ MenuView = Class(View, function(view, model, ...)
         local selected_object = self.controller:get_selection().object
         local prev_selected_object = self.controller:get_prev_selection().object
         assert(selected_object)
-        if prev_selected_object.off_focus then prev_selected_object:off_focus() end
-        if selected_object.on_focus then selected_object:on_focus() end
+        if prev_selected_object.off_focus then prev_selected_object:off_focus_inst() end
+        if selected_object.on_focus then selected_object:on_focus_inst() end
     end
 
     function view:update(event)
@@ -252,9 +253,9 @@ MenuView = Class(View, function(view, model, ...)
 
         -- hide focus if not the active component
         if controller:is_active_component() then
-            if selected_object.on_focus then selected_object:on_focus() end
+            if selected_object.on_focus then selected_object:on_focus_inst() end
         else
-            if selected_object.off_focus then selected_object:off_focus() end
+            if selected_object.off_focus then selected_object:off_focus_inst() end
         end
 ---[[
         if comp ~= Components.MENU then

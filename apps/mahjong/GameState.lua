@@ -448,7 +448,7 @@ GameState = Class(nil,function(state, ctrl)
         if #top_tiles == 0 then
             game:reset_game()
         else
-            game:shuffle_game()
+            router:set_active_component(Components.NO_MOVES_DIALOG)
         end
     end
 
