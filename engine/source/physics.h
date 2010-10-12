@@ -3,6 +3,7 @@
 
 #include "Box2D/Box2D.h"
 #include "clutter/clutter.h"
+#include "cairo.h"
 
 #include "common.h"
 #include "user_data.h"
@@ -21,7 +22,7 @@ namespace Physics
 
     //=========================================================================
 
-    class World : private b2ContactListener
+    class World : private b2ContactListener , private b2DebugDraw
     {
     public:
 
@@ -115,6 +116,12 @@ namespace Physics
 
         //.........................................................................
 
+        void draw_debug( int opacity );
+
+        void clear_debug();
+
+        //.........................................................................
+
         float32   ppm;  // Pixels per meter
 
     private:
@@ -129,6 +136,21 @@ namespace Physics
         virtual void PreSolve( b2Contact * contact , const b2Manifold * oldManifold );
 
         virtual void PostSolve( b2Contact * contact , const b2ContactImpulse * impulse );
+
+        //.........................................................................
+        // b2DebugDraw methods
+
+        virtual void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
+
+        virtual void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
+
+        virtual void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color);
+
+        virtual void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color);
+
+        virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color);
+
+        virtual void DrawTransform(const b2Transform& xf);
 
         //.........................................................................
 
@@ -165,6 +187,9 @@ namespace Physics
         GTimer *        timer;
 
         ClutterActor *  screen;
+
+        ClutterActor *  debug_draw;
+        cairo_t *       debug_cairo;
 
         typedef std::list< b2Body * > b2BodyList;
 
@@ -256,6 +281,8 @@ namespace Physics
         // is alive.
 
         UserData::Handle *  ud_handle;
+
+        gulong              mapped_handler;
     };
 };
 

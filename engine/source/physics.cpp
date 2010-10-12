@@ -23,7 +23,8 @@ World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_mete
     position_iterations( 2 ),
     idle_source( 0 ),
     timer( g_timer_new() ),
-    screen( CLUTTER_ACTOR( g_object_ref( _screen ) ) )
+    screen( CLUTTER_ACTOR( g_object_ref( _screen ) ) ),
+    debug_draw( 0 )
 {
     world.SetContactListener( this );
 }
@@ -32,6 +33,8 @@ World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_mete
 
 World::~World()
 {
+    clear_debug();
+
     // Remove the collision listener so we don't get callbacks while
     // destroying the world.
 
@@ -48,6 +51,7 @@ World::~World()
         // Tell the body wrapper that its body is gone
 
         Body::body_destroyed( body );
+
     }
 
     // Let go of the screen
@@ -754,10 +758,182 @@ void World::PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
     invoke_contact_callback( contact , POST_SOLVE_CONTACT , "on_post_solve_contact" );
 }
 
-//.............................................................................
+//=========================================================================
+// DebugDraw callbacks
 
+void World::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+{
+    g_assert( debug_cairo );
+
+    cairo_new_path( debug_cairo );
+
+    for ( int i = 0; i < vertexCount; ++i )
+    {
+        const b2Vec2 & v( vertices[ i ] );
+
+        cairo_line_to( debug_cairo , v.x , v.y );
+    }
+
+    cairo_close_path( debug_cairo );
+    cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
+    cairo_set_line_width( debug_cairo , 1 / ppm );
+    cairo_stroke( debug_cairo );
+}
+
+void World::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+{
+    g_assert( debug_cairo );
+
+    cairo_new_path( debug_cairo );
+
+    for ( int i = 0; i < vertexCount; ++i )
+    {
+        const b2Vec2 & v( vertices[ i ] );
+
+        cairo_line_to( debug_cairo , v.x , v.y );
+    }
+
+    cairo_close_path( debug_cairo );
+    cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
+    cairo_fill( debug_cairo );
+}
+
+void World::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color)
+{
+    g_assert( debug_cairo );
+
+    cairo_new_path( debug_cairo );
+    cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
+    cairo_arc( debug_cairo , center.x , center.y , radius , 0 , 0 );
+    cairo_set_line_width( debug_cairo , 1 / ppm );
+    cairo_stroke( debug_cairo );
+}
+
+void World::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+{
+    g_assert( debug_cairo );
+
+    cairo_new_path( debug_cairo );
+    cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
+    cairo_arc( debug_cairo , center.x , center.y , radius , 0 , 0 );
+    cairo_fill( debug_cairo );
+}
+
+void World::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+{
+    g_assert( debug_cairo );
+
+    cairo_new_path( debug_cairo );
+    cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
+    cairo_set_line_width( debug_cairo , 1 / ppm );
+    cairo_move_to( debug_cairo , p1.x , p1.y );
+    cairo_line_to( debug_cairo , p2.x , p2.y );
+    cairo_stroke( debug_cairo );
+}
+
+void World::DrawTransform(const b2Transform& xf)
+{
+#if 0
+
+    g_assert( debug_cairo );
+
+    cairo_save( debug_cairo );
+
+    cairo_move_to( debug_cairo , xf.position.x , xf.position.y );
+
+    cairo_rotate( debug_cairo , xf.GetAngle() );
+
+    cairo_line_to( debug_cairo , xf.position.x + 100 / ppm , xf.position.y );
+
+    cairo_set_line_width( debug_cairo , 1 / ppm );
+    cairo_stroke( debug_cairo );
+    cairo_restore( debug_cairo );
+#endif
+}
 
 //=========================================================================
+
+
+//.............................................................................
+
+void World::draw_debug( int opacity )
+{
+    if ( ! debug_draw )
+    {
+        gfloat w;
+        gfloat h;
+
+        clutter_actor_get_size( screen , & w , & h );
+
+        debug_draw = clutter_cairo_texture_new( w , h );
+
+        gdouble sx;
+        gdouble sy;
+
+        clutter_actor_get_scale( screen , & sx , & sy );
+
+        clutter_actor_set_scale( debug_draw , sx , sy );
+
+        ClutterActor * parent = clutter_actor_get_parent( screen );
+
+        clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , debug_draw );
+
+        g_object_ref( G_OBJECT( debug_draw ) );
+    }
+    else
+    {
+        clutter_cairo_texture_clear( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
+    }
+
+    clutter_actor_raise_top( debug_draw );
+
+    clutter_actor_set_opacity( debug_draw , opacity );
+
+    debug_cairo = clutter_cairo_texture_create( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
+
+    cairo_scale( debug_cairo , ppm , ppm );
+
+    b2DebugDraw::SetFlags(
+            b2DebugDraw::e_shapeBit
+            | b2DebugDraw::e_aabbBit
+            | b2DebugDraw::e_centerOfMassBit
+            | b2DebugDraw::e_jointBit
+            | b2DebugDraw::e_pairBit
+            );
+
+    world.SetDebugDraw( this );
+
+    world.DrawDebugData();
+
+    world.SetDebugDraw( 0 );
+
+    cairo_destroy( debug_cairo );
+
+    debug_cairo = 0;
+}
+
+//.............................................................................
+
+void World::clear_debug()
+{
+    if ( ! debug_draw )
+    {
+        return;
+    }
+
+    g_assert( CLUTTER_IS_ACTOR( debug_draw ) );
+
+    ClutterActor * parent = clutter_actor_get_parent( debug_draw );
+
+    if ( parent )
+    {
+        clutter_container_remove( CLUTTER_CONTAINER( parent ) , debug_draw , NULL );
+    }
+
+    g_object_unref( G_OBJECT( debug_draw ) );
+
+    debug_draw = 0;
+}
 
 //.............................................................................
 // This wrapper is owned by the Lua proxy for the body, but the actor will
@@ -773,7 +949,8 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
     world( _world ),
     body( _body ),
     actor( _actor ),
-    ud_handle( 0 )
+    ud_handle( 0 ),
+    mapped_handler( 0 )
 {
     g_assert( world );
     g_assert( body );
@@ -795,7 +972,7 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
 
     // Attach a signal handler to be notified when the actor's mapped property changes
 
-    g_signal_connect_after( G_OBJECT( actor ) , "notify::mapped" , ( GCallback ) actor_mapped_notify , this );
+    mapped_handler = g_signal_connect_after( G_OBJECT( actor ) , "notify::mapped" , ( GCallback ) actor_mapped_notify , this );
 
 
     plog( "CREATED BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
@@ -842,6 +1019,13 @@ void Body::body_destroyed( b2Body * body )
     {
         plog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
 
+        if ( self->actor )
+        {
+            // This will end up calling destroy_actor_body below
+
+            g_object_set_qdata( G_OBJECT( self->actor ) , get_actor_body_quark() , 0 );
+        }
+
         self->body = 0;
     }
 }
@@ -884,6 +1068,13 @@ void Body::destroy_actor_body( Body * self )
     }
 
     g_assert( self->actor );
+
+    if ( g_signal_handler_is_connected( G_OBJECT( self->actor ) , self->mapped_handler ) )
+    {
+        g_signal_handler_disconnect( G_OBJECT( self->actor ) , self->mapped_handler );
+    }
+
+    self->mapped_handler = 0;
 
     self->actor = 0;
 

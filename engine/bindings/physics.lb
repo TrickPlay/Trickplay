@@ -769,6 +769,16 @@ global physics [[ Physics::World * ]]
 		[[
             self->step( time_step , velocity_iterations , position_iterations );
 		]];
+
+	draw_debug( int opacity = 127 )
+        [[
+            self->draw_debug( opacity );
+        ]];
+
+	clear_debug()
+        [[
+            self->clear_debug();
+        ]];
 		
 	Body Body( table properties )
 		[[
