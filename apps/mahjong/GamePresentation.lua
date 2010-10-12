@@ -224,7 +224,8 @@ function(pres, ctrl)
         })
         table.insert(left_durations, 700)
 
-        table.insert(left_intervals_t, {["y"]=Interval(left_y,1200)})
+        table.insert(left_intervals_t,
+            {["y"]=Interval(left_y,1200), ["opacity"]=Interval(255,0)})
         table.insert(left_durations, 400)
 
         right_tile.z = right_tile.z + 1
@@ -247,7 +248,8 @@ function(pres, ctrl)
         })
         table.insert(right_durations, 700)
 
-        table.insert(right_intervals_t, {["y"]=Interval(median.y,1200)})
+        table.insert(right_intervals_t,
+            {["y"]=Interval(median.y,1200), ["opacity"]=Interval(255,0)})
         table.insert(right_durations, 400)
         gameloop:add_list(right_tile, right_durations, right_intervals_t,
             function()

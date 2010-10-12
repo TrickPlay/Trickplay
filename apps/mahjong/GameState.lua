@@ -353,7 +353,19 @@ GameState = Class(nil,function(state, ctrl)
 
     end
 
-    function state:check_remaining_moves(hint)
+    function state:hint()
+        local tile_1 = nil
+        local tile_2 = nil
+        for _,tile in pairs(matching_tiles) do
+            if not tile_1 then
+                tile_1 = tile
+            elseif tile:is_a_match(tile_1) then
+                tile_2 = tile
+            end
+        end
+
+        tile_1:set_green()
+        tile_2:set_green()
     end
 
     function state:click(selector)

@@ -45,7 +45,7 @@ MenuController = Class(Controller,function(self, view, ...)
     Hint.object = view:get_object("hint")
     Hint.callback =
         function()
-            game:get_state():show_matching_tiles()
+            game:get_state():hint()
         end
 
     Help[Directions.UP] = Hint
