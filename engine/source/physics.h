@@ -111,6 +111,10 @@ namespace Physics
 
         //.........................................................................
 
+        void destroy_body_later( b2Body * body );
+
+        //.........................................................................
+
         float32   ppm;  // Pixels per meter
 
     private:
@@ -161,6 +165,10 @@ namespace Physics
         GTimer *        timer;
 
         ClutterActor *  screen;
+
+        typedef std::list< b2Body * > b2BodyList;
+
+        b2BodyList      to_destroy;
     };
 
     //=========================================================================
@@ -248,11 +256,6 @@ namespace Physics
         // is alive.
 
         UserData::Handle *  ud_handle;
-
-        //.....................................................................
-        // Signal handler for mapped
-
-        gulong              mapped_handler;
     };
 };
 
