@@ -9,7 +9,7 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 		name = "buttonsss",
 		source = image_clone,
 		anchor_point = {image_clone.w/2,image_clone.h/2},
-		position = {pos[1], pos[2]}
+		position = {image_clone.w/2,image_clone.h/2}
 	}
 
     focusimg.focus = Clone
@@ -17,10 +17,10 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 		source = focus_clone,
 		anchor_point = {focus_clone.w/2,focus_clone.h/2},
 		opacity = 0,
-		position = {pos[1], pos[2]}
+		position = {focus_clone.w/2,focus_clone.h/2}
 	}
 
-    focusimg.group = Group()
+    focusimg.group = Group{x=pos[1],y=pos[2]}
     focusimg.group:add(focusimg.image, focusimg.focus)
     if txt ~= nil then
 		local t_shadow = Text
@@ -32,10 +32,10 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 		}
 		t_shadow.anchor_point = {t_shadow.w/2,t_shadow.h/2}
 		t_shadow.position     = 
-		{
-			pos[1]-1,
-			pos[2]-1
-		}
+		{focus_clone.w/2-1,focus_clone.h/2-1}
+--			pos[1]-1,
+--			pos[2]-1
+--		}
 
 		local t = Text
 		{
@@ -46,10 +46,10 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 		}
 		t.anchor_point = {t.w/2,t.h/2}
 		t.position     = 
-		{
-			pos[1],
-			pos[2]
-		}
+		{focus_clone.w/2,focus_clone.h/2}
+--			pos[1],
+--			pos[2]
+--		}
         focusimg.group:add(t_shadow,t)
     end
     function focusimg:on_focus()
@@ -78,7 +78,7 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 	focusimg:out_focus()
 end)
 
-ButtonCarousel = Class(function(
+VertButtonCarousel = Class(function(
 	menu,name,options,pos,buttons,arrows,rotate_func,...)
 
 	--sanity checks
@@ -98,44 +98,42 @@ ButtonCarousel = Class(function(
 	{
 		source = buttons[1],
 		anchor_point = {buttons[1].w/2,buttons[1].h/2},
-		position = {pos[1], pos[2]}
+		position = {buttons[1].w/2,buttons[1].h/2+arrows[1].h}
 	}
 	menu.focus = Clone
 	{
 		source = buttons[2],
 		anchor_point = {buttons[2].w/2,buttons[2].h/2},
-		position = {pos[1], pos[2]}
+		position = {buttons[2].w/2,buttons[2].h/2+arrows[1].h}
 
 	}
-	menu.right_un  = Clone
+	menu.up_un  = Clone
 	{
 		source = arrows[1],
 		anchor_point = {arrows[1].w/2,arrows[1].h/2},
-		position = {menu.focus.x + menu.focus.w/2+arrows[1].w/2+15,
-			menu.focus.y}
+		position = {buttons[2].w/2,arrows[1].h/2 }
 	}
-	menu.right_sel = Clone
+	menu.up_sel = Clone
 	{
 		source = arrows[2],
 		anchor_point = {arrows[2].w/2,arrows[2].h/2},
 		opacity = 0,
-		position = {menu.focus.x + menu.focus.w/2+arrows[2].w/2+15,
-			menu.focus.y}
+		position = {buttons[2].w/2,arrows[2].h/2 }
 	}
-	menu.left_un   = Clone
+	menu.down_un   = Clone
 	{
 		source = arrows[3],
 		anchor_point = {arrows[3].w/2,arrows[3].h/2},
-		position = {menu.focus.x - menu.focus.w/2-arrows[3].w/2 -15,
-			menu.focus.y}
+		position = {buttons[2].w/2,arrows[1].w+buttons[1].h+
+		                           arrows[3].h/2 }
 	}
-	menu.left_sel  = Clone
+	menu.down_sel  = Clone
 	{
 		source = arrows[4],
 		anchor_point = {arrows[4].w/2,arrows[4].h/2},
 		opacity = 0,
-		position = {menu.focus.x - menu.focus.w/2-arrows[4].w/2-15,
-			menu.focus.y}
+		position = {buttons[2].w/2,arrows[1].w+buttons[1].h+
+		                           arrows[3].h/2 }
 	}
 	menu.name = Text
 	{
@@ -143,25 +141,28 @@ ButtonCarousel = Class(function(
 		font = "DejaVu Sans Bold 36px",
 		color = "FFFFFF",
 	}
+--[[
 	menu.name.anchor_point = {menu.name.w/2,menu.name.h/2}
-	menu.name.position = {menu.focus.x - menu.focus.w/2 - menu.name.w/2 - 55,menu.focus.y}
-	menu.group = Group{}
+	menu.name.position = {menu.focus.x - menu.focus.w/2 - 
+		menu.name.w/2 - 55,menu.focus.y}
+--]]
+	menu.group = Group{x=pos[1],y=pos[2]}
 	menu.txt_group = Group{}
 	menu.group:add(
 		menu.unfocus,
 		menu.focus,
-		menu.right_un,
-		menu.right_sel,
-		menu.left_un,
-		menu.left_sel,
-		menu.txt_group,
-		menu.name
+		menu.up_un,
+		menu.up_sel,
+		menu.down_un,
+		menu.down_sel,
+		menu.txt_group
+--		menu.name
 	)
 	---[[
 	menu.txt_group.clip = 
 	{
-		pos[1]-menu.focus.w/2+10, pos[2]-menu.focus.h/2,
-		menu.focus.w-20,          menu.focus.h
+		0, arrows[1].h+10,
+		buttons[1].w,          buttons[1].h-10
 	}
 --]]
 	menu.items = {}
@@ -179,6 +180,7 @@ ButtonCarousel = Class(function(
 			txt.w/2,
 			txt.h/2+2
 		}
+		--txt.position = {}
 		local t_shadow = Text
 		{
 			text  = options[i],
@@ -197,8 +199,8 @@ ButtonCarousel = Class(function(
 
 	--first item selected
 	menu.items[1].opacity = 255
-	menu.items[1].x       = pos[1] --+ menu.focus.w/2
-	menu.items[1].y       = pos[2]-- + menu.focus.h/2
+	menu.items[1].x       = buttons[1].w/2 --+ menu.focus.w/2
+	menu.items[1].y       = arrows[1].h+buttons[1].h/2-- + menu.focus.h/2
 
 	--hover events
 	function menu:on_focus()
@@ -211,21 +213,20 @@ ButtonCarousel = Class(function(
 	end
 	local t = nil
 	--key press events
-	function menu:press_left()
+	function menu:press_up()
 		local prev_i = index
 		local next_i = (index-1-1)%(#menu.items)+1
 
-print(prev_i,next_i, #menu.items,"hi")
 		index = next_i
-		local prev_old_x = pos[1]--+menu.focus.w/2
-		local prev_old_y = pos[2]--+menu.focus.h/2
-		local next_old_x = pos[1]+menu.focus.w--+3*menu.focus.w/2
-		local next_old_y = pos[2]--+menu.focus.h/2
+		local prev_old_x = buttons[1].w/2--+menu.focus.w/2
+		local prev_old_y = arrows[1].h+buttons[1].h/2--+menu.focus.h/2
+		local next_old_x = buttons[1].w/2--+3*menu.focus.w/2
+		local next_old_y = arrows[1].h+15+3*buttons[1].h/2--+menu.focus.h/2
 
-		local prev_new_x = pos[1]-menu.focus.w--/2
-		local prev_new_y = pos[2]--+menu.focus.h/2
-		local next_new_x = pos[1]--+menu.focus.w/2
-		local next_new_y = pos[2]--+menu.focus.h/2
+		local prev_new_x = buttons[1].w/2--/2
+		local prev_new_y = arrows[1].h-buttons[1].h/2--+menu.focus.h/2
+		local next_new_x = buttons[1].w/2--+menu.focus.w/2
+		local next_new_y = arrows[1].h+buttons[1].h/2--+menu.focus.h/2
 		if t ~= nil then
 			t:stop()
 			t:on_completed()
@@ -239,11 +240,11 @@ print(prev_i,next_i, #menu.items,"hi")
 
 		function t.on_new_frame(t,msecs,p)
 			if msecs <= 100 then
-				menu.left_sel.opacity = 255* msecs/100
+				menu.up_sel.opacity = 255* msecs/100
 			elseif msecs <= 200 then
-				menu.left_sel.opacity = 255
+				menu.up_sel.opacity = 255
 			else 
-				menu.left_sel.opacity = 255*(1- (msecs-200)/100)
+				menu.up_sel.opacity = 255*(1- (msecs-200)/100)
 			end
 			menu.items[prev_i].x = prev_old_x + p*(prev_new_x - prev_old_x)
 			menu.items[prev_i].y = prev_old_y + p*(prev_new_y - prev_old_y)
@@ -265,20 +266,20 @@ print(prev_i,next_i, #menu.items,"hi")
 
 		t:start()
 	end
-	function menu:press_right()
+	function menu:press_down()
 		local prev_i = index
 		local next_i = (index+1-1)%(#menu.items) + 1
 print(prev_i,next_i)
 		index = next_i
-		local prev_old_x = pos[1]--+menu.focus.w/2
-		local prev_old_y = pos[2]--+menu.focus.h/2
-		local next_old_x = pos[1]-menu.focus.w--/2
-		local next_old_y = pos[2]--+menu.focus.h/2
+		local prev_old_x = buttons[1].w/2--+menu.focus.w/2
+		local prev_old_y = arrows[1].h+buttons[1].h/2--+menu.focus.h/2
+		local next_old_x = buttons[1].w/2--/2
+		local next_old_y = arrows[1].h-buttons[1].h/2--+menu.focus.h/2
 
-		local prev_new_x = pos[1]+menu.focus.w--+3*menu.focus.w/2
-		local prev_new_y = pos[2]--+menu.focus.h/2
-		local next_new_x = pos[1]--+menu.focus.w/2
-		local next_new_y = pos[2]--+menu.focus.h/2
+		local prev_new_x = buttons[1].w/2--+3*menu.focus.w/2
+		local prev_new_y = arrows[1].h+3*buttons[1].h/2--+menu.focus.h/2
+		local next_new_x = buttons[1].w/2--+menu.focus.w/2
+		local next_new_y = arrows[1].h+buttons[1].h/2--+menu.focus.h/2
 		if t ~= nil then
 			t:stop()
 			t:on_completed()
@@ -293,11 +294,11 @@ print(prev_i,next_i)
 
 		function t.on_new_frame(t,msecs,p)
 			if msecs <= 100 then
-				menu.right_sel.opacity = 255* msecs/100
+				menu.down_sel.opacity = 255* msecs/100
 			elseif msecs <= 200 then
-				menu.right_sel.opacity = 255
+				menu.down_sel.opacity = 255
 			else 
-				menu.right_sel.opacity = 255*(1- (msecs-200)/100)
+				menu.down_sel.opacity = 255*(1- (msecs-200)/100)
 			end
 
 			menu.items[prev_i].x = prev_old_x + p*(prev_new_x - prev_old_x)
@@ -326,9 +327,9 @@ print(prev_i,next_i)
 		t:start()
 
 	end
-	function menu:press_up()
+	function menu:press_left()
 	end
-	function menu:press_down()
+	function menu:press_right()
 	end
 	function menu:press_enter()
 	end
