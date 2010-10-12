@@ -96,7 +96,7 @@ local layout_functions = {
         return grid
     end,
     
-    [Layouts.CLUB] = function(tiles)
+    [Layouts.CUBE] = function(tiles)
         local index = 1
         local grid = {}
         for i = 1,GRID_WIDTH do
@@ -271,7 +271,24 @@ local layout_functions = {
             end
         end
 
-        
+        for j = 1,3,2 do
+            -- top left corner
+            grid[1][j][1] = tiles[index]
+            index = index + 1
+            -- edged to the right right above
+            grid[2][j+1][2] = tiles[index]
+            index = index + 1
+        end
+
+        grid[2][5][1] = tiles[index]
+        index = index + 1
+
+        for i = 3,5,2 do
+            grid[i+1][6][1] = tiles[index]
+            index = index + 1
+            grid[i][6][2] = tiles[index]
+            index = index + 1
+        end
 
         return grid
     end,
