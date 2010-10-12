@@ -47,7 +47,7 @@ function(gameloop, ...)
                 if props.on_completed then props.on_completed() end
             end
         end
-        
+       
     end
 
     function gameloop:add(element, duration, wait, intervals, on_completed)

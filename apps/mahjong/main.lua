@@ -2,7 +2,8 @@ Components = {
     COMPONENTS_FIRST = 1,
     GAME = 1,
     MENU = 2,
-    COMPONENTS_LAST = 2
+    NO_MOVES_DIALOG = 3,
+    COMPONENTS_LAST = 3
 }
 
 Events = {
@@ -57,10 +58,13 @@ timer.on_timer = function(timer)
         game = GameControl(router, Components.GAME)
         game_menu = MenuView(router)
         game_menu:initialize()
+        local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components.NO_MOVES_DIALOG,
+            router)
 
         splash:unparent()
 
         router:start_app(Components.GAME)
+        --router:start_app(Components.NO_MOVES_DIALOG)
     end}
 end
 
