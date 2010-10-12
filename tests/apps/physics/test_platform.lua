@@ -68,6 +68,8 @@ local goat = physics:Body
     shape           = physics:Edge( { - GOAT_FEET_HALF_WIDTH , goat_hh } , { GOAT_FEET_HALF_WIDTH , goat_hh } )
 }
 
+local goat_handle = goat.handle
+
 --------------------------------------------------------------------------------
 -- Half height of a platform
 
@@ -88,21 +90,16 @@ local function make_platforms()
 
     local result = {}
     
+    local platforms_by_handle = {}
+    
     local function default_newx()
         return math.random( 100 , screen_w - 100 )
     end
     
     local function default_add_goodie( platform_actor , platform_body , goat , score )
     end
-    
-    local function default_clear_goodie( platform_actor , platform_body )
-        local children = platform_actor.children
-        for i = 2 , # children do
-            platform_actor:remove( children[ i ] )
-        end
-    end
-    
-    local function push_platform( x , y , newx , add_goodie , clear_goodie )
+        
+    local function push_platform( x , y , newx , add_goodie , clear_goodie , goodie_contact )
     
         local actor = Group
         {
@@ -115,19 +112,6 @@ local function make_platforms()
             }
         }
         
-        -- Function to change the x of the platform when it gets recycled
-        
-        actor.extra.newx = newx or default_newx
-        
-        -- Function to add a goodie to the platform
-        
-        actor.extra.add_goodie = add_goodie or default_add_goodie
-        
-        -- Function to clear goodies
-        
-        actor.extra.clear_goodie = clear_goodie or default_clear_goodie
-        
-
         -- The body
         
         local body = physics:Body
@@ -140,9 +124,69 @@ local function make_platforms()
             sensor      = true
         }
         
+        -- Function to change the x of the platform when it gets recycled
+        
+        actor.extra.newx = newx or default_newx
+        
+        -- Function to add a goodie to the platform
+        
+        actor.extra.add_goodie = add_goodie or default_add_goodie
+        
+
+        -- Get the handle to the default fixture so
+        -- that we can remove other fixtures and keep this one
+        
+        local default_fixture = body.fixtures[ 1 ].handle
+        
+        body.extra.default_fixture = default_fixture
+        
+        function actor.extra.clear_goodie( platform_actor , platform_body )
+        
+            -- Call the user provided function if any
+            
+            if clear_goodie then
+                clear_goodie()
+            end
+            
+            -- Remove all but the first child
+            
+            local children = platform_actor.children
+            for i = 2 , # children do
+                platform_actor:remove( children[ i ] )
+            end
+            
+            -- Remove all but the default fixture
+            
+            local fixtures = platform_body.fixtures
+            
+            if # fixtures > 1 then
+                local handle
+                for i = 1 , # fixtures do
+                    handle = fixtures[ i ].handle
+                    if handle ~= default_fixture then
+                        platform_body:remove_fixture( handle )
+                    end
+                end
+            end
+        end
+        
+        function actor.extra.goodie_contact( platform_actor , platform_body , goat , contact )
+        
+            if contact.other_fixture[ default_fixture ] or not goodie_contact then
+                return false
+            end
+            
+            return goodie_contact( platform_actor , platform_body , goat , contact )
+            
+        end
+        
         screen:add( actor )
         
-        table.insert( result , { body , actor } )
+        local pair = { body , actor }
+        
+        table.insert( result , pair )
+        
+        platforms_by_handle[ body.handle ] = pair
         
     end
 
@@ -174,51 +218,55 @@ local function make_platforms()
     
     local function method2()
     
-        local function add_goodie( platform , goat , score )
-        
-            do
+        local function add_goodie( platform_actor , platform_body , goat , score )
+                    
+            if score < 10 then
                 return
             end
             
-            
-            if score < 10 then
+            if math.random( 100 ) > 10 then
                 return
             end
             
             local r = Rectangle
             {
-                color = "FF0000" ,
+                color = "0000FF" ,
                 size = { 60 , 30 },
-                position = { platform.w / 2 - 30 , -30 }
+                anchor_point = { 30 , 15 },
+                position = { platform.w / 2 , -15 }
             }
             
-            platform:add( r )
+            platform_actor:add( r )
             
-            local spring = physics:Body
+            local spring =
             {
-                source = r,
-                type = "static",
-                density = 1
+                shape = physics:Box( r.size , { 0 , - ( platform_hh + 15 ) } ),
+                density = 1,
+                sensor = true
             }
             
-            function spring.on_begin_contact( spring , contact )
+            platform_body:add_fixture( spring )
+                        
+        end
+        
+        local function goodie_contact( platform_actor , platform_body , goat , contact )
+        
+            print( "SPROING!" )
+        
+            local mass = goat.mass
+            local vx , vy = unpack( goat.linear_velocity )
             
-                print( "SPROING!" )
+            if vy >= 0 then
             
-                local mass = goat.mass
-                local vx , vy = unpack( goat.linear_velocity )
-                
-                if vy >= 0 then
-                
-                    local fy = -( ( mass * vy ) * 3  + ( GOAT_TARGET_VY - vy ) )
-                
-                    goat:apply_linear_impulse( { 0 , fy } , goat.position )
-                    
-                end
+                local fy = -( ( mass * vy ) * 3  + ( GOAT_TARGET_VY - vy ) )
+            
+                goat:apply_linear_impulse( { 0 , fy } , goat.position )
                 
             end
             
         end
+            
+        
     
         push_platform( screen_w / 2 , screen_h - 50 , nil , add_goodie )
         
@@ -247,7 +295,9 @@ local function make_platforms()
                         return math.random( ( w * ( j - 1 ) ) + 100 , ( w * j ) - 100 )
                     end,
                     
-                    add_goodie
+                    add_goodie,
+                    nil,
+                    goodie_contact
                     )
                 
             end
@@ -260,14 +310,14 @@ local function make_platforms()
 
     method2()
     
-    return result
+    return result , platforms_by_handle
         
 end
 
 
 --------------------------------------------------------------------------------
 
-local platforms = make_platforms()
+local platforms , platforms_by_handle = make_platforms()
 
 --------------------------------------------------------------------------------
 
@@ -287,6 +337,21 @@ screen:add( score_text )
 -- When the goat collides with a platform, we give it an impulse up
 
 function goat.on_begin_contact( goat , contact )
+
+    local pair = platforms_by_handle[ contact.other_body[ goat_handle ] ]
+    
+    if pair then
+    
+        local platform_body , platform_actor = unpack( pair )
+        
+        if platform_actor.extra.goodie_contact( platform_body , platform_actor , goat , contact ) then
+        
+            return
+            
+        end
+    
+    end
+    
 
     local mass = goat.mass
     local vx , vy = unpack( goat.linear_velocity )
@@ -347,6 +412,8 @@ end
 
 local scrolling = false
 
+local x
+local y
 local vx
 local vy
 local dy
@@ -361,38 +428,39 @@ function idle.on_idle( idle , seconds )
     end
     
     physics:step( seconds )
+    
+    physics:draw_debug()
 
     -- This wraps the goat around the screen horizontally
     
-    if goat_actor.x > screen_w then
+    x = goat_actor.x
+    y = goat_actor.y
     
-        goat_actor.x = goat_actor.x - screen_w
-        goat:synchronize()
+    if x > screen_w then
+    
+        goat.x = x - screen_w
         
-    elseif goat_actor.x < 0 then
+    elseif x < 0 then
     
-        goat_actor.x = screen_w + goat_actor.x
-        goat:synchronize()
+        goat.x = screen_w + x
         
     end
         
     -- Goat went past the bottom of the screen
         
-    if goat_actor.y > screen_h then
+    if y > screen_h then
         
         -- DEAD!
         
-        goat_actor.y = 0 - goat_hh
-        goat_actor.x = screen_w / 2 
+        goat.position = { screen_w / 2 , 0 - goat_hh }
         goat.linear_velocity = { 0 , 0 }
-        goat:synchronize()
         
         score = 0
         score_text.text = "0"
         
     -- Or, it got high enough to scroll down
     
-    elseif goat_actor.y < screen_h / 4 then
+    elseif y < screen_h / 4 then
     
         -- Goat is over the top of the screen, we should scroll platforms, but
         -- only when the goat is traveling up ( negative vy )
@@ -413,7 +481,7 @@ function idle.on_idle( idle , seconds )
             
             -- Clamp the goat
             
-            goat_actor.y = screen_h / 4
+            goat.y = screen_h / 4
             
             -- Move all the platforms
             
@@ -431,22 +499,18 @@ function idle.on_idle( idle , seconds )
                     
                     extra = platform_actor.extra
                     
-                    --extra.clear_goodie( platform_actor , platform )
+                    extra.clear_goodie( platform_actor , platform )
                     
-                    platform_actor.x = extra.newx()
+                    platform.x = extra.newx()
                     
-                    --extra.add_goodie( platform_actor , platform , goat , score )
+                    extra.add_goodie( platform_actor , platform , goat , score )
                 
                 end
             
-                platform_actor.y = vy
-                
-                platform:synchronize()
+                platform.y = vy
                 
             end
-            
-            goat:synchronize()
-            
+                        
         end
         
     end
@@ -454,3 +518,11 @@ function idle.on_idle( idle , seconds )
 end
 
 -------------------------------------------------------------------------------
+
+--[[
+function clear()
+    screen:clear()
+    platforms = nil
+    platforms_by_handle = nil
+end
+]]
