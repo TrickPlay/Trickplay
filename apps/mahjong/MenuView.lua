@@ -3,15 +3,21 @@ MenuView = Class(View, function(view, model, ...)
 
 ------------ Load Assets ------------
 
+    -- main menu
     local menu_bars = {
         Image{src = "assets/menus/menu.jpg"}
     }
-    local menu_options = Image{src = "assets/menus/options-menu.png", x = 0}
-    menu_options.y = 1070 - menu_options.height
     local menu_drop_shadow = Image{
         src="assets/menus/menu-drop-shadow.png",
         x = 395
     }
+
+    -- map selection, tile selection menu
+    local menu_options_back = Image{src = "assets/menus/options-menu.png"}
+    local menu_options = Group()
+    menu_options:add(menu_options_back)
+    menu_options.y = 1070 - menu_options.height
+
 
     --
     view.items = {
@@ -193,8 +199,14 @@ MenuView = Class(View, function(view, model, ...)
             ["x"] = Interval(right_tile.x, right_tile.x - 8)
         }
 
-        gameloop:add(left_tile, 500, nil, left_interval)
-        gameloop:add(right_tile, 500, nil, right_interval)
+        gameloop:add(left_tile, 500, nil, left_interval, 
+            function()
+                gameloop:add(left_tile, 400, nil, {["opacity"]=Interval(255,0)})
+            end)
+        gameloop:add(right_tile, 500, nil, right_interval,
+            function()
+                gameloop:add(right_tile, 400, nil, {["opacity"]=Interval(255,0)})
+            end)
     end
 
     function view:remove_tile_images()
