@@ -21,8 +21,8 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
     local dialog_text = Text{
         text = string,
         position = {dialog.width/2, dialog.height/2-100},
-        font = MENU_FONT_BOLD,
-        color = Colors.BROWN
+        font = MENU_FONT,
+        color = Colors.ERASER_RUST
     }
     dialog_text.anchor_point = {dialog_text.width/2, dialog_text.height/2}
     local dialog_note = Text{
@@ -42,11 +42,11 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
 
     local first_text = Text{
         font = DEFAULT_FONT,
-        color = Colors.YELLOW
+        color = DEFAULT_COLOR
     }
     local second_text = Text{
         font = DEFAULT_FONT,
-        color = Colors.YELLOW
+        color = DEFAULT_COLOR
     }
     if id == Components.NO_MOVES_DIALOG then
         first_text.text = "Shuffle Tiles"

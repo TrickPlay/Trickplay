@@ -20,29 +20,31 @@ MAX_X = 15
 MAX_Y = 8
 
 Directions = {
-   RIGHT = {1,0},
-   LEFT = {-1,0},
-   DOWN = {0,1},
-   UP = {0,-1}
+    RIGHT = {1,0},
+    LEFT = {-1,0},
+    DOWN = {0,1},
+    UP = {0,-1}
 }
 
 Colors={
-   SLATE_GRAY                   ="708090",
-   WHITE                        ="FFFFFF",
-   FIRE_BRICK                   ="B22222",
-   LIME_GREEN                   ="32CD32",
-   TURQUOISE                    ="40E0D0",
-   BLACK                        ="000000",
-   RED                          ="FF0000",
-   YELLOW                       ="FFFF00",
-   GREEN                        ="00FF00",
-   BLUE                         ="0000FF",
-   MAGENTA                      ="FF00FF",
-   CYAN                         ="00FFFF",
-   ORANGE                       ="FFA500",
-   PURPLE                       ="A020F0",
-   PERU                         ="CD853F",
-   FOCUS_RED                    ="602020"
+    SLATE_GRAY                   ="708090",
+    WHITE                        ="FFFFFF",
+    FIRE_BRICK                   ="B22222",
+    LIME_GREEN                   ="32CD32",
+    TURQUOISE                    ="40E0D0",
+    BLACK                        ="000000",
+    RED                          ="FF0000",
+    ERASER_RUST                  ="5E2308",
+    YELLOW                       ="FFFF00",
+    AWESOME_YELLOW               ="FFFF99",
+    GREEN                        ="00FF00",
+    BLUE                         ="0000FF",
+    MAGENTA                      ="FF00FF",
+    CYAN                         ="00FFFF",
+    ORANGE                       ="FFA500",
+    PURPLE                       ="A020F0",
+    PERU                         ="CD853F",
+    FOCUS_RED                    ="602020"
 }
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"
@@ -54,12 +56,12 @@ CUSTOMIZE_SUB_FONT_B  = "KacstArt 36px"
 CUSTOMIZE_SUB_FONT_SP  = "KacstArt 42px"
 CUSTOMIZE_NAME_FONT = "KacstArt 144px"
 
-MENU_FONT = "DejaVu Sans Book 28px"
+MENU_FONT = "Eraser 40px"
 MENU_FONT_BOLD = "DejaVu Sans Bold 30px"
 MENU_FONT_BOLD_BIG = "DejaVu Sans Bold 38px"
 
-DEFAULT_FONT = "DejaVu Serif 24px"
-DEFAULT_COLOR = Colors.YELLOW
+DEFAULT_FONT = "DejaVu Sans Condensed Bold 24px"
+DEFAULT_COLOR = Colors.AWESOME_YELLOW
 
 DIALOG_DISPLAY_TIME = 1000
 CHANGE_VIEW_TIME = 500

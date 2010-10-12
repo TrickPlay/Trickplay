@@ -3,6 +3,9 @@ local tiles = {
     Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0},
     Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0}
 }
+
+TILE_IMAGES = tiles
+
 for i,image in ipairs(tiles) do screen:add(image) end
 
 Suits = {
@@ -94,7 +97,12 @@ Tile = Class(function(tile, suit, number, ...)
         error("glyph["..suit.."]["..number.."] is not registered", 2)
     end
     
-    tile.image = Clone{source = tiles[1]}
+    tile.images = {
+        Clone{source = tiles[1]},
+        Clone{source = tiles[2], opacity = 0},
+        Clone{source = tiles[3], opacity = 0}
+    }
+
     if not glyphs[suit][number].parent then screen:add(glyphs[suit][number]) end
     tile.glyph = Clone{source = glyphs[suit][number]}
     tile.focus = {
@@ -116,14 +124,15 @@ Tile = Class(function(tile, suit, number, ...)
     -- the position of the tile in the game grid
     tile.position = nil
 
-    tile.group = Group{clip = {0,0,tile.image.width,tile.image.height}}
+    tile.group = Group{clip = {0,0,tile.images[1].width,tile.images[1].height}}
+    tile.group:add(unpack(tile.images))
     tile.group:add(
-        tile.image, tile.depth, tile.focus.green, tile.focus.yellow,
+        tile.depth, tile.focus.green, tile.focus.yellow,
         tile.focus.red, tile.glyph, tile.sparkle
     )
 
-    TILE_HEIGHT = tile.image.height
-    TILE_WIDTH = tile.image.width
+    TILE_HEIGHT = tile.images[1].height
+    TILE_WIDTH = tile.images[1].width
 
     function tile:is_a_match(match)
         if tile == match then return false end
@@ -137,6 +146,18 @@ Tile = Class(function(tile, suit, number, ...)
         end
 
         return false
+    end
+
+    function tile:change_image(number)
+        if number < 1 or number > #tile.images then
+            error("tile image number must be between 1 and "..#tile.images, 2)
+        end
+
+        for i,image in pairs(tile.images) do
+            if i == number then image.opacity = 255
+            else image.opacity = 0
+            end
+        end
     end
 
     function tile:reset()
@@ -207,5 +228,17 @@ Tiles = Class(function(self, ...)
             v:reset()
         end
     end
+
+    function self:change_images(number)
+        if number < 1 or number > #TILE_IMAGES then
+            error("tile image number must be between 1 and "..#tile.images, 2)
+        end
+
+        for i,a_tile in ipairs(tiles) do
+            a_tile:change_image(number)
+        end
+    end
+
+    add_to_key_handler(keys.i, function() self:change_images(3) end)
 
 end)
