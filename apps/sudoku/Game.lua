@@ -353,6 +353,9 @@ print(empty_spaces)
 	function g:get_givens(r,c)
 		return givens[r][c]
 	end
+	function g:get_all_givens()
+		return givens
+	end
 	function g:restart()
 		guesses = 
 		{

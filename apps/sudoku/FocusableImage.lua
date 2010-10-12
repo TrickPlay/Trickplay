@@ -124,7 +124,7 @@ VertButtonCarousel = Class(function(
 	{
 		source = arrows[3],
 		anchor_point = {arrows[3].w/2,arrows[3].h/2},
-		position = {buttons[2].w/2,arrows[1].w+buttons[1].h+
+		position = {buttons[2].w/2,arrows[1].h+buttons[1].h+
 		                           arrows[3].h/2 }
 	}
 	menu.down_sel  = Clone
@@ -132,7 +132,7 @@ VertButtonCarousel = Class(function(
 		source = arrows[4],
 		anchor_point = {arrows[4].w/2,arrows[4].h/2},
 		opacity = 0,
-		position = {buttons[2].w/2,arrows[1].w+buttons[1].h+
+		position = {buttons[2].w/2,arrows[1].h+buttons[1].h+
 		                           arrows[3].h/2 }
 	}
 	menu.name = Text
@@ -162,7 +162,7 @@ VertButtonCarousel = Class(function(
 	menu.txt_group.clip = 
 	{
 		0, arrows[1].h+10,
-		buttons[1].w,          buttons[1].h-10
+		buttons[1].w,          buttons[1].h-15
 	}
 --]]
 	menu.items = {}
