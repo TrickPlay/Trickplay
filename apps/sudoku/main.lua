@@ -1,7 +1,7 @@
 math.randomseed(os.time())
 
 dofile("Class.lua") -- Must be declared before any class definitions.
-
+dofile("bg.lua")
 dofile("Game.lua")
 
 dofile("FocusableImage.lua")
@@ -93,10 +93,10 @@ for i = 1,#blue_blox do    for j=1,#blue_blox[i] do
 
 end                        end
 
-local bg_red  = Image{src="assets/bg_red.jpg"}
-local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
+--local bg_red  = Image{src="assets/bg_red.jpg"}
+--local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
 local top_left_logo =  Image{src="assets/logo.png",x=40,y=40,opacity=0}
-screen:add(bg_red,bg_blue,red_board,blue_board, top_left_logo)
+screen:add(--[[bg_red,bg_blue,]]red_board,blue_board, top_left_logo)
 for i=1,3 do
 	blue_board:add( unpack(blue_blox[i]) )
 	red_board:add(  unpack( red_blox[i]) )
@@ -139,7 +139,7 @@ function start_sparkle(x,y, num_sparkles)
 	local t_end       = {}
 
 	--function timeline.on_started()
-		for r = 1,4 do
+		for r = 1,1 do
 			sparkles[r] = {}
 			sparkles_strip[r] = {}
 	
@@ -160,7 +160,7 @@ function start_sparkle(x,y, num_sparkles)
 			t_peak[r]      = {}
 			t_end[r]       = {}
 
-			for c = 1,4 do
+			for c = 1,1 do
 				sparkles[r][c] = {}
 				sparkles_strip[r][c] = {}
 	        
@@ -223,8 +223,8 @@ function start_sparkle(x,y, num_sparkles)
 			--sparkle.z_rotation = {360*p,sparkle_base.w/(5*2),sparkle_base.h/2}
 			local prog
 			local stage
-			for r = 1,4 do
-			for c = 1,4 do
+			for r = 1,1 do
+			for c = 1,1 do
 	    	for i = 1,num_sparkles do
 				stage = math.floor(msecs/stage_speed[r][c][i] + stage_start[r][c][i])%5+1
 --[[	
@@ -252,8 +252,8 @@ function start_sparkle(x,y, num_sparkles)
 		end
 	end
 	function timeline.on_completed()
-		for r = 1,4 do
-		for c = 1,4 do
+		for r = 1,1 do
+		for c = 1,1 do
 
 		for i=1,num_sparkles do
 			sparkles[r][c][i]:clear()
@@ -266,7 +266,16 @@ end
 	timeline:start()
 end
 local help = Group{z=3,opacity=0}
+local help_img = Image{src="assets/help.png"}
+local help_button = FocusableImage({help_img.w/2-blank_button_off.w/2,help_img.h},"Back", 
+		blank_button_off,blank_button_on,
+		function() 
+
+		end)
+
+help:add(help_img,help_button)
 screen:add(help)
+--[[
 help:add(
 	Rectangle{
 		color="000000",
@@ -294,9 +303,10 @@ help:add(
 		x = 50, y = 50
 	}
 )
+--]]
 help.anchor_point = {   help.w/2,   help.h/2 }
 help.position     = { screen.w/2, screen.h/2 }
-
+local dim = Rectangle{color ="000000", w=screen.w,h=screen.h,opacity=150,z=2}
 local side_font = "Dejavu Bold 60px"
 right_menu = Group{z=1}
 local right_list = {
@@ -368,6 +378,7 @@ local left_list = {
 			help.opacity = 255
 			help:raise_to_top()
 			focus = "HELP"
+			dim.opacity = 150
 		end),
 	FocusableImage({0,2*(blank_button_off.h+8)},"Settings", 
 		blank_button_off,blank_button_on,
@@ -407,13 +418,13 @@ function flip_board()
 		if red_is_on then
 			old_board =  red_blox
 			new_board = blue_blox
-			old_bg    =    bg_red
-			new_bg    =   bg_blue
+			old_bg    =    red_bg
+			new_bg    =   blue_bg
 		else
 			old_board = blue_blox
 			new_board =  red_blox
-			old_bg    =   bg_blue
-			new_bg    =    bg_red
+			old_bg    =   blue_bg
+			new_bg    =    red_bg
 		end
 		for r = 1,3 do for c = 1,3 do
 			new_board[r][c].y_rotation = {-180,new_board[r][c].w/2,0}
@@ -425,8 +436,14 @@ if stopwatch then
 	print(stopwatch.elapsed)
 	stopwatch = nil
 end
-		old_bg.opacity = 255 * (1-prog)
-		new_bg.opacity = 255 *    prog
+		bg.color = 
+		{
+			old_bg[1] + prog*(new_bg[1]-old_bg[1]),
+			old_bg[2] + prog*(new_bg[2]-old_bg[2]),
+			old_bg[3] + prog*(new_bg[3]-old_bg[3])
+		}
+--		old_bg.opacity = 255 * (1-prog)
+--		new_bg.opacity = 255 *    prog
 		local stage_i = math.ceil(msecs / 200) --stages 1-15
 				
 		local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
@@ -500,9 +517,14 @@ end
 
 			red_is_on = true 
 		end
-		old_bg.opacity =   0
-		new_bg.opacity = 255
-		
+--		old_bg.opacity =   0
+--		new_bg.opacity = 255
+		bg.color = 
+		{
+			new_bg[1],
+			new_bg[2],
+			new_bg[3]
+		}	
 	end
 	timeline:start()
 end
@@ -584,8 +606,9 @@ screen:add(
 
 
 
+
 local splash     = Group{z=2}
-local splash_items1 = Group{z=2}
+local splash_items1 = Group{}
 local splash_items2 = Group{name="\n\n\ngagaga\n\n\n",z=2,opacity=0}
 local splash_list1 = 
 {
@@ -625,7 +648,7 @@ splash:add(
 	splash_items1,
 	splash_items2
 )
-screen:add(splash)
+screen:add(dim,splash)
 Directions = {
    RIGHT = { 1, 0},
    LEFT  = {-1, 0},
@@ -640,6 +663,7 @@ function splash_to_game(next_func)
 		duration = 500
 	}
 	function timeline.on_new_frame(t,msecs,p)
+		dim.opacity = 40*(1-p)
 		left_menu.y_rotation = {deg*(1-p),0,0}
 		right_menu.y_rotation = {-deg*(1-p),blank_button_off.w,0}
 		left_menu.opacity = 255*p
@@ -648,6 +672,7 @@ function splash_to_game(next_func)
 		splash.opacity = 255*(1-p)
 	end
 	function timeline:on_completed()
+		dim.opacity = 0
 		left_menu.y_rotation = {0,0,0}
 		right_menu.y_rotation = {0,blank_button_off.w,0}
 		left_menu.opacity = 255
@@ -1072,6 +1097,7 @@ function screen:on_key_down(k)
 			right_menu_on_key_down(key_press)
 		end,		
 		["HELP"] = function(key_press)
+			dim.opacity  = 0
 			help.opacity = 0
 			focus = "GAME_LEFT"
 		end,	

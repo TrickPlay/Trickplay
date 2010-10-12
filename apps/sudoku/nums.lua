@@ -27,6 +27,7 @@ for i=1,9 do
 				position = {1,1}
 	})	
 	screen:add(given_nums[i])
+	given_nums[i]:hide()
 	pen_nums[i] = Group{
 		name=i
 	}
@@ -42,6 +43,7 @@ for i=1,9 do
 				position = {1,1}
 	})
 	screen:add(pen_nums[i])
+	pen_nums[i]:hide()
 	wr_pen_nums[i] = Group{
 		name=i
 	}
@@ -57,6 +59,8 @@ for i=1,9 do
 				position = {1,1}
 	})
 	screen:add(wr_pen_nums[i])
+	wr_pen_nums[i]:hide()
+
 	pencil_nums[i] = Text{
 				text  = i,
 				font  = pencil_font,
@@ -64,6 +68,7 @@ for i=1,9 do
 				position = {1,1}
 	}
 	screen:add(pencil_nums[i])
+	pencil_nums[i]:hide()
 	wr_pencil_nums[i] = Text{
 				text  = i,
 				font  = pencil_font,
@@ -71,6 +76,6 @@ for i=1,9 do
 				position = {1,1}
 	}
 	screen:add(wr_pencil_nums[i])
-
+	wr_pencil_nums[i]:hide()
 end
 
