@@ -24,18 +24,17 @@ function( section )
     ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
---[[
      local dropdown_map =
      {
-     	["UNDO                   [Z]"]   = function() editor.undo() mouse_mode = S_SELECT end,
+     	["UNDO                   [U]"]   = function() editor.undo() mouse_mode = S_SELECT end,
+     	["REDO                   [E]"]   = function() editor.redo() mouse_mode = S_SELECT end,
      	["TEXT                    [T]"]   = function() editor.text() mouse_mode = S_SELECT end,
      	["IMAGE                   [I]"]   = function() editor.image() mouse_mode = S_SELECT end,
      	["RECTANGLE         [R]"]   = function() mouse_mode = S_RECTANGLE end,
-     	["VIDEO               "]   = function() mouse_mode = S_SELECT end,
-     	["CLONE OBJECT    [C]"]   = function() end,
-     	["GROUP OBJECT   [G]"]   = function() end
+     	["VIDEO               "]   = function() editor.video() mouse_mode = S_SELECT end,
+     	["CLONE OBJECT    [C]"]   = function() mouse_mode = S_CLONE end,
+     	["GROUP OBJECT   [G]"]   = function() editor.group() mouse_mode = S_SELECT end
      }
-]]
     local function build_dropdown_ui()
     
         local group = section.dropdown
@@ -48,7 +47,8 @@ function( section )
     
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO                   [Z]" ] )
+        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO                   [U]" ] )
+        local f_redo  = factory.make_text_menu_item( assets , ui.strings[ "REDO                   [E]" ] )
         local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT                    [T]" ] )
         local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE                   [I]" ] )
         local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE         [R]" ] )
@@ -59,6 +59,7 @@ function( section )
         --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
         table.insert( section_items , f_undo )
+        table.insert( section_items , f_redo )
         table.insert( section_items , f_text )
         table.insert( section_items , f_image )
         table.insert( section_items , f_rect )
@@ -78,7 +79,6 @@ function( section )
         	end
 		return true 
 	     end
---[[
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
                 --dropmenu_item.reactive = true
@@ -89,10 +89,9 @@ function( section )
             		--screen.grab_key_focus(screen)
                 end
              end
-]]
        end
 
-        items_height = items_height + f_undo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_clone.h + f_group.h
+        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_clone.h + f_group.h
         
         f_rect.extra.on_activate =
             function()
@@ -147,10 +146,7 @@ function( section )
     local function move_focus( delta )
     
         local unfocus = section_items[ section.focus ]
-	print("unfocus : ") print(section.focus)
-        
         local focus = section_items[ section.focus + delta ]
-	print("focus : ") print(section.focus + delta)
         
         if not focus then
             if section.focus + delta == 0 then

@@ -330,10 +330,9 @@ function factory.make_app_tile( assets , caption , app_id )
 end
 
 
-function factory.make_popup_bg(o_type)
+function factory.make_popup_bg(o_type, file_list_size)
 
     local size, color
-   -- local COLOR = "5a252b" -- ppat
 
    -- Set canvas size and color according to o_type 
     if(o_type == "Text") then 
@@ -345,9 +344,15 @@ function factory.make_popup_bg(o_type)
     elseif(o_type == "Rectangle") then
          size = {500, 755}
     	 color = "2c420c" -- ssuk
+    elseif(o_type == "Clone" or o_type == "Group") then
+         size = {500, 500}
+    	 color = "6d2b17" -- bam
     elseif(o_type == "Video") then
          size = {500, 500}
     	 color = "6d2b17" -- bam
+    else 
+	 size = {900, file_list_size + 180} 
+	 color = "5a252b"
     end 
 
     local BORDER_WIDTH= 3 
@@ -433,21 +438,80 @@ function factory.make_popup_bg(o_type)
     c:stroke( true )
 
   -- Draw title line
-    c:new_path()
-    c:move_to (0, 74)
-    c:line_to (c.w, 74)
+    if(o_type ~= "msgw" ) then 
+         c:new_path()
+         c:move_to (0, 74)
+         c:line_to (c.w, 74)
+         c:set_line_width (3)
+         c:set_source_color( BORDER_COLOR )
+         c:stroke (true)
+         c:fill (true)
+    end
 
-    c:set_line_width (3)
-    c:set_source_color( BORDER_COLOR )
-    c:stroke (true)
-
-    c:fill (true)
-    c:finish_painting()
-    c.position = {0,0}
+         c:finish_painting()
+         c.position = {0,0}
 
     return c
 end 
 
+function factory.make_msgw_button_item( assets , caption )
+
+    local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
+    local PADDING_X     = 7 
+    local PADDING_Y     = 7
+    local WIDTH         = 180
+    local HEIGHT        = 60 
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+    
+    local function make_ring()
+        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+    end
+    
+    local text = Text{ text = caption }:set( STYLE )
+    
+    text.name = "caption"
+
+    text.reactive = true
+
+    local ring = make_ring ()
+    
+    local focus = assets( "assets/button-focus.png" )
+
+    local group = Group
+    {
+        size = { WIDTH , HEIGHT },
+        children =
+        {
+            ring:set{ position = { 0 , 0 } },
+            focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
+            text:set{ position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
+        }
+    }
+    
+    function group.extra.on_focus_in()
+        focus.opacity = 255
+    end
+    
+    function group.extra.on_focus_out()
+        focus.opacity = 0
+    end
+    
+    return group
+
+end
 
 function factory.make_xbox()
     local BORDER_WIDTH= 3 
@@ -490,7 +554,55 @@ function factory.make_xbox()
     return c
 end 
 
-function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_item_n) 
+function factory.draw_focus_ring(w, h)
+        local ring = Canvas{ size = {w, h} }
+        ring:begin_painting()
+        ring:set_source_color("1b911b")
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH /2,
+            PADDING_Y + BORDER_WIDTH /2,
+            w - BORDER_WIDTH - PADDING_X * 2 ,
+            h - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
+
+
+function factory.draw_ring()
+	local ring = Canvas{ size = {650, 60} }
+        ring:begin_painting()
+        ring:set_source_color( "1b911b" )
+        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 635, 45, 12)
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
+
+function factory.draw_line()
+    local PADDING_Y     = 7   
+    local WIDTH         = 900
+    local LINE_WIDTH    = 5
+	local LINE_COLOR    = "FFFFFF"
+
+
+	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
+        line:begin_painting()
+        line:new_path()
+        line:move_to (0,0)
+        line:line_to (WIDTH, 0)
+    	line:set_line_width (LINE_WIDTH)
+        line:set_source_color(LINE_COLOR)
+    	line:stroke (true)
+    	line:fill (true)
+        line:finish_painting()
+        return line
+end 
+
+function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s) 
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
     local TEXT_SIZE     = 26
     local PADDING_X     = 7
@@ -600,10 +712,38 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_it
                       screen.grab_key_focus(screen) 
 	              return true
 		  end 
- 	     elseif key == keys.Tab or key == keys.Right then 
+ 	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
                   group.extra.on_focus_out()
-		  inspector:find_child(n_item_n).extra.on_focus_in()	
-             end
+		  for i, v in pairs(attr_t_idx) do
+			if(item_n == v or item_v == v) then 
+			     while(inspector:find_child(attr_t_idx[i+1]) == nil) do 
+				 i = i + 1
+			     end 
+			     if(inspector:find_child(attr_t_idx[i+1])) then
+			     	local n_item = attr_t_idx[i+1]
+				inspector:find_child(n_item).extra.on_focus_in()	
+				break
+			     end
+			end 
+    		  end
+		  return true
+	     elseif key == keys.Up or 
+		    (key == keys.Tab and shift == true )then 
+		  group.extra.on_focus_out()
+		  for i, v in pairs(attr_t_idx) do
+			if(item_n == v or item_v == v) then 
+			     while(inspector:find_child(attr_t_idx[i-1]) == nil) do 
+				 i = i - 1
+			     end 
+			     if(inspector:find_child(attr_t_idx[i-1])) then
+			     	local p_item = attr_t_idx[i-1]
+				inspector:find_child(p_item).extra.on_focus_in()	
+				break
+			     end
+			end 
+    		  end
+		  return true
+            end
         end
 
 	function button:on_button_down ()
@@ -643,8 +783,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_it
         text.position  = {(button.w - text.w)/2, (button.h - text.h)/2}
     	group:add(text)
 
-    	next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
-    	group:add(next_text)
+    	--next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
+    	--group:add(next_text)
 
 
         function group.extra.on_focus_in()
@@ -668,39 +808,26 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_it
         if(item_n == "name" or item_n == "text" or item_n == "src") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	else 
-	     if(item_n == "cx" or item_n == "cy" or item_n == "cw" or item_n == "ch") then 
-                 item_n = string.sub(item_n,2,2)
-	     elseif item_n == "rect_r" or item_n == "bord_r" or
-		    item_n == "rect_g" or item_n == "bord_g" or
-		    item_n == "rect_b" or item_n == "bord_b" then 
-                 item_n = string.sub(item_n,6,6)
-	     elseif item_n =="bwidth" then
-	         item_n = "border width"
-	     elseif item_n =="x_angle" or item_n =="x_ang" or
-	     item_n =="y_angle" or item_n =="y_ang" or
-	     item_n =="z_angle" or item_n =="z_ang" then 
-	         item_n = string.sub(item_n,1,1)
-	     end 
-    	     text = Text {name = "attr", text = string.upper(item_n)}:set(STYLE)
+    	     text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
              text.position  = {WIDTH - space , 0}
     	     group:add(text)
 
-
 	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
-	     space = space - string.len(item_n) * 20
-             if (item_n =="font " or item_n == "color") then 
+	     space = space - string.len(item_s) * 20
+             if (item_n =="font" or item_n == "color") then 
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
 	     elseif (item_n == "base_size") then 
 	          input_box_width = WIDTH - 200 - ( PADDING_X * 2) 
-             elseif(item_n == "fill_color  " or item_n == "border_color" or item_n == "bwidth") then 
+             elseif(item_n == "wrap_mode" or item_n == "border_color") then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
 	     end
         end 
+	print("item name ", item_n)
 	print ("input_box_width", input_box_width)
         print("space", space)
 
-    	next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
-    	group:add(next_text)
+    	--next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
+    	--group:add(next_text)
 
         ring = make_ring(input_box_width, HEIGHT + 5) 
 	ring.name = "ring"
@@ -716,27 +843,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_it
 
 	space = space - PADDING_B
 
-	-- get rid of "table : " form item_v
---[[
-        local j, k, l 
-        print(item_v)
-	l = string.len(item_v)
-        j, k = string.find(item_v, "table")
-        j, k = string.find(item_v, ": ")
-	if(k ~= nil) then 
-             item_v = string.sub(item_v,k+1,l)
-	end 
-
-
-	if(type(item_v) == table) then -- color 
-	
-	local r,g,b 
-	r= item_v[1] 
-	g= item_v[2] 
-	b= item_v[3] 
-	
-	end	
-]]
+	if(item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR") then item_v = string.lower(item_v) end 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
@@ -750,12 +857,40 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_it
                return true;
         end
 
+
+
   	function input_text:on_key_down(key)
 	       if key == keys.Return or
-                  key == keys.Tab or 
-                  key == keys.Right then
+                  (key == keys.Tab and shift == false) or 
+                  key == keys.Down then
 	       	     group.extra.on_focus_out()
-		     inspector:find_child(n_item_n).extra.on_focus_in()	
+		     for i, v in pairs(attr_t_idx) do
+			if(item_n == v or item_v == v) then 
+			     while(inspector:find_child(attr_t_idx[i+1]) == nil) do 
+				 i = i + 1
+			     end 
+			     if(inspector:find_child(attr_t_idx[i+1])) then
+			     	local n_item = attr_t_idx[i+1]
+				inspector:find_child(n_item).extra.on_focus_in()	
+				break
+			     end
+			end 
+    		     end
+	       elseif key == keys.Up or 
+		      (key == keys.Tab and shift == true )then 
+		    group.extra.on_focus_out()
+ 		    for i, v in pairs(attr_t_idx) do
+			if(item_n == v or item_v == v) then 
+			     while(inspector:find_child(attr_t_idx[i-1]) == nil) do 
+				 i = i - 1
+			     end 
+			     if(inspector:find_child(attr_t_idx[i-1])) then
+			     	local p_item = attr_t_idx[i-1]
+				inspector:find_child(p_item).extra.on_focus_in()	
+				break
+			     end
+			end 
+    		    end
                end
    	end 
 
@@ -777,11 +912,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, n_it
         end 
     end
     print ("group width", group.w)
---[[
-    if(next_text) then
-         group.w = group.w - next_text.w
-    end
-]]
     return group
 end
  
