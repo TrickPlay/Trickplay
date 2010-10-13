@@ -804,7 +804,7 @@ void World::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& colo
 
     cairo_new_path( debug_cairo );
     cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
-    cairo_arc( debug_cairo , center.x , center.y , radius , 0 , 0 );
+    cairo_arc( debug_cairo , center.x , center.y , radius , 0 , 2 * G_PI );
     cairo_set_line_width( debug_cairo , 1 / ppm );
     cairo_stroke( debug_cairo );
 }
@@ -815,7 +815,7 @@ void World::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& 
 
     cairo_new_path( debug_cairo );
     cairo_set_source_rgba( debug_cairo , color.r , color.g , color.b , 1 );
-    cairo_arc( debug_cairo , center.x , center.y , radius , 0 , 0 );
+    cairo_arc( debug_cairo , center.x , center.y , radius , 0 , 2 * G_PI );
     cairo_fill( debug_cairo );
 }
 
