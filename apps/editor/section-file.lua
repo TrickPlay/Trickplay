@@ -31,9 +31,9 @@ local dropdown_map =
 {
      ["NEW                [N] "]   = function() editor.close() mouse_mode = S_SELECT end,
      ["OPEN               [O] "]   = function() editor.open() mouse_mode = S_SELECT end,
-     ["SAVE               [S] "]   = function() editor.save() mouse_mode = S_SELECT end,
+     ["SAVE               [S] "]   = function() editor.save(true) mouse_mode = S_SELECT end,
      ["QUIT               [Q] "]   = function() exit() end,
-     ["VIEW CODES   [V]"]          = function() editor.view_codes() mouse_mode = S_SELECT end
+     ["SAVE AS 	       [A] " ]  = function() editor.save(false) mouse_mode = S_SELECT end
 }
 
     local function build_dropdown_ui()
@@ -51,7 +51,7 @@ local dropdown_map =
         local f_open = factory.make_text_menu_item( assets , ui.strings[ "OPEN               [O] " ] )
         local f_save = factory.make_text_menu_item( assets , ui.strings[ "SAVE               [S] " ] )
         local f_quit = factory.make_text_menu_item( assets , ui.strings[ "QUIT               [Q] " ] )
-        local f_view = factory.make_text_menu_item( assets , ui.strings[ "VIEW CODES   [V]" ] )
+        local f_view = factory.make_text_menu_item( assets , ui.strings[ "SAVE AS 	       [A] " ] )
         
         --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
@@ -69,7 +69,6 @@ local dropdown_map =
             		item:on_activate()
         	  end
 	     end 
---[[ 
 	     if item:find_child("caption") then
 		local dropmenu_item = item:find_child("caption") 
 		--dropmenu_item.reactive = true
@@ -79,7 +78,6 @@ local dropdown_map =
         		return true
 		end 
 	     end 
-]]
        end
 
         -- table.insert( section_items , categories )
@@ -101,13 +99,13 @@ local dropdown_map =
         
         f_save.extra.on_activate =
             function()
-		editor.save()
+		editor.save(true)
 		mouse_mode = S_SELECT
             end
         
         f_view.extra.on_activate =
             function()
-		editor.view_codes()
+		editor.save(false)
 		mouse_mode = S_SELECT
             end
         
@@ -129,7 +127,7 @@ local dropdown_map =
             item.x = ( group.w - item.w ) / 2
             item.y = y
             
-            y = y + item.h + margin
+            y = y + item.h - 5.45  -- margin
             
             group:add( item )
             

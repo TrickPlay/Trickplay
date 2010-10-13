@@ -55,7 +55,7 @@ function inspector_apply (v, inspector)
            new_object.color = v.color
 
            org_object.font = v.font
-           v.font = inspector:find_child("font "):find_child("input_text").text
+           v.font = inspector:find_child("font"):find_child("input_text").text
            new_object.font = v.font
 
            org_object.text = v.text
@@ -75,7 +75,7 @@ function inspector_apply (v, inspector)
            new_object.wrap = v.wrap
 
            org_object.wrap_mode = v.wrap_mode
-           v.wrap_mode = inspector:find_child("wrap_mode"):find_child("input_text").text
+           v.wrap_mode = string.upper(inspector:find_child("wrap_mode"):find_child("input_text").text)
            new_object.wrap_mode = v.wrap_mode
 
        elseif (v.type == "Image") then
@@ -112,6 +112,19 @@ function inspector_apply (v, inspector)
            new_object.y_rotation= v.y_rotation
            new_object.z_rotation= v.z_rotation
 ]]
+
+
+       elseif (v.type == "Clone") then
+           org_object = Clone{}
+           new_object = Clone{}
+
+           org_object.source = v.source
+           v.src = inspector:find_child("source"):find_child("input_text").text
+           new_object.source = v.source
+
+       elseif (v.type == "Group") then
+           org_object = Group{}
+           new_object = Group{}
        end
        org_object.name = v.name
        v.name = inspector:find_child("name"):find_child("input_text").text
@@ -163,7 +176,7 @@ function grab_focus(v, inspector, attr)
 	  function input_txt:on_key_down(key)
 	       if key == keys.Return or
                   key == keys.Tab or 
-                  key == keys.Right then
+                  key == keys.Down then
                      inspector:find_child(attr).extra.on_focus_out()
                      inspector:find_child(attr):find_child("input_text"):set{cursor_visible = false}
                      grab_focus(v, inspector, inspector:find_child(attr):find_child("next_attr").text)
@@ -196,7 +209,7 @@ function grab_focus(v, inspector, attr)
                           screen.grab_key_focus(screen) 
 	                  return true
 		      end 
- 		   elseif key == keys.Tab or key == keys.Right then 
+ 		   elseif key == keys.Tab or key == keys.Down then 
                       inspector:find_child(attr).extra.on_focus_out()
                       grab_focus(v, inspector, inspector:find_child(attr):find_child("next_attr").text)
                    end

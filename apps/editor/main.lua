@@ -106,12 +106,12 @@ local function build_ui( show_it )
     end
 
     -------------------------------------------------------------------------------
-    -- Add the search button and the logo
+    -- Add the help button and the logo
     -------------------------------------------------------------------------------
     
-    ui.search_button.position = { left + SEARCH_BUTTON_X_OFFSET , FIRST_BUTTON_Y }
-    ui.search_button.size = { ui.search_button.w -15 , ui.search_button.h - 15 }
-    ui.bar:add( ui.search_button )
+    ui.help_button.position = { left + SEARCH_BUTTON_X_OFFSET , FIRST_BUTTON_Y }
+    ui.help_button.size = { ui.help_button.w -15 , ui.help_button.h - 15 }
+    ui.bar:add( ui.help_button )
     ui.logo.position = { screen.w - ( ui.logo.w + FIRST_BUTTON_X ) , FIRST_BUTTON_Y }
     ui.bar:add( ui.logo )
 
@@ -124,13 +124,14 @@ local function build_ui( show_it )
                         
     ui.strings = strings            -- Store the string table
     ui.focus = SECTION_FILE         -- The section # that has focus
-    ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
+    --ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT / 1000 )
+    ui.dropdown_timer = Timer( DROPDOWN_TIMEOUT )
     ui.color_keys =             -- Which section # to focus with the given key
     {
         [ keys.RED    ] = SECTION_FILE,
         [ keys.GREEN  ] = SECTION_EDIT,
         [ keys.YELLOW ] = SECTION_ARRANGE,
-        [ keys.BLUE   ] = SECTION_HELP
+        [ keys.BLUE   ] = SECTION_SETTING
     }
 
     -------------------------------------------------------------------------------
@@ -142,7 +143,6 @@ local function build_ui( show_it )
         if ui.dropdown_timer then
             ui.dropdown_timer:stop()
             ui.dropdown_timer:start()
-            
         end
     
     end
@@ -174,15 +174,10 @@ local function build_ui( show_it )
         }
     end
 
-    local menu_init 	= 1
+    local menu_init 	= true
 
     local function animate_in_dropdown( )
 
-        if(menu_init ==  1) then 
-		menu_init = 0
-		return 
-	end 
-        
         local ANIMATION_DURATION = 150
         local section = ui.sections[ ui.focus ]
         
@@ -197,7 +192,11 @@ local function build_ui( show_it )
         
         -- Call its on_show method
         
-        pcall( section.on_show , section )
+        -- pcall( section.on_show , section )
+	if section.on_show then
+            section:on_show()
+        end
+
         section.dropdown.opacity = 0
         section.dropdown:show()
         section.dropdown.y_rotation = { 90 , 0 , 0 }
@@ -207,7 +206,7 @@ local function build_ui( show_it )
             opacity = 255,
             y_rotation = 0
         }
-    
+   	section.dropdown:raise_to_top() 
     end
     
     local function move_focus( new_focus )
@@ -215,7 +214,7 @@ local function build_ui( show_it )
         -- Bad focus. Your focus needs more focus.
         if not new_focus then return end
         -- Same focus. Laser focus.
-        if new_focus == ui.focus then return end
+        if new_focus == ui.focus then reset_dropdown_timer() return end
         local section = ui.sections[ new_focus ]
         -- Focus out of range. Blurred.
         if not section then return end -- The new section is out of range
@@ -293,17 +292,20 @@ local function build_ui( show_it )
 
     local key_map =
     {
-
+	[ keys.w	] = function() animate_out_dropdown() editor.the_open() mouse_mode = S_SELECT end,
 	[ keys.r	] = function() animate_out_dropdown() mouse_mode = S_RECTANGLE end,
         [ keys.v	] = function() animate_out_dropdown() editor.view_code() mouse_mode = S_SELECT end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() mouse_mode = S_SELECT end,
         [ keys.o	] = function() animate_out_dropdown() editor.open() mouse_mode = S_SELECT end,
-        [ keys.s	] = function() animate_out_dropdown() editor.save() mouse_mode = S_SELECT end,
+        [ keys.s	] = function() animate_out_dropdown() editor.save(true) mouse_mode = S_SELECT end,
+        [ keys.a	] = function() animate_out_dropdown() editor.save(false) mouse_mode = S_SELECT end,
         [ keys.t	] = function() animate_out_dropdown() editor.text() mouse_mode = S_SELECT end,
         [ keys.i	] = function() animate_out_dropdown() editor.image() mouse_mode = S_SELECT end,
         [ keys.u	] = function() animate_out_dropdown() editor.undo() mouse_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() mouse_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() mouse_mode = S_SELECT end,
+        [ keys.c	] = function() animate_out_dropdown() mouse_mode = S_CLONE end,
+        [ keys.g	] = function() animate_out_dropdown() editor.group() mouse_mode = S_SELECT end,
         [ keys.p	] = function() animate_out_dropdown() end,
         [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
 								   menu_hide = false 
@@ -314,8 +316,8 @@ local function build_ui( show_it )
 								   menu_hide = true 
 							      end end,
         [ keys.q	] = function() exit() end,
-        [ keys.Left     ] = function() move_focus( ui.focus - 1 ) end,
-        [ keys.Right    ] = function() move_focus( ui.focus + 1 ) end,
+        [ keys.Left     ] = function() if(current_inspector == nil) then move_focus( ui.focus - 1 ) end end,
+        [ keys.Right    ] = function() if(current_inspector == nil) then move_focus( ui.focus + 1 ) end end ,
         
         [ keys.RED      ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
         [ keys.GREEN    ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
@@ -327,14 +329,27 @@ local function build_ui( show_it )
         [ keys.F7       ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
         [ keys.F8       ] = function() move_focus( ui.color_keys[ keys.BLUE ] ) end,
         
-        [ keys.Return   ] = function() local s= ui.sections[ui.focus]
-        		    ui.button_focus.position = s.button.position
-        		    ui.button_focus.opacity = 255
-	 		    do_default_for_section() 
-			    animate_in_dropdown() end,
-        
-        [ keys.Down     ] = function() enter_section() end, 
-        [ keys.Up       ] = function() animate_out_dropdown() end
+	[ keys.Shift_L  ] = function() shift = true end,
+	[ keys.Shift_R  ] = function() shift = true end,
+        [ keys.Return   ] = function() if(current_inspector == nil) then 
+			    	     if(menu_init == true) then 
+			                menu_init = false
+			    		local s= ui.sections[ui.focus]
+        		    		ui.button_focus.position = s.button.position
+        		    		ui.button_focus.opacity = 0
+			    		animate_out_dropdown() 
+				     else 
+			                menu_init = true
+			    		local s= ui.sections[ui.focus]
+        		    		ui.button_focus.position = s.button.position
+        		    		ui.button_focus.opacity = 255
+	 		   		-- do_default_for_section() 
+			    		animate_in_dropdown() 
+			    	     end 
+			         end 
+			    end ,
+        [ keys.Down     ] = function() if(current_inspector == nil) then enter_section() end end
+       -- [ keys.Up       ] = function() if(current_inspector == nil) then animate_out_dropdown() end end
     }
     
     -------------------------------------------------------------------------------
@@ -347,7 +362,7 @@ local function build_ui( show_it )
         ["  FILE "]   = function() move_focus(SECTION_FILE) end,
         ["  EDIT  "]  = function() move_focus(SECTION_EDIT) end,
         ["  ARRANGE"] = function() move_focus(SECTION_ARRANGE) end, 
-        ["  HELP"]    = function() move_focus(SECTION_HELP ) end
+        ["  SETTING"]    = function() move_focus(SECTION_SETTING ) end
     }
 
     local menu_button_second_down = false
@@ -357,18 +372,12 @@ local function build_ui( show_it )
 	     section.button.reactive = true
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
-		  button_map[section.button.name]()
---[[
-		  if(menu_button_second_down == false) then
-                       if(button_map[section.button.name]) then
-			    button_map[section.button.name]()
-		       end 
-		       menu_button_second_down = true
-		  else 
-		       animate_out_dropdown()
-		       menu_button_second_down = false
-		  end 
-]]
+	          button_map[section.button.name]()
+		  print("jjj")
+		  menu_init = true
+		  local s= ui.sections[ui.focus]
+        	  ui.button_focus.position = s.button.position
+        	  ui.button_focus.opacity = 255
                   return true
 	     end
 	 end
@@ -399,19 +408,37 @@ local function build_ui( show_it )
               key_map[key](self)
      	  end
      end
+     function screen.on_key_up( screen , key )
+    	if key == keys.Shift_L or key == keys.Shift_R then
+             shift = false
+	end 
+     end
 
      function screen:on_button_down(x,y,button,num_clicks)
           print("button_down() results : ",x,y,button,num_clicks)
 
           mouse_state = BUTTON_DOWN
           if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
-	
+         -- if(mouse_mode == S_GROUP) then editor.group(x, y) end
+          if(mouse_mode == S_SELECT) then 
+	       if(current_inspector == nil) then 
+		     if(menu_init == true) then 
+			 menu_init = false
+			 local s= ui.sections[ui.focus]
+        		 ui.button_focus.position = s.button.position
+        		 ui.button_focus.opacity = 0
+			 animate_out_dropdown() 
+		    end 
+	       end 
+	end
      end
 
      function screen:on_button_up(x,y,button,clicks_count)
           print("button_up() results : ",x,y,button,click_count)
+	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
               if (mouse_mode == S_RECTANGLE) then editor.rectangle_done(x, y) mouse_mode = S_SELECT end
+              --if(mouse_mode == S_GROUP) then editor.group_done(x, y) end
               mouse_state = BUTTON_UP
           end
       end
@@ -420,6 +447,7 @@ local function build_ui( show_it )
           print("on_motion() results : ",x,y)
 	  if (menu_hide == true ) then
     	  if( y > ui.bar_background.h) then 
+        	     animate_out_dropdown()
 		     ui:hide()
     	  else 
 		ui.button_focus:show()
@@ -429,10 +457,26 @@ local function build_ui( show_it )
 	  end
           if dragging then
                local actor , dx , dy = unpack( dragging )
-               actor.position = { x - dx , y - dy  }
+--[[
+	       if ui.group then 
+	             if ui.group:find_child(actor.name) then 
+		     	if(x < ui.group.x or x + actor.w > ui.group.x + ui.group.w or 
+				y < ui.group.y or y + actor.h > ui.group.y + ui.group.h) then 
+		     	else  
+               	         	actor.position = { x - dx , y - dy  }
+		     	end	
+	       	     else 	
+               	     	actor.position = { x - dx , y - dy  }
+	       	     end
+	       else 	
+		     actor.position = { x - dx , y - dy  }
+	       end
+]]
+	       actor.position = { x - dx , y - dy  }
           end
           if(mouse_state == BUTTON_DOWN) then
                if (mouse_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
+               --if (mouse_mode == S_GROUP) then editor.group_move(x, y) end
           end
       end
 
@@ -562,6 +606,9 @@ end
 function main()
 
     screen:add(BG_IMAGE)
+    --g:add(BG_IMAGE)
+    --screen:add(g)
+
     screen:show()
     screen.reactive=true
     ui = build_ui(true)
