@@ -26,6 +26,7 @@ local arrow_up_off = Image{src = "assets/arrow-up-off.png", opacity=0}
 local arrow_up_on = Image{src = "assets/arrow-up-on.png", opacity=0}
 --sparkle = Group{name="\n\n\njhsdfsdfjklsdfjkl;d",z=3}
 
+
 screen:add(
 	 blank_button_on,  blank_button_off, green_button_on, green_button_off,
 	   red_button_on,    red_button_off,  blue_button_on,  blue_button_off,
@@ -111,6 +112,9 @@ blue_board.position     = {     screen.w/2,     screen.h/2 }
 --sparkle.clip = {0,0,sparkle_base.w/5,sparkle_base.h}
 --sparkle.anchor_point = {sparkle_base.w/(5*2),sparkle_base.h/2}
 function start_sparkle(x,y, num_sparkles)
+local win_txt = Text{text="You've Won!",font="DejaVu ExtraLight 60px",color="FFFFFF",opacity=0,z=3,x=x[math.floor(#x/2)],y=y[math.floor(#y/2)]}
+win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
+
 	local timeline = Timeline
 	{
 		duration = 2000,
@@ -139,7 +143,7 @@ function start_sparkle(x,y, num_sparkles)
 	local t_end       = {}
 
 	--function timeline.on_started()
-		for r = 1,1 do
+		for r = 1,#x do
 			sparkles[r] = {}
 			sparkles_strip[r] = {}
 	
@@ -160,7 +164,7 @@ function start_sparkle(x,y, num_sparkles)
 			t_peak[r]      = {}
 			t_end[r]       = {}
 
-			for c = 1,1 do
+			for c = 1,#y do
 				sparkles[r][c] = {}
 				sparkles_strip[r][c] = {}
 	        
@@ -215,6 +219,8 @@ function start_sparkle(x,y, num_sparkles)
 				end
 			end
 		end
+screen:add(win_txt)
+win_txt:raise_to_top()
 	--end
 	
 		function timeline.on_new_frame(t,msecs,p)
@@ -223,8 +229,8 @@ function start_sparkle(x,y, num_sparkles)
 			--sparkle.z_rotation = {360*p,sparkle_base.w/(5*2),sparkle_base.h/2}
 			local prog
 			local stage
-			for r = 1,1 do
-			for c = 1,1 do
+			for r = 1,#x do
+			for c = 1,#y do
 	    	for i = 1,num_sparkles do
 				stage = math.floor(msecs/stage_speed[r][c][i] + stage_start[r][c][i])%5+1
 --[[	
@@ -250,10 +256,15 @@ function start_sparkle(x,y, num_sparkles)
 				end
 			end
 		end
+		if msecs < t.duration/3 then
+			win_txt.opacity = 255*msecs/(t.duration/3)
+		else
+			win_txt.opacity = 255*(1-(msecs-t.duration/3)/(2*t.duration/3))
+		end
 	end
 	function timeline.on_completed()
-		for r = 1,1 do
-		for c = 1,1 do
+		for r = 1,#x do
+		for c = 1,#y do
 
 		for i=1,num_sparkles do
 			sparkles[r][c][i]:clear()
@@ -262,56 +273,31 @@ function start_sparkle(x,y, num_sparkles)
 end
 end
 		end
+		win_txt.opacity = 0
 	end
 	timeline:start()
 end
 local help = Group{z=3,opacity=0}
 local help_img = Image{src="assets/help.png"}
-local help_button = FocusableImage({help_img.w/2-blank_button_off.w/2,help_img.h},"Back", 
+local help_button = FocusableImage({help_img.w/2-blank_button_off.w/2,help_img.h - blank_button_off.h -20},"Back", 
 		blank_button_off,blank_button_on,
 		function() 
 
 		end)
-
-help:add(help_img,help_button)
+help_button:on_focus()
+help:add(help_img,help_button.group)
 screen:add(help)
---[[
-help:add(
-	Rectangle{
-		color="000000",
-		w=1000,
-		h=800,
-	--	x=screen.w/2,
-	--	y=screen.h/2,
-		opacity=220
-	},
-	Text{
-		text = "The Rules of Sudoku:\n\n"..
-			"- All the numbers in any row must be unique\n"..
-			"- All the numbers in any column must be unique\n"..
-			"- All the numbers in any designate 3x3 must be unique\n\n"..
-			"The numbers 1-9 will be placed exactly once in each of\n"..
-			"those categories.\n\n"..
-			"Gameplay:\n\n"..
-			" ARROWS  - Move the cursor around to select tiles\n"..
-			" NUMBERS - Allow you to make a guess on a tile\n"..
-			" ENTER   - Opens the pencil menu to guess multiple"..
-				" numbers\n\n"..
-			"Good Luck!\nPress any button to go back",
-		font = "DejaVu 45px",
-		color = "FFFFFF",
-		x = 50, y = 50
-	}
-)
---]]
 help.anchor_point = {   help.w/2,   help.h/2 }
 help.position     = { screen.w/2, screen.h/2 }
-local dim = Rectangle{color ="000000", w=screen.w,h=screen.h,opacity=150,z=2}
+local dim = Rectangle{color ="000000", w=screen.w,h=screen.h,opacity=100,z=2}
 local side_font = "Dejavu Bold 60px"
 right_menu = Group{z=1}
 local right_list = {
 	FocusableImage({0,0},"Cheat", 
-		red_button_off,red_button_on,function() end),
+		red_button_off,red_button_on,
+		function() 
+			game:cheat()
+		end),
 
 	FocusableImage({0,blank_button_off.h+8},"Undo Move", 
 		green_button_off,green_button_on,
@@ -329,9 +315,11 @@ local right_list = {
 		blue_button_off, blue_button_on, 
 		function() 
 			if red_is_on then
-				game = Game(game:get_all_givens(),nil,blue_blox)
+				game = Game(game:get_all_givens(),
+					game:get_sol(),nil,blue_blox)
 			else
-				game = Game(game:get_all_givens(),nil,red_blox)
+				game = Game(game:get_all_givens(),
+					game:get_sol(),nil,red_blox)
 			end
 			dolater(flip_board)
 
@@ -358,9 +346,13 @@ local left_list = {
 			--ind = {r=1,c=1}
 --]]
 			if red_is_on then
-				game = Game(BoardGen(num_givens),nil,blue_blox)
+				local givens, sol
+				givens,sol =BoardGen(num_givens) 
+				game = Game(givens,sol,nil,blue_blox)
 			else
-				game = Game(BoardGen(num_givens),nil,red_blox)
+				local givens, sol
+				givens,sol =BoardGen(num_givens) 
+				game = Game(givens,sol,nil,red_blox)
 			end
 			dolater(flip_board)
 
@@ -378,7 +370,7 @@ local left_list = {
 			help.opacity = 255
 			help:raise_to_top()
 			focus = "HELP"
-			dim.opacity = 150
+			dim.opacity = 100
 		end),
 	FocusableImage({0,2*(blank_button_off.h+8)},"Settings", 
 		blank_button_off,blank_button_on,
@@ -544,12 +536,12 @@ pencil_menu:add(
 	Text{name="7",text="7",font=num_font,color="FFFFFF",x=p_x(7),y=25},
 	Text{name="8",text="8",font=num_font,color="FFFFFF",x=p_x(8),y=25},
 	Text{name="9",text="9",font=num_font,color="FFFFFF",x=p_x(9),y=25},
-	Image{name="clear_on",  src="assets/button_on.png",y=60,x=100},
-	Image{name="clear_off", src="assets/button_off.png",y=60,x=100},
-	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=67,x=115},
-	Image{name="done_on",   src="assets/button_on.png",y=60,x=210},
-	Image{name="done_off",  src="assets/button_off.png",y=60,x=210},
-	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=67,x=225}
+	Image{name="clear_on",  src="assets/button_on.png",y=60,x=105},
+	Image{name="clear_off", src="assets/button_off.png",y=60,x=105},
+	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=67,x=120},
+	Image{name="done_on",   src="assets/button_on.png",y=60,x=215},
+	Image{name="done_off",  src="assets/button_off.png",y=60,x=215},
+	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=67,x=230}
 )
 --[[
 local clock_sec = 50
@@ -594,7 +586,7 @@ function clock:on_timer()
 	clock_txt.text = base
 end
 --]]
-local selector = Image{src="assets/board-focus.png"}
+local selector = Image{src="assets/board-focus.png",opacity=0}
 selector.anchor_point = {selector.w/2,selector.h/2}
 screen:add(
 	--Image{src="assets/background.jpg"}, 
@@ -633,12 +625,12 @@ splash_items2:raise_to_top()
 	
 }
 splash_items1:add( splash_list1[1].group,splash_list1[2].group )
-local game_num = {55,45,30}
-local game_opts = {"Easy","Medium","Hard"}
+local game_num = {45,55,30}
+local game_opts = {"Medium","Easy","Hard"}
 local curr_opt = 1
 
 local splash_diff = VertButtonCarousel(
-	"Difficulty",game_opts,{screen.w/2-blank_button_on.w/2,screen.h/2+50},blanks,arrows)
+	"Difficulty",game_opts,{screen.w/2-blank_button_on.w/2,screen.h/2+110-arrows[1].h},blanks,arrows)
 splash_diff:on_focus()
 splash_items2:add(splash_diff.group)
 local splash_bg = Image{src="assets/splash-menu.png",x = screen.w/2,y = screen.h/2}
@@ -663,7 +655,7 @@ function splash_to_game(next_func)
 		duration = 500
 	}
 	function timeline.on_new_frame(t,msecs,p)
-		dim.opacity = 40*(1-p)
+		dim.opacity = 100*(1-p)
 		left_menu.y_rotation = {deg*(1-p),0,0}
 		right_menu.y_rotation = {-deg*(1-p),blank_button_off.w,0}
 		left_menu.opacity = 255*p
@@ -804,7 +796,7 @@ function game_on_key_down(k)
 				if ind.r > 9/2 then
 					pencil_menu:find_child("bg_up").opacity=0
 					pencil_menu:find_child("bg_dn").opacity=255
-					pencil_menu.x = selector.x - 160
+					pencil_menu.x = selector.x - 163
 					pencil_menu.y = selector.y - selector.h/2 - 
 					                pencil_menu.h +20
 
@@ -818,7 +810,7 @@ function game_on_key_down(k)
 				else
 					pencil_menu:find_child("bg_up").opacity=255
 					pencil_menu:find_child("bg_dn").opacity=0
-					pencil_menu.x = selector.x - 160
+					pencil_menu.x = selector.x - 163
 					pencil_menu.y = selector.y + selector.h/2-20
 
 					pencil_menu:find_child("clear_on").opacity = 0
@@ -888,34 +880,28 @@ function game_on_key_down(k)
 		[keys["KP_Page_Up"] ] = function()
 			num_press(9)
 		end,
---[[
+		[keys["c"] ] = function()
+			game:cheat()
+		end,
 		[keys["u"] ] = function()
 			game:undo(ind.r,ind.c)
-		end,
-		[keys["r"] ] = function()
-			game:redo(ind.r,ind.c)
-		end,
-		[keys["m"] ] = function()
-			splash.opacity = 255
-			game_on = false
-		end,
-		[keys["c"] ] = function()
-			game:clear_tile(ind.r,ind.c)
 		end,
 		[keys["e"] ] = function()
 			game:error_check()
 		end,
---]]
+		[keys["r"] ] = function()
+			game:restart()
+		end,
 	}
 	if key[k] then key[k]() end
 end
 local splash_hor_index = 2
-if settings.givens and settings.guesses then
+if settings.givens and settings.sol and settings.guesses then
 
 	if red_is_on then
-		game = Game(settings.givens,settings.guesses,red_blox)
+		game = Game(settings.givens,settings.sol,settings.guesses,red_blox)
 	else
-		game = Game(settings.givens,settings.guesses,blue_blox)
+		game = Game(settings.givens,settings.sol,settings.guesses,blue_blox)
 	end
 	screen:add(game.board)
 	splash_hor_index = 1
@@ -952,9 +938,13 @@ function splash_diff_on_key_down(k)
 			splash_items2.opacity=0
 
 			if red_is_on then
-				game = Game(BoardGen(num_givens),nil,blue_blox)
+				local givens,sol
+				givens,sol = BoardGen(num_givens)
+				game = Game(givens,sol,nil,blue_blox)
 			else
-				game = Game(BoardGen(num_givens),nil,red_blox)
+				local givens,sol
+				givens,sol = BoardGen(num_givens)
+				game = Game(givens,sol,nil,red_blox)
 			end
 			collectgarbage("collect")
 			ind = {r=1,c=1}
@@ -1039,6 +1029,16 @@ function left_menu_on_key_down(k)
 			selector.opacity = 255
 
 		end,
+		[keys.Left] = function()
+			right_list[left_index]:on_focus()
+			left_list[left_index]:out_focus()
+			right_index = left_index
+			left_index = 1
+			focus = "GAME_RIGHT"
+			ind.c = 9
+			selector.x,selector.y = sel_pos(ind.r,ind.c)
+		end,
+
 		[keys.Return] = function()
 			left_list[left_index]:press_enter()
 		end,
@@ -1072,6 +1072,16 @@ function right_menu_on_key_down(k)
 			selector.opacity = 255
 
 		end,
+		[keys.Right] = function()
+			right_list[right_index]:out_focus()
+			left_list[right_index]:on_focus()
+			left_index = right_index
+			right_index = 1
+			focus = "GAME_LEFT"
+			ind.c = 1
+			selector.x,selector.y = sel_pos(ind.r,ind.c)
+		end,
+
 		[keys.Return] = function()
 			right_list[right_index]:press_enter()
 		end,
@@ -1097,14 +1107,16 @@ function screen:on_key_down(k)
 			right_menu_on_key_down(key_press)
 		end,		
 		["HELP"] = function(key_press)
-			dim.opacity  = 0
-			help.opacity = 0
-			focus = "GAME_LEFT"
+			if key_press == keys.Return then
+				dim.opacity  = 0
+				help.opacity = 0
+				focus = "GAME_LEFT"
+			end
 		end,	
 	}
 	if k == keys.s then
-		start_sparkle({200,300,400,500,600,700,800,900,1000},
-{200,300,400,500,600,700,800,900,1000},12)
+		start_sparkle({200,300,400,500},
+{200,300,400,500},12)
 		return
 	end
 	if sub_on_key_down[focus] then
@@ -1121,9 +1133,25 @@ function screen:on_key_down(k)
 --]]
 end
 function player_won()
-		splash.opacity = 255
-		focus = "SPLASH"
+print("WTF")
+	local c = {screen.h/2-50,screen.h/2,screen.h/2+50}
+	local r = {screen.w/2-50,screen.w/2,screen.w/2+50}
+--	r[1],c[1] = sel_pos(ind.r-1,ind.c-1)
+--	r[2],c[2] = sel_pos(ind.r,ind.c)
+--	r[3],c[3] = sel_pos(ind.r+1,ind.c+1)
+	start_sparkle(r,c,12)
+	--dolater(flip_board)
+	--	splash.opacity = 255
+	focus = "GAME_LEFT"
 		selector.opacity = 0
+		ind.r = 1
+		ind.c = 1
+		left_list[left_index]:on_focus()
+		
+	--	left_menu.opacity = 0
+	--	right_menu.opacity = 0
+	--	top_left_logo.opacity = 0
+	--	selector.x,selector.y = sel_pos(1,1)
 end
 function app:on_closing()
 	game:save()
