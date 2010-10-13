@@ -59,7 +59,7 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 
     function focusimg:out_focus()
 		focusimg.focus.opacity = 0
-		focusimg.image.opacity = 255
+		focusimg.image.opacity = 180
     end
 
 

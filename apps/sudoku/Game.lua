@@ -33,6 +33,7 @@ function BoardGen(number_of_givens)
         {6,7,8,9,1,2,3,4,5},
         {9,1,2,3,4,5,6,7,8}
     }
+	local solution = {}
 
     local temp = {}
     local num_times = 0
@@ -127,7 +128,12 @@ function BoardGen(number_of_givens)
         end
     end
 
-
+	for r = 1,9 do
+		solution[r] = {}
+		for c = 1,9 do
+			solution[r][c] = base[r][c]
+		end
+	end
     --erase the requested number of squares
     for i = 1, 81-number_of_givens do
         local i = math.random(1,9)
@@ -139,11 +145,12 @@ function BoardGen(number_of_givens)
         base[i][j] = 0
     end
 
-    return base
+    return base, solution
 end
 
 function DevelopBoard(grid_of_groups,givens,guesses,blox)
 --	local grid_of_groups = {}
+	local cheat_list = {}
 	local empty_spaces = 81
 	local text
 	local t
@@ -200,7 +207,9 @@ end
 t.opacity=255
 		else
 			if guesses[r][c].num > 0 then
-				empty_spaces = empty_spaces - 1				
+				empty_spaces = empty_spaces - 1		
+			else
+				table.insert(cheat_list,{r,c})
 			end
 			for g = 1,9 do
 				t= Clone{
@@ -284,7 +293,7 @@ end)
 	---------------------------------
 	end	           end
 	---------------------------------
-	return empty_spaces
+	return empty_spaces, cheat_list
 end
 --[[
 local sel_menu = Group{}
@@ -301,15 +310,17 @@ sel_menu:add(
 sel_menu:add(unpack(m_items))
 sel_menu.anchor_point={TILE_WIDTH/2,TILE_WIDTH/2}
 --]]
-Game = Class(function(g,the_givens, the_guesses,blox, ...)
+Game = Class(function(g,the_givens,solution, the_guesses,blox, ...)
 	local error_checking = false
 	local empty_spaces = 81
 	local the_blox = blox
 	local error_list = {}
-	local undo_list = {}
-	local redo_list = {}
+	local undo_list  = {}
+	local redo_list  = {}
+	local cheat_list = {}
 	local givens = the_givens--BoardGen(number_of_givens)
 	local guesses = {}
+	local sol = solution
 	if the_guesses then
 		guesses = the_guesses
 	else
@@ -339,13 +350,20 @@ Game = Class(function(g,the_givens, the_guesses,blox, ...)
 	--g.board = Group{}
 	g.grid_of_groups = {}
 	--screen:add(g.board)
-	empty_spaces = DevelopBoard(g.grid_of_groups,givens, guesses,blox)
+	empty_spaces, cheat_list = DevelopBoard(g.grid_of_groups,givens, guesses,blox)
 print(empty_spaces)
 	--g.board.anchor_point = {g.board.w/2,g.board.h/2}
 	--g.board.position = {500,0}--{screen.w/2+40,screen.h/2}
 	function g:save()
-		settings.givens  = givens
-		settings.guesses = guesses
+		if empty_spaces == 0 and #error_list == 0 then
+			settings.givens  = nil
+			settings.guesses = nil
+			settings.sol     = nil
+		else
+			settings.givens  = givens
+			settings.guesses = guesses
+			settings.sol     = sol
+		end
 	end
 	function g:get_guesses(r,c)
 		return guesses[r][c]
@@ -355,6 +373,9 @@ print(empty_spaces)
 	end
 	function g:get_all_givens()
 		return givens
+	end
+	function g:get_sol()
+		return sol
 	end
 	function g:restart()
 		guesses = 
@@ -689,6 +710,32 @@ cchild.opacity = 255
 			player_won()
 		end
 		print(empty_spaces)
+	end
+	function g:cheat()
+		local hold_list = cheat_list
+		cheat_list = {}
+		local l = #hold_list
+		local r,c
+		for i=1,l do
+			table.insert(cheat_list,
+				table.remove(hold_list,
+					math.random(1,#hold_list)
+				)
+			)
+		end
+
+		--pull the first one that fits
+		for i = 1,l do
+			r = cheat_list[i][1]
+			c = cheat_list[i][2]
+
+			--if guesses[r][c].pen ~= 0 or guesses[r][c].num == 0 then
+				if guesses[r][c].pen ~= sol[r][c] then
+					g:pen(r,c,sol[r][c])
+					return
+				end
+		--	end
+		end
 	end
 
 
@@ -1027,13 +1074,15 @@ print("undooo",params[2],params[3],params[4])
 		if guesses[r][c].pen ~= 0 then
 			table.insert(undo_list,{g.pen,r,c,guesses[r][c].pen})
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			guesses[r][c][guesses[r][c].pen] = false
+
 			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
 
 			guesses[r][c].pen = 0
 			guesses[r][c].num = 0
 		else
 
-		local params = {}
+			local params = {}
 			for i = 1,9 do
 				if guesses[r][c][i] then
 					g:rem_from_err_list(r,c,i)
