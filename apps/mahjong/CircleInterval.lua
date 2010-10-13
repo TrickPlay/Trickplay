@@ -10,8 +10,8 @@ function(interval, radius, from, to, theta_start, theta_end, is_x, is_y, ...)
     radius = from.x - cntr.x -- for now
     
     function interval:get_value(progress)
-        if is_x then return cntr.x + radius*math.cos(2*math.pi*progress) end
-        if is_y then return cntr.y - radius*math.sin(2*math.pi*progress) end
+        if is_x then return cntr.x + radius*math.cos(math.pi*progress) end
+        if is_y then return cntr.y - radius*math.sin(math.pi*progress) end
     end
 
 end)

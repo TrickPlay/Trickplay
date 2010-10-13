@@ -8,7 +8,7 @@ MenuController = Class(Controller,function(self, view, ...)
     local hide_options = true
     -- the value which represent the current image used of the tiles,
     -- index's global TILE_IMAGES
-    local current_tile_image = 1
+    local current_tile_image = 2
 
     -- Create the tables used as nodes in the menu graph
     local New_Game = {}
@@ -93,7 +93,7 @@ MenuController = Class(Controller,function(self, view, ...)
             else
                 current_tile_image = #TILE_IMAGES
             end
-            game:get_state():get_tiles_class():change_images(current_tile_image)
+            view:change_tiles(current_tile_image, Directions.UP)
         end
     Choose_Tile[Directions.DOWN] =
         function()
@@ -103,7 +103,7 @@ MenuController = Class(Controller,function(self, view, ...)
             else
                 current_tile_image = 1
             end
-            game:get_state():get_tiles_class():change_images(current_tile_image)
+            view:change_tiles(current_tile_image, Directions.DOWN)
         end
     Choose_Tile[Directions.LEFT] = Choose_Map
     Choose_Tile.object = view:get_object("choose_tile")

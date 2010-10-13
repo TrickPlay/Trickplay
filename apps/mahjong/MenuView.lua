@@ -23,21 +23,24 @@ MenuView = Class(View, function(view, model, ...)
 
 
     --
+    local large_button_off = Image{src="assets/menus/button-large-off.png", opacity=0}
+    local large_button_on = Image{src="assets/menus/button-large-on.png", opacity=0}
+    screen:add(large_button_off, large_button_on)
     view.items = {
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "New Game"),
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "Undo Last Move"),
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "Shuffle Tiles"),
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "Show a Hint"),
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "Help"),
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "Show Options"),
-        FocusableImage(40, 392, "assets/menus/button-large-off.png",
-            "assets/menus/button-large-on.png", "Exit"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "New Game"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "Undo Last Move"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "Shuffle Tiles"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "Show a Hint"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "Help"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "Show Options"),
+        FocusableImage(40, 392, Clone{source=large_button_off},
+            Clone{source=large_button_on}, "Exit"),
         FocusableImage(20,54, nil, "assets/options/options-layout-focus.png"),
         FocusableImage(307,54, nil, "assets/options/options-tile-focus.png")
     }
@@ -59,17 +62,18 @@ MenuView = Class(View, function(view, model, ...)
         choose_tile = view.items[9]
     }
 
+
     -- Show/Hide Options arrow
     local show_options = focusable_items.show_options
     show_options.arrow_right = Image
     {
-        src="assets/menus/arrow-right-off.png",
-        position = {270, 10}
+        src="assets/options/option-arrow-right.png",
+        position = {270, 17}
     }
     show_options.arrow_left = Image
     {
-        src="assets/menus/arrow-left-off.png",
-        position = {270, 10},
+        src="assets/options/option-arrow-left.png",
+        position = {270, 17},
         opacity = 0
     }
     show_options.group:add(
@@ -77,12 +81,17 @@ MenuView = Class(View, function(view, model, ...)
         show_options.arrow_left
     )
 
+    local up_arrow_off = Image{src="assets/options/arrow-up-off.png",opacity=0}
+    local up_arrow_on = Image{src="assets/options/arrow-up-on.png",opacity=0}
+    local down_arrow_off = Image{src="assets/options/arrow-down-off.png",opacity=0}
+    local down_arrow_on = Image{src="assets/options/arrow-down-on.png",opacity=0}
+    screen:add(up_arrow_off, up_arrow_on, down_arrow_off, down_arrow_on)
     -- Choose map arrows
     local choose_map = focusable_items.choose_map
-    choose_map.arrow_up = FocusableImage(125,35, "assets/options/arrow-up-off.png",
-        "assets/options/arrow-up-on.png")
-    choose_map.arrow_down = FocusableImage(125,220, "assets/options/arrow-down-off.png",
-        "assets/options/arrow-down-on.png")
+    choose_map.arrow_up = FocusableImage(125,35, Clone{source=up_arrow_off},
+        Clone{source=up_arrow_on})
+    choose_map.arrow_down = FocusableImage(125,220, Clone{source=down_arrow_off},
+        Clone{source=down_arrow_on})
     choose_map.group:add(choose_map.arrow_up.group, choose_map.arrow_down.group)
     choose_map.up_arrow_focus = function()
         choose_map.arrow_up:on_focus_inst()
@@ -94,11 +103,10 @@ MenuView = Class(View, function(view, model, ...)
     end
     -- Choose tile arrows
     local choose_tile = focusable_items.choose_tile
-    choose_tile.arrow_up = FocusableImage(80,35, "assets/options/arrow-up-off.png",
-        "assets/options/arrow-up-on.png")
-    choose_tile.arrow_down = FocusableImage(80,220,"assets/options/arrow-down-off.png",
-        "assets/options/arrow-down-on.png")
-    choose_tile.group:add(choose_tile.arrow_up.group, choose_tile.arrow_down.group)
+    choose_tile.arrow_up = FocusableImage(80,35, Clone{source=up_arrow_off},
+        Clone{source=up_arrow_on})
+    choose_tile.arrow_down = FocusableImage(80,220, Clone{source=down_arrow_off},
+        Clone{source=down_arrow_on})
     choose_tile.up_arrow_focus = function()
         choose_tile.arrow_up:on_focus_inst()
         choose_tile.arrow_up:off_focus()
@@ -108,6 +116,19 @@ MenuView = Class(View, function(view, model, ...)
         choose_tile.arrow_down:off_focus()
     end
 
+    -- Tiles for the player to select
+    local tile_mask = Group{position={45,65},clip={0,0,130,150}}
+    local tiles_strip_image = Image{src="assets/options/tiles-strip3.png", opacity = 0}
+    screen:add(tiles_strip_image)
+    local tiles_strip_1 = Clone{source=tiles_strip_image}
+    local tiles_strip_2 = Clone{source=tiles_strip_image, y = -tiles_strip_1.height-35}
+    local tiles_strip_3 = Clone{source=tiles_strip_image, y = tiles_strip_1.height+35}
+    local tiles_strip = Group{position = {0,-193}}
+    tiles_strip:add(tiles_strip_1, tiles_strip_2, tiles_strip_3)
+    tile_mask:add(tiles_strip)
+    choose_tile.group:add(
+        tile_mask,choose_tile.arrow_up.group, choose_tile.arrow_down.group
+    )
 
     -- score related stuff
     local time_text = game_timer.text
@@ -272,8 +293,31 @@ MenuView = Class(View, function(view, model, ...)
         view.tile_group.position = {140, 220}
     end
 
+    function view:change_tiles(number, dir)
+        if -1 == dir[2] then
+            local interval = nil
+            interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y + 195)}
+            gameloop:add(tiles_strip, 300, nil, interval,
+                function()
+                    if number == 3 then tiles_strip.y = -390 end
+                    game:get_state():get_tiles_class():change_images(number)
+                end)
+        elseif 1 == dir[2] then
+            local interval = nil
+            interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y - 195)}
+            gameloop:add(tiles_strip, 300, nil, interval,
+                function()
+                    if number == 1 then tiles_strip.y = 0 end
+                    game:get_state():get_tiles_class():change_images(number)
+                end)
+        else
+            error("something went wrong")
+        end
+    end
+
 
 ---------- Main View Functionality -------------------
+
 
     -- initialize the View/Controller pair
     function view:initialize()

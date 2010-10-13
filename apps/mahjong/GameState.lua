@@ -348,8 +348,10 @@ GameState = Class(nil,function(state, ctrl)
         last_tiles[1]:reset()
         last_tiles[2]:reset()
 
+        local temp = Utils.deepcopy(last_tiles)
         last_tiles = nil
-        return true
+
+        return temp
 
     end
 
@@ -383,7 +385,7 @@ GameState = Class(nil,function(state, ctrl)
                 -- select the piece
                 selected_tile = tile
                 game_menu:add_tile_image(
-                    Clone{source = tile.image},
+                    Clone{source = tile.images[tiles_class:get_current_tile_image()]},
                     Clone{source = tile.glyph})
                 tile:set_green()
             end
@@ -401,7 +403,7 @@ GameState = Class(nil,function(state, ctrl)
                 gameloop:add(temp.focus.green, 600, nil, interval_2)
                 
                 game_menu:add_tile_image(
-                    Clone{source = tile.image},
+                    Clone{source = tile.images[tiles_class:get_current_tile_image()]},
                     Clone{source = tile.glyph})
 
                 ctrl:get_presentation():tile_bump(tile.group, temp.group)

@@ -217,7 +217,6 @@ function(pres, ctrl)
         local left_durations = {300, 200}
         local from = {x = left_x, y = left_y}
         local to = {x = left_x-200, y = left_y}
-        print("left_x", left_x)
         table.insert(left_intervals_t, {
             ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
             ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true)
@@ -264,6 +263,16 @@ function(pres, ctrl)
             end)
 
         game_menu:tile_bump()
+    end
+
+    function pres:show_undo(last_tiles)
+        last_tiles[1]:set_green()
+        last_tiles[2]:set_green()
+        local interval_1 = {["opacity"] = Interval(255, 0)}
+        local interval_2 = {["opacity"] = Interval(255, 0)}
+
+        gameloop:add(last_tiles[1].focus.green, 300, nil, interval_1)
+        gameloop:add(last_tiles[2].focus.green, 300, nil, interval_2)
     end
 
     function pres:end_game_animation()
