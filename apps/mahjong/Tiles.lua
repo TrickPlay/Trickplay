@@ -1,7 +1,7 @@
 local tiles = {
+    Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0},
     Image{src = "assets/tiles/TileWoodLg.png", opacity = 0},
     Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0},
-    Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0}
 }
 
 TILE_IMAGES = tiles
@@ -70,16 +70,20 @@ end
 
 local tile_depth = Image{src = "assets/tiles/TileDepthLg.png", opacity = 0}
 local tile_highlight_yellow = Image{
-        src="assets/tiles/TileHighlightYellowLg.png",
-        opacity = 0
+    src="assets/tiles/TileHighlightYellowLg.png",
+    opacity = 0
 }
 local tile_highlight_red = Image{
-        src="assets/tiles/TileHighlightRedLg.png",
-        opacity = 0
+    src="assets/tiles/TileHighlightRedLg.png",
+    opacity = 0
 }
 local tile_highlight_green = Image{
-        src="assets/tiles/TileHighlightGreenLg.png",
-        opacity = 0
+    src="assets/tiles/TileHighlightGreenLg.png",
+    opacity = 0
+}
+tile_shadow = Image{
+    src = "assets/tiles/shadow.png",
+--    opacity = 0
 }
 local sparkle = Image{
     src="assets/tiles/Sparkle.png",
@@ -87,7 +91,7 @@ local sparkle = Image{
 }
 screen:add(
     tile_depth, tile_highlight_yellow, tile_highlight_green, tile_highlight_red,
-    sparkle
+    sparkle, tile_shadow
 )
 
 Tile = Class(function(tile, suit, number, ...)
@@ -98,10 +102,12 @@ Tile = Class(function(tile, suit, number, ...)
     end
     
     tile.images = {
-        Clone{source = tiles[1]},
-        Clone{source = tiles[2], opacity = 0},
+        Clone{source = tiles[1], opacity = 0},
+        Clone{source = tiles[2]},
         Clone{source = tiles[3], opacity = 0}
     }
+
+    tile.shadow = Clone{source = tile_shadow, position={8,10}, opacity = 178}
 
     if not glyphs[suit][number].parent then screen:add(glyphs[suit][number]) end
     tile.glyph = Clone{source = glyphs[suit][number]}
@@ -124,11 +130,12 @@ Tile = Class(function(tile, suit, number, ...)
     -- the position of the tile in the game grid
     tile.position = nil
 
-    tile.group = Group{clip = {0,0,tile.images[1].width,tile.images[1].height}}
+    tile.group = Group{}--clip = {0,0,tile.images[1].width,tile.images[1].height}}
+    tile.group:add(tile.shadow)
     tile.group:add(unpack(tile.images))
     tile.group:add(
         tile.depth, tile.focus.green, tile.focus.yellow,
-        tile.focus.red, tile.glyph, tile.sparkle
+        tile.focus.red, tile.glyph, tile.sparkle, shadow
     )
 
     TILE_HEIGHT = tile.images[1].height
@@ -165,6 +172,7 @@ Tile = Class(function(tile, suit, number, ...)
         tile.null = false
         tile.set = false
         tile.position = nil
+        tile.group.opacity = 255
     end
 
     function tile:focus_reset()
@@ -201,8 +209,11 @@ Tiles = Class(function(self, ...)
         original_order[i] = v
     end
 
+    local current_tile_image = 2
+
     function self:get_tiles() return tiles end
     function self:get_matches() return matches end
+    function self:get_current_tile_image() return current_tile_image end
 
     function self:shuffle(number)
         if not number then number = 144 end
@@ -233,6 +244,8 @@ Tiles = Class(function(self, ...)
         if number < 1 or number > #TILE_IMAGES then
             error("tile image number must be between 1 and "..#tile.images, 2)
         end
+
+        current_tile_image = number
 
         for i,a_tile in ipairs(tiles) do
             a_tile:change_image(number)

@@ -109,13 +109,14 @@ function(ctrl, router, ...)
     end
 
     function ctrl:undo_move()
-        local continue = state:undo()
-        if not continue then return end
+        local last_tiles = state:undo()
+        if not last_tiles then return end
         state:set_tile_tables()
         grid = state:get_grid()
 
         pres:display_ui()
         pres:reset()
+        pres:show_undo(last_tiles)
 
         ctrl:reset_selector()
         pres:move_focus()
