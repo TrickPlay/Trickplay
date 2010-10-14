@@ -31,6 +31,8 @@ timer.on_timer = function(timer)
     timer:stop()
     timer.on_timer = nil
 
+    mediaplayer:play_sound("assets/audio/start-sound.mp3")
+
     start_button_focus:animate{duration = 1000, opacity = 255,
     on_completed = function()
 
