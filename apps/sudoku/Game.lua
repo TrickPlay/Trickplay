@@ -310,12 +310,14 @@ sel_menu:add(
 sel_menu:add(unpack(m_items))
 sel_menu.anchor_point={TILE_WIDTH/2,TILE_WIDTH/2}
 --]]
-Game = Class(function(g,the_givens,solution, the_guesses,blox, ...)
+
+
+Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 	local error_checking = false
 	local empty_spaces = 81
 	local the_blox = blox
 	local error_list = {}
-	local undo_list  = {}
+	local undo_list  = undo or {}
 	local redo_list  = {}
 	local cheat_list = {}
 	local givens = the_givens--BoardGen(number_of_givens)
@@ -359,10 +361,12 @@ print(empty_spaces)
 			settings.givens  = nil
 			settings.guesses = nil
 			settings.sol     = nil
+			settings.undo    = nil
 		else
 			settings.givens  = givens
 			settings.guesses = guesses
 			settings.sol     = sol
+			settings.undo    = undo_list
 		end
 	end
 	function g:get_guesses(r,c)
@@ -420,16 +424,16 @@ print(empty_spaces)
 		for rr = 1,9 do
 			if givens[rr][c] == v then
 				table.insert(t,{{r,c,v},{rr,c}})
-			elseif guesses[rr][c][i] and 
+			elseif guesses[rr][c][v] and 
 				rr ~= r then
 				table.insert(t,{{r,c,v},{rr,c,v}})
 			end
 		end
 		--for all the other tiles on that row
 		for cc = 1,9 do
-			if givens[r][cc] == i then
+			if givens[r][cc] == v then
 				table.insert(t,{{r,c,v},{r,cc}})
-			elseif guesses[r][cc][i] and 
+			elseif guesses[r][cc][v] and 
 				cc ~= c then
 				table.insert(t,{{r,c,v},{r,cc,v}})
 			end
@@ -451,7 +455,7 @@ print(empty_spaces)
 			end
 		end
 
-		return mini_list
+		--return mini_list
 	end
 	function g:init_error_list()
 		error_list = {}
@@ -605,7 +609,7 @@ print(empty_spaces)
 		--if another pen number was there
 		if guesses[r][c].pen ~= 0 then
 			if status ~= "UNDO" then
-				table.insert(undo_list,{g.pen,r,c,
+				table.insert(undo_list,{"pen",r,c,
 					guesses[r][c].pen})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
@@ -643,7 +647,7 @@ print("here")
 				end
 			end
 			if status ~= "UNDO" then
-				table.insert(undo_list,{g.set_pencil,r,c,
+				table.insert(undo_list,{"set_pencil",r,c,
 					params})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
@@ -655,7 +659,7 @@ print("here")
 		--if nothing was there
 		else
 			if status ~= "UNDO" then
-				table.insert(undo_list,{g.pen,r,c,p})
+				table.insert(undo_list,{"pen",r,c,p})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
 				end
@@ -756,7 +760,7 @@ cchild.opacity = 255
 			-- remove the "penned" guess, add it to the undo list
 			g:rem_from_err_list(r,c,guesses[r][c].pen)	
 			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list,{g.pen,r,c,guesses[r][c].pen})
+				table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
 				end
@@ -793,7 +797,7 @@ cchild.opacity = 255
 			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 0
 
 			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list,{g.toggle_guess,r,c,guess})
+				table.insert(undo_list,{"toggle_guess",r,c,guess})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
 				end
@@ -814,7 +818,7 @@ cchild.opacity = 255
 			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 255
 
 			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list,{g.toggle_guess,r,c,guess})
+				table.insert(undo_list,{"toggle_guess",r,c,guess})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
 				end
@@ -984,12 +988,78 @@ end
 			end
 		end
 	end
+	function g:clear_tile(r,c)
+		empty_spaces = empty_spaces + 1
+		if guesses[r][c].pen ~= 0 then
+			table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
+			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			guesses[r][c][guesses[r][c].pen] = false
+
+			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+
+			guesses[r][c].pen = 0
+			guesses[r][c].num = 0
+		else
+
+			local params = {}
+			for i = 1,9 do
+				if guesses[r][c][i] then
+					g:rem_from_err_list(r,c,i)
+					guesses[r][c][i] = false
+					g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
+					--guess.opacity = 0
+					table.insert(params,i)
+				end
+			end
+			guesses[r][c].num = 0
+
+			table.insert(undo_list,{"set_pencil",r,c,params})
+		end
+	end
+	function g:set_pencil(r,c,nums)
+		if guesses[r][c].num == 0 then
+			empty_spaces = empty_spaces - 1
+		end
+
+		for i = 1,9 do
+			if guesses[r][c][i] then
+				g:rem_from_err_list(r,c,i)
+				guesses[r][c][i] = false
+				g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
+--				guess.color = "FFFFFF"
+--				guess.opacity = 0
+			end
+		end
+		for i = 1,#nums do
+			guesses[r][c][nums[i]] = true
+			g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 255
+			g:add_to_err_list(r,c,i)
+		end
+		if guesses[r][c].pen ~= 0 then
+			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+
+			guesses[r][c].pen = 0
+		end
+		guesses[r][c].num = #nums
+	--	g.board:find_child("Pen "..r.." "..c).text=""
+	--	g.board:find_child("Pen_s "..r.." "..c).text=""
+
+	end
+
+local str_funcs = 
+{
+	["pen"] = g.pen,
+	["toggle_guess"] = g.toggle_guess,
+	["set_pencil"] = g.set_pencil
+}
+
 	function g:undo()
 		if #undo_list > 0 then
 			params = table.remove(undo_list)
 			table.insert(redo_list,{params[1],params[2],params[3],params[4]})
 print("undooo",params[2],params[3],params[4])
-			params[1](g,params[2],params[3],params[4],"UNDO")
+			str_funcs[params[1]](g,params[2],params[3],params[4],"UNDO")
 --[[
 			if r ~= params[1] or c ~= params[2] then
 				r = params[1]
@@ -1069,64 +1139,6 @@ print("undooo",params[2],params[3],params[4])
 	end
 
 
-	function g:clear_tile(r,c)
-		empty_spaces = empty_spaces + 1
-		if guesses[r][c].pen ~= 0 then
-			table.insert(undo_list,{g.pen,r,c,guesses[r][c].pen})
-			g:rem_from_err_list(r,c,guesses[r][c].pen)
-			guesses[r][c][guesses[r][c].pen] = false
-
-			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
-
-			guesses[r][c].pen = 0
-			guesses[r][c].num = 0
-		else
-
-			local params = {}
-			for i = 1,9 do
-				if guesses[r][c][i] then
-					g:rem_from_err_list(r,c,i)
-					guesses[r][c][i] = false
-					g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
-					--guess.opacity = 0
-					table.insert(params,i)
-				end
-			end
-			guesses[r][c].num = 0
-
-			table.insert(undo_list,{g.set_pencil,r,c,params})
-		end
-	end
-	function g:set_pencil(r,c,nums)
-		if guesses[r][c].num == 0 then
-			empty_spaces = empty_spaces - 1
-		end
-
-		for i = 1,9 do
-			if guesses[r][c][i] then
-				g:rem_from_err_list(r,c,i)
-				guesses[r][c][i] = false
-				g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
---				guess.color = "FFFFFF"
---				guess.opacity = 0
-			end
-		end
-		for i = 1,#nums do
-			guesses[r][c][nums[i]] = true
-			g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 255
-			g:add_to_err_list(r,c,i)
-		end
-		if guesses[r][c].pen ~= 0 then
-			g:rem_from_err_list(r,c,guesses[r][c].pen)
-			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
-
-			guesses[r][c].pen = 0
-		end
-		guesses[r][c].num = #nums
-	--	g.board:find_child("Pen "..r.." "..c).text=""
-	--	g.board:find_child("Pen_s "..r.." "..c).text=""
-
-	end
 --[[
 	function g:enter_menu(r,c)
 		sel_menu.x = (c)*TILE_WIDTH + 
