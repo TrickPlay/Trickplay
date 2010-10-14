@@ -681,6 +681,103 @@ interface Body [[ Physics::Body * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
+    int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
+        [[
+            self->check( L );
+
+            Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
+
+            if ( ! other )
+            {
+                return luaL_error( L , "Invalid body" );
+            }
+
+            other->check( L );
+
+            b2Body * ba = self->body;
+            b2Body * bb = other->body;
+
+            // TODO: at least one of the bodies has to be dynamic with a non-fixed rotation
+
+            lua_rawgeti( L , anchor , 1 );
+            lua_rawgeti( L , anchor , 2 );
+
+            float32 x = self->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 y = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+
+            lua_pop( L , 2 );
+
+            lua_rawgeti( L , axis , 1 );
+            lua_rawgeti( L , axis , 2 );
+
+            float32 ax = self->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 ay = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+
+            lua_pop( L , 2 );
+
+            b2PrismaticJointDef p;
+
+            p.Initialize( ba , bb , b2Vec2( x , y ) , b2Vec2( ax , ay ) );
+
+            if ( properties )
+            {
+                lua_getfield( L , properties , "reference_angle" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.referenceAngle = Physics::World::degrees_to_radians( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "enable_limit" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.enableLimit = lua_toboolean( L , -1 );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "lower_translation" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.lowerTranslation = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "upper_translation" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.upperTranslation = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "enable_motor" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.enableMotor = lua_toboolean( L , -1 );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "motor_speed" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.motorSpeed = Physics::World::degrees_to_radians( lua_tonumber( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+
+                lua_getfield( L , properties , "max_motor_force" );
+                if ( ! lua_isnil( L , -1 ) )
+                {
+                    p.maxMotorForce = lua_tonumber( L , -1 );
+                }
+                lua_pop( L , 1 );
+            }
+
+            result = self->world->get_next_handle();
+
+            b2Joint * joint = self->world->get_world()->CreateJoint( & p );
+
+            joint->SetUserData( GINT_TO_POINTER( result ) );
+        ]];
+
     callback on_begin_contact( table contact )
         [[
             self->world->attach_body_callback( self , Physics::BEGIN_CONTACT , on_begin_contact );
