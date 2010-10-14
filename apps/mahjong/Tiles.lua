@@ -1,7 +1,7 @@
 local tiles = {
-    Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0},
-    Image{src = "assets/tiles/TileWoodLg.png", opacity = 0},
-    Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0},
+    Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0, name = "Marble"},
+    Image{src = "assets/tiles/TileWoodLg.png", opacity = 0, name = "Wood"},
+    Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0, name = "Procelain"},
 }
 
 TILE_IMAGES = tiles
@@ -173,6 +173,7 @@ Tile = Class(function(tile, suit, number, ...)
         tile.set = false
         tile.position = nil
         tile.group.opacity = 255
+        if tile.group.parent then tile.group:unparent() end
     end
 
     function tile:focus_reset()

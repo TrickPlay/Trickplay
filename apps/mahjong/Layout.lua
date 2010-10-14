@@ -1,16 +1,30 @@
 Layouts = {
-    TURTLE = 1,
+    CUBE = 1,
     CLUB = 2,
     ARENA = 3,
-    BULL = 4,
-    CUBE = 5
+    TURTLE = 4
 }
+--[[
+Layouts = {
+    CUBE = 1,
+    CLUB = 2,
+    ARENA = 3,
+    TURTLE = 4,
+    BULL = 5
+}
+--]]
 Layouts.LAST = -1
 for _,__ in pairs(Layouts) do
     Layouts.LAST = Layouts.LAST + 1
 end
 
 NUMBER_OF_TILES = {144, 144, 144, 80, 64}
+LAYOUT_NAMES = {
+    [Layouts.CUBE] = "Cube (Hard)",
+    [Layouts.CLUB] = "Club (Normal)",
+    [Layouts.ARENA] = "Arena (Easy)",
+    [Layouts.TURTLE] = "Turtle (Classic)"
+}
 
 local layout_functions = {
     [Layouts.TURTLE] = function(tiles)
@@ -92,6 +106,104 @@ local layout_functions = {
         -- Top Piece
         grid[14][8][5] = tiles[index]
         index = index + 1
+
+        return grid
+    end,
+
+    [Layouts.CLUB] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        -- Center
+        for i = 13,17,2 do
+            for j = 1,11,2 do
+                for k = 1,2 do
+                    grid[i][j][k] = tiles[index]
+                    index = index + 1
+                end
+            end
+        end
+        -- top left/right side of the top leaf
+        for j = 3,5,2 do
+            for k = 1,2 do
+                grid[11][j][k] = tiles[index]
+                index = index + 1
+                grid[19][j][k] = tiles[index]
+                index = index + 1
+            end
+        end
+        -- Bottom center stuff
+        for k = 1,2 do
+            grid[13][13][k] = tiles[index]
+            index = index + 1
+            grid[17][13][k] = tiles[index]
+            index = index + 1
+        end
+        -- Very Bottom stuff
+        for i = 13,17,2 do
+            for k = 1,2 do
+                grid[i][15][k] = tiles[index]
+                index = index + 1
+            end
+        end
+        for k = 1,2 do
+            grid[15][13][k] = tiles[index]
+            index = index + 1
+        end
+        -- Left/Right leaves
+        -- center part of the left/right leafs
+        for i = 5,9,2 do
+            for j = 7,13,2 do
+                for k = 1,2 do
+                    grid[i][j][k] = tiles[index]
+                    index = index + 1
+                    grid[i+16][j][k] = tiles[index]
+                    index = index + 1
+                end
+            end
+        end
+        -- most left/right tiles
+        for j = 9,11,2 do
+            for k = 1,2 do
+                grid[3][j][k] = tiles[index]
+                index = index + 1
+                grid[19][j][k] = tiles[index]
+                index = index + 1
+            end
+        end
+        -- right/left side tiles on the left/right leaf
+        for j = 9,11,2 do
+            for k = 1,2 do
+                grid[11][j][k] = tiles[index]
+                index = index + 1
+                grid[27][j][k] = tiles[index]
+                index = index + 1
+            end
+        end
+        -- Top Layers
+        -- left/center/right
+        for i = 6,8,2 do
+            for j = 9,11,2 do
+                for k = 3,4 do
+                    -- left
+                    grid[i][j][k] = tiles[index]
+                    index = index + 1
+                    -- center
+                    grid[i+8][j-7][k] = tiles[index]
+                    index = index + 1
+                    -- right
+                    grid[i+16][j][k] = tiles[index]
+                    index = index + 1
+                end
+            end
+        end
+
 
         return grid
     end,
@@ -260,7 +372,7 @@ local layout_functions = {
 
         return grid
     end,
-
+--[[
     [Layouts.BULL] = function(tiles)
         local index = 1
         local grid = {}
@@ -275,24 +387,40 @@ local layout_functions = {
             -- top left corner
             grid[1][j][1] = tiles[index]
             index = index + 1
-            -- edged to the right right above
+            -- edged to the right just above
             grid[2][j+1][2] = tiles[index]
+            index = index + 1
+            -- mirror image on opposite side
+            grid[27][j][1] = tiles[index]
+            index = index + 1
+            -- edged to the right just above
+            grid[26][j+1][2] = tiles[index]
             index = index + 1
         end
 
         grid[2][5][1] = tiles[index]
         index = index + 1
+        grid[26][5][1] = tiles[index]
+        index = index + 1
 
         for i = 3,5,2 do
+            -- left side
             grid[i+1][6][1] = tiles[index]
             index = index + 1
             grid[i][6][2] = tiles[index]
             index = index + 1
+            -- right side
+            grid[i+19][6][1] = tiles[index]
+            index = index + 1
+            grid[i+20][6][2] = tiles[index]
+            index = index + 1
         end
+
+
 
         return grid
     end,
-
+--]]
     [Layouts.CUBE] = function(tiles)
         local index = 1
         local grid = {}
@@ -325,7 +453,7 @@ Layout = Class(function(layout, number, tiles_class, ...)
     end
     if type(number) ~= "number" then error("number must be a number", 2) end
     if number < 1 or number > Layouts.LAST then
-        error("number must be between 1 and "..Layouts.LAST.." inclusive", 2)
+        error("number must be between 1 and "..Layouts.LAST.." inclusive", 3)
     end
 
     tiles_class:shuffle(NUMBER_OF_TILES[number])

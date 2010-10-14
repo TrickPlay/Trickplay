@@ -21,7 +21,7 @@ function(pres, ctrl)
         "assets/tiles/TileMarbleLg.png"
     }
 
-    local grid_group = Group{position = {460, 60}}
+    local grid_group = Group{}--position = {460, 60}}
     
     ui = Group()
     ui:add(background, grid_group)
@@ -148,8 +148,15 @@ function(pres, ctrl)
     end
 
     function pres:tile_bump(tile_group_1, tile_group_2)
+        --[[
         tile_group_1.z = tile_group_1.z + 1
         tile_group_2.z = tile_group_2.z + 1
+        --]]
+        
+        tile_group_1:unparent()
+        screen:add(tile_group_1)
+        tile_group_2:unparent()
+        screen:add(tile_group_2)
 
         local left_tile = nil
         local right_tile = nil

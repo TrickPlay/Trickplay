@@ -3,7 +3,9 @@ Components = {
     GAME = 1,
     MENU = 2,
     NO_MOVES_DIALOG = 3,
-    COMPONENTS_LAST = 3
+    NEW_MAP_DIALOG = 4,
+    HELP = 5,
+    COMPONENTS_LAST = 5
 }
 
 Events = {
@@ -43,7 +45,11 @@ timer.on_timer = function(timer)
             for j = 1,GRID_HEIGHT do
                 GridPositions[i][j] = {}
                 for k = 1,GRID_DEPTH do
-                    GridPositions[i][j][k] = {47*(i-1) - (k-1)*16, 59*(j-1) - (k-1)*21}
+                    GridPositions[i][j][k] = 
+                    {
+                        47*(i-1) - (k-1)*16 + 460,
+                        59*(j-1) - (k-1)*21 + 60
+                    }
                 end
             end
         end
@@ -58,13 +64,15 @@ timer.on_timer = function(timer)
         game = GameControl(router, Components.GAME)
         game_menu = MenuView(router)
         game_menu:initialize()
-        local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components.NO_MOVES_DIALOG,
-            router)
+        local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components.NO_MOVES_DIALOG, router)
+        local new_map_dialog = DialogBox("Start a new game\non this layout?", Components.NEW_MAP_DIALOG, router)
 
         splash:unparent()
+        start_button_focus:unparent()
 
         router:start_app(Components.GAME)
         --router:start_app(Components.NO_MOVES_DIALOG)
+        --router:start_app(Components.NEW_MAP_DIALOG)
     end}
 end
 

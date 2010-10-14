@@ -26,6 +26,9 @@ function(ctrl, router, ...)
     function ctrl:get_selector() return selector end
     function ctrl:get_prev_selector() return prev_selector end
     function ctrl:is_new_game() return state:is_new_game() end
+    function ctrl:get_current_tile_image()
+        return state:get_tiles_class():get_current_tile_image()
+    end
     function ctrl:set_selector(position)
         if not position then error("need a position", 2) end
         if not position.x then error("need position.x", 2) end
@@ -70,15 +73,14 @@ function(ctrl, router, ...)
 
     end
 
-    function ctrl:reset_game()
+    function ctrl:reset_game(number)
         print("game resetting")
-        router:set_active_component(Components.GAME)
-        router:notify()
+        if not number then 
+            router:set_active_component(Components.GAME)
+        end
 
         state:reset()
-        --state:build_layout(Layouts.TURTLE)
-        --state:build_layout(Layouts.CLUB)
-        state:build_layout(Layouts.ARENA)
+        state:build_layout(number)
         --state:build_test()
         --state:build_two_tile_test()
         state:set_tile_tables()
@@ -90,6 +92,8 @@ function(ctrl, router, ...)
         selector = {x = 1, y = 1, z = 1}
         ctrl:reset_selector()
         pres:move_focus()
+
+        router:notify()
     end
 
     function ctrl:shuffle_game()
