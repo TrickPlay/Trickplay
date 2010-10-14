@@ -36,12 +36,6 @@ function controllers.on_controller_connected(controllers,controller)
     if(controller.has_accelerometer) then
     	controller:start_accelerometer("L",0.01)
     	
-    	function controller.on_key_down ( controller, key )
-    		if key == keys.Return then
-    			exit()
-    		end
-    	end
-    	
     	function controller.on_accelerometer(controller, x, y, z)
     		--[[
 				Decompose rotation into 2 rotations, about y-axis onto x-z plane, then about x-axis onto negative y-axis
