@@ -3,7 +3,7 @@ local refresh = Timer{interval=100}
 local base_rect = Rectangle{color="FFFFFF",w=100,h=100,opacity=0}
 local num_rects = 50
 
-local cloud = Image{src="assets/cloud9.jpg"}
+local cloud = Image{src="assets/cloud9.jpg",scale = {4,4}}
 red_bg  = {40, 10, 10}
 blue_bg = {10, 40, 45}
 bg = Rectangle{color = {red_bg[1],red_bg[2],red_bg[3]}, w=screen.w,h=screen.h,opacity=220}
