@@ -291,6 +291,8 @@ win_txt:raise_to_top()
 		restore_keys()
 	end
 	timeline:start()
+	mediaplayer:play_sound("audio/won_game.mp3")
+
 end
 local help = Group{z=3,opacity=0}
 local help_img = Image{src="assets/help.png"}
@@ -566,6 +568,8 @@ end
 		restore_keys()
 	end
 	timeline:start()
+	mediaplayer:play_sound("audio/new_game.mp3")
+
 end
 
 local num_font = "DejaVu Bold Condensed 30px"
