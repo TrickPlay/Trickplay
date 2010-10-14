@@ -632,6 +632,8 @@ print("animate nums",#old_nums,#new_nums)
 
 
 	function g:pen(r,c,p,status)
+		mediaplayer:play_sound("audio/pen.mp3")
+
 		if givens[r][c] ~= 0 then 
 			restore_keys()
 			return
@@ -749,6 +751,8 @@ print("animate nums",#old_nums,#new_nums)
 
 
 	function g:toggle_guess(r,c,guess,status)
+		mediaplayer:play_sound("audio/pencil.mp3")
+
 		if type(guess) == "table" then
 			error("this shouldt happen anymore")
 			for i = 1,#guess do
@@ -1006,6 +1010,8 @@ print("animate nums",#old_nums,#new_nums)
 		end
 	end
 	function g:clear_tile(r,c)
+		mediaplayer:play_sound("audio/pencil.mp3")
+
 		local old_nums = {}
 		local new_nums = {}
 
@@ -1039,6 +1045,7 @@ print("animate nums",#old_nums,#new_nums)
 		end
 	end
 	function g:set_pencil(r,c,nums)
+		mediaplayer:play_sound("audio/pencil.mp3")
 		print("set called wit", nums[1],nums[2],nums[3],nums[4])
 		local old_nums = {}
 		local new_nums = {}
@@ -1080,6 +1087,8 @@ local str_funcs =
 }
 
 	function g:undo()
+		mediaplayer:play_sound("audio/undo.mp3")
+
 		if #undo_list > 0 then
 			params = table.remove(undo_list)
 			table.insert(redo_list,{params[1],params[2],params[3],params[4]})
