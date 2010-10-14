@@ -124,9 +124,16 @@ void World::step( float32 time_step , int _velocity_iterations , int _position_i
 
 gboolean World::on_idle( gpointer me )
 {
+    static float32 sixty = 1.0f / 60.0f;
+
     World * self = ( World * ) me;
 
     float32 seconds = g_timer_elapsed( self->timer , NULL );
+
+    if ( seconds < sixty )
+    {
+        return TRUE;
+    }
 
     g_timer_start( self->timer );
 
