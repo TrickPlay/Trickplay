@@ -7,11 +7,12 @@ local ground = Rectangle
     color = "006600" ,
     size = { screen.w , 100 } ,
     position = { 0 , screen.h - 100 }
+    
 }
 
 screen:add( ground )
 
-physics:Body{ source = ground , friction = 0.5 }
+physics:Body{ source = ground , friction = 0.5 , type = "static" }
 
 -------------------------------------------------------------------------------
 -- Edges
@@ -20,17 +21,16 @@ physics:Body{ source = ground , friction = 0.5 }
 
 local left_edge = Group{ size = { 2 , screen.h } , position = { -2 , 0 } }
 screen:add( left_edge )
-physics:Body{ source = left_edge }
+physics:Body{ source = left_edge , type = "static" }
 
 local right_edge = Group{ size = { 2 , screen.h } , position = { screen.w , 0 } }
 screen:add( right_edge )
-physics:Body{ source = right_edge }
+physics:Body{ source = right_edge , type = "static" }
 
 -- Top edge is inactive at first so we can drop stuff from above it
 
-local top_edge = Group{ size = { screen.w , 2 } , position = { 0 , -2 } }
-screen:add( top_edge )
-top_edge = physics:Body{ source = top_edge , active = false}
+local top_edge_actor = Group{ size = { screen.w , 2 } , position = { 0 , -2 } }
+local top_edge = physics:Body{ source = top_edge_actor , type = "static" }
 
 -------------------------------------------------------------------------------
 -- Castle
@@ -64,51 +64,51 @@ local function build_castle()
     plank = make_plank()
     plank:set{ position = { LEFT , floor - wood.h / 2  } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
         
     plank = make_plank()
     plank:set{ position = { LEFT + 200 , floor - wood.h / 2  } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
     
     plank = make_plank( 90 )
     plank:set{ position = { LEFT + 100 , floor - wood.h - wood.w / 2 } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
 
     plank = make_plank( 30 )
     plank.position = { LEFT + 20 , floor - wood.h * 1.5 - wood.w / 2 - 10 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
     
     plank = make_plank( -30 )
     plank.position = { LEFT + 180 , floor - wood.h * 1.5 - wood.w / 2 - 10 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
 
 
     plank = make_plank( 90 )
     plank.position = { LEFT + 100 , floor - wood.h * 2.1 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
 
     
     plank = make_plank()
     plank:set{ position = { LEFT  , floor - wood.h * 2.65  } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
     
     
     plank = make_plank()
     plank:set{ position = { LEFT + 200 , floor - wood.h * 2.65  } }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
 
 
     plank = make_plank( 90 )
     plank.position = { LEFT + 100 , floor - wood.h * 3.2 }
     screen:add( plank )
-    physics:Body{ source = plank , dynamic = true , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
 
 end
 
@@ -134,7 +134,7 @@ local function drop_crate()
         source = crate,
         bounce = 0.2,
         density = 3.0,
-        dynamic = true
+        awake = true
     }
     
     return crate_body
@@ -151,10 +151,10 @@ local crate = drop_crate()
 
 -------------------------------------------------------------------------------
 
-local sw = Stopwatch()
-local spf = 1 / 60
 local n
 local ret = keys.Return
+
+idle.limit = 1.0 / 60.0
 
 function screen.on_key_down( screen , key )
 
@@ -164,13 +164,10 @@ function screen.on_key_down( screen , key )
 
         function idle.on_idle( )
             
-            if sw.elapsed_seconds < spf then return end
-            
             physics:step()    
-            sw:start()
             
             -- Once the crate has settled down, we can start
-            
+
             if not crate.awake then
             
                 crate.source.color = "FFFFFF"
@@ -179,7 +176,7 @@ function screen.on_key_down( screen , key )
                 
                 -- Close the top edge so stuff doesn't fly off the screen
                 
-                top_edge.active = true
+                screen:add( top_edge_actor )
                 
                 -- Attach key handler
                 
@@ -197,7 +194,7 @@ function screen.on_key_down( screen , key )
                         
                         local p = crate.position
                                         
-                        crate:apply_linear_impulse( 300 , 400 , p[1] , p[2] )
+                        crate:apply_linear_impulse( { 300 , 400 } , p )
                         
                         crate:apply_torque( 9000 )
                         
@@ -205,9 +202,7 @@ function screen.on_key_down( screen , key )
                         
                         function idle.on_idle()
                         
-                            if sw.elapsed_seconds < spf then return end
                             physics:step()
-                            sw:start()
                         
                             -- When the crate is done, we change its color, and re-attach
                             -- the key handler, so you can give it another push
