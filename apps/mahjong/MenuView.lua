@@ -1,6 +1,8 @@
 MenuView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
+    local controller = nil
+
 ------------ Load Assets ------------
 
     -- main menu
@@ -20,7 +22,6 @@ MenuView = Class(View, function(view, model, ...)
     local menu_closed_x = -170
     menu_options.y = 980 - menu_options.height
     menu_options.x = menu_closed_x
-
 
     --
     local large_button_off = Image{src="assets/menus/button-large-off.png", opacity=0}
@@ -352,6 +353,12 @@ MenuView = Class(View, function(view, model, ...)
     end
 
     function view:move_layout(current_layout, dir)
+        if not dir then dir = controller:get_direction() end
+        if not current_layout then
+            current_layout = controller:get_last_layout()
+            controller:restore_layout_indicator()
+        end
+
         local interval = nil
         if -1 == dir[2] then
             interval = {["y"] = Interval(layout_strip.y, layout_strip.y + 
@@ -386,6 +393,7 @@ MenuView = Class(View, function(view, model, ...)
     -- initialize the View/Controller pair
     function view:initialize()
         self:set_controller(MenuController(self))
+        controller = self:get_controller()
     end
 
     -- reset the View/Controller pair
@@ -430,7 +438,7 @@ MenuView = Class(View, function(view, model, ...)
             if selected_object.off_focus then selected_object:off_focus_inst() end
         end
 ---[[
-        if comp ~= Components.MENU then
+        if comp ~= Components.MENU and comp ~= Components.NEW_MAP_DIALOG then
             if menu_options.y ~= menu_closed_y then
                 local intervals = {["x"] = Interval(menu_options.x, menu_closed_x)}
                 gameloop:add(menu_options, CHANGE_VIEW_TIME, nil, intervals)

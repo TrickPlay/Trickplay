@@ -110,7 +110,6 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
                 game_menu:move_layout()
             elseif selector == 2 then
                 router:set_active_component(Components.MENU)
-                router:notify()
                 game:reset_game(game_menu:get_controller():get_current_layout())
             else
                 error("selector not in a correct position")
