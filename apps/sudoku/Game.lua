@@ -601,10 +601,45 @@ print(empty_spaces)
 		print("size of error list = "..#error_list)
 	end
 
+	function animate_numbers(old_nums,new_nums,next_timeline)
+print("animate nums",#old_nums,#new_nums)
+		local timeline = Timeline{duration=200}
+		save(timeline)
+		function timeline.on_new_frame(t,msecs,p)
+			for i = 1, #old_nums do
+				old_nums[i].opacity = 255*(1-p)
+			end
+			for i = 1, #new_nums do
+				new_nums[i].opacity = 255*p
+			end
+		end
+		function timeline:on_completed()
+			for i = 1, #old_nums do
+				old_nums[i].opacity = 0
+			end
+			for i = 1, #new_nums do
+				new_nums[i].opacity = 255
+			end
+			if next_timeline then
+				dolater(next_timeline)
+			else
+				restore_keys()
+			end
+			clear(timeline)
+		end
+		timeline:start()
+	end
 
 
 	function g:pen(r,c,p,status)
-		if givens[r][c] ~= 0 then return end
+		if givens[r][c] ~= 0 then 
+			restore_keys()
+			return
+		end
+
+		local old_nums = {}
+		local new_nums = {}
+
 
 		--if another pen number was there
 		if guesses[r][c].pen ~= 0 then
@@ -619,20 +654,17 @@ print(empty_spaces)
 			end
 			guesses[r][c][guesses[r][c].pen] = false
 
-print("here")
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
 			--if toggling out a penned number
 			if guesses[r][c].pen == p then
 				print("removing pen")
 				empty_spaces = empty_spaces + 1
-				g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+				table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 
 				guesses[r][c].pen = 0
 				guesses[r][c].num = 0
---[[
-				g.board:find_child("Pen "..r.." "..c).text=""
-				g.board:find_child("Pen_s "..r.." "..c).text=""
---]]
+				dolater(animate_numbers,old_nums,new_nums)
+
 				return
 			end
 		--if pencil numbers were there
@@ -643,7 +675,7 @@ print("here")
 					table.insert(params,i)
 					g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
-					g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
+					table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..i))--.opacity = 0
 				end
 			end
 			if status ~= "UNDO" then
@@ -669,49 +701,22 @@ print("here")
 			empty_spaces = empty_spaces - 1
 		end
 
-
-
---[[
-		for i = 1,9 do
-			guesses[r][c][i] = false
-		end
---]]
 		guesses[r][c].num = 1
 		if guesses[r][c].pen ~= 0 then
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
-			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 		end
 
 		guesses[r][c].pen = p
 		guesses[r][c][p] = true
-local ggroup = 	g.grid_of_groups[r][c]
-local cchild = ggroup:find_child("Pen "..p)
-cchild.opacity = 255
+		table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Pen "..p))--.opacity = 255
 
---[[
-		local pen = g.board:find_child("Pen "..r.." "..c)
-		pen.text=p
-		pen.anchor_point={pen.w/2,pen.h/2}
-		pen.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER
-		pen.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2
 
-		local pen_s = g.board:find_child("Pen_s "..r.." "..c)
-		pen_s.text=p
-		pen_s.anchor_point={pen.w/2,pen.h/2}
-		pen_s.x = (c-1)*TILE_WIDTH + 
-				math.floor((c-1)/3)*SET_GUTTER +
-				(c-1)*TILE_GUTTER-1
-		pen_s.y = (r-1)*TILE_WIDTH + 
-				math.floor((r-1)/3)*SET_GUTTER +
-				(r-1)*TILE_GUTTER+TOP_GAP+TILE_WIDTH/2-1
---]]
 		g:add_to_err_list(r,c,p)
 		if empty_spaces == 0 and #error_list == 0 then
-			player_won()
+			dolater(animate_numbers,old_nums,new_nums,player_won())
+		else
+			dolater(animate_numbers,old_nums,new_nums)
 		end
 		print(empty_spaces)
 	end
@@ -752,7 +757,13 @@ cchild.opacity = 255
 			return
 		end
 		--can't toggle a guess for a given
-		if givens[r][c] ~= 0 then return end
+		if givens[r][c] ~= 0 then
+			restore_keys()
+			return
+		end
+
+		local old_nums = {}
+		local new_nums = {}
 
 		--if there was an existing pen mark on the tile
 		if guesses[r][c].pen ~= 0 then
@@ -771,8 +782,8 @@ cchild.opacity = 255
 			guesses[r][c][guesses[r][c].pen] = false
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
 
-			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
-			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 255
+			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
+			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
 
 
 			guesses[r][c].pen = 0
@@ -794,7 +805,7 @@ cchild.opacity = 255
 --			guesses[r][c].sz = guesses[r][c].sz - 1
 			guesses[r][c][guess] = false
 			g:rem_from_err_list(r,c,guess)
-			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 0
+			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 0
 
 			if status ~= "REDO" and status ~= "UNDO" then
 				table.insert(undo_list,{"toggle_guess",r,c,guess})
@@ -815,7 +826,7 @@ cchild.opacity = 255
 
 			--guesses[r][c].sz = guesses[r][c].sz + 1
 			guesses[r][c][guess] = true
-			g.grid_of_groups[r][c]:find_child("Guess "..guess).opacity = 255
+			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
 
 			if status ~= "REDO" and status ~= "UNDO" then
 				table.insert(undo_list,{"toggle_guess",r,c,guess})
@@ -826,12 +837,18 @@ cchild.opacity = 255
 				redo_list = {}
 			end
 			g:add_to_err_list(r,c,guess)
-			if empty_spaces == 0 and #error_list == 0 then
-				player_won()
-			end
+--			if empty_spaces == 0 and #error_list == 0 then
+--				player_won()
+--			end
 		end
-	print(empty_spaces)
-end
+		if empty_spaces == 0 and #error_list == 0 then
+			dolater(animate_numbers,old_nums,new_nums,player_won())
+		else
+			dolater(animate_numbers,old_nums,new_nums)
+		end
+
+		print(empty_spaces)
+	end
 	function g:error_check()
 		if error_checking then
 			error_checking = false
@@ -989,13 +1006,16 @@ end
 		end
 	end
 	function g:clear_tile(r,c)
+		local old_nums = {}
+		local new_nums = {}
+
 		empty_spaces = empty_spaces + 1
 		if guesses[r][c].pen ~= 0 then
 			table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
 			guesses[r][c][guesses[r][c].pen] = false
 
-			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
+			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 
 			guesses[r][c].pen = 0
 			guesses[r][c].num = 0
@@ -1006,7 +1026,7 @@ end
 				if guesses[r][c][i] then
 					g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
-					g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
+					table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..i))--.opacity = 0
 					--guess.opacity = 0
 					table.insert(params,i)
 				end
@@ -1014,9 +1034,15 @@ end
 			guesses[r][c].num = 0
 
 			table.insert(undo_list,{"set_pencil",r,c,params})
+			dolater(animate_numbers,old_nums,new_nums)
+
 		end
 	end
 	function g:set_pencil(r,c,nums)
+		print("set called wit", nums[1],nums[2],nums[3],nums[4])
+		local old_nums = {}
+		local new_nums = {}
+
 		if guesses[r][c].num == 0 then
 			empty_spaces = empty_spaces - 1
 		end
@@ -1025,25 +1051,24 @@ end
 			if guesses[r][c][i] then
 				g:rem_from_err_list(r,c,i)
 				guesses[r][c][i] = false
-				g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 0
---				guess.color = "FFFFFF"
---				guess.opacity = 0
+				table.insert(old_nums,
+					g.grid_of_groups[r][c]:find_child("Guess "..i))
 			end
 		end
 		for i = 1,#nums do
 			guesses[r][c][nums[i]] = true
-			g.grid_of_groups[r][c]:find_child("Guess "..i).opacity = 255
+			table.insert(new_nums,
+				g.grid_of_groups[r][c]:find_child("Guess "..nums[i]))
 			g:add_to_err_list(r,c,i)
 		end
 		if guesses[r][c].pen ~= 0 then
 			g:rem_from_err_list(r,c,guesses[r][c].pen)
-			g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen).opacity = 0
-
+			table.insert(old_nums,
+				g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))
 			guesses[r][c].pen = 0
 		end
 		guesses[r][c].num = #nums
-	--	g.board:find_child("Pen "..r.." "..c).text=""
-	--	g.board:find_child("Pen_s "..r.." "..c).text=""
+		dolater(animate_numbers,old_nums,new_nums)
 
 	end
 

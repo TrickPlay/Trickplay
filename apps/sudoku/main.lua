@@ -10,6 +10,7 @@ local anchors = {}
 function save(thing)  anchors[thing] = true end
 function clear(thing) anchors[thing] = nil  end
 local won = false
+local diff_from = nil
 
 local num_givens = 50
 --local bg = Image{src="assets/background.jpg"}
@@ -339,6 +340,7 @@ right_list = {
 				right_list[3].group:find_child("text_s").text = "Show Errors"
 				yellow_light.opacity = 0
 			end
+			restore_keys()
 		end),
 
 	FocusableImage({0,3*(blank_button_off.h+8)},"Restart Puzzle", 
@@ -355,27 +357,34 @@ right_list = {
 			win_txt:unparent()
 			won = false
 			--game:restart() 
+			--restore_keys()
 		end)
 }
-right_menu:add( right_list[1].group,right_list[2].group,right_list[3].group,right_list[4].group, yellow_light )
+right_menu:add( 
+	right_list[1].group,
+	right_list[2].group,
+	right_list[3].group,
+	right_list[4].group, 
+	yellow_light 
+)
 
 --right_menu.anchor_point = {blank_button_off.w/2,0}
 --right_menu.y_rotation ={-25,right_menu.w/2,0}
 --right_menu.position = {screen.w - right_menu.w/2+80,red.h   + 90}
-right_menu.position = {screen.w/2+3/2*red.w+30+(screen.w/2-3/2*red.w - blank_button_off.w-30)/2,screen.h/2-red.h/2-10}
+right_menu.position = 
+{
+	screen.w/2+3/2*red.w+30+
+		(screen.w/2-3/2*red.w - blank_button_off.w-30)/2,
+	screen.h/2-red.h/2-10
+}
 right_menu.y_rotation = {-135,blank_button_off.w,0}
 right_menu.opacity=0
 local left_menu = Group{z=1}
-local left_list = {
+local left_list = 
+{
 	FocusableImage({0,0},"New Puzzle", 
 		blank_button_off,blank_button_on,
 		function() 
----[[
-			--game.board:clear()
-			
-			--game = Game(BoardGen(num_givens))
-			--ind = {r=1,c=1}
---]]
 			if red_is_on then
 				local givens, sol
 				givens,sol =BoardGen(num_givens) 
@@ -386,15 +395,9 @@ local left_list = {
 				game = Game(givens,sol,nil,red_blox)
 			end
 			dolater(flip_board)
-
---[[
-			splash.opacity = 255
-			focus = "SPLASH"
-			left_list[left_index].color = "FFFFFF"
-			left_index = 1
---]]
 			win_txt:unparent()
 			won = false
+			--restore_keys()
 		end),
 
 	FocusableImage({0,blank_button_off.h+8},"Help", 
@@ -404,6 +407,7 @@ local left_list = {
 			help:raise_to_top()
 			focus = "HELP"
 			dim.opacity = 100
+			restore_keys()
 		end),
 	FocusableImage({0,2*(blank_button_off.h+8)},"Difficulty", 
 		blank_button_off,blank_button_on,
@@ -411,8 +415,9 @@ local left_list = {
 			difficulty.opacity = 255
 --			records:raise_to_top()
 			focus = "DIFF"
-			
+			diff_from  = "GAME_LEFT"
 			dim.opacity = 100
+			restore_keys()
 		end),
 
 
@@ -421,6 +426,7 @@ local left_list = {
 		function() 
 			game:save()
 			exit()
+			restore_keys()
 		end)
 }
 left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group,left_list[4].group )
@@ -642,7 +648,7 @@ screen:add(
 
 
 
-local sp_title             = Image{src = "assets/sudoku.png", x = panel.w/2,y=40 }
+local sp_title             = Image{src = "assets/sudoku.png", x = panel.w/2,y=60 }
 sp_title.anchor_point={sp_title.w/2,0}
 splash:add(Clone{source=panel,x = panel.w/2,y = panel.h/2,anchor_point={panel.w/2,panel.h/2}},sp_title)
 local splash_list = {}
@@ -660,7 +666,7 @@ if settings.givens and settings.sol and settings.guesses then
 	{
 		FocusableImage(
 			{panel.w/2-blank_button_off.w - 20,
-			 panel.h/2+110},
+			 panel.h/2+50},
 			"Continue Game", 
 			blank_button_off,blank_button_on,
 			function(pass_in_splash) 
@@ -668,17 +674,20 @@ if settings.givens and settings.sol and settings.guesses then
 				selector.opacity = 255
 				dolater(splash_to_game,function() restore_keys() end,splash)
 			end),
-		FocusableImage({panel.w/2+ 20,panel.h/2+110},"New Game", 
+		FocusableImage({panel.w/2+ 20,panel.h/2+50},"New Game", 
 			blank_button_off,blank_button_on,
 			function() 
 				focus = "DIFF"
 				splash.opacity=0
 				difficulty.opacity=255
 				difficulty:raise_to_top()
+				restore_keys()
 			end)
 	}
-	splash:add( splash_list[1].group,
-		splash_list[2].group )
+	splash:add( 
+		splash_list[1].group,
+		splash_list[2].group 
+	)
 
 	if red_is_on then
 		game = Game(settings.givens,settings.sol,
@@ -696,7 +705,7 @@ else
 	splash_list = 
 	{
 		FocusableImage({panel.w/2-blank_button_off.w/2,
-			panel.h/2+110},
+			panel.h/2+50},
 			"New Game", 
 			blank_button_off,blank_button_on,
 			function() 
@@ -704,6 +713,7 @@ else
 				splash.opacity=0
 				difficulty.opacity=255
 				difficulty:raise_to_top()
+				restore_keys()
 			end)
 	}
 	splash:add( splash_list[1].group )
@@ -719,13 +729,29 @@ splash_list[1]:on_focus()
 local game_num = {45,55,30}
 local game_opts = {"Medium","Easy","Hard"}
 local curr_opt = 1
+local diff_hor_index = 2
+local diff_list = {
+ 	FocusableImage(
+		{panel.w/2-blank_button_off.w - 20,
+		 panel.h/2+50},
+		"Back", 
+		blank_button_off,blank_button_on,
+		function() restore_keys() end),
+	VertButtonCarousel(
+		"Difficulty",
+		game_opts,
+		{panel.w/2+20,
+		panel.h/2+50-arrows[1].h},
+		blanks,
+		arrows
+	)
+}
 
-local diff_title        = Image{src = "assets/difficulty.png", x = panel.w/2,y=40 }
+
+local diff_title        = Image{src = "assets/difficulty.png", x = panel.w/2,y=60 }
 diff_title.anchor_point={diff_title.w/2,0}
 
-local diff_button = VertButtonCarousel(
-	"Difficulty",game_opts,{panel.w/2-blank_button_on.w/2,panel.h/2+110-arrows[1].h},blanks,arrows)
-diff_button:on_focus()
+diff_list[2]:on_focus()
 difficulty:add(
 	Clone{
 		source=panel,
@@ -734,7 +760,8 @@ difficulty:add(
 		anchor_point={panel.w/2,panel.h/2}
 	},
 	diff_title,
-	diff_button.group
+	diff_list[1].group,
+	diff_list[2].group
 )
 
 screen:add(dim,splash,difficulty)
@@ -746,7 +773,6 @@ Directions = {
 }
 
 function splash_to_game(next_func,prev_menu)
-print("menu",prev_menu)
 	local deg = 135
 	screen.on_key_down = nil
 	local timeline = Timeline
@@ -789,25 +815,20 @@ local ind = {r=1,c=1}
 local mode = {"TRAVERSAL","CLEAR","PEN","PENCIL","BACK"}
 local curr_mode = "TRAVERSAL"
 function num_press(n)
-	if won then return end
+	if won then
+		restore_keys()
+		return 
+	end
 	if menu_open then
 		game:toggle_guess(ind.r,ind.c,n,"REG")
---[[
-		if 	pencil_menu:find_child(n).color == "202020" then
-			pencil_menu:find_child(n).color = "FFFFFF"
-		else
-			pencil_menu:find_child(n).color = "202020"
+		local g = game:get_guesses(ind.r,ind.c)
+		for i = 1,9 do
+			if g[i] then
+				pencil_menu:find_child(i.."").color = "202020"
+			else
+				pencil_menu:find_child(i.."").color = "FFFFFF"
+			end
 		end
---]]
-				local g = game:get_guesses(ind.r,ind.c)
-				for i = 1,9 do
-					if g[i] then
-						pencil_menu:find_child(i.."").color = "202020"
-					else
-						pencil_menu:find_child(i.."").color = "FFFFFF"
-					end
-				end
-
 	else
 		game:pen(ind.r,ind.c,n)
 	end
@@ -820,12 +841,14 @@ function game_on_key_down(k)
 				ind.r=ind.r+1
 				selector.x,selector.y = sel_pos(ind.r,ind.c)
 			end
+			restore_keys()
 		end,
 		[keys.Up] = function()
 			if not menu_open and ind.r > 1 then
 				ind.r=ind.r-1
 				selector.x,selector.y = sel_pos(ind.r,ind.c)
 			end
+			restore_keys()
 		end,
 		[keys.Right] = function()
 			if menu_open then
@@ -849,6 +872,7 @@ function game_on_key_down(k)
 					selector.opacity = 0
 				end
 			end
+			restore_keys()
 		end,
 		[keys.Left] = function()
 			if menu_open then
@@ -861,7 +885,7 @@ function game_on_key_down(k)
 				pencil_menu:find_child("done_on").opacity = 0
 				pencil_menu:find_child("done_off").opacity = 255
 				pencil_menu:find_child("done").color = "FFFFFF"
-
+				
 			else
 				if ind.c > 1 then
 					ind.c=ind.c-1
@@ -872,6 +896,7 @@ function game_on_key_down(k)
 					selector.opacity = 0
 				end
 			end
+			restore_keys()
 		end,
 		[keys.Return] = function()
 			if menu_open then
@@ -935,6 +960,7 @@ function game_on_key_down(k)
 
 				end	
 			end
+			restore_keys()
 		end,
 		[keys["1"] ] = function() num_press(1) end,
 		[keys["2"] ] = function() num_press(2) end,
@@ -975,56 +1001,116 @@ function game_on_key_down(k)
 			num_press(9)
 		end,
 		[keys["c"] ] = function()
-			if won then return end
-			right_list[1]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[1]:press_enter()
+			end
 		end,
 		[keys["u"] ] = function()
-			if won then return end
-			right_list[2]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[2]:press_enter()
+			end
 		end,
 		[keys["e"] ] = function()
-			if won then return end
-			right_list[3]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[3]:press_enter()
+			end
 		end,
 		[keys["r"] ] = function()
-			right_list[4]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[4]:press_enter()
+			end
 		end
 	}
 	if key[k] then key[k]() end
 end
-function splash_diff_on_key_down(k)
+function diff_on_key_down(k)
 	local key = 
 	{
-		[ keys.Up ] = function()
-			curr_opt = (curr_opt - 1-1)%(#game_opts)+1
-			num_givens = game_num[curr_opt]
-			diff_button:press_up()
+		[keys.Left] = function()
+			if diff_hor_index > 1 then
+				diff_list[diff_hor_index]:out_focus()
+				diff_hor_index = diff_hor_index - 1
+				diff_list[diff_hor_index]:on_focus()
+			end
+			restore_keys()
 
+		end,
+		[keys.Right] = function()
+			if diff_hor_index < #diff_list then
+				diff_list[diff_hor_index]:out_focus()
+				diff_hor_index = diff_hor_index + 1
+				diff_list[diff_hor_index]:on_focus()
+			end
+			restore_keys()
+		end,
+		[ keys.Up ] = function()
+			if diff_hor_index == 2 then
+				curr_opt = (curr_opt - 1-1)%(#game_opts)+1
+				num_givens = game_num[curr_opt]
+				diff_list[2]:press_up()
+			end
+			restore_keys()
 		end,
 		[ keys.Down ] = function()
-			curr_opt = (curr_opt + 1-1)%(#game_opts)+1
-			num_givens = game_num[curr_opt]
-			diff_button:press_down()
+			if diff_hor_index == 2 then
+				curr_opt = (curr_opt + 1-1)%(#game_opts)+1
+				num_givens = game_num[curr_opt]
+				diff_list[2]:press_down()
+			end
+			restore_keys()
 		end,
 		[ keys.Return ] = function()
+			if diff_hor_index == 1 then
+				if diff_from == "SPLASH" then
+					focus = "SPLASH"
+					splash.opacity=255
+					difficulty.opacity=0
+					splash:raise_to_top()
+				else
+					focus = "GAME_LEFT"
+					difficulty.opacity=0
+					dim.opacity = 0
 
-			if red_is_on then
-				local givens,sol
-				givens,sol = BoardGen(num_givens)
-				game = Game(givens,sol,nil,blue_blox)
-			else
-				local givens,sol
-				givens,sol = BoardGen(num_givens)
-				game = Game(givens,sol,nil,red_blox)
-			end
-			collectgarbage("collect")
-			ind = {r=1,c=1}
-			focus = "GAME_BOARD"
-			selector.opacity = 255
-			--dolater(flip_board)
-			dolater(splash_to_game,flip_board,difficulty)
-			won = false
-			--difficulty.opacity = 0
+				end
+				restore_keys()
+
+			elseif diff_hor_index == 2 then
+				if red_is_on then
+					local givens,sol
+					givens,sol = BoardGen(num_givens)
+					game = Game(givens,sol,nil,blue_blox)
+				else
+					local givens,sol
+					givens,sol = BoardGen(num_givens)
+					game = Game(givens,sol,nil,red_blox)
+				end
+				collectgarbage("collect")
+				ind = {r=1,c=1}
+				focus = "GAME_BOARD"
+				selector.opacity = 255
+				if diff_from == "SPLASH" then
+					dolater(splash_to_game,flip_board,difficulty)
+				else
+					left_list[left_index]:out_focus()
+					left_index = 1
+					difficulty.opacity=0
+					dim.opacity = 0
+					dolater(flip_board)
+				end
+				won = false
+			end 
 		end
 	}
 	if key[k] then key[k]() end	
@@ -1034,58 +1120,26 @@ function splash_on_key_down(k)
 	local key = 
 	{
 		[ keys.Return ] = function()
---[[
-			splash.opacity = 0			
-
-			if splash_hor_index == 2 then
-				if settings.givens and settings.guesses then
-					game.board:clear()
-				end
-				game = Game(BoardGen(num_givens))
-				ind = {r=1,c=1}
-		
-			end
-			--game_on = true
-			focus = "GAME_BOARD"
-			selector.opacity = 255
-			--clock:start()
-			--game:on_focus(1,1)
---]]
 			splash_list[splash_hor_index]:press_enter(splash)
+			diff_from = "SPLASH"
 		end,
 		[keys.Left] = function()
---[[
-			splash_hor_index = 2
-			splash_list1[2]:on_focus()
-			splash_list1[1]:out_focus()
-			splash:find_child("new").color    = "FF0000"
-			splash:find_child("cont").color   = "FFFFFF"
---]]
 			if splash_hor_index > 1 then
 				splash_list[splash_hor_index]:out_focus()
 				splash_hor_index = splash_hor_index - 1
 				splash_list[splash_hor_index]:on_focus()
 			end
+			restore_keys()
+
 		end,
 		[keys.Right] = function()
---[=[
-			if settings.givens and settings.guesses and settings.solution then
-				splash_hor_index = 1
-			splash_list1[1]:on_focus()
-			splash_list1[2]:out_focus()
---[[
-				splash:find_child("new").color    = "FFFFFF"
-				splash:find_child("cont").color   = "FF0000"
---]]
-			end
---]=]
 			if splash_hor_index < #splash_list then
 				splash_list[splash_hor_index]:out_focus()
 				splash_hor_index = splash_hor_index + 1
 				splash_list[splash_hor_index]:on_focus()
 			end
+			restore_keys()
 		end,
-
 	}
 	if key[k] then key[k]() end	
 end
@@ -1098,6 +1152,7 @@ function left_menu_on_key_down(k)
 				left_index = left_index - 1
 				left_list[left_index]:on_focus()
 			end
+			restore_keys()
 		end,
 		[keys.Down] = function()
 			if left_index < #left_list then
@@ -1105,12 +1160,14 @@ function left_menu_on_key_down(k)
 				left_index = left_index + 1
 				left_list[left_index]:on_focus()
 			end
+			restore_keys()
 		end,
 		[keys.Right] = function()
 			left_list[left_index]:out_focus()
 			left_index = 1
 			focus = "GAME_BOARD"
 			selector.opacity = 255
+			restore_keys()
 
 		end,
 		[keys.Left] = function()
@@ -1121,25 +1178,43 @@ function left_menu_on_key_down(k)
 			focus = "GAME_RIGHT"
 			ind.c = 9
 			selector.x,selector.y = sel_pos(ind.r,ind.c)
+			restore_keys()
 		end,
 
 		[keys.Return] = function()
 			left_list[left_index]:press_enter()
 		end,
 		[keys["c"] ] = function()
-			if won then return end
-			right_list[1]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[1]:press_enter()
+			end
 		end,
 		[keys["u"] ] = function()
-			if won then return end
-			right_list[2]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[2]:press_enter()
+			end
 		end,
 		[keys["e"] ] = function()
-			if won then return end
-			right_list[3]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[3]:press_enter()
+			end
 		end,
 		[keys["r"] ] = function()
-			right_list[4]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[4]:press_enter()
+			end
 		end
 
 	}
@@ -1154,23 +1229,23 @@ function right_menu_on_key_down(k)
 				right_list[right_index]:out_focus()
 				right_index = right_index - 1
 				right_list[right_index]:on_focus()
-
 			end
+			restore_keys()
 		end,
 		[keys.Down] = function()
 			if right_index < #right_list then
 				right_list[right_index]:out_focus()
 				right_index = right_index + 1
 				right_list[right_index]:on_focus()
-
 			end
+			restore_keys()
 		end,
 		[keys.Left] = function()
 			right_list[right_index]:out_focus()
 			right_index = 1
 			focus = "GAME_BOARD"
 			selector.opacity = 255
-
+			restore_keys()
 		end,
 		[keys.Right] = function()
 			right_list[right_index]:out_focus()
@@ -1180,38 +1255,55 @@ function right_menu_on_key_down(k)
 			focus = "GAME_LEFT"
 			ind.c = 1
 			selector.x,selector.y = sel_pos(ind.r,ind.c)
+			restore_keys()
 		end,
-
 		[keys.Return] = function()
 			right_list[right_index]:press_enter()
 		end,
 		[keys["c"] ] = function()
-			if won then return end
-			right_list[1]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[1]:press_enter()
+			end
 		end,
 		[keys["u"] ] = function()
-			if won then return end
-			right_list[2]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[2]:press_enter()
+			end
 		end,
 		[keys["e"] ] = function()
-			if won then return end
-			right_list[3]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[3]:press_enter()
+			end
 		end,
 		[keys["r"] ] = function()
-			right_list[4]:press_enter()
+			if won then
+				restore_keys()
+				return
+			else
+				right_list[4]:press_enter()
+			end
 		end
-
 	}
 	if key[k] then key[k]() end
 end
 function screen:on_key_down(k)
+	screen.on_key_down = nil
 	local sub_on_key_down = 
 	{
 		["SPLASH"] = function(key_press)
 			splash_on_key_down(key_press)
 		end,
 		["DIFF"] = function(key_press)
-			splash_diff_on_key_down(key_press)
+			diff_on_key_down(key_press)
 		end,
 		["GAME_BOARD"] = function(key_press)
 			game_on_key_down(key_press)
@@ -1247,13 +1339,6 @@ function screen:on_key_down(k)
 	else
 		error(focus.." does not have an on_key_down")
 	end
---[[
-	if game_on then
-		game_on_key_down(k)
-	else
-		splash_on_key_down(k)
-	end
---]]
 end
 store_keys = screen.on_key_down
 function restore_keys()
@@ -1262,26 +1347,17 @@ end
 function player_won()
 	local y = {100}
 	local x = {1660,1680,1700,1720}
---	r[1],c[1] = sel_pos(ind.r-1,ind.c-1)
---	r[2],c[2] = sel_pos(ind.r,ind.c)
---	r[3],c[3] = sel_pos(ind.r+1,ind.c+1)
+	win_txt.opacity=0
 	if focus == "GAME_RIGHT" then
 		right_list[right_index]:out_focus()
 	end
 	start_sparkle(x,y,6)
-	--dolater(flip_board)
-	--	splash.opacity = 255
 	focus = "GAME_LEFT"
 	selector.opacity = 0
 	ind.r = 1
 	ind.c = 1
 	selector.x,selector.y = sel_pos(1,1)
 	left_list[left_index]:on_focus()
-		
-	--	left_menu.opacity = 0
-	--	right_menu.opacity = 0
-	--	top_left_logo.opacity = 0
-	--	selector.x,selector.y = sel_pos(1,1)
 end
 function app:on_closing()
 	if game then
