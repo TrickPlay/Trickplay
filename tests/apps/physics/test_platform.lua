@@ -429,7 +429,7 @@ function idle.on_idle( idle , seconds )
     
     physics:step( seconds )
     
-    physics:draw_debug()
+    --physics:draw_debug()
 
     -- This wraps the goat around the screen horizontally
     

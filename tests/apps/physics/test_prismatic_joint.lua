@@ -1,4 +1,3 @@
-
 -------------------------------------------------------------------------------
 
 local ground = Rectangle
@@ -85,7 +84,7 @@ pole = physics:Body
 
 -------------------------------------------------------------------------------
 
-local PADDLE_HEIGHT = POLE_HEIGHT * 0.99
+local PADDLE_HEIGHT = POLE_HEIGHT / 2 
 
 local paddle = physics:Body
 {
@@ -99,19 +98,22 @@ local paddle = physics:Body
     
 }
 
-paddle.position = { pole.x + PADDLE_HEIGHT / 2 , pole.y - POLE_HEIGHT / 2 }
+paddle.position = { pole.x , pole.y - POLE_HEIGHT / 2 }
 paddle.angle = 90
 
-paddle:RevoluteJoint( pole , { pole.x , pole.y - POLE_HEIGHT / 2  } ,
-{
-    enable_motor = true ,
-    motor_speed  = -90,
-    max_motor_torque = 1500
-}
+paddle:PrismaticJoint( pole , { 0 , 0 } , { 0 , 1 } ,
+
+    {
+        enable_limit = true,
+        lower_translation = 0 ,
+        upper_translation = POLE_HEIGHT ,
+        enable_motor = false,
+        motor_speed = 1,
+        max_motor_force = 1000
+    }
 )
 
 screen:add( paddle.source )
-
 
 -------------------------------------------------------------------------------
 
@@ -143,9 +145,6 @@ for i = 1 , BLOCK_COUNT do
 end
 
 -------------------------------------------------------------------------------
-
-physics.gravity = { 0 , 10 }
-
 
 if false then
 
