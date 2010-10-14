@@ -18,7 +18,7 @@ for _,__ in pairs(Layouts) do
     Layouts.LAST = Layouts.LAST + 1
 end
 
-NUMBER_OF_TILES = {144, 144, 144, 80, 64}
+NUMBER_OF_TILES = {80, 144, 144, 144, 64}
 LAYOUT_NAMES = {
     [Layouts.CUBE] = "Cube (Hard)",
     [Layouts.CLUB] = "Club (Normal)",
