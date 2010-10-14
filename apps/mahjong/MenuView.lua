@@ -92,7 +92,6 @@ MenuView = Class(View, function(view, model, ...)
         Clone{source=up_arrow_on})
     choose_map.arrow_down = FocusableImage(125,220, Clone{source=down_arrow_off},
         Clone{source=down_arrow_on})
-    choose_map.group:add(choose_map.arrow_up.group, choose_map.arrow_down.group)
     choose_map.up_arrow_focus = function()
         choose_map.arrow_up:on_focus_inst()
         choose_map.arrow_up:off_focus()
@@ -101,6 +100,26 @@ MenuView = Class(View, function(view, model, ...)
         choose_map.arrow_down:on_focus_inst()
         choose_map.arrow_down:off_focus()
     end
+    -- Layouts for the player to select
+    local layout_mask = Group{position={25,25},clip={0,0,232,225}}
+    local layout_strip_image = Image{src="assets/options/LayoutStrip.png", opacity = 0}
+    screen:add(layout_strip_image)
+    local layout_strip_1 = Clone{source=layout_strip_image}
+    local layout_strip_2 = Clone{source=layout_strip_image, y = -layout_strip_1.height}
+    local layout_strip_3 = Clone{source=layout_strip_image, y = layout_strip_1.height}
+    local layout_strip = Group{position = {0,-layout_strip_image.height*.75}}
+    layout_strip:add(layout_strip_1, layout_strip_2, layout_strip_3)
+    layout_mask:add(layout_strip)
+    -- text describing type of layout
+    local layout_text = Text{
+        text = "Turtle (Classic)", font = MENU_FONT_SMALL,
+        color = DEFAULT_COLOR, position={125, -5}
+    }
+    layout_text.anchor_point = {layout_text.width/2, layout_text.height/2}
+    choose_map.group:add(
+        layout_text, layout_mask,choose_map.arrow_up.group,choose_map.arrow_down.group
+    )
+
     -- Choose tile arrows
     local choose_tile = focusable_items.choose_tile
     choose_tile.arrow_up = FocusableImage(80,35, Clone{source=up_arrow_off},
@@ -117,17 +136,23 @@ MenuView = Class(View, function(view, model, ...)
     end
 
     -- Tiles for the player to select
-    local tile_mask = Group{position={45,65},clip={0,0,130,150}}
+    local tile_mask = Group{position={45,25},clip={0,0,130,225}}
     local tiles_strip_image = Image{src="assets/options/tiles-strip3.png", opacity = 0}
     screen:add(tiles_strip_image)
     local tiles_strip_1 = Clone{source=tiles_strip_image}
     local tiles_strip_2 = Clone{source=tiles_strip_image, y = -tiles_strip_1.height-35}
     local tiles_strip_3 = Clone{source=tiles_strip_image, y = tiles_strip_1.height+35}
-    local tiles_strip = Group{position = {0,-193}}
+    local tiles_strip = Group{position = {0,-153}}
     tiles_strip:add(tiles_strip_1, tiles_strip_2, tiles_strip_3)
     tile_mask:add(tiles_strip)
+    -- text describing type of tile
+    local tile_text = Text{
+        text = "Wood", font = MENU_FONT_SMALL,
+        color = DEFAULT_COLOR, position={100, -5}
+    }
+    tile_text.anchor_point = {tile_text.width/2, tile_text.height/2}
     choose_tile.group:add(
-        tile_mask,choose_tile.arrow_up.group, choose_tile.arrow_down.group
+        tile_text, tile_mask,choose_tile.arrow_up.group, choose_tile.arrow_down.group
     )
 
     -- score related stuff
@@ -294,25 +319,64 @@ MenuView = Class(View, function(view, model, ...)
     end
 
     function view:change_tiles(number, dir)
+        local interval = nil
         if -1 == dir[2] then
-            local interval = nil
             interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y + 195)}
             gameloop:add(tiles_strip, 300, nil, interval,
                 function()
-                    if number == 3 then tiles_strip.y = -390 end
+                    if number == 3 then tiles_strip.y = -350 end
                     game:get_state():get_tiles_class():change_images(number)
                 end)
         elseif 1 == dir[2] then
-            local interval = nil
             interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y - 195)}
             gameloop:add(tiles_strip, 300, nil, interval,
                 function()
-                    if number == 1 then tiles_strip.y = 0 end
+                    if number == 1 then tiles_strip.y = 40 end
                     game:get_state():get_tiles_class():change_images(number)
                 end)
         else
             error("something went wrong")
         end
+
+        tile_text.text = TILE_IMAGES[number].name
+        tile_text.anchor_point = {tile_text.width/2, tile_text.height/2}
+    end
+
+    function view:change_layout(current_layout, dir)
+        if not game:is_new_game() then
+            router:set_active_component(Components.NEW_MAP_DIALOG)
+            router:notify()
+        else
+            game:reset_game(current_layout)
+        end
+    end
+
+    function view:move_layout(current_layout, dir)
+        local interval = nil
+        if -1 == dir[2] then
+            interval = {["y"] = Interval(layout_strip.y, layout_strip.y + 
+                layout_strip_image.height*.25)}
+            gameloop:add(layout_strip, 300, nil, interval,
+                function()
+                    if current_layout == Layouts.LAST then
+                        layout_strip.y = -layout_strip_image.height*.75
+                    end
+                end)
+        elseif 1 == dir[2] then
+            interval = {["y"] = Interval(layout_strip.y, layout_strip.y - 
+                layout_strip_image.height*.25)}
+            gameloop:add(layout_strip, 300, nil, interval,
+                function()
+                    if current_layout == 1 then
+                        layout_strip.y = 0
+                    end
+                end)
+        else
+            error("something went wrong")
+        end
+
+        layout_text.text = LAYOUT_NAMES[current_layout]
+        layout_text.anchor_point = {layout_text.width/2, layout_text.height/2}
     end
 
 

@@ -9,6 +9,9 @@ MenuController = Class(Controller,function(self, view, ...)
     -- the value which represent the current image used of the tiles,
     -- index's global TILE_IMAGES
     local current_tile_image = 2
+    -- the current layout type, defaults to the classic "turtle"
+    local current_layout = 4
+    function controller:get_current_layout() return current_layout end
 
     -- Create the tables used as nodes in the menu graph
     local New_Game = {}
@@ -58,6 +61,8 @@ MenuController = Class(Controller,function(self, view, ...)
     Help.object = view:get_object("help")
     Help.callback = 
         function()
+            HelpScreen(router)
+            router:set_active_component(Components.HELP)
         end
 
     Show_Options[Directions.UP] = Help
@@ -76,10 +81,24 @@ MenuController = Class(Controller,function(self, view, ...)
     Choose_Map[Directions.UP] =
         function()
             Choose_Map.object:up_arrow_focus()
+            if current_layout > 1 then
+                current_layout = current_layout - 1
+            else
+                current_layout = Layouts.LAST
+            end
+            view:move_layout(current_layout, Directions.UP)
+            view:change_layout(current_layout, Directions.UP)
         end
     Choose_Map[Directions.DOWN] =
         function()
             Choose_Map.object:down_arrow_focus()
+            if current_layout < Layouts.LAST then
+                current_layout = current_layout + 1
+            else
+                current_layout = 1
+            end
+            view:move_layout(current_layout, Directions.DOWN)
+            view:change_layout(current_layout, Directions.DOWN)
         end
     Choose_Map[Directions.LEFT] = Show_Options
     Choose_Map[Directions.RIGHT] = Choose_Tile
@@ -88,6 +107,7 @@ MenuController = Class(Controller,function(self, view, ...)
     Choose_Tile[Directions.UP] =
         function()
             Choose_Tile.object:up_arrow_focus()
+            current_tile_image = game:get_current_tile_image()
             if current_tile_image > 1 then
                 current_tile_image = current_tile_image - 1
             else
@@ -98,6 +118,7 @@ MenuController = Class(Controller,function(self, view, ...)
     Choose_Tile[Directions.DOWN] =
         function()
             Choose_Tile.object:down_arrow_focus()
+            current_tile_image = game:get_current_tile_image()
             if current_tile_image < #TILE_IMAGES then
                 current_tile_image = current_tile_image + 1
             else

@@ -52,6 +52,8 @@ GameState = Class(nil,function(state, ctrl)
     -- a table containing the two tiles that were last removed from the board
     -- tiles can be restored by pressing undo
     local last_tiles = nil
+    -- a table containing two tiles currently hinted too
+    local hint_tiles = nil
     -- true if the game has not started yet
     local new_game = true
     -- true if the game was won and the auto-complete dialog already showed
@@ -75,6 +77,7 @@ GameState = Class(nil,function(state, ctrl)
     function state:get_matches() return matches end
     function state:get_tiles_class() return tiles_class end
     function state:get_selected_tile() return selected_tile end
+    function state:get_current_layout() return layout_number end
     function state:is_new_game() return new_game end
     function state:must_restart() return must_restart end
     function state:game_won() return game_won end
@@ -119,9 +122,11 @@ GameState = Class(nil,function(state, ctrl)
     end
 
     function state:build_layout(number)
-        assert(number)
-        assert(type(number) == "number")
-        layout_number = number
+        assert(number or layout_number)
+        if number ~= nil then
+            assert(type(number) == "number")
+            layout_number = number
+        end
         layout = Layout(layout_number, tiles_class)
         grid = layout:get_grid()
     end
@@ -368,6 +373,8 @@ GameState = Class(nil,function(state, ctrl)
 
         tile_1:set_green()
         tile_2:set_green()
+
+        hint_tiles = {tile_1, tile_2}
     end
 
     function state:click(selector)
@@ -407,6 +414,11 @@ GameState = Class(nil,function(state, ctrl)
                     Clone{source = tile.glyph})
 
                 ctrl:get_presentation():tile_bump(tile.group, temp.group)
+
+                if hint_tiles and hint_tiles[1] ~= tile and hint_tiles[2] ~= tile then
+                    hint_tiles[1].focus.green.opacity = 0
+                    hint_tiles[2].focus.green.opacity = 0
+                end
 
                 last_tiles = {tile, selected_tile}
                 state:remove_tile(tile)
@@ -451,6 +463,7 @@ GameState = Class(nil,function(state, ctrl)
             game:reset_game()
         else
             router:set_active_component(Components.NO_MOVES_DIALOG)
+            router:notify()
         end
     end
 

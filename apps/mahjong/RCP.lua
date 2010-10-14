@@ -24,8 +24,11 @@ function(router, ...)
         Detaches the observer from the router. The observer effectively becomes
         inactive.
     --]]
-    function router:detach(observer)
+    function router:detach(observer, controller_id)
         self.registry[observer] = nil
+        if controller_id then
+            self.controllers[controller_id] = nil
+        end
     end
 
     --[[

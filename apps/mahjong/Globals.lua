@@ -57,6 +57,7 @@ CUSTOMIZE_SUB_FONT_SP  = "KacstArt 42px"
 CUSTOMIZE_NAME_FONT = "KacstArt 144px"
 
 MENU_FONT = "Eraser 40px"
+MENU_FONT_SMALL = "DejaVu Sans Condensed 24px"
 MENU_FONT_BOLD = "DejaVu Sans Bold 30px"
 MENU_FONT_BOLD_BIG = "DejaVu Sans Bold 38px"
 

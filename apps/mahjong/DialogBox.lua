@@ -1,5 +1,5 @@
 DialogBox = Class(Controller, function(self, string, id, router, note, ...)
-    assert(id == Components.NO_MOVES_DIALOG or id == Components.AUTO_COMPLETE_DIALOG)
+    assert(id == Components.NO_MOVES_DIALOG or id == Components.NEW_MAP_DIALOG)
     self._base.init(self, router, id)
 
     local controller = self
@@ -103,15 +103,15 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
             else
                 error("selector not in a correct position")
             end
-        elseif id == Components.AUTO_COMPLETE_DIALOG then
+        elseif id == Components.NEW_MAP_DIALOG then
             if selector == 1 then
-                router:set_active_component(Components.GAME)
+                router:set_active_component(Components.MENU)
                 router:notify()
+                game_menu:move_layout()
             elseif selector == 2 then
                 router:set_active_component(Components.MENU)
                 router:notify()
-                game:auto_complete()
-                game:get_state():set_must_restart(true)
+                game:reset_game(game_menu:get_controller():get_current_layout())
             else
                 error("selector not in a correct position")
             end
