@@ -124,6 +124,8 @@ function(pres, ctrl)
 
         local selector = ctrl:get_selector()
         local comp = router:get_active_component()
+
+        if game:get_state():must_restart() then return end
         if comp ~= Components.GAME then
             grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 0
         else
@@ -283,6 +285,24 @@ function(pres, ctrl)
     end
 
     function pres:end_game_animation()
+    end
+
+    local end_game_image
+    function pres:show_end_game()
+        end_game_image = Image{
+            src="assets/victory.png",
+            position={190 + screen.width/2, screen.height/2}
+        }
+        end_game_image.anchor_point = {end_game_image.width/2, end_game_image.height/2}
+
+        screen:add(end_game_image)
+        mediaplayer:play_sound("assets/audio/victory-sound.mp3")
+    end
+
+    function pres:hide_end_game()
+        end_game_image:unparent()
+        end_game_image = nil
+        collectgarbage("collect")
     end
 
 end)

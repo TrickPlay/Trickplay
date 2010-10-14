@@ -79,6 +79,8 @@ function(ctrl, router, ...)
             router:set_active_component(Components.GAME)
         end
 
+        if state:must_restart() then pres:hide_end_game() end
+
         state:reset()
         state:build_layout(number)
         --state:build_test()
@@ -139,6 +141,12 @@ function(ctrl, router, ...)
 
 
     function ctrl:return_pressed()
+        if state:game_won() then
+            pres:hide_end_game()
+            ctrl:reset_game()
+            return
+        end
+
         local was_roaming = state:is_roaming()
         state:click(selector)
         local still_roaming = state:is_roaming()

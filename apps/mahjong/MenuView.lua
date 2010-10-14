@@ -439,7 +439,7 @@ MenuView = Class(View, function(view, model, ...)
         end
 ---[[
         if comp ~= Components.MENU and comp ~= Components.NEW_MAP_DIALOG then
-            if menu_options.y ~= menu_closed_y then
+            if menu_options.x ~= menu_closed_x then
                 local intervals = {["x"] = Interval(menu_options.x, menu_closed_x)}
                 gameloop:add(menu_options, CHANGE_VIEW_TIME, nil, intervals)
             end

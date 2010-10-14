@@ -195,10 +195,8 @@ GameState = Class(nil,function(state, ctrl)
             end
         end
 
-        grid[10][10][1] = tiles[math.random(3,20)]
-        grid[10][10][2] = tiles[math.random(3,20)]
-        grid[1][1][1] = tiles[1]
-        grid[8][5][1] = tiles[2]
+        grid[10][10][1] = tiles[1]
+        grid[10][12][1] = tiles[2]
     end
 
     --[[
@@ -402,6 +400,7 @@ GameState = Class(nil,function(state, ctrl)
                 local temp = selected_tile
 
                 tile:set_green()
+                mediaplayer:play_sound("assets/audio/match-good.mp3")
                 tile.focus.yellow.opacity = 0
                 local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
                 local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}
@@ -435,6 +434,7 @@ GameState = Class(nil,function(state, ctrl)
             else
                 tile.focus.yellow.opacity = 50
                 tile.focus.red.opacity = 255
+                mediaplayer:play_sound("assets/audio/match-bad.mp3")
                 local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
                 gameloop:add(tile.focus.red, 200, nil, interval, 
                     function() tile.focus.yellow.opacity = 255 end)
@@ -460,7 +460,11 @@ GameState = Class(nil,function(state, ctrl)
         selected_tile = nil
         self:find_top_tiles()
         if #top_tiles == 0 then
-            game:reset_game()
+            game_won = true
+            must_restart = true
+            game:get_presentation():show_end_game()
+            router:set_active_component(Components.MENU)
+            router:notify()
         else
             router:set_active_component(Components.NO_MOVES_DIALOG)
             router:notify()
