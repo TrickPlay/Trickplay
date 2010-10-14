@@ -11,7 +11,14 @@ MenuController = Class(Controller,function(self, view, ...)
     local current_tile_image = 2
     -- the current layout type, defaults to the classic "turtle"
     local current_layout = 4
+    -- facilitate the MenuView() function view:move_layout(current_layout, dir)
+    local direction = Directions.UP
+    local last_layout = 4
+
     function controller:get_current_layout() return current_layout end
+    function controller:get_direction() return direction end
+    function controller:get_last_layout() return last_layout end
+    function controller:restore_layout_indicator() current_layout=last_layout end
 
     -- Create the tables used as nodes in the menu graph
     local New_Game = {}
@@ -29,7 +36,7 @@ MenuController = Class(Controller,function(self, view, ...)
     New_Game.object = view:get_object("new_game")
     New_Game.callback =
         function()
-            game:reset_game()
+            game:reset_game(current_layout)
         end
 
     Undo[Directions.UP] = New_Game
@@ -81,22 +88,26 @@ MenuController = Class(Controller,function(self, view, ...)
     Choose_Map[Directions.UP] =
         function()
             Choose_Map.object:up_arrow_focus()
+            last_layout = current_layout
             if current_layout > 1 then
                 current_layout = current_layout - 1
             else
                 current_layout = Layouts.LAST
             end
+            direction = Directions.DOWN
             view:move_layout(current_layout, Directions.UP)
             view:change_layout(current_layout, Directions.UP)
         end
     Choose_Map[Directions.DOWN] =
         function()
             Choose_Map.object:down_arrow_focus()
+            last_layout = current_layout
             if current_layout < Layouts.LAST then
                 current_layout = current_layout + 1
             else
                 current_layout = 1
             end
+            direction = Directions.UP
             view:move_layout(current_layout, Directions.DOWN)
             view:change_layout(current_layout, Directions.DOWN)
         end
