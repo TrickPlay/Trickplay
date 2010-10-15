@@ -577,34 +577,6 @@ print(empty_spaces)
 				                     and e[2][3] == guess) then
 					if error_checking then--and e[1][3] ~= nil then
 						table.insert(updates,{e[1][1],e[1][2],e[1][3]})
---[=[
-						if #e[1] == 2 then
-						elseif #e[1] == 3 then
-							if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 255
-								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 0
-							else
-								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 255
-								g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 0
-							end
-						else
-							error("this should never happen,"..
-								" i did something wrong")
-						end
-						if #e[2] == 2 then
-						elseif #e[2] == 3 then
-							if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 255
-								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 0
-							else                             
-								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 255
-								g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 0
-							end
-						else
-							error("this should never happen,"..
-								" i did something wrong")
-						end
---]=]
 					end
 					table.remove(error_list,i)
 				end
@@ -700,12 +672,12 @@ print(empty_spaces)
 	end
 
 	function g:pen(r,c,p,status)
-		mediaplayer:play_sound("audio/pen.mp3")
 
 		if givens[r][c] ~= 0 then 
 			restore_keys()
 			return
 		end
+		mediaplayer:play_sound("audio/pen.mp3")
 
 		local old_nums = {}
 		local new_nums = {}
@@ -743,12 +715,14 @@ print(empty_spaces)
 		--if pencil numbers were there
 		elseif guesses[r][c].num > 0 then
 			local params = {}
+			empty_spaces = empty_spaces - 1
+
 			for i = 1,9 do
 				if guesses[r][c][i] then
 					table.insert(params,i)
---					o,n=g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
-					table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..i))--.opacity = 0
+					table.insert(old_nums,g.grid_of_groups[r][c]:
+						find_child("Guess "..i))
 				end
 			end
 			if status ~= "UNDO" then
@@ -775,26 +749,15 @@ print(empty_spaces)
 		end
 
 		guesses[r][c].num = 1
---[[
-		if guesses[r][c].pen ~= 0 then
-			o,n=g:rem_from_err_list(r,c,guesses[r][c].pen)
-			table_concat(old_nums,o)
-			table_concat(new_nums,n)
-			--table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
-		end
---]]
-
 		guesses[r][c].pen = p
 		guesses[r][c][p] = true
-		--table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Pen "..p))--.opacity = 255
-
 
 		o,n=g:add_to_err_list(r,c,p)
 		table_concat(old_nums,o)
 		table_concat(new_nums,n)
 
 		if empty_spaces == 0 and #error_list == 0 then
-			dolater(animate_numbers,old_nums,new_nums,player_won())
+			dolater(animate_numbers,old_nums,new_nums,player_won)
 		else
 			dolater(animate_numbers,old_nums,new_nums)
 		end
@@ -829,7 +792,6 @@ print(empty_spaces)
 
 
 	function g:toggle_guess(r,c,guess,status)
-		mediaplayer:play_sound("audio/pencil.mp3")
 
 		if type(guess) == "table" then
 			error("this shouldt happen anymore")
@@ -843,6 +805,7 @@ print(empty_spaces)
 			restore_keys()
 			return
 		end
+		mediaplayer:play_sound("audio/pencil.mp3")
 
 		local old_nums = {}
 		local new_nums = {}
@@ -850,13 +813,16 @@ print(empty_spaces)
 
 		--if there was an existing pen mark on the tile
 		if guesses[r][c].pen ~= 0 then
+			if guesses[r][c].num == 0 then
+				empty_spaces = empty_spaces + 1
+			end
 
 			-- remove the "penned" guess, add it to the undo list
-			o,n = g:rem_from_err_list(r,c,guesses[r][c].pen)	
+			o,n = g:rem_from_err_list(r, c, guesses[r][c].pen)	
 			table_concat(old_nums,o)
 			table_concat(new_nums,n)
 			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
+				table.insert(undo_list, {"pen",r,c,guesses[r][c].pen})
 				if #undo_list > 100 then
 					table.remove(undo_list,1)
 				end
@@ -873,19 +839,19 @@ print(empty_spaces)
 			guesses[r][c].pen = 0
 			--add the penciled guess
 			guesses[r][c][guess] = true
-			o,n = g:add_to_err_list(r,c,guess)
-			table_concat(old_nums,o)
-			table_concat(new_nums,n)
-			if empty_spaces == 0 and #error_list == 0 then
-				player_won()
-			end
+			--o,n = g:add_to_err_list(r,c,guess)
+			--table_concat(old_nums,o)
+			--table_concat(new_nums,n)
+			--if empty_spaces == 0 and #error_list == 0 then
+			--	player_won()
+			--end
 
 		--if toggling the guess off
 		elseif guesses[r][c][guess] then
 				guesses[r][c].num = guesses[r][c].num - 1
-				if guesses[r][c].num == 0 then
-					empty_spaces = empty_spaces + 1
-				end
+			--	if guesses[r][c].num == 0 then
+			--		empty_spaces = empty_spaces + 1
+			--	end
 
 
 --			guesses[r][c].sz = guesses[r][c].sz - 1
@@ -904,9 +870,9 @@ print(empty_spaces)
 
 		--if toggling it on
 		else
-			if guesses[r][c].num == 0 then
-				empty_spaces = empty_spaces - 1
-			end
+			--if guesses[r][c].num == 0 then
+			--	empty_spaces = empty_spaces - 1
+			--end
 			guesses[r][c].num = guesses[r][c].num + 1
 
 
@@ -1102,8 +1068,9 @@ print(empty_spaces)
 		local new_nums = {}
 		local o,n
 
-		empty_spaces = empty_spaces + 1
 		if guesses[r][c].pen ~= 0 then
+			empty_spaces = empty_spaces + 1
+
 			table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
 			o,n = g:rem_from_err_list(r,c,guesses[r][c].pen)
 			table_concat(old_nums,o)
@@ -1176,9 +1143,10 @@ local str_funcs =
 }
 
 	function g:undo()
-		mediaplayer:play_sound("audio/undo.mp3")
 
 		if #undo_list > 0 then
+			mediaplayer:play_sound("audio/undo.mp3")
+
 			params = table.remove(undo_list)
 			table.insert(redo_list,{params[1],params[2],params[3],params[4]})
 print("undooo",params[2],params[3],params[4])
@@ -1208,6 +1176,8 @@ print("undooo",params[2],params[3],params[4])
 				end
 			end
 --]]
+		else
+			restore_keys()
 		end
 	end
 	function g:redo(r,c)
