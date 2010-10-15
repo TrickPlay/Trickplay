@@ -369,8 +369,8 @@ GameState = Class(nil,function(state, ctrl)
             end
         end
 
-        tile_1:set_green()
-        tile_2:set_green()
+        game:get_presentation():sparkle(tile_1.group.x+20, tile_1.group.y+30, 4)
+        game:get_presentation():sparkle(tile_2.group.x+20, tile_2.group.y+30, 4)
 
         hint_tiles = {tile_1, tile_2}
     end

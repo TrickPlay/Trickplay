@@ -150,10 +150,6 @@ function(pres, ctrl)
     end
 
     function pres:tile_bump(tile_group_1, tile_group_2)
-        --[[
-        tile_group_1.z = tile_group_1.z + 1
-        tile_group_2.z = tile_group_2.z + 1
-        --]]
         
         tile_group_1:unparent()
         screen:add(tile_group_1)
@@ -246,7 +242,7 @@ function(pres, ctrl)
             {
                 ["x"] = Interval(right_tile.x, median.x),
                 ["y"] = Interval(right_tile.y, median.y),
-                ["callback"] = function() pres:sparkle({median.x},{median.y+50}, 9) end
+                ["callback"] = function() pres:sparkle(median.x,median.y+50, 9) end
             },
             --[[
             {
@@ -313,10 +309,10 @@ function(pres, ctrl)
             sparkles[i].clip = {0,0,sparkles_strip[i].w/5,sparkles_strip[i].h}
             sparkles[i]:add(sparkles_strip[i])
        
-            local x_dir = math.random(90,125)/110
-            x_start[i] = math.random(-2,2)+x[1]
+            local x_dir = math.random(97,102)/100
+            x_start[i] = math.random(-2,2)+x
             sparkles[i].x = x_start[i]
-            y_start[i] = math.random(-2,2)+y[1]
+            y_start[i] = math.random(-2,2)+y
             sparkles[i].y = y_start[i]
             x_peak[i]  = x_start[i]*x_dir
             y_peak[i]  = y_start[i]-80+math.random(-5,5)
