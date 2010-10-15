@@ -13,6 +13,7 @@ Chip = Class(function(self, value, image, ...)
 
 end)
 
+local chip_images = {}
 -- A stack of chips!
 chipStack = Class(function(self, chipValue, ...)
 
@@ -23,7 +24,14 @@ chipStack = Class(function(self, chipValue, ...)
     self.size = 0
 
     function self:addChip()
-        local chip = Chip( self.chipValue, Image{src = "assets/Chip_"..(self.chipValue)..".png"} )        
+        if not chip_images[self.chipValue] then
+            chip_images[self.chipValue] = Image{
+                src = "assets/Chip_"..(self.chipValue)..".png",
+                opacity = 0
+            }
+            screen:add(chip_images[self.chipValue])
+        end
+        local chip = Chip( self.chipValue, Clone{source = chip_images[self.chipValue]} )        
         self.group:add(chip.image)
         self.chips[self.size + 1] = chip
         self.size = self.size + 1
