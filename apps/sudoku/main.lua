@@ -114,6 +114,13 @@ red_board.anchor_point  = {  red_board.w/2,  red_board.h/2 }
 red_board.position      = {     screen.w/2,     screen.h/2 }
 blue_board.anchor_point = { blue_board.w/2, blue_board.h/2 }
 blue_board.position     = {     screen.w/2,     screen.h/2 }
+local selector = Image{src="assets/board-focus.png",opacity=0}
+selector.anchor_point = {selector.w/2,selector.h/2}
+screen:add(
+	--Image{src="assets/background.jpg"}, 
+	--Image{src="assets/board.png"},
+	selector
+)
 
 
 --sparkle:add(sparkle_base)
@@ -589,10 +596,10 @@ pencil_menu:add(
 	Text{name="9",text="9",font=num_font,color="FFFFFF",x=p_x(9),y=25},
 	Image{name="clear_on",  src="assets/button_on.png",y=60,x=105},
 	Image{name="clear_off", src="assets/button_off.png",y=60,x=105},
-	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=67,x=120},
+	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=67,x=125},
 	Image{name="done_on",   src="assets/button_on.png",y=60,x=215},
 	Image{name="done_off",  src="assets/button_off.png",y=60,x=215},
-	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=67,x=230}
+	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=67,x=235}
 )
 --[[
 local clock_sec = 50
@@ -637,16 +644,7 @@ function clock:on_timer()
 	clock_txt.text = base
 end
 --]]
-local selector = Image{src="assets/board-focus.png",opacity=0}
-selector.anchor_point = {selector.w/2,selector.h/2}
-screen:add(
-	--Image{src="assets/background.jpg"}, 
-	--Image{src="assets/board.png"},
-	selector,
-	pencil_menu
-)
-
-
+screen:add(pencil_menu)
 
 
 
@@ -963,6 +961,7 @@ function game_on_key_down(k)
 					pencil_menu:find_child("done").color = "202020"
 
 				end	
+				--pencil_menu:raise_to_top()
 			end
 			restore_keys()
 		end,
@@ -1037,7 +1036,11 @@ function game_on_key_down(k)
 			end
 		end
 	}
-	if key[k] then key[k]() end
+	if key[k] then 
+		key[k]() 
+	else
+		restore_keys()
+	end
 end
 function diff_on_key_down(k)
 	local key = 
@@ -1117,8 +1120,11 @@ function diff_on_key_down(k)
 			end 
 		end
 	}
-	if key[k] then key[k]() end	
-
+	if key[k] then 
+		key[k]() 
+	else
+		restore_keys()
+	end
 end
 function splash_on_key_down(k)
 	local key = 
@@ -1145,7 +1151,12 @@ function splash_on_key_down(k)
 			restore_keys()
 		end,
 	}
-	if key[k] then key[k]() end	
+	if key[k] then 
+		key[k]() 
+	else
+		restore_keys()
+	end
+
 end
 function left_menu_on_key_down(k)
 	local key = 
@@ -1222,7 +1233,11 @@ function left_menu_on_key_down(k)
 		end
 
 	}
-	if key[k] then key[k]() end
+	if key[k] then 
+		key[k]() 
+	else
+		restore_keys()
+	end
 end
 
 function right_menu_on_key_down(k)
@@ -1297,7 +1312,11 @@ function right_menu_on_key_down(k)
 			end
 		end
 	}
-	if key[k] then key[k]() end
+	if key[k] then 
+		key[k]() 
+	else
+		restore_keys()
+	end
 end
 function screen:on_key_down(k)
 	screen.on_key_down = nil
@@ -1324,18 +1343,13 @@ function screen:on_key_down(k)
 				help.opacity = 0
 				focus = "GAME_LEFT"
 			end
-		end,	
-		["RECORDS"] = function(key_press)
-			if key_press == keys.Return then
-				dim.opacity  = 0
-				records.opacity = 0
-				focus = "GAME_LEFT"
-			end
+			restore_keys()
 		end,	
 	}
 	if k == keys.s then
 		start_sparkle({200,300,400},
 {200,300,400},12)
+restore_keys()
 		return
 	end
 	if sub_on_key_down[focus] then
