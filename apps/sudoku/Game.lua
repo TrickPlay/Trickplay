@@ -419,23 +419,28 @@ print(empty_spaces)
 		--v = value of the guess
 		--t = the error_list
 
+		local m = {} --the mini list of updates
 
 		-- for all the other tiles on that column
 		for rr = 1,9 do
 			if givens[rr][c] == v then
 				table.insert(t,{{r,c,v},{rr,c}})
-			elseif guesses[rr][c][v] and 
+				table.insert(m,{rr,c})
+			elseif guesses[rr][c].pen == v and--guesses[rr][c][v] and 
 				rr ~= r then
 				table.insert(t,{{r,c,v},{rr,c,v}})
+				table.insert(m,{rr,c,v})
 			end
 		end
 		--for all the other tiles on that row
 		for cc = 1,9 do
 			if givens[r][cc] == v then
 				table.insert(t,{{r,c,v},{r,cc}})
-			elseif guesses[r][cc][v] and 
+				table.insert(m,{r,cc})
+			elseif guesses[r][cc].pen == v and-- guesses[r][cc][v] and 
 				cc ~= c then
 				table.insert(t,{{r,c,v},{r,cc,v}})
+				table.insert(m,{r,cc,v})
 			end
 		end
 		--for all the other tiles in that box
@@ -447,15 +452,18 @@ print(empty_spaces)
 				if r ~=rr and c ~= cc then
 					if givens[rr][cc] == v then
 						table.insert(t,{{r,c,v},{rr,cc}})
-					elseif guesses[rr][cc][v] and 
+						table.insert(m,{rr,cc})
+					elseif  guesses[rr][cc].pen == v and--guesses[rr][cc][v] and 
 						(cc ~= c or rr ~= r) then
 						table.insert(t,{{r,c,v},{rr,cc,v}})
+						table.insert(m,{rr,cc,v})
 					end
 				end
 			end
 		end
 
-		--return mini_list
+		--if #m > 0 then table.insert(m,{r,c,v}) end
+		return m
 	end
 	function g:init_error_list()
 		error_list = {}
@@ -463,19 +471,38 @@ print(empty_spaces)
 		-----------------------------------------------------------
 		for r = 1,9 do   for c = 1,9 do   if givens[r][c] == 0 then 
   
-		                 for v = 1,9 do    if guesses[r][c][v] then
+		                 --for v = 1,9 do    if guesses[r][c][v] then
+						if guesses[r][c].pen ~= 0 then
 		-----------------------------------------------------------
 
-			g:check_guess(r,c,v,error_list)
+			g:check_guess(r,c,guesses[r][c].pen,error_list)--v,error_list)
 
 		-----------------------------------------------------------
-		end          end          end          end          end
+		end          end          end          end    --      end
 		-----------------------------------------------------------
 	end
 	g:init_error_list()
 	function g:add_to_err_list(r,c,guess)
-		g:check_guess(r,c,guess,error_list)
+		local updates = g:check_guess(r,c,guess,error_list)
+		local old_nums = {}
+		local new_nums = {}
 		if error_checking then
+
+			for i,u in ipairs(updates) do	if #u == 3 then
+				table.insert(old_nums,g.grid_of_groups[u[1]][u[2]]:
+					find_child("Pen "..u[3]))
+				table.insert(new_nums,g.grid_of_groups[u[1]][u[2]]:
+					find_child("WR_Pen "..u[3]))
+			end								end
+			if #updates == 0 then
+				table.insert(new_nums,g.grid_of_groups[r][c]:
+					find_child("Pen "..guess))
+			else
+				table.insert(new_nums,g.grid_of_groups[r][c]:
+					find_child("WR_Pen "..guess))
+			end
+
+--[=[
 			--update the error_list
 			for i,e in ipairs(error_list) do
 				if #e[1] == 2 then
@@ -520,22 +547,37 @@ print(empty_spaces)
 						" i did something wrong")
 				end
 			end
+--]=]
+		else
+			table.insert(new_nums,g.grid_of_groups[r][
+				c]:find_child("Pen "..guess))
 		end
-
+		return old_nums, new_nums
 	end
 	function g:rem_from_err_list(r,c,guess)
 		--if error_checking then
 			--have to search backwards in order to update the
 			--table at the same time
 			local e
+			local updates  = {}
+			local old_nums = {}
+			local new_nums = {}
+			local found_instance = false
 			for i =#error_list,1,-1 do
 				e = error_list[i]
 				print(e[1][1],e[1][2],e[1][3],e[2][1],e[2][2],e[2][3])
-				if (e[1][1] == r and e[1][2] == c 
-				                 and e[1][3] == guess) or
-				   (e[2][1] == r and e[2][2] == c 
-				                 and e[2][3] == guess) then
-					if error_checking then
+				if     (e[1][1] == r and e[1][2] == c 
+				                     and e[1][3] == guess) then
+					if error_checking  then--and e[2][3] ~= nil then
+						table.insert(updates,{e[2][1],e[2][2],e[2][3]})
+					end
+					table.remove(error_list,i)
+
+				elseif (e[2][1] == r and e[2][2] == c 
+				                     and e[2][3] == guess) then
+					if error_checking then--and e[1][3] ~= nil then
+						table.insert(updates,{e[1][1],e[1][2],e[1][3]})
+--[=[
 						if #e[1] == 2 then
 						elseif #e[1] == 3 then
 							if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
@@ -562,11 +604,43 @@ print(empty_spaces)
 							error("this should never happen,"..
 								" i did something wrong")
 						end
+--]=]
 					end
 					table.remove(error_list,i)
 				end
 			end
 		if error_checking then
+			for i,u in ipairs(updates) do if #u == 3 then
+				found_instance = false
+				for j,e in ipairs(error_list) do
+					if (u[1] == e[1][1] and u[2] == e[1][2]  and 
+					                        u[3] == e[1][3]) or
+					   (u[1] == e[2][1] and u[2] == e[2][2]  and 
+					                        u[3] == e[2][3]) then
+						found_instance = true
+						break
+					end
+				end
+
+				if found_instance == false then
+					table.insert(old_nums,g.grid_of_groups[u[1]][u[2]]:
+						find_child("WR_Pen "..u[3]))
+					table.insert(new_nums,g.grid_of_groups[u[1]][u[2]]:
+						find_child("Pen "..u[3]))
+				end
+			end	end
+			if #updates == 0 then
+				table.insert(old_nums,g.grid_of_groups[r][c]:
+					find_child("Pen "..guess))
+			else
+				table.insert(old_nums,g.grid_of_groups[r][c]:
+					find_child("WR_Pen "..guess))
+			end
+		else
+			table.insert(old_nums,g.grid_of_groups[r][c]:
+				find_child("Pen "..guess))
+
+--[=[
 			for i =#error_list,1,-1 do
 				e = error_list[i]
 					if #e[1] == 2 then
@@ -597,39 +671,33 @@ print(empty_spaces)
 							" i did something wrong")
 					end
 			end	
+--]=]
 		end	
-		print("size of error list = "..#error_list)
+	--	print("size of error list = "..#error_list)
+		return old_nums, new_nums
 	end
 
 	function animate_numbers(old_nums,new_nums,next_timeline)
-print("animate nums",#old_nums,#new_nums)
-		local timeline = Timeline{duration=200}
+		local timeline = Timeline{duration=100}
 		save(timeline)
 		function timeline.on_new_frame(t,msecs,p)
-			for i = 1, #old_nums do
-				old_nums[i].opacity = 255*(1-p)
-			end
-			for i = 1, #new_nums do
-				new_nums[i].opacity = 255*p
-			end
+			for i = 1, #old_nums do old_nums[i].opacity = 255*(1-p) end
+			for i = 1, #new_nums do new_nums[i].opacity = 255*p     end
 		end
 		function timeline:on_completed()
-			for i = 1, #old_nums do
-				old_nums[i].opacity = 0
-			end
-			for i = 1, #new_nums do
-				new_nums[i].opacity = 255
-			end
-			if next_timeline then
-				dolater(next_timeline)
-			else
-				restore_keys()
-			end
+			for i = 1, #old_nums do old_nums[i].opacity = 0   end
+			for i = 1, #new_nums do new_nums[i].opacity = 255 end
+			if next_timeline then dolater(next_timeline)
+			else restore_keys() end
 			clear(timeline)
 		end
 		timeline:start()
 	end
-
+	function table_concat(t1,t2)
+		for i = 1,#t2 do
+			table.insert(t1,t2[i])
+		end
+	end
 
 	function g:pen(r,c,p,status)
 		mediaplayer:play_sound("audio/pen.mp3")
@@ -641,6 +709,7 @@ print("animate nums",#old_nums,#new_nums)
 
 		local old_nums = {}
 		local new_nums = {}
+		local o , n
 
 
 		--if another pen number was there
@@ -656,12 +725,14 @@ print("animate nums",#old_nums,#new_nums)
 			end
 			guesses[r][c][guesses[r][c].pen] = false
 
-			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			o,n = g:rem_from_err_list(r,c,guesses[r][c].pen)
+			table_concat(old_nums,o)
+			table_concat(new_nums,n)
 			--if toggling out a penned number
 			if guesses[r][c].pen == p then
 				print("removing pen")
 				empty_spaces = empty_spaces + 1
-				table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
+--				table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 
 				guesses[r][c].pen = 0
 				guesses[r][c].num = 0
@@ -675,7 +746,7 @@ print("animate nums",#old_nums,#new_nums)
 			for i = 1,9 do
 				if guesses[r][c][i] then
 					table.insert(params,i)
-					g:rem_from_err_list(r,c,i)
+--					o,n=g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
 					table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..i))--.opacity = 0
 				end
@@ -704,17 +775,24 @@ print("animate nums",#old_nums,#new_nums)
 		end
 
 		guesses[r][c].num = 1
+--[[
 		if guesses[r][c].pen ~= 0 then
-			g:rem_from_err_list(r,c,guesses[r][c].pen)
-			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
+			o,n=g:rem_from_err_list(r,c,guesses[r][c].pen)
+			table_concat(old_nums,o)
+			table_concat(new_nums,n)
+			--table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 		end
+--]]
 
 		guesses[r][c].pen = p
 		guesses[r][c][p] = true
-		table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Pen "..p))--.opacity = 255
+		--table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Pen "..p))--.opacity = 255
 
 
-		g:add_to_err_list(r,c,p)
+		o,n=g:add_to_err_list(r,c,p)
+		table_concat(old_nums,o)
+		table_concat(new_nums,n)
+
 		if empty_spaces == 0 and #error_list == 0 then
 			dolater(animate_numbers,old_nums,new_nums,player_won())
 		else
@@ -768,12 +846,15 @@ print("animate nums",#old_nums,#new_nums)
 
 		local old_nums = {}
 		local new_nums = {}
+		local o,n
 
 		--if there was an existing pen mark on the tile
 		if guesses[r][c].pen ~= 0 then
 
 			-- remove the "penned" guess, add it to the undo list
-			g:rem_from_err_list(r,c,guesses[r][c].pen)	
+			o,n = g:rem_from_err_list(r,c,guesses[r][c].pen)	
+			table_concat(old_nums,o)
+			table_concat(new_nums,n)
 			if status ~= "REDO" and status ~= "UNDO" then
 				table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
 				if #undo_list > 100 then
@@ -784,16 +865,17 @@ print("animate nums",#old_nums,#new_nums)
 			end
 
 			guesses[r][c][guesses[r][c].pen] = false
-			g:rem_from_err_list(r,c,guesses[r][c].pen)
 
-			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
+--			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
 
 
 			guesses[r][c].pen = 0
 			--add the penciled guess
 			guesses[r][c][guess] = true
-			g:add_to_err_list(r,c,guess)
+			o,n = g:add_to_err_list(r,c,guess)
+			table_concat(old_nums,o)
+			table_concat(new_nums,n)
 			if empty_spaces == 0 and #error_list == 0 then
 				player_won()
 			end
@@ -808,7 +890,7 @@ print("animate nums",#old_nums,#new_nums)
 
 --			guesses[r][c].sz = guesses[r][c].sz - 1
 			guesses[r][c][guess] = false
-			g:rem_from_err_list(r,c,guess)
+			--g:rem_from_err_list(r,c,guess)
 			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 0
 
 			if status ~= "REDO" and status ~= "UNDO" then
@@ -822,10 +904,10 @@ print("animate nums",#old_nums,#new_nums)
 
 		--if toggling it on
 		else
-				if guesses[r][c].num == 0 then
-					empty_spaces = empty_spaces - 1
-				end
-				guesses[r][c].num = guesses[r][c].num + 1
+			if guesses[r][c].num == 0 then
+				empty_spaces = empty_spaces - 1
+			end
+			guesses[r][c].num = guesses[r][c].num + 1
 
 
 			--guesses[r][c].sz = guesses[r][c].sz + 1
@@ -840,7 +922,7 @@ print("animate nums",#old_nums,#new_nums)
 			elseif status ~= "REDO" and status ~= "UNDO" then
 				redo_list = {}
 			end
-			g:add_to_err_list(r,c,guess)
+			--g:add_to_err_list(r,c,guess)
 --			if empty_spaces == 0 and #error_list == 0 then
 --				player_won()
 --			end
@@ -854,6 +936,8 @@ print("animate nums",#old_nums,#new_nums)
 		print(empty_spaces)
 	end
 	function g:error_check()
+		local old_nums = {}
+		local new_nums = {}
 		if error_checking then
 			error_checking = false
 				for i =#error_list,1,-1 do
@@ -862,13 +946,13 @@ print("animate nums",#old_nums,#new_nums)
 
 					if #e[1] == 2 then
 					elseif #e[1] == 3 then
-						if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 255
-							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 0
-						else
-							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 255
-							g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 0
-						end
+					--	if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+							table.insert(new_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]))--.opacity = 255
+							table.insert(old_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]))--.opacity = 0
+					--	else
+					--		g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 255
+					--		g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 0
+					--	end
 
 					else
 						error("this should never happen,"..
@@ -876,13 +960,13 @@ print("animate nums",#old_nums,#new_nums)
 					end
 					if #e[2] == 2 then
 					elseif #e[2] == 3 then
-						if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 255
-							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 0
-						else
-							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 255
-							g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 0
-						end
+						--if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+							table.insert(new_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]))--.opacity = 255
+							table.insert(old_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]))--.opacity = 0
+						--else
+						--	g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 255
+						--	g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 0
+						--end
 
 					else
 						error("this should never happen,"..
@@ -983,45 +1067,50 @@ print("animate nums",#old_nums,#new_nums)
 					..e[1][2]).color = "FF0000"
 --]]
 			elseif #e[1] == 3 then
-				if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
-					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]).opacity = 0
-					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]).opacity = 255
-				else
-					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 0
-					g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 255
-				end
+			--	if guesses[e[1][1]][e[1][2]].pen == e[1][3] then
+					table.insert(old_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]))--.opacity = 0
+					table.insert(new_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]))--.opacity = 255
+
+			--	else
+			--		g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Guess "..e[1][3]).opacity = 0
+			--		g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Guess "..e[1][3]).opacity = 255
+			--	end
 			else
 				error("this should never happen,"..
 					" i did something wrong")
 			end
 			if #e[2] == 2 then
 			elseif #e[2] == 3 then
-				if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
-					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]).opacity = 0
-					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]).opacity = 255
-				else
-					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 0
-					g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 255
-				end
+			--	if guesses[e[2][1]][e[2][2]].pen == e[2][3] then
+					table.insert(old_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]))--.opacity = 0
+					table.insert(new_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]))--.opacity = 255
+			--	else
+			--		g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Guess "..e[2][3]).opacity = 0
+			--		g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Guess "..e[2][3]).opacity = 255
+			--	end
 			else
 				error("this should never happen,"..
 					" i did something wrong")
 			end
 		end
+		dolater(animate_numbers,old_nums,new_nums)
 	end
 	function g:clear_tile(r,c)
 		mediaplayer:play_sound("audio/pencil.mp3")
 
 		local old_nums = {}
 		local new_nums = {}
+		local o,n
 
 		empty_spaces = empty_spaces + 1
 		if guesses[r][c].pen ~= 0 then
 			table.insert(undo_list,{"pen",r,c,guesses[r][c].pen})
-			g:rem_from_err_list(r,c,guesses[r][c].pen)
+			o,n = g:rem_from_err_list(r,c,guesses[r][c].pen)
+			table_concat(old_nums,o)
+			table_concat(new_nums,n)
 			guesses[r][c][guesses[r][c].pen] = false
 
-			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
+			--table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Pen "..guesses[r][c].pen))--.opacity = 0
 
 			guesses[r][c].pen = 0
 			guesses[r][c].num = 0
@@ -1030,7 +1119,7 @@ print("animate nums",#old_nums,#new_nums)
 			local params = {}
 			for i = 1,9 do
 				if guesses[r][c][i] then
-					g:rem_from_err_list(r,c,i)
+					--g:rem_from_err_list(r,c,i)
 					guesses[r][c][i] = false
 					table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..i))--.opacity = 0
 					--guess.opacity = 0
