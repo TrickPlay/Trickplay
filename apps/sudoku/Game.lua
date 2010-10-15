@@ -940,6 +940,8 @@ print(empty_spaces)
 					end
 					--table.remove(error_list,i)
 				end
+			dolater(animate_numbers,old_nums,new_nums)
+
 			return
 		end
 		error_checking = true
