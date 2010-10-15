@@ -1,7 +1,7 @@
 local tiles = {
     Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0, name = "Marble"},
     Image{src = "assets/tiles/TileWoodLg.png", opacity = 0, name = "Wood"},
-    Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0, name = "Procelain"},
+    Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0, name = "Porcelain"},
 }
 
 TILE_IMAGES = tiles
