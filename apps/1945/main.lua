@@ -74,55 +74,7 @@ end_game:add(
 	--Text{ text = "Press any key to play again",font = "Highway Gothic Wide 36px", color = "FFFFFF",position={400,650}}
 )
 splash:add(
---[[
-	--shadows
-	Text{
-		text = "1945",
-		font = "Highway Gothic Wide Bold 120px",
-		color = "000000",
-		opacity = 150,
-		x = 825,
-		y = 305
-	},
-	Text{
-		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
-		font = "Highway Gothic Wide 32px",
-		color = "000000",
-		opacity = 150,
-		x = 905,
-		y = 455,
-	},
-	Text{
-		text = "Press Enter to begin!",
-		font = "Highway Gothic Wide 32px",
-		color = "000000",
-		opacity = 150,
-		x = 505,
-		y = 705,
-	},
 
-	Text{
-		text = "1945",
-		font = "Highway Gothic Wide Bold 120px",
-		color = "FFFFFF",
-		x = 820,
-		y = 300
-	},
-	Text{
-		text = "Enter - Shoots\nDirectional Pad - Moves\nPlay/Pause - Toggles Pause",
-		font = "Highway Gothic Wide 32px",
-		color = "FFFFFF",
-		x = 900,
-		y = 450,
-	},
-	Text{
-		text = "Press Enter to begin!",
-		font = "Highway Gothic Wide 32px",
-		color = "FFFFFF",
-		x = 500,
-		y = 700,
-	}
---]]
     Image{ name = "logo",src = "assets/splash/AirCombatLogo.png", position = {screen.w/2,screen.h/2-80}},
     Image{ name = "instr", src = "assets/splash/InstructionBar.png", position = {50,screen.h - 120}},
     Image{ name = "start",src = "assets/splash/StartButton.png", position = {screen.w/2,screen.h/2+240}}
@@ -167,9 +119,11 @@ assets =
     water           = Image{ src = "assets/water.png" },
     my_plane_strip  = Image{ src = "assets/myplane_strip3.png" },
     my_bullet       = Image{ src = "assets/bullet.png" },
-    enemy1          = Image{ src = "assets/enemy1_strip3.png" },
-    enemy2          = Image{ src = "assets/enemy2_strip3.png" },
-    enemy3          = Image{ src = "assets/enemy3_strip3.png" },
+    enemy1          = Image{ src = "assets/enemy1_original.png" },
+    enemy2          = Image{ src = "assets/enemy1_palette_8.png" },
+    enemy3          = Image{ src = "assets/enemy1_palette_8_2.png" },
+    enemy4          = Image{ src = "assets/enemy1_palette_10.png" },
+    enemy5          = Image{ src = "assets/enemy1_palette_10_2.png" },
     enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
@@ -1063,7 +1017,7 @@ enemies =
     
     enemy_seconds = ENEMY_FREQUENCY,
     
-    images = { assets.enemy1 , assets.enemy2 , assets.enemy3 },
+    images = { assets.enemy1 , assets.enemy2 , assets.enemy3 , assets.enemy4 , assets.enemy5 },
         
     setup = 
     
