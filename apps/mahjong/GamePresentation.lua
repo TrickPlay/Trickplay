@@ -219,21 +219,25 @@ function(pres, ctrl)
                 ["x"] = Interval(left_tile.x, left_x),
                 ["y"] = Interval(left_tile.y, left_y),
             },
+            --[[
             {
                 ["z"] = Interval(left_tile.z, left_tile.z + 20)
             }
+            --]]
         }
-        local left_durations = {300, 200}
+        local left_durations = {300}--, 200}
         local from = {x = left_x, y = left_y}
         local to = {x = left_x-200, y = left_y}
+        --[[
         table.insert(left_intervals_t, {
             ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
             ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true)
         })
         table.insert(left_durations, 700)
+        --]]
 
         table.insert(left_intervals_t,
-            {["y"]=Interval(left_y,1200), ["opacity"]=Interval(255,0)})
+            {["opacity"]=Interval(255,0)})--, ["y"]=Interval(left_y,1200), })
         table.insert(left_durations, 400)
 
         right_tile.z = right_tile.z + 1
@@ -242,22 +246,27 @@ function(pres, ctrl)
             {
                 ["x"] = Interval(right_tile.x, median.x),
                 ["y"] = Interval(right_tile.y, median.y),
+                ["callback"] = function() pres:sparkle({median.x},{median.y+50}, 9) end
             },
+            --[[
             {
                 ["z"] = Interval(right_tile.z, right_tile.z + 20)
             }
+            --]]
         }
-        local right_durations = {300, 200}
+        local right_durations = {300}--, 200}
         local from = {x = median.x, y = median.y}
         local to = {x = median.x+200, y = median.y}
+        --[[
         table.insert(right_intervals_t, {
             ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
-            ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true)
+            ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true),
         })
         table.insert(right_durations, 700)
+        --]]
 
         table.insert(right_intervals_t,
-            {["y"]=Interval(median.y,1200), ["opacity"]=Interval(255,0)})
+            {["opacity"]=Interval(255,0)})--, ["y"]=Interval(median.y,1200), })
         table.insert(right_durations, 400)
         gameloop:add_list(right_tile, right_durations, right_intervals_t,
             function()
@@ -274,6 +283,97 @@ function(pres, ctrl)
         game_menu:tile_bump()
     end
 
+    local sparkle_base = Image{src = "assets/tiles/Sparkle.png", opacity = 0}
+    screen:add(sparkle_base)
+    function pres:sparkle(x, y, num_sparkles)
+        local sparkles = {}
+        local sparkles_strip = {}
+
+        --each sparkle gets predefined params (with variance)
+        local x_start = {}
+        local y_start = {}
+        local x_peak  = {}
+        local y_peak  = {}
+        local x_end   = {}
+        local y_end   = {}
+
+        local scale  = {}
+        local stage_start = {}
+        local stage_speed = {}
+        local o_peak      = {}
+        local t_start     = {}
+        local t_peak      = {}
+        local t_end       = {}
+
+        local stage_timer = Timer() --timer for the sudo-rotation of the sparkle
+        local sparkle_counter = 0
+        for i = 1, num_sparkles do
+            sparkles[i] = Group{opacity=0}
+            sparkles_strip[i] = Clone{source = sparkle_base}
+            sparkles[i].clip = {0,0,sparkles_strip[i].w/5,sparkles_strip[i].h}
+            sparkles[i]:add(sparkles_strip[i])
+       
+            local x_dir = math.random(90,125)/110
+            x_start[i] = math.random(-2,2)+x[1]
+            sparkles[i].x = x_start[i]
+            y_start[i] = math.random(-2,2)+y[1]
+            sparkles[i].y = y_start[i]
+            x_peak[i]  = x_start[i]*x_dir
+            y_peak[i]  = y_start[i]-80+math.random(-5,5)
+            x_end[i]   = x_peak[i]*x_dir
+            y_end[i]   = y_peak[i]+90+math.random(-5,5)
+       
+            stage_start[i] = math.random(   1,   5) --initial start stage
+            stage_speed[i] = math.random(  50, 100) --num of milliseconds between switches
+           
+            o_peak[i]  = math.random(170,255)
+            t_start[i] = math.random(0,300)
+            t_peak[i]  = 400 + math.random(-100,100)
+            t_end[i]   = math.random(0,300) -- when, during the final 200 milliseconds,
+                                            -- the opacity goes to 0
+            screen:add(sparkles[i])
+            sparkles[i]:raise_to_top()
+            
+            local intervals_1 = {
+                ["x"] = Interval(x_start[i], x_peak[i]),
+                ["y"] = Interval(y_start[i], y_peak[i]),
+                ["opacity"] = Interval(0, o_peak[i])
+            }
+            local intervals_2 = {
+                ["x"] = Interval(x_peak[i], x_end[i]),
+                ["y"] = Interval(y_peak[i], y_end[i]),
+                ["opacity"] = Interval(o_peak[i], 0)
+            }
+            gameloop:add(sparkles[i], t_peak[i]-t_start[i], nil, intervals_1,
+                function()
+                    gameloop:add(sparkles[i], 2000-t_end[i], nil, intervals_2,
+                        function()
+                            sparkles[i]:clear()
+                            sparkles[i]:unparent()
+                            sparkles[i] = nil
+                            sparkle_counter = sparkle_counter + 1
+                        end)
+                end)
+        end
+        stage_timer.interval = 100
+        local stage_counter = 0
+        function stage_timer:on_timer()
+            if sparkle_counter == num_sparkles then
+                stage_timer:stop()
+                stage_timer.on_timer = nil
+                stage_timer = nil
+                collectgarbage("collect")
+                return
+            end
+            for i = 1,num_sparkles do
+                stage = math.floor(stage_start[i] + stage_counter)%5+1
+                sparkles_strip[i].x =  -1*(stage-1)*sparkles_strip[i].w/5
+            end
+            stage_counter = stage_counter + 1
+        end
+        stage_timer:start()
+    end
+
     function pres:show_undo(last_tiles)
         last_tiles[1]:set_green()
         last_tiles[2]:set_green()
@@ -282,9 +382,6 @@ function(pres, ctrl)
 
         gameloop:add(last_tiles[1].focus.green, 300, nil, interval_1)
         gameloop:add(last_tiles[2].focus.green, 300, nil, interval_2)
-    end
-
-    function pres:end_game_animation()
     end
 
     local end_game_image

@@ -112,9 +112,9 @@ MenuView = Class(View, function(view, model, ...)
     layout_strip:add(layout_strip_1, layout_strip_2, layout_strip_3)
     layout_mask:add(layout_strip)
     -- text describing type of layout
-    local layout_text = Text{
+    layout_text = Text{
         text = "Turtle (Classic)", font = MENU_FONT_SMALL,
-        color = DEFAULT_COLOR, position={125, -5}
+        color = DEFAULT_COLOR, position={142, -5}
     }
     layout_text.anchor_point = {layout_text.width/2, layout_text.height/2}
     choose_map.group:add(
@@ -437,7 +437,7 @@ MenuView = Class(View, function(view, model, ...)
         else
             if selected_object.off_focus then selected_object:off_focus_inst() end
         end
----[[
+        -- for opening and closing the options menu
         if comp ~= Components.MENU and comp ~= Components.NEW_MAP_DIALOG then
             if menu_options.x ~= menu_closed_x then
                 local intervals = {["x"] = Interval(menu_options.x, menu_closed_x)}
@@ -452,7 +452,6 @@ MenuView = Class(View, function(view, model, ...)
                 gameloop:add(menu_options, CHANGE_VIEW_TIME, nil, intervals)
             end
         end
-        --]]
     end
 
 end)

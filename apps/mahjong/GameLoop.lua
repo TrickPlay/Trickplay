@@ -94,8 +94,14 @@ function(gameloop, ...)
         local current = callback
         for i = #intervals,1,-1 do
             local temp = current
+            local cb = intervals[i].callback
+            intervals[i].callback = nil
             current = function()
-                gameloop:add(element, durations[i], nil, intervals[i], temp)
+                gameloop:add(element, durations[i], nil, intervals[i],
+                    function()
+                        if cb then cb() end
+                        temp()
+                    end)
             end
         end
 
