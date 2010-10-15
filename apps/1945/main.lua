@@ -865,33 +865,7 @@ if number_of_lives == 0 then
                                     end,
                             })
 
---[[
-	local t = Timeline{
-		duration = 3000,
-		direction= "FORWARD",
-		loop = false
-	}
-	local save_keys = screen.on_key_down
-	screen.on_key_down = nil
-	function t.on_new_frame(t,msecs,p) 
-		if msecs <= 500 then
-			end_game.y = -100 + (500 + 100)*msecs/500
-		elseif msecs <= 2000 then
-			end_game.opacity = 255*(1-(msecs-500)/1500)
-			--end_game.scale   = {.5+4*msecs/2000,.5+4*msecs/2000}
-		else--if msecs > 2500 then
-			end_game.opacity = 0
-			splash.opacity = 255*(msecs-2000)/1000
-print(splash.opacity)
-		end
-	end
-	function t.on_completed()
-print("FIINIISH")
-		splash.opacity = 255
-		screen.on_key_down = save_keys
-	end
-	t:start()
---]]
+
 else
 	lives[number_of_lives].opacity=0
 	number_of_lives = number_of_lives - 1
