@@ -125,12 +125,14 @@ Tile = Class(function(tile, suit, number, ...)
     tile.position = nil
 
     tile.group = Group{}--clip = {0,0,tile.images[1].width,tile.images[1].height}}
+    tile.tile_group = Group()
     tile.group:add(tile.shadow)
-    tile.group:add(unpack(tile.images))
-    tile.group:add(
+    tile.tile_group:add(unpack(tile.images))
+    tile.tile_group:add(
         tile.depth, tile.focus.green, tile.focus.yellow,
         tile.focus.red, tile.glyph
     )
+    tile.group:add(tile.tile_group)
 
     TILE_HEIGHT = tile.images[1].height
     TILE_WIDTH = tile.images[1].width
@@ -170,6 +172,8 @@ Tile = Class(function(tile, suit, number, ...)
         tile.set = false
         tile.position = nil
         tile.group.opacity = 255
+        tile.shadow.position = {8, 10}
+        tile.tile_group.position = {0, 0}
         if tile.group.parent then tile.group:unparent() end
     end
 

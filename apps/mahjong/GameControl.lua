@@ -70,7 +70,7 @@ function(ctrl, router, ...)
         add_to_key_handler(keys.r, ctrl.reset_game)
         add_to_key_handler(keys.s, ctrl.shuffle_game)
         add_to_key_handler(keys.u, ctrl.undo_move)
-        add_to_key_handler(keys.y, function() pres:sparkle({200}, {200}, 12) end)
+        add_to_key_handler(keys.y, function() pres:sparkle(200, 200, 12) end)
 
     end
 

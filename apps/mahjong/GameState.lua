@@ -197,7 +197,7 @@ GameState = Class(nil,function(state, ctrl)
         end
 
         grid[10][10][1] = tiles[1]
-        grid[10][12][1] = tiles[2]
+        grid[12][10][1] = tiles[2]
     end
 
     --[[
@@ -370,8 +370,10 @@ GameState = Class(nil,function(state, ctrl)
             end
         end
 
-        game:get_presentation():sparkle(tile_1.group.x+20, tile_1.group.y+30, 4)
-        game:get_presentation():sparkle(tile_2.group.x+20, tile_2.group.y+30, 4)
+        if tile_1 then
+            game:get_presentation():sparkle(tile_1.group.x+20, tile_1.group.y+30, 4)
+            game:get_presentation():sparkle(tile_2.group.x+20, tile_2.group.y+30, 4)
+        end
 
         hint_tiles = {tile_1, tile_2}
     end
@@ -468,6 +470,7 @@ GameState = Class(nil,function(state, ctrl)
         if #top_tiles == 0 then
             game_won = true
             must_restart = true
+            last_tiles = nil
             game:get_presentation():show_end_game()
             router:set_active_component(Components.MENU)
             router:notify()

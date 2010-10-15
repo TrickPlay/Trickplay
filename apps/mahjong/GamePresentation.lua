@@ -50,13 +50,6 @@ function(pres, ctrl)
 
     function pres:display_ui()
         local grid = ctrl:get_grid()
-        -- left edge
-        --[[
-        grid[1][4][1].group.position = Utils.deepcopy(GridPositions[1][4][1])
-        grid[1][4][1].group.y = grid[1][4][1].group.y + 50
-        grid_group:add(grid[1][4][1].group)
-        --]]
-        -- everything in the middle
         local tile = nil
         local pos = nil
         for k = 1,GRID_DEPTH do
@@ -75,20 +68,6 @@ function(pres, ctrl)
                 end
             end
         end
-        --[[
-        -- right edge
-        grid[14][4][1].group.position = Utils.deepcopy(GridPositions[14][4][1])
-        grid[14][4][1].group.y = grid[14][4][1].group.y + 50
-        grid[15][4][1].group.position = Utils.deepcopy(GridPositions[15][4][1])
-        grid[15][4][1].group.y = grid[15][4][1].group.y + 50
-        -- top
-        grid[7][4][5].group.position = Utils.deepcopy(GridPositions.TOP)
-        grid_group:add(
-            grid[14][4][1].group,
-            grid[15][4][1].group,
-            grid[7][4][5].group
-        )
-        --]]
 
         -- change the tile depth mask layer opacity based on the height of the tile
         for k = 1, GRID_DEPTH do
@@ -210,6 +189,13 @@ function(pres, ctrl)
             left_y = median.y
         end
         
+        left_tile.z = left_tile.z + 1
+        local tile_group_interval = {
+            ["x"] = Interval(left_tile.children[1].x, left_tile.children[2].x + 100),
+            ["y"] = Interval(left_tile.children[1].y, left_tile.children[2].y + 100)
+        }
+        gameloop:add(left_tile.children[1], 200, nil, tile_group_interval)
+
         local left_intervals_t = {
             {
                 ["x"] = Interval(left_tile.x, left_x),
@@ -236,7 +222,12 @@ function(pres, ctrl)
             {["opacity"]=Interval(255,0)})--, ["y"]=Interval(left_y,1200), })
         table.insert(left_durations, 400)
 
-        right_tile.z = right_tile.z + 1
+        right_tile.z = right_tile.z + 2
+        tile_group_interval = {
+            ["x"] = Interval(right_tile.children[1].x, right_tile.children[2].x + 100),
+            ["y"] = Interval(right_tile.children[1].y, right_tile.children[2].y + 100)
+        }
+        gameloop:add(right_tile.children[1], 200, nil, tile_group_interval)
 
         local right_intervals_t = {
             {
