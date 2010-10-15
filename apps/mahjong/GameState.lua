@@ -115,6 +115,7 @@ GameState = Class(nil,function(state, ctrl)
         game_timer.start = 0
         game_timer.current = 0
         last_tiles = nil
+        selected_tile = nil
 
         tiles_class:shuffle(layout_number)
         tiles_class:reset()
@@ -260,9 +261,9 @@ GameState = Class(nil,function(state, ctrl)
         add_to_key_handler(keys.t, function()
             for k,v in ipairs(top_tiles) do
                 if is_key_hint_on(keys.t) then
-                    v.focus.red.opacity = 255
+                    v:show_red()
                 else
-                    v.focus.red.opacity = 0
+                    v:hide_red()
                 end
             end
         end)
@@ -333,8 +334,8 @@ GameState = Class(nil,function(state, ctrl)
 
     function state:show_matching_tiles()
         for _,tile in pairs(matching_tiles) do
-            if tile.focus.green.opacity == 0 then tile:set_green()
-            else tile.focus.green.opacity = 0
+            if tile.focus.green.opacity == 0 then tile:show_green()
+            else tile:hide_green()
             end
         end
     end
@@ -392,16 +393,16 @@ GameState = Class(nil,function(state, ctrl)
                 game_menu:add_tile_image(
                     Clone{source = tile.images[tiles_class:get_current_tile_image()]},
                     Clone{source = tile.glyph})
-                tile:set_green()
+                tile:show_green()
             end
         else
             if selection_grid[tile] and selected_tile:is_a_match(tile) then
                 local counter = 0
                 local temp = selected_tile
 
-                tile:set_green()
+                tile:show_green()
                 mediaplayer:play_sound("assets/audio/match-good.mp3")
-                tile.focus.yellow.opacity = 0
+                tile:hide_yellow()
                 local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
                 local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}
 
@@ -415,8 +416,8 @@ GameState = Class(nil,function(state, ctrl)
                 ctrl:get_presentation():tile_bump(tile.group, temp.group)
 
                 if hint_tiles and hint_tiles[1] ~= tile and hint_tiles[2] ~= tile then
-                    hint_tiles[1].focus.green.opacity = 0
-                    hint_tiles[2].focus.green.opacity = 0
+                    hint_tiles[1]:hide_green()
+                    hint_tiles[2]:hide_green()
                 end
 
                 last_tiles = {tile, selected_tile}
@@ -428,16 +429,21 @@ GameState = Class(nil,function(state, ctrl)
                 state:find_top_tiles()
                 state:find_matching_tiles()
             elseif tile == selected_tile then
-                selected_tile.focus.green.opacity = 0
+                selected_tile:hide_green()
                 game_menu:remove_tile_images()
                 selected_tile = nil
             else
+                tile:show_yellow()
                 tile.focus.yellow.opacity = 50
+                tile:show_red()
                 tile.focus.red.opacity = 255
                 mediaplayer:play_sound("assets/audio/match-bad.mp3")
                 local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
                 gameloop:add(tile.focus.red, 200, nil, interval, 
-                    function() tile.focus.yellow.opacity = 255 end)
+                    function()
+                        tile.focus.yellow.opacity = 255
+                        tile:hide_red()
+                    end)
             end
         end
     end

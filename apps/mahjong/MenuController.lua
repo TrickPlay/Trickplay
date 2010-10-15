@@ -96,7 +96,6 @@ MenuController = Class(Controller,function(self, view, ...)
             end
             direction = Directions.DOWN
             view:move_layout(current_layout, Directions.UP)
-            view:change_layout(current_layout, Directions.UP)
         end
     Choose_Map[Directions.DOWN] =
         function()
@@ -109,7 +108,6 @@ MenuController = Class(Controller,function(self, view, ...)
             end
             direction = Directions.UP
             view:move_layout(current_layout, Directions.DOWN)
-            view:change_layout(current_layout, Directions.DOWN)
         end
     Choose_Map[Directions.LEFT] = Show_Options
     Choose_Map[Directions.RIGHT] = Choose_Tile

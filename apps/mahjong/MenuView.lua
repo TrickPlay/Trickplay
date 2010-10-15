@@ -234,48 +234,8 @@ MenuView = Class(View, function(view, model, ...)
     function get_score() return score_text.extra.score end
 
 
----------- View Mutators ----------------------------
-
-
-    function change_theme(number)
-        assert(number > 0 and number <= 3, "number must be between 0 and 3")
-        -- buttons
-
-        -- menu bar
-        for i,v in ipairs(menu_bars) do
-            if i == number then menu_bars[i].opacity = 255
-            else menu_bars[i].opacity = 0
-            end
-        end
-
-    end
-
-    function view:change_auto_hide()
-        view.auto_hide_menu = not view.auto_hide_menu
-
-        if view.auto_hide_menu then checkmarks.auto_hide.opacity = 255
-        else checkmarks.auto_hide.opacity = 0
-        end
-    end
-
-
 ---------- Extra Animations ------------------------
 
-
-    add_to_key_handler(keys.o, function()
-        local intervals = nil
-        if menu_options.x == menu_open_x then
-            intervals ={
-                ["x"] = Interval(menu_options.x, menu_closed_x)
-            }
-        else
-            intervals ={
-                ["x"] = Interval(menu_options.x, menu_open_x)
-            }
-        end
-
-        gameloop:add(menu_options, 400, nil, intervals)
-    end)
 
     function view:add_tile_image(tile_image, tile_glyph)
         assert(tile_image)
@@ -353,10 +313,13 @@ MenuView = Class(View, function(view, model, ...)
     end
 
     function view:move_layout(current_layout, dir)
+        local change_layout = true
+
         if not dir then dir = controller:get_direction() end
         if not current_layout then
             current_layout = controller:get_last_layout()
             controller:restore_layout_indicator()
+            change_layout = false
         end
 
         local interval = nil
@@ -368,6 +331,9 @@ MenuView = Class(View, function(view, model, ...)
                     if current_layout == Layouts.LAST then
                         layout_strip.y = -layout_strip_image.height*.75
                     end
+                    if change_layout then
+                        view:change_layout(current_layout, dir)
+                    end
                 end)
         elseif 1 == dir[2] then
             interval = {["y"] = Interval(layout_strip.y, layout_strip.y - 
@@ -376,6 +342,9 @@ MenuView = Class(View, function(view, model, ...)
                 function()
                     if current_layout == 1 then
                         layout_strip.y = 0
+                    end
+                    if change_layout then
+                        view:change_layout(current_layout, dir)
                     end
                 end)
         else
