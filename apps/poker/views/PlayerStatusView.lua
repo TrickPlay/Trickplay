@@ -54,6 +54,8 @@ function(self, model, args, player,...)
       self.title.position = { self.top.w/2, self.top.h/2 }
    end
    self.title.text = "Player "..player.number
+   self.title.anchor_point = { self.title.w/2, self.title.h/2 }
+   self.title.position = { self.top.w/2, self.top.h/2 }
 
    self.action = Text{ font = PLAYER_ACTION_FONT, color = Colors.BLACK, text = GET_IMIN_STRING()}
    self.action.on_text_changed = function()
@@ -85,6 +87,8 @@ function(self, model, args, player,...)
    function self:update(text)
       --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
       self.title.text = "Player "..player.number.."  $"..self.player.money
+      self.title.anchor_point = { self.title.w/2, self.title.h/2 }
+      self.title.position = { self.top.w/2, self.top.h/2 }
       
       if text then
          self.action.text = text 
