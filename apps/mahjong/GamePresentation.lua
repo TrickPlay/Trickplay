@@ -127,9 +127,9 @@ function(pres, ctrl)
 
         if game:get_state():must_restart() then return end
         if comp ~= Components.GAME then
-            grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 0
+            grid[selector.x][selector.y][selector.z]:hide_yellow()
         else
-            grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 255
+            grid[selector.x][selector.y][selector.z]:show_yellow()
         end
     end
 
@@ -139,9 +139,9 @@ function(pres, ctrl)
 
         local grid = ctrl:get_grid()
         if prev_selector then
-            grid[prev_selector.x][prev_selector.y][prev_selector.z].focus.yellow.opacity = 0
+            grid[prev_selector.x][prev_selector.y][prev_selector.z]:hide_yellow()
         end
-        grid[selector.x][selector.y][selector.z].focus.yellow.opacity = 255
+        grid[selector.x][selector.y][selector.z]:show_yellow()
 
         local position = Utils.deepcopy(GridPositions[selector.x][selector.y][selector.z])
     end
@@ -371,8 +371,8 @@ function(pres, ctrl)
     end
 
     function pres:show_undo(last_tiles)
-        last_tiles[1]:set_green()
-        last_tiles[2]:set_green()
+        last_tiles[1]:show_green()
+        last_tiles[2]:show_green()
         local interval_1 = {["opacity"] = Interval(255, 0)}
         local interval_2 = {["opacity"] = Interval(255, 0)}
 

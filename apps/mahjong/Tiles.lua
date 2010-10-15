@@ -85,13 +85,9 @@ tile_shadow = Image{
     src = "assets/tiles/shadow.png",
 --    opacity = 0
 }
-local sparkle = Image{
-    src="assets/tiles/Sparkle.png",
-    opacity = 0
-}
 screen:add(
     tile_depth, tile_highlight_yellow, tile_highlight_green, tile_highlight_red,
-    sparkle, tile_shadow
+    tile_shadow
 )
 
 Tile = Class(function(tile, suit, number, ...)
@@ -102,9 +98,9 @@ Tile = Class(function(tile, suit, number, ...)
     end
     
     tile.images = {
-        Clone{source = tiles[1], opacity = 0},
+        Clone{source = tiles[1]},
         Clone{source = tiles[2]},
-        Clone{source = tiles[3], opacity = 0}
+        Clone{source = tiles[3]}
     }
 
     tile.shadow = Clone{source = tile_shadow, position={8,10}, opacity = 178}
@@ -117,8 +113,6 @@ Tile = Class(function(tile, suit, number, ...)
         yellow = Clone{source = tile_highlight_yellow, x = -21, y = -27, opacity = 0}
     }
     tile.depth = Clone{source = tile_depth}
-    tile.sparkle = Clone{source = sparkle, opacity = 0}
-    tile.sparkle.clip = {0, 0, tile.sparkle.width/5, tile.sparkle.height}
 
     tile.number = number
     tile.suit = suit
@@ -135,11 +129,14 @@ Tile = Class(function(tile, suit, number, ...)
     tile.group:add(unpack(tile.images))
     tile.group:add(
         tile.depth, tile.focus.green, tile.focus.yellow,
-        tile.focus.red, tile.glyph, tile.sparkle, shadow
+        tile.focus.red, tile.glyph
     )
 
     TILE_HEIGHT = tile.images[1].height
     TILE_WIDTH = tile.images[1].width
+
+    tile.images[1]:hide()
+    tile.images[3]:hide()
 
     function tile:is_a_match(match)
         if tile == match then return false end
@@ -161,8 +158,8 @@ Tile = Class(function(tile, suit, number, ...)
         end
 
         for i,image in pairs(tile.images) do
-            if i == number then image.opacity = 255
-            else image.opacity = 0
+            if i == number then image:show()
+            else image:hide()
             end
         end
     end
@@ -177,15 +174,45 @@ Tile = Class(function(tile, suit, number, ...)
     end
 
     function tile:focus_reset()
+        self.focus.red:hide()
+        self.focus.yellow:hide()
+        self.focus.green:hide()
         self.focus.red.opacity = 0
         self.focus.yellow.opacity = 0
         self.focus.green.opacity = 0
     end
 
-    function tile:set_green()
+    function tile:show_green()
         tile.focus.green.opacity = 220
+        tile.focus.green:show()
     end
-    
+
+    function tile:hide_green()
+        tile.focus.green.opacity = 0
+        tile.focus.green:hide()
+    end
+
+    function tile:show_red()
+        tile.focus.red.opacity = 255
+        tile.focus.red:show()
+    end
+
+    function tile:hide_red()
+        tile.focus.red.opacity = 0
+        tile.focus.red:hide()
+    end
+
+    function tile:show_yellow()
+        tile.focus.yellow.opacity = 255
+        tile.focus.yellow:show()
+    end
+
+    function tile:hide_yellow()
+        tile.focus.yellow.opacity = 0
+        tile.focus.yellow:hide()
+    end
+
+
 end)
 
 Tiles = Class(function(self, ...)
