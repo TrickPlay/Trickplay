@@ -2,7 +2,11 @@ Layouts = {
     CUBE = 1,
     CLUB = 2,
     ARENA = 3,
-    TURTLE = 4
+    TURTLE = 4,
+    CROWN = 5,
+    BULB = 6,
+    ANCHOR = 7,
+    FISH = 8
 }
 --[[
 Layouts = {
@@ -18,12 +22,16 @@ for _,__ in pairs(Layouts) do
     Layouts.LAST = Layouts.LAST + 1
 end
 
-NUMBER_OF_TILES = {80, 144, 144, 144, 64}
+NUMBER_OF_TILES = {80, 144, 144, 144, 116, 144, 98, 144}
 LAYOUT_NAMES = {
     [Layouts.CUBE] = "Cube (Hard)",
     [Layouts.CLUB] = "Club (Normal)",
     [Layouts.ARENA] = "Arena (Easy)",
-    [Layouts.TURTLE] = "Turtle (Classic)"
+    [Layouts.TURTLE] = "Turtle (Classic)",
+    [Layouts.CROWN] = "Crown (Easy)",
+    [Layouts.BULB] = "Light Bulb (Normal)",
+    [Layouts.ANCHOR] = "Anchor (Easy)",
+    [Layouts.FISH] = "Fish (Easy)"
 }
 
 local layout_functions = {
@@ -441,7 +449,353 @@ local layout_functions = {
         end
 
         return grid
-    end
+    end,
+
+    [Layouts.CROWN] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        for k = 1,2 do
+            -- top
+            grid[8][1][k] = tiles[index]
+            index = index + 1
+            grid[15][1][k] = tiles[index]
+            index = index + 1
+            grid[22][1][k] = tiles[index]
+            index = index + 1
+            grid[9][3][k] = tiles[index]
+            index = index + 1
+            grid[11][3][k] = tiles[index]
+            index = index + 1
+            grid[14][3][k] = tiles[index]
+            index = index + 1
+            grid[16][3][k] = tiles[index]
+            index = index + 1
+            grid[19][3][k] = tiles[index]
+            index = index + 1
+            grid[21][3][k] = tiles[index]
+            index = index + 1
+
+            for i = 10,20,2 do
+                grid[i][5][k] = tiles[index]
+                index = index + 1
+            end
+            for i = 11,19,2 do
+                grid[i][7][k] = tiles[index]
+                index = index + 1
+            end
+
+            --right
+            grid[21][9][k] = tiles[index]
+            index = index + 1
+            grid[28][9][k] = tiles[index]
+            index = index + 1
+            grid[17][11][k] = tiles[index]
+            index = index + 1
+            grid[20][11][k] = tiles[index]
+            index = index + 1
+            grid[22][11][k] = tiles[index]
+            index = index + 1
+            grid[25][11][k] = tiles[index]
+            index = index + 1
+            grid[27][11][k] = tiles[index]
+            index = index + 1
+
+            for i = 16,26,2 do
+                grid[i][13][k] = tiles[index]
+                index = index + 1
+            end
+            for i = 17,25,2 do
+                grid[i][15][k] = tiles[index]
+                index = index + 1
+            end
+
+            --left
+            grid[2][9][k] = tiles[index]
+            index = index + 1
+            grid[9][9][k] = tiles[index]
+            index = index + 1
+            grid[15][9][k] = tiles[index]
+            index = index + 1
+            grid[3][11][k] = tiles[index]
+            index = index + 1
+            grid[5][11][k] = tiles[index]
+            index = index + 1
+            grid[8][11][k] = tiles[index]
+            index = index + 1
+            grid[10][11][k] = tiles[index]
+            index = index + 1
+            grid[13][11][k] = tiles[index]
+            index = index + 1
+            grid[15][11][k] = tiles[index]
+            index = index + 1
+
+            for i = 4,14,2 do
+                grid[i][13][k] = tiles[index]
+                index = index + 1
+            end
+            for i = 5,13,2 do
+                grid[i][15][k] = tiles[index]
+                index = index + 1
+            end
+        end
+
+        return grid
+    end,
+
+    [Layouts.BULB] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        grid[13][1][1] = tiles[index]
+        index = index + 1
+        grid[15][1][1] = tiles[index]
+        index = index + 1
+
+        grid[12][3][1] = tiles[index]
+        index = index + 1
+        grid[14][3][1] = tiles[index]
+        index = index + 1
+        grid[16][3][1] = tiles[index]
+        index = index + 1
+
+        for i = 10,18,2 do
+            for j = 5,7,2 do
+                grid[i][j][1] = tiles[index]
+                index = index + 1
+            end
+        end
+
+        return grid
+    end,
+
+    [Layouts.ANCHOR] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+       
+        for k = 1,3 do
+            -- left side
+            grid[2][6][k] = tiles[index]
+            index = index + 1
+            grid[1][8][k] = tiles[index]
+            index = index + 1
+            grid[3][8][k] = tiles[index]
+            index = index + 1
+            grid[2][10][k] = tiles[index]
+            index = index + 1
+            grid[3][12][k] = tiles[index]
+            index = index + 1
+            grid[5][13][k] = tiles[index]
+            index = index + 1
+            grid[7][14][k] = tiles[index]
+            index = index + 1
+            grid[9][15][k] = tiles[index]
+            index = index + 1
+            grid[11][15][k] = tiles[index]
+            index = index + 1
+            -- center
+            for j = 6,16,2 do
+                grid[13][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[9][7][k] = tiles[index]
+            index = index + 1
+            grid[11][7][k] = tiles[index]
+            index = index + 1
+            grid[15][7][k] = tiles[index]
+            index = index + 1
+            grid[17][7][k] = tiles[index]
+            index = index + 1
+            -- right side
+            grid[24][6][k] = tiles[index]
+            index = index + 1
+            grid[25][8][k] = tiles[index]
+            index = index + 1
+            grid[23][8][k] = tiles[index]
+            index = index + 1
+            grid[24][10][k] = tiles[index]
+            index = index + 1
+            grid[23][12][k] = tiles[index]
+            index = index + 1
+            grid[21][13][k] = tiles[index]
+            index = index + 1
+            grid[19][14][k] = tiles[index]
+            index = index + 1
+            grid[17][15][k] = tiles[index]
+            index = index + 1
+            grid[15][15][k] = tiles[index]
+            index = index + 1
+        end
+        
+        for k = 1,2 do
+            grid[7][8][k] = tiles[index]
+            index = index + 1
+            grid[19][8][k] = tiles[index]
+            index = index + 1
+            for j = 2,4,2 do
+                grid[11][j][k] = tiles[index]
+                index = index + 1
+                grid[15][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[13][1][k] = tiles[index]
+            index = index + 1
+        end
+        
+        return grid
+    end,
+
+    [Layouts.FISH] = function(tiles)
+        local index = 1
+        local grid = {}
+        for i = 1,GRID_WIDTH do
+            grid[i] = {}
+            for j = 1,GRID_HEIGHT do
+                grid[i][j] = {}
+            end
+        end
+
+        -- top fish built from left to right
+        for k = 1,2 do
+            grid[3][4][k] = tiles[index]
+            index = index + 1
+            for j = 3,7,2 do
+                grid[5][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[7][2][k] = tiles[index]
+            index = index + 1
+            grid[7][6][k] = tiles[index]
+            index = index + 1
+            grid[7][8][k] = tiles[index]
+            index = index + 1
+            for j = 1,9,2 do
+                grid[9][j][k] = tiles[index]
+                index = index + 1
+            end
+            for j = 2,8,2 do
+                grid[11][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[13][2][k] = tiles[index]
+            index = index + 1
+            grid[13][4][k] = tiles[index]
+            index = index + 1
+            grid[13][8][k] = tiles[index]
+            index = index + 1
+            for j = 3,7,2 do
+                grid[15][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[17][4][k] = tiles[index]
+            index = index + 1
+            grid[17][6][k] = tiles[index]
+            index = index + 1
+            grid[19][5][k] = tiles[index]
+            index = index + 1
+            grid[21][4][k] = tiles[index]
+            index = index + 1
+            grid[21][6][k] = tiles[index]
+            index = index + 1
+            grid[23][3][k] = tiles[index]
+            index = index + 1
+            grid[23][7][k] = tiles[index]
+            index = index + 1
+            grid[25][2][k] = tiles[index]
+            index = index + 1
+            grid[25][8][k] = tiles[index]
+            index = index + 1
+        end
+        grid[1][5][1] = tiles[index]
+        index = index + 1
+        grid[3][6][1] = tiles[index]
+        index = index + 1
+        grid[13][6][1] = tiles[index]
+        index = index + 1
+        grid[23][5][1] = tiles[index]
+        index = index + 1
+
+        --bottom fish
+        for k = 1,2 do
+            grid[3][10][k] = tiles[index]
+            index = index + 1
+            grid[5][11][k] = tiles[index]
+            index = index + 1
+            grid[7][12][k] = tiles[index]
+            index = index + 1
+            grid[9][13][k] = tiles[index]
+            index = index + 1
+            grid[7][14][k] = tiles[index]
+            index = index + 1
+            grid[5][15][k] = tiles[index]
+            index = index + 1
+            grid[3][16][k] = tiles[index]
+            index = index + 1
+            
+            grid[11][12][k] = tiles[index]
+            index = index + 1
+            grid[11][14][k] = tiles[index]
+            index = index + 1
+            for j = 11,15,2 do
+                grid[13][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[15][10][k] = tiles[index]
+            index = index + 1
+            grid[15][12][k] = tiles[index]
+            index = index + 1
+            grid[15][16][k] = tiles[index]
+            index = index + 1
+            for j = 10,16,2 do
+                grid[17][j][k] = tiles[index]
+                index = index + 1
+            end
+            for j = 9,17,2 do
+                grid[19][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[21][10][k] = tiles[index]
+            index = index + 1
+            grid[21][14][k] = tiles[index]
+            index = index + 1
+            grid[21][16][k] = tiles[index]
+            index = index + 1
+            for j = 11,15,2 do
+                grid[23][j][k] = tiles[index]
+                index = index + 1
+            end
+            grid[25][12][k] = tiles[index]
+            index = index + 1
+        end
+        grid[27][13][1] = tiles[index]
+        index = index + 1
+        grid[25][14][1] = tiles[index]
+        index = index + 1
+        grid[5][13][1] = tiles[index]
+        index = index + 1
+        grid[15][14][1] = tiles[index]
+        index = index + 1
+
+        return grid
+    end,
 }
 
 Layout = Class(function(layout, number, tiles_class, ...)
