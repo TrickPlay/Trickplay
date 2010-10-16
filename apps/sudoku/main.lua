@@ -53,6 +53,7 @@ arrow_down_on
 screen:add(unpack(arrows))
 local red_is_on = true
 local red_board = Group{}
+local red_board2 = Group{}
 local red_blox = 
 {
 	{
@@ -72,55 +73,56 @@ local red_blox =
 	}
 }
 for i = 1,#red_blox do    for j=1,#red_blox[i] do
-
-		red_blox[i][j]:add(Clone{source=red})
+		red_board2:add(Clone{name="3x3 "..i.." "..j,source=red,x=(i-1)*(red.w+30),y=(j-1)*(red.h+30)})
+		--red_blox[i][j]:add(Clone{source=red})
 
 end                        end
 
 local blue_board = Group{}
+local blue_board2 = Group{}
 local blue_blox = 
 {
 	{
 		Group{opacity = 0},
-		Group{opacity = 0, x= blue.w   + 30},
-		Group{opacity = 0, x= blue.w*2 + 30*2}
+		Group{opacity = 0, x= blue.w   + 30,z=1},
+		Group{opacity = 0, x= blue.w*2 + 30*2,z=1}
 	},
 	{
-		Group{opacity = 0,                     y= blue.h   + 30},
-		Group{opacity = 0, x= blue.w   + 30,   y= blue.h   + 30},
-		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30}
+		Group{opacity = 0,                     y= blue.h   + 30,z=1},
+		Group{opacity = 0, x= blue.w   + 30,   y= blue.h   + 30,z=1},
+		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30,z=1}
 	},
 	{
-		Group{opacity = 0,                     y= blue.h*2 + 30*2},
-		Group{opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2},
-		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2}
+		Group{opacity = 0,                     y= blue.h*2 + 30*2,z=1},
+		Group{opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2,z=1},
+		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2,z=1}
 	}
 }
 for i = 1,#blue_blox do    for j=1,#blue_blox[i] do
-
-		blue_blox[i][j]:add(Clone{source=blue})
+		blue_board2:add(Clone{name="3x3 "..i.." "..j,source=blue,x=(i-1)*(blue.w+30),y=(j-1)*(blue.h+30),opacity=0})
+		--blue_blox[i][j]:add(Clone{source=blue})
 
 end                        end
+local selector = Image{src="assets/board-focus.png",opacity=0}
+selector.anchor_point = {selector.w/2,selector.h/2}
 
 --local bg_red  = Image{src="assets/bg_red.jpg"}
 --local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
 local top_left_logo =  Image{src="assets/logo.png",x=40,y=35,opacity=0}
-screen:add(--[[bg_red,bg_blue,]]red_board,blue_board, top_left_logo)
+screen:add(--[[bg_red,bg_blue,]]red_board2,blue_board2,selector,red_board,blue_board, top_left_logo)
 for i=1,3 do
 	blue_board:add( unpack(blue_blox[i]) )
 	red_board:add(  unpack( red_blox[i]) )
 end
-red_board.anchor_point  = {  red_board.w/2,  red_board.h/2 }
+red_board.anchor_point  = {  red_board2.w/2,  red_board2.h/2 }
 red_board.position      = {     screen.w/2,     screen.h/2 }
-blue_board.anchor_point = { blue_board.w/2, blue_board.h/2 }
+blue_board.anchor_point = { blue_board2.w/2, blue_board2.h/2 }
 blue_board.position     = {     screen.w/2,     screen.h/2 }
-local selector = Image{src="assets/board-focus.png",opacity=0}
-selector.anchor_point = {selector.w/2,selector.h/2}
-screen:add(
-	--Image{src="assets/background.jpg"}, 
-	--Image{src="assets/board.png"},
-	selector
-)
+
+red_board2.anchor_point  = {  red_board2.w/2,  red_board2.h/2 }
+red_board2.position      = {     screen.w/2,     screen.h/2 }
+blue_board2.anchor_point = { blue_board2.w/2, blue_board2.h/2 }
+blue_board2.position     = {     screen.w/2,     screen.h/2 }
 
 
 --sparkle:add(sparkle_base)
@@ -365,6 +367,9 @@ right_list = {
 			dolater(flip_board)
 			win_txt:unparent()
 			won = false
+			right_list[3].group:find_child("text").text = "Show Errors"
+			right_list[3].group:find_child("text_s").text = "Show Errors"
+			yellow_light.opacity = 0
 			--game:restart() 
 			--restore_keys()
 		end)
@@ -406,6 +411,9 @@ local left_list =
 			dolater(flip_board)
 			win_txt:unparent()
 			won = false
+			right_list[3].group:find_child("text").text = "Show Errors"
+			right_list[3].group:find_child("text_s").text = "Show Errors"
+			yellow_light.opacity = 0
 			--restore_keys()
 		end),
 
@@ -458,21 +466,29 @@ function flip_board()
 	}
 	save(timeline)
 	local stopwatch = Stopwatch()
-	local old_board, new_board, old_bg, new_bg
+	local old_board, new_board, old_bg, new_bg,old_group,new_group
 	
 	--function timeline.on_started()
 		if red_is_on then
-			old_board =  red_blox
-			new_board = blue_blox
-			old_bg    =    red_bg
-			new_bg    =   blue_bg
+			old_group =  red_board2
+			new_group = blue_board2
+			old_board =   red_blox
+			new_board =  blue_blox
+			old_bg    =     red_bg
+			new_bg    =    blue_bg
 		else
+			old_group = blue_board2
+			new_group =  red_board2
 			old_board = blue_blox
 			new_board =  red_blox
 			old_bg    =   blue_bg
 			new_bg    =    red_bg
 		end
+
 		for r = 1,3 do for c = 1,3 do
+			new_group:find_child("3x3 "..r.." "..c).y_rotation =
+				{-180, new_board[r][c].w/2,0}
+
 			new_board[r][c].y_rotation = {-180,new_board[r][c].w/2,0}
 		end            end
 
@@ -494,7 +510,10 @@ end
 				
 		local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
 		local degrees_old, degrees_new
+		local old_tile,    new_tile
 		for r = 1,3 do   for c = 1,3 do
+			old_tile = old_group:find_child("3x3 "..r.." "..c)
+			new_tile = new_group:find_child("3x3 "..r.." "..c)
 
 			--flipping stage 1
 			-- the old board tiles rotate from    0 - 90
@@ -519,6 +538,11 @@ end
 			end					
 			degrees_new = degrees_old - 180
 
+			old_tile.y_rotation = { degrees_old, 
+				old_tile.w/2, 0 }
+			new_tile.y_rotation = { degrees_new, 
+				new_tile.w/2, 0 }
+
 			old_board[r][c].y_rotation = { degrees_old, 
 				old_board[r][c].w/2, 0 }
 			new_board[r][c].y_rotation = { degrees_new, 
@@ -526,20 +550,33 @@ end
 
 			if degrees_old <  135 and degrees_old >  45 then
 				old_board[r][c].opacity = 255 * (1- (degrees_old - 45)/90)
+				old_tile.opacity = 255 * (1- (degrees_old - 45)/90)
 			elseif degrees_old > 135 then
 				old_board[r][c].opacity = 0
+				old_tile.opacity = 0
 			end
 			if degrees_new > -135 and degrees_new < -45 then
 				new_board[r][c].opacity = 255* (degrees_new - 45)/90
+				new_tile.opacity = 255* (degrees_new - 45)/90
 			elseif degrees_new > -45 then
 				new_board[r][c].opacity = 255
+				new_tile.opacity = 255
 			end
 
 		end		end
 
 	end
 	function timeline.on_completed()
+		local old_tile,    new_tile
+
 		for r = 1,3 do   for c = 1,3 do
+			old_tile = old_group:find_child("3x3 "..r.." "..c)
+			new_tile = new_group:find_child("3x3 "..r.." "..c)
+
+			old_tile.y_rotation = { 180, old_tile.w/2, 0 }
+			new_tile.y_rotation = {   0, new_tile.w/2, 0 }
+			old_tile.opacity =   0
+			new_tile.opacity = 255
 
 			old_board[r][c].y_rotation = { 180, old_board[r][c].w/2, 0 }
 			new_board[r][c].y_rotation = {   0, new_board[r][c].w/2, 0 }
@@ -551,14 +588,14 @@ end
 		if red_is_on then 
 			for r = 1,3 do   for c = 1,3 do
 				red_blox[r][c]:clear()
-				red_blox[r][c]:add(Clone{source=red})
+				--red_blox[r][c]:add(Clone{source=red})
 			end              end
 			
 			red_is_on = false 
 		else 
 			for r = 1,3 do   for c = 1,3 do
 				blue_blox[r][c]:clear()
-				blue_blox[r][c]:add(Clone{source=blue})
+				--blue_blox[r][c]:add(Clone{source=blue})
 			end              end
 
 			red_is_on = true 
@@ -581,6 +618,15 @@ end
 
 local num_font = "DejaVu Bold Condensed 30px"
 local pencil_menu = Group{y=40,opacity=0,z=1}
+local p_m_button_on = Image{src="assets/button_on.png",y=60,x=105,opacity=0}
+local p_m_button_off = Image{src="assets/button_off.png",y=60,x=105,opacity=0}
+screen:add(p_m_button_on,p_m_button_off)
+local clear_txt = Text{ name="clear", text="Clear",font="DejaVu 36px",color="FFFFFF"}
+clear_txt.anchor_point = {clear_txt.w/2,clear_txt.h/2}
+clear_txt.position     = {105+p_m_button_on.w/2,60+p_m_button_on.h/2}
+local done_txt = Text{ name="done", text="Done",font="DejaVu 36px",color="FFFFFF"}
+done_txt.anchor_point = {done_txt.w/2,done_txt.h/2}
+done_txt.position     = {215+p_m_button_on.w/2,60+p_m_button_on.h/2}
 function p_x(i) return 24*i+80 end
 pencil_menu:add(
 	Image{name="bg_up",src="assets/pencil-menu-up.png"},
@@ -594,13 +640,15 @@ pencil_menu:add(
 	Text{name="7",text="7",font=num_font,color="FFFFFF",x=p_x(7),y=25},
 	Text{name="8",text="8",font=num_font,color="FFFFFF",x=p_x(8),y=25},
 	Text{name="9",text="9",font=num_font,color="FFFFFF",x=p_x(9),y=25},
-	Image{name="clear_on",  src="assets/button_on.png",y=60,x=105},
-	Image{name="clear_off", src="assets/button_off.png",y=60,x=105},
-	Text{ name="clear",     text="Clear",font="DejaVu 40px",color="FFFFFF",y=67,x=125},
-	Image{name="done_on",   src="assets/button_on.png",y=60,x=215},
-	Image{name="done_off",  src="assets/button_off.png",y=60,x=215},
-	Text{ name="done",      text="Done",font="DejaVu 40px",color="FFFFFF",y=67,x=235}
+	Clone{name="clear_on",  source= p_m_button_on,  y=60,x=105,opacity=255},
+	Clone{name="clear_off", source= p_m_button_off, y=60,x=105,opacity=255},
+	clear_txt,
+	Clone{name="done_on",  source= p_m_button_on,  y=60,x=215,opacity=255},
+	Clone{name="done_off", source= p_m_button_off, y=60,x=215,opacity=255},
+	done_txt
 )
+screen:add(pencil_menu)
+
 --[[
 local clock_sec = 50
 local clock_min = 59
@@ -644,7 +692,6 @@ function clock:on_timer()
 	clock_txt.text = base
 end
 --]]
-screen:add(pencil_menu)
 
 
 
