@@ -29,6 +29,7 @@ local timer = Timer()
 timer.interval = 7000
 timer.on_timer = function(timer)
     timer:stop()
+    screen.on_key_down = nil
     timer.on_timer = nil
 
     mediaplayer:play_sound("assets/audio/start-sound.mp3")
