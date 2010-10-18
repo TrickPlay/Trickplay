@@ -4,9 +4,8 @@ Layouts = {
     ARENA = 3,
     TURTLE = 4,
     CROWN = 5,
-    BULB = 6,
-    ANCHOR = 7,
-    FISH = 8
+    ANCHOR = 6,
+    FISH = 7
 }
 --[[
 Layouts = {
@@ -22,14 +21,23 @@ for _,__ in pairs(Layouts) do
     Layouts.LAST = Layouts.LAST + 1
 end
 
-NUMBER_OF_TILES = {80, 144, 144, 144, 116, 144, 98, 144}
+NUMBER_OF_TILES = {
+    [Layouts.CUBE] = 64,
+    [Layouts.CLUB] = 144,
+    [Layouts.ARENA] = 144,
+    [Layouts.TURTLE] = 144,
+    [Layouts.CROWN] = 116,
+    [Layouts.ANCHOR] = 98,
+    [Layouts.FISH] = 128
+}
+
 LAYOUT_NAMES = {
     [Layouts.CUBE] = "Cube (Hard)",
     [Layouts.CLUB] = "Club (Normal)",
     [Layouts.ARENA] = "Arena (Easy)",
     [Layouts.TURTLE] = "Turtle (Classic)",
     [Layouts.CROWN] = "Crown (Easy)",
-    [Layouts.BULB] = "Light Bulb (Normal)",
+    --[Layouts.BULB] = "Light Bulb (Normal)",
     [Layouts.ANCHOR] = "Anchor (Easy)",
     [Layouts.FISH] = "Fish (Easy)"
 }
@@ -211,105 +219,7 @@ local layout_functions = {
                 end
             end
         end
-
-
-        return grid
-    end,
-    
-    [Layouts.CUBE] = function(tiles)
-        local index = 1
-        local grid = {}
-        for i = 1,GRID_WIDTH do
-            grid[i] = {}
-            for j = 1,GRID_HEIGHT do
-                grid[i][j] = {}
-            end
-        end
-
-        -- Center
-        for i = 13,17,2 do
-            for j = 1,11,2 do
-                for k = 1,2 do
-                    grid[i][j][k] = tiles[index]
-                    index = index + 1
-                end
-            end
-        end
-        -- top left/right side of the top leaf
-        for j = 3,5,2 do
-            for k = 1,2 do
-                grid[11][j][k] = tiles[index]
-                index = index + 1
-                grid[19][j][k] = tiles[index]
-                index = index + 1
-            end
-        end
-        -- Bottom center stuff
-        for k = 1,2 do
-            grid[13][13][k] = tiles[index]
-            index = index + 1
-            grid[17][13][k] = tiles[index]
-            index = index + 1
-        end
-        -- Very Bottom stuff
-        for i = 13,17,2 do
-            for k = 1,2 do
-                grid[i][15][k] = tiles[index]
-                index = index + 1
-            end
-        end
-        for k = 1,2 do
-            grid[15][13][k] = tiles[index]
-            index = index + 1
-        end
-        -- Left/Right leaves
-        -- center part of the left/right leafs
-        for i = 5,9,2 do
-            for j = 7,13,2 do
-                for k = 1,2 do
-                    grid[i][j][k] = tiles[index]
-                    index = index + 1
-                    grid[i+16][j][k] = tiles[index]
-                    index = index + 1
-                end
-            end
-        end
-        -- most left/right tiles
-        for j = 9,11,2 do
-            for k = 1,2 do
-                grid[3][j][k] = tiles[index]
-                index = index + 1
-                grid[19][j][k] = tiles[index]
-                index = index + 1
-            end
-        end
-        -- right/left side tiles on the left/right leaf
-        for j = 9,11,2 do
-            for k = 1,2 do
-                grid[11][j][k] = tiles[index]
-                index = index + 1
-                grid[27][j][k] = tiles[index]
-                index = index + 1
-            end
-        end
-        -- Top Layers
-        -- left/center/right
-        for i = 6,8,2 do
-            for j = 9,11,2 do
-                for k = 3,4 do
-                    -- left
-                    grid[i][j][k] = tiles[index]
-                    index = index + 1
-                    -- center
-                    grid[i+8][j-7][k] = tiles[index]
-                    index = index + 1
-                    -- right
-                    grid[i+16][j][k] = tiles[index]
-                    index = index + 1
-                end
-            end
-        end
-
+        print("index",index)
 
         return grid
     end,
@@ -378,6 +288,7 @@ local layout_functions = {
         grid[17][12][1] = tiles[index]
         index = index + 1
 
+        print("index",index)
         return grid
     end,
 --[[
@@ -448,6 +359,7 @@ local layout_functions = {
             end
         end
 
+        print("index",index)
         return grid
     end,
 
@@ -546,9 +458,10 @@ local layout_functions = {
             end
         end
 
+        print("index",index)
         return grid
     end,
-
+--[[
     [Layouts.BULB] = function(tiles)
         local index = 1
         local grid = {}
@@ -580,7 +493,7 @@ local layout_functions = {
 
         return grid
     end,
-
+--]]
     [Layouts.ANCHOR] = function(tiles)
         local index = 1
         local grid = {}
@@ -660,6 +573,7 @@ local layout_functions = {
             index = index + 1
         end
         
+        print("index",index)
         return grid
     end,
 
@@ -675,125 +589,126 @@ local layout_functions = {
 
         -- top fish built from left to right
         for k = 1,2 do
-            grid[3][4][k] = tiles[index]
+            grid[3][3][k] = tiles[index]
             index = index + 1
-            for j = 3,7,2 do
+            for j = 2,6,2 do
                 grid[5][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[7][2][k] = tiles[index]
+            grid[7][1][k] = tiles[index]
             index = index + 1
-            grid[7][6][k] = tiles[index]
+            grid[7][5][k] = tiles[index]
             index = index + 1
-            grid[7][8][k] = tiles[index]
+            grid[7][7][k] = tiles[index]
             index = index + 1
-            for j = 1,9,2 do
+            for j = 1,7,2 do
                 grid[9][j][k] = tiles[index]
                 index = index + 1
             end
-            for j = 2,8,2 do
+            for j = 1,7,2 do
                 grid[11][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[13][2][k] = tiles[index]
+            grid[13][1][k] = tiles[index]
             index = index + 1
-            grid[13][4][k] = tiles[index]
+            grid[13][3][k] = tiles[index]
             index = index + 1
-            grid[13][8][k] = tiles[index]
+            grid[13][7][k] = tiles[index]
             index = index + 1
-            for j = 3,7,2 do
+            for j = 2,6,2 do
                 grid[15][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[17][4][k] = tiles[index]
+            grid[17][3][k] = tiles[index]
             index = index + 1
-            grid[17][6][k] = tiles[index]
+            grid[17][5][k] = tiles[index]
             index = index + 1
-            grid[19][5][k] = tiles[index]
+            grid[19][4][k] = tiles[index]
             index = index + 1
-            grid[21][4][k] = tiles[index]
+            grid[21][3][k] = tiles[index]
             index = index + 1
-            grid[21][6][k] = tiles[index]
+            grid[21][5][k] = tiles[index]
             index = index + 1
-            grid[23][3][k] = tiles[index]
+            grid[23][2][k] = tiles[index]
             index = index + 1
-            grid[23][7][k] = tiles[index]
+            grid[23][6][k] = tiles[index]
             index = index + 1
-            grid[25][2][k] = tiles[index]
+            grid[25][1][k] = tiles[index]
             index = index + 1
-            grid[25][8][k] = tiles[index]
+            grid[25][7][k] = tiles[index]
             index = index + 1
         end
-        grid[1][5][1] = tiles[index]
+        grid[1][4][1] = tiles[index]
         index = index + 1
-        grid[3][6][1] = tiles[index]
+        grid[3][5][1] = tiles[index]
         index = index + 1
-        grid[13][6][1] = tiles[index]
+        grid[13][5][1] = tiles[index]
         index = index + 1
-        grid[23][5][1] = tiles[index]
+        grid[23][4][1] = tiles[index]
         index = index + 1
 
         --bottom fish
         for k = 1,2 do
-            grid[3][10][k] = tiles[index]
+            grid[3][9][k] = tiles[index]
             index = index + 1
-            grid[5][11][k] = tiles[index]
+            grid[5][10][k] = tiles[index]
             index = index + 1
-            grid[7][12][k] = tiles[index]
+            grid[7][11][k] = tiles[index]
             index = index + 1
-            grid[9][13][k] = tiles[index]
+            grid[9][12][k] = tiles[index]
             index = index + 1
-            grid[7][14][k] = tiles[index]
+            grid[7][13][k] = tiles[index]
             index = index + 1
-            grid[5][15][k] = tiles[index]
+            grid[5][14][k] = tiles[index]
             index = index + 1
-            grid[3][16][k] = tiles[index]
+            grid[3][15][k] = tiles[index]
             index = index + 1
             
-            grid[11][12][k] = tiles[index]
+            grid[11][11][k] = tiles[index]
             index = index + 1
-            grid[11][14][k] = tiles[index]
+            grid[11][13][k] = tiles[index]
             index = index + 1
-            for j = 11,15,2 do
+            for j = 10,14,2 do
                 grid[13][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[15][10][k] = tiles[index]
+            grid[15][9][k] = tiles[index]
             index = index + 1
-            grid[15][12][k] = tiles[index]
+            grid[15][11][k] = tiles[index]
             index = index + 1
-            grid[15][16][k] = tiles[index]
+            grid[15][15][k] = tiles[index]
             index = index + 1
-            for j = 10,16,2 do
+            for j = 9,15,2 do
                 grid[17][j][k] = tiles[index]
                 index = index + 1
             end
-            for j = 9,17,2 do
+            for j = 9,15,2 do
                 grid[19][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[21][10][k] = tiles[index]
+            grid[21][9][k] = tiles[index]
             index = index + 1
-            grid[21][14][k] = tiles[index]
+            grid[21][13][k] = tiles[index]
             index = index + 1
-            grid[21][16][k] = tiles[index]
+            grid[21][15][k] = tiles[index]
             index = index + 1
-            for j = 11,15,2 do
+            for j = 10,14,2 do
                 grid[23][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[25][12][k] = tiles[index]
+            grid[25][11][k] = tiles[index]
             index = index + 1
         end
-        grid[27][13][1] = tiles[index]
+        grid[27][12][1] = tiles[index]
         index = index + 1
-        grid[25][14][1] = tiles[index]
+        grid[25][13][1] = tiles[index]
         index = index + 1
-        grid[5][13][1] = tiles[index]
+        grid[5][12][1] = tiles[index]
         index = index + 1
-        grid[15][14][1] = tiles[index]
+        grid[15][13][1] = tiles[index]
         index = index + 1
-
+        
+        print("index", index)
         return grid
     end,
 }

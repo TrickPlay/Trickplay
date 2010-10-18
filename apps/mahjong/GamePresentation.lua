@@ -52,39 +52,33 @@ function(pres, ctrl)
         local grid = ctrl:get_grid()
         local tile = nil
         local pos = nil
-        if game:get_state():get_current_layout() == Layouts.CROWN 
-        or game:get_state():get_current_layout() == Layouts.ANCHOR then
-            for k = 1,GRID_DEPTH do
-                for j = 1,GRID_HEIGHT do
-                    for i = 1,GRID_WIDTH do
-                        if grid[i][j][k] then
-                            tile = grid[i][j][k]
-                            pos = tile.position
-                            tile.group.position =
-                                Utils.deepcopy(GridPositions[pos[1]][pos[2]][pos[3]])
-                            if tile.group.parent then --necessary for z position
-                                tile.group:unparent()
-                            end
-                            grid_group:add(tile.group)
-                        end
-                    end
+
+        local i
+        local j
+        local temp = 0
+        for k = 1,GRID_DEPTH do
+            temp = 0
+            while temp + 1 <= GRID_WIDTH + GRID_HEIGHT do
+                j = 1
+                i = temp + 1
+                temp = i
+                if i > GRID_WIDTH then
+                    j = j + i - GRID_WIDTH
+                    i = GRID_WIDTH
                 end
-            end
-        else
-            for k = 1,GRID_DEPTH do
-                for i = 1,GRID_WIDTH do
-                    for j = 1,GRID_HEIGHT do
-                        if grid[i][j][k] then
-                            tile = grid[i][j][k]
-                            pos = tile.position
-                            tile.group.position =
-                                Utils.deepcopy(GridPositions[pos[1]][pos[2]][pos[3]])
-                            if tile.group.parent then --necessary for z position
-                                tile.group:unparent()
-                            end
-                            grid_group:add(tile.group)
+                while i >= 1 and j <= GRID_HEIGHT do
+                    if grid[i][j][k] then
+                        tile = grid[i][j][k]
+                        pos = tile.position
+                        tile.group.position =
+                            Utils.deepcopy(GridPositions[pos[1]][pos[2]][pos[3]])
+                        if tile.group.parent then --necessary for z position
+                            tile.group:unparent()
                         end
+                        grid_group:add(tile.group)
                     end
+                    i = i - 1
+                    j = j + 1
                 end
             end
         end
