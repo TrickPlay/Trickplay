@@ -119,11 +119,11 @@ assets =
     water           = Image{ src = "assets/water.png" },
     my_plane_strip  = Image{ src = "assets/myplane_strip3.png" },
     my_bullet       = Image{ src = "assets/bullet.png" },
-    enemy1          = Image{ src = "assets/enemy1_original.png" },
-    enemy2          = Image{ src = "assets/enemy1_palette_8.png" },
-    enemy3          = Image{ src = "assets/enemy1_palette_8_2.png" },
-    enemy4          = Image{ src = "assets/enemy1_palette_10.png" },
-    enemy5          = Image{ src = "assets/enemy1_palette_10_2.png" },
+    enemy1          = Image{ src = "assets/e1_4x_test.png" },
+    enemy2          = Image{ src = "assets/e1_4x_test.png" },
+    enemy3          = Image{ src = "assets/e1_4x_test.png" },
+    enemy4          = Image{ src = "assets/e1_4x_test.png" },
+    enemy5          = Image{ src = "assets/e1_4x_test.png" },
     enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
@@ -293,7 +293,7 @@ water =
                 
             local tile = assets.water
             
-            tile:set{ w = screen.w , tile = { true , false } }
+            --tile:set{ w = screen.w , tile = { false  , false } }
                         
             for i = 1 , math.ceil( screen.h / tile.h ) + 3 do
                    
@@ -314,12 +314,13 @@ water =
                 screen:add( strip )
                 
             end
-            
+
         end,
             
     render =
     
         function( self , seconds )
+
                 
             -- reposition all the water strips
             
@@ -330,9 +331,10 @@ water =
             self.top_y = self.top_y + dy    
             
             for _ , strip in ipairs( self.strips ) do
+
             
                 strip.y = strip.y + dy
-                
+
                 if strip.y > maxy then
                 
                     strip.y = self.top_y - strip.h + 1   
@@ -347,7 +349,9 @@ water =
             
             self.time = self.time + seconds
             
-            if self.time >= self.island_time then
+            if false then
+
+--self.time >= self.island_time then
             
                 self.time = self.time - self.island_time
                 
@@ -710,7 +714,7 @@ end
                         
                         local score =
                             {
-                                speed = 80,
+                                speed = 255,
                                 
                                 text = Clone{ source = assets.score },
                                 
@@ -1325,7 +1329,7 @@ redo_score_text()
 function start_game()
 add_to_render_list( my_plane )
 end
-add_to_render_list( water )
+--add_to_render_list( water )
 
 add_to_render_list( enemies )
 
@@ -1340,16 +1344,47 @@ screen:show()
 -------------------------------------------------------------------------------
 -- Game loop, renders everything in the render list
 
+local c = 0
+local t = 0
+local ma = 0
+local mi = 1000
+local sw = Stopwatch()
+
 function idle.on_idle( idle , seconds )
+
     if not paused then
-    
+
+
+	if false then
+
+		c = c + 1
+		ma = math.max( seconds , ma )
+		mi = math.min( seconds , mi )
+
+		t = t + seconds
+
+		if sw.elapsed >= 1000 then
+	
+			print( mi , ma , t / c , string.format( "%1.0f" , 1 / ( t / c ) ) )
+
+	
+			t = 0
+			c= 0
+			sw:start()
+			ma = 0
+			mi = 1000
+			
+		end
+
+    end
+
         for _ , item in ipairs( render_list ) do
        
             pcall( item.render , item , seconds ) 
 
         end
         
-        process_collisions( )
+--        process_collisions( )
         
     end
     
