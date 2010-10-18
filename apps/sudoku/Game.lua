@@ -147,6 +147,12 @@ function BoardGen(number_of_givens)
 
     return base, solution
 end
+function guess_x(g)
+	return ((g-1)%3-1)*(TILE_WIDTH/4+5)
+end
+function guess_y(g)
+	return (math.floor((g-1)/3)-1)*(TILE_WIDTH/4+5)
+end
 
 function DevelopBoard(grid_of_groups,givens,guesses,blox)
 --	local grid_of_groups = {}
@@ -186,8 +192,34 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 	--			t.y = TILE_WIDTH/2
 
 			grid_of_groups[r][c]:add(t)
-t.opacity=255
+			t.opacity=255
 		else
+---[[
+			if guesses[r][c].pen ~= 0 then
+				t= Clone{
+					name   = "Pen "..guesses[r][c].pen,
+					source = pen_nums[guesses[r][c].pen],
+				}
+				t.anchor_point={t.w/2,t.h/2}
+				grid_of_groups[r][c]:add(t)
+			else
+				for g = 1,9 do
+					if guesses[r][c][g] then
+						t = Clone{
+							name   = "Guess "..g,
+							source = pencil_nums[g],
+						}
+						t.scale = {1/2,1/2}
+						t.anchor_point={t.w/2,t.h/2}
+						t.x = guess_x(g)
+						t.y = guess_y(g)
+						grid_of_groups[r][c]:add(t)
+
+					end
+				end
+			end
+--]]
+--[[
 			if guesses[r][c].num > 0 then
 				empty_spaces = empty_spaces - 1		
 			else
@@ -200,24 +232,17 @@ t.opacity=255
 					opacity = 0
 				}
 				t.anchor_point={t.w/2,t.h/2}
-		--		t.x = TILE_WIDTH/2
-		--		t.y = TILE_WIDTH/2
-
 				grid_of_groups[r][c]:add(t)
+
 				if guesses[r][c].pen == g then
 					t.opacity=255
 				end
-
 				t= Clone{
 					name   = "WR_Pen "..g,
 					source = wr_pen_nums[g],
 					opacity = 0
 				}
 				t.anchor_point={t.w/2,t.h/2}
-		--		t.x = TILE_WIDTH/2
-		--		t.y = TILE_WIDTH/2
-
-
 				grid_of_groups[r][c]:add(t)
 
 				t = Clone{
@@ -250,6 +275,7 @@ t.opacity=255
 
 				grid_of_groups[r][c]:add(t)
 			end
+--]]
 		end
 
 	---------------------------------
@@ -354,13 +380,12 @@ print(empty_spaces)
 		g.grid_of_groups = {}
 		empty_spaces = DevelopBoard(g.grid_of_groups,givens, guesses,the_blox)
 		print(empty_spaces)
---g.board.position = {500,0}
 	end
 	function g:check_guess(r,c,v,t)
-		--r = row
-		--c = column
-		--v = value of the guess
-		--t = the error_list
+		--  r = row
+		--  c = column
+		--  v = value of the guess
+		--  t = the error_list
 
 		local m = {} --the mini list of updates
 
@@ -434,15 +459,43 @@ print(empty_spaces)
 			for i,u in ipairs(updates) do	if #u == 3 then
 				table.insert(old_nums,g.grid_of_groups[u[1]][u[2]]:
 					find_child("Pen "..u[3]))
-				table.insert(new_nums,g.grid_of_groups[u[1]][u[2]]:
+--[[
+				table.insert(new_nums,g.grid_of_groups[ u[1] ][ u[2] ]:
 					find_child("WR_Pen "..u[3]))
+--]]
+---[[
+				table.insert(new_nums,{Clone{
+					name    = "WR_Pen "..u[3],
+					source  = wr_pen_nums[ u[3] ],
+					opacity = 0
+				},u[1],u[2]})
+--]]
 			end								end
 			if #updates == 0 then
+--[[
 				table.insert(new_nums,g.grid_of_groups[r][c]:
 					find_child("Pen "..guess))
+--]]
+---[[
+				table.insert(new_nums,{Clone{
+					name    = "Pen "..guess,
+					source  = pen_nums[guess],
+					opacity = 0
+				},r,c})
+--]]
 			else
+--[[
 				table.insert(new_nums,g.grid_of_groups[r][c]:
 					find_child("WR_Pen "..guess))
+--]]
+---[[
+				table.insert(new_nums,{Clone{
+					name    = "WR_Pen "..guess,
+					source  = wr_pen_nums[guess],
+					opacity = 0
+				},r,c})
+--]]
+
 			end
 
 --[=[
@@ -492,8 +545,17 @@ print(empty_spaces)
 			end
 --]=]
 		else
+--[[
 			table.insert(new_nums,g.grid_of_groups[r][
 				c]:find_child("Pen "..guess))
+--]]
+---[[
+				table.insert(new_nums,{Clone{
+					name    = "Pen "..guess,
+					source  = pen_nums[guess],
+					opacity = 0
+				},r,c})
+--]]
 		end
 		return old_nums, new_nums
 	end
@@ -540,14 +602,27 @@ print(empty_spaces)
 				if found_instance == false then
 					table.insert(old_nums,g.grid_of_groups[u[1]][u[2]]:
 						find_child("WR_Pen "..u[3]))
-					table.insert(new_nums,g.grid_of_groups[u[1]][u[2]]:
+--[[
+					table.insert(new_nums,g.grid_of_groups[ u[1] ][ u[2] ]:
 						find_child("Pen "..u[3]))
+--]]
+---[[
+					table.insert(new_nums,{Clone{
+						name    = "Pen "..u[3],
+						source  = pen_nums[ u[3] ],
+						opacity = 0
+					},u[1],u[2]})
+--]]
 				end
 			end	end
 			if #updates == 0 then
+print("here",g.grid_of_groups[r][c]:
+					find_child("Pen "..guess))
 				table.insert(old_nums,g.grid_of_groups[r][c]:
 					find_child("Pen "..guess))
 			else
+print("there",g.grid_of_groups[r][c]:
+					find_child("WR_Pen "..guess))
 				table.insert(old_nums,g.grid_of_groups[r][c]:
 					find_child("WR_Pen "..guess))
 			end
@@ -594,14 +669,20 @@ print(empty_spaces)
 
 	function animate_numbers(old_nums,new_nums,next_timeline)
 		local timeline = Timeline{duration=60}
+---[[
+		for i = 1, #new_nums do
+			g.grid_of_groups[new_nums[i][2]][new_nums[i][3]]:add(new_nums[i][1])
+		end
+--]]
 		save(timeline)
 		function timeline.on_new_frame(t,msecs,p)
 			for i = 1, #old_nums do old_nums[i].opacity = 255*(1-p) end
-			for i = 1, #new_nums do new_nums[i].opacity = 255*p     end
+			for i = 1, #new_nums do new_nums[i][1].opacity = 255*p     end
 		end
 		function timeline:on_completed()
-			for i = 1, #old_nums do old_nums[i].opacity = 0   end
-			for i = 1, #new_nums do new_nums[i].opacity = 255 end
+--			for i = 1, #old_nums do old_nums[i].opacity = 0   end
+			for i = 1, #old_nums do old_nums[i]:unparent()    end
+			for i = 1, #new_nums do new_nums[i][1].opacity = 255 end
 			if next_timeline then dolater(next_timeline)
 			else restore_keys() end
 			clear(timeline)
@@ -774,9 +855,17 @@ print(empty_spaces)
 			end
 
 			guesses[r][c][guesses[r][c].pen] = false
-			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
-
-
+--			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
+---[[
+			table.insert(new_nums,{Clone{
+				name    = "Guess "..guess,
+				source  = pencil_nums[ guess ],
+				x       = guess_x(guess),
+				y       = guess_y(guess),
+				scale   = {.5,.5},
+				opacity = 0
+			},r,c})
+--]]
 			guesses[r][c].pen = 0
 			--add the penciled guess
 			guesses[r][c][guess] = true
@@ -799,8 +888,17 @@ print(empty_spaces)
 		else
 			guesses[r][c].num = guesses[r][c].num + 1
 			guesses[r][c][guess] = true
-			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
-
+--			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
+---[[
+			table.insert(new_nums,{Clone{
+				name    = "Guess "..guess,
+				source  = pencil_nums[ guess ],
+				x       = guess_x(guess),
+				y       = guess_y(guess),
+				scale   = {.5,.5},
+				opacity = 0
+			},r,c})
+--]]
 			if status ~= "REDO" and status ~= "UNDO" then
 				table.insert(undo_list,{"toggle_guess",r,c,guess})
 				if #undo_list > 100 then
@@ -827,7 +925,14 @@ print(empty_spaces)
 					e = error_list[i]
 					if #e[1] == 2 then
 					elseif #e[1] == 3 then
-							table.insert(new_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]))--.opacity = 255
+--							table.insert(new_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]))--.opacity = 255
+---[[
+							table.insert(new_nums,{Clone{
+								name    = "Pen "..e[1][3],
+								source  = pen_nums[ e[1][3] ],
+								opacity = 0
+							},e[1][1],e[1][2]})
+--]]
 							table.insert(old_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]))--.opacity = 0
 					else
 						error("this should never happen,"..
@@ -835,7 +940,14 @@ print(empty_spaces)
 					end
 					if #e[2] == 2 then
 					elseif #e[2] == 3 then
-							table.insert(new_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]))--.opacity = 255
+--							table.insert(new_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]))--.opacity = 255
+---[[
+							table.insert(new_nums,{Clone{
+								name    = "Pen "..e[2][3],
+								source  = pen_nums[ e[2][3] ],
+								opacity = 0
+							},e[2][1],e[2][2]})
+--]]
 							table.insert(old_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]))--.opacity = 0
 					else
 						error("this should never happen,"..
@@ -847,23 +959,41 @@ print(empty_spaces)
 			return
 		end
 		error_checking = true
+		local going_red = {}
 
 		for i,e in ipairs(error_list) do
 			if #e[1] == 2 then
-			elseif #e[1] == 3 then
+			elseif #e[1] == 3 and going_red[ e[1][1]..e[1][2] ] == nil then
 					table.insert(old_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]))--.opacity = 0
-					table.insert(new_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]))--.opacity = 255
-			else
-				error("this should never happen,"..
-					" i did something wrong")
+--					table.insert(new_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("WR_Pen "..e[1][3]))--.opacity = 255
+---[[
+					table.insert(new_nums,{Clone{
+						name    = "WR_Pen "..e[1][3],
+						source  = wr_pen_nums[ e[1][3] ],
+						opacity = 0
+					},e[1][1],e[1][2]})
+					going_red[ e[1][1]..e[1][2] ] = true
+--]]
+--			else
+--				error("this should never happen,"..
+--					" i did something wrong")
 			end
 			if #e[2] == 2 then
-			elseif #e[2] == 3 then
+			elseif #e[2] == 3 and going_red[ e[2][1]..e[2][2] ] == nil then
 					table.insert(old_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]))--.opacity = 0
-					table.insert(new_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]))--.opacity = 255
-			else
-				error("this should never happen,"..
-					" i did something wrong")
+--					table.insert(new_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]))--.opacity = 255
+---[[
+					table.insert(new_nums,{Clone{
+						name    = "WR_Pen "..e[2][3],
+						source  = wr_pen_nums[ e[2][3] ],
+						opacity = 0
+					},e[2][1],e[2][2]})
+					going_red[ e[2][1]..e[2][2] ] = true
+
+--]]
+--			else
+--				error("this should never happen,"..
+--					" i did something wrong")
 			end
 		end
 		dolater(animate_numbers,old_nums,new_nums)
@@ -923,8 +1053,21 @@ print(empty_spaces)
 		end
 		for i = 1,#nums do
 			guesses[r][c][nums[i]] = true
+--[[
 			table.insert(new_nums,
 				g.grid_of_groups[r][c]:find_child("Guess "..nums[i]))
+--]]
+---[[
+			table.insert(new_nums,{Clone{
+				name    = "Guess "..nums[i],
+				source  = pen_nums[ nums[i] ],
+				x       = guess_x(nums[i]),
+				y       = guess_y(nums[i]),
+				scale   = {.5,.5},
+				opacity = 0
+			},r,c})
+--]]
+
 			g:add_to_err_list(r,c,i)
 		end
 		if guesses[r][c].pen ~= 0 then
@@ -946,6 +1089,8 @@ local str_funcs =
 }
 
 	function g:undo()
+		local r = nil
+		local c = nil
 
 		if #undo_list > 0 then
 			mediaplayer:play_sound("audio/undo.mp3")
@@ -954,9 +1099,12 @@ local str_funcs =
 			table.insert(redo_list,{params[1],params[2],params[3],params[4]})
 print("undooo",params[2],params[3],params[4])
 			str_funcs[params[1]](g,params[2],params[3],params[4],"UNDO")
+			r = params[2]
+			c = params[3]
 		else
 			restore_keys()
 		end
+		return r,c
 	end
 	function g:redo(r,c)
 		if #redo_list > 0 then
