@@ -72,7 +72,7 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 	function focusimg:press_down()
 	end
 	function focusimg:press_enter(param)
-		enter_func(param)
+		return enter_func(param)
 	end
 	--focusimg.group.anchor_point = {focusimg.group.w/2,focusimg.group.h/2}
 	focusimg:out_focus()

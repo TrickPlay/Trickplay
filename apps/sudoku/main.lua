@@ -335,7 +335,9 @@ right_list = {
 	FocusableImage({0,blank_button_off.h+8},"Undo Move", 
 		green_button_off,green_button_on,
 		function() 
-			game:undo() 
+			local r,c
+			r,c = game:undo() 
+			return r,c
 		end),
 
 	FocusableImage({0,2*(blank_button_off.h+8)},"Show Errors", 
@@ -1063,7 +1065,19 @@ function game_on_key_down(k)
 				restore_keys()
 				return
 			else
-				right_list[2]:press_enter()
+				local r,c
+				r,c = right_list[2]:press_enter()
+				print(r,c)
+				if menu_open and ind.r ==r and ind.c == c then
+					local g = game:get_guesses(ind.r,ind.c)
+					for i = 1,9 do
+						if g[i] then
+							pencil_menu:find_child(i.."").color = "202020"
+						else
+							pencil_menu:find_child(i.."").color = "FFFFFF"
+						end
+					end
+				end
 			end
 		end,
 		[keys["e"] ] = function()
