@@ -456,6 +456,43 @@ void lb_inherit(lua_State*L,const char*metatable)
     LSG_END(0);
 }
 
+// Expects a user data at 1. This will create a new metatable for
+// that user data that includes everything from the new metatable
+// and everything from its old metatable. __gc will be taken from
+// the old metatable.
+
+void lb_chain(lua_State*L,const char * metatable )
+{
+    g_assert( lua_isuserdata( L , 1 ) );
+    g_assert( metatable );
+
+    LSG;
+    lua_newtable( L );
+    int t = lua_gettop( L );
+    lb_inherit( L , metatable );
+
+    lua_getmetatable( L , 1 );
+    lb_inherit( L , 0 );
+    lua_pushstring( L , "__gc" );
+    lua_pushvalue( L , -1 );
+    lua_rawget( L , -3 );  // Get __gc from the old metatable
+    lua_rawset( L , t );   // Set it in the new metatable
+    lua_pop( L , 1 );      // Pop the old metatable
+
+    lua_pushstring( L , "__index" );
+    lua_pushcfunction( L , lb_index );
+    lua_rawset( L , t );
+
+    lua_pushstring( L , "__newindex" );
+    lua_pushcfunction( L , lb_newindex );
+    lua_rawset( L , t );
+
+    lua_setmetatable( L , 1 );
+
+    LSG_CHECK(0);
+}
+
+
 // Assumes that there is a user data at -2 and a table at -1. It then
 // iterates over the table's keys and sets them as properties in the
 // user data.
