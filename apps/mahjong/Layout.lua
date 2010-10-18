@@ -506,70 +506,70 @@ local layout_functions = {
        
         for k = 1,3 do
             -- left side
-            grid[2][6][k] = tiles[index]
-            index = index + 1
-            grid[1][8][k] = tiles[index]
+            grid[4][6][k] = tiles[index]
             index = index + 1
             grid[3][8][k] = tiles[index]
             index = index + 1
-            grid[2][10][k] = tiles[index]
+            grid[5][8][k] = tiles[index]
             index = index + 1
-            grid[3][12][k] = tiles[index]
+            grid[4][10][k] = tiles[index]
             index = index + 1
-            grid[5][13][k] = tiles[index]
+            grid[5][12][k] = tiles[index]
             index = index + 1
-            grid[7][14][k] = tiles[index]
+            grid[7][13][k] = tiles[index]
             index = index + 1
-            grid[9][15][k] = tiles[index]
+            grid[9][14][k] = tiles[index]
             index = index + 1
             grid[11][15][k] = tiles[index]
             index = index + 1
+            grid[13][15][k] = tiles[index]
+            index = index + 1
             -- center
             for j = 6,16,2 do
-                grid[13][j][k] = tiles[index]
+                grid[15][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[9][7][k] = tiles[index]
-            index = index + 1
             grid[11][7][k] = tiles[index]
             index = index + 1
-            grid[15][7][k] = tiles[index]
+            grid[13][7][k] = tiles[index]
             index = index + 1
             grid[17][7][k] = tiles[index]
             index = index + 1
+            grid[19][7][k] = tiles[index]
+            index = index + 1
             -- right side
-            grid[24][6][k] = tiles[index]
+            grid[26][6][k] = tiles[index]
+            index = index + 1
+            grid[27][8][k] = tiles[index]
             index = index + 1
             grid[25][8][k] = tiles[index]
             index = index + 1
-            grid[23][8][k] = tiles[index]
+            grid[26][10][k] = tiles[index]
             index = index + 1
-            grid[24][10][k] = tiles[index]
+            grid[25][12][k] = tiles[index]
             index = index + 1
-            grid[23][12][k] = tiles[index]
+            grid[23][13][k] = tiles[index]
             index = index + 1
-            grid[21][13][k] = tiles[index]
+            grid[21][14][k] = tiles[index]
             index = index + 1
-            grid[19][14][k] = tiles[index]
+            grid[19][15][k] = tiles[index]
             index = index + 1
             grid[17][15][k] = tiles[index]
-            index = index + 1
-            grid[15][15][k] = tiles[index]
             index = index + 1
         end
         
         for k = 1,2 do
-            grid[7][8][k] = tiles[index]
+            grid[9][8][k] = tiles[index]
             index = index + 1
-            grid[19][8][k] = tiles[index]
+            grid[21][8][k] = tiles[index]
             index = index + 1
             for j = 2,4,2 do
-                grid[11][j][k] = tiles[index]
+                grid[13][j][k] = tiles[index]
                 index = index + 1
-                grid[15][j][k] = tiles[index]
+                grid[17][j][k] = tiles[index]
                 index = index + 1
             end
-            grid[13][1][k] = tiles[index]
+            grid[15][1][k] = tiles[index]
             index = index + 1
         end
         
