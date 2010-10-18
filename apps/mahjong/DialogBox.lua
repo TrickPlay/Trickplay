@@ -42,11 +42,11 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
 
     local first_text = Text{
         font = DEFAULT_FONT,
-        color = DEFAULT_COLOR
+        color = DEFAULT_COLOR,
     }
     local second_text = Text{
         font = DEFAULT_FONT,
-        color = DEFAULT_COLOR
+        color = DEFAULT_COLOR,
     }
     if id == Components.NO_MOVES_DIALOG then
         first_text.text = "Shuffle Tiles"
@@ -62,6 +62,10 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
         FocusableImage(10,-10,Clone{source=button_off},
                        Clone{source=button_on},second_text)
     }
+    first_text.x = first_text.x - 3
+    first_text.y = first_text.y - 3
+    second_text.x = second_text.x - 3
+    second_text.y = second_text.y - 3
 
     for i,item in ipairs(focusable_items) do
         dialog:add(item.group)
