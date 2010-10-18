@@ -400,7 +400,9 @@ int lb_copy_table(lua_State*L,int target,int source)
 
 // Assuming there is a metatable at the top of the stack,
 // this function copies the stuff from the source metatable
-// into this one
+// into this one. If you pass NULL for metatable, it assumes
+// that the source metatable is at on the top of the stack and
+// the target is just below it.
 
 void lb_inherit(lua_State*L,const char*metatable)
 {
@@ -408,9 +410,17 @@ void lb_inherit(lua_State*L,const char*metatable)
     
     int target=lua_gettop(L);
     
-    luaL_getmetatable(L,metatable);     // pushes the source metatable
-    if(lua_isnil(L,-1))
-        luaL_error(L,"Missing %s",metatable);
+    if (!metatable)
+    {
+        --target;
+    }
+    else
+    {
+        luaL_getmetatable(L,metatable);     // pushes the source metatable
+        if(lua_isnil(L,-1))
+            luaL_error(L,"Missing %s",metatable);
+    }
+
     int source=lua_gettop(L);
     lb_copy_table(L,target,source);
     
@@ -438,8 +448,11 @@ void lb_inherit(lua_State*L,const char*metatable)
         }
         lua_pop(L,2);                   // pop the two sub tables
     }
-    lua_pop(L,1);                       // pop the source metatable
     
+    if (metatable)
+    {
+        lua_pop(L,1);                       // pop the source metatable
+    }
     LSG_END(0);
 }
 
