@@ -400,7 +400,9 @@ int lb_copy_table(lua_State*L,int target,int source)
 
 // Assuming there is a metatable at the top of the stack,
 // this function copies the stuff from the source metatable
-// into this one
+// into this one. If you pass NULL for metatable, it assumes
+// that the source metatable is at on the top of the stack and
+// the target is just below it.
 
 void lb_inherit(lua_State*L,const char*metatable)
 {
@@ -408,9 +410,17 @@ void lb_inherit(lua_State*L,const char*metatable)
     
     int target=lua_gettop(L);
     
-    luaL_getmetatable(L,metatable);     // pushes the source metatable
-    if(lua_isnil(L,-1))
-        luaL_error(L,"Missing %s",metatable);
+    if (!metatable)
+    {
+        --target;
+    }
+    else
+    {
+        luaL_getmetatable(L,metatable);     // pushes the source metatable
+        if(lua_isnil(L,-1))
+            luaL_error(L,"Missing %s",metatable);
+    }
+
     int source=lua_gettop(L);
     lb_copy_table(L,target,source);
     
@@ -438,10 +448,50 @@ void lb_inherit(lua_State*L,const char*metatable)
         }
         lua_pop(L,2);                   // pop the two sub tables
     }
-    lua_pop(L,1);                       // pop the source metatable
     
+    if (metatable)
+    {
+        lua_pop(L,1);                       // pop the source metatable
+    }
     LSG_END(0);
 }
+
+// Expects a user data at 1. This will create a new metatable for
+// that user data that includes everything from the new metatable
+// and everything from its old metatable. __gc will be taken from
+// the old metatable.
+
+void lb_chain(lua_State*L,const char * metatable )
+{
+    g_assert( lua_isuserdata( L , 1 ) );
+    g_assert( metatable );
+
+    LSG;
+    lua_newtable( L );
+    int t = lua_gettop( L );
+    lb_inherit( L , metatable );
+
+    lua_getmetatable( L , 1 );
+    lb_inherit( L , 0 );
+    lua_pushstring( L , "__gc" );
+    lua_pushvalue( L , -1 );
+    lua_rawget( L , -3 );  // Get __gc from the old metatable
+    lua_rawset( L , t );   // Set it in the new metatable
+    lua_pop( L , 1 );      // Pop the old metatable
+
+    lua_pushstring( L , "__index" );
+    lua_pushcfunction( L , lb_index );
+    lua_rawset( L , t );
+
+    lua_pushstring( L , "__newindex" );
+    lua_pushcfunction( L , lb_newindex );
+    lua_rawset( L , t );
+
+    lua_setmetatable( L , 1 );
+
+    LSG_CHECK(0);
+}
+
 
 // Assumes that there is a user data at -2 and a table at -1. It then
 // iterates over the table's keys and sets them as properties in the
