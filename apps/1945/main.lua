@@ -117,13 +117,11 @@ end
 assets =
 {
     water           = Image{ src = "assets/water.png" },
-    my_plane_strip  = Image{ src = "assets/myplane_strip3.png" },
+    my_plane_strip  = Image{ src = "assets/myplane.png" },
     my_bullet       = Image{ src = "assets/bullet.png" },
     enemy1          = Image{ src = "assets/e1_4x_test.png" },
-    enemy2          = Image{ src = "assets/e1_4x_test.png" },
-    enemy3          = Image{ src = "assets/e1_4x_test.png" },
-    enemy4          = Image{ src = "assets/e1_4x_test.png" },
-    enemy5          = Image{ src = "assets/e1_4x_test.png" },
+    enemy2          = Image{ src = "assets/e2_4x_test.png" },
+    enemy3          = Image{ src = "assets/e3_4x_test.png" },
     enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
@@ -1329,7 +1327,7 @@ redo_score_text()
 function start_game()
 add_to_render_list( my_plane )
 end
---add_to_render_list( water )
+add_to_render_list( water )
 
 add_to_render_list( enemies )
 
