@@ -27,7 +27,7 @@ local GOAT_FEET_HALF_WIDTH  = 36
 
 -- Gravity
 
-physics.gravity             = { 0 , 70 }
+physics.gravity             = { 0 , 45 }
 
 -- How much force we apply to the goat when you press left or right
 
@@ -39,7 +39,7 @@ local MAX_SIDE_VELOCITY     = 12
 
 local SCORE_MULTIPLIER      = 3.28 
 
-local GOAT_TARGET_VY        = 25
+local GOAT_TARGET_VY        = 20
 
 --------------------------------------------------------------------------------
 
@@ -421,6 +421,22 @@ local platform
 local platform_actor
 local extra
 
+local TIMING
+
+if false then
+
+    TIMING = 
+    {
+        maxs = 0,
+        mins = 1000,
+        sw   = Stopwatch(),
+        c    = 0,
+        avs  = 0
+    }
+end
+
+idle.limit = 1/60
+
 function idle.on_idle( idle , seconds )
 
     if paused then
@@ -428,6 +444,21 @@ function idle.on_idle( idle , seconds )
     end
     
     physics:step( seconds )
+    
+    if TIMING then
+    
+        TIMING.maxs = math.max( TIMING.maxs , seconds )
+        TIMING.mins = math.min( TIMING.mins , seconds )
+    
+        TIMING.avs = TIMING.avs + seconds
+        TIMING.c = TIMING.c + 1
+    
+        if TIMING.sw.elapsed_seconds >= 1 then
+            print( TIMING.mins , TIMING.maxs , TIMING.avs / TIMING.c )
+            TIMING.sw:start()
+        end
+        
+    end
     
     --physics:draw_debug()
 
