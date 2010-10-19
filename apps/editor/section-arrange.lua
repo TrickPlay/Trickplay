@@ -26,18 +26,18 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["Left                   [U]"]   = function() editor.left() mouse_mode = S_SELECT end,
-        ["Right                   [E]"]   = function() editor.right() mouse_mode = S_SELECT end,
-        ["Top                    [T]"]   = function() editor.top() mouse_mode = S_SELECT end,
-        ["Bottom                   [I]"]   = function() editor.bottom() mouse_mode = S_SELECT end,
-        ["H-Center         [R]"]   = function() editor.hcenter() mouse_mode = S_SELECT end,
-        ["V-Center               "]   = function() editor.vcenter() mouse_mode = S_SELECT end,
-        ["H-Space     [C]"]   = function() editor.hspace() mouse_mode = S_SELECT end,
-        ["V-Space       [G]"]   = function() editor.vspace() mouse_mode = S_SELECT end,
-        ["Bring to front"]   = function() editor.bring_to_front() mouse_mode = S_SELECT end,
-        ["Bring forward "]   = function() editor.bring_forward() mouse_mode = S_SELECT end,
-        ["Send to back"]   = function() editor.send_to_back() mouse_mode = S_SELECT end,
-        ["Send backward"]   = function() editor.backward() mouse_mode = S_SELECT end
+	["LEFT           "]   = function() editor.left() mouse_mode = S_SELECT end,
+        ["RIGHT         "]   = function() editor.right() mouse_mode = S_SELECT end,
+        ["TOP             "]= function() editor.top() mouse_mode = S_SELECT end,
+        ["BOTTOM        "] = function() editor.bottom() mouse_mode = S_SELECT end,
+        ["H_CENTER   "] = function() editor.hcenter() mouse_mode = S_SELECT end,
+        ["V_CENTER    "] = function() editor.vcenter() mouse_mode = S_SELECT end,
+        ["H_SPACE	  "] = function() editor.hspace() mouse_mode = S_SELECT end,
+        ["V_SPACE 	  "] = function() editor.vspace() mouse_mode = S_SELECT end,
+        ["BRING TO FRONT"] = function() editor.bring_to_front() mouse_mode = S_SELECT end,
+        ["BRING FORWARD "] = function() editor.bring_forward() mouse_mode = S_SELECT end,
+        ["SEND TO BACK "] = function() editor.send_to_back() mouse_mode = S_SELECT end,
+        ["SEND BACKWARD "] = function() editor.send_backward() mouse_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -55,10 +55,10 @@ function( section )
         local f_right  = factory.make_text_menu_item( assets , ui.strings[ "RIGHT         " ] )
         local f_top  = factory.make_text_menu_item( assets , ui.strings[ "TOP             " ] )
         local f_bottom = factory.make_text_menu_item( assets , ui.strings[ "BOTTOM        " ] )
-        local f_h_center  = factory.make_text_menu_item( assets , ui.strings[ "H_CENTER   " ] )
-        local f_v_center = factory.make_text_menu_item( assets , ui.strings[ "V_CENTER    " ] )
-        local f_h_equal = factory.make_text_menu_item( assets , ui.strings[ "H_SPACE	  " ] )
-        local f_v_equal = factory.make_text_menu_item( assets , ui.strings[ "V_SPACE 	  " ] )
+        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "H_CENTER   " ] )
+        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "V_CENTER    " ] )
+        local f_hspace = factory.make_text_menu_item( assets , ui.strings[ "H_SPACE	  " ] )
+        local f_vspace = factory.make_text_menu_item( assets , ui.strings[ "V_SPACE 	  " ] )
         local f_bring_to_front  = factory.make_text_menu_item( assets , ui.strings[ "BRING TO FRONT" ] )
         local f_bring_forward = factory.make_text_menu_item( assets , ui.strings[ "BRING FORWARD "] )
         local f_send_to_back = factory.make_text_menu_item( assets , ui.strings[ "SEND TO BACK " ] )
@@ -70,10 +70,10 @@ function( section )
         table.insert( section_items , f_right )
         table.insert( section_items , f_top )
         table.insert( section_items , f_bottom )
-        table.insert( section_items , f_h_center )
-        table.insert( section_items , f_v_center )
-        table.insert( section_items , f_h_equal )
-        table.insert( section_items , f_v_equal )
+        table.insert( section_items , f_hcenter )
+        table.insert( section_items , f_vcenter )
+        table.insert( section_items , f_hspace )
+        table.insert( section_items , f_vspace )
         table.insert( section_items , f_bring_to_front )
         table.insert( section_items , f_bring_forward )
         table.insert( section_items , f_send_to_back )
@@ -95,6 +95,9 @@ function( section )
                 local dropmenu_item = item:find_child("caption")
                 --dropmenu_item.reactive = true
                 function dropmenu_item:on_button_down(x,y,button,num_clicks)
+		        local s= ui.sections[ui.focus]
+        		ui.button_focus.position = s.button.position
+        		ui.button_focus.opacity = 0
             		animate_out_dropdown()
                         if(dropdown_map[dropmenu_item.text]) then dropdown_map[dropmenu_item.text]() end
                         return true
@@ -103,8 +106,9 @@ function( section )
              end
        end
 
-        items_height = items_height + f_left.h + f_right.h + f_top.h + f_bottom.h + f_h_center.h + f_v_center.h + 
-			f_bring_to_front.h + f_bring_forward.h + f_send_to_back.h + f_send_backward.h
+        items_height = items_height + f_left.h + f_right.h + f_top.h + f_bottom.h + f_hcenter.h + 
+		       f_vcenter.h + f_hspace.h + f_vspace.h + f_bring_to_front.h + f_bring_forward.h + 
+		       f_send_to_back.h + f_send_backward.h
         
         f_left.extra.on_activate =
             function()
@@ -112,24 +116,72 @@ function( section )
 		editor.left()
             end
         
---[[
-        f_text.extra.on_activate =
+        f_right.extra.on_activate =
             function()
 		mouse_mode = S_SELECT
-		editor.text()
+		editor.right()
             end
-        f_image.extra.on_activate =
+
+        f_top.extra.on_activate =
             function()
 		mouse_mode = S_SELECT
-		editor.image()
+		editor.top()
             end
-        f_video.extra.on_activate =
+
+        f_bottom.extra.on_activate =
             function()
-		editor.video()
 		mouse_mode = S_SELECT
+		editor.bottom()
             end
-]]
-        
+
+        f_hcenter.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.hcenter()
+            end
+
+        f_vcenter.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.vcenter()
+            end
+
+        f_hspace.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.hspace()
+            end
+
+        f_vspace.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.vspace()
+            end
+
+        f_bring_to_front.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.bring_to_front()
+            end
+
+        f_bring_forward.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.bring_forward()
+            end
+
+        f_send_to_back.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.send_to_back()
+            end
+
+        f_send_backward.extra.on_activate =
+            function()
+		mouse_mode = S_SELECT
+		editor.send_backward()
+            end
+
         -- This spaces all items equally.
         -- TODO: If there are less than 3 app tiles, it will be wrong.
         

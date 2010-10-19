@@ -194,7 +194,7 @@ function grab_focus(v, inspector, attr)
 		          editor.n_selected(v)
                           screen.grab_key_focus(screen) 
 			  -- org_obj, new_obj = inspector_apply (v, inspector) 
-		          editor.view_code()
+		          editor.view_code(v)
 	                  return true
 		      elseif (attr == "apply") then 
 			  org_obj, new_obj = inspector_apply (v, inspector) 
