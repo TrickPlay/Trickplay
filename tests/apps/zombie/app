@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.tests.zombie",
+    release     = "1",
+    version     = "1.0",
+    name        = "Zombie",
+    author      = "James Rex Fenley",
+    copyright   = "© Trickplay Inc."
+}
+
