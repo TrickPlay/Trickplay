@@ -5,6 +5,7 @@ function(gameloop, ...)
     gameloop.elements = {}
     local elements = gameloop.elements
     local sw = gameloop.sw
+    local props
     
     local function my_idle()
         
@@ -15,7 +16,8 @@ function(gameloop, ...)
         end
         
         local progress
-        for i,props in ipairs(elements) do
+        for i = #elements,1,-1 do
+            props = elements[i]
             if props.wait then
                 if not (type(props.wait) == "number") then
                     error("wait needs a number", 3)

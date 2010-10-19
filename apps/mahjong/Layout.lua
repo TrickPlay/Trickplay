@@ -1,11 +1,11 @@
 Layouts = {
-    CUBE = 1,
-    CLUB = 2,
-    ARENA = 3,
-    TURTLE = 4,
-    CROWN = 5,
-    ANCHOR = 6,
-    FISH = 7
+    ANCHOR = 1,
+    CROWN = 2,
+    FISH = 3,
+    CUBE = 4,
+    CLUB = 5,
+    ARENA = 6,
+    TURTLE = 7
 }
 --[[
 Layouts = {
@@ -219,7 +219,6 @@ local layout_functions = {
                 end
             end
         end
-        print("index",index)
 
         return grid
     end,
@@ -288,7 +287,6 @@ local layout_functions = {
         grid[17][12][1] = tiles[index]
         index = index + 1
 
-        print("index",index)
         return grid
     end,
 --[[
@@ -359,7 +357,6 @@ local layout_functions = {
             end
         end
 
-        print("index",index)
         return grid
     end,
 
@@ -458,7 +455,6 @@ local layout_functions = {
             end
         end
 
-        print("index",index)
         return grid
     end,
 --[[
@@ -573,7 +569,6 @@ local layout_functions = {
             index = index + 1
         end
         
-        print("index",index)
         return grid
     end,
 
@@ -708,7 +703,6 @@ local layout_functions = {
         grid[15][13][1] = tiles[index]
         index = index + 1
         
-        print("index", index)
         return grid
     end,
 }
