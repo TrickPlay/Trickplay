@@ -46,12 +46,15 @@ World::~World()
 
     g_timer_destroy( timer );
 
-    for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
+    // Destroy the body wrappers
+
+    for( b2Body * body = world.GetBodyList(); body; )
     {
-        // Tell the body wrapper that its body is gone
+        b2Body * next = body->GetNext();
 
         Body::body_destroyed( body );
 
+        body = next;
     }
 
     // Let go of the screen
@@ -144,24 +147,21 @@ gboolean World::on_idle( gpointer me )
 
 //.............................................................................
 
-int World::create_body( int properties , lua_CFunction constructor )
+int World::create_body( int element , int properties , const char * metatable )
 {
+    luaL_checktype( L , element , LUA_TUSERDATA );
     luaL_checktype( L , properties , LUA_TTABLE );
 
-    g_assert( constructor );
+    g_assert( metatable );
 
     //.........................................................................
     // Get the actor/source
 
-    lua_getfield( L , properties , "source" );
-
-    ClutterActor * actor = ClutterUtil::user_data_to_actor( L , lua_gettop( L ) );
-
-    lua_pop( L , 1 );
+    ClutterActor * actor = ClutterUtil::user_data_to_actor( L , element );
 
     if ( ! actor )
     {
-        return luaL_error( L , "Invalid or missing body source" );
+        return luaL_error( L , "Invalid or missing UIElement" );
     }
 
     //.........................................................................
@@ -252,30 +252,12 @@ int World::create_body( int properties , lua_CFunction constructor )
     Body * bw = new Body( this , body , actor );
 
     //.........................................................................
-    // Push the body wrapper as a light user data onto the Lua stack and invoke
-    // the constructor function.
+    // The body is attached to the actor and is ready to go. We get the actor
+    // and change its metatable
 
-    lua_pushlightuserdata( L , bw );
+    lb_chain( L , element , metatable );
 
-    LSG;
-
-    int result = constructor( L );
-
-    g_assert( result == 1 );
-
-    LSG_CHECK( 1 );
-
-    //.........................................................................
-    // Now, we get rid of the light user data. After this, the real user
-    // data newly created should be on the top of the stack.
-
-    lua_remove( L , -2 );
-
-    //.........................................................................
-    // This gives the body wrapper a chance to create a handle to itself -
-    // so it doesn't get collected until the actor goes away.
-
-    bw->create_ud_handle( L );
+    lua_pushvalue( L , element );
 
     return 1;
 }
@@ -430,8 +412,8 @@ void World::push_contact( b2Contact * contact )
     b2Body * ba = fa ? fa->GetBody() : 0;
     b2Body * bb = fb ? fb->GetBody() : 0;
 
-    Body * ia = ba ? Body::get_from_body( ba ) : 0;
-    Body * ib = bb ? Body::get_from_body( bb ) : 0;
+    Body * ia = ba ? Body::get( ba ) : 0;
+    Body * ib = bb ? Body::get( bb ) : 0;
 
     int body_a_handle = ia ? ia->handle : 0;
     int body_b_handle = ib ? ib->handle : 0;
@@ -641,7 +623,7 @@ void World::add_contact_callback_body( b2Body * body , ContactCallback callback 
         {
             // If so and its Body is valid, add it to the list
 
-            if ( Body * b = Body::get_from_body( body ) )
+            if ( Body * b = Body::get( body ) )
             {
                 list.push_back( b );
             }
@@ -696,7 +678,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
         {
             lua_pushvalue( L , c );
 
-            UserData::invoke_callback( *it , name , 1 , 0 , L );
+            UserData::invoke_callback( G_OBJECT( (*it)->actor ) , name , 1 , 0 , L );
 
             if ( callback == PRE_SOLVE_CONTACT )
             {
@@ -943,20 +925,13 @@ void World::clear_debug()
 }
 
 //.............................................................................
-// This wrapper is owned by the Lua proxy for the body, but the actor will
-// force the Lua proxy to stay alive as long as it lives. Once the actor
-// dies, it will destroy the b2Body and nullify the body wrapper. It will
-// also let go of its handle to the Lua proxy - which means it can be
-// collected. However, if the user still has a reference to the Lua proxy,
-// that proxy will be invalid - since its body wrapper has no b2Body or
-// actor.
+// This wrapper is attached to the actor and is owned by the actor.
 
 Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
 :
     world( _world ),
     body( _body ),
     actor( _actor ),
-    ud_handle( 0 ),
     mapped_handler( 0 )
 {
     g_assert( world );
@@ -992,27 +967,45 @@ Body::~Body()
 {
     plog( "DESTROYING BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
 
-    if ( actor )
+    if ( body )
     {
-        // This will end up calling destroy_actor_body below
+        // Remove any callbacks for this body
 
-        g_object_set_qdata( G_OBJECT( actor ) , get_actor_body_quark() , 0 );
+        world->detach_body_callbacks( body );
+
+        // Nullify the body's user data
+
+        body->SetUserData( 0 );
+
+        body->SetActive( false );
+
+        // b2Bodies cannot be destroyed during callbacks. So, if an actor is
+        // collected during a collision callback, for example, the call to destroy the
+        // associated b2Body will fail. To get around this, we tell the
+        // world to destroy the body later.
+
+        if ( body->GetWorld()->IsLocked() )
+        {
+            world->destroy_body_later( body );
+        }
+        else
+        {
+            body->GetWorld()->DestroyBody( body );
+        }
+
+        body = 0;
     }
-}
 
-//.............................................................................
-// There is a user data on the top of the Lua stack that points to me.
-// I create a handle so that I won't be collected.
+    g_assert( actor );
 
-void Body::create_ud_handle( lua_State * L )
-{
-    g_assert( ud_handle == 0 );
+    if ( g_signal_handler_is_connected( G_OBJECT( actor ) , mapped_handler ) )
+    {
+        g_signal_handler_disconnect( G_OBJECT( actor ) , mapped_handler );
+    }
 
-    g_assert( UserData::get_client( L , lua_gettop( L ) ) == this );
+    mapped_handler = 0;
 
-    ud_handle = UserData::Handle::make( L , lua_gettop( L ) );
-
-    g_assert( ud_handle );
+    actor = 0;
 }
 
 //.............................................................................
@@ -1022,7 +1015,7 @@ void Body::body_destroyed( b2Body * body )
 {
     plog( "B2BODY BEING DESTROYED" );
 
-    if ( Body * self = Body::get_from_body( body ) )
+    if ( Body * self = Body::get( body ) )
     {
         plog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
 
@@ -1032,8 +1025,6 @@ void Body::body_destroyed( b2Body * body )
 
             g_object_set_qdata( G_OBJECT( self->actor ) , get_actor_body_quark() , 0 );
         }
-
-        self->body = 0;
     }
 }
 
@@ -1043,68 +1034,19 @@ void Body::body_destroyed( b2Body * body )
 
 void Body::destroy_actor_body( Body * self )
 {
-    plog( "CLEARING ACTOR BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
-
-    if ( self->body )
-    {
-        // Remove any callbacks for this body
-
-        self->world->detach_body_callbacks( self->body );
-
-        // Nullify the body's user data
-
-        self->body->SetUserData( 0 );
-
-        self->body->SetActive( false );
-
-        // b2Bodies cannot be destroyed during callbacks. So, if an actor is
-        // collected during a collision callback, for example, the call to destroy the
-        // associated b2Body will fail. To get around this, we tell the
-        // world to destroy the body later.
-
-        if ( self->body->GetWorld()->IsLocked() )
-        {
-            self->world->destroy_body_later( self->body );
-        }
-        else
-        {
-            self->body->GetWorld()->DestroyBody( self->body );
-        }
-
-        self->body = 0;
-    }
-
-    g_assert( self->actor );
-
-    if ( g_signal_handler_is_connected( G_OBJECT( self->actor ) , self->mapped_handler ) )
-    {
-        g_signal_handler_disconnect( G_OBJECT( self->actor ) , self->mapped_handler );
-    }
-
-    self->mapped_handler = 0;
-
-    self->actor = 0;
-
-    // This is the master object that controls the Lua proxy for this
-    // wrapper. We let it go, so that the Lua proxy can be collected.
-
-    g_assert( self->ud_handle );
-
-    UserData::Handle::destroy( self->ud_handle );
-
-    self->ud_handle = 0;
+    delete self;
 }
 
 //.............................................................................
 
-Body * Body::get_from_actor( ClutterActor * actor )
+Body * Body::get( ClutterActor * actor )
 {
     return ! actor ? 0 : ( Body * ) g_object_get_qdata( G_OBJECT( actor ) , get_actor_body_quark() );
 }
 
 //.............................................................................
 
-Body * Body::get_from_body( b2Body * body )
+Body * Body::get( b2Body * body )
 {
     return ! body ? 0 : ( Body * ) body->GetUserData();
 }
@@ -1113,18 +1055,7 @@ Body * Body::get_from_body( b2Body * body )
 
 Body * Body::get_from_lua( lua_State * L , int index )
 {
-    return ( Body * ) UserData::get_client( L , index );
-}
-
-//.............................................................................
-
-GQuark Body::get_actor_body_quark()
-{
-    static const gchar * k = "tp-physics_body";
-
-    static GQuark q = g_quark_from_static_string( k );
-
-    return q;
+    return get( CLUTTER_ACTOR( UserData::get( L , index )->get_master() ) );
 }
 
 //.............................................................................
@@ -1145,7 +1076,7 @@ void Body::synchronize_actor()
 
 void Body::synchronize_actor( b2Body * body )
 {
-    if ( Body * b = Body::get_from_body( body ) )
+    if ( Body * b = Body::get( body ) )
     {
         b->synchronize_actor();
     }
@@ -1177,8 +1108,6 @@ void Body::synchronize_body()
 
 void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
 {
-    //plog( "ACTOR MAPPED CHANGED %p : %s" , self , CLUTTER_ACTOR_IS_MAPPED( self->actor ) ? "TRUE" : "FALSE" );
-
     if ( self->actor && self->body )
     {
         bool mapped = CLUTTER_ACTOR_IS_MAPPED( self->actor );

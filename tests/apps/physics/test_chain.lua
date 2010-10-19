@@ -8,59 +8,50 @@ local ground = Rectangle
     position = { 0 , screen.h - 30 }
 }
 
-ground = physics:Body
+ground = physics:Body( ground , 
 {
-    source = ground,
     type = "static",
     density = 1,
     friction = 0.5,
     bounce = 0.1
-}
+} )
 
-screen:add( ground.source )
+screen:add( ground )
 
 -------------------------------------------------------------------------------
 
 local bumper
 
-bumper = physics:Body
-{
-    source =
-    
+bumper = physics:Body(
         Rectangle
         {
             color = "00FF00",
             size = { screen.h * 1.2 , screen.h / 4 },
         },
-        
-    type = "static"
-    
-}
+        {
+            type = "static"
+        })
 
 bumper.position = { 0 , screen.h / 2 }
 bumper.angle = 75
 
-screen:add( bumper.source )
+screen:add( bumper )
 
 
-bumper = physics:Body
-{
-    source =
-    
+bumper = physics:Body(
         Rectangle
         {
             color = "00FF00",
             size = { screen.h * 1.2 , screen.h / 4 },
         },
-        
-    type = "static"
-    
-}
+        {
+            type = "static"    
+        })
 
 bumper.position = { screen.w , screen.h / 2 }
 bumper.angle = -75
 
-screen:add( bumper.source )
+screen:add( bumper )
 
 -------------------------------------------------------------------------------
 
@@ -70,18 +61,17 @@ local pole = Rectangle
 {
     color = "473232",
     size = { 30 , POLE_HEIGHT },
-    position = { screen.w / 2 - 15 , screen.h - ( POLE_HEIGHT + ground.source.h ) }
+    position = { screen.w / 2 - 15 , screen.h - ( POLE_HEIGHT + ground.h ) }
 }
 
 screen:add( pole )
 
-pole = physics:Body
+pole = physics:Body( pole , 
 {
-    source = pole,
     density = 1,
     type = "static",
     filter = { category = 1 }
-}
+})
 
 -------------------------------------------------------------------------------
 
@@ -103,21 +93,20 @@ for i = 1 , LINKS do
     link.anchor_point = link.center
     link.z_rotation = { 90 , 0 , 0 }
     
-    link.x = pole.source.x + link.h / 2 + ( ( link.h ) * ( i - 1 ) )
-    link.y = pole.source.y - pole.source.h / 2 
+    link.x = pole.x + link.h / 2 + ( ( link.h ) * ( i - 1 ) )
+    link.y = pole.y - pole.h / 2 
 
     screen:add( link )
     
-    link = physics:Body
+    link = physics:Body( link , 
     {
-        source = link,
         density = 2,
         friction = 0.5,
         bounce = 0.5,
         filter = { category = 2 , mask = { 0 , 3 } }
-    }
+    })
 
-    link:RevoluteJoint( last_link , { link.x - link.source.w / 2 , link.y } ,
+    link:RevoluteJoint( last_link , { link.x - link.w / 2 , link.y } ,
     {
         enable_limit = true,
         lower_angle = -90,
@@ -138,23 +127,24 @@ screen:add( globe )
 
 for i = 1 , BLOCK_COUNT do
 
-    local block = physics:Body
-    {
-        source = Clone
+    local block = physics:Body(
+        Clone
         {
             source = globe ,
             opacity = 255,
             scale = { GLOBE_SCALE , GLOBE_SCALE },
             position = { screen.w / BLOCK_COUNT * i  , - 50 }
         },
-        type = "dynamic",
-        density = 0.2,
-        bounce = 0.8,
-        shape = physics:Circle( ( globe.w / 2 ) * GLOBE_SCALE ),
-        filter = { category = 3 , mask = { 0 , 2 , 3 } }
-    }
+        {
+            type = "dynamic",
+            density = 0.2,
+            bounce = 0.8,
+            shape = physics:Circle( ( globe.w / 2 ) * GLOBE_SCALE ),
+            filter = { category = 3 , mask = { 0 , 2 , 3 } }
+        })
+        
     
-    screen:add( block.source )
+    screen:add( block )
 end
 
 -------------------------------------------------------------------------------

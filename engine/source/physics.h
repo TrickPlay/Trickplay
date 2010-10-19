@@ -87,9 +87,10 @@ namespace Physics
         }
 
         //.........................................................................
-        // Properties is the stack index of a Lua table
+        // Element is the stack index of a UIElement, properties is the stack
+        // index of a Lua table
 
-        int create_body( int properties , lua_CFunction constructor );
+        int create_body( int element , int properties , const char * metatable );
 
         //.........................................................................
 
@@ -223,17 +224,11 @@ namespace Physics
         static void body_destroyed( b2Body * body );
 
         //.....................................................................
-        // With my Lua proxy on the top of the stack, we create a handle to
-        // keep it alive.
-
-        void create_ud_handle( lua_State * L );
-
-        //.....................................................................
         // Getters from various places.
 
-        static Body * get_from_actor( ClutterActor * actor );
+        static Body * get( ClutterActor * actor );
 
-        static Body * get_from_body( b2Body * body );
+        static Body * get( b2Body * body );
 
         static Body * get_from_lua( lua_State * L , int index );
 
@@ -261,7 +256,14 @@ namespace Physics
         //.....................................................................
         // The key we use to attach me to the actor
 
-        static GQuark get_actor_body_quark();
+        inline static GQuark get_actor_body_quark()
+        {
+            static const gchar * k = "tp-physics_body";
+
+            static GQuark quark = g_quark_from_static_string( k );
+
+            return quark;
+        }
 
         //.....................................................................
         // When the actor is destroyed
@@ -277,10 +279,6 @@ namespace Physics
         static void actor_mapped_notify( GObject * gobject , GParamSpec * , Body * self );
 
         //.....................................................................
-        // The user data handle that keeps us alive in Lua as long as the actor
-        // is alive.
-
-        UserData::Handle *  ud_handle;
 
         gulong              mapped_handler;
     };

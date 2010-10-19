@@ -26,33 +26,18 @@ interface Shape [[ b2Shape * ]]
 
 /*===========================================================================*/
 
-interface Body [[ Physics::Body * ]]
+interface Body [[ ClutterActor * ]]
 {
-	Body()
-		[[
-			self = lb_construct( Physics::Body , lua_touserdata( L , -2 ) );
-		]];
-		
-	~Body()
-		[[
-			delete self;
-		]];
-
 	readonly int handle
         [[
-            handle = self->handle;
+            Physics::Body * me = Physics::Body::get( self );
+            handle = me->handle;
         ]];
 		
-	readonly UIElement source
-		[[
-            self->check( L );
-			ClutterUtil::wrap_concrete_actor( L , self->actor );
-		]];
-
 	string type
 	    [[
-	        self->check( L );
-            switch( self->body->GetType() )
+            Physics::Body * me = Physics::Body::get( self );
+            switch( me->body->GetType() )
             {
                 case b2_staticBody:
                     type = "static";
@@ -72,7 +57,7 @@ interface Body [[ Physics::Body * ]]
             }
 	    ]]
 	    [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             if ( ! type )
             {
@@ -82,15 +67,15 @@ interface Body [[ Physics::Body * ]]
             {
                 if ( ! strcmp( type , "static" ) )
                 {
-                    self->body->SetType( b2_staticBody );
+                    me->body->SetType( b2_staticBody );
                 }
                 else if ( ! strcmp( type , "kinematic" ) )
                 {
-                    self->body->SetType( b2_kinematicBody );
+                    me->body->SetType( b2_kinematicBody );
                 }
                 else if ( ! strcmp( type , "dynamic" ) )
                 {
-                    self->body->SetType( b2_dynamicBody );
+                    me->body->SetType( b2_dynamicBody );
                 }
                 else
                 {
@@ -101,149 +86,149 @@ interface Body [[ Physics::Body * ]]
 		
 	bool awake
 		[[
-            self->check( L );
-			awake = self->body->IsAwake();
+            Physics::Body * me = Physics::Body::get( self );
+			awake = me->body->IsAwake();
 		]]
 		[[
-            self->check( L );
-			self->body->SetAwake( awake );
+            Physics::Body * me = Physics::Body::get( self );
+			me->body->SetAwake( awake );
 		]];
 		
 	bool active
 		[[
-            self->check( L );
-			active = self->body->IsActive();
+            Physics::Body * me = Physics::Body::get( self );
+			active = me->body->IsActive();
 		]]
 		[[
-            self->check( L );
-			self->body->SetActive( active );
+            Physics::Body * me = Physics::Body::get( self );
+			me->body->SetActive( active );
 		]];
 
 	table position
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            const b2Vec2 & pos( self->body->GetPosition() );
+            const b2Vec2 & pos( me->body->GetPosition() );
 			
 			lua_newtable( L );
-			lua_pushnumber( L , self->world->world_to_screen( pos.x ) );
+			lua_pushnumber( L , me->world->world_to_screen( pos.x ) );
 			lua_rawseti( L , -2 , 1 );
-			lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
+			lua_pushnumber( L , me->world->world_to_screen( pos.y ) );
 			lua_rawseti( L , -2 , 2 );
 		]]
 		[[
-		    self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             lua_rawgeti( L , 2 , 1 );
             lua_rawgeti( L , 2 , 2 );
 
-            const b2Vec2 pos( self->world->screen_to_world( lua_tonumber( L , -2 ) ) ,
-                    self->world->screen_to_world( lua_tonumber( L , -1 ) ) );
+            const b2Vec2 pos( me->world->screen_to_world( lua_tonumber( L , -2 ) ) ,
+                    me->world->screen_to_world( lua_tonumber( L , -1 ) ) );
 
             lua_pop( L , 2 );
 
-            self->body->SetTransform( pos , self->body->GetAngle() );
+            me->body->SetTransform( pos , me->body->GetAngle() );
 
-            self->synchronize_actor();
+            me->synchronize_actor();
 		]];
 
 	double x
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            const b2Vec2 & pos( self->body->GetPosition() );
+            const b2Vec2 & pos( me->body->GetPosition() );
 
-            x = self->world->world_to_screen( pos.x );
+            x = me->world->world_to_screen( pos.x );
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( self->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().position );
 
-            pos.x = self->world->screen_to_world( x );
+            pos.x = me->world->screen_to_world( x );
 
-            self->body->SetTransform( pos , self->body->GetAngle() );
+            me->body->SetTransform( pos , me->body->GetAngle() );
 
-            self->synchronize_actor();
+            me->synchronize_actor();
         ]];
 
     double y
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            const b2Vec2 & pos( self->body->GetPosition() );
+            const b2Vec2 & pos( me->body->GetPosition() );
 
-            y = self->world->world_to_screen( pos.y );
+            y = me->world->world_to_screen( pos.y );
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( self->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().position );
 
-            pos.y = self->world->screen_to_world( y );
+            pos.y = me->world->screen_to_world( y );
 
-            self->body->SetTransform( pos , self->body->GetAngle() );
+            me->body->SetTransform( pos , me->body->GetAngle() );
 
-            self->synchronize_actor();
+            me->synchronize_actor();
         ]];
 
 	double angle
 		[[
-            self->check( L );
-			angle = Physics::World::radians_to_degrees( self->body->GetAngle() );
+            Physics::Body * me = Physics::Body::get( self );
+			angle = Physics::World::radians_to_degrees( me->body->GetAngle() );
 		]]
 		[[
-		    self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( self->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().position );
 
-            self->body->SetTransform( pos , Physics::World::degrees_to_radians( angle ) );
+            me->body->SetTransform( pos , Physics::World::degrees_to_radians( angle ) );
 
-            self->synchronize_actor();
+            me->synchronize_actor();
 		]];
 
     double rotation
         [[
-            self->check( L );
-            rotation = Physics::World::radians_to_degrees( self->body->GetAngle() );
+            Physics::Body * me = Physics::Body::get( self );
+            rotation = Physics::World::radians_to_degrees( me->body->GetAngle() );
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( self->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().position );
 
-            self->body->SetTransform( pos , Physics::World::degrees_to_radians( rotation ) );
+            me->body->SetTransform( pos , Physics::World::degrees_to_radians( rotation ) );
 
-            self->synchronize_actor();
+            me->synchronize_actor();
         ]];
 
     readonly table world_center
         [[
-            self->check( L );
-            const b2Vec2 pos( self->body->GetWorldCenter() );
+            Physics::Body * me = Physics::Body::get( self );
+            const b2Vec2 pos( me->body->GetWorldCenter() );
             lua_newtable( L );
-            lua_pushnumber( L , self->world->world_to_screen( pos.x ) );
+            lua_pushnumber( L , me->world->world_to_screen( pos.x ) );
             lua_rawseti( L , -2 , 1 );
-            lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
+            lua_pushnumber( L , me->world->world_to_screen( pos.y ) );
             lua_rawseti( L , -2 , 2 );
         ]];
 
 	readonly table local_center
         [[
-            self->check( L );
-            const b2Vec2 pos( self->body->GetLocalCenter() );
+            Physics::Body * me = Physics::Body::get( self );
+            const b2Vec2 pos( me->body->GetLocalCenter() );
             lua_newtable( L );
-            lua_pushnumber( L , self->world->world_to_screen( pos.x ) );
+            lua_pushnumber( L , me->world->world_to_screen( pos.x ) );
             lua_rawseti( L , -2 , 1 );
-            lua_pushnumber( L , self->world->world_to_screen( pos.y ) );
+            lua_pushnumber( L , me->world->world_to_screen( pos.y ) );
             lua_rawseti( L , -2 , 2 );
         ]];
 		
 	table linear_velocity
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 lv( self->body->GetLinearVelocity() );
+            b2Vec2 lv( me->body->GetLinearVelocity() );
 			
 			lua_newtable( L );
 			lua_pushnumber( L , lv.x );
@@ -252,113 +237,113 @@ interface Body [[ Physics::Body * ]]
 			lua_rawseti( L , -2 , 2 );	
 		]]
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
 			lua_rawgeti( L , 2 , 1 );
 			lua_rawgeti( L , 2 , 2 );
 			
-			self->body->SetLinearVelocity( b2Vec2( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) ) );
+			me->body->SetLinearVelocity( b2Vec2( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) ) );
 			lua_pop( L , 2 );
 		]];
 		
 	double angular_velocity
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-			angular_velocity = Physics::World::radians_to_degrees( self->body->GetAngularVelocity() );
+			angular_velocity = Physics::World::radians_to_degrees( me->body->GetAngularVelocity() );
 		]]
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-			self->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
+			me->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
 		]];
 
 	readonly double mass
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            mass = self->body->GetMass();
+            mass = me->body->GetMass();
         ]];
 
 	/* TODO: mass_data */
 		
 	double linear_damping
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            linear_damping = self->body->GetLinearDamping();
+            linear_damping = me->body->GetLinearDamping();
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->SetLinearDamping( linear_damping );
+            me->body->SetLinearDamping( linear_damping );
         ]];
 
 	double angular_damping
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            angular_damping = self->body->GetAngularDamping();
+            angular_damping = me->body->GetAngularDamping();
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->SetAngularDamping( angular_damping );
+            me->body->SetAngularDamping( angular_damping );
         ]];
 
 	bool bullet
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            bullet = self->body->IsBullet();
+            bullet = me->body->IsBullet();
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->SetBullet( bullet );
+            me->body->SetBullet( bullet );
         ]];
 
 	bool sleeping_allowed
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            sleeping_allowed = self->body->IsSleepingAllowed();
+            sleeping_allowed = me->body->IsSleepingAllowed();
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->SetSleepingAllowed( sleeping_allowed );
+            me->body->SetSleepingAllowed( sleeping_allowed );
         ]];
 
 	bool fixed_rotation
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            fixed_rotation = self->body->IsFixedRotation();
+            fixed_rotation = me->body->IsFixedRotation();
         ]]
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->SetFixedRotation( fixed_rotation );
+            me->body->SetFixedRotation( fixed_rotation );
         ]];
 
 	readonly table contacts
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->world->push_contact_list( self->body->GetContactList() );
+            me->world->push_contact_list( me->body->GetContactList() );
         ]];
 
 	synchronize( )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->synchronize_body();
+            me->synchronize_body();
         ]];
 
 	apply_force( table force , table point )
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             lua_rawgeti( L , force , 1 );
             lua_rawgeti( L , force , 2 );
@@ -366,24 +351,24 @@ interface Body [[ Physics::Body * ]]
             lua_rawgeti( L , point , 1 );
             lua_rawgeti( L , point , 2 );
 
-			self->body->ApplyForce(
+			me->body->ApplyForce(
 			    b2Vec2( lua_tonumber( L , -4 ) , lua_tonumber( L , -3 ) ) ,
-				b2Vec2( self->world->screen_to_world( lua_tonumber( L , -2 ) ),
-				        self->world->screen_to_world( lua_tonumber( L , -1 ) ) ) );
+				b2Vec2( me->world->screen_to_world( lua_tonumber( L , -2 ) ),
+				        me->world->screen_to_world( lua_tonumber( L , -1 ) ) ) );
 
 			lua_pop( L , 4 );
 		]];
 		
 	apply_torque( double torque )
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->ApplyTorque( torque );
+            me->body->ApplyTorque( torque );
 		]];
 		
 	apply_linear_impulse( table force , table point )
 		[[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             lua_rawgeti( L , force , 1 );
             lua_rawgeti( L , force , 2 );
@@ -391,40 +376,34 @@ interface Body [[ Physics::Body * ]]
             lua_rawgeti( L , point , 1 );
             lua_rawgeti( L , point , 2 );
 
-            self->body->ApplyLinearImpulse(
+            me->body->ApplyLinearImpulse(
                     b2Vec2( lua_tonumber( L , -4 ) , lua_tonumber( L , -3 ) ) ,
-                    b2Vec2( self->world->screen_to_world( lua_tonumber( L , -2 ) ),
-                          self->world->screen_to_world( lua_tonumber( L , -1 ) ) ) );
+                    b2Vec2( me->world->screen_to_world( lua_tonumber( L , -2 ) ),
+                          me->world->screen_to_world( lua_tonumber( L , -1 ) ) ) );
 
             lua_pop( L , 4 );
 		]];
 	
 	apply_angular_impulse( double impulse )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            self->body->ApplyAngularImpulse( impulse );
+            me->body->ApplyAngularImpulse( impulse );
         ]];
 
-    Body set( table props )
-        [[
-            self->check( L );
-            ClutterUtil::set_props_from_table( L , props );
-            lua_pushvalue( L , 1 );
-        ]];
 
     #-------------------------------------------------------------------------
     # Fixtures
 
     readonly table fixtures
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             lua_newtable( L );
             int t = lua_gettop( L );
             int i = 1;
 
-            for( b2Fixture * f = self->body->GetFixtureList(); f ; f = f->GetNext() , ++i )
+            for( b2Fixture * f = me->body->GetFixtureList(); f ; f = f->GetNext() , ++i )
             {
                 lua_newtable( L );
 
@@ -465,11 +444,11 @@ interface Body [[ Physics::Body * ]]
 
     bool remove_fixture( int fixture_handle )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             result = false;
 
-            for( b2Fixture * f = self->body->GetFixtureList(); f ; f = f->GetNext() )
+            for( b2Fixture * f = me->body->GetFixtureList(); f ; f = f->GetNext() )
             {
                 if ( GPOINTER_TO_INT( f->GetUserData() ) == fixture_handle )
                 {
@@ -482,9 +461,9 @@ interface Body [[ Physics::Body * ]]
 
     remove_all_fixtures()
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
-            for( b2Fixture * f = self->body->GetFixtureList(); f ; )
+            for( b2Fixture * f = me->body->GetFixtureList(); f ; )
             {
                 b2Fixture * next = f->GetNext();
 
@@ -497,22 +476,22 @@ interface Body [[ Physics::Body * ]]
 
     int add_fixture( table properties )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             result = 0;
 
-            b2FixtureDef fd = self->world->create_fixture_def( properties );
+            b2FixtureDef fd = me->world->create_fixture_def( properties );
 
             if ( ! fd.shape )
             {
                 return luaL_error( L , "Missing shape" );
             }
 
-            result = self->world->get_next_handle();
+            result = me->world->get_next_handle();
 
             fd.userData = GINT_TO_POINTER( result );
 
-            self->body->CreateFixture( & fd );
+            me->body->CreateFixture( & fd );
         ]];
 
     #..........................................................................
@@ -520,19 +499,19 @@ interface Body [[ Physics::Body * ]]
 
     bool remove_joint( int joint_handle )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             gpointer h = GINT_TO_POINTER( joint_handle );
 
             result = false;
 
-            for( b2JointEdge * e = self->body->GetJointList(); e; e = e->next )
+            for( b2JointEdge * e = me->body->GetJointList(); e; e = e->next )
             {
                 if ( e->joint && e->joint->GetUserData() == h )
                 {
                     result = true;
 
-                    self->world->get_world()->DestroyJoint( e->joint );
+                    me->world->get_world()->DestroyJoint( e->joint );
 
                     break;
                 }
@@ -541,7 +520,7 @@ interface Body [[ Physics::Body * ]]
 
     int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
 
@@ -550,24 +529,22 @@ interface Body [[ Physics::Body * ]]
                 return luaL_error( L , "Invalid body" );
             }
 
-            other->check( L );
-
-            b2Body * ba = self->body;
+            b2Body * ba = me->body;
             b2Body * bb = other->body;
 
             lua_rawgeti( L , anchor , 1 );
             lua_rawgeti( L , anchor , 2 );
 
-            float32 ax = self->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 ay = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+            float32 ax = me->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 ay = me->world->screen_to_world( lua_tonumber( L , -1 ) );
 
             lua_pop( L , 2 );
 
             lua_rawgeti( L , other_anchor , 1 );
             lua_rawgeti( L , other_anchor , 2 );
 
-            float32 bx = self->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 by = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+            float32 bx = me->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 by = me->world->screen_to_world( lua_tonumber( L , -1 ) );
 
             lua_pop( L , 2 );
 
@@ -592,9 +569,9 @@ interface Body [[ Physics::Body * ]]
                 lua_pop( L , 1 );
             }
 
-            result = self->world->get_next_handle();
+            result = me->world->get_next_handle();
 
-            b2Joint * joint = self->world->get_world()->CreateJoint( & d );
+            b2Joint * joint = me->world->get_world()->CreateJoint( & d );
 
             joint->SetUserData( GINT_TO_POINTER( result ) );
 
@@ -602,7 +579,7 @@ interface Body [[ Physics::Body * ]]
 
     int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
 
@@ -611,16 +588,14 @@ interface Body [[ Physics::Body * ]]
                 return luaL_error( L , "Invalid body" );
             }
 
-            other->check( L );
-
-            b2Body * ba = self->body;
+            b2Body * ba = me->body;
             b2Body * bb = other->body;
 
             lua_rawgeti( L , anchor , 1 );
             lua_rawgeti( L , anchor , 2 );
 
-            float32 x = self->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 y = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+            float32 x = me->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 y = me->world->screen_to_world( lua_tonumber( L , -1 ) );
 
             lua_pop( L , 2 );
 
@@ -674,16 +649,16 @@ interface Body [[ Physics::Body * ]]
 
             }
 
-            result = self->world->get_next_handle();
+            result = me->world->get_next_handle();
 
-            b2Joint * joint = self->world->get_world()->CreateJoint( & j );
+            b2Joint * joint = me->world->get_world()->CreateJoint( & j );
 
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
     int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
         [[
-            self->check( L );
+            Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
 
@@ -692,9 +667,7 @@ interface Body [[ Physics::Body * ]]
                 return luaL_error( L , "Invalid body" );
             }
 
-            other->check( L );
-
-            b2Body * ba = self->body;
+            b2Body * ba = me->body;
             b2Body * bb = other->body;
 
             // TODO: at least one of the bodies has to be dynamic with a non-fixed rotation
@@ -702,16 +675,16 @@ interface Body [[ Physics::Body * ]]
             lua_rawgeti( L , anchor , 1 );
             lua_rawgeti( L , anchor , 2 );
 
-            float32 x = self->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 y = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+            float32 x = me->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 y = me->world->screen_to_world( lua_tonumber( L , -1 ) );
 
             lua_pop( L , 2 );
 
             lua_rawgeti( L , axis , 1 );
             lua_rawgeti( L , axis , 2 );
 
-            float32 ax = self->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 ay = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+            float32 ax = me->world->screen_to_world( lua_tonumber( L , -2 ) );
+            float32 ay = me->world->screen_to_world( lua_tonumber( L , -1 ) );
 
             lua_pop( L , 2 );
 
@@ -738,14 +711,14 @@ interface Body [[ Physics::Body * ]]
                 lua_getfield( L , properties , "lower_translation" );
                 if ( ! lua_isnil( L , -1 ) )
                 {
-                    p.lowerTranslation = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+                    p.lowerTranslation = me->world->screen_to_world( lua_tonumber( L , -1 ) );
                 }
                 lua_pop( L , 1 );
 
                 lua_getfield( L , properties , "upper_translation" );
                 if ( ! lua_isnil( L , -1 ) )
                 {
-                    p.upperTranslation = self->world->screen_to_world( lua_tonumber( L , -1 ) );
+                    p.upperTranslation = me->world->screen_to_world( lua_tonumber( L , -1 ) );
                 }
                 lua_pop( L , 1 );
 
@@ -771,32 +744,40 @@ interface Body [[ Physics::Body * ]]
                 lua_pop( L , 1 );
             }
 
-            result = self->world->get_next_handle();
+            result = me->world->get_next_handle();
 
-            b2Joint * joint = self->world->get_world()->CreateJoint( & p );
+            b2Joint * joint = me->world->get_world()->CreateJoint( & p );
 
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
     callback on_begin_contact( table contact )
         [[
-            self->world->attach_body_callback( self , Physics::BEGIN_CONTACT , on_begin_contact );
+            Physics::Body * me = Physics::Body::get( self );
+
+            me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , on_begin_contact );
         ]];
 
     callback on_end_contact( table contact )
         [[
-            self->world->attach_body_callback( self , Physics::END_CONTACT , on_end_contact );
+            Physics::Body * me = Physics::Body::get( self );
+
+            me->world->attach_body_callback( me , Physics::END_CONTACT , on_end_contact );
         ]];
 
 
     callback on_pre_solve_contact( table contact )
         [[
-            self->world->attach_body_callback( self , Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
+            Physics::Body * me = Physics::Body::get( self );
+
+            me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
         ]];
 
     callback on_post_solve_contact( table contact )
         [[
-            self->world->attach_body_callback( self , Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
+            Physics::Body * me = Physics::Body::get( self );
+
+            me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
 }
 
@@ -877,9 +858,9 @@ global physics [[ Physics::World * ]]
             self->clear_debug();
         ]];
 		
-	Body Body( table properties )
+	Body Body( UIElement element , table properties )
 		[[
-            int n = self->create_body( properties , new_Body );
+            int n = self->create_body( element , properties , BODY_METATABLE );
 
             if ( ! n )
             {

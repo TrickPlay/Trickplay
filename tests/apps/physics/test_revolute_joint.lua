@@ -12,7 +12,7 @@ local top = Rectangle
 
 screen:add( top )
 
-local top_body = physics:Body{ source = top , type = "static" }
+local top_body = physics:Body( top , { type = "static" } )
 
 -------------------------------------------------------------------------------
 -- Ropes
@@ -49,9 +49,9 @@ for i = 1 , ROPE_COUNT do
     
     -- Create the bodies
 
-    local rope_body = physics:Body{ source = rope , friction = 0 , density = 0.1 , awake = false }
+    local rope_body = physics:Body( rope , { friction = 0 , density = 0.1 , awake = false } )
 
-    local crate_body = physics:Body{ source = crate , friction = 0.1 , density = 0.8 , bounce = 0.9 , awake = false , fixed_rotation = true }
+    local crate_body = physics:Body( crate , { friction = 0.1 , density = 0.8 , bounce = 0.9 , awake = false , fixed_rotation = true } )
     
     -- Join the rope to the top
     

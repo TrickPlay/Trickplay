@@ -85,17 +85,15 @@ local function make_hopper()
     actor.anchor_point = actor.center
 
 
-    local body = physics:Body
+    local body = physics:Body( actor , 
     {
-        source          = actor,
-        
         density         = 1,
         bounce          = 0,
         friction        = 0,
         bullet          = true,
         fixed_rotation  = true,
         shape           = physics:Edge( { - HOPPER_FEET_HALF_WIDTH , hh } , { HOPPER_FEET_HALF_WIDTH , hh } )
-    }
+    })
     
     return actor , body
     
@@ -114,15 +112,14 @@ local function make_platform( asset_name )
         children = { image }
     }
     
-    local body = physics:Body
+    local body = physics:Body( actor , 
     {
-        source = actor,
         type   = "static",
         density = 1,
         friction = 0,
         bounce = 0,
         sensor = true
-    }
+    })
 
     return actor , body
     
@@ -132,15 +129,15 @@ end
 
 local function start_playing( fade_splash , hopper , platform , on_dead )
     
-    local hopper_actor = hopper.source
+    local hopper_actor = hopper
     local hopper_hh    = hopper_actor.h / 2
-    local platform_hh  = platform.source.h / 2 
+    local platform_hh  = platform.h / 2 
 
         
     ---------------------------------------------------------------------------
     -- Add the splash platform to the table of platforms
         
-    local pair = { platform , platform.source }     
+    local pair = { platform , platform }     
 
     local platforms = { pair }
     
@@ -366,6 +363,8 @@ local function start_playing( fade_splash , hopper , platform , on_dead )
             
             move_up( high_score_label )
             
+            move_up( life_bar )
+            
             done = my == 0
             
             dy = dy / 2
@@ -417,7 +416,7 @@ local function start_playing( fade_splash , hopper , platform , on_dead )
     
         recycle_platform = function( platform_actor , platform_body )
         
-            print( "LEAVES ALIVE" , leaves_alive )
+            --print( "LEAVES ALIVE" , leaves_alive )
         
             -- See if it has a leaf
             
@@ -1010,9 +1009,9 @@ main = function()
     
     local _ , platform = make_platform()
     
-    screen:add( platform.source )
+    screen:add( platform )
     
-    platform.position = { screen.w - ( platform.source.w  / 2 + 40 ) , screen.h - 100 }
+    platform.position = { screen.w - ( platform.w  / 2 + 40 ) , screen.h - 100 }
     
     ---------------------------------------------------------------------------
     -- Add the hopper
@@ -1022,7 +1021,7 @@ main = function()
     hopper.x = platform.x
     hopper.y = screen.h + 200 
     
-    screen:add( hopper.source )
+    screen:add( hopper )
     
     hopper.linear_velocity = { 0 , - HOPPER_TARGET_VY * 1.5 }
     
@@ -1114,11 +1113,11 @@ main = function()
             function timer:on_timer( )
             
                 for i = 1 , # leaves do
-                    leaves[ i ].source:unparent()
+                    leaves[ i ]:unparent()
                 end
                 
                 for i = 1 , # compost do
-                    compost[ i ].source:unparent()
+                    compost[ i ]:unparent()
                 end
                 
                 compost = {}
@@ -1149,7 +1148,7 @@ main = function()
                 
                     table.insert( compost , leaf )
                     table.remove( leaves , i )
-                    leaf.source:hide()
+                    leaf:hide()
                     
                 end
                 
@@ -1168,17 +1167,16 @@ main = function()
             if # compost > 0 then
                 leaf = table.remove( compost )
             else
-                leaf = physics:Body
+                leaf = physics:Body( asset_cache( assets.leaf ) ,
                 {
-                    source = asset_cache( assets.leaf ),
                     density = 1,
                     friction = 0.5,
                     bounce = 0.2
-                }
+                })
                 
-                screen:add( leaf.source )
+                screen:add( leaf )
                 
-                leaf.source:lower( title )
+                leaf:lower( title )
             end
             
             table.insert( leaves , leaf )
@@ -1191,7 +1189,7 @@ main = function()
                 angle = math.random( 360 )
             }
             
-            leaf.source:show()
+            leaf:show()
         
         end
     
@@ -1200,18 +1198,18 @@ main = function()
     ---------------------------------------------------------------------------
     -- Add a bumper to catch leaves
     
-    local bumper = physics:Body
-    {
-        source = Group
+    local bumper = physics:Body( 
+        Group
         {
             size = { 1273 - 575 , 4 } ,
             position = { 575 , 960 }
         } ,
-        type = "static" ,
-        friction = 1
-    }
+        {
+            type = "static" ,
+            friction = 1
+        })
     
-    screen:add( bumper.source )
+    screen:add( bumper )
     
     ---------------------------------------------------------------------------    
     
@@ -1233,7 +1231,7 @@ main = function()
                 
                 idle.on_idle = nil
                 
-                bumper.source:unparent()
+                bumper:unparent()
                 
                 leaf_blower( 0 , true )
                                 

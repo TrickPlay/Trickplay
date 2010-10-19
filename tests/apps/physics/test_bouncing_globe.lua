@@ -6,10 +6,8 @@ local globe_image = Image
     scale = { 0.5 , 0.5 },
 }
 
-globe = physics:Body
+globe = physics:Body( globe_image , 
 {
-    source = globe_image,
-    
     -- Instead of taking the default rectangular-shaped fixture, we
     -- add our own shape
     
@@ -19,6 +17,7 @@ globe = physics:Body
     bounce = 0.8,
     friction = 0.1
 }
+)
 
 -- Start it out spinning
 
@@ -26,49 +25,48 @@ globe.angular_velocity = -1000
 
 -------------------------------------------------------------------------------
            
-local ground = physics:Body
-{
-    source = Rectangle
+local ground = physics:Body( 
+    Rectangle
     {
         color = "00FF0066" ,
         size = { screen.w , 100 } ,
         position = { screen.w / 2 , screen.h - 150 } ,
         anchor_point = { screen.w / 2 , 50 },
         z_rotation = { 10 , 0 , 0  }
-    },
-    
-    friction = 0.9,
-    type = "static"
-}
+    },    
+    {
+        friction = 0.9,
+        type = "static"
+    })
 
 
-screen:add( globe.source , ground.source )
+screen:add( globe , ground )
 
 -------------------------------------------------------------------------------
 -- Add invisible bumpers on the left and right of the screen
 -- Note that these do not have actors attached to them.
 
-local left_bumper = physics:Body
-{
-    type = "static" ,
-    source = Group
+local left_bumper = physics:Body(
+    Group
     {
         size = { 2 , screen.h },
         position = { -2 , 0 }
-    }
-}
+    },
+    {
+        type = "static" ,
+    })
         
-local right_bumper = physics:Body
-{
-    type = "static",
-    source = Group
+local right_bumper = physics:Body( 
+    Group
     {
         size = { 2 , screen.h },
         position = { screen.w , 0 }
-    }
-}
+    },
+    {
+        type = "static",
+    })
 
-screen:add( right_bumper.source , left_bumper.source )
+screen:add( right_bumper , left_bumper )
 
 -------------------------------------------------------------------------------
 
