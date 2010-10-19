@@ -108,7 +108,7 @@ MenuView = Class(View, function(view, model, ...)
     local layout_strip_1 = Clone{source=layout_strip_image}
     local layout_strip_2 = Clone{source=layout_strip_image, y = -layout_strip_1.height}
     local layout_strip_3 = Clone{source=layout_strip_image, y = layout_strip_1.height}
-    local layout_strip = Group{position = {0,-layout_strip_image.height*.75}}
+    local layout_strip = Group{position = {0,-layout_strip_image.height*6/7}}
     layout_strip:add(layout_strip_1, layout_strip_2, layout_strip_3)
     layout_mask:add(layout_strip)
     -- text describing type of layout
@@ -325,11 +325,11 @@ MenuView = Class(View, function(view, model, ...)
         local interval = nil
         if -1 == dir[2] then
             interval = {["y"] = Interval(layout_strip.y, layout_strip.y + 
-                layout_strip_image.height*.25)}
+                layout_strip_image.height*1/7)}
             gameloop:add(layout_strip, 300, nil, interval,
                 function()
                     if current_layout == Layouts.LAST then
-                        layout_strip.y = -layout_strip_image.height*.75
+                        layout_strip.y = -layout_strip_image.height*6/7
                     end
                     if change_layout then
                         view:change_layout(current_layout, dir)
@@ -337,7 +337,7 @@ MenuView = Class(View, function(view, model, ...)
                 end)
         elseif 1 == dir[2] then
             interval = {["y"] = Interval(layout_strip.y, layout_strip.y - 
-                layout_strip_image.height*.25)}
+                layout_strip_image.height*1/7)}
             gameloop:add(layout_strip, 300, nil, interval,
                 function()
                     if current_layout == 1 then
