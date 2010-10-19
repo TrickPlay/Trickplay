@@ -23,13 +23,12 @@ for i = 1 , 30 do
     }
     
     local b = 
-    physics:Body
+    physics:Body( r , 
         {
-            source = r,
             density = 1.0 ,
             friction = 0.5 ,
             bounce = 0.5,
-        }
+        } )
         
     if not body then
         body = b
@@ -54,7 +53,7 @@ g = Rectangle
 screen:add( g )
 
 
-ground = physics:Body{ source = g , friction = 0.2 , type = "static" }
+ground = physics:Body( g , { friction = 0.2 , type = "static" } )
 
 g = Rectangle
 {
@@ -67,22 +66,22 @@ g = Rectangle
 
 screen:add( g )
 
-slide = physics:Body{ source = g , friction = 0.8 , type = "static" }
+slide = physics:Body( g , { friction = 0.8 , type = "static" } )
 
 -------------------------------------------------------------------------------
 -- Add invisible bumpers on the left, right and bottom of the screen
 
 g = Group{ size = { 2 , screen.h } , position = { -2 , 0 } }
 screen:add( g )
-physics:Body{ source = g , type = "static" }
+physics:Body( g , { type = "static" } )
 
 g = Group{ size = { 2 , screen.h } , position = { screen.w , 0 } }
 screen:add( g )
-physics:Body{ source = g , type = "static" }
+physics:Body( g , { type = "static" } )
 
 g = Group{ size = { screen.w , 2 } , position = { 0 , screen.h } }
 screen:add( g )
-physics:Body{ source = g , type = "static" }
+physics:Body( g , { type = "static" } )
 
 -------------------------------------------------------------------------------
 

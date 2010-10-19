@@ -7,59 +7,50 @@ local ground = Rectangle
     position = { 0 , screen.h - 30 }
 }
 
-ground = physics:Body
+ground = physics:Body( ground , 
 {
-    source = ground,
     type = "static",
     density = 1,
     friction = 0.5,
     bounce = 0.1
-}
+} )
 
-screen:add( ground.source )
+screen:add( ground )
 
 -------------------------------------------------------------------------------
 
 local bumper
 
-bumper = physics:Body
-{
-    source =
-    
+bumper = physics:Body(
         Rectangle
         {
             color = "00FF00",
             size = { screen.h * 1.2 , screen.h / 4 },
         },
-        
-    type = "static"
-    
-}
+        {
+            type = "static"
+        })
 
 bumper.position = { 0 , screen.h / 2 }
 bumper.angle = 75
 
-screen:add( bumper.source )
+screen:add( bumper )
 
 
-bumper = physics:Body
-{
-    source =
-    
+bumper = physics:Body(
         Rectangle
         {
             color = "00FF00",
             size = { screen.h * 1.2 , screen.h / 4 },
         },
-        
-    type = "static"
-    
-}
+        {
+            type = "static"    
+        })
 
 bumper.position = { screen.w , screen.h / 2 }
 bumper.angle = -75
 
-screen:add( bumper.source )
+screen:add( bumper )
 
 -------------------------------------------------------------------------------
 
@@ -69,34 +60,31 @@ local pole = Rectangle
 {
     color = "473232",
     size = { 30 , POLE_HEIGHT },
-    position = { screen.w / 2 - 15 , screen.h - ( POLE_HEIGHT + ground.source.h ) }
+    position = { screen.w / 2 - 15 , screen.h - ( POLE_HEIGHT + ground.h ) }
 }
 
 screen:add( pole )
 
-pole = physics:Body
+pole = physics:Body( pole , 
 {
-    source = pole,
     density = 1,
     type = "static",
     filter = { category = 1 }
-}
+})
 
 -------------------------------------------------------------------------------
 
 local PADDLE_HEIGHT = POLE_HEIGHT / 2 
 
-local paddle = physics:Body
-{
-    source = Rectangle
+local paddle = physics:Body(
+    Rectangle
     {
         color = "FFFFFF",
         size = { 30 , PADDLE_HEIGHT }
     },
-    
-    density = 0.8,
-    
-}
+    {
+        density = 0.8,    
+    } )
 
 paddle.position = { pole.x , pole.y - POLE_HEIGHT / 2 }
 paddle.angle = 90
@@ -113,7 +101,7 @@ paddle:PrismaticJoint( pole , { 0 , 0 } , { 0 , 1 } ,
     }
 )
 
-screen:add( paddle.source )
+screen:add( paddle )
 
 -------------------------------------------------------------------------------
 
@@ -125,23 +113,23 @@ screen:add( globe )
 
 for i = 1 , BLOCK_COUNT do
 
-    local block = physics:Body
-    {
-        source = Clone
+    local block = physics:Body(
+        Clone
         {
             source = globe ,
             opacity = 255,
             scale = { GLOBE_SCALE , GLOBE_SCALE },
             position = { screen.w / BLOCK_COUNT * i  , - 50 }
         },
-        type = "dynamic",
-        density = 2,
-        bounce = 0.8,
-        shape = physics:Circle( ( globe.w / 2 ) * GLOBE_SCALE ),
-        filter = { category = 3 , mask = { 0 , 2 , 3 } }
-    }
+        {
+            type = "dynamic",
+            density = 2,
+            bounce = 0.8,
+            shape = physics:Circle( ( globe.w / 2 ) * GLOBE_SCALE ),
+            filter = { category = 3 , mask = { 0 , 2 , 3 } }
+        })
     
-    screen:add( block.source )
+    screen:add( block )
 end
 
 -------------------------------------------------------------------------------

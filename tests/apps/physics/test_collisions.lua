@@ -4,12 +4,11 @@ math.randomseed( os.time() )
 -------------------------------------------------------------------------------
 -- Add invisible walls
 
-local lb = physics:Body{ type = "static" , source = Group{ size = { 2 , screen.h } , position = { -2 , 0 } } }
-local rb = physics:Body{ type = "static" , source = Group{ size = { 2 , screen.h } , position = { screen.w , 0 } } }
-local tb = physics:Body{ type = "static" , source = Group{ size = { screen.w , 2 } , position = { 0 , -2 } } }
-local bb = physics:Body{ type = "static" , source = Group{ size = { screen.w , 2 } , position = { 0 , screen.h } } }
-
-screen:add( lb.source , rb.source , tb.source , bb.source )
+screen:add( 
+    physics:Body( Group{ size = { 2 , screen.h } , position = { -2 , 0 } } , { type = "static" } ),
+    physics:Body( Group{ size = { 2 , screen.h } , position = { screen.w , 0 } } , { type = "static" } ),
+    physics:Body( Group{ size = { screen.w , 2 } , position = { 0 , -2 } } , { type = "static" } ),
+    physics:Body( Group{ size = { screen.w , 2 } , position = { 0 , screen.h } } , { type = "static" } ) )
 
 -------------------------------------------------------------------------------
 
@@ -31,30 +30,31 @@ local function make_ball( color , filter )
     ball:fill()
     ball:finish_painting()
 
-    ball = physics:Body
-    {
-        source = ball:set
+    ball = physics:Body(
+    
+        ball,
         {
             position =
             {
                 math.random( BALL_SIZE / 2 , screen.w - BALL_SIZE / 2 ) ,
                 math.random( BALL_SIZE / 2 , screen.h - BALL_SIZE / 2 )
-            }
-        },
-        shape = physics:Circle( BALL_SIZE / 2 ),
-        density = 1,
-        friction = 0,
-        bounce = 1,
-        filter = filter,
-
-        -- Give the ball an initial velocity and some damping
+            },
+            
+            shape = physics:Circle( BALL_SIZE / 2 ),
+            density = 1,
+            friction = 0,
+            bounce = 1,
+            filter = filter,
     
-        linear_damping = 0.01,    
-        linear_velocity = { math.random( 5 , 10 ) , math.random( 5 , 10 ) },
-    }
+            -- Give the ball an initial velocity and some damping
+        
+            linear_damping = 0.01,    
+            linear_velocity = { math.random( 5 , 10 ) , math.random( 5 , 10 ) },
+        }
+    )
     
     
-    screen:add( ball.source )
+    screen:add( ball )
     
     ball_colors[ ball.handle ] = color
     
@@ -114,14 +114,14 @@ local caption = Text
 
 screen:add( caption )
 
-caption = physics:Body{ source = caption , density = 10 , friction = 0 , bounce = 1 }
+caption = physics:Body( caption , { density = 10 , friction = 0 , bounce = 1 } )
 
 function caption.on_begin_contact( caption , contact )
 
     local other = contact.other_body[ caption.handle ]
     
     if other then
-        caption.source.color = ball_colors[ other ] or "FFFFFF"
+        caption.color = ball_colors[ other ] or "FFFFFF"
     end
 
 end
