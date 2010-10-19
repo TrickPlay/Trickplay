@@ -12,7 +12,7 @@ local ground = Rectangle
 
 screen:add( ground )
 
-physics:Body{ source = ground , friction = 0.5 , type = "static" }
+physics:Body( ground , { friction = 0.5 , type = "static" } )
 
 -------------------------------------------------------------------------------
 -- Edges
@@ -21,16 +21,16 @@ physics:Body{ source = ground , friction = 0.5 , type = "static" }
 
 local left_edge = Group{ size = { 2 , screen.h } , position = { -2 , 0 } }
 screen:add( left_edge )
-physics:Body{ source = left_edge , type = "static" }
+physics:Body( left_edge , { type = "static" } )
 
 local right_edge = Group{ size = { 2 , screen.h } , position = { screen.w , 0 } }
 screen:add( right_edge )
-physics:Body{ source = right_edge , type = "static" }
+physics:Body( right_edge  , { type = "static" } )
 
 -- Top edge is inactive at first so we can drop stuff from above it
 
 local top_edge_actor = Group{ size = { screen.w , 2 } , position = { 0 , -2 } }
-local top_edge = physics:Body{ source = top_edge_actor , type = "static" }
+local top_edge = physics:Body( top_edge_actor , { type = "static" } )
 
 -------------------------------------------------------------------------------
 -- Castle
@@ -64,51 +64,51 @@ local function build_castle()
     plank = make_plank()
     plank:set{ position = { LEFT , floor - wood.h / 2  } }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE } )
         
     plank = make_plank()
     plank:set{ position = { LEFT + 200 , floor - wood.h / 2  } }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE } )
     
     plank = make_plank( 90 )
     plank:set{ position = { LEFT + 100 , floor - wood.h - wood.w / 2 } }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE } )
 
     plank = make_plank( 30 )
     plank.position = { LEFT + 20 , floor - wood.h * 1.5 - wood.w / 2 - 10 }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false } )
     
     plank = make_plank( -30 )
     plank.position = { LEFT + 180 , floor - wood.h * 1.5 - wood.w / 2 - 10 }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false } )
 
 
     plank = make_plank( 90 )
     plank.position = { LEFT + 100 , floor - wood.h * 2.1 }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false } )
 
     
     plank = make_plank()
     plank:set{ position = { LEFT  , floor - wood.h * 2.65  } }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false } )
     
     
     plank = make_plank()
     plank:set{ position = { LEFT + 200 , floor - wood.h * 2.65  } }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false } )
 
 
     plank = make_plank( 90 )
     plank.position = { LEFT + 100 , floor - wood.h * 3.2 }
     screen:add( plank )
-    physics:Body{ source = plank , density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false }
+    physics:Body( plank , { density = DENSITY , friction = FRICTION , bounce = BOUNCE , awake = false } )
 
 end
 
@@ -129,13 +129,12 @@ local function drop_crate()
     
     screen:add( crate )
     
-    local crate_body = physics:Body
+    local crate_body = physics:Body( crate ,
     {
-        source = crate,
         bounce = 0.2,
         density = 3.0,
         awake = true
-    }
+    })
     
     return crate_body
     
@@ -170,7 +169,7 @@ function screen.on_key_down( screen , key )
 
             if not crate.awake then
             
-                crate.source.color = "FFFFFF"
+                crate.color = "FFFFFF"
                 
                 idle.on_idle = nil
                 
@@ -188,7 +187,7 @@ function screen.on_key_down( screen , key )
                     
                         screen.on_key_down = nil
                         
-                        crate.source.color = "FF0000"
+                        crate.color = "FF0000"
                     
                         -- Give the crate a push
                         
@@ -208,7 +207,7 @@ function screen.on_key_down( screen , key )
                             -- the key handler, so you can give it another push
                             
                             if not crate.awake then
-                                crate.source.color = "FFFFFF"
+                                crate.color = "FFFFFF"
                                 screen.on_key_down = old_key_down
                             end
                             
