@@ -32,7 +32,6 @@ TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( Box2D/Box2D.h							ENGINE_INCLUDE_DIRS )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -136,8 +135,6 @@ list(
     json-glib-1.0
     
     uriparser           
-    
-    Box2D
 )
 
 #--------------
