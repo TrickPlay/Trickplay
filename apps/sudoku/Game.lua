@@ -194,6 +194,7 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 			grid_of_groups[r][c]:add(t)
 			t.opacity=255
 		else
+			table.insert(cheat_list,{r,c})
 ---[[
 			if guesses[r][c].pen ~= 0 then
 				t= Clone{
@@ -378,7 +379,7 @@ print(empty_spaces)
 			g.grid_of_groups[r][c]:clear()
 		end                end
 		g.grid_of_groups = {}
-		empty_spaces = DevelopBoard(g.grid_of_groups,givens, guesses,the_blox)
+		empty_spaces,cheat_list = DevelopBoard(g.grid_of_groups,givens, guesses,the_blox)
 		print(empty_spaces)
 	end
 	function g:check_guess(r,c,v,t)
