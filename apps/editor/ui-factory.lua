@@ -68,12 +68,11 @@ function factory.make_dropdown( size , color )
     c:scale( 2 , ( c.h / c.w ) )
 
     local rr = ( c.w / 2 ) 
-    c:set_source_radial_pattern( 0 , 30 , 0 , 0 , 30 , c.w / 2 )
+    c:set_source_radial_pattern( 90 , 210 , 0 , 0 , 60 , c.w / 2 )
     c:add_source_pattern_color_stop( 0 , "00000000" )
     c:add_source_pattern_color_stop( 1 , "000000F0" )
     c:fill()   
     c:restore()
-
     -- Draw the glossy glow    
 
     local R = c.w * 2.2
@@ -116,6 +115,8 @@ function factory.make_text_menu_item( assets , caption )
     local BORDER_COLOR  = "FFFFFF"
     local BORDER_RADIUS = 12
     
+    local group = Group{}
+
     local function make_ring()
         local ring = Canvas{ size = { WIDTH , HEIGHT } }
         ring:begin_painting()
@@ -132,34 +133,119 @@ function factory.make_text_menu_item( assets , caption )
     end
     
     local text = Text{ text = caption }:set( STYLE )
+    text.name = "caption"
+    text.reactive = true
+    local ring = assets( "menu-item-ring" , make_ring )
+    local focus = assets( "assets/button-focus.png" )
+    local text_category, line_category
+    
+    if (caption == "TEXT                    [T]") then 
+	text_category = Text{ text = "INSERT : "}:set(STYLE)
+    elseif (caption == "LEFT           ") then
+	text_category = Text{ text = "ALIGNMENT : "}:set(STYLE)
+    elseif (caption == "H_SPACE	  ") then
+	text_category = Text{ text = "DISTRIBUTION : "}:set(STYLE)
+    elseif ( caption ==  "CLONE OBJECT    [C]" or 
+    	     caption ==  "BRING TO FRONT" ) then 
+        local function make_line()
+    		local LINE_WIDTH    =7 
+    	        local LINE_COLOR    = "FFFFFF5C"
+		local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
+        	line:begin_painting()
+        	line:new_path()
+        	line:move_to (0,0)
+        	line:line_to (WIDTH, 0)
+    		line:set_line_width (LINE_WIDTH)
+        	line:set_source_color(LINE_COLOR)
+    		line:stroke (true)
+    		line:fill (true)
+        	line:finish_painting()
+        	return line
+    	end 
+
+	line_category = make_line()
+    end 
+        
+    if text_category ~= nil then 
+        text_category.reactive = false
+	group = Group
+    	{
+        	size = { WIDTH , HEIGHT + text_category.h + PADDING_Y },
+        	children =
+        	{
+	    	text_category:set{position = {5, 6}},
+            	ring:set{ position = { 0 , text_category.h + PADDING_Y } },
+            	focus:set{ position = { 0 , text_category.h + PADDING_Y } , size = { WIDTH , HEIGHT } , opacity = 0 },
+            	text:set{ position = { 30 , text_category.h + PADDING_Y + 15 } }
+        	}
+    	}  
+    elseif line_category  ~= nil then 
+	group = Group
+    	{
+        	size = { WIDTH , HEIGHT + line_category.h },
+        	children =
+        	{
+		line_category:set{ position = {0,PADDING_Y } }, 
+            	ring:set{ position = { 0 , PADDING_Y *2 } },
+            	focus:set{ position = { 0 , PADDING_Y *2 } , size = { WIDTH , HEIGHT} , opacity = 0 },
+            	text:set{ position = { 30 , PADDING_Y *2 + 15 } }
+        	}
+    	}
+    else 
+ 	group = Group
+    	{
+        	size = { WIDTH , HEIGHT },
+        	children =
+        	{
+            	ring:set{ position = { 0 , 0} },
+            	focus:set{ position = { 0 , 0} , size = { WIDTH , HEIGHT } , opacity = 0 },
+            	text:set{ position = { 30 , 15 } }
+        	}
+    	}
+    end 
+
+    function group.extra.on_focus_in()
+         focus.opacity = 255
+    end
+    
+    function group.extra.on_focus_out()
+    	 focus.opacity = 0
+    end
+    
+    return group
+	
+end
+
+-------------------------------------------------------------------------------
+-- Makes a text menu item with out a ring around it 
+-------------------------------------------------------------------------------
+
+function factory.make_text_menu ( assets , caption )
+
+    local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
+    local PADDING_X     = 7 -- 7  The focus ring has this much padding around it
+    local PADDING_Y     = 7
+    local WIDTH         = 330 + ( PADDING_X * 2 )
+    local HEIGHT        = 46  + ( PADDING_Y * 2 )
+    local BORDER_WIDTH  = 1-- 2
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+      
+    local text = Text{ text = caption }:set( STYLE )
     
     text.name = "caption"
 
-    text.reactive = true
-
-    local ring = assets( "menu-item-ring" , make_ring )
-    
-    local focus = assets( "assets/button-focus.png" )
+    text.reactive = false 
 
     local group = Group
     {
         size = { WIDTH , HEIGHT },
         children =
         {
-            ring:set{ position = { 0 , 0 } },
-            focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
             text:set{ position = { 30 , 15 } }
         }
     }
-    
-    function group.extra.on_focus_in()
-        focus.opacity = 255
-    end
-    
-    function group.extra.on_focus_out()
-        focus.opacity = 0
-    end
-    
+        
     return group
 
 end
@@ -336,7 +422,7 @@ function factory.make_popup_bg(o_type, file_list_size)
 
    -- Set canvas size and color according to o_type 
     if(o_type == "Text") then 
-         size = {500, 870}
+         size = {500, 790}
     	 color = "472446" -- bora
     elseif(o_type == "Image") then
          size = {500, 770}
@@ -350,6 +436,19 @@ function factory.make_popup_bg(o_type, file_list_size)
     elseif(o_type == "Video") then
          size = {500, 500}
     	 color = "6d2b17" -- bam
+    elseif(o_type == "Code") then
+	 if(file_list_size == "Text") then 
+         	size = {800, 630}
+	 elseif(file_list_size == "Image") then 
+         	size = {800, 380}
+	 elseif(file_list_size == "Rectangle") then 
+         	size = {800, 470}
+	 elseif(file_list_size == "Clone") then 
+         	size = {800, 380}
+	 else 
+         	size = {800, 380}
+	 end 
+    	 color = {0, 25, 25, 255}
     else 
 	 size = {900, file_list_size + 180} 
 	 color = "5a252b"
@@ -438,7 +537,7 @@ function factory.make_popup_bg(o_type, file_list_size)
     c:stroke( true )
 
   -- Draw title line
-    if(o_type ~= "msgw" ) then 
+    if(o_type ~= "msgw" and o_type ~= "Code") then 
          c:new_path()
          c:move_to (0, 74)
          c:line_to (c.w, 74)
@@ -554,6 +653,18 @@ function factory.make_xbox()
     return c
 end 
 
+--[[ 
+function factory.draw_focus_ring()
+        local ring = Canvas{ size = {650, 60} }
+        ring:begin_painting()
+        ring:set_source_color("1b911b")
+        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 635, 45, 12)
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
+]]
 function factory.draw_focus_ring(w, h)
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
@@ -586,7 +697,7 @@ function factory.draw_line()
     local PADDING_Y     = 7   
     local WIDTH         = 900
     local LINE_WIDTH    = 5
-	local LINE_COLOR    = "FFFFFF"
+    local LINE_COLOR    = "FFFFFF"
 
 
 	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
@@ -696,7 +807,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.n_selected(v)
                       screen.grab_key_focus(screen) 
 		      -- org_obj, new_obj = inspector_apply (v, inspector) 
-		      editor.view_code()
+		      editor.view_code(v)
 	              return true
 		  elseif (item_v == "apply") then 
 		      org_obj, new_obj = inspector_apply (v, inspector) 
@@ -756,7 +867,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.n_selected(v)
                       screen.grab_key_focus(screen) 
 		      -- org_obj, new_obj = inspector_apply (v, inspector) 
-		      editor.view_code()
+		      editor.view_code(v)
 	     elseif (item_v == "apply") then 
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
@@ -809,7 +920,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	else 
     	     text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
-             text.position  = {WIDTH - space , 0}
+             text.position  = {WIDTH - space , PADDING_Y} --kkk
     	     group:add(text)
 
 	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 

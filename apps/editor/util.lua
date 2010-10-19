@@ -22,74 +22,119 @@ function getObjnames()
     return obj_names
 end
 
+function find_parent(child_obj) 
+   for i, v in pairs(g.children) do
+   	if g:find_child(v.name) then
+   	     if (v.type == "Group") then 
+   	          if(v:find_child(child_obj.name)) then
+		       return v
+   		  end 
+   	     end 
+   	end
+   end
+end 
+
+
 function create_on_button_down_f(v)
 	v.extra.selected = false
 	local org_object, new_object 
 	print("creating on_button_down_f of ", v.type) 
 	
         function v:on_button_down(x,y,button,num_clicks)
-               print (v.type, button, " button down ")
-               if(button == 3 or num_clicks >= 2) then
-                    editor.inspector(v)
-                    return true;
-               end 
-	       if(mouse_mode == S_CLONE) then editor.clone(v) end
-	       if(mouse_mode == S_SELECT and v.extra.selected == false) then 
-			editor.selected(v) 
+           --print (v.type, button, " button down ")
+	   if(v.name ~= "inspector" and v.name ~= "Code") then 
+	       if (v.extra.is_in_group == true and control == false) then 
+		    local p_obj = find_parent(v)
+                    if(button == 3 or num_clicks >= 2) then
+                         editor.inspector(p_obj)
+                         return true;
+                    end 
+	            if(mouse_mode == S_SELECT and p_obj.extra.selected == false) then 
+		     	editor.selected(p_obj)
+			p_obj.extra.selected = true 
+	            elseif (p_obj.extra.selected == true) then 
+		     	editor.n_selected(p_obj)
+			p_obj.extra.selected = false 
+	       	    end
+	            org_object = copy_obj(p_obj)
+           	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+           	    return true;
+	       else  -- v.extra.is_in_group == false
+                    if(button == 3 or num_clicks >= 2) then
+                         editor.inspector(v)
+                         return true;
+                    end 
+	            if(mouse_mode == S_SELECT and v.extra.selected == false) then 
+		     	editor.selected(v) 
 			v.extra.selected = true 
-			print("true1")
-	       elseif (v.extra.selected == true) then 
+	            elseif (v.extra.selected == true) then 
+			if(v.type == "Text") then 
+				v:set{cursor_visible = true}
+     				v.grab_key_focus(v)
+			end 
 			editor.n_selected(v) 
 			v.extra.selected = false 
-			print("false1")
-	       end
-
-
-	       org_object = copy_obj(v)
-               dragging = {v, x - v.x, y - v.y }
-	       if (shift == true) then 
-                    v:raise_to_top()
-	       end 
-               return true;
+	       	    end
+	            org_object = copy_obj(v)
+           	    dragging = {v, x - v.x, y - v.y }
+           	    return true;
+	   	 end
+	   else 
+                 dragging = {v, x - v.x, y - v.y }
+           	 return true;
+           end
         end
+
         function v:on_button_up(x,y,button,num_clicks)
-	      new_object = copy_obj(v)
-	      if(dragging ~= nil) then 
-	            local actor , dx , dy = unpack( dragging )
-	            new_object.position = {x-dx, y-dy}
-                    table.insert(undo_list, {v.name, CHG, org_object, new_object})
-	            dragging = nil
-	            if(shift == true and v.type ~= "Group") then 
-			for i, j in pairs(g.children) do
-             			if g:find_child(j.name) then
-					if (j.type == "Group") then 
-					     local childrent_t = j.children 
-        				     for e in values(children_t) do
-						  if(e == v.name) then	
-							v_is_child = true
-						  end 
-					     end 
-					     if (x > j.x and x < j.x + j.w and y > j.y and y < j.y + j.h) then 	
-						 g:remove(v)
-						 table.insert(v.extra, v.x)
-						 table.insert(v.extra, v.y)
-						 v.x = v.x - j.x
-			 			 v.y = v.y - j.y
-						 j:add(v)
-						 j.reactive = true 
-						 create_on_button_down_f(j)
-						 screen.grab_key_focus(screen)
-					 	 mouse_mode = S_SELECT
-						 break
-					     end
-					end 
-				end
+	   if(v.name ~= "inspector") then 
+	        if (v.extra.is_in_group == true) then 
+		    local p_obj = find_parent(v)
+		    new_object = copy_obj(p_obj)
+		    if(dragging ~= nil) then 
+	            	local actor , dx , dy = unpack( dragging )
+	            	new_object.position = {x-dx, y-dy}
+			if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+			editor.n_selected(v) 
+			editor.n_selected(new_object) 
+			editor.n_selected(org_object) 
+                    	table.insert(undo_list, {p_obj.name, CHG, org_object, new_object})
+			end 
+	            	dragging = nil
+	            end 
+		    return true 
+		else 
+	      	    new_object = copy_obj(v)
+	      	    if(dragging ~= nil) then 
+	            	local actor , dx , dy = unpack( dragging )
+	            	new_object.position = {x-dx, y-dy}
+			if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+			editor.n_selected(v) 
+			editor.n_selected(new_object) 
+			editor.n_selected(org_object) 
+                    	table.insert(undo_list, {v.name, CHG, org_object, new_object})
 			end
-		     end 
-              end
+	            	dragging = nil
+              	  end
+              	  return true
+	      end 
+	   else 
+	      dragging = nil
               return true
+           end
         end
 end
+
+function get_group_position(child_obj)
+     for i, v in pairs(g.children) do
+          if g:find_child(v.name) then
+	       if (v.type == "Group") then 
+		    if(v:find_child(child_obj.name)) then
+			return v.position 
+		    end 
+	       end 
+          end
+     end
+end 
 
 
 function copy_obj (v)
@@ -153,6 +198,7 @@ function inputScreen_savefile()
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                current_filename = input_t.text
+               current_fn = input_t.text
                cleanText()
                cleanText("input")
                printScreen("The file named "..current_filename..
@@ -163,6 +209,7 @@ function inputScreen_savefile()
       end
       if (file_not_exists) then
            current_filename = input_t.text
+           current_fn = input_t.text
            writefile (current_filename, contents, true)
            contents = ""
            cleanText()
@@ -322,14 +369,14 @@ local attr_t =
         table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"font", v.font,"font "})
         table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"caption", "TEXT"})
-        table.insert(attr_t, {"text", v.text,"text"})
+        --table.insert(attr_t, {"caption", "TEXT"})
+        --table.insert(attr_t, {"text", v.text,"text"})
         table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"editable", v.editable,"editable"})
-        table.insert(attr_t, {"wants_enter", v.wants_enter,"wants_enter"})
+        table.insert(attr_t, {"wants_enter", v.wants_enter,"wants enter"})
         table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"wrap", v.wrap, "wrap"})
-        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"wrap_mode"})
+        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"wrap mode"})
       elseif (v.type  == "Rectangle") then
         color_t = v.color 
         if color_t == nil then 
@@ -525,10 +572,12 @@ end
 local function create_input_button(txt)
      	local button_g = Group {}
      	local button = factory.draw_ring()
+     	--local button_focus = factory.draw_focus_ring()
 	button.name = "input_b"
         button.position  = {0,0}
         button.reactive = true
 	button_g:add(button)
+	button_g:add(button_focus)
 	
 --[[	
  	b_text = Text {text = string.upper(button_n)}:set(STYLE)
@@ -587,6 +636,7 @@ function inputMsgWindow_savefile()
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                current_filename = input_t.text
+               current_fn = input_t.text
                cleanText("printMsgWindow")
                cleanText("input")
 	       msgw_cur_x = 25
@@ -601,6 +651,7 @@ function inputMsgWindow_savefile()
       end
       if (file_not_exists) then
            current_filename = input_t.text
+           current_fn = input_t.text
            writefile(current_filename, contents, true)
            contents = ""
            cleanText("printMsgWindow")
@@ -619,7 +670,7 @@ function inputMsgWindow_openfile()
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                current_filename = input_t.text
-     current_fn = input_t.text
+     	       current_fn = input_t.text
                file_not_exists = false
           end
      end
@@ -654,18 +705,23 @@ function inputMsgWindow_openfile()
      screen:grab_key_focus()
 end
 
-function inputMsgWindow_yn()
-     if(input_t.text ~= "y") then
+function inputMsgWindow_yn(txt)
+     if(txt == "no") then
           cleanText()
           cleanText("input")
           printScreen("File Name : ")
           inputMsgWindow("savefile")
-     else
+     elseif(txt =="yes") then 
           writefile (current_filename, contents, true)
           contents = ""
           cleanText()
           cleanText("input")
      end
+     msgw_cur_x = 25
+     msgw_cur_y = 50
+     screen:remove(msgw)
+     msgw.children = {}
+     screen:grab_key_focus()
 end
 
 function inputMsgWindow_openvideo()
@@ -719,8 +775,8 @@ end
 
 local input_purpose     = ""
 
-function inputMsgWindow(a)
-     input_purpose = a
+function inputMsgWindow(input_purpose)
+     local save_b, cancel_b
      if (input_purpose == "reopenfile" or input_purpose == "reopenImg") then 
 	msgw_cur_x = msgw_cur_x + 200 
 	msgw_cur_y = msgw_cur_y + 45
@@ -743,32 +799,103 @@ function inputMsgWindow(a)
      end 
 
      if (input_purpose == "savefile") then 
-     	local save_b  = factory.make_msgw_button_item( assets , "save")
+     	save_b  = factory.make_msgw_button_item( assets , "save")
+	save_b.name = "savefile"
         save_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
+	save_b.reactive = true 
 
-        local cancel_b = factory.make_msgw_button_item( assets ,"cancel")
+        cancel_b = factory.make_msgw_button_item( assets ,"cancel")
+	cancel_b.name = "cancel"
         cancel_b.position = {msgw_cur_x + 470, msgw_cur_y + 70}
+	cancel_b.reactive = true 
 	
         msgw:add(save_b)
         msgw:add(cancel_b)
+	--create_on_key_down_f(save_b) 
+	--create_on_key_down_f(cancel_b) 
+	function save_b:on_button_down(x,y,button,num_clicks)
+		inputMsgWindow_savefile()	
+     	end 
+     	function cancel_b:on_button_down(x,y,button,num_clicks)
+		cleanText("printMsgWindow")
+        	cleanText("input")
+        	msgw.children = {}
+		msgw_cur_x = 25
+		msgw_cur_y = 50
+		screen:remove(msgw)
+     	end 
+	
      elseif (input_purpose == "yn") then 
      	local yes_b  = factory.make_msgw_button_item( assets , "yes")
+	yes_b.name = "yes"
         yes_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
-
+	yes_b.reactive = true
         local no_b = factory.make_msgw_button_item( assets ,"no")
+	no_b.name = "no"
         no_b.position = {msgw_cur_x + 470, msgw_cur_y + 70}
+	no_b.reactive = true
 	
         msgw:add(yes_b)
         msgw:add(no_b)
+
+	--create_on_key_down_f(yes_b) 
+	--create_on_key_down_f(no_b) 
+	function yes_b:on_button_down(x,y,button,num_clicks)
+          	writefile (current_filename, contents, true)
+          	contents = ""
+          	cleanText("printMsgWindow")
+          	cleanText("input")
+	  	msgw.children = {}
+		msgw_cur_x = 25
+		msgw_cur_y = 50
+		screen:remove(msgw)
+     	end 
+     	function no_b:on_button_down(x,y,button,num_clicks)
+
+		cleanText("printMsgWindow")
+        	cleanText("input")
+        	msgw.children = {}
+		msgw_cur_x = 25
+		msgw_cur_y = 50
+		screen:remove(msgw)
+		editor.save(false)
+     	end 
      else 
      	local open_b  = factory.make_msgw_button_item( assets , "open")
         open_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
+	open_b.reactive = true
 
         local cancel_b = factory.make_msgw_button_item( assets ,"cancel")
+	cancel_b.name = "cancel"
         cancel_b.position = {msgw_cur_x + 470, msgw_cur_y + 70}
+	cancel_b.reactive = true 
 	
         msgw:add(open_b)
         msgw:add(cancel_b)
+
+	--create_on_key_down_f(open_b) 
+	--create_on_key_down_f(cancel_b) 
+
+	if (input_purpose == "openfile") then  
+	open_b.name = "openfile"
+	function open_b:on_button_down(x,y,button,num_clicks)
+		inputMsgWindow_openfile() 
+     	end 
+	elseif (input_purpose == "open_imagefile") then  
+	open_b.name = "open_imagefile"
+	function open_b:on_button_down(x,y,button,num_clicks)
+		inputMsgWindow_openimage() 
+     	end 
+	end 
+     	function cancel_b:on_button_down(x,y,button,num_clicks)
+		cleanText("printMsgWindow")
+        	cleanText("input")
+        	msgw.children = {}
+		msgw_cur_x = 25
+		msgw_cur_y = 50
+		screen:remove(msgw)
+                screen:grab_key_focus(screen)
+     	end 
      end
 
      screen:add(msgw)
@@ -776,29 +903,75 @@ function inputMsgWindow(a)
           input_t.grab_key_focus(input_t)
      end 
 
+     local function create_on_key_down_f(button) 
+     	function button:on_key_down(key)
+	     if key == keys.Return then
+              	if (button.name == "savefile") then inputMsgWindow_savefile()
+              	elseif (button.name == "yes") then inputMsgWindow_yn(button.name)
+              	elseif (button.name == "no") then inputMsgWindow_yn(button.name)
+              	elseif (button.name == "openfile") then inputMsgWindow_openfile() 
+              	elseif (button.name == "open_mediafile") then inputMsgWindow_openvideo()
+              	elseif (button.name == "open_imagefile") then  inputMsgWindow_openimage()
+              	elseif (button.name == "cancel") then 	cleanText("printMsgWindow")
+        						cleanText("input")
+        						msgw.children = {}
+							msgw_cur_x = 25
+							msgw_cur_y = 50
+							screen:remove(msgw)
+                					screen:grab_key_focus(screen)
+               end
+	     elseif (key == keys.Tab and shift == false) or key == Down then 
+		if (button.name == "savefile") then cancel_b.extra.on_focus_in()
+              	elseif (button.name == "yes") then no_b.extra.on_focus_in()
+              	elseif (button.name == "openfile") then cancel_b.extra.on_focus_in()
+              	elseif (button.name == "open_mediafile") then cancel_b.extra.on_focus_in()
+              	elseif (button.name == "open_imagefile") then cancel_b.extra.on_focus_in()
+		end
+	     elseif (key == keys.Tab and shift == true ) or key == Up then 
+		if (button.name == "savefile") then save_b.extra.on_focus_out() 
+              	elseif (button.name == "yes") then yes_b.extra.on_focus_out()
+              	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
+              	elseif (button.name == "openfile") then openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
+              	elseif (button.name == "open_mediafile") then openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
+              	elseif (button.name == "open_imagefile") then  openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
+               end
+	     end 
+        end 
+     end 
+
      function input_t:on_key_down(key)
+	       	
           if key == keys.Return then
               if (input_purpose == "savefile") then inputMsgWindow_savefile()
-              elseif (input_purpose == "yn") then screen.grab_key_focus(screen)
-					          --inputMsgWindow_yn()
+              elseif (input_purpose == "yn") then screen.grab_key_focus(screen) --inputMsgWindow_yn()
               elseif (input_purpose == "openfile") then inputMsgWindow_openfile() 
               elseif (input_purpose == "reopenfile") then inputMsgWindow_openfile()
               elseif (input_purpose == "open_mediafile") then inputMsgWindow_openvideo()
               elseif (input_purpose == "open_imagefile") then  inputMsgWindow_openimage()
-              elseif (input_purpose == "reopenImg") then 
-			inputMsgWindow_openimage()
---[[
-          		cleanText("err_msg")
-          		cleanText("reopenImg")
-	  		msgw_cur_x = 25
-	  		msgw_cur_y = 50
-	  		screen:remove(msgw)
-     			msgw.children = {}
-]]
+              elseif (input_purpose == "reopenImg") then inputMsgWindow_openimage()
               elseif (input_purpose == "inspector") then inspector_commit(v, input_t.text)
               end
+	  elseif (key == keys.Tab and shift == false) or key == Down then 
+	  elseif (key == keys.Tab and shift == true ) or key == Up then 
           end
-     end
+
+--[[
+          if key == keys.Return or
+            (key == keys.Tab and shift == false) or 
+             key == keys.Down then
+		input_t:set{color = "000000"} 
+		input_t:set{cursor_visible = false}
+		screen:grab_key_focus(screen)
+	        if (input_purpose == "savefile") then save_b.extra.on_focus_in()
+                elseif (input_purpose == "yn") then yes_b.extra.on_focus_in()
+                elseif (input_purpose == "openfile") then open_b.extra.on_focus_in()
+                elseif (input_purpose == "reopenfile") then open_b.extra.on_focus_in()
+                elseif (input_purpose == "open_mediafile") then open_b.extra.on_focus_in()
+                elseif (input_purpose == "open_imagefile") then  open_b.extra.on_focus_in()
+                elseif (input_purpose == "reopenImg") then open_b.extra.on_focus_in()
+                end
+    	  end 
+]]
+	end 
+	
 end
-
-

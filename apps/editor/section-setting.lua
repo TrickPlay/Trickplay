@@ -26,15 +26,11 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-     	["UNDO                   [Z]"]   = function() editor.undo() mouse_mode = S_SELECT end,
-     	["REDO                   [E]"]   = function() editor.redo() mouse_mode = S_SELECT end,
-     	["TEXT                    [T]"]   = function() editor.text() mouse_mode = S_SELECT end,
-     	["IMAGE                   [I]"]   = function() editor.image() mouse_mode = S_SELECT end,
-     	["RECTANGLE         [R]"]   = function() mouse_mode = S_RECTANGLE end,
-     	["VIDEO               "]   = function() editor.video() mouse_mode = S_SELECT end,
-     	["CLONE OBJECT    [C]"]   = function() editor.clone() mouse_mode = S_SELECT end,
-     	["GROUP OBJECT   [G]"]   = function() editor.group() mouse_mode = S_SELECT end,
-     	["UN GROUP OBJECT   "]   = function() editor.ugroup() mouse_mode = S_SELECT end
+	["Transparency Grid 20"]   = function() BG_IMAGE:set{src = "transparency-grid-20.png", opacity = 255} end,
+	["Transparency Grid 40"]   = function() BG_IMAGE:set{src = "transparency-grid-40.png", opacity = 255} end,
+	["Transparency Grid 80"]   = function() BG_IMAGE:set{src = "transparency-grid-80.png", opacity = 255} end,
+        ["White"]   = function() BG_IMAGE:set{src = "white.png", opacity = 255} end,
+        ["Black"]   = function() BG_IMAGE:set{opacity = 0} end
      }
     local function build_dropdown_ui()
     
@@ -47,31 +43,23 @@ function( section )
         local items_height = 0
     
     
-        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO                   [Z]" ] )
-        local f_redo  = factory.make_text_menu_item( assets , ui.strings[ "REDO                   [E]" ] )
-        local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT                    [T]" ] )
-        local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE                   [I]" ] )
-        local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE         [R]" ] )
-        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO               " ] )
-        local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE OBJECT    [C]" ] )
-        local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP OBJECT   [G]" ] )
-        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UN GROUP OBJECT   " ] )
+        --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
+        local f_tp_20  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 20" ] )
+        local f_tp_40  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 40" ] )
+        local f_tp_80  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 80" ] )
+        local f_white  = factory.make_text_menu_item( assets , ui.strings[ "White" ] )
+        local f_black  = factory.make_text_menu_item( assets , ui.strings[ "Black" ] )
         
+        --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
-        table.insert( section_items , f_undo )
-        table.insert( section_items , f_redo )
-        table.insert( section_items , f_text )
-        table.insert( section_items , f_image )
-        table.insert( section_items , f_rect )
-        table.insert( section_items , f_video )
-        table.insert( section_items , f_clone )
-        table.insert( section_items , f_group )
-        table.insert( section_items , f_ugroup )
-        
+        table.insert( section_items , f_tp_20)
+        table.insert( section_items , f_tp_40)
+        table.insert( section_items , f_tp_80)
+        table.insert( section_items , f_white)
+        table.insert( section_items , f_black)
+
 	for _,item in ipairs( section_items ) do
 	     item.reactive = true
-	     if (item.text ~= "INSERT :                   ") then 
-
              function item:on_button_down(x,y,button,num_clicks)
         	if item.on_activate then
 	    		item:on_focus_out()
@@ -84,68 +72,42 @@ function( section )
 	     end
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
-                --dropmenu_item.reactive = true
+                dropmenu_item.reactive = true
                 function dropmenu_item:on_button_down(x,y,button,num_clicks)
-		        local s= ui.sections[ui.focus]
-        		ui.button_focus.position = s.button.position
-        		ui.button_focus.opacity = 0
             		animate_out_dropdown()
+            		screen.grab_key_focus(screen)
                         if(dropdown_map[dropmenu_item.text]) then dropdown_map[dropmenu_item.text]() end
                         return true
-            		--screen.grab_key_focus(screen)
                 end
-             end
              end
        end
 
-        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_clone.h + f_group.h -- + f_insert.h
+        items_height = items_height + f_tp_20.h + f_tp_40.h + f_tp_80.h + f_white.h + f_black.h
         
-
-        f_rect.extra.on_activate =
+        f_tp_20.extra.on_activate =
             function()
-		mouse_mode = S_RECTANGLE
+		BG_IMAGE:set{src = "transparency-grid-20.png", opacity = 255}
+                screen.grab_key_focus(screen)
             end
-        
-        f_text.extra.on_activate =
+        f_tp_40.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
-		editor.text()
+		BG_IMAGE:set{src = "transparency-grid-40.png", opacity = 255}
+                screen.grab_key_focus(screen)
             end
-        f_image.extra.on_activate =
+        f_tp_80.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
-		editor.image()
+		BG_IMAGE:set{src = "transparency-grid-80.png", opacity = 255}
+                screen.grab_key_focus(screen)
             end
-        f_video.extra.on_activate =
+        f_black.extra.on_activate =
             function()
-		editor.video()
-		mouse_mode = S_SELECT
+		BG_IMAGE:set{opacity = 0}
+                screen.grab_key_focus(screen)
             end
-        f_undo.extra.on_activate =
+        f_white.extra.on_activate =
             function()
-		editor.undo()
-		mouse_mode = S_SELECT
-            end
-        
-        f_redo.extra.on_activate =
-            function()
-		mouse_mode = S_SELECT
-		editor.redo()
-            end
-        f_group.extra.on_activate =
-            function()
-		mouse_mode = S_SELECT
-		editor.group()
-            end
-        f_ugroup.extra.on_activate =
-            function()
-		mouse_mode = S_SELECT
-		editor.ugroup()
-            end
-        f_clone.extra.on_activate =
-            function()
-		editor.clone()
-		mouse_mode = S_SELECT
+		BG_IMAGE:set{src = "white.png", opacity = 255}
+                screen.grab_key_focus(screen)
             end
         
         -- This spaces all items equally.
@@ -160,7 +122,7 @@ function( section )
             item.x = ( group.w - item.w ) / 2
             item.y = y
             
-            y = y + item.h -5.45 -- + margin
+            y = y + item.h - 5.45			-- margin
             
             group:add( item )
             
@@ -199,6 +161,7 @@ function( section )
         section.focus = section.focus + delta
     
         focus:on_focus_in()
+        
     end
     
     local function activate_focused()

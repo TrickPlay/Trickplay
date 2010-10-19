@@ -32,7 +32,7 @@ SECTION_SETTING      = 4
 BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 
 -- Background image 
-BG_IMAGE = Image { name= "bg_img", src = "baduk.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
+BG_IMAGE = Image { name= "bg_img", src = "transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
 
 CURRENT_DIR 	  = "./editor"
 ---------------------
@@ -52,6 +52,7 @@ g = Group{}
 contents    	  = ""
 item_num 	  = 0
 shift 		  = false
+control 	  = false
 undo_list 	  = {}
 redo_list 	  = {}
 
@@ -97,7 +98,7 @@ ui =
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "  EDIT  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 500,
+                height  = 610,
                 init    = dofile( "section-edit" )
             },
 
@@ -106,7 +107,7 @@ ui =
                 button  = assets( "assets/button-yellow.png" ),
                 text    = Text  { text = strings[ "  ARRANGE" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
-                height  = 720,
+                height  = 810,
                 init    = dofile( "section-arrange" )
             },
            [SECTION_SETTING] =

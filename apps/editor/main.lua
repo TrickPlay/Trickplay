@@ -292,6 +292,7 @@ local function build_ui( show_it )
 
     local key_map =
     {
+	[ keys.h	] = function() animate_out_dropdown() editor.undo_history() mouse_mode = S_SELECT end,
 	[ keys.w	] = function() animate_out_dropdown() editor.the_open() mouse_mode = S_SELECT end,
 	[ keys.r	] = function() animate_out_dropdown() mouse_mode = S_RECTANGLE end,
         [ keys.v	] = function() animate_out_dropdown() editor.view_code() mouse_mode = S_SELECT end,
@@ -304,7 +305,7 @@ local function build_ui( show_it )
         [ keys.u	] = function() animate_out_dropdown() editor.undo() mouse_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() mouse_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() mouse_mode = S_SELECT end,
-        [ keys.c	] = function() animate_out_dropdown() mouse_mode = S_CLONE end,
+        [ keys.c	] = function() animate_out_dropdown() editor.clone() mouse_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() mouse_mode = S_SELECT end,
         [ keys.p	] = function() animate_out_dropdown() end,
         [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
@@ -331,6 +332,8 @@ local function build_ui( show_it )
         
 	[ keys.Shift_L  ] = function() shift = true end,
 	[ keys.Shift_R  ] = function() shift = true end,
+	[ keys.Control_L  ] = function() control = true end,
+	[ keys.Control_R  ] = function() control = true end,
         [ keys.Return   ] = function() if(current_inspector == nil) then 
 			    	     if(menu_init == true) then 
 			                menu_init = false
@@ -389,6 +392,11 @@ local function build_ui( show_it )
         
         if f then
             f()
+	    if(current_inspector == nil) then 
+	         local s= ui.sections[ui.focus]
+        	 ui.button_focus.position = s.button.position
+        	 ui.button_focus.opacity = 0
+	    end 
         end    
 	return true
     end
@@ -406,11 +414,20 @@ local function build_ui( show_it )
      function screen.on_key_down( screen , key )
           if key_map[key] then
               key_map[key](self)
+	      if(current_inspector == nil) then 
+	           local s= ui.sections[ui.focus]
+        	   ui.button_focus.position = s.button.position
+        	   ui.button_focus.opacity = 0
+	      end 
+
      	  end
      end
      function screen.on_key_up( screen , key )
     	if key == keys.Shift_L or key == keys.Shift_R then
              shift = false
+	end 
+    	if key == keys.Control_L or key == keys.Control_R then
+             control = false
 	end 
      end
 
@@ -419,18 +436,20 @@ local function build_ui( show_it )
 
           mouse_state = BUTTON_DOWN
           if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
-         -- if(mouse_mode == S_GROUP) then editor.group(x, y) end
           if(mouse_mode == S_SELECT) then 
 	       if(current_inspector == nil) then 
-		     if(menu_init == true) then 
+		    if(menu_init == true) then 
 			 menu_init = false
 			 local s= ui.sections[ui.focus]
         		 ui.button_focus.position = s.button.position
         		 ui.button_focus.opacity = 0
 			 animate_out_dropdown() 
 		    end 
+		    if(shift == true) then 
+			editor.multi_select(x,y)
+		    end 
 	       end 
-	end
+	  end
      end
 
      function screen:on_button_up(x,y,button,clicks_count)
@@ -438,7 +457,10 @@ local function build_ui( show_it )
 	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
               if (mouse_mode == S_RECTANGLE) then editor.rectangle_done(x, y) mouse_mode = S_SELECT end
-              --if(mouse_mode == S_GROUP) then editor.group_done(x, y) end
+	      if(mouse_mode == S_SELECT) then 
+			editor.multi_select_done(x,y)
+	      end 
+
               mouse_state = BUTTON_UP
           end
       end
@@ -457,26 +479,24 @@ local function build_ui( show_it )
 	  end
           if dragging then
                local actor , dx , dy = unpack( dragging )
---[[
-	       if ui.group then 
-	             if ui.group:find_child(actor.name) then 
-		     	if(x < ui.group.x or x + actor.w > ui.group.x + ui.group.w or 
-				y < ui.group.y or y + actor.h > ui.group.y + ui.group.h) then 
-		     	else  
-               	         	actor.position = { x - dx , y - dy  }
-		     	end	
-	       	     else 	
-               	     	actor.position = { x - dx , y - dy  }
-	       	     end
-	       else 	
-		     actor.position = { x - dx , y - dy  }
-	       end
-]]
+	       --if(mouse_mode == S_SELECT and shift == true) then 
+	       --end 
+	
+	       local border = screen:find_child(actor.name.."border")
+	       if(border ~= nil) then 
+		    if (actor.extra.is_in_group == true) then
+			 local group_pos = get_group_position(actor)
+	                 border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+		    else 
+	                 border.position = {x -dx, y -dy}
+		    end 
+	       end 
+
 	       actor.position = { x - dx , y - dy  }
           end
           if(mouse_state == BUTTON_DOWN) then
                if (mouse_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
-               --if (mouse_mode == S_GROUP) then editor.group_move(x, y) end
+               if (mouse_mode == S_SELECT) then editor.multi_select_move(x, y) end
           end
       end
 

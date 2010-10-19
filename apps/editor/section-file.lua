@@ -64,6 +64,12 @@ local dropdown_map =
         for _,item in pairs( section_items ) do
              function item:on_button_down(x,y,button,num_clicks)
         	  if (item.on_activate) then
+--[[
+			 local s= ui.sections[ui.focus]
+        		 ui.button_focus.position = s.button.position
+        		 ui.button_focus.opacity = 0
+]]
+
 	    		item:on_focus_out()
 	    		animate_out_dropdown()
             		item:on_activate()
@@ -73,6 +79,9 @@ local dropdown_map =
 		local dropmenu_item = item:find_child("caption") 
 		--dropmenu_item.reactive = true
     		function dropmenu_item:on_button_down(x,y,button,num_clicks)
+			local s= ui.sections[ui.focus]
+        		ui.button_focus.position = s.button.position
+        		ui.button_focus.opacity = 0
          		animate_out_dropdown()
          		if(dropdown_map[dropmenu_item.text]) then dropdown_map[dropmenu_item.text]() end 
         		return true
