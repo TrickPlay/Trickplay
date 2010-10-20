@@ -98,16 +98,8 @@ bool Profiler::compare( std::pair< String, Entry > a, std::pair< String, Entry >
     return a.second.second > b.second.second;
 }
 
-void Profiler::dump()
+void Profiler::dump( EntryVector & v )
 {
-    lock( true );
-
-    // Creates a vector from the entries
-
-    std::vector< std::pair< String, Entry > > v( entries.begin(), entries.end() );
-
-    lock( false );
-
     // Sorts the vector in descending order by time taken
 
     std::sort( v.begin(), v.end(), compare );
@@ -125,7 +117,7 @@ void Profiler::dump()
 
     for( it = v.begin(); it != v.end(); ++it )
     {
-        g_info( "%40s %6d %6.1f %6.1f %6.1f %%",
+        g_info( "%40s %8d %8.1f %6.1f %6.1f %%",
                 it->first.c_str(),
                 it->second.first,
                 it->second.second,
@@ -133,7 +125,42 @@ void Profiler::dump()
                 time ? it->second.second / time * 100.0 : 0.0 );
     }
 
-    g_info( "%40s        %6.1f", String( 40, '-' ).c_str(), time );
+    g_info( "%40s          %8.1f", String( 40, '-' ).c_str(), time );
+}
+
+void Profiler::dump()
+{
+    lock( true );
+
+    // Creates a vector from the entries
+
+    EntryVector v( entries.begin(), entries.end() );
+
+    lock( false );
+
+    EntryVector from_lua;
+    EntryVector to_lua;
+
+    for ( EntryVector::iterator it = v.begin(); it != v.end(); ++it )
+    {
+        if ( ! strncmp( it->first.c_str() , "on_" , 3 ) )
+        {
+            to_lua.push_back( *it );
+        }
+        else
+        {
+            from_lua.push_back( *it );
+        }
+    }
+
+    g_info( "CALLS FROM APP:" );
+
+    dump( from_lua );
+
+    g_info( "" );
+    g_info( "CALLS TO APP (CALLBACKS):" );
+
+    dump( to_lua );
 }
 
 void Profiler::reset()
