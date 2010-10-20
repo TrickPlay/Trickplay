@@ -2,6 +2,7 @@
 #include "user_data.h"
 #include "lb.h"
 #include "util.h"
+#include "profiler.h"
 
 //.............................................................................
 
@@ -593,10 +594,13 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
 
     lua_insert( L , - ( nargs + 2 ) );
 
-    // callback : proxy : nargs
+    {
+        PROFILER(name);
 
-    lua_call( L , nargs + 1 , nresults );
+        // callback : proxy : nargs
 
+        lua_call( L , nargs + 1 , nresults );
+    }
     LSG_CHECK( nresults - nargs );
 
     return 1;
