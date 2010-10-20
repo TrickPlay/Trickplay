@@ -321,6 +321,7 @@ globals
             }            
         ]];
         
+#ifdef file_op
  /*
         Function: readdir
 
@@ -414,6 +415,7 @@ globals
              }
           ]];
 
+#endif
 
     /*
     	Function: readfile

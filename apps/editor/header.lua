@@ -49,6 +49,7 @@ popup_hide        = false
 mouse_mode        = S_SELECT
 mouse_state       = BUTTON_UP
 g = Group{}
+
 contents    	  = ""
 item_num 	  = 0
 shift 		  = false
