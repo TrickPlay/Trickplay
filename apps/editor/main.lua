@@ -438,6 +438,9 @@ local function build_ui( show_it )
           if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
           if(mouse_mode == S_SELECT) then 
 	       if(current_inspector == nil) then 
+		    if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
+                         editor.inspector(g.extra.video)
+                    end 
 		    if(menu_init == true) then 
 			 menu_init = false
 			 local s= ui.sections[ui.focus]
@@ -626,9 +629,6 @@ end
 function main()
 
     screen:add(BG_IMAGE)
-    --g:add(BG_IMAGE)
-    --screen:add(g)
-
     screen:show()
     screen.reactive=true
     ui = build_ui(true)

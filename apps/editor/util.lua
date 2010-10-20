@@ -8,13 +8,16 @@ function values(t)
 	local j = 0 
 	return function () j = j+1; return t[j] end 
 end 
+
 function abs(a) if(a>0) then return a else return -a end end
+
 function getObjnames()
     local obj_names = ""
     local n = table.getn(g.children)
     for i, v in pairs(g.children) do
         if (i ~= n) then
              obj_names = obj_names..v.name..","
+	     print(obj_names)
         else
              obj_names = obj_names..v.name
         end
@@ -107,12 +110,15 @@ function create_on_button_down_f(v)
 	      	    if(dragging ~= nil) then 
 	            	local actor , dx , dy = unpack( dragging )
 	            	new_object.position = {x-dx, y-dy}
-			if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+			
+			if(org_object ~= nil) then  -- ?  
+		        if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
 			editor.n_selected(v) 
 			editor.n_selected(new_object) 
 			editor.n_selected(org_object) 
                     	table.insert(undo_list, {v.name, CHG, org_object, new_object})
 			end
+			end 
 	            	dragging = nil
               	  end
               	  return true
@@ -275,14 +281,7 @@ function inputScreen_yn()
 end
 
 function inputScreen_openvideo()
-     mediaplayer:load(input_t.text)
-     --mediaplayer:set_viewport_geometry(100, 100, 500, 500)
-     mp_t = Text{name = "mediaplayer", extra = {name = "MediaPlayer", source = input_t.text}}
-     table.insert(undo_list, {mp_t.name, ADD, mp_t})
-     g:add(mp_t)
-     cleanText()
-     cleanText("input")
-
+-- mediaplayer:load(input_t.text)
 end
 
 function inputScreen_openimage()
@@ -321,6 +320,7 @@ function inputScreen(a)
               elseif (input_purpose == "reopenfile") then cleanText("err_msg") inputScreen_openfile()
               elseif (input_purpose == "open_mediafile") then inputScreen_openvideo()
               elseif (input_purpose == "open_imagefile") then  inputScreen_openimage()
+              elseif (input_purpose == "open_videofile") then  inputScreen_openvideo()
               elseif (input_purpose == "inspector") then inspector_commit(v, input_t.text)
               end
           end
@@ -337,14 +337,14 @@ function cleanText(text_name)
      end
 end
 
-attr_t_idx = {"name", "x", "y", "z", "w", "h", "r", "g", "b", "font", "text", "editable", "wants_enter",
- "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "bord_r", "bord_g", "bord_b", 
- "bwidth", "x_ang", "y_ang", "z_ang", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle", "opacity",
- "view code", "apply", "cancel"}
+attr_t_idx = {"name", "source", "left", "top", "width", "height", "rate", "volume", "mute", "loop", "x", "y", "z", "w", "h", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "bord_r", "bord_g", "bord_b", "bwidth", "x_ang", "y_ang", "z_ang", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle", "opacity", "view code", "apply", "cancel"}
 
 function make_attr_t(v)
 function toboolean(s) if (s == "true") then return true else return false end end
-local attr_t =
+  local attr_t 
+
+  if(v.type ~= "Video") then
+     attr_t =
       {
              {"title", "INSPECTOR : "..string.upper(v.type)},
              {"caption", "OBJECT NAME"},
@@ -357,6 +357,32 @@ local attr_t =
              {"h", v.h, "h"},
              {"line",""}
       }
+  else 
+      attr_t =
+      {
+             {"title", "INSPECTOR : "..string.upper(v.type)},
+             {"caption", "OBJECT NAME"},
+             {"name", v.name,"name"},
+             {"line",""},
+             {"caption", "SOURCE"},
+             {"source", v.source, "source"},
+             {"line",""},
+             {"caption", "VIEW PORT"},
+             {"left", v.viewport[1], "x"},
+             {"top", v.viewport[2], "y"},
+             {"width", v.viewport[3], "w"},
+             {"height", v.viewport[4], "h"},
+             {"line",""},
+             {"rate", v.rate, "rate"},
+             {"line",""},
+             {"volume", v.volume, "volume"},
+             {"mute", v.mute, "mute"},
+             {"line",""},
+             {"loop", v.loop, "loop"},
+             {"line",""}
+      }
+  end 
+
       if (v.type == "Text") then
         table.insert(attr_t, {"caption", "COLOR "})
         local color_t = v.color 
@@ -479,6 +505,7 @@ local attr_t =
       elseif (v.type  == "Group") then
         table.insert(attr_t, {"children", v.children,"children"})
       end
+  if(v.type ~= "Video") then
       table.insert(attr_t, {"line",""})
       table.insert(attr_t, {"opacity", v.opacity, "opacity"})
       table.insert(attr_t, {"line",""})
@@ -486,6 +513,7 @@ local attr_t =
       --table.insert(attr_t, {"line",""})
       --table.insert(attr_t, {"anchor_point", v.anchor_point})
       --table.insert(attr_t, {"line",""})
+  end 
       table.insert(attr_t, {"button", "view code", "view code"})
       table.insert(attr_t, {"button", "apply", "apply"})
       table.insert(attr_t, {"button", "cancel", "cancel"})
@@ -497,10 +525,12 @@ function itemTostring(v)
     local itm_str = ""
     local indent       = "\n\t\t"
     local b_indent       = "\n\t"
-    local clip_t = v.clip
-    if(clip_t == nil) then
+    if(v.type ~= "Video")then 
+         local clip_t = v.clip
+         if(clip_t == nil) then
              clip_t = {0,0 ,v.w, v.h}
-    end
+         end
+    end 
     if(v.type == "Rectangle") then
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
@@ -563,8 +593,31 @@ function itemTostring(v)
         "position = {"..v.x..","..v.y.."},"..indent..
         "children = {"..children.."},"..indent..
         "opacity = "..v.opacity..b_indent.."}\n\n"
-
 	
+    elseif (v.type == "Video") then
+	itm_str = itm_str..v.name.." = ".."{"..indent..
+        "name=\""..v.name.."\","..indent..
+        "type=\""..v.type.."\","..indent..
+        "source=\""..v.source.."\","..indent..
+        "viewport={"..table.concat(v.viewport,",").."},"..indent..
+        "rate = "..v.rate..","..indent..
+        "loop = "..tostring(v.loop)..","..indent..
+        "volume = "..v.volume..","..indent..
+        "mute = "..tostring(v.mute)..","..b_indent.."}\n"..b_indent
+	
+	itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
+	"mediaplayer.on_loaded = function(self) screen:remove(BG_IMAGE) self:play() end"..b_indent..
+	"if ("..v.name..".loop == true) then"..b_indent..
+     	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
+	"end"..b_indent..
+	"mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
+	"mediaplayer:set_playback_rate("..v.name..".rate)"..b_indent..
+	"mediaplayer.volume = "..v.name..".volume"..b_indent..
+	"mediaplayer.mute = "..v.name..".mute\n\n"
+
+	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
+
+	print(itm_str)
     end
     return itm_str
 end
@@ -707,14 +760,14 @@ end
 
 function inputMsgWindow_yn(txt)
      if(txt == "no") then
-          cleanText()
+          cleanText("printMsgWindow")
           cleanText("input")
           printScreen("File Name : ")
           inputMsgWindow("savefile")
      elseif(txt =="yes") then 
           writefile (current_filename, contents, true)
           contents = ""
-          cleanText()
+          cleanText("printMsgWindow")
           cleanText("input")
      end
      msgw_cur_x = 25
@@ -726,12 +779,29 @@ end
 
 function inputMsgWindow_openvideo()
      mediaplayer:load(input_t.text)
-     --mediaplayer:set_viewport_geometry(100, 100, 500, 500)
-     mp_t = Text{name = "mediaplayer", extra = {name = "MediaPlayer", source = input_t.text}}
-     table.insert(undo_list, {mp_t.name, ADD, mp_t})
-     g:add(mp_t)
-     cleanText()
-     cleanText("input")
+
+     video1 = { name = "video1", 
+                type ="Video",
+                viewport ={0,0,screen.w/2,screen.h/2},
+           	source= input_t.text,
+           	rate=1,
+           	loop= true, 
+                volume=0.5,  
+                mute=false
+              }
+
+     g.extra.video = video1
+     table.insert(undo_list, {video1.name, ADD, video1})
+     mediaplayer.on_loaded = function( self ) screen:remove(BG_IMAGE) self:play() end 
+     if(video1.loop == true) then 
+	  	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
+     end
+
+     msgw_cur_x = 25
+     msgw_cur_y = 50
+     screen:remove(msgw)
+     msgw.children = {}
+     screen:grab_key_focus()
 
 end
 
@@ -886,7 +956,13 @@ function inputMsgWindow(input_purpose)
 	function open_b:on_button_down(x,y,button,num_clicks)
 		inputMsgWindow_openimage() 
      	end 
+	elseif (input_purpose == "open_videofile") then  
+	open_b.name = "open_videofile"
+	function open_b:on_button_down(x,y,button,num_clicks)
+		inputMsgWindow_openvideo() 
+     	end 
 	end 
+
      	function cancel_b:on_button_down(x,y,button,num_clicks)
 		cleanText("printMsgWindow")
         	cleanText("input")
@@ -910,7 +986,7 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "yes") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "no") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "openfile") then inputMsgWindow_openfile() 
-              	elseif (button.name == "open_mediafile") then inputMsgWindow_openvideo()
+              	elseif (button.name == "open_videofile") then inputMsgWindow_openvideo()
               	elseif (button.name == "open_imagefile") then  inputMsgWindow_openimage()
               	elseif (button.name == "cancel") then 	cleanText("printMsgWindow")
         						cleanText("input")
@@ -924,7 +1000,7 @@ function inputMsgWindow(input_purpose)
 		if (button.name == "savefile") then cancel_b.extra.on_focus_in()
               	elseif (button.name == "yes") then no_b.extra.on_focus_in()
               	elseif (button.name == "openfile") then cancel_b.extra.on_focus_in()
-              	elseif (button.name == "open_mediafile") then cancel_b.extra.on_focus_in()
+              	elseif (button.name == "open_videofile") then cancel_b.extra.on_focus_in()
               	elseif (button.name == "open_imagefile") then cancel_b.extra.on_focus_in()
 		end
 	     elseif (key == keys.Tab and shift == true ) or key == Up then 
@@ -932,7 +1008,7 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "yes") then yes_b.extra.on_focus_out()
               	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
               	elseif (button.name == "openfile") then openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
-              	elseif (button.name == "open_mediafile") then openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
+              	elseif (button.name == "open_videofile") then openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
               	elseif (button.name == "open_imagefile") then  openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
                end
 	     end 
@@ -946,7 +1022,7 @@ function inputMsgWindow(input_purpose)
               elseif (input_purpose == "yn") then screen.grab_key_focus(screen) --inputMsgWindow_yn()
               elseif (input_purpose == "openfile") then inputMsgWindow_openfile() 
               elseif (input_purpose == "reopenfile") then inputMsgWindow_openfile()
-              elseif (input_purpose == "open_mediafile") then inputMsgWindow_openvideo()
+              elseif (input_purpose == "open_videofile") then inputMsgWindow_openvideo()
               elseif (input_purpose == "open_imagefile") then  inputMsgWindow_openimage()
               elseif (input_purpose == "reopenImg") then inputMsgWindow_openimage()
               elseif (input_purpose == "inspector") then inspector_commit(v, input_t.text)
@@ -966,7 +1042,7 @@ function inputMsgWindow(input_purpose)
                 elseif (input_purpose == "yn") then yes_b.extra.on_focus_in()
                 elseif (input_purpose == "openfile") then open_b.extra.on_focus_in()
                 elseif (input_purpose == "reopenfile") then open_b.extra.on_focus_in()
-                elseif (input_purpose == "open_mediafile") then open_b.extra.on_focus_in()
+                elseif (input_purpose == "open_videofile") then open_b.extra.on_focus_in()
                 elseif (input_purpose == "open_imagefile") then  open_b.extra.on_focus_in()
                 elseif (input_purpose == "reopenImg") then open_b.extra.on_focus_in()
                 end

@@ -11,7 +11,20 @@ local factory = ui.factory
 local selected_objs = {}
 
 
-function editor.selected(obj)
+function editor.selected(obj, call_by_inspector)
+     if(call_by_inspector == true) then 
+        for i, v in pairs(g.children) do
+             if g:find_child(v.name) then
+		  if (obj.name ~= v.name) then 
+		       g:find_child(v.name).extra.org_opacity = g:find_child(v.name).opacity
+                       g:find_child(v.name):set{opacity = 50}
+		  end 
+             end
+        end
+	return
+     end 
+
+     if(obj.type ~= "Video") then 
      if(shift == false)then 
 	if (table.getn(selected_objs) ~= 0 ) then -- while () do ? 
 		local t_obj = screen:find_child(table.remove(selected_objs)) 
@@ -45,26 +58,12 @@ function editor.selected(obj)
      screen:add(obj_border)
 	
      obj.extra.selected = true
-
      table.insert(selected_objs, obj_border.name)
---[[
-        for i, v in pairs(g.children) do
-             if g:find_child(v.name) then
-		  if (obj.name ~= v.name) then 
-		       g:find_child(v.name).extra.org_opacity = g:find_child(v.name).opacity
-                       g:find_child(v.name):set{opacity = 50}
-		  end 
-             end
-        end
-]]
+     end 
 end  
 
-function editor.n_selected(obj)
-     screen:remove(screen:find_child(obj.name.."border"))
-     table.remove(selected_objs)
-     obj.extra.selected = false
-	
---[[
+function editor.n_selected(obj, call_by_inspector)
+     if(call_by_inspector == true) then
         for i, v in pairs(g.children) do
              if g:find_child(v.name) then
 		  if (obj.name ~= v.name) then 
@@ -72,10 +71,24 @@ function editor.n_selected(obj)
 		  end
              end
         end
-]]
+	return
+     end
+
+     if(obj.type ~= "Video") then 
+     screen:remove(screen:find_child(obj.name.."border"))
+     table.remove(selected_objs)
+     obj.extra.selected = false
+     end 
 end  
 
 function editor.close()
+
+	g.extra.video = nil
+	if(screen:find_child("bg_img") == nil) then
+		screen:add(BG_IMAGE)
+		BG_IMAGE:lower_to_bottom()
+	end 
+
         screen:remove(g)
         for i, v in pairs(g.children) do
              if g:find_child(v.name) then
@@ -87,7 +100,6 @@ function editor.close()
         end
 	undo_list = {}
 	redo_list = {}
-        cleanText("codes")
         item_num = 0
         current_filename = ""
         current_fn = ""
@@ -97,7 +109,6 @@ end
 function editor.open()
 
      selected_objs = {}
-
      editor.close()
      printMsgWindow("File Name : ")
      inputMsgWindow("openfile")
@@ -276,8 +287,15 @@ function editor.inspector(v)
 		return 
         end 
 
-        editor.selected(v)
+        for i, c in pairs(g.children) do
+            if g:find_child(c.name) then
+	        if(c.extra.selected == true and c.name ~= v.name) then
+			editor.n_selected(c)
+		end
+            end
+        end
 
+        editor.selected(v, true)
 	local attr_t = make_attr_t(v)
 	local inspector_items = {}
 	local inspector_bg = factory.make_popup_bg(v.type, 0)
@@ -297,6 +315,7 @@ function editor.inspector(v)
 
 	local function inspector_position() 
 	     local x_space, y_space
+	     if(v.type == "Video") then return end 
  
 	     if (v.x > screen.w - v.x - v.w) then 
 	          x_space = v.x 
@@ -342,7 +361,12 @@ function editor.inspector(v)
 	    end 
 	end 
 
-	inspector_position() 
+	if(v.type ~= "Video") then
+	     inspector_position() 
+	else 
+	     inspector.x = screen.w/8
+	     inspector.y = screen.h/8
+	end 
 
 	local attr_n, attr_v
 	local i = 0
@@ -411,7 +435,7 @@ function editor.inspector(v)
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(inspector)
 		current_inspector = nil
-		editor.n_selected(v)
+		editor.n_selected(v, true)
                 screen.grab_key_focus(screen) 
 		return true
         end 
@@ -427,16 +451,30 @@ function editor.view_code(v)
         local codes = ""
 	local codeViewWin_bg = factory.make_popup_bg("Code", v.type)
 	local xbox = factory.make_xbox()
+	local codeViewWin 
 
-	local codeViewWin = Group {
-	     name = "Code",
-	     position ={0, 0},
-             children =
-             {
-               codeViewWin_bg,
-	       xbox:set{position = {765, 40}}
-             }
-	}
+	if(v.type ~= "Video") then 
+	     codeViewWin = Group {
+	          name = "Code",
+	          position ={0, 0},
+                  children =
+                  {
+                    codeViewWin_bg,
+	            xbox:set{position = {765, 40}}
+                  }
+	     }
+	else 
+	     codeViewWin = Group {
+	          name = "Code",
+	          position ={0, 0},
+                  children =
+                  {
+                    codeViewWin_bg,
+	            xbox:set{position = {1450, 40}}
+                  }
+	     }
+
+    	end 
 	codeViewWin.reactive = true
 	
 	if(v.type ~= "Group") then 
@@ -467,6 +505,7 @@ function editor.view_code(v)
 
 	local function codeViewWin_position() 
 	     local x_space, y_space
+	     if(v.type == "Video") then return end 
 	     if (v.x > screen.w - v.x - v.w) then 
 	          x_space = v.x 
         	  if (codeViewWin.w + CODE_OFFSET < x_space) then 
@@ -511,9 +550,15 @@ function editor.view_code(v)
 	    end 
 	end 
 
-	codeViewWin_position() 
+	if(v.type ~= "Video") then 
+	     codeViewWin_position() 
+	else 
+	     codeViewWin.x = screen.w / 16
+	     codeViewWin.y = screen.h / 16
+        end 
+
         text_codes = Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-        color = "FFFFFF" , position = { 50 , 60 } , editable = false ,
+        color = "FFFFFF" , position = { 50 , 60 } , size = {1400, 910}, editable = false ,
         reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
 	codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
@@ -523,7 +568,7 @@ function editor.view_code(v)
 	xbox.reactive = true
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(codeViewWin)
-		editor.n_selected(v)
+		editor.n_selected(v, true)
                 screen.grab_key_focus(screen) 
 		return true
         end 
@@ -531,19 +576,21 @@ function editor.view_code(v)
 end 
 
 function editor.save(save_current_f)
-     cleanText("codes")
      if (save_current_f == true) then 
 	print("current_fn...", current_fn)
         contents = "local g = ... \n\n"
         local obj_names = getObjnames()
+
         local n = table.getn(g.children)
    
         for i, v in pairs(g.children) do
              contents= contents..itemTostring(v)
-             if (i == n) then
-                  contents = contents.."g:add("..obj_names..")"
-             end
         end
+	if (g.extra.video ~= nil) then
+	     contents = contents..itemTostring(g.extra.video)
+	end 
+
+	contents = contents.."g:add("..obj_names..")"
         undo_list = {}
         redo_list = {}
 	print("CURRENT", current_filename)
@@ -557,14 +604,17 @@ function editor.save(save_current_f)
         printMsgWindow("File Name : ")
         contents = "local g = ... \n\n"
         local obj_names = getObjnames()
-        local n = table.getn(g.children)
+      --  local n = table.getn(g.children)
    
         for i, v in pairs(g.children) do
              contents= contents..itemTostring(v)
-             if (i == n) then
-                  contents = contents.."g:add("..obj_names..")"
-             end
         end
+
+	if (g.extra.video ~= nil) then
+	     contents = contents..itemTostring(g.extra.video)
+	end 
+
+	contents = contents.."g:add("..obj_names..")"
         undo_list = {}
         redo_list = {}
         inputMsgWindow("savefile")
@@ -573,7 +623,6 @@ end
 
 function editor.rectangle(x, y)
 	
-        cleanText("codes")
         rect_init_x = x 
         rect_init_y = y 
         if (ui.rect ~= nil and "rect"..tostring(item_num) == ui.rect.name) then
@@ -583,7 +632,7 @@ function editor.rectangle(x, y)
         ui.rect = Rectangle{
                 name="rect"..tostring(item_num),
                 border_color= defalut_color,
-                border_width=2,
+                border_width=0,
                 color= DEFAULT_COLOR,
                 size = {1,1},
                 position = {x,y}
@@ -745,7 +794,6 @@ end
 
 function editor.text()
 
-        cleanText("codes")
         ui.text = Text{
         name="text"..tostring(item_num),
 	text = "", font= "DejaVu Sans 40px",
@@ -771,32 +819,20 @@ function editor.text()
 end
 	
 function editor.image()
-        cleanText("codes")
         printMsgWindow("Image File : ")
         inputMsgWindow("open_imagefile")
 end
 	
 function editor.video()
-        mediaplayer.on_loaded = function( self ) screen:remove(BG_IMAGE) self:play() end 
-	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
-        mediaplayer:load("golf_game.mp4")	
-
---[[
-        cleanText("codes")
-        printMsgWindow("File Name : ")
-        inputMsgWindow("open_mediafile")
-]]
+        printMsgWindow("Video File : ")
+        inputMsgWindow("open_videofile")
 end
 	
 function editor.clone()
-
         if(table.getn(selected_objs) == 0 )then 
 		print("error:there aren't any selected objects") 
 		return 
         end 
-
-	--print("making clone of .. ", v.name)
-
 	for i, v in pairs(g.children) do
             if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
@@ -926,7 +962,7 @@ function editor.multi_select(x,y)
         multi_select_border = Rectangle{
                 name="multi_select_border", 
                 border_color= {0,255,0},
-                border_width=2,
+                border_width=0,
                 color= {0,0,0,0},
                 size = {1,1},
                 position = {x,y},
@@ -974,6 +1010,7 @@ end
 
 function editor.multi_select_move(x,y)
 	if(multi_select_border == nil) then return end 
+	multi_select_border:set{border_width = 2}
         multi_select_border.size = { abs(x-m_init_x), abs(y-m_init_y) }
         if(x- m_init_x < 0) then
             multi_select_border.x = x

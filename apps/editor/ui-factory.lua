@@ -417,7 +417,6 @@ end
 
 
 function factory.make_popup_bg(o_type, file_list_size)
-
     local size, color
 
    -- Set canvas size and color according to o_type 
@@ -434,8 +433,8 @@ function factory.make_popup_bg(o_type, file_list_size)
          size = {500, 500}
     	 color = "6d2b17" -- bam
     elseif(o_type == "Video") then
-         size = {500, 500}
-    	 color = "6d2b17" -- bam
+	 size = {500,700}
+    	 color = {0, 25, 25, 255}
     elseif(o_type == "Code") then
 	 if(file_list_size == "Text") then 
          	size = {800, 630}
@@ -445,6 +444,8 @@ function factory.make_popup_bg(o_type, file_list_size)
          	size = {800, 470}
 	 elseif(file_list_size == "Clone") then 
          	size = {800, 380}
+	 elseif(file_list_size == "Video") then 
+         	size = {1500, 910}
 	 else 
          	size = {800, 380}
 	 end 
@@ -804,22 +805,22 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                   if (item_v == "view code") then 
 		      screen:remove(inspector)
 		      current_inspector = nil
-		      editor.n_selected(v)
+		      --editor.n_selected(v, true)
                       screen.grab_key_focus(screen) 
 		      -- org_obj, new_obj = inspector_apply (v, inspector) 
 		      editor.view_code(v)
 	              return true
 		  elseif (item_v == "apply") then 
+		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
 		      current_inspector = nil
-		      editor.n_selected(v)
                       screen.grab_key_focus(screen) 
 	              return true
 		  elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
 		      current_inspector = nil
-		      editor.n_selected(v)
+		      editor.n_selected(v, true)
                       screen.grab_key_focus(screen) 
 	              return true
 		  end 
@@ -864,20 +865,20 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     if (item_v == "view code") then 
 		      screen:remove(inspector)
 		      current_inspector = nil
-		      editor.n_selected(v)
+		      --editor.n_selected(v, true)
                       screen.grab_key_focus(screen) 
 		      -- org_obj, new_obj = inspector_apply (v, inspector) 
 		      editor.view_code(v)
 	     elseif (item_v == "apply") then 
+		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
 		      current_inspector = nil
-		      editor.n_selected(v)
                       screen.grab_key_focus(screen) 
 	     elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
 		      current_inspector = nil
-		      editor.n_selected(v)
+		      editor.n_selected(v, true)
                       screen.grab_key_focus(screen) 
 	     end 
 
@@ -916,7 +917,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
         local space = WIDTH - PADDING_X  
 
-        if(item_n == "name" or item_n == "text" or item_n == "src") then 
+        if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	else 
     	     text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)

@@ -1,5 +1,8 @@
+
 function inspector_apply (v, inspector)
       local org_object, new_object, color_t, x_rotation_t, y_rotation_t, z_rotation_t
+      local function toboolean(s) if (s == "true") then return true else return false end end
+
       if(v.type == "Rectangle") then
            org_object = Rectangle{}
            new_object = Rectangle{}
@@ -58,9 +61,9 @@ function inspector_apply (v, inspector)
            v.font = inspector:find_child("font"):find_child("input_text").text
            new_object.font = v.font
 
-           org_object.text = v.text
-           v.text = inspector:find_child("text"):find_child("input_text").text
-           new_object.text = v.text
+           --org_object.text = v.text
+           --v.text = inspector:find_child("text"):find_child("input_text").text
+           --new_object.text = v.text
 
            org_object.editable = v.editable
            v.editable = toboolean(inspector:find_child("editable"):find_child("input_text").text)
@@ -126,6 +129,7 @@ function inspector_apply (v, inspector)
            org_object = Group{}
            new_object = Group{}
        end
+       if(v.type ~= "Video") then 
        org_object.name = v.name
        v.name = inspector:find_child("name"):find_child("input_text").text
        new_object.name = v.name
@@ -155,6 +159,54 @@ function inspector_apply (v, inspector)
        new_object.opacity = v.opacity
 
        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+       else 
+	   org_object = {}
+           new_object = {}
+	   org_object.name = v.name
+           v.name = inspector:find_child("name"):find_child("input_text").text
+           new_object.name = v.name
+	
+           org_object.source = v.source
+           v.source = inspector:find_child("source"):find_child("input_text").text
+	   if(v.source ~= org_object.source) then 
+	   	mediaplayer:load(v.source)
+	   end 
+           new_object.source = v.source
+
+	   org_object.viewport = v.viewport
+           local viewport_t = {}
+           viewport_t[1] = inspector:find_child("left"):find_child("input_text").text
+           viewport_t[2] = inspector:find_child("top"):find_child("input_text").text
+           viewport_t[3] = inspector:find_child("width"):find_child("input_text").text
+           viewport_t[4] = inspector:find_child("height"):find_child("input_text").text
+           v.viewport = viewport_t
+	   if(v.viewport ~= org_object.viewport) then 
+	   	mediaplayer:set_viewport_geometry(v.viewport[1], v.viewport[2], v.viewport[3], v.viewport[4])
+	   end 
+           new_object.viewport = v.viewport
+	
+           org_object.rate = v.rate
+           v.rate = inspector:find_child("rate"):find_child("input_text").text
+	   if(v.rate ~= org_object.rate) then 
+	   	mediaplayer:set_playback_rate(tonumber(v.rate))
+	   end 
+           new_object.rate = v.rate
+
+           org_object.volume = v.volume
+           v.volume = inspector:find_child("volume"):find_child("input_text").text
+	   mediaplayer.volume = tonumber(v.volume)
+           new_object.volume = v.volume
+
+           org_object.mute = v.mute
+           v.mute = inspector:find_child("mute"):find_child("input_text").text
+	   mediaplayer.mute = toboolean(v.mute)
+           new_object.mute = v.mute
+	
+           org_object.loop = v.loop
+           v.loop = inspector:find_child("loop"):find_child("input_text").text
+           new_object.loop = toboolean(v.loop)
+
+       end 
        return org_object, new_object
 end	
 
@@ -191,7 +243,7 @@ function grab_focus(v, inspector, attr)
                       if (attr == "view code") then 
 		          screen:remove(inspector)
 		          current_inspector = nil
-		          editor.n_selected(v)
+		          editor.n_selected(v, true)
                           screen.grab_key_focus(screen) 
 			  -- org_obj, new_obj = inspector_apply (v, inspector) 
 		          editor.view_code(v)
@@ -200,12 +252,12 @@ function grab_focus(v, inspector, attr)
 			  org_obj, new_obj = inspector_apply (v, inspector) 
 		          screen:remove(inspector)
 		          current_inspector = nil
-		          editor.n_selected(v)
+		          editor.n_selected(v, true)
                           screen.grab_key_focus(screen) 
 		      elseif (attr == "cancel") then 
 		          screen:remove(inspector)
 		          current_inspector = nil
-		          editor.n_selected(v)
+		          editor.n_selected(v, true)
                           screen.grab_key_focus(screen) 
 	                  return true
 		      end 
