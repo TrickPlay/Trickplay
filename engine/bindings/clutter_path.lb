@@ -24,6 +24,36 @@ module clutter_path;
 
     You can also use lower case for M, L and C; which implies the coordinates are
     relative.
+
+    Example:
+
+    This example shows a rectangle moving along a curved path using a <Timeline>.
+
+    (code)
+    local rectangle = Rectangle
+    {
+        color = "FF0000" ,
+        size = { 100 , 100 },
+        position = { 0 , 980 }
+    }
+
+    local path = Path( "M 0,980 C 0,0 1820,0 1820,980" )
+
+    local timeline = Timeline
+    {
+        duration = 3000,
+        on_new_frame =
+            function( timeline , duration , progress )
+                rectangle.position = path:get_position( progress )
+            end
+    }
+
+    timeline:start()
+
+    screen:add( rectangle )
+    screen:show()
+    (end)
+
 */
 
 class Path [[ClutterPath*]]
