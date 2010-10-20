@@ -9,6 +9,13 @@ module globals;
 
 struct DoLater
 {
+    static void * nil()
+    {
+        static char nil=0;
+
+        return & nil;
+    }
+
 	static void add(lua_State * L,int function_ref,int args_table_ref)
 	{
 		DoLater * dl = g_new0( DoLater , 1 );
@@ -44,6 +51,11 @@ struct DoLater
 					
 					while( lua_next(L,-2) )
 					{
+					    if ( lua_islightuserdata( L , -1 ) && lua_touserdata( L , -1 ) == nil() )
+					    {
+					        lua_pop( L , 1 );
+					        lua_pushnil( L );
+					    }
 						// Move the value below the table
 						lua_insert(L,-3);
 						++nargs;
@@ -874,7 +886,14 @@ globals
 				lua_newtable(L);
 				for (int i=1; i<=nargs; ++i)
 				{
-					lua_pushvalue(L,i+f);
+				    if ( lua_isnil( L , i+f ) )
+				    {
+				        lua_pushlightuserdata( L , DoLater::nil() );
+				    }
+				    else
+				    {
+				        lua_pushvalue(L,i+f);
+				    }
 					lua_rawseti(L,-2,i);
 				}
 				args = luaL_ref(L,LUA_REGISTRYINDEX);
