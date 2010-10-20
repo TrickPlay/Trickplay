@@ -37,6 +37,7 @@ extern int luaopen_clutter_canvas( lua_State * L );
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
+extern int luaopen_clutter_path( lua_State * L );
 
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
@@ -703,6 +704,7 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_timeline( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
+    luaopen_clutter_path( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
