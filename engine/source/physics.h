@@ -282,6 +282,22 @@ namespace Physics
 
         gulong              mapped_handler;
     };
+
+    //=========================================================================
+
+    class AABBQuery : public b2QueryCallback
+    {
+    public:
+
+        AABBQuery( lua_State * _L );
+
+        virtual bool ReportFixture( b2Fixture * fixture );
+
+    private:
+
+        lua_State * L;
+    };
+
 };
 
 #endif // _TRICKPLAY_PHYSICS_H

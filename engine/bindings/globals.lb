@@ -864,7 +864,8 @@ globals
 		
 	detach( udata o )
 		[[
-			UserData::clear_callbacks( L , o );
+			// UserData::clear_callbacks( L , o );
+		    g_warning( "'detach' function is deprecated" );
 		]];		       
 		
 	/*
@@ -971,5 +972,29 @@ globals
             lua_pushcclosure( L , marker_gc , 1 );
             lua_setfield( L , -2 , "__gc" );
             lua_setmetatable( L , -2 );
+        ]];
+
+	table udatatypes( udata u )
+        [[
+            LSG;
+            if ( ! lua_isuserdata( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else if ( ! lua_getmetatable( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_getfield( L , -1 , "__types__" );
+                lua_remove( L , -2 );
+            }
+            LSG_CHECK(1);
+        ]];
+
+	bool checkudatatype( udata u , string type )
+        [[
+            result = lb_check_udata_type( L , u , type , false );
         ]];
 }

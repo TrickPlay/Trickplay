@@ -1044,8 +1044,15 @@ def emit( stuff , f ):
                 '  lua_pushstring(L,"type");\n'
                 '  lua_pushstring(L,"%s");\n'
                 "  lua_rawset(L,-3);\n"
+
+                '  lua_pushstring(L,"__types__");\n'
+                "  lua_newtable(L);\n"
+                '  lua_pushstring(L,"%s");\n'
+                "  lua_pushboolean(L,1);\n"
+                "  lua_rawset(L,-3);\n"
+                "  lua_rawset(L,-3);\n"
                 %
-                (metatable_name,bind_name)
+                (metatable_name,bind_name,bind_name)
             )
             
             # Put constants into the metatable
