@@ -345,9 +345,9 @@ function(pres, ctrl)
                 ["y"] = Interval(y_peak[i], y_end[i]),
                 ["opacity"] = Interval(o_peak[i], 0)
             }
-            gameloop:add(sparkles[i], t_peak[i]-t_start[i], nil, intervals_1,
+            gameloop:add(sparkles[i], t_peak[i]-t_start[i], nil, intervals_1, true,
                 function()
-                    gameloop:add(sparkles[i], 2000-t_end[i], nil, intervals_2,
+                    gameloop:add(sparkles[i], 2000-t_end[i], nil, intervals_2, true,
                         function()
                             sparkles[i]:clear()
                             sparkles[i]:unparent()

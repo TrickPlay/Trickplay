@@ -263,11 +263,11 @@ MenuView = Class(View, function(view, model, ...)
             ["x"] = Interval(right_tile.x, right_tile.x - 8)
         }
 
-        gameloop:add(left_tile, 500, nil, left_interval, 
+        gameloop:add(left_tile, 500, nil, left_interval, nil,
             function()
                 gameloop:add(left_tile, 400, nil, {["opacity"]=Interval(255,0)})
             end)
-        gameloop:add(right_tile, 500, nil, right_interval,
+        gameloop:add(right_tile, 500, nil, right_interval, nil,
             function()
                 gameloop:add(right_tile, 400, nil, {["opacity"]=Interval(255,0)})
                 enable_event_listeners()
@@ -283,14 +283,14 @@ MenuView = Class(View, function(view, model, ...)
         local interval = nil
         if -1 == dir[2] then
             interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y + 195)}
-            gameloop:add(tiles_strip, 300, nil, interval,
+            gameloop:add(tiles_strip, 300, nil, interval, nil,
                 function()
                     if number == 3 then tiles_strip.y = -350 end
                     game:get_state():get_tiles_class():change_images(number)
                 end)
         elseif 1 == dir[2] then
             interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y - 195)}
-            gameloop:add(tiles_strip, 300, nil, interval,
+            gameloop:add(tiles_strip, 300, nil, interval, nil,
                 function()
                     if number == 1 then tiles_strip.y = 40 end
                     game:get_state():get_tiles_class():change_images(number)
@@ -326,7 +326,7 @@ MenuView = Class(View, function(view, model, ...)
         if -1 == dir[2] then
             interval = {["y"] = Interval(layout_strip.y, layout_strip.y + 
                 layout_strip_image.height*1/7)}
-            gameloop:add(layout_strip, 300, nil, interval,
+            gameloop:add(layout_strip, 300, nil, interval, nil,
                 function()
                     if current_layout == Layouts.LAST then
                         layout_strip.y = -layout_strip_image.height*6/7
@@ -338,7 +338,7 @@ MenuView = Class(View, function(view, model, ...)
         elseif 1 == dir[2] then
             interval = {["y"] = Interval(layout_strip.y, layout_strip.y - 
                 layout_strip_image.height*1/7)}
-            gameloop:add(layout_strip, 300, nil, interval,
+            gameloop:add(layout_strip, 300, nil, interval, nil,
                 function()
                     if current_layout == 1 then
                         layout_strip.y = 0
