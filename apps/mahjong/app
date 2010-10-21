@@ -1,8 +1,8 @@
 app=
 {
-    id          = "com.trickplay.solitaire",
+    id          = "com.trickplay.mahjong",
     release     = "1",
-    version     = "1.0",
+    version     = "0.5",
     name        = "Mahjong",
     author      = "James Fenley",
     copyright   = "© Trickplay Inc."
