@@ -29,11 +29,11 @@ function( section )
 
 local dropdown_map =
 {
-     ["NEW                [N] "]   = function() editor.close() mouse_mode = S_SELECT end,
-     ["OPEN               [O] "]   = function() editor.open() mouse_mode = S_SELECT end,
-     ["SAVE               [S] "]   = function() editor.save(true) mouse_mode = S_SELECT end,
-     ["QUIT               [Q] "]   = function() exit() end,
-     ["SAVE AS 	       [A] " ]  = function() editor.save(false) mouse_mode = S_SELECT end
+     ["NEW".."\t\t\t".."[N]"]   = function() editor.close() mouse_mode = S_SELECT end,
+     ["OPEN".."\t\t\t".."[O]"]   = function() editor.open() mouse_mode = S_SELECT end,
+     ["SAVE".."\t\t\t".."[S]"]   = function() editor.save(true) mouse_mode = S_SELECT end,
+     ["QUIT".."\t\t\t".."[Q]"]   = function() exit() end,
+     ["SAVE AS".."\t\t\t".."[A]" ]  = function() editor.save(false) mouse_mode = S_SELECT end
 }
 
     local function build_dropdown_ui()
@@ -47,11 +47,11 @@ local dropdown_map =
         local items_height = 0
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_new  = factory.make_text_menu_item( assets , ui.strings[ "NEW                [N] " ] )
-        local f_open = factory.make_text_menu_item( assets , ui.strings[ "OPEN               [O] " ] )
-        local f_save = factory.make_text_menu_item( assets , ui.strings[ "SAVE               [S] " ] )
-        local f_quit = factory.make_text_menu_item( assets , ui.strings[ "QUIT               [Q] " ] )
-        local f_view = factory.make_text_menu_item( assets , ui.strings[ "SAVE AS 	       [A] " ] )
+        local f_new  = factory.make_text_menu_item( assets , ui.strings[ "NEW".."\t\t\t".."[N]" ] )
+        local f_open = factory.make_text_menu_item( assets , ui.strings[ "OPEN".."\t\t\t".."[O]" ] )
+        local f_save = factory.make_text_menu_item( assets , ui.strings[ "SAVE".."\t\t\t".."[S]" ] )
+        local f_quit = factory.make_text_menu_item( assets , ui.strings[ "QUIT".."\t\t\t".."[Q]" ] )
+        local f_view = factory.make_text_menu_item( assets , ui.strings[ "SAVE AS".."\t\t\t".."[A]" ] )
         
         --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     

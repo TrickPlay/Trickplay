@@ -26,15 +26,16 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-     	["UNDO                   [Z]"]   = function() editor.undo() mouse_mode = S_SELECT end,
-     	["REDO                   [E]"]   = function() editor.redo() mouse_mode = S_SELECT end,
-     	["TEXT                    [T]"]   = function() editor.text() mouse_mode = S_SELECT end,
-     	["IMAGE                   [I]"]   = function() editor.image() mouse_mode = S_SELECT end,
-     	["RECTANGLE         [R]"]   = function() mouse_mode = S_RECTANGLE end,
-     	["VIDEO               "]   = function() editor.video() mouse_mode = S_SELECT end,
-     	["CLONE OBJECT    [C]"]   = function() editor.clone() mouse_mode = S_SELECT end,
-     	["GROUP OBJECT   [G]"]   = function() editor.group() mouse_mode = S_SELECT end,
-     	["UN GROUP OBJECT   "]   = function() editor.ugroup() mouse_mode = S_SELECT end
+     	["UNDO".."\t\t\t".."[U]"]   = function() editor.undo() mouse_mode = S_SELECT end,
+     	["REDO".."\t\t\t".."[E]"]   = function() editor.redo() mouse_mode = S_SELECT end,
+     	["TEXT".."\t\t\t".."[T]"]   = function() editor.text() mouse_mode = S_SELECT end,
+     	["IMAGE".."\t\t\t".."[I]"]   = function() editor.image() mouse_mode = S_SELECT end,
+     	["RECTANGLE".."\t\t".."[R]"]   = function() mouse_mode = S_RECTANGLE end,
+     	["VIDEO".."\t\t\t"..""]   = function() editor.video() mouse_mode = S_SELECT end,
+     	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() mouse_mode = S_SELECT end,
+     	["DELETE".."\t\t\t".."[D]"]   = function() editor.delete() mouse_mode = S_SELECT end,
+     	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() mouse_mode = S_SELECT end,
+     	["UN GROUP".."\t\t\t"..""]   = function() editor.ugroup() mouse_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -47,15 +48,16 @@ function( section )
         local items_height = 0
     
     
-        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO                   [Z]" ] )
-        local f_redo  = factory.make_text_menu_item( assets , ui.strings[ "REDO                   [E]" ] )
-        local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT                    [T]" ] )
-        local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE                   [I]" ] )
-        local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE         [R]" ] )
-        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO               " ] )
-        local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE OBJECT    [C]" ] )
-        local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP OBJECT   [G]" ] )
-        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UN GROUP OBJECT   " ] )
+        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO".."\t\t\t".."[U]" ] )
+        local f_redo  = factory.make_text_menu_item( assets , ui.strings[ "REDO".."\t\t\t".."[E]" ] )
+        local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT".."\t\t\t".."[T]" ] )
+        local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE".."\t\t\t".."[I]" ] )
+        local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
+        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t\t".."" ] )
+        local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
+        local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t\t".."[D]" ] )
+        local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )
+        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UN GROUP".."\t\t\t".."" ] )
         
     
         table.insert( section_items , f_undo )
@@ -64,6 +66,7 @@ function( section )
         table.insert( section_items , f_image )
         table.insert( section_items , f_rect )
         table.insert( section_items , f_video )
+        table.insert( section_items , f_delete)
         table.insert( section_items , f_clone )
         table.insert( section_items , f_group )
         table.insert( section_items , f_ugroup )
@@ -98,7 +101,7 @@ function( section )
              end
        end
 
-        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_clone.h + f_group.h -- + f_insert.h
+        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
         
 
         f_rect.extra.on_activate =
@@ -141,6 +144,11 @@ function( section )
             function()
 		mouse_mode = S_SELECT
 		editor.ugroup()
+            end
+        f_delete.extra.on_activate =
+            function()
+		editor.delete()
+		mouse_mode = S_SELECT
             end
         f_clone.extra.on_activate =
             function()

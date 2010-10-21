@@ -10,10 +10,8 @@ BUTTON_UP         = 0
 BUTTON_DOWN       = 1
 S_SELECT          = 0
 S_RECTANGLE       = 1
-S_DRAGGING        = 2
-S_MENU            = 3
-S_CLONE           = 4
-S_GROUP           = 5
+S_POPUP        	  = 2
+
 DEFAULT_COLOR     = "FFFFFFC0"
 
 ADD               = 1
@@ -99,7 +97,7 @@ ui =
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "  EDIT  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 610,
+                height  = 665,
                 init    = dofile( "section-edit" )
             },
 

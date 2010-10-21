@@ -128,6 +128,15 @@ function inspector_apply (v, inspector)
        elseif (v.type == "Group") then
            org_object = Group{}
            new_object = Group{}
+
+	   org_object.scale = v.scale
+           local scale_t = {}
+           scale_t[1] = inspector:find_child("x_scale"):find_child("input_text").text
+           scale_t[2] = inspector:find_child("y_scale"):find_child("input_text").text
+           v.scale = scale_t
+           new_object.scale = v.scale
+		 
+
        end
        if(v.type ~= "Video") then 
        org_object.name = v.name
@@ -185,28 +194,23 @@ function inspector_apply (v, inspector)
 	   end 
            new_object.viewport = v.viewport
 	
-           org_object.rate = v.rate
-           v.rate = inspector:find_child("rate"):find_child("input_text").text
-	   if(v.rate ~= org_object.rate) then 
-	   	mediaplayer:set_playback_rate(tonumber(v.rate))
-	   end 
-           new_object.rate = v.rate
-
            org_object.volume = v.volume
            v.volume = inspector:find_child("volume"):find_child("input_text").text
 	   mediaplayer.volume = tonumber(v.volume)
            new_object.volume = v.volume
 
-           org_object.mute = v.mute
-           v.mute = inspector:find_child("mute"):find_child("input_text").text
-	   mediaplayer.mute = toboolean(v.mute)
-           new_object.mute = v.mute
-	
            org_object.loop = v.loop
-           v.loop = inspector:find_child("loop"):find_child("input_text").text
+           v.loop = toboolean(inspector:find_child("loop"):find_child("input_text").text)
+	   if(v.loop == true) then 
+	  	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
+     	   else  	
+		mediaplayer.on_end_of_stream = function ( self ) self:seek(0) end
+     	   end
+
            new_object.loop = toboolean(v.loop)
 
        end 
+       mouse_mode = S_SELECT
        return org_object, new_object
 end	
 
