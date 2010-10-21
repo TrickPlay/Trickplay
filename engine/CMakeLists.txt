@@ -267,6 +267,7 @@ endif( TP_PROFILING )
 list( APPEND LB_FILES
     
     ${BINDINGS_SRC}/globals.lb
+    ${BINDINGS_SRC}/editor.lb
 
     ${BINDINGS_SRC}/timer.lb
     
