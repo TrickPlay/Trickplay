@@ -425,6 +425,7 @@ function editor.inspector(v)
         end 
 
 	screen:add(inspector)
+	mouse_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
 	
 	current_inspector = inspector
@@ -437,6 +438,7 @@ function editor.inspector(v)
 		current_inspector = nil
 		editor.n_selected(v, true)
                 screen.grab_key_focus(screen) 
+	        mouse_mode = S_SELECT
 		return true
         end 
 
@@ -563,13 +565,14 @@ function editor.view_code(v)
 	codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
         create_on_button_down_f(codeViewWin)
-	mouse_mode = S_SELECT
+	mouse_mode = S_POPUP
 
 	xbox.reactive = true
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(codeViewWin)
 		editor.n_selected(v, true)
                 screen.grab_key_focus(screen) 
+	        mouse_mode = S_SELECT
 		return true
         end 
 
@@ -752,14 +755,14 @@ function editor.redo()
 			     end
         		end 
 			--g:add(redo_item[3])
-               		g:add(g:find_child(undo_item[1])) 
+               		g:add(g:find_child(redo_item[1]))  -- hj : undo->redo 10.21
 			screen:add(g)
 			--create_on_button_down_f(redo_item[3])
 	       else 
                g:add(redo_item[3])
 	       end 
                table.insert(undo_list, redo_item)
-          elseif undo_item[2] == DEL then 
+          elseif redo_item[2] == DEL then 
                g:remove(g:find_child(redo_item[1]))
                table.insert(undo_list, redo_item)
           end 
@@ -855,6 +858,26 @@ function editor.clone()
 	mouse_mode = S_SELECT
 end
 	
+function editor.delete()
+        if(table.getn(selected_objs) == 0 )then 
+		print("error:there aren't any selected objects") 
+		return 
+        end 
+	for i, v in pairs(g.children) do
+            if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     editor.n_selected(v)
+        	     table.insert(undo_list, {v.name, DEL, v})
+        	     g:remove(v)
+        	     screen:add(g)        
+		end 
+            end
+        end
+
+	mouse_mode = S_SELECT
+end
+	
+
 
 	
 local function get_min_max () 
@@ -1526,4 +1549,5 @@ function editor.bring_forward()
     screen.grab_key_focus(screen)
     mouse_mode = S_SELECT
 end
+
 

@@ -44,8 +44,9 @@ function create_on_button_down_f(v)
 	print("creating on_button_down_f of ", v.type) 
 	
         function v:on_button_down(x,y,button,num_clicks)
-           --print (v.type, button, " button down ")
-	   if(v.name ~= "inspector" and v.name ~= "Code") then 
+	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
+	     if(mouse_mode == S_SELECT) and  
+	       (screen:find_child("msgw") == nil) then
 	       if (v.extra.is_in_group == true and control == false) then 
 		    local p_obj = find_parent(v)
                     if(button == 3 or num_clicks >= 2) then
@@ -82,6 +83,7 @@ function create_on_button_down_f(v)
            	    dragging = {v, x - v.x, y - v.y }
            	    return true;
 	   	 end
+              end
 	   else 
                  dragging = {v, x - v.x, y - v.y }
            	 return true;
@@ -89,7 +91,9 @@ function create_on_button_down_f(v)
         end
 
         function v:on_button_up(x,y,button,num_clicks)
-	   if(v.name ~= "inspector") then 
+	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
+	     if(mouse_mode == S_SELECT) and 
+	       (screen:find_child("msgw") == nil) then
 	        if (v.extra.is_in_group == true) then 
 		    local p_obj = find_parent(v)
 		    new_object = copy_obj(p_obj)
@@ -123,6 +127,7 @@ function create_on_button_down_f(v)
               	  end
               	  return true
 	      end 
+             end
 	   else 
 	      dragging = nil
               return true
@@ -170,7 +175,7 @@ function copy_obj (v)
            new_object.source = v.source
        elseif (v.type == "Group") then
            new_object = Group{}
-	   new_object.children = v.children
+	   new_object.scale = v.scale
        end
        new_object.name = v.name
        new_object.x = v.x
@@ -265,6 +270,7 @@ function inputScreen_yn()
 	  msgw_cur_x = 25
      	  msgw_cur_y = 50
           screen:remove(msgw)
+	  mouse_mode = S_SELECT
      	  msgw.children = {}
           printMsgWindow("File Name : ")
           inputMsgWindow("savefile")
@@ -276,6 +282,7 @@ function inputScreen_yn()
 	  msgw_cur_x = 25
      	  msgw_cur_y = 50
           screen:remove(msgw)
+	  mouse_mode = S_SELECT
      	  msgw.children = {}
      end
 end
@@ -337,7 +344,7 @@ function cleanText(text_name)
      end
 end
 
-attr_t_idx = {"name", "source", "left", "top", "width", "height", "rate", "volume", "mute", "loop", "x", "y", "z", "w", "h", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "bord_r", "bord_g", "bord_b", "bwidth", "x_ang", "y_ang", "z_ang", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle", "opacity", "view code", "apply", "cancel"}
+attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "bord_r", "bord_g", "bord_b", "bwidth", "x_ang", "y_ang", "z_ang", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle", "x_scale", "y_scale", "opacity", "view code", "apply", "cancel"}
 
 function make_attr_t(v)
 function toboolean(s) if (s == "true") then return true else return false end end
@@ -373,11 +380,7 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"width", v.viewport[3], "w"},
              {"height", v.viewport[4], "h"},
              {"line",""},
-             {"rate", v.rate, "rate"},
-             {"line",""},
              {"volume", v.volume, "volume"},
-             {"mute", v.mute, "mute"},
-             {"line",""},
              {"loop", v.loop, "loop"},
              {"line",""}
       }
@@ -395,8 +398,6 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"font", v.font,"font "})
         table.insert(attr_t, {"line",""})
-        --table.insert(attr_t, {"caption", "TEXT"})
-        --table.insert(attr_t, {"text", v.text,"text"})
         table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"editable", v.editable,"editable"})
         table.insert(attr_t, {"wants_enter", v.wants_enter,"wants enter"})
@@ -412,7 +413,6 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"rect_r", color_t[1], "r"})
         table.insert(attr_t, {"rect_g", color_t[2], "g"})
         table.insert(attr_t, {"rect_b", color_t[3], "b"})
-        --table.insert(attr_t, {"fill_color  ", v.color,"border_color"})
         color_t = v.border_color 
         if color_t == nil then 
              color_t = {0,0,0}
@@ -421,7 +421,6 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"bord_r", color_t[1], "r"})
         table.insert(attr_t, {"bord_g", color_t[2], "g"})
         table.insert(attr_t, {"bord_b", color_t[3], "b"})
-        --table.insert(attr_t, {"border_color", v.border_color, "border_width"})
         table.insert(attr_t, {"bwidth", v.border_width, "border width"})
         table.insert(attr_t, {"line",""})
 	table.insert(attr_t, {"caption", "ROTATION  "})
@@ -452,7 +451,6 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"cy", clip_t[2], "y"})
         table.insert(attr_t, {"cw", clip_t[3], "w"})
         table.insert(attr_t, {"ch", clip_t[4], "h"})
-        --table.insert(attr_t, {"ch", clip_t[4], "opacity"})
         table.insert(attr_t, {"line",""})
  	table.insert(attr_t, {"caption", "ROTATION  "})
         local x_rotation_t = v.x_rotation 
@@ -503,7 +501,13 @@ function toboolean(s) if (s == "true") then return true else return false end en
       elseif (v.type  == "Clone") then
         table.insert(attr_t, {"source", v.source,"source"})
       elseif (v.type  == "Group") then
-        table.insert(attr_t, {"children", v.children,"children"})
+        table.insert(attr_t, {"caption", "SCALE   "})
+	local scale_t = v.scale
+        if scale_t == nil then
+             scale_t = {1,1} 
+        end
+        table.insert(scale_t, {"x_scale", scale_t[1], "x"})
+        table.insert(scale_t, {"y_scale", scale_t[2], "y"})
       end
   if(v.type ~= "Video") then
       table.insert(attr_t, {"line",""})
@@ -529,6 +533,10 @@ function itemTostring(v)
          local clip_t = v.clip
          if(clip_t == nil) then
              clip_t = {0,0 ,v.w, v.h}
+         end
+	 local scale_t = v.scale
+         if scale_t == nil then
+             scale_t = {1,1} 
          end
     end 
     if(v.type == "Rectangle") then
@@ -575,45 +583,30 @@ function itemTostring(v)
          "source="..v.source.name..","..indent..
          "opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Group") then
-        local i = 1
-        local children = ""
-        for e in values(v.children) do
-		itm_str = itm_str..itemTostring(e)
-		if i == 1 then
-			children = children..e.name
-		else 
-			children = children..","..e.name
-		end
-		i = i + 1
-        end 
-	--print(children)
 	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
         "name=\""..v.name.."\","..indent..
         "size={"..table.concat(v.size,",").."},"..indent..
         "position = {"..v.x..","..v.y.."},"..indent..
-        "children = {"..children.."},"..indent..
+        "scale = {"..scale_t[1]..","..scale_t[2].."},"..indent..
         "opacity = "..v.opacity..b_indent.."}\n\n"
-	
     elseif (v.type == "Video") then
 	itm_str = itm_str..v.name.." = ".."{"..indent..
         "name=\""..v.name.."\","..indent..
         "type=\""..v.type.."\","..indent..
         "source=\""..v.source.."\","..indent..
         "viewport={"..table.concat(v.viewport,",").."},"..indent..
-        "rate = "..v.rate..","..indent..
         "loop = "..tostring(v.loop)..","..indent..
-        "volume = "..v.volume..","..indent..
-        "mute = "..tostring(v.mute)..","..b_indent.."}\n"..b_indent
+        "volume = "..v.volume..b_indent.."}\n"..b_indent
 	
 	itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
 	"mediaplayer.on_loaded = function(self) screen:remove(BG_IMAGE) self:play() end"..b_indent..
 	"if ("..v.name..".loop == true) then"..b_indent..
      	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
+	"else"..b_indent..
+	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) end"..b_indent..
 	"end"..b_indent..
 	"mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
-	"mediaplayer:set_playback_rate("..v.name..".rate)"..b_indent..
-	"mediaplayer.volume = "..v.name..".volume"..b_indent..
-	"mediaplayer.mute = "..v.name..".mute\n\n"
+	"mediaplayer.volume = "..v.name..".volume\n\n"
 
 	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
 
@@ -652,6 +645,7 @@ end
 --------------------------------
 
 local  msgw = Group {
+	     name = "msgw",
 	     position ={400, 400},
 	     anchor_point = {0,0},
              children =
@@ -695,6 +689,7 @@ function inputMsgWindow_savefile()
 	       msgw_cur_x = 25
 	       msgw_cur_y = 50
 	       screen:remove(msgw)
+	       mouse_mode = S_SELECT
                msgw.children = {}
                printMsgWindow("The file named "..current_filename..
                " already exists.\nDo you want to replace it? \n", "aleady_exists")
@@ -712,6 +707,7 @@ function inputMsgWindow_savefile()
 	   msgw_cur_x = 25
 	   msgw_cur_y = 50
 	   screen:remove(msgw)
+	   mouse_mode = S_SELECT
            msgw.children = {}
       end
 end
@@ -733,6 +729,7 @@ function inputMsgWindow_openfile()
 	  msgw_cur_x = 25
 	  msgw_cur_y = 50
 	  screen:remove(msgw)
+	  mouse_mode = S_SELECT
           msgw.children = {}
           printMsgWindow("The file not exists.\nFile Name : ","err_msg")
           inputMsgWindow("reopenfile")
@@ -753,6 +750,7 @@ function inputMsgWindow_openfile()
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
+     mouse_mode = S_SELECT
      msgw.children = {}
      screen:add(g)
      screen:grab_key_focus()
@@ -773,6 +771,7 @@ function inputMsgWindow_yn(txt)
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
+     mouse_mode = S_SELECT
      msgw.children = {}
      screen:grab_key_focus()
 end
@@ -784,10 +783,8 @@ function inputMsgWindow_openvideo()
                 type ="Video",
                 viewport ={0,0,screen.w/2,screen.h/2},
            	source= input_t.text,
-           	rate=1,
            	loop= true, 
-                volume=0.5,  
-                mute=false
+                volume=0.5  
               }
 
      g.extra.video = video1
@@ -795,11 +792,14 @@ function inputMsgWindow_openvideo()
      mediaplayer.on_loaded = function( self ) screen:remove(BG_IMAGE) self:play() end 
      if(video1.loop == true) then 
 	  	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
+     else  	
+		mediaplayer.on_end_of_stream = function ( self ) self:seek(0) end
      end
 
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
+     mouse_mode = S_SELECT
      msgw.children = {}
      screen:grab_key_focus()
 
@@ -821,6 +821,7 @@ function inputMsgWindow_openimage()
 	  msgw_cur_x = 25
 	  msgw_cur_y = 50
 	  screen:remove(msgw)
+          mouse_mode = S_SELECT
      	  msgw.children = {}
           printMsgWindow("The file not exists.\nFile Name :","err_msg")
           inputMsgWindow("reopenImg")
@@ -839,6 +840,7 @@ function inputMsgWindow_openimage()
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
+     mouse_mode = S_SELECT
      msgw.children = {}
      item_num = item_num + 1
 end
@@ -893,6 +895,7 @@ function inputMsgWindow(input_purpose)
 		msgw_cur_x = 25
 		msgw_cur_y = 50
 		screen:remove(msgw)
+                mouse_mode = S_SELECT
      	end 
 	
      elseif (input_purpose == "yn") then 
@@ -919,6 +922,7 @@ function inputMsgWindow(input_purpose)
 		msgw_cur_x = 25
 		msgw_cur_y = 50
 		screen:remove(msgw)
+                mouse_mode = S_SELECT
      	end 
      	function no_b:on_button_down(x,y,button,num_clicks)
 
@@ -928,6 +932,7 @@ function inputMsgWindow(input_purpose)
 		msgw_cur_x = 25
 		msgw_cur_y = 50
 		screen:remove(msgw)
+                mouse_mode = S_SELECT
 		editor.save(false)
      	end 
      else 
@@ -970,11 +975,15 @@ function inputMsgWindow(input_purpose)
 		msgw_cur_x = 25
 		msgw_cur_y = 50
 		screen:remove(msgw)
+                mouse_mode = S_SELECT
                 screen:grab_key_focus(screen)
      	end 
      end
 
      screen:add(msgw)
+     mouse_mode = S_POPUP
+     print(mouse_mode, "**********1******")
+
      if( input_purpose ~="yn") then 
           input_t.grab_key_focus(input_t)
      end 
@@ -994,6 +1003,7 @@ function inputMsgWindow(input_purpose)
 							msgw_cur_x = 25
 							msgw_cur_y = 50
 							screen:remove(msgw)
+							mouse_mode = S_SELECT
                 					screen:grab_key_focus(screen)
                end
 	     elseif (key == keys.Tab and shift == false) or key == Down then 
@@ -1012,6 +1022,7 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "open_imagefile") then  openfile_b.extra.on_focus.out() cancel_b.extra.on_fucus_in()
                end
 	     end 
+     print(mouse_mode, "**********2******")
         end 
      end 
 
@@ -1030,24 +1041,8 @@ function inputMsgWindow(input_purpose)
 	  elseif (key == keys.Tab and shift == false) or key == Down then 
 	  elseif (key == keys.Tab and shift == true ) or key == Up then 
           end
+     print(mouse_mode, "**********3******")
 
---[[
-          if key == keys.Return or
-            (key == keys.Tab and shift == false) or 
-             key == keys.Down then
-		input_t:set{color = "000000"} 
-		input_t:set{cursor_visible = false}
-		screen:grab_key_focus(screen)
-	        if (input_purpose == "savefile") then save_b.extra.on_focus_in()
-                elseif (input_purpose == "yn") then yes_b.extra.on_focus_in()
-                elseif (input_purpose == "openfile") then open_b.extra.on_focus_in()
-                elseif (input_purpose == "reopenfile") then open_b.extra.on_focus_in()
-                elseif (input_purpose == "open_videofile") then open_b.extra.on_focus_in()
-                elseif (input_purpose == "open_imagefile") then  open_b.extra.on_focus_in()
-                elseif (input_purpose == "reopenImg") then open_b.extra.on_focus_in()
-                end
-    	  end 
-]]
-	end 
+     end 
 	
 end

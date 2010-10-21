@@ -139,13 +139,13 @@ function factory.make_text_menu_item( assets , caption )
     local focus = assets( "assets/button-focus.png" )
     local text_category, line_category
     
-    if (caption == "TEXT                    [T]") then 
+    if (caption == "TEXT".."\t\t\t".."[T]") then 
 	text_category = Text{ text = "INSERT : "}:set(STYLE)
     elseif (caption == "LEFT           ") then
 	text_category = Text{ text = "ALIGNMENT : "}:set(STYLE)
     elseif (caption == "H_SPACE	  ") then
 	text_category = Text{ text = "DISTRIBUTION : "}:set(STYLE)
-    elseif ( caption ==  "CLONE OBJECT    [C]" or 
+    elseif ( caption == "DELETE".."\t\t\t".."[D]" or 
     	     caption ==  "BRING TO FRONT" ) then 
         local function make_line()
     		local LINE_WIDTH    =7 
@@ -433,7 +433,7 @@ function factory.make_popup_bg(o_type, file_list_size)
          size = {500, 500}
     	 color = "6d2b17" -- bam
     elseif(o_type == "Video") then
-	 size = {500,700}
+	 size = {500,580}
     	 color = {0, 25, 25, 255}
     elseif(o_type == "Code") then
 	 if(file_list_size == "Text") then 
@@ -445,7 +445,7 @@ function factory.make_popup_bg(o_type, file_list_size)
 	 elseif(file_list_size == "Clone") then 
          	size = {800, 380}
 	 elseif(file_list_size == "Video") then 
-         	size = {1500, 910}
+         	size = {1500, 850}
 	 else 
          	size = {800, 380}
 	 end 
@@ -934,9 +934,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
 	     end
         end 
-	print("item name ", item_n)
-	print ("input_box_width", input_box_width)
-        print("space", space)
+	--print("item name ", item_n)
+	--print ("input_box_width", input_box_width)
+        --print("space", space)
 
     	--next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
     	--group:add(next_text)

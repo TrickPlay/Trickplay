@@ -306,6 +306,7 @@ local function build_ui( show_it )
         [ keys.e	] = function() animate_out_dropdown() editor.redo() mouse_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() mouse_mode = S_SELECT end,
         [ keys.c	] = function() animate_out_dropdown() editor.clone() mouse_mode = S_SELECT end,
+        [ keys.d	] = function() animate_out_dropdown() editor.delete() mouse_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() mouse_mode = S_SELECT end,
         [ keys.p	] = function() animate_out_dropdown() end,
         [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
@@ -375,12 +376,15 @@ local function build_ui( show_it )
 	     section.button.reactive = true
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
-	          button_map[section.button.name]()
-		  print("jjj")
-		  menu_init = true
-		  local s= ui.sections[ui.focus]
-        	  ui.button_focus.position = s.button.position
-        	  ui.button_focus.opacity = 255
+		  if(mouse_mode == S_SELECT) and
+		    (screen:find_child("msgw") == nil) then
+	               button_map[section.button.name]()
+		       print("jjj")
+		       menu_init = true
+		       local s= ui.sections[ui.focus]
+        	       ui.button_focus.position = s.button.position
+        	       ui.button_focus.opacity = 255
+		  end 
                   return true
 	     end
 	 end
@@ -436,7 +440,8 @@ local function build_ui( show_it )
 
           mouse_state = BUTTON_DOWN
           if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
-          if(mouse_mode == S_SELECT) then 
+          if(mouse_mode == S_SELECT) and 
+		    (screen:find_child("msgw") == nil) then
 	       if(current_inspector == nil) then 
 		    if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
                          editor.inspector(g.extra.video)
@@ -460,7 +465,8 @@ local function build_ui( show_it )
 	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
               if (mouse_mode == S_RECTANGLE) then editor.rectangle_done(x, y) mouse_mode = S_SELECT end
-	      if(mouse_mode == S_SELECT) then 
+	      if(mouse_mode == S_SELECT) and 
+		    (screen:find_child("msgw") == nil) then
 			editor.multi_select_done(x,y)
 	      end 
 
@@ -499,7 +505,9 @@ local function build_ui( show_it )
           end
           if(mouse_state == BUTTON_DOWN) then
                if (mouse_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
-               if (mouse_mode == S_SELECT) then editor.multi_select_move(x, y) end
+               if (mouse_mode == S_SELECT) and 
+		  (screen:find_child("msgw") == nil) then 
+		    editor.multi_select_move(x, y) end
           end
       end
 
