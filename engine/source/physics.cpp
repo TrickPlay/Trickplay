@@ -1125,5 +1125,28 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
 
 //.............................................................................
 
+AABBQuery::AABBQuery( lua_State * _L )
+:
+    L( _L )
+{
+    lua_newtable( L );
+}
+
+
+bool AABBQuery::ReportFixture( b2Fixture * fixture )
+{
+    int fixture_handle = GPOINTER_TO_INT( fixture->GetUserData() );
+    int body_handle = 0;
+
+    if ( Body * body = Body::get( fixture->GetBody() ) )
+    {
+        body_handle = body->handle;
+    }
+
+    lua_pushinteger( L , body_handle );
+    lua_rawseti( L , -2 , fixture_handle );
+
+    return true;
+}
 
 }; // Physics
