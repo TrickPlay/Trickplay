@@ -387,66 +387,63 @@ GameState = Class(nil,function(state, ctrl)
 
         local tile = grid[x][y][z]
 
-        if not selected_tile then
-            -- if its a selectable piece
-            if selection_grid[tile] then
-                -- select the piece
-                selected_tile = tile
-                game_menu:add_tile_image(
-                    Clone{source = tile.images[tiles_class:get_current_tile_image()]},
-                    Clone{source = tile.glyph})
-                tile:show_green()
+        -- if its a selectable piece
+        if not selected_tile and selection_grid[tile] then
+            -- select the piece
+            selected_tile = tile
+            game_menu:add_tile_image(
+                Clone{source = tile.images[tiles_class:get_current_tile_image()]},
+                Clone{source = tile.glyph})
+            tile:show_green()
+        elseif selection_grid[tile] and selected_tile
+        and selected_tile:is_a_match(tile) then
+            local counter = 0
+            local temp = selected_tile
+
+            tile:show_green()
+            mediaplayer:play_sound("assets/audio/match-good.mp3")
+            tile:hide_yellow()
+            local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
+            local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}
+
+            gameloop:add(tile.focus.green, 600, nil, interval_1)
+            gameloop:add(temp.focus.green, 600, nil, interval_2)
+            
+            game_menu:add_tile_image(
+                Clone{source = tile.images[tiles_class:get_current_tile_image()]},
+                Clone{source = tile.glyph})
+
+            ctrl:get_presentation():tile_bump(tile.group, temp.group)
+
+            if hint_tiles and hint_tiles[1] ~= tile and hint_tiles[2] ~= tile then
+                hint_tiles[1]:hide_green()
+                hint_tiles[2]:hide_green()
             end
+
+            last_tiles = {tile, selected_tile}
+            state:remove_tile(tile)
+            state:remove_tile(selected_tile)
+            selected_tile = nil
+
+            state:find_selectable_tiles()
+            state:find_top_tiles()
+            state:find_matching_tiles()
+        elseif tile == selected_tile then
+            selected_tile:hide_green()
+            game_menu:remove_tile_images()
+            selected_tile = nil
         else
-            if selection_grid[tile] and selected_tile:is_a_match(tile) then
-                local counter = 0
-                local temp = selected_tile
-
-                tile:show_green()
-                mediaplayer:play_sound("assets/audio/match-good.mp3")
-                tile:hide_yellow()
-                local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
-                local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}
-
-                gameloop:add(tile.focus.green, 600, nil, interval_1)
-                gameloop:add(temp.focus.green, 600, nil, interval_2)
-                
-                game_menu:add_tile_image(
-                    Clone{source = tile.images[tiles_class:get_current_tile_image()]},
-                    Clone{source = tile.glyph})
-
-                ctrl:get_presentation():tile_bump(tile.group, temp.group)
-
-                if hint_tiles and hint_tiles[1] ~= tile and hint_tiles[2] ~= tile then
-                    hint_tiles[1]:hide_green()
-                    hint_tiles[2]:hide_green()
-                end
-
-                last_tiles = {tile, selected_tile}
-                state:remove_tile(tile)
-                state:remove_tile(selected_tile)
-                selected_tile = nil
-
-                state:find_selectable_tiles()
-                state:find_top_tiles()
-                state:find_matching_tiles()
-            elseif tile == selected_tile then
-                selected_tile:hide_green()
-                game_menu:remove_tile_images()
-                selected_tile = nil
-            else
-                tile:show_yellow()
-                tile.focus.yellow.opacity = 50
-                tile:show_red()
-                tile.focus.red.opacity = 255
-                mediaplayer:play_sound("assets/audio/match-bad.mp3")
-                local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
-                gameloop:add(tile.focus.red, 200, nil, interval, 
-                    function()
-                        tile.focus.yellow.opacity = 255
-                        tile:hide_red()
-                    end)
-            end
+            tile:show_yellow()
+            tile.focus.yellow.opacity = 50
+            tile:show_red()
+            tile.focus.red.opacity = 255
+            mediaplayer:play_sound("assets/audio/match-bad.mp3")
+            local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
+            gameloop:add(tile.focus.red, 200, nil, interval, 
+                function()
+                    tile.focus.yellow.opacity = 255
+                    tile:hide_red()
+                end)
         end
     end
 
