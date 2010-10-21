@@ -439,7 +439,7 @@ GameState = Class(nil,function(state, ctrl)
             tile.focus.red.opacity = 255
             mediaplayer:play_sound("assets/audio/match-bad.mp3")
             local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
-            gameloop:add(tile.focus.red, 200, nil, interval, 
+            gameloop:add(tile.focus.red, 200, nil, interval, nil, 
                 function()
                     tile.focus.yellow.opacity = 255
                     tile:hide_red()
