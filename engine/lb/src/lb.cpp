@@ -422,12 +422,13 @@ void lb_inherit(lua_State*L,const char*metatable)
     }
 
     int source=lua_gettop(L);
+
     lb_copy_table(L,target,source);
     
-    static const char * subs[2] = { "__getters__" , "__setters__" };    
+    static const char * subs[3] = { "__getters__" , "__setters__" , "__types__" };
     int i=0;
     
-    for(i=0;i<2;++i)
+    for(i=0;i<3;++i)
     {
         lua_pushstring(L,subs[i]);
         lua_rawget(L,target);           // get the sub table from the target mt
@@ -1014,4 +1015,37 @@ void lb_dump_table( lua_State * L )
     lb_strong_unref(L,visited);
 
     LSG_CHECK(0);
+}
+
+bool lb_check_udata_type( lua_State * L , int index , const char * type , bool fail )
+{
+    LSG;
+
+    bool result = false;
+
+    if ( lua_isuserdata( L , index ) )
+    {
+        if ( lua_getmetatable( L , index ) )
+        {
+            lua_getfield( L , -1 , "__types__" );
+
+            if ( lua_type( L , -1 ) == LUA_TTABLE )
+            {
+                lua_getfield( L , -1 , type );
+                result = lua_toboolean( L , -1 );
+                lua_pop( L , 1 );
+            }
+
+            lua_pop( L , 2 );
+        }
+    }
+
+    if ( ! result && fail )
+    {
+        luaL_error( L , "Incorrect type" );
+    }
+
+    LSG_CHECK(0);
+
+    return result;
 }
