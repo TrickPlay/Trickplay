@@ -520,6 +520,8 @@ interface Body [[ ClutterActor * ]]
 
     int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
         [[
+            lb_check_udata_type( L , other_body , "Body" );
+
             Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
@@ -579,6 +581,8 @@ interface Body [[ ClutterActor * ]]
 
     int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
         [[
+            lb_check_udata_type( L , other_body , "Body" );
+
             Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
@@ -658,6 +662,8 @@ interface Body [[ ClutterActor * ]]
 
     int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
         [[
+            lb_check_udata_type( L , other_body , "Body" );
+
             Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
@@ -906,6 +912,8 @@ global physics [[ Physics::World * ]]
 		
 	Body Body( UIElement element , table properties )
 		[[
+            lb_check_udata_type( L , element , "actor" );
+
             int n = self->create_body( element , properties , BODY_METATABLE );
 
             if ( ! n )

@@ -386,6 +386,8 @@ b2FixtureDef World::create_fixture_def( int properties )
     lua_getfield( L , properties , "shape" );
     if ( lua_isuserdata( L , -1 ) )
     {
+        lb_check_udata_type( L , -1 , "Shape" );
+
         fd.shape = ( b2Shape * ) UserData::get_client( L , lua_gettop( L ) );
     }
     lua_pop( L , 1 );
