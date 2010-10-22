@@ -21,6 +21,7 @@
 #include "downloads.h"
 #include "installer.h"
 #include "versions.h"
+#include "controller_lirc.h"
 
 //-----------------------------------------------------------------------------
 
@@ -676,6 +677,11 @@ int TPContext::run()
     }
 
     //.........................................................................
+    // LIRC controller
+
+    controller_lirc = ControllerLIRC::make( this );
+
+    //.........................................................................
     // Create the downloads
 
     downloads = new Downloads( this );
@@ -824,6 +830,16 @@ int TPContext::run()
 
             notify( TP_NOTIFICATION_APP_CLOSED );
         }
+    }
+
+    //.....................................................................
+    // Kill the LIRC connection
+
+    if ( controller_lirc )
+    {
+        delete controller_lirc;
+
+        controller_lirc = 0;
     }
 
     //.....................................................................
@@ -1490,6 +1506,9 @@ void TPContext::load_external_configuration()
         TP_NETWORK_DEBUG,
         TP_SSL_VERIFY_PEER,
         TP_SSL_CA_CERT_FILE,
+        TP_LIRC_ENABLED,
+        TP_LIRC_UDS,
+        TP_LIRC_REPEAT,
 
         NULL
     };

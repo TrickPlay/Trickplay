@@ -17,6 +17,7 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 TP_FIND_INCLUDE( expat.h 								ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( curl/curl.h 							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( glib-2.0 glib.h 						ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( gio-unix-2.0 gio/gunixsocketaddress.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( pango-1.0 pango/pango.h				ENGINE_INCLUDE_DIRS )
@@ -399,6 +400,7 @@ list( APPEND
 
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
+    ${ENGINE_SRC}/source/controller_lirc.cpp    
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp
