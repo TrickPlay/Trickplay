@@ -184,6 +184,15 @@ typedef struct TPContext TPContext;
                             certificate authorities in PEM format.
                             Defaults to empty, which implies use of system certificates.
 
+    TP_LIRC_ENABLED -       Whether TrickPlay attempts to connect to a LIRC daemon.
+                            Defaults to "true".
+
+    TP_LIRC_UDS -           Path to the LIRC daemon Unix Doman Socket.
+                            Defaults to "/var/run/lirc/lircd".
+
+    TP_LIRC_REPEAT -        Minimum number of milliseconds between button presses. Any
+                            presses that arrive within this time are ignored.
+                            Defaults to 150.
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -212,6 +221,9 @@ typedef struct TPContext TPContext;
 #define TP_NETWORK_DEBUG                "network_debug"
 #define TP_SSL_VERIFY_PEER              "ssl_verifypeer"
 #define TP_SSL_CA_CERT_FILE             "ssl_cacertfile"
+#define TP_LIRC_ENABLED                 "lirc_enabled"
+#define TP_LIRC_UDS                     "lirc_uds"
+#define TP_LIRC_REPEAT                  "lirc_repeat"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
