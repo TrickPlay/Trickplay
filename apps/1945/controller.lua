@@ -12,7 +12,7 @@ function controllers.on_controller_connected( controllers , controller )
         
             --print( string.format( "%d" , x * 100 ) )
             
-            if not my_plane.dead then
+        --    if not my_plane.dead then
             
                 if math.abs( x ) > 0.10 then
             
@@ -26,7 +26,7 @@ function controllers.on_controller_connected( controllers , controller )
                     
                 end
                 
-            end
+         --   end
         
         end
     

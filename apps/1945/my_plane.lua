@@ -1,8 +1,13 @@
+
+
 -------------------------------------------------------------------------------
 -- This is my plane. It spawns bullets
-
+--r = Rectangle{w=1,h=1,color="FFFFFFA0"}
+--screen:add(r)
 my_plane =
 {
+	firing_powerup = 1,
+
     type = TYPE_MY_PLANE,
     
     max_h_speed = 600,
@@ -14,8 +19,10 @@ my_plane =
     friction_bump = 1000, -- per second
     
     speed_bump = 200,
-        
-    group = Group{ size = { --[[65 , 65]]my_plane_sz,my_plane_sz } , clip = { 0 , 0 , my_plane_sz,my_plane_sz--[[65 , 65]] } },
+       
+	prop1 = nil,
+	prop2 = nil, 
+    group = Group{ },--size = { --[[65 , 65]]my_plane_sz,my_plane_sz } },
     
     image = Clone{ source = assets.my_plane_strip },
     
@@ -33,20 +40,34 @@ my_plane =
     
     dead_blink_delay = 0.5,
     
-    
     max_dead_time = 2,
     
     setup =
     
         function( self )
         
+			self.prop1 = { 
+				Clone{source=assets.prop1,anchor_point={assets.prop1.w/2,assets.prop1.h/2},x=35,y=27},
+				Clone{source=assets.prop2,anchor_point={assets.prop2.w/2,assets.prop2.h/2},x=35,y=27,opacity=0},
+				Clone{source=assets.prop3,anchor_point={assets.prop3.w/2,assets.prop3.h/2},x=35,y=27,opacity=0}
+			}
+
+			self.prop2 = { 
+				Clone{source=assets.prop1,anchor_point={assets.prop1.w/2,assets.prop1.h/2},x=93,y=27},
+				Clone{source=assets.prop2,anchor_point={assets.prop2.w/2,assets.prop2.h/2},x=93,y=27,opacity=0},
+				Clone{source=assets.prop3,anchor_point={assets.prop3.w/2,assets.prop3.h/2},x=93,y=27,opacity=0}
+			}
+			self.prop_index = 1
+
             self.image.opacity = 255
             
-            self.group:add( self.image )
+            self.group:add( self.image)
+            self.group:add( unpack(self.prop1))
+            self.group:add( unpack(self.prop2))
             
             screen:add( self.group )
             
-            self.group.position = { screen.w / 2 - my_plane_sz / 2 , screen.h - my_plane_sz }
+            self.group.position = { screen.w / 2 - self.image.w / 2 , screen.h - self.image.h }
             
         end,
         
@@ -59,15 +80,22 @@ my_plane =
             -- We just move the image within the group, which has a clipping
             -- area set.
             
-            local x = self.image.x - my_plane_sz
+			self.prop1[self.prop_index].opacity=0
+			self.prop2[self.prop_index].opacity=0
+			self.prop_index = self.prop_index%3+1
+			self.prop1[self.prop_index].opacity=255
+			self.prop2[self.prop_index].opacity=255
+			
+
+            --local x = self.image.x - my_plane_sz
             
-            if x == -my_plane_sz*3 then
+           -- if x == -my_plane_sz*3 then
             
-                x = 0
+            --    x = 0
                 
-            end
+            --end
             
-            self.image.x = x
+            --self.image.x = x
             
             self.group:raise_to_top()
     
@@ -183,56 +211,33 @@ end
                     self.group.y = y
                 end
     if not self.dead then
-                add_to_collision_list( self , start_point , self.group.center , { self.group.w - 10 , self.group.h - 30 } , TYPE_ENEMY_PLANE )
+                add_to_collision_list( self ,
+					{self.group.x+self.image.w/2,self.group.y+self.image.h/2},
+					{self.group.x+self.image.w/2,self.group.y+self.image.h/2},
+					{self.image.w,self.image.h},
+					TYPE_ENEMY_PLANE)-- start_point , self.group.center , { self.group.w - 10 , self.group.h - 30 } , TYPE_ENEMY_PLANE )
 end
-            
-            -- when dead
-            --[[
-            elseif game_is_running then
-                -- Figure the total time we have been dead
-                self.dead_time = self.dead_time + seconds
-                
-                -- If it is the maximum time, we go back to being alive
-                
-                if self.dead_time >= self.max_dead_time then
-                    self.dead = false
-                    
-                    self.dead_time = 0
-                    
-                    self.group:show()
-                    
-                -- Otherwise, we blink
-                    
-                elseif self.dead_time > self.dead_blink_delay then
-                
-                    local blink_on = math.floor( self.dead_time / ( 1 / self.dead_blinks ) ) % 2 == 0
-                    
-                    if blink_on then
-                    
-                        self.group:show()
-                        
-                    else
-                        
-                        self.group:hide()
-                        
-                    end
-                
-                end
-            --]]
+--[[
+            r.x = self.group.x
+r.y=self.group.y
+r.w=self.image.w
+r.h=self.image.h
+r:raise_to_top()
+--]]
             end
         end,
         
     -- Adds a bullet to the render list
         
-    new_bullet =
-    
-        function( self )
+    new_bullet = function( self, x, y, z_rot )
         
             return
             
             {
                 type = TYPE_MY_BULLET,
                 
+				z_rot = z_rot,
+
                 speed = -400,
                 
                 image =
@@ -242,7 +247,8 @@ end
                         source = self.bullet,
                         opacity = 255,
                         anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
-                        position = { self.group.x + self.group.w / 2 , self.group.y }
+                        position = { x, y },
+						z_rotation = {z_rot,0,0}
                     },
                     
                 setup =
@@ -257,9 +263,10 @@ end
                 
                     function( self , seconds )
                     
-                        local y = self.image.y + self.speed * seconds
+                        local y = self.image.y + self.speed * seconds * math.cos(-1*self.z_rot*math.pi/180)
+                        local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)
                         
-                        if y < -self.image.h then
+                        if y < -self.image.h or y > (screen.h + self.image.h) or x < -self.image.w  or x > (screen.w + self.image.w)then
                             
                             remove_from_render_list( self )
                             
@@ -275,6 +282,7 @@ end
                                 TYPE_ENEMY_PLANE )
                         
                             self.image.y = y
+                            self.image.x = x
                         
                         end
                     
@@ -377,7 +385,7 @@ if number_of_lives == 0 then
 	add_to_render_list(
                 
                             {
-                                speed = 20,
+                                speed = 40,
                                 
                                 text = Clone{ source = assets.g_over },
                                 
@@ -431,6 +439,13 @@ if number_of_lives == 0 then
                                 setup =
                                 
                                     function( self )
+						if curr_level ~= nil then
+print("hhhhhhh")
+
+							remove_from_render_list(curr_level)
+							curr_level = nil
+						end
+
 					self.save_keys = screen.on_key_down
 					screen.on_key_down = nil
 
@@ -556,8 +571,36 @@ redo_score_text()
                 self.v_speed = clamp( self.v_speed - self.speed_bump , -self.max_v_speed , self.max_v_speed )
             
             elseif key == keys.Return then
-            
-                add_to_render_list( self:new_bullet() )
+            	local shoot = {
+					function()
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 , self.group.y,0) )
+					end,
+					function()
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +20, self.group.y,0) )
+					end,
+					function()
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +40, self.group.y,45) )
+					end,
+					function()
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y+self.image.h,180) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +40, self.group.y,45) )
+					end,
+					function()
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y+self.image.h,180) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +40, self.group.y,45) )
+					end,
+
+
+				}
+				shoot[self.firing_powerup]()
                 
             end
                 

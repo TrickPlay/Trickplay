@@ -1,15 +1,11 @@
+my_font = "ARCADECLASSIC 40px"
+
 number_of_lives = 3
 high_score = settings.high_score or 0
 point_counter = 0
 my_plane_sz = 128
 topbar = Group{z=1}
 topbar:add( 
-	Rectangle{
-		name = "BG",
-		color="0000007F",
-		w=1920,
-		h=80
-	},
     --[[
 	Text{
 		name = "LIVES",
@@ -23,14 +19,14 @@ topbar:add(
 	Text{
 		name = "SCORE",
 		text = "Current Score:",
-		font="Highway Gothic Wide Bold 36px",
+		font=my_font,--"Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		y = 20
 	},
 	Text{
 		name = "HIGHSCORE",
 		text = "High Score:",
-		font="Highway Gothic Wide Bold 36px",
+		font=my_font,--"Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		y = 20
 	}
@@ -38,14 +34,14 @@ topbar:add(
 )
 local score_txt = Text{
 		text = "",
-		font="Highway Gothic Wide Bold 36px",
+		font=my_font,--"Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		x = screen.w/2 +20,
 		y = 20
 }
 local h_score_txt = Text{
 		text = "",
-		font="Highway Gothic Wide Bold 36px",
+		font=my_font,--"Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		y = 20
 }

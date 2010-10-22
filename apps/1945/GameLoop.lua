@@ -3,10 +3,11 @@
 --]]
 render_list = {}
 
-function add_to_render_list( item )
-
+function add_to_render_list( item, ... )
+--t = { ... }
+--print(unpack(t))
     if item then
-        pcall( item.setup , item )
+        item:setup( ... )-- , item )
         table.insert( render_list , item )
     end
 
