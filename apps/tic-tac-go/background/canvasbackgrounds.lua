@@ -10,7 +10,7 @@ dofile("background/shape.lua")
 math.randomseed(os.time())
 
 local background = Image{
-				src = "background/background.png",
+				src = "background/background.jpg",
 				opacity = 255,
 				y = 0,
 				x = 0,
