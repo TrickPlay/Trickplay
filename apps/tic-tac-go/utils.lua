@@ -3,21 +3,6 @@ Utils = {}
     Helper Functions
 --]]
 
-function Utils.print_board(board)
-
-    local s=    
-
-       "      1   2   3    \n"..
-       "                   \n"..
-       "  1   %s | %s | %s \n"..
-       "     ---+---+---   \n"..
-       "  2   %s | %s | %s \n"..
-       "     ---+---+---   \n"..
-       "  3   %s | %s | %s \n"
-    
-    print( string.format( s , unpack( board ) ) )
-
-end
 
 function Utils.get_free_spaces(free_spaces)
     local free_spaces_list = {}   

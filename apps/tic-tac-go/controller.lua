@@ -98,8 +98,6 @@ function GameControl:start_round()
         self.free_spaces[i] = true
     end
 
-    Utils.print_board(self.board)
-
     self.round_count = self.round_count + 1
     self.move_count = 0
 
@@ -143,13 +141,11 @@ function GameControl:place_player_at_index(player, index)
     -- update board
     local player_icon = ControlConstants.player_icon[player]
     self.board[index] = player_icon
-    Utils.print_board(self.board)
 
     if self.move_count >= 5 then
         -- check for win
         local win_positions = self:get_win_positions(moves, index)
         if win_positions then 
-            print(" PLAYER " .. player_icon .. " WINS!") 
             -- keep track of previous games
             local wins = self.player_wins[player] + 1
             self.player_wins[player] = wins
@@ -159,7 +155,6 @@ function GameControl:place_player_at_index(player, index)
 
             -- end of a session?
             if wins == ControlConstants.win_rounds then
-                print("1")
                 local winner = Image
                 {
                     name="end session text",
@@ -205,7 +200,7 @@ function GameControl:place_player_at_index(player, index)
 				--ClearPlayField()
 				return ControlConstants.state.clear
             else
-                print("2")
+                
                 -- update view
                 self.board = {}
 			for i=1,9 do
@@ -213,7 +208,6 @@ function GameControl:place_player_at_index(player, index)
 				self.free_spaces[i] = true
 			end
 		
-			Utils.print_board(self.board)
 		
 			self.round_count = self.round_count + 1
 			self.move_count = 0
@@ -230,7 +224,6 @@ function GameControl:place_player_at_index(player, index)
 	end
 
 	if self.move_count == 9 then
-        print(" TIE!") 
          -- nobody won, dec round count!
         self.round_count = self.round_count - 1
 
@@ -241,7 +234,6 @@ function GameControl:place_player_at_index(player, index)
 				self.free_spaces[i] = true
 			end
 		
-			Utils.print_board(self.board)
 		
 			self.round_count = self.round_count + 1
 			self.move_count = 0
@@ -280,11 +272,9 @@ function GameControl.make_random_move_delegate(free_space_mask, placement_callba
 
         callback_player = player
         -- place timer board
-print("wft",ControlConstants.player_icon[player])
         StatusText:pressToDrop(ControlConstants.player_icon[player])
 
         TimerBoardShow(ControlConstants.player_icon[player])
-        print("Player Icon: " .. ControlConstants.player_icon[player])
 
         random_table = get_random_free_spaces()
         length = #random_table
@@ -355,32 +345,26 @@ function GameControl:make_state_machine()
 		
 
     	[ControlConstants.state.init] = function() 
-        	print("Control: INIT STATE")
         	
         	self:start_session()
         	self:start_round()
         	self:hide_splash()
 
 
-            -- update view
-            -- self.print_move_text(self.player)
 
         	return ControlConstants.state.switch
     	end,
 
     	[ControlConstants.state.start] = function() 
-        	print("Control: START STATE")
 			
 			self:start_round()
 
             -- update view
-            -- self.print_move_text(self.player)
         
         	return ControlConstants.state.switch
     	end,
     	
     	[ControlConstants.state.help] = function()
-    	  	print("Control: HELP STATE")
     	    local child = screen:find_child("help text")
             if child == nil then 
     	  		screen:add(Text{text="help text",color="ffffff",position={960,1580},font="DejaVu Sans 50px",name="help text"})
@@ -390,7 +374,6 @@ function GameControl:make_state_machine()
     	end,
 
     	[ControlConstants.state.switch] = function() 
-        	print("Control: SWITCH STATE")
 
 
         	-- prepare for input
@@ -406,7 +389,6 @@ function GameControl:make_state_machine()
     	end,
 
     	[ControlConstants.state.move] = function() 
-        	print("Control: MOVE STATE")
         	self.move_delegate.stop()
 
 			-- delegate callback will trigger next state change
@@ -414,7 +396,6 @@ function GameControl:make_state_machine()
     	end,
 
     	[ControlConstants.state.shutdown] = function() 
-        	print("Control: MOVE SHUTDOWN")
 
         	exit()
     	end,
@@ -499,8 +480,7 @@ function GameControl.make_control()
 
         if key_actions[keyval] then
             key_actions[keyval]()
-        else
-            print("Control: UNKNOWN KEY: " .. keyval)
+        
         end
     end
 end

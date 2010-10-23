@@ -62,7 +62,6 @@ function StatusText:pressToDrop(player_icon)
 	self:clear()
 
 	local image_defaults = {x=5,y=-8}
-print("player_icon",player_icon)
     	local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
                                              or ui:createPieceHalfXC(image_defaults)
 		self:add(PlayIconImage)
