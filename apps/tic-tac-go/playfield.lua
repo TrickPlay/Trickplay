@@ -84,9 +84,7 @@ function PlayFieldAddPiece (player_icon,col,row)
 		current_piece = ui:createPieceLgXC()
 	elseif player_icon == "O" then 
 		current_piece = ui:createPieceLgOC()
-	else 
-		print("Invalid operation: PlayFieldAddPiece takes X or O as the first argument.")
-	end
+		end
 	current_piece.extra.is_moving=true
 	current_piece.position = calcPosition(PlayField.w/3, current_piece.w, col, row)
 	PlayField:add(current_piece)

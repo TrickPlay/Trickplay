@@ -13,7 +13,9 @@ c = Canvas { size = {radius*4, radius*4} }
 ----square canvas size
 s = Canvas { size = {square_width,square_height} }
 
--- Function that draws the circle in 4 quarters
+--- triangle canvas size
+t = Canvas { size = {triangle_base,  triangle_height,} }
+
 
 local function create_circle()
 
@@ -55,6 +57,8 @@ c:fill(fill_bool)
 c:stroke(stroke_bool)
 -- Finishes painting on Canvas
 c:finish_painting()
+print("circle drawn")
+
 end
 
 
@@ -75,6 +79,19 @@ print("square drawn")
 end
 
 local function create_triangle()
+t:begin_painting()
+t:new_path()
+t:line_to(triangle_base/2,triangle_height)
+t:line_to(triangle_base,0)
+t:line_to(0,0)
+-- Sets color and fill
+t:set_source_color( shape_color )
+t:fill(fill_bool)
+t:stroke(stroke_bool)
+-- Finishes painting on Canvas
+t:rotate(180)
+t:finish_painting()
+print("triangle drawn")
 end
 
 function circle_generator()
@@ -92,3 +109,9 @@ print("Square Created")
 shape:add(s)
 end
 
+function triangle_generator()
+-- creates the Square
+create_triangle()
+print("triangle Created")
+shape:add(t)
+end

@@ -1,4 +1,4 @@
-dofile "background/canvasbackgrounds.lua"
+dofile "background/canvasbackground.lua"
 
 dofile "ui.lua"
 dofile "utils.lua"
