@@ -65,10 +65,7 @@ function loading(group)
         for i = 1,#loading_dots do
             local curr_i = (start_i + (i-1))%(#loading_dots) +1
 
-            loading_dots[curr_i].opacity = increment*i--(255*msecs/2400 + increment*i) %
-                                                --       255
-
-            --print("\t",curr_i,loading_dots[curr_i].opacity)
+            loading_dots[curr_i].opacity = increment*i
         end
     end
     load_timeline:start()
