@@ -248,6 +248,7 @@ Tiles = Class(function(self, ...)
     function self:get_current_tile_image() return current_tile_image end
 
     function self:shuffle(number)
+        print("number", number)
         if not number then number = 144 end
         assert(number <= #tiles)
 
@@ -270,6 +271,12 @@ Tiles = Class(function(self, ...)
         for i,v in ipairs(tiles) do
             v:reset()
         end
+    end
+
+    function self:restore_order()
+       for i,v in ipairs(original_order) do
+           tiles[i] = v
+       end 
     end
 
     function self:change_images(number)
