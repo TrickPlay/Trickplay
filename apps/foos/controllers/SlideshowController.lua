@@ -39,6 +39,9 @@ SlideshowController = Class(Controller, function(self, view, ...)
 		for i = 1, upper do
 			view:preload_back()
 		end
+		if view.license_on[1] then
+			view.license_box:add(view.license_on[1])
+		end
     end
 
 --[=[
@@ -160,8 +163,14 @@ SlideshowController = Class(Controller, function(self, view, ...)
             end
             view.on_screen_list  = {}
             view.off_screen_list = {}
- 
-            photo_index =  0
+			view.license_off     = {}
+			for i = 1, #view.license_on do
+				if view.license_on[i].parent ~= nil then
+					view.license_on[i]:unparent()
+				end
+			end
+			view.license_on      = {}
+			photo_index =  0
             view.prev_i = -1
             if menu_is_visible then
         	    menu_is_visible = false

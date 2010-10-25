@@ -2,9 +2,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
     self._base.init(self, view, Components.FRONT_PAGE)
 
     -- the default selected index
-    function self:raise_bottom_bar()
-        view.bottom_bar:raise_to_top()
-    end
+
     local selected = {1,1}
     local MenuKeyTable = {
         [keys.Up]    = function(self) self:move_selector(Directions.UP)    end,
