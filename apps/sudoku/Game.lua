@@ -492,25 +492,32 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 		end	
 		return old_nums, new_nums
 	end
-
+	local anim_nums = nil
 	function animate_numbers(old_nums,new_nums,next_timeline)
-		local timeline = Timeline{duration=60}
+		if anim_nums then
+			anim_nums:stop()
+			anim_nums:on_completed()
+			clear(anim_nums)
+			anim_nums = nil
+		end
+		anim_nums = Timeline{duration=60}
 		for i = 1, #new_nums do
 			g.grid_of_groups[new_nums[i][2]][new_nums[i][3]]:add(new_nums[i][1])
 		end
-		save(timeline)
-		function timeline.on_new_frame(t,msecs,p)
+		save(anim_nums)
+		function anim_nums.on_new_frame(t,msecs,p)
 			for i = 1, #old_nums do old_nums[i].opacity    = 255*(1-p) end
 			for i = 1, #new_nums do new_nums[i][1].opacity = 255*p     end
 		end
-		function timeline:on_completed()
+		function anim_nums:on_completed()
 			for i = 1, #old_nums do old_nums[i]:unparent()    end
 			for i = 1, #new_nums do new_nums[i][1].opacity = 255 end
-			if next_timeline then dolater(next_timeline)
-			else restore_keys() end
-			clear(timeline)
+			if next_timeline then dolater(next_timeline) end
+			--else restore_keys() end
+			clear(anim_nums)
 		end
-		timeline:start()
+		anim_nums:start()
+		if next_timeline == nil then restore_keys() end
 	end
 	function table_concat(t1,t2)
 		for i = 1,#t2 do
@@ -724,7 +731,7 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 			end
 		end
 		if empty_spaces == 0 and #error_list == 0 then
-			dolater(animate_numbers,old_nums,new_nums,player_won())
+			dolater(animate_numbers,old_nums,new_nums,player_won)
 		else
 			dolater(animate_numbers,old_nums,new_nums)
 		end
