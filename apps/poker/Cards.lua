@@ -84,11 +84,9 @@ function flipCard(cardGroup)
       on_completed = function()
          
          if cardGroup.extra.face then
---            print("Showing face:", cardGroup.extra.face)
             front.opacity = 255
             back.opacity = 0
          else
---            print("Showing back:", cardGroup.extra.face)
             front.opacity = 0
             back.opacity = 255
          end

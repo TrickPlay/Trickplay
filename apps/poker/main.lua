@@ -5,8 +5,6 @@ AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.jpg")
 AssetLoader:preloadImage("TableText","assets/UI/new/table-marks.png")
 
-AssetLoader:preloadImage("BubbleNone","assets/UI/BubbleWhite.png")
-
 AssetLoader:preloadImage("ChooseDog","assets/ChooseYourDog.png")
 AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
 
@@ -30,18 +28,6 @@ AssetLoader:preloadImage("BubbleGray", "assets/balloons/Bubble-message.png")
 AssetLoader:preloadImage("BubbleBlack", "assets/balloons/Bubble-nonactive.png")
 
 -- Buttons
---[[
-local ui_colors = {"Red", "Green", "Gray"}
-local ui_buttons = {
-   "Bubble", "ButtonArrowDown", "ButtonArrowUp",
-   "ButtonBet", "ButtonCall", "ButtonFold", "ButtonStart", "ButtonExit"
-}
-for _,color in pairs(ui_colors) do
-   for _,button in pairs(ui_buttons) do
-      AssetLoader:preloadImage(button..color,"assets/UI/"..button..color..".png")
-   end
-end
---]]
 AssetLoader:preloadImage("help_button", "assets/new_buttons/ButtonHelp.png")
 AssetLoader:preloadImage("help_button_on", "assets/new_buttons/ButtonHelp-on.png")
 AssetLoader:preloadImage("exit_button", "assets/new_buttons/ButtonExit.png")
@@ -62,19 +48,6 @@ AssetLoader:preloadImage("bet_button_on", "assets/new_buttons/ButtonBet-on.png")
 -- Load new UI elements
 AssetLoader:preloadImage("BetArrowUp","assets/new_buttons/ButtonBet+.png")
 AssetLoader:preloadImage("BetArrowDown","assets/new_buttons/ButtonBet-.png")
-
---[[
-local button_types = { "focused", "default" }
-local button_names = { "fold", "call", "bet", "check", "exit", "help", "start" }
-
-for i, type in pairs(button_types) do
-   for k, name in pairs(button_names) do
-      if i==1 or k>3 then
-         AssetLoader:preloadImage(name.."_"..type,"assets/UI/new/"..name.."_"..type..".png")
-      end
-   end
-end
---]]
 
 DOGS = {}
 

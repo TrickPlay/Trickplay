@@ -90,19 +90,6 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         }
     }
 
-    -- focuses
-    --local button_focus = Image{position={MDPL[1][1]-15, MDPL[1][2]-15}, src="assets/DevinUI/ButtonFocusBig.png", opacity=0}
-    --local seat_focus = Image{position={MDPL[1][1]-10,MDPL[1][2]-10}, src="assets/DevinUI/ButtonFocusSmall.png"}
-   --[[ 
-    view.text = {
-        Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.START[1] + 30, y = MDPL.START[2] + 20, text = "Start"},
-        Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.EXIT_MENU[1] + 40, y = MDPL.EXIT_MENU[2] + 20, text = "Exit"},
-        Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.HELP_MENU[1] + 35, y = MDPL.HELP_MENU[2] + 20, text = "Help"},
-    }
-    --]]
     --background ui
     view.background_ui = Group{name = "start_menu_background_ui", position = {0, 0}}
     view.background_ui:add(unpack(background))
