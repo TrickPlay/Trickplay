@@ -1,6 +1,7 @@
 --Config
 local refresh = Timer{interval=100}
-local base_rect = Rectangle{color="FFFFFF",w=100,h=100,opacity=0}
+local r_sz = 100
+local base_rect = Rectangle{color="FFFFFF",w=r_sz,h=r_sz,opacity=0}
 local num_rects = 50
 
 local cloud = Image{src="assets/cloud9.jpg",scale = {4,4}}
@@ -13,41 +14,48 @@ screen:add(cloud,bg,base_rect)
 
 
 local da_clonesss = {}
+local lookup_table = {}
 function setup_bg()
 	for i = 1, num_rects do
 		local sc = math.random(70,100)/100
+		lookup_table[i] = {
+		              x = math.random(-50,screen_w/4)*4,
+		              y = math.random(-50,screen_h/4)*4,
+		              z = math.random(0,359)
+		}
+
 		da_clonesss[i] = Clone
 		{
-			source=base_rect,
-			opacity = 10,
-			x = math.random(-50,screen.w/4)*4,
-			y = math.random(-50,screen.h/4)*4,
-			scale = {sc,sc},
-			anchor_point = 
-			{
-				base_rect.w/2,
-				base_rect.h/2
-			}
+			source       = base_rect,
+			opacity      = 10,
+			x            = lookup_table[i].x,
+			y            = lookup_table[i].y,
+			scale        = { sc, sc },
+			anchor_point = { r_sz/2, r_sz/2 },
+			z_rotation   = { lookup_table[i].z, 0, 0 } 
 		}
-		da_clonesss[i].z_rotation = {math.random(0,359),0,0}
 		screen:add(da_clonesss[i])
 	end
 end
 
 function refresh:on_timer()
 	for i = 1, num_rects do
-		da_clonesss[i].x = da_clonesss[i].x + 1
-		da_clonesss[i].y = da_clonesss[i].y + 1
-		da_clonesss[i].z_rotation = {(da_clonesss[i].z_rotation[1]+1)%360,0,0}
-		if da_clonesss[i].x > (screen.w+100) then
-print("x", da_clonesss[i].x)
-			da_clonesss[i].x = -100
-		end
-		if da_clonesss[i].y > (screen.h+100) then
-print("y", da_clonesss[i].y)
-			da_clonesss[i].y = -100
-		end
+		lookup_table[i].x = 	lookup_table[i].x + 1	
+		lookup_table[i].y =     lookup_table[i].y + 1 
+		lookup_table[i].z =   ( lookup_table[i].z + 1 ) % 360
 
+		da_clonesss[i].x          =  lookup_table[i].x
+		da_clonesss[i].y          =  lookup_table[i].y
+		da_clonesss[i].z_rotation = {lookup_table[i].z,0,0}
+
+		if lookup_table[i].x > (screen_w+100) then
+			lookup_table[i].x = -100
+			da_clonesss[i].x  = -100
+		end
+		if lookup_table[i].y > (screen_h+100) then
+			lookup_table[i].y = -100
+			da_clonesss[i].y  = -100
+		end
 	end
 end
 

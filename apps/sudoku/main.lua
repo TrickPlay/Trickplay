@@ -1,6 +1,6 @@
 math.randomseed(os.time())
-local screen_w = screen.w
-local screen_h = screen.h
+screen_w = screen.w
+screen_h = screen.h
 dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("bg.lua")
 dofile("Game.lua")
@@ -118,14 +118,14 @@ for i=1,3 do
 	red_board:add(  unpack( red_blox[i]) )
 end
 red_board.anchor_point  = {  red_board2.w/2,  red_board2.h/2 }
-red_board.position      = {     screen.w/2,     screen.h/2 }
+red_board.position      = {     screen_w/2,     screen_h/2 }
 blue_board.anchor_point = { blue_board2.w/2, blue_board2.h/2 }
-blue_board.position     = {     screen.w/2,     screen.h/2 }
+blue_board.position     = {     screen_w/2,     screen_h/2 }
 
 red_board2.anchor_point  = {  red_board2.w/2,  red_board2.h/2 }
-red_board2.position      = {     screen.w/2,     screen.h/2 }
+red_board2.position      = {     screen_w/2,     screen_h/2 }
 blue_board2.anchor_point = { blue_board2.w/2, blue_board2.h/2 }
-blue_board2.position     = {     screen.w/2,     screen.h/2 }
+blue_board2.position     = {     screen_w/2,     screen_h/2 }
 
 
 --sparkle:add(sparkle_base)
@@ -137,7 +137,7 @@ function start_sparkle(x,y, num_sparkles)
 --Text{text="You've Won!",font="DejaVu ExtraLight 60px",color="FFFFFF",opacity=0,z=3,x=x[math.ceil(#x/2)],y=y[math.ceil(#y/2)]}
 win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
 win_txt.y = 35+win_txt.h/2
-win_txt.x = screen.w/2+3/2*red.w+30+(screen.w/2-3/2*red.w-30)/2
+win_txt.x = screen_w/2+3/2*block_sz+30+(screen_w/2-3/2*block_sz-30)/2
 	--screen.on_key_down = nil
 	local timeline = Timeline
 	{
@@ -227,8 +227,6 @@ win_txt.x = screen.w/2+3/2*red.w+30+(screen.w/2-3/2*red.w-30)/2
 					x_end[r][c][i]   = x_peak[r][c][i]*x_dir
 					y_end[r][c][i]   = y_peak[r][c][i]+90+math.random(-10,10)
                 
-					--scale[i] = math.random(8,9)/10
-					--sparkles[i].scale={scale[i],scale[i]}
                 
 					rot_start[r][c][i]   = math.random(   0, 359) --initial rotation
 					rot_speed[r][c][i]   = math.random( 500, 700) --num of milliseconds for a rotation
@@ -318,13 +316,13 @@ help_button:on_focus()
 help:add(help_img,help_button.group)
 screen:add(help)
 help.anchor_point = {   help.w/2,   help.h/2 }
-help.position     = { screen.w/2, screen.h/2 }
+help.position     = { screen_w/2, screen_h/2 }
 
 
-local splash     = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen.w/2,y=screen.h/2}
-local difficulty = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen.w/2,y=screen.h/2,opacity=0}
+local splash     = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2}
+local difficulty = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2,opacity=0}
 
-local dim = Rectangle{color ="000000", w=screen.w,h=screen.h,opacity=100,z=2}
+local dim = Rectangle{color ="000000", w=screen_w,h=screen_h,opacity=100,z=2}
 local side_font = "Dejavu Bold 60px"
 right_menu = Group{z=1}
 yellow_light = Image{src="assets/button-yellow-circle.png",x=0,y=2*(blank_button_off.h+8),opacity=0}
@@ -393,9 +391,9 @@ right_menu:add(
 --right_menu.position = {screen.w - right_menu.w/2+80,red.h   + 90}
 right_menu.position = 
 {
-	screen.w/2+3/2*red.w+30+
-		(screen.w/2-3/2*red.w - blank_button_off.w-30)/2,
-	screen.h/2-red.h/2-10
+	screen_w/2+3/2*block_sz+30+
+		(screen_w/2-3/2*block_sz - blank_button_off.w-30)/2,
+	screen_h/2-block_sz/2-10
 }
 right_menu.y_rotation = {-135,blank_button_off.w,0}
 right_menu.opacity=0
@@ -454,7 +452,7 @@ local left_list =
 }
 left_menu:add( left_list[1].group,left_list[2].group,left_list[3].group,left_list[4].group )
 --left_menu.anchor_point = {left_menu.w/2,left_menu.h/2}
-left_menu.position = {(screen.w/2-3/2*red.w - blank_button_off.w-30)/2,screen.h/2-red.h/2-10}
+left_menu.position = {(screen_w/2-3/2*block_sz - blank_button_off.w-30)/2,screen_h/2-block_sz/2-10}
 left_menu.y_rotation={135,0,0}
 left_menu.opacity=0
 
@@ -471,53 +469,60 @@ function flip_board()
 		direction = "FORWARD"
 	}
 	save(timeline)
-	local stopwatch = Stopwatch()
+--	local stopwatch = Stopwatch()
+	local lookups = {o_b = {},n_b ={}}
 	local old_board, new_board, old_bg, new_bg,old_group,new_group
 	
-	--function timeline.on_started()
-		if red_is_on then
-			old_group =  red_board2
-			new_group = blue_board2
-			old_board =   red_blox
-			new_board =  blue_blox
-			old_bg    =     red_bg
-			new_bg    =    blue_bg
-		else
-			old_group = blue_board2
-			new_group =  red_board2
-			old_board = blue_blox
-			new_board =  red_blox
-			old_bg    =   blue_bg
-			new_bg    =    red_bg
-		end
+	if red_is_on then
+		old_group =  red_board2
+		new_group = blue_board2
+		old_board =   red_blox
+		new_board =  blue_blox
+		old_bg    =     red_bg
+		new_bg    =    blue_bg
+	else
+		old_group = blue_board2
+		new_group =  red_board2
+		old_board = blue_blox
+		new_board =  red_blox
+		old_bg    =   blue_bg
+		new_bg    =    red_bg
+	end
 
-		for r = 1,3 do for c = 1,3 do
+	for r = 1,3 do 
+		lookups.o_b[r] = {}
+		lookups.n_b[r] = {}
+		for c = 1,3 do
+			lookups.o_b[r][c] = old_board[r][c].w/2
+			lookups.n_b[r][c] = new_board[r][c].w/2
+
 			new_group:find_child("3x3 "..r.." "..c).y_rotation =
-				{-180, new_board[r][c].w/2,0}
+				{-180, lookups.n_b[r][c],0}
 
-			new_board[r][c].y_rotation = {-180,new_board[r][c].w/2,0}
-		end            end
+			new_board[r][c].y_rotation = {-180,lookups.n_b[r][c],0}
+		end
+	end 
 
-	--end
 	function timeline.on_new_frame(t,msecs,prog)
+--[[
 if stopwatch then
 	print(stopwatch.elapsed)
 	stopwatch = nil
 end
+--]]
 		bg.color = 
 		{
 			old_bg[1] + prog*(new_bg[1]-old_bg[1]),
 			old_bg[2] + prog*(new_bg[2]-old_bg[2]),
 			old_bg[3] + prog*(new_bg[3]-old_bg[3])
 		}
---		old_bg.opacity = 255 * (1-prog)
---		new_bg.opacity = 255 *    prog
 		local stage_i = math.ceil(msecs / 200) --stages 1-15
 				
 		local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
 		local degrees_old, degrees_new
 		local old_tile,    new_tile
 		for r = 1,3 do   for c = 1,3 do
+
 			old_tile = old_group:find_child("3x3 "..r.." "..c)
 			new_tile = new_group:find_child("3x3 "..r.." "..c)
 
@@ -545,28 +550,26 @@ end
 			degrees_new = degrees_old - 180
 
 			old_tile.y_rotation = { degrees_old, 
-				old_tile.w/2, 0 }
+				block_sz/2, 0 }
 			new_tile.y_rotation = { degrees_new, 
-				new_tile.w/2, 0 }
+				block_sz/2, 0 }
 
-			old_board[r][c].y_rotation = { degrees_old, 
-				old_board[r][c].w/2, 0 }
-			new_board[r][c].y_rotation = { degrees_new, 
-				new_board[r][c].w/2, 0 }
+			old_board[r][c].y_rotation = { degrees_old, lookups.o_b[r][c], 0 }
+			new_board[r][c].y_rotation = { degrees_new, lookups.n_b[r][c], 0 }
 
 			if degrees_old <  135 and degrees_old >  45 then
 				old_board[r][c].opacity = 255 * (1- (degrees_old - 45)/90)
-				old_tile.opacity = 255 * (1- (degrees_old - 45)/90)
+				old_tile.opacity        = 255 * (1- (degrees_old - 45)/90)
 			elseif degrees_old > 135 then
 				old_board[r][c].opacity = 0
 				old_tile.opacity = 0
 			end
 			if degrees_new > -135 and degrees_new < -45 then
 				new_board[r][c].opacity = 255* (degrees_new - 45)/90
-				new_tile.opacity = 255* (degrees_new - 45)/90
+				new_tile.opacity        = 255* (degrees_new - 45)/90
 			elseif degrees_new > -45 then
 				new_board[r][c].opacity = 255
-				new_tile.opacity = 255
+				new_tile.opacity        = 255
 			end
 
 		end		end
@@ -579,13 +582,13 @@ end
 			old_tile = old_group:find_child("3x3 "..r.." "..c)
 			new_tile = new_group:find_child("3x3 "..r.." "..c)
 
-			old_tile.y_rotation = { 180, old_tile.w/2, 0 }
-			new_tile.y_rotation = {   0, new_tile.w/2, 0 }
+			old_tile.y_rotation = { 180, block_sz/2, 0 }
+			new_tile.y_rotation = {   0, block_sz/2, 0 }
 			old_tile.opacity =   0
 			new_tile.opacity = 255
 
-			old_board[r][c].y_rotation = { 180, old_board[r][c].w/2, 0 }
-			new_board[r][c].y_rotation = {   0, new_board[r][c].w/2, 0 }
+			old_board[r][c].y_rotation = { 180, lookups.o_b[r][c], 0 }
+			new_board[r][c].y_rotation = {   0, lookups.n_b[r][c], 0 }
 			old_board[r][c].opacity =   0
 			new_board[r][c].opacity = 255
 
@@ -594,26 +597,19 @@ end
 		if red_is_on then 
 			for r = 1,3 do   for c = 1,3 do
 				red_blox[r][c]:clear()
-				--red_blox[r][c]:add(Clone{source=red})
 			end              end
 			
 			red_is_on = false 
 		else 
 			for r = 1,3 do   for c = 1,3 do
 				blue_blox[r][c]:clear()
-				--blue_blox[r][c]:add(Clone{source=blue})
 			end              end
 
 			red_is_on = true 
 		end
---		old_bg.opacity =   0
---		new_bg.opacity = 255
-		bg.color = 
-		{
-			new_bg[1],
-			new_bg[2],
-			new_bg[3]
-		}	
+
+		bg.color = { new_bg[1], new_bg[2], new_bg[3] }	
+
 		clear(timeline)
 		restore_keys()
 	end
@@ -623,17 +619,27 @@ end
 end
 
 local num_font = "DejaVu Bold Condensed 30px"
-local pencil_menu = Group{y=40,opacity=0,z=1}
-local p_m_button_on = Image{src="assets/button_on.png",y=60,x=105,opacity=0}
+local pencil_menu    = Group{y=40,opacity=0,z=1}
+local p_m_button_on  = Image{src="assets/button_on.png",y=60,x=105,opacity=0}
 local p_m_button_off = Image{src="assets/button_off.png",y=60,x=105,opacity=0}
 screen:add(p_m_button_on,p_m_button_off)
-local clear_txt = Text{ name="clear", text="Clear",font="DejaVu 36px",color="FFFFFF"}
-clear_txt.anchor_point = {clear_txt.w/2,clear_txt.h/2}
-clear_txt.position     = {105+p_m_button_on.w/2,60+p_m_button_on.h/2}
-local done_txt = Text{ name="done", text="Done",font="DejaVu 36px",color="FFFFFF"}
-done_txt.anchor_point = {done_txt.w/2,done_txt.h/2}
-done_txt.position     = {215+p_m_button_on.w/2,60+p_m_button_on.h/2}
+
+local clear_txt        = Text{ name  = "clear", 
+                               text  = "Clear",
+                               font  = "DejaVu 36px",
+                               color = "FFFFFF"}
+clear_txt.anchor_point = {         clear_txt.w/2,        clear_txt.h/2 }
+clear_txt.position     = { 105+p_m_button_on.w/2, 60+p_m_button_on.h/2 }
+
+local done_txt        = Text{ name  = "done", 
+                              text  = "Done",
+                              font  = "DejaVu 36px",
+                              color = "FFFFFF"}
+done_txt.anchor_point = {          done_txt.w/2,        done_txt.h/2 }
+done_txt.position     = { 215+p_m_button_on.w/2,60+p_m_button_on.h/2 }
+
 function p_x(i) return 24*i+80 end
+
 pencil_menu:add(
 	Image{name="bg_up",src="assets/pencil-menu-up.png"},
 	Image{name="bg_dn",src="assets/pencil-menu-down.png",y=15},
@@ -655,7 +661,7 @@ pencil_menu:add(
 )
 screen:add(pencil_menu)
 
---[[
+--[[ Game Clock Code, could potentially be used again
 local clock_sec = 50
 local clock_min = 59
 local clock_hr = 0
@@ -703,19 +709,11 @@ end
 
 
 
-local sp_title             = Image{src = "assets/sudoku.png", x = panel.w/2,y=60 }
-sp_title.anchor_point={sp_title.w/2,0}
+local sp_title        = Image{src = "assets/sudoku.png", x = panel.w/2,y=60 }
+sp_title.anchor_point = {sp_title.w/2,0}
 splash:add(Clone{source=panel,x = panel.w/2,y = panel.h/2,anchor_point={panel.w/2,panel.h/2}},sp_title)
 local splash_list = {}
 local splash_hor_index = 1
---[[
-function pass()
-				focus = "GAME_BOARD"
-				selector.opacity = 255
-				dolater(splash_to_game,function() restore_keys() end,splash)
-
-end
---]]
 if settings.givens and settings.sol and settings.guesses then
 	splash_list = 
 	{
@@ -837,12 +835,12 @@ function splash_to_game(next_func,prev_menu)
 	save(timeline)
 	function timeline.on_new_frame(t,msecs,p)
 		dim.opacity = 100*(1-p)
-		left_menu.y_rotation = {deg*(1-p),0,0}
+		left_menu.y_rotation  = {deg*(1-p),0,0}
 		right_menu.y_rotation = {-deg*(1-p),blank_button_off.w,0}
-		left_menu.opacity = 255*p
-		right_menu.opacity = 255*p
+		left_menu.opacity     = 255*p
+		right_menu.opacity    = 255*p
 		top_left_logo.opacity = 255*p
-		prev_menu.opacity = 255*(1-p)
+		prev_menu.opacity     = 255*(1-p)
 	end
 	function timeline:on_completed()
 		dim.opacity = 0
@@ -867,8 +865,6 @@ local pencil_menu_index = 2
 focus = "SPLASH"
 local game_on = false
 local ind = {r=1,c=1}
-local mode = {"TRAVERSAL","CLEAR","PEN","PENCIL","BACK"}
-local curr_mode = "TRAVERSAL"
 function num_press(n)
 	if won then
 		restore_keys()
@@ -909,13 +905,13 @@ function game_on_key_down(k)
 			if menu_open then
 				pencil_menu_index = 2
 
-				pencil_menu:find_child("clear_on").opacity = 0
+				pencil_menu:find_child("clear_on").opacity  = 0
 				pencil_menu:find_child("clear_off").opacity = 255
-				pencil_menu:find_child("clear").color = "FFFFFF"
+				pencil_menu:find_child("clear").color       = "FFFFFF"
 
-				pencil_menu:find_child("done_on").opacity = 255
+				pencil_menu:find_child("done_on").opacity  = 255
 				pencil_menu:find_child("done_off").opacity = 0
-				pencil_menu:find_child("done").color = "202020"
+				pencil_menu:find_child("done").color       = "202020"
 
 			else
 				if ind.c < 9 then
@@ -933,13 +929,13 @@ function game_on_key_down(k)
 			if menu_open then
 				pencil_menu_index = 1
 
-				pencil_menu:find_child("clear_on").opacity = 255
+				pencil_menu:find_child("clear_on").opacity  = 255
 				pencil_menu:find_child("clear_off").opacity = 0
-				pencil_menu:find_child("clear").color = "202020"
+				pencil_menu:find_child("clear").color       = "202020"
 
-				pencil_menu:find_child("done_on").opacity = 0
+				pencil_menu:find_child("done_on").opacity  = 0
 				pencil_menu:find_child("done_off").opacity = 255
-				pencil_menu:find_child("done").color = "FFFFFF"
+				pencil_menu:find_child("done").color       = "FFFFFF"
 				
 			else
 				if ind.c > 1 then
@@ -1029,33 +1025,15 @@ function game_on_key_down(k)
 		[keys["9"] ] = function() num_press(9) end,
 
 
-		[keys["KP_End"] ] = function()
-			num_press(1)
-		end,
-		[keys["KP_Down"] ] = function()
-			num_press(2)
-		end,
-		[keys["KP_Page_Down"] ] = function()
-			num_press(3)
-		end,
-		[keys["KP_Left"] ] = function()
-			num_press(4)
-		end,
-		[keys["KP_Begin"] ] = function()
-			num_press(5)
-		end,
-		[keys["KP_Right"] ] = function()
-			num_press(6)
-		end,
-		[keys["KP_Home"] ] = function()
-			num_press(7)
-		end,
-		[keys["KP_Up"] ] = function()
-			num_press(8)
-		end,
-		[keys["KP_Page_Up"] ] = function()
-			num_press(9)
-		end,
+		[keys["KP_End"] ]       = function() num_press(1) end,
+		[keys["KP_Down"] ]      = function() num_press(2) end,
+		[keys["KP_Page_Down"] ] = function() num_press(3) end,
+		[keys["KP_Left"] ]      = function() num_press(4) end,
+		[keys["KP_Begin"] ]     = function() num_press(5) end,
+		[keys["KP_Right"] ]     = function() num_press(6) end,
+		[keys["KP_Home"] ]      = function() num_press(7) end,
+		[keys["KP_Up"] ]        = function() num_press(8) end,
+		[keys["KP_Page_Up"] ]   = function() num_press(9) end,
 		[keys["c"] ] = function()
 			if won then
 				restore_keys()
@@ -1185,11 +1163,7 @@ function diff_on_key_down(k)
 			end 
 		end
 	}
-	if key[k] then 
-		key[k]() 
-	else
-		restore_keys()
-	end
+	if key[k] then key[k]() else restore_keys() end
 end
 function splash_on_key_down(k)
 	local key = 
@@ -1216,11 +1190,7 @@ function splash_on_key_down(k)
 			restore_keys()
 		end,
 	}
-	if key[k] then 
-		key[k]() 
-	else
-		restore_keys()
-	end
+	if key[k] then key[k]() else restore_keys() end
 
 end
 function left_menu_on_key_down(k)
@@ -1310,17 +1280,17 @@ function right_menu_on_key_down(k)
 	{
 		[keys.Up] = function()
 			if right_index > 1 then
-				right_list[right_index]:out_focus()
+				right_list[   right_index]:out_focus()
 				right_index = right_index - 1
-				right_list[right_index]:on_focus()
+				right_list[   right_index]:on_focus()
 			end
 			restore_keys()
 		end,
 		[keys.Down] = function()
 			if right_index < #right_list then
-				right_list[right_index]:out_focus()
+				right_list[   right_index]:out_focus()
 				right_index = right_index + 1
-				right_list[right_index]:on_focus()
+				right_list[   right_index]:on_focus()
 			end
 			restore_keys()
 		end,
