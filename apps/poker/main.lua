@@ -12,13 +12,6 @@ AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
 AssetLoader:preloadImage("Win","assets/outcome_new/winner.png")
 AssetLoader:preloadImage("Lose","assets/outcome_new/loser.png")
 
-
-
--- Tutorial Slides
-for i=1, 4 do
-   AssetLoader:preloadImage("Tutorial"..i,"assets/Tutorial/"..i..".png")
-end
-
 AssetLoader:preloadImage("pot_glow_img", "assets/UI/new/pot_glow.png")
 
 -- Bubbles

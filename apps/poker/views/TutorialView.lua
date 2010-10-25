@@ -11,24 +11,11 @@ TutorialView = Class(View, function(self, model, ...)
     self.tutorialGroup = tutorialGroup
     screen:add(tutorialGroup)
 
-    for i=1, 4 do
-        tutorial[i] = Popup:new{ group=AssetLoader:getImage("Tutorial"..i,{}), noRender = true, }
-    end
-    
-    for i, slide in ipairs(tutorial) do
-        self.tutorialGroup:add(slide.group)
-        slide.group.opacity = 140
-        slide.group.anchor_point = { slide.group.w/2, slide.group.h/2 } -- Anchored in the center
-        slide.group.position = { screen.w * (3/2), screen.h/2 } -- They start off screen to the right
-        slide.animate_start = {opacity=140, x=screen.w * (3/2), duration=500, mode="EASE_OUT_QUAD"} -- This animates them back to the start
-        slide.animate_in = {opacity=255, x=screen.w/2, duration=500, mode="EASE_OUT_QUAD"} -- This animates them into the center screen
-        slide.animate_out = {opacity=140, x=-screen.w/2, duration=500, mode="EASE_OUT_QUAD"} -- This animates them off to the left
-        slide.on_fade_in = function() end
-        slide.on_fade_out = function() end
-    end
+    local TUTORIAL_LENGTH = 4
+
     
     function self:getBounds()
-        return 1, #tutorial
+        return 1, TUTORIAL_LENGTH
     end
     
     -- Initialize
@@ -40,10 +27,50 @@ TutorialView = Class(View, function(self, model, ...)
     function self:update(p, c, n)
     
         if model:get_active_component() == Components.TUTORIAL then
-            
+            if not tutorial[1] then
+                for i=1, TUTORIAL_LENGTH do
+                    tutorial[i] = Popup:new{
+                        group = Image{src = "assets/Tutorial/"..i..".png"},
+                        noRender = true
+                    }
+                end
+                for i, slide in ipairs(tutorial) do
+                    self.tutorialGroup:add(slide.group)
+                    slide.group.opacity = 140
+                    ---[[
+                    -- Anchored in the center
+                    slide.group.anchor_point = { slide.group.w/2, slide.group.h/2 }
+                    -- They start off screen to the right
+                    slide.group.position = { screen.w * (3/2), screen.h/2 }
+                    -- This animates them back to the start
+                    slide.animate_start = {
+                        opacity = 140,
+                        x = screen.w * (3/2),
+                        duration = 500,
+                        mode = "EASE_OUT_QUAD"
+                    }
+                    -- This animates them into the center screen
+                    slide.animate_in = {
+                        opacity = 255,
+                        x = screen.w/2,
+                        duration = 500,
+                        mode = "EASE_OUT_QUAD"
+                    }
+                    -- This animates them off to the left
+                    slide.animate_out = {
+                        opacity = 140,
+                        x = -screen.w/2,
+                        duration = 500,
+                        mode = "EASE_OUT_QUAD"
+                    }
+                    slide.on_fade_in = function() end
+                    slide.on_fade_out = function() end
+                end
+            end
+            --]]
             tutorialGroup:raise_to_top()
             tutorialGroup.opacity = 255
-            
+            ---[[
             -- Active slide moves to center
             if tutorial[c] then
                 local current = tutorial[c]
@@ -65,9 +92,13 @@ TutorialView = Class(View, function(self, model, ...)
                 local current = tutorial[n]
                 current.group:animate( current.animate_start )
             end
-            
+            --]]end end
         else
-            tutorialGroup.opacity = 0
+            for i, slide in ipairs(tutorial) do
+                slide.group:unparent()
+                tutorial[i] = nil
+            end
+            collectgarbage("collect")
         end
         
     end
