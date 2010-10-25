@@ -26,6 +26,7 @@ function(ctrl, router, ...)
     function ctrl:get_selector() return selector end
     function ctrl:get_prev_selector() return prev_selector end
     function ctrl:is_new_game() return state:is_new_game() end
+    function ctrl:game_won() return state:game_won() end
     function ctrl:get_current_tile_image()
         return state:get_tiles_class():get_current_tile_image()
     end
