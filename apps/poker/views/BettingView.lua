@@ -5,22 +5,6 @@ BettingView = Class(View, function(view, model, ...)
     }
      
     --create the components
-    --[[
-    local fold_button = Image{position={MDPL.FOLD[1], MDPL.FOLD[2]}, src="assets/new_buttons/ButtonFold.png"}
-    fold_button.extra.text = "FOLD"
-    local call_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/new_button/ButtonCall.png"}
-    call_button.extra.text = "CALL"
-    local check_button = Image{position={MDPL.CALL[1], MDPL.CALL[2]}, src="assets/DevinUI/check.png"}
-    check_button.extra.text = "CALL"
-    local bet_button = Image{position={MDPL.BET[1], MDPL.BET[2]}, src="assets/DevinUI/bet.png"}
-    bet_button.extra.text = "BET"
-
-    local exit_button = Image{position={MDPL.EXIT[1], MDPL.EXIT[2]}, src="assets/DevinUI/exit.png"}
-    exit_button.extra.text = "EXIT"
-    local help_button = Image{position={MDPL.HELP[1], MDPL.HELP[2]}, src="assets/DevinUI/help.png"}
-    help_button.extra.text = "HELP"
-    --]]
-
     local fold_button = FocusableImage(MDPL.FOLD[1], MDPL.FOLD[2],
         "fold_button", "fold_button_on")
     fold_button.extra.text = "FOLD"
@@ -62,30 +46,9 @@ BettingView = Class(View, function(view, model, ...)
         }
     }
     --]]
---[[
-    -- add the focus
-    local button_focus = Image{position=MDPL.CALL, src="assets/DevinUI/focus_small.png"}
-    local bet_focus = Image{position={MDPL.BET[1]-10,MDPL.BET[2]+5}, src="assets/DevinUI/focus_big.png", opacity=0}
-    --]]
     -- create text for the components
-    --[[
-    local fold_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.FOLD[1] + 17, y = MDPL.FOLD[2] + 30, text = "Fold"}
-    local call_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.CALL[1] + 30, y = MDPL.CALL[2] + 30, text = "Call"}
-    --]]
     local bet_text = Text{font = PLAYER_ACTION_FONT, color = Colors.YELLOW,
             x = MDPL.BET[1] + 130, y = MDPL.BET[2] + 45, text = "$"}
-    --[[
-    local exit_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.EXIT[1] + 40, y = MDPL.EXIT[2] + 20, text = "Exit"}
-    local help_text = Text{font = PLAYER_ACTION_FONT, color = Colors.WHITE,
-            x = MDPL.HELP[1] + 35, y = MDPL.HELP[2] + 20, text = "Help"}
-
-    view.text = {
-        fold_text, call_text, bet_text, exit_text, help_text
-    }
-    --]]
     
     --background ui
     view.background_ui = Group{name = "bettingBackground_ui", position = {0, 0}}
