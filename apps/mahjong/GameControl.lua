@@ -105,7 +105,6 @@ function(ctrl, router, ...)
     function ctrl:shuffle_game()
         print("game re-shuffling")
         state:shuffle()
-        state:shuffle()
         state:set_tile_tables()
         grid = state:get_grid()
 

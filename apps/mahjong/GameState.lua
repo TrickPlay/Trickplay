@@ -117,7 +117,7 @@ GameState = Class(nil,function(state, ctrl)
         last_tiles = nil
         selected_tile = nil
 
-        tiles_class:shuffle(layout_number)
+        tiles_class:restore_order()
         tiles_class:reset()
         game_menu:remove_tile_images()
     end
