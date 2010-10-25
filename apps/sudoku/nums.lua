@@ -6,6 +6,8 @@ local user_color   = "fefa00"
 local wrong_color  = "FF0000"
 local pencil_font  = "Eraser 57px"
 
+a_p = { big = {},   sm = {}}
+
 given_nums     = {}
 pen_nums       = {}
 wr_pen_nums    = {}
@@ -61,6 +63,9 @@ for i=1,9 do
 	screen:add(wr_pen_nums[i])
 	wr_pen_nums[i]:hide()
 
+	a_p.big[i] = {pen_nums[i].w/2,pen_nums[i].h/2}
+
+
 	pencil_nums[i] = Text{
 				text  = i,
 				font  = pencil_font,
@@ -77,5 +82,7 @@ for i=1,9 do
 	}
 	screen:add(wr_pencil_nums[i])
 	wr_pencil_nums[i]:hide()
+
+	a_p.sm[i] = {pencil_nums[i].w/2, pencil_nums[i].h/2}
 end
 

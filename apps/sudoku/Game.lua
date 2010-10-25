@@ -187,7 +187,7 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 				source = given_nums[ givens[r][c] ],
 				opacity=0
 			}
-			t.anchor_point={t.w/2,t.h/2}
+			t.anchor_point={a_p.big[ givens[r][c] ][1],a_p.big[ givens[r][c] ][2]} --t.w/2,t.h/2}
 	--			t.x = TILE_WIDTH/2
 	--			t.y = TILE_WIDTH/2
 
@@ -203,7 +203,7 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 					name   = "Pen "..guesses[r][c].pen,
 					source = pen_nums[guesses[r][c].pen],
 				}
-				t.anchor_point={t.w/2,t.h/2}
+				t.anchor_point={a_p.big[ guesses[r][c].pen ][1],a_p.big[ guesses[r][c].pen ][2]}
 				grid_of_groups[r][c]:add(t)
 			else
 				for g = 1,9 do
@@ -213,7 +213,7 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 							source = pencil_nums[g],
 						}
 						t.scale = {1/2,1/2}
-						t.anchor_point={t.w/2,t.h/2}
+						t.anchor_point={a_p.sm[g][1],a_p.sm[g][2]}
 						t.x = guess_x(g)
 						t.y = guess_y(g)
 						grid_of_groups[r][c]:add(t)
@@ -261,17 +261,17 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 
 		for r = 1,9 do     for c = 1,9 do
 
+
 			for i = 1,9 do
 				guesses[r][c][i] = false
 			end 
 			guesses[r][c].num = 0
 			guesses[r][c].pen = 0
 
+
 		end                end
 	end
-	--g.board = Group{}
 	g.grid_of_groups = {}
-	--screen:add(g.board)
 	empty_spaces, cheat_list = DevelopBoard(g.grid_of_groups,givens, guesses,blox)
 print(empty_spaces)
 	--g.board.anchor_point = {g.board.w/2,g.board.h/2}
@@ -417,7 +417,7 @@ print(empty_spaces)
 					source  = wr_pen_nums[ u[3] ],
 					opacity = 0
 				}
-				clone.anchor_point = {clone.w/2,clone.h/2}
+				clone.anchor_point = {a_p.big[ u[3] ][1],a_p.big[ u[3] ][2]}--clone.w/2,clone.h/2}
 				table.insert(new_nums,{clone,u[1],u[2]})
 --]]
 			end								end
@@ -433,7 +433,7 @@ print(empty_spaces)
 					opacity = 0
 				}
 	
-				clone.anchor_point = {clone.w/2,clone.h/2}
+				clone.anchor_point = {a_p.big[guess][1],a_p.big[guess][2]}--clone.w/2,clone.h/2}
 				table.insert(new_nums,{clone,r,c})
 --]]
 			else
@@ -447,7 +447,7 @@ print(empty_spaces)
 					source  = wr_pen_nums[guess],
 					opacity = 0
 				}
-				clone.anchor_point = {clone.w/2,clone.h/2}
+				clone.anchor_point = {a_p.big[guess][1],a_p.big[guess][2]}--clone.w/2,clone.h/2}
 
 				table.insert(new_nums,{clone,r,c})
 --]]
@@ -511,7 +511,7 @@ print(empty_spaces)
 					source  = pen_nums[guess],
 					opacity = 0
 				}
-				clone.anchor_point = {clone.w/2,clone.h/2}
+				clone.anchor_point = {a_p.big[guess][1],a_p.big[guess][2]}--clone.w/2,clone.h/2}
 				table.insert(new_nums,{clone,r,c})
 --]]
 		end
@@ -571,7 +571,7 @@ print(empty_spaces)
 						source  = pen_nums[ u[3] ],
 						opacity = 0
 					}
-					clone.anchor_point = {clone.w/2,clone.h/2}
+					clone.anchor_point = {a_p.big[u[3]][1],a_p.big[u[3]][2]}--clone.w/2,clone.h/2}
 					table.insert(new_nums,{clone,u[1],u[2]})
 --]]
 				end
@@ -824,7 +824,7 @@ print("there",g.grid_of_groups[r][c]:
 				scale   = {.5,.5},
 				opacity = 0
 			}
-			clone.anchor_point = {clone.w/2,clone.h/2}
+			clone.anchor_point = {a_p.sm[guess][1],a_p.sm[guess][2]}--clone.w/2,clone.h/2}
 			table.insert(new_nums,{clone,r,c})
 			guesses[r][c].pen = 0
 			--add the penciled guess
@@ -858,7 +858,7 @@ print("there",g.grid_of_groups[r][c]:
 				scale   = {.5,.5},
 				opacity = 0
 			}
-			clone.anchor_point = {clone.w/2,clone.h/2}
+			clone.anchor_point = {a_p.sm[guess][1],a_p.sm[guess][2]}--clone.w/2,clone.h/2}
 			table.insert(new_nums,{clone,r,c})
 --]]
 			if status ~= "REDO" and status ~= "UNDO" then
@@ -895,7 +895,7 @@ print("there",g.grid_of_groups[r][c]:
 								source  = pen_nums[ e[1][3] ],
 								opacity = 0
 							}
-							clone.anchor_point = {clone.w/2,clone.h/2}
+							clone.anchor_point = {a_p.big[e[1][3]][1],a_p.big[e[1][3]][2]}--clone.w/2,clone.h/2}
 
 							table.insert(new_nums,{clone,e[1][1],e[1][2]})
 --]]
@@ -913,7 +913,7 @@ print("there",g.grid_of_groups[r][c]:
 								source  = pen_nums[ e[2][3] ],
 								opacity = 0
 							}
-							clone.anchor_point = {clone.w/2,clone.h/2}
+							clone.anchor_point = {a_p.big[e[2][3]][1],a_p.big[e[2][3]][2]}--clone.w/2,clone.h/2}
 							table.insert(new_nums,{clone,e[2][1],e[2][2]})
 --]]
 							table.insert(old_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("WR_Pen "..e[2][3]))--.opacity = 0
@@ -940,7 +940,7 @@ print("there",g.grid_of_groups[r][c]:
 								source  = wr_pen_nums[ e[1][3] ],
 								opacity = 0
 					}
-					clone.anchor_point = {clone.w/2,clone.h/2}
+					clone.anchor_point = {a_p.big[e[1][3]][1],a_p.big[e[1][3]][2]}--clone.w/2,clone.h/2}
 					table.insert(new_nums,{clone,e[1][1],e[1][2]})
 					going_red[ e[1][1]..e[1][2] ] = true
 --]]
@@ -958,7 +958,7 @@ print("there",g.grid_of_groups[r][c]:
 						source  = wr_pen_nums[ e[2][3] ],
 						opacity = 0
 					}
-					clone.anchor_point = {clone.w/2,clone.h/2}
+					clone.anchor_point = {a_p.big[e[2][3]][1],a_p.big[e[2][3]][2]}--clone.w/2,clone.h/2}
 
 					table.insert(new_nums,{clone,e[2][1],e[2][2]})
 					going_red[ e[2][1]..e[2][2] ] = true
@@ -1040,7 +1040,7 @@ print("there",g.grid_of_groups[r][c]:
 				scale   = {.5,.5},
 				opacity = 0
 			}
-			clone.anchor_point = {clone.w/2,clone.h/2}
+			clone.anchor_point = {a_p.sm[nums[i]][1],a_p.sm[nums[i]][2]}--clone.w/2,clone.h/2}
 			
 			table.insert(new_nums,{clone,r,c})
 --]]
