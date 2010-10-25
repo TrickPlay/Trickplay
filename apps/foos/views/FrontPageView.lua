@@ -252,15 +252,15 @@ if fucking_stupid then
 else
             view:shift_group()
 end
-            print("\n\nShowing FrontPageView UI\n")
+  --          print("\n\nShowing FrontPageView UI\n")
 
             --view.ui:raise_to_top()
             view.ui.opacity = 255            
             big_black_box.opacity = 0
-
-            print("new index is",sel[1],sel[2],"shift",
-                                   model.front_page_index)
-            print("previous index is",prev_i[1],prev_i[2])
+--
+  --          print("new index is",sel[1],sel[2],"shift",
+      --                             model.front_page_index)
+    --        print("previous index is",prev_i[1],prev_i[2])
 
 
 
@@ -272,9 +272,9 @@ end
                                view.previous.scale[2]}
             view.prev_target_pos = {PIC_W * (prev_i[2]-1),
                                     PIC_H * (prev_i[1]-1)+10}
-            print(view.prev_pos[1],        view.prev_pos[2]        ,"   ",
-                  view.prev_target_pos[1], view.prev_target_pos[2] ,"   ",
-                  view.previous.x,         view.previous.y)
+--            print(view.prev_pos[1],        view.prev_pos[2]        ,"   ",
+  --                view.prev_target_pos[1], view.prev_target_pos[2] ,"   ",
+    --              view.previous.x,         view.previous.y)
 
             view.current    =  model.fp_slots[sel[1]][sel[2]]
 
@@ -304,7 +304,7 @@ end
 view.move_selector()
             --sel_timeline:start()
         elseif comp == Components.SOURCE_MANAGER then
-            print("Dimming FrontPageView UI")
+      --      print("Dimming FrontPageView UI")
             view:shift_group()
 
             model.album_group:complete_animation()
@@ -312,7 +312,7 @@ view.move_selector()
             big_black_box:animate{duration = 100,opacity = 150}
 
         else
-            print("Hiding FrontPageView UI")
+        --    print("Hiding FrontPageView UI")
             model.album_group:complete_animation()
             big_black_box.opacity = 0
             view.ui.opacity = 0

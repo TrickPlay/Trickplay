@@ -2,6 +2,8 @@ local SLIDESHOW_WIDTH = 1200
 local SLIDESHOW_HEIGHT = 800
 
 SlideshowView = Class(View, function(view, model, ...)
+local outstanding_reqs = 0
+
     view._base.init(view, model)
     view.ui = Group{name="slideshow ui"}
     screen:add(view.ui)
@@ -179,18 +181,18 @@ SlideshowView = Class(View, function(view, model, ...)
                     {(tile_width*0.50) , (tile_height*0.50)},
                     {(tile_width*1.50) , (tile_height*0.50)},
                     {(tile_width*2.50) , (tile_height*0.50)},
-                    {(tile_width*0.50) , (tile_height*1.5)},
-                    {(tile_width*2.50) , (tile_height*2.5)},
-                    {(tile_width*2.50) , (tile_height*1.5)},
-                    {(tile_width*0.50) , (tile_height*2.5)},
-                    {(tile_width*1.51) , (tile_height*2.5)},
+                    {(tile_width*0.50) ,  (tile_height*1.5)},
+                    {(tile_width*2.50) ,  (tile_height*2.5)},
+                    {(tile_width*2.50) ,  (tile_height*1.5)},
+                    {(tile_width*0.50) ,  (tile_height*2.5)},
+                    {(tile_width*1.51) ,  (tile_height*2.5)},
 		
-                    {(tile_width*1)    ,    (tile_height*1)},
-                    {(tile_width*1)    ,    (tile_height*2)},
-                    {(tile_width*2)    ,    (tile_height*1)},
-                    {(tile_width*2)    ,    (tile_height*2)},
+                    {(tile_width*1)    ,     (tile_height*1)},
+                    {(tile_width*1)    ,     (tile_height*2)},
+                    {(tile_width*2)    ,     (tile_height*1)},
+                    {(tile_width*2)    ,     (tile_height*2)},
 		
-                    {(tile_width*1.51) , (tile_height*1.51)},		
+                    {(tile_width*1.51) ,  (tile_height*1.51)},		
                 }
                 local drop_point = {}
                 while #pre_drop_points > 0 do
@@ -769,19 +771,16 @@ end
                     for i = 1, 13 do
                         local child    = pic:find_child("Clone "..i)
 						if child ~= nil then
-            	            child.position = {drop_points[i][1],
-        	                                  drop_points[i][2]}
+            	            child.position = { drop_points[i][1] ,
+        	                                   drop_points[i][2] }
     	                    child.scale    = {1,1}
 	                        child.z        = 0
 						end
                     end
-
 					view.license_box:raise_to_top()
 					layered_timeline = nil
-
                 end
                 layered_timeline:start()
-				--end
         end,
         ["MOSAIC"] = function(pic)
             pic.opacity = 255
@@ -1425,12 +1424,16 @@ mosaic_timeline:start()
                 end
                 return
             end
+			outstanding_reqs = outstanding_reqs + 1
+print(outstanding_reqs)
             local image = Image{
                 name      = "slide",
                 src       = pic,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
+			outstanding_reqs = outstanding_reqs - 1
+print(outstanding_reqs)
 
                     --if it failed to load from the internet, then
                     --throw up the placeholder
@@ -1468,98 +1471,7 @@ mosaic_timeline:start()
             }
         end
         load_pic(timeline,group,attempt)
-        --end
-        --sources[model.fp_1D_index]:get_interesting_photos(index,false,callback)
---[[
-        local request = URLRequest
-        {
-            url = adapters[#adapters - model.fp_1D_index + 1][1].photos(
-                      adapters[#adapters - model.fp_1D_index + 
-                                   1][1].required_inputs.query,
-                      index,
-                      model.fp_1D_index
-                  ),
-            on_complete = function (request, response)
-
-                local data   = json:parse(response.body)
-                local site   = adapters[#adapters - model.fp_1D_index + 
-                                                  1][1].site(data, index)
-                caption.text = adapters[#adapters - model.fp_1D_index + 
-                                                      1][1].caption(data)
-                print("getting image",site)
-                if site ~= "" then    
-                    local image = Image{
-                        name      = "slide",
-                        src       = site, 
-                        async     = true, 
-                        on_loaded = function(img,failed)
-                            img.on_loaded = nil
-
-                            --if it failed to load from the internet, then
-                            --throw up the placeholder
-                            local style_i2 = view:get_controller():get_style_index()
-                            if failed then
-                                print("picture loading failed")
-                                --loaded the placeholder for failed pics
-                                local placeholder = Group{}
-                                placeholder:add(Rectangle
-                                {
-                                    name   = "backing",
-                                    color  = "000000",
-                                    width  = PIC_W,
-                                    height = PIC_H 
-                                })
-
-                                placeholder:add(Clone
-                                {
-                                    name   = "slide",
-                                    source = backup,
-                                    x      = 100,
-                                    y      = 100
-                                })
-                                on_screen_prep[view.styles[style_i2] ](placeholder,group)
-                            else
-                                --view.on_screen_list[rel_i] = Group {z = 500}
-                                timeline:stop()
-                                group:clear()
-                                on_screen_prep[view.styles[style_i2] ](img,group)
-
-                            end
-                            if group == view.on_screen_list[1] then
-                                group.opacity = 255
-                            end
-                        end
-                    } 
-                else
-                    print("url loading failed")
-                    local style_i2 = view:get_controller():get_style_index()
-                    --loaded the placeholder for failed pics
-                    local placeholder = Group{}
-                    placeholder:add(Rectangle
-                    {
-                        name   = "backing",
-                        color  = "000000",
-                        width  = PIC_W,
-                        height = PIC_H 
-                    })
-
-                    placeholder:add(Clone
-                    {
-                        name   = "slide",
-                        source = backup,
-                        x      = 100,
-                        y      = 100
-                    })
-                    on_screen_prep[view.styles[style_i2] ](placeholder,group)
-                    if group == view.on_screen_list[1] then
-                        group.opacity = 255
-                    end
-                end
-            end
-        }
-        request:send()
---]]
-    end
+     end
     function view:preload_back()
         view.on_screen_list[#view.on_screen_list+1] = Group {z = 0}
         view.license_on[#view.license_on+1] = Text
@@ -1601,13 +1513,16 @@ mosaic_timeline:start()
                 timeout:start()
                 return
             end
-
+			outstanding_reqs = outstanding_reqs + 1
+print(outstanding_reqs)
             local image = Image{
                 name      = "slide",
 				src       = pic,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
+			oustanding_reqs = outstanding_reqs - 1
+print(outstanding_reqs)
 
                     if failed then
                         --loaded the placeholder for failed pics
@@ -1816,7 +1731,7 @@ print("toggle on")
             --if moving backwards
             if photo_i - view.prev_i < 0 then
                 if #view.on_screen_list > 1 then
-                    print("moving backward")
+                ---    print("moving backward")
                     --grab the pic underneath the current one
                     local pic = table.remove(view.on_screen_list, 1 )
                     table.insert(view.off_screen_list, 1 ,pic)
@@ -1831,7 +1746,7 @@ print("toggle on")
 					end
 
                     if #view.off_screen_list > 5 then
-                        print("removing from off_screen list")
+                --        print("removing from off_screen list")
                         if view.off_screen_list[#view.off_screen_list] ~= 
                            nil and
                            view.off_screen_list[#view.off_screen_list
@@ -1845,13 +1760,13 @@ print("toggle on")
                 
                     backward_animation[ view.styles[style_i] ](pic)
                 else
-                    print("on screen is 0")
+               --     print("on screen is 0")
 					reset_keys()
                 end
             --if moving forwards
             elseif photo_i - view.prev_i > 0 then
                 if #view.off_screen_list > 0 then
-					print("moving forward")
+			--		print("moving forward")
 					--grab the picture
 
 					local pic = table.remove( view.off_screen_list,1 )
@@ -1867,7 +1782,7 @@ print("toggle on")
 
 					end
 					if #view.on_screen_list > 5 then
-                       print("removing from on_screen list")
+               --        print("removing from on_screen list")
             
                        if view.on_screen_list[#view.on_screen_list] ~= nil and
                           view.on_screen_list[#view.on_screen_list].parent ~= nil
@@ -1889,20 +1804,20 @@ print("toggle on")
                    forward_animation[ view.styles[style_i] ](pic)
 
                 else
-                    print("off screen is 0")
+             --       print("off screen is 0")
 					reset_keys()
                 end
             else
-                print("diff is 0?\tphoto_i:",photo_i,"prev_i",view.prev_i)
+            --    print("diff is 0?\tphoto_i:",photo_i,"prev_i",view.prev_i)
                 reset_keys()
             end
             view.prev_i = photo_i
-            print("\n\nresultant state is\t\tquery index:",
-                  model.fp_1D_index,"photo index:",photo_i,"on screen:",
-                  #view.on_screen_list,"off_screen:",#view.off_screen_list,
-                  "\n")
+      --      print("\n\nresultant state is\t\tquery index:",
+       --           model.fp_1D_index,"photo index:",photo_i,"on screen:",
+       --           #view.on_screen_list,"off_screen:",#view.off_screen_list,
+        --          "\n")
         else
-            print("Hiding SlideshowView UI")
+          --  print("Hiding SlideshowView UI")
             view.ui:complete_animation()
             view.ui.opacity = 0
         end
