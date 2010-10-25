@@ -2,6 +2,7 @@
 dofile( "controller.lua" )
 dofile("hud.lua")
 curr_level = nil
+test_mode = false
 -- Alex's code
 
 game_is_running = false
@@ -159,7 +160,46 @@ function idle.on_idle( idle , seconds )
     end
     
 end
-
+local test_text = {
+                                speed = 60,
+                                text = Text{font = my_font , text = "Test Mode\n\n"..
+									"q    row  in  from  left\n"..
+									"p    row  in  from  right\n"..
+									"a    loop  from  left\n"..
+									"l    loop  from  right\n"..
+									"z    zeppelin\n\n"..
+									"1 2 3 4 5       bullet   powerups\n\n"..
+									"h    to  display  this  text  again"  , color = "FFFFFF"},
+                                
+                                setup = function( self )
+                                        self.text.position = { screen.w/2,0}--screen.h/2}
+                                        self.text.anchor_point = { self.text.w / 2 , 0}--self.text.h / 2 }
+                                        self.text.opacity = 255;
+										if self.text.parent == nil then
+                                        screen:add( self.text )
+										end
+                                    end,
+                                    
+                                render = function( self , seconds )
+										self.text.y = self.text.y + self.speed*seconds
+										if self.text.y > screen.h then
+											self.text:unparent()
+											remove_from_render_list(self)
+										end
+--[[
+                                        local o = self.text.opacity - self.speed * seconds
+                                        local scale = self.text.scale
+                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        if o <= 0 then
+                                            remove_from_render_list( self )
+                                            screen:remove( self.text )
+                                        else
+                                            self.text.opacity = o
+                                            self.text.scale = scale
+                                        end
+--]]
+                                    end,
+                            }
 -------------------------------------------------------------------------------
 -- Event handler
 
@@ -180,6 +220,7 @@ function screen.on_key_down( screen , key )
 			add_to_render_list(levels[1])
 			curr_level = levels[1]
 		elseif key == keys.t then
+			test_mode = true
 			start_game()
 			splash.opacity = 0
 			game_is_running = true
@@ -190,53 +231,12 @@ function screen.on_key_down( screen , key )
 			lives[1].opacity=255
 			lives[3].opacity=255
 			lives[2].opacity=255
-			add_to_render_list({
-                                speed = 40,
-                                text = Text{font = my_font , text = "Test Mode"  , color = "FFFFFF"},
-                                
-                                setup = function( self )
-                                        self.text.position = { screen.w/2,screen.h/2}
-                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
-                                        self.text.opacity = 255;
-                                        screen:add( self.text )
-                                    end,
-                                    
-                                render = function( self , seconds )
-                                        local o = self.text.opacity - self.speed * seconds
-                                        local scale = self.text.scale
-                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        if o <= 0 then
-                                            remove_from_render_list( self )
-                                            screen:remove( self.text )
-                                        else
-                                            self.text.opacity = o
-                                            self.text.scale = scale
-                                        end
-                                    end,
-                            })
+			add_to_render_list(test_text)
 
 		end
     elseif key == keys.space then
         
         paused = not paused
-	elseif key == keys.q then
-		add_to_render_list(formations.row_fly_in_left,50,200)
-	elseif key == keys.p then
-		add_to_render_list(formations.row_fly_in_right,2000,1500)
-	elseif key == keys.a then
-		add_to_render_list(formations.loop_from_left)
-	elseif key == keys.l then
-		add_to_render_list(formations.loop_from_right)
-	elseif key == keys["1"] then
-		my_plane.firing_powerup=1
-	elseif key == keys["2"] then
-		my_plane.firing_powerup=2
-	elseif key == keys["3"] then
-		my_plane.firing_powerup=3
-	elseif key == keys["4"] then
-		my_plane.firing_powerup=4
-	elseif key == keys["5"] then
-		my_plane.firing_powerup=5
     elseif not paused then
     
         for _ , item in ipairs( render_list ) do
@@ -246,7 +246,31 @@ function screen.on_key_down( screen , key )
         end
 
     end
-	
+	if test_mode then
+		if key == keys.q then
+			add_to_render_list(formations.row_fly_in_left,50,200)
+		elseif key == keys.p then
+			add_to_render_list(formations.row_fly_in_right,2000,1500)
+		elseif key == keys.a then
+			add_to_render_list(formations.loop_from_left)
+		elseif key == keys.l then
+			add_to_render_list(formations.loop_from_right)
+		elseif key == keys.z then
+			add_to_render_list(formations.zepp, 150,-400, false )
+		elseif key == keys.h then
+			add_to_render_list(test_text)
+		elseif key == keys["1"] then
+			my_plane.firing_powerup=1
+		elseif key == keys["2"] then
+			my_plane.firing_powerup=2
+		elseif key == keys["3"] then
+			my_plane.firing_powerup=3
+		elseif key == keys["4"] then
+			my_plane.firing_powerup=4
+		elseif key == keys["5"] then
+			my_plane.firing_powerup=5
+		end
+	end
 end
 
 -------------------------------------------------------------------------------

@@ -278,10 +278,9 @@ formations =
 {
 	zepp =
 	{
-				type    = TYPE_ENEMY_PLANE,
-				shoot_time = 2.5,
-				last_shot_time =2,
-		z=5,
+		type    = TYPE_ENEMY_PLANE,
+		shoot_time = 2.5,
+		last_shot_time =2,
 		health = 20,
 		group = nil,
 		image = Clone{source=imgs.zepp},
