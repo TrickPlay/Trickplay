@@ -220,8 +220,6 @@ local layout_functions = {
             end
         end
 
-        print("index", index)
-
         return grid
     end,
 
@@ -289,7 +287,6 @@ local layout_functions = {
         grid[17][12][1] = tiles[index]
         index = index + 1
 
-        print("index", index)
         return grid
     end,
 --[[
@@ -360,7 +357,6 @@ local layout_functions = {
             end
         end
 
-        print("index", index)
         return grid
     end,
 
@@ -459,7 +455,6 @@ local layout_functions = {
             end
         end
 
-        print("index", index)
         return grid
     end,
 --[[
@@ -574,7 +569,6 @@ local layout_functions = {
             index = index + 1
         end
         
-        print("index", index)
         return grid
     end,
 
@@ -709,7 +703,6 @@ local layout_functions = {
         grid[15][13][1] = tiles[index]
         index = index + 1
         
-        print("index", index)
         return grid
     end,
 }
