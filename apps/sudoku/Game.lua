@@ -197,6 +197,8 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 			table.insert(cheat_list,{r,c})
 ---[[
 			if guesses[r][c].pen ~= 0 then
+				empty_spaces = empty_spaces - 1
+
 				t= Clone{
 					name   = "Pen "..guesses[r][c].pen,
 					source = pen_nums[guesses[r][c].pen],
@@ -220,63 +222,7 @@ function DevelopBoard(grid_of_groups,givens,guesses,blox)
 				end
 			end
 --]]
---[[
-			if guesses[r][c].num > 0 then
-				empty_spaces = empty_spaces - 1		
-			else
-				table.insert(cheat_list,{r,c})
-			end
-			for g = 1,9 do
-				t= Clone{
-					name   = "Pen "..g,
-					source = pen_nums[g],
-					opacity = 0
-				}
-				t.anchor_point={t.w/2,t.h/2}
-				grid_of_groups[r][c]:add(t)
 
-				if guesses[r][c].pen == g then
-					t.opacity=255
-				end
-				t= Clone{
-					name   = "WR_Pen "..g,
-					source = wr_pen_nums[g],
-					opacity = 0
-				}
-				t.anchor_point={t.w/2,t.h/2}
-				grid_of_groups[r][c]:add(t)
-
-				t = Clone{
-					name   = "Guess "..g,
-					source = pencil_nums[g],
-					opacity = 0
-				}
-
-				t.scale = {1/2,1/2}
-				t.anchor_point={t.w/2,t.h/2}
-				t.x = ((g-1)%3-1)*(TILE_WIDTH/4+5)
-				t.y = (math.floor((g-1)/3)-1)*(TILE_WIDTH/4+5)
-
-				grid_of_groups[r][c]:add(t)
-				
-				if guesses[r][c][g] and guesses[r][c].pen == 0 then 
-					t.opacity=255
-				end
-				t = Clone{
-					name   = "WR_Guess "..g,
-					source = wr_pencil_nums[g],
-					opacity = 0
-				}
-
-				t.scale = {1/2,1/2}
-				t.anchor_point={t.w/2,t.h/2}
-				t.x = ((g-1)%3-1)*(TILE_WIDTH/4+5)
-				t.y = (math.floor((g-1)/3)-1)*(TILE_WIDTH/4+5)
-
-
-				grid_of_groups[r][c]:add(t)
-			end
---]]
 		end
 
 	---------------------------------
@@ -870,8 +816,6 @@ print("there",g.grid_of_groups[r][c]:
 			end
 
 			guesses[r][c][guesses[r][c].pen] = false
---			table.insert(new_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 255
----[[
 			local clone = Clone{
 				name    = "Guess "..guess,
 				source  = pencil_nums[ guess ],
@@ -882,7 +826,6 @@ print("there",g.grid_of_groups[r][c]:
 			}
 			clone.anchor_point = {clone.w/2,clone.h/2}
 			table.insert(new_nums,{clone,r,c})
---]]
 			guesses[r][c].pen = 0
 			--add the penciled guess
 			guesses[r][c][guess] = true

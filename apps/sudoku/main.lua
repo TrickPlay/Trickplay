@@ -1,5 +1,6 @@
 math.randomseed(os.time())
-
+local screen_w = screen.w
+local screen_h = screen.h
 dofile("Class.lua") -- Must be declared before any class definitions.
 dofile("bg.lua")
 dofile("Game.lua")
@@ -51,6 +52,8 @@ arrow_down_off,
 arrow_down_on 
 }
 screen:add(unpack(arrows))
+local block_sz = red.w
+assert(red.h == block_sz)
 local red_is_on = true
 local red_board = Group{}
 local red_board2 = Group{}
@@ -58,58 +61,58 @@ local red_blox =
 {
 	{
 		Group{},
-		Group{x= red.w   + 30},
-		Group{x= red.w*2 + 30*2}
+		Group{x= block_sz   + 30},
+		Group{x= block_sz*2 + 30*2}
 	},
 	{
-		Group{                   y= red.h   + 30},
-		Group{x= red.w   + 30,   y= red.h   + 30},
-		Group{x= red.w*2 + 30*2, y= red.h   + 30}
+		Group{                      y= block_sz   + 30},
+		Group{x= block_sz   + 30,   y= block_sz   + 30},
+		Group{x= block_sz*2 + 30*2, y= block_sz   + 30}
 	},
 	{
-		Group{                   y= red.h*2 + 30*2},
-		Group{x= red.w   + 30,   y= red.h*2 + 30*2},
-		Group{x= red.w*2 + 30*2, y= red.h*2 + 30*2}
+		Group{                      y= block_sz*2 + 30*2},
+		Group{x= block_sz   + 30,   y= block_sz*2 + 30*2},
+		Group{x= block_sz*2 + 30*2, y= block_sz*2 + 30*2}
 	}
 }
 for i = 1,#red_blox do    for j=1,#red_blox[i] do
-		red_board2:add(Clone{name="3x3 "..i.." "..j,source=red,x=(i-1)*(red.w+30),y=(j-1)*(red.h+30)})
+		red_board2:add(Clone{name="3x3 "..i.." "..j,source=red,x=(i-1)*(block_sz+30),y=(j-1)*(block_sz+30)})
 		--red_blox[i][j]:add(Clone{source=red})
 
 end                        end
 
+assert(blue.w == block_sz)
+assert(blue.h == block_sz)
 local blue_board = Group{}
 local blue_board2 = Group{}
 local blue_blox = 
 {
 	{
 		Group{opacity = 0},
-		Group{opacity = 0, x= blue.w   + 30,z=1},
-		Group{opacity = 0, x= blue.w*2 + 30*2,z=1}
+		Group{opacity = 0, x= block_sz   + 30,z=1},
+		Group{opacity = 0, x= block_sz*2 + 30*2,z=1}
 	},
 	{
-		Group{opacity = 0,                     y= blue.h   + 30,z=1},
-		Group{opacity = 0, x= blue.w   + 30,   y= blue.h   + 30,z=1},
-		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h   + 30,z=1}
+		Group{opacity = 0,                       y= block_sz   + 30,z=1},
+		Group{opacity = 0, x= block_sz   + 30,   y= block_sz   + 30,z=1},
+		Group{opacity = 0, x= block_sz*2 + 30*2, y= block_sz   + 30,z=1}
 	},
 	{
-		Group{opacity = 0,                     y= blue.h*2 + 30*2,z=1},
-		Group{opacity = 0, x= blue.w   + 30,   y= blue.h*2 + 30*2,z=1},
-		Group{opacity = 0, x= blue.w*2 + 30*2, y= blue.h*2 + 30*2,z=1}
+		Group{opacity = 0,                       y= block_sz*2 + 30*2,z=1},
+		Group{opacity = 0, x= block_sz   + 30,   y= block_sz*2 + 30*2,z=1},
+		Group{opacity = 0, x= block_sz*2 + 30*2, y= block_sz*2 + 30*2,z=1}
 	}
 }
 for i = 1,#blue_blox do    for j=1,#blue_blox[i] do
-		blue_board2:add(Clone{name="3x3 "..i.." "..j,source=blue,x=(i-1)*(blue.w+30),y=(j-1)*(blue.h+30),opacity=0})
+		blue_board2:add(Clone{name="3x3 "..i.." "..j,source=blue,x=(i-1)*(block_sz+30),y=(j-1)*(block_sz+30),opacity=0})
 		--blue_blox[i][j]:add(Clone{source=blue})
 
 end                        end
 local selector = Image{src="assets/board-focus.png",opacity=0}
 selector.anchor_point = {selector.w/2,selector.h/2}
 
---local bg_red  = Image{src="assets/bg_red.jpg"}
---local bg_blue = Image{src="assets/bg_blue.jpg",opacity=0}
 local top_left_logo =  Image{src="assets/logo.png",x=40,y=35,opacity=0}
-screen:add(--[[bg_red,bg_blue,]]red_board2,blue_board2,selector,red_board,blue_board, top_left_logo)
+screen:add(red_board2,blue_board2,selector,red_board,blue_board, top_left_logo)
 for i=1,3 do
 	blue_board:add( unpack(blue_blox[i]) )
 	red_board:add(  unpack( red_blox[i]) )
@@ -145,7 +148,8 @@ win_txt.x = screen.w/2+3/2*red.w+30+(screen.w/2-3/2*red.w-30)/2
 	save(timeline)
 	local sparkles = {}
 	local sparkles_strip = {}
-
+	local sparkle_w = sparkle_base.w
+	local sparkle_h = sparkle_base.h
 	--each sparkle gets predefined params (with variance)
 	local x_start = {}
 	local y_start = {}
@@ -210,7 +214,7 @@ win_txt.x = screen.w/2+3/2*red.w+30+(screen.w/2-3/2*red.w-30)/2
 				for i = 1, num_sparkles do
 					sparkles[r][c][i] = Group{opacity=0}
 					sparkles_strip[r][c][i] = Clone{source = sparkle_base}
-					sparkles[r][c][i].clip = {0,0,sparkles_strip[r][c][i].w/5,sparkles_strip[r][c][i].h}
+					sparkles[r][c][i].clip = {0,0,sparkle_w/5,sparkle_h}
 					sparkles[r][c][i]:add(sparkles_strip[r][c][i])
                 
 					local x_dir = math.random(85,115)/100
@@ -273,7 +277,7 @@ win_txt:raise_to_top()
 					sparkles[r][c][i].x = prog*(x_end[r][c][i]-x_peak[r][c][i]) + x_peak[r][c][i]
 					sparkles[r][c][i].y = prog*(y_end[r][c][i]-y_peak[r][c][i]) + y_peak[r][c][i]
 					sparkles[r][c][i].opacity = (1-prog)*o_peak[r][c][i]
-					sparkles_strip[r][c][i].x =  -1*(stage-1)*sparkles_strip[r][c][i].w/5
+					sparkles_strip[r][c][i].x =  -1*(stage-1)*sparkle_w/5
 					end
 				end
 			end
