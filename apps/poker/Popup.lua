@@ -28,7 +28,6 @@ end
 -- Popup is removed from its parent and should be garbage collected if there is external reference
 
 function Popup:new(args)
-
 	assert(args, "Popup created with no arguments!")
 
 	local animate_in = args.animate_in or {opacity = 220}
@@ -48,7 +47,7 @@ function Popup:new(args)
         
 	-- Various parameters
     -- if not object.group.parent then screen:add(object.group) end
-    if not args.keepDown then object.group:raise_to_top() end
+    if not args.keepDown and object.group.parent then object.group:raise_to_top() end
 	
 	-- Callbacks
 	if args.on_fade_in then object.on_fade_in = args.on_fade_in end
