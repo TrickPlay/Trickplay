@@ -103,9 +103,9 @@ FrontPageView = Class(View, function(view, model, ...)
 
 	fp_selector = Group{name="selector"}
 	local selectorImg = Image {name="img",src = "assets/poloroid.png" }
-	local selector_title = Text{name="title",font = "DejaVu Sans ExtraLight 18px",
-			y = 585,color = "000000",text = "",x=30,ellipsize="END",alignment="RIGHT",w=PIC_W,clip={0,0,540,50}}
-	local selector_auth = Text{name="auth",font = "DejaVu Sans ExtraLight 18px",
+	local selector_title = Text{name="title",font = "DejaVu Sans condensed 22px",
+			y = 585,color = "000000",text = "", opacity=125, x=30,ellipsize="END",alignment="RIGHT",w=PIC_W,clip={0,0,540,50}}
+	local selector_auth = Text{name="auth", opacity=125,font = "DejaVu Sans condensed 22px",
 			y = 610,color = "000000",text = "",alignment="RIGHT",w=PIC_W,x=30,clip={0,0,540,50},ellipsize="END"}
 
 	fp_selector:add(selectorImg,selector_title,selector_auth)
