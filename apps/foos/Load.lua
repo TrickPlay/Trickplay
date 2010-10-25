@@ -166,15 +166,11 @@ function LoadImg(url,slot,lic_tit,lic_auth, index)
                     --add the next album cover
                     Scale_To_Fit(img, img.base_size,{PIC_W,PIC_H})
                     slot:add(img)
-                    model:get_controller(Components.FRONT_PAGE): 
-                                              raise_bottom_bar()
                     --put the old one on top and animate it down
                     --only animate if there is a picture already there
                     if prev_cover ~= nil then
                         print("\tan old cover exists, animating it out")
                         prev_cover:raise_to_top()
-                        model:get_controller(Components.FRONT_PAGE):
-                                                  raise_bottom_bar()
                         prev_cover:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
                             y            = img.y + PIC_H,
@@ -211,15 +207,11 @@ function LoadImg(url,slot,lic_tit,lic_auth, index)
 					img = Clone{source=failed_to_load}
                     --add the next album cover
                     slot:add(img)
-                    model:get_controller(Components.FRONT_PAGE): 
-                                              raise_bottom_bar()
                     --put the old one on top and animate it down
                     --only animate if there is a picture already there
                     if prev_cover ~= nil then
                         print("\tan old cover exists, animating it out")
                         prev_cover:raise_to_top()
-                        model:get_controller(Components.FRONT_PAGE):
-                                                  raise_bottom_bar()
                         prev_cover:animate{
                             duration     = 4*CHANGE_VIEW_TIME,
                             y            = img.y + PIC_H,

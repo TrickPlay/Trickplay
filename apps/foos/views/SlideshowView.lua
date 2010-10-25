@@ -53,8 +53,8 @@ SlideshowView = Class(View, function(view, model, ...)
 	postit:add(unpack(postit_text))
 
 	-- License Info At the Bottom --
-	local license_box = Group{name="license box",position={0,1040}}
-	license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
+	view.license_box = Group{name="license box",position={0,1040}}
+	view.license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
 
 	local pause = Image{src = "assets/pause.png",x=screen.w/2,y=screen.h/2,opacity = 0}
 	pause.anchor_point = {pause.w/2,pause.h/2}
@@ -63,7 +63,7 @@ SlideshowView = Class(View, function(view, model, ...)
 
     view.ui:add(
 		overlay_image, view.background, postit, caption, view.mosaic_background,
-		license_box, pause,play
+		view.license_box, pause,play
 	)
 
     view.timer            = Timer()
@@ -672,7 +672,7 @@ end
                 y        = end_pos[2],
                 z        = 0,
                 on_completed = function()
-						license_box:raise_to_top()
+						view.license_box:raise_to_top()
 
                     reset_keys()            
                 end
@@ -689,7 +689,7 @@ end
                 opacity  = 255,
                 on_completed = function()
                     reset_keys()
-						license_box:raise_to_top()
+						view.license_box:raise_to_top()
 
                 end
             }
@@ -776,7 +776,7 @@ end
 						end
                     end
 
-					license_box:raise_to_top()
+					view.license_box:raise_to_top()
 					layered_timeline = nil
 
                 end
@@ -964,7 +964,7 @@ function mosaic_timeline.on_completed()
 					child.opacity = 15
 child:raise_to_top()
 --]]
-						license_box:raise_to_top()
+						view.license_box:raise_to_top()
 
 				end
 			end 
@@ -1022,7 +1022,7 @@ mosaic_timeline:start()
                         off_screen_list[#off_screen_list] = nil
                     end
 --]]
-						license_box:raise_to_top()
+						view.license_box:raise_to_top()
 
                  end
             }
@@ -1044,7 +1044,7 @@ mosaic_timeline:start()
                         off_screen_list[#off_screen_list] = nil
                     end
 --]]
-						license_box:raise_to_top()
+						view.license_box:raise_to_top()
 
                 end
             }
@@ -1131,7 +1131,7 @@ mosaic_timeline:start()
 	                        child.z        = 500
 						end
                     end
-					license_box:raise_to_top()
+					view.license_box:raise_to_top()
 					layered_timeline = nil
                 end
                 layered_timeline:start()
@@ -1344,7 +1344,7 @@ reset_keys()
 old.opacity = 0
 
 		end
-						license_box:raise_to_top()
+						view.license_box:raise_to_top()
 
 end
 
@@ -1826,8 +1826,8 @@ print("toggle on")
 						license:unparent()
 					end
 					if view.license_on[1] ~= nil then
-						license_box:add(view.license_on[1])
-						license_box:raise_to_top()
+						view.license_box:add(view.license_on[1])
+						view.license_box:raise_to_top()
 					end
 
                     if #view.off_screen_list > 5 then
@@ -1862,8 +1862,8 @@ print("toggle on")
 						view.license_on[2]:unparent()
 					end
 					if license ~= nil then
-						license_box:add(license)
-						license_box:raise_to_top()
+						view.license_box:add(license)
+						view.license_box:raise_to_top()
 
 					end
 					if #view.on_screen_list > 5 then

@@ -37,6 +37,7 @@ FrontPageView = Class(View, function(view, model, ...)
 --]]
 
     --the bottom bar that appears over the selected album cover
+--[[
     view.bottom_bar = Group{name="bottom_bar"}
     local sel_info = Image
     {
@@ -68,28 +69,10 @@ FrontPageView = Class(View, function(view, model, ...)
         position = {-10, 45}
     }
     view.bottom_bar:add(sel_info, album_logo, album_title,controls)
-
+--]]
 
     --gradients for the half-visible albums
-    local grad = Image
-    {
-        src = "assets/gradient_mask.png",
-        opacity = 0
-    }
-    screen:add(grad)
-    local right_edge = Clone{source = grad}
-    right_edge.scale = {.5,1080}
-    right_edge.opacity = 255
-    right_edge.x = 1750
-    view.ui:add(right_edge)
 
-    local left_edge = Clone{source = grad}
-    left_edge.scale = {.5,1080}
-    left_edge.opacity = 255
-    left_edge.z_rotation = {180,0,0}
-    left_edge.y = 1080
-    left_edge.x = 1920-1750
-    view.ui:add(left_edge)
 
     --add the album covers to the ui
     view.ui:add(model.album_group)
@@ -207,95 +190,6 @@ reset_keys()
 		end
 		sel_timeline:start()
 	end
---[=[
-
-    --the selection timeline
-    local sel_timeline = Timeline
-    {
-        name      = "Selection animation",
-        loop      =  false,
-        --duration  =  3000,
-        duration  = 900,
-        direction = "FORWARD",
-    }
-    function sel_timeline.on_new_frame(t,msecs)
-        local sel     = {}
-        sel[1],sel[2] = view:get_controller():get_selected_index()
-        sel[2]        = sel[2] + model.front_page_index  - 1
-        -- shrink the previous
-        if msecs <= 200  then
-            local progress    =  msecs/200
-			  dontswap = true		
-            --cannot assume that image will have made it to its full expanded size
-            local   pos_delta = {view.prev_pos[1] - view.prev_target_pos[1],
-                                 view.prev_pos[2] - view.prev_target_pos[2]}
-            local scale_delta = {view.prev_scale[1] - 1, view.prev_scale[2] - 1}
-
-            view.previous.x     =  view.prev_pos[1]   - progress*pos_delta[1]
-            view.previous.y     =  view.prev_pos[2]   - progress*pos_delta[2]
-            view.previous.scale = 
-            {
-                view.prev_scale[1] - progress*scale_delta[1],
-                view.prev_scale[2] - progress*scale_delta[2]
-            }
-        -- grow the next one
-        elseif msecs > 200 and msecs <= 400 then
- 
-            --in case on_new_frame didn't get called on the 200th msec
-            view.previous.position = 
-            {
-                view.prev_target_pos[1],
-                view.prev_target_pos[2]
-            }
-            view.previous.scale = { 1 , 1 }
-            prev_i = { sel[1] , sel[2] }
-
-            local progress = (msecs - 200)/200
-
-            view.current.x = PIC_W * (sel[2]-1) -  (.025*PIC_W)*progress
-            view.current.y = PIC_H * (sel[1]-1) +  10 - progress*15
-	         view.current.scale = {1 + progress*.05, 1 + progress * .05}
-				
-            view.backdrop.scale = {.845 + .1*progress,.845 + .1*progress}
-            view.backdrop.opacity = 255--*progress
-            view.backdrop.position={PIC_W * (sel[2]-1) -  (.025*PIC_W)-22*progress,
-                         PIC_H * (sel[1]-1)-22*progress}
-           --dontswap = false
-            --screen.on_key_down = model.keep_keys
-
-        elseif msecs > 400  and msecs <= 800 then
-            --in case on_new_frame didn't get called on the 400th msec
-            view.current.position = {PIC_W * (sel[2]-1) -  (.025*PIC_W),
-                                     PIC_H * (sel[1]-1)-5}
-            view.current.scale    = {1.05,1.05}
-
-            view.backdrop.scale = {.945,.945}
-            view.backdrop.position = {
-                PIC_W * (sel[2]-1) - 22 - (.025*PIC_W),
-                PIC_H * (sel[1]-1) - 22
-            }
-        -- bring the bar up a little bit
-        elseif msecs > 800  and msecs <= 900 then
-            local progress = (msecs - 800)/100
-            view.bottom_bar.opacity = 255
-            view.bottom_bar.y = PIC_H - progress*70
---[[
-        elseif msecs > 900 and msecs <= 2900 then
-            view.bottom_bar.y = PIC_H - 70
-
-        -- bring the bar up a little more
-        elseif msecs > 2900 and msecs <= 3000 then
-            local progress = (msecs - 2900)/100
-            view.bottom_bar.y = PIC_H - progress*140
---]]
-        end
-    end
-
-    function sel_timeline.on_completed()
-        --view.bottom_bar.y = PIC_H - 140
-        view.bottom_bar.y = PIC_H - 70
-    end
---]=]
 
 
     function view:initialize()
@@ -305,25 +199,17 @@ reset_keys()
     local prev_scale = {1,1}
     function view:shift_group(dir)
 
-        left_edge:complete_animation()
-        right_edge:complete_animation()
 
         local new_x
         if model.front_page_index == 1 then
             new_x = 0--10
-            left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 0}
-            right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
         elseif model.front_page_index == math.ceil(#sources / 
                      NUM_ROWS) - (NUM_VIS_COLS-1)               then
             new_x = -1*(model.front_page_index-1) * PIC_W + 
                        (screen.width - NUM_VIS_COLS*PIC_W)-- - 10
-            left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
-            right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 0}
         else
             new_x = -1*(model.front_page_index-1) * PIC_W + 
                        (screen.width - NUM_VIS_COLS*PIC_W)/2 
-            left_edge:animate{ duration = CHANGE_VIEW_TIME, opacity = 255}
-            right_edge:animate{duration = CHANGE_VIEW_TIME, opacity = 255}
         end
         model.album_group:complete_animation()
 
@@ -341,7 +227,7 @@ reset_keys()
         
     end
  local fucking_stupid = true
-
+view.timer:start()
     function view:update()
         local controller  = view:get_controller()
         local comp        = model:get_active_component()
@@ -353,12 +239,12 @@ reset_keys()
         if comp == Components.FRONT_PAGE  then
 
             --an if that is entered every time the view switches back
-            if model.album_group:find_child("bottom_bar") == nil then
-                print("adding bottom bar")
+   --         if model.album_group:find_child("bottom_bar") == nil then
+   --             print("adding bottom bar")
                 --model.album_group:add(view.backdrop)
                 --model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
-                view.timer:start()
-            end
+    --            view.timer:start()
+    --        end
 --stupid edge case for the very beginning
 if fucking_stupid then
 	fucking_stupid = false 

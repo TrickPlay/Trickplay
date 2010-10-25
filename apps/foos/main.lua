@@ -56,10 +56,26 @@ function app:on_closing()
 	settings.user_ids = user_ids
 end
 
+local lock = { anim = true, timer = true}
+single_press = Timer{interval=100}
+function single_press:on_timer()
+	if lock.timer and lock.anim then
+		self:stop()
+		screen.on_key_down = model.keep_keys	
+	end
+	lock.timer = true
+end
+
+
 --delegates the key press to the appropriate on_key_down() 
 --function in the active component
 function screen:on_key_down(k)
-    screen.on_key_down = function() end
+    screen.on_key_down = function()
+		lock.timer = false
+	end
+	lock.anim = false
+	lock.timer = true
+	single_press:start()
     assert(model:get_active_controller())
     model:get_active_controller():on_key_down(k)
 end
@@ -68,8 +84,9 @@ end
 model.keep_keys = screen.on_key_down
 
 function reset_keys()
+	lock.anim = true
    -- print("reseting keys",model.keep_keys)
-    screen.on_key_down = model.keep_keys
+   -- screen.on_key_down = model.keep_keys
 end
 model:start_app(Components.FRONT_PAGE)
 
