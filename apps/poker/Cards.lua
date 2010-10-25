@@ -31,8 +31,15 @@ end
 local card_back_image = Image{src = "assets/Card_Reverse.png", opacity = 0}
 screen:add(card_back_image)
 -- Get a group with the image of a card's front/back
+local card_front_images = {}
 function getCardGroup(card, args, face)
-   local cardImage = Image{ src="assets/cards/"..getCardImageName(card)..".png", name="front" }
+   if not card_front_images[getCardImageName(card)] then
+      card_front_images[getCardImageName(card)] = 
+         Image{ src="assets/cards/"..getCardImageName(card)..".png", name="front", opacity=0}
+      screen:add(card_front_images[getCardImageName(card)])
+   end
+
+   local cardImage = Clone{source=card_front_images[getCardImageName(card)], name="front"}
    local cardBack = Clone{source = card_back_image, name="back" }
    local cardGroup = Group{ children={cardBack,cardImage}, name="card",extra={face = true}, anchor_point = {cardImage.w/2, cardImage.h/2} }
 

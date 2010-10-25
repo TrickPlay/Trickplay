@@ -53,7 +53,9 @@ chipStack = Class(function(self, chipValue, ...)
         for i=1, self.size do
             self.chips[i].image.y = y
             y = y - dy
-            self.group:add(self.chips[i])
+            --TODO: previously was (self.chips[i]) check to make sure this
+            -- didn't break anything
+            self.group:add(self.chips[i].image)
         end
     end
 
@@ -238,46 +240,3 @@ chipCollection = Class(function(self, ...)
     self:initialize()
 
 end)
-
---[[
-col = chipCollection()
-
-local stack1 = chipStack(1)
-local stack5 = chipStack(5)
-local stack10 = chipStack(10)
-local stack100 = chipStack(100)
-
-col:add(stack1)
-col:add(stack5)
-col:add(stack10)
-col:add(stack100)
-
-col:set(247)
-col:convertUp()
-col:arrange(55, 5)
-col.group.scale={3, 3}]]
-
-
---[[
--- First, sort the stacks
--- FOR SMARTER REMOVE
-self:sort()
-local biggest = 1
-local v = self:value()
-
--- While there are more chips to add...
-while v >= value do
-
---        print("Next biggest chip:", biggest, self.stacks[biggest].chipValue)
-
--- Find the biggest chip we can add
-while v - self.stacks[biggest].chipValue < value do
-biggest = biggest + 1
-if biggest > #self.stacks then return end
-end
-
-self.stacks[biggest]:removeChip()
-v = v - self.stacks[biggest].chipValue
-
-end
-]]
