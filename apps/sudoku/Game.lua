@@ -798,9 +798,9 @@ print("there",g.grid_of_groups[r][c]:
 
 		--if there was an existing pen mark on the tile
 		if guesses[r][c].pen ~= 0 then
-			if guesses[r][c].num == 0 then
+			--if guesses[r][c].num == 0 then
 				empty_spaces = empty_spaces + 1
-			end
+			--end
 
 			-- remove the "penned" guess, add it to the undo list
 			o,n = g:rem_from_err_list(r, c, guesses[r][c].pen)	
