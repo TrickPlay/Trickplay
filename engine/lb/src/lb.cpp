@@ -280,16 +280,16 @@ int lb_index(lua_State*L)
     lua_rawget(L,-2);               // get the value for that key from the mt
     if (!lua_isnil(L,-1))           // if it is not nil, return it
     {
-        lua_replace(L,-2);          // replace mt with value
+        lua_remove(L,-2);          // replace mt with value
         return LSG_END(1);
     }
     lua_pop(L,1);                   // pop nil
-    lua_pushstring(L,"__getters__");// push "_getters_"
+    lua_pushliteral(L,"__getters__");// push "_getters_"
     lua_rawget(L,-2);               // get the getters table from the mt
-    lua_replace(L,-2);              // replace mt with getters table
+    lua_remove(L,-2);              // replace mt with getters table
     lua_pushvalue(L,2);             // push the key
     lua_rawget(L,-2);               // get the value for that key from the getters table
-    lua_replace(L,-2);              // get rid of the getters table
+    lua_remove(L,-2);              // get rid of the getters table
     if(!lua_isnil(L,-1))
     {
         lua_pushvalue(L,1);         // push the user data
@@ -323,9 +323,9 @@ int lb_newindex(lua_State*L)
     
     if(!lua_getmetatable(L,1))      // get the mt
         return LSG_END(0);
-    lua_pushstring(L,"__setters__");// push "_setters_"
+    lua_pushliteral(L,"__setters__");// push "_setters_"
     lua_rawget(L,-2);               // get the setters table from the mt
-    lua_replace(L,-2);              // get rid of the metatable
+    lua_remove(L,-2);              // get rid of the metatable
 
     if (lua_isnil(L,-1))
     {
@@ -335,7 +335,7 @@ int lb_newindex(lua_State*L)
 
     lua_pushvalue(L,2);             // push the original key
     lua_rawget(L,-2);               // get the setter function for this key
-    lua_replace(L,-2);              // get rid of the setters table
+    lua_remove(L,-2);              // get rid of the setters table
     if(lua_isnil(L,-1))
     {
         lua_pop(L,1);               // if the setter function is not found, look in the extra table
