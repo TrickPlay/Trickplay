@@ -45,10 +45,6 @@ front_page_view:initialize()
 
 local slide_show_view = SlideshowView(model)
 slide_show_view:initialize()
---[[
-local source_manager_view = SourceManagerView(model)
-source_manager_view:initialize()
---]]
 --cache all of the current searches
 function app:on_closing()
 	settings.searches = searches

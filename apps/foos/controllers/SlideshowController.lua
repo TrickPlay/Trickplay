@@ -44,74 +44,6 @@ SlideshowController = Class(Controller, function(self, view, ...)
 		end
     end
 
---[=[
-    local NavCallbacks =
-    {
-        --CLOSE THE NAV MENU
-        function()
-            menu_is_visible = false
-            view:nav_out_focus()
-        end,
-        --GO BACK TO THE FRONT PAGE
-        function()
-            if view.timer_is_running then
-                view.timer:stop()
-                view.timer_it_running = false
-            end
-            if view.off_screen_list[1] ~= nil then
-                view.off_screen_list[1]:complete_animation()
-            end
-            if view.on_screen_list[1] ~= nil then
-                view.on_screen_list[1]:complete_animation()
-            end
-            collectgarbage()
-
-            for i = 1,#view.on_screen_list do
-                view.on_screen_list[i]:unparent()
-            end
-            for i = 1,#view.off_screen_list do
-                view.off_screen_list[i]:unparent()
-            end
-            view.on_screen_list  = {}
-            view.off_screen_list = {}
- 
-            photo_index =  0
-            view.prev_i = -1
-
-            menu_is_visible = false
-            view:nav_out_focus()
-
-            self:get_model():set_active_component(Components.FRONT_PAGE)
-            self:get_model():notify()
-
-        end,
---[[
-        --DELETE THIS ALBUM & GO BACK TO THE FRONT PAGE
-        function()
-        end,
---]]
-        --TOGGLE THE SLIDESHOW & CLOSE THE NAV MENU
-
-        function()
-            view:toggle_timer()
-            menu_is_visible = false
-            view:nav_out_focus()
-        end,
-
-        --SWITCH SLIDE SHOW STYLE
-        function()
-            style_index = style_index%(#view.styles) +1
-            print(style_index)
-            view.set_ui[ view.styles[style_index] ]()
-            reset_keys()  
-            menu_is_visible = false
-            view:nav_out_focus()
-
-        end,
-
-    }
---]=]
-
     local NavCallbacks =
     {
         --CLOSE THE NAV MENU
@@ -208,10 +140,10 @@ reset_keys()
     end
 
     function self:move_selector(dir)
-        print("\n\nKey press when\t\t query index:",
-               model.fp_1D_index,"photo index:",photo_index,"on screen:",
-               #view.on_screen_list,"off_screen:",#view.off_screen_list,
-              "\n")
+  --      print("\n\nKey press when\t\t query index:",
+  --             model.fp_1D_index,"photo index:",photo_index,"on screen:",
+  --             #view.on_screen_list,"off_screen:",#view.off_screen_list,
+  --            "\n")
         photo_index = photo_index + dir[1]
         if photo_index < 0 then
            photo_index = 0
@@ -222,35 +154,7 @@ reset_keys()
                 menu_index = menu_index - dir[2]
             end
             view:nav_move(menu_index)
---[[
-            menu_index = menu_index + dir[2]
-            if menu_index < 1 or menu_index > #view.nav_items then
-                menu_index = menu_index - dir[2]
-            end
---]]
         end
---[[
-        if #view.on_screen_list > 5 then
-            print("removing from on_screen list")
-            
-            if view.on_screen_list[#view.on_screen_list] ~= nil and
-               view.on_screen_list[#view.on_screen_list].parent ~= nil
-                                                                 then
-                view.on_screen_list[#view.on_screen_list]:unparent()
-            end
-
-            view.on_screen_list[#view.on_screen_list]=nil
-        end
-        if #view.off_screen_list > 5 then
-            print("removing from off_screen list")
-            if view.off_screen_list[#view.off_screen_list] ~= nil and
-               view.off_screen_list[#view.off_screen_list].parent ~= nil
-                                                                 then
-                view.off_screen_list[#view.off_screen_list]:unparent()
-            end
-            view.off_screen_list[#view.off_screen_list]=nil
-        end
---]]
 
         --moving foward through the photos
         if dir == Directions.RIGHT then
