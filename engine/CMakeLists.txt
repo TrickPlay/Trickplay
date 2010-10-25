@@ -389,7 +389,6 @@ list( APPEND
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/app.cpp    
     ${ENGINE_SRC}/source/network.cpp
-    ${ENGINE_SRC}/source/storage.cpp
     ${ENGINE_SRC}/source/console.cpp
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
