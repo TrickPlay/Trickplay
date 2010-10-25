@@ -304,7 +304,7 @@ MenuView = Class(View, function(view, model, ...)
     end
 
     function view:change_layout(current_layout, dir)
-        if not game:is_new_game() then
+        if not game:is_new_game() and not game:game_won() then
             router:set_active_component(Components.NEW_MAP_DIALOG)
             router:notify()
         else
