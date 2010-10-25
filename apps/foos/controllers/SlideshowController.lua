@@ -20,14 +20,11 @@ SlideshowController = Class(Controller, function(self, view, ...)
 
     function self:Prep_Slideshow(i)
         photo_index = i
-view.prev_i = i
---[[
-        view.queryText.text = string.gsub(
-            adapters[#adapters - model.fp_1D_index + 1][1].required_inputs.query,"%%20"," ")
-        view.logo.src  = adapters[#adapters - model.fp_1D_index + 1].logoUrl
---]]
-        --view.nav_group:add(view.logo)
-        view.set_ui[ view.styles[style_index] ]()
+		view.prev_i = i
+        view.background.opacity  = 255
+        view.mosaic_background.opacity  = 0
+
+--        view.set_ui[ view.styles[style_index] ]()
 
         menu_index = 1
         menu_is_visible = false
@@ -116,15 +113,17 @@ view.prev_i = i
     {
         --CLOSE THE NAV MENU
         function()
-            if view.set_ui[ view.styles[1] ]() then
+            if style_index ~= 1 and view.set_ui[ view.styles[1] ]() then
     	        view:pick(1,style_index)
 	            style_index = 1
+			else reset_keys()
             end
         end,
         function()
-            if view.set_ui[ view.styles[2] ]() then
+            if style_index ~= 2 and view.set_ui[ view.styles[2] ]() then
     	        view:pick(2,style_index)
 	            style_index = 2
+			else reset_keys()
 			end
         end,
         function()

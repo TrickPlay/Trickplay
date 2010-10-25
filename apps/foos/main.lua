@@ -68,7 +68,7 @@ end
 model.keep_keys = screen.on_key_down
 
 function reset_keys()
-    print("reseting keys",model.keep_keys)
+   -- print("reseting keys",model.keep_keys)
     screen.on_key_down = model.keep_keys
 end
 model:start_app(Components.FRONT_PAGE)

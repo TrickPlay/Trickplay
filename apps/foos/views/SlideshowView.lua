@@ -12,8 +12,8 @@ SlideshowView = Class(View, function(view, model, ...)
     }
     local layered_timeline = nil
 
-    local background  = Image {src = "assets/background.jpg"  }
-	local mosaic_background = Image 
+    view.background  = Image {src = "assets/background.jpg"  }
+	view.mosaic_background = Image 
 	{
 		src = "assets/tiled-slideshow-bkgd.jpg" ,
 		size = {screen.w,screen.h},opacity=255
@@ -56,13 +56,13 @@ SlideshowView = Class(View, function(view, model, ...)
 	local license_box = Group{name="license box",position={0,1040}}
 	license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
 
-local pause = Image{src = "assets/pause.png",x=screen.w/2,y=screen.h/2,opacity = 0}
-pause.anchor_point = {pause.w/2,pause.h/2}
-local play = Image{src = "assets/play.png",x=screen.w/2,y=screen.h/2,opacity = 0}
-play.anchor_point = {play.w/2,play.h/2}
+	local pause = Image{src = "assets/pause.png",x=screen.w/2,y=screen.h/2,opacity = 0}
+	pause.anchor_point = {pause.w/2,pause.h/2}
+	local play = Image{src = "assets/play.png",x=screen.w/2,y=screen.h/2,opacity = 0}
+	play.anchor_point = {play.w/2,play.h/2}
 
     view.ui:add(
-		overlay_image, background, postit, caption, mosaic_background,
+		overlay_image, view.background, postit, caption, view.mosaic_background,
 		license_box, pause,play
 	)
 
@@ -438,11 +438,12 @@ play.anchor_point = {play.w/2,play.h/2}
 					reset_keys()
 --]]
                 end
-            background.opacity  = 255
-			mosaic_background.opacity = 0
+            view.background.opacity  = 255
+			view.mosaic_background.opacity = 0
             --view.logo.opacity   = 255
 
             for i = #view.on_screen_list,1,-1 do
+print("why1")
                 local pic = view.on_screen_list[i]:find_child("slide")
                 if pic ~= nil then
 					pic.opacity      =  255
@@ -464,10 +465,12 @@ play.anchor_point = {play.w/2,play.h/2}
 					--view.on_screen_list[i]:lower_to_bottom()
 					--background:lower_to_bottom()
                 else
-                    error("shit")
+                 --   error("shit")
                 end
             end
+print("why0")
             for i = 1,#view.off_screen_list do
+print("why2")
                 local pic = view.off_screen_list[i]:find_child("slide")
                 if pic ~= nil then
                     pic.opacity      =  255
@@ -491,8 +494,8 @@ play.anchor_point = {play.w/2,play.h/2}
         end,
 
         ["FULLSCREEN"] = function()
-            background.opacity  = 0
-			mosaic_background.opacity = 0
+            view.background.opacity  = 0
+			view.mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -534,11 +537,10 @@ play.anchor_point = {play.w/2,play.h/2}
         ["LAYERED"]    = function()
 if layered_timeline ~= nil then
 					reset_keys()
-
 					return false
 end
-            background.opacity  = 255
-			mosaic_background.opacity = 0
+            --background.opacity  = 255
+			view.mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -573,9 +575,9 @@ end
 			return true
         end,
         ["MOSAIC"] = function()
-            background.opacity  = 0
-			mosaic_background.opacity = 255
-			mosaic_background:lower_to_bottom()
+            view.background.opacity  = 0
+			view.mosaic_background.opacity = 255
+			view.mosaic_background:lower_to_bottom()
 			if layered_timeline ~= nil then
 				layered_timeline:stop()
                 layered_timeline:on_completed()
@@ -1571,7 +1573,7 @@ mosaic_timeline:start()
 		local license = view.license_on[#view.license_on]
         view.ui:add(group)
         group:lower_to_bottom()
-        background:lower_to_bottom()
+        view.background:lower_to_bottom()
 
         local style_i = view:get_controller():get_style_index()
         local clone = Group{name="loading"}
@@ -1754,7 +1756,7 @@ print("toggle on")
 			}
 			function t.on_new_frame(t,msecs,p)
 				postit_text[curr+1].opacity = 255*(p)
-				postit_text[old+1].opacity = 255*(1-p)
+				postit_text[old+1].opacity  = 255*(1-p)
 
 			end
 			function t.on_completed()

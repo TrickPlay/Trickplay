@@ -146,9 +146,7 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 				"&format=json&nojsoncallback=1"
 		--if a parameter indicates the page requested
 		local page = page_num
-		if i ~= nil then
-			page = i
-		end
+		if i ~= nil then page = i end
 		--checks if a request for this page has already been sent
 		local already_requested = false
 		for i = 1, #outbound_requests do
@@ -157,7 +155,7 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 			end
 		end
 		if already_requested then return end
-print("requesting",page)
+		print("requesting",page)
 
 		outbound_requests[#outbound_requests + 1] = page
 		local request  = URLRequest
@@ -228,7 +226,7 @@ print("here")
 	end
 	function adapter:get_photos_at(i,thumb)
 		local lic_tit, lic_auth
-		i=i+1
+	--	i=i+1
 		if  adapter.photo_list[i] == nil then
 			self:get_interesting_photos(math.ceil(i/50))
 
@@ -247,25 +245,17 @@ print("here")
 			lic_tit = "Acquiring Licenses..."
 			lic_auth = ""
 		end
-
+--[[
 		if thumb then
 			return adapter.photo_list[i].url_m,  lic_tit, lic_auth
 		else
 
---dumptable(adapter.photo_list[i])
 local lg_img = adapter.photo_list[i].url_m
---[[
-if adapter.photo_list[i].height_o == nil or adapter.photo_list[i].width_o == nil then 
-lg_img = adapter.photo_list[i].url_m
-elseif tonumber(adapter.photo_list[i].height_o)  > 1024 or tonumber(adapter.photo_list[i].width_o) > 1024 then
-lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_b.%2" , 1 )
-else
-lg_img = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_o.%2" , 1 )
 
-end
---]]
 			return lg_img, lic_tit, lic_auth
 		end
+--]]
+		return adapter.photo_list[i].url_m,  lic_tit, lic_auth
 	end
 end)
 
