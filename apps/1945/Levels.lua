@@ -62,7 +62,7 @@ levels =
 		bg             = water,
 		enemy_list     =
 		{
---[[
+---[[
 			{y =    0, item = lvl1txt,                     params = {         }},
 			{y =   80, item = formations.row_fly_in_left,  params = {  50, 200}},
 			{y =  300, item = formations.row_fly_in_right, params = {         }},
