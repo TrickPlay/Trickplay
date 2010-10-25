@@ -269,7 +269,6 @@ VertButtonCarousel = Class(function(
 	function menu:press_down()
 		local prev_i = index
 		local next_i = (index+1-1)%(#menu.items) + 1
-print(prev_i,next_i)
 		index = next_i
 		local prev_old_x = buttons[1].w/2--+menu.focus.w/2
 		local prev_old_y = arrows[1].h+buttons[1].h/2--+menu.focus.h/2
