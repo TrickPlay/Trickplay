@@ -149,9 +149,9 @@ function(pres, ctrl)
    -- called when sb_qty and bb_qty updated
    function pres:update_blinds()
       if not info_grp or info_grp.opacity==0 then
-         info_bb = Image{src=model.bbchip.src}
+         info_bb = Clone{source=model.bbchip}
          info_bb_t = Text{position={60,5}, text=tostring(ctrl:get_bb_qty()), color="FFFFFF", font=PLAYER_NAME_FONT}
-         info_sb = Image{src=model.sbchip.src,y=30}
+         info_sb = Clone{source=model.sbchip,y=30}
          info_sb_t = Text{position={60,35}, text=tostring(ctrl:get_sb_qty()), color="FFFFFF", font=PLAYER_NAME_FONT}
          info_grp = Group{children={info_bb,info_sb,info_bb_t,info_sb_t},position={15,1000}}
          screen:add(info_grp)
