@@ -1049,7 +1049,6 @@ function game_on_key_down(k)
 			else
 				local r,c
 				r,c = right_list[2]:press_enter()
-				print(r,c)
 				if menu_open and ind.r ==r and ind.c == c then
 					local g = game:get_guesses(ind.r,ind.c)
 					for i = 1,9 do
