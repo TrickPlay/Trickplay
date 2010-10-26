@@ -79,7 +79,7 @@ function(ctrl, router, ...)
     end
 
     function ctrl:reset_game(number)
-        print("game resetting")
+        --print("game resetting")
         if not number then 
             router:set_active_component(Components.GAME)
         end
@@ -111,7 +111,7 @@ function(ctrl, router, ...)
     end
 
     function ctrl:shuffle_game()
-        print("game re-shuffling")
+        --print("game re-shuffling")
         state:shuffle()
         state:set_tile_tables()
         grid = state:get_grid()
@@ -188,10 +188,10 @@ function(ctrl, router, ...)
             counter = counter + 1
         end
         if counter <= 0 then
-            print("game over")
+            --print("game over")
             state:check_for_win()
         end
-        print("pieces left =",counter)
+        --print("pieces left =",counter)
     end
 
     function ctrl:back_pressed()
@@ -217,11 +217,9 @@ function(ctrl, router, ...)
 
         if 0 ~= dir[1] and top_grid[x+dir[1]] and top_grid[x+dir[1]][y][z] then
             x = x + dir[1]
-            --print("x1",x)
             if top_grid[x-dir[1]][y][z] == top_grid[x][y][z]
             and top_grid[x+dir[1]] and top_grid[x+dir[1]][y][z] then
                 x = x + dir[1]
-            --print("x2",x)
             end
         elseif 0 ~= dir[2] and top_grid[x][y+dir[2]] and top_grid[x][y+dir[2]][z] then
             y = y + dir[2]
@@ -243,18 +241,8 @@ function(ctrl, router, ...)
             local dist = nil
             --arbitrarily high value
             local closest_dist = 10000
-            --print("selector")
-            --dumptable(selector)
             for _,tile in ipairs(top_tiles) do
-                --dumptable(tile)
                 -- check against comparing tiles in the wrong direction
-                --[[
-                if tile.position[1] == 15 and tile.position[2] == 7 then
-                    dumptable(tile.position)
-                    print("x = ", x)
-                    print("y = ", y)
-                end
-                --]]
                 if -1 == dir[1] and tile.position[1] >= x then
                     -- dont compare
                 elseif 1 == dir[1] and tile.position[1] <= x then
@@ -272,8 +260,6 @@ function(ctrl, router, ...)
                         closest_dist = dist
                         new_tile = tile
                     end
-                --    print("new_tile")
-              --      dumptable(tile.position)
                 end
             end
         end
