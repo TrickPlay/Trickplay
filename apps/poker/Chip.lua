@@ -12,7 +12,6 @@ function REMOVE_ALL_DA_CHIPS()
             if chip.group.parent then chip.group:unparent() end
             chip.group = nil
         end
-        chip = nil
     end
 
     ALL_DA_CHIPS = {}
@@ -23,8 +22,10 @@ function CHIP_RECURSIVE_DEL(container)
         container:unparent()
         return
     end
-    for i = #container.children,1,-1 do
-        CHIP_RECURSIVE_DEL(container.children[i])
+    if container.children then
+        for i = #container.children,1,-1 do
+            CHIP_RECURSIVE_DEL(container.children[i])
+        end
     end
 end
 

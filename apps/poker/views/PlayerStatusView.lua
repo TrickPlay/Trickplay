@@ -1,3 +1,28 @@
+ALL_DA_PLAYER_STATS = {}
+function REMOVE_ALL_DA_PLAYER_STATS()
+    for i = #ALL_DA_PLAYER_STATS,1,-1 do
+        local stat = ALL_DA_PLAYER_STATS[i]
+        if stat.group then
+            if stat.group.parent then stat.group:unparent() end
+            stat.group = nil
+        end
+    end
+
+    ALL_DA_PLAYER_STATS = {}
+end
+function STAT_RECURSIVE_DEL(container)
+    if container.name == "player_status_group" then
+        container:unparent()
+        return
+    end
+    if container.children then
+        for i = #container.children,1,-1 do
+            CHIP_RECURSIVE_DEL(container.children[i])
+        end
+    end
+end
+
+
 PlayerStatusView = Class(View,
 function(self, model, args, player,...)
    
@@ -20,7 +45,12 @@ function(self, model, args, player,...)
    self.bottom_group = Group{y=60}
    self.bottom_group:add(self.bottom)
    
-   self.group = Group{ children={self.bottom_group, self.top}, opacity=0, position = MPBL[player.table_position] }
+   self.group = Group{
+       children = {self.bottom_group, self.top},
+       opacity = 0,
+       position = MPBL[player.table_position],
+       name = "player_status_group"
+   }
    
    -- Blinking red focus
    self.focus = Group{ children = { AssetLoader:getImage("BubbleRed",{}) }, opacity = 0 }
@@ -116,5 +146,7 @@ function(self, model, args, player,...)
       self.group:animate{opacity = 240, duration=300}
       --self.show = 1
    end
+
+   table.insert(ALL_DA_PLAYER_STATS, self)
    
 end)

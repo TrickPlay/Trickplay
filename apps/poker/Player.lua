@@ -422,13 +422,7 @@ Player = Class(function(player, args, ...)
    end
 
    player.status = PlayerStatusView(model, nil, player)
-   --player.status:initialize()
    player.status:display()
    assert(player.status)
    
-   --function player:get_move(state)
-   --   local call_bet = state:get_call_bet()
-   --   return false, call_bet
-   --end
-
 end)
