@@ -448,10 +448,8 @@ local single_press = Timer{interval=100}
 function single_press:on_timer()
 	if lock then
 		self:stop()
-print("here")
 		screen.on_key_down = stored_keys	
 	end
-print("there")
 	lock = true
 end
 function GameControl.make_control()

@@ -29,8 +29,8 @@ end
 function SavePlayField (board,winspots,number_of_wins,gamenumber)
 	local number_of_wins =tonumber(number_of_wins)
 	local miniboard_background = ui:createFieldSm()
-	local MiniBoard	= Group()
-	local GameSavePos = {}
+	local MiniBoard    = Group()
+	local GameSavePos  = {}
 	local GameSavePosX = { {300,120},{300,420},{300,720},{60,120},{60,420},{60,720} }
 	local GameSavePosO = { {1440,120},{1440,420},{1440,720},{1680,120},{1680,420},{1680,720} }
 	MiniBoard:add(ui:createFieldSm{x=0,y=0})
@@ -107,9 +107,9 @@ end
 
 function calcPosition(squareWidth,pieceWidth,col,row)
 	local margins = ( squareWidth - pieceWidth ) / 2
-	local xpos = margins + ((col-1)*squareWidth)
-	local ypos = margins + ((row-1)*squareWidth)
-	return {xpos,ypos}
+	local xpos    = margins + ((col-1)*squareWidth)
+	local ypos    = margins + ((row-1)*squareWidth)
+	return { xpos, ypos }
 end
 
 --timer=Timer() timer.interval=5 function timer.on_timer(timer)	EnterButtonPressed() end timer:start()
