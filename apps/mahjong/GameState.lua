@@ -98,7 +98,7 @@ GameState = Class(nil,function(state, ctrl)
 
 
     function state:initialize()
-        print("state initializing")
+        --print("state initializing")
         new_game = true
         game_won = false
         
