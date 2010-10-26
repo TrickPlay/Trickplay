@@ -9,7 +9,7 @@ local ControlConstants = {
     rev_magic_3 =  { [2]=1, [7]=2, [6]=3, [9]=4, [5]=5, [1]=6, [4]=7, [3]=8, [8]=9 },
     player_icon = { "X", "O"},
     play = {invalid = 1, win = 2, no = 3, tie = 4},
-    speeds = {500, 400, 300, 300},
+    speeds = {400, 300, 250, 200},
     win_rounds = 6
 }
 
