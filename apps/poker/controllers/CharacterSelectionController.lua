@@ -84,7 +84,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          [HELP] = function()
             print("starting tutorial")
             model:set_active_component(Components.TUTORIAL)
-            self:get_model():notify()
+            model:notify()
          end
       },
    }
@@ -118,6 +118,22 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
       return num
       
+   end
+
+   -- called after a character is selected to rotate to the next available
+   --character
+   function self:new_position()
+
+      if selected == 2 and subselection == 1 then
+          selected = 1
+      elseif selected == 1 then
+         if subselection < 4 then
+            subselection = subselection + 1
+         else
+            subselection = 5
+            selected = 2
+         end
+      end
    end
 
    local function setCharacterSeat()
@@ -155,7 +171,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       if(self.playerCounter >= 2) then
          view.items[2][3].opacity = 255
       end
-      self:get_model():notify()
+      model:notify()
+      self:new_position()
+      view:update()
    end
 
    local CharacterSelectionKeyTable = {
@@ -226,7 +244,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             end
          end
       end
-      self:get_model():notify()
+      model:notify()
    end
 
    function self:reset()
