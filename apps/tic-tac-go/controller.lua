@@ -442,7 +442,18 @@ function GameControl:make_state_machine()
 
     return state
 end
-
+local lock = true
+local stored_keys = nil
+local single_press = Timer{interval=100}
+function single_press:on_timer()
+	if lock then
+		self:stop()
+print("here")
+		screen.on_key_down = stored_keys	
+	end
+print("there")
+	lock = true
+end
 function GameControl.make_control()
     self = GameControl
 
@@ -457,6 +468,10 @@ function GameControl.make_control()
     self.state.set(ControlConstants.state.clear)
 
     screen.on_key_down = function(screen, keyval)
+	    screen.on_key_down = function()
+			lock = false
+		end
+		single_press:start()
         local key_actions = {
 
             [keys.Return] = function()
@@ -484,6 +499,7 @@ function GameControl.make_control()
         end
     end
 end
-
 GameControl.make_control()
+stored_keys = screen.on_key_down
+
 GameControl:show_splash()
