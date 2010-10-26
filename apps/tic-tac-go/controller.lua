@@ -1,8 +1,9 @@
 
+local lock = {timer=true,anim=true}
 GameControl = {}
 local dim = Rectangle{w=screen.w,h=screen.h,color="000000",opacity=0}
 screen:add(dim)
-
+local win_anim = nil
 -- defaults (these should probably never change)
 
 local ControlConstants = {
@@ -34,13 +35,20 @@ splash:add(splashImg,startbutton)
 screen:add(splash)
 
 function GameControl:show_splash()
+		if win_anim then
+			win_anim:stop()
+			win_anim:on_completed()
+			win_anim = nil
+		end
+	--	lock.anim = false
 		splash:raise_to_top()
 		splash:animate({ 
 			duration = 700, 
-			y = 1080, 
+			y = screen.h, 
 			mode = "EASE_IN_OUT_SINE", 
 			on_completed = function() 
 				dim.opacity=0 
+				lock.anim = true
 			end 
 		})
 		local child = screen:find_child("end session text")
@@ -50,17 +58,21 @@ end
 
 
 function GameControl:hide_splash()
+	splash:complete_animation()
+--lock.anim = false
 	local t = Timeline
 	{
 		duration = 1000,
 		direction = "FORWARD",
 		loop = false
 	}
+	dim.opacity = 0
 	local button_old_x = startbutton.x
 	local button_old_y = startbutton.y
 	local button_new_x = startbutton.x+30
 	local button_new_y = startbutton.y+20
 	function t.on_new_frame(t,msecs)
+	dim.opacity = 0
 		if msecs <= 150 then
 			local p = (msecs)/(150)
 			startbutton.x = button_old_x + (button_new_x - button_old_x)*p
@@ -80,8 +92,9 @@ function GameControl:hide_splash()
 		splash.y = 0
 		startbutton.x = button_old_x
 		startbutton.y = button_old_y
+		lock.anim = true
 	end
-t:start()
+	t:start()
 
 
 end
@@ -186,13 +199,13 @@ function GameControl:place_player_at_index(player, index)
                 
                 --winner:animate{duration=700,y=screen.h/2, mode = "EASE_IN_OUT_SINE"}
                 --winnertext:animate{duration=700,y=screen.h/2 + 240, mode = "EASE_IN_OUT_SINE"}
-				local t = Timeline
+				win_anim = Timeline
 				{
 					duration  = 1300,
 					direction = "FORWARD",
 					loop      = false
 				}
-				function t.on_new_frame(t,msecs,p)
+				function win_anim.on_new_frame(t,msecs,p)
 					dim.opacity = p*150
 					if msecs <= 200 then
 						PlayField.opacity = msecs/200*(255*.7-255) + 255
@@ -208,12 +221,16 @@ function GameControl:place_player_at_index(player, index)
 						winnertext.opacity = 255*p
 					end
 				end
-				function t.on_completed()
+				function win_anim.on_completed()
+					win_anim=false
+					winner.y = screen.h/2
+					winnertext.opacity = 255
+					dim.opacity = 150
 				end
 				dim:raise_to_top()
 				winner:raise_to_top()
 				winnertext:raise_to_top()
-                t:start()
+                win_anim:start()
 				--ClearPlayField()
 				return ControlConstants.state.clear
             else
@@ -458,15 +475,14 @@ function GameControl:make_state_machine()
 
     return state
 end
-local lock = true
 local stored_keys = nil
 local single_press = Timer{interval=100}
 function single_press:on_timer()
-	if lock then
+	if lock.timer and lock.anim then
 		self:stop()
 		screen.on_key_down = stored_keys	
 	end
-	lock = true
+	lock.timer = true
 end
 function GameControl.make_control()
     self = GameControl
@@ -483,8 +499,10 @@ function GameControl.make_control()
 
     screen.on_key_down = function(screen, keyval)
 	    screen.on_key_down = function()
-			lock = false
+			print("1")
+			lock.timer = false
 		end
+		print("2")
 		single_press:start()
         local key_actions = {
 
