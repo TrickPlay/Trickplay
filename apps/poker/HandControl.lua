@@ -189,7 +189,16 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl.showdown(ctrl)
       local winners, poker_hand = state:showdown()
       pres:showdown(winners, poker_hand)
-      enable_event_listener(KbdEvent())
+      ---[[
+      if game:game_won() then
+         enable_event_listener(
+            TimerEvent{interval=800}
+         )
+      else
+         enable_event_listener(KbdEvent())
+      end
+      --]]enable_event_listener(KbdEvent())
+      
       return true
    end
 

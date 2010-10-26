@@ -48,29 +48,6 @@ function(ctrl, model, ...)
       end
    }
 
-    --[[
-   local help_game_pipeline = {
-      function(ctrl)
-         hand_ctrl:initialize()
-         enable_event_listener(TimerEvent{interval=1000})
-         local continue = true
-         return continue
-      end,
-      -- stage where we play through a hand
-      function(ctrl, event)
-         local continue = hand_ctrl:on_event(event)
-         return continue
-      end,
-      function(ctrl)
-         state:move_blinds()
-         local continue = hand_ctrl:cleanup()
-         enable_event_listener(TimerEvent{interval=1000})
-         pres:finish_hand()
-         return continue
-      end
-   }
-   --]]
-
    -- getters/setters
    function ctrl.get_players(ctrl) return state:get_players() end
    function ctrl.get_sb_qty(ctrl) return state:get_sb_qty() end
@@ -120,6 +97,20 @@ function(ctrl, model, ...)
    function ctrl.on_key_down(ctrl, key)
       ctrl:on_event(KbdEvent{key=key})
    end
+   
+   function ctrl.game_won(ctrl)
+      local players = ctrl:get_players()
+      return #players == 1 or not ctrl:human_still_playing()
+   end
+
+   function ctrl.human_still_playing(ctrl)
+      local players = ctrl:get_players()
+      for _,player in ipairs(players) do
+         if player.isHuman then return true end
+      end
+
+      return false
+   end
 
    function ctrl.on_event(ctrl, event)
       assert(event:is_a(Event))
@@ -135,18 +126,12 @@ function(ctrl, model, ...)
       print(#game_pipeline, "entries left in game pipeline")
       disable_event_listeners()
 
-      local players = ctrl:get_players()
-      local still_playing = false
-      for _,player in ipairs(players) do
-         if player.isHuman then still_playing = true end
-      end
-
-      if #players == 1 or not still_playing then
+      if ctrl:game_won() then
          hand_ctrl:cleanup()
          pres:return_to_main_menu(still_playing)
 
          disable_event_listeners()
-         disable_events_timer = Timer()
+         local disable_events_timer = Timer()
          disable_events_timer.interval = 6000
          function disable_events_timer:on_timer()
             disable_events_timer:stop()
@@ -173,12 +158,5 @@ function(ctrl, model, ...)
       local result = action(ctrl, event)
       if result then table.remove(game_pipeline, 1) end
 
-      -- if #game_pipeline > 0 then
-      --    local action = game_pipeline[1]
-      --    local result = action(ctrl)
-      --    if result then table.remove(game_pipeline, 1) end
-      -- else
-      --    enable_event_listener(Events.KEYBOARD)
-      -- end
    end
 end)

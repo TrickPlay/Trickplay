@@ -13,11 +13,13 @@ function(pres, ctrl)
          model.potchips.group:raise_to_top()
       else
          local pot = model.potchips
-         pot.group:animate{
-            opacity=0,
-            duration=300,
-            on_completed = function() screen:remove(pot.group) end
-         }
+         if pot.group.parent then
+             pot.group:animate{
+                opacity=0,
+                duration=300,
+                on_completed = function() screen:remove(pot.group) end
+             }
+         end
          model.potchips:set(0)
          model.potchips = nil
          
@@ -95,37 +97,16 @@ function(pres, ctrl)
       for _,card in ipairs(model.deck.cards) do
          card.group:unparent()
       end
+      info_grp:unparent()
+      info_grp = nil
       model.dealerchip:unparent()
       model.bbchip:unparent()
       model.sbchip:unparent()
       model.potchips.group:unparent()
-      info_grp.opacity=0
-      info_grp:unparent()
+      model.dealerchip = nil
+      model.bbchip = nil
+      model.sbchip = nil
       screen:find_child("TableText"):unparent()
-      
-      --[[
-      local text
-      if human_won then
-         text = Text{
-            text="You win!",
-            font="Sans 60px",
-            color="FFFFFF",
-            position={screen.w/2,400},
-            opacity=0
-         }
-      else
-         text = Text{
-            text="You lose!",
-            font="Sans 60px",
-            color="FFFFFF",
-            position={screen.w/2,400},
-            opacity=0
-         }
-      end
-      text.anchor_point = {text.w/2, text.h/2}
-      screen:add(text)
-      Popup:new{group = text, time = 3000}
-      --]]
       
       if not reset then 
          local r = Rectangle{ w=1920, h=1080, opacity = 0, color = "000000"}

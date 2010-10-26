@@ -246,16 +246,18 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
       end
       animate_pot_to_player(winners[1])
-      local text = Text{
-         text="Hit any key to continue!",
-         font="Sans 36px",
-         color="FFFFFF",
-         position={screen.w/2,400},
-         opacity=0
-      }
-      text.anchor_point = {text.w/2, text.h/2}
-      screen:add(text)
-      Popup:new{group = text, time = 1500}
+      if not game:game_won() then
+          local text = Text{
+             text="Press ENTER to continue!",
+             font="Sans 36px",
+             color="FFFFFF",
+             position={screen.w/2,400},
+             opacity=0
+          }
+          text.anchor_point = {text.w/2, text.h/2}
+          screen:add(text)
+          Popup:new{group = text, time = 1500}
+      end
 
    end
 
@@ -381,7 +383,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    -- EVERYONE ELSE FOLDED
    function pres:win_from_bets(only_player)
       assert(only_player)
-      only_player.status:update( "weaksauce." )
+      only_player.status:update( "weaksauce" )
       if only_player.betChips then only_player.betChips:set(0) end
       animate_pot_to_player( only_player )
    end
