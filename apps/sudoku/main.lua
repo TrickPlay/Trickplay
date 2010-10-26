@@ -12,36 +12,42 @@ function save(thing)  anchors[thing] = true end
 function clear(thing) anchors[thing] = nil  end
 local won = false
 local diff_from = nil
+local conf_from = nil
 
 local num_givens = 50
---local bg = Image{src="assets/background.jpg"}
-local blank_button_on   = Image{src="assets/blank_on.png",      opacity=0}
-local blank_button_off  = Image{src="assets/blank_off.png",     opacity=0}
-local green_button_on   = Image{src="assets/green_on.png",      opacity=0}
-local green_button_off  = Image{src="assets/green_off.png",     opacity=0}
-local red_button_on     = Image{src="assets/red_on.png",        opacity=0}
-local red_button_off    = Image{src="assets/red_off.png",       opacity=0}
-local blue_button_on    = Image{src="assets/blue_on.png",       opacity=0}
-local blue_button_off   = Image{src="assets/blue_off.png",      opacity=0}
-local yellow_button_on  = Image{src="assets/yellow_on.png",     opacity=0}
-local yellow_button_off = Image{src="assets/yellow_off.png",    opacity=0}
-local blue              = Image{src ="assets/3x3grid-blue.png", opacity=0}
-local red               = Image{src ="assets/3x3grid-red.png",  opacity=0}
-sparkle_base            = Image{src ="assets/Sparkle.png",      opacity=0}
+local blank_button_on   = Image{src="assets/blank_on.png",         opacity=0}
+local blank_button_off  = Image{src="assets/blank_off.png",        opacity=0}
+local green_button_on   = Image{src="assets/green_on.png",         opacity=0}
+local green_button_off  = Image{src="assets/green_off.png",        opacity=0}
+local red_button_on     = Image{src="assets/red_on.png",           opacity=0}
+local red_button_off    = Image{src="assets/red_off.png",          opacity=0}
+local blue_button_on    = Image{src="assets/blue_on.png",          opacity=0}
+local blue_button_off   = Image{src="assets/blue_off.png",         opacity=0}
+local yellow_button_on  = Image{src="assets/yellow_on.png",        opacity=0}
+local yellow_button_off = Image{src="assets/yellow_off.png",       opacity=0}
+local blue              = Image{src ="assets/3x3grid-blue.png",    opacity=0}
+local red               = Image{src ="assets/3x3grid-red.png",     opacity=0}
+local sparkle_base      = Image{src ="assets/Sparkle.png",         opacity=0}
 local arrow_down_off    = Image{src = "assets/arrow-down-off.png", opacity=0}
-local arrow_down_on     = Image{src = "assets/arrow-down-on.png", opacity=0}
-local arrow_up_off      = Image{src = "assets/arrow-up-off.png", opacity=0}
-local arrow_up_on       = Image{src = "assets/arrow-up-on.png", opacity=0}
-local panel             = Image{src = "assets/panel.png",       opacity=0}
---sparkle = Group{name="\n\n\njhsdfsdfjklsdfjkl;d",z=3}
+local arrow_down_on     = Image{src = "assets/arrow-down-on.png",  opacity=0}
+local arrow_up_off      = Image{src = "assets/arrow-up-off.png",   opacity=0}
+local arrow_up_on       = Image{src = "assets/arrow-up-on.png",    opacity=0}
+local panel             = Image{src = "assets/panel.png",          opacity=0}
+local diff_title        = Image{src = "assets/difficulty.png",     opacity=0}
+local sudoku_title      = Image{src = "assets/sudoku.png",         opacity=0}
+local conf_text         = Text { text  = "Are you sure you want to start a new game?",
+                                 font  = "DejaVu Sans Condensed 32px",
+                                 color = "FFFFFF", 
+								 opacity = 0
+}
 
 
 screen:add(
 	 blank_button_on,  blank_button_off, green_button_on, green_button_off,
 	   red_button_on,    red_button_off,  blue_button_on,  blue_button_off,
 	yellow_button_on, yellow_button_off,             red,             blue,
-	   panel,      sparkle_base
-
+	           panel,      sparkle_base,      diff_title,     sudoku_title,
+	       conf_text
 )
 local blanks = {blank_button_off,blank_button_on}
 local arrows = {
@@ -404,6 +410,13 @@ local left_list =
 	FocusableImage({0,0},"New Puzzle", 
 		blank_button_off,blank_button_on,
 		function() 
+						focus = "ARE_YOU_SURE"
+						confirm.opacity   = 255
+						conf_from = "GAME_LEFT"
+						confirm:find_child("DIFF").opacity=0
+						confirm:find_child("GAME_LEFT").opacity=255
+restore_keys()
+--[[
 			if red_is_on then
 				local givens, sol
 				givens,sol =BoardGen(num_givens) 
@@ -420,6 +433,7 @@ local left_list =
 			right_list[3].group:find_child("text_s").text = "Show Errors"
 			yellow_light.opacity = 0
 			--restore_keys()
+--]]
 		end),
 
 	FocusableImage({0,blank_button_off.h+8},"Help", 
@@ -710,9 +724,8 @@ end
 
 
 
-local sp_title        = Image{src = "assets/sudoku.png", x = panel.w/2,y=60 }
-sp_title.anchor_point = {sp_title.w/2,0}
-splash:add(Clone{source=panel,x = panel.w/2,y = panel.h/2,anchor_point={panel.w/2,panel.h/2}},sp_title)
+splash:add(Clone{source=panel,        x=panel.w/2, y=panel.h/2,anchor_point={panel.w/2,panel.h/2}},
+           Clone{source=sudoku_title, x=panel.w/2, y=60,       anchor_point={sudoku_title.w/2, 0}})
 local splash_list = {}
 local splash_hor_index = 1
 if settings.givens and settings.sol and settings.guesses then
@@ -751,10 +764,6 @@ if settings.givens and settings.sol and settings.guesses then
 			settings.guesses,blue_blox,settings.undo)
 	end
 	screen:add(game.board)
---[[
-	splash:find_child("cont").color = "FF0000"
-	splash:find_child("new").color  = "FFFFFF"
---]]
 else
 	splash_list = 
 	{
@@ -773,10 +782,6 @@ else
 	splash:add( splash_list[1].group )
 
 	game = nil
---[[
-	splash:find_child("cont").color = "FFFFFF"
-	splash:find_child("new").color  = "FF0000"
---]]
 end
 splash_list[1]:on_focus()
 
@@ -802,8 +807,6 @@ local diff_list = {
 }
 
 
-local diff_title        = Image{src = "assets/difficulty.png", x = panel.w/2,y=60 }
-diff_title.anchor_point={diff_title.w/2,0}
 
 diff_list[2]:on_focus()
 difficulty:add(
@@ -813,7 +816,12 @@ difficulty:add(
 		y = panel.h/2,
 		anchor_point={panel.w/2,panel.h/2}
 	},
-	diff_title,
+	Clone{
+		source=diff_title,
+		x = panel.w/2,
+		y = 60,
+		anchor_point={diff_title.w/2,0}
+	},
 	diff_list[1].group,
 	diff_list[2].group
 )
@@ -827,21 +835,12 @@ local conf_list = {
 		blank_button_off,blank_button_on,
 		function() restore_keys() end),
  	FocusableImage(
-		{panel.w/2+ 20,
-		 panel.h/2+90},
+		{panel.w/2 + 20,
+		 panel.h/2 + 90},
 		"Yes", 
 		blank_button_off,blank_button_on,
 		function() restore_keys() end),
 }
-local conf_title = Image{src = "assets/difficulty.png", x = panel.w/2,y=60 }
-local conf_text  = Text{ text="Are you sure you want to start a new game?",
-                         font="DejaVu Sans Condensed 32px",
-                        color="FFFFFF", 
-                            x=panel.w/2,
-                            y=panel.h/2+10
-}
-conf_title.anchor_point = { conf_title.w/2, 0 }
-conf_text.anchor_point  = { conf_text.w/2,  0 }
 conf_list[conf_hor_index]:on_focus()
 confirm:add(
 	Clone{
@@ -850,8 +849,26 @@ confirm:add(
 		y = panel.h/2,
 		anchor_point={panel.w/2,panel.h/2}
 	},
-	conf_title,
-	conf_text,
+	Clone{
+		name="GAME_LEFT",
+		source=sudoku_title,
+		x = panel.w/2,
+		y = 60,
+		anchor_point={sudoku_title.w/2,0}
+	},
+	Clone{
+		name="DIFF",
+		source=diff_title,
+		x = panel.w/2,
+		y = 60,
+		anchor_point={diff_title.w/2,0}
+	},
+	Clone{
+		source=conf_text,
+        x = panel.w/2,
+        y = panel.h/2+10,
+		anchor_point={conf_text.w/2,0}
+	},
 	conf_list[1].group,
 	conf_list[2].group
 )
@@ -1123,6 +1140,69 @@ function game_on_key_down(k)
 		restore_keys()
 	end
 end
+function confirm_on_key_down(k)
+	local key = 
+	{
+		[keys.Left] = function()
+				if conf_hor_index > 1 then
+					conf_list[conf_hor_index]:out_focus()
+					conf_hor_index = conf_hor_index - 1
+					conf_list[conf_hor_index]:on_focus()
+				end
+			restore_keys()
+		end,
+		[keys.Right] = function()
+				if conf_hor_index < #conf_list then
+					conf_list[conf_hor_index]:out_focus()
+					conf_hor_index = conf_hor_index + 1
+					conf_list[conf_hor_index]:on_focus()
+				end
+			restore_keys()
+		end,
+		[keys.Return] = function()
+				if conf_hor_index == 2 then
+
+						if red_is_on then
+							local givens,sol
+							givens,sol = BoardGen(num_givens)
+							game = Game(givens,sol,nil,blue_blox)
+						else
+							local givens,sol
+							givens,sol = BoardGen(num_givens)
+							game = Game(givens,sol,nil,red_blox)
+						end
+                
+						ind = {r=1,c=1}
+						selector.x, selector.y = sel_pos(1,1)
+						selector.opacity = 255
+
+						focus = "GAME_BOARD"
+
+						left_list[left_index]:out_focus()
+						left_index      = 1
+						confirm.opacity = 0
+						dim.opacity     = 0
+						dolater(flip_board)
+						are_you_sure      = false
+
+
+				elseif conf_hor_index == 1 then
+						are_you_sure      = false
+						focus = conf_from
+						confirm.opacity   = 0
+						if conf_from == "DIFF" then
+							difficulty.opacity = 255
+						end
+						conf_hor_index = 2
+						conf_list[1]:out_focus()
+						conf_list[2]:on_focus()
+						restore_keys()
+				end
+			restore_keys()
+		end
+	}
+	if key[k] then key[k]() else restore_keys() end
+end
 function diff_on_key_down(k)
 	local key = 
 	{
@@ -1210,7 +1290,8 @@ function diff_on_key_down(k)
 
 
 				elseif conf_hor_index == 1 then
-						are_you_sure      = false
+						focus = "DIFF"
+						--are_you_sure      = false
 						confirm.opacity   = 0
 						difficulty.opacity = 255
 						conf_hor_index = 2
@@ -1263,10 +1344,14 @@ function diff_on_key_down(k)
 						focus = "GAME_BOARD"
 						dolater(splash_to_game,flip_board,difficulty)
 					else
-						are_you_sure = true
+						--are_you_sure = true
+						focus = "ARE_YOU_SURE"
 						confirm.opacity = 255
 						difficulty.opacity = 0
 						restore_keys()
+						conf_from = "DIFF"
+						confirm:find_child("DIFF").opacity=255
+						confirm:find_child("GAME_LEFT").opacity=0
 --[[
 						left_list[left_index]:out_focus()
 						left_index = 1
@@ -1474,6 +1559,9 @@ function screen:on_key_down(k)
 	screen.on_key_down = nil
 	local sub_on_key_down = 
 	{
+		["ARE_YOU_SURE"] = function(key_press)
+			confirm_on_key_down(key_press)
+		end,
 		["SPLASH"] = function(key_press)
 			splash_on_key_down(key_press)
 		end,
