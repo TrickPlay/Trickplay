@@ -1,0 +1,37 @@
+
+set(CMAKE_SYSTEM_NAME Linux)
+
+set(CMAKE_SYSTEM_VERSION 1)
+
+set(HOST $ENV{HOST})
+
+set(CMAKE_C_COMPILER   $ENV{CC})
+set(CMAKE_CXX_COMPILER $ENV{CXX})
+
+set(PREFIX $ENV{PREFIX})
+
+if (CMAKE_TOOLCHAIN_FILE)
+
+    if (PREFIX)
+    
+        file(TO_CMAKE_PATH ${PREFIX} PREFIX)
+        
+        set(CMAKE_FIND_ROOT_PATH  ${PREFIX})
+        
+    else(PREFIX)
+    
+        get_filename_component(LIBS_ROOT ${CMAKE_TOOLCHAIN_FILE} PATH)
+    
+        file(TO_CMAKE_PATH ${LIBS_ROOT} LIBS_ROOT)
+    
+        set(CMAKE_FIND_ROOT_PATH  ${LIBS_ROOT}/output)
+        
+    endif(PREFIX)
+    
+endif(CMAKE_TOOLCHAIN_FILE)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PATH ONLY)

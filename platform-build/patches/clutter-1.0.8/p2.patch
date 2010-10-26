@@ -1,0 +1,19 @@
+--- ../../../lg2/source/clutter-1.0.8/Makefile.in	2009-10-19 07:34:42.000000000 -0700
++++ Makefile.in	2010-09-29 19:51:20.300410509 -0700
+@@ -245,6 +245,7 @@
+ PACKAGE_NAME = @PACKAGE_NAME@
+ PACKAGE_STRING = @PACKAGE_STRING@
+ PACKAGE_TARNAME = @PACKAGE_TARNAME@
++PACKAGE_URL = @PACKAGE_URL@
+ PACKAGE_VERSION = @PACKAGE_VERSION@
+ PANGO_PREFIX = @PANGO_PREFIX@
+ PATH_SEPARATOR = @PATH_SEPARATOR@
+@@ -336,7 +337,7 @@
+ @USE_SHAVE_FALSE@QUIET_RM_ = $(QUIET_RM_$(AM_DEFAULT_VERBOSITY))
+ @USE_SHAVE_FALSE@QUIET_RM_0 = @echo '  RM     '$@;
+ NULL = 
+-SUBDIRS = build clutter tests po $(am__append_1)
++SUBDIRS = build clutter po $(am__append_1)
+ DIST_SUBDIRS = build clutter tests doc po
+ ACLOCAL_AMFLAGS = -I build/autotools
+ pcfiles = \
