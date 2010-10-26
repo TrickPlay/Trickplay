@@ -93,6 +93,13 @@ function(ctrl, router, ...)
         state:set_tile_tables()
         grid = state:get_grid()
 
+        -- check for at least one playable move
+        local i = 0
+        for _,__ in pairs(state:get_matching_tiles()) do
+            i = i + 1
+        end
+        if i < 2 then ctrl:reset_game(number) end
+
         pres:display_ui()
         pres:reset()
 
@@ -108,6 +115,13 @@ function(ctrl, router, ...)
         state:shuffle()
         state:set_tile_tables()
         grid = state:get_grid()
+        
+        -- check for at least one playable move
+        local i = 0
+        for _,__ in pairs(state:get_matching_tiles()) do
+            i = i + 1
+        end
+        if i < 2 then ctrl:shuffle_game() end
 
         pres:display_ui()
         pres:reset()
