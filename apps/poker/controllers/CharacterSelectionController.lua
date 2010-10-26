@@ -64,7 +64,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       game:initialize_game{
          sb=SMALL_BLIND,
          bb=BIG_BLIND,
-         endowment=INITIAL_ENDOWMENT,
+         endowment=4,--INITIAL_ENDOWMENT,
          randomness=RANDOMNESS,
          players=model.players
       }

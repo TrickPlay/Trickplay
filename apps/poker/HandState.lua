@@ -96,8 +96,9 @@ HandState = Class(nil,function(state, ctrl, ...)
             not_all_in_player = player
          end
       end
-      if num_all_in == num_in_players-1 and player_bets[not_all_in_player] == all_in_bet or 
-         num_all_in == num_in_players then
+      if num_all_in == num_in_players-1
+       and player_bets[not_all_in_player] == all_in_bet
+       or num_all_in == num_in_players then
          return true
       end
 
