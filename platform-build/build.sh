@@ -350,7 +350,7 @@ for THIS in ${ALL}; do
         THIS_COMMANDS=${THIS}_COMMANDS
         
         echo "================================================================="
-        echo "== Building ${THIS} ${!THIS_V}..."
+        echo "== Building ${!THIS_SOURCE}..."
         echo "================================================================="
 
         # If the source directory does not exist, unpack the dist
