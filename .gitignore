@@ -1,8 +1,6 @@
 /Debug
 /src
 /build
-*.o
-*.a
 trickplay.cfg
 .trickplay
 .DS_Store
