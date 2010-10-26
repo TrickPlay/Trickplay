@@ -1,0 +1,30 @@
+--- ../libupnp-1.6.6-old/upnp/src/inc/uuid.h	2008-02-09 17:55:34.000000000 -0800
++++ upnp/src/inc/uuid.h	2010-10-26 13:51:21.711637684 -0700
+@@ -27,12 +27,12 @@
+   } uuid_upnp;
+ 
+   /* uuid_create -- generate a UUID */
+-  int uuid_create(uuid_upnp * id);
+-  void uuid_unpack(uuid_upnp *u, char *out);	// out will be xxxx-xx-xx-xx-xxxxxx format
++  int  uuid_create_upnp(uuid_upnp * id);
++  void uuid_unpack_upnp(uuid_upnp *u, char *out);	// out will be xxxx-xx-xx-xx-xxxxxx format
+ 
+   /* uuid_create_from_name -- create a UUID using a "name"
+      from a "name space" */
+-  void uuid_create_from_name(
++  void uuid_create_from_name_upnp(
+     uuid_upnp * uid,        /* resulting UUID */
+     uuid_upnp nsid,          /* UUID to serve as context, so identical
+                              names from different name spaces generate
+@@ -47,4 +47,10 @@
+            1   u1 is lexically after u2
+      Note:   lexical ordering is not temporal ordering!
+   */
+-  int uuid_compare(uuid_upnp *u1, uuid_upnp *u2);
++  int uuid_compare_upnp(uuid_upnp *u1, uuid_upnp *u2);
++  
++  #define uuid_create(a) uuid_create_upnp(a)
++  #define uuid_unpack(a,b) uuid_unpack_upnp(a,b)
++  #define uuid_create_from_name(a,b,c,d) uuid_create_from_name_upnp(a,b,c,d)  
++  #define uuid_compare(a,b) uuid_compare_upnp(a,b)
++  

@@ -1,0 +1,38 @@
+--- ../libupnp-1.6.6-old/upnp/src/uuid/uuid.c	2008-03-22 10:18:46.000000000 -0700
++++ upnp/src/uuid/uuid.c	2010-10-26 13:49:51.970149627 -0700
+@@ -53,7 +53,7 @@
+    uuid_create -- generator a UUID 
+  */
+ int
+-uuid_create(uuid_upnp *uid)
++uuid_create_upnp(uuid_upnp *uid)
+ {
+     uuid_time_t timestamp;
+     uuid_time_t last_time;
+@@ -108,7 +108,7 @@
+ 
+ /*-----------------------------------------------------------------------------*/
+ void
+-uuid_unpack(uuid_upnp *u, char *out)
++uuid_unpack_upnp(uuid_upnp *u, char *out)
+ {
+ 	sprintf(out,
+ 		"%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x",
+@@ -290,7 +290,7 @@
+    uuid_create_from_name -- create a UUID using a "name" from a "name space" 
+  */
+ void
+-uuid_create_from_name( uuid_upnp * uid, /* resulting UUID */
++uuid_create_from_name_upnp( uuid_upnp * uid, /* resulting UUID */
+ 
+                        uuid_upnp nsid,  /* UUID to serve as context, so identical
+                                            names from different name spaces generate
+@@ -366,7 +366,7 @@
+    Note:   lexical ordering is not temporal ordering!
+  */
+ int
+-uuid_compare( uuid_upnp * u1,
++uuid_compare_upnp( uuid_upnp * u1,
+               uuid_upnp * u2 )
+ {
+     int i;
