@@ -248,7 +248,6 @@ Tiles = Class(function(self, ...)
     function self:get_current_tile_image() return current_tile_image end
 
     function self:shuffle(number)
-        print("number", number)
         if not number then number = 144 end
         assert(number <= #tiles)
 
