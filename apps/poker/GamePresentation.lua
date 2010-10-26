@@ -125,7 +125,13 @@ function(pres, ctrl)
          Popup:new{group = m, time = 5000}
       end
 
+      -- could not figure out a way to clear all this nonsense from the game and
+      -- screen, unsafe deletions left and right, stuff not being removed from screen,
+      -- just too much to track, but these four functions should do the job
       REMOVE_ALL_DA_CHIPS()
+      CHIP_RECURSIVE_DEL(screen)
+      REMOVE_ALL_DA_PLAYER_STATS()
+      STAT_RECURSIVE_DEL(screen)
    end
 
    -- called when sb_qty and bb_qty updated
