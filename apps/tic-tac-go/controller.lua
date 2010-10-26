@@ -192,8 +192,8 @@ function GameControl:place_player_at_index(player, index)
                 winner.position = {screen.w/2,-screen.h/2}
                 winner.anchor_point={winner.w/2,winner.h/2}    
                 
-                winnertext.position = {screen.w/2,695}
-                winnertext.anchor_point={winnertext.w/2,winner.h/2}
+                winnertext.position = {screen.w/2,screen.h/2}
+                winnertext.anchor_point={winnertext.w/2,winnertext.h/2}
 				dim.opacity = 0
                 screen:add(winner,winnertext)
                 
