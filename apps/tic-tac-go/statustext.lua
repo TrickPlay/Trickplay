@@ -52,8 +52,10 @@ function StatusText:pressToMove(player_icon)
 	textToMove:set{text="Press enter to move",x=150}
 	self:add(textToMove)
 	ui:createTextShadow(textToMove)
-	if self:getContainer().parent ~= nil then self:getContainer():unparent() end
-	PlayField:add(self:getContainer())
+	local c = self:getContainer()
+	if c.parent ~= nil then c:unparent() end
+	PlayField:add(c)
+	c.opacity = 255
 	
 end
 

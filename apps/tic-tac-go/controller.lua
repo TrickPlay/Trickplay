@@ -1,5 +1,7 @@
 
 GameControl = {}
+local dim = Rectangle{w=screen.w,h=screen.h,color="000000",opacity=0}
+screen:add(dim)
 
 -- defaults (these should probably never change)
 
@@ -32,7 +34,15 @@ splash:add(splashImg,startbutton)
 screen:add(splash)
 
 function GameControl:show_splash()
-		splash:animate({ duration = 700, y = 1080, mode = "EASE_IN_OUT_SINE" })
+		splash:raise_to_top()
+		splash:animate({ 
+			duration = 700, 
+			y = 1080, 
+			mode = "EASE_IN_OUT_SINE", 
+			on_completed = function() 
+				dim.opacity=0 
+			end 
+		})
 		local child = screen:find_child("end session text")
         if child ~= nil then child:unparent() end
 
@@ -171,7 +181,7 @@ function GameControl:place_player_at_index(player, index)
                 
                 winnertext.position = {screen.w/2,695}
                 winnertext.anchor_point={winnertext.w/2,winner.h/2}
-                
+				dim.opacity = 0
                 screen:add(winner,winnertext)
                 
                 --winner:animate{duration=700,y=screen.h/2, mode = "EASE_IN_OUT_SINE"}
@@ -182,20 +192,27 @@ function GameControl:place_player_at_index(player, index)
 					direction = "FORWARD",
 					loop      = false
 				}
-				function t.on_new_frame(t,msecs)
+				function t.on_new_frame(t,msecs,p)
+					dim.opacity = p*150
 					if msecs <= 200 then
 						PlayField.opacity = msecs/200*(255*.7-255) + 255
 					elseif msecs <= 400 then
 						local p = (msecs-200)/200
 						winner.y = -screen.h/2 + screen.h*p
-						
+					elseif msecs <= 1000 then
+						winner.y = screen.h/2
+
 					elseif msecs > 1000 then
+						winner.y = screen.h/2
 						local p = (msecs-1000)/(t.duration-1000)
 						winnertext.opacity = 255*p
 					end
 				end
 				function t.on_completed()
 				end
+				dim:raise_to_top()
+				winner:raise_to_top()
+				winnertext:raise_to_top()
                 t:start()
 				--ClearPlayField()
 				return ControlConstants.state.clear
@@ -420,7 +437,6 @@ function GameControl:make_state_machine()
             ClearPlayField()
  			
  			GameControl:show_splash()
-
 
             return ControlConstants.state.init
     	end
