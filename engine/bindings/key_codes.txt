@@ -41,6 +41,8 @@ Constants: Numeric keypad
         8 - The "8" key on the remote keypad
         9 - The "9" key on the remote keypad
 
+Remember that these are *strings* and not *numbers* so you can't do keys[0] you have to do keys["0"].  Also, you cannot do keys.0 or keys."0" since that syntax is not allowed in Lua.
+
 Constants: Basic TV control functions
         CHAN_UP - The "CHANNEL UP" button
         CHAN_DOWN - The "CHANNEL DOWN" button
