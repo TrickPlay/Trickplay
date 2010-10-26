@@ -321,6 +321,7 @@ help.position     = { screen_w/2, screen_h/2 }
 
 local splash     = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2}
 local difficulty = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2,opacity=0}
+local confirm    = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2,opacity=0}
 
 local dim = Rectangle{color ="000000", w=screen_w,h=screen_h,opacity=100,z=2}
 local side_font = "Dejavu Bold 60px"
@@ -816,8 +817,41 @@ difficulty:add(
 	diff_list[1].group,
 	diff_list[2].group
 )
+local are_you_sure = false
+local conf_hor_index = 2
+local conf_list = {
+ 	FocusableImage(
+		{panel.w/2-blank_button_off.w - 20,
+		 panel.h/2+90},
+		"No", 
+		blank_button_off,blank_button_on,
+		function() restore_keys() end),
+ 	FocusableImage(
+		{panel.w/2+ 20,
+		 panel.h/2+90},
+		"Yes", 
+		blank_button_off,blank_button_on,
+		function() restore_keys() end),
+}
+local conf_title        = Image{src = "assets/difficulty.png", x = panel.w/2,y=60 }
+local conf_text = Text{text="Are you sure you want to start a new game?",font="DejaVu Sans Condensed 32px",color="FFFFFF",x=panel.w/2,y=panel.h/2+10}
+conf_title.anchor_point={conf_title.w/2,0}
+conf_text.anchor_point={conf_text.w/2,0}
+conf_list[conf_hor_index]:on_focus()
+confirm:add(
+	Clone{
+		source=panel,
+		x = panel.w/2,
+		y = panel.h/2,
+		anchor_point={panel.w/2,panel.h/2}
+	},
+	conf_title,
+	conf_text,
+	conf_list[1].group,
+	conf_list[2].group
+)
 
-screen:add(dim,splash,difficulty)
+screen:add(dim,splash,difficulty,confirm)
 Directions = {
    RIGHT = { 1, 0},
    LEFT  = {-1, 0},
@@ -1088,78 +1122,157 @@ function diff_on_key_down(k)
 	local key = 
 	{
 		[keys.Left] = function()
-			if diff_hor_index > 1 then
-				diff_list[diff_hor_index]:out_focus()
-				diff_hor_index = diff_hor_index - 1
-				diff_list[diff_hor_index]:on_focus()
+			if are_you_sure then
+				if conf_hor_index > 1 then
+					conf_list[conf_hor_index]:out_focus()
+					conf_hor_index = conf_hor_index - 1
+					conf_list[conf_hor_index]:on_focus()
+				end
+			else
+				if diff_hor_index > 1 then
+					diff_list[diff_hor_index]:out_focus()
+					diff_hor_index = diff_hor_index - 1
+					diff_list[diff_hor_index]:on_focus()
+				end
 			end
 			restore_keys()
 
 		end,
 		[keys.Right] = function()
-			if diff_hor_index < #diff_list then
-				diff_list[diff_hor_index]:out_focus()
-				diff_hor_index = diff_hor_index + 1
-				diff_list[diff_hor_index]:on_focus()
+			if are_you_sure then
+				if conf_hor_index < #conf_list then
+					conf_list[conf_hor_index]:out_focus()
+					conf_hor_index = conf_hor_index + 1
+					conf_list[conf_hor_index]:on_focus()
+				end
+			else
+				if diff_hor_index < #diff_list then
+					diff_list[diff_hor_index]:out_focus()
+					diff_hor_index = diff_hor_index + 1
+					diff_list[diff_hor_index]:on_focus()
+				end
 			end
 			restore_keys()
 		end,
 		[ keys.Up ] = function()
-			if diff_hor_index == 2 then
-				curr_opt = (curr_opt - 1-1)%(#game_opts)+1
-				num_givens = game_num[curr_opt]
-				diff_list[2]:press_up()
+			if are_you_sure then
+			else
+				if diff_hor_index == 2 then
+					curr_opt = (curr_opt - 1-1)%(#game_opts)+1
+					num_givens = game_num[curr_opt]
+					diff_list[2]:press_up()
+				end
 			end
 			restore_keys()
 		end,
 		[ keys.Down ] = function()
-			if diff_hor_index == 2 then
-				curr_opt = (curr_opt + 1-1)%(#game_opts)+1
-				num_givens = game_num[curr_opt]
-				diff_list[2]:press_down()
+			if are_you_sure then
+			else
+				if diff_hor_index == 2 then
+					curr_opt = (curr_opt + 1-1)%(#game_opts)+1
+					num_givens = game_num[curr_opt]
+					diff_list[2]:press_down()
+				end
 			end
 			restore_keys()
 		end,
 		[ keys.Return ] = function()
-			if diff_hor_index == 1 then
-				if diff_from == "SPLASH" then
-					focus = "SPLASH"
-					splash.opacity=255
-					difficulty.opacity=0
-					splash:raise_to_top()
-				else
-					focus = "GAME_LEFT"
-					difficulty.opacity=0
-					dim.opacity = 0
+			if are_you_sure then
+				if conf_hor_index == 2 then
 
-				end
-				restore_keys()
+					if red_is_on then
+						local givens,sol
+						givens,sol = BoardGen(num_givens)
+						game = Game(givens,sol,nil,blue_blox)
+					else
+						local givens,sol
+						givens,sol = BoardGen(num_givens)
+						game = Game(givens,sol,nil,red_blox)
+					end
 
-			elseif diff_hor_index == 2 then
-				if red_is_on then
-					local givens,sol
-					givens,sol = BoardGen(num_givens)
-					game = Game(givens,sol,nil,blue_blox)
-				else
-					local givens,sol
-					givens,sol = BoardGen(num_givens)
-					game = Game(givens,sol,nil,red_blox)
+					ind = {r=1,c=1}
+					selector.x, selector.y = sel_pos(1,1)
+					selector.opacity = 255
+
+						focus = "GAME_BOARD"
+
+						left_list[left_index]:out_focus()
+						left_index      = 1
+						confirm.opacity = 0
+						dim.opacity     = 0
+						dolater(flip_board)
+						are_you_sure      = false
+
+
+				elseif conf_hor_index == 1 then
+						are_you_sure      = false
+						confirm.opacity   = 0
+						difficulty.opacity = 255
+						conf_hor_index = 2
+						conf_list[1]:out_focus()
+						conf_list[2]:on_focus()
+						restore_keys()
 				end
-				collectgarbage("collect")
-				ind = {r=1,c=1}
-				focus = "GAME_BOARD"
-				selector.opacity = 255
-				if diff_from == "SPLASH" then
-					dolater(splash_to_game,flip_board,difficulty)
-				else
-					left_list[left_index]:out_focus()
-					left_index = 1
-					difficulty.opacity=0
-					dim.opacity = 0
-					dolater(flip_board)
-				end
-				won = false
-			end 
+			else
+				if diff_hor_index == 1 then
+
+					if diff_from == "SPLASH" then
+						focus = "SPLASH"
+						splash.opacity=255
+						difficulty.opacity=0
+						splash:raise_to_top()
+					else
+						focus = "GAME_LEFT"
+						difficulty.opacity=0
+						dim.opacity = 0
+
+					end
+					restore_keys()
+
+				elseif diff_hor_index == 2 then
+--					if red_is_on then
+--						local givens,sol
+--						givens,sol = BoardGen(num_givens)
+--						game = Game(givens,sol,nil,blue_blox)
+--					else
+--						local givens,sol
+--						givens,sol = BoardGen(num_givens)
+--						game = Game(givens,sol,nil,red_blox)
+--					end
+--					--collectgarbage("collect")
+--					ind = {r=1,c=1}
+--					focus = "GAME_BOARD"
+					if diff_from == "SPLASH" then
+						if red_is_on then
+							local givens,sol
+							givens,sol = BoardGen(num_givens)
+							game = Game(givens,sol,nil,blue_blox)
+						else
+							local givens,sol
+							givens,sol = BoardGen(num_givens)
+							game = Game(givens,sol,nil,red_blox)
+						end
+
+						selector.opacity = 255
+
+						focus = "GAME_BOARD"
+						dolater(splash_to_game,flip_board,difficulty)
+					else
+						are_you_sure = true
+						confirm.opacity = 255
+						difficulty.opacity = 0
+						restore_keys()
+--[[
+						left_list[left_index]:out_focus()
+						left_index = 1
+						difficulty.opacity=0
+						dim.opacity = 0
+						dolater(flip_board)
+--]]
+					end
+					won = false
+				end 
+			end
 		end
 	}
 	if key[k] then key[k]() else restore_keys() end
