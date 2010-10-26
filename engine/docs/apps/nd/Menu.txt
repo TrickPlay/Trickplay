@@ -17,11 +17,6 @@ Timestamp: mm.d.yyyy
 #   yyyy  - Four digit year.  2006 is "2006"
 #   year  - Four digit year.  2006 is "2006"
 
-# These are indexes you deleted, so Natural Docs will not add them again
-# unless you remove them from this line.
-
-Don't Index: Files
-
 
 # --------------------------------------------------------------------------
 # 
@@ -120,6 +115,7 @@ Group: Reference  {
       Constructor Index: Constructors
       Interface Index: Interfaces
       Constant Index: Constants
+      File Index: Files
       }  # Group: Index
 
    }  # Group: Reference
