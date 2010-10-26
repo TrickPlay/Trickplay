@@ -7,11 +7,11 @@ local outstanding_reqs = 0
     view._base.init(view, model)
     view.ui = Group{name="slideshow ui"}
     screen:add(view.ui)
-    local overlay_image = Image
-    { 
-        src     = "assets/overlay.png", 
-        opacity = 0 
-    }
+  --  local overlay_image = Image
+  --  { 
+  --      src     = "assets/overlay.png", 
+  --      opacity = 0 
+  --  }
     local layered_timeline = nil
 
     view.background  = Image {src = "assets/background.jpg"  }
@@ -56,7 +56,7 @@ local outstanding_reqs = 0
 
 	-- License Info At the Bottom --
 	view.license_box = Group{name="license box",position={0,1040}}
-	view.license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150})
+	view.license_box:add(Rectangle{color="000000",w=screen.w,h=40,opacity=150},Image{src="assets/playpause.png"})
 
 	local pause = Image{src = "assets/pause.png",x=screen.w/2,y=screen.h/2,opacity = 0}
 	pause.anchor_point = {pause.w/2,pause.h/2}
@@ -64,7 +64,7 @@ local outstanding_reqs = 0
 	play.anchor_point = {play.w/2,play.h/2}
 
     view.ui:add(
-		overlay_image, view.background, postit, caption, view.mosaic_background,
+		--[[overlay_image,]] view.background, postit, caption, view.mosaic_background,
 		view.license_box, pause,play
 	)
 
