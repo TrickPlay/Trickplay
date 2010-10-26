@@ -35,7 +35,6 @@ function StatusText:pressToMove(player_icon)
     local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
                                              or ui:createPieceHalfXC(image_defaults)
 	self:add(PlayIconImage)
-	
 -- adding text "press"
 --	local textPress = StatusText:Text()
 --	textPress:set{text="Press",x=120}
@@ -53,6 +52,7 @@ function StatusText:pressToMove(player_icon)
 	textToMove:set{text="Press enter to move",x=150}
 	self:add(textToMove)
 	ui:createTextShadow(textToMove)
+	if self:getContainer().parent ~= nil then self:getContainer():unparent() end
 	PlayField:add(self:getContainer())
 	
 end
@@ -65,7 +65,6 @@ function StatusText:pressToDrop(player_icon)
     	local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
                                              or ui:createPieceHalfXC(image_defaults)
 		self:add(PlayIconImage)
-
 	-- adding text "press"
 	local textPress = StatusText:Text()
 	textPress:set{text="Press enter to drop",x=150}
