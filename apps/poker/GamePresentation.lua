@@ -125,6 +125,7 @@ function(pres, ctrl)
          Popup:new{group = m, time = 5000}
       end
 
+      REMOVE_ALL_DA_CHIPS()
    end
 
    -- called when sb_qty and bb_qty updated

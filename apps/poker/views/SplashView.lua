@@ -1,14 +1,9 @@
 SplashView = Class(View, function(view, model, ...)
     view._base.init(view,model)
 
-    local splash = Image{
-        src = "assets/splash-logo.png",
-        position = {screen.width/2, screen.height/2},
-    }
-    splash.anchor_point = {splash.width/2, splash.height/2}
+    local splash
 
     view.ui=Group{name="splash_ui", position={0,0}}
-    view.ui:add(splash)
 
     screen:add(view.ui)
 
@@ -21,6 +16,13 @@ SplashView = Class(View, function(view, model, ...)
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
         if comp == Components.SPLASH then
+            splash = Image{
+                src = "assets/splash-logo.png",
+                position = {screen.width/2, screen.height/2},
+            }
+            splash.anchor_point = {splash.width/2, splash.height/2}
+            view.ui:add(splash)
+
             if not splash_timer then
                 splash_timer = Timer()
                 splash_timer.interval = 7000
@@ -33,7 +35,6 @@ SplashView = Class(View, function(view, model, ...)
                 splash_timer:start()
             end
 
-            self.ui.opacity = 255
             self.ui:raise_to_top()
             for i,dog in ipairs(DOGS) do
                 dog.opacity = 255
@@ -49,7 +50,10 @@ SplashView = Class(View, function(view, model, ...)
             end
 
             self.ui:complete_animation()
-            self.ui.opacity = 0
+            if splash then
+                splash:unparent()
+                splash = nil
+            end
         end
     end
 

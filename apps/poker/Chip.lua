@@ -4,6 +4,30 @@
 CHIP_W = 55
 CHIP_H = 5
 
+ALL_DA_CHIPS = {}
+function REMOVE_ALL_DA_CHIPS()
+    for i = #ALL_DA_CHIPS,1,-1 do
+        local chip = ALL_DA_CHIPS[i]
+        if chip.group then
+            if chip.group.parent then chip.group:unparent() end
+            chip.group = nil
+        end
+        chip = nil
+    end
+
+    ALL_DA_CHIPS = {}
+end
+
+function CHIP_RECURSIVE_DEL(container)
+    if container.name == "a_chip" then
+        container:unparent()
+        return
+    end
+    for i = #container.children,1,-1 do
+        CHIP_RECURSIVE_DEL(container.children[i])
+    end
+end
+
 
 -- A chip
 Chip = Class(function(self, value, image, ...)
@@ -27,15 +51,19 @@ chipStack = Class(function(self, chipValue, ...)
         if not chip_images[self.chipValue] then
             chip_images[self.chipValue] = Image{
                 src = "assets/Chip_"..(self.chipValue)..".png",
-                opacity = 0
+                opacity = 0,
             }
             screen:add(chip_images[self.chipValue])
         end
-        local chip = Chip( self.chipValue, Clone{source = chip_images[self.chipValue]} )        
+        local chip = Chip(
+            self.chipValue, Clone{source = chip_images[self.chipValue], name = "a_chip"}
+        )
         self.group:add(chip.image)
         self.chips[self.size + 1] = chip
         self.size = self.size + 1
         self.value = self.value + self.chipValue
+
+        table.insert(ALL_DA_CHIPS, chip)
     end
 
     function self:removeChip()      

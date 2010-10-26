@@ -281,6 +281,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
       
       -- reset bets
       remove_all_chips()
+
+      REMOVE_ALL_DA_CHIPS()
    end
    
    -------------------------PLAYER TURNS--------------------------
