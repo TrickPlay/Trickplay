@@ -445,10 +445,14 @@ then
             -DCMAKE_BUILD_TYPE=Debug \
             -DTP_CLUTTER_BACKEND_EGL=1 \
             -DTP_PROFILING=1 \
-            "${THERE}/../"
-    
-    make
+            "${THERE}/../"   
 fi
+
+echo "================================================================="
+echo "== Building libtpcore..."
+echo "================================================================="
+
+make -C ${HERE}/tp-build
    
 #------------------------------------------------------------------------------
 # Build a test exe
