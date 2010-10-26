@@ -833,10 +833,15 @@ local conf_list = {
 		blank_button_off,blank_button_on,
 		function() restore_keys() end),
 }
-local conf_title        = Image{src = "assets/difficulty.png", x = panel.w/2,y=60 }
-local conf_text = Text{text="Are you sure you want to start a new game?",font="DejaVu Sans Condensed 32px",color="FFFFFF",x=panel.w/2,y=panel.h/2+10}
-conf_title.anchor_point={conf_title.w/2,0}
-conf_text.anchor_point={conf_text.w/2,0}
+local conf_title = Image{src = "assets/difficulty.png", x = panel.w/2,y=60 }
+local conf_text  = Text{ text="Are you sure you want to start a new game?",
+                         font="DejaVu Sans Condensed 32px",
+                        color="FFFFFF", 
+                            x=panel.w/2,
+                            y=panel.h/2+10
+}
+conf_title.anchor_point = { conf_title.w/2, 0 }
+conf_text.anchor_point  = { conf_text.w/2,  0 }
 conf_list[conf_hor_index]:on_focus()
 confirm:add(
 	Clone{
