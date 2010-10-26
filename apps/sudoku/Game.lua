@@ -385,6 +385,8 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 		local updates = g:check_guess(r,c,guess,error_list)
 		local old_nums = {}
 		local new_nums = {}
+
+
 		if error_checking then
 
 			for i,u in ipairs(updates) do	if #u == 3 then
@@ -494,7 +496,8 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 	end
 	local anim_nums = nil
 	function animate_numbers(old_nums,new_nums,next_timeline)
-		if anim_nums then
+		if next_timeline == nil then restore_keys() end
+		if anim_nums ~= nil then
 			anim_nums:stop()
 			anim_nums:on_completed()
 			clear(anim_nums)
@@ -517,7 +520,6 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 			clear(anim_nums)
 		end
 		anim_nums:start()
-		if next_timeline == nil then restore_keys() end
 	end
 	function table_concat(t1,t2)
 		for i = 1,#t2 do
@@ -608,9 +610,9 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 		table_concat(new_nums,n)
 
 		if empty_spaces == 0 and #error_list == 0 then
-			dolater(animate_numbers,old_nums,new_nums,player_won)
+			animate_numbers(old_nums,new_nums,player_won)
 		else
-			dolater(animate_numbers,old_nums,new_nums)
+			animate_numbers(old_nums,new_nums)
 		end
 	end
 	function g:cheat()
@@ -643,13 +645,6 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 
 	function g:toggle_guess(r,c,guess,status)
 		local clone
-		if type(guess) == "table" then
-			error("this shouldt happen anymore")
-			for i = 1,#guess do
-			g:toggle_guess(r,c,guess[i],status)
-			end
-			return
-		end
 		--can't toggle a guess for a given
 		if givens[r][c] ~= 0 then
 			restore_keys()
@@ -663,77 +658,77 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 
 		--if there was an existing pen mark on the tile
 		if guesses[r][c].pen ~= 0 then
-			empty_spaces = empty_spaces + 1
-
-			-- remove the "penned" guess, add it to the undo list
-			o,n = g:rem_from_err_list(r, c, guesses[r][c].pen)	
-			table_concat(old_nums,o)
-			table_concat(new_nums,n)
-			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list, {"pen",r,c,guesses[r][c].pen})
-				if #undo_list > 100 then
-					table.remove(undo_list,1)
+				empty_spaces = empty_spaces + 1
+        
+				-- remove the "penned" guess, add it to the undo list
+				o,n = g:rem_from_err_list(r, c, guesses[r][c].pen)	
+				table_concat(old_nums,o)
+				table_concat(new_nums,n)
+				if status ~= "REDO" and status ~= "UNDO" then
+					table.insert(undo_list, {"pen",r,c,guesses[r][c].pen})
+					if #undo_list > 100 then
+						table.remove(undo_list,1)
+					end
+				elseif status ~= "REDO" and status ~= "UNDO" then
+					redo_list = {}
 				end
-			elseif status ~= "REDO" and status ~= "UNDO" then
-				redo_list = {}
-			end
-
-			guesses[r][c][guesses[r][c].pen] = false
-			local clone = Clone{
-				name    = "Guess "..guess,
-				source  = pencil_nums[ guess ],
-				x       = guess_x(guess),
-				y       = guess_y(guess),
-				scale   = {.5,.5},
-				opacity = 0,
-				anchor_point = {a_p.sm[guess][1],a_p.sm[guess][2]}
-			}
-			table.insert(new_nums,{clone,r,c})
-			guesses[r][c].pen = 0
-			--add the penciled guess
-			guesses[r][c][guess] = true
+        
+				guesses[r][c][guesses[r][c].pen] = false
+				clone = Clone{
+					name    = "Guess "..guess,
+					source  = pencil_nums[ guess ],
+					x       = guess_x(guess),
+					y       = guess_y(guess),
+					scale   = {.5,.5},
+					opacity = 0,
+					anchor_point = {a_p.sm[guess][1],a_p.sm[guess][2]}
+				}
+				table.insert(new_nums,{clone,r,c})
+				guesses[r][c].pen = 0
+				--add the penciled guess
+				guesses[r][c][guess] = true
 		--if toggling the guess off
 		elseif guesses[r][c][guess] then
-			guesses[r][c].num = guesses[r][c].num - 1
-			guesses[r][c][guess] = false
-			table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))--.opacity = 0
-
-			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list,{"toggle_guess",r,c,guess})
-				if #undo_list > 100 then
-					table.remove(undo_list,1)
+				guesses[r][c].num    = guesses[r][c].num - 1
+				guesses[r][c][guess] = false
+				table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..guess))
+        
+				if status ~= "REDO" and status ~= "UNDO" then
+					table.insert(undo_list,{"toggle_guess",r,c,guess})
+					if #undo_list > 100 then
+						table.remove(undo_list,1)
+					end
+				elseif status ~= "REDO" and status ~= "UNDO" then
+					redo_list = {}
 				end
-			elseif status ~= "REDO" and status ~= "UNDO" then
-				redo_list = {}
-			end
 
 		--if toggling it on
 		else
-			guesses[r][c].num = guesses[r][c].num + 1
-			guesses[r][c][guess] = true
-			clone = Clone{
-				name    = "Guess "..guess,
-				source  = pencil_nums[ guess ],
-				x       = guess_x(guess),
-				y       = guess_y(guess),
-				scale   = {.5,.5},
-				opacity = 0,
-				anchor_point = {a_p.sm[guess][1],a_p.sm[guess][2]}
-			}
-			table.insert(new_nums,{clone,r,c})
-			if status ~= "REDO" and status ~= "UNDO" then
-				table.insert(undo_list,{"toggle_guess",r,c,guess})
-				if #undo_list > 100 then
-					table.remove(undo_list,1)
+				guesses[r][c].num = guesses[r][c].num + 1
+				guesses[r][c][guess] = true
+				clone = Clone{
+					name    = "Guess "..guess,
+					source  = pencil_nums[ guess ],
+					x       = guess_x(guess),
+					y       = guess_y(guess),
+					scale   = {.5,.5},
+					opacity = 0,
+					anchor_point = {a_p.sm[guess][1],a_p.sm[guess][2]}
+				}
+				table.insert(new_nums,{clone,r,c})
+				if status ~= "REDO" and status ~= "UNDO" then
+					table.insert(undo_list,{"toggle_guess",r,c,guess})
+					if #undo_list > 100 then
+						table.remove(undo_list,1)
+					end
+				elseif status ~= "REDO" and status ~= "UNDO" then
+					redo_list = {}
 				end
-			elseif status ~= "REDO" and status ~= "UNDO" then
-				redo_list = {}
-			end
 		end
 		if empty_spaces == 0 and #error_list == 0 then
-			dolater(animate_numbers,old_nums,new_nums,player_won)
+			animate_numbers(old_nums,new_nums,player_won)
 		else
-			dolater(animate_numbers,old_nums,new_nums)
+			animate_numbers(old_nums,new_nums)
 		end
 
 	end
@@ -781,11 +776,11 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 			return
 		end
 		error_checking = true
-		local going_red = {}
+		local going_red = {} -- this prevents adding multiples of the same number to the tile
 
 		for i,e in ipairs(error_list) do
 			if #e[1] == 2 then
-			elseif #e[1] == 3 and going_red[ e[1][1]..e[1][2] ] == nil then
+			elseif #e[1] == 3 and going_red[ e[1][1].." "..e[1][2] ] == nil then
 					table.insert(old_nums,g.grid_of_groups[e[1][1]][e[1][2]]:find_child("Pen "..e[1][3]))
 					clone = Clone{
 								name    = "WR_Pen "..e[1][3],
@@ -794,10 +789,10 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 								anchor_point = {a_p.big[e[1][3]][1],a_p.big[e[1][3]][2]}
 					}
 					table.insert(new_nums,{clone,e[1][1],e[1][2]})
-					going_red[ e[1][1]..e[1][2] ] = true
+					going_red[ e[1][1].." "..e[1][2] ] = true
 			end
 			if #e[2] == 2 then
-			elseif #e[2] == 3 and going_red[ e[2][1]..e[2][2] ] == nil then
+			elseif #e[2] == 3 and going_red[ e[2][1].." "..e[2][2] ] == nil then
 					table.insert(old_nums,g.grid_of_groups[e[2][1]][e[2][2]]:find_child("Pen "..e[2][3]))
 					clone = Clone{
 						name    = "WR_Pen "..e[2][3],
@@ -807,7 +802,7 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 					}
 
 					table.insert(new_nums,{clone,e[2][1],e[2][2]})
-					going_red[ e[2][1]..e[2][2] ] = true
+					going_red[ e[2][1].." "..e[2][2] ] = true
 
 			end
 		end
@@ -833,13 +828,14 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 		else
 
 			local params = {}
-			for i = 1,9 do
-				if guesses[r][c][i] then
+			for i = 1,9 do   if guesses[r][c][i] then
+				
 					guesses[r][c][i] = false
-					table.insert(old_nums,g.grid_of_groups[r][c]:find_child("Guess "..i))--.opacity = 0
+					table.insert(old_nums,g.grid_of_groups[r][c]:
+						find_child("Guess "..i))
 					table.insert(params,i)
-				end
-			end
+
+			end              end
 			guesses[r][c].num = 0
 
 			table.insert(undo_list,{"set_pencil",r,c,params})
@@ -858,26 +854,26 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 			empty_spaces = empty_spaces - 1
 		end
 
-		for i = 1,9 do
-			if guesses[r][c][i] then
+		for i = 1,9 do    if guesses[r][c][i] then
+		
 				g:rem_from_err_list(r,c,i)
 				guesses[r][c][i] = false
 				table.insert(old_nums,
 					g.grid_of_groups[r][c]:find_child("Guess "..i))
-			end
-		end
+
+		end               end
 		for i = 1,#nums do
 			guesses[r][c][nums[i]] = true
 			clone = Clone{
-				name    = "Guess "..nums[i],
+				name    = "Guess "..nums[i]  ,
 				source  = pen_nums[ nums[i] ],
-				x       = guess_x(nums[i]),
-				y       = guess_y(nums[i]),
+				x       = guess_x(  nums[i] ),
+				y       = guess_y(  nums[i] ),
 				scale   = {.5,.5},
 				opacity = 0,
-				anchor_point = {a_p.sm[nums[i]][1],a_p.sm[nums[i]][2]}
+				anchor_point = { a_p.sm[nums[i]][1] ,
+				                 a_p.sm[nums[i]][2] }
 			}
-		--	clone.anchor_point = {a_p.sm[nums[i]][1],a_p.sm[nums[i]][2]}--clone.w/2,clone.h/2}
 			
 			table.insert(new_nums,{clone,r,c})
 			g:add_to_err_list(r,c,i)
@@ -902,8 +898,6 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 	}
 
 	function g:undo()
-	--	local r = nil
-	--	local c = nil
 		local params = {}
 
 		if #undo_list > 0 then
@@ -912,12 +906,10 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 			params = table.remove(undo_list)
 			table.insert(redo_list,{params[1],params[2],params[3],params[4]})
 			str_funcs[params[1]](g,params[2],params[3],params[4],"UNDO")
-		--	r = params[2]
-		--	c = params[3]
 		else
 			restore_keys()
 		end
-		return params[2],params[3]--r,c
+		return params[2],params[3]
 	end
 
 
