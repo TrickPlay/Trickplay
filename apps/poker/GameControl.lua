@@ -81,7 +81,7 @@ function(ctrl, model, ...)
 
       hand_ctrl:cleanup()
       hand_ctrl:reset()
-      pres:return_to_main_menu(still_playing, true)
+      pres:return_to_main_menu(ctrl:human_still_playing(), true)
       enable_event_listener(KbdEvent())
       model:get_controller(Components.PLAYER_BETTING):reset()
       model:set_active_component(Components.CHARACTER_SELECTION)
@@ -128,7 +128,7 @@ function(ctrl, model, ...)
 
       if ctrl:game_won() then
          hand_ctrl:cleanup()
-         pres:return_to_main_menu(still_playing)
+         pres:return_to_main_menu(ctrl:human_still_playing())
 
          disable_event_listeners()
          local disable_events_timer = Timer()
