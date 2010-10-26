@@ -542,7 +542,7 @@ if layered_timeline ~= nil then
 					return false
 end
             --background.opacity  = 255
-			view.mosaic_background.opacity = 0
+			--view.mosaic_background.opacity = 0
             --view.logo.opacity   = 0
 
             for i = 1,#view.on_screen_list do
@@ -654,10 +654,50 @@ end
 
 
     }
+	local forward_anim_prep = 
+	{
+        ["REGULAR"]    = function(pic)
+			pic.extra.end_x = pic.x
+			pic.extra.end_y = pic.y
+			pic.x = math.random(0,1)*1920
+            pic.y = math.random(0,1)*1080
+
+            pic.z = 400
+
+		end,
+		["LAYERED"] = function(pic)
+                if layered_timeline ~= nil then
+					layered_timeline:stop()
+                    layered_timeline:on_completed()
+					layered_timeline = nil
+					--reset_keys()
+                end
+                pic.extra.drop_points = {}
+				pic.opacity = 255
+                pic.z = 0
+
+                --function layered_timeline.on_started()
+                    pic.opacity = 255
+                    pic:raise_to_top()
+                    for i = 1, 13 do
+                        local child = pic:find_child("Clone "..i)
+						if child ~= nil then
+     	                   pic.extra.drop_points[i]    = {}
+        	                pic.extra.drop_points[i][1] = child.x
+            	            pic.extra.drop_points[i][2] = child.y
+	                        child.position = {pic.w/2,-pic.h/2}
+    	                    child.z        = 500
+        	                child.opacity  = 255
+						end
+                    end
+                --end
+
+		end
+	}
     local forward_animation =
     {
         ["REGULAR"]    = function(pic)
-
+--[[
             local end_pos = {pic.position[1],
                              pic.position[2]}
 
@@ -665,13 +705,13 @@ end
             pic.y = math.random(0,1)*1080
 
             pic.z = 400
-
+--]]
             pic:animate 
             {
                 duration = 500,
                 --mode     = EASE_IN_EXPO,
-                x        = end_pos[1],
-                y        = end_pos[2],
+                x        = pic.extra.end_x,--end_pos[1],
+                y        = pic.extra.end_y,--end_pos[2],
                 z        = 0,
                 on_completed = function()
 						view.license_box:raise_to_top()
@@ -718,17 +758,18 @@ end
                     loop      = false,
                     direction = "FORWARD"
                 }
-				local tmp = Timer{}
-				tmp.interval = 500
+				local tmp = Timer{interval = 100}
 				function tmp.on_timer()
 					reset_keys()
 					tmp:stop()
 					tmp = nil
 				end
 				tmp:start()
+--[[
                 local drop_points = {}
 				pic.opacity = 255
                 pic.z = 0
+
                 function layered_timeline.on_started()
                     pic.opacity = 255
                     pic:raise_to_top()
@@ -744,14 +785,15 @@ end
 						end
                     end
                 end
+--]]
                 function layered_timeline.on_new_frame(t,msecs)
                     local index    =  math.ceil(msecs/200)
                     local progress = (msecs - 200*(index-1))/200
                     for i = 1,index-1 do
                         local child    = pic:find_child("Clone "..i)
 						if child ~= nil then
-        	                child.position = {drop_points[i][1],
-            	                              drop_points[i][2]}
+        	                child.position = {pic.extra.drop_points[i][1],
+            	                              pic.extra.drop_points[i][2]}
                 	        child.scale    = { 1 , 1 }
                     	    child.z        = 0
 						end
@@ -759,9 +801,9 @@ end
                     local child = pic:find_child("Clone "..index)
 					if child ~= nil then
                 	    child.x = pic.w/2 + progress*(
-            	                     drop_points[index][1] - pic.w/2)
+            	                     pic.extra.drop_points[index][1] - pic.w/2)
         	            child.y = pic.h/2 + progress*(
-    	                             drop_points[index][2] - pic.h/2)
+    	                             pic.extra.drop_points[index][2] - pic.h/2)
 	                    child.scale = {2-progress,2-progress}
                     	child.z     = (1-progress)*500             
 					end
@@ -771,8 +813,8 @@ end
                     for i = 1, 13 do
                         local child    = pic:find_child("Clone "..i)
 						if child ~= nil then
-            	            child.position = { drop_points[i][1] ,
-        	                                   drop_points[i][2] }
+            	            child.position = { pic.extra.drop_points[i][1] ,
+        	                                   pic.extra.drop_points[i][2] }
     	                    child.scale    = {1,1}
 	                        child.z        = 0
 						end
@@ -995,6 +1037,36 @@ mosaic_timeline:start()
 
     }
 
+	local back_anim_prep = 
+	{
+		["REGULAR"] = function(pic)
+			pic.extra.end_x = pic.x
+			pic.extra.end_y = pic.y
+		end,
+		["LAYERED"] = function(pic)
+                if layered_timeline ~= nil then
+					layered_timeline:stop()
+                    layered_timeline:on_completed()
+					layered_timeline = nil
+					--reset_keys()
+                end
+
+                pic.extra.drop_points = {}
+
+                pic.z = 0
+              --  function layered_timeline.on_started()
+                    for i = 1, 13 do
+                        local child = pic:find_child("Clone "..i)
+						if child ~= nil then
+     	                   pic.extra.drop_points[i]    = {}
+        	                pic.extra.drop_points[i][1] = child.x
+            	            pic.extra.drop_points[i][2] = child.y
+						end
+                    end
+            --    end
+		end,
+	}
+
     local backward_animation =
     {
         ["REGULAR"]    = function(pic)
@@ -1014,13 +1086,6 @@ mosaic_timeline:start()
                     view.ui:remove(pic)
                     reset_keys()            
 
---[[handled in a different function
-
-                    if #off_screen_list > 6 then
-                        print("removing from off_screen list")
-                        off_screen_list[#off_screen_list] = nil
-                    end
---]]
 						view.license_box:raise_to_top()
 
                  end
@@ -1036,14 +1101,7 @@ mosaic_timeline:start()
                 on_completed = function()
                     z = 500
                     view.ui:remove(pic)
---[[ handled in a different function
-
-                    if #off_screen_list > 6 then
-                        print("removing from off_screen list")
-                        off_screen_list[#off_screen_list] = nil
-                    end
---]]
-						view.license_box:raise_to_top()
+					view.license_box:raise_to_top()
 
                 end
             }
@@ -1059,12 +1117,14 @@ mosaic_timeline:start()
             }
         end,
         ["LAYERED"]    = function(pic)
+--[[
                 if layered_timeline ~= nil then
 					layered_timeline:stop()
                     layered_timeline:on_completed()
 					layered_timeline = nil
 					--reset_keys()
                 end--lse
+--]]
                 layered_timeline = Timeline
                 {
                     name      = "Backward Layered Timeline",
@@ -1080,6 +1140,7 @@ mosaic_timeline:start()
 					tmp = nil
 				end
 				tmp:start()
+--[[
                 local drop_points = {}
                 pic.z = 0
                 function layered_timeline.on_started()
@@ -1090,13 +1151,9 @@ mosaic_timeline:start()
     	                    drop_points[i][1] = child.x
 	                        drop_points[i][2] = child.y
 						end
---[[
-                        child.position = {pic.w/2,-pic.h/2}
-                        child.z        = 500
-                        child.opacity  = 255
---]]
                     end
                 end
+--]]
                 function layered_timeline.on_new_frame(t,msecs)
                     local index    =  math.ceil(msecs/200)
                     local progress = (msecs - 200*(index-1))/200
@@ -1375,7 +1432,8 @@ mosaic_timeline:start()
         self:set_controller(SlideshowController(self))
     end
 
-    function view:preload_front()
+    function view:preload_front(pre)
+		if pre ~= true and outstanding_reqs >= 5 then return false end
         view.off_screen_list[#view.off_screen_list+1] = Group {z = 500}
         view.license_off[#view.license_off+1] = Text
 		{
@@ -1425,15 +1483,15 @@ mosaic_timeline:start()
                 return
             end
 			outstanding_reqs = outstanding_reqs + 1
-print(outstanding_reqs)
+			print(index,outstanding_reqs)
             local image = Image{
                 name      = "slide",
                 src       = pic,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
-			outstanding_reqs = outstanding_reqs - 1
-print(outstanding_reqs)
+					outstanding_reqs = outstanding_reqs - 1
+					print(index,outstanding_reqs)
 
                     --if it failed to load from the internet, then
                     --throw up the placeholder
@@ -1454,8 +1512,6 @@ print(outstanding_reqs)
                         {
                             name   = "slide",
                             source = failed_to_load,
---                            x      = 100,
- --                           y      = 100
                         })
                         on_screen_prep[view.styles[style_i2] ](placeholder,group)
                     else
@@ -1472,7 +1528,8 @@ print(outstanding_reqs)
         end
         load_pic(timeline,group,attempt)
      end
-    function view:preload_back()
+    function view:preload_back(pre)
+		if pre ~= true and outstanding_reqs >= 5 then return false end
         view.on_screen_list[#view.on_screen_list+1] = Group {z = 0}
         view.license_on[#view.license_on+1] = Text
 		{
@@ -1493,9 +1550,8 @@ print(outstanding_reqs)
         on_screen_prep[view.styles[style_i] ](clone,group)
         local index = view:get_controller():get_photo_index()  -
                                                   #view.on_screen_list +1-- + 2
-        print("preload back",index)
+        --print("preload back",index)
         local function load_pic(timeline,group)
-
 			local pic, title, auth 
 			pic, title, auth = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
@@ -1514,15 +1570,15 @@ print(outstanding_reqs)
                 return
             end
 			outstanding_reqs = outstanding_reqs + 1
-print(outstanding_reqs)
+print(index,outstanding_reqs)
             local image = Image{
                 name      = "slide",
 				src       = pic,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
-			oustanding_reqs = outstanding_reqs - 1
-print(outstanding_reqs)
+			outstanding_reqs = outstanding_reqs - 1
+print(index,outstanding_reqs)
 
                     if failed then
                         --loaded the placeholder for failed pics
@@ -1723,6 +1779,7 @@ print("toggle on")
         local photo_i    = controller:get_photo_index()
         local style_i    = controller:get_style_index()
         local menu_i     = controller:get_menu_index()
+
         if comp == Components.SLIDE_SHOW  then
             print("\n\nShowing SlideshowView UI")
             view.ui:raise_to_top()
@@ -1731,7 +1788,6 @@ print("toggle on")
             --if moving backwards
             if photo_i - view.prev_i < 0 then
                 if #view.on_screen_list > 1 then
-                ---    print("moving backward")
                     --grab the pic underneath the current one
                     local pic = table.remove(view.on_screen_list, 1 )
                     table.insert(view.off_screen_list, 1 ,pic)
@@ -1758,7 +1814,8 @@ print("toggle on")
 
                     pic:complete_animation()
                 
-                    backward_animation[ view.styles[style_i] ](pic)
+					back_anim_prep[view.styles[style_i]](pic)
+                   dolater(backward_animation[ view.styles[style_i] ],pic)
                 else
                --     print("on screen is 0")
 					reset_keys()
@@ -1800,8 +1857,8 @@ print("toggle on")
                    self.ui:add(pic)
                    pic:complete_animation()
                    pic.opacity = 255
-
-                   forward_animation[ view.styles[style_i] ](pic)
+					forward_anim_prep[view.styles[style_i]](pic)
+                   dolater(forward_animation[ view.styles[style_i] ],pic)
 
                 else
              --       print("off screen is 0")

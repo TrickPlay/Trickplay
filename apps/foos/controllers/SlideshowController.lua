@@ -30,14 +30,14 @@ SlideshowController = Class(Controller, function(self, view, ...)
         menu_is_visible = false
 
         for i = 1,5 do
-            view:preload_front()
+            view:preload_front(true)
         end
 		local upper = i
 		if i > 4 then
 			upper = 4
 		end
 		for i = 1, upper do
-			view:preload_back()
+			view:preload_back(true)
 		end
 		if view.license_on[1] then
 			view.license_box:add(view.license_on[1])
@@ -158,12 +158,16 @@ reset_keys()
 
         --moving foward through the photos
         if dir == Directions.RIGHT then
-            view:preload_front()
+            if view:preload_front() == false then
+				photo_index = photo_index - dir[1]
+			end
         --moving back
         elseif dir == Directions.LEFT then
             --toss the end of the off_screen_list
             if photo_index >= 4  then
-                view:preload_back()
+                if view:preload_back() == false then
+					photo_index = photo_index - dir[1]
+				end
             end
         end 
         self:get_model():notify()
