@@ -27,6 +27,16 @@ TutorialView = Class(View, function(self, model, ...)
     function self:update(p, c, n)
     
         if model:get_active_component() == Components.TUTORIAL then
+            local c = Canvas{
+                size = {1804, 964},
+                position = {55, 60}
+            }
+            c:begin_painting()
+            c:set_source_color("FFFFFF")
+            c:round_rectangle(0, 0, 1804, 964, 15)
+            c:fill()
+            c:finish_painting()
+            screen:add(c)
             if not tutorial[1] then
                 for i=1, TUTORIAL_LENGTH do
                     tutorial[i] = Popup:new{
