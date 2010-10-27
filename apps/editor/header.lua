@@ -32,7 +32,7 @@ BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 -- Background image 
 BG_IMAGE = Image { name= "bg_img", src = "transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
 
-CURRENT_DIR 	  = "./editor"
+CURRENT_DIR 	  = "./editor/working_space"
 ---------------------
 -- Variables
 ---------------------
@@ -119,5 +119,8 @@ ui =
             }
         }
     }
+
+
+attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "x_scale", "y_scale", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
 
 

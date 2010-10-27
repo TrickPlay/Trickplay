@@ -1,174 +1,81 @@
 
 function inspector_apply (v, inspector)
-      local org_object, new_object, color_t, x_rotation_t, y_rotation_t, z_rotation_t
+      local org_object, new_object, color_t 
       local function toboolean(s) if (s == "true") then return true else return false end end
-
       if(v.type == "Rectangle") then
            org_object = Rectangle{}
            new_object = Rectangle{}
-
-	   color_t = v.color
-           org_object.color = v.color
-           color_t[1] = tonumber(inspector:find_child("rect_r"):find_child("input_text").text)
-           color_t[2] = tonumber(inspector:find_child("rect_g"):find_child("input_text").text)
-           color_t[3] = tonumber(inspector:find_child("rect_b"):find_child("input_text").text)
-	   v.color = color_t
-           new_object.color = v.color
-
-	   color_t = v.border_color
-           org_object.border_color = v.border_color
-           color_t[1] = tonumber(inspector:find_child("bord_r"):find_child("input_text").text)
-           color_t[2] = tonumber(inspector:find_child("bord_g"):find_child("input_text").text)
-           color_t[3] = tonumber(inspector:find_child("bord_b"):find_child("input_text").text)
-	   v.border_color = color_t
-           new_object.border_color = v.border_color
-
-           org_object.border_width = v.border_width
-           v.border_width = tonumber(inspector:find_child("bwidth"):find_child("input_text").text)
-           new_object.border_width = v.border_width
-
---[[
-	   x_rotation_t = v.x_rotation
-	   y_rotation_t = v.y_rotation
-	   z_rotation_t = v.z_rotation
-           org_object.x_rotation = v.x_rotation
-           org_object.y_rotation = v.y_rotation
-           org_object.z_rotation = v.z_rotation
-           x_rotation_t[1] = tonumber(inspector:find_child("x_ang"):find_child("input_text").text)
-           y_rotation_t[1] = tonumber(inspector:find_child("y_ang"):find_child("input_text").text)
-           z_rotation_t[1] = tonumber(inspector:find_child("z_ang"):find_child("input_text").text)
-	   v.x_rotaton = x_rotation_t
-	   v.y_rotaton = y_rotation_t
-	   v.z_rotaton = z_rotation_t
-           new_object.x_rotation= v.x_rotation
-           new_object.y_rotation= v.y_rotation
-           new_object.z_rotation= v.z_rotation
-]]
-
-       elseif (v.type == "Text") then
+      elseif (v.type == "Text") then
            org_object = Text{}
            new_object = Text{}
-
-	   color_t = v.color
-           org_object.color = v.color
-           color_t[1] = tonumber(inspector:find_child("r"):find_child("input_text").text)
-           color_t[2] = tonumber(inspector:find_child("g"):find_child("input_text").text)
-           color_t[3] = tonumber(inspector:find_child("b"):find_child("input_text").text)
-	   v.color = color_t
-           new_object.color = v.color
-
-           org_object.font = v.font
-           v.font = inspector:find_child("font"):find_child("input_text").text
-           new_object.font = v.font
-
-           --org_object.text = v.text
-           --v.text = inspector:find_child("text"):find_child("input_text").text
-           --new_object.text = v.text
-
-           org_object.editable = v.editable
-           v.editable = toboolean(inspector:find_child("editable"):find_child("input_text").text)
-           new_object.editable = v.editable
-
-           org_object.wants_enter = v.wants_enter
-           v.wants_enter = toboolean(inspector:find_child("wants_enter"):find_child("input_text").text)
-           new_object.wants_enter = v.wants_enter
-
-           org_object.wrap = v.wrap
-           v.wrap = toboolean(inspector:find_child("wrap"):find_child("input_text").text)
-           new_object.wrap = v.wrap
-
-           org_object.wrap_mode = v.wrap_mode
-           v.wrap_mode = string.upper(inspector:find_child("wrap_mode"):find_child("input_text").text)
-           new_object.wrap_mode = v.wrap_mode
-
-       elseif (v.type == "Image") then
+      elseif (v.type == "Image") then
            org_object = Image{}
            new_object = Image{}
-
-           org_object.src = v.src
-           v.src = inspector:find_child("src"):find_child("input_text").text
-           new_object.src = v.src
-
-           org_object.clip = v.clip
-           local clip_t = {}
-           clip_t[1] = inspector:find_child("cx"):find_child("input_text").text
-           clip_t[2] = inspector:find_child("cy"):find_child("input_text").text
-           clip_t[3] = inspector:find_child("cw"):find_child("input_text").text
-           clip_t[4] = inspector:find_child("ch"):find_child("input_text").text
-           v.clip = clip_t
-           new_object.clip = v.clip
-		 
---[[
-           x_rotation_t = v.x_rotation
-	   y_rotation_t = v.y_rotation
-	   z_rotation_t = v.z_rotation
-           org_object.x_rotation = v.x_rotation
-           org_object.y_rotation = v.y_rotation
-           org_object.z_rotation = v.z_rotation
-           x_rotation_t[1] = tonumber(inspector:find_child("x_angle"):find_child("input_text").text)
-           y_rotation_t[1] = tonumber(inspector:find_child("y_angle"):find_child("input_text").text)
-           z_rotation_t[1] = tonumber(inspector:find_child("z_angle"):find_child("input_text").text)
-	   v.x_rotaton = x_rotation_t
-	   v.y_rotaton = y_rotation_t
-	   v.z_rotaton = z_rotation_t
-           new_object.x_rotation= v.x_rotation
-           new_object.y_rotation= v.y_rotation
-           new_object.z_rotation= v.z_rotation
-]]
-
-
-       elseif (v.type == "Clone") then
+      elseif (v.type == "Clone") then
            org_object = Clone{}
            new_object = Clone{}
-
-           org_object.source = v.source
-           v.src = inspector:find_child("source"):find_child("input_text").text
-           new_object.source = v.source
-
-       elseif (v.type == "Group") then
+      elseif (v.type == "Group") then
            org_object = Group{}
            new_object = Group{}
+      end
 
-	   org_object.scale = v.scale
-           local scale_t = {}
-           scale_t[1] = inspector:find_child("x_scale"):find_child("input_text").text
-           scale_t[2] = inspector:find_child("y_scale"):find_child("input_text").text
-           v.scale = scale_t
-           new_object.scale = v.scale
-		 
+      if(v.type ~= "Video") then 
+          org_object.name = v.name
+          v.name = inspector:find_child("name"):find_child("input_text").text
+          new_object.name = v.name
 
-       end
-       if(v.type ~= "Video") then 
-       org_object.name = v.name
-       v.name = inspector:find_child("name"):find_child("input_text").text
-       new_object.name = v.name
+          org_object.x = v.x
+          v.x = tonumber(inspector:find_child("x"):find_child("input_text").text)
+          new_object.x = v.x
 
-       org_object.x = v.x
-       v.x = tonumber(inspector:find_child("x"):find_child("input_text").text)
-       new_object.x = v.x
+          org_object.y = v.y
+          v.y = tonumber(inspector:find_child("y"):find_child("input_text").text)
+          new_object.y = v.y
 
-       org_object.y = v.y
-       v.y = tonumber(inspector:find_child("y"):find_child("input_text").text)
-       new_object.y = v.y
+          org_object.z = v.z
+          v.z = tonumber(inspector:find_child("z"):find_child("input_text").text)
+          new_object.z = v.z
 
-       org_object.z = v.z
-       v.z = tonumber(inspector:find_child("z"):find_child("input_text").text)
-       new_object.z = v.z
+          org_object.w = v.w
+          v.w = tonumber(inspector:find_child("w"):find_child("input_text").text)
+          new_object.w = v.w
 
-       org_object.w = v.w
-       v.w = tonumber(inspector:find_child("w"):find_child("input_text").text)
-       new_object.w = v.w
+          org_object.h = v.h
+          v.h = tonumber(inspector:find_child("h"):find_child("input_text").text)
+          new_object.h = v.h
 
-       org_object.h = v.h
-       v.h = tonumber(inspector:find_child("h"):find_child("input_text").text)
-       new_object.h = v.h
+          org_object.opacity = v.opacity
+          v.opacity = tonumber(inspector:find_child("opacity"):find_child("input_text").text)
+          --v.extra.org_opacity = tonumber(inspector:find_child("opacity"):find_child("input_text").text)
+          new_object.opacity = v.opacity
+	  
+          local x_rotation_t ={} 
+	  local y_rotation_t ={}
+	  local z_rotation_t ={}
 
-       org_object.opacity = v.opacity
-       v.opacity = tonumber(inspector:find_child("opacity"):find_child("input_text").text)
-       new_object.opacity = v.opacity
+          x_rotation_t = v.x_rotation
+	  y_rotation_t = v.y_rotation
+	  z_rotation_t = v.z_rotation
+          org_object.x_rotation = v.x_rotation
+          org_object.y_rotation = v.y_rotation
+          org_object.z_rotation = v.z_rotation
 
-       table.insert(undo_list, {v.name, CHG, org_object, new_object})
-       else 
+          x_rotation_t[1] = tonumber(inspector:find_child("x_angle"):find_child("input_text").text)
+          y_rotation_t[1] = tonumber(inspector:find_child("y_angle"):find_child("input_text").text)
+          z_rotation_t[1] = tonumber(inspector:find_child("z_angle"):find_child("input_text").text)
+	  v.x_rotation = x_rotation_t 
+	  v.y_rotation = y_rotation_t
+	  v.z_rotation = z_rotation_t
+
+          new_object.x_rotation= v.x_rotation
+          new_object.y_rotation= v.y_rotation
+          new_object.z_rotation= v.z_rotation
+
+	  org_object.anchor_point = v.anchor_point
+          v.anchor_point = inspector:find_child("anchor_point"):find_child("anchor").extra.anchor_point
+          new_object.anchor_point = v.anchor_point
+
+       else  --Video 
 	   org_object = {}
            new_object = {}
 	   org_object.name = v.name
@@ -208,9 +115,94 @@ function inspector_apply (v, inspector)
      	   end
 
            new_object.loop = toboolean(v.loop)
+      end 
 
-       end 
+
+      if(v.type == "Rectangle") then
+	   color_t = v.color
+           org_object.color = v.color
+           color_t[1] = tonumber(inspector:find_child("rect_r"):find_child("input_text").text)
+           color_t[2] = tonumber(inspector:find_child("rect_g"):find_child("input_text").text)
+           color_t[3] = tonumber(inspector:find_child("rect_b"):find_child("input_text").text)
+           color_t[4] = tonumber(inspector:find_child("rect_a"):find_child("input_text").text)
+	   v.color = color_t
+           new_object.color = v.color
+
+	   color_t = v.border_color
+           org_object.border_color = v.border_color
+           color_t[1] = tonumber(inspector:find_child("bord_r"):find_child("input_text").text)
+           color_t[2] = tonumber(inspector:find_child("bord_g"):find_child("input_text").text)
+           color_t[3] = tonumber(inspector:find_child("bord_b"):find_child("input_text").text)
+	   v.border_color = color_t
+           new_object.border_color = v.border_color
+
+           org_object.border_width = v.border_width
+           v.border_width = tonumber(inspector:find_child("bwidth"):find_child("input_text").text)
+           new_object.border_width = v.border_width
+
+       elseif (v.type == "Text") then
+	   color_t = v.color
+           org_object.color = v.color
+           color_t[1] = tonumber(inspector:find_child("r"):find_child("input_text").text)
+           color_t[2] = tonumber(inspector:find_child("g"):find_child("input_text").text)
+           color_t[3] = tonumber(inspector:find_child("b"):find_child("input_text").text)
+	   v.color = color_t
+           new_object.color = v.color
+
+           org_object.font = v.font
+           v.font = inspector:find_child("font"):find_child("input_text").text
+           new_object.font = v.font
+
+           org_object.editable = v.editable
+           v.editable = toboolean(inspector:find_child("editable"):find_child("input_text").text)
+           new_object.editable = v.editable
+
+           org_object.wrap = v.wrap
+           v.wrap = toboolean(inspector:find_child("wrap"):find_child("input_text").text)
+           new_object.wrap = v.wrap
+
+           org_object.wrap_mode = v.wrap_mode
+           v.wrap_mode = string.upper(inspector:find_child("wrap_mode"):find_child("input_text").text)
+           new_object.wrap_mode = v.wrap_mode
+
+       elseif (v.type == "Image") then
+           org_object.src = v.src
+           v.src = inspector:find_child("src"):find_child("input_text").text
+           new_object.src = v.src
+
+           org_object.clip = v.clip
+           local clip_t = {}
+           clip_t[1] = inspector:find_child("cx"):find_child("input_text").text
+           clip_t[2] = inspector:find_child("cy"):find_child("input_text").text
+           clip_t[3] = inspector:find_child("cw"):find_child("input_text").text
+           clip_t[4] = inspector:find_child("ch"):find_child("input_text").text
+	   if (org_object.w == new_object.w and org_object.h == new_object.h) and 
+	      (org_object.clip ~= new_object.clip) then 
+                clip_t[3] = new_object.w 
+           	clip_t[4] = new_object.h 
+	   end 
+           v.clip = clip_t
+           new_object.clip = v.clip
+		 
+       elseif (v.type == "Clone") then
+	   org_object.scale = v.scale
+           local scale_t = {}
+           scale_t[1] = inspector:find_child("x_scale"):find_child("input_text").text
+           scale_t[2] = inspector:find_child("y_scale"):find_child("input_text").text
+           v.scale = scale_t
+           new_object.scale = v.scale
+
+       elseif (v.type == "Group") then
+	   org_object.scale = v.scale
+           local scale_t = {}
+           scale_t[1] = inspector:find_child("x_scale"):find_child("input_text").text
+           scale_t[2] = inspector:find_child("y_scale"):find_child("input_text").text
+           v.scale = scale_t
+           new_object.scale = v.scale
+       end
+
        mouse_mode = S_SELECT
+       table.insert(undo_list, {v.name, CHG, org_object, new_object})
        return org_object, new_object
 end	
 

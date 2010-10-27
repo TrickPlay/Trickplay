@@ -1,7 +1,8 @@
 local factory = {}
+
 function factory.make_dropdown( size , color )
 
-    local BORDER_WIDTH= 3--6
+    local BORDER_WIDTH= 3
     local POINT_HEIGHT=34
     local POINT_WIDTH=60
     local BORDER_COLOR="FFFFFF5C"
@@ -107,13 +108,14 @@ end
 function factory.make_text_menu_item( assets , caption )
 
     local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
-    local PADDING_X     = 7 -- 7  The focus ring has this much padding around it
+    local PADDING_X     = 7 -- The focus ring has this much padding around it
     local PADDING_Y     = 7
     local WIDTH         = 330 + ( PADDING_X * 2 )
     local HEIGHT        = 46  + ( PADDING_Y * 2 )
-    local BORDER_WIDTH  = 1-- 2
+    local BORDER_WIDTH  = 1
     local BORDER_COLOR  = "FFFFFF"
     local BORDER_RADIUS = 12
+    local ITEM_SPACE = "\t\t\t"
     
     local group = Group{}
 
@@ -131,7 +133,23 @@ function factory.make_text_menu_item( assets , caption )
         ring:finish_painting()
         return ring
     end
-    
+
+    local function make_line()
+    	local LINE_WIDTH    =7 
+    	local LINE_COLOR    = "FFFFFF5C"
+	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
+        line:begin_painting()
+        line:new_path()
+        line:move_to (0,0)
+        line:line_to (WIDTH, 0)
+    	line:set_line_width (LINE_WIDTH)
+        line:set_source_color(LINE_COLOR)
+    	line:stroke (true)
+    	line:fill (true)
+        line:finish_painting()
+        return line
+    end 
+
     local text = Text{ text = caption }:set( STYLE )
     text.name = "caption"
     text.reactive = true
@@ -139,30 +157,15 @@ function factory.make_text_menu_item( assets , caption )
     local focus = assets( "assets/button-focus.png" )
     local text_category, line_category
     
-    if (caption == "TEXT".."\t\t\t".."[T]") then 
+    if (caption == "TEXT"..ITEM_SPACE.."[T]") then 
 	text_category = Text{ text = "INSERT : "}:set(STYLE)
     elseif (caption == "LEFT           ") then
 	text_category = Text{ text = "ALIGNMENT : "}:set(STYLE)
     elseif (caption == "H_SPACE	  ") then
 	text_category = Text{ text = "DISTRIBUTION : "}:set(STYLE)
-    elseif ( caption == "DELETE".."\t\t\t".."[D]" or 
+    elseif ( caption == "DELETE"..ITEM_SPACE.."[D]" or 
     	     caption ==  "BRING TO FRONT" ) then 
-        local function make_line()
-    		local LINE_WIDTH    =7 
-    	        local LINE_COLOR    = "FFFFFF5C"
-		local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
-        	line:begin_painting()
-        	line:new_path()
-        	line:move_to (0,0)
-        	line:line_to (WIDTH, 0)
-    		line:set_line_width (LINE_WIDTH)
-        	line:set_source_color(LINE_COLOR)
-    		line:stroke (true)
-    		line:fill (true)
-        	line:finish_painting()
-        	return line
-    	end 
-
+        
 	line_category = make_line()
     end 
         
@@ -415,45 +418,34 @@ function factory.make_app_tile( assets , caption , app_id )
 
 end
 
+local code_map =
+{
+        [ "Text" ] = function()  size = {800, 800} color =  {0, 25, 25, 255} return size, color end,
+        [ "Image" ] = function()  size = {800, 550} color =  {0, 25, 25, 255}  return size, color end,
+        [ "Rectangle" ] = function()  size = {800, 600} color =  {0, 25, 25, 255} return size, color end,
+        [ "Clone" ] = function()  size = {800, 550} color =  {0, 25, 25, 255} return size, color end,
+        [ "Group" ] = function()  size = {800, 550} color =  {0, 25, 25, 255} return size, color end,
+}
+
+local color_map =
+{
+        [ "Text" ] = function()  size = {500, 920} color = "472446" return size, color end,
+        [ "Image" ] = function()  size = {500, 850} color = "5a252b" return size, color end,
+        [ "Rectangle" ] = function()  size = {500, 840} color = "2c420c" return size, color end,
+        [ "Clone" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
+        [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
+        [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
+        [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
+        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
+}
+
+-------------------------------------------------------------------------------
+-- Makes a popup window background 
+-------------------------------------------------------------------------------
 
 function factory.make_popup_bg(o_type, file_list_size)
-    local size, color
 
-   -- Set canvas size and color according to o_type 
-    if(o_type == "Text") then 
-         size = {500, 790}
-    	 color = "472446" -- bora
-    elseif(o_type == "Image") then
-         size = {500, 770}
-    	 color = "5a252b" -- ppat
-    elseif(o_type == "Rectangle") then
-         size = {500, 755}
-    	 color = "2c420c" -- ssuk
-    elseif(o_type == "Clone" or o_type == "Group") then
-         size = {500, 500}
-    	 color = "6d2b17" -- bam
-    elseif(o_type == "Video") then
-	 size = {500,580}
-    	 color = {0, 25, 25, 255}
-    elseif(o_type == "Code") then
-	 if(file_list_size == "Text") then 
-         	size = {800, 630}
-	 elseif(file_list_size == "Image") then 
-         	size = {800, 380}
-	 elseif(file_list_size == "Rectangle") then 
-         	size = {800, 470}
-	 elseif(file_list_size == "Clone") then 
-         	size = {800, 380}
-	 elseif(file_list_size == "Video") then 
-         	size = {1500, 850}
-	 else 
-         	size = {800, 380}
-	 end 
-    	 color = {0, 25, 25, 255}
-    else 
-	 size = {900, file_list_size + 180} 
-	 color = "5a252b"
-    end 
+    local size, color = color_map[o_type](file_list_size)
 
     local BORDER_WIDTH= 3 
     local POINT_HEIGHT=34
@@ -554,7 +546,11 @@ function factory.make_popup_bg(o_type, file_list_size)
     return c
 end 
 
-function factory.make_msgw_button_item( assets , caption )
+-------------------------------------------------------------------------------
+-- Makes a messsage window button item 
+-------------------------------------------------------------------------------
+
+function factory.make_msgw_button_item( assets , caption)
 
     local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
     local PADDING_X     = 7 
@@ -601,17 +597,27 @@ function factory.make_msgw_button_item( assets , caption )
         }
     }
     
+    
+
     function group.extra.on_focus_in()
         focus.opacity = 255
+	group:grab_key_focus(group)
+	--print (caption, "button group grab key focus")
     end
     
     function group.extra.on_focus_out()
         focus.opacity = 0
     end
-    
-    return group
+	
+--group.name = name -- (savefile, cancel, yes, no, openfile, reopenfile, open_imagefile, reopenImg, open_videofile)
+
+    return group, text
 
 end
+
+-------------------------------------------------------------------------------
+-- Makes an x(close) box
+-------------------------------------------------------------------------------
 
 function factory.make_xbox()
     local BORDER_WIDTH= 3 
@@ -654,7 +660,9 @@ function factory.make_xbox()
     return c
 end 
 
---[[ 
+-------------------------------------------------------------------------------
+-- Makes a focus(green) ring 
+-------------------------------------------------------------------------------
 function factory.draw_focus_ring()
         local ring = Canvas{ size = {650, 60} }
         ring:begin_painting()
@@ -665,28 +673,14 @@ function factory.draw_focus_ring()
         ring:finish_painting()
         return ring
 end
-]]
-function factory.draw_focus_ring(w, h)
-        local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color("1b911b")
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH /2,
-            PADDING_Y + BORDER_WIDTH /2,
-            w - BORDER_WIDTH - PADDING_X * 2 ,
-            h - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
-        return ring
-end
 
-
+-------------------------------------------------------------------------------
+-- Makes a focus(white, input) ring 
+-------------------------------------------------------------------------------
 function factory.draw_ring()
 	local ring = Canvas{ size = {650, 60} }
         ring:begin_painting()
-        ring:set_source_color( "1b911b" )
+        ring:set_source_color( "FFFFFFC0" )
         ring:round_rectangle( 7 + 1/2, 7 + 1/2, 635, 45, 12)
     	ring:set_line_width (4)
         ring:stroke()
@@ -694,6 +688,9 @@ function factory.draw_ring()
         return ring
 end
 
+-------------------------------------------------------------------------------
+-- Makes a line for categorizing menu items 
+-------------------------------------------------------------------------------
 function factory.draw_line()
     local PADDING_Y     = 7   
     local WIDTH         = 900
@@ -714,6 +711,10 @@ function factory.draw_line()
         return line
 end 
 
+
+-------------------------------------------------------------------------------
+-- Makes a popup window contents (attribute name, input text, input button)
+-------------------------------------------------------------------------------
 function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s) 
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
     local TEXT_SIZE     = 26
@@ -778,13 +779,21 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local group = Group {}
     local text, input_text, ring, focus, line, button
 
+
     if(item_n == "title" or item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
 	text.position = {PADDING_X, 0}
     	group:add(text)
-        group.size = {WIDTH, HEIGHT}
+	if(item_v == "SCALE") then 
+             group.size = {WIDTH/4, HEIGHT}
+	else
+             group.size = {WIDTH, HEIGHT}
+	end 
     elseif (item_n =="line") then 
         line = make_line()
+	if(item_s =="hide") then 
+		line.opacity = 0 
+        end 
 	group:add(line)
         group.size = {WIDTH, LINE_WIDTH + PADDING_Y}
     elseif (item_n == "button") then 
@@ -804,9 +813,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              if key == keys.Return then
                   if (item_v == "view code") then 
 		      screen:remove(inspector)
+		      mouse_mode = S_SELECT
 		      current_inspector = nil
 		      --editor.n_selected(v, true)
-                      screen.grab_key_focus(screen) 
+                      screen:grab_key_focus(screen) 
 		      -- org_obj, new_obj = inspector_apply (v, inspector) 
 		      editor.view_code(v)
 	              return true
@@ -814,14 +824,17 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
+		      mouse_mode = S_SELECT
+		     
 		      current_inspector = nil
-                      screen.grab_key_focus(screen) 
+                      screen:grab_key_focus(screen) 
 	              return true
 		  elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
+		      mouse_mode = S_SELECT
 		      current_inspector = nil
 		      editor.n_selected(v, true)
-                      screen.grab_key_focus(screen) 
+                      screen:grab_key_focus(screen) 
 	              return true
 		  end 
  	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
@@ -864,25 +877,26 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     group.extra.on_focus_in()
 	     if (item_v == "view code") then 
 		      screen:remove(inspector)
+		      mouse_mode = S_SELECT
 		      current_inspector = nil
-		      --editor.n_selected(v, true)
-                      screen.grab_key_focus(screen) 
-		      -- org_obj, new_obj = inspector_apply (v, inspector) 
+                      screen:grab_key_focus(screen) 
 		      editor.view_code(v)
 	     elseif (item_v == "apply") then 
 		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
+		      mouse_mode = S_SELECT
 		      current_inspector = nil
-                      screen.grab_key_focus(screen) 
+                      screen:grab_key_focus(screen) 
 	     elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
+		      mouse_mode = S_SELECT
 		      current_inspector = nil
 		      editor.n_selected(v, true)
-                      screen.grab_key_focus(screen) 
+                      screen:grab_key_focus(screen) 
 	     end 
 
-             return true;
+             return true
 	end 
     	group:add(button)
 
@@ -895,13 +909,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         text.position  = {(button.w - text.w)/2, (button.h - text.h)/2}
     	group:add(text)
 
-    	--next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
-    	--group:add(next_text)
-
-
         function group.extra.on_focus_in()
              current_focus = group
-	     button:grab_key_focus()
+	     button:grab_key_focus(button)
 	     button.opacity = 0 
              focus.opacity = 255
         end
@@ -917,29 +927,32 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
         local space = WIDTH - PADDING_X  
 
+
         if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
+	elseif item_n == "anchor_point" then 
+	     text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
+             text.position  = {WIDTH - space , 0}
+    	     group:add(text)
+	     local anchor_pnt = factory.draw_anchor_point(v)
+	     anchor_pnt.position = {300, 0}
+	     group:add(anchor_pnt)
+             return group
 	else 
     	     text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
-             text.position  = {WIDTH - space , PADDING_Y} --kkk
+             text.position  = {WIDTH - space , PADDING_Y}
     	     group:add(text)
 
 	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
 	     space = space - string.len(item_s) * 20
-             if (item_n =="font" or item_n == "color") then 
+             if (item_n =="font" ) then
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
-	     elseif (item_n == "base_size") then 
-	          input_box_width = WIDTH - 200 - ( PADDING_X * 2) 
-             elseif(item_n == "wrap_mode" or item_n == "border_color") then 
+             elseif(item_n == "wrap_mode" ) then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
+             elseif(item_n == "rect_r" or item_n == "rect_g" or item_n == "rect_b" or item_n == "rect_a" ) then 
+	          input_box_width = WIDTH - 350 - ( PADDING_X * 2) 
 	     end
         end 
-	--print("item name ", item_n)
-	--print ("input_box_width", input_box_width)
-        --print("space", space)
-
-    	--next_text = Text {name = "next_attr", text = n_item_n, opacity = 0}:set(STYLE)
-    	--group:add(next_text)
 
         ring = make_ring(input_box_width, HEIGHT + 5) 
 	ring.name = "ring"
@@ -966,11 +979,17 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
  	       current_focus.extra.on_focus_out()
 	       current_focus = group
 	       group.extra.on_focus_in()
-               return true;
+               return true
         end
 
+	function group:on_button_down(x,y,button,num_clicks)
+ 	       current_focus.extra.on_focus_out()
+	       current_focus = group
+	       group.extra.on_focus_in()
+               return true
+        end
 
-
+	
   	function input_text:on_key_down(key)
 	       if key == keys.Return or
                   (key == keys.Tab and shift == false) or 
@@ -1014,7 +1033,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              ring.opacity = 0
              input_text.cursor_visible = true
              focus.opacity = 255
-	     input_text:grab_key_focus()
+	     input_text:grab_key_focus(input_text)
         end
 
         function group.extra.on_focus_out()
@@ -1023,8 +1042,221 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              ring.opacity = 255
         end 
     end
-    print ("group width", group.w)
     return group
 end
  
+function factory.draw_anchor_point(v, inspector)
+    local h_pos = 0
+    local v_pos = 0
+    local cur_posint = left_top
+    local center, left_top, left_mid, left_bottom, mid_top, mid_bottom, right_top, right_mid, right_bottom
+ 
+    local function find_current_anchor (v)
+        if(v.anchor_point == nil) then 
+	     return h_pos, v_pos
+        end 
+        if (v.anchor_point[1] < v.w/2) then h_pos = 0
+        elseif (v.anchor_point[1] > v.w/2) then h_pos = 2 
+        else h_pos = 1
+        end 
+
+        if (v.anchor_point[2] < v.h/2) then v_pos = 0 
+        elseif (v.anchor_point[2] > v.h/2) then v_pos = 2 
+        else v_pos = 1 
+        end 
+    end 
+
+    local function mark_current_anchor()
+	if(h_pos == 0 and v_pos == 0) then 
+		left_top.color = {200,0,0,200}
+		cur_point = left_top
+		anchor_pnt.extra.anchor_point = {0, 0}
+	elseif(h_pos == 0 and v_pos == 1) then 
+		left_mid.color = {200,0,0,200} 
+		cur_point = left_mid
+		anchor_pnt.extra.anchor_point = {0, v.h/2}
+	elseif(h_pos == 0 and v_pos == 2) then 
+		left_bottom.color = {200,0,0,200}
+		cur_point = left_bottom
+		anchor_pnt.extra.anchor_point = {0, v.h}
+	elseif(h_pos == 1 and v_pos == 0) then 
+		mid_top.color = {200,0,0,200} 
+		cur_point = mid_top
+		anchor_pnt.extra.anchor_point = {v.w/2, 0}
+	elseif(h_pos == 1 and v_pos == 1) then 
+		center.color = {200,0,0,200} 
+		cur_point = center
+		anchor_pnt.extra.anchor_point = {v.w/2, v.h/2}
+	elseif(h_pos == 1 and v_pos == 2) then 
+		mid_bottom.color = {200,0,0,200} 
+		cur_point = mid_bottom
+		anchor_pnt.extra.anchor_point = {v.w/2, v.h}
+	elseif(h_pos == 2 and v_pos == 0) then 
+		right_top.color = {200,0,0,200} 
+		cur_point = right_top
+		anchor_pnt.extra.anchor_point = {v.w, 0}
+	elseif(h_pos == 2 and v_pos == 1) then 
+		right_mid.color = {200,0,0,200} 
+		cur_point = right_mid
+		anchor_pnt.extra.anchor_point = {v.w, v.h/2}
+	elseif(h_pos == 2 and v_pos == 2) then 
+		right_bottom.color = {200,0,0,200} 
+		cur_point = right_bottom
+		anchor_pnt.extra.anchor_point = {v.w, v.h}
+	end 
+    end 
+
+    function create_point_on_button_down(point)
+	function point:on_button_down(x,y,button,num)
+		cur_point.color = {25,25,25,250}
+		-- point.color = {200,0,0,200} 
+		if(point.name == "center") then h_pos = 1 v_pos = 1
+		elseif(point.name == "left_top") then h_pos = 0 v_pos = 0
+		elseif(point.name == "left_mid") then h_pos = 0 v_pos = 1
+		elseif(point.name == "left_bottom") then h_pos = 0 v_pos = 2
+		elseif(point.name == "mid_top") then h_pos = 1 v_pos = 0
+		elseif(point.name == "mid_bottom") then h_pos = 1 v_pos = 2
+		elseif(point.name == "right_top") then h_pos = 2 v_pos = 0
+		elseif(point.name == "right_mid") then h_pos = 2 v_pos = 1
+		elseif(point.name == "right_bottom") then h_pos = 2 v_pos = 2
+		end 
+		
+                mark_current_anchor()
+		cur_point = point
+	end 
+    end
+
+    find_current_anchor (v)
+
+    local object = Rectangle
+	{
+		name="rect0",
+		color={155,155,155,255},
+		size = {50,50},
+		position = {4,6},
+		opacity = 255
+	}
+
+     center = Rectangle
+	{
+		name="center",
+		color={25,25,25,250},
+		size = {15,15},
+		position = {22.25,23},
+		opacity = 255
+	}
+
+     center.reactive = true
+     create_point_on_button_down(center)
+
+     mid_top = Rectangle
+	{
+		name="mid_top",
+		color={25,25,25,250},
+		size={15,15},
+		position = {22.25,0},
+		opacity = 255
+	}
+
+    mid_top.reactive = true
+    create_point_on_button_down(mid_top)
+
+    mid_bottom = Rectangle
+	{
+		name="mid_bottom",
+		color={25,25,25,250},
+		size={15,15},
+		position = {22.25,46},
+		opacity = 255
+	}
+
+    mid_bottom.reactive = true
+    create_point_on_button_down(mid_bottom)
+
+    right_mid = Rectangle
+	{
+		name="right_mid",
+		color={25,25,25,250},
+		size={15,15},
+		position = {44.5,23},
+		opacity = 255
+	}
+
+    right_mid.reactive = true
+    create_point_on_button_down(right_mid)
+
+    right_top = Rectangle
+	{
+		name="right_top",
+		color={25,25,25,250},
+		size={15,15},
+		position = {44.5,0},
+		opacity = 255
+	}
+    right_top.reactive = true
+    create_point_on_button_down(right_top)
+
+    left_mid = Rectangle
+	{
+		name="left_mid",
+		color={25,25,25,250},
+		size={15,15},
+		position = {0,23},
+		opacity = 255
+	}
+
+     left_mid.reactive = true
+     create_point_on_button_down(left_mid)
+
+     right_bottom = Rectangle
+	{
+		name="right_bottom",
+		color={25,25,25,250},
+		size={15,15},
+		position = {44.5,46},
+		opacity = 255
+	}
+
+     right_bottom.reactive = true
+     create_point_on_button_down(right_bottom)
+
+     left_bottom = Rectangle
+	{
+		name="left_bottom",
+		color={25,25,25,250},
+		size={15,15},
+		position = {0,46},
+		opacity = 255
+	}
+
+     left_bottom.reactive = true
+     create_point_on_button_down(left_bottom)
+
+     left_top = Rectangle
+	{
+		name="left_top",
+		color={25,25,25,250},
+		size={15,15},
+		position = {0,0},
+		opacity = 255
+	}
+
+     left_top.reactive = true
+     create_point_on_button_down(left_top)
+
+     anchor_pnt = Group
+	{
+		name="anchor",
+		size={59.5,61},
+		position = {0,0},
+		children = {object,center,mid_top,mid_bottom,right_mid,right_top,left_mid,right_bottom,left_bottom,left_top},
+		scale = {1,1,0,0},
+		opacity = 255
+	}
+ 
+       mark_current_anchor()
+
+    return anchor_pnt
+end 
+
 return factory

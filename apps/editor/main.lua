@@ -306,7 +306,7 @@ local function build_ui( show_it )
         [ keys.e	] = function() animate_out_dropdown() editor.redo() mouse_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() mouse_mode = S_SELECT end,
         [ keys.c	] = function() animate_out_dropdown() editor.clone() mouse_mode = S_SELECT end,
-        [ keys.d	] = function() animate_out_dropdown() editor.delete() mouse_mode = S_SELECT end,
+        [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() mouse_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() mouse_mode = S_SELECT end,
         [ keys.p	] = function() animate_out_dropdown() end,
         [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
@@ -314,6 +314,7 @@ local function build_ui( show_it )
         							   ui.bar:show()
 								   ui.button_focus:show()
         							   ui:animate_in() 
+   								   ui.bar:raise_to_top()  --kkk
 							      else 
 								   menu_hide = true 
 							      end end,
@@ -379,7 +380,6 @@ local function build_ui( show_it )
 		  if(mouse_mode == S_SELECT) and
 		    (screen:find_child("msgw") == nil) then
 	               button_map[section.button.name]()
-		       print("jjj")
 		       menu_init = true
 		       local s= ui.sections[ui.focus]
         	       ui.button_focus.position = s.button.position
@@ -391,17 +391,28 @@ local function build_ui( show_it )
     end
 
     function ui.bar.on_key_down( _ , key )
-    
-        local f = key_map[ key ]
-        
-        if f then
-            f()
-	    if(current_inspector == nil) then 
-	         local s= ui.sections[ui.focus]
-        	 ui.button_focus.position = s.button.position
-        	 ui.button_focus.opacity = 0
-	    end 
-        end    
+     
+	if(key == keys.Shift_L) then shift = true end
+	if(key == keys.Shift_R ) then shift = true end
+	if(key == keys.Control_L ) then control = true end
+	if(key == keys.Control_R ) then control = true end
+
+	if(mouse_mode == S_SELECT) then 
+             local f = key_map[ key ]
+             if f then
+            	f()
+	    	if(current_inspector == nil and (key == keys.Return or key == keys.Down 
+		   or key == keys.Left or key == keys.Right)) then 
+	             local s= ui.sections[ui.focus]
+        	     ui.button_focus.position = s.button.position
+        	     ui.button_focus.opacity = 255 
+	        else 
+		   local s= ui.sections[ui.focus]
+        	   ui.button_focus.position = s.button.position
+        	   ui.button_focus.opacity = 0
+	        end 
+             end    
+	end
 	return true
     end
     
@@ -416,15 +427,28 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
 
      function screen.on_key_down( screen , key )
+
+	if(key == keys.Shift_L) then shift = true end
+	if(key == keys.Shift_R ) then shift = true end
+	if(key == keys.Control_L ) then control = true end
+	if(key == keys.Control_R ) then control = true end
+
+	if(mouse_mode == S_SELECT) then 
           if key_map[key] then
               key_map[key](self)
-	      if(current_inspector == nil) then 
+	      if(current_inspector == nil)and (key == keys.Return or key == keys.Down 
+		   or key == keys.Left or key == keys.Right) then 
 	           local s= ui.sections[ui.focus]
+        	   ui.button_focus.position = s.button.position
+        	   ui.button_focus.opacity = 255 
+	      else 
+		   local s= ui.sections[ui.focus]
         	   ui.button_focus.position = s.button.position
         	   ui.button_focus.opacity = 0
 	      end 
 
      	  end
+     	end
      end
      function screen.on_key_up( screen , key )
     	if key == keys.Shift_L or key == keys.Shift_R then
@@ -436,7 +460,6 @@ local function build_ui( show_it )
      end
 
      function screen:on_button_down(x,y,button,num_clicks)
-          print("button_down() results : ",x,y,button,num_clicks)
 
           mouse_state = BUTTON_DOWN
           if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
@@ -461,7 +484,6 @@ local function build_ui( show_it )
      end
 
      function screen:on_button_up(x,y,button,clicks_count)
-          print("button_up() results : ",x,y,button,click_count)
 	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
               if (mouse_mode == S_RECTANGLE) then editor.rectangle_done(x, y) mouse_mode = S_SELECT end
@@ -475,7 +497,6 @@ local function build_ui( show_it )
       end
 
       function screen:on_motion(x,y)
-          print("on_motion() results : ",x,y)
 	  if (menu_hide == true ) then
     	  if( y > ui.bar_background.h) then 
         	     animate_out_dropdown()
@@ -484,12 +505,11 @@ local function build_ui( show_it )
 		ui.button_focus:show()
         	ui.bar:show()
         	ui:animate_in()
+   	        ui.bar:raise_to_top()  --kkk
     	  end 
 	  end
           if dragging then
                local actor , dx , dy = unpack( dragging )
-	       --if(mouse_mode == S_SELECT and shift == true) then 
-	       --end 
 	
 	       local border = screen:find_child(actor.name.."border")
 	       if(border ~= nil) then 
@@ -571,7 +591,7 @@ local function build_ui( show_it )
         local function animation_completed()
         
             -- The bar gets key focus after we animate
-            self.bar:grab_key_focus()
+            self.bar:grab_key_focus(self.bar)
             self.dropdown_timer:start()
             
             if callback then
@@ -605,7 +625,7 @@ local function build_ui( show_it )
     
     function ui:on_exit_section()
     
-        self.bar:grab_key_focus()
+        self.bar:grab_key_focus(self.bar)
         self.button_focus.opacity = 255
     
     end
