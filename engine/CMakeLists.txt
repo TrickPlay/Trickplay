@@ -101,13 +101,13 @@ list(
     # pango/cairo/fontconfig
     #--------------
     
-    cairo pango-1.0 pangocairo-1.0 fontconfig
+    cairo pixman-1 pango-1.0 pangocairo-1.0 pangoft2 fontconfig freetype
 
     #--------------
     # curl
     #--------------
     
-    ssl crypto cares curl
+    ssl crypto cares curl z bz2
 
     #--------------
     # sqlite
@@ -135,6 +135,8 @@ list(
     json-glib-1.0
     
     uriparser           
+    
+    uuid
 )
 
 #--------------
@@ -159,11 +161,7 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 
 	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
 	
-	list( APPEND ENGINE_LIBRARY_NAMES upnp )
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		list( APPEND ENGINE_LIBRARY_NAMES ixml )
-	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	
+	list( APPEND ENGINE_LIBRARY_NAMES upnp ixml threadutil )
 	
 	if ( TP_CONTROLLER_DISCOVERY_UPNP )
 		
@@ -386,7 +384,6 @@ list( APPEND
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/app.cpp    
     ${ENGINE_SRC}/source/network.cpp
-    ${ENGINE_SRC}/source/storage.cpp
     ${ENGINE_SRC}/source/console.cpp
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
@@ -442,7 +439,7 @@ set_target_properties(
     
     PROPERTIES
     LINK_INTERFACE_LIBRARIES tpcore
-    COMPILE_FLAGS -fvisibility=hidden
+    COMPILE_FLAGS "-fvisibility=hidden -fPIC"
 )
 
 
