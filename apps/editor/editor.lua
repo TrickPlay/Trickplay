@@ -964,11 +964,7 @@ function editor.ugroup()
 	for i, v in pairs(g.children) do
              if g:find_child(v.name) then
 		  if(v.extra.selected == true) then
-			if(v.type ~= "Group") then 
-			     print("error:this object is not Group")
-			     mouse_mode = S_SELECT
-			     return 
-			else
+			if(v.type == "Group") then 
 			     editor.n_selected(v)
 			  
 			     --print(v.name)
