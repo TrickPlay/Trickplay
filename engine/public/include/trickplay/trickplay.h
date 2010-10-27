@@ -165,6 +165,9 @@ typedef struct TPContext TPContext;
                             DEBUG messages from being logged.
                             Defaults to "1".
                             
+    TP_LOG_APP_ONLY -       Whether to log only MESSAGE messages (printed by apps).
+                            Defaults to "0".
+
     TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
                             TrickPlay will use the systems fonts.
                             Defaults to NULL.
@@ -216,6 +219,7 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
 #define TP_LOG_DEBUG                    "log_debug"
+#define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
 #define TP_DOWNLOADS_PATH               "downloads_path"
 #define TP_NETWORK_DEBUG                "network_debug"
