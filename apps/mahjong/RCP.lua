@@ -99,7 +99,7 @@ function(router, ...)
         end
         self.previous_component = self.active_component
         self.active_component = comp
-        print("set active component to",comp)
+        --print("set active component to",comp)
     end
 
     function router:set_keys()

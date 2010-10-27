@@ -37,24 +37,26 @@ function(gameloop, ...)
                 else
                     return
                 end
-            end
-            progress = Utils.clamp(0, (sw.elapsed-props.start)/props.duration, 1)
+            else
+                progress = Utils.clamp(0, (sw.elapsed-props.start)/props.duration, 1)
 
-            for var,interval in pairs(props.vals) do
-                if type(interval) == "table" and not interval.is_a then
-                    local temp_table = {}
-                    for j,v in ipairs(interval) do
-                        temp_table[j] = v:get_value(progress) 
+                for var,interval in pairs(props.vals) do
+                    if type(interval) == "table" and not interval.is_a then
+                        local temp_table = {}
+                        for j,v in ipairs(interval) do
+                            temp_table[j] = v:get_value(progress) 
+                        end
+                        props.element[var] = temp_table
+                    else
+                        props.element[var] = interval:get_value(progress)
                     end
-                    props.element[var] = temp_table
-                else
-                    props.element[var] = interval:get_value(progress)
+                end
+                if progress >= 1 then
+                    table.remove(elements, i)
+                    if props.on_completed then props.on_completed() end
                 end
             end
-            if progress >= 1 then
-                table.remove(elements, i)
-                if props.on_completed then props.on_completed() end
-            end
+
             if not props.enable then to_enable_listeners = false end
         end
 
