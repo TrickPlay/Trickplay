@@ -4,6 +4,13 @@
 #include "trickplay/controller.h"
 #include "trickplay/keys.h"
 
+#include "EGL/egl.h"
+
+extern "C" NativeWindowType tp_egl_get_native_window()
+{
+  return 0;
+}
+
 static TPController * remote = NULL;
 
 int main( int argc , char * argv[] )
