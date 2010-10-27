@@ -166,7 +166,9 @@ function()
 --      if k == keys.s then
 --         t:complete()
 --      elseif not t.enabled then
-      if not t.enabled and event_listener_en then
+      if k == keys.i then
+          INITIAL_ENDOWMENT = 4
+      elseif not t.enabled and event_listener_en then
          assert(model:get_active_controller())
          print("current comp: "..model:get_active_component())
          model:get_active_controller():on_key_down(k)
