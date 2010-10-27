@@ -33,9 +33,9 @@ function( section )
      	["RECTANGLE".."\t\t".."[R]"]   = function() mouse_mode = S_RECTANGLE end,
      	["VIDEO".."\t\t\t"..""]   = function() editor.video() mouse_mode = S_SELECT end,
      	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() mouse_mode = S_SELECT end,
-     	["DELETE".."\t\t\t".."[D]"]   = function() editor.delete() mouse_mode = S_SELECT end,
+     	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() mouse_mode = S_SELECT end,
      	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() mouse_mode = S_SELECT end,
-     	["UN GROUP".."\t\t\t"..""]   = function() editor.ugroup() mouse_mode = S_SELECT end
+     	["UNGROUP".."\t\t\t"..""]   = function() editor.ugroup() mouse_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -55,9 +55,9 @@ function( section )
         local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
         local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t\t".."" ] )
         local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
-        local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t\t".."[D]" ] )
+        local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t     ".."[Del]" ] )
         local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )
-        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UN GROUP".."\t\t\t".."" ] )
+        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UNGROUP".."\t\t\t".."" ] )
         
     
         table.insert( section_items , f_undo )

@@ -156,10 +156,7 @@ local dropdown_map =
     local function move_focus( delta )
     
         local unfocus = section_items[ section.focus ]
-	print("unfocus : ") print(section.focus)
-        
         local focus = section_items[ section.focus + delta ]
-	print("focus : ") print(section.focus + delta)
         
         if not focus then
             if section.focus + delta == 0 then
