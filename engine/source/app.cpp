@@ -83,18 +83,18 @@ LuaStateProxy::LuaStateProxy( lua_State * l )
     :
     L( l )
 {
-    g_debug( "CREATED LSP %p", this );
+//    g_debug( "CREATED LSP %p", this );
 }
 
 LuaStateProxy::~LuaStateProxy()
 {
-    g_debug( "DESTROYED LSP %p", this );
+//    g_debug( "DESTROYED LSP %p", this );
 }
 
 void LuaStateProxy::invalidate()
 {
     L = NULL;
-    g_debug( "INVALIDATED LSP %p", this );
+//    g_debug( "INVALIDATED LSP %p", this );
 }
 
 lua_State * LuaStateProxy::get_lua_state()
