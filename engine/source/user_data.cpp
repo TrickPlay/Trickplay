@@ -736,7 +736,10 @@ void UserData::disconnect_all_signals()
     {
         for ( SignalMap::const_iterator it = signals->begin(); it != signals->end(); ++it )
         {
-            g_signal_handler_disconnect( master , it->second );
+            if ( g_signal_handler_is_connected( master , it->second ) )
+            {
+                g_signal_handler_disconnect( master , it->second );
+            }
         }
 
         delete signals;
