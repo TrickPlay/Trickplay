@@ -13,6 +13,31 @@ TutorialView = Class(View, function(self, model, ...)
 
     local TUTORIAL_LENGTH = 2
 
+    -- some Buttons
+    -- create the awesome Done and Next buttons
+     done_button = FocusableImage(112, 920,
+        Image{src = "assets/help/button-done.png"},
+        Image{src = "assets/help/button-done-on.png", opacity = 0})
+    local next_button = FocusableImage(1665, 920,
+        Image{src = "assets/help/button-next.png"},
+        Image{src = "assets/help/button-next-on.png", opacity = 0})
+    -- 2nd buttons
+    local back_button = FocusableImage(done_button.x, done_button.y,
+        Image{src = "assets/help/button-back.png"},
+        Image{src = "assets/help/button-back-on.png", opacity = 0})
+    local done_button_2 = FocusableImage(next_button.x, next_button.y,
+        Clone{source = done_button.image},
+        Clone{source = done_button.focus, opacity = 0})
+
+    done_button.focus.x = done_button.focus.x - 10
+    done_button.focus.y = done_button.focus.y - 10
+    done_button_2.focus.x = done_button_2.focus.x - 10
+    done_button_2.focus.y = done_button_2.focus.y - 10
+    back_button.focus.x = back_button.focus.x - 10
+    back_button.focus.y = back_button.focus.y - 10
+    next_button.focus.x = next_button.focus.x - 10
+    next_button.focus.y = next_button.focus.y - 10
+
     
     function self:getBounds()
         return 1, TUTORIAL_LENGTH
@@ -24,6 +49,20 @@ TutorialView = Class(View, function(self, model, ...)
     end
     
     -- Update
+    function self:move_focus(selector)
+        if selector == 1 then
+            done_button:on_focus_inst()
+            back_button:on_focus_inst()
+            next_button:out_focus_inst()
+            done_button_2:out_focus_inst()
+        else
+            done_button:out_focus_inst()
+            back_button:out_focus_inst()
+            next_button:on_focus_inst()
+            done_button_2:on_focus_inst()
+        end
+    end
+
     function self:update(p, c, n)
     
         if model:get_active_component() == Components.TUTORIAL then
@@ -85,32 +124,10 @@ TutorialView = Class(View, function(self, model, ...)
                     font = "Deja Vu Sans Condensed 32px",
                     color = Colors.WHITE
                 }
-                -- create the awesome Done and Next buttons
-                local done_button = Image{
-                    src = "assets/help/button-done.png",
-                    position = {112, 920}
-                }
-                local next_button = Image{
-                    src = "assets/help/button-next.png",
-                    position = {1665, 920}
-                }
-                -- some arrow buttons for direction
-                local arrow_right = Image{
-                    src = "assets/help/arrow.png",
-                    position = {1780, 951},
-                    scale = {1, .5}
-                }
-                arrow_right.z_rotation = {-90, arrow_right.w/2, 0}
-                local arrow_left = Clone{
-                    source = arrow_right,
-                    position = {55, 951},
-                    scale = {1, .5}
-                }
-                arrow_left.z_rotation = {90, arrow_left.w/2, 0}
                 -- page number 1
                 local page_number_1 = Text{
                    text = "1/2",
-                   position = {screen.w/2, 925},
+                   position = {screen.w/2, 950},
                     font = "Deja Vu Sans Condensed Bold 32px",
                     color = Colors.WHITE
                 }
@@ -128,9 +145,10 @@ TutorialView = Class(View, function(self, model, ...)
                 }
                 local tutorial_1 = Group()
                 tutorial_1:add(
-                    border_mask, mask, text_left_1, text_right_1, marker_chips, done_button,
-                    next_button, arrow_left, arrow_right, page_number_1, logo
+                    border_mask, mask, text_left_1, text_right_1, marker_chips,
+                    done_button.group, next_button.group, page_number_1, logo
                 )
+                done_button.group:raise_to_top()
 
                 -- Page 2
                 -- mask
@@ -185,32 +203,10 @@ TutorialView = Class(View, function(self, model, ...)
                     font = "Deja Vu Sans Condensed Bold 32px",
                     color = Colors.WHITE
                 }
-                -- buttons
-                local back_button = Image{
-                    src = "assets/help/button-back.png",
-                    position = done_button.position,
-                }
-                local done_button_2 = Clone{
-                    source = done_button,
-                    position = next_button.position
-                }
-                -- arrows
-                local arrow_right_2 = Clone{
-                    source = arrow_right,
-                    position = {1780, 951},
-                    scale = {1, .5}
-                }
-                arrow_right_2.z_rotation = {-90, arrow_right_2.w/2, 0}
-                local arrow_left_2 = Clone{
-                    source = arrow_right,
-                    position = {55, 951},
-                    scale = {1, .5}
-                }
-                arrow_left_2.z_rotation = {90, arrow_left_2.w/2, 0}
                 -- page number 2
                 local page_number_2 = Text{
                    text = "2/2",
-                   position = {screen.w/2, 925},
+                   position = {screen.w/2, 950},
                     font = "Deja Vu Sans Condensed Bold 32px",
                     color = Colors.WHITE
                 }
@@ -222,8 +218,8 @@ TutorialView = Class(View, function(self, model, ...)
                 page_number_2.anchor_point = {page_number_2.w/2, page_number_2.h/2}
                 local tutorial_2 = Group()
                 tutorial_2:add(
-                    border_mask_2, mask_2, logo_2, back_button, done_button_2,
-                    arrow_right_2, arrow_left_2, text_2_top, numbers_left,
+                    border_mask_2, mask_2, logo_2, back_button.group,
+                    done_button_2.group, text_2_top, numbers_left,
                     hands_left, numbers_right, hands_right, page_number_2
                 )
                 for i = 1,5 do
@@ -305,6 +301,10 @@ TutorialView = Class(View, function(self, model, ...)
             --]]end end
         else
             for i, slide in ipairs(tutorial) do
+                done_button.group:unparent()
+                done_button_2.group:unparent()
+                next_button.group:unparent()
+                back_button.group:unparent()
                 slide.group:unparent()
                 tutorial[i] = nil
             end

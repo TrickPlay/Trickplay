@@ -98,3 +98,12 @@ function hand_print(hand)
    table.insert(str_builder,"")
    print(table.concat(str_builder,"\n"))
 end
+
+Utils = {}
+Utils.clamp = function(a, b, c)
+    if b < a then return a
+    elseif b > c then return c
+    end
+
+    return b
+end

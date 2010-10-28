@@ -187,7 +187,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local cards = ctrl:get_community_cards()
       for i=start,(finish or start) do
          cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
-         screen:add(cards[i].group)
+         if not cards[i].group.parent then
+             screen:add(cards[i].group)
+         end
          print("NOW DEALING CARD", i)
          table.insert(allCards, cards[i])
       end
@@ -208,7 +210,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
             local pos = {MPCL[player.table_position][1], MPCL[player.table_position][2]}
             
             for k,card in pairs(hole) do
-               screen:add(card.group)
+               if not card.group.parent then
+                   screen:add(card.group)
+               end
                -- Animate and flip the card if the player is human
                card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, z_rotation=0, on_completed = function() if player.isHuman then flipCard(card.group) end end }
                card.group:raise_to_top()
