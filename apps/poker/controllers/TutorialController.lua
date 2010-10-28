@@ -5,16 +5,10 @@ TutorialController = Class(Controller, function(self, view, ...)
     model = view:get_model()
     
     local keyTable = {
-        [keys.Up] = function(self) end,
-        [keys.Down] = function(self) 
-            model:set_active_component(model.previous_component)
-            self:get_model():notify()
-        end,
         [keys.Left] = function(self) self:move(Directions.LEFT) end,
         [keys.Right] = function(self) self:move(Directions.RIGHT) end,
         [keys.Return] = function(self)
-            model:set_active_component(model.previous_component)
-            self:get_model():notify()
+            leave_help()
         end,
     }
     
@@ -30,6 +24,14 @@ TutorialController = Class(Controller, function(self, view, ...)
     local c = 1 -- Current slide
     local n = 2 -- Next slide
 
+    local function leave_help()
+        p = 0
+        c = 1
+        n = 2
+        model:set_active_component(model.previous_component)
+        self:get_model():notify()
+    end
+
     function self:move(dir)
         screen:grab_key_focus()
         
@@ -41,6 +43,8 @@ TutorialController = Class(Controller, function(self, view, ...)
                 p = p + dir[1]
                 c = c + dir[1]
                 n = n + dir[1]
+            else
+                leave_help()
             end
         
         elseif(0 ~= dir[2]) then
