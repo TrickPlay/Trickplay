@@ -84,7 +84,9 @@ chipStack = Class(function(self, chipValue, ...)
             y = y - dy
             --TODO: previously was (self.chips[i]) check to make sure this
             -- didn't break anything
-            self.group:add(self.chips[i].image)
+            if not self.chips[i].image.parent then
+                self.group:add(self.chips[i].image)
+            end
         end
     end
 
@@ -110,7 +112,9 @@ chipCollection = Class(function(self, ...)
 
     function self:add(newStack)
         self.stacks[#self.stacks + 1] = newStack
-        self.group:add(newStack.group)
+        if not newStack.group.parent then
+            self.group:add(newStack.group)
+        end
         self:sort()
     end
 

@@ -4,6 +4,8 @@ FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, ...)
     --assert(image_src)
     --assert(focus_src)
 
+    focusimg.x = x
+    focusimg.y = y
     focusimg.extra = {}
     
     if image_src and type(image_src) == "string" then
