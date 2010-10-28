@@ -1041,11 +1041,18 @@ def emit( stuff , f ):
             
             f.write(
                 "  luaL_newmetatable(L,%s);\n"
-                '  lua_pushstring(L,"type");\n'
-                '  lua_pushstring(L,"%s");\n'
+                '  lua_pushliteral(L,"type");\n'
+                '  lua_pushliteral(L,"%s");\n'
+                "  lua_rawset(L,-3);\n"
+
+                '  lua_pushliteral(L,"__types__");\n'
+                "  lua_newtable(L);\n"
+                '  lua_pushliteral(L,"%s");\n'
+                "  lua_pushboolean(L,1);\n"
+                "  lua_rawset(L,-3);\n"
                 "  lua_rawset(L,-3);\n"
                 %
-                (metatable_name,bind_name)
+                (metatable_name,bind_name,bind_name)
             )
             
             # Put constants into the metatable
@@ -1053,7 +1060,7 @@ def emit( stuff , f ):
             for const in bind["constants"]:
                 
                 f.write(
-                    '  lua_pushstring(L,"%s");\n'
+                    '  lua_pushliteral(L,"%s");\n'
                     "  %s(L,%s);\n"
                     "  lua_rawset(L,-3);\n"
                     %
@@ -1115,7 +1122,7 @@ def emit( stuff , f ):
                 if bind[ "inherits" ] is None:
                     
                     f.write(
-                        '  lua_pushstring(L,"__index");\n'
+                        '  lua_pushliteral(L,"__index");\n'
                         "  lua_pushvalue(L,-2);\n"
                         "  lua_rawset(L,-3);\n"
                     )
@@ -1126,7 +1133,7 @@ def emit( stuff , f ):
             else:
                 
                 f.write(
-                    '  lua_pushstring(L,"__getters__");\n'
+                    '  lua_pushliteral(L,"__getters__");\n'
                     "  lua_newtable(L);\n"
                     "  const luaL_Reg getters[]=\n"
                     "  {\n"
@@ -1155,7 +1162,7 @@ def emit( stuff , f ):
                 # Setters
                                     
                 f.write(
-                    '  lua_pushstring(L,"__setters__");\n'
+                    '  lua_pushliteral(L,"__setters__");\n'
                     "  lua_newtable(L);\n"
                     "  const luaL_Reg setters[]=\n"
                     "  {\n"
