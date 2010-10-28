@@ -1,4 +1,4 @@
-my_font = "ARCADECLASSIC 40px"
+my_font = "kroeger 06_65 26px"
 
 number_of_lives = 3
 high_score = settings.high_score or 0
