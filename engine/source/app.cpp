@@ -1223,6 +1223,23 @@ char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const Stri
 
 //-----------------------------------------------------------------------------
 
+bool App::change_app_path( const char * path )
+{
+    g_assert( path );
+
+    if ( ! g_file_test( path , G_FILE_TEST_IS_DIR ) )
+    {
+        return false;
+    }
+
+    metadata.path = path;
+
+    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , path );
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
 guint32 App::get_screen_gid() const
 {
     return screen_gid;
