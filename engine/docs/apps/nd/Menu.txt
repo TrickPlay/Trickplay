@@ -4,7 +4,7 @@ Format: 1.5
 Title: TrickPlay
 SubTitle: Application Developer's Guide and Reference
 
-Footer: v (23b3bc7)
+Footer: v (4a99115)
 Timestamp: mm.d.yyyy
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
@@ -84,7 +84,6 @@ Group: Reference  {
       File: app  (bindings/app.lb)
       File: audiosampler  (bindings/audiosampler.lb)
       File: controllers  (bindings/controllers.lb)
-      File: editor.lb  (bindings/editor.lb)
       File: global functions  (bindings/globals.lb)
       File: idle  (bindings/idle.lb)
       File: json  (bindings/json.lb)
