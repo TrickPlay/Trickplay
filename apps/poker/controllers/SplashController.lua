@@ -11,6 +11,7 @@ SplashController = Class(Controller, function(self, view, ...)
             model:notify()
         end
     }
+    KeyTable[keys.OK] = KeyTable[keys.Return]
 
     function self:on_key_down(k)
         if KeyTable[k] then
