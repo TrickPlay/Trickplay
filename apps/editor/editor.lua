@@ -12,29 +12,12 @@ local selected_objs = {}
 
 
 function editor.selected(obj, call_by_inspector)
---[[
-     if(call_by_inspector == true) then 
-        for i, v in pairs(g.children) do
-	     if(v.type ~= "Group") then 
-             if g:find_child(v.name) then
-		  if (obj.name ~= v.name) then 
-		       g:find_child(v.name).extra.org_opacity = g:find_child(v.name).opacity
-                       g:find_child(v.name):set{opacity = 50}
-		  end 
-             end
-	     end
-        end
-        obj.extra.org_opacity = obj.opacity
-        obj.opacity = 255
-	return
-     end 
 
-]]
      if(obj.type ~= "Video") then 
      if(shift == false)then 
 	if (table.getn(selected_objs) ~= 0 ) then -- while () do ? 
 		local t_obj = screen:find_child(table.remove(selected_objs)) 
-		if (t_obj == nil) then print("error: the_obj is nil") return end 
+		if (t_obj == nil) then print(" the_obj is nil") return end 
 		if(t_obj.name ~= obj.name.."border") then
 			screen:remove(t_obj)
 			local i, j = string.find(t_obj.name,"border")
@@ -60,6 +43,10 @@ function editor.selected(obj, call_by_inspector)
      else 
      	obj_border.position = obj.position
      end
+     obj_border.anchor_point = obj.anchor_point
+     obj_border.x_rotation = obj.x_rotation
+     obj_border.y_rotation = obj.y_rotation
+     obj_border.z_rotation = obj.z_rotation
      obj_border.size = obj.size
      screen:add(obj_border)
      obj.extra.selected = true
@@ -68,18 +55,6 @@ function editor.selected(obj, call_by_inspector)
 end  
 
 function editor.n_selected(obj, call_by_inspector)
---[[
-     if(call_by_inspector == true) then
-        for i, v in pairs(g.children) do
-             if g:find_child(v.name) then
-		  --if (obj.name ~= v.name) then 
-		       g:find_child(v.name):set{opacity = g:find_child(v.name).extra.org_opacity} 
-		 -- end
-             end
-        end
-	return
-     end
-]]
 
      if(obj.type ~= "Video") then 
      screen:remove(screen:find_child(obj.name.."border"))
@@ -110,6 +85,7 @@ function editor.close()
 		  end 
              end
         end
+
 	undo_list = {}
 	redo_list = {}
         item_num = 0
@@ -121,7 +97,7 @@ function editor.open()
 
      selected_objs = {}
      editor.close()
-     mouse_mode = S_POPUP
+     input_mode = S_POPUP
      printMsgWindow("File Name : ")
      inputMsgWindow("openfile")
 end 
@@ -129,7 +105,6 @@ end
 function editor.the_open()
 ---[[
 	local WIDTH = 800
-	local MSGW_OFFSET = 30 
 	local L_PADDING = 50
 	local R_PADDING = 50
         local TOP_PADDING = 60
@@ -137,16 +112,15 @@ function editor.the_open()
         local Y_PADDING = 10 
 	local X_PADDING = 10
 	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
-
-        local items_height = 0
 	local space = WIDTH
-	local used = 0
 
 	local dir = readdir(CURRENT_DIR)
-	local dir_text = Text {name = "dir", text = "FILE LOCATION : "..CURRENT_DIR}:set(STYLE)
-	local w= (WIDTH - dir_text.w)/2
-	local h= TOP_PADDING/2 + Y_PADDING
-	dir_text.position = {w,h}
+	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
+
+	local cur_w= (WIDTH - dir_text.w)/2
+	local cur_h= TOP_PADDING/2 + Y_PADDING
+
+	dir_text.position = {cur_w,cur_h}
 
 	local line = factory.draw_line()
 	
@@ -159,51 +133,49 @@ function editor.the_open()
 	     end 
 	end 
 
-	function is_dir(fn)
-	     --i, j = string.find(fn, ".")
-	
-	     --if (j ~= nil) then
-	     if(fn == "assets" or fn == "dir1" or fn == "dir2") then 
-		return true
-	     else 
-		return false
-	     end 
-	end
-	
-	function get_file_list() 
-	local iw = w
-	local ih = h
-	local p_text = Text {name = "parent_dir", text = ".."}:set(STYLE)
-	p_text.color = {255,0,255}
-	p_text.position = {w,h}
-	w = L_PADDING
-	h = h + p_text.h + Y_PADDING
+	function get_file_list_sz() 
+	local iw = cur_w
+	local ih = cur_h
+	cur_w = L_PADDING
+	cur_h = cur_h + dir_text.h + Y_PADDING
+
      	for i, v in pairs(dir) do
 	     if (is_lua_file(v) == true) then 
-	     text = Text {name = tostring(i), text = v}:set(STYLE)
-	     if (space < text.w) then 
-		  w = L_PADDING 
-	          h = h + text.h + Y_PADDING
-		  space = WIDTH
-	     end 
-             text.position  = {w,h}
-	     space = space - text.w - X_PADDING
-	     w = w + text.w + X_PADDING 
+	          text = Text {name = tostring(i), text = v}:set(STYLE)
+	          if (space < text.w) then 
+		       cur_w = L_PADDING 
+	               cur_h = cur_h + text.h + Y_PADDING
+		       space = WIDTH
+	          end 
+                  text.position  = {cur_w, cur_h}
+	          space = space - text.w - X_PADDING
+	          cur_w = cur_w + text.w + X_PADDING 
+--[[
 	     if (w/WIDTH > 1) then 
 		w = L_PADDING 
 		h = h + text.h + Y_PADDING
 		space = WIDTH
-	     end  
+	     end 
+]] 
              end 
         end
-	local return_h = h
-	w = iw
-	h = ih
+	local return_h = cur_h - 40
+
+	cur_w = iw
+	cur_h = ih
 	return return_h 
         end 
 
 	
-	local file_list_size = get_file_list()
+	local file_list_size = get_file_list_sz()
+	
+	print(file_list_size) 
+	print(file_list_size) 
+	print(file_list_size) 
+	print(file_list_size) 
+	print(file_list_size) 
+	print(file_list_size) 
+
 
 	local msgw_bg = factory.make_popup_bg("msgw", file_list_size)
 	local msgw = Group {
@@ -218,34 +190,32 @@ function editor.the_open()
         msgw:add(dir_text)
 	line.position = {0, 80}
         msgw:add(line)
-	w = L_PADDING
-        h = TOP_PADDING + text.h + Y_PADDING
+	cur_w = L_PADDING
+        cur_h = TOP_PADDING + text.h + Y_PADDING
 
 	function print_file_list() 
-	     local p_text = Text {name = "parent_dir", text = ".."}:set(STYLE)
-	     p_text.position = {w,h - 20}
-	     p_text.color = {255,0,255}
+	     cur_w = L_PADDING
 
-	     w = L_PADDING
-	     h = h - 20 -- p_text.h -- + Y_PADDING
-	     msgw:add(p_text)
      	     for i, v in pairs(dir) do
 	          if (is_lua_file(v) == true) then 
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
 	               if (space < text.w) then 
-		            w = L_PADDING 
-	                    h = h + text.h + Y_PADDING
+		            cur_w = L_PADDING 
+	                    cur_h = cur_h + text.h + Y_PADDING
 		            space = WIDTH
 	               end 
-                       text.position  = {w,h}
+                       text.position  = {cur_w, cur_h}
     	               msgw:add(text)
 	               space = space - text.w - X_PADDING
-	               w = w + text.w + X_PADDING 
+	               cur_w = cur_w + text.w + X_PADDING 
+--[[
 	               if (w/WIDTH > 1) then 
 		            w = L_PADDING 
 		            h = h + text.h + Y_PADDING
 		            space = WIDTH
 	     	       end  
+]]
+	--[[
 		  elseif (is_dir(v) == true) then
 		      text = Text {name = tostring(i), text = v}:set(STYLE) 
 		      text.color = {255,0,255}
@@ -263,7 +233,7 @@ function editor.the_open()
 		            h = h + text.h + Y_PADDING
 		            space = WIDTH
 	     	       end  
-	
+	]]
                   end
              end
         end 
@@ -271,10 +241,10 @@ function editor.the_open()
 	print_file_list()
 
 	local open_b  = factory.make_msgw_button_item( assets , "open")
-	open_b.position = {WIDTH - 2*open_b.w + 2*X_PADDING, h+ 40 }
+	open_b.position = {WIDTH - 2*open_b.w + 2*X_PADDING, cur_h+ 40 }
 
         local cancel_b = factory.make_msgw_button_item( assets , "cancel")
-	cancel_b.position = {WIDTH - open_b.w + 3*X_PADDING, h+ 40}
+	cancel_b.position = {WIDTH - open_b.w + 3*X_PADDING, cur_h+ 40}
 	
 	msgw:add(open_b)
 	msgw:add(cancel_b)
@@ -297,12 +267,16 @@ function editor.inspector(v)
 	if(current_inspector ~= nil) then 
 		return 
         end 
-
+	
+	
         for i, c in pairs(g.children) do
             if g:find_child(c.name) then
 	        if(c.extra.selected == true and c.name ~= v.name) then
 			editor.n_selected(c)
 		end
+		if(c.type == "Text") then 
+			c.reactive = false
+		end 
             end
         end
 
@@ -405,7 +379,6 @@ function editor.inspector(v)
 		 used = 0
              end 
 		
----[[
 	     if  attr_n == "name" or attr_n == "text" or attr_n == "src" 
 	       or attr_n == "r" or attr_n == "g" or attr_n == "b" 
 	       or attr_n == "rect_r" or attr_n == "rect_g" or attr_n == "rect_b" or attr_n == "rect_a" 
@@ -422,7 +395,6 @@ function editor.inspector(v)
 	     else 
                  item.y = items_height
 	     end
---]]
 
 	    if(space == 0) then 
 	         space = WIDTH - item.w 
@@ -437,7 +409,7 @@ function editor.inspector(v)
         end 
 
 	screen:add(inspector)
-	mouse_mode = S_POPUP
+	input_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
 	
 	current_inspector = inspector
@@ -449,8 +421,15 @@ function editor.inspector(v)
 		screen:remove(inspector)
 		current_inspector = nil
 		editor.n_selected(v, true)
+			
+        	for i, c in pairs(g.children) do
+		    if(c.type == "Text") then 
+			c.reactive = true
+		    end 
+                end
+
                 screen.grab_key_focus(screen) 
-	        mouse_mode = S_SELECT
+	        input_mode = S_SELECT
 		return true
         end 
 
@@ -582,14 +561,14 @@ function editor.view_code(v)
 	codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
         create_on_button_down_f(codeViewWin)
-	mouse_mode = S_POPUP
+	input_mode = S_POPUP
 
 	xbox.reactive = true
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(codeViewWin)
 		editor.n_selected(v, true)
                 screen.grab_key_focus(screen) 
-	        mouse_mode = S_SELECT
+	        input_mode = S_SELECT
 		return true
         end 
 
@@ -619,11 +598,10 @@ function editor.save(save_current_f)
 		return
 	end 
      else 
-        mouse_mode = S_POPUP
+        input_mode = S_POPUP
         printMsgWindow("File Name : ")
         contents = "local g = ... \n\n"
         local obj_names = getObjnames()
-      --  local n = table.getn(g.children)
    
         for i, v in pairs(g.children) do
              contents= contents..itemTostring(v)
@@ -659,7 +637,9 @@ function editor.rectangle(x, y)
         ui.rect.reactive = true
         table.insert(undo_list, {ui.rect.name, ADD, ui.rect})
         g:add(ui.rect)
-        screen:add(g)
+	if(screen:find_child("screen_objects") == nil) then 
+             screen:add(g)
+	end
 
         create_on_button_down_f(ui.rect) 
 
@@ -687,18 +667,34 @@ function editor.rectangle_move(x,y)
         end
 end
 
+local function ungroup(v)
+     for i,c in pairs(v.children) do 
+	v:remove(c)
+	c.extra.is_in_group = false
+	c.x = c.x + v.x 
+	c.y = c.y + v.y 
+	g:add(c)
+	c.reactive = true
+        create_on_button_down_f(c)
+	if(c.type == "Text") then
+	function c:on_key_down(key)
+             if key == keys.Return then
+	          c:set{cursor_visible = false}
+        	  screen.grab_key_focus(screen)
+		  return true
+	     end 
+	end 
+	end 
+     end
+     g:remove(v)
+end 
+
 function editor.undo()
 	  if( undo_list == nil) then return true end 
           local undo_item= table.remove(undo_list)
+
 	  if(undo_item == nill) then return true end
 	  if undo_item[2] == CHG then 
---[[
-                local the_obj = g:find_child(undo_item[1])
-		g:remove(the_obj)
-		the_obj = undo_item[3] --original object 
-		g:add(the_obj)
-		create_on_button_down_f(the_obj)
-]]
 		g:remove(g:find_child(undo_item[1]))
 		g:add(undo_item[3])
 		undo_item[3].reactive = true
@@ -707,25 +703,9 @@ function editor.undo()
 
 	  elseif undo_item[2] == ADD then 
 	       if((undo_item[3]).type == "Group") then 
-		 	children_t = undo_item[3].children 
-			--dumptable(children_t)
-		 	for e in values(children_t) do
-			     if (e.name ~= "group_border") then
-			          undo_item[3]:remove(e)
-				  table.insert(undo_item[3].extra, e.name)
-				  local g_position = e.position 
-				  e.position = e.extra
-				  e.extra = g_position
-			          g:add(e)
-				  --create_on_button_down_f(e)
-			     end 
-        		end 
-			editor.n_selected(undo_item[3]) --kkk
-			--screen:remove(undo_item[3]) --kkk
-			g:remove(undo_item[3])
-			screen:add(g)
+			ungroup(undo_item[3])
 	       else
-			editor.n_selected(undo_item[3]) --kkk
+			editor.n_selected(undo_item[3])
 			g:remove(g:find_child(undo_item[1]))
 	       end 
                table.insert(redo_list, undo_item)
@@ -737,27 +717,32 @@ end
 	
 function editor.redo()
           
-	  if( redo_list == nil) then return true end 
+	  if(redo_list == nil) then return true end 
           local redo_item= table.remove(redo_list)
 	  if(redo_item == nill) then return true end
  	  
           if redo_item[2] == CHG then 
 		local the_obj = g:find_child(redo_item[1])
 		g:remove(the_obj)
-		the_obj = redo_item[4] --new object 
+		the_obj = redo_item[4]
 		g:add(the_obj)
 		the_obj.reactive = true
 		create_on_button_down_f(the_obj)
 	        table.insert(undo_list, redo_item)
---[[
-              local the_obj = g:find_child(redo_item[1])
-	       the_obj:set{opacity = redo_item[4].opacity}
- 	       the_obj:set{w = redo_item[4].w, h =redo_item[4].h } 
-               undo_item = {redo_item[4].name, CHG, redo_item[3], redo_item[4]}
-               table.insert(undo_list, undo_item)
-]]
           elseif redo_item[2] == ADD then 
 	       if(redo_item[3].type == "Group") then 
+		    print("group redo")
+		    for i, v in pairs(redo_item[3].children) do 
+		          g:remove(v)
+			  print("remove", v.name)
+	            end 
+		    g:add(redo_item[3]) 
+		    redo_item[3].reactive = true
+                    create_on_button_down_f(redo_item[3])
+                    screen.grab_key_focus(screen)
+	            input_mode = S_SELECT
+
+--[[
 		 	children_t = redo_item[3].extra 
 		 	for e in values(children_t) do
 			     local group_item = g:find_child(e)
@@ -774,6 +759,7 @@ function editor.redo()
                		g:add(g:find_child(redo_item[1]))  -- hj : undo->redo 10.21
 			screen:add(g)
 			--create_on_button_down_f(redo_item[3])
+]]
 	       else 
                g:add(redo_item[3])
 	       end 
@@ -796,20 +782,16 @@ function editor.add(obj)
         --screen:add(obj)
 end
 
-function editor.delete(obj)
+function editor.rm(obj)
         --screen:remove(obj)
 	g:remove(obj)
 end
 
 function editor.debug()
+	print("input_mode", input_mode)
+	print("selected objects")
 	dumptable(selected_objs)
 end 
-
-function editor.preferences()
-     -- background setting 
-     -- menu hidign 
-     -- file saving  
-end
 
 function editor.text()
 
@@ -820,7 +802,9 @@ function editor.text()
      	reactive = true, wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR"} 
         table.insert(undo_list, {ui.text.name, ADD, ui.text})
         g:add(ui.text)
-        screen:add(g)
+	if(screen:find_child("screen_objects") == nil) then 
+             screen:add(g)
+	end
         ui.text.grab_key_focus(ui.text)
         local n = table.getn(g.children)
 
@@ -828,6 +812,14 @@ function editor.text()
              if key == keys.Return then
 		ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
+		ui.text:set{editable= false}
+		local text_len = string.len(ui.text.text) 
+		local font_len = string.len(ui.text.font) 
+	        local font_sz = tonumber(string.sub(ui.text.font, font_len - 3, font_len -2))	
+		local total = math.floor((font_sz * text_len / ui.text.w) * font_sz *2/3) -- math.floor(font_sz * text_len % ui.text.w)  
+		if(total > ui.text.h) then 
+			ui.text.h = total 
+		end 
 		item_num = item_num + 1
 		return true
 	     end 
@@ -838,21 +830,21 @@ function editor.text()
 end
 	
 function editor.image()
-        mouse_mode = S_POPUP
+        input_mode = S_POPUP
         printMsgWindow("Image File : ")
         inputMsgWindow("open_imagefile")
 end
 	
 function editor.video()
-        mouse_mode = S_POPUP
+        input_mode = S_POPUP
         printMsgWindow("Video File : ")
         inputMsgWindow("open_videofile")
 end
 	
 function editor.clone()
         if(table.getn(selected_objs) == 0 )then 
-		print("error:there are no selected objects") 
-	        mouse_mode = S_SELECT
+		print("there are no selected objects") 
+	        input_mode = S_SELECT
 		return 
         end 
 	for i, v in pairs(g.children) do
@@ -866,7 +858,9 @@ function editor.clone()
         	     }
         	     table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
         	     g:add(ui.clone)
-        	     screen:add(g)        
+	             if(screen:find_child("screen_objects") == nil) then 
+        	          screen:add(g)        
+		     end 
         	     ui.clone.reactive = true
 		     create_on_button_down_f(ui.clone)
 		     item_num = item_num + 1
@@ -874,13 +868,13 @@ function editor.clone()
             end
         end
 
-	mouse_mode = S_SELECT
+	input_mode = S_SELECT
 end
 	
 function editor.delete()
         if(table.getn(selected_objs) == 0 )then 
-		print("error:there are no selected objects") 
-		mouse_mode = S_SELECT
+		print("there are no selected objects") 
+		input_mode = S_SELECT
 		return 
         end 
 	for i, v in pairs(g.children) do
@@ -889,12 +883,11 @@ function editor.delete()
 		     editor.n_selected(v)
         	     table.insert(undo_list, {v.name, DEL, v})
         	     g:remove(v)
-        	     screen:add(g)        
 		end 
             end
         end
 
-	mouse_mode = S_SELECT
+	input_mode = S_SELECT
 end
 	
 
@@ -950,15 +943,15 @@ function editor.group()
 	end 
 
         g:add(ui.group)
-        screen:add(g)
+	if(screen:find_child("screen_objects") == nil) then 
+             screen:add(g)
+	end 
 
         item_num = item_num + 1
         create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
-	mouse_mode = S_SELECT
+	input_mode = S_SELECT
 end
-
-
 
 function editor.ugroup()
 	for i, v in pairs(g.children) do
@@ -966,19 +959,12 @@ function editor.ugroup()
 		  if(v.extra.selected == true) then
 			if(v.type == "Group") then 
 			     editor.n_selected(v)
-			  
-			     --print(v.name)
-			     --dumptable(v.children)
 			     for i,c in pairs(v.children) do 
-			     	--if(v:find_child(c.name)) then 
-			             --dumptable(c.position)
-			             --dumptable(c.size)
 				     v:remove(c)
 				     c.extra.is_in_group = false
 				     c.x = c.x + v.x 
 				     c.y = c.y + v.y 
 		     		     g:add(c)
-				     --screen:add(g)
 				     c.reactive = true
         			     create_on_button_down_f(c)
 				     if(c.type == "Text") then
@@ -990,7 +976,6 @@ function editor.ugroup()
 	     				    end 
 					end 
 	  			     end 
-			     	--end 
 			     end
 			     g:remove(v)
         		     table.insert(undo_list, {v.name, DEL, v})
@@ -999,7 +984,7 @@ function editor.ugroup()
               end
         end
         screen.grab_key_focus(screen)
-	mouse_mode = S_SELECT
+	input_mode = S_SELECT
 end
 	
 local m_init_x = 0 
@@ -1055,7 +1040,7 @@ function editor.multi_select_done(x,y)
 	m_init_y = 0 
 	multi_select_border = nil
         screen.grab_key_focus(screen)
-	mouse_mode = S_SELECT
+	input_mode = S_SELECT
 
 end 
 
@@ -1100,7 +1085,7 @@ function editor.group_done(x, y)
         item_num = item_num + 1
         create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
-	mouse_mode = S_SELECT
+	input_mode = S_SELECT
 end 
 
 function editor.group_move(x,y)
@@ -1122,10 +1107,12 @@ local function getObjName (border_n)
 end 
 
 function editor.left() 
+     local org_object, new_object 
+
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print("there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1135,21 +1122,27 @@ function editor.left()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-			v.x = basis_obj.x
-			editor.n_selected(v)
+		     editor.n_selected(v)
+		     if(v.x ~= basis_obj.x) then
+	                  org_object = copy_obj(v)
+			  v.x = basis_obj.x
+			  new_object = copy_obj(v)
+                          table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		     end
 		end 
           end
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 function editor.right() 
+     local org_object, new_object 
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print(":there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1159,21 +1152,27 @@ function editor.right()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
+		   editor.n_selected(v)
+		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
+	                org_object = copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w - v.w
-			editor.n_selected(v)
+			new_object = copy_obj(v)
+                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		   end
 		end 
           end
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 function editor.top()
+     local org_object, new_object 
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print("there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1183,21 +1182,27 @@ function editor.top()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
+		     editor.n_selected(v)
+		     if(v.y ~= basis_obj.y) then
+	                org_object = copy_obj(v)
 			v.y = basis_obj.y 
-			editor.n_selected(v)
+			new_object = copy_obj(v)
+                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		     end 
 		end 
           end
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 function editor.bottom()
+     local org_object, new_object 
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are  no selected objects") 
-	mouse_mode = S_SELECT
+	print(":there are  no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1207,45 +1212,26 @@ function editor.bottom()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
+		     editor.n_selected(v)
+		     if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
+	                org_object = copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h - v.h 
-			editor.n_selected(v)
+			new_object = copy_obj(v)
+                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		     end 
 		end 
           end
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
-function editor.vcenter()
-
-     if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
-	return 
-     end 
-
-     local basis_obj_name = getObjName(selected_objs[1])
-     local basis_obj = g:find_child(basis_obj_name)
-
-     for i, v in pairs(g.children) do
-          if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
-			v.x = basis_obj.x + basis_obj.w/2 - v.w/2
-			editor.n_selected(v)
-		end 
-          end
-    end
-
-    screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
-
-end
-
 function editor.hcenter()
+     local org_object, new_object 
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print("there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1255,14 +1241,50 @@ function editor.hcenter()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-			v.y = basis_obj.y + basis_obj.h/2 - v.h/2
-			editor.n_selected(v)
+		     editor.n_selected(v)
+		     if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
+	                org_object = copy_obj(v)
+			v.x = basis_obj.x + basis_obj.w/2 - v.w/2
+			new_object = copy_obj(v)
+                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		     end
 		end 
           end
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
+
+end
+
+function editor.vcenter()
+     local org_object, new_object 
+
+     if(table.getn(selected_objs) == 0 )then 
+	print("there are no selected objects") 
+	input_mode = S_SELECT
+	return 
+     end 
+
+     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj = g:find_child(basis_obj_name)
+
+     for i, v in pairs(g.children) do
+          if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     editor.n_selected(v)
+		     if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
+	                org_object = copy_obj(v)
+			v.y = basis_obj.y + basis_obj.h/2 - v.h/2
+			new_object = copy_obj(v)
+                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		     end
+		end 
+          end
+    end
+
+    screen.grab_key_focus(screen)
+    input_mode = S_SELECT
 end
 
 local function get_x_sort_t()
@@ -1295,9 +1317,6 @@ local function get_x_sort_t()
           end
      end
      
-     for j,k in pairs(x_sort_t) do 
-	print(k.name)
-     end 
      return x_sort_t 
 end
 
@@ -1323,18 +1342,17 @@ local function get_x_space(x_sort_t)
      local n = table.getn(selected_objs)
      if (n > 2) then 
      	space = space / (n - 1)
-     else 
-	print("error: get_x_space: the number of selected_objs is less than two.")
      end 
 
      return space
 end 
 
 function editor.hspace()
+    local org_object, new_object 
 
     if(table.getn(selected_objs) == 0 )then 
-	print("error:there are  no selected objects") 
-	mouse_mode = S_SELECT
+	print("there are  no selected objects") 
+	input_mode = S_SELECT
 	return 
     end 
 
@@ -1344,21 +1362,10 @@ function editor.hspace()
 
     space = get_x_space(x_sort_t)
     space = math.floor(space)
-    print(space)
 
     x_sort_t = get_x_sort_t()
     reverse_t = get_reverse_t(x_sort_t)
 
-    f = table.remove(reverse_t)
-    while(table.getn(reverse_t) ~= 0) do  
-         b = table.remove(reverse_t)
-         b.x = f.x + f.w + space 
-	 if(b.x > 1920) then 
-		print("error b.x is bigger than screen size") 
-		print(b.x)
-	 end 
-         f = b 
-    end 
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
@@ -1367,8 +1374,26 @@ function editor.hspace()
           end
     end
 
+    f = table.remove(reverse_t)
+    while(table.getn(reverse_t) ~= 0) do  
+         b = table.remove(reverse_t)
+	 if(b.x ~= f.x + f.w + space) then 
+	      org_object = copy_obj(b)
+	      b.x = f.x + f.w + space 
+	      if(b.x > 1920) then 
+		print("ERROR b.x is bigger than screen size") 
+		print("b.x",b.x,"f.x",f.x,"f.w",f.w,"space",space)
+		b.x = 1920 - b.w 
+	      end 
+	      new_object = copy_obj(b)
+              table.insert(undo_list, {b.name, CHG, org_object, new_object})
+	 end 
+
+         f = b 
+    end 
+
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 local function get_y_sort_t()
@@ -1421,10 +1446,11 @@ local function get_y_space(y_sort_t)
 end 
 
 function editor.vspace()
+    local org_object, new_object 
 
     if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print(":there are no selected objects") 
+	input_mode = S_SELECT
 	return 
     end 
 
@@ -1440,7 +1466,12 @@ function editor.vspace()
     f = table.remove(reverse_t)
     while(table.getn(reverse_t) ~= 0) do  
          b = table.remove(reverse_t)
-         b.y = f.y + f.h + space 
+	 if(b.y ~= f.y + f.h + space) then 
+	      org_object = copy_obj(b)
+              b.y = f.y + f.h + space 
+	      new_object = copy_obj(b)
+              table.insert(undo_list, {b.name, CHG, org_object, new_object})
+	 end
          f = b 
     end 
 
@@ -1453,14 +1484,14 @@ function editor.vspace()
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 function editor.bring_to_front()
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print(":there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1475,14 +1506,14 @@ function editor.bring_to_front()
     end
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 function editor.send_to_back()
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print(":there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1513,14 +1544,14 @@ function editor.send_to_back()
     end 
 	
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 function editor.send_backward()
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are no selected objects") 
-	mouse_mode = S_SELECT
+	print("there are no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1560,15 +1591,15 @@ function editor.send_backward()
     end 
 
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 
 end
 
 function editor.bring_forward()
 
      if(table.getn(selected_objs) == 0 )then 
-	print("error:there are  no selected objects") 
-	mouse_mode = S_SELECT
+	print("there are  no selected objects") 
+	input_mode = S_SELECT
 	return 
      end 
 
@@ -1601,7 +1632,7 @@ function editor.bring_forward()
     end 
 	
     screen.grab_key_focus(screen)
-    mouse_mode = S_SELECT
+    input_mode = S_SELECT
 end
 
 

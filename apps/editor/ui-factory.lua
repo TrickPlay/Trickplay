@@ -105,6 +105,19 @@ end
 -- Makes a menu item with a white ring around it
 ---------------------------------------------------------------------------
 
+local icon_map = 
+{
+	["LEFT SIDE      "] = function() icon = Image { name= "icon", src = "./assets/left.png"} return icon end, 
+        ["RIGHT SIDE    "] = function() icon = Image { name= "icon", src = "./assets/right.png"} return icon end, 
+        ["TOP             "] = function() icon = Image { name= "icon", src = "./assets/top.png"} return icon end, 
+        ["BOTTOM        "] = function() icon = Image { name= "icon", src = "./assets/bottom.png"} return icon end, 
+        ["HORIZ. CENTER   "] = function() icon = Image { name= "icon", src = "./assets/align-horizontally-center.png"} return icon end, 
+        ["VERT. CENTER    "] = function() icon = Image { name= "icon", src = "./assets/align-vertically-center.png"} return icon end, 
+        ["HORIZONTALLY	  "] = function() icon = Image { name= "icon", src = "./assets/distribute-horizontal-center.png"} return icon end,  
+        ["VERTICALLY 	  "] = function() icon = Image { name= "icon", src = "./assets/distribute-vertical-center.png"} return icon end 
+}
+
+   
 function factory.make_text_menu_item( assets , caption )
 
     local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
@@ -149,6 +162,9 @@ function factory.make_text_menu_item( assets , caption )
         line:finish_painting()
         return line
     end 
+    local icon 
+
+    if(icon_map[caption]) then icon = icon_map[caption]() end 
 
     local text = Text{ text = caption }:set( STYLE )
     text.name = "caption"
@@ -159,18 +175,32 @@ function factory.make_text_menu_item( assets , caption )
     
     if (caption == "TEXT"..ITEM_SPACE.."[T]") then 
 	text_category = Text{ text = "INSERT : "}:set(STYLE)
-    elseif (caption == "LEFT           ") then
-	text_category = Text{ text = "ALIGNMENT : "}:set(STYLE)
-    elseif (caption == "H_SPACE	  ") then
-	text_category = Text{ text = "DISTRIBUTION : "}:set(STYLE)
-    elseif ( caption == "DELETE"..ITEM_SPACE.."[D]" or 
-    	     caption ==  "BRING TO FRONT" ) then 
-        
+    elseif (caption == "LEFT SIDE      ") then
+	text_category = Text{ text = "ALIGN : "}:set(STYLE)
+    elseif (caption == "HORIZONTALLY	  ") then
+	text_category = Text{ text = "DISTRIBUTE : "}:set(STYLE)
+    elseif (caption ==  "BRING TO FRONT" ) then 
+	text_category = Text{ text = "ARRANGE : "}:set(STYLE)
+    elseif ( caption == "DELETE".."\t\t     ".."[Del]") then
 	line_category = make_line()
     end 
         
     if text_category ~= nil then 
         text_category.reactive = false
+	if(icon ~= nil) then 
+	group = Group
+    	{
+        	size = { WIDTH , HEIGHT + text_category.h + PADDING_Y },
+        	children =
+        	{
+		icon:set{position = {280, text_category.h + PADDING_Y + 15}, scale = {1.3, 1.3}},
+	    	text_category:set{position = {5, 6}},
+            	ring:set{ position = { 0 , text_category.h + PADDING_Y } },
+            	focus:set{ position = { 0 , text_category.h + PADDING_Y } , size = { WIDTH , HEIGHT } , opacity = 0 },
+            	text:set{ position = { 30 , text_category.h + PADDING_Y + 15 } }
+        	}
+    	}  
+	else 
 	group = Group
     	{
         	size = { WIDTH , HEIGHT + text_category.h + PADDING_Y },
@@ -181,7 +211,8 @@ function factory.make_text_menu_item( assets , caption )
             	focus:set{ position = { 0 , text_category.h + PADDING_Y } , size = { WIDTH , HEIGHT } , opacity = 0 },
             	text:set{ position = { 30 , text_category.h + PADDING_Y + 15 } }
         	}
-    	}  
+    	} 
+	end 
     elseif line_category  ~= nil then 
 	group = Group
     	{
@@ -194,12 +225,24 @@ function factory.make_text_menu_item( assets , caption )
             	text:set{ position = { 30 , PADDING_Y *2 + 15 } }
         	}
     	}
-    else 
+    elseif( icon == nil ) then  
  	group = Group
     	{
         	size = { WIDTH , HEIGHT },
         	children =
         	{
+            	ring:set{ position = { 0 , 0} },
+            	focus:set{ position = { 0 , 0} , size = { WIDTH , HEIGHT } , opacity = 0 },
+            	text:set{ position = { 30 , 15 } }
+        	}
+    	}
+    else
+ 	group = Group
+    	{
+        	size = { WIDTH , HEIGHT },
+        	children =
+        	{
+		icon:set{position = {280, 15 }, scale = {1.3, 1.3}},
             	ring:set{ position = { 0 , 0} },
             	focus:set{ position = { 0 , 0} , size = { WIDTH , HEIGHT } , opacity = 0 },
             	text:set{ position = { 30 , 15 } }
@@ -425,6 +468,7 @@ local code_map =
         [ "Rectangle" ] = function()  size = {800, 600} color =  {0, 25, 25, 255} return size, color end,
         [ "Clone" ] = function()  size = {800, 550} color =  {0, 25, 25, 255} return size, color end,
         [ "Group" ] = function()  size = {800, 550} color =  {0, 25, 25, 255} return size, color end,
+	[ "Video" ] =  function()  size = {1500, 850} color =  {0, 25, 25, 255} return size, color end
 }
 
 local color_map =
@@ -436,7 +480,7 @@ local color_map =
         [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
-        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
+        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end
 }
 
 -------------------------------------------------------------------------------
@@ -731,6 +775,14 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
     local input_box_width     
  
+    local function text_reactive()
+	for i, c in pairs(g.children) do
+	     if(c.type == "Text") then 
+	          c.reactive = true
+	     end 
+        end
+    end 
+
     local function make_focus_ring(w, h)
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
@@ -813,28 +865,31 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              if key == keys.Return then
                   if (item_v == "view code") then 
 		      screen:remove(inspector)
-		      mouse_mode = S_SELECT
+		      input_mode = S_SELECT
 		      current_inspector = nil
 		      --editor.n_selected(v, true)
                       screen:grab_key_focus(screen) 
 		      -- org_obj, new_obj = inspector_apply (v, inspector) 
 		      editor.view_code(v)
+		      text_reactive()
 	              return true
 		  elseif (item_v == "apply") then 
 		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
-		      mouse_mode = S_SELECT
+		      input_mode = S_SELECT
 		     
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
+		      text_reactive()
 	              return true
 		  elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
-		      mouse_mode = S_SELECT
+		      input_mode = S_SELECT
 		      current_inspector = nil
 		      editor.n_selected(v, true)
                       screen:grab_key_focus(screen) 
+		      text_reactive()
 	              return true
 		  end 
  	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
@@ -877,23 +932,26 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     group.extra.on_focus_in()
 	     if (item_v == "view code") then 
 		      screen:remove(inspector)
-		      mouse_mode = S_SELECT
+		      input_mode = S_SELECT
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
 		      editor.view_code(v)
+		      text_reactive()
 	     elseif (item_v == "apply") then 
 		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
-		      mouse_mode = S_SELECT
+		      input_mode = S_SELECT
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
+		      text_reactive()
 	     elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
-		      mouse_mode = S_SELECT
+		      input_mode = S_SELECT
 		      current_inspector = nil
 		      editor.n_selected(v, true)
                       screen:grab_key_focus(screen) 
+		      text_reactive()
 	     end 
 
              return true
@@ -1259,4 +1317,58 @@ function factory.draw_anchor_point(v, inspector)
     return anchor_pnt
 end 
 
+
+
+
+
+
+function factory.draw_mouse_pointer() 
+
+sero = Rectangle
+	{
+		name="sero",
+		border_color={255,255,255,192},
+		border_width=0,
+		color={255,255,255,255},
+		size = {5,30},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {12.5,0},
+		opacity = 255
+	}
+
+garo = Rectangle
+	{
+		name="garo",
+		border_color={255,255,255,192},
+		border_width=0,
+		color={255,255,255,255},
+		size = {30,5},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {0,12},
+		opacity = 255
+	}
+
+mouse_pointer = Group
+	{
+		name="mouse_pointer",
+		size={30,30},
+		position = {300,300},
+		children = {sero, garo},
+		scale = {1,1,0,0},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		opacity = 255
+	}
+
+	mouse_pointer.anchor_point = {mouse_pointer.w/2, mouse_pointer.h/2}
+	return mouse_pointer
+end 
 return factory

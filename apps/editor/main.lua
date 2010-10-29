@@ -178,6 +178,7 @@ local function build_ui( show_it )
 
     local function animate_in_dropdown( )
 
+	input_mode = S_MENU 
         local ANIMATION_DURATION = 150
         local section = ui.sections[ ui.focus ]
         
@@ -292,32 +293,31 @@ local function build_ui( show_it )
 
     local key_map =
     {
-	[ keys.h	] = function() animate_out_dropdown() editor.undo_history() mouse_mode = S_SELECT end,
-	[ keys.w	] = function() animate_out_dropdown() editor.the_open() mouse_mode = S_SELECT end,
-	[ keys.r	] = function() animate_out_dropdown() mouse_mode = S_RECTANGLE end,
-        [ keys.v	] = function() animate_out_dropdown() editor.view_code() mouse_mode = S_SELECT end,
-        [ keys.n	] = function() animate_out_dropdown() editor.close() mouse_mode = S_SELECT end,
-        [ keys.o	] = function() animate_out_dropdown() editor.open() mouse_mode = S_SELECT end,
-        [ keys.s	] = function() animate_out_dropdown() editor.save(true) mouse_mode = S_SELECT end,
-        [ keys.a	] = function() animate_out_dropdown() editor.save(false) mouse_mode = S_SELECT end,
-        [ keys.t	] = function() animate_out_dropdown() editor.text() mouse_mode = S_SELECT end,
-        [ keys.i	] = function() animate_out_dropdown() editor.image() mouse_mode = S_SELECT end,
-        [ keys.u	] = function() animate_out_dropdown() editor.undo() mouse_mode = S_SELECT end,
-        [ keys.e	] = function() animate_out_dropdown() editor.redo() mouse_mode = S_SELECT end,
-        [ keys.x	] = function() animate_out_dropdown() editor.debug() mouse_mode = S_SELECT end,
-        [ keys.c	] = function() animate_out_dropdown() editor.clone() mouse_mode = S_SELECT end,
-        [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() mouse_mode = S_SELECT end,
-        [ keys.g	] = function() animate_out_dropdown() editor.group() mouse_mode = S_SELECT end,
-        [ keys.p	] = function() animate_out_dropdown() end,
+	[ keys.h	] = function() animate_out_dropdown() editor.undo_history() input_mode = S_SELECT end,
+--	[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
+	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
+        [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
+        [ keys.o	] = function() animate_out_dropdown() editor.open() input_mode = S_SELECT end,
+        [ keys.s	] = function() animate_out_dropdown() editor.save(true) input_mode = S_SELECT end,
+        [ keys.a	] = function() animate_out_dropdown() editor.save(false) input_mode = S_SELECT end,
+        [ keys.t	] = function() animate_out_dropdown() editor.text() input_mode = S_SELECT end,
+        [ keys.i	] = function() animate_out_dropdown() editor.image() input_mode = S_SELECT end,
+        [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
+        [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
+        [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
+        [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
+        [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() input_mode = S_SELECT end,
+        [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
         [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
 								   menu_hide = false 
         							   ui.bar:show()
 								   ui.button_focus:show()
         							   ui:animate_in() 
-   								   ui.bar:raise_to_top()  --kkk
+   								   ui.bar:raise_to_top() 
 							      else 
 								   menu_hide = true 
-							      end end,
+							      end 
+							      input_mode = S_SELECT end,
         [ keys.q	] = function() exit() end,
         [ keys.Left     ] = function() if(current_inspector == nil) then move_focus( ui.focus - 1 ) end end,
         [ keys.Right    ] = function() if(current_inspector == nil) then move_focus( ui.focus + 1 ) end end ,
@@ -343,6 +343,7 @@ local function build_ui( show_it )
         		    		ui.button_focus.position = s.button.position
         		    		ui.button_focus.opacity = 0
 			    		animate_out_dropdown() 
+					input_mode = S_SELECT 
 				     else 
 			                menu_init = true
 			    		local s= ui.sections[ui.focus]
@@ -350,6 +351,7 @@ local function build_ui( show_it )
         		    		ui.button_focus.opacity = 255
 	 		   		-- do_default_for_section() 
 			    		animate_in_dropdown() 
+					input_mode = S_MENU
 			    	     end 
 			         end 
 			    end ,
@@ -377,7 +379,7 @@ local function build_ui( show_it )
 	     section.button.reactive = true
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
-		  if(mouse_mode == S_SELECT) and
+		  if(input_mode ~= S_POPUP) and
 		    (screen:find_child("msgw") == nil) then
 	               button_map[section.button.name]()
 		       menu_init = true
@@ -397,7 +399,7 @@ local function build_ui( show_it )
 	if(key == keys.Control_L ) then control = true end
 	if(key == keys.Control_R ) then control = true end
 
-	if(mouse_mode == S_SELECT) then 
+	if(input_mode ~= S_POPUP) then 
              local f = key_map[ key ]
              if f then
             	f()
@@ -433,7 +435,7 @@ local function build_ui( show_it )
 	if(key == keys.Control_L ) then control = true end
 	if(key == keys.Control_R ) then control = true end
 
-	if(mouse_mode == S_SELECT) then 
+	if(input_mode ~= S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
 	      if(current_inspector == nil)and (key == keys.Return or key == keys.Down 
@@ -460,23 +462,23 @@ local function build_ui( show_it )
      end
 
      function screen:on_button_down(x,y,button,num_clicks)
-
           mouse_state = BUTTON_DOWN
-          if(mouse_mode == S_RECTANGLE) then editor.rectangle(x, y) end
-          if(mouse_mode == S_SELECT) and 
-		    (screen:find_child("msgw") == nil) then
+          if(input_mode == S_RECTANGLE) then editor.rectangle(x, y) end
+          if(input_mode == S_MENU) then
+		if(menu_init == true) then 
+		     menu_init = false
+		     local s= ui.sections[ui.focus]
+        	     ui.button_focus.position = s.button.position
+        	     ui.button_focus.opacity = 0
+		     animate_out_dropdown() 
+		     input_mode = S_SELECT
+		end 
+          elseif(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	       if(current_inspector == nil) then 
 		    if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
                          editor.inspector(g.extra.video)
                     end 
-		    if(menu_init == true) then 
-			 menu_init = false
-			 local s= ui.sections[ui.focus]
-        		 ui.button_focus.position = s.button.position
-        		 ui.button_focus.opacity = 0
-			 animate_out_dropdown() 
-		    end 
-		    if(shift == true) then 
+		    		    if(shift == true) then 
 			editor.multi_select(x,y)
 		    end 
 	       end 
@@ -486,8 +488,8 @@ local function build_ui( show_it )
      function screen:on_button_up(x,y,button,clicks_count)
 	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
-              if (mouse_mode == S_RECTANGLE) then editor.rectangle_done(x, y) mouse_mode = S_SELECT end
-	      if(mouse_mode == S_SELECT) and 
+              if (input_mode == S_RECTANGLE) then editor.rectangle_done(x, y) screen:remove(mouse_pointer) input_mode = S_SELECT end
+	      if(input_mode == S_SELECT) and 
 		    (screen:find_child("msgw") == nil) then
 			editor.multi_select_done(x,y)
 	      end 
@@ -497,6 +499,17 @@ local function build_ui( show_it )
       end
 
       function screen:on_motion(x,y)
+
+	  if(input_mode == S_RECTANGLE) then 
+		if(rect_mouse_pointer == nil) then 
+		rect_mouse_pointer = ui.factory.draw_mouse_pointer()
+	        end 
+		rect_mouse_pointer.position = {x,y,0}
+		if(screen:find_child("mouse_pointer") == nil) then 
+		     screen:add(rect_mouse_pointer)
+		end 
+	  end 
+
 	  if (menu_hide == true ) then
     	  if( y > ui.bar_background.h) then 
         	     animate_out_dropdown()
@@ -505,7 +518,7 @@ local function build_ui( show_it )
 		ui.button_focus:show()
         	ui.bar:show()
         	ui:animate_in()
-   	        ui.bar:raise_to_top()  --kkk
+   	        ui.bar:raise_to_top()  
     	  end 
 	  end
           if dragging then
@@ -524,8 +537,8 @@ local function build_ui( show_it )
 	       actor.position = { x - dx , y - dy  }
           end
           if(mouse_state == BUTTON_DOWN) then
-               if (mouse_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
-               if (mouse_mode == S_SELECT) and 
+               if (input_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
+               if (input_mode == S_SELECT) and 
 		  (screen:find_child("msgw") == nil) then 
 		    editor.multi_select_move(x, y) end
           end

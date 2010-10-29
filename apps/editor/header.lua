@@ -11,6 +11,7 @@ BUTTON_DOWN       = 1
 S_SELECT          = 0
 S_RECTANGLE       = 1
 S_POPUP        	  = 2
+S_MENU        	  = 3
 
 DEFAULT_COLOR     = "FFFFFFC0"
 
@@ -30,7 +31,7 @@ SECTION_SETTING      = 4
 BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 
 -- Background image 
-BG_IMAGE = Image { name= "bg_img", src = "transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
+BG_IMAGE = Image { name= "bg_img", src = "assets/transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
 
 CURRENT_DIR 	  = "./editor/working_space"
 ---------------------
@@ -44,9 +45,9 @@ current_focus 	  = nil
 
 menu_hide         = false
 popup_hide        = false
-mouse_mode        = S_SELECT
+input_mode        = S_MENU
 mouse_state       = BUTTON_UP
-g = Group{}
+g = Group{name = "screen_objects"}
 
 contents    	  = ""
 item_num 	  = 0
@@ -106,7 +107,7 @@ ui =
                 button  = assets( "assets/button-yellow.png" ),
                 text    = Text  { text = strings[ "  ARRANGE" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
-                height  = 810,
+                height  = 840,
                 init    = dofile( "section-arrange" )
             },
            [SECTION_SETTING] =
@@ -114,7 +115,7 @@ ui =
                 button  = assets( "assets/button-blue.png" ),
                 text    = Text  { text = strings[ "  SETTING" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
-                height  = 340,
+                height  = 400,
                 init    = dofile( "section-setting" )
             }
         }
