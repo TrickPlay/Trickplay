@@ -193,6 +193,7 @@ Controller = Class(Observer, function(ctrl, router, id)
                 if ctrl.return_pressed then ctrl:return_pressed() end
             end
     }
+    ControlKeyTable[keys.OK] = ControlKeyTable[keys.Return]
 
     function ctrl:on_key_down(k)
         if ControlKeyTable[k] then
