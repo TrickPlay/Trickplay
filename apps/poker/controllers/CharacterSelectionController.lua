@@ -193,6 +193,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             end
          end
    }
+   CharacterSelectionKeyTable[keys.OK] = CharacterSelectionKeyTable[keys.Return]
 
    function self:on_key_down(k)
       if CharacterSelectionKeyTable[k] then

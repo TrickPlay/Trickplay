@@ -100,6 +100,7 @@ BettingController = Class(Controller, function(self, view, ...)
            -- if not success then print(error_msg) end
         end,
     }
+    PlayerSelectionKeyTable[keys.OK] = PlayerSelectionKeyTable[keys.Return]
 
     function self:set_callback(cb)
        print("callback set")

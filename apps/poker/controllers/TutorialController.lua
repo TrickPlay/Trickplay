@@ -32,6 +32,7 @@ TutorialController = Class(Controller, function(self, view, ...)
             end
         end,
     }
+    keyTable[keys.OK] = keyTable[keys.Return]
     
     function self:on_key_down(k)
         print("Tutorial on_key_down")
