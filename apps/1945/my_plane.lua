@@ -19,14 +19,12 @@ my_plane =
     friction_bump = 1000, -- per second
     
     speed_bump = 200,
-       
-	prop1 = nil,
-	prop2 = nil, 
+    
     group = Group{ },--size = { --[[65 , 65]]my_plane_sz,my_plane_sz } },
     
-    image = Clone{ source = assets.my_plane_strip },
+    image = Clone{ source = imgs.my_plane_strip },
     
-    bullet = assets.my_bullet,
+    bullet = imgs.my_bullet,
     
     v_speed = 0,
     
@@ -42,28 +40,51 @@ my_plane =
     
     max_dead_time = 2,
     
-    setup =
+    prop =
+    {
+        l = Clone{source=imgs.prop2},
+        r = Clone{source=imgs.prop2},
+        g_l = Group
+        {
+            clip =
+            {
+                0,
+                0,
+                imgs.prop2.w ,
+                --self.num_prop_frames still DNE 
+                imgs.prop2.h/3,
+            },
+            anchor_point = {imgs.prop2.w/2,
+                            imgs.prop2.h/2},
+            position     = {35,35},
+        },
+        g_r = Group
+        {
+            clip =
+            {
+                0,
+                0,
+                imgs.prop2.w ,
+                --self.num_prop_frames still DNE 
+                imgs.prop2.h/3,
+            },
+            anchor_point = {imgs.prop2.w/2,
+                            imgs.prop2.h/2},
+            position     = {93,35},
+        },
+    },
     
-        function( self )
-        
-			self.prop1 = { 
-				Clone{source=assets.prop1,anchor_point={assets.prop1.w/2,assets.prop1.h/2},x=35,y=27},
-				Clone{source=assets.prop2,anchor_point={assets.prop2.w/2,assets.prop2.h/2},x=35,y=27,opacity=0},
-				Clone{source=assets.prop3,anchor_point={assets.prop3.w/2,assets.prop3.h/2},x=35,y=27,opacity=0}
-			}
+    setup = function( self )
+        	self.prop.g_l:add( self.prop.l )
+			self.prop.g_r:add( self.prop.r )
+            self.num_prop_frames = 3
 
-			self.prop2 = { 
-				Clone{source=assets.prop1,anchor_point={assets.prop1.w/2,assets.prop1.h/2},x=93,y=27},
-				Clone{source=assets.prop2,anchor_point={assets.prop2.w/2,assets.prop2.h/2},x=93,y=27,opacity=0},
-				Clone{source=assets.prop3,anchor_point={assets.prop3.w/2,assets.prop3.h/2},x=93,y=27,opacity=0}
-			}
-			self.prop_index = 1
-
-            self.image.opacity = 255
+	self.prop_index = 1
+        self.image.opacity = 255
             
             self.group:add( self.image)
-            self.group:add( unpack(self.prop1))
-            self.group:add( unpack(self.prop2))
+            self.group:add( self.prop.g_r)
+            self.group:add( self.prop.g_l)
             
             screen:add( self.group )
             
@@ -74,34 +95,17 @@ my_plane =
     render =
     
         function( self , seconds )
-        
-            -- Flip sprites
-            
-            -- We just move the image within the group, which has a clipping
-            -- area set.
-            
-			self.prop1[self.prop_index].opacity=0
-			self.prop2[self.prop_index].opacity=0
-			self.prop_index = self.prop_index%3+1
-			self.prop1[self.prop_index].opacity=255
-			self.prop2[self.prop_index].opacity=255
-			
-
-            --local x = self.image.x - my_plane_sz
-            
-           -- if x == -my_plane_sz*3 then
-            
-            --    x = 0
-                
-            --end
-            
-            --self.image.x = x
+			self.prop_index = self.prop_index%
+				self.num_prop_frames + 1
+			self.prop.l.y = -(self.prop_index - 1)*self.prop.l.h/
+				self.num_prop_frames
+			self.prop.r.y = -(self.prop_index - 1)*self.prop.r.h/
+				self.num_prop_frames
             
             self.group:raise_to_top()
-    
             -- Move
             
-            if game_is_running then--not self.dead then
+            --if game_is_running then--not self.dead then
 if self.dead then
                 -- Figure the total time we have been dead
                 self.dead_time = self.dead_time + seconds
@@ -224,7 +228,7 @@ r.w=self.image.w
 r.h=self.image.h
 r:raise_to_top()
 --]]
-            end
+            --end
         end,
         
     -- Adds a bullet to the render list
@@ -304,7 +308,7 @@ r:raise_to_top()
                             {
                                 speed = 80,
                                 
-                                text = Clone{ source = assets.score },
+                                text = Clone{ source = txt.score },
                                 
                                 setup =
                                 
@@ -318,7 +322,7 @@ if point_counter < 999990 then
 	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
 		number_of_lives = number_of_lives + 1
 		lives[number_of_lives].opacity =255
-		self.text = Clone{source=assets.up_life}
+		self.text = Clone{source=txt.up_life}
 	end
 	redo_score_text()
 end
@@ -374,20 +378,16 @@ end
         function( self , other )
 
 
-
 --more Alex code
-if number_of_lives == 0 then
-	game_is_running = false
-	--end_game.y = -100
-	--end_game.opacity = 255
---	end_game.scale = {.5,.5}
+if state.num_lives == 0 then
+
 	remove_from_render_list( my_plane )
 	add_to_render_list(
                 
                             {
                                 speed = 40,
                                 
-                                text = Clone{ source = assets.g_over },
+                                text = Clone{ source = img.g_over },
                                 
                                 setup =
                                 
@@ -429,12 +429,13 @@ if number_of_lives == 0 then
                                     
                                     end,
                             })
+                            --[[
 	add_to_render_list(
                 
                             {
                                 elapsed = 0,
                                 
-                                --text = Clone{ source = assets.g_over },
+                                --text = Clone{ source = txt.g_over },
                                 
                                 setup =
                                 
@@ -463,16 +464,16 @@ print("hhhhhhh")
 					end
                                     end,
                             })
+                            --]]
 
 
-else
-	lives[number_of_lives].opacity=0
-	number_of_lives = number_of_lives - 1
-	
+elseif state.curr_mode ~= "TEST_MODE" then
+	lives[state.hud.num_lives].opacity=0
+	state.hud.num_lives = state.hud.num_lives - 1
 end
 redo_score_text()
---------
 
+--------
 
 
             self.dead = true
@@ -492,7 +493,7 @@ redo_score_text()
             local explosion =
                 
                 {
-                    image = Clone{ source = assets.explosion2 , opacity = 255 },
+                    image = Clone{ source = imgs.explosion2 , opacity = 255 },
                     
                     group = nil,
                     
@@ -547,6 +548,7 @@ redo_score_text()
     on_key =
     
         function( self , key )
+        print(self,key)
         --[[
             if number_of_lives == 0 then--self.dead then
             
@@ -555,7 +557,7 @@ redo_score_text()
             end
             --]]   
             if key == keys.Right then
-            
+            print("right")
                 self.h_speed = clamp( self.h_speed + self.speed_bump , -self.max_h_speed , self.max_h_speed )
                 
             elseif key == keys.Left then

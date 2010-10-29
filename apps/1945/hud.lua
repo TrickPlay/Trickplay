@@ -1,4 +1,4 @@
-my_font = "ARCADECLASSIC 40px"
+my_font = "kroeger 06_65 40px"
 
 number_of_lives = 3
 high_score = settings.high_score or 0
@@ -69,5 +69,5 @@ lives =
 }
 
 screen:add(topbar,score)
-screen:add(unpack(lives))
+topbar:add(unpack(lives))
 

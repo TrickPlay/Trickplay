@@ -8,7 +8,7 @@ water =
     top_y  = 0,
     setup = function( self )
                 
-            local tile = assets.water
+            local tile = imgs.water
             tile:set{ w = screen.w , tile = { true  , false } }
             for i = 1 , math.ceil( screen.h / tile.h ) + 3 do
                 table.insert( self.strips , Clone{ source = tile } )
@@ -25,12 +25,41 @@ water =
 	add_doodad = function( self, index, xxx, x_rot, y_rot, z_rot )
 
 
+        local cloud =
+            
+            {
+                speed = self.speed,
+                image = Clone{ 
+					source       = imgs[ "cloud"..tostring( index -5) ] , 
+					x_rotation   = { x_rot , 0, 0},
+					y_rotation   = { y_rot , 0, 0},
+					z_rotation   = { z_rot , 0, 0},
+					opacity      = 255 
+				},
+                setup = function( self )
+                        screen:add( self.image )
+						self.image:lower_to_bottom()
+						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
+						self.image.position     = {               xxx , -self.image.h / 2 }
+
+
+                end,
+                    
+                render = function( self , seconds )
+                        self.image.y = self.image.y + self.speed * seconds
+                        if self.image.y > (screen.h+self.image.h) then
+                            remove_from_render_list( self )
+                            screen:remove( self.image )
+                        end
+                        self.image:raise_to_top()
+                end,
+            }
         local island =
             
             {
                 speed = self.speed,
                 image = Clone{ 
-					source       = assets[ "island"..tostring( index ) ] , 
+					source       = imgs[ "island"..tostring( index ) ] , 
 					x_rotation   = { x_rot , 0, 0},
 					y_rotation   = { y_rot , 0, 0},
 					z_rotation   = { z_rot , 0, 0},
@@ -56,8 +85,11 @@ water =
                         
                 end,
             }
-            
-        add_to_render_list( island )
+	if index > 5 then
+	    add_to_render_list( cloud )
+	else
+	    add_to_render_list( island )
+	end
 	end,
             
     render = function( self , seconds )

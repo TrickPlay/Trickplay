@@ -1,125 +1,68 @@
-
-dofile( "controller.lua" )
-dofile("hud.lua")
-curr_level = nil
-test_mode = false
--- Alex's code
-
-game_is_running = false
-splash = Group{z=10}
-splash:add(
-
-    Image{ name = "logo",src = "assets/splash/AirCombatLogo.png", position = {screen.w/2,screen.h/2-80}},
-    Image{ name = "instr", src = "assets/splash/InstructionBar.png", position = {50,screen.h - 120}},
-    Image{ name = "start",src = "assets/splash/StartButton.png", position = {screen.w/2,screen.h/2+240}}
-)
-local logo = splash:find_child("logo")
-logo.anchor_point = {logo.w/2,logo.h/2}
 --[[
-local instr = splash:find_child("instr")
-instr.anchor_point = {instr.w/2,instr.h/2}
+    Air Combat
 --]]
-local startt = splash:find_child("start")
-startt.anchor_point = {startt.w/2,startt.h/2}
-screen:add(splash)
--------------------------------------------------------------------------------
 
-function clamp( v , min , max )
 
-    if v < min then return min        
-    elseif v > max then return max        
-    else return v        
-    end
-
-end
-
--------------------------------------------------------------------------------
-
-assets =
-{
-    water           = Image{ src  = "assets/water.png" },
-    my_plane_strip  = Image{ src  = "assets/player.png" },
-    my_bullet       = Image{ src  = "assets/bullet.png" },
-    enemy1          = Image{ src  = "assets/e1_4x_test.png" },
-    enemy2          = Image{ src  = "assets/e2_4x_test.png" },
-    enemy3          = Image{ src  = "assets/e3_4x_test.png" },
-    enemy_bullet    = Image{ src  = "assets/enemybullet1.png" },
-    explosion1      = Image{ src  = "assets/explosion1_strip6.png" },
-    explosion2      = Image{ src  = "assets/explosion2_strip7.png" },
-    island1         = Image{ src  = "assets/island1.png" },
-    island2         = Image{ src  = "assets/island2.png" },
-    island3         = Image{ src  = "assets/island3.png" },
-    score           = Text{  font = my_font , text = "+10" , color = "FFFF00" },
-    g_over          = Text{  font = my_font , text = "GAMEOVER" , color = "FFFFFF" },
-    up_life         = Text{  font = my_font , text = "+1 Life"  , color = "FFFFFF" },
-    level1          = Text{  font = my_font , text = "LEVEL 1"  , color = "FFFFFF" },
-	prop1           = Image{ src  = "assets/prop1.png" },
-	prop2           = Image{ src  = "assets/prop2.png" },
-	prop3           = Image{ src  = "assets/prop3.png" },
-	gun_l			= Image{ src  = "assets/cannon_left.png" },
-	gun_r			= Image{ src  = "assets/cannon_right.png" },
-}
-for _ , v in pairs( assets ) do
-    
-    v.opacity = 0
-        
-    screen:add( v )
-    
-end
-
--------------------------------------------------------------------------------
-
-ENEMY_PLANE_MIN_SPEED       = 105
-
-ENEMY_PLANE_MAX_SPEED       = 150
-
-ENEMY_FREQUENCY             = 1--0.8
-
-ENEMY_SHOOTER_PERCENTAGE    = 20--deprecated
-
--------------------------------------------------------------------------------
+--global variables
+dofile( "globals.lua")
+--code for the smart phone accelerometers
+dofile( "controller.lua")
+--code for the top bar
+dofile( "hud.lua")
+--functions of the game loop
+--	add_to_render_list()
+--	remove_from_render_list()
+--	process_collisions()
 dofile("GameLoop.lua")
--------------------------------------------------------------------------------
--- This one deals with the water and occasional islands
-dofile("land.lua")
--------------------------------------------------------------------------------
--- This is my plane. It spawns bullets
-dofile("my_plane.lua")
--------------------------------------------------------------------------------
--- This thing renders nothing, it just spawns enemies
 
+
+
+--All these files consist of tables which get added to the Game Loop
+dofile("land.lua")
+dofile("my_plane.lua")
 dofile("enemies.lua")
--------------------------------------------------------------------------------
--- This table contains all the things that are moving on the screen
+dofile("Levels.lua")
+
+--The splash Items
+local splash = Group{}
+splash:add(
+    Image
+    {
+	name     = "logo",
+	src      = "assets/splash/AirCombatLogo.png",
+	position = {screen.w/2,screen.h/2-80}
+    },
+    Image
+    {
+	name     = "instr",
+	src      = "assets/splash/InstructionBar.png",
+	position = {50,screen.h - 120}
+    },
+    Image
+    {
+	name     = "start",
+	src      = "assets/splash/StartButton.png",
+	position = {screen.w/2,screen.h/2+240}
+    }
+)
+splash:foreach_child(function(c)
+    c.anchor_point = {c.w/2,c.h/2}
+end)
+
+
 function start_game()
 add_to_render_list( my_plane )
 end
 add_to_render_list( water )
+screen:add(splash)
 
 --add_to_render_list( enemies )
 
-
-paused = false
-
-
-
-
-dofile("Levels.lua")
 -------------------------------------------------------------------------------
 
-screen:show()
 
-
--------------------------------------------------------------------------------
--- Game loop, renders everything in the render list
---[[
---Pablo's performance measuring code
-local c = 0
-local t = 0
-local ma = 0
-local mi = 1000
-local sw = Stopwatch()
---]]
+--moves through all the items in the render list
+--i.e. performs the game loop
 function idle.on_idle( idle , seconds )
 
     if not paused then
@@ -131,14 +74,9 @@ function idle.on_idle( idle , seconds )
 		c = c + 1
 		ma = math.max( seconds , ma )
 		mi = math.min( seconds , mi )
-
 		t = t + seconds
-
 		if sw.elapsed >= 1000 then
-	
 			print( mi , ma , t / c , string.format( "%1.0f" , 1 / ( t / c ) ) )
-
-	
 			t = 0
 			c= 0
 			sw:start()
@@ -146,68 +84,166 @@ function idle.on_idle( idle , seconds )
 			mi = 1000
 			
 		end
-
-    end
+	end
 --]]
         for _ , item in ipairs( render_list ) do
-       
             item.render( item , seconds ) 
-
         end
-        
+	
         process_collisions( )
         
     end
     
 end
-local test_text = {
-                                speed = 60,
-                                text = Text{font = my_font , text = "Test Mode\n\n"..
-									"q    row  in  from  left\n"..
-									"p    row  in  from  right\n"..
-									"a    loop  from  left\n"..
-									"l    loop  from  right\n"..
-									"z    zeppelin\n\n"..
-									"1 2 3 4 5       bullet   powerups\n\n"..
-									"h    to  display  this  text  again"  , color = "FFFFFF"},
-                                
-                                setup = function( self )
-                                        self.text.position = { screen.w/2,0}--screen.h/2}
-                                        self.text.anchor_point = { self.text.w / 2 , 0}--self.text.h / 2 }
-                                        self.text.opacity = 255;
-										if self.text.parent == nil then
-                                        screen:add( self.text )
-										end
-                                    end,
-                                    
-                                render = function( self , seconds )
-										self.text.y = self.text.y + self.speed*seconds
-										if self.text.y > screen.h then
-											self.text:unparent()
-											remove_from_render_list(self)
-										end
---[[
-                                        local o = self.text.opacity - self.speed * seconds
-                                        local scale = self.text.scale
-                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        if o <= 0 then
-                                            remove_from_render_list( self )
-                                            screen:remove( self.text )
-                                        else
-                                            self.text.opacity = o
-                                            self.text.scale = scale
-                                        end
---]]
-                                    end,
-                            }
+local test_text = function() return {
+	speed = 60,
+	text = Text
+	{
+	    font = my_font,
+	    text =  "Test Mode\n\n"..
+	            "q    row  in  from  left\n"..
+	            "p    row  in  from  right\n"..
+	            "a    loop  from  left\n"..
+	            "l    loop  from  right\n"..
+	            "z    zeppelin\n\n"..
+	            "1 2 3 4 5       bullet   powerups\n\n"..
+	            "h    to  display  this  text  again",
+	    color = "FFFFFF"
+	},
+    setup = function( self )
+        self.text.position     = {    screen.w/2 , 0}
+        self.text.anchor_point = { self.text.w/2 , 0}
+	    if self.text.parent == nil then
+                screen:add( self.text )
+	    end
+    end,
+    render = function( self , seconds )
+	    self.text.y = self.text.y + self.speed*seconds
+	    if self.text.y > screen.h then
+            self.text:unparent()
+            remove_from_render_list(self)
+	    end
+    end,
+} end
+
+out_splash__in_hud = function()
+    splash.opacity = 0
+end
 -------------------------------------------------------------------------------
 -- Event handler
-
+local keys = {
+    ["SPLASH"] =
+    {
+        [keys.Return] = function()
+            
+            out_splash__in_hud()
+            
+            state.curr_mode  = "CAMPAIGN"
+            state.curr_level = 1
+            
+            add_to_render_list(my_plane)
+            add_to_render_list(levels[state.curr_level])
+            
+        end,
+        [keys.t] = function()
+            
+            out_splash__in_hud()
+            
+            state.curr_mode  = "TEST_MODE"
+            
+            add_to_render_list(my_plane)
+            add_to_render_list(test_text())
+            
+        end,
+    },
+    ["TEST_MODE"] =
+    {
+        [keys.q] = function()
+            formations.row_from_side(5,150,  -100,1000,  50,300,  200)
+        end,
+        [keys.p] = function()
+            formations.row_from_side(5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200)
+        end,
+        [keys.a] = function()
+            formations.one_loop(2,150,200,200,300,-1)
+        end,
+        [keys.l] = function()
+            formations.one_loop(2,150,1200,1200,300,1)
+        end,
+        [keys.z] = function()
+            formations.zepp_boss(900)
+        end,
+        [keys.h] = function()
+            add_to_render_list(test_text())
+        end,
+        [keys["1"]] = function()
+            my_plane.firing_powerup=1
+        end,
+        [keys["2"]] = function()
+            my_plane.firing_powerup=2
+        end,
+        [keys["3"]]= function()
+            my_plane.firing_powerup=3
+        end,
+        [keys["4"]] = function()
+            my_plane.firing_powerup=4
+        end,
+        [keys["5"]] = function()
+            my_plane.firing_powerup=5
+        end,
+        [keys.Right] = function()
+        print("got here")
+            my_plane:on_key(keys.Right)
+        end,
+        [keys.Left] = function()
+            my_plane:on_key(keys.Left)
+        end,
+        [keys.Up] = function()
+            my_plane:on_key(keys.Up)
+        end,
+        [keys.Down] = function()
+            my_plane:on_key(keys.Down)
+        end,
+        [keys.Return] = function()
+            my_plane:on_key(keys.Return)
+        end,
+    },
+    ["CAMPAIGN"] =
+    {
+        [keys.Right] = function()
+            my_plane:on_key(keys.Right)
+        end,
+        [keys.Left] = function()
+            my_plane:on_key(keys.Left)
+        end,
+        [keys.Up] = function()
+            my_plane:on_key(keys.Up)
+        end,
+        [keys.Down] = function()
+            my_plane:on_key(keys.Down)
+        end,
+        [keys.Return] = function()
+            my_plane:on_key(keys.Return)
+        end,
+        [keys.space] = function()
+            state.paused = not (state.paused)
+        end
+    }
+}
+    
 function screen.on_key_down( screen , key )
 
+    assert(keys[state.curr_mode])
+    
+    if state.paused == true and key == keys.Space then
+        state.paused = false
+    elseif keys[state.curr_mode][key] then keys[state.curr_mode][key]()
+    end
+--[[
     if not game_is_running then
 		if key == keys.Return then
-	        start_game()
+	        
+            start_game()
 			splash.opacity = 0
 			game_is_running = true
 			--end_game.opacity = 0
@@ -218,10 +254,12 @@ function screen.on_key_down( screen , key )
 			lives[3].opacity=255
 			lives[2].opacity=255
 			add_to_render_list(levels[1])
-			curr_level = levels[1]
+			state.curr_mode  = "LEVEL 1"
+			state.curr_level = 1
+			add_to_render_list( my_plane )
+            
 		elseif key == keys.t then
-			test_mode = true
-			start_game()
+			state.curr_mode = "TEST MODE"
 			splash.opacity = 0
 			game_is_running = true
 			--end_game.opacity = 0
@@ -231,8 +269,10 @@ function screen.on_key_down( screen , key )
 			lives[1].opacity=255
 			lives[3].opacity=255
 			lives[2].opacity=255
-			add_to_render_list(test_text)
-
+			add_to_render_list( test_text() )
+			add_to_render_list( my_plane )
+            
+            
 		end
     elseif key == keys.space then
         
@@ -246,17 +286,22 @@ function screen.on_key_down( screen , key )
         end
 
     end
-	if test_mode then
+	if state.curr_mode == "TEST MODE" then
 		if key == keys.q then
-			add_to_render_list(formations.row_fly_in_left,50,200)
+			--add_to_render_list(formations.row_fly_in_left,50,200)
+                        formations.row_from_side(5,150,  -100,1000,  50,300,  200)
 		elseif key == keys.p then
-			add_to_render_list(formations.row_fly_in_right,2000,1500)
+			--add_to_render_list(formations.row_fly_in_right,2000,1500)
+                        formations.row_from_side(5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200)
 		elseif key == keys.a then
-			add_to_render_list(formations.loop_from_left)
+			--add_to_render_list(formations.loop_from_left)
+                        formations.one_loop(2,150,200,200,300,-1)
 		elseif key == keys.l then
-			add_to_render_list(formations.loop_from_right)
+			--add_to_render_list(formations.loop_from_right)
+                        formations.one_loop(2,150,1200,1200,300,1)
 		elseif key == keys.z then
-			add_to_render_list(formations.zepp, 150,-400, false )
+			--add_to_render_list(formations.zepp, 150,-400, false )
+                        formations.zepp_boss(900)
 		elseif key == keys.h then
 			add_to_render_list(test_text)
 		elseif key == keys["1"] then
@@ -271,6 +316,7 @@ function screen.on_key_down( screen , key )
 			my_plane.firing_powerup=5
 		end
 	end
+    --]]
 end
 
 -------------------------------------------------------------------------------
@@ -279,3 +325,4 @@ function app:on_closing()
 	settings.high_score = high_score
 end
 math.randomseed( os.time() )
+screen:show()

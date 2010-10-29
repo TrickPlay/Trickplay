@@ -91,8 +91,10 @@ function process_collisions( )
                         -- Invoke the collision function on bothe the source and
                         -- the target, passing the other.
                         
-                        pcall( source.item.collision , source.item , target.item )
-                        pcall( target.item.collision , target.item , source.item )
+                        --pcall( source.item.collision , source.item , target.item )
+                        --pcall( target.item.collision , target.item , source.item )
+                        source.item.collision(source.item,target.item)
+                        target.item.collision(target.item,source.item)
                         
                         -- Mark them as 'removed'
                         
