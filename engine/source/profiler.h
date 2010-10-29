@@ -54,6 +54,10 @@ private:
     typedef std::pair< unsigned int , double > Entry;
     typedef std::map< String , Entry > EntryMap;
 
+    typedef std::vector< std::pair< String, Entry > > EntryVector;
+
+    static void dump( EntryVector & v );
+
     static bool compare( std::pair< String, Entry > a, std::pair< String, Entry > b );
 
     static EntryMap entries;
