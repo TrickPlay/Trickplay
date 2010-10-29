@@ -44,8 +44,15 @@ class Clone [[ClutterActor*]] actor
 	    	ClutterUtil::wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
         [[
-            ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
-	        clutter_clone_set_source(CLUTTER_CLONE(self),source);
+            if ( lua_isnil( L , 2 ) )
+            {
+                clutter_clone_set_source(CLUTTER_CLONE(self),0);
+            }
+            else
+            {
+                ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
+                clutter_clone_set_source(CLUTTER_CLONE(self),source);
+            }
         ]];
 }
 
