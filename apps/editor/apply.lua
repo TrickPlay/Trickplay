@@ -72,7 +72,8 @@ function inspector_apply (v, inspector)
           new_object.z_rotation= v.z_rotation
 
 	  org_object.anchor_point = v.anchor_point
-          v.anchor_point = inspector:find_child("anchor_point"):find_child("anchor").extra.anchor_point
+	  v:move_anchor_point(inspector:find_child("anchor_point"):find_child("anchor").extra.anchor_point[1], 
+	  inspector:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
           new_object.anchor_point = v.anchor_point
 
        else  --Video 
@@ -176,8 +177,7 @@ function inspector_apply (v, inspector)
            clip_t[2] = inspector:find_child("cy"):find_child("input_text").text
            clip_t[3] = inspector:find_child("cw"):find_child("input_text").text
            clip_t[4] = inspector:find_child("ch"):find_child("input_text").text
-	   if (org_object.w == new_object.w and org_object.h == new_object.h) and 
-	      (org_object.clip ~= new_object.clip) then 
+	   if (org_object.w ~= new_object.w or org_object.h ~= new_object.h) then
                 clip_t[3] = new_object.w 
            	clip_t[4] = new_object.h 
 	   end 
@@ -201,7 +201,7 @@ function inspector_apply (v, inspector)
            new_object.scale = v.scale
        end
 
-       mouse_mode = S_SELECT
+       input_mode = S_SELECT
        table.insert(undo_list, {v.name, CHG, org_object, new_object})
        return org_object, new_object
 end	
@@ -212,7 +212,7 @@ function grab_focus(v, inspector, attr)
 
      current_focus = inspector:find_child(attr)
  
-     if (inspector == nil ) then print ("Uh oh !!") end 
+     if (inspector == nil ) then print ("yugi !!") end 
 
      if inspector:find_child(attr) and  
           inspector:find_child(attr):find_child("input_text") then

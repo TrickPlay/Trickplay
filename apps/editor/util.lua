@@ -43,16 +43,16 @@ function create_on_button_down_f(v)
 	local org_object, new_object 
 	
         function v:on_button_down(x,y,button,num_clicks)
+	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
-	     if(mouse_mode == S_SELECT) and  
-	       (screen:find_child("msgw") == nil) then
+	     if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
 	       if (v.extra.is_in_group == true and control == false) then 
 		    local p_obj = find_parent(v)
                     if(button == 3 or num_clicks >= 2) then
                          editor.inspector(p_obj)
                          return true
                     end 
-	            if(mouse_mode == S_SELECT and p_obj.extra.selected == false) then 
+	            if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
 		     	editor.selected(p_obj)
 			p_obj.extra.selected = true 
 	            elseif (p_obj.extra.selected == true) then 
@@ -67,13 +67,15 @@ function create_on_button_down_f(v)
                          editor.inspector(v)
                          return true
                     end 
-	            if(mouse_mode == S_SELECT and v.extra.selected == false) then 
+	            if(input_mode == S_SELECT and v.extra.selected == false) then 
 		     	editor.selected(v) 
 			v.extra.selected = true 
 	            elseif (v.extra.selected == true) then 
 			if(v.type == "Text") then 
 			      v:set{cursor_visible = true}
+			      v:set{editable= true}
      			      v:grab_key_focus(v)
+			      print("text object grabbed key focus")
 			end 
 			editor.n_selected(v) 
 			v.extra.selected = false 
@@ -83,17 +85,18 @@ function create_on_button_down_f(v)
            	    return true
 	   	 end
               end
-	   else 
+	   elseif( input_mode ~= S_RECTANGLE) then  
                  dragging = {v, x - v.x, y - v.y }
            	 return true
            end
-           return true
+	  end
+           --return true .. 렉탱글 안에서 또 렉탱글 글릴때 안되아서.. 뺌
         end
 
         function v:on_button_up(x,y,button,num_clicks)
+	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
-	     if(mouse_mode == S_SELECT) and 
-	       (screen:find_child("msgw") == nil) then
+	     if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	        if (v.extra.is_in_group == true) then 
 		    local p_obj = find_parent(v)
 		    new_object = copy_obj(p_obj)
@@ -109,12 +112,11 @@ function create_on_button_down_f(v)
 	            	dragging = nil
 	            end 
 		    return true 
-		else 
-	      	    new_object = copy_obj(v)
+		elseif( input_mode ~= S_RECTANGLE) then  
 	      	    if(dragging ~= nil) then 
 	            	local actor , dx , dy = unpack( dragging )
+		        new_object = copy_obj(v)
 	            	new_object.position = {x-dx, y-dy}
-			
 			if(org_object ~= nil) then  -- ?  
 		        if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
 			editor.n_selected(v) 
@@ -132,7 +134,7 @@ function create_on_button_down_f(v)
 	      dragging = nil
               return true
            end
-           return true
+          end
         end
 end
 
@@ -194,9 +196,6 @@ end
 --------------------------------
 
 local input_t
-
-attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "x_scale", "y_scale", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
-
 function make_attr_t(v)
 function toboolean(s) if (s == "true") then return true else return false end end
   local attr_t 
@@ -520,7 +519,7 @@ function cleanMsgWindow()
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
-     mouse_mode = S_SELECT
+     input_mode = S_SELECT
 end 
 
 function printMsgWindow(txt, name)
@@ -540,7 +539,7 @@ function printMsgWindow(txt, name)
      end 
      local msgw_bg = factory.make_popup_bg("msgw", txt_sz)
      msgw:add(msgw_bg)
-     mouse_mode = S_POPUP
+     input_mode = S_POPUP
      msgw:add(Text{name= name, text = txt, font= "DejaVu Sans 32px",
      color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
      reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})
@@ -603,7 +602,9 @@ function inputMsgWindow_openfile()
 
      end 
      cleanMsgWindow()
-     screen:add(g)
+     if(screen:find_child("screen_objects") == nil) then
+          screen:add(g)
+     end
      screen:grab_key_focus(screen) 
 end
 
@@ -643,7 +644,7 @@ function inputMsgWindow_openvideo()
 
 end
 
-function inputMsgWindow_openimage()
+function inputMsgWindow_openimage(input_purpose)
 
      local file_not_exists = true
      local dir = readdir(CURRENT_DIR)
@@ -658,16 +659,23 @@ function inputMsgWindow_openimage()
           inputMsgWindow("reopenImg")
 	  return 0
      end
+ 
+     if (input_purpose == "open_bg_imagefile") then  
+	  BG_IMAGE:set{src = "./working_space/"..input_t.text, opacity = 255} input_mode = S_SELECT
+     else 
+          ui.image= Image { name="img"..tostring(item_num),
+          src = "./working_space/"..input_t.text, opacity = 255 , position = {200,200}}
+          ui.image.reactive = true
+          create_on_button_down_f(ui.image)
+          table.insert(undo_list, {ui.image.name, ADD, ui.image})
+          g:add(ui.image)
+          if(screen:find_child("screen_objects") == nil) then
+               screen:add(g)
+          end 
+          item_num = item_num + 1
+     end 
 
-     ui.image= Image { name="img"..tostring(item_num),
-     src = "./working_space/"..input_t.text, opacity = 255 , position = {200,200}}
-     ui.image.reactive = true
-     create_on_button_down_f(ui.image)
-     table.insert(undo_list, {ui.image.name, ADD, ui.image})
-     g:add(ui.image)
-     screen:add(g)
      cleanMsgWindow()
-     item_num = item_num + 1
      screen:grab_key_focus(screen)
 end
 
@@ -687,7 +695,7 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "no") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "openfile") or (button.name == "reopenfile") then inputMsgWindow_openfile() 
               	elseif (button.name == "open_videofile") then inputMsgWindow_openvideo()
-              	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  inputMsgWindow_openimage()
+              	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  inputMsgWindow_openimage(input_purpose)
               	elseif (button.name == "cancel") then 	cleanMsgWindow() screen:grab_key_focus(screen)
                 end
 	        return true 
@@ -821,14 +829,15 @@ function inputMsgWindow(input_purpose)
 			--return true
      		end 
 	elseif (input_purpose == "open_imagefile") or  
+	       (input_purpose == "open_bg_imagefile") or  
 	       (input_purpose == "reopenImg") then  
 		open_b.name = "open_imagefile"
 		function open_b:on_button_down(x,y,button,num_clicks)
-			inputMsgWindow_openimage() 
+			inputMsgWindow_openimage(input_purpose) 
 			--return true
      		end 
 		function open_t:on_button_down(x,y,button,num_clicks)
-			inputMsgWindow_openimage() 
+			inputMsgWindow_openimage(input_purpose) 
 			--return true
      		end 
 	elseif (input_purpose == "open_videofile") then  
@@ -859,7 +868,7 @@ function inputMsgWindow(input_purpose)
      end
 
      screen:add(msgw)
-     mouse_mode = S_POPUP
+     input_mode = S_POPUP
 
 	
      if( input_purpose ~="yn") then 

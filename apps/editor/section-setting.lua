@@ -26,11 +26,12 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["Transparency Grid 20"]   = function() BG_IMAGE:set{src = "transparency-grid-20.png", opacity = 255} end,
-	["Transparency Grid 40"]   = function() BG_IMAGE:set{src = "transparency-grid-40.png", opacity = 255} end,
-	["Transparency Grid 80"]   = function() BG_IMAGE:set{src = "transparency-grid-80.png", opacity = 255} end,
-        ["White"]   = function() BG_IMAGE:set{src = "white.png", opacity = 255} end,
-        ["Black"]   = function() BG_IMAGE:set{opacity = 0} end
+	["Background Image        "]   = function()	input_mode = S_POPUP printMsgWindow("Image File : ") inputMsgWindow("open_bg_imagefile") input_mode = S_SELECTION end, 
+	["Transparency Grid 20"]   = function() BG_IMAGE:set{src = "assets/transparency-grid-20.png", opacity = 255} input_mode = S_SELECT end,
+	["Transparency Grid 40"]   = function() BG_IMAGE:set{src = "assets/transparency-grid-40.png", opacity = 255} input_mode = S_SELECT end,
+	["Transparency Grid 80"]   = function() BG_IMAGE:set{src = "assets/transparency-grid-80.png", opacity = 255} input_mode = S_SELECT end,
+        ["White"]   = function() BG_IMAGE:set{src = "assets/white.png", opacity = 255} input_mode = S_SELECT end,
+        ["Black"]   = function() BG_IMAGE:set{opacity = 0} input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -44,6 +45,7 @@ function( section )
     
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
+        local f_import = factory.make_text_menu_item( assets , ui.strings[ "Background Image        " ] )
         local f_tp_20  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 20" ] )
         local f_tp_40  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 40" ] )
         local f_tp_80  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 80" ] )
@@ -52,6 +54,7 @@ function( section )
         
         --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
+        table.insert( section_items , f_import)
         table.insert( section_items , f_tp_20)
         table.insert( section_items , f_tp_40)
         table.insert( section_items , f_tp_80)
@@ -74,6 +77,9 @@ function( section )
                 local dropmenu_item = item:find_child("caption")
                 dropmenu_item.reactive = true
                 function dropmenu_item:on_button_down(x,y,button,num_clicks)
+			local s= ui.sections[ui.focus]
+        		ui.button_focus.position = s.button.position
+        		ui.button_focus.opacity = 0
             		animate_out_dropdown()
             		screen.grab_key_focus(screen)
                         if(dropdown_map[dropmenu_item.text]) then dropdown_map[dropmenu_item.text]() end
@@ -82,21 +88,24 @@ function( section )
              end
        end
 
-        items_height = items_height + f_tp_20.h + f_tp_40.h + f_tp_80.h + f_white.h + f_black.h
+        items_height = items_height + f_tp_20.h + f_tp_40.h + f_tp_80.h + f_white.h + f_black.h + f_import.h
         
+	f_import.extra.on_activate = 
+	    function()	input_mode = S_POPUP printMsgWindow("Image File : ") inputMsgWindow("open_imagefile") 
+	    end 
         f_tp_20.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "transparency-grid-20.png", opacity = 255}
+		BG_IMAGE:set{src = "assets/transparency-grid-20.png", opacity = 255}
                 screen.grab_key_focus(screen)
             end
         f_tp_40.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "transparency-grid-40.png", opacity = 255}
+		BG_IMAGE:set{src = "assets/transparency-grid-40.png", opacity = 255}
                 screen.grab_key_focus(screen)
             end
         f_tp_80.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "transparency-grid-80.png", opacity = 255}
+		BG_IMAGE:set{src = "assets/transparency-grid-80.png", opacity = 255}
                 screen.grab_key_focus(screen)
             end
         f_black.extra.on_activate =
@@ -106,7 +115,7 @@ function( section )
             end
         f_white.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "white.png", opacity = 255}
+		BG_IMAGE:set{src = "assets/white.png", opacity = 255}
                 screen.grab_key_focus(screen)
             end
         

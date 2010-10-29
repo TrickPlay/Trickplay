@@ -26,18 +26,18 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["LEFT           "]   = function() editor.left() mouse_mode = S_SELECT end,
-        ["RIGHT         "]   = function() editor.right() mouse_mode = S_SELECT end,
-        ["TOP             "]= function() editor.top() mouse_mode = S_SELECT end,
-        ["BOTTOM        "] = function() editor.bottom() mouse_mode = S_SELECT end,
-        ["H_CENTER   "] = function() editor.hcenter() mouse_mode = S_SELECT end,
-        ["V_CENTER    "] = function() editor.vcenter() mouse_mode = S_SELECT end,
-        ["H_SPACE	  "] = function() editor.hspace() mouse_mode = S_SELECT end,
-        ["V_SPACE 	  "] = function() editor.vspace() mouse_mode = S_SELECT end,
-        ["BRING TO FRONT"] = function() editor.bring_to_front() mouse_mode = S_SELECT end,
-        ["BRING FORWARD "] = function() editor.bring_forward() mouse_mode = S_SELECT end,
-        ["SEND TO BACK "] = function() editor.send_to_back() mouse_mode = S_SELECT end,
-        ["SEND BACKWARD "] = function() editor.send_backward() mouse_mode = S_SELECT end
+	["LEFT SIDE      "]   = function() editor.left() input_mode = S_SELECT end,
+        ["RIGHT SIDE    "]   = function() editor.right() input_mode = S_SELECT end,
+        ["TOP             "]= function() editor.top() input_mode = S_SELECT end,
+        ["BOTTOM        "] = function() editor.bottom() input_mode = S_SELECT end,
+        ["HORIZ. CENTER   "] = function() editor.hcenter() input_mode = S_SELECT end,
+        ["VERT. CENTER    "] = function() editor.vcenter() input_mode = S_SELECT end,
+        ["HORIZONTALLY	  "] = function() editor.hspace() input_mode = S_SELECT end,
+        ["VERTICALLY 	  "] = function() editor.vspace() input_mode = S_SELECT end,
+        ["BRING TO FRONT"] = function() editor.bring_to_front() input_mode = S_SELECT end,
+        ["BRING FORWARD "] = function() editor.bring_forward() input_mode = S_SELECT end,
+        ["SEND TO BACK "] = function() editor.send_to_back() input_mode = S_SELECT end,
+        ["SEND BACKWARD "] = function() editor.send_backward() input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -51,14 +51,14 @@ function( section )
     
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_left  = factory.make_text_menu_item( assets , ui.strings[ "LEFT           " ] )
-        local f_right  = factory.make_text_menu_item( assets , ui.strings[ "RIGHT         " ] )
+        local f_left  = factory.make_text_menu_item( assets , ui.strings[ "LEFT SIDE      " ] )
+        local f_right  = factory.make_text_menu_item( assets , ui.strings[ "RIGHT SIDE    " ] )
         local f_top  = factory.make_text_menu_item( assets , ui.strings[ "TOP             " ] )
         local f_bottom = factory.make_text_menu_item( assets , ui.strings[ "BOTTOM        " ] )
-        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "H_CENTER   " ] )
-        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "V_CENTER    " ] )
-        local f_hspace = factory.make_text_menu_item( assets , ui.strings[ "H_SPACE	  " ] )
-        local f_vspace = factory.make_text_menu_item( assets , ui.strings[ "V_SPACE 	  " ] )
+        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "HORIZ. CENTER   " ] )
+        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "VERT. CENTER    " ] )
+        local f_hspace = factory.make_text_menu_item( assets , ui.strings[ "HORIZONTALLY	  " ] )
+        local f_vspace = factory.make_text_menu_item( assets , ui.strings[ "VERTICALLY 	  " ] )
         local f_bring_to_front  = factory.make_text_menu_item( assets , ui.strings[ "BRING TO FRONT" ] )
         local f_bring_forward = factory.make_text_menu_item( assets , ui.strings[ "BRING FORWARD "] )
         local f_send_to_back = factory.make_text_menu_item( assets , ui.strings[ "SEND TO BACK " ] )
@@ -112,73 +112,73 @@ function( section )
         
         f_left.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.left()
             end
         
         f_right.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.right()
             end
 
         f_top.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.top()
             end
 
         f_bottom.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.bottom()
             end
 
         f_hcenter.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.hcenter()
             end
 
         f_vcenter.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.vcenter()
             end
 
         f_hspace.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.hspace()
             end
 
         f_vspace.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.vspace()
             end
 
         f_bring_to_front.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.bring_to_front()
             end
 
         f_bring_forward.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.bring_forward()
             end
 
         f_send_to_back.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.send_to_back()
             end
 
         f_send_backward.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.send_backward()
             end
 
@@ -194,7 +194,7 @@ function( section )
             item.x = ( group.w - item.w ) / 2
             item.y = y
             
-            y = y + item.h - 5.45			-- margin
+            y = y + item.h - 5.45			
             
             group:add( item )
             

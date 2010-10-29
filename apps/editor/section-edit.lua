@@ -26,16 +26,16 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-     	["UNDO".."\t\t\t".."[U]"]   = function() editor.undo() mouse_mode = S_SELECT end,
-     	["REDO".."\t\t\t".."[E]"]   = function() editor.redo() mouse_mode = S_SELECT end,
-     	["TEXT".."\t\t\t".."[T]"]   = function() editor.text() mouse_mode = S_SELECT end,
-     	["IMAGE".."\t\t\t".."[I]"]   = function() editor.image() mouse_mode = S_SELECT end,
-     	["RECTANGLE".."\t\t".."[R]"]   = function() mouse_mode = S_RECTANGLE end,
-     	["VIDEO".."\t\t\t"..""]   = function() editor.video() mouse_mode = S_SELECT end,
-     	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() mouse_mode = S_SELECT end,
-     	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() mouse_mode = S_SELECT end,
-     	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() mouse_mode = S_SELECT end,
-     	["UNGROUP".."\t\t\t"..""]   = function() editor.ugroup() mouse_mode = S_SELECT end
+     	["UNDO".."\t\t\t".."[U]"]   = function() editor.undo() input_mode = S_SELECT end,
+     	["REDO".."\t\t\t".."[E]"]   = function() editor.redo() input_mode = S_SELECT end,
+     	["TEXT".."\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
+     	["IMAGE".."\t\t\t".."[I]"]   = function() editor.image() input_mode = S_SELECT end,
+     	["RECTANGLE".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
+     	["VIDEO".."\t\t\t"..""]   = function() editor.video() input_mode = S_SELECT end,
+     	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
+     	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
+     	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
+     	["UNGROUP".."\t\t\t"..""]   = function() editor.ugroup() input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -74,7 +74,7 @@ function( section )
 	for _,item in ipairs( section_items ) do
 	     item.reactive = true
 	     if (item.text ~= "INSERT :                   ") then 
-
+--[[
              function item:on_button_down(x,y,button,num_clicks)
         	if item.on_activate then
 	    		item:on_focus_out()
@@ -85,6 +85,7 @@ function( section )
         	end
 		return true 
 	     end
+]]
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
                 --dropmenu_item.reactive = true
@@ -106,54 +107,54 @@ function( section )
 
         f_rect.extra.on_activate =
             function()
-		mouse_mode = S_RECTANGLE
+		input_mode = S_RECTANGLE
             end
         
         f_text.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.text()
             end
         f_image.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.image()
             end
         f_video.extra.on_activate =
             function()
 		editor.video()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
             end
         f_undo.extra.on_activate =
             function()
 		editor.undo()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
             end
         
         f_redo.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.redo()
             end
         f_group.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.group()
             end
         f_ugroup.extra.on_activate =
             function()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
 		editor.ugroup()
             end
         f_delete.extra.on_activate =
             function()
 		editor.delete()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
             end
         f_clone.extra.on_activate =
             function()
 		editor.clone()
-		mouse_mode = S_SELECT
+		input_mode = S_SELECT
             end
         
         -- This spaces all items equally.
