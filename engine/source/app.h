@@ -226,6 +226,11 @@ public:
     char * normalize_path( const gchar * path_or_uri, bool * is_uri = NULL, const StringSet & additional_uri_schemes = StringSet() );
 
     //.........................................................................
+    // ONLY FOR THE EDITOR - apps should not do this
+
+    bool change_app_path( const char * path );
+
+    //.........................................................................
     // This returns the clutter actor GID for this app's screen
 
     guint32 get_screen_gid() const;
