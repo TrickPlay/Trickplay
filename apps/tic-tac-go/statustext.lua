@@ -64,8 +64,9 @@ function StatusText:pressToDrop(player_icon)
 	self:clear()
 
 	local image_defaults = {x=5,y=-8}
-    	local PlayIconImage = player_icon == "O" and ui:createPieceHalfOC(image_defaults)
-                                             or ui:createPieceHalfXC(image_defaults)
+    	local PlayIconImage = player_icon == "O" and
+            ui:createPieceHalfOC(image_defaults) or
+            ui:createPieceHalfXC(image_defaults)
 		self:add(PlayIconImage)
 	-- adding text "press"
 	local textPress = StatusText:Text()
@@ -73,16 +74,6 @@ function StatusText:pressToDrop(player_icon)
 	self:add(textPress)
 	ui:createTextShadow(textPress)
 	
-	
---	
---	-- adding Enter Button
---	self:addEnterButton{240,720}	
---	
---	-- adding text "to drop"
---	local textToDrop = StatusText:Text()
---	textToDrop:set{text="to drop",x=390}
---	self:add(textToDrop)
---	ui:createTextShadow(textToDrop)
 end
 
 function StatusText:addEnterButton(position)
@@ -101,6 +92,7 @@ function StatusText:addEnterButton(position)
 end
 
 function StatusText:EnterButtonPressed()
+
 	if self.enterButtons.pressed ~= nil then
 		self.enterButtons.pressed.opacity = 255
 		self.enterButtons.pressed:animate{ duration=400,opacity=0 }
