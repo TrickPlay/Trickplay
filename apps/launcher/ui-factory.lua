@@ -424,9 +424,10 @@ end
 -- Makes a featured app tile
 -------------------------------------------------------------------------------
 
-function factory.make_featured_app_tile( assets , caption , icon_url )
+function factory.make_featured_app_tile( assets , caption , description , icon_url )
 
-    local STYLE                 = { font = "DejaVu Sans 34px" , color = "FFFFFF" }
+    local STYLE                 = { font = "DejaVu Sans bold 34px" , color = "FFFFFF" }
+    local DESC_STYLE            = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
     local FRAME_X_OFFSET        = 15
     local FRAME_Y_OFFSET        = 23
     local FRAME_X_PADDING       = 7
@@ -437,27 +438,25 @@ function factory.make_featured_app_tile( assets , caption , icon_url )
     local LABEL_BORDER_COLOR    = "CCCCCCAA"
     local TEXT_TOP_OFFSET       = 10
     local TEXT_LEFT_OFFSET      = 30
-    local LABEL_BOTTOM_OFFSET   = -( LABEL_HEIGHT - 2 ) 
+    local LABEL_BOTTOM_OFFSET   = -( LABEL_HEIGHT - 2 )
+    local SLIDER_HEIGHT         = LABEL_HEIGHT * 2
+    local DESC_TOP_OFFSET       = 47
     
     local text = Text{ text = caption }:set( STYLE )
+    
+    local desc = Text{ text = description }:set( DESC_STYLE )
 
     local frame = assets( "assets/featured-app-overlay-frame.png" )
     
     local focus = assets( "assets/featured-app-focus.png" )
-    
-    local label = Rectangle
-    {
-        color = LABEL_COLOR ,
-        size = { frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT },
-        border_width = LABEL_BORDER_WIDTH,
-        border_color = LABEL_BORDER_COLOR
-    }
     
     local icon = Image
     {
         src = icon_url ,
         async = true,
     }
+    
+    local slider = Group()
     
     local group = Group
     {
@@ -471,30 +470,59 @@ function factory.make_featured_app_tile( assets , caption , icon_url )
                 y = FRAME_Y_OFFSET
             },
             
-            label:set
+            slider:set
             {
                 x = FRAME_X_OFFSET + FRAME_X_PADDING,
-                y = FRAME_Y_OFFSET + frame.h + LABEL_BOTTOM_OFFSET - FRAME_Y_PADDING
+                y = FRAME_Y_OFFSET + frame.h + LABEL_BOTTOM_OFFSET - FRAME_Y_PADDING,
+                size = { frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT + SLIDER_HEIGHT },
+                clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT },
+                
+                children =
+                {
+                    Rectangle
+                    {
+                        color = LABEL_COLOR ,
+                        size = { frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT * 4 },
+                        border_width = LABEL_BORDER_WIDTH,
+                        border_color = LABEL_BORDER_COLOR,
+                        position = { 0 , 0 }
+                    },
+                    
+                    text:set
+                    {
+                        position = { TEXT_LEFT_OFFSET , TEXT_TOP_OFFSET }    
+                    },
+                    
+                    desc:set
+                    {
+                        position = { TEXT_LEFT_OFFSET , TEXT_TOP_OFFSET + DESC_TOP_OFFSET },
+                        h = SLIDER_HEIGHT,
+                        w = frame.w - FRAME_X_PADDING * 2 - TEXT_LEFT_OFFSET * 2  ,
+                        wrap = true,
+                        ellipsize = "END"
+                    }
+                    
+                }
+                            
             },
             
             frame:set
             {
                 position = { FRAME_X_OFFSET , FRAME_Y_OFFSET }
             },
-            
-            text:set
-            {
-                position = { frame.x + TEXT_LEFT_OFFSET , label.y + TEXT_TOP_OFFSET }
-            }
         }
     }
 
     function group.extra.on_focus_in()
         focus.opacity = 255
+        slider.y = slider.y - SLIDER_HEIGHT
+        slider.clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT + SLIDER_HEIGHT }
     end
     
     function group.extra.on_focus_out()
         focus.opacity = 0
+        slider.y = slider.y + SLIDER_HEIGHT
+        slider.clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT }
     end
     
     return group

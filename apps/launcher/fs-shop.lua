@@ -260,7 +260,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
             
             if featured_icon_url and # featured_items < 2 then
                 
-                local item = factory.make_featured_app_tile( assets , shop_app.name , featured_icon_url )
+                local item = factory.make_featured_app_tile( assets , shop_app.name , shop_app.description , featured_icon_url )
                 
                 -- Store the data from the app store in its extra
                 
