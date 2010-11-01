@@ -36,7 +36,8 @@ function BoardTimerChangeSprite(position)
 end
 
 function TimerBoardTick()
-	local tick = BoardTimer.extra.tick
+    mediaplayer:play_sound("audio/Tic Tac Go Timer.mp3")
+    local tick = BoardTimer.extra.tick
 	if tick == 3 then
 		BoardTimerChangeSprite(4)
 		return

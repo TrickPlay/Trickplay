@@ -172,10 +172,10 @@ function GameControl:place_player_at_index(player, index)
             -- keep track of previous games
             local wins = self.player_wins[player] + 1
             self.player_wins[player] = wins
-
+			
             -- update view
             SavePlayField(self.board, win_positions, wins, self.round_count)
-
+			
             -- end of a session?
             if wins == ControlConstants.win_rounds then
                 local winner = Image
@@ -214,7 +214,7 @@ function GameControl:place_player_at_index(player, index)
 						winner.y = -screen.h/2 + screen.h*p
 					elseif msecs <= 1000 then
 						winner.y = screen.h/2
-
+						
 					elseif msecs > 1000 then
 						winner.y = screen.h/2
 						local p = (msecs-1000)/(t.duration-1000)
@@ -241,17 +241,17 @@ function GameControl:place_player_at_index(player, index)
 				table.insert(self.board, " ")
 				self.free_spaces[i] = true
 			end
-		
-		
+			
+			
 			self.round_count = self.round_count + 1
 			self.move_count = 0
-		
+			
 			self.player = math.random(1,2)
-		
+			
 			self.player_moves[1] = {}
 			self.player_moves[2] = {}
 		        FuckPlayField()
-
+				
                 return ControlConstants.state.switch
             end
 		end
@@ -260,20 +260,20 @@ function GameControl:place_player_at_index(player, index)
 	if self.move_count == 9 then
          -- nobody won, dec round count!
         self.round_count = self.round_count - 1
-
+				
                 -- update view
                 self.board = {}
 			for i=1,9 do
 				table.insert(self.board, " ")
 				self.free_spaces[i] = true
 			end
-		
-		
+			
+			
 			self.round_count = self.round_count + 1
 			self.move_count = 0
-		
+			
 			self.player = math.random(1,2)
-		
+			
 			self.player_moves[1] = {}
 			self.player_moves[2] = {}
 		    FuckPlayField()
@@ -380,12 +380,13 @@ function GameControl:make_state_machine()
 
     	[ControlConstants.state.init] = function() 
         	
+			mediaplayer:play_sound("audio/Tic Tac Go Start Button.mp3")
         	self:start_session()
         	self:start_round()
         	self:hide_splash()
-
-
-
+			
+			
+			
         	return ControlConstants.state.switch
     	end,
 
@@ -408,29 +409,28 @@ function GameControl:make_state_machine()
     	end,
 
     	[ControlConstants.state.switch] = function() 
-
-
+			
         	-- prepare for input
         	self.move_count = self.move_count + 1
-
+			
         	-- switch player
         	self.player = self.player == 1 and 2 or 1
-
+			
         	-- start move_timer
         	self.move_delegate.start(self.player)
-
+			
         	return ControlConstants.state.move
     	end,
-
+		
     	[ControlConstants.state.move] = function() 
         	self.move_delegate.stop()
-
+			mediaplayer:play_sound("audio/Tic Tac Go Piece Placement.mp3")
 			-- delegate callback will trigger next state change
         	return ControlConstants.state.wait
     	end,
-
+		
     	[ControlConstants.state.shutdown] = function() 
-
+			
         	exit()
     	end,
 
