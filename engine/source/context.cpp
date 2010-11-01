@@ -4,9 +4,11 @@
 #include <sstream>
 
 #include "clutter/clutter.h"
+#include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig.h"
 
+#include "trickplay/keys.h"
 #include "lb.h"
 #include "context.h"
 #include "app.h"
@@ -484,6 +486,35 @@ void TPContext::setup_fonts()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
+static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
+{
+    * keyval = event->key.keyval;
+    * unicode = event->key.unicode_value;
+
+    switch ( * keyval )
+    {
+        case CLUTTER_F5:
+            * keyval = TP_KEY_RED;
+            * unicode = 0;
+            break;
+
+        case CLUTTER_F6:
+            * keyval = TP_KEY_GREEN;
+            * unicode = 0;
+            break;
+
+        case CLUTTER_F7:
+            * keyval = TP_KEY_YELLOW;
+            * unicode = 0;
+            break;
+
+        case CLUTTER_F8:
+            * keyval = TP_KEY_BLUE;
+            * unicode = 0;
+            break;
+    }
+}
+
 // In desktop builds, we catch all key events that are not synthetic and pass
 // them through a keyboard controller. That will generate an event for the
 // controller and re-inject the event into clutter as a synthetic event.
@@ -498,8 +529,12 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
+                    guint keyval;
+                    gunichar unicode;
 
-                    tp_controller_key_down( ( TPController * )controller, event->key.keyval, event->key.unicode_value );
+                    map_key( event , & keyval , & unicode );
+
+                    tp_controller_key_down( ( TPController * )controller, keyval, unicode );
                     return TRUE;
                 }
 
@@ -510,7 +545,12 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
-                    tp_controller_key_up( ( TPController * )controller, event->key.keyval, event->key.unicode_value );
+                    guint keyval;
+                    gunichar unicode;
+
+                    map_key( event , & keyval , & unicode );
+
+                    tp_controller_key_up( ( TPController * )controller, keyval, unicode );
                     return TRUE;
                 }
                 break;
