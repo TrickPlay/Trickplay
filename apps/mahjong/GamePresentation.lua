@@ -247,7 +247,10 @@ function(pres, ctrl)
             {
                 ["x"] = Interval(right_tile.x, median.x),
                 ["y"] = Interval(right_tile.y, median.y),
-                ["callback"] = function() pres:sparkle(median.x,median.y+50, 9) end
+                ["callback"] = function()
+                    mediaplayer:play_sound("assets/audio/match-good.mp3")
+                    pres:sparkle(median.x,median.y+50, 9)
+                end
             },
             --[[
             {

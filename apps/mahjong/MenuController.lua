@@ -55,12 +55,21 @@ MenuController = Class(Controller,function(self, view, ...)
             game:shuffle_game()
         end
 
+    local wait = false
+    local timer = Timer()
     Hint[Directions.UP] = Shuffle
     Hint[Directions.DOWN] = Help
     Hint.object = view:get_object("hint")
     Hint.callback =
         function()
-            game:get_state():hint()
+            if not wait then game:get_state():hint() end
+            wait = true
+            timer.interval = 2000
+            function timer:on_timer()
+                timer:stop()
+                wait = false
+            end
+            timer:start()
         end
 
     Help[Directions.UP] = Hint
