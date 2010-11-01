@@ -1091,7 +1091,7 @@ function game_on_key_down(k)
 		[keys["KP_Up"] ]        = function() num_press(8) end,
 		[keys["KP_Page_Up"] ]   = function() num_press(9) end,
 		[keys["c"] ] = function()
-			if won then
+			if won or menu_open then
 				restore_keys()
 				return
 			else
@@ -1099,7 +1099,7 @@ function game_on_key_down(k)
 			end
 		end,
 		[keys["u"] ] = function()
-			if won then
+			if won or menu_open then
 				restore_keys()
 				return
 			else
@@ -1118,7 +1118,7 @@ function game_on_key_down(k)
 			end
 		end,
 		[keys["e"] ] = function()
-			if won then
+			if won or menu_open then
 				restore_keys()
 				return
 			else
@@ -1126,7 +1126,7 @@ function game_on_key_down(k)
 			end
 		end,
 		[keys["r"] ] = function()
-			if won then
+			if won or menu_open then
 				restore_keys()
 				return
 			else
@@ -1557,6 +1557,11 @@ function right_menu_on_key_down(k)
 end
 function screen:on_key_down(k)
 	screen.on_key_down = nil
+
+	if k == keys.RED    then k = keys.c end
+	if k == keys.GREEN  then k = keys.u end
+	if k == keys.YELLOW then k = keys.e end
+	if k == keys.BLUE   then k = keys.r end
 	local sub_on_key_down = 
 	{
 		["ARE_YOU_SURE"] = function(key_press)
