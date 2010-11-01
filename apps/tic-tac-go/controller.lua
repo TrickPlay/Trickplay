@@ -526,6 +526,7 @@ function GameControl.make_control()
         }
 		
 		if keyval == keys.OK then keyval = keys.Return end
+		if keyval == keys.BLUE then keyval = keys.r end
         if key_actions[keyval] then
             key_actions[keyval]()
         
