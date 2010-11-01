@@ -4,6 +4,7 @@ state =
     curr_mode  = "SPLASH", --
     curr_level = 0,
     paused     = false,
+    set_highscore = false,
     
     --Gameplay state that sits at the top
     hud =
@@ -21,18 +22,17 @@ imgs =
     island1         = Image{ src = "assets/island1.png" },
     island2         = Image{ src = "assets/island2.png" },
     island3         = Image{ src = "assets/island3.png" },
-    island4         = Image{ src = "assets/island1_1.png" },
-    island5         = Image{ src = "assets/island2_1.png" },
     cloud1          = Image{ src = "assets/cloud1.png"},
     cloud2          = Image{ src = "assets/cloud2.png"},
     cloud3          = Image{ src = "assets/cloud3.png"},
 
-    my_plane_strip  = Image{ src = "assets/player.png" },
+    my_plane_strip  = Image{ src = "assets/player_strip.png" },
     my_bullet       = Image{ src = "assets/bullet.png" },
 
     enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
+    smoke           = Image{ src = "assets/smoke.png"},
     enemy_1         = Image{ src = "assets/enemy1.png"   },
     zepp            = Image{ src = "assets/zeppelin.png" },
 

@@ -1,5 +1,56 @@
 
+smoke = function(xxx,yyy) return {
+                image = Clone{ source = imgs.smoke },
+                group = nil,
+                duration = 0.2, 
+                time = 0,
+                setup = function( self )
+                    mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
 
+                        self.group = Group
+			{
+				size =
+				{
+					self.image.w / 4 ,
+					self.image.h
+				},
+				clip =
+				{
+					0 ,
+					0 ,
+					self.image.w / 4 ,
+					self.image.h
+				},
+				children = { self.image },
+				anchor_point =
+				{
+					( self.image.w / 4 ) / 2 ,
+					  self.image.h / 2
+				},
+                x=500,
+                y=500
+			}
+                    
+			screen:add( self.group )
+                end,
+                
+		render = function( self , seconds )
+			
+			self.time = self.time + seconds
+				
+			if self.time > self.duration then
+					
+				remove_from_render_list( self )
+				screen:remove( self.group )
+					
+			else
+				local frame = math.floor( self.time /
+					( self.duration / 4 ) )
+				self.image.x = - ( ( self.image.w / 4 )
+					* frame )
+			end
+        end,
+} end
 -------------------------------------------------------------------------------
 -- This is my plane. It spawns bullets
 --r = Rectangle{w=1,h=1,color="FFFFFFA0"}
@@ -7,8 +58,12 @@
 my_plane =
 {
 	firing_powerup = 1,
+    
+    damage = 0,
 
     type = TYPE_MY_PLANE,
+    
+    num_frames = 4,
     
     max_h_speed = 600,
     
@@ -89,6 +144,7 @@ my_plane =
             screen:add( self.group )
             
             self.group.position = { screen.w / 2 - self.image.w / 2 , screen.h - self.image.h }
+            self.group.clip = {0,0,self.image.w/self.num_frames,self.image.h}
             
         end,
         
@@ -216,9 +272,9 @@ end
                 end
     if not self.dead then
                 add_to_collision_list( self ,
-					{self.group.x+self.image.w/2,self.group.y+self.image.h/2},
-					{self.group.x+self.image.w/2,self.group.y+self.image.h/2},
-					{self.image.w,self.image.h},
+					{self.group.x+self.image.w/(2*self.num_frames),self.group.y+self.image.h/2},
+					{self.group.x+self.image.w/(2*self.num_frames),self.group.y+self.image.h/2},
+					{self.image.w/(2*self.num_frames),self.image.h},
 					TYPE_ENEMY_PLANE)-- start_point , self.group.center , { self.group.w - 10 , self.group.h - 30 } , TYPE_ENEMY_PLANE )
 end
 --[[
@@ -260,7 +316,7 @@ r:raise_to_top()
                     function( self )
                     
                         screen:add( self.image )
-                        
+                        mediaplayer:play_sound("audio/Air Combat 1P Fire.mp3")
                     end,
                     
                 render =
@@ -318,6 +374,10 @@ if point_counter < 999990 then
 	point_counter = point_counter+10
 	if point_counter > high_score then
 		high_score = point_counter
+        if not state.set_highscore then
+            state.set_highscore = true
+            mediaplayer:play_sound("audio/Air Combat High Score.mp3")
+        end
 	end
 	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
 		number_of_lives = number_of_lives + 1
@@ -377,9 +437,17 @@ end
     
         function( self , other )
 
+if self.damage ~= (self.num_frames - 1) then
+    self.damage = self.damage + 1
+    self.image.x = -1*self.damage*self.image.w/self.num_frames
+    return
+else
+    self.damage = 0
+    self.image.x = 0
+end
 
 --more Alex code
-if state.num_lives == 0 then
+if state.hud.num_lives == 0 then
 
 	remove_from_render_list( my_plane )
 	add_to_render_list(
@@ -387,20 +455,20 @@ if state.num_lives == 0 then
                             {
                                 speed = 40,
                                 
-                                text = Clone{ source = img.g_over },
+                                text = Clone{ source = txt.g_over },
                                 
                                 setup =
-                                
-                                    function( self )
                                     
+                                    function( self )
+                                        
                                         self.text.position = { screen.w/2,screen.h/2}--location[ 1 ] + 30 , location[ 2 ] }
                                         
                                         self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
                                         
                                         self.text.opacity = 255;
-                                    
-                                        screen:add( self.text )
                                         
+                                        screen:add( self.text )
+                                        mediaplayer:play_sound("audio/Air Combat Game Over.mp3")
                                     end,
                                     
                                 render =
@@ -504,7 +572,8 @@ redo_score_text()
                     setup =
                     
                         function( self )
-                        
+                            mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
+
                             self.group = Group
                                 {
                                     size = { self.image.w / 7 , self.image.h },
@@ -548,7 +617,6 @@ redo_score_text()
     on_key =
     
         function( self , key )
-        print(self,key)
         --[[
             if number_of_lives == 0 then--self.dead then
             
@@ -557,7 +625,6 @@ redo_score_text()
             end
             --]]   
             if key == keys.Right then
-            print("right")
                 self.h_speed = clamp( self.h_speed + self.speed_bump , -self.max_h_speed , self.max_h_speed )
                 
             elseif key == keys.Left then
@@ -575,29 +642,29 @@ redo_score_text()
             elseif key == keys.Return then
             	local shoot = {
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 , self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / (2*self.num_frames) , self.group.y,0) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -20, self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +20, self.group.y,0) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -40, self.group.y,-45) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +40, self.group.y,45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames),    self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / (2*self.num_frames)+40, self.group.y,45) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -40, self.group.y,-45) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y+self.image.h,180) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +40, self.group.y,45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) ,    self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) ,    self.group.y+self.image.h,180) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +40, self.group.y,45) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -40, self.group.y,-45) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 -20, self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +20, self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 ,    self.group.y+self.image.h,180) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / 2 +40, self.group.y,45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) ,    self.group.y+self.image.h,180) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +40, self.group.y,45) )
 					end,
 
 

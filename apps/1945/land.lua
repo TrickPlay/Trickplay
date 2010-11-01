@@ -10,10 +10,10 @@ water =
                 
             local tile = imgs.water
             tile:set{ w = screen.w , tile = { true  , false } }
-            for i = 1 , math.ceil( screen.h / tile.h ) + 3 do
+            for i = 1 , math.ceil( screen.h / tile.h ) + 1 do
                 table.insert( self.strips , Clone{ source = tile } )
             end
-            local top = - ( tile.h * 2 )
+            local top = - ( tile.h  )
             self.top_y = top
             for _ , strip in ipairs( self.strips ) do
                 strip.position = { 0 , top }
@@ -87,6 +87,9 @@ water =
             }
 	if index > 5 then
 	    add_to_render_list( cloud )
+    elseif index > 3 then
+        index = index - 3
+        add_to_render_list( island )
 	else
 	    add_to_render_list( island )
 	end
