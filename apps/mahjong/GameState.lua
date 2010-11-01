@@ -401,7 +401,6 @@ GameState = Class(nil,function(state, ctrl)
             local temp = selected_tile
 
             tile:show_green()
-            mediaplayer:play_sound("assets/audio/match-good.mp3")
             tile:hide_yellow()
             local interval_1 = {opacity = Interval(tile.focus.green.opacity, 0)}
             local interval_2 = {opacity = Interval(temp.focus.green.opacity, 0)}

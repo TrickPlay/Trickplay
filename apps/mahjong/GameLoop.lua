@@ -72,7 +72,7 @@ function(gameloop, ...)
     on_completed)
         if not element then error("no element", 2) end
         if not duration then error("no duration", 2) end
-        if not intervals or not type(intervals) == "table" then
+        if (not intervals) or type(intervals) ~= "table" then
             error("intervals is nil or not a table", 2)
         end
         if wait and not type(wait) == "number" then
