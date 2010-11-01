@@ -505,17 +505,17 @@ function GameControl.make_control()
 		print("2")
 		single_press:start()
         local key_actions = {
-
+			
             [keys.Return] = function()
                 -- update view
                 StatusText:EnterButtonPressed()
                 self.state.next()
             end,
-
+			
             [keys.q] = function() 
                 self.state.set(ControlConstants.state.shutdown)
             end,
-
+			
             [keys.r] = function()
                 self.state.set(ControlConstants.state.clear)
             end,
@@ -524,7 +524,8 @@ function GameControl.make_control()
                 self.state.set(ControlConstants.state.help)
             end,
         }
-
+		
+		if keyval == keys.OK then keyval = keys.Return end
         if key_actions[keyval] then
             key_actions[keyval]()
         
