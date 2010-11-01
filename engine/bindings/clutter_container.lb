@@ -100,10 +100,13 @@ interface container [[ClutterActor*]]
         [[
             for(int i=2;i<=lua_gettop(L);++i)
             {
-				if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
-				{
-				    clutter_container_add_actor(CLUTTER_CONTAINER(self),actor);
-				}
+                if ( ! lua_isnil( L , i ) )
+                {
+                    if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
+                    {
+                        clutter_container_add_actor(CLUTTER_CONTAINER(self),actor);
+                    }
+                }
             }
         ]];
 	
@@ -121,10 +124,13 @@ interface container [[ClutterActor*]]
 	[[
             for(int i=2;i<=lua_gettop(L);++i)
             {
-				if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
-				{
-				    clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
-				}
+                if ( ! lua_isnil( L , i ) )
+                {
+                    if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
+                    {
+                        clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
+                    }
+                }
             }	    
 	]];
 	

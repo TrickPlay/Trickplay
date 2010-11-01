@@ -17,6 +17,7 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 TP_FIND_INCLUDE( expat.h 								ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( curl/curl.h 							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( glib-2.0 glib.h 						ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( gio-unix-2.0 gio/gunixsocketaddress.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h				ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( pango-1.0 pango/pango.h				ENGINE_INCLUDE_DIRS )
@@ -267,6 +268,7 @@ endif( TP_PROFILING )
 list( APPEND LB_FILES
     
     ${BINDINGS_SRC}/globals.lb
+    ${BINDINGS_SRC}/editor.lb
 
     ${BINDINGS_SRC}/timer.lb
     
@@ -297,11 +299,14 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_canvas.lb
     ${BINDINGS_SRC}/clutter_timeline.lb
     ${BINDINGS_SRC}/clutter_alpha.lb
-    ${BINDINGS_SRC}/clutter_interval.lb
+    ${BINDINGS_SRC}/clutter_interval.lb    
+    ${BINDINGS_SRC}/clutter_path.lb
     
     ${BINDINGS_SRC}/socket.lb
     
     ${BINDINGS_SRC}/uri.lb
+    
+    ${BINDINGS_SRC}/physics.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
@@ -384,7 +389,6 @@ list( APPEND
     ${ENGINE_SRC}/source/context.cpp
     ${ENGINE_SRC}/source/app.cpp    
     ${ENGINE_SRC}/source/network.cpp
-    ${ENGINE_SRC}/source/storage.cpp
     ${ENGINE_SRC}/source/console.cpp
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
@@ -396,6 +400,7 @@ list( APPEND
 
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp    
+    ${ENGINE_SRC}/source/controller_lirc.cpp    
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp
@@ -413,6 +418,8 @@ list( APPEND
 
     ${ENGINE_SRC}/source/user_data.cpp
     ${ENGINE_SRC}/source/util.cpp
+    
+    ${ENGINE_SRC}/source/physics.cpp
 )
 
 #------------------------------------------------------------------------------

@@ -37,6 +37,7 @@ extern int luaopen_clutter_canvas( lua_State * L );
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
+extern int luaopen_clutter_path( lua_State * L );
 
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
@@ -56,6 +57,8 @@ extern int luaopen_json( lua_State * L );
 extern int luaopen_socket( lua_State * L );
 
 extern int luaopen_uri( lua_State * L );
+extern int luaopen_physics_module( lua_State * L );
+extern int luaopen_editor( lua_State * L );
 
 #ifdef TP_UPNP_CLIENT
 extern int luaopen_upnp( lua_State * L );
@@ -80,18 +83,18 @@ LuaStateProxy::LuaStateProxy( lua_State * l )
     :
     L( l )
 {
-    g_debug( "CREATED LSP %p", this );
+//    g_debug( "CREATED LSP %p", this );
 }
 
 LuaStateProxy::~LuaStateProxy()
 {
-    g_debug( "DESTROYED LSP %p", this );
+//    g_debug( "DESTROYED LSP %p", this );
 }
 
 void LuaStateProxy::invalidate()
 {
     L = NULL;
-    g_debug( "INVALIDATED LSP %p", this );
+//    g_debug( "INVALIDATED LSP %p", this );
 }
 
 lua_State * LuaStateProxy::get_lua_state()
@@ -702,6 +705,7 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_timeline( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
+    luaopen_clutter_path( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
@@ -718,6 +722,8 @@ int App::run( const StringSet & allowed_names )
     luaopen_socket( L );
     luaopen_url_request( L );
     luaopen_uri( L );
+    luaopen_physics_module( L );
+    luaopen_editor( L );
 
 #ifdef TP_UPNP_CLIENT
     luaopen_upnp( L );
@@ -1213,6 +1219,23 @@ char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const Stri
 #endif
 
     return result;
+}
+
+//-----------------------------------------------------------------------------
+
+bool App::change_app_path( const char * path )
+{
+    g_assert( path );
+
+    if ( ! g_file_test( path , G_FILE_TEST_IS_DIR ) )
+    {
+        return false;
+    }
+
+    metadata.path = path;
+
+    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , path );
+    return true;
 }
 
 //-----------------------------------------------------------------------------

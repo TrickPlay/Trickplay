@@ -138,23 +138,43 @@ class _Debug_ON
 {
 public:
 
+    _Debug_ON( const char * _prefix = 0 )
+    {
+        if ( _prefix )
+        {
+            prefix = _prefix;
+        }
+    }
+
     inline void operator()( const gchar * format, ...)
     {
+        gchar * fmt = prefix.empty() ? 0 : g_strdup_printf( "[%s] : %s" , prefix.c_str() , format );
+
         va_list args;
         va_start( args, format );
-        g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
+        g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, fmt ? fmt : format, args );
         va_end( args );
+
+        g_free( fmt );
     }
 
     inline operator bool()
     {
         return true;
     }
+
+private:
+
+    String prefix;
 };
 
 class _Debug_OFF
 {
 public:
+
+    _Debug_OFF( const char * prefix = 0 )
+    {
+    }
 
     inline void operator()( const gchar * format, ...)
     {
