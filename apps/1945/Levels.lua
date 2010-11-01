@@ -68,20 +68,23 @@ levels =
 			{y =  300, item = formations.row_from_side, params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
 			{y =  400, item = formations.row_from_side, params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
 			{y =  550, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
-			{y =  800, item = formations.one_loop,  params = {2,150,1200,1200,300,1}},
-			{y = 1200, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
-			{y = 1200, item = formations.one_loop,  params = {2,150,1200,1200,300,1}},
-                        
+			{y =  700, item = formations.one_loop,  params = {2,150,screen.w-200,screen.w-200,300,1}},
+			{y = 1050, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
+			{y = 1050, item = formations.one_loop,  params = {2,150,screen.w-200,screen.w-200,300,1}},
+            
+            {y = 1300, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+            {y = 1300, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
+            
 			{y = 1600, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
 			{y = 1660, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
-			{y = 1660, item = formations.one_loop,  params = {2,150,1200,1200,300,1}},
+			{y = 1660, item = formations.one_loop,  params = {2,150,screen.w-200,screen.w-200,300,1}},
 			{y = 1720, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
 			{y = 1780, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
                         
 			{y = 2000, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
 			{y = 2000, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
 			--]]
-			{y = 2200, item = formations.zepp_boss,             params = { 150 }},	
+			{y = 2300, item = formations.zepp_boss,             params = { 150 }},	
 			
 		},
 		doodad_list  = {
@@ -89,7 +92,7 @@ levels =
 			{y =    0, params = {2, 300, 0, 0, 0}},
 			{y =    0, params = {5, 1620, 0, 180, 0}},
                         
-			{y =  180, params = {6, 1520,   0, 0,   0}},
+			{y =  180, params = {6, 1720,   0, 0,   0}},
 			{y =  220, params = {6,  0, 0, 180,   0}},
 			{y =  280, params = {8,  600,   0,   0,  0}},
 			{y =  280, params = {1, 1500, 180,   0, -260}},
@@ -203,3 +206,4 @@ levels =
 
 	}, 
 }
+levels[0] = {level_complete = function(self) print("Level 0 has no level_complete function") end }

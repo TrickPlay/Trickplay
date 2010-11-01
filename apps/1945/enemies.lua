@@ -32,7 +32,9 @@ function fire_bullet(enemy)
 		}
 	    },
             
-            setup = function( self )	
+        setup = function( self )
+            mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+
 		--enemies are assumed to be facing downwards
 		local deg    = enemy.group.z_rotation[1] + 90
 		
@@ -275,6 +277,8 @@ explosions =
                 duration = 0.2, 
                 time = 0,
                 setup = function( self )
+                    mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
+
                         self.group = Group
 			{
 				size =
@@ -315,7 +319,7 @@ explosions =
 				self.image.x = - ( ( self.image.w / 6 )
 					* frame )
 			end
-                end,
+        end,
 	}
 }
 
@@ -785,7 +789,7 @@ enemies =
 				return
 			end
 			if self.is_boss then
-				curr_level:level_complete()
+				levels[state.curr_level]:level_complete()
 			end
 			screen:remove( self.group )
 			remove_from_render_list( self )

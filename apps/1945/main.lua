@@ -36,7 +36,7 @@ splash:add(
     {
 	name     = "instr",
 	src      = "assets/splash/InstructionBar.png",
-	position = {50,screen.h - 120}
+	position = {screen.w/2,screen.h - 120}
     },
     Image
     {
@@ -150,7 +150,7 @@ local keys = {
             out_splash__in_hud()
             
             state.curr_mode  = "TEST_MODE"
-            
+            state.curr_level = 0
             add_to_render_list(my_plane)
             add_to_render_list(test_text())
             
@@ -158,6 +158,9 @@ local keys = {
     },
     ["TEST_MODE"] =
     {
+        [keys.s] = function()
+            add_to_render_list(smoke())
+        end,
         [keys.q] = function()
             formations.row_from_side(5,150,  -100,1000,  50,300,  200)
         end,
@@ -168,7 +171,7 @@ local keys = {
             formations.one_loop(2,150,200,200,300,-1)
         end,
         [keys.l] = function()
-            formations.one_loop(2,150,1200,1200,300,1)
+            formations.one_loop(2,150,screen.w-200,screen.w-200,300,1)
         end,
         [keys.z] = function()
             formations.zepp_boss(900)
@@ -325,4 +328,6 @@ function app:on_closing()
 	settings.high_score = high_score
 end
 math.randomseed( os.time() )
+mediaplayer:play_sound("audio/Air Combat Launch.mp3")
+
 screen:show()
