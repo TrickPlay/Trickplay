@@ -315,6 +315,10 @@ local function build_ui( show_it )
             return
         end
         
+        if not section.dropdown then
+            return
+        end
+        
         if section.dropdown.is_visible then return end
         
         -- If the section has not been initialized, do it now
@@ -430,10 +434,24 @@ local function build_ui( show_it )
     
         if ui.fs_focus and ( ui.focus == ui.fs_focus ) then
             
-            -- If they hit enter on the section that is currently full screen,
-            -- we just act like they hit 'down' and enter the section
+            -- If they hit enter on the section that is currently full screen
             
-            --enter_section()
+            ui.sections[ ui.fs_focus ]:on_hide()
+            
+            
+            ui.sections = ui.dropdowns
+            
+            for _ , section in ipairs( ui.sections ) do
+                screen:add( section.dropdown )
+                section.dropdown:hide()
+            end
+
+            ui.fs_focus = nil
+            
+            animate_in_dropdown()
+            
+            ui.dropdowns = nil
+            
         
         else
         
@@ -641,19 +659,25 @@ local function build_ui( show_it )
         
         -- Kill the dropdown timer
         
-        ui.dropdown_timer = nil            
+        ui.dropdown_timer:stop()
         
         -- Function to show the new section
         
         local function show_new_section( old_section )
         
             -- Get rid of all the dropdowns
-        
-            for _ , section in ipairs( ui.sections ) do
-                if section.dropdown then
-                    section.dropdown:unparent()
-                    section.dropdown = nil
+            
+            if not ui.dropdowns then
+            
+                ui.dropdowns = {}
+            
+                for _ , section in ipairs( ui.sections ) do
+                    table.insert( ui.dropdowns , section )
+                    if section.dropdown then
+                        section.dropdown:unparent()
+                    end
                 end
+                
             end
             
                     
