@@ -5,8 +5,6 @@
 return
 function( section )
 
---    dofile("editor.lua")
-
     local ui = section.ui
     local assets = ui.assets
     local factory = ui.factory
@@ -86,10 +84,10 @@ function( section )
 	    		item:on_focus_out()
             		animate_out_dropdown()
             		item:on_activate()
-            		screen.grab_key_focus(screen)
+            		-- screen.grab_key_focus(screen) 1101 
 			
         	end
-		return true 
+		--return true  1101 
 	     end
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")

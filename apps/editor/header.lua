@@ -2,6 +2,7 @@
 ---------------------
 -- Global 
 ---------------------
+editor_lb = editor
 ----------------
 -- Constants 
 ----------------
@@ -30,17 +31,17 @@ SECTION_SETTING      = 4
 
 BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 
--- Background image 
-BG_IMAGE = Image { name= "bg_img", src = "assets/transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
 
-CURRENT_DIR 	  = "./editor/working_space"
+CURRENT_DIR 	  = ""
 ---------------------
 -- Variables
 ---------------------
+--base 		  = ""
+--project 	  = ""
+--projects 	  = {}
 dragging          = nil
 current_inspector = nil 
 current_fn  	  = ""
-
 current_focus 	  = nil
 
 menu_hide         = false
@@ -122,6 +123,25 @@ ui =
     }
 
 
-attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "x_scale", "y_scale", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
+BG_IMAGE_20 = Image{src = "assets/transparency-grid-20.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_40 = Image{src = "assets/transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
+BG_IMAGE_80 = Image{src = "assets/transparency-grid-80.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_import = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+icon_l = Image{src = "assets/left.png"}
+icon_r = Image{src = "assets/right.png"} 
+icon_t = Image{src = "assets/top.png"}
+icon_b = Image{src = "assets/bottom.png"} 
+icon_hc = Image{src = "assets/align-horizontally-center.png"} 
+icon_vc = Image{src = "assets/align-vertically-center.png"}
+icon_dhc = Image{src = "assets/distribute-horizontal-center.png"}
+icon_dvc = Image{src = "assets/distribute-vertical-center.png"}
+
+-- Background image 
+
+--Image { name= "bg_img", src = grid40.src, tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
+
+attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "x_scale", "y_scale", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "clip_use", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
 
 

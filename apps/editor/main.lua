@@ -38,6 +38,7 @@ local function build_ui( show_it )
             ui.button_focus:set
             {
                 position = { FIRST_BUTTON_X , FIRST_BUTTON_Y },        
+		size  = {ui.button_focus.w, ui.button_focus.h - 15}
             }
         }
     }
@@ -308,16 +309,20 @@ local function build_ui( show_it )
         [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
         [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() input_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
-        [ keys.m	] = function() animate_out_dropdown() if (menu_hide == true) then 
-								   menu_hide = false 
-        							   ui.bar:show()
-								   ui.button_focus:show()
-        							   ui:animate_in() 
-   								   ui.bar:raise_to_top() 
-							      else 
-								   menu_hide = true 
-							      end 
-							      input_mode = S_SELECT end,
+        [ keys.m	] = function() if (menu_hide == true) then 
+					    ui.button_focus:show()
+        				    ui.bar:show()
+        				    ui:animate_in()
+   	        			    ui.bar:raise_to_top()  
+					    menu_hide = false 
+				       else 
+        	     			    animate_out_dropdown()
+		     			    ui:hide()
+					    menu_hide = true 
+    					    menu_init = true
+					    screen:grab_key_focus()
+				       end 
+				       input_mode = S_SELECT end,
         [ keys.q	] = function() exit() end,
         [ keys.Left     ] = function() if(current_inspector == nil) then move_focus( ui.focus - 1 ) end end,
         [ keys.Right    ] = function() if(current_inspector == nil) then move_focus( ui.focus + 1 ) end end ,
@@ -349,7 +354,6 @@ local function build_ui( show_it )
 			    		local s= ui.sections[ui.focus]
         		    		ui.button_focus.position = s.button.position
         		    		ui.button_focus.opacity = 255
-	 		   		-- do_default_for_section() 
 			    		animate_in_dropdown() 
 					input_mode = S_MENU
 			    	     end 
@@ -372,7 +376,6 @@ local function build_ui( show_it )
         ["  SETTING"]    = function() move_focus(SECTION_SETTING ) end
     }
 
-    local menu_button_second_down = false
 
     function ui:menu_button_down() 
         for _,section in ipairs( ui.sections ) do
@@ -452,6 +455,7 @@ local function build_ui( show_it )
      	  end
      	end
      end
+
      function screen.on_key_up( screen , key )
     	if key == keys.Shift_L or key == keys.Shift_R then
              shift = false
@@ -488,7 +492,14 @@ local function build_ui( show_it )
      function screen:on_button_up(x,y,button,clicks_count)
 	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
-              if (input_mode == S_RECTANGLE) then editor.rectangle_done(x, y) screen:remove(mouse_pointer) input_mode = S_SELECT end
+              if (input_mode == S_RECTANGLE) then 
+	           editor.rectangle_done(x, y) 
+	           if(screen:find_child("mouse_pointer") ~= nil) then 
+		        screen:remove(mouse_pointer) 
+		   end 
+	           input_mode = S_SELECT 
+	      end
+
 	      if(input_mode == S_SELECT) and 
 		    (screen:find_child("msgw") == nil) then
 			editor.multi_select_done(x,y)
@@ -510,17 +521,6 @@ local function build_ui( show_it )
 		end 
 	  end 
 
-	  if (menu_hide == true ) then
-    	  if( y > ui.bar_background.h) then 
-        	     animate_out_dropdown()
-		     ui:hide()
-    	  else 
-		ui.button_focus:show()
-        	ui.bar:show()
-        	ui:animate_in()
-   	        ui.bar:raise_to_top()  
-    	  end 
-	  end
           if dragging then
                local actor , dx , dy = unpack( dragging )
 	
@@ -604,8 +604,8 @@ local function build_ui( show_it )
         local function animation_completed()
         
             -- The bar gets key focus after we animate
-            self.bar:grab_key_focus(self.bar)
-            self.dropdown_timer:start()
+            self.bar:grab_key_focus(self.bar) 
+            --self.dropdown_timer:start() -- 1101   set_app_path()
             
             if callback then
                 callback( self )
@@ -626,7 +626,7 @@ local function build_ui( show_it )
         self.button_focus:animate
         {
             duration = ANIMATION_DURATION,
-            opacity = 255
+            opacity = 0 --255 1101 set_app_path()
         }
         
     end
@@ -658,24 +658,30 @@ local function build_ui( show_it )
     end
 
     ----------------------------------------------------------------------------
-    
+ 
     return ui
     
 end
 
+
+    
 -------------------------------------------------------------------------------
 -- Main
 -------------------------------------------------------------------------------
 
 function main()
-
-    screen:add(BG_IMAGE)
+    screen:add(BG_IMAGE_20)
+    screen:add(BG_IMAGE_40)
+    screen:add(BG_IMAGE_80)
+    screen:add(BG_IMAGE_white)
+    screen:add(BG_IMAGE_import)
     screen:show()
     screen.reactive=true
     ui = build_ui(true)
     ui:animate_in()
     ui:menu_button_down() 
-    
+    set_app_path()
 end
 
 main()
+

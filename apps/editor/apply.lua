@@ -171,17 +171,18 @@ function inspector_apply (v, inspector)
            v.src = inspector:find_child("src"):find_child("input_text").text
            new_object.src = v.src
 
-           org_object.clip = v.clip
            local clip_t = {}
-           clip_t[1] = inspector:find_child("cx"):find_child("input_text").text
-           clip_t[2] = inspector:find_child("cy"):find_child("input_text").text
-           clip_t[3] = inspector:find_child("cw"):find_child("input_text").text
-           clip_t[4] = inspector:find_child("ch"):find_child("input_text").text
-	   if (org_object.w ~= new_object.w or org_object.h ~= new_object.h) then
-                clip_t[3] = new_object.w 
-           	clip_t[4] = new_object.h 
+           local clip_use = toboolean(inspector:find_child("clip_use"):find_child("input_text").text)
+	   if (clip_use == true) then 
+                org_object.clip = v.clip
+           	clip_t[1] = inspector:find_child("cx"):find_child("input_text").text
+           	clip_t[2] = inspector:find_child("cy"):find_child("input_text").text
+           	clip_t[3] = inspector:find_child("cw"):find_child("input_text").text
+           	clip_t[4] = inspector:find_child("ch"):find_child("input_text").text
+           	v.clip = clip_t
+	   else 
+		v.clip = {0,0, v.w, v.h}
 	   end 
-           v.clip = clip_t
            new_object.clip = v.clip
 		 
        elseif (v.type == "Clone") then

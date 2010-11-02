@@ -3,6 +3,14 @@
 -----------
 
 
+function clear_bg()
+    BG_IMAGE_20.opacity = 0
+    BG_IMAGE_40.opacity = 0
+    BG_IMAGE_80.opacity = 0
+    BG_IMAGE_white.opacity = 0
+    BG_IMAGE_import.opacity = 0
+end
+
 local factory = ui.factory
 
 function values(t) 
@@ -37,6 +45,44 @@ function find_parent(child_obj)
    end
 end 
 
+
+local project
+local base
+local projects = {}
+
+function set_app_path()
+
+    input_mode = S_POPUP
+    -- Get the user's home directory and make sure it is valid
+    local home = editor_lb:get_home_dir()
+    
+    assert( home )
+    
+    -- The base directory where the editor will store its files, make sure
+    -- we are able to create it (or it already exists )
+    
+    base = editor_lb:build_path( home , "trickplay-editor"  )
+
+    assert( editor_lb:mkdir( base ) )
+    
+    -- The list of files and directories there. We go through it and look for
+    -- directories.
+    local list = editor_lb:readdir( base )
+    
+    for i = 1 , # list do
+    
+        if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+        
+            table.insert( projects , list[ i ] )
+            
+        end
+        
+    end
+    
+    printMsgWindow("Select Project : ", "projectlist")
+    inputMsgWindow("projectlist")
+
+end 
 
 function create_on_button_down_f(v)
 	v.extra.selected = false
@@ -309,6 +355,8 @@ function toboolean(s) if (s == "true") then return true else return false end en
         if clip_t == nil then
              clip_t = {0,0 ,v.w, v.h}
         end
+        table.insert(attr_t, {"clip_use", false, "use"})
+        table.insert(attr_t, {"line","", "hide"})
         table.insert(attr_t, {"cx", clip_t[1], "x"})
         table.insert(attr_t, {"cy", clip_t[2], "y"})
         table.insert(attr_t, {"cw", clip_t[3], "w"})
@@ -457,7 +505,7 @@ function itemTostring(v)
         "volume = "..v.volume..b_indent.."}\n"..b_indent
 	
 	itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
-	"mediaplayer.on_loaded = function(self) screen:remove(BG_IMAGE) self:play() end"..b_indent..
+	"mediaplayer.on_loaded = function(self) self:play() end"..b_indent..
 	"if ("..v.name..".loop == true) then"..b_indent..
      	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
 	"else"..b_indent..
@@ -472,11 +520,45 @@ function itemTostring(v)
     return itm_str
 end
 
+local msgw_focus = ""
+
+local function create_small_input_box(txt)
+     	local box_g = Group {}
+     	local box = factory.draw_small_ring()
+     	local box_focus = factory.draw_small_focus_ring()
+	box_g.name = "input_b"
+        box.position  = {0,0}
+        box.reactive = true
+        box.opacity = 255
+	box_g:add(box)
+	box_focus.opacity = 0 
+	box_g:add(box_focus)
+    	box_g:add(txt)
+
+        function box_g.extra.on_focus_in()
+		txt:grab_key_focus(txt)
+		txt.cursor_visible = true
+	        box.opacity = 0 
+            	box_focus.opacity = 255
+		msgw_focus = "input_b"
+        end
+
+        function box_g.extra.on_focus_out()
+	        box.opacity = 255 
+            	box_focus.opacity = 0
+		txt.cursor_visible = false
+        end
+
+	return box_g
+end 
+
+
+
 local function create_input_box(txt)
      	local box_g = Group {}
      	local box = factory.draw_ring()
      	local box_focus = factory.draw_focus_ring()
-	box.name = "input_b"
+	box_g.name = "input_b"
         box.position  = {0,0}
         box.reactive = true
         box.opacity = 255
@@ -489,11 +571,14 @@ local function create_input_box(txt)
 		txt:grab_key_focus(txt)
 	        box.opacity = 0 
             	box_focus.opacity = 255
+		msgw_focus = "input_b"
+		txt.cursor_visible = true
         end
 
         function box_g.extra.on_focus_out()
 	        box.opacity = 255 
             	box_focus.opacity = 0
+		txt.cursor_visible = false
         end
 
 	return box_g
@@ -522,15 +607,29 @@ function cleanMsgWindow()
      input_mode = S_SELECT
 end 
 
+local projectlist_len 
+local selected_prj 	= ""
+
 function printMsgWindow(txt, name)
      if (name == nil) then
         name = "pritMsgWindow"
      end
 
      txt_sz = string.len(txt) 
+     local n = table.getn(projects)
 
      if (name == "aleady_exists" ) then
 	txt_sz = txt_sz - 50
+     elseif(name == "projectlist") then  
+     	projectlist_len = n * 45 
+	txt_sz = projectlist_len + 20  
+	if (n > 14) then 
+		msgw.position = {400, 100}
+	elseif (n > 10) then 
+		msgw.position = {400, 200}
+	elseif (n > 5) then 
+		msgw.position = {400, 300}
+	end 
      else 
      	i, j = string.find(txt, "\n")
      	if (j ~= nil) then 
@@ -542,15 +641,95 @@ function printMsgWindow(txt, name)
      input_mode = S_POPUP
      msgw:add(Text{name= name, text = txt, font= "DejaVu Sans 32px",
      color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
-     reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})
+     reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})     
+  
+
+     if(name == "projectlist") then  
+         msgw_cur_x = msgw_cur_x + string.len(txt) * 20
+	 
+     	 for i, j in pairs (projects) do  
+	     local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
+	     prj_text.reactive = true
+	     prj_text.position = {msgw_cur_x, msgw_cur_y+10}
+	     prj_text.extra.index = i 
+	     prj_text.name = "prj"..i 
+	     msgw:add(prj_text)
+	     msgw_cur_y = msgw_cur_y + 32 + 10 -- 10 : line padding 
+
+
+	     function prj_text.extra.on_focus_in()
+		 print("prj_text.extra.on_focus_in()") 
+                  prj_text:set{color = {0,255,0,255}}
+	 	  prj_text:grab_key_focus()
+		  msgw_focus = prj_text.name
+             end
+    
+             function prj_text.extra.on_focus_out()
+                  prj_text:set{color = {255,255,255,255}}
+             end
+
+	     function prj_text:on_key_down(key)
+		if(key == keys.Return) then 
+		     if( selected_prj == prj_text.name) then 
+			selected_prj = ""
+			prj_text.extra.on_focus_in()
+		     else
+			if( selected_prj ~= "") then  
+			    if(msgw:find_child(selected_prj) ~= nil) then 
+				msgw:find_child(selected_prj):set{color = {255,255,255,255}} 
+			    end 
+			end 
+			selected_prj = prj_text.name
+		     end 
+		elseif(key == keys.Tab and shift == false) or (key == keys.Down) then 
+			prj_text.extra.on_focus_out()
+			if(prj_text.name == selected_prj) then
+			     prj_text:set{color = {0,255,0,255}}
+			end 
+			if (prj_text.extra.index < n) then 
+				local k = prj_text.extra.index + 1
+				msgw:find_child("prj"..k).extra.on_focus_in()
+			else 
+				msgw:find_child("input_b").extra.on_focus_in()
+			end 
+		elseif(key == keys.Tab and shift == true) or key == keys.Up then 
+			if (prj_text.extra.index > 1) then 
+				prj_text.extra.on_focus_out()
+				if(prj_text.name == selected_prj) then
+			     	     	prj_text:set{color = {0,255,0,255}}
+				end 
+				local k = prj_text.extra.index - 1
+				msgw:find_child("prj"..k).extra.on_focus_in()
+			end 
+		end 
+		return true 
+	     end 
+
+	     function prj_text:on_button_down(x,y,button,num)
+	         if( selected_prj ~= "") then  
+		      if(msgw:find_child(selected_prj) ~= nil) then 
+		           msgw:find_child(selected_prj):set{color = {255,255,255,255}} 
+	              end 
+		 end 
+	         msgw:find_child(msgw_focus).extra.on_focus_out()
+		 prj_text.extra.on_focus_in()
+		 selected_prj = prj_text.name
+		 msgw_focus = prj_text.name --1102
+	     end 
+
+	     if (i == 1) then msgw_focus = prj_text.name selected_prj = prj_text.name end 
+
+         end 
+     end 
+	
 end
 
 local function inputMsgWindow_savefile()
      local file_not_exists = true
-     local dir = readdir(CURRENT_DIR)
+     local dir = editor_lb:readdir(CURRENT_DIR)
      for i, v in pairs(dir) do
           if(input_t.text == v)then
-               current_fn = "./working_space/"..input_t.text
+               current_fn = input_t.text
 	       cleanMsgWindow()
                printMsgWindow("The file named "..current_fn..
                " already exists.\nDo you want to replace it? \n", "aleady_exists")
@@ -559,8 +738,8 @@ local function inputMsgWindow_savefile()
           end
       end
       if (file_not_exists) then
-           current_fn = "./working_space/"..input_t.text
-           writefile(current_fn, contents, true)
+           current_fn = input_t.text
+           editor_lb:writefile(current_fn, contents, true)
            contents = ""
 	   cleanMsgWindow()
            screen:grab_key_focus(screen) 
@@ -569,10 +748,10 @@ end
 
 function inputMsgWindow_openfile()
      local file_not_exists = true
-     local dir = readdir(CURRENT_DIR)
+     local dir = editor_lb:readdir(CURRENT_DIR)
      for i, v in pairs(dir) do
           if(input_t.text == v)then
-     	       current_fn = "./working_space/"..input_t.text
+     	       current_fn = input_t.text
                file_not_exists = false
           end
      end
@@ -583,9 +762,10 @@ function inputMsgWindow_openfile()
           inputMsgWindow("reopenfile")
           return 
      end
-     current_fn = "./working_space/"..input_t.text
+     current_fn = input_t.text
      local f = loadfile(current_fn)
      f(g)
+     if(g.extra.video ~= nil) then clear_bg() end 
      item_num = table.getn(g.children)
      for i, v in pairs(g.children) do
           v.reactive = true
@@ -613,28 +793,28 @@ function inputMsgWindow_yn(txt)
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 
-          writefile (current_fn, contents, true)
+          editor_lb:writefile (current_fn, contents, true)
           contents = ""
      end
      screen:grab_key_focus(screen) --kkk
 end
 
 function inputMsgWindow_openvideo()
-     mediaplayer:load("working_space/"..input_t.text)
+     mediaplayer:load(input_t.text)
 
      video1 = { name = "video1", 
                 type ="Video",
                 viewport ={0,0,screen.w/2,screen.h/2},
-           	source= "./working_space/"..input_t.text,
-           	loop= true, 
+           	source= input_t.text,
+           	loop= false, 
                 volume=0.5  
               }
 
      g.extra.video = video1
      table.insert(undo_list, {video1.name, ADD, video1})
-     mediaplayer.on_loaded = function( self ) screen:remove(BG_IMAGE) self:play() end 
+     mediaplayer.on_loaded = function( self ) clear_bg() if(g.extra.video ~= nil) then self:play() end end 
      if(video1.loop == true) then 
-	  	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
+	  	mediaplayer.on_end_of_stream = function ( self ) if(g.extra.video ~= nil) then self:seek(0) self:play() else self:seek(0) end end
      else  	
 		mediaplayer.on_end_of_stream = function ( self ) self:seek(0) end
      end
@@ -647,7 +827,7 @@ end
 function inputMsgWindow_openimage(input_purpose)
 
      local file_not_exists = true
-     local dir = readdir(CURRENT_DIR)
+     local dir = editor_lb:readdir(CURRENT_DIR)
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                file_not_exists = false
@@ -661,10 +841,15 @@ function inputMsgWindow_openimage(input_purpose)
      end
  
      if (input_purpose == "open_bg_imagefile") then  
-	  BG_IMAGE:set{src = "./working_space/"..input_t.text, opacity = 255} input_mode = S_SELECT
+	  BG_IMAGE_20.opacity = 0
+	  BG_IMAGE_40.opacity = 0
+	  BG_IMAGE_80.opacity = 0
+	  BG_IMAGE_white.opacity = 0
+	  BG_IMAGE_import:set{src = input_t.text, opacity = 255} 
+	  input_mode = S_SELECT
      else 
           ui.image= Image { name="img"..tostring(item_num),
-          src = "./working_space/"..input_t.text, opacity = 255 , position = {200,200}}
+          src = input_t.text, opacity = 255 , position = {200,200}}
           ui.image.reactive = true
           create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, ADD, ui.image})
@@ -681,6 +866,27 @@ end
 
 local input_purpose     = ""
 
+local function set_project_path ()
+	print("YUGI!!!")
+	if(selected_prj == "" or input_t.text ~= "") then
+	     project = input_t.text 
+	     print("project", project)
+	else 
+		print("selected_prj....", selected_prj)
+	     project = msgw:find_child(selected_prj).text
+	     print("project", project)
+	end 
+        app_path = editor_lb:build_path( base , project )
+        if not editor_lb:mkdir( app_path ) then
+        -- Tell the user we were not able to create it
+   	     print("couldn't create ",app_path)  
+        else
+             editor_lb:change_app_path( app_path )
+	     CURRENT_DIR = app_path
+        end
+	cleanMsgWindow()
+        screen:grab_key_focus(screen)
+end 
 
 function inputMsgWindow(input_purpose)
 
@@ -694,22 +900,27 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "yes") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "no") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "openfile") or (button.name == "reopenfile") then inputMsgWindow_openfile() 
+              	elseif (button.name == "projectlist") then set_project_path()
               	elseif (button.name == "open_videofile") then inputMsgWindow_openvideo()
               	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  inputMsgWindow_openimage(input_purpose)
               	elseif (button.name == "cancel") then 	cleanMsgWindow() screen:grab_key_focus(screen)
+							if(input_purpose == "projectlist") then projects = {} end 
                 end
 	        return true 
-	     elseif (key == keys.Tab and shift == false ) then 
+	     elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) then 
 		if (button.name == "savefile") then save_b.extra.on_focus_out() cancel_b.extra.on_focus_in()
               	elseif (button.name == "yes") then yes_b.extra.on_focus_out() no_b.extra.on_focus_in() 
+              	elseif (button.name == "projectlist") then button.extra.on_focus_out() cancel_b.extra.on_focus_in() 
               	elseif (button.name == "openfile") or (button.name == "open_videofile") or 
               	       (button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
 			open_b.extra.on_focus_out() cancel_b.extra.on_focus_in() 
 		end
-	     elseif (key == keys.Tab and shift == true) then 
+	     elseif (key == keys.Tab and shift == true) or ( key == keys.Up ) then 
 			--print(" tap + shift")
 		if (button.name == "savefile") then save_b.extra.on_focus_out() input_box.extra.on_focus_in()
               	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
+              	elseif (button.name == "projectlist") then button.extra.on_focus_out() 
+				                           msgw:find_child("input_b").extra.on_focus_in()
               	elseif (button.name == "openfile") or (button.name == "open_videofile") or 
               	(button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
 			open_b.extra.on_focus_out() input_box.extra.on_focus_in()
@@ -723,9 +934,18 @@ function inputMsgWindow(input_purpose)
         end 
      end 
 
+
      if (input_purpose == "reopenfile" or input_purpose == "reopenImg") then 
 	msgw_cur_x = msgw_cur_x + 200 
 	msgw_cur_y = msgw_cur_y + 45
+     elseif(input_purpose == "projectlist") then 
+	msgw_cur_x = 25
+	msgw:add(Text{name= name, text = "   New Project : ", font= "DejaVu Sans 32px",
+     	color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
+     	reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})  
+
+	msgw_cur_x = 360
+	msgw_cur_y = msgw_cur_y + 10
      else 
 	msgw_cur_x = msgw_cur_x + 200 
      end
@@ -733,13 +953,22 @@ function inputMsgWindow(input_purpose)
      position = {msgw_cur_x, msgw_cur_y} 
 
      if (input_purpose ~= "yn") then 
-        input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
-        position = {25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+	if(input_purpose == "projectlist") then 
+            input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+            position = {25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+            input_box = create_small_input_box(input_t)
+            input_box.position = position
+            msgw:add(input_box)
+	    input_box.extra.on_focus_out()
+	else 
+            input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+            position = {25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+            input_box = create_input_box(input_t)
+            input_box.position = position
+            msgw:add(input_box)
+	    input_box.extra.on_focus_in()
+	end
 
-        input_box = create_input_box(input_t)
-        input_box.position = position
-        msgw:add(input_box)
-	input_box.extra.on_focus_in()
      end 
 
      if (input_purpose == "savefile") then 
@@ -828,6 +1057,18 @@ function inputMsgWindow(input_purpose)
 			inputMsgWindow_openfile() 
 			--return true
      		end 
+        elseif (input_purpose == "projectlist") then
+ 		open_b.name = "projectlist"
+        	open_b.position = {360, msgw_cur_y + 70}
+        	cancel_b.position = {560, msgw_cur_y + 70}
+
+		function open_b:on_button_down(x,y,button,num_clicks)
+			set_project_path()
+     		end 
+		function open_t:on_button_down(x,y,button,num_clicks)
+			set_project_path()
+     		end 
+
 	elseif (input_purpose == "open_imagefile") or  
 	       (input_purpose == "open_bg_imagefile") or  
 	       (input_purpose == "reopenImg") then  
@@ -858,11 +1099,13 @@ function inputMsgWindow(input_purpose)
      	   function cancel_b:on_button_down(x,y,button,num_clicks)
 		cleanMsgWindow()	
 		screen:grab_key_focus(screen)
+		if(input_purpose == "projectlist") then projects = {} end 
 		--return true
      	   end 
      	   function cancel_t:on_button_down(x,y,button,num_clicks)
 		cleanMsgWindow()	
 		screen:grab_key_focus(screen)
+		if(input_purpose == "projectlist") then projects = {} end 
 		--return true
      	   end 
      end
@@ -871,18 +1114,42 @@ function inputMsgWindow(input_purpose)
      input_mode = S_POPUP
 
 	
-     if( input_purpose ~="yn") then 
-          input_t:grab_key_focus(input_t)
-     else 
+     if( input_purpose =="yn") then 
           yes_b:grab_key_focus(yes_b)
+     elseif( input_purpose == "projectlist") then 
+	  msgw:find_child(msgw_focus).extra.on_focus_in()
+     else 
+          input_t:grab_key_focus(input_t)
      end 
 
      function input_t:on_key_down(key)
-          if key == keys.Return or (key == keys.Tab and shift == false) or key == Down then 
+	  if (input_t.text ~= "") then 
+		selected_prj = ""
+	  end
+          if key == keys.Return or (key == keys.Tab and shift == false) or key == keys.Down then 
 	      input_box.extra.on_focus_out()
 	      if(open_b ~= nil) then open_b.extra.on_focus_in() 
 	      elseif(save_b ~= nil) then save_b.extra.on_focus_in() end
+	  elseif(key == keys.Tab and shift == true) or key == keys.Up then 
+	      if (input_purpose == "projectlist") then 
+	           local n = table.getn(projects)
+	           input_box.extra.on_focus_out()
+		   msgw:find_child("prj"..n).extra.on_focus_in()
+		   return true 
+	      end 
           end
      end 
 	
+    function input_t:on_button_down(x,y,button,num)
+ 	if (input_purpose == "projectlist") then 
+	 msgw:find_child(msgw_focus).extra.on_focus_out()
+	 input_box.extra.on_focus_in()
+	end
+    end 
+    function input_box:on_button_down(x,y,button,num)
+ 	if (input_purpose == "projectlist") then 
+	 msgw:find_child(msgw_focus).extra.on_focus_out()
+	 input_box.extra.on_focus_in()
+	end
+    end 
 end

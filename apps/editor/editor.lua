@@ -10,7 +10,6 @@ local g_init_y = 0
 local factory = ui.factory
 local selected_objs = {}
 
-
 function editor.selected(obj, call_by_inspector)
 
      if(obj.type ~= "Video") then 
@@ -57,6 +56,7 @@ end
 function editor.n_selected(obj, call_by_inspector)
 
      if(obj.type ~= "Video") then 
+	print("obj.name", obj.name)
      screen:remove(screen:find_child(obj.name.."border"))
      table.remove(selected_objs)
      obj.extra.selected = false
@@ -65,14 +65,17 @@ end
 
 function editor.close()
 
-	mediaplayer.on_loaded = function( self ) self:stop() end
-	
-	g.extra.video = nil
-	if(screen:find_child("bg_img") == nil) then
-		screen:add(BG_IMAGE)
-		BG_IMAGE:lower_to_bottom()
-	end 
+	clear_bg()
+        if(g.extra.video ~= nil) then 
+	    g.extra.video = nil
+	end
 
+	BG_IMAGE_40.opacity = 255 
+
+	if(screen:find_child("mouse_pointer") ~= nil) then 
+             screen:remove(mouse_pointer) 
+	end 
+	
 	if(table.getn(g.children) ~= 0) then 
              screen:remove(g)
 	end 
@@ -95,11 +98,15 @@ end
 
 function editor.open()
 
-     selected_objs = {}
      editor.close()
-     input_mode = S_POPUP
-     printMsgWindow("File Name : ")
-     inputMsgWindow("openfile")
+     if(CURRENT_DIR == "") then 
+	set_app_path()
+     else 
+        input_mode = S_POPUP
+        printMsgWindow("File Name : ")
+        inputMsgWindow("openfile")
+     end 
+     
 end 
 
 function editor.the_open()
@@ -114,7 +121,7 @@ function editor.the_open()
 	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
 	local space = WIDTH
 
-	local dir = readdir(CURRENT_DIR)
+	local dir = editor_lb:readdir(CURRENT_DIR)
 	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
@@ -169,14 +176,6 @@ function editor.the_open()
 	
 	local file_list_size = get_file_list_sz()
 	
-	print(file_list_size) 
-	print(file_list_size) 
-	print(file_list_size) 
-	print(file_list_size) 
-	print(file_list_size) 
-	print(file_list_size) 
-
-
 	local msgw_bg = factory.make_popup_bg("msgw", file_list_size)
 	local msgw = Group {
 	     position ={400, 400},
@@ -280,7 +279,7 @@ function editor.inspector(v)
             end
         end
 
-        editor.selected(v, true)
+        --editor.selected(v, true)
 	local attr_t = make_attr_t(v)
 
 	local inspector_items = {}
@@ -418,9 +417,9 @@ function editor.inspector(v)
 
         inspector_xbox.reactive = true
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
+		editor.n_selected(v, true)
 		screen:remove(inspector)
 		current_inspector = nil
-		editor.n_selected(v, true)
 			
         	for i, c in pairs(g.children) do
 		    if(c.type == "Text") then 
@@ -592,29 +591,33 @@ function editor.save(save_current_f)
         undo_list = {}
         redo_list = {}
 	if(current_fn ~= "") then 
-		writefile (current_fn, contents, true)	
+		editor_lb:writefile (current_fn, contents, true)	
 	else 
 		editor.save(false)
 		return
 	end 
      else 
-        input_mode = S_POPUP
-        printMsgWindow("File Name : ")
-        contents = "local g = ... \n\n"
-        local obj_names = getObjnames()
+	if(CURRENT_DIR == "") then 
+	     set_app_path()
+        else 
+             input_mode = S_POPUP
+             printMsgWindow("File Name : ")
+             contents = "local g = ... \n\n"
+             local obj_names = getObjnames()
    
-        for i, v in pairs(g.children) do
-             contents= contents..itemTostring(v)
-        end
+             for i, v in pairs(g.children) do
+                  contents= contents..itemTostring(v)
+             end
 
-	if (g.extra.video ~= nil) then
-	     contents = contents..itemTostring(g.extra.video)
-	end 
+	     if (g.extra.video ~= nil) then
+	          contents = contents..itemTostring(g.extra.video)
+	     end 
 
-	contents = contents.."g:add("..obj_names..")"
-        undo_list = {}
-        redo_list = {}
-        inputMsgWindow("savefile")
+	     contents = contents.."g:add("..obj_names..")"
+             undo_list = {}
+             redo_list = {}
+             inputMsgWindow("savefile")
+        end 
      end 	
 end  
 
@@ -830,15 +833,23 @@ function editor.text()
 end
 	
 function editor.image()
-        input_mode = S_POPUP
-        printMsgWindow("Image File : ")
-        inputMsgWindow("open_imagefile")
+	if(CURRENT_DIR == "") then 
+		set_app_path()
+     	else 
+        	input_mode = S_POPUP
+        	printMsgWindow("Image File : ")
+        	inputMsgWindow("open_imagefile")
+	end 
 end
 	
 function editor.video()
-        input_mode = S_POPUP
-        printMsgWindow("Video File : ")
-        inputMsgWindow("open_videofile")
+	if(CURRENT_DIR == "") then 
+		set_app_path()
+     	else 
+        	input_mode = S_POPUP
+        	printMsgWindow("Video File : ")
+        	inputMsgWindow("open_videofile")
+	end
 end
 	
 function editor.clone()
