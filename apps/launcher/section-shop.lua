@@ -312,6 +312,7 @@ function( section )
         local focused = section_items[ section.focus ]
         
         if focused and focused.on_activate then
+            focused:on_focus_out()
             focused:on_activate()
         end
     
