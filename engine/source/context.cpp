@@ -234,16 +234,26 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         g_free( c );
     }
 
+    guint8 o = clutter_actor_get_opacity( actor );
+
+    if ( o < 255 )
+    {
+        gchar * c = g_strdup_printf( "  opacity(%u)" , o );
+        details += c;
+        g_free( c );
+    }
+
     if ( !extra.empty() )
     {
         extra = String( " : " ) + extra;
     }
 
 
-    g_info( "%s%s: '%s' : %u : (%d,%d %ux%u)%s%s",
+    g_info( "%s%s%s:%s%u : (%d,%d %ux%u)%s%s",
+            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
-            name ? name : "",
+            name ? String( " " + String( name ) + " : " ).c_str()  : " ",
             clutter_actor_get_gid( actor ),
             g.x,
             g.y,
