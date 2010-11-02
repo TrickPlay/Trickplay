@@ -4,7 +4,7 @@ Format: 1.5
 Title: TrickPlay
 SubTitle: Application Developer's Guide and Reference
 
-Footer: v (4a99115)
+Footer: v (5d8d42f)
 Timestamp: mm.d.yyyy
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
@@ -16,6 +16,11 @@ Timestamp: mm.d.yyyy
 #   yy    - Two digit year.  2006 is "06"
 #   yyyy  - Four digit year.  2006 is "2006"
 #   year  - Four digit year.  2006 is "2006"
+
+# These are indexes you deleted, so Natural Docs will not add them again
+# unless you remove them from this line.
+
+Don't Index: Files
 
 
 # --------------------------------------------------------------------------
@@ -114,7 +119,6 @@ Group: Reference  {
       Constructor Index: Constructors
       Interface Index: Interfaces
       Constant Index: Constants
-      File Index: Files
       }  # Group: Index
 
    }  # Group: Reference
