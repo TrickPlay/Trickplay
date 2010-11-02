@@ -34,11 +34,12 @@ water =
 					x_rotation   = { x_rot , 0, 0},
 					y_rotation   = { y_rot , 0, 0},
 					z_rotation   = { z_rot , 0, 0},
-					opacity      = 255 
+					opacity      = 255 ,
+                    z = z.air_doodads_2
 				},
                 setup = function( self )
                         screen:add( self.image )
-						self.image:lower_to_bottom()
+						--self.image:lower_to_bottom()
 						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
 						self.image.position     = {               xxx , -self.image.h / 2 }
 
@@ -51,7 +52,7 @@ water =
                             remove_from_render_list( self )
                             screen:remove( self.image )
                         end
-                        self.image:raise_to_top()
+                        --self.image:raise_to_top()
                 end,
             }
         local island =
@@ -63,16 +64,17 @@ water =
 					x_rotation   = { x_rot , 0, 0},
 					y_rotation   = { y_rot , 0, 0},
 					z_rotation   = { z_rot , 0, 0},
-					opacity      = 255 
+					opacity      = 255 ,
+                    z = z.land_doodads_1
 				},
                 setup = function( self )
                         screen:add( self.image )
-						self.image:lower_to_bottom()
+						--self.image:lower_to_bottom()
 						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
 						self.image.position     = {               xxx , -self.image.h / 2 }
 
                         for _ , strip in ipairs( water.strips ) do
-    				        strip:lower_to_bottom()
+    				    --    strip:lower_to_bottom()
     					end
                 end,
                     

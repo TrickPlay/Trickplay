@@ -1,9 +1,9 @@
 --Game state
 state =
 {
-    curr_mode  = "SPLASH", --
-    curr_level = 0,
-    paused     = false,
+    curr_mode     = "SPLASH", 
+    curr_level    = 0,
+    paused        = false,
     set_highscore = false,
     
     --Gameplay state that sits at the top
@@ -14,6 +14,38 @@ state =
         high_score = settings.high_score or 0
     },
 }
+
+layers =
+{
+    splash         = Group{},
+    hud            = Group{},
+    
+    air_doodads_2  = Group{},
+    planes         = Group{}, --explosions go here as well
+    air_bullets    = Group{},
+    air_doodads_1  = Group{},
+    
+    land_doodads_2 = Group{},
+    land_targets   = Group{}, -- explostions go here as well
+    land_bullets   = Group{},
+    land_doodads   = Group{},
+    ground         = Group{}
+}
+
+screen:add(
+    layers.ground,
+    layers.land_doodads,
+    layers.land_bullets,
+    layers.land_targets,
+    layers.land_doodads_2,
+    layers.air_doodads_1, 
+    layers.air_bullets,   
+    layers.planes,        
+    layers.air_doodads_2, 
+    layers.hud,           
+    layers.splash
+)
+
 
 -- Base images for cloning
 imgs =
@@ -32,6 +64,8 @@ imgs =
     enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
+    explosion3      = Image{ src = "assets/explosion3_strip7.png" },
+
     smoke           = Image{ src = "assets/smoke.png"},
     enemy_1         = Image{ src = "assets/enemy1.png"   },
     zepp            = Image{ src = "assets/zeppelin.png" },

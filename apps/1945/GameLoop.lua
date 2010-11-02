@@ -37,7 +37,46 @@ TYPE_MY_BULLET      = 2
 TYPE_ENEMY_PLANE    = 3
 TYPE_ENEMY_BULLET   = 4
 
-collision_list = {}
+bad_guys_collision_list  = {}
+good_guys_collision_list = {}
+
+local collided = function(good_guy,bad_guy)
+
+    --do box collision detection
+    
+    return not (                    --returns true if
+        good_guy.x1 > bad_guy.x2 or -- good guy is   to the right of    bad guy
+        good_guy.x2 < bad_guy.x1 or -- good guy is   to the left  of    bad guy
+        good_guy.y1 > bad_guy.y2 or -- good guy is   behind             bad guy
+        good_guy.y2 < bad_guy.y1    -- good guy is   ahead of           bad guy
+    )
+
+end
+
+function process_collisions()
+
+    --check for collisions between the good guys and bad guys
+    for     i, good_guy in ipairs(good_guys_collision_list) do
+        for j,  bad_guy in ipairs( bad_guys_collision_list) do
+            
+            if collided(good_guy,bad_guy) then
+                
+                
+                good_guy.obj:collision(bad_guy.obj)
+                bad_guy.obj:collision(good_guy.obj)
+                table.remove(bad_guys_collision_list,j)
+                
+                break
+            end
+            
+        end
+    end
+    
+    bad_guys_collision_list  = {}
+    good_guys_collision_list = {}
+end
+
+--[[
 
 function add_to_collision_list( item , start_point, end_point , size , other_type )
 
@@ -106,6 +145,7 @@ function process_collisions( )
     -- Clear the collision list
     collision_list = {}
 end
+--]]
 
 
 

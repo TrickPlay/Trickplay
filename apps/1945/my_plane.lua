@@ -5,7 +5,6 @@ smoke = function(xxx,yyy) return {
                 duration = 0.2, 
                 time = 0,
                 setup = function( self )
-                    mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
 
                         self.group = Group
 			{
@@ -75,7 +74,7 @@ my_plane =
     
     speed_bump = 200,
     
-    group = Group{ },--size = { --[[65 , 65]]my_plane_sz,my_plane_sz } },
+    group = Group{ z=z.planes},--size = { --[[65 , 65]]my_plane_sz,my_plane_sz } },
     
     image = Clone{ source = imgs.my_plane_strip },
     
@@ -158,7 +157,7 @@ my_plane =
 			self.prop.r.y = -(self.prop_index - 1)*self.prop.r.h/
 				self.num_prop_frames
             
-            self.group:raise_to_top()
+            --self.group:raise_to_top()
             -- Move
             
             --if game_is_running then--not self.dead then
@@ -271,18 +270,29 @@ end
                     self.group.y = y
                 end
     if not self.dead then
+                table.insert(good_guys_collision_list,
+                    {
+                        obj = self,
+                        x1  = self.group.x-self.image.w/(2*self.num_frames),
+                        x2  = self.group.x+self.image.w/(2*self.num_frames),
+                        y1  = self.group.y-self.image.h/2,
+                        y2  = self.group.y+self.image.h/2,
+                    }
+                )
+                --[[
                 add_to_collision_list( self ,
 					{self.group.x+self.image.w/(2*self.num_frames),self.group.y+self.image.h/2},
 					{self.group.x+self.image.w/(2*self.num_frames),self.group.y+self.image.h/2},
 					{self.image.w/(2*self.num_frames),self.image.h},
 					TYPE_ENEMY_PLANE)-- start_point , self.group.center , { self.group.w - 10 , self.group.h - 30 } , TYPE_ENEMY_PLANE )
+                --]]
 end
 --[[
             r.x = self.group.x
 r.y=self.group.y
 r.w=self.image.w
 r.h=self.image.h
-r:raise_to_top()
+--r:raise_to_top()
 --]]
             --end
         end,
@@ -296,6 +306,7 @@ r:raise_to_top()
             {
                 type = TYPE_MY_BULLET,
                 
+                
 				z_rot = z_rot,
 
                 speed = -400,
@@ -308,7 +319,8 @@ r:raise_to_top()
                         opacity = 255,
                         anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
                         position = { x, y },
-						z_rotation = {z_rot,0,0}
+						z_rotation = {z_rot,0,0},
+                        z = z.air_bullets
                     },
                     
                 setup =
@@ -334,13 +346,23 @@ r:raise_to_top()
                         
                         else
                         
+                            table.insert(good_guys_collision_list,
+                                {
+                                    obj = self,
+                                    x1  = self.image.x-self.image.w/2,
+                                    x2  = self.image.x+self.image.w/2,
+                                    y1  = self.image.y-self.image.h/2,
+                                    y2  = self.image.y+self.image.h/2,
+                                }
+                            )
+                            --[[
                             add_to_collision_list(
                                 self ,
                                 { self.image.x , self.image.y },
                                 { self.image.x , y },
                                 { self.image.w , self.image.h },
                                 TYPE_ENEMY_PLANE )
-                        
+                        --]]
                             self.image.y = y
                             self.image.x = x
                         
@@ -355,7 +377,7 @@ r:raise_to_top()
                         remove_from_render_list( self )
                         
                         local location = other.group.position
-
+                        
                         screen:remove( self.image )
                         
                         -- Now, we create a score bubble
@@ -580,7 +602,8 @@ redo_score_text()
                                     position = location,
                                     clip = { 0 , 0 , self.image.w / 7 , self.image.h },
                                     children = { self.image },
-                                    anchor_point = { ( self.image.w / 7 ) / 2 , self.image.h / 2 }
+                                    anchor_point = { ( self.image.w / 7 ) / 2 , self.image.h / 2 },
+                                    z=z.planes
                                 }
                             
                             screen:add( self.group )

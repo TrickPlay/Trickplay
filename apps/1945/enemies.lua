@@ -13,24 +13,25 @@
 
 function fire_bullet(enemy)
     local bullet =
+    {
+        speed = 500,
+        num_frames = 1,
+        image = Clone
         {
-            speed = 500,
-            
-            image = Clone
-	    {
-		source = imgs.enemy_bullet ,
-		opacity = 255,
-		anchor_point =
-		{
-			imgs.enemy_bullet.w/2,
-			imgs.enemy_bullet.h/2
-		},
-		position =
-		{
-			enemy.group.x,
-			enemy.group.y
-		}
-	    },
+            source = imgs.enemy_bullet ,
+            opacity = 255,
+            anchor_point =
+            {
+                imgs.enemy_bullet.w/2,
+                imgs.enemy_bullet.h/2
+            },
+            position =
+            {
+                enemy.group.x,
+                enemy.group.y
+            },
+            z = z.air_bullets
+        },
             
         setup = function( self )
             mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
@@ -60,6 +61,17 @@ function fire_bullet(enemy)
                     self.image.y = y
 		    self.image.x = x
 		    --check for collisions
+            
+            table.insert(bad_guys_collision_list,
+                {
+                    obj = self,
+                    x1  = self.image.x-self.image.w/2,
+                    x2  = self.image.x+self.image.w/2,
+                    y1  = self.image.y-self.image.h/2,
+                    y2  = self.image.y+self.image.h/2,
+                }
+            )
+            --[[
                     add_to_collision_list(
                         self,
 			self.image.center,
@@ -67,12 +79,13 @@ function fire_bullet(enemy)
 			{ 4 , 4 },
 			TYPE_MY_PLANE
                     )
+                    --]]
                 end
+                
             end,
             
             collision =
                 function( self , other )
-                print("enemy bullet")
                     remove_from_render_list( self )
                     screen:remove( self.image )
                 end
@@ -110,7 +123,7 @@ function face(start_x,start_y,dest_x,dest_y, dir)
 	return deg
     --]]
 end
-
+--[[
 function move_to(obj,dest_x,dest_y,speed,seconds)
 
 	local dist_x   = dest_x - obj.x
@@ -159,7 +172,6 @@ function prep_bank_to( start_x,  start_y,
 			deg_remaining = (360 - start_deg) + end_deg
 		end
 	end
-print(deg_remaining)
 	return {
 		radius  = math.sqrt(math.pow((center_x - start_x),2)+math.pow((center_y - start_y),2)),
 		dir     = dir,
@@ -167,9 +179,11 @@ print(deg_remaining)
 			x   = dest_x,
 			y   = dest_y,
 			deg = end_deg},
-		center  = {
+		center  =
+        {
 			x   = center_x,
-			y   = center_y},
+			y   = center_y
+        },
 		deg_remaining = deg_remaining,
 		deg_total = deg_remaining
 	}
@@ -179,16 +193,6 @@ function inc_banking(prep, obj, speed, seconds)
 	local deg_travelled = speed*seconds/(math.pi*2*prep.radius)*360
 	prep.deg_remaining = prep.deg_remaining - deg_travelled 
 	local new_deg = (prep.dir*deg_travelled + obj.z_rotation[1])
---[[
-	if (dir == -1 and new_deg < deg_limit) or
-	   (dir ==  1 and new_deg > deg_limit) then
-
-		new_deg = deg_limit
-		ret_val = false
-	end
---]]
-
-
 	if prep.deg_remaining <= 0 then
 		obj.z_rotation = {prep.dest.deg,0,0}
 		obj.x = prep.dest.x
@@ -241,45 +245,70 @@ function bank(obj,radius,deg_limit,center, speed, seconds, dir)
 	end
 	return ret_val
 end
---[[
-function bank(gg,rad,deg_limit,cent, sp, sec, quad,dir)
-	assert(gg)
-	local deg_travelled = sp*sec/(math.pi*2*rad)*360
-	local new_deg = dir*deg_travelled + gg.z_rotation[1]
-	if new_deg >= deg_limit  then
-		gg.z_rotation = { deg_limit,0,0}
-		return false
-	end
 
-	gg.z_rotation    = {new_deg,0.0}
-
-	if quad == 1 then
-		gg.x = cent[1] + math.cos((-1*new_deg)*math.pi/180)*rad
-		gg.y = cent[2] - math.sin((-1*new_deg)*math.pi/180)*rad
-	elseif quad == 2 then
-		gg.x = cent[1] - math.sin((-1*new_deg-90)*math.pi/180)*rad
-		gg.y = cent[2] - math.cos((-1*new_deg-90)*math.pi/180)*rad
-	elseif quad == 3 then
-	elseif quad == 4 then
-	else
-		error("only 4 quadrants, received quad ="..quad)
-	end
-	--	local new_x = center[1] - 
-	return true
-end
 --]]
 explosions =
 {
-	small =
-	{
-                image = Clone{ source = imgs.explosion1 },
-                group = nil,
-                duration = 0.2, 
-                time = 0,
-                setup = function( self )
-                    mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
+	big = function(x,y) return {
+        image = Clone{ source = imgs.explosion3 },
+        group = nil,
+        duration = 0.3, 
+        time = 0,
+        setup = function( self )
+            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
 
-                        self.group = Group
+            self.group = Group
+			{
+				size =
+				{
+					self.image.w / 7 ,
+					self.image.h
+				},
+				clip =
+				{
+					0 ,
+					0 ,
+					self.image.w / 7 ,
+					self.image.h
+				},
+				children = { self.image },
+				anchor_point =
+				{
+					( self.image.w / 7 ) / 2 ,
+					  self.image.h / 2
+				},
+                position = {x,y},
+                z=z.planes
+			}
+                    
+			screen:add( self.group )
+        end,
+                
+		render = function( self , seconds )
+			self.time = self.time + seconds
+				
+			if self.time > self.duration then
+					
+				remove_from_render_list( self )
+				screen:remove( self.group )
+					
+			else
+				local frame = math.floor( self.time /
+					( self.duration / 7 ) )
+				self.image.x = - ( ( self.image.w / 7 )
+					* frame )
+			end
+        end,
+	} end,
+	small = function(x,y) return {
+        image = Clone{ source = imgs.explosion1 },
+        group = nil,
+        duration = 0.2, 
+        time = 0,
+        setup = function( self )
+            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+
+            self.group = Group
 			{
 				size =
 				{
@@ -298,14 +327,15 @@ explosions =
 				{
 					( self.image.w / 6 ) / 2 ,
 					  self.image.h / 2
-				}
+				},
+                position = {x,y},
+                z=z.planes
 			}
                     
 			screen:add( self.group )
-                end,
+        end,
                 
 		render = function( self , seconds )
-			
 			self.time = self.time + seconds
 				
 			if self.time > self.duration then
@@ -320,13 +350,9 @@ explosions =
 					* frame )
 			end
         end,
-	}
+	} end
 }
 
-function explode(explosion, x, y)
-	explosion.position = { x, y }
-	add_to_render_list( explosion)
-end
 
 
 
@@ -361,7 +387,7 @@ enemies =
 			anchor_point = {imgs.prop1.w/2,   imgs.prop1.h/2},
 			position     = {imgs.enemy_1.w/2, imgs.enemy_1.h},
 		},
-		group  = Group{anchor_point = {imgs.enemy_1.w/2,imgs.enemy_1.h/2}},
+		group  = Group{anchor_point = {imgs.enemy_1.w/2,imgs.enemy_1.h/2},z=z.planes},
 		
 		shoot_time      = 2,	--how frequently the plane shoots
 		last_shot_time = math.random()*2,	--how long ago the plane last shot
@@ -417,6 +443,16 @@ enemies =
 			self.stages[self.stage](self,seconds)
 			
 			--check for collisions
+            table.insert(bad_guys_collision_list,
+                {
+                    obj = self,
+                    x1  = self.group.x-self.image.w/2,
+                    x2  = self.group.x+self.image.w/2,
+                    y1  = self.group.y-self.image.h/2,
+                    y2  = self.group.y+self.image.h/2,
+                }
+            )
+            --[[
 			add_to_collision_list(
                             
 				self,
@@ -434,6 +470,7 @@ enemies =
 				},
 				TYPE_MY_BULLET
                         )
+                        --]]
 		end,
 		
                 collision = function( self , other )
@@ -441,10 +478,10 @@ enemies =
                     remove_from_render_list( self )
                         
                     -- Explode
-                    explode(
-			explosions.small,
+                    add_to_render_list(
+			explosions.small(
 			self.group.center[1],
-			self.group.center[2]
+			self.group.center[2])
 			)
 		end	
 	} end,
@@ -528,7 +565,7 @@ enemies =
 			},
 		},
 		
-		group    = Group{},
+		group    = Group{z=z.planes},
 		
 		shoot_time      = 3,	--how frequently the plane shoots
 		last_shot_time = 2,	--how long ago the plane last shot
@@ -764,6 +801,16 @@ enemies =
 			self.stages[self.stage](self,seconds)
 			
 			--check for collisions
+            table.insert(bad_guys_collision_list,
+                {
+                    obj = self,
+                    x1  = self.group.x,
+                    x2  = self.group.x+self.image.w,
+                    y1  = self.group.y,
+                    y2  = self.group.y+self.image.h,
+                }
+            )
+            --[[
 			add_to_collision_list(
                             
 				self,
@@ -781,6 +828,7 @@ enemies =
 				},
 				TYPE_MY_BULLET
                         )
+                        --]]
 		end,
 		
         collision = function( self , other )
@@ -795,10 +843,10 @@ enemies =
 			remove_from_render_list( self )
                         
 			-- Explode
-			explode(
-				explosions.small,
-				self.group.center[1],
-				self.group.center[2]
+            add_to_render_list(
+			explosions.big(
+			self.group.center[1],
+			self.group.center[2])
 			)
 		end	
 	} end,
