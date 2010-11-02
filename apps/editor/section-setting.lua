@@ -21,17 +21,32 @@ function( section )
     local section_items = {}
     
         
+    local function clear_bg() 
+	BG_IMAGE_20.opacity = 0
+	BG_IMAGE_40.opacity = 0
+	BG_IMAGE_80.opacity = 0
+	BG_IMAGE_white.opacity = 0
+	BG_IMAGE_import.opacity = 0
+    end
     ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["Background Image        "]   = function()	input_mode = S_POPUP printMsgWindow("Image File : ") inputMsgWindow("open_bg_imagefile") input_mode = S_SELECTION end, 
-	["Transparency Grid 20"]   = function() BG_IMAGE:set{src = "assets/transparency-grid-20.png", opacity = 255} input_mode = S_SELECT end,
-	["Transparency Grid 40"]   = function() BG_IMAGE:set{src = "assets/transparency-grid-40.png", opacity = 255} input_mode = S_SELECT end,
-	["Transparency Grid 80"]   = function() BG_IMAGE:set{src = "assets/transparency-grid-80.png", opacity = 255} input_mode = S_SELECT end,
-        ["White"]   = function() BG_IMAGE:set{src = "assets/white.png", opacity = 255} input_mode = S_SELECT end,
-        ["Black"]   = function() BG_IMAGE:set{opacity = 0} input_mode = S_SELECT end
+	["Background Image        "]   = function() 
+			if(CURRENT_DIR == "") then 
+				set_app_path() 
+			else 
+				input_mode = S_POPUP 
+				printMsgWindow("Image File : ") 
+			        inputMsgWindow("open_bg_imagefile") 
+				input_mode = S_SELECTION 
+			end end, 
+	["Transparency Grid 20"]   = function() clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT end,
+	["Transparency Grid 40"]   = function() clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT end,
+	["Transparency Grid 80"]   = function() clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT end,
+        ["White"]   = function() clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT end,
+        ["Black"]   = function() clear_bg() input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -42,7 +57,8 @@ function( section )
         
         local space = group.h - ( TOP_PADDING + BOTTOM_PADDING )
         local items_height = 0
-    
+     
+	  
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
         local f_import = factory.make_text_menu_item( assets , ui.strings[ "Background Image        " ] )
@@ -95,27 +111,27 @@ function( section )
 	    end 
         f_tp_20.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "assets/transparency-grid-20.png", opacity = 255}
+		clear_bg() BG_IMAGE_20.opacity = 255 
                 screen.grab_key_focus(screen)
             end
         f_tp_40.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "assets/transparency-grid-40.png", opacity = 255}
+		clear_bg() BG_IMAGE_40.opacity = 255 
                 screen.grab_key_focus(screen)
             end
         f_tp_80.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "assets/transparency-grid-80.png", opacity = 255}
+		clear_bg() BG_IMAGE_80.opacity = 255 
                 screen.grab_key_focus(screen)
             end
         f_black.extra.on_activate =
             function()
-		BG_IMAGE:set{opacity = 0}
+		clear_bg() 
                 screen.grab_key_focus(screen)
             end
         f_white.extra.on_activate =
             function()
-		BG_IMAGE:set{src = "assets/white.png", opacity = 255}
+		clear_bg() BG_IMAGE_white.opacity = 255 
                 screen.grab_key_focus(screen)
             end
         

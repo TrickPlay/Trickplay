@@ -107,14 +107,14 @@ end
 
 local icon_map = 
 {
-	["LEFT SIDE      "] = function() icon = Image { name= "icon", src = "./assets/left.png"} return icon end, 
-        ["RIGHT SIDE    "] = function() icon = Image { name= "icon", src = "./assets/right.png"} return icon end, 
-        ["TOP             "] = function() icon = Image { name= "icon", src = "./assets/top.png"} return icon end, 
-        ["BOTTOM        "] = function() icon = Image { name= "icon", src = "./assets/bottom.png"} return icon end, 
-        ["HORIZ. CENTER   "] = function() icon = Image { name= "icon", src = "./assets/align-horizontally-center.png"} return icon end, 
-        ["VERT. CENTER    "] = function() icon = Image { name= "icon", src = "./assets/align-vertically-center.png"} return icon end, 
-        ["HORIZONTALLY	  "] = function() icon = Image { name= "icon", src = "./assets/distribute-horizontal-center.png"} return icon end,  
-        ["VERTICALLY 	  "] = function() icon = Image { name= "icon", src = "./assets/distribute-vertical-center.png"} return icon end 
+	["LEFT SIDE      "] = function() icon = icon_l return icon end, 
+        ["RIGHT SIDE    "] = function() icon = icon_r return icon end, 
+        ["TOP             "] = function() icon = icon_t return icon end, 
+        ["BOTTOM        "] = function() icon = icon_b return icon end, 
+        ["HORIZ. CENTER   "] = function() icon = icon_hc return icon end, 
+        ["VERT. CENTER    "] = function() icon = icon_vc return icon end, 
+        ["HORIZONTALLY	  "] = function() icon = icon_dhc return icon end,  
+        ["VERTICALLY 	  "] = function() icon = icon_dvc return icon end 
 }
 
    
@@ -193,7 +193,7 @@ function factory.make_text_menu_item( assets , caption )
         	size = { WIDTH , HEIGHT + text_category.h + PADDING_Y },
         	children =
         	{
-		icon:set{position = {280, text_category.h + PADDING_Y + 15}, scale = {1.3, 1.3}},
+		icon:set{position = {280, text_category.h + PADDING_Y + 15}, scale = {0.75, 0.75}},
 	    	text_category:set{position = {5, 6}},
             	ring:set{ position = { 0 , text_category.h + PADDING_Y } },
             	focus:set{ position = { 0 , text_category.h + PADDING_Y } , size = { WIDTH , HEIGHT } , opacity = 0 },
@@ -242,7 +242,7 @@ function factory.make_text_menu_item( assets , caption )
         	size = { WIDTH , HEIGHT },
         	children =
         	{
-		icon:set{position = {280, 15 }, scale = {1.3, 1.3}},
+		icon:set{position = {280, 15 }, scale = {0.75, 0.75}},
             	ring:set{ position = { 0 , 0} },
             	focus:set{ position = { 0 , 0} , size = { WIDTH , HEIGHT } , opacity = 0 },
             	text:set{ position = { 30 , 15 } }
@@ -718,6 +718,17 @@ function factory.draw_focus_ring()
         return ring
 end
 
+function factory.draw_small_focus_ring()
+        local ring = Canvas{ size = {375, 60} }
+        ring:begin_painting()
+        ring:set_source_color("1b911b")
+        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 365, 45, 12)
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
+
 -------------------------------------------------------------------------------
 -- Makes a focus(white, input) ring 
 -------------------------------------------------------------------------------
@@ -732,6 +743,16 @@ function factory.draw_ring()
         return ring
 end
 
+function factory.draw_small_ring()
+	local ring = Canvas{ size = {375, 60} }
+        ring:begin_painting()
+        ring:set_source_color( "FFFFFFC0" )
+        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 365, 45, 12)
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
 -------------------------------------------------------------------------------
 -- Makes a line for categorizing menu items 
 -------------------------------------------------------------------------------
@@ -869,7 +890,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      current_inspector = nil
 		      --editor.n_selected(v, true)
                       screen:grab_key_focus(screen) 
-		      -- org_obj, new_obj = inspector_apply (v, inspector) 
 		      editor.view_code(v)
 		      text_reactive()
 	              return true
@@ -938,20 +958,20 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.view_code(v)
 		      text_reactive()
 	     elseif (item_v == "apply") then 
-		      editor.n_selected(v, true)
 		      org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
 		      input_mode = S_SELECT
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
 		      text_reactive()
+		      editor.n_selected(v, true)
 	     elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
 		      input_mode = S_SELECT
 		      current_inspector = nil
-		      editor.n_selected(v, true)
                       screen:grab_key_focus(screen) 
 		      text_reactive()
+		      editor.n_selected(v, true)
 	     end 
 
              return true
@@ -1007,7 +1027,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
              elseif(item_n == "wrap_mode" ) then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
-             elseif(item_n == "rect_r" or item_n == "rect_g" or item_n == "rect_b" or item_n == "rect_a" ) then 
+             elseif(item_n == "rect_r" or item_n == "rect_g" or item_n == "rect_b" or item_n == "rect_a" ) 
+             or (item_n == "cx" or item_n == "cy" or item_n == "cw" or item_n == "ch" ) then 
 	          input_box_width = WIDTH - 350 - ( PADDING_X * 2) 
 	     end
         end 
