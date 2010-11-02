@@ -2,6 +2,8 @@
     Air Combat
 --]]
 
+my_font = "kroeger 06_65 40px"
+
 
 --global variables
 dofile( "globals.lua")
@@ -24,7 +26,7 @@ dofile("enemies.lua")
 dofile("Levels.lua")
 
 --The splash Items
-local splash = Group{}
+local splash = Group{z=z.splash}
 splash:add(
     Image
     {
@@ -195,7 +197,6 @@ local keys = {
             my_plane.firing_powerup=5
         end,
         [keys.Right] = function()
-        print("got here")
             my_plane:on_key(keys.Right)
         end,
         [keys.Left] = function()

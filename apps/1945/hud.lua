@@ -1,10 +1,9 @@
-my_font = "kroeger 06_65 40px"
 
 number_of_lives = 3
 high_score = settings.high_score or 0
 point_counter = 0
 my_plane_sz = 128
-topbar = Group{z=1}
+topbar = Group{z=z.hud}
 topbar:add( 
     --[[
 	Text{
@@ -68,6 +67,6 @@ lives =
 	Clone{name="life5",source=life,x=260,y=15,z=10,opacity=0},
 }
 
-screen:add(topbar,score)
+screen:add(topbar)
 topbar:add(unpack(lives))
 
