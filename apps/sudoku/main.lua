@@ -1562,6 +1562,8 @@ function screen:on_key_down(k)
 	if k == keys.GREEN  then k = keys.u end
 	if k == keys.YELLOW then k = keys.e end
 	if k == keys.BLUE   then k = keys.r end
+	if k == keys.OK     then k = keys.Return end
+
 	local sub_on_key_down = 
 	{
 		["ARE_YOU_SURE"] = function(key_press)
