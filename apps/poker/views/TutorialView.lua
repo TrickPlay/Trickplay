@@ -66,6 +66,7 @@ TutorialView = Class(View, function(self, model, ...)
     function self:update(p, c, n)
     
         if model:get_active_component() == Components.TUTORIAL then
+            tutorialGroup:raise_to_top()
             if not tutorial[1] then
                 -- begin by making an awesome red mask
                 local mask = Canvas{
@@ -117,8 +118,8 @@ TutorialView = Class(View, function(self, model, ...)
                            "dealt starting with the player\none position from the "..
                            "dealer.\n\nThe first round of betting begins with the\n"..
                            "player one position clockwise from the Big\nBlind. Every "..
-                           "round after begins with the\nplayer one position clockwise"..
-                           "from the Deal.",
+                           "round after begins with the\nplayer one position "..
+                           "clockwise from the Deal.",
                     size = {685,600},
                     position = {1038, 228},
                     font = "Deja Vu Sans Condensed 32px",
