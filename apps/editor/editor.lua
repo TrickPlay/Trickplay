@@ -101,7 +101,7 @@ end
 
 function editor.open()
 
-     editor.close()
+    -- editor.close()
      if(CURRENT_DIR == "") then 
 	set_app_path()
      else 
