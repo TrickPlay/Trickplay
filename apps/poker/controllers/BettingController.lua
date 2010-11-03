@@ -173,6 +173,7 @@ BettingController = Class(Controller, function(self, view, ...)
                    end
                    minRaiseBet = bet
                    player.bet, player.money = bet, player.bet+player.money-bet
+                   mediaplayer:play_sound(CHANGE_BET_MP3)
                 end
              end
           elseif(PlayerGroups.BOTTOM == selected) then
@@ -202,6 +203,7 @@ BettingController = Class(Controller, function(self, view, ...)
                  model.currentPlayer.bet = new_bet
                  model.currentPlayer.money = new_money
                  print("Current bet:", model.currentPlayer.bet, "Current money:", model.currentPlayer.money)
+                 mediaplayer:play_sound(CHANGE_BET_MP3)
               end
            else
              local new_selected = selected + dir[2]

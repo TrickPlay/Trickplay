@@ -144,6 +144,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       local isHuman = false
       if(self.playerCounter == 0) then
          isHuman = true
+         mediaplayer:play_sound(FIRST_PLAYER_MP3)
       end
       self.playerCounter = self.playerCounter + 1
       

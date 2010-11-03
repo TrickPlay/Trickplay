@@ -110,6 +110,8 @@ CHECK_WAV = "assets/sounds/check.mp3"
 CALL_WAV = "assets/sounds/Chips.mp3"
 RAISE_WAV = "assets/sounds/Chips.mp3"
 BUSTOUT_WAV = "assets/sounds/Bust out sound.mp3"
+FIRST_PLAYER_MP3 = "assets/sounds/barkpant.mp3"
+CHANGE_BET_MP3 = "assets/sounds/Chip Stack.mp3"
 
 local MYTURN_STRINGS = {"My turn!", "I'm up", "On me", "Hmmm", "Woof woof", "Me me me"}
 function GET_MYTURN_STRING()
