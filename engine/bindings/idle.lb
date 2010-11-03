@@ -26,9 +26,9 @@ struct idle
     void set()
     {
         clear();
-        source=clutter_threads_add_idle(on_idle,this);
-        g_timer_start(timer);
+        source=g_idle_add_full( G_PRIORITY_LOW , on_idle , this , 0 );
         //source=clutter_threads_add_frame_source(60,on_idle,this);
+        g_timer_start(timer);
     }
 
     void clear()
