@@ -55,8 +55,9 @@ end
 
 function editor.n_selected(obj, call_by_inspector)
 
+     if(obj.name == nil) then return end 
+
      if(obj.type ~= "Video") then 
-	print("obj.name", obj.name)
      screen:remove(screen:find_child(obj.name.."border"))
      table.remove(selected_objs)
      obj.extra.selected = false
@@ -68,6 +69,8 @@ function editor.close()
 	clear_bg()
         if(g.extra.video ~= nil) then 
 	    g.extra.video = nil
+	    mediaplayer:reset()
+            mediaplayer.on_loaded = nil
 	end
 
 	BG_IMAGE_40.opacity = 255 
@@ -671,14 +674,15 @@ function editor.rectangle_move(x,y)
 end
 
 local function ungroup(v)
+     v.extra.children = {}
+     editor.n_selected(v)
      for i,c in pairs(v.children) do 
+        table.insert(v.extra.children, c.name) 
 	v:remove(c)
 	c.extra.is_in_group = false
 	c.x = c.x + v.x 
 	c.y = c.y + v.y 
 	g:add(c)
-	c.reactive = true
-        create_on_button_down_f(c)
 	if(c.type == "Text") then
 	function c:on_key_down(key)
              if key == keys.Return then
@@ -698,77 +702,67 @@ function editor.undo()
 
 	  if(undo_item == nill) then return true end
 	  if undo_item[2] == CHG then 
-		g:remove(g:find_child(undo_item[1]))
-		g:add(undo_item[3])
-		undo_item[3].reactive = true
-		create_on_button_down_f(undo_item[3])
+	        editor.n_selected(undo_item[1])
+		set_obj(g:find_child(undo_item[1]), undo_item[3])
 	        table.insert(redo_list, undo_item)
-
 	  elseif undo_item[2] == ADD then 
+	       editor.n_selected(undo_item[3])
 	       if((undo_item[3]).type == "Group") then 
 			ungroup(undo_item[3])
 	       else
-			editor.n_selected(undo_item[3])
 			g:remove(g:find_child(undo_item[1]))
 	       end 
                table.insert(redo_list, undo_item)
 	  elseif undo_item[2] == DEL then 
-	       g:add(undo_item[3])
+	       editor.n_selected(undo_item[3])
+	       if((undo_item[3]).type == "Group") then 
+		    for i, c in pairs(undo_item[3].extra.children) do
+			local c_tmp = g:find_child(c)
+			editor.n_selected(c_tmp)
+			g:remove(g:find_child(c))
+			c_tmp.extra.is_in_group = true
+			c_tmp.x = c_tmp.x - undo_item[3].x
+			c_tmp.y = c_tmp.y - undo_item[3].y
+			undo_item[3]:add(c_tmp)
+		    end 
+		    g:add(undo_item[3])
+  
+	       else 
+	            g:add(undo_item[3])
+	       end
                table.insert(redo_list, undo_item)
  	  end 
 end
 	
 function editor.redo()
-          
 	  if(redo_list == nil) then return true end 
           local redo_item= table.remove(redo_list)
 	  if(redo_item == nill) then return true end
  	  
           if redo_item[2] == CHG then 
-		local the_obj = g:find_child(redo_item[1])
-		g:remove(the_obj)
-		the_obj = redo_item[4]
-		g:add(the_obj)
-		the_obj.reactive = true
-		create_on_button_down_f(the_obj)
+		set_obj(g:find_child(redo_item[1]),  redo_item[4])
 	        table.insert(undo_list, redo_item)
           elseif redo_item[2] == ADD then 
 	       if(redo_item[3].type == "Group") then 
-		    print("group redo")
-		    for i, v in pairs(redo_item[3].children) do 
-		          g:remove(v)
-			  print("remove", v.name)
-	            end 
-		    g:add(redo_item[3]) 
-		    redo_item[3].reactive = true
-                    create_on_button_down_f(redo_item[3])
-                    screen.grab_key_focus(screen)
-	            input_mode = S_SELECT
-
---[[
-		 	children_t = redo_item[3].extra 
-		 	for e in values(children_t) do
-			     local group_item = g:find_child(e)
-			     if(group_item ~= nil) then 
-			     local o_position = group_item.position 
-			     g:remove(group_item)
-			     screen:remove(group_item)
-			     group_item.position = group_item.extra
-			     group_item.extra =  o_position
-			     redo_item[3]:add(group_item)
-			     end
-        		end 
-			--g:add(redo_item[3])
-               		g:add(g:find_child(redo_item[1]))  -- hj : undo->redo 10.21
-			screen:add(g)
-			--create_on_button_down_f(redo_item[3])
-]]
+	           for i, c in pairs(redo_item[3].extra.children) do
+			local c_tmp = g:find_child(c)
+			g:remove(g:find_child(c))
+			c_tmp.extra.is_in_group = true
+			c_tmp.x = c_tmp.x - redo_item[3].x
+			c_tmp.y = c_tmp.y - redo_item[3].y
+			redo_item[3]:add(c_tmp)
+		   end 
+		   g:add(redo_item[3])
 	       else 
-               g:add(redo_item[3])
+                   g:add(redo_item[3])
 	       end 
                table.insert(undo_list, redo_item)
           elseif redo_item[2] == DEL then 
-               g:remove(g:find_child(redo_item[1]))
+	       if(redo_item[3].type == "Group") then 
+		    ungroup(redo_item[3])
+	       else 
+                    g:remove(g:find_child(redo_item[1]))
+	       end 
                table.insert(undo_list, redo_item)
           end 
 end
@@ -970,14 +964,16 @@ function editor.ugroup()
 		  if(v.extra.selected == true) then
 			if(v.type == "Group") then 
 			     editor.n_selected(v)
+			     v.extra.children = {}
 			     for i,c in pairs(v.children) do 
+				     table.insert(v.extra.children, c.name) 
 				     v:remove(c)
 				     c.extra.is_in_group = false
 				     c.x = c.x + v.x 
 				     c.y = c.y + v.y 
 		     		     g:add(c)
-				     c.reactive = true
-        			     create_on_button_down_f(c)
+				     --c.reactive = true
+        			     --create_on_button_down_f(c)
 				     if(c.type == "Text") then
 					function c:on_key_down(key)
              				    if key == keys.Return then
@@ -1511,6 +1507,7 @@ function editor.bring_to_front()
 	        if(v.extra.selected == true) then
 			g:remove(v)
 			g:add(v)
+    			table.insert(undo_list, {v.name, ARG, BRING_FR})
 			editor.n_selected(v)
 		end 
           end
@@ -1545,12 +1542,14 @@ function editor.send_to_back()
     
     while(table.getn(slt_g) ~= 0) do
 	v = table.remove(slt_g)
+         table.insert(undo_list, {v.name, ARG, SEND_BK})
 	g:add(v)	
     end 
     
-    tmp_g = get_reverse_t(tmp_g) --kk
+    tmp_g = get_reverse_t(tmp_g) 
     while(table.getn(tmp_g) ~= 0) do
 	v = table.remove(tmp_g)
+        table.insert(undo_list, {v.name, ARG, SEND_BK})
 	g:add(v)	
     end 
 	
@@ -1599,6 +1598,7 @@ function editor.send_backward()
     while(table.getn(tmp_g) ~= 0) do
 	v = table.remove(tmp_g)
 	g:add(v) 
+        table.insert(undo_list, {v.name, ARG, SEND_BW})
     end 
 
     screen.grab_key_focus(screen)
@@ -1639,6 +1639,7 @@ function editor.bring_forward()
     tmp_g = get_reverse_t(tmp_g)
     while(table.getn(tmp_g) ~= 0) do
 	v = table.remove(tmp_g)
+        table.insert(undo_list, {v.name, ARG, BRING_FW})
 	g:add(v)
     end 
 	

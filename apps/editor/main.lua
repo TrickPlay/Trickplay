@@ -376,6 +376,7 @@ local function build_ui( show_it )
         ["  SETTING"]    = function() move_focus(SECTION_SETTING ) end
     }
 
+    local menu_button_second_down = false
 
     function ui:menu_button_down() 
         for _,section in ipairs( ui.sections ) do
@@ -604,7 +605,7 @@ local function build_ui( show_it )
         local function animation_completed()
         
             -- The bar gets key focus after we animate
-            self.bar:grab_key_focus(self.bar) 
+            --self.bar:grab_key_focus(self.bar)  -- 1102
             --self.dropdown_timer:start() -- 1101   set_app_path()
             
             if callback then
@@ -681,7 +682,12 @@ function main()
     ui:animate_in()
     ui:menu_button_down() 
     set_app_path()
+    
+end
+dolater(main)
+function screen.on_key_down( s , k )
+	print( "SCREEN KD" , k )
 end
 
-main()
+--main()
 

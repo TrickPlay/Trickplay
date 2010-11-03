@@ -43,7 +43,7 @@ function( section )
 				input_mode = S_SELECTION 
 			end end, 
 	["Transparency Grid 20"]   = function() clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT end,
-	["Transparency Grid 40"]   = function() clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT end,
+	["Transparency Grid 40"]   = function() clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT end,
 	["Transparency Grid 80"]   = function() clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT end,
         ["White"]   = function() clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT end,
         ["Black"]   = function() clear_bg() input_mode = S_SELECT end

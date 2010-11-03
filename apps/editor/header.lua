@@ -19,6 +19,12 @@ DEFAULT_COLOR     = "FFFFFFC0"
 ADD               = 1
 CHG               = 2
 DEL               = 3
+ARG		  = 4
+
+BRING_FR	  = 5
+SEND_BK		  = 6
+BRING_FW	  = 7
+SEND_BW		  = 8
 
 -- Section index constants. These also determine their order.
 
