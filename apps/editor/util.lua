@@ -121,7 +121,6 @@ function create_on_button_down_f(v)
 			      v:set{cursor_visible = true}
 			      v:set{editable= true}
      			      v:grab_key_focus(v)
-			      print("text object grabbed key focus")
 			end 
 			editor.n_selected(v) 
 			v.extra.selected = false 
@@ -197,6 +196,45 @@ function get_group_position(child_obj)
 end 
 
 
+function set_obj (f, v)
+
+      if(f.type == "Rectangle") then
+           f.color = v.color
+           f.border_color = v.border_color
+           f.border_width = v.border_width
+
+       elseif (v.type == "Text") then
+           f.color = v.color
+           f.font = v.font
+           f.text = v.text
+           f.editable = v.editable
+           f.wants_enter = v.wants_enter
+           f.wrap = v.wrap
+           f.wrap_mode = v.wrap_mode
+       elseif (v.type == "Image") then
+           f.src = v.src
+           f.clip = v.clip
+       elseif (v.type == "Clone") then
+	   f.scale = v.scale
+           f.source = v.source
+       elseif (v.type == "Group") then
+	   f.scale = v.scale
+       end
+       f.x_rotation = v.x_rotation
+       f.y_rotation = v.y_rotation
+       f.z_rotation = v.z_rotation
+       f.anchor_point = v.anchor_point
+       f.name = v.name
+       f.x = v.x
+       f.y = v.y
+       f.z = v.z
+       f.w = v.w
+       f.h = v.h
+       f.opacity = v.opacity
+       return new_object
+end	
+
+
 function copy_obj (v)
 
       local new_object
@@ -227,6 +265,10 @@ function copy_obj (v)
            new_object = Group{}
 	   new_object.scale = v.scale
        end
+       new_object.x_rotation = v.x_rotation
+       new_object.y_rotation = v.y_rotation
+       new_object.z_rotation = v.z_rotation
+       new_object.anchor_point = v.anchor_point
        new_object.name = v.name
        new_object.x = v.x
        new_object.y = v.y
@@ -658,7 +700,6 @@ function printMsgWindow(txt, name)
 
 
 	     function prj_text.extra.on_focus_in()
-		 print("prj_text.extra.on_focus_in()") 
                   prj_text:set{color = {0,255,0,255}}
 	 	  prj_text:grab_key_focus()
 		  msgw_focus = prj_text.name
@@ -717,7 +758,7 @@ function printMsgWindow(txt, name)
 		 msgw_focus = prj_text.name --1102
 	     end 
 
-	     if (i == 1) then msgw_focus = prj_text.name selected_prj = prj_text.name end 
+	     if (i == 1) then msgw_focus = prj_text.name end 
 
          end 
      end 
@@ -814,7 +855,7 @@ function inputMsgWindow_openvideo()
      table.insert(undo_list, {video1.name, ADD, video1})
      mediaplayer.on_loaded = function( self ) clear_bg() if(g.extra.video ~= nil) then self:play() end end 
      if(video1.loop == true) then 
-	  	mediaplayer.on_end_of_stream = function ( self ) if(g.extra.video ~= nil) then self:seek(0) self:play() else self:seek(0) end end
+	  	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end
      else  	
 		mediaplayer.on_end_of_stream = function ( self ) self:seek(0) end
      end
@@ -867,14 +908,10 @@ end
 local input_purpose     = ""
 
 local function set_project_path ()
-	print("YUGI!!!")
 	if(selected_prj == "" or input_t.text ~= "") then
 	     project = input_t.text 
-	     print("project", project)
 	else 
-		print("selected_prj....", selected_prj)
 	     project = msgw:find_child(selected_prj).text
-	     print("project", project)
 	end 
         app_path = editor_lb:build_path( base , project )
         if not editor_lb:mkdir( app_path ) then
@@ -916,7 +953,6 @@ function inputMsgWindow(input_purpose)
 			open_b.extra.on_focus_out() cancel_b.extra.on_focus_in() 
 		end
 	     elseif (key == keys.Tab and shift == true) or ( key == keys.Up ) then 
-			--print(" tap + shift")
 		if (button.name == "savefile") then save_b.extra.on_focus_out() input_box.extra.on_focus_in()
               	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
               	elseif (button.name == "projectlist") then button.extra.on_focus_out() 
@@ -925,7 +961,6 @@ function inputMsgWindow(input_purpose)
               	(button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
 			open_b.extra.on_focus_out() input_box.extra.on_focus_in()
               	elseif (button.name == "cancel") then 
-			--print("cancel, tap + shift")
 			cancel_b.extra.on_focus_out() 
 			if(open_b ~= nil) then open_b.extra.on_focus_in()
 			elseif(save_b ~= nil) then save_b.extra.on_focus_in() end
@@ -1123,9 +1158,13 @@ function inputMsgWindow(input_purpose)
      end 
 
      function input_t:on_key_down(key)
-	  if (input_t.text ~= "") then 
+	  if (input_t.text ~= "" and selected_prj ~= "") then 
+		if(msgw:find_child(selected_prj) ~= nil) then 
+			msgw:find_child(selected_prj):set{color = {255,255,255,255}}
+		end 
 		selected_prj = ""
-	  end
+	  end 
+
           if key == keys.Return or (key == keys.Tab and shift == false) or key == keys.Down then 
 	      input_box.extra.on_focus_out()
 	      if(open_b ~= nil) then open_b.extra.on_focus_in() 
