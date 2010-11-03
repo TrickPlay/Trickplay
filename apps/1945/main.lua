@@ -26,8 +26,7 @@ dofile("enemies.lua")
 dofile("Levels.lua")
 
 --The splash Items
-local splash = Group{z=z.splash}
-splash:add(
+layers.splash:add(
     Image
     {
 	name     = "logo",
@@ -47,7 +46,7 @@ splash:add(
 	position = {screen.w/2,screen.h/2+240}
     }
 )
-splash:foreach_child(function(c)
+layers.splash:foreach_child(function(c)
     c.anchor_point = {c.w/2,c.h/2}
 end)
 
@@ -56,80 +55,38 @@ function start_game()
 add_to_render_list( my_plane )
 end
 add_to_render_list( water )
-screen:add(splash)
 
 --add_to_render_list( enemies )
 
 -------------------------------------------------------------------------------
 
 
---moves through all the items in the render list
---i.e. performs the game loop
-function idle.on_idle( idle , seconds )
 
-    if not paused then
-
---[[
-	--Pablo's performance measuring code
-	if false then
-
-		c = c + 1
-		ma = math.max( seconds , ma )
-		mi = math.min( seconds , mi )
-		t = t + seconds
-		if sw.elapsed >= 1000 then
-			print( mi , ma , t / c , string.format( "%1.0f" , 1 / ( t / c ) ) )
-			t = 0
-			c= 0
-			sw:start()
-			ma = 0
-			mi = 1000
-			
-		end
-	end
---]]
-        for _ , item in ipairs( render_list ) do
-            item.render( item , seconds ) 
-        end
-	
-        process_collisions( )
-        
-    end
-    
-end
-local test_text = function() return {
-	speed = 60,
-	text = Text
+local test_text = Text
 	{
 	    font = my_font,
 	    text =  "Test Mode\n\n"..
 	            "q    row  in  from  left\n"..
-	            "p    row  in  from  right\n"..
-	            "a    loop  from  left\n"..
-	            "l    loop  from  right\n"..
-	            "z    zeppelin\n\n"..
+	            "w    row  in  from  right\n"..
+	            "e    loop  from  left\n"..
+	            "r    loop  from  right\n"..
+	            "m    zeppelin\n\n"..
+                "z    gun powerup\n"..
+                "x    health powerup\n"..
+                "c    life powerup\n\n"..
 	            "1 2 3 4 5       bullet   powerups\n\n"..
-	            "h    to  display  this  text  again",
-	    color = "FFFFFF"
-	},
-    setup = function( self )
-        self.text.position     = {    screen.w/2 , 0}
-        self.text.anchor_point = { self.text.w/2 , 0}
-	    if self.text.parent == nil then
-                screen:add( self.text )
-	    end
-    end,
-    render = function( self , seconds )
-	    self.text.y = self.text.y + self.speed*seconds
-	    if self.text.y > screen.h then
-            self.text:unparent()
-            remove_from_render_list(self)
-	    end
-    end,
-} end
+	            "h    toggles  this  text\n\n"..
+                "fyi, you don't die",
+	    color = "FFFFFF",
+        opacity = 0
+	}
+        test_text.position     = {    screen.w/2 , 100}
+        test_text.anchor_point = { test_text.w/2 , 0}
+        layers.air_doodads_1:add( test_text )
+
 
 out_splash__in_hud = function()
-    splash.opacity = 0
+    layers.splash.opacity = 0
 end
 -------------------------------------------------------------------------------
 -- Event handler
@@ -154,32 +111,55 @@ local keys = {
             state.curr_mode  = "TEST_MODE"
             state.curr_level = 0
             add_to_render_list(my_plane)
-            add_to_render_list(test_text())
+            test_text.opacity = 255
             
         end,
     },
     ["TEST_MODE"] =
     {
-        [keys.s] = function()
-            add_to_render_list(smoke())
-        end,
+        --enemies
         [keys.q] = function()
             formations.row_from_side(5,150,  -100,1000,  50,300,  200)
         end,
-        [keys.p] = function()
+        [keys.w] = function()
             formations.row_from_side(5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200)
         end,
-        [keys.a] = function()
+        [keys.e] = function()
             formations.one_loop(2,150,200,200,300,-1)
         end,
-        [keys.l] = function()
+        [keys.r] = function()
             formations.one_loop(2,150,screen.w-200,screen.w-200,300,1)
         end,
-        [keys.z] = function()
+        [keys.t] = function()
+            formations.cluster(500)
+        end,
+        [keys.y] = function()
+            formations.zig_zag(500,400)
+        end,
+        --bosses
+        [keys.m] = function()
             formations.zepp_boss(900)
         end,
+        --powerups
+        [keys.z] = function()
+            add_to_render_list(powerups.guns(300))
+        end,
+        [keys.x] = function()
+            add_to_render_list(powerups.health(500))
+        end,
+        [keys.c] = function()
+            add_to_render_list(powerups.life(400))
+        end,
+        --other
+        [keys.s] = function()
+            add_to_render_list(smoke())
+        end,
         [keys.h] = function()
-            add_to_render_list(test_text())
+            if test_text.opacity == 255 then
+                test_text.opacity = 0
+            else
+                test_text.opacity = 255
+            end
         end,
         [keys["1"]] = function()
             my_plane.firing_powerup=1
@@ -234,15 +214,59 @@ local keys = {
         end
     }
 }
+local press
+--moves through all the items in the render list
+--i.e. performs the game loop
+function idle.on_idle( idle , seconds )
+    if press ~= nil then
+        if state.paused == true and press == keys.Space then
+            state.paused = false
+        elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()
+        end
+        press = nil
+    end
+    if not paused then
+
+--[[
+	--Pablo's performance measuring code
+	if false then
+
+		c = c + 1
+		ma = math.max( seconds , ma )
+		mi = math.min( seconds , mi )
+		t = t + seconds
+		if sw.elapsed >= 1000 then
+			print( mi , ma , t / c , string.format( "%1.0f" , 1 / ( t / c ) ) )
+			t = 0
+			c= 0
+			sw:start()
+			ma = 0
+			mi = 1000
+			
+		end
+	end
+--]]
+        for _ , item in ipairs( render_list ) do
+            item.render( item , seconds ) 
+        end
+	
+        process_collisions( )
+        
+    end
     
+end
+
 function screen.on_key_down( screen , key )
 
+    press = key
+--[[
     assert(keys[state.curr_mode])
     
     if state.paused == true and key == keys.Space then
         state.paused = false
     elseif keys[state.curr_mode][key] then keys[state.curr_mode][key]()
     end
+    --]]
 --[[
     if not game_is_running then
 		if key == keys.Return then

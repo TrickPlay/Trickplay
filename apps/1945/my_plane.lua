@@ -1,54 +1,134 @@
 
-smoke = function(xxx,yyy) return {
-                image = Clone{ source = imgs.smoke },
-                group = nil,
-                duration = 0.2, 
-                time = 0,
-                setup = function( self )
+smoke = function(i)   return {
+    index = i,
 
-                        self.group = Group
+    duration = 0.5,
+    time     = 0,
+    speed    = 80,
+    halted   = true,
+    plumes   = {},
+
+    setup = function( self, num )
+        self.num = num
+        for i = 1,num do
+            self.plumes[i] =
+            {
+                image = Clone{ source = imgs.smoke },
+                group = Group{},
+                time  = -(i-1)/num*self.duration
+            }
+            self.plumes[i].group.size =
+                	{
+                		self.plumes[i].image.w / 4 ,
+                		self.plumes[i].image.h
+                	}
+            self.plumes[i].group.clip =
+                	{
+                		0 ,
+                		0 ,
+                		self.plumes[i].image.w / 4 ,
+                		self.plumes[i].image.h
+                	}
+            self.plumes[i].group:add(self.plumes[i].image)
+            self.plumes[i].group.anchor_point =
+                	{
+                		( self.plumes[i].image.w / 4 ) / 2 ,
+                		  self.plumes[i].image.h / 2
+                	}
+            if self.index == 1 then
+                self.plumes[i].group.x = my_plane.group.x + 10
+                self.plumes[i].group.y = my_plane.group.y + 50
+            elseif self.index == 2 then
+                self.plumes[i].group.x = my_plane.group.x + my_plane.image.w/(my_plane.num_frames)-30
+                self.plumes[i].group.y = my_plane.group.y + 50
+            else
+                self.plumes[i].group.x = my_plane.group.x + 30
+                self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+            end
+            self.plumes[i].image.x =  - ( ( self.plumes[i].image.w / 4 ) * 5 )
+            layers.planes:add( self.plumes[i].group )
+        end
+        --[[
+        self.group = Group
+		{
+			size =
 			{
-				size =
-				{
-					self.image.w / 4 ,
-					self.image.h
-				},
-				clip =
-				{
-					0 ,
-					0 ,
-					self.image.w / 4 ,
-					self.image.h
-				},
-				children = { self.image },
-				anchor_point =
-				{
-					( self.image.w / 4 ) / 2 ,
-					  self.image.h / 2
-				},
-                x=500,
-                y=500
-			}
+				self.image.w / 4 ,
+				self.image.h
+			},
+			clip =
+			{
+				0 ,
+				0 ,
+				self.image.w / 4 ,
+				self.image.h
+			},
+			children = { self.image },
+            anchor_point =
+			{
+				( self.image.w / 4 ) / 2 ,
+				  self.image.h / 2
+			},
+		}
+        self.time    = -self.duration*(num-1)/tot
+        --]]
+        self.halted  = true
+        --self.image.x =  - ( ( self.image.w / 4 ) * 5 ) --not visible
+		
+    end,
+    reset = function(self,i)
+        if self.index == 1 then
+            self.plumes[i].group.x = my_plane.group.x + 10
+            self.plumes[i].group.y = my_plane.group.y + 50
+        elseif self.index == 2 then
+            self.plumes[i].group.x = my_plane.group.x + my_plane.image.w/(my_plane.num_frames)-30
+            self.plumes[i].group.y = my_plane.group.y + 50
+        else
+            self.plumes[i].group.x = my_plane.group.x + 30
+            self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+        end
+        --self.plumes[i].time = 0
+    end,
+    halt = function(self)
+        self.halted = true
+    end,
+    unhalt = function(self)
+        self.halted = false
+        for i = 1,self.num do
+            if self.index == 1 then
+                self.plumes[i].group.x = my_plane.group.x + 10
+                self.plumes[i].group.y = my_plane.group.y + 50
+            elseif self.index == 2 then
+                self.plumes[i].group.x = my_plane.group.x + my_plane.image.w/(my_plane.num_frames)-30
+                self.plumes[i].group.y = my_plane.group.y + 50
+            else
+                self.plumes[i].group.x = my_plane.group.x + 30
+                self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+            end
+            self.plumes[i].time = -(i-1)/self.num*self.duration
+            layers.planes:add( self.plumes[i].group )
+        end
+    end,
+	render = function( self , seconds )
+        local frame
+        for i = 1,self.num do
+            
+            if self.plumes[i].time == 0 and self.halted then break end
+            self.plumes[i].time = self.plumes[i].time + seconds
+            self.plumes[i].group.y = self.plumes[i].group.y + self.speed*seconds
+            frame  = math.floor( self.plumes[i].time / ( self.duration / 4 ) )
+            self.plumes[i].image.x = - ( ( self.plumes[i].image.w / 4 ) * frame )
+            
+            if self.plumes[i].time > self.duration then
+                self.plumes[i].time =0
+                if not self.halted then
+                    self:reset(i)
+                end
+                --self.plumes[i].time = self.plumes[i].time%self.duration
                     
-			screen:add( self.group )
-                end,
-                
-		render = function( self , seconds )
-			
-			self.time = self.time + seconds
-				
-			if self.time > self.duration then
-					
-				remove_from_render_list( self )
-				screen:remove( self.group )
-					
-			else
-				local frame = math.floor( self.time /
-					( self.duration / 4 ) )
-				self.image.x = - ( ( self.image.w / 4 )
-					* frame )
-			end
-        end,
+            end
+        end
+    end,
 } end
 -------------------------------------------------------------------------------
 -- This is my plane. It spawns bullets
@@ -57,12 +137,17 @@ smoke = function(xxx,yyy) return {
 my_plane =
 {
 	firing_powerup = 1,
-    
+    firing_powerup_max = 5,
+
     damage = 0,
 
     type = TYPE_MY_PLANE,
     
     num_frames = 4,
+    
+    smoke_stream = {},
+    
+    plumes_per_stream = 1,
     
     max_h_speed = 600,
     
@@ -74,7 +159,7 @@ my_plane =
     
     speed_bump = 200,
     
-    group = Group{ z=z.planes},--size = { --[[65 , 65]]my_plane_sz,my_plane_sz } },
+    group = Group{},
     
     image = Clone{ source = imgs.my_plane_strip },
     
@@ -89,6 +174,12 @@ my_plane =
     dead_blinks = 5,
     
     dead_time = 0,
+    
+    smoke_rate_base = .1,
+    
+    last_smoke = 0,
+    
+    smoke_thresh = 2,
     
     dead_blink_delay = 0.5,
     
@@ -127,29 +218,88 @@ my_plane =
             position     = {93,35},
         },
     },
+    render_items = {},
     
     setup = function( self )
         	self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
             self.num_prop_frames = 3
-
-	self.prop_index = 1
-        self.image.opacity = 255
+            
+            self.prop_index = 1
+            self.image.opacity = 255
             
             self.group:add( self.image)
             self.group:add( self.prop.g_r)
             self.group:add( self.prop.g_l)
             
-            screen:add( self.group )
+            layers.planes:add( self.group )
             
             self.group.position = { screen.w / 2 - self.image.w / 2 , screen.h - self.image.h }
             self.group.clip = {0,0,self.image.w/self.num_frames,self.image.h}
+
+            for i = 1, self.num_frames - 1 do
+                self.smoke_stream[i] = smoke(i)
+                    self.smoke_stream[i]:setup(self.plumes_per_stream)
+                    table.insert(self.render_items,self.smoke_stream[i])
+                
+            end
             
         end,
+    hit = function(self)
+        self.damage = self.damage + 1
+        self.image.x = -1*self.damage*self.image.w/self.num_frames
+        --for j = 1,self.plumes_per_stream do
+                self.smoke_stream[self.damage]:unhalt()
+        --end
         
+    end,
+    heal = function(self)
+        for i = 1, self.num_frames - 1 do
+            --for j = 1,self.plumes_per_stream do
+                self.smoke_stream[i]:halt()
+            --end
+        end
+        self.image.x = 0
+    end,
     render =
     
         function( self , seconds )
+            for _ , item in ipairs( self.render_items ) do
+                item.render( item , seconds ) 
+            end
+            --[[
+            if self.damage > 0 then
+                self.last_smoke = self.last_smoke + self.smoke_rate_base
+                if self.last_smoke >self.smoke_thresh then
+                    local s
+                    if self.damage >= 1 then
+                        s = smoke(self.group.x + 10,self.group.y + 50)
+                        s:setup(self.render_items)
+                        table.insert(self.render_items,s)
+                    end
+                    if self.damage >= 2 then
+                        s = smoke(self.group.x +self.image.w/(self.num_frames)-30,
+                            self.group.y + 50)
+                        s:setup(self.render_items)
+                        table.insert(self.render_items,s)
+                    end
+                    if self.damage >= 3 then
+                        s = smoke(self.group.x +30,
+                            self.group.y + self.image.h-20)
+                        s:setup(self.render_items)
+                        table.insert(self.render_items,s)
+                    end
+                    self.last_smoke = 0
+                end
+            else
+                for i = 1, self.num_frames - 1 do
+                    for j = 1,self.plumes_per_stream do
+                        self.smoke_stream[i][j]:halt()
+                    end
+                end
+            end
+            --]]
+            
 			self.prop_index = self.prop_index%
 				self.num_prop_frames + 1
 			self.prop.l.y = -(self.prop_index - 1)*self.prop.l.h/
@@ -273,10 +423,10 @@ end
                 table.insert(good_guys_collision_list,
                     {
                         obj = self,
-                        x1  = self.group.x-self.image.w/(2*self.num_frames),
-                        x2  = self.group.x+self.image.w/(2*self.num_frames),
-                        y1  = self.group.y-self.image.h/2,
-                        y2  = self.group.y+self.image.h/2,
+                        x1  = self.group.x+20,--self.image.w/(2*self.num_frames),
+                        x2  = self.group.x+self.image.w/(self.num_frames)-20,
+                        y1  = self.group.y+20,--self.image.h/2,
+                        y2  = self.group.y+self.image.h,--/2,
                     }
                 )
                 --[[
@@ -320,15 +470,13 @@ r.h=self.image.h
                         anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
                         position = { x, y },
 						z_rotation = {z_rot,0,0},
-                        z = z.air_bullets
                     },
                     
                 setup =
                 
                     function( self )
                     
-                        screen:add( self.image )
-                        mediaplayer:play_sound("audio/Air Combat 1P Fire.mp3")
+                        layers.air_bullets:add( self.image )
                     end,
                     
                 render =
@@ -342,7 +490,7 @@ r.h=self.image.h
                             
                             remove_from_render_list( self )
                             
-                            screen:remove( self.image )
+                            self.image:unparent()
                         
                         else
                         
@@ -373,12 +521,17 @@ r.h=self.image.h
                 collision =
                 
                     function( self , other )
+                        if other.type == TYPE_ENEMY_BULLET then return end
                     
                         remove_from_render_list( self )
+                        local location
+                        if other.group ~= nil then
+                            location = other.group.position
+                        else
+                            location = other.image.position
+                        end
                         
-                        local location = other.group.position
-                        
-                        screen:remove( self.image )
+                        self.image:unparent()
                         
                         -- Now, we create a score bubble
                         
@@ -415,7 +568,7 @@ end
                                         
                                         self.text.opacity = 255;
                                     
-                                        screen:add( self.text )
+                                        layers.planes:add( self.text )
                                         
                                     end,
                                     
@@ -425,21 +578,21 @@ end
                                    -- print("aaaa")
                                         local o = self.text.opacity - self.speed * seconds
                                         
-                                        local scale = self.text.scale
+                                        --local scale = self.text.scale
                                         
-                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        --scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
                                         
                                         if o <= 0 then
                                         
                                             remove_from_render_list( self )
                                             
-                                            screen:remove( self.text )
+                                            self.text:unparent()
                                         
                                         else
                                         
                                             self.text.opacity = o
                                             
-                                            self.text.scale = scale
+                                            --self.text.scale = scale
                                         
                                         end
                                     
@@ -460,12 +613,10 @@ end
         function( self , other )
 
 if self.damage ~= (self.num_frames - 1) then
-    self.damage = self.damage + 1
-    self.image.x = -1*self.damage*self.image.w/self.num_frames
+    self:hit()
     return
 else
-    self.damage = 0
-    self.image.x = 0
+    self:heal()
 end
 
 --more Alex code
@@ -489,7 +640,7 @@ if state.hud.num_lives == 0 then
                                         
                                         self.text.opacity = 255;
                                         
-                                        screen:add( self.text )
+                                        layers.hud:add( self.text )
                                         mediaplayer:play_sound("audio/Air Combat Game Over.mp3")
                                     end,
                                     
@@ -507,7 +658,7 @@ if state.hud.num_lives == 0 then
                                         
                                             remove_from_render_list( self )
                                             
-                                            screen:remove( self.text )
+                                            self.text:unparent()
                                         
                                         else
                                         
@@ -603,10 +754,9 @@ redo_score_text()
                                     clip = { 0 , 0 , self.image.w / 7 , self.image.h },
                                     children = { self.image },
                                     anchor_point = { ( self.image.w / 7 ) / 2 , self.image.h / 2 },
-                                    z=z.planes
                                 }
                             
-                            screen:add( self.group )
+                            layers.planes:add( self.group )
                             
                         end,
                         
@@ -620,7 +770,7 @@ redo_score_text()
                                 
                                 remove_from_render_list( self )
                                 
-                                screen:remove( self.group )
+                                self.group:unparent()
                             
                             else
                             
@@ -646,7 +796,8 @@ redo_score_text()
                 return
                 
             end
-            --]]   
+            --]]
+
             if key == keys.Right then
                 self.h_speed = clamp( self.h_speed + self.speed_bump , -self.max_h_speed , self.max_h_speed )
                 
@@ -693,9 +844,98 @@ redo_score_text()
 
 				}
 				shoot[self.firing_powerup]()
+                mediaplayer:play_sound("audio/Air Combat 1P Fire.mp3")
                 
             end
                 
         end
 }
+powerups =
+{
+    guns = function(xxx) return {
+        image = Rectangle{w=60,h=60,color="FFFF00",},
+        speed = 50,
+        setup = function(self)
+            self.image.position = {xxx,-self.image.h}
+            layers.planes:add(self.image)
+        end,
+        render = function(self,seconds)
+            self.image.y = self.image.y + self.speed * seconds
 
+            if not (                    
+                my_plane.group.x+20 > self.image.x+self.image.w or 
+                my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
+                    self.image.x or 
+                my_plane.group.y+20 > self.image.y+self.image.h or 
+                my_plane.group.y+my_plane.image.h < self.image.y 
+                ) then
+                
+                if my_plane.firing_powerup < my_plane.firing_powerup_max then
+                    my_plane.firing_powerup = my_plane.firing_powerup + 1
+                end
+                self.image:unparent()
+                remove_from_render_list(self)
+            elseif self.image.y > screen.h + self.image.h then
+                self.image:unparent()
+                remove_from_render_list(self)
+                end
+        end,
+    } end,
+    health = function(xxx) return {
+        image = Rectangle{w=60,h=60,color="FFFFFF",},
+        speed = 50,
+        setup = function(self)
+            self.image.position = {xxx,-self.image.h}
+            layers.planes:add(self.image)
+        end,
+        render = function(self,seconds)
+            self.image.y = self.image.y + self.speed * seconds
+
+            if not (                    
+                my_plane.group.x+20 > self.image.x+self.image.w or 
+                my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
+                    self.image.x or 
+                my_plane.group.y+20 > self.image.y+self.image.h or 
+                my_plane.group.y+my_plane.image.h < self.image.y 
+                ) then
+                
+                my_plane:heal()
+                self.image:unparent()
+                remove_from_render_list(self)
+            elseif self.image.y > screen.h + self.image.h then
+                self.image:unparent()
+                remove_from_render_list(self)
+                end
+        end,
+    } end,
+    life = function(xxx) return {
+        image = Rectangle{w=60,h=60,color="654321",},
+        speed = 50,
+        setup = function(self)
+            self.image.position = {xxx,-self.image.h}
+            layers.planes:add(self.image)
+        end,
+        render = function(self,seconds)
+            self.image.y = self.image.y + self.speed * seconds
+
+            if not (                    
+                my_plane.group.x+20 > self.image.x+self.image.w or 
+                my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
+                    self.image.x or 
+                my_plane.group.y+20 > self.image.y+self.image.h or 
+                my_plane.group.y+my_plane.image.h < self.image.y 
+                ) then
+                
+                if state.hud.num_lives < state.hud.max_lives then
+                    state.hud.num_lives = state.hud.num_lives + 1
+                    lives[state.hud.num_lives].opacity =255
+                end
+                self.image:unparent()
+                remove_from_render_list(self)
+            elseif self.image.y > screen.h + self.image.h then
+                self.image:unparent()
+                remove_from_render_list(self)
+                end
+        end,
+    } end,
+}

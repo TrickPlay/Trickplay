@@ -8,7 +8,7 @@
                                         self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
                                         self.text.opacity = 255;
 					self.text.scale = {1,1}
-                                        screen:add( self.text )
+                                        layers.hud:add( self.text )
                                     end,
                                     
                                 render = function( self , seconds )
@@ -17,7 +17,7 @@
                                         scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
                                         if o <= 0 then
                                             remove_from_render_list( self )
-                                            screen:remove( self.text )
+                                            self.text:unparent()
                                         else
                                             self.text.opacity = o
                                             self.text.scale = scale
@@ -32,7 +32,7 @@ lvlcomplete =      {
                                         self.text.position = { screen.w/2,screen.h/2}
                                         self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
                                         self.text.opacity = 255;
-                                        screen:add( self.text )
+                                        layers.hud:add( self.text )
                                     end,
                                     
                                 render = function( self , seconds )
@@ -41,7 +41,7 @@ lvlcomplete =      {
                                         scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
                                         if o <= 0 then
                                             remove_from_render_list( self )
-                                            screen:remove( self.text )
+                                            self.text:unparent()
                                         else
                                             self.text.opacity = o
                                             self.text.scale = scale
@@ -60,99 +60,89 @@ levels =
 		dist_travelled = 0,
 		launch_index   = 1,
 		bg             = water,
-		enemy_list     =
-		{
----[[
-			{y =    0, item = add_to_render_list,                     params = { lvl1txt        }},
-			{y =   80, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-			{y =  300, item = formations.row_from_side, params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
-			{y =  400, item = formations.row_from_side, params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
-			{y =  550, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
-			{y =  700, item = formations.one_loop,  params = {2,150,screen.w-200,screen.w-200,300,1}},
-			{y = 1050, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
-			{y = 1050, item = formations.one_loop,  params = {2,150,screen.w-200,screen.w-200,300,1}},
-            
-            {y = 1300, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-            {y = 1300, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
-            
-			{y = 1600, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-			{y = 1660, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
-			{y = 1660, item = formations.one_loop,  params = {2,150,screen.w-200,screen.w-200,300,1}},
-			{y = 1720, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
-			{y = 1780, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
-                        
-			{y = 2000, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
-			{y = 2000, item = formations.one_loop,   params = {2,150,200,200,300,-1}},
-			--]]
-			{y = 2300, item = formations.zepp_boss,             params = { 150 }},	
-			
-		},
-		doodad_list  = {
-		--   y_pos          asset#  x_pos x_rot y_rot z_rot
-			{y =    0, params = {2, 300, 0, 0, 0}},
-			{y =    0, params = {5, 1620, 0, 180, 0}},
-                        
-			{y =  180, params = {6, 1720,   0, 0,   0}},
-			{y =  220, params = {6,  0, 0, 180,   0}},
-			{y =  280, params = {8,  600,   0,   0,  0}},
-			{y =  280, params = {1, 1500, 180,   0, -260}},
-			{y =  380, params = {1,  200,   0, 180,   50}},
-			{y =  420, params = {3, 1800, 180, 180,   90}},
-			{y =  460, params = {2,  500,   0,   0,  150}},
-			{y =  480, params = {1, 1500, 180, 180, -250}},
-			{y =  580, params = {3,  200,   0, 180,  280}},
-			{y =  620, params = {1,  500, 180,   0,  320}},
-			{y =  660, params = {2, 1600,   0, 180,  150}},
-			{y =  740, params = {5,  100, 180, 180,   10}},
-			{y =  790, params = {3,  300,   0, 180,  300}},
-			{y =  820, params = {3, 1700, 180, 180, -170}},
-			{y =  860, params = {2, 1400,   0, 180,  -60}},
-			{y =  890, params = {1,  500, 180,   0,   70}},
-			{y =  940, params = {4, 1800, 180,   0,  130}},
-			{y = 1090, params = {2, 1100,   0,   0,  190}},
-			--got lazy and copy pasted
-			{y = 1180, params = {1,  200,   0, 180,   50}},
-			{y = 1220, params = {5,  800, 180, 180,   50}},
-			{y = 1280, params = {3,  600,   0,   0,  170}},
-			{y = 1280, params = {1, 1500, 180,   0, -260}},
-			{y = 1380, params = {1,  200,   0, 180,   50}},
-			{y = 1420, params = {3, 1800, 180, 180,   90}},
-			{y = 1460, params = {2,  500,   0,   0,  150}},
-			{y = 1480, params = {5, 1500, 180, 180, -250}},
-			{y = 1580, params = {3,  200,   0, 180,  280}},
-			{y = 1620, params = {1,  500, 180,   0,  320}},
-			{y = 1660, params = {2, 1600,   0, 180,  150}},
-			{y = 1740, params = {5,  100, 180, 180,   10}},
-			{y = 1790, params = {3,  300,   0, 180,  300}},
-			{y = 1820, params = {4, 1700, 180, 180, -170}},
-			{y = 1860, params = {2, 1400,   0, 180,  -60}},
-			{y = 1890, params = {5,  500, 180,   0,   70}},
-			{y = 1940, params = {2, 1800, 180,   0,  130}},
-			{y = 2090, params = {2, 1100,   0,   0,  190}},
-			--got lazy and copy pasted...again
-			{y = 2180, params = {1,  200,   0, 180,   50}},
-			{y = 2220, params = {3,  800, 180, 180,   50}},
-			{y = 2280, params = {5,  600,   0,   0,  170}},
-			{y = 2280, params = {1, 1500, 180,   0, -260}},
-			{y = 2380, params = {4,  200,   0, 180,   50}},
-			{y = 2420, params = {3, 1800, 180, 180,   90}},
-			{y = 2460, params = {2,  500,   0,   0,  150}},
-			{y = 2480, params = {5, 1500, 180, 180, -250}},
-			{y = 2580, params = {3,  200,   0, 180,  280}},
-			{y = 2620, params = {1,  500, 180,   0,  320}},
-			{y = 2660, params = {4, 1600,   0, 180,  150}},
-			{y = 2740, params = {1,  100, 180, 180,   10}},
-			{y = 2790, params = {5,  300,   0, 180,  300}},
-			{y = 2820, params = {3, 1700, 180, 180, -170}},
-			{y = 2860, params = {2, 1400,   0, 180,  -60}},
-			{y = 2890, params = {1,  500, 180,   0,   70}},
-			{y = 2940, params = {2, 1800, 180,   0,  130}},
-		},
-		doodad_index = 1,
+        offset         = {},
+        index          = {},
+        add_list       = {},
+
 		setup = function(self)
 		--	add_to_render_list( self.bg )
-			self.launch_index = 1
-			self.doodad_index = 1
+            self.add_list = {
+            --enemy
+            {
+                {y =    0, item = add_to_render_list,        params = { lvl1txt        }},
+                {y =   80, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {y =  300, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
+                {y =  400, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
+                {y =  550, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
+                {y =  700, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
+                {y = 1050, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
+                {y = 1050, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
+                
+                {y = 1300, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {y = 1300, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
+                
+                {y = 1600, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {y = 1660, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
+                {y = 1660, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
+                {y = 1720, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
+                {y = 1780, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
+                            
+                {y = 2000, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
+                {y = 2000, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
+                --]]
+                {y = 2320, item = formations.cluster,         params = {200}},
+                {y = 2350, item = formations.cluster,         params = {1200}},
+                {y = 2450, item = formations.cluster,         params = {900}},
+                {y = 2550, item = formations.cluster,         params = {500}},
+                {y = 2600, item = formations.cluster,         params = {1700}},
+                
+                {y = 2700, item = formations.cluster,         params = {240}},
+                {y = 2750, item = formations.zepp_boss,      params = { 120 }}
+            },
+            --island
+            {
+                {y =    50, item = self.bg.add_island, params = {self.bg,  2, 300, 0, 0, 0}},
+                
+                {y =  180, item = self.bg.add_island, params = {self.bg, 1, 1720,   0,   0, -123}},
+                {y =  220, item = self.bg.add_island, params = {self.bg, 2,    0, 180, 180,   67}},
+                {y =  280, item = self.bg.add_island, params = {self.bg, 3,  600,   0,   0,   45}},
+                {y =  280, item = self.bg.add_island, params = {self.bg, 1, 1500, 180,   0, -260}},
+                {y =  380, item = self.bg.add_island, params = {self.bg, 1,  200,   0, 180,   50}},
+                {y =  420, item = self.bg.add_island, params = {self.bg, 3, 1800, 180, 180,   90}},
+                {y =  460, item = self.bg.add_island, params = {self.bg, 2,  500,   0,   0,  150}},
+                {y =  480, item = self.bg.add_island, params = {self.bg, 1, 1500, 180, 180, -250}},
+                {y =  580, item = self.bg.add_island, params = {self.bg, 3,  200,   0, 180,  280}},
+                {y =  620, item = self.bg.add_island, params = {self.bg, 1,  500, 180,   0,  320}},
+                {y =  660, item = self.bg.add_island, params = {self.bg, 2, 1600,   0, 180,  150}},
+                {y =  740, item = self.bg.add_island, params = {self.bg, 5,  100, 180, 180,   10}},
+                {y =  790, item = self.bg.add_island, params = {self.bg, 3,  300,   0, 180,  300}},
+                {y =  820, item = self.bg.add_island, params = {self.bg, 3, 1700, 180, 180, -170}},
+                {y =  860, item = self.bg.add_island, params = {self.bg, 2, 1400,   0, 180,  -60}},
+                {y =  890, item = self.bg.add_island, params = {self.bg, 1,  500, 180,   0,   70}},
+                {y =  940, item = self.bg.add_island, params = {self.bg, 4, 1800, 180,   0,  130}},
+                {y = 1090, item = self.bg.add_island, params = {self.bg, 2, 1100,   0,   0,  190}},
+            },
+            --cloud
+            {
+                {y =  100, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2,   0,   0, 0}},
+                {y =  170, item = self.bg.add_cloud, params = {self.bg, 1,  425/2, 0, 180,    0}},
+                {y =  280, item = self.bg.add_cloud, params = {self.bg, 3,  700,   0,   0,    0}},
+                {y =  340, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2, 0,   0,    0}},
+                {y =  380, item = self.bg.add_cloud, params = {self.bg, 1, 425/2,   0, 180,    0}},
+                {y =  420, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0, 0,    0}},
+                {y =  480, item = self.bg.add_cloud, params = {self.bg, 2, 484/2, 0, 180, 0}},
+                {y =  580, item = self.bg.add_cloud, params = {self.bg, 3,  300,   0, 180,  0}},
+                {y =  620, item = self.bg.add_cloud, params = {self.bg, 1,  screen.w - 425/2, 0,   0,  0}},
+                {y =  660, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2,   0, 0,  0}},
+                {y =  740, item = self.bg.add_cloud, params = {self.bg, 1,  425/2, 0, 180,   0}},
+                {y =  790, item = self.bg.add_cloud, params = {self.bg, 3,  300,   0, 180,  0}},
+                {y =  820, item = self.bg.add_cloud, params = {self.bg, 3, 1700, 0, 180, 0}},
+            }
+            }
+            for i = 1, #self.add_list do
+                self.index[i] = 1
+                self.offset[i] = 0
+            end
 			self.dist_travelled = 0
 		end,
 		render = function(self,seconds)
@@ -160,38 +150,28 @@ levels =
 
 
 			local curr_dist = self.dist_travelled + self.speed*seconds
-
-
-
-			while self.launch_index <= #self.enemy_list do
-				if self.enemy_list[self.launch_index].y < curr_dist and
-				   self.enemy_list[self.launch_index].y >=
-				   self.dist_travelled then
---print(unpack(self.launch_list[self.launch_index].params))
-					--add_to_render_list(self.enemy_list[self.launch_index].item,
-						 --unpack(self.enemy_list[self.launch_index].params))
-					--self.launch_index = self.launch_index + 1
-                    self.enemy_list[self.launch_index].item(unpack(self.enemy_list[self.launch_index].params))
-                    self.launch_index = self.launch_index + 1
-				else
-					break
-				end
-			end
-
-			while self.doodad_index <= #self.doodad_list do
-				
-				if self.doodad_list[self.doodad_index].y < curr_dist and
-				   self.doodad_list[self.doodad_index].y >=
-				   self.dist_travelled then
---print(unpack(self.launch_list[self.launch_index].params))
-					add_to_render_list(self.bg:add_doodad(
-						unpack(self.doodad_list[self.doodad_index].params)) )
-					self.doodad_index = self.doodad_index + 1
-				else
-					break
-				end
-
-			end
+            for i = 1,#self.add_list do
+                local done = false
+                while not done do
+                	
+                    if  self.index[i] > #self.add_list[i] then
+                        if i ~= 1 then
+                            self.index[i] = 1
+                            self.offset[i] = curr_dist
+                            print("aaa",i,self.offset[i])
+                        end
+                        done = true
+                    elseif self.add_list[i][ self.index[i] ].y < (curr_dist - self.offset[i]) and
+                	   self.add_list[i][ self.index[i] ].y >=
+                	   (self.dist_travelled - self.offset[i]) then
+                        
+                        self.add_list[i][self.index[i]].item(unpack(self.add_list[i][self.index[i]].params))
+                        self.index[i] = self.index[i] + 1
+                	else
+                		done = true
+                	end
+                end
+            end
 
 
 			self.dist_travelled = curr_dist

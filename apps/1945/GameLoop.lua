@@ -2,7 +2,6 @@
 		Contains the gameloop functions
 --]]
 render_list = {}
-
 function add_to_render_list( item, ... )
 --t = { ... }
 --print(unpack(t))
@@ -54,10 +53,12 @@ local collided = function(good_guy,bad_guy)
 end
 
 function process_collisions()
-
+local bad_guy
     --check for collisions between the good guys and bad guys
     for     i, good_guy in ipairs(good_guys_collision_list) do
-        for j,  bad_guy in ipairs( bad_guys_collision_list) do
+        --for j,  bad_guy in ipairs( bad_guys_collision_list) do
+        for j=1,#bad_guys_collision_list do
+            bad_guy = bad_guys_collision_list[j]
             
             if collided(good_guy,bad_guy) then
                 
