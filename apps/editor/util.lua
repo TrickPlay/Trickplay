@@ -806,6 +806,7 @@ function inputMsgWindow_openfile()
           inputMsgWindow("reopenfile")
           return 
      end
+     editor.close()
      current_fn = input_t.text
      local f = loadfile(current_fn)
      f(g)
