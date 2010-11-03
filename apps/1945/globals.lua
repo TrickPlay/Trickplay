@@ -10,6 +10,7 @@ state =
     hud =
     {
         num_lives  = 3,
+        max_lives  = 5,
         curr_score = 0,
         high_score = settings.high_score or 0
     },
@@ -18,7 +19,7 @@ state =
 layers =
 {
     splash         = Group{},
-    hud            = Group{},
+    hud            = Group{}, --text bubbles go here too
     
     air_doodads_2  = Group{},
     planes         = Group{}, --explosions go here as well
@@ -28,13 +29,13 @@ layers =
     land_doodads_2 = Group{},
     land_targets   = Group{}, -- explostions go here as well
     land_bullets   = Group{},
-    land_doodads   = Group{},
+    land_doodads_1 = Group{},
     ground         = Group{}
 }
 
 screen:add(
     layers.ground,
-    layers.land_doodads,
+    layers.land_doodads_1,
     layers.land_bullets,
     layers.land_targets,
     layers.land_doodads_2,
@@ -60,6 +61,7 @@ imgs =
 
     my_plane_strip  = Image{ src = "assets/player_strip.png" },
     my_bullet       = Image{ src = "assets/bullet.png" },
+    life            = Image{ src = "assets/life.png"},
 
     enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
@@ -69,6 +71,14 @@ imgs =
     smoke           = Image{ src = "assets/smoke.png"},
     enemy_1         = Image{ src = "assets/enemy1.png"   },
     zepp            = Image{ src = "assets/zeppelin.png" },
+    z_d_1           = Image{ src = "assets/zepp_dam/zep_dmg1.png"},
+    z_d_2           = Image{ src = "assets/zepp_dam/zep_dmg2.png"},
+    z_d_3           = Image{ src = "assets/zepp_dam/zep_dmg3.png"},
+    z_d_4           = Image{ src = "assets/zepp_dam/zep_dmg4.png"},
+    z_d_5           = Image{ src = "assets/zepp_dam/zep_dmg5.png"},
+    z_d_6           = Image{ src = "assets/zepp_dam/zep_dmg6.png"},
+    z_d_7           = Image{ src = "assets/zepp_dam/zep_dmg7.png"},
+    z_d_e           = Image{ src = "assets/zepp_dam/zep_dmg_engine.png"},
 
     prop1           = Image{ src  = "assets/prop1.png" },
     prop2           = Image{ src  = "assets/prop2.png" },

@@ -30,8 +30,9 @@ function fire_bullet(enemy)
                 enemy.group.x,
                 enemy.group.y
             },
-            z = z.air_bullets
         },
+        
+        type = TYPE_ENEMY_BULLET,
             
         setup = function( self )
             mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
@@ -43,7 +44,7 @@ function fire_bullet(enemy)
 		self.speed_x = math.cos(deg*math.pi/180) * self.speed
 		self.speed_y = math.sin(deg*math.pi/180) * self.speed
 		
-                screen:add( self.image )
+                layers.air_bullets:add( self.image )
             end,
                 
             render = function( self , seconds )
@@ -54,7 +55,7 @@ function fire_bullet(enemy)
 		--remove it from the screen, if it travels off screen
                 if y > screen.h or x > screen.w or y < 0 or x < 0 then
                     remove_from_render_list( self )
-                    screen:remove( self.image )
+                    self.image:unparent()
 		--otherwise, update the position
                 else
                     local start_point = self.image.center
@@ -86,8 +87,9 @@ function fire_bullet(enemy)
             
             collision =
                 function( self , other )
+                    if other.type == TYPE_MY_BULLET then return end
                     remove_from_render_list( self )
-                    screen:remove( self.image )
+                    self.image:unparent()
                 end
         }
 	add_to_render_list( bullet )
@@ -278,10 +280,9 @@ explosions =
 					  self.image.h / 2
 				},
                 position = {x,y},
-                z=z.planes
 			}
                     
-			screen:add( self.group )
+			layers.planes:add( self.group )
         end,
                 
 		render = function( self , seconds )
@@ -290,7 +291,7 @@ explosions =
 			if self.time > self.duration then
 					
 				remove_from_render_list( self )
-				screen:remove( self.group )
+				self.group:unparent()
 					
 			else
 				local frame = math.floor( self.time /
@@ -329,10 +330,9 @@ explosions =
 					  self.image.h / 2
 				},
                 position = {x,y},
-                z=z.planes
 			}
                     
-			screen:add( self.group )
+			layers.planes:add( self.group )
         end,
                 
 		render = function( self , seconds )
@@ -341,7 +341,7 @@ explosions =
 			if self.time > self.duration then
 					
 				remove_from_render_list( self )
-				screen:remove( self.group )
+				self.group:unparent()
 					
 			else
 				local frame = math.floor( self.time /
@@ -367,7 +367,7 @@ enemies =
 		stage  = 0,     --the current stage the fighter is in
 		stages = {},    --the stages, must be set by formations{}
 		approach_speed = 300,
-		attack_speed   = 100,
+		attack_speed   = 105,
 		
 		--graphics for the fighter
 		num_prop_frames = 3,
@@ -387,7 +387,7 @@ enemies =
 			anchor_point = {imgs.prop1.w/2,   imgs.prop1.h/2},
 			position     = {imgs.enemy_1.w/2, imgs.enemy_1.h},
 		},
-		group  = Group{anchor_point = {imgs.enemy_1.w/2,imgs.enemy_1.h/2},z=z.planes},
+		group  = Group{anchor_point = {imgs.enemy_1.w/2,imgs.enemy_1.h/2}},
 		
 		shoot_time      = 2,	--how frequently the plane shoots
 		last_shot_time = math.random()*2,	--how long ago the plane last shot
@@ -410,17 +410,16 @@ enemies =
 			
 			self.group:add( self.image, self.prop_g )
 			
-			screen:add( self.group )
+			layers.planes:add( self.group )
 			
 			--default fighter animation
-			self.stages[0] = function(f)
+			self.stages[0] = function(f,seconds)
 				
 				--fly downwards
-				f.group.y = f.group.y +
-					f.attack_speed*seconds
+				f.group.y = f.group.y + f.attack_speed*seconds
 				
 				--fire bullets
-				f:fire()
+				f:fire(seconds)
 				
 				--see if you reached the end
 				if f.group.y >= screen.h + self.image.h then
@@ -474,7 +473,7 @@ enemies =
 		end,
 		
                 collision = function( self , other )
-                    screen:remove( self.group )
+                    self.group:unparent()
                     remove_from_render_list( self )
                         
                     -- Explode
@@ -488,13 +487,14 @@ enemies =
 	zeppelin  = function() return {
 		health = 20,
 		type = TYPE_ENEMY_PLANE,
+        bulletholes = {},
 		
 		stage  = 0,	--the current stage the fighter is in
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 40,
 		attack_speed   = 15,
 		
-		--graphics for the fighter
+		
 		num_prop_frames = 3,
 		prop_index = 1,
 		image    = Clone{source=imgs.zepp},
@@ -517,7 +517,7 @@ enemies =
 				},
 				anchor_point = {imgs.prop3.w/2,
 				                imgs.prop3.h/2},
-				position     = {37,265},
+				position     = {37,260},
 			},
 			g_r = Group
 			{
@@ -531,7 +531,7 @@ enemies =
 				},
 				anchor_point = {imgs.prop3.w/2,
 				                imgs.prop3.h/2},
-				position     = {202,265},
+				position     = {202,260},
 			},
 		},
 		
@@ -565,7 +565,7 @@ enemies =
 			},
 		},
 		
-		group    = Group{z=z.planes},
+		group    = Group{},
 		
 		shoot_time      = 3,	--how frequently the plane shoots
 		last_shot_time = 2,	--how long ago the plane last shot
@@ -768,7 +768,7 @@ enemies =
 				
 			)
 			
-			screen:add( self.group )
+			layers.air_doodads_1:add( self.group )
 			
 			
 			--default zeppelin animation
@@ -799,17 +799,29 @@ enemies =
 				
 			--animate the zeppelin based on the current stage
 			self.stages[self.stage](self,seconds)
-			
-			--check for collisions
+			--[[			--check for collisions
+            for i = 1,#self.bulletholes do
+                table.insert(bad_guys_collision_list,
+                {
+                    obj = self.bulletholes[i],
+                    x1  = self.group.x+self.bulletholes[i].image.x,
+                    x2  = self.group.x+self.bulletholes[i].image.x+self.bulletholes[i].image.w,
+                    y1  = self.group.y+self.bulletholes[i].image.y,
+                    y2  = self.group.y+self.bulletholes[i].image.y+self.bulletholes[i].image.h,
+                }
+
+            )
+            --]]
             table.insert(bad_guys_collision_list,
                 {
                     obj = self,
-                    x1  = self.group.x,
-                    x2  = self.group.x+self.image.w,
-                    y1  = self.group.y,
-                    y2  = self.group.y+self.image.h,
+                    x1  = self.group.x+self.guns.g_l.x+3*self.guns.l.w/4,
+                    x2  = self.group.x+self.guns.g_r.x-3*self.guns.l.w/4-5,
+                    y1  = self.group.y+80,
+                    y2  = self.group.y+self.image.h-50,
                 }
             )
+            
             --[[
 			add_to_collision_list(
                             
@@ -831,15 +843,68 @@ enemies =
                         --]]
 		end,
 		
-        collision = function( self , other )
+        collision = function( self , other, from_bullethole )
 			if self.health > 1 then 
-				self.health = self.health - 1 
+				self.health = self.health - 1
+                if from_bullethole == nil then
+                print("there")
+                local dam = {}
+                if other.group ~= nil then
+                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    self.group:add(dam.image)
+                    dam.image.x = other.group.x - self.group.x
+                    dam.image.y = other.group.y - self.group.y
+                    --[[
+                    dam.collision = function(d,other)
+                    print("here")
+                        local x = d.image.x
+                        local y = d.image.y
+                        
+                        d.image:unparent()
+                        d ={}
+                        
+                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image.x = x
+                        d.image.y = y-4
+                        self.group:add(dam.image)
+                        self:collision(other,true)
+                    end
+                    --]]
+                elseif other.image ~= nil then
+                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    self.group:add(dam.image)
+                    dam.image.x = other.image.x - self.group.x
+                    dam.image.y = other.image.y - self.group.y
+                    --[[
+                    dam.collision = function(d,other)
+                    print("here")
+                        local x = d.image.x
+                        local y = d.image.y
+                        
+                        d.image:unparent()
+                        d = {}
+                        
+                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image.x = x
+                        d.image.y = y-4
+                        self.group:add(dam.image)
+                        self:collision(other,true)
+                    end
+                    --]]
+                else
+                    error("render_list object with out a .group or a .image collided with the zeppelin")
+                end
+                --table.insert(self.bulletholes,dam)
+                end
+                --if dam.y > 0 then dam.y =dam.y -50 end
 				return
 			end
 			if self.is_boss then
 				levels[state.curr_level]:level_complete()
 			end
-			screen:remove( self.group )
+			self.group:unparent()
 			remove_from_render_list( self )
                         
 			-- Explode
@@ -915,7 +980,7 @@ formations =
                 
                 move(z.group,z.approach_speed,secs)
                 
-                if z.group.y >= 0 then
+                if z.group.y >= -100 then
                     z.stage = 2
                 end
             end,
@@ -1057,6 +1122,101 @@ formations =
             add_to_render_list(e)
 		end
 	end,
+    
+    cluster = function(x)
+        
+        e1 = enemies.basic_fighter()
+        e2 = enemies.basic_fighter()
+        e3 = enemies.basic_fighter()
+        
+        e1.group.position = {x-e2.image.w,-2*e2.image.h}
+        e2.group.position = {x,-e2.image.h}
+        e3.group.position = {x+e2.image.w,-2*e2.image.h}
+        
+        add_to_render_list(e1)
+        add_to_render_list(e2)
+        add_to_render_list(e3)
+
+    end,
+    zig_zag = function(x,r)
+        e = enemies.basic_fighter()
+        e.group.x = x
+        e.shoot_time      = 1.5
+        e.deg_counter = {}
+        e.stages =
+        {
+            --enter the screen
+            function(f,secs)
+                move(f.group,f.attack_speed,secs)
+                    
+                f:fire(secs)
+                    
+                if f.group.y >= f.image.h/2 then
+                        f.stage = f.stage + 1
+                end
+            end,
+            --initial bank
+            function(f,secs)
+                    
+                f.deg_counter[f.stage] = f.deg_counter[f.stage] +
+                    turn(f.group,r,1,f.attack_speed,secs)
+                    
+                f:fire(secs)
+                    
+                if f.deg_counter[f.stage] >= 45 then
+                    f.deg_counter[f.stage] = 0
+                    f.stage = f.stage + 1
+                        
+                    f.group.z_rotation = {45,0,0}
+                end
+                    
+            end,
+            --zig
+            function(f,secs)
+                    
+                f.deg_counter[f.stage] = f.deg_counter[f.stage] +
+                    turn(f.group,r,-1,f.attack_speed,secs)
+                    
+                f:fire(secs)
+                    
+                if f.group.y >= screen.h + f.image.h then
+					f.group:unparent()
+					remove_from_render_list(f)
+                end
+                if f.deg_counter[f.stage] >= 90 then
+                    f.deg_counter[f.stage] = 0
+                    f.stage = f.stage + 1
+                        
+                    f.group.z_rotation = {-45,0,0}
+                end
+            end,
+            --zag
+            function(f,secs)
+                    
+                f.deg_counter[f.stage] = f.deg_counter[f.stage] +
+                    turn(f.group,r,1,f.attack_speed,secs)
+                    
+                f:fire(secs)
+                if f.group.y >= screen.h + f.image.h then
+					f.group:unparent()
+					remove_from_render_list(f)
+                end
+                if f.deg_counter[f.stage] >= 90 then
+                    f.deg_counter[f.stage] = 0
+                    f.stage = f.stage - 1
+                        
+                    f.group.z_rotation = {45,0,0}
+                end
+                    
+            end,
+        }
+        for j = 1,#e.stages do
+            e.deg_counter[j] = 0
+        end
+        e.stage = 1
+        add_to_render_list(e)
+    end,
+
 	
     one_loop = function(
                 num,      -- number of fighters in the formation
