@@ -295,7 +295,7 @@ local function build_ui( show_it )
     local key_map =
     {
 	[ keys.h	] = function() animate_out_dropdown() editor.undo_history() input_mode = S_SELECT end,
---	[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
+	[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
 	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
         [ keys.o	] = function() animate_out_dropdown() editor.open() input_mode = S_SELECT end,
