@@ -280,16 +280,16 @@ int lb_index(lua_State*L)
     lua_rawget(L,-2);               // get the value for that key from the mt
     if (!lua_isnil(L,-1))           // if it is not nil, return it
     {
-        lua_replace(L,-2);          // replace mt with value
+        lua_remove(L,-2);          // replace mt with value
         return LSG_END(1);
     }
     lua_pop(L,1);                   // pop nil
-    lua_pushstring(L,"__getters__");// push "_getters_"
+    lua_pushliteral(L,"__getters__");// push "_getters_"
     lua_rawget(L,-2);               // get the getters table from the mt
-    lua_replace(L,-2);              // replace mt with getters table
+    lua_remove(L,-2);              // replace mt with getters table
     lua_pushvalue(L,2);             // push the key
     lua_rawget(L,-2);               // get the value for that key from the getters table
-    lua_replace(L,-2);              // get rid of the getters table
+    lua_remove(L,-2);              // get rid of the getters table
     if(!lua_isnil(L,-1))
     {
         lua_pushvalue(L,1);         // push the user data
@@ -323,9 +323,9 @@ int lb_newindex(lua_State*L)
     
     if(!lua_getmetatable(L,1))      // get the mt
         return LSG_END(0);
-    lua_pushstring(L,"__setters__");// push "_setters_"
+    lua_pushliteral(L,"__setters__");// push "_setters_"
     lua_rawget(L,-2);               // get the setters table from the mt
-    lua_replace(L,-2);              // get rid of the metatable
+    lua_remove(L,-2);              // get rid of the metatable
 
     if (lua_isnil(L,-1))
     {
@@ -335,7 +335,7 @@ int lb_newindex(lua_State*L)
 
     lua_pushvalue(L,2);             // push the original key
     lua_rawget(L,-2);               // get the setter function for this key
-    lua_replace(L,-2);              // get rid of the setters table
+    lua_remove(L,-2);              // get rid of the setters table
     if(lua_isnil(L,-1))
     {
         lua_pop(L,1);               // if the setter function is not found, look in the extra table
@@ -422,12 +422,13 @@ void lb_inherit(lua_State*L,const char*metatable)
     }
 
     int source=lua_gettop(L);
+
     lb_copy_table(L,target,source);
     
-    static const char * subs[2] = { "__getters__" , "__setters__" };    
+    static const char * subs[3] = { "__getters__" , "__setters__" , "__types__" };
     int i=0;
     
-    for(i=0;i<2;++i)
+    for(i=0;i<3;++i)
     {
         lua_pushstring(L,subs[i]);
         lua_rawget(L,target);           // get the sub table from the target mt
@@ -685,7 +686,7 @@ static int lb_lazy_globals_index( lua_State * L )
 
         if ( ! lua_isnil( L , -1 ) )
         {
-            g_debug( "LAZY LOADING '%s'" , lua_tostring( L , 2 ) );
+            //g_debug( "LAZY LOADING '%s'" , lua_tostring( L , 2 ) );
 
             lua_call( L , 0 , 0 );
 
@@ -727,7 +728,7 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 
     if ( 0 == lua_getmetatable( L , -1 ) )
     {
-        g_debug( "INSTALLING LAZY LOADER" );
+//        g_debug( "INSTALLING LAZY LOADER" );
 //        g_debug( "ADDING LAZY LOAD ENTRY FOR %s" , name );
 
         // Create the metatable
@@ -1014,4 +1015,37 @@ void lb_dump_table( lua_State * L )
     lb_strong_unref(L,visited);
 
     LSG_CHECK(0);
+}
+
+bool lb_check_udata_type( lua_State * L , int index , const char * type , bool fail )
+{
+    LSG;
+
+    bool result = false;
+
+    if ( lua_isuserdata( L , index ) )
+    {
+        if ( lua_getmetatable( L , index ) )
+        {
+            lua_getfield( L , -1 , "__types__" );
+
+            if ( lua_type( L , -1 ) == LUA_TTABLE )
+            {
+                lua_getfield( L , -1 , type );
+                result = lua_toboolean( L , -1 );
+                lua_pop( L , 1 );
+            }
+
+            lua_pop( L , 2 );
+        }
+    }
+
+    if ( ! result && fail )
+    {
+        luaL_error( L , "Incorrect type" );
+    }
+
+    LSG_CHECK(0);
+
+    return result;
 }

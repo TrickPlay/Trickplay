@@ -520,6 +520,8 @@ interface Body [[ ClutterActor * ]]
 
     int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
         [[
+            lb_check_udata_type( L , other_body , "Body" );
+
             Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
@@ -579,6 +581,8 @@ interface Body [[ ClutterActor * ]]
 
     int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
         [[
+            lb_check_udata_type( L , other_body , "Body" );
+
             Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
@@ -658,6 +662,8 @@ interface Body [[ ClutterActor * ]]
 
     int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
         [[
+            lb_check_udata_type( L , other_body , "Body" );
+
             Physics::Body * me = Physics::Body::get( self );
 
             Physics::Body * other = Physics::Body::get_from_lua( L , other_body );
@@ -823,6 +829,14 @@ global physics [[ Physics::World * ]]
             lua_pop( L , 2 );
         ]];
 
+    bool auto_clear_forces
+        [[
+            auto_clear_forces = self->get_world()->GetAutoClearForces();
+        ]]
+        [[
+            self->get_world()->SetAutoClearForces( auto_clear_forces );
+        ]];
+
     readonly table contacts
         [[
             self->push_contact_list( self->get_world()->GetContactList() );
@@ -848,6 +862,11 @@ global physics [[ Physics::World * ]]
             self->step( time_step , velocity_iterations , position_iterations );
 		]];
 
+	clear_forces()
+        [[
+            self->get_world()->ClearForces();
+        ]];
+
 	draw_debug( int opacity = 127 )
         [[
             self->draw_debug( opacity );
@@ -857,9 +876,44 @@ global physics [[ Physics::World * ]]
         [[
             self->clear_debug();
         ]];
+
+	table get_fixtures_in_rectangle( table top_left , table bottom_right )
+        [[
+            float32 x1;
+	        float32 y1;
+	        float32 x2;
+	        float32 y2;
+
+            lua_rawgeti( L , top_left , 1 );
+            x1 = self->screen_to_world( lua_tonumber( L , -1 ) );
+            lua_pop( L , 1 );
+            lua_rawgeti( L , top_left , 2 );
+            y1 = self->screen_to_world( lua_tonumber( L , -1 ) );
+            lua_pop( L , 1 );
+
+            lua_rawgeti( L , bottom_right , 1 );
+            x2 = self->screen_to_world( lua_tonumber( L , -1 ) );
+            lua_pop( L , 1 );
+            lua_rawgeti( L , bottom_right , 2 );
+            y2 = self->screen_to_world( lua_tonumber( L , -1 ) );
+            lua_pop( L , 1 );
+
+            b2AABB a;
+
+            a.lowerBound.x = x1;
+            a.lowerBound.y = y1;
+            a.upperBound.x = x2;
+            a.upperBound.y = y2;
+
+            Physics::AABBQuery q( L );
+
+            self->get_world()->QueryAABB( & q , a );
+        ]];
 		
 	Body Body( UIElement element , table properties )
 		[[
+            lb_check_udata_type( L , element , "actor" );
+
             int n = self->create_body( element , properties , BODY_METATABLE );
 
             if ( ! n )

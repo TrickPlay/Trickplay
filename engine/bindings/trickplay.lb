@@ -1,0 +1,40 @@
+[[
+#include "util.h"
+]]
+
+/*
+    Global: trickplay
+
+    Provides information about the TrickPlay platform.
+*/
+
+global trickplay [[void*]]
+{
+    /*
+        Property: version
+
+        The version of the TrickPlay platform.
+    */
+
+    readonly string version
+        [[
+            String v( Util::format( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION ) );
+
+            version = v.c_str();
+        ]];
+
+    /*
+       Property: production
+
+       Whether this is a production release of the TrickPlay platform.
+    */
+
+    readonly bool production
+        [[
+#ifdef TP_PRODUCTION
+            production = true;
+#else
+            production = false;
+#endif
+        ]];
+}

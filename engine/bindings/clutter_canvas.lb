@@ -130,7 +130,8 @@ class Canvas [[ClutterActor*]] actor
 			    case CAIRO_OPERATOR_DEST_ATOP:	op = "DEST_ATOP"; break;
 			    case CAIRO_OPERATOR_XOR:		op = "XOR"; break;
 			    case CAIRO_OPERATOR_ADD:		op = "ADD"; break;
-			    case CAIRO_OPERATOR_SATURATE:	op = "SATURATE"; break;	    			
+			    case CAIRO_OPERATOR_SATURATE:	op = "SATURATE"; break;
+			    default:                        op = "SOURCE";
 	    	}
     	]]
     	[[
@@ -412,7 +413,7 @@ class Canvas [[ClutterActor*]] actor
 		    {		    
 			    FreeLater free_later( path );
 			    
-			    Image * image;
+			    Image * image = 0;
 			
 				if ( is_uri )
 				{

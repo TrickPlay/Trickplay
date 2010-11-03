@@ -9,6 +9,13 @@ module globals;
 
 struct DoLater
 {
+    static void * nil()
+    {
+        static char nil=0;
+
+        return & nil;
+    }
+
 	static void add(lua_State * L,int function_ref,int args_table_ref)
 	{
 		DoLater * dl = g_new0( DoLater , 1 );
@@ -44,6 +51,11 @@ struct DoLater
 					
 					while( lua_next(L,-2) )
 					{
+					    if ( lua_islightuserdata( L , -1 ) && lua_touserdata( L , -1 ) == nil() )
+					    {
+					        lua_pop( L , 1 );
+					        lua_pushnil( L );
+					    }
 						// Move the value below the table
 						lua_insert(L,-3);
 						++nargs;
@@ -84,6 +96,12 @@ private:
 	int 			function_ref;
 	int				args_table_ref;
 };
+
+static int marker_gc( lua_State * L )
+{
+    g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
+    return 0;
+}
 
 #if 0
 void pb( void * s , int l )
@@ -320,7 +338,7 @@ globals
                 return 2;  
             }            
         ]];
-        
+
     /*
     	Function: readfile
     	
@@ -846,7 +864,8 @@ globals
 		
 	detach( udata o )
 		[[
-			UserData::clear_callbacks( L , o );
+			// UserData::clear_callbacks( L , o );
+		    g_warning( "'detach' function is deprecated" );
 		]];		       
 		
 	/*
@@ -874,7 +893,14 @@ globals
 				lua_newtable(L);
 				for (int i=1; i<=nargs; ++i)
 				{
-					lua_pushvalue(L,i+f);
+				    if ( lua_isnil( L , i+f ) )
+				    {
+				        lua_pushlightuserdata( L , DoLater::nil() );
+				    }
+				    else
+				    {
+				        lua_pushvalue(L,i+f);
+				    }
 					lua_rawseti(L,-2,i);
 				}
 				args = luaL_ref(L,LUA_REGISTRYINDEX);
@@ -930,5 +956,45 @@ globals
 	dumptable( table t , function filter = 0 )
 		[[
 			lb_dump_table(L);
-		]];						
+		]];
+
+	/*
+        Marker is a thing that prints out its name when it is garbage collected. This
+        lets us attach it to stuff and see when it goes away.
+	*/
+
+	udata marker( lstring name )
+        [[
+            lua_newuserdata( L , 1 );
+
+            lua_newtable( L );
+            lua_pushvalue( L , 1 );
+            lua_pushcclosure( L , marker_gc , 1 );
+            lua_setfield( L , -2 , "__gc" );
+            lua_setmetatable( L , -2 );
+        ]];
+
+	table udatatypes( udata u )
+        [[
+            LSG;
+            if ( ! lua_isuserdata( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else if ( ! lua_getmetatable( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_getfield( L , -1 , "__types__" );
+                lua_remove( L , -2 );
+            }
+            LSG_CHECK(1);
+        ]];
+
+	bool checkudatatype( udata u , string type )
+        [[
+            result = lb_check_udata_type( L , u , type , false );
+        ]];
 }

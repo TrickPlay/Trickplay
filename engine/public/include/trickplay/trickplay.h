@@ -34,7 +34,7 @@ extern "C" {
 
 #define TP_MAJOR_VERSION    0
 #define TP_MINOR_VERSION    0
-#define TP_PATCH_VERSION    11
+#define TP_PATCH_VERSION    13
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -165,6 +165,9 @@ typedef struct TPContext TPContext;
                             DEBUG messages from being logged.
                             Defaults to "1".
                             
+    TP_LOG_APP_ONLY -       Whether to log only MESSAGE messages (printed by apps).
+                            Defaults to "0".
+
     TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
                             TrickPlay will use the systems fonts.
                             Defaults to NULL.
@@ -184,6 +187,15 @@ typedef struct TPContext TPContext;
                             certificate authorities in PEM format.
                             Defaults to empty, which implies use of system certificates.
 
+    TP_LIRC_ENABLED -       Whether TrickPlay attempts to connect to a LIRC daemon.
+                            Defaults to "true".
+
+    TP_LIRC_UDS -           Path to the LIRC daemon Unix Doman Socket.
+                            Defaults to "/var/run/lirc/lircd".
+
+    TP_LIRC_REPEAT -        Minimum number of milliseconds between button presses. Any
+                            presses that arrive within this time are ignored.
+                            Defaults to 150.
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -207,11 +219,15 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
 #define TP_LOG_DEBUG                    "log_debug"
+#define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
 #define TP_DOWNLOADS_PATH               "downloads_path"
 #define TP_NETWORK_DEBUG                "network_debug"
 #define TP_SSL_VERIFY_PEER              "ssl_verifypeer"
 #define TP_SSL_CA_CERT_FILE             "ssl_cacertfile"
+#define TP_LIRC_ENABLED                 "lirc_enabled"
+#define TP_LIRC_UDS                     "lirc_uds"
+#define TP_LIRC_REPEAT                  "lirc_repeat"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

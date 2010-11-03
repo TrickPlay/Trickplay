@@ -66,19 +66,20 @@ class Alpha [[ClutterAlpha*]]
 		    }
 		]]
 		[[
-		    luaL_checkudata(L,-1,"TIMELINE_METATABLE");
-		    
-		    UserData * ud = UserData::get( L , -1 );
-		    
-		    if ( ud )
-		    {
-		    	GObject * timeline = ud->get_master();
-		    	
-		    	if ( timeline && CLUTTER_IS_TIMELINE( timeline ) )
-		    	{
-			    	clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
-		    	}
-		    }		    
+            if ( lb_check_udata_type( L , lua_gettop( L ) , "Timeline" ) )
+            {
+                UserData * ud = UserData::get( L , -1 );
+
+                if ( ud )
+                {
+                    GObject * timeline = ud->get_master();
+
+                    if ( timeline && CLUTTER_IS_TIMELINE( timeline ) )
+                    {
+                        clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
+                    }
+                }
+            }
 		]];
 		
 	/*

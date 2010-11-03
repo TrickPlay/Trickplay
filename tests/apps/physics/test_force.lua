@@ -1,4 +1,8 @@
 
+
+physics.gravity = { 0 , 10 }
+
+
 -------------------------------------------------------------------------------
 
 local ground = Rectangle
@@ -53,73 +57,14 @@ bumper.angle = -75
 
 screen:add( bumper )
 
--------------------------------------------------------------------------------
-
-local POLE_HEIGHT = 800
-
-local pole = Rectangle
-{
-    color = "473232",
-    size = { 30 , POLE_HEIGHT },
-    position = { screen.w / 2 - 15 , screen.h - ( POLE_HEIGHT + ground.h ) }
-}
-
-screen:add( pole )
-
-pole = physics:Body( pole , 
-{
-    density = 1,
-    type = "static",
-    filter = { category = 1 }
-})
 
 -------------------------------------------------------------------------------
 
-local CHAIN_LENGTH = POLE_HEIGHT * 1.2
-local LINKS = 60
-local LINK_WIDTH = 20
-local LINK_COLOR = "FFFFFF"
-
-local last_link = pole
-
-for i = 1 , LINKS do
-
-    local link = Rectangle
-    {
-        color = LINK_COLOR,
-        size = { LINK_WIDTH , CHAIN_LENGTH / LINKS },
-    }
-    
-    link.anchor_point = link.center
-    link.z_rotation = { 90 , 0 , 0 }
-    
-    link.x = pole.x + link.h / 2 + ( ( link.h ) * ( i - 1 ) )
-    link.y = pole.y - pole.h / 2 
-
-    screen:add( link )
-    
-    link = physics:Body( link , 
-    {
-        density = 2,
-        friction = 0.1,
-        bounce = 0.5,
-        filter = { category = 2 , mask = { 0 , 3 } }
-    })
-
-    link:RevoluteJoint( last_link , { link.x - link.w / 2 , link.y } ,
-    {
-        enable_limit = true,
-        lower_angle = -90,
-        upper_angle = 90
-    }
-    )
-    
-    last_link = link
-end
+local bodies = {}
 
 -------------------------------------------------------------------------------
 
-local BLOCK_COUNT = 10
+local BLOCK_COUNT = 20
 
 local GLOBE_SCALE = 0.2
 local globe = Image{ src = "images/globe.png" , opacity = 0 }
@@ -137,23 +82,77 @@ for i = 1 , BLOCK_COUNT do
         },
         {
             type = "dynamic",
-            density = 0.2,
+            density = 10,
             bounce = 0.8,
+            angular_damping = 1,
             shape = physics:Circle( ( globe.w / 2 ) * GLOBE_SCALE ),
             filter = { category = 3 , mask = { 0 , 2 , 3 } }
         })
         
     
     screen:add( block )
+    
+    bodies[ block.handle ] = block
 end
 
 -------------------------------------------------------------------------------
 
-physics.gravity = { 0 , 6 }
+turbine = physics:Body(
+    
+    Rectangle
+    {
+        color = "FFFFFF11",
+        size  = { 300 , screen.h - 400 },
+        x = screen.w / 2 - 150,
+        y = 400
+    }
+    ,
+    {
+        type = "static",
+        sensor = true
+    }
+    
+)
 
-function idle.on_idle()
 
-    physics:step()
-    --physics:draw_debug( 255 )
+screen:add( turbine )
+
+turbine:lower_to_bottom()
+
+
+local bodies_in_contact = {}
+
+function turbine.on_begin_contact( turbine , contact )
+    local handle = contact.other_body[ turbine.handle ]
+    bodies_in_contact[ handle ] = bodies[ handle ]
+end
+
+function turbine.on_end_contact( turbine , contact )
+    local handle = contact.other_body[ turbine.handle ]
+    bodies_in_contact[ handle ] = nil
+end
+
+-------------------------------------------------------------------------------
+
+idle.limit = 1/60
+
+local g = physics.gravity[ 2 ]
+
+function idle:on_idle( seconds )
+
+    physics:step( seconds )
+        
+    if globe.x < -300 then
+    
+        globe.x = screen.w 
+        
+    end
+    
+    for _ , body in pairs( bodies_in_contact ) do
+
+        body:apply_force( { 0 , - g * 1.06 * body.mass } , { turbine.x , body.y } )
+    
+    end
     
 end
+

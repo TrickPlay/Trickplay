@@ -4,9 +4,11 @@
 #include <sstream>
 
 #include "clutter/clutter.h"
+#include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig.h"
 
+#include "trickplay/keys.h"
 #include "lb.h"
 #include "context.h"
 #include "app.h"
@@ -21,6 +23,7 @@
 #include "downloads.h"
 #include "installer.h"
 #include "versions.h"
+#include "controller_lirc.h"
 
 //-----------------------------------------------------------------------------
 
@@ -231,16 +234,26 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         g_free( c );
     }
 
+    guint8 o = clutter_actor_get_opacity( actor );
+
+    if ( o < 255 )
+    {
+        gchar * c = g_strdup_printf( "  opacity(%u)" , o );
+        details += c;
+        g_free( c );
+    }
+
     if ( !extra.empty() )
     {
         extra = String( " : " ) + extra;
     }
 
 
-    g_info( "%s%s: '%s' : %u : (%d,%d %ux%u)%s%s",
+    g_info( "%s%s%s:%s%u : (%d,%d %ux%u)%s%s",
+            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
-            name ? name : "",
+            name ? String( " " + String( name ) + " : " ).c_str()  : " ",
             clutter_actor_get_gid( actor ),
             g.x,
             g.y,
@@ -483,6 +496,35 @@ void TPContext::setup_fonts()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
+static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
+{
+    * keyval = event->key.keyval;
+    * unicode = event->key.unicode_value;
+
+    switch ( * keyval )
+    {
+        case CLUTTER_F5:
+            * keyval = TP_KEY_RED;
+            * unicode = 0;
+            break;
+
+        case CLUTTER_F6:
+            * keyval = TP_KEY_GREEN;
+            * unicode = 0;
+            break;
+
+        case CLUTTER_F7:
+            * keyval = TP_KEY_YELLOW;
+            * unicode = 0;
+            break;
+
+        case CLUTTER_F8:
+            * keyval = TP_KEY_BLUE;
+            * unicode = 0;
+            break;
+    }
+}
+
 // In desktop builds, we catch all key events that are not synthetic and pass
 // them through a keyboard controller. That will generate an event for the
 // controller and re-inject the event into clutter as a synthetic event.
@@ -497,8 +539,12 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
+                    guint keyval;
+                    gunichar unicode;
 
-                    tp_controller_key_down( ( TPController * )controller, event->key.keyval, event->key.unicode_value );
+                    map_key( event , & keyval , & unicode );
+
+                    tp_controller_key_down( ( TPController * )controller, keyval, unicode );
                     return TRUE;
                 }
 
@@ -509,7 +555,12 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
-                    tp_controller_key_up( ( TPController * )controller, event->key.keyval, event->key.unicode_value );
+                    guint keyval;
+                    gunichar unicode;
+
+                    map_key( event , & keyval , & unicode );
+
+                    tp_controller_key_up( ( TPController * )controller, keyval, unicode );
                     return TRUE;
                 }
                 break;
@@ -676,6 +727,11 @@ int TPContext::run()
     }
 
     //.........................................................................
+    // LIRC controller
+
+    controller_lirc = ControllerLIRC::make( this );
+
+    //.........................................................................
     // Create the downloads
 
     downloads = new Downloads( this );
@@ -824,6 +880,16 @@ int TPContext::run()
 
             notify( TP_NOTIFICATION_APP_CLOSED );
         }
+    }
+
+    //.....................................................................
+    // Kill the LIRC connection
+
+    if ( controller_lirc )
+    {
+        delete controller_lirc;
+
+        controller_lirc = 0;
     }
 
     //.....................................................................
@@ -1251,6 +1317,11 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             output = false;
         }
 
+        if ( context->get_bool( TP_LOG_APP_ONLY , false ) )
+        {
+            output = log_level == G_LOG_LEVEL_MESSAGE;
+        }
+
         if ( output )
         {
             if ( context->external_log_handler )
@@ -1485,11 +1556,15 @@ void TPContext::load_external_configuration()
         TP_CONTROLLERS_PORT,
         TP_CONTROLLERS_NAME,
         TP_LOG_DEBUG,
+        TP_LOG_APP_ONLY,
         TP_FONTS_PATH,
         TP_DOWNLOADS_PATH,
         TP_NETWORK_DEBUG,
         TP_SSL_VERIFY_PEER,
         TP_SSL_CA_CERT_FILE,
+        TP_LIRC_ENABLED,
+        TP_LIRC_UDS,
+        TP_LIRC_REPEAT,
 
         NULL
     };

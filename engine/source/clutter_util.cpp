@@ -128,8 +128,11 @@ gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
 
 ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 {
-    if ( lua_type( L , n ) != LUA_TUSERDATA )
+    if ( ! lb_check_udata_type( L , n , "actor" , false ) )
     {
+        luaL_where( L , 1 );
+        g_warning( "%s : NOT A UI ELEMENT" , lua_tostring( L , -1 ) );
+        lua_pop( L , 1 );
         return NULL;
     }
 
