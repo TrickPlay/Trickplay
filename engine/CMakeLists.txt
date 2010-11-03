@@ -307,6 +307,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/uri.lb
     
     ${BINDINGS_SRC}/physics.lb
+    ${BINDINGS_SRC}/trickplay.lb
 )
 
 foreach( LB_FILE ${LB_FILES} )
