@@ -101,14 +101,14 @@ CHANGE_VIEW_TIME = 400
 
 -- SOUNDS
 
-DEAL_WAV = "assets/sounds/sound84.wav"
-SHOWDOWN_WAV = "assets/sounds/Dog Bark 3.wav"
-SHUFFLE_WAV = "assets/sounds/Shuffle 1.wav"
---FOLD_WAV = "assets/sounds/Dog bust out 4.wav"
-FOLD_WAV = "assets/sounds/sound57.wav"
-CHECK_WAV = "assets/sounds/check.wav"
-CALL_WAV = "assets/sounds/Chips.wav"
-RAISE_WAV = "assets/sounds/Chips.wav"
+DEAL_WAV = "assets/sounds/sound84.mp3"
+SHOWDOWN_WAV = "assets/sounds/Dog Bark 3.mp3"
+SHUFFLE_WAV = "assets/sounds/Shuffle 1.mp3"
+--FOLD_WAV = "assets/sounds/Dog bust out 4.mp3"
+FOLD_WAV = "assets/sounds/sound57.mp3"
+CHECK_WAV = "assets/sounds/check.mp3"
+CALL_WAV = "assets/sounds/Chips.mp3"
+RAISE_WAV = "assets/sounds/Chips.mp3"
 BUSTOUT_WAV = "assets/sounds/Bust out sound.mp3"
 
 local MYTURN_STRINGS = {"My turn!", "I'm up", "On me", "Hmmm", "Woof woof", "Me me me"}
