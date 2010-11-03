@@ -3,6 +3,7 @@
 -- Global 
 ---------------------
 editor_lb = editor
+
 ----------------
 -- Constants 
 ----------------
@@ -31,35 +32,31 @@ SEND_BW		  = 8
 SECTION_FILE      = 1
 SECTION_EDIT      = 2
 SECTION_ARRANGE   = 3
-SECTION_SETTING      = 4
+SECTION_SETTING   = 4
 
 -- Style constants
 
 BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 
-
-CURRENT_DIR 	  = ""
 ---------------------
 -- Variables
 ---------------------
---base 		  = ""
---project 	  = ""
---projects 	  = {}
+CURRENT_DIR 	  = ""
 dragging          = nil
 current_inspector = nil 
 current_fn  	  = ""
 current_focus 	  = nil
-
 menu_hide         = false
 popup_hide        = false
 input_mode        = S_MENU
 mouse_state       = BUTTON_UP
 g = Group{name = "screen_objects"}
-
 contents    	  = ""
 item_num 	  = 0
+
 shift 		  = false
 control 	  = false
+
 undo_list 	  = {}
 redo_list 	  = {}
 
@@ -73,7 +70,6 @@ end
 
 setmetatable( strings , { __index = missing_localized_string } )
 
-
 -- The asset cache
 assets = dofile( "assets-cache" )
 
@@ -85,8 +81,8 @@ ui =
         bar                 = Group {},
         bar_background      = assets( "assets/menu-background.png" ),
         button_focus        = assets( "assets/button-focus.png" ),
-        help_button       = assets( "assets/button-help.png" ),
-        help_focus        = assets( "assets/button-help-focus.png" ),
+        help_button         = assets( "assets/button-help.png" ),
+        help_focus          = assets( "assets/button-help-focus.png" ),
         logo                = assets( "assets/logo.png" ),
 
         sections =
@@ -128,6 +124,7 @@ ui =
         }
     }
 
+-- Background image 
 
 BG_IMAGE_20 = Image{src = "assets/transparency-grid-20.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_40 = Image{src = "assets/transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
@@ -135,19 +132,17 @@ BG_IMAGE_80 = Image{src = "assets/transparency-grid-80.png", tile = {true, true}
 BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_import = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 
-icon_l = Image{src = "assets/left.png"}
-icon_r = Image{src = "assets/right.png"} 
-icon_t = Image{src = "assets/top.png"}
-icon_b = Image{src = "assets/bottom.png"} 
-icon_hc = Image{src = "assets/align-horizontally-center.png"} 
-icon_vc = Image{src = "assets/align-vertically-center.png"}
-icon_dhc = Image{src = "assets/distribute-horizontal-center.png"}
-icon_dvc = Image{src = "assets/distribute-vertical-center.png"}
+-- Arrange Icon image
+icon_l = Image{src = "assets/left.png", opacity = 155}
+icon_r = Image{src = "assets/right.png", opacity = 155} 
+icon_t = Image{src = "assets/top.png", opacity = 155}
+icon_b = Image{src = "assets/bottom.png", opacity = 155} 
+icon_hc = Image{src = "assets/align-horizontally-center.png", opacity = 175} 
+icon_vc = Image{src = "assets/align-vertically-center.png", opacity = 175}
+icon_dhc = Image{src = "assets/distribute-horizontal-center.png", opacity = 185}
+icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 185}
 
--- Background image 
-
---Image { name= "bg_img", src = grid40.src, tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}}
-
+-- Inspector attribute name index 
 attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "x_scale", "y_scale", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "clip_use", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
 
 

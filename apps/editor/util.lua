@@ -2,7 +2,9 @@
 -- Utils 
 -----------
 
+local factory = ui.factory
 
+-- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
     BG_IMAGE_40.opacity = 0
@@ -10,8 +12,6 @@ function clear_bg()
     BG_IMAGE_white.opacity = 0
     BG_IMAGE_import.opacity = 0
 end
-
-local factory = ui.factory
 
 function values(t) 
 	local j = 0 
@@ -45,14 +45,12 @@ function find_parent(child_obj)
    end
 end 
 
-
 local project
 local base
 local projects = {}
 
 function set_app_path()
 
-    input_mode = S_POPUP
     -- Get the user's home directory and make sure it is valid
     local home = editor_lb:get_home_dir()
     
@@ -79,6 +77,8 @@ function set_app_path()
         
     end
     
+    input_mode = S_POPUP
+
     printMsgWindow("Select Project : ", "projectlist")
     inputMsgWindow("projectlist")
 
@@ -162,7 +162,7 @@ function create_on_button_down_f(v)
 	            	local actor , dx , dy = unpack( dragging )
 		        new_object = copy_obj(v)
 	            	new_object.position = {x-dx, y-dy}
-			if(org_object ~= nil) then  -- ?  
+			if(org_object ~= nil) then  
 		        if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
 			editor.n_selected(v) 
 			editor.n_selected(new_object) 
@@ -195,9 +195,7 @@ function get_group_position(child_obj)
      end
 end 
 
-
 function set_obj (f, v)
-
       if(f.type == "Rectangle") then
            f.color = v.color
            f.border_color = v.border_color
@@ -280,7 +278,7 @@ function copy_obj (v)
 end	
 
 --------------------------------
--- Screen Command Line Inputs 
+-- Inspector 
 --------------------------------
 
 local input_t
@@ -596,8 +594,12 @@ end
 
 
 
-local function create_input_box(txt)
+local function create_input_box()
      	local box_g = Group {}
+        local input_l = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+              position = {25, 10}, text = project.."/" }
+        input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+        position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
      	local box = factory.draw_ring()
      	local box_focus = factory.draw_focus_ring()
 	box_g.name = "input_b"
@@ -607,27 +609,28 @@ local function create_input_box(txt)
 	box_g:add(box)
 	box_focus.opacity = 0 
 	box_g:add(box_focus)
-    	box_g:add(txt)
+    	box_g:add(input_l)
+    	box_g:add(input_t)
 
         function box_g.extra.on_focus_in()
-		txt:grab_key_focus(txt)
+		input_t:grab_key_focus(input_t)
 	        box.opacity = 0 
             	box_focus.opacity = 255
 		msgw_focus = "input_b"
-		txt.cursor_visible = true
+		input_t.cursor_visible = true
         end
 
         function box_g.extra.on_focus_out()
 	        box.opacity = 255 
             	box_focus.opacity = 0
-		txt.cursor_visible = false
+		input_t.cursor_visible = false
         end
 
 	return box_g
 end 
 
 --------------------------------
--- Message Window Inputs 
+-- Message Window 
 --------------------------------
 
 local  msgw = Group {
@@ -758,7 +761,7 @@ function printMsgWindow(txt, name)
 		 msgw_focus = prj_text.name --1102
 	     end 
 
-	     if (i == 1) then msgw_focus = prj_text.name end 
+	     if (i == 1) then msgw_focus = prj_text.name project = prj_text.text end 
 
          end 
      end 
@@ -908,9 +911,9 @@ end
 local input_purpose     = ""
 
 local function set_project_path ()
-	if(selected_prj == "" or input_t.text ~= "") then
+	if(selected_prj == "" and input_t.text ~= "") then
 	     project = input_t.text 
-	else 
+	elseif(selected_prj ~= "") then  
 	     project = msgw:find_child(selected_prj).text
 	end 
         app_path = editor_lb:build_path( base , project )
@@ -996,9 +999,7 @@ function inputMsgWindow(input_purpose)
             msgw:add(input_box)
 	    input_box.extra.on_focus_out()
 	else 
-            input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
-            position = {25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
-            input_box = create_input_box(input_t)
+            input_box = create_input_box()
             input_box.position = position
             msgw:add(input_box)
 	    input_box.extra.on_focus_in()
