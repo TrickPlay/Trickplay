@@ -100,11 +100,11 @@ BZIP_COMMANDS="make CC=\"$CC\" AR=\"$AR\" RANLIB=\"$RANLIB\" LDFLAGS=\"$LDFLAGS\
 #------------------------------------------------------------------------------
 # tokyo (DEPRECATED IN 0.0.8)
 
-TOKYO_V="1.4.42"
-TOKYO_DIST="tokyocabinet-${TOKYO_V}.tar.gz"
-TOKYO_SOURCE="tokyocabinet-${TOKYO_V}"
-TOKYO_COMMANDS="CFLAGS=\"${CFLAGS} -D_SYS_OPENBSD_=1\" ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make && make install"
-TOKYO_DEPENDS="BZIP"
+#TOKYO_V="1.4.42"
+#TOKYO_DIST="tokyocabinet-${TOKYO_V}.tar.gz"
+#TOKYO_SOURCE="tokyocabinet-${TOKYO_V}"
+#TOKYO_COMMANDS="CFLAGS=\"${CFLAGS} -D_SYS_OPENBSD_=1\" ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make && make install"
+#TOKYO_DEPENDS="BZIP"
 
 #------------------------------------------------------------------------------
 # expat
@@ -256,7 +256,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 
 #------------------------------------------------------------------------------
 
-ALL="GLIB SQLITE OPENSSL ZLIB CARES CURL BZIP TOKYO EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON CLUTTER AVAHI UPNP URI UUID"
+ALL="GLIB SQLITE OPENSSL ZLIB CARES CURL BZIP EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON CLUTTER AVAHI UPNP URI UUID"
 
 #-----------------------------------------------------------------------------
 
@@ -489,7 +489,6 @@ ${CXX} -o ${HERE}/test \
 	-lfontconfig \
 	-lfreetype \
 	-lexpat \
-	-ltokyocabinet \
 	-lbz2 \
 	-lcurl \
 	-lcares \
