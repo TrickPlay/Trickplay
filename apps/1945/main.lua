@@ -147,6 +147,9 @@ local keys = {
         [keys.y] = function()
             formations.zig_zag(500,400,-30)
         end,
+        [keys.u] = function()
+            add_to_render_list(enemies.turret(),500)
+        end,
         --bosses
         [keys.m] = function()
             formations.zepp_boss(900)
