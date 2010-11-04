@@ -203,7 +203,9 @@ function inspector_apply (v, inspector)
        end
 
        input_mode = S_SELECT
-       table.insert(undo_list, {v.name, CHG, org_object, new_object})
+       if(v.name ~= "video1") then 
+       	    table.insert(undo_list, {v.name, CHG, org_object, new_object})
+       end 
        return org_object, new_object
 end	
 

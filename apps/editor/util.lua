@@ -856,7 +856,6 @@ function inputMsgWindow_openvideo()
               }
 
      g.extra.video = video1
-     table.insert(undo_list, {video1.name, ADD, video1})
      mediaplayer.on_loaded = function( self ) clear_bg() if(g.extra.video ~= nil) then self:play() end end 
      if(video1.loop == true) then 
 	  	mediaplayer.on_end_of_stream = function ( self ) self:seek(0) self:play() end

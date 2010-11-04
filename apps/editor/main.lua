@@ -295,7 +295,7 @@ local function build_ui( show_it )
     local key_map =
     {
 	[ keys.h	] = function() animate_out_dropdown() editor.undo_history() input_mode = S_SELECT end,
-	[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
+	--[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
 	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
         [ keys.o	] = function() animate_out_dropdown() editor.open() input_mode = S_SELECT end,
@@ -305,7 +305,7 @@ local function build_ui( show_it )
         [ keys.i	] = function() animate_out_dropdown() editor.image() input_mode = S_SELECT end,
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
-        [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
+        --[ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
         [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
         [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() input_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
@@ -383,6 +383,9 @@ local function build_ui( show_it )
 	     section.button.reactive = true
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
+	          if(screen:find_child("mouse_pointer") ~= nil) then 
+             		screen:remove(mouse_pointer) 
+        	  end 
 		  if(input_mode ~= S_POPUP) and
 		    (screen:find_child("msgw") == nil) then
 	               button_map[section.button.name]()
@@ -439,6 +442,10 @@ local function build_ui( show_it )
 	if(key == keys.Control_L ) then control = true end
 	if(key == keys.Control_R ) then control = true end
 
+	if(screen:find_child("mouse_pointer") ~= nil) then 
+             screen:remove(mouse_pointer) 
+        end 
+	        
 	if(input_mode ~= S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
