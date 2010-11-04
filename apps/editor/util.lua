@@ -109,22 +109,19 @@ function create_on_button_down_f(v)
                     end 
 	            if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
 		     	editor.selected(p_obj)
-			p_obj.extra.selected = true 
 	            elseif (p_obj.extra.selected == true) then 
 		     	editor.n_selected(p_obj)
-			p_obj.extra.selected = false 
 	       	    end
 	            org_object = copy_obj(p_obj)
            	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
            	    return true
-	       else  -- v.extra.is_in_group == false or control == true 
+	      else 
                     if(button == 3 or num_clicks >= 2) then
                          editor.inspector(v)
                          return true
                     end 
 	            if(input_mode == S_SELECT and v.extra.selected == false) then 
 		     	editor.selected(v) 
-			v.extra.selected = true 
 	            elseif (v.extra.selected == true) then 
 			if(v.type == "Text") then 
 			      v:set{cursor_visible = true}
@@ -132,7 +129,6 @@ function create_on_button_down_f(v)
      			      v:grab_key_focus(v)
 			end 
 			editor.n_selected(v) 
-			v.extra.selected = false 
 	       	    end
 	            org_object = copy_obj(v)
            	    dragging = {v, x - v.x, y - v.y }
@@ -190,6 +186,7 @@ function create_on_button_down_f(v)
            end
           end
         end
+
 end
 
 function get_group_position(child_obj)
@@ -302,11 +299,11 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"caption", "OBJECT NAME"},
              {"name", v.name,"name"},
              {"line",""},
-             {"x", v.x, "x"},
-             {"y", v.y, "y"},
-             {"z", v.z, "z"},
-             {"w", v.w, "w"},
-             {"h", v.h, "h"},
+             {"x", math.floor(v.x), "x"},
+             {"y", math.floor(v.y), "y"},
+             {"z", math.floor(v.z), "z"},
+             {"w", math.floor(v.w), "w"},
+             {"h", math.floor(v.h), "h"},
              {"line",""}
       }
   else 

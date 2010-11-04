@@ -324,8 +324,6 @@ local function build_ui( show_it )
 				       end 
 				       input_mode = S_SELECT end,
         [ keys.q	] = function() exit() end,
-        [ keys.Left     ] = function() if(current_inspector == nil) then move_focus( ui.focus - 1 ) end end,
-        [ keys.Right    ] = function() if(current_inspector == nil) then move_focus( ui.focus + 1 ) end end ,
         
         [ keys.RED      ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
         [ keys.GREEN    ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
@@ -359,8 +357,58 @@ local function build_ui( show_it )
 			    	     end 
 			         end 
 			    end ,
-        [ keys.Down     ] = function() if(current_inspector == nil) then enter_section() end end
-       -- [ keys.Up       ] = function() if(current_inspector == nil) then animate_out_dropdown() end end
+        [ keys.Left     ] = function() if table.getn(selected_objs) ~= 0 then
+			         for q, w in pairs (selected_objs) do
+				      local t_border = screen:find_child(w)
+				      if(t_border ~= nil) then 
+		     			    t_border.x = t_border.x - 1
+		     		            local i, j = string.find(t_border.name,"border")
+		     			    local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                            if(t_obj ~= nil) then 
+			                         t_obj.x = t_obj.x - 1
+					    end 
+	             		      end
+			         end
+			   elseif(current_inspector == nil) then move_focus( ui.focus - 1 ) end end,
+        [ keys.Right    ] = function() if table.getn(selected_objs) ~= 0 then
+			         for q, w in pairs (selected_objs) do
+				      local t_border = screen:find_child(w)
+				      if(t_border ~= nil) then 
+		     			    t_border.x = t_border.x + 1
+		     		            local i, j = string.find(t_border.name,"border")
+		     			    local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                            if(t_obj ~= nil) then 
+			                         t_obj.x = t_obj.x + 1
+					    end 
+	             		      end
+			         end
+			   elseif(current_inspector == nil) then move_focus( ui.focus + 1 ) end end ,
+        [ keys.Down     ] = function()if table.getn(selected_objs) ~= 0 then
+			         for q, w in pairs (selected_objs) do
+				      local t_border = screen:find_child(w)
+				      if(t_border ~= nil) then 
+		     			    t_border.y = t_border.y + 1
+		     		            local i, j = string.find(t_border.name,"border")
+		     			    local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                            if(t_obj ~= nil) then 
+			                         t_obj.y = t_obj.y + 1
+					    end 
+	             		      end
+			         end
+			   elseif(current_inspector == nil) then enter_section() end end,
+        [ keys.Up       ] = function() if table.getn(selected_objs) ~= 0 then
+			         for q, w in pairs (selected_objs) do
+				      local t_border = screen:find_child(w)
+				      if(t_border ~= nil) then 
+		     			    t_border.y = t_border.y - 1
+		     		            local i, j = string.find(t_border.name,"border")
+		     			    local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                            if(t_obj ~= nil) then 
+			                         t_obj.y = t_obj.y - 1
+					    end 
+	             		      end
+			         end
+			   end end
     }
     
     -------------------------------------------------------------------------------
@@ -405,8 +453,7 @@ local function build_ui( show_it )
 	if(key == keys.Shift_R ) then shift = true end
 	if(key == keys.Control_L ) then control = true end
 	if(key == keys.Control_R ) then control = true end
-
-	if(input_mode ~= S_POPUP) then 
+	if(table.getn(selected_objs) == 0) and (input_mode ~= S_POPUP) then 
              local f = key_map[ key ]
              if f then
             	f()
@@ -449,6 +496,7 @@ local function build_ui( show_it )
 	if(input_mode ~= S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
+	      if(table.getn(selected_objs) == 0) then 
 	      if(current_inspector == nil)and (key == keys.Return or key == keys.Down 
 		   or key == keys.Left or key == keys.Right) then 
 	           local s= ui.sections[ui.focus]
@@ -459,7 +507,7 @@ local function build_ui( show_it )
         	   ui.button_focus.position = s.button.position
         	   ui.button_focus.opacity = 0
 	      end 
-
+	      end
      	  end
      	end
      end
@@ -692,9 +740,5 @@ function main()
     
 end
 dolater(main)
-function screen.on_key_down( s , k )
-	print( "SCREEN KD" , k )
-end
-
 --main()
 
