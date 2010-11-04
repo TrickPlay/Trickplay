@@ -25,8 +25,61 @@ function( section )
         
     local section_items = {}
     
-    local recently_used_apps = dofile( "app-list" )( profile_apps , "recently_used" )
+    -- A persistent list of recently used apps
+    
+    local AppList = dofile( "app-list" )
+    
+    local recently_used_apps = AppList( profile_apps , "recently_used" )
+    
+    -- A list of apps sorted by name
+    
+    local alpha_apps = {}
+    
+    -- Insert all of the app ids
+    
+    for k , v in pairs( profile_apps ) do
+        table.insert( alpha_apps , k )
+    end
+    
+    -- Sort the app ids by the app name
+    
+    table.sort( alpha_apps , function( a , b ) return profile_apps[ a ].name < profile_apps[ b ].name end )
+    
+    -- Create an official AppList out of it
+    
+    alpha_apps = AppList( profile_apps , nil , alpha_apps )
+    
+    
+    -- This should match the order in the category picker
+    
+    local app_lists = { recently_used_apps , alpha_apps }
+    
+    local current_app_list = settings.last_app_list or 1
+    
+    if current_app_list < 1 then
+        current_app_list = 1
+    elseif current_app_list > # app_lists then
+        current_app_list = 1
+    end
+
+    ---------------------------------------------------------------------------
+    
+    local statistics 
+    
+    do
+    
+        local mt = {}
         
+        mt.__index = mt
+        
+        function mt:app_launched( app_id )
+            recently_used_apps:make_first( app_id )
+        end
+        
+        statistics = setmetatable( {} , mt )
+    
+    end
+       
     ---------------------------------------------------------------------------
     -- We're switching to a list of apps in full screen
     ---------------------------------------------------------------------------
@@ -35,7 +88,7 @@ function( section )
     
         ui:on_exit_section( section )
     
-        local fs_apps = dofile( "fs-apps" )( ui , app_list )
+        local fs_apps = dofile( "fs-apps" )( ui , app_list , statistics )
         
         ui:on_section_full_screen( fs_apps )
     
@@ -58,7 +111,7 @@ function( section )
     
 --        local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
         
-        local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
+        local categories = factory.make_text_side_selector( assets , { ui.strings[ "Recently Used" ] , ui.strings[ "By Name" ] } , current_app_list )
     
 --        table.insert( section_items , all_apps )
         
@@ -82,15 +135,17 @@ function( section )
         -- The top apps
         ---------------------------------------------------------------------------
         
+        local list = app_lists[ current_app_list ]
+        
         for i = 1 , TOP_APP_COUNT do    
             
-            local app_id = recently_used_apps[ i ]
+            local app_id = list[ i ]
             
             if not app_id then
                 break
             end
             
-            local name = recently_used_apps.all[ app_id ].name
+            local name = list.all[ app_id ].name
             
             local tile = factory.make_app_tile( assets , name , app_id )
             
@@ -126,6 +181,47 @@ function( section )
             
         end
         
+    end
+    
+    ---------------------------------------------------------------------------
+
+    local function replace_app_tiles( list )
+    
+        for i = 1 , TOP_APP_COUNT do
+        
+            local old_tile = section_items[ i + 1 ]
+            
+            if not old_tile then
+                break
+            end
+            
+            local app_id = list[ i ]
+            
+            if not app_id then
+                break
+            end
+            
+            local name = profile_apps[ app_id ].name
+            
+            local tile = factory.make_app_tile( assets , name , app_id )
+            
+            tile.extra.on_activate =
+            
+                function( )
+                    if apps:launch( app_id ) then
+                        recently_used_apps:make_first( app_id )
+                    end
+                end
+            
+            tile.position = old_tile.position
+            
+            old_tile.parent:add( tile )
+            
+            old_tile:unparent()
+            
+            section_items[ i + 1 ] = tile
+        end
+    
     end
     
     ---------------------------------------------------------------------------
@@ -173,11 +269,39 @@ function( section )
     
     end
     
+    ---------------------------------------------------------------------------
+    -- Choosing a different sort algorithm
+    
+    local function show_previous()
+        if section.focus == 1 then
+            local i = section_items[ section.focus ]:on_show_previous()
+            if i then
+                replace_app_tiles( app_lists[ i ] )
+                settings.last_app_list = i
+                current_app_list = i
+            end
+        end
+    end
+    
+    local function show_next()
+        if section.focus == 1 then
+            local i = section_items[ section.focus ]:on_show_next()
+            if i then
+                replace_app_tiles( app_lists[ i ] )
+                settings.last_app_list = i
+                current_app_list = i
+            end
+        end
+    end
+
+    ---------------------------------------------------------------------------
     
     local key_map =
     {
         [ keys.Up     ] = function() move_focus( -1 ) end,
         [ keys.Down   ] = function() move_focus( 1  ) end,
+        [ keys.Left   ] = show_previous,
+        [ keys.Right  ] = show_next,
         [ keys.Return ] = activate_focused,
     }
 
@@ -212,7 +336,7 @@ function( section )
     
     function section.on_default_action( section )
     
-        show_all_apps( recently_used_apps )
+        show_all_apps( app_lists[ current_app_list ] )
         
         return true
     

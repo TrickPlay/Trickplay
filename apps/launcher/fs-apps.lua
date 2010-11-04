@@ -2,7 +2,7 @@
 -- This one implements a full screen list of apps.
 
 return
-function( ui , app_list )
+function( ui , app_list , statistics )
 
     local section   = {}
 
@@ -104,7 +104,7 @@ function( ui , app_list )
             
                 function()
                     if apps:launch( app_id ) then
-                        app_list:make_first( app_id )
+                        statistics:app_launched( app_id )
                     end
                 end
         end

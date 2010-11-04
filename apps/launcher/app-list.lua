@@ -12,11 +12,11 @@
 -- app object using its app_id
 
 return
-function ( all , settings_key )
+function ( all , settings_key , sorted )
     
     local result = {}
 
-    local saved = ( settings_key and settings[ settings_key ] ) or {}
+    local saved = sorted or ( settings_key and settings[ settings_key ] ) or {}
     
     local to_add = {}
     
@@ -48,17 +48,19 @@ function ( all , settings_key )
     end
     
     function mt:make_first( app_id )
-        local index = nil
-        for i , j in ipairs( self ) do
-            if j == app_id then
-                index = i
-                break
+        if settings_key then
+            local index = nil
+            for i , j in ipairs( self ) do
+                if j == app_id then
+                    index = i
+                    break
+                end
             end
-        end
-        if index and index > 1 then
-            table.remove( self , index )
-            table.insert( self , 1 , app_id )
-            self:save()
+            if index and index > 1 then
+                table.remove( self , index )
+                table.insert( self , 1 , app_id )
+                self:save()
+            end
         end
     end
 
