@@ -184,6 +184,135 @@ levels =
 			add_to_render_list( lvlcomplete )
 		end
 
-	}, 
+	},
+    {
+    		speed          = 80,   --px/s
+		level_dist     = 3000, --px
+		dist_travelled = 0,
+		launch_index   = 1,
+		bg             = water,
+        offset         = {},
+        index          = {},
+        add_list       = {},
+
+		setup = function(self)
+		--	add_to_render_list( self.bg )
+            self.add_list = {
+            --enemy
+            --[[{
+                {y =    0, item = add_to_render_list,        params = { lvl1txt        }},
+                {y =   80, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {y =  300, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
+                {y =  400, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
+                {y =  550, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
+                {y =  700, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
+                {y = 1050, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
+                {y = 1050, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
+                
+                {y = 1300, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {y = 1300, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
+                
+                {y = 1600, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {y = 1660, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
+                {y = 1660, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
+                {y = 1720, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
+                {y = 1780, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
+                            
+                {y = 2000, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
+                {y = 2000, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
+
+                {y = 2320, item = formations.cluster,         params = {200}},
+                {y = 2350, item = formations.cluster,         params = {1200}},
+                {y = 2450, item = formations.cluster,         params = {900}},
+                {y = 2550, item = formations.cluster,         params = {500}},
+                {y = 2600, item = formations.cluster,         params = {1700}},
+                
+                {y = 2700, item = formations.cluster,         params = {240}},
+                {y = 2750, item = formations.zepp_boss,      params = { 120 }}
+            },--]]
+            --docks
+            {
+                {y =   0, item = self.bg.add_dock, params = {self.bg,  2,  1}},
+                {y =  280, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2,  1}},
+                {y =  280+imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  2*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  2,  1}},
+                {y =  280+2*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  3*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  2,  1}},
+                {y =  280+3*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  4*imgs.dock_1_1.h*9,  item = self.bg.add_dock, params = {self.bg,  2,  1}},
+                {y =  280+4*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                
+                {y =  5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1,  1}},
+                {y =  280+5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+                {y =  6*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  1,  1}},
+                {y =  280+6*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+                {y =  7*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  1,  1}},
+                {y =  280+7*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+                {y =  8*imgs.dock_1_1.h*9,  item = self.bg.add_dock, params = {self.bg,  1,  1}},
+                {y =  280+8*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+            },
+            --cloud
+            --[[{
+                {y =  100, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2,   0,   0, 0}},
+                {y =  170, item = self.bg.add_cloud, params = {self.bg, 1,  425/2, 0, 180,    0}},
+                {y =  280, item = self.bg.add_cloud, params = {self.bg, 3,  700,   0,   0,    0}},
+                {y =  340, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2, 0,   0,    0}},
+                {y =  380, item = self.bg.add_cloud, params = {self.bg, 1, 425/2,   0, 180,    0}},
+                {y =  420, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0, 0,    0}},
+                {y =  480, item = self.bg.add_cloud, params = {self.bg, 2, 484/2, 0, 180, 0}},
+                {y =  580, item = self.bg.add_cloud, params = {self.bg, 3,  300,   0, 180,  0}},
+                {y =  620, item = self.bg.add_cloud, params = {self.bg, 1,  screen.w - 425/2, 0,   0,  0}},
+                {y =  660, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2,   0, 0,  0}},
+                {y =  740, item = self.bg.add_cloud, params = {self.bg, 1,  425/2, 0, 180,   0}},
+                {y =  790, item = self.bg.add_cloud, params = {self.bg, 3,  300,   0, 180,  0}},
+                {y =  820, item = self.bg.add_cloud, params = {self.bg, 3, 1700, 0, 180, 0}},
+            }--]]
+            }
+            for i = 1, #self.add_list do
+                self.index[i] = 1
+                self.offset[i] = 0
+            end
+			self.dist_travelled = 0
+		end,
+		render = function(self,seconds)
+			--if player is dead
+
+
+			local curr_dist = self.dist_travelled + self.speed*seconds
+            for i = 1,#self.add_list do
+                local done = false
+                while not done do
+                	
+                    if  self.index[i] > #self.add_list[i] then
+                        if i ~= 1 then
+                            self.index[i] = 1
+                            self.offset[i] = curr_dist
+                            print("aaa",i,self.offset[i])
+                        end
+                        done = true
+                    elseif self.add_list[i][ self.index[i] ].y < (curr_dist - self.offset[i]) and
+                	   self.add_list[i][ self.index[i] ].y >=
+                	   (self.dist_travelled - self.offset[i]) then
+                        
+                        self.add_list[i][self.index[i]].item(unpack(self.add_list[i][self.index[i]].params))
+                        self.index[i] = self.index[i] + 1
+                	else
+                		done = true
+                	end
+                end
+            end
+
+
+			self.dist_travelled = curr_dist
+	--		if self.dist_travelled > self.level_dist then
+	--			remove_from_render_list( self )
+	--		end
+		end,
+		level_complete = function(self)
+			remove_from_render_list( self)
+			add_to_render_list( lvlcomplete )
+		end
+    }
 }
 levels[0] = {level_complete = function(self) print("Level 0 has no level_complete function") end }

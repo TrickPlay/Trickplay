@@ -114,6 +114,17 @@ local keys = {
             test_text.opacity = 255
             
         end,
+        [keys["2"]] = function()
+            
+            out_splash__in_hud()
+            
+            state.curr_mode  = "CAMPAIGN"
+            state.curr_level = 2
+            
+            add_to_render_list(my_plane)
+            add_to_render_list(levels[state.curr_level])
+            
+        end,
     },
     ["TEST_MODE"] =
     {
@@ -152,7 +163,8 @@ local keys = {
         end,
         --other
         [keys.s] = function()
-            add_to_render_list(smoke())
+            water:add_dock(1,1)
+            --add_to_render_list(smoke())
         end,
         [keys.h] = function()
             if test_text.opacity == 255 then

@@ -915,6 +915,8 @@ enemies =
 			)
 		end	
 	} end,
+    battleship = function() return{
+    } end
 }
 
 

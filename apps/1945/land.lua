@@ -21,7 +21,46 @@ water =
                 layers.ground:add( strip )
             end
     end,
-
+    add_dock = function(self,type, side)
+        local h = imgs.dock_1_1.h
+        local x = imgs.dock_1_5.w - imgs.dock_1_1.w
+        local dock = {
+            speed = self.speed,
+            group = Group{},
+            setup = function(self)
+                self.group:add(
+                    Clone{source=imgs["dock_"..type.."_3"], y =   0, x = x},
+                    Clone{source=imgs["dock_"..type.."_6"], y =   h       },
+                    Clone{source=imgs["dock_"..type.."_1"], y = 2*h, x = x},
+                    Clone{source=imgs["dock_"..type.."_1"], y = 3*h, x = x},
+                    Clone{source=imgs["dock_"..type.."_2"], y = 4*h, x = x},
+                    Clone{source=imgs["dock_"..type.."_1"], y = 5*h, x = x},
+                    Clone{source=imgs["dock_"..type.."_1"], y = 6*h, x = x},
+                    Clone{source=imgs["dock_"..type.."_5"], y = 7*h,      },
+                    Clone{source=imgs["dock_"..type.."_4"], y = 8*h, x = x},
+                    --Clone{source=imgs.battleship,y = 5/2*h,x=x - imgs.battleship.w-20}
+                )
+                self.group.y = -self.group.h
+                if side == 1 then
+                    self.group.y_rotation = {180,0,0}
+                    self.group.x = imgs.dock_1_5.w 
+                elseif side == -1 then
+                    self.group.x = screen.w - imgs.dock_1_5.w 
+                else
+                    error("unexpected value for side received, expected 1 or -1, got "..side)
+                end
+                layers.land_doodads_1:add(self.group)
+            end,
+            render = function(self,secs)
+                self.group.y = self.group.y + self.speed*secs
+                if self.group.y > screen.h then
+                    self.group:unparent()
+                    remove_from_render_list(self)
+                end
+            end,
+        }
+        add_to_render_list(dock)
+    end,
 
     add_cloud = function(self,index, xxx, x_rot, y_rot, z_rot)
         local cloud =
