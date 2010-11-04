@@ -173,16 +173,17 @@ end
 -- Makes a text menu item with two white arrows
 -------------------------------------------------------------------------------
 
-function factory.make_text_side_selector( assets , caption )
+function factory.make_text_side_selector( assets , caption , chosen )
 
     local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
-    local PADDING_X     = 7 -- The focus ring has this much padding around it
+    local PADDING_X     = 8 -- The focus ring has this much padding around it
     local PADDING_Y     = 7  
     local WIDTH         = 300 + ( PADDING_X * 2 )
     local HEIGHT        = 46  + ( PADDING_Y * 2 )
     local ARROW_COLOR   = "FFFFFF"
     local ARROW_WIDTH   = HEIGHT / 4
     local ARROW_HEIGHT  = HEIGHT / 3
+    local ANIMATION_DURATION = 150
     
     local function make_arrow()
         local arrow = Canvas{ size = { ARROW_WIDTH , ARROW_HEIGHT } }
@@ -196,8 +197,6 @@ function factory.make_text_side_selector( assets , caption )
         return arrow
     end
     
-    local text = Text{ text = caption }:set( STYLE )
-    
     local l_arrow = assets( "menu-item-arrow" , make_arrow )
     local r_arrow = assets( "menu-item-arrow" , make_arrow )
     
@@ -207,14 +206,18 @@ function factory.make_text_side_selector( assets , caption )
     r_arrow.z_rotation = { 180 , 0 , 0 }
     
     local focus = assets( "assets/button-focus.png" )
+    
+    local slider = Group()
 
     local group = Group
     {
         size = { WIDTH , HEIGHT },
+
         children =
         {
             l_arrow:set{ position = { PADDING_X + ARROW_WIDTH / 2 , HEIGHT / 2 } , opacity = 128 },
             r_arrow:set{ position = { WIDTH - PADDING_X - ARROW_WIDTH / 2 , HEIGHT / 2 } , opacity = 128 },
+
             focus:set
             {
                 position =
@@ -229,9 +232,45 @@ function factory.make_text_side_selector( assets , caption )
                 } ,
                 opacity = 0
             },
-            text:set{ position = { ( WIDTH - text.w ) / 2 , ( HEIGHT - text.h ) / 2 } }
+            
+            slider:set
+            {
+                position = { PADDING_X * 2 + ARROW_WIDTH * 2 , 0 },
+                size = { WIDTH - PADDING_X * 4 - ARROW_WIDTH * 4 , HEIGHT },
+                clip = { 0 , 0 , WIDTH - PADDING_X * 4 - ARROW_WIDTH * 4 , HEIGHT },
+            }
         }
     }
+
+    local choices = caption
+    local current_choice = 1
+    
+    if type( choices ) == "string" then
+        choices = { choices }
+    end
+
+    if chosen and chosen >= 1 and chosen <= #choices then
+        current_choice = chosen
+    end
+    
+    
+    for i = 1 , # choices do
+    
+        local text = Text{ text = choices[ i ] }:set( STYLE )
+        
+        text.y = ( slider.h - text.h ) / 2
+        
+        if i == current_choice then
+            text.x = ( ( slider.w - text.w ) / 2  )
+        else
+            text.x = ( ( slider.w - text.w ) / 2  ) + slider.w
+        end
+        
+        slider:add( text )
+    
+    end
+    
+    local animating = false
     
     function group.extra.on_focus_in()
         focus.opacity = 255
@@ -243,6 +282,88 @@ function factory.make_text_side_selector( assets , caption )
         focus.opacity = 0
         l_arrow.opacity = 128
         r_arrow.opacity = 128
+    end
+    
+    function group.extra.on_show_next()
+
+        if # choices < 2 or animating then
+            return
+        end
+        
+        local children = slider.children
+        
+        local next_choice = current_choice + 1
+        if next_choice > # children then
+            next_choice = 1
+        end
+        
+        local this_one = children[ current_choice ]
+        local next_one = children[ next_choice ]
+        
+        next_one.x = ( ( slider.w - next_one.w ) / 2  ) + slider.w 
+        
+        local this_interval = Interval( this_one.x , this_one.x - slider.w )
+        local next_interval = Interval( next_one.x , next_one.x - slider.w )
+        
+        local timeline = Timeline{ duration = ANIMATION_DURATION }
+        
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            this_one.x = this_interval:get_value( progress )
+            next_one.x = next_interval:get_value( progress )
+        end
+                
+        function timeline.on_completed( )
+            animating = false
+        end
+        
+        current_choice = next_choice
+        
+        animating = true
+        
+        timeline:start()
+        
+        return current_choice
+    end
+
+    function group.extra.on_show_previous()
+
+        if # choices < 2 or animating then
+            return
+        end
+        
+        local children = slider.children
+        
+        local next_choice = current_choice - 1
+        if next_choice < 1 then
+            next_choice = # choices
+        end
+        
+        local this_one = children[ current_choice ]
+        local next_one = children[ next_choice ]
+        
+        next_one.x = ( ( slider.w - next_one.w ) / 2  ) - slider.w 
+        
+        local this_interval = Interval( this_one.x , this_one.x + slider.w )
+        local next_interval = Interval( next_one.x , next_one.x + slider.w )
+        
+        local timeline = Timeline{ duration = ANIMATION_DURATION }
+        
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            this_one.x = this_interval:get_value( progress )
+            next_one.x = next_interval:get_value( progress )
+        end
+                
+        function timeline.on_completed( )
+            animating = false
+        end
+        
+        current_choice = next_choice
+        
+        animating = true
+        
+        timeline:start()
+        
+        return current_choice
     end
     
     return group
