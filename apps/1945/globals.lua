@@ -58,7 +58,21 @@ imgs =
     cloud1          = Image{ src = "assets/cloud1.png"},
     cloud2          = Image{ src = "assets/cloud2.png"},
     cloud3          = Image{ src = "assets/cloud3.png"},
+    
+    dock_1_1        = Image{ src = "assets/dock/harbor_1_1.png"},
+    dock_1_2        = Image{ src = "assets/dock/harbor_1_2.png"},
+    dock_1_3        = Image{ src = "assets/dock/harbor_1_3.png"},
+    dock_1_4        = Image{ src = "assets/dock/harbor_1_4.png"},
+    dock_1_5        = Image{ src = "assets/dock/harbor_1_5.png"},
+    dock_1_6        = Image{ src = "assets/dock/harbor_1_6.png"},
 
+    dock_2_1        = Image{ src = "assets/dock/harbor_2_1.png"},
+    dock_2_2        = Image{ src = "assets/dock/harbor_2_2.png"},
+    dock_2_3        = Image{ src = "assets/dock/harbor_2_3.png"},
+    dock_2_4        = Image{ src = "assets/dock/harbor_2_4.png"},
+    dock_2_5        = Image{ src = "assets/dock/harbor_2_5.png"},
+    dock_2_6        = Image{ src = "assets/dock/harbor_2_6.png"},
+    
     my_plane_strip  = Image{ src = "assets/player_strip.png" },
     my_bullet       = Image{ src = "assets/bullet.png" },
     life            = Image{ src = "assets/life.png"},
@@ -67,6 +81,8 @@ imgs =
     explosion1      = Image{ src = "assets/explosion1_strip6.png" },
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
     explosion3      = Image{ src = "assets/explosion3_strip7.png" },
+
+    battleship      = Image{ src = "assets/battleship.png" },
 
     smoke           = Image{ src = "assets/smoke.png"},
     enemy_1         = Image{ src = "assets/enemy1.png"   },
