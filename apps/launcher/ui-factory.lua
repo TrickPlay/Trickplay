@@ -562,6 +562,7 @@ function factory.make_featured_app_tile( assets , caption , description , icon_u
     local LABEL_BOTTOM_OFFSET   = -( LABEL_HEIGHT - 2 )
     local SLIDER_HEIGHT         = LABEL_HEIGHT * 2
     local DESC_TOP_OFFSET       = 47
+    local SLIDE_DURATION        = 150
     
     local text = Text{ text = caption }:set( STYLE )
     
@@ -633,17 +634,65 @@ function factory.make_featured_app_tile( assets , caption , description , icon_u
             },
         }
     }
+    
+    local y_interval = Interval( slider.y , slider.y - SLIDER_HEIGHT )
+    
+    local clip_interval = Interval( LABEL_HEIGHT , LABEL_HEIGHT + SLIDER_HEIGHT )
+
+    local timeline 
 
     function group.extra.on_focus_in()
+
         focus.opacity = 255
-        slider.y = slider.y - SLIDER_HEIGHT
-        slider.clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT + SLIDER_HEIGHT }
+        
+        local start = 0
+        
+        if timeline then
+            timeline:pause()
+            start = timeline.duration - timeline.elapsed
+            timeline = nil
+        end
+
+        timeline = Timeline{ duration = SLIDE_DURATION }
+        
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            slider.y = y_interval:get_value( progress )
+            slider.clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , clip_interval:get_value( progress ) }
+        end
+        
+        function timeline.on_completed( )
+            timeline = nil
+        end
+        
+        timeline:start()
+        timeline:advance( start )
+        
     end
     
     function group.extra.on_focus_out()
         focus.opacity = 0
-        slider.y = slider.y + SLIDER_HEIGHT
-        slider.clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , LABEL_HEIGHT }
+
+        local start = 0
+        
+        if timeline then
+            timeline:pause()
+            start = timeline.duration - timeline.elapsed
+            timeline = nil
+        end
+        
+        timeline = Timeline{ duration = SLIDE_DURATION }
+        
+        function timeline.on_new_frame( timeline , elapsed , progress )
+            slider.y = y_interval:get_value( 1 - progress )
+            slider.clip = { 0 , 0 , frame.w - FRAME_X_PADDING * 2 , clip_interval:get_value( 1 - progress ) }
+        end
+        
+        function timeline.on_completed( )
+            timeline = nil
+        end
+        
+        timeline:start()
+        timeline:advance( start )
     end
     
     return group
