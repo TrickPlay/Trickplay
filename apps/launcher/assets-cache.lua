@@ -7,7 +7,7 @@
 
    
 local function make_image( k )
-    return Image{ src = k }
+    return Image{ src = k } 
 end
 
 local list = {}
@@ -17,13 +17,22 @@ local mt = {}
 mt.__index = mt
 
 function mt.__call( t , k , f )
+    local print = function() end
+    print( "ASKING FOR" , k )
     local asset = rawget( list , k )
     if not asset then
         asset = ( f or make_image )( k )
+        if type( asset ) == "string" then
+            print( "  ASK AGAIN" )
+            return t( asset )
+        end
         assert( asset , "Failed to create asset "..k )
         asset:set{ opacity = 0 }
         rawset( list , k , asset )
         screen:add( asset )
+        print( "  MISS" )
+    else
+        print( "  HIT" )
     end
     return Clone{ source = asset , opacity = 255 }
 end

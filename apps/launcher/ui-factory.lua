@@ -393,7 +393,7 @@ function factory.make_app_tile( assets , caption , app_id )
         if icon:load_app_icon( app_id , "launcher-icon.png" ) then
             return icon
         end
-        return Image{ src = "assets/generic-app-icon.jpg" }
+        return "assets/generic-app-icon.jpg"
     end
     
     local text = Text{ text = caption }:set( STYLE )
