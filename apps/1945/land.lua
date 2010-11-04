@@ -37,7 +37,7 @@ water =
                     Clone{source=imgs["dock_"..type.."_1"], y = 5*h, x = x},
                     Clone{source=imgs["dock_"..type.."_1"], y = 6*h, x = x},
                     Clone{source=imgs["dock_"..type.."_5"], y = 7*h,      },
-                    Clone{source=imgs["dock_"..type.."_4"], y = 8*h, x = x},
+                    Clone{source=imgs["dock_"..type.."_4"], y = 8*h, x = x}
                     --Clone{source=imgs.battleship,y = 5/2*h,x=x - imgs.battleship.w-20}
                 )
                 self.group.y = -self.group.h
