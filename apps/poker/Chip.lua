@@ -82,8 +82,6 @@ chipStack = Class(function(self, chipValue, ...)
         for i=1, self.size do
             self.chips[i].image.y = y
             y = y - dy
-            --TODO: previously was (self.chips[i]) check to make sure this
-            -- didn't break anything
             if not self.chips[i].image.parent then
                 self.group:add(self.chips[i].image)
             end
