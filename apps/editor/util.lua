@@ -4,6 +4,15 @@
 
 local factory = ui.factory
 
+function is_lua_file(fn)
+	     i, j = string.find(fn, ".lua")
+	     if (j == string.len(fn)) then
+		return true
+	     else 
+		return false
+	     end 
+end 
+
 -- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
@@ -806,12 +815,30 @@ function inputMsgWindow_openfile()
           inputMsgWindow("reopenfile")
           return 
      end
-     editor.close()
-     current_fn = input_t.text
-     local f = loadfile(current_fn)
-     f(g)
+     if(is_lua_file(input_t.text) == true) then 
+           editor.close()
+           current_fn = input_t.text
+           local f = loadfile(current_fn)
+           f(g)
+     else 
+	  cleanMsgWindow()
+	  screen:grab_key_focus(screen) -- iii
+          printMsgWindow("The file is not a lua file.\nFile Name : ","err_msg")
+          inputMsgWindow("reopenfile")
+          return 
+     end 
      if(g.extra.video ~= nil) then clear_bg() end 
      item_num = table.getn(g.children)
+
+--[[
+     for i, v in pairs(g.children) do
+	  if(v.type == "Group") then 
+		g:remove(v) 
+          end
+     end 
+     ]]
+
+	
      for i, v in pairs(g.children) do
           v.reactive = true
 	  if(v.type == "Text") then
@@ -824,7 +851,13 @@ function inputMsgWindow_openfile()
 		end 
 	  end 
           create_on_button_down_f(v)
-
+	  if(v.type == "Group") then 
+	       for j, c in pairs (v.children) do
+                    c.reactive = true
+		    c.extra.is_in_group = true
+                    create_on_button_down_f(c)
+	       end 
+	  end 
      end 
      cleanMsgWindow()
      if(screen:find_child("screen_objects") == nil) then
@@ -978,9 +1011,13 @@ function inputMsgWindow(input_purpose)
 	msgw_cur_y = msgw_cur_y + 45
      elseif(input_purpose == "projectlist") then 
 	msgw_cur_x = 25
+	if(msgw_focus ~= "") then 
 	msgw:add(Text{name= name, text = "   New Project : ", font= "DejaVu Sans 32px",
      	color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
      	reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})  
+	else 
+	     msgw_focus = "input_b"
+	end 
 
 	msgw_cur_x = 360
 	msgw_cur_y = msgw_cur_y + 10
@@ -1153,7 +1190,9 @@ function inputMsgWindow(input_purpose)
      if( input_purpose =="yn") then 
           yes_b:grab_key_focus(yes_b)
      elseif( input_purpose == "projectlist") then 
-	  msgw:find_child(msgw_focus).extra.on_focus_in()
+	  if(msgw_focus ~= "") then 
+	       msgw:find_child(msgw_focus).extra.on_focus_in()
+	  end 
      else 
           input_t:grab_key_focus(input_t)
      end 
