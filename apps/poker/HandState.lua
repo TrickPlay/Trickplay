@@ -153,6 +153,7 @@ HandState = Class(nil,function(state, ctrl, ...)
          bb_player.money, player_bets[bb_player] = bb_player.money-bb_qty, bb_qty
       end
 
+      -- holds everyone's current money put into the pot
       running_money = {}
       for _, player in ipairs(players) do
          running_money[player] = player_bets[player]
@@ -231,7 +232,8 @@ HandState = Class(nil,function(state, ctrl, ...)
          else
             ctrl:call_player(active_player)
          end
-      elseif bet >= call_bet+min_raise or (call_bet < bet and bet < call_bet+min_raise and active_player.money==0) then
+      elseif bet >= call_bet+min_raise
+      or (call_bet < bet and bet < call_bet+min_raise and active_player.money==0) then
          -- player raises, forces everyone to act
          delta = bet - player_bets[active_player]
          player_bets[active_player] = bet
@@ -291,9 +293,10 @@ HandState = Class(nil,function(state, ctrl, ...)
          local tmp_action = (dealer % #players) + 1
          local safety_counter = 1
          local num_all_in = 0
-         print("before true loop")
+         --print("before true loop")
          local num_in_players = #self:get_in_players()
-         while out[players[tmp_action]] or done[players[tmp_action]] or all_in[players[tmp_action]] do
+         while out[players[tmp_action]]
+         or done[players[tmp_action]] or all_in[players[tmp_action]] do
             if all_in[players[tmp_action]] then
                print("player "..tmp_action.." is all in")
                num_all_in = num_all_in+1
@@ -318,6 +321,8 @@ HandState = Class(nil,function(state, ctrl, ...)
          local num_all_in = 0
          print("before false loop")
          local num_in_players = #self:get_in_players()
+         -- rotate through the players to try and find the next available player to
+         -- bet
          while out[players[tmp_action]] or done[players[tmp_action]] or all_in[players[tmp_action]] do
             if all_in[players[tmp_action]] then
                print("player "..tmp_action.." is all in")
