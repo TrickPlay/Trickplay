@@ -82,7 +82,8 @@ imgs =
     explosion2      = Image{ src = "assets/explosion2_strip7.png" },
     explosion3      = Image{ src = "assets/explosion3_strip7.png" },
 
-    battleship      = Image{ src = "assets/battleship.png" },
+    b_ship          = Image{ src = "assets/battleship.png" },
+    turret          = Image{ src = "assets/battleship_cannon.png" },
 
     smoke           = Image{ src = "assets/smoke.png"},
     enemy_1         = Image{ src = "assets/enemy1.png"   },
@@ -121,6 +122,12 @@ txt =
     {
         font  = my_font,
         text = "+1 Life",
+        color = "FFFFFF"
+    },
+    level2 = Text
+    {
+        font  = my_font,
+        text = "LEVEL 2",
         color = "FFFFFF"
     },
     level1 = Text

@@ -24,6 +24,31 @@
                                         end
                                     end,
                             }
+                   lvl2txt    =     {
+                                speed = 40,
+                                text = Clone{ source = txt.level2 },
+                                
+                                setup = function( self )
+                                        self.text.position = { screen.w/2,screen.h/2}
+                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
+                                        self.text.opacity = 255;
+					self.text.scale = {1,1}
+                                        layers.hud:add( self.text )
+                                    end,
+                                    
+                                render = function( self , seconds )
+                                        local o = self.text.opacity - self.speed * seconds
+                                        local scale = self.text.scale
+                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        if o <= 0 then
+                                            remove_from_render_list( self )
+                                            self.text:unparent()
+                                        else
+                                            self.text.opacity = o
+                                            self.text.scale = scale
+                                        end
+                                    end,
+                            }
 lvlcomplete =      {
                                 speed = 40,
                                 text = Text{font = my_font , text = "Level Complete"  , color = "FFFFFF"},
@@ -199,9 +224,24 @@ levels =
 		--	add_to_render_list( self.bg )
             self.add_list = {
             --enemy
-            --[[{
-                {y =    0, item = add_to_render_list,        params = { lvl1txt        }},
-                {y =   80, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+            {
+                {y =    0, item = add_to_render_list,        params = { lvl2txt }},
+                {y =   75, item = formations.zig_zag,  params = { 400,400, -30}},
+                {y =   75, item = formations.zig_zag,  params = {1520,400,  30}},
+                {y =  200, item = formations.zig_zag,  params = { 400,400,  30}},
+                {y =  200, item = formations.zig_zag,  params = {1520,400, -30}},
+                {y =  800, item = formations.zig_zag,  params = { 400,400, -30}},
+                {y =  800, item = formations.zig_zag,  params = {1520,400,  30}},
+                {y =  925, item = formations.zig_zag,  params = { 400,400,  30}},
+                {y =  925, item = formations.zig_zag,  params = {1520,400, -30}},
+                
+                {y = 1300, item = formations.cluster,  params = {screen.w/2 - 150}},
+                {y = 1300, item = formations.cluster,  params = {screen.w/2 + 150}},
+                {y = 1400, item = add_to_render_list,  params = { powerups.guns( screen.w/2 )}},
+                
+                
+                
+                --[[
                 {y =  300, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
                 {y =  400, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
                 {y =  550, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
@@ -229,7 +269,8 @@ levels =
                 
                 {y = 2700, item = formations.cluster,         params = {240}},
                 {y = 2750, item = formations.zepp_boss,      params = { 120 }}
-            },--]]
+                --]]
+            },
             --docks
             {
                 {y =   0, item = self.bg.add_dock, params = {self.bg,  2,  1}},

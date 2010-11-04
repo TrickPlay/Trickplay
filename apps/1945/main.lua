@@ -145,11 +145,14 @@ local keys = {
             formations.cluster(500)
         end,
         [keys.y] = function()
-            formations.zig_zag(500,400)
+            formations.zig_zag(500,400,-30)
         end,
         --bosses
         [keys.m] = function()
             formations.zepp_boss(900)
+        end,
+        [keys.n] = function()
+            add_to_render_list(enemies.battleship(),500)
         end,
         --powerups
         [keys.z] = function()

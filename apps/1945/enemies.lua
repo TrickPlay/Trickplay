@@ -586,7 +586,7 @@ enemies =
 			--user plane is the target
 			local targ =
 			{ 
-				x = (my_plane.group.x+my_plane.image.w/2), 
+				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
 				y = (my_plane.group.y+my_plane.image.h/2)
 			}
 			local zepp =
@@ -638,8 +638,8 @@ enemies =
 			elseif targ.x < zepp.l.x then
 				
 				self.guns.l.z_rotation = {180/math.pi*
-					math.atan2(targ.y-zepp.r.y,
-					targ.x-zepp.r.x),0,0}
+					math.atan2(targ.y-zepp.l.y,
+					targ.x-zepp.l.x),0,0}
 				mock_obj =
 				{
 					group =
@@ -915,7 +915,366 @@ enemies =
 			)
 		end	
 	} end,
+    
+    
+    
     battleship = function() return{
+        
+		health = 20,
+		type = TYPE_ENEMY_PLANE,
+        bulletholes = {},
+		
+		stage  = 0,	--the current stage the fighter is in
+		stages = {},	--the stages, must be set by formations{}
+		approach_speed = 80,
+		--attack_speed   = 15,
+		
+		
+		num_prop_frames = 3,
+		prop_index = 1,
+		image    = Clone{source=imgs.b_ship},
+		
+		is_boss = false,
+		
+		
+		guns =
+		{
+            bow = Clone
+            {
+                source       = imgs.turret,
+				anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+				z_rotation   = {180,0,0}
+            },
+            mid = Clone
+            {
+                source       = imgs.turret,
+				anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+				z_rotation   = {180,0,0}
+            },
+            stern = Clone
+            {
+                source       = imgs.turret,
+				anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+				z_rotation   = {180,0,0}
+            },
+			
+			g_b = Group
+			{
+				x = imgs.b_ship.w/2,
+				y = 130,
+			},
+			
+			g_m = Group
+			{
+				x = imgs.b_ship.w/2,
+				y = 190,
+			},
+            g_s = Group
+			{
+				x = imgs.b_ship.w/2,
+				y = 410,
+			},
+		},
+        
+		group    = Group{},
+		
+		shoot_time      = 7 , --how frequently the ship shoots
+		last_shot_time  =    --how long ago the ship last shot
+        {
+            b = math.random()*2,
+            m = math.random()*2,
+            s = math.random()*2
+        },
+        
+		
+		
+		rotate_guns_and_fire = function(self,secs)
+			---[[
+			--prep the variables that determine if its time to shoot
+			
+            self.last_shot_time.m = self.last_shot_time.m + secs
+            self.last_shot_time.s = self.last_shot_time.s + secs
+			
+			--mock enemy-object which is passed to fire_bullet()
+			local mock_obj = {}
+			
+			--these x,y values are used for rotations and
+			--bullet trajectories
+			
+			--user plane is the target
+			local targ =
+			{ 
+				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
+				y = (my_plane.group.y+my_plane.image.h/2)
+			}
+			local b_ship =
+			{
+                b =
+                {
+                    x = (self.guns.g_b.x+self.group.x-self.group.anchor_point[1]),
+					y = (self.guns.g_b.y+self.group.y-self.group.anchor_point[2])
+                },
+                m =
+                {
+                    x = (self.guns.g_m.x+self.group.x-self.group.anchor_point[1]),
+					y = (self.guns.g_m.y+self.group.y-self.group.anchor_point[2])
+                },
+                s =
+                {
+                    x = (self.guns.g_s.x+self.group.x-self.group.anchor_point[1]),
+					y = (self.guns.g_s.y+self.group.y-self.group.anchor_point[2])
+                }
+			}
+			
+            --rotate and fire the bow turret
+            if b_ship.b.y < screen.h + imgs.turret.h and
+               b_ship.b.y >           -imgs.turret.h then
+                
+                self.last_shot_time.b = self.last_shot_time.b + secs
+                
+                self.guns.bow.z_rotation =
+                {
+                    180/math.pi*math.atan2(
+                        targ.y - b_ship.b.y,
+                        targ.x - b_ship.b.x
+                    )-90,
+                    0,
+                    0
+                }
+                
+                mock_obj =
+				{
+					group =
+					{
+						z_rotation =
+						{self.guns.bow.z_rotation[1]+90,
+							0,0},
+						x = b_ship.b.x+self.guns.bow.h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
+						y = b_ship.b.y+self.guns.bow.h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
+					}
+				}
+                self.r1.x = b_ship.b.x+self.guns.bow.h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90)
+				self.r1.y = b_ship.b.y+self.guns.bow.h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
+				if self.last_shot_time.b >= self.shoot_time and
+					math.random(1,20) == 8 then
+					
+					self.last_shot_time.b = 0
+					fire_bullet(mock_obj)
+					
+				end
+            end
+            
+            --rotate and fire the mid turret
+            if b_ship.m.y < screen.h + imgs.turret.h and
+               b_ship.m.y >           -imgs.turret.h then
+                
+                self.last_shot_time.m = self.last_shot_time.m + secs
+                
+                self.guns.mid.z_rotation =
+                {
+                    180/math.pi*math.atan2(
+                        targ.y - b_ship.m.y,
+                        targ.x - b_ship.m.x
+                    )-90,
+                    0,
+                    0
+                }
+                
+                mock_obj =
+				{
+					group =
+					{
+						z_rotation =
+						{self.guns.mid.z_rotation[1]+90,
+							0,0},
+						x = b_ship.m.x+self.guns.mid.h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
+						y = b_ship.m.y+self.guns.mid.h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
+					}
+				}
+                
+                self.r2.x = b_ship.m.x+self.guns.mid.h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90)
+				self.r2.y = b_ship.m.y+self.guns.mid.h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
+
+				if self.last_shot_time.m >= self.shoot_time and
+					math.random(1,20) == 8 then
+					
+					self.last_shot_time.m = 0
+					fire_bullet(mock_obj)
+					
+				end
+            end
+            
+            --rotate and fire the stern turret
+            if b_ship.s.y < screen.h + imgs.turret.h and
+               b_ship.s.y >           -imgs.turret.h then
+                
+                self.last_shot_time.s = self.last_shot_time.s + secs
+                
+                self.guns.stern.z_rotation =
+                {
+                    180/math.pi*math.atan2(
+                        targ.y - b_ship.s.y,
+                        targ.x - b_ship.s.x
+                    )-90,
+                    0,
+                    0
+                }
+                
+                mock_obj =
+				{
+					group =
+					{
+						z_rotation =
+						{self.guns.stern.z_rotation[1],
+							0,0},
+						x = b_ship.s.x+self.guns.stern.h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180),
+						y = b_ship.s.y+self.guns.stern.h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180)
+					}
+				}
+                print(self.guns.stern.z_rotation[1])
+                
+                self.r3.x = b_ship.s.x+self.guns.stern.h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180)
+				self.r3.y = b_ship.s.y+self.guns.stern.h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180)
+                
+				if self.last_shot_time.s >= self.shoot_time and
+					math.random(1,20) == 8 then
+					
+					self.last_shot_time.s = 0
+					fire_bullet(mock_obj)
+					
+				end
+            end
+			
+		end,
+		
+		
+		
+		setup = function(self,xxx)
+			
+			
+			self.guns.g_b:add( self.guns.bow )
+			self.guns.g_m:add( self.guns.mid )
+            self.guns.g_s:add( self.guns.stern )
+			
+			self.group:add(
+				
+				self.image,
+                
+				self.guns.g_s,
+				self.guns.g_m,
+                self.guns.g_b
+				
+			)
+            self.group.x = xxx
+            self.group.y = -self.image.h
+			
+			layers.land_targets:add( self.group,self.r1,self.r2,self.r3 )
+			
+			
+			--default battleship animation animation
+			self.stages[0] = function(b,seconds)
+				--fly downwards
+				b.group.y = b.group.y +self.approach_speed*seconds
+				
+				--fire bullets
+				b:rotate_guns_and_fire(seconds)
+				
+				--see if you reached the end
+				if b.group.y >= screen.h + b.image.h then
+					b.group:unparent()
+					remove_from_render_list(b)
+				end
+			end
+			
+		end,
+		
+		render = function(self,seconds)
+				
+			--animate the zeppelin based on the current stage
+			self.stages[self.stage](self,seconds)
+            
+            table.insert(bad_guys_collision_list,
+                {
+                    obj = self,
+                    x1  = self.group.x+10,
+                    x2  = self.group.x+self.image.w-10,
+                    y1  = self.group.y+40,
+                    y2  = self.group.y+self.image.h-20,
+                }
+            )
+		end,
+		
+        collision = function( self , other, from_bullethole )
+			if self.health > 1 then 
+				self.health = self.health - 1
+                if from_bullethole == nil then
+                print("there")
+                local dam = {}
+                if other.group ~= nil then
+                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    self.group:add(dam.image)
+                    dam.image.x = other.group.x - self.group.x
+                    dam.image.y = other.group.y - self.group.y
+                    --[[
+                    dam.collision = function(d,other)
+                    print("here")
+                        local x = d.image.x
+                        local y = d.image.y
+                        
+                        d.image:unparent()
+                        d ={}
+                        
+                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image.x = x
+                        d.image.y = y-4
+                        self.group:add(dam.image)
+                        self:collision(other,true)
+                    end
+                    --]]
+                elseif other.image ~= nil then
+                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    self.group:add(dam.image)
+                    dam.image.x = other.image.x - self.group.x
+                    dam.image.y = other.image.y - self.group.y
+                    --[[
+                    dam.collision = function(d,other)
+                    print("here")
+                        local x = d.image.x
+                        local y = d.image.y
+                        
+                        d.image:unparent()
+                        d = {}
+                        
+                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image.x = x
+                        d.image.y = y-4
+                        self.group:add(dam.image)
+                        self:collision(other,true)
+                    end
+                    --]]
+                else
+                    error("render_list object with out a .group or a .image collided with the battleship")
+                end
+                --table.insert(self.bulletholes,dam)
+                end
+                --if dam.y > 0 then dam.y =dam.y -50 end
+				return
+			end
+			if self.is_boss then
+				levels[state.curr_level]:level_complete()
+			end
+			self.group:unparent()
+			remove_from_render_list( self )
+                        
+			-- Explode
+            add_to_render_list(
+			explosions.big(
+			self.group.center[1],
+			self.group.center[2])
+			)
+		end	
     } end
 }
 
@@ -1140,10 +1499,13 @@ formations =
         add_to_render_list(e3)
 
     end,
-    zig_zag = function(x,r)
+    zig_zag = function(x,r, rot)
         e = enemies.basic_fighter()
+        local dir = rot/math.abs(rot)
         e.group.x = x
-        e.shoot_time      = 1.5
+        e.group.y = -e.image.h
+        e.shoot_time      = 1.25
+        e.last_shot_time = 1
         e.deg_counter = {}
         e.stages =
         {
@@ -1161,15 +1523,15 @@ formations =
             function(f,secs)
                     
                 f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                    turn(f.group,r,1,f.attack_speed,secs)
+                    turn(f.group,r,dir,f.attack_speed,secs)
                     
                 f:fire(secs)
                     
-                if f.deg_counter[f.stage] >= 45 then
+                if f.deg_counter[f.stage] >= math.abs(rot) then
                     f.deg_counter[f.stage] = 0
                     f.stage = f.stage + 1
                         
-                    f.group.z_rotation = {45,0,0}
+                    f.group.z_rotation = {rot,0,0}
                 end
                     
             end,
@@ -1177,7 +1539,7 @@ formations =
             function(f,secs)
                     
                 f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                    turn(f.group,r,-1,f.attack_speed,secs)
+                    turn(f.group,r,-dir,f.attack_speed,secs)
                     
                 f:fire(secs)
                     
@@ -1185,29 +1547,29 @@ formations =
 					f.group:unparent()
 					remove_from_render_list(f)
                 end
-                if f.deg_counter[f.stage] >= 90 then
+                if f.deg_counter[f.stage] >= math.abs(2*rot) then
                     f.deg_counter[f.stage] = 0
                     f.stage = f.stage + 1
                         
-                    f.group.z_rotation = {-45,0,0}
+                    f.group.z_rotation = {-rot,0,0}
                 end
             end,
             --zag
             function(f,secs)
                     
                 f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                    turn(f.group,r,1,f.attack_speed,secs)
+                    turn(f.group,r,dir,f.attack_speed,secs)
                     
                 f:fire(secs)
                 if f.group.y >= screen.h + f.image.h then
 					f.group:unparent()
 					remove_from_render_list(f)
                 end
-                if f.deg_counter[f.stage] >= 90 then
+                if f.deg_counter[f.stage] >= math.abs(2*rot) then
                     f.deg_counter[f.stage] = 0
                     f.stage = f.stage - 1
                         
-                    f.group.z_rotation = {45,0,0}
+                    f.group.z_rotation = {rot,0,0}
                 end
                     
             end,
