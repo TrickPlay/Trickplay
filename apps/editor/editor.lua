@@ -47,6 +47,9 @@ function editor.selected(obj, call_by_inspector)
      obj_border.y_rotation = obj.y_rotation
      obj_border.z_rotation = obj.z_rotation
      obj_border.size = obj.size
+     if(obj.scale ~= nil) then 
+          obj_border.scale = obj.scale
+     end 
      screen:add(obj_border)
      obj.extra.selected = true
      table.insert(selected_objs, obj_border.name)
