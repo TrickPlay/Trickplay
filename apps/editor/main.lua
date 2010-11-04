@@ -305,7 +305,7 @@ local function build_ui( show_it )
         [ keys.i	] = function() animate_out_dropdown() editor.image() input_mode = S_SELECT end,
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
-        --[ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
+        [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
         [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
         [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() input_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,

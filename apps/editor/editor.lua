@@ -137,6 +137,7 @@ function editor.the_open()
 
 	local line = factory.draw_line()
 	
+--[[
 	function is_lua_file(fn)
 	     i, j = string.find(fn, ".lua")
 	     if (j == string.len(fn)) then
@@ -145,7 +146,7 @@ function editor.the_open()
 		return false
 	     end 
 	end 
-
+]]
 	function get_file_list_sz() 
 	local iw = cur_w
 	local ih = cur_h
