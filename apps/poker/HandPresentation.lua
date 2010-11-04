@@ -134,11 +134,49 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Give the pot to a player after he wins
    local function animate_pot_to_player(player)
-      model.potchips.group:animate{
-         position = { MSCL[player.table_position][1] + 55, MSCL[player.table_position][2] },
-         duration = 500,
-         mode="EASE_OUT_QUAD",
-      }
+      -- for the split pots case
+      if type(player) == "table" then
+         -- create a temporary group to store the animating groups
+         local temp_group = Group()
+         screen:add(temp_group)
+         -- correctly adjust the amount of the pot to the division each player will
+         -- receive
+         model.potchips:set(math.floor(model.potchips:value()/3))
+         -- add it to the temp group
+         model.potchips.group:unparent()
+         temp_group:add(model.potchips.group)
+         model.potchips.group.opacity = 0
+         -- create clones and animations
+         for _,winner in ipairs(player) do
+            local clone = Clone{
+               source = model.potchips.group,
+               position = Utils.deepcopy(model.potchips.group.position)
+            }
+            temp_group:add(clone)
+            clone:animate{ 
+               position = {
+                   MSCL[winner.table_position][1] + 55,
+                   MSCL[winner.table_position][2]
+               },
+               duration = 500,
+               mode="EASE_OUT_QUAD"
+            }
+         end
+         -- set the group to temp_group, variable is deleted in another function.
+         -- this allows for easy deletion of both the original pot image and the
+         -- clones
+         model.potchips.group = temp_group
+      else
+      -- for any other case
+         model.potchips.group:animate{
+            position = {
+                MSCL[player.table_position][1] + 55,
+                MSCL[player.table_position][2]
+            },
+            duration = 500,
+            mode="EASE_OUT_QUAD",
+         }
+      end
    end
    
    ------------------------- GAME FLOW --------------------------
@@ -249,7 +287,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
             player.status:hide()
          end
       end
-      animate_pot_to_player(winners[1])
+      animate_pot_to_player(winners)
       if not game:game_won() then
           local text = Text{
              text="Press ENTER to continue!",

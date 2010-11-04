@@ -17,7 +17,7 @@ function(pres, ctrl)
              pot.group:animate{
                 opacity=0,
                 duration=300,
-                on_completed = function() screen:remove(pot.group) end
+                on_completed = function() pot.group:unparent() end
              }
          end
          model.potchips:set(0)

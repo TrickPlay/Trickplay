@@ -158,11 +158,19 @@ function(self, rank, suit)
 end)
 
 Cards = {}
+---[[
 for _, suit in pairs(Suits) do
    for __, rank in pairs(Ranks) do
       table.insert(Cards, Card(rank, suit))
    end
 end
+--]]
+--[[
+-- for testing split pot
+for i = 1,52 do
+    table.insert(Cards, Card("ACE", "HEARTS"))
+end
+--]]
 function get_rigged_cards()
    return {
       Card("ACE","HEARTS"),
