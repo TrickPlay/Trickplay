@@ -350,7 +350,10 @@ int lb_newindex(lua_State*L)
     }
     lua_pushvalue(L,1);             // push the original user data
     lua_pushvalue(L,3);             // push the new value to set
-    lua_call(L,2,0);                // call the setter
+    if (lua_pcall(L,2,0,0))        // call the setter
+    {
+        luaL_error(L,"Failed to set '%s' : %s" , lua_tostring(L,2),lua_tostring(L,-1));
+    }
     return LSG_END(0);
 }
 
@@ -528,7 +531,10 @@ void lb_set_props_from_table(lua_State*L)
         {
             lua_pushvalue(L,udata);     // push the original udata
             lua_pushvalue(L,-3);        // push the value from the source table
-            lua_call(L,2,0);            // pops the setter function, the udata and the value
+            if(lua_pcall(L,2,0,0))      // pops the setter function, the udata and the value
+            {
+                luaL_error(L,"Failed to set '%s' : %s" , lua_tostring(L,-3),lua_tostring(L,-1));
+            }
         }
         lua_pop(L,1);                   // pop the value pushed by lua_next
     }

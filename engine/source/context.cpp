@@ -203,6 +203,19 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 
         g_free( c );
     }
+    else if ( CLUTTER_IS_CLONE( actor ) )
+    {
+        ClutterActor * other = clutter_clone_get_source( CLUTTER_CLONE( actor ) );
+
+        if ( other )
+        {
+            gchar * c = g_strdup_printf( "[source=%u]" , clutter_actor_get_gid( other ) );
+
+            extra = c;
+
+            g_free( c );
+        }
+    }
 
     String details;
 
