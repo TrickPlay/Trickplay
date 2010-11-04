@@ -5,9 +5,6 @@ AssetLoader:construct()
 AssetLoader:preloadImage("Table","assets/table.jpg")
 AssetLoader:preloadImage("TableText","assets/UI/new/table-marks.png")
 
-AssetLoader:preloadImage("ChooseDog","assets/ChooseYourDog.png")
-AssetLoader:preloadImage("ChooseAI","assets/ChooseYourOpponents.png")
-
 
 AssetLoader:preloadImage("Win","assets/outcome_new/winner.png")
 AssetLoader:preloadImage("Lose","assets/outcome_new/loser.png")
