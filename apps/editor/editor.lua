@@ -8,25 +8,25 @@ local rect_init_y = 0
 local g_init_x = 0
 local g_init_y = 0
 local factory = ui.factory
-local selected_objs = {}
+
 
 function editor.selected(obj, call_by_inspector)
 
      if(obj.type ~= "Video") then 
      if(shift == false)then 
-	if (table.getn(selected_objs) ~= 0 ) then -- while () do ? 
-		local t_obj = screen:find_child(table.remove(selected_objs)) 
-		if (t_obj == nil) then print(" the_obj is nil") return end 
-		if(t_obj.name ~= obj.name.."border") then
-			screen:remove(t_obj)
-			local i, j = string.find(t_obj.name,"border")
-			t_obj = g:find_child(string.sub(t_obj.name, 1, i-1))	
-			if(t_obj == nil) then return end 
+	
+	while(table.getn(selected_objs) ~= 0) do
+		local t_border = screen:find_child(table.remove(selected_objs)) 
+		if(t_border ~= nil) then 
+		     screen:remove(t_border)
+		     local i, j = string.find(t_border.name,"border")
+		     t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		     if(t_obj ~= nil) then 
 			t_obj.extra.selected = false
-		else 
-			table.insert(selected_objs, t_obj.name)
+	             end
 		end
 	end
+
      end 
 
      obj_border = Rectangle{}
@@ -61,10 +61,27 @@ function editor.n_selected(obj, call_by_inspector)
      if(obj.name == nil) then return end 
 
      if(obj.type ~= "Video") then 
-     screen:remove(screen:find_child(obj.name.."border"))
-     table.remove(selected_objs)
-     obj.extra.selected = false
+
+     if(shift == false)then 
+	while(table.getn(selected_objs) ~= 0) do
+		local t_border = screen:find_child(table.remove(selected_objs)) 
+		if(t_border ~= nil) then 
+		     screen:remove(t_border)
+		     local i, j = string.find(t_border.name,"border")
+		     t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		     if(t_obj ~= nil) then 
+			t_obj.extra.selected = false
+	             end
+		end
+	end
+	editor.selected(obj) 
+     else
+        screen:remove(screen:find_child(obj.name.."border"))
+        table.remove(selected_objs)
+        obj.extra.selected = false
      end 
+
+    end
 end  
 
 function editor.close()

@@ -46,6 +46,7 @@ dragging          = nil
 current_inspector = nil 
 current_fn  	  = ""
 current_focus 	  = nil
+selected_objs	  = {}
 menu_hide         = false
 popup_hide        = false
 input_mode        = S_MENU
