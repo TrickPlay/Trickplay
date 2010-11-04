@@ -158,18 +158,26 @@ BettingView = Class(View, function(view, model, ...)
         end
     end
 
+    local popup_ok = true
     function view:show_all_in_notification()
-        local text = Text{
-            text="You can't bet anymore, you're already pushing everyone all in!",
-            font="Sans 36px",
-            color="FFFFFF",
-            position={screen.w/2,400},
-            opacity=0
-        }
-        text.anchor_point = {text.w/2, text.h/2}
-        screen:add(text)
-        Popup:new{group = text, time = 1000}
-       
+        if popup_ok then
+            local text = Text{
+                text="You can't bet anymore, you're already pushing everyone all in!",
+                font="Sans 36px",
+                color="FFFFFF",
+                position={screen.w/2,400},
+                opacity=0
+            }
+            text.anchor_point = {text.w/2, text.h/2}
+            screen:add(text)
+            Popup:new{
+                group = text,
+                time = 1000,
+                on_fade_out = function() popup_ok = true end
+            }
+            popup_ok = false
+            return
+        end
        --[[
        screen:add(text)
        text:animate{
