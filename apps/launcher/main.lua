@@ -430,9 +430,15 @@ local function build_ui( show_it )
     -- Invoke the default action for the current section    
     -------------------------------------------------------------------------------
     
+    local return_to_dropdown = true
+    
     local function do_default_for_section()
     
         if ui.fs_focus and ( ui.focus == ui.fs_focus ) then
+            
+            if not return_to_dropdown then
+                return
+            end
             
             -- If they hit enter on the section that is currently full screen
             
@@ -473,11 +479,16 @@ local function build_ui( show_it )
                 return
             end
             
+            return_to_dropdown = false
+            
+            Timer{ interval = 500 , on_timer = function() return_to_dropdown = true return false end }
+            
             if section:on_default_action() then
                 
                 --ui.button_focus.opacity = 0
                 
                 --ui.fs_focus = ui.focus
+                
             end
         
         end
@@ -732,18 +743,6 @@ local function build_ui( show_it )
     function ui:lower( element )
         element:lower( ui.bar )
     end
-    
-    ----------------------------------------------------------------------------
-    
-    function screen.on_key_down( screen , key )
-        if key == keys.BackSpace or key == keys.EXIT then
-            if type( reload == "function" ) then
-                screen.opacity = 0
-                reload()
-            end
-        end
-    end
-    
     
     ----------------------------------------------------------------------------
     -- Hide everything unless show_it is true (only for debugging)
