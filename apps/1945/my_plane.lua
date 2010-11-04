@@ -259,6 +259,7 @@ my_plane =
                 self.smoke_stream[i]:halt()
             --end
         end
+        self.damage = 0
         self.image.x = 0
     end,
     render =

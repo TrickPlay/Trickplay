@@ -219,12 +219,23 @@ levels =
         offset         = {},
         index          = {},
         add_list       = {},
-
+        wait           = {},
+        w_q_index      = {},
+        
 		setup = function(self)
+            
+            local h_reg   = 1
+            local h_cleat = 2
+            local h_close = 3
+            local h_open  = 4
+            local h_pier1 = 5
+            local h_pier2 = 6
+            
 		--	add_to_render_list( self.bg )
             self.add_list = {
             --enemy
             {
+            --[[
                 {y =    0, item = add_to_render_list,        params = { lvl2txt }},
                 {y =   75, item = formations.zig_zag,  params = { 400,400, -30}},
                 {y =   75, item = formations.zig_zag,  params = {1520,400,  30}},
@@ -239,7 +250,7 @@ levels =
                 {y = 1300, item = formations.cluster,  params = {screen.w/2 + 150}},
                 {y = 1400, item = add_to_render_list,  params = { powerups.guns( screen.w/2 )}},
                 
-                
+                --]]
                 
                 --[[
                 {y =  300, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
@@ -271,27 +282,37 @@ levels =
                 {y = 2750, item = formations.zepp_boss,      params = { 120 }}
                 --]]
             },
-            --docks
+            --left harbor
             {
+                --{y =   0, item = self.bg.add_start, params = {self.bg,  2,  1}},
+                --{y =   imgs.dock_1_1.h, item = self.bg.add_stretch, params = {self.bg,  2,  1,20}}
+            --[[
                 {y =   0, item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  280, item = self.bg.add_dock, params = {self.bg,  2, -1}},
                 {y =  imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  280+imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
                 {y =  2*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  280+2*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
                 {y =  3*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  280+3*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
                 {y =  4*imgs.dock_1_1.h*9,  item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  280+4*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
                 
                 {y =  5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                {y =  280+5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
                 {y =  6*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                {y =  280+6*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
                 {y =  7*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                {y =  280+7*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
                 {y =  8*imgs.dock_1_1.h*9,  item = self.bg.add_dock, params = {self.bg,  1,  1}},
+                --]]
+            },
+            --right harbor
+            {
+            --[[
+                {y =  280, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  280+imgs.dock_1_1.h*9, item = self.bg.add_dock, params =   {self.bg,  2, -1}},
+                {y =  280+2*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  280+3*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                {y =  280+4*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
+                
+                {y =  280+5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+                {y =  280+6*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+                {y =  280+7*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
                 {y =  280+8*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
+                --]]
             },
             --cloud
             --[[{
@@ -310,9 +331,76 @@ levels =
                 {y =  820, item = self.bg.add_cloud, params = {self.bg, 3, 1700, 0, 180, 0}},
             }--]]
             }
+            --each func in the list returns the amount of time to wait before
+            --calling the next one
+            self.next_queues =
+            {
+                {   --left harbor
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_open  }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      2 }},
+                                        {f = add_to_render_list,      p = {enemies.turret(),400 }},
+
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1 }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      15 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_close  }},
+                    
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open  }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1 }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1 }},
+                    {f = add_to_render_list,      p = {enemies.turret(),400-imgs.b_ship.w }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1 }},
+                    {f = add_to_render_list,      p = {enemies.turret(),400-imgs.b_ship.w }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
+                },
+                {   --right harbor
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open  }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier1 }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),1520 }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2 }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close  }},
+                    
+                    {f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    {f = add_to_render_list,      p = {powerups.health,1300 }},
+                    
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open  }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1, -1,      2 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier2 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),1520 }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1, -1,      4 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier1 }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close  }},
+                    
+                    {f = self.bg.empty_stretch,   p = {self.bg,   5 }},
+                    {f = add_to_render_list,      p = {powerups.life,1600 }},
+                    {f = self.bg.empty_stretch,   p = {self.bg,   5 }},
+                    
+                }
+            }
             for i = 1, #self.add_list do
                 self.index[i] = 1
                 self.offset[i] = 0
+            end
+            for i = 1, #self.next_queues do
+                self.w_q_index[i] = 1
+                self.wait[i] = 0
             end
 			self.dist_travelled = 0
 		end,
@@ -327,9 +415,9 @@ levels =
                 	
                     if  self.index[i] > #self.add_list[i] then
                         if i ~= 1 then
-                            self.index[i] = 1
-                            self.offset[i] = curr_dist
-                            print("aaa",i,self.offset[i])
+                            --self.index[i] = 1
+                            --self.offset[i] = curr_dist
+                            --print("aaa",i,self.offset[i])
                         end
                         done = true
                     elseif self.add_list[i][ self.index[i] ].y < (curr_dist - self.offset[i]) and
@@ -338,9 +426,31 @@ levels =
                         
                         self.add_list[i][self.index[i]].item(unpack(self.add_list[i][self.index[i]].params))
                         self.index[i] = self.index[i] + 1
+                        
                 	else
                 		done = true
                 	end
+                end
+            end
+            
+            for i = 1,#self.next_queues do
+                --if you havent reached the end of the queue
+                if self.w_q_index[i] <= #self.next_queues[i] then
+                    self.wait[i] = self.wait[i] - seconds
+                    --if your not still waiting
+                    if self.wait[i] <=0 then
+                        local t = self.next_queues[i][self.w_q_index[i]].p
+                        t[#t+1] = self.wait[i]
+                        --call the next function in the wait queue
+                        --it returns the next amount to wait by
+                        local w = self.next_queues[i][self.w_q_index[i]].f(
+                            unpack(t)
+                        )
+                        print(w,self.wait[i])
+                        self.w_q_index[i] = self.w_q_index[i] + 1
+                        if w ~= nil then self.wait[i] = w end
+                    else
+                    end
                 end
             end
 

@@ -21,6 +21,125 @@ water =
                 layers.ground:add( strip )
             end
     end,
+    add_start = function(self,type,side)
+        add_to_render_list(
+        {
+            speed = self.speed,
+            image = Clone{source=imgs["dock_"..type.."_4"]},
+            setup = function(self)
+                self.image.y = -imgs["dock_"..type.."_4"].h
+                if side == 1 then
+                    self.image.y_rotation = {180,0,0}
+                    self.image.x = imgs["dock_"..type.."_4"].w  
+                elseif side == -1 then
+                    self.image.x = screen.w - imgs["dock_"..type.."_4"].w 
+                else
+                    error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+                end
+                layers.land_doodads_1:add(self.image)
+            end,
+            render = function(self,secs)
+                self.image.y = self.image.y + self.speed*secs
+                if self.image.y > screen.h then
+                    self.image:unparent()
+                    remove_from_render_list(self)
+                end
+            end,
+        }        )
+    end,
+    add_end = function(self,type,side)
+        add_to_render_list(
+        {
+            speed = self.speed,
+            image = Clone{source=imgs["dock_"..type.."_3"]},
+            setup = function(self)
+                self.image.y = -imgs["dock_"..type.."_3"].h
+                if side == 1 then
+                    self.image.y_rotation = {180,0,0}
+                    self.image.x = imgs["dock_"..type.."_3"].w  
+                elseif side == -1 then
+                    self.image.x = screen.w - imgs["dock_"..type.."_3"].w 
+                else
+                    error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+                end
+                layers.land_doodads_1:add(self.image)
+            end,
+            render = function(self,secs)
+                self.image.y = self.image.y + self.speed*secs
+                if self.image.y > screen.h then
+                    self.image:unparent()
+                    remove_from_render_list(self)
+                end
+            end,
+        }        )
+    end,
+    empty_stretch = function(self,len,delay)
+        return imgs["dock_1_1"].h*len/self.speed + delay
+    end,
+    add_stretch = function(self,type,side,len,delay)
+        add_to_render_list(
+        {
+            speed = self.speed,
+            recirc = false,
+            group = Group{},
+            
+            setup = function(self)
+                
+                local h = imgs["dock_"..type.."_1"].h
+                
+                for i = 1,len do
+                    self.group:add(Clone{source=imgs["dock_"..type.."_1"],y = i*h})
+                end
+                
+                self.group.y = -(len+1)*h-self.speed*delay
+                if side == 1 then
+                    self.group.y_rotation = {180,0,0}
+                    self.group.x = imgs["dock_"..type.."_1"].w 
+                elseif side == -1 then
+                    self.group.x = screen.w - imgs["dock_"..type.."_1"].w 
+                else
+                    error("unexpected value for side received, expected 1 or -1, got "..side)
+                end
+                layers.land_doodads_1:add(self.group)
+            end,
+            render = function(self,secs)
+                self.group.y = self.group.y + self.speed*secs
+                if self.group.y > screen.h then
+                    self.group:unparent()
+                    remove_from_render_list(self)
+                end
+            end,
+        }        )
+        return imgs["dock_"..type.."_1"].h*len/self.speed + delay
+    end,
+    add_harbor_tile = function(self,type,side,tile_index,delay)
+        
+        add_to_render_list(
+        {
+            speed = self.speed,
+            image = Clone{source=imgs["dock_"..type.."_"..tile_index]},
+            setup = function(self)
+                self.image.y = -imgs["dock_"..type.."_"..tile_index].h-self.speed*delay
+                if side == 1 then
+                    self.image.y_rotation = {180,0,0}
+                    self.image.x = imgs["dock_"..type.."_"..tile_index].w  
+                elseif side == -1 then
+                    self.image.x = screen.w - imgs["dock_"..type.."_"..tile_index].w 
+                else
+                    error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+                end
+                layers.land_doodads_1:add(self.image)
+            end,
+            render = function(self,secs)
+                self.image.y = self.image.y + self.speed*secs
+                if self.image.y > screen.h then
+                    self.image:unparent()
+                    remove_from_render_list(self)
+                end
+            end,
+        }        )
+        return imgs["dock_"..type.."_"..tile_index].h/self.speed + delay
+    end,
     add_dock = function(self,type, side)
         local h = imgs.dock_1_1.h
         local x = imgs.dock_1_5.w - imgs.dock_1_1.w
@@ -40,7 +159,7 @@ water =
                     Clone{source=imgs["dock_"..type.."_4"], y = 8*h, x = x}
                     --Clone{source=imgs.battleship,y = 5/2*h,x=x - imgs.battleship.w-20}
                 )
-                self.group.y = -self.group.h
+                self.group.y = -9*h
                 if side == 1 then
                     self.group.y_rotation = {180,0,0}
                     self.group.x = imgs.dock_1_5.w 

@@ -916,7 +916,141 @@ enemies =
 		end	
 	} end,
     
-    
+    turret = function() return{
+		type = TYPE_ENEMY_PLANE,
+		
+		stage  = 0,	--the current stage the fighter is in
+		stages = {},	--the stages, must be set by formations{}
+		approach_speed = 80,
+		last_shot_time = 4,
+        shoot_time = 4,
+		image = Clone
+        {
+            source       = imgs.turret,
+			anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+			z_rotation   = {180,0,0}
+        },
+			
+		group = Group{},
+		
+        rotate_guns_and_fire = function(self,secs)
+			---[[
+			--prep the variables that determine if its time to shoot
+			
+			
+			--mock enemy-object which is passed to fire_bullet()
+			--local mock_obj = {}
+			
+			--these x,y values are used for rotations and
+			--bullet trajectories
+			
+			--user plane is the target
+			local targ =
+			{ 
+				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
+				y = (my_plane.group.y+my_plane.image.h/2)
+			}
+			local me =
+            {
+                x = (self.group.x-self.group.anchor_point[1]),
+				y = (self.group.y-self.group.anchor_point[2])
+			}
+			
+            --rotate and fire the bow turret
+            if me.y < screen.h + imgs.turret.h and
+               me.y >           -imgs.turret.h then
+                
+                self.last_shot_time = self.last_shot_time + secs
+                
+                self.image.z_rotation =
+                {
+                    180/math.pi*math.atan2(
+                        targ.y - me.y,
+                        targ.x - me.x
+                    )-90,
+                    0,
+                    0
+                }
+                
+                local mock_obj =
+				{
+					group =
+					{
+						z_rotation =
+						{self.image.z_rotation[1],
+							0,0},
+						x = self.group.x+self.group.h*2/3*math.cos(self.image.z_rotation[1]*math.pi/180+90),
+						y = self.group.y+self.group.h*2/3*math.sin(self.image.z_rotation[1]*math.pi/180+90)
+					}
+				}
+
+				if self.last_shot_time >= self.shoot_time and
+					math.random(1,20) == 8 then
+					
+					self.last_shot_time = 0
+					fire_bullet(mock_obj)
+					
+				end
+            end
+ 
+			
+		end,
+        setup = function(self,xxx)
+			
+			self.group:add( self.image )
+            self.group.x = xxx
+            self.group.y = -self.image.h
+			
+			layers.land_targets:add( self.group )
+			
+			
+			--default battleship animation animation
+			self.stages[0] = function(t,seconds)
+				--fly downwards
+				t.group.y = t.group.y +self.approach_speed*seconds
+				
+				--fire bullets
+				t:rotate_guns_and_fire(seconds)
+				
+				--see if you reached the end
+				if t.group.y >= screen.h + t.image.h then
+					t.group:unparent()
+					remove_from_render_list(t)
+				end
+			end
+			
+		end,
+		
+		render = function(self,seconds)
+				
+			--animate the zeppelin based on the current stage
+			self.stages[self.stage](self,seconds)
+            
+            table.insert(bad_guys_collision_list,
+                {
+                    obj = self,
+                    x1  = self.group.x+10,
+                    x2  = self.group.x+self.image.w-10,
+                    y1  = self.group.y+40,
+                    y2  = self.group.y+self.image.h-20,
+                }
+            )
+		end,
+		
+        collision = function( self , other )
+            
+			self.group:unparent()
+			remove_from_render_list( self )
+            
+			-- Explode
+            add_to_render_list(
+                explosions.small(
+                    self.group.center[1],
+                    self.group.center[2]
+                )
+			)
+		end	
+    } end,
     
     battleship = function() return{
         
@@ -930,8 +1064,6 @@ enemies =
 		--attack_speed   = 15,
 		
 		
-		num_prop_frames = 3,
-		prop_index = 1,
 		image    = Clone{source=imgs.b_ship},
 		
 		is_boss = false,
@@ -992,8 +1124,6 @@ enemies =
 			---[[
 			--prep the variables that determine if its time to shoot
 			
-            self.last_shot_time.m = self.last_shot_time.m + secs
-            self.last_shot_time.s = self.last_shot_time.s + secs
 			
 			--mock enemy-object which is passed to fire_bullet()
 			local mock_obj = {}
@@ -1047,14 +1177,13 @@ enemies =
 					group =
 					{
 						z_rotation =
-						{self.guns.bow.z_rotation[1]+90,
+						{self.guns.bow.z_rotation[1],
 							0,0},
 						x = b_ship.b.x+self.guns.bow.h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
 						y = b_ship.b.y+self.guns.bow.h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
 					}
 				}
-                self.r1.x = b_ship.b.x+self.guns.bow.h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90)
-				self.r1.y = b_ship.b.y+self.guns.bow.h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
+
 				if self.last_shot_time.b >= self.shoot_time and
 					math.random(1,20) == 8 then
 					
@@ -1085,15 +1214,13 @@ enemies =
 					group =
 					{
 						z_rotation =
-						{self.guns.mid.z_rotation[1]+90,
+						{self.guns.mid.z_rotation[1],
 							0,0},
 						x = b_ship.m.x+self.guns.mid.h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
 						y = b_ship.m.y+self.guns.mid.h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
 					}
 				}
-                
-                self.r2.x = b_ship.m.x+self.guns.mid.h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90)
-				self.r2.y = b_ship.m.y+self.guns.mid.h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
+
 
 				if self.last_shot_time.m >= self.shoot_time and
 					math.random(1,20) == 8 then
@@ -1127,14 +1254,11 @@ enemies =
 						z_rotation =
 						{self.guns.stern.z_rotation[1],
 							0,0},
-						x = b_ship.s.x+self.guns.stern.h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180),
-						y = b_ship.s.y+self.guns.stern.h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180)
+						x = b_ship.s.x+self.guns.stern.h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
+						y = b_ship.s.y+self.guns.stern.h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
 					}
 				}
-                print(self.guns.stern.z_rotation[1])
                 
-                self.r3.x = b_ship.s.x+self.guns.stern.h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180)
-				self.r3.y = b_ship.s.y+self.guns.stern.h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180)
                 
 				if self.last_shot_time.s >= self.shoot_time and
 					math.random(1,20) == 8 then
@@ -1168,7 +1292,7 @@ enemies =
             self.group.x = xxx
             self.group.y = -self.image.h
 			
-			layers.land_targets:add( self.group,self.r1,self.r2,self.r3 )
+			layers.land_targets:add( self.group )
 			
 			
 			--default battleship animation animation
