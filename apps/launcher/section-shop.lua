@@ -39,6 +39,8 @@ function( section )
         
         group:add( loading_text )
         
+        group.name = "app-shop-dropdown"
+        
     end
     
     ---------------------------------------------------------------------------

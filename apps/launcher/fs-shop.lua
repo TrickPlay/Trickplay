@@ -194,6 +194,8 @@ function( ui , details_shop_app , featured_apps , all_apps )
         
             screen:add( background )
             
+            background.name = "app-shop-main-background"
+            
         end
         
         -----------------------------------------------------------------------
@@ -1113,12 +1115,24 @@ function( ui , details_shop_app , featured_apps , all_apps )
         
         end
    
-        print ( "HIDING BACKGROUND" , background )
-        
         if background then
             background.opacity = 0
         end
         
+    end
+   
+    function section.on_clear()
+        if group then
+            group:unparent()
+            group = nil
+        end
+        if background then
+            background:unparent()
+            background = nil
+        end
+        if details then
+            details:on_clear()
+        end
     end
     
     ---------------------------------------------------------------------------

@@ -29,6 +29,7 @@ function( ui , app_list , statistics )
         
         group = Group
         {
+            name = "my-apps-full-screen",
             size = { client_rect.w , client_rect.h } ,
             position = { client_rect.x , client_rect.y },
             clip = { 0 , 0 , client_rect.w , client_rect.h }
@@ -344,6 +345,15 @@ function( ui , app_list , statistics )
             group.on_key_down = nil
         end
         
+    end
+    
+    function section.on_clear( section )
+    
+        if group then
+            group:unparent()
+            group = nil
+        end
+    
     end
     
     ---------------------------------------------------------------------------

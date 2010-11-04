@@ -133,6 +133,8 @@ local function build_ui( show_it )
     
     ui.bar:set
     {
+        name = "menu_bar",
+        
         size = ui.bar_background.size,
         
         position = { 0 , 0 },
@@ -443,6 +445,26 @@ local function build_ui( show_it )
             -- If they hit enter on the section that is currently full screen
             
             ui.sections[ ui.fs_focus ]:on_hide()
+            
+            do
+            
+                local old_sections = ui.sections
+                
+                local timer = Timer( 1000 )
+                
+                function timer.on_timer()
+                    print( "CLEARING SECTIONS" )
+                    for _ , section in ipairs( old_sections ) do
+                        if section.on_clear then
+                            section:on_clear()
+                        end
+                    end
+                    return false;
+                end
+                
+                timer:start()
+                
+            end
             
             
             ui.sections = ui.dropdowns

@@ -102,6 +102,8 @@ function( section )
     
         local group = section.dropdown
         
+        group.name = "my-apps-dropdown"
+        
         local TOP_PADDING = 48
         local BOTTOM_PADDING = 12
         

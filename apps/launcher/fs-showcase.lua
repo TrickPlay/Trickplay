@@ -167,7 +167,16 @@ function( ui )
         animate_out()
         
     end
-        
+    
+    function section.on_clear( section )
+    
+        if group then
+            group:unparent()
+            group = nil
+        end
+    
+    end
+    
     ---------------------------------------------------------------------------
 
     return section
