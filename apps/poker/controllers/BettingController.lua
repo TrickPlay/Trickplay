@@ -187,8 +187,8 @@ BettingController = Class(Controller, function(self, view, ...)
        -- Change bet
        elseif(0 ~= dir[2]) then
           if(selected == PlayerGroups.TOP and subselection == SubGroups.RAISE) then
-              local new_money = model.currentPlayer.money + ( dir[2] * model.bet.BIG_BLIND )
-              local new_bet = model.currentPlayer.bet + ( - dir[2] * model.bet.BIG_BLIND )
+              local new_money = model.currentPlayer.money + dir[2]
+              local new_bet = model.currentPlayer.bet - dir[2]
               local max_bet = model.max_bet
               view:change_bet_animation(dir)
               if new_money < 0 then
