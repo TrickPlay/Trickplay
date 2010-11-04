@@ -430,6 +430,18 @@ function( ui , api )
         me:animate_out( go_back )
     end
     
+    function section:on_clear()
+        local group = me.group
+        if group then
+            group:unparent()
+            group=nil
+        end
+        if background then
+            background:unparent()
+            background = nil
+        end
+    end
+    
     return Encapsulate( section )
     
 end

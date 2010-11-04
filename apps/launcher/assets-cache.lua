@@ -14,6 +14,8 @@ local list = {}
 
 local mt = {}
 
+local group = nil
+
 mt.__index = mt
 
 function mt.__call( t , k , f )
@@ -27,14 +29,18 @@ function mt.__call( t , k , f )
             return t( asset )
         end
         assert( asset , "Failed to create asset "..k )
-        asset:set{ opacity = 0 }
         rawset( list , k , asset )
-        screen:add( asset )
+        if not group then
+            group = Group{ name = "assets" }
+            screen:add( group )
+            group:hide()
+        end
+        group:add( asset )
         print( "  MISS" )
     else
         print( "  HIT" )
     end
-    return Clone{ source = asset , opacity = 255 }
+    return Clone{ source = asset }
 end
 
 

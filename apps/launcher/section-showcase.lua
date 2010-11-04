@@ -29,6 +29,8 @@ function( section )
             return 
         end
         
+        group.name = "showcase-dropdown"
+        
         local TOP_PADDING = 60
         local BOTTOM_PADDING = 40
         
