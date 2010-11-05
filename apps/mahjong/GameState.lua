@@ -56,8 +56,12 @@ GameState = Class(nil,function(state, ctrl)
     local hint_tiles = nil
     -- true if the game has not started yet
     local new_game = true
+    -- number of games started
+    local games_started = 0
     -- true if the game was won and the auto-complete dialog already showed
     local game_won = false
+    -- number of games won
+    local games_won = 0
     -- true if the game is won and the player must redeal to do anything
     local must_restart = false
     -- true if the player is in roaming mode
@@ -381,7 +385,10 @@ GameState = Class(nil,function(state, ctrl)
     end
 
     function state:click(selector)
-        if new_game then new_game = false end
+        if new_game then
+            new_game = false
+            games_started = games_started + 1
+        end
 
         local x = selector.x
         local y = selector.y
@@ -468,6 +475,7 @@ GameState = Class(nil,function(state, ctrl)
         selected_tile = nil
         self:find_top_tiles()
         if #top_tiles == 0 then
+            games_won = games_won + 1
             game_won = true
             must_restart = true
             last_tiles = nil
