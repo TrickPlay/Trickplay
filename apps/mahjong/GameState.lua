@@ -343,17 +343,19 @@ GameState = Class(nil,function(state, ctrl)
     function state:undo()
         if not last_tiles then return false end
 
-        local position_1 = last_tiles[1].position
-        local position_2 = last_tiles[2].position
+        local tile_2 = table.remove(last_tiles)
+        local tile_1 = table.remove(last_tiles)
+        local position_1 = tile_1.position
+        local position_2 = tile_2.position
 
-        grid[position_1[1]][position_1[2]][position_1[3]] = last_tiles[1]
-        grid[position_2[1]][position_2[2]][position_2[3]] = last_tiles[2]
+        grid[position_1[1]][position_1[2]][position_1[3]] = tile_1
+        grid[position_2[1]][position_2[2]][position_2[3]] = tile_2
 
-        last_tiles[1]:reset()
-        last_tiles[2]:reset()
+        tile_1:reset()
+        tile_2:reset()
 
-        local temp = Utils.deepcopy(last_tiles)
-        last_tiles = nil
+        local temp = {tile_1, tile_2}
+        if not last_tiles[1] then last_tiles = nil end
 
         return temp
 
@@ -419,7 +421,9 @@ GameState = Class(nil,function(state, ctrl)
                 hint_tiles[2]:hide_green()
             end
 
-            last_tiles = {tile, selected_tile}
+            if not last_tiles then last_tiles = {} end
+            table.insert(last_tiles, tile)
+            table.insert(last_tiles, selected_tile)
             state:remove_tile(tile)
             state:remove_tile(selected_tile)
             selected_tile = nil

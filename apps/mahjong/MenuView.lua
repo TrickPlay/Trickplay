@@ -179,7 +179,8 @@ MenuView = Class(View, function(view, model, ...)
     view.menu_ui:add(menu_options, menu_drop_shadow)
     view.menu_ui:add(unpack(menu_bars))
     for i,item in ipairs(view.items) do
-        if item.group and not item.group.parent then view.menu_ui:add(item.group)
+        if item.group then
+            if not item.group.parent then view.menu_ui:add(item.group) end
         elseif not item.parent then view.menu_ui:add(item)
         end
     end
