@@ -1,3 +1,7 @@
+screen_h = screen.h
+screen_w = screen.w
+
+
 --Game state
 state =
 {

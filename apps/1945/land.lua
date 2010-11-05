@@ -3,80 +3,52 @@
 
 water =
 {
-    speed  = 80, -- pixels per second
-    strips = {},
-    top_y  = 0,
-    setup = function( self )
-                
-            local tile = imgs.water
-            tile:set{ w = screen.w , tile = { true  , false } }
-            for i = 1 , math.ceil( screen.h / tile.h ) + 1 do
-                table.insert( self.strips , Clone{ source = tile } )
-            end
-            local top = - ( tile.h  )
-            self.top_y = top
-            for _ , strip in ipairs( self.strips ) do
-                strip.position = { 0 , top }
-                top = top + tile.h - 1
-                layers.ground:add( strip )
-            end
+    speed         = 80, -- pixels per second
+    strips        = {},
+    top_strip     = 0,
+    doodad_frames = {},
+    doodad_h      = imgs.dock_1_1.h,
+    strip_h       = imgs.water.h,
+    top_doodad    = 0,
+    q_i           = 0,
+    append_i      = 0,
+    queues        = {},
+    setup         = function( self )
+        --base water strip
+        self.base_tile = imgs.water
+        self.base_tile:set{ w = screen.w, tile = { true  , false } }
+        for i = 1 , math.ceil( screen.h / self.base_tile.h ) + 1 do
+            table.insert( self.strips , Clone{name="water", source = self.base_tile } )
+        end
+        
+        --set up the water strips
+        local top = - ( self.base_tile.h  )
+        self.top_strip = top
+        for _ , strip in ipairs( self.strips ) do
+            strip.position = { 0 , top }
+            top = top + self.base_tile.h - 1
+            layers.ground:add( strip )
+        end
+        
+        local g
+        --setup the doodad frames
+        self.top_doodad = -self.doodad_h+1
+        for i = 1, math.ceil(screen.h/self.doodad_h)+1 do
+            g   =  Group{y=(i-2)*(self.doodad_h-1)}
+            table.insert( self.doodad_frames , g)
+            layers.land_doodads_1:add(g)
+        end
     end,
-    add_start = function(self,type,side)
-        add_to_render_list(
-        {
-            speed = self.speed,
-            image = Clone{source=imgs["dock_"..type.."_4"]},
-            setup = function(self)
-                self.image.y = -imgs["dock_"..type.."_4"].h
-                if side == 1 then
-                    self.image.y_rotation = {180,0,0}
-                    self.image.x = imgs["dock_"..type.."_4"].w  
-                elseif side == -1 then
-                    self.image.x = screen.w - imgs["dock_"..type.."_4"].w 
-                else
-                    error("unexpected value for SIDE received, expected 1 or -1, got "..side)
-                end
-                layers.land_doodads_1:add(self.image)
-            end,
-            render = function(self,secs)
-                self.image.y = self.image.y + self.speed*secs
-                if self.image.y > screen.h then
-                    self.image:unparent()
-                    remove_from_render_list(self)
-                end
-            end,
-        }        )
-    end,
-    add_end = function(self,type,side)
-        add_to_render_list(
-        {
-            speed = self.speed,
-            image = Clone{source=imgs["dock_"..type.."_3"]},
-            setup = function(self)
-                self.image.y = -imgs["dock_"..type.."_3"].h
-                if side == 1 then
-                    self.image.y_rotation = {180,0,0}
-                    self.image.x = imgs["dock_"..type.."_3"].w  
-                elseif side == -1 then
-                    self.image.x = screen.w - imgs["dock_"..type.."_3"].w 
-                else
-                    error("unexpected value for SIDE received, expected 1 or -1, got "..side)
-                end
-                layers.land_doodads_1:add(self.image)
-            end,
-            render = function(self,secs)
-                self.image.y = self.image.y + self.speed*secs
-                if self.image.y > screen.h then
-                    self.image:unparent()
-                    remove_from_render_list(self)
-                end
-            end,
-        }        )
+    append_to_queue = function(q)
+        for i = 1,   #q do
+            self.queues[self.append_i+i] = q[i]
+        end
     end,
     empty_stretch = function(self,len,delay)
         return imgs["dock_1_1"].h*len/self.speed + delay
     end,
     add_stretch = function(self,type,side,len,delay)
+    --[[
         add_to_render_list(
         {
             speed = self.speed,
@@ -111,9 +83,27 @@ water =
             end,
         }        )
         return imgs["dock_"..type.."_1"].h*len/self.speed + delay
-    end,
-    add_harbor_tile = function(self,type,side,tile_index,delay)
+        --]]
+        local c
         
+        for i = 1,len do
+            c = Clone {source =  imgs["dock_"..type.."_1"]}
+            if side == 1 then
+                c.y_rotation = {180,0,0}
+                c.x = imgs["dock_"..type.."_1"].w  
+            elseif side == -1 then
+                c.x = screen.w - imgs["dock_"..type.."_1"].w 
+            else
+                error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+            end
+            if self.queues[self.q_i+i] == nil then self.queues[self.q_i+i] = {} end
+            table.insert(self.queues[self.q_i+i],c)
+        end
+        
+        return self.doodad_h*len/self.speed + delay
+    end,
+    add_harbor_tile = function(self,type,side,tile_index,turret, b_ship, delay)
+        --[[
         add_to_render_list(
         {
             speed = self.speed,
@@ -138,7 +128,42 @@ water =
                 end
             end,
         }        )
-        return imgs["dock_"..type.."_"..tile_index].h/self.speed + delay
+        --]]
+        local c = Clone {source =  imgs["dock_"..type.."_"..tile_index]}
+        
+        if side == 1 then
+            c.y_rotation = {180,0,0}
+            c.x = imgs["dock_"..type.."_"..tile_index].w  
+        elseif side == -1 then
+            c.x = screen.w - imgs["dock_"..type.."_"..tile_index].w 
+        else
+            error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+        end
+        
+        local x
+        if b_ship then
+            if side == 1 then
+                x = 400-imgs.b_ship.w
+            elseif side == -1 then
+                x = 1520
+            else
+            end
+            add_to_render_list(enemies.battleship(), x, self.top_doodad-self.doodad_h, self.speed)
+        end
+        
+        if turret then
+            if side == 1 then
+                x = 350
+            elseif side == -1 then
+                x = screen.w -350
+            else
+            end
+            add_to_render_list(enemies.turret(), x, self.top_doodad-10)
+        end
+        
+        if self.queues[self.q_i+1] == nil then self.queues[self.q_i+1] = {} end
+        table.insert(self.queues[self.q_i+1],c)
+        return self.doodad_h/self.speed + delay
     end,
     add_dock = function(self,type, side)
         local h = imgs.dock_1_1.h
@@ -231,7 +256,7 @@ water =
 						--self.image:lower_to_bottom()
 						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
 						self.image.position     = {               xxx , -self.image.h / 2 }
-
+                        
                         for _ , strip in ipairs( water.strips ) do
     				    --    strip:lower_to_bottom()
     					end
@@ -250,16 +275,54 @@ water =
 	end,
             
     render = function( self , seconds )
-            -- reposition all the water strips
+            
             local dy   = self.speed * seconds
-            local maxy = screen.h
-            self.top_y = self.top_y + dy    
-
+            
+            self.top_strip  = self.top_strip  + dy
+            self.top_doodad = self.top_doodad + dy
+            
+            --reposition all the water strips
             for _ , strip in ipairs( self.strips ) do
                 strip.y = strip.y + dy
-                if strip.y > maxy then
-                    strip.y    = self.top_y - strip.h + 1   
-                    self.top_y = strip.y
+                --if dropped below the bottom of the screen move it to the top
+                if strip.y > screen.h then
+                    strip.y    = self.top_strip - self.strip_h+1--strip.y - screen.h - strip.h
+                    self.top_strip = strip.y
+                end
+            end
+            
+            --print("next")
+            --reposition all the doodads
+            for _ , frame in ipairs( self.doodad_frames ) do
+                frame.y = frame.y + dy
+                --print(frame.y)
+                
+                --if dropped below the bottom of the screen...
+                if frame.y > screen.h then
+                    
+                    --move it to the top
+                    frame.y = self.top_doodad - self.doodad_h+1--frame.y - screen.h - self.doodad_h  
+                    self.top_doodad = frame.y
+                    
+                    --clear out the frame
+                    frame:clear()
+                    self.queues[self.q_i] = nil
+                    
+                    --update the position
+                    self.q_i = self.q_i + 1
+                    if self.q_i >= self.append_i then
+                        self.append_i = self.q_i + 1
+                    end
+                    
+                    print("inc",self.q_i,frame.y)
+                    
+                    --load the next doodads
+                    if self.queues[self.q_i] ~= nil then
+                        for _,new_child in ipairs(self.queues[self.q_i]) do
+                            frame:add(new_child)
+                        end
+                    end
+                    
                 end
             end
     end,        

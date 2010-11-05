@@ -948,7 +948,7 @@ enemies =
 			local targ =
 			{ 
 				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
-				y = (my_plane.group.y+my_plane.image.h/2)
+				y = (my_plane.group.y+my_plane.img_h/2)
 			}
 			local me =
             {
@@ -956,9 +956,9 @@ enemies =
 				y = (self.group.y-self.group.anchor_point[2])
 			}
 			
-            --rotate and fire the bow turret
-            if me.y < screen.h + imgs.turret.h and
-               me.y >           -imgs.turret.h then
+            --rotate and fire the turret
+            if me.y < screen_h + self.img_h and
+               me.y >           -self.img_h then
                 
                 self.last_shot_time = self.last_shot_time + secs
                 
@@ -979,8 +979,8 @@ enemies =
 						z_rotation =
 						{self.image.z_rotation[1],
 							0,0},
-						x = self.group.x+self.group.h*2/3*math.cos(self.image.z_rotation[1]*math.pi/180+90),
-						y = self.group.y+self.group.h*2/3*math.sin(self.image.z_rotation[1]*math.pi/180+90)
+						x = self.group.x+self.img_h*2/3*math.cos(self.image.z_rotation[1]*math.pi/180+90),
+						y = self.group.y+self.img_h*2/3*math.sin(self.image.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
@@ -995,11 +995,11 @@ enemies =
  
 			
 		end,
-        setup = function(self,xxx)
+        setup = function(self,xxx,y_offset)
 			
 			self.group:add( self.image )
             self.group.x = xxx
-            self.group.y = -self.image.h
+            self.group.y = -self.image.h + y_offset
 			
 			layers.land_targets:add( self.group )
 			
@@ -1013,12 +1013,14 @@ enemies =
 				t:rotate_guns_and_fire(seconds)
 				
 				--see if you reached the end
-				if t.group.y >= screen.h + t.image.h then
+				if t.group.y >= screen_h + t.image.h then
 					t.group:unparent()
 					remove_from_render_list(t)
 				end
 			end
 			
+            
+            self.img_h = self.image.h
 		end,
 		
 		render = function(self,seconds)
@@ -1032,7 +1034,7 @@ enemies =
                     x1  = self.group.x+10,
                     x2  = self.group.x+self.image.w-10,
                     y1  = self.group.y+40,
-                    y2  = self.group.y+self.image.h-20,
+                    y2  = self.group.y+self.img_h-20,
                 }
             )
 		end,
@@ -1110,7 +1112,7 @@ enemies =
         
 		group    = Group{},
 		
-		shoot_time      = 7 , --how frequently the ship shoots
+		shoot_time      = 4 , --how frequently the ship shoots
 		last_shot_time  =    --how long ago the ship last shot
         {
             b = math.random()*2,
@@ -1135,7 +1137,7 @@ enemies =
 			local targ =
 			{ 
 				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
-				y = (my_plane.group.y+my_plane.image.h/2)
+				y = (my_plane.group.y+my_plane.img_h/2)
 			}
 			local b_ship =
 			{
@@ -1157,8 +1159,8 @@ enemies =
 			}
 			
             --rotate and fire the bow turret
-            if b_ship.b.y < screen.h + imgs.turret.h and
-               b_ship.b.y >           -imgs.turret.h then
+            if b_ship.b.y < screen_h + self.turr_h and
+               b_ship.b.y >           -self.turr_h then
                 
                 self.last_shot_time.b = self.last_shot_time.b + secs
                 
@@ -1179,8 +1181,8 @@ enemies =
 						z_rotation =
 						{self.guns.bow.z_rotation[1],
 							0,0},
-						x = b_ship.b.x+self.guns.bow.h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
-						y = b_ship.b.y+self.guns.bow.h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
+						x = b_ship.b.x+self.turr_h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
+						y = b_ship.b.y+self.turr_h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
@@ -1194,8 +1196,8 @@ enemies =
             end
             
             --rotate and fire the mid turret
-            if b_ship.m.y < screen.h + imgs.turret.h and
-               b_ship.m.y >           -imgs.turret.h then
+            if b_ship.m.y < screen_h + self.turr_h and
+               b_ship.m.y >           -self.turr_h then
                 
                 self.last_shot_time.m = self.last_shot_time.m + secs
                 
@@ -1216,8 +1218,8 @@ enemies =
 						z_rotation =
 						{self.guns.mid.z_rotation[1],
 							0,0},
-						x = b_ship.m.x+self.guns.mid.h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
-						y = b_ship.m.y+self.guns.mid.h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
+						x = b_ship.m.x+self.turr_h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
+						y = b_ship.m.y+self.turr_h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
@@ -1232,8 +1234,8 @@ enemies =
             end
             
             --rotate and fire the stern turret
-            if b_ship.s.y < screen.h + imgs.turret.h and
-               b_ship.s.y >           -imgs.turret.h then
+            if b_ship.s.y < screen_h + self.turr_h and
+               b_ship.s.y >           -self.turr_h then
                 
                 self.last_shot_time.s = self.last_shot_time.s + secs
                 
@@ -1254,8 +1256,8 @@ enemies =
 						z_rotation =
 						{self.guns.stern.z_rotation[1],
 							0,0},
-						x = b_ship.s.x+self.guns.stern.h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
-						y = b_ship.s.y+self.guns.stern.h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
+						x = b_ship.s.x+self.turr_h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
+						y = b_ship.s.y+self.turr_h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
 					}
 				}
                 
@@ -1273,9 +1275,10 @@ enemies =
 		
 		
 		
-		setup = function(self,xxx)
+		setup = function(self,xxx,y_offset,speed)
 			
-			
+			self.approach_speed = speed
+            
 			self.guns.g_b:add( self.guns.bow )
 			self.guns.g_m:add( self.guns.mid )
             self.guns.g_s:add( self.guns.stern )
@@ -1290,7 +1293,7 @@ enemies =
 				
 			)
             self.group.x = xxx
-            self.group.y = -self.image.h
+            self.group.y = -self.image.h+y_offset
 			
 			layers.land_targets:add( self.group )
 			
@@ -1304,12 +1307,12 @@ enemies =
 				b:rotate_guns_and_fire(seconds)
 				
 				--see if you reached the end
-				if b.group.y >= screen.h + b.image.h then
+				if b.group.y >= screen_h + b.image.h then
 					b.group:unparent()
 					remove_from_render_list(b)
 				end
 			end
-			
+			self.turr_h = self.guns.stern.h
 		end,
 		
 		render = function(self,seconds)
