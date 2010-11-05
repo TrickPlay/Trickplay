@@ -102,7 +102,7 @@ list(
     # pango/cairo/fontconfig
     #--------------
     
-    cairo pixman-1 pango-1.0 pangocairo-1.0 pangoft2 fontconfig freetype
+    cairo pixman-1 pango-1.0 pangocairo-1.0 pangoft2-1.0 fontconfig freetype
 
     #--------------
     # curl
