@@ -56,7 +56,7 @@ function editor.selected(obj, call_by_inspector)
      end 
 end  
 
-function editor.n_selected(obj, call_by_inspector)
+function editor.n_select(obj, call_by_inspector, drag)
 
      if(obj.name == nil) then return end 
 
@@ -74,7 +74,9 @@ function editor.n_selected(obj, call_by_inspector)
 	             end
 		end
 	end
-	editor.selected(obj) 
+	if(drag == nil) then
+	     editor.selected(obj) 
+	end 
      else
         screen:remove(screen:find_child(obj.name.."border"))
         table.remove(selected_objs)
@@ -82,6 +84,17 @@ function editor.n_selected(obj, call_by_inspector)
      end 
 
     end
+end  
+
+function editor.n_selected(obj, call_by_inspector)
+
+     if(obj.name == nil) then return end 
+     if(obj.type ~= "Video") then 
+        screen:remove(screen:find_child(obj.name.."border"))
+        table.remove(selected_objs)
+        obj.extra.selected = false
+     end 
+
 end  
 
 function editor.close()
@@ -653,6 +666,10 @@ function editor.rectangle(x, y)
                 return 0
         end
 
+	while (is_available("rect"..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	end 
+
         ui.rect = Rectangle{
                 name="rect"..tostring(item_num),
                 border_color= DEFAULT_COLOR,
@@ -813,6 +830,10 @@ end
 
 function editor.text()
 
+	while (is_available("text"..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	end 
+
         ui.text = Text{
         name="text"..tostring(item_num),
 	text = "", font= "DejaVu Sans 40px",
@@ -873,6 +894,9 @@ function editor.clone()
 	        input_mode = S_SELECT
 		return 
         end 
+	while (is_available("clone"..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	end 
 	for i, v in pairs(g.children) do
             if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
@@ -941,6 +965,9 @@ end
 function editor.group()
         local min_x, max_x, min_y, max_y = get_min_max () 
        
+	while (is_available("group"..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	end 
         ui.group = Group{
                 name="group"..tostring(item_num),
         	position = {min_x, min_y}
@@ -953,6 +980,7 @@ function editor.group()
              if g:find_child(v.name) then
 		  if(v.extra.selected == true) then
 			editor.n_selected(v)
+
 			g:remove(v)
         		ui.group:add(v)
 		  end 

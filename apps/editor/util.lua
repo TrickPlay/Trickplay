@@ -4,6 +4,14 @@
 
 local factory = ui.factory
 
+function is_available(new_name)
+    if(g:find_child(new_name) ~= nil) then 
+	return false 
+    else 
+	return true
+    end
+end 
+
 function is_lua_file(fn)
 	     i, j = string.find(fn, ".lua")
 	     if (j == string.len(fn)) then
@@ -110,7 +118,7 @@ function create_on_button_down_f(v)
 	            if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
 		     	editor.selected(p_obj)
 	            elseif (p_obj.extra.selected == true) then 
-		     	editor.n_selected(p_obj)
+		     	editor.n_select(p_obj)
 	       	    end
 	            org_object = copy_obj(p_obj)
            	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
@@ -128,7 +136,7 @@ function create_on_button_down_f(v)
 			      v:set{editable= true}
      			      v:grab_key_focus(v)
 			end 
-			editor.n_selected(v) 
+			editor.n_select(v) 
 	       	    end
 	            org_object = copy_obj(v)
            	    dragging = {v, x - v.x, y - v.y }
@@ -154,9 +162,9 @@ function create_on_button_down_f(v)
 	            	local actor , dx , dy = unpack( dragging )
 	            	new_object.position = {x-dx, y-dy}
 			if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			editor.n_selected(v) 
-			editor.n_selected(new_object) 
-			editor.n_selected(org_object) 
+			editor.n_select(v, false, dragging) 
+			editor.n_select(new_object, false, dragging) 
+			editor.n_select(org_object, false, dragging) 
                     	table.insert(undo_list, {p_obj.name, CHG, org_object, new_object})
 			end 
 	            	dragging = nil
@@ -169,9 +177,9 @@ function create_on_button_down_f(v)
 	            	new_object.position = {x-dx, y-dy}
 			if(org_object ~= nil) then  
 		        if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			editor.n_selected(v) 
-			editor.n_selected(new_object) 
-			editor.n_selected(org_object) 
+			editor.n_select(v, false, dragging) 
+			editor.n_select(new_object, false, dragging) 
+			editor.n_select(org_object, false, dragging) 
                     	table.insert(undo_list, {v.name, CHG, org_object, new_object})
 			end
 			end 
@@ -922,6 +930,11 @@ function inputMsgWindow_openimage(input_purpose)
 	  BG_IMAGE_import:set{src = input_t.text, opacity = 255} 
 	  input_mode = S_SELECT
      else 
+	  
+	  while (is_available("img"..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	  end 
+
           ui.image= Image { name="img"..tostring(item_num),
           src = input_t.text, opacity = 255 , position = {200,200}}
           ui.image.reactive = true
