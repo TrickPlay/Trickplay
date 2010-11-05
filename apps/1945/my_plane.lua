@@ -43,7 +43,7 @@ smoke = function(i)   return {
                 self.plumes[i].group.y = my_plane.group.y + 50
             else
                 self.plumes[i].group.x = my_plane.group.x + 30
-                self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+                self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
             end
             self.plumes[i].image.x =  - ( ( self.plumes[i].image.w / 4 ) * 5 )
             layers.planes:add( self.plumes[i].group )
@@ -85,7 +85,7 @@ smoke = function(i)   return {
             self.plumes[i].group.y = my_plane.group.y + 50
         else
             self.plumes[i].group.x = my_plane.group.x + 30
-            self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+            self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
         end
         --self.plumes[i].time = 0
     end,
@@ -234,7 +234,7 @@ my_plane =
             
             layers.planes:add( self.group )
             
-            self.group.position = { screen.w / 2 - self.image.w / 2 , screen.h - self.image.h }
+            self.group.position = { screen.w / 2 - self.image.w / 2 , screen_h - self.image.h }
             self.group.clip = {0,0,self.image.w/self.num_frames,self.image.h}
 
             for i = 1, self.num_frames - 1 do
@@ -243,7 +243,8 @@ my_plane =
                     table.insert(self.render_items,self.smoke_stream[i])
                 
             end
-            
+            self.img_h = self.image.h
+            self.prop_h = self.prop.l.h
         end,
     hit = function(self)
         self.damage = self.damage + 1
@@ -303,9 +304,9 @@ my_plane =
             
 			self.prop_index = self.prop_index%
 				self.num_prop_frames + 1
-			self.prop.l.y = -(self.prop_index - 1)*self.prop.l.h/
+			self.prop.l.y = -(self.prop_index - 1)*self.prop_h/
 				self.num_prop_frames
-			self.prop.r.y = -(self.prop_index - 1)*self.prop.r.h/
+			self.prop.r.y = -(self.prop_index - 1)*self.prop_h/
 				self.num_prop_frames
             
             --self.group:raise_to_top()
@@ -389,9 +390,9 @@ end
     
                     local y = self.group.y + ( self.v_speed * seconds )
                     
-                    if y > screen.h - my_plane_sz then
+                    if y > screen_h - my_plane_sz then
                     
-                        y = screen.h -my_plane_sz 
+                        y = screen_h -my_plane_sz 
                         
                         self.v_speed = 0
                     
@@ -427,7 +428,7 @@ end
                         x1  = self.group.x+20,--self.image.w/(2*self.num_frames),
                         x2  = self.group.x+self.image.w/(self.num_frames)-20,
                         y1  = self.group.y+20,--self.image.h/2,
-                        y2  = self.group.y+self.image.h,--/2,
+                        y2  = self.group.y+self.img_h,--/2,
                     }
                 )
                 --[[
@@ -478,6 +479,8 @@ r.h=self.image.h
                     function( self )
                     
                         layers.air_bullets:add( self.image )
+                        self.img_w = self.image.w
+                        self.img_h = self.image.h
                     end,
                     
                 render =
@@ -487,7 +490,7 @@ r.h=self.image.h
                         local y = self.image.y + self.speed * seconds * math.cos(-1*self.z_rot*math.pi/180)
                         local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)
                         
-                        if y < -self.image.h or y > (screen.h + self.image.h) or x < -self.image.w  or x > (screen.w + self.image.w)then
+                        if y < -self.img_h or y > (screen_h + self.img_h) or x < -self.image.w  or x > (screen.w + self.image.w)then
                             
                             remove_from_render_list( self )
                             
@@ -498,10 +501,10 @@ r.h=self.image.h
                             table.insert(good_guys_collision_list,
                                 {
                                     obj = self,
-                                    x1  = self.image.x-self.image.w/2,
-                                    x2  = self.image.x+self.image.w/2,
-                                    y1  = self.image.y-self.image.h/2,
-                                    y2  = self.image.y+self.image.h/2,
+                                    x1  = self.image.x-self.img_w/2,
+                                    x2  = self.image.x+self.img_w/2,
+                                    y1  = self.image.y-self.img_h/2,
+                                    y2  = self.image.y+self.img_h/2,
                                 }
                             )
                             --[[
@@ -635,7 +638,7 @@ if state.hud.num_lives == 0 then
                                     
                                     function( self )
                                         
-                                        self.text.position = { screen.w/2,screen.h/2}--location[ 1 ] + 30 , location[ 2 ] }
+                                        self.text.position = { screen.w/2,screen_h/2}--location[ 1 ] + 30 , location[ 2 ] }
                                         
                                         self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
                                         
@@ -728,7 +731,7 @@ redo_score_text()
             
             local location = self.group.center
             
-            self.group.position = { screen.w / 2 - self.group.w / 2 , screen.h - self.group.h }
+            self.group.position = { screen.w / 2 - self.group.w / 2 , screen_h - self.group.h }
 
             -- Spawn an explosion
             
@@ -868,7 +871,7 @@ powerups =
                 my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
                     self.image.x or 
                 my_plane.group.y+20 > self.image.y+self.image.h or 
-                my_plane.group.y+my_plane.image.h < self.image.y 
+                my_plane.group.y+my_plane.img_h < self.image.y 
                 ) then
                 
                 if my_plane.firing_powerup < my_plane.firing_powerup_max then
@@ -876,7 +879,7 @@ powerups =
                 end
                 self.image:unparent()
                 remove_from_render_list(self)
-            elseif self.image.y > screen.h + self.image.h then
+            elseif self.image.y > screen_h + self.image.h then
                 self.image:unparent()
                 remove_from_render_list(self)
                 end
@@ -897,13 +900,13 @@ powerups =
                 my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
                     self.image.x or 
                 my_plane.group.y+20 > self.image.y+self.image.h or 
-                my_plane.group.y+my_plane.image.h < self.image.y 
+                my_plane.group.y+my_plane.img_h < self.image.y 
                 ) then
                 
                 my_plane:heal()
                 self.image:unparent()
                 remove_from_render_list(self)
-            elseif self.image.y > screen.h + self.image.h then
+            elseif self.image.y > screen_h + self.image.h then
                 self.image:unparent()
                 remove_from_render_list(self)
                 end
@@ -924,7 +927,7 @@ powerups =
                 my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
                     self.image.x or 
                 my_plane.group.y+20 > self.image.y+self.image.h or 
-                my_plane.group.y+my_plane.image.h < self.image.y 
+                my_plane.group.y+my_plane.img_h < self.image.y 
                 ) then
                 
                 if state.hud.num_lives < state.hud.max_lives then
@@ -933,7 +936,7 @@ powerups =
                 end
                 self.image:unparent()
                 remove_from_render_list(self)
-            elseif self.image.y > screen.h + self.image.h then
+            elseif self.image.y > screen_h + self.image.h then
                 self.image:unparent()
                 remove_from_render_list(self)
                 end

@@ -155,7 +155,7 @@ local keys = {
             formations.zepp_boss(900)
         end,
         [keys.n] = function()
-            add_to_render_list(enemies.battleship(),500)
+            add_to_render_list(enemies.battleship(),500, 80)
         end,
         --powerups
         [keys.z] = function()
