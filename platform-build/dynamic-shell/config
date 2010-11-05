@@ -1,0 +1,9 @@
+
+fonts_path="/mnt/usb2/Drive1/trickplay/fonts"
+
+data_path="/mnt/usb2/Drive1/data"
+
+screen_width=1920
+screen_height=1080
+
+console_enabled=false

@@ -453,9 +453,13 @@ echo "================================================================="
 
 make -C ${HERE}/tp-build --no-print-directory
    
+if [[ ! -f "${PREFIX}/lib/libtpcore.a" ]]
+then
+    ln -s ${HERE}/tp-build/engine/libtpcore.a "${PREFIX}/lib/libtpcore.a"
+fi
+   
 #------------------------------------------------------------------------------
 # Build a test exe
-
 
 echo "================================================================="
 echo "== Link test..."
@@ -514,6 +518,23 @@ ${CXX} -o ${HERE}/test \
 	${THERE}/test/main.cpp \
 	-Wl,--end-group 
 	
-	
+rm -rf ${HERE}/test	
+
+#------------------------------------------------------------------------------
+# Build the LG dynamic shell
+
+echo "================================================================="
+echo "== Building dynamic shell..."
+echo "================================================================="
+
+if [[ ! -d ${HERE}/dynamic-shell ]] 
+then
+    cp -r ${THERE}/dynamic-shell ${HERE}/
+    ln -s ${THERE}/../engine/public/include/trickplay ${HERE}/dynamic-shell/include/trickplay
+    ln -s ${PREFIX}/lib ${HERE}/dynamic-shell/lib
+fi
+
+make -C ${HERE}/dynamic-shell --no-print-directory
+
 
 

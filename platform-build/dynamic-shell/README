@@ -1,0 +1,39 @@
+
+THESE FILES CAME FROM WONGI, BUT I MADE SOME CHANGES- AND SOME FIXES
+
+IMPORTANT NOTE: 
+In tp_main.c I do:
+    tp_context_set(pContext, TP_CONFIG_FROM_FILE , "/mnt/usb2/Drive1/trickplay/config" );
+This is to pick up Trickplay configuration information from that file. That path may need to be changed.
+
+ON THE USB DRIVE YOU NEED THE FOLLOWING:
+
+<usb>/trickplay/libtrickplay.so (produced by this makefile)
+<usb>/trickplay/config (located here, but may need changes)
+<usb>/trickplay/apps (any apps you want to run)
+
+
+
+1. Makefile produces 'libtrickplay.so' at the current directory.
+
+2. For successful build, you may change CROSS_COMPILE variable to the path of your toolchain located.
+
+3. You can add or remove dependencies for modifying INCLUDE_MODULE variable of Makefile.
+
+4. Header files at the include directory are the simplified copy of related LG DTV modules' header file.
+
+5. Media playing functions are implemented but do not work.
+
+
+[Issues]
+
+- When includes libtpcore.a to the INCLUDE_MODULE, shows following message as a result of link. Target is created however.
+
+	ld: BFD 2.17.50-brcm 20070220 assertion fail ../../binutils-2.17.50/bfd/elf-eh-frame.c:1070
+
+
+-- FIXED - by adding environment G_SLICE=always_malloc in the correct place in tp_main.c
+    - Aborted at runtime because of assertion failed condition related to Glib memory align.
+    This is not happen when using Glib received with TrickPlay 0.0.6.
+
+	    ***MEMORY-ERROR***: [453]: GSlice: assertion failed: aligned_memory == (gpointer) addr 
