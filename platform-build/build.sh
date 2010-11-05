@@ -444,7 +444,6 @@ then
     cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
             -DCMAKE_BUILD_TYPE=Debug \
             -DTP_CLUTTER_BACKEND_EGL=1 \
-            -DTP_PROFILING=1 \
             "${THERE}/../"   
 fi
 
