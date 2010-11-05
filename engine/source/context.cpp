@@ -729,7 +729,7 @@ int TPContext::run()
     //.........................................................................
     // LIRC controller
 
-    controller_lirc = ControllerLIRC::make( this );
+    //controller_lirc = ControllerLIRC::make( this );
 
     //.........................................................................
     // Create the downloads
