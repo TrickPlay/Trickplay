@@ -431,10 +431,11 @@ function( ui , api )
     end
     
     function section:on_clear()
-        local group = me.group
-        if group then
-            group:unparent()
-            group=nil
+        if me then
+            if me.group then
+                me.group:unparent()
+                me.group=nil
+            end
         end
         if background then
             background:unparent()
@@ -445,4 +446,3 @@ function( ui , api )
     return Encapsulate( section )
     
 end
-    
