@@ -379,11 +379,8 @@ for THIS in ${ALL}; do
 
             if [[ -d "${THERE}/patches/${!THIS_SOURCE}" ]]
 	        then
-		        for PATCH in `ls -1 ${THERE}/patches/${!THIS_SOURCE}/`; do
-
-			        cd ${SOURCE}/${!THIS_SOURCE} && patch -p0 < ${THERE}/patches/${!THIS_SOURCE}/${PATCH}
-
-		        done
+			cd "${SOURCE}/${!THIS_SOURCE}"
+			QUILT_PATCHES="${THERE}/patches/${!THIS_SOURCE}" quilt push -a
 	        fi
         fi
         

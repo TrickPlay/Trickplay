@@ -1,5 +1,5 @@
---- ../libupnp-1.6.6-old/upnp/src/uuid/uuid.c	2008-03-22 10:18:46.000000000 -0700
-+++ upnp/src/uuid/uuid.c	2010-10-26 13:49:51.970149627 -0700
+--- a/upnp/src/uuid/uuid.c	2008-03-22 10:18:46.000000000 -0700
++++ b/upnp/src/uuid/uuid.c	2010-10-26 13:49:51.970149627 -0700
 @@ -53,7 +53,7 @@
     uuid_create -- generator a UUID 
   */
