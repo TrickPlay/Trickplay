@@ -714,8 +714,8 @@ end
                 y        = pic.extra.end_y,--end_pos[2],
                 z        = 0,
                 on_completed = function()
-						view.license_box:raise_to_top()
-mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
+					view.license_box:raise_to_top()
+					mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
                     reset_keys()            
                 end
             }
@@ -1657,7 +1657,8 @@ print("toggle on")
 	print("tick "..photo_i)
         view:get_controller():on_key_down(keys.Right)
     end
-
+	view.timer_is_running = true
+	view.timer:start()
     function view:nav_on_focus(style_i)
 --[[
         view.nav_group:raise_to_top()
