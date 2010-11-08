@@ -443,7 +443,7 @@ levels =
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open ,false,false }},
                     --{f = add_to_render_list,      p = {enemies.turret(), screen.w -350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier1,true,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close ,false,false }},
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
                     
                     {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
                     {f = add_to_render_list,      p = {powerups.life(1800)}},
