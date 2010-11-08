@@ -452,7 +452,7 @@ make -C ${HERE}/tp-build --no-print-directory
    
 if [[ ! -f "${PREFIX}/lib/libtpcore.a" ]]
 then
-    ln -s ${HERE}/tp-build/engine/libtpcore.a "${PREFIX}/lib/libtpcore.a"
+    cp ${HERE}/tp-build/engine/libtpcore.a "${PREFIX}/lib/libtpcore.a"
 fi
    
 #------------------------------------------------------------------------------
