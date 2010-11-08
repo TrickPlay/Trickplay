@@ -1048,6 +1048,7 @@ local m_init_y = 0
 local multi_select_border
 
 function editor.multi_select(x,y) 
+
  	m_init_x = x -- origin x
         m_init_y = y -- origin y
 
@@ -1162,9 +1163,35 @@ local function getObjName (border_n)
      return string.sub(border_n, 1, i-1)
 end 
 
+local function org_cord() 
+     for i, v in pairs(g.children) do
+          if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     v.x = v.x - v.anchor_point[1] 
+		     v.y = v.y - v.anchor_point[2] 
+		end 
+	  end 
+     end 
+end  
+
+local function ang_cord() 
+     for i, v in pairs(g.children) do
+          if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     editor.n_selected(v)
+		     v.x = v.x + v.anchor_point[1] 
+		     v.y = v.y + v.anchor_point[2] 
+		end 
+	  end 
+     end 
+end  
+
+
+
 function editor.left() 
      local org_object, new_object 
 
+     org_cord()
 
      if(table.getn(selected_objs) == 0 )then 
 	print("there are no selected objects") 
@@ -1178,7 +1205,7 @@ function editor.left()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     editor.n_selected(v)
+		     --editor.n_selected(v)
 		     if(v.x ~= basis_obj.x) then
 	                  org_object = copy_obj(v)
 			  v.x = basis_obj.x
@@ -1188,6 +1215,8 @@ function editor.left()
 		end 
           end
     end
+
+    ang_cord()
 
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
@@ -1202,13 +1231,15 @@ function editor.right()
 	return 
      end 
 
+     org_cord()
+
      local basis_obj_name = getObjName(selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		   editor.n_selected(v)
+		   --editor.n_selected(v)
 		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
 	                org_object = copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w - v.w
@@ -1219,6 +1250,7 @@ function editor.right()
           end
     end
 
+    ang_cord()
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
 end
@@ -1232,13 +1264,15 @@ function editor.top()
 	return 
      end 
 
+     org_cord()
+
      local basis_obj_name = getObjName(selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     editor.n_selected(v)
+		  --   editor.n_selected(v)
 		     if(v.y ~= basis_obj.y) then
 	                org_object = copy_obj(v)
 			v.y = basis_obj.y 
@@ -1249,6 +1283,7 @@ function editor.top()
           end
     end
 
+    ang_cord()
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
 end
@@ -1262,13 +1297,15 @@ function editor.bottom()
 	return 
      end 
 
+     org_cord() 
+
      local basis_obj_name = getObjName(selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     editor.n_selected(v)
+		     --editor.n_selected(v)
 		     if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
 	                org_object = copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h - v.h 
@@ -1278,6 +1315,8 @@ function editor.bottom()
 		end 
           end
     end
+
+    ang_cord()
 
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
@@ -1291,13 +1330,15 @@ function editor.hcenter()
 	return 
      end 
 
+     org_cord() 
+
      local basis_obj_name = getObjName(selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     editor.n_selected(v)
+		     -- editor.n_selected(v)
 		     if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
 	                org_object = copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w/2 - v.w/2
@@ -1307,6 +1348,8 @@ function editor.hcenter()
 		end 
           end
     end
+
+    ang_cord() 
 
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
@@ -1322,13 +1365,15 @@ function editor.vcenter()
 	return 
      end 
 
+     org_cord() 
+
      local basis_obj_name = getObjName(selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     editor.n_selected(v)
+		     -- editor.n_selected(v)
 		     if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
 	                org_object = copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h/2 - v.h/2
@@ -1338,6 +1383,8 @@ function editor.vcenter()
 		end 
           end
     end
+
+    ang_cord()
 
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
@@ -1414,6 +1461,8 @@ function editor.hspace()
 
     local  x_sort_t, space, reverse_t, f, b
 
+    org_cord() 
+
     x_sort_t = get_x_sort_t()
 
     space = get_x_space(x_sort_t)
@@ -1425,7 +1474,7 @@ function editor.hspace()
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-			editor.n_selected(v)
+			--editor.n_selected(v)
 		end 
           end
     end
@@ -1448,6 +1497,8 @@ function editor.hspace()
          f = b 
     end 
 
+    ang_cord()
+
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
 end
@@ -1456,6 +1507,7 @@ local function get_y_sort_t()
      local y_sort_t = {}
      local n
      
+
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
@@ -1512,6 +1564,8 @@ function editor.vspace()
 
     local  y_sort_t, space, reverse_t, f, b
 
+    org_cord()
+
     y_sort_t = get_y_sort_t()
     space = get_y_space(y_sort_t)
     space = math.floor(space)
@@ -1534,10 +1588,12 @@ function editor.vspace()
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-			editor.n_selected(v)
+	--		editor.n_selected(v)
 		end 
           end
     end
+
+    ang_cord()
 
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
