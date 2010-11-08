@@ -131,6 +131,31 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
       end
    end
+
+   -- Animate all chips to winner
+   local function animate_chips_to_winner(winner)
+      for _, player in pairs( ctrl:get_players() ) do
+         if player.betChips then
+            player.betChips.group:animate{
+               position = {
+                   MSCL[winner.table_position][1] + 55,
+                   MSCL[winner.table_position][2]
+               },
+               duration=500,
+               mode="EASE_OUT_QUAD",
+               on_completed = function()
+                  if player ~= winner then
+                     winner.betChips:set(
+                        winner.betChips:value() + player.betChips:value()
+                     )
+                     player.betChips:set(0)
+                  end
+               end
+            }
+         end
+      end
+   end
+
    
    -- Give the pot to a player after he wins
    local function animate_pot_to_player(player)
@@ -428,8 +453,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
    function pres:win_from_bets(only_player)
       assert(only_player)
       only_player.status:update( "weaksauce" )
-      if only_player.betChips then only_player.betChips:set(0) end
       animate_pot_to_player( only_player )
+      animate_chips_to_winner(only_player)
    end
 
    -- Betting round over, HandState has been set for next betting round
