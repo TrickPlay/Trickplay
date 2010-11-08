@@ -715,7 +715,7 @@ end
                 z        = 0,
                 on_completed = function()
 						view.license_box:raise_to_top()
-
+mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
                     reset_keys()            
                 end
             }
@@ -1087,7 +1087,7 @@ mosaic_timeline:start()
                     reset_keys()            
 
 						view.license_box:raise_to_top()
-
+					mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
                  end
             }
         end,
@@ -1186,6 +1186,7 @@ mosaic_timeline:start()
     	                    child.scale    = { 2 , 2 }
 	                        child.z        = 500
 						end
+						mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
                     end
 					view.license_box:raise_to_top()
 					layered_timeline = nil
@@ -1816,6 +1817,7 @@ print("toggle on")
                 
 					back_anim_prep[view.styles[style_i]](pic)
                    dolater(backward_animation[ view.styles[style_i] ],pic)
+				   --mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
                 else
                --     print("on screen is 0")
 					reset_keys()
@@ -1859,7 +1861,7 @@ print("toggle on")
                    pic.opacity = 255
 					forward_anim_prep[view.styles[style_i]](pic)
                    dolater(forward_animation[ view.styles[style_i] ],pic)
-
+					--mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
                 else
              --       print("off screen is 0")
 					reset_keys()

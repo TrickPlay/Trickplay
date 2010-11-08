@@ -51,6 +51,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
             if style_index ~= 1 and view.set_ui[ view.styles[1] ]() then
     	        view:pick(1,style_index)
 	            style_index = 1
+				mediaplayer:play_sound("audio/Fo'os Flip Slideshow Sound.mp3")
 			else reset_keys()
             end
         end,
@@ -58,6 +59,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
             if style_index ~= 2 and view.set_ui[ view.styles[2] ]() then
     	        view:pick(2,style_index)
 	            style_index = 2
+				mediaplayer:play_sound("audio/Fo'os Flip Slideshow Sound.mp3")
 			else reset_keys()
 			end
         end,
