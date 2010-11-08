@@ -70,6 +70,8 @@ function screen:on_key_down(k)
     screen.on_key_down = function()
 		lock.timer = false
 	end
+    if k == keys.OK   then k = keys.Return end
+    if k == keys.BACK then k = keys.BackSpace end
 	lock.anim = false
 	lock.timer = true
 	single_press:start()
