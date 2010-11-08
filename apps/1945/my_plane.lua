@@ -43,7 +43,7 @@ smoke = function(i)   return {
                 self.plumes[i].group.y = my_plane.group.y + 50
             else
                 self.plumes[i].group.x = my_plane.group.x + 30
-                self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
+                self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
             end
             self.plumes[i].image.x =  - ( ( self.plumes[i].image.w / 4 ) * 5 )
             layers.planes:add( self.plumes[i].group )
@@ -85,9 +85,10 @@ smoke = function(i)   return {
             self.plumes[i].group.y = my_plane.group.y + 50
         else
             self.plumes[i].group.x = my_plane.group.x + 30
-            self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
+            self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
         end
         --self.plumes[i].time = 0
+        self.plumes[i].image.x =  self.plumes[i].image.w / 4
     end,
     halt = function(self)
         self.halted = true
@@ -121,6 +122,7 @@ smoke = function(i)   return {
             
             if self.plumes[i].time > self.duration then
                 self.plumes[i].time =0
+                self.plumes[i].image.x =  self.plumes[i].image.w / 4 
                 if not self.halted then
                     self:reset(i)
                 end
@@ -239,20 +241,22 @@ my_plane =
 
             for i = 1, self.num_frames - 1 do
                 self.smoke_stream[i] = smoke(i)
-                    self.smoke_stream[i]:setup(self.plumes_per_stream)
-                    table.insert(self.render_items,self.smoke_stream[i])
+                    --self.smoke_stream[i]:setup(self.plumes_per_stream)
+                    --table.insert(self.render_items,self.smoke_stream[i])
+                    add_to_render_list(self.smoke_stream[i],self.plumes_per_stream)
                 
             end
             self.img_h = self.image.h
             self.prop_h = self.prop.l.h
         end,
     hit = function(self)
+        if self.damage ~= (self.num_frames - 1) then
         self.damage = self.damage + 1
         self.image.x = -1*self.damage*self.image.w/self.num_frames
         --for j = 1,self.plumes_per_stream do
                 self.smoke_stream[self.damage]:unhalt()
         --end
-        
+        end
     end,
     heal = function(self)
         for i = 1, self.num_frames - 1 do
@@ -262,13 +266,14 @@ my_plane =
         end
         self.damage = 0
         self.image.x = 0
+        print("HEAL")
     end,
     render =
     
         function( self , seconds )
-            for _ , item in ipairs( self.render_items ) do
-                item.render( item , seconds ) 
-            end
+            --for _ , item in ipairs( self.render_items ) do
+              --  item.render( item , seconds ) 
+            --end
             --[[
             if self.damage > 0 then
                 self.last_smoke = self.last_smoke + self.smoke_rate_base
@@ -313,7 +318,7 @@ my_plane =
             -- Move
             
             --if game_is_running then--not self.dead then
-if self.dead then
+            if self.dead then
                 -- Figure the total time we have been dead
                 self.dead_time = self.dead_time + seconds
                 
@@ -649,7 +654,7 @@ if state.hud.num_lives == 0 then
                                     end,
                                     
                                 render =
-                                
+                                    
                                     function( self , seconds )
                                     
                                         local o = self.text.opacity - self.speed * seconds
@@ -674,42 +679,7 @@ if state.hud.num_lives == 0 then
                                     
                                     end,
                             })
-                            --[[
-	add_to_render_list(
-                
-                            {
-                                elapsed = 0,
-                                
-                                --text = Clone{ source = txt.g_over },
-                                
-                                setup =
-                                
-                                    function( self )
-						if curr_level ~= nil then
-print("hhhhhhh")
 
-							remove_from_render_list(curr_level)
-							curr_level = nil
-						end
-
-					self.save_keys = screen.on_key_down
-					screen.on_key_down = nil
-
-                                    end,
-                                    
-                                render =
-                                
-                                    function( self , seconds )
-                                   	self.elapsed = self.elapsed + seconds
-					if self.elapsed > 5 then
-						remove_from_render_list( self )
-						screen.on_key_down = self.save_keys
-					elseif self.elapsed >4 then
-						splash.opacity = 255
-					end
-                                    end,
-                            })
-                            --]]
 
 
 elseif state.curr_mode ~= "TEST_MODE" then
@@ -729,7 +699,7 @@ redo_score_text()
             
             self.v_speed = 0
             
-            local location = self.group.center
+            local location = {self.group.x + self.image.w/(2*self.num_frames), self.group.y+self.image.h/2}
             
             self.group.position = { screen.w / 2 - self.group.w / 2 , screen_h - self.group.h }
 
@@ -738,7 +708,7 @@ redo_score_text()
             local explosion =
                 
                 {
-                    image = Clone{ source = imgs.explosion2 , opacity = 255 },
+                    image = Clone{ source = imgs.explosion1 , opacity = 255 },
                     
                     group = nil,
                     
@@ -749,15 +719,16 @@ redo_score_text()
                     setup =
                     
                         function( self )
+                            
                             mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
-
+                            
                             self.group = Group
                                 {
-                                    size = { self.image.w / 7 , self.image.h },
+                                    size = { self.image.w / 6 , self.image.h },
                                     position = location,
-                                    clip = { 0 , 0 , self.image.w / 7 , self.image.h },
+                                    clip = { 0 , 0 , self.image.w / 6 , self.image.h },
                                     children = { self.image },
-                                    anchor_point = { ( self.image.w / 7 ) / 2 , self.image.h / 2 },
+                                    anchor_point = { ( self.image.w / 6 ) / 2 , self.image.h / 2 },
                                 }
                             
                             layers.planes:add( self.group )
@@ -780,7 +751,7 @@ redo_score_text()
                             
                                 local frame = math.floor( self.time / ( self.duration / 6 ) )
                                 
-                                self.image.x = - ( ( self.image.w / 7 ) * frame )
+                                self.image.x = - ( ( self.image.w / 6 ) * frame )
                             
                             end
                         

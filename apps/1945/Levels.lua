@@ -336,6 +336,7 @@ levels =
             self.next_queues =
             {
                 {   --left harbor
+                    {f = add_to_render_list,        p = { lvl2txt        }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_open,false,false  }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      2}},
                     --{f = add_to_render_list,      p = {enemies.turret(), 350, -imgs.dock_1_1.h*2/3 }},
@@ -464,30 +465,7 @@ levels =
 
 
 			local curr_dist = self.dist_travelled + self.speed*seconds
-            for i = 1,#self.add_list do
-                local done = false
-                while not done do
-                	
-                    if  self.index[i] > #self.add_list[i] then
-                        if i ~= 1 then
-                            --self.index[i] = 1
-                            --self.offset[i] = curr_dist
-                            --print("aaa",i,self.offset[i])
-                        end
-                        done = true
-                    elseif self.add_list[i][ self.index[i] ].y < (curr_dist - self.offset[i]) and
-                	   self.add_list[i][ self.index[i] ].y >=
-                	   (self.dist_travelled - self.offset[i]) then
-                        
-                        self.add_list[i][self.index[i]].item(unpack(self.add_list[i][self.index[i]].params))
-                        self.index[i] = self.index[i] + 1
-                        
-                	else
-                		done = true
-                	end
-                end
-            end
-            
+
             for i = 1,#self.next_queues do
                 --if you havent reached the end of the queue
                 if self.w_q_index[i] <= #self.next_queues[i] then

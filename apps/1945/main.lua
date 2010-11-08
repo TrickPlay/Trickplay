@@ -66,16 +66,13 @@ local test_text = Text
 	{
 	    font = my_font,
 	    text =  "Test Mode\n\n"..
-	            "q    row  in  from  left\n"..
-	            "w    row  in  from  right\n"..
-	            "e    loop  from  left\n"..
-	            "r    loop  from  right\n"..
-	            "m    zeppelin\n\n"..
-                "z    gun powerup\n"..
-                "x    health powerup\n"..
-                "c    life powerup\n\n"..
-	            "1 2 3 4 5       bullet   powerups\n\n"..
-	            "h    toggles  this  text\n\n"..
+	            "q-y    enemy formations\n"..
+	            "n-m    big enemies\n\n"..
+                "z-c    powerup\n"..
+	            "1-5    bullet   powerups\n\n"..
+                "9      plane gets hit\n"..
+                "0      plane heals\n\n"..
+	            "h      toggles  this  text\n\n"..
                 "fyi, you don't die",
 	    color = "FFFFFF",
         opacity = 0
@@ -194,6 +191,12 @@ local keys = {
         [keys["5"]] = function()
             my_plane.firing_powerup=5
         end,
+        [keys["9"]] = function()
+            my_plane:hit()
+        end,
+        [keys["0"]] = function()
+            my_plane:heal()
+        end,
         [keys.Right] = function()
             my_plane:on_key(keys.Right)
         end,
@@ -237,13 +240,13 @@ local press
 --i.e. performs the game loop
 function idle.on_idle( idle , seconds )
     if press ~= nil then
-        if state.paused == true and press == keys.Space then
-            state.paused = false
+        if press == keys.Space then
+            state.paused = not state.paused
         elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()
         end
         press = nil
     end
-    if not paused then
+    if not state.paused then
 
 --[[
 	--Pablo's performance measuring code
