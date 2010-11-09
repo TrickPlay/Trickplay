@@ -933,6 +933,9 @@ function editor.delete()
 		     editor.n_selected(v)
         	     table.insert(undo_list, {v.name, DEL, v})
         	     g:remove(v)
+                     if (v.extra.a_m ~= nil) then 
+			g:remove(v.extra.a_m)
+                     end
 		end 
             end
         end

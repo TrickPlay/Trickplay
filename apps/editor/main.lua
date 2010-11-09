@@ -589,8 +589,11 @@ local function build_ui( show_it )
 	                 border.position = {x -dx, y -dy}
 		    end 
 	       end 
-
-	       actor.position = { x - dx , y - dy  }
+	       actor.x =  x - dx 
+	       actor.y =  y - dy  
+               if (actor.extra.a_m ~= nil) then 
+		     actor.extra.a_m.position = {actor.x, actor.y, actor.z}
+	       end
           end
           if(mouse_state == BUTTON_DOWN) then
                if (input_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end

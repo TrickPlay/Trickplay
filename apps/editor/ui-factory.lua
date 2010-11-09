@@ -1343,6 +1343,57 @@ end
 
 
 
+function factory.draw_anchor_pointer() 
+
+sero = Rectangle
+	{
+		name="sero",
+		border_color={255,255,255,192},
+		border_width=0,
+		color={255,0,0,255},
+		size = {5,30},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {12.5,0},
+		opacity = 255
+	}
+
+garo = Rectangle
+	{
+		name="garo",
+		border_color={255,255,255,192},
+		border_width=0,
+		color={255,0,0,255},
+		size = {30,5},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {0,12},
+		opacity = 255
+	}
+
+anchor_point = Group
+	{
+		name="mouse_pointer",
+		size={30,30},
+		position = {0,0},
+		children = {sero, garo},
+		scale = {1,1,0,0},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		opacity = 255
+	}
+
+	anchor_point.anchor_point = {anchor_point.w/2, anchor_point.h/2}
+	anchor_point.scale = {0.5, 0.5}
+	return anchor_point
+end 
+
 function factory.draw_mouse_pointer() 
 
 sero = Rectangle
