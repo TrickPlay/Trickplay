@@ -21,6 +21,9 @@ function editor.selected(obj, call_by_inspector)
 		     screen:remove(t_border)
 		     local i, j = string.find(t_border.name,"border")
 		     t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+                     if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+     			screen:remove(screen:find_child(t_obj.name.."a_m"))
+     		     end
 		     if(t_obj ~= nil) then 
 			t_obj.extra.selected = false
 	             end
@@ -34,8 +37,9 @@ function editor.selected(obj, call_by_inspector)
      obj_border.color = {0,0,0,0}
      obj_border.border_color = {255,0,0,255}
      obj_border.border_width = 2
+     local group_pos
      if(obj.extra.is_in_group == true)then 
-	local group_pos = get_group_position(obj)
+	group_pos = get_group_position(obj)
      	obj_border.x = obj.x + group_pos[1]
      	obj_border.y = obj.y + group_pos[2]
 	obj_border.extra.group_postion = obj.extra.group_position
@@ -50,6 +54,19 @@ function editor.selected(obj, call_by_inspector)
      if(obj.scale ~= nil) then 
           obj_border.scale = obj.scale
      end 
+
+     if (screen:find_child(obj.name.."a_m") ~= nil) then 
+     	screen:remove(screen:find_child(obj.name.."a_m"))
+     end
+
+     anchor_mark= ui.factory.draw_anchor_pointer()
+     if(obj.extra.is_in_group == true)then 
+          anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
+     else 
+          anchor_mark.position = {obj.x, obj.y, obj.z}
+     end
+     anchor_mark.name = obj.name.."a_m"
+     screen:add(anchor_mark)
      screen:add(obj_border)
      obj.extra.selected = true
      table.insert(selected_objs, obj_border.name)
@@ -71,6 +88,9 @@ function editor.n_select(obj, call_by_inspector, drag)
 		     t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
 		     if(t_obj ~= nil) then 
 			t_obj.extra.selected = false
+        		if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+	   			screen:remove(screen:find_child(t_obj.name.."a_m"))
+        		end
 	             end
 		end
 	end
@@ -78,6 +98,9 @@ function editor.n_select(obj, call_by_inspector, drag)
 	     editor.selected(obj) 
 	end 
      else
+        if (screen:find_child(obj.name.."a_m") ~= nil) then 
+	     screen:remove(screen:find_child(obj.name.."a_m"))
+        end
         screen:remove(screen:find_child(obj.name.."border"))
         table.remove(selected_objs)
         obj.extra.selected = false
@@ -91,6 +114,9 @@ function editor.n_selected(obj, call_by_inspector)
      if(obj.name == nil) then return end 
      if(obj.type ~= "Video") then 
         screen:remove(screen:find_child(obj.name.."border"))
+        if (screen:find_child(obj.name.."a_m") ~= nil) then 
+	     screen:remove(screen:find_child(obj.name.."a_m"))
+        end
         table.remove(selected_objs)
         obj.extra.selected = false
      end 
@@ -933,10 +959,10 @@ function editor.delete()
 	        if(v.extra.selected == true) then
 		     editor.n_selected(v)
         	     table.insert(undo_list, {v.name, DEL, v})
-        	     g:remove(v)
-                     if (v.extra.a_m ~= nil) then 
-			g:remove(v.extra.a_m)
+        	     if (screen:find_child(v.name.."a_m") ~= nil) then 
+	     		screen:remove(screen:find_child(v.name.."a_m"))
                      end
+        	     g:remove(v)
 		end 
             end
         end
