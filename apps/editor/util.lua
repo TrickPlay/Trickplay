@@ -20,6 +20,22 @@ function is_lua_file(fn)
 		return false
 	     end 
 end 
+function is_png_file(fn)
+	     i, j = string.find(fn, ".png")
+	     if (j == string.len(fn)) then
+		return true
+	     else 
+		return false
+	     end 
+end 
+function is_mp4_file(fn)
+	     i, j = string.find(fn, ".mp4")
+	     if (j == string.len(fn)) then
+		return true
+	     else 
+		return false
+	     end 
+end 
 
 -- Clear background images 
 function clear_bg()
@@ -879,11 +895,20 @@ function inputMsgWindow_yn(txt)
           editor_lb:writefile (current_fn, contents, true)
           contents = ""
      end
-     screen:grab_key_focus(screen) --kkk
+     screen:grab_key_focus(screen) 
 end
 
 function inputMsgWindow_openvideo()
-     mediaplayer:load(input_t.text)
+     
+     if(is_mp4_file(input_t.text) == true) then 
+          mediaplayer:load(input_t.text)
+     else 
+	  cleanMsgWindow()
+	  screen:grab_key_focus(screen)
+          printMsgWindow("The file is not a video file.\nFile Name : ","err_msg")
+          inputMsgWindow("reopen_videofile")
+          return 
+     end 
 
      video1 = { name = "video1", 
                 type ="Video",
@@ -929,7 +954,7 @@ function inputMsgWindow_openimage(input_purpose)
 	  BG_IMAGE_white.opacity = 0
 	  BG_IMAGE_import:set{src = input_t.text, opacity = 255} 
 	  input_mode = S_SELECT
-     else 
+     elseif(is_png_file(input_t.text) == true) then 
 	  
 	  while (is_available("img"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
@@ -945,6 +970,12 @@ function inputMsgWindow_openimage(input_purpose)
                screen:add(g)
           end 
           item_num = item_num + 1
+     else 
+	  cleanMsgWindow()
+	  screen:grab_key_focus(screen) -- iii
+          printMsgWindow("The file is not a png file.\nFile Name : ","err_msg")
+          inputMsgWindow("reopenImg")
+          return 
      end 
 
      cleanMsgWindow()
@@ -984,7 +1015,7 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "no") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "openfile") or (button.name == "reopenfile") then inputMsgWindow_openfile() 
               	elseif (button.name == "projectlist") then set_project_path()
-              	elseif (button.name == "open_videofile") then inputMsgWindow_openvideo()
+              	elseif (button.name == "open_videofile") or (button.name == "reopen_videofile")then inputMsgWindow_openvideo()
               	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  inputMsgWindow_openimage(input_purpose)
               	elseif (button.name == "cancel") then 	cleanMsgWindow() screen:grab_key_focus(screen)
 							if(input_purpose == "projectlist") then projects = {} end 
@@ -994,7 +1025,7 @@ function inputMsgWindow(input_purpose)
 		if (button.name == "savefile") then save_b.extra.on_focus_out() cancel_b.extra.on_focus_in()
               	elseif (button.name == "yes") then yes_b.extra.on_focus_out() no_b.extra.on_focus_in() 
               	elseif (button.name == "projectlist") then button.extra.on_focus_out() cancel_b.extra.on_focus_in() 
-              	elseif (button.name == "openfile") or (button.name == "open_videofile") or 
+              	elseif (button.name == "openfile") or (button.name == "open_videofile") or (button.name == "reopen_videofile") or 
               	       (button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
 			open_b.extra.on_focus_out() cancel_b.extra.on_focus_in() 
 		end
@@ -1003,7 +1034,7 @@ function inputMsgWindow(input_purpose)
               	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
               	elseif (button.name == "projectlist") then button.extra.on_focus_out() 
 				                           msgw:find_child("input_b").extra.on_focus_in()
-              	elseif (button.name == "openfile") or (button.name == "open_videofile") or 
+              	elseif (button.name == "openfile") or (button.name == "open_videofile") or (button.name == "reopen_videofile") or 
               	(button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
 			open_b.extra.on_focus_out() input_box.extra.on_focus_in()
               	elseif (button.name == "cancel") then 
@@ -1016,7 +1047,7 @@ function inputMsgWindow(input_purpose)
      end 
 
 
-     if (input_purpose == "reopenfile" or input_purpose == "reopenImg") then 
+     if (input_purpose == "reopenfile" or input_purpose == "reopenImg") or (input_purpose== "reopen_videofile") then 
 	msgw_cur_x = msgw_cur_x + 200 
 	msgw_cur_y = msgw_cur_y + 45
      elseif(input_purpose == "projectlist") then 
@@ -1164,7 +1195,7 @@ function inputMsgWindow(input_purpose)
 			inputMsgWindow_openimage(input_purpose) 
 			--return true
      		end 
-	elseif (input_purpose == "open_videofile") then  
+	elseif (input_purpose == "open_videofile") or (input_purpose == "reopen_videofile") then  
 		open_b.name = "open_videofile"
 		function open_b:on_button_down(x,y,button,num_clicks)
 			inputMsgWindow_openvideo() 
