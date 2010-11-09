@@ -596,7 +596,7 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
-    if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_Escape )
+    if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
     {
         ( ( TPContext * )context )->close_app();
 
