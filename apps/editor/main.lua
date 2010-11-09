@@ -591,9 +591,11 @@ local function build_ui( show_it )
 	       end 
 	       actor.x =  x - dx 
 	       actor.y =  y - dy  
-               if (actor.extra.a_m ~= nil) then 
-		     actor.extra.a_m.position = {actor.x, actor.y, actor.z}
-	       end
+
+	       if (screen:find_child(actor.name.."a_m") ~= nil) then 
+		     local anchor_mark = screen:find_child(actor.name.."a_m")
+		     anchor_mark.position = {actor.x, actor.y, actor.z}
+               end
           end
           if(mouse_state == BUTTON_DOWN) then
                if (input_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end

@@ -76,7 +76,7 @@ function inspector_apply (v, inspector)
 	  inspector:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
           new_object.anchor_point = v.anchor_point
 
-    
+   --[[ 
           if(org_object.anchor_point ~= v.anchor_point) then 
 	       if (v.extra.a_m ~= nil) then 
 	            g:remove(v.extra.a_m) 
@@ -86,6 +86,7 @@ function inspector_apply (v, inspector)
                v.extra.a_m = anchor_mark
 	       g:add(anchor_mark)
           end
+]]
 
        else  --Video 
 	   org_object = {}
