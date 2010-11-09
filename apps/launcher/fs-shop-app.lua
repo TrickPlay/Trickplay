@@ -434,7 +434,7 @@ function( ui , api )
         if me then
             if me.group then
                 me.group:unparent()
-                me.group=nil
+                me=nil
             end
         end
         if background then
