@@ -11,19 +11,19 @@
 
 
 
-function fire_bullet(enemy)
+function fire_bullet(enemy,source)
     local bullet =
     {
         speed = 500,
         num_frames = 1,
         image = Clone
         {
-            source = imgs.enemy_bullet ,
+            source = source ,
             opacity = 255,
             anchor_point =
             {
-                imgs.enemy_bullet.w/2,
-                imgs.enemy_bullet.h/2
+                source.w/2,
+                source.h/2
             },
             position =
             {
@@ -53,7 +53,7 @@ function fire_bullet(enemy)
 		local x = self.image.x + self.speed_x *seconds
 		local y = self.image.y + self.speed_y *seconds
 		--remove it from the screen, if it travels off screen
-                if y > screen.h or x > screen.w or y < 0 or x < 0 then
+                if y > screen_h or x > screen_w or y < 0 or x < 0 then
                     remove_from_render_list( self )
                     self.image:unparent()
 		--otherwise, update the position
@@ -63,7 +63,7 @@ function fire_bullet(enemy)
 		    self.image.x = x
 		    --check for collisions
             
-            table.insert(bad_guys_collision_list,
+            table.insert(b_guys_air,
                 {
                     obj = self,
                     x1  = self.image.x-self.image.w/2,
@@ -72,6 +72,192 @@ function fire_bullet(enemy)
                     y2  = self.image.y+self.image.h/2,
                 }
             )
+            --[[
+                    add_to_collision_list(
+                        self,
+			self.image.center,
+			self.image.center,
+			{ 4 , 4 },
+			TYPE_MY_PLANE
+                    )
+                    --]]
+                end
+                
+            end,
+            
+            collision =
+                function( self , other )
+                    if other.type == TYPE_MY_BULLET then return end
+                    remove_from_render_list( self )
+                    self.image:unparent()
+                end
+        }
+	add_to_render_list( bullet )
+end
+function flak(x,y)
+    dolater(add_to_render_list,
+    {
+        num   = 8,
+        delays = {},
+        flaks = {},
+        groups = {},
+        group = nil,
+        duration = 0.2,
+        hit = false,
+        time = 0,
+        setup = function( self )
+            --mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            self.group = Group{ position = {x,y} }
+            
+            for i = 1,self.num do
+                self.flaks[i] = Clone{ source = imgs.flak }
+                self.groups[i] = Group
+                {
+                	size =
+                	{
+                		imgs.flak.w / 4 ,
+                		imgs.flak.h
+                	},
+                	clip =
+                	{
+                		0 ,
+                		0 ,
+                		imgs.flak.w / 4 ,
+                		imgs.flak.h
+                	},
+                	children = { self.flaks[i] },
+                	anchor_point =
+                	{
+                		( imgs.flak.w / 4 ) / 2 ,
+                		  imgs.flak.h / 2
+                	},
+                    position = {x,y},
+                }
+                self.delays[i] = math.ceil(i/2)-1--math.random() *.1
+                self.group:add(self.groups[i])
+                
+                self.groups[i].x = math.random(-6,6)*4
+                self.groups[i].y = math.random(-6,6)*4
+            end
+            
+            
+            
+			layers.planes:add( self.group )
+        end,
+                
+		render = function( self , seconds )
+            
+			self.time = self.time + seconds
+			
+			if self.time > (self.duration +.5)then
+				
+				remove_from_render_list( self )
+                for i = 1,self.num do
+                    self.flaks[i]:unparent()
+                    self.groups[i]:unparent()
+                end
+				self.group:unparent()
+				
+			else
+				
+                for i = 1,self.num do
+                    local frame = math.floor( self.time /
+                        ( self.duration / 4 ) ) -self.delays[i]
+                    self.flaks[i].x = - ( ( imgs.flak.w / 4 )
+                    	* frame )
+                end
+				
+			end
+            if not self.hit then
+            table.insert(b_guys_air,
+                {
+                    obj = self,
+                    x1  = self.group.x-24-imgs.flak.w/8,
+                    x2  = self.group.x+24-imgs.flak.w/8,
+                    y1  = self.group.y-24-imgs.flak.h/2,
+                    y2  = self.group.y+24-imgs.flak.h/2,
+                }
+            )
+            end
+        end,
+        collision = function( self , other )
+            
+			self.hit = true
+            
+		end	
+	}
+    )
+end
+function fire_flak(enemy, dist_x,dist_y)
+print("dists",dist_x,dist_y)
+    local bullet =
+    {
+        dist_x = dist_x,
+        dist_y = dist_y,
+        speed = 600,
+        num_frames = 1,
+        image = Clone
+        {
+            source = imgs.t_bullet ,
+            opacity = 255,
+            anchor_point =
+            {
+                imgs.t_bullet.w/2,
+                imgs.t_bullet.h/2
+            },
+            position =
+            {
+                enemy.group.x,
+                enemy.group.y
+            },
+            z_rotation = {enemy.group.z_rotation[1]+90,0,0}
+        },
+        
+        type = TYPE_ENEMY_BULLET,
+            
+        setup = function( self )
+            mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+            
+		--enemies are assumed to be facing downwards
+		local deg    = enemy.group.z_rotation[1] + 90
+		
+		--set up the velocities for x and y
+		self.speed_x = math.cos(deg*math.pi/180) * self.speed
+		self.speed_y = math.sin(deg*math.pi/180) * self.speed
+		
+                layers.air_bullets:add( self.image )
+            end,
+                
+            render = function( self , seconds )
+                self.dist_x = self.dist_x - math.abs(self.speed_x *seconds)
+                self.dist_y = self.dist_y - math.abs(self.speed_y *seconds)
+                --calculate the next position of the bullet
+                local x = self.image.x + self.speed_x *seconds
+                local y = self.image.y + self.speed_y *seconds
+                --remove it from the screen, if it travels off screen
+                if y > screen_h or x > screen_w or y < 0 or x < 0 then
+                    remove_from_render_list( self )
+                    self.image:unparent()
+                --otherwise, update the position
+                elseif self.dist_y < 0 and self.dist_x < 0 then
+                    remove_from_render_list( self )
+                    self.image:unparent()
+                    flak(x,y)
+                else
+                    local start_point = self.image.center
+                    self.image.y = y
+		    self.image.x = x
+		    --check for collisions
+            --[[
+            table.insert(b_guys_air,
+                {
+                    obj = self,
+                    x1  = self.image.x-self.image.w/2,
+                    x2  = self.image.x+self.image.w/2,
+                    y1  = self.image.y-self.image.h/2,
+                    y2  = self.image.y+self.image.h/2,
+                }
+            )--]]
             --[[
                     add_to_collision_list(
                         self,
@@ -372,22 +558,22 @@ enemies =
 		--graphics for the fighter
 		num_prop_frames = 3,
 		prop_index = 1,
-		image  = Clone{source=imgs.enemy_1},
-		prop   = Clone{source=imgs.prop1},
+		image  = Clone{source=imgs.fighter},
+		prop   = Clone{source=imgs.fighter_prop},
 		prop_g = Group
 		{
 			clip =
 			{
 				0,
 				0,
-				imgs.prop1.w,
-				imgs.prop1.h/3,--self.num_prop_frames still DNE 
+				imgs.fighter_prop.w,
+				imgs.fighter_prop.h/3,--self.num_prop_frames still DNE 
 			},
 			
-			anchor_point = {imgs.prop1.w/2,   imgs.prop1.h/2},
-			position     = {imgs.enemy_1.w/2, imgs.enemy_1.h},
+			anchor_point = {imgs.fighter_prop.w/2,   imgs.fighter_prop.h/2},
+			position     = {imgs.fighter.w/2, imgs.fighter.h},
 		},
-		group  = Group{anchor_point = {imgs.enemy_1.w/2,imgs.enemy_1.h/2}},
+		group  = Group{anchor_point = {imgs.fighter.w/2,imgs.fighter.h/2}},
 		
 		shoot_time      = 2,	--how frequently the plane shoots
 		last_shot_time = math.random()*2,	--how long ago the plane last shot
@@ -400,7 +586,7 @@ enemies =
 				math.random(1,20) == 8 then
 					
 				f.last_shot_time = 0
-				fire_bullet(f)
+				fire_bullet(f,imgs.fighter_bullet)
 			end
 		end,
 		
@@ -422,7 +608,7 @@ enemies =
 				f:fire(seconds)
 				
 				--see if you reached the end
-				if f.group.y >= screen.h + self.image.h then
+				if f.group.y >= screen_h + self.image.h then
 					self.group:unparent()
 					remove_from_render_list(self)
 				end
@@ -442,7 +628,7 @@ enemies =
 			self.stages[self.stage](self,seconds)
 			
 			--check for collisions
-            table.insert(bad_guys_collision_list,
+            table.insert(b_guys_air,
                 {
                     obj = self,
                     x1  = self.group.x-self.image.w/2,
@@ -503,20 +689,20 @@ enemies =
 		
 		prop =
 		{
-			l = Clone{source=imgs.prop3},
-			r = Clone{source=imgs.prop3},
+			l = Clone{source=imgs.zepp_prop},
+			r = Clone{source=imgs.zepp_prop},
 			g_l = Group
 			{
 				clip =
 				{
 					0,
 					0,
-					imgs.prop3.w ,
+					imgs.zepp_prop.w ,
 					--self.num_prop_frames still DNE 
-					imgs.prop3.h/3,
+					imgs.zepp_prop.h/3,
 				},
-				anchor_point = {imgs.prop3.w/2,
-				                imgs.prop3.h/2},
+				anchor_point = {imgs.zepp_prop.w/2,
+				                imgs.zepp_prop.h/2},
 				position     = {37,260},
 			},
 			g_r = Group
@@ -525,12 +711,12 @@ enemies =
 				{
 					0,
 					0,
-					imgs.prop3.w ,
+					imgs.zepp_prop.w ,
 					--self.num_prop_frames still DNE 
-					imgs.prop3.h/3,
+					imgs.zepp_prop.h/3,
 				},
-				anchor_point = {imgs.prop3.w/2,
-				                imgs.prop3.h/2},
+				anchor_point = {imgs.zepp_prop.w/2,
+				                imgs.zepp_prop.h/2},
 				position     = {202,260},
 			},
 		},
@@ -540,15 +726,15 @@ enemies =
 			
 			l = Clone
 			{
-				source       = imgs.barrel,
-				anchor_point = {0,imgs.barrel.h/2},
+				source       = imgs.z_barrel,
+				anchor_point = {0,imgs.z_barrel.h/2},
 				z_rotation   = {90,0,0}
 			},
 			
 			r = Clone
 			{
-				source       = imgs.barrel,
-				anchor_point = {0,imgs.barrel.h/2},
+				source       = imgs.z_barrel,
+				anchor_point = {0,imgs.z_barrel.h/2},
 				z_rotation   = {90,0,0}
 			},
 			
@@ -630,7 +816,7 @@ enemies =
 					
 					
 					self.last_shot_time = 0
-					fire_bullet(mock_obj)
+					fire_bullet(mock_obj,imgs.z_bullet)
 					
 				end
 			-- if the target is to the left, shoot with the left
@@ -655,7 +841,7 @@ enemies =
 					r == 8 then
 					
 					self.last_shot_time = 0
-					fire_bullet(mock_obj)
+					fire_bullet(mock_obj,imgs.z_bullet)
 					
 				end
 				
@@ -681,7 +867,7 @@ enemies =
 					if self.last_shot_time >=
 						self.shoot_time and r == 8 then
 						
-						fire_bullet(mock_obj)
+						fire_bullet(mock_obj,imgs.z_bullet)
 					end
 					self.guns.l.z_rotation = {-90,0,0}
 					mock_obj =
@@ -700,7 +886,7 @@ enemies =
 						self.shoot_time and r == 8 then
 						
 						self.last_shot_time = 0
-						fire_bullet(mock_obj)
+						fire_bullet(mock_obj,imgs.z_bullet)
 						
 					end
 				else -- behind
@@ -721,7 +907,7 @@ enemies =
 		                        if self.last_shot_time >=
 						self.shoot_time and r == 8 then
 		    	                        
-						fire_bullet(mock_obj)
+						fire_bullet(mock_obj,imgs.z_bullet)
 					end
 					
 					self.guns.l.z_rotation = {90,0,0}
@@ -738,7 +924,7 @@ enemies =
 					if self.last_shot_time >= self.shoot_time and r == 8 then
 						
 						self.last_shot_time = 0
-						fire_bullet(mock_obj)
+						fire_bullet(mock_obj,imgs.z_bullet)
 						
 					end
 				end
@@ -753,8 +939,8 @@ enemies =
 			self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
 			
-			self.guns.g_l:add( self.guns.l, Clone{source=imgs.cannon_l,x = -imgs.cannon_l.w+7,y = -imgs.cannon_l.h/2 } )
-			self.guns.g_r:add( self.guns.r, Clone{source=imgs.cannon_r,x=-2,y = -imgs.cannon_l.h/2} )
+			self.guns.g_l:add( self.guns.l, Clone{source=imgs.z_cannon_l,x = -imgs.z_cannon_l.w+7,y = -imgs.z_cannon_l.h/2 } )
+			self.guns.g_r:add( self.guns.r, Clone{source=imgs.z_cannon_r,x=-2,y = -imgs.z_cannon_l.h/2} )
 			
 			self.group:add(
 				
@@ -780,7 +966,7 @@ enemies =
 				self:rotate_guns_and_fire()
 				
 				--see if you reached the end
-				if z.group.y >= screen.h + z.image.h then
+				if z.group.y >= screen_h + z.image.h then
 					z.group:unparent()
 					remove_from_render_list(self)
 				end
@@ -812,7 +998,7 @@ enemies =
 
             )
             --]]
-            table.insert(bad_guys_collision_list,
+            table.insert(b_guys_air,
                 {
                     obj = self,
                     x1  = self.group.x+self.guns.g_l.x+3*self.guns.l.w/4,
@@ -850,7 +1036,6 @@ enemies =
                 print("there")
                 local dam = {}
                 if other.group ~= nil then
-                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
                     dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
                     self.group:add(dam.image)
                     dam.image.x = other.group.x - self.group.x
@@ -923,11 +1108,11 @@ enemies =
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 80,
 		last_shot_time = 4,
-        shoot_time = 4,
+        shoot_time = 2,
 		image = Clone
         {
             source       = imgs.turret,
-			anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+			anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
 			z_rotation   = {180,0,0}
         },
 			
@@ -979,16 +1164,17 @@ enemies =
 						z_rotation =
 						{self.image.z_rotation[1],
 							0,0},
-						x = self.group.x+self.img_h*2/3*math.cos(self.image.z_rotation[1]*math.pi/180+90),
-						y = self.group.y+self.img_h*2/3*math.sin(self.image.z_rotation[1]*math.pi/180+90)
+						x = self.group.x+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
+						y = self.group.y+self.img_h*math.sin(self.image.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
-				if self.last_shot_time >= self.shoot_time and
+				if self.last_shot_time >= self.shoot_time and  (math.abs(me.x - targ.x) > 200 or
+                    math.abs(me.y - targ.y) > 200) and
 					math.random(1,20) == 8 then
 					
 					self.last_shot_time = 0
-					fire_bullet(mock_obj)
+					fire_flak(mock_obj, math.abs(me.x - targ.x)-50, math.abs(me.y - targ.y)-50)
 					
 				end
             end
@@ -1028,13 +1214,13 @@ enemies =
 			--animate the zeppelin based on the current stage
 			self.stages[self.stage](self,seconds)
             
-            table.insert(bad_guys_collision_list,
+            table.insert(b_guys_land,
                 {
                     obj = self,
-                    x1  = self.group.x+10,
-                    x2  = self.group.x+self.image.w-10,
-                    y1  = self.group.y+40,
-                    y2  = self.group.y+self.img_h-20,
+                    x1  = self.group.x-self.image.w/2,
+                    x2  = self.group.x+self.image.w/2,
+                    y1  = self.group.y-self.image.w/2,
+                    y2  = self.group.y+self.image.w/2,
                 }
             )
 		end,
@@ -1056,10 +1242,28 @@ enemies =
     
     battleship = function() return{
         
-		health = 20,
+		health = 5,
 		type = TYPE_ENEMY_PLANE,
         bulletholes = {},
-		
+        moving = false,
+        
+        bow_wake =
+        {
+            Clone{source=imgs.bow_wake_1,opacity = 0},
+            Clone{source=imgs.bow_wake_2,opacity = 0},
+            Clone{source=imgs.bow_wake_3,opacity = 0},
+            Clone{source=imgs.bow_wake_4,opacity = 0}
+        },
+        stern_wake =
+        {
+            Clone{source=imgs.stern_wake_1,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_1.h+40},
+            Clone{source=imgs.stern_wake_2,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_2.h+40},
+            Clone{source=imgs.stern_wake_3,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_3.h+40},
+            Clone{source=imgs.stern_wake_4,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_4.h+40},
+            Clone{source=imgs.stern_wake_5,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_5.h+40},
+        },
+		b_w_i = 1,
+        s_w_i = 1,
 		stage  = 0,	--the current stage the fighter is in
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 80,
@@ -1076,19 +1280,19 @@ enemies =
             bow = Clone
             {
                 source       = imgs.turret,
-				anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+				anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
 				z_rotation   = {180,0,0}
             },
             mid = Clone
             {
                 source       = imgs.turret,
-				anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+				anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
 				z_rotation   = {180,0,0}
             },
             stern = Clone
             {
                 source       = imgs.turret,
-				anchor_point = {imgs.turret.w/2,imgs.barrel.h/3},
+				anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
 				z_rotation   = {180,0,0}
             },
 			
@@ -1112,7 +1316,7 @@ enemies =
         
 		group    = Group{},
 		
-		shoot_time      = 4 , --how frequently the ship shoots
+		shoot_time      = 2 , --how frequently the ship shoots
 		last_shot_time  =    --how long ago the ship last shot
         {
             b = math.random()*2,
@@ -1181,16 +1385,17 @@ enemies =
 						z_rotation =
 						{self.guns.bow.z_rotation[1],
 							0,0},
-						x = b_ship.b.x+self.turr_h*2/3*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
-						y = b_ship.b.y+self.turr_h*2/3*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
+						x = b_ship.b.x+self.turr_h*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
+						y = b_ship.b.y+self.turr_h*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
-				if self.last_shot_time.b >= self.shoot_time and
+				if self.last_shot_time.b >= self.shoot_time and  (math.abs(b_ship.b.x - targ.x) > 200 or
+                    math.abs(b_ship.b.y - targ.y) > 200) and
 					math.random(1,20) == 8 then
 					
 					self.last_shot_time.b = 0
-					fire_bullet(mock_obj)
+					fire_flak(mock_obj, math.abs(b_ship.b.x - targ.x)-50, math.abs(b_ship.b.y - targ.y)-50)
 					
 				end
             end
@@ -1218,17 +1423,18 @@ enemies =
 						z_rotation =
 						{self.guns.mid.z_rotation[1],
 							0,0},
-						x = b_ship.m.x+self.turr_h*2/3*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
-						y = b_ship.m.y+self.turr_h*2/3*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
+						x = b_ship.m.x+self.turr_h*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
+						y = b_ship.m.y+self.turr_h*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
 
-				if self.last_shot_time.m >= self.shoot_time and
+				if self.last_shot_time.m >= self.shoot_time and  (math.abs(b_ship.m.x - targ.x) > 200 or
+                    math.abs(b_ship.m.y - targ.y) > 200) and
 					math.random(1,20) == 8 then
 					
 					self.last_shot_time.m = 0
-					fire_bullet(mock_obj)
+					fire_flak(mock_obj, math.abs(b_ship.m.x - targ.x)-50, math.abs(b_ship.m.y - targ.y)-50)
 					
 				end
             end
@@ -1256,17 +1462,18 @@ enemies =
 						z_rotation =
 						{self.guns.stern.z_rotation[1],
 							0,0},
-						x = b_ship.s.x+self.turr_h*2/3*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
-						y = b_ship.s.y+self.turr_h*2/3*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
+						x = b_ship.s.x+self.turr_h*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
+						y = b_ship.s.y+self.turr_h*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
 					}
 				}
                 
                 
-				if self.last_shot_time.s >= self.shoot_time and
+				if self.last_shot_time.s >= self.shoot_time and  (math.abs(b_ship.s.x - targ.x) > 200 or
+                    math.abs(b_ship.s.y - targ.y) > 200) and
 					math.random(1,20) == 8 then
 					
 					self.last_shot_time.s = 0
-					fire_bullet(mock_obj)
+					fire_flak(mock_obj, math.abs(b_ship.s.x - targ.x)-50, math.abs(b_ship.s.y - targ.y)-50)
 					
 				end
             end
@@ -1275,14 +1482,16 @@ enemies =
 		
 		
 		
-		setup = function(self,xxx,y_offset,speed)
+		setup = function(self,xxx,y_offset,speed,moving)
 			
+            self.moving = moving
 			self.approach_speed = speed
             
 			self.guns.g_b:add( self.guns.bow )
 			self.guns.g_m:add( self.guns.mid )
             self.guns.g_s:add( self.guns.stern )
-			
+			self.group:add(unpack(self.bow_wake))
+            self.group:add(unpack(self.stern_wake))
 			self.group:add(
 				
 				self.image,
@@ -1301,7 +1510,7 @@ enemies =
 			--default battleship animation animation
 			self.stages[0] = function(b,seconds)
 				--fly downwards
-				b.group.y = b.group.y +self.approach_speed*seconds
+				b.group.y = b.group.y +b.approach_speed*seconds
 				
 				--fire bullets
 				b:rotate_guns_and_fire(seconds)
@@ -1316,11 +1525,19 @@ enemies =
 		end,
 		
 		render = function(self,seconds)
-				
+			
+            if self.moving then
+                self.bow_wake[self.b_w_i].opacity=0
+                self.stern_wake[self.s_w_i].opacity=0
+                self.b_w_i = self.b_w_i%(#self.bow_wake)+1
+                self.s_w_i = self.s_w_i%(#self.stern_wake)+1
+                self.bow_wake[self.b_w_i].opacity=255
+                self.stern_wake[self.s_w_i].opacity=255
+            end
 			--animate the zeppelin based on the current stage
 			self.stages[self.stage](self,seconds)
             
-            table.insert(bad_guys_collision_list,
+            table.insert(b_guys_land,
                 {
                     obj = self,
                     x1  = self.group.x+10,
@@ -1479,7 +1696,7 @@ formations =
                 move(z.group,z.attack_speed,secs)
                 z:rotate_guns_and_fire(secs)
                 --check if it left the screen
-                if z.group.y >= screen.h +
+                if z.group.y >= screen_h +
                     z.image.h then
                     z.group:unparent()
                     remove_from_render_list(z)
@@ -1596,7 +1813,7 @@ formations =
 					
 					f:fire(secs)
                     
-                    if f.group.y >= screen.h + f.image.h then
+                    if f.group.y >= screen_h + f.image.h then
 					    f.group:unparent()
 					    remove_from_render_list(f)
                     end
@@ -1670,7 +1887,7 @@ formations =
                     
                 f:fire(secs)
                     
-                if f.group.y >= screen.h + f.image.h then
+                if f.group.y >= screen_h + f.image.h then
 					f.group:unparent()
 					remove_from_render_list(f)
                 end
@@ -1688,7 +1905,7 @@ formations =
                     turn(f.group,r,dir,f.attack_speed,secs)
                     
                 f:fire(secs)
-                if f.group.y >= screen.h + f.image.h then
+                if f.group.y >= screen_h + f.image.h then
 					f.group:unparent()
 					remove_from_render_list(f)
                 end
@@ -1793,7 +2010,7 @@ formations =
                 function(f,secs)
                     
                     f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                        turn(f.group,250,dir,f.attack_speed,secs)
+                        turn(f.group,250,dir,f.approach_speed,secs)
                     
                     --[[
                     local deg = 180*dir
@@ -1825,7 +2042,7 @@ formations =
                         
                     f:fire(secs)
                                             
-                    if f.group.y >= screen.h + f.image.h then
+                    if f.group.y >= screen_h + f.image.h then
                         f.group:unparent()
                         remove_from_render_list(f)
                     end

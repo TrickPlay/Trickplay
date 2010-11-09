@@ -3,24 +3,28 @@
 --]]
 render_list = {}
 function add_to_render_list( item, ... )
---t = { ... }
---print(unpack(t))
     if item then
-        item:setup( ... )-- , item )
-        table.insert( render_list , item )
+        if item.setup then
+            item:setup( ... )-- , item )
+        end
+        render_list[item] = item.render
     end
 
 end
 
 function remove_from_render_list( item )
-
+--[[
     for i , v in ipairs( render_list ) do
     
         if v == item then
             table.remove( render_list , i )
             return true
         end
-
+    end
+    --]]
+    if  render_list[ item ] then
+        render_list[ item ] = nil
+        return true
     end
 
     return false
@@ -35,9 +39,14 @@ TYPE_MY_PLANE       = 1
 TYPE_MY_BULLET      = 2
 TYPE_ENEMY_PLANE    = 3
 TYPE_ENEMY_BULLET   = 4
-
+--[[
 bad_guys_collision_list  = {}
 good_guys_collision_list = {}
+--]]
+b_guys_air  = {}
+b_guys_land = {}
+g_guys_air  = {}
+g_guys_land = {}
 
 local collided = function(good_guy,bad_guy)
 
@@ -49,23 +58,20 @@ local collided = function(good_guy,bad_guy)
         good_guy.y1 > bad_guy.y2 or -- good guy is   behind             bad guy
         good_guy.y2 < bad_guy.y1    -- good guy is   ahead of           bad guy
     )
-
 end
 
 function process_collisions()
 local bad_guy
     --check for collisions between the good guys and bad guys
-    for     i, good_guy in ipairs(good_guys_collision_list) do
+    for     i, good_guy in ipairs(g_guys_air) do
         --for j,  bad_guy in ipairs( bad_guys_collision_list) do
-        for j=1,#bad_guys_collision_list do
-            bad_guy = bad_guys_collision_list[j]
+        for j, bad_guy in ipairs(b_guys_air) do
             
             if collided(good_guy,bad_guy) then
                 
-                
                 good_guy.obj:collision(bad_guy.obj)
                 bad_guy.obj:collision(good_guy.obj)
-                table.remove(bad_guys_collision_list,j)
+                table.remove(b_guys_air,j)
                 
                 break
             end
@@ -73,8 +79,29 @@ local bad_guy
         end
     end
     
-    bad_guys_collision_list  = {}
-    good_guys_collision_list = {}
+    
+    --check for collisions between the good guys and bad guys
+    for     i, good_guy in ipairs(g_guys_land) do
+        --for j,  bad_guy in ipairs( bad_guys_collision_list) do
+        for j, bad_guy in ipairs(b_guys_land) do
+            
+            if collided(good_guy,bad_guy) then
+                
+                good_guy.obj:collision(bad_guy.obj)
+                bad_guy.obj:collision(good_guy.obj)
+                table.remove(b_guys_land,j)
+                
+                break
+            end
+            
+        end
+    end
+    
+    b_guys_air  = {}
+    b_guys_land = {}
+    g_guys_air  = {}
+    g_guys_land = {}
+    
 end
 
 --[[

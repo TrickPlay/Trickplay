@@ -13,7 +13,7 @@ smoke = function(i)   return {
         for i = 1,num do
             self.plumes[i] =
             {
-                image = Clone{ source = imgs.smoke },
+                image = Clone{ source = imgs.flak },
                 group = Group{},
                 time  = -(i-1)/num*self.duration
             }
@@ -48,33 +48,9 @@ smoke = function(i)   return {
             self.plumes[i].image.x =  - ( ( self.plumes[i].image.w / 4 ) * 5 )
             layers.planes:add( self.plumes[i].group )
         end
-        --[[
-        self.group = Group
-		{
-			size =
-			{
-				self.image.w / 4 ,
-				self.image.h
-			},
-			clip =
-			{
-				0 ,
-				0 ,
-				self.image.w / 4 ,
-				self.image.h
-			},
-			children = { self.image },
-            anchor_point =
-			{
-				( self.image.w / 4 ) / 2 ,
-				  self.image.h / 2
-			},
-		}
-        self.time    = -self.duration*(num-1)/tot
-        --]]
+        
         self.halted  = true
-        --self.image.x =  - ( ( self.image.w / 4 ) * 5 ) --not visible
-		
+        
     end,
     reset = function(self,i)
         if self.index == 1 then
@@ -107,7 +83,7 @@ smoke = function(i)   return {
                 self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
             end
             self.plumes[i].time = -(i-1)/self.num*self.duration
-            layers.planes:add( self.plumes[i].group )
+            --layers.planes:add( self.plumes[i].group )
         end
     end,
 	render = function( self , seconds )
@@ -187,22 +163,28 @@ my_plane =
     
     max_dead_time = 2,
     
+    bombing_mode = false,
+    
+    bombing_crosshair = Rectangle{w=5,h=5,color="FF0000",y=-100,opacity=0},
+    
+    shadow = Clone{source=imgs.player_shadow,opacity=0, x=100,y=30},
+    
     prop =
     {
-        l = Clone{source=imgs.prop2},
-        r = Clone{source=imgs.prop2},
+        l = Clone{source=imgs.my_prop},
+        r = Clone{source=imgs.my_prop},
         g_l = Group
         {
             clip =
             {
                 0,
                 0,
-                imgs.prop2.w ,
+                imgs.my_prop.w ,
                 --self.num_prop_frames still DNE 
-                imgs.prop2.h/3,
+                imgs.my_prop.h/3,
             },
-            anchor_point = {imgs.prop2.w/2,
-                            imgs.prop2.h/2},
+            anchor_point = {imgs.my_prop.w/2,
+                            imgs.my_prop.h/2},
             position     = {35,35},
         },
         g_r = Group
@@ -211,17 +193,18 @@ my_plane =
             {
                 0,
                 0,
-                imgs.prop2.w ,
+                imgs.my_prop.w ,
                 --self.num_prop_frames still DNE 
-                imgs.prop2.h/3,
+                imgs.my_prop.h/3,
             },
-            anchor_point = {imgs.prop2.w/2,
-                            imgs.prop2.h/2},
+            anchor_point = {imgs.my_prop.w/2,
+                            imgs.my_prop.h/2},
             position     = {93,35},
         },
     },
     render_items = {},
     
+
     setup = function( self )
         	self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
@@ -229,15 +212,17 @@ my_plane =
             
             self.prop_index = 1
             self.image.opacity = 255
-            
-            self.group:add( self.image)
-            self.group:add( self.prop.g_r)
-            self.group:add( self.prop.g_l)
-            
+            local g = Group{}
+            self.group:add( self.shadow   )
+            self.group:add(self.bombing_crosshair)
+            g:add( self.image    )
+            g:add( self.prop.g_r )
+            g:add( self.prop.g_l )
+            self.group:add(g)
             layers.planes:add( self.group )
-            
-            self.group.position = { screen.w / 2 - self.image.w / 2 , screen_h - self.image.h }
-            self.group.clip = {0,0,self.image.w/self.num_frames,self.image.h}
+            self.bombing_crosshair.x = self.image.w / (2*self.num_frames)
+            self.group.position = { screen_w / 2 - self.image.w / (2*self.num_frames) , screen_h - self.image.h }
+            g.clip = {0,0,self.image.w/self.num_frames,self.image.h}
 
             for i = 1, self.num_frames - 1 do
                 self.smoke_stream[i] = smoke(i)
@@ -358,9 +343,9 @@ end
                 
                     local x = self.group.x + ( self.h_speed * seconds )
                     
-                    if x > screen.w - my_plane_sz then
+                    if x > screen_w - my_plane_sz then
                     
-                        x = screen.w -my_plane_sz 
+                        x = screen_w -my_plane_sz 
                         
                         self.h_speed = 0
                     
@@ -427,7 +412,7 @@ end
                     self.group.y = y
                 end
     if not self.dead then
-                table.insert(good_guys_collision_list,
+                table.insert(g_guys_air,
                     {
                         obj = self,
                         x1  = self.group.x+20,--self.image.w/(2*self.num_frames),
@@ -456,6 +441,235 @@ r.h=self.image.h
         
     -- Adds a bullet to the render list
         
+    new_bomb   = function( self, x, y, z_rot )
+    return
+            
+            {
+                type = TYPE_MY_BULLET,
+                
+                
+				z_rot = z_rot,
+
+                speed = -200,
+                time = 0,
+                dur  = 1,
+                
+                image =
+                    
+                    Clone
+                    {                    
+                        source = imgs.my_bomb,
+                        opacity = 255,
+                        anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
+                        position = { x, y },
+						z_rotation = {z_rot,0,0},
+                    },
+                    
+                setup =
+                
+                    function( self )
+                    
+                        layers.air_bullets:add( self.image )
+                        self.img_w = self.image.w
+                        self.img_h = self.image.h
+                    end,
+                    
+                render =
+                    
+                    function( self , seconds )
+                    --print((1-self.time/self.dur), self.speed)
+                        self.time = self.time + seconds
+                         
+                        local y = self.image.y + self.speed * seconds*(1-self.time/self.dur)
+                        --local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)*(1-self.time/self.dur)
+                        
+                        self.image.scale = {1-.7*(self.time/self.dur),1-.7*(self.time/self.dur)}
+                        
+                        
+                        
+                        if y < -self.img_h or y > (screen_h + self.img_h) then--or x < -self.image.w  or x > (screen_w + self.image.w)then
+                            
+                            remove_from_render_list( self )
+                            
+                            self.image:unparent()
+                        
+                        elseif self.time > self.dur then
+                        
+                            --[[
+                            add_to_collision_list(
+                                self ,
+                                { self.image.x , self.image.y },
+                                { self.image.x , y },
+                                { self.image.w , self.image.h },
+                                TYPE_ENEMY_PLANE )
+                        --]]
+                            
+                            --self.image.x = x
+                            remove_from_render_list( self )
+                            
+                            self.image:unparent()
+                            local x = self.image.x
+                            local y = self.image.y
+    dolater(add_to_render_list,
+    {
+        image = Clone{ source = imgs.explosion1 },
+        group = nil,
+        duration = 0.2, 
+        time = 0,
+        setup = function( self )
+            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+
+            self.group = Group
+			{
+				size =
+				{
+					self.image.w / 6 ,
+					self.image.h
+				},
+				clip =
+				{
+					0 ,
+					0 ,
+					self.image.w / 6 ,
+					self.image.h
+				},
+				children = { self.image },
+				anchor_point =
+				{
+					( self.image.w / 6 ) / 2 ,
+					  self.image.h / 2
+				},
+                position = {x,y},
+			}
+                    
+			layers.land_targets:add( self.group )
+            
+            self.img_w = self.image.w
+            self.img_h = self.image.h
+        end,
+                
+		render = function( self , seconds )
+			self.time = self.time + seconds
+				
+			if self.time > self.duration then
+					
+				remove_from_render_list( self )
+				self.group:unparent()
+                            table.insert(g_guys_land,
+                                {
+                                    obj = self,
+                                    x1  = self.group.x-self.img_w/2,
+                                    x2  = self.group.x+self.img_w/2,
+                                    y1  = self.group.y-self.img_h/2,
+                                    y2  = self.group.y+self.img_h/2,
+                                }
+                            )
+					
+			else
+				local frame = math.floor( self.time /
+					( self.duration / 6 ) )
+				self.image.x = - ( ( self.image.w / 6 )
+					* frame )
+			end
+
+        end,
+        collision = function( self , other )
+
+        end,
+	})
+                        else
+                            self.image.y = y
+                        end
+                    
+                    end,
+                    
+                collision =
+                
+                    function( self , other )
+                        if other.type == TYPE_ENEMY_BULLET then return end
+                    
+                        remove_from_render_list( self )
+                        local location
+                        if other.group ~= nil then
+                            location = other.group.position
+                        else
+                            location = other.image.position
+                        end
+                        
+                        self.image:unparent()
+                        
+                        -- Now, we create a score bubble
+                        
+                        local score =
+                            {
+                                speed = 80,
+                                
+                                text = Clone{ source = txt.score },
+                                
+                                setup =
+                                
+                                    function( self )
+                               
+if point_counter < 999990 then     
+	point_counter = point_counter+10
+	if point_counter > high_score then
+		high_score = point_counter
+        if not state.set_highscore then
+            state.set_highscore = true
+            mediaplayer:play_sound("audio/Air Combat High Score.mp3")
+        end
+	end
+	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
+		number_of_lives = number_of_lives + 1
+		lives[number_of_lives].opacity =255
+		self.text = Clone{source=txt.up_life}
+	end
+	redo_score_text()
+end
+
+                                        self.text.position = { location[ 1 ] + 30 , location[ 2 ] }
+                                        
+                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
+                                        
+                                        self.text.opacity = 255;
+                                    
+                                        layers.planes:add( self.text )
+                                        
+                                    end,
+                                    
+                                render =
+                                
+                                    function( self , seconds )
+                                   -- print("aaaa")
+                                        local o = self.text.opacity - self.speed * seconds
+                                        
+                                        --local scale = self.text.scale
+                                        
+                                        --scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        
+                                        if o <= 0 then
+                                        
+                                            remove_from_render_list( self )
+                                            
+                                            self.text:unparent()
+                                        
+                                        else
+                                        
+                                            self.text.opacity = o
+                                            
+                                            --self.text.scale = scale
+                                        
+                                        end
+                                    
+                                    end,
+                            }
+                            
+                        add_to_render_list( score )
+                    
+                    end
+            }
+        
+        end,
     new_bullet = function( self, x, y, z_rot )
         
             return
@@ -495,7 +709,7 @@ r.h=self.image.h
                         local y = self.image.y + self.speed * seconds * math.cos(-1*self.z_rot*math.pi/180)
                         local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)
                         
-                        if y < -self.img_h or y > (screen_h + self.img_h) or x < -self.image.w  or x > (screen.w + self.image.w)then
+                        if y < -self.img_h or y > (screen_h + self.img_h) or x < -self.image.w  or x > (screen_w + self.image.w)then
                             
                             remove_from_render_list( self )
                             
@@ -503,7 +717,7 @@ r.h=self.image.h
                         
                         else
                         
-                            table.insert(good_guys_collision_list,
+                            table.insert(g_guys_air,
                                 {
                                     obj = self,
                                     x1  = self.image.x-self.img_w/2,
@@ -643,7 +857,7 @@ if state.hud.num_lives == 0 then
                                     
                                     function( self )
                                         
-                                        self.text.position = { screen.w/2,screen_h/2}--location[ 1 ] + 30 , location[ 2 ] }
+                                        self.text.position = { screen_w/2,screen_h/2}--location[ 1 ] + 30 , location[ 2 ] }
                                         
                                         self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
                                         
@@ -701,14 +915,16 @@ redo_score_text()
             
             local location = {self.group.x + self.image.w/(2*self.num_frames), self.group.y+self.image.h/2}
             
-            self.group.position = { screen.w / 2 - self.group.w / 2 , screen_h - self.group.h }
+            self.group.position = { screen_w / 2 - self.group.w / (2*self.num_frames) , screen_h - self.group.h }
 
             -- Spawn an explosion
             
             local explosion =
                 
                 {
-                    image = Clone{ source = imgs.explosion1 , opacity = 255 },
+                    num_frames = 7,
+                    
+                    image = Clone{ source = imgs.explosion3 , opacity = 255 },
                     
                     group = nil,
                     
@@ -724,11 +940,11 @@ redo_score_text()
                             
                             self.group = Group
                                 {
-                                    size = { self.image.w / 6 , self.image.h },
+                                    size = { self.image.w / self.num_frames , self.image.h },
                                     position = location,
-                                    clip = { 0 , 0 , self.image.w / 6 , self.image.h },
+                                    clip = { 0 , 0 , self.image.w / self.num_frames , self.image.h },
                                     children = { self.image },
-                                    anchor_point = { ( self.image.w / 6 ) / 2 , self.image.h / 2 },
+                                    anchor_point = { ( self.image.w / self.num_frames ) / 2 , self.image.h / 2 },
                                 }
                             
                             layers.planes:add( self.group )
@@ -749,9 +965,9 @@ redo_score_text()
                             
                             else
                             
-                                local frame = math.floor( self.time / ( self.duration / 6 ) )
+                                local frame = math.floor( self.time / ( self.duration / self.num_frames ) )
                                 
-                                self.image.x = - ( ( self.image.w / 6 ) * frame )
+                                self.image.x = - ( ( self.image.w / self.num_frames ) * frame )
                             
                             end
                         
@@ -818,7 +1034,8 @@ redo_score_text()
 
 
 				}
-				shoot[self.firing_powerup]()
+                if self.bombing_mode then add_to_render_list( self:new_bomb(self.group.x + self.image.w / (2*self.num_frames) , self.group.y+60,0) )
+				else  shoot[self.firing_powerup]() end
                 mediaplayer:play_sound("audio/Air Combat 1P Fire.mp3")
                 
             end

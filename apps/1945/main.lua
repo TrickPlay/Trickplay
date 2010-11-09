@@ -31,19 +31,19 @@ layers.splash:add(
     {
 	name     = "logo",
 	src      = "assets/splash/AirCombatLogo.png",
-	position = {screen.w/2,screen.h/2-80}
+	position = {screen.w/2,screen_h/2-80}
     },
     Image
     {
 	name     = "instr",
 	src      = "assets/splash/InstructionBar.png",
-	position = {screen.w/2,screen.h - 120}
+	position = {screen_w/2,screen_h - 120}
     },
     Image
     {
 	name     = "start",
 	src      = "assets/splash/StartButton.png",
-	position = {screen.w/2,screen.h/2+240}
+	position = {screen_w/2,screen_h/2+240}
     }
 )
 layers.splash:foreach_child(function(c)
@@ -54,7 +54,7 @@ end)
 function start_game()
 add_to_render_list( my_plane )
 end
-add_to_render_list( water )
+add_to_render_list( lvlbg[1] )
 
 --add_to_render_list( enemies )
 
@@ -77,7 +77,7 @@ local test_text = Text
 	    color = "FFFFFF",
         opacity = 0
 	}
-        test_text.position     = {    screen.w/2 , 100}
+        test_text.position     = {    screen_w/2 , 100}
         test_text.anchor_point = { test_text.w/2 , 0}
         layers.air_doodads_1:add( test_text )
 
@@ -97,6 +97,7 @@ local keys = {
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 1
             
+            my_plane.bombing_mode = false
             add_to_render_list(my_plane)
             add_to_render_list(levels[state.curr_level])
             
@@ -104,6 +105,7 @@ local keys = {
         [keys.t] = function()
             
             out_splash__in_hud()
+            my_plane.bombing_mode = false
             
             state.curr_mode  = "TEST_MODE"
             state.curr_level = 0
@@ -114,11 +116,16 @@ local keys = {
         [keys["2"]] = function()
             
             out_splash__in_hud()
+            my_plane.bombing_mode = true
             
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 2
             
             add_to_render_list(my_plane)
+            remove_from_render_list(lvlbg[1])
+            add_to_render_list(lvlbg[2])
+            my_plane.shadow.opacity = 255
+            my_plane.bombing_crosshair.opacity = 255
             add_to_render_list(levels[state.curr_level])
             
         end,
@@ -130,13 +137,13 @@ local keys = {
             formations.row_from_side(5,150,  -100,1000,  50,300,  200)
         end,
         [keys.w] = function()
-            formations.row_from_side(5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200)
+            formations.row_from_side(5,150,  screen_w+100,1000,  screen_w-50,300,  screen_w-200)
         end,
         [keys.e] = function()
             formations.one_loop(2,150,200,200,300,-1)
         end,
         [keys.r] = function()
-            formations.one_loop(2,150,screen.w-200,screen.w-200,300,1)
+            formations.one_loop(2,150,screen_w-200,screen_w-200,300,1)
         end,
         [keys.t] = function()
             formations.cluster(500)
@@ -145,14 +152,14 @@ local keys = {
             formations.zig_zag(500,400,-30)
         end,
         [keys.u] = function()
-            add_to_render_list(enemies.turret(),500)
+            add_to_render_list(enemies.turret(),500,-100)
         end,
         --bosses
         [keys.m] = function()
             formations.zepp_boss(900)
         end,
         [keys.n] = function()
-            add_to_render_list(enemies.battleship(),500, 80)
+            add_to_render_list(enemies.battleship(),500,-100, 40,true)
         end,
         --powerups
         [keys.z] = function()
@@ -196,6 +203,9 @@ local keys = {
         end,
         [keys["0"]] = function()
             my_plane:heal()
+        end,
+        [keys["8"]] = function()
+            my_plane.bombing_mode = not my_plane.bombing_mode
         end,
         [keys.Right] = function()
             my_plane:on_key(keys.Right)
@@ -267,10 +277,10 @@ function idle.on_idle( idle , seconds )
 		end
 	end
 --]]
-        for _ , item in ipairs( render_list ) do
-            item.render( item , seconds ) 
+        for item,render in pairs( render_list ) do
+            render( item , seconds ) 
         end
-	
+
         process_collisions( )
         
     end
