@@ -117,6 +117,30 @@ function set_app_path()
 
 end 
 
+function org_cord() 
+     for i, v in pairs(g.children) do
+          if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     v.x = v.x - v.anchor_point[1] 
+		     v.y = v.y - v.anchor_point[2] 
+		end 
+	  end 
+     end 
+end  
+
+function ang_cord() 
+     for i, v in pairs(g.children) do
+          if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     editor.n_selected(v)
+		     v.x = v.x + v.anchor_point[1] 
+		     v.y = v.y + v.anchor_point[2] 
+		end 
+	  end 
+     end 
+end  
+
+
 function create_on_button_down_f(v)
 	v.extra.selected = false
 	local org_object, new_object 
