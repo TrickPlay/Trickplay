@@ -55,58 +55,82 @@ screen:add(
 -- Base images for cloning
 imgs =
 {
-    water           = Image{ src = "assets/water.png" },
-    island1         = Image{ src = "assets/island1.png" },
-    island2         = Image{ src = "assets/island2.png" },
-    island3         = Image{ src = "assets/island3.png" },
-    cloud1          = Image{ src = "assets/cloud1.png"},
-    cloud2          = Image{ src = "assets/cloud2.png"},
-    cloud3          = Image{ src = "assets/cloud3.png"},
+    --BACKGROUND/SCENERY/LEVEL OBJECTS/ETC
+    water1          = Image{ src = "assets/lvls/bg_tiles/water1.png" },
+    water2          = Image{ src = "assets/lvls/bg_tiles/water2.png" },
+    --LVL 1
+    island1         = Image{ src = "assets/lvls/islands/island1.png" },
+    island2         = Image{ src = "assets/lvls/islands/island2.png" },
+    island3         = Image{ src = "assets/lvls/islands/island3.png" },
+    cloud1          = Image{ src = "assets/lvls/clouds/cloud1.png"},
+    cloud2          = Image{ src = "assets/lvls/clouds/cloud2.png"},
+    cloud3          = Image{ src = "assets/lvls/clouds/cloud3.png"},
+    --LVL 2
+    dock_1_1        = Image{ src = "assets/lvls/harbor/harbor_1_1.png"},
+    dock_1_2        = Image{ src = "assets/lvls/harbor/harbor_1_2.png"},
+    dock_1_3        = Image{ src = "assets/lvls/harbor/harbor_1_3.png"},
+    dock_1_4        = Image{ src = "assets/lvls/harbor/harbor_1_4.png"},
+    dock_1_5        = Image{ src = "assets/lvls/harbor/harbor_1_5.png"},
+    dock_1_6        = Image{ src = "assets/lvls/harbor/harbor_1_6.png"},
+    dock_1_7        = Image{ src = "assets/lvls/harbor/harbor_1_7.png"},
+    dock_2_1        = Image{ src = "assets/lvls/harbor/harbor_2_1.png"},
+    dock_2_2        = Image{ src = "assets/lvls/harbor/harbor_2_2.png"},
+    dock_2_3        = Image{ src = "assets/lvls/harbor/harbor_2_3.png"},
+    dock_2_4        = Image{ src = "assets/lvls/harbor/harbor_2_4.png"},
+    dock_2_5        = Image{ src = "assets/lvls/harbor/harbor_2_5.png"},
+    dock_2_6        = Image{ src = "assets/lvls/harbor/harbor_2_6.png"},
+    dock_2_7        = Image{ src = "assets/lvls/harbor/harbor_2_7.png"},
     
-    dock_1_1        = Image{ src = "assets/dock/harbor_1_1.png"},
-    dock_1_2        = Image{ src = "assets/dock/harbor_1_2.png"},
-    dock_1_3        = Image{ src = "assets/dock/harbor_1_3.png"},
-    dock_1_4        = Image{ src = "assets/dock/harbor_1_4.png"},
-    dock_1_5        = Image{ src = "assets/dock/harbor_1_5.png"},
-    dock_1_6        = Image{ src = "assets/dock/harbor_1_6.png"},
+    --PLAYER ASSETS
+    my_plane_strip  = Image{ src = "assets/player/player_strip.png" },
+    my_bullet       = Image{ src = "assets/player/bullet.png" },
+    my_bomb         = Image{ src = "assets/player/fat_man.png" },
+    life            = Image{ src = "assets/player/life.png"},
+    my_shadow       = Image{ src = "assets/player/player_shadow.png"},
+    my_prop         = Image{ src = "assets/player/player_prop.png"},
+    engine_fire     = Image{ src = "assets/fx/engine-fire.png"},
 
-    dock_2_1        = Image{ src = "assets/dock/harbor_2_1.png"},
-    dock_2_2        = Image{ src = "assets/dock/harbor_2_2.png"},
-    dock_2_3        = Image{ src = "assets/dock/harbor_2_3.png"},
-    dock_2_4        = Image{ src = "assets/dock/harbor_2_4.png"},
-    dock_2_5        = Image{ src = "assets/dock/harbor_2_5.png"},
-    dock_2_6        = Image{ src = "assets/dock/harbor_2_6.png"},
+    --EXPLOSIONS
+    explosion1      = Image{ src = "assets/fx/explosion1_strip6.png" },
+    explosion3      = Image{ src = "assets/fx/explosion3_strip7.png" },
     
-    my_plane_strip  = Image{ src = "assets/player_strip.png" },
-    my_bullet       = Image{ src = "assets/bullet.png" },
-    life            = Image{ src = "assets/life.png"},
+    --TURRET ASSETS
+    turret          = Image{ src = "assets/enemies/turret/turret.png" },
+    t_bullet        = Image{ src = "assets/enemies/turret/turret_bullet.png" },
+    flak            = Image{ src = "assets/fx/flak.png"},
+    
+    --BATTLESHIP ASSETS
+    b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
+    bow_wake_1      = Image{ src = "assets/enemies/b_ship/bow_wake1.png"},
+    bow_wake_2      = Image{ src = "assets/enemies/b_ship/bow_wake2.png"},
+    bow_wake_3      = Image{ src = "assets/enemies/b_ship/bow_wake3.png"},
+    bow_wake_4      = Image{ src = "assets/enemies/b_ship/bow_wake4.png"},
+    stern_wake_1    = Image{ src = "assets/enemies/b_ship/stern_wake1.png"},
+    stern_wake_2    = Image{ src = "assets/enemies/b_ship/stern_wake2.png"},
+    stern_wake_3    = Image{ src = "assets/enemies/b_ship/stern_wake3.png"},
+    stern_wake_4    = Image{ src = "assets/enemies/b_ship/stern_wake4.png"},
+    stern_wake_5    = Image{ src = "assets/enemies/b_ship/stern_wake5.png"},
 
-    enemy_bullet    = Image{ src = "assets/enemybullet1.png" },
-    explosion1      = Image{ src = "assets/explosion1_strip6.png" },
-    explosion2      = Image{ src = "assets/explosion2_strip7.png" },
-    explosion3      = Image{ src = "assets/explosion3_strip7.png" },
-
-    b_ship          = Image{ src = "assets/battleship.png" },
-    turret          = Image{ src = "assets/battleship_cannon.png" },
-
-    smoke           = Image{ src = "assets/smoke.png"},
-    enemy_1         = Image{ src = "assets/enemy1.png"   },
-    zepp            = Image{ src = "assets/zeppelin.png" },
-    z_d_1           = Image{ src = "assets/zepp_dam/zep_dmg1.png"},
-    z_d_2           = Image{ src = "assets/zepp_dam/zep_dmg2.png"},
-    z_d_3           = Image{ src = "assets/zepp_dam/zep_dmg3.png"},
-    z_d_4           = Image{ src = "assets/zepp_dam/zep_dmg4.png"},
-    z_d_5           = Image{ src = "assets/zepp_dam/zep_dmg5.png"},
-    z_d_6           = Image{ src = "assets/zepp_dam/zep_dmg6.png"},
-    z_d_7           = Image{ src = "assets/zepp_dam/zep_dmg7.png"},
-    z_d_e           = Image{ src = "assets/zepp_dam/zep_dmg_engine.png"},
-
-    prop1           = Image{ src  = "assets/prop1.png" },
-    prop2           = Image{ src  = "assets/prop2.png" },
-    prop3           = Image{ src  = "assets/prop3.png" },
-    cannon_l        = Image{ src  = "assets/cannon_left.png" },
-    cannon_r        = Image{ src  = "assets/cannon_right.png"},
-    barrel          = Image{ src  = "assets/cannon_barrel.png"}
+    --FIGHTER ASSETS
+    fighter         = Image{ src = "assets/enemies/fighter/fighter.png"   },
+    fighter_bullet  = Image{ src = "assets/enemies/fighter/fighter_bullet.png" },
+    fighter_prop    = Image{ src = "assets/enemies/fighter/fighter_prop.png" },
+    
+    --ZEPPELIN ASSETS
+    zepp            = Image{ src = "assets/enemies/zepp/zeppelin.png" },
+    z_bullet        = Image{ src = "assets/enemies/zepp/zepp_bullet.png" },
+    zepp_prop       = Image{ src = "assets/enemies/zepp/zepp_prop.png" },
+    z_cannon_l      = Image{ src = "assets/enemies/zepp/cannon_left.png" },
+    z_cannon_r      = Image{ src = "assets/enemies/zepp/cannon_right.png"},
+    z_barrel        = Image{ src = "assets/enemies/zepp/cannon_barrel.png"},
+    z_d_1           = Image{ src = "assets/enemies/zepp/zep_dmg1.png"},
+    z_d_2           = Image{ src = "assets/enemies/zepp/zep_dmg2.png"},
+    z_d_3           = Image{ src = "assets/enemies/zepp/zep_dmg3.png"},
+    z_d_4           = Image{ src = "assets/enemies/zepp/zep_dmg4.png"},
+    z_d_5           = Image{ src = "assets/enemies/zepp/zep_dmg5.png"},
+    z_d_6           = Image{ src = "assets/enemies/zepp/zep_dmg6.png"},
+    z_d_7           = Image{ src = "assets/enemies/zepp/zep_dmg7.png"},
+    z_d_e           = Image{ src = "assets/enemies/zepp/zep_dmg_engine.png"},
 }
 txt =
 {

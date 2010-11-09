@@ -35,7 +35,7 @@ local score_txt = Text{
 		text = "",
 		font=my_font,--"Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
-		x = screen.w/2 +20,
+		x = screen_w/2 +20,
 		y = 20
 }
 local h_score_txt = Text{
@@ -50,10 +50,10 @@ function redo_score_text()
 end
 
 redo_score_text()
-h_score_txt.x = screen.w-h_score_txt.w-20
+h_score_txt.x = screen_w-h_score_txt.w-20
 
 topbar:add(score_txt,h_score_txt)
-topbar:find_child("SCORE").x = screen.w/2 - topbar:find_child("SCORE").w - 20
+topbar:find_child("SCORE").x = screen_w/2 - topbar:find_child("SCORE").w - 20
 topbar:find_child("HIGHSCORE").x = h_score_txt.x - topbar:find_child("HIGHSCORE").w - 20
 
 lives =
