@@ -304,6 +304,7 @@ function editor.inspector(v)
 		return 
         end 
 	
+        editor.n_selected(v) --add 1108
 	
         for i, c in pairs(g.children) do
             if g:find_child(c.name) then
