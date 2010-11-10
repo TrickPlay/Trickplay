@@ -207,38 +207,41 @@ local keys = {
         [keys["8"]] = function()
             my_plane.bombing_mode = not my_plane.bombing_mode
         end,
-        [keys.Right] = function()
-            my_plane:on_key(keys.Right)
+        [keys.Right] = function(second)
+            my_plane:on_key(keys.Right,second)
         end,
-        [keys.Left] = function()
-            my_plane:on_key(keys.Left)
+        [keys.Left] = function(second)
+            my_plane:on_key(keys.Left,second)
         end,
-        [keys.Up] = function()
-            my_plane:on_key(keys.Up)
+        [keys.Up] = function(second)
+            my_plane:on_key(keys.Up,second)
         end,
-        [keys.Down] = function()
-            my_plane:on_key(keys.Down)
+        [keys.Down] = function(second)
+            my_plane:on_key(keys.Down,second)
         end,
-        [keys.Return] = function()
-            my_plane:on_key(keys.Return)
+        [keys.Return] = function(second)
+            my_plane:on_key(keys.Return,second)
         end,
+        [keys.space] = function()
+            state.paused = not (state.paused)
+        end
     },
     ["CAMPAIGN"] =
     {
-        [keys.Right] = function()
-            my_plane:on_key(keys.Right)
+        [keys.Right] = function(second)
+            my_plane:on_key(keys.Right,second)
         end,
-        [keys.Left] = function()
-            my_plane:on_key(keys.Left)
+        [keys.Left] = function(second)
+            my_plane:on_key(keys.Left,second)
         end,
-        [keys.Up] = function()
-            my_plane:on_key(keys.Up)
+        [keys.Up] = function(second)
+            my_plane:on_key(keys.Up,second)
         end,
-        [keys.Down] = function()
-            my_plane:on_key(keys.Down)
+        [keys.Down] = function(second)
+            my_plane:on_key(keys.Down,second)
         end,
-        [keys.Return] = function()
-            my_plane:on_key(keys.Return)
+        [keys.Return] = function(second)
+            my_plane:on_key(keys.Return,second)
         end,
         [keys.space] = function()
             state.paused = not (state.paused)
@@ -246,15 +249,17 @@ local keys = {
     }
 }
 local press
+local second_press
 --moves through all the items in the render list
 --i.e. performs the game loop
 function idle.on_idle( idle , seconds )
     if press ~= nil then
         if press == keys.Space then
             state.paused = not state.paused
-        elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()
+        elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()--second_press)
         end
         press = nil
+        --second_press = nil
     end
     if not state.paused then
 
@@ -287,9 +292,30 @@ function idle.on_idle( idle , seconds )
     
 end
 
+local double_press = false
+local double_press_timer = Timer{interval=500}
+double_press_timer.on_timer = function()
+    double_press_timer:stop()
+    double_press = false
+end
 function screen.on_key_down( screen , key )
-
-    press = key
+--[[
+    if double_press  then
+        second_press = key
+        if press == nil then
+            press = key
+        end
+        double_press_timer:stop()
+        double_press = false
+        print("dub press")
+    else--]]
+        press = key
+        --if second_press ~= nil then
+        --    second_press = nil
+        --end
+        --double_press_timer:start()
+        --double_press = true
+    --end
 --[[
     assert(keys[state.curr_mode])
     

@@ -101,10 +101,20 @@ imgs =
     
     --BATTLESHIP ASSETS
     b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
+    --[[
     bow_wake_1      = Image{ src = "assets/enemies/b_ship/bow_wake1.png"},
     bow_wake_2      = Image{ src = "assets/enemies/b_ship/bow_wake2.png"},
     bow_wake_3      = Image{ src = "assets/enemies/b_ship/bow_wake3.png"},
     bow_wake_4      = Image{ src = "assets/enemies/b_ship/bow_wake4.png"},
+    --]]
+    bow_wake_1      = Image{ src = "assets/enemies/b_ship/bw1.png"},
+    bow_wake_2      = Image{ src = "assets/enemies/b_ship/bw2.png"},
+    bow_wake_3      = Image{ src = "assets/enemies/b_ship/bw3.png"},
+    bow_wake_4      = Image{ src = "assets/enemies/b_ship/bw4.png"},
+    bow_wake_5      = Image{ src = "assets/enemies/b_ship/bw5.png"},
+    bow_wake_6      = Image{ src = "assets/enemies/b_ship/bw6.png"},
+    bow_wake_7      = Image{ src = "assets/enemies/b_ship/bw7.png"},
+    bow_wake_8      = Image{ src = "assets/enemies/b_ship/bw8.png"},
     stern_wake_1    = Image{ src = "assets/enemies/b_ship/stern_wake1.png"},
     stern_wake_2    = Image{ src = "assets/enemies/b_ship/stern_wake2.png"},
     stern_wake_3    = Image{ src = "assets/enemies/b_ship/stern_wake3.png"},
