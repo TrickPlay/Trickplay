@@ -1247,12 +1247,27 @@ enemies =
         bulletholes = {},
         moving = false,
         
-        bow_wake =
+        bow_wake_r =
         {
-            Clone{source=imgs.bow_wake_1,opacity = 0},
-            Clone{source=imgs.bow_wake_2,opacity = 0},
-            Clone{source=imgs.bow_wake_3,opacity = 0},
-            Clone{source=imgs.bow_wake_4,opacity = 0}
+            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.b_ship.w/2},
+            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.b_ship.w/2},
+        },
+        bow_wake_l =
+        {
+            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.b_ship.w/2,y_rotation={180,0,0}},
         },
         stern_wake =
         {
@@ -1490,7 +1505,8 @@ enemies =
 			self.guns.g_b:add( self.guns.bow )
 			self.guns.g_m:add( self.guns.mid )
             self.guns.g_s:add( self.guns.stern )
-			self.group:add(unpack(self.bow_wake))
+			self.group:add(unpack(self.bow_wake_r))
+            self.group:add(unpack(self.bow_wake_l))
             self.group:add(unpack(self.stern_wake))
 			self.group:add(
 				
@@ -1523,16 +1539,26 @@ enemies =
 			end
 			self.turr_h = self.guns.stern.h
 		end,
+        
+        wake_thresh = .1,
+        last_wake_change = 0,
 		
 		render = function(self,seconds)
 			
             if self.moving then
-                self.bow_wake[self.b_w_i].opacity=0
+                self.last_wake_change = self.last_wake_change + seconds
+                
+                if self.last_wake_change >= self.wake_thresh then
+                self.last_wake_change = 0
+                self.bow_wake_r[self.b_w_i].opacity=0
+                self.bow_wake_l[self.b_w_i].opacity=0
                 self.stern_wake[self.s_w_i].opacity=0
-                self.b_w_i = self.b_w_i%(#self.bow_wake)+1
+                self.b_w_i = self.b_w_i%(#self.bow_wake_r)+1
                 self.s_w_i = self.s_w_i%(#self.stern_wake)+1
-                self.bow_wake[self.b_w_i].opacity=255
+                self.bow_wake_r[self.b_w_i].opacity=255
+                self.bow_wake_l[self.b_w_i].opacity=255
                 self.stern_wake[self.s_w_i].opacity=255
+                end
             end
 			--animate the zeppelin based on the current stage
 			self.stages[self.stage](self,seconds)

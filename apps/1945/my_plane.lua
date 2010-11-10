@@ -110,8 +110,7 @@ smoke = function(i)   return {
 } end
 -------------------------------------------------------------------------------
 -- This is my plane. It spawns bullets
---r = Rectangle{w=1,h=1,color="FFFFFFA0"}
---screen:add(r)
+
 my_plane =
 {
 	firing_powerup = 1,
@@ -127,15 +126,14 @@ my_plane =
     
     plumes_per_stream = 1,
     
-    max_h_speed = 600,
+    max_h_speed = 500,
     
-    max_v_speed = 175,
+    max_v_speed = 300,
     
-    friction = 0.85,
+    friction = 200,
     
-    friction_bump = 1000, -- per second
     
-    speed_bump = 200,
+    speed_bump = 250,
     
     group = Group{},
     
@@ -256,42 +254,8 @@ my_plane =
     render =
     
         function( self , seconds )
-            --for _ , item in ipairs( self.render_items ) do
-              --  item.render( item , seconds ) 
-            --end
-            --[[
-            if self.damage > 0 then
-                self.last_smoke = self.last_smoke + self.smoke_rate_base
-                if self.last_smoke >self.smoke_thresh then
-                    local s
-                    if self.damage >= 1 then
-                        s = smoke(self.group.x + 10,self.group.y + 50)
-                        s:setup(self.render_items)
-                        table.insert(self.render_items,s)
-                    end
-                    if self.damage >= 2 then
-                        s = smoke(self.group.x +self.image.w/(self.num_frames)-30,
-                            self.group.y + 50)
-                        s:setup(self.render_items)
-                        table.insert(self.render_items,s)
-                    end
-                    if self.damage >= 3 then
-                        s = smoke(self.group.x +30,
-                            self.group.y + self.image.h-20)
-                        s:setup(self.render_items)
-                        table.insert(self.render_items,s)
-                    end
-                    self.last_smoke = 0
-                end
-            else
-                for i = 1, self.num_frames - 1 do
-                    for j = 1,self.plumes_per_stream do
-                        self.smoke_stream[i][j]:halt()
-                    end
-                end
-            end
-            --]]
             
+            --animate the prop
 			self.prop_index = self.prop_index%
 				self.num_prop_frames + 1
 			self.prop.l.y = -(self.prop_index - 1)*self.prop_h/
@@ -299,10 +263,7 @@ my_plane =
 			self.prop.r.y = -(self.prop_index - 1)*self.prop_h/
 				self.num_prop_frames
             
-            --self.group:raise_to_top()
-            -- Move
-            
-            --if game_is_running then--not self.dead then
+            --if respawned, then blink
             if self.dead then
                 -- Figure the total time we have been dead
                 self.dead_time = self.dead_time + seconds
@@ -310,108 +271,70 @@ my_plane =
                 -- If it is the maximum time, we go back to being alive
                 
                 if self.dead_time >= self.max_dead_time then
+                    
                     self.dead = false
-                    
                     self.dead_time = 0
-                    
                     self.group:show()
                     
                 -- Otherwise, we blink
-                    
                 elseif self.dead_time > self.dead_blink_delay then
                 
                     local blink_on = math.floor( self.dead_time / ( 1 / self.dead_blinks ) ) % 2 == 0
                     
-                    if blink_on then
-                    
-                        self.group:show()
-                        
-                    else
-                        
-                        self.group:hide()
-                        
-                    end
-                
+                    if blink_on then self.group:show()
+                    else             self.group:hide() end
                 end
-
-end
-
+            end
             
-                local start_point = self.group.center
+            --update position
+            --print(self.h_speed)
+            local x = self.group.x + ( self.h_speed * seconds )
+            
+            if x > screen_w - my_plane_sz then
                 
+                x = screen_w -my_plane_sz 
+                self.h_speed = 0
+                
+            elseif x < 0 then
+                x = 0
+                self.h_speed = 0
+            else
                 if self.h_speed > 0 then
-                
-                    local x = self.group.x + ( self.h_speed * seconds )
-                    
-                    if x > screen_w - my_plane_sz then
-                    
-                        x = screen_w -my_plane_sz 
-                        
-                        self.h_speed = 0
-                    
-                    else
-                    
-                        self.h_speed = clamp( ( self.h_speed * ( self.friction ^ seconds ) ) - ( self.friction_bump * seconds ) , 0 , self.max_h_speed )
-                        
-                    end
-                    
-                    self.group.x = x
-                                
+                    self.h_speed =  self.h_speed - ( 2*self.friction * seconds )
+                    if self.h_speed < 0 then self.h_speed = 0 end
                 elseif self.h_speed < 0 then
-                
-                    local x = self.group.x + ( self.h_speed * seconds )
-                    
-                    if x < 0 then
-                    
-                        x = 0
-                        
-                        self.h_speed = 0
-                    
-                    else
-                    
-                        self.h_speed = clamp( ( self.h_speed * ( self.friction ^ seconds ) ) + ( self.friction_bump * seconds )  , - self.max_h_speed , 0 )
-                    end
-                    
-                    self.group.x = x
-                
+                    self.h_speed =  self.h_speed + ( 2*self.friction * seconds )
+                    if self.h_speed > 0 then self.h_speed = 0 end
                 end
+            end
+            self.group.x = x
+            
+            
+            local y = self.group.y + ( self.v_speed * seconds )
+            
+            if y > screen_h - my_plane_sz then
                 
+                y = screen_h -my_plane_sz 
+                self.v_speed = 0
+                
+            elseif y < 0 then
+                
+                y = 0
+                self.v_speed = 0
+                
+            else
                 if self.v_speed > 0 then
-    
-                    local y = self.group.y + ( self.v_speed * seconds )
-                    
-                    if y > screen_h - my_plane_sz then
-                    
-                        y = screen_h -my_plane_sz 
-                        
-                        self.v_speed = 0
-                    
-                    else
-                    
-                        self.v_speed = clamp( ( self.v_speed * ( self.friction ^ seconds ) ) - ( self.friction_bump * seconds ) , 0 , self.max_v_speed )
-                        
-                    end
-                    
-                    self.group.y = y
-                
+                    self.v_speed =  self.v_speed - ( 2*self.friction * seconds )
+                    if self.v_speed < 0 then self.v_speed = 0 end
                 elseif self.v_speed < 0 then
-                
-                    local y = self.group.y + ( self.v_speed * seconds )
-                    
-                    if y < 0 then
-                    
-                        y = 0
-                        
-                        self.v_speed = 0
-                    
-                    else
-                    
-                        self.v_speed = clamp( ( self.v_speed * ( self.friction ^ seconds ) ) + ( self.friction_bump * seconds )  , - self.max_v_speed , 0 )
-                    end
-                    
-                    self.group.y = y
+                    self.v_speed =  self.v_speed + ( 2*self.friction * seconds )
+                    if self.v_speed > 0 then self.v_speed = 0 end
                 end
-    if not self.dead then
+            end
+            
+            self.group.y = y
+            
+            if not self.dead then
                 table.insert(g_guys_air,
                     {
                         obj = self,
@@ -421,22 +344,7 @@ end
                         y2  = self.group.y+self.img_h,--/2,
                     }
                 )
-                --[[
-                add_to_collision_list( self ,
-					{self.group.x+self.image.w/(2*self.num_frames),self.group.y+self.image.h/2},
-					{self.group.x+self.image.w/(2*self.num_frames),self.group.y+self.image.h/2},
-					{self.image.w/(2*self.num_frames),self.image.h},
-					TYPE_ENEMY_PLANE)-- start_point , self.group.center , { self.group.w - 10 , self.group.h - 30 } , TYPE_ENEMY_PLANE )
-                --]]
-end
---[[
-            r.x = self.group.x
-r.y=self.group.y
-r.w=self.image.w
-r.h=self.image.h
---r:raise_to_top()
---]]
-            --end
+            end
         end,
         
     -- Adds a bullet to the render list
@@ -449,7 +357,7 @@ r.h=self.image.h
                 
                 
 				z_rot = z_rot,
-
+                
                 speed = -200,
                 time = 0,
                 dur  = 1,
@@ -544,7 +452,7 @@ r.h=self.image.h
                     
 			layers.land_targets:add( self.group )
             
-            self.img_w = self.image.w
+            self.img_w = self.image.w/6
             self.img_h = self.image.h
         end,
                 
@@ -980,7 +888,7 @@ redo_score_text()
         
     on_key =
     
-        function( self , key )
+        function( self , key, second_key )
         --[[
             if number_of_lives == 0 then--self.dead then
             
@@ -990,19 +898,40 @@ redo_score_text()
             --]]
 
             if key == keys.Right then
-                self.h_speed = clamp( self.h_speed + self.speed_bump , -self.max_h_speed , self.max_h_speed )
+                --if second_key == keys.Right then
+                --    print("double right")
+                --    self.h_speed = self.max_h_speed
+                --else
+                    self.h_speed = clamp( self.h_speed + self.speed_bump ,
+                        -self.max_h_speed , self.max_h_speed )
+                --end
                 
             elseif key == keys.Left then
-            
-                self.h_speed = clamp( self.h_speed - self.speed_bump , -self.max_h_speed , self.max_h_speed )
+                --if second_key == keys.Left then
+                --    print("double left")
+                --    self.h_speed = -self.max_h_speed
+                --else
+                    self.h_speed = clamp( self.h_speed - self.speed_bump ,
+                        -self.max_h_speed , self.max_h_speed )
+                --end
                 
             elseif key == keys.Down then
-            
-                self.v_speed = clamp( self.v_speed + self.speed_bump , -self.max_v_speed , self.max_v_speed )
+                --if second_key == keys.Down then
+                --    print("double down")
+                --    self.v_speed = self.max_v_speed
+                --else
+                    self.v_speed = clamp( self.v_speed + self.speed_bump ,
+                        -self.max_v_speed , self.max_v_speed )
+                --end
                 
             elseif key == keys.Up then
-            
-                self.v_speed = clamp( self.v_speed - self.speed_bump , -self.max_v_speed , self.max_v_speed )
+                --if second_key == keys.Up then
+                --  print("double up")
+                --    self.v_speed = -self.max_v_speed
+                --else
+                    self.v_speed = clamp( self.v_speed - self.speed_bump ,
+                        -self.max_v_speed , self.max_v_speed )
+                --end
             
             elseif key == keys.Return then
             	local shoot = {
