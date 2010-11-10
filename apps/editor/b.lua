@@ -21,32 +21,21 @@ function( section )
     local section_items = {}
     
         
-    local function clear_bg() 
-	BG_IMAGE_20.opacity = 0
-	BG_IMAGE_40.opacity = 0
-	BG_IMAGE_80.opacity = 0
-	BG_IMAGE_white.opacity = 0
-	BG_IMAGE_import.opacity = 0
-    end
     ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["Background Image        "]   = function() 
-			if(CURRENT_DIR == "") then 
-				set_app_path() 
-			else 
-				input_mode = S_POPUP 
-				printMsgWindow("Image File : ") 
-			        inputMsgWindow("open_bg_imagefile") 
-				input_mode = S_SELECTION 
-			end end, 
-	["Transparency Grid 20"]   = function() clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT end,
-	["Transparency Grid 40"]   = function() clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT end,
-	["Transparency Grid 80"]   = function() clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT end,
-        ["White"]   = function() clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT end,
-        ["Black"]   = function() clear_bg() input_mode = S_SELECT end
+     	["UNDO".."\t\t\t".."[U]"]   = function() editor.undo() input_mode = S_SELECT end,
+     	["REDO".."\t\t\t".."[E]"]   = function() editor.redo() input_mode = S_SELECT end,
+     	["TEXT".."\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
+     	["IMAGE".."\t\t\t".."[I]"]   = function() editor.image() input_mode = S_SELECT end,
+     	["RECTANGLE".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
+     	["VIDEO".."\t\t\t"..""]   = function() editor.video() input_mode = S_SELECT end,
+     	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
+     	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
+     	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
+     	["UNGROUP".."\t\t\t"..""]   = function() editor.ugroup() input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -57,28 +46,35 @@ function( section )
         
         local space = group.h - ( TOP_PADDING + BOTTOM_PADDING )
         local items_height = 0
-     
-	  
     
-        --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_import = factory.make_text_menu_item( assets , ui.strings[ "Background Image        " ] )
-        local f_tp_20  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 20" ] )
-        local f_tp_40  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 40" ] )
-        local f_tp_80  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 80" ] )
-        local f_white  = factory.make_text_menu_item( assets , ui.strings[ "White" ] )
-        local f_black  = factory.make_text_menu_item( assets , ui.strings[ "Black" ] )
+    
+        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO".."\t\t\t".."[U]" ] )
+        local f_redo  = factory.make_text_menu_item( assets , ui.strings[ "REDO".."\t\t\t".."[E]" ] )
+        local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT".."\t\t\t".."[T]" ] )
+        local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE".."\t\t\t".."[I]" ] )
+        local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
+        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t\t".."" ] )
+        local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
+        local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t     ".."[Del]" ] )
+        local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )
+        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UNGROUP".."\t\t\t".."" ] )
         
-        --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
-        table.insert( section_items , f_import)
-        table.insert( section_items , f_tp_20)
-        table.insert( section_items , f_tp_40)
-        table.insert( section_items , f_tp_80)
-        table.insert( section_items , f_white)
-        table.insert( section_items , f_black)
-
+        table.insert( section_items , f_undo )
+        table.insert( section_items , f_redo )
+        table.insert( section_items , f_text )
+        table.insert( section_items , f_image )
+        table.insert( section_items , f_rect )
+        table.insert( section_items , f_video )
+        table.insert( section_items , f_delete)
+        table.insert( section_items , f_clone )
+        table.insert( section_items , f_group )
+        table.insert( section_items , f_ugroup )
+        
 	for _,item in ipairs( section_items ) do
 	     item.reactive = true
+	     if (item.text ~= "INSERT :                   ") then 
+--[[
              function item:on_button_down(x,y,button,num_clicks)
         	if item.on_activate then
 	    		item:on_focus_out()
@@ -89,50 +85,76 @@ function( section )
         	end
 		return true 
 	     end
+]]
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
-                dropmenu_item.reactive = true
+                --dropmenu_item.reactive = true
                 function dropmenu_item:on_button_down(x,y,button,num_clicks)
-			local s= ui.sections[ui.focus]
+		        local s= ui.sections[ui.focus]
         		ui.button_focus.position = s.button.position
         		ui.button_focus.opacity = 0
             		animate_out_dropdown()
-            		screen.grab_key_focus(screen)
                         if(dropdown_map[dropmenu_item.text]) then dropdown_map[dropmenu_item.text]() end
+            		screen.grab_key_focus(screen)
                         return true
                 end
              end
+             end
        end
 
-        items_height = items_height + f_tp_20.h + f_tp_40.h + f_tp_80.h + f_white.h + f_black.h + f_import.h
+        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
         
-	f_import.extra.on_activate = 
-	    function()	input_mode = S_POPUP printMsgWindow("Image File : ") inputMsgWindow("open_imagefile") 
-	    end 
-        f_tp_20.extra.on_activate =
+
+        f_rect.extra.on_activate =
             function()
-		clear_bg() BG_IMAGE_20.opacity = 255 
-                screen.grab_key_focus(screen)
+		input_mode = S_RECTANGLE
             end
-        f_tp_40.extra.on_activate =
+        
+        f_text.extra.on_activate =
             function()
-		clear_bg() BG_IMAGE_40.opacity = 255 
-                screen.grab_key_focus(screen)
+		editor.text()
+		input_mode = S_SELECT
             end
-        f_tp_80.extra.on_activate =
+        f_image.extra.on_activate =
             function()
-		clear_bg() BG_IMAGE_80.opacity = 255 
-                screen.grab_key_focus(screen)
+		input_mode = S_SELECT
+		editor.image()
             end
-        f_black.extra.on_activate =
+        f_video.extra.on_activate =
             function()
-		clear_bg() 
-                screen.grab_key_focus(screen)
+		editor.video()
+		input_mode = S_SELECT
             end
-        f_white.extra.on_activate =
+        f_undo.extra.on_activate =
             function()
-		clear_bg() BG_IMAGE_white.opacity = 255 
-                screen.grab_key_focus(screen)
+		editor.undo()
+		input_mode = S_SELECT
+            end
+        
+        f_redo.extra.on_activate =
+            function()
+		input_mode = S_SELECT
+		editor.redo()
+            end
+        f_group.extra.on_activate =
+            function()
+		input_mode = S_SELECT
+		editor.group()
+            end
+        f_ugroup.extra.on_activate =
+            function()
+		input_mode = S_SELECT
+		editor.ugroup()
+            end
+        f_delete.extra.on_activate =
+            function()
+		editor.delete()
+		input_mode = S_SELECT
+            end
+        f_clone.extra.on_activate =
+            function()
+		editor.clone()
+		input_mode = S_SELECT
             end
         
         -- This spaces all items equally.
@@ -147,7 +169,7 @@ function( section )
             item.x = ( group.w - item.w ) / 2
             item.y = y
             
-            y = y + item.h - 5.45			-- margin
+            y = y + item.h -5.45 -- + margin
             
             group:add( item )
             
@@ -186,7 +208,6 @@ function( section )
         section.focus = section.focus + delta
     
         focus:on_focus_in()
-        
     end
     
     local function activate_focused()
@@ -197,6 +218,7 @@ function( section )
 	    focused:on_focus_out()
             animate_out_dropdown()
             focused:on_activate()
+	    screen:grab_key_focus()
         end
     
     end
@@ -224,15 +246,15 @@ function( section )
         
         section.dropdown.on_key_down =
             function( section , key )
+	    	local s= ui.sections[ui.focus]
+            	ui.button_focus.position = s.button.position
+            	ui.button_focus.opacity = 0
 
-            local s= ui.sections[ui.focus]
-            ui.button_focus.position = s.button.position
-            ui.button_focus.opacity = 0
-        
                 local f = key_map[ key ]
                 if f then
                     f()
                 end
+		--screen:grab_key_focus()
 		return true -- hjk
             end
     

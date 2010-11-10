@@ -122,8 +122,8 @@ function( section )
             end
         f_video.extra.on_activate =
             function()
-		editor.video()
 		input_mode = S_SELECT
+		editor.video()
             end
         f_undo.extra.on_activate =
             function()
@@ -246,6 +246,10 @@ function( section )
         section.dropdown.on_key_down =
         
             function( section , key )
+		local s= ui.sections[ui.focus]
+        	ui.button_focus.position = s.button.position
+        	ui.button_focus.opacity = 0
+
                 local f = key_map[ key ]
                 if f then
                     f()

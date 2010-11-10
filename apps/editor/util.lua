@@ -760,7 +760,7 @@ function printMsgWindow(txt, name)
 			end 
 			selected_prj = prj_text.name
 		     end 
-		elseif(key == keys.Tab and shift == false) or (key == keys.Down) then 
+		elseif(key == keys.Tab and shift == false) or (key == keys.Down) or key == keys.Right then 
 			prj_text.extra.on_focus_out()
 			if(prj_text.name == selected_prj) then
 			     prj_text:set{color = {0,255,0,255}}
@@ -771,7 +771,7 @@ function printMsgWindow(txt, name)
 			else 
 				msgw:find_child("input_b").extra.on_focus_in()
 			end 
-		elseif(key == keys.Tab and shift == true) or key == keys.Up then 
+		elseif(key == keys.Tab and shift == true) or key == keys.Up or key == keys.Left then 
 			if (prj_text.extra.index > 1) then 
 				prj_text.extra.on_focus_out()
 				if(prj_text.name == selected_prj) then
@@ -1026,7 +1026,7 @@ function inputMsgWindow(input_purpose)
 							if(input_purpose == "projectlist") then projects = {} end 
                 end
 	        return true 
-	     elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) then 
+	     elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) or (key == keys.Right) then 
 		if (button.name == "savefile") then save_b.extra.on_focus_out() cancel_b.extra.on_focus_in()
               	elseif (button.name == "yes") then yes_b.extra.on_focus_out() no_b.extra.on_focus_in() 
               	elseif (button.name == "projectlist") then button.extra.on_focus_out() cancel_b.extra.on_focus_in() 
@@ -1034,7 +1034,7 @@ function inputMsgWindow(input_purpose)
               	       (button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
 			open_b.extra.on_focus_out() cancel_b.extra.on_focus_in() 
 		end
-	     elseif (key == keys.Tab and shift == true) or ( key == keys.Up ) then 
+	     elseif (key == keys.Tab and shift == true) or ( key == keys.Up ) or (key == keys.Left) then 
 		if (button.name == "savefile") then save_b.extra.on_focus_out() input_box.extra.on_focus_in()
               	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
               	elseif (button.name == "projectlist") then button.extra.on_focus_out() 
@@ -1251,11 +1251,11 @@ function inputMsgWindow(input_purpose)
 		selected_prj = ""
 	  end 
 
-          if key == keys.Return or (key == keys.Tab and shift == false) or key == keys.Down then 
+          if key == keys.Return or (key == keys.Tab and shift == false) or key == keys.Down or key == keys.Right then 
 	      input_box.extra.on_focus_out()
 	      if(open_b ~= nil) then open_b.extra.on_focus_in() 
 	      elseif(save_b ~= nil) then save_b.extra.on_focus_in() end
-	  elseif(key == keys.Tab and shift == true) or key == keys.Up then 
+	  elseif(key == keys.Tab and shift == true) or key == keys.Up or key == keys.Left then 
 	      if (input_purpose == "projectlist") then 
 	           local n = table.getn(projects)
 	           input_box.extra.on_focus_out()
@@ -1266,15 +1266,11 @@ function inputMsgWindow(input_purpose)
      end 
 	
     function input_t:on_button_down(x,y,button,num)
- 	if (input_purpose == "projectlist") then 
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
-	end
     end 
     function input_box:on_button_down(x,y,button,num)
- 	if (input_purpose == "projectlist") then 
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
-	end
     end 
 end

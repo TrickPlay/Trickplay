@@ -268,8 +268,11 @@ function( section )
         section.dropdown:grab_key_focus()
         
         section.dropdown.on_key_down =
-        
             function( section , key )
+		local s= ui.sections[ui.focus]
+        	ui.button_focus.position = s.button.position
+        	ui.button_focus.opacity = 0
+
                 local f = key_map[ key ]
                 if f then
                     f()

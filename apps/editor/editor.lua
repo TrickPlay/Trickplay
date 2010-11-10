@@ -134,6 +134,12 @@ function editor.close()
 
 	BG_IMAGE_40.opacity = 255 
 
+	for i, j in pairs (g.children) do 
+	     if(j.extra.selected == true) then 
+		editor.n_selected(j) 
+	     end 
+	end 
+
 	if(screen:find_child("mouse_pointer") ~= nil) then 
              screen:remove(mouse_pointer) 
 	end 
@@ -918,6 +924,7 @@ end
 function editor.clone()
         if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
+                screen:grab_key_focus()
 	        input_mode = S_SELECT
 		return 
         end 
@@ -951,6 +958,7 @@ end
 function editor.delete()
         if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
+                screen:grab_key_focus()
 		input_mode = S_SELECT
 		return 
         end 
@@ -1225,6 +1233,7 @@ function editor.left()
 
      if(table.getn(selected_objs) == 0 )then 
 	print("there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1257,6 +1266,7 @@ function editor.right()
 
      if(table.getn(selected_objs) == 0 )then 
 	print(":there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1290,6 +1300,7 @@ function editor.top()
 
      if(table.getn(selected_objs) == 0 )then 
 	print("there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1356,6 +1367,7 @@ function editor.hcenter()
 
      if(table.getn(selected_objs) == 0 )then 
 	print("there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1391,6 +1403,7 @@ function editor.vcenter()
 
      if(table.getn(selected_objs) == 0 )then 
 	print("there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1588,6 +1601,7 @@ function editor.vspace()
 
     if(table.getn(selected_objs) == 0 )then 
 	print(":there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
     end 
@@ -1633,6 +1647,7 @@ function editor.bring_to_front()
 
      if(table.getn(selected_objs) == 0 )then 
 	print(":there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1656,6 +1671,7 @@ function editor.send_to_back()
 
      if(table.getn(selected_objs) == 0 )then 
 	print(":there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
@@ -1696,6 +1712,7 @@ function editor.send_backward()
 
      if(table.getn(selected_objs) == 0 )then 
 	print("there are no selected objects") 
+                screen:grab_key_focus()
 	input_mode = S_SELECT
 	return 
      end 
