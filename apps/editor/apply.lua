@@ -21,7 +21,11 @@ function inspector_apply (v, inspector)
 
       if(v.type ~= "Video") then 
           org_object.name = v.name
-          v.name = inspector:find_child("name"):find_child("input_text").text
+	  if(is_available(inspector:find_child("name"):find_child("input_text").text) == true) then 
+               v.name = inspector:find_child("name"):find_child("input_text").text
+	  else 
+		print("The name is duplicated")
+	  end
           new_object.name = v.name
 
           org_object.x = v.x
@@ -76,23 +80,15 @@ function inspector_apply (v, inspector)
 	  inspector:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
           new_object.anchor_point = v.anchor_point
 
-   --[[ 
-          if(org_object.anchor_point ~= v.anchor_point) then 
-	       if (v.extra.a_m ~= nil) then 
-	            g:remove(v.extra.a_m) 
-               end
-               anchor_mark= ui.factory.draw_anchor_pointer()
-	       anchor_mark.position = {v.x, v.y, v.z}
-               v.extra.a_m = anchor_mark
-	       g:add(anchor_mark)
-          end
-]]
-
        else  --Video 
 	   org_object = {}
            new_object = {}
 	   org_object.name = v.name
-           v.name = inspector:find_child("name"):find_child("input_text").text
+	   if(is_available(inspector:find_child("name"):find_child("input_text").text) == true) then 
+                v.name = inspector:find_child("name"):find_child("input_text").text
+	   else 
+		print("the name is duplicated")
+	   end 
            new_object.name = v.name
 	
            org_object.source = v.source
