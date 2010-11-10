@@ -1,2 +1,3 @@
 p1.patch
 p2.patch
+remove-eglwait.patch

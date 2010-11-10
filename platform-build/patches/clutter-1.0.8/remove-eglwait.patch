@@ -1,0 +1,16 @@
+Index: clutter-1.0.8/clutter/eglnative/clutter-backend-egl.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/eglnative/clutter-backend-egl.c	2010-11-10 16:51:46.640002641 +0900
++++ clutter-1.0.8/clutter/eglnative/clutter-backend-egl.c	2010-11-10 21:02:46.398847001 +0900
+@@ -79,11 +79,9 @@
+   g_assert (CLUTTER_IS_STAGE_EGL (impl));
+   stage_egl = CLUTTER_STAGE_EGL (impl);
+ 
+-  eglWaitNative (EGL_CORE_NATIVE_ENGINE);
+   clutter_actor_paint (CLUTTER_ACTOR (stage));
+   cogl_flush ();
+ 
+-  eglWaitGL();
+   eglSwapBuffers (backend_egl->edpy,  stage_egl->egl_surface);
+ }
+ 
