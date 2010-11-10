@@ -502,14 +502,14 @@ function itemTostring(v)
          "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
          "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
          "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "position = {"..v.x..","..v.y.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
+         "position = {"..v.x..","..v.y..","..v.z.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Image") then
 
 	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "src=\""..v.src.."\","..indent..
-         "position = {"..v.x..","..v.y.."},"..indent..
+         "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
          "size = {"..table.concat(v.size,",").."},"..indent..
          "clip = {"..table.concat(v.clip,",").."},"..indent..
          "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
@@ -524,7 +524,7 @@ function itemTostring(v)
          "font=\""..v.font.."\","..indent..
          "color={"..table.concat(v.color,",").."},"..indent..
          "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y.."},"..indent..
+         "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
          "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
          "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
          "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
@@ -538,7 +538,7 @@ function itemTostring(v)
 	itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y.."},"..indent..
+         "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
          "source="..v.source.name..","..indent..
          "scale = {"..table.concat(v.scale,",").."},"..indent..
          "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
@@ -562,7 +562,7 @@ function itemTostring(v)
 	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
         "name=\""..v.name.."\","..indent..
         "size={"..table.concat(v.size,",").."},"..indent..
-        "position = {"..v.x..","..v.y.."},"..indent..
+        "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
 	"children = {"..children.."},"..indent..
         "scale = {"..table.concat(v.scale,",").."},"..indent..
         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..

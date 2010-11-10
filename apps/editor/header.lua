@@ -15,7 +15,7 @@ S_RECTANGLE       = 1
 S_POPUP        	  = 2
 S_MENU        	  = 3
 
-DEFAULT_COLOR     = "FFFFFFC0"
+DEFAULT_COLOR     = {255,255,255,255}
 
 ADD               = 1
 CHG               = 2
