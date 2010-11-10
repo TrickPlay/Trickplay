@@ -24,6 +24,7 @@
 #include "installer.h"
 #include "versions.h"
 #include "controller_lirc.h"
+#include "app_push_server.h"
 
 //-----------------------------------------------------------------------------
 
@@ -39,6 +40,8 @@ TPContext::TPContext()
     is_running( false ),
     sysdb( NULL ),
     controller_server( NULL ),
+    controller_lirc( NULL ),
+    app_push_server( NULL ),
     console( NULL ),
     downloads( NULL ),
     installer( NULL ),
@@ -760,6 +763,10 @@ int TPContext::run()
     controller_lirc = ControllerLIRC::make( this );
 
     //.........................................................................
+
+    app_push_server = AppPushServer::make( this );
+
+    //.........................................................................
     // Create the downloads
 
     downloads = new Downloads( this );
@@ -908,6 +915,15 @@ int TPContext::run()
 
             notify( TP_NOTIFICATION_APP_CLOSED );
         }
+    }
+
+    //.....................................................................
+
+    if ( app_push_server )
+    {
+        delete app_push_server;
+
+        app_push_server = 0;
     }
 
     //.....................................................................
@@ -1593,6 +1609,8 @@ void TPContext::load_external_configuration()
         TP_LIRC_ENABLED,
         TP_LIRC_UDS,
         TP_LIRC_REPEAT,
+        TP_APP_PUSH_ENABLED,
+        TP_APP_PUSH_PORT,
 
         NULL
     };
