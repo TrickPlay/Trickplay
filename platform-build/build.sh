@@ -439,8 +439,9 @@ then
     cd ${HERE}/tp-build 
     
     cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DTP_CLUTTER_BACKEND_EGL=1 \
+	    -DTP_PROFILING=1 \
             "${THERE}/../"   
 fi
 
