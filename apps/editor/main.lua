@@ -175,7 +175,6 @@ local function build_ui( show_it )
         }
     end
 
-    local menu_init 	= true
 
     local function animate_in_dropdown( )
 
@@ -319,7 +318,6 @@ local function build_ui( show_it )
         	     			    animate_out_dropdown()
 		     			    ui:hide()
 					    menu_hide = true 
-    					    menu_init = true
 					    screen:grab_key_focus()
 				       end 
 				       input_mode = S_SELECT end,
@@ -340,22 +338,17 @@ local function build_ui( show_it )
 	[ keys.Control_L  ] = function() control = true end,
 	[ keys.Control_R  ] = function() control = true end,
         [ keys.Return   ] = function() if(current_inspector == nil) then 
-			    	     if(menu_init == true) then 
-			                menu_init = false
-			    		local s= ui.sections[ui.focus]
-        		    		ui.button_focus.position = s.button.position
-        		    		ui.button_focus.opacity = 0
-			    		animate_out_dropdown() 
-					input_mode = S_SELECT 
-				     else 
-			                menu_init = true
-			    		local s= ui.sections[ui.focus]
-        		    		ui.button_focus.position = s.button.position
-        		    		ui.button_focus.opacity = 255
-			    		animate_in_dropdown() 
-					input_mode = S_MENU
-			    	     end 
-			         end 
+				     for i, j in pairs (g.children) do 
+					if(j.extra.selected == true) then 
+						editor.n_selected(j) 
+					end 
+				     end 
+			    	     local s= ui.sections[ui.focus]
+        		    	     ui.button_focus.position = s.button.position
+        		    	     ui.button_focus.opacity = 255
+			    	     animate_in_dropdown() 
+				     input_mode = S_MENU
+			             end 
 			    end ,
         [ keys.Left     ] = function() if table.getn(selected_objs) ~= 0 then
 			         for q, w in pairs (selected_objs) do
@@ -367,6 +360,10 @@ local function build_ui( show_it )
 		                            if(t_obj ~= nil) then 
 			                         t_obj.x = t_obj.x - 1
 					    end 
+	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+               				    end
 	             		      end
 			         end
 			   elseif(current_inspector == nil) then move_focus( ui.focus - 1 ) end end,
@@ -380,6 +377,10 @@ local function build_ui( show_it )
 		                            if(t_obj ~= nil) then 
 			                         t_obj.x = t_obj.x + 1
 					    end 
+	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+               				    end
 	             		      end
 			         end
 			   elseif(current_inspector == nil) then move_focus( ui.focus + 1 ) end end ,
@@ -393,6 +394,10 @@ local function build_ui( show_it )
 		                            if(t_obj ~= nil) then 
 			                         t_obj.y = t_obj.y + 1
 					    end 
+	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+               				    end
 	             		      end
 			         end
 			   elseif(current_inspector == nil) then enter_section() end end,
@@ -406,6 +411,10 @@ local function build_ui( show_it )
 		                            if(t_obj ~= nil) then 
 			                         t_obj.y = t_obj.y - 1
 					    end 
+	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+               				    end
 	             		      end
 			         end
 			   end end
@@ -437,7 +446,6 @@ local function build_ui( show_it )
 		  if(input_mode ~= S_POPUP) and
 		    (screen:find_child("msgw") == nil) then
 	               button_map[section.button.name]()
-		       menu_init = true
 		       local s= ui.sections[ui.focus]
         	       ui.button_focus.position = s.button.position
         	       ui.button_focus.opacity = 255
@@ -457,16 +465,6 @@ local function build_ui( show_it )
              local f = key_map[ key ]
              if f then
             	f()
-	    	if(current_inspector == nil and (key == keys.Return or key == keys.Down 
-		   or key == keys.Left or key == keys.Right)) then 
-	             local s= ui.sections[ui.focus]
-        	     ui.button_focus.position = s.button.position
-        	     ui.button_focus.opacity = 255 
-	        else 
-		   local s= ui.sections[ui.focus]
-        	   ui.button_focus.position = s.button.position
-        	   ui.button_focus.opacity = 0
-	        end 
              end    
 	end
 	return true
@@ -525,14 +523,12 @@ local function build_ui( show_it )
           mouse_state = BUTTON_DOWN
           if(input_mode == S_RECTANGLE) then editor.rectangle(x, y) end
           if(input_mode == S_MENU) then
-		if(menu_init == true) then 
-		     menu_init = false
 		     local s= ui.sections[ui.focus]
         	     ui.button_focus.position = s.button.position
         	     ui.button_focus.opacity = 0
 		     animate_out_dropdown() 
+		     screen:grab_key_focus()
 		     input_mode = S_SELECT
-		end 
           elseif(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	       if(current_inspector == nil) then 
 		    if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then

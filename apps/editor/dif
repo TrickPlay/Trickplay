@@ -1,0 +1,83 @@
+177a178
+>     local menu_init 	= true
+320a322
+>     					    menu_init = true
+341,351c343,358
+< 				     for i, j in pairs (g.children) do 
+< 					if(j.extra.selected == true) then 
+< 						editor.n_selected(j) 
+< 					end 
+< 				     end 
+< 			    	     local s= ui.sections[ui.focus]
+<         		    	     ui.button_focus.position = s.button.position
+<         		    	     ui.button_focus.opacity = 255
+< 			    	     animate_in_dropdown() 
+< 				     input_mode = S_MENU
+< 			             end 
+---
+> 			    	     if(menu_init == true) then 
+> 			                menu_init = false
+> 			    		local s= ui.sections[ui.focus]
+>         		    		ui.button_focus.position = s.button.position
+>         		    		ui.button_focus.opacity = 0
+> 			    		animate_out_dropdown() 
+> 					input_mode = S_SELECT 
+> 				     else 
+> 			                menu_init = true
+> 			    		local s= ui.sections[ui.focus]
+>         		    		ui.button_focus.position = s.button.position
+>         		    		ui.button_focus.opacity = 255
+> 			    		animate_in_dropdown() 
+> 					input_mode = S_MENU
+> 			    	     end 
+> 			         end 
+363,366d369
+< 	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+< 		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+< 		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+<                				    end
+380,383d382
+< 	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+< 		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+< 		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+<                				    end
+397,400d395
+< 	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+< 		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+< 		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+<                				    end
+414,417d408
+< 	       				    if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+< 		     				local anchor_mark = screen:find_child(t_obj.name.."a_m")
+< 		     				anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+<                				    end
+448a440
+> 		       menu_init = true
+467a460,469
+> 	    	if(current_inspector == nil and (key == keys.Return or key == keys.Down 
+> 		   or key == keys.Left or key == keys.Right)) then 
+> 	             local s= ui.sections[ui.focus]
+>         	     ui.button_focus.position = s.button.position
+>         	     ui.button_focus.opacity = 255 
+> 	        else 
+> 		   local s= ui.sections[ui.focus]
+>         	   ui.button_focus.position = s.button.position
+>         	   ui.button_focus.opacity = 0
+> 	        end 
+525a528,529
+> 		if(menu_init == true) then 
+> 		     menu_init = false
+530d533
+< 		     screen:grab_key_focus()
+531a535
+> 		end 
+588,589d591
+< 	       actor.x =  x - dx 
+< 	       actor.y =  y - dy  
+591,594c593
+< 	       if (screen:find_child(actor.name.."a_m") ~= nil) then 
+< 		     local anchor_mark = screen:find_child(actor.name.."a_m")
+< 		     anchor_mark.position = {actor.x, actor.y, actor.z}
+<                end
+---
+> 	       actor.position = { x - dx , y - dy  }
