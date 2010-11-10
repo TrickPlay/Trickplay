@@ -62,13 +62,24 @@ TPContext::~TPContext()
 
 void TPContext::set( const char * key, const char * value )
 {
-    set( key, String( value ) );
+    g_assert( key );
+
+    if ( ! value )
+    {
+        config.erase( String( key ) );
+    }
+    else
+    {
+        set( key, String( value ) );
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::set( const char * key, int value )
 {
+    g_assert( key );
+
     std::stringstream str;
     str << value;
     set( key, str.str() );
@@ -78,12 +89,16 @@ void TPContext::set( const char * key, int value )
 
 void TPContext::set( const char * key, const String & value )
 {
+    g_assert( key );
+
     config[String( key )] = value;
 }
 //-----------------------------------------------------------------------------
 
 const char * TPContext::get( const char * key, const char * def )
 {
+    g_assert( key );
+
     StringMap::const_iterator it = config.find( String( key ) );
 
     if ( it == config.end() )
