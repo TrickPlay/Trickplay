@@ -175,6 +175,7 @@ local function build_ui( show_it )
         }
     end
 
+    local meun_init = true
 
     local function animate_in_dropdown( )
 
@@ -297,11 +298,11 @@ local function build_ui( show_it )
 	--[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
 	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
-        [ keys.o	] = function() animate_out_dropdown() editor.open() input_mode = S_SELECT end,
-        [ keys.s	] = function() animate_out_dropdown() editor.save(true) input_mode = S_SELECT end,
-        [ keys.a	] = function() animate_out_dropdown() editor.save(false) input_mode = S_SELECT end,
+        [ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.open()  end,
+        [ keys.s	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(true) end,
+        [ keys.a	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(false) end,
         [ keys.t	] = function() animate_out_dropdown() editor.text() input_mode = S_SELECT end,
-        [ keys.i	] = function() animate_out_dropdown() editor.image() input_mode = S_SELECT end,
+        [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.image() end,
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,

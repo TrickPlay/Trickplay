@@ -30,10 +30,10 @@ function( section )
 local dropdown_map =
 {
      ["NEW".."\t\t\t".."[N]"]   = function() editor.close() input_mode = S_SELECT end,
-     ["OPEN".."\t\t\t".."[O]"]   = function() editor.open() input_mode = S_SELECT end,
-     ["SAVE".."\t\t\t".."[S]"]   = function() editor.save(true) input_mode = S_SELECT end,
+     ["OPEN".."\t\t\t".."[O]"]   = function()input_mode = S_SELECT  editor.open() end,
+     ["SAVE".."\t\t\t".."[S]"]   = function() input_mode = S_SELECT  editor.save(true)end,
      ["QUIT".."\t\t\t".."[Q]"]   = function() exit() end,
-     ["SAVE AS".."\t\t\t".."[A]" ]  = function() editor.save(false) input_mode = S_SELECT end
+     ["SAVE AS".."\t\t\t".."[A]" ]  = function()input_mode = S_SELECT editor.save(false)  end
 }
 
     local function build_dropdown_ui()
@@ -99,20 +99,20 @@ local dropdown_map =
         
         f_open.extra.on_activate =
             function()
-		editor.open()
 		input_mode = S_SELECT
+		editor.open()
             end
         
         f_save.extra.on_activate =
             function()
-		editor.save(true)
 		input_mode = S_SELECT
+		editor.save(true)
             end
         
         f_view.extra.on_activate =
             function()
-		editor.save(false)
 		input_mode = S_SELECT
+		editor.save(false)
             end
         
         f_quit.extra.on_activate =

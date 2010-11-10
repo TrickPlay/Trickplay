@@ -29,9 +29,9 @@ function( section )
      	["UNDO".."\t\t\t".."[U]"]   = function() editor.undo() input_mode = S_SELECT end,
      	["REDO".."\t\t\t".."[E]"]   = function() editor.redo() input_mode = S_SELECT end,
      	["TEXT".."\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
-     	["IMAGE".."\t\t\t".."[I]"]   = function() editor.image() input_mode = S_SELECT end,
+     	["IMAGE".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
      	["RECTANGLE".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
-     	["VIDEO".."\t\t\t"..""]   = function() editor.video() input_mode = S_SELECT end,
+     	["VIDEO".."\t\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
      	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
      	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
      	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
@@ -127,8 +127,8 @@ function( section )
             end
         f_undo.extra.on_activate =
             function()
-		editor.undo()
 		input_mode = S_SELECT
+		editor.undo()
             end
         
         f_redo.extra.on_activate =
@@ -257,7 +257,7 @@ function( section )
 		return true -- hjk
             end
     
-        return true
+        --return true
     end
 
     ---------------------------------------------------------------------------
