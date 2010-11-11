@@ -449,12 +449,7 @@ echo "================================================================="
 echo "== Building libtpcore..."
 echo "================================================================="
 
-make -C ${HERE}/tp-build --no-print-directory
-   
-if [[ ! -f "${PREFIX}/lib/libtpcore.a" ]]
-then
-    cp ${HERE}/tp-build/engine/libtpcore.a "${PREFIX}/lib/libtpcore.a"
-fi
+make -C ${HERE}/tp-build --no-print-directory && cp ${HERE}/tp-build/engine/libtpcore.a "${PREFIX}/lib/libtpcore.a"
    
 #------------------------------------------------------------------------------
 # Build a test exe
