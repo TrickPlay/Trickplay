@@ -26,6 +26,20 @@ void Console::readline_handler( char * line )
 
 #endif
 
+
+static Debug_ON log( "CONSOLE" );
+
+Console * Console::make( TPContext * context )
+{
+#ifdef TP_PRODUCTION
+    return 0;
+#else
+
+    return new Console( context , context->get_bool( TP_CONSOLE_ENABLED, TP_CONSOLE_ENABLED_DEFAULT ),
+                           context->get_int( TP_TELNET_CONSOLE_PORT, TP_TELNET_CONSOLE_PORT_DEFAULT ) );
+#endif
+}
+
 Console::Console( TPContext * ctx, bool read_stdin, int port )
     :
     context( ctx ),
@@ -70,13 +84,13 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
         if ( error )
         {
             delete new_server;
-            g_warning( "FAILED TO START TELNET CONSOLE ON PORT %d : %s", port, error->message );
+            log( "FAILED TO START ON PORT %d : %s", port, error->message );
             g_clear_error( &error );
         }
         else
         {
             server.reset( new_server );
-            g_info( "TELNET CONSOLE LISTENING ON PORT %d", server->get_port() );
+            log( "READY ON PORT %d", server->get_port() );
         }
     }
 
@@ -219,7 +233,7 @@ gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gp
 void Console::connection_accepted( gpointer connection, const char * remote_address )
 {
     server->write_printf( connection, "WELCOME TO TrickPlay %d.%d.%d\n", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
-    g_debug( "ACCEPTED CONSOLE CONNECTION FROM %s", remote_address );
+    log( "ACCEPTED CONNECTION FROM %s", remote_address );
 }
 
 void Console::connection_data_received( gpointer connection, const char * data , gsize )

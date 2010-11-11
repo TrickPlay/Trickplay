@@ -223,7 +223,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
 # log domain for glib log functions
 #------------------------------------------------------------------------------
 
-add_definitions( -DG_LOG_DOMAIN="TrickPlay" ) 
+add_definitions( -DG_LOG_DOMAIN="tp" ) 
 
 #------------------------------------------------------------------------------
 # Add a -D for the clutter backend

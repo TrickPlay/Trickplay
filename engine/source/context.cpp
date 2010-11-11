@@ -492,7 +492,7 @@ void TPContext::setup_fonts()
     {
         FcConfigAppFontClear( config );
 
-        g_info( "READING FONTS FROM '%s'", fonts_path );
+        g_debug( "READING FONTS FROM '%s'", fonts_path );
 
         // This adds all the fonts in the directory to the cache...it can take
         // a long time the first time around. Once the cache exists, it will
@@ -511,7 +511,7 @@ void TPContext::setup_fonts()
 
             config = NULL;
 
-            g_info( "FONT CONFIGURATION COMPLETE" );
+            g_debug( "FONT CONFIGURATION COMPLETE" );
         }
     }
 
@@ -778,16 +778,12 @@ int TPContext::run()
     //.........................................................................
     // Start the console
 
-#ifndef TP_PRODUCTION
+    console = Console::make( this );
 
-    g_info( "STARTING CONSOLE..." );
-
-    console = new Console( this,
-                           get_bool( TP_CONSOLE_ENABLED, TP_CONSOLE_ENABLED_DEFAULT ),
-                           get_int( TP_TELNET_CONSOLE_PORT, TP_TELNET_CONSOLE_PORT_DEFAULT ) );
-    console->add_command_handler( console_command_handler, this );
-
-#endif
+    if ( console )
+    {
+        console->add_command_handler( console_command_handler, this );
+    }
 
     //.........................................................................
     // Set default size and color for the stage
@@ -1860,34 +1856,51 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
 
     const char * level = "OTHER";
 
+    const char * color_start = "";
+    const char * color_end = "\033[0m";
+
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
+        color_start = "\033[31m";
         level = "ERROR";
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
+        color_start = "\033[31m";
         level = "CRITICAL";
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
+        color_start = "\033[33m";
         level = "WARNING";
     }
     else if ( log_level & G_LOG_LEVEL_MESSAGE )
     {
+        color_start = "\033[36m";
         level = "MESSAGE";
     }
     else if ( log_level & G_LOG_LEVEL_INFO )
     {
+        color_start = "\33[32m";
         level = "INFO";
     }
     else if ( log_level & G_LOG_LEVEL_DEBUG )
     {
+        color_start = "\33[37m";
         level = "DEBUG";
     }
 
-    return g_strdup_printf( "%p %2.2d:%2.2d:%2.2d:%3.3lu %s %s %s\n" ,
+#if 0 // Set to 1 to disable colors
+    color_start = "";
+    color_end = "";
+#endif
+
+    return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
+                            log_domain,
                             g_thread_self() ,
-                            hour , min , sec , ms , level , log_domain , message );
+                            hour , min , sec , ms ,
+                            color_start , level , color_end ,
+                            message );
 }
 
 //-----------------------------------------------------------------------------
