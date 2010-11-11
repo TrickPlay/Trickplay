@@ -228,6 +228,8 @@ typedef struct TPContext TPContext;
 #define TP_LIRC_ENABLED                 "lirc_enabled"
 #define TP_LIRC_UDS                     "lirc_uds"
 #define TP_LIRC_REPEAT                  "lirc_repeat"
+#define TP_APP_PUSH_ENABLED             "app_push_enabled"
+#define TP_APP_PUSH_PORT                "app_push_port"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

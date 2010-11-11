@@ -8,6 +8,7 @@
 #include "network.h"
 #include "lb.h"
 #include "profiler.h"
+#include "json.h"
 
 //-----------------------------------------------------------------------------
 #define APP_TABLE_NAME          "app"
@@ -132,7 +133,27 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
 
         if ( result )
         {
-            throw String( "FAILED TO PARSE APP METADATA : " ) + lua_tostring( L, -1 );
+            // Parsing it as Lua failed, try to parse it as JSON.
+
+            if ( JSON::parse( L , data ) )
+            {
+                if ( ! lua_istable( L , -1 ) )
+                {
+                    lua_pop( L , 1 );
+
+                    throw String( "FAILED TO PARSE APP METADATA : " ) + lua_tostring( L , -1 );
+                }
+
+                lua_setglobal( L , APP_TABLE_NAME );
+
+                lua_pop( L , 1 );
+            }
+            else
+            {
+                lua_pop( L , 1 );
+
+                throw String( "FAILED TO PARSE APP METADATA : " ) + lua_tostring( L, -1 );
+            }
         }
 
         // Look for the 'app' global

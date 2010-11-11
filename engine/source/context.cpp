@@ -24,6 +24,7 @@
 #include "installer.h"
 #include "versions.h"
 #include "controller_lirc.h"
+#include "app_push_server.h"
 
 //-----------------------------------------------------------------------------
 
@@ -39,6 +40,8 @@ TPContext::TPContext()
     is_running( false ),
     sysdb( NULL ),
     controller_server( NULL ),
+    controller_lirc( NULL ),
+    app_push_server( NULL ),
     console( NULL ),
     downloads( NULL ),
     installer( NULL ),
@@ -62,13 +65,24 @@ TPContext::~TPContext()
 
 void TPContext::set( const char * key, const char * value )
 {
-    set( key, String( value ) );
+    g_assert( key );
+
+    if ( ! value )
+    {
+        config.erase( String( key ) );
+    }
+    else
+    {
+        set( key, String( value ) );
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::set( const char * key, int value )
 {
+    g_assert( key );
+
     std::stringstream str;
     str << value;
     set( key, str.str() );
@@ -78,12 +92,16 @@ void TPContext::set( const char * key, int value )
 
 void TPContext::set( const char * key, const String & value )
 {
+    g_assert( key );
+
     config[String( key )] = value;
 }
 //-----------------------------------------------------------------------------
 
 const char * TPContext::get( const char * key, const char * def )
 {
+    g_assert( key );
+
     StringMap::const_iterator it = config.find( String( key ) );
 
     if ( it == config.end() )
@@ -202,6 +220,19 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         extra = c;
 
         g_free( c );
+    }
+    else if ( CLUTTER_IS_CLONE( actor ) )
+    {
+        ClutterActor * other = clutter_clone_get_source( CLUTTER_CLONE( actor ) );
+
+        if ( other )
+        {
+            gchar * c = g_strdup_printf( "[source=%u]" , clutter_actor_get_gid( other ) );
+
+            extra = c;
+
+            g_free( c );
+        }
     }
 
     String details;
@@ -583,7 +614,7 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
-    if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_Escape )
+    if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
     {
         ( ( TPContext * )context )->close_app();
 
@@ -730,6 +761,10 @@ int TPContext::run()
     // LIRC controller
 
     //controller_lirc = ControllerLIRC::make( this );
+
+    //.........................................................................
+
+    app_push_server = AppPushServer::make( this );
 
     //.........................................................................
     // Create the downloads
@@ -880,6 +915,15 @@ int TPContext::run()
 
             notify( TP_NOTIFICATION_APP_CLOSED );
         }
+    }
+
+    //.....................................................................
+
+    if ( app_push_server )
+    {
+        delete app_push_server;
+
+        app_push_server = 0;
     }
 
     //.....................................................................
@@ -1565,6 +1609,8 @@ void TPContext::load_external_configuration()
         TP_LIRC_ENABLED,
         TP_LIRC_UDS,
         TP_LIRC_REPEAT,
+        TP_APP_PUSH_ENABLED,
+        TP_APP_PUSH_PORT,
 
         NULL
     };
