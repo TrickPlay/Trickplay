@@ -163,6 +163,10 @@ reset_keys()
             if view:preload_front() == false then
 				photo_index = photo_index - dir[1]
 			end
+		if view.timer_is_running then
+			view.timer:stop()
+			view.timer:start()
+		end
         --moving back
         elseif dir == Directions.LEFT then
             --toss the end of the off_screen_list
@@ -171,6 +175,10 @@ reset_keys()
 					photo_index = photo_index - dir[1]
 				end
             end
+		if view.timer_is_running then
+			view.timer:stop()
+			view.timer:start()
+		end
         end 
         self:get_model():notify()
     end
