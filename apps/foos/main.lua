@@ -1,4 +1,4 @@
-print = function() end
+--print = function() end
 Directions = {
    RIGHT = { 1, 0},
    LEFT  = {-1, 0},
