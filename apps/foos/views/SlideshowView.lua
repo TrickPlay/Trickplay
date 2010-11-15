@@ -1459,16 +1459,16 @@ mosaic_timeline:start()
             attempt = attempt + 1
 	        local photo_i    = view:get_controller():get_photo_index()
 
-			local pic, title, auth 
-			pic, title, auth = sources[model.fp_1D_index]:get_photos_at(
+			local pic_m, title, auth, pic_l
+			pic, title, auth, pic_l = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
 			license.text = title.." "..auth
 			license.x = screen.w - license.w
-			if pic == nil or attempt == 5 or index < photo_i - 5 then
+			if pic_m == nil or attempt == 5 or index < photo_i - 5 then
 				
 				return
 			end
-            if pic == "" then
+            if pic_m == "" then
                 if group ~= nil then
                     local timeout = Timer{ interval = 4000 }
 
@@ -1484,10 +1484,10 @@ mosaic_timeline:start()
                 return
             end
 			outstanding_reqs = outstanding_reqs + 1
-			print(index,outstanding_reqs)
+			print(index,outstanding_reqs, pic_l)
             local image = Image{
                 name      = "slide",
-                src       = pic,
+                src       = pic_m,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil
@@ -1498,6 +1498,7 @@ mosaic_timeline:start()
                     --throw up the placeholder
                     local style_i2 = view:get_controller():get_style_index()
                     if failed then
+
                         print("picture loading failed")
                         --loaded the placeholder for failed pics
                         local placeholder = Group{}
@@ -1516,6 +1517,7 @@ mosaic_timeline:start()
                         })
                         on_screen_prep[view.styles[style_i2] ](placeholder,group)
                     else
+			print("worked???")
                         --view.on_screen_list[rel_i] = Group {z = 500}
                         timeline:stop()
                         group:clear()
@@ -1553,13 +1555,13 @@ mosaic_timeline:start()
                                                   #view.on_screen_list +1-- + 2
         --print("preload back",index)
         local function load_pic(timeline,group)
-			local pic, title, auth 
-			pic, title, auth = sources[model.fp_1D_index]:get_photos_at(
+			local pic_m, title, auth, pic_l
+			pic_m, title, auth,pic_l = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
 			license.text = title.." "..auth
 			license.x = screen.w - license.w
 
-            if pic == "" then
+            if pic_m == "" then
                 local timeout = Timer{ interval = 4000 }
 
                 function timeout:on_timer()
@@ -1574,7 +1576,7 @@ mosaic_timeline:start()
 print(index,outstanding_reqs)
             local image = Image{
                 name      = "slide",
-				src       = pic,
+				src       = pic_l,
                 async     = true, 
                 on_loaded = function(img,failed)
                     img.on_loaded = nil

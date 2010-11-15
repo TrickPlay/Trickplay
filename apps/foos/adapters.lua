@@ -124,7 +124,7 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 	--save the URLEncoded search term
 	local search = string.gsub(search_term,"%%20"," ")
 	--keeps track of current search page (50 results per page)
-    local page_num = 1
+	local page_num = 1
 	--saved img urls from the search queries
 	adapter.photo_list = {}
 	--an attempt to prevent the user from flooding Flickr with requests
@@ -208,8 +208,8 @@ print("response",num_retrys)
 					end
 					return
 				end
-print("here")
 				--Otherwise, grab the URLs
+				--dumptable( data.photos.photo )
 				for i , photo in ipairs( data.photos.photo ) do
 					adapter.photo_list[(page-1)*50 +i]= photo
 				end
@@ -226,12 +226,12 @@ print("here")
 	end
 	function adapter:get_photos_at(i,thumb)
 		local lic_tit, lic_auth
-	--	i=i+1
+		--i=i+1
 		if  adapter.photo_list[i] == nil then
 			self:get_interesting_photos(math.ceil(i/50))
 
 			return "","",""
-        end
+		end
 		if i == #adapter.photo_list -30 then
 			page_num = page_num + 1
 			self:get_interesting_photos()
@@ -255,7 +255,8 @@ local lg_img = adapter.photo_list[i].url_m
 			return lg_img, lic_tit, lic_auth
 		end
 --]]
-		return adapter.photo_list[i].url_m,  lic_tit, lic_auth
+local l = string.gsub( adapter.photo_list[i].url_m , "(.*)%.([^%.]*)$" , "%1_b.%2" , 1 )
+		return adapter.photo_list[i].url_m,  lic_tit, lic_auth, l
 	end
 end)
 
