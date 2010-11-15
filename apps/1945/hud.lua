@@ -17,7 +17,7 @@ topbar:add(
     --]]
 	Text{
 		name = "SCORE",
-		text = "Current Score:",
+		text = "Score:",
 		font=my_font,--"Highway Gothic Wide Bold 36px",
 		color="FFFFFF",
 		y = 20

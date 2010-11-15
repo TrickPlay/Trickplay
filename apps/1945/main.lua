@@ -129,6 +129,22 @@ local keys = {
             add_to_render_list(levels[state.curr_level])
             
         end,
+        [keys["3"]] = function()
+            
+            out_splash__in_hud()
+            my_plane.bombing_mode = true
+            
+            state.curr_mode  = "CAMPAIGN"
+            state.curr_level = 3
+            
+            add_to_render_list(my_plane)
+            remove_from_render_list(lvlbg[1])
+            add_to_render_list(lvlbg[3])
+            my_plane.shadow.opacity = 255
+            my_plane.bombing_crosshair.opacity = 255
+            add_to_render_list(levels[state.curr_level])
+            
+        end,
     },
     ["TEST_MODE"] =
     {
@@ -154,12 +170,18 @@ local keys = {
         [keys.u] = function()
             add_to_render_list(enemies.turret(),500,-100)
         end,
+        [keys.i] = function()
+            formations.hor_row_tanks(1,-200,3,150)
+        end,
+        [keys.o] = function()
+            formations.vert_row_tanks(200,-1,3,150)
+        end,
         --bosses
         [keys.m] = function()
             formations.zepp_boss(900)
         end,
         [keys.n] = function()
-            add_to_render_list(enemies.battleship(),500,-100, 40,true)
+            add_to_render_list(enemies.battleship(),500,300, 40,true)
         end,
         --powerups
         [keys.z] = function()
@@ -184,13 +206,19 @@ local keys = {
             end
         end,
         [keys["1"]] = function()
-            my_plane.firing_powerup=1
+            remove_from_render_list(lvlbg[state.curr_level])
+            state.curr_level = 1
+            add_to_render_list(lvlbg[state.curr_level])
         end,
         [keys["2"]] = function()
-            my_plane.firing_powerup=2
+            remove_from_render_list(lvlbg[state.curr_level])
+            state.curr_level = 2
+            add_to_render_list(lvlbg[state.curr_level])
         end,
         [keys["3"]]= function()
-            my_plane.firing_powerup=3
+            remove_from_render_list(lvlbg[state.curr_level])
+            state.curr_level = 3
+            add_to_render_list(lvlbg[state.curr_level])
         end,
         [keys["4"]] = function()
             my_plane.firing_powerup=4
@@ -248,6 +276,7 @@ local keys = {
         end
     }
 }
+
 local press
 local second_press
 --moves through all the items in the render list

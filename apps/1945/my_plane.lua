@@ -163,10 +163,22 @@ my_plane =
     
     bombing_mode = false,
     
-    bombing_crosshair = Rectangle{w=5,h=5,color="FF0000",y=-100,opacity=0},
+    bombing_crosshair_strip =
+        Clone{
+            source=imgs.target,
+            --x=-imgs.target.w/2,
+            --anchor_point={imgs.target.w/4,imgs.target.h/2},
+            --y=-100
+        },
+    bombing_crosshair =
+        Group{
+            y=-100,
+            anchor_point={imgs.target.w/4,imgs.target.h/2},
+            clip={0,0,imgs.target.w/2,imgs.target.h}
+        },
     
     shadow = Clone{source=imgs.player_shadow,opacity=0, x=100,y=30},
-    
+        
     prop =
     {
         l = Clone{source=imgs.my_prop},
@@ -204,6 +216,7 @@ my_plane =
     
 
     setup = function( self )
+            self.bombing_crosshair:add(self.bombing_crosshair_strip)
         	self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
             self.num_prop_frames = 3
@@ -300,10 +313,10 @@ my_plane =
                 self.h_speed = 0
             else
                 if self.h_speed > 0 then
-                    self.h_speed =  self.h_speed - ( 2*self.friction * seconds )
+                    self.h_speed =  self.h_speed - ( 3/2*self.friction * seconds )
                     if self.h_speed < 0 then self.h_speed = 0 end
                 elseif self.h_speed < 0 then
-                    self.h_speed =  self.h_speed + ( 2*self.friction * seconds )
+                    self.h_speed =  self.h_speed + ( 3/2*self.friction * seconds )
                     if self.h_speed > 0 then self.h_speed = 0 end
                 end
             end
@@ -324,10 +337,10 @@ my_plane =
                 
             else
                 if self.v_speed > 0 then
-                    self.v_speed =  self.v_speed - ( 2*self.friction * seconds )
+                    self.v_speed =  self.v_speed - ( 3/2*self.friction * seconds )
                     if self.v_speed < 0 then self.v_speed = 0 end
                 elseif self.v_speed < 0 then
-                    self.v_speed =  self.v_speed + ( 2*self.friction * seconds )
+                    self.v_speed =  self.v_speed + ( 3/2*self.friction * seconds )
                     if self.v_speed > 0 then self.v_speed = 0 end
                 end
             end
@@ -402,7 +415,15 @@ my_plane =
                             self.image:unparent()
                         
                         elseif self.time > self.dur then
-                        
+                            table.insert(g_guys_land,
+                                {
+                                    obj = self,
+                                    x1  = self.image.x-self.img_w/2,
+                                    x2  = self.image.x+self.img_w/2,
+                                    y1  = self.image.y-self.img_h/2,
+                                    y2  = self.image.y+self.img_h/2,
+                                }
+                            )
                             --[[
                             add_to_collision_list(
                                 self ,
@@ -463,6 +484,7 @@ my_plane =
 					
 				remove_from_render_list( self )
 				self.group:unparent()
+                --[[
                             table.insert(g_guys_land,
                                 {
                                     obj = self,
@@ -472,7 +494,7 @@ my_plane =
                                     y2  = self.group.y+self.img_h/2,
                                 }
                             )
-					
+					--]]
 			else
 				local frame = math.floor( self.time /
 					( self.duration / 6 ) )
@@ -902,36 +924,52 @@ redo_score_text()
                 --    print("double right")
                 --    self.h_speed = self.max_h_speed
                 --else
+                    if self.h_speed < 0 then self.h_speed = 0 
+                    elseif self.h_speed == 0 then
+                        self.h_speed = self.h_speed + self.speed_bump/2
+                    else
                     self.h_speed = clamp( self.h_speed + self.speed_bump ,
                         -self.max_h_speed , self.max_h_speed )
-                --end
+                end
                 
             elseif key == keys.Left then
                 --if second_key == keys.Left then
                 --    print("double left")
                 --    self.h_speed = -self.max_h_speed
                 --else
+                if self.h_speed > 0 then self.h_speed = 0
+                elseif self.h_speed == 0 then
+                        self.h_speed = self.h_speed - self.speed_bump/2
+                else
                     self.h_speed = clamp( self.h_speed - self.speed_bump ,
                         -self.max_h_speed , self.max_h_speed )
-                --end
+                end
                 
             elseif key == keys.Down then
                 --if second_key == keys.Down then
                 --    print("double down")
                 --    self.v_speed = self.max_v_speed
                 --else
+                if self.v_speed < 0 then self.v_speed = 0
+                elseif self.v_speed == 0 then
+                    self.v_speed = self.v_speed + self.speed_bump/2
+                else
                     self.v_speed = clamp( self.v_speed + self.speed_bump ,
                         -self.max_v_speed , self.max_v_speed )
-                --end
+                end
                 
             elseif key == keys.Up then
                 --if second_key == keys.Up then
                 --  print("double up")
                 --    self.v_speed = -self.max_v_speed
                 --else
+                if self.v_speed > 0 then self.v_speed = 0
+                elseif self.v_speed == 0 then
+                    self.v_speed = self.v_speed - self.speed_bump/2
+                else
                     self.v_speed = clamp( self.v_speed - self.speed_bump ,
                         -self.max_v_speed , self.max_v_speed )
-                --end
+                end
             
             elseif key == keys.Return then
             	local shoot = {
@@ -974,7 +1012,7 @@ redo_score_text()
 powerups =
 {
     guns = function(xxx) return {
-        image = Rectangle{w=60,h=60,color="FFFF00",},
+        image = Clone{source=imgs.guns},--Rectangle{w=60,h=60,color="FFFF00",},
         speed = 50,
         setup = function(self)
             self.image.position = {xxx,-self.image.h}
@@ -1003,7 +1041,7 @@ powerups =
         end,
     } end,
     health = function(xxx) return {
-        image = Rectangle{w=60,h=60,color="FFFFFF",},
+        image = Clone{source=imgs.health},--Rectangle{w=60,h=60,color="FFFFFF",},
         speed = 50,
         setup = function(self)
             self.image.position = {xxx,-self.image.h}
