@@ -1,0 +1,29 @@
+Index: clutter-1.0.8/clutter/cogl/gles/cogl-gles2-wrapper.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/cogl/gles/cogl-gles2-wrapper.c	2010-11-11 17:04:17.806287001 +0900
++++ clutter-1.0.8/clutter/cogl/gles/cogl-gles2-wrapper.c	2010-11-11 17:05:24.390287750 +0900
+@@ -1274,6 +1274,8 @@
+ {
+   cogl_wrap_prepare_for_draw ();
+ 
++  printf("%s]: mode=%d, count=%d, type=%d, indices=%p\n",__FUNCTION__,mode,count,type,indices);
++
+   glDrawElements (mode, count, type, indices);
+ }
+ 
+Index: clutter-1.0.8/clutter/cogl/common/cogl-primitives.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/cogl/common/cogl-primitives.c	2010-11-11 17:08:49.014286983 +0900
++++ clutter-1.0.8/clutter/cogl/common/cogl-primitives.c	2010-11-11 17:15:57.286287018 +0900
+@@ -211,6 +211,11 @@
+   if (batch_len > 1)
+     {
+       int indices_offset = (state->vertex_offset / 4) * 6;
++      printf("%s]: vertex_offset: %d, batch_len: %d, type: %p, type_size: %d\n",__FUNCTION__,
++						state->vertex_offset,
++						batch_len,
++						state->indices->type,
++						state->indices_type_size);
+       GE (glDrawElements (GL_TRIANGLES,
+                           6 * batch_len,
+                           state->indices->type,

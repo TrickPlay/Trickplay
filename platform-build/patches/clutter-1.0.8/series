@@ -1,3 +1,4 @@
-p1.patch
-p2.patch
+custom-egl-initialization.patch
+dont-build-tests.patch
 remove-eglwait.patch
+gles-blending-bug.patch

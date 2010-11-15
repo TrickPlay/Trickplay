@@ -1,0 +1,13 @@
+Index: clutter-1.0.8/clutter/cogl/common/cogl-material.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/cogl/common/cogl-material.c	2010-11-15 16:22:59.400001513 +0900
++++ clutter-1.0.8/clutter/cogl/common/cogl-material.c	2010-11-15 16:23:14.676001486 +0900
+@@ -109,7 +109,7 @@
+   material->blend_constant[2] = 0;
+   material->blend_constant[3] = 0;
+ #endif
+-  material->blend_src_factor_rgb = GL_ONE;
++  material->blend_src_factor_rgb = GL_SRC_ALPHA;
+   material->blend_dst_factor_rgb = GL_ONE_MINUS_SRC_ALPHA;
+   material->flags |= COGL_MATERIAL_FLAG_DEFAULT_BLEND;
+ 
