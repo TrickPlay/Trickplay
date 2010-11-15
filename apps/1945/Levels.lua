@@ -498,6 +498,83 @@ levels =
 			remove_from_render_list( self)
 			add_to_render_list( lvlcomplete )
 		end
+    },
+    {
+    	speed          = 80,   --px/s
+		level_dist     = 3000, --px
+		dist_travelled = 0,
+		launch_index   = 1,
+		bg             = lvlbg[3],
+        offset         = {},
+        index          = {},
+        add_list       = {},
+        wait           = {},
+        w_q_index      = {},
+        
+		setup = function(self)
+            
+            --each func in the list returns the amount of time to wait before
+            --calling the next one
+            self.bg:append_to_queue(
+                {
+                    {Clone{source=imgs.road_diagonal,x=300-2*imgs.road_diagonal.w}},--y_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
+                    {Clone{source=imgs.road_diagonal,x=300-imgs.road_diagonal.w,x_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
+                    {Clone{source=imgs.road_diagonal,x=300-imgs.road_diagonal.w,y_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
+                    {Clone{source=imgs.road_diagonal,x=300-imgs.road_diagonal.w,x_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
+                    {Clone{source=imgs.road_diagonal,x=300,y_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
+                    {Clone{source=imgs.road_straight,x=400}},
+                    {Clone{source=imgs.road_straight,x=300}},
+                    {Clone{source=imgs.road_straight,x=400}},
+                    {Clone{source=imgs.road_straight,x=300}},
+                    {Clone{source=imgs.road_straight,x=400}},
+                    {Clone{source=imgs.road_straight,x=300}},
+                    {Clone{source=imgs.road_straight,x=400}},
+                    {Clone{source=imgs.road_straight,x=300}},
+                    {Clone{source=imgs.road_straight,x=400}},
+                    {Clone{source=imgs.road_straight,x=300}},
+                    {Clone{source=imgs.road_straight,x=400}},
+                }
+            )
+
+			self.dist_travelled = 0
+		end,
+		render = function(self,seconds)
+			--if player is dead
+
+
+			local curr_dist = self.dist_travelled + self.speed*seconds
+--[[
+            for i = 1,#self.next_queues do
+                --if you havent reached the end of the queue
+                if self.w_q_index[i] <= #self.next_queues[i] then
+                    self.wait[i] = self.wait[i] - seconds
+                    --if your not still waiting
+                    if self.wait[i] <=0 then
+                        local t = self.next_queues[i][self.w_q_index[i] ].p
+                        t[#t+1] = self.wait[i]
+                        --call the next function in the wait queue
+                        --it returns the next amount to wait by
+                        local w = self.next_queues[i][self.w_q_index[i] ].f(
+                            unpack(t)
+                        )
+                        --print(w,self.wait[i])
+                        self.w_q_index[i] = self.w_q_index[i] + 1
+                        if w ~= nil then self.wait[i] = w end
+                    else
+                    end
+                end
+            end
+--]]
+
+			self.dist_travelled = curr_dist
+	--		if self.dist_travelled > self.level_dist then
+	--			remove_from_render_list( self )
+	--		end
+		end,
+		level_complete = function(self)
+			remove_from_render_list( self)
+			add_to_render_list( lvlcomplete )
+		end
     }
 }
 levels[0] = {level_complete = function(self) print("Level 0 has no level_complete function") end }

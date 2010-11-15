@@ -2,6 +2,9 @@
 
 
 lvlbg = {
+
+
+--Level 1
 {
     speed         = 80, -- pixels per second
     strips        = {},
@@ -113,6 +116,10 @@ lvlbg = {
 
     end,        
 },
+
+
+
+--Level 2
 {
     speed         = 80, -- pixels per second
     strips        = {},
@@ -303,6 +310,136 @@ lvlbg = {
                 end
             end
     end,        
-}
+},
+
+
+
+--Level 3
+{
+    speed         = 80, -- pixels per second
+    strips        = {},
+    top_strip     = 0,
+    doodad_frames = {},
+    doodad_h      = 128,--imgs.dirt_full.h,
+    strip_h       = imgs.grass1.h,
+    top_doodad    = 0,
+    q_i           = 0,
+    append_i      = 0,
+    queues        = {},
+    setup         = function( self )
+        --base water strip
+        self.base_tile = imgs.grass1
+        self.base_tile:set{ w = screen_w, tile = { true  , false } }
+        for i = 1 , math.ceil( screen_h / self.base_tile.h ) + 1 do
+            table.insert( self.strips , Clone{ source = self.base_tile } )
+        end
+        
+        --set up the grass strips
+        local top = - ( self.base_tile.h  )
+        self.top_strip = top
+        for _ , strip in ipairs( self.strips ) do
+            strip.position = { 0 , top }
+            top = top + self.base_tile.h - 1
+            layers.ground:add( strip )
+        end
+        
+        local g
+        --setup the doodad frames
+        self.top_doodad = -self.doodad_h+1
+        for i = 1, math.ceil(screen_h/self.doodad_h)+1 do
+            g   =  Group{y=(i-2)*(self.doodad_h-1)}
+            table.insert( self.doodad_frames , g)
+            layers.land_doodads_1:add(g)
+        end
+    end,
+    append_to_queue = function(self,q)
+        
+        for i = 1,   #q do
+            
+            if  self.queues[self.append_i+i] == nil then
+                self.queues[self.append_i+i] = {}
+            end
+            for j = 1, #q[i] do
+                table.insert(self.queues[self.append_i+i], q[i][j])
+            end
+        end
+        
+    end,
+    empty_stretch = function(self,len,delay)
+        return imgs["dock_1_1"].h*len/self.speed + delay
+    end,
+    add_stretch = function(self,type,side,len,delay)
+        local c
+        
+        for i = 1,len do
+            c = Clone {source =  imgs["dock_"..type.."_1"]}
+            if side == 1 then
+                c.y_rotation = {180,0,0}
+                c.x = imgs["dock_"..type.."_1"].w  
+            elseif side == -1 then
+                c.x = screen_w - imgs["dock_"..type.."_1"].w 
+            else
+                error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+            end
+            if self.queues[self.q_i+i] == nil then self.queues[self.q_i+i] = {} end
+            table.insert(self.queues[self.q_i+i],c)
+        end
+        
+        return self.doodad_h*len/self.speed + delay
+    end,
+
+    render = function( self , seconds )
+            
+            local dy   = self.speed * seconds
+            
+            self.top_strip  = self.top_strip  + dy
+            self.top_doodad = self.top_doodad + dy
+            
+            --reposition all the water strips
+            for _ , strip in ipairs( self.strips ) do
+                strip.y = strip.y + dy
+                --if dropped below the bottom of the screen move it to the top
+                if strip.y > screen_h then
+                    strip.y    = self.top_strip - self.strip_h+1--strip.y - screen.h - strip.h
+                    self.top_strip = strip.y
+                end
+            end
+            
+            --print("next")
+            --reposition all the doodads
+            for _ , frame in ipairs( self.doodad_frames ) do
+                frame.y = frame.y + dy
+                --print(frame.y)
+                
+                --if dropped below the bottom of the screen...
+                if frame.y > screen_h then
+                    
+                    --move it to the top
+                    frame.y = self.top_doodad - self.doodad_h+1--frame.y - screen.h - self.doodad_h  
+                    self.top_doodad = frame.y
+                    
+                    --clear out the frame
+                    frame:clear()
+                    self.queues[self.q_i] = nil
+                    
+                    --update the position
+                    self.q_i = self.q_i + 1
+                    if self.q_i >= self.append_i then
+                        self.append_i = self.q_i + 1
+                    end
+                    
+                    print("inc",self.q_i,frame.y)
+                    
+                    --load the next doodads
+                    if self.queues[self.q_i] ~= nil then
+                        for _,new_child in ipairs(self.queues[self.q_i]) do
+                            frame:add(new_child)
+                        end
+                    end
+                    
+                end
+            end
+    end,        
+},
 }
 

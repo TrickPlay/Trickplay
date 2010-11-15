@@ -58,6 +58,7 @@ imgs =
     --BACKGROUND/SCENERY/LEVEL OBJECTS/ETC
     water1          = Image{ src = "assets/lvls/bg_tiles/water1.png" },
     water2          = Image{ src = "assets/lvls/bg_tiles/water2.png" },
+    grass1          = Image{ src = "assets/lvls/bg_tiles/grass1.png"},
     --LVL 1
     island1         = Image{ src = "assets/lvls/islands/island1.png" },
     island2         = Image{ src = "assets/lvls/islands/island2.png" },
@@ -80,6 +81,13 @@ imgs =
     dock_2_5        = Image{ src = "assets/lvls/harbor/harbor_2_5.png"},
     dock_2_6        = Image{ src = "assets/lvls/harbor/harbor_2_6.png"},
     dock_2_7        = Image{ src = "assets/lvls/harbor/harbor_2_7.png"},
+    --LVL3
+    dirt_full       = Image{ src = "assets/lvls/bg_tiles/dirt1.png"},
+    dirt_half       = Image{ src = "assets/lvls/bg_tiles/dirt2.png"},
+    dirt_diag_big   = Image{ src = "assets/lvls/bg_tiles/dirt3.png"},
+    dirt_diag_sm    = Image{ src = "assets/lvls/bg_tiles/dirt4.png"},
+    road_straight   = Image{ src = "assets/lvls/bg_tiles/road1.png"},
+    road_diagonal   = Image{ src = "assets/lvls/bg_tiles/road2.png"},
     
     --PLAYER ASSETS
     my_plane_strip  = Image{ src = "assets/player/player_strip.png" },
@@ -88,7 +96,10 @@ imgs =
     life            = Image{ src = "assets/player/life.png"},
     my_shadow       = Image{ src = "assets/player/player_shadow.png"},
     my_prop         = Image{ src = "assets/player/player_prop.png"},
-    engine_fire     = Image{ src = "assets/fx/engine-fire.png"},
+    target          = Image{ src = "assets/player/target_strip.png"},
+    --POWERUPS
+    health          = Image{ src="assets/player/health.png"},
+    guns            = Image{ src="assets/player/2xfire.png"},
 
     --EXPLOSIONS
     explosion1      = Image{ src = "assets/fx/explosion1_strip6.png" },
@@ -101,12 +112,14 @@ imgs =
     
     --BATTLESHIP ASSETS
     b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
-    --[[
-    bow_wake_1      = Image{ src = "assets/enemies/b_ship/bow_wake1.png"},
-    bow_wake_2      = Image{ src = "assets/enemies/b_ship/bow_wake2.png"},
-    bow_wake_3      = Image{ src = "assets/enemies/b_ship/bow_wake3.png"},
-    bow_wake_4      = Image{ src = "assets/enemies/b_ship/bow_wake4.png"},
+    ---[[
+    bbow_wake_1      = Image{ src = "assets/enemies/b_ship/bow_wake1.png"},
+    bbow_wake_2      = Image{ src = "assets/enemies/b_ship/bow_wake2.png"},
+    bbow_wake_3      = Image{ src = "assets/enemies/b_ship/bow_wake3.png"},
+    bbow_wake_4      = Image{ src = "assets/enemies/b_ship/bow_wake4.png"},
     --]]
+    laminar         = Image{ src = "assets/enemies/b_ship/bship_laminar.png"},
+
     bow_wake_1      = Image{ src = "assets/enemies/b_ship/bw1.png"},
     bow_wake_2      = Image{ src = "assets/enemies/b_ship/bw2.png"},
     bow_wake_3      = Image{ src = "assets/enemies/b_ship/bw3.png"},
@@ -141,6 +154,12 @@ imgs =
     z_d_6           = Image{ src = "assets/enemies/zepp/zep_dmg6.png"},
     z_d_7           = Image{ src = "assets/enemies/zepp/zep_dmg7.png"},
     z_d_e           = Image{ src = "assets/enemies/zepp/zep_dmg_engine.png"},
+    engine_fire     = Image{ src = "assets/fx/engine-fire.png"},
+
+    --TANK ASSETS
+    tank_strip      = Image{ src = "assets/enemies/tank/flaktank.png"},
+    tank_turret     = Image{ src = "assets/enemies/tank/tankturret.png"},
+
 }
 txt =
 {
