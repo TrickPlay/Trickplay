@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.tests.physics",
+    release     = "1",
+    version     = "1.0",
+    name        = "Physics",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+

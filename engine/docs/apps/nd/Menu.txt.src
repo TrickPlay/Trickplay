@@ -76,6 +76,7 @@ Group: Reference  {
 
          File: Alpha  (bindings/clutter_alpha.lb)
          File: Interval  (bindings/clutter_interval.lb)
+         File: Path (bindings/clutter_path.lb)
          File: Timeline  (bindings/clutter_timeline.lb)
          }  # Group: Animation
 

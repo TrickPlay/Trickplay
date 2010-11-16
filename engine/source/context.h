@@ -31,10 +31,15 @@
 #define TP_SCREEN_WIDTH_DEFAULT         960
 #define TP_SCREEN_HEIGHT_DEFAULT        540
 #define TP_CONTROLLERS_NAME_DEFAULT     "TrickPlay"
+#define TP_LIRC_ENABLED_DEFAULT         true
+#define TP_LIRC_UDS_DEFAULT             "/var/run/lirc/lircd"
+#define TP_LIRC_REPEAT_DEFAULT          150
+#define TP_APP_PUSH_ENABLED_DEFAULT     true
+#define TP_APP_PUSH_PORT_DEFAULT        8888
 
 // TODO: Don't like hard-coding this app id here
 
-#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps:com.trickplay.store=apps"
+#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps:com.trickplay.store=apps:com.trickplay.editor=editor"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -45,6 +50,8 @@ class Console;
 class Downloads;
 class Installer;
 class Image;
+class ControllerLIRC;
+class AppPushServer;
 
 //-----------------------------------------------------------------------------
 
@@ -245,6 +252,10 @@ private:
     ControllerServer *          controller_server;
 
     ControllerList              controller_list;
+
+    ControllerLIRC *            controller_lirc;
+
+    AppPushServer *             app_push_server;
 
     Console *                   console;
 

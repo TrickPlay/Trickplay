@@ -28,6 +28,7 @@ if (NATURAL_DOCS)
             -r
             -i ${PROJECT_SOURCE_DIR}/engine
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/editor
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
             -xi ${PROJECT_SOURCE_DIR}/engine/lb
             -xi ${PROJECT_SOURCE_DIR}/engine/lua
@@ -43,6 +44,13 @@ if (NATURAL_DOCS)
             -o HTML ${PROJECT_BINARY_DIR}/docs/oem
             -p ${PROJECT_SOURCE_DIR}/engine/docs/oem/nd
             -s Default Trickplay
+
+        COMMAND ${NATURAL_DOCS}
+            -r
+            -i ${PROJECT_SOURCE_DIR}/engine/docs/editor/text
+            -o HTML ${PROJECT_BINARY_DIR}/docs/editor
+            -p ${PROJECT_SOURCE_DIR}/engine/docs/editor/nd
+            -s Default Trickplay
     )
 
     file(
@@ -51,6 +59,10 @@ if (NATURAL_DOCS)
 
     file(
         MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/docs/oem
+    )
+
+    file(
+        MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/docs/editor
     )
     
 endif(NATURAL_DOCS)

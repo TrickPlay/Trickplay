@@ -113,6 +113,48 @@ class Text [[ClutterActor*]] actor
         [[clutter_text_set_line_wrap(CLUTTER_TEXT(self),wrap);]];
     
     /*
+    	Property: wrap_mode
+
+	How the line wrapping is performed. 
+        The default is WORD which means wrap on word boundaries.
+
+	     Possible Values:
+		
+		WORD	  - wrap lines at word boundaries
+		CHAR	  - wrap lines at character boundaries 
+		WORD_CHAR - wrap lines at word boundaries, but fall back to character 
+			   boundaries if there is not enough space for a full word. 
+    */    
+
+    string wrap_mode
+	[[
+                    switch(clutter_text_get_line_wrap_mode(CLUTTER_TEXT(self)))
+                    {
+                        case PANGO_WRAP_WORD:
+                            wrap_mode="WORD";
+                            break;
+                        case PANGO_WRAP_CHAR:
+                            wrap_mode="CHAR";
+                            break;
+                        default:
+                            wrap_mode="WORD_CHAR";
+                    }
+        ]]
+        [[
+                    PangoWrapMode wm=PANGO_WRAP_WORD;
+                    if(!strcmp(wrap_mode,"WORD"))
+                        wm=PANGO_WRAP_WORD;
+                    else if(!strcmp(wrap_mode,"CHAR"))
+                        wm=PANGO_WRAP_CHAR;
+                    else if(!strcmp(wrap_mode,"WORD_CHAR"))
+                        wm=PANGO_WRAP_WORD_CHAR;
+                    else
+                        luaL_error(L,"Invalid wrap_mode '%s'",wrap_mode);
+                    clutter_text_set_line_wrap_mode(CLUTTER_TEXT(self),wm);
+        ]];
+
+
+    /*
     	Property: use_markup
     	
     	Whether to interpret the text's string as markup or not.

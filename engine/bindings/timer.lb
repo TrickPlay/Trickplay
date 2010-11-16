@@ -181,6 +181,7 @@ void timer::start( UserData * ud )
     source = g_timeout_source_new( interval );
 
     g_source_set_callback( source , timer_fired , UserData::Handle::make( ud , this ) , UserData::Handle::destroy );
+    g_source_set_priority( source , G_PRIORITY_LOW );
     g_source_attach( source , g_main_context_default()  );
 }
 
