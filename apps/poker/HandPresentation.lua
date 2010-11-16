@@ -203,6 +203,63 @@ HandPresentation = Class(nil,function(pres, ctrl)
          }
       end
    end
+
+   local function animate_winning_hands()
+      for _,card in ipairs(ctrl:get_community_cards()) do
+          card.group.opacity = 140
+      end
+      for _,card in ipairs(ctrl:get_deck()) do
+          card.group.opacity = 140
+      end
+      local final_hands = ctrl:get_final_hands()
+      da_clones = {}
+      local length = 0
+      for i,hand in pairs(final_hands) do
+         length = length + 1
+      end
+      local counter = 0
+      for player,hand in pairs(final_hands) do
+         print("first")
+         for i,card in ipairs(hand) do
+            print("second")
+            local clone = Clone{
+               name = "card_clone"..i,
+               source = card.group,
+               position = Utils.deepcopy(card.group.position),
+               scale = {1.3, 1.3}
+            }
+            clone.anchor_point = {
+                clone.w*1.3/2,
+                clone.h*1.3/2
+            }
+            screen:add(clone)
+            ---[[
+            local x_length_between_centroids = clone.w*1.3 + 10
+            local y_length_between_centroids = clone.h*1.3 + 10
+            local total_x_length = x_length_between_centroids*(#hand-1)
+            local total_y_length = y_length_between_centroids*(length-1)
+            local start_x = screen.w/2 - total_x_length/2
+            local start_y = screen.h/2 - total_y_length/2
+            local pos = {
+               start_x + (i-1)*x_length_between_centroids,
+               start_y + counter*y_length_between_centroids
+            }
+            clone:animate{
+               position = Utils.deepcopy(pos),
+               duration = TIME,
+               mode = MODE,
+               z_rotation=-3 + math.random(5),
+               on_completed = function() clone:raise_to_top() end
+            }
+            --]]
+            table.insert(allCards, clone)
+            table.insert(da_clones, clone)
+         end
+         counter = counter + 1
+      end
+      dumptable(final_hands)
+   end
+
    
    ------------------------- GAME FLOW --------------------------
    
@@ -299,6 +356,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       mediaplayer:play_sound(SHOWDOWN_WAV)
       animate_chips_to_center()
       all_cards_up()
+      animate_winning_hands()
       print(poker_hand.name .. " passed to pres:showdown()")
 
       local won = {}
@@ -336,9 +394,13 @@ HandPresentation = Class(nil,function(pres, ctrl)
       
       -- clear cards
       for i,card in ipairs(allCards) do
-         resetCardGroup(card.group)
-         print(card.group.parent, screen, card.group.parent==screen)
-         if card.group.parent == screen then screen:remove(card.group) end
+         if card.group then
+            resetCardGroup(card.group)
+            print(card.group.parent, screen, card.group.parent==screen)
+            if card.group.parent == screen then screen:remove(card.group) end
+         elseif card.parent then
+            card:unparent()
+         end
       end
       
       allCards = {}

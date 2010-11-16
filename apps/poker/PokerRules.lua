@@ -23,6 +23,35 @@ function has_n_of_a_kind(hand, n)
    return false
 end
 
+function get_n_of_a_kind(hand, n)
+   if not has_n_of_a_kind(hand, n) then
+      error("hand does not have "..n.."of a kind", 2)
+   end
+
+   local cards = {}
+   local h = sort_hand(hand)
+   print("\n\nbefore")
+   dumptable(h)
+   local rank = nil
+   for i = #h, 1, -1 do
+      if h[i].rank == rank then
+         counter = counter+1
+         if counter >= n then
+            for j = 1,counter do
+               table.insert(cards, table.remove(h, i))
+            end
+            print("\n\nafter")
+            dumptable(cards)
+            print("\n\n")
+            return cards
+         end
+      else
+         rank = h[i].rank
+         counter = 1
+      end
+   end
+end
+
 function n_of_a_kind_compare(hand1,hand2,N)
    local pair1_found, rank1, rem_hand1 = has_n_of_a_kind(hand1, N)
    assert(pair1_found)
@@ -183,6 +212,10 @@ STRAIGHT_FLUSH = {
          if not hand then error("hand is nil, in STRAIGHT_FLUSH.present_in()", 2) end
          return #get_best_straight_flush(hand) == 5
       end,
+   get_best=
+      function(hand)
+         return get_best_straight_flush(hand)
+      end,
    comparator=
       function(hand1, hand2)
          -- get_best_straight returns cards in descending order
@@ -207,6 +240,10 @@ FOUR_OF_A_KIND = {
       function(hand)
          return has_n_of_a_kind(hand, 4)
       end,
+   get_best=
+      function(hand)
+         return get_n_of_a_kind(hand, 4)
+      end,
    comparator=
       function(hand1,hand2)
          return n_of_a_kind_compare(hand1,hand2,4)
@@ -222,6 +259,17 @@ FULL_HOUSE = {
             return has_n_of_a_kind(rem_hand, 2)
          end
          return false
+      end,
+   get_best=
+      function(hand)
+         local triplet = get_n_of_a_kind(hand, 3)
+         local success, rank, rem_hand = has_n_of_a_kind(hand, 3)
+         if not success then error("fail", 2) end
+         local pair = get_n_of_a_kind(rem_hand, 2)
+         table.insert(triplet, table.remove(pair))
+         table.insert(triplet, table.remove(pair))
+
+         return triplet
       end,
    comparator=
       function(hand1,hand2)
@@ -271,6 +319,10 @@ FLUSH = {
             end
          end
       end,
+   get_best=
+      function(hand)
+         return get_best_flush(hand)
+      end,
    comparator=
       function(hand1,hand2)
          local cards1 = get_best_flush(hand1)
@@ -297,6 +349,10 @@ STRAIGHT = {
          local straight = get_best_straight(hand)
          return #straight ~= 0
       end,
+   get_best =
+      function(hand)
+         return get_best_straight(hand)
+      end,
    comparator=
       function(hand1,hand2)
          -- get_best_straight returns cards in descending order
@@ -321,6 +377,10 @@ THREE_OF_A_KIND = {
       function(hand)
          return has_n_of_a_kind(hand, 3)
       end,
+   get_best=
+      function(hand)
+         return get_n_of_a_kind(hand, 3)
+      end,
    comparator=
       function(hand1,hand2)
          return n_of_a_kind_compare(hand1,hand2,3)
@@ -336,6 +396,17 @@ TWO_PAIR = {
             return has_n_of_a_kind(rem_hand, 2)
          end
          return false
+      end,
+   get_best=
+      function(hand)
+         local pair1 = get_n_of_a_kind(hand, 2)
+         local success, rank, rem_hand = has_n_of_a_kind(hand, 2)
+         if not success then error("fail", 2) end
+         local pair2 = get_n_of_a_kind(rem_hand, 2)
+         table.insert(pair2, table.remove(pair1))
+         table.insert(pair2, table.remove(pair1))
+
+         return pair2
       end,
    comparator=
       function(hand1,hand2)
@@ -388,6 +459,11 @@ ONE_PAIR = {
          -- end
          -- return false
       end,
+   get_best=
+      function(hand)
+         print("in ONE_PAIR.get_best")
+         return get_n_of_a_kind(hand, 2)
+      end,
    comparator=
       function(hand1,hand2)
          local N = 2
@@ -422,6 +498,11 @@ HIGH_CARD = {
    present_in=
       function(hand)
          return #hand > 0
+      end,
+   get_best =
+      function(hand)
+         local h = sort_hand(hand)
+         return h[#h]
       end,
    comparator=
       function(hand1, hand2)
@@ -481,6 +562,11 @@ function get_best(hand)
       end
    end
    error("fail.")
+end
+
+function get_best_cards(hand)
+    poker_hand = get_best(hand)
+    return poker_hand.get_best(hand)
 end
 
 PokerHands = {

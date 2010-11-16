@@ -148,7 +148,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       end
       self.playerCounter = self.playerCounter + 1
       
-      args = {
+      local args = {
          isHuman = isHuman,
          number = self.playerCounter,
          table_position = pos,
