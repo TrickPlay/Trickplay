@@ -30,8 +30,6 @@ function get_n_of_a_kind(hand, n)
 
    local cards = {}
    local h = sort_hand(hand)
-   print("\n\nbefore")
-   dumptable(h)
    local rank = nil
    for i = #h, 1, -1 do
       if h[i].rank == rank then
@@ -40,9 +38,6 @@ function get_n_of_a_kind(hand, n)
             for j = 1,counter do
                table.insert(cards, table.remove(h, i))
             end
-            print("\n\nafter")
-            dumptable(cards)
-            print("\n\n")
             return cards
          end
       else
@@ -461,7 +456,6 @@ ONE_PAIR = {
       end,
    get_best=
       function(hand)
-         print("in ONE_PAIR.get_best")
          return get_n_of_a_kind(hand, 2)
       end,
    comparator=

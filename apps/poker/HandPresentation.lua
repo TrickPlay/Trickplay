@@ -3,7 +3,7 @@ local MODE = "EASE_OUT_QUAD"
 
 --realPrint = print
 --print = function() end
---local print = function() end --realPrint
+local print = function() end --realPrint
 
 HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
