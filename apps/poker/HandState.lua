@@ -14,6 +14,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    local bb_p
    local deck
    local in_players
+   local final_hands
 
    -- index of active player in players table.. it should be the case that players[players_action] == in_players[action]
    local players_action
@@ -52,6 +53,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       end
       return in_players
    end
+   function state:get_final_hands() return final_hands end
    function state:get_orig_bet()
       return player_bets[state:get_active_player()]
    end
@@ -356,6 +358,8 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state.showdown(state)
       local in_players = state:get_in_players()
       assert(#in_players > 1)
+
+      -- get all the players' hands
       local in_hands = {}
       for _, player in ipairs(in_players) do
          local hand = {}
@@ -367,11 +371,14 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
          in_hands[player] = hand
       end
+      final_hands = {}
 
       local best = in_players[1]
       local winners = {in_players[1]}
       local result, tmp_poker_hand, poker_hand
+      final_hands[in_players[1]] = in_hands[in_players[1]]
 
+      -- compare all hands
       for i=2,#in_players do
          result, tmp_poker_hand = compare_hands(in_hands[best], in_hands[in_players[i]])
          if not poker_hand then
@@ -379,10 +386,13 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
          if result == 0 then
             table.insert(winners, in_players[i])
+            final_hands[in_players[i]] = poker_hand.get_best(in_hands[in_players[i]])
          elseif result == 1 then
             best = in_players[i]
             winners = {in_players[i]}
             poker_hand = tmp_poker_hand
+            final_hands = {}
+            final_hands[in_players[i]] = poker_hand.get_best(in_hands[in_players[i]])
          end
          if #in_players == 2 then
             poker_hand = tmp_poker_hand
