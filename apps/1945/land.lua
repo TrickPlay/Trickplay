@@ -37,7 +37,12 @@ lvlbg = {
             {
                 speed = self.speed,
                 image = Clone{ 
-					source       = imgs[ "cloud"..tostring( index ) ] , 
+					source       = imgs[ "cloud"..tostring( index ) ] ,
+                    anchor_point =
+                    {
+                        imgs[ "cloud"..tostring( index ) ].w/2,
+                        imgs[ "cloud"..tostring( index ) ].h/2
+                    },
 					x_rotation   = { x_rot , 0, 0},
 					y_rotation   = { y_rot , 0, 0},
 					z_rotation   = { z_rot , 0, 0},
@@ -63,15 +68,19 @@ lvlbg = {
             }
         add_to_render_list(cloud)
     end,
-    add_island = function(self,index, xxx, x_rot, y_rot, z_rot)
+    add_island = function(self,index, xxx, y_rot, z_rot)
 
         local island =
             
             {
                 speed = self.speed,
                 image = Clone{ 
-					source       = imgs[ "island"..tostring( index ) ] , 
-					x_rotation   = { x_rot , 0, 0},
+					source       = imgs[ "island"..tostring( index ) ] ,
+                    anchor_point =
+                    {
+                        imgs[ "island"..tostring( index ) ].w/2,
+                        imgs[ "island"..tostring( index ) ].h/2
+                    },
 					y_rotation   = { y_rot , 0, 0},
 					z_rotation   = { z_rot , 0, 0},
 					opacity      = 255 ,

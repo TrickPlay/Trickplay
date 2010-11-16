@@ -189,7 +189,6 @@ function flak(x,y)
     )
 end
 function fire_flak(enemy, dist_x,dist_y)
-print("dists",dist_x,dist_y)
     local bullet =
     {
         dist_x = dist_x,
@@ -401,7 +400,49 @@ explosions =
 	} end
 }
 
+-- Functions for formation movements
 
+
+--moves the object according to its speed and its z_rotation
+--0 is assumed to be when the object is facing down
+local move = function(group, speed, secs)
+	assert(group)
+        local x = secs*speed*math.cos((group.z_rotation[1]+90)*math.pi/180)
+        local y = secs*speed*math.sin((group.z_rotation[1]+90)*math.pi/180)
+	group.x = group.x + x
+	
+	group.y = group.y + y
+	
+        return x,y
+end
+
+
+
+local COUNTER   = -1
+local CLOCKWISE =  1
+
+local turn = function(group, radius, dir, speed, secs)
+    assert( group )
+    assert( dir == COUNTER or dir == CLOCKWISE )
+    
+    local deg_travelled = speed*secs/(math.pi*2*radius)*360
+    local curr_deg = group.z_rotation[1]
+    local next_deg = dir*deg_travelled + curr_deg
+    
+    --center of rotation
+    local center =
+    {
+        x = group.x - dir * radius*math.cos(curr_deg*math.pi/180),
+        y = group.y - dir * radius*math.sin(curr_deg*math.pi/180)
+    }
+--print(center.x,center.y)
+    
+    group.z_rotation = {next_deg,0,0}	
+    group.x = center.x+dir*radius*math.cos((next_deg*math.pi/180))
+    group.y = center.y+dir*radius*math.sin((next_deg*math.pi/180))
+    --print(center.x,center.y," ",group.x,group.y)
+    return deg_travelled
+end
 
 
 enemies =
@@ -532,7 +573,7 @@ enemies =
 			)
 		end	
 	} end,
-	zeppelin  = function() return {
+	zeppelin  = function(x) return {
 		health = 20,
 		type = TYPE_ENEMY_PLANE,
         bulletholes = {},
@@ -627,7 +668,7 @@ enemies =
 			},
 		},
 		
-		group    = Group{},
+		group    = Group{x=x,y=-imgs.zepp.h},
 		
 		shoot_time      = 3,	--how frequently the plane shoots
 		last_shot_time = 2,	--how long ago the plane last shot
@@ -837,19 +878,33 @@ enemies =
 			
 			
 			--default zeppelin animation
-			self.stages[0] = function(z)
-				--fly downwards
-				z.group.y = z.group.y +self.speed*seconds
-				
-				--fire bullets
-				self:rotate_guns_and_fire()
-				
-				--see if you reached the end
-				if z.group.y >= screen_h + z.image.h then
-					z.group:unparent()
-					remove_from_render_list(self)
-				end
-			end
+			self.stages =
+            {
+                -- enter screen at a slightly faster speed
+                function(z,secs)
+                    
+                    move(z.group,z.approach_speed,secs)
+                    
+                    if z.group.y >= -100 then
+                        z.stage = 2
+                    end
+                end,
+                
+                -- slow down to attack speed and start shooting
+                function(z,secs) 
+                
+                    move(z.group,z.attack_speed,secs)
+                    z:rotate_guns_and_fire(secs)
+                    --check if it left the screen
+                    if z.group.y >= screen_h +
+                        z.image.h then
+                        z.group:unparent()
+                        remove_from_render_list(z)
+                        
+                    end
+                end
+            }
+            self.stage = 1
 			
 		end,
 		
@@ -955,7 +1010,6 @@ enemies =
 			if self.health > 1 then 
 				self.health = self.health - 1
                 if from_bullethole == nil then
-                print("there")
                 local dam = {}
                 if other.group ~= nil then
                     if loc == 0 then
@@ -966,7 +1020,6 @@ enemies =
                     elseif loc == 1 then
                         self.left_engine_dam = self.left_engine_dam + 1
                         if self.left_engine_dam == 1 then
-                            print(self.e_l_dam,self.e_l_dam.parent)
                             self.e_l_dam.opacity = 255
                         elseif self.left_engine_dam == 2 then
                             self.e_fire_l.opacity = 255
@@ -1304,7 +1357,6 @@ enemies =
 				
 				--see if you reached the end
 				if t.group.y >= screen_h + t.base_strip.h then
-                print("niogga")
 					t.group:unparent()
 					remove_from_render_list(t)
 				end
@@ -1777,53 +1829,292 @@ enemies =
 			self.group.center[2])
 			)
 		end	
+    } end,
+    destroyer = function() return{
+        
+		health = 2,
+		type = TYPE_ENEMY_PLANE,
+        bulletholes = {},
+        moving = false,
+        
+        bow_wake_r =
+        {
+            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.dest.w/2-12},
+        },
+        bow_wake_t =
+        {
+            Clone{source=imgs.bbow_wake_1,opacity = 0},
+            Clone{source=imgs.bbow_wake_2,opacity = 0},
+            Clone{source=imgs.bbow_wake_3,opacity = 0},
+            Clone{source=imgs.bbow_wake_4,opacity = 0},
+        },
+        bow_wake_l =
+        {
+            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+        },
+        stern_wake =
+        {
+            Clone{source=imgs.stern_wake_1,opacity = 0,y=imgs.dest.h-imgs.stern_wake_1.h+40},
+            Clone{source=imgs.stern_wake_2,opacity = 0,y=imgs.dest.h-imgs.stern_wake_2.h+40},
+            Clone{source=imgs.stern_wake_3,opacity = 0,y=imgs.dest.h-imgs.stern_wake_3.h+40},
+            Clone{source=imgs.stern_wake_4,opacity = 0,y=imgs.dest.h-imgs.stern_wake_4.h+40},
+            Clone{source=imgs.stern_wake_5,opacity = 0,y=imgs.dest.h-imgs.stern_wake_5.h+40},
+        },
+		b_w_i = 1,
+        s_w_i = 1,
+		stage  = 0,	--the current stage the fighter is in
+		stages = {},	--the stages, must be set by formations{}
+		approach_speed = 80,
+		--attack_speed   = 15,
+		
+		image    = Clone{source=imgs.dest},
+		
+		gun_img =
+		Clone {
+            source       = imgs.turret,
+			anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
+			z_rotation   = {180,0,0}
+        },
+		gun_group = Group
+		{
+			x = imgs.dest.w/2,
+			y = 145,
+		},
+        
+		group    = Group{},
+		
+		shoot_time      = 2 , --how frequently the ship shoots
+		last_shot_time  = math.random()*2,
+		
+		rotate_guns_and_fire = function(self,secs)
+			---[[
+			--prep the variables that determine if its time to shoot
+			
+			
+			--mock enemy-object which is passed to fire_bullet()
+			local mock_obj = {}
+			
+			--these x,y values are used for rotations and
+			--bullet trajectories
+			
+			--user plane is the target
+			local targ =
+			{ 
+				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
+				y = (my_plane.group.y+my_plane.img_h/2)
+			}
+			local dest =
+			{
+                x = (self.gun_group.x+self.group.x-self.group.anchor_point[1]),
+				y = (self.gun_group.y+self.group.y-self.group.anchor_point[2])
+			}
+			
+            --rotate and fire the bow turret
+            if dest.y < screen_h + imgs.turret.h and
+               dest.y >           -imgs.turret.h then
+                
+                self.last_shot_time = self.last_shot_time + secs
+                
+                self.gun_img.z_rotation =
+                {
+                    180/math.pi*math.atan2(
+                        targ.y - dest.y,
+                        targ.x - dest.x
+                    )-90,
+                    0,
+                    0
+                }
+                
+                mock_obj =
+				{
+					group =
+					{
+						z_rotation =
+						{self.gun_img.z_rotation[1],
+							0,0},
+						x = dest.x+imgs.turret.h*math.cos(self.gun_img.z_rotation[1]*math.pi/180+90),
+						y = dest.y+imgs.turret.h*math.sin(self.gun_img.z_rotation[1]*math.pi/180+90)
+					}
+				}
+				if self.last_shot_time >= self.shoot_time and  (math.abs(dest.x - targ.x) > 200 or
+                    math.abs(dest.y - targ.y) > 200) and
+					math.random(1,20) == 8 then
+					
+					self.last_shot_time = 0
+					fire_flak(mock_obj, math.abs(dest.x - targ.x)-50, math.abs(dest.y - targ.y)-50)
+					
+				end
+            end
+		end,
+		
+		
+		
+		setup = function(self,xxx,y_offset,speed,moving)
+			
+            self.moving = moving
+			self.approach_speed = speed
+            
+			self.gun_group:add( self.gun_img )
+            self.group:add(Clone{source=imgs.laminar})
+			self.group:add(unpack(self.bow_wake_r))
+            self.group:add(unpack(self.bow_wake_l))
+            self.group:add(unpack(self.stern_wake))
+            --self.group:add(unpack(self.bow_wake_t))
+
+			self.group:add(
+				
+				self.image,
+                
+				self.gun_group
+
+				
+			)
+            self.group.x = xxx
+            self.group.y = -self.image.h+y_offset
+			
+			layers.land_targets:add( self.group )
+			
+			
+			--default battleship animation animation
+			self.stages[0] = function(d,seconds)
+				--fly downwards
+				d.group.y = d.group.y +d.approach_speed*seconds
+				
+				--fire bullets
+				d:rotate_guns_and_fire(seconds)
+				
+				--see if you reached the end
+				if d.group.y >= screen_h + d.image.h then
+					d.group:unparent()
+					remove_from_render_list(d)
+				end
+			end
+			self.turr_h = self.gun_img.h
+		end,
+        
+        wake_thresh = .1,
+        last_wake_change = 0,
+		
+		render = function(self,seconds)
+			
+            if self.moving then
+                self.last_wake_change = self.last_wake_change + seconds
+                
+                if self.last_wake_change >= self.wake_thresh then
+                self.last_wake_change = 0
+                self.bow_wake_r[self.b_w_i].opacity=0
+                self.bow_wake_l[self.b_w_i].opacity=0
+                self.bow_wake_t[self.b_w_i%4+1].opacity=0
+                self.stern_wake[self.s_w_i].opacity=0
+                self.b_w_i = self.b_w_i%(#self.bow_wake_r)+1
+                self.s_w_i = self.s_w_i%(#self.stern_wake)+1
+                self.bow_wake_r[self.b_w_i].opacity=255
+                self.bow_wake_l[self.b_w_i].opacity=255
+                self.bow_wake_t[self.b_w_i%4+1].opacity=255
+                self.stern_wake[self.s_w_i].opacity=255
+                end
+            end
+			--animate the zeppelin based on the current stage
+			self.stages[self.stage](self,seconds)
+            
+            table.insert(b_guys_land,
+                {
+                    obj = self,
+                    x1  = self.group.x+10,
+                    x2  = self.group.x+self.image.w-10,
+                    y1  = self.group.y+40,
+                    y2  = self.group.y+self.image.h-20,
+                }
+            )
+		end,
+		
+        collision = function( self , other, from_bullethole )
+			if self.health > 1 then 
+				self.health = self.health - 1
+                if from_bullethole == nil then
+                print("there")
+                local dam = {}
+                if other.group ~= nil then
+                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    self.group:add(dam.image)
+                    dam.image.x = other.group.x - self.group.x
+                    dam.image.y = other.group.y - self.group.y
+                    --[[
+                    dam.collision = function(d,other)
+                    print("here")
+                        local x = d.image.x
+                        local y = d.image.y
+                        
+                        d.image:unparent()
+                        d ={}
+                        
+                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image.x = x
+                        d.image.y = y-4
+                        self.group:add(dam.image)
+                        self:collision(other,true)
+                    end
+                    --]]
+                elseif other.image ~= nil then
+                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    self.group:add(dam.image)
+                    dam.image.x = other.image.x - self.group.x
+                    dam.image.y = other.image.y - self.group.y
+                    --[[
+                    dam.collision = function(d,other)
+                    print("here")
+                        local x = d.image.x
+                        local y = d.image.y
+                        
+                        d.image:unparent()
+                        d = {}
+                        
+                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image.x = x
+                        d.image.y = y-4
+                        self.group:add(dam.image)
+                        self:collision(other,true)
+                    end
+                    --]]
+                else
+                    error("render_list object with out a .group or a .image collided with the battleship")
+                end
+                --table.insert(self.bulletholes,dam)
+                end
+                --if dam.y > 0 then dam.y =dam.y -50 end
+				return
+			end
+			self.group:unparent()
+			remove_from_render_list( self )
+                        
+			-- Explode
+            add_to_render_list(
+			explosions.big(
+			self.group.center[1],
+			self.group.center[2])
+			)
+		end	
     } end
 }
 
 
--- Functions for formation movements
 
-
---moves the object according to its speed and its z_rotation
---0 is assumed to be when the object is facing down
-local move = function(group, speed, secs)
-	assert(group)
-        local x = secs*speed*math.cos((group.z_rotation[1]+90)*math.pi/180)
-        local y = secs*speed*math.sin((group.z_rotation[1]+90)*math.pi/180)
-	group.x = group.x + x
-	
-	group.y = group.y + y
-	
-        return x,y
-end
-
-
-
-local COUNTER   = -1
-local CLOCKWISE =  1
-
-local turn = function(group, radius, dir, speed, secs)
-    assert( group )
-    assert( dir == COUNTER or dir == CLOCKWISE )
-    
-    local deg_travelled = speed*secs/(math.pi*2*radius)*360
-    local curr_deg = group.z_rotation[1]
-    local next_deg = dir*deg_travelled + curr_deg
-    
-    --center of rotation
-    local center =
-    {
-        x = group.x - dir * radius*math.cos(curr_deg*math.pi/180),
-        y = group.y - dir * radius*math.sin(curr_deg*math.pi/180)
-    }
---print(center.x,center.y)
-    
-    group.z_rotation = {next_deg,0,0}	
-    group.x = center.x+dir*radius*math.cos((next_deg*math.pi/180))
-    group.y = center.y+dir*radius*math.sin((next_deg*math.pi/180))
-    --print(center.x,center.y," ",group.x,group.y)
-    return deg_travelled
-end
 
 
 formations = 
@@ -1982,7 +2273,6 @@ formations =
                     
                     local l = dir*270
                     if math.abs(f.deg_counter[f.stage]) >= math.abs(l-rot) then
-                        print(f.deg_counter[f.stage])
                         f.stage = f.stage + 1
                         
                         f.group.z_rotation = {l,0,0}

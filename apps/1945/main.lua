@@ -183,6 +183,9 @@ local keys = {
         [keys.n] = function()
             add_to_render_list(enemies.battleship(),500,300, 40,true)
         end,
+        [keys.b] = function()
+            add_to_render_list(enemies.destroyer(),500,300, 40,true)
+        end,
         --powerups
         [keys.z] = function()
             add_to_render_list(powerups.guns(300))
