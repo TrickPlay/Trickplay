@@ -67,7 +67,7 @@
     [super viewDidLoad];
 	self.view.tag = 2;
 	
-	mSocketMode = SOCKET_MODE_IPHONE4;
+	mSocketMode = SOCKET_MODE_LEGACY;
 	
 	accelerationY = 0;
 	accelerationX = 0;
