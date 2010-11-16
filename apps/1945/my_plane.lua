@@ -225,7 +225,7 @@ my_plane =
             self.image.opacity = 255
             local g = Group{}
             self.group:add( self.shadow   )
-            self.group:add(self.bombing_crosshair)
+            --self.group:add(self.bombing_crosshair)
             g:add( self.image    )
             g:add( self.prop.g_r )
             g:add( self.prop.g_l )
@@ -262,7 +262,6 @@ my_plane =
         end
         self.damage = 0
         self.image.x = 0
-        print("HEAL")
     end,
     render =
     
@@ -1068,7 +1067,7 @@ powerups =
         end,
     } end,
     life = function(xxx) return {
-        image = Rectangle{w=60,h=60,color="654321",},
+        image = Clone{source=imgs.up_life},--Rectangle{w=60,h=60,color="654321",},
         speed = 50,
         setup = function(self)
             self.image.position = {xxx,-self.image.h}

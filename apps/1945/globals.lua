@@ -100,6 +100,7 @@ imgs =
     --POWERUPS
     health          = Image{ src="assets/player/health.png"},
     guns            = Image{ src="assets/player/2xfire.png"},
+    up_life         = Image{ src="assets/player/up_life.png"},
 
     --EXPLOSIONS
     explosion1      = Image{ src = "assets/fx/explosion1_strip6.png" },
@@ -110,6 +111,8 @@ imgs =
     t_bullet        = Image{ src = "assets/enemies/turret/turret_bullet.png" },
     flak            = Image{ src = "assets/fx/flak.png"},
     
+    --DESTROYER ASSETS
+    dest            = Image{ src = "assets/enemies/dest/destroyer.png"},
     --BATTLESHIP ASSETS
     b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
     ---[[
@@ -136,6 +139,8 @@ imgs =
 
     --FIGHTER ASSETS
     fighter         = Image{ src = "assets/enemies/fighter/fighter.png"   },
+    fighter_r       = Image{ src = "assets/enemies/fighter/fighter_r.png"   },
+    fighter_w       = Image{ src = "assets/enemies/fighter/fighter_w.png"   },
     fighter_bullet  = Image{ src = "assets/enemies/fighter/fighter_bullet.png" },
     fighter_prop    = Image{ src = "assets/enemies/fighter/fighter_prop.png" },
     
