@@ -3,7 +3,7 @@ local MODE = "EASE_OUT_QUAD"
 
 --realPrint = print
 --print = function() end
-local print = function() end --realPrint
+--local print = function() end --realPrint
 
 HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
@@ -219,9 +219,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       end
       local counter = 0
       for player,hand in pairs(final_hands) do
-         print("first")
          for i,card in ipairs(hand) do
-            print("second")
             local clone = Clone{
                name = "card_clone"..i,
                source = card.group,
@@ -257,7 +255,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
          counter = counter + 1
       end
-      dumptable(final_hands)
    end
 
    

@@ -376,7 +376,8 @@ HandState = Class(nil,function(state, ctrl, ...)
       local best = in_players[1]
       local winners = {in_players[1]}
       local result, tmp_poker_hand, poker_hand
-      final_hands[in_players[1]] = in_hands[in_players[1]]
+      result, tmp_poker_hand = compare_hands(in_hands[best], in_hands[in_players[1]])
+      final_hands[in_players[1]] = tmp_poker_hand.get_best(in_hands[in_players[1]])
 
       -- compare all hands
       for i=2,#in_players do
