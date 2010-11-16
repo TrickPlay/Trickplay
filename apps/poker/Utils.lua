@@ -1,5 +1,3 @@
-
-
 function sort_hand(hand)
    if not hand then error("hand is nil!", 2) end
    local hand_copy = {}
