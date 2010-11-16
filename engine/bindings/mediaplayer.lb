@@ -312,7 +312,7 @@ global mediaplayer [[MP*]]
     nil.
     */
     
-    readonly udata texture
+    readonly UIElement texture
         [[
             if (!self->get_player())
             {
@@ -665,7 +665,7 @@ global mediaplayer [[MP*]]
     nil -                   Otherwise.
     */
     
-    udata new()
+    MediaPlayer new()
         [[
                 lua_pushnil(L);
 #if 0

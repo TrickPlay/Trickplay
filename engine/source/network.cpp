@@ -30,7 +30,8 @@ public:
         notify( NULL ),
         got_body( false ),
         put_offset( 0 ),
-        cookie_jar( cookie_jar_ref( cj ) )
+        cookie_jar( cookie_jar_ref( cj ) ),
+        headers( 0 )
 
     {
         if ( event_group )
@@ -50,7 +51,8 @@ public:
         notify( dn ),
         got_body( false ),
         put_offset( 0 ),
-        cookie_jar( cookie_jar_ref( cj ) )
+        cookie_jar( cookie_jar_ref( cj ) ),
+        headers( 0 )
     {
         if ( event_group )
         {
@@ -69,7 +71,8 @@ public:
         notify( dn ),
         got_body( false ),
         put_offset( 0 ),
-        cookie_jar( cookie_jar_ref( cj ) )
+        cookie_jar( cookie_jar_ref( cj ) ),
+        headers( 0 )
     {
         if ( event_group )
         {
@@ -90,6 +93,11 @@ public:
         {
             event_group->unref();
         }
+
+        if ( headers )
+        {
+            curl_slist_free_all( headers );
+        }
     }
 
     Settings                    settings;
@@ -103,6 +111,7 @@ public:
     bool                        got_body;
     size_t                      put_offset;
     CookieJar         *         cookie_jar;
+    curl_slist *                headers;
 };
 
 
@@ -718,14 +727,13 @@ public:
             cc( curl_easy_setopt( eh, CURLOPT_FOLLOWLOCATION, closure->request.redirect ? 1 : 0 ) );
             cc( curl_easy_setopt( eh, CURLOPT_USERAGENT, closure->request.user_agent.c_str() ) );
 
-            struct curl_slist * headers = NULL;
             for ( StringMap::const_iterator it = closure->request.headers.begin(); it != closure->request.headers.end(); ++it )
             {
-                curl_slist_append( headers, std::string( it->first + ":" + it->second ).c_str() );
+                closure->headers = curl_slist_append( closure->headers, std::string( it->first + ": " + it->second ).c_str() );
             }
 
-            cc( curl_easy_setopt( eh, CURLOPT_HTTPHEADER, headers ) );
-            // TODO: do we free the slist?
+            cc( curl_easy_setopt( eh, CURLOPT_HTTPHEADER, closure->headers ) );
+
 
             if ( closure->request.method == "PUT" )
             {

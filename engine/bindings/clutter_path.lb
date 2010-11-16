@@ -1,0 +1,237 @@
+
+module clutter_path;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "clutter_util.h"
+]]
+
+/*
+    Class: Path
+
+    Path lets you build a path using points, lines and curves. Then, given
+    a number between 0 and 1, it lets you get x and y coordinates. Paths can
+    be used to animate UIElements.
+
+    You an also use an SVG-like syntax to construct and modify paths, as follows.
+
+    M - Tells the path to move to the coordinates, expects 1 set of coordinates.
+    L - Adds a line to the path. Expects 1 set of coordinates.
+    C - Adds a curve to the path. Expects 3 sets of coordinates.
+    z - Closes the path. Expects no coordinates.
+
+    You can also use lower case for M, L and C; which implies the coordinates are
+    relative.
+
+    Example:
+
+    This example shows a rectangle moving along a curved path using a <Timeline>.
+
+    (code)
+    local rectangle = Rectangle
+    {
+        color = "FF0000" ,
+        size = { 100 , 100 },
+        position = { 0 , 980 }
+    }
+
+    local path = Path( "M 0,980 C 0,0 1820,0 1820,980" )
+
+    local timeline = Timeline
+    {
+        duration = 3000,
+        on_new_frame =
+            function( timeline , duration , progress )
+                rectangle.position = path:get_position( progress )
+            end
+    }
+
+    timeline:start()
+
+    screen:add( rectangle )
+    screen:show()
+    (end)
+
+*/
+
+class Path [[ClutterPath*]]
+{
+    /*
+        Constructor: Path
+
+        Arguments:
+
+            string_path - Optional string, describing a path in SVG-like syntax.
+
+        Returns:
+
+            A newly constructed path.
+    */
+
+    Path( string string_path = 0 )
+        [[
+            self=clutter_path_new();
+            g_object_ref_sink(self);
+            g_object_ref( self );
+            self=lb_construct_gobject(ClutterPath,self);
+            if ( string_path )
+            {
+                clutter_path_add_string( self , string_path );
+            }
+            g_object_unref(self);
+        ]];
+
+    ~Path()
+        [[
+        ]];
+
+    /*
+        Property: length
+
+        An approximation of the current length of the path.
+
+    */
+
+    readonly int length
+        [[
+            length = clutter_path_get_length( self );
+        ]];
+
+    /*
+        Function: move_to
+
+        Moves the path to the given point. This can be used when you first create the
+        path to establish an initial point, or in the middle of the path to jump to
+        a new point.
+
+        Arguments:
+
+            x - The x coordinate to move to.
+            y - The y coordinate.
+            relative - Whether the coordinates are relative to the last point or absolute.
+    */
+
+    move_to( int x , int y , bool relative = false )
+        [[
+            if ( relative )
+            {
+                clutter_path_add_rel_move_to( self , x , y );
+            }
+            else
+            {
+                clutter_path_add_move_to( self , x , y );
+            }
+        ]];
+
+    /*
+        Function: line_to
+
+        Adds a line to the path.
+
+        Arguments:
+
+            x - The x coordinate to draw the line to.
+            y - The y coordinate.
+            relative - Whether the coordinates are relative to the last point or absolute.
+    */
+
+    line_to( int x , int y , bool relative = false )
+        [[
+            if ( relative )
+            {
+                clutter_path_add_rel_line_to( self , x , y );
+            }
+            else
+            {
+                clutter_path_add_line_to( self , x , y );
+            }
+        ]];
+
+    /*
+        Function: curve_to
+
+        Adds a Bezier curve to the path.
+
+        Arguments:
+
+            x1 , y1 - The first control point.
+            x2 , y2 - The second control point.
+            x3 , y3 - The third control point.
+            relative - Whether the coordinates are relative to the last point or absolute.
+    */
+
+    curve_to( int x1 , int y1 , int x2 , int y2 , int x3 , int y3 , bool relative = false )
+        [[
+            if ( relative )
+            {
+                clutter_path_add_rel_curve_to( self , x1 , y1 , x2 , y2 , x3 , y3 );
+            }
+            else
+            {
+                clutter_path_add_curve_to( self , x1 , y1 , x2 , y2 , x3 , y3 );
+            }
+        ]];
+
+    /*
+        Function: close
+
+        Closes the path adding a straight line from the current point to the last move_to point.
+    */
+
+    close()
+        [[
+            clutter_path_add_close( self );
+        ]];
+
+    /*
+        Function: add_string_path
+
+        Lets you specify path operations using the SVG-like syntax described above.
+    */
+
+    add_string_path( string string_path )
+        [[
+            clutter_path_add_string( self , string_path );
+        ]];
+
+    /*
+        Function: clear
+
+        Clears the path completely.
+    */
+
+    clear()
+        [[
+            clutter_path_clear( self );
+        ]];
+
+    /*
+        Function: get_position
+
+        Given a number between 0 and 1, where 0 is the beginning of the path and 1 is the end
+        of the path, this function returns a table with x and y coordinates.
+
+        Arguments:
+
+            progress - Between 0 and 1.
+
+        Returns:
+
+            table - A table with interpolated x and y coordinates.
+    */
+
+    table get_position( double progress )
+        [[
+            ClutterKnot position;
+
+            clutter_path_get_position( self , progress , & position );
+
+            lua_newtable( L );
+            lua_pushinteger( L , position.x );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushinteger( L , position.y );
+            lua_rawseti( L , -2 , 2 );
+        ]];
+}

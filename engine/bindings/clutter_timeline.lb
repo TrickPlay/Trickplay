@@ -13,6 +13,26 @@ void Timeline_on_started(ClutterTimeline*timeline,lua_State*L);
 void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L);
 void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L);
 void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L);
+
+// We use these signal handlers to keep the timeline alive as long as
+// it is running. There is still an issue with timelines that have
+// delays...while the delay is ticking away, they can get collected.
+
+void Timeline_started( ClutterTimeline * timeline , gpointer )
+{
+    g_object_ref( timeline );
+}
+
+void Timeline_paused( ClutterTimeline * timeline , gpointer )
+{
+    g_object_unref( timeline );
+}
+
+void Timeline_completed( ClutterTimeline * timeline , gpointer )
+{
+    g_object_unref( timeline );
+}
+
 ]]
 
 /*
@@ -30,6 +50,11 @@ class Timeline [[ClutterTimeline*]]
 		g_object_ref(self);
 		self=lb_construct_gobject(ClutterTimeline,self);
     	ClutterUtil::set_props_from_table(L,props);
+
+    	g_signal_connect( self , "started" , ( GCallback ) Timeline_started , 0 );
+    	g_signal_connect( self , "paused" , ( GCallback ) Timeline_paused , 0 );
+        g_signal_connect( self , "completed" , ( GCallback ) Timeline_completed , 0 );
+
     	g_object_unref(self);
 	]];
 	
@@ -149,7 +174,9 @@ class Timeline [[ClutterTimeline*]]
 	*/
 	
     start()
-	[[clutter_timeline_start(self);]];
+	[[
+	  clutter_timeline_start(self);
+    ]];
 	
 	/*
 		Function: pause
@@ -187,7 +214,7 @@ class Timeline [[ClutterTimeline*]]
 			msecs - The milliseconds to skip.
 		
 	*/
-	
+
     skip(int msecs)
 	[[clutter_timeline_skip(self,msecs);]];
 	

@@ -54,8 +54,6 @@ else (CMAKE_TOOLCHAIN_FILE)
 
     add_subdirectory( clients/desktop )
 
-    #add_subdirectory( clients/lirc )
-
     add_subdirectory( clients/clutter-mediaplayer )
     
     add_subdirectory( sdk )

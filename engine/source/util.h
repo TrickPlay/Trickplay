@@ -138,23 +138,53 @@ class _Debug_ON
 {
 public:
 
+    _Debug_ON( const char * _prefix = 0 )
+    {
+        prefix = _prefix ? g_strdup_printf( "[%s]" , _prefix ) : 0;
+    }
+
+    ~_Debug_ON()
+    {
+        g_free( prefix );
+    }
+
     inline void operator()( const gchar * format, ...)
     {
-        va_list args;
-        va_start( args, format );
-        g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
-        va_end( args );
+        if ( prefix )
+        {
+            va_list args;
+            va_start( args, format );
+            gchar * message = g_strdup_vprintf( format , args );
+            va_end( args );
+            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "%s %s" , prefix , message );
+            g_free( message );
+        }
+        else
+        {
+            va_list args;
+            va_start( args, format );
+            g_logv( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , format , args );
+            va_end( args );
+        }
     }
 
     inline operator bool()
     {
         return true;
     }
+
+private:
+
+    gchar * prefix;
 };
 
 class _Debug_OFF
 {
 public:
+
+    _Debug_OFF( const char * prefix = 0 )
+    {
+    }
 
     inline void operator()( const gchar * format, ...)
     {
