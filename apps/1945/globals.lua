@@ -97,6 +97,7 @@ imgs =
     my_shadow       = Image{ src = "assets/player/player_shadow.png"},
     my_prop         = Image{ src = "assets/player/player_prop.png"},
     target          = Image{ src = "assets/player/target_strip.png"},
+    smoke           = Image{ src = "assets/fx/smoke.png"},
     --POWERUPS
     health          = Image{ src="assets/player/health.png"},
     guns            = Image{ src="assets/player/2xfire.png"},
@@ -164,6 +165,14 @@ imgs =
     --TANK ASSETS
     tank_strip      = Image{ src = "assets/enemies/tank/flaktank.png"},
     tank_turret     = Image{ src = "assets/enemies/tank/tankturret.png"},
+    --JEEP ASSETS
+    jeep            = Image{ src = "assets/enemies/jeep/jeep.png"},
+    --TRENCH
+    trench_1        = Image{ src = "assets/enemies/trench/trench1.png"},
+    trench_2        = Image{ src = "assets/enemies/trench/trench2.png"},
+    trench_3        = Image{ src = "assets/enemies/trench/trench3.png"},
+    trench_4        = Image{ src = "assets/enemies/trench/trench4.png"},
+    trench_bullet   = Image{ src = "assets/enemies/trench/mortar_round.png"},
 
 }
 txt =

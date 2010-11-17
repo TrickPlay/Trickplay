@@ -176,6 +176,9 @@ local keys = {
         [keys.o] = function()
             formations.vert_row_tanks(200,-1,3,150)
         end,
+        [keys.p] = function()
+            add_to_render_list(enemies.jeep(),500,-100)
+        end,
         --bosses
         [keys.m] = function()
             formations.zepp_boss(900)
@@ -185,6 +188,9 @@ local keys = {
         end,
         [keys.b] = function()
             add_to_render_list(enemies.destroyer(),500,300, 40,true)
+        end,
+        [keys.l] = function()
+            add_to_render_list(enemies.trench(),500,100, 40,true)
         end,
         --powerups
         [keys.z] = function()

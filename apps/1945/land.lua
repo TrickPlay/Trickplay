@@ -6,14 +6,15 @@ lvlbg = {
 
 --Level 1
 {
-    offset        = -240,
-    speed         = 80, -- pixels per second
+    
+    speed         = 50, -- pixels per second
     strips        = {},
     top_strip     = 0,
     strip_h       = imgs.water1.h,
     q_i           = 0,
     append_i      = 0,
     queues        = {},
+    g             = Group{},
     setup         = function( self )
         --base water strip
         self.base_tile = imgs.water1
@@ -26,22 +27,28 @@ lvlbg = {
         local top = - ( self.base_tile.h  )
         self.top_strip = top
         for i , strip in ipairs( self.strips ) do
-            strip.position = { 0 , self.offset+(i-1)*(self.base_tile.h)}--1) }
+            strip.position = { 0 , (i-1)*(self.base_tile.h)}--1) }
             --strip.extra.y = top
             --strip.y = math.ceil(strip.extra.y/4)*4
             --top = top + self.base_tile.h - 1
-            layers.ground:add( strip )
+            self.g:add( strip )
         end
+        self.g.y = -self.base_tile.h
+        layers.ground:add(self.g)
         
     end,
     add_cloud = function(self,index, xxx, x_rot, y_rot, z_rot)
+    local offset = self.offset
         local cloud =
             
             {
-                speed_y = self.speed,
-                speed_x = 20,
+                speed_y = self.speed+10,
+                speed_x = 10,
                 x=0,
                 y = 0,
+                g_off = self.offset,
+                p_off = self.offset,
+                index = 0,
                 image = Clone{ 
 					source       = imgs[ "cloud"..tostring( index ) ] ,
                     anchor_point =
@@ -57,24 +64,32 @@ lvlbg = {
                 setup = function( self )
                         if xxx <= self.image.w / 2 then
                             xxx = xxx-5*92;
-                            end
+                        end
                         layers.air_doodads_2:add( self.image )
 						self.image:lower_to_bottom()
-						self.image.anchor_point = {  self.image.w / 2+2 ,  self.image.h / 2+2 }
-                        self.x = xxx
-                        self.y = -self.image.h / 2
-                        self.image.y = math.ceil(self.y/4)*4
-                        self.image.x = math.ceil(self.x/4)*4
+						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
+                        -----self.x = xxx
+                        self.image.x = xxx
+                        self.image.y = -self.image.h / 2
+                        -----self.y = offset-self.image.h--self.image.h / 2
+                        -----self.image.y = math.ceil(self.y/4)*4
+                        -----self.image.x = math.ceil(self.x/4)*4
                         self.img_h = self.image.h
 
                 end,
                     
                 render = function( self , seconds )
-                        self.y = self.y + self.speed_y * seconds
-                        self.image.y = math.ceil(self.y/4)*4
-                        self.x = self.x + self.speed_x * seconds
-                        self.image.x = math.ceil(self.x/4)*4
-                        if self.y > (screen_h+self.img_h) then
+                        ------if self.p_off > lvlbg[1].offset then
+                        ------    self.index = self.index + 1
+                        ------end
+                        ------self.p_off = lvlbg[1].offset
+                        ------self.y = self.p_off+(self.index-1)*240
+                        ------self.image.y = math.ceil(self.y/4)*4
+                        ------self.x = self.x + self.speed_x * seconds
+                        ------self.image.x = math.ceil(self.x/4)*4
+                        self.image.x = self.image.x + self.speed_x * seconds
+                        self.image.y = self.image.y + self.speed_y * seconds
+                        if self.image.y > (screen_h+self.img_h) then
                             remove_from_render_list( self )
                             self.image:unparent()
                         end
@@ -84,11 +99,14 @@ lvlbg = {
         add_to_render_list(cloud)
     end,
     add_island = function(self,index, xxx, y_rot, z_rot)
-
+        --local offset = self.offset
         local island =
             
             {
                 speed = self.speed,
+                g_off = self.offset,
+                p_off = self.offset,
+                index = 0,
                 image = Clone{ 
 					source       = imgs[ "island"..tostring( index ) ] ,
                     anchor_point =
@@ -104,17 +122,22 @@ lvlbg = {
                         layers.land_doodads_1:add( self.image )
 						--self.image:lower_to_bottom()
 						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
-                        self.image.position     = {               xxx , 0 }
-                        self.y = -self.image.h / 2
-                        self.image.y = math.ceil(self.y/4)*4
+                        self.image.position     = {               xxx , -self.image.h/2 }
+                        -----self.y = self.g_off-self.image.h
+                        -----self.image.y = math.ceil(self.y/4)*4
                         self.img_h = self.image.h                        
 
                 end,
                     
                 render = function( self , seconds )
-                        self.y = self.y + self.speed * seconds
-                        self.image.y = math.ceil(self.y/4)*4
-                        if self.y > (screen_h+self.img_h) then
+                        -----if self.p_off > lvlbg[1].offset then
+                        -----    self.index = self.index + 1
+                        -----end
+                        -----self.p_off = lvlbg[1].offset
+                        -----self.y = self.p_off+(self.index-1)*240-- + self.speed * seconds
+                        -----self.image.y = math.ceil(self.y/4)*4
+                        self.image.y = self.image.y + self.speed * seconds
+                        if self.image.y > (screen_h+self.img_h) then
                             remove_from_render_list( self )
                             self.image:unparent()
                         end
@@ -126,26 +149,10 @@ lvlbg = {
             
     render = function( self , seconds )
             
-            local dy   = self.speed * seconds
             
-            self.top_strip  = self.top_strip  + dy
-            
-            self.offset = self.offset + dy
-            if self.offset > 0 then self.offset = self.offset - (self.base_tile.h) end
-            local off = math.ceil(self.offset/4)*4
-            --reposition all the water strips
-            for i , strip in ipairs( self.strips ) do
-            --[[
-                strip.extra.y = strip.extra.y + dy
-                strip.y = math.ceil(strip.extra.y/4)*4
-                --if dropped below the bottom of the screen move it to the top
-                if strip.y > screen_h then
-                    strip.extra.y = self.top_strip - self.strip_h+1
-                    strip.y    = math.ceil(strip.extra.y/4)*4
-                    self.top_strip = strip.y
-                end
-                --]]
-                strip.y = off+(i-1)*(self.base_tile.h) 
+            self.g.y = self.g.y + self.speed*seconds
+            if self.g.y > 0 then
+                self.g.y = self.g.y - self.base_tile.h
             end
             
 
@@ -166,6 +173,7 @@ lvlbg = {
     q_i           = 0,
     append_i      = 0,
     queues        = {},
+    repeating     = false,
     setup         = function( self )
         --base water strip
         self.base_tile = imgs.water2
@@ -239,6 +247,7 @@ lvlbg = {
         --]]
         local c
         
+        
         for i = 1,len do
             c = Clone {source =  imgs["dock_"..type.."_1"]}
             if side == 1 then
@@ -255,6 +264,7 @@ lvlbg = {
         
         return self.doodad_h*len/self.speed + delay
     end,
+    
     add_harbor_tile = function(self,type,side,tile_index,turret, b_ship, delay)
         
         local c = Clone {source =  imgs["dock_"..type.."_"..tile_index]}
@@ -293,6 +303,9 @@ lvlbg = {
         table.insert(self.queues[self.q_i+1],c)
         return self.doodad_h/self.speed + delay
     end,
+    begin_to_repeat = function(self)
+        self.repeating = true
+    end,
     render = function( self , seconds )
             
             local dy   = self.speed * seconds
@@ -323,24 +336,28 @@ lvlbg = {
                     frame.y = self.top_doodad - self.doodad_h+1--frame.y - screen.h - self.doodad_h  
                     self.top_doodad = frame.y
                     
-                    --clear out the frame
-                    frame:clear()
-                    self.queues[self.q_i] = nil
-                    
-                    --update the position
-                    self.q_i = self.q_i + 1
-                    if self.q_i >= self.append_i then
-                        self.append_i = self.q_i + 1
-                    end
-                    
-                    print("inc",self.q_i,frame.y)
-                    
-                    --load the next doodads
-                    if self.queues[self.q_i] ~= nil then
-                        for _,new_child in ipairs(self.queues[self.q_i]) do
-                            frame:add(new_child)
+                    --if not repeating, move to the next item in the queue
+                    if not self.repeating then
+                        
+                        --clear out the frame
+                        frame:clear()
+                        self.queues[self.q_i] = nil
+                        
+                        --update the position
+                        self.q_i = self.q_i + 1
+                        if self.q_i >= self.append_i then
+                            self.append_i = self.q_i + 1
+                        end
+                        
+                        --load the next doodads
+                        if self.queues[self.q_i] ~= nil then
+                            for _,new_child in ipairs(self.queues[self.q_i]) do
+                                frame:add(new_child)
+                            end
                         end
                     end
+                    
+                    
                     
                 end
             end
