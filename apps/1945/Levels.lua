@@ -187,7 +187,7 @@ levels =
             },
             --island
             {
-                {t =    40, item = self.bg.add_island, params = {self.bg,  2, 300, 0, 0,}},
+                {t =  40, item = self.bg.add_island, params = {self.bg,  2, 300, 0, 0,}},
                 {t =  50, item = self.bg.add_island, params = {self.bg, 1, 1720,    0, }},
                 {t =  60, item = self.bg.add_island, params = {self.bg, 2,    0,  180,  }},
                 {t =  68, item = self.bg.add_island, params = {self.bg, 3,  600,    0,  }},
@@ -360,6 +360,7 @@ levels =
         add_list       = {},
         wait           = {},
         w_q_index      = {},
+        num_bosses     = 4,
         
 		setup = function(self)
             
@@ -476,22 +477,19 @@ levels =
             self.next_queues =
             {
                 {   --left harbor
+                ---[[
                     {f = add_to_render_list,        p = { lvl2txt        }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_open,false,false  }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      2}},
-                    --{f = add_to_render_list,      p = {enemies.turret(), 350, -imgs.dock_1_1.h*2/3 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w, -imgs.dock_1_1.h*2/3, self.bg.speed }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), 350 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w, -imgs.dock_1_1.h*2/3, self.bg.speed }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_close,false,false  }},
@@ -499,21 +497,16 @@ levels =
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w, -imgs.dock_1_1.h*2/3, self.bg.speed}},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(),    350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(),    350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(),    350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
                     {f = add_to_render_list,      p = {powerups.health(300)}},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(),    350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      7 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_close ,false,false }},
@@ -521,28 +514,33 @@ levels =
                     {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), 350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w, -imgs.dock_1_1.h*2/3, self.bg.speed}},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), 350 }},
+                    --]]
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),400-imgs.b_ship.w, -imgs.dock_1_1.h*2/3, self.bg.speed}},
                     {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), 350, -imgs.dock_1_1.h*2/3 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      10 }},
+                    {f = add_to_render_list,      p = {powerups.health(300)}},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      3 }},
+                    --[[
+                    {f = add_to_render_list,      p = {enemies.battleship(),300, 1600, -15 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),700, 1600, -15 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),1100, 1600, -15 }},
+                    {f = add_to_render_list,      p = {enemies.battleship(),1500, 1600, -15 }},
+                    --]]
+                    {f = formations.b_ship_bosses, p = {}},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      25 }},
                 },
                 {   --right harbor
+                ---[[
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), screen.w -350, -imgs.dock_1_1.h*2/3 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert, true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier1,false,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),1520, -imgs.dock_1_1.h*2/3, self.bg.speed }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
@@ -554,40 +552,48 @@ levels =
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1, -1,      2 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier2,false,true }},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),1520, -imgs.dock_1_1.h*2/3, self.bg.speed }},
                     {f = self.bg.add_stretch,     p = {self.bg,  1, -1,      4 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier1,false,false }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_close ,false,false }},
                     
                     {f = self.bg.empty_stretch,   p = {self.bg,   2 }},
                     {f = add_to_render_list,      p = {powerups.life(1800)}},
-                    {f = add_to_render_list,      p = {enemies.battleship(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   13 }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    {f = self.bg.empty_stretch,   p = {self.bg,   5 }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    {f = self.bg.empty_stretch,   p = {self.bg,   2 }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
                     
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), screen.w -350, -imgs.dock_1_1.h*2/3 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true}},
-                    --{f = add_to_render_list,      p = {enemies.battleship(),1520, -imgs.dock_1_1.h*2/3, self.bg.speed }},
                     {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), screen.w -350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
                     
-                    {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
+                    {f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1400, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    {f = self.bg.empty_stretch,   p = {self.bg,   2 }},
                     {f = add_to_render_list,      p = {powerups.health(1800)}},
                     {f = self.bg.empty_stretch,   p = {self.bg,   10 }},
                     
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open ,false,false }},
-                    --{f = add_to_render_list,      p = {enemies.turret(), screen.w -350 , -imgs.dock_1_1.h*2/3}},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
                     {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
                     
                     {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
                     {f = add_to_render_list,      p = {powerups.life(1800)}},
                     {f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    --]]
+                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
+                    {f = self.bg.add_stretch,     p = {self.bg,  1, -1,     30}},
+                    {f = self.bg.begin_to_repeat, p = {self.bg}},
+                    
                 }
             }
             for i = 1, #self.add_list do
@@ -634,8 +640,11 @@ levels =
 	--		end
 		end,
 		level_complete = function(self)
-			remove_from_render_list( self)
-			add_to_render_list( lvlcomplete )
+            self.num_bosses = self.num_bosses - 1
+            if self.num_bosses == 0 then
+                remove_from_render_list( self)
+                add_to_render_list( lvlcomplete )
+            end
 		end
     },
     {

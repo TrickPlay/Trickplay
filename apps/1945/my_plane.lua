@@ -13,7 +13,7 @@ smoke = function(i)   return {
         for i = 1,num do
             self.plumes[i] =
             {
-                image = Clone{ source = imgs.flak },
+                image = Clone{ source = imgs.smoke },
                 group = Group{},
                 time  = -(i-1)/num*self.duration
             }
@@ -1017,7 +1017,7 @@ powerups =
 {
     guns = function(xxx) return {
         image = Clone{source=imgs.guns},--Rectangle{w=60,h=60,color="FFFF00",},
-        speed = 50,
+        speed = 30,
         setup = function(self)
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
@@ -1046,7 +1046,7 @@ powerups =
     } end,
     health = function(xxx) return {
         image = Clone{source=imgs.health},--Rectangle{w=60,h=60,color="FFFFFF",},
-        speed = 50,
+        speed = 30,
         setup = function(self)
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
@@ -1073,7 +1073,7 @@ powerups =
     } end,
     life = function(xxx) return {
         image = Clone{source=imgs.up_life},--Rectangle{w=60,h=60,color="654321",},
-        speed = 50,
+        speed = 30,
         setup = function(self)
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
