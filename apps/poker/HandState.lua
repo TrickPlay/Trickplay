@@ -4,6 +4,8 @@ HandState = Class(nil,function(state, ctrl, ...)
    local hole_cards
    local player_bets
    local pot
+   local pots
+   local current_pot
    local action
 
    local players
@@ -32,6 +34,7 @@ HandState = Class(nil,function(state, ctrl, ...)
    function state:get_hole_cards() return hole_cards end
    function state:get_player_bets() return player_bets end
    function state:get_pot() return pot end
+   function state:get_pots() return pots end
    function state:get_active_player_bet() return player_bets(players[action]) end
    function state:get_action()
       local in_players = state:get_in_players()
@@ -140,6 +143,8 @@ HandState = Class(nil,function(state, ctrl, ...)
          player_bets[player] = 0
       end
       pot = 0
+      pots = {}
+      current_pot = 1
 
       -- initialize small blind, big blind bets
       local sb_player = players[sb_p]
@@ -199,22 +204,95 @@ HandState = Class(nil,function(state, ctrl, ...)
    end
 
 
+   -- side pot stuff
+   local function update_side_pot(active_player, bet)
+      pots[current_pot].contributions[active_player] = bet
+   end
+
+   local function create_side_pot(bet)
+      local quota = bet
+      for _,pot in ipairs(pots) do
+         quota = quota - pot.quota
+      end
+      pots[#pots].quota = quota
+      table.insert(pots, {value = 0, contributions = {}, quota = 0})
+   end
+
+   local function balance_side_pots()
+      for i,pot in ipairs(pots) do
+         for player,contribution in pairs(pot.contributions) do
+            if contribution > pot.quota and pot.quota > 0 then
+               local diff = contribution - pot.quota
+               pot.contributions[player] = pot.quota
+               pots[i+1].contributions[player] = diff
+            end
+         end
+      end
+
+      current_pot = #pots
+   end
+
+   -- must guarentee in logic that winners[1] is the highest winner (overall best
+   -- hand) or none of this will work!!!
+   local function divide_side_pots(winners)
+      for i,player in ipairs(winners) do
+         -- if the player is a table of players you've got a split pot
+         -- scenario as well
+         if not player.is_a then
+            local total = 0
+            local the_player = player[1]
+            for k,pot in ipairs(pots) do
+               if pot.contributions[the_player] then
+                  for a_player,contribution in pairs(pot.contributions) do
+                     total = total + contribution
+                     pot.contributions[a_player] = 0
+                  end
+               end
+            end
+            for j,a_player in ipairs(player) do
+               a_player.money = a_player.money + math.floor(total/#player)
+            end
+         else
+            local total = 0
+            for j,pot in ipairs(pots) do
+               if pot.contributions[player] then
+                  for a_player,contribution in pairs(pot.contributions) do
+                     total = total + contribution
+                     pot.contributions[a_player] = 0
+                  end
+               end
+            end
+            player.money = player.money + total
+         end
+      end
+   end
+
    ---
    -- Makes the active player take his turn. If fold is true, then player
    -- folded, otherwise, player bet changes to bet (may be a call or a
    -- raise). Assumes the active player's money (player.money) reflects
    -- his current holdings.
    function state:execute_bet(fold, bet)
+      if not pots[current_pot] then
+          pots[current_pot] = {
+              value = pot,
+              contributions = {},
+              quota = 0
+          }
+      end
+
       print("state:execute_bet(" .. tostring(fold) .. ", " .. tostring(bet) .. ")")
       local active_player = players[action]
       local old_player_bet = player_bets[active_player]
       done[active_player] = true
       if active_player.money == 0 then
          all_in[active_player] = true
+         create_side_pot(bet)
       end
+
       local delta = 0
+      -- if the player folds, then he's out of the hand, and whatever bet he had goes into the pot
       if fold then
-         -- if the player folds, then he's out of the hand, and whatever bet he had goes into the pot
          set_out(active_player)
          pot, player_bets[active_player] = pot+player_bets[active_player], 0
          ctrl:fold_player(active_player)
@@ -223,10 +301,12 @@ HandState = Class(nil,function(state, ctrl, ...)
             table.remove(players, action)
             action = action - 1
          end
+
+      -- player calls
       elseif bet == call_bet or (bet < call_bet and active_player.money == 0) then
-         -- player calls
          delta = bet - player_bets[active_player]
          player_bets[active_player] = bet
+         -- specify the animation to be used
          if bet == 0 then
             ctrl:check_player(active_player)
          elseif active_player.money == 0 then
@@ -234,9 +314,12 @@ HandState = Class(nil,function(state, ctrl, ...)
          else
             ctrl:call_player(active_player)
          end
+
+         update_side_pot(active_player, bet)
+
+      -- player raises, forces everyone to act
       elseif bet >= call_bet+min_raise
       or (call_bet < bet and bet < call_bet+min_raise and active_player.money==0) then
-         -- player raises, forces everyone to act
          delta = bet - player_bets[active_player]
          player_bets[active_player] = bet
          for _, player in ipairs(players) do
@@ -256,6 +339,8 @@ HandState = Class(nil,function(state, ctrl, ...)
          else
             ctrl:raise_player(active_player)
          end
+
+         update_side_pot(active_player, bet)
       else
          error(
             "problem. this should never display. let's see what happened:" .. '\n' ..
@@ -265,8 +350,11 @@ HandState = Class(nil,function(state, ctrl, ...)
          )
       end
 
+    -------------- player finished bet, figure out next step ----------------
+
       running_money[active_player] = running_money[active_player] + delta
       local continue = true
+      -- if only one player left then give him the pot and clean up
       if get_num_inplayers() == 1 then
          local only_player = get_only_player()
          only_player.money, player_bets[only_player], pot = only_player.money+player_bets[only_player]+pot,0,0
@@ -282,9 +370,10 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
       end
 
+      -- otherwise, betting round done, so...
+      -- consolidate bets into the pot
       if continue then
-         -- otherwise, betting round done, so...
-         -- consolidate bets into the pot
+         balance_side_pots()
          for i,player in ipairs(players) do
             pot, player_bets[player] = pot+player_bets[player], 0
             done[player] = false
