@@ -456,9 +456,11 @@ enemies =
 		stage  = 0,     --the current stage the fighter is in
 		stages = {},    --the stages, must be set by formations{}
 		approach_speed = 300,
-		attack_speed   = 105,
+		attack_speed   = 120,
 		
 		--graphics for the fighter
+        x=0,
+        y=0,
 		num_prop_frames = 3,
 		prop_index = 1,
 		image  = Clone{source=imgs.fighter},
@@ -474,19 +476,19 @@ enemies =
 			},
 			
 			anchor_point = {imgs.fighter_prop.w/2,   imgs.fighter_prop.h/2},
-			position     = {imgs.fighter.w/2, imgs.fighter.h},
+			position     = {imgs.fighter.w/2, imgs.fighter.h+2},
 		},
 		group  = Group{anchor_point = {imgs.fighter.w/2,imgs.fighter.h/2}},
 		
-		shoot_time      = 2,	--how frequently the plane shoots
-		last_shot_time = math.random()*2,	--how long ago the plane last shot
+		shoot_time      = 3,	--how frequently the plane shoots
+		last_shot_time = 3,--math.random()*2,	--how long ago the plane last shot
 		
 		fire = function(f,secs)
 			f.last_shot_time = f.last_shot_time +
 				secs
 				
-			if f.last_shot_time >= f.shoot_time and
-				math.random(1,20) == 8 then
+			if f.last_shot_time >= f.shoot_time then--and
+				--math.random(1,20) == 8 then
 					
 				f.last_shot_time = 0
 				fire_bullet(f,imgs.fighter_bullet)
@@ -505,8 +507,10 @@ enemies =
 			self.stages[0] = function(f,seconds)
 				
 				--fly downwards
-				f.group.y = f.group.y + f.attack_speed*seconds
-				
+                local prev = f.group.y
+                f.y = f.y + f.attack_speed*seconds
+				f.group.y = math.ceil(f.y/4)*4
+				--print(f.name,"\t",f.group.y,"\t", f.y,"\t", f.group.y-prev, seconds)
 				--fire bullets
 				f:fire(seconds)
 				
@@ -523,7 +527,7 @@ enemies =
 			--animate the propeller
 			self.prop_index = self.prop_index%
 				self.num_prop_frames + 1
-			self.prop.y = -(self.prop_index - 1)*self.prop.w/
+			self.prop.y = -(self.prop_index - 1)*self.prop.h/
 				self.num_prop_frames
 				
                                 --print(self.group.x,self.group.y)
@@ -618,9 +622,9 @@ enemies =
 					--self.num_prop_frames still DNE 
 					imgs.zepp_prop.h/3,
 				},
-				anchor_point = {imgs.zepp_prop.w/2,
-				                imgs.zepp_prop.h/2},
-				position     = {37,260},
+				--anchor_point = {imgs.zepp_prop.w/2,
+				--                imgs.zepp_prop.h/2},
+				position     = {16,252},
 			},
 			g_r = Group
 			{
@@ -632,9 +636,9 @@ enemies =
 					--self.num_prop_frames still DNE 
 					imgs.zepp_prop.h/3,
 				},
-				anchor_point = {imgs.zepp_prop.w/2,
-				                imgs.zepp_prop.h/2},
-				position     = {202,260},
+				--anchor_point = {imgs.zepp_prop.w/2,
+				--                imgs.zepp_prop.h/2},
+				position     = {180,252},
 			},
 		},
 		
@@ -657,13 +661,13 @@ enemies =
 			
 			g_l = Group
 			{
-				x =  57,
+				x =  56,
 				y = 130,
 			},
 			
 			g_r = Group
 			{
-				x = 180,
+				x = 182,
 				y = 130,
 			},
 		},
@@ -857,8 +861,18 @@ enemies =
 			self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
 			
-			self.guns.g_l:add( self.guns.l, Clone{source=imgs.z_cannon_l,x = -imgs.z_cannon_l.w+7,y = -imgs.z_cannon_l.h/2 } )
-			self.guns.g_r:add( self.guns.r, Clone{source=imgs.z_cannon_r,x=-2,y = -imgs.z_cannon_l.h/2} )
+			self.guns.g_l:add( self.guns.l,
+            Clone{
+                source=imgs.z_cannon_l,
+                x = -imgs.z_cannon_l.w+8,
+                y = -imgs.z_cannon_l.h/2
+            } )
+			self.guns.g_r:add( self.guns.r,
+            Clone{
+                source=imgs.z_cannon_r,
+                x=-2,
+                y = -imgs.z_cannon_l.h/2
+            } )
 			
 			self.group:add(
 				
@@ -929,6 +943,7 @@ enemies =
                     self.e_fire_l.x = -(self.e_fire_l_i - 1)*self.e_fire_l.w/ 6
                 end
             end
+            
 			--animate the propellers
 			self.prop_index = self.prop_index%
 				self.num_prop_frames + 1
@@ -937,8 +952,48 @@ enemies =
 			self.prop.r.y = -(self.prop_index - 1)*self.prop.r.h/
 				self.num_prop_frames
 				
-			--animate the zeppelin based on the current stage
-			self.stages[self.stage](self,seconds)
+            if self.right_engine_dam > 2 and self.left_engine_dam > 2 then
+                self:rotate_guns_and_fire(seconds)
+                self.group.y = self.group.y + 60*seconds
+                self.prop.g_r.y = self.prop.g_r.y - 400*seconds
+                self.prop.g_r.x = self.prop.g_r.x + 200*seconds
+                self.prop.g_l.y = self.prop.g_l.y - 400*seconds
+                self.prop.g_l.x = self.prop.g_l.x - 200*seconds
+                if self.group.y >= screen_h +
+                        self.image.h then
+                        self.group:unparent()
+                        remove_from_render_list(self)
+                        
+                end
+            elseif self.right_engine_dam > 2 then
+                self:rotate_guns_and_fire(seconds)
+                self.group.x = self.group.x + 20*seconds
+                self.group.y = self.group.y + self.approach_speed*seconds
+                self.prop.g_r.y = self.prop.g_r.y - 400*seconds
+                self.prop.g_r.x = self.prop.g_r.x + 200*seconds
+                if self.group.y >= screen_h +
+                        self.image.h then
+                        self.group:unparent()
+                        remove_from_render_list(self)
+                        
+                end
+            elseif self.left_engine_dam > 2 then
+                self:rotate_guns_and_fire(seconds)
+                self.group.x = self.group.x - 20*seconds
+                self.group.y = self.group.y + self.approach_speed*seconds
+                self.prop.g_l.y = self.prop.g_l.y - 400*seconds
+                self.prop.g_l.x = self.prop.g_l.x - 200*seconds
+                if self.group.y >= screen_h +
+                        self.image.h then
+                        self.group:unparent()
+                        remove_from_render_list(self)
+                        
+                    end
+            else
+                --animate the zeppelin based on the current stage
+                self.stages[self.stage](self,seconds)
+            end
+			
 			--[[			--check for collisions
             for i = 1,#self.bulletholes do
                 table.insert(bad_guys_collision_list,
@@ -967,10 +1022,10 @@ enemies =
             table.insert(b_guys_air,
                 {
                     obj = self,
-                    x1  = self.group.x+self.prop.g_l.x-self.prop.l.w/2,
-                    x2  = self.group.x+self.guns.g_l.x+self.prop.l.w/2,
-                    y1  = self.group.y+self.prop.g_l.y-self.prop.l.h/2,
-                    y2  = self.group.y+self.prop.g_l.y+self.prop.l.h/2,
+                    x1  = self.group.x+57-self.prop.l.w/2,
+                    x2  = self.group.x+57+self.prop.l.w/2,
+                    y1  = self.group.y+260-self.prop.l.h/2,
+                    y2  = self.group.y+260+self.prop.l.h/2,
                     p   = 1,
                 }
             )
@@ -978,10 +1033,10 @@ enemies =
             table.insert(b_guys_air,
                 {
                     obj = self,
-                    x1  = self.group.x+self.prop.g_r.x-self.prop.r.w/2,
-                    x2  = self.group.x+self.guns.g_r.x+self.prop.r.w/2,
-                    y1  = self.group.y+self.prop.g_r.y-self.prop.r.h/2,
-                    y2  = self.group.y+self.prop.g_r.y+self.prop.r.h/2,
+                    x1  = self.group.x+180-self.prop.r.w/2,
+                    x2  = self.group.x+180+self.prop.r.w/2,
+                    y1  = self.group.y+260-self.prop.r.h/2,
+                    y2  = self.group.y+260+self.prop.r.h/2,
                     p   = 2,
                 }
             )
@@ -2340,9 +2395,15 @@ formations =
         e2 = enemies.basic_fighter()
         e3 = enemies.basic_fighter()
         
-        e1.group.position = {x-e2.image.w,-2*e2.image.h}
-        e2.group.position = {x,-e2.image.h}
-        e3.group.position = {x+e2.image.w,-2*e2.image.h}
+        e1.name = "one"
+        e1.group.position = {x-e2.image.w,0}---2*e2.image.h}
+        e1.y = -2*math.ceil(e2.image.h/4)*4
+         e2.name = "two"
+        e2.group.position = {x,0}---e2.image.h}
+        e2.y = -math.ceil(e2.image.h/4)*4
+         e3.name = "three"
+        e3.group.position = {x+e2.image.w,0}---2*e2.image.h}
+        e3.y = -2*math.ceil(e2.image.h/4)*4
         
         add_to_render_list(e1)
         add_to_render_list(e2)
@@ -2357,11 +2418,12 @@ formations =
         e.shoot_time      = 1.25
         e.last_shot_time = 1
         e.deg_counter = {}
+        e.approach_speed = 150
         e.stages =
         {
             --enter the screen
             function(f,secs)
-                move(f.group,f.attack_speed,secs)
+                move(f.group,f.approach_speed,secs)
                     
                 f:fire(secs)
                     
@@ -2373,7 +2435,7 @@ formations =
             function(f,secs)
                     
                 f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                    turn(f.group,r,dir,f.attack_speed,secs)
+                    turn(f.group,r,dir,f.approach_speed,secs)
                     
                 f:fire(secs)
                     
@@ -2389,7 +2451,7 @@ formations =
             function(f,secs)
                     
                 f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                    turn(f.group,r,-dir,f.attack_speed,secs)
+                    turn(f.group,r,-dir,f.approach_speed,secs)
                     
                 f:fire(secs)
                     
@@ -2408,7 +2470,7 @@ formations =
             function(f,secs)
                     
                 f.deg_counter[f.stage] = f.deg_counter[f.stage] +
-                    turn(f.group,r,dir,f.attack_speed,secs)
+                    turn(f.group,r,dir,f.approach_speed,secs)
                     
                 f:fire(secs)
                 if f.group.y >= screen_h + f.image.h then

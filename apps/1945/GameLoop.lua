@@ -2,14 +2,17 @@
 		Contains the gameloop functions
 --]]
 render_list = {}
-function add_to_render_list( item, ... )
+function add_call (item, ...)
     if item then
         if item.setup then
             item:setup( ... )-- , item )
         end
         render_list[item] = item.render
     end
+end
+function add_to_render_list( item, ... )
 
+    dolater(add_call, item, ... )
 end
 
 function remove_from_render_list( item )
