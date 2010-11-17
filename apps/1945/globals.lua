@@ -1,5 +1,5 @@
-screen_h = screen.h
-screen_w = screen.w
+screen_h = screen.h--/4
+screen_w = screen.w--/4
 
 
 --Game state

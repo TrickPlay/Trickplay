@@ -213,7 +213,8 @@ my_plane =
         },
     },
     render_items = {},
-    
+    x =0,
+    y=0,
 
     setup = function( self )
             self.bombing_crosshair:add(self.bombing_crosshair_strip)
@@ -233,6 +234,8 @@ my_plane =
             layers.planes:add( self.group )
             self.bombing_crosshair.x = self.image.w / (2*self.num_frames)
             self.group.position = { screen_w / 2 - self.image.w / (2*self.num_frames) , screen_h - self.image.h }
+            self.x = screen_w / 2 - self.image.w / (2*self.num_frames)
+            self.y = screen_h - self.image.h 
             g.clip = {0,0,self.image.w/self.num_frames,self.image.h}
 
             for i = 1, self.num_frames - 1 do
@@ -300,15 +303,16 @@ my_plane =
             
             --update position
             --print(self.h_speed)
-            local x = self.group.x + ( self.h_speed * seconds )
+            self.x = self.x + ( self.h_speed * seconds )
+            --local x = self.group.x + ( self.h_speed * seconds )
             
-            if x > screen_w - my_plane_sz then
+            if self.x > screen_w - my_plane_sz then
                 
                 x = screen_w -my_plane_sz 
                 self.h_speed = 0
                 
-            elseif x < 0 then
-                x = 0
+            elseif self.x < 0 then
+                self.x = 0
                 self.h_speed = 0
             else
                 if self.h_speed > 0 then
@@ -319,19 +323,20 @@ my_plane =
                     if self.h_speed > 0 then self.h_speed = 0 end
                 end
             end
-            self.group.x = x
+            self.group.x = math.ceil(self.x/4)*4
             
             
-            local y = self.group.y + ( self.v_speed * seconds )
+            self.y = self.y + ( self.v_speed * seconds )
+            --local y = self.group.y + ( self.v_speed * seconds )
             
-            if y > screen_h - my_plane_sz then
+            if self.y > screen_h - my_plane_sz then
                 
-                y = screen_h -my_plane_sz 
+                self.y = screen_h -my_plane_sz 
                 self.v_speed = 0
                 
-            elseif y < 0 then
+            elseif self.y < 0 then
                 
-                y = 0
+                self.y = 0
                 self.v_speed = 0
                 
             else
@@ -344,7 +349,7 @@ my_plane =
                 end
             end
             
-            self.group.y = y
+            self.group.y = math.ceil(self.y/4)*4
             
             if not self.dead then
                 table.insert(g_guys_air,

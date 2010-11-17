@@ -6,6 +6,7 @@ lvlbg = {
 
 --Level 1
 {
+    offset        = -240,
     speed         = 80, -- pixels per second
     strips        = {},
     top_strip     = 0,
@@ -24,9 +25,11 @@ lvlbg = {
         --set up the water strips
         local top = - ( self.base_tile.h  )
         self.top_strip = top
-        for _ , strip in ipairs( self.strips ) do
-            strip.position = { 0 , top }
-            top = top + self.base_tile.h - 1
+        for i , strip in ipairs( self.strips ) do
+            strip.position = { 0 , self.offset+(i-1)*(self.base_tile.h)}--1) }
+            --strip.extra.y = top
+            --strip.y = math.ceil(strip.extra.y/4)*4
+            --top = top + self.base_tile.h - 1
             layers.ground:add( strip )
         end
         
@@ -35,7 +38,10 @@ lvlbg = {
         local cloud =
             
             {
-                speed = self.speed,
+                speed_y = self.speed,
+                speed_x = 20,
+                x=0,
+                y = 0,
                 image = Clone{ 
 					source       = imgs[ "cloud"..tostring( index ) ] ,
                     anchor_point =
@@ -49,17 +55,26 @@ lvlbg = {
 					opacity      = 255 ,
 				},
                 setup = function( self )
+                        if xxx <= self.image.w / 2 then
+                            xxx = xxx-5*92;
+                            end
                         layers.air_doodads_2:add( self.image )
 						self.image:lower_to_bottom()
-						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
-						self.image.position     = {               xxx , -self.image.h / 2 }
-
+						self.image.anchor_point = {  self.image.w / 2+2 ,  self.image.h / 2+2 }
+                        self.x = xxx
+                        self.y = -self.image.h / 2
+                        self.image.y = math.ceil(self.y/4)*4
+                        self.image.x = math.ceil(self.x/4)*4
+                        self.img_h = self.image.h
 
                 end,
                     
                 render = function( self , seconds )
-                        self.image.y = self.image.y + self.speed * seconds
-                        if self.image.y > (screen_h+self.image.h) then
+                        self.y = self.y + self.speed_y * seconds
+                        self.image.y = math.ceil(self.y/4)*4
+                        self.x = self.x + self.speed_x * seconds
+                        self.image.x = math.ceil(self.x/4)*4
+                        if self.y > (screen_h+self.img_h) then
                             remove_from_render_list( self )
                             self.image:unparent()
                         end
@@ -89,14 +104,17 @@ lvlbg = {
                         layers.land_doodads_1:add( self.image )
 						--self.image:lower_to_bottom()
 						self.image.anchor_point = {  self.image.w / 2 ,  self.image.h / 2 }
-						self.image.position     = {               xxx , -self.image.h / 2 }
-                        
+                        self.image.position     = {               xxx , 0 }
+                        self.y = -self.image.h / 2
+                        self.image.y = math.ceil(self.y/4)*4
+                        self.img_h = self.image.h                        
 
                 end,
                     
                 render = function( self , seconds )
-                        self.image.y = self.image.y + self.speed * seconds
-                        if self.image.y > (screen_h+self.image.h) then
+                        self.y = self.y + self.speed * seconds
+                        self.image.y = math.ceil(self.y/4)*4
+                        if self.y > (screen_h+self.img_h) then
                             remove_from_render_list( self )
                             self.image:unparent()
                         end
@@ -112,14 +130,22 @@ lvlbg = {
             
             self.top_strip  = self.top_strip  + dy
             
+            self.offset = self.offset + dy
+            if self.offset > 0 then self.offset = self.offset - (self.base_tile.h) end
+            local off = math.ceil(self.offset/4)*4
             --reposition all the water strips
-            for _ , strip in ipairs( self.strips ) do
-                strip.y = strip.y + dy
+            for i , strip in ipairs( self.strips ) do
+            --[[
+                strip.extra.y = strip.extra.y + dy
+                strip.y = math.ceil(strip.extra.y/4)*4
                 --if dropped below the bottom of the screen move it to the top
                 if strip.y > screen_h then
-                    strip.y    = self.top_strip - self.strip_h+1--strip.y - screen.h - strip.h
+                    strip.extra.y = self.top_strip - self.strip_h+1
+                    strip.y    = math.ceil(strip.extra.y/4)*4
                     self.top_strip = strip.y
                 end
+                --]]
+                strip.y = off+(i-1)*(self.base_tile.h) 
             end
             
 

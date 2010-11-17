@@ -317,7 +317,7 @@ function idle.on_idle( idle , seconds )
         for item,render in pairs( render_list ) do
             render( item , seconds ) 
         end
-
+--print("\n")
         process_collisions( )
         
     end
