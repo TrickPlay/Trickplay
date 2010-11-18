@@ -1,4 +1,4 @@
 custom-egl-initialization.patch
 dont-build-tests.patch
 remove-eglwait.patch
-debug-vbo-khrn-cacheword-crash.patch
+disable-unused-attribs.patch
