@@ -63,13 +63,13 @@ typedef struct TPContext TPContext;
                             from.
                             Defaults to "apps" (in the current working directory).
                         
-    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "1" TrickPlay will scan the
+    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "TRUE" TrickPlay will scan the
                             paths listed in app sources for apps. If you attempt to
                             launch an app using an id (instead of a path) and the
                             TrickPlay database does not have any apps, TrickPlay will
                             scan all of the app sources regardless of the value of
                             this variable.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_APP_ID -             Initial app id. The id of the first application to launch.
                             Instead of specifying the id, you can set <TP_APP_PATH> to
@@ -147,10 +147,10 @@ typedef struct TPContext TPContext;
                             production builds, the telnet console is always disabled.
                             Defaults to "7777".
                             
-    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "1" if you wish to enable
+    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "TRUE" if you wish to enable
                             support for remote controllers. This will create a
                             listener and establish an mDNS service for discovery.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_CONTROLLERS_PORT -   Controllers port. Set to non-zero to run the controllers
                             listener on a fixed port.
