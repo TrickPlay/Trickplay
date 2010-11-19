@@ -498,21 +498,27 @@ void TPContext::setup_fonts()
         // a long time the first time around. Once the cache exists, it will
         // be very quick.
 
-        if ( FcConfigAppFontAddDir( config, ( const FcChar8 * )fonts_path ) == FcFalse )
-        {
-            g_warning( "FAILED TO READ FONTS" );
-        }
-        else
-        {
-            // This transfers ownership of the config object over to FC, so we
-            // don't have to destroy it or unref it.
+		gchar ** paths = g_strsplit( fonts_path, ";", 0 );
+		for ( gchar ** p = paths; *p; ++p )
+		{
+			gchar * path = g_strstrip( *p );
 
-            FcConfigSetCurrent( config );
-
-            config = NULL;
-
-            g_debug( "FONT CONFIGURATION COMPLETE" );
-        }
+			if ( FcConfigAppFontAddDir( config, ( const FcChar8 * )path ) == FcFalse )
+			{
+				g_warning( "FAILED TO READ FONTS" );
+			}
+			else
+			{
+				// This transfers ownership of the config object over to FC, so we
+				// don't have to destroy it or unref it.
+	
+				FcConfigSetCurrent( config );
+	
+				config = NULL;
+	
+				g_debug( "FONT CONFIGURATION COMPLETE" );
+			}
+		}
     }
 
     // If something went wrong, we destroy the config
