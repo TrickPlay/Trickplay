@@ -32,11 +32,25 @@ void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor 
     }
 }
 
+void ClutterUtil::actor_on_show(ClutterActor*actor,void*)
+{
+	if( clutter_actor_get_opacity( actor ) == 0 )
+	{
+        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
+	    clutter_actor_hide( actor );
+	}
+}
+
+void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
+{
+}
 
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
 {
     ClutterActor * actor = CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
     g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
+    g_signal_connect( G_OBJECT(actor), "show", (GCallback)actor_on_show, actor );
+    g_signal_connect( G_OBJECT(actor), "hide", (GCallback)actor_on_hide, actor );
     return actor;
 }
 
