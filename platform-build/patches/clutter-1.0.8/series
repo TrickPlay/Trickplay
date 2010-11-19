@@ -2,3 +2,7 @@ custom-egl-initialization.patch
 dont-build-tests.patch
 remove-eglwait.patch
 disable-unused-attribs.patch
+blend-typo.patch
+texture-combining-shader-error-fix.patch
+pango-render-enable-blend.patch
+enable-gl-alphafunc.patch

@@ -1,0 +1,24 @@
+Index: clutter-1.0.8/clutter/pango/cogl-pango-display-list.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/pango/cogl-pango-display-list.c	2010-11-19 11:05:04.664651214 +0900
++++ clutter-1.0.8/clutter/pango/cogl-pango-display-list.c	2010-11-19 11:07:10.312651216 +0900
+@@ -234,6 +234,8 @@
+ }
+ 
+ extern void cogl_wrap_glEnable (GLenum cap);
++extern void cogl_wrap_glAlphaFunc (GLenum func, GLclampf ref);
++#define GL_ALPHA_TEST		0x0BC0
+ 
+ static void
+ _cogl_pango_display_list_render_texture (CoglHandle material,
+@@ -241,6 +243,10 @@
+                                          CoglPangoDisplayListNode *node)
+ {
+   CoglColor premult_color = *color;
++
++  cogl_wrap_glEnable(GL_ALPHA_TEST);
++  cogl_wrap_glAlphaFunc(GL_GREATER, 0.0f);
++
+   cogl_material_set_layer (material, 0, node->d.texture.texture);
+   cogl_material_set_color (material, &premult_color);
+   cogl_set_source (material);

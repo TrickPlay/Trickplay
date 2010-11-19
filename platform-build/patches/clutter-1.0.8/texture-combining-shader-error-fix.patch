@@ -1,0 +1,13 @@
+Index: clutter-1.0.8/clutter/cogl/gles/cogl-gles2-wrapper.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/cogl/gles/cogl-gles2-wrapper.c	2010-11-18 21:04:00.072000696 +0900
++++ clutter-1.0.8/clutter/cogl/gles/cogl-gles2-wrapper.c	2010-11-18 21:24:58.364001410 +0900
+@@ -371,7 +372,7 @@
+              black. We want to use the RGB from the current color in that
+              case */
+           g_string_append_printf (shader_source,
+-                                  "gl_FragColor.a *= "
++                                  "gl_FragColor *= "
+                                   "texture2D (texture_unit[%d], "
+                                   "tex_coord[%d]).a;\n",
+                                   i, i);

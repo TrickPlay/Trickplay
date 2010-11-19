@@ -1,0 +1,21 @@
+Index: clutter-1.0.8/clutter/pango/cogl-pango-display-list.c
+===================================================================
+--- clutter-1.0.8.orig/clutter/pango/cogl-pango-display-list.c	2010-11-19 11:00:16.964651213 +0900
++++ clutter-1.0.8/clutter/pango/cogl-pango-display-list.c	2010-11-19 11:01:43.016651214 +0900
+@@ -233,6 +233,8 @@
+   _cogl_pango_display_list_append_node (dl, node);
+ }
+ 
++extern void cogl_wrap_glEnable (GLenum cap);
++
+ static void
+ _cogl_pango_display_list_render_texture (CoglHandle material,
+                                          const CoglColor *color,
+@@ -296,6 +298,7 @@
+       node->d.texture.vertex_buffer = vb;
+     }
+ 
++  cogl_wrap_glEnable(GL_BLEND);
+ 
+ #ifdef CLUTTER_COGL_HAS_GL
+ 
