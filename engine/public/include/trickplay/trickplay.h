@@ -59,17 +59,16 @@ typedef struct TPContext TPContext;
     Context configuration keys to be used with <tp_context_set> and <tp_context_get>.
     
     TP_APP_SOURCES -        List of paths to applications. This is a semicolon (";")
-                            delimited list of paths where applications can be sourced
-                            from.
+                            delimited list of paths where applications can be sourced.
                             Defaults to "apps" (in the current working directory).
                         
-    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "1" TrickPlay will scan the
+    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "TRUE" TrickPlay will scan the
                             paths listed in app sources for apps. If you attempt to
                             launch an app using an id (instead of a path) and the
                             TrickPlay database does not have any apps, TrickPlay will
                             scan all of the app sources regardless of the value of
                             this variable.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_APP_ID -             Initial app id. The id of the first application to launch.
                             Instead of specifying the id, you can set <TP_APP_PATH> to
@@ -147,10 +146,10 @@ typedef struct TPContext TPContext;
                             production builds, the telnet console is always disabled.
                             Defaults to "7777".
                             
-    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "1" if you wish to enable
+    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "TRUE" if you wish to enable
                             support for remote controllers. This will create a
                             listener and establish an mDNS service for discovery.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_CONTROLLERS_PORT -   Controllers port. Set to non-zero to run the controllers
                             listener on a fixed port.
@@ -168,8 +167,9 @@ typedef struct TPContext TPContext;
     TP_LOG_APP_ONLY -       Whether to log only MESSAGE messages (printed by apps).
                             Defaults to "0".
 
-    TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
-                            TrickPlay will use the systems fonts.
+    TP_FONTS_PATH -         List of paths to directories containing fonts. If not set,
+                            TrickPlay will use the systems fonts.  This is a semicolon (";")
+                            delimited list of paths where fonts can be sourced.
                             Defaults to NULL.
 
     TP_DOWNLOADS_PATH -     Path to a directory that TrickPlay will use to download
