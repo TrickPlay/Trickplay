@@ -8,50 +8,9 @@
 
 //.............................................................................
 
-// We want all actors to have a listener on their opacity property.  When opacity goes to 0,
-// the object should automatically hide(); when opacity stops being 0, unless hide() has been called manually,
-// it should show() itself
-
-void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self )
-{
-    unsigned opacity = clutter_actor_get_opacity(self);
-
-    if(opacity == 0)
-    {
-        if(CLUTTER_ACTOR_IS_VISIBLE(self))
-        {
-            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
-            clutter_actor_hide(self);
-        }
-    } else {
-        if(!CLUTTER_ACTOR_IS_VISIBLE(self))
-        {
-            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
-            clutter_actor_show(self);
-        }
-    }
-}
-
-void ClutterUtil::actor_on_show(ClutterActor*actor,void*)
-{
-	if( clutter_actor_get_opacity( actor ) == 0 )
-	{
-        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
-	    clutter_actor_hide( actor );
-	}
-}
-
-void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
-{
-}
-
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
 {
-    ClutterActor * actor = CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
-    g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
-    g_signal_connect( G_OBJECT(actor), "show", (GCallback)actor_on_show, actor );
-    g_signal_connect( G_OBJECT(actor), "hide", (GCallback)actor_on_hide, actor );
-    return actor;
+    return CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
 }
 
 //.............................................................................
@@ -214,10 +173,52 @@ void ClutterUtil::set_props_from_table( lua_State * L, int table )
 
 //.............................................................................
 
+// We want all actors to have a listener on their opacity property.  When opacity goes to 0,
+// the object should automatically hide(); when opacity stops being 0, unless hide() has been called manually,
+// it should show() itself
+
+void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self )
+{
+    unsigned opacity = clutter_actor_get_opacity(self);
+
+    if(opacity == 0)
+    {
+        if(CLUTTER_ACTOR_IS_VISIBLE(self))
+        {
+            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_hide(self);
+        }
+    } else {
+        if(!CLUTTER_ACTOR_IS_VISIBLE(self))
+        {
+            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_show(self);
+        }
+    }
+}
+
+void ClutterUtil::actor_on_show(ClutterActor*actor,void*)
+{
+	if( clutter_actor_get_opacity( actor ) == 0 )
+	{
+        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
+	    clutter_actor_hide( actor );
+	}
+}
+
+void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
+{
+}
+
+
 void ClutterUtil::initialize_actor( lua_State * L, ClutterActor * actor, const char * metatable )
 {
     // Metatables are static, so we don't need to free it
     g_object_set_data( G_OBJECT( actor ), "tp-metatable", ( gpointer )metatable );
+
+    g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
+    g_signal_connect( G_OBJECT(actor), "show", (GCallback)actor_on_show, actor );
+    g_signal_connect( G_OBJECT(actor), "hide", (GCallback)actor_on_hide, actor );
 }
 
 //.............................................................................
