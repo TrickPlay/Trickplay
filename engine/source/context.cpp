@@ -279,8 +279,13 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         extra = String( " : " ) + extra;
     }
 
+	if( !CLUTTER_ACTOR_IS_VISIBLE( actor ) )
+	{
+		details += " HIDDEN";
+	}
 
-    g_info( "%s%s%s:%s%u : (%d,%d %ux%u)%s%s",
+    g_info( "%s%s%s%s:%s%u : (%d,%d %ux%u)%s%s\033[0m",
+    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
             clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
