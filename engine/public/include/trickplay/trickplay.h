@@ -59,8 +59,7 @@ typedef struct TPContext TPContext;
     Context configuration keys to be used with <tp_context_set> and <tp_context_get>.
     
     TP_APP_SOURCES -        List of paths to applications. This is a semicolon (";")
-                            delimited list of paths where applications can be sourced
-                            from.
+                            delimited list of paths where applications can be sourced.
                             Defaults to "apps" (in the current working directory).
                         
     TP_SCAN_APP_SOURCES -   Scan app sources. If set to "TRUE" TrickPlay will scan the
@@ -168,8 +167,9 @@ typedef struct TPContext TPContext;
     TP_LOG_APP_ONLY -       Whether to log only MESSAGE messages (printed by apps).
                             Defaults to "0".
 
-    TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
-                            TrickPlay will use the systems fonts.
+    TP_FONTS_PATH -         List of paths to directories containing fonts. If not set,
+                            TrickPlay will use the systems fonts.  This is a semicolon (";")
+                            delimited list of paths where fonts can be sourced.
                             Defaults to NULL.
 
     TP_DOWNLOADS_PATH -     Path to a directory that TrickPlay will use to download
