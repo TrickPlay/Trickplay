@@ -8,9 +8,36 @@
 
 //.............................................................................
 
+// We want all actors to have a listener on their opacity property.  When opacity goes to 0,
+// the object should automatically hide(); when opacity stops being 0, unless hide() has been called manually,
+// it should show() itself
+
+void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self )
+{
+    unsigned opacity = clutter_actor_get_opacity(self);
+
+    if(opacity == 0)
+    {
+        if(CLUTTER_ACTOR_IS_VISIBLE(self))
+        {
+            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_hide(self);
+        }
+    } else {
+        if(!CLUTTER_ACTOR_IS_VISIBLE(self))
+        {
+            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_show(self);
+        }
+    }
+}
+
+
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
 {
-    return CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
+    ClutterActor * actor = CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
+    g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
+    return actor;
 }
 
 //.............................................................................

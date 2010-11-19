@@ -8,6 +8,9 @@
 
 namespace ClutterUtil
 {
+    // Notification handler for actors on opacity changes to show/hide as necessary
+    void actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self );
+
     // Returns an actor created from the constructor function. It sinks
     // the original ref and then adds another, so you have to unref the
     // result.
