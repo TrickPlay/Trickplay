@@ -279,8 +279,13 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         extra = String( " : " ) + extra;
     }
 
+	if( !CLUTTER_ACTOR_IS_VISIBLE( actor ) )
+	{
+		details += " HIDDEN";
+	}
 
-    g_info( "%s%s%s:%s%u : (%d,%d %ux%u)%s%s",
+    g_info( "%s%s%s%s:%s%u : (%d,%d %ux%u)%s%s\033[0m",
+    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
             clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
@@ -499,25 +504,30 @@ void TPContext::setup_fonts()
         // be very quick.
 
 		gchar ** paths = g_strsplit( fonts_path, ";", 0 );
+		int success = 1;
 		for ( gchar ** p = paths; *p; ++p )
 		{
 			gchar * path = g_strstrip( *p );
 
+			g_debug( "ADDING FONT PATH: '%s'", path );
+
 			if ( FcConfigAppFontAddDir( config, ( const FcChar8 * )path ) == FcFalse )
 			{
 				g_warning( "FAILED TO READ FONTS" );
+				success = 0; break;
 			}
-			else
-			{
-				// This transfers ownership of the config object over to FC, so we
-				// don't have to destroy it or unref it.
-	
-				FcConfigSetCurrent( config );
-	
-				config = NULL;
-	
-				g_debug( "FONT CONFIGURATION COMPLETE" );
-			}
+		}
+
+		if(success)
+		{
+			// This transfers ownership of the config object over to FC, so we
+			// don't have to destroy it or unref it.
+
+			FcConfigSetCurrent( config );
+
+			config = NULL;
+
+			g_debug( "FONT CONFIGURATION COMPLETE" );
 		}
     }
 
@@ -1751,6 +1761,8 @@ void TPContext::validate_configuration()
     }
 
     gchar * full_data_path = g_build_filename( data_path, "trickplay", NULL );
+
+	g_debug( "USING DATA PATH: '%s'", full_data_path );
 
     if ( g_mkdir_with_parents( full_data_path, 0700 ) != 0 )
     {
