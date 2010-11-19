@@ -185,13 +185,13 @@ void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor 
     {
         if(CLUTTER_ACTOR_IS_VISIBLE(self))
         {
-            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
+--            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
             clutter_actor_hide(self);
         }
     } else {
         if(!CLUTTER_ACTOR_IS_VISIBLE(self))
         {
-            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
+--            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
             clutter_actor_show(self);
         }
     }
@@ -201,7 +201,7 @@ void ClutterUtil::actor_on_show(ClutterActor*actor,void*)
 {
 	if( clutter_actor_get_opacity( actor ) == 0 )
 	{
-        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
+--        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
 	    clutter_actor_hide( actor );
 	}
 }
