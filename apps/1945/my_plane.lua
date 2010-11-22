@@ -111,6 +111,8 @@ smoke = function(i)   return {
 -------------------------------------------------------------------------------
 -- This is my plane. It spawns bullets
 
+setup_my_plane = nil
+
 my_plane =
 {
 	firing_powerup = 1,
@@ -247,6 +249,40 @@ my_plane =
             end
             self.img_h = self.image.h
             self.prop_h = self.prop.l.h
+            if type(self.overwrite_vars) == "table"  then
+                print("self.overwrite_vars", self.overwrite_vars)
+                recurse_and_apply(  self, self.overwrite_vars  )
+            end
+        end,
+        salvage = function( self, salvage_list )
+            
+            s = {
+                func         = {"setup_my_plane"},
+                table_params = {},
+                setup_params = {},
+            }
+            table.insert(s.table_params,{
+                prop_index     = self.prop_index,
+                v_speed        = self.v_speed,
+                h_speed        = self.h_speed,
+                damage         = self.damage, 
+                last_shot_time = self.last_shot_time,
+                bombing_mode   = self.bombing_mode,
+                last_smoke     = last_smoke,
+                deg_counter    = {},
+                dead           = self.dead,
+                dead_time      = self.dead_time,
+                firing_powerup = self.firing_powerup,
+                group = {
+                    x = self.group.x,
+                    y = self.group.y,
+                },
+                image = {
+                    x = self.image.x,
+                    y = self.image.y
+                }
+            })
+            return s
         end,
     hit = function(self)
         if self.damage ~= (self.num_frames - 1) then
@@ -1102,3 +1138,4 @@ powerups =
         end,
     } end,
 }
+setup_my_plane = function(o) add_to_render_list(my_plane,o) end
