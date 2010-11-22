@@ -74,7 +74,7 @@ function( section )
 	for _,item in ipairs( section_items ) do
 	     item.reactive = true
 	     if (item.text ~= "INSERT :                   ") then 
---[[
+---[[
              function item:on_button_down(x,y,button,num_clicks)
         	if item.on_activate then
 	    		item:on_focus_out()
@@ -85,7 +85,7 @@ function( section )
         	end
 		return true 
 	     end
-]]
+--]]
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
                 --dropmenu_item.reactive = true
@@ -190,22 +190,43 @@ function( section )
     
         local unfocus = section_items[ section.focus ]
         local focus = section_items[ section.focus + delta ]
-        
-        if not focus then
+        local next_focus = section.focus + delta 
+	local prev_focus 
+
+	if not focus then
             if section.focus + delta == 0 then
                 if unfocus then
-                    unfocus:on_focus_out()
+                    unfocus:on_focus_out() 
                 end
                 ui:on_exit_section()
             end
             return
         end
+
+        while focus.reactive == false do 
+	      next_focus = next_focus + delta 
+	      focus = section_items[next_focus]
+	      if focus == nil then 
+	          next_focus = 1 
+		  focus = section_items[ next_focus ]
+		  if(delta < 0) then 
+		       while focus ~= nil do 
+		       	    if focus.reactive == true then 
+				prev_focus = focus
+		            end 
+			    next_focus = next_focus + 1
+			    focus = section_items[next_focus]
+		       end 
+		       focus = prev_focus
+		  end
+	      end 
+	end 
         
         if unfocus then
             unfocus:on_focus_out()
         end
         
-        section.focus = section.focus + delta
+        section.focus = next_focus
     
         focus:on_focus_in()
     end
@@ -254,10 +275,8 @@ function( section )
                 if f then
                     f()
                 end
-		return true -- hjk
+		return true 
             end
-    
-        --return true
     end
 
     ---------------------------------------------------------------------------

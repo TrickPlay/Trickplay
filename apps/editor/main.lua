@@ -177,6 +177,112 @@ local function build_ui( show_it )
 
     local meun_init = true
 
+    local function grayed_out_dd_item()
+        local section = ui.sections[ ui.focus ]
+
+	local function turn_off(item)
+		item.reactive = false 
+		for i, j in pairs(item.children) do 
+		     if (j.reactive) then 
+			j.reactive = false
+		     end 
+		end 
+		item:find_child("caption").color = {100,100,100,255} 
+	end 
+
+	local function turn_on(item)
+		item.reactive = true	
+		for i, j in pairs(item.children) do 
+		     if (j.reactive) then 
+			j.reactive = true
+		     end 
+		end 
+		item:find_child("caption").color = {255,255,255,255} 
+		
+	end 
+
+	if (ui.focus == SECTION_EDIT) then 
+	     if table.getn(undo_list) == 0 then
+		turn_off(section.dropdown:find_child("undo")) 
+	     else 
+		turn_on(section.dropdown:find_child("undo")) 
+	     end
+
+	     if table.getn(redo_list) == 0 then
+		turn_off(section.dropdown:find_child("redo")) 
+	     else 
+		turn_on(section.dropdown:find_child("redo")) 
+	     end
+
+	     if table.getn(selected_objs) == 0 then 
+		turn_off(section.dropdown:find_child("clone")) 
+		turn_off(section.dropdown:find_child("delete")) 
+		turn_off(section.dropdown:find_child("group")) 
+		turn_off(section.dropdown:find_child("ungroup")) 
+	     else 
+		turn_on(section.dropdown:find_child("clone")) 
+		turn_on(section.dropdown:find_child("delete")) 
+		turn_on(section.dropdown:find_child("group")) 
+		turn_on(section.dropdown:find_child("ungroup")) 
+	     end 	
+	elseif (ui.focus == SECTION_ARRANGE) then 
+	     if table.getn(selected_objs) == 0 then 
+		turn_off(section.dropdown:find_child("left"))
+		turn_off(section.dropdown:find_child("right"))
+		turn_off(section.dropdown:find_child("top"))
+		turn_off(section.dropdown:find_child("bottom"))
+		turn_off(section.dropdown:find_child("hcenter"))
+		turn_off(section.dropdown:find_child("vcenter"))
+		turn_off(section.dropdown:find_child("hspace"))
+		turn_off(section.dropdown:find_child("vspace"))
+		turn_off(section.dropdown:find_child("bring_front"))
+		turn_off(section.dropdown:find_child("bring_forward"))
+		turn_off(section.dropdown:find_child("send_back"))
+		turn_off(section.dropdown:find_child("send_backward"))
+	     elseif table.getn(selected_objs) == 1 then 
+		turn_off(section.dropdown:find_child("left"))
+		turn_off(section.dropdown:find_child("right"))
+		turn_off(section.dropdown:find_child("top"))
+		turn_off(section.dropdown:find_child("bottom"))
+		turn_off(section.dropdown:find_child("hcenter"))
+		turn_off(section.dropdown:find_child("vcenter"))
+		turn_off(section.dropdown:find_child("hspace"))
+		turn_off(section.dropdown:find_child("vspace"))
+		turn_on(section.dropdown:find_child("bring_front"))
+		turn_on(section.dropdown:find_child("bring_forward"))
+		turn_on(section.dropdown:find_child("send_back"))
+		turn_on(section.dropdown:find_child("send_backward"))
+             elseif table.getn(selected_objs) == 2 then 
+		turn_on(section.dropdown:find_child("left"))
+		turn_on(section.dropdown:find_child("right"))
+		turn_on(section.dropdown:find_child("top"))
+		turn_on(section.dropdown:find_child("bottom"))
+		turn_on(section.dropdown:find_child("hcenter"))
+		turn_on(section.dropdown:find_child("vcenter"))
+		turn_on(section.dropdown:find_child("bring_front"))
+		turn_on(section.dropdown:find_child("bring_forward"))
+		turn_on(section.dropdown:find_child("send_back"))
+		turn_on(section.dropdown:find_child("send_backward"))
+		turn_off(section.dropdown:find_child("hspace"))
+		turn_off(section.dropdown:find_child("vspace"))
+             else 
+		turn_on(section.dropdown:find_child("left"))
+		turn_on(section.dropdown:find_child("right"))
+		turn_on(section.dropdown:find_child("top"))
+		turn_on(section.dropdown:find_child("bottom"))
+		turn_on(section.dropdown:find_child("hcenter"))
+		turn_on(section.dropdown:find_child("vcenter"))
+		turn_on(section.dropdown:find_child("hspace"))
+		turn_on(section.dropdown:find_child("vspace"))
+		turn_on(section.dropdown:find_child("bring_front"))
+		turn_on(section.dropdown:find_child("bring_forward"))
+		turn_on(section.dropdown:find_child("send_back"))
+		turn_on(section.dropdown:find_child("send_backward"))
+
+	     end 
+	end 
+    end 
+
     local function animate_in_dropdown( )
 
 	input_mode = S_MENU 
@@ -208,6 +314,9 @@ local function build_ui( show_it )
             opacity = 255,
             y_rotation = 0
         }
+
+        grayed_out_dd_item()
+
    	section.dropdown:raise_to_top() 
     end
     
@@ -298,11 +407,13 @@ local function build_ui( show_it )
 	--[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
 	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
-        [ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.open()  end,
+        --[ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.open()  end,
+        [ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.the_open()  end,
         [ keys.s	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(true) end,
         [ keys.a	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(false) end,
         [ keys.t	] = function() animate_out_dropdown() editor.text() input_mode = S_SELECT end,
-        [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.image() end,
+        --[ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.image() end,
+        [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.the_image() end,
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
@@ -563,7 +674,6 @@ local function build_ui( show_it )
       end
 
       function screen:on_motion(x,y)
-
 	  if(input_mode == S_RECTANGLE) then 
 		if(rect_mouse_pointer == nil) then 
 		rect_mouse_pointer = ui.factory.draw_mouse_pointer()
@@ -586,9 +696,17 @@ local function build_ui( show_it )
 	                 border.position = {x -dx, y -dy}
 		    end 
 	       end 
-	       actor.x =  x - dx 
-	       actor.y =  y - dy  
-
+	       if(actor.type ~= "Canvas") then 
+	            actor.x =  x - dx 
+	       end 
+	       if(actor.type ~= "Canvas") then 
+	             actor.y =  y - dy  
+	       elseif (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 
+		     local dif = y - dy - actor.extra.org_y
+	             actor.y =  y - dy  
+		     actor.extra.text_position = {actor.extra.text_position[1], actor.extra.txt_y -dif}
+		     actor.extra.text_clip = {0,dif,actor.extra.text_clip[3],500}
+	       end 	
 	       if (screen:find_child(actor.name.."a_m") ~= nil) then 
 		     local anchor_mark = screen:find_child(actor.name.."a_m")
 		     anchor_mark.position = {actor.x, actor.y, actor.z}

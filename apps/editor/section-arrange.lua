@@ -213,7 +213,17 @@ function( section )
     
         local unfocus = section_items[ section.focus ]
         local focus = section_items[ section.focus + delta ]
-        
+	local next_focus = section.focus + delta 
+	local prev_focus 
+	local gray_cnt = 0
+	local icnt = table.getn(section_items) 
+
+--[[
+	while focus.reactive == false do 
+             animate_out_dropdown()
+	     return -1
+	end 
+  ]]
         if not focus then
             if section.focus + delta == 0 then
                 if unfocus then
@@ -223,11 +233,35 @@ function( section )
             end
             return
         end
-        
+	
+	while focus.reactive == false do 
+	      gray_cnt = gray_cnt + 1
+	      next_focus = next_focus + delta 
+	      focus = section_items[next_focus]
+	      if focus == nil then 
+		  if (gray_cnt == icnt) then 
+			animate_out_dropdown()
+		        return -1
+		  end 
+	          next_focus = 1 
+		  focus = section_items[ next_focus ]
+		  if(delta < 0) then 
+		       while focus ~= nil do 
+		       	    if focus.reactive == true then 
+				prev_focus = focus
+		            end 
+			    next_focus = next_focus + 1
+			    focus = section_items[next_focus]
+		       end 
+		       focus = prev_focus
+		  end
+	      end 
+	end 
+
         if unfocus then
             unfocus:on_focus_out()
         end
-        
+
         section.focus = section.focus + delta
     
         focus:on_focus_in()
@@ -263,9 +297,11 @@ function( section )
     
         section.focus = 0
         
-        move_focus( 1 )
-        
-        section.dropdown:grab_key_focus()
+        if (move_focus( 1 ) < 0 ) then 
+       	     return  
+	else 
+             section.dropdown:grab_key_focus()
+	end 
         
         section.dropdown.on_key_down =
             function( section , key )
@@ -277,10 +313,8 @@ function( section )
                 if f then
                     f()
                 end
-		return true -- hjk
+		return true 
             end
-    
-        return true
     end
 
     ---------------------------------------------------------------------------

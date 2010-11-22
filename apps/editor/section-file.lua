@@ -30,7 +30,8 @@ function( section )
 local dropdown_map =
 {
      ["NEW".."\t\t\t".."[N]"]   = function() editor.close() input_mode = S_SELECT end,
-     ["OPEN".."\t\t\t".."[O]"]   = function()input_mode = S_SELECT  editor.open() end,
+     --["OPEN".."\t\t\t".."[O]"]   = function()input_mode = S_SELECT  editor.open() end,
+     ["OPEN".."\t\t\t".."[O]"]   = function()input_mode = S_SELECT  editor.the_open() end,
      ["SAVE".."\t\t\t".."[S]"]   = function() input_mode = S_SELECT  editor.save(true)end,
      ["QUIT".."\t\t\t".."[Q]"]   = function() exit() end,
      ["SAVE AS".."\t\t\t".."[A]" ]  = function()input_mode = S_SELECT editor.save(false)  end
@@ -100,7 +101,8 @@ local dropdown_map =
         f_open.extra.on_activate =
             function()
 		input_mode = S_SELECT
-		editor.open()
+		--editor.open()
+		editor.the_open()
             end
         
         f_save.extra.on_activate =
@@ -154,7 +156,7 @@ local dropdown_map =
     
         local unfocus = section_items[ section.focus ]
         local focus = section_items[ section.focus + delta ]
-        
+		 
         if not focus then
             if section.focus + delta == 0 then
                 if unfocus then
