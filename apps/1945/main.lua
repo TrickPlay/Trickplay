@@ -77,9 +77,9 @@ local test_text = Text
 	    color = "FFFFFF",
         opacity = 0
 	}
-        test_text.position     = {    screen_w/2 , 100}
-        test_text.anchor_point = { test_text.w/2 , 0}
-        layers.air_doodads_1:add( test_text )
+    test_text.position     = {    screen_w/2 , 100}
+    test_text.anchor_point = { test_text.w/2 , 0}
+    layers.air_doodads_1:add( test_text )
 
 
 out_splash__in_hud = function()
@@ -145,6 +145,28 @@ local keys = {
             add_to_render_list(levels[state.curr_level])
             
         end,
+        [keys.o] = function()
+            
+            if type(settings.salvage_list) == "table" and #settings.salvage_list > 0 then
+                print("salvage list is size ",#settings.salvage_list)
+                out_splash__in_hud()
+                local f
+                for _,i in ipairs(settings.salvage_list) do
+                    f = _G
+                    for j = 1,#i.func do
+                        print(i.func[j])
+                        f = f[ i.func[j] ]
+                    end
+                    print("done\n\n")
+                    f(unpack(i.table_params))
+                end
+                
+                recurse_and_apply(state,settings.state)
+            else
+                print("No salvage list saved, cannot restore an old game")
+            end
+
+        end,
     },
     ["TEST_MODE"] =
     {
@@ -191,6 +213,9 @@ local keys = {
         end,
         [keys.l] = function()
             add_to_render_list(enemies.trench(),500,100, 40,true)
+        end,
+        [keys.k] = function()
+            add_to_render_list(enemies.big_tank(),200,200)
         end,
         --powerups
         [keys.z] = function()
@@ -446,6 +471,23 @@ end
 --saves high score
 function app:on_closing()
 	settings.high_score = high_score
+    
+    settings.salvage_list = {}
+    print("start")
+    local temp_table = {}
+    local s
+    for render_item,  render_f in pairs(render_list) do
+        if  render_item.salvage then
+            s = render_item:salvage()
+        print("before", #temp_table, s)
+            table.insert(temp_table,s)
+            print("after", #temp_table, s,"\n")
+        end
+    end
+    settings.salvage_list = temp_table
+    print("done", #settings.salvage_list, s)
+    settings.state = {}
+    recurse_and_apply(settings.state, state)
 end
 math.randomseed( os.time() )
 mediaplayer:play_sound("audio/Air Combat Launch.mp3")
