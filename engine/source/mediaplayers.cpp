@@ -748,8 +748,6 @@ int MediaPlayer::play_sound( const char * uri )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- play_sound('%s')", mp, uri );
-
     if ( int result = mp->play_sound( mp, uri ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
