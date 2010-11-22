@@ -362,6 +362,28 @@ levels =
         w_q_index      = {},
         num_bosses     = 4,
         
+        pier_turret = function(side)
+            local x= 960
+            if side == 1 then
+                x = imgs.dock_1_7.w - 70
+            elseif side == -1 then
+                x = screen_w - imgs.dock_1_7.w + 70
+            else
+            end
+            add_to_render_list(enemies.turret(), x, 0)
+        end,
+        
+        docked_b_ship = function(side)
+            local x=960
+            if side == 1 then
+                x = 250-imgs.b_ship.w
+            elseif side == -1 then
+                x = 1670
+            else
+            end
+            add_to_render_list(enemies.battleship(), x, -100, 80,false)
+        end,
+        
 		setup = function(self)
             
             local h_reg   = 1
@@ -373,229 +395,333 @@ levels =
             local h_piert = 7
             
 		--	add_to_render_list( self.bg )
-            self.add_list = {
-            --enemy
-            {
-            --[[
-                {y =    0, item = add_to_render_list,        params = { lvl2txt }},
-                {y =   75, item = formations.zig_zag,  params = { 400,400, -30}},
-                {y =   75, item = formations.zig_zag,  params = {1520,400,  30}},
-                {y =  200, item = formations.zig_zag,  params = { 400,400,  30}},
-                {y =  200, item = formations.zig_zag,  params = {1520,400, -30}},
-                {y =  800, item = formations.zig_zag,  params = { 400,400, -30}},
-                {y =  800, item = formations.zig_zag,  params = {1520,400,  30}},
-                {y =  925, item = formations.zig_zag,  params = { 400,400,  30}},
-                {y =  925, item = formations.zig_zag,  params = {1520,400, -30}},
-                
-                {y = 1300, item = formations.cluster,  params = {screen.w/2 - 150}},
-                {y = 1300, item = formations.cluster,  params = {screen.w/2 + 150}},
-                {y = 1400, item = add_to_render_list,  params = { powerups.guns( screen.w/2 )}},
-                
-                --]]
-                
-                --[[
-                {y =  300, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
-                {y =  400, item = formations.row_from_side,  params = { 5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200 }},
-                {y =  550, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
-                {y =  700, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
-                {y = 1050, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
-                {y = 1050, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
-                
-                {y = 1300, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-                {y = 1300, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
-                
-                {y = 1600, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-                {y = 1660, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
-                {y = 1660, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
-                {y = 1720, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
-                {y = 1780, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
-                            
-                {y = 2000, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
-                {y = 2000, item = formations.one_loop,       params = {2,150,200,200,300,-1}},
-
-                {y = 2320, item = formations.cluster,         params = {200}},
-                {y = 2350, item = formations.cluster,         params = {1200}},
-                {y = 2450, item = formations.cluster,         params = {900}},
-                {y = 2550, item = formations.cluster,         params = {500}},
-                {y = 2600, item = formations.cluster,         params = {1700}},
-                
-                {y = 2700, item = formations.cluster,         params = {240}},
-                {y = 2750, item = formations.zepp_boss,      params = { 120 }}
-                --]]
-            },
-            --left harbor
-            {
-                --{y =   0, item = self.bg.add_start, params = {self.bg,  2,  1}},
-                --{y =   imgs.dock_1_1.h, item = self.bg.add_stretch, params = {self.bg,  2,  1,20}}
-            --[[
-                {y =   0, item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  2*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  3*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                {y =  4*imgs.dock_1_1.h*9,  item = self.bg.add_dock, params = {self.bg,  2,  1}},
-                
-                {y =  5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                {y =  6*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                {y =  7*imgs.dock_1_1.h*9,   item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                {y =  8*imgs.dock_1_1.h*9,  item = self.bg.add_dock, params = {self.bg,  1,  1}},
-                --]]
-            },
-            --right harbor
-            {
-            --[[
-                {y =  280, item = self.bg.add_dock, params = {self.bg,  2, -1}},
-                {y =  280+imgs.dock_1_1.h*9, item = self.bg.add_dock, params =   {self.bg,  2, -1}},
-                {y =  280+2*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
-                {y =  280+3*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
-                {y =  280+4*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  2, -1}},
-                
-                {y =  280+5*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
-                {y =  280+6*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
-                {y =  280+7*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
-                {y =  280+8*imgs.dock_1_1.h*9, item = self.bg.add_dock, params = {self.bg,  1, -1}},
-                --]]
-            },
-            --cloud
-            --[[{
-                {y =  100, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2,   0,   0, 0}},
-                {y =  170, item = self.bg.add_cloud, params = {self.bg, 1,  425/2, 0, 180,    0}},
-                {y =  280, item = self.bg.add_cloud, params = {self.bg, 3,  700,   0,   0,    0}},
-                {y =  340, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2, 0,   0,    0}},
-                {y =  380, item = self.bg.add_cloud, params = {self.bg, 1, 425/2,   0, 180,    0}},
-                {y =  420, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0, 0,    0}},
-                {y =  480, item = self.bg.add_cloud, params = {self.bg, 2, 484/2, 0, 180, 0}},
-                {y =  580, item = self.bg.add_cloud, params = {self.bg, 3,  300,   0, 180,  0}},
-                {y =  620, item = self.bg.add_cloud, params = {self.bg, 1,  screen.w - 425/2, 0,   0,  0}},
-                {y =  660, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2,   0, 0,  0}},
-                {y =  740, item = self.bg.add_cloud, params = {self.bg, 1,  425/2, 0, 180,   0}},
-                {y =  790, item = self.bg.add_cloud, params = {self.bg, 3,  300,   0, 180,  0}},
-                {y =  820, item = self.bg.add_cloud, params = {self.bg, 3, 1700, 0, 180, 0}},
-            }--]]
-            }
-            --each func in the list returns the amount of time to wait before
             --calling the next one
-            self.next_queues =
+            self.bg:append_to_queue(
             {
                 {   --left harbor
                 ---[[
-                    {f = add_to_render_list,        p = { lvl2txt        }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_open,false,false  }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      2}},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_close,false,false  }},
+                    --{f = add_to_render_list,        p = { lvl2txt        }},
+                    { enemies={{f = add_to_render_list,        p = { lvl2txt } }} },
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_open,false,false  }},
+                    { self.bg:add_harbor_tile(2,  1, h_open)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      2}},
+                    { self.bg:add_harbor_tile(2,  1, h_reg), times=2},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(2,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
+                    { self.bg:add_harbor_tile(2,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
+                    { self.bg:add_harbor_tile(2,  1, h_pier1),
+                        enemies = {
+                            {f=self.docked_b_ship, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
+                    { self.bg:add_harbor_tile(2,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
+                    { self.bg:add_harbor_tile(2,  1, h_pier1)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
+                    { self.bg:add_harbor_tile(2,  1, h_reg), times=7},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(2,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
+                    { self.bg:add_harbor_tile(2,  1, h_reg), times=7},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
+                    { self.bg:add_harbor_tile(2,  1, h_pier1),
+                        enemies = {
+                            {f=self.docked_b_ship, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
+                    { self.bg:add_harbor_tile(2,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
+                    { self.bg:add_harbor_tile(2,  1, h_pier1)},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_close,false,false  }},
+                    { self.bg:add_harbor_tile(2,  1, h_close)},
                     
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    {f = add_to_render_list,      p = {powerups.health(300)}},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      7 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_close ,false,false }},
                     
-                    {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
+                    
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_open)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=6},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,true }},
+                    { self.bg:add_harbor_tile(1,  1, h_pier1),
+                        enemies = {
+                            {f=self.docked_b_ship, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_pier1)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}}
+                        }
+                    },
+                    --{f = add_to_render_list,      p = {powerups.health(300)}},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4,
+                        enemies = {
+                            {f = add_to_render_list,      p = {powerups.health(300)}},
+                        }
+                    },
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      7 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=7},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_close ,false,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_close)},
+                    
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   6 }},
+                    {},{},{},{},{},{},
+                    
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_open)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=6},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}},
+                            {f=self.docked_b_ship, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
                     --]]
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      10 }},
-                    {f = add_to_render_list,      p = {powerups.health(300)}},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      3 }},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}},
+                            {f=self.docked_b_ship, p={1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={1}},
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      10 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=10},
+                    --{f = add_to_render_list,      p = {powerups.health(300)}},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      3 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=10,
+                        enemies = {
+                            {f = add_to_render_list,      p = {powerups.health(300)}},
+                        }
+                    },
                     --[[
                     {f = add_to_render_list,      p = {enemies.battleship(),300, 1600, -15 }},
                     {f = add_to_render_list,      p = {enemies.battleship(),700, 1600, -15 }},
                     {f = add_to_render_list,      p = {enemies.battleship(),1100, 1600, -15 }},
                     {f = add_to_render_list,      p = {enemies.battleship(),1500, 1600, -15 }},
                     --]]
-                    {f = formations.b_ship_bosses, p = {}},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1,  1,      25 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg),
+                        enemies={{f = formations.b_ship_bosses, p = {} }}
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      25 }},
+                    { self.bg:add_harbor_tile(1,  1, h_reg), times=25},
                 },
+                
+                
                 {   --right harbor
                 ---[[
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert, true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier1,false,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false  }},
+                    {},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
+                    { self.bg:add_harbor_tile(2,  -1, h_open)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=2},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert, true,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={-1}},
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier1,false,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_pier1)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=10},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true }},
+                    { self.bg:add_harbor_tile(2,  -1, h_pier2),
+                        enemies = {
+                            {f=self.docked_b_ship, p={-1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_pier2)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=10},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false  }},
+                    { self.bg:add_harbor_tile(2,  -1, h_close)},
                     
-                    {f = self.bg.empty_stretch,   p = {self.bg,   4 }},
-                    {f = add_to_render_list,      p = {powerups.health(1300)}},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    {},{},{},{},
                     
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1, -1,      2 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier2,false,true }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1, -1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier1,false,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_close ,false,false }},
+                    --{f = add_to_render_list,      p = {powerups.health(1300)}},
                     
-                    {f = self.bg.empty_stretch,   p = {self.bg,   2 }},
-                    {f = add_to_render_list,      p = {powerups.life(1800)}},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   5 }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   2 }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
+                    { self.bg:add_harbor_tile(1,  -1, h_open),
+                        enemies=
+                        {
+                            {f = add_to_render_list,      p = {powerups.health(1300)}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1, -1,      2 }},
+                    { self.bg:add_harbor_tile(1,  -1, h_reg), times=2},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier2,false,true }},
+                    { self.bg:add_harbor_tile(1,  -1, h_pier2),
+                        enemies = {
+                            {f=self.docked_b_ship, p={-1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1, -1,      4 }},
+                    { self.bg:add_harbor_tile(1,  -1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier1,false,false }},
+                    { self.bg:add_harbor_tile(1,  -1, h_pier1),},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_close ,false,false }},
+                    { self.bg:add_harbor_tile(1,  -1, h_close)},
                     
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true}},
-                    {f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   2 }},
+                    {},{},
                     
-                    {f = self.bg.empty_stretch,   p = {self.bg,   4 }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1400, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   2 }},
-                    {f = add_to_render_list,      p = {powerups.health(1800)}},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   10 }},
+                    --{f = add_to_render_list,      p = {powerups.life(1800)}},
+                    --{f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   5 }},
+                    { enemies =
+                        {
+                            {f = add_to_render_list,      p = {powerups.life(1800)}},
+                            {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                        }
+                    },
+                    {},{},{},{},{},
                     
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open ,false,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
+                    --{f = add_to_render_list,      p = {enemies.destroyer(),800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   2 }},
+                    { enemies =
+                        {
+                            {f = add_to_render_list,      p = {enemies.destroyer(),800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                        }
+                    },
+                    {},{},
+                    --{f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   6 }},
+                    {enemies =
+                        {
+                            {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                        }
+                    },
+                    {},{},{},{},{},{},
                     
-                    {f = self.bg.empty_stretch,   p = {self.bg,   6 }},
-                    {f = add_to_render_list,      p = {powerups.life(1800)}},
-                    {f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
+                    { self.bg:add_harbor_tile(2,  -1, h_open)},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={-1}},
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=2},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_pier2)},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true}},
+                    { self.bg:add_harbor_tile(2,  -1, h_pier2),
+                        enemies = {
+                            {f=self.docked_b_ship, p={-1}}
+                        }
+                    },
+                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
+                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=4},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={-1}},
+                        }
+                    },
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_close)},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    {},{},{},{},
+                    {enemies={
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = add_to_render_list,      p = {enemies.destroyer(),1400, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    }},
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   2 }},
+                    {},{},
+                    --{f = add_to_render_list,      p = {powerups.health(1800)}},
+                    {enemies={{f = add_to_render_list,      p = {powerups.health(1800)} }} },
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   10 }},
+                    {},{},{},{},{},  {},{},{},{},{},
+                    
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open ,false,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_open)},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                        enemies = {
+                            {f=self.pier_turret, p={-1}},
+                        }
+                    },
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
+                    { self.bg:add_harbor_tile(2,  -1, h_close)},
+                    
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   6 }},
+                    {},{},{},{},{},{},
+                    {enemies={{f = add_to_render_list,      p = {powerups.life(1800)} }} },
+                    --{f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    {},{},{},{},
                     --]]
-                    {f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
-                    {f = self.bg.add_stretch,     p = {self.bg,  1, -1,     30}},
-                    {f = self.bg.begin_to_repeat, p = {self.bg}},
+                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
+                    { self.bg:add_harbor_tile(1,  -1, h_open)},
+                    --{f = self.bg.add_stretch,     p = {self.bg,  1, -1,     30}},
+                    { self.bg:add_harbor_tile(1,  -1, h_reg), times=30},
+                    {self.bg:add_harbor_tile(1,  -1, h_reg), times=3, enemies={{f = self.bg.begin_to_repeat,      p = {self.bg} }} }
+                    
                     
                 }
             }
+            )
+            --[[
             for i = 1, #self.add_list do
                 self.index[i] = 1
                 self.offset[i] = 0
@@ -605,8 +731,11 @@ levels =
                 self.wait[i] = 0
             end
 			self.dist_travelled = 0
+            --]]
+            remove_from_render_list( self )
 		end,
 		render = function(self,seconds)
+        --[[
 			--if player is dead
 
 
@@ -618,11 +747,11 @@ levels =
                     self.wait[i] = self.wait[i] - seconds
                     --if your not still waiting
                     if self.wait[i] <=0 then
-                        local t = self.next_queues[i][self.w_q_index[i]].p
+                        local t = self.next_queues[i][self.w_q_index[i] ].p
                         t[#t+1] = self.wait[i]
                         --call the next function in the wait queue
                         --it returns the next amount to wait by
-                        local w = self.next_queues[i][self.w_q_index[i]].f(
+                        local w = self.next_queues[i][self.w_q_index[i] ].f(
                             unpack(t)
                         )
                         --print(w,self.wait[i])
@@ -638,6 +767,7 @@ levels =
 	--		if self.dist_travelled > self.level_dist then
 	--			remove_from_render_list( self )
 	--		end
+    --]]
 		end,
 		level_complete = function(self)
             self.num_bosses = self.num_bosses - 1
@@ -661,66 +791,658 @@ levels =
         
 		setup = function(self)
             
-            --each func in the list returns the amount of time to wait before
-            --calling the next one
+            
             self.bg:append_to_queue(
-                {
-                    {Clone{source=imgs.road_diagonal,x=300-2*imgs.road_diagonal.w}},--y_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
-                    {Clone{source=imgs.road_diagonal,x=300-imgs.road_diagonal.w,x_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
-                    {Clone{source=imgs.road_diagonal,x=300-imgs.road_diagonal.w,y_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
-                    {Clone{source=imgs.road_diagonal,x=300-imgs.road_diagonal.w,x_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
-                    {Clone{source=imgs.road_diagonal,x=300,y_rotation={180,imgs.road_diagonal.w/2,imgs.road_diagonal.h/2}}},
-                    {Clone{source=imgs.road_straight,x=400}},
-                    {Clone{source=imgs.road_straight,x=300}},
-                    {Clone{source=imgs.road_straight,x=400}},
-                    {Clone{source=imgs.road_straight,x=300}},
-                    {Clone{source=imgs.road_straight,x=400}},
-                    {Clone{source=imgs.road_straight,x=300}},
-                    {Clone{source=imgs.road_straight,x=400}},
-                    {Clone{source=imgs.road_straight,x=300}},
-                    {Clone{source=imgs.road_straight,x=400}},
-                    {Clone{source=imgs.road_straight,x=300}},
-                    {Clone{source=imgs.road_straight,x=400}},
+                {---[[
+                    {
+                        Clone{source=imgs.trench_l, x=1300+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=1300+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=1300+3*imgs.trench_l.w},
+                        enemies={
+                            {f=add_to_render_list,p={enemies.trench(),1300+2*imgs.trench_l.w,-144-imgs.trench_l.h/2-10}},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.trench_l, x=500+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=500+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=500+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=500+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=500+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=500+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=500+7*imgs.trench_l.w},
+                        enemies={
+                            {f=add_to_render_list,p={enemies.trench(),500+2*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),500+5*imgs.trench_l.w,-100, 40,true}},
+                        }
+                    },
+                    {
+
+                        Clone{source=imgs.road_hor, x=300-5*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300-4*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300-3*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300-2*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300-imgs.road_hor.w},
+                        Clone{source=imgs.road_left,x=300},
+                    },
+                    {Clone{source=imgs.road_ver,x=300},times=5},
+                    {Clone{source=imgs.road_ver,x=300},times=3,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {1,-200,3,150 }},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300}, times   = 2,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {1,-200,3,150 }},
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.dirt_area_1,x=500,y=-imgs.dirt_area_1.h},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.dirt_area_1.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300}, times=2,
+                        enemies = {
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_sm,x=1150,y=-imgs.building_sm.h,z_rotation={90}},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_sm.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_sm,x=850,y=-imgs.building_sm.h+50,z_rotation={-90}},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_sm.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300},times=3},
+                    {Clone{source=imgs.road_ver,x=300},times=2,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {1200,-1,3,150}},
+                            {f = add_to_render_list,      p = {powerups.health(1800)}},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300},times=3,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {400,-1,3,150}},
+                        }
+                    },
+
+                    {
+                        Clone{source=imgs.road_right,x=300},
+                        Clone{source=imgs.road_hor, x=300+  imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300+2*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300+3*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300+4*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor, x=300+5*imgs.road_hor.w},
+                        Clone{source=imgs.road_left,x=300+6*imgs.road_hor.w},
+                    },
+                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=2},
+                    {
+                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l, x=50+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=50+8*imgs.trench_l.w},
+                        
+                        Clone{source=imgs.trench_l,  x=1250},
+                        Clone{source=imgs.trench_reg,x=1250+1*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=1250+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=1250+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=1250+4*imgs.trench_l.w},
+                        enemies={
+                            {f=add_to_render_list,p={enemies.trench(),50+2*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),50+4*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),50+7*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),1250+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),1250+3*imgs.trench_l.w,-100, 40,true}},
+                            
+                            
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3},
+                    {
+                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=50},
+                        Clone{source=imgs.trench_reg,x=50+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=50+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=50+8*imgs.trench_l.w},
+                        
+                        Clone{source=imgs.trench_l,  x=1250},
+                        Clone{source=imgs.trench_reg,x=1250+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=1250+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=1250+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=1250+4*imgs.trench_l.w},
+                        enemies={
+                            
+                            {f=add_to_render_list,p={enemies.trench(),50+2*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),50+4*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),50+6*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),1250+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),1250+3*imgs.trench_l.w,-100, 40,true}},
+                            {f = add_to_render_list,      p = {powerups.life(200)}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3},
+                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {-1,-200,5,150 }},
+                            {f = add_to_render_list,            p = {enemies.jeep(false),270+6*imgs.road_hor.w,-100}},
+                            
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w}, times   = 3,
+                        enemies = {
+                            
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.dirt_area_2,x=100,y=-imgs.dirt_area_2.h},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.dirt_area_2.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w}, times=6,
+                        enemies = {
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_big,x=700,y=-imgs.building_big.h},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_big.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p = {enemies.tank(false),700, -400}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),800, -400}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),900, -400}}
+                            
+                        }
+                    },
+
+                    
+                    {
+                        Clone{source=imgs.road_right,x=300+6*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+7*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+8*imgs.road_hor.w},
+                        Clone{source=imgs.road_left,x=300+9*imgs.road_hor.w},
+                        enemies = { {f = add_to_render_list,      p = {powerups.health(200)}},}
+                    },
+                    {
+                        
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=100},
+                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        
+                        
+                        enemies={
+                            
+                            {f=add_to_render_list,p={enemies.trench(),100+2*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+8*imgs.trench_l.w,-100, 40,true}},
+                            
+                            
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w}},
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=100},
+                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        
+                        
+                        enemies={
+                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+3*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+7*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        enemies={
+                            {f = add_to_render_list,      p = {enemies.tank(false),200,  -150}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),400,  -150}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),1650, -150}},
+                            {f = add_to_render_list,      p = {enemies.jeep(true),2000,100}},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=100},
+                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        
+                        
+                        enemies={
+                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+4*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+6*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=2},
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w}, times   = 7,
+                        enemies = {
+                            
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.dirt_area_3,x=100,y=-imgs.dirt_area_3.h},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.dirt_area_3.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{
+                                    source=imgs.dirt_area_2,
+                                    x=800,
+                                    y=-imgs.dirt_area_2.h/2,
+                                    z_rotation={180,0,0},
+                                    anchor_point={imgs.dirt_area_2.w/2,imgs.dirt_area_2.h/2}
+                                },
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.dirt_area_2.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_sm,x=600,y=-imgs.building_sm.h-100},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_sm.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_big,x=500,y=-imgs.building_big.h-300},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_big.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p = {enemies.tank(false),400, -200}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),400, -600}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),800, -600}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),800, -200}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),400, -400}},
+                            {f = add_to_render_list,      p = {enemies.tank(false),800, -400}}
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=100},
+                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        
+                        
+                        enemies={
+                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+3*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+7*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                        }
+                    },
+                    
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
+                        enemies = {
+                            --{f = add_to_render_list,      p = {powerups.health(600)}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {-1,-300,6,150 }},
+                            {f = formations.hor_row_tanks,      p = {1,-450,6,150 }},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {300,1,4,150}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {300,1,4,150}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=5,
+                        enemies = {
+                            {f = add_to_render_list,p = {enemies.jeep(false),300+9*imgs.road_ver.w-20,-100}},
+                            
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
+                        enemies = {
+                            {f = add_to_render_list,      p = {powerups.health(1600)}},
+                            
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {1,-450,6,150 }},
+                        }
+                    },
+                    
+                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {1,-450,6,150 }},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=100},
+                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        enemies = {
+                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+3*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+7*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_left,x=300+9*imgs.road_hor.w,z_rotation={-90,0,0}},
+                        Clone{source=imgs.road_hor,x=300+8*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+7*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+6*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+5*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+4*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+3*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+2*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+1*imgs.road_hor.w},
+                        Clone{source=imgs.road_hor,x=300+0*imgs.road_hor.w},
+                        Clone{source=imgs.road_right,x=300-imgs.road_ver.w,z_rotation={-90,0,0}},
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},
+                        Clone{source=imgs.trench_l,  x=300},
+                        Clone{source=imgs.trench_reg,x=300+  imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+2*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+3*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+4*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+5*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+6*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+7*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+8*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+9*imgs.trench_l.w},
+                        Clone{source=imgs.trench_reg,x=300+10*imgs.trench_l.w},
+                        Clone{source=imgs.trench_r,  x=300+11*imgs.trench_l.w},
+                        enemies = {
+                            {f=add_to_render_list,p={enemies.trench(),300+1*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),300+3*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),300+5*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),300+7*imgs.trench_l.w,-100, 40,true}},
+                            {f=add_to_render_list,p={enemies.trench(),300+9*imgs.trench_l.w,-100, 40,true}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=3,
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = {1,-150,3,150 }},
+                            {f = formations.hor_row_tanks,      p = {1,-400,3,150 }},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300-imgs.road_ver.w}, times   = 2,
+                        enemies = {
+                            
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.dirt_area_1,x=500,y=-imgs.dirt_area_1.h},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.dirt_area_1.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.dirt_area_3,x=200,y=-imgs.dirt_area_3.h},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.dirt_area_3.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_ver,x=300-imgs.road_ver.w}, times=2,
+                        enemies = {
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_sm,x=1150,y=-imgs.building_sm.h,z_rotation={90}},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_sm.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                            {f = add_to_render_list,      p =
+                            {
+                            {
+                                c = Clone{source=imgs.building_big,x=500,y=-imgs.building_big.h-300},
+                                setup=function(s) layers.ground:add(s.c) end,
+                                render = function(s,secs)
+                                    s.c.y = s.c.y + self.bg.speed*secs
+                                    if s.c.y > (screen_h + imgs.building_big.h) then
+                                        s.c:unparent()
+                                        remove_from_render_list(s)
+                                    end
+                                end,
+                            }
+                            }
+                            },
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=3},
+                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {1200,-1,3,150}},
+                            {f = add_to_render_list,      p = {powerups.health(1800)}},
+                        }
+                    },
+                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {300,-1,3,150}},
+                        }
+                    },
+                    --]]
+                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
+                        enemies = {
+                            {f = formations.vert_row_tanks,      p = {500,-1,3,150}},
+                        }
+                    },
+                    {
+                        Clone{source=imgs.road_left,x=300-1*imgs.road_hor.w,z_rotation={-90,0,0}},
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = { 1,-150,4,200 }},
+                            {f = formations.hor_row_tanks,      p = { 1,-400,4,200 }},
+                            {f = formations.hor_row_tanks,      p = { 1,-650,4,200 }},
+                            {f = formations.hor_row_tanks,      p = {-1,-275,4,200 }},
+                            {f = formations.hor_row_tanks,      p = {-1,-525,4,200 }},
+                            {f = formations.hor_row_tanks,      p = {-1,-775,4,200 }},
+                        }
+                    },
+                    {},{},{},{},{},{},
+                    {
+                        enemies = {
+                            {f = formations.hor_row_tanks,      p = { 1,-150,4,200 }},
+                            {f = formations.hor_row_tanks,      p = { 1,-400,4,200 }},
+                            {f = formations.hor_row_tanks,      p = { 1,-650,4,200 }},
+                            {f = formations.hor_row_tanks,      p = {-1,-275,4,200 }},
+                            {f = formations.hor_row_tanks,      p = {-1,-525,4,200 }},
+                            {f = formations.hor_row_tanks,      p = {-1,-775,4,200 }},
+                        }
+                    },
+                    {},{},{},{},{},{},{},{},{},{},{},{},
+                    {
+                        enemies = {
+                            {f = self.level_complete,      p = {self}},
+                        }
+                    }
                 }
             )
 
 			self.dist_travelled = 0
+            remove_from_render_list(self)
 		end,
 		render = function(self,seconds)
-			--if player is dead
 
-
-			local curr_dist = self.dist_travelled + self.speed*seconds
---[[
-            for i = 1,#self.next_queues do
-                --if you havent reached the end of the queue
-                if self.w_q_index[i] <= #self.next_queues[i] then
-                    self.wait[i] = self.wait[i] - seconds
-                    --if your not still waiting
-                    if self.wait[i] <=0 then
-                        local t = self.next_queues[i][self.w_q_index[i] ].p
-                        t[#t+1] = self.wait[i]
-                        --call the next function in the wait queue
-                        --it returns the next amount to wait by
-                        local w = self.next_queues[i][self.w_q_index[i] ].f(
-                            unpack(t)
-                        )
-                        --print(w,self.wait[i])
-                        self.w_q_index[i] = self.w_q_index[i] + 1
-                        if w ~= nil then self.wait[i] = w end
-                    else
-                    end
-                end
-            end
---]]
-
-			self.dist_travelled = curr_dist
-	--		if self.dist_travelled > self.level_dist then
-	--			remove_from_render_list( self )
-	--		end
 		end,
 		level_complete = function(self)
-			remove_from_render_list( self)
 			add_to_render_list( lvlcomplete )
 		end
     }

@@ -86,8 +86,22 @@ imgs =
     dirt_half       = Image{ src = "assets/lvls/bg_tiles/dirt2.png"},
     dirt_diag_big   = Image{ src = "assets/lvls/bg_tiles/dirt3.png"},
     dirt_diag_sm    = Image{ src = "assets/lvls/bg_tiles/dirt4.png"},
+    dirt_area_1     = Image{ src = "assets/lvls/bg_tiles/dirt_area1.png"},
+    dirt_area_2     = Image{ src = "assets/lvls/bg_tiles/dirt_area2.png"},
+    dirt_area_3     = Image{ src = "assets/lvls/bg_tiles/dirt_area3.png"},
+    --[[
     road_straight   = Image{ src = "assets/lvls/bg_tiles/road1.png"},
-    road_diagonal   = Image{ src = "assets/lvls/bg_tiles/road2.png"},
+    road_diagonal1  = Image{ src = "assets/lvls/bg_tiles/road2.png"},
+    road_diagonal2  = Image{ src = "assets/lvls/bg_tiles/road3.png"},
+    --]]
+    road_ver        = Image{ src = "assets/lvls/road/road-vertical.png"},
+    road_hor        = Image{ src = "assets/lvls/road/road-horizontal.png"},
+    road_left          = Image{ src = "assets/lvls/road/road-left.png"},
+    road_right          = Image{ src = "assets/lvls/road/road-right.png"},
+    building_sm     = Image{ src = "assets/lvls/buildings/building1.png"},
+    building_big    = Image{ src = "assets/lvls/buildings/building2.png"},
+    trees           = Image{ src = "assets/lvls/bg_tiles/trees.png"},
+
     
     --PLAYER ASSETS
     my_plane_strip  = Image{ src = "assets/player/player_strip.png" },
@@ -168,10 +182,10 @@ imgs =
     --JEEP ASSETS
     jeep            = Image{ src = "assets/enemies/jeep/jeep.png"},
     --TRENCH
-    trench_1        = Image{ src = "assets/enemies/trench/trench1.png"},
-    trench_2        = Image{ src = "assets/enemies/trench/trench2.png"},
-    trench_3        = Image{ src = "assets/enemies/trench/trench3.png"},
-    trench_4        = Image{ src = "assets/enemies/trench/trench4.png"},
+    trench_l        = Image{ src = "assets/enemies/trench/trench1.png"},
+    trench_gun      = Image{ src = "assets/enemies/trench/trench2.png"},
+    trench_reg      = Image{ src = "assets/enemies/trench/trench3.png"},
+    trench_r        = Image{ src = "assets/enemies/trench/trench4.png"},
     trench_bullet   = Image{ src = "assets/enemies/trench/mortar_round.png"},
 
 }
