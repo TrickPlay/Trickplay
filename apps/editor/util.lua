@@ -825,9 +825,12 @@ local function inputMsgWindow_savefile()
       end
 end
 
-function inputMsgWindow_openfile()
+function inputMsgWindow_openfile(input_text)
      local file_not_exists = true
      local dir = editor_lb:readdir(CURRENT_DIR)
+     if(input_text ~= nil) then
+	  input_t.text = input_text
+     end 
      for i, v in pairs(dir) do
           if(input_t.text == v)then
      	       current_fn = input_t.text
@@ -844,6 +847,7 @@ function inputMsgWindow_openfile()
      if(is_lua_file(input_t.text) == true) then 
            editor.close()
            current_fn = input_t.text
+	   print("current fn", current_fn)
            local f = loadfile(current_fn)
            f(g)
      else 
@@ -936,7 +940,11 @@ function inputMsgWindow_openvideo()
 
 end
 
-function inputMsgWindow_openimage(input_purpose)
+function inputMsgWindow_openimage(input_purpose, input_text)
+
+     if(input_text ~= nil) then
+	  input_t.text = input_text
+     end 
 
      local file_not_exists = true
      local dir = editor_lb:readdir(CURRENT_DIR)

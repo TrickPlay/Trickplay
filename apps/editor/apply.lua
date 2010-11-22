@@ -21,10 +21,10 @@ function inspector_apply (v, inspector)
 
       if(v.type ~= "Video") then 
           org_object.name = v.name
-	  if(is_available(inspector:find_child("name"):find_child("input_text").text) == true) then 
-               v.name = inspector:find_child("name"):find_child("input_text").text
-	  else 
-		print("The name is duplicated")
+	  local i_name = inspector:find_child("name"):find_child("input_text").text
+	  i_name = string.gsub(i_name, "%A", "_")
+	  if(is_available(i_name) == true) then 
+               v.name = i_name--inspector:find_child("name"):find_child("input_text").text
 	  end
           new_object.name = v.name
 

@@ -177,16 +177,22 @@ function editor.open()
      
 end 
 
-function editor.the_open()
+local function cleanMsgWin(msgw)	
+     msgw.children = {}
+     screen:remove(msgw)
+     input_mode = S_SELECT
+end 
+
+function editor.the_image()
 ---[[
-	local WIDTH = 800
+	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50
         local TOP_PADDING = 60
         local BOTTOM_PADDING = 12
         local Y_PADDING = 10 
 	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
+	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
 	local space = WIDTH
 
 	local dir = editor_lb:readdir(CURRENT_DIR)
@@ -195,59 +201,53 @@ function editor.the_open()
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
+
 	dir_text.position = {cur_w,cur_h}
 
-	local line = factory.draw_line()
+	--local line = factory.draw_line()
 	
---[[
-	function is_lua_file(fn)
-	     i, j = string.find(fn, ".lua")
-	     if (j == string.len(fn)) then
-		return true
-	     else 
-		return false
-	     end 
-	end 
-]]
 	function get_file_list_sz() 
-	local iw = cur_w
-	local ih = cur_h
-	cur_w = L_PADDING
-	cur_h = cur_h + dir_text.h + Y_PADDING
+	     local iw = cur_w
+	     local ih = cur_h
+	     cur_w = L_PADDING
+	     cur_h = cur_h + dir_text.h + Y_PADDING
 
-     	for i, v in pairs(dir) do
-	     if (is_lua_file(v) == true) then 
-	          text = Text {name = tostring(i), text = v}:set(STYLE)
-	          if (space < text.w) then 
-		       cur_w = L_PADDING 
-	               cur_h = cur_h + text.h + Y_PADDING
-		       space = WIDTH
-	          end 
-                  text.position  = {cur_w, cur_h}
-	          space = space - text.w - X_PADDING
-	          cur_w = cur_w + text.w + X_PADDING 
---[[
-	     if (w/WIDTH > 1) then 
-		w = L_PADDING 
-		h = h + text.h + Y_PADDING
-		space = WIDTH
-	     end 
-]] 
-             end 
-        end
-	local return_h = cur_h - 40
+     	     for i, v in pairs(dir) do
+	          if (is_png_file(v) == true) then 
+	               text = Text {name = tostring(i), text = v}:set(STYLE)
 
-	cur_w = iw
-	cur_h = ih
-	return return_h 
+                       text.position  = {cur_w, cur_h}
+		       if(cur_w == L_PADDING) then
+				cur_w = cur_w + 7*L_PADDING
+		       else 
+	               		cur_w = L_PADDING 
+	               		cur_h = cur_h + text.h + Y_PADDING
+		       end
+                  end 
+             end
+
+	     local return_h = cur_h - 40
+
+	     cur_w = iw
+	     cur_h = ih
+	     return return_h 
         end 
 
 	
 	local file_list_size = get_file_list_sz()
+        local scroll_box 
+        local scroll_bar 
 	
-	local msgw_bg = factory.make_popup_bg("msgw", file_list_size)
+	if (file_list_size > 500) then 
+             scroll_box = factory.make_msgw_scroll_box()
+             scroll_bar = factory.make_msgw_scroll_bar(file_list_size)
+	     file_list_size = 500 
+	end 
+	
+	local msgw_bg = factory.make_popup_bg("file_ls", file_list_size)
+
 	local msgw = Group {
-	     position ={400, 400},
+	     position ={500, 100},
 	     anchor_point = {0,0},
              children =
              {
@@ -256,68 +256,316 @@ function editor.the_open()
 	}
 
         msgw:add(dir_text)
-	line.position = {0, 80}
-        msgw:add(line)
-	cur_w = L_PADDING
-        cur_h = TOP_PADDING + text.h + Y_PADDING
 
+	local text_g
+	local input_text
 	function print_file_list() 
 	     cur_w = L_PADDING
+             cur_h = TOP_PADDING + dir_text.h + Y_PADDING
+	     text_g = Group{position = {cur_w, cur_h}}
+	     text_g.extra.org_y = cur_h
+	     text_g.reactive  = true 
+
+	     cur_w = 0
+	     cur_h = 0 
+     	     for i, v in pairs(dir) do
+	          if (is_png_file(v) == true) then 
+	               text = Text {name = tostring(i), text = v}:set(STYLE)
+
+                       text.position = {cur_w, cur_h}
+	 	       text.reactive = true
+    	               text_g:add(text)
+
+		       if(cur_w == 0) then
+				cur_w = cur_w + 7*L_PADDING
+		       else 
+	               		cur_w = 0
+	               		cur_h = cur_h + text.h + Y_PADDING
+		       end
+                  end
+             end
+
+	     cur_w = cur_w + L_PADDING
+	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
+	     text_g.clip = {0,0,text_g.w,500}
+    	     msgw:add(text_g)
+        end 
+	
+	print_file_list()
+	if(scroll_bar ~= nil) then 
+	     scroll_box.position = {720, TOP_PADDING + dir_text.h + Y_PADDING}
+	     scroll_bar.position = {724, TOP_PADDING + dir_text.h + Y_PADDING + 4}
+	     scroll_bar.extra.org_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
+	     scroll_bar.extra.txt_y = text_g.extra.org_y
+	     scroll_bar.extra.h_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
+	     scroll_bar.extra.l_y = scroll_bar.extra.h_y + 500 - scroll_bar.h
+	     scroll_bar.extra.text_clip = text_g.clip 
+	     scroll_bar.extra.text_position = text_g.position 
+	     msgw:add(scroll_box)
+	     msgw:add(scroll_bar)
+ 
+             function scroll_bar:on_button_down(x,y,button,num_clicks)
+	     	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+        	return true
+    	     end 
+
+    	     function scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      	      local actor , dx , dy = unpack( dragging )
+	       		if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
+	           		local dif = y - dy - scroll_bar.extra.org_y
+	           		scroll_bar.y = y - dy 
+	           		text_g.position = {text_g.x, text_g.extra.org_y -dif}
+	           		text_g.clip = {0,dif,text_g.w,500}
+	      		end 
+	      		dragging = nil
+	 	end 
+         	return true
+            end 
+ 	end 
+
+        for i,j in pairs (text_g.children) do 
+         function j:on_button_down(x,y,button, num_clicks)
+	      if input_text ~= nil then 
+		    input_text.color = {255, 255, 255, 255}
+	      end 
+              input_text = j
+	      j.color = {0,255,0,255}
+	      return true
+         end 
+        end 
+
+    local open_b, open_t  = factory.make_msgw_button_item( assets , "open")
+    open_b.position = {(WIDTH - 2*open_b.w - X_PADDING)/2, file_list_size + 110}
+    open_b.name = "openfile"
+    open_b.reactive = true
+
+    local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
+    cancel_b.position = {open_b.x + open_b.w + X_PADDING, file_list_size + 110}
+    cancel_b.name = "cancel"
+    cancel_b.reactive = true 
+	
+    msgw:add(open_b)
+    msgw:add(cancel_b)
+
+    function open_b:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+	      inputMsgWindow_openimage("open_imagefile", input_text.text)
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+    function open_t:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+	      inputMsgWindow_openimage("open_imagefile", input_text.text)
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+
+    function cancel_b:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    function cancel_t:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    screen:add(msgw)
+--]]
+end 
+
+
+function editor.the_open()
+---[[
+	local WIDTH = 700
+	local L_PADDING = 50
+	local R_PADDING = 50
+        local TOP_PADDING = 60
+        local BOTTOM_PADDING = 12
+        local Y_PADDING = 10 
+	local X_PADDING = 10
+	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+	local space = WIDTH
+
+	local dir = editor_lb:readdir(CURRENT_DIR)
+	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
+
+	local cur_w= (WIDTH - dir_text.w)/2
+	local cur_h= TOP_PADDING/2 + Y_PADDING
+
+
+	dir_text.position = {cur_w,cur_h}
+
+	--local line = factory.draw_line()
+	
+	function get_file_list_sz() 
+	     local iw = cur_w
+	     local ih = cur_h
+	     cur_w = L_PADDING
+	     cur_h = cur_h + dir_text.h + Y_PADDING
 
      	     for i, v in pairs(dir) do
 	          if (is_lua_file(v) == true) then 
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
-	               if (space < text.w) then 
-		            cur_w = L_PADDING 
-	                    cur_h = cur_h + text.h + Y_PADDING
-		            space = WIDTH
-	               end 
+
                        text.position  = {cur_w, cur_h}
-    	               msgw:add(text)
-	               space = space - text.w - X_PADDING
-	               cur_w = cur_w + text.w + X_PADDING 
---[[
-	               if (w/WIDTH > 1) then 
-		            w = L_PADDING 
-		            h = h + text.h + Y_PADDING
-		            space = WIDTH
-	     	       end  
-]]
-	--[[
-		  elseif (is_dir(v) == true) then
-		      text = Text {name = tostring(i), text = v}:set(STYLE) 
-		      text.color = {255,0,255}
-		      if (space < text.w) then 
-		            w = L_PADDING 
-	                    h = h + text.h + Y_PADDING
-		            space = WIDTH
-	               end 
-                       text.position  = {w,h}
-    	               msgw:add(text)
-	               space = space - text.w - X_PADDING
-	               w = w + text.w + X_PADDING 
-	               if (w/WIDTH > 1) then 
-		            w = L_PADDING 
-		            h = h + text.h + Y_PADDING
-		            space = WIDTH
-	     	       end  
-	]]
+		       if(cur_w == L_PADDING) then
+				cur_w = cur_w + 7*L_PADDING
+		       else 
+	               		cur_w = L_PADDING 
+	               		cur_h = cur_h + text.h + Y_PADDING
+		       end
+                  end 
+             end
+
+	     local return_h = cur_h - 40
+
+	     cur_w = iw
+	     cur_h = ih
+	     return return_h 
+        end 
+
+	
+	local file_list_size = get_file_list_sz()
+        local scroll_box 
+        local scroll_bar 
+	
+	if (file_list_size > 500) then 
+             scroll_box = factory.make_msgw_scroll_box()
+             scroll_bar = factory.make_msgw_scroll_bar(file_list_size)
+	     file_list_size = 500 
+	end 
+	
+	local msgw_bg = factory.make_popup_bg("file_ls", file_list_size)
+
+	local msgw = Group {
+	     position ={500, 100},
+	     anchor_point = {0,0},
+             children =
+             {
+              msgw_bg,
+             }
+	}
+
+        msgw:add(dir_text)
+
+	local text_g
+	local input_text
+	function print_file_list() 
+	     cur_w = L_PADDING
+             cur_h = TOP_PADDING + dir_text.h + Y_PADDING
+	     text_g = Group{position = {cur_w, cur_h}}
+	     text_g.extra.org_y = cur_h
+	     text_g.reactive  = true 
+
+	     cur_w = 0
+	     cur_h = 0 
+     	     for i, v in pairs(dir) do
+	          if (is_lua_file(v) == true) then 
+	               text = Text {name = tostring(i), text = v}:set(STYLE)
+
+                       text.position = {cur_w, cur_h}
+	 	       text.reactive = true
+    	               text_g:add(text)
+
+		       if(cur_w == 0) then
+				cur_w = cur_w + 7*L_PADDING
+		       else 
+	               		cur_w = 0
+	               		cur_h = cur_h + text.h + Y_PADDING
+		       end
                   end
              end
+
+	     cur_w = cur_w + L_PADDING
+	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
+	     text_g.clip = {0,0,text_g.w,500}
+    	     msgw:add(text_g)
         end 
 	
 	print_file_list()
+	if(scroll_bar ~= nil) then 
+	     scroll_box.position = {720, TOP_PADDING + dir_text.h + Y_PADDING}
+	     scroll_bar.position = {724, TOP_PADDING + dir_text.h + Y_PADDING + 4}
+	     scroll_bar.extra.org_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
+	     scroll_bar.extra.txt_y = text_g.extra.org_y
+	     scroll_bar.extra.h_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
+	     scroll_bar.extra.l_y = scroll_bar.extra.h_y + 500 - scroll_bar.h
+	     scroll_bar.extra.text_clip = text_g.clip 
+	     scroll_bar.extra.text_position = text_g.position 
+	     msgw:add(scroll_box)
+	     msgw:add(scroll_bar)
 
-	local open_b  = factory.make_msgw_button_item( assets , "open")
-	open_b.position = {WIDTH - 2*open_b.w + 2*X_PADDING, cur_h+ 40 }
+ 
+    	function scroll_bar:on_button_down(x,y,button,num_clicks)
+		dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+        	return true
+    	end 
 
-        local cancel_b = factory.make_msgw_button_item( assets , "cancel")
-	cancel_b.position = {WIDTH - open_b.w + 3*X_PADDING, cur_h+ 40}
+    	function scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( dragging )
+	      		if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
+	           		local dif = y - dy - scroll_bar.extra.org_y
+	           		scroll_bar.y = y - dy 
+	           		text_g.position = {text_g.x, text_g.extra.org_y -dif}
+	           		text_g.clip = {0,dif,text_g.w,500}
+	      		end 
+	      		dragging = nil
+	 	end 
+         	return true
+    	end 
+    end 
+
+    for i,j in pairs (text_g.children) do 
+         function j:on_button_down(x,y,button, num_clicks)
+	      if input_text ~= nil then 
+		    input_text.color = {255, 255, 255, 255}
+	      end 
+              input_text = j
+	      j.color = {0,255,0,255}
+	      return true
+         end 
+    end 
+
+    local open_b, open_t  = factory.make_msgw_button_item( assets , "open")
+    open_b.position = {(WIDTH - 2*open_b.w - X_PADDING)/2, file_list_size + 110}
+    open_b.name = "openfile"
+    open_b.reactive = true
+
+    local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
+    cancel_b.position = {open_b.x + open_b.w + X_PADDING, file_list_size + 110}
+    cancel_b.name = "cancel"
+    cancel_b.reactive = true 
 	
-	msgw:add(open_b)
-	msgw:add(cancel_b)
+    msgw:add(open_b)
+    msgw:add(cancel_b)
 
-	screen:add(msgw)
+    function open_b:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+              inputMsgWindow_openfile(input_text.text) 
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+    function open_t:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+              inputMsgWindow_openfile(input_text.text) 
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+
+    function cancel_b:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    function cancel_t:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    screen:add(msgw)
 --]]
 end 
 
@@ -456,8 +704,8 @@ function editor.inspector(v)
 	       then 
                  --item.y = items_height - 15
                  item.y = items_height 
-             elseif (attr_n == "line") then  
-                 item.y = items_height  + 40
+             --elseif (attr_n == "line") then  
+                 --item.y = items_height  + 40
 
 	     elseif (attr_n == "caption") then  
                   item.y = items_height + 10
@@ -803,6 +1051,7 @@ function editor.undo()
 	       end
                table.insert(redo_list, undo_item)
  	  end 
+	  screen:grab_key_focus() --1115
 end
 	
 function editor.redo()
@@ -836,6 +1085,7 @@ function editor.redo()
 	       end 
                table.insert(undo_list, redo_item)
           end 
+	  screen:grab_key_focus() --1115
 end
 
 function editor.undo_history()

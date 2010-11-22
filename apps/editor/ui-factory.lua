@@ -117,6 +117,29 @@ local icon_map =
         ["VERTICALLY 	  "] = function() icon = icon_dvc return icon end 
 }
 
+local item_map = 
+{
+        ["UNDO".."\t\t\t".."[U]"]   = function()  return "undo" end,
+     	["REDO".."\t\t\t".."[E]"]   = function()  return "redo" end,
+     	["CLONE".."\t\t\t".."[C]"]   = function() return "clone" end,
+     	["DELETE".."\t\t     ".."[Del]"]   = function() return "delete" end,
+     	["GROUP".."\t\t\t".."[G]"]   = function() return "group" end,
+     	["UNGROUP".."\t\t\t"..""]   = function() return "ungroup" end,
+	["LEFT SIDE      "] = function() return "left" end, 
+        ["RIGHT SIDE    "] = function() return "right" end, 
+        ["TOP             "] = function() return "top" end, 
+        ["BOTTOM        "] = function() return "bottom" end, 
+        ["HORIZ. CENTER   "] = function() return "hcenter" end, 
+        ["VERT. CENTER    "] = function() return "vcenter" end, 
+        ["HORIZONTALLY	  "] = function() return "hspace" end,  
+        ["VERTICALLY 	  "] = function() return "vspace" end,
+	["BRING TO FRONT"] = function() return "bring_front" end,
+        ["BRING FORWARD "] = function() return "bring_forward" end,
+        ["SEND TO BACK "] = function() return "send_back" end,
+        ["SEND BACKWARD "] = function() return "send_backward"end,
+	["Background Image        "] = function() return "bgimage" end
+}
+
    
 function factory.make_text_menu_item( assets , caption )
 
@@ -258,6 +281,9 @@ function factory.make_text_menu_item( assets , caption )
     	 focus.opacity = 0
     end
     
+    if(item_map[caption]) then 
+         group.name = item_map[caption]()
+    end 
     return group
 	
 end
@@ -480,7 +506,8 @@ local color_map =
         [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
-        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end
+        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
+        [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = "5a252b" return size, color end
 }
 
 -------------------------------------------------------------------------------
@@ -590,6 +617,7 @@ function factory.make_popup_bg(o_type, file_list_size)
     return c
 end 
 
+
 -------------------------------------------------------------------------------
 -- Makes a messsage window button item 
 -------------------------------------------------------------------------------
@@ -658,6 +686,91 @@ function factory.make_msgw_button_item( assets , caption)
     return group, text
 
 end
+
+-------------------------------------------------------------------------------
+-- Makes a scroll bar item
+-------------------------------------------------------------------------------
+
+function factory.make_msgw_scroll_box()
+
+    local PADDING_X     = 7 
+    local PADDING_Y     = 7
+    local WIDTH         = 50
+    local HEIGHT        = 500 
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+    
+    local function make_ring()
+        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+    end
+    ring = make_ring ()
+    return ring
+end
+
+
+function factory.make_msgw_scroll_bar(file_list_size)
+
+    local PADDING_X     = 7 
+    local PADDING_Y     = 7
+    local WIDTH         = 50
+    local HEIGHT        = 500 
+    local S_HEIGHT      = 2*HEIGHT - file_list_size 
+    local S_WIDTH       = 42
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+    
+    local function make_scroll_bar()
+        local ring = Canvas{ size = { S_WIDTH , S_HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+	ring:fill()
+        ring:finish_painting()
+        return ring
+    end
+
+    local scroll_bar = make_scroll_bar ()
+    
+    scroll_bar.name = "scroll_bar"
+    scroll_bar.reactive = true 
+    
+    function scroll_bar:on_button_down(x,y,button,num_clicks)
+	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+        return true
+    end 
+
+    function scroll_bar:on_button_up(x,y,button,num_clicks)
+	 if(dragging ~= nil) then 
+	      local actor , dx , dy = unpack( dragging )
+	      if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
+	           scroll_bar.y = y - dy 
+	      end 
+	      dragging = nil
+	 end 
+         return true
+    end 
+
+    return scroll_bar
+end
+
 
 -------------------------------------------------------------------------------
 -- Makes an x(close) box
