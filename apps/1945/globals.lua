@@ -246,3 +246,43 @@ function clamp( v , min , max )
     end
 
 end
+
+recurse_and_apply = nil
+
+recurse_and_apply = function(table1,table2)
+    
+    assert(type(table1) == "table" or type(table1) == "userdata")
+    assert(type(table2) == "table" or type(table2) == "userdata")
+    
+    --move through all of the items of table 2
+    for k,v in pairs(table2) do
+        
+        --fields of trickplay items where you can't just index into
+        --them in order to assign values
+        if k == "z_rotation" or k == "y_rotation" or k == "x_rotation" then
+            table1[k] = {v[1],v[2],v[3]}
+        elseif k == "position" or k == "scale" then
+            table1[k] = {v[1],v[2]}
+        elseif k == "clip" then
+            table1[k] = {v[1],v[2],v[3],v[4]}
+            
+        --if an item is a table, recurse
+        elseif type(v) == "table" then
+            --if that table did not exist in table 1, create it
+            if type(table1[k]) ~= "table" and type(table1[k]) ~= "userdata" then
+                --if the key was some other kind of variable, then it is
+                --now overwritten
+                print("making",k)
+                table1[k] = {} 
+            end
+            print("in ",k)
+            --recurse into that table
+            recurse_and_apply(table1[k], v)
+            
+        --otherwise, copy the value over
+        else
+            table1[k] = v
+            print(k,"=",v)
+        end
+    end
+end

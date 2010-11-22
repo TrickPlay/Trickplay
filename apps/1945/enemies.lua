@@ -583,7 +583,7 @@ local turn = function(group, radius, dir, speed, secs)
         x = group.x - dir * radius*math.cos(curr_deg*math.pi/180),
         y = group.y - dir * radius*math.sin(curr_deg*math.pi/180)
     }
---print(center.x,center.y)
+    --print(center.x,center.y)
     
     group.z_rotation = {next_deg,0,0}	
     group.x = center.x+dir*radius*math.cos((next_deg*math.pi/180))
@@ -592,35 +592,7 @@ local turn = function(group, radius, dir, speed, secs)
     return deg_travelled
 end
 
-recurse_and_apply = nil
 
-recurse_and_apply = function(table1,table2)
-    
-    assert(type(table1) == "table" or type(table1) == "userdata")
-    assert(type(table2) == "table" or type(table2) == "userdata")
-    
-    --move through all of the items of table 2
-    for k,v in pairs(table2) do
-        --if an item is a table, recurse
-        if type(v) == "table" then
-            --if that table did not exist in table 1, create it
-            if type(table1[k]) ~= "table" and type(table1[k]) ~= "userdata" then
-                --if the key was some other kind of variable, then it is
-                --now overwritten
-                print("making",k)
-                table1[k] = {} 
-            end
-            print("in ",k)
-            --recurse into that table
-            recurse_and_apply(table1[k], v)
-            
-        --otherwise, copy the value over
-        else
-            table1[k] = v
-            print(k,"=",v)
-        end
-    end
-end
 
 
 enemies =
@@ -3002,8 +2974,6 @@ formations =
                         f.stage = f.stage + 1
                         
                         f.group.z_rotation = {l,0,0}
-                        --f.group.x = math.abs(100*math.cos(l * 180/math.pi))
-                        --f.group.y = math.abs(100*math.sin(l * 180/math.pi))
                     end
 				end,
                 
@@ -3014,13 +2984,11 @@ formations =
                     
                     local limit = targ_x + dir*spacing*(num-i)
 					
-					if (dir == 1 and f.group.x >= limit) or
+					if  (dir ==  1 and f.group.x >= limit) or
                         (dir == -1 and f.group.x <= limit) then
                         
                         f.stage   = f.stage + 1
-						--f.group.y = rot_at_y
 						f.group.x = limit
-                        --f.stages[f.stage](f,secs)
                         
 					end
                 end,
@@ -3059,25 +3027,38 @@ formations =
 		end
 	end,
     
-    cluster = function(x)
+    cluster = function(x, salvage_overwrites, salvage_index)
         
-        e1 = enemies.basic_fighter(imgs.fighter)
-        e2 = enemies.basic_fighter(imgs.fighter)
-        e3 = enemies.basic_fighter(imgs.fighter)
         
-        -----e1.name = "one"
-        e1.group.position = {x-e2.image.w,-2*e2.image.h}
-        -----e1.y = -2*math.ceil(e2.image.h/4)*4
-        -----e2.name = "two"
-        e2.group.position = {x,-e2.image.h}
-        -----e2.y = -math.ceil(e2.image.h/4)*4
-        -----e3.name = "three"
-        e3.group.position = {x+e2.image.w,-2*e2.image.h}
-        -----e3.y = -2*math.ceil(e2.image.h/4)*4
+        if salvage_index == nil or salvage_index == 1 then
+            local e1 = enemies.basic_fighter(imgs.fighter)
+            e1.salvage_func   = {"formations","cluster"}
+            e1.index          = 1
+            e1.salvage_params = {x}
+            e1.group.position = {x-e1.image.w,-2*e1.image.h}
+            e1.overwrite_vars = salvage_overwrites
+            add_to_render_list(e1)
+        end
         
-        add_to_render_list(e1)
-        add_to_render_list(e2)
-        add_to_render_list(e3)
+        if salvage_index == nil or salvage_index == 2 then
+            local e2 = enemies.basic_fighter(imgs.fighter)
+            e2.salvage_func   = {"formations","cluster"}
+            e2.index          = 2
+            e2.salvage_params = {x}
+            e2.group.position = {x,-e2.image.h}
+            e2.overwrite_vars = salvage_overwrites
+            add_to_render_list(e2)
+        end
+        
+        if salvage_index == nil or salvage_index == 3 then
+            local e3 = enemies.basic_fighter(imgs.fighter)
+            e3.salvage_func   = {"formations","cluster"}
+            e3.index          = 3
+            e3.salvage_params = {x}
+            e3.group.position = {x+e3.image.w,-2*e3.image.h}
+            e3.overwrite_vars = salvage_overwrites
+            add_to_render_list(e3)
+        end
 
     end,
     zig_zag = function(x,r, rot)
