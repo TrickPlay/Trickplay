@@ -171,6 +171,7 @@ GameState = Class(nil,function(state, ctrl)
         state:find_selectable_tiles()
         state:find_matching_tiles()
         state:find_top_tiles()
+        state:find_drawn_tiles()
     end
 
     function state:build_test()
@@ -231,6 +232,47 @@ GameState = Class(nil,function(state, ctrl)
 
 --------------------- Functions ------------------
 
+    local function check_top(x, y)
+        local matrix = {}
+        for i = 1,4 do
+            matrix[i] = {}
+            for j = 1,4 do
+                matrix[i][j] = true
+            end
+        end
+
+        for i = -1,1 do
+            for j = -1,1 do
+                if grid[x+i] and grid[x+i][y+j] and grid[x+i][y+j][k] then
+                    matrix
+                end
+            end
+        end
+    end
+    function state:find_drawn_tiles()
+        for i = 1,GRID_WIDTH do
+            for j = 1,GRID_HEIGHT do
+                for k = 1,GRID_DEPTH do
+                    -- tile exists
+                    if grid[i][j][k] then
+                        -- right side
+                        if grid[i+2] and (grid[i+2][j][k]
+                        or (grid[i+2][j-1] and grid[i+2][j+1]
+                        and grid[i+2][j-1][k] and grid[i+2][j+1][k]))
+                        -- bottom side
+                        and grid[i][j+2] and (grid[i][j+2][k] or grid[i-1]
+                        and grid[i-1][j+2] and grid[i-1][j+2][k]
+                        and grid[i+1][j+2][k])
+                        -- above
+                        and (grid[i][j][k+1] or grid[i+1][j][k+1]
+                        and grid[i-1] and (grid[i-1][j][k] or grid[i-1][j-1]
+                        and grid[i-1][j+1] and grid[i-1][j-1][k]
+                        and grid[i-1][j+1][k]) or grid[i-1] and then
+                    end
+                end
+            end
+        end
+    end
 
     function state:find_top_tiles()
         top_grid = {}
