@@ -171,7 +171,7 @@ GameState = Class(nil,function(state, ctrl)
         state:find_selectable_tiles()
         state:find_matching_tiles()
         state:find_top_tiles()
-        state:find_drawn_tiles()
+        --state:find_drawn_tiles()
     end
 
     function state:build_test()
@@ -232,7 +232,7 @@ GameState = Class(nil,function(state, ctrl)
 
 --------------------- Functions ------------------
 
-    local function check_top(x, y)
+    local function check_top(x, y, z)
         local matrix = {}
         for i = 1,4 do
             matrix[i] = {}
@@ -243,11 +243,17 @@ GameState = Class(nil,function(state, ctrl)
 
         for i = -1,1 do
             for j = -1,1 do
-                if grid[x+i] and grid[x+i][y+j] and grid[x+i][y+j][k] then
-                    matrix
+                if grid[x+i] and grid[x+i][y+j] and grid[x+i][y+j][z+1] then
+                    matrix[i+2][j+2] = false
+                    matrix[i+3][j+2] = false
+                    matrix[i+2][j+3] = false
+                    matrix[i+3][j+3] = false
                 end
             end
         end
+
+        return not (matrix[2][2] or matrix[2][3]
+                or matrix[3][2] or matrix[3][3])
     end
     function state:find_drawn_tiles()
         for i = 1,GRID_WIDTH do
@@ -264,13 +270,18 @@ GameState = Class(nil,function(state, ctrl)
                         and grid[i-1][j+2] and grid[i-1][j+2][k]
                         and grid[i+1][j+2][k])
                         -- above
-                        and (grid[i][j][k+1] or grid[i+1][j][k+1]
-                        and grid[i-1] and (grid[i-1][j][k] or grid[i-1][j-1]
-                        and grid[i-1][j+1] and grid[i-1][j-1][k]
-                        and grid[i-1][j+1][k]) or grid[i-1] and then
+                        and check_top(i, j, k) then
+                            grid[i][j][k].group:hide()
+                        else
+                            grid[i][j][k].group:show()
+                        end
                     end
                 end
             end
+        end
+        -- TODO: figure out why this only works with this f*king HACK!!!
+        if layout_number == Layouts.TURTLE then
+            grid[13][7][4].group:show()
         end
     end
 
