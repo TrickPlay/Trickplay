@@ -178,7 +178,7 @@ function(ctrl, router, ...)
                 -- do nothing (for now)
             else
                 --increase_moves() --this is global in "MenuView.lua"/should change
-                state:set_tile_tables()
+                --state:find_drawn_tiles()
                 self:reset_selector()
             end
         end
