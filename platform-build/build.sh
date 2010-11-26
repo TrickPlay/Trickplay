@@ -217,7 +217,7 @@ CLUTTER_V="${CLUTTER_MV}.8"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
-CLUTTER_COMMANDS="ac_cv_lib_GLES_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal && make install" 
+CLUTTER_COMMANDS="ac_cv_lib_GLES_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --enable-shared --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal && make install" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG"
 
 #------------------------------------------------------------------------------
@@ -440,6 +440,7 @@ then
     
     cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_SHARED_LIBS=1 \
             -DTP_CLUTTER_BACKEND_EGL=1 \
 	    -DTP_PROFILING=1 \
             "${THERE}/../"   
@@ -449,7 +450,7 @@ echo "================================================================="
 echo "== Building libtpcore..."
 echo "================================================================="
 
-make -C ${HERE}/tp-build --no-print-directory && cp ${HERE}/tp-build/engine/libtpcore.a "${PREFIX}/lib/libtpcore.a"
+make -C ${HERE}/tp-build --no-print-directory && cp ${HERE}/tp-build/engine/libtpcore.* "${PREFIX}/lib/"
    
 #------------------------------------------------------------------------------
 # Build a test exe
