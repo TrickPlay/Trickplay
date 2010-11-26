@@ -6,3 +6,4 @@ blend-typo.patch
 texture-combining-shader-error-fix.patch
 pango-render-enable-blend.patch
 enable-gl-alphafunc.patch
+dont-need-egl-gles-to-dynamic-link.patch

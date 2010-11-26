@@ -1,0 +1,13 @@
+Index: clutter-1.0.8/configure
+===================================================================
+--- clutter-1.0.8.orig/configure	2010-11-26 12:20:54.784618333 -0500
++++ clutter-1.0.8/configure	2010-11-26 12:21:19.984618239 -0500
+@@ -13712,7 +13712,7 @@
+ done
+ 
+ 
+-                  GLES_LIBS="-lGLESv2 -lEGL"
++                  GLES_LIBS=""
+                  ;;
+   fruity)
+                   clutter_gl_header="GLES/gl.h"
