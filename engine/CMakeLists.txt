@@ -429,8 +429,6 @@ add_library(
     
     tpcore
     
-    STATIC
-
 	${ENGINE_SOURCE_FILES}    
     
     ${GENERATED_FILES}
