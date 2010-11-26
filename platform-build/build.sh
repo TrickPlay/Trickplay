@@ -21,6 +21,8 @@
 # By default, stdout is redirected to /dev/null. To see all output, call the
 # script like this: 'VERBOSE=1 ./build.sh <parameters>'
 #
+# To build dynamic versions of clutter and libtpcore, set the environment variable DYNAMIC_BUILD=1
+#
 #------------------------------------------------------------------------------
 
 set -u
@@ -33,6 +35,19 @@ THERE=$(cd ${0%/*} && echo $PWD/${0##*/})
 THERE=`dirname ${THERE}`
 
 source "${THERE}/env"
+
+
+DYNAMIC_BUILD=${DYNAMIC_BUILD:-0}
+
+if [[ ${DYNAMIC_BUILD} == 1 ]]
+then
+    BUILD_TP_CORE_DYNAMIC="-DBUILD_SHARED_LIBS=1"
+    BUILD_CLUTTER_DYNAMIC="--enable-shared"
+else
+    BUILD_TP_CORE_DYNAMIC=""
+    BUILD_CLUTTER_DYNAMIC="--disable-shared"
+fi
+
 
 #------------------------------------------------------------------------------
 # glib
@@ -217,7 +232,7 @@ CLUTTER_V="${CLUTTER_MV}.8"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
-CLUTTER_COMMANDS="ac_cv_lib_GLES_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --enable-shared --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal && make install" 
+CLUTTER_COMMANDS="ac_cv_lib_GLES_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal && make install" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG"
 
 #------------------------------------------------------------------------------
@@ -440,7 +455,7 @@ then
     
     cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DBUILD_SHARED_LIBS=1 \
+            ${BUILD_TP_CORE_DYNAMIC} \
             -DTP_CLUTTER_BACKEND_EGL=1 \
 	    -DTP_PROFILING=1 \
             "${THERE}/../"   
