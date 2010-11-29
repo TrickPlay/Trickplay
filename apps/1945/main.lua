@@ -41,11 +41,31 @@ layers.splash:add(
     },
     Image
     {
-	name     = "start",
-	src      = "assets/splash/StartButton.png",
-	position = {screen_w/2,screen_h/2+240}
+	name     = "arrow",
+	src      = "assets/splash/Arrow.png",
+	position = {screen_w/2-300,screen_h/2+240}
     }
 )
+local splash_i = 1
+local splash_limit = 1
+if type(settings.salvage_list) == "table" and #settings.salvage_list > 0 then
+    layers.splash:add(
+        Text{text="Continue Old Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240},
+        Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300}
+    )
+    splash_limit = 2
+else
+    layers.splash:add(
+        Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240}
+    )
+end
+layers.splash:add(
+        Text{name="level report",text="",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2-240}
+    )
+layers.splash:add(
+        Text{name = "Next Level",text="Next Level",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240, opacity=0},
+        Text{name = "Replay Level",text="Replay Level",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300, opacity=0}
+    )
 layers.splash:foreach_child(function(c)
     c.anchor_point = {c.w/2,c.h/2}
 end)
@@ -83,23 +103,62 @@ local test_text = Text
 
 
 out_splash__in_hud = function()
-    layers.splash.opacity = 0
+    layers.splash:foreach_child(function(c)
+        c.opacity = 0
+    end)
 end
+
+lvl_end_i = 1
 -------------------------------------------------------------------------------
 -- Event handler
 local keys = {
     ["SPLASH"] =
     {
+        [keys.Up] = function()
+            if splash_i - 1 >= 1 then
+                splash_i = splash_i - 1
+                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(splash_i-1)
+            end
+        end,
+        [keys.Down] = function()
+            if splash_i + 1 <= splash_limit then
+                splash_i = splash_i + 1
+                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(splash_i-1)
+            end
+        end,
         [keys.Return] = function()
             
-            out_splash__in_hud()
+            if splash_i == 1 and splash_limit == 2 then
+                out_splash__in_hud()
+                local f
+                for _,i in ipairs(settings.salvage_list) do
+                    f = _G
+                    for j = 1,#i.func do
+                        print(i.func[j])
+                        f = f[ i.func[j] ]
+                    end
+                    print("done\n\n")
+                    f(unpack(i.table_params))
+                    print("?")
+                end
+                
+                recurse_and_apply(state,settings.state)
+                redo_score_text()
+                for i = 1, state.hud.num_lives do
+                    lives[i].opacity=255
+                end
+                
+                print("done done")
+            else
+                out_splash__in_hud()
+                
+                state.curr_mode  = "CAMPAIGN"
+                state.curr_level = 1
+                
+                add_to_render_list(my_plane)
+                add_to_render_list(levels[state.curr_level])
+            end
             
-            state.curr_mode  = "CAMPAIGN"
-            state.curr_level = 1
-            
-            my_plane.bombing_mode = false
-            add_to_render_list(my_plane)
-            add_to_render_list(levels[state.curr_level])
             
         end,
         [keys.t] = function()
@@ -116,7 +175,6 @@ local keys = {
         [keys["2"]] = function()
             
             out_splash__in_hud()
-            my_plane.bombing_mode = true
             
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 2
@@ -124,15 +182,13 @@ local keys = {
             add_to_render_list(my_plane)
             remove_from_render_list(lvlbg[1])
             add_to_render_list(lvlbg[2])
-            my_plane.shadow.opacity = 255
-            my_plane.bombing_crosshair.opacity = 255
+
             add_to_render_list(levels[state.curr_level])
             
         end,
         [keys["3"]] = function()
             
             out_splash__in_hud()
-            my_plane.bombing_mode = true
             
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 3
@@ -140,8 +196,7 @@ local keys = {
             add_to_render_list(my_plane)
             remove_from_render_list(lvlbg[1])
             add_to_render_list(lvlbg[3])
-            my_plane.shadow.opacity = 255
-            my_plane.bombing_crosshair.opacity = 255
+
             add_to_render_list(levels[state.curr_level])
             
         end,
@@ -159,9 +214,16 @@ local keys = {
                     end
                     print("done\n\n")
                     f(unpack(i.table_params))
+                    print("?")
                 end
                 
                 recurse_and_apply(state,settings.state)
+                redo_score_text()
+                for i = 1, state.hud.num_lives do
+                    lives[i].opacity=255
+                end
+                
+                print("done done")
             else
                 print("No salvage list saved, cannot restore an old game")
             end
@@ -203,13 +265,13 @@ local keys = {
         end,
         --bosses
         [keys.m] = function()
-            formations.zepp_boss(900)
+            enemies.zeppelin(900)
         end,
         [keys.n] = function()
-            add_to_render_list(enemies.battleship(),500,300, 40,true)
+            enemies.battleship(500,300, 40,true)
         end,
         [keys.b] = function()
-            add_to_render_list(enemies.destroyer(),500,300, 40,true)
+            enemies.destroyer(500,300, 40,true)
         end,
         [keys.l] = function()
             add_to_render_list(enemies.trench(),500,100, 40,true)
@@ -308,7 +370,114 @@ local keys = {
         [keys.space] = function()
             state.paused = not (state.paused)
         end
-    }
+    },
+    ["LEVEL_END"] = {
+        [keys.Return] = function(second)
+            if lvl_end_i == 1 then
+                remove_from_render_list(lvlbg[state.curr_level])
+                state.curr_level = state.curr_level + 1
+                if lvlbg[state.curr_level] ~= nil then
+                    add_to_render_list(lvlbg[ state.curr_level])
+                    add_to_render_list(levels[state.curr_level])
+                    state.curr_mode = "CAMPAIGN"
+                end
+            else
+                remove_from_render_list(lvlbg[state.curr_level])
+                for k,v in pairs(state.counters[state.curr_level]) do
+                    if type(v) == "table" then
+                        v.killed  = 0
+                        v.spawned = 0
+                    end
+                end
+                state.hud.num_lives = state.counters[state.curr_level].lives_before
+                for i = 1,#lives do
+                    if i<= state.hud.num_lives then
+                        lives[i].opacity=255
+                    else
+                        lives[i].opacity=0
+                    end
+                end
+                state.hud.curr_score = state.hud.curr_score - state.counters[state.curr_level].lvl_points
+                state.counters[state.curr_level].lvl_points = 0
+                redo_score_text()
+                if lvlbg[state.curr_level] ~= nil then
+                    add_to_render_list(lvlbg[ state.curr_level])
+                    add_to_render_list(levels[state.curr_level])
+                    state.curr_mode = "CAMPAIGN"
+                end
+            end
+            remove_from_render_list(lvlcomplete)
+            my_plane:heal()
+            my_plane.group.position = { screen_w / 2 - my_plane.image.w / (2*my_plane.num_frames) , screen_h - my_plane.image.h }
+        end,
+        [keys.Up] = function()
+            if lvl_end_i - 1 >= 1 then
+                lvl_end_i = lvl_end_i - 1
+                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
+            end
+        end,
+        [keys.Down] = function()
+            if lvl_end_i + 1 <= 2 then
+                lvl_end_i = lvl_end_i + 1
+                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
+            end
+        end,
+    },
+    ["SAVE_HIGH_SCORE"]={
+        
+    },
+    ["GAME_OVER"] = {
+        [keys.Return] = function(second)
+            if lvl_end_i == 1 then
+                remove_from_render_list(lvlbg[state.curr_level])
+                state.curr_level = state.curr_level + 1
+                if lvlbg[state.curr_level] ~= nil then
+                    add_to_render_list(lvlbg[ state.curr_level])
+                    add_to_render_list(levels[state.curr_level])
+                    state.curr_mode = "CAMPAIGN"
+                end
+            else
+                remove_from_render_list(lvlbg[state.curr_level])
+                for k,v in pairs(state.counters[state.curr_level]) do
+                    if type(v) == "table" then
+                        v.killed  = 0
+                        v.spawned = 0
+                    end
+                end
+                state.hud.num_lives = state.counters[state.curr_level].lives_before
+                for i = 1,#lives do
+                    if i<= state.hud.num_lives then
+                        lives[i].opacity=255
+                    else
+                        lives[i].opacity=0
+                    end
+                end
+                state.hud.curr_score = state.hud.curr_score - state.counters[state.curr_level].lvl_points
+                state.counters[state.curr_level].lvl_points = 0
+                redo_score_text()
+                if lvlbg[state.curr_level] ~= nil then
+                    add_to_render_list(lvlbg[ state.curr_level])
+                    add_to_render_list(levels[state.curr_level])
+                    state.curr_mode = "CAMPAIGN"
+                end
+            end
+            remove_from_render_list(lvlcomplete)
+            my_plane:heal()
+            my_plane.group.position = { screen_w / 2 - my_plane.image.w / (2*my_plane.num_frames) , screen_h - my_plane.image.h }
+        end,
+        [keys.Up] = function()
+            if lvl_end_i - 1 >= 1 then
+                lvl_end_i = lvl_end_i - 1
+                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
+            end
+        end,
+        [keys.Down] = function()
+            if lvl_end_i + 1 <= 2 then
+                lvl_end_i = lvl_end_i + 1
+                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
+            end
+        end,
+    },
 }
 
 local press
@@ -470,7 +639,6 @@ end
 -------------------------------------------------------------------------------
 --saves high score
 function app:on_closing()
-	settings.high_score = high_score
     
     settings.salvage_list = {}
     print("start")
@@ -487,7 +655,9 @@ function app:on_closing()
     settings.salvage_list = temp_table
     print("done", #settings.salvage_list, s)
     settings.state = {}
-    recurse_and_apply(settings.state, state)
+    temp_table = {}
+    recurse_and_apply(temp_table, state)
+    settings.state = temp_table
 end
 math.randomseed( os.time() )
 mediaplayer:play_sound("audio/Air Combat Launch.mp3")
