@@ -1,8 +1,8 @@
 app=
 {
     id          = "com.trickplay.foos",
-    release     = "2",
-    version     = "0.5",
+    release     = "3",
+    version     = "0.6",
     name        = "Fo'Os",
     author      = "Trickplay, Jr.",
     copyright   = "© Trickplay Inc."
