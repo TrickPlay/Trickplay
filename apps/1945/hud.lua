@@ -1,7 +1,4 @@
 
-number_of_lives = 3
-high_score = settings.high_score or 0
-point_counter = 0
 my_plane_sz = 128
 topbar = Group{}
 topbar:add( 
@@ -45,8 +42,8 @@ local h_score_txt = Text{
 		y = 20
 }
 function redo_score_text()
-	score_txt.text   = string.format("%06d",point_counter)
-	h_score_txt.text = string.format("%06d",high_score) 
+	score_txt.text   = string.format("%06d",state.hud.curr_score)
+	h_score_txt.text = string.format("%06d",state.hud.high_score) 
 end
 
 redo_score_text()

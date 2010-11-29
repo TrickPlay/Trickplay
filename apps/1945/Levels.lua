@@ -50,29 +50,116 @@
                                     end,
                             }
 lvlcomplete =      {
+                                time  = 0,
                                 speed = 40,
-                                text = Text{font = my_font , text = "Level Complete"  , color = "FFFFFF"},
+                                text = {
+                                    Text{font = my_font , text = "L"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "e"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "v"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "e"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "l"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = " "  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "C"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "o"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "m"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "p"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "l"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "e"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "t"  , color = "FFFFFF"},
+                                    Text{font = my_font , text = "e"  , color = "FFFFFF"},
+                                },
+                                stage=1,
+                                rect = Rectangle{color="000000",w=screen_w,h=screen_h},
                                 
                                 setup = function( self )
-                                        self.text.position = { screen_w/2,screen_h/2}
-                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
-                                        self.text.opacity = 255;
-                                        layers.hud:add( self.text )
-                                    end,
+                                    layers.hud:add( self.rect)
+                                    self.rect:lower_to_bottom()
+                                    self.rect.y = -screen_h
+                                    for i,t in ipairs(self.text) do
+                                        layers.hud:add( t )
+                                        t.x = screen_w/2
+                                        t.y = -100
+                                        t.extra.targ_x = screen_w/2 + (i-#self.text/2)*50
+                                    end
                                     
-                                render = function( self , seconds )
-                                        local o = self.text.opacity - self.speed * seconds
-                                        local scale = self.text.scale
-                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        if o <= 0 then
-                                            remove_from_render_list( self )
-                                            self.text:unparent()
-                                        else
-                                            self.text.opacity = o
-                                            self.text.scale = scale
+                                    self.stage = 1
+                                    self.time = 0
+                                    
+                                    
+                                    local rep = "Points from Level: "..state.counters[state.curr_level].lvl_points.."\n\n"
+                                    for k,v in pairs(state.counters[state.curr_level]) do
+                                        if type(v) == "table" then
+                                            rep = rep .. k .. ":  "..v.killed .. "/"..v.spawned.."\n"
+                                        end
+                                    end
+                                    
+                                    layers.splash:find_child("level report").text=rep
+                                    
+                                    layers.splash:find_child("arrow").y = screen_h/2+240
+                                    
+                                    lvl_end_i = 1
+                                end,
+                                factor = 6,
+                                stages = {
+                                    function(self)
+                                        self.rect.y = -screen_h*(1-self.time)
+                                        if self.time >= 1 then
+                                            self.rect.y = 0
+                                            self.stage  = self.stage + 1
+                                            self.time   = 0
                                         end
                                     end,
+                                    function(self)
+                                        for i = 1, #self.text do
+                                            if i < (self.factor*self.time-1) then
+                                                self.text[i].x = self.text[i].extra.targ_x
+                                                self.text[i].y = 100
+                                            elseif i < (self.factor*self.time) then
+                                                self.text[i].x = screen_w/2 + (self.text[i].extra.targ_x - screen_w/2)* (self.factor*self.time-i)
+                                                self.text[i].y = -100 + (100 - -100)*(self.factor*self.time-i)
+                                            else
+                                            end
+                                            x = self.text
+                                        end
+                                        if self.factor*self.time >= #self.text then
+                                            for i = 1, #self.text do
+                                                self.text[i].x = self.text[i].extra.targ_x
+                                                self.text[i].y = 100
+                                            end
+                                            self.stage  = self.stage + 1
+                                            self.time   = 0
+                                        end
+                                    end,
+                                    function(self)
+                                        layers.splash:find_child("level report").opacity = 255
+                                        layers.splash:find_child("arrow").opacity        = 255
+                                        layers.splash:find_child("Next Level").opacity   = 255
+                                        layers.splash:find_child("Replay Level").opacity = 255
+                                        self.stage  = self.stage + 1
+                                        state.curr_mode = "LEVEL_END"
+                                    end,
+                                    function(self) end
+                                },
+                                
+                                render = function( self , seconds )
+                                        
+                                        self.time = self.time + seconds
+                                        
+                                        self.stages[self.stage](self)
+                                        
+                                end,
+                                remove = function (self)
+                                    layers.splash:find_child("level report").opacity = 0
+                                    layers.splash:find_child("arrow").opacity        = 0
+                                    layers.splash:find_child("Next Level").opacity   = 0
+                                    layers.splash:find_child("Replay Level").opacity = 0
+                                    for i = 1, #self.text do
+                                        self.text[i]:unparent()
+                                    end
+                                    self.rect:unparent()
+                                end
                             }
+
 
 
 
@@ -93,13 +180,18 @@ levels =
             if self.num_bosses == 0 then
                 remove_from_render_list( self)
                 add_to_render_list( lvlcomplete )
+                
+                --state.curr_mode = "LEVEL_END"
             end
 		end,
-		setup = function(self)
+		setup = function(self,o)
+            
+            my_plane.bombing_mode = false
 		--	add_to_render_list( self.bg )
             self.add_list = {
             --enemy
             {
+            --[[
                 {t =    0, item = add_to_render_list,         params = { lvl1txt        }},
                 
                 
@@ -110,7 +202,7 @@ levels =
                 {t =   12, item = formations.cluster,         params = {  500 }},
                 {t =   17, item = formations.cluster,         params = { 1200 }},
                 {t =   18, item = formations.cluster,         params = {  200 }},
-                {t =   19, item = add_to_render_list,         params = {powerups.health(700)}},
+                {t =   19, item = powerups.health,            params = {700}},
                 {t =   21, item = formations.cluster,         params = {  900 }},
                 
                 {t =   27, item = formations.zig_zag,         params = {  600, 300, 30 }},
@@ -119,35 +211,39 @@ levels =
                 {t =   30, item = formations.cluster,         params = {  300 }},
                 
                 {t =   36, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-                {t =   41, item = add_to_render_list,        params = {powerups.life(1400)}},
+                {t =   41, item = powerups.life,             params = {1400}},
                 {t =   41, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
                 {t =   46, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
                 {t =   51, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
                 {t =   52, item = formations.cluster,        params = {  125 }},
                 {t =   52, item = formations.cluster,        params = { 1795 }},
                 
-                {t =   58, item = add_to_render_list,        params = {powerups.guns(950)}},
+                {t =   58, item = powerups.guns,             params = {950}},
                 {t =   60, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
                 {t =   60, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
                 {t =   70, item = formations.one_loop,       params = {2,150,100,200,300,-1}},
                 {t =   70, item = formations.one_loop,       params = {2,150,screen.w-100,screen.w-200,300,1}},
                 {t =   72, item = formations.cluster,        params = { 950 }},
-                {t =   80, item = add_to_render_list,        params = {powerups.health(950)}},
+                {t =   80, item = powerups.health,           params = {950}},
                 
-                {t =   82, item = add_to_render_list,        params = {enemies.zeppelin(850)}},
-                {t =   97, item = formations.zig_zag,         params = {  400, 300, -30 }},
-                {t =   97, item = formations.zig_zag,         params = { 1520, 300,  30 }},
-                {t =   112, item = formations.zig_zag,         params = {  400, 300, -30 }},
-                {t =   112, item = formations.zig_zag,         params = { 1520, 300,  30 }},
-                {t =   115, item = formations.zig_zag,         params = {  400, 300, -30 }},
-                {t =   115, item = formations.zig_zag,         params = { 1520, 300,  30 }},
-                {t =   122, item = formations.zig_zag,         params = {  400, 300, -30 }},
-                {t =   122, item = formations.zig_zag,         params = { 1520, 300,  30 }},
-                {t =   125, item = formations.zig_zag,         params = {  400, 300, -30 }},
-                {t =   125, item = formations.zig_zag,         params = { 1520, 300,  30 }},
+                {t =   82, item = enemies.zeppelin,          params = {850}},
+                {t =   91, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   91, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                {t =   94, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   94, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                {t =   97, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   97, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                {t =   112, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   112, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                {t =   115, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   115, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                {t =   122, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   122, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                {t =   125, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                {t =   125, item = formations.zig_zag,         params = { 1420, 300,  30 }},
                 {t =   135, item = formations.cluster,        params = { 400 }},
                 {t =   135, item = formations.cluster,        params = { 1700 }},
-                {t =   149, item = add_to_render_list,         params = {powerups.health(1700)}},
+                {t =   149, item = powerups.health,         params = {1700}},
                 --{t =   75, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  800}},
                 {t =   152, item = formations.one_loop,       params = {3,300,900,200,300, 1}},
                 {t =   153.5, item = formations.one_loop,       params = {3,300,900,200,300,-1}},
@@ -155,7 +251,7 @@ levels =
                 
                 {t =   175, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
                 {t =   178, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
-                {t =   178, item = add_to_render_list,        params = {powerups.life(300)}},
+                {t =   178, item = powerups.life,             params = {300}},
                 {t =   178, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
                 {t =   181, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
                 {t =   184, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
@@ -166,12 +262,12 @@ levels =
                 {t =   193.5, item = formations.zig_zag,         params = { 1520, 400, -45 }},
                 {t =   195, item = formations.zig_zag,         params = {  400, 400, -45 }},
                 {t =   195, item = formations.zig_zag,         params = { 1520, 400,  45 }},
-                {t =   19, item = add_to_render_list,         params = {powerups.health(300)}},
+                {t =   19, item = powerups.health,             params = {300}},
                 --{t =   5, item = formations.zig_zag,         params = {  800, 200, 30 }},
                 --{t =   5, item = formations.zig_zag,         params = {  1120, 200, -30 }},
                 {t =   197, item = formations.zig_zag,         params = {  300, 300, -30 }},
                 {t =   197, item = formations.zig_zag,         params = {  1620, 300, 30 }},
-                
+                --]]
                 {t =   202, item = formations.zig_zag,         params = {  400, 300, -20 }},
                 {t =   202, item = formations.zig_zag,         params = {  800, 300, 20 }},
                 {t =   202, item = formations.zig_zag,         params = {  1200, 300, 20 }},
@@ -187,108 +283,108 @@ levels =
             },
             --island
             {
-                {t =  40, item = self.bg.add_island, params = {self.bg,  2, 300, 0, 0,}},
-                {t =  50, item = self.bg.add_island, params = {self.bg, 1, 1720,    0, }},
-                {t =  60, item = self.bg.add_island, params = {self.bg, 2,    0,  180,  }},
-                {t =  68, item = self.bg.add_island, params = {self.bg, 3,  600,    0,  }},
-                {t =  75, item = self.bg.add_island, params = {self.bg, 1, 1500,    0, }},
-                {t =  80, item = self.bg.add_island, params = {self.bg, 1,  200,  180,  }},
-                {t =  82, item = self.bg.add_island, params = {self.bg, 3, 1800,  180,  }},
-                {t =  100, item = self.bg.add_island, params = {self.bg, 2,  500,    0, }},
-                {t =  110, item = self.bg.add_island, params = {self.bg, 1, 1500,  180, }},
-                {t =  112, item = self.bg.add_island, params = {self.bg, 3,  200,  180, }},
-                {t =  130, item = self.bg.add_island, params = {self.bg, 1,  500,    0, }},
-                {t =  136, item = self.bg.add_island, params = {self.bg, 2, 1600,  180, }},
-                {t =  150, item = self.bg.add_island, params = {self.bg, 1,  100,  180, }},
-                {t =  160, item = self.bg.add_island, params = {self.bg, 3,  300,  180, }},
-                {t =  167, item = self.bg.add_island, params = {self.bg, 3, 1700,  180, }},
-                {t =  179, item = self.bg.add_island, params = {self.bg, 2, 1400,  180, }},
-                {t =  200, item = self.bg.add_island, params = {self.bg, 1,  500,    0, }},
-                {t =  220, item = self.bg.add_island, params = {self.bg, 2, 1800,    0, }},
-                {t =  222, item = self.bg.add_island, params = {self.bg, 2, 1100,    0, }},
-                {t =  236, item = self.bg.add_island, params = {self.bg, 2, 1600,  180, }},
-                {t =  242, item = self.bg.add_island, params = {self.bg, 3, 1700,  180, }},
-                {t =  260, item = self.bg.add_island, params = {self.bg, 2, 1400,  180, }},
-                {t =  260, item = self.bg.add_island, params = {self.bg, 3,  300,  180, }},
-                {t =  271, item = self.bg.add_island, params = {self.bg, 1,  500,    0, }},
-                {t =  278, item = self.bg.add_island, params = {self.bg, 1,  100,  180, }},
-                {t =  290, item = self.bg.add_island, params = {self.bg, 3, 1800,    0, }},
-                {t =  300, item = self.bg.add_island, params = {self.bg, 2, 1100,    0, }},
+                {t =   40, item = self.bg.add_island, params = {  2,  300, 0, }},
+                {t =   50, item = self.bg.add_island, params = {  1, 1720,    0, }},
+                {t =   60, item = self.bg.add_island, params = {  2,    0,  180,  }},
+                {t =   68, item = self.bg.add_island, params = {  3,  600,    0,  }},
+                {t =   75, item = self.bg.add_island, params = {  1, 1500,    0, }},
+                {t =   80, item = self.bg.add_island, params = {  1,  200,  180,  }},
+                {t =   82, item = self.bg.add_island, params = {  3, 1800,  180,  }},
+                {t =  100, item = self.bg.add_island, params = { 2,  500,    0, }},
+                {t =  110, item = self.bg.add_island, params = { 1, 1500,  180, }},
+                {t =  112, item = self.bg.add_island, params = { 3,  200,  180, }},
+                {t =  130, item = self.bg.add_island, params = { 1,  500,    0, }},
+                {t =  136, item = self.bg.add_island, params = { 2, 1600,  180, }},
+                {t =  150, item = self.bg.add_island, params = { 1,  100,  180, }},
+                {t =  160, item = self.bg.add_island, params = { 3,  300,  180, }},
+                {t =  167, item = self.bg.add_island, params = { 3, 1700,  180, }},
+                {t =  179, item = self.bg.add_island, params = { 2, 1400,  180, }},
+                {t =  200, item = self.bg.add_island, params = { 1,  500,    0, }},
+                {t =  220, item = self.bg.add_island, params = { 2, 1800,    0, }},
+                {t =  222, item = self.bg.add_island, params = { 2, 1100,    0, }},
+                {t =  236, item = self.bg.add_island, params = { 2, 1600,  180, }},
+                {t =  242, item = self.bg.add_island, params = { 3, 1700,  180, }},
+                {t =  260, item = self.bg.add_island, params = { 2, 1400,  180, }},
+                {t =  260, item = self.bg.add_island, params = { 3,  300,  180, }},
+                {t =  271, item = self.bg.add_island, params = { 1,  500,    0, }},
+                {t =  278, item = self.bg.add_island, params = { 1,  100,  180, }},
+                {t =  290, item = self.bg.add_island, params = { 3, 1800,    0, }},
+                {t =  300, item = self.bg.add_island, params = { 2, 1100,    0, }},
             },
             --cloud
             {
-                {t =   4, item = self.bg.add_cloud, params = {self.bg, 3,  1000, 0,   0,  0}},
-                {t =  12, item = self.bg.add_cloud, params = {self.bg, 3,   300, 0,   0,  0}},
-                {t =  15, item = self.bg.add_cloud, params = {self.bg, 3,  1200, 0,   0,  0}},
-                {t =  20, item = self.bg.add_cloud, params = {self.bg, 3,   700, 0,   0,  0}},
-                {t =  21, item = self.bg.add_cloud, params = {self.bg, 3,   900, 0,   0,  0}},
-                {t =  30, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 70, 0,   0,  0}},
-                {t =  31, item = self.bg.add_cloud, params = {self.bg, 1,            425/2, 0, 180,  0}},
-                {t =  33, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  34, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2+200, 0,   0,  0}},
+                {t =   4, item = self.bg.add_cloud, params = { 3,  1000, 0,   0,  0}},
+                {t =  12, item = self.bg.add_cloud, params = { 3,   300, 0,   0,  0}},
+                {t =  15, item = self.bg.add_cloud, params = { 3,  1200, 0,   0,  0}},
+                {t =  20, item = self.bg.add_cloud, params = { 3,   700, 0,   0,  0}},
+                {t =  21, item = self.bg.add_cloud, params = { 3,   900, 0,   0,  0}},
+                {t =  30, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 70, 0,   0,  0}},
+                {t =  31, item = self.bg.add_cloud, params = { 1,            425/2, 0, 180,  0}},
+                {t =  33, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  34, item = self.bg.add_cloud, params = { 2, screen.w - 484/2+200, 0,   0,  0}},
                 
-                {t =  42, item = self.bg.add_cloud, params = {self.bg, 3,   900, 0,   0,  0}},
-                {t =  46, item = self.bg.add_cloud, params = {self.bg, 3,   500, 0,   0,  0}},
-                {t =  50, item = self.bg.add_cloud, params = {self.bg, 3,  1200, 0,  180,  0}},
-                {t =  52, item = self.bg.add_cloud, params = {self.bg, 3,   300, 0,   0,  0}},
-                {t =  52, item = self.bg.add_cloud, params = {self.bg, 3,  1600, 0,   0,  0}},
-                {t =  63, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0,   0,  0}},
-                {t =  68, item = self.bg.add_cloud, params = {self.bg, 2,            484/2-100, 0, 180,  0}},
-                {t =  72, item = self.bg.add_cloud, params = {self.bg, 3,   900, 0,   0,  0}},
-                {t =  74, item = self.bg.add_cloud, params = {self.bg, 3,  1000, 0, 180,  0}},
+                {t =  42, item = self.bg.add_cloud, params = { 3,   900, 0,   0,  0}},
+                {t =  46, item = self.bg.add_cloud, params = { 3,   500, 0,   0,  0}},
+                {t =  50, item = self.bg.add_cloud, params = { 3,  1200, 0,  180,  0}},
+                {t =  52, item = self.bg.add_cloud, params = { 3,   300, 0,   0,  0}},
+                {t =  52, item = self.bg.add_cloud, params = { 3,  1600, 0,   0,  0}},
+                {t =  63, item = self.bg.add_cloud, params = { 1, screen.w - 425/2, 0,   0,  0}},
+                {t =  68, item = self.bg.add_cloud, params = { 2,            484/2-100, 0, 180,  0}},
+                {t =  72, item = self.bg.add_cloud, params = { 3,   900, 0,   0,  0}},
+                {t =  74, item = self.bg.add_cloud, params = { 3,  1000, 0, 180,  0}},
                 
-                {t =  82, item = self.bg.add_cloud, params = {self.bg, 3,  1050, 0, 180,  0}},
-                {t =  84, item = self.bg.add_cloud, params = {self.bg, 3,  950, 0,  0,  0}},
-                {t =  85, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 170, 0,   0,  0}},
-                {t =  90, item = self.bg.add_cloud, params = {self.bg, 1,            425/2, 0, 180,  0}},
-                {t =  95, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0,   0,  0}},
+                {t =  82, item = self.bg.add_cloud, params = { 3,  1050, 0, 180,  0}},
+                {t =  84, item = self.bg.add_cloud, params = { 3,  950, 0,  0,  0}},
+                {t =  85, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 170, 0,   0,  0}},
+                {t =  90, item = self.bg.add_cloud, params = { 1,            425/2, 0, 180,  0}},
+                {t =  95, item = self.bg.add_cloud, params = { 1, screen.w - 425/2, 0,   0,  0}},
                 
-                {t =  102, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 300, 0,   0,  0}},
-                {t =  104, item = self.bg.add_cloud, params = {self.bg, 2,            484/2-220, 0, 180,  0}},
-                {t =  108, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  120, item = self.bg.add_cloud, params = {self.bg, 1,            425/2-120, 0, 180,  0}},
-                {t =  122, item = self.bg.add_cloud, params = {self.bg, 3,  1200, 0,   0,  0}},
-                {t =  128, item = self.bg.add_cloud, params = {self.bg, 3,   700, 0,   180,  0}},
-                {t =  135, item = self.bg.add_cloud, params = {self.bg, 3,   900, 0,   0,  0}},
-                {t =  135, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0,   0,  0}},
+                {t =  102, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 300, 0,   0,  0}},
+                {t =  104, item = self.bg.add_cloud, params = { 2,            484/2-220, 0, 180,  0}},
+                {t =  108, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  120, item = self.bg.add_cloud, params = { 1,            425/2-120, 0, 180,  0}},
+                {t =  122, item = self.bg.add_cloud, params = { 3,  1200, 0,   0,  0}},
+                {t =  128, item = self.bg.add_cloud, params = { 3,   700, 0,   180,  0}},
+                {t =  135, item = self.bg.add_cloud, params = { 3,   900, 0,   0,  0}},
+                {t =  135, item = self.bg.add_cloud, params = { 1, screen.w - 425/2, 0,   0,  0}},
                 
-                {t =  144, item = self.bg.add_cloud, params = {self.bg, 1,            425/2-50, 0, 180,  0}},
-                {t =  150, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  150, item = self.bg.add_cloud, params = {self.bg, 3,  1200, 0,  180,  0}},
-                {t =  152, item = self.bg.add_cloud, params = {self.bg, 3,   300, 0,   0,  0}},
-                {t =  152, item = self.bg.add_cloud, params = {self.bg, 3,  1600, 0,   0,  0}},
-                {t =  160, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 70, 0,   0,  0}},
-                {t =  164, item = self.bg.add_cloud, params = {self.bg, 1,            425/2, 0, 180,  0}},
-                {t =  164, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  170, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2+200, 0,   0,  0}},
+                {t =  144, item = self.bg.add_cloud, params = { 1,            425/2-50, 0, 180,  0}},
+                {t =  150, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  150, item = self.bg.add_cloud, params = { 3,  1200, 0,  180,  0}},
+                {t =  152, item = self.bg.add_cloud, params = { 3,   300, 0,   0,  0}},
+                {t =  152, item = self.bg.add_cloud, params = { 3,  1600, 0,   0,  0}},
+                {t =  160, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 70, 0,   0,  0}},
+                {t =  164, item = self.bg.add_cloud, params = { 1,            425/2, 0, 180,  0}},
+                {t =  164, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  170, item = self.bg.add_cloud, params = { 2, screen.w - 484/2+200, 0,   0,  0}},
                 
                 --copy pasted
                 
-                {t =  172, item = self.bg.add_cloud, params = {self.bg, 3,   900, 0,   0,  0}},
-                {t =  174, item = self.bg.add_cloud, params = {self.bg, 3,  1000, 0, 180,  0}},
+                {t =  172, item = self.bg.add_cloud, params = { 3,   900, 0,   0,  0}},
+                {t =  174, item = self.bg.add_cloud, params = { 3,  1000, 0, 180,  0}},
                 
-                {t =  182, item = self.bg.add_cloud, params = {self.bg, 3,  1050, 0, 180,  0}},
-                {t =  184, item = self.bg.add_cloud, params = {self.bg, 3,  950, 0,  0,  0}},
-                {t =  185, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 170, 0,   0,  0}},
-                {t =  190, item = self.bg.add_cloud, params = {self.bg, 1,            425/2, 0, 180,  0}},
-                {t =  195, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0,   0,  0}},
+                {t =  182, item = self.bg.add_cloud, params = { 3,  1050, 0, 180,  0}},
+                {t =  184, item = self.bg.add_cloud, params = { 3,  950, 0,  0,  0}},
+                {t =  185, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 170, 0,   0,  0}},
+                {t =  190, item = self.bg.add_cloud, params = { 1,            425/2, 0, 180,  0}},
+                {t =  195, item = self.bg.add_cloud, params = { 1, screen.w - 425/2, 0,   0,  0}},
                 
-                {t =  202, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 300, 0,   0,  0}},
-                {t =  204, item = self.bg.add_cloud, params = {self.bg, 2,            484/2-220, 0, 180,  0}},
-                {t =  208, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  220, item = self.bg.add_cloud, params = {self.bg, 1,            425/2-120, 0, 180,  0}},
-                {t =  222, item = self.bg.add_cloud, params = {self.bg, 3,  1200, 0,   0,  0}},
-                {t =  228, item = self.bg.add_cloud, params = {self.bg, 3,   700, 0,   180,  0}},
-                {t =  235, item = self.bg.add_cloud, params = {self.bg, 3,   900, 0,   0,  0}},
-                {t =  235, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2, 0,   0,  0}},
+                {t =  202, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 300, 0,   0,  0}},
+                {t =  204, item = self.bg.add_cloud, params = { 2,            484/2-220, 0, 180,  0}},
+                {t =  208, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  220, item = self.bg.add_cloud, params = { 1,            425/2-120, 0, 180,  0}},
+                {t =  222, item = self.bg.add_cloud, params = { 3,  1200, 0,   0,  0}},
+                {t =  228, item = self.bg.add_cloud, params = { 3,   700, 0,   180,  0}},
+                {t =  235, item = self.bg.add_cloud, params = { 3,   900, 0,   0,  0}},
+                {t =  235, item = self.bg.add_cloud, params = { 1, screen.w - 425/2, 0,   0,  0}},
                 
-                {t =  244, item = self.bg.add_cloud, params = {self.bg, 1,            425/2-50, 0, 180,  0}},
-                {t =  250, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  253, item = self.bg.add_cloud, params = {self.bg, 3,  1200, 0,  180,  0}},
-                {t =  260, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 70, 0,   0,  0}},
-                {t =  264, item = self.bg.add_cloud, params = {self.bg, 1,            425/2, 0, 180,  0}},
-                {t =  264, item = self.bg.add_cloud, params = {self.bg, 2,            484/2, 0, 180,  0}},
-                {t =  270, item = self.bg.add_cloud, params = {self.bg, 2, screen.w - 484/2+200, 0,   0,  0}},
+                {t =  244, item = self.bg.add_cloud, params = { 1,            425/2-50, 0, 180,  0}},
+                {t =  250, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  253, item = self.bg.add_cloud, params = { 3,  1200, 0,  180,  0}},
+                {t =  260, item = self.bg.add_cloud, params = { 1, screen.w - 425/2+ 70, 0,   0,  0}},
+                {t =  264, item = self.bg.add_cloud, params = { 1,            425/2, 0, 180,  0}},
+                {t =  264, item = self.bg.add_cloud, params = { 2,            484/2, 0, 180,  0}},
+                {t =  270, item = self.bg.add_cloud, params = { 2, screen.w - 484/2+200, 0,   0,  0}},
                 --[[
                 {t =  100, item = self.bg.add_cloud, params = {self.bg, 1, screen.w - 425/2+ 70, 0,   0,  0}},
                 {t =  170, item = self.bg.add_cloud, params = {self.bg, 1,            425/2- 10, 0, 180,  0}},
@@ -308,9 +404,14 @@ levels =
             }
             for i = 1, #self.add_list do
                 self.index[i] = 1
-                self.offset[i] = 0
             end
-            self.time = 0
+            self.time = 200
+            self.num_bosses = 2
+            if type(o) == "table"  then
+                print("self.overwrite_vars", o)
+                recurse_and_apply(  self, o  )
+            end
+            
 		end,
 		render = function(self,seconds)
 			--if player is dead
@@ -331,7 +432,7 @@ levels =
                         end
                         --]]
                         done = true
-                    elseif self.add_list[i][ self.index[i] ].t < (self.time - self.offset[i]) then
+                    elseif self.add_list[i][ self.index[i] ].t < (self.time ) then
                         
                         self.add_list[i][self.index[i]].item(unpack(self.add_list[i][self.index[i]].params))
                         self.index[i] = self.index[i] + 1
@@ -346,11 +447,35 @@ levels =
 	--			remove_from_render_list( self )
 	--		end
 		end,
+        salvage = function( self, salvage_list )
+            
+            s = {
+                func         = {"levels",1,"add_to_render_list"},
+                table_params = {},
+                setup_params = {},
+            }
+            
+            table.insert(s.table_params,{
+                num_bosses     = selfnum_bosses,
+                time           = self.time,
+                index          = {},
+                
+                
+            })
+            for i = 1, #self.index do
+                s.table_params[#s.table_params].index[i] = self.index[i]
+            end
+            table.insert(s.table_params,self.index)
+            return s
+        end,
 
-
-	},
+	
+        add_to_render_list = function(o)
+            add_to_render_list(levels[1],o)
+        end
+    },
     {
-    		speed          = 80,   --px/s
+    	speed          = 80,   --px/s
 		level_dist     = 3000, --px
 		dist_travelled = 0,
 		launch_index   = 1,
@@ -370,7 +495,7 @@ levels =
                 x = screen_w - imgs.dock_1_7.w + 70
             else
             end
-            add_to_render_list(enemies.turret(), x, 0)
+            enemies.turret(x,0)
         end,
         
         docked_b_ship = function(side)
@@ -381,7 +506,39 @@ levels =
                 x = 1670
             else
             end
-            add_to_render_list(enemies.battleship(), x, -100, 80,false)
+            enemies.battleship( x, -100, 80, false )
+        end,
+        
+        add_harbor_tile = function(
+                self,
+                type,
+                side,
+                tile_index)
+            --[[
+            local c = Clone {source =  imgs["dock_"..type.."_"..tile_index]}
+            
+            if side == 1 then
+                c.y_rotation = {180,0,0}
+                c.x = imgs["dock_"..type.."_"..tile_index].w  
+            elseif side == -1 then
+                c.x = screen_w - imgs["dock_"..type.."_"..tile_index].w 
+            else
+                error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+            end
+            
+            return c
+            --]]
+            local c =  { source = {"imgs","dock_"..type.."_"..tile_index} }
+            if side == 1 then
+                c.y_rotation = 180
+                c.x = imgs["dock_"..type.."_"..tile_index].w 
+            elseif side == -1 then
+                c.y_rotation = 0
+                c.x = screen_w - imgs["dock_"..type.."_"..tile_index].w 
+            else
+                error("unexpected value for SIDE received, expected 1 or -1, got "..side)
+            end
+            return c
         end,
         
 		setup = function(self)
@@ -394,328 +551,235 @@ levels =
             local h_pier2 = 6
             local h_piert = 7
             
+            self.num_bosses     = 4
+            my_plane.bombing_mode = true
 		--	add_to_render_list( self.bg )
             --calling the next one
             self.bg:append_to_queue(
             {
                 {   --left harbor
                 ---[[
-                    --{f = add_to_render_list,        p = { lvl2txt        }},
-                    { enemies={{f = add_to_render_list,        p = { lvl2txt } }} },
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_open,false,false  }},
-                    { self.bg:add_harbor_tile(2,  1, h_open)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      2}},
-                    { self.bg:add_harbor_tile(2,  1, h_reg), times=2},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(2,  1, h_piert),
+                    { enemies={{f = {"add_to_render_list"},        p = { lvl2txt } }} },
+                    { self:add_harbor_tile(2,  1, h_open)},
+                    { self:add_harbor_tile(2,  1, h_reg), times=2},
+                    { self:add_harbor_tile(2,  1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={1}}
+                            {f={"levels",2,"pier_turret"}, p={1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
-                    { self.bg:add_harbor_tile(2,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
-                    { self.bg:add_harbor_tile(2,  1, h_pier1),
+                    { self:add_harbor_tile(2,  1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  1, h_pier1),
                         enemies = {
-                            {f=self.docked_b_ship, p={1}}
+                            {f={"levels",2,"docked_b_ship"}, p={1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
-                    { self.bg:add_harbor_tile(2,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
-                    { self.bg:add_harbor_tile(2,  1, h_pier1)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
-                    { self.bg:add_harbor_tile(2,  1, h_reg), times=7},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(2,  1, h_piert),
+                    { self:add_harbor_tile(2,  1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  1, h_pier1)},
+                    { self:add_harbor_tile(2,  1, h_reg), times=7},
+                    { self:add_harbor_tile(2,  1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={1}}
+                            {f={"levels",2,"pier_turret"}, p={1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      7 }},
-                    { self.bg:add_harbor_tile(2,  1, h_reg), times=7},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,true }},
-                    { self.bg:add_harbor_tile(2,  1, h_pier1),
+                    { self:add_harbor_tile(2,  1, h_reg), times=7},
+                    { self:add_harbor_tile(2,  1, h_pier1),
                         enemies = {
-                            {f=self.docked_b_ship, p={1}}
+                            {f={"levels",2,"docked_b_ship"}, p={1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2,  1,      4 }},
-                    { self.bg:add_harbor_tile(2,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_pier1,false,false }},
-                    { self.bg:add_harbor_tile(2,  1, h_pier1)},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2,  1, h_close,false,false  }},
-                    { self.bg:add_harbor_tile(2,  1, h_close)},
+                    { self:add_harbor_tile(2,  1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  1, h_pier1)},
+                    { self:add_harbor_tile(2,  1, h_close)},
+                          
+                          
+                          
+                    { self:add_harbor_tile(1,  1, h_open)},
+                    { self:add_harbor_tile(1,  1, h_reg), times=6},
+                    { self:add_harbor_tile(1,  1, h_pier1),
+                        enemies = {
+                            {f={"levels",2,"docked_b_ship"}, p={1}}
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_pier1)},
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f={"levels",2,"pier_turret"}, p={1}}
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f={"levels",2,"pier_turret"}, p={1}}
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f={"levels",2,"pier_turret"}, p={1}}
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=4,
+                        enemies = {
+                            {f = {"powerups","health"},      p = {300}},
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f={"levels",2,"pier_turret"}, p={1}}
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=7},
+                    { self:add_harbor_tile(1,  1, h_close)},
                     
-                    
-                    
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_open)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=6},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,true }},
-                    { self.bg:add_harbor_tile(1,  1, h_pier1),
-                        enemies = {
-                            {f=self.docked_b_ship, p={1}}
-                        }
-                    },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_pier1,false,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_pier1)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
-                        enemies = {
-                            {f=self.pier_turret, p={1}}
-                        }
-                    },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
-                        enemies = {
-                            {f=self.pier_turret, p={1}}
-                        }
-                    },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
-                        enemies = {
-                            {f=self.pier_turret, p={1}}
-                        }
-                    },
-                    --{f = add_to_render_list,      p = {powerups.health(300)}},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4,
-                        enemies = {
-                            {f = add_to_render_list,      p = {powerups.health(300)}},
-                        }
-                    },
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
-                        enemies = {
-                            {f=self.pier_turret, p={1}}
-                        }
-                    },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      7 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=7},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_close ,false,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_close)},
-                    
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   6 }},
                     {},{},{},{},{},{},
                     
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_open ,false,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_open)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      6 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=6},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
+                    { self:add_harbor_tile(1,  1, h_open)},
+                    { self:add_harbor_tile(1,  1, h_reg), times=6},
+                    { self:add_harbor_tile(1,  1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={1}},
-                            {f=self.docked_b_ship, p={1}}
+                            {f={"levels",2,"pier_turret"}, p={1}},
+                            {f={"levels",2,"docked_b_ship"}, p={1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f={"levels",2,"pier_turret"}, p={1}},
+                            {f={"levels",2,"docked_b_ship"}, p={1}}
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  1, h_piert),
+                        enemies = {
+                            {f={"levels",2,"pier_turret"}, p={1}},
+                        }
+                    },
+                    { self:add_harbor_tile(1,  1, h_reg), times=10},
+                    
+                    { self:add_harbor_tile(1,  1, h_reg), times=10,
+                        enemies = {
+                            {f = {"powerups","health"},      p = {300}},
+                        }
+                    },
                     --]]
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,true }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
-                        enemies = {
-                            {f=self.pier_turret, p={1}},
-                            {f=self.docked_b_ship, p={1}}
-                        }
+                    { self:add_harbor_tile(1,  1, h_reg),
+                        enemies={{f = {"formations","b_ship_bosses"}, p = {} }}
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,       4 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1,  1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(1,  1, h_piert),
-                        enemies = {
-                            {f=self.pier_turret, p={1}},
-                        }
-                    },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      10 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=10},
-                    --{f = add_to_render_list,      p = {powerups.health(300)}},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      3 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=10,
-                        enemies = {
-                            {f = add_to_render_list,      p = {powerups.health(300)}},
-                        }
-                    },
-                    --[[
-                    {f = add_to_render_list,      p = {enemies.battleship(),300, 1600, -15 }},
-                    {f = add_to_render_list,      p = {enemies.battleship(),700, 1600, -15 }},
-                    {f = add_to_render_list,      p = {enemies.battleship(),1100, 1600, -15 }},
-                    {f = add_to_render_list,      p = {enemies.battleship(),1500, 1600, -15 }},
-                    --]]
-                    { self.bg:add_harbor_tile(1,  1, h_reg),
-                        enemies={{f = formations.b_ship_bosses, p = {} }}
-                    },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1,  1,      25 }},
-                    { self.bg:add_harbor_tile(1,  1, h_reg), times=25},
+                    { self:add_harbor_tile(1,  1, h_reg), times=25},
                 },
                 
                 
                 {   --right harbor
                 ---[[
                     {},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
-                    { self.bg:add_harbor_tile(2,  -1, h_open)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=2},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert, true,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                    { self:add_harbor_tile(2,  -1, h_open)},
+                    { self:add_harbor_tile(2,  -1, h_reg), times=2},
+                    { self:add_harbor_tile(2,  -1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={-1}},
+                            {f={"levels",2,"pier_turret"}, p={-1}},
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier1,false,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_pier1)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=10},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true }},
-                    { self.bg:add_harbor_tile(2,  -1, h_pier2),
+                    { self:add_harbor_tile(2,  -1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  -1, h_pier1)},
+                    { self:add_harbor_tile(2,  -1, h_reg), times=10},
+                    { self:add_harbor_tile(2,  -1, h_pier2),
                         enemies = {
-                            {f=self.docked_b_ship, p={-1}}
+                            {f={"levels",2,"docked_b_ship"}, p={-1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_pier2)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      10 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=10},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false  }},
-                    { self.bg:add_harbor_tile(2,  -1, h_close)},
+                    { self:add_harbor_tile(2,  -1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  -1, h_pier2)},
+                    { self:add_harbor_tile(2,  -1, h_reg), times=10},
+                    { self:add_harbor_tile(2,  -1, h_close)},
                     
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   4 }},
                     {},{},{},{},
                     
-                    --{f = add_to_render_list,      p = {powerups.health(1300)}},
-                    
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
-                    { self.bg:add_harbor_tile(1,  -1, h_open),
+                    { self:add_harbor_tile(1,  -1, h_open),
                         enemies=
                         {
-                            {f = add_to_render_list,      p = {powerups.health(1300)}}
+                            {f = {"powerups","health"},      p = {1300}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1, -1,      2 }},
-                    { self.bg:add_harbor_tile(1,  -1, h_reg), times=2},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier2,false,true }},
-                    { self.bg:add_harbor_tile(1,  -1, h_pier2),
+                    { self:add_harbor_tile(1,  -1, h_reg), times=2},
+                    { self:add_harbor_tile(1,  -1, h_pier2),
                         enemies = {
-                            {f=self.docked_b_ship, p={-1}}
+                            {f={"levels",2,"docked_b_ship"}, p={-1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1, -1,      4 }},
-                    { self.bg:add_harbor_tile(1,  -1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_pier1,false,false }},
-                    { self.bg:add_harbor_tile(1,  -1, h_pier1),},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_close ,false,false }},
-                    { self.bg:add_harbor_tile(1,  -1, h_close)},
-                    
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   2 }},
+                    { self:add_harbor_tile(1,  -1, h_reg), times=4},
+                    { self:add_harbor_tile(1,  -1, h_pier1),},
+                    { self:add_harbor_tile(1,  -1, h_close)},
                     {},{},
-                    
-                    --{f = add_to_render_list,      p = {powerups.life(1800)}},
-                    --{f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   5 }},
+
                     { enemies =
                         {
-                            {f = add_to_render_list,      p = {powerups.life(1800)}},
-                            {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"powerups","life"},     p = {1800}},
+                            {f = {"enemies","destroyer"},      p = {1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},{},{},{},
-                    
-                    --{f = add_to_render_list,      p = {enemies.destroyer(),800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   2 }},
+
                     { enemies =
                         {
-                            {f = add_to_render_list,      p = {enemies.destroyer(),800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"enemies","destroyer"},      p = {800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},
-                    --{f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3 }},
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   6 }},
+
                     {enemies =
                         {
-                            {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"enemies","destroyer"},      p = {1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},{},{},{},{},
                     
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open,false,false  }},
-                    { self.bg:add_harbor_tile(2,  -1, h_open)},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                    { self:add_harbor_tile(2,  -1, h_open)},
+                    { self:add_harbor_tile(2,  -1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={-1}},
+                            {f={"levels",2,"pier_turret"}, p={-1}},
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      2 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=2},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_pier2)},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_pier2,false,true}},
-                    { self.bg:add_harbor_tile(2,  -1, h_pier2),
+                    { self:add_harbor_tile(2,  -1, h_reg), times=2},
+                    { self:add_harbor_tile(2,  -1, h_pier2)},
+                    { self:add_harbor_tile(2,  -1, h_pier2),
                         enemies = {
-                            {f=self.docked_b_ship, p={-1}}
+                            {f={"levels",2,"docked_b_ship"}, p={-1}}
                         }
                     },
-                    --{f = self.bg.add_stretch,     p = {self.bg,  2, -1,      4 }},
-                    { self.bg:add_harbor_tile(2,  -1, h_reg), times=4},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                    { self:add_harbor_tile(2,  -1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  -1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={-1}},
+                            {f={"levels",2,"pier_turret"}, p={-1}},
                         }
                     },
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_close)},
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    { self:add_harbor_tile(2,  -1, h_close)},
                     {},{},{},{},
                     {enemies={
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
-                    {f = add_to_render_list,      p = {enemies.destroyer(),1400, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = {"enemies","destroyer"},      p = {1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = {"enemies","destroyer"},      p = {1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = {"enemies","destroyer"},      p = {1400, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
                     }},
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   2 }},
                     {},{},
-                    --{f = add_to_render_list,      p = {powerups.health(1800)}},
-                    {enemies={{f = add_to_render_list,      p = {powerups.health(1800)} }} },
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   10 }},
+                    {enemies={{f = {"powerups","health"},      p = {1800} }} },
                     {},{},{},{},{},  {},{},{},{},{},
                     
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_open ,false,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_open)},
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_piert,true,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_piert),
+                    { self:add_harbor_tile(2,  -1, h_open)},
+                    { self:add_harbor_tile(2,  -1, h_piert),
                         enemies = {
-                            {f=self.pier_turret, p={-1}},
+                            {f={"levels",2,"pier_turret"}, p={-1}},
                         }
                     },
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  2, -1, h_close,false,false }},
-                    { self.bg:add_harbor_tile(2,  -1, h_close)},
+                    { self:add_harbor_tile(2,  -1, h_close)},
                     
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   6 }},
                     {},{},{},{},{},{},
-                    {enemies={{f = add_to_render_list,      p = {powerups.life(1800)} }} },
-                    --{f = self.bg.empty_stretch,   p = {self.bg,   4 }},
+                    {enemies={{f = {"powerups","life"},      p = {1800} }} },
                     {},{},{},{},
+                    { self:add_harbor_tile(1,  -1, h_open)},
                     --]]
-                    --{f = self.bg.add_harbor_tile, p = {self.bg,  1, -1, h_open,false,false  }},
-                    { self.bg:add_harbor_tile(1,  -1, h_open)},
-                    --{f = self.bg.add_stretch,     p = {self.bg,  1, -1,     30}},
-                    { self.bg:add_harbor_tile(1,  -1, h_reg), times=30},
-                    {self.bg:add_harbor_tile(1,  -1, h_reg), times=3, enemies={{f = self.bg.begin_to_repeat,      p = {self.bg} }} }
+                    { self:add_harbor_tile(1,  -1, h_reg), times=30},
+                    { self:add_harbor_tile(1,  -1, h_reg), times=3, enemies={{f = {"lvlbg",2,"begin_to_repeat"},      p = {} }} }
                     
                     
                 }
@@ -774,6 +838,7 @@ levels =
             if self.num_bosses == 0 then
                 remove_from_render_list( self)
                 add_to_render_list( lvlcomplete )
+                state.curr_mode = "LEVEL_END"
             end
 		end
     },
@@ -791,7 +856,7 @@ levels =
         
 		setup = function(self)
             
-            
+            my_plane.bombing_mode = true
             self.bg:append_to_queue(
                 {---[[
                     {

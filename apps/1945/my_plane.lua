@@ -1,5 +1,5 @@
 
-smoke = function(i)   return {
+smoke = function(i,o)   return {
     index = i,
 
     duration = 0.5,
@@ -50,6 +50,11 @@ smoke = function(i)   return {
         end
         
         self.halted  = true
+        print("m")
+        if type(o) == "table"  then
+                print("AMOK", o)
+                recurse_and_apply(  self, o  )
+        end
         
     end,
     reset = function(self,i)
@@ -107,6 +112,7 @@ smoke = function(i)   return {
             end
         end
     end,
+
 } end
 -------------------------------------------------------------------------------
 -- This is my plane. It spawns bullets
@@ -115,6 +121,7 @@ setup_my_plane = nil
 
 my_plane =
 {
+    overwrite_vars = {},
 	firing_powerup = 1,
     firing_powerup_max = 5,
 
@@ -241,7 +248,13 @@ my_plane =
             g.clip = {0,0,self.image.w/self.num_frames,self.image.h}
 
             for i = 1, self.num_frames - 1 do
-                self.smoke_stream[i] = smoke(i)
+                if self.overwrite_vars.smoke_stream ~= nil then
+                    print("wtf",self.overwrite_vars.smoke_stream[i])
+                    self.smoke_stream[i] = smoke(i,self.overwrite_vars.smoke_stream[i])
+                else
+                    self.smoke_stream[i] = smoke(i)
+                end
+                    
                     --self.smoke_stream[i]:setup(self.plumes_per_stream)
                     --table.insert(self.render_items,self.smoke_stream[i])
                     add_to_render_list(self.smoke_stream[i],self.plumes_per_stream)
@@ -273,6 +286,7 @@ my_plane =
                 dead           = self.dead,
                 dead_time      = self.dead_time,
                 firing_powerup = self.firing_powerup,
+                smoke_stream   = {},
                 group = {
                     x = self.group.x,
                     y = self.group.y,
@@ -282,6 +296,23 @@ my_plane =
                     y = self.image.y
                 }
             })
+            local sm = s.table_params[#s.table_params].smoke_stream
+            for i = 1,#self.smoke_stream do
+                sm[i] = {}
+                sm[i].time   = self.smoke_stream[i].time
+                sm[i].halted = self.smoke_stream[i].halted
+                sm[i].plumes = {}
+                for j = 1, #self.smoke_stream[i].plumes do
+                    sm[i].plumes[j] = {}
+                    sm[i].plumes[j].group    = {}
+                    sm[i].plumes[j].image    = {}
+                    sm[i].plumes[j].group.x  = self.smoke_stream[i].plumes[j].group.x
+                    sm[i].plumes[j].group.y  = self.smoke_stream[i].plumes[j].group.y
+                    sm[i].plumes[j].image.x  = self.smoke_stream[i].plumes[j].image.x
+                    sm[i].plumes[j].time     = self.smoke_stream[i].plumes[j].time
+
+                end
+            end
             return s
         end,
     hit = function(self)
@@ -339,16 +370,16 @@ my_plane =
             
             --update position
             --print(self.h_speed)
-            self.x = self.x + ( self.h_speed * seconds )
-            --local x = self.group.x + ( self.h_speed * seconds )
+            --self.x = self.x + ( self.h_speed * seconds )
+            local x = self.group.x + ( self.h_speed * seconds )
             
-            if self.x > screen_w - my_plane_sz then
+            if x > screen_w - my_plane_sz then
                 
                 x = screen_w -my_plane_sz 
                 self.h_speed = 0
                 
-            elseif self.x < 0 then
-                self.x = 0
+            elseif x < 0 then
+                x = 0
                 self.h_speed = 0
             else
                 if self.h_speed > 0 then
@@ -359,18 +390,18 @@ my_plane =
                     if self.h_speed > 0 then self.h_speed = 0 end
                 end
             end
-            self.group.x = math.ceil(self.x/4)*4
+            self.group.x = x--math.ceil(self.x/4)*4
             
             
-            self.y = self.y + ( self.v_speed * seconds )
-            --local y = self.group.y + ( self.v_speed * seconds )
+            --self.y = self.y + ( self.v_speed * seconds )
+            local y = self.group.y + ( self.v_speed * seconds )
             
-            if self.y > screen_h - my_plane_sz then
+            if y > screen_h - my_plane_sz then
                 
                 self.y = screen_h -my_plane_sz 
                 self.v_speed = 0
                 
-            elseif self.y < 0 then
+            elseif y < 0 then
                 
                 self.y = 0
                 self.v_speed = 0
@@ -385,7 +416,7 @@ my_plane =
                 end
             end
             
-            self.group.y = math.ceil(self.y/4)*4
+            self.group.y = y--math.ceil(self.y/4)*4
             
             if not self.dead then
                 table.insert(g_guys_air,
@@ -580,20 +611,23 @@ my_plane =
                                 
                                     function( self )
                                
-if point_counter < 999990 then     
-	point_counter = point_counter+10
-	if point_counter > high_score then
-		high_score = point_counter
+if state.hud.curr_score < 999990 then     
+	state.hud.curr_score = state.hud.curr_score+10
+    state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
+	if state.hud.curr_score > state.hud.high_score then
+		state.hud.high_score = state.hud.curr_score
         if not state.set_highscore then
             state.set_highscore = true
             mediaplayer:play_sound("audio/Air Combat High Score.mp3")
         end
 	end
+    --[[
 	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
 		number_of_lives = number_of_lives + 1
 		lives[number_of_lives].opacity =255
 		self.text = Clone{source=txt.up_life}
 	end
+    --]]
 	redo_score_text()
 end
 
@@ -738,20 +772,23 @@ end
                                 
                                     function( self )
                                
-if point_counter < 999990 then     
-	point_counter = point_counter+10
-	if point_counter > high_score then
-		high_score = point_counter
+if state.hud.curr_score < 999990 then     
+	state.hud.curr_score = state.hud.curr_score+10
+    state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
+	if state.hud.curr_score > state.hud.high_score then
+		state.hud.high_score = state.hud.curr_score
         if not state.set_highscore then
             state.set_highscore = true
             mediaplayer:play_sound("audio/Air Combat High Score.mp3")
         end
 	end
-	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
+    --[[
+	if (state.hud.curr_score % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
 		number_of_lives = number_of_lives + 1
 		lives[number_of_lives].opacity =255
 		self.text = Clone{source=txt.up_life}
 	end
+    --]]
 	redo_score_text()
 end
 
@@ -1051,7 +1088,8 @@ redo_score_text()
 }
 powerups =
 {
-    guns = function(xxx) return {
+    guns = function(xxx) 
+    local p =  {
         image = Clone{source=imgs.guns},--Rectangle{w=60,h=60,color="FFFF00",},
         speed = 30,
         setup = function(self)
@@ -1079,8 +1117,12 @@ powerups =
                 remove_from_render_list(self)
                 end
         end,
-    } end,
-    health = function(xxx) return {
+    } 
+    add_to_render_list(p)
+    return p
+    end,
+    health = function(xxx) 
+    local p =  {
         image = Clone{source=imgs.health},--Rectangle{w=60,h=60,color="FFFFFF",},
         speed = 30,
         setup = function(self)
@@ -1106,8 +1148,12 @@ powerups =
                 remove_from_render_list(self)
                 end
         end,
-    } end,
-    life = function(xxx) return {
+    } 
+    add_to_render_list(p)
+    return p
+    end,
+    life = function(xxx)
+    local p = {
         image = Clone{source=imgs.up_life},--Rectangle{w=60,h=60,color="654321",},
         speed = 30,
         setup = function(self)
@@ -1136,6 +1182,12 @@ powerups =
                 remove_from_render_list(self)
                 end
         end,
-    } end,
+    }
+    add_to_render_list(p)
+    return p
+    end,
 }
-setup_my_plane = function(o) add_to_render_list(my_plane,o) end
+setup_my_plane = function(o)
+    add_to_render_list(my_plane)
+    my_plane.overwrite_vars = o
+end

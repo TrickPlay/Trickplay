@@ -16,10 +16,52 @@ state =
         num_lives  = 3,
         max_lives  = 5,
         curr_score = 0,
-        high_score = settings.high_score or 0
+        high_score = 0
     },
+    counters =
+    {
+        {
+            lvl_points = 0,
+            lives_before = 3,
+            fighters = {
+                killed  = 0,
+                spawned = 0
+            },
+            zepp = {
+                killed  = 0,
+                spawned = 0
+            }
+        },
+        {
+            lvl_points = 0,
+            lives_before = 3,
+            fighters = {
+                killed  = 0,
+                spawned = 0
+            },
+            zepp = {
+                killed  = 0,
+                spawned = 0
+            }
+        },
+        {
+            lvl_points = 0,
+            lives_before = 3,
+            fighters = {
+                killed  = 0,
+                spawned = 0
+            },
+            zepp = {
+                killed  = 0,
+                spawned = 0
+            }
+        },
+    }
 }
 
+if settings.state ~= nil  and settings.state.hud ~= nil then
+    state.hud.high_score = settings.state.hud.high_score
+end
 layers =
 {
     splash         = Group{},
@@ -31,7 +73,7 @@ layers =
     air_doodads_1  = Group{},
     
     land_doodads_2 = Group{},
-    land_targets   = Group{}, -- explostions go here as well
+    land_targets   = Group{}, -- explosions go here as well
     land_bullets   = Group{},
     land_doodads_1 = Group{},
     ground         = Group{}
@@ -272,7 +314,7 @@ recurse_and_apply = function(table1,table2)
             if type(table1[k]) ~= "table" and type(table1[k]) ~= "userdata" then
                 --if the key was some other kind of variable, then it is
                 --now overwritten
-                print("making",k)
+                --print("making",k)
                 table1[k] = {} 
             end
             print("in ",k)
@@ -282,7 +324,7 @@ recurse_and_apply = function(table1,table2)
         --otherwise, copy the value over
         else
             table1[k] = v
-            print(k,"=",v)
+            --print(k,"=",v)
         end
     end
 end

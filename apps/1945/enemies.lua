@@ -647,6 +647,7 @@ enemies =
 		
 		setup = function(self)
 			
+            state.counters[1].fighters.spawned = state.counters[1].fighters.spawned + 1
 			self.prop_g:add( self.prop )
 			
 			self.group:add( self.image, self.prop_g )
@@ -739,7 +740,7 @@ enemies =
         collision = function( self , other )
             self.group:unparent()
             remove_from_render_list( self )
-            
+            state.counters[1].fighters.killed = state.counters[1].fighters.killed + 1
             -- Explode
             add_to_render_list(
                 explosions.small(
@@ -748,7 +749,13 @@ enemies =
 			)
 		end	
 	} end,
-	zeppelin  = function(x) return {
+	zeppelin  = function(x,o)
+    print(x,o)
+        local z = {
+        salvage_func = {"enemies","zeppelin"},
+        overwrite_vars = o or {},
+        setup_params = {},
+        salvage_params = { x },
 		health = 20,
 		type = TYPE_ENEMY_PLANE,
         bulletholes = {},
@@ -767,9 +774,9 @@ enemies =
         e_fire_r_i = 0,
         
         e_fire_r = Clone{ source=imgs.engine_fire, opacity=0 },
-        e_r_dam  = Clone{ source=imgs.z_d_e, opacity=0 },
+        e_r_dam  = Clone{ source=imgs.z_d_e,       opacity=0 },
         e_fire_l = Clone{ source=imgs.engine_fire, opacity=0 },
-        e_l_dam  = Clone{ source=imgs.z_d_e,opacity=0 },
+        e_l_dam  = Clone{ source=imgs.z_d_e,       opacity=0 },
         
         e_fire_r_g = Group{position={185,260},clip={0,0,imgs.engine_fire.w/6,imgs.engine_fire.h}},
         e_fire_l_g = Group{position={ 22,260},clip={0,0,imgs.engine_fire.w/6,imgs.engine_fire.h}},
@@ -842,6 +849,7 @@ enemies =
 				y = 130,
 			},
 		},
+        dam = {},
 		
 		group    = Group{x=x,y=-imgs.zepp.h},
 		
@@ -1024,9 +1032,16 @@ enemies =
 			--]]
 		end,
 		
+        fire_thresh = .1,
+        fire_r = 0,
+        fire_l = 0,
+        
+        speed_x = 0,
+        speed_x_cap = 20,
 		
 		
 		setup = function(self)
+            state.counters[1].zepp.spawned = state.counters[1].zepp.spawned + 1
 			self.e_fire_l_g:add(self.e_l_dam, self.e_fire_l)
             self.e_fire_r_g:add(self.e_r_dam, self.e_fire_r)
 			self.prop.g_l:add( self.prop.l )
@@ -1090,15 +1105,35 @@ enemies =
                 end
             }
             self.stage = 1
+            if type(self.overwrite_vars) == "table"  then
+                print("self.overwrite_vars", self.overwrite_vars)
+                recurse_and_apply(  self, self.overwrite_vars  )
+            end
 			
+            for iii = 1,#self.dam do
+                self.group:add(Clone
+                    {
+                        source = imgs["z_d_"..self.dam[iii].i],
+                        x = self.dam[iii].x,
+                        y = self.dam[iii].y
+                    }
+                )
+            end
+            if      self.left_engine_dam == 1 then
+                    self.e_l_dam.opacity  = 255
+            elseif  self.left_engine_dam == 2 then
+                    self.e_l_dam.opacity  = 255
+                    self.e_fire_l.opacity = 255
+            end
+            if      self.right_engine_dam == 1 then
+                    self.e_r_dam.opacity   = 255
+            elseif  self.right_engine_dam == 2 then
+                    self.e_r_dam.opacity   = 255
+                    self.e_fire_r.opacity  = 255
+            end 
 		end,
 		
-        fire_thresh = .1,
-        fire_r = 0,
-        fire_l = 0,
         
-        speed_x = 0,
-        speed_x_cap = 20,
         
         
         
@@ -1244,7 +1279,60 @@ enemies =
                         )
                         --]]
 		end,
-		
+		salvage = function( self, salvage_list )
+            
+            s = {
+                func         = {},
+                table_params = {},
+            }
+            
+            
+            for i = 1, #self.salvage_params do
+                s.table_params[i] = self.salvage_params[i]
+            end
+
+            for i = 1, #self.salvage_func do
+                s.func[i] = self.salvage_func[i]
+            end
+            table.insert(s.table_params,{
+                is_boss  = self.is_boss,
+                right_engine_dam = self.right_engine_dam,
+                left_engine_dam  = self.left_engine_dam,
+                fire_r = self.fire_r,
+                fire_l = self.fire_l,
+                e_fire_l_i     = self.e_fire_l_i,
+                e_fire_r_i     = self.e_fire_r_i,
+                health         = self.health,
+                prop_index     = self.prop_index,
+                stage          = self.stage,
+                last_shot_time = self.last_shot_time,
+                speed_x        = self.speed_x,
+                group = {
+                    x = self.group.x,
+                    y = self.group.y,
+                },
+                prop = {
+                    g_r = {
+                        y = self.prop.g_r.y,
+                        x = self.prop.g_r.x
+                    },
+                    g_l = {
+                        y = self.prop.g_l.y,
+                        x = self.prop.g_l.x
+                    }
+                },
+                dam = {}
+            })
+            for i = 1,#self.dam do
+                s.table_params[#s.table_params].dam[i] = {}
+                s.table_params[#s.table_params].dam[i].x = self.dam[i].x
+                s.table_params[#s.table_params].dam[i].y = self.dam[i].y
+                s.table_params[#s.table_params].dam[i].i = self.dam[i].i
+            end
+            return s
+        end,
+        
+        
         collision = function( self , other, loc, from_bullethole )
 			if self.health > 1 then 
 				self.health = self.health - 1
@@ -1252,7 +1340,8 @@ enemies =
                 local dam = {}
                 if other.group ~= nil then
                     if loc == 0 then
-                        dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                        local i =math.random(1,7)
+                        dam.image = Clone{source = imgs["z_d_"..i]}
                         self.group:add(dam.image)
                         dam.image.x = other.group.x - self.group.x
                         dam.image.y = other.group.y - self.group.y - math.random(0,80)
@@ -1266,6 +1355,7 @@ enemies =
                         elseif dam.image.y > self.image.h-70 then
                             dam.image.y = self.image.h-70
                         end
+                        table.insert(self.dam, {i=i,x=dam.image.x,y=dam.image.y})
                     elseif loc == 1 then
                         self.left_engine_dam = self.left_engine_dam + 1
                         if self.left_engine_dam == 1 then
@@ -1283,6 +1373,7 @@ enemies =
                     else
                         error("unexpected location given for zeppelin impact")
                     end
+                    
                     --[[
                     dam.collision = function(d,other)
                     print("here")
@@ -1302,10 +1393,12 @@ enemies =
                 elseif other.image ~= nil then
                     
                     if loc == 0 then
-                        dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                        local i = math.random(1,7)
+                        dam.image = Clone{source = imgs["z_d_"..i]}
                         self.group:add(dam.image)
                         dam.image.x = other.image.x - self.group.x
                         dam.image.y = other.image.y - self.group.y - math.random(0,80)
+                        table.insert(self.dam, {i=i,x=dam.image.x,y=dam.image.y})
                     elseif loc == 1 then
                         self.left_engine_dam = self.left_engine_dam + 1
                         if self.left_engine_dam == 1 then
@@ -1350,6 +1443,9 @@ enemies =
 			if self.is_boss then
 				levels[state.curr_level]:level_complete()
 			end
+            
+            state.counters[1].zepp.killed = state.counters[1].zepp.killed + 1
+            
 			self.group:unparent()
 			remove_from_render_list( self )
                         
@@ -1375,11 +1471,17 @@ enemies =
 			self.group.y+imgs.zepp.h/2+70)
 			)
 		end	
-	} end,
+	}
+    print("huh")
+        add_to_render_list(z)
+        return z
+    end,
     
-    turret = function() return{
+    turret = function(xxx,y_offset,o) 
+        local t = {
 		type = TYPE_ENEMY_PLANE,
-		
+		salvage_func = {"enemies","turret"},
+        salvage_params = {xxx,y_offset},
 		stage  = 0,	--the current stage the fighter is in
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 80,
@@ -1457,7 +1559,7 @@ enemies =
  
 			
 		end,
-        setup = function(self,xxx,y_offset)
+        setup = function(self)
 			
 			self.group:add( self.image )
             self.group.x = xxx
@@ -1483,6 +1585,11 @@ enemies =
 			
             
             self.img_h = self.image.h
+            
+            if type(o) == "table"  then
+                print("self.overwrite_vars", o)
+                recurse_and_apply(  self, o  )
+            end
 		end,
 		
 		render = function(self,seconds)
@@ -1513,8 +1620,41 @@ enemies =
                     self.group.center[2]
                 )
 			)
-		end	
-    } end,
+		end,
+        salvage = function( self, salvage_list )
+            
+            s = {
+                func         = {},
+                table_params = {},
+            }
+            
+            for i = 1, #self.salvage_params do
+                s.table_params[i] = self.salvage_params[i]
+            end
+            
+            for i = 1, #self.salvage_func do
+                s.func[i] = self.salvage_func[i]
+            end
+            
+            table.insert(s.table_params,{
+                stage          = self.stage,
+                last_shot_time = self.last_shot_time,
+                image  = {
+                    z_rotation = {self.image.z_rotation[1],0,0},
+                },
+                group = {
+                    x = self.group.x,
+                    y = self.group.y,
+                },
+                
+            })
+            
+            return s
+        end,
+    }
+    add_to_render_list(t)
+    return t
+    end,
     
     trench = function() return{
 		type = TYPE_ENEMY_PLANE,
@@ -2064,8 +2204,10 @@ enemies =
 			)
 		end	
     } end,
-    battleship = function() return{
-        
+    battleship = function(xxx,y_offset,speed,moving,o)
+        local b = {
+        salvage_func = {"enemies","battleship"},
+        salvage_params = {xxx,y_offset,speed,moving},
 		health = 5,
 		type = TYPE_ENEMY_PLANE,
         bulletholes = {},
@@ -2328,7 +2470,7 @@ enemies =
 		
 		
 		
-		setup = function(self,xxx,y_offset,speed,moving)
+		setup = function(self)
 			
             self.moving = moving
 			self.approach_speed = speed
@@ -2372,6 +2514,10 @@ enemies =
 				end
 			end
 			self.turr_h = self.guns.stern.h
+            if type(o) == "table"  then
+                print("self.overwrite_vars", o)
+                recurse_and_apply(  self, o  )
+            end
 		end,
         
         wake_thresh = .1,
@@ -2413,58 +2559,9 @@ enemies =
         collision = function( self , other, from_bullethole )
 			if self.health > 1 then 
 				self.health = self.health - 1
-                if from_bullethole == nil then
-                print("there")
-                local dam = {}
-                if other.group ~= nil then
-                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
-                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
-                    self.group:add(dam.image)
-                    dam.image.x = other.group.x - self.group.x
-                    dam.image.y = other.group.y - self.group.y
-                    --[[
-                    dam.collision = function(d,other)
-                    print("here")
-                        local x = d.image.x
-                        local y = d.image.y
-                        
-                        d.image:unparent()
-                        d ={}
-                        
-                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
-                        d.image.x = x
-                        d.image.y = y-4
-                        self.group:add(dam.image)
-                        self:collision(other,true)
-                    end
-                    --]]
-                elseif other.image ~= nil then
-                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
-                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
-                    self.group:add(dam.image)
-                    dam.image.x = other.image.x - self.group.x
-                    dam.image.y = other.image.y - self.group.y
-                    --[[
-                    dam.collision = function(d,other)
-                    print("here")
-                        local x = d.image.x
-                        local y = d.image.y
-                        
-                        d.image:unparent()
-                        d = {}
-                        
-                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
-                        d.image.x = x
-                        d.image.y = y-4
-                        self.group:add(dam.image)
-                        self:collision(other,true)
-                    end
-                    --]]
-                else
-                    error("render_list object with out a .group or a .image collided with the battleship")
-                end
+                
                 --table.insert(self.bulletholes,dam)
-                end
+                
                 --if dam.y > 0 then dam.y =dam.y -50 end
 				return
 			end
@@ -2480,10 +2577,66 @@ enemies =
 			self.group.center[1],
 			self.group.center[2])
 			)
-		end	
-    } end,
-    destroyer = function() return{
-        
+		end,
+        salvage = function( self, salvage_list )
+            
+            s = {
+                func         = {},
+                table_params = {},
+            }
+            
+            for i = 1, #self.salvage_params do
+                s.table_params[i] = self.salvage_params[i]
+            end
+            
+            for i = 1, #self.salvage_func do
+                s.func[i] = self.salvage_func[i]
+            end
+            
+            table.insert(s.table_params,{
+                last_wake_change = self.last_wake_change,
+                is_boss        = self.is_boss,
+                health         = self.health,
+                b_w_i          = self.b_w_i,
+                s_w_i          = self.s_w_i,
+                stage          = self.stage,
+                last_shot_time = self.last_shot_time,
+                guns  = {
+                    bow = {
+                        z_rotation = {self.guns.bow.z_rotation[1],0,0},
+                    },
+                    mid = {
+                        z_rotation = {self.guns.mid.z_rotation[1],0,0},
+                    },
+                    stern = {
+                        z_rotation = {self.guns.stern.z_rotation[1],0,0},
+                    },
+                },
+                group = {
+                    x = self.group.x,
+                    y = self.group.y,
+                },
+                last_shot_time  =    --how long ago the ship last shot
+                {
+                    b = self.last_shot_time.b,
+                    m = self.last_shot_time.m,
+                    s = self.last_shot_time.s
+                },
+                
+            })
+            if self.index then
+                table.insert(s.table_params,self.index)
+            end
+            return s
+        end,
+    }
+    add_to_render_list(b)
+    return b
+    end,
+    destroyer = function(xxx,y_offset,speed,moving,o)
+        local b = {
+        salvage_func = {"enemies","destroyer"},
+        salvage_params = {xxx,y_offset,speed,moving},
 		health = 2,
 		type = TYPE_ENEMY_PLANE,
         bulletholes = {},
@@ -2615,7 +2768,7 @@ enemies =
 		
 		
 		
-		setup = function(self,xxx,y_offset,speed,moving)
+		setup = function(self)
 			
             self.moving = moving
 			self.approach_speed = speed
@@ -2656,6 +2809,10 @@ enemies =
 				end
 			end
 			self.turr_h = self.gun_img.h
+            if type(o) == "table"  then
+                print("self.overwrite_vars", o)
+                recurse_and_apply(  self, o  )
+            end
 		end,
         
         wake_thresh = .1,
@@ -2761,8 +2918,47 @@ enemies =
 			self.group.center[1],
 			self.group.center[2])
 			)
-		end	
-    } end,
+		end,
+        salvage = function( self, salvage_list )
+            
+            s = {
+                func         = {},
+                table_params = {},
+            }
+            
+            for i = 1, #self.salvage_params do
+                s.table_params[i] = self.salvage_params[i]
+            end
+            
+            for i = 1, #self.salvage_func do
+                s.func[i] = self.salvage_func[i]
+            end
+            
+            table.insert(s.table_params,{
+                last_wake_change = self.last_wake_change,
+                is_boss        = self.is_boss,
+                health         = self.health,
+                b_w_i          = self.b_w_i,
+                s_w_i          = self.s_w_i,
+                stage          = self.stage,
+                last_shot_time = self.last_shot_time,
+                gun_img  = {
+                    z_rotation = {self.gun_img.z_rotation[1],0,0},
+                },
+                group = {
+                    x = self.group.x,
+                    y = self.group.y,
+                },
+                last_shot_time  =  self.last_shot_time,
+                
+            })
+            
+            return s
+        end,
+    }
+    add_to_render_list(b)
+    return b
+    end,
     
 }
 
@@ -2772,10 +2968,20 @@ enemies =
 
 formations = 
 {
-    b_ship_bosses = function()
+    b_ship_bosses = function(o,salvage_index)
         local b
-        for i=1,4 do
-            b = enemies.battleship()
+        if salvage_index then
+            lower = salvage_index
+            upper = salvage_index
+        else
+            lower = 1
+            upper = 4
+        end
+        for i= lower,upper do
+            b = enemies.battleship(300+(i-1)*400, 1600, -15, true,o)
+            b.salvage_func = {"formations","b_ship_bosses"}
+            b.salvage_params = {}
+            b.index = i
             b.is_boss = true
             b.stages = {
                 function(b,seconds)
@@ -2792,7 +2998,7 @@ formations =
 				end,
             }
             b.stage = 1
-            add_to_render_list(b,300+(i-1)*400, 1600, -15, true )
+            --add_to_render_list(b,300+(i-1)*400, 1600, -15, true )
         end
     end,
     hor_row_tanks = function(x,y,num,spacing)
@@ -2857,11 +3063,11 @@ formations =
         end
     end,
     
-    zepp_boss = function(x)
+    zepp_boss = function(x,o)
         
-        local zepp = enemies.zeppelin()
+        local zepp = enemies.zeppelin(x,o)
         
-        zepp.group.x = x
+        zepp.salvage_func = {"formations","zepp_boss"}
         zepp.group.y = -zepp.image.h
         zepp.is_boss = true
         
@@ -2893,7 +3099,7 @@ formations =
         }
 		zepp.stage = 1
 		
-		add_to_render_list(zepp)
+		--add_to_render_list(zepp)
 		
     end,
 	
@@ -3061,8 +3267,11 @@ formations =
         end
 
     end,
-    zig_zag = function(x,r, rot)
+    zig_zag = function(x, r, rot, salvage_overwrites)
         e = enemies.basic_fighter(imgs.fighter_w)
+        e.salvage_func   = {"formations","zig_zag"}
+        e.salvage_params = {x,r,rot}
+        e.overwrite_vars = salvage_overwrites
         local dir = rot/math.abs(rot)
         e.group.x = x
         e.group.y = -e.image.h
@@ -3154,12 +3363,27 @@ formations =
                 rot_at_x, -- position where each fighter performs 
                 rot_at_y, --     the first turn
                 
-                dir       -- the direction of the loop
+                dir,      -- the direction of the loop
+                salvage_overwrites,
+                salvage_index       --which fighter of the formation is being salvaged
         )
         
         local e
-        for i = 1,num do
+        if salvage_index then
+            lower = salvage_index
+            upper = salvage_index
+        else
+            lower = 1
+            upper = num
+        end
+        for i = lower,upper do
             e = enemies.basic_fighter(imgs.fighter_w)
+            e.salvage_func   = {"formations","one_loop"}
+            e.salvage_params = {num, spacing, start_x, rot_at_x, rot_at_y, dir}
+            if type(salvage_overwrites) == "table" then
+                e.overwrite_vars = salvage_overwrites
+            end
+            e.index = i
             e.group.position = {start_x,-e.image.h - spacing*(i-1)}
             e.deg_counter = {}
             e.stages =
