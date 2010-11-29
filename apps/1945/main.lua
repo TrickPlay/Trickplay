@@ -66,6 +66,10 @@ layers.splash:add(
         Text{name = "Next Level",text="Next Level",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240, opacity=0},
         Text{name = "Replay Level",text="Replay Level",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300, opacity=0}
     )
+    layers.splash:add(
+        Text{name = "save",text="Save and Exit",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240, opacity=0},
+        Text{name = "exit",text="Exit",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300, opacity=0}
+    )
 layers.splash:foreach_child(function(c)
     c.anchor_point = {c.w/2,c.h/2}
 end)
