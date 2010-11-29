@@ -160,7 +160,117 @@ lvlcomplete =      {
                                 end
                             }
 
-
+save_highscore =      {
+                                time  = 0,
+                                text = {
+                                    Text{font = my_font , text = "G" , color = "FFFFFF"},
+                                    Text{font = my_font , text = "A" , color = "FFFFFF"},
+                                    Text{font = my_font , text = "M" , color = "FFFFFF"},
+                                    Text{font = my_font , text = "E" , color = "FFFFFF"},
+                                    Text{font = my_font , text = " " , color = "FFFFFF"},
+                                    Text{font = my_font , text = "O" , color = "FFFFFF"},
+                                    Text{font = my_font , text = "V" , color = "FFFFFF"},
+                                    Text{font = my_font , text = "E" , color = "FFFFFF"},
+                                    Text{font = my_font , text = "R" , color = "FFFFFF"},
+                                },
+                                initials = {
+                                    Text{font = my_font , text = "" , color = "FFFFFF",x=screen_w/2-50},
+                                    Text{font = my_font , text = "" , color = "FFFFFF",x=screen_w/2},
+                                    Text{font = my_font , text = "" , color = "FFFFFF",x=screen_w/2+50},
+                                },
+                                stage=1,
+                                rect = Rectangle{color="000000",w=screen_w,h=screen_h},
+                                
+                                setup = function( self )
+                                    layers.splash:add( self.rect)
+                                    self.rect:lower_to_bottom()
+                                    self.rect.y = -screen_h
+                                    for i,t in ipairs(self.text) do
+                                        layers.splash:add( t )
+                                        t.x = screen_w/2
+                                        t.y = -100
+                                        t.extra.targ_x = screen_w/2 + (i-#self.text/2)*50
+                                    end
+                                    
+                                    for _,i in ipairs(self.initials) do
+                                        layers.splash:add( i )
+                                        i.text = "_"
+                                    end
+                                    
+                                    
+                                    self.stage = 1
+                                    self.time = 0
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    layers.splash:find_child("arrow").y = screen_h/2+240
+                                    
+                                    lvl_end_i = 1
+                                end,
+                                factor = 6,
+                                stages = {
+                                    function(self)
+                                        self.rect.y = -screen_h*(1-self.time)
+                                        if self.time >= 1 then
+                                            self.rect.y = 0
+                                            self.stage  = self.stage + 1
+                                            self.time   = 0
+                                        end
+                                    end,
+                                    function(self)
+                                        for i = 1, #self.text do
+                                            if i < (self.factor*self.time-1) then
+                                                self.text[i].x = self.text[i].extra.targ_x
+                                                self.text[i].y = 100
+                                            elseif i < (self.factor*self.time) then
+                                                self.text[i].x = screen_w/2 + (self.text[i].extra.targ_x - screen_w/2)* (self.factor*self.time-i)
+                                                self.text[i].y = -100 + (100 - -100)*(self.factor*self.time-i)
+                                            else
+                                            end
+                                            x = self.text
+                                        end
+                                        if self.factor*self.time >= #self.text then
+                                            for i = 1, #self.text do
+                                                self.text[i].x = self.text[i].extra.targ_x
+                                                self.text[i].y = 100
+                                            end
+                                            self.stage  = self.stage + 1
+                                            self.time   = 0
+                                        end
+                                    end,
+                                    function(self)
+                                        layers.splash:find_child("arrow").opacity = 255
+                                        layers.splash:find_child("save").opacity  = 255
+                                        layers.splash:find_child("exit").opacity  = 255
+                                        self.stage  = self.stage + 1
+                                        state.curr_mode = "LEVEL_END"
+                                    end,
+                                    function(self) end
+                                },
+                                
+                                render = function( self , seconds )
+                                        
+                                        self.time = self.time + seconds
+                                        
+                                        self.stages[self.stage](self)
+                                        
+                                end,
+                                remove = function (self)
+                                    layers.splash:find_child("arrow").opacity = 0
+                                    layers.splash:find_child("save").opacity  = 0
+                                    layers.splash:find_child("exit").opacity  = 0
+                                    for i = 1, #self.text do
+                                        self.text[i]:unparent()
+                                    end
+                                    for i = 1, #self.initials do
+                                        self.initials[i]:unparent()
+                                    end
+                                    self.rect:unparent()
+                                end
+                            }
 
 
 levels = 
