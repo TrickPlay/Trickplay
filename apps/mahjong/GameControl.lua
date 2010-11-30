@@ -178,7 +178,7 @@ function(ctrl, router, ...)
                 -- do nothing (for now)
             else
                 --increase_moves() --this is global in "MenuView.lua"/should change
-                --state:find_drawn_tiles()
+                state:find_drawn_tiles()
                 self:reset_selector()
             end
         end
@@ -276,6 +276,8 @@ function(ctrl, router, ...)
             router:set_active_component(Components.MENU)
             router:notify()
         end
+        print("selector")
+        dumptable(selector)
     end
 
     function ctrl:reset_selector()

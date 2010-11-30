@@ -171,7 +171,7 @@ GameState = Class(nil,function(state, ctrl)
         state:find_selectable_tiles()
         state:find_matching_tiles()
         state:find_top_tiles()
-        --state:find_drawn_tiles()
+        state:find_drawn_tiles()
     end
 
     function state:build_test()
@@ -202,7 +202,7 @@ GameState = Class(nil,function(state, ctrl)
         end
 
         grid[10][10][1] = tiles[1]
-        grid[12][10][1] = tiles[2]
+        grid[12][9][2] = tiles[2]
     end
 
     --[[
@@ -255,12 +255,34 @@ GameState = Class(nil,function(state, ctrl)
         return not (matrix[2][2] or matrix[2][3]
                 or matrix[3][2] or matrix[3][3])
     end
+    local function check_right(x, y, z)
+        local matrix = {}
+        for i = 1,4 do
+            matrix[i] = {}
+            for j = 1,4 do
+                matrix[i][j] = true
+            end
+        end
+    end
+    local function check_bottom(x, y, z)
+        local matrix = {}
+        for i = 1,4 do
+            matrix[i] = {}
+            for j = 1,4 do
+                matrix[i][j] = true
+            end
+        end
+    end
+
     function state:find_drawn_tiles()
+    do return end
         for i = 1,GRID_WIDTH do
             for j = 1,GRID_HEIGHT do
                 for k = 1,GRID_DEPTH do
                     -- tile exists
-                    if grid[i][j][k] then
+                    if grid[i][j][k] and (not grid[i-1]
+                    or grid[i][j][k] ~= grid[i-1][j][k])
+                    and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k]) then
                         -- right side
                         if grid[i+2] and (grid[i+2][j][k]
                         or (grid[i+2][j-1] and grid[i+2][j+1]
@@ -278,10 +300,6 @@ GameState = Class(nil,function(state, ctrl)
                     end
                 end
             end
-        end
-        -- TODO: figure out why this only works with this f*king HACK!!!
-        if layout_number == Layouts.TURTLE then
-            grid[13][7][4].group:show()
         end
     end
 
