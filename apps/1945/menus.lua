@@ -295,8 +295,10 @@ Menu_High_Scores = Class(function(menu, ...)
     local play_again  = Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2}
     local quit        = Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2+80}
     local arrow       = Image{src="assets/splash/Arrow.png", x = play_again.x-50, y = play_again.y+20}
-    local highscores  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
-    menu.group:add(title,play_again,highscores,quit,arrow)
+    local highscores_num  = Text{text="1:\n2:\n3:\n4:\n5:\n6:\n7:\n8:",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
+    local highscores_sc  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+400, y = screen_h/2-350}
+    local highscores_ini  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-350}
+    menu.group:add(title,play_again,highscores_num,highscores_sc,highscores_ini,quit,arrow)
     
     layers.splash:add(menu.group)
     menu.group:hide()
@@ -305,10 +307,12 @@ Menu_High_Scores = Class(function(menu, ...)
     
     function menu:animate_in()
         
-        highscores.text = ""
+        highscores_ini.text = ""
+        highscores_sc.text = ""
         for i = 1,8 do
         print(i)
-            highscores.text = highscores.text..i..":  "..state.high_scores[i].initials.." "..state.high_scores[i].score.."\n"
+            highscores_ini.text = highscores_ini.text..state.high_scores[i].initials.."\n"
+            highscores_sc.text  = highscores_sc.text..state.high_scores[i].score.."\n"
         end
         menu_index       = 1
         menu.group:show()
