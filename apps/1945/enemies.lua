@@ -19,7 +19,6 @@ explosions =
             self.group:unparent()
         end,
         setup = function( self )
-        print("h")
             mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
 
             self.group = Group
@@ -146,7 +145,7 @@ function fire_bullet(enemy,source)
                     self.image:unparent()
                 end,
         setup = function( self )
-            mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+            
 
 		--enemies are assumed to be facing downwards
 		local deg    = enemy.group.z_rotation[1] + 90
@@ -156,6 +155,9 @@ function fire_bullet(enemy,source)
 		self.speed_y = math.sin(deg*math.pi/180) * self.speed
 		
                 layers.air_bullets:add( self.image )
+                if not (self.image.x > screen_w or self.image.x < 0 or self.image.y < 0 or self.image.y > screen_h) then
+                    mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+                end
             end,
                 
             render = function( self , seconds )
@@ -690,7 +692,6 @@ enemies =
 			end
 			
             if type(self.overwrite_vars) == "table"  then
-                print("self.overwrite_vars", self.overwrite_vars)
                 recurse_and_apply(  self, self.overwrite_vars  )
             end
 		end,
@@ -869,7 +870,7 @@ enemies =
 		
 		group    = Group{x=x,y=-imgs.zepp.h},
 		
-		shoot_time      = 3,	--how frequently the plane shoots
+		shoot_time      = 1,	--how frequently the plane shoots
 		last_shot_time = 2,	--how long ago the plane last shot
 		
 		
@@ -1490,7 +1491,6 @@ enemies =
 			)
 		end	
 	}
-    print("huh")
         add_to_render_list(z)
         return z
     end,
@@ -1607,7 +1607,6 @@ enemies =
             self.img_h = self.image.h
             
             if type(o) == "table"  then
-                print("self.overwrite_vars", o)
                 recurse_and_apply(  self, o  )
             end
 		end,
@@ -2539,7 +2538,6 @@ enemies =
 			end
 			self.turr_h = self.guns.stern.h
             if type(o) == "table"  then
-                print("self.overwrite_vars", o)
                 recurse_and_apply(  self, o  )
             end
 		end,
@@ -2836,7 +2834,6 @@ enemies =
 			end
 			self.turr_h = self.gun_img.h
             if type(o) == "table"  then
-                print("self.overwrite_vars", o)
                 recurse_and_apply(  self, o  )
             end
 		end,
@@ -2881,7 +2878,6 @@ enemies =
 			if self.health > 1 then 
 				self.health = self.health - 1
                 if from_bullethole == nil then
-                print("there")
                 local dam = {}
                 if other.group ~= nil then
                     --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
@@ -3144,7 +3140,6 @@ formations =
             salvage_overwrites, --overwrite vars for the enemy
             salvage_index       --which fighter of the formation is being salvaged
 		)                 
-		print("row")
         assert(math.abs(targ_x-rot_at_x) >= 100)
         local dir, e
         if targ_x > start_x then
@@ -3166,7 +3161,6 @@ formations =
         end
         
 		for i = lower,upper do
-            print("num",i)
             --dumptable(salvage_overwrites)
 			e = enemies.basic_fighter(imgs.fighter_r)
             if type(salvage_overwrites) == "table" then
