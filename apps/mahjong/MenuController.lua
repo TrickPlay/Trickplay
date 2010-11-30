@@ -32,6 +32,10 @@ MenuController = Class(Controller,function(self, view, ...)
     local Choose_Tile = {}
 
     -- create the graph
+    New_Game[Directions.UP] =
+        function()
+            mediaplayer:play_sound("assets/audio/bonk.mp3")
+        end
     New_Game[Directions.DOWN] = Undo
     New_Game.object = view:get_object("new_game")
     New_Game.callback =
@@ -91,6 +95,10 @@ MenuController = Class(Controller,function(self, view, ...)
         end
 
     Exit[Directions.UP] = Show_Options
+    Exit[Directions.DOWN] =
+        function()
+            mediaplayer:play_sound("assets/audio/bonk.mp3")
+        end
     Exit.object = view:get_object("exit")
     Exit.callback = function() exit() end
 
@@ -105,6 +113,7 @@ MenuController = Class(Controller,function(self, view, ...)
             end
             direction = Directions.DOWN
             view:move_layout(current_layout, Directions.UP)
+            mediaplayer:play_sound("assets/audio/arrow.mp3")
         end
     Choose_Map[Directions.DOWN] =
         function()
@@ -117,6 +126,7 @@ MenuController = Class(Controller,function(self, view, ...)
             end
             direction = Directions.UP
             view:move_layout(current_layout, Directions.DOWN)
+            mediaplayer:play_sound("assets/audio/arrow.mp3")
         end
     Choose_Map[Directions.LEFT] = Show_Options
     Choose_Map[Directions.RIGHT] = Choose_Tile
@@ -132,6 +142,7 @@ MenuController = Class(Controller,function(self, view, ...)
                 current_tile_image = #TILE_IMAGES
             end
             view:change_tiles(current_tile_image, Directions.UP)
+            mediaplayer:play_sound("assets/audio/arrow.mp3")
         end
     Choose_Tile[Directions.DOWN] =
         function()
@@ -143,6 +154,7 @@ MenuController = Class(Controller,function(self, view, ...)
                 current_tile_image = 1
             end
             view:change_tiles(current_tile_image, Directions.DOWN)
+            mediaplayer:play_sound("assets/audio/arrow.mp3")
         end
     Choose_Tile[Directions.LEFT] = Choose_Map
     Choose_Tile.object = view:get_object("choose_tile")
@@ -167,18 +179,13 @@ MenuController = Class(Controller,function(self, view, ...)
         old_on_key_down = nil
     end
 
-    local MenuCallbacks = {
-    }
-
-    local function check_for_valid(dir)
-    end
-
     function self:move_selector(dir)
         -- move to the next node
         if 1 == dir[1] and selection ~= Choose_Map and selection ~= Choose_Tile
         and not self:is_options_hidden() then
             prev_selection = selection
             selection = Choose_Map
+            mediaplayer:play_sound("assets/audio/arrow.mp3")
             view:move_focus()
         elseif selection[dir] then
             if type(selection[dir]) == "function" then
@@ -186,9 +193,10 @@ MenuController = Class(Controller,function(self, view, ...)
             else
                 prev_selection = selection
                 selection = selection[dir]
+                mediaplayer:play_sound("assets/audio/arrow.mp3")
                 view:move_focus()
             end
-        -- if moving down and nothing below then move down
+        -- if moving right and only the game is to the right
         elseif 1 == dir[1] and (not game:get_state():must_restart()) then
             -- if options are not hidden then hide them first
             router:set_active_component(Components.GAME)
@@ -210,6 +218,7 @@ MenuController = Class(Controller,function(self, view, ...)
         end
 
         selection:callback()
+        mediaplayer:play_sound("assets/audio/enter.mp3")
     end
 
 end)
