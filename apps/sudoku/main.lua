@@ -337,7 +337,8 @@ local right_list = {}
 right_list = {
 	FocusableImage({0,0},"Cheat", 
 		red_button_off,red_button_on,
-		function() 
+		function()
+			mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 			game:cheat()
 		end),
 
@@ -362,12 +363,13 @@ right_list = {
 				right_list[3].group:find_child("text_s").text = "Show Errors"
 				yellow_light.opacity = 0
 			end
+			mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 			restore_keys()
 		end),
 
 	FocusableImage({0,3*(blank_button_off.h+8)},"Restart Puzzle", 
 		blue_button_off, blue_button_on, 
-		function() 
+		function()
 			if red_is_on then
 				game = Game(game:get_all_givens(),
 					game:get_sol(),nil,blue_blox)
@@ -947,6 +949,9 @@ function game_on_key_down(k)
 			if not menu_open and ind.r < 9 then
 				ind.r=ind.r+1
 				selector.x,selector.y = sel_pos(ind.r,ind.c)
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -954,6 +959,9 @@ function game_on_key_down(k)
 			if not menu_open and ind.r > 1 then
 				ind.r=ind.r-1
 				selector.x,selector.y = sel_pos(ind.r,ind.c)
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -979,6 +987,7 @@ function game_on_key_down(k)
 					selector.opacity = 0
 				end
 			end
+			mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
 			restore_keys()
 		end,
 		[keys.Left] = function()
@@ -1003,9 +1012,11 @@ function game_on_key_down(k)
 					selector.opacity = 0
 				end
 			end
+			mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
 			restore_keys()
 		end,
 		[keys.Return] = function()
+			
 			if menu_open then
 				if pencil_menu_index == 1 then
 					game:clear_tile(ind.r,ind.c)
@@ -1020,12 +1031,14 @@ function game_on_key_down(k)
 
 
 				elseif pencil_menu_index == 2 then
+					mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 					menu_open = false
 					pencil_menu.opacity = 0
 				else
 					error("pencil_menu_index is "..pencil_menu_index)
 				end
 			elseif game:get_givens(ind.r,ind.c) == 0 then
+				mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 				menu_open = true
 				pencil_menu.opacity = 255
 				pencil_menu_index = 2
@@ -1092,6 +1105,7 @@ function game_on_key_down(k)
 		[keys["KP_Page_Up"] ]   = function() num_press(9) end,
 		[keys["c"] ] = function()
 			if won or menu_open then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1100,6 +1114,7 @@ function game_on_key_down(k)
 		end,
 		[keys["u"] ] = function()
 			if won or menu_open then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1119,6 +1134,7 @@ function game_on_key_down(k)
 		end,
 		[keys["e"] ] = function()
 			if won or menu_open then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1127,6 +1143,7 @@ function game_on_key_down(k)
 		end,
 		[keys["r"] ] = function()
 			if won or menu_open then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1143,11 +1160,22 @@ end
 function confirm_on_key_down(k)
 	local key = 
 	{
+		[keys.Up] = function()
+			mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
+			restore_keys()
+		end,
+		[keys.Down] = function()
+			mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
+			restore_keys()
+		end,
 		[keys.Left] = function()
 				if conf_hor_index > 1 then
 					conf_list[conf_hor_index]:out_focus()
 					conf_hor_index = conf_hor_index - 1
 					conf_list[conf_hor_index]:on_focus()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			restore_keys()
 		end,
@@ -1156,10 +1184,14 @@ function confirm_on_key_down(k)
 					conf_list[conf_hor_index]:out_focus()
 					conf_hor_index = conf_hor_index + 1
 					conf_list[conf_hor_index]:on_focus()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			restore_keys()
 		end,
 		[keys.Return] = function()
+			
 				if conf_hor_index == 2 then
 
 						if red_is_on then
@@ -1187,6 +1219,7 @@ function confirm_on_key_down(k)
 
 
 				elseif conf_hor_index == 1 then
+						mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 						are_you_sure      = false
 						focus = conf_from
 						confirm.opacity   = 0
@@ -1198,6 +1231,7 @@ function confirm_on_key_down(k)
 						conf_list[2]:on_focus()
 						restore_keys()
 				end
+			
 			restore_keys()
 		end
 	}
@@ -1212,12 +1246,18 @@ function diff_on_key_down(k)
 					conf_list[conf_hor_index]:out_focus()
 					conf_hor_index = conf_hor_index - 1
 					conf_list[conf_hor_index]:on_focus()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			else
 				if diff_hor_index > 1 then
 					diff_list[diff_hor_index]:out_focus()
 					diff_hor_index = diff_hor_index - 1
 					diff_list[diff_hor_index]:on_focus()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			end
 			restore_keys()
@@ -1229,12 +1269,18 @@ function diff_on_key_down(k)
 					conf_list[conf_hor_index]:out_focus()
 					conf_hor_index = conf_hor_index + 1
 					conf_list[conf_hor_index]:on_focus()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			else
 				if diff_hor_index < #diff_list then
 					diff_list[diff_hor_index]:out_focus()
 					diff_hor_index = diff_hor_index + 1
 					diff_list[diff_hor_index]:on_focus()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			end
 			restore_keys()
@@ -1246,6 +1292,9 @@ function diff_on_key_down(k)
 					curr_opt = (curr_opt - 1-1)%(#game_opts)+1
 					num_givens = game_num[curr_opt]
 					diff_list[2]:press_up()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			end
 			restore_keys()
@@ -1257,11 +1306,15 @@ function diff_on_key_down(k)
 					curr_opt = (curr_opt + 1-1)%(#game_opts)+1
 					num_givens = game_num[curr_opt]
 					diff_list[2]:press_down()
+					mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+				else
+					mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				end
 			end
 			restore_keys()
 		end,
 		[ keys.Return ] = function()
+			
 			if are_you_sure then
 				if conf_hor_index == 2 then
 
@@ -1290,6 +1343,7 @@ function diff_on_key_down(k)
 
 
 				elseif conf_hor_index == 1 then
+						mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 						focus = "DIFF"
 						--are_you_sure      = false
 						confirm.opacity   = 0
@@ -1301,7 +1355,7 @@ function diff_on_key_down(k)
 				end
 			else
 				if diff_hor_index == 1 then
-
+					mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 					if diff_from == "SPLASH" then
 						focus = "SPLASH"
 						splash.opacity=255
@@ -1344,6 +1398,7 @@ function diff_on_key_down(k)
 						focus = "GAME_BOARD"
 						dolater(splash_to_game,flip_board,difficulty)
 					else
+						mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 						--are_you_sure = true
 						focus = "ARE_YOU_SURE"
 						confirm.opacity = 255
@@ -1370,7 +1425,16 @@ end
 function splash_on_key_down(k)
 	local key = 
 	{
+		[keys.Up] = function()
+			mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
+			restore_keys()
+		end,
+		[keys.Down] = function()
+			mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
+			restore_keys()
+		end,
 		[ keys.Return ] = function()
+			mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 			splash_list[splash_hor_index]:press_enter(splash)
 			diff_from = "SPLASH"
 		end,
@@ -1379,6 +1443,9 @@ function splash_on_key_down(k)
 				splash_list[splash_hor_index]:out_focus()
 				splash_hor_index = splash_hor_index - 1
 				splash_list[splash_hor_index]:on_focus()
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 
@@ -1388,6 +1455,9 @@ function splash_on_key_down(k)
 				splash_list[splash_hor_index]:out_focus()
 				splash_hor_index = splash_hor_index + 1
 				splash_list[splash_hor_index]:on_focus()
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -1403,6 +1473,9 @@ function left_menu_on_key_down(k)
 				left_list[left_index]:out_focus()
 				left_index = left_index - 1
 				left_list[left_index]:on_focus()
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -1411,6 +1484,9 @@ function left_menu_on_key_down(k)
 				left_list[left_index]:out_focus()
 				left_index = left_index + 1
 				left_list[left_index]:on_focus()
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -1420,7 +1496,7 @@ function left_menu_on_key_down(k)
 			focus = "GAME_BOARD"
 			selector.opacity = 255
 			restore_keys()
-
+			mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
 		end,
 		[keys.Left] = function()
 			right_list[left_index]:on_focus()
@@ -1431,13 +1507,16 @@ function left_menu_on_key_down(k)
 			ind.c = 9
 			selector.x,selector.y = sel_pos(ind.r,ind.c)
 			restore_keys()
+			mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
 		end,
 
 		[keys.Return] = function()
+			mediaplayer:play_sound("audio/Button4_v4_heavier[enter].mp3")
 			left_list[left_index]:press_enter()
 		end,
 		[keys["c"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1446,6 +1525,7 @@ function left_menu_on_key_down(k)
 		end,
 		[keys["u"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1454,6 +1534,7 @@ function left_menu_on_key_down(k)
 		end,
 		[keys["e"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1462,6 +1543,7 @@ function left_menu_on_key_down(k)
 		end,
 		[keys["r"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1485,6 +1567,9 @@ function right_menu_on_key_down(k)
 				right_list[   right_index]:out_focus()
 				right_index = right_index - 1
 				right_list[   right_index]:on_focus()
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -1493,6 +1578,9 @@ function right_menu_on_key_down(k)
 				right_list[   right_index]:out_focus()
 				right_index = right_index + 1
 				right_list[   right_index]:on_focus()
+				mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
+			else
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 			end
 			restore_keys()
 		end,
@@ -1501,6 +1589,7 @@ function right_menu_on_key_down(k)
 			right_index = 1
 			focus = "GAME_BOARD"
 			selector.opacity = 255
+			mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
 			restore_keys()
 		end,
 		[keys.Right] = function()
@@ -1511,6 +1600,7 @@ function right_menu_on_key_down(k)
 			focus = "GAME_LEFT"
 			ind.c = 1
 			selector.x,selector.y = sel_pos(ind.r,ind.c)
+			mediaplayer:play_sound("audio/Button_Clicky1v2[arrow].mp3")
 			restore_keys()
 		end,
 		[keys.Return] = function()
@@ -1518,6 +1608,7 @@ function right_menu_on_key_down(k)
 		end,
 		[keys["c"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1526,6 +1617,7 @@ function right_menu_on_key_down(k)
 		end,
 		[keys["u"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1534,6 +1626,7 @@ function right_menu_on_key_down(k)
 		end,
 		[keys["e"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
@@ -1542,6 +1635,7 @@ function right_menu_on_key_down(k)
 		end,
 		[keys["r"] ] = function()
 			if won then
+				mediaplayer:play_sound("audio/Button7_v4_deeper[bonk].mp3")
 				restore_keys()
 				return
 			else
