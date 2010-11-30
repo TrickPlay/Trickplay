@@ -303,7 +303,7 @@ levels =
             self.add_list = {
             --enemy
             {
-            --[[
+            ---[[
                 {t =    0, item = add_to_render_list,         params = { lvl1txt        }},
                 
                 
@@ -517,7 +517,7 @@ levels =
             for i = 1, #self.add_list do
                 self.index[i] = 1
             end
-            self.time = 200
+            self.time = 0--200
             self.num_bosses = 2
             if type(o) == "table"  then
                 print("self.overwrite_vars", o)
@@ -670,7 +670,7 @@ levels =
             self.bg:append_to_queue(
             {
                 {   --left harbor
-                --[[
+                ---[[
                     { enemies={{f = {"add_to_render_list"},        p = { lvl2txt } }} },
                     { self:add_harbor_tile(2,  1, h_open)},
                     { self:add_harbor_tile(2,  1, h_reg), times=2},
@@ -784,7 +784,7 @@ levels =
                 
                 
                 {   --right harbor
-                --[[
+                ---[[
                     {},
                     { self:add_harbor_tile(2,  -1, h_open)},
                     { self:add_harbor_tile(2,  -1, h_reg), times=2},

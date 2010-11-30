@@ -60,7 +60,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         h_score_val.text = string.format("%06d",highscore).." pts"
         
         
-        local timer = Timer{interval=1000}
+        local timer = Timer{interval=3000}
         timer.on_timer = function()
             remove_all_from_render_list()
             menu.group:show()
@@ -192,7 +192,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         arrow.y = play_again.y+40
         h_score_val.text = string.format("%06d",highscore).." pts"
         
-        local timer = Timer{interval=1000}
+        local timer = Timer{interval=3000}
         
         timer.on_timer = function()
             remove_all_from_render_list()
@@ -400,7 +400,7 @@ Menu_Level_Complete = Class(function(menu, ...)
         state.menu = score
         h_score_val.text = score.." pts"
         mediaplayer:play_sound("audio/Air Combat Player Power Up.mp3")
-        local timer = Timer{interval=1000}
+        local timer = Timer{interval=3000}
         timer.on_timer = function()
             remove_all_from_render_list()
             menu.group:show()
