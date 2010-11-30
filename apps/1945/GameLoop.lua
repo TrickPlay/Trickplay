@@ -37,7 +37,31 @@ function remove_from_render_list( item )
 
 end
 
+function remove_all_from_render_list( item )
+--[[
+    for i , v in ipairs( render_list ) do
+    
+        if v == item then
+            table.remove( render_list , i )
+            return true
+        end
+    end
+    --]]
+    local temp_list = {}
+    for k,v in pairs(render_list) do
+        temp_list[#temp_list+1] = k
+    end
+    local upper = #temp_list
+    for i = 1,upper do
+        if temp_list[i].remove then  temp_list[i]:remove() end
+        render_list[ temp_list[i] ] = nil
+        temp_list[i] = nil
+    end
 
+
+    return false
+
+end
 
 
 

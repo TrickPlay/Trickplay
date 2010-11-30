@@ -71,7 +71,9 @@ lvlbg = {
                     recurse_and_apply(  self, overwrite_vars  )
                 end
             end,
-            
+            remove = function(self)
+                    self.image:unparent()
+                end,
             render = function( self , seconds )
                 self.image.x = self.image.x + self.speed_x * seconds
                 self.image.y = self.image.y + self.speed_y * seconds
@@ -116,7 +118,6 @@ lvlbg = {
     end,
     add_island = function(index, xxx, y_rot, overwrite_vars)
         --local offset = self.offset
-        print("\n\nislands",index, xxx, y_rot, overwrite_vars,"a")
         local island =
             
             {
@@ -145,13 +146,13 @@ lvlbg = {
                         -----self.image.y = math.ceil(self.y/4)*4
                         self.img_h = self.image.h                        
                         lvlbg[1].doodad_list[self] = true
-                        print("\n\nislands",overwrite_vars)
                         if type(overwrite_vars) == "table"  then
-                            print("islans self.overwrite_vars", overwrite_vars)
                             recurse_and_apply(  self, overwrite_vars  )
                         end
                 end,
-                    
+                remove = function(self)
+                    self.image:unparent()
+                end,
                 render = function( self , seconds )
                         -----if self.p_off > lvlbg[1].offset then
                         -----    self.index = self.index + 1
