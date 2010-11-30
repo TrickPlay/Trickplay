@@ -524,7 +524,7 @@ levels =
             for i = 1, #self.add_list do
                 self.index[i] = 1
             end
-            self.time = 0--200
+            self.time = 200
             self.num_bosses = 2
             if type(o) == "table"  then
                 print("self.overwrite_vars", o)
@@ -915,7 +915,7 @@ levels =
             end
 			self.dist_travelled = 0
             --]]
-            self.num_bosses = 1
+            self.num_bosses = 4--1
             remove_from_render_list( self )
             
 		end,

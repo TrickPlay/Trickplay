@@ -258,7 +258,7 @@ function flak(x,y)
             end
             
             
-            mediaplayer:play_sound("audio/Air Combat Player Flak Explosion.mp3")
+            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
 			layers.planes:add( self.group )
         end,
                 
