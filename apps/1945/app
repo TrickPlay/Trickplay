@@ -2,7 +2,7 @@ app=
 {
     id          = "com.trickplay.1945",
     release     = "1",
-    version     = "1.0",
+    version     = "1.2",
     name        = "1945",
     author      = "Pablo Pissanetzky",
     copyright   = "© Trickplay Inc."
