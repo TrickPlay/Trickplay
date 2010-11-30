@@ -339,7 +339,6 @@ local keys = {
         --other
         [keys.s] = function()
             water:add_dock(1,1)
-            --add_to_render_list(smoke())
         end,
         [keys.h] = function()
             if test_text.opacity == 255 then
@@ -419,117 +418,9 @@ local keys = {
         end
     },
     ["LEVEL_END"] = level_completed.keys,
-    --[[
-    {
-        [keys.Return] = function(second)
-            if lvl_end_i == 1 then
-                remove_from_render_list(lvlbg[state.curr_level])
-                state.curr_level = state.curr_level + 1
-                if lvlbg[state.curr_level] ~= nil then
-                    add_to_render_list(lvlbg[ state.curr_level])
-                    add_to_render_list(levels[state.curr_level])
-                    state.curr_mode = "CAMPAIGN"
-                end
-            else
-                remove_from_render_list(lvlbg[state.curr_level])
-                for k,v in pairs(state.counters[state.curr_level]) do
-                    if type(v) == "table" then
-                        v.killed  = 0
-                        v.spawned = 0
-                    end
-                end
-                state.hud.num_lives = state.counters[state.curr_level].lives_before
-                for i = 1,#lives do
-                    if i<= state.hud.num_lives then
-                        lives[i].opacity=255
-                    else
-                        lives[i].opacity=0
-                    end
-                end
-                state.hud.curr_score = state.hud.curr_score - state.counters[state.curr_level].lvl_points
-                state.counters[state.curr_level].lvl_points = 0
-                redo_score_text()
-                if lvlbg[state.curr_level] ~= nil then
-                    add_to_render_list(lvlbg[ state.curr_level])
-                    add_to_render_list(levels[state.curr_level])
-                    state.curr_mode = "CAMPAIGN"
-                end
-            end
-            remove_from_render_list(lvlcomplete)
-            my_plane:heal()
-            my_plane.group.position = { screen_w / 2 - my_plane.image.w / (2*my_plane.num_frames) , screen_h - my_plane.image.h }
-        end,
-        [keys.Up] = function()
-            if lvl_end_i - 1 >= 1 then
-                lvl_end_i = lvl_end_i - 1
-                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
-            end
-        end,
-        [keys.Down] = function()
-            if lvl_end_i + 1 <= 2 then
-                lvl_end_i = lvl_end_i + 1
-                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
-            end
-        end,
-    },
-    --]]
     ["GAME_OVER_SAVE"]= game_over_save.keys,
     ["GAME_OVER"]  = game_over_no_save.keys,
     ["HIGH_SCORE"]  = high_score_menu.keys,
-    --[[
-    {
-        [keys.Return] = function(second)
-            if lvl_end_i == 1 then
-                remove_from_render_list(lvlbg[state.curr_level])
-                state.curr_level = state.curr_level + 1
-                if lvlbg[state.curr_level] ~= nil then
-                    add_to_render_list(lvlbg[ state.curr_level])
-                    add_to_render_list(levels[state.curr_level])
-                    state.curr_mode = "CAMPAIGN"
-                end
-            else
-                remove_from_render_list(lvlbg[state.curr_level])
-                for k,v in pairs(state.counters[state.curr_level]) do
-                    if type(v) == "table" then
-                        v.killed  = 0
-                        v.spawned = 0
-                    end
-                end
-                state.hud.num_lives = state.counters[state.curr_level].lives_before
-                for i = 1,#lives do
-                    if i<= state.hud.num_lives then
-                        lives[i].opacity=255
-                    else
-                        lives[i].opacity=0
-                    end
-                end
-                state.hud.curr_score = state.hud.curr_score - state.counters[state.curr_level].lvl_points
-                state.counters[state.curr_level].lvl_points = 0
-                redo_score_text()
-                if lvlbg[state.curr_level] ~= nil then
-                    add_to_render_list(lvlbg[ state.curr_level])
-                    add_to_render_list(levels[state.curr_level])
-                    state.curr_mode = "CAMPAIGN"
-                end
-            end
-            remove_from_render_list(lvlcomplete)
-            my_plane:heal()
-            my_plane.group.position = { screen_w / 2 - my_plane.image.w / (2*my_plane.num_frames) , screen_h - my_plane.image.h }
-        end,
-        [keys.Up] = function()
-            if lvl_end_i - 1 >= 1 then
-                lvl_end_i = lvl_end_i - 1
-                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
-            end
-        end,
-        [keys.Down] = function()
-            if lvl_end_i + 1 <= 2 then
-                lvl_end_i = lvl_end_i + 1
-                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(lvl_end_i-1)
-            end
-        end,
-    },
-    --]]
 }
 
 local press
