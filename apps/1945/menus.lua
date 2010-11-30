@@ -110,13 +110,14 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
             end
         end,
         [keys.Return] = function()
-            assert(index_to_be>0 and index_to_be < 11)
+            assert(index_to_be > 0 and index_to_be < 11)
             table.insert(
                 state.high_scores,
                 index_to_be,
                 {
                     score = h_score_to_be,
-                    initials=menu.initials[1].text..
+                    initials=
+                        menu.initials[1].text..
                         menu.initials[2].text..
                         menu.initials[3].text,
                     medals=0

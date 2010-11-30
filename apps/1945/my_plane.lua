@@ -232,8 +232,10 @@ remove = function(self)
     self.group:unparent()
 end,
     setup = function( self )
+            self.firing_powerup = 1
             self.damage = 0
             self.image.x = 0
+            self.group:show()
             self.bombing_crosshair:add(self.bombing_crosshair_strip)
         	self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
@@ -552,6 +554,7 @@ end,
 				},
                 position = {x,y},
 			}
+            
                     
 			layers.land_targets:add( self.group )
             
