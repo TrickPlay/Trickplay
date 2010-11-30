@@ -853,54 +853,20 @@ end
 if state.hud.num_lives == 0 then
 
 	remove_from_render_list( my_plane )
-	add_to_render_list(
-                
-                            {
-                                speed = 40,
-                                
-                                text = Clone{ source = txt.g_over },
-                                
-                                setup =
-                                    
-                                    function( self )
-                                        
-                                        self.text.position = { screen_w/2,screen_h/2}--location[ 1 ] + 30 , location[ 2 ] }
-                                        
-                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
-                                        
-                                        self.text.opacity = 255;
-                                        
-                                        layers.hud:add( self.text )
-                                        mediaplayer:play_sound("audio/Air Combat Game Over.mp3")
-                                    end,
-                                    
-                                render =
-                                    
-                                    function( self , seconds )
-                                    
-                                        local o = self.text.opacity - self.speed * seconds
-                                        
-                                        local scale = self.text.scale
-                                        
-                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        
-                                        if o <= 0 then
-                                        
-                                            remove_from_render_list( self )
-                                            
-                                            self.text:unparent()
-                                        
-                                        else
-                                        
-                                            self.text.opacity = o
-                                            
-                                            self.text.scale = scale
-                                        
-                                        end
-                                    
-                                    end,
-                            })
-
+	
+    local index = 0
+    for i=1,8 do
+        print(state.hud.curr_score, state.high_scores[i].score)
+        if state.hud.curr_score > state.high_scores[i].score then
+            index = i
+            break
+        end
+    end
+    if index ~= 0 then
+        game_over_save:animate_in(state.hud.curr_score,index)
+    else
+        game_over_no_save:animate_in(state.hud.curr_score)
+    end
 
 
 elseif state.curr_mode ~= "TEST_MODE" then

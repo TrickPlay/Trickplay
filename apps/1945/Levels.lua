@@ -289,9 +289,11 @@ levels =
             self.num_bosses = self.num_bosses - 1
             if self.num_bosses == 0 then
                 remove_from_render_list( self)
-                add_to_render_list( lvlcomplete )
+                --add_to_render_list( lvlcomplete )
                 
-                --state.curr_mode = "LEVEL_END"
+                
+                state.curr_mode = "LEVEL_END"
+                level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
             end
 		end,
 		setup = function(self,o)

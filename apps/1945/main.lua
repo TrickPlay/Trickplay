@@ -4,7 +4,7 @@
 
 my_font = "kroeger 06_65 40px"
 
-
+dofile("Class.lua")
 --global variables
 dofile( "globals.lua")
 --code for the smart phone accelerometers
@@ -82,7 +82,18 @@ add_to_render_list( lvlbg[1] )
 
 --add_to_render_list( enemies )
 
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--modal menus
+dofile("menus.lua")
+game_over_save = Menu_Game_Over_Save_Highscore()
+game_over_no_save = Menu_Game_Over_No_Save()
+high_score_menu = Menu_High_Scores()
+level_completed = Menu_Level_Complete()
+
+game_over_save:set_ptr_to_h_scores(high_score_menu)
+game_over_no_save:set_ptr_to_h_scores(high_score_menu)
+
 
 
 
@@ -113,7 +124,7 @@ out_splash__in_hud = function()
 end
 
 lvl_end_i = 1
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Event handler
 local keys = {
     ["SPLASH"] =
@@ -134,24 +145,38 @@ local keys = {
             
             if splash_i == 1 and splash_limit == 2 then
                 out_splash__in_hud()
-                local f
-                for _,i in ipairs(settings.salvage_list) do
-                    f = _G
-                    for j = 1,#i.func do
-                        print(i.func[j])
-                        f = f[ i.func[j] ]
-                    end
-                    print("done\n\n")
-                    f(unpack(i.table_params))
-                    print("?")
-                end
-                
                 recurse_and_apply(state,settings.state)
-                redo_score_text()
-                for i = 1, state.hud.num_lives do
-                    lives[i].opacity=255
-                end
                 
+                if state.in_lvl_complete then
+                    level_completed:animate_in(string.format("%06d",state.menu))
+                    add_to_render_list(my_plane)
+                    redo_score_text()
+                    for i = 1,#lives do
+                        if i<= state.hud.num_lives then
+                            lives[i].opacity=255
+                        else
+                            lives[i].opacity=0
+                        end
+                    end
+                else
+                    local f
+                    for _,i in ipairs(settings.salvage_list) do
+                        f = _G
+                        for j = 1,#i.func do
+                            print(i.func[j])
+                            f = f[ i.func[j] ]
+                        end
+                        print("done\n\n")
+                        f(unpack(i.table_params))
+                        print("?")
+                    end
+                    
+                    
+                    redo_score_text()
+                    for i = 1, state.hud.num_lives do
+                        lives[i].opacity=255
+                    end
+                end
                 print("done done")
             else
                 out_splash__in_hud()
@@ -293,6 +318,18 @@ local keys = {
         [keys.c] = function()
             add_to_render_list(powerups.life(400))
         end,
+        [keys.g] = function()
+            level_completed:animate_in(string.format("%06d",33333))
+        end,
+        [keys.d] = function()
+            game_over_save:animate_in(string.format("%06d",33333),3)
+        end,
+        [keys.j] = function()
+            game_over_no_save:animate_in(string.format("%06d",33333))
+        end,
+        [keys.f] = function()
+            high_score_menu:animate_in()
+        end,
         --other
         [keys.s] = function()
             water:add_dock(1,1)
@@ -375,7 +412,9 @@ local keys = {
             state.paused = not (state.paused)
         end
     },
-    ["LEVEL_END"] = {
+    ["LEVEL_END"] = level_completed.keys,
+    --[[
+    {
         [keys.Return] = function(second)
             if lvl_end_i == 1 then
                 remove_from_render_list(lvlbg[state.curr_level])
@@ -427,10 +466,12 @@ local keys = {
             end
         end,
     },
-    ["SAVE_HIGH_SCORE"]={
-        
-    },
-    ["GAME_OVER"] = {
+    --]]
+    ["GAME_OVER_SAVE"]= game_over_save.keys,
+    ["GAME_OVER"]  = game_over_no_save.keys,
+    ["HIGH_SCORE"]  = high_score_menu.keys,
+    --[[
+    {
         [keys.Return] = function(second)
             if lvl_end_i == 1 then
                 remove_from_render_list(lvlbg[state.curr_level])
@@ -482,6 +523,7 @@ local keys = {
             end
         end,
     },
+    --]]
 }
 
 local press
@@ -662,6 +704,8 @@ function app:on_closing()
     temp_table = {}
     recurse_and_apply(temp_table, state)
     settings.state = temp_table
+    --dumptable(temp_table)
+    --dumptable(settings.state)
 end
 math.randomseed( os.time() )
 mediaplayer:play_sound("audio/Air Combat Launch.mp3")

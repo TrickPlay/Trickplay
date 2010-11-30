@@ -136,7 +136,9 @@ function fire_bullet(enemy,source)
         },
         
         type = TYPE_ENEMY_BULLET,
-            
+        remove = function(self)
+                    self.image:unparent()
+                end,
         setup = function( self )
             mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
 
@@ -208,6 +210,9 @@ function flak(x,y)
         duration = 0.2,
         hit = false,
         time = 0,
+        remove = function(self)
+                    self.group:unparent()
+                end,
         setup = function( self )
             --mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
             self.group = Group{ position = {x,y} }
@@ -314,7 +319,9 @@ function fire_flak(enemy, dist_x,dist_y)
             },
             z_rotation = {enemy.group.z_rotation[1]+90,0,0}
         },
-        
+        remove = function(self)
+                    self.image:unparent()
+                end,
         type = TYPE_ENEMY_BULLET,
             
         setup = function( self )
@@ -644,7 +651,9 @@ enemies =
 				fire_bullet(f,imgs.fighter_bullet)
 			end
 		end,
-		
+		remove = function(self)
+            self.group:unparent()
+        end,
 		setup = function(self)
 			
             state.counters[1].fighters.spawned = state.counters[1].fighters.spawned + 1
@@ -1039,7 +1048,9 @@ enemies =
         speed_x = 0,
         speed_x_cap = 20,
 		
-		
+		remove = function(self)
+            self.group:unparent()
+        end,
 		setup = function(self)
             state.counters[1].zepp.spawned = state.counters[1].zepp.spawned + 1
 			self.e_fire_l_g:add(self.e_l_dam, self.e_fire_l)

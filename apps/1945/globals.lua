@@ -9,7 +9,8 @@ state =
     curr_level    = 0,
     paused        = false,
     set_highscore = false,
-    
+    in_lvl_complete = false,
+    menu          = 0, 
     --Gameplay state that sits at the top
     hud =
     {
@@ -17,6 +18,18 @@ state =
         max_lives  = 5,
         curr_score = 0,
         high_score = 0
+    },
+    high_scores = {
+        {score = 0, initials="AAA", medals = 0},
+        {score = 0, initials="AAA", medals = 0},
+        {score = 0, initials="AAA", medals = 0},
+        {score = 0, initials="AAA", medals = 0},
+        
+        {score = 0, initials="AAA", medals = 0},
+        {score = 0, initials="AAA", medals = 0},
+        {score = 0, initials="AAA", medals = 0},
+        {score = 0, initials="AAA", medals = 0},
+
     },
     counters =
     {
@@ -154,6 +167,11 @@ imgs =
     my_prop         = Image{ src = "assets/player/player_prop.png"},
     target          = Image{ src = "assets/player/target_strip.png"},
     smoke           = Image{ src = "assets/fx/smoke.png"},
+    medal_1         = Image{ src = "assets/splash/WingmanMedal.png"},
+    medal_1_sm      = Image{ src = "assets/splash/WingmanMedal_sm.png"},
+    medal_2         = Image{ src = "assets/splash/PilotMedal.png"},
+    medal_2_sm      = Image{ src = "assets/splash/PilotMedal_sm.png"},
+
     --POWERUPS
     health          = Image{ src="assets/player/health.png"},
     guns            = Image{ src="assets/player/2xfire.png"},
@@ -327,4 +345,8 @@ recurse_and_apply = function(table1,table2)
             --print(k,"=",v)
         end
     end
+end
+
+if settings.state ~= nil and settings.state.high_scores ~= nil then
+    recurse_and_apply(state.high_scores,settings.state.high_scores)
 end
