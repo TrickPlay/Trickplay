@@ -297,7 +297,7 @@ levels =
             end
 		end,
 		setup = function(self,o)
-            
+            state.counters[1].lvl_points = 0
             my_plane.bombing_mode = false
 		--	add_to_render_list( self.bg )
             self.add_list = {
@@ -654,7 +654,7 @@ levels =
         end,
         
 		setup = function(self)
-            
+            state.counters[2].lvl_points = 0
             local h_reg   = 1
             local h_cleat = 2
             local h_close = 3
@@ -970,7 +970,7 @@ levels =
         w_q_index      = {},
         
 		setup = function(self)
-            
+            state.counters[3].lvl_points = 0
             my_plane.bombing_mode = true
             self.bg:append_to_queue(
                 {---[[
