@@ -292,7 +292,7 @@ levels =
                 --add_to_render_list( lvlcomplete )
                 
                 
-                state.curr_mode = "LEVEL_END"
+                --state.curr_mode = "LEVEL_END"
                 level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
             end
 		end,

@@ -15,9 +15,12 @@ explosions =
         group = nil,
         duration = 0.3, 
         time = 0,
+        remove = function(self)
+            self.group:unparent()
+        end,
         setup = function( self )
         print("h")
-            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
 
             self.group = Group
 			{
@@ -66,6 +69,9 @@ explosions =
         group = nil,
         duration = 0.2, 
         time = 0,
+        remove = function(self)
+            self.group:unparent()
+        end,
         setup = function( self )
             mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
 
@@ -246,10 +252,11 @@ function flak(x,y)
                 
                 self.groups[i].x = math.random(-6,6)*4
                 self.groups[i].y = math.random(-6,6)*4
+                
             end
             
             
-            
+            mediaplayer:play_sound("audio/Air Combat Player Flak Explosion.mp3")
 			layers.planes:add( self.group )
         end,
                 
@@ -326,7 +333,7 @@ function fire_flak(enemy, dist_x,dist_y)
             
         setup = function( self )
         if not (self.image.x > screen_w or self.image.x < 0 or self.image.y < 0 or self.image.y > screen_h) then
-            mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+            mediaplayer:play_sound("audio/Air Combat Flak Fire.mp3")
         end
             
 		--enemies are assumed to be facing downwards
@@ -1506,7 +1513,9 @@ enemies =
         },
 			
 		group = Group{},
-		
+		remove = function(self)
+            self.group:unparent()
+        end,
         rotate_guns_and_fire = function(self,secs)
 			---[[
 			--prep the variables that determine if its time to shoot
@@ -1980,7 +1989,9 @@ enemies =
         num_frames = 3,
 		base_clip = Group{clip={0,0,imgs.tank_strip.w/3,imgs.tank_strip.h}},
 		group = Group{},
-		
+		remove = function(self)
+            self.group:unparent()
+        end,
         rotate_guns_and_fire = function(self,secs)
 			---[[
 			--prep the variables that determine if its time to shoot
@@ -2324,7 +2335,9 @@ enemies =
         },
         
 		
-		
+		remove = function(self)
+            self.group:unparent()
+        end,
 		rotate_guns_and_fire = function(self,secs)
 			---[[
 			--prep the variables that determine if its time to shoot
@@ -2715,7 +2728,9 @@ enemies =
 		
 		shoot_time      = 2 , --how frequently the ship shoots
 		last_shot_time  = math.random()*2,
-		
+		remove = function(self)
+            self.group:unparent()
+        end,
 		rotate_guns_and_fire = function(self,secs)
 			---[[
 			--prep the variables that determine if its time to shoot

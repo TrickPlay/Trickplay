@@ -7,7 +7,11 @@ smoke = function(i,o)   return {
     speed    = 80,
     halted   = true,
     plumes   = {},
-
+remove = function(self)
+    for i = 1,self.num do
+        self.plumes[i].group:unparent()
+    end
+end,
     setup = function( self, num )
         self.num = num
         for i = 1,num do
@@ -224,7 +228,9 @@ my_plane =
     render_items = {},
     x =0,
     y=0,
-
+remove = function(self)
+    self.group:unparent()
+end,
     setup = function( self )
             self.bombing_crosshair:add(self.bombing_crosshair_strip)
         	self.prop.g_l:add( self.prop.l )
@@ -844,6 +850,7 @@ end
 
 if self.damage ~= (self.num_frames - 1) then
     self:hit()
+    mediaplayer:play_sound("audio/Air Combat Damaged Plane.mp3")
     return
 else
     self:heal()
@@ -867,7 +874,7 @@ if state.hud.num_lives == 0 then
     else
         game_over_no_save:animate_in(state.hud.curr_score)
     end
-
+    mediaplayer:play_sound("audio/Air Combat Game Over.mp3")
 
 elseif state.curr_mode ~= "TEST_MODE" then
 	lives[state.hud.num_lives].opacity=0
@@ -1062,6 +1069,9 @@ powerups =
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
         end,
+        remove = function(self)
+            self.image:unparent()
+        end,
         render = function(self,seconds)
             self.image.y = self.image.y + self.speed * seconds
 
@@ -1075,6 +1085,7 @@ powerups =
                 
                 if my_plane.firing_powerup < my_plane.firing_powerup_max then
                     my_plane.firing_powerup = my_plane.firing_powerup + 1
+                    mediaplayer:play_sound("audio/Air Combat Player Guns Up.mp3")
                 end
                 self.image:unparent()
                 remove_from_render_list(self)
@@ -1095,6 +1106,9 @@ powerups =
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
         end,
+        remove = function(self)
+            self.image:unparent()
+        end,
         render = function(self,seconds)
             self.image.y = self.image.y + self.speed * seconds
 
@@ -1107,6 +1121,7 @@ powerups =
                 ) then
                 
                 my_plane:heal()
+                mediaplayer:play_sound("audio/Air Combat Player Guns Up.mp3")
                 self.image:unparent()
                 remove_from_render_list(self)
             elseif self.image.y > screen_h + self.image.h then
@@ -1126,6 +1141,9 @@ powerups =
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
         end,
+        remove = function(self)
+            self.image:unparent()
+        end,
         render = function(self,seconds)
             self.image.y = self.image.y + self.speed * seconds
 
@@ -1140,6 +1158,7 @@ powerups =
                 if state.hud.num_lives < state.hud.max_lives then
                     state.hud.num_lives = state.hud.num_lives + 1
                     lives[state.hud.num_lives].opacity =255
+                    mediaplayer:play_sound("audio/Air Combat Player Guns Up.mp3")
                 end
                 self.image:unparent()
                 remove_from_render_list(self)
