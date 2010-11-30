@@ -232,6 +232,8 @@ remove = function(self)
     self.group:unparent()
 end,
     setup = function( self )
+            self.damage = 0
+            self.image.x = 0
             self.bombing_crosshair:add(self.bombing_crosshair_strip)
         	self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
@@ -463,6 +465,9 @@ end,
 						z_rotation = {z_rot,0,0},
                     },
                     
+                remove = function(self)
+                    self.image:unparent()
+                end,
                 setup =
                 
                     function( self )
@@ -553,7 +558,9 @@ end,
             self.img_w = self.image.w/6
             self.img_h = self.image.h
         end,
-                
+        remove = function(self)
+            self.group:unparent()
+        end,
 		render = function( self , seconds )
 			self.time = self.time + seconds
 				
@@ -646,7 +653,9 @@ end
                                         layers.planes:add( self.text )
                                         
                                     end,
-                                    
+                                remove = function(self)
+                                    self.text:unparent()
+                                end,
                                 render =
                                 
                                     function( self , seconds )
@@ -702,7 +711,9 @@ end
                         position = { x, y },
 						z_rotation = {z_rot,0,0},
                     },
-                    
+                remove = function(self)
+                    self.image:unparent()
+                end,
                 setup =
                 
                     function( self )
@@ -773,7 +784,9 @@ end
                                 speed = 80,
                                 
                                 text = Clone{ source = txt.score },
-                                
+                                remove = function(self)
+                                    self.text:unparent()
+                                end,
                                 setup =
                                 
                                     function( self )

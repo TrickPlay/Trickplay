@@ -647,7 +647,7 @@ lvlbg = {
                     
                     --clear out the frame
                     frame:clear()
-                    self.queues[self.q_i - #self.frames] = nil
+                    self.queues[self.q_i - #self.doodad_frames] = nil
                     
                     --update the position
                     self.q_i = self.q_i + 1

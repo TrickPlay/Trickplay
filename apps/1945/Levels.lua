@@ -670,7 +670,7 @@ levels =
             self.bg:append_to_queue(
             {
                 {   --left harbor
-                ---[[
+                --[[
                     { enemies={{f = {"add_to_render_list"},        p = { lvl2txt } }} },
                     { self:add_harbor_tile(2,  1, h_open)},
                     { self:add_harbor_tile(2,  1, h_reg), times=2},
@@ -784,7 +784,7 @@ levels =
                 
                 
                 {   --right harbor
-                ---[[
+                --[[
                     {},
                     { self:add_harbor_tile(2,  -1, h_open)},
                     { self:add_harbor_tile(2,  -1, h_reg), times=2},
@@ -908,7 +908,9 @@ levels =
             end
 			self.dist_travelled = 0
             --]]
+            self.num_bosses = 1
             remove_from_render_list( self )
+            
 		end,
 		render = function(self,seconds)
         --[[
@@ -949,8 +951,9 @@ levels =
             self.num_bosses = self.num_bosses - 1
             if self.num_bosses == 0 then
                 remove_from_render_list( self)
-                add_to_render_list( lvlcomplete )
-                state.curr_mode = "LEVEL_END"
+                
+                level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
+
             end
 		end
     },
@@ -1067,7 +1070,7 @@ levels =
                     {Clone{source=imgs.road_ver,x=300},times=2,
                         enemies = {
                             {f = formations.vert_row_tanks,      p = {1200,-1,3,150}},
-                            {f = add_to_render_list,      p = {powerups.health(1800)}},
+                            {f = powerups.health,      p = {1800}},
                         }
                     },
                     {
@@ -1138,7 +1141,7 @@ levels =
                             {f=add_to_render_list,p={enemies.trench(),50+6*imgs.trench_l.w,-100, 40,true}},
                             {f=add_to_render_list,p={enemies.trench(),1250+1*imgs.trench_l.w,-100, 40,true}},
                             {f=add_to_render_list,p={enemies.trench(),1250+3*imgs.trench_l.w,-100, 40,true}},
-                            {f = add_to_render_list,      p = {powerups.life(200)}},
+                            {f = powerups.life,      p = {200}},
                         }
                     },
                     {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3},
@@ -1416,7 +1419,7 @@ levels =
                     },
                     {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = add_to_render_list,      p = {powerups.health(1600)}},
+                            {f = powerups.health,      p = {1600}},
                             
                         }
                     },
@@ -1568,7 +1571,7 @@ levels =
                     {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
                         enemies = {
                             {f = formations.vert_row_tanks,      p = {1200,-1,3,150}},
-                            {f = add_to_render_list,      p = {powerups.health(1800)}},
+                            {f = powerups.health,      p = {1800}},
                         }
                     },
                     {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,

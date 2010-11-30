@@ -402,6 +402,7 @@ Menu_Level_Complete = Class(function(menu, ...)
         mediaplayer:play_sound("audio/Air Combat Player Power Up.mp3")
         local timer = Timer{interval=1000}
         timer.on_timer = function()
+            remove_all_from_render_list()
             menu.group:show()
             menu.group.opacity=255
             state.curr_mode = "LEVEL_END"
@@ -418,6 +419,7 @@ Menu_Level_Complete = Class(function(menu, ...)
             remove_from_render_list(lvlbg[state.curr_level])
             state.curr_level = state.curr_level + 1
             if lvlbg[state.curr_level] ~= nil then
+                add_to_render_list(my_plane)
                 add_to_render_list(lvlbg[ state.curr_level])
                 add_to_render_list(levels[state.curr_level])
                 state.curr_mode = "CAMPAIGN"
