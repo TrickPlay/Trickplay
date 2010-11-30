@@ -171,7 +171,13 @@ local keys = {
                         print("?")
                     end
                     
-                    
+                    for i = 1,#lives do
+                        if i<= state.hud.num_lives then
+                            lives[i].opacity=255
+                        else
+                            lives[i].opacity=0
+                        end
+                    end
                     redo_score_text()
                     for i = 1, state.hud.num_lives do
                         lives[i].opacity=255
@@ -531,8 +537,11 @@ local second_press
 --moves through all the items in the render list
 --i.e. performs the game loop
 function idle.on_idle( idle , seconds )
+    
     if press ~= nil then
-        if press == keys.Space then
+        if press == keys.Ok then
+            press = keys.Return
+        elseif press == keys.Space or press == keys.Pause then
             state.paused = not state.paused
         elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()--second_press)
         end

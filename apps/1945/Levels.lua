@@ -524,7 +524,7 @@ levels =
             for i = 1, #self.add_list do
                 self.index[i] = 1
             end
-            self.time = 200
+            self.time = 0--200
             self.num_bosses = 2
             if type(o) == "table"  then
                 print("self.overwrite_vars", o)
