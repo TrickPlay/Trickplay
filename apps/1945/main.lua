@@ -94,7 +94,7 @@ level_completed = Menu_Level_Complete()
 game_over_save:set_ptr_to_h_scores(high_score_menu)
 game_over_no_save:set_ptr_to_h_scores(high_score_menu)
 
-
+level_completed:set_ptr_to_g_over(game_over_save)
 
 
 local test_text = Text

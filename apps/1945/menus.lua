@@ -1,6 +1,8 @@
 modal_title = "kroeger 06_65 140px"
 modal_font  = "kroeger 06_65 70px"
 
+local max_levels = 2
+
 Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     
     menu.group = Group{}
@@ -35,7 +37,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     local h_score_to_be = 0
     local medals = {}
     
-    function menu:animate_in(highscore,index)
+    function menu:animate_in(highscore,index,no_delay)
         if state.curr_level == 2 then
             local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
             table.insert(medals,m)
@@ -60,7 +62,9 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         h_score_val.text = string.format("%06d",highscore).." pts"
         
         
-        local timer = Timer{interval=3000}
+        local iii = 3000
+        if no_delay then iii = 100 end
+        local timer = Timer{interval=iii}
         timer.on_timer = function()
             remove_all_from_render_list()
             menu.group:show()
@@ -174,7 +178,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     
     local menu_index = 1
     local medals = {}
-    function menu:animate_in(highscore)
+    function menu:animate_in(highscore,no_delay)
         if state.curr_level == 2 then
         
             local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
@@ -193,7 +197,9 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         arrow.y = play_again.y+40
         h_score_val.text = string.format("%06d",highscore).." pts"
         
-        local timer = Timer{interval=3000}
+        local iii = 3000
+        if no_delay then iii = 100 end
+        local timer = Timer{interval=iii}
         
         timer.on_timer = function()
             remove_all_from_render_list()
@@ -302,7 +308,7 @@ Menu_High_Scores = Class(function(menu, ...)
         highscores.text = ""
         for i = 1,8 do
         print(i)
-            highscores.text = highscores.text.."#"..i..":  "..state.high_scores[i].initials.." "..state.high_scores[i].score.."\n"
+            highscores.text = highscores.text..i..":  "..state.high_scores[i].initials.." "..state.high_scores[i].score.."\n"
         end
         menu_index       = 1
         menu.group:show()
@@ -374,14 +380,14 @@ Menu_Level_Complete = Class(function(menu, ...)
     
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-250}
     local medal_name = Text{text="",font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-140}
-    local enter       = Text{text="Press Enter to begin next level",        font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2+300}
+    local enter       = Text{text="Press Enter to Continue",        font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2+300}
     enter.anchor_point = {enter.w/2,enter.h/2}
     menu.group:add(title,h_score_val,medal_name,enter)
     
     layers.splash:add(menu.group)
     menu.group:hide()
-        local medals = {}
-
+    local medals = {}
+    local g_over = nil
     function menu:animate_in(score)
         if state.curr_level == 1 then
             local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
@@ -412,25 +418,51 @@ Menu_Level_Complete = Class(function(menu, ...)
         end
         timer:start()
     end
-    
+    menu.g_over_menu=nil
+    function menu:set_ptr_to_g_over(obj)
+        menu.g_over_menu = obj
+    end
+
     menu.keys = {
         [keys.Return] = function()
         state.in_lvl_complete = false
         print("ddddd")
-            remove_from_render_list(lvlbg[state.curr_level])
-            state.curr_level = state.curr_level + 1
-            if lvlbg[state.curr_level] ~= nil then
-                add_to_render_list(my_plane)
-                add_to_render_list(lvlbg[ state.curr_level])
-                add_to_render_list(levels[state.curr_level])
-                state.curr_mode = "CAMPAIGN"
-            end
-            menu.group:hide()
-            menu.group.opacity=0
-            local upper = #medals
-            for i = 1,upper do
-                medals[i]:unparent()
-                medals[i] = nil
+            if state.curr_level == 2 then
+                menu.group:hide()
+                local index = 0
+                for i=1,8 do
+                    print(state.hud.curr_score, state.high_scores[i].score)
+                    if state.hud.curr_score > state.high_scores[i].score then
+                        index = i
+                        break
+                    end
+                end
+                if index ~= 0 then
+                    menu.g_over_menu:animate_in(state.hud.curr_score,index,true)
+                else
+                    menu.g_over_menu:animate_in(state.hud.curr_score,true)
+                end
+                local upper = #medals
+                for i = 1,upper do
+                    medals[i]:unparent()
+                    medals[i] = nil
+                end
+            else
+                remove_from_render_list(lvlbg[state.curr_level])
+                state.curr_level = state.curr_level + 1
+                if lvlbg[state.curr_level] ~= nil then
+                    add_to_render_list(my_plane)
+                    add_to_render_list(lvlbg[ state.curr_level])
+                    add_to_render_list(levels[state.curr_level])
+                    state.curr_mode = "CAMPAIGN"
+                end
+                menu.group:hide()
+                menu.group.opacity=0
+                local upper = #medals
+                for i = 1,upper do
+                    medals[i]:unparent()
+                    medals[i] = nil
+                end
             end
         end,
     }
