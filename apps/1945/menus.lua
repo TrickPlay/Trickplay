@@ -48,7 +48,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
             table.insert(medals,m)
             self.group:add(m)
         end
-        remove_all_from_render_list()
+        
         menu.initials[1].text = "A"
         menu.initials[2].text = "A"
         menu.initials[3].text = "A"
@@ -58,9 +58,18 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         index_to_be      = index
         h_score_to_be    = highscore
         h_score_val.text = string.format("%06d",highscore).." pts"
-        menu.group:show()
-        menu.group.opacity=255
-        state.curr_mode = "GAME_OVER_SAVE"
+        
+        
+        local timer = Timer{interval=1000}
+        timer.on_timer = function()
+            remove_all_from_render_list()
+            menu.group:show()
+            menu.group.opacity=255
+            state.curr_mode = "GAME_OVER_SAVE"
+            timer:stop()
+            timer = nil
+        end
+        timer:start()
     end
     
     function menu:animate_out()
@@ -178,13 +187,22 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
             table.insert(medals,m)
             self.group:add(m)
         end
-        remove_all_from_render_list()
+        
         menu_index       = 1
         arrow.y = play_again.y+40
         h_score_val.text = string.format("%06d",highscore).." pts"
-        menu.group:show()
-        menu.group.opacity=255
-        state.curr_mode = "GAME_OVER"
+        
+        local timer = Timer{interval=1000}
+        
+        timer.on_timer = function()
+            remove_all_from_render_list()
+            menu.group:show()
+            menu.group.opacity=255
+            state.curr_mode = "GAME_OVER"
+            timer:stop()
+            timer = nil
+        end
+        timer:start()
     end
     
     function menu:animate_out()
@@ -364,9 +382,7 @@ Menu_Level_Complete = Class(function(menu, ...)
         local medals = {}
 
     function menu:animate_in(score)
-    print("jdjdjdjdjdjdjdjdjdjd",state.curr_level)
         if state.curr_level == 1 then
-            print(";ldfja;lsf;asnvnas")
             local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
@@ -383,10 +399,16 @@ Menu_Level_Complete = Class(function(menu, ...)
         state.in_lvl_complete = true
         state.menu = score
         h_score_val.text = score.." pts"
-        
-        menu.group:show()
-        menu.group.opacity=255
-        state.curr_mode = "LEVEL_END"
+        mediaplayer:play_sound("audio/Air Combat Player Power Up.mp3")
+        local timer = Timer{interval=1000}
+        timer.on_timer = function()
+            menu.group:show()
+            menu.group.opacity=255
+            state.curr_mode = "LEVEL_END"
+            timer:stop()
+            timer = nil
+        end
+        timer:start()
     end
     
     menu.keys = {
