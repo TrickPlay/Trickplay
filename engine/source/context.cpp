@@ -497,28 +497,35 @@ void TPContext::setup_fonts()
     {
         FcConfigAppFontClear( config );
 
-        g_debug( "READING FONTS FROM '%s'", fonts_path );
+        g_debug( "FONT PATHS ARE '%s'", fonts_path );
 
         // This adds all the fonts in the directory to the cache...it can take
         // a long time the first time around. Once the cache exists, it will
         // be very quick.
 
-		gchar ** paths = g_strsplit( fonts_path, ";", 0 );
-		int success = 1;
+		gchar ** paths = g_strsplit( fonts_path , ";" , 0 );
+
+		int added = 0;
+
 		for ( gchar ** p = paths; *p; ++p )
 		{
 			gchar * path = g_strstrip( *p );
 
-			g_debug( "ADDING FONT PATH: '%s'", path );
+			g_debug( "ADDING FONT PATH '%s'", path );
 
-			if ( FcConfigAppFontAddDir( config, ( const FcChar8 * )path ) == FcFalse )
+			if ( FcConfigAppFontAddDir( config, ( const FcChar8 * ) path ) == FcFalse )
 			{
-				g_warning( "FAILED TO READ FONTS" );
-				success = 0; break;
+				g_warning( "FAILED TO ADD FONT PATH '%s'" , path );
+			}
+			else
+			{
+			    ++added;
 			}
 		}
 
-		if(success)
+        g_strfreev( paths );
+
+		if( added )
 		{
 			// This transfers ownership of the config object over to FC, so we
 			// don't have to destroy it or unref it.
