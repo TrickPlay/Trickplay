@@ -517,7 +517,7 @@ lvlbg = {
     queues        = {},
     enemies       = {},
     image         = Image{src = "assets/lvls/bg_tiles/grass1.png" },
-    setup         = function( self )
+    setup         = function( self, o, top_doodad  )
 
         self.img_h = self.image.h
         self.image:set{
@@ -529,14 +529,148 @@ lvlbg = {
         layers.ground:add(self.image)
         
         local g
+        local num_frames =  math.ceil(screen_h/self.doodad_h)+1
         --setup the doodad frames
         self.top_doodad = -self.doodad_h+1
-        for i = 1, math.ceil(screen_h/self.doodad_h)+1 do
-            g   =  Group{y=(i-2)*(self.doodad_h-1)}
+        for i = 1, num_frames do
+            g   =  Group{y=(num_frames - i)*(self.doodad_h-1)+self.top_doodad}
             table.insert( self.doodad_frames , g)
             layers.land_doodads_1:add(g)
+            
+            self.q_i = self.q_i + 1
+            
+            if o ~= nil and o[self.q_i] ~= nil then
+                print(type(o[self.q_i]),#o[self.q_i])
+                for j = 1, #o[self.q_i] do
+                    g:add(Clone{
+                        source     =  _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ],
+                        x          =  o[self.q_i][j].x,
+                        y          =  self.doodad_h/2,
+                        z_rotation = {o[self.q_i][j].z_rotation,0,0}
+                    })
+                    if self.queues[self.q_i] == nil then
+                        self.queues[self.q_i] = {}
+                    end
+                    
+                    table.insert(self.queues[self.q_i],o[self.q_i][j])
+                end
+            end
+        end
+        if o ~= nil then
+            print("num o",#o)
+            for i = (self.q_i+1), #o do
+                self.queues[i] = {}
+                print(#o[i])
+                for j = 1, #o[i] do
+                    table.insert(self.queues[i],o[i][j])
+                end
+                if o[i].enemies ~= nil then
+                print("rite hurr")
+                    if  self.enemies[i] == nil then
+                        self.enemies[i] = {}
+                    end
+                    for j = 1, #o[i].enemies do
+                        table.insert(self.enemies[i], o[i].enemies[j])
+                    end
+                end
+            end
+            self.append_i = #o+1
+        else
+            self.append_i =self.q_i + 1
         end
         layers.land_doodads_2:add(self.trees.l[1],self.trees.l[2],self.trees.r[1],self.trees.r[2])
+    end,
+    add_building = function(building,x,y,z_rot, big_explo)
+        add_to_render_list( {
+                image = Clone{source=imgs[building],x=x,y=y,z_rotation={z_rot,0,0}},
+                dead = false,
+                setup=function(s) layers.ground:add(s.image) end,
+                render = function(s,secs)
+                    s.image.y = s.image.y + lvlbg[3].speed*secs
+                    if s.image.y > (screen_h + 2*imgs.building_1_1.h) then
+                        s.image:unparent()
+                        remove_from_render_list(s)
+                    end
+                    if not s.dead then
+                        table.insert(b_guys_land,
+                            {
+                                obj = s,
+                                x1  = s.image.x,--/2,
+                                x2  = s.image.x+s.image.w,--/2,
+                                y1  = s.image.y,--/2,
+                                y2  = s.image.y+s.image.h,--/2,
+                            }
+                        )
+                    end
+                end,
+                collision = function( self , other )
+                    local c = Clone{
+                        source     = imgs[building.."_d"],
+                        x          =  self.image.x,
+                        y          =  self.image.y,
+                        z_rotation = {self.image.z_rotation[1],0,0}
+                    }
+                    layers.ground:add(c)
+                    self.image:unparent()
+                    self.image = c
+                    
+                    self.dead = true
+                	-- Explode
+                    if big_explo then
+                        add_to_render_list(
+                            explosions.big(
+                                self.image.x+self.image.w/2,
+                                self.image.y+self.image.h/2
+                            )
+                        )
+                    else
+                        add_to_render_list(
+                            explosions.small(
+                                self.image.x+self.image.w/2,
+                                self.image.y+self.image.h/2
+                            )
+                        )
+                    end
+                end
+            } )
+    end,
+    add_dirt = function(dirt_i,x)
+        add_to_render_list( {
+            c = Clone{
+                source = imgs["dirt_area_"..dirt_i],
+                x      = x,
+                y      =-imgs["dirt_area_"..dirt_i].h
+            },
+            setup = function(s)
+                layers.ground:add(s.c)
+            end,
+            render = function(s,secs)
+                s.c.y = s.c.y + lvlbg[3].speed*secs
+                if s.c.y > (screen_h + imgs.dirt_area_1.h) then
+                    s.c:unparent()
+                    remove_from_render_list(s)
+                end
+                
+            end,
+            salvage = function(self)
+                s = {
+                    func         = {"lvlbg",3,"add_dirt"},
+                    table_params = {dirt_i,x},
+                }
+                
+                
+                table.insert(s.table_params,
+                    {
+                        c = {
+                            y = self.c.y
+                        }
+                    }
+                )
+                
+                return s
+            end,
+            
+        } )
     end,
     append_to_queue = function(self,q)
         
@@ -560,6 +694,7 @@ lvlbg = {
                     if  self.queues[self.append_i+q_i] == nil then
                         self.queues[self.append_i+q_i] = {}
                     end
+                    --[[
                     c = Clone
                     {
                         source=q[i][1].source,
@@ -568,7 +703,8 @@ lvlbg = {
                         z_rotation={q[i][1].z_rotation[1],0,0},
                         anchor_point={q[i][1].w/2,q[i][1].h/2}
                     }
-                    table.insert(self.queues[self.append_i+q_i], c)
+                    --]]
+                    table.insert(self.queues[self.append_i+q_i], q[i][1])
                     q_i = q_i+1
                 end
             else
@@ -576,8 +712,8 @@ lvlbg = {
                     self.queues[self.append_i+q_i] = {}
                 end
                 for j = 1, #q[i] do
-                    q[i][j].anchor_point = {q[i][j].w/2,q[i][j].h/2}
-                    q[i][j].y = q[i][j].h/2
+                    --q[i][j].anchor_point = {q[i][j].w/2,q[i][j].h/2}
+                    --q[i][j].y = q[i][j].h/2
                     table.insert(self.queues[self.append_i+q_i], q[i][j])
                 end
                 q_i = q_i+1
@@ -658,13 +794,43 @@ lvlbg = {
                     
                     --load the next doodads
                     if self.queues[self.q_i] ~= nil then
+                        --[[
                         for _,new_child in ipairs(self.queues[self.q_i]) do
                             frame:add(new_child)
                         end
+                        --]]
+                        for _,new_child in ipairs(self.queues[self.q_i]) do
+                            --dumptable(new_child)
+                            if new_child.z_rotation == nil then
+                                new_child.z_rotation = {0,0,0}
+                            end
+                            frame:add(Clone{
+                                source       = _G[new_child.source[1]][new_child.source[2]],
+                                x            = new_child.x,
+                                y            = _G[new_child.source[1]][new_child.source[2]].h/2,
+                                z_rotation   = {new_child.z_rotation[1],0,0},
+                                anchor_point =
+                                    {
+                                        _G[new_child.source[1]][new_child.source[2]].w/2,
+                                        _G[new_child.source[1]][new_child.source[2]].h/2
+                                    }
+                            })
+                        end
                     end
                     if self.enemies[self.q_i] ~= nil then
+                        --for _,e in ipairs(self.enemies[self.q_i]) do
+                        --    e.f(unpack(e.p))
+                        --end
+                        
+                        
                         for _,e in ipairs(self.enemies[self.q_i]) do
-                            e.f(unpack(e.p))
+                            f = _G
+                            for j = 1,#e.f do
+                                print(e.f[j])
+                                f = f[ e.f[j] ]
+                            end
+                            print("done\n\n")
+                            f(unpack(e.p))
                         end
                     end
                     
@@ -685,10 +851,141 @@ lvlbg = {
         self.trees.r[2]:unparent()
 
     end,
+    salvage = function(self)
+        s = {
+            func = {"salvage_level_3"},
+            table_params = {{ queues={}, top_doodad = self.top_doodad }}
+        }
+        local iii = 0
+        print("LEVEL 3333",self.q_i, #self.doodad_frames, self.append_i)
+        for i = (self.q_i - #self.doodad_frames), self.append_i do
+            s.table_params[1].queues[iii] = {}
+            if type(self.queues[i]) == "table" then
+                for j = 1, #self.queues[i] do
+                    s.table_params[1].queues[iii][j] = {}
+                    s.table_params[1].queues[iii][j].x = self.queues[i][j].x
+                    s.table_params[1].queues[iii][j].z_rotation = self.queues[i][j].z_rotation
+                    s.table_params[1].queues[iii][j].source = {
+                        self.queues[i][j].source[1],
+                        self.queues[i][j].source[2]
+                    }
+                end
+                
+                if self.enemies[i] ~= nil then
+                    s.table_params[1].queues[iii].enemies = {}
+                    for j = 1, #self.enemies[i] do
+                        s.table_params[1].queues[iii].enemies[j] = {}
+                        s.table_params[1].queues[iii].enemies[j].f ={}
+                        for k = 1, #self.enemies[i][j].f do
+                            s.table_params[1].queues[iii].enemies[j].f[k] = self.enemies[i][j].f[k]
+                        end
+                        s.table_params[1].queues[iii].enemies[j].p ={}
+                        for k = 1, #self.enemies[i][j].p do
+                            s.table_params[1].queues[iii].enemies[j].p[k] = self.enemies[i][j].p[k]
+                        end
+                    end
+                end
+            end
+            iii = iii + 1
+        end
+            
+        return s
+    end
+},
+
+--Level 4
+{
+    speed = 80, -- pixels per second
+    image = Image{src = "assets/lvls/bg_tiles/water2.png" },
+    grass = Image{src = "assets/lvls/bg_tiles/grass1.png"},
+    beach = Image{src = "assets/lvls/bg_tiles/beach.png"},
+    setup = function( self,o)
+        
+        self.img_h = self.image.h
+        
+        self.image:set{
+            tile   = {true, true},
+            w      = screen_w,
+            h      = screen_h+self.img_h,
+            y      = -self.img_h
+        }
+        self.grass:set{
+            tile   = {true, true},
+            w      = screen_w,
+            h      = screen_h+self.img_h,
+            y      = -self.img_h
+        }
+        self.beach.y = -self.beach.h-self.img_h
+        layers.ground:add(self.image,self.grass,self.beach)
+        if type(o) == "table"  then
+                recurse_and_apply(  self, o  )
+        end
+    end,
+    
+    
+    render = function( self , seconds )
+            
+        local dy   = self.speed * seconds
+        if self.beach.parent ~= nil then
+            self.beach.y = self.beach.y + dy
+            if self.beach.y > screen_h then
+                self.beach:unparent()
+                self.beach.parent = nil
+            end
+        end
+        if self.grass.parent ~= nil then
+            self.grass.y = self.grass.y + dy
+            if self.grass.y > screen_h then
+                self.grass:unparent()
+                self.grass.parent = nil
+            end
+        end
+        self.image.y = self.image.y + dy
+        if self.image.y > 0 then
+            self.image.y = self.image.y - self.img_h
+        end
+        
+        
+    end, 
+    remove = function(self)
+        self.image:unparent()
+        if self.beach.parent ~= nil then
+            self.beach:unparent()
+        end
+        if self.grass.parent ~= nil then
+            self.grass:unparent()
+        end
+    end,
+    salvage = function(self)
+        s = {
+            func = {"salvage_level_4"},
+            table_params = {}
+        }
+        
+        table.insert(s.table_params,{
+            grass ={
+                y= self.grass.y
+            },
+            
+            beach = {
+                y = self.beach.y
+            }
+        })
+        
+        return s
+    end
 },
 }
 
 function salvage_level_2(o)
     levels[2].num_bosses = o.num_bosses
     add_to_render_list(lvlbg[2],o.queues,o.top_doodad)
+end
+function salvage_level_3(o)
+    levels[3].num_bosses = o.num_bosses
+    add_to_render_list(lvlbg[3],o.queues,o.top_doodad)
+end
+function salvage_level_4(o)
+dumptable(o)
+    add_to_render_list(lvlbg[4],o)
 end

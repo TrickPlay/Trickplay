@@ -527,7 +527,6 @@ levels =
             self.time = 0--200
             self.num_bosses = 2
             if type(o) == "table"  then
-                print("self.overwrite_vars", o)
                 recurse_and_apply(  self, o  )
             end
             
@@ -980,535 +979,464 @@ levels =
             state.counters[3].lvl_points = 0
             my_plane.bombing_mode = true
             self.bg:append_to_queue(
-                {---[[
+                {--[[
                     {
-                        Clone{source=imgs.trench_l, x=1300+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=1300+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=1300+3*imgs.trench_l.w},
+                        {source={"imgs","trench_l"},  x=1300+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=1300+2*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=1300+3*imgs.trench_l.w},
+                        {source={"imgs","trench_l"},  x=100+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=100+3*imgs.trench_l.w},
                         enemies={
-                            {f=add_to_render_list,p={enemies.trench(),1300+2*imgs.trench_l.w,-144-imgs.trench_l.h/2-10}},
+                            {f = {"enemies","trench"}, p = {1300+2*imgs.trench_l.w}},
+                            {f = {"enemies","trench"}, p = { 100+2*imgs.trench_l.w}},
+                            {f = {"enemies","tank"},   p = {false,200, -300}},
+                            {f = {"enemies","tank"},      p = {false,300, -300}},
                         }
                     },
                     {
-                        Clone{source=imgs.trench_l, x=500+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=500+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=500+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=500+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=500+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=500+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=500+7*imgs.trench_l.w},
+                        {source={"imgs","trench_l"},  x=500+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=500+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=500+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=500+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=500+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=500+6*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=500+7*imgs.trench_l.w},
                         enemies={
-                            {f=add_to_render_list,p={enemies.trench(),500+2*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),500+5*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={500+2*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={500+5*imgs.trench_l.w}},
                         }
                     },
                     {
 
-                        Clone{source=imgs.road_hor, x=300-5*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300-4*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300-3*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300-2*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300-imgs.road_hor.w},
-                        Clone{source=imgs.road_left,x=300},
+                        {source={"imgs","road_hor"}, x=300-5*imgs.road_hor.w},
+                        {source={"imgs","road_hor"}, x=300-4*imgs.road_hor.w},
+                        {source={"imgs","road_hor"}, x=300-3*imgs.road_hor.w},
+                        {source={"imgs","road_hor"}, x=300-2*imgs.road_hor.w},
+                        {source={"imgs","road_hor"}, x=300-imgs.road_hor.w},
+                        {source={"imgs","road_left"},x=300},
                     },
-                    {Clone{source=imgs.road_ver,x=300},times=5},
-                    {Clone{source=imgs.road_ver,x=300},times=3,
+                    {{source={"imgs","road_ver"},x=300},times=5},
+                    {{source={"imgs","road_ver"},x=300},times=3,
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {1,-200,3,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-200,3,150 }},
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300}, times   = 2,
+                        {source={"imgs","road_ver"},x=300}, times   = 2,
+                        
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {1,-200,3,150 }},
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{source=imgs.dirt_area_1,x=500,y=-imgs.dirt_area_1.h},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.dirt_area_1.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
+                            {f = {"formations","hor_row_tanks"},      p = {1,-200,3,150 }},
+                            {f = {"lvlbg",3,"add_dirt"},      p =
+                            {1,500
                             }
                             },
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300}, times=2,
+                        {source={"imgs","road_ver"},x=300}, times=2,
                         enemies = {
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{source=imgs.building_sm,x=1150,y=-imgs.building_sm.h,z_rotation={90}},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_sm.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
+                            {f = {"lvlbg",3,"add_building"},      p = {
+                                "building_1_1",1200,-30,-90,false
+                                }
+                            },
+                            {f = {"lvlbg",3,"add_building"},      p = {
+                            "building_1_1",1050,-30,-90,false
                             }
                             },
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{source=imgs.building_sm,x=850,y=-imgs.building_sm.h+50,z_rotation={-90}},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_sm.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
+                            {f = {"lvlbg",3,"add_building"},      p = {
+                            "building_1_2",900,-3*imgs.building_1_2.h,0,false
+                            
                             }
+                            },
+                            {f = {"lvlbg",3,"add_building"},      p =
+                            {
+                            "building_1_2",900,-4*imgs.building_1_2.h,0,false
                             }
                             },
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300},times=3},
-                    {Clone{source=imgs.road_ver,x=300},times=2,
+                    {{source={"imgs","road_ver"},x=300},times=3},
+                    {{source={"imgs","road_ver"},x=300},times=2,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {1200,-1,3,150}},
-                            {f = powerups.health,      p = {1800}},
+                            {f = {"formations","vert_row_tanks"},      p = {1200,-1,3,150}},
+                            {f = {"powerups","health"},      p = {1800}},
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300},times=3,
+                        {source={"imgs","road_ver"},x=300},times=3,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {400,-1,3,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {400,-1,3,150}},
                         }
                     },
 
                     {
-                        Clone{source=imgs.road_right,x=300},
-                        Clone{source=imgs.road_hor, x=300+  imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300+2*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300+3*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300+4*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor, x=300+5*imgs.road_hor.w},
-                        Clone{source=imgs.road_left,x=300+6*imgs.road_hor.w},
+                        {source={"imgs","road_right"},x=300},
+                        {source={"imgs","road_hor"},  x=300+  imgs.road_hor.w},
+                        {source={"imgs","road_hor"},  x=300+2*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},  x=300+3*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},  x=300+4*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},  x=300+5*imgs.road_hor.w},
+                        {source={"imgs","road_left"}, x=300+6*imgs.road_hor.w},
                     },
-                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=2},
+                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=2},
                     {
-                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l, x=50+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=50+8*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},
+                        {source={"imgs","trench_l"}, x=50+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+7*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=50+8*imgs.trench_l.w},
                         
-                        Clone{source=imgs.trench_l,  x=1250},
-                        Clone{source=imgs.trench_reg,x=1250+1*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=1250+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=1250+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=1250+4*imgs.trench_l.w},
+                        {source={"imgs","trench_l"},  x=1250},
+                        {source={"imgs","trench_reg"},x=1250+1*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=1250+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=1250+3*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=1250+4*imgs.trench_l.w},
                         enemies={
-                            {f=add_to_render_list,p={enemies.trench(),50+2*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),50+4*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),50+7*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),1250+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),1250+3*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={  50+2*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={   0+4*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+7*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+3*imgs.trench_l.w}},
                             
                             
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3},
+                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3},
                     {
-                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=50},
-                        Clone{source=imgs.trench_reg,x=50+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=50+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=50+8*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=50},
+                        {source={"imgs","trench_reg"},x=50+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=50+7*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=50+8*imgs.trench_l.w},
                         
-                        Clone{source=imgs.trench_l,  x=1250},
-                        Clone{source=imgs.trench_reg,x=1250+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=1250+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=1250+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=1250+4*imgs.trench_l.w},
+                        {source={"imgs","trench_l"},  x=1250},
+                        {source={"imgs","trench_reg"},x=1250+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=1250+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=1250+3*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=1250+4*imgs.trench_l.w},
                         enemies={
                             
-                            {f=add_to_render_list,p={enemies.trench(),50+2*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),50+4*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),50+6*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),1250+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),1250+3*imgs.trench_l.w,-100, 40,true}},
-                            {f = powerups.life,      p = {200}},
+                            {f={"enemies","trench"},p={  50+2*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+4*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+6*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+3*imgs.trench_l.w}},
+                            {f = {"powerups","life"},      p = {200}},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3},
-                    {Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w},times=3,
+                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3},
+                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {-1,-200,5,150 }},
-                            {f = add_to_render_list,            p = {enemies.jeep(false),270+6*imgs.road_hor.w,-100}},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-200,5,150 }},
+                            {f = {"enemies","jeep"},            p = {false,270+6*imgs.road_hor.w,-100}},
                             
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w}, times   = 3,
+                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w}, times   = 3,
                         enemies = {
                             
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{source=imgs.dirt_area_2,x=100,y=-imgs.dirt_area_2.h},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.dirt_area_2.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
-                            }
+                            {f = {"lvlbg",3,"add_dirt"},      p = { 2, 100}
                             },
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+6*imgs.road_ver.w}, times=6,
+                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w}, times=6,
                         enemies = {
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{source=imgs.building_big,x=700,y=-imgs.building_big.h},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_big.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
-                            }
+                            {f = {"lvlbg",3,"add_building"},
+                            p ={"building_big",700,-imgs.building_big.h,0,true}
                             },
-                            {f = add_to_render_list,      p = {enemies.tank(false),700, -400}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),800, -400}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),900, -400}}
+                            {f = {"enemies","tank"}, p = {false,700, -400}},
+                            {f = {"enemies","tank"}, p = {false,800, -400}},
+                            {f = {"enemies","tank"}, p = {false,900, -400}}
                             
                         }
                     },
 
                     
                     {
-                        Clone{source=imgs.road_right,x=300+6*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+7*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+8*imgs.road_hor.w},
-                        Clone{source=imgs.road_left,x=300+9*imgs.road_hor.w},
-                        enemies = { {f = add_to_render_list,      p = {powerups.health(200)}},}
+                        {source={"imgs","road_right"}, x=300+6*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},   x=300+7*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},   x=300+8*imgs.road_hor.w},
+                        {source={"imgs","road_left"},  x=300+9*imgs.road_hor.w},
+                        enemies = { {f = {"powerups","health"},      p = {200}},}
                     },
                     {
                         
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=100},
-                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=100},
+                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
                         
                         
                         enemies={
                             
-                            {f=add_to_render_list,p={enemies.trench(),100+2*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+8*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={100+2*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+8*imgs.trench_l.w}},
                             
                             
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w}},
+                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w}},
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=100},
-                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=100},
+                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
                         
                         
                         enemies={
-                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+3*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+7*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+3*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+7*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
+                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
                         enemies={
-                            {f = add_to_render_list,      p = {enemies.tank(false),200,  -150}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),400,  -150}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),1650, -150}},
-                            {f = add_to_render_list,      p = {enemies.jeep(true),2000,100}},
+                            {f = {"enemies","tank"}, p = {false,200,  -150}},
+                            {f = {"enemies","tank"}, p = {false,400,  -150}},
+                            {f = {"enemies","tank"}, p = {false,1650, -150}},
+                            {f = {"enemies","jeep"}, p = {true,2000,100}},
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=100},
-                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},  x=300+9*imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=100},
+                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
                         
                         
                         enemies={
-                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+4*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+6*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+4*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+6*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=2},
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=2},
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w}, times   = 7,
+                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w}, times   = 7,
                         enemies = {
                             
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{source=imgs.dirt_area_3,x=100,y=-imgs.dirt_area_3.h},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.dirt_area_3.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
+                            {f = {"lvlbg",3,"add_dirt"},      p =
+                            {3,100
                             }
                             },
-                            {f = add_to_render_list,      p =
-                            {
-                            {
-                                c = Clone{
-                                    source=imgs.dirt_area_2,
-                                    x=800,
-                                    y=-imgs.dirt_area_2.h/2,
-                                    z_rotation={180,0,0},
-                                    anchor_point={imgs.dirt_area_2.w/2,imgs.dirt_area_2.h/2}
-                                },
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.dirt_area_2.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
+                            {f = {"lvlbg",3,"add_dirt"},      p =
+                            {2,800
                             }
                             },
-                            {f = add_to_render_list,      p =
+                            {f = {"lvlbg",3,"add_building"},      p =
                             {
-                            {
-                                c = Clone{source=imgs.building_sm,x=600,y=-imgs.building_sm.h-100},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_sm.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
+                            "building_1_1",600,-imgs.building_big.h-100,0,true
+
                             }
                             },
-                            {f = add_to_render_list,      p =
+                            {f = {"lvlbg",3,"add_building"},      p =
                             {
-                            {
-                                c = Clone{source=imgs.building_big,x=500,y=-imgs.building_big.h-300},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_big.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }
+                            "building_big",500,-imgs.building_big.h-400,0,true
+
                             }
                             },
-                            {f = add_to_render_list,      p = {enemies.tank(false),400, -200}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),400, -600}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),800, -600}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),800, -200}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),400, -400}},
-                            {f = add_to_render_list,      p = {enemies.tank(false),800, -400}}
+                            {f = {"enemies","tank"}, p = {false,400, -200}},
+                            {f = {"enemies","tank"}, p = {false,400, -600}},
+                            {f = {"enemies","tank"}, p = {false,800, -600}},
+                            {f = {"enemies","tank"}, p = {false,800, -200}},
+                            {f = {"enemies","tank"}, p = {false,400, -400}},
+                            {f = {"enemies","tank"}, p = {false,800, -400}}
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=100},
-                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},  x=300+9*imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=100},
+                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
                         
                         
                         enemies={
-                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+3*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+7*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+3*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+7*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
                         }
                     },
                     
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
                         enemies = {
                             --{f = add_to_render_list,      p = {powerups.health(600)}},
                         }
-                    },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                    },--]]
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=10,
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {-1,-300,6,150 }},
-                            {f = formations.hor_row_tanks,      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-300,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {300,1,4,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {300,1,4,150}},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=10,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {300,1,4,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {300,1,4,150}},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=5,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = add_to_render_list,p = {enemies.jeep(false),300+9*imgs.road_ver.w-20,-100}},
+                            {f = {"enemies","jeep"},p = {false,300+9*imgs.road_ver.w-20,-100}},
                             
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = powerups.health,      p = {1600}},
+                            {f = {"formations","vert_row_tanks"},      p = {1000,-1,4,150}},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                        }
+                    },
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
+                        enemies = {
+                            {f = {"powerups","health"},      p = {1600}},
                             
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
                     
-                    {Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},times=10,
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                        }
+                    },
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                        enemies = {
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                        }
+                    },
+                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                        enemies = {
+                            {f = {"formations","vert_row_tanks"},      p = {1000,-1,4,150}},
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300+9*imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=100},
-                        Clone{source=imgs.trench_reg,x=100+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+8*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=100+9*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=100+10*imgs.trench_l.w},
+                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=100},
+                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
                         enemies = {
-                            {f=add_to_render_list,p={enemies.trench(),100+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+3*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+5*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+7*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),100+9*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+3*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+7*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
                         }
                     },
                     {
-                        Clone{source=imgs.road_left,x=300+9*imgs.road_hor.w,z_rotation={-90,0,0}},
-                        Clone{source=imgs.road_hor,x=300+8*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+7*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+6*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+5*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+4*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+3*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+2*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+1*imgs.road_hor.w},
-                        Clone{source=imgs.road_hor,x=300+0*imgs.road_hor.w},
-                        Clone{source=imgs.road_right,x=300-imgs.road_ver.w,z_rotation={-90,0,0}},
+                        {source={"imgs","road_left"},x=300+9*imgs.road_hor.w,z_rotation={-90,0,0}},
+                        {source={"imgs","road_hor"},x=300+8*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+7*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+6*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+5*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+4*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+3*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+2*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+1*imgs.road_hor.w},
+                        {source={"imgs","road_hor"},x=300+0*imgs.road_hor.w},
+                        {source={"imgs","road_right"},x=300-imgs.road_ver.w,z_rotation={-90,0,0}},
                     },
-                    {
-                        Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},
-                        Clone{source=imgs.trench_l,  x=300},
-                        Clone{source=imgs.trench_reg,x=300+  imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+2*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+3*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+4*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+5*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+6*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+7*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+8*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+9*imgs.trench_l.w},
-                        Clone{source=imgs.trench_reg,x=300+10*imgs.trench_l.w},
-                        Clone{source=imgs.trench_r,  x=300+11*imgs.trench_l.w},
+                    { 
+                        {source={"imgs","road_ver"},  x=300-imgs.road_ver.w},
+                        {source={"imgs","trench_l"},  x=300},
+                        {source={"imgs","trench_reg"},x=300+  imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+2*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+3*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+4*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+5*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+6*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+7*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+8*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+9*imgs.trench_l.w},
+                        {source={"imgs","trench_reg"},x=300+10*imgs.trench_l.w},
+                        {source={"imgs","trench_r"},  x=300+11*imgs.trench_l.w},
                         enemies = {
-                            {f=add_to_render_list,p={enemies.trench(),300+1*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),300+3*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),300+5*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),300+7*imgs.trench_l.w,-100, 40,true}},
-                            {f=add_to_render_list,p={enemies.trench(),300+9*imgs.trench_l.w,-100, 40,true}},
+                            {f={"enemies","trench"},p={300+1*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+3*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+5*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+7*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+9*imgs.trench_l.w}},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=3,
+                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = {1,-150,3,150 }},
-                            {f = formations.hor_row_tanks,      p = {1,-400,3,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-150,3,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-400,3,150 }},
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300-imgs.road_ver.w}, times   = 2,
+                        {source={"imgs","road_ver"},x=300-imgs.road_ver.w}, times   = 2,
                         enemies = {
                             
-                            {f = add_to_render_list,      p =
-                            {
+                            {f = {"lvlbg",3,"add_dirt"},      p =
+                            {1,500--[[
                             {
                                 c = Clone{source=imgs.dirt_area_1,x=500,y=-imgs.dirt_area_1.h},
                                 setup=function(s) layers.ground:add(s.c) end,
@@ -1519,11 +1447,11 @@ levels =
                                         remove_from_render_list(s)
                                     end
                                 end,
-                            }
+                            }--]]
                             }
                             },
-                            {f = add_to_render_list,      p =
-                            {
+                            {f = {"lvlbg",3,"add_dirt"},      p =
+                            {3,200--[[
                             {
                                 c = Clone{source=imgs.dirt_area_3,x=200,y=-imgs.dirt_area_3.h},
                                 setup=function(s) layers.ground:add(s.c) end,
@@ -1534,16 +1462,16 @@ levels =
                                         remove_from_render_list(s)
                                     end
                                 end,
-                            }
+                            }--]]
                             }
                             },
                         }
                     },
                     {
-                        Clone{source=imgs.road_ver,x=300-imgs.road_ver.w}, times=2,
+                        {source={"imgs","road_ver"},x=300-imgs.road_ver.w}, times=2,
                         enemies = {
-                            {f = add_to_render_list,      p =
-                            {
+                            {f = {"lvlbg",3,"add_building"},      p =
+                            {"building_1_1",1150,-imgs.building_1_1.h-300,90,false--[[
                             {
                                 c = Clone{source=imgs.building_sm,x=1150,y=-imgs.building_sm.h,z_rotation={90}},
                                 setup=function(s) layers.ground:add(s.c) end,
@@ -1554,11 +1482,11 @@ levels =
                                         remove_from_render_list(s)
                                     end
                                 end,
-                            }
+                            }--]]
                             }
                             },
-                            {f = add_to_render_list,      p =
-                            {
+                            {f = {"lvlbg",3,"add_building"},      p =
+                            {"building_big",500,-imgs.building_1_1.h-300,0,true--[[
                             {
                                 c = Clone{source=imgs.building_big,x=500,y=-imgs.building_big.h-300},
                                 setup=function(s) layers.ground:add(s.c) end,
@@ -1569,69 +1497,117 @@ levels =
                                         remove_from_render_list(s)
                                     end
                                 end,
-                            }
+                            }--]]
                             }
                             },
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=3},
-                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
+                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=3},
+                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {1200,-1,3,150}},
-                            {f = powerups.health,      p = {1800}},
+                            {f = {"formations","vert_row_tanks"},      p = {1200,-1,3,150}},
+                            {f = {"powerups","health"},      p = {1800}},
                         }
                     },
-                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
+                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {300,-1,3,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {300,-1,3,150}},
                         }
                     },
                     --]]
-                    {Clone{source=imgs.road_ver,x=300-imgs.road_ver.w},times=2,
+                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
                         enemies = {
-                            {f = formations.vert_row_tanks,      p = {500,-1,3,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {500,-1,3,150}},
                         }
                     },
                     {
-                        Clone{source=imgs.road_left,x=300-1*imgs.road_hor.w,z_rotation={-90,0,0}},
+                        {source={"imgs","road_left"},x=300-1*imgs.road_hor.w,z_rotation={-90,0,0}},
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = { 1,-150,4,200 }},
-                            {f = formations.hor_row_tanks,      p = { 1,-400,4,200 }},
-                            {f = formations.hor_row_tanks,      p = { 1,-650,4,200 }},
-                            {f = formations.hor_row_tanks,      p = {-1,-275,4,200 }},
-                            {f = formations.hor_row_tanks,      p = {-1,-525,4,200 }},
-                            {f = formations.hor_row_tanks,      p = {-1,-775,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-150,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-400,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-650,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-275,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-525,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-775,4,200 }},
                         }
                     },
                     {},{},{},{},{},{},
                     {
                         enemies = {
-                            {f = formations.hor_row_tanks,      p = { 1,-150,4,200 }},
-                            {f = formations.hor_row_tanks,      p = { 1,-400,4,200 }},
-                            {f = formations.hor_row_tanks,      p = { 1,-650,4,200 }},
-                            {f = formations.hor_row_tanks,      p = {-1,-275,4,200 }},
-                            {f = formations.hor_row_tanks,      p = {-1,-525,4,200 }},
-                            {f = formations.hor_row_tanks,      p = {-1,-775,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-150,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-400,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-650,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-275,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-525,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-775,4,200 }},
                         }
                     },
                     {},{},{},{},{},{},{},{},{},{},{},{},
                     {
                         enemies = {
-                            {f = self.level_complete,      p = {self}},
+                            {f = {"levels",3,"level_complete"},      p = {self}},
                         }
                     }
                 }
             )
-
+            
 			self.dist_travelled = 0
             remove_from_render_list(self)
 		end,
-		render = function(self,seconds)
-
-		end,
+		
 		level_complete = function(self)
 			add_to_render_list( lvlcomplete )
 		end
+    },
+    {
+        speed          = 80,   --px/s
+		level_dist     = 3000, --px
+		dist_travelled = 0,
+		launch_index   = 1,
+		bg             = lvlbg[3],
+        offset         = {},
+        index          = {},
+        add_list       = {},
+        wait           = {},
+        w_q_index      = {},
+        time = 0,
+		setup = function(self,o)
+            state.counters[3].lvl_points = 0
+            my_plane.bombing_mode = false
+            self.time = 0
+            if type(o) == "table"  then
+                recurse_and_apply(  self, o  )
+            end
+		end,
+        render = function(self,seconds)
+            self.time = self.time + seconds
+            if self.time >= 4 then
+                enemies.final_boss(true)
+                remove_from_render_list(self)
+            end
+		end,
+        salvage = function(self,salvage_list)
+            s = {
+                func         = {"levels",4,"add_to_render_list"},
+                table_params = {},
+            }
+            
+            
+            
+            table.insert(s.table_params,{
+                time = self.time
+                
+            })
+
+            return s
+        end,
+        level_complete = function(self)
+			level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
+		end,
+        add_to_render_list = function(o)
+            add_to_render_list(levels[4],o)
+        end,
     }
 }
+
 levels[0] = {level_complete = function(self) print("Level 0 has no level_complete function") end }

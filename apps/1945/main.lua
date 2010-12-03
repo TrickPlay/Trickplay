@@ -235,6 +235,20 @@ local keys = {
             add_to_render_list(levels[state.curr_level])
             
         end,
+        [keys["4"]] = function()
+            
+            out_splash__in_hud()
+            
+            state.curr_mode  = "CAMPAIGN"
+            state.curr_level = 4
+            
+            add_to_render_list(my_plane)
+            remove_from_render_list(lvlbg[1])
+            add_to_render_list(lvlbg[4])
+
+            add_to_render_list(levels[state.curr_level])
+            
+        end,
         [keys.o] = function()
             
             if type(settings.salvage_list) == "table" and #settings.salvage_list > 0 then
@@ -296,7 +310,7 @@ local keys = {
             formations.vert_row_tanks(200,-1,3,150)
         end,
         [keys.p] = function()
-            add_to_render_list(enemies.jeep(),500,-100)
+            enemies.jeep(false,500,-100)
         end,
         --bosses
         [keys.m] = function()
@@ -309,20 +323,23 @@ local keys = {
             enemies.destroyer(500,300, 40,true)
         end,
         [keys.l] = function()
-            add_to_render_list(enemies.trench(),500,100, 40,true)
+            enemies.trench(500)
         end,
         [keys.k] = function()
             add_to_render_list(enemies.big_tank(),200,200)
         end,
+        [keys.v] = function()
+            enemies.final_boss(false)
+        end,
         --powerups
         [keys.z] = function()
-            add_to_render_list(powerups.guns(300))
+            add_to_render_list(powerups.guns(300,true))
         end,
         [keys.x] = function()
-            add_to_render_list(powerups.health(500))
+            add_to_render_list(powerups.health(500,true))
         end,
         [keys.c] = function()
-            add_to_render_list(powerups.life(400))
+            add_to_render_list(powerups.life(400,true))
         end,
         [keys.g] = function()
             level_completed:animate_in(string.format("%06d",33333))
@@ -427,8 +444,11 @@ local press
 local second_press
 --moves through all the items in the render list
 --i.e. performs the game loop
+
+--idle.limit=1/60
+--collectgarbage("stop")
+
 function idle.on_idle( idle , seconds )
-    
     if press ~= nil then
         if press == keys.Ok then
             press = keys.Return
@@ -460,9 +480,14 @@ function idle.on_idle( idle , seconds )
 		end
 	end
 --]]
+
         for item,render in pairs( render_list ) do
-            render( item , seconds ) 
+            render( item , seconds )
+
         end
+        
+
+
 --print("\n")
         process_collisions( )
         
@@ -584,6 +609,7 @@ end
 
 -------------------------------------------------------------------------------
 --saves high score
+
 function app:on_closing()
     
     settings.salvage_list = {}
@@ -592,12 +618,15 @@ function app:on_closing()
     local s
     for render_item,  render_f in pairs(render_list) do
         if  render_item.salvage then
+        print("salvage_call")
             s = render_item:salvage()
         print("before", #temp_table, s)
             table.insert(temp_table,s)
             print("after", #temp_table, s,"\n")
         end
     end
+    print("um")
+    dumptable(temp_table)
     settings.salvage_list = temp_table
     print("done", #settings.salvage_list, s)
     settings.state = {}
@@ -605,7 +634,7 @@ function app:on_closing()
     recurse_and_apply(temp_table, state)
     settings.state = temp_table
     --dumptable(temp_table)
-    --dumptable(settings.state)
+    --dumptable(settings.state)--]]
 end
 math.randomseed( os.time() )
 mediaplayer:play_sound("audio/Air Combat Launch.mp3")

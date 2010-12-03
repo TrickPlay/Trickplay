@@ -69,8 +69,22 @@ state =
                 spawned = 0
             }
         },
+        {
+            lvl_points = 0,
+            lives_before = 3,
+            fighters = {
+                killed  = 0,
+                spawned = 0
+            },
+            zepp = {
+                killed  = 0,
+                spawned = 0
+            }
+        },
     }
 }
+state.counters[0] = {}
+state.counters[0].lvl_points = 0
 
 if settings.state ~= nil  and settings.state.hud ~= nil then
     state.hud.high_score = settings.state.hud.high_score
@@ -154,7 +168,12 @@ imgs =
     road_left          = Image{ src = "assets/lvls/road/road-left.png"},
     road_right          = Image{ src = "assets/lvls/road/road-right.png"},
     building_sm     = Image{ src = "assets/lvls/buildings/building1.png"},
+    building_1_1    = Image{ src = "assets/lvls/buildings/building1_1.png"},
+    building_1_1_d  = Image{ src = "assets/lvls/buildings/building1_1_destroyed.png"},
+    building_1_2    = Image{ src = "assets/lvls/buildings/building1_2.png"},
+    building_1_2_d  = Image{ src = "assets/lvls/buildings/building1_2_destroyed.png"},
     building_big    = Image{ src = "assets/lvls/buildings/building2.png"},
+    building_big_d  = Image{ src = "assets/lvls/buildings/building2_destroyed.png"},
     trees           = Image{ src = "assets/lvls/bg_tiles/trees.png"},
 
     
@@ -171,11 +190,18 @@ imgs =
     medal_1_sm      = Image{ src = "assets/splash/WingmanMedal_sm.png"},
     medal_2         = Image{ src = "assets/splash/PilotMedal.png"},
     medal_2_sm      = Image{ src = "assets/splash/PilotMedal_sm.png"},
+    medal_3         = Image{ src = "assets/splash/AceMedal.png"},
+    medal_3_sm      = Image{ src = "assets/splash/AceMedal_sm.png"},
+    medal_4         = Image{ src = "assets/splash/MedalofVictory.png"},
+    medal_4_sm      = Image{ src = "assets/splash/MedalofVictory_sm.png"},
 
     --POWERUPS
     health          = Image{ src="assets/player/health.png"},
     guns            = Image{ src="assets/player/2xfire.png"},
     up_life         = Image{ src="assets/player/up_life.png"},
+    health_g        = Image{ src="assets/player/health_g.png"},
+    guns_g          = Image{ src="assets/player/2xfire_g.png"},
+    up_life_g       = Image{ src="assets/player/up_life_g.png"},
 
     --EXPLOSIONS
     explosion1      = Image{ src = "assets/fx/explosion1_strip6.png" },
@@ -188,8 +214,10 @@ imgs =
     
     --DESTROYER ASSETS
     dest            = Image{ src = "assets/enemies/dest/destroyer.png"},
+    dest_sunk       = Image{ src = "assets/enemies/dest/destroyer_sunk.png"},
     --BATTLESHIP ASSETS
     b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
+    b_ship_sunk     = Image{ src = "assets/enemies/b_ship/battleship_sunk.png" },
     ---[[
     bbow_wake_1      = Image{ src = "assets/enemies/b_ship/bow_wake1.png"},
     bbow_wake_2      = Image{ src = "assets/enemies/b_ship/bow_wake2.png"},
@@ -241,13 +269,21 @@ imgs =
     tank_turret     = Image{ src = "assets/enemies/tank/tankturret.png"},
     --JEEP ASSETS
     jeep            = Image{ src = "assets/enemies/jeep/jeep.png"},
+    jeep_b          = Image{ src = "assets/enemies/jeep/jeep_b.png"},
     --TRENCH
     trench_l        = Image{ src = "assets/enemies/trench/trench1.png"},
     trench_gun      = Image{ src = "assets/enemies/trench/trench2.png"},
+    trench_crater   = Image{ src = "assets/enemies/trench/trench2_crater.png"},
     trench_reg      = Image{ src = "assets/enemies/trench/trench3.png"},
     trench_r        = Image{ src = "assets/enemies/trench/trench4.png"},
     trench_bullet   = Image{ src = "assets/enemies/trench/mortar_round.png"},
-
+    
+    --FINAL BOSS ASSETS
+    final_boss      = Image{ src = "assets/enemies/final_boss/boss3.png"},
+    boss_prop       = Image{ src = "assets/enemies/final_boss/prop-big-strip-2x118px.png"},
+    boss_prop_d     = Image{ src = "assets/enemies/final_boss/prop-big-strip-2x118px_destroyed.png"},
+    boss_turret     = Image{ src = "assets/enemies/final_boss/boss_turret.png"},
+    splash          = Image{ src = "assets/fx/splash.png"},
 }
 txt =
 {
