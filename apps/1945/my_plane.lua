@@ -258,7 +258,7 @@ end,
             g.clip = {0,0,self.image.w/self.num_frames,self.image.h}
 
             for i = 1, self.num_frames - 1 do
-                if self.overwrite_vars.smoke_stream ~= nil then
+                if self.overwrite_vars ~= nil and self.overwrite_vars.smoke_stream ~= nil then
                     print("wtf",self.overwrite_vars.smoke_stream[i])
                     self.smoke_stream[i] = smoke(i,self.overwrite_vars.smoke_stream[i])
                 else
@@ -275,6 +275,7 @@ end,
             if type(self.overwrite_vars) == "table"  then
                 print("self.overwrite_vars", self.overwrite_vars)
                 recurse_and_apply(  self, self.overwrite_vars  )
+                self.overwrite_vars = nil
             end
         end,
         salvage = function( self, salvage_list )
@@ -629,6 +630,7 @@ end,
                                
 if state.hud.curr_score < 999990 then     
 	state.hud.curr_score = state.hud.curr_score+10
+    
     state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
 	if state.hud.curr_score > state.hud.high_score then
 		state.hud.high_score = state.hud.curr_score
@@ -1077,11 +1079,14 @@ redo_score_text()
 }
 powerups =
 {
-    guns = function(xxx) 
+    guns = function(xxx,green) 
     local p =  {
         image = Clone{source=imgs.guns},--Rectangle{w=60,h=60,color="FFFF00",},
         speed = 30,
         setup = function(self)
+            if green == true then
+                self.image = Clone{source=imgs.guns_g}
+            end
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
         end,
@@ -1114,11 +1119,14 @@ powerups =
     add_to_render_list(p)
     return p
     end,
-    health = function(xxx) 
+    health = function(xxx,green) 
     local p =  {
         image = Clone{source=imgs.health},--Rectangle{w=60,h=60,color="FFFFFF",},
         speed = 30,
         setup = function(self)
+            if green == true then
+                self.image = Clone{source=imgs.health_g}
+            end
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
         end,
@@ -1149,11 +1157,14 @@ powerups =
     add_to_render_list(p)
     return p
     end,
-    life = function(xxx)
+    life = function(xxx,green)
     local p = {
         image = Clone{source=imgs.up_life},--Rectangle{w=60,h=60,color="654321",},
         speed = 30,
         setup = function(self)
+            if green == true then
+                self.image = Clone{source=imgs.up_life_g}
+            end
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
         end,

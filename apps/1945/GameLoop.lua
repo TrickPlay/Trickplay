@@ -91,7 +91,7 @@ local collided = function(good_guy,bad_guy)
 end
 
 function process_collisions()
-local bad_guy
+    local bad_guy
     --check for collisions between the good guys and bad guys
     for     i, good_guy in ipairs(g_guys_air) do
         --for j,  bad_guy in ipairs( bad_guys_collision_list) do

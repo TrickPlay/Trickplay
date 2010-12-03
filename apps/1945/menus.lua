@@ -1,7 +1,7 @@
 modal_title = "kroeger 06_65 140px"
 modal_font  = "kroeger 06_65 70px"
 
-local max_levels = 2
+local max_level = 4
 
 Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     
@@ -38,18 +38,15 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     local medals = {}
     
     function menu:animate_in(highscore,index,no_delay)
-        if state.curr_level == 2 then
-            local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
+        
+        local m
+        local upper = state.curr_level-1
+        if no_delay ~= nil then upper = state.curr_level end
+        for i = 1, upper do
+            m = Clone{source=imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
-        elseif  state.curr_level == 3 then
-            local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-            local m = Clone{source=imgs.medal_2, x=screen_w/2-300,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-        end
+        end 
         
         menu.initials[1].text = "A"
         menu.initials[2].text = "A"
@@ -179,19 +176,15 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     local menu_index = 1
     local medals = {}
     function menu:animate_in(highscore,no_delay)
-        if state.curr_level == 2 then
+        local m
+        local upper = state.curr_level-1
+        if no_delay ~= nil then upper = state.curr_level end
+        for i = 1, upper do
+            m = Clone{source=imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
+            table.insert(medals,m)
+            self.group:add(m)
+        end   
         
-            local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-        elseif  state.curr_level == 3 then
-            local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-            local m = Clone{source=imgs.medal_2, x=screen_w/2-300,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-        end
         
         menu_index       = 1
         arrow.y = play_again.y+40
@@ -393,19 +386,16 @@ Menu_Level_Complete = Class(function(menu, ...)
     local medals = {}
     local g_over = nil
     function menu:animate_in(score)
-        if state.curr_level == 1 then
-            local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
+        local m
+        for i = 1, state.curr_level do
+            m = Clone{source=imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
-            medal_name.text = "Wingman Medal"
-        elseif  state.curr_level == 2 then
-            local m = Clone{source=imgs.medal_1, x=screen_w/2-100,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-            local m = Clone{source=imgs.medal_2, x=screen_w/2-300,y=screen_h/2-250}
-            table.insert(medals,m)
-            self.group:add(m)
-            medal_name.text = "Pilot Medal"
+        end
+        if      state.curr_level == 1 then   medal_name.text = "Wingman Medal"
+        elseif  state.curr_level == 2 then   medal_name.text = "Pilot Medal"
+        elseif  state.curr_level == 3 then   medal_name.text = "Ace Medal"
+        elseif  state.curr_level == 4 then   medal_name.text = "Medal of Victory"
         end
         state.in_lvl_complete = true
         state.menu = score
@@ -431,7 +421,7 @@ Menu_Level_Complete = Class(function(menu, ...)
         [keys.Return] = function()
         state.in_lvl_complete = false
         print("ddddd")
-            if state.curr_level == 2 then
+            if state.curr_level == max_level then
                 menu.group:hide()
                 local index = 0
                 for i=1,8 do
