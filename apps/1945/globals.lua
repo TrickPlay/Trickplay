@@ -346,7 +346,7 @@ end
 recurse_and_apply = nil
 
 recurse_and_apply = function(table1,table2)
-    
+--print("r_a start")
     assert(type(table1) == "table" or type(table1) == "userdata")
     assert(type(table2) == "table" or type(table2) == "userdata")
     
@@ -371,7 +371,7 @@ recurse_and_apply = function(table1,table2)
                 --print("making",k)
                 table1[k] = {} 
             end
-            print("in ",k)
+            --print("in ",k)
             --recurse into that table
             recurse_and_apply(table1[k], v)
             
@@ -381,6 +381,7 @@ recurse_and_apply = function(table1,table2)
             --print(k,"=",v)
         end
     end
+    --print("r_a end")
 end
 
 if settings.state ~= nil and settings.state.high_scores ~= nil then

@@ -232,6 +232,7 @@ remove = function(self)
     self.group:unparent()
 end,
     setup = function( self )
+    print("my_plane setup start")
             self.firing_powerup = 1
             self.damage = 0
             self.image.x = 0
@@ -277,6 +278,7 @@ end,
                 recurse_and_apply(  self, self.overwrite_vars  )
                 self.overwrite_vars = nil
             end
+            print("my_plane setup end")
         end,
         salvage = function( self, salvage_list )
             

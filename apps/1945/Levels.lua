@@ -976,10 +976,11 @@ levels =
         w_q_index      = {},
         
 		setup = function(self)
+        print("not me")
             state.counters[3].lvl_points = 0
             my_plane.bombing_mode = true
             self.bg:append_to_queue(
-                {--[[
+                {---[[
                     {
                         {source={"imgs","trench_l"},  x=1300+  imgs.trench_l.w},
                         {source={"imgs","trench_reg"},x=1300+2*imgs.trench_l.w},
@@ -1313,7 +1314,7 @@ levels =
                         enemies = {
                             --{f = add_to_render_list,      p = {powerups.health(600)}},
                         }
-                    },--]]
+                    },
                     {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=10,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {-1,-300,6,150 }},
@@ -1391,7 +1392,7 @@ levels =
                         }
                     },
                     {
-                        {source={"imgs","road_left"},x=300+9*imgs.road_hor.w,z_rotation={-90,0,0}},
+                        {source={"imgs","road_left"},x=300+9*imgs.road_hor.w,z_rotation=-90},
                         {source={"imgs","road_hor"},x=300+8*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+7*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+6*imgs.road_hor.w},
@@ -1401,7 +1402,7 @@ levels =
                         {source={"imgs","road_hor"},x=300+2*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+1*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+0*imgs.road_hor.w},
-                        {source={"imgs","road_right"},x=300-imgs.road_ver.w,z_rotation={-90,0,0}},
+                        {source={"imgs","road_right"},x=300-imgs.road_ver.w,z_rotation=-90},
                     },
                     { 
                         {source={"imgs","road_ver"},  x=300-imgs.road_ver.w},
@@ -1436,34 +1437,10 @@ levels =
                         enemies = {
                             
                             {f = {"lvlbg",3,"add_dirt"},      p =
-                            {1,500--[[
-                            {
-                                c = Clone{source=imgs.dirt_area_1,x=500,y=-imgs.dirt_area_1.h},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.dirt_area_1.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }--]]
-                            }
+                            {1,500}
                             },
                             {f = {"lvlbg",3,"add_dirt"},      p =
-                            {3,200--[[
-                            {
-                                c = Clone{source=imgs.dirt_area_3,x=200,y=-imgs.dirt_area_3.h},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.dirt_area_3.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }--]]
-                            }
+                            {3,200}
                             },
                         }
                     },
@@ -1471,34 +1448,10 @@ levels =
                         {source={"imgs","road_ver"},x=300-imgs.road_ver.w}, times=2,
                         enemies = {
                             {f = {"lvlbg",3,"add_building"},      p =
-                            {"building_1_1",1150,-imgs.building_1_1.h-300,90,false--[[
-                            {
-                                c = Clone{source=imgs.building_sm,x=1150,y=-imgs.building_sm.h,z_rotation={90}},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_sm.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }--]]
-                            }
+                            {"building_1_1",1150,-imgs.building_1_1.h-300,90,false}
                             },
                             {f = {"lvlbg",3,"add_building"},      p =
-                            {"building_big",500,-imgs.building_1_1.h-300,0,true--[[
-                            {
-                                c = Clone{source=imgs.building_big,x=500,y=-imgs.building_big.h-300},
-                                setup=function(s) layers.ground:add(s.c) end,
-                                render = function(s,secs)
-                                    s.c.y = s.c.y + self.bg.speed*secs
-                                    if s.c.y > (screen_h + imgs.building_big.h) then
-                                        s.c:unparent()
-                                        remove_from_render_list(s)
-                                    end
-                                end,
-                            }--]]
-                            }
+                            {"building_big",500,-imgs.building_1_1.h-300,0,true}
                             },
                         }
                     },
@@ -1514,14 +1467,14 @@ levels =
                             {f = {"formations","vert_row_tanks"},      p = {300,-1,3,150}},
                         }
                     },
-                    --]]
+                    
                     {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {500,-1,3,150}},
                         }
                     },
                     {
-                        {source={"imgs","road_left"},x=300-1*imgs.road_hor.w,z_rotation={-90,0,0}},
+                        {source={"imgs","road_left"},x=300-1*imgs.road_hor.w,z_rotation=-90},
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = { 1,-150,4,200 }},
                             {f = {"formations","hor_row_tanks"},      p = { 1,-400,4,200 }},
@@ -1542,21 +1495,22 @@ levels =
                             {f = {"formations","hor_row_tanks"},      p = {-1,-775,4,200 }},
                         }
                     },
-                    {},{},{},{},{},{},{},{},{},{},{},{},
+                    
+                    {},{},{},{},{},{},{},{},{},{},{},{},--]]
+                    ---[[
                     {
                         enemies = {
-                            {f = {"levels",3,"level_complete"},      p = {self}},
+                            {f = {"levels",3,"level_complete"},      p = {}},
                         }
-                    }
+                    }--]]
                 }
             )
             
-			self.dist_travelled = 0
             remove_from_render_list(self)
 		end,
 		
 		level_complete = function(self)
-			add_to_render_list( lvlcomplete )
+			level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
 		end
     },
     {
