@@ -1,6 +1,7 @@
 --[[
 		Contains the gameloop functions
 --]]
+special_checks = {}
 render_list = {}
 function add_call (item, ...)
     if item then
@@ -124,7 +125,20 @@ function process_collisions()
             
         end
     end
-    
+    for i = 1,#special_checks do
+	for j,good_guy in ipairs(g_guys_air) do
+            
+            if special_checks[i].f(special_checks[i].p,good_guy) then
+                
+                good_guy.obj:collision(special_checks[i].p,good_guy.p)
+                
+                break
+            end
+            
+        end
+
+        
+    end
     b_guys_air  = {}
     b_guys_land = {}
     g_guys_air  = {}

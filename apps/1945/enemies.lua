@@ -680,6 +680,7 @@ end
 enemies =
 {
     final_boss = function(is_boss,o) add_to_render_list({
+	health_body = 10,
         salvage_func = {"enemies","final_boss"},
         salvage_params = {is_boss},
         approach_speed = 70,
@@ -777,6 +778,46 @@ enemies =
         },
         stage  = 1,
         overwrite_vars = {},
+        special_check = function(self,other)
+local y_off = self.group.y - self.group.anchor_point[2]
+local x_off = self.group.x - self.group.anchor_point[1]
+
+local gg_sz = other.x2 - other.x1
+local wing_tip = 418
+local ass_hole = 272
+
+--left side
+if (other.x2 <= (self.group.x + gg_sz)) and (other.x2 >= (self.group.x - self.image.w/2)) then
+
+if( (other.y1 - y_off)  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip) and
+   (other.y1 - y_off)  > ((- wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip)) or
+( (other.y2 - y_off)  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip) and
+   (other.y2 - y_off)  > ((- wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip)) 
+ then
+
+	print("left wing hit!")
+ self:collision(other,"gen")
+
+return true
+
+end
+
+--right side
+elseif other.x1 >= (self.group.x - gg_sz) and other.x1 <= (self.group.x + self.image.w/2) then
+
+if ((other.y2 - y_off) < (wing_tip - ass_hole)/( self.image.w/2)*(other.x2- x_off) +wing_tip- 2*(wing_tip - ass_hole) and
+   (other.y2 - y_off)  > (wing_tip)/( self.image.w/2)*(other.x2- x_off) - wing_tip) or ((other.y1 - y_off) < (wing_tip - ass_hole)/( self.image.w/2)*(other.x1- x_off) +wing_tip- 2*(wing_tip - ass_hole) and
+   (other.y1 - y_off)  > (wing_tip)/( self.image.w/2)*(other.x1- x_off) - wing_tip) then
+
+	print("right wing hit!")
+ self:collision(other,"gen")
+
+return true
+end
+
+end
+return false
+        end,
         setup = function(self)
             self.prop.g_ll:add(self.prop.dead_ll,self.prop.img_ll)
             self.prop.g_lr:add(self.prop.dead_lr,self.prop.img_lr)
@@ -803,6 +844,7 @@ enemies =
             )
             layers.air_doodads_1:add(self.group)
             
+            table.insert(special_checks,{f=self.special_check,p=self})
             if type(o) == "table"  then
                 recurse_and_apply(  self, o  )
             end
@@ -906,7 +948,7 @@ enemies =
             end
             
             if not self.dying then
-                self:rotate_guns_and_fire(secs)
+               -- self:rotate_guns_and_fire(secs)
             end
             self.stages[self.stage](self,secs)
             local x = self.group.x-self.group.anchor_point[1]
@@ -965,8 +1007,13 @@ enemies =
             ["prop_lr"] = 5,
             ["prop_rl"] = 5,
             ["prop_rr"] = 5,
+            ["gen"]     = 10
         },
         damage_maxed = {
+["gen"] = function(self)
+                
+            end,
+
             ["prop_ll"] = function(self)
                 self.prop.broke_ll = true
                 self.prop.img_ll.opacity=0
@@ -1010,15 +1057,17 @@ enemies =
         },
         props_remaining = 4,
         collision = function(self,other,loc)
-            
+print(self.health[loc])
             if  self.health[loc] - 1  == 0 then
                 self.health[loc] = self.health[loc] - 1
                 
                 self.damage_maxed[loc](self)
                 self.props_remaining = self.props_remaining - 1
-                if self.props_remaining == 0 then
+                if self.props_remaining == 0 or  loc == "gen" then
                     self.dying = true
                     self.stage = self.stage + 1
+                    dolater( function() table.remove(special_checks) end)
+
                 end
             else
                 self.health[loc] = self.health[loc] - 1
