@@ -790,10 +790,12 @@ enemies =
             
             self.group:add(
                 self.image,
+                
                 self.prop.g_ll,
                 self.prop.g_lr,
                 self.prop.g_rl,
                 self.prop.g_rr,
+                
                 self.guns.g_ll,
                 self.guns.g_lr,
                 self.guns.g_rl,
