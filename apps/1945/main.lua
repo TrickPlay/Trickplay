@@ -626,7 +626,6 @@ function app:on_closing()
         end
     end
     print("um")
-    dumptable(temp_table)
     settings.salvage_list = temp_table
     print("done", #settings.salvage_list, s)
     settings.state = {}

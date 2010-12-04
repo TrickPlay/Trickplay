@@ -3,14 +3,12 @@
 --]]
 render_list = {}
 function add_call (item, ...)
-
     if item then
         if item.setup then
             item:setup( ... )-- , item )
         end
         render_list[item] = item.render
     end
-    
 end
 function add_to_render_list( item, ... )
 

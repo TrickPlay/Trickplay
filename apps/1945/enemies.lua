@@ -2592,11 +2592,15 @@ enemies =
 			
 		end,
         setup = function(self)
+        print("quer")
 			self.base_clip:add(self.base_strip)
+            print(3)
 			self.group:add( self.base_clip,self.image )
+            print(343434)
             self.group.x = xxx
+            print("ass")
             self.group.y = y_offset
-			
+			print("hole")
 			layers.land_targets:add( self.group )
 			
 			
@@ -2668,7 +2672,7 @@ enemies =
 		end,
         
         salvage_func = {"enemies","tank"},
-        salvage_params = {hor},---[[
+        salvage_params = {m,xxx,y_offset},---[[
         salvage = function( self, salvage_list )
             
             s = {
@@ -3428,13 +3432,11 @@ enemies =
             self.group:add(unpack(self.bow_wake_l))
             self.group:add(unpack(self.stern_wake))
             --self.group:add(unpack(self.bow_wake_t))
-
 			self.group:add(
 				
 				self.image,
                 
 				self.gun_group
-
 				
 			)
             self.group.x = xxx
@@ -3723,7 +3725,6 @@ formations =
         end
     end,
     vert_row_tanks = function(x,y,num,spacing,o,salvage_index)
-        
         if salvage_index then
             lower = salvage_index
             upper = salvage_index

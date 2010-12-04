@@ -518,7 +518,6 @@ lvlbg = {
     enemies       = {},
     image         = Image{src = "assets/lvls/bg_tiles/grass1.png" },
     setup         = function( self, o, top_doodad  )
-
         self.img_h = self.image.h
         self.image:set{
             tile   = {true, true},
@@ -531,7 +530,13 @@ lvlbg = {
         local g
         local num_frames =  math.ceil(screen_h/self.doodad_h)+1
         --setup the doodad frames
-        self.top_doodad = -self.doodad_h+1
+        if top_doodad then
+            self.top_doodad = top_doodad
+        else
+        print("me")
+            self.top_doodad = -self.doodad_h
+        end
+        print("wuurrrr")
         for i = 1, num_frames do
             g   =  Group{y=(num_frames - i)*(self.doodad_h-1)+self.top_doodad}
             table.insert( self.doodad_frames , g)
@@ -545,8 +550,15 @@ lvlbg = {
                     g:add(Clone{
                         source     =  _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ],
                         x          =  o[self.q_i][j].x,
-                        y          =  self.doodad_h/2,
-                        z_rotation = {o[self.q_i][j].z_rotation,0,0}
+                        y          =  _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ].h/2,
+                        z_rotation = {o[self.q_i][j].z_rotation,0,0},
+                        ---[[
+                        anchor_point =
+                                    {
+                                        _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ].w/2,
+                                        _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ].h/2
+                                    }
+                        --]]
                     })
                     if self.queues[self.q_i] == nil then
                         self.queues[self.q_i] = {}
@@ -556,6 +568,7 @@ lvlbg = {
                 end
             end
         end
+        print("hurrrrr")
         if o ~= nil then
             print("num o",#o)
             for i = (self.q_i+1), #o do
@@ -578,13 +591,33 @@ lvlbg = {
         else
             self.append_i =self.q_i + 1
         end
+        print("donzoooo")
         layers.land_doodads_2:add(self.trees.l[1],self.trees.l[2],self.trees.r[1],self.trees.r[2])
     end,
-    add_building = function(building,x,y,z_rot, big_explo)
+    ---[[
+    add_building = function(building,x,y,z_rot, big_explo,o)
+    print(building,x,y,z_rot, big_explo,o)
         add_to_render_list( {
                 image = Clone{source=imgs[building],x=x,y=y,z_rotation={z_rot,0,0}},
                 dead = false,
-                setup=function(s) layers.ground:add(s.image) end,
+                setup=function(s)
+                    layers.land_doodads_1:add(s.image)
+                    if type(o) == "table"  then
+                        recurse_and_apply(  s, o  )
+                        --s.image:raise_to_top()
+                    end
+                    if s.dead then
+                        local c = Clone{
+                            source     = imgs[building.."_d"],
+                            x          =  s.image.x,
+                            y          =  s.image.y,
+                            z_rotation = {s.image.z_rotation[1],0,0}
+                        }
+                        layers.land_doodads_1:add(c)
+                        s.image:unparent()
+                        s.image = c
+                    end
+                end,
                 render = function(s,secs)
                     s.image.y = s.image.y + lvlbg[3].speed*secs
                     if s.image.y > (screen_h + 2*imgs.building_1_1.h) then
@@ -592,15 +625,37 @@ lvlbg = {
                         remove_from_render_list(s)
                     end
                     if not s.dead then
-                        table.insert(b_guys_land,
-                            {
-                                obj = s,
-                                x1  = s.image.x,--/2,
-                                x2  = s.image.x+s.image.w,--/2,
-                                y1  = s.image.y,--/2,
-                                y2  = s.image.y+s.image.h,--/2,
-                            }
-                        )
+                        if s.image.z_rotation[1] == -90 then
+                            table.insert(b_guys_land,
+                                {
+                                    obj = s,
+                                    x1  = s.image.x,--/2,
+                                    x2  = s.image.x+s.image.h,--/2,
+                                    y1  = s.image.y-s.image.w,--/2,
+                                    y2  = s.image.y,--/2,
+                                }
+                            )
+                        elseif s.image.z_rotation[1] == 90 then
+                            table.insert(b_guys_land,
+                                {
+                                    obj = s,
+                                    x1  = s.image.x-s.image.h,--/2,
+                                    x2  = s.image.x,--/2,
+                                    y1  = s.image.y,--/2,
+                                    y2  = s.image.y+s.image.w,--/2,
+                                }
+                            )
+                        else
+                            table.insert(b_guys_land,
+                                {
+                                    obj = s,
+                                    x1  = s.image.x,--/2,
+                                    x2  = s.image.x+s.image.w,--/2,
+                                    y1  = s.image.y,--/2,
+                                    y2  = s.image.y+s.image.h,--/2,
+                                }
+                            )
+                        end
                     end
                 end,
                 collision = function( self , other )
@@ -610,7 +665,7 @@ lvlbg = {
                         y          =  self.image.y,
                         z_rotation = {self.image.z_rotation[1],0,0}
                     }
-                    layers.ground:add(c)
+                    layers.land_doodads_1:add(c)
                     self.image:unparent()
                     self.image = c
                     
@@ -631,10 +686,29 @@ lvlbg = {
                             )
                         )
                     end
-                end
+                end,
+                salvage = function(self)
+                    s = {
+                        func         = {"lvlbg",3,"add_building"},
+                        table_params = {building,x,y,z_rot, big_explo},
+                    }
+                    
+                    
+                    table.insert(s.table_params,
+                        {
+                            image = {
+                                y          =  self.image.y,
+                                z_rotation = {self.image.z_rotation[1],0,0}
+                            },
+                            dead = self.dead
+                        }
+                    )
+                    
+                return s
+            end,
             } )
     end,
-    add_dirt = function(dirt_i,x)
+    add_dirt = function(dirt_i,x,o)
         add_to_render_list( {
             c = Clone{
                 source = imgs["dirt_area_"..dirt_i],
@@ -643,6 +717,9 @@ lvlbg = {
             },
             setup = function(s)
                 layers.ground:add(s.c)
+                if type(o) == "table"  then
+                    recurse_and_apply(  s, o  )
+                end
             end,
             render = function(s,secs)
                 s.c.y = s.c.y + lvlbg[3].speed*secs
@@ -672,6 +749,7 @@ lvlbg = {
             
         } )
     end,
+    --]]
     append_to_queue = function(self,q)
         
         local q_i = 1
@@ -802,13 +880,13 @@ lvlbg = {
                         for _,new_child in ipairs(self.queues[self.q_i]) do
                             --dumptable(new_child)
                             if new_child.z_rotation == nil then
-                                new_child.z_rotation = {0,0,0}
+                                new_child.z_rotation = 0
                             end
                             frame:add(Clone{
                                 source       = _G[new_child.source[1]][new_child.source[2]],
                                 x            = new_child.x,
                                 y            = _G[new_child.source[1]][new_child.source[2]].h/2,
-                                z_rotation   = {new_child.z_rotation[1],0,0},
+                                z_rotation   = {new_child.z_rotation,0,0},
                                 anchor_point =
                                     {
                                         _G[new_child.source[1]][new_child.source[2]].w/2,
@@ -833,7 +911,6 @@ lvlbg = {
                             f(unpack(e.p))
                         end
                     end
-                    
                 end
             end
     end,
@@ -857,14 +934,13 @@ lvlbg = {
             table_params = {{ queues={}, top_doodad = self.top_doodad }}
         }
         local iii = 0
-        print("LEVEL 3333",self.q_i, #self.doodad_frames, self.append_i)
         for i = (self.q_i - #self.doodad_frames), self.append_i do
             s.table_params[1].queues[iii] = {}
             if type(self.queues[i]) == "table" then
                 for j = 1, #self.queues[i] do
                     s.table_params[1].queues[iii][j] = {}
                     s.table_params[1].queues[iii][j].x = self.queues[i][j].x
-                    s.table_params[1].queues[iii][j].z_rotation = self.queues[i][j].z_rotation
+                    s.table_params[1].queues[iii][j].z_rotation = 0-- self.queues[i][j].z_rotation
                     s.table_params[1].queues[iii][j].source = {
                         self.queues[i][j].source[1],
                         self.queues[i][j].source[2]
@@ -982,7 +1058,7 @@ function salvage_level_2(o)
     add_to_render_list(lvlbg[2],o.queues,o.top_doodad)
 end
 function salvage_level_3(o)
-    levels[3].num_bosses = o.num_bosses
+print("o shit")
     add_to_render_list(lvlbg[3],o.queues,o.top_doodad)
 end
 function salvage_level_4(o)
