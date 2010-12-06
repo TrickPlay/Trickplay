@@ -13,9 +13,10 @@ lvlbg = {
     speed         = 50, -- pixels per second
     doodad_list   = {},
     img_h         = nil,
-    image         = Image{src = "assets/lvls/bg_tiles/water1.png" },
+    image         = nil, 
     setup         = function( self )
-
+        
+        self.image = Image{src = "assets/lvls/bg_tiles/water1.png" }
         self.img_h = self.image.h
         self.image:set{
             tile   = {true, true},
@@ -205,10 +206,12 @@ lvlbg = {
         self.image.y = self.image.y + self.speed*seconds
         if self.image.y > 0 then
             self.image.y = self.image.y - self.img_h
+            print(self)
         end
     end,
     remove = function(self)
         self.image:unparent()
+        self.image = nil
         for k,v in pairs(self.doodad_list) do
             k.image:unparent()
         end
@@ -533,10 +536,8 @@ lvlbg = {
         if top_doodad then
             self.top_doodad = top_doodad
         else
-        print("me")
             self.top_doodad = -self.doodad_h
         end
-        print("wuurrrr")
         for i = 1, num_frames do
             g   =  Group{y=(num_frames - i)*(self.doodad_h-1)+self.top_doodad}
             table.insert( self.doodad_frames , g)
@@ -568,7 +569,6 @@ lvlbg = {
                 end
             end
         end
-        print("hurrrrr")
         if o ~= nil then
             print("num o",#o)
             for i = (self.q_i+1), #o do
@@ -591,7 +591,6 @@ lvlbg = {
         else
             self.append_i =self.q_i + 1
         end
-        print("donzoooo")
         layers.land_doodads_2:add(self.trees.l[1],self.trees.l[2],self.trees.r[1],self.trees.r[2])
     end,
     ---[[

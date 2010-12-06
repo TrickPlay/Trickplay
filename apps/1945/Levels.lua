@@ -608,12 +608,12 @@ levels =
         pier_turret = function(side)
             local x= 960
             if side == 1 then
-                x = imgs.dock_1_7.w - 70
+                x = imgs.dock_1_7.w - 50
             elseif side == -1 then
-                x = screen_w - imgs.dock_1_7.w + 70
+                x = screen_w - imgs.dock_1_7.w + 50
             else
             end
-            enemies.turret(x,0)
+            enemies.turret(x,-5)
         end,
         
         docked_b_ship = function(side)
@@ -685,7 +685,7 @@ levels =
                             {f={"levels",2,"pier_turret"}, p={1}}
                         }
                     },
-                    { self:add_harbor_tile(2,  1, h_reg), times=4},
+                    { self:add_harbor_tile(2,  1, h_reg), times=2},
                     { self:add_harbor_tile(2,  1, h_pier1),
                         enemies = {
                             {f={"levels",2,"docked_b_ship"}, p={1}}
@@ -693,7 +693,7 @@ levels =
                     },
                     { self:add_harbor_tile(2,  1, h_reg), times=4},
                     { self:add_harbor_tile(2,  1, h_pier1)},
-                    { self:add_harbor_tile(2,  1, h_reg), times=7},
+                    { self:add_harbor_tile(2,  1, h_reg), times=3},
                     { self:add_harbor_tile(2,  1, h_piert),
                         enemies = {
                             {f={"levels",2,"pier_turret"}, p={1}}
@@ -712,7 +712,7 @@ levels =
                           
                           
                     { self:add_harbor_tile(1,  1, h_open)},
-                    { self:add_harbor_tile(1,  1, h_reg), times=6},
+                    { self:add_harbor_tile(1,  1, h_reg), times=4},
                     { self:add_harbor_tile(1,  1, h_pier1),
                         enemies = {
                             {f={"levels",2,"docked_b_ship"}, p={1}}
@@ -801,7 +801,7 @@ levels =
                     },
                     { self:add_harbor_tile(2,  -1, h_reg), times=4},
                     { self:add_harbor_tile(2,  -1, h_pier1)},
-                    { self:add_harbor_tile(2,  -1, h_reg), times=10},
+                    { self:add_harbor_tile(2,  -1, h_reg), times=4},
                     { self:add_harbor_tile(2,  -1, h_pier2),
                         enemies = {
                             {f={"levels",2,"docked_b_ship"}, p={-1}}
@@ -820,7 +820,6 @@ levels =
                             {f = {"powerups","health"},      p = {1300}}
                         }
                     },
-                    { self:add_harbor_tile(1,  -1, h_reg), times=2},
                     { self:add_harbor_tile(1,  -1, h_pier2),
                         enemies = {
                             {f={"levels",2,"docked_b_ship"}, p={-1}}

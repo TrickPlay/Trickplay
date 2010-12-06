@@ -301,7 +301,7 @@ local keys = {
             formations.zig_zag(500,400,-30)
         end,
         [keys.u] = function()
-            add_to_render_list(enemies.turret(),500,-100)
+            enemies.turret(500,-100)
         end,
         [keys.i] = function()
             formations.hor_row_tanks(1,-200,3,150)
@@ -330,6 +330,9 @@ local keys = {
         end,
         [keys.v] = function()
             enemies.final_boss(false)
+        end,
+        [keys.a] = function()
+            add_to_render_list(wake(100,100))
         end,
         --powerups
         [keys.z] = function()

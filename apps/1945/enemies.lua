@@ -8,12 +8,137 @@
 
 
 --base images for clones
+points = function(x,y,num_points)
+
+
+                            add_to_render_list(
+                            {
+                                speed = 80,
+                                
+                                text = Text{font  = my_font,
+        text  = "+",
+        color = "FFFF00"},
+                                remove = function(self)
+                                    self.text:unparent()
+                                end,
+                                setup =
+                                
+                                    function( self )
+                                        self.text.text = "+"..num_points
+if state.hud.curr_score < 999990 then     
+	state.hud.curr_score = state.hud.curr_score+num_points
+    state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
+	if state.hud.curr_score > state.hud.high_score then
+		state.hud.high_score = state.hud.curr_score
+        if not state.set_highscore then
+            state.set_highscore = true
+            mediaplayer:play_sound("audio/Air Combat High Score.mp3")
+        end
+	end
+    --[[
+	if (state.hud.curr_score % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
+		number_of_lives = number_of_lives + 1
+		lives[number_of_lives].opacity =255
+		self.text = Clone{source=txt.up_life}
+	end
+    --]]
+	redo_score_text()
+end
+
+                                        self.text.position = { x , y }
+                                        
+                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
+                                        
+                                        self.text.opacity = 255;
+                                    
+                                        layers.planes:add( self.text )
+                                        
+                                    end,
+                                    
+                                render =
+                                
+                                    function( self , seconds )
+                                   -- print("aaaa")
+                                        local o = self.text.opacity - self.speed * seconds
+                                        
+                                        --local scale = self.text.scale
+                                        
+                                        --scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        
+                                        if o <= 0 then
+                                        
+                                            remove_from_render_list( self )
+                                            
+                                            self.text:unparent()
+                                        
+                                        else
+                                        
+                                            self.text.opacity = o
+                                            
+                                            --self.text.scale = scale
+                                        
+                                        end
+                                    
+                                    end,
+                            })
+
+end
+wake = 
+    function(x,y) return {
+        left  = Clone{ source = imgs.rear_wake },
+        right = Clone{ source = imgs.rear_wake },
+        g_l   = Group{clip={0,0,imgs.rear_wake.w/11,imgs.rear_wake.h}},
+        g_l_rot = Group{anchor_point = {imgs.rear_wake.w/11/2,imgs.rear_wake.h/2},x=10},
+        g_r   = Group{clip={0,0,imgs.rear_wake.w/11,imgs.rear_wake.h}},
+        g_r_rot = Group{anchor_point = {imgs.rear_wake.w/11/2,imgs.rear_wake.h/2},x=imgs.rear_wake.w/11-10},
+        group = Group{x=x-imgs.rear_wake.w/11/2,y=y},
+        speed = 80,
+        rot_speed = 20,
+        duration = 6, 
+        time = 0,
+        remove = function(self)
+            self.group:unparent()
+        end,
+        setup = function( self )
+            
+            self.group:add(self.g_l_rot,self.g_r_rot)
+            self.g_l_rot:add(self.g_l)
+            self.g_r_rot:add(self.g_r)
+            self.g_l:add(self.left)
+            self.g_r:add(self.right)
+            
+			layers.land_doodads_1:add( self.group )
+        end,
+                
+		render = function( self , seconds )
+			self.time = self.time + seconds
+			
+			if self.time > self.duration then
+					
+				remove_from_render_list( self )
+				self.group:unparent()
+					
+			else
+				local frame = math.floor( self.time /
+					( self.duration / 11 ) )
+				self.left.x = - ( ( self.left.w / 11 )
+					* frame )
+                self.g_l_rot.z_rotation = {self.g_l_rot.z_rotation[1]+self.rot_speed*seconds,0,0}
+                self.right.x = - ( ( self.right.w / 11 )
+					* frame )
+                self.g_r_rot.z_rotation = {self.g_r_rot.z_rotation[1]-self.rot_speed*seconds,0,0}
+                
+                self.group.y = self.group.y + self.speed*seconds
+			end
+        end,
+	} end
+
 explosions =
 {
 	big = function(x,y,dam_list) return {
         image = Clone{ source = imgs.explosion3 },
         group = nil,
-        duration = 0.3, 
+        duration = 0.5, 
         time = 0,
         remove = function(self)
             self.group:unparent()
@@ -56,6 +181,83 @@ explosions =
 				self.group:unparent()
 					
 			else
+				local frame = math.floor( self.time /
+					( self.duration / 7 ) )
+				self.image.x = - ( ( self.image.w / 7 )
+					* frame )
+			end
+            
+            if (not self.hit) and type(dam_list) == "table" then
+            --print("hhhheeeeerrrrreeee")
+                table.insert(b_guys_air,{
+                    obj=self,
+                    x1=x-( self.image.w / 7 ) / 2,
+                    x2=x+( self.image.w / 7 ) / 2,
+                    y1=y-self.image.h / 2,
+                    y2=y+self.image.h / 2,
+                })
+                
+            end
+        end,
+        collision = function( self , other )
+            
+			self.hit = true
+            
+		end	
+	} end,
+    delayed_big = function(x,y,delay) return {
+        image = Clone{ source = imgs.explosion3},
+        group = nil,
+        duration = 0.5, 
+        time = delay,
+        remove = function(self)
+            self.group:unparent()
+        end,
+        setup = function( self )
+            local timer = Timer{interval=-delay}
+            timer.on_timer = function(t)
+                t:stop()
+                t = nil
+                mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
+            end
+            timer:start()
+            
+            self.group = Group
+			{
+				size =
+				{
+					self.image.w / 7 ,
+					self.image.h
+				},
+				clip =
+				{
+					0 ,
+					0 ,
+					self.image.w / 7 ,
+					self.image.h
+				},
+				children = { self.image },
+				anchor_point =
+				{
+					( self.image.w / 7 ) / 2 ,
+					  self.image.h / 2
+				},
+                position = {x,y},
+			}
+            self.image.x = self.image.w / 7 
+                    
+			layers.planes:add( self.group )
+        end,
+        hit = false,
+		render = function( self , seconds )
+			self.time = self.time + seconds
+				
+			if self.time > self.duration then
+					
+				remove_from_render_list( self )
+				self.group:unparent()
+					
+			elseif self.time >= 0 then
 				local frame = math.floor( self.time /
 					( self.duration / 7 ) )
 				self.image.x = - ( ( self.image.w / 7 )
@@ -684,8 +886,9 @@ enemies =
         salvage_func = {"enemies","final_boss"},
         salvage_params = {is_boss},
         approach_speed = 70,
-        drop_speed = .3,
-        turn_speed = 8,
+        drop_speed  = 0,
+        drop_thresh = .3,
+        turn_speed = 5,
         x_speed = 15,
         y_speed = 5,
         group = Group{
@@ -755,6 +958,9 @@ enemies =
                 end
             end,
             function(self,secs)
+                if self.drop_speed < self.drop_thresh then
+                    self.drop_speed = self.drop_speed +secs/10
+                end
                 local scale = self.group.scale[1] - self.drop_speed * secs
                 self.group.scale={scale,scale}
                 self.group.x_rotation={self.group.x_rotation[1]+self.turn_speed*secs,0,0}
@@ -772,51 +978,66 @@ enemies =
                         levels[state.curr_level]:level_complete()
                     end
                     --]]
-                
+                    points(self.group.x,self.group.y,1000)
                 end
             end,
         },
         stage  = 1,
         overwrite_vars = {},
         special_check = function(self,other)
-local y_off = self.group.y - self.group.anchor_point[2]
-local x_off = self.group.x - self.group.anchor_point[1]
-
-local gg_sz = other.x2 - other.x1
-local wing_tip = 418
-local ass_hole = 272
-
---left side
-if (other.x2 <= (self.group.x + gg_sz)) and (other.x2 >= (self.group.x - self.image.w/2)) then
-
-if( (other.y1 - y_off)  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip) and
-   (other.y1 - y_off)  > ((- wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip)) or
-( (other.y2 - y_off)  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip) and
-   (other.y2 - y_off)  > ((- wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip)) 
- then
-
-	print("left wing hit!")
- self:collision(other,"gen")
-
-return true
-
-end
-
---right side
-elseif other.x1 >= (self.group.x - gg_sz) and other.x1 <= (self.group.x + self.image.w/2) then
-
-if ((other.y2 - y_off) < (wing_tip - ass_hole)/( self.image.w/2)*(other.x2- x_off) +wing_tip- 2*(wing_tip - ass_hole) and
-   (other.y2 - y_off)  > (wing_tip)/( self.image.w/2)*(other.x2- x_off) - wing_tip) or ((other.y1 - y_off) < (wing_tip - ass_hole)/( self.image.w/2)*(other.x1- x_off) +wing_tip- 2*(wing_tip - ass_hole) and
-   (other.y1 - y_off)  > (wing_tip)/( self.image.w/2)*(other.x1- x_off) - wing_tip) then
-
-	print("right wing hit!")
- self:collision(other,"gen")
-
-return true
-end
-
-end
-return false
+            local y_off = self.group.y - self.group.anchor_point[2]
+            local x_off = self.group.x - self.group.anchor_point[1]
+            
+            local gg_sz = other.x2 - other.x1
+            local wing_tip = 418
+            local ass_hole = 272
+            
+            
+            --left side
+            if
+                (other.x2 <= (self.group.x + gg_sz/2)) and
+                (other.x2 >= (self.group.x - self.image.w/2)) then
+                
+                if
+                    (other.y1 - y_off  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip)  and
+                    (other.y1 - y_off) > ((         - wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip)) then
+                
+                    self:collision(other.obj,"gen",{other.x1,other.y1})
+                    
+                    return true
+                
+                elseif
+                    (other.y2 - y_off  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip)  and
+                    (other.y2 - y_off) > ((         - wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip)) then
+                    
+                    self:collision(other.obj,"gen",{other.x2,other.y2})
+                    
+                    return true
+                    
+                end
+            --right side
+            elseif
+                other.x1 >= (self.group.x - gg_sz/2) and
+                other.x1 <= (self.group.x + self.image.w/2) then
+                
+                if
+                (other.y2 - y_off  < (wing_tip - ass_hole)/( self.image.w/2)*(other.x2- x_off) + wing_tip- 2*(wing_tip - ass_hole) and
+                (other.y2 - y_off) > (wing_tip           )/( self.image.w/2)*(other.x2- x_off) - wing_tip) then
+                
+                    self:collision(other.obj,"gen",{other.x2,other.y2})
+                    
+                    return true
+                
+                elseif
+                (other.y1 - y_off  < (wing_tip - ass_hole)/( self.image.w/2)*(other.x1- x_off) + wing_tip- 2*(wing_tip - ass_hole) and
+                (other.y1 - y_off) > (wing_tip           )/( self.image.w/2)*(other.x1- x_off) - wing_tip) then
+                    
+                    self:collision(other.obj,"gen",{other.x1,other.y1})
+                    
+                    return true
+                end
+            end
+            return false
         end,
         setup = function(self)
             self.prop.g_ll:add(self.prop.dead_ll,self.prop.img_ll)
@@ -948,7 +1169,7 @@ return false
             end
             
             if not self.dying then
-               -- self:rotate_guns_and_fire(secs)
+                self:rotate_guns_and_fire(secs)
             end
             self.stages[self.stage](self,secs)
             local x = self.group.x-self.group.anchor_point[1]
@@ -1003,14 +1224,14 @@ return false
             end
         end,
         health = {
-            ["prop_ll"] = 5,
-            ["prop_lr"] = 5,
-            ["prop_rl"] = 5,
-            ["prop_rr"] = 5,
-            ["gen"]     = 10
+            ["prop_ll"] = 10,
+            ["prop_lr"] = 10,
+            ["prop_rl"] = 10,
+            ["prop_rr"] = 10,
+            ["gen"]     = 50
         },
         damage_maxed = {
-["gen"] = function(self)
+            ["gen"] = function(self)
                 
             end,
 
@@ -1056,8 +1277,7 @@ return false
             end,
         },
         props_remaining = 4,
-        collision = function(self,other,loc)
-print(self.health[loc])
+        collision = function(self,other,loc,pos)
             if  self.health[loc] - 1  == 0 then
                 self.health[loc] = self.health[loc] - 1
                 
@@ -1067,10 +1287,26 @@ print(self.health[loc])
                     self.dying = true
                     self.stage = self.stage + 1
                     dolater( function() table.remove(special_checks) end)
-
+                    
                 end
             else
                 self.health[loc] = self.health[loc] - 1
+                if loc == "gen" then
+                    local x = self.group.x-self.group.anchor_point[1]
+                    local y = self.group.y-self.group.anchor_point[2]
+                    local i =math.random(1,7)
+                    local dam = Clone{source = imgs["z_d_"..i]}
+                    self.group:add(dam)
+                    if other.group ~= nil then
+                        dam.x = pos[1]-x--other.group.x - x
+                        dam.y = pos[2]-y - math.random(20,40)
+                    elseif other.image ~= nil then
+                        dam.x = pos[1]-x--other.image.x - x
+                        dam.y = pos[2]-y - math.random(20,40)
+                    else
+                        error("unexpected location given for final_boss impact")
+                    end 
+                end
             end
             
         end,
@@ -1293,6 +1529,7 @@ print(self.health[loc])
                 self.group.center[1],
                 self.group.center[2])
 			)
+            points(self.group.x,self.group.y,5)
 		end	
 	} end,
 	zeppelin  = function(x,o)
@@ -1310,7 +1547,8 @@ print(self.health[loc])
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 40,
 		attack_speed   = 15,
-		
+		drop_speed = .3,
+        turn_speed = 8,
 		
 		num_prop_frames = 3,
 		prop_index = 1,
@@ -1642,7 +1880,9 @@ print(self.health[loc])
                 function(z,secs) 
                 
                     move(z.group,z.attack_speed,secs)
-                    z:rotate_guns_and_fire(secs)
+                    if not self.dying then
+                        z:rotate_guns_and_fire(secs)
+                    end
                     --check if it left the screen
                     if z.group.y >= screen_h +
                         z.image.h then
@@ -1650,7 +1890,29 @@ print(self.health[loc])
                         remove_from_render_list(z)
                         
                     end
-                end
+                end,
+                function(self,secs)
+                    move(self.group,80,secs)
+                    local scale = self.group.scale[1] - self.drop_speed * secs
+                    self.group.scale={scale,scale}
+                    --self.group.x_rotation={self.group.x_rotation[1]+self.turn_speed*secs,0,0}
+                    if scale <= .1 then
+                        self.group:unparent()
+                        remove_from_render_list(self)
+                        add_to_render_list(
+                        explosions.splash(
+                            self.group.x,
+                            self.group.y
+                        )
+                        )
+                        ---[[
+                        if is_boss then
+                            levels[state.curr_level]:level_complete()
+                        end
+                        --]]
+                        points(self.group.x,self.group.y,50)
+                    end
+                end,
             }
             self.stage = 1
             if type(self.overwrite_vars) == "table"  then
@@ -1683,7 +1945,7 @@ print(self.health[loc])
 		
         
         
-        
+        dying = false,
         
 		render = function(self,seconds)
             if self.right_engine_dam > 1 then
@@ -1712,20 +1974,12 @@ print(self.health[loc])
 				self.num_prop_frames
 				
             if self.right_engine_dam > 2 and self.left_engine_dam > 2 then
-                self:rotate_guns_and_fire(seconds)
-                self.group.y = self.group.y + 60*seconds
                 self.prop.g_r.y = self.prop.g_r.y - 500*seconds
                 self.prop.g_r.x = self.prop.g_r.x + 200*seconds
                 self.prop.g_l.y = self.prop.g_l.y - 500*seconds
                 self.prop.g_l.x = self.prop.g_l.x - 200*seconds
-                if self.group.y >= screen_h +
-                        self.image.h then
-                        self.group:unparent()
-                        remove_from_render_list(self)
-                        
-                end
+
             elseif self.right_engine_dam > 2 then
-                self:rotate_guns_and_fire(seconds)
                 self.speed_x = self.speed_x + 2*seconds
                 if self.speed_x > 20 then
                     self.speed_x = 20
@@ -1734,98 +1988,54 @@ print(self.health[loc])
                 self.group.y = self.group.y + self.approach_speed*seconds
                 self.prop.g_r.y = self.prop.g_r.y - 500*seconds
                 self.prop.g_r.x = self.prop.g_r.x + 200*seconds
-                if self.group.y >= screen_h +
-                        self.image.h then
-                        self.group:unparent()
-                        remove_from_render_list(self)
-                        
-                end
+
             elseif self.left_engine_dam > 2 then
-                self:rotate_guns_and_fire(seconds)
                 self.speed_x = self.speed_x + 2*seconds
                 if self.speed_x > 20 then
                     self.speed_x = 20
                 end
                 self.group.x = self.group.x - self.speed_x*seconds
-                self.group.y = self.group.y + self.approach_speed*seconds
                 self.prop.g_l.y = self.prop.g_l.y - 500*seconds
                 self.prop.g_l.x = self.prop.g_l.x - 200*seconds
-                if self.group.y >= screen_h +
-                        self.image.h then
-                        self.group:unparent()
-                        remove_from_render_list(self)
-                        
-                    end
-            else
+                
+            end
                 --animate the zeppelin based on the current stage
                 self.stages[self.stage](self,seconds)
+            if not self.dying then
+                table.insert(b_guys_air,
+                    {
+                        obj = self,
+                        x1  = self.group.x+self.guns.g_l.x+3*self.guns.l.w/4,
+                        x2  = self.group.x+self.guns.g_r.x-3*self.guns.l.w/4-5,
+                        y1  = self.group.y+80,
+                        y2  = self.group.y+self.image.h-70,
+                        p   = 0,
+                    }
+                )
+                
+                
+                table.insert(b_guys_air,
+                    {
+                        obj = self,
+                        x1  = self.group.x+16,
+                        x2  = self.group.x+16+self.prop.l.w,
+                        y1  = self.group.y+252,
+                        y2  = self.group.y+260+self.prop.l.h,
+                        p   = 1,
+                    }
+                )
+                
+                table.insert(b_guys_air,
+                    {
+                        obj = self,
+                        x1  = self.group.x+180,
+                        x2  = self.group.x+180+self.prop.r.w,
+                        y1  = self.group.y+252,
+                        y2  = self.group.y+252+self.prop.r.h,
+                        p   = 2,
+                    }
+                )
             end
-			
-			--[[			--check for collisions
-            for i = 1,#self.bulletholes do
-                table.insert(bad_guys_collision_list,
-                {
-                    obj = self.bulletholes[i],
-                    x1  = self.group.x+self.bulletholes[i].image.x,
-                    x2  = self.group.x+self.bulletholes[i].image.x+self.bulletholes[i].image.w,
-                    y1  = self.group.y+self.bulletholes[i].image.y,
-                    y2  = self.group.y+self.bulletholes[i].image.y+self.bulletholes[i].image.h,
-                }
-
-            )
-            --]]
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.group.x+self.guns.g_l.x+3*self.guns.l.w/4,
-                    x2  = self.group.x+self.guns.g_r.x-3*self.guns.l.w/4-5,
-                    y1  = self.group.y+80,
-                    y2  = self.group.y+self.image.h-70,
-                    p   = 0,
-                }
-            )
-            
-            
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.group.x+16,
-                    x2  = self.group.x+16+self.prop.l.w,
-                    y1  = self.group.y+252,
-                    y2  = self.group.y+260+self.prop.l.h,
-                    p   = 1,
-                }
-            )
-            
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.group.x+180,
-                    x2  = self.group.x+180+self.prop.r.w,
-                    y1  = self.group.y+252,
-                    y2  = self.group.y+252+self.prop.r.h,
-                    p   = 2,
-                }
-            )
-            --[[
-			add_to_collision_list(
-                            
-				self,
-				{
-					self.group.x + self.group.w / 2 ,
-					self.group.y + self.group.h / 2
-				},
-				{
-					self.group.x + self.group.w / 2 ,
-					self.group.y + self.group.h / 2
-				},
-				{
-					self.group.w ,
-					self.group.h
-				},
-				TYPE_MY_BULLET
-                        )
-                        --]]
 		end,
 		salvage = function( self, salvage_list )
             
@@ -1911,6 +2121,7 @@ print(self.health[loc])
                         elseif self.left_engine_dam == 2 then
                             self.e_fire_l.opacity = 255
                         end
+                        self.attack_speed = self.approach_speed
                     elseif loc == 2 then
                         self.right_engine_dam = self.right_engine_dam + 1
                         if self.right_engine_dam == 1 then
@@ -1918,6 +2129,7 @@ print(self.health[loc])
                         elseif self.right_engine_dam == 2 then
                             self.e_fire_r.opacity = 255
                         end
+                        self.attack_speed = self.approach_speed
                     else
                         error("unexpected location given for zeppelin impact")
                     end
@@ -1954,6 +2166,7 @@ print(self.health[loc])
                         elseif self.left_engine_dam == 2 then
                             self.e_fire_l.opacity = 255
                         end
+                        self.attack_speed = self.approach_speed
                     elseif loc == 2 then
                         self.right_engine_dam = self.right_engine_dam + 1
                         if self.right_engine_dam == 1 then
@@ -1961,6 +2174,7 @@ print(self.health[loc])
                         elseif self.right_engine_dam == 2 then
                             self.e_fire_r.opacity = 255
                         end
+                        self.attack_speed = self.approach_speed
                     else
                         error("unexpected location given for zeppelin impact")
                     end
@@ -1994,28 +2208,15 @@ print(self.health[loc])
             
             state.counters[1].zepp.killed = state.counters[1].zepp.killed + 1
             
-			self.group:unparent()
-			remove_from_render_list( self )
+			--self.group:unparent()
+			--remove_from_render_list( self )
+            self.dying = true
+            self.stage = self.stage + 1
                         
 			-- Explode
             add_to_render_list(
 			explosions.big(
-			self.group.x+imgs.zepp.w/2-40,
-			self.group.y+imgs.zepp.h/2-70)
-			)
-            add_to_render_list(
-            explosions.big(
-			self.group.x+imgs.zepp.w/2-40,
-			self.group.y+imgs.zepp.h/2+70)
-			)
-            add_to_render_list(
-            explosions.big(
-			self.group.x+imgs.zepp.w/2+40,
-			self.group.y+imgs.zepp.h/2-70)
-			)
-            add_to_render_list(
-            explosions.big(
-			self.group.x+imgs.zepp.w/2+40,
+			self.group.x+imgs.zepp.w/2,
 			self.group.y+imgs.zepp.h/2+70)
 			)
 		end	
@@ -2168,6 +2369,7 @@ print(self.health[loc])
                     self.group.center[2]
                 )
 			)
+            points(self.group.x,self.group.y,10)
 		end,
         salvage = function( self, salvage_list )
             
@@ -2357,6 +2559,7 @@ print(self.health[loc])
                     self.image.y
                 )
 			)
+            points(self.image.x,self.image.y,10)
 		end,
         
         
@@ -2720,6 +2923,7 @@ print(self.health[loc])
                     self.group.center[2]
                 )
 			)
+            points(self.group.x,self.group.y,10)
 		end,
         
         salvage_func = {"enemies","tank"},
@@ -2860,6 +3064,7 @@ print(self.health[loc])
                     self.group.center[2]
                 )
 			)
+            points(self.group.x,self.group.y,1000)
 		end,
         salvage_params = {hor,xxx,y_offset},
         salvage = function( self, salvage_list )
@@ -2932,7 +3137,7 @@ print(self.health[loc])
             Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
             Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
             Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-        },
+        },--[[
         stern_wake =
         {
             Clone{source=imgs.stern_wake_1,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_1.h+40},
@@ -2940,7 +3145,7 @@ print(self.health[loc])
             Clone{source=imgs.stern_wake_3,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_3.h+40},
             Clone{source=imgs.stern_wake_4,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_4.h+40},
             Clone{source=imgs.stern_wake_5,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_5.h+40},
-        },
+        },--]]
 		b_w_i = 1,
         s_w_i = 1,
 		stage  = 0,	--the current stage the fighter is in
@@ -3174,7 +3379,7 @@ print(self.health[loc])
             self.group:add(Clone{source=imgs.laminar})
 			self.group:add(unpack(self.bow_wake_r))
             self.group:add(unpack(self.bow_wake_l))
-            self.group:add(unpack(self.stern_wake))
+            --self.group:add(unpack(self.stern_wake))
             --self.group:add(unpack(self.bow_wake_t))
 
 			self.group:add(
@@ -3215,6 +3420,9 @@ print(self.health[loc])
         
         wake_thresh = .1,
         last_wake_change = 0,
+        
+        s_wake_thresh = 1,
+        s_last_wake_change = 1,
 		
 		render = function(self,seconds)
 			
@@ -3226,15 +3434,22 @@ print(self.health[loc])
                 self.bow_wake_r[self.b_w_i].opacity=0
                 self.bow_wake_l[self.b_w_i].opacity=0
                 self.bow_wake_t[self.b_w_i%4+1].opacity=0
-                self.stern_wake[self.s_w_i].opacity=0
+                --self.stern_wake[self.s_w_i].opacity=0
                 self.b_w_i = self.b_w_i%(#self.bow_wake_r)+1
-                self.s_w_i = self.s_w_i%(#self.stern_wake)+1
+                --self.s_w_i = self.s_w_i%(#self.stern_wake)+1
                 self.bow_wake_r[self.b_w_i].opacity=255
                 self.bow_wake_l[self.b_w_i].opacity=255
                 self.bow_wake_t[self.b_w_i%4+1].opacity=255
-                self.stern_wake[self.s_w_i].opacity=255
+                --self.stern_wake[self.s_w_i].opacity=255
+                
+                end
+                self.s_last_wake_change = self.s_last_wake_change + seconds
+                if self.s_last_wake_change >= self.s_wake_thresh then
+                    add_to_render_list(wake(self.group.x+self.image.w/2,self.group.y+self.image.h-80))
+                    self.s_last_wake_change = 0
                 end
             end
+            
 			--animate the zeppelin based on the current stage
 			self.stages[self.stage](self,seconds)
             if not self.dead then
@@ -3266,18 +3481,39 @@ print(self.health[loc])
             -- Explode
             add_to_render_list(
                 explosions.big(
-                    self.group.center[1],
-                    self.group.center[2]
+                    self.group.center[1]-30,
+                    self.group.center[2]+20
                 )
 			)
-            
-			self.group:clear()
-			--remove_from_render_list( self )
-            self.image    = Clone{source=imgs.b_ship_sunk}
-            self.group:add(self.image)
+            add_to_render_list(
+                explosions.delayed_big(
+                    self.group.center[1]-30,
+                    self.group.center[2]+140,
+                    -.2
+                )
+			)
+            add_to_render_list(
+                explosions.delayed_big(
+                    self.group.center[1]-30,
+                    self.group.center[2]+220,
+                    -.4
+                )
+			)
+            local timer = Timer{interval=400}
             self.dead = true
-            self.moving = false
-            self.approach_speed = lvlbg[2].speed
+            timer.on_timer = function(t)
+                t:stop()
+                t = nil
+                
+                self.group:clear()
+                self.image    = Clone{source=imgs.b_ship_sunk}
+                self.group:add(self.image)
+                
+                self.moving = false
+                self.approach_speed = lvlbg[2].speed
+                points(self.group.x,self.group.y,60)
+            end
+			timer:start()
             
 		end,
         salvage = function( self, salvage_list )
@@ -3478,7 +3714,7 @@ print(self.health[loc])
 			self.approach_speed = speed
             
 			self.gun_group:add( self.gun_img )
-            self.group:add(Clone{source=imgs.laminar})
+            --self.group:add(Clone{source=imgs.laminar})
 			self.group:add(unpack(self.bow_wake_r))
             self.group:add(unpack(self.bow_wake_l))
             self.group:add(unpack(self.stern_wake))
@@ -3519,7 +3755,9 @@ print(self.health[loc])
         
         wake_thresh = .1,
         last_wake_change = 0,
-		
+		s_wake_thresh = 1,
+        s_last_wake_change = 1,
+        
 		render = function(self,seconds)
 			
             if self.moving then
@@ -3530,13 +3768,18 @@ print(self.health[loc])
                 self.bow_wake_r[self.b_w_i].opacity=0
                 self.bow_wake_l[self.b_w_i].opacity=0
                 self.bow_wake_t[self.b_w_i%4+1].opacity=0
-                self.stern_wake[self.s_w_i].opacity=0
+                --self.stern_wake[self.s_w_i].opacity=0
                 self.b_w_i = self.b_w_i%(#self.bow_wake_r)+1
-                self.s_w_i = self.s_w_i%(#self.stern_wake)+1
+                --self.s_w_i = self.s_w_i%(#self.stern_wake)+1
                 self.bow_wake_r[self.b_w_i].opacity=255
                 self.bow_wake_l[self.b_w_i].opacity=255
                 self.bow_wake_t[self.b_w_i%4+1].opacity=255
-                self.stern_wake[self.s_w_i].opacity=255
+                --self.stern_wake[self.s_w_i].opacity=255
+                end
+                self.s_last_wake_change = self.s_last_wake_change + seconds
+                if self.s_last_wake_change >= self.s_wake_thresh then
+                    add_to_render_list(wake(self.group.x+self.image.w/2,self.group.y+self.image.h-80))
+                    self.s_last_wake_change = 0
                 end
             end
 			--animate the zeppelin based on the current stage
@@ -3617,17 +3860,32 @@ print(self.health[loc])
 			-- Explode
             add_to_render_list(
 			explosions.big(
-			self.group.center[1],
-			self.group.center[2])
+			self.group.center[1]-30,
+			self.group.center[2]+40)
 			)
-            
-            self.group:clear()
-			--remove_from_render_list( self )
-            self.image    = Clone{source=imgs.dest_sunk}
-            self.group:add(self.image)
+
+            add_to_render_list(
+                explosions.delayed_big(
+                    self.group.center[1]-30,
+                    self.group.center[2]+130,
+                    -.2
+                )
+			)
+            local timer = Timer{interval=200}
             self.dead = true
-            self.moving = false
-            self.approach_speed = lvlbg[2].speed
+            timer.on_timer = function(t)
+                t:stop()
+                t = nil
+                
+                self.group:clear()
+                self.image    = Clone{source=imgs.dest_sunk}
+                self.group:add(self.image)
+                
+                self.moving = false
+                self.approach_speed = lvlbg[2].speed
+                points(self.group.x,self.group.y,30)
+            end
+			timer:start()
 		end,
         salvage = function( self, salvage_list )
             
@@ -3820,34 +4078,6 @@ formations =
         zepp.salvage_func = {"formations","zepp_boss"}
         zepp.group.y = -zepp.image.h
         zepp.is_boss = true
-        
-        zepp.stages =
-        {
-            -- enter screen at a slightly faster speed
-            function(z,secs)
-                
-                move(z.group,z.approach_speed,secs)
-                
-                if z.group.y >= -100 then
-                    z.stage = 2
-                end
-            end,
-            
-            -- slow down to attack speed and start shooting
-            function(z,secs) 
-            
-                move(z.group,z.attack_speed,secs)
-                z:rotate_guns_and_fire(secs)
-                --check if it left the screen
-                if z.group.y >= screen_h +
-                    z.image.h then
-                    z.group:unparent()
-                    remove_from_render_list(z)
-                    
-                end
-            end
-        }
-		zepp.stage = 1
 		
 		--add_to_render_list(zepp)
 		
