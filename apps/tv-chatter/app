@@ -3,7 +3,7 @@ app=
     id          = "com.trickplay.sudoku",
     release     = "2",
     version     = ".6",
-    name        = "Sudoku",
-    author      = "Trickplay, Jr.",
+    name        = "TV Chatter",
+    author      = "Francesco Alex Indaco",
     copyright   = "© Trickplay Inc."
 }
