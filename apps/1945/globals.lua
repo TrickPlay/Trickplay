@@ -165,8 +165,8 @@ imgs =
     --]]
     road_ver        = Image{ src = "assets/lvls/road/road-vertical.png"},
     road_hor        = Image{ src = "assets/lvls/road/road-horizontal.png"},
-    road_left          = Image{ src = "assets/lvls/road/road-left.png"},
-    road_right          = Image{ src = "assets/lvls/road/road-right.png"},
+    road_left       = Image{ src = "assets/lvls/road/road-left.png"},
+    road_right      = Image{ src = "assets/lvls/road/road-right.png"},
     building_sm     = Image{ src = "assets/lvls/buildings/building1.png"},
     building_1_1    = Image{ src = "assets/lvls/buildings/building1_1.png"},
     building_1_1_d  = Image{ src = "assets/lvls/buildings/building1_1_destroyed.png"},
@@ -186,6 +186,7 @@ imgs =
     my_prop         = Image{ src = "assets/player/player_prop.png"},
     target          = Image{ src = "assets/player/target_strip.png"},
     smoke           = Image{ src = "assets/fx/smoke.png"},
+    impact          = Image{ src = "assets/player/bullet_impact.png"},
     medal_1         = Image{ src = "assets/splash/WingmanMedal.png"},
     medal_1_sm      = Image{ src = "assets/splash/WingmanMedal_sm.png"},
     medal_2         = Image{ src = "assets/splash/PilotMedal.png"},
@@ -215,6 +216,7 @@ imgs =
     --DESTROYER ASSETS
     dest            = Image{ src = "assets/enemies/dest/destroyer.png"},
     dest_sunk       = Image{ src = "assets/enemies/dest/destroyer_sunk.png"},
+    rear_wake       = Image{ src = "assets/enemies/b_ship/stern_wake_strip.png"},
     --BATTLESHIP ASSETS
     b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
     b_ship_sunk     = Image{ src = "assets/enemies/b_ship/battleship_sunk.png" },

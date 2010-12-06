@@ -50,7 +50,9 @@ function remove_all_from_render_list( item )
     for k,v in pairs(render_list) do
         temp_list[#temp_list+1] = k
     end
+    
     local upper = #temp_list
+    
     for i = 1,upper do
         if temp_list[i].remove then  temp_list[i]:remove() end
         render_list[ temp_list[i] ] = nil

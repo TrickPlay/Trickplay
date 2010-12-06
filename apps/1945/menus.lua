@@ -112,6 +112,8 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         end,
         [keys.Return] = function()
             assert(index_to_be > 0 and index_to_be < 11)
+            local m = state.curr_level-1
+            if no_delay ~= nil then m = state.curr_level end
             table.insert(
                 state.high_scores,
                 index_to_be,
@@ -121,7 +123,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
                         menu.initials[1].text..
                         menu.initials[2].text..
                         menu.initials[3].text,
-                    medals=0
+                    medals=m
                 }
             )
             state.high_scores[#state.high_scores] = nil
@@ -291,7 +293,8 @@ Menu_High_Scores = Class(function(menu, ...)
     local highscores_num  = Text{text="1:\n2:\n3:\n4:\n5:\n6:\n7:\n8:",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
     local highscores_sc  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+400, y = screen_h/2-350}
     local highscores_ini  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-350}
-    menu.group:add(title,play_again,highscores_num,highscores_sc,highscores_ini,quit,arrow)
+    local medals = Group{x = screen_w/2+600}
+    menu.group:add(title,play_again,highscores_num,highscores_sc,highscores_ini,quit,arrow,medals)
     
     layers.splash:add(menu.group)
     menu.group:hide()
@@ -299,13 +302,18 @@ Menu_High_Scores = Class(function(menu, ...)
     local menu_index = 1
     
     function menu:animate_in()
-        
+        medals:clear()
         highscores_ini.text = ""
         highscores_sc.text = ""
         for i = 1,8 do
         print(i)
             highscores_ini.text = highscores_ini.text..state.high_scores[i].initials.."\n"
             highscores_sc.text  = highscores_sc.text..state.high_scores[i].score.."\n"
+            for j = 1,state.high_scores[i].medals do
+            print("gay")
+                medals:add(Clone{source=imgs["medals_"..j.."_sm"], x = 40*j, y = 100*(i-1)})
+            end
+            
         end
         menu_index       = 1
         menu.group:show()

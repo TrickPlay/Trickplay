@@ -1,3 +1,59 @@
+impact = function(x,y) add_to_render_list(
+{
+        image = Clone{ source = imgs.impact },
+        group = nil,
+        duration = 0.2, 
+        time = 0,
+        remove = function(self)
+            self.group:unparent()
+        end,
+        setup = function( self )
+            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            
+            self.group = Group
+			{
+				size =
+				{
+					self.image.w / 4 ,
+					self.image.h
+				},
+				clip =
+				{
+					0 ,
+					0 ,
+					self.image.w / 4 ,
+					self.image.h
+				},
+				children = { self.image },
+				anchor_point =
+				{
+					( self.image.w / 4 ) / 2 ,
+					  self.image.h / 2
+				},
+                position = {x,y},
+			}
+                    
+			layers.air_doodads_2:add( self.group )
+        end,
+                
+		render = function( self , seconds )
+			self.time = self.time + seconds
+				
+			if self.time > self.duration then
+					
+				remove_from_render_list( self )
+				self.group:unparent()
+					
+			else
+				local frame = math.floor( self.time /
+					( self.duration / 4 ) )
+				self.image.x = - ( ( self.image.w / 4 )
+					* frame )
+			end
+        end,
+}
+)
+end
 
 smoke = function(i,o)   return {
     index = i,
@@ -619,78 +675,6 @@ end,
                         self.image:unparent()
                         
                         -- Now, we create a score bubble
-                        
-                        local score =
-                            {
-                                speed = 80,
-                                
-                                text = Clone{ source = txt.score },
-                                
-                                setup =
-                                
-                                    function( self )
-                               
-if state.hud.curr_score < 999990 then     
-	state.hud.curr_score = state.hud.curr_score+10
-    
-    state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
-	if state.hud.curr_score > state.hud.high_score then
-		state.hud.high_score = state.hud.curr_score
-        if not state.set_highscore then
-            state.set_highscore = true
-            mediaplayer:play_sound("audio/Air Combat High Score.mp3")
-        end
-	end
-    --[[
-	if (point_counter % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
-		number_of_lives = number_of_lives + 1
-		lives[number_of_lives].opacity =255
-		self.text = Clone{source=txt.up_life}
-	end
-    --]]
-	redo_score_text()
-end
-
-                                        self.text.position = { location[ 1 ] + 30 , location[ 2 ] }
-                                        
-                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
-                                        
-                                        self.text.opacity = 255;
-                                    
-                                        layers.planes:add( self.text )
-                                        
-                                    end,
-                                remove = function(self)
-                                    self.text:unparent()
-                                end,
-                                render =
-                                
-                                    function( self , seconds )
-                                   -- print("aaaa")
-                                        local o = self.text.opacity - self.speed * seconds
-                                        
-                                        --local scale = self.text.scale
-                                        
-                                        --scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        
-                                        if o <= 0 then
-                                        
-                                            remove_from_render_list( self )
-                                            
-                                            self.text:unparent()
-                                        
-                                        else
-                                        
-                                            self.text.opacity = o
-                                            
-                                            --self.text.scale = scale
-                                        
-                                        end
-                                    
-                                    end,
-                            }
-                            
-                        add_to_render_list( score )
                     
                     end
             }
@@ -784,79 +768,7 @@ end
                         
                         self.image:unparent()
                         
-                        -- Now, we create a score bubble
-                        
-                        local score =
-                            {
-                                speed = 80,
-                                
-                                text = Clone{ source = txt.score },
-                                remove = function(self)
-                                    self.text:unparent()
-                                end,
-                                setup =
-                                
-                                    function( self )
-                               
-if state.hud.curr_score < 999990 then     
-	state.hud.curr_score = state.hud.curr_score+10
-    state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
-	if state.hud.curr_score > state.hud.high_score then
-		state.hud.high_score = state.hud.curr_score
-        if not state.set_highscore then
-            state.set_highscore = true
-            mediaplayer:play_sound("audio/Air Combat High Score.mp3")
-        end
-	end
-    --[[
-	if (state.hud.curr_score % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
-		number_of_lives = number_of_lives + 1
-		lives[number_of_lives].opacity =255
-		self.text = Clone{source=txt.up_life}
-	end
-    --]]
-	redo_score_text()
-end
-
-                                        self.text.position = { location[ 1 ] + 30 , location[ 2 ] }
-                                        
-                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
-                                        
-                                        self.text.opacity = 255;
-                                    
-                                        layers.planes:add( self.text )
-                                        
-                                    end,
-                                    
-                                render =
-                                
-                                    function( self , seconds )
-                                   -- print("aaaa")
-                                        local o = self.text.opacity - self.speed * seconds
-                                        
-                                        --local scale = self.text.scale
-                                        
-                                        --scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        
-                                        if o <= 0 then
-                                        
-                                            remove_from_render_list( self )
-                                            
-                                            self.text:unparent()
-                                        
-                                        else
-                                        
-                                            self.text.opacity = o
-                                            
-                                            --self.text.scale = scale
-                                        
-                                        end
-                                    
-                                    end,
-                            }
-                            
-                        add_to_render_list( score )
-                    
+                        -- Now, we create a score bubble          
                     end
             }
         
@@ -870,6 +782,9 @@ end
 
 if self.damage ~= (self.num_frames - 1) then
     self:hit()
+    if other.image ~= nil then
+        impact(other.image.x,other.image.y)
+    end
     mediaplayer:play_sound("audio/Air Combat Damaged Plane.mp3")
     return
 else
