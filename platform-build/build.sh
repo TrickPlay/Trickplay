@@ -484,7 +484,8 @@ echo "================================================================="
 echo "== Building libtpcore..."
 echo "================================================================="
 
-make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory && cp ${HERE}/tp-build/engine/libtpcore.* "${PREFIX}/lib/"
+make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory 
+make -C ${HERE}/tp-build --no-print-directory install
    
 #------------------------------------------------------------------------------
 # Build a test exe
@@ -496,8 +497,6 @@ echo "================================================================="
 ${CXX} -o ${HERE}/test \
     -g -Wall -fPIC \
     -L ${PREFIX}/lib \
-    -L ${HERE}/tp-build/engine \
-    -I ${THERE}/../engine/public/include \
     -I ${PREFIX}/include \
     -Wl,--start-group \
     -ltpcore \

@@ -460,5 +460,9 @@ target_link_libraries(
     dl
 )
 
+#------------------------------------------------------------------------------
+
+install( TARGETS tpcore ARCHIVE DESTINATION lib )
+install( DIRECTORY public/include/trickplay DESTINATION include )
 
 
