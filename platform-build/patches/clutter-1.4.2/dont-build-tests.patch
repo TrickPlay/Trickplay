@@ -1,0 +1,13 @@
+Index: clutter-1.4.2/Makefile.in
+===================================================================
+--- clutter-1.4.2.orig/Makefile.in	2010-12-06 12:50:56.924267838 -0800
++++ clutter-1.4.2/Makefile.in	2010-12-06 12:51:10.554878233 -0800
+@@ -367,7 +367,7 @@
+ QUIET_COMP_ = $(QUIET_COMP_$(AM_DEFAULT_VERBOSITY))
+ QUIET_COMP_0 = @echo '  GICOMP '$@;
+ NULL = 
+-SUBDIRS = build clutter tests doc po
++SUBDIRS = build clutter doc po
+ ACLOCAL_AMFLAGS = -I build/autotools
+ pcfiles = \
+ 	clutter-$(CLUTTER_API_VERSION).pc \

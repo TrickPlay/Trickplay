@@ -234,14 +234,24 @@ JSON_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disabl
 JSON_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
+# ATK
+
+ATK_MV="1.32"
+ATK_V="${ATK_MV}.0"
+ATK_URL="http://ftp.gnome.org/pub/gnome/sources/atk/${ATK_MV}/atk-${ATK_V}.tar.gz"
+ATK_DIST="atk-${ATK_V}.tar.gz"
+ATK_SOURCE="atk-${ATK_V}"
+ATK_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
 # clutter
 
-CLUTTER_MV="1.0"
-CLUTTER_V="${CLUTTER_MV}.8"
+CLUTTER_MV="1.4"
+CLUTTER_V="${CLUTTER_MV}.2"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
-CLUTTER_COMMANDS="ac_cv_lib_GLES_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal && make ${NUM_MAKE_JOBS} install" 
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no && make ${NUM_MAKE_JOBS} install" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG"
 
 #------------------------------------------------------------------------------
@@ -280,7 +290,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 
 #------------------------------------------------------------------------------
 
-ALL="GLIB SQLITE OPENSSL ZLIB CARES CURL BZIP EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON CLUTTER AVAHI UPNP URI UUID"
+ALL="GLIB SQLITE OPENSSL ZLIB CARES CURL BZIP EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK CLUTTER AVAHI UPNP URI UUID"
 
 #-----------------------------------------------------------------------------
 
@@ -492,6 +502,7 @@ ${CXX} -o ${HERE}/test \
     -Wl,--start-group \
     -ltpcore \
 	-ljson-glib-1.0 \
+	-latk-1.0 \
 	-lclutter-eglnative-1.0 \
 	-lavahi-core \
 	-lavahi-common \
@@ -552,7 +563,7 @@ then
     ln -s ${PREFIX}/lib ${HERE}/dynamic-shell/lib
 fi
 
-make -C ${HERE}/dynamic-shell ${NUM_MAKE_JOBS} --no-print-directory
+make -C ${HERE}/dynamic-shell --no-print-directory clean all
 
 
 

@@ -35,6 +35,7 @@ OBJS			= $(foreach src, $(SRCS), $(OBJ_DIR)/$(src:.c=.o))
 #=========================================================================
 INCLUDE_MODULE	=
 INCLUDE_MODULE	+= asprintf
+INCLUDE_MODULE	+= atk-1.0
 INCLUDE_MODULE	+= avahi-common
 INCLUDE_MODULE	+= avahi-core
 INCLUDE_MODULE	+= avahi-glib

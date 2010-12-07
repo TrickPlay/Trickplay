@@ -1,0 +1,31 @@
+Index: clutter-1.4.2/clutter/egl/clutter-backend-egl.c
+===================================================================
+--- clutter-1.4.2.orig/clutter/egl/clutter-backend-egl.c	2010-12-07 12:11:46.945411059 -0800
++++ clutter-1.4.2/clutter/egl/clutter-backend-egl.c	2010-12-07 12:16:58.554978117 -0800
+@@ -182,6 +182,17 @@
+ 
+   edpy = clutter_egl_display ();
+ 
++  status = eglGetConfigs (edpy,
++		      &config, 
++		      1, 
++		      &config_count);
++ 
++  if (status != EGL_TRUE || config_count == 0)
++  {
++    error_message = "Unable to get EGL config";    
++    goto fail;
++  }
++
+ /* XXX: we should get rid of this goto yukkyness, there is a fail:
+  * goto at the end and this retry: goto at the top, but we should just
+  * have a try_create_context() function and call it in a loop that
+@@ -381,6 +392,8 @@
+   g_set_error (error, CLUTTER_INIT_ERROR,
+                CLUTTER_INIT_ERROR_BACKEND,
+                "%s", error_message);
++               
++  g_critical( "EGL initialization failed : %s" , error_message );               
+ 
+   return FALSE;
+ }
