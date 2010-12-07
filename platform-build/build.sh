@@ -549,20 +549,15 @@ ${CXX} -o ${HERE}/test \
 rm -rf ${HERE}/test	
 
 #------------------------------------------------------------------------------
-# Build the LG dynamic shell
+# Build the LG addon
 
 echo "================================================================="
-echo "== Building dynamic shell..."
+echo "== Building addon..."
 echo "================================================================="
 
-if [[ ! -d ${HERE}/dynamic-shell ]] 
-then
-    cp -r ${THERE}/dynamic-shell ${HERE}/
-    ln -s ${THERE}/../engine/public/include/trickplay ${HERE}/dynamic-shell/include/trickplay
-    ln -s ${PREFIX}/lib ${HERE}/dynamic-shell/lib
-fi
-
-make -C ${HERE}/dynamic-shell --no-print-directory clean all
-
+make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean 
+make -C ${THERE}/lg-source/tp_addon/src TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
+mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/
+make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean
 
 

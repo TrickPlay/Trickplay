@@ -1,0 +1,19 @@
+#ifndef __TP_SETTINGS_H__
+#define __TP_SETTINGS_H__
+
+// DRM 복호화 한 app을 임시로 생성할 디렉토리
+#define TRICKPLAY_DRM_DECRYPTED_PATH	"/tmp/trickplay"
+// 사용할 font가 위치한 디렉토리
+#define TRICKPLAY_FONTS_PATH			"/mnt/lgfont"
+// 설정값 등의 데이터가 저장될 경로 (해당 디렉토리에 'trickplay' 서브 디렉토리 생성)
+#define TRICKPLAY_DATA_PATH				"/mnt/lg/cmn_data"
+// TRICKPLAY_APP_SOURCES에 지정된 디렉토리에서 app들을 검색할 것인지 여부
+#define TRICKPLAY_SCAN_APP_SOURCES		"1"
+
+// 스크린 너비. maximum width of graphics plane.
+#define TRICKPLAY_SCREEN_WIDTH			960
+// 스크린 높이. maximum height of graphics plane.
+#define TRICKPLAY_SCREEN_HEIGHT			540
+
+#endif
+
