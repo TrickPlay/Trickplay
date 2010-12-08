@@ -72,6 +72,7 @@ BettingController = Class(Controller, function(self, view, ...)
         [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
         [keys.Return] =
         function(self)
+           mediaplayer:play_sound(ENTER_MP3)
            if(PlayerGroups.BOTTOM == selected and SubGroups2.EXIT == subselection) then
                exit()
                return
@@ -142,6 +143,29 @@ BettingController = Class(Controller, function(self, view, ...)
        print("player.bet", player.bet)
        print("orig_money", orig_money)
        assert(player.money + player.bet == orig_money)
+
+       local function handle_bet_change()
+          if subselection == SubGroups.FOLD then
+             local old_money = player.money
+             player.bet, player.money = orig_bet, player.money+player.bet-orig_bet
+             print("subgroups.fold: player.money was $" .. old_money .. ", now $" .. player.money)
+          elseif subselection == SubGroups.CALL then
+             if call_bet <= player.bet+player.money then -- TODO gogogo.
+                local old_money = player.money
+                player.bet, player.money = call_bet, player.money+player.bet-call_bet
+             else
+                player.bet, player.money = player.bet+player.money, 0
+             end
+          elseif subselection == SubGroups.RAISE then
+             local bet = call_bet + min_raise
+             if call_bet < player.bet + player.money and player.bet + player.money < bet then
+                bet = player.bet+player.money
+             end
+             minRaiseBet = bet
+             player.bet, player.money = bet, player.bet+player.money-bet
+          end
+       end
+
        -- Change button
        if(0 ~= dir[1]) then
           local new_selected = subselection + dir[1]
@@ -154,32 +178,19 @@ BettingController = Class(Controller, function(self, view, ...)
           end
           if(PlayerGroups.TOP == selected) then
              if 1 <= new_selected and SubSize >= new_selected then
+                mediaplayer:play_sound(ARROW_MP3)
                 subselection = new_selected
-                if subselection == SubGroups.FOLD then
-                   local old_money = player.money
-                   player.bet, player.money = orig_bet, player.money+player.bet-orig_bet
-                   print("subgroups.fold: player.money was $" .. old_money .. ", now $" .. player.money)
-                elseif subselection == SubGroups.CALL then
-                   if call_bet <= player.bet+player.money then -- TODO gogogo.
-                      local old_money = player.money
-                      player.bet, player.money = call_bet, player.money+player.bet-call_bet
-                   else
-                      player.bet, player.money = player.bet+player.money, 0
-                   end
-                elseif subselection == SubGroups.RAISE then
-                   local bet = call_bet + min_raise
-                   if call_bet < player.bet + player.money and player.bet + player.money < bet then
-                      bet = player.bet+player.money
-                   end
-                   minRaiseBet = bet
-                   player.bet, player.money = bet, player.bet+player.money-bet
-                   mediaplayer:play_sound(CHANGE_BET_MP3)
-                end
+                handle_bet_change()
+             else
+                mediaplayer:play_sound(BONK_MP3)
              end
           elseif(PlayerGroups.BOTTOM == selected) then
              local new_selected = subselection + dir[1]
              if(1 <= new_selected and SubSize2 >= new_selected) then
-                 subselection = new_selected
+                subselection = new_selected
+                mediaplayer:play_sound(ARROW_MP3)
+             else
+                mediaplayer:play_sound(BONK_MP3)
              end
           else
              error("betting controller eff'd up")
@@ -220,9 +231,14 @@ BettingController = Class(Controller, function(self, view, ...)
                    text.anchor_point = {text.w/2, text.h/2}
                    screen:add(text)
                    Popup:new{group = text, time = 1000}
+                   mediaplayer:play_sound(BONK_MP3)
                 else
                    selected = new_selected
+                   handle_bet_change()
+                   mediaplayer:play_sound(ARROW_MP3)
                 end
+             else
+                mediaplayer:play_sound(BONK_MP3)
              end
           end
        end

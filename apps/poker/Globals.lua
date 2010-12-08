@@ -113,6 +113,11 @@ BUSTOUT_WAV = "assets/sounds/Bust out sound.mp3"
 FIRST_PLAYER_MP3 = "assets/sounds/barkpant.mp3"
 CHANGE_BET_MP3 = "assets/sounds/Chip Stack.mp3"
 
+-- System sounds
+ARROW_MP3 = "assets/sounds/arrow.mp3"
+BONK_MP3 = "assets/sounds/bonk.mp3"
+ENTER_MP3 = "assets/sounds/enter.mp3"
+
 local MYTURN_STRINGS = {"My turn!", "I'm up", "On me", "Hmmm", "Woof woof", "Me me me"}
 function GET_MYTURN_STRING()
    return MYTURN_STRINGS[math.random(#MYTURN_STRINGS)]
