@@ -184,6 +184,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
       [keys.Return] =
          function(self)
+            mediaplayer:play_sound(ENTER_MP3)
             if(CharacterSelectionCallbacks[selected][subselection]) then
                CharacterSelectionCallbacks[selected][subselection]()
             else
@@ -210,10 +211,14 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       return subselection
    end
 
+   --[[
+      Corrects for positions not on the grid
+   --]]
    local function check_for_valid(dir)
       if (CharacterSelectionGroups.TOP == selected) and
          (SubGroups.RIGHT == subselection) then
             subselection = SubGroups.RIGHT_MIDDLE 
+            return false
       elseif CharacterSelectionGroups.BOTTOM == selected then
          if(0 ~= dir[2]) then
             if(subselection >= SubGroups.MIDDLE) then
@@ -224,6 +229,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
                subselection = subselection + dir[1]
          end
       end
+      return true
    end
 
    function self:move_selector(dir)
@@ -232,17 +238,27 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          local new_selected = subselection + dir[1]
          if 1 <= new_selected and SubSize >= new_selected then
             subselection = new_selected
-            check_for_valid(dir)
+            if check_for_valid(dir) then
+               mediaplayer:play_sound(ARROW_MP3)
+            else
+               mediaplayer:play_sound(BONK_MP3)
+            end
+         else
+            mediaplayer:play_sound(BONK_MP3)
          end
       elseif 0 ~= dir[2] then
          if dir[2] == -1 and selected == CharacterSelectionGroups.BOTTOM and subselection == SubGroups.RIGHT_MIDDLE then
             selected = CharacterSelectionGroups.TOP
             subselection = SubGroups.MIDDLE
+            mediaplayer:play_sound(ARROW_MP3)
          else
             local new_selected = selected + dir[2]
             if 1 <= new_selected and GroupSize >= new_selected then
                selected = new_selected
                check_for_valid(dir)
+               mediaplayer:play_sound(ARROW_MP3)
+            else
+               mediaplayer:play_sound(BONK_MP3)
             end
          end
       end
