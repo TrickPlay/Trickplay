@@ -233,29 +233,6 @@ GameState = Class(nil,function(state, ctrl)
 --------------------- Functions ------------------
 
     local function check_top(x, y, z)
-    --[[
-        local matrix = {}
-        for i = 1,4 do
-            matrix[i] = {}
-            for j = 1,4 do
-                matrix[i][j] = true
-            end
-        end
-
-        for i = -1,1 do
-            for j = -1,1 do
-                if grid[x+i] and grid[x+i][y+j] and grid[x+i][y+j][z+1] then
-                    matrix[i+2][j+2] = false
-                    matrix[i+3][j+2] = false
-                    matrix[i+2][j+3] = false
-                    matrix[i+3][j+3] = false
-                end
-            end
-        end
-
-        return not (matrix[2][2] or matrix[2][3]
-                or matrix[3][2] or matrix[3][3])
-        --]]
         return grid[x][y][z+1]
                and grid[x+1] and grid[x+1][y] and grid[x+1][y][z+1]
                and grid[x][y+1] and grid[x][y+1][z+1]
@@ -461,7 +438,7 @@ GameState = Class(nil,function(state, ctrl)
             -- select the piece
             selected_tile = tile
             game_menu:add_tile_image(
-                Clone{source = tile.images[tiles_class:get_current_tile_image()]},
+                Clone{source = tile.images[tile.current][tile.height]},
                 Clone{source = tile.glyph})
             tile:show_green()
         elseif selection_grid[tile] and selected_tile
@@ -478,7 +455,7 @@ GameState = Class(nil,function(state, ctrl)
             gameloop:add(temp.focus.green, 600, nil, interval_2)
             
             game_menu:add_tile_image(
-                Clone{source = tile.images[tiles_class:get_current_tile_image()]},
+                Clone{source = tile.images[tile.current][tile.height]},
                 Clone{source = tile.glyph})
 
             ctrl:get_presentation():tile_bump(tile.group, temp.group)

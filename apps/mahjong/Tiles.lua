@@ -1,12 +1,29 @@
+--[[
 local tiles = {
     Image{src = "assets/tiles/TileMarbleLg.png", opacity = 0, name = "Marble"},
     Image{src = "assets/tiles/TileWoodLg.png", opacity = 0, name = "Wood"},
     Image{src = "assets/tiles/TilePlasticLg.png", opacity = 0, name = "Porcelain"},
 }
+--]]
+
+local tiles = {}
+for i = 1,3 do
+    tiles[i] = {}
+end
+
+for i = 0,4 do
+    tiles[1][i] = Image{src = "assets/tiles/m"..i..".png", opacity = 0, name = "m"..i}
+    tiles[2][i] = Image{src = "assets/tiles/w"..i..".png", opacity = 0, name = "w"..i}
+    tiles[3][i] = Image{src = "assets/tiles/p"..i..".png", opacity = 0, name = "p"..i}
+end
 
 TILE_IMAGES = tiles
 
-for i,image in ipairs(tiles) do screen:add(image) end
+for i,tbl in ipairs(tiles) do
+    for j = 0,4 do
+        screen:add(tbl[j])
+    end
+end
 
 Suits = {
     FIRST = 1,
@@ -68,7 +85,7 @@ for i = 1,4 do
     i = i + 1
 end
 
-local tile_depth = Image{src = "assets/tiles/TileDepthLg.png", opacity = 0}
+--local tile_depth = Image{src = "assets/tiles/TileDepthLg.png", opacity = 0}
 local tile_highlight_yellow = Image{
     src="assets/tiles/TileHighlightYellowLg.png",
     opacity = 0
@@ -81,12 +98,13 @@ local tile_highlight_green = Image{
     src="assets/tiles/TileHighlightGreenLg.png",
     opacity = 0
 }
-tile_shadow = Image{
+local tile_shadow = Image{
     src = "assets/tiles/shadow.png",
 --    opacity = 0
 }
 screen:add(
-    tile_depth, tile_highlight_yellow, tile_highlight_green, tile_highlight_red,
+    --tile_depth, tile_highlight_yellow, tile_highlight_green, tile_highlight_red,
+    tile_highlight_yellow, tile_highlight_green, tile_highlight_red,
     tile_shadow
 )
 
@@ -97,11 +115,17 @@ Tile = Class(function(tile, suit, number, ...)
         error("glyph["..suit.."]["..number.."] is not registered", 2)
     end
     
-    tile.images = {
-        Clone{source = tiles[1]},
-        Clone{source = tiles[2]},
-        Clone{source = tiles[3]}
-    }
+    tile.current = 2
+    tile.height = 1
+
+    tile.images = {}
+
+    for i = 1,3 do
+        tile.images[i] = {}
+        for j = 0,4 do
+            tile.images[i][j] = Clone{source = tiles[i][j]}
+        end
+    end
 
     tile.shadow = Clone{source = tile_shadow, position={8,10}, opacity = 178}
 
@@ -112,7 +136,7 @@ Tile = Class(function(tile, suit, number, ...)
         red = Clone{source = tile_highlight_red, x = -21, y = -27, opacity = 0},
         yellow = Clone{source = tile_highlight_yellow, x = -21, y = -27, opacity = 0}
     }
-    tile.depth = Clone{source = tile_depth}
+    --tile.depth = Clone{source = tile_depth}
 
     tile.number = number
     tile.suit = suit
@@ -127,18 +151,29 @@ Tile = Class(function(tile, suit, number, ...)
     tile.group = Group{}--clip = {0,0,tile.images[1].width,tile.images[1].height}}
     tile.tile_group = Group()
     tile.group:add(tile.shadow)
-    tile.tile_group:add(unpack(tile.images))
+    for i = 1,3 do
+        tile.tile_group:add(unpack(tile.images[i]))
+    end
     tile.tile_group:add(
-        tile.depth, tile.focus.green, tile.focus.yellow,
+        tile.focus.green, tile.focus.yellow, 
+        --tile.depth, tile.focus.green, tile.focus.yellow,
         tile.focus.red, tile.glyph
     )
     tile.group:add(tile.tile_group)
 
-    TILE_HEIGHT = tile.images[1].height
-    TILE_WIDTH = tile.images[1].width
+    --[[
+    TILE_HEIGHT = tile.images[1][1].height
+    TILE_WIDTH = tile.images[1][1].width
+    --]]
 
-    tile.images[1]:hide()
-    tile.images[3]:hide()
+    TILE_HEIGHT = Image{src = "assets/tiles/TileMarbleLg.png"}.h
+    TILE_WIDTH = Image{src = "assets/tiles/TileMarbleLg.png"}.w
+
+    for i = 1,3 do
+        for j = 0,4 do
+            tile.images[i][j]:hide()
+        end
+    end
 
     function tile:is_a_match(match)
         if tile == match then return false end
@@ -154,16 +189,21 @@ Tile = Class(function(tile, suit, number, ...)
         return false
     end
 
+    function tile:set_height(val)
+        val = Utils.clamp(0, val, 4)
+        tile.images[tile.current][tile.height]:hide()
+        tile.height = val
+        tile.images[tile.current][tile.height]:show()
+    end
+
     function tile:change_image(number)
         if number < 1 or number > #tile.images then
             error("tile image number must be between 1 and "..#tile.images, 2)
         end
 
-        for i,image in pairs(tile.images) do
-            if i == number then image:show()
-            else image:hide()
-            end
-        end
+        tile.images[tile.current][tile.height]:hide()
+        current_tile = number
+        tile.images[tile.current][tile.height]:show()
     end
 
     function tile:reset()

@@ -88,7 +88,8 @@ function(pres, ctrl)
             for i = 1,GRID_WIDTH do
                 for j = 1, GRID_HEIGHT do
                     if grid[i][j][k] then
-                        grid[i][j][k].depth.opacity = 255-255*((k-1)/4)
+                        --grid[i][j][k].depth.opacity = 255-255*((k-1)/4)
+                        grid[i][j][k]:set_height(k)
                     end
                 end
             end
