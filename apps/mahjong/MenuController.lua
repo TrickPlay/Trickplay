@@ -218,7 +218,11 @@ MenuController = Class(Controller,function(self, view, ...)
         end
 
         selection:callback()
-        mediaplayer:play_sound("assets/audio/enter.mp3")
+        if selection == Hint then
+            mediaplayer:play_sound("assets/audio/Hint.mp3")
+        else
+            mediaplayer:play_sound("assets/audio/enter.mp3")
+        end
     end
 
 end)
