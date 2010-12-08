@@ -233,6 +233,7 @@ GameState = Class(nil,function(state, ctrl)
 --------------------- Functions ------------------
 
     local function check_top(x, y, z)
+    --[[
         local matrix = {}
         for i = 1,4 do
             matrix[i] = {}
@@ -254,28 +255,24 @@ GameState = Class(nil,function(state, ctrl)
 
         return not (matrix[2][2] or matrix[2][3]
                 or matrix[3][2] or matrix[3][3])
+        --]]
+        return grid[x][y][z+1]
+               and grid[x+1] and grid[x+1][y] and grid[x+1][y][z+1]
+               and grid[x][y+1] and grid[x][y+1][z+1]
+               and grid[x+1][y+1] and grid[x+1][y+1][z+1]
     end
     local function check_right(x, y, z)
-        local matrix = {}
-        for i = 1,4 do
-            matrix[i] = {}
-            for j = 1,4 do
-                matrix[i][j] = true
-            end
-        end
+        return grid[x+2] and (grid[x+2][y] and (grid[x+2][y][z] or grid[x+2][y][z+1]))
+               and (grid[x+2][y+1] and (grid[x+2][y+1][z] or grid[x+2][y+1][z+1]))
     end
+
     local function check_bottom(x, y, z)
-        local matrix = {}
-        for i = 1,4 do
-            matrix[i] = {}
-            for j = 1,4 do
-                matrix[i][j] = true
-            end
-        end
+        return grid[x][y+2] and (grid[x][y+2][z] or grid[x][y+2][z+1])
+               and grid[x+2] and grid[x+2][y+2] and (grid[x+2][y+2][z]
+               or grid[x+2][y+2][z])
     end
 
     function state:find_drawn_tiles()
-    do return end
         for i = 1,GRID_WIDTH do
             for j = 1,GRID_HEIGHT do
                 for k = 1,GRID_DEPTH do
@@ -283,15 +280,7 @@ GameState = Class(nil,function(state, ctrl)
                     if grid[i][j][k] and (not grid[i-1]
                     or grid[i][j][k] ~= grid[i-1][j][k])
                     and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k]) then
-                        -- right side
-                        if grid[i+2] and (grid[i+2][j][k]
-                        or (grid[i+2][j-1] and grid[i+2][j+1]
-                        and grid[i+2][j-1][k] and grid[i+2][j+1][k]))
-                        -- bottom side
-                        and grid[i][j+2] and (grid[i][j+2][k] or grid[i-1]
-                        and grid[i-1][j+2] and grid[i-1][j+2][k]
-                        and grid[i+1][j+2][k])
-                        -- above
+                        if check_right(i, j, k) and check_bottom(i, j, k)
                         and check_top(i, j, k) then
                             grid[i][j][k].group:hide()
                         else
