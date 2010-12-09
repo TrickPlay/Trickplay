@@ -30,6 +30,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_hole_cards() return state:get_hole_cards() end
    function ctrl:get_player_bets() return state:get_player_bets() end
    function ctrl:get_pot() return state:get_pot() end
+   function ctrl:get_pots() return state:get_pots() end
+   function ctrl:are_side_pots() return #state:get_pots() > 1 end
    function ctrl:get_action() return state:get_action() end
    function ctrl:get_players() return state:get_players() end
    function ctrl:get_sb_qty() return state:get_sb_qty() end
