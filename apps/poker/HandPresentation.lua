@@ -100,36 +100,58 @@ HandPresentation = Class(nil,function(pres, ctrl)
    
    -- Animate all chips to center and add them to the pot
    local function animate_chips_to_center()
-      for _, player in pairs( ctrl:get_players() ) do
-         if player.betChips then
-            player.betChips.group:animate{
-               position = model.potchips.group.position,
-               duration=500,
-               mode="EASE_OUT_QUAD",
-               on_completed = function()
-                  local to_show_glow = player.betChips:value() > 0
-                  model.potchips:set( model.potchips:value() + player.betChips:value() )
-                  potText.text = "$"..model.potchips:value()
-
-                  -- flash the glow under the pot value text
-                  local function show_glow(x)
-                     if(x >= 6) then return end
-                     x = x + 1
-                     if(x%2 > 0) then
-                        pot_glow_img:animate{duration=300, opacity=255,
-                           on_completed = function() show_glow(x) end}
-                     else
-                        pot_glow_img:animate{duration=300, opacity=0,
-                           on_completed = function() show_glow(x) end}
-                     end
-                  end
-                  if to_show_glow then show_glow(0) end
-
-                  remove_player_chips(player)
+    --[[
+       local pots = ctrl:get_pots()
+       if #pots > 1 then
+           local pot_positions = {}
+           -- figure out positions for side pots
+           for i = 1,#pots do
+               pot_positions[i] = {}
+           end
+           --send chips to side pots
+           for i,pot in ipairs(pots) do
+               for player,contribution in pairs(pot.contributions) do
+                   remove_player_chips(player)
+                   local chips = chipCollection()
+                   chips.group.position = Utils.deepcopy(MDBL[player.table_position])
+                   chips:set(contribution)
+                   chips.group:animate{
+                   }
                end
-            }
-         end
-      end
+           end
+       else
+           --]]
+           for _, player in pairs( ctrl:get_players() ) do
+               if player.betChips then
+                   player.betChips.group:animate{
+                       position = model.potchips.group.position,
+                       duration=500,
+                       mode="EASE_OUT_QUAD",
+                       on_completed = function()
+                           local to_show_glow = player.betChips:value() > 0
+                           model.potchips:set( model.potchips:value() + player.betChips:value() )
+                           potText.text = "$"..model.potchips:value()
+
+                           -- flash the glow under the pot value text
+                           local function show_glow(x)
+                               if(x >= 6) then return end
+                                   x = x + 1
+                               if(x%2 > 0) then
+                                   pot_glow_img:animate{duration=300, opacity=255,
+                                   on_completed = function() show_glow(x) end}
+                               else
+                                   pot_glow_img:animate{duration=300, opacity=0,
+                                   on_completed = function() show_glow(x) end}
+                               end
+                           end
+                           if to_show_glow then show_glow(0) end
+
+                           remove_player_chips(player)
+                       end
+                   }
+               end
+           end
+       --end
    end
 
    -- Animate all chips to winner
