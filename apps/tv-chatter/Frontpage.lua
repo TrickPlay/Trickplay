@@ -15,8 +15,28 @@ local bottom_containers_y = title_card_y + title_card_h + 33
 
 
 --the group for the front page
-local fp_group = Group{}
+fp_group = Group{}
 screen:add(fp_group)
+
+do
+local bg = Canvas{size={screen_w,screen_h},x=0,y=0}
+bg:begin_painting()
+bg:move_to(0,0)
+bg:line_to(screen_w,0)
+bg:line_to(screen_w,screen_h)
+bg:line_to(0,screen_h)
+bg:line_to(0,0)
+
+bg:set_source_linear_pattern(
+	bg.w/2,0,
+	bg.w/2,bg.h
+)
+bg:add_source_pattern_color_stop( 0 , "000000" )
+bg:add_source_pattern_color_stop( 1 , "1A1A1A" )
+bg:fill(true)
+bg:finish_painting()
+fp_group:add(bg)
+end
 
 
 
@@ -47,7 +67,7 @@ end
 
 
 --Container for the Title Cards
-Titlecards_Bar = Class(function(self,parent,...)
+local Titlecards_Bar = Class(function(self,parent,...)
     local group   = Group{x=gutter_sides, y = title_card_y}
     local title   = Image{src="assets/recents.png"}
     local tiles   = Group{}
@@ -64,7 +84,8 @@ Titlecards_Bar = Class(function(self,parent,...)
             title_card_h
         }
     }
-    local focus   = Rectangle{w=title_card_w+20,h=title_card_h+20,color="#FFFFFF",y=clip.y-10,x=-10}
+    local focus   = Image{src="assets/tile-focus.png",y=clip.y-2,x=-3}
+    --Rectangle{w=title_card_w+20,h=title_card_h+20,color="#FFFFFF",y=clip.y-10,x=-10}
     clip:add(tiles)
     group:add(focus,title,clip)
     fp_group:add(group)
@@ -94,7 +115,7 @@ Titlecards_Bar = Class(function(self,parent,...)
                 tiles.x = -(list_i -1)*(title_card_w+title_card_spacing)
             else
                 vis_loc = vis_loc - 1
-                focus.x = (vis_loc-1)*(title_card_w+title_card_spacing) - 10
+                focus.x = (vis_loc-1)*(title_card_w+title_card_spacing) - 3
             end
             fp.tweetstream:display(bar_items[list_i])
         end
@@ -107,7 +128,7 @@ Titlecards_Bar = Class(function(self,parent,...)
                 tiles.x = -(list_i - max_on_screen)*(title_card_w+title_card_spacing)
             else
                 vis_loc = vis_loc + 1
-                focus.x = (vis_loc-1)*(title_card_w+title_card_spacing) - 10
+                focus.x = (vis_loc-1)*(title_card_w+title_card_spacing) - 3
             end
             fp.tweetstream:display(bar_items[list_i])
         end
@@ -118,10 +139,18 @@ Titlecards_Bar = Class(function(self,parent,...)
         self:lose_focus()
         fp.listings_container:receive_focus()
     end
+    function self:enter()
+        focus = "sp"
+        fp_group:hide()
+        sp_group:show()
+        bar_items[list_i].tweetstream:get_group():unparent()
+        bar_items[list_i].tweetstream:out_view()
+        sp.tweetstream:display(bar_items[list_i])
+    end
 end)
 
 --Container for the Listings
-Listings = Class(function(self,...)
+local Listings = Class(function(self,...)
 
     local listing_h           = 69
     
@@ -133,6 +162,7 @@ Listings = Class(function(self,...)
     local title    = Image{src="assets/listings.png"}
    
     local bg = make_bg(704,592,   0,title.h+5)
+    local border_w = 1
     
     local rules = Canvas{size={bg.w,bg.h-23*2},x=0,y=bg.y+23}
           rules:begin_painting()
@@ -168,7 +198,7 @@ Listings = Class(function(self,...)
     local listings = {}
     local listings_clip = Group
     {
-        y    = bg_unsel.y+23,
+        y    = bg.y+23,
         clip = { 2, 0,  bg.w-5, bg.h-23*2}
     }
     local listings_g = Group{}
@@ -261,8 +291,8 @@ Listings = Class(function(self,...)
     
     
     function self:receive_focus()
-        bg_sel.opacity   = 255
-        bg_unsel.opacity = 0
+        --bg_sel.opacity   = 255
+        --bg_unsel.opacity = 0
         
         if #listings > 0 then
             focus_o.opacity=255
@@ -273,8 +303,8 @@ Listings = Class(function(self,...)
         fp.tweetstream:display(listings[list_i].obj)
     end
     function self:lose_focus()
-        bg_sel.opacity   = 0
-        bg_unsel.opacity = 255
+        --bg_sel.opacity   = 0
+        --bg_unsel.opacity = 255
         
         if #listings > 0 then
             focus_o.opacity=0
@@ -283,9 +313,7 @@ Listings = Class(function(self,...)
             listings[list_i].tv_station.color = TV_Station_Color
         end
     end
-    function rgb(r,g,b)
-        return
-    end
+    
     local highlight_timeline = nil
     function self:move_highlight_to(old_i,new_i)
         focus_n.y = (new_i-1)*listing_h
@@ -371,6 +399,14 @@ Listings = Class(function(self,...)
                 end
             end
         else
+            if highlight_timeline ~= nil then
+                highlight_timeline:stop()
+                highlight_timeline:on_completed()
+            end
+            if move_timeline ~= nil then
+                move_timeline:stop()
+                move_timeline:on_completed()
+            end
             fp.focus = "TITLECARDS"
             self:lose_focus()
             fp.title_card_bar:receive_focus()
@@ -398,12 +434,27 @@ Listings = Class(function(self,...)
         end
     end
 
-    
+    function self:enter()
+        if highlight_timeline ~= nil then
+            highlight_timeline:stop()
+            highlight_timeline:on_completed()
+        end
+        if move_timeline ~= nil then
+            move_timeline:stop()
+            move_timeline:on_completed()
+        end
+        focus = "sp"
+        fp_group:hide()
+        sp_group:show()
+        listings[list_i].obj.tweetstream:get_group():unparent()
+        listings[list_i].obj.tweetstream:out_view()
+        sp.tweetstream:display(listings[list_i].obj)
+    end
     
 end)
 
 --Container for the TweetStream
-TweetStream = Class(function(self,...)
+local TweetStream_Container = Class(function(self,...)
     
     local group = Group
     {
@@ -416,14 +467,15 @@ TweetStream = Class(function(self,...)
     local Show_Name_Color = "#FFFFFF"
     local Show_Desc_Font  = Show_Time_Font
     local Show_Desc_Color = Show_Time_Color
-    local streams = {}
+    local Curr_Tweet_List = {}
+    --local max_tweets_in_list = 4
+    
     
     local bg = make_bg(1086,592,   0,title.h+22)
-    local bg = Canvas{size={1086,592},x=0,y=title.h+22}
+    --local bg = Canvas{size={1086,592},x=0,y=title.h+22}
 
-    
+    --local tweet_clip = Group{clip={0,0,bg.w-368,bg.h-127},x=366,y=bg.y+125}
     local top_rule    = Image{src="assets/object_tweetstream_top_Shadow.png",x = 366, y=bg.y+123}
-    local side_shadow = Image{src="assets/object_tweetstream_side_Shadow.png",x = 348, y=bg.y+1}
     local bottom_rule = Image{src="assets/object_tweetstream_bottom_Shadow.png",x=346}
     bottom_rule.y = bg.y + bg.h - bottom_rule.h-2
     
@@ -458,12 +510,30 @@ TweetStream = Class(function(self,...)
     }
     local add_image = nil
     show_time.x = show_time.x - show_time.w
-    group:add(bg,title,show_name,show_desc,tv_station,show_time,top_rule,side_shadow,bottom_rule)
+    group:add(bg,title,show_name,show_desc,tv_station,show_time,top_rule,bottom_rule)
     fp_group:add(group)
     
-    
+    local curr_obj = nil
     function self:display(show_obj)
-        
+        --[[
+        if curr_obj ~= nil then
+            for i = 1,#curr_obj.tweet_g_cache do
+                curr_obj.tweet_g_cache[i].group:unparent()
+            end
+        end
+        --]]
+        if curr_obj ~= nil then
+            curr_obj.tweetstream:get_group():unparent()
+            curr_obj.tweetstream:out_view()
+        end
+        curr_obj = show_obj
+        --[[
+        if curr_obj ~= nil then
+            for i = 1,#curr_obj.tweet_g_cache do
+                tweet_clip:add(curr_obj.tweet_g_cache[i].group)
+            end
+        end
+        --]]
         show_name.text  = show_obj.show_name
         show_desc.text  = show_obj.show_desc
         
@@ -485,6 +555,38 @@ TweetStream = Class(function(self,...)
             add_image.y = bg.y+1
             add_image.x = 2
             group:add(add_image)
+            --tweet_clip.clip = {0,0,bg.w-368,bg.h-127}
+            --tweet_clip.x    = 366
+            show_name.x     = 366
+            show_desc.x     = 366
+            top_rule.x      = 366
+            if curr_obj ~= nil then
+                curr_obj.tweetstream:set_w(bg.w-368)
+                curr_obj.tweetstream:set_h(bg.h-127-30)
+                curr_obj.tweetstream:set_pos(366,bg.y+125+15)
+                group:add( curr_obj.tweetstream:get_group() )
+                --for i = 1,#curr_obj.tweet_g_cache do
+                --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
+                --end
+                curr_obj.tweetstream:in_view()
+                
+            end
+        else
+            --tweet_clip.clip = {0,0,bg.w-30,bg.h-127}
+            --tweet_clip.x    = 15
+            show_name.x     = 15
+            show_desc.x     = 15
+            top_rule.x      = 150
+            if curr_obj ~= nil then
+                curr_obj.tweetstream:set_w(bg.w-30)
+                curr_obj.tweetstream:set_h(bg.h-127-30)
+                curr_obj.tweetstream:set_pos(15,bg.y+125+15)
+                group:add( curr_obj.tweetstream:get_group() )
+                --for i = 1,#curr_obj.tweet_g_cache do
+                --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
+                --end
+                curr_obj.tweetstream:in_view()
+            end
         end
     end
 end)
@@ -493,7 +595,7 @@ end)
 fp={
     title_card_bar     = Titlecards_Bar(),
     listings_container = Listings(),
-    tweetstream        = TweetStream(),
+    tweetstream        = TweetStream_Container(),
     focus              = "TITLECARDS",
     keys = {
         ["LISTINGS"] = {
@@ -502,6 +604,9 @@ fp={
             end,
             [keys.Up] = function()
                 fp.listings_container:up()
+            end,
+            [keys.Return] = function()
+                fp.listings_container:enter()
             end,
         },
         ["TITLECARDS"] = {
@@ -513,6 +618,9 @@ fp={
             end,
             [keys.Right] = function()
                 fp.title_card_bar:right()
+            end,
+            [keys.Return] = function()
+                fp.title_card_bar:enter()
             end,
         }
     }
