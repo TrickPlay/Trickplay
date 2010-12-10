@@ -201,7 +201,7 @@ local function start()
     
     function idle:on_idle( seconds )
     
-        sweeper.x = sweeper.x + 1
+        sweeper.x = sweeper.x + 2
         
         frames = frames + 1
         
@@ -214,15 +214,16 @@ local function start()
             
                 print( "" )
                 print( "PLEASE NOTE the clutter version (/ver) and whether profiling is enabled (/prof)" )
-                print( "TRICKPLAY VERSION: "..tv )
-                print( "BENCHMARK VERSION: "..md5( readfile( "main.lua" ) ) )
+                print( "TRICKPLAY VERSION  : "..tv )
+                print( "BENCHMARK VERSION  : "..md5( readfile( "main.lua" ) ) )
+                print( "DISPLAY DIMENSIONS : "..string.format( "%dx%d" , screen.display_size[1] , screen.display_size[2] ) )
                 print( "" )
-                print( "#\tticks\tactors\tframes\ts\tfps" )
+                print( "#\ttick %\tactors\tframes\ts\tfps" )
             end
             
             print( string.format( "%d\t%d\t%d\t%d\t%2.3f\t%d" ,
                 iteration,
-                ticks,
+                math.ceil( ticks / ( total.elapsed / timer.interval ) * 100 ),
                 actors,
                 frames ,
                 total.elapsed_seconds ,
