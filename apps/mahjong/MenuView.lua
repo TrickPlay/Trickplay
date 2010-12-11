@@ -300,7 +300,7 @@ MenuView = Class(View, function(view, model, ...)
             error("something went wrong")
         end
 
-        tile_text.text = TILE_IMAGES[number].name
+        tile_text.text = TILE_NAMES[number]
         tile_text.anchor_point = {tile_text.width/2, tile_text.height/2}
     end
 

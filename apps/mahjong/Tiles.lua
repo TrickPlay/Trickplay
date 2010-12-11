@@ -12,12 +12,13 @@ for i = 1,3 do
 end
 
 for i = 0,4 do
-    tiles[1][i] = Image{src = "assets/tiles/m"..i..".png", opacity = 0, name = "m"..i}
-    tiles[2][i] = Image{src = "assets/tiles/w"..i..".png", opacity = 0, name = "w"..i}
-    tiles[3][i] = Image{src = "assets/tiles/p"..i..".png", opacity = 0, name = "p"..i}
+    tiles[1][4-i] = Image{src = "assets/tiles/m"..i..".png", opacity = 0, name = "m"..i}
+    tiles[2][4-i] = Image{src = "assets/tiles/w"..i..".png", opacity = 0, name = "w"..i}
+    tiles[3][4-i] = Image{src = "assets/tiles/p"..i..".png", opacity = 0, name = "p"..i}
 end
 
 TILE_IMAGES = tiles
+TILE_NAMES = {"Marble", "Wood", "Porcelain"}
 
 for i,tbl in ipairs(tiles) do
     for j = 0,4 do
@@ -202,7 +203,7 @@ Tile = Class(function(tile, suit, number, ...)
         end
 
         tile.images[tile.current][tile.height]:hide()
-        current_tile = number
+        tile.current = number
         tile.images[tile.current][tile.height]:show()
     end
 
