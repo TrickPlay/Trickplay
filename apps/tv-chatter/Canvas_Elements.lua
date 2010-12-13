@@ -53,3 +53,46 @@ make_bg = function(w,h,x,y)
     bg:finish_painting()
     return bg
 end
+
+make_bg_mini = function(w,h,x,y)
+    local bg = Canvas{size={w,h},x=x,y=y}
+    
+    
+    local top    = 0    
+	local bottom = bg.h
+	local left   = 0    
+	local right  = bg.w
+    bg:begin_painting()
+    bg:move_to(left+r,top)
+    bg:line_to(right-r,top)
+    bg:curve_to(
+        right, top,
+        right, top,
+        right, top+r
+    )
+    bg:line_to(right,bottom-r)
+    bg:curve_to(
+        right,   bottom,
+        right,   bottom,
+        right-r, bottom
+    )
+    bg:line_to(left+r,bottom)
+    bg:curve_to(
+        left, bottom,
+        left, bottom,
+        left, bottom-r
+    )
+    bg:line_to(left,top+r)
+    bg:curve_to(
+        left,   top,
+        left,   top,
+        left+r, top
+    )
+
+    
+    bg:set_source_color( bg_color.."D0" )
+    bg:fill(true)
+    
+    bg:finish_painting()
+    return bg
+end

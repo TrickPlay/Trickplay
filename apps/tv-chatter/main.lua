@@ -28,6 +28,7 @@ dofile("Objects.lua")   --Defines 'ShowObject'
 dofile("Frontpage.lua") --Layout and key handler for the front page
 dofile("TweetStream.lua")
 dofile("Showpage.lua")
+dofile("Minipage.lua")
 
 
 
@@ -60,7 +61,7 @@ tv_show[1] = ShowObject(
 tv_show[2] = ShowObject(
         "assets/titlecards/tile_dexter.png",
         "Dexter",
-        "Murderin'",
+        "Darkly Dreaming Dexter",
         "SHO 240",
         "Sunday 9pm",
         "assets/posters/banner_dexter.png",
@@ -91,7 +92,7 @@ tv_show[4] = ShowObject(
 tv_show[5] = ShowObject(
         "assets/titlecards/tile_sons_of_anarchy.png",
         "Sons of Anarchy",
-        "Vrooom...",
+        "On the road again.",
         "FX 24",
         "Tonight 10pm",
         "assets/posters/banner_sons_of_anarchy.png",
@@ -121,7 +122,7 @@ tv_show[7] = ShowObject(
 tv_show[8] = ShowObject(
         "assets/titlecards/tile_outsourced.png",
         "Outsourced",
-        "They tuk r jerbs!!",
+        "Jobless",
         "NBC 3",
         "Thursday 9:30pm",
         "assets/posters/banner_outsourced.png",
@@ -140,10 +141,9 @@ end
 fp.title_card_bar:receive_focus()
 
 --key handler
-focus = "fp"
+page = "fp"
 function screen:on_key_down(key)
-    if  _G[focus].keys[  _G[focus].focus  ][key] then
-    print("h")
-        _G[focus].keys[  _G[focus].focus  ][key]()
+    if  _G[page].keys[  _G[page].focus  ][key] then
+        _G[page].keys[  _G[page].focus  ][key]()
     end
 end

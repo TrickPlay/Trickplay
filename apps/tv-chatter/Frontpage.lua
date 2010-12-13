@@ -140,12 +140,13 @@ local Titlecards_Bar = Class(function(self,parent,...)
         fp.listings_container:receive_focus()
     end
     function self:enter()
-        focus = "sp"
+        page = "sp"
         fp_group:hide()
         sp_group:show()
         bar_items[list_i].tweetstream:get_group():unparent()
         bar_items[list_i].tweetstream:out_view()
         sp.tweetstream:display(bar_items[list_i])
+        bar_items[list_i].tweetstream:receive_focus()
     end
 end)
 
@@ -443,12 +444,13 @@ local Listings = Class(function(self,...)
             move_timeline:stop()
             move_timeline:on_completed()
         end
-        focus = "sp"
+        page = "sp"
         fp_group:hide()
         sp_group:show()
         listings[list_i].obj.tweetstream:get_group():unparent()
         listings[list_i].obj.tweetstream:out_view()
         sp.tweetstream:display(listings[list_i].obj)
+        listings[list_i].obj.tweetstream:receive_focus()
     end
     
 end)
@@ -473,7 +475,8 @@ local TweetStream_Container = Class(function(self,...)
     
     local bg = make_bg(1086,592,   0,title.h+22)
     --local bg = Canvas{size={1086,592},x=0,y=title.h+22}
-
+    local wallpaper = Image{src="assets/fp_tweetstream_container.png",y=title.h+22}
+    
     --local tweet_clip = Group{clip={0,0,bg.w-368,bg.h-127},x=366,y=bg.y+125}
     local top_rule    = Image{src="assets/object_tweetstream_top_Shadow.png",x = 366, y=bg.y+123}
     local bottom_rule = Image{src="assets/object_tweetstream_bottom_Shadow.png",x=346}
@@ -510,7 +513,7 @@ local TweetStream_Container = Class(function(self,...)
     }
     local add_image = nil
     show_time.x = show_time.x - show_time.w
-    group:add(bg,title,show_name,show_desc,tv_station,show_time,top_rule,bottom_rule)
+    group:add(bg,wallpaper,title,show_name,show_desc,tv_station,show_time,top_rule,bottom_rule)
     fp_group:add(group)
     
     local curr_obj = nil
@@ -562,7 +565,7 @@ local TweetStream_Container = Class(function(self,...)
             top_rule.x      = 366
             if curr_obj ~= nil then
                 curr_obj.tweetstream:set_w(bg.w-368)
-                curr_obj.tweetstream:set_h(bg.h-127-30)
+                curr_obj.tweetstream:set_h(bg.h-127-20)
                 curr_obj.tweetstream:set_pos(366,bg.y+125+15)
                 group:add( curr_obj.tweetstream:get_group() )
                 --for i = 1,#curr_obj.tweet_g_cache do

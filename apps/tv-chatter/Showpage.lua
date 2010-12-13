@@ -82,16 +82,19 @@ do
         color        = "#00000000",
         border_color = "#B9B9B9FF"
     }
-    mediaplayer:set_viewport_geometry(
-        gutter_sides  * screen.scale[1],
-        mediaplayer_y * screen.scale[2],
-        mediaplayer_w * screen.scale[1],
-        mediaplayer_h * screen.scale[2]
-    )
+
     mediaplayer:load("video/glee-1.mp4")
+    mediaplayer.mute = true
     
     function mediaplayer:on_loaded()
         mediaplayer:play()
+        mediaplayer.mute = true
+        mediaplayer:set_viewport_geometry(
+            gutter_sides  * screen.scale[1],
+            mediaplayer_y * screen.scale[2],
+            mediaplayer_w * screen.scale[1],
+            mediaplayer_h * screen.scale[2]
+        )
     end
     function mediaplayer:on_end_of_stream()
         mediaplayer:seek(0)
@@ -133,6 +136,7 @@ local TweetStream_Container = Class(function(self,...)
         0,title.h+22
     )
     
+    
     local show_name = Text{
         text  = "show_name",
         font  = Show_Name_Font,
@@ -157,76 +161,35 @@ local TweetStream_Container = Class(function(self,...)
     }
     
     
-    local top_rule    = Image{src="assets/object_tweetstream_top_Shadow.png",x = 15, y=show_name.y+show_name.h+19}
-    local bottom_rule = Image{src="assets/object_tweetstream_bottom_Shadow.png"}
+    local top_rule    = Image{src="assets/sp_top_rule.png",x = 15, y=show_name.y+show_name.h+19}
+    local bottom_rule = Image{src="assets/sp_shadow.png"}
     bottom_rule.y = bg.y + bg.h - bottom_rule.h-2
     bottom_rule.x = bg.w-bottom_rule.w
-    
-    local add_image = nil
+    local wallpaper = Image{src="assets/sp_tweetstream_container.png",x=3,y=top_rule.y, w = bg.w-6}
     show_time.x = show_time.x - show_time.w
-    group:add(bg,title,show_name,tv_station,show_time,top_rule,bottom_rule)
+    group:add(bg,wallpaper,title,show_name,tv_station,show_time,top_rule,bottom_rule)
     sp_group:add(group)
     
     local curr_obj = nil
-    function self:display(show_obj)
-        if curr_obj ~= nil then
-            for i = 1,#curr_obj.tweet_g_cache do
-                curr_obj.tweet_g_cache[i].group:unparent()
-            end
-        end
-        curr_obj = show_obj
-        if curr_obj ~= nil then
-            for i = 1,#curr_obj.tweet_g_cache do
-                tweet_clip:add(curr_obj.tweet_g_cache[i].group)
-            end
-        end
-        show_name.text  = show_obj.show_name
-        show_desc.text  = show_obj.show_desc
-        
-        tv_station.x    = tv_station.x + tv_station.w
-        tv_station.text = show_obj.tv_station
-        tv_station.x    = tv_station.x - tv_station.w
-        
-        show_time.x     = show_time.x + show_time.w
-        show_time.text  = show_obj.show_time
-        show_time.x     = show_time.x - show_time.w
-        
-        if add_image ~= nil then
-            add_image:unparent()
-            add_image = nil
-        end
-        
-        if show_obj.add_image ~= nil then
-            add_image = show_obj.add_image
-            add_image.y = bg.y+1
-            add_image.x = 2
-            group:add(add_image)
-            tweet_clip.clip = {0,0,bg.w-368,bg.h-127}
-            tweet_clip.x    = 366
-            show_name.x     = 366
-            show_desc.x     = 366
-            top_rule.x      = 366
-            if curr_obj ~= nil then
-                for i = 1,#curr_obj.tweet_g_cache do
-                    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
-                end
-            end
-        else
-            tweet_clip.clip = {0,0,bg.w-30,bg.h-127}
-            tweet_clip.x    = 15
-            show_name.x     = 15
-            show_desc.x     = 15
-            top_rule.x      = 150
-            if curr_obj ~= nil then
-                for i = 1,#curr_obj.tweet_g_cache do
-                    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
-                end
-            end
-        end
-    end
+    
     function self:going_back()
+        page = "fp"
+        sp_group:hide()
+        fp_group:show()
         curr_obj.tweetstream:get_group():unparent()
+        curr_obj.tweetstream:lose_focus()
         curr_obj.tweetstream:out_view()
+        fp.tweetstream:display(curr_obj)
+        curr_obj = nil
+    end
+    function self:go_to_minimized()
+        page = "mp"
+        sp_group:hide()
+        mp_group:show()
+        curr_obj.tweetstream:get_group():unparent()
+        curr_obj.tweetstream:lose_focus()
+        curr_obj.tweetstream:out_view()
+        mp.tweetstream:display(curr_obj)
         curr_obj = nil
     end
     function self:display(show_obj)
@@ -244,8 +207,7 @@ local TweetStream_Container = Class(function(self,...)
         show_time.x     = show_time.x - show_time.w
         
         
-        
-        curr_obj.tweetstream:set_h(bg.h-(top_rule.y-bg.y))
+        curr_obj.tweetstream:set_h(bg.h-(top_rule.y-bg.y)-10)
         curr_obj.tweetstream:set_w(bg.w-30)
         curr_obj.tweetstream:set_pos(15,top_rule.y)
         group:add( curr_obj.tweetstream:get_group() )
@@ -255,12 +217,24 @@ local TweetStream_Container = Class(function(self,...)
         curr_obj.tweetstream:in_view()
         
     end
+    function self:up()
+        if curr_obj ~= nil then
+            curr_obj.tweetstream:move_up()
+        end
+    end
+    function self:down()
+        if curr_obj ~= nil then
+            curr_obj.tweetstream:move_down()
+        end
+    end
 
 end)
 sp = {
     tweetstream = TweetStream_Container(),
     banner      = Banner(),
+    focus       = "TWEETSTREAM",
     keys        = {
+    --[[
         ["BANNER"] = {
             [keys.Down] = function()
                 sp.banner:down()
@@ -272,19 +246,26 @@ sp = {
                 sp.banner:enter()
             end,
         },
+    --]]
         ["TWEETSTREAM"] = {
             [keys.Down] = function()
                 sp.tweetstream:down()
             end,
-            [keys.Left] = function()
-                sp.tweetstream:left()
-            end,
-            [keys.Right] = function()
-                sp.tweetstream:right()
+            [keys.Up] = function()
+                sp.tweetstream:up()
             end,
             [keys.Return] = function()
-                sp.tweetstream:enter()
+                --sp.tweetstream:enter()
+            end,
+            [keys.BackSpace] = function()
+                sp.tweetstream:going_back()
+            end,
+            [keys.YELLOW] = function()
+                sp.tweetstream:go_to_minimized()
+            end,
+            [keys.F11] = function()
+                sp.tweetstream:go_to_minimized()
             end,
         }
     }
-    }
+}
