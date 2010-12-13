@@ -201,6 +201,8 @@ function create_on_button_down_f(v)
 			editor.n_select(v, false, dragging) 
 			editor.n_select(new_object, false, dragging) 
 			editor.n_select(org_object, false, dragging) 
+			v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
+			v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
                     	table.insert(undo_list, {v.name, CHG, org_object, new_object})
 			end
 			end 
@@ -321,6 +323,7 @@ function make_attr_t(v)
 function toboolean(s) if (s == "true") then return true else return false end end
   local attr_t 
 
+
   if(v.type ~= "Video") then
      attr_t =
       {
@@ -328,8 +331,8 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"caption", "OBJECT NAME"},
              {"name", v.name,"name"},
              {"line",""},
-             {"x", math.floor(v.x), "x"},
-             {"y", math.floor(v.y), "y"},
+             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
+             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
              {"z", math.floor(v.z), "z"},
              {"w", math.floor(v.w), "w"},
              {"h", math.floor(v.h), "h"},
@@ -502,14 +505,14 @@ function itemTostring(v)
          "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
          "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
          "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "position = {"..v.x..","..v.y..","..v.z.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Image") then
 
 	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "src=\""..v.src.."\","..indent..
-         "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
          "size = {"..table.concat(v.size,",").."},"..indent..
          "clip = {"..table.concat(v.clip,",").."},"..indent..
          "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
@@ -524,7 +527,7 @@ function itemTostring(v)
          "font=\""..v.font.."\","..indent..
          "color={"..table.concat(v.color,",").."},"..indent..
          "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
          "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
          "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
          "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
@@ -538,7 +541,7 @@ function itemTostring(v)
 	itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
          "source="..v.source.name..","..indent..
          "scale = {"..table.concat(v.scale,",").."},"..indent..
          "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
@@ -562,7 +565,7 @@ function itemTostring(v)
 	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
         "name=\""..v.name.."\","..indent..
         "size={"..table.concat(v.size,",").."},"..indent..
-        "position = {"..v.x..","..v.y..","..v.z.."},"..indent..
+        "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
 	"children = {"..children.."},"..indent..
         "scale = {"..table.concat(v.scale,",").."},"..indent..
         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
@@ -825,6 +828,270 @@ local function inputMsgWindow_savefile()
       end
 end
 
+function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
+     
+     local x_scroll_box, y_scroll_box 
+     local x_scroll_bar, y_scroll_bar 
+
+     if(x_scroll_to == 0)then 
+	 x_scroll_to = screen.w
+     end
+     if(y_scroll_to == 0)then 
+	 y_scroll_to = screen.h
+     end
+
+     g.extra.canvas_h = y_scroll_to - y_scroll_from -- y 전체 캔버스 사이즈가 되겠구 
+     g.extra.canvas_w = x_scroll_to - x_scroll_from -- x 전체 캔버스 사이즈가 되겠구 
+     g.extra.canvas_f = y_scroll_from
+     g.extra.canvas_xf = x_scroll_from
+     g.extra.canvas_t = y_scroll_to
+     g.extra.canvas_xt = x_scroll_to
+
+     screen_rect =  Rectangle{
+                name="screen_rect",
+                border_color= {2, 25, 25, 140},
+                border_width=2,
+                color= {255,255,255,0},
+                size = {screen.w+1,screen.h+1},
+                position = {0,0,0}, 
+     }
+     screen_rect.reactive = false
+     g:add(screen_rect)
+
+
+     
+    if (g.extra.canvas_w > screen.w) then 
+	local SCROLL_X_POS = 10
+	local BOX_BAR_SPACE = 6
+	
+        x_scroll_box = factory.make_x_scroll_box()
+        x_scroll_bar = factory.make_x_scroll_bar(g.extra.canvas_w)
+
+	x_scroll_box.position = {SCROLL_X_POS, screen.h - 60}
+	x_scroll_bar.position = {SCROLL_X_POS + BOX_BAR_SPACE, screen.h - 56}
+
+	
+        x_scroll_bar.extra.org_x = 16
+	x_scroll_bar.extra.h_x = 16
+	x_scroll_bar.extra.l_x = x_scroll_box.x + x_scroll_box.w - x_scroll_bar.w - BOX_BAR_SPACE -- 스크롤 되는 영역의 길이 
+
+	screen:add(x_scroll_box) 
+	screen:add(x_scroll_bar) 
+
+        -- 요 값은 스크롤 바가 움직일때 오브젝의 와이 포지션이 밖뀌는 값을 나타내는건데 이름이 너무 헤깔리는군 
+        g.extra.scroll_dx = ((g.extra.canvas_w - screen.w)/(x_scroll_bar.extra.l_x - x_scroll_bar.extra.h_x))
+
+		
+	local x0 = - g.extra.canvas_xf/g.extra.scroll_dx + 10 
+	local x1920 = (-g.extra.canvas_xf+1080)/g.extra.scroll_dx + 10
+
+	x_0_mark= Rectangle {
+		name="x_0_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {2, 40},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {SCROLL_X_POS + x0, screen.h - 55, 0},
+		opacity = 255
+        }
+
+	x_1920_mark= Rectangle {
+		name="x_1920_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {2, 40},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {SCROLL_X_POS + x1920, screen.h - 55, 0},
+		opacity = 255
+        }
+  
+	screen:add(x_0_mark)
+	screen:add(x_1920_mark) 
+
+        -- 스크롤 바 넣고 원래 좌표를 기억해 두는기지요 
+	for n,m in pairs (g.children) do 
+		m.extra.org_x = m.x
+	end 
+         
+        function x_scroll_bar:on_button_down(x,y,button,num_clicks)
+		dragging = {x_scroll_bar, x-x_scroll_bar.x, y-x_scroll_bar.y }
+
+		if table.getn(selected_objs) ~= 0 then
+		     for q, w in pairs (selected_objs) do
+			 local t_border = screen:find_child(w)
+			 local i, j = string.find(t_border.name,"border")
+		         local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		         if(t_obj ~= nil) then 
+			      screen:remove(screen:find_child(t_obj.name.."a_m"))
+			 end
+		     end
+		end
+
+        	return true
+    	end 
+
+    	function x_scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( dragging )
+			local dif
+	      		if (actor.extra.h_x <= x-dx and x-dx <= actor.extra.l_x) then -- 스크롤 되는 범위안에 있으면	
+	           		dif = x - dx - x_scroll_bar.extra.org_x -- 스크롤이 이동한 거리 
+	           		x_scroll_bar.x = x - dx 
+	      		elseif (actor.extra.h_x > x-dx ) then
+				dif = actor.extra.h_x - x_scroll_bar.extra.org_x 
+	           		x_scroll_bar.x = actor.extra.h_x
+	      		elseif (actor.extra.l_x < x-dx ) then
+				dif = actor.extra.l_x- x_scroll_bar.extra.org_x 
+	           		x_scroll_bar.x = actor.extra.l_x
+			end 
+			dif = dif * g.extra.scroll_dx -- 스클롤된 길이 * 그 길이가 나타내는 와이값 증감 
+			for i,j in pairs (g.children) do 
+	           	     j.position = {j.extra.org_x-dif-x_scroll_from, j.y, j.z}
+			end 
+
+			if table.getn(selected_objs) ~= 0 then
+			     for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+			              t_border.x = t_obj.x 
+				 end
+			     end
+			end
+
+			g.extra.scroll_x = math.floor(dif) 
+	      		dragging = nil
+	 	end 
+         	return true
+    	end 
+     end 
+
+
+     if(g.extra.canvas_h > screen.h) then 
+
+
+	local SCROLL_Y_POS = 90
+	local BOX_BAR_SPACE = 6
+
+	y_scroll_box = factory.make_y_scroll_box()
+        y_scroll_bar = factory.make_y_scroll_bar(g.extra.canvas_h) 
+
+	y_scroll_box.position = {screen.w - 60, SCROLL_Y_POS}
+	y_scroll_bar.position = {screen.w - 56, SCROLL_Y_POS + BOX_BAR_SPACE}
+
+        y_scroll_bar.extra.org_y = 96
+	y_scroll_bar.extra.h_y = 96
+	y_scroll_bar.extra.l_y = y_scroll_box.y + y_scroll_box.h - y_scroll_bar.h - BOX_BAR_SPACE -- 스크롤 되는 영역의 길이 
+
+	screen:add(y_scroll_box) 
+	screen:add(y_scroll_bar) 
+
+        -- 요 값은 스크롤 바가 움직일때 오브젝의 와이 포지션이 밖뀌는 값을 나타내는건데 이름이 너무 헤깔리는군 
+        g.extra.scroll_dy = ((g.extra.canvas_h - screen.h)/(y_scroll_bar.extra.l_y - y_scroll_bar.extra.h_y))
+  
+	
+	local y0 = - g.extra.canvas_f/g.extra.scroll_dy + 10 
+	local y1080 = (-g.extra.canvas_f+1080)/g.extra.scroll_dy + 10
+
+	y_0_mark= Rectangle {
+		name="y_0_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {40,2},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {screen.w - 55, SCROLL_Y_POS + y0, 0},
+		opacity = 255
+        }
+
+	y_1080_mark= Rectangle {
+		name="y_1080_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {40,2},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {screen.w - 55, SCROLL_Y_POS + y1080, 0},
+		opacity = 255
+       }
+  
+	screen:add (y_0_mark)
+	screen:add (y_1080_mark)
+
+        -- 스크롤 바 넣고 원래 좌표를 기억해 두는기지요 
+	for n,m in pairs (g.children) do 
+		m.extra.org_y = m.y
+	end 
+         
+        function y_scroll_bar:on_button_down(x,y,button,num_clicks)
+		dragging = {y_scroll_bar, x-y_scroll_bar.x, y-y_scroll_bar.y }
+		if table.getn(selected_objs) ~= 0 then
+			for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+				      screen:remove(screen:find_child(t_obj.name.."a_m"))
+				 end
+			end
+		end
+
+        	return true
+    	end 
+
+    	function y_scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( dragging )
+			local dif
+	      		if (actor.extra.h_y <= y-dy and y-dy <= actor.extra.l_y) then -- 스크롤 되는 범위안에 있으면	
+	           		dif = y - dy - y_scroll_bar.extra.org_y -- 스크롤이 이동한 거리 
+	           		y_scroll_bar.y = y - dy 
+	      		elseif (actor.extra.h_y > y-dy ) then
+				dif = actor.extra.h_y - y_scroll_bar.extra.org_y 
+	           		y_scroll_bar.y = actor.extra.h_y
+	      		elseif (actor.extra.l_y < y-dy ) then
+				dif = actor.extra.l_y- y_scroll_bar.extra.org_y 
+	           		y_scroll_bar.y = actor.extra.l_y
+			end 
+			dif = dif * g.extra.scroll_dy -- 스클롤된 길이 * 그 길이가 나타내는 와이값 증감 
+			for i,j in pairs (g.children) do 
+	           	     j.position = {j.x, j.extra.org_y-dif-y_scroll_from, j.z}
+			end 
+
+			if table.getn(selected_objs) ~= 0 then
+			     for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+			              t_border.y = t_obj.y 
+				 end
+			     end
+			end
+
+			g.extra.scroll_y = math.floor(dif) 
+	      		dragging = nil
+	 	end 
+         	return true
+    	end 
+     end 
+end
+
 function inputMsgWindow_openfile(input_text)
      local file_not_exists = true
      local dir = editor_lb:readdir(CURRENT_DIR)
@@ -839,7 +1106,7 @@ function inputMsgWindow_openfile(input_text)
      end
      if (file_not_exists) then
 	  cleanMsgWindow()
-	  screen:grab_key_focus(screen) -- iii
+	  screen:grab_key_focus(screen) 
           printMsgWindow("The file not exists.\nFile Name : ","err_msg")
           inputMsgWindow("reopenfile")
           return 
@@ -847,12 +1114,11 @@ function inputMsgWindow_openfile(input_text)
      if(is_lua_file(input_t.text) == true) then 
            editor.close()
            current_fn = input_t.text
-	   print("current fn", current_fn)
            local f = loadfile(current_fn)
            f(g)
      else 
 	  cleanMsgWindow()
-	  screen:grab_key_focus(screen) -- iii
+	  screen:grab_key_focus(screen)
           printMsgWindow("The file is not a lua file.\nFile Name : ","err_msg")
           inputMsgWindow("reopenfile")
           return 
@@ -860,15 +1126,12 @@ function inputMsgWindow_openfile(input_text)
      if(g.extra.video ~= nil) then clear_bg() end 
      item_num = table.getn(g.children)
 
---[[
-     for i, v in pairs(g.children) do
-	  if(v.type == "Group") then 
-		g:remove(v) 
-          end
-     end 
-     ]]
+     local x_scroll_from=0
+     local x_scroll_to=0
 
-	
+     local y_scroll_from=0
+     local y_scroll_to=0
+
      for i, v in pairs(g.children) do
           v.reactive = true
 	  if(v.type == "Text") then
@@ -888,9 +1151,46 @@ function inputMsgWindow_openfile(input_text)
                     create_on_button_down_f(c)
 	       end 
 	  end 
+
+          if(v.x < 0) then 
+		if( v.x < x_scroll_from )then 
+		     x_scroll_from = v.x 
+		end
+          end 
+	  
+          if(v.y < 0) then 
+		if( v.y < y_scroll_from ) then 
+		     y_scroll_from = v.y 
+		end
+          end 
+
+          if(v.x > screen.w) then 
+		if( x_scroll_to < v.x + v.w)then 
+		     x_scroll_to = v.x + v.w
+		end
+          end 
+	  
+          if(v.y > screen.h) then 
+		if(y_scroll_to < v.y + v.h) then 
+		     y_scroll_to = v.y + v.h 
+		end
+          end 
      end 
+
+     if (x_scroll_to ~= 0 or x_scroll_from ~= 0 or y_scroll_to ~=0 or y_scroll_from ~= 0) then 
+          make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
+     end 
+
      cleanMsgWindow()
      if(screen:find_child("screen_objects") == nil) then
+	  for i,j in pairs(g.children) do 
+		if(y_scroll_from < 0) then
+			j.y = j.y - y_scroll_from
+		end 
+		if(x_scroll_from < 0) then
+			j.x = j.x - x_scroll_from
+		end 
+	  end 
           screen:add(g)
      end
      screen:grab_key_focus(screen) 
@@ -974,7 +1274,8 @@ function inputMsgWindow_openimage(input_purpose, input_text)
 	  end 
 
           ui.image= Image { name="img"..tostring(item_num),
-          src = input_t.text, opacity = 255 , position = {200,200}}
+          src = input_t.text, opacity = 255 , position = {200,200}, 
+	  extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
           create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, ADD, ui.image})

@@ -1,5 +1,5 @@
 dofile("apply.lua")
-dofile("util.lua")
+--1209 dofile("util.lua")
 
 editor = {}
 
@@ -157,11 +157,37 @@ function editor.close()
              end
         end
 
+	if(screen:find_child("xscroll_bar") ~= nil) then 
+		screen:remove(screen:find_child("xscroll_bar")) 
+		screen:remove(screen:find_child("xscroll_box")) 
+		screen:remove(screen:find_child("x_0_mark"))
+		screen:remove(screen:find_child("x_1920_mark"))
+	end 
+
+	if(screen:find_child("scroll_bar") ~= nil) then 
+		screen:remove(screen:find_child("scroll_bar")) 
+		screen:remove(screen:find_child("scroll_box")) 
+		screen:remove(screen:find_child("y_0_mark"))
+		screen:remove(screen:find_child("y_1080_mark"))
+	end 
+
+
 	undo_list = {}
 	redo_list = {}
         item_num = 0
         current_fn = ""
         screen.grab_key_focus(screen)
+
+	g.extra.canvas_f = 0
+	g.extra.canvas_t = 0
+	g.extra.canvas_xf = 0
+	g.extra.canvas_xt = 0
+	g.extra.scroll_y = 0
+	g.extra.scroll_x = 0
+	g.extra.canvas_w = screen.w
+	g.extra.canvas_h = screen.h
+	g.extra.scroll_dy = 0
+	g.extra.scroll_dx = 0
 end 
 
 function editor.open()
@@ -202,7 +228,7 @@ function editor.the_image()
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
 
-	dir_text.position = {cur_w,cur_h}
+	dir_text.position = {cur_w,cur_h,0}
 
 	--local line = factory.draw_line()
 	
@@ -216,7 +242,7 @@ function editor.the_image()
 	          if (is_png_file(v) == true) then 
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
 
-                       text.position  = {cur_w, cur_h}
+                       text.position  = {cur_w, cur_h,0}
 		       if(cur_w == L_PADDING) then
 				cur_w = cur_w + 7*L_PADDING
 		       else 
@@ -247,7 +273,7 @@ function editor.the_image()
 	local msgw_bg = factory.make_popup_bg("file_ls", file_list_size)
 
 	local msgw = Group {
-	     position ={500, 100},
+	     position ={500, 100,0},
 	     anchor_point = {0,0},
              children =
              {
@@ -262,7 +288,7 @@ function editor.the_image()
 	function print_file_list() 
 	     cur_w = L_PADDING
              cur_h = TOP_PADDING + dir_text.h + Y_PADDING
-	     text_g = Group{position = {cur_w, cur_h}}
+	     text_g = Group{position = {cur_w, cur_h,0}}
 	     text_g.extra.org_y = cur_h
 	     text_g.reactive  = true 
 
@@ -272,7 +298,7 @@ function editor.the_image()
 	          if (is_png_file(v) == true) then 
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
 
-                       text.position = {cur_w, cur_h}
+                       text.position = {cur_w, cur_h,0}
 	 	       text.reactive = true
     	               text_g:add(text)
 
@@ -892,6 +918,13 @@ function editor.view_code(v)
 end 
 
 function editor.save(save_current_f)
+
+     local screen_rect = g:find_child("screen_rect")
+  
+     if(g:find_child("screen_rect") ~= nil) then 
+          g:remove(g:find_child("screen_rect"))
+     end 
+
      if (save_current_f == true) then 
         contents = "local g = ... \n\n"
         local obj_names = getObjnames()
@@ -899,7 +932,7 @@ function editor.save(save_current_f)
         local n = table.getn(g.children)
    
         for i, v in pairs(g.children) do
-             contents= contents..itemTostring(v)
+               contents= contents..itemTostring(v)
         end
 	if (g.extra.video ~= nil) then
 	     contents = contents..itemTostring(g.extra.video)
@@ -924,7 +957,7 @@ function editor.save(save_current_f)
              local obj_names = getObjnames()
    
              for i, v in pairs(g.children) do
-                  contents= contents..itemTostring(v)
+                   contents= contents..itemTostring(v)
              end
 
 	     if (g.extra.video ~= nil) then
@@ -937,6 +970,8 @@ function editor.save(save_current_f)
              inputMsgWindow("savefile")
         end 
      end 	
+
+     g:add(screen_rect) 
 end  
 
 function editor.rectangle(x, y)
@@ -957,7 +992,8 @@ function editor.rectangle(x, y)
                 border_width=0,
                 color= {255,255,255,255},
                 size = {1,1},
-                position = {x,y}
+                position = {x,y,0}, 
+		extra = {org_x = x, org_y = y}
         }
         ui.rect.reactive = true
         table.insert(undo_list, {ui.rect.name, ADD, ui.rect})
@@ -1120,8 +1156,14 @@ function editor.text()
         ui.text = Text{
         name="text"..tostring(item_num),
 	text = "", font= "DejaVu Sans 40px",
-     	color = DEFAULT_COLOR, position ={700, 500}, editable = true ,
-     	reactive = true, wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR"} 
+     	color = DEFAULT_COLOR, 
+	position ={700, 500, 0}, 
+	editable = true , reactive = true, 
+	wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
+	extra = {org_x = 700, org_y = 500}
+	} 
+
+
         table.insert(undo_list, {ui.text.name, ADD, ui.text})
         g:add(ui.text)
 	if(screen:find_child("screen_objects") == nil) then 

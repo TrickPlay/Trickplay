@@ -51,7 +51,7 @@ menu_hide         = false
 popup_hide        = false
 input_mode        = S_MENU
 mouse_state       = BUTTON_UP
-g = Group{name = "screen_objects"}
+g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
 contents    	  = ""
 item_num 	  = 0
 
