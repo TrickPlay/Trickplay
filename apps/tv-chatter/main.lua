@@ -56,7 +56,7 @@ tv_show[1] = ShowObject(
         "Friday 6pm",
         "assets/posters/banner_community.png",
         {"community"},
-        {"Jeff Winger","Britta","Pierce","Abed","Troy Barnes"}
+        {"Jeff Winger","Britta","Abed","Troy Barnes"}
 )
 tv_show[2] = ShowObject(
         "assets/titlecards/tile_dexter.png",

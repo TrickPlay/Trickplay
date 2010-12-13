@@ -606,7 +606,7 @@ sp = {
             [keys.F8] = function()
                 sp.tweetstream:go_to_options()
             end,
-            [keys.p] = function()
+            [keys["0"]] = function()
                 if mediaplayer.state == mediaplayer.PAUSED then
                     mediaplayer:play()
                 else
