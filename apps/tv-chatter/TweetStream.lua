@@ -116,7 +116,7 @@ TweetStream = Class(function(t,parent,...)
             local btm_tweet = (index_of_bottom_tweet)
             local sum = group.clip[4]--tweets[top_tweet].group.y
             for i = btm_tweet,top_tweet,-1 do
-                tweets[i].text.w = w
+                tweets[i].text.w = w-100
                 tweets[i].time.x = w-10
                 tweets[i].h = tweets[i].text.y + tweets[i].text.h + tweet_gap
                 tweets[i].group.y = sum - tweets[i].h
@@ -144,10 +144,12 @@ TweetStream = Class(function(t,parent,...)
         return group
     end
     function t:in_view()
-        animate_tweets:start()
+        --animate_tweets:start()
+        active_stream = t
     end
     function t:out_view()
-        animate_tweets:stop()
+        --animate_tweets:stop()
+        active_stream = nil
     end
     function t:select_tweet(i)
         highlight.y = tweets[i].group.y-25
@@ -461,17 +463,18 @@ TweetStream = Class(function(t,parent,...)
         return true
     end
     
-    local px_p_sec = 100
+    local px_p_sec = 30
     local last_msec = 0
     function animate_tweets:on_completed()
         last_msec = 0
         print("comp")
     end
     animate_tweets.stop = nil
-    function animate_tweets:on_new_frame(msecs,prog)
-        local last_call = msecs - last_msec
-        last_msec = msecs
-        print(last_call)
+    --function animate_tweets:on_new_frame(msecs,prog)
+    function t:on_idle(last_call)
+        --local last_call = msecs - last_msec
+        --last_msec = msecs
+        ---print(last_call)
         --if you start running out of tweets and didn't already request more
         if #results_cache <= 5 and not requesting then
             requesting = true
@@ -484,7 +487,6 @@ TweetStream = Class(function(t,parent,...)
             --move all the tweets up
             for i = top_tweet,btm_tweet do
                 tweets[i].group.y = tweets[i].group.y - px_p_sec * last_call
-                print("fuck")
             end
             
             highlight.y = highlight.y - px_p_sec * last_call

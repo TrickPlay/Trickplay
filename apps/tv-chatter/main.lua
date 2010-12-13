@@ -138,12 +138,28 @@ for i=1,#tv_show do
     fp.listings_container:add(tv_show[i])
 end
 
-fp.title_card_bar:receive_focus()
 
 --key handler
 page = "fp"
+local prev_stream = nil
+active_stream = nil
+fp.title_card_bar:receive_focus()
+
 function screen:on_key_down(key)
+    
     if  _G[page].keys[  _G[page].focus  ][key] then
         _G[page].keys[  _G[page].focus  ][key]()
+    end
+end
+
+function idle:on_idle(elapsed)
+    --ping active stream
+    if active_stream ~= nil then
+        if prev_stream ~= active_stream then
+            active_stream:on_idle(0)
+            prev_stream = active_stream
+        else
+            active_stream:on_idle(elapsed)
+        end
     end
 end

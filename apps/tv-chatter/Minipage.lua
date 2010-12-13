@@ -129,8 +129,22 @@ mp = {
             [keys.BackSpace] = function()
                 mp.tweetstream:going_back()
             end,
-            [keys.F11] = function()
+            [keys.F9] = function()
                 mp.tweetstream:going_back()
+            end,
+            [keys.BACK] = function()
+                mp.tweetstream:going_back()
+            end,
+            [keys.F7] = function()
+                mp.tweetstream:going_back()
+            end,
+            [keys.p] = function()
+            print("why")
+                if mediaplayer.state == mediaplayer.PAUSED then
+                    mediaplayer:play()
+                else
+                    mediaplayer:pause()
+                end
             end,
         }
     }

@@ -88,6 +88,7 @@ do
     
     function mediaplayer:on_loaded()
         mediaplayer:play()
+        
         mediaplayer.mute = true
         mediaplayer:set_viewport_geometry(
             gutter_sides  * screen.scale[1],
@@ -95,6 +96,8 @@ do
             mediaplayer_w * screen.scale[1],
             mediaplayer_h * screen.scale[2]
         )
+        mediaplayer:seek(3000)
+        mediaplayer:pause()
     end
     function mediaplayer:on_end_of_stream()
         mediaplayer:seek(0)
@@ -115,6 +118,312 @@ local Banner = Class(function(self,...)
     function self:display(show_obj)
         
     end
+end)
+
+--Container for the Options
+local Options = Class(function(self,...)
+
+    local listing_h           = 69
+    
+    local group = Group
+    {
+        x = screen_w,
+        y = bottom_containers_y
+    }
+    local title    = Image{src="assets/options_tit.png"}
+   
+    local bg = make_bg(504,592,   0,title.h+5)
+    local border_w = 1
+    
+    local rules = Canvas{size={bg.w,bg.h-23*2},x=0,y=bg.y+23}
+          rules:begin_painting()
+          rules:move_to(0,0)--border_w,         border_w)
+          rules:line_to(rules.w-border_w, border_w)
+          rules:move_to(border_w,         rules.h-border_w)
+          rules:line_to(rules.w-border_w, rules.h-border_w)
+          rules:set_source_color( "505050" )
+          rules:set_line_width(   border_w )
+          rules:stroke( true )
+          rules:finish_painting()
+    local grey_rect = Canvas{size={bg.w,listing_h},opacity=0}
+          grey_rect:begin_painting()
+          grey_rect:move_to(0,0)--border_w,         border_w)
+          grey_rect:line_to(grey_rect.w-border_w, border_w)
+          grey_rect:line_to(grey_rect.w-border_w, grey_rect.h-border_w)
+          grey_rect:line_to(border_w,             grey_rect.h-border_w)
+          grey_rect:line_to(0,0)
+          grey_rect:set_source_color( "181818" )
+	      grey_rect:fill( true )
+          grey_rect:set_source_color( "2D2D2D" )
+          grey_rect:set_line_width(   border_w )
+	      grey_rect:stroke( true )
+          grey_rect:finish_painting()
+    screen:add(grey_rect)
+    
+    local focus_o = Image{src="assets/listing_focus.png",opacity=0}
+    local focus_n = Clone{source=focus_o,opacity=0}
+    
+    local Option_Name_Font  = "Helvetica 24px"
+    local Option_Name_Color = "#a6a6a6"
+    local Option_Sel_Font   = "Helvetica bold 26px"
+    local Option_Sel_Color  = "#FFFFFF"
+
+    local listings = {}
+    local listings_clip = Group
+    {
+        y    = bg.y+23,
+        clip = { 2, 0,  bg.w-5, bg.h-23*2}
+    }
+    local listings_g = Group{}
+    local listings_bg = Group{}
+    listings_clip:add(listings_bg,listings_g)
+    listings_g:add(focus_o,focus_n)
+    local arrow_dn = Image{src="assets/arrow.png",x=bg.w/2,y=bg.y+bg.h-12,opacity=0}
+    arrow_dn.anchor_point={arrow_dn.w/2,arrow_dn.h/2}
+    local arrow_up = Clone
+    {
+        source       = arrow_dn,
+        z_rotation   = {180,0,0},
+        anchor_point = {arrow_dn.w/2,arrow_dn.h/2},
+        opacity=0,
+        x=bg.w/2,y=bg.y+12
+    }
+    group:add(
+        --bg_unsel,
+        bg,
+        title,
+        listings_clip,
+        arrow_dn,
+        arrow_up,
+        rules
+    )
+    
+    fp_group:add(group)
+    ----------------------------------------------------------------------------
+    
+    local list_i = 1
+    local vis_loc = 1
+    local max_on_screen = 8
+    function self:add(option)
+        local index = #listings + 1
+        local opt_name = Text
+                {
+                    text  = option.name,
+                    font  = Option_Name_Font,
+                    color = Option_Name_Color,
+                    x     = 15,
+                    y     = listing_h*(index-.5)
+                }
+                opt_name.anchor_point={
+                    0,--show_name.w/2,
+                    opt_name.h/2
+                }
+        local opt_selection = Text
+                {
+                    text  = option.default,
+                    font  = Option_Sel_Font,
+                    color = Option_Sel_Color,
+                    x     = bg.x+bg.w-15,
+                    y     = listing_h*(index-.5)
+                }
+                opt_selection.anchor_point={
+                    opt_selection.w,
+                    opt_selection.h/2
+                }
+
+        
+            listings_bg:add(Clone{source=grey_rect,y=listing_h*(index-1)})
+        
+        table.insert(listings,
+            {
+                opt        = option,
+                name  = opt_name,
+                opt_selection  = opt_selection,
+            }
+        )
+        
+        listings_g:add(opt_name, opt_selection)
+        if #listings > max_on_screen then
+            arrow_dn.opacity=255
+        end
+    end
+    
+    self:add({name="Scroll Speed", default="Medium"})
+    self:add({name="Filter Tweets", default="Celebrities"})
+    self:add({name="Zip Code", default="94109"})
+    self:add({name="Cable Provider", default="Cox"})
+    self:add({name="Twitter Account", default="JohnnyApples"})
+    local prev = nil
+    local prev_f = nil
+    
+    
+    function self:receive_focus(p,f)
+        prev = p
+        prev_f = f
+        --bg_sel.opacity   = 255
+        --bg_unsel.opacity = 0
+        if #listings > 0 then
+            focus_o.opacity=255
+            listings[list_i].name.color  = "#000000"
+            listings[list_i].opt_selection.color  = "#000000"
+        end
+        fp.listings_container:move_x_by(-(bg.w+50))
+        fp.tweetstream:move_x_by(-(bg.w+50))
+        group.x = group.x - (bg.w+50)
+        --fp.tweetstream:display(listings[list_i].obj)
+    end
+    function self:lose_focus()
+        --bg_sel.opacity   = 0
+        --bg_unsel.opacity = 255
+        if #listings > 0 then
+            focus_o.opacity=0
+            listings[list_i].name.color  = Option_Name_Color
+            listings[list_i].opt_selection.color  = Option_Sel_Color
+        end
+        fp.listings_container:move_x_by((bg.w+50))
+        fp.tweetstream:move_x_by((bg.w+50))
+        group.x = group.x + (bg.w+50)
+    end
+    
+    local highlight_timeline = nil
+    function self:move_highlight_to(old_i,new_i)
+        focus_n.y = (new_i-1)*listing_h
+        focus_n.opacity = 0
+        if highlight_timeline ~= nil then
+            highlight_timeline:stop()
+            highlight_timeline:on_completed()
+        end
+        highlight_timeline = Timeline{
+            loop     = false,
+            duration = 100
+        }
+        
+        local to_zero = 255
+        local to_max  = 0
+        local to_a6   = 166
+        function highlight_timeline:on_new_frame(msecs,prog)
+            to_max  = 255*(prog)
+            to_zero = 255*(1-prog)
+            to_a6   = 166*(prog)
+            listings[new_i].name.color  = {to_zero,to_zero,to_zero}
+            listings[new_i].opt_selection.color  = {to_zero,to_zero,to_zero}
+            listings[old_i].name.color  = {to_a6,to_a6,to_a6}
+            listings[old_i].opt_selection.color  = {to_max,to_max,to_max}
+            focus_n.opacity = to_max
+            focus_o.opacity = to_zero
+        end
+        function highlight_timeline:on_completed()
+            focus_n.opacity = 0
+            focus_o.opacity = 255
+            focus_o.y = focus_n.y
+            listings[new_i].name.color  = {0,0,0}
+            listings[new_i].opt_selection.color  = {0,0,0}
+            listings[old_i].name.color  = {166,166,166}
+            listings[old_i].opt_selection.color  = {255,255,255}
+            highlight_timeline = nil
+        end
+        highlight_timeline:start()
+        list_i = new_i
+    end
+    local move_timeline = nil
+    function self:move_list(new_loc)
+        --local delta = new_loc - listings_bg.y
+        local old_loc = listings_bg.y
+        if move_timeline ~= nil then
+            move_timeline:stop()
+            move_timeline:on_completed()
+        end
+        move_timeline = Timeline{
+            loop     = false,
+            duration = 100
+        }
+        function move_timeline:on_new_frame(msecs,prog)
+            listings_bg.y = old_loc + (new_loc - old_loc)*prog
+            listings_g.y  = old_loc + (new_loc - old_loc)*prog
+        end
+        function move_timeline:on_completed()
+            listings_bg.y = new_loc
+            listings_g.y  = new_loc
+            move_timeline = nil
+        end
+        move_timeline:start()
+    end
+    
+    function self:up()
+        if list_i - 1 >= 1 then
+            self:move_highlight_to(list_i,list_i - 1)
+            if vis_loc == 1 then
+                self:move_list(-(list_i -1)*(grey_rect.h))
+                arrow_dn.opacity=255
+                if list_i == 1 then
+                    arrow_up.opacity=0
+                end
+            else
+                vis_loc = vis_loc - 1
+                
+                if vis_loc == 1 then
+                    self:move_list(-(list_i -1)*(grey_rect.h))
+                end
+            end
+        else
+        --[[
+            if highlight_timeline ~= nil then
+                highlight_timeline:stop()
+                highlight_timeline:on_completed()
+            end
+            if move_timeline ~= nil then
+                move_timeline:stop()
+                move_timeline:on_completed()
+            end
+            fp.focus = "TITLECARDS"
+            self:lose_focus()
+            fp.title_card_bar:receive_focus()
+            --]]
+        end
+    end
+    
+    function self:down()
+        if list_i + 1 <= #listings then
+            self:move_highlight_to(list_i,list_i + 1)
+            if vis_loc == max_on_screen then
+                self:move_list(-(list_i -max_on_screen)*(grey_rect.h))
+                arrow_up.opacity=255
+                if list_i == #listings then
+                    arrow_dn.opacity=0
+                end
+            else
+                vis_loc = vis_loc + 1
+                
+                if vis_loc == max_on_screen then
+                    self:move_list(-(list_i -max_on_screen)*(grey_rect.h))
+                end
+            end
+        end
+    end
+    function self:return_to_prev()
+        self:lose_focus()
+        prev:receive_focus()
+        sp.focus = prev_f
+    end
+--[[
+    function self:enter()
+        if highlight_timeline ~= nil then
+            highlight_timeline:stop()
+            highlight_timeline:on_completed()
+        end
+        if move_timeline ~= nil then
+            move_timeline:stop()
+            move_timeline:on_completed()
+        end
+        page = "sp"
+        fp_group:hide()
+        sp_group:show()
+        listings[list_i].obj.tweetstream:get_group():unparent()
+        listings[list_i].obj.tweetstream:out_view()
+        sp.tweetstream:display(listings[list_i].obj)
+        listings[list_i].obj.tweetstream:receive_focus()
+    end
+    --]]
 end)
 
 --Container for the TweetStream
@@ -228,10 +537,16 @@ local TweetStream_Container = Class(function(self,...)
         end
     end
 
+    function self:go_to_options()
+        fp.focus = "OPTIONS"
+        self:lose_focus()
+        fp.options:receive_focus(fp.title_card_bar,"TITLECARDS")
+    end
 end)
 sp = {
     tweetstream = TweetStream_Container(),
     banner      = Banner(),
+    --options    = Options(),
     focus       = "TWEETSTREAM",
     keys        = {
     --[[
@@ -246,7 +561,21 @@ sp = {
                 sp.banner:enter()
             end,
         },
-    --]]
+        ["OPTIONS"] = {
+            [keys.Down] = function()
+                sp.options:down()
+            end,
+            [keys.Up] = function()
+                sp.options:up()
+            end,
+            [keys.Return] = function()
+                sp.options:enter()
+            end,
+            [keys.F10] = function()
+                sp.options:return_to_prev()
+            end,
+        },
+        --]]
         ["TWEETSTREAM"] = {
             [keys.Down] = function()
                 sp.tweetstream:down()
@@ -257,14 +586,32 @@ sp = {
             [keys.Return] = function()
                 --sp.tweetstream:enter()
             end,
+            --[[
             [keys.BackSpace] = function()
+                sp.tweetstream:going_back()
+            end,
+            --]]
+            [keys.BACK] = function()
+                sp.tweetstream:going_back()
+            end,
+            [keys.F9] = function()
                 sp.tweetstream:going_back()
             end,
             [keys.YELLOW] = function()
                 sp.tweetstream:go_to_minimized()
             end,
-            [keys.F11] = function()
+            [keys.F7] = function()
                 sp.tweetstream:go_to_minimized()
+            end,
+            [keys.F8] = function()
+                sp.tweetstream:go_to_options()
+            end,
+            [keys.p] = function()
+                if mediaplayer.state == mediaplayer.PAUSED then
+                    mediaplayer:play()
+                else
+                    mediaplayer:pause()
+                end
             end,
         }
     }
