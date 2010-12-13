@@ -138,8 +138,7 @@ mp = {
             [keys.F7] = function()
                 mp.tweetstream:going_back()
             end,
-            [keys.p] = function()
-            print("why")
+            [keys["0"]] = function()
                 if mediaplayer.state == mediaplayer.PAUSED then
                     mediaplayer:play()
                 else
