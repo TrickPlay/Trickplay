@@ -1,3 +1,6 @@
+dofile("util.lua") --1209
+
+local factory = ui.factory
 
 function inspector_apply (v, inspector)
       local org_object, new_object, color_t 
@@ -24,17 +27,97 @@ function inspector_apply (v, inspector)
 	  local i_name = inspector:find_child("name"):find_child("input_text").text
 	  i_name = string.gsub(i_name, "%A", "_")
 	  if(is_available(i_name) == true) then 
-               v.name = i_name--inspector:find_child("name"):find_child("input_text").text
+               v.name = i_name --inspector:find_child("name"):find_child("input_text").text
 	  end
           new_object.name = v.name
 
           org_object.x = v.x
           v.x = tonumber(inspector:find_child("x"):find_child("input_text").text)
-          new_object.x = v.x
 
           org_object.y = v.y
-          v.y = tonumber(inspector:find_child("y"):find_child("input_text").text)
-          new_object.y = v.y
+          v.y = tonumber(inspector:find_child("y"):find_child("input_text").text) 
+
+---[[ 스크롤되는 영역 넓히는 코드 
+	if(v.y + v.h > g.extra.canvas_t or v.y < g.extra.canvas_f or  
+	   v.x + v.w > g.extra.canvas_xt or v.x < g.extra.canvas_xf) then 
+	       v.extra.org_y = v.y 
+	       v.extra.org_x = v.x 
+
+	       if(g:find_child("screen_rect") ~= nil) then 
+                    g:remove(g:find_child("screen_rect"))
+	       end 
+
+	       if (screen:find_child("scroll_bar") ~= nil) then 
+	            screen:remove(screen:find_child("scroll_bar")) 
+	            screen:remove(screen:find_child("scroll_box")) 
+		    screen:remove(screen:find_child("y_0_mark"))
+		    screen:remove(screen:find_child("y_1080_mark"))
+	       end 
+
+	       if (screen:find_child("xscroll_bar") ~= nil) then 
+	            screen:remove(screen:find_child("xscroll_bar")) 
+	            screen:remove(screen:find_child("xscroll_box")) 
+		    screen:remove(screen:find_child("x_0_mark"))
+		    screen:remove(screen:find_child("x_1920_mark"))
+	       end 
+
+	       for n,m in pairs (g.children) do 
+	            m.y = m.extra.org_y
+	            m.x = m.extra.org_x
+	       end 
+
+	       local x_scroll_from = 0 
+	       local x_scroll_to = 0  
+	       local y_scroll_from = 0
+	       local y_scroll_to = 0 
+
+	       if (v.y + v.h > g.extra.canvas_t) then 
+		    y_scroll_to = v.y + v.h
+	       else 
+		    y_scroll_from = v.y
+	       end 
+			
+	       if (v.x + v.w > g.extra.canvas_xt) then 
+		    x_scroll_to = v.x + v.w 
+	       else 
+		    x_scroll_from = v.x
+	       end 
+		
+	       if (x_scroll_from == 0) then 
+	            x_scroll_from = g.extra.canvas_xf
+	       end 
+	       if (x_scroll_to == 0) then 
+	            x_scroll_to = g.extra.canvas_xt
+	       end 
+	       if (y_scroll_from == 0) then 
+	            y_scroll_from = g.extra.canvas_f
+	       end 
+	       if (y_scroll_to == 0) then 
+	            y_scroll_to = g.extra.canvas_t
+	       end 
+		
+	       make_scroll(x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
+
+	       for i,j in pairs(g.children) do 
+		    if(g.extra.canvas_f < 0) then
+			j.y = j.y - g.extra.canvas_f
+		    end 
+		    if(g.extra.canvas_xf < 0) then
+			j.x = j.x - g.extra.canvas_xf
+		    end 
+	       end 
+	  else 
+	       v.extra.org_x = v.x
+               v.x = math.floor(tonumber(inspector:find_child("x"):find_child("input_text").text) - g.extra.scroll_x-g.extra.canvas_xf) 
+	       v.extra.org_y = v.y
+               v.y = math.floor(tonumber(inspector:find_child("y"):find_child("input_text").text) - g.extra.scroll_y-g.extra.canvas_f) 
+          end 
+--]]
+
+---[[ -- 스크롤되는 영역 넓히는 코드 
+	  --]]
+          new_object.x = v.x
+          new_object.y = v.y 
 
           org_object.z = v.z
           v.z = tonumber(inspector:find_child("z"):find_child("input_text").text)

@@ -425,10 +425,34 @@ local function build_ui( show_it )
         				    ui.bar:show()
         				    ui:animate_in()
    	        			    ui.bar:raise_to_top()  
+					    if(screen:find_child("xscroll_bar") ~= nil) then 
+					    	screen:find_child("xscroll_bar"):show() 
+						screen:find_child("xscroll_box"):show() 
+						screen:find_child("x_0_mark"):show()
+						screen:find_child("x_1920_mark"):show()
+					    end 
+					    if(screen:find_child("scroll_bar") ~= nil) then 
+		 				screen:find_child("scroll_bar"):show() 
+						screen:find_child("scroll_box"):show() 
+						screen:find_child("y_0_mark"):show()
+						screen:find_child("y_1080_mark"):show()
+					    end 
 					    menu_hide = false 
 				       else 
         	     			    animate_out_dropdown()
 		     			    ui:hide()
+					    if(screen:find_child("xscroll_bar") ~= nil) then 
+					    	screen:find_child("xscroll_bar"):hide() 
+						screen:find_child("xscroll_box"):hide() 
+						screen:find_child("x_0_mark"):hide()
+						screen:find_child("x_1920_mark"):hide()
+					    end 
+					    if(screen:find_child("scroll_bar") ~= nil) then 
+		 				screen:find_child("scroll_bar"):hide() 
+						screen:find_child("scroll_box"):hide() 
+						screen:find_child("y_0_mark"):hide()
+						screen:find_child("y_1080_mark"):hide()
+					    end 
 					    menu_hide = true 
 					    screen:grab_key_focus()
 				       end 
@@ -686,7 +710,6 @@ local function build_ui( show_it )
 
           if dragging then
                local actor , dx , dy = unpack( dragging )
-	
 	       local border = screen:find_child(actor.name.."border")
 	       if(border ~= nil) then 
 		    if (actor.extra.is_in_group == true) then
@@ -696,22 +719,88 @@ local function build_ui( show_it )
 	                 border.position = {x -dx, y -dy}
 		    end 
 	       end 
+	      
+
 	       if(actor.type ~= "Canvas") then 
+	            actor.y =  y - dy  
 	            actor.x =  x - dx 
-	       end 
-	       if(actor.type ~= "Canvas") then 
-	             actor.y =  y - dy  
-	       elseif (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 
-		     local dif = y - dy - actor.extra.org_y
-	             actor.y =  y - dy  
-		     actor.extra.text_position = {actor.extra.text_position[1], actor.extra.txt_y -dif}
-		     actor.extra.text_clip = {0,dif,actor.extra.text_clip[3],500}
-	       end 	
+	       else
+		    if(actor.extra.h_y) then 
+	                local dif 
+			if(actor.extra.h_y <= y-dy and y-dy <= actor.extra.l_y) then 
+		             dif = y - dy - actor.extra.org_y
+	                     actor.y =  y - dy  
+			elseif (actor.extra.h_y > y-dy ) then
+				dif = actor.extra.h_y - actor.extra.org_y 
+	           		actor.y = actor.extra.h_y
+	      		elseif (actor.extra.l_y < y-dy ) then
+				dif = actor.extra.l_y- actor.extra.org_y 
+	           		actor.y = actor.extra.l_y
+			end 
+		        if(actor.extra.text_position) then 
+		              actor.extra.text_position = {actor.extra.text_position[1], actor.extra.txt_y -dif}
+		              actor.extra.text_clip = {0, dif, actor.extra.text_clip[3], 500}
+		        else 
+			      dif = dif * g.extra.scroll_dy
+			      for i,j in pairs (g.children) do 
+	           	           j.position = {j.x, j.extra.org_y- dif - g.extra.canvas_f, j.z}
+			      end 
+			      
+			      if table.getn(selected_objs) ~= 0 then
+			      	for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+			              t_border.y = t_obj.y 
+				 end
+			     	end
+			      end
+
+			      g.extra.scroll_y = math.floor(dif) -- + 1
+		       end 
+		    end
+
+		    if(actor.extra.h_x) then 
+	                local dif 
+	                if (actor.extra.h_x <= x-dx and x-dx <= actor.extra.l_x) then 
+		             dif = x - dx - actor.extra.org_x
+	                     actor.x =  x - dx  
+			elseif(actor.extra.h_x > x-dx) then 
+			     dif = actor.extra.h_x - actor.extra.org_x
+			     actor.x = actor.extra.h_x
+			elseif(actor.extra.l_x < x-dx) then 
+			     dif = actor.extra.l_x - actor.extra.org_x
+			     actor.x = actor.extra.l_x
+		        end 
+		        dif = dif * g.extra.scroll_dx
+		        for i,j in pairs (g.children) do 
+	           	     j.position = {j.extra.org_x- dif - g.extra.canvas_xf, j.y, j.z}
+		        end 
+
+
+			if table.getn(selected_objs) ~= 0 then
+			     for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+			              t_border.x = t_obj.x 
+				      screen:remove(screen:find_child(t_obj.name.."a_m"))
+				 end
+			     end
+			end
+
+		        g.extra.scroll_x = math.floor(dif) -- + 1
+	            end 
+	       end
+
 	       if (screen:find_child(actor.name.."a_m") ~= nil) then 
 		     local anchor_mark = screen:find_child(actor.name.."a_m")
 		     anchor_mark.position = {actor.x, actor.y, actor.z}
                end
           end
+
           if(mouse_state == BUTTON_DOWN) then
                if (input_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
                if (input_mode == S_SELECT) and 

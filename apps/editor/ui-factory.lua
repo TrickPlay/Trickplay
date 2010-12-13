@@ -691,6 +691,66 @@ end
 -- Makes a scroll bar item
 -------------------------------------------------------------------------------
 
+
+function factory.make_y_scroll_box()
+    local PADDING_X     = 5 --7
+    local PADDING_Y     = 5 --7
+    local WIDTH         = 50
+    local HEIGHT        = screen.h - 90 - 70 -- 90 is the menu bar height  
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 1
+    
+    local function make_ring()
+        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+    end
+    ring = make_ring ()
+
+    ring.name = "scroll_box"
+    return ring
+end
+
+
+function factory.make_x_scroll_box()
+    local PADDING_X     = 5 
+    local PADDING_Y     = 5
+    local WIDTH         = screen.w - 70 
+    local HEIGHT        = 50
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 1
+    
+    local function make_ring()
+        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+    end
+    ring = make_ring ()
+    ring.name = "xscroll_box"
+    return ring
+end
+
+
 function factory.make_msgw_scroll_box()
 
     local PADDING_X     = 7 
@@ -719,6 +779,78 @@ function factory.make_msgw_scroll_box()
     return ring
 end
 
+function factory.make_x_scroll_bar(canvas_sz)
+
+    local PADDING_X     = 5 
+    local PADDING_Y     = 5
+    local WIDTH         = screen.w - 70 
+    local HEIGHT        = 50 
+    local S_HEIGHT      = 42
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+
+    local S_WIDTH       = WIDTH / (canvas_sz/screen.w)
+    
+    local function make_scroll_bar()
+        local ring = Canvas{ size = { S_WIDTH , S_HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+	ring:fill()
+        ring:finish_painting()
+        return ring
+    end
+
+    local scroll_bar = make_scroll_bar ()
+    
+    scroll_bar.name = "xscroll_bar"
+    scroll_bar.reactive = true 
+    
+    return scroll_bar
+end
+
+function factory.make_y_scroll_bar(canvas_sz)
+
+    local PADDING_X     = 5 
+    local PADDING_Y     = 5
+    local WIDTH         = 50
+    local SCROLL_Y_POS  = 90
+    local HEIGHT        = screen.h - SCROLL_Y_POS -70
+    local S_WIDTH       = 42
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+    
+    local S_HEIGHT = HEIGHT / (canvas_sz/screen.h)
+
+    local function make_scroll_bar()
+        local ring = Canvas{ size = { S_WIDTH , S_HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+	ring:fill()
+        ring:finish_painting()
+        return ring
+    end
+
+    local scroll_bar = make_scroll_bar ()
+    
+    scroll_bar.name = "scroll_bar"
+    scroll_bar.reactive = true 
+    
+    return scroll_bar
+end
 
 function factory.make_msgw_scroll_bar(file_list_size)
 
