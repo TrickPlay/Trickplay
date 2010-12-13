@@ -563,6 +563,38 @@ function get_best_cards(hand)
     return poker_hand.get_best(hand)
 end
 
+function get_best_5(hand)
+    local orig_hand = {}
+    for i,card in ipairs(hand) do
+        orig_hand[i] = card
+    end
+    local tmp_hand = get_best_cards(hand)
+    for i = #orig_hand,1,-1 do
+        for j = 1,#tmp_hand do
+            if orig_hand[i] == tmp_hand[j] then
+                table.remove(orig_hand, i)
+                break
+            end
+        end
+    end
+
+    if #tmp_hand >= 5 then return tmp_hand end
+    
+    local card
+    for i = 5-#tmp_hand,1,-1 do
+        card = HIGH_CARD.get_best(orig_hand)
+        for i,v in ipairs(orig_hand) do
+            if v == card then
+                table.remove(orig_hand, i)
+                break
+            end
+        end
+        table.insert(tmp_hand, card)
+    end
+
+    return tmp_hand
+end
+
 PokerHands = {
    STRAIGHT_FLUSH,
    FOUR_OF_A_KIND,

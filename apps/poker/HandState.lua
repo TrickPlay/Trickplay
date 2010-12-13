@@ -56,6 +56,24 @@ HandState = Class(nil,function(state, ctrl, ...)
       end
       return in_players
    end
+   function state:get_in_hands()
+      local in_players = state:get_in_players()
+      assert(#in_players > 1)
+
+      -- get all the players' hands
+      local in_hands = {}
+      for _, player in ipairs(in_players) do
+         local hand = {}
+         for _, card in ipairs(hole_cards[player]) do
+            table.insert(hand, card)
+         end
+         for _, card in ipairs(community_cards) do
+            table.insert(hand, card)
+         end
+         in_hands[player] = get_best_5(hand)
+      end
+      return in_hands
+   end
    function state:get_final_hands() return final_hands end
    function state:get_orig_bet()
       return player_bets[state:get_active_player()]
@@ -449,17 +467,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       assert(#in_players > 1)
 
       -- get all the players' hands
-      local in_hands = {}
-      for _, player in ipairs(in_players) do
-         local hand = {}
-         for _, card in ipairs(hole_cards[player]) do
-            table.insert(hand, card)
-         end
-         for _, card in ipairs(community_cards) do
-            table.insert(hand, card)
-         end
-         in_hands[player] = hand
-      end
+      local in_hands = state:get_in_hands()
       final_hands = {}
 
       local best = in_players[1]

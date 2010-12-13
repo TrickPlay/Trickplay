@@ -41,6 +41,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl:get_deck() return state:get_deck() end
    function ctrl:get_round() return round end
    function ctrl:get_out_table() return state:get_out_table() end
+   function ctrl:get_in_hands() return state:get_in_hands() end
    function ctrl:get_final_hands() return state:get_final_hands() end
 
    -- private functions

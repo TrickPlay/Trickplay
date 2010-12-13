@@ -234,13 +234,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
           card.group.opacity = 140
       end
       local final_hands = ctrl:get_final_hands()
+      local in_hands = ctrl:get_in_hands()
       da_clones = {}
       local length = 0
-      for i,hand in pairs(final_hands) do
+      for i,hand in pairs(in_hands) do
          length = length + 1
       end
       local counter = 0
-      for player,hand in pairs(final_hands) do
+      for player,hand in pairs(in_hands) do
          for i,card in ipairs(hand) do
             local clone = Clone{
                name = "card_clone"..i,
