@@ -576,6 +576,11 @@ static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode 
             * keyval = TP_KEY_BLUE;
             * unicode = 0;
             break;
+
+        case CLUTTER_F9:
+            * keyval = TP_KEY_BACK;
+            * unicode = 0;
+            break;
     }
 }
 
