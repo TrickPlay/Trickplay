@@ -470,12 +470,12 @@ end,
             
             if y > screen_h - my_plane_sz then
                 
-                self.y = screen_h -my_plane_sz 
+                y = screen_h -my_plane_sz 
                 self.v_speed = 0
                 
             elseif y < 0 then
                 
-                self.y = 0
+                y = 0
                 self.v_speed = 0
                 
             else
@@ -488,7 +488,7 @@ end,
                 end
             end
             
-            self.group.y = y--math.ceil(self.y/4)*4
+            self.group.y = y
             self.coll_box.x1  = self.group.x+20
             self.coll_box.x2  = self.group.x+self.image.w/(self.num_frames)-20
             self.coll_box.y1  = self.group.y+20
