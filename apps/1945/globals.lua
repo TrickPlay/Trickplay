@@ -123,7 +123,7 @@ screen:add(
 
 -- Base images for cloning
 imgs =
-{
+{---[[
     --BACKGROUND/SCENERY/LEVEL OBJECTS/ETC
     water1          = Image{ src = "assets/lvls/bg_tiles/water1.png" },
     water2          = Image{ src = "assets/lvls/bg_tiles/water2.png" },
@@ -151,18 +151,11 @@ imgs =
     dock_2_6        = Image{ src = "assets/lvls/harbor/harbor_2_6.png"},
     dock_2_7        = Image{ src = "assets/lvls/harbor/harbor_2_7.png"},
     --LVL3
-    dirt_full       = Image{ src = "assets/lvls/bg_tiles/dirt1.png"},
-    dirt_half       = Image{ src = "assets/lvls/bg_tiles/dirt2.png"},
-    dirt_diag_big   = Image{ src = "assets/lvls/bg_tiles/dirt3.png"},
-    dirt_diag_sm    = Image{ src = "assets/lvls/bg_tiles/dirt4.png"},
+
     dirt_area_1     = Image{ src = "assets/lvls/bg_tiles/dirt_area1.png"},
     dirt_area_2     = Image{ src = "assets/lvls/bg_tiles/dirt_area2.png"},
     dirt_area_3     = Image{ src = "assets/lvls/bg_tiles/dirt_area3.png"},
-    --[[
-    road_straight   = Image{ src = "assets/lvls/bg_tiles/road1.png"},
-    road_diagonal1  = Image{ src = "assets/lvls/bg_tiles/road2.png"},
-    road_diagonal2  = Image{ src = "assets/lvls/bg_tiles/road3.png"},
-    --]]
+
     road_ver        = Image{ src = "assets/lvls/road/road-vertical.png"},
     road_hor        = Image{ src = "assets/lvls/road/road-horizontal.png"},
     road_left       = Image{ src = "assets/lvls/road/road-left.png"},
@@ -184,7 +177,7 @@ imgs =
     life            = Image{ src = "assets/player/life.png"},
     my_shadow       = Image{ src = "assets/player/player_shadow.png"},
     my_prop         = Image{ src = "assets/player/player_prop.png"},
-    target          = Image{ src = "assets/player/target_strip.png"},
+    --target          = Image{ src = "assets/player/target_strip.png"},
     smoke           = Image{ src = "assets/fx/smoke.png"},
     impact          = Image{ src = "assets/player/bullet_impact.png"},
     medal_1         = Image{ src = "assets/splash/WingmanMedal.png"},
@@ -210,9 +203,9 @@ imgs =
     
     --TURRET ASSETS
     turret          = Image{ src = "assets/enemies/turret/turret.png" },
+    
     t_bullet        = Image{ src = "assets/enemies/turret/turret_bullet.png" },
     flak            = Image{ src = "assets/fx/flak.png"},
-    
     --DESTROYER ASSETS
     dest            = Image{ src = "assets/enemies/dest/destroyer.png"},
     dest_sunk       = Image{ src = "assets/enemies/dest/destroyer_sunk.png"},
@@ -220,12 +213,7 @@ imgs =
     --BATTLESHIP ASSETS
     b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" },
     b_ship_sunk     = Image{ src = "assets/enemies/b_ship/battleship_sunk.png" },
-    ---[[
-    bbow_wake_1      = Image{ src = "assets/enemies/b_ship/bow_wake1.png"},
-    bbow_wake_2      = Image{ src = "assets/enemies/b_ship/bow_wake2.png"},
-    bbow_wake_3      = Image{ src = "assets/enemies/b_ship/bow_wake3.png"},
-    bbow_wake_4      = Image{ src = "assets/enemies/b_ship/bow_wake4.png"},
-    --]]
+
     laminar         = Image{ src = "assets/enemies/b_ship/bship_laminar.png"},
 
     bow_wake_1      = Image{ src = "assets/enemies/b_ship/bw1.png"},
@@ -236,11 +224,6 @@ imgs =
     bow_wake_6      = Image{ src = "assets/enemies/b_ship/bw6.png"},
     bow_wake_7      = Image{ src = "assets/enemies/b_ship/bw7.png"},
     bow_wake_8      = Image{ src = "assets/enemies/b_ship/bw8.png"},
-    stern_wake_1    = Image{ src = "assets/enemies/b_ship/stern_wake1.png"},
-    stern_wake_2    = Image{ src = "assets/enemies/b_ship/stern_wake2.png"},
-    stern_wake_3    = Image{ src = "assets/enemies/b_ship/stern_wake3.png"},
-    stern_wake_4    = Image{ src = "assets/enemies/b_ship/stern_wake4.png"},
-    stern_wake_5    = Image{ src = "assets/enemies/b_ship/stern_wake5.png"},
 
     --FIGHTER ASSETS
     fighter         = Image{ src = "assets/enemies/fighter/fighter.png"   },
@@ -285,8 +268,192 @@ imgs =
     boss_prop       = Image{ src = "assets/enemies/final_boss/prop-big-strip-2x118px.png"},
     boss_prop_d     = Image{ src = "assets/enemies/final_boss/prop-big-strip-2x118px_destroyed.png"},
     boss_turret     = Image{ src = "assets/enemies/final_boss/boss_turret.png"},
-    splash          = Image{ src = "assets/fx/splash.png"},
+    splash          = Image{ src = "assets/fx/splash.png"},--]]
 }
+--[[
+function load_base()
+    imgs.water1          = Image{ src = "assets/lvls/bg_tiles/water1.png" }
+    imgs.explosion1      = Image{ src = "assets/fx/explosion1_strip6.png" }
+    imgs.explosion3      = Image{ src = "assets/fx/explosion3_strip7.png" }
+    imgs.health          = Image{ src="assets/player/health.png"}
+    imgs.guns            = Image{ src="assets/player/2xfire.png"}
+    imgs.up_life         = Image{ src="assets/player/up_life.png"}
+    imgs.health_g        = Image{ src="assets/player/health_g.png"}
+    imgs.guns_g          = Image{ src="assets/player/2xfire_g.png"}
+    imgs.up_life_g       = Image{ src="assets/player/up_life_g.png"}
+    
+    imgs.my_plane_strip  = Image{ src = "assets/player/player_strip.png" }
+    imgs.my_bullet       = Image{ src = "assets/player/bullet.png" }
+    imgs.my_bomb         = Image{ src = "assets/player/fat_man.png" }
+    imgs.life            = Image{ src = "assets/player/life.png"}
+    imgs.my_shadow       = Image{ src = "assets/player/player_shadow.png"}
+    imgs.my_prop         = Image{ src = "assets/player/player_prop.png"}
+    imgs.smoke           = Image{ src = "assets/fx/smoke.png"}
+    imgs.impact          = Image{ src = "assets/player/bullet_impact.png"}
+    imgs.medal_1         = Image{ src = "assets/splash/WingmanMedal.png"}
+    imgs.medal_1_sm      = Image{ src = "assets/splash/WingmanMedal_sm.png"}
+    imgs.medal_2         = Image{ src = "assets/splash/PilotMedal.png"}
+    imgs.medal_2_sm      = Image{ src = "assets/splash/PilotMedal_sm.png"}
+    imgs.medal_3         = Image{ src = "assets/splash/AceMedal.png"}
+    imgs.medal_3_sm      = Image{ src = "assets/splash/AceMedal_sm.png"}
+    imgs.medal_4         = Image{ src = "assets/splash/MedalofVictory.png"}
+    imgs.medal_4_sm      = Image{ src = "assets/splash/MedalofVictory_sm.png"}
+end
+function load_lvl_1_images()
+    print("aassa")
+    for k , v in pairs( imgs ) do
+        v:unparent()
+    end
+    imgs={}
+    load_base()
+    
+    imgs.island1         = Image{ src = "assets/lvls/islands/island1.png" }
+    imgs.island2         = Image{ src = "assets/lvls/islands/island2.png" }
+    imgs.island3         = Image{ src = "assets/lvls/islands/island3.png" }
+    imgs.cloud1          = Image{ src = "assets/lvls/clouds/cloud1.png"}
+    imgs.cloud2          = Image{ src = "assets/lvls/clouds/cloud2.png"}
+    imgs.cloud3          = Image{ src = "assets/lvls/clouds/cloud3.png"}
+    --FIGHTER ASSETS
+    imgs.fighter         = Image{ src = "assets/enemies/fighter/fighter.png"   }
+    imgs.fighter_r       = Image{ src = "assets/enemies/fighter/fighter_r.png"   }
+    imgs.fighter_w       = Image{ src = "assets/enemies/fighter/fighter_w.png"   }
+    imgs.fighter_bullet  = Image{ src = "assets/enemies/fighter/fighter_bullet.png" }
+    imgs.fighter_prop    = Image{ src = "assets/enemies/fighter/fighter_prop.png" }
+    
+    --ZEPPELIN ASSETS
+    imgs.zepp            = Image{ src = "assets/enemies/zepp/zeppelin.png" }
+    imgs.z_bullet        = Image{ src = "assets/enemies/zepp/zepp_bullet.png" }
+    imgs.zepp_prop       = Image{ src = "assets/enemies/zepp/zepp_prop.png" }
+    imgs.z_cannon_l      = Image{ src = "assets/enemies/zepp/cannon_left.png" }
+    imgs.z_cannon_r      = Image{ src = "assets/enemies/zepp/cannon_right.png"}
+    imgs.z_barrel        = Image{ src = "assets/enemies/zepp/cannon_barrel.png"}
+    imgs.z_d_1           = Image{ src = "assets/enemies/zepp/zep_dmg1.png"}
+    imgs.z_d_2           = Image{ src = "assets/enemies/zepp/zep_dmg2.png"}
+    imgs.z_d_3           = Image{ src = "assets/enemies/zepp/zep_dmg3.png"}
+    imgs.z_d_4           = Image{ src = "assets/enemies/zepp/zep_dmg4.png"}
+    imgs.z_d_5           = Image{ src = "assets/enemies/zepp/zep_dmg5.png"}
+    imgs.z_d_6           = Image{ src = "assets/enemies/zepp/zep_dmg6.png"}
+    imgs.z_d_7           = Image{ src = "assets/enemies/zepp/zep_dmg7.png"}
+    imgs.z_d_e           = Image{ src = "assets/enemies/zepp/zep_dmg_engine.png"}
+    imgs.engine_fire     = Image{ src = "assets/fx/engine-fire.png"}
+    for _ , v in pairs( imgs ) do
+        screen:add( v )
+        v:hide()
+    end
+end
+function load_lvl_2_images()
+    for k , v in pairs( imgs ) do
+        v:unparent()
+    end
+    imgs={}
+    load_base()
+    imgs.water2          = Image{ src = "assets/lvls/bg_tiles/water2.png" }
+    imgs.dock_1_1        = Image{ src = "assets/lvls/harbor/harbor_1_1.png"}
+    imgs.dock_1_2        = Image{ src = "assets/lvls/harbor/harbor_1_2.png"}
+    imgs.dock_1_3        = Image{ src = "assets/lvls/harbor/harbor_1_3.png"}
+    imgs.dock_1_4        = Image{ src = "assets/lvls/harbor/harbor_1_4.png"}
+    imgs.dock_1_5        = Image{ src = "assets/lvls/harbor/harbor_1_5.png"}
+    imgs.dock_1_6        = Image{ src = "assets/lvls/harbor/harbor_1_6.png"}
+    imgs.dock_1_7        = Image{ src = "assets/lvls/harbor/harbor_1_7.png"}
+    imgs.dock_2_1        = Image{ src = "assets/lvls/harbor/harbor_2_1.png"}
+    imgs.dock_2_2        = Image{ src = "assets/lvls/harbor/harbor_2_2.png"}
+    imgs.dock_2_3        = Image{ src = "assets/lvls/harbor/harbor_2_3.png"}
+    imgs.dock_2_4        = Image{ src = "assets/lvls/harbor/harbor_2_4.png"}
+    imgs.dock_2_5        = Image{ src = "assets/lvls/harbor/harbor_2_5.png"}
+    imgs.dock_2_6        = Image{ src = "assets/lvls/harbor/harbor_2_6.png"}
+    imgs.dock_2_7        = Image{ src = "assets/lvls/harbor/harbor_2_7.png"}
+    --TURRET ASSETS
+    imgs.turret          = Image{ src = "assets/enemies/turret/turret.png" }
+    
+    --DESTROYER ASSETS
+    imgs.dest            = Image{ src = "assets/enemies/dest/destroyer.png"}
+    imgs.dest_sunk       = Image{ src = "assets/enemies/dest/destroyer_sunk.png"}
+    imgs.rear_wake       = Image{ src = "assets/enemies/b_ship/stern_wake_strip.png"}
+    --BATTLESHIP ASSETS
+    imgs.b_ship          = Image{ src = "assets/enemies/b_ship/battleship.png" }
+    imgs.b_ship_sunk     = Image{ src = "assets/enemies/b_ship/battleship_sunk.png" }
+
+    imgs.laminar         = Image{ src = "assets/enemies/b_ship/bship_laminar.png"}
+
+    imgs.bow_wake_1      = Image{ src = "assets/enemies/b_ship/bw1.png"}
+    imgs.bow_wake_2      = Image{ src = "assets/enemies/b_ship/bw2.png"}
+    imgs.bow_wake_3      = Image{ src = "assets/enemies/b_ship/bw3.png"}
+    imgs.bow_wake_4      = Image{ src = "assets/enemies/b_ship/bw4.png"}
+    imgs.bow_wake_5      = Image{ src = "assets/enemies/b_ship/bw5.png"}
+    imgs.bow_wake_6      = Image{ src = "assets/enemies/b_ship/bw6.png"}
+    imgs.bow_wake_7      = Image{ src = "assets/enemies/b_ship/bw7.png"}
+    imgs.bow_wake_8      = Image{ src = "assets/enemies/b_ship/bw8.png"}
+    imgs.splash          = Image{ src = "assets/fx/splash.png"}
+    imgs.t_bullet        = Image{ src = "assets/enemies/turret/turret_bullet.png" }
+    imgs.flak            = Image{ src = "assets/fx/flak.png"}
+    for _ , v in pairs( imgs ) do
+        screen:add( v )
+        v:hide()
+    end
+end
+function load_lvl_3_images()
+    for k , v in pairs( imgs ) do
+        v:unparent()
+    end
+    imgs={}
+    load_base()
+    imgs.grass1          = Image{ src = "assets/lvls/bg_tiles/grass1.png"}
+    imgs.dirt_area_1     = Image{ src = "assets/lvls/bg_tiles/dirt_area1.png"}
+    imgs.dirt_area_2     = Image{ src = "assets/lvls/bg_tiles/dirt_area2.png"}
+    imgs.dirt_area_3     = Image{ src = "assets/lvls/bg_tiles/dirt_area3.png"}
+    
+    imgs.road_ver        = Image{ src = "assets/lvls/road/road-vertical.png"}
+    imgs.road_hor        = Image{ src = "assets/lvls/road/road-horizontal.png"}
+    imgs.road_left       = Image{ src = "assets/lvls/road/road-left.png"}
+    imgs.road_right      = Image{ src = "assets/lvls/road/road-right.png"}
+    imgs.building_sm     = Image{ src = "assets/lvls/buildings/building1.png"}
+    imgs.building_1_1    = Image{ src = "assets/lvls/buildings/building1_1.png"}
+    imgs.building_1_1_d  = Image{ src = "assets/lvls/buildings/building1_1_destroyed.png"}
+    imgs.building_1_2    = Image{ src = "assets/lvls/buildings/building1_2.png"}
+    imgs.building_1_2_d  = Image{ src = "assets/lvls/buildings/building1_2_destroyed.png"}
+    imgs.building_big    = Image{ src = "assets/lvls/buildings/building2.png"}
+    imgs.building_big_d  = Image{ src = "assets/lvls/buildings/building2_destroyed.png"}
+    imgs.trees           = Image{ src = "assets/lvls/bg_tiles/trees.png"}
+    --TANK ASSETS
+    imgs.tank_strip      = Image{ src = "assets/enemies/tank/flaktank.png"}
+    imgs.tank_turret     = Image{ src = "assets/enemies/tank/tankturret.png"}
+    --JEEP ASSETS
+    imgs.jeep            = Image{ src = "assets/enemies/jeep/jeep.png"}
+    imgs.jeep_b          = Image{ src = "assets/enemies/jeep/jeep_b.png"}
+    --TRENCH
+    imgs.trench_l        = Image{ src = "assets/enemies/trench/trench1.png"}
+    imgs.trench_gun      = Image{ src = "assets/enemies/trench/trench2.png"}
+    imgs.trench_crater   = Image{ src = "assets/enemies/trench/trench2_crater.png"}
+    imgs.trench_reg      = Image{ src = "assets/enemies/trench/trench3.png"}
+    imgs.trench_r        = Image{ src = "assets/enemies/trench/trench4.png"}
+    imgs.trench_bullet   = Image{ src = "assets/enemies/trench/mortar_round.png"}
+    imgs.t_bullet        = Image{ src = "assets/enemies/turret/turret_bullet.png" }
+    imgs.flak            = Image{ src = "assets/fx/flak.png"}
+    for _ , v in pairs( imgs ) do
+        screen:add( v )
+        v:hide()
+    end
+end
+function load_lvl_4_images()
+    for k , v in pairs( imgs ) do
+        v:unparent()
+    end
+    imgs={}
+    load_base()
+    imgs.grass1          = Image{ src = "assets/lvls/bg_tiles/grass1.png"}
+    imgs.imgs.water2     = Image{ src = "assets/lvls/bg_tiles/water2.png" }
+    --FINAL BOSS ASSETS
+    imgs.final_boss      = Image{ src = "assets/enemies/final_boss/boss3.png"}
+    imgs.boss_prop       = Image{ src = "assets/enemies/final_boss/prop-big-strip-2x118px.png"}
+    imgs.boss_prop_d     = Image{ src = "assets/enemies/final_boss/prop-big-strip-2x118px_destroyed.png"}
+    imgs.boss_turret     = Image{ src = "assets/enemies/final_boss/boss_turret.png"}
+    imgs.splash          = Image{ src = "assets/fx/splash.png"}
+    for _ , v in pairs( imgs ) do
+        screen:add( v )
+        v:hide()
+    end
+end
+--]]
 txt =
 {
     score = Text
@@ -321,6 +488,7 @@ txt =
     },
 }
 --hide the base images and add them to screen
+--load_base()
 for _ , v in pairs( imgs ) do
     screen:add( v )
     v:hide()
@@ -344,6 +512,10 @@ function clamp( v , min , max )
     end
 
 end
+
+
+
+
 
 recurse_and_apply = nil
 

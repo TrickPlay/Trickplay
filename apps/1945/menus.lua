@@ -250,7 +250,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
                 menu.group:hide()
                 menu.h_score_menu:animate_in()
             else
-                os.exit()
+                exit()
             end
             menu.group:hide()
             menu.group.opacity=0
@@ -355,7 +355,7 @@ Menu_High_Scores = Class(function(menu, ...)
                 state.hud.curr_score = 0
                 redo_score_text()
             else
-                os.exit()
+                exit()
             end
             menu.group:hide()
             menu.group.opacity=0
@@ -407,10 +407,12 @@ Menu_Level_Complete = Class(function(menu, ...)
         end
         state.in_lvl_complete = true
         state.menu = score
-        h_score_val.text = score.." pts"
+        
         mediaplayer:play_sound("audio/Air Combat Player Power Up.mp3")
         local timer = Timer{interval=3000}
         timer.on_timer = function()
+            print(state.counters[state.curr_level].lvl_points)
+            h_score_val.text = string.format("%06d",state.counters[state.curr_level].lvl_points).." pts"
             remove_all_from_render_list()
             menu.group:show()
             menu.group.opacity=255
@@ -433,7 +435,6 @@ Menu_Level_Complete = Class(function(menu, ...)
                 menu.group:hide()
                 local index = 0
                 for i=1,8 do
-                    print(state.hud.curr_score, state.high_scores[i].score)
                     if state.hud.curr_score > state.high_scores[i].score then
                         index = i
                         break

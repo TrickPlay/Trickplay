@@ -9,79 +9,47 @@
 
 --base images for clones
 points = function(x,y,num_points)
+    local t = make_table()
 
-
-                            add_to_render_list(
-                            {
-                                speed = 80,
-                                
-                                text = Text{font  = my_font,
+    t.speed = 80
+    t.text = Text{
+        font  = my_font,
         text  = "+",
-        color = "FFFF00"},
-                                remove = function(self)
-                                    self.text:unparent()
-                                end,
-                                setup =
-                                
-                                    function( self )
-                                        self.text.text = "+"..num_points
-if state.hud.curr_score < 999990 then     
-	state.hud.curr_score = state.hud.curr_score+num_points
-    state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + 10
-	if state.hud.curr_score > state.hud.high_score then
-		state.hud.high_score = state.hud.curr_score
-        if not state.set_highscore then
-            state.set_highscore = true
-            mediaplayer:play_sound("audio/Air Combat High Score.mp3")
+        color = "FFFF00"
+    }
+    t.remove = function(self)
+        self.text:unparent()
+    end
+    t.setup = function( self )
+        self.text.text = "+"..num_points
+        if state.hud.curr_score < 999990 then     
+        	state.hud.curr_score = state.hud.curr_score+num_points
+            state.counters[state.curr_level].lvl_points = state.counters[state.curr_level].lvl_points + num_points
+        	if state.hud.curr_score > state.hud.high_score then
+        		state.hud.high_score = state.hud.curr_score
+                if not state.set_highscore then
+                    state.set_highscore = true
+                    mediaplayer:play_sound("audio/Air Combat High Score.mp3")
+                end
+            end
+            redo_score_text()
         end
-	end
-    --[[
-	if (state.hud.curr_score % 1000) == 0 and lives[number_of_lives + 1] ~= nil then
-		number_of_lives = number_of_lives + 1
-		lives[number_of_lives].opacity =255
-		self.text = Clone{source=txt.up_life}
-	end
-    --]]
-	redo_score_text()
-end
-
-                                        self.text.position = { x , y }
-                                        
-                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
-                                        
-                                        self.text.opacity = 255;
-                                    
-                                        layers.planes:add( self.text )
-                                        
-                                    end,
-                                    
-                                render =
-                                
-                                    function( self , seconds )
-                                   -- print("aaaa")
-                                        local o = self.text.opacity - self.speed * seconds
-                                        
-                                        --local scale = self.text.scale
-                                        
-                                        --scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
-                                        
-                                        if o <= 0 then
-                                        
-                                            remove_from_render_list( self )
-                                            
-                                            self.text:unparent()
-                                        
-                                        else
-                                        
-                                            self.text.opacity = o
-                                            
-                                            --self.text.scale = scale
-                                        
-                                        end
-                                    
-                                    end,
-                            })
-
+        self.text.position = { x , y }
+        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
+        self.text.opacity = 255;
+        layers.planes:add( self.text )
+    end
+    t.render = function( self , seconds )
+        local o = self.text.opacity - self.speed * seconds
+        
+        if o <= 0 then
+            remove_from_render_list( self )
+            self.text:unparent()
+        else
+            self.text.opacity = o
+        end
+    end
+    add_to_render_list(t)
 end
 wake = 
     function(x,y) return {
@@ -133,156 +101,199 @@ wake =
         end,
 	} end
 
+local big_explos = {}
+local num_big_explos = 0
+local sm_explos = {}
+local num_sm_explos = 0
 explosions =
 {
-	big = function(x,y,dam_list) return {
-        image = Clone{ source = imgs.explosion3 },
-        group = nil,
-        duration = 0.5, 
-        time = 0,
-        remove = function(self)
-            self.group:unparent()
-        end,
-        setup = function( self )
-            mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
-
-            self.group = Group
-			{
-				size =
-				{
-					self.image.w / 7 ,
-					self.image.h
-				},
-				clip =
-				{
-					0 ,
-					0 ,
-					self.image.w / 7 ,
-					self.image.h
-				},
-				children = { self.image },
-				anchor_point =
-				{
-					( self.image.w / 7 ) / 2 ,
-					  self.image.h / 2
-				},
-                position = {x,y},
-			}
+	big = function(x,y,dam_list,delay)
+        local e
+        if #big_explos == 0 then
+        num_big_explos = num_big_explos + 1
+            e = {
+                image    = Clone{ source = imgs.explosion3 },
+                duration = 0.5, 
+                time     = delay,
+                timer    = Timer
+                {
+                    interval = -delay,
+                    on_timer = function(t)
+                        t:stop()
+                        mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
+                    end
+                },
+                group = Group
+                	{
+            		size =
+            		{
+            			imgs.explosion3.w / 7 ,
+                		imgs.explosion3.h
+                	},
+            		clip =
+            		{
+            			0 ,
+                		0 ,
+                        imgs.explosion3.w / 7 ,
+            			imgs.explosion3.h
+            		},
+                	anchor_point =
+                    {
+                    	( imgs.explosion3.w / 7 ) / 2 ,
+                    	  imgs.explosion3.h / 2
+                    },
+                    position = {x,y},
+                },
+                remove = function(self)
+                    self.group:unparent()
+                    table.insert(big_explos,self)
+                end,
+                setup = function( self )
+                    if  self.time == nil then
+                        self.time =  0
+                    end
+                    self.timer:start()
                     
-			layers.planes:add( self.group )
-        end,
-        hit = false,
-		render = function( self , seconds )
-			self.time = self.time + seconds
-				
-			if self.time > self.duration then
-					
-				remove_from_render_list( self )
-				self.group:unparent()
-					
-			else
-				local frame = math.floor( self.time /
-					( self.duration / 7 ) )
-				self.image.x = - ( ( self.image.w / 7 )
-					* frame )
-			end
-            
-            if (not self.hit) and type(dam_list) == "table" then
-            --print("hhhheeeeerrrrreeee")
-                table.insert(b_guys_air,{
-                    obj=self,
-                    x1=x-( self.image.w / 7 ) / 2,
-                    x2=x+( self.image.w / 7 ) / 2,
-                    y1=y-self.image.h / 2,
-                    y2=y+self.image.h / 2,
-                })
-                
-            end
-        end,
-        collision = function( self , other )
-            
-			self.hit = true
-            
-		end	
-	} end,
-    delayed_big = function(x,y,delay) return {
-        image = Clone{ source = imgs.explosion3},
-        group = nil,
-        duration = 0.5, 
-        time = delay,
-        remove = function(self)
-            self.group:unparent()
-        end,
-        setup = function( self )
-            local timer = Timer{interval=-delay}
-            timer.on_timer = function(t)
-                t:stop()
-                t = nil
-                mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
-            end
-            timer:start()
-            
-            self.group = Group
-			{
-				size =
-				{
-					self.image.w / 7 ,
-					self.image.h
-				},
-				clip =
-				{
-					0 ,
-					0 ,
-					self.image.w / 7 ,
-					self.image.h
-				},
-				children = { self.image },
-				anchor_point =
-				{
-					( self.image.w / 7 ) / 2 ,
-					  self.image.h / 2
-				},
-                position = {x,y},
-			}
-            self.image.x = self.image.w / 7 
+                    if self.image.parent == nil then
+                        self.group:add(self.image)
+                    end
+                    assert(self.image.parent==self.group)
                     
-			layers.planes:add( self.group )
-        end,
-        hit = false,
-		render = function( self , seconds )
-			self.time = self.time + seconds
-				
-			if self.time > self.duration then
-					
-				remove_from_render_list( self )
-				self.group:unparent()
-					
-			elseif self.time >= 0 then
-				local frame = math.floor( self.time /
-					( self.duration / 7 ) )
-				self.image.x = - ( ( self.image.w / 7 )
-					* frame )
-			end
+                    layers.planes:add( self.group )
+                end,
+                hit = false,
+                render = function( self , seconds )
+                	self.time = self.time + seconds
+                		
+                	if self.time > self.duration then
+                			
+                		remove_from_render_list( self )
+                			
+                	else
+                		local frame = math.floor( self.time /
+                			( self.duration / 7 ) )
+                		self.image.x = - ( ( self.image.w / 7 )
+                			* frame )
+                	end
             
-            if (not self.hit) and type(dam_list) == "table" then
-            --print("hhhheeeeerrrrreeee")
-                table.insert(b_guys_air,{
-                    obj=self,
-                    x1=x-( self.image.w / 7 ) / 2,
-                    x2=x+( self.image.w / 7 ) / 2,
-                    y1=y-self.image.h / 2,
-                    y2=y+self.image.h / 2,
-                })
+                    if (not self.hit) and type(dam_list) == "table" then
+                    --print("hhhheeeeerrrrreeee")
+                        table.insert(b_guys_air,
+                            {
+                                obj=self,
+                                x1=x-( self.image.w / 7 ) / 2,
+                                x2=x+( self.image.w / 7 ) / 2,
+                                y1=y-self.image.h / 2,
+                                y2=y+self.image.h / 2,
+                            }
+                        )
+                        
+                    end
+                end,
+                collision = function( self , other )
+                	self.hit = true
+                end	
+            }
+        else
+            e = table.remove(big_explos)
+            e.group.x = x
+            e.group.y = y
+            e.time    = delay
+            e.hit     = false
+        end
+        return e
+    end,
+	small = function(x,y)
+    
+        local e
+        print(num_sm_explos)
+        if #sm_explos == 0 then
+        num_sm_explos = num_sm_explos + 1
+            e = {
+                image    = Clone{ source = imgs.explosion1 },
+                duration = 0.2, 
+                time     = 0,
                 
-            end
-        end,
-        collision = function( self , other )
+                group = Group
+                	{
+            		size =
+            		{
+            			imgs.explosion1.w / 6 ,
+                		imgs.explosion1.h
+                	},
+            		clip =
+            		{
+            			0 ,
+                		0 ,
+                        imgs.explosion1.w / 6 ,
+            			imgs.explosion1.h
+            		},
+                	anchor_point =
+                    {
+                    	( imgs.explosion1.w / 6 ) / 2 ,
+                    	  imgs.explosion1.h / 2
+                    },
+                    position = {x,y},
+                },
+                remove = function(self)
+                    self.group:unparent()
+                    table.insert(sm_explos,self)
+                end,
+                setup = function( self )
+                    if  self.time == nil then
+                        self.time =  0
+                    end
+                    
+                    if self.image.parent == nil then
+                        self.group:add(self.image)
+                    end
+                    assert(self.image.parent==self.group)
+                    
+                    layers.planes:add( self.group )
+                end,
+                hit = false,
+                render = function( self , seconds )
+                	self.time = self.time + seconds
+                		
+                	if self.time > self.duration then
+                			
+                		remove_from_render_list( self )
+                			
+                	else
+                		local frame = math.floor( self.time /
+                			( self.duration / 6 ) )
+                		self.image.x = - ( ( self.image.w / 6 )
+                			* frame )
+                	end
             
-			self.hit = true
-            
-		end	
-	} end,
-	small = function(x,y) return {
+                    if (not self.hit) and type(dam_list) == "table" then
+                    --print("hhhheeeeerrrrreeee")
+                        table.insert(b_guys_air,
+                            {
+                                obj=self,
+                                x1=x-( self.image.w / 6 ) / 2,
+                                x2=x+( self.image.w / 6 ) / 2,
+                                y1=y-self.image.h / 2,
+                                y2=y+self.image.h / 2,
+                            }
+                        )
+                        
+                    end
+                end,
+                collision = function( self , other )
+                	self.hit = true
+                end	
+            }
+        else
+            e = table.remove(sm_explos)
+            e.group.x = x
+            e.group.y = y
+            e.time    = delay
+            e.hit     = false
+        end
+        return e
+        --[[
+        return {
         image = Clone{ source = imgs.explosion1 },
         group = nil,
         duration = 0.2, 
@@ -334,7 +345,7 @@ explosions =
 					* frame )
 			end
         end,
-	} end,
+	}--]] end,
     splash = function(x,y) return {
         image = Clone{ source = imgs.splash },
         group = nil,
@@ -390,94 +401,96 @@ explosions =
 	} end
 }
 
-
+local old_bullets = {}
+local tot_bullets_created = 0
 function fire_bullet(enemy,source)
-    local bullet =
-    {
-        speed = 500,
-        num_frames = 1,
-        image = Clone
-        {
-            source = source ,
-            opacity = 255,
-            anchor_point =
+    local deg    = enemy.group.z_rotation[1] + 90
+    local bullet
+    --print("num in old list",#old_bullets,"num created",tot_bullets_created)
+    if #old_bullets == 0 then
+        tot_bullets_created = tot_bullets_created + 1
+        bullet = {
+            speed_x = math.cos(deg*math.pi/180) * 500,
+            speed_y = math.sin(deg*math.pi/180) * 500,
+            num_frames = 1,
+            image = Clone
             {
-                source.w/2,
-                source.h/2
+                source = source ,
+                opacity = 255,
+                anchor_point =
+                {
+                    source.w/2,
+                    source.h/2
+                },
+                position =
+                {
+                    enemy.group.x,
+                    enemy.group.y
+                },
             },
-            position =
-            {
-                enemy.group.x,
-                enemy.group.y
-            },
-        },
-        
-        type = TYPE_ENEMY_BULLET,
-        remove = function(self)
-                    self.image:unparent()
-                end,
-        setup = function( self )
             
-
-		--enemies are assumed to be facing downwards
-		local deg    = enemy.group.z_rotation[1] + 90
-		
-		--set up the velocities for x and y
-		self.speed_x = math.cos(deg*math.pi/180) * self.speed
-		self.speed_y = math.sin(deg*math.pi/180) * self.speed
-		
+            type = TYPE_ENEMY_BULLET,
+            remove = function(self)
+                self.image:unparent()
+                table.insert(old_bullets,self)
+            end,
+            coll_box = {},
+            setup = function( self )
+                --enemies are assumed to be facing downwards
+                self.coll_box.obj=self
+                
+                --set up the velocities for x and y
+                self.image.x = self.image.x + self.speed_x *.1
+                self.image.y = self.image.y + self.speed_y *.1
                 layers.air_bullets:add( self.image )
-                if not (self.image.x > screen_w or self.image.x < 0 or self.image.y < 0 or self.image.y > screen_h) then
+                if not (self.image.x > screen_w or self.image.x < 0 or
+                    self.image.y < 0 or self.image.y > screen_h) then
+                    
                     mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
                 end
             end,
-                
+            
             render = function( self , seconds )
             
-		--calculate the next position of the bullet
-		local x = self.image.x + self.speed_x *seconds
-		local y = self.image.y + self.speed_y *seconds
-		--remove it from the screen, if it travels off screen
+                --calculate the next position of the bullet
+                local x = self.image.x + self.speed_x *seconds
+                local y = self.image.y + self.speed_y *seconds
+                --remove it from the screen, if it travels off screen
                 if y > screen_h or x > screen_w or y < 0 or x < 0 then
                     remove_from_render_list( self )
                     self.image:unparent()
-		--otherwise, update the position
+                --otherwise, update the position
                 else
                     local start_point = self.image.center
                     self.image.y = y
-		    self.image.x = x
-		    --check for collisions
-            
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.image.x-self.image.w/2,
-                    x2  = self.image.x+self.image.w/2,
-                    y1  = self.image.y-self.image.h/2,
-                    y2  = self.image.y+self.image.h/2,
-                }
-            )
-            --[[
-                    add_to_collision_list(
-                        self,
-			self.image.center,
-			self.image.center,
-			{ 4 , 4 },
-			TYPE_MY_PLANE
-                    )
-                    --]]
+                    self.image.x = x
+                    --check for collisions
+                    self.coll_box.x1  = self.image.x-self.image.w/2
+                    self.coll_box.x2  = self.image.x+self.image.w/2
+                    self.coll_box.y1  = self.image.y-self.image.h/2
+                    self.coll_box.y2  = self.image.y+self.image.h/2
+                    
+                    table.insert(b_guys_air,self.coll_box)
                 end
-                
             end,
             
-            collision =
-                function( self , other )
-                    if other.type == TYPE_MY_BULLET then return end
-                    remove_from_render_list( self )
-                    self.image:unparent()
-                end
+            collision = function( self , other )
+                
+                if other.type == TYPE_MY_BULLET then return end
+                
+                remove_from_render_list( self )
+                
+            end
         }
-	add_to_render_list( bullet )
+    else
+        bullet = table.remove(old_bullets)
+        bullet.image.x = enemy.group.x
+        bullet.image.y = enemy.group.y
+        bullet.speed_x = math.cos(deg*math.pi/180) * 500
+        bullet.speed_y = math.sin(deg*math.pi/180) * 500
+        
+    end
+    add_to_render_list( bullet )
 end
 function flak(x,y)
     dolater(add_to_render_list,
@@ -616,7 +629,8 @@ function fire_flak(enemy, dist_x,dist_y)
 		--set up the velocities for x and y
 		self.speed_x = math.cos(deg*math.pi/180) * self.speed
 		self.speed_y = math.sin(deg*math.pi/180) * self.speed
-		
+		self.image.x = self.image.x + self.speed_x *.1
+        self.image.y = self.image.y + self.speed_y *.1
                 layers.air_bullets:add( self.image )
             end,
                 
@@ -881,503 +895,7 @@ end
 
 enemies =
 {
-    final_boss = function(is_boss,o) add_to_render_list({
-	health_body = 10,
-        salvage_func = {"enemies","final_boss"},
-        salvage_params = {is_boss},
-        approach_speed = 70,
-        drop_speed  = 0,
-        drop_thresh = .3,
-        turn_speed = 5,
-        x_speed = 15,
-        y_speed = 5,
-        group = Group{
-            anchor_point={
-                imgs.final_boss.w/2,
-                imgs.final_boss.h/2
-            },
-            x =  screen_w/2,
-            y = -imgs.final_boss.h/2
-        },
-        image = Clone{source=imgs.final_boss},
-        shoot_time=1,
-        last_shot_time={ll=0,lr=.2,rl=.4,rr=.6},
-        prop  = {
-            
-            broke_ll = false,
-            broke_lr = false,
-            broke_rl = false,
-            broke_rr = false,
-            
-            dead_ll = Clone{source=imgs.boss_prop_d},
-            dead_lr = Clone{source=imgs.boss_prop_d},
-            dead_rl = Clone{source=imgs.boss_prop_d},
-            dead_rr = Clone{source=imgs.boss_prop_d},
-            
-            img_ll = Clone{source=imgs.boss_prop},
-            img_lr = Clone{source=imgs.boss_prop},
-            img_rl = Clone{source=imgs.boss_prop},
-            img_rr = Clone{source=imgs.boss_prop},
-            
-            g_ll   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=431,y=384},
-            g_lr   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=583,y=363},
-            g_rl   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=803,y=363},
-            g_rr   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=959,y=384},
-        },
-        guns = {
-            img_ll = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            img_lr = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            img_rl = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            img_rr = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            g_ll   = Group{x=390,y=240},
-            g_lr   = Group{x=550,y=190},
-            g_rl   = Group{x=923,y=190},
-            g_rr   = Group{x=1070,y=240},
-        },
-        dying = false,
-        stages = {
-            function(self,secs)
-                self.group.y = self.group.y + self.approach_speed * secs
-                
-                if self.group.y >= self.image.h/2 then
-                    self.stage = self.stage+1
-                end
-            end,
-            function(self,secs)
-                
-                self.group.x = self.group.x + self.x_speed * secs
-                self.group.y = self.group.y + self.y_speed * secs
-                
-                if self.group.x >= (screen_w - self.image.w/2) or
-                    self.group.x <= (self.image.w/2)then
-                    self.x_speed = -self.x_speed
-                end
-                if self.group.y >= (screen_h*2/3 - self.image.h/2) or
-                    self.group.y <= (self.image.h/2)then
-                    self.y_speed = -self.y_speed
-                end
-            end,
-            function(self,secs)
-                if self.drop_speed < self.drop_thresh then
-                    self.drop_speed = self.drop_speed +secs/10
-                end
-                local scale = self.group.scale[1] - self.drop_speed * secs
-                self.group.scale={scale,scale}
-                self.group.x_rotation={self.group.x_rotation[1]+self.turn_speed*secs,0,0}
-                if scale <= .1 then
-                    self.group:unparent()
-                    remove_from_render_list(self)
-                    add_to_render_list(
-                    explosions.splash(
-                        self.group.x,
-                        self.group.y
-                    )
-                    )
-                    ---[[
-                    if is_boss then
-                        levels[state.curr_level]:level_complete()
-                    end
-                    --]]
-                    points(self.group.x,self.group.y,1000)
-                end
-            end,
-        },
-        stage  = 1,
-        overwrite_vars = {},
-        special_check = function(self,other)
-            local y_off = self.group.y - self.group.anchor_point[2]
-            local x_off = self.group.x - self.group.anchor_point[1]
-            
-            local gg_sz = other.x2 - other.x1
-            local wing_tip = 418
-            local ass_hole = 272
-            
-            
-            --left side
-            if
-                (other.x2 <= (self.group.x + gg_sz/2)) and
-                (other.x2 >= (self.group.x - self.image.w/2)) then
-                
-                if
-                    (other.y1 - y_off  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip)  and
-                    (other.y1 - y_off) > ((         - wing_tip)/( self.image.w/2)*(other.x1- x_off) + wing_tip)) then
-                
-                    self:collision(other.obj,"gen",{other.x1,other.y1})
-                    
-                    return true
-                
-                elseif
-                    (other.y2 - y_off  < ((ass_hole - wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip)  and
-                    (other.y2 - y_off) > ((         - wing_tip)/( self.image.w/2)*(other.x2- x_off) + wing_tip)) then
-                    
-                    self:collision(other.obj,"gen",{other.x2,other.y2})
-                    
-                    return true
-                    
-                end
-            --right side
-            elseif
-                other.x1 >= (self.group.x - gg_sz/2) and
-                other.x1 <= (self.group.x + self.image.w/2) then
-                
-                if
-                (other.y2 - y_off  < (wing_tip - ass_hole)/( self.image.w/2)*(other.x2- x_off) + wing_tip- 2*(wing_tip - ass_hole) and
-                (other.y2 - y_off) > (wing_tip           )/( self.image.w/2)*(other.x2- x_off) - wing_tip) then
-                
-                    self:collision(other.obj,"gen",{other.x2,other.y2})
-                    
-                    return true
-                
-                elseif
-                (other.y1 - y_off  < (wing_tip - ass_hole)/( self.image.w/2)*(other.x1- x_off) + wing_tip- 2*(wing_tip - ass_hole) and
-                (other.y1 - y_off) > (wing_tip           )/( self.image.w/2)*(other.x1- x_off) - wing_tip) then
-                    
-                    self:collision(other.obj,"gen",{other.x1,other.y1})
-                    
-                    return true
-                end
-            end
-            return false
-        end,
-        setup = function(self)
-            self.prop.g_ll:add(self.prop.dead_ll,self.prop.img_ll)
-            self.prop.g_lr:add(self.prop.dead_lr,self.prop.img_lr)
-            self.prop.g_rl:add(self.prop.dead_rl,self.prop.img_rl)
-            self.prop.g_rr:add(self.prop.dead_rr,self.prop.img_rr)
-            
-            self.guns.g_ll:add(self.guns.img_ll)
-            self.guns.g_lr:add(self.guns.img_lr)
-            self.guns.g_rl:add(self.guns.img_rl)
-            self.guns.g_rr:add(self.guns.img_rr)
-            
-            self.group:add(
-                self.image,
-                
-                self.prop.g_ll,
-                self.prop.g_lr,
-                self.prop.g_rl,
-                self.prop.g_rr,
-                
-                self.guns.g_ll,
-                self.guns.g_lr,
-                self.guns.g_rl,
-                self.guns.g_rr
-            )
-            layers.air_doodads_1:add(self.group)
-            
-            table.insert(special_checks,{f=self.special_check,p=self})
-            if type(o) == "table"  then
-                recurse_and_apply(  self, o  )
-            end
-            
-            
-        end,
-        rotate_guns_and_fire = function(self,secs)
-			---[[
-			--prep the variables that determine if its time to shoot
-			local r  = 8
-			
-			
-			--mock enemy-object which is passed to fire_bullet()
-			local mock_obj = {}
-			
-			--these x,y values are used for rotations and
-			--bullet trajectories
-			
-			--user plane is the target
-			local targ =
-			{ 
-				x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames)), 
-				y = (my_plane.group.y+my_plane.image.h/2)
-			}
-			local me =
-			{
-                ll =
-				{ --absolute position of the zeppelin's right gun
-					x = (self.guns.g_ll.x+self.group.x-self.group.anchor_point[1]),
-					y = (self.guns.g_ll.y+self.group.y-self.group.anchor_point[2])
-				},
-                lr =
-				{ --absolute position of the zeppelin's right gun
-					x = (self.guns.g_lr.x+self.group.x-self.group.anchor_point[1]),
-					y = (self.guns.g_lr.y+self.group.y-self.group.anchor_point[2])
-				},
-                rl =
-				{ --absolute position of the zeppelin's right gun
-					x = (self.guns.g_rl.x+self.group.x-self.group.anchor_point[1]),
-					y = (self.guns.g_rl.y+self.group.y-self.group.anchor_point[2])
-				},
-                rr =
-				{ --absolute position of the zeppelin's right gun
-					x = (self.guns.g_rr.x+self.group.x-self.group.anchor_point[1]),
-					y = (self.guns.g_rr.y+self.group.y-self.group.anchor_point[2])
-				}
-			}
-			
-            local mock_obj
-			for k,v in pairs(me) do
-                self.last_shot_time[k] = self.last_shot_time[k] + secs
-                self.guns["img_"..k].z_rotation = {
-                    180/math.pi*math.atan2(
-                        targ.y-me[k].y,
-                        targ.x-me[k].x)-90,
-                    0,
-                    0
-                }
-                mock_obj =
-				{
-					group =
-					{
-						z_rotation =
-						{ self.guns["img_"..k].z_rotation[1],
-							0,0},
-						x = me[k].x,
-						y = me[k].y
-					}
-				}
-                if self.last_shot_time[k] >= self.shoot_time and
-					r == 8 then
-					
-					
-					self.last_shot_time[k] = 0
-					fire_bullet(mock_obj,imgs.z_bullet)
-					
-				end
-            end
-		end,
-        prop_w = imgs.boss_prop.w/2,
-        render = function(self,secs)
-            if self.prop.img_ll.x == 0 then
-                    self.prop.dead_ll.x = -self.prop_w
-                    self.prop.img_ll.x  = -self.prop_w
-                    self.prop.dead_lr.x = -self.prop_w
-                    self.prop.img_lr.x  = -self.prop_w
-                    self.prop.dead_rl.x = -self.prop_w
-                    self.prop.img_rl.x  = -self.prop_w
-                    self.prop.dead_rr.x = -self.prop_w
-                    self.prop.img_rr.x  = -self.prop_w
-            else
-                self.prop.img_ll.x =0
-                self.prop.img_lr.x =0
-                self.prop.img_rl.x =0
-                self.prop.img_rr.x =0
-                
-                self.prop.dead_ll.x =0
-                self.prop.dead_lr.x =0
-                self.prop.dead_rl.x =0
-                self.prop.dead_rr.x =0
-            end
-            
-            if not self.dying then
-                self:rotate_guns_and_fire(secs)
-            end
-            self.stages[self.stage](self,secs)
-            local x = self.group.x-self.group.anchor_point[1]
-            local y = self.group.y-self.group.anchor_point[2]
-            if not self.prop.broke_ll then
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.prop.g_ll.x+x,
-                    x2  = self.prop.g_ll.x+x+self.prop.g_ll.w/2,
-                    y1  = self.prop.g_ll.y+y,
-                    y2  = self.prop.g_ll.y+y+self.prop.g_ll.h/2,
-                    p   = "prop_ll",
-                }
-            )
-            end
-            if not self.prop.broke_lr then
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.prop.g_lr.x+x,
-                    x2  = self.prop.g_lr.x+x+self.prop.g_lr.w/2,
-                    y1  = self.prop.g_lr.y+y,
-                    y2  = self.prop.g_lr.y+y+self.prop.g_lr.h/2,
-                    p   = "prop_lr",
-                }
-            )
-            end
-            if not self.prop.broke_rr then
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.prop.g_rr.x+x,
-                    x2  = self.prop.g_rr.x+x+self.prop.g_rr.w/2,
-                    y1  = self.prop.g_rr.y+y,
-                    y2  = self.prop.g_rr.y+y+self.prop.g_rr.h/2,
-                    p   = "prop_rr",
-                }
-            )
-            end
-            if not self.prop.broke_rl then
-            table.insert(b_guys_air,
-                {
-                    obj = self,
-                    x1  = self.prop.g_rl.x+x,
-                    x2  = self.prop.g_rl.x+x+self.prop.g_rl.w/2,
-                    y1  = self.prop.g_rl.y+y,
-                    y2  = self.prop.g_rl.y+y+self.prop.g_rl.h/2,
-                    p   = "prop_rl",
-                }
-            )
-            end
-        end,
-        health = {
-            ["prop_ll"] = 10,
-            ["prop_lr"] = 10,
-            ["prop_rl"] = 10,
-            ["prop_rr"] = 10,
-            ["gen"]     = 50
-        },
-        damage_maxed = {
-            ["gen"] = function(self)
-                
-            end,
 
-            ["prop_ll"] = function(self)
-                self.prop.broke_ll = true
-                self.prop.img_ll.opacity=0
-                add_to_render_list(
-                    explosions.small(
-                        self.prop.g_ll.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_ll.y+self.group.y-self.group.anchor_point[2]
-                    )
-                )
-            end,
-            ["prop_lr"] = function(self)
-                self.prop.broke_lr = true
-                self.prop.img_lr.opacity=0
-                add_to_render_list(
-                    explosions.small(
-                        self.prop.g_lr.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_lr.y+self.group.y-self.group.anchor_point[2]
-                    )
-                )
-            end,
-            ["prop_rl"] = function(self)
-                self.prop.broke_rl = true
-                self.prop.img_rl.opacity=0
-                add_to_render_list(
-                    explosions.small(
-                        self.prop.g_rl.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_rl.y+self.group.y-self.group.anchor_point[2]
-                    )
-                )
-            end,
-            ["prop_rr"] = function(self)
-                self.prop.broke_rr = true
-                self.prop.img_rr.opacity=0
-                add_to_render_list(
-                    explosions.small(
-                        self.prop.g_rr.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_rr.y+self.group.y-self.group.anchor_point[2]
-                    )
-                )
-            end,
-        },
-        props_remaining = 4,
-        collision = function(self,other,loc,pos)
-            if  self.health[loc] - 1  == 0 then
-                self.health[loc] = self.health[loc] - 1
-                
-                self.damage_maxed[loc](self)
-                self.props_remaining = self.props_remaining - 1
-                if self.props_remaining == 0 or  loc == "gen" then
-                    self.dying = true
-                    self.stage = self.stage + 1
-                    dolater( function() table.remove(special_checks) end)
-                    
-                end
-            else
-                self.health[loc] = self.health[loc] - 1
-                if loc == "gen" then
-                    local x = self.group.x-self.group.anchor_point[1]
-                    local y = self.group.y-self.group.anchor_point[2]
-                    local i =math.random(1,7)
-                    local dam = Clone{source = imgs["z_d_"..i]}
-                    self.group:add(dam)
-                    if other.group ~= nil then
-                        dam.x = pos[1]-x--other.group.x - x
-                        dam.y = pos[2]-y - math.random(20,40)
-                    elseif other.image ~= nil then
-                        dam.x = pos[1]-x--other.image.x - x
-                        dam.y = pos[2]-y - math.random(20,40)
-                    else
-                        error("unexpected location given for final_boss impact")
-                    end 
-                end
-            end
-            
-        end,
-        salvage = function( self, salvage_list )
-            s = {
-                func         = {},
-                table_params = {},
-            }
-            
-            for i = 1, #self.salvage_params do
-                s.table_params[i] = self.salvage_params[i]
-            end
-            
-            for i = 1, #self.salvage_func do
-                s.func[i] = self.salvage_func[i]
-            end
-            
-            table.insert(s.table_params,{
-                is_boss         = self.is_boss,
-                props_remaining = self.props_remaining,
-                health          = {
-                    prop_ll = self.health.prop_ll,
-                    prop_lr = self.health.prop_lr,
-                    prop_rl = self.health.prop_rl,
-                    prop_rr = self.health.prop_rr,
-                },
-                dying = self.dying,
-                stage          = self.stage,
-                prop  = {
-                    img_ll   = {
-                        opacity = self.prop.img_ll.opacity
-                    },
-                    img_lr   = {
-                        opacity = self.prop.img_lr.opacity
-                    },
-                    img_rl   = {
-                        opacity = self.prop.img_rl.opacity
-                    },
-                    img_rr   = {
-                        opacity = self.prop.img_rr.opacity
-                    },
-                    broke_ll = self.prop.broke_ll,
-                    broke_lr = self.prop.broke_lr,
-                    broke_rl = self.prop.broke_rl,
-                    broke_rr = self.prop.broke_rr,
-                },
-                group = {
-                    x = self.group.x,
-                    y = self.group.y,
-                    scale = {self.group.scale[1],self.group.scale[2]},
-                    x_rotation = {self.group.x_rotation[1],0,0}
-                },
-                last_shot_time  =    --how long ago the ship last shot
-                {
-                    ll = self.last_shot_time.ll,
-                    lr = self.last_shot_time.lr,
-                    rl = self.last_shot_time.rl,
-                    rr = self.last_shot_time.rr,
-                },
-                x_speed = self.x_speed,
-                y_speed = self.y_speed,
-                
-                
-            })
-            if self.index then
-                table.insert(s.table_params,self.index)
-            end
-            return s
-        end,
-    }
-    ) end,
 	basic_fighter = function(color) return {
 		num   = nil,    --number of fighters in formation
 		index = nil,    --number of this fighter in its formation,
@@ -1529,7 +1047,7 @@ enemies =
                 self.group.center[1],
                 self.group.center[2])
 			)
-            points(self.group.x,self.group.y,5)
+            points(self.group.x,self.group.y,50)
 		end	
 	} end,
 	zeppelin  = function(x,o)
@@ -1910,7 +1428,7 @@ enemies =
                             levels[state.curr_level]:level_complete()
                         end
                         --]]
-                        points(self.group.x,self.group.y,50)
+                        points(self.group.x,self.group.y,200)
                     end
                 end,
             }
@@ -2292,8 +1810,8 @@ enemies =
 						z_rotation =
 						{self.image.z_rotation[1],
 							0,0},
-						x = self.group.x+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
-						y = self.group.y+self.img_h*math.sin(self.image.z_rotation[1]*math.pi/180+90)
+						x = self.group.x,--+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
+						y = self.group.y--+self.img_h*math.sin(self.image.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
@@ -2369,7 +1887,7 @@ enemies =
                     self.group.center[2]
                 )
 			)
-            points(self.group.x,self.group.y,10)
+            points(self.group.x,self.group.y,100)
 		end,
         salvage = function( self, salvage_list )
             
@@ -2521,8 +2039,10 @@ enemies =
 		
 		render = function(self,seconds)
 				
+            
 			--animate the zeppelin based on the current stage
 			self.stages[self.stage](self,seconds)
+            if self.image == nil then return end
             
             if not self.dead then
                 table.insert(b_guys_land,
@@ -2536,8 +2056,12 @@ enemies =
                 )
             end
 		end,
-		
-        
+		---[[
+        remove = function( self )
+            self.image:unparent()
+            self.image = nil
+        end,
+        --]]
         collision = function( self , other )
             
             local c = Clone{
@@ -2559,7 +2083,7 @@ enemies =
                     self.image.y
                 )
 			)
-            points(self.image.x,self.image.y,10)
+            points(self.image.x,self.image.y,100)
 		end,
         
         
@@ -2828,8 +2352,8 @@ enemies =
 						z_rotation =
 						{self.image.z_rotation[1],
 							0,0},
-						x = self.group.x+self.image.x+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
-						y = self.group.y+self.image.y+self.img_h*math.sin(self.image.z_rotation[1]*math.pi/180+90)
+						x = self.group.x,--+self.image.x+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
+						y = self.group.y--+self.image.y+self.img_h*math.sin(self.image.z_rotation[1]*math.pi/180+90)
 					}
 				}
                 
@@ -2846,15 +2370,10 @@ enemies =
 			
 		end,
         setup = function(self)
-        print("quer")
 			self.base_clip:add(self.base_strip)
-            print(3)
 			self.group:add( self.base_clip,self.image )
-            print(343434)
             self.group.x = xxx
-            print("ass")
             self.group.y = y_offset
-			print("hole")
 			layers.land_targets:add( self.group )
 			
 			
@@ -2923,7 +2442,7 @@ enemies =
                     self.group.center[2]
                 )
 			)
-            points(self.group.x,self.group.y,10)
+            points(self.group.x,self.group.y,200)
 		end,
         
         salvage_func = {"enemies","tank"},
@@ -3271,8 +2790,8 @@ enemies =
 						z_rotation =
 						{self.guns.bow.z_rotation[1],
 							0,0},
-						x = b_ship.b.x+self.turr_h*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
-						y = b_ship.b.y+self.turr_h*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
+						x = b_ship.b.x,--+self.turr_h*math.cos(self.guns.bow.z_rotation[1]*math.pi/180+90),
+						y = b_ship.b.y--+self.turr_h*math.sin(self.guns.bow.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
@@ -3309,8 +2828,8 @@ enemies =
 						z_rotation =
 						{self.guns.mid.z_rotation[1],
 							0,0},
-						x = b_ship.m.x+self.turr_h*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
-						y = b_ship.m.y+self.turr_h*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
+						x = b_ship.m.x,--+self.turr_h*math.cos(self.guns.mid.z_rotation[1]*math.pi/180+90),
+						y = b_ship.m.y--+self.turr_h*math.sin(self.guns.mid.z_rotation[1]*math.pi/180+90)
 					}
 				}
 
@@ -3348,8 +2867,8 @@ enemies =
 						z_rotation =
 						{self.guns.stern.z_rotation[1],
 							0,0},
-						x = b_ship.s.x+self.turr_h*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
-						y = b_ship.s.y+self.turr_h*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
+						x = b_ship.s.x,--+self.turr_h*math.cos(self.guns.stern.z_rotation[1]*math.pi/180+90),
+						y = b_ship.s.y--+self.turr_h*math.sin(self.guns.stern.z_rotation[1]*math.pi/180+90)
 					}
 				}
                 
@@ -3511,7 +3030,7 @@ enemies =
                 
                 self.moving = false
                 self.approach_speed = lvlbg[2].speed
-                points(self.group.x,self.group.y,60)
+                points(self.group.x,self.group.y,300)
             end
 			timer:start()
             
@@ -3691,8 +3210,8 @@ enemies =
 						z_rotation =
 						{self.gun_img.z_rotation[1],
 							0,0},
-						x = dest.x+imgs.turret.h*math.cos(self.gun_img.z_rotation[1]*math.pi/180+90),
-						y = dest.y+imgs.turret.h*math.sin(self.gun_img.z_rotation[1]*math.pi/180+90)
+						x = dest.x,--+imgs.turret.h*math.cos(self.gun_img.z_rotation[1]*math.pi/180+90),
+						y = dest.y--+imgs.turret.h*math.sin(self.gun_img.z_rotation[1]*math.pi/180+90)
 					}
 				}
 				if self.last_shot_time >= self.shoot_time and  (math.abs(dest.x - targ.x) > 200 or
@@ -3883,7 +3402,7 @@ enemies =
                 
                 self.moving = false
                 self.approach_speed = lvlbg[2].speed
-                points(self.group.x,self.group.y,30)
+                points(self.group.x,self.group.y,200)
             end
 			timer:start()
 		end,
