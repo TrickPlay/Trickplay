@@ -408,7 +408,7 @@ Menu_Level_Complete = Class(function(menu, ...)
         state.in_lvl_complete = true
         state.menu = score
         
-        mediaplayer:play_sound("audio/Air Combat Player Power Up.mp3")
+        mediaplayer:play_sound("audio/level-complete.mp3")
         local timer = Timer{interval=3000}
         timer.on_timer = function()
             print(state.counters[state.curr_level].lvl_points)

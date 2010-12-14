@@ -503,7 +503,14 @@ lvlbg = {
 --Level 3
 {
     speed         = 80, -- pixels per second
-    trees         = nil,
+    trees         = {
+            l={Clone{source=imgs.trees,x=-imgs.trees.w/2},
+               Clone{source=imgs.trees,x=-imgs.trees.w/2,y=-imgs.trees.h}
+            },
+            r={Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2},
+               Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2,y=-imgs.trees.h}
+            }
+        },
     tree_i = 1,
     doodad_frames = {},
     doodad_h      = 144,--imgs.dirt_full.h,
@@ -514,14 +521,7 @@ lvlbg = {
     enemies       = {},
     image         = Image{src = "assets/lvls/bg_tiles/grass1.png" },
     setup         = function( self, o, top_doodad  )
-        trees = {
-            l={Clone{source=imgs.trees,x=-imgs.trees.w/2},
-               Clone{source=imgs.trees,x=-imgs.trees.w/2,y=-imgs.trees.h}
-            },
-            r={Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2},
-               Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2,y=-imgs.trees.h}
-            }
-        }
+
         self.img_h = self.image.h
         self.image:set{
             tile   = {true, true},
