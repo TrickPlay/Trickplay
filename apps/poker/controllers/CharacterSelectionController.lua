@@ -154,7 +154,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          table_position = pos,
          position = model.default_player_locations[ self:getPosition() ],
          chipPosition = model.default_bet_locations[ self:getPosition() ],
-         endowment = INITIAL_ENDOWMENT
+         endowment = INITIAL_ENDOWMENT -- redundant code, look at line 64
+                                       -- and GameState:initialize()
       }
 
       -- insertion point

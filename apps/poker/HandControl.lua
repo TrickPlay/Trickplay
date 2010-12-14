@@ -25,6 +25,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    local bets_done = false
    function ctrl:set_bets_done(boo)
       bets_done = boo
+      pres:all_cards_up()
    end
    function ctrl:get_community_cards() return state:get_community_cards() end
    function ctrl:get_hole_cards() return state:get_hole_cards() end
@@ -193,6 +194,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
    function ctrl.showdown(ctrl)
       local winners, poker_hand = state:showdown()
       pres:showdown(winners, poker_hand)
+      state:remove_players()
       ---[[
       if game:game_won() then
          enable_event_listener(

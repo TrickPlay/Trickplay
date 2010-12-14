@@ -67,7 +67,6 @@ function(ctrl, model, ...)
 
    -- public functions
    function ctrl.initialize_game(ctrl, args)
-
       state:initialize(args)
       pres:display_ui()
 

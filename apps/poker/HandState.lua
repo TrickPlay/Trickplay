@@ -421,7 +421,7 @@ HandState = Class(nil,function(state, ctrl, ...)
             end
             tmp_action = (tmp_action % #players) + 1
          end
-         print("after true loop")
+         --print("after true loop")
          action = tmp_action
          ctrl:betting_round_over()
       else
@@ -461,6 +461,17 @@ HandState = Class(nil,function(state, ctrl, ...)
       player_bets[removed_player] = nil
       ctrl:remove_player(removed_player)
    end
+   
+   function state:remove_players()
+      local i = 1
+      while i <= #players do
+         if players[i].money == 0 then
+            remove_player(i)
+         else
+            i=i+1
+         end
+      end
+   end
 
    function state.showdown(state)
       local in_players = state:get_in_players()
@@ -474,7 +485,7 @@ HandState = Class(nil,function(state, ctrl, ...)
       local winners = {in_players[1]}
       local result, tmp_poker_hand, poker_hand
       result, tmp_poker_hand = compare_hands(in_hands[best], in_hands[in_players[1]])
-      final_hands[in_players[1]] = tmp_poker_hand.get_best(in_hands[in_players[1]])
+      final_hands[in_players[1]] = in_hands[in_players[1]]
 
       -- compare all hands
       for i=2,#in_players do
@@ -484,13 +495,13 @@ HandState = Class(nil,function(state, ctrl, ...)
          end
          if result == 0 then
             table.insert(winners, in_players[i])
-            final_hands[in_players[i]] = poker_hand.get_best(in_hands[in_players[i]])
+            final_hands[in_players[i]] = in_hands[in_players[i]]
          elseif result == 1 then
             best = in_players[i]
             winners = {in_players[i]}
             poker_hand = tmp_poker_hand
             final_hands = {}
-            final_hands[in_players[i]] = poker_hand.get_best(in_hands[in_players[i]])
+            final_hands[in_players[i]] = in_hands[in_players[i]]
          end
          if #in_players == 2 then
             poker_hand = tmp_poker_hand
@@ -511,14 +522,6 @@ HandState = Class(nil,function(state, ctrl, ...)
       end
       pot = 0
 
-      local i = 1
-      while i <= #players do
-         if players[i].money == 0 then
-            remove_player(i)
-         else
-            i=i+1
-         end
-      end
       return winners, poker_hand
    end
 

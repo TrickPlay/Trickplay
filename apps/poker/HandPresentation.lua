@@ -71,15 +71,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
       player.betChips.group:raise_to_top()
    end
    
-   -- Flip all cards up at the end of the hand
-   local function all_cards_up()
-      for _,card in pairs(allCards) do
-         if not card.group.extra.face then
-            flipCard(card.group)
-         end
-      end
-   end
-   
    -- Remove a player's hole cards
    local function remove_player_cards(player)
       local hole_cards = ctrl:get_hole_cards()
@@ -233,6 +224,36 @@ HandPresentation = Class(nil,function(pres, ctrl)
       for _,card in ipairs(ctrl:get_deck()) do
           card.group.opacity = 140
       end
+      -- make the place holders for the hands and the text
+      local border_group = Group()
+      local back = Canvas{
+          size = {900, 146}
+      }
+      back:begin_painting()
+      back:set_source_color("024B23")
+      back:round_rectangle(0, 0, 720, 146, 15)
+      back:set_source_radial_pattern(
+         back.x+back.w/2, back.y+back.h/2+100, 20,
+         back.x+back.w/2, back.y+back.h/2+100, 200
+      )
+      back:add_source_pattern_color_stop(0, "010803")
+      back:add_source_pattern_color_stop(1, "024B23")
+      back:fill()
+      back:finish_painting()
+      local border = Canvas{
+          size = {906, 152},
+          position = {-3, -3}
+      }
+      border:begin_painting()
+      border:set_source_color("FFFFFF")
+      border:round_rectangle(0, 0, 726, 152, 15)
+      border:fill()
+      border:finish_painting()
+      border.opacity = 128
+      border_group:add(border, back)
+      border_group.opacity = 0
+      screen:add(border_group)
+
       local final_hands = ctrl:get_final_hands()
       local in_hands = ctrl:get_in_hands()
       da_clones = {}
@@ -242,40 +263,74 @@ HandPresentation = Class(nil,function(pres, ctrl)
       end
       local counter = 0
       for player,hand in pairs(in_hands) do
+         local player_text = Text{
+            text = "Dog "..player.table_position,
+            x = 600,
+            font = PLAYER_NAME_FONT,
+            color = Colors.WHITE,
+            opacity = 0
+         }
+         player_text.anchor_point = {player_text.w/2, player_text.h/2}
+         local winner_text
+         if final_hands[player] then
+            winner_text = Text{
+               text = "WINNER!",
+               x = 600,
+               font = PLAYER_NAME_FONT,
+               color = "E4D312",
+               opacity = 0
+            }
+            winner_text.anchor_point = {winner_text.w/2, winner_text.h/2}
+         end
+         local back_clone = Clone{source = border_group}
+         back_clone.anchor_point = {back_clone.w/2, back_clone.h/2}
+         back_clone.x = screen.w/2
+         screen:add(back_clone, player_text, winner_text)
          for i,card in ipairs(hand) do
             local clone = Clone{
                name = "card_clone"..i,
                source = card.group,
                position = Utils.deepcopy(card.group.position),
-               scale = {1.3, 1.3}
             }
             clone.anchor_point = {
-                clone.w*1.3/2,
-                clone.h*1.3/2
+               clone.w/2,
+               clone.h/2
             }
             screen:add(clone)
             ---[[
-            local x_length_between_centroids = clone.w*1.3 + 10
-            local y_length_between_centroids = clone.h*1.3 + 10
+            local x_length_between_centroids = clone.w + 10
+            local y_length_between_centroids = clone.h + 30
             local total_x_length = x_length_between_centroids*(#hand-1)
             local total_y_length = y_length_between_centroids*(length-1)
             local start_x = screen.w/2 - total_x_length/2
             local start_y = screen.h/2 - total_y_length/2
             local pos = {
-               start_x + (i-1)*x_length_between_centroids,
+               start_x + (i-1)*x_length_between_centroids - 10,
                start_y + counter*y_length_between_centroids
             }
+            player_text.y = pos[2] - 20
+            back_clone.y = pos[2]
+            if winner_text then winner_text.y = pos[2] + 20 end
             clone:animate{
                position = Utils.deepcopy(pos),
                duration = TIME,
                mode = MODE,
                z_rotation=-3 + math.random(5),
-               on_completed = function() clone:raise_to_top() end
+               on_completed = function() 
+                  clone:raise_to_top()
+                  player_text.opacity = 255
+                  if winner_text then winner_text.opacity = 255 end
+               end
             }
             --]]
             table.insert(allCards, clone)
             table.insert(da_clones, clone)
          end
+         table.insert(allCards, player_text)
+         if winner_text then
+            table.insert(allCards, winner_text)
+         end
+         table.insert(allCards, back_clone)
          counter = counter + 1
       end
    end
@@ -371,11 +426,20 @@ HandPresentation = Class(nil,function(pres, ctrl)
       end
    end
    
+   -- Flip all cards up at the end of the hand
+   function pres:all_cards_up()
+      for _,card in pairs(allCards) do
+         if not card.group.extra.face then
+            flipCard(card.group)
+         end
+      end
+   end
+   
    -- End of the game
    function pres.showdown(pres, winners, poker_hand)
       mediaplayer:play_sound(SHOWDOWN_WAV)
       animate_chips_to_center()
-      all_cards_up()
+      pres:all_cards_up()
       animate_winning_hands()
       print(poker_hand.name .. " passed to pres:showdown()")
 
@@ -396,7 +460,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
              text="Press ENTER to continue!",
              font="Sans 36px",
              color="FFFFFF",
-             position={screen.w/2,400},
+             position={screen.w/2,300},
              opacity=0
           }
           text.anchor_point = {text.w/2, text.h/2}
