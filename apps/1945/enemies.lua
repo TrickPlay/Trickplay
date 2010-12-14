@@ -155,8 +155,11 @@ explosions =
                     if  self.time == nil then
                         self.time =  0
                     end
-                    self.timer:start()
-                    
+                    if delay == 0 then
+                        mediaplayer:play_sound("audio/big-explosion.mp3")
+                    else
+                        self.timer:start()
+                    end
                     if self.image.parent == nil then
                         self.group:add(self.image)
                     end
