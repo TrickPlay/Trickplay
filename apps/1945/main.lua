@@ -4,6 +4,18 @@
 
 my_font = "kroeger 06_65 40px"
 
+local recycled_tables = {}
+function make_table()
+    if #recycled_tables ~= 0 then
+        return table.remove(recycled_tables)
+    else
+        return {}
+    end
+end
+function recycle_table(t)
+    table.insert(recycled_tables,t)
+end
+
 dofile("Class.lua")
 --global variables
 dofile( "globals.lua")
@@ -23,6 +35,7 @@ dofile("GameLoop.lua")
 dofile("land.lua")
 dofile("my_plane.lua")
 dofile("enemies.lua")
+dofile("enemies/final_boss.lua")
 dofile("Levels.lua")
 
 --The splash Items

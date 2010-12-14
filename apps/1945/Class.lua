@@ -17,9 +17,9 @@ function Class(base, init)
     c.__index = c
 
     -- expose a constructor which can be called by <classname>(<args>)
-    local mt = {}
+    local mt = make_table()
     mt.__call = function(class_tbl, ...)
-        local obj = {}
+        local obj = make_table()
         setmetatable(obj,c)
         if init then
             init(obj,...)

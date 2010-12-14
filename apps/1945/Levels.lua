@@ -1525,7 +1525,7 @@ levels =
         w_q_index      = {},
         time = 0,
 		setup = function(self,o)
-            state.counters[3].lvl_points = 0
+            state.counters[4].lvl_points = 0
             my_plane.bombing_mode = false
             self.time = 0
             if type(o) == "table"  then

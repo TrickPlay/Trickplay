@@ -1,58 +1,72 @@
-impact = function(x,y) add_to_render_list(
-{
-        image = Clone{ source = imgs.impact },
-        group = nil,
-        duration = 0.2, 
-        time = 0,
-        remove = function(self)
-            self.group:unparent()
-        end,
-        setup = function( self )
-            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
-            
-            self.group = Group
-			{
-				size =
-				{
-					self.image.w / 4 ,
-					self.image.h
-				},
-				clip =
-				{
-					0 ,
-					0 ,
-					self.image.w / 4 ,
-					self.image.h
-				},
-				children = { self.image },
-				anchor_point =
-				{
-					( self.image.w / 4 ) / 2 ,
-					  self.image.h / 2
-				},
+local old_impacts = {}
+
+impact = function(x,y)
+    local imp
+    
+    if #old_impacts == 0 then
+        imp = {
+            image = Clone{ source = imgs.impact },
+            group = Group
+            {
+                size =
+                {
+                    imgs.impact.w / 4 ,
+                    imgs.impact.h
+                },
+                clip =
+                {
+                    0 ,
+                    0 ,
+                    imgs.impact.w / 4 ,
+                    imgs.impact.h
+                },
+                --children = { self.image },
+                anchor_point =
+                {
+                    ( imgs.impact.w / 4 ) / 2 ,
+                    imgs.impact.h / 2
+                },
                 position = {x,y},
-			}
-                    
-			layers.air_doodads_2:add( self.group )
-        end,
+            },
+            duration = 0.2, 
+            time = 0,
+            remove = function(self)
+                self.group:unparent()
+                table.insert(old_impacts,self)
+            end,
+            setup = function( self )
+                mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
                 
-		render = function( self , seconds )
-			self.time = self.time + seconds
-				
-			if self.time > self.duration then
-					
-				remove_from_render_list( self )
-				self.group:unparent()
-					
-			else
-				local frame = math.floor( self.time /
-					( self.duration / 4 ) )
-				self.image.x = - ( ( self.image.w / 4 )
-					* frame )
-			end
-        end,
-}
-)
+                
+                if self.image.parent == nil then
+                    self.group:add(self.image)
+                end
+                assert(self.image.parent==self.group)
+                        
+                layers.air_doodads_2:add( self.group )
+            end,
+                    
+            render = function( self , seconds )
+                self.time = self.time + seconds
+                    
+                if self.time > self.duration then
+                        
+                    remove_from_render_list( self )
+                else
+                    local frame = math.floor( self.time /
+                        ( self.duration / 4 ) )
+                    self.image.x = - ( ( self.image.w / 4 )
+                        * frame )
+                end
+            end,
+        }
+    else
+        imp = table.remove(old_impacts)
+        imp.group.x = x
+        imp.group.y = y
+        imp.time    = 0
+    end
+    add_to_render_list(imp)
 end
 
 smoke = function(i,o)   return {
@@ -232,20 +246,7 @@ my_plane =
     
     bombing_mode = false,
     
-    bombing_crosshair_strip =
-        Clone{
-            source=imgs.target,
-            --x=-imgs.target.w/2,
-            --anchor_point={imgs.target.w/4,imgs.target.h/2},
-            --y=-100
-        },
-    bombing_crosshair =
-        Group{
-            y=-100,
-            anchor_point={imgs.target.w/4,imgs.target.h/2},
-            clip={0,0,imgs.target.w/2,imgs.target.h}
-        },
-    
+
     shadow = Clone{source=imgs.player_shadow,opacity=0, x=100,y=30},
         
     prop =
@@ -284,16 +285,18 @@ my_plane =
     render_items = {},
     x =0,
     y=0,
+    coll_box = {},
 remove = function(self)
     self.group:unparent()
 end,
     setup = function( self )
+            self.coll_box.obj = self
     print("my_plane setup start")
             self.firing_powerup = 1
             self.damage = 0
             self.image.x = 0
             self.group:show()
-            self.bombing_crosshair:add(self.bombing_crosshair_strip)
+            --self.bombing_crosshair:add(self.bombing_crosshair_strip)
         	self.prop.g_l:add( self.prop.l )
 			self.prop.g_r:add( self.prop.r )
             self.num_prop_frames = 3
@@ -308,7 +311,7 @@ end,
             g:add( self.prop.g_l )
             self.group:add(g)
             layers.planes:add( self.group )
-            self.bombing_crosshair.x = self.image.w / (2*self.num_frames)
+            --self.bombing_crosshair.x = self.image.w / (2*self.num_frames)
             self.group.position = { screen_w / 2 - self.image.w / (2*self.num_frames) , screen_h - self.image.h }
             self.x = screen_w / 2 - self.image.w / (2*self.num_frames)
             self.y = screen_h - self.image.h 
@@ -486,17 +489,12 @@ end,
             end
             
             self.group.y = y--math.ceil(self.y/4)*4
-            
+            self.coll_box.x1  = self.group.x+20
+            self.coll_box.x2  = self.group.x+self.image.w/(self.num_frames)-20
+            self.coll_box.y1  = self.group.y+20
+            self.coll_box.y2  = self.group.y+self.img_h
             if not self.dead then
-                table.insert(g_guys_air,
-                    {
-                        obj = self,
-                        x1  = self.group.x+20,--self.image.w/(2*self.num_frames),
-                        x2  = self.group.x+self.image.w/(self.num_frames)-20,
-                        y1  = self.group.y+20,--self.image.h/2,
-                        y2  = self.group.y+self.img_h,--/2,
-                    }
-                )
+                table.insert(g_guys_air,self.coll_box)
             end
         end,
         
@@ -582,77 +580,8 @@ end,
                             self.image:unparent()
                             local x = self.image.x
                             local y = self.image.y
-    dolater(add_to_render_list,
-    {
-        image = Clone{ source = imgs.explosion1 },
-        group = nil,
-        duration = 0.2, 
-        time = 0,
-        setup = function( self )
-            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
-
-            self.group = Group
-			{
-				size =
-				{
-					self.image.w / 6 ,
-					self.image.h
-				},
-				clip =
-				{
-					0 ,
-					0 ,
-					self.image.w / 6 ,
-					self.image.h
-				},
-				children = { self.image },
-				anchor_point =
-				{
-					( self.image.w / 6 ) / 2 ,
-					  self.image.h / 2
-				},
-                position = {x,y},
-			}
-            
-                    
-			layers.land_targets:add( self.group )
-            
-            self.img_w = self.image.w/6
-            self.img_h = self.image.h
-        end,
-        remove = function(self)
-            self.group:unparent()
-        end,
-		render = function( self , seconds )
-			self.time = self.time + seconds
-				
-			if self.time > self.duration then
-					
-				remove_from_render_list( self )
-				self.group:unparent()
-                --[[
-                            table.insert(g_guys_land,
-                                {
-                                    obj = self,
-                                    x1  = self.group.x-self.img_w/2,
-                                    x2  = self.group.x+self.img_w/2,
-                                    y1  = self.group.y-self.img_h/2,
-                                    y2  = self.group.y+self.img_h/2,
-                                }
-                            )
-					--]]
-			else
-				local frame = math.floor( self.time /
-					( self.duration / 6 ) )
-				self.image.x = - ( ( self.image.w / 6 )
-					* frame )
-			end
-
-        end,
-        collision = function( self , other )
-
-        end,
-	})
+    dolater(add_to_render_list,explosions.small(x,y)
+    )
                         else
                             self.image.y = y
                         end
@@ -833,64 +762,7 @@ redo_score_text()
             self.group.position = { screen_w / 2 - self.group.w / (2*self.num_frames) , screen_h - self.group.h }
 
             -- Spawn an explosion
-            
-            local explosion =
-                
-                {
-                    num_frames = 7,
-                    
-                    image = Clone{ source = imgs.explosion3 , opacity = 255 },
-                    
-                    group = nil,
-                    
-                    duration = 0.4, 
-                    
-                    time = 0,
-                    
-                    setup =
-                    
-                        function( self )
-                            
-                            mediaplayer:play_sound("audio/Air Combat 1P Explosion.mp3")
-                            
-                            self.group = Group
-                                {
-                                    size = { self.image.w / self.num_frames , self.image.h },
-                                    position = location,
-                                    clip = { 0 , 0 , self.image.w / self.num_frames , self.image.h },
-                                    children = { self.image },
-                                    anchor_point = { ( self.image.w / self.num_frames ) / 2 , self.image.h / 2 },
-                                }
-                            
-                            layers.planes:add( self.group )
-                            
-                        end,
-                        
-                    render =
-                    
-                        function( self , seconds )
-                        
-                            self.time = self.time + seconds
-                            
-                            if self.time > self.duration then
-                                
-                                remove_from_render_list( self )
-                                
-                                self.group:unparent()
-                            
-                            else
-                            
-                                local frame = math.floor( self.time / ( self.duration / self.num_frames ) )
-                                
-                                self.image.x = - ( ( self.image.w / self.num_frames ) * frame )
-                            
-                            end
-                        
-                        end,
-                }
-            
-            add_to_render_list( explosion )
-        
+            add_to_render_list(explosions.big(location[1],location[2],nil,0))
         end,
         
     on_key =

@@ -17,15 +17,7 @@ function add_to_render_list( item, ... )
 end
 
 function remove_from_render_list( item )
---[[
-    for i , v in ipairs( render_list ) do
-    
-        if v == item then
-            table.remove( render_list , i )
-            return true
-        end
-    end
-    --]]
+
     if  render_list[ item ] then
         if item.remove then item:remove() end
         render_list[ item ] = nil

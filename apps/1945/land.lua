@@ -248,7 +248,7 @@ lvlbg = {
 {
     speed         = 80, -- pixels per second
     doodad_frames = {},
-    doodad_h      = imgs.dock_1_1.h,
+    doodad_h      = 0,
     top_doodad    = 0,
     q_i           = 0,
     append_i      = 0,
@@ -257,7 +257,7 @@ lvlbg = {
     repeating     = false,
     image         = Image{src = "assets/lvls/bg_tiles/water2.png" },
     setup         = function( self,o, top_doodad )
-        
+        self.doodad_h = imgs.dock_1_1.h
         self.img_h = self.image.h
         
         self.image:set{
@@ -503,14 +503,7 @@ lvlbg = {
 --Level 3
 {
     speed         = 80, -- pixels per second
-    trees         = {
-        l={Clone{source=imgs.trees,x=-imgs.trees.w/2},
-           Clone{source=imgs.trees,x=-imgs.trees.w/2,y=-imgs.trees.h}
-        },
-        r={Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2},
-           Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2,y=-imgs.trees.h}
-        }
-    },
+    trees         = nil,
     tree_i = 1,
     doodad_frames = {},
     doodad_h      = 144,--imgs.dirt_full.h,
@@ -521,6 +514,14 @@ lvlbg = {
     enemies       = {},
     image         = Image{src = "assets/lvls/bg_tiles/grass1.png" },
     setup         = function( self, o, top_doodad  )
+        trees = {
+            l={Clone{source=imgs.trees,x=-imgs.trees.w/2},
+               Clone{source=imgs.trees,x=-imgs.trees.w/2,y=-imgs.trees.h}
+            },
+            r={Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2},
+               Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2,y=-imgs.trees.h}
+            }
+        }
         self.img_h = self.image.h
         self.image:set{
             tile   = {true, true},
@@ -677,6 +678,7 @@ lvlbg = {
                                 self.image.y+self.image.h/2
                             )
                         )
+                        points(self.image.x,self.image.y,300)
                     else
                         add_to_render_list(
                             explosions.small(
@@ -684,7 +686,9 @@ lvlbg = {
                                 self.image.y+self.image.h/2
                             )
                         )
+                        points(self.image.x,self.image.y,200)
                     end
+                    
                 end,
                 salvage = function(self)
                     s = {
