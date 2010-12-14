@@ -232,10 +232,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
       back:begin_painting()
       back:set_source_color("024B23")
       back:round_rectangle(0, 0, 720, 146, 15)
-      back:set_source_radial_pattern(
-         back.x+back.w/2, back.y+back.h/2+100, 20,
-         back.x+back.w/2, back.y+back.h/2+100, 200
-      )
+      back:set_source_linear_pattern(back.x, back.y, back.x + back.w, back.y + back.h)
       back:add_source_pattern_color_stop(0, "010803")
       back:add_source_pattern_color_stop(1, "024B23")
       back:fill()
@@ -256,6 +253,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
       local final_hands = ctrl:get_final_hands()
       local in_hands = ctrl:get_in_hands()
+      local hole_cards = ctrl:get_hole_cards()
+
       da_clones = {}
       local length = 0
       for i,hand in pairs(in_hands) do
@@ -264,9 +263,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
       local counter = 0
       for player,hand in pairs(in_hands) do
          local player_text = Text{
-            text = "Dog "..player.table_position,
-            x = 600,
-            font = PLAYER_NAME_FONT,
+            text = "Player "..player.number,
+            x = 685,
+            font = WINNER_FONT,
             color = Colors.WHITE,
             opacity = 0
          }
@@ -275,58 +274,77 @@ HandPresentation = Class(nil,function(pres, ctrl)
          if final_hands[player] then
             winner_text = Text{
                text = "WINNER!",
-               x = 600,
-               font = PLAYER_NAME_FONT,
+               x = 685,
+               font = WINNER_FONT,
                color = "E4D312",
                opacity = 0
             }
             winner_text.anchor_point = {winner_text.w/2, winner_text.h/2}
          end
-         local back_clone = Clone{source = border_group}
+          back_clone = Clone{source = border_group}
          back_clone.anchor_point = {back_clone.w/2, back_clone.h/2}
-         back_clone.x = screen.w/2
+         back_clone.x = screen.w/2 + 85
          screen:add(back_clone, player_text, winner_text)
          for i,card in ipairs(hand) do
+            local card_group = Group{
+               position = Utils.deepcopy(card.group.position)
+            }
             local clone = Clone{
                name = "card_clone"..i,
-               source = card.group,
-               position = Utils.deepcopy(card.group.position),
+               source = card.group
             }
-            clone.anchor_point = {
+            card_group.anchor_point = {
                clone.w/2,
                clone.h/2
             }
-            screen:add(clone)
+            card_group:add(clone)
+            screen:add(card_group)
+            if card:equals(hole_cards[player][1])
+            or card:equals(hole_cards[player][2]) then
+               card_group:add(Image{src = "assets/hole-overlay.png", x = 5, y = 92})
+            end
             ---[[
-            local x_length_between_centroids = clone.w + 10
-            local y_length_between_centroids = clone.h + 30
+            local x_length_between_centroids = card_group.w + 10
+            local y_length_between_centroids = card_group.h + 30
             local total_x_length = x_length_between_centroids*(#hand-1)
             local total_y_length = y_length_between_centroids*(length-1)
             local start_x = screen.w/2 - total_x_length/2
             local start_y = screen.h/2 - total_y_length/2
             local pos = {
-               start_x + (i-1)*x_length_between_centroids - 10,
-               start_y + counter*y_length_between_centroids
+               start_x + (i-1)*x_length_between_centroids + 75,
+               start_y + counter*y_length_between_centroids - 30
             }
-            player_text.y = pos[2] - 20
+            player_text.y = pos[2]
             back_clone.y = pos[2]
-            if winner_text then winner_text.y = pos[2] + 20 end
-            clone:animate{
+            blah = back_clone
+            if winner_text then
+                winner_text.y = pos[2] + 20
+                player_text.y = pos[2] - 20
+            end
+            card_group:animate{
                position = Utils.deepcopy(pos),
                duration = TIME,
                mode = MODE,
-               z_rotation=-3 + math.random(5),
+               --z_rotation=-3 + math.random(5),
                on_completed = function() 
-                  clone:raise_to_top()
+                  card_group:raise_to_top()
                   player_text.opacity = 255
                   if winner_text then winner_text.opacity = 255 end
                end
             }
             --]]
-            table.insert(allCards, clone)
+            table.insert(allCards, card_group)
             table.insert(da_clones, clone)
          end
+         local done_button = Image{
+             src = "assets/help/button-done-on.png",
+             position = {screen.w/2, 1030}
+         }
+         done_button.anchor_point = {done_button.w/2, done_button.h/2}
+         screen:add(done_button)
+         -- for easy deletion
          table.insert(allCards, player_text)
+         table.insert(allCards, done_button)
          if winner_text then
             table.insert(allCards, winner_text)
          end
@@ -440,7 +458,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
       mediaplayer:play_sound(SHOWDOWN_WAV)
       animate_chips_to_center()
       pres:all_cards_up()
-      animate_winning_hands()
       print(poker_hand.name .. " passed to pres:showdown()")
 
       local won = {}
@@ -455,18 +472,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
          end
       end
       animate_pot_to_player(winners)
-      if not game:game_won() then
-          local text = Text{
-             text="Press ENTER to continue!",
-             font="Sans 36px",
-             color="FFFFFF",
-             position={screen.w/2,300},
-             opacity=0
-          }
-          text.anchor_point = {text.w/2, text.h/2}
-          screen:add(text)
-          Popup:new{group = text, time = 1500}
-      end
+      -- TODO: might want winning hands to animate a bit after pot to player
+      animate_winning_hands()
 
    end
 
