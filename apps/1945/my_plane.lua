@@ -35,7 +35,7 @@ impact = function(x,y)
                 table.insert(old_impacts,self)
             end,
             setup = function( self )
-                mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+                --mediaplayer:play_sound("audio/taking-damage.mp3")
                 
                 
                 if self.image.parent == nil then
@@ -462,10 +462,9 @@ end,
                     if self.h_speed > 0 then self.h_speed = 0 end
                 end
             end
-            self.group.x = x--math.ceil(self.x/4)*4
             
+            self.group.x = x
             
-            --self.y = self.y + ( self.v_speed * seconds )
             local y = self.group.y + ( self.v_speed * seconds )
             
             if y > screen_h - my_plane_sz then
@@ -714,7 +713,7 @@ if self.damage ~= (self.num_frames - 1) then
     if other.image ~= nil then
         impact(other.image.x,other.image.y)
     end
-    mediaplayer:play_sound("audio/Air Combat Damaged Plane.mp3")
+    mediaplayer:play_sound("audio/taking-damage.mp3")
     return
 else
     self:heal()
@@ -738,7 +737,7 @@ if state.hud.num_lives == 0 then
     else
         game_over_no_save:animate_in(state.hud.curr_score)
     end
-    mediaplayer:play_sound("audio/Air Combat Game Over.mp3")
+    mediaplayer:play_sound("audio/game-over.mp3")
 
 elseif state.curr_mode ~= "TEST_MODE" then
 	lives[state.hud.num_lives].opacity=0
@@ -858,9 +857,17 @@ redo_score_text()
 
 
 				}
-                if self.bombing_mode then add_to_render_list( self:new_bomb(self.group.x + self.image.w / (2*self.num_frames) , self.group.y+60,0) )
-				else  shoot[self.firing_powerup]() end
-                mediaplayer:play_sound("audio/Air Combat 1P Fire.mp3")
+                if self.bombing_mode then
+                    add_to_render_list(
+                        self:new_bomb(self.group.x + self.image.w / (2*self.num_frames) ,
+                        self.group.y+60,0)
+                    )
+                    mediaplayer:play_sound("audio/drop-bomb.mp3")
+				else
+                    shoot[self.firing_powerup]()
+                    mediaplayer:play_sound("audio/player-shooting.mp3")
+                end
+                
                 
             end
                 
@@ -895,7 +902,7 @@ powerups =
                 
                 if my_plane.firing_powerup < my_plane.firing_powerup_max then
                     my_plane.firing_powerup = my_plane.firing_powerup + 1
-                    mediaplayer:play_sound("audio/Air Combat Player Guns Up.mp3")
+                    mediaplayer:play_sound("audio/power-up.mp3")
                 end
                 self.image:unparent()
                 remove_from_render_list(self)
@@ -934,7 +941,7 @@ powerups =
                 ) then
                 
                 my_plane:heal()
-                mediaplayer:play_sound("audio/Air Combat Player Guns Up.mp3")
+                mediaplayer:play_sound("audio/power-up.mp3")
                 self.image:unparent()
                 remove_from_render_list(self)
             elseif self.image.y > screen_h + self.image.h then
@@ -974,7 +981,7 @@ powerups =
                 if state.hud.num_lives < state.hud.max_lives then
                     state.hud.num_lives = state.hud.num_lives + 1
                     lives[state.hud.num_lives].opacity =255
-                    mediaplayer:play_sound("audio/Air Combat Player Guns Up.mp3")
+                    mediaplayer:play_sound("audio/power-up.mp3")
                 end
                 self.image:unparent()
                 remove_from_render_list(self)

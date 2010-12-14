@@ -29,7 +29,7 @@ points = function(x,y,num_points)
         		state.hud.high_score = state.hud.curr_score
                 if not state.set_highscore then
                     state.set_highscore = true
-                    mediaplayer:play_sound("audio/Air Combat High Score.mp3")
+                    mediaplayer:play_sound("audio/level-complete.mp3")
                 end
             end
             redo_score_text()
@@ -108,6 +108,9 @@ local num_sm_explos = 0
 explosions =
 {
 	big = function(x,y,dam_list,delay)
+        if delay == nil then
+            delay = 0
+        end
         local e
         if #big_explos == 0 then
         num_big_explos = num_big_explos + 1
@@ -120,7 +123,7 @@ explosions =
                     interval = -delay,
                     on_timer = function(t)
                         t:stop()
-                        mediaplayer:play_sound("audio/Air Combat Big Explosion.mp3")
+                        mediaplayer:play_sound("audio/big-explosion.mp3")
                     end
                 },
                 group = Group
@@ -240,6 +243,7 @@ explosions =
                     table.insert(sm_explos,self)
                 end,
                 setup = function( self )
+                    mediaplayer:play_sound("audio/enemy-explosion.mp3")
                     if  self.time == nil then
                         self.time =  0
                     end
@@ -355,7 +359,7 @@ explosions =
             self.group:unparent()
         end,
         setup = function( self )
-            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            mediaplayer:play_sound("audio/enemy-explosion.mp3")
             
             self.group = Group
 			{
@@ -446,7 +450,7 @@ function fire_bullet(enemy,source)
                 if not (self.image.x > screen_w or self.image.x < 0 or
                     self.image.y < 0 or self.image.y > screen_h) then
                     
-                    mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+                    mediaplayer:play_sound("audio/enemy-firing.mp3")
                 end
             end,
             
@@ -543,7 +547,7 @@ function flak(x,y)
             end
             
             
-            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            mediaplayer:play_sound("audio/flak-mortar-explosion.mp3")
 			layers.planes:add( self.group )
         end,
                 
@@ -620,7 +624,7 @@ function fire_flak(enemy, dist_x,dist_y)
             
         setup = function( self )
         if not (self.image.x > screen_w or self.image.x < 0 or self.image.y < 0 or self.image.y > screen_h) then
-            mediaplayer:play_sound("audio/Air Combat Flak Fire.mp3")
+            mediaplayer:play_sound("audio/flak-shot.mp3")
         end
             
 		--enemies are assumed to be facing downwards
@@ -766,7 +770,7 @@ function fire_mortar(enemy, dist_x,dist_y)
         setup = function( self )
             self.g:add(self.image)
             layers.air_bullets:add(self.g)
-            mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+            mediaplayer:play_sound("audio/mortar-shot.mp3")
             
             --enemies are assumed to be facing downwards
             --local deg    = enemy.group.z_rotation[1] + 90
