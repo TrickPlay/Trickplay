@@ -20,7 +20,9 @@ end
 
 for r = 1 , ROWS do
     
-    for c = 1 , COLS do
+    local c = r
+    
+    do
     
         local globe = Image{ src = "assets/globe.png" }
         
