@@ -67,7 +67,7 @@ timer.on_timer = function(timer)
         game = GameControl(router, Components.GAME)
         game_menu = MenuView(router)
         game_menu:initialize()
-        local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components.NO_MOVES_DIALOG, router)
+        local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves.", Components.NO_MOVES_DIALOG, router)
         local new_map_dialog = DialogBox("Start a new game\non this layout?", Components.NEW_MAP_DIALOG, router)
 
         splash:unparent()
