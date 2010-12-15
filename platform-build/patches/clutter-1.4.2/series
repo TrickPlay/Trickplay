@@ -1,2 +1,4 @@
 dont-build-tests.patch
 #egl-config.patch
+custom-egl-initialization.patch
+disable-unused-attribs.patch

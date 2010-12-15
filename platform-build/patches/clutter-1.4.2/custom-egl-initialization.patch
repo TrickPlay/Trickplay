@@ -1,0 +1,22 @@
+Index: clutter-1.4.2/clutter/egl/clutter-backend-egl.c
+===================================================================
+--- clutter-1.4.2.orig/clutter/egl/clutter-backend-egl.c	2010-12-14 16:54:05.234306286 -0800
++++ clutter-1.4.2/clutter/egl/clutter-backend-egl.c	2010-12-14 16:55:12.861197810 -0800
+@@ -45,6 +45,8 @@
+ #include "../clutter-debug.h"
+ #include "../clutter-version.h"
+ 
++extern NativeWindowType tp_egl_get_native_window();
++
+ static ClutterBackendEGL *backend_singleton = NULL;
+ 
+ static const gchar *clutter_fb_device = NULL;
+@@ -325,7 +327,7 @@
+       backend_egl->egl_surface =
+         eglCreateWindowSurface (edpy,
+                                 config,
+-                                (NativeWindowType) NULL,
++                                tp_egl_get_native_window(),
+                                 NULL);
+     }
+ 

@@ -1,0 +1,50 @@
+Index: clutter-1.4.2/clutter/cogl/cogl/driver/gles/cogl-gles2-wrapper.c
+===================================================================
+--- clutter-1.4.2.orig/clutter/cogl/cogl/driver/gles/cogl-gles2-wrapper.c	2010-12-14 17:32:27.451806087 -0800
++++ clutter-1.4.2/clutter/cogl/cogl/driver/gles/cogl-gles2-wrapper.c	2010-12-14 17:36:32.090556995 -0800
+@@ -1176,12 +1176,29 @@
+ {
+   CoglGles2WrapperProgram *program;
+   guint32 dirty_custom_uniforms = 0;
++  GLuint old_attribs[COGL_GLES2_MAX_TEXTURE_UNITS];
++  int was_dirty=0;
+ 
+   _COGL_GET_GLES2_WRAPPER (w, NO_RETVAL);
+ 
+   /* Check if we need to switch programs */
+   if (w->settings_dirty)
+     {
++
++      if(w->current_program != NULL)
++      {
++        was_dirty = 1;
++        int i;
++        /* First need to save old attributes since new program might not use them */
++        
++	      for (i = 0; i < COGL_GLES2_MAX_TEXTURE_UNITS; i++)
++		{
++			{
++		          old_attribs[i] = w->current_program->attributes.multi_texture_coords[i];
++			}
++		}
++	}
++
+       /* Find or create a program for the current settings */
+       program = cogl_gles2_wrapper_get_program (&w->settings);
+ 
+@@ -1339,6 +1356,15 @@
+                                    texture_unit->texture_coords_stride,
+                                    texture_unit->texture_coords_pointer);
+           }
++	else if(was_dirty)
++	  {
++		// Disable old ones that aren't used any more
++		if(old_attribs[i] != -1)
++		{
++			glDisableVertexAttribArray(old_attribs[i]);
++		}
++	  }
++
+     }
+ 
+   if (w->dirty_vertex_attrib_enables)
