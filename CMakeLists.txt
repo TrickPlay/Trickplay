@@ -6,7 +6,17 @@ project( TP )
 #------------------------------------------------------------------------------
 
 if(CMAKE_TOOLCHAIN_FILE)
-   
+
+    set(PREFIX $ENV{PREFIX})
+
+    if (PREFIX)
+    
+        set( CMAKE_INSTALL_PREFIX ${PREFIX} )
+        
+    endif(PREFIX)
+    
+    unset(PREFIX)
+      
 else(CMAKE_TOOLCHAIN_FILE)
 
     set( CMAKE_FIND_ROOT_PATH /opt/local /usr/local /usr)
