@@ -41,6 +41,8 @@ MenuController = Class(Controller,function(self, view, ...)
     New_Game.callback =
         function()
             game:reset_game(current_layout)
+            router:set_active_component(Components.GAME)
+            router:notify()
         end
 
     Undo[Directions.UP] = New_Game
