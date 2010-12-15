@@ -11,7 +11,7 @@ HelpScreen = Class(Controller, function(self, router, ...)
         opacity = 60
     }
     local help_screen = Image{src = "assets/help.jpg", position = {676, 80}}
-    local help_button = FocusableImage(996, 858, "assets/menus/button-large-off.png",
+    local help_button = FocusableImage(996, 858, "assets/menus/button-large-on.png",
         nil, "Done")
     help_button.text.y = help_button.text.y - 3
     local help_ui = Group{name="help_ui"}
