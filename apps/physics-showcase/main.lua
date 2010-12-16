@@ -1,0 +1,2 @@
+
+dofile( "lottery/main.lua" )
