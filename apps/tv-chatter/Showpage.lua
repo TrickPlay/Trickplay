@@ -3,11 +3,11 @@
 local gutter_sides        = 50
 local top_gutter          = 26
 local bottom_gutter       = 20
-local mediaplayer_w       = 1308
+local mediaplayer_w       = 1307
 local mediaplayer_h       = 735
 local mediaplayer_y       = 124
 local banner_y            = mediaplayer_y + mediaplayer_h + 25
-
+local mediaplayer_border  = 2
 
 
 
@@ -59,7 +59,7 @@ do
     local scale = (mediaplayer_y - top_gutter - 11)/logo.h
     logo.scale={scale,scale}
     --Upper Right
-    local up_r_spacing = 16
+    local up_r_spacing = 20
     local up_r_top_gutter = 54
 
     local show_less = Image{ src="assets/show_less.png", y = up_r_top_gutter }
@@ -67,17 +67,24 @@ do
     local back      = Image{ src="assets/back.png",      y = up_r_top_gutter }
     local exit      = Image{ src="assets/exit.png",      y = up_r_top_gutter }
         
+        --[[
     exit.x      = screen_w  - gutter_sides - exit.w
     back.x      = exit.x    - up_r_spacing - back.w
     options.x   = back.x    - up_r_spacing - options.w
     show_less.x = options.x - up_r_spacing - show_less.w
-    
+    --]]
+    ---[[
+    show_less.x = gutter_sides + mediaplayer_w + 25
+    options.x   = show_less.x + show_less.w + up_r_spacing
+    back.x   = options.x + options.w + up_r_spacing
+    exit.x   = screen_w  - gutter_sides - exit.w
+    --]]
     local border = Rectangle
     {
-        w            = mediaplayer_w+4,
-        h            = mediaplayer_h+4,
-        y            = mediaplayer_y-2,
-        x            = gutter_sides-2,
+        w            = mediaplayer_w,--+2*mediaplayer_border,
+        h            = mediaplayer_h,--+2*mediaplayer_border,
+        y            = mediaplayer_y,--mediaplayer_border,
+        x            = gutter_sides,--mediaplayer_border,
         border_width = 2,
         color        = "#00000000",
         border_color = "#B9B9B9FF"
@@ -107,12 +114,13 @@ do
 end
 
 local Banner = Class(function(self,...)
+    
+    local banner = Image{src="assets/img_glee_banner.png"}
     local group = Group
     {
         x = gutter_sides,
-        y = mediaplayer_y + mediaplayer_h + 25
+        y = screen_h-bottom_gutter-banner.h--mediaplayer_y + mediaplayer_h + 25
     }
-    local banner = Image{src="assets/img_glee_banner.png"}
     group:add(banner)
     sp_group:add(group)
     function self:display(show_obj)
@@ -440,8 +448,8 @@ local TweetStream_Container = Class(function(self,...)
     local Show_Name_Color = "#FFFFFF"
     
     local bg = make_bg(
-        screen_w - group.x - gutter_sides,
-        screen_h - (group.y + title.h+22+bottom_gutter),
+        screen_w - group.x - gutter_sides+2,
+        screen_h - (group.y + title.h+22+bottom_gutter)+2,
         0,title.h+22
     )
     
@@ -516,14 +524,16 @@ local TweetStream_Container = Class(function(self,...)
         show_time.x     = show_time.x - show_time.w
         
         
-        curr_obj.tweetstream:set_h(bg.h-(top_rule.y-bg.y)-10)
-        curr_obj.tweetstream:set_w(bg.w-30)
-        curr_obj.tweetstream:set_pos(15,top_rule.y)
+        curr_obj.tweetstream:resize(bg.w,bg.h-(top_rule.y+1-bg.y)-3,true)
+        curr_obj.tweetstream:set_pos(0,top_rule.y+1)
         group:add( curr_obj.tweetstream:get_group() )
+        top_rule:raise_to_top()
+        bottom_rule:raise_to_top()
         --for i = 1,#curr_obj.tweet_g_cache do
         --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
         --end
         curr_obj.tweetstream:in_view()
+        curr_obj.tweetstream:receive_focus()
         
     end
     function self:up()

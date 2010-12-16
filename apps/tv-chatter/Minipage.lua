@@ -27,21 +27,18 @@ mp_group:hide()
 
 --Container for the TweetStream
 local TweetStream_Container = Class(function(self,...)
-    
+    local bg = Image{src="assets/mp_tweetstream_container.png"}
     local group = Group
     {
-        x = screen_w - 487,
-        y = 3*screen_h/4-70,
+        x = screen_w - bg.w,
+        y = screen_h-bg.h,
     }
     
     local Show_Name_Font  = "Helvetica bold 26px"
     local Show_Name_Color = "#FFFFFF"
     
-    local bg = make_bg_mini(
-        487,
-        screen_h/4+70,
-        0,0
-    )
+    local bg = Image{src="assets/mp_tweetstream_container.png"}
+
     
     local show_name = Text{
         text  = "show_name",
@@ -68,7 +65,6 @@ local TweetStream_Container = Class(function(self,...)
         sp_group:show()
         curr_obj.tweetstream:get_group():unparent()
         curr_obj.tweetstream:out_view()
-        curr_obj.tweetstream:receive_focus()
         sp.tweetstream:display(curr_obj)
         curr_obj = nil
         mediaplayer:set_viewport_geometry(
@@ -84,10 +80,11 @@ local TweetStream_Container = Class(function(self,...)
         
         show_name.text  = show_obj.show_name
         
-        curr_obj.tweetstream:set_h(screen_w/4)
+        curr_obj.tweetstream:resize(bg.w+80,bg.h-(top_rule.y+1),false)
         --curr_obj.tweetstream:set_w(bg.w-30) --still okay from showpage
-        curr_obj.tweetstream:set_pos(15,top_rule.y)
+        curr_obj.tweetstream:set_pos(15-95,top_rule.y+1)
         group:add( curr_obj.tweetstream:get_group() )
+        top_rule:raise_to_top()
         --for i = 1,#curr_obj.tweet_g_cache do
         --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
         --end
@@ -102,12 +99,12 @@ local TweetStream_Container = Class(function(self,...)
     end
     function self:up()
         if curr_obj ~= nil then
-            curr_obj.tweetstream:move_up()
+           -- curr_obj.tweetstream:move_up()
         end
     end
     function self:down()
         if curr_obj ~= nil then
-            curr_obj.tweetstream:move_down()
+           -- curr_obj.tweetstream:move_down()
         end
     end
 
