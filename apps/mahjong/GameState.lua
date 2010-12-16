@@ -127,7 +127,24 @@ GameState = Class(nil,function(state, ctrl)
     end
 
     function state:save()
-        settings.grid = grid
+        local saved_data = {}
+        for i = 1,GRID_WIDTH do
+            saved_data[i] = {}
+            for j = 1,GRID_HEIGHT do
+                saved_data[i][j] = {}
+                for k = 1,GRID_DEPTH do
+                    saved_data[i][j][k] = {}
+                    saved_data[i][j][k].object = false
+                    if grid_check(grid, i, j, k) then
+                        saved_data[i][j][k].object = true
+                        saved_data[i][j][k].suit = grid[i][j][k].suit
+                        saved_data[i][j][k].number = grid[i][j][k].number
+                    end
+                end
+            end
+        end
+
+        settings.grid = saved_data
     end
 
     function state:build_layout(number)
@@ -266,21 +283,11 @@ GameState = Class(nil,function(state, ctrl)
             for j = 1,GRID_HEIGHT do
                 for k = 1,GRID_DEPTH do
                     -- tile exists
-                    if grid[i][j][k] and (not grid[i-1]
-                    or grid[i][j][k] ~= grid[i-1][j][k])
-                    and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k]) then
+                    if grid_check(grid, i, j, k) then
                         if check_right(i, j, k) and check_bottom(i, j, k)
                         and check_top(i, j, k) then
-                            if not grid[i][j][k].group then
-                                print("grid...", grid[i][j][k])
-                                dumptable(grid[i][j][k])
-                            end
                             grid[i][j][k].group:hide()
                         else
-                            if not grid[i][j][k].group then
-                                print("grid...", grid[i][j][k])
-                                dumptable(grid[i][j][k])
-                            end
                             grid[i][j][k].group:show()
                         end
                     end

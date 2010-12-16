@@ -732,24 +732,25 @@ Layout = Class(function(layout, tiles_class, number, load_game, ...)
         local match_check = {}
         local tile
         local new_tile
-        local count = 0
+        local count = 1
         for i = 1,GRID_WIDTH do
             for j = 1,GRID_HEIGHT do
                 for k = 1,GRID_DEPTH do
-                    if grid[i][j][k] and (not grid[i-1]
-                    or grid[i][j][k] ~= grid[i-1][j][k])
-                    and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k]) then
+                    if grid[i][j][k].object then
                         tile = grid[i][j][k]
-                        new_tile = matches[tile.suit][tile.number][1]
-                        count  = count + 1
-                        if match_check[new_tile] then
-                            new_tile = matches[tile.suit][tile.number][2]
-                            if match_check[new_tile] then
-                                error("trying to access same tile three times")
+                        count = 1
+                        new_tile = matches[tile.suit][tile.number][count]
+                        while match_check[new_tile] do
+                            count = count + 1
+                            new_tile = matches[tile.suit][tile.number][count]
+                            if count > 4 then
+                                error("too many loops")
                             end
-                            match_check[new_tile] = true
                         end
+                        match_check[new_tile] = true
                         grid[i][j][k] = new_tile
+                    else
+                        grid[i][j][k] = nil
                     end
                 end
             end
