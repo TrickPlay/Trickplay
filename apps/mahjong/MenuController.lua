@@ -102,7 +102,10 @@ MenuController = Class(Controller,function(self, view, ...)
             mediaplayer:play_sound("assets/audio/bonk.mp3")
         end
     Exit.object = view:get_object("exit")
-    Exit.callback = function() exit() end
+    Exit.callback = function()
+        game:save()
+        exit()
+    end
 
     Choose_Map[Directions.UP] =
         function()

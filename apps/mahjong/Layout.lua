@@ -707,20 +707,54 @@ local layout_functions = {
     end,
 }
 
-Layout = Class(function(layout, number, tiles_class, ...)
+Layout = Class(function(layout, tiles_class, number, load_game, ...)
 
-    assert(number)
+    assert(number or load_game)
     assert(tiles_class)
     if not tiles_class.is_a or not tiles_class:is_a(Tiles) then
         error("tiles must be a table of tiles", 2)
     end
-    if type(number) ~= "number" then error("number must be a number", 2) end
-    if number < 1 or number > Layouts.LAST then
-        error("number must be between 1 and "..Layouts.LAST.." inclusive", 3)
-    end
 
-    tiles_class:shuffle(NUMBER_OF_TILES[number])
-    local grid = layout_functions[number](tiles_class:get_tiles())
+    local grid
+
+    if number then
+        if type(number) ~= "number" then error("number must be a number", 2) end
+        if number < 1 or number > Layouts.LAST then
+            error("number must be between 1 and "..Layouts.LAST.." inclusive", 3)
+        end
+
+        tiles_class:shuffle(NUMBER_OF_TILES[number])
+        grid = layout_functions[number](tiles_class:get_tiles())
+    else
+        -- load game
+        grid = settings.grid
+        local matches = tiles_class:get_matches()
+        local match_check = {}
+        local tile
+        local new_tile
+        local count = 0
+        for i = 1,GRID_WIDTH do
+            for j = 1,GRID_HEIGHT do
+                for k = 1,GRID_DEPTH do
+                    if grid[i][j][k] and (not grid[i-1]
+                    or grid[i][j][k] ~= grid[i-1][j][k])
+                    and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k]) then
+                        tile = grid[i][j][k]
+                        new_tile = matches[tile.suit][tile.number][1]
+                        count  = count + 1
+                        if match_check[new_tile] then
+                            new_tile = matches[tile.suit][tile.number][2]
+                            if match_check[new_tile] then
+                                error("trying to access same tile three times")
+                            end
+                            match_check[new_tile] = true
+                        end
+                        grid[i][j][k] = new_tile
+                    end
+                end
+            end
+        end
+    end
 
     function layout:get_grid() return grid end
 

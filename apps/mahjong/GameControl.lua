@@ -53,7 +53,9 @@ function(ctrl, router, ...)
     function ctrl:initialize_game(args)
 
         state:initialize(args)
-        state:build_layout(Layouts.TURTLE)
+        if not state:load_layout() then
+            state:build_layout(Layouts.TURTLE)
+        end
         --state:build_layout(Layouts.CROWN)
         --state:build_layout(Layouts.ANCHOR)
         --state:build_layout(Layouts.FISH)
@@ -131,6 +133,8 @@ function(ctrl, router, ...)
         pres:move_focus()
         router:notify(NotifyEvent())
     end
+
+    function ctrl:save() state:save() end
 
     function ctrl:undo_move()
         local last_tiles = state:undo()
