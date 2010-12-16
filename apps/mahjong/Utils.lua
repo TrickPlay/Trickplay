@@ -1,3 +1,8 @@
+function grid_check(grid, i, j, k)
+    return grid[i][j][k] and (not grid[i-1] or grid[i][j][k] ~= grid[i-1][j][k])
+           and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k])
+end
+
 Utils = {}
 
 function Utils.clamp(min, element, max)

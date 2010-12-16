@@ -53,6 +53,7 @@ function(pres, ctrl)
         local tile = nil
         local pos = nil
 
+        -- draws diagonally
         local i
         local j
         local temp = 0
@@ -84,9 +85,9 @@ function(pres, ctrl)
         end
 
         -- change the tile depth mask layer opacity based on the height of the tile
-        for k = 1, GRID_DEPTH do
+        for k = 1,GRID_DEPTH do
             for i = 1,GRID_WIDTH do
-                for j = 1, GRID_HEIGHT do
+                for j = 1,GRID_HEIGHT do
                     if grid[i][j][k] then
                         --grid[i][j][k].depth.opacity = 255-255*((k-1)/4)
                         grid[i][j][k]:set_height(k)
