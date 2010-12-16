@@ -62,10 +62,11 @@ local req_page = function(keywords, callback, since_id)
         url = url,
         on_complete = function(request,response)
             
-            if response == nil or response.body == nil then
+            if response == nil or response.failed or response.body == nil then
                 callback(false)
+                return
             end
-            print("returning response")
+            --print("returning response",response.body)
             callback( json:parse( response.body ).results )
         end
     }
@@ -73,25 +74,53 @@ local req_page = function(keywords, callback, since_id)
 end
 
 
---Container for the TweetStream
+
+
+
+
+--TweetStream Class
 TweetStream = Class(function(t,parent,...)
     
     local show_obj      = parent
-    
+    local clip_side_gutter = 14
     local group       = Group{clip={0,0,0,0}}
     --local tweet_slate = Group{} --move a group, not a bunch of objects
     local tweets      = {}      --all the tweet groups
                                 --format {group,username,time,channel,text,obj}
+    local highlight      = Rectangle{w=0,h=0,color = "#595959",opacity = 0,x=-15}
     local results_cache  = {}
     --local animate_tweets = Timer{interval= 100} --manual Timeline
-    local animate_tweets = Timeline{loop=true,duration=5000}
+    local animate_tweets = Timeline{loop=true, duration=5000}
+    local manual_scroll  = nil
     local scroll_thresh  = Timer{interval=10000} --wait-time to scrolling again
+    local auto_scrolling  = true
+    
+    local fade_in_hl     = Timeline
+        {
+            duration=200,
+            on_new_frame=function(tl,msecs,prog)
+                highlight.opacity = 255*prog
+            end,
+            on_completed=function()
+                highlight.opacity=255
+            end
+        }
+    local fade_out_hl    = Timeline
+        {
+            duration=200,
+            on_new_frame=function(tl,msecs,prog)
+                highlight.opacity = 255*(1-prog)
+            end,
+            on_completed=function()
+                highlight.opacity=0
+                auto_scrolling = true
+            end
+        }
     local tweet_gap      = 44 
-    local highlight = Rectangle{w=0,h=0,color = "#595959",opacity = 0}
-    local sel_i     = 0
+    local sel_i          = 0
+    local hl_border      = 25
     --state
     local requesting      = false
-    local auto_scrolling  = true
     local at_bottom       = true
     local since_id        = 0
     local attempt         = 0
@@ -104,39 +133,73 @@ TweetStream = Class(function(t,parent,...)
     --wait 10 seconds and start scrolling again
     function scroll_thresh:on_timer()
         auto_scrolling = true
+        fade_out_hl:start()
         scroll_thresh:stop()
     end
     
     --resize the tweetstream
-    function t:set_w(w)
-        highlight.w = w
-        group.clip = {group.clip[1],group.clip[2],w,group.clip[4]}
+    
+    function t:resize(w,h,crop_avatar)
+        
+        if  w == -1 then
+            w = group.clip[3]
+        end
+        if  h == -1 then
+            h = group.clip[4]
+        end
+        
+        
+        highlight.w =  w+2*clip_side_gutter
+        group.y     =  group.y   +  (group.clip[4] - h)
+        if crop_avatar then
+            group.clip  = {0,group.clip[2],w,h}
+        else
+            group.clip  = {110,group.clip[2],w,h}
+        end
         if #tweets ~= 0 then
             local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
             local btm_tweet = (index_of_bottom_tweet)
-            local sum = group.clip[4]--tweets[top_tweet].group.y
+            local sum = group.clip[4]
             for i = btm_tweet,top_tweet,-1 do
-                tweets[i].text.w = w-100
-                tweets[i].time.x = w-10
+                tweets[i].text.w = w- tweets[i].text.x- clip_side_gutter
+                tweets[i].time.x = w-clip_side_gutter
                 tweets[i].h = tweets[i].text.y + tweets[i].text.h + tweet_gap
                 tweets[i].group.y = sum - tweets[i].h
                 sum = tweets[i].group.y
             end
-        end
-    end
-    function t:set_h(h)
-        --assumes y is fixed to bottom
-        group.y    = group.y + (group.clip[4] - h)
-        group.clip = {group.clip[1],group.clip[2],group.clip[3],h}
-        if #tweets ~= 0 then
-            local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
-            local btm_tweet = (index_of_bottom_tweet)
-            local sum = (group.clip[4] - h)
-            for i = top_tweet,btm_tweet do
-                tweets[i].group.y = tweets[i].group.y + sum
+            
+            if sum + tweets[top_tweet].h < 0 then
+                print("removing tweets")
+                while tweets[top_tweet].group.y + tweets[top_tweet].h < 0 do
+                    print("unparent")
+                    tweets[top_tweet].group:unparent()
+                    
+                    num_tweets_on_screen = num_tweets_on_screen - 1
+                    top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
+                    
+                    assert(top_tweet <= btm_tweet)
+                end
+            else
+                print("adding tweets")
+                while sum > 0 do
+                    if top_tweet == 1 then break end
+                    print("add")
+                    num_tweets_on_screen = num_tweets_on_screen + 1
+                    top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
+                    
+                    group:add(tweets[top_tweet])
+                    tweets[top_tweet].text.w  = w- tweets[top_tweet].text.x- clip_side_gutter
+                    tweets[top_tweet].time.x  = w-clip_side_gutter
+                    tweets[top_tweet].h       = tweets[top_tweet].text.y +
+                            tweets[top_tweet].text.h + tweet_gap
+                    tweets[top_tweet].group.y = sum - tweets[top_tweet].h
+                    sum = tweets[top_tweet].group.y
+                end
             end
         end
-    end
+        
+        
+    end 
     function t:set_pos(x,y)
         group.position ={x, y}
     end
@@ -152,122 +215,213 @@ TweetStream = Class(function(t,parent,...)
         active_stream = nil
     end
     function t:select_tweet(i)
-        highlight.y = tweets[i].group.y-25
-        highlight.h = tweets[i].h -10
+        highlight.y = tweets[i].group.y-hl_border
+        highlight.h = tweets[i].h +(2*hl_border-tweet_gap)
     end
     
+    
     function t:move_up()
+        if highlight.opacity ~= 255 and not fade_in_hl.is_playing then
+            fade_in_hl:start()
+            auto_scrolling = false
+            scroll_thresh:stop()
+            scroll_thresh = Timer{interval=10000}
+            
+            scroll_thresh.on_timer = function(self)
+                self:stop()
+                fade_out_hl:start()
+            end
+            scroll_thresh:start()
+            return
+        end
+
         auto_scrolling = false
         scroll_thresh:stop()
         scroll_thresh = Timer{interval=10000}
+        
         scroll_thresh.on_timer = function(self)
-            auto_scrolling = true
             self:stop()
+            fade_out_hl:start()
         end
         scroll_thresh:start()
+        
+        if manual_scroll ~= nil then
+            manual_scroll:stop()
+            manual_scroll:on_completed()
+        end
+        manual_scroll = Timeline{loop=false,duration=200}
+        
+        local curr_tweet_y = {}
+        local targ_tweet_y = {}
+        local curr_hl_h    = highlight.h
+        local targ_hl_h    = highlight.h
+        local curr_hl_y    = highlight.y
+        local targ_hl_y    = highlight.y
+        
         if sel_i - 1 < index_of_bottom_tweet+1 - num_tweets_on_screen then
             if sel_i - 1 >= 1 then
-                group:add(tweets[sel_i - 1].group)
-                tweets[sel_i - 1].text.w = group.clip[3] - 100
-                tweets[sel_i - 1].time.x = group.clip[3] - 10
-                tweets[sel_i - 1].time.y = 25
-                num_tweets_on_screen  = num_tweets_on_screen  + 1
+                print("up to old tweet")
                 local sum = 25
+                group:add(tweets[sel_i - 1].group)
+                tweets[sel_i - 1].text.w = group.clip[3] - tweets[sel_i - 1].text.x- clip_side_gutter
+                tweets[sel_i - 1].time.x = group.clip[3] - clip_side_gutter
+                tweets[sel_i - 1].h      = tweets[sel_i - 1].text.y +
+                            tweets[sel_i - 1].text.h + tweet_gap
+                num_tweets_on_screen  = num_tweets_on_screen  + 1
+                tweets[sel_i - 1].group.y = sum - tweets[sel_i - 1].h
+                
                 for j = sel_i - 1,index_of_bottom_tweet do
-                    tweets[j].group.y = sum 
+                    curr_tweet_y[j] = tweets[j].group.y
+                    targ_tweet_y[j] = sum
                     sum = sum + tweets[j].h
                 end
-                self:select_tweet(sel_i - 1)
-                sel_i = sel_i - 1
-                if tweets[index_of_bottom_tweet].group.y >= group.clip[4] then
-                    tweets[index_of_bottom_tweet].group:unparent()
-                    num_tweets_on_screen  = num_tweets_on_screen - 1
-                    index_of_bottom_tweet = index_of_bottom_tweet - 1 
-                end
+                targ_hl_h = tweets[sel_i - 1].h +(2*hl_border-tweet_gap)
+                
+            else
+                manual_scroll = nil
+                return
             end
         elseif sel_i - 1 == index_of_bottom_tweet+1 - num_tweets_on_screen and
             tweets[sel_i - 1].group.y < 0 then
-            
-                local sum = 0
+                print("up - to half-clipped tweet")
+                local sum = 25
                 for j = sel_i - 1,index_of_bottom_tweet do
-                    tweets[j].group.y = sum 
+                    curr_tweet_y[j] = tweets[j].group.y
+                    targ_tweet_y[j] = sum
                     sum = sum + tweets[j].h
                 end
-                self:select_tweet(sel_i - 1)
-                sel_i = sel_i - 1
-                if tweets[index_of_bottom_tweet].group.y >= group.clip[4] then
-                    tweets[index_of_bottom_tweet].group:unparent()
-                    num_tweets_on_screen  = num_tweets_on_screen - 1
-                    index_of_bottom_tweet = index_of_bottom_tweet - 1 
-                end
+                targ_hl_h = tweets[sel_i - 1].h +(2*hl_border-tweet_gap)
+                targ_hl_y = 0
+        elseif tweets[sel_i - 1] ~= nil  then
+        print("up - within the bounds",sel_i - 1,index_of_bottom_tweet+1 - num_tweets_on_screen)
+            targ_hl_h = tweets[sel_i - 1].h +(2*hl_border-tweet_gap)
+            targ_hl_y = tweets[sel_i - 1].group.y - hl_border
         else
-            self:select_tweet(sel_i - 1)
-            sel_i = sel_i - 1
+            manual_scroll = nil
+            auto_scrolling = true
+            scroll_thresh:stop()
+            return
         end
+        
+        function manual_scroll:on_new_frame(msecs,prog)
+            highlight.h = curr_hl_h + (targ_hl_h-curr_hl_h)*prog
+            highlight.y = curr_hl_y + (targ_hl_y-curr_hl_y)*prog
+            for j = sel_i - 1,index_of_bottom_tweet do
+                if targ_tweet_y[j] ~= nil then
+                    tweets[j].group.y = curr_tweet_y[j] +
+                        (targ_tweet_y[j]-curr_tweet_y[j])*prog
+                end
+            end
+        end
+        
+        
+        function manual_scroll:on_completed()
+            print("comp")
+            highlight.h = targ_hl_h
+            highlight.y = targ_hl_y
+            for j = sel_i - 1,index_of_bottom_tweet do
+                if targ_tweet_y[j] ~= nil then
+                    tweets[j].group.y = targ_tweet_y[j]
+                end
+            end
+            
+            sel_i = sel_i - 1
+            
+            while tweets[index_of_bottom_tweet].group.y >= group.clip[4] do
+                tweets[index_of_bottom_tweet].group:unparent()
+                num_tweets_on_screen  = num_tweets_on_screen - 1
+                index_of_bottom_tweet = index_of_bottom_tweet - 1 
+            end
+            
+            print((index_of_bottom_tweet+1 - num_tweets_on_screen),sel_i,index_of_bottom_tweet)
+            manual_scroll = nil
+        end
+        manual_scroll:start()
     end
     
     function t:move_down()
+        if highlight.opacity ~= 255 and not fade_in_hl.is_playing then
+            fade_in_hl:start()
+            auto_scrolling = false
+            scroll_thresh:stop()
+            scroll_thresh = Timer{interval=10000}
+            
+            scroll_thresh.on_timer = function(self)
+                self:stop()
+                fade_out_hl:start()
+            end
+            scroll_thresh:start()
+            return
+        end
         auto_scrolling = false
         scroll_thresh:stop()
         scroll_thresh = Timer{interval=10000}
         scroll_thresh.on_timer = function(self)
-            auto_scrolling = true
+            
             self:stop()
+            fade_out_hl:start()
         end
         scroll_thresh:start()
+        
+        if manual_scroll ~= nil then
+            manual_scroll:stop()
+            manual_scroll:on_completed()
+        end
+        manual_scroll = Timeline{loop=false,duration=200}
+        
+        local curr_tweet_y = {}
+        local targ_tweet_y = {}
+        local curr_hl_h    = highlight.h
+        local targ_hl_h    = highlight.h
+        local curr_hl_y    = highlight.y
+        local targ_hl_y    = highlight.y
+        
         if sel_i + 1 > index_of_bottom_tweet then
             print("load in a tweet from the bottom")
             if not at_bottom then
                 print("not the last tweet")
                 if index_of_bottom_tweet < #tweets then
                     print("bringing in a previously loaded tweet")
-                    group:add(tweets[sel_i - 1].group)
-                    tweets[sel_i + 1].text.w = group.clip[3] - 100
-                    tweets[sel_i + 1].time.x = group.clip[3] - 10
-                    num_tweets_on_screen  = num_tweets_on_screen  + 1
-                    index_of_bottom_tweet = index_of_bottom_tweet + 1
-                    local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
-                    local sum = group.clip[4]
-                    for i = index_of_bottom_tweet,top_tweet,-1 do
-                        tweets[i].group.y = sum - tweets[i].h
-                        sum = tweets[i].group.y
-                    end
-                    self:select_tweet(sel_i + 1)
-                    sel_i = sel_i + 1
-                    if tweets[top_tweet].group.y + tweets[top_tweet].h <= 0 then
-                        tweets[top_tweet].group:unparent()
-                        num_tweets_on_screen = num_tweets_on_screen - 1
-                    end
+                    group:add(tweets[sel_i + 1].group)
+                    tweets[sel_i + 1].text.w = group.clip[3] - tweets[sel_i + 1].text.x- clip_side_gutter
+                    tweets[sel_i + 1].time.x = group.clip[3] - clip_side_gutter
+                    tweets[sel_i + 1].group.y = tweets[sel_i].group.y + tweets[sel_i].h
+
                 elseif self:next_tweet() then
                     print("successfully next_tweeted")
-                    num_tweets_on_screen  = num_tweets_on_screen  + 1
-                    index_of_bottom_tweet = index_of_bottom_tweet + 1
-                    
-                    local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
-                    local sum = group.clip[4]
-                    
-                    for i = index_of_bottom_tweet,top_tweet,-1 do
-                        tweets[i].group.y = sum - tweets[i].h
-                        sum = tweets[i].group.y
+                    if tweets[sel_i] ~= nil then
+                        tweets[sel_i + 1].group.y = tweets[sel_i].group.y + tweets[sel_i].h
+                    else
+                        tweets[sel_i + 1].group.y = group.clip[4]
                     end
-                    self:select_tweet(index_of_bottom_tweet)
-                    sel_i = sel_i + 1
-                    if tweets[top_tweet].group.y + tweets[top_tweet].h <= 0 then
-                        tweets[top_tweet].group:unparent()
-                        num_tweets_on_screen = num_tweets_on_screen - 1
-                    end
+
                 else
                     at_bottom = true
+                    manual_scroll = nil
+                    return
                 end
+                
+                num_tweets_on_screen  = num_tweets_on_screen  + 1
+                index_of_bottom_tweet = index_of_bottom_tweet + 1
+                
+                local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
+                local sum = group.clip[4]
+                for j = index_of_bottom_tweet,top_tweet,-1 do
+                    curr_tweet_y[j] = tweets[j].group.y
+                    targ_tweet_y[j] = sum - tweets[j].h
+                    sum = sum - tweets[j].h
+                end
+                targ_hl_h = tweets[sel_i + 1].h +(2*hl_border-tweet_gap)
+                targ_hl_y = group.clip[4]-tweets[sel_i + 1].h - hl_border
+
+                
             end
         elseif sel_i + 1 == index_of_bottom_tweet and
-            
             tweets[sel_i + 1].group.y + tweets[sel_i + 1].h >(group.clip[4]) then
-            print("if selecting the bottom tweet (which is 99% likely"..
-                " to be hanging off the clip)")
+            
             local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
             local sum = group.clip[4]
-            
+            --[[
             for i = index_of_bottom_tweet,top_tweet,-1 do
                 tweets[i].group.y = sum - tweets[i].h
                 sum = tweets[i].group.y
@@ -278,11 +432,60 @@ TweetStream = Class(function(t,parent,...)
                 tweets[top_tweet].group:unparent()
                 num_tweets_on_screen = num_tweets_on_screen - 1
             end
+            --]]
+            for j = index_of_bottom_tweet,top_tweet,-1 do
+                curr_tweet_y[j] = tweets[j].group.y
+                targ_tweet_y[j] = sum - tweets[j].h
+                sum = sum - tweets[j].h
+            end
+            targ_hl_h = tweets[sel_i + 1].h +2*hl_border
+            targ_hl_y = group.clip[4]-tweets[sel_i + 1].h - hl_border
         else
             print("selecting within the bounds")
+            --[[
             self:select_tweet(sel_i + 1)
             sel_i = sel_i + 1
+            --]]
+            targ_hl_h = tweets[sel_i + 1].h +(2*hl_border-tweet_gap)
+            targ_hl_y = tweets[sel_i + 1].group.y - hl_border
         end
+        
+        function manual_scroll:on_new_frame(msecs,prog)
+        local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
+            highlight.h = curr_hl_h + (targ_hl_h-curr_hl_h)*prog
+            highlight.y = curr_hl_y + (targ_hl_y-curr_hl_y)*prog
+            
+            for j = index_of_bottom_tweet,top_tweet,-1 do
+                if targ_tweet_y[j] ~= nil then
+                    tweets[j].group.y = curr_tweet_y[j] +
+                        (targ_tweet_y[j]-curr_tweet_y[j])*prog
+                end
+            end
+        end
+        
+        function manual_scroll:on_completed()
+            local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
+            highlight.h = targ_hl_h
+            highlight.y = targ_hl_y
+            for j = index_of_bottom_tweet,top_tweet,-1 do
+                if targ_tweet_y[j] ~= nil then
+                    print(targ_tweet_y[j])
+                    tweets[j].group.y = targ_tweet_y[j]
+                end
+            end
+            
+            sel_i = sel_i + 1
+            
+            while tweets[top_tweet].group.y + tweets[top_tweet].h <= 0 do
+                tweets[top_tweet].group:unparent()
+                num_tweets_on_screen = num_tweets_on_screen - 1
+                top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
+            end
+            
+            print((index_of_bottom_tweet+1 - num_tweets_on_screen),sel_i,index_of_bottom_tweet)
+            manual_scroll = nil
+        end
+        manual_scroll:start()
     end
     
     
@@ -291,25 +494,27 @@ TweetStream = Class(function(t,parent,...)
         if num_tweets_on_screen ~= 0 then        print("num_onscreen")
             local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
             local btm_tweet = (index_of_bottom_tweet)
-            highlight.opacity=255
-            auto_scrolling = false
-            scroll_thresh:start()
+            --highlight.opacity=255
+            --auto_scrolling = false
+            --scroll_thresh:start()
             
             --if the top tweet is half out of the tweetstream highlight the next one
             if tweets[top_tweet].group.y <= 0 then
-             print("hangin above")
+                print("hangin above")
                 self:select_tweet(top_tweet+1)
+                sel_i = top_tweet+1
             --if the top tweet is hanging half way off the bottom of the tweet stream then
             --bring that nigga up
             elseif tweets[top_tweet].group.y + tweets[top_tweet].h >= group.clip[4] then
-             print("hangin below")
+                print("hangin below")
                 tweets[top_tweet].group.y = group.clip[4] - tweets[top_tweet].h
                 self:select_tweet(top_tweet)
+                sel_i = top_tweet
             --if neither than just focus on it
             else
-             print("reg")
-             self:select_tweet(top_tweet)
-             sel_i = top_tweet
+                print("reg")
+                self:select_tweet(top_tweet)
+                sel_i = top_tweet
             end  
         --if there are results that haven't been loaded yet, then throw one on
         elseif #results_cache ~= 0 then
@@ -415,14 +620,14 @@ TweetStream = Class(function(t,parent,...)
                             text  = tweet_obj.name,
                             font  = Username_Font,
                             color = Username_Color,
-                            x     = 95,
+                            x     = 110,
                             y     = 0
         }
         local time       = Text{
                             text  = time_diff(tweet_obj.time),
                             font  = Time_Font,
                             color = Time_Color,
-                            x     = group.clip[3]-10,
+                            x     = group.clip[3]-clip_side_gutter,
                             y     = 0
         }
         local text       = Text{
@@ -431,21 +636,28 @@ TweetStream = Class(function(t,parent,...)
                             color = User_text_Color,
                             wrap  = true,
                             word_wrap = "WORD_CHAR",
-                            w     = group.clip[3]-100,
-                            x     = 95,
+                            w     = group.clip[3]- clip_side_gutter,
+                            x     = 110,
                             y     = 40
         }
+        text.w = text.w - text.x
         time.anchor_point =
         {
             time.w,
             0
         }
         local next_tweet = {
-            group    = Group{y = group.clip[4] },
+            group    = Group{ y = group.clip[4] },
             username = username,
             time     = time,
             text     = text,
-            icon     = Image{   async = true,   src = tweet_obj.icon,size={73,73}   },
+            icon     = Image
+                        {
+                            async = true,
+                            src   = tweet_obj.icon,
+                            size  = {73,73},
+                            x     = 15
+                        },
             h        = text.y + text.h + tweet_gap,
             obj      = tweet_obj
         }
@@ -470,11 +682,9 @@ TweetStream = Class(function(t,parent,...)
         print("comp")
     end
     animate_tweets.stop = nil
-    --function animate_tweets:on_new_frame(msecs,prog)
+    
     function t:on_idle(last_call)
-        --local last_call = msecs - last_msec
-        --last_msec = msecs
-        ---print(last_call)
+        
         --if you start running out of tweets and didn't already request more
         if #results_cache <= 5 and not requesting then
             requesting = true
@@ -490,14 +700,11 @@ TweetStream = Class(function(t,parent,...)
             end
             
             highlight.y = highlight.y - px_p_sec * last_call
-            
-            if highlight.y <= 0 then
-                if num_tweets_on_screen ~= 0 then
-                    if top_tweet == btm_tweet then
-                        t:select_tweet(top_tweet)
-                    else
-                        t:select_tweet(top_tweet+1)
-                    end
+            if highlight.y < 0 then
+                sel_i = sel_i + 1
+                if tweets[sel_i] ~= nil then
+                    highlight.y = tweets[sel_i].group.y - hl_border
+                    highlight.h = tweets[sel_i].h +(2*hl_border-tweet_gap)
                 end
             end
             
@@ -512,7 +719,15 @@ TweetStream = Class(function(t,parent,...)
                  then
                 
                 --if it was able to load the next tweet
-                if t:next_tweet() then
+                if index_of_bottom_tweet < #tweets then
+                    print("bringing in a previously loaded tweet")
+                    group:add(tweets[index_of_bottom_tweet + 1].group)
+                    tweets[index_of_bottom_tweet + 1].text.w = group.clip[3] - tweets[index_of_bottom_tweet + 1].text.x- clip_side_gutter
+                    tweets[index_of_bottom_tweet + 1].time.x = group.clip[3] - clip_side_gutter
+                    tweets[index_of_bottom_tweet + 1].group.y = tweets[index_of_bottom_tweet].group.y + tweets[index_of_bottom_tweet].h
+                    num_tweets_on_screen  = num_tweets_on_screen  + 1
+                    index_of_bottom_tweet = index_of_bottom_tweet + 1
+                elseif t:next_tweet() then
                     num_tweets_on_screen  = num_tweets_on_screen  + 1
                     index_of_bottom_tweet = index_of_bottom_tweet + 1
                 else

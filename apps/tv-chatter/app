@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.sudoku",
+    id          = "com.trickplay.TV-Chatter",
     release     = "2",
     version     = ".6",
     name        = "TV Chatter",

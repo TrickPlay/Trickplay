@@ -146,7 +146,7 @@ local Titlecards_Bar = Class(function(self,parent,...)
         bar_items[list_i].tweetstream:get_group():unparent()
         bar_items[list_i].tweetstream:out_view()
         sp.tweetstream:display(bar_items[list_i])
-        bar_items[list_i].tweetstream:receive_focus()
+        --bar_items[list_i].tweetstream:receive_focus()
     end
     
     function self:go_to_options()
@@ -464,7 +464,7 @@ local Listings = Class(function(self,...)
         listings[list_i].obj.tweetstream:get_group():unparent()
         listings[list_i].obj.tweetstream:out_view()
         sp.tweetstream:display(listings[list_i].obj)
-        listings[list_i].obj.tweetstream:receive_focus()
+        --listings[list_i].obj.tweetstream:receive_focus()
     end
     function self:move_x_by(x)
         group.x = group.x + x
@@ -902,10 +902,11 @@ local TweetStream_Container = Class(function(self,...)
             show_desc.x     = 366
             top_rule.x      = 366
             if curr_obj ~= nil then
-                curr_obj.tweetstream:set_w(bg.w-368)
-                curr_obj.tweetstream:set_h(bg.h-127-20)
-                curr_obj.tweetstream:set_pos(366,bg.y+125+15)
+                curr_obj.tweetstream:resize(bg.w-366,bg.h-127,true)
+                curr_obj.tweetstream:set_pos(366,bg.y+125)
                 group:add( curr_obj.tweetstream:get_group() )
+                top_rule:raise_to_top()
+                bottom_rule:raise_to_top()
                 --for i = 1,#curr_obj.tweet_g_cache do
                 --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
                 --end
@@ -919,10 +920,11 @@ local TweetStream_Container = Class(function(self,...)
             show_desc.x     = 15
             top_rule.x      = 150
             if curr_obj ~= nil then
-                curr_obj.tweetstream:set_w(bg.w-30)
-                curr_obj.tweetstream:set_h(bg.h-127-30)
-                curr_obj.tweetstream:set_pos(15,bg.y+125+15)
+                curr_obj.tweetstream:resize(bg.w,bg.h-127,true)
+                curr_obj.tweetstream:set_pos(0,bg.y+125)
                 group:add( curr_obj.tweetstream:get_group() )
+                top_rule:raise_to_top()
+                bottom_rule:raise_to_top()
                 --for i = 1,#curr_obj.tweet_g_cache do
                 --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
                 --end
@@ -950,7 +952,7 @@ fp={
             [keys.Return] = function()
                 fp.listings_container:enter()
             end,
-            [keys.F10] = function()
+            [keys.F8] = function()
                 fp.listings_container:go_to_options()
             end,
             [keys.BLUE] = function()

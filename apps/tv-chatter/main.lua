@@ -146,7 +146,7 @@ active_stream = nil
 fp.title_card_bar:receive_focus()
 
 function screen:on_key_down(key)
-    
+    if key == keys.EXIT then exit() end
     if  _G[page].keys[  _G[page].focus  ][key] then
         _G[page].keys[  _G[page].focus  ][key]()
     end
