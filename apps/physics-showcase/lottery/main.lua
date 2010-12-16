@@ -346,7 +346,7 @@ table.insert( step_functions , pusher_push )
 screen:add( pusher_sensor , pusher )
 
 -------------------------------------------------------------------------------
-
+--[[
 
 local GATE_POSITION = { 562 , 951 }
 
@@ -395,7 +395,7 @@ table.insert( step_functions , hold_gate )
 
 screen:add( gate )
 
-
+]]
 
 -------------------------------------------------------------------------------
 -- Now, some balls
@@ -436,15 +436,17 @@ for i = 1 , BALL_COUNT do
         ,
         {
             shape = physics:Circle( ball_image.w / 2 ),
-            density = 0.5 ,
+            density = 1 ,
             friction = 0.1 ,
             bounce = 0.7,
             filter = { category = 1 , mask = { 0 , 1 } },
-            angular_damping = 0.5,
+            angular_damping = 1,
             
         }
     )
 
+   -- ball.position = { 1283 , 978 }
+    
     screen:add( ball )
     
     ball:show()
@@ -457,9 +459,8 @@ end
 -- Elevator(s)
 
 local ELEVATOR_POSITION = { 368 , 1066 }
-local ELEVATOR_SPEED    = 40 -- pixels per second
-local ELEVATOR_COUNT    = 5
-local ELEVATOR_INTERVAL = 5 -- seconds
+local ELEVATOR_COUNT    = 4
+local ELEVATOR_INTERVAL = 1 -- seconds
 
 local elevator_image = Image{ src = "lottery/assets/elevator.png" }
 screen:add( elevator_image )
@@ -467,9 +468,12 @@ elevator_image:hide()
 
 local elevators = {}
 
-local function deploy_elevator()
+local elevator_start_x = false
+
+for i = 1 , ELEVATOR_COUNT do
 
     local elevator = physics:Body(
+        
         Clone
         {
             source = elevator_image,
@@ -477,53 +481,129 @@ local function deploy_elevator()
         }
         ,
         {
-            type = "static",
+            type = "dynamic",
+            density = 100,
             friction = 1,
+            fixed_rotation = true,
+            filter = { group = -1 }
         }
     )
     
     screen:add( elevator )
     
+    elevator:hide()
+    
     elevators[ elevator ] = true
-
+    
+    if not elevator_start_x then
+    
+        elevator_start_x = elevator.x
+        
+    end
+    
 end
 
-local function elevate( seconds )
+local ELEVATOR_SENSOR_POSITION = { 366 , 1000 }
+local ELEVATOR_SENSOR_SIZE     = { 10 , 20 }
 
-    for elevator , _ in pairs( elevators ) do
+local elevator_sensor = physics:Body(
     
-        elevator.y = elevator.y - ELEVATOR_SPEED * seconds
+    Rectangle
+    {
+        color = SENSOR_COLOR,
+        position = ELEVATOR_SENSOR_POSITION,
+        size = ELEVATOR_SENSOR_SIZE
+    }
+    ,
+    {
+        type = "static",
+        sensor = true
+    }
+)
+
+screen:add( elevator_sensor )
+
+local elevator_sensor_time = Stopwatch()
+elevator_sensor_time:stop()
+
+function elevator_sensor:on_begin_contact( contact )
+    local ball = balls[ contact.other_body[ self.handle ] ]
+    
+    if ball then
+        elevator_sensor_time:start()
+    end
+end
+
+function elevator_sensor:on_end_contact( contact )
+    local ball = balls[ contact.other_body[ self.handle ] ]
+    
+    if ball then
+        elevator_sensor_time:stop()
+    end
+end
+
+local function elevate()
+
+    if elevator_sensor_time.elapsed_seconds >= ELEVATOR_INTERVAL then
+    
+        for elevator , _ in pairs( elevators ) do
         
-        if elevator.y <= 60 then
-        
-            elevator.y = ELEVATOR_POSITION[ 2 ]
-            elevator.angle = 0
-        
-        elseif elevator.y < 142 then
-        
-            elevator.angle = 20
+            if not elevator.is_visible then
+            
+                elevator:show()
+                
+                elevator_sensor_time:start()
+                
+                break
+                
+            end
             
         end
     
     end
 
-end
+    for elevator , _ in pairs( elevators ) do
+    
+        if elevator.is_visible then
+    
+            if elevator.y < 60 then
+                            
+                elevator:hide()
+                
+                elevator.x = elevator_start_x
+                
+                elevator.y = ELEVATOR_POSITION[ 2 ]
+                
+                elevator.linear_velocity = { 0 , 0 }
+                
+                elevator.angle = 0
+                
+            elseif elevator.y < 142 then
+            
+                elevator.angle = 20
+                
+            end
+        
+            if elevator.is_visible then
+            
+                elevator.x = elevator_start_x
+                
+                local vx , vy = unpack( elevator.linear_velocity )
+                
+                if vy > - G * 0.4 then
+            
+                    elevator:apply_force( { 0 , - G * 2.05 * elevator.mass } , elevator.position )
+                
+                end
+                
+            end
+        end
+        
+    end
+        
+end    
 
 table.insert( step_functions , elevate )
-
-local count = 1
-
-local t = Timer( ELEVATOR_INTERVAL * 1000 )
-
-function t.on_timer()
-    deploy_elevator()
-    count = count + 1
-    return count < ELEVATOR_COUNT
-end
-
-t:start()
-
-deploy_elevator()
 
 -------------------------------------------------------------------------------
 
