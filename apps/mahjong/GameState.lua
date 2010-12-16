@@ -126,14 +126,26 @@ GameState = Class(nil,function(state, ctrl)
         game_menu:remove_tile_images()
     end
 
+    function state:save()
+        settings.grid = grid
+    end
+
     function state:build_layout(number)
         assert(number or layout_number)
         if number ~= nil then
             assert(type(number) == "number")
             layout_number = number
         end
-        layout = Layout(layout_number, tiles_class)
+        layout = Layout(tiles_class, layout_number)
         grid = layout:get_grid()
+    end
+
+    function state:load_layout()
+        if not settings.grid then return false end 
+
+        layout = Layout(tiles_class, nil, true)
+        grid = layout:get_grid()
+        return true
     end
 
     function state:shuffle()
@@ -259,8 +271,16 @@ GameState = Class(nil,function(state, ctrl)
                     and (not grid[i][j-1] or grid[i][j][k] ~= grid[i][j-1][k]) then
                         if check_right(i, j, k) and check_bottom(i, j, k)
                         and check_top(i, j, k) then
+                            if not grid[i][j][k].group then
+                                print("grid...", grid[i][j][k])
+                                dumptable(grid[i][j][k])
+                            end
                             grid[i][j][k].group:hide()
                         else
+                            if not grid[i][j][k].group then
+                                print("grid...", grid[i][j][k])
+                                dumptable(grid[i][j][k])
+                            end
                             grid[i][j][k].group:show()
                         end
                     end
