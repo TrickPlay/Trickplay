@@ -839,8 +839,3 @@ function idle:on_idle( seconds )
     
 end
 
-function screen.on_key_down( screen , k )
-    if k == keys.Return then
-        gate_open = not gate_open
-    end
-end
