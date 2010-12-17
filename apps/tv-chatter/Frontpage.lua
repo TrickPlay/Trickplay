@@ -191,11 +191,11 @@ local Listings = Class(function(self,...)
           rules:finish_painting()
     local grey_rect = Canvas{size={bg.w,listing_h},opacity=0}
           grey_rect:begin_painting()
-          grey_rect:move_to(0,0)--border_w,         border_w)
-          grey_rect:line_to(grey_rect.w-border_w, border_w)
+          grey_rect:move_to(border_w,0)--border_w,         border_w)
+          grey_rect:line_to(grey_rect.w-border_w, 0)
           grey_rect:line_to(grey_rect.w-border_w, grey_rect.h-border_w)
           grey_rect:line_to(border_w,             grey_rect.h-border_w)
-          grey_rect:line_to(0,0)
+          grey_rect:line_to(border_w,0)
           grey_rect:set_source_color( "181818" )
 	      grey_rect:fill( true )
           grey_rect:set_source_color( "2D2D2D" )
@@ -206,11 +206,11 @@ local Listings = Class(function(self,...)
     
     local focus_o = Canvas{size={bg.w,listing_h},opacity=0}
           focus_o:begin_painting()
-          focus_o:move_to(0,0)--border_w,         border_w)
-          focus_o:line_to(focus_o.w-border_w, border_w)
+          focus_o:move_to(border_w,0)--border_w,         border_w)
+          focus_o:line_to(focus_o.w-border_w, 0)
           focus_o:line_to(focus_o.w-border_w, focus_o.h-border_w)
           focus_o:line_to(border_w,           focus_o.h-border_w)
-          focus_o:line_to(0,0)
+          focus_o:line_to(border_w,0)
           focus_o:set_source_linear_pattern(
             focus_o.w/2,0,
             focus_o.w/2,focus_o.h
@@ -401,9 +401,7 @@ local Listings = Class(function(self,...)
                     tv_station.h/2
                 }
         
-        if #listings%2 == 0 then
-            listings_bg:add(Clone{source=grey_rect,y=listing_h*(#listings-1)})
-        end
+        
         
         listings[index]=
             {
@@ -412,7 +410,9 @@ local Listings = Class(function(self,...)
                 show_time  = show_time,
                 tv_station = tv_station
             }
-        
+        if #listings%2 == 0 then
+            listings_bg:add(Clone{source=grey_rect,y=listing_h*(#listings-1)})
+        end
         
         listings_g:add(show_name, show_time, tv_station)
         if #listings > max_on_screen then
