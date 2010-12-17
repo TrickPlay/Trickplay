@@ -251,6 +251,7 @@ imgs =
     z_debris_1      = Image{ src = "assets/enemies/zepp/zep_debris1.png"},
     z_debris_2      = Image{ src = "assets/enemies/zepp/zep_debris2.png"},
     z_debris_3      = Image{ src = "assets/enemies/zepp/zep_debris3.png"},
+    z_br_prop_1     = Image{ src = "assets/enemies/zepp/prop_piece1.png"},
     engine_fire     = Image{ src = "assets/fx/engine-fire.png"},
 
     --TANK ASSETS

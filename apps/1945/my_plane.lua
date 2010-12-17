@@ -761,7 +761,7 @@ redo_score_text()
             self.group.position = { screen_w / 2 - self.group.w / (2*self.num_frames) , screen_h - self.group.h }
 
             -- Spawn an explosion
-            add_to_render_list(explosions.big(location[1],location[2],nil,0))
+            add_to_render_list(explosions.big(location[1],location[2],nil,0,"audio/player-explosion.mp3"))
         end,
         
     on_key =
