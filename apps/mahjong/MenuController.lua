@@ -10,10 +10,18 @@ MenuController = Class(Controller,function(self, view, ...)
     -- index's global TILE_IMAGES
     local current_tile_image = 2
     -- the current layout type, defaults to the classic "turtle"
-    local current_layout = 7
+    local current_layout
     -- facilitate the MenuView() function view:move_layout(current_layout, dir)
     local direction = Directions.UP
-    local last_layout = 7
+    local last_layout
+    if settings.layout_number then
+        last_layout = settings.layout_number
+        current_layout = settings.layout_number
+        view:load_layout(current_layout)
+    else
+        last_layout = 7
+        current_layout = 7
+    end
 
     function controller:get_current_layout() return current_layout end
     function controller:get_direction() return direction end

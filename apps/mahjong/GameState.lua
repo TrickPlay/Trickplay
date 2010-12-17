@@ -145,6 +145,7 @@ GameState = Class(nil,function(state, ctrl)
         end
 
         settings.grid = saved_data
+        settings.layout_number = layout_number
     end
 
     function state:build_layout(number)
@@ -159,6 +160,9 @@ GameState = Class(nil,function(state, ctrl)
 
     function state:load_layout()
         if not settings.grid then return false end 
+        if not settings.layout_number then return false end
+
+        layout_number = settings.layout_number
 
         layout = Layout(tiles_class, nil, true)
         grid = layout:get_grid()

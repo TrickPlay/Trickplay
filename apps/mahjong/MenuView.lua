@@ -313,6 +313,12 @@ MenuView = Class(View, function(view, model, ...)
         end
     end
 
+    function view:load_layout(number)
+        layout_strip.y = -layout_strip_image.height*(number-1)/7
+        layout_text.text = LAYOUT_NAMES[number]
+        layout_text.anchor_point = {layout_text.width/2, layout_text.height/2}
+    end
+
     function view:move_layout(current_layout, dir)
         local change_layout = true
 
