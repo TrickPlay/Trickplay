@@ -102,6 +102,7 @@ enemies.final_boss = function(is_boss,o)
                 local scale = self.group.scale[1] - self.drop_speed * secs
                 self.group.scale={scale,scale}
                 self.group.x_rotation={self.group.x_rotation[1]+self.turn_speed*secs,0,0}
+				self.group.z_rotation={self.group.z_rotation[1]+self.turn_speed/2*secs,0,0}
                 if scale <= .1 then
                     points(self.group.x,self.group.y,5000)
                     self.group:unparent()
@@ -289,7 +290,7 @@ enemies.final_boss = function(is_boss,o)
             end
             
             if not self.dying then
-                --self:rotate_guns_and_fire(secs)
+                self:rotate_guns_and_fire(secs)
             end
             self.stages[self.stage](self,secs)
             local x = self.group.x-self.group.anchor_point[1]

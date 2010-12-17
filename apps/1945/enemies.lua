@@ -212,7 +212,6 @@ explosions =
 	small = function(x,y)
     
         local e
-        print(num_sm_explos)
         if #sm_explos == 0 then
         num_sm_explos = num_sm_explos + 1
             e = {
@@ -407,7 +406,12 @@ explosions =
         end,
 	} end
 }
-
+local bullet_sound_playing = false
+local bullet_sound = Timer{interval=700}
+function bullet_sound:on_timer()
+    bullet_sound_playing = false
+    bullet_sound:stop()
+end
 local old_bullets = {}
 local tot_bullets_created = 0
 function fire_bullet(enemy,source)
@@ -453,7 +457,10 @@ function fire_bullet(enemy,source)
                 if not (self.image.x > screen_w or self.image.x < 0 or
                     self.image.y < 0 or self.image.y > screen_h) then
                     
-                    mediaplayer:play_sound("audio/enemy-firing.mp3")
+                    if not bullet_sound_playing then
+                        mediaplayer:play_sound("audio/enemy-firing.mp3")
+                        bullet_sound_playing = true
+                    end
                 end
             end,
             
@@ -498,17 +505,19 @@ function fire_bullet(enemy,source)
         
     end
     add_to_render_list( bullet )
+    bullet_sound:start()
 end
 function flak(x,y)
     dolater(add_to_render_list,
     {
-        num   = 8,
+        num   = 1,
         delays = {},
         flaks = {},
         groups = {},
         group = nil,
         duration = 0.2,
         hit = false,
+        num_frames = 9,
         time = 0,
         remove = function(self)
                     self.group:unparent()
@@ -523,20 +532,20 @@ function flak(x,y)
                 {
                 	size =
                 	{
-                		imgs.flak.w / 4 ,
+                		imgs.flak.w / self.num_frames ,
                 		imgs.flak.h
                 	},
                 	clip =
                 	{
                 		0 ,
                 		0 ,
-                		imgs.flak.w / 4 ,
+                		imgs.flak.w / self.num_frames ,
                 		imgs.flak.h
                 	},
                 	children = { self.flaks[i] },
                 	anchor_point =
                 	{
-                		( imgs.flak.w / 4 ) / 2 ,
+                		( imgs.flak.w / self.num_frames ) / 2 ,
                 		  imgs.flak.h / 2
                 	},
                     position = {x,y},
@@ -571,8 +580,8 @@ function flak(x,y)
 				
                 for i = 1,self.num do
                     local frame = math.floor( self.time /
-                        ( self.duration / 4 ) ) -self.delays[i]
-                    self.flaks[i].x = - ( ( imgs.flak.w / 4 )
+                        ( self.duration / self.num_frames ) ) -self.delays[i]
+                    self.flaks[i].x = - ( ( imgs.flak.w / self.num_frames )
                     	* frame )
                 end
 				
@@ -581,8 +590,8 @@ function flak(x,y)
             table.insert(b_guys_air,
                 {
                     obj = self,
-                    x1  = self.group.x-24-imgs.flak.w/8,
-                    x2  = self.group.x+24-imgs.flak.w/8,
+                    x1  = self.group.x-24-imgs.flak.w/self.num_frames/2,
+                    x2  = self.group.x+24-imgs.flak.w/self.num_frames/2,
                     y1  = self.group.y-24-imgs.flak.h/2,
                     y2  = self.group.y+24-imgs.flak.h/2,
                 }
@@ -919,10 +928,10 @@ enemies =
 		attack_speed   = 120,
 		
 		--graphics for the fighter
-		num_prop_frames = 3,
-		prop_index = 1,
+		num_frames = 3,
+		frame_index = 1,
 		image  = Clone{source=color},
-		prop   = Clone{source=imgs.fighter_prop},
+		--[[prop   = Clone{source=imgs.fighter_prop},
 		prop_g = Group
 		{
 			clip =
@@ -935,8 +944,8 @@ enemies =
 			
 			anchor_point = {imgs.fighter_prop.w/2,   imgs.fighter_prop.h/2},
 			position     = {imgs.fighter.w/2, imgs.fighter.h+2},
-		},
-		group  = Group{anchor_point = {imgs.fighter.w/2,imgs.fighter.h/2}},
+		},--]]
+		group  = Group{anchor_point = {imgs.fighter.w/3/2,imgs.fighter.h/2},clip={0,0,color.w/3,color.h}},
 		
 		shoot_time      = 3,	--how frequently the plane shoots
 		last_shot_time = 3,--math.random()*2,	--how long ago the plane last shot
@@ -956,9 +965,8 @@ enemies =
 		setup = function(self)
 			
             state.counters[1].fighters.spawned = state.counters[1].fighters.spawned + 1
-			self.prop_g:add( self.prop )
 			
-			self.group:add( self.image, self.prop_g )
+			self.group:add( self.image )
 			
 			layers.planes:add( self.group )
 			
@@ -988,10 +996,10 @@ enemies =
 		
 		render = function(self,seconds)
 			--animate the propeller
-			self.prop_index = self.prop_index%
-				self.num_prop_frames + 1
-			self.prop.y = -(self.prop_index - 1)*self.prop.h/
-				self.num_prop_frames
+			self.frame_index = self.frame_index%
+				self.num_frames + 1
+			self.image.x = -(self.frame_index - 1)*self.image.w/
+				self.num_frames
 				
                                 --print(self.group.x,self.group.y)
 			--animate the fighter based on the current stage
@@ -1001,8 +1009,8 @@ enemies =
             table.insert(b_guys_air,
                 {
                     obj = self,
-                    x1  = self.group.x-self.image.w/2,
-                    x2  = self.group.x+self.image.w/2,
+                    x1  = self.group.x-self.image.w/2/self.num_frames,
+                    x2  = self.group.x+self.image.w/2/self.num_frames,
                     y1  = self.group.y-self.image.h/2,
                     y2  = self.group.y+self.image.h/2,
                 }
@@ -1058,7 +1066,6 @@ enemies =
 		end	
 	} end,
 	zeppelin  = function(x,o)
-    print(x,o)
         local z = {
         salvage_func = {"enemies","zeppelin"},
         overwrite_vars = o or {},
@@ -1430,6 +1437,33 @@ enemies =
                             self.group.y
                         )
                         )
+                        add_to_render_list(
+                            {
+                                group = Group{x=self.group.x,y=self.group.y},
+                                pieces = {},
+                                setup = function(self)
+                                    self.pieces[1] = Clone{source=imgs.z_debris_1,x= 10,y= 20}
+                                    self.pieces[2] = Clone{source=imgs.z_debris_2,x=-30,y= 5}
+                                    self.pieces[3] = Clone{source=imgs.z_debris_3,x= 0, y=-40}
+                                    self.group:add(unpack(self.pieces))
+                                    layers.land_doodads_1:add(self.group)
+                                end,
+                                render = function(self,seconds)
+                                    self.group.y = self.group.y + 50*seconds
+                                    if self.group.y > screen_h+100 then
+                                        remove_from_render_list(self)
+                                    end
+                                end,
+                                remove = function(self,seconds)
+                                    group:unparent()
+                                    group:clear()
+                                end,
+
+                            }
+                        )
+                        
+                        
+                        
                         ---[[
                         if is_boss then
                             levels[state.curr_level]:level_complete()
@@ -1441,7 +1475,6 @@ enemies =
             }
             self.stage = 1
             if type(self.overwrite_vars) == "table"  then
-                print("self.overwrite_vars", self.overwrite_vars)
                 recurse_and_apply(  self, self.overwrite_vars  )
             end
 			
@@ -2445,7 +2478,7 @@ enemies =
 			-- Explode
             add_to_render_list(
                 explosions.small(
-                    self.group.center[1],
+                    self.group.x+self.group.w/self.num_frames/2,
                     self.group.center[2]
                 )
 			)

@@ -1060,7 +1060,7 @@ levels =
                     {{source={"imgs","road_ver"},x=300},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {1200,-1,3,150}},
-                            {f = {"powerups","health"},      p = {1800}},
+                            {f = {"powerups","health"},      p = {1800,true}},
                         }
                     },
                     {
@@ -1131,7 +1131,7 @@ levels =
                             {f={"enemies","trench"},p={  50+6*imgs.trench_l.w}},
                             {f={"enemies","trench"},p={1250+1*imgs.trench_l.w}},
                             {f={"enemies","trench"},p={1250+3*imgs.trench_l.w}},
-                            {f = {"powerups","life"},      p = {200}},
+                            {f = {"powerups","life"},      p = {200,true}},
                         }
                     },
                     {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3},
@@ -1169,7 +1169,7 @@ levels =
                         {source={"imgs","road_hor"},   x=300+7*imgs.road_hor.w},
                         {source={"imgs","road_hor"},   x=300+8*imgs.road_hor.w},
                         {source={"imgs","road_left"},  x=300+9*imgs.road_hor.w},
-                        enemies = { {f = {"powerups","health"},      p = {200}},}
+                        enemies = { {f = {"powerups","health"},      p = {200,true}},}
                     },
                     {
                         
@@ -1344,7 +1344,7 @@ levels =
                     },
                     {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = {"powerups","health"},      p = {1600}},
+                            {f = {"powerups","health"},      p = {1600,true}},
                             
                         }
                     },
@@ -1390,8 +1390,9 @@ levels =
                             {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
                         }
                     },
+                    
                     {
-                        {source={"imgs","road_left"},x=300+9*imgs.road_hor.w,z_rotation=-90},
+                        {source={"imgs","road_right"},x=300+9*imgs.road_hor.w,z_rotation=90},
                         {source={"imgs","road_hor"},x=300+8*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+7*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+6*imgs.road_hor.w},
@@ -1401,7 +1402,7 @@ levels =
                         {source={"imgs","road_hor"},x=300+2*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+1*imgs.road_hor.w},
                         {source={"imgs","road_hor"},x=300+0*imgs.road_hor.w},
-                        {source={"imgs","road_right"},x=300-imgs.road_ver.w,z_rotation=-90},
+                        {source={"imgs","road_left"},x=300-imgs.road_ver.w,z_rotation=90},
                     },
                     { 
                         {source={"imgs","road_ver"},  x=300-imgs.road_ver.w},
@@ -1458,7 +1459,7 @@ levels =
                     {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {1200,-1,3,150}},
-                            {f = {"powerups","health"},      p = {1800}},
+                            {f = {"powerups","health"},      p = {1800,true}},
                         }
                     },
                     {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
