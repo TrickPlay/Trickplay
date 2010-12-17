@@ -1530,7 +1530,7 @@ enemies =
 				self.num_prop_frames
 			self.prop.r.y = -(self.prop_index - 1)*self.prop.r.h/
 				self.num_prop_frames
-				
+				--[[
             if self.right_engine_dam > 2 and self.left_engine_dam > 2 then
                 self.prop.g_r.y = self.prop.g_r.y - 500*seconds
                 self.prop.g_r.x = self.prop.g_r.x + 200*seconds
@@ -1556,7 +1556,7 @@ enemies =
                 self.prop.g_l.y = self.prop.g_l.y - 500*seconds
                 self.prop.g_l.x = self.prop.g_l.x - 200*seconds
                 
-            end
+            end--]]
                 --animate the zeppelin based on the current stage
                 self.stages[self.stage](self,seconds)
             if not self.dying then
@@ -1678,6 +1678,13 @@ enemies =
                             self.e_l_dam.opacity = 255
                         elseif self.left_engine_dam == 2 then
                             self.e_fire_l.opacity = 255
+                        elseif self.left_engine_dam == 3 then
+                            self.prop.g_l.clip = {
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_l.clip[2],
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_l.clip[4]
+                            }
                         end
                         self.attack_speed = self.approach_speed
                     elseif loc == 2 then
@@ -1686,6 +1693,13 @@ enemies =
                             self.e_r_dam.opacity = 255
                         elseif self.right_engine_dam == 2 then
                             self.e_fire_r.opacity = 255
+                        elseif self.right_engine_dam == 3 then
+                            self.prop.g_r.clip = {
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_r.clip[2],
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_r.clip[4]
+                            }
                         end
                         self.attack_speed = self.approach_speed
                     else
@@ -1723,6 +1737,13 @@ enemies =
                             self.e_l_dam.opacity = 255
                         elseif self.left_engine_dam == 2 then
                             self.e_fire_l.opacity = 255
+                        elseif self.left_engine_dam == 3 then
+                            self.prop.g_l.clip = {
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_l.clip[2],
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_l.clip[4]
+                            }
                         end
                         self.attack_speed = self.approach_speed
                     elseif loc == 2 then
@@ -1731,6 +1752,13 @@ enemies =
                             self.e_r_dam.opacity = 255
                         elseif self.right_engine_dam == 2 then
                             self.e_fire_r.opacity = 255
+                        elseif self.right_engine_dam == 3 then
+                            self.prop.g_r.clip = {
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_r.clip[2],
+                                imgs.zepp_prop.w/3,
+                                self.prop.g_r.clip[4]
+                            }
                         end
                         self.attack_speed = self.approach_speed
                     else
@@ -3045,16 +3073,18 @@ enemies =
                 )
 			)
             add_to_render_list(
-                explosions.delayed_big(
+                explosions.big(
                     self.group.center[1]-30,
                     self.group.center[2]+140,
+                    nil,
                     -.2
                 )
 			)
             add_to_render_list(
-                explosions.delayed_big(
+                explosions.big(
                     self.group.center[1]-30,
                     self.group.center[2]+220,
+                    nil,
                     -.4
                 )
 			)
@@ -3168,6 +3198,7 @@ enemies =
             Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
             Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
         },
+        --[[
         stern_wake =
         {
             Clone{source=imgs.stern_wake_1,opacity = 0,y=imgs.dest.h-imgs.stern_wake_1.h+40},
@@ -3176,6 +3207,7 @@ enemies =
             Clone{source=imgs.stern_wake_4,opacity = 0,y=imgs.dest.h-imgs.stern_wake_4.h+40},
             Clone{source=imgs.stern_wake_5,opacity = 0,y=imgs.dest.h-imgs.stern_wake_5.h+40},
         },
+        --]]
 		b_w_i = 1,
         s_w_i = 1,
 		stage  = 0,	--the current stage the fighter is in
@@ -3276,7 +3308,7 @@ enemies =
             --self.group:add(Clone{source=imgs.laminar})
 			self.group:add(unpack(self.bow_wake_r))
             self.group:add(unpack(self.bow_wake_l))
-            self.group:add(unpack(self.stern_wake))
+            --self.group:add(unpack(self.stern_wake))
             --self.group:add(unpack(self.bow_wake_t))
 			self.group:add(
 				
@@ -3424,9 +3456,10 @@ enemies =
 			)
 
             add_to_render_list(
-                explosions.delayed_big(
+                explosions.big(
                     self.group.center[1]-30,
                     self.group.center[2]+130,
+                    nil,
                     -.2
                 )
 			)
