@@ -107,7 +107,7 @@ local sm_explos = {}
 local num_sm_explos = 0
 explosions =
 {
-	big = function(x,y,dam_list,delay)
+	big = function(x,y,dam_list,delay,sound)
         if delay == nil then
             delay = 0
         end
@@ -123,7 +123,11 @@ explosions =
                     interval = -delay,
                     on_timer = function(t)
                         t:stop()
-                        mediaplayer:play_sound("audio/big-explosion.mp3")
+                        if sound then
+                            mediaplayer:play_sound(sound)
+                        else
+                            mediaplayer:play_sound("audio/big-explosion.mp3")
+                        end
                     end
                 },
                 group = Group
@@ -156,7 +160,11 @@ explosions =
                         self.time =  0
                     end
                     if delay == 0 then
-                        mediaplayer:play_sound("audio/big-explosion.mp3")
+                        if sound then
+                            mediaplayer:play_sound(sound)
+                        else
+                            mediaplayer:play_sound("audio/big-explosion.mp3")
+                        end
                     else
                         self.timer:start()
                     end
@@ -209,7 +217,7 @@ explosions =
         end
         return e
     end,
-	small = function(x,y)
+	small = function(x,y,sound)
     
         local e
         if #sm_explos == 0 then
@@ -245,7 +253,11 @@ explosions =
                     table.insert(sm_explos,self)
                 end,
                 setup = function( self )
-                    mediaplayer:play_sound("audio/enemy-explosion.mp3")
+                    if sound then
+                            mediaplayer:play_sound(sound)
+                        else
+                            mediaplayer:play_sound("audio/enemy-explosion.mp3")
+                        end
                     if  self.time == nil then
                         self.time =  0
                     end
@@ -1744,6 +1756,27 @@ enemies =
                                 imgs.zepp_prop.w/3,
                                 self.prop.g_l.clip[4]
                             }
+                            add_to_render_list(
+                            {
+                                image = Clone{source=imgs.z_br_prop_1,x= self.group.x+16,y= self.group.y+252},
+                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3}},
+                                pieces = {},
+                                setup = function(self)
+                                    layers.air_doodads_1:add(self.group)
+                                end,
+                                render = function(self,seconds)
+                                    self.group.y = self.group.y - 200*seconds
+                                    self.group.x = self.group.x - 500*seconds
+                                    if self.group.y < -100 or self.group.x < -100  then
+                                        remove_from_render_list(self)
+                                    end
+                                end,
+                                remove = function(self,seconds)
+                                    self.group:unparent()
+                                end,
+
+                            }
+                        )
                         end
                         self.attack_speed = self.approach_speed
                     elseif loc == 2 then
@@ -2507,7 +2540,8 @@ enemies =
             add_to_render_list(
                 explosions.small(
                     self.group.x+self.group.w/self.num_frames/2,
-                    self.group.center[2]
+                    self.group.center[2],
+                    "audio/turret-tank-exploding.mp3"
                 )
 			)
             points(self.group.x,self.group.y,200)
@@ -3811,7 +3845,7 @@ formations =
             e1.salvage_func   = {"formations","cluster"}
             e1.index          = 1
             e1.salvage_params = {x}
-            e1.group.position = {x-e1.image.w,-2*e1.image.h}
+            e1.group.position = {x-e1.image.w/e1.num_frames,-2*e1.image.h}
             e1.overwrite_vars = salvage_overwrites
             add_to_render_list(e1)
         end
@@ -3831,7 +3865,7 @@ formations =
             e3.salvage_func   = {"formations","cluster"}
             e3.index          = 3
             e3.salvage_params = {x}
-            e3.group.position = {x+e3.image.w,-2*e3.image.h}
+            e3.group.position = {x+e3.image.w/e3.num_frames,-2*e3.image.h}
             e3.overwrite_vars = salvage_overwrites
             add_to_render_list(e3)
         end
