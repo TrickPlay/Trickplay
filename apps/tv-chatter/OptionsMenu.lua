@@ -83,11 +83,11 @@ do
     local bg = Image{src="assets/object_options_background.png"}
     local focus_o = Canvas{size={485,scroll_listing_h}}
           focus_o:begin_painting()
-          focus_o:move_to(0,0)
-          focus_o:line_to(focus_o.w-border_w, border_w)
+          focus_o:move_to(border_w,0)
+          focus_o:line_to(focus_o.w-border_w, 0)
           focus_o:line_to(focus_o.w-border_w, focus_o.h-border_w)
           focus_o:line_to(border_w,           focus_o.h-border_w)
-          focus_o:line_to(0,0)
+          focus_o:line_to(border_w,0)
           focus_o:set_source_linear_pattern(
             focus_o.w/2,0,
             focus_o.w/2,focus_o.h
@@ -266,11 +266,11 @@ Options = Class(function(self,x,y,parent,...)
           rules:finish_painting()
     local grey_rect = Canvas{size={bg.w,listing_h},opacity=0}
           grey_rect:begin_painting()
-          grey_rect:move_to(0,0)--border_w,         border_w)
-          grey_rect:line_to(grey_rect.w-border_w, border_w)
+          grey_rect:move_to(border_w,0)--border_w,         border_w)
+          grey_rect:line_to(grey_rect.w-border_w, 0)
           grey_rect:line_to(grey_rect.w-border_w, grey_rect.h-border_w)
           grey_rect:line_to(border_w,             grey_rect.h-border_w)
-          grey_rect:line_to(0,0)
+          grey_rect:line_to(border_w,0)
           grey_rect:set_source_color( "181818" )
 	      grey_rect:fill( true )
           grey_rect:set_source_color( "2D2D2D" )
