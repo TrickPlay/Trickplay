@@ -92,7 +92,9 @@ function api.private:send_request( sub_url , params , callback )
     
     if base_url == "" then
     
-        local results = readfile( "fake-server/"..url..".json" )
+        local name = "fake-server/"..url..".json" 
+    
+        local results = readfile( name ) or readfile( string.gsub( name , "%?" , "_" ) )
         
         if results then
         
