@@ -1,9 +1,13 @@
+
+
 ShowObject = Class(function(self,
                         title_card,  
                         show_name ,  
                         show_desc ,  
-                        tv_station,  
-                        show_time ,  
+                        tv_station,
+                        show_day,
+                        show_time ,
+                        show_ampm,
                         add_image ,
                         hash_tags,
                         char_names,
@@ -39,18 +43,40 @@ ShowObject = Class(function(self,
     self.show_name     = show_name  or "Default Show Name"
     self.show_desc     = show_desc  or "Default Sub-Title"
     self.tv_station    = tv_station or "Default TV Station"
-    self.show_time     = show_time  or "Default Show Time"
+    self.show_day      = show_day   or "Sunday"
+    self.show_time     = show_time  or 6
+    self.show_ampm     = show_ampm  or "pm"
     self.query         = query or "%2230%20Rock%22+OR+30rock+OR+%22Liz%20Lemon"..
                          "%22+OR+%22Jack%20Donaghy%22+OR+nbc30rock+OR+%2330rock"
-    --self.since_id      = 0
-    --self.tweet_g_cache = {}
-    --self.results_cache = {}
-    --self.tweet_i       = 1
-    --self.outstanding_req = false
-    --self.pause_stream    = false
-    
+
     self.tweetstream = TweetStream(self)
-    
+    local days_r = {
+        "Sunday"    ,
+        "Monday"    ,
+        "Tuesday"   ,
+        "Wednesday" ,
+        "Thursday"  ,
+        "Friday"    ,
+        "Saturday"  
+    }
+    local curr_date = os.date("*t",os.time())
+    local time = show_time-math.floor(show_time)
+        if time == 0 then
+            time = show_time
+        else
+            time = math.floor(show_time)..":"..(time*60)
+        end
+        if show_day==days_r[curr_date.wday] then
+            if show_ampm == curr_ampm and
+                show_time ==  curr_time then
+                
+                self.show_time_text = "Now Playing"
+            else
+                self.show_time_text = "Tonight at "..time..show_ampm
+            end
+        else
+            self.show_time_text = show_day.." "..time..show_ampm
+        end
 end)
 
 TweetObj = Class(function(t, name,icon,text,time,...)
