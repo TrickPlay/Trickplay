@@ -167,7 +167,7 @@ function screen:on_key_down(key)
         _G[page].keys[  _G[page].focus  ][key]()
     end
 end
-
+--[[
 function idle:on_idle(elapsed)
     --ping active stream
     if active_stream ~= nil then
@@ -178,4 +178,4 @@ function idle:on_idle(elapsed)
             active_stream:on_idle(elapsed)
         end
     end
-end
+end--]]
