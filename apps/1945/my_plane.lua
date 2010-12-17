@@ -857,6 +857,7 @@ redo_score_text()
 
 
 				}
+                if not self.dead then
                 if self.bombing_mode then
                     add_to_render_list(
                         self:new_bomb(self.group.x + self.image.w / (2*self.num_frames) ,
@@ -867,7 +868,7 @@ redo_score_text()
                     shoot[self.firing_powerup]()
                     mediaplayer:play_sound("audio/player-shooting.mp3")
                 end
-                
+                end
                 
             end
                 

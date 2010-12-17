@@ -205,7 +205,8 @@ imgs =
     turret          = Image{ src = "assets/enemies/turret/turret.png" },
     
     t_bullet        = Image{ src = "assets/enemies/turret/turret_bullet.png" },
-    flak            = Image{ src = "assets/fx/flak.png"},
+    --flak            = Image{ src = "assets/fx/flak.png"},
+    flak            = Image{ src = "assets/fx/flak_strip2.png"},
     --DESTROYER ASSETS
     dest            = Image{ src = "assets/enemies/dest/destroyer.png"},
     dest_sunk       = Image{ src = "assets/enemies/dest/destroyer_sunk.png"},
@@ -226,9 +227,9 @@ imgs =
     bow_wake_8      = Image{ src = "assets/enemies/b_ship/bw8.png"},
 
     --FIGHTER ASSETS
-    fighter         = Image{ src = "assets/enemies/fighter/fighter.png"   },
-    fighter_r       = Image{ src = "assets/enemies/fighter/fighter_r.png"   },
-    fighter_w       = Image{ src = "assets/enemies/fighter/fighter_w.png"   },
+    fighter         = Image{ src = "assets/enemies/fighter/fighter_g_strip.png"   },
+    fighter_r       = Image{ src = "assets/enemies/fighter/fighter_r_strip.png"   },
+    fighter_w       = Image{ src = "assets/enemies/fighter/fighter_w_strip.png"   },
     fighter_bullet  = Image{ src = "assets/enemies/fighter/fighter_bullet.png" },
     fighter_prop    = Image{ src = "assets/enemies/fighter/fighter_prop.png" },
     
@@ -247,6 +248,9 @@ imgs =
     z_d_6           = Image{ src = "assets/enemies/zepp/zep_dmg6.png"},
     z_d_7           = Image{ src = "assets/enemies/zepp/zep_dmg7.png"},
     z_d_e           = Image{ src = "assets/enemies/zepp/zep_dmg_engine.png"},
+    z_debris_1      = Image{ src = "assets/enemies/zepp/zep_debris1.png"},
+    z_debris_2      = Image{ src = "assets/enemies/zepp/zep_debris2.png"},
+    z_debris_3      = Image{ src = "assets/enemies/zepp/zep_debris3.png"},
     engine_fire     = Image{ src = "assets/fx/engine-fire.png"},
 
     --TANK ASSETS
