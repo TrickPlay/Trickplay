@@ -280,8 +280,10 @@ function(ctrl, router, ...)
             router:set_active_component(Components.MENU)
             router:notify()
         end
+        --[[
         print("selector")
         dumptable(selector)
+        --]]
     end
 
     function ctrl:reset_selector()
