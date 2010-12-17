@@ -187,7 +187,7 @@ TweetStream = Class(function(t,parent,...)
                     num_tweets_on_screen = num_tweets_on_screen + 1
                     top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
                     
-                    group:add(tweets[top_tweet])
+                    group:add(tweets[top_tweet].group)
                     tweets[top_tweet].text.w  = w- tweets[top_tweet].text.x- clip_side_gutter
                     tweets[top_tweet].time.x  = w-clip_side_gutter
                     tweets[top_tweet].h       = tweets[top_tweet].text.y +
@@ -357,7 +357,6 @@ TweetStream = Class(function(t,parent,...)
         scroll_thresh:stop()
         scroll_thresh = Timer{interval=10000}
         scroll_thresh.on_timer = function(self)
-            
             self:stop()
             fade_out_hl:start()
         end
@@ -377,7 +376,7 @@ TweetStream = Class(function(t,parent,...)
         local targ_hl_y    = highlight.y
         
         if sel_i + 1 > index_of_bottom_tweet then
-            print("load in a tweet from the bottom")
+            print("load in a tweet from the bottom",sel_i + 1,index_of_bottom_tweet)
             if not at_bottom then
                 print("not the last tweet")
                 if index_of_bottom_tweet < #tweets then
@@ -413,12 +412,14 @@ TweetStream = Class(function(t,parent,...)
                 end
                 targ_hl_h = tweets[sel_i + 1].h +(2*hl_border-tweet_gap)
                 targ_hl_y = group.clip[4]-tweets[sel_i + 1].h - hl_border
-
-                
+            else
+                manual_scroll = nil
+                return
             end
         elseif sel_i + 1 == index_of_bottom_tweet and
+
             tweets[sel_i + 1].group.y + tweets[sel_i + 1].h >(group.clip[4]) then
-            
+            print("down - clipped tweet")            
             local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
             local sum = group.clip[4]
             --[[
@@ -696,10 +697,10 @@ TweetStream = Class(function(t,parent,...)
             local btm_tweet = (index_of_bottom_tweet)
             --move all the tweets up
             for i = top_tweet,btm_tweet do
-                tweets[i].group.y = tweets[i].group.y - px_p_sec * last_call
+                tweets[i].group.y = tweets[i].group.y - scroll_speed * last_call
             end
             
-            highlight.y = highlight.y - px_p_sec * last_call
+            highlight.y = highlight.y - scroll_speed * last_call
             if highlight.y < 0 then
                 sel_i = sel_i + 1
                 if tweets[sel_i] ~= nil then
