@@ -32,9 +32,9 @@ extern "C" {
     TrickPlay version
 */
 
-#define TP_MAJOR_VERSION    0
-#define TP_MINOR_VERSION    0
-#define TP_PATCH_VERSION    13
+#define TP_MAJOR_VERSION    1
+#define TP_MINOR_VERSION    14
+#define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
