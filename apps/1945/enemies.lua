@@ -1455,8 +1455,8 @@ enemies =
                                     end
                                 end,
                                 remove = function(self,seconds)
-                                    group:unparent()
-                                    group:clear()
+                                    self.group:unparent()
+                                    self.group:clear()
                                 end,
 
                             }
