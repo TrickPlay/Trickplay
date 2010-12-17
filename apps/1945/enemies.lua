@@ -1542,13 +1542,13 @@ enemies =
 				self.num_prop_frames
 			self.prop.r.y = -(self.prop_index - 1)*self.prop.r.h/
 				self.num_prop_frames
-				--[[
+				---[[
             if self.right_engine_dam > 2 and self.left_engine_dam > 2 then
-                self.prop.g_r.y = self.prop.g_r.y - 500*seconds
-                self.prop.g_r.x = self.prop.g_r.x + 200*seconds
-                self.prop.g_l.y = self.prop.g_l.y - 500*seconds
-                self.prop.g_l.x = self.prop.g_l.x - 200*seconds
-
+                --self.prop.g_r.y = self.prop.g_r.y - 500*seconds
+                --self.prop.g_r.x = self.prop.g_r.x + 200*seconds
+                --self.prop.g_l.y = self.prop.g_l.y - 500*seconds
+                --self.prop.g_l.x = self.prop.g_l.x - 200*seconds
+                self.group.y = self.group.y + self.approach_speed*seconds
             elseif self.right_engine_dam > 2 then
                 self.speed_x = self.speed_x + 2*seconds
                 if self.speed_x > 20 then
@@ -1556,8 +1556,8 @@ enemies =
                 end
                 self.group.x = self.group.x + self.speed_x*seconds
                 self.group.y = self.group.y + self.approach_speed*seconds
-                self.prop.g_r.y = self.prop.g_r.y - 500*seconds
-                self.prop.g_r.x = self.prop.g_r.x + 200*seconds
+                --self.prop.g_r.y = self.prop.g_r.y - 500*seconds
+                --self.prop.g_r.x = self.prop.g_r.x + 200*seconds
 
             elseif self.left_engine_dam > 2 then
                 self.speed_x = self.speed_x + 2*seconds
@@ -1565,8 +1565,8 @@ enemies =
                     self.speed_x = 20
                 end
                 self.group.x = self.group.x - self.speed_x*seconds
-                self.prop.g_l.y = self.prop.g_l.y - 500*seconds
-                self.prop.g_l.x = self.prop.g_l.x - 200*seconds
+                --self.prop.g_l.y = self.prop.g_l.y - 500*seconds
+                --self.prop.g_l.x = self.prop.g_l.x - 200*seconds
                 
             end--]]
                 --animate the zeppelin based on the current stage
@@ -1697,6 +1697,29 @@ enemies =
                                 imgs.zepp_prop.w/3,
                                 self.prop.g_l.clip[4]
                             }
+                            add_to_render_list(
+                            {
+                                image = Clone{source=imgs.z_br_prop_1},
+                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                    x= self.group.x+16,y= self.group.y+252},
+                                pieces = {},
+                                setup = function(self)
+                                    self.group:add(self.image)
+                                    layers.air_doodads_1:add(self.group)
+                                end,
+                                render = function(self,seconds)
+                                    self.group.y = self.group.y - 200*seconds
+                                    self.group.x = self.group.x - 500*seconds
+                                    if self.group.y < -100 or self.group.x < -100  then
+                                        remove_from_render_list(self)
+                                    end
+                                end,
+                                remove = function(self,seconds)
+                                    self.group:unparent()
+                                end,
+
+                            }
+                            )
                         end
                         self.attack_speed = self.approach_speed
                     elseif loc == 2 then
@@ -1712,6 +1735,29 @@ enemies =
                                 imgs.zepp_prop.w/3,
                                 self.prop.g_r.clip[4]
                             }
+                            add_to_render_list(
+                            {
+                                image = Clone{source=imgs.z_br_prop_1},
+                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                    x= self.group.x+180,y= self.group.y+252},
+                                pieces = {},
+                                setup = function(self)
+                                    self.group:add(self.image)
+                                    layers.air_doodads_1:add(self.group)
+                                end,
+                                render = function(self,seconds)
+                                    self.group.y = self.group.y - 200*seconds
+                                    self.group.x = self.group.x + 500*seconds
+                                    if self.group.y < -100 or self.group.x < -100  then
+                                        remove_from_render_list(self)
+                                    end
+                                end,
+                                remove = function(self,seconds)
+                                    self.group:unparent()
+                                end,
+
+                            }
+                            )
                         end
                         self.attack_speed = self.approach_speed
                     else
@@ -1758,10 +1804,12 @@ enemies =
                             }
                             add_to_render_list(
                             {
-                                image = Clone{source=imgs.z_br_prop_1,x= self.group.x+16,y= self.group.y+252},
-                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3}},
+                                image = Clone{source=imgs.z_br_prop_1},
+                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                    x= self.group.x+16,y= self.group.y+252},
                                 pieces = {},
                                 setup = function(self)
+                                    self.group:add(self.image)
                                     layers.air_doodads_1:add(self.group)
                                 end,
                                 render = function(self,seconds)
@@ -1792,6 +1840,29 @@ enemies =
                                 imgs.zepp_prop.w/3,
                                 self.prop.g_r.clip[4]
                             }
+                            add_to_render_list(
+                            {
+                                image = Clone{source=imgs.z_br_prop_1},
+                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                    x= self.group.x+180,y= self.group.y+252},
+                                pieces = {},
+                                setup = function(self)
+                                    self.group:add(self.image)
+                                    layers.air_doodads_1:add(self.group)
+                                end,
+                                render = function(self,seconds)
+                                    self.group.y = self.group.y - 200*seconds
+                                    self.group.x = self.group.x + 500*seconds
+                                    if self.group.y < -100 or self.group.x < -100  then
+                                        remove_from_render_list(self)
+                                    end
+                                end,
+                                remove = function(self,seconds)
+                                    self.group:unparent()
+                                end,
+
+                            }
+                            )
                         end
                         self.attack_speed = self.approach_speed
                     else
@@ -1830,7 +1901,7 @@ enemies =
 			--self.group:unparent()
 			--remove_from_render_list( self )
             self.dying = true
-            self.stage = self.stage + 1
+            self.stage = #self.stages
                         
 			-- Explode
             add_to_render_list(
