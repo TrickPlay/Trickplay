@@ -62,7 +62,7 @@ local req_page = function(keywords, callback, since_id)
         url = url,
         on_complete = function(request,response)
             
-            if response == nil or response.failed or response.body == nil then
+            if response == nil or response.failed then
                 callback(false)
                 return
             end
@@ -90,7 +90,7 @@ TweetStream = Class(function(t,parent,...)
     local highlight      = Rectangle{w=0,h=0,color = "#595959",opacity = 0,x=-15}
     local results_cache  = {}
     --local animate_tweets = Timer{interval= 100} --manual Timeline
-    local animate_tweets = Timeline{loop=true, duration=5000}
+    local animate_tweets = Timeline{loop=true, duration=1000}
     local manual_scroll  = nil
     local scroll_thresh  = Timer{interval=10000} --wait-time to scrolling again
     local auto_scrolling  = true
@@ -127,7 +127,9 @@ TweetStream = Class(function(t,parent,...)
     local num_tweets_on_screen  = 0
     local index_of_bottom_tweet = 0
     
-    group:add(highlight)
+    local error_message = Text{text="",font=Show_Time_Font,color=Show_Time_Color,x=20}
+    
+    group:add(highlight,error_message)
     
     --when user moves with in the tweet stream
     --wait 10 seconds and start scrolling again
@@ -156,6 +158,7 @@ TweetStream = Class(function(t,parent,...)
         else
             group.clip  = {110,group.clip[2],w,h}
         end
+        error_message.y = group.clip[4]-35
         if #tweets ~= 0 then
             local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
             local btm_tweet = (index_of_bottom_tweet)
@@ -207,12 +210,17 @@ TweetStream = Class(function(t,parent,...)
         return group
     end
     function t:in_view()
-        --animate_tweets:start()
-        active_stream = t
+        if #tweets ~= 0 then
+            animate_tweets:start()
+        elseif not requesting then
+            requesting = true
+            req_page(show_obj.query,  t.url_callback,  since_id)
+        end
+        --active_stream = t
     end
     function t:out_view()
-        --animate_tweets:stop()
-        active_stream = nil
+        animate_tweets:stop()
+        --active_stream = nil
     end
     function t:select_tweet(i)
         highlight.y = tweets[i].group.y-hl_border
@@ -242,9 +250,10 @@ TweetStream = Class(function(t,parent,...)
         scroll_thresh.on_timer = function(self)
             self:stop()
             fade_out_hl:start()
+            animate_tweets:start()
         end
         scroll_thresh:start()
-        
+        animate_tweets:stop()
         if manual_scroll ~= nil then
             manual_scroll:stop()
             manual_scroll:on_completed()
@@ -259,6 +268,8 @@ TweetStream = Class(function(t,parent,...)
         local targ_hl_y    = highlight.y
         
         if sel_i - 1 < index_of_bottom_tweet+1 - num_tweets_on_screen then
+            error_message.opacity=0
+            at_bottom = false
             if sel_i - 1 >= 1 then
                 print("up to old tweet")
                 local sum = 25
@@ -283,6 +294,8 @@ TweetStream = Class(function(t,parent,...)
             end
         elseif sel_i - 1 == index_of_bottom_tweet+1 - num_tweets_on_screen and
             tweets[sel_i - 1].group.y < 0 then
+                error_message.opacity=0
+                at_bottom = false
                 print("up - to half-clipped tweet")
                 local sum = 25
                 for j = sel_i - 1,index_of_bottom_tweet do
@@ -359,9 +372,10 @@ TweetStream = Class(function(t,parent,...)
         scroll_thresh.on_timer = function(self)
             self:stop()
             fade_out_hl:start()
+            animate_tweets:start()
         end
         scroll_thresh:start()
-        
+        animate_tweets:stop()
         if manual_scroll ~= nil then
             manual_scroll:stop()
             manual_scroll:on_completed()
@@ -378,6 +392,7 @@ TweetStream = Class(function(t,parent,...)
         if sel_i + 1 > index_of_bottom_tweet then
             print("load in a tweet from the bottom",sel_i + 1,index_of_bottom_tweet)
             if not at_bottom then
+            
                 print("not the last tweet")
                 if index_of_bottom_tweet < #tweets then
                     print("bringing in a previously loaded tweet")
@@ -397,6 +412,8 @@ TweetStream = Class(function(t,parent,...)
                 else
                     at_bottom = true
                     manual_scroll = nil
+                    error_message.opacity=255
+                    print("1")
                     return
                 end
                 
@@ -414,6 +431,8 @@ TweetStream = Class(function(t,parent,...)
                 targ_hl_y = group.clip[4]-tweets[sel_i + 1].h - hl_border
             else
                 manual_scroll = nil
+                error_message.opacity=255
+                print("2")
                 return
             end
         elseif sel_i + 1 == index_of_bottom_tweet and
@@ -543,7 +562,8 @@ TweetStream = Class(function(t,parent,...)
     function t.url_callback(data)
         if data == false then
             if attempt == 5 then
-                error("Twitter isn't sending responds")
+                error_message.text = "Twitter isn't sending responds, giving up"
+                return
             end
             attempt = attempt + 1
             local retry = Timer{interval = 30000}
@@ -555,8 +575,10 @@ TweetStream = Class(function(t,parent,...)
             end
             retry:start()
             print("waiting 30 seconds, before checking twitter again")
+            error_message.text = "Twitter didn't respond. Trying again"
             return
         end
+        
         
         --Got an empty response
         if data == nil or #data == 0 then
@@ -569,8 +591,10 @@ TweetStream = Class(function(t,parent,...)
             end
             retry:start()
             print("waiting 30 seconds, before checking twitter again")
+            error_message.text = "Viewing newest tweets, waiting for more..."
             return
         end
+        error_message.text = ""
         print("received actual data")
         local d,t,text
         for i = 0,(#data-1) do
@@ -608,6 +632,7 @@ TweetStream = Class(function(t,parent,...)
         end
         requesting = false
         at_bottom  = false
+        animate_tweets:start()
     end
     
     --Grabs the next stored search result and adds it to the visible tweets
@@ -622,14 +647,15 @@ TweetStream = Class(function(t,parent,...)
                             font  = Username_Font,
                             color = Username_Color,
                             x     = 110,
-                            y     = 0
+                            y     = -7,
+                            ellipsize = "END"
         }
         local time       = Text{
                             text  = time_diff(tweet_obj.time),
                             font  = Time_Font,
                             color = Time_Color,
                             x     = group.clip[3]-clip_side_gutter,
-                            y     = 0
+                            y     = -5
         }
         local text       = Text{
                             text  = tweet_obj.text,
@@ -641,12 +667,14 @@ TweetStream = Class(function(t,parent,...)
                             x     = 110,
                             y     = 40
         }
+        
         text.w = text.w - text.x
         time.anchor_point =
         {
             time.w,
             0
         }
+        username.w = (time.x-time.w)-username.x
         local next_tweet = {
             group    = Group{ y = group.clip[4] },
             username = username,
@@ -680,11 +708,13 @@ TweetStream = Class(function(t,parent,...)
     local last_msec = 0
     function animate_tweets:on_completed()
         last_msec = 0
-        print("comp")
     end
-    animate_tweets.stop = nil
+    --animate_tweets.stop = nil
     
-    function t:on_idle(last_call)
+    --function t:on_idle(last_call)
+    function animate_tweets:on_new_frame(msecs,prog)
+        local last_call = msecs/1000 - last_msec
+        last_msec = msecs/1000
         
         --if you start running out of tweets and didn't already request more
         if #results_cache <= 5 and not requesting then
@@ -693,6 +723,7 @@ TweetStream = Class(function(t,parent,...)
         end
         --if still auto scrolling and you haven't reached the bottom yet
         if auto_scrolling and not at_bottom then
+            error_message.opacity = 0
             local top_tweet = (index_of_bottom_tweet+1 - num_tweets_on_screen)
             local btm_tweet = (index_of_bottom_tweet)
             --move all the tweets up
@@ -733,8 +764,11 @@ TweetStream = Class(function(t,parent,...)
                     index_of_bottom_tweet = index_of_bottom_tweet + 1
                 else
                     at_bottom = true
+                    animate_tweets:stop()
                 end
             end
+        elseif at_bottom then
+            error_message.opacity = 255
         end
     end
     
