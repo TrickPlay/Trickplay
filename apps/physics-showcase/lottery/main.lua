@@ -160,7 +160,7 @@ local function fan_blow( seconds )
 
         for _ , ball in pairs( balls_in_fan ) do
         
-            ball:apply_force( { 0 , - G * FAN_FORCE * ball.mass * fan_speed } , { fan.x , ball.y } )
+            ball:apply_force( { 0 , - G * FAN_FORCE * ball.mass * fan_speed } , { ball.x , ball.y } )
             
         end
         
@@ -498,11 +498,10 @@ for i = 1 , BALL_COUNT do
         ,
         {
             shape = physics:Circle( ball_image.w / 2 ),
-            density = 1 ,
-            friction = 0.1 ,
+            density =  20,
+            friction = 0.2 ,
             bounce = 0.7,
             filter = { category = 1 , mask = { 0 , 1 } },
-            angular_damping = 1,
             
         }
     )
@@ -520,7 +519,7 @@ end
 -- They are created hidden below the inbound pipe. A sensor detects when a ball
 -- sits in the corner for a bit and deploys the next elevator.
 
-local ELEVATOR_POSITION = { 368 , 1066 }
+local ELEVATOR_POSITION = { 364 , 1066 }
 local ELEVATOR_COUNT    = 4
 local ELEVATOR_INTERVAL = 1 -- seconds
 
@@ -545,7 +544,7 @@ for i = 1 , ELEVATOR_COUNT do
         {
             type = "dynamic",
             density = 100,
-            friction = 1,
+            friction = 0.1,
             fixed_rotation = true,
             filter = { group = -1 }
         }
