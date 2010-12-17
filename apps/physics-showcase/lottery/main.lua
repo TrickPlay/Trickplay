@@ -1,5 +1,5 @@
 
-local SENSOR_COLOR = "FF000010"
+local SENSOR_COLOR = "FF000000"
 
 -------------------------------------------------------------------------------
 -- Start with the hopper. We create a single static body that is invisible
@@ -109,6 +109,8 @@ local FAN_SIZE     = { 154 * 2 , 40 }
 
 local FAN_FORCE    = 25.06 -- in Gs
 
+local fan_speed    = 0
+
 local fan = physics:Body(
 
     Rectangle
@@ -123,6 +125,8 @@ local fan = physics:Body(
         sensor = true
     }
 )
+
+local fan_on = true
 
 local balls_in_fan = {}
 
@@ -144,11 +148,21 @@ function fan:on_end_contact( contact )
     
 end
 
-local function fan_blow()
+local function fan_blow( seconds )
 
-    for _ , ball in pairs( balls_in_fan ) do
+    if fan_on then
     
-        ball:apply_force( { 0 , - G * FAN_FORCE * ball.mass } , { fan.x , ball.y } )
+        if fan_speed < 1 then
+        
+            fan_speed = math.min( fan_speed + 0.25 * seconds , 1 )
+            
+        end
+
+        for _ , ball in pairs( balls_in_fan ) do
+        
+            ball:apply_force( { 0 , - G * FAN_FORCE * ball.mass * fan_speed } , { fan.x , ball.y } )
+            
+        end
         
     end
 
@@ -205,16 +219,18 @@ end
 
 local function sucker_suck()
 
-    if sucker_on then
-
-        for _ , ball in pairs( balls_in_sucker ) do
+    for _ , ball in pairs( balls_in_sucker ) do
+    
+        local force = - G * SUCKER_FORCE * ball.mass
         
-            ball:apply_force( { 0 , - G * SUCKER_FORCE * ball.mass } , ball.position )
-            
+        if not sucker_on then
+            force = - force
         end
+    
+        ball:apply_force( { 0 , force  } , ball.position )
         
     end
-    
+        
 end
 
 table.insert( step_functions , sucker_suck )
@@ -259,7 +275,7 @@ local pusher = physics:Body(
     ,
     {
         type = "dynamic",
-        density = 4,
+        density = 40,
         friction = 0,
         shape = physics:Box( { 190 , 140 } , { -55 , 0 } ),
         filter = { group = -1 }
@@ -293,9 +309,9 @@ function pusher_sensor:on_begin_contact( contact )
     
     local ball = balls[ contact.other_body[ self.handle ] ]
     
-    if ball then
+    if ball and sucker_on then
     
-        pusher:apply_linear_impulse( { 400 , 0 } , pusher.position )
+        pusher:apply_linear_impulse( { 4000 , 0 } , pusher.position )
 
         sucker_on = false
 
@@ -319,7 +335,11 @@ local function pusher_push( seconds )
     
         if pusher.x >= pusher_start_x + PUSHER_DISTANCE then
 
-            pusher.linear_velocity = { - vx , 0 }
+            pusher.x = pusher_start_x + PUSHER_DISTANCE
+            
+            pusher.linear_velocity = { 0 , 0 }
+            
+            push_it = false
         
         end
     
@@ -330,7 +350,14 @@ local function pusher_push( seconds )
             pusher.linear_velocity = { 0 , 0 }
             
             pusher.x = pusher_start_x
-            
+--[[            
+            local t = Timer( 4000 )
+            function t.on_timer()
+                sucker_on = true
+                return false
+            end
+            t:start()
+]]
             sucker_on = true
             
             push_it = false
@@ -408,14 +435,22 @@ ball_image:hide()
 local BALL_COUNT = 18 -- Too many balls may need a stronger fan
 local BALL_POSITION = { 390 * 2 , 204 * 2 }
 
-for i = 1 , BALL_COUNT do
+local function make_ball( i )
 
-    local ball = physics:Body(
+    local text =
+    
+        Text
+        {
+            text = tostring( i ),
+            position = { 10 , 10 },
+            color = "000000D0",
+            font = "DejaVu Mono bold 70px",
+        }
+    
+    local result = 
 
         Group
         {
-            position = BALL_POSITION,
-            
             children =
             {
                 Clone
@@ -423,15 +458,42 @@ for i = 1 , BALL_COUNT do
                     source = ball_image,
                 }
                 ,
-                Text
-                {
-                    text = tostring( i ),
-                    position = { 10 , 10 },
-                    color = "000000",
-                    font = "DejaVu Mono bold 70px",
-                }
-                
+                text
             }
+            ,
+            extra =
+            {
+                number = i
+            }
+        }
+        
+    if i == 6 or i == 9 then
+    
+        result:add(
+            Rectangle
+            {
+                color = "000000C0" ,
+                x = text.x + 7 ,
+                y = text.y + text.h - 10 ,
+                size = { 18 , 6 }
+            }
+        )
+    
+    end
+    
+    return result
+end        
+
+
+
+for i = 1 , BALL_COUNT do
+
+    local ball = physics:Body(
+
+        make_ball( i ):set
+        {
+            position = BALL_POSITION,
+        
         }
         ,
         {
@@ -445,8 +507,6 @@ for i = 1 , BALL_COUNT do
         }
     )
 
-   -- ball.position = { 1283 , 978 }
-    
     screen:add( ball )
     
     ball:show()
@@ -456,7 +516,9 @@ for i = 1 , BALL_COUNT do
 end
 
 -------------------------------------------------------------------------------
--- Elevator(s)
+-- Elevators
+-- They are created hidden below the inbound pipe. A sensor detects when a ball
+-- sits in the corner for a bit and deploys the next elevator.
 
 local ELEVATOR_POSITION = { 368 , 1066 }
 local ELEVATOR_COUNT    = 4
@@ -542,26 +604,38 @@ function elevator_sensor:on_end_contact( contact )
     end
 end
 
+local elevators_on = false
+
 local function elevate()
 
-    if elevator_sensor_time.elapsed_seconds >= ELEVATOR_INTERVAL then
+    -- If the sensor has been active long enough, deploy one elevator
     
-        for elevator , _ in pairs( elevators ) do
+    if elevators_on then
+    
+        if elevator_sensor_time.elapsed_seconds >= ELEVATOR_INTERVAL then
         
-            if not elevator.is_visible then
+            for elevator , _ in pairs( elevators ) do
             
-                elevator:show()
+                if not elevator.is_visible then
                 
-                elevator_sensor_time:start()
-                
-                break
+                    elevator:show()
+                    
+                    elevator_sensor_time:start()
+                    
+                    break
+                    
+                end
                 
             end
-            
+        
         end
-    
+        
     end
 
+    -- Now, push all the visible elevators up. If they reach the top, they are
+    -- hidden until they are re-deployed. Near the top of the tube, they tilt
+    -- to push the ball out.
+    
     for elevator , _ in pairs( elevators ) do
     
         if elevator.is_visible then
@@ -606,7 +680,148 @@ end
 table.insert( step_functions , elevate )
 
 -------------------------------------------------------------------------------
+-- Sensors to track how many balls are out.
 
+local out_sensor = physics:Body(
+    Rectangle
+    {
+        color = SENSOR_COLOR,
+        position = { 1580 , 286 },
+        size = { 40 , 40 }
+    }
+    ,
+    {
+        type = "static",
+        sensor = true
+    }
+)
+
+local in_sensor = physics:Body(
+    Rectangle
+    {
+        color = SENSOR_COLOR,
+        position = { 732 , 162 },
+        size = { 40 , 40 }
+    }
+    ,
+    {
+        type = "static",
+        sensor = true
+    }
+)
+
+
+in_sensor.angle = -45
+
+screen:add( out_sensor , in_sensor )
+
+--[[
+local count_text = Text
+{
+    font = "DejaVu Mono bold 90px",
+    color = "FFFFFF",
+    text = "0",
+    position = { 1540 , 922 }
+}
+
+screen:add( count_text )
+]]
+
+local balls_out = 0
+
+local chosen_group = Group{ position = { 120 , 140 } }
+
+function out_sensor:on_begin_contact( contact )
+
+    local ball = balls[ contact.other_body[ self.handle ] ]
+    
+    if ball then
+    
+        balls_out = balls_out + 1
+    
+        local count = # chosen_group.children
+    
+        if count == 6 then
+        
+            chosen_group:clear()
+            
+            count = 0
+            
+        end
+        
+        chosen_group:add(
+        
+            make_ball( ball.extra.number ):set
+            {
+                x = 0,
+                y = ( ball.h + 20 ) * count
+            }
+        )
+        
+        if balls_out < 6 then
+        
+            pusher:apply_linear_impulse( { -1000 , 0 } , pusher.position )
+        
+            push_it = true
+            
+        else
+        
+            elevators_on = true
+            
+            fan_on = false
+                        
+        end
+    
+    end
+
+end
+
+screen:add( chosen_group )
+
+
+function in_sensor:on_begin_contact( contact )
+
+    local ball = balls[ contact.other_body[ self.handle ] ]
+    
+    if ball then
+        
+        local vx , vy = unpack( ball.linear_velocity )
+        
+        if vy < 0 then
+            
+            ball:apply_linear_impulse( { 0 , 10 } , ball.position )
+            
+        else
+        
+            balls_out = balls_out - 1
+            
+            if balls_out == 0 then
+            
+                pusher:apply_linear_impulse( { -1000 , 0 } , pusher.position )
+            
+                push_it = true
+                
+                elevators_on = false
+                
+                local t = Timer( 3000 )
+                function t.on_timer()
+                    fan_speed = 0
+                    fan_on = true
+                    return false
+                end
+                t:start()
+                
+            
+            end
+        
+        end
+    
+    end
+
+end
+
+
+-------------------------------------------------------------------------------
 
 screen:show()
 
