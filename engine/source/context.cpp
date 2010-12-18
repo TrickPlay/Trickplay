@@ -670,6 +670,26 @@ gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer co
 #endif
 
 //-----------------------------------------------------------------------------
+// When profiling is enabled, these signal handlers let us know when painting
+// the stage begins and ends.
+
+#ifdef TP_PROFILING
+
+static gpointer paint_profiler = 0;
+
+static void before_paint( ClutterActor * actor , gpointer )
+{
+    paint_profiler = PROFILE_START( "PAINT" , PROFILER_INTERNAL_CALLS );
+}
+
+static void after_paint( ClutterActor * actor , gpointer )
+{
+    PROFILE_STOP( paint_profiler );
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 int TPContext::run()
 {
@@ -830,6 +850,13 @@ int TPContext::run()
     color.alpha = 0;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+
+#ifdef TP_PROFILING
+
+    g_signal_connect( stage , "paint" , ( GCallback ) before_paint , 0 );
+    g_signal_connect_after( stage , "paint" , ( GCallback ) after_paint , 0 );
+
+#endif
 
 #ifndef TP_PRODUCTION
 
