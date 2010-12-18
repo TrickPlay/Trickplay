@@ -20,7 +20,7 @@ function is_lua_file(fn)
 		return false
 	     end 
 end 
-function is_png_file(fn)
+function is_img_file(fn)
 	     i, j = string.find(fn, ".png")
 	     if (j == string.len(fn)) then
 		return true
@@ -122,6 +122,7 @@ function set_app_path()
 
 end 
 
+
 function create_on_button_down_f(v)
 	v.extra.selected = false
 	local org_object, new_object 
@@ -193,18 +194,74 @@ function create_on_button_down_f(v)
 		    return true 
 		elseif( input_mode ~= S_RECTANGLE) then  
 	      	    if(dragging ~= nil) then 
-	            	local actor , dx , dy = unpack( dragging )
-		        new_object = copy_obj(v)
-	            	new_object.position = {x-dx, y-dy}
-			if(org_object ~= nil) then  
-		        if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			editor.n_select(v, false, dragging) 
-			editor.n_select(new_object, false, dragging) 
-			editor.n_select(org_object, false, dragging) 
-			v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
-			v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
-                    	table.insert(undo_list, {v.name, CHG, org_object, new_object})
+	               local actor , dx , dy = unpack( dragging )
+		       new_object = copy_obj(v)
+	               new_object.position = {x-dx, y-dy}
+	
+		       local border = screen:find_child(v.name.."border")
+		       local group_pos
+	       	       if(border ~= nil) then 
+		             if (v.extra.is_in_group == true) then
+			     group_pos = get_group_position(v)
+	                     border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+		             else 
+	                     border.position = {x -dx, y -dy}
+		             end 
+	                end 
+
+			local am = screen:find_child(v.name.."a_m") 
+ 
+			for i=1, v_guideline,1 do 
+			   if(screen:find_child("v_guideline"..i) ~= nil) then 
+			     local gx = screen:find_child("v_guideline"..i).x 
+			     if(15 >= math.abs(gx - x + dx)) then  
+				new_object.x = gx
+				v.x = gx
+				if (am ~= nil) then 
+			     	     am.x = am.x - (x-dx-gx)
+				end
+			     elseif(15>= math.abs(gx - x + dx - new_object.w)) then
+				new_object.x = gx - new_object.w
+				v.x = gx - new_object.w
+				if (am ~= nil) then 
+			     	     am.x = am.x - (x-dx+new_object.w - gx)
+				end
+			     end 
+			   end 
+		        end 
+    
+			for i=1, h_guideline,1 do 
+			   if(screen:find_child("h_guideline"..i) ~= nil) then 
+			      local gy =  screen:find_child("h_guideline"..i).y 
+			      if(15 >= math.abs(gy - y + dy)) then 
+				new_object.y = gy
+				v.y = gy
+				if (am ~= nil) then 
+			     	     am.y = am.y - (y-dy - gy) 
+				end
+			      elseif(15>= math.abs(gy - y + dy - new_object.h)) then
+				new_object.y = gy - new_object.h
+				v.y =  gy - new_object.h
+				if (am ~= nil) then 
+			     	     am.y = am.y - (y-dy + new_object.h - gy)  
+				end
+			      end 
+			   end
 			end
+
+		        if(border ~= nil )then 
+			     border.position = v.position
+			end 
+
+			if(org_object ~= nil) then  
+		           if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+			     editor.n_select(v, false, dragging) 
+			     editor.n_select(new_object, false, dragging) 
+			     editor.n_select(org_object, false, dragging) 
+			     v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
+			     v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
+                    	     table.insert(undo_list, {v.name, CHG, org_object, new_object})
+			   end
 			end 
 	            	dragging = nil
               	  end
@@ -600,6 +657,38 @@ end
 
 local msgw_focus = ""
 
+function create_tiny_input_box(txt)
+     	local box_g = Group {}
+     	local box = factory.draw_tiny_ring()
+     	local box_focus = factory.draw_tiny_focus_ring()
+	box_g.name = "input_b"
+        box.position  = {0,0}
+        box.reactive = true
+        box.opacity = 255
+	box_g:add(box)
+	box_focus.opacity = 0 
+	box_g:add(box_focus)
+    	box_g:add(txt)
+
+        function box_g.extra.on_focus_in()
+		txt:grab_key_focus(txt)
+		txt.cursor_visible = true
+	        box.opacity = 0 
+            	box_focus.opacity = 255
+		msgw_focus = "input_b"
+        end
+
+        function box_g.extra.on_focus_out()
+	        box.opacity = 255 
+            	box_focus.opacity = 0
+		txt.cursor_visible = false
+        end
+
+	return box_g
+end 
+
+
+
 local function create_small_input_box(txt)
      	local box_g = Group {}
      	local box = factory.draw_small_ring()
@@ -739,7 +828,6 @@ function printMsgWindow(txt, name)
 	     msgw:add(prj_text)
 	     msgw_cur_y = msgw_cur_y + 32 + 10 -- 10 : line padding 
 
-
 	     function prj_text.extra.on_focus_in()
                   prj_text:set{color = {0,255,0,255}}
 	 	  prj_text:grab_key_focus()
@@ -803,7 +891,6 @@ function printMsgWindow(txt, name)
 
          end 
      end 
-	
 end
 
 local function inputMsgWindow_savefile()
@@ -1267,7 +1354,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
 	  BG_IMAGE_white.opacity = 0
 	  BG_IMAGE_import:set{src = input_t.text, opacity = 255} 
 	  input_mode = S_SELECT
-     elseif(is_png_file(input_t.text) == true) then 
+     elseif(is_img_file(input_t.text) == true) then 
 	  
 	  while (is_available("img"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
@@ -1320,7 +1407,7 @@ function inputMsgWindow(input_purpose)
 
      local save_b, cancel_b, input_box, open_b, yes_b, no_b
      local save_t, cancel_t, input_box, open_t, yes_t, no_t
-
+    
      function create_on_key_down_f(button) 
      	function button:on_key_down(key)
 	     if key == keys.Return then

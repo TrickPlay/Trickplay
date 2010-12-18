@@ -506,6 +506,7 @@ local color_map =
         [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
+        [ "guidew" ] = function()  color =  "5a252b" size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = "5a252b" return size, color end
 }
@@ -974,6 +975,26 @@ function factory.draw_small_focus_ring()
         return ring
 end
 
+--[[
+	round_rectangle ( 
+        PADDING_X + BORDER_WIDTH /2,
+        PADDING_Y + BORDER_WIDTH /2,
+        w - BORDER_WIDTH - PADDING_X * 2 ,
+        h - BORDER_WIDTH - PADDING_Y * 2 ,
+        BORDER_RADIUS )
+]]--
+
+function factory.draw_tiny_focus_ring()
+        local ring = Canvas{ size = {150, 50} }
+        ring:begin_painting()
+        ring:set_source_color("1b911b")
+        ring:round_rectangle( 4, 4, 142, 42, 12)
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
+
 -------------------------------------------------------------------------------
 -- Makes a focus(white, input) ring 
 -------------------------------------------------------------------------------
@@ -998,6 +1019,19 @@ function factory.draw_small_ring()
         ring:finish_painting()
         return ring
 end
+
+
+function factory.draw_tiny_ring()
+	local ring = Canvas{ size = {150, 50} }
+        ring:begin_painting()
+        ring:set_source_color( "FFFFFFC0" )
+        ring:round_rectangle( 4, 4, 142, 42, 12 )
+    	ring:set_line_width (4)
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+end
+
 -------------------------------------------------------------------------------
 -- Makes a line for categorizing menu items 
 -------------------------------------------------------------------------------

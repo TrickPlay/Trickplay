@@ -403,23 +403,24 @@ local function build_ui( show_it )
 
     local key_map =
     {
-	[ keys.h	] = function() animate_out_dropdown() editor.undo_history() input_mode = S_SELECT end,
-	--[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
-	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
+        [ keys.a	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(false) end,
+	[ keys.b	] = function() animate_out_dropdown() editor.undo_history() input_mode = S_SELECT end,
+        [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
+        [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
+        [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
+        [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.the_image() end,
+        --[ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.image() end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
         --[ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.open()  end,
         [ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.the_open()  end,
+        [ keys.q	] = function() exit() end,
+	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(true) end,
-        [ keys.a	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(false) end,
         [ keys.t	] = function() animate_out_dropdown() editor.text() input_mode = S_SELECT end,
-        --[ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.image() end,
-        [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.the_image() end,
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
-        [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
+        [ keys.v	] = function() animate_out_dropdown() editor.v_guideline() input_mode = S_SELECT end,
+        [ keys.h	] = function() animate_out_dropdown() editor.h_guideline() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
-        [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
-        [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() input_mode = S_SELECT end,
-        [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    ui.button_focus:show()
         				    ui.bar:show()
@@ -457,8 +458,8 @@ local function build_ui( show_it )
 					    screen:grab_key_focus()
 				       end 
 				       input_mode = S_SELECT end,
-        [ keys.q	] = function() exit() end,
-        
+	--[ keys.w	] = function() animate_out_dropdown() editor.the_open() input_mode = S_SELECT end,
+        [ keys.BackSpace] = function() animate_out_dropdown() editor.delete() input_mode = S_SELECT end,
         [ keys.RED      ] = function() move_focus( ui.color_keys[ keys.RED ] ) end,
         [ keys.GREEN    ] = function() move_focus( ui.color_keys[ keys.GREEN ] ) end,
         [ keys.YELLOW   ] = function() move_focus( ui.color_keys[ keys.YELLOW ] ) end,
@@ -698,6 +699,7 @@ local function build_ui( show_it )
       end
 
       function screen:on_motion(x,y)
+
 	  if(input_mode == S_RECTANGLE) then 
 		if(rect_mouse_pointer == nil) then 
 		rect_mouse_pointer = ui.factory.draw_mouse_pointer()
@@ -710,6 +712,15 @@ local function build_ui( show_it )
 
           if dragging then
                local actor , dx , dy = unpack( dragging )
+
+	       if (guideline_type(actor.name) == "v_guideline") then 
+	            actor.x = x - dx
+	            return true
+	       elseif (guideline_type(actor.name) == "h_guideline") then 
+		    actor.y = y - dy
+	            return true
+	       end 
+
 	       local border = screen:find_child(actor.name.."border")
 	       if(border ~= nil) then 
 		    if (actor.extra.is_in_group == true) then
@@ -756,7 +767,6 @@ local function build_ui( show_it )
 				 end
 			     	end
 			      end
-
 			      g.extra.scroll_y = math.floor(dif) -- + 1
 		       end 
 		    end

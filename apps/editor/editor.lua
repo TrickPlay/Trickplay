@@ -3,11 +3,310 @@ dofile("apply.lua")
 
 editor = {}
 
+
 local rect_init_x = 0
 local rect_init_y = 0
 local g_init_x = 0
 local g_init_y = 0
 local factory = ui.factory
+
+function guideline_type(name) 
+    local i, j = string.find(name,"v_guideline")
+    if(i ~= nil and j ~= nil)then 
+         return "v_guideline"
+    end 
+    local i, j = string.find(name,"h_guideline")
+    if(i ~= nil and j ~= nil)then 
+         return "h_guideline"
+    end 
+    return ""
+end 
+
+
+local function guideline_inspector(v)
+	local gw  = Group {
+	     name = "msgw",
+	     position ={500, 500},
+	     anchor_point = {0,0},
+             children = {}
+        }
+	local input_h, input_v, input_box_h, input_box_v
+	local save_t, save_b, cancel_t, cancel_b, delete_t, delete_b
+
+	local function create_on_key_down_f(button) 
+     	     function button:on_key_down(key)
+	     if key == keys.Return then
+              	if (button.name == "apply") then 
+		     if (input_h.text ~= "") then 
+			v.y = tonumber(input_h.text) 
+		     elseif (input_v.text ~= "") then 
+			v.x = tonumber(input_v.text) 
+		     end 
+              	elseif (button.name == "delete") then  
+		     screen:remove(screen:find_child(v.name))
+              	end
+		gw.children = {}
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+	        return true 
+	     elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) or (key == keys.Right) then 
+              	if (button.name == "cancel") then cancel_b.extra.on_focus_out() save_b.extra.on_focus_in()
+              	elseif (button.name == "apply") then save_b.extra.on_focus_out() delete_b.extra.on_focus_in()
+              	elseif (button.name == "delete") then 
+		     delete_b.extra.on_focus_out()
+		     if(guideline_type(v.name) == "v_guideline") then 
+			  input_box_v.extra.on_focus_in()
+                          input_v.cursor_visible = true
+		     elseif(guideline_type(v.name) == "h_guideline") then 
+			  input_box_h.extra.on_focus_in()
+                          input_h.cursor_visible = true
+		     end 
+                end
+	        return true 
+	     elseif (key == keys.Tab and shift == true) or ( key == keys.Up ) or (key == keys.Left) then 
+              	if (button.name == "apply") then 
+		     save_b.extra.on_focus_out() 
+		     cancel_b.extra.on_focus_in()
+              	elseif (button.name == "cancel") then 
+	             cancel_b.extra.on_focus_out()	
+		     if(guideline_type(v.name) == "v_guideline") then 
+			  input_box_v.extra.on_focus_in()
+                          input_v.cursor_visible = true
+		     elseif(guideline_type(v.name) == "h_guideline") then 
+			  input_box_h.extra.on_focus_in()
+                          input_h.cursor_visible = true
+		     end 
+              	elseif (button.name == "delete") then 
+		     delete_b.extra.on_focus_out()
+		     save_b.extra.on_focus_in()
+                end
+	        return true 
+	     end 
+             end 
+        end 
+
+	local gw_bg = factory.make_popup_bg("guidew", 0)
+
+     	gw:add(gw_bg)
+     	gw:add(Text{name= "title", text = "GUIDE LINE", font= "DejaVu Sans 25px",
+     	color = "FFFFFF", position ={gw.w * 2/5, 40}, editable = false , reactive = false})
+
+	if(guideline_type(v.name) == "h_guideline") then 
+             input_h = Text { name="input_h", font= "DejaVu Sans 25px", color = "FFFFFF", 
+	     position = {10, 10}, text = tostring(v.y), editable = true , reactive = true, cursor_visible=false}
+
+             input_v = Text { name="input_v", font= "DejaVu Sans 25px", color = "FFFFFF", 
+	     position = {10, 10}, text = "" , editable = true , reactive = true, cursor_visible=false}
+	elseif(guideline_type(v.name) == "v_guideline") then 
+             input_v = Text { name="input_v", font= "DejaVu Sans 25px", color = "FFFFFF", 
+	     position = {10, 10}, text = tostring(v.x) , editable = true , reactive = true, cursor_visible=false}
+
+             input_h = Text { name="input_h", font= "DejaVu Sans 25px", color = "FFFFFF", 
+	     position = {10, 10}, text = "", editable = true , reactive = true, cursor_visible=false}
+	end 
+
+	gw:add(Text{name= "horiz", text = "HORIZ.", font= "DejaVu Sans 25px",
+     	color = "FFFFFF", position ={40, 90}, editable = false , reactive = false})
+
+	input_box_h = create_tiny_input_box(input_h)
+        input_box_h.position = {140, 90}
+        gw:add(input_box_h)
+
+	gw:add(Text{name= "vert", text = "VERT.", font= "DejaVu Sans 25px",
+     	color = "FFFFFF", position ={350, 90}, editable = false ,
+     	reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}) 
+	
+	input_box_v = create_tiny_input_box(input_v)
+        input_box_v.position = {430, 90}
+        gw:add(input_box_v)
+
+	save_b, save_t  = factory.make_msgw_button_item( assets , "Apply")
+        save_b.position = {250, 150}
+	save_b.reactive = true 
+	save_b.name = "apply"
+
+        cancel_b, cancel_t= factory.make_msgw_button_item( assets ,"Cancel")
+        cancel_b.position = {40, 150}
+	cancel_b.reactive = true 
+	cancel_b.name = "cancel"
+	
+        delete_b, delete_t= factory.make_msgw_button_item( assets ,"Delete")
+        delete_b.position = {450, 150}
+	delete_b.reactive = true 
+	delete_b.name = "delete"
+
+        gw:add(cancel_b)
+        gw:add(save_b)
+        gw:add(delete_b)
+
+	create_on_key_down_f(save_b) 
+	create_on_key_down_f(cancel_b) 
+	create_on_key_down_f(delete_b) 
+
+	 function input_h:on_key_down(key)
+		if(key == keys.Return) then 
+		elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) or (key == keys.Right) then 
+			input_box_h.extra.on_focus_out()
+                        input_h.cursor_visible = false
+              		cancel_b.extra.on_focus_in()
+	                return true 
+                end
+	 end
+
+	 function input_v:on_key_down(key)
+		if(key == keys.Return) then 
+		elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) or (key == keys.Right) then 
+			input_box_v.extra.on_focus_out()
+                        input_v.cursor_visible = false
+			cancel_b.extra.on_focus_in()
+			return true
+		end 
+	 end
+	
+	 function cancel_b:on_button_down(x,y,button,num_clicks)
+		gw.children = {}
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+         end 
+
+         function cancel_t:on_button_down(x,y,button,num_clicks)
+		gw.children = {}
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+         end 
+
+	 function save_b:on_button_down(x,y,button,num_clicks)
+		if (input_h.text ~= "") then 
+		     v.y = tonumber(input_h.text) 
+		elseif (input_v.text ~= "") then 
+		     v.x = tonumber(input_v.text) 
+		end 
+		gw.children = {}
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+	 end 
+
+         function save_t:on_button_down(x,y,button,num_clicks)
+	        if (input_h.text ~= "") then 
+		     v.y = tonumber(input_h.text) 
+		elseif (input_v.text ~= "") then 
+		     v.x = tonumber(input_v.text) 
+		end 
+
+		gw.children = {}
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+	 end 
+
+	 function delete_b:on_button_down(x,y,button,num_clicks)
+		gw.children = {}
+		screen:remove(screen:find_child(v.name))
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+	 end 
+
+         function delete_t:on_button_down(x,y,button,num_clicks)
+		gw.children = {}
+		screen:remove(screen:find_child(v.name))
+		screen:remove(gw)
+                input_mode = S_SELECT
+	        screen:grab_key_focus(screen)
+	 end 
+         
+	input_mode = S_POPUP 
+	screen:add(gw)
+
+	if(guideline_type(v.name) == "h_guideline")then 
+            input_h.cursor_visible = true
+	    input_box_h.extra.on_focus_in()
+	    input_h:grab_key_focus()
+	else 
+            input_v.cursor_visible = true
+	    input_box_v.extra.on_focus_in()
+	    input_v:grab_key_focus()
+	end
+
+end 
+
+local function create_on_line_down_f(v)
+        function v:on_button_down(x,y,button,num_clicks)
+             dragging = {v, x - v.x, y - v.y }
+	     v.color = {50, 50,50,255}
+	     if(button == 3 or num_clicks >= 2) then
+		  guideline_inspector(v)
+                  return true
+             end 
+ 
+             return true
+        end
+
+        function v:on_button_up(x,y,button,num_clicks)
+	     if(dragging ~= nil) then 
+	          local actor , dx , dy = unpack( dragging )
+		  if(guideline_type(v.name) == "v_guideline") then 
+			v.x = x - dx
+		  elseif(guideline_type(v.name) == "h_guideline") then  
+			v.y = y - dy
+		  end 
+	          dragging = nil
+             end
+	     v.color = {100,255,25,255}
+             return true
+        end
+end 
+
+function editor.v_guideline()
+
+     v_guideline = v_guideline + 1 
+
+
+     local v_gl = Rectangle {
+		name="v_guideline"..tostring(v_guideline),
+		border_color={255,255,255,255},
+		border_color={255,255,255,255},
+		color={100,255,25,255},
+		size = {4, screen.h},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {screen.w/2, 0, 0}, 
+		opacity = 255,
+		reactive = true
+     }
+     create_on_line_down_f(v_gl)
+     screen:add(v_gl)
+end
+
+function editor.h_guideline()
+     
+     h_guideline = h_guideline + 1
+
+
+     local h_gl = Rectangle {
+		name="h_guideline"..tostring(h_guideline),
+		border_color={255,255,255,255},
+		border_color={255,255,255,255},
+		color={100,255,25,255},
+		size = {screen.w, 4},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {0, screen.h/2, 0}, 
+		opacity = 255,
+		reactive = true
+     }
+
+     create_on_line_down_f(h_gl)
+     screen:add(h_gl)
+end
 
 
 function editor.selected(obj, call_by_inspector)
@@ -239,7 +538,7 @@ function editor.the_image()
 	     cur_h = cur_h + dir_text.h + Y_PADDING
 
      	     for i, v in pairs(dir) do
-	          if (is_png_file(v) == true) then 
+	          if (is_img_file(v) == true) then 
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
 
                        text.position  = {cur_w, cur_h,0}
@@ -295,7 +594,7 @@ function editor.the_image()
 	     cur_w = 0
 	     cur_h = 0 
      	     for i, v in pairs(dir) do
-	          if (is_png_file(v) == true) then 
+	          if (is_img_file(v) == true) then 
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
 
                        text.position = {cur_w, cur_h,0}

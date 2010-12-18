@@ -54,6 +54,10 @@ mouse_state       = BUTTON_UP
 g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
 contents    	  = ""
 item_num 	  = 0
+h_guideline = 0
+v_guideline = 0
+
+
 
 shift 		  = false
 control 	  = false
@@ -61,11 +65,14 @@ control 	  = false
 undo_list 	  = {}
 redo_list 	  = {}
 
+
+
 -- localized string table
 
 strings = dofile( "localized:strings.lua" ) or {}
 function missing_localized_string( t , s )
-        rawset(t,s,s)
+	--print( "\t*** MISSING LOCALIZED STRING '"..s.."'" )
+        rawset(t,s,s) -- only warn once per string
         return s
 end
 
