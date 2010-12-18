@@ -71,6 +71,7 @@ local req_page = function(keywords, callback, since_id)
         end
     }
     req:send()
+    error_message.text = "Latest tweet, waiting for more..."
 end
 
 
@@ -127,7 +128,7 @@ TweetStream = Class(function(t,parent,...)
     local num_tweets_on_screen  = 0
     local index_of_bottom_tweet = 0
     
-    local error_message = Text{text="",font=Show_Time_Font,color=Show_Time_Color,x=20}
+    local error_message = Text{text="",font="Helvetica 22px",color=Show_Time_Color,x=20}
     
     group:add(highlight,error_message)
     
@@ -155,8 +156,10 @@ TweetStream = Class(function(t,parent,...)
         group.y     =  group.y   +  (group.clip[4] - h)
         if crop_avatar then
             group.clip  = {0,group.clip[2],w,h}
+            error_message.x = 20
         else
             group.clip  = {110,group.clip[2],w,h}
+            error_message.x = 120
         end
         error_message.y = group.clip[4]-35
         if #tweets ~= 0 then
@@ -410,10 +413,10 @@ TweetStream = Class(function(t,parent,...)
                     end
 
                 else
+                    print("next_tweeted unsuccessfully")
                     at_bottom = true
                     manual_scroll = nil
                     error_message.opacity=255
-                    print("1")
                     return
                 end
                 
@@ -430,9 +433,9 @@ TweetStream = Class(function(t,parent,...)
                 targ_hl_h = tweets[sel_i + 1].h +(2*hl_border-tweet_gap)
                 targ_hl_y = group.clip[4]-tweets[sel_i + 1].h - hl_border
             else
+            print("me")
                 manual_scroll = nil
                 error_message.opacity=255
-                print("2")
                 return
             end
         elseif sel_i + 1 == index_of_bottom_tweet and
@@ -591,7 +594,7 @@ TweetStream = Class(function(t,parent,...)
             end
             retry:start()
             print("waiting 30 seconds, before checking twitter again")
-            error_message.text = "Viewing newest tweets, waiting for more..."
+            error_message.text = "Latest tweet, waiting for more..."
             return
         end
         error_message.text = ""
