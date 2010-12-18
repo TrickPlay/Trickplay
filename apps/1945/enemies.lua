@@ -1369,6 +1369,9 @@ enemies =
 		
 		remove = function(self)
             self.group:unparent()
+            if self.is_boss then
+				levels[state.curr_level]:level_complete()
+			end
         end,
 		setup = function(self)
             state.counters[1].zepp.spawned = state.counters[1].zepp.spawned + 1
@@ -1428,8 +1431,7 @@ enemies =
                         z:rotate_guns_and_fire(secs)
                     end
                     --check if it left the screen
-                    if z.group.y >= screen_h +
-                        z.image.h then
+                    if z.group.y >= screen_h  then
                         z.group:unparent()
                         remove_from_render_list(z)
                         
@@ -1892,9 +1894,7 @@ enemies =
                 --if dam.y > 0 then dam.y =dam.y -50 end
 				return
 			end
-			if self.is_boss then
-				levels[state.curr_level]:level_complete()
-			end
+			
             
             state.counters[1].zepp.killed = state.counters[1].zepp.killed + 1
             

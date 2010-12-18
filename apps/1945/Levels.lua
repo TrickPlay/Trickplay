@@ -278,7 +278,7 @@ levels =
 	--level 1
 	{
 		level_dist     = 3000, --px
-		time           = 0,
+		time           = 200,
 		launch_index   = 1,
 		bg             = lvlbg[1],
         offset         = {},
@@ -290,7 +290,7 @@ levels =
             if self.num_bosses == 0 then
                 remove_from_render_list( self)
                 --add_to_render_list( lvlcomplete )
-                
+                print("me")
                 
                 --state.curr_mode = "LEVEL_END"
                 level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
