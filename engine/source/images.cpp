@@ -467,7 +467,7 @@ Images::DecoderList Images::get_decoders( const char * _hint )
 
 TPImage * Images::decode_image( gpointer data, gsize size, const char * content_type )
 {
-    PROFILER( "Images::decode_image/data" );
+    PROFILER( "Images::decode_image/data" , PROFILER_INTERNAL_CALLS );
 
     TPImage image;
     memset( &image, 0, sizeof( TPImage ) );
@@ -513,7 +513,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
 TPImage * Images::decode_image( const char * filename )
 {
-    PROFILER( "Images::decode_image/file" );
+    PROFILER( "Images::decode_image/file" , PROFILER_INTERNAL_CALLS );
 
     if ( ! g_file_test( filename, G_FILE_TEST_IS_REGULAR ) )
     {
@@ -587,7 +587,7 @@ void Images::destroy_image( TPImage * image )
 
 void Images::load_texture( ClutterTexture * texture, TPImage * image )
 {
-    PROFILER( "Images::load_texture/clutter" );
+    PROFILER( "Images::load_texture/clutter" , PROFILER_INTERNAL_CALLS );
 
     g_assert( texture );
     g_assert( image );

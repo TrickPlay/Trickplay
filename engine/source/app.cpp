@@ -684,7 +684,7 @@ int App::run( const StringSet & allowed_names )
 {
     Util::GTimer t;
 
-    PROFILER( "App::run" );
+    PROFILER( "App::run" , PROFILER_INTERNAL_CALLS );
 
     int result = TP_RUN_OK;
 

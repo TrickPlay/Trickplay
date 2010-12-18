@@ -1097,7 +1097,7 @@ String TPContext::make_fake_app()
 
 int TPContext::load_app( App ** app )
 {
-    PROFILER( "TPContext::load_app" );
+    PROFILER( "TPContext::load_app" , PROFILER_INTERNAL_CALLS );
 
     String app_path;
 
@@ -2007,7 +2007,7 @@ ControllerList * TPContext::get_controller_list()
 
 Image * TPContext::load_icon( const gchar * path )
 {
-    PROFILER( "TPContext::load_icon" );
+    PROFILER( "TPContext::load_icon" , PROFILER_INTERNAL_CALLS );
 
     FreeLater free_later;
 
@@ -2084,7 +2084,7 @@ Image * TPContext::load_icon( const gchar * path )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
-                PROFILER( "TPContext::load_icon(load raw)" );
+                PROFILER( "TPContext::load_icon(load raw)" , PROFILER_INTERNAL_CALLS );
 
                 gchar * raw_contents = NULL;
 
@@ -2118,7 +2118,7 @@ Image * TPContext::load_icon( const gchar * path )
         // raw icon file. Any failure below this point is simply a failure to cache,
         // and even though it will affect performance, it is not considered critical.
 
-        PROFILER( "TPContext::load_icon(cache)" );
+        PROFILER( "TPContext::load_icon(cache)" , PROFILER_INTERNAL_CALLS );
 
         // Make sure the icon cache directory exists
 
