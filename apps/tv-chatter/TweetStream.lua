@@ -71,7 +71,7 @@ local req_page = function(keywords, callback, since_id)
         end
     }
     req:send()
-    error_message.text = "Latest tweet, waiting for more..."
+--    error_message.text = "Latest tweet, waiting for more..."
 end
 
 
