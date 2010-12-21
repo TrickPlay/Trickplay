@@ -1,8 +1,8 @@
 app=
 {
     id          = "com.trickplay.TV-Chatter",
-    release     = "2",
-    version     = ".6",
+    release     = "1",
+    version     = ".1",
     name        = "TV Chatter",
     author      = "Francesco Alex Indaco",
     copyright   = "© Trickplay Inc."
