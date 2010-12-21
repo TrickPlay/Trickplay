@@ -169,6 +169,7 @@ TweetStream = Class(function(t,parent,...)
             for i = btm_tweet,top_tweet,-1 do
                 tweets[i].text.w = w- tweets[i].text.x- clip_side_gutter
                 tweets[i].time.x = w-clip_side_gutter
+		tweets[i].username.w = (tweets[i].time.x-tweets[i].time.w)-tweets[i].username.x
                 tweets[i].h = tweets[i].text.y + tweets[i].text.h + tweet_gap
                 tweets[i].group.y = sum - tweets[i].h
                 sum = tweets[i].group.y
