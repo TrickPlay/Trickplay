@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.foos",
-    release     = "3",
+    release     = "4",
     version     = "0.6",
     name        = "Fo'Os",
     author      = "Trickplay, Jr.",
