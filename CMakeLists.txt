@@ -56,7 +56,9 @@ if(NOT GIT_CURRENT_TAG)
 	SET(GIT_CURRENT_TAG "no tag")
 endif (NOT GIT_CURRENT_TAG)
 
-message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION} - GIT REVISION ${GIT_CURRENT_REVISION} (${GIT_CURRENT_TAG})" )
+set(GIT_VERSION "${GIT_CURRENT_REVISION} (${GIT_CURRENT_TAG})")
+
+message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION} - GIT REVISION ${GIT_VERSION}" )
 
 #------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build
