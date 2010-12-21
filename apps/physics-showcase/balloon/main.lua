@@ -297,6 +297,7 @@ end
 local OK_KEY    = keys.Return
 local LEFT_KEY  = keys.Left
 local RIGHT_KEY = keys.Right
+local BACK_KEY  = keys.BACK
 
 local W = 0.8
 
@@ -320,6 +321,12 @@ function screen:on_key_down( key )
             wind = -W
         end
         physics.gravity = { wind , G }
+    elseif key == BACK_KEY then
+        idle.on_idle = nil
+        screen.on_key_down = nil
+        screen:clear()
+        collectgarbage("collect")
+        dofile("main.lua")
     end
 end
 

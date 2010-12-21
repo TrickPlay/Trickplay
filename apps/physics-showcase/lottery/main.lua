@@ -96,7 +96,9 @@ local step_functions = {}
 
 -- Y part of gravity
 
-local G = physics.gravity[ 2 ]
+local G = 10
+
+physics.gravity = { 0 , G }
 
 -------------------------------------------------------------------------------
 -- Now, the fan
@@ -836,5 +838,18 @@ function idle:on_idle( seconds )
     
    --physics:draw_debug()
     
+end
+
+local BACK_KEY = keys.BACK
+
+function screen:on_key_down( key )
+
+    if key == BACK_KEY then
+        idle.on_idle = nil
+        screen.on_key_down = nil
+        screen:clear()
+        collectgarbage("collect")
+        dofile("main.lua")
+    end
 end
 
