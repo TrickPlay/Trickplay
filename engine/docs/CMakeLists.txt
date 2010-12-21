@@ -2,20 +2,6 @@ cmake_minimum_required( VERSION 2.6 )
 
 if (NATURAL_DOCS)
 
-    execute_process(
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND git log -1 --pretty=format:%h
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-	OUTPUT_VARIABLE GIT_CURRENT_REVISION
-    )
-
-    execute_process(
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND git tag --contains ${GIT_CURRENT_REVISION}
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-	OUTPUT_VARIABLE GIT_CURRENT_TAG
-    )
-
     add_custom_target(
         docs
         ALL
