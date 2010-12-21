@@ -1,5 +1,6 @@
 [[
 #include "util.h"
+#include "versions.h"
 ]]
 
 /*
@@ -36,5 +37,49 @@ global trickplay [[void*]]
 #else
             production = false;
 #endif
+        ]];
+
+    /*
+        Property: profiling
+
+        Whether this release was built with profiling enabled.
+    */
+
+    readonly bool profiling
+        [[
+#ifdef TP_PROFILING
+            profiling = true;
+#else
+            profiling = false;
+#endif
+        ]];
+
+    /*
+        Property: libraries
+
+        Returns a table containing the version strings of most libraries TrickPlay uses.
+    */
+
+    readonly table libraries
+        [[
+            lua_newtable( L );
+            int t = lua_gettop( L );
+
+            VersionMap v = get_versions();
+
+            for ( VersionMap::iterator it = v.begin(); it != v.end(); ++it )
+            {
+                lua_newtable( L );
+                int vt = lua_gettop( L );
+                int i = 1;
+
+                for ( StringVector::iterator vit = it->second.begin(); vit != it->second.end(); ++vit , ++i )
+                {
+                    lua_pushstring( L , vit->c_str() );
+                    lua_rawseti( L , vt , i );
+                }
+
+                lua_setfield( L , t , it->first.c_str() );
+            }
         ]];
 }

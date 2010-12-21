@@ -30,7 +30,10 @@ void Timeline_paused( ClutterTimeline * timeline , gpointer )
 
 void Timeline_completed( ClutterTimeline * timeline , gpointer )
 {
-    g_object_unref( timeline );
+    if ( ! clutter_timeline_get_loop( timeline ) )
+    {
+        g_object_unref( timeline );
+    }
 }
 
 ]]

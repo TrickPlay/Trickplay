@@ -216,9 +216,12 @@ void ClutterUtil::initialize_actor( lua_State * L, ClutterActor * actor, const c
     // Metatables are static, so we don't need to free it
     g_object_set_data( G_OBJECT( actor ), "tp-metatable", ( gpointer )metatable );
 
+#if 0
     g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
     g_signal_connect( G_OBJECT(actor), "show", (GCallback)actor_on_show, actor );
     g_signal_connect( G_OBJECT(actor), "hide", (GCallback)actor_on_hide, actor );
+#endif
+
 }
 
 //.............................................................................
