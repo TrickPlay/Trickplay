@@ -52,6 +52,10 @@ execute_process(
 	OUTPUT_VARIABLE GIT_CURRENT_TAG
 )
 
+if(NOT GIT_CURRENT_TAG)
+	SET(GIT_CURRENT_TAG "no tag")
+endif (NOT GIT_CURRENT_TAG)
+
 message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION} - GIT REVISION ${GIT_CURRENT_REVISION} (${GIT_CURRENT_TAG})" )
 
 #------------------------------------------------------------------------------
