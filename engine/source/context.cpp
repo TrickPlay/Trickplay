@@ -670,6 +670,26 @@ gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer co
 #endif
 
 //-----------------------------------------------------------------------------
+// When profiling is enabled, these signal handlers let us know when painting
+// the stage begins and ends.
+
+#ifdef TP_PROFILING
+
+static gpointer paint_profiler = 0;
+
+static void before_paint( ClutterActor * actor , gpointer )
+{
+    paint_profiler = PROFILE_START( "PAINT" , PROFILER_INTERNAL_CALLS );
+}
+
+static void after_paint( ClutterActor * actor , gpointer )
+{
+    PROFILE_STOP( paint_profiler );
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 int TPContext::run()
 {
@@ -830,6 +850,13 @@ int TPContext::run()
     color.alpha = 0;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+
+#ifdef TP_PROFILING
+
+    g_signal_connect( stage , "paint" , ( GCallback ) before_paint , 0 );
+    g_signal_connect_after( stage , "paint" , ( GCallback ) after_paint , 0 );
+
+#endif
 
 #ifndef TP_PRODUCTION
 
@@ -1097,7 +1124,7 @@ String TPContext::make_fake_app()
 
 int TPContext::load_app( App ** app )
 {
-    PROFILER( "TPContext::load_app" );
+    PROFILER( "TPContext::load_app" , PROFILER_INTERNAL_CALLS );
 
     String app_path;
 
@@ -2007,7 +2034,7 @@ ControllerList * TPContext::get_controller_list()
 
 Image * TPContext::load_icon( const gchar * path )
 {
-    PROFILER( "TPContext::load_icon" );
+    PROFILER( "TPContext::load_icon" , PROFILER_INTERNAL_CALLS );
 
     FreeLater free_later;
 
@@ -2084,7 +2111,7 @@ Image * TPContext::load_icon( const gchar * path )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
-                PROFILER( "TPContext::load_icon(load raw)" );
+                PROFILER( "TPContext::load_icon(load raw)" , PROFILER_INTERNAL_CALLS );
 
                 gchar * raw_contents = NULL;
 
@@ -2118,7 +2145,7 @@ Image * TPContext::load_icon( const gchar * path )
         // raw icon file. Any failure below this point is simply a failure to cache,
         // and even though it will affect performance, it is not considered critical.
 
-        PROFILER( "TPContext::load_icon(cache)" );
+        PROFILER( "TPContext::load_icon(cache)" , PROFILER_INTERNAL_CALLS );
 
         // Make sure the icon cache directory exists
 
