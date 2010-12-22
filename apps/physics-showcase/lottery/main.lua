@@ -106,10 +106,10 @@ physics.gravity = { 0 , G }
 -- the balls that are in contact with it and applies a force to all of them
 -- every step.
 
-local FAN_POSITION = { 454 * 2 , 428 * 2 }
-local FAN_SIZE     = { 154 * 2 , 40 }
+local FAN_POSITION = { 504 * 2 , 358 * 2 }
+local FAN_SIZE     = { 54 * 2 , 90 * 2 }
 
-local FAN_FORCE    = 25.06 -- in Gs
+local FAN_FORCE    = 5 -- in Gs
 
 local fan_speed    = 0
 
