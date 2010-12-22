@@ -301,6 +301,15 @@ local BACK_KEY  = keys.BACK
 
 local W = 0.8
 
+local random_key_timer = Timer { interval = 5000 }
+local inject_keys = { LEFT_KEY , RIGHT_KEY , OK_KEY }
+function random_key_timer:on_timer()
+    local choose_key = math.random(#inject_keys)
+    screen:on_key_down(inject_keys[choose_key])
+end
+
+random_key_timer:start()
+
 function screen:on_key_down( key )
 
     local wind = physics.gravity[ 1 ]
@@ -322,6 +331,7 @@ function screen:on_key_down( key )
         end
         physics.gravity = { wind , G }
     elseif key == BACK_KEY then
+        random_key_timer:stop()
         idle.on_idle = nil
         screen.on_key_down = nil
         screen:clear()
@@ -330,10 +340,4 @@ function screen:on_key_down( key )
     end
 end
 
-random_key_timer = Timer { interval = 5000 }
-local inject_keys = { keys.Left, keys.Right, keys.OK }
-function random_key_timer:on_timer()
-    local choose_key = math.random(#inject_keys)
-    screen:on_key_down(inject_keys[choose_key])
-end
-random_key_timer:start()
+
