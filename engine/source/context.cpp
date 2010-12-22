@@ -840,7 +840,19 @@ int TPContext::run()
 
     ClutterActor * stage = clutter_stage_get_default();
 
-    clutter_actor_set_size( stage, get_int( TP_SCREEN_WIDTH ), get_int( TP_SCREEN_HEIGHT ) );
+    int display_width = get_int( TP_SCREEN_WIDTH );
+    int display_height = get_int( TP_SCREEN_HEIGHT );
+
+    if ( display_width <= 0 || display_height <= 0 )
+    {
+        clutter_stage_set_fullscreen( CLUTTER_STAGE( stage ) , TRUE );
+    }
+    else
+    {
+        clutter_actor_set_size( stage , display_width , display_height );
+        clutter_stage_set_user_resizable( CLUTTER_STAGE( stage ) , TRUE );
+    }
+
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
 
     ClutterColor color;
