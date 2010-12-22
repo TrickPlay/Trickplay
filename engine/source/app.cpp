@@ -679,6 +679,29 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 #endif
 
 //-----------------------------------------------------------------------------
+// Signal handler that tells us when the stage changes dimensions, so we can
+// update the screen's scale.
+
+static void stage_allocation_notify( GObject * , GParamSpec * , gpointer screen_gid )
+{
+    ClutterActor * screen = clutter_get_actor_by_gid( GPOINTER_TO_INT( screen_gid ) );
+
+    if ( screen )
+    {
+        ClutterActor * stage = clutter_stage_get_default();
+
+        gfloat width;
+        gfloat height;
+
+        clutter_actor_get_size( stage , & width , & height );
+
+        clutter_actor_set_scale( screen, width / 1920, height / 1080 );
+
+        g_debug( "DISPLAY SIZE CHANGED TO %1.0fx%1.0f" , width , height );
+    }
+}
+
+//-----------------------------------------------------------------------------
 
 int App::run( const StringSet & allowed_names )
 {
@@ -702,6 +725,8 @@ int App::run( const StringSet & allowed_names )
     clutter_actor_set_name( screen , "screen" );
 
     screen_gid = clutter_actor_get_gid( screen );
+
+    g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
 
     secure_lua_state( allowed_names );
 
