@@ -2236,7 +2236,7 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
 
     g_log_set_default_handler( TPContext::log_handler, NULL );
 
-    g_info( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
+    g_info( "%d.%d.%d [%s]", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION , TP_GIT_VERSION );
 }
 
 //-----------------------------------------------------------------------------
