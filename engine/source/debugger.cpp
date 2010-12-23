@@ -185,7 +185,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         case LUA_HOOKRET:
             break;
 
-        case LUA_HOOKTAILRET:
+        case LUA_HOOKTAILCALL:
             break;
 
         case LUA_HOOKLINE:
