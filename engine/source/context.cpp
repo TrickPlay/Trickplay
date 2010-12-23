@@ -898,9 +898,16 @@ int TPContext::run()
     //.........................................................................
     // Create the default media player. This may come back NULL.
 
-    g_info( "CREATING MEDIA PLAYER..." );
+    if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
+    {
+        g_info( "CREATING MEDIA PLAYER..." );
 
-    media_player = MediaPlayer::make( media_player_constructor );
+        media_player = MediaPlayer::make( media_player_constructor );
+    }
+    else
+    {
+        g_info( "MEDIA PLAYER IS DISABLED..." );
+    }
 
     //.........................................................................
     // Load the app
@@ -1674,6 +1681,7 @@ void TPContext::load_external_configuration()
         TP_LIRC_REPEAT,
         TP_APP_PUSH_ENABLED,
         TP_APP_PUSH_PORT,
+        TP_MEDIAPLAYER_ENABLED,
 
         NULL
     };
@@ -2031,7 +2039,14 @@ MediaPlayer * TPContext::get_default_media_player()
 
 MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delegate )
 {
-    return MediaPlayer::make( media_player_constructor, delegate );
+    if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
+    {
+        return MediaPlayer::make( media_player_constructor, delegate );
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
