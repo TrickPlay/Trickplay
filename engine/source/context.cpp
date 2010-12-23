@@ -1583,7 +1583,7 @@ void TPContext::load_external_configuration()
 
     // Now open the Lua state
 
-    lua_State * L = lua_open();
+    lua_State * L = luaL_newstate();
 
     const luaL_Reg lualibs[] =
     {
@@ -1608,9 +1608,8 @@ void TPContext::load_external_configuration()
 
     for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
     {
-        lua_pushcfunction( L, lib->func );
-        lua_pushstring( L, lib->name );
-        lua_call( L, 1, 0 );
+        luaL_requiref(L, lib->name, lib->func, 1);
+        lua_pop(L, 1);  /* remove lib */
     }
 
     //.....................................................................

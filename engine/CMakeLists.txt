@@ -334,11 +334,11 @@ set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
 # Lua has to be built as C++ in order to get exceptions. Since most distributions
 # do not already do that, we include Lua directly into our engine.
 
-set( LUA_VERSION 5.1.4 )
+set( LUA_VERSION 5.2.0-alpha )
 
 set( LUA_ROOT ${PROJECT_SOURCE_DIR}/engine/lua/lua-${LUA_VERSION} )
 
-add_definitions( -DLUA_USE_LINUX=1 )
+add_definitions( -DLUA_USE_LINUX=1 -DLUA_COMPAT_MODULE=1 )
 
 include_directories( ${LUA_ROOT}/src ) 
 
@@ -373,6 +373,11 @@ set( LUA_SOURCE_FILES
     ${LUA_ROOT}/src/loadlib.c
     ${LUA_ROOT}/src/liolib.c
 #    ${LUA_ROOT}/src/linit.c
+
+    ${LUA_ROOT}/src/lbitlib.c
+    ${LUA_ROOT}/src/lcorolib.c
+    ${LUA_ROOT}/src/lctype.c
+
 )
 
 set_source_files_properties(

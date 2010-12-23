@@ -174,7 +174,7 @@ JsonNode * JSON::to_json( lua_State * L, int index )
 
             // If it has a length, we treat it as an array
 
-            if ( lua_objlen( L, index ) > 0 )
+            if ( lua_rawlen( L, index ) > 0 )
             {
                 JsonArray * array = json_array_new();
 

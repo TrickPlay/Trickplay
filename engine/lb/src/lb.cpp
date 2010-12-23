@@ -727,7 +727,7 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 {
     LSG;
 
-    lua_pushvalue( L , LUA_GLOBALSINDEX );
+    lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
 
     // There is no metatable on the globals table, so we create it and plug in
     // our own index function.
