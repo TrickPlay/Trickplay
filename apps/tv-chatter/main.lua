@@ -1,3 +1,5 @@
+print=function() end
+
 --store globals of the screens height and width
 screen_w = screen.w
 screen_h = screen.h
