@@ -826,9 +826,13 @@ end
 
 screen:show()
 
+local step = 1 / 60
+
+idle.limit = step
+
 function idle:on_idle( seconds )
 
-    physics:step( seconds )
+    physics:step( math.min( seconds , step ) )
     
     for i = 1 , # step_functions do
     
