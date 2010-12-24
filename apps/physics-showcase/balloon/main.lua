@@ -280,11 +280,13 @@ screen:show()
 
 ------------------------------------------------------------------------------
 
-idle.limit = 1/60
+local step = 1 / 60
+
+idle.limit = step
 
 function idle:on_idle( seconds )
 
-    physics:step( seconds )
+    physics:step( math.min( seconds , step ) )
     
     --physics:draw_debug()
     
