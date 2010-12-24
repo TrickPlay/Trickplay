@@ -1,3 +1,5 @@
+mediaplayer:reset()
+
 local OEM = "trickplay"
 
 dofile( "globals" )
