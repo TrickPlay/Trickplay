@@ -430,6 +430,69 @@ int TPContext::console_command_handler( const char * command, const char * param
             }
         }
     }
+    else if ( ! strcmp( command , "ss" ) )
+    {
+        // Screenshot
+
+        const gchar * home = g_getenv( "HOME" );
+
+        if ( ! home )
+        {
+            home = g_get_home_dir();
+
+            if ( ! home )
+            {
+                home = g_get_tmp_dir();
+            }
+        }
+
+        if ( ! home )
+        {
+            g_warning( "FAILED TO FIND HOME OR TEMP DIR" );
+        }
+        else
+        {
+            Image * image = Image::screenshot();
+
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String checksum( image->checksum() );
+
+                GTimeVal t;
+
+                g_get_current_time( & t );
+
+                gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+
+                gchar * fn = g_build_filename( home , ts , NULL );
+
+                g_free( ts );
+
+                if ( ! image->write_to_png( fn ) )
+                {
+                    g_warning( "FAILED TO WRITE SCREENSHOT TO %s" , fn );
+                }
+                else
+                {
+                    g_info( "%s" , fn );
+                    g_info( "%s" , checksum.c_str() );
+                }
+
+                g_free( fn );
+
+                delete image;
+            }
+
+
+        }
+
+
+
+    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
