@@ -31,11 +31,6 @@ void destroy_cairo_t(gpointer t)
     cairo_destroy((cairo_t*)t);    
 }
 
-void destroy_image(void * i)
-{
-	delete ( Image * ) i;
-}
-
 double degrees_to_radians( double degrees )
 {
 	return degrees * ( G_PI / 180.0 );
@@ -433,27 +428,18 @@ class Canvas [[ClutterActor*]] actor
 				
 				if ( image )
 				{
-					result = true;
+					cairo_surface_t * surface = image->cairo_surface();
 					
-					image->convert_to_cairo_argb32();
-					
-					cairo_surface_t * surface = cairo_image_surface_create_for_data( 
-						(unsigned char *) image->pixels(), 
-						CAIRO_FORMAT_ARGB32, 
-						image->width(), 
-						image->height(), 
-						image->pitch() );
+					if ( surface )
+					{
+	                    result = true;
 
-					// We attach the image to the cairo surface so that it will be
-					// destroyed when the surface is destroyed.
-											
-					static cairo_user_data_key_t image_key;
+	                    cairo_set_source_surface( cr, surface, x, y );
+
+	                    cairo_surface_destroy( surface );
+					}
 					
-					cairo_surface_set_user_data( surface, & image_key, image, destroy_image );
-					
-					cairo_set_source_surface( cr, surface, x, y );
-					
-					cairo_surface_destroy( surface );					
+					delete image;
 				}
 			}
 		]];
