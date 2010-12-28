@@ -6,6 +6,7 @@ module globals;
 #include "app.h"
 #include "context.h"
 #include "actions.h"
+#include "images.h"
 
 struct DoLater
 {
@@ -996,5 +997,21 @@ globals
 	bool checkudatatype( udata u , string type )
         [[
             result = lb_check_udata_type( L , u , type , false );
+        ]];
+
+	string screensum()
+        [[
+            Image * image = Image::screenshot();
+
+            String checksum;
+
+            if ( image )
+            {
+                checksum = image->checksum();
+
+                delete image;
+	        }
+
+            result = checksum.c_str();
         ]];
 }
