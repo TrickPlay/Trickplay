@@ -294,7 +294,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
     // In the EGL backend, there is nothing pulling the events from
     // the event queue, so we force that by adding an idle source
 
-    g_idle_add_full( G_PRIORITY_HIGH_IDLE, event_pump, NULL, NULL );
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
 
 #endif
 }
@@ -321,7 +321,7 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
     // In the EGL backend, there is nothing pulling the events from
     // the event queue, so we force that by adding an idle source
 
-    g_idle_add_full( G_PRIORITY_HIGH_IDLE, event_pump, NULL, NULL );
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
 
 #endif
 }

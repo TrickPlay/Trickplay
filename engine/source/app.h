@@ -286,6 +286,11 @@ private:
     static int lua_panic_handler( lua_State * L );
 
     //.........................................................................
+    // A handler for changes to the stage allocation (size)
+
+    static void stage_allocation_notify( gpointer , gpointer , gpointer screen_gid );
+
+    //.........................................................................
 
     TPContext       *       context;
     Metadata                metadata;
@@ -298,6 +303,7 @@ private:
     Network::CookieJar   *  cookie_jar;
     guint32                 screen_gid;
     LaunchInfo              launch;
+    gulong                  stage_allocation_handler;
 
 #ifndef TP_PRODUCTION
 

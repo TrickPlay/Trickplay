@@ -599,7 +599,8 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
     event_group( new EventGroup() ),
     cookie_jar( NULL ),
     screen_gid( 0 ),
-    launch( _launch )
+    launch( _launch ),
+    stage_allocation_handler( 0 )
 
 #ifndef TP_PRODUCTION
 
@@ -683,7 +684,7 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 // Signal handler that tells us when the stage changes dimensions, so we can
 // update the screen's scale.
 
-static void stage_allocation_notify( GObject * , GParamSpec * , gpointer screen_gid )
+void App::stage_allocation_notify( gpointer , gpointer , gpointer screen_gid )
 {
     ClutterActor * screen = clutter_get_actor_by_gid( GPOINTER_TO_INT( screen_gid ) );
 
@@ -727,7 +728,7 @@ int App::run( const StringSet & allowed_names )
 
     screen_gid = clutter_actor_get_gid( screen );
 
-    g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
+    stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
 
     secure_lua_state( allowed_names );
 
@@ -865,6 +866,11 @@ App::~App()
     // Release the event group
 
     event_group->unref();
+
+    if ( stage_allocation_handler )
+    {
+        g_signal_handler_disconnect( clutter_stage_get_default() , stage_allocation_handler );
+    }
 }
 
 //-----------------------------------------------------------------------------
