@@ -2,6 +2,7 @@ module timer;
 
 [[
 #include "glib.h"
+#include "common.h"
 
 /*
     You can create a timer in two ways:
