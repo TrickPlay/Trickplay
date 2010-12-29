@@ -6,6 +6,7 @@ module globals;
 #include "app.h"
 #include "context.h"
 #include "actions.h"
+#include "images.h"
 
 struct DoLater
 {
@@ -24,7 +25,7 @@ struct DoLater
 		dl->function_ref = function_ref;
 		dl->args_table_ref = args_table_ref;
 		
-		g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy ); 
+		g_idle_add_full( TRICKPLAY_PRIORITY , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
 	}  
 	
 	static gboolean do_it( DoLater * self )
@@ -996,5 +997,21 @@ globals
 	bool checkudatatype( udata u , string type )
         [[
             result = lb_check_udata_type( L , u , type , false );
+        ]];
+
+	string screensum()
+        [[
+            Image * image = Image::screenshot();
+
+            String checksum;
+
+            if ( image )
+            {
+                checksum = image->checksum();
+
+                delete image;
+	        }
+
+            result = checksum.c_str();
         ]];
 }

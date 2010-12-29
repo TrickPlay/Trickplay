@@ -3,6 +3,8 @@
 #include <fstream>
 #include <algorithm>
 
+#include "clutter/clutter.h"
+
 #include "common.h"
 #include "images.h"
 #include "profiler.h"
@@ -181,6 +183,46 @@ Image * Image::decode( const gchar * filename )
 
 //-----------------------------------------------------------------------------
 
+Image * Image::screenshot()
+{
+    TPImage image;
+
+    ClutterActor * stage = clutter_stage_get_default();
+
+    gfloat width;
+    gfloat height;
+
+    clutter_actor_get_size( stage , & width , & height );
+
+    image.pixels = clutter_stage_read_pixels( CLUTTER_STAGE( stage ) , 0 , 0 , width , height );
+
+    if ( ! image.pixels )
+    {
+        return 0;
+    }
+
+    // The alpha component of the stage is meaningless, so we set it
+    // to 255 for every pixel.
+
+    guchar * p = ( guchar * ) image.pixels + 3;
+
+    for ( int i = 0; i < width * height ; ++i , p += 4  )
+    {
+        *p = 255;
+    }
+
+    image.width = width;
+    image.height = height;
+    image.depth = 4;
+    image.pitch = width * 4;
+    image.bgr = 0;
+    image.free_pixels = g_free;
+
+    return Image::make( image );
+}
+
+//-----------------------------------------------------------------------------
+
 Image::Image()
 {
     g_assert( false );
@@ -211,7 +253,7 @@ Image::~Image()
 
 //-----------------------------------------------------------------------------
 
-void Image::convert_to_cairo_argb32()
+Image * Image::convert_to_cairo_argb32() const
 {
     TPImage * result = g_slice_new0( TPImage );
 
@@ -225,13 +267,13 @@ void Image::convert_to_cairo_argb32()
 
     guint8 * dest_pixel = ( guint8 * ) result->pixels;
 
-    guint8 * source_pixel;
+    const guint8 * source_pixel;
 
     double mult;
 
     for ( unsigned int r = 0; r < image->height; ++r )
     {
-        source_pixel = ( ( guint8 * ) image->pixels ) + ( image->pitch * r );
+        source_pixel = ( ( const guint8 * ) image->pixels ) + ( image->pitch * r );
 
         for ( unsigned int c = 0; c < image->width; ++c )
         {
@@ -272,9 +314,87 @@ void Image::convert_to_cairo_argb32()
         }
     }
 
-    Images::destroy_image( image );
+    return new Image( result );
+}
 
-    image = result;
+//-----------------------------------------------------------------------------
+
+String Image::checksum() const
+{
+    GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 );
+
+    guchar * source;
+
+    for ( unsigned int r = 0; r < image->height; ++r )
+    {
+        source = ( ( guchar * ) image->pixels ) + ( image->pitch * r );
+
+        g_checksum_update( ck , source , image->width * image->depth );
+    }
+
+    String result( g_checksum_get_string( ck ) );
+
+    g_checksum_free( ck );
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+static void surface_destroy_image( void * image )
+{
+    delete ( Image * ) image;
+}
+
+//-----------------------------------------------------------------------------
+
+cairo_surface_t * Image::cairo_surface() const
+{
+    Image * cairo_image = convert_to_cairo_argb32();
+
+    if ( ! cairo_image )
+    {
+        return 0;
+    }
+
+    cairo_surface_t * surface = cairo_image_surface_create_for_data(
+        ( unsigned char * ) cairo_image->pixels(),
+        CAIRO_FORMAT_ARGB32,
+        cairo_image->width(),
+        cairo_image->height(),
+        cairo_image->pitch() );
+
+    if ( ! surface )
+    {
+        delete cairo_image;
+
+        return 0;
+    }
+
+    // We attach the image to the cairo surface so that it will be
+    // destroyed when the surface is destroyed.
+
+    static cairo_user_data_key_t image_key;
+
+    cairo_surface_set_user_data( surface , & image_key , cairo_image , surface_destroy_image );
+
+    return surface;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Image::write_to_png( const gchar * filename ) const
+{
+    bool result = false;
+
+    if ( cairo_surface_t * surface = this->cairo_surface() )
+    {
+        result = ( CAIRO_STATUS_SUCCESS == cairo_surface_write_to_png( surface , filename ) );
+
+        cairo_surface_destroy( surface );
+    }
+
+    return result;
 }
 
 

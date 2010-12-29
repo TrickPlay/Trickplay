@@ -2,6 +2,7 @@
 #define _TRICKPLAY_IMAGES_H
 
 #include "clutter/clutter.h"
+#include "cairo/cairo.h"
 #include "trickplay/image.h"
 #include "common.h"
 
@@ -24,7 +25,8 @@ public:
 
     static Image * decode( const gchar * filename );
 
-    void convert_to_cairo_argb32();
+    static Image * screenshot();
+
 
     ~Image();
 
@@ -37,6 +39,12 @@ public:
 
     inline guint size() const { return image->height * image->pitch; }
 
+    String checksum() const;
+
+    cairo_surface_t * cairo_surface() const;
+
+    bool write_to_png( const gchar * filename ) const;
+
 private:
 
     friend class Images;
@@ -46,6 +54,8 @@ private:
     Image( TPImage * );
 
     Image( const Image & );
+
+    Image * convert_to_cairo_argb32() const;
 
     TPImage * image;
 };
