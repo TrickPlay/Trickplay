@@ -1,4 +1,8 @@
+
 mediaplayer:reset()
+if mediaplayer.reset_viewport_geometry then
+    mediaplayer:reset_viewport_geometry()
+end
 
 local OEM = "trickplay"
 
