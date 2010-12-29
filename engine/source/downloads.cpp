@@ -214,7 +214,7 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
         {
             // Send a progress report to the main thread
 
-            g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, progress_callback, Progress::make( closure ), Progress::destroy );
+            g_idle_add_full( TRICKPLAY_PRIORITY, progress_callback, Progress::make( closure ), Progress::destroy );
 
             // Reset the timer
 

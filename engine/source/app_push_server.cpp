@@ -315,7 +315,7 @@ void AppPushServer::line_read( GObject * stream , GAsyncResult * result )
 
         gsize to_read = std::min( sizeof( state->input_buffer ) , size_t( state->next_file_size ) );
 
-        g_input_stream_read_async( G_INPUT_STREAM( stream ) , state->input_buffer , to_read , G_PRIORITY_DEFAULT , NULL , file_read , this );
+        g_input_stream_read_async( G_INPUT_STREAM( stream ) , state->input_buffer , to_read , TRICKPLAY_PRIORITY , NULL , file_read , this );
     }
     else
     {
@@ -604,7 +604,7 @@ void AppPushServer::file_read( GObject * stream , GAsyncResult * result )
 
         gsize to_read = std::min( sizeof( state->input_buffer ) , size_t( state->next_file_size ) );
 
-        g_input_stream_read_async( G_INPUT_STREAM( stream ) , state->input_buffer , to_read , G_PRIORITY_DEFAULT , NULL , file_read , this );
+        g_input_stream_read_async( G_INPUT_STREAM( stream ) , state->input_buffer , to_read , TRICKPLAY_PRIORITY , NULL , file_read , this );
     }
 }
 
