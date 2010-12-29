@@ -25,7 +25,7 @@ struct DoLater
 		dl->function_ref = function_ref;
 		dl->args_table_ref = args_table_ref;
 		
-		g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy ); 
+		g_idle_add_full( TRICKPLAY_PRIORITY , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
 	}  
 	
 	static gboolean do_it( DoLater * self )

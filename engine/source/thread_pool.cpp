@@ -130,7 +130,7 @@ gboolean ThreadPool::idle_function( gpointer _task )
 
 void ThreadPool::push_main_thread( Task * task )
 {
-    g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, idle_function, task, destroy_task );
+    g_idle_add_full( TRICKPLAY_PRIORITY, idle_function, task, destroy_task );
 }
 
 //.............................................................................
