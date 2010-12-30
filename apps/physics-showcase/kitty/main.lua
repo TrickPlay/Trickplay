@@ -25,6 +25,9 @@ function Sprite( image , columns , total , frame_time )
     
     function result.extra.set_sequence( s , t )
         assert( type( s ) == "table" )
+        if sequence == s then
+            return
+        end
         sequence = s
         index = 1
         if t then
@@ -91,6 +94,23 @@ end
 
 local kitty = Sprite( "kitty/assets/sprites.png" , 8 , 24 , 0.125 )
 
+kitty = physics:Body(
+    kitty ,
+    {
+        density = 100 ,
+        bounce = 0 ,
+        friction = 1 ,
+        fixed_rotation = true ,
+        linear_damping = 2,
+        filter = { group = -1 }
+    } )
+
+-------------------------------------------------------------------------------
+
+physics.gravity = { 0 , 0 }
+
+-------------------------------------------------------------------------------
+
 local SIT       = { 1 }
 local FREAK     = { 1 , 8 }
 local SCRATCH   = { 3 , 4 }
@@ -103,99 +123,85 @@ local RUN_NE    = { 19 , 20 }
 local RUN_SW    = { 21 , 22 }
 local RUN_SE    = { 23 , 24 }
 
-local SCREEN_W_3 = screen.w / 3
-local SCREEN_H_3 = screen.h / 3 
-
-local QUADRANTS =
-{
-    [1] = { 1 , 2 , 3 },
-    [2] = { 4 , 5 , 6 },
-    [3] = { 7 , 8 , 9 }
-}
-
-local DESTINATIONS =
-{
-    [1] = { { 3 , RUN_E } , { 9 , RUN_SE } , { 7 , RUN_S } },
-    [2] = { { 7 , RUN_SW} , { 9 , RUN_SE } },
-    [3] = { { 1 , RUN_W } , { 7 , RUN_SW } , { 9 , RUN_S } },
-    [4] = { { 3 , RUN_NE} , { 9 , RUN_SE } },
-    [5] = { { 1 , RUN_NW} , { 3 , RUN_NE } },
-    [6] = { { 1 , RUN_NW} , { 7 , RUN_SW } },
-    [7] = { { 1 , RUN_N } , { 3 , RUN_NE } , { 9 , RUN_E } },
-    [8] = { { 1 , RUN_NW} , { 3 , RUN_NE } },
-    [9] = { { 3 , RUN_N } , { 1 , RUN_NW } , { 7 , RUN_W } }
-}
-
 -------------------------------------------------------------------------------
+
+local push = Stopwatch()
+
+local PUSH_TIME    = 2000
+local PUSH_IMPULSE = 20
+
+local abs = math.abs
 
 local function move( seconds )
-end
 
--------------------------------------------------------------------------------
-
-local KITTY_SPEED = 2   -- Seconds for the kitty to get to its new location
-local MOVE_TIME = 4     -- How often the kitty chooses a new location
-
--------------------------------------------------------------------------------
-
-local function start_moving( )
-
-    local function get_quadrant()
-        local c = math.floor( kitty.x / SCREEN_W_3 ) + 1 
-        local r = math.floor( kitty.y / SCREEN_H_3 ) + 1
-        return QUADRANTS[ r ][ c ]
-    end
+    local vx , vy = unpack( kitty.linear_velocity )
     
-    local function get_destination()
-        local q = get_quadrant() 
-        local t = DESTINATIONS[ q ]
-        t = t[ math.random( 1 , #t ) ]
-        return unpack( t )
-    end
-
-    local q , sequence = get_destination()
+   
+    if abs( vx ) <= 0.9 and abs( vy ) <= 0.9 then
     
-    local row = math.ceil( q / 3 )
-    local col = q - ( 3 * ( row - 1 ) )
-    
-    local sx = kitty.x
-    local sy = kitty.y
-    
-    local tx = math.random( SCREEN_W_3 * ( col - 1 ) , SCREEN_W_3 * col )
-    local ty = math.random( SCREEN_H_3 * ( row - 1 ) , SCREEN_H_3 * row )
-    
-    tx = math.min( tx , screen.w - kitty.w )
-    ty = math.min( ty , screen.h - kitty.h )
-    
-    tx = math.max( tx , kitty.w )
-    ty = math.max( ty , kitty.h )
-    
-    local t = 0
-    local duration = KITTY_SPEED
-    
-    kitty.extra.set_sequence( sequence )
-    
-    function move( seconds )
-    
-        t = math.min( t + seconds , duration )
-               
-        kitty.x = sx + ( tx - sx ) * ( t / duration )
-        kitty.y = sy + ( ty - sy ) * ( t / duration )
+        kitty.set_sequence( SIT )
         
-        if t >= duration then
-            move = function() end
-            kitty.extra.set_sequence( SIT )
+        if push.elapsed >= PUSH_TIME then
+        
+            -- push the kitty
+            
+            local px = kitty.mass * math.random( -PUSH_IMPULSE , PUSH_IMPULSE )
+            local py = kitty.mass * math.random( -PUSH_IMPULSE , PUSH_IMPULSE )
+            
+            print( "PUSHING" , px , py )
+            
+            kitty:apply_linear_impulse( { px , py } , kitty.position )
+        
+            push:start()
+        
         end
+        
+    else
+    
+        local seq = SIT
+        
+        if vx > 0 then
+        
+            if abs( vy ) <= 1 then
+            
+                seq = RUN_E
+                
+            elseif vy < 1 then
+                
+                seq = RUN_NE
+                
+            else
+            
+                seq = RUN_SE
+                
+            end
+                
+        
+        else
+        
+            if abs( vy ) <= 1 then
+            
+                seq = RUN_W
+                
+            elseif vy < 1 then
+            
+                seq = RUN_NW
+                
+            else
+            
+                seq = RUN_SW
+                
+            end
+        
+        end
+        
+        kitty.set_sequence( seq )
     
     end
     
+    kitty.flip( seconds )
+    
 end
-
--------------------------------------------------------------------------------
-
-kitty = physics:Body( kitty , { density = 1 , bounce = 0 , friction = 1 , fixed_rotation = true , filter = { group = -1 } } )
-
-physics.gravity = { 0 , 0.0 }
 
 -------------------------------------------------------------------------------
 
@@ -223,7 +229,13 @@ local function build_chain()
     
         local link = physics:Body(
             Clone{ source = link_image },
-            { density = 10 , friction = 1 , bounce = 0 , filter = { group = -1 } }
+            {
+                density = 10 ,
+                friction = 1 ,
+                bounce = 0 ,
+                filter = { group = -1 },
+                linear_damping = 1
+            }
         )
         
         screen:add( link )
@@ -248,7 +260,7 @@ build_chain()
 
 -------------------------------------------------------------------------------
 
-kitty.set_sequence( RUN_NE ) -- Good kitty.
+kitty.set_sequence( SIT ) -- Good kitty.
 
 kitty.flip()
 
@@ -258,31 +270,21 @@ screen:show()
 
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
+local step = 1/60
 
-idle.limit = 1/60
+local min = math.min
+
+idle.limit = step
 
 local watch = Stopwatch()
 
 function idle:on_idle( seconds )
 
-    physics:step( seconds )
-
-    if watch.elapsed_seconds >= MOVE_TIME then
-    
-        watch:start()
-        
---        start_moving()
-    
-    end
-    
+    physics:step( min( seconds , step ) )
+   
     move( seconds )
-
-    kitty.flip( seconds )
-    
 
 end
 
 -------------------------------------------------------------------------------
 
-kitty:apply_linear_impulse( { 100 , -20 } , kitty.position )
