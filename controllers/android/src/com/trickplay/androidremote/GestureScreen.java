@@ -1,4 +1,4 @@
-package com.kennyhamandroid.trickplay;
+package com.trickplay.androidremote;
 import java.io.File;
 import java.util.ArrayList; 
 
@@ -42,7 +42,6 @@ import java.lang.System;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;  /* this is Event Handler */
-//import com.kennyhamandroid.biblescope.R;
 import android.os.Vibrator;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
