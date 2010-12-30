@@ -572,6 +572,18 @@ int MediaPlayer::set_viewport_geometry( int left, int top, int width, int height
 
 //-----------------------------------------------------------------------------
 
+int MediaPlayer::reset_viewport_geometry( )
+{
+    gfloat width;
+    gfloat height;
+
+    clutter_actor_get_size( clutter_stage_get_default() , & width , & height );
+
+    return set_viewport_geometry( 0 , 0 , width , height );
+}
+
+//-----------------------------------------------------------------------------
+
 int MediaPlayer::get_media_type( int * type )
 {
     MPLOCK;
