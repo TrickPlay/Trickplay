@@ -154,8 +154,6 @@ struct UserData
 
         g_assert( result );
 
-        g_assert( result->L == L );
-
         return result;
     }
 
