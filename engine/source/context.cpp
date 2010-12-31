@@ -1470,6 +1470,62 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
+    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT } verbose = CHECK;
+
+    if ( verbose == CHECK )
+    {
+        verbose = NORMAL;
+
+        if ( const gchar * e = g_getenv( "TP_VERBOSE" ) )
+        {
+            if ( ! strcmp( e , "engine" ) )
+            {
+                verbose = ENGINE;
+            }
+            else if ( ! strcmp( e , "app" ) )
+            {
+                verbose = APP;
+            }
+            else if ( ! strcmp( e , "raw" ) )
+            {
+                verbose = APP_RAW;
+            }
+            else if ( ! strcmp( e , "silent" ) )
+            {
+                verbose = SILENT;
+            }
+        }
+    }
+
+    switch( verbose )
+    {
+        case NORMAL:
+            break;
+
+        case SILENT:
+            return;
+
+        case ENGINE:
+            if ( log_level == G_LOG_LEVEL_MESSAGE )
+                return;
+            break;
+
+        case APP:
+            if ( log_level != G_LOG_LEVEL_MESSAGE )
+               return;
+            break;
+
+        case APP_RAW:
+            if ( log_level == G_LOG_LEVEL_MESSAGE )
+            {
+                fprintf( stdout, "%s\n", message );
+            }
+            return;
+
+        default:
+            break;
+    }
+
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message
