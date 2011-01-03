@@ -1,4 +1,4 @@
-package com.kennyhamandroid.trickplay;
+package com.trickplay.androidremote;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +41,6 @@ import org.cybergarage.upnp.device.DeviceChangeListener;
 import org.cybergarage.upnp.device.NotifyListener;
 import org.cybergarage.upnp.device.SearchResponseListener;
 import org.cybergarage.upnp.event.EventListener;
-//import com.kennyhamandroid.biblescope.R;
 import org.cybergarage.upnp.ssdp.SSDPPacket;
 
 
