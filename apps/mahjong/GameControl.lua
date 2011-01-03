@@ -53,16 +53,18 @@ function(ctrl, router, ...)
     function ctrl:initialize_game(args)
 
         state:initialize(args)
+        --[[
         if not state:load_layout() then
             state:build_layout(Layouts.TURTLE)
         end
+        --]]
         --state:build_layout(Layouts.CROWN)
         --state:build_layout(Layouts.ANCHOR)
         --state:build_layout(Layouts.FISH)
         --state:build_layout(Layouts.ARENA)
         --state:build_layout(Layouts.BULL)
         --state:build_layout(Layouts.CUBE)
-        --state:build_test()
+        state:build_test()
         --state:build_two_tile_test()
         state:set_tile_tables()
         grid = state:get_grid()
@@ -243,29 +245,53 @@ function(ctrl, router, ...)
             x = selector.x
             y = selector.y
             z = selector.z
-            local dist = nil
-            --arbitrarily high value
-            local closest_dist = 10000
-            for _,tile in ipairs(top_tiles) do
-                -- check against comparing tiles in the wrong direction
-                if -1 == dir[1] and tile.position[1] >= x then
-                    -- dont compare
-                elseif 1 == dir[1] and tile.position[1] <= x then
-                    -- dont compare
-                elseif -1 == dir[2] and tile.position[2] >= y then
-                    -- dont compare
-                elseif 1 == dir[2] and tile.position[2] <= y then
-                    -- dont compare
-                else
-                    -- Euclidean distance measure
-                        -- check against comparing against current position
-                    dist = math.sqrt((tile.position[1]-x)^2 + (tile.position[2]-y)^2
-                        + (tile.position[3]-z)^2)
-                    if dist < closest_dist and dist ~= 0 then
-                        closest_dist = dist
-                        new_tile = tile
+            local i = 1
+            while i <= 2 do
+                local dist = nil
+                --arbitrarily high value
+                local closest_dist = 10000
+                local angle = nil
+                for _,tile in ipairs(top_tiles) do
+                    -- on first pass include spectral element
+                    if i == 1 then
+                        angle = math.atan((tile.position[2]-y)/(tile.position[1]-x))
+                            * 180/math.pi
+                        dumptable(tile.position)
+                        print(angle)
+                    end
+                    -- check against comparing tiles in the wrong direction
+                    if -1 == dir[1] and (tile.position[1] >= x 
+                      or (angle and (angle < -55 or angle > 55))) then
+                        -- dont compare
+                        print("first")
+                    elseif 1 == dir[1] and (tile.position[1] <= x
+                      or (angle and (angle < -55 or angle > 55))) then
+                        -- dont compare
+                        print("second")
+                    elseif -1 == dir[2] and (tile.position[2] >= y
+                      or (angle and (angle > -55 or angle < 55))) then
+                        -- dont compare
+                        print("third")
+                    elseif 1 == dir[2] and (tile.position[2] <= y
+                      or (angle and (angle > -55 or angle < 55))) then
+                        -- dont compare
+                        print("forth")
+                    else
+                        -- Euclidean distance measure
+                            -- check against comparing against current position
+                        print("fifth")
+                        dist = math.sqrt((tile.position[1]-x)^2
+                            + (tile.position[2]-y)^2
+                            + (tile.position[3]-z)^2)
+                        if dist < closest_dist and dist ~= 0 then
+                            closest_dist = dist
+                            new_tile = tile
+                        end
                     end
                 end
+                print("i", i)
+                if new_tile then break end
+                i = i + 1
             end
         end
         --]]
