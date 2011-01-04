@@ -222,7 +222,7 @@ GameState = Class(nil,function(state, ctrl)
         grid[5][4][2] = tiles[2]
         grid[8][10][1] = tiles[3]
         grid[5][4][1] = tiles[4]
-        grid[14][11][1] = tiles[5]
+        grid[11][15][1] = tiles[5]
         grid[8][18][1] = tiles[6]
     end
 
