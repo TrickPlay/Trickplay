@@ -53,7 +53,7 @@ function(ctrl, router, ...)
     function ctrl:initialize_game(args)
 
         state:initialize(args)
-        --[[
+        ---[[
         if not state:load_layout() then
             state:build_layout(Layouts.TURTLE)
         end
@@ -64,7 +64,7 @@ function(ctrl, router, ...)
         --state:build_layout(Layouts.ARENA)
         --state:build_layout(Layouts.BULL)
         --state:build_layout(Layouts.CUBE)
-        state:build_test()
+        --state:build_test()
         --state:build_two_tile_test()
         state:set_tile_tables()
         grid = state:get_grid()
@@ -256,30 +256,23 @@ function(ctrl, router, ...)
                     if i == 1 then
                         angle = math.atan((tile.position[2]-y)/(tile.position[1]-x))
                             * 180/math.pi
-                        dumptable(tile.position)
-                        print(angle)
                     end
                     -- check against comparing tiles in the wrong direction
                     if -1 == dir[1] and (tile.position[1] >= x 
-                      or (angle and (angle < -55 or angle > 55))) then
+                      or (angle and (angle < -60 or angle > 60))) then
                         -- dont compare
-                        print("first")
                     elseif 1 == dir[1] and (tile.position[1] <= x
-                      or (angle and (angle < -55 or angle > 55))) then
+                      or (angle and (angle < -60 or angle > 60))) then
                         -- dont compare
-                        print("second")
                     elseif -1 == dir[2] and (tile.position[2] >= y
-                      or (angle and (angle > -55 or angle < 55))) then
+                      or (angle and (angle > -30 and angle < 30))) then
                         -- dont compare
-                        print("third")
                     elseif 1 == dir[2] and (tile.position[2] <= y
-                      or (angle and (angle > -55 or angle < 55))) then
+                      or (angle and (angle > -30 and angle < 30))) then
                         -- dont compare
-                        print("forth")
                     else
                         -- Euclidean distance measure
                             -- check against comparing against current position
-                        print("fifth")
                         dist = math.sqrt((tile.position[1]-x)^2
                             + (tile.position[2]-y)^2
                             + (tile.position[3]-z)^2)
@@ -289,7 +282,6 @@ function(ctrl, router, ...)
                         end
                     end
                 end
-                print("i", i)
                 if new_tile then break end
                 i = i + 1
             end
