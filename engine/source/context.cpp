@@ -1476,7 +1476,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
     {
         verbose = NORMAL;
 
-        if ( const gchar * e = g_getenv( "TP_VERBOSE" ) )
+        if ( const gchar * e = g_getenv( "TP_LOG" ) )
         {
             if ( ! strcmp( e , "engine" ) )
             {
