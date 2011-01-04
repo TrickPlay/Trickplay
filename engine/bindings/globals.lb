@@ -1014,4 +1014,24 @@ globals
 
             result = checksum.c_str();
         ]];
+
+	/*
+	Function: time
+
+	Returns the current time, but includes microseconds, so it has more resolution than
+	os.time.
+
+	Returns:
+
+	time - Fractional number of seconds since the Epoch.
+	*/
+
+	double time()
+        [[
+            GTimeVal tv;
+
+	        g_get_current_time( & tv );
+
+	        result = tv.tv_sec + double( tv.tv_usec ) / G_USEC_PER_SEC;
+        ]];
 }
