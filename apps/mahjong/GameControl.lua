@@ -114,6 +114,7 @@ function(ctrl, router, ...)
         router:notify()
     end
 
+    local loops = 0
     function ctrl:shuffle_game()
         --print("game re-shuffling")
         state:shuffle()
@@ -125,7 +126,12 @@ function(ctrl, router, ...)
         for _,__ in pairs(state:get_matching_tiles()) do
             i = i + 1
         end
-        if i < 2 then ctrl:shuffle_game() end
+        if i < 2 and loops < 10 then
+            loops = loops + 1
+            ctrl:shuffle_game()
+        end
+
+        loops = 0
 
         pres:display_ui()
         pres:reset()
