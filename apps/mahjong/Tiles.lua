@@ -12,9 +12,9 @@ for i = 1,3 do
 end
 
 for i = 0,4 do
-    tiles[1][4-i] = Image{src = "assets/tiles/m"..i..".png", opacity = 0, name = "m"..i}
-    tiles[2][4-i] = Image{src = "assets/tiles/w"..i..".png", opacity = 0, name = "w"..i}
-    tiles[3][4-i] = Image{src = "assets/tiles/p"..i..".png", opacity = 0, name = "p"..i}
+    tiles[1][4-i] = Image{src = "assets/tiles/m"..i.."s.png", opacity = 0, name = "m"..i}
+    tiles[2][4-i] = Image{src = "assets/tiles/w"..i.."s.png", opacity = 0, name = "w"..i}
+    tiles[3][4-i] = Image{src = "assets/tiles/p"..i.."s.png", opacity = 0, name = "p"..i}
 end
 
 TILE_IMAGES = tiles
@@ -214,6 +214,7 @@ Tile = Class(function(tile, suit, number, ...)
         tile.position = nil
         tile.group.opacity = 255
         tile.shadow.position = {8, 10}
+        tile.shadow:hide()
         tile.tile_group.position = {0, 0}
         if tile.group.parent then tile.group:unparent() end
     end
