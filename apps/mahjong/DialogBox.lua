@@ -73,6 +73,7 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
     local dialog_ui = Group()
     dialog_ui:add(mask, dialog)
     screen:add(dialog_ui)
+    dialog_ui:hide()
 
     local selector = 1
 
@@ -83,6 +84,7 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
         elseif event:is_a(NotifyEvent) then
             if controller:is_active_component() then
                 dialog_ui.opacity = 255
+                dialog_ui:show()
                 for i,item in ipairs(focusable_items) do
                     if i == selector then
                         item:on_focus_inst()
@@ -92,6 +94,7 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
                 end
             else
                 dialog_ui.opacity = 0
+                dialog_ui:hide()
             end
         end
     end
