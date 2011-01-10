@@ -13,6 +13,7 @@ function screen:on_key_down(k)
     end
     if event_listener_en then
         router:delegate(KbdEvent({key = k}), {router:get_active_component()})
+        print("here")
     end
 end
 
