@@ -166,6 +166,10 @@ GameState = Class(nil,function(state, ctrl)
 
         layout = Layout(tiles_class, nil, true)
         grid = layout:get_grid()
+        self:find_top_tiles()
+        if #top_tiles == 0 then
+            return false
+        end
         return true
     end
 

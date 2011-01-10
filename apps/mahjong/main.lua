@@ -16,7 +16,7 @@ Events = {
 
 dofile("DoFiles.lua")
 
-local splash = Image{src = "assets/Mahjong_Splash.jpg"}
+local splash = Image{src = "assets/Mahjong_Splash.jpg", size = {1920, 1080}}
 local start_button_focus = Image{
     src = "assets/StartGlow.png",
     opacity = 0,
