@@ -772,6 +772,17 @@ void Images::texture_destroyed_notify( gpointer data, GObject * instance )
 
 //-----------------------------------------------------------------------------
 
+#ifndef TP_PRODUCTION
+
+bool Images::compare( std::pair< gpointer , ImageInfo > a, std::pair< gpointer , ImageInfo > b )
+{
+    return a.second.bytes < b.second.bytes;
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
+
 void Images::dump()
 {
 #ifndef TP_PRODUCTION
@@ -780,16 +791,23 @@ void Images::dump()
 
     Util::GSRMutexLock lock( & self->mutex );
 
+    typedef std::vector< std::pair< gpointer , ImageInfo> > ImageVector;
+
+    ImageVector v( self->images.begin() , self->images.end() );
+
+    std::sort( v.begin() , v.end() , Images::compare );
+
+
     gsize total = 0;
     int i = 1;
 
     g_info( "Loaded images:" );
 
-    for( ImageMap::const_iterator it = self->images.begin(); it != self->images.end(); ++it, ++i )
+    for ( ImageVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
     {
         gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
 
-        g_info( "  %3d) %ux%u : %1.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
+        g_info( "  %3d) %4u x %-4u : %8.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
 
         total += it->second.bytes;
     }

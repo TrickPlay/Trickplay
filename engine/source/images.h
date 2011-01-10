@@ -235,6 +235,8 @@ private:
 
     ImageMap        images;
 
+    static bool compare( std::pair< gpointer , ImageInfo > a, std::pair< gpointer , ImageInfo > b );
+
 #endif
 
 };
