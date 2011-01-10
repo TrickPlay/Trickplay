@@ -26,7 +26,7 @@ screen:add(splash, start_button_focus)
 screen:show()
 
 local timer = Timer()
-timer.interval = 7000
+timer.interval = 500
 timer.on_timer = function(timer)
     timer:stop()
     screen.on_key_down = nil
@@ -40,6 +40,7 @@ timer.on_timer = function(timer)
         -- Router initialization
         router = Router()
         dofile("EventHandling.lua")
+        disable_event_listeners()
 
 
         GridPositions = {}
@@ -76,6 +77,14 @@ timer.on_timer = function(timer)
         router:start_app(Components.GAME)
         --router:start_app(Components.NO_MOVES_DIALOG)
         --router:start_app(Components.NEW_MAP_DIALOG)
+
+        timer.interval = 400
+        timer.on_timer = function()
+            enable_event_listeners()
+            timer:stop()
+            timer.on_timer = nil
+        end
+        timer:start()
     end}
 end
 
