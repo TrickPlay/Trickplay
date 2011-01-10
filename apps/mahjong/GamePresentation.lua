@@ -166,6 +166,9 @@ function(pres, ctrl)
             right_tile = tile_group_1
         end
 
+        left_tile.children[1]:show()
+        right_tile.children[1]:show()
+
         local left_x = left_tile.x
         local left_y = left_tile.y
 
@@ -282,12 +285,14 @@ function(pres, ctrl)
             function()
                 game_menu:remove_tile_images()
                 right_tile:unparent()
+                right_tile.children[1]:hide()
             end)
 
         gameloop:add_list(left_tile, left_durations, left_intervals_t,
             function()
                 game_menu:remove_tile_images()
                 left_tile:unparent()
+                left_tile.children[1]:hide()
             end)
 
         game_menu:tile_bump()
