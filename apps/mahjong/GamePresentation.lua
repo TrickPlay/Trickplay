@@ -9,7 +9,11 @@ function(pres, ctrl)
     local backgrounds = {
         "assets/Mahjong_bg1.jpg"
     }
-    local current_background = Image{src=backgrounds[1], name="background"}
+    local current_background = Image{
+        src=backgrounds[1],
+        name="background",
+        size = {1920, 1080}
+    }
     local background = Group()
     background:add(current_background)
     --background.anchor_point = {current_background.w/2, current_background.h/2}
