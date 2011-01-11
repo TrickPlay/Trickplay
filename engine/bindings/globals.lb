@@ -865,8 +865,7 @@ globals
 		
 	detach( udata o )
 		[[
-			// UserData::clear_callbacks( L , o );
-		    g_warning( "'detach' function is deprecated" );
+			UserData::clear_callbacks( L , o );
 		]];		       
 		
 	/*
