@@ -913,10 +913,13 @@ int TPContext::run()
     else
     {
         clutter_actor_set_size( stage , display_width , display_height );
-        clutter_stage_set_user_resizable( CLUTTER_STAGE( stage ) , TRUE );
     }
 
+#ifndef TP_CLUTTER_BACKEND_EGL
+
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+
+#endif
 
     ClutterColor color;
     color.red = 0;
