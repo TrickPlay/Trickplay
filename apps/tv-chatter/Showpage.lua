@@ -18,7 +18,7 @@ local mediaplayer_border  = 2
 sp_group = Group{}
 screen:add(sp_group)
 sp_group:hide()
-
+--[[
 do
 local bg = Canvas{size={screen_w,screen_h},x=0,y=0}
 bg:begin_painting()
@@ -48,7 +48,7 @@ bg:fill()
 bg:finish_painting()
 sp_group:add(bg)
 end
-
+--]]
 
 --Load in the stationary assets for the Show Page
 --using a do-end to toss the locals once they're loaded
@@ -90,8 +90,8 @@ do
         border_color = "#B9B9B9FF"
     }
 
-    mediaplayer:load("video/glee-1.mp4")
-    mediaplayer.mute = true
+    --mediaplayer:load("video/glee-1.mp4")
+    --mediaplayer.mute = true
     
     function mediaplayer:on_loaded()
         mediaplayer:play()
@@ -141,12 +141,13 @@ local TweetStream_Container = Class(function(self,...)
     local Show_Name_Font  = "Helvetica bold 26px"
     local Show_Name_Color = "#FFFFFF"
     
-    local bg = make_bg(
+    local bg,big_focus = make_bg(
         485,
         screen_h - (group.y + title.h+22+bottom_gutter)+2,
         0,title.h+22
     )
-    local big_focus = Image{src="assets/focus-tweetstream.png",x=bg.x-20,y=bg.y-19}
+    big_focus.opacity=255
+    --local big_focus = Image{src="assets/focus-tweetstream.png",x=bg.x-20,y=bg.y-19}
     
     local show_name = Text{
         text  = "show_name",
@@ -176,9 +177,11 @@ local TweetStream_Container = Class(function(self,...)
     local bottom_rule = Image{src="assets/sp_shadow.png"}
     bottom_rule.y = bg.y + bg.h - bottom_rule.h-2
     bottom_rule.x = bg.w-bottom_rule.w
-    local wallpaper = Image{src="assets/sp_tweetstream_container.png",x=3,y=top_rule.y, w = bg.w-6}
+    local wallpaper = Image{src="assets/tweetstream_bg_tile.png",tile={true,true},x=1,y=top_rule.y,h=bg.y+bg.h-top_rule.y-1, w = bg.w-2}
+    local corner_l  = Image{src="assets/banner_corner_bottom.png",y=bg.y+bg.h-8}
+    local corner_r  = Image{src="assets/banner_corner_bottom.png",y=bg.y+bg.h-8,y_rotation={180,0,0},x=bg.w}
     show_time.x = show_time.x - show_time.w
-    group:add(big_focus,bg,wallpaper,title,show_name,tv_station,show_time,top_rule,bottom_rule)
+    group:add(bg,wallpaper,corner_l,corner_r,big_focus,title,show_name,tv_station,show_time,top_rule,bottom_rule)
     sp_group:add(group)
     
     local curr_obj = nil

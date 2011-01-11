@@ -67,12 +67,13 @@ local TweetStream_Container = Class(function(self,...)
         curr_obj.tweetstream:out_view()
         sp.tweetstream:display(curr_obj)
         curr_obj = nil
+        --[[
         mediaplayer:set_viewport_geometry(
             gutter_sides  * screen.scale[1],
             mediaplayer_y * screen.scale[2],
             mediaplayer_w * screen.scale[1],
             mediaplayer_h * screen.scale[2]
-        )
+        )--]]
     end
     function self:display(show_obj)
         
@@ -89,13 +90,13 @@ local TweetStream_Container = Class(function(self,...)
         --    tweet_clip:add(curr_obj.tweet_g_cache[i].group)
         --end
         curr_obj.tweetstream:in_view()
-        
+        --[[
         mediaplayer:set_viewport_geometry(
             0,
             0,
             screen_w * screen.scale[1],
             screen_h * screen.scale[2]
-        )
+        )--]]
     end
     function self:up()
         if curr_obj ~= nil then

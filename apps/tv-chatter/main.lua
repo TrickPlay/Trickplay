@@ -58,7 +58,7 @@ tv_show[1] = ShowObject(
         "Thursday",
         6,
         "pm",
-        "assets/posters/banner_community.png",
+        "assets/posters/banner_community.jpg",
         {"nbccommunity","community"},
         {"Jeff Winger","Britta","Abed","Troy Barnes"}
 )
@@ -70,7 +70,7 @@ tv_show[2] = ShowObject(
         "Sunday",
         9,
         "pm",
-        "assets/posters/banner_dexter.png",
+        "assets/posters/banner_dexter.jpg",
         {"Dexter","sho_dexter"},
         {"Dexter Morgan","Debra Morgan"}
 )
@@ -82,7 +82,7 @@ tv_show[3] = ShowObject(
         "Sunday",
         9,
         "pm",
-        "assets/posters/banner_family_guy.png",
+        "assets/posters/banner_family_guy.jpg",
         {"familyguy","fox_familyguy"},
         {"Peter Griffin","Lois Griffin", "Meg Griffin",
         "Brian Griffin", "Chris Griffin", "Stewie, Quagmire"}
@@ -95,7 +95,7 @@ tv_show[4] = ShowObject(
         "Tuesday",
         8,
         "pm",
-        "assets/posters/banner_glee.png",
+        "assets/posters/banner_glee.jpg",
         {"glee","gleek","fox_glee"},
         {"Quinn Fabray", "Kurt Hummel", "Terri Schuester", "Will Schuester"}
 )
@@ -107,7 +107,7 @@ tv_show[5] = ShowObject(
         "Tuesday",
         10,
         "pm",
-        "assets/posters/banner_sons_of_anarchy.png",
+        "assets/posters/banner_sons_of_anarchy.jpg",
         {"soafx"},
         {"Jax", "Clay Morrow", "Gemma Morrow"}
 )
@@ -119,7 +119,7 @@ tv_show[6] = ShowObject(
         "Tuesday",
         9,
         "pm",
-        "assets/posters/banner_biggest_loser.png",
+        "assets/posters/banner_biggest_loser.jpg",
         {"BL10","BL11","nbc_loser"},
         {"Allison Sweeney", "Jillian Michaels", "Bob Harper"}
 )
@@ -131,7 +131,7 @@ tv_show[7] = ShowObject(
         "Thursday",
         9,
         "pm",
-        "assets/posters/banner_csiNY.png",
+        "assets/posters/banner_csiNY.jpg",
         {"csiny"},
         {"Mac Taylor", "Jo Danville"}
 )
@@ -143,7 +143,7 @@ tv_show[8] = ShowObject(
         "Thursday",
         9.5,
         "pm",
-        "assets/posters/banner_outsourced.png",
+        "assets/posters/banner_outsourced.jpg",
         {"outsourcednbc"},
         {"Todd Dempsey", "Asha"}
 )

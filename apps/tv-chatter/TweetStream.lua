@@ -48,6 +48,9 @@ local time_diff = function(tweet_time)
     end
 end
 local req_page = function(keywords, callback, since_id)
+    --dolater(callback,false)
+    --return
+    ----[[
     print("making request with since id: "..string.format("%d",since_id))
     local url = "http://search.twitter.com/search.json?q="..
         keywords.."&lang=en&lang=en&result_type=recent"
@@ -72,6 +75,7 @@ local req_page = function(keywords, callback, since_id)
     }
     req:send()
 --    error_message.text = "Latest tweet, waiting for more..."
+--]]
 end
 
 
@@ -641,7 +645,7 @@ TweetStream = Class(function(t,parent,...)
     
     --Grabs the next stored search result and adds it to the visible tweets
     function t:next_tweet()
-        print("next_tweet")
+        --print("next_tweet")
         if #results_cache == 0 then
             return false
         end

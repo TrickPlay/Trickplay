@@ -81,13 +81,16 @@ do
 	end
 
     local bg = Image{src="assets/object_options_background.png"}
-    local focus_o = Canvas{size={485,scroll_listing_h}}
+	
+    local focus_o = Clone{source = focus_strip,scale={485,1},y = (scroll_speed_i-1)*scroll_listing_h+y}
+	--[[
+		  Canvas{size={1,scroll_listing_h}, scale={485,1}}
           focus_o:begin_painting()
-          focus_o:move_to(border_w,0)
-          focus_o:line_to(focus_o.w-border_w, 0)
-          focus_o:line_to(focus_o.w-border_w, focus_o.h-border_w)
-          focus_o:line_to(border_w,           focus_o.h-border_w)
-          focus_o:line_to(border_w,0)
+          focus_o:move_to(0,0)
+          focus_o:line_to(focus_o.w, 0)
+          focus_o:line_to(focus_o.w, focus_o.h)
+          focus_o:line_to(0,         focus_o.h)
+          focus_o:line_to(0,0)
           focus_o:set_source_linear_pattern(
             focus_o.w/2,0,
             focus_o.w/2,focus_o.h
@@ -97,7 +100,9 @@ do
 	      focus_o:fill( true )
           focus_o:finish_painting()
 		  focus_o.y = (scroll_speed_i-1)*scroll_listing_h+y
-    local focus_n = Clone{source=focus_o,opacity=0}
+		  --]]
+		  --local focus_o = Rectangle{size={485,scroll_listing_h}}
+    local focus_n = Clone{source = focus_strip,scale={485,1},opacity=0}--Clone{source=menu_focus,opacity=0}
     
     scroll_speed_g:add(focus_o,focus_n)
 	scroll_speed_g:add(unpack(speed))
@@ -239,7 +244,7 @@ end
 
 Options = Class(function(self,x,y,parent,...)
 
-    local listing_h           = 69
+    local listing_h           = 68
     
     local group = Group
     {
@@ -248,12 +253,12 @@ Options = Class(function(self,x,y,parent,...)
     }
     local title    = Image{src="assets/options_tit.png"}
    
-    local bg = make_bg(485,595,   0,title.h+10)
-    local big_focus = Image{src="assets/focus-options.png",opacity=0,x=bg.x-20,y=bg.y-20}
+    local bg,big_focus = make_bg(485,595,   0,title.h+10,true)
+    --local big_focus = Image{src="assets/focus-options.png",opacity=0,x=bg.x-20,y=bg.y-20}
     local border_w = 1
     local anim_menu_tl = nil
     local viewing = false
-    
+    --[[
     local rules = Canvas{size={bg.w,bg.h-23*2},x=0,y=bg.y+23}
           rules:begin_painting()
           rules:move_to(0,0)--border_w,         border_w)
@@ -277,8 +282,11 @@ Options = Class(function(self,x,y,parent,...)
           grey_rect:set_line_width(   border_w )
 	      grey_rect:stroke( true )
           grey_rect:finish_painting()
-    screen:add(grey_rect)
-    
+		  --]]
+	--local grey_rect = Clone{source = base_grey_rect, scale={bg.w,1},opacity=0}
+	--local grey_rect = Rectangle{size={bg.w,listing_h},opacity=0}
+    --screen:add(grey_rect)
+    --[[
     local focus_o = Canvas{size={485,listing_h},opacity=0}
           focus_o:begin_painting()
           focus_o:move_to(0,0)--border_w,         border_w)
@@ -294,7 +302,11 @@ Options = Class(function(self,x,y,parent,...)
           focus_o:add_source_pattern_color_stop( 1 , "727272" )
 	      focus_o:fill( true )
           focus_o:finish_painting()
-    local focus_n = Clone{source=focus_o,opacity=0}
+		  --]]
+	local focus_o = Clone{source = focus_strip,scale={485,1},opacity=0}
+	--local focus_o = Rectangle{size={485,listing_h},opacity=0}
+	local focus_n = Clone{source = focus_strip,scale={485,1},opacity=0}
+    --local focus_n = Clone{source=focus_o,opacity=0}
     
     local Option_Name_Font  = "Helvetica 24px"
     local Option_Name_Color = "#a6a6a6"
@@ -305,7 +317,7 @@ Options = Class(function(self,x,y,parent,...)
     local listings_clip = Group
     {
         y    = bg.y+23,
-        clip = { 2, 0,  bg.w-5, bg.h-23*2}
+        clip = { 1, 0,  bg.w-2, bg.h-23*2}
     }
     local listings_g = Group{}
     local listings_bg = Group{}
@@ -328,8 +340,8 @@ Options = Class(function(self,x,y,parent,...)
         title,
         listings_clip,
         arrow_dn,
-        arrow_up,
-        rules
+        arrow_up
+        --rules
     )
     
     if parent == sp then
@@ -370,7 +382,7 @@ Options = Class(function(self,x,y,parent,...)
                 }
 		
         
-            listings_bg:add(Clone{source=grey_rect,y=listing_h*(index-1)})
+            listings_bg:add(Clone{source=base_grey_rect,scale={bg.w,1},y=listing_h*(index-1)})
         
         table.insert(listings,
             {
@@ -605,7 +617,7 @@ Options = Class(function(self,x,y,parent,...)
 					vis_loc = vis_loc - 1
 					
 					if vis_loc == 1 then
-						self:move_list(-(list_i -1)*(grey_rect.h))
+						self:move_list(-(list_i -1)*(listing_h))
 					end
 				end
 			else
@@ -633,7 +645,7 @@ Options = Class(function(self,x,y,parent,...)
 			if list_i + 1 <= #listings then
 			    self:move_highlight_to(list_i,list_i + 1)
 			    if vis_loc == max_on_screen then
-			        self:move_list(-(list_i -max_on_screen)*(grey_rect.h))
+			        self:move_list(-(list_i -max_on_screen)*(listing_h))
 			        arrow_up.opacity=255
 			        if list_i == #listings then
 			            arrow_dn.opacity=0
@@ -642,7 +654,7 @@ Options = Class(function(self,x,y,parent,...)
 			        vis_loc = vis_loc + 1
 			        
 			        if vis_loc == max_on_screen then
-			            self:move_list(-(list_i -max_on_screen)*(grey_rect.h))
+			            self:move_list(-(list_i -max_on_screen)*(listing_h))
 			        end
 			    end
 			end

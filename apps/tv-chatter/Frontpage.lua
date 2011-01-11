@@ -16,7 +16,7 @@ local bottom_containers_y = title_card_y + title_card_h + 33
 --the group for the front page
 fp_group = Group{}
 screen:add(fp_group)
-
+--[[
 do
 local bg = Canvas{size={screen_w,screen_h},x=0,y=0}
 bg:begin_painting()
@@ -36,7 +36,7 @@ bg:fill(true)
 bg:finish_painting()
 fp_group:add(bg)
 end
-
+--]]
 
 
 --Load in the stationary assets for the Front Page
@@ -83,7 +83,7 @@ local Titlecards_Bar = Class(function(self,parent,...)
             title_card_h
         }
     }
-    local focus   = Image{src="assets/focus-shows.png",y=clip.y-19,x=-19}
+    local focus   = make_focus(title_card_w,title_card_h,0,clip.y) --Image{src="assets/focus-shows.png",y=clip.y-19,x=-19}
     --Rectangle{w=title_card_w+20,h=title_card_h+20,color="#FFFFFF",y=clip.y-10,x=-10}
     clip:add(tiles)
     group:add(focus,title,clip)
@@ -174,11 +174,12 @@ local Listings = Class(function(self,...)
     }
     local title    = Image{src="assets/listings.png"}
    
-    local bg = make_bg(704,592,   0,title.h+5)
-    local big_focus = Image{src="assets/focus-listings.png",opacity=0,x=bg.x-20,y=bg.y-20}
+    local bg,big_focus = make_bg(704,592,   0,title.h+5,true)
+    --local big_focus = Image{src="assets/focus-listings.png",opacity=0,x=bg.x-20,y=bg.y-20}
+    F = big_focus:find_child("F")
     local focus_tl = nil
     local border_w = 1
-    
+    --[[
     local rules = Canvas{size={bg.w,bg.h-23*2},x=0,y=bg.y+23}
           rules:begin_painting()
           rules:move_to(0,0)--border_w,         border_w)
@@ -189,6 +190,9 @@ local Listings = Class(function(self,...)
           rules:set_line_width(   border_w )
           rules:stroke( true )
           rules:finish_painting()
+          --]]
+    --local rules = Rectangle{size={bg.w,bg.h-23*2},x=0,y=bg.y+23}
+    --[[
     local grey_rect = Canvas{size={bg.w,listing_h},opacity=0}
           grey_rect:begin_painting()
           grey_rect:move_to(border_w,0)--border_w,         border_w)
@@ -202,8 +206,10 @@ local Listings = Class(function(self,...)
           grey_rect:set_line_width(   border_w )
 	      grey_rect:stroke( true )
           grey_rect:finish_painting()
-    screen:add(grey_rect)
-    
+          --]]
+    --local grey_rect = Rectangle{size={bg.w,listing_h},opacity=0}
+    --screen:add(grey_rect)
+    --[[
     local focus_o = Canvas{size={bg.w,listing_h},opacity=0}
           focus_o:begin_painting()
           focus_o:move_to(border_w,0)--border_w,         border_w)
@@ -219,7 +225,9 @@ local Listings = Class(function(self,...)
           focus_o:add_source_pattern_color_stop( 1 , "727272" )
 	      focus_o:fill( true )
           focus_o:finish_painting()
-    local focus_n = Clone{source=focus_o,opacity=0}
+          --]]
+    local focus_o = Clone{source = focus_strip,scale={bg.w,1},opacity=0}
+    local focus_n = Clone{source = focus_strip,scale={bg.w,1},opacity=0}
     
     local Show_Name_Font  = "Helvetica bold 26px"
     local Show_Name_Color = "#FFFFFF"
@@ -228,7 +236,7 @@ local Listings = Class(function(self,...)
     local listings_clip = Group
     {
         y    = bg.y+23,
-        clip = { 2, 0,  bg.w-5, bg.h-23*2}
+        clip = { 1, 0,  bg.w-2, bg.h-23*2}
     }
     local listings_g = Group{}
     local listings_bg = Group{}
@@ -251,8 +259,8 @@ local Listings = Class(function(self,...)
         title,
         listings_clip,
         arrow_dn,
-        arrow_up,
-        rules
+        arrow_up
+        --rules
     )
     
     fp_group:add(group)
@@ -411,7 +419,7 @@ local Listings = Class(function(self,...)
                 tv_station = tv_station
             }
         if #listings%2 == 0 then
-            listings_bg:add(Clone{source=grey_rect,y=listing_h*(#listings-1)})
+            listings_bg:add(Clone{source=base_grey_rect,y=listing_h*(#listings-1),scale={bg.w,1}})
         end
         
         listings_g:add(show_name, show_time, tv_station)
@@ -543,7 +551,7 @@ local Listings = Class(function(self,...)
             self:move_highlight_to(list_i,list_i - 1)
             print(list_i)
             if vis_loc == 1 then
-                self:move_list(-(list_i -1)*(grey_rect.h))
+                self:move_list(-(list_i -1)*(listing_h))
                 arrow_dn.opacity=255
                 if list_i == 1 then
                     arrow_up.opacity=0
@@ -552,7 +560,7 @@ local Listings = Class(function(self,...)
                 vis_loc = vis_loc - 1
                 
                 if vis_loc == 1 then
-                    self:move_list(-(list_i -1)*(grey_rect.h))
+                    self:move_list(-(list_i -1)*(listing_h))
                 end
             end
         else
@@ -576,7 +584,7 @@ local Listings = Class(function(self,...)
             self:move_highlight_to(list_i,list_i + 1)
             print(list_i)
             if vis_loc == max_on_screen then
-                self:move_list(-(list_i -max_on_screen)*(grey_rect.h))
+                self:move_list(-(list_i -max_on_screen)*(listing_h))
                 arrow_up.opacity=255
                 if list_i == #listings then
                     arrow_dn.opacity=0
@@ -585,7 +593,7 @@ local Listings = Class(function(self,...)
                 vis_loc = vis_loc + 1
                 
                 if vis_loc == max_on_screen then
-                    self:move_list(-(list_i -max_on_screen)*(grey_rect.h))
+                    self:move_list(-(list_i -max_on_screen)*(listing_h))
                 end
             end
         end
@@ -657,13 +665,15 @@ local TweetStream_Container = Class(function(self,...)
     end
     local bg = make_bg(1086,592,   0,title.h+22)
     --local bg = Canvas{size={1086,592},x=0,y=title.h+22}
-    local wallpaper = Image{src="assets/fp_tweetstream_container.png",y=title.h+22}
+    local wallpaper = Image{src="assets/tweetstream_bg_tile.png",tile={true,true},x=346,y=bg.y+123,w=1086-346-1,h=592-(bg.y+72)}
+    --= Image{src="assets/fp_tweetstream_container.png",y=title.h+22}
     
     --local tweet_clip = Group{clip={0,0,bg.w-368,bg.h-127},x=366,y=bg.y+125}
     local top_rule    = Image{src="assets/object_tweetstream_top_Shadow.png",x = 366, y=bg.y+123}
     local bottom_rule = Image{src="assets/object_tweetstream_bottom_Shadow.png",x=346}
     bottom_rule.y = bg.y + bg.h - bottom_rule.h-2
     
+    local poster = Image{src="assets/posters/banner_side_shadow_tile.png",x=348,y=bg.y+2,tile={false,true},h=588}
     local show_name = Text{
         text  = "show_name",
         font  = Show_Name_Font,
@@ -695,7 +705,7 @@ local TweetStream_Container = Class(function(self,...)
     }
     local add_image = nil
     show_time.x = show_time.x - show_time.w
-    group:add(bg,wallpaper,title,show_name,show_desc,tv_station,show_time,top_rule,bottom_rule)
+    group:add(bg,wallpaper,title,show_name,show_desc,tv_station,show_time,top_rule,bottom_rule,poster)
     fp_group:add(group)
     
     local curr_obj = nil
