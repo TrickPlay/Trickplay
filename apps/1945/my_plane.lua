@@ -1,5 +1,12 @@
 local old_impacts = {}
-
+local can_fire = true
+local fire_rate = Timer{interval=200}
+function fire_rate:on_timer()
+    can_fire = true
+    fire_rate:stop()
+end
+local old_bullets = {}
+local tot_bullets_created = 0
 impact = function(x,y)
     local imp
     
@@ -610,96 +617,108 @@ end,
         end,
     new_bullet = function( self, x, y, z_rot )
         
-            return
-            
-            {
-                type = TYPE_MY_BULLET,
+            if #old_bullets == 0 then
+                    tot_bullets_created = tot_bullets_created + 1
+                    --print(tot_bullets_created)
+                return
                 
-                
-				z_rot = z_rot,
-
-                speed = -400,
-                
-                image =
+                {
+                    type = TYPE_MY_BULLET,
                     
-                    Clone
-                    {                    
-                        source = self.bullet,
-                        opacity = 255,
-                        anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
-                        position = { x, y },
-						z_rotation = {z_rot,0,0},
-                    },
-                remove = function(self)
-                    self.image:unparent()
-                end,
-                setup =
-                
-                    function( self )
                     
-                        layers.air_bullets:add( self.image )
-                        self.img_w = self.image.w
-                        self.img_h = self.image.h
-                    end,
+                    z_rot = z_rot,
+    
+                    speed = -400,
                     
-                render =
-                
-                    function( self , seconds )
-                    
-                        local y = self.image.y + self.speed * seconds * math.cos(-1*self.z_rot*math.pi/180)
-                        local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)
+                    image =
                         
-                        if y < -self.img_h or y > (screen_h + self.img_h) or x < -self.image.w  or x > (screen_w + self.image.w)then
+                        Clone
+                        {                    
+                            source = self.bullet,
+                            opacity = 255,
+                            anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
+                            position = { x, y },
+                            z_rotation = {z_rot,0,0},
+                        },
+                    remove = function(self)
+                        self.image:unparent()
+                    end,
+                    setup =
+                    
+                        function( self )
+                        
+                            layers.air_bullets:add( self.image )
+                            self.img_w = self.image.w
+                            self.img_h = self.image.h
+                        end,
+                    remove = function(self)
+                        self.image:unparent()
+                        table.insert(old_bullets,self)
+                    end,
+                    render =
+                    
+                        function( self , seconds )
+                        
+                            local y = self.image.y + self.speed * seconds * math.cos(-1*self.z_rot*math.pi/180)
+                            local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)
                             
+                            if y < -self.img_h or y > (screen_h + self.img_h) or x < -self.image.w  or x > (screen_w + self.image.w)then
+                                
+                                remove_from_render_list( self )
+                                
+                                self.image:unparent()
+                            
+                            else
+                            
+                                table.insert(g_guys_air,
+                                    {
+                                        obj = self,
+                                        x1  = self.image.x-self.img_w/2,
+                                        x2  = self.image.x+self.img_w/2,
+                                        y1  = self.image.y-self.img_h/2,
+                                        y2  = self.image.y+self.img_h/2,
+                                    }
+                                )
+                                --[[
+                                add_to_collision_list(
+                                    self ,
+                                    { self.image.x , self.image.y },
+                                    { self.image.x , y },
+                                    { self.image.w , self.image.h },
+                                    TYPE_ENEMY_PLANE )
+                            --]]
+                                self.image.y = y
+                                self.image.x = x
+                            
+                            end
+                        
+                        end,
+                        
+                    collision =
+                    
+                        function( self , other )
+                            if other.type == TYPE_ENEMY_BULLET then return end
+                        
                             remove_from_render_list( self )
+                            local location
+                            if other.group ~= nil then
+                                location = other.group.position
+                            else
+                                location = other.image.position
+                            end
                             
                             self.image:unparent()
-                        
-                        else
-                        
-                            table.insert(g_guys_air,
-                                {
-                                    obj = self,
-                                    x1  = self.image.x-self.img_w/2,
-                                    x2  = self.image.x+self.img_w/2,
-                                    y1  = self.image.y-self.img_h/2,
-                                    y2  = self.image.y+self.img_h/2,
-                                }
-                            )
-                            --[[
-                            add_to_collision_list(
-                                self ,
-                                { self.image.x , self.image.y },
-                                { self.image.x , y },
-                                { self.image.w , self.image.h },
-                                TYPE_ENEMY_PLANE )
-                        --]]
-                            self.image.y = y
-                            self.image.x = x
-                        
+                            
+                            -- Now, we create a score bubble          
                         end
-                    
-                    end,
-                    
-                collision =
-                
-                    function( self , other )
-                        if other.type == TYPE_ENEMY_BULLET then return end
-                    
-                        remove_from_render_list( self )
-                        local location
-                        if other.group ~= nil then
-                            location = other.group.position
-                        else
-                            location = other.image.position
-                        end
-                        
-                        self.image:unparent()
-                        
-                        -- Now, we create a score bubble          
-                    end
-            }
-        
+                }
+            else
+                local bullet = table.remove(old_bullets)
+                bullet.image.y = y
+                bullet.image.x = x
+                return bullet
+            end
+            
         end,
         
     -- When we crash with an enemy plane
@@ -865,8 +884,13 @@ redo_score_text()
                     )
                     mediaplayer:play_sound("audio/drop-bomb.mp3")
 				else
-                    shoot[self.firing_powerup]()
-                    mediaplayer:play_sound("audio/player-shooting.mp3")
+                    if can_fire then
+                        fire_rate:start()
+                        can_fire = false
+                        shoot[self.firing_powerup]()
+                        mediaplayer:play_sound("audio/player-shooting.mp3")
+                    end
+                    
                 end
                 end
                 

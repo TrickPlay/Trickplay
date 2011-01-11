@@ -419,7 +419,7 @@ explosions =
 	} end
 }
 local bullet_sound_playing = false
-local bullet_sound = Timer{interval=700}
+local bullet_sound = Timer{interval=400}
 function bullet_sound:on_timer()
     bullet_sound_playing = false
     bullet_sound:stop()
@@ -484,7 +484,7 @@ function fire_bullet(enemy,source)
                 --remove it from the screen, if it travels off screen
                 if y > screen_h or x > screen_w or y < 0 or x < 0 then
                     remove_from_render_list( self )
-                    self.image:unparent()
+                    --self.image:unparent()
                 --otherwise, update the position
                 else
                     local start_point = self.image.center
@@ -520,7 +520,7 @@ function fire_bullet(enemy,source)
     bullet_sound:start()
 end
 function flak(x,y)
-    dolater(add_to_render_list,
+    add_to_render_list(
     {
         num   = 1,
         delays = {},
@@ -1719,7 +1719,6 @@ enemies =
                                 remove = function(self,seconds)
                                     self.group:unparent()
                                 end,
-
                             }
                             )
                         end
