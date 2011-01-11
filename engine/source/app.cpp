@@ -1,6 +1,4 @@
 
-#include "clutter/clutter.h"
-
 #include "app.h"
 #include "sysdb.h"
 #include "util.h"
@@ -9,6 +7,7 @@
 #include "lb.h"
 #include "profiler.h"
 #include "json.h"
+#include "common.h"
 
 //-----------------------------------------------------------------------------
 #define APP_TABLE_NAME          "app"
