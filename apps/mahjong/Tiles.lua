@@ -109,6 +109,9 @@ screen:add(
     tile_shadow
 )
 
+TILE_HEIGHT = 110
+TILE_WIDTH = 140
+
 Tile = Class(function(tile, suit, number, ...)
     assert(type(suit) == "number")
     assert(type(number) == "number")
@@ -161,14 +164,6 @@ Tile = Class(function(tile, suit, number, ...)
         tile.focus.red, tile.glyph
     )
     tile.group:add(tile.tile_group)
-
-    --[[
-    TILE_HEIGHT = tile.images[1][1].height
-    TILE_WIDTH = tile.images[1][1].width
-    --]]
-
-    TILE_HEIGHT = Image{src = "assets/tiles/TileMarbleLg.png"}.h
-    TILE_WIDTH = Image{src = "assets/tiles/TileMarbleLg.png"}.w
 
     for i = 1,3 do
         for j = 0,4 do
