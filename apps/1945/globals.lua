@@ -91,19 +91,19 @@ if settings.state ~= nil  and settings.state.hud ~= nil then
 end
 layers =
 {
-    splash         = Group{},
-    hud            = Group{}, --text bubbles go here too
+    splash         = Group{name="splash layer"},
+    hud            = Group{name="hud layer"}, --text bubbles go here too
     
-    air_doodads_2  = Group{},
-    planes         = Group{}, --explosions go here as well
-    air_bullets    = Group{},
-    air_doodads_1  = Group{},
+    air_doodads_2  = Group{name="air_doodads_2 layer"},
+    planes         = Group{name="planes layer"}, --explosions go here as well
+    air_bullets    = Group{name="air_bullets layer"},
+    air_doodads_1  = Group{name="air_doodads_1 layer"},
     
-    land_doodads_2 = Group{},
-    land_targets   = Group{}, -- explosions go here as well
-    land_bullets   = Group{},
-    land_doodads_1 = Group{},
-    ground         = Group{}
+    land_doodads_2 = Group{name="land_doodads_2 layer"},
+    land_targets   = Group{name="land_targets layer"}, -- explosions go here as well
+    land_bullets   = Group{name="land_bullets layer"},
+    land_doodads_1 = Group{name="land_doodads_1 layer"},
+    ground         = Group{name="ground layer"}
 }
 
 screen:add(

@@ -73,6 +73,9 @@ enemies.final_boss = function(is_boss,o)
             g_rr   = Group{x=1070,y=240},
         },
         dying = false,
+		remove = function(self)
+			self.group:unparent()
+		end,
         stages = {
             function(self,secs)
                 self.group.y = self.group.y + self.approach_speed * secs
@@ -105,7 +108,7 @@ enemies.final_boss = function(is_boss,o)
 				self.group.z_rotation={self.group.z_rotation[1]+self.turn_speed/2*secs,0,0}
                 if scale <= .1 then
                     points(self.group.x,self.group.y,5000)
-                    self.group:unparent()
+                    
                     remove_from_render_list(self)
                     add_to_render_list(
                     explosions.splash(

@@ -540,7 +540,7 @@ lvlbg = {
             self.top_doodad = -self.doodad_h
         end
         for i = 1, num_frames do
-            g   =  Group{y=(num_frames - i)*(self.doodad_h-1)+self.top_doodad}
+            g   =  Group{y=(num_frames - i)*(self.doodad_h-1)+self.top_doodad, name="level 3 conveyor group"}
             table.insert( self.doodad_frames , g)
             layers.land_doodads_1:add(g)
             
