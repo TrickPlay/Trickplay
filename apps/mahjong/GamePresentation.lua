@@ -250,6 +250,7 @@ function(pres, ctrl)
     local sparkle_base = Image{src = "assets/tiles/Sparkle.png", opacity = 0}
     screen:add(sparkle_base)
     function pres:sparkle(x, y, num_sparkles)
+        do return end
         local sparkles = {}
         local sparkles_strip = {}
 
