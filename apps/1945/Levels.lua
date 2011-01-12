@@ -393,8 +393,8 @@ levels =
                 {t =   202, item = formations.zig_zag,         params = {  1600, 300, -20 }},
                 {t =   205, item = formations.cluster,         params = {  600 }},
                 {t =   205, item = formations.cluster,         params = {  1400 }},
-                {t =   210, item = formations.zepp_boss,         params = {1200}},
-                {t =   210, item = formations.zepp_boss,         params = {400}},
+                {t =   210, item = formations.zepp_boss,       params = {1200}},
+                {t =   210, item = formations.zepp_boss,       params = {400}},
                 {t =   212, item = formations.cluster,         params = {  600 }},
                 {t =   212, item = formations.cluster,         params = {  1400 }},
                 {t =   300, item = self.level_complete,        params = {self}},
@@ -833,7 +833,7 @@ levels =
                     { enemies =
                         {
                             {f = {"powerups","life"},     p = {1800}},
-                            {f = {"enemies","destroyer"},      p = {1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"enemies","destroyer"}, p = {1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},{},{},{},

@@ -837,11 +837,11 @@ function fire_mortar(enemy, dist_x,dist_y)
             --remove it from the screen, if it travels off screen
             if y > screen_h or x > screen_w or y < 0 or x < 0 then
                 remove_from_render_list( self )
-                self.image:unparent()
+                self.g:unparent()
             --otherwise, update the position
             elseif self.dist_y < 0  then
                 remove_from_render_list( self )
-                self.image:unparent()
+                self.g:unparent()
                 add_to_render_list(explosions.big(x,y,b_guys_air))
             else
                 local start_point = self.image.center
@@ -1369,9 +1369,7 @@ enemies =
 		
 		remove = function(self)
             self.group:unparent()
-            if self.is_boss then
-				levels[state.curr_level]:level_complete()
-			end
+            
         end,
 		setup = function(self)
             state.counters[1].zepp.spawned = state.counters[1].zepp.spawned + 1
@@ -2473,7 +2471,7 @@ enemies =
         },
         num_frames = 3,
 		base_clip = Group{clip={0,0,imgs.tank_strip.w/3,imgs.tank_strip.h}},
-		group = Group{},
+		group = Group{name="tank"},
 		remove = function(self)
             self.group:unparent()
         end,
