@@ -209,7 +209,7 @@ local keys = {
             
             
         end,
-        [keys.t] = function()
+        [keys["0"]] = function()
             
             out_splash__in_hud()
             my_plane.bombing_mode = false
@@ -217,7 +217,7 @@ local keys = {
             state.curr_mode  = "TEST_MODE"
             state.curr_level = 0
             add_to_render_list(my_plane)
-            test_text.opacity = 255
+            --test_text.opacity = 255
             
         end,
         [keys["2"]] = function()
@@ -295,44 +295,44 @@ local keys = {
     ["TEST_MODE"] =
     {
         --enemies
-        [keys.q] = function()
+        [keys["1"]] = function()
             formations.row_from_side(5,150,  -100,1000,  50,300,  200)
         end,
         [keys.w] = function()
             formations.row_from_side(5,150,  screen_w+100,1000,  screen_w-50,300,  screen_w-200)
         end,
-        [keys.e] = function()
+        [keys["2"]] = function()
             formations.one_loop(2,150,200,200,300,-1)
         end,
         [keys.r] = function()
             formations.one_loop(2,150,screen_w-200,screen_w-200,300,1)
         end,
-        [keys.t] = function()
+        [keys["3"]] = function()
             formations.cluster(500)
         end,
         [keys.y] = function()
             formations.zig_zag(500,400,-30)
         end,
-        [keys.u] = function()
+        [keys["4"]] = function()
             enemies.turret(500,-100)
         end,
         [keys.i] = function()
             formations.hor_row_tanks(1,-200,3,150)
         end,
-        [keys.o] = function()
+        [keys["5"]] = function()
             formations.vert_row_tanks(200,-1,3,150)
         end,
         [keys.p] = function()
             enemies.jeep(false,500,-100)
         end,
         --bosses
-        [keys.m] = function()
+        [keys["6"]] = function()
             enemies.zeppelin(900)
         end,
-        [keys.n] = function()
+        [keys["7"]] = function()
             enemies.battleship(500,300, 40,true)
         end,
-        [keys.b] = function()
+        [keys["8"]] = function()
             enemies.destroyer(500,300, 40,true)
         end,
         [keys.l] = function()
@@ -341,7 +341,7 @@ local keys = {
         [keys.k] = function()
             add_to_render_list(enemies.big_tank(),200,200)
         end,
-        [keys.v] = function()
+        [keys["9"]] = function()
             enemies.final_boss(false)
         end,
         [keys.a] = function()
@@ -380,34 +380,36 @@ local keys = {
                 test_text.opacity = 255
             end
         end,
-        [keys["1"]] = function()
+        --[[
+        [keys["1"] ] = function()
             remove_from_render_list(lvlbg[state.curr_level])
             state.curr_level = 1
             add_to_render_list(lvlbg[state.curr_level])
         end,
-        [keys["2"]] = function()
+        [keys["2"] ] = function()
             remove_from_render_list(lvlbg[state.curr_level])
             state.curr_level = 2
             add_to_render_list(lvlbg[state.curr_level])
         end,
-        [keys["3"]]= function()
+        [keys["3"] ]= function()
             remove_from_render_list(lvlbg[state.curr_level])
             state.curr_level = 3
             add_to_render_list(lvlbg[state.curr_level])
         end,
-        [keys["4"]] = function()
+        [keys["4"] ] = function()
             my_plane.firing_powerup=4
         end,
-        [keys["5"]] = function()
+        [keys["5"] ] = function()
             my_plane.firing_powerup=5
         end,
-        [keys["9"]] = function()
+        [keys["9"] ] = function()
             my_plane:hit()
         end,
-        [keys["0"]] = function()
+        [keys["0"] ] = function()
             my_plane:heal()
         end,
-        [keys["8"]] = function()
+        --]]
+        [keys["0"]] = function()
             my_plane.bombing_mode = not my_plane.bombing_mode
         end,
         [keys.Right] = function(second)
