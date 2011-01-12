@@ -2,27 +2,6 @@ GameState = Class(nil,function(state, ctrl)
     math.randomseed(os.time())
     local ctrl = ctrl
     
-    game_timer = {
-        start = 0,
-        current = 0,
-        prev = 0,
-        stop = false,
-        text = Text{
-            text = "0:00",
-            position = {1015, 301},
-            font = MENU_FONT_BOLD,
-            color = Colors.WHITE
-        }
-    }
-    function game_timer:update()
-        local min = math.floor(self.prev/60)
-        local sec = self.prev - min*60
-        if sec < 10 then
-            self.text.text = tostring(min)..":0"..tostring(sec)
-        else
-            self.text.text = tostring(min)..":"..tostring(sec)
-        end
-    end
     --[[
         Private Variables
     --]]
@@ -116,8 +95,6 @@ GameState = Class(nil,function(state, ctrl)
         new_game = true
         game_won = false
         must_restart = false
-        game_timer.start = 0
-        game_timer.current = 0
         last_tiles = nil
         selected_tile = nil
 
@@ -451,8 +428,12 @@ GameState = Class(nil,function(state, ctrl)
         end
 
         if tile_1 then
+            --[[
             game:get_presentation():sparkle(tile_1.group.x+20, tile_1.group.y+30, 4)
             game:get_presentation():sparkle(tile_2.group.x+20, tile_2.group.y+30, 4)
+            -]]
+            tile_1:show_green()
+            tile_2:show_green()
         end
 
         hint_tiles = {tile_1, tile_2}

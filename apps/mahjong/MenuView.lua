@@ -157,7 +157,6 @@ MenuView = Class(View, function(view, model, ...)
     )
 
     -- score related stuff
-    local time_text = game_timer.text
     local score_text = Text{
         text="Score: 0",
         position = {1145, 301},

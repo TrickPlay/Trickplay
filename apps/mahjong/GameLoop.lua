@@ -135,35 +135,4 @@ function(gameloop, ...)
 
     end
 
-    -- The game timer
-    --[[
-    local t = Timer
-    {
-        interval = 1500,
-        on_timer = 
-            function()
-                if game_timer  and (not game_timer.stop) then
-                    if game:get_router():get_active_component() == Components.GAME then
-                        if game:is_new_game() then
-                            game_timer.start = math.floor(sw.elapsed_seconds)
-                            if game_timer.prev ~= 0 then
-                                game_timer.prev = 0
-                                game_timer.text.text = "0:00"
-                            end
-                        else
-                            game_timer.current = math.floor(sw.elapsed_seconds)
-                            if game_timer.prev ~= game_timer.current - game_timer.start then
-                                game_timer.prev = game_timer.current - game_timer.start
-                                game_timer:update()
-                            end
-                        end
-                    else
-                        game_timer.current = math.floor(sw.elapsed_seconds)
-                        game_timer.start = game_timer.current - game_timer.prev
-                    end
-                end
-            end
-    }
-    --]]
-
 end)
