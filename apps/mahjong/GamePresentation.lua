@@ -172,28 +172,6 @@ function(pres, ctrl)
         local left_x = left_tile.x
         local left_y = left_tile.y
 
-        local x_bump = true
-        -- bump in y direction
-        if left_tile.x >= right_tile.x - 2*TILE_WIDTH then
-            x_bump = false
-        -- bump in x direction
-        elseif left_tile.y + TILE_HEIGHT - 59 > right_tile.y then
-            x_bump = true
-        end
-
-        if x_bump then 
-            left_x = left_tile.x + TILE_WIDTH - 47
-        else -- y bump
-            -- determine which is the bottom tile and set right to bottom
-            --[[
-            if left_tile.y > right_tile.y then
-                right_tile, left_tile = left_tile, right_tile
-                left_x = right_tile.x
-            end
-            --]]
-            left_y = left_tile.y + TILE_HEIGHT - 59
-        end
-
         local median = {
             x = (left_x + right_tile.x)*.5,
             y = (left_y + right_tile.y)*.5
@@ -204,13 +182,8 @@ function(pres, ctrl)
         local right_intervals_t = nil
         local right_durations = nil
         
-        if x_bump then
-            left_x = median.x-1-TILE_WIDTH+16
-            left_y = median.y
-        else
-            left_x = median.x-1-TILE_WIDTH+16
-            left_y = median.y
-        end
+        left_x = median.x-1-TILE_WIDTH+45
+        left_y = median.y
         
         left_tile.z = left_tile.z + 1
         local tile_group_interval = {
@@ -223,26 +196,14 @@ function(pres, ctrl)
             {
                 ["x"] = Interval(left_tile.x, left_x),
                 ["y"] = Interval(left_tile.y, left_y),
-            },
-            --[[
-            {
-                ["z"] = Interval(left_tile.z, left_tile.z + 20)
             }
-            --]]
         }
-        local left_durations = {300}--, 200}
+        local left_durations = {300}
         local from = {x = left_x, y = left_y}
         local to = {x = left_x-200, y = left_y}
-        --[[
-        table.insert(left_intervals_t, {
-            ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
-            ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true)
-        })
-        table.insert(left_durations, 700)
-        --]]
 
         table.insert(left_intervals_t,
-            {["opacity"]=Interval(255,0)})--, ["y"]=Interval(left_y,1200), })
+            {["opacity"]=Interval(255,0)})
         table.insert(left_durations, 400)
 
         right_tile.z = right_tile.z + 2
@@ -260,26 +221,14 @@ function(pres, ctrl)
                     mediaplayer:play_sound("assets/audio/match-good.mp3")
                     pres:sparkle(median.x,median.y+50, 9)
                 end
-            },
-            --[[
-            {
-                ["z"] = Interval(right_tile.z, right_tile.z + 20)
             }
-            --]]
         }
-        local right_durations = {300}--, 200}
+        local right_durations = {300}
         local from = {x = median.x, y = median.y}
         local to = {x = median.x+200, y = median.y}
-        --[[
-        table.insert(right_intervals_t, {
-            ["x"] = SemiCircleInterval(nil, from, to, 0, 180, true, false),
-            ["y"] = SemiCircleInterval(nil, from, to, 0, 180, false, true),
-        })
-        table.insert(right_durations, 700)
-        --]]
 
         table.insert(right_intervals_t,
-            {["opacity"]=Interval(255,0)})--, ["y"]=Interval(median.y,1200), })
+            {["opacity"]=Interval(255,0)})
         table.insert(right_durations, 400)
         gameloop:add_list(right_tile, right_durations, right_intervals_t,
             function()
