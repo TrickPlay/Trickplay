@@ -258,10 +258,10 @@ MenuView = Class(View, function(view, model, ...)
         local right_tile = view.tile_group.children[2]
 
         local left_interval = {
-            ["x"] = Interval(left_tile.x, left_tile.x + 8)
+            ["x"] = Interval(left_tile.x, left_tile.x + 22)
         }
         local right_interval = {
-            ["x"] = Interval(right_tile.x, right_tile.x - 8)
+            ["x"] = Interval(right_tile.x, right_tile.x - 22)
         }
 
         gameloop:add(left_tile, 500, nil, left_interval, nil,
