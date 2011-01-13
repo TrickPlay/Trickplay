@@ -716,9 +716,9 @@ TweetStream = Class(function(t,parent,...)
     --animate_tweets.stop = nil
     
     --function t:on_idle(last_call)
-    function animate_tweets:on_new_frame(msecs,prog)
-        local last_call = msecs/1000 - last_msec
-        last_msec = msecs/1000
+    function animate_tweets:on_new_frame()
+        local last_call = animate_tweets.elapsed/1000 - last_msec
+        last_msec = animate_tweets.elapsed/1000
         
         --if you start running out of tweets and didn't already request more
         if #results_cache <= 5 and not requesting then
