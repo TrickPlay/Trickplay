@@ -10,6 +10,7 @@
 #include "profiler.h"
 #include "util.h"
 #include "image_decoders.h"
+#include "context.h"
 
 //=============================================================================
 // Set to OFF to stop image debug log
@@ -23,12 +24,18 @@ class ExternalDecoder : public Images::Decoder
 {
 public:
 
-    ExternalDecoder( TPImageDecoder _decoder, gpointer _decoder_data )
+    ExternalDecoder( TPContext * _context , TPImageDecoder _decoder, gpointer _decoder_data )
     :
+        context( _context ),
         decoder( _decoder ),
         decoder_data( _decoder_data )
     {
         g_assert( decoder );
+    }
+
+    bool enabled( ) const
+    {
+        return context->get_bool( TP_IMAGE_DECODER_ENABLED , true );
     }
 
     virtual const char * name()
@@ -38,6 +45,13 @@ public:
 
     virtual int decode( gpointer data, gsize size, TPImage * image )
     {
+        if ( ! enabled() )
+        {
+            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
+        }
+
         images_debug( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
 
         int result = decoder( data, size, image, decoder_data );
@@ -69,6 +83,13 @@ public:
 
     virtual int decode( const char * filename, TPImage * image )
     {
+        if ( ! enabled() )
+        {
+            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
+        }
+
         std::ifstream stream;
 
         stream.open( filename, std::ios_base::in | std::ios_base::binary );
@@ -151,6 +172,7 @@ public:
 
 private:
 
+    TPContext *     context;
     TPImageDecoder  decoder;
     gpointer        decoder_data;
 };
@@ -524,7 +546,7 @@ void Images::shutdown()
 
 //-----------------------------------------------------------------------------
 
-void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data )
+void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data )
 {
     Images * self( Images::get() );
 
@@ -536,7 +558,7 @@ void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data
         self->external_decoder = NULL;
     }
 
-    self->external_decoder = new ExternalDecoder( decoder, decoder_data );
+    self->external_decoder = new ExternalDecoder( context , decoder, decoder_data );
 }
 
 //-----------------------------------------------------------------------------
