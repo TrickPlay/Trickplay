@@ -16,14 +16,9 @@ lvlbg = {
     image         = nil, 
     setup         = function( self )
         
-        self.image = Image{src = "assets/lvls/bg_tiles/water1.png" }
-        self.img_h = self.image.h
-        self.image:set{
-            tile   = {true, true},
-            w      = screen_w,
-            h      = screen_h+self.img_h,
-            y      = -self.img_h
-        }
+        self.image = Clone{source=base_imgs.water1} --Image{src = "assets/lvls/bg_tiles/water1.png" }
+        self.img_h = tilesize
+        
         layers.ground:add(self.image)
         
     end,
@@ -41,11 +36,11 @@ lvlbg = {
 
             index   = 0,
             image   = Clone{ 
-                source       = imgs[ "cloud"..tostring( index ) ] ,
+                source       = curr_lvl_imgs[ "cloud"..tostring( index ) ] ,
                 anchor_point =
                 {
-                    imgs[ "cloud"..tostring( index ) ].w/2,
-                    imgs[ "cloud"..tostring( index ) ].h/2
+                    curr_lvl_imgs[ "cloud"..tostring( index ) ].w/2,
+                    curr_lvl_imgs[ "cloud"..tostring( index ) ].h/2
                 },
                 x_rotation   = { x_rot , 0, 0},
                 y_rotation   = { y_rot , 0, 0},
@@ -128,11 +123,11 @@ lvlbg = {
 
                 index = 0,
                 image = Clone{ 
-					source       = imgs[ "island"..tostring( index ) ] ,
+					source       = curr_lvl_imgs[ "island"..tostring( index ) ] ,
                     anchor_point =
                     {
-                        imgs[ "island"..tostring( index ) ].w/2,
-                        imgs[ "island"..tostring( index ) ].h/2
+                        curr_lvl_imgs[ "island"..tostring( index ) ].w/2,
+                        curr_lvl_imgs[ "island"..tostring( index ) ].h/2
                     },
 					y_rotation   = { y_rot , 0, 0},
 					z_rotation   = { z_rot , 0, 0},
@@ -255,10 +250,11 @@ lvlbg = {
     queues        = {},
     enemies       = {},
     repeating     = false,
-    image         = Image{src = "assets/lvls/bg_tiles/water2.png" },
+    image         = nil, --Image{src = "assets/lvls/bg_tiles/water2.png" },
     setup         = function( self,o, top_doodad )
-        self.doodad_h = imgs.dock_1_1.h
-        self.img_h = self.image.h
+	self.image = Clone{source=curr_lvl_imgs.water2}
+        self.doodad_h = curr_lvl_imgs.dock_1_1.h
+        self.img_h = tilesize
         
         self.image:set{
             tile   = {true, true},
@@ -503,14 +499,7 @@ lvlbg = {
 --Level 3
 {
     speed         = 80, -- pixels per second
-    trees         = {
-            l={Clone{source=imgs.trees,x=-imgs.trees.w/2},
-               Clone{source=imgs.trees,x=-imgs.trees.w/2,y=-imgs.trees.h}
-            },
-            r={Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2},
-               Clone{source=imgs.trees,x=screen_w-imgs.trees.w/2,y=-imgs.trees.h}
-            }
-        },
+    trees         = {},
     tree_i = 1,
     doodad_frames = {},
     doodad_h      = 144,--imgs.dirt_full.h,
@@ -519,10 +508,16 @@ lvlbg = {
     append_i      = 0,
     queues        = {},
     enemies       = {},
-    image         = Image{src = "assets/lvls/bg_tiles/grass1.png" },
+    image         = nil, --Image{src = "assets/lvls/bg_tiles/grass1.png" },
     setup         = function( self, o, top_doodad  )
-
-        self.img_h = self.image.h
+	self.image = Clone{source=curr_lvl_imgs.grass1}
+	self.trees.l={Clone{source=curr_lvl_imgs.trees,x=-curr_lvl_imgs.trees.w/2},
+               Clone{source=curr_lvl_imgs.trees,x=-curr_lvl_imgs.trees.w/2,y=-curr_lvl_imgs.trees.h}
+            }
+	self.trees.r={Clone{source=curr_lvl_imgs.trees,x=screen_w-curr_lvl_imgs.trees.w/2},
+               Clone{source=curr_lvl_imgs.trees,x=screen_w-curr_lvl_imgs.trees.w/2,y=-curr_lvl_imgs.trees.h}
+            }
+        self.img_h = tilesize
         self.image:set{
             tile   = {true, true},
             w      = screen_w,
@@ -598,7 +593,7 @@ lvlbg = {
     add_building = function(building,x,y,z_rot, big_explo,o)
     print(building,x,y,z_rot, big_explo,o)
         add_to_render_list( {
-                image = Clone{source=imgs[building],x=x,y=y,z_rotation={z_rot,0,0}},
+                image = Clone{source=curr_lvl_imgs[building],x=x,y=y,z_rotation={z_rot,0,0}},
                 dead = false,
                 setup=function(s)
                     layers.land_doodads_1:add(s.image)
@@ -608,7 +603,7 @@ lvlbg = {
                     end
                     if s.dead then
                         local c = Clone{
-                            source     = imgs[building.."_d"],
+                            source     = curr_lvl_imgs[building.."_d"],
                             x          =  s.image.x,
                             y          =  s.image.y,
                             z_rotation = {s.image.z_rotation[1],0,0}
@@ -620,7 +615,7 @@ lvlbg = {
                 end,
                 render = function(s,secs)
                     s.image.y = s.image.y + lvlbg[3].speed*secs
-                    if s.image.y > (screen_h + 2*imgs.building_1_1.h) then
+                    if s.image.y > (screen_h + 2*curr_lvl_imgs.building_1_1.h) then
                         s.image:unparent()
                         remove_from_render_list(s)
                     end
@@ -660,7 +655,7 @@ lvlbg = {
                 end,
                 collision = function( self , other )
                     local c = Clone{
-                        source     = imgs[building.."_d"],
+                        source     = curr_lvl_imgs[building.."_d"],
                         x          =  self.image.x,
                         y          =  self.image.y,
                         z_rotation = {self.image.z_rotation[1],0,0}
@@ -714,9 +709,9 @@ lvlbg = {
     add_dirt = function(dirt_i,x,o)
         add_to_render_list( {
             c = Clone{
-                source = imgs["dirt_area_"..dirt_i],
+                source = curr_lvl_imgs["dirt_area_"..dirt_i],
                 x      = x,
-                y      =-imgs["dirt_area_"..dirt_i].h
+                y      =-curr_lvl_imgs["dirt_area_"..dirt_i].h
             },
             setup = function(s)
                 layers.ground:add(s.c)
@@ -726,7 +721,7 @@ lvlbg = {
             end,
             render = function(s,secs)
                 s.c.y = s.c.y + lvlbg[3].speed*secs
-                if s.c.y > (screen_h + imgs.dirt_area_1.h) then
+                if s.c.y > (screen_h + curr_lvl_imgs.dirt_area_1.h) then
                     s.c:unparent()
                     remove_from_render_list(s)
                 end
@@ -804,18 +799,18 @@ lvlbg = {
         self.append_i = self.append_i + q_i
     end,
     empty_stretch = function(self,len,delay)
-        return imgs["dock_1_1"].h*len/self.speed + delay
+        return curr_lvl_imgs["dock_1_1"].h*len/self.speed + delay
     end,
     add_stretch = function(self,type,side,len,delay)
         local c
         
         for i = 1,len do
-            c = Clone {source =  imgs["dock_"..type.."_1"]}
+            c = Clone {source =  curr_lvl_imgs["dock_"..type.."_1"]}
             if side == 1 then
                 c.y_rotation = {180,0,0}
-                c.x = imgs["dock_"..type.."_1"].w  
+                c.x = curr_lvl_imgs["dock_"..type.."_1"].w  
             elseif side == -1 then
-                c.x = screen_w - imgs["dock_"..type.."_1"].w 
+                c.x = screen_w - curr_lvl_imgs["dock_"..type.."_1"].w 
             else
                 error("unexpected value for SIDE received, expected 1 or -1, got "..side)
             end
@@ -975,11 +970,13 @@ lvlbg = {
 --Level 4
 {
     speed = 80, -- pixels per second
-    image = Image{src = "assets/lvls/bg_tiles/water2.png" },
-    grass = Image{src = "assets/lvls/bg_tiles/grass1.png"},
-    beach = Image{src = "assets/lvls/bg_tiles/beach.png"},
+    image = nil, --Image{src = "assets/lvls/bg_tiles/water2.png" },
+    grass = nil, --Image{src = "assets/lvls/bg_tiles/grass1.png"},
+    beach = nil, --Image{src = "assets/lvls/bg_tiles/beach.png"},
     setup = function( self,o)
-        
+        image = Clone{source=curr_lvl_imgs.water2}
+	grass = Clone{source=curr_lvl_imgs.grass}
+	beach = Clone{source=curr_lvl_imgs.beach}
         self.img_h = self.image.h
         
         self.image:set{

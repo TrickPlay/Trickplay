@@ -12,26 +12,26 @@ impact = function(x,y)
     
     if #old_impacts == 0 then
         imp = {
-            image = Clone{ source = imgs.impact },
+            image = Clone{ source = base_imgs.impact },
             group = Group
             {
                 size =
                 {
-                    imgs.impact.w / 4 ,
-                    imgs.impact.h
+                    base_imgs.impact.w / 4 ,
+                    base_imgs.impact.h
                 },
                 clip =
                 {
                     0 ,
                     0 ,
-                    imgs.impact.w / 4 ,
-                    imgs.impact.h
+                    base_imgs.impact.w / 4 ,
+                    base_imgs.impact.h
                 },
                 --children = { self.image },
                 anchor_point =
                 {
-                    ( imgs.impact.w / 4 ) / 2 ,
-                    imgs.impact.h / 2
+                    ( base_imgs.impact.w / 4 ) / 2 ,
+                    base_imgs.impact.h / 2
                 },
                 position = {x,y},
             },
@@ -42,7 +42,7 @@ impact = function(x,y)
                 table.insert(old_impacts,self)
             end,
             setup = function( self )
-                --mediaplayer:play_sound("audio/taking-damage.mp3")
+                --play_sound_wrapper("audio/taking-damage.mp3")
                 
                 
                 if self.image.parent == nil then
@@ -94,7 +94,7 @@ end,
         for i = 1,num do
             self.plumes[i] =
             {
-                image = Clone{ source = imgs.smoke },
+                image = Clone{ source = base_imgs.smoke },
                 group = Group{},
                 time  = -(i-1)/num*self.duration
             }
@@ -173,6 +173,7 @@ end,
         end
     end,
 	render = function( self , seconds )
+    --[[
         local frame
         for i = 1,self.num do
             
@@ -192,6 +193,7 @@ end,
                     
             end
         end
+        --]]
     end,
 
 } end
@@ -227,9 +229,9 @@ my_plane =
     
     group = Group{},
     
-    image = Clone{ source = imgs.my_plane_strip },
+    image = Clone{ source = base_imgs.my_plane_strip },
     
-    bullet = imgs.my_bullet,
+    bullet = base_imgs.my_bullet,
     
     v_speed = 0,
     
@@ -254,24 +256,24 @@ my_plane =
     bombing_mode = false,
     
 
-    shadow = Clone{source=imgs.player_shadow,opacity=0, x=100,y=30},
+    shadow = Clone{source=base_imgs.player_shadow,opacity=0, x=100,y=30},
         
     prop =
     {
-        l = Clone{source=imgs.my_prop},
-        r = Clone{source=imgs.my_prop},
+        l = Clone{source=base_imgs.my_prop},
+        r = Clone{source=base_imgs.my_prop},
         g_l = Group
         {
             clip =
             {
                 0,
                 0,
-                imgs.my_prop.w ,
+                base_imgs.my_prop.w ,
                 --self.num_prop_frames still DNE 
-                imgs.my_prop.h/3,
+                base_imgs.my_prop.h/3,
             },
-            anchor_point = {imgs.my_prop.w/2,
-                            imgs.my_prop.h/2},
+            anchor_point = {base_imgs.my_prop.w/2,
+                            base_imgs.my_prop.h/2},
             position     = {35,35},
         },
         g_r = Group
@@ -280,12 +282,12 @@ my_plane =
             {
                 0,
                 0,
-                imgs.my_prop.w ,
+                base_imgs.my_prop.w ,
                 --self.num_prop_frames still DNE 
-                imgs.my_prop.h/3,
+                base_imgs.my_prop.h/3,
             },
-            anchor_point = {imgs.my_prop.w/2,
-                            imgs.my_prop.h/2},
+            anchor_point = {base_imgs.my_prop.w/2,
+                            base_imgs.my_prop.h/2},
             position     = {93,35},
         },
     },
@@ -523,7 +525,7 @@ end,
                     
                     Clone
                     {                    
-                        source = imgs.my_bomb,
+                        source = base_imgs.my_bomb,
                         opacity = 255,
                         anchor_point = { self.bullet.w / 2 , self.bullet.h / 2 },
                         position = { x, y },
@@ -732,7 +734,7 @@ if self.damage ~= (self.num_frames - 1) then
     if other.image ~= nil then
         impact(other.image.x,other.image.y)
     end
-    mediaplayer:play_sound("audio/taking-damage.mp3")
+    play_sound_wrapper("audio/taking-damage.mp3")
     return
 else
     self:heal()
@@ -756,11 +758,11 @@ if state.hud.num_lives == 0 then
     else
         game_over_no_save:animate_in(state.hud.curr_score)
     end
-    mediaplayer:play_sound("audio/game-over.mp3")
+    play_sound_wrapper("audio/game-over.mp3")
 
 elseif state.curr_mode ~= "TEST_MODE" then
 	lives[state.hud.num_lives].opacity=0
-	state.hud.num_lives = state.hud.num_lives - 1
+	--state.hud.num_lives = state.hud.num_lives - 1
 end
 redo_score_text()
 
@@ -882,13 +884,13 @@ redo_score_text()
                         self:new_bomb(self.group.x + self.image.w / (2*self.num_frames) ,
                         self.group.y+60,0)
                     )
-                    mediaplayer:play_sound("audio/drop-bomb.mp3")
+                    play_sound_wrapper("audio/drop-bomb.mp3")
 				else
                     if can_fire then
                         fire_rate:start()
                         can_fire = false
                         shoot[self.firing_powerup]()
-                        mediaplayer:play_sound("audio/player-shooting.mp3")
+                        play_sound_wrapper("audio/player-shooting.mp3")
                     end
                     
                 end
@@ -902,11 +904,11 @@ powerups =
 {
     guns = function(xxx,green) 
     local p =  {
-        image = Clone{source=imgs.guns},--Rectangle{w=60,h=60,color="FFFF00",},
+        image = Clone{source=base_imgs.guns},--Rectangle{w=60,h=60,color="FFFF00",},
         speed = 30,
         setup = function(self)
             if green == true then
-                self.image = Clone{source=imgs.guns_g}
+                self.image = Clone{source=base_imgs.guns_g}
             end
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
@@ -927,7 +929,7 @@ powerups =
                 
                 if my_plane.firing_powerup < my_plane.firing_powerup_max then
                     my_plane.firing_powerup = my_plane.firing_powerup + 1
-                    mediaplayer:play_sound("audio/power-up.mp3")
+                    play_sound_wrapper("audio/power-up.mp3")
                 end
                 self.image:unparent()
                 remove_from_render_list(self)
@@ -942,11 +944,11 @@ powerups =
     end,
     health = function(xxx,green) 
     local p =  {
-        image = Clone{source=imgs.health},--Rectangle{w=60,h=60,color="FFFFFF",},
+        image = Clone{source=base_imgs.health},--Rectangle{w=60,h=60,color="FFFFFF",},
         speed = 30,
         setup = function(self)
             if green == true then
-                self.image = Clone{source=imgs.health_g}
+                self.image = Clone{source=base_imgs.health_g}
             end
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
@@ -966,7 +968,7 @@ powerups =
                 ) then
                 
                 my_plane:heal()
-                mediaplayer:play_sound("audio/power-up.mp3")
+                play_sound_wrapper("audio/power-up.mp3")
                 self.image:unparent()
                 remove_from_render_list(self)
             elseif self.image.y > screen_h + self.image.h then
@@ -980,11 +982,11 @@ powerups =
     end,
     life = function(xxx,green)
     local p = {
-        image = Clone{source=imgs.up_life},--Rectangle{w=60,h=60,color="654321",},
+        image = Clone{source=base_imgs.up_life},--Rectangle{w=60,h=60,color="654321",},
         speed = 30,
         setup = function(self)
             if green == true then
-                self.image = Clone{source=imgs.up_life_g}
+                self.image = Clone{source=base_imgs.up_life_g}
             end
             self.image.position = {xxx,-self.image.h}
             layers.planes:add(self.image)
@@ -1006,7 +1008,7 @@ powerups =
                 if state.hud.num_lives < state.hud.max_lives then
                     state.hud.num_lives = state.hud.num_lives + 1
                     lives[state.hud.num_lives].opacity =255
-                    mediaplayer:play_sound("audio/power-up.mp3")
+                    play_sound_wrapper("audio/power-up.mp3")
                 end
                 self.image:unparent()
                 remove_from_render_list(self)

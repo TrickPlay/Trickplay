@@ -55,11 +55,11 @@ topbar:find_child("HIGHSCORE").x = h_score_txt.x - topbar:find_child("HIGHSCORE"
 
 lives =
 {
-	Clone{name="life1",source=imgs.life,x=20,y=15,z=10},
-	Clone{name="life2",source=imgs.life,x=80,y=15,z=10},
-	Clone{name="life3",source=imgs.life,x=140,y=15,z=10},
-	Clone{name="life4",source=imgs.life,x=200,y=15,z=10,opacity=0},
-	Clone{name="life5",source=imgs.life,x=260,y=15,z=10,opacity=0},
+	Clone{name="life1",source=base_imgs.life,x=20,y=15,z=10},
+	Clone{name="life2",source=base_imgs.life,x=80,y=15,z=10},
+	Clone{name="life3",source=base_imgs.life,x=140,y=15,z=10},
+	Clone{name="life4",source=base_imgs.life,x=200,y=15,z=10,opacity=0},
+	Clone{name="life5",source=base_imgs.life,x=260,y=15,z=10,opacity=0},
 }
 
 layers.hud:add(topbar)
