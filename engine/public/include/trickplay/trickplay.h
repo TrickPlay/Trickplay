@@ -200,6 +200,10 @@ typedef struct TPContext TPContext;
     TP_MEDIAPLAYER_ENABLED - Whether the media player is enabled. If set to false, apps
                              will behave as if there is no media player.
                              Defaults to "true".
+
+    TP_IMAGE_DECODER_ENABLED - Whether the external image decoder is enabled. If set to false,
+                               only internal decoders will be used.
+                               Defaults to "true".
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -235,6 +239,8 @@ typedef struct TPContext TPContext;
 #define TP_APP_PUSH_ENABLED             "app_push_enabled"
 #define TP_APP_PUSH_PORT                "app_push_port"
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
+#define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
+
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

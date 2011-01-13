@@ -68,7 +68,7 @@ public:
 
     //.........................................................................
 
-    static void set_external_decoder( TPImageDecoder decoder, gpointer decoder_data );
+    static void set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data );
 
     //.........................................................................
     // Decodes an image and gives it to the Clutter texture.
