@@ -59,5 +59,5 @@ function refresh:on_timer()
 	end
 end
 
-setup_bg()
-refresh:start()
+--setup_bg()
+--refresh:start()
