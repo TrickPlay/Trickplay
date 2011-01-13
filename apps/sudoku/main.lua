@@ -137,8 +137,10 @@ blue_board2.position     = {     screen_w/2,     screen_h/2 }
 --sparkle:add(sparkle_base)
 --sparkle.clip = {0,0,sparkle_base.w/5,sparkle_base.h}
 --sparkle.anchor_point = {sparkle_base.w/(5*2),sparkle_base.h/2}
-local win_txt = Image{src="assets/won.png",z=3,y=35,opacity=0}
-
+local win_txt = Image{name="You've Won!!!!",src="assets/won.png",z=3,y=35,opacity=0}
+win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
+win_txt.y = 35+win_txt.h/2
+win_txt.x = screen_w/2+3/2*block_sz+30+(screen_w/2-3/2*block_sz-30)/2
 function start_sparkle(x,y, num_sparkles)
 --Text{text="You've Won!",font="DejaVu ExtraLight 60px",color="FFFFFF",opacity=0,z=3,x=x[math.ceil(#x/2)],y=y[math.ceil(#y/2)]}
 win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
@@ -1710,7 +1712,11 @@ function player_won()
 	if focus == "GAME_RIGHT" then
 		right_list[right_index]:out_focus()
 	end
-	start_sparkle(x,y,6)
+	--start_sparkle(x,y,6)
+	win_txt.opacity = 255
+mediaplayer:play_sound("audio/won_game.mp3")
+screen:add(win_txt)
+win_txt:raise_to_top()
 	focus = "GAME_LEFT"
 	selector.opacity = 0
 	ind.r = 1
