@@ -913,10 +913,13 @@ int TPContext::run()
     else
     {
         clutter_actor_set_size( stage , display_width , display_height );
-        clutter_stage_set_user_resizable( CLUTTER_STAGE( stage ) , TRUE );
     }
 
+#ifndef TP_CLUTTER_BACKEND_EGL
+
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+
+#endif
 
     ClutterColor color;
     color.red = 0;
@@ -1801,6 +1804,7 @@ void TPContext::load_external_configuration()
         TP_APP_PUSH_ENABLED,
         TP_APP_PUSH_PORT,
         TP_MEDIAPLAYER_ENABLED,
+        TP_IMAGE_DECODER_ENABLED,
 
         NULL
     };
@@ -2491,12 +2495,12 @@ void tp_context_remove_controller( TPContext * context, TPController * controlle
 // Image Decoder
 //-----------------------------------------------------------------------------
 
-void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user)
+void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user )
 {
     g_assert( context );
     g_assert( decoder );
 
-    Images::set_external_decoder( decoder, user );
+    Images::set_external_decoder( context , decoder, user );
 }
 
 //-----------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 
 #include "trickplay/keys.h"
 #include "common.h"
+#include "lb.h"
 
 // The function below creates a global table called "keys" that has two mappings.
 // It maps the names to the key values as well as the key values to the names.
@@ -2121,6 +2122,11 @@ static int find_key( lua_State * L )
 
 void luaopen_keys( lua_State * L )
 {
+    LSG;
+
+    lua_pushvalue( L , LUA_GLOBALSINDEX );
+    lua_pushliteral( L , "keys" );
+
     lua_newtable( L );
 
     lua_newtable( L );
@@ -2129,6 +2135,9 @@ void luaopen_keys( lua_State * L )
     lua_rawset( L , -3 );
     lua_setmetatable( L , -2 );
 
-    lua_setglobal( L, "keys" );
+    lua_rawset( L , -3 );
+    lua_pop( L , 1 );
+
+    LSG_END(0);
 }
 
