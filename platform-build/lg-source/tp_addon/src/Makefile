@@ -24,11 +24,12 @@ SYM_TARGET		= $(ELF_TARGET).sym
 
 C_NAMES			= \
 				main \
-				tp_openapi \
+				tp_system \
 				tp_drm \
 				tp_controller \
 				tp_imagedecoder \
-				tp_mediaplayer
+				tp_mediaplayer \
+				tp_util
 
 #=========================================================================
 # Include Module and Path
@@ -83,6 +84,7 @@ INCLUDE_MODULE	+= resolv
 INCLUDE_MODULE	+= rt
 
 # LG supported libraries
+INCLUDE_MODULE	+= rpc4dtv
 INCLUDE_MODULE	+= opengles
 INCLUDE_MODULE	+= openapi
 INCLUDE_MODULE	+= freespacealg
@@ -108,7 +110,9 @@ THIS_DEFINES	= \
 				_LINUX \
 				NEXUS_HAS_GRAPHICS3D \
 				NULL_PLATFORM \
-				_TP_DEBUG
+				_TP_DEBUG \
+				USE_HW_IMAGEDECODER \
+				LIBJPEG_MEMSRC_SUPPORT
 
 LDPATHS			= $(addprefix -L, $(INCLUDE_LDPATHS))
 LIBS			= $(addprefix -l, $(INCLUDE_MODULE))

@@ -5,7 +5,7 @@
 
 #include "tp_common.h"
 #include "tp_settings.h"
-#include "tp_openapi.h"
+#include "tp_system.h"
 #ifdef INCLUDE_NEW_WMDRMPD
 #include "tp_drm.h"
 #endif
@@ -16,7 +16,7 @@
 
 void *tp_egl_get_native_window(void)
 {
-	return TP_OpenAPI_GetEGLNativeWindow();
+	return TP_System_GetEGLNativeWindow();
 }
 
 static TPContext *pContext = NULL;
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 {
 	int result = 1;
 
-	if (!TP_OpenAPI_Initialize()) {
+	if (!TP_System_Initialize()) {
 		goto done;
 	}
 
@@ -202,14 +202,16 @@ int main(int argc, char *argv[])
 		goto done;
 	}
 
-	TP_OpenAPI_EnableFullDisplay();
+	TP_System_EnableFullDisplay();
 	result = _TP_RunContext() ? 0 : 1;
-	TP_OpenAPI_DisableFullDisplay();
+	TP_System_DisableFullDisplay();
 
 done:
 	_TP_FiniContext();
 
-	TP_OpenAPI_Finalize();
+	TP_ImageDecoder_Finalize();
+
+	TP_System_Finalize();
 
 	return result;
 }

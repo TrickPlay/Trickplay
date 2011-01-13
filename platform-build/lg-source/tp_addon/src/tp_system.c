@@ -1,23 +1,25 @@
 #include "tp_common.h"
 #include "tp_settings.h"
 #include "tp_controller.h"
-#include "tp_openapi.h"
+#include "tp_system.h"
 
 
 static EGLNativeWindowType eglWindow = NULL;
 static UINT32 ulInitializedStep;
 
-BOOLEAN TP_OpenAPI_Initialize(void)
+BOOLEAN TP_System_Initialize(void)
 {
 	DBG_PRINT_TP();
 
 	HOA_STATUS_T	hoaStatus;
+	GOA_STATUS_T	goaStatus;
 	APP_CALLBACKS_T	callbacks;
+	GOA_CALLBACK_T	goa_callback;
 	const UINT32	openglAttributes[] = {
 		OPENGLES_WINDOW_WIDTH,	TRICKPLAY_SCREEN_WIDTH,
 		OPENGLES_WINDOW_HEIGHT, TRICKPLAY_SCREEN_HEIGHT,
 		OPENGLES_WINDOW_FORMAT,	OPENGLES_WINDOW_PIXEL8888,
-		OPENGLES_WINDOW_STRETCHTODISPLAY, 1,
+		OPENGLES_WINDOW_STRETCHTODISPLAY, TRICKPLAY_STRETCH_TO_SCREEN,
 		OPENGLES_WINDOW_NONE
 	};
 
@@ -28,37 +30,39 @@ BOOLEAN TP_OpenAPI_Initialize(void)
 #else
 	callbacks.pfnMouseEventCallback	= NULL;
 #endif
+	goa_callback.callbacks = callbacks;
 
 	ulInitializedStep = 0;
 
-	hoaStatus = HOA_APP_RegisterToMgr(&callbacks);
-	if (hoaStatus != HOA_OK) {
-		DBG_PRINT_TP("HOA_APP_RegisterToMgr() failed. (%d)", hoaStatus);
-		TP_OpenAPI_Finalize();
+	goaStatus = GOA_SYSTEM_Initialize(
+			TRICKPLAY_REQUIRED_SYSTEM_MEMORY,
+			TRICKPLAY_REQUIRED_GRAPHIC_MEMORY,
+			&goa_callback);
+	if (goaStatus != GOA_OK) {
+		DBG_PRINT_TP("GOA_SYSTEM_Initialize() failed. (%d)", goaStatus);
+		TP_System_Finalize();
 		return FALSE;
 	}
 	++ulInitializedStep;	// Done initialize step 1
 
-	hoaStatus = GOA_OPENGLES_Initialize(openglAttributes);
-	if (hoaStatus != HOA_OK) {
-		DBG_PRINT_TP("GOA_OPENGLES_Initialize() failed.");
-		TP_OpenAPI_Finalize();
+	goaStatus = GOA_OPENGLES_Initialize(openglAttributes);
+	if (goaStatus != GOA_OK) {
+		DBG_PRINT_TP("GOA_OPENGLES_Initialize() failed. (%d)", goaStatus);
+		TP_System_Finalize();
 		return FALSE;
 	}
 	++ulInitializedStep;	// Done initialize step 2
 
-	hoaStatus = HOA_APP_SetReady();
-	if (hoaStatus != HOA_OK) {
+	if (HOA_APP_SetReady() != HOA_OK) {
 		DBG_PRINT_TP("HOA_APP_SetReady() failed. (%d)", hoaStatus);
-		TP_OpenAPI_Finalize();
+		TP_System_Finalize();
 		return FALSE;
 	}
 	++ulInitializedStep;	// Done initialize step 3
 
-	hoaStatus = HOA_APP_RequestFocus();
-	if (hoaStatus != HOA_OK) {
+	if (HOA_APP_RequestFocus() != HOA_OK) {
 		DBG_PRINT_TP("HOA_APP_RequestFocus() failed. (%d)", hoaStatus);
-		TP_OpenAPI_Finalize();
+		TP_System_Finalize();
 		return FALSE;
 	}
 	++ulInitializedStep;	// Done initialize step 4
@@ -66,7 +70,7 @@ BOOLEAN TP_OpenAPI_Initialize(void)
 	return TRUE;
 }
 
-void TP_OpenAPI_Finalize(void)
+void TP_System_Finalize(void)
 {
 	DBG_PRINT_TP();
 
@@ -75,41 +79,36 @@ void TP_OpenAPI_Finalize(void)
 		eglWindow = NULL;
 	}
 
-	if (ulInitializedStep > 3) {
+	if (ulInitializedStep > 3)
 		HOA_APP_ReleaseFocus(EXITCODE_NORMAL);
-	}
-	if (ulInitializedStep > 2) {
+	if (ulInitializedStep > 2)
 		HOA_APP_SetTerminate();
-	}
-	if (ulInitializedStep > 1) {
+	if (ulInitializedStep > 1)
 		GOA_OPENGLES_Finalize(EXITCODE_NORMAL);
-	}
-	if (ulInitializedStep > 0) {
-		HOA_APP_DeregisterFromMgr(EXITCODE_NORMAL);
-	}
+	if (ulInitializedStep > 0)
+		GOA_SYSTEM_Finalize(EXITCODE_NORMAL);
 
 	ulInitializedStep = 0;
 }
 
-EGLNativeWindowType TP_OpenAPI_GetEGLNativeWindow(void)
+EGLNativeWindowType TP_System_GetEGLNativeWindow(void)
 {
 	DBG_PRINT_TP();
 
-	if (eglWindow == NULL) {
+	if (eglWindow == NULL)
 		eglWindow = GOA_OPENGLES_CreateNativeEGLWindow();
-	}
 
 	return eglWindow;
 }
 
-void TP_OpenAPI_EnableFullDisplay(void)
+void TP_System_EnableFullDisplay(void)
 {
 	DBG_PRINT_TP();
 
 	HOA_TV_SetDisplayMode(ADDON_DISP_FULLUI);	// This API always returns HOA_OK
 }
 
-void TP_OpenAPI_DisableFullDisplay(void)
+void TP_System_DisableFullDisplay(void)
 {
 	DBG_PRINT_TP();
 
