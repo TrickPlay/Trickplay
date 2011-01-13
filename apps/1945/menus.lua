@@ -15,8 +15,8 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     local h_score_val = Text{text="000000",    font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-200}
     local h_score_txt = Text{text="HIGH SCORE!",font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-110}
     local init_here   = Text{text="Enter your initials:",font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2+200}
-    local arrow_up    = Image{src="assets/splash/Arrow.png", x = screen_w/2-95, y = screen_h-200, z_rotation={-90,0,0}}
-    local arrow_dn    = Image{src="assets/splash/Arrow.png", x = screen_w/2-55, y = screen_h-100, z_rotation={90,0,0}}
+    local arrow_up    = Clone{source=base_imgs.arrow, x = screen_w/2-95, y = screen_h-200, z_rotation={-90,0,0}}
+    local arrow_dn    = Clone{source=base_imgs.arrow, x = screen_w/2-55, y = screen_h-100, z_rotation={90,0,0}}
 
     init_here.anchor_point = {init_here.w/2,init_here.h/2}
     menu.initials = {
@@ -43,7 +43,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         local upper = state.curr_level-1
         if no_delay ~= nil then upper = state.curr_level end
         for i = 1, upper do
-            m = Clone{source=imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
+            m = Clone{source=base_imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
         end 
@@ -66,6 +66,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
             remove_all_from_render_list()
             menu.group:show()
             menu.group.opacity=255
+            scrap_caches()
             state.curr_mode = "GAME_OVER_SAVE"
             timer:stop()
             timer = nil
@@ -168,7 +169,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     local play_again  = Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+100}
     local high_scores = Text{text="High Scores", font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+180}
     local quit        = Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+260}
-    local arrow       = Image{src="assets/splash/Arrow.png", x = play_again.x-50, y = play_again.y+40}
+    local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+40}
     
     menu.group:add(title,h_score_val,play_again,high_scores,quit,arrow)
     
@@ -182,7 +183,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         local upper = state.curr_level-1
         if no_delay ~= nil then upper = state.curr_level end
         for i = 1, upper do
-            m = Clone{source=imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
+            m = Clone{source=base_imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
         end   
@@ -200,6 +201,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
             remove_all_from_render_list()
             menu.group:show()
             menu.group.opacity=255
+            scrap_caches()
             state.curr_mode = "GAME_OVER"
             timer:stop()
             timer = nil
@@ -233,6 +235,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
                 menu.group:hide()
                 state.curr_mode  = "CAMPAIGN"
                 state.curr_level = 1
+		load_imgs[state.curr_level]()
                 add_to_render_list(lvlbg[1])
                 add_to_render_list(my_plane)
                 add_to_render_list(levels[state.curr_level])
@@ -289,7 +292,7 @@ Menu_High_Scores = Class(function(menu, ...)
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
     local play_again  = Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2}
     local quit        = Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2+80}
-    local arrow       = Image{src="assets/splash/Arrow.png", x = play_again.x-50, y = play_again.y+20}
+    local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+20}
     local highscores_num  = Text{text="1:\n2:\n3:\n4:\n5:\n6:\n7:\n8:",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
     local highscores_sc  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+400, y = screen_h/2-350}
     local highscores_ini  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-350}
@@ -311,7 +314,7 @@ Menu_High_Scores = Class(function(menu, ...)
             highscores_sc.text  = highscores_sc.text..state.high_scores[i].score.."\n"
             for j = 1,state.high_scores[i].medals do
             print("gay")
-                medals:add(Clone{source=imgs["medals_"..j.."_sm"], x = 40*j, y = 100*(i-1)})
+                medals:add(Clone{source=base_imgs["medals_"..j.."_sm"], x = 40*j, y = 100*(i-1)})
             end
             
         end
@@ -341,6 +344,7 @@ Menu_High_Scores = Class(function(menu, ...)
                 menu.group:hide()
                 state.curr_mode  = "CAMPAIGN"
                 state.curr_level = 1
+		load_imgs[state.curr_level]()
                 add_to_render_list(lvlbg[1])
                 add_to_render_list(my_plane)
                 add_to_render_list(levels[state.curr_level])
@@ -394,9 +398,10 @@ Menu_Level_Complete = Class(function(menu, ...)
     local medals = {}
     local g_over = nil
     function menu:animate_in(score)
+	print("end of level")
         local m
         for i = 1, state.curr_level do
-            m = Clone{source=imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
+            m = Clone{source=base_imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
         end
@@ -408,14 +413,15 @@ Menu_Level_Complete = Class(function(menu, ...)
         state.in_lvl_complete = true
         state.menu = score
         
-        mediaplayer:play_sound("audio/level-complete.mp3")
+        play_sound_wrapper("audio/level-complete.mp3")
         local timer = Timer{interval=3000}
         timer.on_timer = function()
-            print(state.counters[state.curr_level].lvl_points)
+            print("progressing to level "..state.counters[state.curr_level].lvl_points)
             h_score_val.text = string.format("%06d",state.counters[state.curr_level].lvl_points).." pts"
             remove_all_from_render_list()
             menu.group:show()
             menu.group.opacity=255
+            scrap_caches()
             state.curr_mode = "LEVEL_END"
             timer:stop()
             timer = nil
@@ -453,6 +459,7 @@ Menu_Level_Complete = Class(function(menu, ...)
             else
                 remove_from_render_list(lvlbg[state.curr_level])
                 state.curr_level = state.curr_level + 1
+		load_imgs[state.curr_level]()
                 if lvlbg[state.curr_level] ~= nil then
                     add_to_render_list(my_plane)
                     add_to_render_list(lvlbg[ state.curr_level])

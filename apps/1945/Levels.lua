@@ -608,9 +608,9 @@ levels =
         pier_turret = function(side)
             local x= 960
             if side == 1 then
-                x = imgs.dock_1_7.w - 50
+                x = curr_lvl_imgs.dock_1_7.w - 50
             elseif side == -1 then
-                x = screen_w - imgs.dock_1_7.w + 50
+                x = screen_w - curr_lvl_imgs.dock_1_7.w + 50
             else
             end
             enemies.turret(x,-5)
@@ -619,7 +619,7 @@ levels =
         docked_b_ship = function(side)
             local x=960
             if side == 1 then
-                x = 250-imgs.b_ship.w
+                x = 250-curr_lvl_imgs.b_ship.w
             elseif side == -1 then
                 x = 1670
             else
@@ -633,26 +633,26 @@ levels =
                 side,
                 tile_index)
             --[[
-            local c = Clone {source =  imgs["dock_"..type.."_"..tile_index]}
+            local c = Clone {source =  curr_lvl_imgs["dock_"..type.."_"..tile_index]}
             
             if side == 1 then
                 c.y_rotation = {180,0,0}
-                c.x = imgs["dock_"..type.."_"..tile_index].w  
+                c.x = curr_lvl_imgs["dock_"..type.."_"..tile_index].w  
             elseif side == -1 then
-                c.x = screen_w - imgs["dock_"..type.."_"..tile_index].w 
+                c.x = screen_w - curr_lvl_imgs["dock_"..type.."_"..tile_index].w 
             else
                 error("unexpected value for SIDE received, expected 1 or -1, got "..side)
             end
             
             return c
             --]]
-            local c =  { source = {"imgs","dock_"..type.."_"..tile_index} }
+            local c =  { source = {"curr_lvl_imgs","dock_"..type.."_"..tile_index} }
             if side == 1 then
                 c.y_rotation = 180
-                c.x = imgs["dock_"..type.."_"..tile_index].w 
+                c.x = curr_lvl_imgs["dock_"..type.."_"..tile_index].w 
             elseif side == -1 then
                 c.y_rotation = 0
-                c.x = screen_w - imgs["dock_"..type.."_"..tile_index].w 
+                c.x = screen_w - curr_lvl_imgs["dock_"..type.."_"..tile_index].w 
             else
                 error("unexpected value for SIDE received, expected 1 or -1, got "..side)
             end
@@ -833,21 +833,21 @@ levels =
                     { enemies =
                         {
                             {f = {"powerups","life"},     p = {1800}},
-                            {f = {"enemies","destroyer"}, p = {1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"enemies","destroyer"}, p = {1000, -curr_lvl_imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},{},{},{},
 
                     { enemies =
                         {
-                            {f = {"enemies","destroyer"},      p = {800, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"enemies","destroyer"},      p = {800, -curr_lvl_imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},
 
                     {enemies =
                         {
-                            {f = {"enemies","destroyer"},      p = {1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
+                            {f = {"enemies","destroyer"},      p = {1200, -curr_lvl_imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true  }},
                         }
                     },
                     {},{},{},{},{},{},
@@ -874,9 +874,9 @@ levels =
                     { self:add_harbor_tile(2,  -1, h_close)},
                     {},{},{},{},
                     {enemies={
-                    {f = {"enemies","destroyer"},      p = {1000, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
-                    {f = {"enemies","destroyer"},      p = {1200, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
-                    {f = {"enemies","destroyer"},      p = {1400, -imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = {"enemies","destroyer"},      p = {1000, -curr_lvl_imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = {"enemies","destroyer"},      p = {1200, -curr_lvl_imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
+                    {f = {"enemies","destroyer"},      p = {1400, -curr_lvl_imgs.dock_1_1.h*2/3, self.bg.speed*2/3,true }},
                     }},
                     {},{},
                     {enemies={{f = {"powerups","health"},      p = {1800} }} },
@@ -981,27 +981,27 @@ levels =
             self.bg:append_to_queue(
                 {---[[
                     {
-                        {source={"imgs","trench_l"},  x=1300+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=1300+2*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=1300+3*imgs.trench_l.w},
-                        {source={"imgs","trench_l"},  x=100+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=100+3*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=1300+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1300+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=1300+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=100+3*curr_lvl_imgs.trench_l.w},
                         enemies={
-                            {f = {"enemies","trench"}, p = {1300+2*imgs.trench_l.w}},
-                            {f = {"enemies","trench"}, p = { 100+2*imgs.trench_l.w}},
+                            {f = {"enemies","trench"}, p = {1300+2*curr_lvl_imgs.trench_l.w}},
+                            {f = {"enemies","trench"}, p = { 100+2*curr_lvl_imgs.trench_l.w}},
                             {f = {"enemies","tank"},   p = {false,200, -300}},
                             {f = {"enemies","tank"},      p = {false,300, -300}},
                         }
                     },
                     {
-                        {source={"imgs","trench_l"},  x=500+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=500+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=500+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=500+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=500+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=500+6*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=500+7*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=500+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=500+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=500+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=500+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=500+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=500+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=500+7*curr_lvl_imgs.trench_l.w},
                         enemies={
                             {f={"enemies","trench"},p={500+2*imgs.trench_l.w}},
                             {f={"enemies","trench"},p={500+5*imgs.trench_l.w}},
@@ -1009,21 +1009,21 @@ levels =
                     },
                     {
 
-                        {source={"imgs","road_hor"}, x=300-5*imgs.road_hor.w},
-                        {source={"imgs","road_hor"}, x=300-4*imgs.road_hor.w},
-                        {source={"imgs","road_hor"}, x=300-3*imgs.road_hor.w},
-                        {source={"imgs","road_hor"}, x=300-2*imgs.road_hor.w},
-                        {source={"imgs","road_hor"}, x=300-imgs.road_hor.w},
-                        {source={"imgs","road_left"},x=300},
+                        {source={"curr_lvl_imgs","road_hor"}, x=300-5*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"}, x=300-4*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"}, x=300-3*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"}, x=300-2*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"}, x=300-  curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_left"},x=300},
                     },
-                    {{source={"imgs","road_ver"},x=300},times=5},
-                    {{source={"imgs","road_ver"},x=300},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300},times=5},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300},times=3,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {1,-200,3,150 }},
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300}, times   = 2,
+                        {source={"curr_lvl_imgs","road_ver"},x=300}, times   = 2,
                         
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {1,-200,3,150 }},
@@ -1034,7 +1034,7 @@ levels =
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300}, times=2,
+                        {source={"curr_lvl_imgs","road_ver"},x=300}, times=2,
                         enemies = {
                             {f = {"lvlbg",3,"add_building"},      p = {
                                 "building_1_1",1200,-30,-90,false
@@ -1045,105 +1045,105 @@ levels =
                             }
                             },
                             {f = {"lvlbg",3,"add_building"},      p = {
-                            "building_1_2",900,-3*imgs.building_1_2.h,0,false
+                            "building_1_2",900,-3*curr_lvl_imgs.building_1_2.h,0,false
                             
                             }
                             },
                             {f = {"lvlbg",3,"add_building"},      p =
                             {
-                            "building_1_2",900,-4*imgs.building_1_2.h,0,false
+                            "building_1_2",900,-4*curr_lvl_imgs.building_1_2.h,0,false
                             }
                             },
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300},times=3},
-                    {{source={"imgs","road_ver"},x=300},times=2,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300},times=3},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {1200,-1,3,150}},
                             {f = {"powerups","health"},      p = {1800,true}},
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300},times=3,
+                        {source={"curr_lvl_imgs","road_ver"},x=300},times=3,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {400,-1,3,150}},
                         }
                     },
 
                     {
-                        {source={"imgs","road_right"},x=300},
-                        {source={"imgs","road_hor"},  x=300+  imgs.road_hor.w},
-                        {source={"imgs","road_hor"},  x=300+2*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},  x=300+3*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},  x=300+4*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},  x=300+5*imgs.road_hor.w},
-                        {source={"imgs","road_left"}, x=300+6*imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_right"},x=300},
+                        {source={"curr_lvl_imgs","road_hor"},  x=300+  curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},  x=300+2*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},  x=300+3*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},  x=300+4*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},  x=300+5*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_left"}, x=300+6*curr_lvl_imgs.road_hor.w},
                     },
-                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=2},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},times=2},
                     {
-                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},
-                        {source={"imgs","trench_l"}, x=50+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+7*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=50+8*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"}, x=300+6*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=50+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=50+8*curr_lvl_imgs.trench_l.w},
                         
-                        {source={"imgs","trench_l"},  x=1250},
-                        {source={"imgs","trench_reg"},x=1250+1*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=1250+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=1250+3*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=1250+4*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=1250},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1250+1*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1250+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1250+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=1250+4*curr_lvl_imgs.trench_l.w},
                         enemies={
-                            {f={"enemies","trench"},p={  50+2*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={   0+4*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={  50+7*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={1250+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={1250+3*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+2*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={   0+4*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+7*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+3*curr_lvl_imgs.trench_l.w}},
                             
                             
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},times=3},
                     {
-                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=50},
-                        {source={"imgs","trench_reg"},x=50+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=50+7*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=50+8*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=50},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=50+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=50+8*curr_lvl_imgs.trench_l.w},
                         
-                        {source={"imgs","trench_l"},  x=1250},
-                        {source={"imgs","trench_reg"},x=1250+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=1250+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=1250+3*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=1250+4*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=1250},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1250+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1250+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=1250+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=1250+4*curr_lvl_imgs.trench_l.w},
                         enemies={
                             
-                            {f={"enemies","trench"},p={  50+2*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={  50+4*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={  50+6*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={1250+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={1250+3*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+2*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+4*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={  50+6*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={1250+3*curr_lvl_imgs.trench_l.w}},
                             {f = {"powerups","life"},      p = {200,true}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3},
-                    {{source={"imgs","road_ver"},x=300+6*imgs.road_ver.w},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},times=3},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {-1,-200,5,150 }},
-                            {f = {"enemies","jeep"},            p = {false,270+6*imgs.road_hor.w,-100}},
+                            {f = {"enemies","jeep"},            p = {false,270+6*curr_lvl_imgs.road_hor.w,-100}},
                             
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w}, times   = 3,
+                        {source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w}, times   = 3,
                         enemies = {
                             
                             {f = {"lvlbg",3,"add_dirt"},      p = { 2, 100}
@@ -1151,10 +1151,10 @@ levels =
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300+6*imgs.road_ver.w}, times=6,
+                        {source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w}, times=6,
                         enemies = {
                             {f = {"lvlbg",3,"add_building"},
-                            p ={"building_big",700,-imgs.building_big.h,0,true}
+                            p ={"building_big",700,-curr_lvl_imgs.building_big.h,0,true}
                             },
                             {f = {"enemies","tank"}, p = {false,700, -400}},
                             {f = {"enemies","tank"}, p = {false,800, -400}},
@@ -1165,64 +1165,64 @@ levels =
 
                     
                     {
-                        {source={"imgs","road_right"}, x=300+6*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},   x=300+7*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},   x=300+8*imgs.road_hor.w},
-                        {source={"imgs","road_left"},  x=300+9*imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_right"}, x=300+6*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},   x=300+7*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},   x=300+8*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_left"},  x=300+9*curr_lvl_imgs.road_hor.w},
                         enemies = { {f = {"powerups","health"},      p = {200,true}},}
                     },
                     {
                         
-                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=100},
-                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=100},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
                         enemies={
                             
-                            {f={"enemies","trench"},p={100+2*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+8*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+2*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+8*curr_lvl_imgs.trench_l.w}},
                             
                             
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w}},
+                        {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w}},
                     {
-                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=100},
-                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=100},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
                         enemies={
-                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+3*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+7*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
                         enemies={
                             {f = {"enemies","tank"}, p = {false,200,  -150}},
                             {f = {"enemies","tank"}, p = {false,400,  -150}},
@@ -1231,30 +1231,30 @@ levels =
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},  x=300+9*imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=100},
-                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},  x=300+9*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=100},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
                         enemies={
-                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+4*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+6*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+4*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+6*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=2},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=2},
                     {
-                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w}, times   = 7,
+                        {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w}, times   = 7,
                         enemies = {
                             
                             {f = {"lvlbg",3,"add_dirt"},      p =
@@ -1267,13 +1267,13 @@ levels =
                             },
                             {f = {"lvlbg",3,"add_building"},      p =
                             {
-                            "building_1_1",600,-imgs.building_big.h-100,0,true
+                            "building_1_1",600,-curr_lvl_imgs.building_big.h-100,0,true
 
                             }
                             },
                             {f = {"lvlbg",3,"add_building"},      p =
                             {
-                            "building_big",500,-imgs.building_big.h-400,0,true
+                            "building_big",500,-curr_lvl_imgs.building_big.h-400,0,true
 
                             }
                             },
@@ -1286,154 +1286,154 @@ levels =
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},  x=300+9*imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=100},
-                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},  x=300+9*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=100},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
                         enemies={
-                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+3*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+7*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
                     
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
                             --{f = add_to_render_list,      p = {powerups.health(600)}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=10,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=10,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {-1,-300,6,150 }},
                             {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {300,1,4,150}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=10,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=10,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {300,1,4,150}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = {"enemies","jeep"},p = {false,300+9*imgs.road_ver.w-20,-100}},
+                            {f = {"enemies","jeep"},p = {false,300+9*curr_lvl_imgs.road_ver.w-20,-100}},
                             
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {1000,-1,4,150}},
                             {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
                             {f = {"powerups","health"},      p = {1600,true}},
                             
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
                     
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},times=5,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {1000,-1,4,150}},
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300+9*imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=100},
-                        {source={"imgs","trench_reg"},x=100+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+7*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+8*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=100+9*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=100+10*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=100},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         enemies = {
-                            {f={"enemies","trench"},p={100+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+3*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+5*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+7*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+9*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
                     
                     {
-                        {source={"imgs","road_right"},x=300+9*imgs.road_hor.w,z_rotation=90},
-                        {source={"imgs","road_hor"},x=300+8*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+7*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+6*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+5*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+4*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+3*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+2*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+1*imgs.road_hor.w},
-                        {source={"imgs","road_hor"},x=300+0*imgs.road_hor.w},
-                        {source={"imgs","road_left"},x=300-imgs.road_ver.w,z_rotation=90},
+                        {source={"curr_lvl_imgs","road_right"},x=300+9*curr_lvl_imgs.road_hor.w,z_rotation=90},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+8*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+7*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+6*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+5*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+4*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+3*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+2*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+1*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"},x=300+0*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_left"},x=300-curr_lvl_imgs.road_ver.w,z_rotation=90},
                     },
                     { 
-                        {source={"imgs","road_ver"},  x=300-imgs.road_ver.w},
-                        {source={"imgs","trench_l"},  x=300},
-                        {source={"imgs","trench_reg"},x=300+  imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+2*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+3*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+4*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+5*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+6*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+7*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+8*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+9*imgs.trench_l.w},
-                        {source={"imgs","trench_reg"},x=300+10*imgs.trench_l.w},
-                        {source={"imgs","trench_r"},  x=300+11*imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","road_ver"},  x=300-curr_lvl_imgs.road_ver.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=300},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+3*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+4*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+5*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+6*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+7*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+8*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+9*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg"},x=300+10*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=300+11*curr_lvl_imgs.trench_l.w},
                         enemies = {
-                            {f={"enemies","trench"},p={300+1*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={300+3*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={300+5*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={300+7*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={300+9*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+1*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+3*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+5*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+7*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={300+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=3,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = {1,-150,3,150 }},
                             {f = {"formations","hor_row_tanks"},      p = {1,-400,3,150 }},
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300-imgs.road_ver.w}, times   = 2,
+                        {source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w}, times   = 2,
                         enemies = {
                             
                             {f = {"lvlbg",3,"add_dirt"},      p =
@@ -1445,36 +1445,36 @@ levels =
                         }
                     },
                     {
-                        {source={"imgs","road_ver"},x=300-imgs.road_ver.w}, times=2,
+                        {source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w}, times=2,
                         enemies = {
                             {f = {"lvlbg",3,"add_building"},      p =
-                            {"building_1_1",1150,-imgs.building_1_1.h-300,90,false}
+                            {"building_1_1",1150,-curr_lvl_imgs.building_1_1.h-300,90,false}
                             },
                             {f = {"lvlbg",3,"add_building"},      p =
-                            {"building_big",500,-imgs.building_1_1.h-300,0,true}
+                            {"building_big",500,-curr_lvl_imgs.building_1_1.h-300,0,true}
                             },
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=3},
-                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=3},
+                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {1200,-1,3,150}},
                             {f = {"powerups","health"},      p = {1800,true}},
                         }
                     },
-                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {300,-1,3,150}},
                         }
                     },
                     
-                    {{source={"imgs","road_ver"},x=300-imgs.road_ver.w},times=2,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=2,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {500,-1,3,150}},
                         }
                     },
                     {
-                        {source={"imgs","road_left"},x=300-1*imgs.road_hor.w,z_rotation=-90},
+                        {source={"curr_lvl_imgs","road_left"},x=300-1*curr_lvl_imgs.road_hor.w,z_rotation=-90},
                         enemies = {
                             {f = {"formations","hor_row_tanks"},      p = { 1,-150,4,200 }},
                             {f = {"formations","hor_row_tanks"},      p = { 1,-400,4,200 }},

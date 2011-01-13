@@ -29,7 +29,7 @@ points = function(x,y,num_points)
         		state.hud.high_score = state.hud.curr_score
                 if not state.set_highscore then
                     state.set_highscore = true
-                    mediaplayer:play_sound("audio/level-complete.mp3")
+                    play_sound_wrapper("audio/level-complete.mp3")
                 end
             end
             redo_score_text()
@@ -53,13 +53,13 @@ points = function(x,y,num_points)
 end
 wake = 
     function(x,y) return {
-        left  = Clone{ source = imgs.rear_wake },
-        right = Clone{ source = imgs.rear_wake },
-        g_l   = Group{clip={0,0,imgs.rear_wake.w/11,imgs.rear_wake.h}},
-        g_l_rot = Group{anchor_point = {imgs.rear_wake.w/11/2,imgs.rear_wake.h/2},x=10},
-        g_r   = Group{clip={0,0,imgs.rear_wake.w/11,imgs.rear_wake.h}},
-        g_r_rot = Group{anchor_point = {imgs.rear_wake.w/11/2,imgs.rear_wake.h/2},x=imgs.rear_wake.w/11-10},
-        group = Group{x=x-imgs.rear_wake.w/11/2,y=y},
+        left  = Clone{ source = curr_lvl_imgs.rear_wake },
+        right = Clone{ source = curr_lvl_imgs.rear_wake },
+        g_l   = Group{clip={0,0,curr_lvl_imgs.rear_wake.w/11,curr_lvl_imgs.rear_wake.h}},
+        g_l_rot = Group{anchor_point = {curr_lvl_imgs.rear_wake.w/11/2,curr_lvl_imgs.rear_wake.h/2},x=10},
+        g_r   = Group{clip={0,0,curr_lvl_imgs.rear_wake.w/11,curr_lvl_imgs.rear_wake.h}},
+        g_r_rot = Group{anchor_point = {curr_lvl_imgs.rear_wake.w/11/2,curr_lvl_imgs.rear_wake.h/2},x=curr_lvl_imgs.rear_wake.w/11-10},
+        group = Group{x=x-curr_lvl_imgs.rear_wake.w/11/2,y=y},
         speed = 80,
         rot_speed = 20,
         duration = 6, 
@@ -105,6 +105,8 @@ local big_explos = {}
 local num_big_explos = 0
 local sm_explos = {}
 local num_sm_explos = 0
+
+
 explosions =
 {
 	big = function(x,y,dam_list,delay,sound)
@@ -115,7 +117,7 @@ explosions =
         if #big_explos == 0 then
         num_big_explos = num_big_explos + 1
             e = {
-                image    = Clone{ source = imgs.explosion3 },
+                image    = Clone{ source = base_imgs.explosion3 },
                 duration = 0.5, 
                 time     = delay,
                 timer    = Timer
@@ -124,9 +126,9 @@ explosions =
                     on_timer = function(t)
                         t:stop()
                         if sound then
-                            mediaplayer:play_sound(sound)
+                            play_sound_wrapper(sound)
                         else
-                            mediaplayer:play_sound("audio/big-explosion.mp3")
+                            play_sound_wrapper("audio/big-explosion.mp3")
                         end
                     end
                 },
@@ -134,20 +136,20 @@ explosions =
                 	{
             		size =
             		{
-            			imgs.explosion3.w / 7 ,
-                		imgs.explosion3.h
+            			base_imgs.explosion3.w / 7 ,
+                		base_imgs.explosion3.h
                 	},
             		clip =
             		{
             			0 ,
                 		0 ,
-                        imgs.explosion3.w / 7 ,
-            			imgs.explosion3.h
+                        base_imgs.explosion3.w / 7 ,
+            			base_imgs.explosion3.h
             		},
                 	anchor_point =
                     {
-                    	( imgs.explosion3.w / 7 ) / 2 ,
-                    	  imgs.explosion3.h / 2
+                    	( base_imgs.explosion3.w / 7 ) / 2 ,
+                    	  base_imgs.explosion3.h / 2
                     },
                     position = {x,y},
                 },
@@ -161,9 +163,9 @@ explosions =
                     end
                     if delay == 0 then
                         if sound then
-                            mediaplayer:play_sound(sound)
+                            play_sound_wrapper(sound)
                         else
-                            mediaplayer:play_sound("audio/big-explosion.mp3")
+                            play_sound_wrapper("audio/big-explosion.mp3")
                         end
                     else
                         self.timer:start()
@@ -223,7 +225,7 @@ explosions =
         if #sm_explos == 0 then
         num_sm_explos = num_sm_explos + 1
             e = {
-                image    = Clone{ source = imgs.explosion1 },
+                image    = Clone{ source = base_imgs.explosion1 },
                 duration = 0.2, 
                 time     = 0,
                 
@@ -231,20 +233,20 @@ explosions =
                 	{
             		size =
             		{
-            			imgs.explosion1.w / 6 ,
-                		imgs.explosion1.h
+            			base_imgs.explosion1.w / 6 ,
+                		base_imgs.explosion1.h
                 	},
             		clip =
             		{
             			0 ,
                 		0 ,
-                        imgs.explosion1.w / 6 ,
-            			imgs.explosion1.h
+                        base_imgs.explosion1.w / 6 ,
+            			base_imgs.explosion1.h
             		},
                 	anchor_point =
                     {
-                    	( imgs.explosion1.w / 6 ) / 2 ,
-                    	  imgs.explosion1.h / 2
+                    	( base_imgs.explosion1.w / 6 ) / 2 ,
+                    	  base_imgs.explosion1.h / 2
                     },
                     position = {x,y},
                 },
@@ -254,9 +256,9 @@ explosions =
                 end,
                 setup = function( self )
                     if sound then
-                            mediaplayer:play_sound(sound)
+                            play_sound_wrapper(sound)
                         else
-                            mediaplayer:play_sound("audio/enemy-explosion.mp3")
+                            play_sound_wrapper("audio/enemy-explosion.mp3")
                         end
                     if  self.time == nil then
                         self.time =  0
@@ -312,7 +314,7 @@ explosions =
         return e
         --[[
         return {
-        image = Clone{ source = imgs.explosion1 },
+        image = Clone{ source = curr_lvl_imgs.explosion1 },
         group = nil,
         duration = 0.2, 
         time = 0,
@@ -320,7 +322,7 @@ explosions =
             self.group:unparent()
         end,
         setup = function( self )
-            mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            play_sound_wrapper("audio/Air Combat Enemy Explosion.mp3")
             
             self.group = Group
 			{
@@ -365,7 +367,7 @@ explosions =
         end,
 	}--]] end,
     splash = function(x,y) return {
-        image = Clone{ source = imgs.splash },
+        image = Clone{ source = curr_lvl_imgs.splash },
         group = nil,
         duration = 0.2, 
         time = 0,
@@ -373,7 +375,7 @@ explosions =
             self.group:unparent()
         end,
         setup = function( self )
-            mediaplayer:play_sound("audio/enemy-explosion.mp3")
+            play_sound_wrapper("audio/enemy-explosion.mp3")
             
             self.group = Group
 			{
@@ -426,6 +428,16 @@ function bullet_sound:on_timer()
 end
 local old_bullets = {}
 local tot_bullets_created = 0
+scrap_caches = function()
+    print("scrapping",#big_explos,#sm_explos,#old_bullets)
+    big_explos = {}
+    num_big_explos = 0
+    sm_explos = {}
+    num_sm_explos = 0
+    old_bullets = {}
+    tot_bullets_created = 0
+    collectgarbage("collect")
+end
 function fire_bullet(enemy,source)
     local deg    = enemy.group.z_rotation[1] + 90
     local bullet
@@ -470,7 +482,7 @@ function fire_bullet(enemy,source)
                     self.image.y < 0 or self.image.y > screen_h) then
                     
                     if not bullet_sound_playing then
-                        mediaplayer:play_sound("audio/enemy-firing.mp3")
+                        play_sound_wrapper("audio/enemy-firing.mp3")
                         bullet_sound_playing = true
                     end
                 end
@@ -535,30 +547,30 @@ function flak(x,y)
                     self.group:unparent()
                 end,
         setup = function( self )
-            --mediaplayer:play_sound("audio/Air Combat Enemy Explosion.mp3")
+            --play_sound_wrapper("audio/Air Combat Enemy Explosion.mp3")
             self.group = Group{ position = {x,y} }
             
             for i = 1,self.num do
-                self.flaks[i] = Clone{ source = imgs.flak }
+                self.flaks[i] = Clone{ source = curr_lvl_imgs.flak }
                 self.groups[i] = Group
                 {
                 	size =
                 	{
-                		imgs.flak.w / self.num_frames ,
-                		imgs.flak.h
+                		curr_lvl_imgs.flak.w / self.num_frames ,
+                		curr_lvl_imgs.flak.h
                 	},
                 	clip =
                 	{
                 		0 ,
                 		0 ,
-                		imgs.flak.w / self.num_frames ,
-                		imgs.flak.h
+                		curr_lvl_imgs.flak.w / self.num_frames ,
+                		curr_lvl_imgs.flak.h
                 	},
                 	children = { self.flaks[i] },
                 	anchor_point =
                 	{
-                		( imgs.flak.w / self.num_frames ) / 2 ,
-                		  imgs.flak.h / 2
+                		( curr_lvl_imgs.flak.w / self.num_frames ) / 2 ,
+                		  curr_lvl_imgs.flak.h / 2
                 	},
                     position = {x,y},
                 }
@@ -571,7 +583,7 @@ function flak(x,y)
             end
             
             
-            mediaplayer:play_sound("audio/flak-mortar-explosion.mp3")
+            play_sound_wrapper("audio/flak-mortar-explosion.mp3")
 			layers.planes:add( self.group )
         end,
                 
@@ -593,7 +605,7 @@ function flak(x,y)
                 for i = 1,self.num do
                     local frame = math.floor( self.time /
                         ( self.duration / self.num_frames ) ) -self.delays[i]
-                    self.flaks[i].x = - ( ( imgs.flak.w / self.num_frames )
+                    self.flaks[i].x = - ( ( curr_lvl_imgs.flak.w / self.num_frames )
                     	* frame )
                 end
 				
@@ -602,10 +614,10 @@ function flak(x,y)
             table.insert(b_guys_air,
                 {
                     obj = self,
-                    x1  = self.group.x-24-imgs.flak.w/self.num_frames/2,
-                    x2  = self.group.x+24-imgs.flak.w/self.num_frames/2,
-                    y1  = self.group.y-24-imgs.flak.h/2,
-                    y2  = self.group.y+24-imgs.flak.h/2,
+                    x1  = self.group.x-24-curr_lvl_imgs.flak.w/self.num_frames/2,
+                    x2  = self.group.x+24-curr_lvl_imgs.flak.w/self.num_frames/2,
+                    y1  = self.group.y-24-curr_lvl_imgs.flak.h/2,
+                    y2  = self.group.y+24-curr_lvl_imgs.flak.h/2,
                 }
             )
             end
@@ -627,17 +639,17 @@ function fire_flak(enemy, dist_x,dist_y)
         num_frames = 1,
         image = Clone
         {
-            source = imgs.t_bullet ,
+            source = curr_lvl_imgs.t_bullet ,
             opacity = 255,
             anchor_point =
             {
-                imgs.t_bullet.w/2,
-                imgs.t_bullet.h/2
+                curr_lvl_imgs.t_bullet.w/2,
+                curr_lvl_imgs.t_bullet.h/2
             },
             position =
             {
-                enemy.group.x+imgs.t_bullet.w,
-                enemy.group.y+imgs.t_bullet.h/2
+                enemy.group.x+curr_lvl_imgs.t_bullet.w,
+                enemy.group.y+curr_lvl_imgs.t_bullet.h/2
             },
             z_rotation = {enemy.group.z_rotation[1]+90,0,0}
         },
@@ -648,7 +660,7 @@ function fire_flak(enemy, dist_x,dist_y)
             
         setup = function( self )
         if not (self.image.x > screen_w or self.image.x < 0 or self.image.y < 0 or self.image.y > screen_h) then
-            mediaplayer:play_sound("audio/flak-shot.mp3")
+            play_sound_wrapper("audio/flak-shot.mp3")
         end
             
 		--enemies are assumed to be facing downwards
@@ -703,17 +715,17 @@ function fire_big_flak(enemy, dist_x,dist_y)
         num_frames = 1,
         image = Clone
         {
-            source = imgs.t_bullet ,
+            source = curr_lvl_imgs.t_bullet ,
             opacity = 255,
             anchor_point =
             {
-                imgs.t_bullet.w/2,
-                imgs.t_bullet.h/2
+                curr_lvl_imgs.t_bullet.w/2,
+                curr_lvl_imgs.t_bullet.h/2
             },
             position =
             {
-                enemy.group.x+imgs.t_bullet.w,
-                enemy.group.y+imgs.t_bullet.h/2
+                enemy.group.x+curr_lvl_imgs.t_bullet.w,
+                enemy.group.y+curr_lvl_imgs.t_bullet.h/2
             },
             z_rotation = {enemy.group.z_rotation[1]+90,0,0},
             scale = {2,2}
@@ -723,7 +735,7 @@ function fire_big_flak(enemy, dist_x,dist_y)
             
         setup = function( self )
         if not (self.image.x > screen_w or self.image.x < 0 or self.image.y < 0 or self.image.y > screen_h) then
-            mediaplayer:play_sound("audio/Air Combat Enemy Fire.mp3")
+            play_sound_wrapper("audio/Air Combat Enemy Fire.mp3")
         end
             
 		--enemies are assumed to be facing downwards
@@ -777,14 +789,14 @@ function fire_mortar(enemy, dist_x,dist_y)
         speed_y = 0,
         speed_x = 0,
         num_frames = 1,
-        image = Clone{ source = imgs.trench_bullet },
+        image = Clone{ source = curr_lvl_imgs.trench_bullet },
         g = Group
         {
-            clip = {0,0,imgs.trench_bullet.w/3,imgs.trench_bullet.h},
+            clip = {0,0,curr_lvl_imgs.trench_bullet.w/3,curr_lvl_imgs.trench_bullet.h},
             position =
             {
-                enemy.group.x+imgs.trench_bullet.w,
-                enemy.group.y+imgs.trench_bullet.h/2
+                enemy.group.x+curr_lvl_imgs.trench_bullet.w,
+                enemy.group.y+curr_lvl_imgs.trench_bullet.h/2
             },
             scale = {.5,.5}
         },
@@ -794,7 +806,7 @@ function fire_mortar(enemy, dist_x,dist_y)
         setup = function( self )
             self.g:add(self.image)
             layers.air_bullets:add(self.g)
-            mediaplayer:play_sound("audio/mortar-shot.mp3")
+            play_sound_wrapper("audio/mortar-shot.mp3")
             
             --enemies are assumed to be facing downwards
             --local deg    = enemy.group.z_rotation[1] + 90
@@ -943,21 +955,21 @@ enemies =
 		num_frames = 3,
 		frame_index = 1,
 		image  = Clone{source=color},
-		--[[prop   = Clone{source=imgs.fighter_prop},
+		--[[prop   = Clone{source=curr_lvl_imgs.fighter_prop},
 		prop_g = Group
 		{
 			clip =
 			{
 				0,
 				0,
-				imgs.fighter_prop.w,
-				imgs.fighter_prop.h/3,--self.num_prop_frames still DNE 
+				curr_lvl_imgs.fighter_prop.w,
+				curr_lvl_imgs.fighter_prop.h/3,--self.num_prop_frames still DNE 
 			},
 			
-			anchor_point = {imgs.fighter_prop.w/2,   imgs.fighter_prop.h/2},
-			position     = {imgs.fighter.w/2, imgs.fighter.h+2},
+			anchor_point = {curr_lvl_imgs.fighter_prop.w/2,   curr_lvl_imgs.fighter_prop.h/2},
+			position     = {curr_lvl_imgs.fighter.w/2, curr_lvl_imgs.fighter.h+2},
 		},--]]
-		group  = Group{anchor_point = {imgs.fighter.w/3/2,imgs.fighter.h/2},clip={0,0,color.w/3,color.h}},
+		group  = Group{anchor_point = {curr_lvl_imgs.fighter.w/3/2,curr_lvl_imgs.fighter.h/2},clip={0,0,color.w/3,color.h}},
 		
 		shoot_time      = 3,	--how frequently the plane shoots
 		last_shot_time = 3,--math.random()*2,	--how long ago the plane last shot
@@ -968,7 +980,7 @@ enemies =
 				
 			if f.last_shot_time >= f.shoot_time then
 				f.last_shot_time = 0
-				fire_bullet(f,imgs.fighter_bullet)
+				fire_bullet(f,curr_lvl_imgs.fighter_bullet)
 			end
 		end,
 		remove = function(self)
@@ -986,10 +998,10 @@ enemies =
 			self.stages[0] = function(f,seconds)
 				
 				--fly downwards
-                local prev = f.group.y
-                -----f.y = f.y + f.attack_speed*seconds
+				local prev = f.group.y
+				-----f.y = f.y + f.attack_speed*seconds
 				-----f.group.y = math.ceil(f.y/4)*4
-                f.group.y = f.group.y +f.attack_speed*seconds
+				f.group.y = f.group.y +f.attack_speed*seconds
 				--print(f.name,"\t",f.group.y,"\t", f.y,"\t", f.group.y-prev, seconds)
 				--fire bullets
 				f:fire(seconds)
@@ -1096,18 +1108,18 @@ enemies =
 		
 		num_prop_frames = 3,
 		prop_index = 1,
-		image    = Clone{source=imgs.zepp},
+		image    = Clone{source=curr_lvl_imgs.zepp},
         
         e_fire_l_i = 0,
         e_fire_r_i = 0,
         
-        e_fire_r = Clone{ source=imgs.engine_fire, opacity=0 },
-        e_r_dam  = Clone{ source=imgs.z_d_e,       opacity=0 },
-        e_fire_l = Clone{ source=imgs.engine_fire, opacity=0 },
-        e_l_dam  = Clone{ source=imgs.z_d_e,       opacity=0 },
+        e_fire_r = Clone{ source=curr_lvl_imgs.engine_fire, opacity=0 },
+        e_r_dam  = Clone{ source=curr_lvl_imgs.z_d_e,       opacity=0 },
+        e_fire_l = Clone{ source=curr_lvl_imgs.engine_fire, opacity=0 },
+        e_l_dam  = Clone{ source=curr_lvl_imgs.z_d_e,       opacity=0 },
         
-        e_fire_r_g = Group{position={185,260},clip={0,0,imgs.engine_fire.w/6,imgs.engine_fire.h}},
-        e_fire_l_g = Group{position={ 22,260},clip={0,0,imgs.engine_fire.w/6,imgs.engine_fire.h}},
+        e_fire_r_g = Group{position={185,260},clip={0,0,curr_lvl_imgs.engine_fire.w/6,curr_lvl_imgs.engine_fire.h}},
+        e_fire_l_g = Group{position={ 22,260},clip={0,0,curr_lvl_imgs.engine_fire.w/6,curr_lvl_imgs.engine_fire.h}},
         
         right_engine_dam = 0,
         left_engine_dam = 0,
@@ -1116,20 +1128,20 @@ enemies =
 		
 		prop =
 		{
-			l = Clone{source=imgs.zepp_prop},
-			r = Clone{source=imgs.zepp_prop},
+			l = Clone{source=curr_lvl_imgs.zepp_prop},
+			r = Clone{source=curr_lvl_imgs.zepp_prop},
 			g_l = Group
 			{
 				clip =
 				{
 					0,
 					0,
-					imgs.zepp_prop.w ,
+					curr_lvl_imgs.zepp_prop.w ,
 					--self.num_prop_frames still DNE 
-					imgs.zepp_prop.h/3,
+					curr_lvl_imgs.zepp_prop.h/3,
 				},
-				--anchor_point = {imgs.zepp_prop.w/2,
-				--                imgs.zepp_prop.h/2},
+				--anchor_point = {curr_lvl_imgs.zepp_prop.w/2,
+				--                curr_lvl_imgs.zepp_prop.h/2},
 				position     = {16,252},
 			},
 			g_r = Group
@@ -1138,12 +1150,12 @@ enemies =
 				{
 					0,
 					0,
-					imgs.zepp_prop.w ,
+					curr_lvl_imgs.zepp_prop.w ,
 					--self.num_prop_frames still DNE 
-					imgs.zepp_prop.h/3,
+					curr_lvl_imgs.zepp_prop.h/3,
 				},
-				--anchor_point = {imgs.zepp_prop.w/2,
-				--                imgs.zepp_prop.h/2},
+				--anchor_point = {curr_lvl_imgs.zepp_prop.w/2,
+				--                curr_lvl_imgs.zepp_prop.h/2},
 				position     = {180,252},
 			},
 		},
@@ -1153,15 +1165,15 @@ enemies =
 			
 			l = Clone
 			{
-				source       = imgs.z_barrel,
-				anchor_point = {0,imgs.z_barrel.h/2},
+				source       = curr_lvl_imgs.z_barrel,
+				anchor_point = {0,curr_lvl_imgs.z_barrel.h/2},
 				z_rotation   = {90,0,0}
 			},
 			
 			r = Clone
 			{
-				source       = imgs.z_barrel,
-				anchor_point = {0,imgs.z_barrel.h/2},
+				source       = curr_lvl_imgs.z_barrel,
+				anchor_point = {0,curr_lvl_imgs.z_barrel.h/2},
 				z_rotation   = {90,0,0}
 			},
 			
@@ -1179,7 +1191,7 @@ enemies =
 		},
         dam = {},
 		
-		group    = Group{x=x,y=-imgs.zepp.h},
+		group    = Group{x=x,y=-curr_lvl_imgs.zepp.h},
 		
 		shoot_time      = 1,	--how frequently the plane shoots
 		last_shot_time = 2,	--how long ago the plane last shot
@@ -1244,7 +1256,7 @@ enemies =
 					
 					
 					self.last_shot_time = 0
-					fire_bullet(mock_obj,imgs.z_bullet)
+					fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 					
 				end
 			-- if the target is to the left, shoot with the left
@@ -1269,7 +1281,7 @@ enemies =
 					r == 8 then
 					
 					self.last_shot_time = 0
-					fire_bullet(mock_obj,imgs.z_bullet)
+					fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 					
 				end
 				
@@ -1295,7 +1307,7 @@ enemies =
 					if self.last_shot_time >=
 						self.shoot_time and r == 8 then
 						
-						fire_bullet(mock_obj,imgs.z_bullet)
+						fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 					end
 					self.guns.l.z_rotation = {-90,0,0}
 					mock_obj =
@@ -1314,7 +1326,7 @@ enemies =
 						self.shoot_time and r == 8 then
 						
 						self.last_shot_time = 0
-						fire_bullet(mock_obj,imgs.z_bullet)
+						fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 						
 					end
 				else -- behind
@@ -1335,7 +1347,7 @@ enemies =
 		                        if self.last_shot_time >=
 						self.shoot_time and r == 8 then
 		    	                        
-						fire_bullet(mock_obj,imgs.z_bullet)
+						fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 					end
 					
 					self.guns.l.z_rotation = {90,0,0}
@@ -1352,7 +1364,7 @@ enemies =
 					if self.last_shot_time >= self.shoot_time and r == 8 then
 						
 						self.last_shot_time = 0
-						fire_bullet(mock_obj,imgs.z_bullet)
+						fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 						
 					end
 				end
@@ -1380,15 +1392,15 @@ enemies =
 			
 			self.guns.g_l:add( self.guns.l,
             Clone{
-                source=imgs.z_cannon_l,
-                x = -imgs.z_cannon_l.w+8,
-                y = -imgs.z_cannon_l.h/2
+                source=curr_lvl_imgs.z_cannon_l,
+                x = -curr_lvl_imgs.z_cannon_l.w+8,
+                y = -curr_lvl_imgs.z_cannon_l.h/2
             } )
 			self.guns.g_r:add( self.guns.r,
             Clone{
-                source=imgs.z_cannon_r,
+                source=curr_lvl_imgs.z_cannon_r,
                 x=-2,
-                y = -imgs.z_cannon_l.h/2
+                y = -curr_lvl_imgs.z_cannon_l.h/2
             } )
 			
 			self.group:add(
@@ -1454,9 +1466,9 @@ enemies =
                                 group = Group{x=self.group.x,y=self.group.y},
                                 pieces = {},
                                 setup = function(self)
-                                    self.pieces[1] = Clone{source=imgs.z_debris_1,x= 10,y= 20}
-                                    self.pieces[2] = Clone{source=imgs.z_debris_2,x=-30,y= 5}
-                                    self.pieces[3] = Clone{source=imgs.z_debris_3,x= 0, y=-40}
+                                    self.pieces[1] = Clone{source=curr_lvl_imgs.z_debris_1,x= 10,y= 20}
+                                    self.pieces[2] = Clone{source=curr_lvl_imgs.z_debris_2,x=-30,y= 5}
+                                    self.pieces[3] = Clone{source=curr_lvl_imgs.z_debris_3,x= 0, y=-40}
                                     self.group:add(unpack(self.pieces))
                                     layers.land_doodads_1:add(self.group)
                                 end,
@@ -1493,7 +1505,7 @@ enemies =
             for iii = 1,#self.dam do
                 self.group:add(Clone
                     {
-                        source = imgs["z_d_"..self.dam[iii].i],
+                        source = curr_lvl_imgs["z_d_"..self.dam[iii].i],
                         x = self.dam[iii].x,
                         y = self.dam[iii].y
                     }
@@ -1669,7 +1681,7 @@ enemies =
                 if other.group ~= nil then
                     if loc == 0 then
                         local i =math.random(1,7)
-                        dam.image = Clone{source = imgs["z_d_"..i]}
+                        dam.image = Clone{source = curr_lvl_imgs["z_d_"..i]}
                         self.group:add(dam.image)
                         dam.image.x = other.group.x - self.group.x
                         dam.image.y = other.group.y - self.group.y - math.random(0,80)
@@ -1692,15 +1704,15 @@ enemies =
                             self.e_fire_l.opacity = 255
                         elseif self.left_engine_dam == 3 then
                             self.prop.g_l.clip = {
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_l.clip[2],
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_l.clip[4]
                             }
                             add_to_render_list(
                             {
-                                image = Clone{source=imgs.z_br_prop_1},
-                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                image = Clone{source=curr_lvl_imgs.z_br_prop_1},
+                                group = Group{clip={0,0,curr_lvl_imgs.z_br_prop_1.w,curr_lvl_imgs.z_br_prop_1.h/3},
                                     x= self.group.x+16,y= self.group.y+252},
                                 pieces = {},
                                 setup = function(self)
@@ -1729,15 +1741,15 @@ enemies =
                             self.e_fire_r.opacity = 255
                         elseif self.right_engine_dam == 3 then
                             self.prop.g_r.clip = {
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_r.clip[2],
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_r.clip[4]
                             }
                             add_to_render_list(
                             {
-                                image = Clone{source=imgs.z_br_prop_1},
-                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                image = Clone{source=curr_lvl_imgs.z_br_prop_1},
+                                group = Group{clip={0,0,curr_lvl_imgs.z_br_prop_1.w,curr_lvl_imgs.z_br_prop_1.h/3},
                                     x= self.group.x+180,y= self.group.y+252},
                                 pieces = {},
                                 setup = function(self)
@@ -1772,7 +1784,7 @@ enemies =
                         d.image:unparent()
                         d ={}
                         
-                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(5,7)]}
                         d.image.x = x
                         d.image.y = y-4
                         self.group:add(dam.image)
@@ -1783,7 +1795,7 @@ enemies =
                     
                     if loc == 0 then
                         local i = math.random(1,7)
-                        dam.image = Clone{source = imgs["z_d_"..i]}
+                        dam.image = Clone{source = curr_lvl_imgs["z_d_"..i]}
                         self.group:add(dam.image)
                         dam.image.x = other.image.x - self.group.x
                         dam.image.y = other.image.y - self.group.y - math.random(0,80)
@@ -1796,15 +1808,15 @@ enemies =
                             self.e_fire_l.opacity = 255
                         elseif self.left_engine_dam == 3 then
                             self.prop.g_l.clip = {
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_l.clip[2],
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_l.clip[4]
                             }
                             add_to_render_list(
                             {
-                                image = Clone{source=imgs.z_br_prop_1},
-                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                image = Clone{source=curr_lvl_imgs.z_br_prop_1},
+                                group = Group{clip={0,0,curr_lvl_imgs.z_br_prop_1.w,curr_lvl_imgs.z_br_prop_1.h/3},
                                     x= self.group.x+16,y= self.group.y+252},
                                 pieces = {},
                                 setup = function(self)
@@ -1834,15 +1846,15 @@ enemies =
                             self.e_fire_r.opacity = 255
                         elseif self.right_engine_dam == 3 then
                             self.prop.g_r.clip = {
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_r.clip[2],
-                                imgs.zepp_prop.w/3,
+                                curr_lvl_imgs.zepp_prop.w/3,
                                 self.prop.g_r.clip[4]
                             }
                             add_to_render_list(
                             {
-                                image = Clone{source=imgs.z_br_prop_1},
-                                group = Group{clip={0,0,imgs.z_br_prop_1.w,imgs.z_br_prop_1.h/3},
+                                image = Clone{source=curr_lvl_imgs.z_br_prop_1},
+                                group = Group{clip={0,0,curr_lvl_imgs.z_br_prop_1.w,curr_lvl_imgs.z_br_prop_1.h/3},
                                     x= self.group.x+180,y= self.group.y+252},
                                 pieces = {},
                                 setup = function(self)
@@ -1876,7 +1888,7 @@ enemies =
                         d.image:unparent()
                         d = {}
                         
-                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(5,7)]}
                         d.image.x = x
                         d.image.y = y-4
                         self.group:add(dam.image)
@@ -1903,8 +1915,8 @@ enemies =
 			-- Explode
             add_to_render_list(
 			explosions.big(
-			self.group.x+imgs.zepp.w/2,
-			self.group.y+imgs.zepp.h/2+70)
+			self.group.x+curr_lvl_imgs.zepp.w/2,
+			self.group.y+curr_lvl_imgs.zepp.h/2+70)
 			)
 		end	
 	}
@@ -1924,8 +1936,8 @@ enemies =
         shoot_time = 2,
 		image = Clone
         {
-            source       = imgs.turret,
-			anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
+            source       = curr_lvl_imgs.turret,
+			anchor_point = {curr_lvl_imgs.turret.w/2,curr_lvl_imgs.turret.h/3},
 			z_rotation   = {180,0,0}
         },
 			
@@ -2104,8 +2116,8 @@ enemies =
         dead = false,
 		image = Clone
         {
-            source       = imgs.trench_gun,
-			anchor_point = {imgs.trench_gun.w/2,imgs.trench_gun.h/3},
+            source       = curr_lvl_imgs.trench_gun,
+			anchor_point = {curr_lvl_imgscurr_lvl_imgs.trench_gun.w/2,curr_lvl_imgs.trench_gun.h/3},
 			--z_rotation   = {180,0,0}
         },
 			
@@ -2147,7 +2159,7 @@ enemies =
 						z_rotation =
 						{90,--self.image.z_rotation[1],
 							0,0},
-						x = self.image.x - imgs.trench_gun.w/2,--+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
+						x = self.image.x - curr_lvl_imgs.trench_gun.w/2,--+self.img_h*math.cos(self.image.z_rotation[1]*math.pi/180+90),
 						y = self.image.y--+self.img_h*math.sin(self.image.z_rotation[1]*math.pi/180+90)
 					}
 				}
@@ -2195,10 +2207,10 @@ enemies =
             end
             if self.dead then
                 local c = Clone{
-                    source     = imgs.trench_crater,
+                    source     = curr_lvl_imgs.trench_crater,
                     x          =  self.image.x,
                     y          =  self.image.y+17,
-                    anchor_point = {imgs.trench_crater.w/2,imgs.trench_crater.h/2}
+                    anchor_point = {curr_lvl_imgs.trench_crater.w/2,curr_lvl_imgs.trench_crater.h/2}
                 }
                 layers.land_targets:add(c)
                 self.image:unparent()
@@ -2234,10 +2246,10 @@ enemies =
         collision = function( self , other )
             
             local c = Clone{
-                source     = imgs.trench_crater,
+                source     = curr_lvl_imgs.trench_crater,
                 x          =  self.image.x,
                 y          =  self.image.y+17,
-                anchor_point = {imgs.trench_crater.w/2,imgs.trench_crater.h/2}
+                anchor_point = {curr_lvl_imgs.trench_crater.w/2,curr_lvl_imgs.trench_crater.h/2}
             }
             layers.land_targets:add(c)
             self.image:unparent()
@@ -2298,16 +2310,16 @@ enemies =
         shoot_time     = 2,
 		image = Clone
         {
-            source       =  imgs.tank_turret,
-			anchor_point = {imgs.tank_turret.w/2,imgs.tank_turret.h/3},
-            position     = {imgs.tank_strip.w/6,imgs.tank_strip.h/2},
+            source       =  curr_lvl_imgs.tank_turret,
+			anchor_point = {curr_lvl_imgs.tank_turret.w/2,curr_lvl_imgs.tank_turret.h/3},
+            position     = {curr_lvl_imgs.tank_strip.w/6,curr_lvl_imgs.tank_strip.h/2},
         },
         base_strip = Clone
         {
-            source    = imgs.tank_strip
+            source    = curr_lvl_imgs.tank_strip
         },
         num_frames = 3,
-		base_clip = Group{clip={0,0,imgs.tank_strip.w/3,imgs.tank_strip.h}},
+		base_clip = Group{clip={0,0,curr_lvl_imgs.tank_strip.w/3,curr_lvl_imgs.tank_strip.h}},
 		group = Group{scale={1.5,1.5}},
 		
         rotate_guns_and_fire = function(self,secs)
@@ -2461,16 +2473,16 @@ enemies =
         shoot_time     = 2,
 		image = Clone
         {
-            source       =  imgs.tank_turret,
-			anchor_point = {imgs.tank_turret.w/2,imgs.tank_turret.h/3},
-            position     = {imgs.tank_strip.w/6,imgs.tank_strip.h/2},
+            source       =  curr_lvl_imgs.tank_turret,
+			anchor_point = {curr_lvl_imgs.tank_turret.w/2,curr_lvl_imgs.tank_turret.h/3},
+            position     = {curr_lvl_imgs.tank_strip.w/6,curr_lvl_imgs.tank_strip.h/2},
         },
         base_strip = Clone
         {
-            source    = imgs.tank_strip
+            source    = curr_lvl_imgs.tank_strip
         },
         num_frames = 3,
-		base_clip = Group{clip={0,0,imgs.tank_strip.w/3,imgs.tank_strip.h}},
+		base_clip = Group{clip={0,0,curr_lvl_imgs.tank_strip.w/3,curr_lvl_imgs.tank_strip.h}},
 		group = Group{name="tank"},
 		remove = function(self)
             self.group:unparent()
@@ -2665,14 +2677,14 @@ enemies =
         shoot_time     = 2,
 		image = Clone
         {
-            source       =  imgs.jeep_b,
+            source       =  curr_lvl_imgs.jeep_b,
         },
         base_strip = Clone
         {
-            source    = imgs.tank_strip
+            source    = curr_lvl_imgs.tank_strip
         },
         num_frames = 3,
-		group = Group{clip={0,0,imgs.jeep.w/3,imgs.jeep.h}},
+		group = Group{clip={0,0,curr_lvl_imgs.jeep.w/3,curr_lvl_imgs.jeep.h}},
 		
         
         setup = function(self)
@@ -2800,41 +2812,33 @@ enemies =
         
         bow_wake_r =
         {
-            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.b_ship.w/2-12},
-            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_1,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_2,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_3,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_4,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_5,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_6,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_7,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_8,opacity = 0,x=curr_lvl_imgs.b_ship.w/2-12},
         },
         bow_wake_t =
         {
-            Clone{source=imgs.bbow_wake_1,opacity = 0},
-            Clone{source=imgs.bbow_wake_2,opacity = 0},
-            Clone{source=imgs.bbow_wake_3,opacity = 0},
-            Clone{source=imgs.bbow_wake_4,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_1,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_2,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_3,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_4,opacity = 0},
         },
         bow_wake_l =
         {
-            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.b_ship.w/2+12,y_rotation={180,0,0}},
-        },--[[
-        stern_wake =
-        {
-            Clone{source=imgs.stern_wake_1,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_1.h+40},
-            Clone{source=imgs.stern_wake_2,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_2.h+40},
-            Clone{source=imgs.stern_wake_3,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_3.h+40},
-            Clone{source=imgs.stern_wake_4,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_4.h+40},
-            Clone{source=imgs.stern_wake_5,opacity = 0,y=imgs.b_ship.h-imgs.stern_wake_5.h+40},
-        },--]]
+            Clone{source=curr_lvl_imgs.bow_wake_1,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_2,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_3,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_4,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_5,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_6,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_7,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_8,opacity = 0,x=curr_lvl_imgs.b_ship.w/2+12,y_rotation={180,0,0}},
+        },
 		b_w_i = 1,
         s_w_i = 1,
 		stage  = 0,	--the current stage the fighter is in
@@ -2843,7 +2847,7 @@ enemies =
 		--attack_speed   = 15,
 		
 		
-		image    = Clone{source=imgs.b_ship},
+		image    = Clone{source=curr_lvl_imgs.b_ship},
 		
 		is_boss = false,
 		
@@ -2852,37 +2856,37 @@ enemies =
 		{
             bow = Clone
             {
-                source       = imgs.turret,
-				anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
+                source       = curr_lvl_imgs.turret,
+				anchor_point = {curr_lvl_imgs.turret.w/2,curr_lvl_imgs.turret.h/3},
 				z_rotation   = {180,0,0}
             },
             mid = Clone
             {
-                source       = imgs.turret,
-				anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
+                source       = curr_lvl_imgs.turret,
+				anchor_point = {curr_lvl_imgs.turret.w/2,curr_lvl_imgs.turret.h/3},
 				z_rotation   = {180,0,0}
             },
             stern = Clone
             {
-                source       = imgs.turret,
-				anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
+                source       = curr_lvl_imgs.turret,
+				anchor_point = {curr_lvl_imgs.turret.w/2,curr_lvl_imgs.turret.h/3},
 				z_rotation   = {180,0,0}
             },
 			
 			g_b = Group
 			{
-				x = imgs.b_ship.w/2,
+				x = curr_lvl_imgs.b_ship.w/2,
 				y = 130,
 			},
 			
 			g_m = Group
 			{
-				x = imgs.b_ship.w/2,
+				x = curr_lvl_imgs.b_ship.w/2,
 				y = 190,
 			},
             g_s = Group
 			{
-				x = imgs.b_ship.w/2,
+				x = curr_lvl_imgs.b_ship.w/2,
 				y = 410,
 			},
 		},
@@ -3065,7 +3069,7 @@ enemies =
 			self.guns.g_b:add( self.guns.bow )
 			self.guns.g_m:add( self.guns.mid )
             self.guns.g_s:add( self.guns.stern)
-            self.group:add(Clone{source=imgs.laminar})
+            self.group:add(Clone{source=curr_lvl_imgs.laminar})
 			self.group:add(unpack(self.bow_wake_r))
             self.group:add(unpack(self.bow_wake_l))
             --self.group:add(unpack(self.stern_wake))
@@ -3197,7 +3201,7 @@ enemies =
                 t = nil
                 
                 self.group:clear()
-                self.image    = Clone{source=imgs.b_ship_sunk}
+                self.image    = Clone{source=curr_lvl_imgs.b_ship_sunk}
                 self.group:add(self.image)
                 
                 self.moving = false
@@ -3273,32 +3277,32 @@ enemies =
         
         bow_wake_r =
         {
-            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.dest.w/2-12},
-            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_1,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_2,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_3,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_4,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_5,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_6,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_7,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
+            Clone{source=curr_lvl_imgs.bow_wake_8,opacity = 0,x=curr_lvl_imgs.dest.w/2-12},
         },
         bow_wake_t =
         {
-            Clone{source=imgs.bbow_wake_1,opacity = 0},
-            Clone{source=imgs.bbow_wake_2,opacity = 0},
-            Clone{source=imgs.bbow_wake_3,opacity = 0},
-            Clone{source=imgs.bbow_wake_4,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_1,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_2,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_3,opacity = 0},
+            Clone{source=curr_lvl_imgs.bbow_wake_4,opacity = 0},
         },
         bow_wake_l =
         {
-            Clone{source=imgs.bow_wake_1,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_2,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_3,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_4,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_5,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_6,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_7,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
-            Clone{source=imgs.bow_wake_8,opacity = 0,x=imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_1,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_2,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_3,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_4,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_5,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_6,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_7,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
+            Clone{source=curr_lvl_imgs.bow_wake_8,opacity = 0,x=curr_lvl_imgs.dest.w/2+12,y_rotation={180,0,0}},
         },
         --[[
         stern_wake =
@@ -3317,17 +3321,17 @@ enemies =
 		approach_speed = 80,
 		--attack_speed   = 15,
 		
-		image    = Clone{source=imgs.dest},
+		image    = Clone{source=curr_lvl_imgs.dest},
 		
 		gun_img =
 		Clone {
-            source       = imgs.turret,
-			anchor_point = {imgs.turret.w/2,imgs.turret.h/3},
+            source       = curr_lvl_imgs.turret,
+			anchor_point = {curr_lvl_imgs.turret.w/2,curr_lvl_imgs.turret.h/3},
 			z_rotation   = {180,0,0}
         },
 		gun_group = Group
 		{
-			x = imgs.dest.w/2,
+			x = curr_lvl_imgs.dest.w/2,
 			y = 145,
 		},
         
@@ -3362,8 +3366,8 @@ enemies =
 			}
 			
             --rotate and fire the bow turret
-            if dest.y < screen_h + imgs.turret.h and
-               dest.y >           -imgs.turret.h then
+            if dest.y < screen_h + curr_lvl_imgs.turret.h and
+               dest.y >           -curr_lvl_imgs.turret.h then
                 
                 self.last_shot_time = self.last_shot_time + secs
                 
@@ -3384,8 +3388,8 @@ enemies =
 						z_rotation =
 						{self.gun_img.z_rotation[1],
 							0,0},
-						x = dest.x,--+imgs.turret.h*math.cos(self.gun_img.z_rotation[1]*math.pi/180+90),
-						y = dest.y--+imgs.turret.h*math.sin(self.gun_img.z_rotation[1]*math.pi/180+90)
+						x = dest.x,--+curr_lvl_imgs.turret.h*math.cos(self.gun_img.z_rotation[1]*math.pi/180+90),
+						y = dest.y--+curr_lvl_imgs.turret.h*math.sin(self.gun_img.z_rotation[1]*math.pi/180+90)
 					}
 				}
 				if self.last_shot_time >= self.shoot_time and  (math.abs(dest.x - targ.x) > 200 or
@@ -3407,7 +3411,7 @@ enemies =
 			self.approach_speed = speed
             
 			self.gun_group:add( self.gun_img )
-            --self.group:add(Clone{source=imgs.laminar})
+            --self.group:add(Clone{source=curr_lvl_imgs.laminar})
 			self.group:add(unpack(self.bow_wake_r))
             self.group:add(unpack(self.bow_wake_l))
             --self.group:add(unpack(self.stern_wake))
@@ -3497,8 +3501,8 @@ enemies =
                 if from_bullethole == nil then
                 local dam = {}
                 if other.group ~= nil then
-                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
-                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    --dam.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(1,7)]}
                     self.group:add(dam.image)
                     dam.image.x = other.group.x - self.group.x
                     dam.image.y = other.group.y - self.group.y
@@ -3511,7 +3515,7 @@ enemies =
                         d.image:unparent()
                         d ={}
                         
-                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(5,7)]}
                         d.image.x = x
                         d.image.y = y-4
                         self.group:add(dam.image)
@@ -3519,8 +3523,8 @@ enemies =
                     end
                     --]]
                 elseif other.image ~= nil then
-                    --dam.image = Clone{source = imgs["z_d_"..math.random(1,4)]}
-                    dam.image = Clone{source = imgs["z_d_"..math.random(1,7)]}
+                    --dam.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(1,4)]}
+                    dam.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(1,7)]}
                     self.group:add(dam.image)
                     dam.image.x = other.image.x - self.group.x
                     dam.image.y = other.image.y - self.group.y
@@ -3533,7 +3537,7 @@ enemies =
                         d.image:unparent()
                         d = {}
                         
-                        d.image = Clone{source = imgs["z_d_"..math.random(5,7)]}
+                        d.image = Clone{source = curr_lvl_imgs["z_d_"..math.random(5,7)]}
                         d.image.x = x
                         d.image.y = y-4
                         self.group:add(dam.image)
@@ -3572,7 +3576,7 @@ enemies =
                 t = nil
                 
                 self.group:clear()
-                self.image    = Clone{source=imgs.dest_sunk}
+                self.image    = Clone{source=curr_lvl_imgs.dest_sunk}
                 self.group:add(self.image)
                 
                 self.moving = false
@@ -3665,7 +3669,7 @@ formations =
 				end,
                 function(b,seconds)
                     b.group.y = b.group.y -b.approach_speed*seconds
-                    if not self.dead then
+                    if not b.dead then
                         b:rotate_guns_and_fire(seconds)
                     end
                     if b.dead and b.group.y >= screen_h + b.image.h then
@@ -3814,7 +3818,7 @@ formations =
         
 		for i = lower,upper do
             --dumptable(salvage_overwrites)
-			e = enemies.basic_fighter(imgs.fighter_r)
+			e = enemies.basic_fighter(curr_lvl_imgs.fighter_r)
             if type(salvage_overwrites) == "table" then
                 e.overwrite_vars = salvage_overwrites
             end
@@ -3909,7 +3913,7 @@ formations =
         
         
         if salvage_index == nil or salvage_index == 1 then
-            local e1 = enemies.basic_fighter(imgs.fighter)
+            local e1 = enemies.basic_fighter(curr_lvl_imgs.fighter)
             e1.salvage_func   = {"formations","cluster"}
             e1.index          = 1
             e1.salvage_params = {x}
@@ -3919,7 +3923,7 @@ formations =
         end
         
         if salvage_index == nil or salvage_index == 2 then
-            local e2 = enemies.basic_fighter(imgs.fighter)
+            local e2 = enemies.basic_fighter(curr_lvl_imgs.fighter)
             e2.salvage_func   = {"formations","cluster"}
             e2.index          = 2
             e2.salvage_params = {x}
@@ -3929,7 +3933,7 @@ formations =
         end
         
         if salvage_index == nil or salvage_index == 3 then
-            local e3 = enemies.basic_fighter(imgs.fighter)
+            local e3 = enemies.basic_fighter(curr_lvl_imgs.fighter)
             e3.salvage_func   = {"formations","cluster"}
             e3.index          = 3
             e3.salvage_params = {x}
@@ -3940,7 +3944,7 @@ formations =
 
     end,
     zig_zag = function(x, r, rot, salvage_overwrites)
-        e = enemies.basic_fighter(imgs.fighter_w)
+        e = enemies.basic_fighter(curr_lvl_imgs.fighter_w)
         e.salvage_func   = {"formations","zig_zag"}
         e.salvage_params = {x,r,rot}
         e.overwrite_vars = salvage_overwrites
@@ -4049,7 +4053,7 @@ formations =
             upper = num
         end
         for i = lower,upper do
-            e = enemies.basic_fighter(imgs.fighter_w)
+            e = enemies.basic_fighter(curr_lvl_imgs.fighter_w)
             e.salvage_func   = {"formations","one_loop"}
             e.salvage_params = {num, spacing, start_x, rot_at_x, rot_at_y, dir}
             if type(salvage_overwrites) == "table" then

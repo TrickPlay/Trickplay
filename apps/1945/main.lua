@@ -2,6 +2,10 @@
     Air Combat
 --]]
 
+play_sound_wrapper = function(sound)
+	--mediaplayer:play_sound(sound)
+end
+
 my_font = "kroeger 06_65 40px"
 
 local recycled_tables = {}
@@ -207,7 +211,7 @@ local keys = {
                 add_to_render_list(levels[state.curr_level])
             end
             
-            
+            load_imgs[state.curr_level]()
         end,
         [keys["0"]] = function()
             
@@ -226,7 +230,7 @@ local keys = {
             
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 2
-            
+            load_imgs[2]()
             add_to_render_list(my_plane)
             remove_from_render_list(lvlbg[1])
             add_to_render_list(lvlbg[2])
@@ -240,7 +244,7 @@ local keys = {
             
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 3
-            
+            load_imgs[3]()
             add_to_render_list(my_plane)
             remove_from_render_list(lvlbg[1])
             add_to_render_list(lvlbg[3])
@@ -254,7 +258,7 @@ local keys = {
             
             state.curr_mode  = "CAMPAIGN"
             state.curr_level = 4
-            
+            load_imgs[4]()
             add_to_render_list(my_plane)
             remove_from_render_list(lvlbg[1])
             add_to_render_list(lvlbg[4])
@@ -498,12 +502,11 @@ function idle.on_idle( idle , seconds )
 		end
 	end
 --]]
-
+    
         for item,render in pairs( render_list ) do
             render( item , seconds )
 
         end
-        
 
 
 --print("\n")
@@ -654,6 +657,6 @@ function app:on_closing()
     --dumptable(settings.state)--]]
 end
 math.randomseed( os.time() )
-mediaplayer:play_sound("audio/Air Combat Launch.mp3")
+play_sound_wrapper("audio/Air Combat Launch.mp3")
 
 screen:show()
