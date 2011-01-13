@@ -6,13 +6,13 @@
 #include "fontconfig.h"
 #include "cairo/cairo-version.h"
 #include "pango/pango.h"
+#include "json-glib/json-glib.h"
 #include "clutter/clutter.h"
 #include "ft2build.h"
 #include "freetype/freetype.h"
 #include "gif_lib.h"
 #include "tiffio.h"
 #include "jpeglib.h"
-#include "json-glib/json-glib.h"
 
 #define PNG_SKIP_SETJMP_CHECK 1
 #include "png.h"
@@ -37,13 +37,18 @@ static String clean_version( const gchar * dirty )
     return result;
 }
 
+// If build passes us a GIT revision then use it, otherwise just define it as blank
+#if !defined(TP_GIT_VERSION)
+	#define TP_GIT_VERSION "nogit"
+#endif
+
 void dump_versions()
 {
     VersionMap v = get_versions();
 
     g_info( "VERSIONS" );
     g_info( "--------" );
-    g_info( "%-10s %d.%d.%d" , "trickplay" , TP_MAJOR_VERSION , TP_MINOR_VERSION , TP_PATCH_VERSION );
+    g_info( "%-10s %d.%d.%d [%s]" , "trickplay" , TP_MAJOR_VERSION , TP_MINOR_VERSION , TP_PATCH_VERSION, TP_GIT_VERSION );
     g_info( "" );
 
     for ( VersionMap::iterator it = v.begin(); it != v.end(); ++it )

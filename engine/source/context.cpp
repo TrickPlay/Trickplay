@@ -430,6 +430,69 @@ int TPContext::console_command_handler( const char * command, const char * param
             }
         }
     }
+    else if ( ! strcmp( command , "ss" ) )
+    {
+        // Screenshot
+
+        const gchar * home = g_getenv( "HOME" );
+
+        if ( ! home )
+        {
+            home = g_get_home_dir();
+
+            if ( ! home )
+            {
+                home = g_get_tmp_dir();
+            }
+        }
+
+        if ( ! home )
+        {
+            g_warning( "FAILED TO FIND HOME OR TEMP DIR" );
+        }
+        else
+        {
+            Image * image = Image::screenshot();
+
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String checksum( image->checksum() );
+
+                GTimeVal t;
+
+                g_get_current_time( & t );
+
+                gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+
+                gchar * fn = g_build_filename( home , ts , NULL );
+
+                g_free( ts );
+
+                if ( ! image->write_to_png( fn ) )
+                {
+                    g_warning( "FAILED TO WRITE SCREENSHOT TO %s" , fn );
+                }
+                else
+                {
+                    g_info( "%s" , fn );
+                    g_info( "%s" , checksum.c_str() );
+                }
+
+                g_free( fn );
+
+                delete image;
+            }
+
+
+        }
+
+
+
+    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
@@ -670,6 +733,26 @@ gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer co
 #endif
 
 //-----------------------------------------------------------------------------
+// When profiling is enabled, these signal handlers let us know when painting
+// the stage begins and ends.
+
+#ifdef TP_PROFILING
+
+static gpointer paint_profiler = 0;
+
+static void before_paint( ClutterActor * actor , gpointer )
+{
+    paint_profiler = PROFILE_START( "PAINT" , PROFILER_INTERNAL_CALLS );
+}
+
+static void after_paint( ClutterActor * actor , gpointer )
+{
+    PROFILE_STOP( paint_profiler );
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 int TPContext::run()
 {
@@ -820,7 +903,19 @@ int TPContext::run()
 
     ClutterActor * stage = clutter_stage_get_default();
 
-    clutter_actor_set_size( stage, get_int( TP_SCREEN_WIDTH ), get_int( TP_SCREEN_HEIGHT ) );
+    int display_width = get_int( TP_SCREEN_WIDTH );
+    int display_height = get_int( TP_SCREEN_HEIGHT );
+
+    if ( display_width <= 0 || display_height <= 0 )
+    {
+        clutter_stage_set_fullscreen( CLUTTER_STAGE( stage ) , TRUE );
+    }
+    else
+    {
+        clutter_actor_set_size( stage , display_width , display_height );
+        clutter_stage_set_user_resizable( CLUTTER_STAGE( stage ) , TRUE );
+    }
+
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
 
     ClutterColor color;
@@ -830,6 +925,13 @@ int TPContext::run()
     color.alpha = 0;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+
+#ifdef TP_PROFILING
+
+    g_signal_connect( stage , "paint" , ( GCallback ) before_paint , 0 );
+    g_signal_connect_after( stage , "paint" , ( GCallback ) after_paint , 0 );
+
+#endif
 
 #ifndef TP_PRODUCTION
 
@@ -859,9 +961,16 @@ int TPContext::run()
     //.........................................................................
     // Create the default media player. This may come back NULL.
 
-    g_info( "CREATING MEDIA PLAYER..." );
+    if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
+    {
+        g_info( "CREATING MEDIA PLAYER..." );
 
-    media_player = MediaPlayer::make( media_player_constructor );
+        media_player = MediaPlayer::make( media_player_constructor );
+    }
+    else
+    {
+        g_info( "MEDIA PLAYER IS DISABLED..." );
+    }
 
     //.........................................................................
     // Load the app
@@ -1097,7 +1206,7 @@ String TPContext::make_fake_app()
 
 int TPContext::load_app( App ** app )
 {
-    PROFILER( "TPContext::load_app" );
+    PROFILER( "TPContext::load_app" , PROFILER_INTERNAL_CALLS );
 
     String app_path;
 
@@ -1361,6 +1470,62 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
+    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT } verbose = CHECK;
+
+    if ( verbose == CHECK )
+    {
+        verbose = NORMAL;
+
+        if ( const gchar * e = g_getenv( "TP_LOG" ) )
+        {
+            if ( ! strcmp( e , "engine" ) )
+            {
+                verbose = ENGINE;
+            }
+            else if ( ! strcmp( e , "app" ) )
+            {
+                verbose = APP;
+            }
+            else if ( ! strcmp( e , "raw" ) )
+            {
+                verbose = APP_RAW;
+            }
+            else if ( ! strcmp( e , "silent" ) )
+            {
+                verbose = SILENT;
+            }
+        }
+    }
+
+    switch( verbose )
+    {
+        case NORMAL:
+            break;
+
+        case SILENT:
+            return;
+
+        case ENGINE:
+            if ( log_level == G_LOG_LEVEL_MESSAGE )
+                return;
+            break;
+
+        case APP:
+            if ( log_level != G_LOG_LEVEL_MESSAGE )
+               return;
+            break;
+
+        case APP_RAW:
+            if ( log_level == G_LOG_LEVEL_MESSAGE )
+            {
+                fprintf( stdout, "%s\n", message );
+            }
+            return;
+
+        default:
+            break;
+    }
+
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message
@@ -1635,6 +1800,7 @@ void TPContext::load_external_configuration()
         TP_LIRC_REPEAT,
         TP_APP_PUSH_ENABLED,
         TP_APP_PUSH_PORT,
+        TP_MEDIAPLAYER_ENABLED,
 
         NULL
     };
@@ -1992,7 +2158,14 @@ MediaPlayer * TPContext::get_default_media_player()
 
 MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delegate )
 {
-    return MediaPlayer::make( media_player_constructor, delegate );
+    if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
+    {
+        return MediaPlayer::make( media_player_constructor, delegate );
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
@@ -2007,7 +2180,7 @@ ControllerList * TPContext::get_controller_list()
 
 Image * TPContext::load_icon( const gchar * path )
 {
-    PROFILER( "TPContext::load_icon" );
+    PROFILER( "TPContext::load_icon" , PROFILER_INTERNAL_CALLS );
 
     FreeLater free_later;
 
@@ -2084,7 +2257,7 @@ Image * TPContext::load_icon( const gchar * path )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
-                PROFILER( "TPContext::load_icon(load raw)" );
+                PROFILER( "TPContext::load_icon(load raw)" , PROFILER_INTERNAL_CALLS );
 
                 gchar * raw_contents = NULL;
 
@@ -2118,7 +2291,7 @@ Image * TPContext::load_icon( const gchar * path )
         // raw icon file. Any failure below this point is simply a failure to cache,
         // and even though it will affect performance, it is not considered critical.
 
-        PROFILER( "TPContext::load_icon(cache)" );
+        PROFILER( "TPContext::load_icon(cache)" , PROFILER_INTERNAL_CALLS );
 
         // Make sure the icon cache directory exists
 
@@ -2182,7 +2355,7 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
 
     g_log_set_default_handler( TPContext::log_handler, NULL );
 
-    g_info( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
+    g_info( "%d.%d.%d [%s]", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION , TP_GIT_VERSION );
 }
 
 //-----------------------------------------------------------------------------

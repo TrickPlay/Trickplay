@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    14
+#define TP_MINOR_VERSION    15
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -196,6 +196,10 @@ typedef struct TPContext TPContext;
     TP_LIRC_REPEAT -        Minimum number of milliseconds between button presses. Any
                             presses that arrive within this time are ignored.
                             Defaults to 150.
+
+    TP_MEDIAPLAYER_ENABLED - Whether the media player is enabled. If set to false, apps
+                             will behave as if there is no media player.
+                             Defaults to "true".
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -230,6 +234,7 @@ typedef struct TPContext TPContext;
 #define TP_LIRC_REPEAT                  "lirc_repeat"
 #define TP_APP_PUSH_ENABLED             "app_push_enabled"
 #define TP_APP_PUSH_PORT                "app_push_port"
+#define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

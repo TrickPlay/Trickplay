@@ -48,7 +48,29 @@ string(REGEX REPLACE "^#define.*TP_PATCH_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP
 
 set(TP_VERSION "${TP_MAJOR_VERSION}.${TP_MINOR_VERSION}.${TP_PATCH_VERSION}")
 
-message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION}" )
+execute_process(
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	COMMAND git log -1 --pretty=format:%h
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	OUTPUT_VARIABLE GIT_CURRENT_REVISION
+)
+
+execute_process(
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	COMMAND git tag --contains ${GIT_CURRENT_REVISION}
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	OUTPUT_VARIABLE GIT_CURRENT_TAG
+)
+
+if(NOT GIT_CURRENT_TAG)
+	SET(GIT_CURRENT_TAG "no tag")
+endif (NOT GIT_CURRENT_TAG)
+
+string(REPLACE "\n" ", " GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
+
+set(GIT_VERSION "${GIT_CURRENT_REVISION} (${GIT_CURRENT_TAG})")
+
+message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION} - GIT REVISION ${GIT_VERSION}" )
 
 #------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build

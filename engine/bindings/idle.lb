@@ -26,8 +26,7 @@ struct idle
     void set()
     {
         clear();
-        source=g_idle_add_full( G_PRIORITY_LOW , on_idle , this , 0 );
-        //source=clutter_threads_add_frame_source(60,on_idle,this);
+        source=g_idle_add_full( TRICKPLAY_PRIORITY , on_idle , this , 0 );
         g_timer_start(timer);
     }
 

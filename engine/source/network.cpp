@@ -414,7 +414,7 @@ public:
 
         IncrementalResponseClosure * self = new IncrementalResponseClosure( closure , chunk , size );
 
-        closure->event_group->add_idle( G_PRIORITY_DEFAULT_IDLE , response_callback , self , destroy );
+        closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback , self , destroy );
     }
 
 private:
@@ -507,7 +507,7 @@ public:
     static void request_finished( RequestClosure * closure )
     {
         g_assert( closure->event_group );
-        closure->event_group->add_idle( G_PRIORITY_DEFAULT_IDLE, response_callback, closure, request_closure_destroy );
+        closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback, closure, request_closure_destroy );
     }
 
     //.........................................................................
