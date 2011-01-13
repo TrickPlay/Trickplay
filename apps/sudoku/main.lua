@@ -1717,6 +1717,7 @@ function player_won()
 mediaplayer:play_sound("audio/won_game.mp3")
 screen:add(win_txt)
 win_txt:raise_to_top()
+restore_keys()
 	focus = "GAME_LEFT"
 	selector.opacity = 0
 	ind.r = 1
