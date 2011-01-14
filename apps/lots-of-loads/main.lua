@@ -796,7 +796,7 @@ local function load_photos()
 end
 
 local function load_trickplay()
-    load_images("App images",trickplay_list)
+    load_images("App images",trickplay_images)
 end
 
 local function load_all()
