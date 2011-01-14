@@ -120,23 +120,26 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       
    end
 
-   -- called after a character is selected to rotate to the next available
-   --character
-   function self:new_position()
+    -- called after a character is selected to rotate to the next available
+    --character
+    function self:new_position()
+        if selected == 2 then
+            if subselection == 1 then
+                selected = 1
+            else
+                subselection = 1
+            end
+        elseif selected == 1 then
+            if subselection < 4 then
+                subselection = subselection + 1
+            else
+                subselection = 5
+                selected = 2
+            end
+        end
+    end
 
-      if selected == 2 and subselection == 1 then
-          selected = 1
-      elseif selected == 1 then
-         if subselection < 4 then
-            subselection = subselection + 1
-         else
-            subselection = 5
-            selected = 2
-         end
-      end
-   end
-
-   local function setCharacterSeat()
+   local function setCharacterSeat(ctrl)
 
       --instantiate the player
       local pos = self:getPosition()
@@ -154,6 +157,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          table_position = pos,
          position = model.default_player_locations[ self:getPosition() ],
          chipPosition = model.default_bet_locations[ self:getPosition() ],
+         controller = ctrl,
          endowment = INITIAL_ENDOWMENT -- redundant code, look at line 64
                                        -- and GameState:initialize()
       }
@@ -178,103 +182,119 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       view:update()
    end
 
-   local CharacterSelectionKeyTable = {
-      [keys.Up] = function(self) self:move_selector(Directions.UP) end,
-      [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
-      [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
-      [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
-      [keys.Return] =
-         function(self)
-            mediaplayer:play_sound(ENTER_MP3)
-            if(CharacterSelectionCallbacks[selected][subselection]) then
-               CharacterSelectionCallbacks[selected][subselection]()
-            else
-               setCharacterSeat()
-               if(self.playerCounter >= 6) then
-                  start_a_game()
-               end
+    local CharacterSelectionKeyTable = {
+        [keys.Up] = function(self) self:move_selector(Directions.UP) end,
+        [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
+        [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
+        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
+        [keys.Return] =
+            function(self)
+                mediaplayer:play_sound(ENTER_MP3)
+                if(CharacterSelectionCallbacks[selected][subselection]) then
+                    CharacterSelectionCallbacks[selected][subselection]()
+                else
+                    setCharacterSeat()
+                    if(self.playerCounter >= 6) then
+                        start_a_game()
+                    end
+                end
             end
-         end
-   }
-   CharacterSelectionKeyTable[keys.OK] = CharacterSelectionKeyTable[keys.Return]
+    }
+    CharacterSelectionKeyTable[keys.OK] = CharacterSelectionKeyTable[keys.Return]
 
-   function self:on_key_down(k)
-      if CharacterSelectionKeyTable[k] then
-         CharacterSelectionKeyTable[k](self)
-      end
-   end
+    function self:on_key_down(k)
+        if CharacterSelectionKeyTable[k] then
+            CharacterSelectionKeyTable[k](self)
+        end
+    end
 
-   function self:get_selected_index()
-      return selected
-   end
+    function self:get_selected_index()
+        return selected
+    end
 
-   function self:get_subselection_index()
-      return subselection
-   end
+    function self:get_subselection_index()
+        return subselection
+    end
 
-   --[[
-      Corrects for positions not on the grid
-   --]]
-   local function check_for_valid(dir)
-      if (CharacterSelectionGroups.TOP == selected) and
-         (SubGroups.RIGHT == subselection) then
+    --[[
+    Corrects for positions not on the grid
+    --]]
+    local function check_for_valid(dir)
+        if (CharacterSelectionGroups.TOP == selected)
+        and (SubGroups.RIGHT == subselection) then
             subselection = SubGroups.RIGHT_MIDDLE 
             return false
-      elseif CharacterSelectionGroups.BOTTOM == selected then
-         if(0 ~= dir[2]) then
-            if(subselection >= SubGroups.MIDDLE) then
-               subselection = subselection + 1
+        elseif CharacterSelectionGroups.BOTTOM == selected then
+            if(0 ~= dir[2]) then
+                if(subselection >= SubGroups.MIDDLE) then
+                    subselection = subselection + 1
+                end
+            elseif (0 ~= dir[1]) and (self.playerCounter < 2) and
+                (subselection == SubGroups.MIDDLE) then
+                subselection = subselection + dir[1]
             end
-         elseif (0 ~= dir[1]) and (self.playerCounter < 2) and
-            (subselection == SubGroups.MIDDLE) then
-               subselection = subselection + dir[1]
-         end
-      end
-      return true
-   end
+        end
+        return true
+    end
 
-   function self:move_selector(dir)
-      screen:grab_key_focus()
-      if 0 ~= dir[1] then
-         local new_selected = subselection + dir[1]
-         if 1 <= new_selected and SubSize >= new_selected then
-            subselection = new_selected
-            if check_for_valid(dir) then
-               mediaplayer:play_sound(ARROW_MP3)
+    function self:move_selector(dir)
+        screen:grab_key_focus()
+        if 0 ~= dir[1] then
+            local new_selected = subselection + dir[1]
+            if 1 <= new_selected and SubSize >= new_selected then
+                subselection = new_selected
+                if check_for_valid(dir) then
+                    mediaplayer:play_sound(ARROW_MP3)
+                else
+                    mediaplayer:play_sound(BONK_MP3)
+                end
             else
-               mediaplayer:play_sound(BONK_MP3)
+                mediaplayer:play_sound(BONK_MP3)
             end
-         else
-            mediaplayer:play_sound(BONK_MP3)
-         end
-      elseif 0 ~= dir[2] then
-         if dir[2] == -1 and selected == CharacterSelectionGroups.BOTTOM and subselection == SubGroups.RIGHT_MIDDLE then
-            selected = CharacterSelectionGroups.TOP
-            subselection = SubGroups.MIDDLE
-            mediaplayer:play_sound(ARROW_MP3)
-         else
-            local new_selected = selected + dir[2]
-            if 1 <= new_selected and GroupSize >= new_selected then
-               selected = new_selected
-               check_for_valid(dir)
-               mediaplayer:play_sound(ARROW_MP3)
+        elseif 0 ~= dir[2] then
+            if dir[2] == -1 and selected == CharacterSelectionGroups.BOTTOM
+            and subselection == SubGroups.RIGHT_MIDDLE then
+                selected = CharacterSelectionGroups.TOP
+                subselection = SubGroups.MIDDLE
+                mediaplayer:play_sound(ARROW_MP3)
             else
-               mediaplayer:play_sound(BONK_MP3)
+                local new_selected = selected + dir[2]
+                if 1 <= new_selected and GroupSize >= new_selected then
+                    selected = new_selected
+                    check_for_valid(dir)
+                    mediaplayer:play_sound(ARROW_MP3)
+                else
+                    mediaplayer:play_sound(BONK_MP3)
+                end
             end
-         end
-      end
-      model:notify()
-   end
+        end
+        model:notify()
+    end
 
    function self:reset()
-      self.playerCounter = 0
-      selected = 2
-      subselection = 1
-      model.players = {}
-      for i=1,6 do
-         model.positions[i] = false
-      end
+       self.playerCounter = 0
+       selected = 2
+       subselection = 1
+       model.players = {}
+       for i=1,6 do
+          model.positions[i] = false
+       end
 
-      view:reset()
+       view:reset()
    end
+
+    function self:add_controller(ctrl)
+        local counter = 0
+        local pos = self:getPosition()
+        while model.positions[pos] and counter < 6 or type(pos) ~= "number" do
+            counter = counter + 1
+            self:new_position()
+            pos = self:getPosition()
+        end
+        setCharacterSeat(ctrl)
+        if(self.playerCounter >= 6) then
+            start_a_game()
+        end
+    end
+
 end)

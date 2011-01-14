@@ -130,6 +130,7 @@ function()
    dofile("PreFlopLUT.lua")
    dofile("Events.lua")
    dofile("Animate.lua")
+   dofile("ControllerManager.lua")
 
    Components = {
       COMPONENTS_FIRST = 1,
@@ -205,6 +206,7 @@ function()
       return event_listener_en
    end
 
+   ctrlman = ControllerManager(false, false, false, nil, 6)
    game = GameControl(model)
    model:start_app(Components.SPLASH)
 --   model:start_app(Components.PLAYER_BETTING)

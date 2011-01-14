@@ -15,7 +15,7 @@ TutorialView = Class(View, function(self, model, ...)
 
     -- some Buttons
     -- create the awesome Done and Next buttons
-     done_button = FocusableImage(112, 920,
+    local done_button = FocusableImage(112, 920,
         Image{src = "assets/help/button-done.png"},
         Image{src = "assets/help/button-done-on.png", opacity = 0})
     local next_button = FocusableImage(1665, 920,

@@ -112,6 +112,8 @@ BettingView = Class(View, function(view, model, ...)
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
         if comp == Components.PLAYER_BETTING then
+            ctrlman:start_accepting_ctrls()
+
             self.ui.opacity = 255
             self.ui:raise_to_top()
 --            print("Showing Betting UI")
@@ -178,25 +180,6 @@ BettingView = Class(View, function(view, model, ...)
             popup_ok = false
             return
         end
-       --[[
-       screen:add(text)
-       text:animate{
-          duration=200,
-          opacity=255,
-          on_completed=function(anim, ui)
-             if not ui then ui = anim end
-             ui:animate{
-                duration=200,
-                opacity=0,
-                on_completed=function(anim,ui)
-                   if not ui then ui=anim end
-                   ui:unparent()
-                end
-             }
-          end
-       }
-       --]]
-       
     end
     
 end)
