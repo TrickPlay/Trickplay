@@ -426,6 +426,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
                if not card.group.parent then
                    screen:add(card.group)
                end
+               ctrlman:declare_resource(card.group)
                -- Animate and flip the card if the player is human
                card.group:animate{x = pos[1] + offset, y = pos[2] + offset, mode=MODE, duration=TIME, z_rotation=0, on_completed = function() if player.isHuman then flipCard(card.group) end end }
                card.group:raise_to_top()

@@ -149,6 +149,9 @@ CharacterSelectionView = Class(View, function(view, model, ...)
         local controller = self:get_controller()
         local comp = self.model:get_active_component()
         if comp == Components.CHARACTER_SELECTION then
+            -- set accepting controllers to true
+            ctrlman:start_accepting_ctrls()
+
             self.ui.opacity = 255
 --            self.ui:raise_to_top()
 --            print("Showing Character Selection UI")
@@ -217,6 +220,7 @@ CharacterSelectionView = Class(View, function(view, model, ...)
                 end
             end
         else
+            ctrlman:stop_accepting_ctrls()
 --            print("Hiding Character Selection UI")
             self.ui:complete_animation()
             self.ui.opacity = 0

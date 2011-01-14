@@ -95,19 +95,19 @@ function(ctrl, model, ...)
       ctrl:on_event(KbdEvent{key=key})
    end
    
-   function ctrl.game_won(ctrl)
-      local players = ctrl:get_players()
-      return #players == 1 or not ctrl:human_still_playing()
-   end
+    function ctrl.game_won(ctrl)
+        local players = ctrl:get_players()
+        return #players == 1 or not ctrl:human_still_playing()
+    end
 
-   function ctrl.human_still_playing(ctrl)
-      local players = ctrl:get_players()
-      for _,player in ipairs(players) do
-         if player.isHuman then return true end
-      end
+    function ctrl.human_still_playing(ctrl)
+        local players = ctrl:get_players()
+        for _,player in ipairs(players) do
+            if player.isHuman then return true end
+        end
 
-      return false
-   end
+        return false
+    end
 
    function ctrl.on_event(ctrl, event)
       assert(event:is_a(Event))
