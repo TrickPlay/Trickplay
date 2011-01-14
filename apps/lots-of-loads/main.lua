@@ -788,6 +788,7 @@ local function load_images(title, list)
         individual_cpu_stop = os.clock()
         individual_time:stop()
         print(image,individual_time.elapsed,(individual_cpu_stop-individual_cpu_start)*1000,img.w,img.h)
+        collectgarbage()
     end
 end
 
