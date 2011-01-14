@@ -28,8 +28,8 @@
 
 //-----------------------------------------------------------------------------
 
-static int * g_argc     = NULL;
-static char *** g_argv  = NULL;
+static int g_argc     = 0;
+static char ** g_argv = 0;
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -1742,9 +1742,9 @@ void TPContext::load_external_configuration()
 
     if ( g_argc && g_argv )
     {
-        for( int i = 1; i < * g_argc; ++i )
+        for( int i = 1; i < g_argc; ++i )
         {
-            lua_pushstring( L , ( * g_argv )[ i ] );
+            lua_pushstring( L , g_argv[ i ] );
             lua_rawseti( L , -2 , i );
         }
     }
@@ -2325,9 +2325,6 @@ Image * TPContext::load_icon( const gchar * path )
 
 void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
 {
-    g_argc = argc;
-    g_argv = argv;
-
     if ( !g_thread_supported() )
     {
         g_thread_init( NULL );
@@ -2358,6 +2355,12 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
     }
 
     g_log_set_default_handler( TPContext::log_handler, NULL );
+
+    if ( argc && argv )
+    {
+        g_argc = * argc;
+        g_argv = * argv;
+    }
 
     g_info( "%d.%d.%d [%s]", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION , TP_GIT_VERSION );
 }
