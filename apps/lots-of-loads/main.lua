@@ -1,4 +1,4 @@
-    local image_list = {
+    local photos_list = {
         "David_Urbanke_Flickr-64.jpg",
         "DrGulas_Flickr-64.jpg",
         "HeyRocker_Flickr-64.jpg",
@@ -74,7 +74,7 @@ local function load_images()
     overall_time:start()
     local individual_cpu_start,individual_cpu_stop,overall_cpu_stop
     local overall_cpu_start = os.clock()
-    for _,image in pairs(image_list) do
+    for _,image in pairs(photos_list) do
         individual_time:start()
         individual_cpu_start = os.clock()
         local img = Image{src="assets/"..image}
