@@ -665,9 +665,7 @@
         "fp_tweetstream_container.png",
         "tweetstream_bg.png",
         "block_robert.png",
-        "dirt_area1.png",
         "you-blasted-the-zombie.png",
-        "artists-screen1.png",
         "block.png",
         "frame.png",
         "TP_logo_black_white_red.png",
@@ -683,6 +681,11 @@
         "navbar7.png",
         "navbar8.png",
         "InstructionBar.png",
+    }
+
+local big_trickplay = { -- these images too big for wongi's HW decoder right now
+        "dirt_area1.png",
+        "artists-screen1.png",
         "_reference_main_screen.png",
         "_reference_main_screen_rl.png",
         "app-screen-scrim.png",
@@ -706,7 +709,7 @@
         "menu-background.png",
         "minimized_view.png",
         "top.png",
-    }
+}
 
     local photos_list = {
         "David_Urbanke_Flickr-64.jpg",
@@ -770,7 +773,8 @@
         "David_Urbanke_Flickr-orig.jpg",
         "Morgan_Solar_Flickr-orig.jpg",
 }
-local big_images = { -- these are bigger than 1920x1080 by quite a bit in some cases
+
+local big_photos = { -- these are bigger than 1920x1080 by quite a bit in some cases
         "Matthew_Tosh_Flickr-orig.jpg", -- 2000x1264
         "[cypher]_Flickr-orig.jpg", -- 2144x1435
         "Tambako_the_Jaguar_Flickr-orig.jpg", -- 2274x3424
@@ -779,7 +783,7 @@ local big_images = { -- these are bigger than 1920x1080 by quite a bit in some c
 
 local function load_images(title, list)
     local individual_time = Stopwatch()
-    print(title,"wallclock\tcputime\twidth\theight")
+    print("width\theight\twallclock\tcputime\t",title)
     local individual_cpu_start,individual_cpu_stop,overall_cpu_stop
     for _,image in pairs(list) do
         individual_time:start()
@@ -787,7 +791,7 @@ local function load_images(title, list)
         local img = Image{src="assets/"..image}
         individual_cpu_stop = os.clock()
         individual_time:stop()
-        print(image,individual_time.elapsed,(individual_cpu_stop-individual_cpu_start)*1000,img.w,img.h)
+        print(img.w,img.h,math.floor(individual_time.elapsed*100)/100,math.floor((individual_cpu_stop-individual_cpu_start)*1000*100)/100,image)
         collectgarbage()
     end
 end
