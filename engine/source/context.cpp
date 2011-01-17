@@ -2318,6 +2318,12 @@ Image * TPContext::load_icon( const gchar * path )
     return image;
 }
 
+//-----------------------------------------------------------------------------
+
+StringMap TPContext::get_config() const
+{
+    return config;
+}
 
 //=============================================================================
 // External-facing functions
