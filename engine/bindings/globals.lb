@@ -7,6 +7,7 @@ module globals;
 #include "context.h"
 #include "actions.h"
 #include "images.h"
+#include "clutter_util.h"
 
 struct DoLater
 {
@@ -1053,6 +1054,12 @@ globals
 	        }
 
             result = checksum.c_str();
+        ]];
+
+	keypress( int key , int unicode = 0 )
+        [[
+            ClutterUtil::inject_key_down( key , unicode );
+            ClutterUtil::inject_key_up( key , unicode );
         ]];
 
 	/*
