@@ -872,6 +872,14 @@ App::~App()
 }
 
 //-----------------------------------------------------------------------------
+// Replacement function for math.randomseed that does nothing
+
+static int disabled_randomseed( lua_State * )
+{
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
 
 void App::secure_lua_state( const StringSet & allowed_names )
 {
@@ -983,6 +991,24 @@ void App::secure_lua_state( const StringSet & allowed_names )
         lb_allow( L, it->c_str() );
     }
 
+    //.........................................................................
+    // If there is a fixed random seed, set it and also replace math.randomseed
+
+    int seed = context->get_int( TP_RANDOM_SEED , 0 );
+
+    if ( seed != 0 )
+    {
+        lua_getglobal( L , "math" );
+
+        lua_getfield( L , -1 , "randomseed" );
+        lua_pushinteger( L , seed );
+        lua_call( L , 1 , 0 );
+
+        lua_pushcfunction( L , disabled_randomseed );
+        lua_setfield( L , -2 , "randomseed" );
+
+        lua_pop( L , 1 );
+    }
 }
 
 //-----------------------------------------------------------------------------
