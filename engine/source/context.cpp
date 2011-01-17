@@ -1805,6 +1805,7 @@ void TPContext::load_external_configuration()
         TP_APP_PUSH_PORT,
         TP_MEDIAPLAYER_ENABLED,
         TP_IMAGE_DECODER_ENABLED,
+        TP_RANDOM_SEED,
 
         NULL
     };

@@ -193,17 +193,22 @@ typedef struct TPContext TPContext;
     TP_LIRC_UDS -           Path to the LIRC daemon Unix Doman Socket.
                             Defaults to "/var/run/lirc/lircd".
 
-    TP_LIRC_REPEAT -        Minimum number of milliseconds between button presses. Any
-                            presses that arrive within this time are ignored.
-                            Defaults to 150.
+    TP_LIRC_REPEAT -            Minimum number of milliseconds between button presses. Any
+                                presses that arrive within this time are ignored.
+                                Defaults to 150.
 
-    TP_MEDIAPLAYER_ENABLED - Whether the media player is enabled. If set to false, apps
-                             will behave as if there is no media player.
-                             Defaults to "true".
+    TP_MEDIAPLAYER_ENABLED -    Whether the media player is enabled. If set to false, apps
+                                will behave as if there is no media player.
+                                Defaults to "true".
 
-    TP_IMAGE_DECODER_ENABLED - Whether the external image decoder is enabled. If set to false,
-                               only internal decoders will be used.
-                               Defaults to "true".
+    TP_IMAGE_DECODER_ENABLED -  Whether the external image decoder is enabled. If set to false,
+                                only internal decoders will be used.
+                                Defaults to "true".
+
+    TP_RANDOM_SEED -            If set to a non-zero value, this will be the default random
+                                seed for all apps and the 'math.randomseed' function will
+                                become a no-op.
+                                Defaults to 0.
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -240,6 +245,7 @@ typedef struct TPContext TPContext;
 #define TP_APP_PUSH_PORT                "app_push_port"
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
+#define TP_RANDOM_SEED                  "random_seed"
 
 
 /*-----------------------------------------------------------------------------
