@@ -24,6 +24,7 @@ MenuController = Class(Controller,function(self, view, ...)
     end
 
     function controller:get_current_layout() return current_layout end
+    function controller:get_current_tile_image() return current_tile_image end
     function controller:get_direction() return direction end
     function controller:get_last_layout() return last_layout end
     function controller:restore_layout_indicator() current_layout=last_layout end
@@ -235,6 +236,31 @@ MenuController = Class(Controller,function(self, view, ...)
             mediaplayer:play_sound("assets/audio/Hint.mp3")
         else
             mediaplayer:play_sound("assets/audio/enter.mp3")
+        end
+    end
+
+    --[[
+        Load the previous games tile type
+    --]]
+    function self:load_tile_type()
+        if not settings.current_tile_image then return end
+
+        if settings.current_tile_image > current_tile_image then
+            current_tile_image = game:get_current_tile_image()
+            if current_tile_image < #TILE_IMAGES then
+                current_tile_image = current_tile_image + 1
+            else
+                current_tile_image = 1
+            end
+            view:change_tiles(current_tile_image, Directions.DOWN, true)
+        elseif settings.current_tile_image < current_tile_image then
+            current_tile_image = game:get_current_tile_image()
+            if current_tile_image > 1 then
+                current_tile_image = current_tile_image - 1
+            else
+                current_tile_image = #TILE_IMAGES
+            end
+            view:change_tiles(current_tile_image, Directions.UP, true)
         end
     end
 

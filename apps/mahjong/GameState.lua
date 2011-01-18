@@ -123,6 +123,8 @@ GameState = Class(nil,function(state, ctrl)
 
         settings.grid = saved_data
         settings.layout_number = layout_number
+        settings.current_tile_image =
+            router:get_controller(Components.MENU):get_current_tile_image()
     end
 
     function state:build_layout(number)
