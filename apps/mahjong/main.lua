@@ -78,6 +78,9 @@ timer.on_timer = function(timer)
         --router:start_app(Components.NO_MOVES_DIALOG)
         --router:start_app(Components.NEW_MAP_DIALOG)
 
+        -- load the tile image that was used from the previous game
+        router:get_controller(Components.MENU):load_tile_type()
+
         timer.interval = 400
         timer.on_timer = function()
             enable_event_listeners()

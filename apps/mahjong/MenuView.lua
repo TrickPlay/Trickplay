@@ -153,7 +153,7 @@ MenuView = Class(View, function(view, model, ...)
     }
     tile_text.anchor_point = {tile_text.width/2, tile_text.height/2}
     choose_tile.group:add(
-        tile_text, tile_mask,choose_tile.arrow_up.group, choose_tile.arrow_down.group
+        tile_text, tile_mask, choose_tile.arrow_up.group, choose_tile.arrow_down.group
     )
 
     -- score related stuff
@@ -279,21 +279,29 @@ MenuView = Class(View, function(view, model, ...)
         view.tile_group.position = {140, 220}
     end
 
-    function view:change_tiles(number, dir)
+    function view:change_tiles(number, dir, instant)
+        if instant then
+            game:get_state():get_tiles_class():change_images(number)
+        end
+
         local interval = nil
         if -1 == dir[2] then
             interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y + 195)}
             gameloop:add(tiles_strip, 300, nil, interval, nil,
                 function()
                     if number == 3 then tiles_strip.y = -350 end
-                    game:get_state():get_tiles_class():change_images(number)
+                    if not instant then
+                        game:get_state():get_tiles_class():change_images(number)
+                    end
                 end)
         elseif 1 == dir[2] then
             interval = {["y"] = Interval(tiles_strip.y, tiles_strip.y - 195)}
             gameloop:add(tiles_strip, 300, nil, interval, nil,
                 function()
                     if number == 1 then tiles_strip.y = 40 end
-                    game:get_state():get_tiles_class():change_images(number)
+                    if not instant then
+                        game:get_state():get_tiles_class():change_images(number)
+                    end
                 end)
         else
             error("something went wrong")
