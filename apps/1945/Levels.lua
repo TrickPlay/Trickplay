@@ -307,7 +307,7 @@ levels =
                 {t =    0, item = add_to_render_list,         params = { lvl1txt        }},
                 
                 
-                
+                --[[
                 {t =    2, item = formations.cluster,         params = {  1100 }},
                 {t =    3, item = formations.cluster,         params = {  200 }},
                 {t =   10, item = formations.cluster,         params = { 1700 }},
@@ -335,7 +335,7 @@ levels =
                 {t =   60, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
                 {t =   70, item = formations.one_loop,       params = {2,150,100,200,300,-1}},
                 {t =   70, item = formations.one_loop,       params = {2,150,screen.w-100,screen.w-200,300,1}},
-                {t =   72, item = formations.cluster,        params = { 950 }},
+                {t =   72, item = formations.cluster,        params = { 950 }},--]
                 {t =   80, item = powerups.health,           params = {950}},
                 
                 {t =   82, item = enemies.zeppelin,          params = {850}},
@@ -524,7 +524,7 @@ levels =
             for i = 1, #self.add_list do
                 self.index[i] = 1
             end
-            self.time = 0--200
+            self.time = 200
             self.num_bosses = 2
             if type(o) == "table"  then
                 recurse_and_apply(  self, o  )
@@ -982,10 +982,10 @@ levels =
                 {---[[
                     {
                         {source={"curr_lvl_imgs","trench_l"},  x=1300+  curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=1300+2*curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=1300+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_r"},  x=1300+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=100+  curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_r"},  x=100+3*curr_lvl_imgs.trench_l.w},
                         enemies={
                             {f = {"enemies","trench"}, p = {1300+2*curr_lvl_imgs.trench_l.w}},
@@ -995,24 +995,27 @@ levels =
                         }
                     },
                     {
-                        {source={"curr_lvl_imgs","trench_l"},  x=500+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=500 },
+                        {source={"curr_lvl_imgs","trench_reg_6"},x=500+  3.5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=500+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=500+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=500+4*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=500+5*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=500+6*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=500+7*curr_lvl_imgs.trench_l.w},
                         enemies={
-                            {f={"enemies","trench"},p={500+2*imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={500+5*imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={500+2*curr_lvl_imgs.trench_l.w}},
+                            {f={"enemies","trench"},p={500+5*curr_lvl_imgs.trench_l.w}},
                         }
                     },
                     {
 
-                        {source={"curr_lvl_imgs","road_hor"}, x=300-5*curr_lvl_imgs.road_hor.w},
+                        --[[{source={"curr_lvl_imgs","road_hor"}, x=300-5*curr_lvl_imgs.road_hor.w},
                         {source={"curr_lvl_imgs","road_hor"}, x=300-4*curr_lvl_imgs.road_hor.w},
                         {source={"curr_lvl_imgs","road_hor"}, x=300-3*curr_lvl_imgs.road_hor.w},
-                        {source={"curr_lvl_imgs","road_hor"}, x=300-2*curr_lvl_imgs.road_hor.w},
+                        {source={"curr_lvl_imgs","road_hor"}, x=300-2*curr_lvl_imgs.road_hor.w},--]]
                         {source={"curr_lvl_imgs","road_hor"}, x=300-  curr_lvl_imgs.road_hor.w},
                         {source={"curr_lvl_imgs","road_left"},x=300},
                     },
@@ -1083,18 +1086,20 @@ levels =
                     {
                         {source={"curr_lvl_imgs","road_ver"}, x=300+6*curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=50+  curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=50+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_6"},x=50+4.5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=50+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+4*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+5*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+6*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+7*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=50+8*curr_lvl_imgs.trench_l.w},
                         
                         {source={"curr_lvl_imgs","trench_l"},  x=1250},
-                        {source={"curr_lvl_imgs","trench_reg"},x=1250+1*curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=1250+1*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=1250+2*curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=1250+3*curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=1250+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_r"},  x=1250+4*curr_lvl_imgs.trench_l.w},
                         enemies={
                             {f={"enemies","trench"},p={  50+2*curr_lvl_imgs.trench_l.w}},
@@ -1109,20 +1114,22 @@ levels =
                     {{source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},times=3},
                     {
                         {source={"curr_lvl_imgs","road_ver"},x=300+6*curr_lvl_imgs.road_ver.w},
-                        {source={"curr_lvl_imgs","trench_l"},  x=50},
-                        {source={"curr_lvl_imgs","trench_reg"},x=50+  curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=50+2*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_l"},  x=50+  curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=50+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_6"},x=50+4.5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=50+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+4*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+5*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+6*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=50+7*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=50+8*curr_lvl_imgs.trench_l.w},
                         
                         {source={"curr_lvl_imgs","trench_l"},  x=1250},
-                        {source={"curr_lvl_imgs","trench_reg"},x=1250+  curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=1250+  curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=1250+2*curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=1250+3*curr_lvl_imgs.trench_l.w},
+                        --{source={"curr_lvl_imgs","trench_reg"},x=1250+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_r"},  x=1250+4*curr_lvl_imgs.trench_l.w},
                         enemies={
                             
@@ -1175,7 +1182,8 @@ levels =
                         
                         {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=100},
-                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_9"},x=100+  5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
@@ -1184,6 +1192,7 @@ levels =
                         {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
@@ -1201,7 +1210,8 @@ levels =
                     {
                         {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=100},
-                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_9"},x=100+  5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
@@ -1210,6 +1220,7 @@ levels =
                         {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
@@ -1233,7 +1244,8 @@ levels =
                     {
                         {source={"curr_lvl_imgs","road_ver"},  x=300+9*curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=100},
-                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_9"},x=100+  5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
@@ -1242,6 +1254,7 @@ levels =
                         {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
@@ -1288,7 +1301,8 @@ levels =
                     {
                         {source={"curr_lvl_imgs","road_ver"},  x=300+9*curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=100},
-                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_9"},x=100+  5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
@@ -1297,6 +1311,7 @@ levels =
                         {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         
                         
@@ -1338,8 +1353,8 @@ levels =
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = {"formations","vert_row_tanks"},      p = {1000,-1,4,150}},
-                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                            --{f = {"formations","vert_row_tanks"},      p = {1000,-1,4,150}},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,4,150 }},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
@@ -1350,18 +1365,18 @@ levels =
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,4,150 }},
                         }
                     },
                     
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,4,150 }},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
                         enemies = {
-                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,3,150 }},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=5,
@@ -1372,7 +1387,8 @@ levels =
                     {
                         {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=100},
-                        {source={"curr_lvl_imgs","trench_reg"},x=100+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_9"},x=100+  5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=100+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+4*curr_lvl_imgs.trench_l.w},
@@ -1381,6 +1397,7 @@ levels =
                         {source={"curr_lvl_imgs","trench_reg"},x=100+7*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+8*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=100+9*curr_lvl_imgs.trench_l.w},
+                        --]]
                         {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         enemies = {
                             {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
@@ -1407,7 +1424,8 @@ levels =
                     { 
                         {source={"curr_lvl_imgs","road_ver"},  x=300-curr_lvl_imgs.road_ver.w},
                         {source={"curr_lvl_imgs","trench_l"},  x=300},
-                        {source={"curr_lvl_imgs","trench_reg"},x=300+  curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_reg_9"},x=300+  5*curr_lvl_imgs.trench_l.w},
+                        --[[
                         {source={"curr_lvl_imgs","trench_reg"},x=300+2*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=300+3*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=300+4*curr_lvl_imgs.trench_l.w},
@@ -1416,8 +1434,9 @@ levels =
                         {source={"curr_lvl_imgs","trench_reg"},x=300+7*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=300+8*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_reg"},x=300+9*curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_reg"},x=300+10*curr_lvl_imgs.trench_l.w},
-                        {source={"curr_lvl_imgs","trench_r"},  x=300+11*curr_lvl_imgs.trench_l.w},
+                        --]]
+                        --{source={"curr_lvl_imgs","trench_reg"},x=300+10*curr_lvl_imgs.trench_l.w},
+                        {source={"curr_lvl_imgs","trench_r"},  x=300+10*curr_lvl_imgs.trench_l.w},
                         enemies = {
                             {f={"enemies","trench"},p={300+1*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={300+3*curr_lvl_imgs.trench_l.w}},
@@ -1468,7 +1487,7 @@ levels =
                         }
                     },
                     
-                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=2,
+                    {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=6,
                         enemies = {
                             {f = {"formations","vert_row_tanks"},      p = {500,-1,3,150}},
                         }
@@ -1476,26 +1495,26 @@ levels =
                     {
                         {source={"curr_lvl_imgs","road_left"},x=300-1*curr_lvl_imgs.road_hor.w,z_rotation=-90},
                         enemies = {
-                            {f = {"formations","hor_row_tanks"},      p = { 1,-150,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = { 1,-400,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = { 1,-650,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-275,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-525,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-775,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-150,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-400,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-650,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-275,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-525,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-775,3,250 }},
                         }
-                    },
+                    },--[[
                     {},{},{},{},{},{},
                     {
                         enemies = {
-                            {f = {"formations","hor_row_tanks"},      p = { 1,-150,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = { 1,-400,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = { 1,-650,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-275,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-525,4,200 }},
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-775,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-150,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-400,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = { 1,-650,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-275,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-525,3,250 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-775,3,250 }},
                         }
                     },
-                    
+                    --]]
                     {},{},{},{},{},{},{},{},{},{},{},{},--]]
                     ---[[
                     {

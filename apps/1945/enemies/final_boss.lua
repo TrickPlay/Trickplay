@@ -31,13 +31,13 @@ enemies.final_boss = function(is_boss,o)
         y_speed = 5,
         group = Group{
             anchor_point={
-                imgs.final_boss.w/2,
-                imgs.final_boss.h/2
+                curr_lvl_imgs.final_boss.w/2,
+                curr_lvl_imgs.final_boss.h/2
             },
             x =  screen_w/2,
-            y = -imgs.final_boss.h/2
+            y = -curr_lvl_imgs.final_boss.h/2
         },
-        image = Clone{source=imgs.final_boss},
+        image = Clone{source=curr_lvl_imgs.final_boss},
         shoot_time=1,
         last_shot_time={ll=0,lr=.2,rl=.4,rr=.6},
         prop  = {
@@ -46,31 +46,67 @@ enemies.final_boss = function(is_boss,o)
             broke_lr = false,
             broke_rl = false,
             broke_rr = false,
-            
+            --[[
             dead_ll = Clone{source=imgs.boss_prop_d},
             dead_lr = Clone{source=imgs.boss_prop_d},
             dead_rl = Clone{source=imgs.boss_prop_d},
             dead_rr = Clone{source=imgs.boss_prop_d},
-            
-            img_ll = Clone{source=imgs.boss_prop},
-            img_lr = Clone{source=imgs.boss_prop},
-            img_rl = Clone{source=imgs.boss_prop},
-            img_rr = Clone{source=imgs.boss_prop},
-            
-            g_ll   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=431,y=384},
-            g_lr   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=583,y=363},
-            g_rl   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=803,y=363},
-            g_rr   = Group{clip={0,0,imgs.boss_prop.w/2,imgs.boss_prop.h},x=959,y=384},
+            --]]
+            img_ll = {
+				Clone{source=curr_lvl_imgs.boss_prop[1],x=431,y=384},
+				Clone{source=curr_lvl_imgs.boss_prop[2],x=431,y=384,opacity=0}
+			},
+            img_lr = {
+				Clone{source=curr_lvl_imgs.boss_prop[1],x=583,y=363},
+				Clone{source=curr_lvl_imgs.boss_prop[2],x=583,y=363,opacity=0}
+			},
+            img_rl = {
+				Clone{source=curr_lvl_imgs.boss_prop[1],x=803,y=363},
+				Clone{source=curr_lvl_imgs.boss_prop[2],x=803,y=363,opacity=0}
+			},
+            img_rr = {
+				Clone{source=curr_lvl_imgs.boss_prop[1],x=959,y=384},
+				Clone{source=curr_lvl_imgs.boss_prop[2],x=959,y=384,opacity=0}
+			},
         },
         guns = {
-            img_ll = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            img_lr = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            img_rl = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
-            img_rr = Clone{source=imgs.boss_turret,anchor_point={imgs.boss_turret.w/2,imgs.boss_turret.h/3}},
+            img_ll = Clone{
+				source=curr_lvl_imgs.boss_turret,
+				position={390,240},
+				anchor_point={
+					curr_lvl_imgs.boss_turret.w/2,
+					curr_lvl_imgs.boss_turret.h/3
+				}
+			},
+            img_lr = Clone{
+				source=curr_lvl_imgs.boss_turret,
+				position={550,190},
+				anchor_point={
+					curr_lvl_imgs.boss_turret.w/2,
+					curr_lvl_imgs.boss_turret.h/3
+				}
+			},
+            img_rl = Clone{
+				source=curr_lvl_imgs.boss_turret,
+				position={923,190},
+				anchor_point={
+					curr_lvl_imgs.boss_turret.w/2,
+					curr_lvl_imgs.boss_turret.h/3
+				}
+			},
+            img_rr = Clone{
+				source=curr_lvl_imgs.boss_turret,
+				position={1070,240},
+				anchor_point={
+					curr_lvl_imgs.boss_turret.w/2,
+					curr_lvl_imgs.boss_turret.h/3
+				}
+			},--[[
             g_ll   = Group{x=390,y=240},
             g_lr   = Group{x=550,y=190},
             g_rl   = Group{x=923,y=190},
             g_rr   = Group{x=1070,y=240},
+			--]]
         },
         dying = false,
 		remove = function(self)
@@ -185,36 +221,50 @@ enemies.final_boss = function(is_boss,o)
             return false
         end,
         setup = function(self)
-            self.prop.g_ll:add(self.prop.dead_ll,self.prop.img_ll)
-            self.prop.g_lr:add(self.prop.dead_lr,self.prop.img_lr)
-            self.prop.g_rl:add(self.prop.dead_rl,self.prop.img_rl)
-            self.prop.g_rr:add(self.prop.dead_rr,self.prop.img_rr)
-            
+			--[[
             self.guns.g_ll:add(self.guns.img_ll)
             self.guns.g_lr:add(self.guns.img_lr)
             self.guns.g_rl:add(self.guns.img_rl)
             self.guns.g_rr:add(self.guns.img_rr)
-            
+            --]]
             self.group:add(
                 self.image,
                 
-                self.prop.g_ll,
-                self.prop.g_lr,
-                self.prop.g_rl,
-                self.prop.g_rr,
+                self.prop.img_ll[1],self.prop.img_ll[2],
+                self.prop.img_lr[1],self.prop.img_lr[2],
+                self.prop.img_rl[1],self.prop.img_rl[2],
+                self.prop.img_rr[1],self.prop.img_rr[2],
                 
-                self.guns.g_ll,
-                self.guns.g_lr,
-                self.guns.g_rl,
-                self.guns.g_rr
+                self.guns.img_ll,
+                self.guns.img_lr,
+                self.guns.img_rl,
+                self.guns.img_rr
             )
             layers.air_doodads_1:add(self.group)
-            
+            self.num_frames = 2
+			self.index = 1
             table.insert(special_checks,{f=self.special_check,p=self})
             if type(o) == "table"  then
                 recurse_and_apply(  self, o  )
             end
             
+			if self.prop.broke_ll then
+				 self.prop.img_ll[1].opacity=0
+				 self.prop.img_ll[2].opacity=0
+			end
+			if self.prop.broke_lr then
+				 self.prop.img_lr[1].opacity=0
+				 self.prop.img_lr[2].opacity=0
+			end
+			if self.prop.broke_rl then
+				 self.prop.img_rl[1].opacity=0
+				 self.prop.img_rl[2].opacity=0
+			end
+			if self.prop.broke_rr then
+				 self.prop.img_rr[1].opacity=0
+				 self.prop.img_rr[2].opacity=0
+			end
+			
             coll_box.ll.obj=self
             coll_box.lr.obj=self
             coll_box.rl.obj=self
@@ -235,21 +285,21 @@ enemies.final_boss = function(is_boss,o)
 			--bullet trajectories
 			
 			--user plane is the target 
-			targ.x = (my_plane.group.x+my_plane.image.w/(2*my_plane.num_frames))
-			targ.y = (my_plane.group.y+my_plane.image.h/2)
+			targ.x = (my_plane.group.x+my_plane.img_w/2)
+			targ.y = (my_plane.group.y+my_plane.img_h/2)
 			
             --absolute position of the zeppelin's right gun
-			me.ll.x = (self.guns.g_ll.x+self.group.x-self.group.anchor_point[1])
-			me.ll.y = (self.guns.g_ll.y+self.group.y-self.group.anchor_point[2])
+			me.ll.x = (self.guns.img_ll.x+self.group.x-self.group.anchor_point[1])
+			me.ll.y = (self.guns.img_ll.y+self.group.y-self.group.anchor_point[2])
             --absolute position of the zeppelin's right gun
-			me.lr.x = (self.guns.g_lr.x+self.group.x-self.group.anchor_point[1])
-			me.lr.y = (self.guns.g_lr.y+self.group.y-self.group.anchor_point[2])
+			me.lr.x = (self.guns.img_lr.x+self.group.x-self.group.anchor_point[1])
+			me.lr.y = (self.guns.img_lr.y+self.group.y-self.group.anchor_point[2])
             --absolute position of the zeppelin's right gun
-			me.rl.x = (self.guns.g_rl.x+self.group.x-self.group.anchor_point[1])
-			me.rl.y = (self.guns.g_rl.y+self.group.y-self.group.anchor_point[2])
-             --absolute position of the zeppelin's right gun
-			me.rr.x = (self.guns.g_rr.x+self.group.x-self.group.anchor_point[1])
-			me.rr.y = (self.guns.g_rr.y+self.group.y-self.group.anchor_point[2])
+			me.rl.x = (self.guns.img_rl.x+self.group.x-self.group.anchor_point[1])
+			me.rl.y = (self.guns.img_rl.y+self.group.y-self.group.anchor_point[2])
+            --absolute position of the zeppelin's right gun
+			me.rr.x = (self.guns.img_rr.x+self.group.x-self.group.anchor_point[1])
+			me.rr.y = (self.guns.img_rr.y+self.group.y-self.group.anchor_point[2])
 			
 			for k,v in pairs(me) do
                 self.last_shot_time[k] = self.last_shot_time[k] + secs
@@ -265,33 +315,45 @@ enemies.final_boss = function(is_boss,o)
 					
 					
 					self.last_shot_time[k] = 0
-					fire_bullet(mock_obj,imgs.z_bullet)
+					fire_bullet(mock_obj,curr_lvl_imgs.z_bullet)
 					
 				end
             end
 		end,
-        prop_w = imgs.boss_prop.w/2,
+		strip_thresh = .1,
+        strip_time = 0,
+        prop_w = curr_lvl_imgs.boss_prop[1].w/2,
         render = function(self,secs)
-            if self.prop.img_ll.x == 0 then
-                    self.prop.dead_ll.x = -self.prop_w
-                    self.prop.img_ll.x  = -self.prop_w
-                    self.prop.dead_lr.x = -self.prop_w
-                    self.prop.img_lr.x  = -self.prop_w
-                    self.prop.dead_rl.x = -self.prop_w
-                    self.prop.img_rl.x  = -self.prop_w
-                    self.prop.dead_rr.x = -self.prop_w
-                    self.prop.img_rr.x  = -self.prop_w
-            else
-                self.prop.img_ll.x =0
-                self.prop.img_lr.x =0
-                self.prop.img_rl.x =0
-                self.prop.img_rr.x =0
-                
-                self.prop.dead_ll.x =0
-                self.prop.dead_lr.x =0
-                self.prop.dead_rl.x =0
-                self.prop.dead_rr.x =0
+			self.strip_time = self.strip_time + secs
+            if self.strip_time > self.strip_thresh then
+                self.strip_time   = 0
+				if not self.prop.broke_ll then
+					self.prop.img_ll[self.index].opacity = 0
+				end
+				if not self.prop.broke_rl then
+					self.prop.img_rl[self.index].opacity = 0
+				end
+				if not self.prop.broke_lr then
+					self.prop.img_lr[self.index].opacity = 0
+				end
+				if not self.prop.broke_rr then
+					self.prop.img_rr[self.index].opacity = 0
+				end
+                self.index      = self.index%self.num_frames + 1
+				if not self.prop.broke_ll then
+					self.prop.img_ll[self.index].opacity = 255
+				end
+				if not self.prop.broke_rl then
+					self.prop.img_rl[self.index].opacity = 255
+				end
+				if not self.prop.broke_lr then
+					self.prop.img_lr[self.index].opacity = 255
+				end
+				if not self.prop.broke_rr then
+					self.prop.img_rr[self.index].opacity = 255
+				end
             end
+            
             
             if not self.dying then
                 self:rotate_guns_and_fire(secs)
@@ -300,31 +362,31 @@ enemies.final_boss = function(is_boss,o)
             local x = self.group.x-self.group.anchor_point[1]
             local y = self.group.y-self.group.anchor_point[2]
             if not self.dying and not self.prop.broke_ll then
-                coll_box.ll.x1=self.prop.g_ll.x+x
-                coll_box.ll.x2=self.prop.g_ll.x+x+self.prop.g_ll.w/2
-                coll_box.ll.y1=self.prop.g_ll.y+y
-                coll_box.ll.y2=self.prop.g_ll.y+y+self.prop.g_ll.h/2
+                coll_box.ll.x1=self.prop.img_ll[1].x+x
+                coll_box.ll.x2=self.prop.img_ll[1].x+x+self.prop.img_ll[1].w
+                coll_box.ll.y1=self.prop.img_ll[1].y+y
+                coll_box.ll.y2=self.prop.img_ll[1].y+y+self.prop.img_ll[1].h
                 table.insert(b_guys_air,coll_box.ll)
             end
             if not self.dying and not self.prop.broke_lr then
-                coll_box.lr.x1=self.prop.g_lr.x+x
-                coll_box.lr.x2=self.prop.g_lr.x+x+self.prop.g_lr.w/2
-                coll_box.lr.y1=self.prop.g_lr.y+y
-                coll_box.lr.y2=self.prop.g_lr.y+y+self.prop.g_lr.h/2
+                coll_box.lr.x1=self.prop.img_lr[1].x+x
+                coll_box.lr.x2=self.prop.img_lr[1].x+x+self.prop.img_lr[1].w
+                coll_box.lr.y1=self.prop.img_lr[1].y+y
+                coll_box.lr.y2=self.prop.img_lr[1].y+y+self.prop.img_lr[1].h
                 table.insert(b_guys_air,coll_box.lr)
             end
             if not self.dying and not self.prop.broke_rr then
-                coll_box.rr.x1=self.prop.g_rr.x+x
-                coll_box.rr.x2=self.prop.g_rr.x+x+self.prop.g_rr.w/2
-                coll_box.rr.y1=self.prop.g_rr.y+y
-                coll_box.rr.y2=self.prop.g_rr.y+y+self.prop.g_rr.h/2
+                coll_box.rr.x1=self.prop.img_rr[1].x+x
+                coll_box.rr.x2=self.prop.img_rr[1].x+x+self.prop.img_rr[1].w
+                coll_box.rr.y1=self.prop.img_rr[1].y+y
+                coll_box.rr.y2=self.prop.img_rr[1].y+y+self.prop.img_rr[1].h
                 table.insert(b_guys_air,coll_box.rr)
             end
             if not self.dying and not self.prop.broke_rl then
-                coll_box.rl.x1=self.prop.g_rl.x+x
-                coll_box.rl.x2=self.prop.g_rl.x+x+self.prop.g_rl.w/2
-                coll_box.rl.y1=self.prop.g_rl.y+y
-                coll_box.rl.y2=self.prop.g_rl.y+y+self.prop.g_rl.h/2
+                coll_box.rl.x1=self.prop.img_rl[1].x+x
+                coll_box.rl.x2=self.prop.img_rl[1].x+x+self.prop.img_rl[1].w
+                coll_box.rl.y1=self.prop.img_rl[1].y+y
+                coll_box.rl.y2=self.prop.img_rl[1].y+y+self.prop.img_rl[1].h
                 table.insert(b_guys_air,coll_box.rl)
             
             end
@@ -343,41 +405,45 @@ enemies.final_boss = function(is_boss,o)
 
             ["prop_ll"] = function(self)
                 self.prop.broke_ll = true
-                self.prop.img_ll.opacity=0
+                self.prop.img_ll[1].opacity=0
+				self.prop.img_ll[2].opacity=0
                 add_to_render_list(
                     explosions.small(
-                        self.prop.g_ll.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_ll.y+self.group.y-self.group.anchor_point[2]
+                        self.prop.img_ll[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
+                        self.prop.img_ll[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
             end,
             ["prop_lr"] = function(self)
                 self.prop.broke_lr = true
-                self.prop.img_lr.opacity=0
+                self.prop.img_lr[1].opacity=0
+				self.prop.img_lr[2].opacity=0
                 add_to_render_list(
                     explosions.small(
-                        self.prop.g_lr.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_lr.y+self.group.y-self.group.anchor_point[2]
+                        self.prop.img_lr[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
+                        self.prop.img_lr[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
             end,
             ["prop_rl"] = function(self)
                 self.prop.broke_rl = true
-                self.prop.img_rl.opacity=0
+                self.prop.img_rl[1].opacity=0
+				self.prop.img_rl[2].opacity=0
                 add_to_render_list(
                     explosions.small(
-                        self.prop.g_rl.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_rl.y+self.group.y-self.group.anchor_point[2]
+                        self.prop.img_rl[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
+                        self.prop.img_rl[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
             end,
             ["prop_rr"] = function(self)
                 self.prop.broke_rr = true
-                self.prop.img_rr.opacity=0
+                self.prop.img_rr[1].opacity=0
+				self.prop.img_rr[2].opacity=0
                 add_to_render_list(
                     explosions.small(
-                        self.prop.g_rr.x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
-                        self.prop.g_rr.y+self.group.y-self.group.anchor_point[2]
+                        self.prop.img_rr[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2,
+                        self.prop.img_rr[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
             end,
@@ -401,7 +467,7 @@ enemies.final_boss = function(is_boss,o)
                     local x = self.group.x-self.group.anchor_point[1]
                     local y = self.group.y-self.group.anchor_point[2]
                     local i =math.random(1,7)
-                    local dam = Clone{source = imgs["z_d_"..i]}
+                    local dam = Clone{source = curr_lvl_imgs["z_d_"..i]}
                     self.group:add(dam)
                     if other.group ~= nil then
                         dam.x = pos[1]-x--other.group.x - x
