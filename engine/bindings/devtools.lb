@@ -103,5 +103,10 @@ global devtools [[ void * ]]
             ClutterUtil::inject_key_down( key , unicode );
             ClutterUtil::inject_key_up( key , unicode );
         ]];
+
+    udata gid( int gid )
+        [[
+            ClutterUtil::wrap_concrete_actor( L , clutter_get_actor_by_gid( gid ) );
+        ]];
 }
 
