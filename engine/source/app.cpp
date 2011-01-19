@@ -61,6 +61,10 @@ extern int luaopen_physics_module( lua_State * L );
 extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 
+#ifndef TP_PRODUCTION
+extern int luaopen_devtools( lua_State * L );
+#endif
+
 #ifdef TP_UPNP_CLIENT
 extern int luaopen_upnp( lua_State * L );
 #endif
@@ -772,6 +776,10 @@ int App::run( const StringSet & allowed_names )
     luaopen_physics_module( L );
     luaopen_editor( L );
     luaopen_trickplay( L );
+
+#ifndef TP_PRODUCTION
+    luaopen_devtools( L );
+#endif
 
 #ifdef TP_UPNP_CLIENT
     luaopen_upnp( L );
