@@ -834,7 +834,11 @@ int App::run( const StringSet & allowed_names )
 
 App::~App()
 {
+#ifndef TP_PRODUCTION
+
     debugger.uninstall();
+
+#endif
 
     context->remove_notification_handler( "*", forward_notification_handler, this );
     context->remove_notification_handler( TP_NOTIFICATION_PROFILE_CHANGE, profile_notification_handler, this );
