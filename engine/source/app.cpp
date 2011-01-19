@@ -61,6 +61,10 @@ extern int luaopen_physics_module( lua_State * L );
 extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 
+#ifndef TP_PRODUCTION
+extern int luaopen_devtools( lua_State * L );
+#endif
+
 #ifdef TP_UPNP_CLIENT
 extern int luaopen_upnp( lua_State * L );
 #endif
@@ -773,6 +777,10 @@ int App::run( const StringSet & allowed_names )
     luaopen_editor( L );
     luaopen_trickplay( L );
 
+#ifndef TP_PRODUCTION
+    luaopen_devtools( L );
+#endif
+
 #ifdef TP_UPNP_CLIENT
     luaopen_upnp( L );
 #endif
@@ -834,7 +842,11 @@ int App::run( const StringSet & allowed_names )
 
 App::~App()
 {
+#ifndef TP_PRODUCTION
+
     debugger.uninstall();
+
+#endif
 
     context->remove_notification_handler( "*", forward_notification_handler, this );
     context->remove_notification_handler( TP_NOTIFICATION_PROFILE_CHANGE, profile_notification_handler, this );
