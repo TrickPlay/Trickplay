@@ -43,7 +43,9 @@ dofile("enemies/final_boss.lua")
 dofile("Levels.lua")
 
 --The splash Items
-layers.splash:add(
+local splash_screen = Group{}
+layers.splash:add( splash_screen )
+splash_screen:add(
     Image
     {
 	name     = "logo",
@@ -65,29 +67,29 @@ layers.splash:add(
 )
 local splash_i = 1
 local splash_limit = 1
-if type(settings.salvage_list) == "table" and #settings.salvage_list > 0 then
-    layers.splash:add(
+if settings.state.in_lvl_complete or (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) then
+    splash_screen:add(
         Text{text="Continue Old Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240},
         Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300}
     )
     splash_limit = 2
 else
-    layers.splash:add(
+    splash_screen:add(
         Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240}
     )
 end
-layers.splash:add(
+splash_screen:add(
         Text{name="level report",text="",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2-240}
     )
-layers.splash:add(
+splash_screen:add(
         Text{name = "Next Level",text="Next Level",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240, opacity=0},
         Text{name = "Replay Level",text="Replay Level",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300, opacity=0}
     )
-    layers.splash:add(
+    splash_screen:add(
         Text{name = "save",text="Save and Exit",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240, opacity=0},
         Text{name = "exit",text="Exit",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300, opacity=0}
     )
-layers.splash:foreach_child(function(c)
+splash_screen:foreach_child(function(c)
     c.anchor_point = {c.w/2,c.h/2}
 end)
 
@@ -135,9 +137,7 @@ local test_text = Text
 
 
 out_splash__in_hud = function()
-    layers.splash:foreach_child(function(c)
-        c.opacity = 0
-    end)
+    splash_screen:clear()
 end
 
 lvl_end_i = 1
@@ -165,7 +165,8 @@ local keys = {
                 recurse_and_apply(state,settings.state)
                 
                 if state.in_lvl_complete then
-                    level_completed:animate_in(string.format("%06d",state.menu))
+                    
+                    level_completed:animate_in(string.format("%06d",state.menu), true)
                     add_to_render_list(my_plane)
                     redo_score_text()
                     for i = 1,#lives do
@@ -176,6 +177,7 @@ local keys = {
                         end
                     end
                 else
+                    load_imgs[state.curr_level]()
                     local f
                     for _,i in ipairs(settings.salvage_list) do
                         f = _G
@@ -209,9 +211,10 @@ local keys = {
                 
                 add_to_render_list(my_plane)
                 add_to_render_list(levels[state.curr_level])
+                load_imgs[state.curr_level]()
             end
             
-            load_imgs[state.curr_level]()
+            
         end,
         [keys["0"]] = function()
             
@@ -471,6 +474,7 @@ local second_press
 --collectgarbage("stop")
 
 function idle.on_idle( idle , seconds )
+--[[
     if press ~= nil then
         if press == keys.Ok then
             press = keys.Return
@@ -481,6 +485,7 @@ function idle.on_idle( idle , seconds )
         press = nil
         --second_press = nil
     end
+    --]]
     if not state.paused then
 
 --[[
@@ -516,117 +521,18 @@ function idle.on_idle( idle , seconds )
     
 end
 
-local double_press = false
-local double_press_timer = Timer{interval=500}
-double_press_timer.on_timer = function()
-    double_press_timer:stop()
-    double_press = false
-end
-function screen.on_key_down( screen , key )
---[[
-    if double_press  then
-        second_press = key
-        if press == nil then
-            press = key
-        end
-        double_press_timer:stop()
-        double_press = false
-        print("dub press")
-    else--]]
-        press = key
-        --if second_press ~= nil then
-        --    second_press = nil
-        --end
-        --double_press_timer:start()
-        --double_press = true
-    --end
---[[
-    assert(keys[state.curr_mode])
-    
-    if state.paused == true and key == keys.Space then
-        state.paused = false
-    elseif keys[state.curr_mode][key] then keys[state.curr_mode][key]()
-    end
-    --]]
---[[
-    if not game_is_running then
-		if key == keys.Return then
-	        
-            start_game()
-			splash.opacity = 0
-			game_is_running = true
-			--end_game.opacity = 0
-			number_of_lives = 3
-			point_counter = 0
-			redo_score_text()
-			lives[1].opacity=255
-			lives[3].opacity=255
-			lives[2].opacity=255
-			add_to_render_list(levels[1])
-			state.curr_mode  = "LEVEL 1"
-			state.curr_level = 1
-			add_to_render_list( my_plane )
-            
-		elseif key == keys.t then
-			state.curr_mode = "TEST MODE"
-			splash.opacity = 0
-			game_is_running = true
-			--end_game.opacity = 0
-			number_of_lives = 3
-			point_counter = 0
-			redo_score_text()
-			lives[1].opacity=255
-			lives[3].opacity=255
-			lives[2].opacity=255
-			add_to_render_list( test_text() )
-			add_to_render_list( my_plane )
-            
-            
-		end
-    elseif key == keys.space then
-        
-        paused = not paused
-    elseif not paused then
-    
-        for _ , item in ipairs( render_list ) do
-       
-            pcall( item.on_key , item , key )
-       
+
+function screen.on_key_down( screen , press )
+
+        if press == keys.Ok then
+            press = keys.Return
+        elseif press == keys.Space or press == keys.Pause then
+            state.paused = not state.paused
+        elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()--second_press)
         end
 
-    end
-	if state.curr_mode == "TEST MODE" then
-		if key == keys.q then
-			--add_to_render_list(formations.row_fly_in_left,50,200)
-                        formations.row_from_side(5,150,  -100,1000,  50,300,  200)
-		elseif key == keys.p then
-			--add_to_render_list(formations.row_fly_in_right,2000,1500)
-                        formations.row_from_side(5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200)
-		elseif key == keys.a then
-			--add_to_render_list(formations.loop_from_left)
-                        formations.one_loop(2,150,200,200,300,-1)
-		elseif key == keys.l then
-			--add_to_render_list(formations.loop_from_right)
-                        formations.one_loop(2,150,1200,1200,300,1)
-		elseif key == keys.z then
-			--add_to_render_list(formations.zepp, 150,-400, false )
-                        formations.zepp_boss(900)
-		elseif key == keys.h then
-			add_to_render_list(test_text)
-		elseif key == keys["1"] then
-			my_plane.firing_powerup=1
-		elseif key == keys["2"] then
-			my_plane.firing_powerup=2
-		elseif key == keys["3"] then
-			my_plane.firing_powerup=3
-		elseif key == keys["4"] then
-			my_plane.firing_powerup=4
-		elseif key == keys["5"] then
-			my_plane.firing_powerup=5
-		end
-	end
-    --]]
 end
+
 
 -------------------------------------------------------------------------------
 --saves high score
@@ -653,7 +559,7 @@ function app:on_closing()
     temp_table = {}
     recurse_and_apply(temp_table, state)
     settings.state = temp_table
-    --dumptable(temp_table)
+    dumptable(temp_table)
     --dumptable(settings.state)--]]
 end
 math.randomseed( os.time() )

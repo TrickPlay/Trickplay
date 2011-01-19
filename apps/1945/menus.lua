@@ -36,7 +36,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     local index_to_be   = 0
     local h_score_to_be = 0
     local medals = {}
-    
+    local idle_loop = nil
     function menu:animate_in(highscore,index,no_delay)
         
         local m
@@ -65,11 +65,12 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         timer.on_timer = function()
             remove_all_from_render_list()
             menu.group:show()
-            menu.group.opacity=255
+            --menu.group.opacity=255
             scrap_caches()
             state.curr_mode = "GAME_OVER_SAVE"
             timer:stop()
             timer = nil
+            idle_loop = idle.on_idle
         end
         timer:start()
     end
@@ -129,8 +130,9 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
             )
             state.high_scores[#state.high_scores] = nil
             menu.group:hide()
-            menu.group.opacity=0
+            --menu.group.opacity=0
             menu.h_score_menu:animate_in()
+            idle.on_idle = idle_loop
             local upper = #medals
             for i = 1,upper do
                 medals[i]:unparent()
@@ -200,7 +202,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         timer.on_timer = function()
             remove_all_from_render_list()
             menu.group:show()
-            menu.group.opacity=255
+            --menu.group.opacity=255
             scrap_caches()
             state.curr_mode = "GAME_OVER"
             timer:stop()
@@ -256,7 +258,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
                 exit()
             end
             menu.group:hide()
-            menu.group.opacity=0
+            --menu.group.opacity=0
             local upper = #medals
             for i = 1,upper do
                 medals[i]:unparent()
@@ -320,7 +322,7 @@ Menu_High_Scores = Class(function(menu, ...)
         end
         menu_index       = 1
         menu.group:show()
-        menu.group.opacity=255
+        --menu.group.opacity=255
         state.curr_mode = "HIGH_SCORE"
     end
     
@@ -362,7 +364,7 @@ Menu_High_Scores = Class(function(menu, ...)
                 exit()
             end
             menu.group:hide()
-            menu.group.opacity=0
+            --menu.group.opacity=0
             
         end,
     }
@@ -397,8 +399,8 @@ Menu_Level_Complete = Class(function(menu, ...)
     menu.group:hide()
     local medals = {}
     local g_over = nil
-    function menu:animate_in(score)
-	print("end of level")
+    function menu:animate_in(score,from_splash)
+        print("end of level")
         local m
         for i = 1, state.curr_level do
             m = Clone{source=base_imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
@@ -420,13 +422,17 @@ Menu_Level_Complete = Class(function(menu, ...)
             h_score_val.text = string.format("%06d",state.counters[state.curr_level].lvl_points).." pts"
             remove_all_from_render_list()
             menu.group:show()
-            menu.group.opacity=255
+            --menu.group.opacity=255
             scrap_caches()
             state.curr_mode = "LEVEL_END"
             timer:stop()
             timer = nil
         end
-        timer:start()
+        if from_splash then
+            timer.on_timer()
+        else
+            timer:start()
+        end
     end
     menu.g_over_menu=nil
     function menu:set_ptr_to_g_over(obj)
@@ -467,7 +473,7 @@ Menu_Level_Complete = Class(function(menu, ...)
                     state.curr_mode = "CAMPAIGN"
                 end
                 menu.group:hide()
-                menu.group.opacity=0
+                --menu.group.opacity=0
                 local upper = #medals
                 for i = 1,upper do
                     medals[i]:unparent()

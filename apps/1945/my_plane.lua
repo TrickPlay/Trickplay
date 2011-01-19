@@ -12,66 +12,53 @@ impact = function(x,y)
     
     if #old_impacts == 0 then
         imp = {
-            image = Clone{ source = base_imgs.impact },
-            group = Group
-            {
-                size =
-                {
-                    base_imgs.impact.w / 4 ,
-                    base_imgs.impact.h
-                },
-                clip =
-                {
-                    0 ,
-                    0 ,
-                    base_imgs.impact.w / 4 ,
-                    base_imgs.impact.h
-                },
-                --children = { self.image },
-                anchor_point =
-                {
-                    ( base_imgs.impact.w / 4 ) / 2 ,
-                    base_imgs.impact.h / 2
-                },
-                position = {x,y},
-            },
-            duration = 0.2, 
+            images = {},
+            num    = 0,
+            index  = 0,
+            duration_p_frame = 0.1, 
             time = 0,
             remove = function(self)
-                self.group:unparent()
+                for i =1,self.num do
+                    self.images[i]:unparent()
+                end
                 table.insert(old_impacts,self)
             end,
             setup = function( self )
-                --play_sound_wrapper("audio/taking-damage.mp3")
-                
-                
-                if self.image.parent == nil then
-                    self.group:add(self.image)
+                play_sound_wrapper("audio/taking-damage.mp3")
+                if #self.images == 0 then
+                    self.num = #base_imgs.impact
+                    for i =1,self.num do
+                        self.images[i] = Clone{ source = base_imgs.impact[i], opacity = 0, position = {x,y} }
+                    end
                 end
-                assert(self.image.parent==self.group)
-                        
-                layers.air_doodads_2:add( self.group )
+                for i =1,self.num do
+                    layers.air_doodads_2:add( self.images[i] )
+                end
+                self.index = 1
+                self.time  = 0
+                self.images[self.index].opacity=255
             end,
                     
             render = function( self , seconds )
                 self.time = self.time + seconds
                     
-                if self.time > self.duration then
-                        
-                    remove_from_render_list( self )
-                else
-                    local frame = math.floor( self.time /
-                        ( self.duration / 4 ) )
-                    self.image.x = - ( ( self.image.w / 4 )
-                        * frame )
+                if self.time > self.duration_p_frame then
+                    if self.index < self.num then
+                        self.images[self.index].opacity=0
+                        self.index = self.index + 1
+                        self.time = 0
+                        self.images[self.index].opacity=255
+                    else
+                        remove_from_render_list( self )
+                    end
                 end
             end,
         }
     else
         imp = table.remove(old_impacts)
-        imp.group.x = x
-        imp.group.y = y
-        imp.time    = 0
+        for i =1,imp.num do
+            imp.images[i].position = {x,y}
+        end
     end
     add_to_render_list(imp)
 end
@@ -84,11 +71,11 @@ smoke = function(i,o)   return {
     speed    = 80,
     halted   = true,
     plumes   = {},
-remove = function(self)
-    for i = 1,self.num do
-        self.plumes[i].group:unparent()
-    end
-end,
+    remove = function(self)
+        for i = 1,self.num do
+            self.plumes[i].group:unparent()
+        end
+    end,
     setup = function( self, num )
         self.num = num
         for i = 1,num do
@@ -120,11 +107,11 @@ end,
                 self.plumes[i].group.x = my_plane.group.x + 10
                 self.plumes[i].group.y = my_plane.group.y + 50
             elseif self.index == 2 then
-                self.plumes[i].group.x = my_plane.group.x + my_plane.image.w/(my_plane.num_frames)-30
+                self.plumes[i].group.x = my_plane.group.x + my_plane.img_w-30
                 self.plumes[i].group.y = my_plane.group.y + 50
             else
                 self.plumes[i].group.x = my_plane.group.x + 30
-                self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+                self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
             end
             self.plumes[i].image.x =  - ( ( self.plumes[i].image.w / 4 ) * 5 )
             layers.planes:add( self.plumes[i].group )
@@ -143,11 +130,11 @@ end,
             self.plumes[i].group.x = my_plane.group.x + 10
             self.plumes[i].group.y = my_plane.group.y + 50
         elseif self.index == 2 then
-            self.plumes[i].group.x = my_plane.group.x + my_plane.image.w/(my_plane.num_frames)-30
+            self.plumes[i].group.x = my_plane.group.x + my_plane.img_w-30
             self.plumes[i].group.y = my_plane.group.y + 50
         else
             self.plumes[i].group.x = my_plane.group.x + 30
-            self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+            self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
         end
         --self.plumes[i].time = 0
         self.plumes[i].image.x =  self.plumes[i].image.w / 4
@@ -162,11 +149,11 @@ end,
                 self.plumes[i].group.x = my_plane.group.x + 10
                 self.plumes[i].group.y = my_plane.group.y + 50
             elseif self.index == 2 then
-                self.plumes[i].group.x = my_plane.group.x + my_plane.image.w/(my_plane.num_frames)-30
+                self.plumes[i].group.x = my_plane.group.x + my_plane.img_w-30
                 self.plumes[i].group.y = my_plane.group.y + 50
             else
                 self.plumes[i].group.x = my_plane.group.x + 30
-                self.plumes[i].group.y = my_plane.group.y + my_plane.image.h-20
+                self.plumes[i].group.y = my_plane.group.y + my_plane.img_h-20
             end
             self.plumes[i].time = -(i-1)/self.num*self.duration
             --layers.planes:add( self.plumes[i].group )
@@ -212,7 +199,7 @@ my_plane =
 
     type = TYPE_MY_PLANE,
     
-    num_frames = 4,
+    num_frames = 0,
     
     smoke_stream = {},
     
@@ -229,7 +216,7 @@ my_plane =
     
     group = Group{},
     
-    image = Clone{ source = base_imgs.my_plane_strip },
+    images = {},
     
     bullet = base_imgs.my_bullet,
     
@@ -255,77 +242,50 @@ my_plane =
     
     bombing_mode = false,
     
-
-    shadow = Clone{source=base_imgs.player_shadow,opacity=0, x=100,y=30},
-        
+    duration_p_frame = 0.1,
+    
     prop =
     {
-        l = Clone{source=base_imgs.my_prop},
-        r = Clone{source=base_imgs.my_prop},
-        g_l = Group
-        {
-            clip =
-            {
-                0,
-                0,
-                base_imgs.my_prop.w ,
-                --self.num_prop_frames still DNE 
-                base_imgs.my_prop.h/3,
-            },
-            anchor_point = {base_imgs.my_prop.w/2,
-                            base_imgs.my_prop.h/2},
-            position     = {35,35},
-        },
-        g_r = Group
-        {
-            clip =
-            {
-                0,
-                0,
-                base_imgs.my_prop.w ,
-                --self.num_prop_frames still DNE 
-                base_imgs.my_prop.h/3,
-            },
-            anchor_point = {base_imgs.my_prop.w/2,
-                            base_imgs.my_prop.h/2},
-            position     = {93,35},
-        },
+        l = {},
+        r = {}
     },
     render_items = {},
     x =0,
     y=0,
     coll_box = {},
-remove = function(self)
-    self.group:unparent()
-end,
+    remove = function(self)
+        self.group:unparent()
+    end,
     setup = function( self )
             self.coll_box.obj = self
-    print("my_plane setup start")
             self.firing_powerup = 1
             self.damage = 0
-            self.image.x = 0
             self.group:show()
+            
+            self.num_frames = #base_imgs.my_plane_strip
+            for i = 1,self.num_frames do
+                self.images[i] = Clone{source=base_imgs.my_plane_strip[i],opacity=0}
+            end
+            self.num_prop_frames = #base_imgs.my_prop
+            for i = 1,self.num_prop_frames do
+                self.prop.l[i] = Clone{source=base_imgs.my_prop[i],position = {35,35},opacity=0}
+                self.prop.r[i] = Clone{source=base_imgs.my_prop[i],position = {93,35},opacity=0}
+                self.prop.l[i].anchor_point = {base_imgs.my_prop[i].w/2,base_imgs.my_prop[i].h/2}
+                self.prop.r[i].anchor_point = {base_imgs.my_prop[i].w/2,base_imgs.my_prop[i].h/2}
+            end
+            
+            self.images[1].opacity=255
+            self.prop.l[1].opacity=255
+            self.prop.r[1].opacity=255
             --self.bombing_crosshair:add(self.bombing_crosshair_strip)
-        	self.prop.g_l:add( self.prop.l )
-			self.prop.g_r:add( self.prop.r )
-            self.num_prop_frames = 3
             
             self.prop_index = 1
-            self.image.opacity = 255
-            local g = Group{}
-            self.group:add( self.shadow   )
-            --self.group:add(self.bombing_crosshair)
-            g:add( self.image    )
-            g:add( self.prop.g_r )
-            g:add( self.prop.g_l )
-            self.group:add(g)
+            self.group:add( unpack(self.images) )
+            self.group:add( unpack(self.prop.r) )
+            self.group:add( unpack(self.prop.l) )
             layers.planes:add( self.group )
-            --self.bombing_crosshair.x = self.image.w / (2*self.num_frames)
-            self.group.position = { screen_w / 2 - self.image.w / (2*self.num_frames) , screen_h - self.image.h }
-            self.x = screen_w / 2 - self.image.w / (2*self.num_frames)
-            self.y = screen_h - self.image.h 
-            g.clip = {0,0,self.image.w/self.num_frames,self.image.h}
-
+            self.group.position = { screen_w / 2 - self.images[1].w / 2 , screen_h - self.images[1].h }
+            --[[
             for i = 1, self.num_frames - 1 do
                 if self.overwrite_vars ~= nil and self.overwrite_vars.smoke_stream ~= nil then
                     print("wtf",self.overwrite_vars.smoke_stream[i])
@@ -336,11 +296,11 @@ end,
                     
                     --self.smoke_stream[i]:setup(self.plumes_per_stream)
                     --table.insert(self.render_items,self.smoke_stream[i])
-                    add_to_render_list(self.smoke_stream[i],self.plumes_per_stream)
+                    --add_to_render_list(self.smoke_stream[i],self.plumes_per_stream)
                 
-            end
-            self.img_h = self.image.h
-            self.prop_h = self.prop.l.h
+            end--]]
+            self.img_h = self.images[1].h
+            self.img_w = self.images[1].w
             if type(self.overwrite_vars) == "table"  then
                 print("self.overwrite_vars", self.overwrite_vars)
                 recurse_and_apply(  self, self.overwrite_vars  )
@@ -371,10 +331,6 @@ end,
                 group = {
                     x = self.group.x,
                     y = self.group.y,
-                },
-                image = {
-                    x = self.image.x,
-                    y = self.image.y
                 }
             })
             local sm = s.table_params[#s.table_params].smoke_stream
@@ -398,33 +354,35 @@ end,
         end,
     hit = function(self)
         if self.damage ~= (self.num_frames - 1) then
+        self.images[self.damage+1].opacity=255
         self.damage = self.damage + 1
-        self.image.x = -1*self.damage*self.image.w/self.num_frames
+        self.images[self.damage+1].opacity=255
         --for j = 1,self.plumes_per_stream do
-                self.smoke_stream[self.damage]:unhalt()
+                --self.smoke_stream[self.damage]:unhalt()
         --end
         end
     end,
     heal = function(self)
         for i = 1, self.num_frames - 1 do
             --for j = 1,self.plumes_per_stream do
-                self.smoke_stream[i]:halt()
+                --self.smoke_stream[i]:halt()
             --end
         end
         self.damage = 0
-        self.image.x = 0
+        for i = 1,self.num_frames do
+            self.images[i].opacity=0
+        end
+        self.images[1].opacity=255
     end,
-    render =
-    
-        function( self , seconds )
+    render = function( self , seconds )
             
             --animate the prop
+            self.prop.l[self.prop_index].opacity=0
+            self.prop.r[self.prop_index].opacity=0
 			self.prop_index = self.prop_index%
 				self.num_prop_frames + 1
-			self.prop.l.y = -(self.prop_index - 1)*self.prop_h/
-				self.num_prop_frames
-			self.prop.r.y = -(self.prop_index - 1)*self.prop_h/
-				self.num_prop_frames
+			self.prop.l[self.prop_index].opacity=255
+            self.prop.r[self.prop_index].opacity=255
             
             --if respawned, then blink
             if self.dead then
@@ -498,7 +456,7 @@ end,
             
             self.group.y = y
             self.coll_box.x1  = self.group.x+20
-            self.coll_box.x2  = self.group.x+self.image.w/(self.num_frames)-20
+            self.coll_box.x2  = self.group.x+self.img_w-20
             self.coll_box.y1  = self.group.y+20
             self.coll_box.y2  = self.group.y+self.img_h
             if not self.dead then
@@ -617,7 +575,7 @@ end,
             }
         
         end,
-    new_bullet = function( self, x, y, z_rot )
+    new_bullet = function( self, x, y )
         
             if #old_bullets == 0 then
                     tot_bullets_created = tot_bullets_created + 1
@@ -627,9 +585,7 @@ end,
                 {
                     type = TYPE_MY_BULLET,
                     
-                    
-                    z_rot = z_rot,
-    
+                        
                     speed = -400,
                     
                     image =
@@ -661,10 +617,8 @@ end,
                     
                         function( self , seconds )
                         
-                            local y = self.image.y + self.speed * seconds * math.cos(-1*self.z_rot*math.pi/180)
-                            local x = self.image.x + self.speed * seconds * math.sin(-1*self.z_rot*math.pi/180)
-                            
-                            if y < -self.img_h or y > (screen_h + self.img_h) or x < -self.image.w  or x > (screen_w + self.image.w)then
+                            local y = self.image.y + self.speed * seconds
+                            if y < -self.img_h then
                                 
                                 remove_from_render_list( self )
                                 
@@ -690,7 +644,6 @@ end,
                                     TYPE_ENEMY_PLANE )
                             --]]
                                 self.image.y = y
-                                self.image.x = x
                             
                             end
                         
@@ -715,6 +668,7 @@ end,
                         end
                 }
             else
+            print(x,y)
                 local bullet = table.remove(old_bullets)
                 bullet.image.y = y
                 bullet.image.x = x
@@ -732,6 +686,7 @@ end,
 if self.damage ~= (self.num_frames - 1) then
     self:hit()
     if other.image ~= nil then
+    print(other.image.x,other.image.y)
         impact(other.image.x,other.image.y)
     end
     play_sound_wrapper("audio/taking-damage.mp3")
@@ -777,9 +732,9 @@ redo_score_text()
             
             self.v_speed = 0
             
-            local location = {self.group.x + self.image.w/(2*self.num_frames), self.group.y+self.image.h/2}
+            local location = {self.group.x + self.img_w/2, self.group.y+self.img_h/2}
             
-            self.group.position = { screen_w / 2 - self.group.w / (2*self.num_frames) , screen_h - self.group.h }
+            self.group.position = { screen_w / 2 - self.group.w / 2 , screen_h - self.group.h }
 
             -- Spawn an explosion
             add_to_render_list(explosions.big(location[1],location[2],nil,0,"audio/player-explosion.mp3"))
@@ -851,29 +806,29 @@ redo_score_text()
             elseif key == keys.Return then
             	local shoot = {
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / (2*self.num_frames) , self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 , self.group.y,0) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -20, self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 -20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 +20, self.group.y,0) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -40, self.group.y,-45) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames),    self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w / (2*self.num_frames)+40, self.group.y,45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2,    self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2+40, self.group.y,45) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -40, self.group.y,-45) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) ,    self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) ,    self.group.y+self.image.h,180) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +40, self.group.y,45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 ,    self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 ,    self.group.y+self.img_h,180) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 +40, self.group.y,45) )
 					end,
 					function()
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -40, self.group.y,-45) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) -20, self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +20, self.group.y,0) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) ,    self.group.y+self.image.h,180) )
-		                add_to_render_list( self:new_bullet(self.group.x + self.image.w /(2*self.num_frames) +40, self.group.y,45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 -40, self.group.y,-45) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 -20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 +20, self.group.y,0) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 ,    self.group.y+self.img_h,180) )
+		                add_to_render_list( self:new_bullet(self.group.x + self.img_w / 2 +40, self.group.y,45) )
 					end,
 
 
@@ -881,7 +836,7 @@ redo_score_text()
                 if not self.dead then
                 if self.bombing_mode then
                     add_to_render_list(
-                        self:new_bomb(self.group.x + self.image.w / (2*self.num_frames) ,
+                        self:new_bomb(self.group.x + self.img_w/2 ,
                         self.group.y+60,0)
                     )
                     play_sound_wrapper("audio/drop-bomb.mp3")
@@ -921,7 +876,7 @@ powerups =
 
             if not (                    
                 my_plane.group.x+20 > self.image.x+self.image.w or 
-                my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
+                my_plane.group.x+my_plane.img_w-20 <
                     self.image.x or 
                 my_plane.group.y+20 > self.image.y+self.image.h or 
                 my_plane.group.y+my_plane.img_h < self.image.y 
@@ -961,7 +916,7 @@ powerups =
 
             if not (                    
                 my_plane.group.x+20 > self.image.x+self.image.w or 
-                my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
+                my_plane.group.x+my_plane.img_w-20 <
                     self.image.x or 
                 my_plane.group.y+20 > self.image.y+self.image.h or 
                 my_plane.group.y+my_plane.img_h < self.image.y 
@@ -999,7 +954,7 @@ powerups =
 
             if not (                    
                 my_plane.group.x+20 > self.image.x+self.image.w or 
-                my_plane.group.x+my_plane.image.w/(my_plane.num_frames)-20 <
+                my_plane.group.x+my_plane.img_w-20 <
                     self.image.x or 
                 my_plane.group.y+20 > self.image.y+self.image.h or 
                 my_plane.group.y+my_plane.img_h < self.image.y 

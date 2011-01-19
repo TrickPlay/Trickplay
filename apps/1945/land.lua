@@ -974,11 +974,11 @@ lvlbg = {
     grass = nil, --Image{src = "assets/lvls/bg_tiles/grass1.png"},
     beach = nil, --Image{src = "assets/lvls/bg_tiles/beach.png"},
     setup = function( self,o)
-        image = Clone{source=curr_lvl_imgs.water2}
-	grass = Clone{source=curr_lvl_imgs.grass}
-	beach = Clone{source=curr_lvl_imgs.beach}
-        self.img_h = self.image.h
-        
+        self.image = Clone{source=curr_lvl_imgs.water2}
+        self.grass = Clone{source=curr_lvl_imgs.grass}
+        self.beach = Clone{source=curr_lvl_imgs.beach}
+        self.img_h = tilesize--self.image.h
+        --[[
         self.image:set{
             tile   = {true, true},
             w      = screen_w,
@@ -991,10 +991,12 @@ lvlbg = {
             h      = screen_h+self.img_h,
             y      = -self.img_h
         }
+        --]]
+        self.grass.y = -self.img_h
         self.beach.y = -self.beach.h-self.img_h
         layers.ground:add(self.image,self.grass,self.beach)
         if type(o) == "table"  then
-                recurse_and_apply(  self, o  )
+            recurse_and_apply(  self, o  )
         end
     end,
     
