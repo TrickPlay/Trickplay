@@ -7,7 +7,6 @@ module globals;
 #include "context.h"
 #include "actions.h"
 #include "images.h"
-#include "clutter_util.h"
 
 struct DoLater
 {
@@ -105,28 +104,6 @@ private:
 	int 			function_ref;
 	int				args_table_ref;
 };
-
-static int marker_gc( lua_State * L )
-{
-    g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
-    return 0;
-}
-
-#if 0
-void pb( void * s , int l )
-{
-	String o;
-	
-	for( int i = 0; i < l; ++i )
-	{
-		gchar * t = g_strdup_printf( "%s%d" , i == 0 ? "" : "," , ((guint8*)s)[i] );
-		o += t;
-		g_free(t);
-	}
-	g_debug( "%s" , o.c_str() );
-}
-#endif
-
 
 String hash( GChecksumType type , const void * data , gsize length , bool binary )
 {
@@ -863,14 +840,6 @@ globals
 			} 
 		]];		
 
-	debug()
-		[[
-		    if ( Debugger * debugger = App::get( L )->get_debugger() )
-		    {
-		        debugger->break_next_line();
-		    }		
-		]];
-		
 	detach( udata o )
 		[[
 			UserData::clear_callbacks( L , o );
@@ -954,15 +923,6 @@ globals
             }
 		]];
 		
-	table registry()
-		[[
-#ifdef TP_PRODUCTION		
-			lua_pushnil( L );
-#else
-			lua_pushvalue( L , LUA_REGISTRYINDEX );
-#endif			
-		]];
-		
 	/*
 		Function: uuid
 		
@@ -1001,76 +961,14 @@ globals
 		]];
 
 	/*
-        Marker is a thing that prints out its name when it is garbage collected. This
-        lets us attach it to stuff and see when it goes away.
-	*/
+        Function: time
 
-	udata marker( lstring name )
-        [[
-            lua_newuserdata( L , 1 );
+        Returns the current time, but includes microseconds, so it has more resolution than
+        os.time.
 
-            lua_newtable( L );
-            lua_pushvalue( L , 1 );
-            lua_pushcclosure( L , marker_gc , 1 );
-            lua_setfield( L , -2 , "__gc" );
-            lua_setmetatable( L , -2 );
-        ]];
+        Returns:
 
-	table udatatypes( udata u )
-        [[
-            LSG;
-            if ( ! lua_isuserdata( L , u ) )
-            {
-                lua_pushnil( L );
-            }
-            else if ( ! lua_getmetatable( L , u ) )
-            {
-                lua_pushnil( L );
-            }
-            else
-            {
-                lua_getfield( L , -1 , "__types__" );
-                lua_remove( L , -2 );
-            }
-            LSG_CHECK(1);
-        ]];
-
-	bool checkudatatype( udata u , string type )
-        [[
-            result = lb_check_udata_type( L , u , type , false );
-        ]];
-
-	string screensum()
-        [[
-            Image * image = Image::screenshot();
-
-            String checksum;
-
-            if ( image )
-            {
-                checksum = image->checksum();
-
-                delete image;
-	        }
-
-            result = checksum.c_str();
-        ]];
-
-	keypress( int key , int unicode = 0 )
-        [[
-            ClutterUtil::inject_key_down( key , unicode );
-            ClutterUtil::inject_key_up( key , unicode );
-        ]];
-
-	/*
-	Function: time
-
-	Returns the current time, but includes microseconds, so it has more resolution than
-	os.time.
-
-	Returns:
-
-	time - Fractional number of seconds since the Epoch.
+        time - Fractional number of seconds since the Epoch.
 	*/
 
 	double time()
