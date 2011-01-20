@@ -238,7 +238,8 @@ VertButtonCarousel = Class(function(
 			loop = false
 		}
 
-		function t.on_new_frame(t,msecs,p)
+		function t.on_new_frame(t,_,p)
+			local msecs = t.elapsed
 			if msecs <= 100 then
 				menu.up_sel.opacity = 255* msecs/100
 			elseif msecs <= 200 then
@@ -291,7 +292,8 @@ VertButtonCarousel = Class(function(
 			loop = false
 		}
 
-		function t.on_new_frame(t,msecs,p)
+		function t.on_new_frame(t,_,p)
+			local msecs = t.elapsed
 			if msecs <= 100 then
 				menu.down_sel.opacity = 255* msecs/100
 			elseif msecs <= 200 then
@@ -513,7 +515,8 @@ dropbox.group.clip = {0,0,longest_str+175,90}
 			direction = "FORWARD",
 			loop = false,
 		}
-		function t.on_new_frame(t,msecs)
+		function t.on_new_frame(t)
+			local msecs = t.elapsed
 			local p = msecs/t.duration
 			dropbox.group.clip = 
 				{0,old_y + (targ_y-old_y)*p,
@@ -569,7 +572,8 @@ dropbox.group.clip = {0,0,longest_str+175,90}
 			direction = "FORWARD",
 			loop = false,
 		}
-		function t.on_new_frame(t,msecs)
+		function t.on_new_frame(t)
+			local msecs = t.elapsed
 			local p = msecs/t.duration
 			dropbox.group.clip = 
 				{0,old_y + (targ_y-old_y)*p,
