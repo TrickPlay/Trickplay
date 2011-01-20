@@ -256,7 +256,7 @@ my_plane =
     remove = function(self)
         self.group:unparent()
     end,
-    setup = function( self )
+    setup = function( self,o )
             self.coll_box.obj = self
             self.firing_powerup = 1
             self.damage = 0
@@ -270,8 +270,8 @@ my_plane =
             for i = 1,self.num_prop_frames do
                 self.prop.l[i] = Clone{source=base_imgs.my_prop[i],position = {35,35},opacity=0}
                 self.prop.r[i] = Clone{source=base_imgs.my_prop[i],position = {93,35},opacity=0}
-                self.prop.l[i].anchor_point = {base_imgs.my_prop[i].w/2,base_imgs.my_prop[i].h/2}
-                self.prop.r[i].anchor_point = {base_imgs.my_prop[i].w/2,base_imgs.my_prop[i].h/2}
+                self.prop.l[i].anchor_point = {base_imgs.my_prop[i].w/2,base_imgs.my_prop[i].h}
+                self.prop.r[i].anchor_point = {base_imgs.my_prop[i].w/2,base_imgs.my_prop[i].h}
             end
             
             self.images[1].opacity=255
@@ -301,9 +301,8 @@ my_plane =
             end--]]
             self.img_h = self.images[1].h
             self.img_w = self.images[1].w
-            if type(self.overwrite_vars) == "table"  then
-                print("self.overwrite_vars", self.overwrite_vars)
-                recurse_and_apply(  self, self.overwrite_vars  )
+            if type(o) == "table"  then
+                recurse_and_apply(  self, o  )
                 self.overwrite_vars = nil
             end
             print("my_plane setup end")
@@ -978,6 +977,6 @@ powerups =
     end,
 }
 setup_my_plane = function(o)
-    add_to_render_list(my_plane)
-    my_plane.overwrite_vars = o
+    add_to_render_list(my_plane,o)
+    
 end
