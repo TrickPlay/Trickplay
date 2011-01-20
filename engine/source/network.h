@@ -51,7 +51,7 @@ public:
         Response( const Response & other );
         const Response & operator =( const Response & other );
 
-        const char * get_header( const String & name );
+        const char * get_header( const String & name ) const;
 
         void replace_body( gpointer data , gsize size );
 

@@ -382,7 +382,7 @@ const Network::Response & Network::Response::operator =( const Network::Response
     return * this;
 }
 
-const char * Network::Response::get_header( const String & name )
+const char * Network::Response::get_header( const String & name ) const
 {
     StringMultiMap::const_iterator it = headers.find( name );
 
