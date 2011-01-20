@@ -271,19 +271,23 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         model:notify()
     end
 
-   function self:reset()
-       self.playerCounter = 0
-       selected = 2
-       subselection = 1
-       model.players = {}
-       for i=1,6 do
-          model.positions[i] = false
-       end
+    function self:reset()
+        self.playerCounter = 0
+        selected = 2
+        subselection = 1
+        model.players = {}
+        for i=1,6 do
+            model.positions[i] = false
+        end
 
-       view:reset()
-   end
+        view:reset()
+    end
 
     function self:add_controller(ctrl)
+        --ctrl:choose_dog()
+        print("blah")
+        ctrl:set_ui_image("splash", 100, 100, 19, 85)
+    --[[
         local counter = 0
         local pos = self:getPosition()
         while model.positions[pos] and counter < 6 or type(pos) ~= "number" do
@@ -295,6 +299,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         if(self.playerCounter >= 6) then
             start_a_game()
         end
+    --]]
     end
 
 end)
