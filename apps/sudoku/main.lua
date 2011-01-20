@@ -255,7 +255,8 @@ screen:add(win_txt)
 win_txt:raise_to_top()
 	--end
 	
-		function timeline.on_new_frame(t,msecs,p)
+		function timeline.on_new_frame(t,_,p)
+			local msecs = t.elapsed
 			--local sparkle_stage = math.ceil(p*5)
 			--sparkle_base.x = -1*(stage-1)*sparkle_base.w/5
 			--sparkle.z_rotation = {360*p,sparkle_base.w/(5*2),sparkle_base.h/2}
@@ -522,7 +523,8 @@ function flip_board()
 		end
 	end 
 
-	function timeline.on_new_frame(t,msecs,prog)
+	function timeline.on_new_frame(t,_,prog)
+			local msecs = t.elapsed
 --[[
 if stopwatch then
 	print(stopwatch.elapsed)
@@ -893,7 +895,8 @@ function splash_to_game(next_func,prev_menu)
 		duration = 500
 	}
 	save(timeline)
-	function timeline.on_new_frame(t,msecs,p)
+	function timeline.on_new_frame(t,_,p)
+			local msecs = t.elapsed
 		dim.opacity = 100*(1-p)
 		left_menu.y_rotation  = {deg*(1-p),0,0}
 		right_menu.y_rotation = {-deg*(1-p),blank_button_off.w,0}

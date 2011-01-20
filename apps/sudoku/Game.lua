@@ -508,7 +508,8 @@ Game = Class(function(g,the_givens,solution, the_guesses,blox,undo, ...)
 			g.grid_of_groups[new_nums[i][2]][new_nums[i][3]]:add(new_nums[i][1])
 		end
 		save(anim_nums)
-		function anim_nums.on_new_frame(t,msecs,p)
+		function anim_nums.on_new_frame(t,_,p)
+			local msecs = t.elapsed
 			for i = 1, #old_nums do old_nums[i].opacity    = 255*(1-p) end
 			for i = 1, #new_nums do new_nums[i][1].opacity = 255*p     end
 		end
