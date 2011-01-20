@@ -4,6 +4,6 @@ app=
     release     = "4",
     version     = "0.6",
     name        = "Fo'Os",
-    author      = "Trickplay, Jr.",
+    author      = "Alex Indaco",
     copyright   = "© Trickplay Inc."
 }

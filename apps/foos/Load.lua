@@ -58,8 +58,9 @@ function loading(group)
             duration  =  150 * (#loading_dots),
             direction = "FORWARD", 
     }
-    function load_timeline.on_new_frame(t,msecs)
+    function load_timeline.on_new_frame(t)
         --print("on_frame",msecs)
+		local msecs = t.elapsed
         local increment = math.ceil(255/(#loading_dots))
         local start_i = math.ceil(msecs/150)
         for i = 1,#loading_dots do
