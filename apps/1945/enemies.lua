@@ -1185,7 +1185,7 @@ enemies =
 				anchor_point = {0,curr_lvl_imgs.z_barrel.h/2},
 				z_rotation   = {90,0,0},
                 x =  56,
-				y = 130,
+				y = 135,
 			},
 			
 			r = Clone
@@ -1194,9 +1194,9 @@ enemies =
 				anchor_point = {0,curr_lvl_imgs.z_barrel.h/2},
 				z_rotation   = {90,0,0},
                 x = 182,
-				y = 130,
+				y = 135,
 			},
-			
+			--[[
 			g_l = Group
 			{
 				x =  56,
@@ -1207,7 +1207,7 @@ enemies =
 			{
 				x = 182,
 				y = 130,
-			},
+			},--]]
 		},
         dam = {},
 		
@@ -1440,13 +1440,14 @@ enemies =
             self.group:add(unpack(self.prop.r))
 			self.group:add(
 				
+                self.guns.l,
+				self.guns.r,
 				self.image,
 				
                 self.e_l_dam,
-				self.e_r_dam,
+				self.e_r_dam
                 
-				self.guns.l,
-				self.guns.r
+				
 				
                 --self.e_fire_l_g,
                 --self.e_fire_r_g
@@ -1625,8 +1626,8 @@ enemies =
                 table.insert(b_guys_air,
                     {
                         obj = self,
-                        x1  = self.group.x+self.guns.g_l.x+3*self.guns.l.w/4,
-                        x2  = self.group.x+self.guns.g_r.x-3*self.guns.l.w/4-5,
+                        x1  = self.group.x+self.guns.l.x+3*self.guns.l.w/4,
+                        x2  = self.group.x+self.guns.r.x-3*self.guns.l.w/4-5,
                         y1  = self.group.y+80,
                         y2  = self.group.y+self.image.h-70,
                         p   = 0,
@@ -1723,10 +1724,10 @@ enemies =
                         self.group:add(dam.image)
                         dam.image.x = other.group.x - self.group.x
                         dam.image.y = other.group.y - self.group.y - math.random(0,80)
-                        if dam.image.x < self.guns.g_l.x+3*self.guns.l.w/4 then
-                            dam.image.x = self.guns.g_l.x+3*self.guns.l.w/4+20
-                        elseif dam.image.x > self.guns.g_r.x-3*self.guns.l.w/4-5 then
-                            dam.image.x = self.guns.g_r.x-3*self.guns.l.w/4-20
+                        if dam.image.x < self.guns.l.x+3*self.guns.l.w/4 then
+                            dam.image.x = self.guns.l.x+3*self.guns.l.w/4+20
+                        elseif dam.image.x > self.guns.r.x-3*self.guns.l.w/4-5 then
+                            dam.image.x = self.guns.r.x-3*self.guns.l.w/4-20
                         end
                         if dam.image.y < 80 then
                             dam.image.y = 80
