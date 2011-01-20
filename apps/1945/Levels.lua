@@ -307,7 +307,7 @@ levels =
                 {t =    0, item = add_to_render_list,         params = { lvl1txt        }},
                 
                 
-                --[[
+                ---[[
                 {t =    2, item = formations.cluster,         params = {  1100 }},
                 {t =    3, item = formations.cluster,         params = {  200 }},
                 {t =   10, item = formations.cluster,         params = { 1700 }},
@@ -354,13 +354,13 @@ levels =
                 {t =   122, item = formations.zig_zag,         params = { 1420, 300,  30 }},
                 {t =   125, item = formations.zig_zag,         params = {  500, 300, -30 }},
                 {t =   125, item = formations.zig_zag,         params = { 1420, 300,  30 }},
-                {t =   128, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,screen.w-50,300,  screen.w-200}},
-                {t =   135, item = formations.cluster,        params = { 400 }},
-                {t =   135, item = formations.cluster,        params = { 1700 }},
-                {t =   138, item = formations.cluster,        params = { 1100 }},
-                {t =   142, item = formations.cluster,        params = { 1300 }},
-                {t =   144, item = formations.cluster,        params = { 300 }},
-                {t =   147, item = formations.cluster,        params = { 1700 }},
+                {t =   128, item = formations.row_from_side,   params = {5,150,  screen.w+100,1000,screen.w-50,300,  screen.w-200}},
+                {t =   135, item = formations.cluster,         params = { 400 }},
+                {t =   135, item = formations.cluster,         params = { 1700 }},
+                {t =   138, item = formations.cluster,         params = { 1100 }},
+                {t =   142, item = formations.cluster,         params = { 1300 }},
+                {t =   144, item = formations.cluster,         params = { 300 }},
+                {t =   147, item = formations.cluster,         params = { 1700 }},
                 {t =   149, item = powerups.health,         params = {1700}},
                 --{t =   75, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  800}},
                 {t =   152, item = formations.one_loop,       params = {3,300,900,200,300, 1}},
@@ -524,7 +524,7 @@ levels =
             for i = 1, #self.add_list do
                 self.index[i] = 1
             end
-            self.time = 200
+            self.time = 0--200
             self.num_bosses = 2
             if type(o) == "table"  then
                 recurse_and_apply(  self, o  )
