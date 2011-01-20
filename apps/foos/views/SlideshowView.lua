@@ -1434,7 +1434,9 @@ mosaic_timeline:start()
     end
 
     function view:preload_front(pre)
+		print("here too...", pre,outstanding_reqs)
 		if pre ~= true and outstanding_reqs >= 5 then return false end
+		print("passed it")
         view.off_screen_list[#view.off_screen_list+1] = Group {z = 500}
         view.license_off[#view.license_off+1] = Text
 		{
@@ -1457,17 +1459,20 @@ mosaic_timeline:start()
         local attempt = 1
         local function load_pic(timeline,group,attempt)
             attempt = attempt + 1
+			
 	        local photo_i    = view:get_controller():get_photo_index()
 
 			local pic_m, title, auth, pic_l
-			pic, title, auth, pic_l = sources[model.fp_1D_index]:get_photos_at(
+			pic_m, title, auth, pic_l = sources[model.fp_1D_index]:get_photos_at(
 								index,false)
 			license.text = title.." "..auth
 			license.x = screen.w - license.w
+			print("attemptinggg",pic_m,attempt,index,photo_i)
 			if pic_m == nil or attempt == 5 or index < photo_i - 5 then
 				
 				return
 			end
+			print("why")
             if pic_m == "" then
                 if group ~= nil then
                     local timeout = Timer{ interval = 4000 }
@@ -1490,6 +1495,7 @@ mosaic_timeline:start()
                 src       = pic_m,
                 async     = true, 
                 on_loaded = function(img,failed)
+					print("preload front on_loaded")
                     img.on_loaded = nil
 					outstanding_reqs = outstanding_reqs - 1
 					print(index,outstanding_reqs)
@@ -1532,6 +1538,7 @@ mosaic_timeline:start()
         load_pic(timeline,group,attempt)
      end
     function view:preload_back(pre)
+		print("here,...")
 		if pre ~= true and outstanding_reqs >= 5 then return false end
         view.on_screen_list[#view.on_screen_list+1] = Group {z = 0}
         view.license_on[#view.license_on+1] = Text
@@ -1579,6 +1586,7 @@ print(index,outstanding_reqs)
 				src       = pic_l,
                 async     = true, 
                 on_loaded = function(img,failed)
+					print("preload back on_loaded")
                     img.on_loaded = nil
 			outstanding_reqs = outstanding_reqs - 1
 print(index,outstanding_reqs)

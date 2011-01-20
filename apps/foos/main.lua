@@ -13,10 +13,10 @@ PIC_W = PIC_H
 
 
 
-dofile("Class.lua") -- Must be declared before any class definitions.
-dofile("adapters.lua")--/Adapter.lua")
+dofile("Utils/Class.lua") -- Must be declared before any class definitions.
+dofile("Photo_Downloader.lua")--/Adapter.lua")
 
-dofile("MVC.lua")
+dofile("Utils/MVC.lua")
 dofile("FocusableImage.lua")
 
 dofile("views/FrontPageView.lua")

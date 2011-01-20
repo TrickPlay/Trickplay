@@ -160,7 +160,7 @@ reset_keys()
 
         --moving foward through the photos
         if dir == Directions.RIGHT then
-            if view:preload_front() == false then
+            if view:preload_front(true) == false then
 				photo_index = photo_index - dir[1]
 			end
 		if view.timer_is_running then
@@ -171,7 +171,7 @@ reset_keys()
         elseif dir == Directions.LEFT then
             --toss the end of the off_screen_list
             if photo_index >= 4  then
-                if view:preload_back() == false then
+                if view:preload_back(true) == false then
 					photo_index = photo_index - dir[1]
 				end
             end
