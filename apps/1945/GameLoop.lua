@@ -3,6 +3,7 @@
 --]]
 special_checks = {}
 render_list = {}
+just_added_list = {}
 function add_call (item, ...)
     if item then
         if item.setup then
@@ -13,7 +14,13 @@ function add_call (item, ...)
 end
 function add_to_render_list( item, ... )
 
-    dolater(add_call, item, ... )
+    --dolater(add_call, item, ... )
+    if item then
+        if item.setup then
+            item:setup( ... )-- , item )
+        end
+        just_added_list[item] = item.render
+    end
 end
 
 function remove_from_render_list( item )
@@ -21,6 +28,10 @@ function remove_from_render_list( item )
     if  render_list[ item ] then
         if item.remove then item:remove() end
         render_list[ item ] = nil
+        return true
+    elseif just_added_list[item] then
+        if item.remove then item:remove() end
+        just_added_list[ item ] = nil
         return true
     end
 

@@ -213,16 +213,15 @@ explosions =
                             self.images[self.index].opacity=255
                         end
                 	end
-            
+                    
                     if (not self.hit) and type(dam_list) == "table" then
-                    --print("hhhheeeeerrrrreeee")
                         table.insert(b_guys_air,
                             {
                                 obj=self,
-                                x1=x-( self.images[1].w ) / 2,
-                                x2=x+( self.images[1].w ) / 2,
-                                y1=y-self.images[1].h / 2,
-                                y2=y+self.images[1].h / 2,
+                                x1=self.images[1].x-( self.images[1].w ) / 2,
+                                x2=self.images[1].x+( self.images[1].w ) / 2,
+                                y1=self.images[1].y-self.images[1].h / 2,
+                                y2=self.images[1].y+self.images[1].h / 2,
                             }
                         )
                         
@@ -412,13 +411,17 @@ local tot_flak_shot_created = 0
 local old_bullets = {}
 local tot_bullets_created = 0
 scrap_caches = function()
-    print("scrapping",#big_explos,#sm_explos,#old_bullets)
+    print("scrapping",#big_explos,#sm_explos,#old_bullets,#old_flak,#old_flak_shot)
     big_explos = {}
     num_big_explos = 0
     sm_explos = {}
     num_sm_explos = 0
     old_bullets = {}
     tot_bullets_created = 0
+    old_flak    = {}
+    tot_flak_created = 0
+    old_flak_shot    = {}
+    tot_flak_shot_created = 0
     collectgarbage("collect")
 end
 function fire_bullet(enemy,source)
@@ -584,10 +587,10 @@ function flak(x,y)
             table.insert(b_guys_air,
                 {
                     obj = self,
-                    x1  = self.x-curr_lvl_imgs.flak[1].w/2,
-                    x2  = self.x+curr_lvl_imgs.flak[1].w/2,
-                    y1  = self.y-curr_lvl_imgs.flak[1].h/2,
-                    y2  = self.y+curr_lvl_imgs.flak[1].h/2,
+                    x1  = self.x,--curr_lvl_imgs.flak[1].w/2,
+                    x2  = self.x+curr_lvl_imgs.flak[1].w,--/2,
+                    y1  = self.y,--curr_lvl_imgs.flak[1].h/2,
+                    y2  = self.y+curr_lvl_imgs.flak[1].h,--/2,
                 }
             )
             end
@@ -602,7 +605,7 @@ function flak(x,y)
         f = table.remove(old_flak)
         f.x = x
         f.y = y
-        
+        f.hit = false
     end
     add_to_render_list( f )
 end
@@ -915,13 +918,13 @@ end
 --0 is assumed to be when the object is facing down
 local move = function(group, speed, secs)
 	assert(group)
-        local x = secs*speed*math.cos((group.z_rotation[1]+90)*math.pi/180)
-        local y = secs*speed*math.sin((group.z_rotation[1]+90)*math.pi/180)
+    local x = secs*speed*math.cos((group.z_rotation[1]+90)*math.pi/180)
+    local y = secs*speed*math.sin((group.z_rotation[1]+90)*math.pi/180)
 	group.x = group.x + x
 	
 	group.y = group.y + y
 	
-        return x,y
+    return x,y
 end
 
 
@@ -1180,14 +1183,18 @@ enemies =
 			{
 				source       = curr_lvl_imgs.z_barrel,
 				anchor_point = {0,curr_lvl_imgs.z_barrel.h/2},
-				z_rotation   = {90,0,0}
+				z_rotation   = {90,0,0},
+                x =  56,
+				y = 130,
 			},
 			
 			r = Clone
 			{
 				source       = curr_lvl_imgs.z_barrel,
 				anchor_point = {0,curr_lvl_imgs.z_barrel.h/2},
-				z_rotation   = {90,0,0}
+				z_rotation   = {90,0,0},
+                x = 182,
+				y = 130,
 			},
 			
 			g_l = Group
@@ -1232,14 +1239,14 @@ enemies =
 			{
 				r =
 				{ --absolute position of the zeppelin's right gun
-					x = (self.guns.g_r.x+self.group.x-self.group.anchor_point[1]),
-					y = (self.guns.g_r.y+self.group.y-self.group.anchor_point[2])
+					x = (self.guns.r.x+self.group.x-self.group.anchor_point[1]),
+					y = (self.guns.r.y+self.group.y-self.group.anchor_point[2])
 				},
 				l =
 				{ --absolute position of the zeppelin's left gun
-					x = (self.guns.g_l.x+self.group.x-
+					x = (self.guns.l.x+self.group.x-
 						self.group.anchor_point[1]),
-					y = (self.guns.g_l.y+self.group.y-
+					y = (self.guns.l.y+self.group.y-
 						self.group.anchor_point[2])
 				}
 			}
@@ -1394,7 +1401,9 @@ enemies =
 		
 		remove = function(self)
             self.group:unparent()
-            
+            if self.is_boss then
+                levels[state.curr_level]:level_complete()
+            end
         end,
 		setup = function(self)
             state.counters[1].zepp.spawned = state.counters[1].zepp.spawned + 1
@@ -1413,7 +1422,7 @@ enemies =
             
             self.prop.l[1].opacity=255
             self.prop.r[1].opacity=255
-            
+            --[[
 			self.guns.g_l:add( self.guns.l,
             Clone{
                 source=curr_lvl_imgs.z_cannon_l,
@@ -1426,6 +1435,7 @@ enemies =
                 x=-2,
                 y = -curr_lvl_imgs.z_cannon_l.h/2
             } )
+            --]]
 			self.group:add(unpack(self.prop.l))
             self.group:add(unpack(self.prop.r))
 			self.group:add(
@@ -1435,8 +1445,8 @@ enemies =
                 self.e_l_dam,
 				self.e_r_dam,
                 
-				self.guns.g_l,
-				self.guns.g_r
+				self.guns.l,
+				self.guns.r
 				
                 --self.e_fire_l_g,
                 --self.e_fire_r_g
@@ -1513,7 +1523,7 @@ enemies =
                         
                         
                         
-                        ---[[
+                        --[[
                         if self.is_boss then
                             levels[state.curr_level]:level_complete()
                         end
@@ -2637,6 +2647,7 @@ enemies =
             if type(o) == "table"  then
                 recurse_and_apply(  self, o  )
             end
+            --print("end setup",self)
 		end,
 		
         strip_thresh = .1,
@@ -2645,7 +2656,7 @@ enemies =
         moving = m,
         
 		render = function(self,seconds)
-			
+			--print("render",self,self.index,self.images,#self.images)
             if self.moving then
                 self.strip_time = self.strip_time + seconds
                 if self.strip_time > self.strip_thresh then
@@ -2740,7 +2751,7 @@ enemies =
         },--]]
         
         num_frames = 3,
-		group = Group{--[[clip={0,0,curr_lvl_imgs.jeep.w/3,curr_lvl_imgs.jeep.h}--]]},
+		group = Group{position = {xxx,y_offset},--[[clip={0,0,curr_lvl_imgs.jeep.w/3,curr_lvl_imgs.jeep.h}--]]},
 		
         
         setup = function(self)
@@ -2751,7 +2762,7 @@ enemies =
 			for i = 1,self.num_frames do
                 self.images[i] = Clone{
                     source=curr_lvl_imgs.jeep_b[i],
-                    position = {xxx,y_offset},
+                    
                     opacity=0,
                     --[[
                     anchor_point={
@@ -3785,7 +3796,7 @@ formations =
         for i = lower,upper do
             t = enemies.tank(true,screen_w/2+(screen_w/2+spacing*i)*x,y,o)
             t.salvage_func= {"formations","hor_row_tanks"}
-            t.index = i
+            --t.index = i
             t.salvage_params = {x,y,num,spacing}
             t.stages = {
                 function(t,seconds)
@@ -3828,7 +3839,7 @@ formations =
         for i = lower,upper do
             t = enemies.tank(true,x+spacing*(i-1),screen_h/2+y*(screen_h/2+100),o)
             t.salvage_func= {"formations","vert_row_tanks"}
-            t.index = i
+            --t.index = i
             t.salvage_params = {x,y,num,spacing}
             t.approach_speed = -y*60+40
             

@@ -507,6 +507,10 @@ function idle.on_idle( idle , seconds )
 		end
 	end
 --]]
+    for item,render in pairs( just_added_list ) do
+        render_list[item] = render
+    end
+    just_added_list = {}
     
         for item,render in pairs( render_list ) do
             render( item , seconds )
