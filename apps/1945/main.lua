@@ -67,7 +67,7 @@ splash_screen:add(
 )
 local splash_i = 1
 local splash_limit = 1
-if settings.state.in_lvl_complete or (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) then
+if (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) or (settings.state ~= nil and settings.state.in_lvl_complete) then
     splash_screen:add(
         Text{text="Continue Old Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240},
         Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300}
@@ -563,8 +563,7 @@ function app:on_closing()
     temp_table = {}
     recurse_and_apply(temp_table, state)
     settings.state = temp_table
-    dumptable(temp_table)
-    --dumptable(settings.state)--]]
+
 end
 math.randomseed( os.time() )
 play_sound_wrapper("audio/Air Combat Launch.mp3")

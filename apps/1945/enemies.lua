@@ -3150,8 +3150,8 @@ enemies =
 			self.guns.g_m:add( self.guns.mid   )
             self.guns.g_s:add( self.guns.stern )
             self.group:add(Clone{source=curr_lvl_imgs.laminar})
-			--self.group:add(unpack(self.bow_wake_r))
-            --self.group:add(unpack(self.bow_wake_l))
+			self.group:add(unpack(self.bow_wake_r))
+            self.group:add(unpack(self.bow_wake_l))
             --self.group:add(unpack(self.stern_wake))
             --self.group:add(unpack(self.bow_wake_t))
 
@@ -3206,7 +3206,7 @@ enemies =
         s_last_wake_change = 1,
 		
 		render = function(self,seconds)
-			--[[
+			---[[
             if self.moving then
                 self.last_wake_change = self.last_wake_change + seconds
                 
@@ -3224,12 +3224,12 @@ enemies =
                 --self.stern_wake[self.s_w_i].opacity=255
                 
                 end
-                
+                --[[
                 self.s_last_wake_change = self.s_last_wake_change + seconds
                 if self.s_last_wake_change >= self.s_wake_thresh then
                     add_to_render_list(wake(self.group.x+self.image.w/2,self.group.y+self.image.h-80))
                     self.s_last_wake_change = 0
-                end
+                end--]]
             end
             --]]
 			--animate the zeppelin based on the current stage
@@ -3553,7 +3553,7 @@ enemies =
         s_last_wake_change = 1,
         
 		render = function(self,seconds)
-			--[[
+			---[[
             if self.moving then
                 self.last_wake_change = self.last_wake_change + seconds
                 
@@ -3569,12 +3569,12 @@ enemies =
                 self.bow_wake_l[self.b_w_i].opacity=255
                 self.bow_wake_t[self.b_w_i%4+1].opacity=255
                 --self.stern_wake[self.s_w_i].opacity=255
-                end
+                end--[[
                 self.s_last_wake_change = self.s_last_wake_change + seconds
                 if self.s_last_wake_change >= self.s_wake_thresh then
                     add_to_render_list(wake(self.group.x+self.image.w/2,self.group.y+self.image.h-80))
                     self.s_last_wake_change = 0
-                end
+                end--]]
             end
             --]]
 			--animate the zeppelin based on the current stage
@@ -3767,7 +3767,7 @@ formations =
                     end
 				end,
                 function(b,seconds)
-                    b.group.y = b.group.y -b.approach_speed*seconds
+                    b.group.y = b.group.y +b.approach_speed*seconds
                     if not b.dead then
                         b:rotate_guns_and_fire(seconds)
                     end

@@ -980,6 +980,7 @@ levels =
             my_plane.bombing_mode = true
             self.bg:append_to_queue(
                 {---[[
+                    {},{},{},{},
                     {
                         {source={"curr_lvl_imgs","trench_l"},  x=1300+  curr_lvl_imgs.trench_l.w},
                         --{source={"curr_lvl_imgs","trench_reg"},x=1300+2*curr_lvl_imgs.trench_l.w},

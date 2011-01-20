@@ -252,9 +252,9 @@ lvlbg = {
     repeating     = false,
     image         = nil, --Image{src = "assets/lvls/bg_tiles/water2.png" },
     setup         = function( self,o, top_doodad )
-	self.image = Clone{source=curr_lvl_imgs.water2}
+        self.image    = Clone{source=curr_lvl_imgs.water2}
         self.doodad_h = curr_lvl_imgs.dock_1_1.h
-        self.img_h = tilesize
+        self.img_h    = tilesize
         
         self.image:set{
             tile   = {true, true},
@@ -456,7 +456,7 @@ lvlbg = {
     salvage = function(self)
         s = {
             func = {"salvage_level_2"},
-            table_params = {{ queues={}, top_doodad = self.top_doodad, num_bosses = levels[2].num_bosses }}
+            table_params = {{ queues={}, top_doodad = self.top_doodad, num_bosses = levels[2].num_bosses, repeating = lvlbg[2].repeating }}
         }
         local iii = 0
         for i = (self.q_i - #self.doodad_frames), self.append_i do
@@ -1057,6 +1057,7 @@ lvlbg = {
 
 function salvage_level_2(o)
     levels[2].num_bosses = o.num_bosses
+    lvlbg[2].repeating  = o.repeating
     add_to_render_list(lvlbg[2],o.queues,o.top_doodad)
 end
 function salvage_level_3(o)
