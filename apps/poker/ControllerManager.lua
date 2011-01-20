@@ -27,22 +27,40 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         Hook up the connect, disconnect and ui controller events
     --]]
     function controllers:on_controller_connected(controller)
-        if number_of_ctrls > 10 or not accepting_controllers then return end
+        if number_of_ctrls > max_controllers or not accepting_controllers then return end
         if not model:get_active_controller().add_controller then return end
 
-        model:get_active_controller():add_controller(controller)
-        number_of_ctrls = number_of_ctrls + 1
+        local function declare_necessary_resources()
+            --[[
+                Declare resources to be used by the phone
+            --]]
+            -- buttons for betting
+            controller:declare_resource("buttons", "assets/phone/buttons.png")
+            -- buttons for dog selection
+            controller:declare_resource("dog_1", "assets/phone/chip1.jpg")
+            controller:declare_resource("dog_2", "assets/phone/chip2.jpg")
+            controller:declare_resource("dog_3", "assets/phone/chip3.jpg")
+            controller:declare_resource("dog_4", "assets/phone/chip4.jpg")
+            controller:declare_resource("dog_5", "assets/phone/chip5.jpg")
+            controller:declare_resource("dog_6", "assets/phone/chip6.jpg")
+            -- covers up dog selection
+            controller:declare_resource("blank_1", "assets/phone/chip1-blank.jpg")
+            controller:declare_resource("blank_2", "assets/phone/chip2-blank.jpg")
+            controller:declare_resource("blank_3", "assets/phone/chip3-blank.jpg")
+            controller:declare_resource("blank_4", "assets/phone/chip4-blank.jpg")
+            controller:declare_resource("blank_5", "assets/phone/chip5-blank.jpg")
+            controller:declare_resource("blank_6", "assets/phone/chip6-blank.jpg")
+            -- phone splash screen
+            controller:declare_resource("splash", "assets/phone/splash.jpg")
+            -- headers which help instruct the player
+            controller:declare_resource("hdr_blank", "assets/phone/title-blank.jpg")
+            controller:declare_resource("hdr_choose_dog",
+                "assets/phone/title-choose-dawg.jpg")
+            controller:declare_resource("hdr_name_dog",
+                "assets/phone/title-name-dawg.jpg")
 
-        active_ctrls[controller.name] = controller
-
-        if resources then
-            for name,resource in pairs(resources) do
-                controller:declare_resource(name, resource)
-            end
+ --           controller:set_ui_background("splash")
         end
-        controller:declare_resource("bomb","bomb.png")
-        controller:declare_resource("numbers","numbers.png")
-        --controller:set_ui_background("numbers")
 
         function controller:on_key_down(key)
             print("controller keypress:", key)
@@ -52,23 +70,20 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
 
 
-        print("CONNECTED",controller.name)
+        print("CONNECTED", controller.name)
         
         function controller.on_disconnected(controller)
             
-            print("DISCONNECTED",controller.name)
+            print("DISCONNECTED", controller.name)
             
         end
 
         if start_click then
-            function controller.on_click(controller, x, y)
-                print("answered",controller.name,x,y)
+            function controller:on_click(x, y)
+                print("answered", controller.name,x,y)
 
                 -- disable additional clicks
                 controller.on_click = nil
-
-                -- reset background picture
-                controller:set_ui_background("bomb")
             end
             controller:start_clicks()
         end
@@ -79,6 +94,31 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             end
             controller:start_accelerometer("L", 1)
         end
+
+--[[
+        function controller:choose_dog()
+            print("choosing dog")
+
+            if not controller:set_ui_image("dog_1", 0, 0, 19, 85) then
+                print("error setting dog image")
+            end
+        end
+--]]
+        
+---------------On Connected Junk---------------
+
+
+        number_of_ctrls = number_of_ctrls + 1
+
+        active_ctrls[controller.name] = controller
+
+        if resources then
+            for name,resource in pairs(resources) do
+                controller:declare_resource(name, resource)
+            end
+        end
+        declare_necessary_resources()
+        model:get_active_controller():add_controller(controller)
 
     end
 end)
