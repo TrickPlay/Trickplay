@@ -54,13 +54,16 @@ impact = function(x,y)
                 end
             end,
         }
+        add_to_render_list(imp)
     else
+        print(x,y)
         imp = table.remove(old_impacts)
+        add_to_render_list(imp)
         for i =1,imp.num do
             imp.images[i].position = {x,y}
         end
     end
-    add_to_render_list(imp)
+    
 end
 
 smoke = function(i,o)   return {
@@ -352,10 +355,10 @@ my_plane =
             return s
         end,
     hit = function(self)
-        if self.damage ~= (self.num_frames - 1) then
-        self.images[self.damage+1].opacity=255
+        if self.damage ~= (2*self.num_frames - 1) then
+        self.images[math.ceil((self.damage+1)/2)].opacity=0
         self.damage = self.damage + 1
-        self.images[self.damage+1].opacity=255
+        self.images[math.ceil((self.damage+1)/2)].opacity=255
         --for j = 1,self.plumes_per_stream do
                 --self.smoke_stream[self.damage]:unhalt()
         --end
@@ -524,10 +527,10 @@ my_plane =
                             table.insert(g_guys_land,
                                 {
                                     obj = self,
-                                    x1  = self.image.x-self.img_w,
-                                    x2  = self.image.x+self.img_w,
-                                    y1  = self.image.y-self.img_h,
-                                    y2  = self.image.y+self.img_h,
+                                    x1  = self.image.x-base_imgs.explosion1[1].w/2-10,
+                                    x2  = self.image.x+base_imgs.explosion1[1].w/2+10,
+                                    y1  = self.image.y-base_imgs.explosion1[1].h/2-10,
+                                    y2  = self.image.y+base_imgs.explosion1[1].h/2+10,
                                 }
                             )
                             --[[
@@ -682,10 +685,11 @@ my_plane =
     
         function( self , other )
 
-if self.damage ~= (self.num_frames - 1) then
+if self.damage ~= (2*self.num_frames - 1) then
     self:hit()
-    if other.image ~= nil then
-    print(other.image.x,other.image.y)
+    if other.group ~= nil then
+        impact(other.group.x,other.group.y)
+    elseif other.image ~= nil then
         impact(other.image.x,other.image.y)
     end
     play_sound_wrapper("audio/taking-damage.mp3")
