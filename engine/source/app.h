@@ -7,6 +7,7 @@
 #include "util.h"
 #include "event_group.h"
 #include "debugger.h"
+#include "images.h"
 
 #define APP_METADATA_FILENAME   "app"
 
@@ -249,6 +250,11 @@ public:
 
     Debugger * get_debugger();
 
+    //.........................................................................
+
+    Image * load_image( const gchar * source );
+
+    bool load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
 private:
 
