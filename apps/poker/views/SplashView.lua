@@ -9,11 +9,6 @@ SplashView = Class(View, function(view, model, ...)
 
     function view:initialize()
         self:set_controller(SplashController(self))
-        --[[
-        for k,controller in pairs(controllers.connected) do
-            controller:set_ui_background("splash")
-        end
-        --]]
     end
 
     local splash_timer = nil
