@@ -35,7 +35,7 @@ Model = Class(function(model, ...)
                                     PIC_W / model.prac_pic.base_size[1],
                                     PIC_H / model.prac_pic.base_size[2]
                                 }
---]]
+
 	model.default = {}
 	for i=1,8 do 
 		 model.default[i] = Image{
@@ -47,7 +47,7 @@ Model = Class(function(model, ...)
 		 screen:add(model.default[i])
 
 	end
-
+--]]
 
     --SLIDE_SHOW
     model.curr_slideshow = {}
@@ -135,6 +135,7 @@ Model = Class(function(model, ...)
     end
     
     function model:set_active_component(comp)
+       collectgarbage("collect")
        if type(comp) ~= "number" then
           error("Component " .. tostring(comp) .. " is not a number", 2)
        elseif comp < Components.COMPONENTS_FIRST or 

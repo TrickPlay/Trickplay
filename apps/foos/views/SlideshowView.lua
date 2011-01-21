@@ -15,12 +15,13 @@ local outstanding_reqs = 0
     local layered_timeline = nil
 
     view.background  = Image {src = "assets/background.jpg"  }
+	--[[
 	view.mosaic_background = Image 
 	{
 		src = "assets/tiled-slideshow-bkgd.jpg" ,
 		size = {screen.w,screen.h},opacity=255
 	}
-
+--]]
 	-- POST-IT Menu --
 	local postit = Group{name="post-it",position = {-250,400}}
 	local postit_bg = Image{src = "assets/note-menu.png"}
@@ -441,7 +442,7 @@ local outstanding_reqs = 0
 --]]
                 end
             view.background.opacity  = 255
-			view.mosaic_background.opacity = 0
+			--view.mosaic_background.opacity = 0
             --view.logo.opacity   = 255
 
             for i = #view.on_screen_list,1,-1 do
@@ -786,8 +787,11 @@ end
                     end
                 end
 --]]
-                function layered_timeline.on_new_frame(t,msecs)
+                function layered_timeline.on_new_frame(t)
+				
+					local msecs    =  t.elapsed
                     local index    =  math.ceil(msecs/200)
+					
                     local progress = (msecs - 200*(index-1))/200
                     for i = 1,index-1 do
                         local child    = pic:find_child("Clone "..i)
@@ -875,7 +879,8 @@ function mosaic_timeline.on_started()
 		end
 
 end
-function mosaic_timeline.on_new_frame(t,msecs)
+function mosaic_timeline.on_new_frame(t)
+				local msecs   = t.elapsed
 				local stage_i = math.ceil(msecs / 200) --stages 1-15
 				
 				local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
@@ -1154,7 +1159,8 @@ mosaic_timeline:start()
                     end
                 end
 --]]
-                function layered_timeline.on_new_frame(t,msecs)
+                function layered_timeline.on_new_frame(t)
+					local msecs   = t.elapsed
                     local index    =  math.ceil(msecs/200)
                     local progress = (msecs - 200*(index-1))/200
                     for i = 1,index-1 do
@@ -1249,7 +1255,8 @@ function mosaic_timeline.on_started()
 		end
 
 end
-function mosaic_timeline.on_new_frame(t,msecs)
+function mosaic_timeline.on_new_frame(t)
+				local msecs   = t.elapsed
 				local stage_i = math.ceil(msecs / 200) --stages 1-15
 				
 				local p = (msecs - (stage_i-1)*200) / 200  --progress w/in a stage
@@ -1467,12 +1474,12 @@ mosaic_timeline:start()
 								index,false)
 			license.text = title.." "..auth
 			license.x = screen.w - license.w
-			print("attemptinggg",pic_m,attempt,index,photo_i)
+			--print("attemptinggg",pic_m,attempt,index,photo_i)
 			if pic_m == nil or attempt == 5 or index < photo_i - 5 then
 				
 				return
 			end
-			print("why")
+			--print("why")
             if pic_m == "" then
                 if group ~= nil then
                     local timeout = Timer{ interval = 4000 }
@@ -1661,7 +1668,25 @@ print("toggle on")
 			play:animate{duration=1000,scale={2,2},opacity = 0}
         end
         reset_keys()            
-    end  
+    end
+	function view:play_slideshow()
+		if not view.timer_is_running then return end
+		view.timer:stop()
+        view.timer_is_running = false
+		pause:raise_to_top()
+		pause.opacity=255
+		pause.scale = {.1,.1}
+		pause:animate{duration=1000,scale={2,2},opacity = 0}
+	end
+	function view:pause_slideshow()
+		if view.timer_is_running then return end
+		view.timer:start()
+        view.timer_is_running = true
+		play:raise_to_top()
+		play.opacity=255
+		play.scale = {.1,.1}
+		play:animate{duration=1000,scale={2,2},opacity = 0}
+	end
     function view.timer.on_timer(timer)
         local photo_i = view:get_controller():get_photo_index()+1
 	print("tick "..photo_i)
@@ -1762,7 +1787,8 @@ print("toggle on")
 		}
 		local old_x  = 10
 		local targ_x = -250
-		function t.on_new_frame(t,msecs)
+		function t.on_new_frame(t)
+			local msecs   = t.elapsed
 			if msecs <= 100 then
 				local p = msecs/100
 				postit_text[4].opacity = 255*(p)

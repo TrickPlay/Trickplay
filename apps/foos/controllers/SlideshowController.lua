@@ -22,7 +22,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
         photo_index = i
 		view.prev_i = i
         view.background.opacity  = 255
-        view.mosaic_background.opacity  = 0
+        --view.mosaic_background.opacity  = 0
 
 --        view.set_ui[ view.styles[style_index] ]()
 
@@ -119,6 +119,14 @@ reset_keys()
 	end,
 		[keys.p] = function(self)
             view:toggle_timer()
+			reset_keys()			
+		end,
+		[keys.PAUSE] = function(self)
+            view:pause_slideshow()
+			reset_keys()			
+		end,
+		[keys.PLAY] = function(self)
+            view:play_slideshow()
 			reset_keys()			
 		end,
         [keys.Return] = function(self) 
