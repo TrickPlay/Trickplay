@@ -39,124 +39,35 @@ struct ImageExtra
 };
 
 //-----------------------------------------------------------------------------
-// ThreadPool task that decodes images
 
-class DecodeTask : public ThreadPool::Task
+static void image_load_callback( Image * image , gpointer _texture )
 {
-public:
+    ClutterTexture * texture = CLUTTER_TEXTURE( _texture );
 
-	DecodeTask( const char * _path, ClutterTexture * _texture )
-	:
-		path( _path ),
-		texture( _texture ),
-		image( NULL )
-	{
-		g_object_ref( G_OBJECT( texture ) );		
-	}
-
-	DecodeTask( const Network::Response & _response, ClutterTexture * _texture )
-	:
-		response( _response ),
-		texture( _texture ),
-		image( NULL )
-	{
-		g_object_ref( G_OBJECT( texture ) );
-	}
-	
-	~DecodeTask()
-	{
-		g_object_unref( G_OBJECT( texture ) );
-
-		if ( image )
-		{
-			delete image;
-		}
-	}
-	
-	virtual void process()
-	{
-		if ( ! path.empty() )
-		{
-			image = Image::decode( path.c_str() ); 
-		}
-		else
-		{
-	    	image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
-	    }
-	}
-	
-	virtual void process_main_thread()
-	{
-		if ( ! image )
-		{
-			GError * error = NULL;
-		
-		    g_set_error(&error,
-				CLUTTER_TEXTURE_ERROR,
-				CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-				"Failed to load texture data");
-				
-			g_warning("FAILED TO LOAD IMAGE : %s",error->message);
-			
-			g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
-			
-			g_clear_error( &error );
-		}
-		else
-		{
-			ImageExtra::get( texture )->loaded = TRUE;
-
-			Images::load_texture( texture, image );
-		}		
-	} 
-	
-	static void push( DecodeTask * task )
-	{
-		static ThreadPool * thread_pool = NULL;
-		
-		if ( ! thread_pool )
-		{
-			thread_pool = new ThreadPool( 2 );
-		}
-		
-		thread_pool->push( task );
-	}
-	
-	String				path;
-	Network::Response	response;
-	ClutterTexture *  	texture;
-	Image *		      	image;
-};
-
-//-----------------------------------------------------------------------------
-// Callback for network requests
-
-void Image_response_callback(const Network::Response & response,gpointer texture)
-{
-    if ( response.failed )
+    if ( ! image )
     {
-    	GError * error=NULL;
-    
-		g_set_error(&error,
-		    CLUTTER_TEXTURE_ERROR,
-		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-		    "Request failed : %s" , response.status.c_str() );	
+        GError * error = NULL;
 
-		g_warning("FAILED TO LOAD IMAGE : %s",error->message);
-	
-		g_signal_emit_by_name(G_OBJECT(texture),"load-finished",error);
-	
-		g_clear_error(&error);    
+        g_set_error( & error,
+            CLUTTER_TEXTURE_ERROR,
+            CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+            "Failed to load texture data");
+
+        g_warning("FAILED TO LOAD IMAGE : %s",error->message);
+
+        g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
+
+        g_clear_error( & error );
     }
     else
     {
-    	DecodeTask::push( new DecodeTask( response , CLUTTER_TEXTURE( texture ) ) );    			
+        ImageExtra::get( texture )->loaded = TRUE;
+
+        Images::load_texture( texture, image );
+
+        delete image;
     }
 }
-
-]]
-
-[[
 
 bool load_image( lua_State * L, ClutterTexture * texture )
 {
@@ -185,43 +96,19 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 	}
 	
 	//.........................................................................
-	// Sanitize it, convert it to an app path or determine whether it is a valid
-	// uri.
-	
-    App * app = App::get( L );
-
-    bool is_uri = false;
-    
-    char * path = app->normalize_path( src, & is_uri );
-    
-    if ( ! path ) 
-    {
-    	return false;
-    }
-    
-    FreeLater free_later( path );
-
-	//.........................................................................
 	// Synchronous loading
 	
 	if ( ! extra->async )
 	{
-		bool result = false;
-		
-		if ( is_uri )
-		{
-			Network::Request request( app->get_user_agent(), path );
+	    Image * image = App::get( L )->load_image( src );
 
-			Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
-			
-			if ( ! response.failed )
-			{
-				result = Images::load_texture( texture, response.body->data, response.body->len, response.get_header( "Content-Type" ) );
-			}
-		}
-		else
+		bool result = image != 0;
+		
+		if ( result )
 		{
-			result = Images::load_texture( texture, path );
+		    Images::load_texture( texture , image );
+
+		    delete image;
 		}
 		
 		extra->loaded = result;
@@ -232,26 +119,17 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 	//.........................................................................
 	// Asynchronous loading
 	
-	if ( is_uri )
+    extra->loaded = false;
+
+    g_object_ref( texture );
+
+	if ( ! App::get( L )->load_image_async( src , image_load_callback , texture , g_object_unref ) )
 	{
-		Network::Request request( app->get_user_agent(), path );
-		
-		g_object_ref( G_OBJECT( texture ) );
-		    
-		app->get_network()->perform_request_async(
-			request,
-			app->get_cookie_jar(),
-			Image_response_callback,
-			texture,
-			g_object_unref );		    
+	    g_object_unref( texture );
+
+	    return false;
 	}
-	else
-	{
-		DecodeTask::push( new DecodeTask( path, texture ) );
-	} 
-	
-	extra->loaded = false;
-	
+
 	return true;
 } 
 
