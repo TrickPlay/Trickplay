@@ -242,9 +242,11 @@ view.timer:start()
                 --model.fp_slots[model.fp_index[1]][model.fp_index[2]]:add(view.bottom_bar)
     --            view.timer:start()
     --        end
+	
+	
+	
 --stupid edge case for the very beginning
 if fucking_stupid then
-	 
 	model.album_group.x=0--10
 else
             view:shift_group()
