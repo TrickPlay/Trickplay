@@ -209,7 +209,7 @@ print("response",num_retrys)
 					return
 				end
 				--Otherwise, grab the URLs
-				dumptable( data.photos.photo )
+				--dumptable( data.photos.photo )
 				for i , photo in ipairs( data.photos.photo ) do
 					adapter.photo_list[(page-1)*50 +i]= photo
 				end

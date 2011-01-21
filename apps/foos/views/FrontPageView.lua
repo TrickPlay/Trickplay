@@ -113,7 +113,6 @@ FrontPageView = Class(View, function(view, model, ...)
 
 		local old_x    = fp_selector.x
 		local old_y    = fp_selector.y
-		print(model.album_group.x, view.current.x)
 ---[[
 		if     sel[2] + model.front_page_index -1 == 1 then
 			curr_targ_x = 35
@@ -150,10 +149,9 @@ FrontPageView = Class(View, function(view, model, ...)
 		elseif sel[1] == NUM_ROWS then curr_targ_y = PIC_H -75
 		end
 
-	    function sel_timeline.on_new_frame(t,msecs)
-			local p = msecs/t.duration
-			local target_x = model.album_group.x + view.current.x - 35
-
+	    function sel_timeline.on_new_frame(t,_,p)
+			--local target_x = model.album_group.x + view.current.x - 35
+local target_x = model.album_group.x + view.current.x - 35
 			--move the selector
 			fp_selector.x = old_x + (target_x - old_x)*p
 			fp_selector.y = old_y + (target_y - old_y)*p
@@ -172,7 +170,6 @@ FrontPageView = Class(View, function(view, model, ...)
 		end
 	    function sel_timeline.on_completed()
 			local target_x = model.album_group.x + view.current.x - 35
-print(model.album_group.x, view.current.x)
 	        --view.previous.scale = {1, 1 }
 
 	        --view.current.scale = {1.05, 1.05}
@@ -247,7 +244,7 @@ view.timer:start()
     --        end
 --stupid edge case for the very beginning
 if fucking_stupid then
-	fucking_stupid = false 
+	 
 	model.album_group.x=0--10
 else
             view:shift_group()
@@ -301,7 +298,10 @@ end
             --view.backdrop.opacity = 0
             --view.backdrop:raise_to_top()
             view.current:raise_to_top()
-view.move_selector()
+			if prev_i[1] ~= sel[1] or prev_i[2] ~= sel[2] or fucking_stupid then
+				fucking_stupid = false
+				view.move_selector()
+			end
             --sel_timeline:start()
         elseif comp == Components.SOURCE_MANAGER then
       --      print("Dimming FrontPageView UI")

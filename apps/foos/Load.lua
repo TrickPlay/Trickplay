@@ -91,10 +91,11 @@ function Setup_Album_Covers()
                     clip     = { 0, 0,  PIC_W, PIC_H },
                     opacity  = 255
                 }
-                model.fp_slots[i][j]:add(Clone
+                model.fp_slots[i][j]:add(Image
                 {
                     name    = "placeholder",
-                    source  = model.default[math.random(1,8)],
+		            src = "assets/backs/color_0"..math.random(1,8)..".jpg",
+		             
                     opacity = 255
                 })
 				model.fp_slots[i][j].extra.lic_tit = "Waiting for Picture"
