@@ -9,6 +9,7 @@ SplashController = Class(Controller, function(self, view, ...)
         function(self)
             model:set_active_component(Components.CHARACTER_SELECTION)
             model:notify()
+            ctrlman:choose_dog()
         end
     }
     KeyTable[keys.OK] = KeyTable[keys.Return]
@@ -17,6 +18,9 @@ SplashController = Class(Controller, function(self, view, ...)
         if KeyTable[k] then
             KeyTable[k](self)
         end
+    end
+
+    function self:add_controller()
     end
 
 end)

@@ -195,6 +195,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
                 else
                     setCharacterSeat()
                     if(self.playerCounter >= 6) then
+                        ctrlman:stop_accepting_ctrls()
                         start_a_game()
                     end
                 end
@@ -284,9 +285,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
     end
 
     function self:add_controller(ctrl)
-        --ctrl:choose_dog()
-        print("blah")
-        ctrl:set_ui_image("splash", 100, 100, 19, 85)
+        ctrl:choose_dog()
+        --ctrl:set_ui_image("splash", 100, 100, 19, 85)
     --[[
         local counter = 0
         local pos = self:getPosition()

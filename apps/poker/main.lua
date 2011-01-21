@@ -87,7 +87,7 @@ DOG_GLOW = {
 }
 --]]
 
-for i=1, 6 do
+for i = 1,6 do
    AssetLoader:preloadImage("dog"..i.."glow","assets/new_dogs/dog-"..i.."-focus.png")
 end
 
@@ -210,6 +210,8 @@ function()
    game = GameControl(model)
    model:start_app(Components.SPLASH)
 --   model:start_app(Components.PLAYER_BETTING)
+   
+   ctrlman:initialize()
 
    AssetLoader.on_preload_ready = nil
 end

@@ -220,7 +220,6 @@ CharacterSelectionView = Class(View, function(view, model, ...)
                 end
             end
         else
-            ctrlman:stop_accepting_ctrls()
 --            print("Hiding Character Selection UI")
             self.ui:complete_animation()
             self.ui.opacity = 0
