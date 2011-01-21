@@ -11,11 +11,38 @@
 #include "util.h"
 #include "image_decoders.h"
 #include "context.h"
+#include "thread_pool.h"
+#include "app.h"
 
 //=============================================================================
 // Set to OFF to stop image debug log
 
 Debug_OFF images_debug;
+
+//=============================================================================
+
+static ThreadPool * get_images_threadpool( bool destroy = false )
+{
+    static ThreadPool * tp = 0;
+
+    if ( destroy )
+    {
+        if ( tp )
+        {
+            delete tp;
+            tp = 0;
+        }
+    }
+    else
+    {
+        if ( ! tp )
+        {
+            tp = new ThreadPool( 2 );
+        }
+    }
+
+    return tp;
+}
 
 //=============================================================================
 // Wraps around an external decoder
@@ -419,6 +446,129 @@ bool Image::write_to_png( const gchar * filename ) const
     return result;
 }
 
+//-----------------------------------------------------------------------------
+
+class DecodeTask : public ThreadPool::Task
+{
+public:
+
+    DecodeTask( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        image( 0 ),
+        callback( _callback ),
+        user( _user ),
+        destroy_notify( _destroy_notify )
+    {
+    }
+
+    virtual ~DecodeTask()
+    {
+        if ( image )
+        {
+            delete image;
+        }
+
+        if ( destroy_notify )
+        {
+            destroy_notify( user );
+        }
+    }
+
+    virtual void process_main_thread()
+    {
+        if ( callback )
+        {
+            callback( image , user );
+
+            image = 0;
+        }
+    }
+
+protected:
+
+    Image *                     image;
+
+private:
+
+    Image::DecodeAsyncCallback  callback;
+    gpointer                    user;
+    GDestroyNotify              destroy_notify;
+};
+
+//-----------------------------------------------------------------------------
+
+class DecodeFileTask : public DecodeTask
+{
+public:
+
+    DecodeFileTask( const gchar * _filename , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        DecodeTask( _callback , _user , _destroy_notify ),
+        filename( _filename )
+    {
+
+    }
+
+    virtual void process()
+    {
+        image = Image::decode( filename.c_str() );
+    }
+
+private:
+
+    String                      filename;
+};
+
+//-----------------------------------------------------------------------------
+
+class DecodeBufferTask : public DecodeTask
+{
+public:
+
+    DecodeBufferTask( GByteArray * _bytes , const gchar * _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        DecodeTask( _callback , _user , _destroy_notify ),
+        bytes( _bytes ),
+        content_type( _content_type ? _content_type : "" )
+    {
+        g_byte_array_ref( bytes );
+    }
+
+    virtual ~DecodeBufferTask()
+    {
+        g_byte_array_unref( bytes );
+    }
+
+    virtual void process()
+    {
+        image = Image::decode( bytes->data , bytes->len , content_type.c_str() );
+    }
+
+private:
+
+    GByteArray *    bytes;
+    String          content_type;
+};
+
+//-----------------------------------------------------------------------------
+
+void Image::decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    g_assert( filename );
+
+    get_images_threadpool()->push( new DecodeFileTask( filename , callback , user , destroy_notify ) );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    g_assert( bytes );
+    g_assert( bytes->data );
+    g_assert( bytes->len );
+
+    get_images_threadpool()->push( new DecodeBufferTask( bytes , content_type , callback , user , destroy_notify ) );
+}
 
 //=============================================================================
 
@@ -542,6 +692,7 @@ Images * Images::get( bool destroy )
 void Images::shutdown()
 {
     Images::get( true );
+    get_images_threadpool( true );
 }
 
 //-----------------------------------------------------------------------------
