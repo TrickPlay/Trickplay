@@ -7,6 +7,7 @@ module globals;
 #include "context.h"
 #include "actions.h"
 #include "images.h"
+#include "clutter_util.h"
 
 struct DoLater
 {
@@ -17,7 +18,7 @@ struct DoLater
         return & nil;
     }
 
-	static void add(lua_State * L,int function_ref,int args_table_ref)
+	static void add(lua_State * L,int delay,int function_ref,int args_table_ref)
 	{
 		DoLater * dl = g_new0( DoLater , 1 );
 		
@@ -25,7 +26,14 @@ struct DoLater
 		dl->function_ref = function_ref;
 		dl->args_table_ref = args_table_ref;
 		
-		g_idle_add_full( TRICKPLAY_PRIORITY , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
+		if ( delay <= 0 )
+		{
+		    g_idle_add_full( TRICKPLAY_PRIORITY , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
+		}
+		else
+		{
+		    g_timeout_add_full( TRICKPLAY_PRIORITY , delay , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
+		}
 	}  
 	
 	static gboolean do_it( DoLater * self )
@@ -874,42 +882,76 @@ globals
 		Posts a function and arguments for execution during the next pass of the event loop. Note
 		that there is no way to receive any values returned by the function. 
 		
+		If the first argument is a number, it is interpreted as a number of milliseconds to wait
+		before executing the function, which must be the second argument. This can act as a simple
+		alternative to a timer.
+
 		Arguments:
 		
+            delay - Otional. A number of milliseconds to wait.
 			f - The function to execute.
-			others - Any number of arguments to pass to the function. 
+			others - Any number of arguments to pass to the function.
+
+        Example:
+
+	    (code)
+
+	      dolater( print , 1 ) -- Will call print as soon as it can and pass 1 as a parameter
+
+	      dolater( 1000 , print , 1 ) -- Will call print in a second, with 1 as a parameter
+
+	    (end)
+
 	*/
 	
-	dolater( function f , ... )
+	dolater( ... )
 		[[
-			int nargs = lua_gettop(L)-f;
-			int args = LUA_NOREF;
-			
-			// If there are args, we put them into a table and
-			// get a ref to the table
-			
-			if ( nargs > 0 )
-			{
-				lua_newtable(L);
-				for (int i=1; i<=nargs; ++i)
-				{
-				    if ( lua_isnil( L , i+f ) )
-				    {
-				        lua_pushlightuserdata( L , DoLater::nil() );
-				    }
-				    else
-				    {
-				        lua_pushvalue(L,i+f);
-				    }
-					lua_rawseti(L,-2,i);
-				}
-				args = luaL_ref(L,LUA_REGISTRYINDEX);
-			}
-			
-			lua_pushvalue(L,f);
-			int func = luaL_ref(L,LUA_REGISTRYINDEX);
-			
-			DoLater::add(L,func,args);
+			int nargs = lua_gettop(L);
+
+            if ( nargs > 0 )
+            {
+                int f = 1;
+                int delay = 0;
+
+                if ( lua_type( L , 1 ) == LUA_TNUMBER )
+                {
+                    delay = lua_tonumber( L , 1 );
+                    ++f;
+                    --nargs;
+                }
+
+                lb_checkfunction( L , f );
+
+                --nargs;
+
+                int args = LUA_NOREF;
+
+                // If there are args, we put them into a table and
+                // get a ref to the table
+
+                if ( nargs > 0 )
+                {
+                    lua_newtable(L);
+                    for (int i=1; i<=nargs; ++i)
+                    {
+                        if ( lua_isnil( L , i+f ) )
+                        {
+                            lua_pushlightuserdata( L , DoLater::nil() );
+                        }
+                        else
+                        {
+                            lua_pushvalue(L,i+f);
+                        }
+                        lua_rawseti(L,-2,i);
+                    }
+                    args = luaL_ref(L,LUA_REGISTRYINDEX);
+                }
+
+                lua_pushvalue(L,f);
+                int func = luaL_ref(L,LUA_REGISTRYINDEX);
+
+                DoLater::add(L,delay,func,args);
+            }
 		]];
 		
 	table registry()
@@ -1012,6 +1054,12 @@ globals
 	        }
 
             result = checksum.c_str();
+        ]];
+
+	keypress( int key , int unicode = 0 )
+        [[
+            ClutterUtil::inject_key_down( key , unicode );
+            ClutterUtil::inject_key_up( key , unicode );
         ]];
 
 	/*
