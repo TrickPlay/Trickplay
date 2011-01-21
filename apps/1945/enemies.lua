@@ -1213,7 +1213,7 @@ enemies =
 		
 		group    = Group{x=x,y=-curr_lvl_imgs.zepp.h},
 		
-		shoot_time      = 1,	--how frequently the plane shoots
+		shoot_time      = 2,	--how frequently the plane shoots
 		last_shot_time = 2,	--how long ago the plane last shot
 		
 		
@@ -1996,8 +1996,8 @@ enemies =
 		stage  = 0,	--the current stage the fighter is in
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 80,
-		last_shot_time = 4,
-        shoot_time = 2,
+		last_shot_time = math.random()*4,
+        shoot_time = 4,
 		image = Clone
         {
             source       = curr_lvl_imgs.turret,
@@ -2530,7 +2530,7 @@ enemies =
 		stages = {},	--the stages, must be set by formations{}
 		approach_speed = 80,
 		last_shot_time = 4,
-        shoot_time     = 2,
+        shoot_time     = 4,
 		image = Clone
         {
             source       =  curr_lvl_imgs.tank_turret,
@@ -2974,12 +2974,12 @@ enemies =
         
 		group    = Group{},
 		
-		shoot_time      = 2 , --how frequently the ship shoots
+		shoot_time      = 4 , --how frequently the ship shoots
 		last_shot_time  =    --how long ago the ship last shot
         {
-            b = math.random()*2,
-            m = math.random()*2,
-            s = math.random()*2
+            b = 0,
+            m = .5,
+            s = 1
         },
         
 		
@@ -3428,7 +3428,7 @@ enemies =
         
 		group    = Group{},
 		
-		shoot_time      = 2 , --how frequently the ship shoots
+		shoot_time      = 4 , --how frequently the ship shoots
 		last_shot_time  = math.random()*2,
 		remove = function(self)
             self.group:unparent()

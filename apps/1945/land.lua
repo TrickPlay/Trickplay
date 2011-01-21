@@ -973,10 +973,15 @@ lvlbg = {
     image = nil, --Image{src = "assets/lvls/bg_tiles/water2.png" },
     grass = nil, --Image{src = "assets/lvls/bg_tiles/grass1.png"},
     beach = nil, --Image{src = "assets/lvls/bg_tiles/beach.png"},
+    land  = Group{},
     setup = function( self,o)
         self.image = Clone{source=curr_lvl_imgs.water2}
-        self.grass = Clone{source=curr_lvl_imgs.grass}
-        self.beach = Clone{source=curr_lvl_imgs.beach}
+        self.land:add(
+            Clone{source=curr_lvl_imgs.grass},
+            Clone{source=curr_lvl_imgs.beach,y=-curr_lvl_imgs.beach.h}
+        )
+        --self.grass = Clone{source=curr_lvl_imgs.grass}
+        --self.beach = Clone{source=curr_lvl_imgs.beach}
         self.img_h = tilesize--self.image.h
         --[[
         self.image:set{
@@ -992,9 +997,10 @@ lvlbg = {
             y      = -self.img_h
         }
         --]]
-        self.grass.y = -self.img_h
-        self.beach.y = -self.beach.h-self.img_h
-        layers.ground:add(self.image,self.grass,self.beach)
+        --self.grass.y = -self.img_h
+        --self.beach.y = -curr_lvl_imgs.beach.h--self.beach.h-self.img_h
+        self.land.y = -self.img_h
+        layers.ground:add(self.image,self.land)
         if type(o) == "table"  then
             recurse_and_apply(  self, o  )
         end
@@ -1004,6 +1010,14 @@ lvlbg = {
     render = function( self , seconds )
             
         local dy   = self.speed * seconds
+        if self.land.parent ~= nil then
+            self.land.y = self.land.y + dy
+            if self.land.y > (screen_h+curr_lvl_imgs.beach.h) then
+                self.land:unparent()
+                self.land.parent = nil
+            end
+        end
+        --[[
         if self.beach.parent ~= nil then
             self.beach.y = self.beach.y + dy
             if self.beach.y > screen_h then
@@ -1017,7 +1031,7 @@ lvlbg = {
                 self.grass:unparent()
                 self.grass.parent = nil
             end
-        end
+        end--]]
         self.image.y = self.image.y + dy
         if self.image.y > 0 then
             self.image.y = self.image.y - self.img_h
@@ -1027,11 +1041,16 @@ lvlbg = {
     end, 
     remove = function(self)
         self.image:unparent()
+        --[[
         if self.beach.parent ~= nil then
             self.beach:unparent()
         end
         if self.grass.parent ~= nil then
             self.grass:unparent()
+        end
+        --]]
+        if self.land.parent ~= nil then
+            self.land:unparent()
         end
     end,
     salvage = function(self)
@@ -1041,12 +1060,13 @@ lvlbg = {
         }
         
         table.insert(s.table_params,{
+        --[[
             grass ={
                 y= self.grass.y
             },
-            
-            beach = {
-                y = self.beach.y
+            --]]
+            land = {
+                y = self.land.y
             }
         })
         

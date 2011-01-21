@@ -524,10 +524,10 @@ my_plane =
                             table.insert(g_guys_land,
                                 {
                                     obj = self,
-                                    x1  = self.image.x-self.img_w/2,
-                                    x2  = self.image.x+self.img_w/2,
-                                    y1  = self.image.y-self.img_h/2,
-                                    y2  = self.image.y+self.img_h/2,
+                                    x1  = self.image.x-self.img_w,
+                                    x2  = self.image.x+self.img_w,
+                                    y1  = self.image.y-self.img_h,
+                                    y2  = self.image.y+self.img_h,
                                 }
                             )
                             --[[
@@ -716,7 +716,7 @@ if state.hud.num_lives == 0 then
 
 elseif state.curr_mode ~= "TEST_MODE" then
 	lives[state.hud.num_lives].opacity=0
-	--state.hud.num_lives = state.hud.num_lives - 1
+	state.hud.num_lives = state.hud.num_lives - 1
 end
 redo_score_text()
 

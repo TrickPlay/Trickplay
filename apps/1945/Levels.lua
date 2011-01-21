@@ -49,6 +49,31 @@
                                         end
                                     end,
                             }
+                            lvl3txt    =     {
+                                speed = 40,
+                                text = Clone{ source = txt.level3 },
+                                
+                                setup = function( self )
+                                        self.text.position = { screen_w/2,screen_h/2}
+                                        self.text.anchor_point = { self.text.w / 2 , self.text.h / 2 }
+                                        self.text.opacity = 255;
+					self.text.scale = {1,1}
+                                        layers.hud:add( self.text )
+                                    end,
+                                    
+                                render = function( self , seconds )
+                                        local o = self.text.opacity - self.speed * seconds
+                                        local scale = self.text.scale
+                                        scale = { scale[ 1 ] + ( 2 * seconds ) , scale[ 2 ] + ( 2 * seconds ) }
+                                        if o <= 0 then
+                                            remove_from_render_list( self )
+                                            self.text:unparent()
+                                        else
+                                            self.text.opacity = o
+                                            self.text.scale = scale
+                                        end
+                                    end,
+                            }
 lvlcomplete =      {
                                 time  = 0,
                                 speed = 40,
@@ -324,9 +349,9 @@ levels =
                 
                 {t =   36, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
                 {t =   41, item = powerups.life,             params = {1400}},
-                {t =   41, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
-                {t =   46, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-                {t =   51, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
+                --{t =   41, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
+                --{t =   46, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
+                {t =   46, item = formations.row_from_side,  params = {5,150,  screen.w+100,1000,  screen.w-50,300,  screen.w-200}},
                 {t =   52, item = formations.cluster,        params = {  125 }},
                 {t =   52, item = formations.cluster,        params = { 1795 }},
                 
@@ -340,13 +365,13 @@ levels =
                 
                 {t =   82, item = enemies.zeppelin,          params = {850}},
                 {t =   91, item = formations.zig_zag,         params = {  500, 300, -30 }},
-                {t =   91, item = formations.zig_zag,         params = { 1420, 300,  30 }},
-                {t =   94, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                --{t =   91, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                --{t =   94, item = formations.zig_zag,         params = {  500, 300, -30 }},
                 {t =   94, item = formations.zig_zag,         params = { 1420, 300,  30 }},
                 {t =   97, item = formations.zig_zag,         params = {  500, 300, -30 }},
-                {t =   97, item = formations.zig_zag,         params = { 1420, 300,  30 }},
+                --{t =   97, item = formations.zig_zag,         params = { 1420, 300,  30 }},
                 {t =   100, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-                {t =   112, item = formations.zig_zag,         params = {  500, 300, -30 }},
+                --{t =   112, item = formations.zig_zag,         params = {  500, 300, -30 }},
                 {t =   112, item = formations.zig_zag,         params = { 1420, 300,  30 }},
                 {t =   115, item = formations.zig_zag,         params = {  500, 300, -30 }},
                 {t =   115, item = formations.zig_zag,         params = { 1420, 300,  30 }},
@@ -369,10 +394,10 @@ levels =
                 {t =   162, item = formations.one_loop,       params = {2,150,screen.w-100,screen.w-200,300,1}},
                 
                 {t =   175, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  200}},
-                {t =   178, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
+                --{t =   178, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  350}},
                 {t =   178, item = powerups.life,             params = {300}},
                 {t =   178, item = formations.one_loop,       params = {2,150,screen.w-200,screen.w-200,300,1}},
-                {t =   181, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
+                --{t =   181, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  500}},
                 {t =   184, item = formations.row_from_side,  params = {5,150,  -100,1000,  50,300,  650}},
                 
                 {t =   192, item = formations.zig_zag,         params = {  400, 400, -45 }},
@@ -776,7 +801,7 @@ levels =
                     },
                     { self:add_harbor_tile(1,  1, h_reg), times=10},
                     
-                    { self:add_harbor_tile(1,  1, h_reg), times=10,
+                    { self:add_harbor_tile(1,  1, h_reg), times=7,
                         enemies = {
                             {f = {"powerups","health"},      p = {300}},
                         }
@@ -892,7 +917,7 @@ levels =
                     
                     {},{},{},{},{},{},
                     {enemies={{f = {"powerups","life"},      p = {1800} }} },
-                    {},{},{},{},
+                    {},
                     { self:add_harbor_tile(1,  -1, h_open)},
                     --]]
                     { self:add_harbor_tile(1,  -1, h_reg), times=30},
@@ -980,7 +1005,10 @@ levels =
             my_plane.bombing_mode = true
             self.bg:append_to_queue(
                 {---[[
-                    {},{},{},{},
+                    {enemies = {
+                            {f = {"add_to_render_list"},      p = {lvl3txt}},
+                        }
+                    },{},{},{},
                     {
                         {source={"curr_lvl_imgs","trench_l"},  x=1300+  curr_lvl_imgs.trench_l.w},
                         --{source={"curr_lvl_imgs","trench_reg"},x=1300+2*curr_lvl_imgs.trench_l.w},
@@ -1200,7 +1228,7 @@ levels =
                         enemies={
                             
                             {f={"enemies","trench"},p={100+2*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+8*curr_lvl_imgs.trench_l.w}},
                             
                             
@@ -1227,9 +1255,9 @@ levels =
                         
                         enemies={
                             {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
@@ -1237,7 +1265,7 @@ levels =
                         {source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},
                         enemies={
                             {f = {"enemies","tank"}, p = {false,200,  -150}},
-                            {f = {"enemies","tank"}, p = {false,400,  -150}},
+                            --{f = {"enemies","tank"}, p = {false,400,  -150}},
                             {f = {"enemies","tank"}, p = {false,1650, -150}},
                             {f = {"enemies","jeep"}, p = {true,2000,100}},
                         }
@@ -1260,9 +1288,9 @@ levels =
                         
                         
                         enemies={
-                            {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+4*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+6*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+6*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
@@ -1295,8 +1323,8 @@ levels =
                             {f = {"enemies","tank"}, p = {false,400, -600}},
                             {f = {"enemies","tank"}, p = {false,800, -600}},
                             {f = {"enemies","tank"}, p = {false,800, -200}},
-                            {f = {"enemies","tank"}, p = {false,400, -400}},
-                            {f = {"enemies","tank"}, p = {false,800, -400}}
+                            --{f = {"enemies","tank"}, p = {false,400, -400}},
+                            --{f = {"enemies","tank"}, p = {false,800, -400}}
                         }
                     },
                     {
@@ -1318,8 +1346,8 @@ levels =
                         
                         enemies={
                             {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
@@ -1332,18 +1360,18 @@ levels =
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=10,
                         enemies = {
-                            {f = {"formations","hor_row_tanks"},      p = {-1,-300,6,150 }},
-                            {f = {"formations","hor_row_tanks"},      p = {1,-450,6,150 }},
+                            {f = {"formations","hor_row_tanks"},      p = {-1,-300,4,200 }},
+                            {f = {"formations","hor_row_tanks"},      p = {1,-450,4,200 }},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
                         enemies = {
-                            {f = {"formations","vert_row_tanks"},      p = {300,1,4,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {300,1,3,200}},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=10,
                         enemies = {
-                            {f = {"formations","vert_row_tanks"},      p = {300,1,4,150}},
+                            {f = {"formations","vert_row_tanks"},      p = {300,1,3,200}},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300+9*curr_lvl_imgs.road_ver.w},times=3,
@@ -1402,9 +1430,9 @@ levels =
                         {source={"curr_lvl_imgs","trench_r"},  x=100+10*curr_lvl_imgs.trench_l.w},
                         enemies = {
                             {f={"enemies","trench"},p={100+1*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+3*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+5*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={100+7*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={100+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
@@ -1439,11 +1467,11 @@ levels =
                         --{source={"curr_lvl_imgs","trench_reg"},x=300+10*curr_lvl_imgs.trench_l.w},
                         {source={"curr_lvl_imgs","trench_r"},  x=300+10*curr_lvl_imgs.trench_l.w},
                         enemies = {
-                            {f={"enemies","trench"},p={300+1*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={300+1*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={300+3*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={300+5*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={300+5*curr_lvl_imgs.trench_l.w}},
                             {f={"enemies","trench"},p={300+7*curr_lvl_imgs.trench_l.w}},
-                            {f={"enemies","trench"},p={300+9*curr_lvl_imgs.trench_l.w}},
+                            --{f={"enemies","trench"},p={300+9*curr_lvl_imgs.trench_l.w}},
                         }
                     },
                     {{source={"curr_lvl_imgs","road_ver"},x=300-curr_lvl_imgs.road_ver.w},times=3,
