@@ -1,0 +1,132 @@
+module bitmap;
+
+[[
+#include "common.h"
+#include "images.h"
+#include "app.h"
+#include "network.h"
+
+static Debug_ON log( "BITMAP" );
+
+class Bitmap : public RefCounted
+{
+public:
+
+    Bitmap( lua_State * L , const char * _src , bool _async )
+    :
+        src( _src ),
+        image( 0 )
+    {
+        App * app = App::get( L );
+
+        g_assert( app );
+
+        if ( ! _async )
+        {
+            image = app->load_image( _src );
+        }
+        else
+        {
+            log( "LOADING ASYNC '%s'" , _src );
+
+            RefCounted::ref( this );
+
+            if ( ! app->load_image_async( _src , callback , this , destroy_notify ) )
+            {
+                RefCounted::unref( this );
+            }
+        }
+    }
+
+    guint width() const
+    {
+        return image ? image->width() : 0;
+    }
+
+    guint height() const
+    {
+        return image ? image->height() : 0;
+    }
+
+    bool loaded() const
+    {
+        return image ? true : false;
+    }
+
+protected:
+
+    virtual ~Bitmap()
+    {
+        log( "DESTROYING BITMAP %p" , this );
+
+        if ( image )
+        {
+            delete image;
+        }
+    }
+
+private:
+
+    static void callback( Image * image , gpointer me )
+    {
+        log( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
+
+        Bitmap * self = ( Bitmap * ) me;
+
+        // Image will be null when it failed, otherwise, we take ownership of it
+
+        self->image = image;
+
+        // TODO: invoked the loaded callback
+    }
+
+    static void destroy_notify( gpointer me )
+    {
+        log( "  UNREF %p" , me );
+
+        RefCounted::unref( ( RefCounted * ) me );
+    }
+
+    String          src;
+    Image *         image;
+};
+
+]]
+
+class Bitmap [[ Bitmap * ]]
+{
+    Bitmap( string src , bool async = false )
+        [[
+            self = lb_construct( Bitmap , new Bitmap( L , src , async ) );
+        ]];
+
+    ~Bitmap()
+        [[
+            self->unref();
+        ]];
+
+    readonly int width
+        [[
+            width = self->width();
+        ]];
+
+    readonly int w
+        [[
+            w = self->width();
+        ]];
+
+    readonly int height
+        [[
+            height = self->height();
+        ]];
+
+    readonly int h
+        [[
+            h = self->height();
+        ]];
+
+    readonly bool loaded
+        [[
+            loaded = self->loaded();
+        ]];
+}
