@@ -38,8 +38,8 @@ enemies.final_boss = function(is_boss,o)
             y = -curr_lvl_imgs.final_boss.h/2
         },
         image = Clone{source=curr_lvl_imgs.final_boss},
-        shoot_time=1,
-        last_shot_time={ll=0,lr=.2,rl=.4,rr=.6},
+        shoot_time=4,
+        last_shot_time={ll=0,lr=0,rl=2,rr=2},
         prop  = {
             
             broke_ll = false,
@@ -413,6 +413,8 @@ enemies.final_boss = function(is_boss,o)
                         self.prop.img_ll[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
+				local p = powerups.health(self.prop.img_ll[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2)
+				p.image.y = self.prop.img_ll[1].y+self.group.y-self.group.anchor_point[2]
             end,
             ["prop_lr"] = function(self)
                 self.prop.broke_lr = true
@@ -424,6 +426,8 @@ enemies.final_boss = function(is_boss,o)
                         self.prop.img_lr[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
+				local p = powerups.health(self.prop.img_lr[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2)
+				p.image.y = self.prop.img_lr[1].y+self.group.y-self.group.anchor_point[2]
             end,
             ["prop_rl"] = function(self)
                 self.prop.broke_rl = true
@@ -435,6 +439,8 @@ enemies.final_boss = function(is_boss,o)
                         self.prop.img_rl[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
+				local p = powerups.health(self.prop.img_rl[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2)
+				p.image.y = self.prop.img_rl[1].y+self.group.y-self.group.anchor_point[2]
             end,
             ["prop_rr"] = function(self)
                 self.prop.broke_rr = true
@@ -446,6 +452,8 @@ enemies.final_boss = function(is_boss,o)
                         self.prop.img_rr[1].y+self.group.y-self.group.anchor_point[2]
                     )
                 )
+				local p = powerups.health(self.prop.img_rr[1].x+self.group.x-self.group.anchor_point[1]+self.prop_w/2)
+				p.image.y = self.prop.img_rr[1].y+self.group.y-self.group.anchor_point[2]
             end,
         },
         props_remaining = 4,

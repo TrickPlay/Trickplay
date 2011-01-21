@@ -725,6 +725,12 @@ txt =
         text = "+1 Life",
         color = "FFFFFF"
     },
+    level3 = Text
+    {
+        font  = my_font,
+        text = "LEVEL 3",
+        color = "FFFFFF"
+    },
     level2 = Text
     {
         font  = my_font,
