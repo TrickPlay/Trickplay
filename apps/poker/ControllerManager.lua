@@ -64,9 +64,24 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:set_ui_background("splash")
         end
 
+        function controller:add_image(image_name, x, y, width, height)
+            local x_ratio = controller.ui_size[1]/540
+            local y_ratio = controller.ui_size[2]/(960-150)
+
+            print("x_ratio", tostring(x_ratio))
+            print("y_ratio", tostring(y_ratio))
+            print("x*x_ratio", tostring(x*x_ratio))
+            print("y*y_ratio", tostring(y*y_ratio))
+            print("width*x_ratio", tostring(width*x_ratio))
+            print("height*y_ratio", tostring(height*y_ratio))
+
+            return
+                controller:set_ui_image(image_name, x*x_ratio, y*y_ratio,
+                width*x_ratio, height*y_ratio)
+        end
+
         function controller:on_key_down(key)
             print("controller keypress:", key)
-            screen:on_key_down(key)
 
             return true
         end
@@ -102,7 +117,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             print("choosing dog")
 
             controller:set_ui_background("bkg")
-            if not controller:set_ui_image("dog_1", 0, 0, 256, 256) then
+            if not controller:add_image("dog_1", 0, 0, 256, 256) then
                 print("error setting dog image")
                 return
             end
