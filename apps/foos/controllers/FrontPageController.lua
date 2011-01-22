@@ -46,7 +46,7 @@ FrontPageController = Class(Controller, function(self, view, ...)
 					model.fp_slots[model.fp_index[1]][model.fp_index[2]].extra.index)
                 self:get_model():notify()
             end
-			mediaplayer:play_sound("audio/Fo'os Panel to Slideshow.mp3")
+			play_sound_wrapper("audio/Fo'os Panel to Slideshow.mp3")
             reset_keys()
         end
     }

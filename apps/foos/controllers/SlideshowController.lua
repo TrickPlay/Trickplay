@@ -51,7 +51,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
             if style_index ~= 1 and view.set_ui[ view.styles[1] ]() then
     	        view:pick(1,style_index)
 	            style_index = 1
-				mediaplayer:play_sound("audio/Fo'os Flip Slideshow Sound.mp3")
+				play_sound_wrapper("audio/Fo'os Flip Slideshow Sound.mp3")
 			else reset_keys()
             end
         end,
@@ -59,7 +59,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
             if style_index ~= 2 and view.set_ui[ view.styles[2] ]() then
     	        view:pick(2,style_index)
 	            style_index = 2
-				mediaplayer:play_sound("audio/Fo'os Flip Slideshow Sound.mp3")
+				play_sound_wrapper("audio/Fo'os Flip Slideshow Sound.mp3")
 			else reset_keys()
 			end
         end,
@@ -88,7 +88,7 @@ SlideshowController = Class(Controller, function(self, view, ...)
                 view.on_screen_list[1]:complete_animation()
             end
             collectgarbage()
-
+			
             for i = 1,#view.on_screen_list do
                 view.on_screen_list[i]:unparent()
             end
@@ -110,13 +110,12 @@ SlideshowController = Class(Controller, function(self, view, ...)
         	    menu_is_visible = false
 	            view:nav_out_focus(style_index)
             end
-
+			
             self:get_model():set_active_component(Components.FRONT_PAGE)
             self:get_model():notify()
-
-reset_keys()
-
-	end,
+			reset_keys()
+			
+		end,
 		[keys.p] = function(self)
             view:toggle_timer()
 			reset_keys()			
