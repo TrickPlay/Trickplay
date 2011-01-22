@@ -286,20 +286,6 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
     function self:add_controller(ctrl)
         ctrl:choose_dog()
-        --ctrl:set_ui_image("splash", 100, 100, 19, 85)
-    --[[
-        local counter = 0
-        local pos = self:getPosition()
-        while model.positions[pos] and counter < 6 or type(pos) ~= "number" do
-            counter = counter + 1
-            self:new_position()
-            pos = self:getPosition()
-        end
-        setCharacterSeat(ctrl)
-        if(self.playerCounter >= 6) then
-            start_a_game()
-        end
-    --]]
     end
 
 end)
