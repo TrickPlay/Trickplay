@@ -1,4 +1,7 @@
 print = function() end
+play_sound_wrapper = function(sound)
+   mediaplayer:play_sound(sound)
+end
 Directions = {
    RIGHT = { 1, 0},
    LEFT  = {-1, 0},

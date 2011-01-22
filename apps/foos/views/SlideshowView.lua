@@ -446,7 +446,6 @@ local outstanding_reqs = 0
             --view.logo.opacity   = 255
 
             for i = #view.on_screen_list,1,-1 do
-print("why1")
                 local pic = view.on_screen_list[i]:find_child("slide")
                 if pic ~= nil then
 					pic.opacity      =  255
@@ -471,9 +470,7 @@ print("why1")
                  --   error("shit")
                 end
             end
-print("why0")
             for i = 1,#view.off_screen_list do
-print("why2")
                 local pic = view.off_screen_list[i]:find_child("slide")
                 if pic ~= nil then
                     pic.opacity      =  255
@@ -716,7 +713,7 @@ end
                 z        = 0,
                 on_completed = function()
 					view.license_box:raise_to_top()
-					mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
+					play_sound_wrapper("audio/Fo'os Slideshow.mp3")
                     reset_keys()            
                 end
             }
@@ -1092,7 +1089,7 @@ mosaic_timeline:start()
                     reset_keys()            
 
 						view.license_box:raise_to_top()
-					mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
+					play_sound_wrapper("audio/Fo'os Slideshow.mp3")
                  end
             }
         end,
@@ -1192,7 +1189,7 @@ mosaic_timeline:start()
     	                    child.scale    = { 2 , 2 }
 	                        child.z        = 500
 						end
-						mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
+						play_sound_wrapper("audio/Fo'os Slideshow.mp3")
                     end
 					view.license_box:raise_to_top()
 					layered_timeline = nil
@@ -1854,7 +1851,7 @@ print("toggle on")
                 
 					back_anim_prep[view.styles[style_i]](pic)
                    dolater(backward_animation[ view.styles[style_i] ],pic)
-				   --mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
+				   --play_sound_wrapper("audio/Fo'os Slideshow.mp3")
                 else
                --     print("on screen is 0")
 					reset_keys()
@@ -1898,7 +1895,7 @@ print("toggle on")
                    pic.opacity = 255
 					forward_anim_prep[view.styles[style_i]](pic)
                    dolater(forward_animation[ view.styles[style_i] ],pic)
-					--mediaplayer:play_sound("audio/Fo'os Slideshow.mp3")
+					--play_sound_wrapper("audio/Fo'os Slideshow.mp3")
                 else
              --       print("off screen is 0")
 					reset_keys()
@@ -1907,6 +1904,7 @@ print("toggle on")
             --    print("diff is 0?\tphoto_i:",photo_i,"prev_i",view.prev_i)
                 reset_keys()
             end
+			collectgarbage("collect")
             view.prev_i = photo_i
       --      print("\n\nresultant state is\t\tquery index:",
        --           model.fp_1D_index,"photo index:",photo_i,"on screen:",
