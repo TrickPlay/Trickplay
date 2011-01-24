@@ -1,6 +1,6 @@
 {
     "id" : "com.trickplay.physics-showcase",
-    "release" : 1,
+    "release" : "2",
     "version" : "1.0",
     "name"    : "Physics Showcase",
     "author"  : "Pablo Pissanetzky",
