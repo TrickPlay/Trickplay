@@ -15,11 +15,14 @@ public:
     Bitmap( lua_State * L , const char * _src , bool _async )
     :
         src( _src ),
-        image( 0 )
+        image( 0 ),
+        lsp( 0 )
     {
         App * app = App::get( L );
 
         g_assert( app );
+
+        lsp = app->ref_lua_state_proxy();
 
         if ( ! _async )
         {
@@ -63,6 +66,8 @@ protected:
         {
             delete image;
         }
+
+        lsp->unref();
     }
 
 private:
@@ -77,7 +82,11 @@ private:
 
         self->image = image;
 
-        // TODO: invoked the loaded callback
+        if ( lua_State * L = self->lsp->get_lua_state() )
+        {
+            lua_pushboolean( L , image ? false : true );
+            UserData::invoke_callback( self , "on_loaded" , 1 , 0 , L );
+        }
     }
 
     static void destroy_notify( gpointer me )
@@ -89,6 +98,7 @@ private:
 
     String          src;
     Image *         image;
+    LuaStateProxy * lsp;
 };
 
 ]]
@@ -129,4 +139,6 @@ class Bitmap [[ Bitmap * ]]
         [[
             loaded = self->loaded();
         ]];
+
+    callback on_loaded( Bitmap bitmap , bool failed );
 }
