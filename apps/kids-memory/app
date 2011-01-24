@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.kids",
-    release     = "0",
+    release     = "1",
     version     = ".1",
     name        = "Kids Memory",
     author      = "Alex Indaco",
