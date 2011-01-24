@@ -1,8 +1,8 @@
 app=
 {
     id          = "com.trickplay.foos",
-    release     = "4",
-    version     = "0.6",
+    release     = "5",
+    version     = "0.7",
     name        = "Fo'Os",
     author      = "Alex Indaco",
     copyright   = "© Trickplay Inc."
