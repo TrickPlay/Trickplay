@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.kids",
+    release     = "0",
+    version     = ".1",
+    name        = "Kids Memory",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}
