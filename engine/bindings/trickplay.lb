@@ -1,4 +1,6 @@
 [[
+#include <cstdlib>
+
 #include "util.h"
 #include "versions.h"
 #include "app.h"
@@ -146,6 +148,38 @@ global trickplay [[void*]]
             lua_pushstring( L , "uuid" );
             lua_pushstring( L , ctx->get_db()->get_string( TP_DB_UUID , "" ).c_str() );
             lua_rawset( L , -3 );
+        ]];
+
+    bool check_version( string version )
+        [[
+            int major = 0;
+            int minor = 0;
+            int micro = 0;
+
+            gchar * * parts = g_strsplit( version , "." , 3 );
+
+            guint count = g_strv_length( parts );
+
+            if ( count >= 1 )
+            {
+                major = atoi( parts[ 0 ] );
+
+                if ( count >= 2 )
+                {
+                    minor = atoi( parts[ 1 ] );
+
+                    if ( count >= 3 )
+                    {
+                        micro = atoi( parts[ 2 ] );
+                    }
+                }
+            }
+
+            g_strfreev( parts );
+
+            result = ( TP_MAJOR_VERSION > (major) ||
+             (TP_MAJOR_VERSION == (major) && TP_MINOR_VERSION > (minor)) ||
+             (TP_MAJOR_VERSION == (major) && TP_MINOR_VERSION == (minor) && TP_PATCH_VERSION >= (micro)));
         ]];
 
 }
