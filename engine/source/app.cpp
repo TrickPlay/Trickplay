@@ -63,6 +63,7 @@ extern int luaopen_physics_module( lua_State * L );
 extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
+extern int luaopen_canvas( lua_State * L );
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -780,6 +781,7 @@ int App::run( const StringSet & allowed_names )
     luaopen_editor( L );
     luaopen_trickplay( L );
     luaopen_bitmap( L );
+    luaopen_canvas( L );
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
