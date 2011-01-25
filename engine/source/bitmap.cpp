@@ -115,3 +115,10 @@ Image * Bitmap::get_image( lua_State * L , int index )
 
     return b ? b->image : 0;
 }
+
+//.............................................................................
+
+Image * Bitmap::get_image()
+{
+    return image;
+}
