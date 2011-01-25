@@ -150,6 +150,7 @@ class Canvas2 [[ cairo_t * ]]
                 case CAIRO_FILTER_NEAREST: filter = "NEAREST"; break;
                 case CAIRO_FILTER_BILINEAR: filter = "BILINEAR"; break;
                 case CAIRO_FILTER_GAUSSIAN: filter = "GAUSSIAN"; break;
+                default: filter = ""; break;
             }
         ]]
         [[
