@@ -1,36 +1,45 @@
 Player = Class(function(player, args, ...)
-   player.isHuman = false
-   player.number = 0
-   player.bet = model.bet.DEFAULT_BET
-   player.money = args.endowment
-   player.position = false
-   player.table_position = nil
-   player.chipPosition = nil
-   player.difficulty = math.random(Difficulty.HARD,Difficulty.EASY)
-   for k,v in pairs(args) do
-      player[k] = v
-   end
-   
-   player.glow = DOG_GLOW[ player.table_position ]
-   player.dog = DOGS[ player.table_position ]
-   --player.dog.position = player.position
-   player.dog.opacity = 255
-   
-   function player:dim()
+    player.isHuman = false
+    player.number = 0
+    player.bet = model.bet.DEFAULT_BET
+    player.money = args.endowment
+    player.position = false
+    player.table_position = nil
+    player.chipPosition = nil
+    player.difficulty = math.random(Difficulty.HARD,Difficulty.EASY)
+    for k,v in pairs(args) do
+        player[k] = v
+    end
+
+    player.glow = DOG_GLOW[ player.table_position ]
+    player.dog = DOGS[ player.table_position ]
+    --player.dog.position = player.position
+    player.dog.opacity = 255
+
+    --[[
+        If User disconnects controller the player becomes an AI.
+    --]]
+    local temp_func = player.controller.on_disconnected
+    function player.controller:on_disconnected()
+        temp_func(player.controller)
+        player.isHuman = false
+    end
+
+    function player:dim()
         player.dog:animate{opacity = 50, duration = 300}
         player.glow:animate{opacity = 0, duration = 300}
-   end
-   
-   function player:hide()
+    end
+
+    function player:hide()
         player.dog:animate{opacity = 0, duration = 300}
         player.glow:animate{opacity = 0, duration = 300}
-   end
-   
-   function player:show()
+    end
+
+    function player:show()
         player.dog:animate{opacity = 255, duration = 300}
-   end
-   
-   function player:createBetChips()
+    end
+
+    function player:createBetChips()
       
       player.betChips = chipCollection()
       player.betChips.group.position = {player.chipPosition[1], player.chipPosition[2]}
@@ -38,9 +47,9 @@ Player = Class(function(player, args, ...)
       player.betChips:arrange(55, 5)
       screen:add(player.betChips.group)
       
-   end
+    end
 
-   function player:get_position(state)
+    function player:get_position(state)
       
       local num_of_players = 0
       for _,__ in ipairs(state:get_players()) do
@@ -78,9 +87,9 @@ Player = Class(function(player, args, ...)
          return position
       end
       error("error calculation position")
-   end
+    end
 
-   local function do_fold(call_bet, pot, orig_bet)
+    local function do_fold(call_bet, pot, orig_bet)
       assert(call_bet >=0)
       if(call_bet == 0) then
          print("\nCHECK\n")
@@ -98,11 +107,11 @@ Player = Class(function(player, args, ...)
       end
       print("\nFOLD\n")
       return true, 0
-   end
-   
-   local number_of_bets = 0
-   -- calculate and returns a bet
-   local function calculate_bet(state, stddev, ai_move, amount_to_raise, best_hand)
+    end
+
+    local number_of_bets = 0
+    -- calculate and returns a bet
+    local function calculate_bet(state, stddev, ai_move, amount_to_raise, best_hand)
 
          print("player.bet = "..player.bet)
       local pot = state:get_pot()
@@ -162,24 +171,24 @@ Player = Class(function(player, args, ...)
          error("someth'n wrong with the moves")
       end
 
-   end
+    end
 
-   ---
-   -- @param hole an array of two hole cards
-   -- @param community_cards
-   -- @param call_bet the bet you need to make in order to call
-   -- @param position  early, middle, late, whatever
-   -- @param min_raise the minimum raise, so values of bet between
-   -- call_bet+1 and call_bet+min_raise-1 are invalid
-   -- @param current_bet the size of the bet currently in front of the
-   -- player for the betting round
-   -- @param pot current size of pot
-   -- @param round
-   -- @returns fold boolean  true if player should fold
-   -- @returns bet number  quantity of bet, if fold then bet should be 0
-   local last_move = Moves.FOLD
-   local last_round = 0
-   function player:get_move(state)
+    ---
+    -- @param hole an array of two hole cards
+    -- @param community_cards
+    -- @param call_bet the bet you need to make in order to call
+    -- @param position  early, middle, late, whatever
+    -- @param min_raise the minimum raise, so values of bet between
+    -- call_bet+1 and call_bet+min_raise-1 are invalid
+    -- @param current_bet the size of the bet currently in front of the
+    -- player for the betting round
+    -- @param pot current size of pot
+    -- @param round
+    -- @returns fold boolean  true if player should fold
+    -- @returns bet number  quantity of bet, if fold then bet should be 0
+    local last_move = Moves.FOLD
+    local last_round = 0
+    function player:get_move(state)
       -- stuff that the player usually plays off of
       local hole = state:get_hole_cards()[self]
       local position = self:get_position(state)
@@ -419,10 +428,10 @@ Player = Class(function(player, args, ...)
          return calculate_bet(state, stddev, ai_move, amount_to_raise, best_hand)
       end
 
-   end
+    end
 
-   player.status = PlayerStatusView(model, nil, player)
-   player.status:display()
-   assert(player.status)
-   
+    player.status = PlayerStatusView(model, nil, player)
+    player.status:display()
+    assert(player.status)
+
 end)
