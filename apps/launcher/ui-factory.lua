@@ -1,6 +1,23 @@
 
 local factory = {}
 
+-------------------------------------------------------------------------------
+
+local function make_canvas( ... )
+    return Canvas( ... )
+end
+
+local function make_canvas_actor( c )
+    if c.Image then
+        return c:Image()
+    else
+        return c
+    end
+end
+
+-------------------------------------------------------------------------------
+
+
 function factory.make_dropdown( size , color )
 
     local BORDER_WIDTH=6
@@ -53,10 +70,10 @@ function factory.make_dropdown( size , color )
     
     end
 
-    local c = Canvas{ size = size }
-
+    local c = make_canvas{ size = size }
+    
     c:begin_painting()
-
+        
     draw_path( c )
 
     -- Fill the whole thing with the color passed in and keep the path
@@ -100,8 +117,8 @@ function factory.make_dropdown( size , color )
     c:stroke( true )
 
     c:finish_painting()
-    
-    return c
+
+    return make_canvas_actor( c )
     
 end
 
@@ -121,7 +138,7 @@ function factory.make_text_menu_item( assets , caption )
     local BORDER_RADIUS = 12
     
     local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        local ring = make_canvas{ size = { WIDTH , HEIGHT } }
         ring:begin_painting()
         ring:set_source_color( BORDER_COLOR )
         ring:round_rectangle(
@@ -132,7 +149,7 @@ function factory.make_text_menu_item( assets , caption )
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
-        return ring
+        return make_canvas_actor( ring )
     end
     
     local text = Text{ text = caption }:set( STYLE )
@@ -186,7 +203,7 @@ function factory.make_text_side_selector( assets , caption , chosen )
     local ANIMATION_DURATION = 150
     
     local function make_arrow()
-        local arrow = Canvas{ size = { ARROW_WIDTH , ARROW_HEIGHT } }
+        local arrow = make_canvas{ size = { ARROW_WIDTH , ARROW_HEIGHT } }
         arrow:begin_painting()
         arrow:set_source_color( ARROW_COLOR )
         arrow:move_to( 0 , ARROW_HEIGHT / 2 )
@@ -194,7 +211,7 @@ function factory.make_text_side_selector( assets , caption , chosen )
         arrow:line_to( ARROW_WIDTH , ARROW_HEIGHT )
         arrow:fill()
         arrow:finish_painting()
-        return arrow
+        return make_canvas_actor( arrow )
     end
     
     local l_arrow = assets( "menu-item-arrow" , make_arrow )
@@ -803,7 +820,7 @@ function factory.make_star( size , percent_filled , empty_color , full_color )
         canvas:restore()
     end
 
-    local c = Canvas{ size = { size , size } }
+    local c = make_canvas{ size = { size , size } }
     
     local r = size / 2
     
@@ -828,6 +845,8 @@ function factory.make_star( size , percent_filled , empty_color , full_color )
     end
     
     c:finish_painting()
+    
+    c = make_canvas_actor( c )
     
     function c.extra.on_focus_in()
     end
