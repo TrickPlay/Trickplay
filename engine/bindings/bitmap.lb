@@ -41,5 +41,24 @@ class Bitmap [[ Bitmap * ]]
             loaded = self->loaded();
         ]];
 
+    Image Image( table props = 0 )
+        [[
+            lua_getglobal( L , "Image" );
+
+            if ( props )
+            {
+              lua_pushvalue( L , props );
+            }
+
+            lua_call( L , props ? 1 : 0 , 1 );
+
+            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+            if ( Image * image = self->get_image() )
+            {
+                Images::load_texture( t , image );
+            }
+        ]];
+
     callback on_loaded( Bitmap bitmap , bool failed );
 }
