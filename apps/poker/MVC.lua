@@ -248,4 +248,7 @@ Controller = Class(Observer, function(controller, view, controller_id)
         error("self:out_focus() not defined for controller")
     end
 
+    function controller:handle_click()
+    end
+
 end)

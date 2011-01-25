@@ -55,18 +55,19 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             -- blank background
             controller:declare_resource("bkg", "assets/phone/bkgd-blank.jpg")
             -- headers which help instruct the pyylayer
-            controller:declare_resource("hdr_blank", "assets/phone/title-blank.jpg")
             controller:declare_resource("hdr_choose_dog",
-                "assets/phone/title-choose-dawg.jpg")
+                "assets/phone/text-choose-your-dog.png")
             controller:declare_resource("hdr_name_dog",
-                "assets/phone/title-name-dawg.jpg")
+                "assets/phone/text-name-your-dog.png")
 
             controller:set_ui_background("splash")
         end
 
+        local x_ratio = controller.ui_size[1]/640
+        local y_ratio = controller.ui_size[2]/870
         function controller:add_image(image_name, x, y, width, height)
-            local x_ratio = controller.ui_size[1]/540
-            local y_ratio = controller.ui_size[2]/(960-150)
+            print("controller.ui_size")
+            dumptable(controller.ui_size)
 
             print("x_ratio", tostring(x_ratio))
             print("y_ratio", tostring(y_ratio))
@@ -80,10 +81,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 width*x_ratio, height*y_ratio)
         end
 
+        controller.x_ratio = x_ratio
+        controller.y_ratio = y_ratio
+
         function controller:on_key_down(key)
             print("controller keypress:", key)
 
-            return true
+            return false
         end
 
 
@@ -99,9 +103,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             function controller:on_click(x, y)
                 print("answered", controller.name,x,y)
 
-                -- disable additional clicks
-                controller.on_click = nil
-
+                model:get_active_controller():handle_click(controller, x, y)
             end
             controller:start_clicks()
         end
@@ -117,9 +119,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             print("choosing dog")
 
             controller:set_ui_background("bkg")
-            if not controller:add_image("dog_1", 0, 0, 256, 256) then
-                print("error setting dog image")
-                return
+            controller:add_image("hdr_choose_dog", 95, 30, 450, 50)
+            for i = 1,6 do
+                if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
+                math.floor((i-1)/2)*256+100, 256, 256) then
+                    -- TODO: figure out some good error handling
+                    print("error setting dog image")
+                end
             end
         end
         

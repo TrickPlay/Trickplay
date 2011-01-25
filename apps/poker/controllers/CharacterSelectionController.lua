@@ -139,13 +139,13 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         end
     end
 
-   local function setCharacterSeat(ctrl)
+   local function setCharacterSeat(ctrl, dog_number)
 
       --instantiate the player
-      local pos = self:getPosition()
+      local pos = dog_number or self:getPosition()
       if(model.positions[pos]) then return end
       local isHuman = false
-      if(self.playerCounter == 0) then
+      if(self.playerCounter == 0 or ctrl) then
          isHuman = true
          mediaplayer:play_sound(FIRST_PLAYER_MP3)
       end
@@ -155,8 +155,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
          isHuman = isHuman,
          number = self.playerCounter,
          table_position = pos,
-         position = model.default_player_locations[ self:getPosition() ],
-         chipPosition = model.default_bet_locations[ self:getPosition() ],
+         position = model.default_player_locations[pos],
+         chipPosition = model.default_bet_locations[pos],
          controller = ctrl,
          endowment = INITIAL_ENDOWMENT -- redundant code, look at line 64
                                        -- and GameState:initialize()
@@ -286,6 +286,31 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
     function self:add_controller(ctrl)
         ctrl:choose_dog()
+    end
+
+    function self:handle_click(ctrl, x, y)
+        assert(ctrl)
+        assert(x)
+        assert(y)
+
+        local pos
+        local col = 1
+        local row = 1
+        if x > ctrl.ui_size[1]/2 then
+            col = 2
+        end
+        if y > (100+256)*ctrl.y_ratio then
+            row = 2
+            if y > (100+256*2)*ctrl.y_ratio then
+                row = 3
+            end
+        end
+        pos = row*col
+        setCharacterSeat(ctrl, pos)
+        if(self.playerCounter >= 6) then
+            ctrlman:stop_accepting_ctrls()
+            start_a_game()
+        end
     end
 
 end)
