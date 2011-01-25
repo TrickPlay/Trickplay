@@ -16,6 +16,8 @@ public:
 
     bool loaded() const;
 
+    Image * get_image();
+
     static Image * get_image( lua_State * L , int index );
 
 protected:
