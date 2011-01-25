@@ -34,7 +34,6 @@ extern int luaopen_clutter_rectangle( lua_State * L );
 extern int luaopen_clutter_clone( lua_State * L );
 extern int luaopen_clutter_group( lua_State * L );
 extern int luaopen_clutter_image( lua_State * L );
-extern int luaopen_clutter_canvas( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
@@ -756,7 +755,6 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_clone( L );
     luaopen_clutter_group( L );
     luaopen_clutter_image( L );
-    luaopen_clutter_canvas( L );
     luaopen_clutter_timeline( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
