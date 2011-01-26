@@ -104,17 +104,14 @@ end
 
 app.on_closing = function()
     
-    settings = {}
-    
     --only save if you are in the middle of a game
     if game_state.in_game then
-        
+        print("Saving the game,",game_state.tot,"tiles remaining")
         -- build a temp table to save the tiles
         local board = {}
         for i = 1, #game_state.board do
             board[i] = {}
             for j = 1, #game_state.board[i] do
-            
                 -- 0 indicates that  spot is empty
                 if game_state.board[i][j]==0 then
                     board[i][j] = 0
@@ -127,5 +124,8 @@ app.on_closing = function()
         -- assigin it to the save file
         settings.board = board
         settings.difficulty = game_state.difficulty
+    else
+        --need to clear out the old game
+        settings.board = nil
     end
 end

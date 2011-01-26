@@ -1,5 +1,7 @@
 -- Objects.lua - this file defines the Tile class
 
+
+
 --the source for cloning the backs of the tiles
 local backing = Rectangle{w=150,h=150,color="0000AF"}
 screen:add(backing)
@@ -7,28 +9,38 @@ backing:hide()
 
 Tile = Class(function(obj, face_source, parent, ...)
     
+    --Clone of the backing
     obj.backing = Clone{
         source = backing,
         anchor_point={backing.w/2,backing.h/2},
         z=1
     }
+    --Container group for all of the Clones of the face of the tile
     obj.face    = Group{
         y_rotation={180,0,0},
         anchor_point={backing.w/2,backing.h/2}
     }
+    --save the source integer
     obj.index   = face_source
-    obj.tbl     = {}
+    
     
     --clone each part of the face
+    obj.tbl     = {}
     for i = 1, #tile_faces[face_source].tbl do
         obj.tbl[i] = Clone{ source = tile_faces[face_source].tbl[i] }
         obj.face:add(obj.tbl[i])
     end
     
+    
+    --Umbrella group for the instance
     obj.group = Group{name="Tile"}
     obj.group:add(obj.backing,obj.face)
+    
+    --flag for whether the tile is flipped or not
     local flipped = false
-    obj.flip_over = function(first_choice)
+    
+    --Animation for flipping the tile over
+    local flip_over = function(first_choice)
         local tl = Timeline{duration=500}
         function tl:on_new_frame()
             obj.group.y_rotation={180*tl.progress,0,0}
@@ -41,12 +53,12 @@ Tile = Class(function(obj, face_source, parent, ...)
             obj.backing.z = 0
             obj.face.z    = 1
             
+            --animation for the face
             tl = Timeline{duration=1000}
             function tl:on_new_frame()
                 tile_faces[face_source].on_new_frame(obj.tbl,tl.progress)
             end
             function tl:on_completed()
-                print(1)
                 tile_faces[face_source].on_completed(obj.tbl)
                 if first_choice ~= nil then
                     if obj.index ~= first_choice.index then
@@ -64,7 +76,10 @@ Tile = Class(function(obj, face_source, parent, ...)
         tile_faces[face_source].reset(obj.tbl)
         tl:start()
     end
-    obj.flip_back = function()
+    
+    
+    --animation for flipping the tile back down
+    local flip_back = function()
         local tl = Timeline{duration=500}
         function tl:on_new_frame()
             obj.group.y_rotation={180*(1-tl.progress),0,0}
@@ -80,6 +95,8 @@ Tile = Class(function(obj, face_source, parent, ...)
         tl:start()
     end
     
+    
+    --
     obj.remove = function()
         game_state.board[parent[1]][parent[2]] = 0
         
@@ -119,13 +136,12 @@ Tile = Class(function(obj, face_source, parent, ...)
     end
     
     obj.flip = function(first_choice)
-        if flipped then
-            flipped = false
-            obj.flip_back(first_choice)
-        else
-            flipped = true
-            obj.flip_over(first_choice)
-        end
+        
+        if flipped then  flip_back(first_choice)
+        else             flip_over()  end
+        
+        flipped = not flipped
         return face_source
+        
     end
 end)
