@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.editor",
-    release     = "1",
+    release     = "2",
     version     = "1.0",
     name        = "TrickPlay",
     copyright   = "© Trickplay Inc."
