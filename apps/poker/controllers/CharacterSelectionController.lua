@@ -139,48 +139,59 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         end
     end
 
-   local function setCharacterSeat(ctrl, dog_number)
+    local function setCharacterSeat(ctrl, dog_number)
 
-      --instantiate the player
-      local pos = dog_number or self:getPosition()
-      if(model.positions[pos]) then return end
-      local isHuman = false
-      if(self.playerCounter == 0 or ctrl) then
-         isHuman = true
-         mediaplayer:play_sound(FIRST_PLAYER_MP3)
-      end
-      self.playerCounter = self.playerCounter + 1
-      
-      local args = {
-         isHuman = isHuman,
-         number = self.playerCounter,
-         table_position = pos,
-         position = model.default_player_locations[pos],
-         chipPosition = model.default_bet_locations[pos],
-         controller = ctrl,
-         endowment = INITIAL_ENDOWMENT -- redundant code, look at line 64
-                                       -- and GameState:initialize()
-      }
+        --instantiate the player
+        local pos = dog_number or self:getPosition()
+        print("pos", pos)
+        if(model.positions[pos]) then return end
 
-      -- insertion point
-      local i = 1
-      while i <= #model.players do
-         if pos < model.players[i].table_position then
-            break
-         end
-         i = i+1
-      end
-      table.insert(model.players, i, Player(args))
-      model.positions[pos] = true
-      model.currentPlayer = self.playerCounter
+        local isHuman = false
+        if(self.playerCounter == 0 or ctrl) then
+            isHuman = true
+            mediaplayer:play_sound(FIRST_PLAYER_MP3)
+        end
+        print("isHuman", isHuman)
+        self.playerCounter = self.playerCounter + 1
 
-      if(self.playerCounter >= 2) then
-         view.items[2][3].opacity = 255
-      end
-      model:notify()
-      self:new_position()
-      view:update()
-   end
+        local args = {
+            isHuman = isHuman,
+            number = self.playerCounter,
+            table_position = pos,
+            position = model.default_player_locations[pos],
+            chipPosition = model.default_bet_locations[pos],
+            controller = ctrl,
+            endowment = INITIAL_ENDOWMENT -- redundant code, look at line 64
+                                          -- and GameState:initialize()
+        }
+
+        --[[
+            Insert dogs in order into the table model.players. Hence, if dogs
+            2, 5, and 1 are selected to play in the game, model.players[1] =
+            Player class instantiation that corresponds to dog 1, model.players[2]
+            = dog 2, and model.players[3] = dog 5. This makes it easy to discover
+            how many dogs are playing with #model.players and deal cards in the
+            correct order (i.e. dog 1, then dog 2, then dog 5).
+        --]]
+        local i = 1
+        while i <= #model.players do
+            if pos < model.players[i].table_position then
+                break
+            end
+            i = i+1
+        end
+        table.insert(model.players, i, Player(args))
+        model.positions[pos] = true
+        model.currentPlayer = self.playerCounter
+
+        if(self.playerCounter >= 2) then
+            view.items[2][3].opacity = 255
+        end
+        model:notify()
+        self:new_position()
+        view:update()
+
+    end
 
     local CharacterSelectionKeyTable = {
         [keys.Up] = function(self) self:move_selector(Directions.UP) end,
@@ -293,6 +304,7 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         assert(x)
         assert(y)
 
+        -- based off of click position grab the correct dog position (pos)
         local pos
         local col = 1
         local row = 1
@@ -306,6 +318,22 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             end
         end
         pos = row*col
+        if row == 2 and col == 1 then pos = 3 end
+        if row == 3 and col == 1 then pos = 5 end
+
+        -- move the selector to the dog
+        if pos == 1 then
+            selected = 2
+            subselection = 1
+        elseif pos > 1 and pos < 6 then
+            selected = 1
+            subselection = pos - 1
+        else
+            selected = 2
+            subselection = 5
+        end
+
+        -- select that dog
         setCharacterSeat(ctrl, pos)
         if(self.playerCounter >= 6) then
             ctrlman:stop_accepting_ctrls()
