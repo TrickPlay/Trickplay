@@ -2434,10 +2434,10 @@ local function insert_widget(widget_name)
 	     bp = widget.buttonPicker()  
 	     g:add(bp)
              create_on_button_down_f(bp)
-        elseif (widget_name == "DropDownMenu") then 
-	     t = TextField()  
-	     g:add(t)
-             create_on_button_down_f(t)
+        elseif (widget_name == "LoadingDots") then 
+	     ld = widget.loadingdots()
+	     g:add(ld)
+             create_on_button_down_f(ld)
 	end 
 	screen:add(g)
 end 
@@ -2470,7 +2470,7 @@ function editor.widgets()
         widgets_list.position = {cur_w,cur_h}
         msgw:add(widgets_list)
 
-	local widgets = {"Button", "TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker"}
+	local widgets = {"TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots"}
         
         function print_widget_list() 
 	    cur_w = L_PADDING
