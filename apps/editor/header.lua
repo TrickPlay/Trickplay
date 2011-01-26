@@ -154,3 +154,10 @@ icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 185}
 attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "x_scale", "y_scale", "r", "g", "b", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "clip_use", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
 
 
+widget = dofile("widget.lua")
+--[[
+dofile("Button.lua")
+dofile("TextField.lua")
+]]
+
+

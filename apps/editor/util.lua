@@ -137,6 +137,7 @@ function create_on_button_down_f(v)
                          editor.inspector(p_obj)
                          return true
                     end 
+
 	            if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
 		     	editor.selected(p_obj)
 	            elseif (p_obj.extra.selected == true) then 
@@ -289,7 +290,22 @@ function get_group_position(child_obj)
      end
 end 
 
+
+	
+
+	
 function set_obj (f, v)
+
+      if f == nil then 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+      end 
+
       if(f.type == "Rectangle") then
            f.color = v.color
            f.border_color = v.border_color
@@ -382,7 +398,23 @@ function toboolean(s) if (s == "true") then return true else return false end en
 
 
   if(v.type ~= "Video") then
-     attr_t =
+     if (v.extra.type == "Button") then 
+	attr_t =
+      {
+             {"title", "INSPECTOR : "..string.upper(v.extra.type)},
+             {"caption", "OBJECT NAME"},
+             {"name", v.name,"name"},
+             {"line",""},
+             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
+             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
+             {"z", math.floor(v.z), "z"},
+             {"bw", math.floor(v.bw), "bw"},
+             {"bh", math.floor(v.bh), "bh"},
+             {"line",""}
+      }
+
+     else 
+	attr_t =
       {
              {"title", "INSPECTOR : "..string.upper(v.type)},
              {"caption", "OBJECT NAME"},
@@ -395,6 +427,8 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"h", math.floor(v.h), "h"},
              {"line",""}
       }
+
+     end 
   else 
       attr_t =
       {
@@ -423,12 +457,12 @@ function toboolean(s) if (s == "true") then return true else return false end en
         if color_t == nil then 
              color_t = {0,0,0}
         end
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"r", color_t[1], "r"})
         table.insert(attr_t, {"g", color_t[2], "g"})
         table.insert(attr_t, {"b", color_t[3], "b"})
-        table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"font", v.font,"font "})
-        table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"editable", v.editable,"editable"})
         table.insert(attr_t, {"line",""})
@@ -511,11 +545,13 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line","", "hide"})
 
       elseif (v.type  == "Group" or v.type == "Clone") then
+
         table.insert(attr_t, {"caption", "SCALE"})
 	local scale_t = v.scale
         if scale_t == nil then
              scale_t = {1,1} 
         end
+
         table.insert(attr_t, {"x_scale", scale_t[1], "x"})
         table.insert(attr_t, {"y_scale", scale_t[2], "y"})
 
@@ -533,7 +569,12 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line","", "hide"})
         table.insert(attr_t, {"line","", "hide"})
 
+	if (v.extra.type == "Button") then 
+             table.insert(attr_t, {"Caption","Button", "Caption"})
+	end 
+
       end
+
       if(v.type ~= "Video") then
       	table.insert(attr_t, {"line",""})
       	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
@@ -726,7 +767,8 @@ local function create_input_box()
         local input_l = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
               position = {25, 10}, text = project.."/" }
         input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
-        position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+        -- 0111 position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+        position = {input_l.w + 25, 10}, text = strings[""] , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
      	local box = factory.draw_ring()
      	local box_focus = factory.draw_focus_ring()
 	box_g.name = "input_b"
@@ -1202,7 +1244,7 @@ function inputMsgWindow_openfile(input_text)
            editor.close()
            current_fn = input_t.text
            local f = loadfile(current_fn)
-           f(g)
+           f(g) 
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)

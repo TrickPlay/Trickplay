@@ -421,6 +421,7 @@ local function build_ui( show_it )
         [ keys.v	] = function() animate_out_dropdown() editor.v_guideline() input_mode = S_SELECT end,
         [ keys.h	] = function() animate_out_dropdown() editor.h_guideline() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
+        [ keys.w	] = function() animate_out_dropdown() editor.widgets() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    ui.button_focus:show()
         				    ui.bar:show()

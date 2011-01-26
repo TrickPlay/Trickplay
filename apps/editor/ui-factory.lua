@@ -506,6 +506,7 @@ local color_map =
         [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
+        [ "widgets" ] = function() size = {500, 470} color = "472446" return size, color end,
         [ "guidew" ] = function()  color =  "5a252b" size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = "5a252b" return size, color end
