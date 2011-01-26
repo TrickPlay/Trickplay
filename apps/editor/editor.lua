@@ -471,6 +471,18 @@ function editor.close()
 	end 
 
 
+	for i=1, v_guideline, 1 do 
+	   if(screen:find_child("v_guideline"..i) ~= nil) then 
+	     screen:remove(screen:find_child("v_guideline"..i))
+	   end 
+	end
+    
+	for i=1, h_guideline, 1 do 
+	   if(screen:find_child("h_guideline"..i) ~= nil) then 
+	     screen:remove(screen:find_child("h_guideline"..i))
+	   end 
+	end
+
 	undo_list = {}
 	redo_list = {}
         item_num = 0
@@ -1454,7 +1466,8 @@ function editor.text()
 
         ui.text = Text{
         name="text"..tostring(item_num),
-	text = "", font= "DejaVu Sans 40px",
+	text = strings[""], font= "DejaVu Sans 40px",
+	-- 0111 text = "", font= "DejaVu Sans 40px",
      	color = DEFAULT_COLOR, 
 	position ={700, 500, 0}, 
 	editable = true , reactive = true, 
@@ -2349,6 +2362,7 @@ function editor.send_backward()
 
 end
 
+
 function editor.bring_forward()
 
      if(table.getn(selected_objs) == 0 )then 
@@ -2389,5 +2403,159 @@ function editor.bring_forward()
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
 end
+
+local function insert_widget(widget_name) 
+	if (widget_name == "Button") then
+	     b = widget.button()  
+	     g:add(b)
+             create_on_button_down_f(b)
+	elseif (widget_name == "TextField") then
+	     t = widget.textField()  
+	     g:add(t)
+             create_on_button_down_f(t)
+	elseif (widget_name == "DialogBox") then 
+	     w = widget.dialogBox()  
+	     g:add(w)
+             create_on_button_down_f(w)
+	elseif (widget_name == "ToastBox") then 
+	     tb = widget.toastBox()  
+	     g:add(tb)
+	     --tb.start_timer()
+             create_on_button_down_f(tb)
+	elseif (widget_name == "RadioButton") then 
+	     rb = widget.radioButton()  
+	     g:add(rb)
+             create_on_button_down_f(rb)
+        elseif (widget_name == "CheckBox") then 
+	     cb = widget.checkBox()  
+	     g:add(cb)
+             create_on_button_down_f(cb)
+        elseif (widget_name == "ButtonPicker") then 
+	     bp = widget.buttonPicker()  
+	     g:add(bp)
+             create_on_button_down_f(bp)
+        elseif (widget_name == "DropDownMenu") then 
+	     t = TextField()  
+	     g:add(t)
+             create_on_button_down_f(t)
+	end 
+	screen:add(g)
+end 
+
+function editor.widgets()
+	local WIDTH = 500
+	local L_PADDING = 50
+	local R_PADDING = 50
+        local TOP_PADDING = 60
+        local BOTTOM_PADDING = 12
+        local Y_PADDING = 10 
+	local X_PADDING = 10
+	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+	local space = WIDTH
+	local msgw_bg = factory.make_popup_bg("widgets")
+	local msgw = Group {
+	     position ={500, 100},
+	     anchor_point = {0,0},
+             children =
+             {
+              msgw_bg,
+             }
+	}
+        local widgets_list = Text {name = "w_list", text = "Widgets List"}:set(STYLE)
+	local text_g
+
+	cur_w= (WIDTH - widgets_list.w)/2
+	cur_h= TOP_PADDING/2 + Y_PADDING
+
+        widgets_list.position = {cur_w,cur_h}
+        msgw:add(widgets_list)
+
+	local widgets = {"Button", "TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker"}
+        
+        function print_widget_list() 
+	    cur_w = L_PADDING
+            cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
+
+	    text_g = Group{position = {cur_w, cur_h}}
+	    text_g.extra.org_y = cur_h
+	    text_g.reactive  = true 
+            cur_w = 0
+	    cur_h = 0 
+
+            local input_text
+            for i, v in pairs(widgets) do
+	        text = Text {name = tostring(i), text = v}:set(STYLE)
+                text.position  = {cur_w, cur_h}
+		text.reactive = true
+    	        text_g:add(text)
+
+		if(cur_w == L_PADDING) then
+		     cur_w = cur_w + 7*L_PADDING
+		else 
+	             cur_w = 0 
+	             cur_h = cur_h + text.h + Y_PADDING
+		end
+           end
+           cur_w = cur_w + L_PADDING
+           cur_h = cur_h + TOP_PADDING + widgets_list.h + Y_PADDING
+           msgw:add(text_g)
+	end
+
+	print_widget_list()
+
+	
+        for i,j in pairs (text_g.children) do 
+             function j:on_button_down(x,y,button, num_clicks)
+	      if input_text ~= nil then 
+		    input_text.color = {255, 255, 255, 255}
+	      end 
+              input_text = j
+	      j.color = {0,255,0,255}
+	      return true
+             end 
+        end 
+
+	
+	local file_list_size = 280
+        local insert_b, insert_t  = factory.make_msgw_button_item( assets , "insert")
+    	insert_b.position = {(WIDTH - 2*insert_b.w - X_PADDING)/2, file_list_size + 110}
+    	insert_b.name = "insert"
+    	insert_b.reactive = true
+
+    	local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
+    	cancel_b.position = {insert_b.x + insert_b.w + X_PADDING, file_list_size + 110}
+    	cancel_b.name = "cancel"
+    	cancel_b.reactive = true 
+	
+    	msgw:add(insert_b)
+    	msgw:add(cancel_b)
+
+    function insert_b:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+              insert_widget(input_text.text) 
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+    function insert_t:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+              insert_widget(input_text.text) 
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+
+    function cancel_b:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    function cancel_t:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    screen:add(msgw)
+--]]
+end 
+
 
 
