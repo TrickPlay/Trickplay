@@ -108,5 +108,10 @@ global devtools [[ void * ]]
         [[
             ClutterUtil::wrap_concrete_actor( L , clutter_get_actor_by_gid( gid ) );
         ]];
+
+    sleep( int ms )
+        [[
+            usleep( ms * 1000 );
+        ]];
 }
 
