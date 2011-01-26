@@ -1300,8 +1300,8 @@ function widget.buttonPicker(t)
      if not p.items then p.items = {"item1", "item2", "itme3"} end
      if not p.events then p.events = {} end   
 
-     if not p.width then p.width = 180 end
-     if not p.height then p.height = 60 end
+     if not p.width then p.width =  300 end -- 180 end
+     if not p.height then p.height = 100 end  -- 60 end
      if not p.size then p.size = {p.width, p.height} end   
 
      if not p.border_width then p.border_width  = 3 end
@@ -1319,7 +1319,8 @@ function widget.buttonPicker(t)
      local buttons = { unfocus, focus }
      local arrows    = { right_un, right_sel, left_un, left_sel }
 
-     local pos = {30, 30} -- button top position   
+     --local pos = {30, 30} -- button top position   
+     local pos = {p.width/6, p.height/2}
      local index = 1
 
      local unfocus = assets("assets/smallbutton.png")
