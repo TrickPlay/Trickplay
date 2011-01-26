@@ -19,10 +19,12 @@ Player = Class(function(player, args, ...)
     --[[
         If User disconnects controller the player becomes an AI.
     --]]
-    local temp_func = player.controller.on_disconnected
-    function player.controller:on_disconnected()
-        temp_func(player.controller)
-        player.isHuman = false
+    if player.controller then
+        local temp_func = player.controller.on_disconnected
+        function player.controller:on_disconnected()
+            temp_func(player.controller)
+            player.isHuman = false
+        end
     end
 
     function player:dim()
