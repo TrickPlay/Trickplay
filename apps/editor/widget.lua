@@ -1901,7 +1901,109 @@ function widget.checkBox(t)
      
      return cBox
 end 
+function widget.loadingdots(t)
+    --default parameters
+    local p = {
+        dot_radius    = 5,
+        dot_color     = "#FFFFFF",
+        num_dots      = 12,
+        anim_radius   = 50,
+        anim_duration = 150 
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
 
+
+    --the umbrella Group
+    local l_dots = Group{ 
+        name     = "loadingdots",
+        position = {400,400},
+    }
+    --table of the dots, used by the animation
+    local dots   = {}
+    local load_timeline = nil
+    
+    local make_dot = function(x,y)
+          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius},x=x,y=y}
+          dot:begin_painting()
+          dot:arc(p.dot_radius,p.dot_radius,p.dot_radius,0,360)
+          dot:set_source_color(p.dot_color)
+          dot:fill(true)
+          dot:finish_painting()
+          dot.anchor_point ={p.dot_radius,p.dot_radius}
+          dot.name         = "Loading Dot"
+          return dot
+    end
+    local create_dots = function()
+        l_dots:clear()
+        dots = {}
+        local rad
+
+        for i = 1, p.num_dots do
+            --they're radial position
+            rad = (2*math.pi)/(p.num_dots) * i
+            dots[i] = make_dot(
+                math.floor( p.anim_radius * math.cos(rad) ),
+                math.floor( p.anim_radius * math.sin(rad) )
+            )    
+            l_dots:add(dots[i])
+        end
+
+        -- the animation timeline
+        if load_timeline ~= nil and load_timeline.is_playing then
+            load_timeline:stop()
+            load_timeline = nil
+        end
+        load_timeline = Timeline
+        {
+            name      = "Loading Animation",
+            loop      =  true,
+            duration  =  p.anim_duration * (p.num_dots),
+            direction = "FORWARD", 
+        }
+        local increment = math.ceil(255/p.num_dots)
+
+        function load_timeline.on_new_frame(t)
+        
+            local start_i   = math.ceil(t.elapsed/p.anim_duration)
+            local curr_i    = nil
+
+            for i = 1, p.num_dots do
+                curr_i = (start_i + (i-1))%(p.num_dots) +1
+
+                dots[curr_i].opacity = increment*i
+            end
+
+        end
+        load_timeline:start()
+    end
+    create_dots()
+
+    
+
+
+    
+
+
+    mt = {}
+    mt.__newindex = function(t,k,v)
+
+
+       p[k] = v
+       create_dots()
+
+
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(l_dots.extra, mt)
+    return l_dots
+end
 
 
 -----------------------------------------
