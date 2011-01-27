@@ -1413,8 +1413,24 @@ function widget.checkBox(t)
     return cb_group
 end 
 
--- fff = {}
 
+--[[
+Function: Loading Dots
+
+Creates a loading bar widget
+
+Arguments:
+	dot_radius              - radius of the individual dots
+	dot_color  - color of the individual dots
+	num_dots  - number of dots in the loading circle
+	anim_radius       - the radius of the circle of dots
+	anim_duration   - millisecs spent on a dot, this number times the number of
+                      dots is the time for the animation to make a full circle
+
+Return:
+
+	loading_dots_group - group containing the loading dots
+]]
 function widget.loadingdots(t)
     --default parameters
     local p = {
@@ -1431,11 +1447,25 @@ function widget.loadingdots(t)
         end
     end
 
-
+    local create_dots
     --the umbrella Group
     local l_dots = Group{ 
         name     = "loadingdots",
         position = {400,400},
+        anchor_point = {p.radius,p.radius},
+        reactive = true,
+        extra = {
+            type = "LoadingDots", 
+            selected = 1, 
+            speed_up = function()
+                p.anim_duration = p.anim_duration - 20
+                create_dots()
+            end,
+            speed_down = function()
+                p.anim_duration = p.anim_duration + 20
+                create_dots()
+            end,
+        },
     }
     --table of the dots, used by the animation
     local dots   = {}
@@ -1452,7 +1482,7 @@ function widget.loadingdots(t)
           dot.name         = "Loading Dot"
           return dot
     end
-    local create_dots = function()
+    create_dots = function()
         l_dots:clear()
         dots = {}
         local rad
@@ -1461,8 +1491,8 @@ function widget.loadingdots(t)
             --they're radial position
             rad = (2*math.pi)/(p.num_dots) * i
             dots[i] = make_dot(
-                math.floor( p.anim_radius * math.cos(rad) ),
-                math.floor( p.anim_radius * math.sin(rad) )
+                math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
+                math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
             )    
             l_dots:add(dots[i])
         end
@@ -1505,7 +1535,7 @@ function widget.loadingdots(t)
     create_dots()
 
 
-    mt = {}
+    local mt = {}
     mt.__newindex = function(t,k,v)
 
 
@@ -1520,7 +1550,149 @@ function widget.loadingdots(t)
     setmetatable(l_dots.extra, mt)
     return l_dots
 end
+--[[
+Function: Loading Bar
 
+Creates a loading bar widget
+
+Arguments:
+	bsize              - size of the loading bar
+	shell_upper_color  - the upper color for the inside of the loading bar
+	shell_lower_color  - the upper color for the inside of the loading bar
+	stroke_color       - the color for the outline
+	fill_upper_color   - the upper color for the loading bar fill
+	fill_lower_color   - the lower color for the loading bar fill
+
+Return:
+
+	loading_bar_group - group containing the loading bar
+]]
+function widget.loadingbar(t)
+
+    local p={
+        bsize     = {300, 50},
+        shell_upper_color  = "000000",
+        shell_lower_color  = "7F7F7F",
+        stroke_color       = "A0A0A0",
+	fill_upper_color  = "FF0000",
+	fill_lower_color  = "603030",
+
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+
+	
+local c_shell = Canvas{
+            size = {p.bsize[1],p.bsize[2]},
+            x    = p.position[1],
+            y    = p.position[2]
+        }
+	local c_fill  = Canvas{
+            size = {1,p.bsize[2]},
+            x    = p.position[1]+2,
+            y    = p.position[2]
+        }
+local l_bar_group = Group{
+		name     = "loadingbar",
+        position = {400,400},
+        anchor_point = {p.radius,p.radius},
+        reactive = true,
+        extra = {
+            type = "LoadingBar", 
+            selected = 1, 
+            set_prog = function(prog)
+                c_fill.scale = {(p.bsize[1]-4)*(prog),1}
+            end,
+        },
+	}
+
+	local function create_loading_bar()
+		print("me")
+		l_bar_group:clear()
+		c_shell = Canvas{
+				size = {p.bsize[1],p.bsize[2]},
+				--x    = p.position[1],
+				--y    = p.position[2]
+			}
+		c_fill  = Canvas{
+				size = {1,p.bsize[2]},
+				--x    = p.position[1]+2,
+				--y    = p.position[2]
+			}
+	
+		local stroke_width = 2
+		local RAD = 6
+	
+		local top    = math.ceil(stroke_width/2)
+		local bottom = c_shell.h - math.ceil(stroke_width/2)
+		local left   = math.ceil(stroke_width/2)
+		local right  = c_shell.w - math.ceil(stroke_width/2)
+	
+		c_shell:begin_painting()
+	
+		
+		c_shell:move_to(        left,         top )
+		c_shell:line_to(   right-RAD,         top )
+		c_shell:curve_to( right, top,right,top,right,top+RAD)
+		c_shell:line_to(       right,  bottom-RAD )
+		c_shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+	
+		c_shell:line_to(           left+RAD,          bottom )
+		c_shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		c_shell:line_to(           left,            top+RAD )
+		c_shell:curve_to(left,top,left,top,left+RAD,top)
+	
+		c_shell:set_source_linear_pattern(
+			c_shell.w/2,0,
+			c_shell.w/2,c_shell.h
+		)
+		c_shell:add_source_pattern_color_stop( 0 , p.shell_upper_color )
+		c_shell:add_source_pattern_color_stop( 1 , p.shell_lower_color )
+	
+		c_shell:fill(true)
+		c_shell:set_line_width(   stroke_width )
+		c_shell:set_source_color( p.stroke_color )
+		c_shell:stroke( true )
+		c_shell:finish_painting()
+	
+	
+	
+		c_fill:begin_painting()
+	
+		c_fill:move_to(-1,    top )
+		c_fill:line_to( 2,    top )
+		c_fill:line_to( 2, bottom )
+		c_fill:line_to(-1, bottom )
+		c_fill:line_to(-1,    top )
+	
+		c_fill:set_source_linear_pattern(
+			c_shell.w/2,0,
+			c_shell.w/2,c_shell.h
+		)
+		c_fill:add_source_pattern_color_stop( 0 , p.fill_upper_color )
+		c_fill:add_source_pattern_color_stop( 1 , p.fill_lower_color )
+		c_fill:fill(true)
+		c_fill:finish_painting()
+		
+		l_bar_group:add(c_shell,c_fill)
+	end
+	create_loading_bar()
+	local mt = {}
+    mt.__newindex = function(t,k,v)
+		print("here")
+        p[k] = v
+        create_loading_bar()
+    end
+    mt.__index = function(t,k)       
+        return p[k]
+    end
+    setmetatable(l_bar_group.extra, mt)
+	return l_bar_group
+end
 
 -----------------------------------------
 -- List Scroll Button (or Arrow Image)   
