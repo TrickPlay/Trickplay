@@ -499,17 +499,31 @@ local code_map =
 
 local color_map =
 {
+--[[
         [ "Text" ] = function()  size = {500, 920} color = "472446" return size, color end,
         [ "Image" ] = function()  size = {500, 850} color = "5a252b" return size, color end,
         [ "Rectangle" ] = function()  size = {500, 840} color = "2c420c" return size, color end,
         [ "Clone" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
         [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
+]]
+        [ "Text" ] = function()  size = {500, 920} color = {25,25,25,100}  return size, color end,
+        [ "Image" ] = function()  size = {500, 850} color ={25,25,25,100}  return size, color end,
+        [ "Rectangle" ] = function()  size = {500, 840} color = {25,25,25,100}   return size, color end,
+        [ "Clone" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
+        [ "Group" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
+        [ "Video" ] = function()  size = {500, 575} color = {25,25,25,100}   return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
-        [ "widgets" ] = function() size = {500, 470} color = "472446" return size, color end,
+        [ "widgets" ] = function() size = {500, 570} color = {25,25,25,100}  return size, color end,
+        --[ "widgets" ] = function() size = {500, 470} color = "472446" return size, color end,
+        [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
+        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
+        [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = {25,25,25,100}  return size, color end
+--[[
         [ "guidew" ] = function()  color =  "5a252b" size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = "5a252b" return size, color end
+  ]]
 }
 
 -------------------------------------------------------------------------------
