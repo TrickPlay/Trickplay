@@ -3,7 +3,8 @@
 
 
 --the source for cloning the backs of the tiles
-local backing = Rectangle{w=150,h=150,color="0000AF"}
+local backing = Image{src="assets/tile-front.png"}
+tile_size = backing.w
 screen:add(backing)
 backing:hide()
 
@@ -60,6 +61,7 @@ Tile = Class(function(obj, face_source, parent, ...)
             end
             function tl:on_completed()
                 tile_faces[face_source].on_completed(obj.tbl)
+                print(first_choice)
                 if first_choice ~= nil then
                     if obj.index ~= first_choice.index then
                         first_choice.flip()
@@ -101,7 +103,7 @@ Tile = Class(function(obj, face_source, parent, ...)
         game_state.board[parent[1]][parent[2]] = 0
         
         obj.group:animate{
-            duration = 200,
+            duration = 300,
             opacity  = 0,
             on_completed = function()
                 obj = nil
@@ -136,9 +138,8 @@ Tile = Class(function(obj, face_source, parent, ...)
     end
     
     obj.flip = function(first_choice)
-        
-        if flipped then  flip_back(first_choice)
-        else             flip_over()  end
+        if flipped then  flip_back()
+        else             flip_over(first_choice)  end
         
         flipped = not flipped
         return face_source
