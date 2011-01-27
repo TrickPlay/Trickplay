@@ -145,6 +145,10 @@ public:
 
     Image * load_icon( const gchar * path );
 
+    //.........................................................................
+
+    StringMap get_config() const;
+
 private:
 
     TPContext();

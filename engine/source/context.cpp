@@ -28,8 +28,8 @@
 
 //-----------------------------------------------------------------------------
 
-static int * g_argc     = NULL;
-static char *** g_argv  = NULL;
+static int g_argc     = 0;
+static char ** g_argv = 0;
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -289,7 +289,7 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
             clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
-            name ? String( " " + String( name ) + " : " ).c_str()  : " ",
+            name ? String( " \033[33m" + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "\33[0m" : "\33[37m" ) + " : " ).c_str()  : " ",
             clutter_actor_get_gid( actor ),
             g.x,
             g.y,
@@ -913,10 +913,13 @@ int TPContext::run()
     else
     {
         clutter_actor_set_size( stage , display_width , display_height );
-        clutter_stage_set_user_resizable( CLUTTER_STAGE( stage ) , TRUE );
     }
 
+#ifndef TP_CLUTTER_BACKEND_EGL
+
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+
+#endif
 
     ClutterColor color;
     color.red = 0;
@@ -1738,9 +1741,9 @@ void TPContext::load_external_configuration()
 
     if ( g_argc && g_argv )
     {
-        for( int i = 1; i < * g_argc; ++i )
+        for( int i = 1; i < g_argc; ++i )
         {
-            lua_pushstring( L , ( * g_argv )[ i ] );
+            lua_pushstring( L , g_argv[ i ] );
             lua_rawseti( L , -2 , i );
         }
     }
@@ -1800,6 +1803,8 @@ void TPContext::load_external_configuration()
         TP_APP_PUSH_ENABLED,
         TP_APP_PUSH_PORT,
         TP_MEDIAPLAYER_ENABLED,
+        TP_IMAGE_DECODER_ENABLED,
+        TP_RANDOM_SEED,
 
         NULL
     };
@@ -2313,6 +2318,12 @@ Image * TPContext::load_icon( const gchar * path )
     return image;
 }
 
+//-----------------------------------------------------------------------------
+
+StringMap TPContext::get_config() const
+{
+    return config;
+}
 
 //=============================================================================
 // External-facing functions
@@ -2320,9 +2331,6 @@ Image * TPContext::load_icon( const gchar * path )
 
 void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
 {
-    g_argc = argc;
-    g_argv = argv;
-
     if ( !g_thread_supported() )
     {
         g_thread_init( NULL );
@@ -2353,6 +2361,12 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
     }
 
     g_log_set_default_handler( TPContext::log_handler, NULL );
+
+    if ( argc && argv )
+    {
+        g_argc = * argc;
+        g_argv = * argv;
+    }
 
     g_info( "%d.%d.%d [%s]", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION , TP_GIT_VERSION );
 }
@@ -2490,12 +2504,12 @@ void tp_context_remove_controller( TPContext * context, TPController * controlle
 // Image Decoder
 //-----------------------------------------------------------------------------
 
-void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user)
+void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user )
 {
     g_assert( context );
     g_assert( decoder );
 
-    Images::set_external_decoder( decoder, user );
+    Images::set_external_decoder( context , decoder, user );
 }
 
 //-----------------------------------------------------------------------------

@@ -1,6 +1,11 @@
 [[
+#include <cstdlib>
+
 #include "util.h"
 #include "versions.h"
+#include "app.h"
+#include "context.h"
+#include "sysdb.h"
 ]]
 
 /*
@@ -82,4 +87,99 @@ global trickplay [[void*]]
                 lua_setfield( L , t , it->first.c_str() );
             }
         ]];
+
+    /*
+        Property: config
+
+        Returns a table containing the configuration parameters of TrickPlay.
+    */
+
+    readonly table config
+        [[
+            lua_newtable( L );
+
+            // In production, we return an empty table, since config is a bit
+            // private and could reveal paths to an app.
+
+#ifndef TP_PRODUCTION
+
+            StringMap config( App::get( L )->get_context()->get_config() );
+
+            for ( StringMap::const_iterator it = config.begin(); it != config.end(); ++it )
+            {
+                lua_pushstring( L , it->first.c_str() );
+                lua_pushstring( L , it->second.c_str() );
+                lua_rawset( L , -3 );
+            }
+
+#endif
+
+        ]];
+
+    /*
+       Property: system
+
+       Returns a table containing information about the system TrickPlay is running on,
+       such as its name, version, country and language.
+    */
+
+    readonly table system
+        [[
+            lua_newtable( L );
+
+            TPContext * ctx = App::get( L )->get_context();
+
+            lua_pushstring( L , "name" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_NAME , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "version" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_VERSION , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "country" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_COUNTRY , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "language" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_LANGUAGE , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "uuid" );
+            lua_pushstring( L , ctx->get_db()->get_string( TP_DB_UUID , "" ).c_str() );
+            lua_rawset( L , -3 );
+        ]];
+
+    bool check_version( string version )
+        [[
+            int major = 0;
+            int minor = 0;
+            int micro = 0;
+
+            gchar * * parts = g_strsplit( version , "." , 3 );
+
+            guint count = g_strv_length( parts );
+
+            if ( count >= 1 )
+            {
+                major = atoi( parts[ 0 ] );
+
+                if ( count >= 2 )
+                {
+                    minor = atoi( parts[ 1 ] );
+
+                    if ( count >= 3 )
+                    {
+                        micro = atoi( parts[ 2 ] );
+                    }
+                }
+            }
+
+            g_strfreev( parts );
+
+            result = ( TP_MAJOR_VERSION > (major) ||
+             (TP_MAJOR_VERSION == (major) && TP_MINOR_VERSION > (minor)) ||
+             (TP_MAJOR_VERSION == (major) && TP_MINOR_VERSION == (minor) && TP_PATCH_VERSION >= (micro)));
+        ]];
+
 }

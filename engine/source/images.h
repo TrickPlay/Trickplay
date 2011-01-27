@@ -3,6 +3,7 @@
 
 #include "clutter/clutter.h"
 #include "cairo/cairo.h"
+
 #include "trickplay/image.h"
 #include "common.h"
 
@@ -27,6 +28,11 @@ public:
 
     static Image * screenshot();
 
+    typedef void ( * DecodeAsyncCallback )( Image * image , gpointer user );
+
+    static void decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+
+    static void decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     ~Image();
 
@@ -68,7 +74,7 @@ public:
 
     //.........................................................................
 
-    static void set_external_decoder( TPImageDecoder decoder, gpointer decoder_data );
+    static void set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data );
 
     //.........................................................................
     // Decodes an image and gives it to the Clutter texture.
@@ -234,6 +240,8 @@ private:
     typedef std::map< gpointer, ImageInfo > ImageMap;
 
     ImageMap        images;
+
+    static bool compare( std::pair< gpointer , ImageInfo > a, std::pair< gpointer , ImageInfo > b );
 
 #endif
 

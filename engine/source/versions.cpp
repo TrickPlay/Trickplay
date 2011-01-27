@@ -6,13 +6,13 @@
 #include "fontconfig.h"
 #include "cairo/cairo-version.h"
 #include "pango/pango.h"
+#include "json-glib/json-glib.h"
 #include "clutter/clutter.h"
 #include "ft2build.h"
 #include "freetype/freetype.h"
 #include "gif_lib.h"
 #include "tiffio.h"
 #include "jpeglib.h"
-#include "json-glib/json-glib.h"
 
 #define PNG_SKIP_SETJMP_CHECK 1
 #include "png.h"
