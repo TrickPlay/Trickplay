@@ -84,6 +84,7 @@ function(self, model, args, player,...)
       self.title.position = { self.top.w/2, self.top.h/2 }
    end
    self.title.text = "Player "..player.number
+   self.name = self.title.text
    self.title.anchor_point = { self.title.w/2, self.title.h/2 }
    self.title.position = { self.top.w/2, self.top.h/2 }
 
@@ -116,7 +117,7 @@ function(self, model, args, player,...)
    
    function self:update(text)
       --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
-      self.title.text = "Player "..player.number.."  $"..self.player.money
+      self.title.text = self.name.."  $"..self.player.money
       self.title.anchor_point = { self.title.w/2, self.title.h/2 }
       self.title.position = { self.top.w/2, self.top.h/2 }
       
@@ -126,6 +127,11 @@ function(self, model, args, player,...)
       end
       self.action.anchor_point = {self.action.w/2, self.action.h/2}
       self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
+   end
+
+   function self:update_name(name)
+      self.name = name
+      self:update()
    end
 
    function self:hide_bottom()
