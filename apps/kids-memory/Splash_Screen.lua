@@ -1,19 +1,41 @@
 --umbrella group for all members of the splash screen
 local images = Group{}
-
+local button_backing = Image{src="assets/button-start.png"}
+screen:add(button_backing)
+button_backing:hide()
 local difficulty_items = {
-    Text{font="Sans 32px",text="Easy",x=300,y=300},
-    Text{font="Sans 32px",text="Medium",x=500,y=300},
-    Text{font="Sans 32px",text="Hard",x=700,y=300},
+    Group{},
+    Group{},
+    Group{},
 }
+for i = 1,#difficulty_items do
+    difficulty_items[i]:add(Clone{source = button_backing})
+    difficulty_items[i].position={1255,96+(i-1)*(button_backing.h+38)}
+end
+local t = Image{src="assets/level-start-easy.png",position={button_backing.w/2,button_backing.h/2}}
+t.anchor_point={t.w/2,t.h/2}
+
+difficulty_items[1]:add(t)
+t = Image{src="assets/level-start-medium.png",position={button_backing.w/2,button_backing.h/2}}
+t.anchor_point={t.w/2,t.h/2}
+difficulty_items[2]:add(t)
+t = Image{src="assets/level-start-hard.png",position={button_backing.w/2,button_backing.h/2}}
+t.anchor_point={t.w/2,t.h/2}
+difficulty_items[3]:add(t)
 local diff_i = 1
-images:add(Rectangle{w=screen_w,h=screen_h,color="452342"})
+images:add(Image{src="assets/background-start.jpg",scale={2,2}})
 images:add(unpack(difficulty_items))
 screen:add(images)
 images:hide()
 
-local focus = Rectangle{name="focus",w=100,h=100,color="FFFFFF",x=350,y=350}
+local focus = Image{src="assets/focus-rectangle-start.png",x=difficulty_items[1].x+button_backing.w/2,y=difficulty_items[1].y+button_backing.h/2}
+focus.anchor_point={focus.w/2,focus.h/2}
 images:add(focus)
+
+local exit_focus  = Image{src="assets/focus-exit-btn.png",x=29,y=978}
+local exit_button = Image{src="assets/button-exit.png",x=29,y=978}
+exit_focus:hide()
+images:add(exit_focus,exit_button)
 
 function splash_fade_in()
     images:show()
@@ -23,7 +45,18 @@ function splash_fade_out()
 end
 
 
+local exit_sel = false
 
+local exit_button_key_handler = {
+    [keys.OK] = function()
+        exit()
+    end,
+    [keys.Right] = function()
+        exit_focus:hide()
+        focus:show()
+        exit_sel = false
+    end,
+}
 
 local key_handler = {
     [keys.OK] = function()
@@ -32,23 +65,30 @@ local key_handler = {
         game_state.in_game=true
         give_keys("GAME")
     end,
-    [keys.Right] = function()
+    [keys.Down] = function()
         if diff_i < 3 then
             diff_i = diff_i + 1
-            focus.x = 100+200*diff_i
+            focus.y = focus.y+button_backing.h+38
+        end
+    end,
+    [keys.Up] = function()
+        if diff_i > 1 then
+            diff_i = diff_i - 1
+            focus.y = focus.y-(button_backing.h+38)
         end
     end,
     [keys.Left] = function()
-        if diff_i > 1 then
-            diff_i = diff_i - 1
-            focus.x = 100+200*diff_i
-        end
+        exit_focus:show()
+        focus:hide()
+        exit_sel = true
     end,
 }
 
 splash_on_key_down = function(key)
     
-    if key_handler[key] then
+    if exit_sel and exit_button_key_handler[key] then
+        exit_button_key_handler[key]()
+    elseif key_handler[key] then
         key_handler[key]()
     else
         print("Splash Screen Key handler does not support the key "..key)
