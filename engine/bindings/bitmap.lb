@@ -1,0 +1,64 @@
+module bitmap;
+
+[[
+#include "bitmap.h"
+]]
+
+class Bitmap [[ Bitmap * ]]
+{
+    Bitmap( string src , bool async = false )
+        [[
+            self = lb_construct( Bitmap , new Bitmap( L , src , async ) );
+        ]];
+
+    ~Bitmap()
+        [[
+            self->unref();
+        ]];
+
+    readonly int width
+        [[
+            width = self->width();
+        ]];
+
+    readonly int w
+        [[
+            w = self->width();
+        ]];
+
+    readonly int height
+        [[
+            height = self->height();
+        ]];
+
+    readonly int h
+        [[
+            h = self->height();
+        ]];
+
+    readonly bool loaded
+        [[
+            loaded = self->loaded();
+        ]];
+
+    Image Image( table props = 0 )
+        [[
+            lua_getglobal( L , "Image" );
+
+            if ( props )
+            {
+              lua_pushvalue( L , props );
+            }
+
+            lua_call( L , props ? 1 : 0 , 1 );
+
+            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+            if ( Image * image = self->get_image() )
+            {
+                Images::load_texture( t , image );
+            }
+        ]];
+
+    callback on_loaded( Bitmap bitmap , bool failed );
+}

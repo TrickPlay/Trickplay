@@ -1,6 +1,8 @@
 module clutter_canvas;
 
 [[
+#error "THIS SHOULD NOT BE IN THE BUILD"
+
 #include "clutter/clutter.h"
 #include "pango/pangocairo.h"
 

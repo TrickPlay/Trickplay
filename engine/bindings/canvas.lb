@@ -1,0 +1,656 @@
+module canvas;
+
+[[
+#include <cstring>
+
+#include "pango/pangocairo.h"
+
+#include "common.h"
+#include "clutter_util.h"
+#include "bitmap.h"
+
+#define degrees_to_radians( degrees ) ( degrees * ( G_PI / 180.0 ) )
+
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+#define CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT COGL_PIXEL_FORMAT_BGRA_8888_PRE
+#else
+#define CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT COGL_PIXEL_FORMAT_ARGB_8888_PRE
+#endif
+
+]]
+
+
+class Canvas [[ cairo_t * ]]
+{
+    Canvas( ... )
+        [[
+            int width = 0;
+            int height = 0;
+
+            if ( lua_gettop( L ) >= 1 && lua_type( L , 1 ) == LUA_TTABLE )
+            {
+                lua_getfield( L , 1 , "size" );
+
+                if ( lua_type( L , -1 ) == LUA_TTABLE )
+                {
+                    lua_rawgeti( L , -1 , 1 );
+                    width = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                    lua_rawgeti( L , -1 , 2 );
+                    height = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                }
+                else
+                {
+                    lua_rawgeti( L , 1 , 1 );
+                    width = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                    lua_rawgeti( L , 1 , 2 );
+                    height = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                }
+
+                lua_pop( L , 1 );
+            }
+            else if ( lua_gettop( L ) >= 2 && lua_type( L , 1 ) == LUA_TNUMBER && lua_type( L , 2 ) == LUA_TNUMBER )
+            {
+                width = lua_tonumber( L , 1 );
+                height = lua_tonumber( L , 2 );
+            }
+
+            if ( width == 0 || height == 0 )
+            {
+                luaL_error( L , "Invalid arguments to Canvas()" );
+            }
+
+            cairo_surface_t * surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32 , width , height );
+
+            self = lb_construct( cairo_t , cairo_create( surface ) );
+
+            cairo_surface_destroy( surface );
+        ]];
+
+    ~Canvas()
+        [[
+            cairo_destroy( self );
+        ]];
+
+    readonly int width
+        [[
+            width = cairo_image_surface_get_width( cairo_get_target( self ) );
+        ]];
+
+    readonly int w
+        [[
+            w = cairo_image_surface_get_width( cairo_get_target( self ) );
+        ]];
+
+    readonly int height
+        [[
+            height = cairo_image_surface_get_height( cairo_get_target( self ) );
+        ]];
+
+    readonly int h
+        [[
+            h = cairo_image_surface_get_height( cairo_get_target( self ) );
+        ]];
+
+    readonly table size
+        [[
+            lua_newtable( L );
+            lua_pushinteger( L , cairo_image_surface_get_width( cairo_get_target( self ) ) );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushinteger( L , cairo_image_surface_get_height( cairo_get_target( self ) ) );
+            lua_rawseti( L , -2 , 2 );
+        ]];
+
+    readonly table current_point
+        [[
+            double x;
+            double y;
+
+            cairo_get_current_point( self , & x , & y );
+
+            lua_newtable( L );
+            lua_pushnumber( L , x );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , y );
+            lua_rawseti( L , -2 , 2 );
+        ]];
+
+    string antialias
+        [[
+            switch( cairo_get_antialias( self ) )
+            {
+                case CAIRO_ANTIALIAS_DEFAULT: antialias = "DEFAULT"; break;
+                case CAIRO_ANTIALIAS_NONE: antialias = "NONE"; break;
+                case CAIRO_ANTIALIAS_GRAY: antialias = "GRAY"; break;
+                case CAIRO_ANTIALIAS_SUBPIXEL: antialias = "SUBPIXEL"; break;
+                default: antialias = "DEFAULT"; break;
+            }
+        ]]
+        [[
+            cairo_antialias_t a = cairo_get_antialias( self );
+
+            if ( ! strcmp( antialias , "DEFAULT" ) )
+            {
+                a = CAIRO_ANTIALIAS_DEFAULT;
+            }
+            else if ( ! strcmp( antialias , "NONE" ) )
+            {
+                a = CAIRO_ANTIALIAS_NONE;
+            }
+            else if ( ! strcmp( antialias , "GRAY" ) )
+            {
+                a = CAIRO_ANTIALIAS_GRAY;
+            }
+            else if ( ! strcmp( antialias , "SUBPIXEL" ) )
+            {
+                a = CAIRO_ANTIALIAS_SUBPIXEL;
+            }
+            else
+            {
+                luaL_error( L , "Invalid canvas antialias '%s'" , antialias );
+            }
+
+            cairo_set_antialias( self , a );
+        ]];
+
+    string fill_rule
+        [[
+            switch( cairo_get_fill_rule( self ) )
+            {
+                case CAIRO_FILL_RULE_EVEN_ODD: fill_rule = "EVEN_ODD"; break;
+                default: fill_rule = "WINDING"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( fill_rule , "WINDING" ) )
+            {
+                cairo_set_fill_rule( self , CAIRO_FILL_RULE_WINDING );
+            }
+            else if ( ! strcmp( fill_rule , "EVEN_ODD" ) )
+            {
+                cairo_set_fill_rule( self , CAIRO_FILL_RULE_EVEN_ODD );
+            }
+            else
+            {
+                luaL_error( L , "Invalid fill_rule '%s'" , fill_rule );
+            }
+        ]];
+
+    string filter
+        [[
+            switch( cairo_pattern_get_filter( cairo_get_source( self  ) ) )
+            {
+                case CAIRO_FILTER_FAST: filter = "FAST"; break;
+                case CAIRO_FILTER_GOOD: filter = "GOOD"; break;
+                case CAIRO_FILTER_BEST: filter = "BEST"; break;
+                case CAIRO_FILTER_NEAREST: filter = "NEAREST"; break;
+                case CAIRO_FILTER_BILINEAR: filter = "BILINEAR"; break;
+                case CAIRO_FILTER_GAUSSIAN: filter = "GAUSSIAN"; break;
+                default: filter = ""; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( filter , "FAST" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_FAST );
+            }
+            else if ( ! strcmp( filter , "GOOD" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_GOOD );
+            }
+            else if ( ! strcmp( filter , "BEST" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_BEST );
+            }
+            else if ( ! strcmp( filter , "NEAREST" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_NEAREST );
+            }
+            else if ( ! strcmp( filter , "BILINEAR" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_BILINEAR );
+            }
+            else if ( ! strcmp( filter , "GAUSSIAN" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_GAUSSIAN );
+            }
+            else
+            {
+                luaL_error( L , "Invalid filter '%s'" , filter );
+            }
+        ]];
+
+    string line_cap
+        [[
+            switch( cairo_get_line_cap( self ) )
+            {
+                case CAIRO_LINE_CAP_ROUND: line_cap = "ROUND"; break;
+                case CAIRO_LINE_CAP_SQUARE: line_cap = "SQUARE"; break;
+                default: line_cap = "BUTT"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( line_cap , "BUTT" ) )
+            {
+                cairo_set_line_cap( self , CAIRO_LINE_CAP_BUTT );
+            }
+            else if ( ! strcmp( line_cap , "ROUND" ) )
+            {
+                cairo_set_line_cap( self , CAIRO_LINE_CAP_ROUND );
+            }
+            else if ( ! strcmp( line_cap , "SQUARE" ) )
+            {
+                cairo_set_line_cap( self , CAIRO_LINE_CAP_SQUARE );
+            }
+            else
+            {
+                luaL_error( L , "Invalid line_cap '%s'" , line_cap );
+            }
+        ]];
+
+    string line_join
+        [[
+            switch( cairo_get_line_join( self ) )
+            {
+                case CAIRO_LINE_JOIN_ROUND: line_join = "ROUND"; break;
+                case CAIRO_LINE_JOIN_BEVEL: line_join = "BEVEL"; break;
+                default: line_join = "MITER"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( line_join , "MITER" ) )
+            {
+                cairo_set_line_join( self , CAIRO_LINE_JOIN_MITER );
+            }
+            else if ( ! strcmp( line_join , "ROUND" ) )
+            {
+                cairo_set_line_join( self , CAIRO_LINE_JOIN_ROUND );
+            }
+            else if ( ! strcmp( line_join , "BEVEL" ) )
+            {
+                cairo_set_line_join( self , CAIRO_LINE_JOIN_BEVEL );
+            }
+            else
+            {
+                luaL_error( L , "Invalid line_join '%s'" , line_join );
+            }
+        ]];
+
+    double line_width
+        [[
+            line_width = cairo_get_line_width( self );
+        ]]
+        [[
+            cairo_set_line_width( self , line_width );
+        ]];
+
+    double miter_limit
+        [[
+            miter_limit = cairo_get_miter_limit( self );
+        ]]
+        [[
+            cairo_set_miter_limit( self , miter_limit );
+        ]];
+
+    string op
+        [[
+            switch ( cairo_get_operator( self ) )
+            {
+                case CAIRO_OPERATOR_CLEAR:      op = "CLEAR"; break;
+                case CAIRO_OPERATOR_SOURCE:     op = "SOURCE"; break;
+                case CAIRO_OPERATOR_OVER:       op = "OVER"; break;
+                case CAIRO_OPERATOR_IN:         op = "IN"; break;
+                case CAIRO_OPERATOR_OUT:        op = "OUT"; break;
+                case CAIRO_OPERATOR_ATOP:       op = "ATOP"; break;
+                case CAIRO_OPERATOR_DEST:       op = "DEST"; break;
+                case CAIRO_OPERATOR_DEST_OVER:  op = "DEST_OVER"; break;
+                case CAIRO_OPERATOR_DEST_IN:    op = "DEST_IN"; break;
+                case CAIRO_OPERATOR_DEST_OUT:   op = "DEST_OUT"; break;
+                case CAIRO_OPERATOR_DEST_ATOP:  op = "DEST_ATOP"; break;
+                case CAIRO_OPERATOR_XOR:        op = "XOR"; break;
+                case CAIRO_OPERATOR_ADD:        op = "ADD"; break;
+                case CAIRO_OPERATOR_SATURATE:   op = "SATURATE"; break;
+                default:                        op = "SOURCE";
+            }
+        ]]
+        [[
+            static std::map< String , cairo_operator_t > op_map;
+
+            if ( op_map.empty() )
+            {
+                op_map[ "CLEAR" ] = CAIRO_OPERATOR_CLEAR;
+                op_map[ "SOURCE" ] = CAIRO_OPERATOR_SOURCE;
+                op_map[ "OVER" ] = CAIRO_OPERATOR_OVER;
+                op_map[ "IN" ] = CAIRO_OPERATOR_IN;
+                op_map[ "OUT" ] = CAIRO_OPERATOR_OUT;
+                op_map[ "ATOP" ] = CAIRO_OPERATOR_ATOP;
+                op_map[ "DEST" ] = CAIRO_OPERATOR_DEST;
+                op_map[ "DEST_OVER" ] = CAIRO_OPERATOR_DEST_OVER;
+                op_map[ "DEST_IN" ] = CAIRO_OPERATOR_DEST_IN;
+                op_map[ "DEST_OUT" ] = CAIRO_OPERATOR_DEST_OUT;
+                op_map[ "DEST_ATOP" ] = CAIRO_OPERATOR_DEST_ATOP;
+                op_map[ "XOR" ] = CAIRO_OPERATOR_XOR;
+                op_map[ "ADD" ] = CAIRO_OPERATOR_ADD;
+                op_map[ "SATURATE" ] = CAIRO_OPERATOR_SATURATE;
+            }
+
+            std::map< String, cairo_operator_t >::const_iterator it = op_map.find( op );
+
+            if ( it == op_map.end() )
+            {
+                luaL_error(L,"Invalid canvas op '%s'", op );
+            }
+
+            cairo_set_operator( self , it->second );
+        ]];
+
+    double tolerance
+        [[
+            tolerance = cairo_get_tolerance( self );
+        ]]
+        [[
+            cairo_set_tolerance( self , tolerance );
+        ]];
+
+    set_dash( double offset , table dashes )
+        [[
+            std::vector< double > d;
+
+            lua_pushnil( L );
+
+            while( lua_next( L , dashes ) )
+            {
+                if ( lua_isnumber( L , -1 ) )
+                {
+                    d.push_back( lua_tonumber( L , -1 ) );
+                }
+
+                lua_pop( L , 1 );
+            }
+
+            cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+        ]];
+
+    save()
+        [[
+            cairo_save( self );
+        ]];
+
+    restore()
+        [[
+            cairo_restore( self );
+        ]];
+
+    translate( double tx , double ty )
+        [[
+            cairo_translate( self , tx , ty );
+        ]];
+
+    rotate( double angle )
+        [[
+            cairo_rotate( self , degrees_to_radians( angle ) );
+        ]];
+
+    scale( double sx , double sy )
+        [[
+            cairo_scale( self , sx , sy );
+        ]];
+
+    push_group()
+        [[
+            cairo_push_group( self );
+        ]];
+
+    pop_group()
+        [[
+            cairo_pop_group_to_source( self );
+        ]];
+
+    clip( bool preserve = false )
+        [[
+            if ( ! preserve )
+            {
+                cairo_clip( self );
+            }
+            else
+            {
+                cairo_clip_preserve( self );
+            }
+        ]];
+
+    reset_clip()
+        [[
+            cairo_reset_clip( self );
+        ]];
+
+    fill( bool preserve = false )
+        [[
+            if(preserve)
+            {
+                cairo_fill_preserve( self );
+            }
+            else
+            {
+                cairo_fill( self );
+            }
+        ]];
+
+    paint( int alpha = 255 )
+        [[
+            if ( alpha == 255 )
+            {
+                cairo_paint( self );
+            }
+            else
+            {
+                cairo_paint_with_alpha( self , alpha / 255.0 );
+            }
+        ]];
+
+    stroke( bool preserve = false )
+        [[
+            if(preserve)
+            {
+                cairo_stroke_preserve( self );
+            }
+            else
+            {
+                cairo_stroke( self );
+            }
+        ]];
+
+
+    new_path()
+        [[
+            cairo_new_path( self );
+        ]];
+
+    new_sub_path()
+        [[
+            cairo_new_sub_path( self );
+        ]];
+
+    close_path()
+        [[
+            cairo_close_path( self );
+        ]];
+
+    arc( double xc , double yc , double radius , double angle1 , double angle2 )
+        [[
+            cairo_arc( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
+        ]];
+
+    arc_negative( double xc , double yc , double radius , double angle1 , double angle2 )
+        [[
+            cairo_arc_negative( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
+        ]];
+
+    curve_to( double x1 , double y1 , double x2 , double y2 , double x3, double y3 , bool relative = false )
+        [[
+            if ( relative )
+            {
+                cairo_rel_curve_to( self , x1 , y1 , x2 , y2 , x3 , y3 );
+            }
+            else
+            {
+                cairo_curve_to( self , x1 , y1 , x2 , y2 , x3 , y3 );
+            }
+        ]];
+
+    line_to( double x , double y , bool relative = false )
+        [[
+            if ( relative )
+            {
+                cairo_rel_line_to( self , x , y );
+            }
+            else
+            {
+                cairo_line_to( self , x , y );
+            }
+        ]];
+
+    move_to( double x , double y , bool relative = false )
+        [[
+            if ( relative )
+            {
+                cairo_rel_move_to( self , x , y );
+            }
+            else
+            {
+                cairo_move_to( self , x , y );
+            }
+        ]];
+
+    rectangle( double x , double y , double width , double height )
+        [[
+            cairo_rectangle( self , x , y , width , height );
+        ]];
+
+    round_rectangle( double x , double y , double w , double h , double r )
+        [[
+            cairo_move_to(self,x+r,y);
+            cairo_line_to(self,x+w-r,y);
+            cairo_curve_to(self,x+w,y,x+w,y,x+w,y+r);
+            cairo_line_to(self,x+w,y+h-r);
+            cairo_curve_to(self,x+w,y+h,x+w,y+h,x+w-r,y+h);
+            cairo_line_to(self,x+r,y+h);
+            cairo_curve_to(self,x,y+h,x,y+h,x,y+h-r);
+            cairo_line_to(self,x,y+r);
+            cairo_curve_to(self,x,y,x,y,x+r,y);
+        ]];
+
+    text_path( string font , string text , bool markup = true )
+        [[
+            PangoLayout * layout = pango_cairo_create_layout( self );
+
+            if ( markup )
+            {
+                pango_layout_set_markup( layout , text , -1 );
+            }
+            else
+            {
+                pango_layout_set_text( layout , text , -1 );
+            }
+
+            PangoFontDescription * fd = pango_font_description_from_string( font );
+
+            pango_layout_set_font_description( layout , fd );
+
+            pango_font_description_free( fd );
+
+            pango_cairo_layout_path( self , layout );
+
+            g_object_unref( G_OBJECT( layout ) );
+        ]];
+
+    set_source_color( ... )
+        [[
+            ClutterColor c;
+            ClutterUtil::to_clutter_color( L , 2 , & c );
+            cairo_set_source_rgba( self , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
+        ]];
+
+    set_source_linear_pattern( double x1 , double y1 , double x2 , double y2 )
+        [[
+            cairo_pattern_t * p = cairo_pattern_create_linear( x1 , y1 , x2 , y2 );
+            cairo_set_source( self , p );
+            cairo_pattern_destroy( p );
+        ]];
+
+    set_source_radial_pattern( double cx0 , double cy0 , double radius0 , double cx1 , double cy1 , double radius1 )
+        [[
+            cairo_pattern_t * p = cairo_pattern_create_radial( cx0 , cy0 , radius0 , cx1 , cy1 , radius1 );
+            cairo_set_source( self , p );
+            cairo_pattern_destroy( p );
+        ]];
+
+    set_source_bitmap( Bitmap bitmap , double x = 0 , double y = 0 )
+        [[
+            if ( Image * image = Bitmap::get_image( L , bitmap ) )
+            {
+                if ( cairo_surface_t * surface = image->cairo_surface() )
+                {
+                    cairo_set_source_surface( self , surface , x , y );
+
+                    cairo_surface_destroy( surface );
+                }
+            }
+        ]];
+
+    add_source_pattern_color_stop( double offset , ... )
+        [[
+            if ( cairo_pattern_t * p = cairo_get_source( self ) )
+            {
+                ClutterColor c;
+                ClutterUtil::to_clutter_color( L , 3 , & c );
+                cairo_pattern_add_color_stop_rgba( p , offset , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
+            }
+        ]];
+
+    Image Image( table props = 0 )
+        [[
+            lua_getglobal( L , "Image" );
+
+            if ( props )
+            {
+                lua_pushvalue( L , props );
+            }
+
+            lua_call( L , props ? 1 : 0 , 1 );
+
+            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+            cairo_surface_t * surface = cairo_get_target( self );
+
+            CoglHandle cogl_texture = cogl_texture_new_from_data (
+                    cairo_image_surface_get_width( surface),
+                    cairo_image_surface_get_height( surface ),
+                    COGL_TEXTURE_NONE,
+                    CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
+                    COGL_PIXEL_FORMAT_ANY,
+                    cairo_image_surface_get_stride( surface ),
+                    cairo_image_surface_get_data( surface ) );
+
+            clutter_texture_set_cogl_texture ( t , cogl_texture );
+            cogl_handle_unref( cogl_texture );
+        ]];
+
+    set_line_width( double line_width )
+        [[
+            // For compatibility with old canvas
+            cairo_set_line_width( self , line_width );
+        ]];
+
+    begin_painting()
+        [[
+            // Does nothing - only for compatibility with the old canvas
+        ]];
+
+    finish_painting()
+        [[
+            // Does nothing - only for compatibility with the old canvas
+        ]];
+}

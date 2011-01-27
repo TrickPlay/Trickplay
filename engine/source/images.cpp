@@ -10,11 +10,39 @@
 #include "profiler.h"
 #include "util.h"
 #include "image_decoders.h"
+#include "context.h"
+#include "thread_pool.h"
+#include "app.h"
 
 //=============================================================================
 // Set to OFF to stop image debug log
 
 Debug_OFF images_debug;
+
+//=============================================================================
+
+static ThreadPool * get_images_threadpool( bool destroy = false )
+{
+    static ThreadPool * tp = 0;
+
+    if ( destroy )
+    {
+        if ( tp )
+        {
+            delete tp;
+            tp = 0;
+        }
+    }
+    else
+    {
+        if ( ! tp )
+        {
+            tp = new ThreadPool( 2 );
+        }
+    }
+
+    return tp;
+}
 
 //=============================================================================
 // Wraps around an external decoder
@@ -23,12 +51,18 @@ class ExternalDecoder : public Images::Decoder
 {
 public:
 
-    ExternalDecoder( TPImageDecoder _decoder, gpointer _decoder_data )
+    ExternalDecoder( TPContext * _context , TPImageDecoder _decoder, gpointer _decoder_data )
     :
+        context( _context ),
         decoder( _decoder ),
         decoder_data( _decoder_data )
     {
         g_assert( decoder );
+    }
+
+    bool enabled( ) const
+    {
+        return context->get_bool( TP_IMAGE_DECODER_ENABLED , true );
     }
 
     virtual const char * name()
@@ -38,6 +72,13 @@ public:
 
     virtual int decode( gpointer data, gsize size, TPImage * image )
     {
+        if ( ! enabled() )
+        {
+            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
+        }
+
         images_debug( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
 
         int result = decoder( data, size, image, decoder_data );
@@ -69,6 +110,13 @@ public:
 
     virtual int decode( const char * filename, TPImage * image )
     {
+        if ( ! enabled() )
+        {
+            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
+        }
+
         std::ifstream stream;
 
         stream.open( filename, std::ios_base::in | std::ios_base::binary );
@@ -151,6 +199,7 @@ public:
 
 private:
 
+    TPContext *     context;
     TPImageDecoder  decoder;
     gpointer        decoder_data;
 };
@@ -397,6 +446,129 @@ bool Image::write_to_png( const gchar * filename ) const
     return result;
 }
 
+//-----------------------------------------------------------------------------
+
+class DecodeTask : public ThreadPool::Task
+{
+public:
+
+    DecodeTask( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        image( 0 ),
+        callback( _callback ),
+        user( _user ),
+        destroy_notify( _destroy_notify )
+    {
+    }
+
+    virtual ~DecodeTask()
+    {
+        if ( image )
+        {
+            delete image;
+        }
+
+        if ( destroy_notify )
+        {
+            destroy_notify( user );
+        }
+    }
+
+    virtual void process_main_thread()
+    {
+        if ( callback )
+        {
+            callback( image , user );
+
+            image = 0;
+        }
+    }
+
+protected:
+
+    Image *                     image;
+
+private:
+
+    Image::DecodeAsyncCallback  callback;
+    gpointer                    user;
+    GDestroyNotify              destroy_notify;
+};
+
+//-----------------------------------------------------------------------------
+
+class DecodeFileTask : public DecodeTask
+{
+public:
+
+    DecodeFileTask( const gchar * _filename , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        DecodeTask( _callback , _user , _destroy_notify ),
+        filename( _filename )
+    {
+
+    }
+
+    virtual void process()
+    {
+        image = Image::decode( filename.c_str() );
+    }
+
+private:
+
+    String                      filename;
+};
+
+//-----------------------------------------------------------------------------
+
+class DecodeBufferTask : public DecodeTask
+{
+public:
+
+    DecodeBufferTask( GByteArray * _bytes , const gchar * _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        DecodeTask( _callback , _user , _destroy_notify ),
+        bytes( _bytes ),
+        content_type( _content_type ? _content_type : "" )
+    {
+        g_byte_array_ref( bytes );
+    }
+
+    virtual ~DecodeBufferTask()
+    {
+        g_byte_array_unref( bytes );
+    }
+
+    virtual void process()
+    {
+        image = Image::decode( bytes->data , bytes->len , content_type.c_str() );
+    }
+
+private:
+
+    GByteArray *    bytes;
+    String          content_type;
+};
+
+//-----------------------------------------------------------------------------
+
+void Image::decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    g_assert( filename );
+
+    get_images_threadpool()->push( new DecodeFileTask( filename , callback , user , destroy_notify ) );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    g_assert( bytes );
+    g_assert( bytes->data );
+    g_assert( bytes->len );
+
+    get_images_threadpool()->push( new DecodeBufferTask( bytes , content_type , callback , user , destroy_notify ) );
+}
 
 //=============================================================================
 
@@ -520,11 +692,12 @@ Images * Images::get( bool destroy )
 void Images::shutdown()
 {
     Images::get( true );
+    get_images_threadpool( true );
 }
 
 //-----------------------------------------------------------------------------
 
-void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data )
+void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data )
 {
     Images * self( Images::get() );
 
@@ -536,7 +709,7 @@ void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data
         self->external_decoder = NULL;
     }
 
-    self->external_decoder = new ExternalDecoder( decoder, decoder_data );
+    self->external_decoder = new ExternalDecoder( context , decoder, decoder_data );
 }
 
 //-----------------------------------------------------------------------------
@@ -772,6 +945,17 @@ void Images::texture_destroyed_notify( gpointer data, GObject * instance )
 
 //-----------------------------------------------------------------------------
 
+#ifndef TP_PRODUCTION
+
+bool Images::compare( std::pair< gpointer , ImageInfo > a, std::pair< gpointer , ImageInfo > b )
+{
+    return a.second.bytes < b.second.bytes;
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
+
 void Images::dump()
 {
 #ifndef TP_PRODUCTION
@@ -780,16 +964,23 @@ void Images::dump()
 
     Util::GSRMutexLock lock( & self->mutex );
 
+    typedef std::vector< std::pair< gpointer , ImageInfo> > ImageVector;
+
+    ImageVector v( self->images.begin() , self->images.end() );
+
+    std::sort( v.begin() , v.end() , Images::compare );
+
+
     gsize total = 0;
     int i = 1;
 
     g_info( "Loaded images:" );
 
-    for( ImageMap::const_iterator it = self->images.begin(); it != self->images.end(); ++it, ++i )
+    for ( ImageVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
     {
         gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
 
-        g_info( "  %3d) %ux%u : %1.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
+        g_info( "  %3d) %4u x %-4u : %8.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
 
         total += it->second.bytes;
     }
