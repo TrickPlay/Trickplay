@@ -1,3 +1,11 @@
+ControllerStates = {
+    SPLASH = 1,
+    CHOOSE_DOG = 2,
+    NAME_DOG = 3,
+    WAITING = 4,
+    PLAY_HAND = 5
+}
+
 ControllerManager = Class(nil,
 function(ctrlman, start_accel, start_click, start_touch, resources, max_controllers)
     if resources ~= nil and not type(resources) == "table" then
@@ -37,6 +45,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             return
         end
 
+        controller.state = ControllerStates.SPLASH
+
         local function declare_necessary_resources()
             --[[
                 Declare resources to be used by the phone
@@ -54,11 +64,28 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:declare_resource("splash", "assets/phone/splash.jpg")
             -- blank background
             controller:declare_resource("bkg", "assets/phone/bkgd-blank.jpg")
-            -- headers which help instruct the pyylayer
+            -- headers which help instruct the player
             controller:declare_resource("hdr_choose_dog",
                 "assets/phone/text-choose-your-dog.png")
             controller:declare_resource("hdr_name_dog",
                 "assets/phone/text-name-your-dog.png")
+            -- waiting room stuff
+            controller:declare_resource("click_label",
+                "assets/phone/waiting_screen/label-clicktoadd.png")
+            controller:declare_resource("comp_label",
+                "assets/phone/waiting_screen/label-computer.png")
+            controller:declare_resource("human_label",
+                "assets/phone/waiting_screen/label-human.png")
+            controller:declare_resource("ready_label",
+                "assets/phone/waiting_screen/label-ready.png")
+            controller:declare_resource("start_button",
+                "assets/phone/waiting_screen/button-start.png")
+            controller:declare_resource("waiting_text",
+                "assets/phone/waiting_screen/text-waiting.png")
+            for i = 1,6 do
+                controller:declare_resource("player_"..i,
+                    "assets/phone/waiting_screen/player"..i..".png")
+            end
 
             controller:set_ui_background("splash")
         end
@@ -66,6 +93,9 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         local x_ratio = controller.ui_size[1]/640
         local y_ratio = controller.ui_size[2]/870
         function controller:add_image(image_name, x, y, width, height)
+            if not image_name then error("no image name", 2) end
+            
+            --[[
             print("controller.ui_size")
             dumptable(controller.ui_size)
 
@@ -75,10 +105,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             print("y*y_ratio", tostring(y*y_ratio))
             print("width*x_ratio", tostring(width*x_ratio))
             print("height*y_ratio", tostring(height*y_ratio))
+            --]]
 
             return
-                controller:set_ui_image(image_name, x*x_ratio, y*y_ratio,
-                width*x_ratio, height*y_ratio)
+                controller:set_ui_image(image_name, math.floor(x*x_ratio),
+                    math.floor(y*y_ratio), math.floor(width*x_ratio),
+                    math.floor(height*y_ratio))
         end
 
         controller.x_ratio = x_ratio
@@ -86,6 +118,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         function controller:on_key_down(key)
             print("controller keypress:", key)
+            if controller.name == "Keyboard" then return true end
 
             return false
         end
@@ -127,7 +160,66 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                     print("error setting dog image")
                 end
             end
+
+            controller.state = ControllerStates.CHOOSE_DOG
         end
+
+        --[[
+            Brings up the name your dog screen on the iphone. Player may enter a name
+            that replaces the Player # on their dogs name bubble.
+
+            @parameter pos : the dogs number/position (1-6). Determines which dog icon
+                to show on the iphone.
+        --]]
+        function controller:name_dog(pos)
+            print("naming dog")
+            controller:set_ui_background("bkg")
+            controller:add_image("hdr_name_dog", 109, 30, 422, 50)
+            controller:add_image("dog_"..pos, 192, 100, 256, 256)
+            if controller:enter_text("Name Your Dog", "Name Your Dog") then
+                function controller:on_ui_event(text)
+                    if text ~= "" then
+                        controller.player.status:update_name(text)
+                    end
+                    controller.on_ui_event = function() end
+                    controller:waiting_room()
+                end
+            end
+
+            controller.state = ControllerStates.NAME_DOG
+        end
+
+        function controller:waiting_room()
+            controller:set_ui_background("bkg")
+            controller:add_image("waiting_text", 0, 0, 640, 86)
+            for i = 1,6 do
+                controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
+            end
+            controller:add_image("start_button", 0, 6*115+86, 640, 115)
+            controller:update_waiting_room()
+
+            controller.state = ControllerStates.WAITING
+        end
+
+        function controller:update_waiting_room()
+            local playing = {}
+            for i,player in ipairs(model.players) do
+                local pos = player.table_position
+                controller:add_image("ready_label", 167, (pos-1)*115+86+60, 122, 34)
+                if player.isHuman then
+                    controller:add_image("human_label", 330, (pos-1)*115+86+20, 122, 34)
+                else
+                    controller:add_image("comp_label", 330, (pos-1)*115+86+20, 122, 34)
+                end
+                playing[pos] = true
+            end
+            for i = 1,6 do
+                if not playing[i] then
+                    controller:add_image("click_label", 167, (i-1)*115+86+60, 122, 34)
+                end
+            end
+        end
+
         
 ---------------On Connected Junk---------------
 

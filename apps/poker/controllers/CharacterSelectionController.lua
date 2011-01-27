@@ -139,19 +139,17 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         end
     end
 
-    local function setCharacterSeat(ctrl, dog_number)
+    local function setCharacterSeat(ctrl, dog_number, human)
 
         --instantiate the player
         local pos = dog_number or self:getPosition()
-        print("pos", pos)
         if(model.positions[pos]) then return end
 
-        local isHuman = false
-        if(self.playerCounter == 0 or ctrl) then
+        local isHuman = human or false
+        if(self.playerCounter == 0) then
             isHuman = true
             mediaplayer:play_sound(FIRST_PLAYER_MP3)
         end
-        print("isHuman", isHuman)
         self.playerCounter = self.playerCounter + 1
 
         local args = {
@@ -180,7 +178,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             end
             i = i+1
         end
-        table.insert(model.players, i, Player(args))
+        local player = Player(args)
+        if ctrl then ctrl.player = player end
+        table.insert(model.players, i, player)
         model.positions[pos] = true
         model.currentPlayer = self.playerCounter
 
@@ -299,28 +299,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         ctrl:choose_dog()
     end
 
-    function self:handle_click(ctrl, x, y)
-        assert(ctrl)
-        assert(x)
-        assert(y)
-
-        -- based off of click position grab the correct dog position (pos)
-        local pos
-        local col = 1
-        local row = 1
-        if x > ctrl.ui_size[1]/2 then
-            col = 2
-        end
-        if y > (100+256)*ctrl.y_ratio then
-            row = 2
-            if y > (100+256*2)*ctrl.y_ratio then
-                row = 3
-            end
-        end
-        pos = row*col
-        if row == 2 and col == 1 then pos = 3 end
-        if row == 3 and col == 1 then pos = 5 end
-
+    -- moves the selector and subselector into a coordinates based on
+    -- dog position as input
+    local function correct_selector(pos)
         -- move the selector to the dog
         if pos == 1 then
             selected = 2
@@ -332,12 +313,58 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             selected = 2
             subselection = 5
         end
+    end
 
-        -- select that dog
-        setCharacterSeat(ctrl, pos)
-        if(self.playerCounter >= 6) then
-            ctrlman:stop_accepting_ctrls()
-            start_a_game()
+
+    function self:handle_click(ctrl, x, y)
+        assert(ctrl)
+        assert(x)
+        assert(y)
+
+        if ctrl.state == ControllerStates.CHOOSE_DOG then
+            -- based off of click position grab the correct dog position (pos)
+            local pos
+            local col = 1
+            local row = 1
+            if x > ctrl.ui_size[1]/2 then
+                col = 2
+            end
+            if y > (100+256)*ctrl.y_ratio then
+                row = 2
+                if y > (100+256*2)*ctrl.y_ratio then
+                    row = 3
+                end
+            end
+            pos = row*col
+            if row == 2 and col == 1 then pos = 3 end
+            if row == 3 and col == 1 then pos = 5 end
+
+            correct_selector(pos)
+
+            -- select that dog
+            setCharacterSeat(ctrl, pos, true)
+            if(self.playerCounter >= 6) then
+                ctrlman:stop_accepting_ctrls()
+                start_a_game()
+            end
+            ctrl:name_dog(pos)
+        elseif ctrl.state == ControllerStates.WAITING then
+            print("y_ratio", ctrl.y_ratio)
+            local pos = math.floor((y/ctrl.y_ratio-86)/115+1)
+            print("\nthis is teh position", pos, "\n")
+            -- do selected
+            if pos > 0 and pos <= 6 then
+                correct_selector(pos)
+                setCharacterSeat(nil, pos, false) 
+                if(self.playerCounter >= 6) then
+                    ctrlman:stop_accepting_ctrls()
+                    start_a_game()
+                end
+            -- check x range for "Start" button press
+            elseif pos > 6 then
+                ctrlman:stop_accepting_ctrls()
+                start_a_game()
+            end
         end
     end
 
