@@ -41,7 +41,6 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
       -- add table text
       --local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
       local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {674, 445}, opacity = 0})
-      ttt = table_text
       screen:add( table_text )
       table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
       
@@ -139,11 +138,30 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         end
     end
 
+    --[[
+        Function for setting a character on the screen. If a user selects a
+        character then this function checks to see if the player is already in use
+        if not in use then a Player() is definied for the position (pos) the player
+        exists on the table and this Player() is added to model.positions[pos].
+        If ctrl (a controller) is defined and human is true the Player() registers
+        this controller as its controller and as being human. The first player
+        selected by any means is always assumed to be human.
+
+        @param ctrl : controller which controls this Player
+        @param dog_number : defines dogs position on the table if needed otherwise
+            self:getPosition() checks for dog position based on the current position
+            of selected and subselection variables on the grid.
+        @param human : whether or not this dog is a human player. First player
+            selected by any means is always assumed to be human.
+
+        @return : false if dog_number or position already has been selected by a
+            Player. true otherwise (assumes success).
+    --]]
     local function setCharacterSeat(ctrl, dog_number, human)
 
         --instantiate the player
         local pos = dog_number or self:getPosition()
-        if(model.positions[pos]) then return end
+        if(model.positions[pos]) then return false end
 
         local isHuman = human or false
         if(self.playerCounter == 0) then
@@ -190,6 +208,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
         model:notify()
         self:new_position()
         view:update()
+
+        return true
 
     end
 
@@ -342,16 +362,14 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             correct_selector(pos)
 
             -- select that dog
-            setCharacterSeat(ctrl, pos, true)
+            if not setCharacterSeat(ctrl, pos, true) then return end
             if(self.playerCounter >= 6) then
                 ctrlman:stop_accepting_ctrls()
                 start_a_game()
             end
             ctrl:name_dog(pos)
         elseif ctrl.state == ControllerStates.WAITING then
-            print("y_ratio", ctrl.y_ratio)
             local pos = math.floor((y/ctrl.y_ratio-86)/115+1)
-            print("\nthis is teh position", pos, "\n")
             -- do selected
             if pos > 0 and pos <= 6 then
                 correct_selector(pos)
@@ -360,10 +378,13 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
                     ctrlman:stop_accepting_ctrls()
                     start_a_game()
                 end
+                ctrlman:update_waiting_room()
             -- check x range for "Start" button press
-            elseif pos > 6 then
-                ctrlman:stop_accepting_ctrls()
-                start_a_game()
+            elseif pos > 6 and x/ctrl.x_ratio > 640/3 and x/ctrl.x_ratio < 2*640/3 then
+                if self.playerCounter >= 2 then
+                    ctrlman:stop_accepting_ctrls()
+                    start_a_game()
+                end
             end
         end
     end

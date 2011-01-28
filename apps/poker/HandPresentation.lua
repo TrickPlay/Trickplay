@@ -420,8 +420,15 @@ HandPresentation = Class(nil,function(pres, ctrl)
          for player,hole in pairs( ctrl:get_hole_cards() ) do
             
             local offset = 0
-            local pos = {MPCL[player.table_position][1], MPCL[player.table_position][2]}
+            local pos = {
+                MPCL[player.table_position][1],
+                MPCL[player.table_position][2]
+            }
+            if player.controller then
+                player.controller:set_hole_cards(hole)
+            end
             
+            -- give the player their cards
             for k,card in pairs(hole) do
                if not card.group.parent then
                    screen:add(card.group)

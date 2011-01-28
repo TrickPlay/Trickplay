@@ -23,7 +23,11 @@ Player = Class(function(player, args, ...)
         local temp_func = player.controller.on_disconnected
         function player.controller:on_disconnected()
             temp_func(player.controller)
-            player.isHuman = false
+            local human_count = 0
+            for i,player in ipairs(model.players) do
+                if player.isHuman then human_count = human_count + 1 end
+            end
+            player.isHuman = (human_count <= 1)
         end
     end
 
