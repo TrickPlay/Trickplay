@@ -1,20 +1,18 @@
 --umbrella group for all members of the splash screen
-local images = Group{}
+local game_screen = Group{}
 --back icon
 local back_button = Image{src="assets/button-back.png",x=28,y=870}
 local back_focus  = Image{src="assets/focus-back-btn.png",x=28,y=870}
-back_focus:hide()
+
 --background
-images:add(Image{src="assets/background-game.jpg",scale={2,2}})
-screen:add(images)
-images:hide()
+game_screen:add(Image{src="assets/background-game.jpg",scale={2,2}})
+screen:add(game_screen)
+game_screen:hide()
 
 --the Focus indicator, and its index-position
 local focus = Image{src="assets/focus-square-tiles.png"}
-local focus_next = Clone{source=focus}
 focus.anchor_point      = {focus.w/2,focus.h/2}
-focus_next.anchor_point = {focus.w/2,focus.h/2}
-focus_next:hide()
+
 local focus_i = {1,1}
 
 --container for the tiles
@@ -46,7 +44,7 @@ local function x_y_from_index(i,j)
          (j- 1)*spacing)
 end
 local back_sel = false
-images:add(back_button,back_focus,board,focus,focus_next)
+game_screen:add(back_button,back_focus,focus,focus_next,board)
 function game_fade_in(previous_board)
     board:clear()
     
@@ -96,37 +94,109 @@ function game_fade_in(previous_board)
         end
     end
     focus.scale={board_spec[game_state.difficulty][3],board_spec[game_state.difficulty][3]}
-    images:show()
     back_sel = false
     first_selected   = nil
-    back_focus:hide()
-    focus:show()
+    game_screen:show()
+    back_focus.opacity=0
+    focus.opacity=255
     focus.x, focus.y = x_y_from_index(1,1)
     focus_i = {1,1}
 end
+
 function game_fade_out()
-    images:hide()
+    game_screen:hide()
 end
 
+local focus_tl = nil
+--[[
 local function anim_focus()
-    local tl = Timeline{duration=200}
-    function tl:on_new_frame()
-        local p = tl.progress
+    if focus_tl ~= nil then
+        focus_tl:stop()
+        focus_tl:on_completed()
+        focus_tl=nil
+    end
+    focus_tl = Timeline{duration=200}
+    local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
+    function focus_tl:on_new_frame(_,p)
+        local p = ani_mode.alpha
         focus_next.opacity = 255*p
         focus.opacity = 255*(1-p)
     end
-    function tl:on_completed()
+    function focus_tl:on_completed()
         
         focus.x = focus_next.x
         focus.y = focus_next.y
         focus.opacity = 255
         focus_next:hide()
+        focus_tl = nil
     end
     focus_next.opacity=0
     focus_next:show()
-    tl:start()
+    focus_tl:start()
 end
+--]]
+local function anim_focus(targ_x,targ_y)
+    if focus_tl ~= nil then
+        focus_tl:stop()
+        focus_tl:on_completed()
+        focus_tl=nil
+    end
+    focus_tl = Timeline{duration=200}
+    local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
+    local curr_x = focus.x
+    local curr_y = focus.y
+    function focus_tl:on_new_frame(_,p)
+        local p = ani_mode.alpha
+        focus.x = curr_x + (targ_x-curr_x)*p
+        focus.y = curr_y + (targ_y-curr_y)*p
+    end
+    function focus_tl:on_completed()
+        
+        focus.x = targ_x
+        focus.y = targ_y
+        focus_tl = nil
+    end
 
+    focus_tl:start()
+end
+local function corner_get_focus()
+    if focus_tl ~= nil then
+        focus_tl:stop()
+        focus_tl:on_completed()
+        focus_tl=nil
+    end
+    focus_tl = Timeline{duration=200}
+    function focus_tl:on_new_frame(_,p)
+        back_focus.opacity = 255*p
+        focus.opacity = 255*(1-p)
+    end
+    function focus_tl:on_completed()
+        
+        focus.opacity = 0
+        back_focus.opacity = 255
+        focus_tl = nil
+    end
+    focus_tl:start()
+end
+local function corner_lose_focus()
+    if focus_tl ~= nil then
+        focus_tl:stop()
+        focus_tl:on_completed()
+        focus_tl=nil
+    end
+    focus_tl = Timeline{duration=200}
+    function focus_tl:on_new_frame(_,p)
+        back_focus.opacity = 255*(1-p)
+        focus.opacity = 255*(p)
+    end
+    function focus_tl:on_completed()
+        
+        focus.opacity = 255
+        back_focus.opacity = 0
+        focus_tl = nil
+    end
+    focus_tl:start()
+end
 ------------------------
 ---- key handler
 ------------------------
@@ -143,7 +213,6 @@ local board_key_handler = {
             first_selected.flip(nil)
             
         else -- second selected
-        print("second")
             game_state.board[focus_i[1]][focus_i[2]].flip(first_selected)
             first_selected = nil
         end
@@ -151,8 +220,7 @@ local board_key_handler = {
     [keys.Up] = function()
         if focus_i[2] > 1 then
             focus_i[2] = focus_i[2] - 1
-            focus_next.x,focus_next.y = x_y_from_index(focus_i[1],focus_i[2])
-            anim_focus()
+            anim_focus( x_y_from_index(focus_i[1],focus_i[2]) )
             --focus.y    = 200*focus_i[2]
             back_sel   = false
         end
@@ -161,27 +229,26 @@ local board_key_handler = {
         if focus_i[2] < board_spec[game_state.difficulty][4] then
             focus_i[2] = focus_i[2] + 1
             --focus.y    = 200*focus_i[2]
-            focus_next.x,focus_next.y = x_y_from_index(focus_i[1],focus_i[2])
-            anim_focus()
+            anim_focus( x_y_from_index(focus_i[1],focus_i[2])
+            )
         end
     end,
     [keys.Right] = function()
         if focus_i[1] < board_spec[game_state.difficulty][5] then
             focus_i[1] = focus_i[1] + 1
-            focus_next.x,focus_next.y = x_y_from_index(focus_i[1],focus_i[2])
-            anim_focus()
+            anim_focus( x_y_from_index(focus_i[1],focus_i[2])
+            )
             --focus.x = 200*focus_i[1]
         end
     end,
     [keys.Left] = function()
         if focus_i[1] >1 then
             focus_i[1] = focus_i[1] - 1
-            focus_next.x,focus_next.y = x_y_from_index(focus_i[1],focus_i[2])
-            anim_focus()
+            anim_focus( x_y_from_index(focus_i[1],focus_i[2])
+            )
             --focus.x = 200*focus_i[1]
         else
-            back_focus:show()
-            focus:hide()
+            corner_get_focus()
             back_sel = true
         end
     end,
@@ -194,9 +261,7 @@ back_button_key_handler = {
     end,
     [keys.Right] = function()
         back_sel = false
-        --focus.x,focus.y = x_y_from_index(focus_i[1],focus_i[2])
-        back_focus:hide()
-        focus:show()
+        corner_lose_focus()
     end,
 }
 
