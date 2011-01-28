@@ -1,28 +1,80 @@
 
 local widget = {}
 
---Skin Test--
---Skin Test--
---Skin Test--
+local skin_list = { ["default"] = {
+				   ["button"] = "assets/smallbutton.png", 
+				   ["button_focus"] = "assets/smallbuttonfocus.png", 
+				   ["toast_icon"] = "assets/voice-1.png", 
+			           ["buttonpicker"] = "assets/smallbutton.png",
+     				   ["buttonpicker_focus"] = "assets/smallbuttonfocus.png",
+				   ["buttonpicker_left_un"] = "assets/left.png",
+				   ["buttonpciker_left_sel"] = "assets/leftfocus.png",
+				   ["buttonpicker_right_un"] = "assets/right.png",
+        			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
+				   ["checkbox_sel"] = "assets/checkmark.png", 
+				  },
 
-local skin_list = { ["default"] = {["button"] = "assets/button-blue.png",}, ["skin_type1"] =  {["button"] = "assets/button-red.png",}, }
+		    ["skin_type1"] = { 
+				   ["button"] = "assets/button-red.png", 
+				   ["button_focus"] = "assets/button-focus.png", 
+				   ["textinput"] = "", 
+				   ["textinput_focus"] = "", 
+				   ["dialogbox"] = "", 
+			           ["dialogbox_x"] ="", 
+				   ["toast"] = "", 
+				   ["toast_icon"] = "assets/voice-2.png", 
+			           ["buttonpicker"] = "assets/button-red.png",
+     				   ["buttonpicker_focus"] = "assets/button-focus.png",
+				   ["buttonpicker_left_un"] = "assets/left.png",
+				   ["buttonpciker_left_sel"] = "assets/leftfocus.png",
+				   ["buttonpicker_right_un"] = "assets/right.png",
+        			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
+				   ["radiobutton"] = "", 
+				   ["radiobutton_sel"] = "", 
+				   ["checkbox"] = "", 
+				   ["checkbox_sel"] = "assets/checkmark.png", 
+				   ["loadingdot"] = "", 
+				  },
+ 
+		    ["skin_type2"] = { 
+				   ["button"] = "assets/button-blue.png", 
+				   ["button_focus"] = "assets/button-focus.png", 
+				   ["textinput"] = "", 
+				   ["textinput_focus"] = "", 
+				   ["dialogbox"] = "", 
+			           ["dialogbox_x"] ="", 
+				   ["toast"] = "", 
+				   ["toast_icon"] = "assets/voice-2.png", 
+			           ["buttonpicker"] = "assets/button-red.png",
+     				   ["buttonpicker_focus"] = "assets/button-focus.png",
+				   ["buttonpicker_left_un"] = "assets/left.png",
+				   ["buttonpciker_left_sel"] = "assets/leftfocus.png",
+				   ["buttonpicker_right_un"] = "assets/right.png",
+        			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
+				   ["radiobutton"] = "", 
+				   ["radiobutton_sel"] = "", 
+				   ["checkbox"] = "", 
+				   ["checkbox_sel"] = "assets/checkmark.png", 
+				   ["loadingdot"] = "", 
+				  },
+
+		  }
 
 function widget.change_all_skin(skin_name)
-    
-for i = 1, table.getn(g.children), 1 do
-	if g.children[i].Skin then 
-	     g.children[i].Skin = skin_name
-	     print("hereherhhh")
+    for i = 1, table.getn(g.children), 1 do
+	if g.children[i].skin then 
+	     g.children[i].skin = skin_name
 	end 
-end 
-	
+    end 
 end
---Skin Test--
---Skin Test--
---Skin Test--
 
-
-
+function widget.change_button_skin(skin_name)
+    for i = 1, table.getn(g.children), 1 do
+	if g.children[i].extra.type == "Button" then 
+	     g.children[i].skin = skin_name
+	end 
+    end 
+end 
 
 -------------
 -- Util
@@ -468,145 +520,10 @@ c:fill(false)
 c:stroke(false)
 -- Finishes painting on Canvas
 c:finish_painting()
-print("circle drawn")
 
 return c
 end
 
-
---Skin Test--
---Skin Test--
---Skin Test--
-function widget.bb(t) 
-
- --default parameters
-    local p = {
-    	Skin = "default", --------------*******************
-    	skin = "ring_image", 
-    	bwidth = 180,
-    	bheight = 60, 
-    	border_color = "FFFFFF", 
-    	focus_color = "1b911b", 
-    	border_width = 1,
-    	text = "Button", 
-    	font = "DejaVu Sans 30px",
-    	color = "FFFFFF",
-    	padding_x = 7,
-    	padding_y = 7,
-    	border_radius = 12,
-    	button_image = Image{},
-    	focus_image = assets("assets/smallbuttonfocus.png"),
-    }
-
-    
-
- --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
-	    p[k] = v 
-        end 
-    end 
-
- --the umbrella Group
-    local ring, focus_ring, text, button, focus 
-
-    local b_group = Group
-    {
-        name = "button", 
-        size = { p.bwidth , p.bheight},
-        position = {100, 100, 0},  
-        reactive = true,
-        extra = {type = "Button"}
-    } 
-
-    local create_button = function() 
-    
-        p.button_image = assets(skin_list[p.Skin]["button"])  ---------------*************
-        b_group:clear()
-    
-        ring = make_ring(p.bwidth, p.bheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
-        ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
-
-        focus_ring = make_ring(p.bwidth, p.bheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
-        focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
-
-        button = p.button_image
-        button:set{name="button", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 255}
-
-        focus = p.focus_image
-        focus:set{name="focus", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 0}
-
-        text = Text{name = "text", text = p.text, font = p.font, color = p.color, reactive = true} 
-        text:set{name = "text", position = { (p.bwidth  -text.w)/2, (p.bheight - text.h)/2}}
-
-        b_group:add(ring, focus_ring, button, focus, text)
-
-        if (p.skin == "ring") then button.opacity = 0
-        elseif (p.skin == "image") then ring.opacity = 0 end 
-
-    end 
-
-    create_button()
-
-    function b_group.extra.on_focus_in()
-        if (p.skin == "ring") then 
-	     ring.opacity = 0
-	     focus_ring.opacity = 255
-        elseif (p.skin == "image") then 
-	     button.opacity = 0
-             focus.opacity = 255
-	else 
-	     ring.opacity = 0
-	     focus_ring.opacity = 255
-	     button.opacity = 0
-             focus.opacity = 255
-        end 
-	b_group:grab_key_focus(b_group)
-    end
-    
-    function b_group.extra.on_focus_out()
-        if (p.skin == "ring") then 
-	     ring.opacity = 255
-	     focus_ring.opacity = 0
-             focus.opacity = 0
-        elseif (p.skin == "image") then 
-	     button.opacity = 255
-             focus.opacity = 0
-	     focus_ring.opacity = 0
-	else 
-	     ring.opacity = 255
-	     focus_ring.opacity = 0
-	     button.opacity = 255
-             focus.opacity = 0
-        end 
-    end
-	
-    mt = {}
-    mt.__newindex = function (t, k, v)
-        if k == "bsize" then  
-	    p.bwidth = v[1] p.bheight = v[2]  
-        else 
-           p[k] = v
-        end
-        create_button()
-    end 
-
-    mt.__index = function (t,k)
-        if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
-        else 
-	    return p[k]
-        end 
-    end 
-
-    setmetatable (b_group.extra, mt) 
-
-    return b_group 
-end
-
---Skin Test--
---Skin Test--
---Skin Test--
 
 --------------
 --  Button  
@@ -616,7 +533,7 @@ function widget.button(t)
 
  --default parameters
     local p = {
-    	skin = "ring_image", 
+    	skin = "default", 
     	bwidth = 180,
     	bheight = 60, 
     	border_color = "FFFFFF", 
@@ -628,8 +545,8 @@ function widget.button(t)
     	padding_x = 7,
     	padding_y = 7,
     	border_radius = 12,
-    	button_image = assets("assets/smallbutton.png"),
-    	focus_image = assets("assets/smallbuttonfocus.png"),
+    	button_image = Image{}, 
+    	focus_image = Image{} 
     }
 
  --overwrite defaults
@@ -653,6 +570,11 @@ function widget.button(t)
 
     local create_button = function() 
     
+	if(p.skin ~= "canvas") then 
+		p.button_image = assets(skin_list[p.skin]["button"])
+		p.focus_image = assets(skin_list[p.skin]["button_focus"])
+	end
+
         b_group:clear()
     
         ring = make_ring(p.bwidth, p.bheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
@@ -672,23 +594,18 @@ function widget.button(t)
 
         b_group:add(ring, focus_ring, button, focus, text)
 
-        if (p.skin == "ring") then button.opacity = 0
-        elseif (p.skin == "image") then ring.opacity = 0 end 
+        if (p.skin == "canvas") then button.opacity = 0
+        else ring.opacity = 0 end 
 
     end 
 
     create_button()
 
     function b_group.extra.on_focus_in()
-        if (p.skin == "ring") then 
+        if (p.skin == "canvas") then 
 	     ring.opacity = 0
 	     focus_ring.opacity = 255
-        elseif (p.skin == "image") then 
-	     button.opacity = 0
-             focus.opacity = 255
-	else 
-	     ring.opacity = 0
-	     focus_ring.opacity = 255
+        else
 	     button.opacity = 0
              focus.opacity = 255
         end 
@@ -696,19 +613,14 @@ function widget.button(t)
     end
     
     function b_group.extra.on_focus_out()
-        if (p.skin == "ring") then 
+        if (p.skin == "canvas") then 
 	     ring.opacity = 255
 	     focus_ring.opacity = 0
              focus.opacity = 0
-        elseif (p.skin == "image") then 
+        else
 	     button.opacity = 255
              focus.opacity = 0
 	     focus_ring.opacity = 0
-	else 
-	     ring.opacity = 255
-	     focus_ring.opacity = 0
-	     button.opacity = 255
-             focus.opacity = 0
         end 
     end
 	
@@ -742,7 +654,7 @@ end
 function widget.textField(t)
  --default parameters
     local p = {
-    	skin = "ring", 
+    	skin = "canvas", 
     	bwidth = 200 ,
     	bheight = 80 ,
     	text = "" ,
@@ -755,8 +667,9 @@ function widget.textField(t)
     	padding_x = 7 ,
     	padding_y = 7 ,
     	border_radius = 12 ,
-    	box_img = assets("assets/smallbutton.png") , 
-    	focus_img = assets("assets/smallbuttonfocus.png")  
+    	box_img = Image{}, 
+    	focus_img = Image{}, 
+
     }
  --overwrite defaults
     if t ~= nil then 
@@ -779,6 +692,11 @@ function widget.textField(t)
  
 
     local create_textInputField= function()
+ 	
+	if(p.skin ~= "canvas") then 
+             p.box_image = assets(skin_list[p.skin]["textinput"])
+	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
+	end 
 
     	t_group:clear()
 
@@ -798,23 +716,18 @@ function widget.textField(t)
     	text:set{name = "text", position = {p.text_indent, (p.bheight - text.h)/2} }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
-    	if (p.skin == "ring_image") then box_img.opacity = 255
-    	elseif (p.skin == "image") then box.opacity = 0 box_img.opacity = 255 end 
+    	if (p.skin == "canvas") then box_img.opacity = 0
+    	else box.opacity = 0 box_img.opacity = 255 end 
 
      end 
 
      create_textInputField()
 
      function t_group.extra.on_focus_in()
-          if (p.skin == "ring") then 
+          if (p.skin == "canvas") then 
 	     box.opacity = 0
 	     focus_box.opacity = 255
-          elseif (p.skin== "image") then 
-	     box_img.opacity = 0
-             focus_img.opacity = 255
- 	  else 
-	     box.opacity = 0
-	     focus_box.opacity = 255
+          else
 	     box_img.opacity = 0
              focus_img.opacity = 255
           end 
@@ -823,18 +736,13 @@ function widget.textField(t)
      end
 
      function t_group.extra.on_focus_out()
-          if (p.skin == "ring") then 
+          if (p.skin == "canvas") then 
 	     box.opacity = 255
 	     focus_box.opacity = 0
              focus_img.opacity = 0
-          elseif (p.skin == "image") then 
+          else
 	     box_img.opacity = 255
 	     focus_box.opacity = 0
-             focus_img.opacity = 0
- 	  else 
-	     box.opacity = 255
-	     focus_box.opacity = 0
-	     box_img.opacity = 255
              focus_img.opacity = 0
           end 
 	  text.cursor_visible = false
@@ -871,7 +779,7 @@ function widget.dialogBox(t)
  
 --default parameters
    local p = {
-	skin = "ring", 
+	skin = "canvas", 
 	title = "Dialog Box Title" ,
 	font = "DejaVu Sans 30px" , 
 	color = "FFFFFF" , 
@@ -883,8 +791,8 @@ function widget.dialogBox(t)
 	padding_x = 10 ,
 	padding_y = 10 ,
 	border_radius = 22 ,
-	box_image = assets("assets/smallbutton.png"), 
-        x_image = assets("assets/smallbutton.png") --temp
+	box_image = Image{}, 
+        x_image = Image{}, 
     }
 
  --overwrite defaults
@@ -907,7 +815,12 @@ function widget.dialogBox(t)
 
 
     local create_dialogBox  = function ()
-    
+   
+	if(p.skin ~= "canvas") then 
+		p.box_image = assets(skin_list[p.skin]["dialogbox"])
+		p.x_image = assets(skin_list[p.skin]["dialogbox_x"])
+	end
+ 
         db_group:clear()
     	
         d_box = make_dialogBox_bg(p.bwidth, p.bheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
@@ -927,8 +840,8 @@ function widget.dialogBox(t)
 
 	db_group:add(d_box, x_box, title, d_box_img, x_box_img)
 
-	if (p.skin == "ring") then d_box_img.opacity = 0
-        elseif (p.skin == "image") then d_box.opacity = 0 end 
+	if (p.skin == "canvas") then d_box_img.opacity = 0
+        else d_box.opacity = 0 end 
 
      end 
 
@@ -969,7 +882,7 @@ function widget.toastBox(t)
 
  --default parameters
     local p = {
- 	skin = "ring",  
+ 	skin = "canvas",  
 	title = "Toast Box Title",
 	message = "Toast box message ... ",
 	font = "DejaVu Sans 30px", 
@@ -984,7 +897,7 @@ function widget.toastBox(t)
 	border_radius = 22,
 	fade_duration = 2000,
 	duration = 5000,
-	box_image = assets("assets/smallbutton.png"),
+	box_image = Image{},
 	icon_image = assets("assets/voice-1.png")
     }
 
@@ -1012,6 +925,10 @@ function widget.toastBox(t)
 
     local create_toastBox = function()
 
+	if(p.skin ~= "canvas") then 
+	     p.box_image = assets(skin_list[p.skin]["toast"])
+	end 
+
     	tb_group:clear()
 
     	t_box = make_toastb_group_bg(p.bwidth, p.bheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
@@ -1030,8 +947,8 @@ function widget.toastBox(t)
     	t_box_img:set{name="t_box_img", size = { p.bwidth , p.bheight } , opacity = 0}
     	tb_group:add(t_box, icon, title, message, t_box_img)
 
-    	if (p.skin == "ring") then t_box_img.opacity = 0
-    	elseif (p.skin == "image") then t_box.opacity = 0 end 
+    	if (p.skin == "canvas") then t_box_img.opacity = 0
+    	else t_box.opacity = 0 end 
 
     	tb_group_timer.interval = p.duration 
     	tb_group_timeline.duration = p.fade_duration
@@ -1139,22 +1056,22 @@ function widget.buttonPicker(t)
 
 	bp_group:clear()
 
-     	unfocus = assets("assets/smallbutton.png")
+     	unfocus = assets(skin_list[p.skin]["buttonpicker"])
      	unfocus:set{ position = {pos[1], pos[2]}, size = {p.bwidth, p.bheight}, opacity = 255}
 
-     	focus = assets("assets/smallbuttonfocus.png")
+     	focus = assets(skin_list[p.skin]["buttonpicker_focus"])
 	focus:set{ position = {pos[1], pos[2]}, size = {p.bwidth, p.bheight}, opacity = 0}
 
-	left_un   = assets("assets/left.png")
+	left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
 	left_un:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 255}
 
-	left_sel  = assets("assets/leftfocus.png")
+	left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
 	left_sel:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 0}
 
-	right_un  = assets("assets/right.png")
+	right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
 	right_un:set{position = {pos[1] + focus.w + padding, pos[2] + padding}, opacity = 255}
 
-        right_sel = assets("assets/rightfocus.png")
+        right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
 	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
    	
      	for i, j in pairs(p.items) do 
@@ -1391,6 +1308,12 @@ function widget.radioButton(t)
      }
 
     local create_radioButton = function() 
+
+	if(p.skin ~= "canvas") then 
+	 p.button_image = assets(skin_list[p.skin]["radiobutton"])
+	 p.select_image = assets(skin_list[p.skin]["radiobutton_sel"])
+	end
+
          rb_group:clear()
          rings:clear()
          items:clear()
@@ -1408,7 +1331,7 @@ function widget.radioButton(t)
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "canvas" then 
     	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {0, i * itm_h - itm_h}} ) 
-	      elseif p.skin == "image" then 
+	      else
 	           rings:add(Clone{name = "item"..tostring(i),  source=p.button_image, position = {0, i * itm_h - itm_h}}) 
 	      end 
          end 
@@ -1482,7 +1405,7 @@ function widget.checkBox(t)
 	box_pos = {0, 0},  -- items 
 	item_pos = {50,-5},  -- items 
 	selected_item = 1,  
-	box_image = Image{}, --assets("assets/radiobutton.png") end
+	box_image = Image{},
 	check_image = assets("assets/checkmark.png") 
     } 
 
@@ -1508,6 +1431,9 @@ function widget.checkBox(t)
 
 
     local function create_checkBox()
+	if(p.skin ~= "canvas") then 
+         p.box_image = assets(skin_list[p.skin]["checkbox"])
+	end
 	
 	 items:clear() 
 	 boxes:clear() 
@@ -1526,7 +1452,7 @@ function widget.checkBox(t)
 	      if p.skin == "canvas" then 
     	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
 				       size = p.box_size, position = {0, i * itm_h - itm_h,0}, opacity = 255}) 
-	      elseif p.skin == "image" then 
+	      else
 	           boxes:add(Clone{name = "item"..tostring(i),  source=p.button_image, size = p.box_size, position = {0, i * itm_h - itm_h,0}, opacity = 255}) 
 	      end 
          end 
@@ -1675,8 +1601,6 @@ function widget.loadingdots(t)
 
         function load_timeline.on_new_frame(t)
 
-		print( "HERE" , t.elapsed )
-        
             local start_i   = math.ceil(t.elapsed/p.anim_duration)
             local curr_i    = nil
 

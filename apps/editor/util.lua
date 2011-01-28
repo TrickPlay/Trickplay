@@ -1427,6 +1427,16 @@ end
 
 local input_purpose     = ""
 
+--[[
+local function copy_widget_imgs ()
+	local source_files = readdir("assets/widgets")
+	for i, j in pairs(source_files) do 
+	     source_file = "assets/widgets"..j 
+	     dest_file = CURRENT_DIR..j 
+	     file_copy(source_file, dest_file) 
+	end 
+end 
+]]
 local function set_project_path ()
 	if(selected_prj == "" and input_t.text ~= "") then
 	     project = input_t.text 
@@ -1441,6 +1451,7 @@ local function set_project_path ()
              editor_lb:change_app_path( app_path )
 	     CURRENT_DIR = app_path
         end
+	--copy_widget_imgs()
 	cleanMsgWindow()
         screen:grab_key_focus(screen)
 end 
