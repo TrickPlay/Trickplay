@@ -1,5 +1,4 @@
 dofile("apply.lua")
---1209 dofile("util.lua")
 
 editor = {}
 
@@ -570,7 +569,6 @@ function editor.the_image()
 	     return return_h 
         end 
 
-	
 	local file_list_size = get_file_list_sz()
         local scroll_box 
         local scroll_bar 
@@ -2409,6 +2407,9 @@ local function insert_widget(widget_name)
 	     b = widget.button()  
 	     g:add(b)
              create_on_button_down_f(b)
+	     a = widget.button()  
+	     g:add(a)
+             create_on_button_down_f(a)
 	elseif (widget_name == "TextField") then
 	     t = widget.textField()  
 	     g:add(t)
@@ -2435,9 +2436,13 @@ local function insert_widget(widget_name)
 	     g:add(bp)
              create_on_button_down_f(bp)
         elseif (widget_name == "LoadingDots") then 
-	     ld = widget.loadingdots()
+	     ld = widget.loadingdots{}
 	     g:add(ld)
              create_on_button_down_f(ld)
+        elseif (widget_name == "LoadingBar") then 
+	     lb = widget.loadingbar{}
+	     g:add(lb)
+             create_on_button_down_f(lb)
 	end 
 	screen:add(g)
 end 
@@ -2470,7 +2475,7 @@ function editor.widgets()
         widgets_list.position = {cur_w,cur_h}
         msgw:add(widgets_list)
 
-	local widgets = {"TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots"}
+	local widgets = {"Button", "TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots", "LoadingBar"}
         
         function print_widget_list() 
 	    cur_w = L_PADDING
@@ -2518,12 +2523,12 @@ function editor.widgets()
 	
 	local file_list_size = 280
         local insert_b, insert_t  = factory.make_msgw_button_item( assets , "insert")
-    	insert_b.position = {(WIDTH - 2*insert_b.w - X_PADDING)/2, file_list_size + 110}
+    	insert_b.position = {(WIDTH - 2*insert_b.w - X_PADDING)/2, file_list_size + 210}
     	insert_b.name = "insert"
     	insert_b.reactive = true
 
     	local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
-    	cancel_b.position = {insert_b.x + insert_b.w + X_PADDING, file_list_size + 110}
+    	cancel_b.position = {insert_b.x + insert_b.w + X_PADDING, file_list_size + 210}
     	cancel_b.name = "cancel"
     	cancel_b.reactive = true 
 	
