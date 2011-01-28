@@ -132,117 +132,127 @@ BettingController = Class(Controller, function(self, view, ...)
         return subselection
     end
 
-    function self:move_selector(dir)
-       screen:grab_key_focus()
-       local orig_money = model.orig_money
-       local orig_bet = model.orig_bet
-       local call_bet = model.call_bet
-       local min_raise = model.min_raise
-       local player = model.currentPlayer
-       print("player.money", player.money)
-       print("player.bet", player.bet)
-       print("orig_money", orig_money)
-       assert(player.money + player.bet == orig_money)
+    local function handle_bet_change()
+        local orig_money = model.orig_money
+        local orig_bet = model.orig_bet
+        local call_bet = model.call_bet
+        local min_raise = model.min_raise
+        local player = model.currentPlayer
 
-       local function handle_bet_change()
-          if subselection == SubGroups.FOLD then
-             local old_money = player.money
-             player.bet, player.money = orig_bet, player.money+player.bet-orig_bet
-             print("subgroups.fold: player.money was $" .. old_money .. ", now $" .. player.money)
-          elseif subselection == SubGroups.CALL then
-             if call_bet <= player.bet+player.money then -- TODO gogogo.
+        if subselection == SubGroups.FOLD then
+            local old_money = player.money
+            player.bet, player.money = orig_bet, player.money+player.bet-orig_bet
+            print("subgroups.fold: player.money was $"
+                  ..old_money..", now $"..player.money)
+        elseif subselection == SubGroups.CALL then
+            if call_bet <= player.bet+player.money then -- TODO gogogo.
                 local old_money = player.money
-                player.bet, player.money = call_bet, player.money+player.bet-call_bet
-             else
+                player.bet, player.money =
+                    call_bet, player.money+player.bet-call_bet
+            else
                 player.bet, player.money = player.bet+player.money, 0
-             end
-          elseif subselection == SubGroups.RAISE then
-             local bet = call_bet + min_raise
-             if call_bet < player.bet + player.money and player.bet + player.money < bet then
+            end
+        elseif subselection == SubGroups.RAISE then
+            local bet = call_bet + min_raise
+            if call_bet < player.bet + player.money
+            and player.bet + player.money < bet then
                 bet = player.bet+player.money
-             end
-             minRaiseBet = bet
-             player.bet, player.money = bet, player.bet+player.money-bet
-          end
-       end
+            end
+            minRaiseBet = bet
+            player.bet, player.money = bet, player.bet+player.money-bet
+        end
+    end
 
-       -- Change button
-       if(0 ~= dir[1]) then
-          local new_selected = subselection + dir[1]
-          if player.bet+player.money <= call_bet then
-             SubSize = SubGroups.CALL -- 2
-             raise_enabled = false
-          else
-             SubSize = SubGroups.RAISE -- 3
-             raise_enabled = true
-          end
-          if(PlayerGroups.TOP == selected) then
-             if 1 <= new_selected and SubSize >= new_selected then
-                mediaplayer:play_sound(ARROW_MP3)
-                subselection = new_selected
-                handle_bet_change()
-             else
-                mediaplayer:play_sound(BONK_MP3)
-             end
-          elseif(PlayerGroups.BOTTOM == selected) then
-             local new_selected = subselection + dir[1]
-             if(1 <= new_selected and SubSize2 >= new_selected) then
-                subselection = new_selected
-                mediaplayer:play_sound(ARROW_MP3)
-             else
-                mediaplayer:play_sound(BONK_MP3)
-             end
-          else
-             error("betting controller eff'd up")
-          end
-       -- Change bet
-       elseif(0 ~= dir[2]) then
-          if(selected == PlayerGroups.TOP and subselection == SubGroups.RAISE) then
-              local new_money = model.currentPlayer.money + dir[2]
-              local new_bet = model.currentPlayer.bet - dir[2]
-              local max_bet = model.max_bet
-              view:change_bet_animation(dir)
-              if new_money < 0 then
-                 new_bet, new_money = new_bet+new_money, 0
-              elseif new_bet > max_bet then
-                 new_bet, new_money = max_bet, new_bet + new_money - max_bet
-                 view:show_all_in_notification()
-              elseif new_bet < minRaiseBet then
-                 new_bet, new_money = minRaiseBet, new_bet+new_money-minRaiseBet
-              end
-              if new_bet >= minRaiseBet and new_money >= 0 then
-                 model.currentPlayer.bet = new_bet
-                 model.currentPlayer.money = new_money
-                 print("Current bet:", model.currentPlayer.bet, "Current money:", model.currentPlayer.money)
-                 mediaplayer:play_sound(CHANGE_BET_MP3)
-              end
-           else
-             local new_selected = selected + dir[2]
-             if(1 <= new_selected and GroupSize >= new_selected) then
-                if (selected == PlayerGroups.BOTTOM
-                and subselection == SubGroups2.EXIT) then
-                   local text = Text{
-                       text = "Can only move to Help from Exit!",
-                       font = "Sans 36px",
-                       color = "FFFFFF",
-                       position = {screen.w/2, 400},
-                       opacity = 0
-                   }
-                   text.anchor_point = {text.w/2, text.h/2}
-                   screen:add(text)
-                   Popup:new{group = text, time = 1000}
-                   mediaplayer:play_sound(BONK_MP3)
+    function self:move_selector(dir)
+        screen:grab_key_focus()
+        local orig_money = model.orig_money
+        local orig_bet = model.orig_bet
+        local call_bet = model.call_bet
+        local min_raise = model.min_raise
+        local player = model.currentPlayer
+        print("player.money", player.money)
+        print("player.bet", player.bet)
+        print("orig_money", orig_money)
+        assert(player.money + player.bet == orig_money)
+
+        -- Change button
+        if(0 ~= dir[1]) then
+            local new_selected = subselection + dir[1]
+            if player.bet+player.money <= call_bet then
+                SubSize = SubGroups.CALL -- 2
+                raise_enabled = false
+            else
+                SubSize = SubGroups.RAISE -- 3
+                raise_enabled = true
+            end
+            if(PlayerGroups.TOP == selected) then
+                if 1 <= new_selected and SubSize >= new_selected then
+                    mediaplayer:play_sound(ARROW_MP3)
+                    subselection = new_selected
+                    handle_bet_change()
                 else
-                   selected = new_selected
-                   handle_bet_change()
-                   mediaplayer:play_sound(ARROW_MP3)
+                    mediaplayer:play_sound(BONK_MP3)
                 end
-             else
-                mediaplayer:play_sound(BONK_MP3)
-             end
-          end
-       end
-       self:get_model():notify()
+            elseif(PlayerGroups.BOTTOM == selected) then
+                local new_selected = subselection + dir[1]
+                if(1 <= new_selected and SubSize2 >= new_selected) then
+                    subselection = new_selected
+                    mediaplayer:play_sound(ARROW_MP3)
+                else
+                    mediaplayer:play_sound(BONK_MP3)
+                end
+            else
+                error("betting controller eff'd up")
+            end
+        -- Change bet
+        elseif(0 ~= dir[2]) then
+            if(selected == PlayerGroups.TOP and subselection == SubGroups.RAISE) then
+                local new_money = model.currentPlayer.money + dir[2]
+                local new_bet = model.currentPlayer.bet - dir[2]
+                local max_bet = model.max_bet
+                view:change_bet_animation(dir)
+                if new_money < 0 then
+                    new_bet, new_money = new_bet+new_money, 0
+                elseif new_bet > max_bet then
+                    new_bet, new_money = max_bet, new_bet + new_money - max_bet
+                    view:show_all_in_notification()
+                elseif new_bet < minRaiseBet then
+                    new_bet, new_money = minRaiseBet, new_bet+new_money-minRaiseBet
+                end
+                if new_bet >= minRaiseBet and new_money >= 0 then
+                    model.currentPlayer.bet = new_bet
+                    model.currentPlayer.money = new_money
+                    print("Current bet:", model.currentPlayer.bet, "Current money:",
+                          model.currentPlayer.money)
+                    mediaplayer:play_sound(CHANGE_BET_MP3)
+                end
+            else
+                local new_selected = selected + dir[2]
+                if(1 <= new_selected and GroupSize >= new_selected) then
+                    if (selected == PlayerGroups.BOTTOM
+                    and subselection == SubGroups2.EXIT) then
+                        local text = Text{
+                            text = "Can only move to Help from Exit!",
+                            font = "Sans 36px",
+                            color = "FFFFFF",
+                            position = {screen.w/2, 400},
+                            opacity = 0
+                        }
+                        text.anchor_point = {text.w/2, text.h/2}
+                        screen:add(text)
+                        Popup:new{group = text, time = 1000}
+                        mediaplayer:play_sound(BONK_MP3)
+                    else
+                        selected = new_selected
+                        handle_bet_change()
+                        mediaplayer:play_sound(ARROW_MP3)
+                    end
+                else
+                    mediaplayer:play_sound(BONK_MP3)
+                end
+            end
+        end
+        self:get_model():notify()
     end
 
     function self:update()
@@ -302,27 +312,40 @@ BettingController = Class(Controller, function(self, view, ...)
     local EXIT_Y_1 = 780
     local EXIT_Y_2 = 837
     function self:handle_click(ctrl, x, y)
+        if ctrl ~= game:get_current_player().controller then return end 
+
         y = y/ctrl.y_ratio
         x = x/ctrl.x_ratio
 
         if x > FOLD_X_1 and x < FOLD_X_2 and y > FOLD_Y_1 and y < FOLD_Y_2 then
             selected = PlayerGroups.TOP
             subselection = SubGroups.FOLD
+            handle_bet_change()
         elseif x > CALL_X_1 and x < CALL_X_2 and y > CALL_Y_1 and y < CALL_Y_2 then
             selected = PlayerGroups.TOP
             subselection = SubGroups.CALL
+            handle_bet_change()
         elseif x > BET_X_1 and x < BET_X_2 and y > BET_Y_1 and y < BET_Y_2 then
-            selected = PlayerGroups.TOP
-            subselection = SubGroups.RAISE
+            if selected ~= PlayerGroups.TOP or subselection ~= SubGroups.RAISE then
+                selected = PlayerGroups.TOP
+                subselection = SubGroups.RAISE
+                handle_bet_change()
+            end
         elseif x > UP_X_1 and x < UP_X_2 and y > UP_Y_1 and y < UP_Y_2 then
-            selected = PlayerGroups.TOP
-            subselection = SubGroups.RAISE
-            self:move_selector(Directions.UP)
+            if selected ~= PlayerGroups.TOP or subselection ~= SubGroups.RAISE then
+                selected = PlayerGroups.TOP
+                subselection = SubGroups.RAISE
+                handle_bet_change()
+            end
+            PlayerSelectionKeyTable[keys.Up](self)
             return
         elseif x > DOWN_X_1 and x < DOWN_X_2 and y > DOWN_Y_1 and y < DOWN_Y_2 then
-            selected = PlayerGroups.TOP
-            subselection = SubGroups.RAISE
-            self:move_selector(Directions.DOWN)
+            if selected ~= PlayerGroups.TOP or subselection ~= SubGroups.RAISE then
+                selected = PlayerGroups.TOP
+                subselection = SubGroups.RAISE
+                handle_bet_change()
+            end
+            PlayerSelectionKeyTable[keys.Down](self)
             return
         elseif x > DEAL_X_1 and x < DEAL_X_2 and y > DEAL_Y_1 and y < DEAL_Y_2 then
             selected = PlayerGroups.BOTTOM

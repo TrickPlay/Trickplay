@@ -56,6 +56,10 @@ function(ctrl, model, ...)
     function ctrl.get_sb_p(ctrl) return state:get_sb_p() end
     function ctrl.get_bb_p(ctrl) return state:get_bb_p() end
     function ctrl.get_deck(ctrl) return state:get_deck() end
+    function ctrl.get_current_player(ctrl)
+        return hand_ctrl:get_players()[hand_ctrl:get_action()]
+    end
+        
 
 
     local function reset_pipeline()
