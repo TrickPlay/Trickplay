@@ -2537,8 +2537,6 @@ function editor.widgets()
 		lb=new_widget
 	      end
 --imsi 
-
-	      a = new_widget
 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	      end 

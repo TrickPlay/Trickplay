@@ -68,7 +68,7 @@ Arguments:
 	skin_name 	   - name of skin  
 ]]
 
-function widget.change_all_skin(skin_name);
+function widget.change_all_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].skin then 
 	     g.children[i].skin = skin_name
@@ -85,7 +85,7 @@ Arguments:
 	skin_name 	   - name of skin  
 ]]
 
-function widget.change_button_skin(skin_name);
+function widget.change_button_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].extra.type == "Button" then 
 	     g.children[i].skin = skin_name
@@ -572,7 +572,7 @@ Extra Function:
 	
 ]]
 
-function widget.button(table);
+function widget.button(table) 
 
  --default parameters
     local p = {
@@ -644,7 +644,7 @@ function widget.button(table);
 
     create_button()
 
-    function b_group.extra.on_focus_in();
+    function b_group.extra.on_focus_in() 
         if (p.skin == "canvas") then 
 	     ring.opacity = 0
 	     focus_ring.opacity = 255
@@ -655,7 +655,7 @@ function widget.button(table);
 	b_group:grab_key_focus(b_group)
     end
     
-    function b_group.extra.on_focus_out();
+    function b_group.extra.on_focus_out() 
         if (p.skin == "canvas") then 
 	     ring.opacity = 255
 	     focus_ring.opacity = 0
@@ -724,7 +724,7 @@ Extra Function:
 
 
 
-function widget.textField(table);
+function widget.textField(table) 
  --default parameters
     local p = {
     	skin = "canvas", 
@@ -870,7 +870,7 @@ Return:
  	db_group - group containing the dialog box
 ]]
 
-function widget.dialogBox(table);
+function widget.dialogBox(table) 
  
 --default parameters
    local p = {
@@ -997,7 +997,7 @@ Extra Function:
 
 
 
-function widget.toastBox(table);
+function widget.toastBox(table) 
 
  --default parameters
     local p = {
@@ -1153,7 +1153,7 @@ Extra Function:
 ]]
 
  
-function widget.buttonPicker(table);
+function widget.buttonPicker(table) 
  --default parameters 
     local p = {
 	skin = "default", 
@@ -1401,10 +1401,40 @@ function widget.buttonPicker(table);
         return bp_group 
 end
 
-------------------------------------
---  List Picker : Radio Button   
-------------------------------------
-function widget.radioButton(t)
+--[[
+Function: radioButton
+
+Creates a radio button widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of radio button  
+    	bwidth  - radio button image width 
+    	bheight - radio button image hight 
+	items   - a table of radio button items 
+    	font - the font of radio button items
+    	color - the color of radio button items
+	button_color - the color of radio button
+	select_color - the color of selected radio button 
+	button_radius - the radius of radio button
+	select_radius - the radius of selected radio button
+	ring_pos - the postion of the group of radio buttons 
+	item_pos - the position of the group of text items 
+	line_space - the space between the text itmes 
+	selected_item - selected item's number 
+	rotate_func - table of functions that is called by selected item numger   
+
+Return:
+ 	rb_group - group containing the radio button 
+
+Extra Function:
+	insert_item(item) - add an item to the items table 
+	remove_item(item) - remove an item from the items table 
+]]
+
+
+function widget.radioButton(table) 
 
  --default parameters
     local p = {
@@ -1420,15 +1450,16 @@ function widget.radioButton(t)
 	select_radius = 5,  -- items 
 	ring_pos = {0, 0},  -- items 
 	item_pos = {50,3},  -- items 
-	line_pad = 40,  -- items 
+	line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
+	rotate_func = {}, 
 	selected_item = 1 
     }
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -1465,7 +1496,7 @@ function widget.radioButton(t)
          select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
 
          for i, j in pairs(p.items) do 
-	      itm_h = p.line_pad
+	      itm_h = p.line_space
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "canvas" then 
     	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {0, i * itm_h - itm_h}} ) 
@@ -1519,12 +1550,40 @@ function widget.radioButton(t)
      return rb_group
 end 
 
+--[[
+Function: checkBox
+
+Creates a check box widget
+
+Arguments:
+	Table of 
+	skin 	- skin name of check box   
+    	bwidth  - check box image width 
+    	bheight - check box image hight 
+	items   - a table of check box items 
+    	font - the font of check box items
+    	color - the color of check box items
+	box_color - the color of check box border 
+	fill_color - the color of check box 
+	box_width - the line width of check box border
+	box_size - the size of check box 
+        check_size - the size of check image 
+	box_pos - the postion of the group of check box  
+	item_pos - the position of the group of text items 
+	line_space - the space between the text itmes 
+	selected_item - selected item's number 
+	rotate_func - table of functions that is called by selected item numger   
+
+Return:
+ 	rb_group - group containing the check box  
+
+Extra Function:
+	insert_item(item) - add an item to the items table 
+	remove_item(item) - remove an item from the items table 
+]]
 
 
-------------------------------------
---  List Picker : Check Box   
-------------------------------------
-function widget.checkBox(t)
+function widget.checkBox(table) 
 
  --default parameters
     local p = {
@@ -1539,17 +1598,18 @@ function widget.checkBox(t)
 	check_size = {25,25},
 	bwidth = 600,
 	bheight = 200,
-	line_pad = 40,   
+	line_space = 40,   
 	box_pos = {0, 0},  -- items 
 	item_pos = {50,-5},  -- items 
 	selected_item = 1,  
 	box_image = Image{},
+	rotate_func = {}, 
 	check_image = assets("assets/checkmark.png") 
     } 
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -1585,7 +1645,7 @@ function widget.checkBox(t)
 
 
          for i, j in pairs(p.items) do 
-	      itm_h = p.line_pad
+	      itm_h = p.line_space
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "canvas" then 
     	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
