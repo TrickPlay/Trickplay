@@ -278,20 +278,20 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     // Now read the 2 32 bit lengths
 
-    char sizes[ 8 ];
+    guint32 sizes[ 2 ];
 
     stream.seekg( - std::streamoff( TP_SIGN_MARKER_LENGTH + 1 + 8 + skip_trailing_bytes ), std::ios_base::end );
 
-    stream.read( sizes, 8 );
+    stream.read( ( char * ) sizes, 8 );
 
     if ( stream.fail() || stream.gcount() != 8 )
     {
         fail( "FAILED TO READ SIGNATURE LENGTH" );
     }
 
-    guint32 signature_size = GUINT32_FROM_LE( * ( guint32 * ) sizes );
+    guint32 signature_size = GUINT32_FROM_LE( sizes[ 0 ] );
 
-    guint32 cert_size = GUINT32_FROM_LE( * ( guint32 * ) ( sizes + 4 ) );
+    guint32 cert_size = GUINT32_FROM_LE( sizes[ 1 ] );
 
     goffset data_size = stream_size - ( TP_SIGN_MARKER_LENGTH + 1 + 8 + cert_size + signature_size );
 

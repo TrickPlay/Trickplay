@@ -41,22 +41,67 @@ class Bitmap [[ Bitmap * ]]
             loaded = self->loaded();
         ]];
 
-    Image Image( table props = 0 )
+    Image Image( table props = 0 , table source_rectangle = 0 )
         [[
-            lua_getglobal( L , "Image" );
+            Image * image = self->get_image();
 
-            if ( props )
+            if ( ! image )
             {
-              lua_pushvalue( L , props );
+                lua_pushnil( L );
             }
-
-            lua_call( L , props ? 1 : 0 , 1 );
-
-            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
-
-            if ( Image * image = self->get_image() )
+            else
             {
-                Images::load_texture( t , image );
+                bool good = true;
+
+                guint x = 0;
+                guint y = 0;
+                guint w = 0;
+                guint h = 0;
+
+                if ( source_rectangle )
+                {
+                    lua_rawgeti( L , source_rectangle , 1 );
+                    lua_rawgeti( L , source_rectangle , 2 );
+                    lua_rawgeti( L , source_rectangle , 3 );
+                    lua_rawgeti( L , source_rectangle , 4 );
+
+                    x = lua_tointeger( L , -4 );
+                    y = lua_tointeger( L , -3 );
+                    w = lua_tointeger( L , -2 );
+                    h = lua_tointeger( L , -1 );
+
+                    lua_pop( L , 4 );
+
+                    if ( x < 0 ||
+                         y < 0 ||
+                         w <= 0 ||
+                         h <= 0 ||
+                         guint( x + w ) > image->width() ||
+                         guint( y + h ) > image->height() )
+                    {
+                        good = false;
+                    }
+                }
+
+                if ( ! good )
+                {
+                    lua_pushnil( L );
+                }
+                else
+                {
+                    lua_getglobal( L , "Image" );
+
+                    if ( props )
+                    {
+                        lua_pushvalue( L , props );
+                    }
+
+                    lua_call( L , props ? 1 : 0 , 1 );
+
+                    ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+                    Images::load_texture( t , image , x , y , w , h );
+                }
             }
         ]];
 

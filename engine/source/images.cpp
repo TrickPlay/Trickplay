@@ -878,19 +878,31 @@ void Images::destroy_image( TPImage * image )
 
 //-----------------------------------------------------------------------------
 
-void Images::load_texture( ClutterTexture * texture, TPImage * image )
+void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x , guint y , guint w , guint h )
 {
     PROFILER( "Images::load_texture/clutter" , PROFILER_INTERNAL_CALLS );
 
     g_assert( texture );
     g_assert( image );
 
+    const guchar * pixels = ( const guchar * ) image->pixels;
+
+    guint width = image->width;
+    guint height = image->height;
+
+    if ( w != 0 && h != 0 )
+    {
+        pixels += x * image->depth + y * image->pitch;
+        width = w;
+        height = h;
+    }
+
     clutter_texture_set_from_rgb_data(
         texture,
-        ( const guchar * ) image->pixels,
+        pixels,
         image->depth == 4,
-        image->width,
-        image->height,
+        width,
+        height,
         image->pitch,
         image->depth,
         image->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
@@ -907,6 +919,13 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
     Util::GSRMutexLock lock( & self->mutex );
 
     ImageInfo info( image );
+
+    if ( w !=0 && h != 0 )
+    {
+        info.width = w;
+        info.height = h;
+        info.bytes = w * h * image->depth;
+    }
 
     ImageMap::iterator it( self->images.find( texture ) );
 
@@ -1044,11 +1063,11 @@ void Images::set_cache_limit( guint bytes )
 
 //-----------------------------------------------------------------------------
 
-void Images::load_texture( ClutterTexture * texture, const Image * image )
+void Images::load_texture( ClutterTexture * texture, const Image * image , guint x , guint y , guint w , guint h )
 {
     g_assert( image );
 
-    load_texture( texture, image->image );
+    load_texture( texture, image->image , x , y , w , h );
 }
 
 //-----------------------------------------------------------------------------
