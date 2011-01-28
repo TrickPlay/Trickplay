@@ -12,6 +12,7 @@ local skin_list = { ["default"] = {
 				   ["buttonpicker_right_un"] = "assets/right.png",
         			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
 				   ["checkbox_sel"] = "assets/checkmark.png", 
+				   ["loading_dot"]  = nil
 				  },
 
 		    ["skin_type1"] = { 
@@ -33,7 +34,7 @@ local skin_list = { ["default"] = {
 				   ["radiobutton_sel"] = "", 
 				   ["checkbox"] = "", 
 				   ["checkbox_sel"] = "assets/checkmark.png", 
-				   ["loadingdot"] = "", 
+				   ["loadingdot"] = "assets/checkmark.png", 
 				  },
  
 		    ["skin_type2"] = { 
@@ -55,7 +56,7 @@ local skin_list = { ["default"] = {
 				   ["radiobutton_sel"] = "", 
 				   ["checkbox"] = "", 
 				   ["checkbox_sel"] = "assets/checkmark.png", 
-				   ["loadingdot"] = "", 
+				   ["loadingdot"] = "assets/left.png", 
 				  },
 
 		  }
@@ -572,7 +573,7 @@ function widget.button(t)
     
 	if(p.skin ~= "canvas") then 
 		p.button_image = assets(skin_list[p.skin]["button"])
-		p.focus_image = assets(skin_list[p.skin]["button_focus"])
+		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
 	end
 
         b_group:clear()
@@ -694,7 +695,7 @@ function widget.textField(t)
     local create_textInputField= function()
  	
 	if(p.skin ~= "canvas") then 
-             p.box_image = assets(skin_list[p.skin]["textinput"])
+             p.box_image   = assets(skin_list[p.skin]["textinput"])
 	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
 	end 
 
@@ -1414,7 +1415,7 @@ function widget.checkBox(t)
         for k, v in pairs (t) do
 	    p[k] = v 
         end 
-    end 
+    end
 
  --the umbrella Group
     local check_img
@@ -1519,6 +1520,7 @@ Return:
 function widget.loadingdots(t)
     --default parameters
     local p = {
+        skin          = "default",
         dot_radius    = 5,
         dot_color     = "#FFFFFF",
         num_dots      = 12,
@@ -1570,28 +1572,42 @@ function widget.loadingdots(t)
           dot.name         = "Loading Dot"
           return dot
     end
-    
+    local img
     --function used to remake the dots upon a parameter change
     create_dots = function()
         l_dots:clear()
         dots = {}
+	
         local rad
         
         for i = 1, p.num_dots do
             --they're radial position
             rad = (2*math.pi)/(p.num_dots) * i
             print(p.clone_src)
-            if p.clone_src == nil then
+            if p.clone_src == nil and skin_list[p.skin]["loadingdot"] == nil then
                 print(1)
                 dots[i] = make_dot(
                     math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
                     math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
                 )
+	    elseif skin_list[p.skin]["loadingdot"] ~= nil then
+		img = assets(skin_list[p.skin]["loadingdot"])
+		img.anchor_point = {
+                        img.w/2,
+                        img.h/2
+                    }
+		img.position = {
+
+                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
+                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                    }
+		dots[i] = img
             else
                 print(2)
                 dots[i] = Clone{
                     source = p.clone_src,
                     position = {
+
                         math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
                         math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
                     },
