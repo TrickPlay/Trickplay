@@ -119,6 +119,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:on_key_down(key)
             print("controller keypress:", key)
             if controller.name == "Keyboard" then return true end
+            print("key consumed")
 
             return false
         end
@@ -195,7 +196,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             for i = 1,6 do
                 controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
             end
-            controller:add_image("start_button", 0, 6*115+86, 640, 115)
+            controller:add_image("start_button", 0, 6*115+86, 640, 95)
             controller:update_waiting_room()
 
             controller.state = ControllerStates.WAITING
@@ -209,15 +210,30 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 if player.isHuman then
                     controller:add_image("human_label", 330, (pos-1)*115+86+20, 122, 34)
                 else
-                    controller:add_image("comp_label", 330, (pos-1)*115+86+20, 122, 34)
+                    controller:add_image("comp_label", 330, (pos-1)*115+86+20, 196, 34)
                 end
                 playing[pos] = true
             end
             for i = 1,6 do
                 if not playing[i] then
-                    controller:add_image("click_label", 167, (i-1)*115+86+60, 122, 34)
+                    controller:add_image("click_label", 167, (i-1)*115+86+60, 212, 33)
                 end
             end
+        end
+
+        function controller:set_hole_cards(hole)
+            assert(hole[1])
+            assert(hole[2])
+            controller:set_ui_background("bkg")
+            controller:add_image("buttons", 0, 535, 640, 313)
+
+            controller:declare_resource("card1",
+                "assets/cards/"..getCardImageName(hole[1])..".png")
+            controller:declare_resource("card2",
+                "assets/cards/"..getCardImageName(hole[2])..".png")
+
+            controller:add_image("card1", 60, 70, 100*3, 130*3)
+            controller:add_image("card2", 280, 90, 100*3, 130*3)
         end
 
         
@@ -251,6 +267,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     function ctrlman:choose_dog()
         for k,controller in pairs(controllers.connected) do
             controller:choose_dog()
+        end
+    end
+
+    -- update the waiting room for all controllers
+    function ctrlman:update_waiting_room()
+        for k,controller in pairs(controllers.connected) do
+            controller:update_waiting_room()
         end
     end
 

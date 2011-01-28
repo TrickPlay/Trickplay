@@ -252,7 +252,7 @@ BettingController = Class(Controller, function(self, view, ...)
           local call_bet = model.call_bet
           local player = model.currentPlayer
           player.bet = model.orig_bet
-          if call_bet <= player.bet+player.money then -- TODO gogogo.
+          if call_bet <= player.bet+player.money then -- TODO gogogo. (wtf did darren put this stupid comment here for???)
              player.bet, player.money = call_bet, player.money+player.bet-call_bet
           else
              player.bet, player.money = player.bet+player.money, 0
@@ -260,4 +260,85 @@ BettingController = Class(Controller, function(self, view, ...)
        end
        view:update()
     end
+
+    -- constants define coordinate space of button presses
+    local FOLD_X_1 = 110
+    local FOLD_X_2 = 246
+    local FOLD_Y_1 = 600
+    local FOLD_Y_2 = 640
+
+    local CALL_X_1 = 260
+    local CALL_X_2 = 406
+    local CALL_Y_1 = 600
+    local CALL_Y_2 = 640
+
+    local BET_X_1 = 420
+    local BET_X_2 = 528
+    local BET_Y_1 = 600
+    local BET_Y_2 = 640
+
+    local UP_X_1 = 420
+    local UP_X_2 = 528
+    local UP_Y_1 = 534
+    local UP_Y_2 = 576
+
+    local DOWN_X_1 = 420
+    local DOWN_X_2 = 528
+    local DOWN_Y_1 = 678
+    local DOWN_Y_2 = 717
+
+    local DEAL_X_1 = 66
+    local DEAL_X_2 = 252
+    local DEAL_Y_1 = 780
+    local DEAL_Y_2 = 837
+
+    local HELP_X_1 = 273
+    local HELP_X_2 = 411
+    local HELP_Y_1 = 780
+    local HELP_Y_2 = 837
+
+    local EXIT_X_1 = 432
+    local EXIT_X_2 = 567
+    local EXIT_Y_1 = 780
+    local EXIT_Y_2 = 837
+    function self:handle_click(ctrl, x, y)
+        y = y/ctrl.y_ratio
+        x = x/ctrl.x_ratio
+
+        if x > FOLD_X_1 and x < FOLD_X_2 and y > FOLD_Y_1 and y < FOLD_Y_2 then
+            selected = PlayerGroups.TOP
+            subselection = SubGroups.FOLD
+        elseif x > CALL_X_1 and x < CALL_X_2 and y > CALL_Y_1 and y < CALL_Y_2 then
+            selected = PlayerGroups.TOP
+            subselection = SubGroups.CALL
+        elseif x > BET_X_1 and x < BET_X_2 and y > BET_Y_1 and y < BET_Y_2 then
+            selected = PlayerGroups.TOP
+            subselection = SubGroups.RAISE
+        elseif x > UP_X_1 and x < UP_X_2 and y > UP_Y_1 and y < UP_Y_2 then
+            selected = PlayerGroups.TOP
+            subselection = SubGroups.RAISE
+            self:move_selector(Directions.UP)
+            return
+        elseif x > DOWN_X_1 and x < DOWN_X_2 and y > DOWN_Y_1 and y < DOWN_Y_2 then
+            selected = PlayerGroups.TOP
+            subselection = SubGroups.RAISE
+            self:move_selector(Directions.DOWN)
+            return
+        elseif x > DEAL_X_1 and x < DEAL_X_2 and y > DEAL_Y_1 and y < DEAL_Y_2 then
+            selected = PlayerGroups.BOTTOM
+            subselection = SubGroups2.NEW_DEAL
+        elseif x > HELP_X_1 and x < HELP_X_2 and y > HELP_Y_1 and y < HELP_Y_2 then
+            selected = PlayerGroups.BOTTOM
+            subselection = SubGroups2.HELP
+        elseif x > EXIT_X_1 and x < EXIT_X_2 and y > EXIT_Y_1 and y < EXIT_Y_2 then
+            selected = PlayerGroups.BOTTOM
+            subselection = SubGroups2.EXIT
+        else
+            print("nothing selected")
+            return
+        end
+        view:update()
+        PlayerSelectionKeyTable[keys.Return](self)
+    end
+
 end)
