@@ -1522,7 +1522,8 @@ function widget.loadingdots(t)
         dot_color     = "#FFFFFF",
         num_dots      = 12,
         anim_radius   = 50,
-        anim_duration = 150 
+        anim_duration = 150,
+        clone_src     = nil
     }
     --overwrite defaults
     if t ~= nil then
@@ -1532,6 +1533,7 @@ function widget.loadingdots(t)
     end
 
     local create_dots
+    
     --the umbrella Group
     local l_dots = Group{ 
         name     = "loadingdots",
@@ -1555,6 +1557,7 @@ function widget.loadingdots(t)
     local dots   = {}
     local load_timeline = nil
     
+    --the Canvas used to create the dots
     local make_dot = function(x,y)
           local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius},x=x,y=y}
           dot:begin_painting()
@@ -1566,21 +1569,40 @@ function widget.loadingdots(t)
           dot.name         = "Loading Dot"
           return dot
     end
+    
+    --function used to remake the dots upon a parameter change
     create_dots = function()
         l_dots:clear()
         dots = {}
         local rad
-
+        
         for i = 1, p.num_dots do
             --they're radial position
             rad = (2*math.pi)/(p.num_dots) * i
-            dots[i] = make_dot(
-                math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
-            )    
+            print(p.clone_src)
+            if p.clone_src == nil then
+                print(1)
+                dots[i] = make_dot(
+                    math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
+                    math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                )
+            else
+                print(2)
+                dots[i] = Clone{
+                    source = p.clone_src,
+                    position = {
+                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
+                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                    },
+                    anchor_point = {
+                        p.clone_src.w/2,
+                        p.clone_src.h/2
+                    }
+                }
+            end
             l_dots:add(dots[i])
         end
-
+        
         -- the animation timeline
         if load_timeline ~= nil and load_timeline.is_playing then
             load_timeline:stop()
@@ -1597,18 +1619,17 @@ function widget.loadingdots(t)
 	-- table.insert( fff , load_timeline )
 
         local increment = math.ceil(255/p.num_dots)
-
+        
         function load_timeline.on_new_frame(t)
-
             local start_i   = math.ceil(t.elapsed/p.anim_duration)
             local curr_i    = nil
-
+            
             for i = 1, p.num_dots do
                 curr_i = (start_i + (i-1))%(p.num_dots) +1
-
+                
                 dots[curr_i].opacity = increment*i
             end
-
+            
         end
         load_timeline:start()
 
@@ -1619,12 +1640,8 @@ function widget.loadingdots(t)
 
     local mt = {}
     mt.__newindex = function(t,k,v)
-
-
        p[k] = v
        create_dots()
-
-
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -1651,14 +1668,14 @@ Return:
 ]]
 function widget.loadingbar(t)
 
+    --default parameters
     local p={
         bsize     = {300, 50},
         shell_upper_color  = "000000",
         shell_lower_color  = "7F7F7F",
         stroke_color       = "A0A0A0",
-	fill_upper_color  = "FF0000",
-	fill_lower_color  = "603030",
-
+        fill_upper_color  = "FF0000",
+        fill_lower_color  = "603030",
     }
     --overwrite defaults
     if t ~= nil then
@@ -1668,7 +1685,8 @@ function widget.loadingbar(t)
     end
 
 	
-local c_shell = Canvas{
+
+	local c_shell = Canvas{
             size = {p.bsize[1],p.bsize[2]},
             x    = p.bsize[1],
             y    = p.bsize[2]
@@ -1678,79 +1696,74 @@ local c_shell = Canvas{
             x    = p.bsize[1]+2,
             y    = p.bsize[2]
         }
-local l_bar_group = Group{
+	local l_bar_group = Group{
 		name     = "loadingbar",
-        position = {400,400},
-        anchor_point = {p.radius,p.radius},
-        reactive = true,
-        extra = {
-            type = "LoadingBar", 
-            selected = 1, 
-            set_prog = function(prog)
-                c_fill.scale = {(p.bsize[1]-4)*(prog),1}
-            end,
-        },
+        	position = {400,400},
+	        anchor_point = {p.radius,p.radius},
+        	reactive = true,
+	        extra = {
+        	    type = "LoadingBar", 
+	            selected = 1, 
+        	    set_prog = function(prog)
+	                c_fill.scale = {(p.bsize[1]-4)*(prog),1}
+        	    end,
+	        },
 	}
 
 	local function create_loading_bar()
-		print("me")
 		l_bar_group:clear()
 		c_shell = Canvas{
 				size = {p.bsize[1],p.bsize[2]},
-				--x    = p.position[1],
-				--y    = p.position[2]
-			}
+		}
 		c_fill  = Canvas{
 				size = {1,p.bsize[2]},
-				--x    = p.position[1]+2,
-				--y    = p.position[2]
-			}
-	
+		}  
+        
 		local stroke_width = 2
 		local RAD = 6
-	
+        
 		local top    = math.ceil(stroke_width/2)
 		local bottom = c_shell.h - math.ceil(stroke_width/2)
 		local left   = math.ceil(stroke_width/2)
 		local right  = c_shell.w - math.ceil(stroke_width/2)
-	
+        
 		c_shell:begin_painting()
-	
+        
 		
 		c_shell:move_to(        left,         top )
 		c_shell:line_to(   right-RAD,         top )
 		c_shell:curve_to( right, top,right,top,right,top+RAD)
 		c_shell:line_to(       right,  bottom-RAD )
 		c_shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-	
+        
 		c_shell:line_to(           left+RAD,          bottom )
 		c_shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
 		c_shell:line_to(           left,            top+RAD )
 		c_shell:curve_to(left,top,left,top,left+RAD,top)
-	
+        
 		c_shell:set_source_linear_pattern(
 			c_shell.w/2,0,
 			c_shell.w/2,c_shell.h
 		)
 		c_shell:add_source_pattern_color_stop( 0 , p.shell_upper_color )
 		c_shell:add_source_pattern_color_stop( 1 , p.shell_lower_color )
-	
+        
 		c_shell:fill(true)
 		c_shell:set_line_width(   stroke_width )
 		c_shell:set_source_color( p.stroke_color )
 		c_shell:stroke( true )
 		c_shell:finish_painting()
-	
-	
-	
+        
+        
+        
 		c_fill:begin_painting()
-	
+        
 		c_fill:move_to(-1,    top )
 		c_fill:line_to( 2,    top )
 		c_fill:line_to( 2, bottom )
 		c_fill:line_to(-1, bottom )
 		c_fill:line_to(-1,    top )
-	
+        
 		c_fill:set_source_linear_pattern(
 			c_shell.w/2,0,
 			c_shell.w/2,c_shell.h
@@ -1762,17 +1775,25 @@ local l_bar_group = Group{
 		
 		l_bar_group:add(c_shell,c_fill)
 	end
+    
 	create_loading_bar()
+    
+    
+    
+    
 	local mt = {}
+    
     mt.__newindex = function(t,k,v)
-		print("here")
         p[k] = v
         create_loading_bar()
     end
+    
     mt.__index = function(t,k)       
         return p[k]
     end
+    
     setmetatable(l_bar_group.extra, mt)
+    
 	return l_bar_group
 end
 
