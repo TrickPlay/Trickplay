@@ -59,7 +59,16 @@ local skin_list = { ["default"] = {
 
 		  }
 
-function widget.change_all_skin(skin_name)
+--[[
+Function: change_all_skin
+
+Change all widgets' skin to skin_name 
+
+Arguments:
+	skin_name 	   - name of skin  
+]]
+
+function widget.change_all_skin(skin_name);
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].skin then 
 	     g.children[i].skin = skin_name
@@ -67,7 +76,16 @@ function widget.change_all_skin(skin_name)
     end 
 end
 
-function widget.change_button_skin(skin_name)
+--[[
+Function: change_button_skin
+
+Change all buttons' skin to skin_name 
+
+Arguments:
+	skin_name 	   - name of skin  
+]]
+
+function widget.change_button_skin(skin_name);
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].extra.type == "Button" then 
 	     g.children[i].skin = skin_name
@@ -524,11 +542,37 @@ return c
 end
 
 
---------------
---  Button  
---------------
+--[[
+Function: button
 
-function widget.button(t) 
+Creates a button widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of button 
+    	bwidth  - button image width 
+    	bheight - button image hight 
+    	border_color - the border color of button image 
+    	focus_color - the focus color of button image  
+    	border_width - the focus color of button image  
+    	text - the caption of button 
+    	font - the font of button caption 
+    	color - the color of button caption 
+    	padding_x - the x padding of button image 
+    	padding_y - the y padding of button image
+    	border_radius - the border radius of button image 
+
+Return:
+ 	b_group - group containing the button 
+
+Extra Function:
+	on_focus_out() - release button focus 
+	on_focus_in() - grab button focus 
+	
+]]
+
+function widget.button(table);
 
  --default parameters
     local p = {
@@ -549,8 +593,8 @@ function widget.button(t)
     }
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -600,7 +644,7 @@ function widget.button(t)
 
     create_button()
 
-    function b_group.extra.on_focus_in()
+    function b_group.extra.on_focus_in();
         if (p.skin == "canvas") then 
 	     ring.opacity = 0
 	     focus_ring.opacity = 255
@@ -611,7 +655,7 @@ function widget.button(t)
 	b_group:grab_key_focus(b_group)
     end
     
-    function b_group.extra.on_focus_out()
+    function b_group.extra.on_focus_out();
         if (p.skin == "canvas") then 
 	     ring.opacity = 255
 	     focus_ring.opacity = 0
@@ -646,11 +690,41 @@ function widget.button(t)
     return b_group 
 end
 
------------------------
--- Text Input Field
------------------------
 
-function widget.textField(t)
+--[[
+Function: textField
+
+Creates a text input field widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of text input field 
+    	bwidth  - button image width 
+    	bheight - text input field image hight 
+    	border_color - the border color of text input field image 
+    	focus_color - the focus color of text input field image  
+    	border_width - the focus color of text input field image  
+    	text - the text  
+    	text_indent - the size of text indentation  
+    	font - the font of text input field caption 
+    	color - the color of text input field caption 
+    	padding_x - the x padding of text input field image 
+    	padding_y - the y padding of text input field image
+    	border_radius - the border radius of text input field image 
+
+Return:
+ 	t_group - group containing the text input field 
+
+Extra Function:
+	on_focus_out() - release text input field focus 
+	on_focus_in() - grab text input field focus 
+	
+]]
+
+
+
+function widget.textField(table);
  --default parameters
     local p = {
     	skin = "canvas", 
@@ -671,8 +745,8 @@ function widget.textField(t)
 
     }
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -770,11 +844,33 @@ function widget.textField(t)
      return t_group
 end 
 
--------------------
---  Dialog Box  
--------------------
+--[[
+Function: dialogBox
 
-function widget.dialogBox(t)
+Creates a dialog box widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of dialog box 
+    	bwidth  - button image width 
+    	bheight - dialog box image hight 
+    	fill_color - the color of dialog box image  
+    	border_color - the border color of dialog box image 
+    	focus_color - the focus color of dialog box image  
+    	border_width - the focus color of dialog box image  
+    	title - the title of dialog box
+    	font - the font of dialog box title 
+    	color - the color of dialog box caption 
+    	padding_x - the x padding of dialog box image 
+    	padding_y - the y padding of dialog box image
+    	border_radius - the border radius of dialog box image 
+
+Return:
+ 	db_group - group containing the dialog box
+]]
+
+function widget.dialogBox(table);
  
 --default parameters
    local p = {
@@ -795,8 +891,8 @@ function widget.dialogBox(t)
     }
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -844,12 +940,6 @@ function widget.dialogBox(t)
 
      end 
 
-     function db_group.extra.clean()
-          db_group.children = {}
-          db_group_cur_y = 40
-          screen:remove(db_group)
-     end 
-
      mt = {}
      mt.__newindex = function (t, k, v)
 	 if k == "bsize" then  
@@ -873,11 +963,41 @@ function widget.dialogBox(t)
      return db_group
 end 
 
--------------------
---  Toast  
--------------------
+--[[
+Function: toastBox
 
-function widget.toastBox(t)
+Creates a toast widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of toast 
+	title - title of toast
+	message - message of toast
+    	font - the font of toast title and message 
+    	color - the color of toast title and message 
+    	bwidth  - toast image width 
+    	bheight - toast image hight 
+    	border_color - the border color of toast image 
+    	fill_color - the color of toast image  
+    	focus_color - the focus color of toast image  
+    	border_width - the focus color of toast image  
+    	padding_x - the x padding of toast image 
+    	padding_y - the y padding of toast image
+    	border_radius - the border radius of toast image 
+	fade_duration - millisecs spent on fading away the toast 
+	duration - millisecs spent on showing the toast 
+
+Return:
+ 	tb_group - group containing the toast box
+
+Extra Function:
+	start_timer() - start the timer of toast box 	
+]]
+
+
+
+function widget.toastBox(table);
 
  --default parameters
     local p = {
@@ -902,8 +1022,8 @@ function widget.toastBox(t)
 
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -971,11 +1091,6 @@ function widget.toastBox(t)
 
      create_toastBox()
 
-     function tb_group.extra.clean()
-          tb_group.children = {}
-          g:remove(tb_group)
-     end 
-
        
      function tb_group.extra.start_timer() 
 	tb_group_timer:start()
@@ -1005,31 +1120,55 @@ function widget.toastBox(t)
 end 
 
 
------------------------
---  Button Picker 
------------------------
+--[[
+Function: buttonPicker
+
+Creates a button picker widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of button picker  
+    	bwidth  - button picker image width 
+    	bheight - button picker image hight 
+	items   - a table of button picker items 
+    	font - the font of button picker items
+    	color - the color of button picker items
+	selected_item - selected item's number 
+	rotate_func - table of functions that is called by selected item numger   
+
+Return:
+ 	bp_group - group containing the button picker 
+
+Extra Function:
+	on_focus() - grab focus of button picker 
+	out_focus() - release focus of button picker
+	press_left() - left key press event, apply the selection of button picker
+	press_right() - right key press event, apply the selection of button picker
+	press_up() - up key press event, apply the selection of button picker
+	press_down() - down key press event, apply the selection of button picker
+	press_enter() - enter key press event, apply the selection of button picker
+	insert_item(item) - add an item to the items table 
+	remove_item(item) - remove an item from the items table 
+]]
+
  
-function widget.buttonPicker(t)
+function widget.buttonPicker(table);
  --default parameters 
     local p = {
 	skin = "default", 
-	items = {"item1", "item2", "item3"},
 	bwidth =  180,
 	bheight = 60,
-	border_width  = 3,
-	border_color  = "FFFFFFC0", 
+	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px" , 
 	color = "FFFFFF", 
-	padding_x = 10,
-	padding_y = 10,
-	border_radius = 22,
-	rotate_func = function(p,n) end, 
+	rotate_func = {}, 
         selected_item = 1 
     }
 
  --overwrite defaults
-     if t ~= nil then 
-        for k, v in pairs (t) do
+     if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
      end 
